@@ -7,7 +7,8 @@
 
   :min-lein-version "2.7.1"
 
-  :dependencies [[org.clojure/clojure "1.9.0-alpha14"]
+   :dependencies [[org.clojure/clojure "1.9.0-alpha14"]
+                  [org.clojure/test.check "0.9.0"]
                  [org.clojure/clojurescript "1.9.229"]
                  [org.clojure/core.async "0.2.391"
                   :exclusions [org.clojure/tools.reader]]
@@ -20,15 +21,15 @@
   :plugins [[lein-figwheel "0.5.8"]
             [lein-cljsbuild "1.1.4" :exclusions [[org.clojure/clojure]]]]
 
-  :source-paths ["src"]
+   :source-paths ["src/clj" "src/cljc" "src/cljs"]
+
+   :test-paths ["test/clj" "test/cljc" "test/cljs"]
 
   :clean-targets ^{:protect false} ["resources/public/js/compiled" "target"]
 
   :cljsbuild {:builds
               [{:id "dev"
                 :source-paths ["src/clj" "src/cljc" "src/cljs"]
-
-                :test-paths ["test/clj" "test/cljc" "test/cljs"]
 
                 ;; the presence of a :figwheel configuration here
                 ;; will cause figwheel to inject the figwheel client
@@ -104,7 +105,7 @@
                                   [figwheel-sidecar "0.5.8"]
                                   [com.cemerick/piggieback "0.2.1"]]
                    ;; need to add dev source path here to get user.clj loaded
-                   :source-paths ["src" "dev"]
+                   :source-paths ["src/clj" "src/cljc" "src/cljs" "dev"]
                    ;; for CIDER
                    ;; :plugins [[cider/cider-nrepl "0.12.0"]]
                    :repl-options {; for nREPL dev you really need to limit output

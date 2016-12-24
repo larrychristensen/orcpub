@@ -1,43 +1,42 @@
 (ns orcpub.modifiers
-  (:require [clojure.core.match :refer [match]]))
+  (:require [clojure.spec :as spec]))
 
-(def cumulative-numeric-modifier-type :cumulative-numeric)
-(def override-modifier-type :overriding)
-(def cumulative-list-modifier-type :cumulative-list)
+(def cumulative-numeric-modifier-type ::cumulative-numeric)
+(def override-modifier-type ::overriding)
+(def cumulative-list-modifier-type ::cumulative-list)
 
-(defn resistances [& values]
-  {:path :resistances
-   :type cumulative-list-modifier-type
-   :value values})
+(spec/def ::value some?)
+(spec/def ::path-token (spec/or :key keyword?
+                                :int int?))
+(spec/def ::path-tokens (spec/+ ::path-token))
+(spec/def ::path (spec/or :key ::path-token
+                          :full-path ::path-tokens))
+(spec/def ::type #{cumulative-numeric-modifier-type
+                   override-modifier-type
+                   cumulative-list-modifier-type})
+(spec/def ::modifier (spec/keys :req [::path ::type ::value]))
+(spec/def ::modifiers (spec/+ ::modifier))
+(spec/def ::keywords (spec/+ keyword?))
+
+(defn modifier [path type value]
+  {:pre [(spec/valid? ::path path)
+         (spec/valid? ::type type)]
+   :post [(spec/valid? ::modifier %)]}
+  {::path path
+   ::type type
+   ::value value})
 
 (defn overriding [path value]
-  {:path path
-   :type override-modifier-type
-   :value value})
+  (modifier path override-modifier-type value))
 
 (defn cumulative-numeric [path bonus]
-  {:path path
-   :type cumulative-numeric-modifier-type
-   :value bonus})
+  (modifier path cumulative-numeric-modifier-type bonus))
 
-(defn darkvision []
-  {:path :darkvision
-   :type override-modifier-type
-   :value true})
+(defn cumulative-list [path values]
+  (modifier path cumulative-list-modifier-type values))
 
-(defn speed [value]
-  (overriding :speed value))
-
-(defn ability [ability bonus]
-  (cumulative-numeric [:abilities ability] bonus))
-
-(defn saving-throws [& abilities]
-  {:path :saving-throws
-   :type cumulative-list-modifier-type
-   :value abilities})
-
-(defn modify [{:keys [type value]} current-value]
+(defn modify [{:keys [orcpub.modifiers/type orcpub.modifiers/value]} current-value]
   (case type
-    :cumulative-numeric (+ value (or current-value 0))
-    :overriding value
-    :cumulative-list (concat current-value value)))
+    ::cumulative-numeric (+ value (or current-value 0))
+    ::overriding value
+    ::cumulative-list (concat current-value value)))
