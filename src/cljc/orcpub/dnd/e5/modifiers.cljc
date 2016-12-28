@@ -14,7 +14,10 @@
   (mods/overriding ::char5e/speed value))
 
 (defn ability [ability bonus]
-  (mods/cumulative-numeric ability bonus))
+  (mods/cumulative-numeric [::char5e/abilities ability] bonus))
+
+(defn abilities [abilities]
+  (mods/overriding [::char5e/abilities] abilities))
 
 (defn saving-throws [& abilities]
   (mods/cumulative-list ::char5e/savings-throws abilities))
@@ -39,3 +42,6 @@
 
 (defn proficiency-bonus [bonus]
   (mods/cumulative-numeric ::char5e/proficiency-bonus bonus))
+
+(defn max-hit-points [bonus]
+  (mods/cumulative-numeric ::char5e/max-hit-points bonus))

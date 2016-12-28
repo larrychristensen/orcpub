@@ -18,13 +18,30 @@
 (spec/def ::options (spec/+ ::option))
 (spec/def ::selection (spec/keys :req [::name ::key ::options]
                                  :opt [::min ::max]))
-(spec/def ::selections (spec/+ ::selection))
+(spec/def ::selections (spec/* ::selection))
 (spec/def ::template (spec/keys :opt [::attributes ::derived-attributes ::selections]))
 
 (spec/def ::modifier-map-value (spec/or :modifiers ::modifiers
                                         :modifier-map ::modifier-map))
 (spec/def ::modifier-map-entry (spec/tuple keyword? ::modifier-map-value))
 (spec/def ::modifier-map (spec/map-of keyword? ::modifier-map-value))
+
+(defn name-to-kw [name]
+  (-> name
+      clojure.string/lower-case
+      (clojure.string/replace #"\W" "-")
+      keyword))
+
+(defn selection [name options]
+  {::name name
+   ::key (name-to-kw name)
+   ::options options})
+
+(defn option [name & [selections modifiers]]
+  (cond-> {::name name
+           ::key (name-to-kw name)}
+    selections (assoc ::selections selections)
+    modifiers (assoc ::modifiers modifiers)))
 
 (declare make-modifier-map-from-selections)
 

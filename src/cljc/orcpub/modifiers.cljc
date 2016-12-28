@@ -14,20 +14,20 @@
 (spec/def ::type #{cumulative-numeric-modifier-type
                    override-modifier-type
                    cumulative-list-modifier-type})
-(spec/def ::modifier (spec/keys :req [::path ::type ::value]))
+(spec/def ::modifier (spec/keys :req [::path ::type]
+                                :opt [::value]))
 (spec/def ::modifiers (spec/+ ::modifier))
 (spec/def ::keywords (spec/+ keyword?))
 
 (defn modifier [path type value]
-  {:pre [(spec/valid? ::path path)
-         (spec/valid? ::type type)]
-   :post [(spec/valid? ::modifier %)]}
-  {::path path
-   ::type type
-   ::value value})
+  (cond-> {::path path
+           ::type type}
+    value (assoc ::value value)))
 
 (defn overriding [path value]
   (modifier path override-modifier-type value))
+
+(defn overriding-fn [])
 
 (defn cumulative-numeric [path bonus]
   (modifier path cumulative-numeric-modifier-type bonus))

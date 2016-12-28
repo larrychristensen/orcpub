@@ -1,5 +1,6 @@
 (ns orcpub.dnd.e5.character-test
   (:require [clojure.spec :as spec]
+            [clojure.spec.test :as stest]
             [clojure.test :refer [deftest testing is]]
             [clojure.test.check :as tc]
             [clojure.test.check.generators :as gen]
@@ -7,16 +8,8 @@
             [clojure.test.check.clojure-test :refer [defspec]]
             [orcpub.dnd.e5.character :as char5e]))
 
-(defn abilities [str con dex int wis cha]
-  {::char5e/str str
-   ::char5e/con con
-   ::char5e/dex dex
-   ::char5e/int int
-   ::char5e/wis wis
-   ::char5e/cha cha})
-
 (def valid-char
-  {::char5e/abilities (abilities 12 13 1 20 14 12) 
+  {::char5e/abilities (char5e/abilities 12 13 1 20 14 12) 
    ::char5e/savings-throws [:int :con]
    ::char5e/speed 35
    ::char5e/darkvision false
@@ -43,3 +36,7 @@
                 (let [updated-char (assoc valid-char ::char5e/speed speed)]
                   (= (not (neg? speed))
                      (spec/valid? ::char5e/character updated-char)))))
+
+(stest/instrument `char5e/standard-ability-rolls)
+(char5e/standard-ability-rolls)
+(stest/summarize-results (stest/check `char5e/standard-ability-rolls))

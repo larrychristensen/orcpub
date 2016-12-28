@@ -5,7 +5,7 @@
             [orcpub.entity :as entity]
             [orcpub.template :as t]
             [orcpub.dnd.e5.modifiers :as modifiers]
-            [orcpub.dnd.e5.character :as dnd5e-char]))
+            [orcpub.dnd.e5.character :as char5e]))
 
 (def abilities
   [{:name "Strength"
@@ -371,32 +371,20 @@
     options (assoc ::entity/options options)))
 
 (def character
-  {::entity/options {:race {::entity/key :elf
+  {::entity/options {:ability-score-variant {::entity/key :standard-rolls
+                                             ::entity/value (char5e/abilities 12 13 14 15 16 17)}
+                     :race {::entity/key :elf
                             ::entity/options {:subrace {::entity/key :high-elf
                                                         ::entity/options {:cantrip {::entity/key :light}}}}}
                      :levels [{::entity/key :wizard-1
-                               ::entity/options {:cantrips-known {::entity/key :acid-splash}}}
+                               ::entity/options {:cantrips-known {::entity/key :acid-splash}
+                                                 :hit-points {::entity/key :max}}}
                               {::entity/key :wizard-2
-                               ::entity/options {:arcane-tradition {::entity/key :school-of-evocation}}}]}})
+                               ::entity/options {:arcane-tradition {::entity/key :school-of-evocation}
+                                                 :hit-points {::entity/key :roll
+                                                              ::entity/value 3}}}]}})
 
 (spec/explain-data ::entity/raw-entity character)
-
-(defn name-to-kw [name]
-  (-> name
-      clojure.string/lower-case
-      (clojure.string/replace #"\W" "-")
-      keyword))
-
-(defn selection [name options]
-  {::t/name name
-   ::t/key (name-to-kw name)
-   ::t/options options})
-
-(defn option [name & [selections modifiers]]
-  (cond-> {::t/name name
-           ::t/key (name-to-kw name)}
-    selections (assoc ::t/selections selections)
-    modifiers (assoc ::t/modifiers modifiers)))
 
 (def wizard-cantrip-options
   (map
@@ -407,7 +395,7 @@
    wizard-cantrips))
 
 (def arcane-tradition-options
-  [(option
+  [(t/option
     "School of Evocation"
     nil
     [(modifiers/trait "Evocation Savant")
@@ -415,32 +403,52 @@
 
 (def template
   {::t/selections
-   [(selection
+   [(t/selection
+     "Ability Score Variant"
+     [(t/option
+       "Standard Rolls"
+       []
+       [(modifiers/abilities nil)])])
+    (t/selection
      "Race"
-     [(option
+     [(t/option
        "Elf"
-       [(selection
+       [(t/selection
          "Subrace"
-         [(option
+         [(t/option
            "High Elf"
-           [(selection
+           [(t/selection
              "Cantrip"
-             wizard-cantrip-options)])])])])
-    (selection
+             wizard-cantrip-options)]
+           [(modifiers/ability ::char5e/int 1)])])]
+       [(modifiers/ability ::char5e/dex 2)])])
+    (t/selection
      "Levels"
-     [(option
+     [(t/option
        "Wizard 1"
-       [(selection
+       [(t/selection
          "Cantrips Known"
-         wizard-cantrip-options)]
-       [(modifiers/saving-throws :int :wis)])
+         wizard-cantrip-options)
+        (t/selection
+         "Hit Points"
+         [(t/option
+           "Max"
+           []
+           [(modifiers/max-hit-points 6)])])]
+       [(modifiers/saving-throws ::char5e/int ::char5e/wis)
+        (modifiers/level :wizard)])
       (option
        "Wizard 2"
-       [(selection
+       [(t/selection
          "Arcane Tradition"
-         arcane-tradition-options)])])]})
-
-(clojure.pprint/pprint template)
+         arcane-tradition-options)
+        (t/selection
+         "Hit Points"
+         [(t/option
+           "Roll"
+           []
+           [(modifiers/max-hit-points nil)])])]
+       [(modifiers/level :wizard)])])]})
 
 (spec/explain-data ::t/template template)
 
@@ -448,7 +456,10 @@
 
 (deftest test-build
   (let [built (entity/build character (t/make-modifier-map template))]
-    (is (= (::dnd5e-char/spells-known built) {0 [:light :acid-splash]}))
-    (is (= (::dnd5e-char/savings-throws built) [:int :wis]))
-    (is (= (::dnd5e-char/traits built) [{:name "Evocation Savant"} {:name "Sculpt Spells"}]))))
+    (is (= (::char5e/spells-known built) {0 [:light :acid-splash]}))
+    (is (= (::char5e/savings-throws built) [::char5e/int ::char5e/wis]))
+    (is (= (::char5e/traits built) [{:name "Evocation Savant"} {:name "Sculpt Spells"}]))
+    (is (= (::char5e/abilities built) (char5e/abilities 12 13 16 16 16 17)))
+    (is (= (::char5e/max-hit-points built) 9))
+    (is (= (::char5e/levels built) {:wizard 2}))))
 
