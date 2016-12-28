@@ -12,3 +12,5 @@ pom.xml
 .repl
 .nrepl-port
 *~
+#
+*#*
