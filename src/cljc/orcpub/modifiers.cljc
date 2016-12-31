@@ -5,7 +5,7 @@
 (def override-modifier-type ::overriding)
 (def cumulative-list-modifier-type ::cumulative-list)
 
-(spec/def ::value some?)
+(spec/def ::value any?)
 (spec/def ::path-token (spec/or :key keyword?
                                 :int int?))
 (spec/def ::path-tokens (spec/+ ::path-token))

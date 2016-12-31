@@ -3,11 +3,14 @@
             [om.next :as om :refer-macros [defui]]
             [om.dom :as dom]
             [cljs.pprint :as pprint]
+            [clojure.string :as s]
             
             [orcpub.template :as t]
             [orcpub.entity :as entity]
             [orcpub.dnd.e5.character :as char5e]
             [orcpub.dnd.e5.modifiers :as modifiers]
+
+            [clojure.spec.test :as stest]
 
             [reagent.core :as r]))
 
@@ -33,7 +36,25 @@
 
 (declare app-state)
 
-(defn abilities [character]
+(defn get-raw-abilities [character]
+  (get-in character [::entity/options :ability-scores ::entity/value]))
+
+(defn abilities-standard [character]
+  [:div
+   [:div
+    {:style {:display :flex
+             :justify-content :space-between}}
+    (for [[k v] (get-raw-abilities character)]
+      ^{:key k} [:div {:style {:margin-top "10px"
+                               :margin-bottom "10px"
+                               :text-align :center}}
+                 [:div {:style {:text-transform :uppercase}} (name k)]
+                 [:div {:style {:font-size "18px"}} v]
+                 [:div
+                  [:i.fa.fa-chevron-circle-left {:style {:font-size "16px"}}]
+                  [:i.fa.fa-chevron-circle-right {:style {:margin-left "5px" :font-size "16px"}}]]])]])
+
+(defn abilities-roller [character]
   [:div
    [:div
     {:style {:display :flex
@@ -59,12 +80,14 @@
      "Ability Scores"
      [{::t/name "Standard Roll"
        ::t/key :standard-roll
-       ::t/ui-fn #(abilities (::character @app-state))
+       ::t/ui-fn #(abilities-roller (::character @app-state))
        ::t/modifiers [(modifiers/abilities nil)]}
-      (t/option
-       "Standard Scores"
-       []
-       [(modifiers/abilities (char5e/abilities 15 14 13 12 10 8))])])
+      {::t/name "Standard Scores"
+       ::t/key :standard-scores
+       ::t/ui-fn #(abilities-standard (::character @app-state))
+       ::t/select-fn #(swap! app-state update ::character (fn [c] (assoc-in c [::entity/options :ability-scores] {::entity/key :standard-scores
+                                                                                                                 ::entity/value (char5e/abilities 15 14 13 12 10 8)})))
+       ::t/modifiers [(modifiers/abilities nil)]}])
     (t/selection
      "Race"
      [(t/option
@@ -91,12 +114,12 @@
            [(t/selection
              "Tool Proficiency"
              wizard-cantrip-options)]
-           [(modifiers/ability ::char5e/int 1)])
+           [(modifiers/ability ::char5e/wis 1)])
           (t/option
            "Mountain Dwarf"
            []
-           [(modifiers/ability ::char5e/wis 1)])])]
-       [(modifiers/ability ::char5e/dex 2)])])
+           [(modifiers/ability ::char5e/str 2)])])]
+       [(modifiers/ability ::char5e/con 2)])])
     (t/selection+
      "Class"
      [(t/option
@@ -157,6 +180,10 @@
    {::template template
     ::character character}))
 
+(add-watch app-state :log (fn [k r os ns]
+                            (js/console.log "OLD" (clj->js os))
+                            (js/console.log "NEW" (clj->js ns))))
+
 (defn index-of-option [selection option-key]
   (first
    (keep-indexed
@@ -187,7 +214,7 @@
 
 (declare builder-selector)
 
-(defn option [path option-paths selectable? {:keys [::t/key ::t/name ::t/selections ::t/ui-fn]}]
+(defn option [path option-paths selectable? {:keys [::t/key ::t/name ::t/selections ::t/ui-fn ::t/select-fn]}]
   (let [new-path (conj path key)
         selected? (boolean (get-in option-paths new-path))]
     [:div.builder-option
@@ -196,7 +223,11 @@
                    [(if selected? "selected-builder-option")
                     (if selectable? "selectable-builder-option")])
       :on-click (fn [e]
-                  (if selectable? (swap! app-state update ::character #(update-option % [] path (fn [o] (assoc o ::entity/key key)))))
+                  (if selectable?
+                    (do
+                      (if select-fn
+                        (select-fn)
+                        (swap! app-state update ::character #(update-option % [] path (fn [o] (assoc o ::entity/key key)))))))
                   (.stopPropagation e))}
      [:h2 name]
      (if selected?
@@ -279,7 +310,8 @@
 (defn builder-selector [path option-paths selection]
   [:div.builder-selector
    [:h2.builder-selector-header (::t/name selection)]
-   (if (not-any? ::t/selections (::t/options selection))
+   (if (not-any? #(or (::t/selections %)
+                      (::t/ui-fn %)) (::t/options selection))
      (dropdown-selector selection)
      (list-selector path option-paths selection))])
 
@@ -334,8 +366,89 @@
      {}
      flat-options)))
 
+(defn abilities-radar [size abilities]
+  (let [d size
+        stroke 1.5
+        point-offset 10
+        double-point-offset (* point-offset 2)
+        double-stroke (* 2 stroke)
+        alpha (/ d 4)
+        triple-alpha (* alpha 3)
+        beta (* alpha (Math/sqrt 3))
+        double-beta (* beta 2)
+        points [[0 (- (* alpha 2))]
+                [beta (- alpha)]
+                [beta alpha]
+                [0 (* alpha 2)]
+                [(- beta) alpha]
+                [(- beta) (- alpha)]]
+        offset-abilities (take 6 (drop 1 (cycle abilities)))
+        text-points [[-40 25] [66 -30] [166 25] [166 160] [66 210] [-40 160]]
+        abilities-points (map
+                          (fn [[_ av] [x y]]
+                            (let [ratio (double (/ av 20))]
+                              [(* x ratio) (* y ratio)]))
+                          offset-abilities
+                          points)
+        colors (map-indexed
+                (fn [i c]
+                  {:key i
+                   :color c})
+                ["#f4692a" "#f32e50" "#b35c95" "#47eaf8" "#bbe289" "#f9b747"])]
+    [:div {:style {:position :relative}}
+     (map
+      (fn [[ak av] [x y] {:keys [color]}]
+        [:div {:style {:width 50 :text-align :center :position :absolute :left x :top y}}
+         [:div
+          [:span (s/upper-case (name ak))]
+          [:span {:style {:margin-left 5 :color color}} av]]
+         [:div {:style {:color color}} (str "(" (int (/ (- av 10) 2)) ")")]])
+      offset-abilities
+      (take 6 (drop 1 (cycle text-points)))
+      colors)
+     [:svg {:width (+ double-beta double-point-offset) :height (+ d double-point-offset)}
+      [:defs
+       (map
+        (fn [[x1 y1] [x2 y2] c1 c2]
+          [:g
+           [:linearGradient {:id (str "lg-" (:key c1) "-o")
+                             :x1 x1 :y1 y1 :x2 0 :y2 0
+                             :gradientUnits :userSpaceOnUse}
+            [:stop {:offset "0%" :stop-color (:color c1)}]
+            [:stop {:offset "70%" :stop-color (:color c2) :stop-opacity 0}]]
+           [:linearGradient {:id (str "lg-" (:key c1) "-" (:key c2))
+                             :x1 x1 :y1 y1 :x2 x2 :y2 y2
+                             :gradientUnits :userSpaceOnUse}
+            [:stop {:offset "0%" :stop-color (:color c1)}]
+            [:stop {:offset "100%" :stop-color (:color c2)}]]])
+        points
+        (drop 1 (cycle points))
+        colors
+        (drop 1 (cycle colors)))]
+      [:g {:transform (str "translate(" (+ beta point-offset) "," (+ (* alpha 2) point-offset) ")")}
+       [:polygon.abilities-polygon
+        {:stroke "#31bef8"
+         :fill "rgba(48, 189, 248, 0.2)"
+         :points (s/join " " (map (partial s/join ",") abilities-points))}]
+       (map
+        (fn [[x1 y1] [x2 y2] c1 c2]
+          [:g
+           [:line {:x1 x1 :y1 y1 :x2 0 :y2 0 :stroke (str "url(#lg-" (:key c1) "-o)")}]
+           [:line {:x1 x1 :y1 y1 :x2 x2 :y2 y2 :stroke (str "url(#lg-" (:key c1) "-" (:key c2) ")") :stroke-width 1.5}]
+           [:circle {:cx (* x1 1.05) :cy (* y1 1.05) :r 1 :fill (:color c1)}]])
+        points
+        (drop 1 (cycle points))
+        colors
+        (drop 1 (cycle colors)))]]]))
+
+;;(stest/instrument `entity/build)
+;;(stest/instrument `t/make-modifier-map)
+
 (defn character-builder []
-  (let [option-paths (make-path-map (::character @app-state))]
+  (let [option-paths (make-path-map (::character @app-state))
+        modifier-map (t/make-modifier-map (::template @app-state))
+        built-char (entity/build (::character @app-state) modifier-map)
+        _ (prn "BUILT" built-char)]
     [:div.app
      [:div.app-header
       [:div.app-header-bar.container
@@ -350,9 +463,13 @@
       [:div
        {:style character-builder-style}
        [:h1 {:style page-header-style} "Character Builder"]
-       (into [:div {:style {:width "300px"}}]
-             (map (partial builder-selector [] option-paths))
-             (::t/selections (::template @app-state)))]]]))
+       [:div
+        {:style {:display :flex}}
+        (into [:div {:style {:width "300px"}}]
+              (map (partial builder-selector [] option-paths))
+              (::t/selections (::template @app-state)))
+        [:div {:style {:flex-grow 1}}]
+        (abilities-radar 187 (::char5e/abilities built-char))]]]]))
 
 (r/render [character-builder]
           (js/document.getElementById "app"))

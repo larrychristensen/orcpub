@@ -4,8 +4,8 @@
 
 (spec/def ::name string?)
 (spec/def ::key keyword?)
-(spec/def ::min (spec/int-in 0 10))
-(spec/def ::max (spec/int-in 1 10))
+(spec/def ::min (spec/nilable (spec/int-in 0 100)))
+(spec/def ::max (spec/nilable (spec/int-in 1 100)))
 (spec/def ::attribute (spec/keys :req [::name ::key]))
 (spec/def ::attributes (spec/+ ::attribute))
 (spec/def ::derived-value (spec/or :func (spec/fspec :args (spec/cat :entity map?))

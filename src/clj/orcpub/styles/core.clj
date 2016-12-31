@@ -104,6 +104,10 @@
   [:.fa
    {:color "#f0a100"}]
 
+  [:.abilities-polygon
+   {:transition "points 2s"
+    :-webkit-transition "points 2s"}]
+
   [:.form-button
    {:color :white
     :font-weight 600

@@ -40,16 +40,16 @@
     (build-options-entry-value-paths new-path value)))
 
 (defn build-options-paths [path options]
-  {:pre [(spec/valid? ::options options)]}
+  #_{:pre [(spec/valid? ::options options)]}
   (map (partial build-options-entry-paths path) options))
 
 (defn flatten-options [options]
-  {:pre [(spec/valid? ::options options)]
+  #_{:pre [(spec/valid? ::options options)]
    :post [(spec/valid? ::flat-options %)]}
   (flatten (build-options-paths [] options)))
 
 (defn collect-modifiers [flat-options modifier-map]
-  {:pre [(spec/valid? ::flat-options flat-options)
+  #_{:pre [(spec/valid? ::flat-options flat-options)
          (spec/valid? ::t/modifier-map modifier-map)]
    :post [(spec/valid? ::modifiers/modifiers %)]}
   (mapcat
@@ -65,8 +65,6 @@
    flat-options))
 
 (defn build [raw-entity modifier-map]
-  {:pre [(spec/valid? ::raw-entity raw-entity)
-         (spec/valid? ::t/modifier-map modifier-map)]}
   (let [options (flatten-options (::options raw-entity))
         modifiers (collect-modifiers options modifier-map)]
     (reduce
@@ -79,6 +77,11 @@
                   (partial modifiers/modify modifier)))
      raw-entity
      modifiers)))
+
+(spec/fdef
+ build
+ :args (spec/cat :raw-entity ::raw-entity :modifier-map ::t/modifier-map)
+ :ret any?)
 
 (defn name-to-kw [name]
   (-> name
