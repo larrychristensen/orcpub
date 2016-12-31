@@ -3,6 +3,12 @@
             [orcpub.modifiers :as mods]
             [orcpub.dnd.e5.character :as char5e]))
 
+(defn race [nm]
+  (mods/overriding [::char5e/race] nm))
+
+(defn subrace [nm]
+  (mods/overriding [::char5e/subrace] nm))
+
 (defn resistances [& values]
   {:pre [(spec/valid? ::mods/keywords values)]}
   (mods/cumulative-list ::resistances values))
@@ -25,8 +31,9 @@
 (defn initiative [bonus]
   (mods/cumulative-numeric ::char5e/initiative bonus))
 
-(defn level [class-key]
-  (mods/cumulative-numeric [::char5e/levels class-key] 1))
+(defn level [class-key class-nm level]
+  (mods/overriding [::char5e/levels class-key] {::char5e/class-name class-nm
+                                                ::char5e/class-level level}))
 
 (defn spell-slots [level num]
   (mods/cumulative-numeric [::char5e/spell-slots level] num))

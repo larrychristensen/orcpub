@@ -2,8 +2,8 @@
   (:require [clojure.spec :as spec]
             [orcpub.dice :as dice]))
 
-(spec/def ::not-negative (comp not neg?))
-
+(spec/def ::subrace string?)
+(spec/def ::race string?)
 (spec/def ::darkvision boolean?)
 (spec/def ::speed nat-int?)
 (spec/def ::character-ability (spec/int-in 1 21))

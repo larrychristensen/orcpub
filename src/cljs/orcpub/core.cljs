@@ -99,12 +99,15 @@
            [(t/selection?
              "Cantrip"
               wizard-cantrip-options)]
-           [(modifiers/ability ::char5e/int 1)])
+           [(modifiers/subrace "High Elf")
+            (modifiers/ability ::char5e/int 1)])
           (t/option
            "Wood Elf"
            []
-           [(modifiers/ability ::char5e/wis 1)])])]
-       [(modifiers/ability ::char5e/dex 2)])
+           [(modifiers/subrace "Wood Elf")
+            (modifiers/ability ::char5e/wis 1)])])]
+       [(modifiers/race "Elf")
+        (modifiers/ability ::char5e/dex 2)])
       (t/option
        "Dwarf"
        [(t/selection
@@ -114,12 +117,15 @@
            [(t/selection
              "Tool Proficiency"
              wizard-cantrip-options)]
-           [(modifiers/ability ::char5e/wis 1)])
+           [(modifiers/subrace "Hill Dwarf")
+            (modifiers/ability ::char5e/wis 1)])
           (t/option
            "Mountain Dwarf"
            []
-           [(modifiers/ability ::char5e/str 2)])])]
-       [(modifiers/ability ::char5e/con 2)])])
+           [(modifiers/subrace "Mountain Dwarf")
+            (modifiers/ability ::char5e/str 2)])])]
+       [(modifiers/race "Dwarf")
+        (modifiers/ability ::char5e/con 2)])])
     (t/selection+
      "Class"
      [(t/option
@@ -130,7 +136,7 @@
            "1"
            [(t/selection "Cantrip" wizard-cantrip-options 0 3)]
            [(modifiers/saving-throws ::char5e/int ::char5e/wis)
-            (modifiers/level :wizard)
+            (modifiers/level :wizard "Wizard" 1)
             (modifiers/max-hit-points 6)])
           (t/option
            "2"
@@ -147,12 +153,12 @@
                "Average"
                []
                [(modifiers/max-hit-points 4)])])]
-           [(modifiers/level :wizard)])
+           [(modifiers/level :wizard "Wizard" 2)])
           (t/option
            "3"
            [(t/selection "Cantrip" wizard-cantrip-options 0 3)]
            [(modifiers/saving-throws ::char5e/int ::char5e/wis)
-            (modifiers/level :wizard)
+            (modifiers/level :wizard "Wizard" 3)
             (modifiers/max-hit-points 6)])])])])]})
 
 (def character
@@ -241,7 +247,7 @@
 
 (defn dropdown-option [option]
   ^{:key (name (::t/key option))} [:option.builder-dropdown-item
-                            (::t/name option)])
+                                   (::t/name option)])
 
 (defn dropdown [options change-fn]
   (into [:select.builder-option.builder-option-dropdown
@@ -383,7 +389,7 @@
                 [(- beta) alpha]
                 [(- beta) (- alpha)]]
         offset-abilities (take 6 (drop 1 (cycle abilities)))
-        text-points [[-40 25] [66 -30] [166 25] [166 160] [66 210] [-40 160]]
+        text-points [[0 55] [106 0] [206 55] [206 190] [106 240] [0 190]]
         abilities-points (map
                           (fn [[_ av] [x y]]
                             (let [ratio (double (/ av 20))]
@@ -402,11 +408,12 @@
          [:div
           [:span (s/upper-case (name ak))]
           [:span {:style {:margin-left 5 :color color}} av]]
-         [:div {:style {:color color}} (str "(" (int (/ (- av 10) 2)) ")")]])
+         [:div {:style {:color color}} (let [bonus (int (/ (- av 10) 2))]
+                                         (str "(" (if (pos? bonus) "+") bonus ")"))]])
       offset-abilities
       (take 6 (drop 1 (cycle text-points)))
       colors)
-     [:svg {:width (+ double-beta double-point-offset) :height (+ d double-point-offset)}
+     [:svg {:width (+ 80 double-beta double-point-offset) :height (+ 60 d double-point-offset)}
       [:defs
        (map
         (fn [[x1 y1] [x2 y2] c1 c2]
@@ -425,7 +432,7 @@
         (drop 1 (cycle points))
         colors
         (drop 1 (cycle colors)))]
-      [:g {:transform (str "translate(" (+ beta point-offset) "," (+ (* alpha 2) point-offset) ")")}
+      [:g {:transform (str "translate(" (+ 40 beta point-offset) "," (+ 30 (* alpha 2) point-offset) ")")}
        [:polygon.abilities-polygon
         {:stroke "#31bef8"
          :fill "rgba(48, 189, 248, 0.2)"
@@ -469,7 +476,26 @@
               (map (partial builder-selector [] option-paths))
               (::t/selections (::template @app-state)))
         [:div {:style {:flex-grow 1}}]
-        (abilities-radar 187 (::char5e/abilities built-char))]]]]))
+        [:div
+         (let [race (::char5e/race built-char)
+               subrace (::char5e/subrace built-char)
+               levels (::char5e/levels built-char)]
+           [:div {:style {:font-size "24px"
+                          :font-weight 600
+                          :margin-bottom "16px"
+                          :text-align :center
+                          :text-shadow "1px 2px 1px black"}}
+            [:div (str race
+                       (if (and race subrace) " / ")
+                       subrace)]
+            (if (seq levels)
+              [:div
+               (map
+                (fn [[cls-k {:keys [::char5e/class-name ::char5e/class-level]}]]
+                  [:span (str class-name " (" class-level ")")])
+                levels)])
+            ])
+         (abilities-radar 187 (::char5e/abilities built-char))]]]]]))
 
 (r/render [character-builder]
           (js/document.getElementById "app"))
