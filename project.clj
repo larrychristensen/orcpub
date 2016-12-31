@@ -1,4 +1,4 @@
- (defproject orcpub "0.1.0-SNAPSHOT"
+(defproject orcpub "0.1.0-SNAPSHOT"
   :description "FIXME: write this!"
   :url "http://example.com/FIXME"
   :license {:name "Eclipse Public License"
@@ -7,8 +7,8 @@
 
   :min-lein-version "2.7.1"
 
-   :dependencies [[org.clojure/clojure "1.9.0-alpha14"]
-                  [org.clojure/test.check "0.9.0"]
+  :dependencies [[org.clojure/clojure "1.9.0-alpha14"]
+                 [org.clojure/test.check "0.9.0"]
                  [org.clojure/clojurescript "1.9.229"]
                  [org.clojure/core.async "0.2.391"
                   :exclusions [org.clojure/tools.reader]]
@@ -16,16 +16,31 @@
                  [cljsjs/react-dom "15.3.1-0"]
                  [sablono "0.7.3"]
                  [org.omcljs/om "1.0.0-alpha46"]
-                 [org.clojure/core.match "0.3.0-alpha4"]]
+                 [org.clojure/core.match "0.3.0-alpha4"]
+                 [reagent "0.6.0"]
+                 [garden "1.3.2"]]
 
   :plugins [[lein-figwheel "0.5.8"]
-            [lein-cljsbuild "1.1.4" :exclusions [[org.clojure/clojure]]]]
+            [lein-cljsbuild "1.1.4" :exclusions [[org.clojure/clojure]]]
+            [lein-garden "0.3.0"]]
 
-   :source-paths ["src/clj" "src/cljc" "src/cljs"]
+  :source-paths ["src/clj" "src/cljc" "src/cljs"]
 
-   :test-paths ["test/clj" "test/cljc" "test/cljs"]
+  :test-paths ["test/clj" "test/cljc" "test/cljs"]
 
   :clean-targets ^{:protect false} ["resources/public/js/compiled" "target"]
+
+  :garden {:builds [{;; Optional name of the build:
+                     :id "screen"
+                     ;; Source paths where the stylesheet source code is
+                     :source-paths ["src/clj"]
+                     ;; The var containing your stylesheet:
+                     :stylesheet orcpub.styles.core/app
+                     ;; Compiler flags passed to `garden.core/css`:
+                     :compiler {;; Where to save the file:
+                                :output-to "resources/public/css/compiled/styles.css"
+                                ;; Compress the output?
+                                :pretty-print? false}}]}
 
   :cljsbuild {:builds
               [{:id "dev"
@@ -112,4 +127,4 @@
                                   :init (set! *print-length* 50)
                                   :nrepl-middleware [cemerick.piggieback/wrap-cljs-repl]}}}
 
-)
+  )

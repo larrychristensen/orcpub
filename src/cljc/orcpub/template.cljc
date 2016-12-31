@@ -32,10 +32,25 @@
       (clojure.string/replace #"\W" "-")
       keyword))
 
-(defn selection [name options]
-  {::name name
-   ::key (name-to-kw name)
-   ::options options})
+(defn selection
+  ([name options]
+   (selection name options 1 1))
+  ([name options min max &[sequential?]]
+   {::name name
+    ::key (name-to-kw name)
+    ::options options
+    ::min min
+    ::max max
+    ::sequential? (boolean sequential?)}))
+
+(defn selection? [name options]
+  (selection name options 0 1))
+
+(defn selection+ [name options]
+  (selection name options 1 nil))
+
+(defn sequential-selection [name options]
+  (selection name options 1 nil true))
 
 (defn option [name & [selections modifiers]]
   (cond-> {::name name
@@ -47,11 +62,12 @@
 
 (defn make-modifier-map-entry-from-option [option]
   [(::key option)
-   (let [modifiers (select-keys option [::modifiers])
+   (let [modifiers option
          selections (::selections option)]
      (if selections
        (merge (make-modifier-map-from-selections (::selections option)) modifiers)
        modifiers))])
+
 (spec/fdef
  make-modifier-map-entry-from-option
  :args ::option
@@ -59,7 +75,9 @@
 
 (defn make-modifier-map-entry-from-selection [selection]
   [(::key selection)
-   (into {} (map make-modifier-map-entry-from-option (::options selection)))])
+   (into (select-keys selection [::min ::max])
+         (map make-modifier-map-entry-from-option (::options selection)))])
+
 (spec/fdef
  make-modifier-map-entry-from-selection
  :args ::selection
@@ -67,14 +85,15 @@
 
 (defn make-modifier-map-from-selections [selections]
   (into {} (map make-modifier-map-entry-from-selection selections)))
+
 (spec/fdef
  make-modifier-map-entry-from-selections
  :args ::selections
  :ret ::modifier-map)
 
 (defn make-modifier-map [template]
-  (prn template)
   (make-modifier-map-from-selections (::selections template)))
+
 (spec/fdef
  make-modifier-map
  :args ::template

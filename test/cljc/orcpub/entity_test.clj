@@ -437,7 +437,7 @@
            [(modifiers/max-hit-points 6)])])]
        [(modifiers/saving-throws ::char5e/int ::char5e/wis)
         (modifiers/level :wizard)])
-      (option
+      (t/option
        "Wizard 2"
        [(t/selection
          "Arcane Tradition"
@@ -449,6 +449,8 @@
            []
            [(modifiers/max-hit-points nil)])])]
        [(modifiers/level :wizard)])])]})
+
+(clojure.pprint/pprint (t/make-modifier-map template))
 
 (spec/explain-data ::t/template template)
 
