@@ -64,6 +64,42 @@
          modifiers)))
    flat-options))
 
+(defn index-of-option [selection option-key]
+  (first
+   (keep-indexed
+    (fn [i v]
+      (if (= option-key (::key v))
+        i))
+    selection)))
+
+(defn template-item-with-key [items item-key]
+  (first
+   (keep-indexed
+    (fn [i s]
+      (if (= (::t/key s) item-key)
+        [i s]))
+    items)))
+
+(defn get-entity-path
+  ([template option-path]
+   (get-entity-path template [] option-path))
+  ([template current-path [selection-k option-k & ks]]
+   (prn "CURRENT_PATH" current-path selection-k option-k ks)
+   (if selection-k
+     (let [[selection-i selection]
+           (template-item-with-key (::t/selections template) selection-k)
+           {:keys [::t/min ::t/max ::t/options]} selection
+           [option-i option]
+           (template-item-with-key options option-k)]
+       (get-entity-path
+        option
+        (concat current-path
+                [::options selection-k]
+                (if (or (nil? max) (> max 1))
+                  [option-i]))
+        ks))
+     current-path)))
+
 (defn build [raw-entity modifier-map]
   (let [options (flatten-options (::options raw-entity))
         modifiers (collect-modifiers options modifier-map)]

@@ -24,7 +24,9 @@
 (spec/def ::modifier-map-value (spec/or :modifiers ::modifiers
                                         :modifier-map ::modifier-map))
 (spec/def ::modifier-map-entry (spec/tuple keyword? ::modifier-map-value))
-(spec/def ::modifier-map (spec/map-of keyword? ::modifier-map-value))
+(spec/def ::modifier-map (spec/map-of keyword? (spec/or :modifier-map-value ::modifier-map-value
+                                                        :min ::min
+                                                        :max ::max)))
 
 (defn name-to-kw [name]
   (-> name

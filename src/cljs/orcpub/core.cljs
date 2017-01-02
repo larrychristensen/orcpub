@@ -12,6 +12,7 @@
             [orcpub.dnd.e5.character :as char5e]
             [orcpub.dnd.e5.modifiers :as mod5e]
 
+            [clojure.spec :as spec]
             [clojure.spec.test :as stest]
 
             [reagent.core :as r]))
@@ -57,34 +58,19 @@
         i))
     selection)))
 
-(defn get-entity-path
-  ([obj path]
-   (get-entity-path obj [] path))
-  ([obj current-path [k & ks]]
-   (if k
-     (let [selection-path (vec (concat current-path [::entity/options k]))
-           selection (get-in obj selection-path)
-           next-key (first ks)
-           next-path (if (and (vector? selection)
-                              next-key)
-                       (conj selection-path
-                             (index-of-option selection next-key))
-                       selection-path)]
-       (get-entity-path obj next-path (rest ks)))
-     current-path)))
+(defn get-option-value-path [template path]
+  (conj (entity/get-entity-path template path) ::entity/value))
 
-(defn get-option-value-path [obj path]
-  (conj (get-entity-path obj path) ::entity/value))
+(defn get-option-value [template entity path]
+  (get-in entity (get-option-value-path template path)))
 
-(defn get-option-value [obj path]
-  (let [entity-path (get-entity-path obj path)]
-    (get-in obj (get-option-value-path obj path))))
+(defn update-option [template entity path update-fn]
+  (update-in entity (entity/get-entity-path template [] path) update-fn))
 
-(defn update-option [obj path update-fn]
-  (update-in obj (get-entity-path obj [] path) update-fn))
-
-(defn remove-list-option [obj path index]
-  (update-option obj path
+(defn remove-list-option [template entity path index]
+  (update-option template
+                 entity
+                 path
                  (fn [list]
                    (keep-indexed
                     (fn [i v] (if (not= i index) v))
@@ -135,7 +121,7 @@
     {:style {:margin-top "10px"}
      :on-click
      (fn []
-       (swap! app-state update ::character #(assoc-in % (get-option-value-path character path) (dice/die-roll die))))}
+       (swap! app-state update ::character #(assoc-in % (get-option-value-path (::template @app-state) path) (dice/die-roll die))))}
     "Re-Roll"]])
 
 (def template
@@ -161,7 +147,7 @@
          "Subrace"
          [(t/option
            "High Elf"
-           [(t/selection?
+           [(t/selection
              "Cantrip"
               wizard-cantrip-options)]
            [(mod5e/subrace "High Elf")
@@ -352,7 +338,7 @@
                     (do
                       (if select-fn
                         (select-fn)
-                        (swap! app-state update ::character #(update-option % path (fn [o] (assoc o ::entity/key key)))))))
+                        (swap! app-state update ::character #(update-option (::template @app-state) % path (fn [o] (assoc o ::entity/key key)))))))
                   (.stopPropagation e))}
      [:span {:style {:font-weight :bold}} name]
      (if (seq named-mods)
@@ -368,7 +354,7 @@
              (::mod/name m)
              " "
              (let [v (or (::mod/value m)
-                          (get-option-value (::character @app-state) path))]
+                          (get-option-value (::template @app-state) (::character @app-state) path))]
                 (case (::mod/type m)
                   ::mod/cumulative-numeric (bonus-str v)
                   v))))
@@ -409,30 +395,40 @@
     {:on-click
      (fn []
        (swap! app-state update ::character
-              #(update-option % path
+              #(update-option (::template @app-state) % path
                               (fn [options] (conj options (new-item-fn selection options))))))
      :style {:margin-left "5px"}} (str "Add " name)]])
 
 (defn dropdown-selector [path option-paths {:keys [::t/options ::t/min ::t/max ::t/key ::t/name ::t/sequential?] :as selection}]
   (prn "OPTIONPATHS" option-paths (conj path key) (count (get-in option-paths (conj path key))))
   (prn "DROPDWON" name min max)
-  [:div
-   (if max
-     (if (= min max)
-       (doall
-        (for [i (range max)]
-          ^{:key i} [:div (dropdown options nil (fn [] (prn i)))])))
-     [:div
-      (doall
-       (for [[value _] (get-in option-paths (conj path key))]
-         ^{:key value} [:div (dropdown options value (fn []))]))
-      (add-option-button selection path (fn []))])])
+  (let [change-fn (fn [i]
+                    (fn [e]
+                      (let [new-path (concat path [key i])
+                            option-value-path (get-option-value-path (::template @app-state) new-path)]
+                        (prn "NEW PATH" new-path option-value-path)
+                        (swap! app-state update ::character
+                               #(assoc-in % option-value-path (:keyword (.. e -target -value)))))))]
+    [:div
+     (if max
+       (if (= min max)
+         (doall
+          (for [i (range max)]
+            ^{:key i} [:div (dropdown options nil (change-fn i))])))
+       [:div
+        (doall
+         (map-indexed
+          (fn [i [value _]]
+            ^{:key value}
+            [:div (dropdown options value (change-fn i))])
+          (get-in option-paths (conj path key))))
+        (add-option-button selection path (fn []))])]))
 
 (defn remove-option-button [path index]
   [:i.fa.fa-minus-circle.remove-item-button
    {:on-click
     (fn [e]
-      (swap! app-state update ::character #(remove-list-option % path index)))}])
+      (swap! app-state update ::character #(remove-list-option (::template @app-state) % path index)))}])
 
 (defn filter-selected [path key option-paths options]
   (filter
@@ -621,6 +617,9 @@
 
 ;;(stest/instrument `entity/build)
 ;;(stest/instrument `t/make-modifier-map)
+
+;;(prn "MODIFIER MAP" (cljs.pprint/pprint (t/make-modifier-map (::template @app-state))))
+;;(spec/explain ::t/modifier-map (t/make-modifier-map (::template @app-state)))
 
 (defn character-builder []
   (let [option-paths (make-path-map (::character @app-state))
