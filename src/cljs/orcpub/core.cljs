@@ -25,11 +25,14 @@
 (def wizard-spells-1
   [:mage-armor :magic-missile :magic-mouth :shield])
 
+(defn key-to-name [key]
+  (s/join " " (map s/capitalize (s/split (name key) #"-"))))
+
 (def wizard-cantrip-options
   (map
    (fn [key]
      {::t/key key
-      ::t/name (name key)
+      ::t/name (key-to-name key)
       ::t/modifiers [(mod5e/spells-known 0 key)]})
    wizard-cantrips))
 
@@ -37,7 +40,7 @@
   (map
    (fn [key]
      {::t/key key
-      ::t/name (name key)
+      ::t/name (key-to-name key)
       ::t/modifiers [(mod5e/spells-known 1 key)]})
    wizard-spells-1))
 
@@ -227,6 +230,12 @@
              "1st Level Spells Known"
              (fn [])
              wizard-spell-options-1)]
+           [(mod5e/level :wizard "Wizard" 3)])
+          (t/option
+           "4"
+           [(t/selection
+             "Ability Score Improvement/Feat"
+             wizard-spell-options-1)]
            [(mod5e/level :wizard "Wizard" 3)])])])
       (t/option
        "Rogue"
@@ -373,7 +382,7 @@
 
 (defn dropdown-option [option]
   [:option.builder-dropdown-item
-   {:value (::t/name option)}
+   {:value (::t/key option)}
    (::t/name option)])
 
 (defn dropdown [options selected-value change-fn]
@@ -401,8 +410,6 @@
      :style {:margin-left "5px"}} (str "Add " name)]])
 
 (defn dropdown-selector [path option-paths {:keys [::t/options ::t/min ::t/max ::t/key ::t/name ::t/sequential?] :as selection}]
-  (prn "OPTIONPATHS" option-paths (conj path key) (count (get-in option-paths (conj path key))))
-  (prn "DROPDWON" name min max)
   (let [change-fn (fn [i]
                     (fn [e]
                       (js/console.log "E" e)
@@ -480,7 +487,7 @@
        (if multiple-select?
          selected-options
          options)))
-     (if addable?
+     (if (and addable? new-item-fn)
        (add-option-button selection (conj path key) new-item-fn))]))
 
 (defn builder-selector [path option-paths selection]

@@ -95,7 +95,8 @@
         option
         (concat current-path
                 [::options selection-k]
-                (if (or (nil? max) (> max 1))
+                (if (and option-k
+                         (or (nil? max) (> max 1)))
                   (if (nat-int? option-k)
                     [option-k]
                     [option-i])))
