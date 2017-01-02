@@ -96,9 +96,11 @@
         (concat current-path
                 [::options selection-k]
                 (if (or (nil? max) (> max 1))
-                  [option-i]))
+                  (if (nat-int? option-k)
+                    [option-k]
+                    [option-i])))
         ks))
-     current-path)))
+     (vec current-path))))
 
 (defn build [raw-entity modifier-map]
   (let [options (flatten-options (::options raw-entity))

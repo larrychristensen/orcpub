@@ -195,7 +195,7 @@
            {::entity/key (-> levels count inc str keyword)})
          [(t/option
            "1"
-           [(t/selection "Cantrip" wizard-cantrip-options 3 3)
+           [(t/selection "Cantrips Known" wizard-cantrip-options 3 3)
             (assoc (t/selection*
                     "1st Level Spells Known"
                     (fn [])
@@ -377,9 +377,10 @@
    (::t/name option)])
 
 (defn dropdown [options selected-value change-fn]
+  (prn "DROPDOWN VALUE" selected-value)
   [:select.builder-option.builder-option-dropdown
-         {:on-change change-fn
-          :value (or selected-value "")}
+   {:on-change change-fn
+    :value (or selected-value "")}
    [:option.builder-dropdown-item]
    (doall
     (map
@@ -404,17 +405,25 @@
   (prn "DROPDWON" name min max)
   (let [change-fn (fn [i]
                     (fn [e]
+                      (js/console.log "E" e)
                       (let [new-path (concat path [key i])
-                            option-value-path (get-option-value-path (::template @app-state) new-path)]
-                        (prn "NEW PATH" new-path option-value-path)
+                            option-path (entity/get-entity-path (::template @app-state) new-path)
+                            new-value (keyword (.. e -target -value))]
+                        (prn "NEW PATH" new-path option-path new-value)
                         (swap! app-state update ::character
-                               #(assoc-in % option-value-path (:keyword (.. e -target -value)))))))]
+                               #(assoc-in % (conj option-path ::entity/key) new-value)))))]
     [:div
      (if max
        (if (= min max)
          (doall
           (for [i (range max)]
-            ^{:key i} [:div (dropdown options nil (change-fn i))])))
+            ^{:key i}
+            (let [option-path (conj path key i)
+                  entity-path (entity/get-entity-path (::template @app-state) option-path)
+                  key-path (conj entity-path ::entity/key)
+                  value (get-in (::character @app-state) key-path)]
+              (prn "PATH VALUE" option-path entity-path key-path value)
+              [:div (dropdown options value (change-fn i))]))))
        [:div
         (doall
          (map-indexed
