@@ -377,8 +377,10 @@
        [:div
         (if ui-fn (ui-fn path))
         [:div
-         (map (fn [selection]
-                [builder-selector new-path option-paths selection])
+         (map
+          (fn [selection]
+            ^{:key (::t/key selection)}
+            [builder-selector new-path option-paths selection])
               selections)]])]))
 
 (def builder-selector-style)
@@ -440,11 +442,11 @@
    options))
 
 (defn list-selector-option [removeable? path option-paths multiple-select? i opt]
-  ^{:key i}
   [:div.list-selector-option
-   [:div {:style {:flex-grow 1}} (option path option-paths (not multiple-select?) opt)]
+   [:div {:style {:flex-grow 1}}
+    [option path option-paths (not multiple-select?) opt]]
    (if (removeable? i)
-     (remove-option-button path i))])
+     [remove-option-button path i])])
 
 (defn list-selector [path option-paths {:keys [::t/options ::t/min ::t/max ::t/key ::t/name ::t/sequential? ::t/new-item-fn] :as selection}]
   (let [no-max? (nil? max)
@@ -458,15 +460,18 @@
     [:div
      (doall
       (map-indexed
-       (partial
-        list-selector-option
-        #(and multiple-select?
-              more-than-min?
-              (or (not sequential?)
-                  (= % (dec (count selected-options)))))
-        next-path
-        option-paths
-        multiple-select?)
+       (fn [i option]
+         ^{:key i}
+         [list-selector-option
+          #(and multiple-select?
+                more-than-min?
+                (or (not sequential?)
+                    (= % (dec (count selected-options)))))
+          next-path
+          option-paths
+          multiple-select?
+          i
+          option])
        (if multiple-select?
          selected-options
          options)))
@@ -639,8 +644,10 @@
        [:div
         {:style {:display :flex}}
         [:div {:style {:width "300px"}}
-         (map (fn [selection]
-                [builder-selector [] option-paths selection])
+         (map
+          (fn [selection]
+            ^{:key (::t/key selection)}
+            [builder-selector [] option-paths selection])
               (::t/selections (::template @app-state)))]
         [:div {:style {:flex-grow 1}}]
         [:div
