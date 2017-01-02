@@ -17,10 +17,10 @@
   (mods/overriding ::char5e/darkvision true))
 
 (defn speed [value]
-  (mods/overriding ::char5e/speed value))
+  (mods/overriding ::char5e/speed value "Speed"))
 
 (defn ability [ability bonus]
-  (mods/cumulative-numeric [::char5e/abilities ability] bonus))
+  (mods/cumulative-numeric [::char5e/abilities ability] bonus (clojure.string/upper-case (name ability))))
 
 (defn abilities [abilities]
   (mods/overriding [::char5e/abilities] abilities))
@@ -51,4 +51,11 @@
   (mods/cumulative-numeric ::char5e/proficiency-bonus bonus))
 
 (defn max-hit-points [bonus]
-  (mods/cumulative-numeric ::char5e/max-hit-points bonus))
+  (mods/cumulative-numeric ::char5e/max-hit-points bonus "HP"))
+
+(defn skill-expertise [key]
+  (mods/cumulative-list [::char5e/skill-expertise] [key]))
+
+(defn tool-proficiency [name key]
+  (mods/cumulative-list [::char5e/tool-proficiencies] [{::char5e/name name
+                                                        ::char5e/key key}]))

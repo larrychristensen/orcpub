@@ -35,22 +35,26 @@
 (defn selection
   ([name options]
    (selection name options 1 1))
-  ([name options min max &[sequential?]]
+  ([name options min max &[sequential? new-item-fn]]
    {::name name
     ::key (name-to-kw name)
     ::options options
     ::min min
     ::max max
-    ::sequential? (boolean sequential?)}))
+    ::sequential? (boolean sequential?)
+    ::new-item-fn new-item-fn}))
 
 (defn selection? [name options]
   (selection name options 0 1))
 
-(defn selection+ [name options]
-  (selection name options 1 nil))
+(defn selection+ [name new-item-fn options]
+  (selection name options 1 nil false new-item-fn))
 
-(defn sequential-selection [name options]
-  (selection name options 1 nil true))
+(defn selection* [name new-item-fn options]
+  (selection name options 0 nil false new-item-fn))
+
+(defn sequential-selection [name new-item-fn options]
+  (selection name options 1 nil true new-item-fn))
 
 (defn option [name & [selections modifiers]]
   (cond-> {::name name
