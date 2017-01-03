@@ -102,8 +102,9 @@
         ks))
      (vec current-path))))
 
-(defn build [raw-entity modifier-map]
-  (let [options (flatten-options (::options raw-entity))
+(defn apply-options [raw-entity template]
+  (let [modifier-map (t/make-modifier-map template)
+        options (flatten-options (::options raw-entity))
         modifiers (collect-modifiers options modifier-map)]
     (reduce
      (fn [current-entity modifier]
@@ -116,9 +117,23 @@
      raw-entity
      modifiers)))
 
+(defn apply-derived-values [raw-entity template]
+  (reduce
+   (fn [current-entity derived-value]
+     (assoc-in
+      current-entity
+      (::t/path derived-value)
+      ((::t/value-fn derived-value) current-entity)))
+   raw-entity
+   (::t/derived-values template)))
+
+(defn build [raw-entity template]
+  (-> (apply-options raw-entity template)
+      (apply-derived-values template)))
+
 (spec/fdef
  build
- :args (spec/cat :raw-entity ::raw-entity :modifier-map ::t/modifier-map)
+ :args (spec/cat :raw-entity ::raw-entity :modifier-map ::t/template)
  :ret any?)
 
 (defn name-to-kw [name]

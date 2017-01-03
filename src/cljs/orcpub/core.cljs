@@ -129,7 +129,17 @@
     "Re-Roll"]])
 
 (def template
-  {::count 0
+  {::t/derived-values
+   [{::t/path [::char5e/ability-bonuses]
+     ::t/value-fn (fn [c]
+                    (reduce-kv
+                     (fn [m k v]
+                       (assoc m k (int (/ (- v 10) 2))))
+                     {}
+                     (::char5e/abilities c)))}
+    {::t/path [::char5e/initiative]
+     ::t/value-fn (fn [c]
+                    (get-in c [::char5e/ability-bonuses ::char5e/dex]))}]
    ::t/selections
    [(t/selection
      "Ability Scores"
@@ -610,7 +620,7 @@
      {}
      flat-options)))
 
-(defn abilities-radar [size abilities]
+(defn abilities-radar [size abilities ability-bonuses]
   (let [d size
         stroke 1.5
         point-offset 10
@@ -648,7 +658,7 @@
           [:span (s/upper-case (name ak))]
           [:span {:style {:margin-left 5 :color color}} av]]
          [:div {:style {:color color}} (let [bonus (int (/ (- av 10) 2))]
-                                         (str "(" (if (pos? bonus) "+") bonus ")"))]])
+                                         (str "(" (bonus-str (get ability-bonuses ak)) ")"))]])
       offset-abilities
       (take 6 (drop 1 (cycle text-points)))
       colors)
@@ -698,9 +708,7 @@
 (defn character-builder []
   (cljs.pprint/pprint (::character @app-state))
   (let [option-paths (make-path-map (::character @app-state))
-        modifier-map (t/make-modifier-map (::template @app-state))
-        _ (js/console.log "MOD MAP" (clj->js modifier-map))
-        built-char (entity/build (::character @app-state) modifier-map)]
+        built-char (entity/build (::character @app-state) (::template @app-state))]
     [:div.app
      [:div.app-header
       [:div.app-header-bar.container
@@ -742,9 +750,11 @@
                 (fn [[cls-k {:keys [::char5e/class-name ::char5e/class-level]}]]
                   ^{:key cls-k}
                   [:span (str class-name " (" class-level ")")])
-                levels)])
-            ])
-         [abilities-radar 187 (::char5e/abilities built-char)]]]]]]))
+                levels)])])
+         [:div
+          [:span "Initiative"]
+          [:span {:style {:margin-left "5px"}} (bonus-str (::char5e/initiative built-char))]]
+         [abilities-radar 187 (::char5e/abilities built-char) (::char5e/ability-bonuses built-char)]]]]]]))
 
 (r/render [character-builder]
           (js/document.getElementById "app"))
