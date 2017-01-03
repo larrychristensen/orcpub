@@ -84,7 +84,6 @@
   ([template option-path]
    (get-entity-path template [] option-path))
   ([template current-path [selection-k option-k & ks]]
-   (prn "CURRENT_PATH" current-path selection-k option-k ks)
    (if selection-k
      (let [[selection-i selection]
            (template-item-with-key (::t/selections template) selection-k)

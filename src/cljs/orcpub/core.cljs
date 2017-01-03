@@ -47,6 +47,7 @@
 (def arcane-tradition-options
   [(t/option
     "School of Evocation"
+    :school-of-evocation
     nil
     [(mod5e/trait "Evocation Savant")
      (mod5e/trait "Sculpt Spells")])])
@@ -146,10 +147,12 @@
      "Race"
      [(t/option
        "Elf"
+       :elf
        [(t/selection
          "Subrace"
          [(t/option
            "High Elf"
+           :high-elf
            [(t/selection
              "Cantrip"
               wizard-cantrip-options)]
@@ -157,6 +160,7 @@
             (mod5e/ability ::char5e/int 1)])
           (t/option
            "Wood Elf"
+           :wood-elf
            []
            [(mod5e/subrace "Wood Elf")
             (mod5e/ability ::char5e/wis 1)])])]
@@ -164,10 +168,12 @@
         (mod5e/ability ::char5e/dex 2)])
       (t/option
        "Dwarf"
+       :dwarf
        [(t/selection
          "Subrace"
          [(t/option
            "Hill Dwarf"
+           :hill-dwarf
            [(t/selection
              "Tool Proficiency"
              wizard-cantrip-options)]
@@ -175,6 +181,7 @@
             (mod5e/ability ::char5e/wis 1)])
           (t/option
            "Mountain Dwarf"
+           :mountain-dwarf
            []
            [(mod5e/subrace "Mountain Dwarf")
             (mod5e/ability ::char5e/str 2)])])]
@@ -192,12 +199,14 @@
           ::entity/options {:levels [{::entity/key :1}]}}))
      [(t/option
        "Wizard"
+       :wizard
        [(t/sequential-selection
          "Levels"
          (fn [selection levels]
            {::entity/key (-> levels count inc str keyword)})
          [(t/option
            "1"
+           :1
            [(t/selection "Cantrips Known" wizard-cantrip-options 3 3)
             (assoc (t/selection*
                     "1st Level Spells Known"
@@ -210,6 +219,7 @@
             (mod5e/max-hit-points 6)])
           (t/option
            "2"
+           :2
            [(t/selection
              "Arcane Tradition"
              arcane-tradition-options)
@@ -221,11 +231,13 @@
                ::t/modifiers [(mod5e/max-hit-points nil)]}
               (t/option
                "Average"
+               :average
                nil
                [(mod5e/max-hit-points 4)])])]
            [(mod5e/level :wizard "Wizard" 2)])
           (t/option
            "3"
+           :3
            [(t/selection*
              "1st Level Spells Known"
              (fn [])
@@ -233,44 +245,87 @@
            [(mod5e/level :wizard "Wizard" 3)])
           (t/option
            "4"
+           :4
            [(t/selection
              "Ability Score Improvement/Feat"
-             wizard-spell-options-1)]
-           [(mod5e/level :wizard "Wizard" 3)])])])
+             [(t/option
+               "Ability Score Improvement"
+               :ability-score-improvement
+               [(t/selection
+                 "Abilities"
+                 (into
+                  []
+                  (map
+                   (fn [ability]
+                     (t/option
+                      (s/upper-case (name ability))
+                      ability
+                      []
+                      [(mod5e/ability ability 1)])))
+                  char5e/ability-keys)
+                 2
+                 2)]
+               [])
+              (t/option
+               "Feat"
+               :feat
+               [(t/selection
+                 "Feat"
+                 (map
+                  (fn [ability]
+                    (let [option (t/option
+                                  (s/upper-case (name ability))
+                                  ability
+                                  nil
+                                  [(mod5e/ability ability 1)])]
+                      option))
+                  char5e/ability-keys))]
+               [])])]
+           [(mod5e/level :wizard "Wizard" 3)])])]
+       [])
       (t/option
        "Rogue"
+       :rogue
        [(t/sequential-selection
          "Levels"
          (fn [selection levels]
            {::entity/key (-> levels count str keyword)})
          [(t/option
            "1"
+           :1
            [(t/selection
              "Expertise"
              [(t/option
                "Two Skills"
+               :two-skills
                [(t/selection
                  "Skills"
                  [(t/option
                    "Athletics"
+                   :athletics
                    nil
                    [(mod5e/skill-expertise ::char5e/athletics)])
                   (t/option
                    "Acrobatics"
+                   :acrobatics
                    nil
                    [(mod5e/skill-expertise ::char5e/acrobatics)])]
                  2
-                 2)])
+                 2)]
+               [])
               (t/option
                "One Skill/Theives Tools"
+               :one-skill-thieves-tools
                [(t/selection
                  "Skills"
                  [(t/option
                    "Athletics"
+                   :athletics
                    nil
                    [(mod5e/skill-expertise ::char5e/athletics)])
                   (t/option
                    "Acrobatics"
+                   :acrobatics
                    nil
                    [(mod5e/skill-expertise ::char5e/acrobatics)])])]
                [(mod5e/tool-proficiency "Thieves Tools" ::char5e/thieves-tools)])])]
@@ -279,6 +334,7 @@
             (mod5e/max-hit-points 8)])
           (t/option
            "2"
+           :2
            [(t/selection
              "Roguish Archetype"
              arcane-tradition-options)
@@ -286,13 +342,16 @@
              "Hit Points"
              [(t/option
                "Average"
+               :average
                []
                [(mod5e/max-hit-points 5)])])]
            [(mod5e/level :rogue "Rogue" 2)])
           (t/option
            "3"
+           :3
            []
-           [(mod5e/level :rogue "rogue" 3)])])])])]})
+           [(mod5e/level :rogue "rogue" 3)])])]
+       [])])]})
 
 (def character
   {::entity/options {:ability-scores {::entity/key :standard-roll
@@ -307,7 +366,11 @@
                                                          {::entity/key :2
                                                           ::entity/options {:arcane-tradition {::entity/key :school-of-evocation}
                                                                             :hit-points {::entity/key :roll
-                                                                                         ::entity/value 3}}}]}}]}})
+                                                                                         ::entity/value 3}}}
+                                                         {::entity/key :3}
+                                                         {::entity/key :4
+                                                          ::entity/options {:ability-score-improvement-feat {::entity/key :ability-score-improvement
+                                                                                                             ::entity/options {:abilities [{::entity/key ::char5e/cha}]}}}}]}}]}})
 
 (def text-color
   {:color :white})
@@ -332,7 +395,6 @@
     (str bonus)))
 
 (defn option [path option-paths selectable? {:keys [::t/key ::t/name ::t/selections ::t/modifiers ::t/ui-fn ::t/select-fn]}]
-  (prn "MODFIERS" modifiers)
   (let [new-path (conj path key)
         selected? (boolean (get-in option-paths new-path))
         named-mods (filter ::mod/name modifiers)]
@@ -382,20 +444,18 @@
 
 (defn dropdown-option [option]
   [:option.builder-dropdown-item
-   {:value (::t/key option)}
+   {:value (str (::t/key option))}
    (::t/name option)])
 
 (defn dropdown [options selected-value change-fn]
-  (prn "DROPDOWN VALUE" selected-value)
   [:select.builder-option.builder-option-dropdown
    {:on-change change-fn
-    :value (or selected-value "")}
+    :value (or (str selected-value) "")}
    [:option.builder-dropdown-item]
    (doall
     (map
      (fn [option]
-       ^{:key (::t/key option)}
-       [dropdown-option option])
+       ^{:key (::t/key option)} [dropdown-option option])
      options))])
 
 (defn add-option-button [{:keys [::t/name ::t/options] :as selection} path new-item-fn]
@@ -412,11 +472,9 @@
 (defn dropdown-selector [path option-paths {:keys [::t/options ::t/min ::t/max ::t/key ::t/name ::t/sequential?] :as selection}]
   (let [change-fn (fn [i]
                     (fn [e]
-                      (js/console.log "E" e)
                       (let [new-path (concat path [key i])
                             option-path (entity/get-entity-path (::template @app-state) new-path)
-                            new-value (keyword (.. e -target -value))]
-                        (prn "NEW PATH" new-path option-path new-value)
+                            new-value (cljs.reader/read-string (.. e -target -value))]
                         (swap! app-state update ::character
                                #(assoc-in % (conj option-path ::entity/key) new-value)))))]
     [:div
@@ -424,13 +482,11 @@
        (if (= min max)
          (doall
           (for [i (range max)]
-            ^{:key i}
             (let [option-path (conj path key i)
                   entity-path (entity/get-entity-path (::template @app-state) option-path)
                   key-path (conj entity-path ::entity/key)
                   value (get-in (::character @app-state) key-path)]
-              (prn "PATH VALUE" option-path entity-path key-path value)
-              [:div (dropdown options value (change-fn i))]))))
+              ^{:key i} [:div (dropdown options value (change-fn i))]))))
        [:div
         (doall
          (map-indexed
@@ -495,11 +551,13 @@
   [:div.builder-selector
    [:h2.builder-selector-header (::t/name selection)]
    [:div
-    (if (not-any? #(or (::t/selections %)
-                       (::t/ui-fn %))
-                  (::t/options selection))
-      [dropdown-selector path option-paths selection]
-      [list-selector path option-paths selection])]])
+    (let [simple-options?
+          (not-any? #(or (seq (::t/selections %))
+                         (::t/ui-fn %))
+                    (::t/options selection))]
+      (if simple-options?
+        [dropdown-selector path option-paths selection]
+        [list-selector path option-paths selection]))]])
 
 
 (def content-style
@@ -638,10 +696,11 @@
 ;;(spec/explain ::t/modifier-map (t/make-modifier-map (::template @app-state)))
 
 (defn character-builder []
+  (cljs.pprint/pprint (::character @app-state))
   (let [option-paths (make-path-map (::character @app-state))
         modifier-map (t/make-modifier-map (::template @app-state))
-        built-char (entity/build (::character @app-state) modifier-map)
-        _ (prn "BUILT" built-char)]
+        _ (js/console.log "MOD MAP" (clj->js modifier-map))
+        built-char (entity/build (::character @app-state) modifier-map)]
     [:div.app
      [:div.app-header
       [:div.app-header-bar.container

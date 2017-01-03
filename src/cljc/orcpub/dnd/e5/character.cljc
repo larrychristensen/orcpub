@@ -18,6 +18,7 @@
 (spec/def ::int ::character-ability)
 (spec/def ::wis ::character-ability)
 (spec/def ::cha ::character-ability)
+
 (spec/def ::abilities (spec/keys :req [::str ::dex ::con ::int ::wis ::cha]))
 
 (spec/def ::character (spec/keys :req [::abilities
@@ -35,9 +36,11 @@
  :ret ::character-ability
  :fn (spec/and (partial <= 3) (partial >= 18)))
 
+(def ability-keys [::str ::dex ::con ::int ::wis ::cha])
+
 (defn standard-ability-rolls []
   (zipmap
-   [::str ::dex ::con ::int ::wis ::cha]
+   ability-keys
    (take 6 (repeatedly standard-ability-roll))))
 
 (spec/fdef
@@ -45,11 +48,8 @@
  :args nil?
  :ret ::abilities)
 
-(defn abilities [str con dex int wis cha]
-  {::str str
-   ::con con
-   ::dex dex
-   ::int int
-   ::wis wis
-   ::cha cha})
+(defn abilities [& as]
+  (zipmap
+   ability-keys
+   as))
 

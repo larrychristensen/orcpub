@@ -58,9 +58,9 @@
 (defn sequential-selection [name new-item-fn options]
   (selection name options 1 nil true new-item-fn))
 
-(defn option [name & [selections modifiers]]
+(defn option [name key selections modifiers]
   (cond-> {::name name
-           ::key (name-to-kw name)}
+           ::key key}
     selections (assoc ::selections selections)
     modifiers (assoc ::modifiers modifiers)))
 
