@@ -113,14 +113,14 @@
               abilities))})
 
 (def wizard-levels
-  [{:modifiers [(modifiers/level :wizard)
+  [{:modifiers [(modifiers/level :wizard "Wizard" 1)
                 (modifiers/spell-slots 1 2)
                 (modifiers/proficiency-bonus 2)
                 (modifiers/trait "Arcane Recovery")]
     :selections [{:name "Cantrips Known"
                   :max 3
                   :options wizard-cantrips}]}
-   {:modifiers [(modifiers/level :wizard)
+   {:modifiers [(modifiers/level :wizard "Wizard" 2)
                 (modifiers/spell-slots 1 1)
                 (modifiers/trait "Arcane Recovery")]
     :selections [{:name "Arcane Tradition"
@@ -129,7 +129,7 @@
                   :min 1
                   :max 1
                   :options :arcane-tradition}]}
-   {:modifiers [(modifiers/level :wizard)
+   {:modifiers [(modifiers/level :wizard "Wizard" 2)
                 (modifiers/spell-slots 1 1)
                 (modifiers/spell-slots 2 2)]
     :selections [ability-score-improvement]}])
@@ -397,6 +397,7 @@
 (def arcane-tradition-options
   [(t/option
     "School of Evocation"
+    :school-of-evocation
     nil
     [(modifiers/trait "Evocation Savant")
      (modifiers/trait "Sculpt Spells")])])
@@ -407,16 +408,19 @@
      "Ability Score Variant"
      [(t/option
        "Standard Rolls"
+       :standard-rolls
        []
        [(modifiers/abilities nil)])])
     (t/selection
      "Race"
      [(t/option
        "Elf"
+       :elf
        [(t/selection
          "Subrace"
          [(t/option
            "High Elf"
+           :high-elf
            [(t/selection
              "Cantrip"
              wizard-cantrip-options)]
@@ -426,6 +430,7 @@
      "Levels"
      [(t/option
        "Wizard 1"
+       :wizard-1
        [(t/selection
          "Cantrips Known"
          wizard-cantrip-options)
@@ -433,12 +438,14 @@
          "Hit Points"
          [(t/option
            "Max"
+           :max
            []
            [(modifiers/max-hit-points 6)])])]
        [(modifiers/saving-throws ::char5e/int ::char5e/wis)
-        (modifiers/level :wizard)])
+        (modifiers/level :wizard "Wizard" 1)])
       (t/option
        "Wizard 2"
+       :wizard-2
        [(t/selection
          "Arcane Tradition"
          arcane-tradition-options)
@@ -446,9 +453,10 @@
          "Hit Points"
          [(t/option
            "Roll"
+           :roll
            []
            [(modifiers/max-hit-points nil)])])]
-       [(modifiers/level :wizard)])])]})
+       [(modifiers/level :wizard "Wizard" 2)])])]})
 
 (clojure.pprint/pprint (t/make-modifier-map template))
 
@@ -461,7 +469,7 @@
     (is (= (::char5e/spells-known built) {0 [:light :acid-splash]}))
     (is (= (::char5e/savings-throws built) [::char5e/int ::char5e/wis]))
     (is (= (::char5e/traits built) [{:name "Evocation Savant"} {:name "Sculpt Spells"}]))
-    (is (= (::char5e/abilities built) (char5e/abilities 12 13 16 16 16 17)))
+    (is (= (::char5e/abilities built) (char5e/abilities 12 15 14 16 16 17)))
     (is (= (::char5e/max-hit-points built) 9))
-    (is (= (::char5e/levels built) {:wizard 2}))))
+    (is (= (::char5e/levels built) {:wizard {::char5e/class-name "Wizard" ::char5e/class-level 2}}))))
 

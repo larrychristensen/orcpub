@@ -11,8 +11,6 @@
             [orcpub.modifiers :as modifiers]))
 
 (deftest make-modifer-map
-  (testing "empty makes empty"
-    (is (thrown? AssertionError (template/make-modifier-map {}))))
   (testing "one level"
     (let [modifiers-1 (sgen/sample (spec/gen ::modifiers/modifier) 2)
           modifiers-2 (sgen/sample (spec/gen ::modifiers/modifier) 3)

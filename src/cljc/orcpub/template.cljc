@@ -24,7 +24,9 @@
 (spec/def ::modifier-map-value (spec/or :modifiers ::modifiers
                                         :modifier-map ::modifier-map))
 (spec/def ::modifier-map-entry (spec/tuple keyword? ::modifier-map-value))
-(spec/def ::modifier-map (spec/map-of keyword? ::modifier-map-value))
+(spec/def ::modifier-map (spec/map-of keyword? (spec/or :modifier-map-value ::modifier-map-value
+                                                        :min ::min
+                                                        :max ::max)))
 
 (defn name-to-kw [name]
   (-> name
@@ -35,26 +37,30 @@
 (defn selection
   ([name options]
    (selection name options 1 1))
-  ([name options min max &[sequential?]]
+  ([name options min max &[sequential? new-item-fn]]
    {::name name
     ::key (name-to-kw name)
     ::options options
     ::min min
     ::max max
-    ::sequential? (boolean sequential?)}))
+    ::sequential? (boolean sequential?)
+    ::new-item-fn new-item-fn}))
 
 (defn selection? [name options]
   (selection name options 0 1))
 
-(defn selection+ [name options]
-  (selection name options 1 nil))
+(defn selection+ [name new-item-fn options]
+  (selection name options 1 nil false new-item-fn))
 
-(defn sequential-selection [name options]
-  (selection name options 1 nil true))
+(defn selection* [name new-item-fn options]
+  (selection name options 0 nil false new-item-fn))
 
-(defn option [name & [selections modifiers]]
+(defn sequential-selection [name new-item-fn options]
+  (selection name options 1 nil true new-item-fn))
+
+(defn option [name key selections modifiers]
   (cond-> {::name name
-           ::key (name-to-kw name)}
+           ::key key}
     selections (assoc ::selections selections)
     modifiers (assoc ::modifiers modifiers)))
 

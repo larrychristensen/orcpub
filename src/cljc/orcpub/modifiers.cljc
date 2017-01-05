@@ -19,18 +19,19 @@
 (spec/def ::modifiers (spec/+ ::modifier))
 (spec/def ::keywords (spec/+ keyword?))
 
-(defn modifier [path type value]
+(defn modifier [path type value & [name]]
   (cond-> {::path path
            ::type type}
-    value (assoc ::value value)))
+    value (assoc ::value value)
+    name (assoc ::name name)))
 
-(defn overriding [path value]
-  (modifier path override-modifier-type value))
+(defn overriding [path value & [name]]
+  (modifier path override-modifier-type value name))
 
 (defn overriding-fn [])
 
-(defn cumulative-numeric [path bonus]
-  (modifier path cumulative-numeric-modifier-type bonus))
+(defn cumulative-numeric [path bonus & [name]]
+  (modifier path cumulative-numeric-modifier-type bonus name))
 
 (defn cumulative-list [path values]
   (modifier path cumulative-list-modifier-type values))

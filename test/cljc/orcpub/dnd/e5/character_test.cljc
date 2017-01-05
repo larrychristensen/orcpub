@@ -21,15 +21,6 @@
   (testing "missing ability"
     (is (spec/explain-data ::char5e/character (update valid-char ::char5e/abilities dissoc ::char5e/dex)))))
 
-(defspec abilities-between-1-and-20-are-valid
-  100
-  (prop/for-all [abilities (gen/tuple gen/int gen/int gen/int gen/int gen/int gen/int)]
-                (let [updated-char (assoc valid-char ::char5e/abilities abilities)
-                      all-valid (not (or (some neg? abilities)
-                                         (some zero? abilities)
-                                         (some #(> % 20) abilities)))]
-                  (= all-valid (spec/valid? ::char5e/character updated-char)))))
-
 (defspec non-negative-speeds-are-valid
   100
   (prop/for-all [speed gen/int]
