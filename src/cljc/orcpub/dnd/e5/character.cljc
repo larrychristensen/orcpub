@@ -2,6 +2,7 @@
   (:require [clojure.spec :as spec]
             [orcpub.dice :as dice]))
 
+(spec/def ::armor-class nat-int?)
 (spec/def ::subrace string?)
 (spec/def ::race string?)
 (spec/def ::darkvision boolean?)

@@ -46,7 +46,6 @@
              :justify-content :space-between}}
     (for [[k v] (get-raw-abilities character)]
       ^{:key k} [:div {:style {:margin-top "10px"
-                               :margin-bottom "10px"
                                :text-align :center}}
                  [:div {:style {:text-transform :uppercase}} (name k)]
                  [:div {:style {:font-size "18px"}} v]
@@ -74,7 +73,7 @@
     "Re-Roll"]])
 
 (def template
-  {::count 0
+  {::char5e/armor-class 10
    ::t/selections
    [(t/selection
      "Ability Scores"
@@ -317,7 +316,8 @@
   [:div.builder-selector
    [:h2.builder-selector-header (::t/name selection)]
    (if (not-any? #(or (::t/selections %)
-                      (::t/ui-fn %)) (::t/options selection))
+                      (::t/ui-fn %))
+                 (::t/options selection))
      (dropdown-selector selection)
      (list-selector path option-paths selection))])
 
@@ -478,24 +478,32 @@
         [:div {:style {:flex-grow 1}}]
         [:div
          (let [race (::char5e/race built-char)
-               subrace (::char5e/subrace built-char)
-               levels (::char5e/levels built-char)]
-           [:div {:style {:font-size "24px"
-                          :font-weight 600
-                          :margin-bottom "16px"
-                          :text-align :center
-                          :text-shadow "1px 2px 1px black"}}
-            [:div (str race
-                       (if (and race subrace) " / ")
-                       subrace)]
-            (if (seq levels)
-              [:div
-               (map
-                (fn [[cls-k {:keys [::char5e/class-name ::char5e/class-level]}]]
-                  [:span (str class-name " (" class-level ")")])
-                levels)])
-            ])
-         (abilities-radar 187 (::char5e/abilities built-char))]]]]]))
+                subrace (::char5e/subrace built-char)
+                levels (::char5e/levels built-char)]
+            [:div {:style {:font-size "24px"
+                           :font-weight 600
+                           :margin-bottom "16px"
+                           :text-shadow "1px 2px 1px black"}}
+             [:span (str race
+                        (if (and race subrace) " / ")
+                        subrace)]
+             [:span {:style {:margin-left "5px"}} "-"]
+             (if (seq levels)
+               [:span
+                {:style {:margin-left "5px"}}
+                (map
+                 (fn [[cls-k {:keys [::char5e/class-name ::char5e/class-level]}]]
+                   [:span (str class-name " (" class-level ")")])
+                 levels)])])
+         [:div {:style {:display :flex}}
+          [:div
+           (abilities-radar 187 (::char5e/abilities built-char))]
+          [:div {:style {:margin-left "25px"}}
+           [:span {:style {:font-size "16px" :font-weight 600}} "Armor Class"]
+           [:div
+            [:i.fa.fa-shield {:style {:font-size "32px" :color :white}}]
+            [:span {:style {:font-size "24px" :font-weight 600 :margin-left "18px"}} (::char5e/armor-class built-char)]
+            [:span {:style {:margin-left "5px"}} "(padded armor)"]]]]]]]]]))
 
 (r/render [character-builder]
           (js/document.getElementById "app"))
