@@ -1,6 +1,6 @@
 (ns orcpub.entity-spec)
 
-(defn entity-val [k entity]
+(defn entity-val [entity k]
   (let [v (entity k)]
     (if (fn? v)
       (v entity)
@@ -9,10 +9,15 @@
 (defn ref-sym-to-kw [s]
   (keyword (subs (name s) 1)))
 
+(defmacro q [entity query]
+  `(entity-val
+    ~entity
+    ~(ref-sym-to-kw query)))
+
 (defn ref-to-kw [s entity]
   (if (and (symbol? s)
            (.startsWith (name s) "?"))
-    `(entity-val ~(ref-sym-to-kw s) ~entity)
+    `(entity-val ~entity ~(ref-sym-to-kw s))
     s))
 
 (defn replace-refs-2 [entity body]
@@ -34,17 +39,27 @@
 (defmacro replace-refs [entity body]
   (:x entity))
 
-(defmacro defentity [nm body]
-  `(def ~nm
-     ~(reduce-kv
-       (fn [m k v]
-         (let [replaced (replace-refs-2 'e v)]
-           (assoc
-            m
-            (ref-sym-to-kw k)
-            (concat '(fn [e]) [replaced]))))
-       {}
-       body)))
+(defmacro make-entity [body]
+  (reduce-kv
+   (fn [m k v]
+     (let [arg (gensym "e")
+           replaced (replace-refs-2 arg v)]
+       (assoc
+        m
+        (ref-sym-to-kw k)
+        (concat `(fn [~arg]) [replaced]))))
+   {}
+   `~body))
+
+(def skills [{:key :athletics
+              :ability :str}
+             {:key :acrobatics
+              :ability :dex}
+             {:key :perception
+              :ability :wis}])
+
+(def skill-abilities
+  (into {} (map (juxt :key :ability)) skills))
 
 (defentity char1
   {?levels {:wizard 1
@@ -56,11 +71,31 @@
                      {}
                      ?abilities)
    ?total-levels (apply + (vals ?levels))
-   ?prof-bonus (+ (int (/ (dec ?total-levels) 4)) 2)})
+   ?prof-bonus (+ (int (/ (dec ?total-levels) 4)) 2)
+   ?skill-profs #{:athletics :perception}
+   ?skill-prof-bonuses (into {}
+                             (map (fn [{k :key}]
+                                    [k (if (?skill-profs k) ?prof-bonus 0)]))
+                             skills)
+   ?skill-bonuses (into {}
+                        (map
+                         (fn [[k v]]
+                           [k (+ v (?ability-bonuses (skill-abilities k)))]))
+                        ?skill-prof-bonuses)})
 
-(defentity char3
-  {?x (+ 1 2)
-   ?y (+ 5 ?x)})
+(defmacro modifier [k body]
+  (let [arg (gensym "e")
+        replaced (replace-refs-2 arg body)]
+    (concat `(fn [~arg]) `((update ~arg ~(ref-sym-to-kw k) (fn [_#] ~replaced))))))
+
+(def modifiers2
+  [(modifier ?skill-expertise (conj ?skill-expertise :perception))
+   (modifier ?abilities (update ?abilities :dex + 2))])
+
+(def char3
+  (make-entity
+   {?x (+ 1 2)
+    ?y (+ 5 ?x)}))
 
 (def char4
   {:x (fn [c] (+ 1 2))
