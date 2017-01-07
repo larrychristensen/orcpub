@@ -1,12 +1,13 @@
 (ns orcpub.entity-spec-test
   (:require [clojure.test :refer :all]
+            [orcpub.dnd.e5.character :as char5e]
             [orcpub.entity-spec :refer [make-entity q modifier modifiers apply-modifiers]]))
 
 (deftest test-defentity
-  (let [e (make-entity {?x (+ 1 2)
-                        ?y (+ 5 ?x)})]
-    (is (= 3 (q e ?x)))
-    (is (= 8 (q e ?y)))))
+  (let [e (make-entity {?char5e/x (+ 1 2)
+                        ?char5e/y (+ 5 ?char5e/x)})]
+    (is (= 3 (q e ?char5e/x)))
+    (is (= 8 (q e ?char5e/y)))))
 
 (def skills [{:key :athletics
               :ability :str}

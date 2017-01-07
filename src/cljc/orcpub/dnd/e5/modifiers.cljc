@@ -1,23 +1,42 @@
 (ns orcpub.dnd.e5.modifiers
   (:require [clojure.spec :as spec]
             [orcpub.modifiers :as mods]
-            [orcpub.dnd.e5.character :as char5e]))
+            [orcpub.entity-spec :as es]
+            [orcpub.dnd.e5.character :as char5e])
+  #?(:cljs (:require-macros [orcpub.entity-spec :as es])))
 
 (defn race [nm]
   (mods/overriding [::char5e/race] nm))
 
+(defn race2 [nm]
+  (es/modifier ?char5e/race nm))
+
 (defn subrace [nm]
   (mods/overriding [::char5e/subrace] nm))
+
+(defn subrace2 [nm]
+  (es/modifier ?char5e/subrace nm))
 
 (defn resistances [& values]
   {:pre [(spec/valid? ::mods/keywords values)]}
   (mods/cumulative-list ::resistances values))
 
+(defn resistances2 [& values]
+  (es/vec-mod ?char5e/resistances values))
+
 (defn darkvision []
   (mods/overriding ::char5e/darkvision true))
 
+(defn darkvision2 []
+  (es/modifier ?char5e/darkvision true))
+
 (defn speed [value]
   (mods/overriding ::char5e/speed value "Speed"))
+
+(defn speed2 [value]
+  ^{:name "Speed"} (es/modifier ?char5e/speed value))
+
+(meta (speed2 35))
 
 (defn ability [ability bonus]
   (mods/cumulative-numeric [::char5e/abilities ability] bonus (clojure.string/upper-case (name ability))))

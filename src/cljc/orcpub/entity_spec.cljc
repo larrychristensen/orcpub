@@ -1,4 +1,5 @@
-(ns orcpub.entity-spec)
+(ns orcpub.entity-spec
+  (:require [clojure.string :as s]))
 
 (defn entity-val [entity k]
   (let [v (entity k)]
@@ -6,8 +7,8 @@
       (v entity)
       v)))
 
-(defn ref-sym-to-kw [s]
-  (keyword (subs (name s) 1)))
+(defn ref-sym-to-kw [sym]
+  (apply keyword (s/split (subs (str sym) 1) #"/")))
 
 (defmacro q [entity query]
   `(entity-val
@@ -16,45 +17,48 @@
 
 (defn ref-to-kw [s entity]
   (if (and (symbol? s)
-           (.startsWith (name s) "?"))
+           (.startsWith (str s) "?"))
     `(entity-val ~entity ~(ref-sym-to-kw s))
     s))
 
-(defn replace-refs-2 [entity body]
+(defn replace-refs [entity body]
   (cond
     (map? body)
     (into
      {}
      (reduce-kv
       (fn [m k v]
-        (assoc m (ref-to-kw k entity) (replace-refs-2 entity v)))
+        (assoc m (ref-to-kw k entity) (replace-refs entity v)))
       {}
       body))
     (vector? body)
-    (mapv (partial replace-refs-2 entity) body)
+    (mapv (partial replace-refs entity) body)
     (sequential? body)
-    (map (partial replace-refs-2 entity) body)
+    (map (partial replace-refs entity) body)
     :else (ref-to-kw body entity)))
-
-(defmacro replace-refs [entity body]
-  (:x entity))
 
 (defmacro make-entity [body]
   (reduce-kv
    (fn [m k v]
      (let [arg (gensym "e")
-           replaced (replace-refs-2 arg v)]
+           replaced (replace-refs arg v)]
        (assoc
         m
         (ref-sym-to-kw k)
-        (concat `(fn [~arg]) [replaced]))))
+        (concat `(fn [~arg])
+                [replaced]))))
    {}
    `~body))
 
-(defmacro modifier [k body]
+(defmacro modifier [k body & [name]]
   (let [arg (gensym "e")
-        replaced (replace-refs-2 arg body)]
-    (concat `(fn [~arg]) `((update ~arg ~(ref-sym-to-kw k) (fn [_#] ~replaced))))))
+        replaced (replace-refs arg body)]
+    (concat
+     `(fn [~arg])
+     `((update ~arg ~(ref-sym-to-kw k) (fn [_#] ~replaced))))))
+
+(defmacro vec-mod [q vals]
+  `(modifier ~q (conj (or ~q []) ~vals)))
 
 (defmacro modifiers [& mods]
   (mapv
@@ -68,12 +72,3 @@
      (mod e))
    entity
    modifiers))
-
-(def char3
-  (make-entity
-   {?x (+ 1 2)
-    ?y (+ 5 ?x)}))
-
-(def char4
-  {:x (fn [c] (+ 1 2))
-   :y (fn [c] (+ 5 ((:x c) c)))})
