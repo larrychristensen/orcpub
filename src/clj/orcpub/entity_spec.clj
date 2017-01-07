@@ -51,46 +51,23 @@
    {}
    `~body))
 
-(def skills [{:key :athletics
-              :ability :str}
-             {:key :acrobatics
-              :ability :dex}
-             {:key :perception
-              :ability :wis}])
-
-(def skill-abilities
-  (into {} (map (juxt :key :ability)) skills))
-
-(defentity char1
-  {?levels {:wizard 1
-            :rogue 4}
-   ?abilities {:str 18 :dex 12 :con 14 :int 15 :wis 17 :cha 19}
-   ?ability-bonuses (reduce-kv
-                     (fn [m k v]
-                       (assoc m k (int (/ (- v 10) 2))))
-                     {}
-                     ?abilities)
-   ?total-levels (apply + (vals ?levels))
-   ?prof-bonus (+ (int (/ (dec ?total-levels) 4)) 2)
-   ?skill-profs #{:athletics :perception}
-   ?skill-prof-bonuses (into {}
-                             (map (fn [{k :key}]
-                                    [k (if (?skill-profs k) ?prof-bonus 0)]))
-                             skills)
-   ?skill-bonuses (into {}
-                        (map
-                         (fn [[k v]]
-                           [k (+ v (?ability-bonuses (skill-abilities k)))]))
-                        ?skill-prof-bonuses)})
-
 (defmacro modifier [k body]
   (let [arg (gensym "e")
         replaced (replace-refs-2 arg body)]
     (concat `(fn [~arg]) `((update ~arg ~(ref-sym-to-kw k) (fn [_#] ~replaced))))))
 
-(def modifiers2
-  [(modifier ?skill-expertise (conj ?skill-expertise :perception))
-   (modifier ?abilities (update ?abilities :dex + 2))])
+(defmacro modifiers [& mods]
+  (mapv
+   (fn [mod]
+     (cons `modifier mod))
+   mods))
+
+(defn apply-modifiers [entity modifiers]
+  (reduce
+   (fn [e mod]
+     (mod e))
+   entity
+   modifiers))
 
 (def char3
   (make-entity
@@ -100,18 +77,3 @@
 (def char4
   {:x (fn [c] (+ 1 2))
    :y (fn [c] (+ 5 ((:x c) c)))})
-
-(def char2
-  {:levels (fn [c]
-             {:wizard 1
-              :rogue 4})
-   :abilities (fn [c]
-                {:str 18 :dex 12 :con 14 :int 15 :wis 17 :cha 19})
-   :ability-bonuses (fn [c]
-                      (reduce-kv
-                       (fn [m k v]
-                         (assoc m k (int (/ (- v 10) 2))))
-                       {}
-                       (entity-val :abilities c)))
-   :total-levels (fn [c] (apply + (vals (entity-val :levels c))))
-   :prof-bonus (fn [c] (+ (int (/ (dec (entity-val :total-levels c)) 4)) 2))})
