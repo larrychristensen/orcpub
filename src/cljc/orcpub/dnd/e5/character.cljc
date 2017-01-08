@@ -20,13 +20,13 @@
 (spec/def ::wis ::character-ability)
 (spec/def ::cha ::character-ability)
 
-(spec/def ::abilities (spec/keys :req [::str ::dex ::con ::int ::wis ::cha]))
+(spec/def ::abilities (spec/keys :req-un [::str ::dex ::con ::int ::wis ::cha]))
 
-(spec/def ::character (spec/keys :req [::abilities
-                                       ::savings-throws
-                                       ::speed
-                                       ::darkvision
-                                       ::initiative]))
+(spec/def ::character (spec/keys :req-un [::abilities
+                                          ::savings-throws
+                                          ::speed
+                                          ::darkvision
+                                          ::initiative]))
 
 (defn standard-ability-roll []
   (dice/dice-roll {:num 4 :sides 6 :drop-num 1}))
@@ -37,7 +37,7 @@
  :ret ::character-ability
  :fn (spec/and (partial <= 3) (partial >= 18)))
 
-(def ability-keys [::str ::dex ::con ::int ::wis ::cha])
+(def ability-keys [:str :dex :con :int :wis :cha])
 
 (defn standard-ability-rolls []
   (zipmap

@@ -141,13 +141,13 @@
 (def template
   {::t/base
    (es/make-entity
-    {?armor-class 10
+    {?armor-class (+ 10 (?ability-bonuses :dex))
      ?ability-bonuses (reduce-kv
                        (fn [m k v]
                          (assoc m k (int (/ (- v 10) 2))))
                        {}
                        ?abilities)
-     ?total-levels (apply + (vals ?levels))
+     ?total-levels (apply + (map (fn [[k {l :class-level}]] l) ?levels))
      ?prof-bonus (+ (int (/ (dec ?total-levels) 4)) 2)
      ?skill-prof-bonuses (into {}
                                (map (fn [{k :key}]
@@ -157,19 +157,8 @@
                           (map
                            (fn [[k v]]
                              [k (+ v (?ability-bonuses (skill-abilities k)))]))
-                          ?skill-prof-bonuses)})
-   ::char5e/armor-class 10
-   ::t/derived-values
-   [{::t/path [::char5e/ability-bonuses]
-     ::t/value-fn (fn [c]
-                    (reduce-kv
-                     (fn [m k v]
-                       (assoc m k (int (/ (- v 10) 2))))
-                     {}
-                     (::char5e/abilities c)))}
-    {::t/path [::char5e/initiative]
-     ::t/value-fn (fn [c]
-                    (get-in c [::char5e/ability-bonuses ::char5e/dex]))}]
+                          ?skill-prof-bonuses)
+     ?max-hit-points (do (prn "T" ?levels ?total-levels ?ability-bonuses) (* ?total-levels (?ability-bonuses :con)))})
    ::t/selections
    [(t/selection
      "Ability Scores"
@@ -197,15 +186,15 @@
              "Cantrip"
               wizard-cantrip-options)]
            [(mod5e/subrace2 "High Elf")
-            (mod5e/ability2 ::char5e/int 1)])
+            (mod5e/ability2 :int 1)])
           (t/option
            "Wood Elf"
            :wood-elf
            []
            [(mod5e/subrace2 "Wood Elf")
-            (mod5e/ability2 ::char5e/wis 1)])])]
+            (mod5e/ability2 :wis 1)])])]
        [(mod5e/race2 "Elf")
-        (mod5e/ability2 ::char5e/dex 2)])
+        (mod5e/ability2 :dex 2)])
       (t/option
        "Dwarf"
        :dwarf
@@ -218,15 +207,15 @@
              "Tool Proficiency"
              wizard-cantrip-options)]
            [(mod5e/subrace2 "Hill Dwarf")
-            (mod5e/ability2 ::char5e/wis 1)])
+            (mod5e/ability2 :wis 1)])
           (t/option
            "Mountain Dwarf"
            :mountain-dwarf
            []
            [(mod5e/subrace2 "Mountain Dwarf")
-            (mod5e/ability2 ::char5e/str 2)])])]
+            (mod5e/ability2 :str 2)])])]
        [(mod5e/race2 "Dwarf")
-        (mod5e/ability2 ::char5e/con 2)
+        (mod5e/ability2 :con 2)
         (mod5e/speed2 25)])])
     (t/selection+
      "Class"
@@ -254,7 +243,7 @@
                     wizard-spell-options-1)
                    ::t/key
                    :spells-known)]
-           [(mod5e/saving-throws2 ::char5e/int ::char5e/wis)
+           [(mod5e/saving-throws2 :int :wis)
             (mod5e/level2 :wizard "Wizard" 1)
             (mod5e/max-hit-points2 6)])
           (t/option
@@ -344,12 +333,12 @@
                    "Athletics"
                    :athletics
                    nil
-                   [(mod5e/skill-expertise2 ::char5e/athletics)])
+                   [(mod5e/skill-expertise2 :athletics)])
                   (t/option
                    "Acrobatics"
                    :acrobatics
                    nil
-                   [(mod5e/skill-expertise2 ::char5e/acrobatics)])]
+                   [(mod5e/skill-expertise2 :acrobatics)])]
                  2
                  2)]
                [])
@@ -362,14 +351,14 @@
                    "Athletics"
                    :athletics
                    nil
-                   [(mod5e/skill-expertise2 ::char5e/athletics)])
+                   [(mod5e/skill-expertise2 :athletics)])
                   (t/option
                    "Acrobatics"
                    :acrobatics
                    nil
-                   [(mod5e/skill-expertise2 ::char5e/acrobatics)])])]
-               [(mod5e/tool-proficiency2 "Thieves Tools" ::char5e/thieves-tools)])])]
-           [(mod5e/saving-throws2 ::char5e/dex ::char5e/int)
+                   [(mod5e/skill-expertise2 :acrobatics)])])]
+               [(mod5e/tool-proficiency2 "Thieves Tools" :thieves-tools)])])]
+           [(mod5e/saving-throws2 :dex :int)
             (mod5e/level2 :rogue "Rogue" 1)
             (mod5e/max-hit-points2 8)])
           (t/option
@@ -410,7 +399,7 @@
                                                          {::entity/key :3}
                                                          {::entity/key :4
                                                           ::entity/options {:ability-score-improvement-feat {::entity/key :ability-score-improvement
-                                                                                                             ::entity/options {:abilities [{::entity/key ::char5e/cha}]}}}}]}}]}})
+                                                                                                             ::entity/options {:abilities [{::entity/key :cha}]}}}}]}}]}})
 
 (def text-color
   {:color :white})
@@ -782,18 +771,24 @@
                [:span
                 {:style {:margin-left "5px"}}
                 (map
-                 (fn [[cls-k {:keys [::char5e/class-name ::char5e/class-level]}]]
+                 (fn [[cls-k {:keys [:class-name :class-level]}]]
                    ^{:key cls-k} [:span (str class-name " (" class-level ")")])
                  levels)])])
          [:div {:style {:display :flex}}
           [:div
            (abilities-radar 187 (es/entity-val built-char :abilities) (es/entity-val built-char :ability-bonuses))]
-          [:div {:style {:margin-left "25px"}}
-           [:span {:style {:font-size "16px" :font-weight 600}} "Armor Class"]
-           [:div
-            [:i.fa.fa-shield {:style {:font-size "32px" :color :white}}]
-            [:span {:style {:font-size "24px" :font-weight 600 :margin-left "18px"}} 10]
-            [:span {:style {:margin-left "5px"}} "(padded armor)"]]]]]]]]]))
+          [:div
+           [:div {:style {:margin-left "25px" :margin-top "20px"}}
+            [:span {:style {:font-size "16px" :font-weight 600}} "Armor Class"]
+            [:div {:style {:margin-top "4px"}}
+             [:i.fa.fa-shield {:style {:font-size "32px" :color :white}}]
+             [:span {:style {:font-size "24px" :font-weight 600 :margin-left "18px"}} (es/entity-val built-char :armor-class)]
+             [:span {:style {:margin-left "5px"}} "(padded armor)"]]]
+           [:div {:style {:margin-left "25px" :margin-top "20px"}}
+            [:span {:style {:font-size "16px" :font-weight 600}} "Hit Points"]
+            [:div {:style {:margin-top "4px"}}
+             [:i.fa.fa-shield {:style {:font-size "32px" :color :white}}]
+             [:span {:style {:font-size "24px" :font-weight 600 :margin-left "18px"}} (es/entity-val built-char :max-hit-points)]]]]]]]]]]))
 
 (r/render [character-builder]
           (js/document.getElementById "app"))
