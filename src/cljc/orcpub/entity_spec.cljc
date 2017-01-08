@@ -7,71 +7,70 @@
       (v entity)
       v)))
 
-(defn ref-sym-to-kw [sym nsx]
-  (if nsx
-    (keyword nsx (subs (str sym) 1))
-    (keyword (subs (str sym) 1))))
+(defn ref-sym-to-kw [sym]
+  (keyword (subs (str sym) 1)))
 
-(defmacro q [entity query & [nsx]]
+(defmacro q [entity query]
   `(entity-val
     ~entity
-    ~(ref-sym-to-kw query nsx)))
+    ~(ref-sym-to-kw query)))
 
-(defn ref-to-kw [s entity & [nsx]]
+(defn ref-to-kw [s entity]
   (if (and (symbol? s)
            (.startsWith (str s) "?"))
-    `(entity-val ~entity ~(ref-sym-to-kw s nsx))
+    `(entity-val ~entity ~(ref-sym-to-kw s))
     s))
 
-(defn replace-refs [entity body & [nsx]]
+(defn replace-refs [entity body]
   (cond
     (map? body)
     (into
      {}
      (reduce-kv
       (fn [m k v]
-        (assoc m (ref-to-kw k entity) (replace-refs entity v nsx)))
+        (assoc m (ref-to-kw k entity) (replace-refs entity v)))
       {}
       body))
     (vector? body)
-    (mapv #(replace-refs entity % nsx) body)
+    (mapv #(replace-refs entity %) body)
     (sequential? body)
-    (map #(replace-refs entity % nsx) body)
+    (map #(replace-refs entity %) body)
     :else (ref-to-kw body entity)))
 
-(defmacro make-entity [body & [nsx]]
+(defmacro make-entity [body]
   (reduce-kv
    (fn [m k v]
      (let [arg (gensym "e")
-           replaced (replace-refs arg v nsx)]
+           replaced (replace-refs arg v)]
        (assoc
         m
-        (ref-sym-to-kw k nsx)
+        (ref-sym-to-kw k)
         (concat `(fn [~arg])
                 [replaced]))))
    {}
    `~body))
 
-(defmacro modifier [k body & [nm nsx]]
+(defmacro modifier [k body & [nm value]]
   (let [arg (gensym "e")
-        replaced (replace-refs arg body nsx)]
+        replaced (replace-refs arg body)]
     `(with-meta
       ~(concat
         `(fn [~arg])
-        `((update ~arg ~(ref-sym-to-kw k nsx) (fn [_#] ~replaced))))
-       {:name ~nm})))
+        `((update ~arg ~(ref-sym-to-kw k) (fn [_#] ~replaced))))
+       {:name ~nm
+        :value ~value})))
 
-(defmacro vec-mod [q val & [nm]]
-  `(modifier ~q (conj (or ~q []) ~val) ~nm))
+(defmacro vec-mod [q val & [nm value]]
+  `(modifier ~q (conj (or ~q []) ~val) ~nm ~value))
 
-(defmacro set-mod [q val & [nm]]
-  `(modifier ~q (conj (or ~q #{}) ~val) ~nm))
+(defmacro set-mod [q val & [nm value]]
+  `(modifier ~q (conj (or ~q #{}) ~val) ~nm ~value))
 
-(defmacro map-mod [q key val & [nm]]
-  `(modifier ~q (assoc ~q ~key ~val) ~nm))
+(defmacro map-mod [q key val & [nm value]]
+  `(modifier ~q (assoc ~q ~key ~val) ~nm ~value))
 
-(defmacro cum-sum-mod [q bonus & [nm]]
-  `(modifier ~q (+ ~q ~bonus) ~nm))
+(defmacro cum-sum-mod [q bonus & [nm value]]
+  `(modifier ~q (+ ~q ~bonus) ~nm ~value))
 
 (defmacro modifiers [& mods]
   (mapv

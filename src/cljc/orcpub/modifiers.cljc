@@ -19,6 +19,11 @@
 (spec/def ::modifiers (spec/+ ::modifier))
 (spec/def ::keywords (spec/+ keyword?))
 
+(defn bonus-str [bonus]
+  (if (pos? bonus)
+    (str "+" bonus)
+    (str bonus)))
+
 (defn modifier [path type value & [name]]
   (cond-> {::path path
            ::type type}

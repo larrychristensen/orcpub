@@ -1,6 +1,7 @@
 (ns orcpub.entity-spec-test
   (:require [clojure.test :refer :all]
             [orcpub.dnd.e5.character :as char5e]
+            [orcpub.dnd.e5.modifiers :as mod5e]
             [orcpub.entity-spec :refer [make-entity q modifier modifiers apply-modifiers]]))
 
 (deftest test-defentity
@@ -21,9 +22,7 @@
 
 (def char1
   (make-entity
-   {?levels {:wizard 1
-             :rogue 4}
-    ?ability-bonuses (reduce-kv
+   {?ability-bonuses (reduce-kv
                       (fn [m k v]
                         (assoc m k (int (/ (- v 10) 2))))
                       {}

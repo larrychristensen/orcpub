@@ -51,7 +51,8 @@
     "School of Evocation"
     :school-of-evocation
     nil
-    [(mod5e/trait2 "Evocation Savant")
+    [(mod5e/subclass :wizard "School of Evocation")
+     (mod5e/trait2 "Evocation Savant")
      (mod5e/trait2 "Sculpt Spells")])])
 
 (declare app-state)
@@ -151,14 +152,14 @@
      ?prof-bonus (+ (int (/ (dec ?total-levels) 4)) 2)
      ?skill-prof-bonuses (into {}
                                (map (fn [{k :key}]
-                                      [k (if (?skill-profs k) ?prof-bonus 0)]))
+                                      [k (if (k ?skill-profs) ?prof-bonus 0)]))
                                skills)
      ?skill-bonuses (into {}
                           (map
                            (fn [[k v]]
                              [k (+ v (?ability-bonuses (skill-abilities k)))]))
                           ?skill-prof-bonuses)
-     ?max-hit-points (do (prn "T" ?levels ?total-levels ?ability-bonuses) (* ?total-levels (?ability-bonuses :con)))})
+     ?max-hit-points (* ?total-levels (?ability-bonuses :con))})
    ::t/selections
    [(t/selection
      "Ability Scores"
@@ -418,15 +419,10 @@
 
 (declare builder-selector)
 
-(defn bonus-str [bonus]
-  (if (pos? bonus)
-    (str "+" bonus)
-    (str bonus)))
-
 (defn option [path option-paths selectable? {:keys [::t/key ::t/name ::t/selections ::t/modifiers ::t/ui-fn ::t/select-fn]}]
   (let [new-path (conj path key)
         selected? (boolean (get-in option-paths new-path))
-        named-mods (filter ::mod/name modifiers)]
+        named-mods (filter (comp :name meta) modifiers)]
     ^{:key key}
     [:div.builder-option
      {:class-name (clojure.string/join
@@ -450,14 +446,14 @@
          ", "
          (map
           (fn [m]
-            (str
-             (::mod/name m)
-             " "
-             (let [v (or (::mod/value m)
-                          (get-option-value (::template @app-state) (::character @app-state) path))]
-                (case (::mod/type m)
-                  ::mod/cumulative-numeric (bonus-str v)
-                  v))))
+            (let [md (meta m)]
+              (prn "META" md)
+              (str
+               (:name md)
+               " "
+               (let [v (or (:value md)
+                           (get-option-value (::template @app-state) (::character @app-state) path))]
+                 v))))
           named-mods))])
      (if selected?
        [:div
@@ -677,7 +673,7 @@
           [:span (s/upper-case (name ak))]
           [:span {:style {:margin-left 5 :color color}} av]]
          [:div {:style {:color color}} (let [bonus (int (/ (- av 10) 2))]
-                                         (str "(" (bonus-str (get ability-bonuses ak)) ")"))]])
+                                         (str "(" (mod/bonus-str (get ability-bonuses ak)) ")"))]])
       offset-abilities
       (take 6 (drop 1 (cycle text-points)))
       colors)
@@ -724,14 +720,14 @@
 ;;(prn "MODIFIER MAP" (cljs.pprint/pprint (t/make-modifier-map (::template @app-state))))
 ;;(spec/explain ::t/modifier-map (t/make-modifier-map (::template @app-state)))
 
-(prn "ABILITIES-BONUSES" (es/entity-val (entity/build (::character @app-state) (::template @app-state)) :ability-bonuses))
-(prn "ABFN" (:ability-bonuses (entity/build (::character @app-state) (::template @app-state))))
+
+(prn (es/entity-val (entity/build (::character @app-state) (::template @app-state)) :skill-bonuses))
 
 (defn character-builder []
   (cljs.pprint/pprint (::character @app-state))
   (let [option-paths (make-path-map (::character @app-state))
         built-char (entity/build (::character @app-state) (::template @app-state))]
-    (cljs.pprint/pprint built-char)
+    #_(cljs.pprint/pprint built-char)
     [:div.app
      [:div.app-header
       [:div.app-header-bar.container
@@ -763,17 +759,18 @@
                            :font-weight 600
                            :margin-bottom "16px"
                            :text-shadow "1px 2px 1px black"}}
-             [:span (str race
-                        (if (and race subrace) " / ")
-                        subrace)]
-             [:span {:style {:margin-left "5px"}} "-"]
+             [:span race]
              (if (seq levels)
                [:span
-                {:style {:margin-left "5px"}}
-                (map
-                 (fn [[cls-k {:keys [:class-name :class-level]}]]
-                   ^{:key cls-k} [:span (str class-name " (" class-level ")")])
-                 levels)])])
+                {:style {:margin-left "10px"}}
+                (apply
+                 str
+                 (interpose
+                  " / "
+                  (map
+                   (fn [[cls-k {:keys [class-name class-level subclass]}]]
+                    (str class-name " (" class-level ")"))
+                   levels)))])])
          [:div {:style {:display :flex}}
           [:div
            (abilities-radar 187 (es/entity-val built-char :abilities) (es/entity-val built-char :ability-bonuses))]
@@ -787,8 +784,18 @@
            [:div {:style {:margin-left "25px" :margin-top "20px"}}
             [:span {:style {:font-size "16px" :font-weight 600}} "Hit Points"]
             [:div {:style {:margin-top "4px"}}
-             [:i.fa.fa-shield {:style {:font-size "32px" :color :white}}]
-             [:span {:style {:font-size "24px" :font-weight 600 :margin-left "18px"}} (es/entity-val built-char :max-hit-points)]]]]]]]]]]))
+             [:i.fa.fa-crosshairs {:style {:font-size "32px" :color :white}}]
+             [:span {:style {:font-size "24px" :font-weight 600 :margin-left "18px"}} (es/entity-val built-char :max-hit-points)]]]
+           [:div {:style {:margin-left "25px" :margin-top "20px"}}
+            [:span {:style {:font-size "16px" :font-weight 600}} "Skills"]
+            [:div {:style {:margin-top "4px"}}
+             [:span {:style {:font-size "14px" :font-weight 600}}
+              (s/join
+               ", "
+               (map
+                (fn [[k v]]
+                  (str (s/capitalize (name k)) " " (mod/bonus-str v)))
+                (es/entity-val built-char :skill-bonuses)))]]]]]]]]]]))
 
 (r/render [character-builder]
           (js/document.getElementById "app"))
