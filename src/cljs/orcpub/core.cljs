@@ -7,6 +7,7 @@
             
             [orcpub.template :as t]
             [orcpub.entity :as entity]
+            [orcpub.entity-spec :as es]
             [orcpub.dice :as dice]
             [orcpub.modifiers :as mod]
             [orcpub.dnd.e5.character :as char5e]
@@ -15,7 +16,8 @@
             [clojure.spec :as spec]
             [clojure.spec.test :as stest]
 
-            [reagent.core :as r]))
+            [reagent.core :as r])
+  (:require-macros [orcpub.entity-spec :refer [make-entity]]))
 
 (enable-console-print!)
 
@@ -33,7 +35,7 @@
    (fn [key]
      {::t/key key
       ::t/name (key-to-name key)
-      ::t/modifiers [(mod5e/spells-known 0 key)]})
+      ::t/modifiers [(mod5e/spells-known2 0 key)]})
    wizard-cantrips))
 
 (def wizard-spell-options-1
@@ -41,7 +43,7 @@
    (fn [key]
      {::t/key key
       ::t/name (key-to-name key)
-      ::t/modifiers [(mod5e/spells-known 1 key)]})
+      ::t/modifiers [(mod5e/spells-known2 1 key)]})
    wizard-spells-1))
 
 (def arcane-tradition-options
@@ -49,8 +51,8 @@
     "School of Evocation"
     :school-of-evocation
     nil
-    [(mod5e/trait "Evocation Savant")
-     (mod5e/trait "Sculpt Spells")])])
+    [(mod5e/trait2 "Evocation Savant")
+     (mod5e/trait2 "Sculpt Spells")])])
 
 (declare app-state)
 
@@ -126,8 +128,37 @@
        (swap! app-state update ::character #(assoc-in % (get-option-value-path (::template @app-state) path) (dice/die-roll die))))}
     "Re-Roll"]])
 
+(def skills [{:key :athletics
+              :ability :str}
+             {:key :acrobatics
+              :ability :dex}
+             {:key :perception
+              :ability :wis}])
+
+(def skill-abilities
+  (into {} (map (juxt :key :ability)) skills))
+
 (def template
-  {::char5e/armor-class 10
+  {::t/base
+   (es/make-entity
+    {?armor-class 10
+     ?ability-bonuses (reduce-kv
+                       (fn [m k v]
+                         (assoc m k (int (/ (- v 10) 2))))
+                       {}
+                       ?abilities)
+     ?total-levels (apply + (vals ?levels))
+     ?prof-bonus (+ (int (/ (dec ?total-levels) 4)) 2)
+     ?skill-prof-bonuses (into {}
+                               (map (fn [{k :key}]
+                                      [k (if (?skill-profs k) ?prof-bonus 0)]))
+                               skills)
+     ?skill-bonuses (into {}
+                          (map
+                           (fn [[k v]]
+                             [k (+ v (?ability-bonuses (skill-abilities k)))]))
+                          ?skill-prof-bonuses)})
+   ::char5e/armor-class 10
    ::t/derived-values
    [{::t/path [::char5e/ability-bonuses]
      ::t/value-fn (fn [c]
@@ -145,13 +176,13 @@
      [{::t/name "Standard Roll"
        ::t/key :standard-roll
        ::t/ui-fn #(abilities-roller (::character @app-state))
-       ::t/modifiers [(mod5e/abilities nil)]}
+       ::t/modifiers [(partial mod5e/abilities2)]}
       {::t/name "Standard Scores"
        ::t/key :standard-scores
        ::t/ui-fn #(abilities-standard (::character @app-state))
        ::t/select-fn #(swap! app-state update ::character (fn [c] (assoc-in c [::entity/options :ability-scores] {::entity/key :standard-scores
                                                                                                                  ::entity/value (char5e/abilities 15 14 13 12 10 8)})))
-       ::t/modifiers [(mod5e/abilities nil)]}])
+       ::t/modifiers [(partial mod5e/abilities2)]}])
     (t/selection
      "Race"
      [(t/option
@@ -165,16 +196,16 @@
            [(t/selection
              "Cantrip"
               wizard-cantrip-options)]
-           [(mod5e/subrace "High Elf")
-            (mod5e/ability ::char5e/int 1)])
+           [(mod5e/subrace2 "High Elf")
+            (mod5e/ability2 ::char5e/int 1)])
           (t/option
            "Wood Elf"
            :wood-elf
            []
-           [(mod5e/subrace "Wood Elf")
-            (mod5e/ability ::char5e/wis 1)])])]
-       [(mod5e/race "Elf")
-        (mod5e/ability ::char5e/dex 2)])
+           [(mod5e/subrace2 "Wood Elf")
+            (mod5e/ability2 ::char5e/wis 1)])])]
+       [(mod5e/race2 "Elf")
+        (mod5e/ability2 ::char5e/dex 2)])
       (t/option
        "Dwarf"
        :dwarf
@@ -186,17 +217,17 @@
            [(t/selection
              "Tool Proficiency"
              wizard-cantrip-options)]
-           [(mod5e/subrace "Hill Dwarf")
-            (mod5e/ability ::char5e/wis 1)])
+           [(mod5e/subrace2 "Hill Dwarf")
+            (mod5e/ability2 ::char5e/wis 1)])
           (t/option
            "Mountain Dwarf"
            :mountain-dwarf
            []
-           [(mod5e/subrace "Mountain Dwarf")
-            (mod5e/ability ::char5e/str 2)])])]
-       [(mod5e/race "Dwarf")
-        (mod5e/ability ::char5e/con 2)
-        (mod5e/speed 25)])])
+           [(mod5e/subrace2 "Mountain Dwarf")
+            (mod5e/ability2 ::char5e/str 2)])])]
+       [(mod5e/race2 "Dwarf")
+        (mod5e/ability2 ::char5e/con 2)
+        (mod5e/speed2 25)])])
     (t/selection+
      "Class"
      (fn [selection classes]
@@ -223,9 +254,9 @@
                     wizard-spell-options-1)
                    ::t/key
                    :spells-known)]
-           [(mod5e/saving-throws ::char5e/int ::char5e/wis)
-            (mod5e/level :wizard "Wizard" 1)
-            (mod5e/max-hit-points 6)])
+           [(mod5e/saving-throws2 ::char5e/int ::char5e/wis)
+            (mod5e/level2 :wizard "Wizard" 1)
+            (mod5e/max-hit-points2 6)])
           (t/option
            "2"
            :2
@@ -237,13 +268,13 @@
              [{::t/name "Roll"
                ::t/key :roll
                ::t/ui-fn #(hit-points-roller 6 (::character @app-state) %)
-               ::t/modifiers [(mod5e/max-hit-points nil)]}
+               ::t/modifiers [(partial mod5e/max-hit-points2)]}
               (t/option
                "Average"
                :average
                nil
-               [(mod5e/max-hit-points 4)])])]
-           [(mod5e/level :wizard "Wizard" 2)])
+               [(mod5e/max-hit-points2 4)])])]
+           [(mod5e/level2 :wizard "Wizard" 2)])
           (t/option
            "3"
            :3
@@ -251,7 +282,7 @@
              "1st Level Spells Known"
              (fn [])
              wizard-spell-options-1)]
-           [(mod5e/level :wizard "Wizard" 3)])
+           [(mod5e/level2 :wizard "Wizard" 3)])
           (t/option
            "4"
            :4
@@ -270,7 +301,7 @@
                       (s/upper-case (name ability))
                       ability
                       []
-                      [(mod5e/ability ability 1)])))
+                      [(mod5e/ability2 ability 1)])))
                   char5e/ability-keys)
                  2
                  2)]
@@ -286,11 +317,11 @@
                                   (s/upper-case (name ability))
                                   ability
                                   nil
-                                  [(mod5e/ability ability 1)])]
+                                  [(mod5e/ability2 ability 1)])]
                       option))
                   char5e/ability-keys))]
                [])])]
-           [(mod5e/level :wizard "Wizard" 3)])])]
+           [(mod5e/level2 :wizard "Wizard" 3)])])]
        [])
       (t/option
        "Rogue"
@@ -313,12 +344,12 @@
                    "Athletics"
                    :athletics
                    nil
-                   [(mod5e/skill-expertise ::char5e/athletics)])
+                   [(mod5e/skill-expertise2 ::char5e/athletics)])
                   (t/option
                    "Acrobatics"
                    :acrobatics
                    nil
-                   [(mod5e/skill-expertise ::char5e/acrobatics)])]
+                   [(mod5e/skill-expertise2 ::char5e/acrobatics)])]
                  2
                  2)]
                [])
@@ -331,16 +362,16 @@
                    "Athletics"
                    :athletics
                    nil
-                   [(mod5e/skill-expertise ::char5e/athletics)])
+                   [(mod5e/skill-expertise2 ::char5e/athletics)])
                   (t/option
                    "Acrobatics"
                    :acrobatics
                    nil
-                   [(mod5e/skill-expertise ::char5e/acrobatics)])])]
-               [(mod5e/tool-proficiency "Thieves Tools" ::char5e/thieves-tools)])])]
-           [(mod5e/saving-throws ::char5e/dex ::char5e/int)
-            (mod5e/level :rogue "Rogue" 1)
-            (mod5e/max-hit-points 8)])
+                   [(mod5e/skill-expertise2 ::char5e/acrobatics)])])]
+               [(mod5e/tool-proficiency2 "Thieves Tools" ::char5e/thieves-tools)])])]
+           [(mod5e/saving-throws2 ::char5e/dex ::char5e/int)
+            (mod5e/level2 :rogue "Rogue" 1)
+            (mod5e/max-hit-points2 8)])
           (t/option
            "2"
            :2
@@ -353,13 +384,13 @@
                "Average"
                :average
                []
-               [(mod5e/max-hit-points 5)])])]
-           [(mod5e/level :rogue "Rogue" 2)])
+               [(mod5e/max-hit-points2 5)])])]
+           [(mod5e/level2 :rogue "Rogue" 2)])
           (t/option
            "3"
            :3
            []
-           [(mod5e/level :rogue "rogue" 3)])])]
+           [(mod5e/level2 :rogue "rogue" 3)])])]
        [])])]})
 
 (def character
@@ -704,6 +735,9 @@
 ;;(prn "MODIFIER MAP" (cljs.pprint/pprint (t/make-modifier-map (::template @app-state))))
 ;;(spec/explain ::t/modifier-map (t/make-modifier-map (::template @app-state)))
 
+(prn "ABILITIES-BONUSES" (es/entity-val (entity/build (::character @app-state) (::template @app-state)) :ability-bonuses))
+(prn "ABFN" (:ability-bonuses (entity/build (::character @app-state) (::template @app-state))))
+
 (defn character-builder []
   (cljs.pprint/pprint (::character @app-state))
   (let [option-paths (make-path-map (::character @app-state))
@@ -733,9 +767,9 @@
               (::t/selections (::template @app-state)))]
         [:div {:style {:flex-grow 1}}]
         [:div
-         (let [race (::char5e/race built-char)
-                subrace (::char5e/subrace built-char)
-                levels (::char5e/levels built-char)]
+         (let [race (es/entity-val built-char :race)
+               subrace (es/entity-val built-char :subrace)
+               levels (es/entity-val built-char :levels)]
             [:div {:style {:font-size "24px"
                            :font-weight 600
                            :margin-bottom "16px"
@@ -753,12 +787,12 @@
                  levels)])])
          [:div {:style {:display :flex}}
           [:div
-           (abilities-radar 187 (::char5e/abilities built-char) (::char5e/ability-bonuses built-char))]
+           (abilities-radar 187 (es/entity-val built-char :abilities) (es/entity-val built-char :ability-bonuses))]
           [:div {:style {:margin-left "25px"}}
            [:span {:style {:font-size "16px" :font-weight 600}} "Armor Class"]
            [:div
             [:i.fa.fa-shield {:style {:font-size "32px" :color :white}}]
-            [:span {:style {:font-size "24px" :font-weight 600 :margin-left "18px"}} (::char5e/armor-class built-char)]
+            [:span {:style {:font-size "24px" :font-weight 600 :margin-left "18px"}} 10]
             [:span {:style {:margin-left "5px"}} "(padded armor)"]]]]]]]]]))
 
 (r/render [character-builder]

@@ -1,6 +1,7 @@
 (ns orcpub.entity
   (:require [clojure.spec :as spec]
             [orcpub.modifiers :as modifiers]
+            [orcpub.entity-spec :as es]
             [orcpub.dnd.e5.modifiers :as dnd5-mods]
             [orcpub.dnd.e5.character :as dnd5-char]
             [orcpub.template :as t]))
@@ -59,7 +60,9 @@
      (let [modifiers (::t/modifiers (get-in modifier-map path))]
        (if option-value
          (map
-          #(assoc % ::modifiers/value option-value)
+          (fn [mod]
+            (prn "MOD" mod)
+            (mod option-value))
           modifiers)
          modifiers)))
    flat-options))
@@ -106,7 +109,9 @@
   (let [modifier-map (t/make-modifier-map template)
         options (flatten-options (::options raw-entity))
         modifiers (collect-modifiers options modifier-map)]
-    (reduce
+    (prn "BASE" (::t/base template))
+    (es/apply-modifiers (::t/base template) modifiers)
+    #_(reduce
      (fn [current-entity modifier]
        (update-in current-entity
                   (let [path (::modifiers/path modifier)]
@@ -129,7 +134,7 @@
 
 (defn build [raw-entity template]
   (-> (apply-options raw-entity template)
-      (apply-derived-values template)))
+      #_(apply-derived-values template)))
 
 (spec/fdef
  build

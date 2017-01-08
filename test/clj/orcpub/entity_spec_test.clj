@@ -23,7 +23,6 @@
   (make-entity
    {?levels {:wizard 1
              :rogue 4}
-    ?abilities {:str 18 :dex 12 :con 14 :int 15 :wis 17 :cha 19}
     ?ability-bonuses (reduce-kv
                       (fn [m k v]
                         (assoc m k (int (/ (- v 10) 2))))
@@ -36,14 +35,16 @@
                               (map (fn [{k :key}]
                                      [k (if (?skill-profs k) ?prof-bonus 0)]))
                               skills)
-    ?skill-bonuses (into {}
-                         (map
-                          (fn [[k v]]
-                            [k (+ v (?ability-bonuses (skill-abilities k)))]))
-                         ?skill-prof-bonuses)}))
+    ?skill-bonuses (reduce-kv
+                    (fn [m k v]
+                      (prn "KV" m k v (or (?ability-bonuses (skill-abilities k)) 0))
+                      (assoc m k (+ v (or (?ability-bonuses (skill-abilities k)) 0))))
+                    {}
+                    ?skill-prof-bonuses)}))
 
 (def modifiers2
   (modifiers
+   (?abilities {:str 18 :dex 12 :con 14 :int 15 :wis 17 :cha 19})
    (?skill-expertise (conj (or ?skill-expertise #{}) :perception))
    (?skill-prof-bonuses (reduce-kv
                          (fn [m k v]
@@ -54,10 +55,14 @@
                          ?skill-prof-bonuses))
    (?abilities (update ?abilities :wis + 2))))
 
-(deftest test-defentity--character
-  (is (= 4 (:rogue (q char1 ?levels))))
-  (is (= {:athletics 7 :acrobatics 1 :perception 6} (q char1 ?skill-bonuses))))
-
 (deftest test-modifier
   (let [modified (apply-modifiers char1 modifiers2)]
+    (prn (:abilities (apply-modifiers char1 modifiers2)))
+    (is (= {:str 18 :dex 12 :con 14 :int 15 :wis 19 :cha 19} (q modified ?abilities)))
+    (is (= {:str 4 :dex 1 :con 2 :int 2 :wis 4 :cha 4} (q modified ?ability-bonuses)))
+    (is (= #{:athletics :perception} (q modified ?skill-profs)))
+    (is (= #{:perception} (q modified ?skill-expertise)))
+    (is (= {:athletics 3 :acrobatics 0 :perception 6} (q modified ?skill-prof-bonuses)))
+    (is (= 4 (:rogue (q char1 ?levels))))
+    (is (= {:athletics 7 :acrobatics 1 :perception 10} (q modified ?skill-bonuses)))
     (is (= 10 (:perception (q modified ?skill-bonuses))))))
