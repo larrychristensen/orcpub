@@ -219,13 +219,13 @@
      [{::t/name "Standard Roll"
        ::t/key :standard-roll
        ::t/ui-fn #(abilities-roller (::character @app-state))
-       ::t/modifiers [(partial mod5e/abilities2)]}
+       ::t/modifiers [(mod5e/deferred-abilities)]}
       {::t/name "Standard Scores"
        ::t/key :standard-scores
        ::t/ui-fn #(abilities-standard (::character @app-state))
        ::t/select-fn #(swap! app-state update ::character (fn [c] (assoc-in c [::entity/options :ability-scores] {::entity/key :standard-scores
                                                                                                                   ::entity/value (char5e/abilities 15 14 13 12 10 8)})))
-       ::t/modifiers [(partial mod5e/abilities2)]}])
+       ::t/modifiers [(mod5e/deferred-abilities)]}])
     (t/selection
      "Race"
      [(t/option
@@ -319,7 +319,7 @@
              [{::t/name "Roll"
                ::t/key :roll
                ::t/ui-fn #(hit-points-roller 6 (::character @app-state) %)
-               ::t/modifiers [(partial mod5e/max-hit-points2)]}
+               ::t/modifiers [(mod5e/deferred-max-hit-points)]}
               (t/option
                "Average"
                :average
@@ -481,7 +481,7 @@
 (defn option [path option-paths selectable? {:keys [::t/key ::t/name ::t/selections ::t/modifiers ::t/ui-fn ::t/select-fn]}]
   (let [new-path (conj path key)
         selected? (boolean (get-in option-paths new-path))
-        named-mods (filter (comp :name meta) modifiers)]
+        named-mods (filter ::mod/name modifiers)]
     ^{:key key}
     [:div.builder-option
      {:class-name (clojure.string/join
@@ -505,14 +505,12 @@
          ", "
          (map
           (fn [m]
-            (let [md (meta m)]
-              (prn "META" md)
-              (str
-               (:name md)
-               " "
-               (let [v (or (:value md)
-                           (get-option-value (::template @app-state) (::character @app-state) path))]
-                 v))))
+            (prn "MOD" m)
+            (str
+             (::mod/name m)
+             " "
+             (let [v (or (::mod/value m) (get-option-value (::template @app-state) (::character @app-state) path))]
+               v)))
           named-mods))])
      (if selected?
        [:div

@@ -1,6 +1,6 @@
 (ns orcpub.entity
   (:require [clojure.spec :as spec]
-            [orcpub.modifiers :as modifiers]
+            [orcpub.modifiers :as mods]
             [orcpub.entity-spec :as es]
             [orcpub.dnd.e5.modifiers :as dnd5-mods]
             [orcpub.dnd.e5.character :as dnd5-char]
@@ -52,19 +52,20 @@
 (defn collect-modifiers [flat-options modifier-map]
   #_{:pre [(spec/valid? ::flat-options flat-options)
          (spec/valid? ::t/modifier-map modifier-map)]
-     :post [(spec/valid? ::modifiers/modifiers %)]}
+     :post [(spec/valid? ::mods/modifiers %)]}
   #?(:cljs (cljs.pprint/pprint flat-options))
   (mapcat
    (fn [{path ::t/path
          option-value ::value
          :as option}]
      (let [modifiers (::t/modifiers (get-in modifier-map path))]
-       (if option-value
-         (map
-          (fn [mod]
-            (mod option-value))
-          modifiers)
-         modifiers)))
+       (map
+        (fn [{:keys [::mods/fn ::mods/deferred-fn]}]
+          (prn "DEFERED" deferred-fn option-value fn)
+          (if (and deferred-fn option-value)
+            (deferred-fn option-value)
+            fn))
+        modifiers)))
    flat-options))
 
 (defn index-of-option [selection option-key]
@@ -109,6 +110,7 @@
   (let [modifier-map (t/make-modifier-map template)
         options (flatten-options (::options raw-entity))
         modifiers (collect-modifiers options modifier-map)]
+    (prn "MODIFIERS" modifiers)
     (es/apply-modifiers (::t/base template) modifiers)))
 
 (defn build [raw-entity template]

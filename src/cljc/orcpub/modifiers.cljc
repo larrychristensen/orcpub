@@ -1,5 +1,6 @@
 (ns orcpub.modifiers
-  (:require [clojure.spec :as spec]))
+  (:require [clojure.spec :as spec]
+            [orcpub.entity-spec :as es]))
 
 (def cumulative-numeric-modifier-type ::cumulative-numeric)
 (def override-modifier-type ::overriding)
@@ -24,25 +25,32 @@
     (str "+" bonus)
     (str bonus)))
 
-(defn modifier [path type value & [name]]
-  (cond-> {::path path
-           ::type type}
-    value (assoc ::value value)
-    name (assoc ::name name)))
+(defmacro modifier [prop body & [nm value]]
+  `{::name ~nm
+    ::value ~value
+    ::fn (es/modifier ~prop ~body)})
 
-(defn overriding [path value & [name]]
-  (modifier path override-modifier-type value name))
+(defn deferred-modifier [fn & [nm value]]
+  {::name nm
+   ::value value
+   ::deferred-fn fn})
 
-(defn overriding-fn [])
+(defmacro cum-sum-mod [prop bonus & [nm value]]
+  `{::name ~nm
+    ::value ~value
+    ::fn (es/cum-sum-mod ~prop ~bonus)})
 
-(defn cumulative-numeric [path bonus & [name]]
-  (modifier path cumulative-numeric-modifier-type bonus name))
+(defmacro vec-mod [prop val & [nm value]]
+  `{::name ~nm
+    ::value ~value
+    ::fn (es/vec-mod ~prop ~val)})
 
-(defn cumulative-list [path values]
-  (modifier path cumulative-list-modifier-type values))
+(defmacro set-mod [prop body & [nm value]]
+  `{::name ~nm
+    ::value ~value
+    ::fn (es/set-mod ~prop ~body)})
 
-(defn modify [{:keys [orcpub.modifiers/type orcpub.modifiers/value]} current-value]
-  (case type
-    ::cumulative-numeric (+ value (or current-value 0))
-    ::overriding value
-    ::cumulative-list (concat current-value value)))
+(defmacro map-mod [prop k v & [nm value]]
+  `{::name ~nm
+    ::value ~value
+    ::fn (es/map-mod ~prop ~k ~v)})
