@@ -199,15 +199,16 @@
                        ?abilities)
      ?total-levels (apply + (map (fn [[k {l :class-level}]] l) ?levels))
      ?prof-bonus (+ (int (/ (dec ?total-levels) 4)) 2)
-     ?skill-prof-bonuses (into {}
-                               (map (fn [{k :key}]
-                                      [k (if (k ?skill-profs) ?prof-bonus 0)]))
-                               skills)
-     ?skill-bonuses (into {}
-                          (map
-                           (fn [[k v]]
-                             [k (+ v (?ability-bonuses (skill-abilities k)))]))
-                          ?skill-prof-bonuses)
+     ?skill-prof-bonuses (reduce
+                          (fn [m {k :key}]
+                            (assoc m k (if (k ?skill-profs) ?prof-bonus 0)))
+                          {}
+                          skills)
+     ?skill-bonuses (reduce-kv
+                     (fn [m k v]
+                       (assoc m k (+ v (?ability-bonuses (skill-abilities k)))))
+                     {}
+                     ?skill-prof-bonuses)
      ?max-hit-points (* ?total-levels (?ability-bonuses :con))})
    ::t/selections
    [(t/selection
@@ -220,7 +221,7 @@
        ::t/key :standard-scores
        ::t/ui-fn #(abilities-standard (::character @app-state))
        ::t/select-fn #(swap! app-state update ::character (fn [c] (assoc-in c [::entity/options :ability-scores] {::entity/key :standard-scores
-                                                                                                                 ::entity/value (char5e/abilities 15 14 13 12 10 8)})))
+                                                                                                                  ::entity/value (char5e/abilities 15 14 13 12 10 8)})))
        ::t/modifiers [(partial mod5e/abilities2)]}])
     (t/selection
      "Race"
@@ -234,7 +235,7 @@
            :high-elf
            [(t/selection
              "Cantrip"
-              wizard-cantrip-options)]
+             wizard-cantrip-options)]
            [(mod5e/subrace2 "High Elf")
             (mod5e/ability2 :int 1)])
           (t/option
@@ -520,7 +521,7 @@
           (fn [selection]
             ^{:key (::t/key selection)}
             [builder-selector new-path option-paths selection])
-              selections)]])]))
+          selections)]])]))
 
 (def builder-selector-style)
 
@@ -831,28 +832,28 @@
           (fn [selection]
             ^{:key (::t/key selection)}
             [builder-selector [] option-paths selection])
-              (::t/selections (::template @app-state)))]
+          (::t/selections (::template @app-state)))]
         [:div {:style {:flex-grow 1}}]
         [:div
          (let [race (es/entity-val built-char :race)
                subrace (es/entity-val built-char :subrace)
                levels (es/entity-val built-char :levels)]
-            [:div {:style {:font-size "24px"
-                           :font-weight 600
-                           :margin-bottom "16px"
-                           :text-shadow "1px 2px 1px black"}}
-             [:span race]
-             (if (seq levels)
-               [:span
-                {:style {:margin-left "10px"}}
-                (apply
-                 str
-                 (interpose
-                  " / "
-                  (map
-                   (fn [[cls-k {:keys [class-name class-level subclass]}]]
+           [:div {:style {:font-size "24px"
+                          :font-weight 600
+                          :margin-bottom "16px"
+                          :text-shadow "1px 2px 1px black"}}
+            [:span race]
+            (if (seq levels)
+              [:span
+               {:style {:margin-left "10px"}}
+               (apply
+                str
+                (interpose
+                 " / "
+                 (map
+                  (fn [[cls-k {:keys [class-name class-level subclass]}]]
                     (str class-name " (" class-level ")"))
-                   levels)))])])
+                  levels)))])])
          [:div {:style {:display :flex}}
           [:div
            (abilities-radar 187 (es/entity-val built-char :abilities) (es/entity-val built-char :ability-bonuses))]
@@ -875,6 +876,7 @@
               (s/join
                ", "
                (let [skill-bonuses (es/entity-val built-char :skill-bonuses)]
+                 (prn "SKILL_PROF_BONUSES" (es/entity-val built-char :skill-prof-bonuses))
                  (map
                   (fn [skill-kw]
                     (str (s/capitalize (name skill-kw)) " " (mod/bonus-str (skill-bonuses skill-kw))))

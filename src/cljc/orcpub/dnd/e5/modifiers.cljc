@@ -57,7 +57,7 @@
   (es/modifier ?proficiency-bonus bonus))
 
 (defn skill-proficiency [skill-kw]
-  (es/modifier ?skill-profs (do (prn "SKILL_PROF" skill-kw) (conj ?skill-profs skill-kw))))
+  (es/set-mod ?skill-profs skill-kw))
 
 (defn max-hit-points2 [bonus]
   (es/cum-sum-mod ?max-hit-points bonus "HP" bonus))
