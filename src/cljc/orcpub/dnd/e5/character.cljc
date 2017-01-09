@@ -1,6 +1,7 @@
 (ns orcpub.dnd.e5.character
   (:require [clojure.spec :as spec]
-            [orcpub.dice :as dice]))
+            [orcpub.dice :as dice]
+            [orcpub.template :as t]))
 
 (spec/def ::armor-class nat-int?)
 (spec/def ::subrace string?)
@@ -53,4 +54,3 @@
   (zipmap
    ability-keys
    as))
-

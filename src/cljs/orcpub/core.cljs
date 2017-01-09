@@ -12,6 +12,7 @@
             [orcpub.modifiers :as mod]
             [orcpub.dnd.e5.character :as char5e]
             [orcpub.dnd.e5.modifiers :as mod5e]
+            [orcpub.dnd.e5.options :as opt5e]
 
             [clojure.spec :as spec]
             [clojure.spec.test :as stest]
@@ -129,11 +130,59 @@
        (swap! app-state update ::character #(assoc-in % (get-option-value-path (::template @app-state) path) (dice/die-roll die))))}
     "Re-Roll"]])
 
-(def skills [{:key :athletics
-              :ability :str}
-             {:key :acrobatics
+(def skills [{:name "Acrobatics"
+              :key :acrobatics
               :ability :dex}
-             {:key :perception
+             {:name "Animal Handling"
+              :key :animal-handling
+              :ability :wis}
+             {:name "Arcana"
+              :key :arcana
+              :ability :int}
+             {:name "Athletics"
+              :key :athletics
+              :ability :str}
+             {:name "Deception"
+              :key :deception
+              :ability :cha}
+             {:name "History"
+              :key :history
+              :ability :int}
+             {:name "Insight"
+              :key :insight
+              :ability :wis}
+             {:name "Intimidation"
+              :key :intimidation
+              :ability :cha}
+             {:name "Investigation"
+              :key :investigation
+              :ability :int}
+             {:name "Medicine"
+              :key :medicine
+              :ability :wis}
+             {:name "Nature"
+              :key :nature
+              :ability :int}
+             {:name "Perception"
+              :key :perception
+              :ability :wis}
+             {:name "Performance"
+              :key :performance
+              :ability :cha}
+             {:name "Persuasion"
+              :key :persuasion
+              :ability :cha}
+             {:name "Religion"
+              :key :religion
+              :ability :int}
+             {:name "Sleight of Hand"
+              :key :sleight-of-hand
+              :ability :dex}
+             {:name "Stealth"
+              :key :stealth
+              :ability :dex}
+             {:name "Survival"
+              :key :survival
               :ability :wis}])
 
 (def skill-abilities
@@ -230,7 +279,15 @@
      [(t/option
        "Wizard"
        :wizard
-       [(t/sequential-selection
+       [(t/selection
+         "Skills"
+         (opt5e/skill-options
+          (filter
+           (comp #{:arcana :history :insight :investigation :medicine :religion} :key)
+           skills))
+         2
+         2)
+        (t/sequential-selection
          "Levels"
          (fn [selection levels]
            {::entity/key (-> levels count inc str keyword)})
@@ -494,6 +551,23 @@
                               (fn [options] (conj options (new-item-fn selection options))))))
      :style {:margin-left "5px"}} (str "Add " name)]])
 
+(defn set-option-value [char path value]
+  (let [number-indices (keep-indexed (fn [i v] (if (number? v) i))
+                                     path)
+        subpaths (map #(subvec path 0 %) number-indices)]
+    (prn "PATH" path)
+    (assoc-in
+     (reduce
+      (fn [c p]
+        (prn "SUBPATH" p c)
+        (if (nil? (get-in c p))
+          (assoc-in c p [])
+          c))
+      char
+      subpaths)
+     path
+     value)))
+
 (defn dropdown-selector [path option-paths {:keys [::t/options ::t/min ::t/max ::t/key ::t/name ::t/sequential?] :as selection}]
   (let [change-fn (fn [i]
                     (fn [e]
@@ -501,7 +575,7 @@
                             option-path (entity/get-entity-path (::template @app-state) new-path)
                             new-value (cljs.reader/read-string (.. e -target -value))]
                         (swap! app-state update ::character
-                               #(assoc-in % (conj option-path ::entity/key) new-value)))))]
+                               #(set-option-value % (conj option-path ::entity/key) new-value)))))]
     [:div
      (if max
        (if (= min max)
@@ -723,11 +797,19 @@
 
 (prn (es/entity-val (entity/build (::character @app-state) (::template @app-state)) :skill-bonuses))
 
+(defn print-char [built-char]
+  (cljs.pprint/pprint
+   (reduce-kv
+    (fn [m k v]
+      (assoc m k (es/entity-val built-char k)))
+    {}
+    built-char)))
+
 (defn character-builder []
   (cljs.pprint/pprint (::character @app-state))
   (let [option-paths (make-path-map (::character @app-state))
         built-char (entity/build (::character @app-state) (::template @app-state))]
-    #_(cljs.pprint/pprint built-char)
+    (print-char built-char)
     [:div.app
      [:div.app-header
       [:div.app-header-bar.container
@@ -774,7 +856,7 @@
          [:div {:style {:display :flex}}
           [:div
            (abilities-radar 187 (es/entity-val built-char :abilities) (es/entity-val built-char :ability-bonuses))]
-          [:div
+          [:div {:style {:width "250px"}}
            [:div {:style {:margin-left "25px" :margin-top "20px"}}
             [:span {:style {:font-size "16px" :font-weight 600}} "Armor Class"]
             [:div {:style {:margin-top "4px"}}
@@ -792,10 +874,11 @@
              [:span {:style {:font-size "14px" :font-weight 600}}
               (s/join
                ", "
-               (map
-                (fn [[k v]]
-                  (str (s/capitalize (name k)) " " (mod/bonus-str v)))
-                (es/entity-val built-char :skill-bonuses)))]]]]]]]]]]))
+               (let [skill-bonuses (es/entity-val built-char :skill-bonuses)]
+                 (map
+                  (fn [skill-kw]
+                    (str (s/capitalize (name skill-kw)) " " (mod/bonus-str (skill-bonuses skill-kw))))
+                  (es/entity-val built-char :skill-profs))))]]]]]]]]]]))
 
 (r/render [character-builder]
           (js/document.getElementById "app"))

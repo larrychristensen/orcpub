@@ -33,7 +33,7 @@
   (es/modifier ?abilities abilities))
 
 (defn saving-throws2 [& abilities]
-  (es/set-mod ?savings-throws abilities))
+  (es/modifier ?savings-throws (concat (or ?savings-throws #{}) abilities)))
 
 (defn initiative2 [bonus]
   (es/cum-sum-mod ?initiative bonus))
@@ -46,8 +46,8 @@
   (es/map-mod ?spell-slots level num))
 
 (defn spells-known2 [level spell-key]
-  (es/modifier ?spell-slots
-               (update ?spell-slots level conj spell-key)))
+  (es/modifier ?spells-known
+               (update ?spells-known level conj spell-key)))
 
 (defn trait2 [name & [description]]
   (es/vec-mod ?traits (cond-> {:name name}
@@ -55,6 +55,9 @@
 
 (defn proficiency-bonus2 [bonus]
   (es/modifier ?proficiency-bonus bonus))
+
+(defn skill-proficiency [skill-kw]
+  (es/modifier ?skill-profs (do (prn "SKILL_PROF" skill-kw) (conj ?skill-profs skill-kw))))
 
 (defn max-hit-points2 [bonus]
   (es/cum-sum-mod ?max-hit-points bonus "HP" bonus))

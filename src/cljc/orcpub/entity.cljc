@@ -52,7 +52,8 @@
 (defn collect-modifiers [flat-options modifier-map]
   #_{:pre [(spec/valid? ::flat-options flat-options)
          (spec/valid? ::t/modifier-map modifier-map)]
-   :post [(spec/valid? ::modifiers/modifiers %)]}
+     :post [(spec/valid? ::modifiers/modifiers %)]}
+  #?(:cljs (cljs.pprint/pprint flat-options))
   (mapcat
    (fn [{path ::t/path
          option-value ::value
@@ -108,31 +109,10 @@
   (let [modifier-map (t/make-modifier-map template)
         options (flatten-options (::options raw-entity))
         modifiers (collect-modifiers options modifier-map)]
-    (es/apply-modifiers (::t/base template) modifiers)
-    #_(reduce
-     (fn [current-entity modifier]
-       (update-in current-entity
-                  (let [path (::modifiers/path modifier)]
-                    (if (keyword? path)
-                      [path]
-                      path))
-                  (partial modifiers/modify modifier)))
-     raw-entity
-     modifiers)))
-
-(defn apply-derived-values [raw-entity template]
-  (reduce
-   (fn [current-entity derived-value]
-     (assoc-in
-      current-entity
-      (::t/path derived-value)
-      ((::t/value-fn derived-value) current-entity)))
-   raw-entity
-   (::t/derived-values template)))
+    (es/apply-modifiers (::t/base template) modifiers)))
 
 (defn build [raw-entity template]
-  (-> (apply-options raw-entity template)
-      #_(apply-derived-values template)))
+  (apply-options raw-entity template))
 
 (spec/fdef
  build
