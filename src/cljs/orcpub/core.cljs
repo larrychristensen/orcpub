@@ -201,7 +201,10 @@
      ?prof-bonus (+ (int (/ (dec ?total-levels) 4)) 2)
      ?skill-prof-bonuses (reduce
                           (fn [m {k :key}]
-                            (assoc m k (if (k ?skill-profs) ?prof-bonus 0)))
+                            (assoc m k (if (k ?skill-profs)
+                                         (if (k ?skill-expertise)
+                                           (* 2 ?prof-bonus)
+                                           ?prof-bonus) 0)))
                           {}
                           skills)
      ?skill-bonuses (reduce-kv
@@ -388,16 +391,14 @@
                :two-skills
                [(t/selection
                  "Skills"
-                 [(t/option
-                   "Athletics"
-                   :athletics
-                   nil
-                   [(mod5e/skill-expertise2 :athletics)])
-                  (t/option
-                   "Acrobatics"
-                   :acrobatics
-                   nil
-                   [(mod5e/skill-expertise2 :acrobatics)])]
+                 (map
+                  (fn [skill]
+                    (t/option
+                     (:name skill)
+                     (:key skill)
+                     nil
+                     [(mod5e/skill-expertise2 (:key skill))]))
+                  skills)
                  2
                  2)]
                [])
