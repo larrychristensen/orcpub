@@ -274,7 +274,11 @@
     (t/selection+
      "Class"
      (fn [selection classes]
-       (let [current-classes (into #{} (map ::entity/key) classes)]
+       (let [current-classes (into #{}
+                                   (map ::entity/key)
+                                   (get-in (::character @app-state)
+                                           (entity/get-entity-path (::template @app-state) [:class])))]
+         (prn "CURRENT_CLASSES" current-classes classes)
          {::entity/key (->> selection
                             ::t/options
                             (map ::t/key)
@@ -301,7 +305,9 @@
            [(t/selection "Cantrips Known" wizard-cantrip-options 3 3)
             (assoc (t/selection*
                     "1st Level Spells Known"
-                    (fn [])
+                    (fn [selection spells-known]
+                      (prn "NEW ITEM")
+                      {::entity/key :shield})
                     wizard-spell-options-1)
                    ::t/key
                    :spells-known)]
@@ -329,10 +335,13 @@
           (t/option
            "3"
            :3
-           [(t/selection*
-             "1st Level Spells Known"
-             (fn [])
-             wizard-spell-options-1)]
+           [(assoc
+             (t/selection*
+              "1st Level Spells Known"
+              (fn [] {::entity/key :light})
+              wizard-spell-options-1)
+             ::t/key
+             :spells-known)]
            [(mod5e/level2 :wizard "Wizard" 3)])
           (t/option
            "4"
@@ -505,7 +514,6 @@
          ", "
          (map
           (fn [m]
-            (prn "MOD" m)
             (str
              (::mod/name m)
              " "
@@ -540,26 +548,25 @@
        ^{:key (::t/key option)} [dropdown-option option])
      options))])
 
-(defn add-option-button [{:keys [::t/name ::t/options] :as selection} path new-item-fn]
+(defn add-option-button [{:keys [::t/key ::t/name ::t/options] :as selection} path new-item-fn]
   [:div.add-item-button
    [:i.fa.fa-plus-circle]
    [:span
     {:on-click
      (fn []
-       (swap! app-state update ::character
-              #(update-option (::template @app-state) % path
-                              (fn [options] (conj options (new-item-fn selection options))))))
+       (let [new-item (new-item-fn selection options)]
+         (swap! app-state update ::character
+                #(update-option (::template @app-state) % path
+                                (fn [options] (conj (vec options) new-item))))))
      :style {:margin-left "5px"}} (str "Add " name)]])
 
 (defn set-option-value [char path value]
   (let [number-indices (keep-indexed (fn [i v] (if (number? v) i))
                                      path)
         subpaths (map #(subvec path 0 %) number-indices)]
-    (prn "PATH" path)
     (assoc-in
      (reduce
       (fn [c p]
-        (prn "SUBPATH" p c)
         (if (nil? (get-in c p))
           (assoc-in c p [])
           c))
@@ -568,7 +575,7 @@
      path
      value)))
 
-(defn dropdown-selector [path option-paths {:keys [::t/options ::t/min ::t/max ::t/key ::t/name ::t/sequential?] :as selection}]
+(defn dropdown-selector [path option-paths {:keys [::t/options ::t/min ::t/max ::t/key ::t/name ::t/sequential? ::t/new-item-fn] :as selection}]
   (let [change-fn (fn [i]
                     (fn [e]
                       (let [new-path (concat path [key i])
@@ -589,11 +596,11 @@
        [:div
         (doall
          (map-indexed
-          (fn [i [value _]]
+          (fn [i {value ::entity/key}]
             ^{:key value}
             [:div (dropdown options value (change-fn i))])
-          (get-in option-paths (conj path key))))
-        (add-option-button selection path (fn []))])]))
+          (get-in (::character @app-state) (entity/get-entity-path (::template @app-state) (conj path key)))))
+        (add-option-button selection (conj path key) new-item-fn)])]))
 
 (defn remove-option-button [path index]
   [:i.fa.fa-minus-circle.remove-item-button
@@ -794,9 +801,6 @@
 ;;(prn "MODIFIER MAP" (cljs.pprint/pprint (t/make-modifier-map (::template @app-state))))
 ;;(spec/explain ::t/modifier-map (t/make-modifier-map (::template @app-state)))
 
-
-(prn (es/entity-val (entity/build (::character @app-state) (::template @app-state)) :skill-bonuses))
-
 (defn print-char [built-char]
   (cljs.pprint/pprint
    (reduce-kv
@@ -875,7 +879,7 @@
               (s/join
                ", "
                (let [skill-bonuses (es/entity-val built-char :skill-bonuses)]
-                 (prn "SKILL_PROF_BONUSES" (es/entity-val built-char :skill-prof-bonuses))
+                 ;;(prn "SKILL_PROF_BONUSES" (es/entity-val built-char :skill-prof-bonuses))
                  (map
                   (fn [skill-kw]
                     (str (s/capitalize (name skill-kw)) " " (mod/bonus-str (skill-bonuses skill-kw))))

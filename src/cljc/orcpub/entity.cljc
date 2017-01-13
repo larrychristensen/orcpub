@@ -61,7 +61,6 @@
      (let [modifiers (::t/modifiers (get-in modifier-map path))]
        (map
         (fn [{:keys [::mods/fn ::mods/deferred-fn]}]
-          (prn "DEFERED" deferred-fn option-value fn)
           (if (and deferred-fn option-value)
             (deferred-fn option-value)
             fn))
@@ -110,7 +109,6 @@
   (let [modifier-map (t/make-modifier-map template)
         options (flatten-options (::options raw-entity))
         modifiers (collect-modifiers options modifier-map)]
-    (prn "MODIFIERS" modifiers)
     (es/apply-modifiers (::t/base template) modifiers)))
 
 (defn build [raw-entity template]
