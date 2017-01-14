@@ -694,12 +694,14 @@
    :padding-right 25
    :padding-bottom 13
    :display :inline-block
+   :opacity 0.2
    :border-bottom "5px solid rgba(255, 255, 255, 0.05)"})
 
 (def selected-tab-style
   (merge
    tab-style
-   {:border-bottom-color "#f1a20f"}))
+   {:border-bottom-color "#f1a20f"
+    :opacity 1}))
 
 (def page-header-style
   (merge
@@ -836,7 +838,28 @@
             ^{:key (::t/key selection)}
             [builder-selector [] option-paths selection])
           (::t/selections (::template @app-state)))]
-        [:div {:style {:flex-grow 1}}]
+        [:div {:style {:flex-grow 1
+                       :margin-top "10px"
+                       :margin-left "30px"
+                       :margin-right "80px"}}
+         [:div {:style {:margin-top "5px"}}
+          [:span.personality-label {:style {:font-size "18px"}} "Character Name"]
+          [:input.input {:type :text}]]
+         [:div.field
+          [:span.personality-label {:style {:font-size "18px"}} "Personality Trait 1"]
+          [:select.builder-option.builder-option-dropdown]]
+         [:div.field
+          [:span.personality-label {:style {}} "Personality Trait 2"]
+          [:select.builder-option.builder-option-dropdown]]
+         [:div.field
+          [:span.personality-label {:style {}} "Ideals"]
+          [:select.builder-option.builder-option-dropdown]]
+         [:div.field
+          [:span.personality-label {:style {}} "Bonds"]
+          [:select.builder-option.builder-option-dropdown]]
+         [:div.field
+          [:span.personality-label {:style {}} "Flaws"]
+          [:select.builder-option.builder-option-dropdown]]]
         [:div
          (let [race (es/entity-val built-char :race)
                subrace (es/entity-val built-char :subrace)
@@ -859,6 +882,8 @@
                   levels)))])])
          [:div {:style {:display :flex}}
           [:div
+           [:img {:src "image/barbarian-girl.png"
+                  :style {:width "267px"}}]
            (abilities-radar 187 (es/entity-val built-char :abilities) (es/entity-val built-char :ability-bonuses))]
           [:div {:style {:width "250px"}}
            [:div {:style {:margin-left "25px" :margin-top "20px"}}
@@ -879,7 +904,6 @@
               (s/join
                ", "
                (let [skill-bonuses (es/entity-val built-char :skill-bonuses)]
-                 ;;(prn "SKILL_PROF_BONUSES" (es/entity-val built-char :skill-prof-bonuses))
                  (map
                   (fn [skill-kw]
                     (str (s/capitalize (name skill-kw)) " " (mod/bonus-str (skill-bonuses skill-kw))))

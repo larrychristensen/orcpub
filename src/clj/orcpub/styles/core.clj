@@ -67,7 +67,8 @@
     {:background-color :transparent
      :width "100%"
      :-webkit-appearance :menulist
-     :cursor :pointer}
+     :cursor :pointer
+     :border "3px solid white"}
     text-color)
 
    [:&:active :&:focus
@@ -116,4 +117,25 @@
     :text-transform :uppercase
     :padding "10px 15px"
     :cursor :pointer
-    :background-image "linear-gradient(to bottom, #f1a20f, #dbab50)"}])
+    :background-image "linear-gradient(to bottom, #f1a20f, #dbab50)"}]
+
+  [:.field
+   {:margin-top "30px"}]
+
+  [:.field-label
+   {:font-size "14px"}]
+
+  [:.personality-label
+   {:font-size "18px"}]
+
+  [:.input
+   {:background-color :transparent
+    :color :white
+    :border "3px solid white"
+    :border-radius "5px"
+    :margin-top "5px"
+    :display :block
+    :padding "10px"
+    :width "100%"
+    :box-sizing :border-box
+    :font-size "14px"}])
