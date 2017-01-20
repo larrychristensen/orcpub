@@ -2,8 +2,6 @@
   (:require [clojure.spec :as spec]
             [orcpub.modifiers :as mods]
             [orcpub.entity-spec :as es]
-            [orcpub.dnd.e5.modifiers :as dnd5-mods]
-            [orcpub.dnd.e5.character :as dnd5-char]
             [orcpub.template :as t]))
 
 (spec/def ::key keyword?)
@@ -60,7 +58,8 @@
          :as option}]
      (let [modifiers (::t/modifiers (get-in modifier-map path))]
        (map
-        (fn [{:keys [::mods/fn ::mods/deferred-fn]}]
+        (fn [{:keys [::mods/name ::mods/value ::mods/fn ::mods/deferred-fn]}]
+          (prn "MOD" name value fn deferred-fn)
           (if (and deferred-fn option-value)
             (deferred-fn option-value)
             fn))

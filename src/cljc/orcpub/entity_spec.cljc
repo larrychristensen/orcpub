@@ -50,27 +50,24 @@
    {}
    `~body))
 
-(defmacro modifier [k body & [nm value]]
+(defmacro modifier [k body]
   (let [arg (gensym "e")
         replaced (replace-refs arg body)]
-    `(with-meta
-      ~(concat
-        `(fn [~arg])
-        `((update ~arg ~(ref-sym-to-kw k) (fn [_#] ~replaced))))
-       {:name ~nm
-        :value ~value})))
+    (concat
+       `(fn [~arg])
+       `((update ~arg ~(ref-sym-to-kw k) (fn [_#] ~replaced))))))
 
-(defmacro vec-mod [q val & [nm value]]
-  `(modifier ~q (conj (or ~q []) ~val) ~nm ~value))
+(defmacro vec-mod [k val]
+  `(modifier ~k (conj (or ~k []) ~val)))
 
-(defmacro set-mod [q val & [nm value]]
-  `(modifier ~q (conj (or ~q #{}) ~val) ~nm ~value))
+(defmacro set-mod [k val]
+  `(modifier ~k (conj (or ~k #{}) ~val)))
 
-(defmacro map-mod [q key val & [nm value]]
-  `(modifier ~q (assoc ~q ~key ~val) ~nm ~value))
+(defmacro map-mod [k key val]
+  `(modifier ~k (assoc ~k ~key ~val)))
 
-(defmacro cum-sum-mod [q bonus & [nm value]]
-  `(modifier ~q (+ ~q ~bonus) ~nm ~value))
+(defmacro cum-sum-mod [k bonus]
+  `(modifier ~k (+ ~k ~bonus)))
 
 (defmacro modifiers [& mods]
   (mapv
@@ -80,7 +77,8 @@
 
 (defn apply-modifiers [entity modifiers]
   (reduce
-   (fn [e mod] 
+   (fn [e mod]
+     (prn "MOD " mod)
      (mod e))
    entity
    modifiers))

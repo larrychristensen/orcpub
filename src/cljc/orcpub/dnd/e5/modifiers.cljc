@@ -3,7 +3,8 @@
             [orcpub.modifiers :as mods]
             [orcpub.entity-spec :as es]
             [orcpub.dnd.e5.character :as char5e])
-  #?(:cljs (:require-macros [orcpub.entity-spec :as es])))
+  #?(:cljs (:require-macros [orcpub.entity-spec :as es]
+                            [orcpub.modifiers :as mods])))
 
 (defn subclass [cls-key nm]
   (mods/modifier ?levels (assoc-in ?levels [cls-key :subclass] nm)))

@@ -25,32 +25,32 @@
     (str "+" bonus)
     (str bonus)))
 
-(defmacro modifier [prop body & [nm value]]
-  `{::name ~nm
-    ::value ~value
-    ::fn (es/modifier ~prop ~body)})
-
-(defn deferred-modifier [fn & [nm value]]
+(defn mod-f [nm value fn]
   {::name nm
    ::value value
-   ::deferred-fn fn})
+   ::fn fn})
+
+(defn deferred-mod [nm value deferred-fn]
+  {::name nm
+   ::value value
+   ::deferred-fn deferred-fn})
+
+(defmacro modifier [prop body & [nm value]]
+  `(mod-f ~nm ~value (es/modifier ~prop ~body)))
+
+(defn deferred-modifier [fn & [nm value]]
+  (deferred-mod nm value fn))
 
 (defmacro cum-sum-mod [prop bonus & [nm value]]
-  `{::name ~nm
-    ::value ~value
-    ::fn (es/cum-sum-mod ~prop ~bonus)})
+  `(mod-f ~nm ~value (es/cum-sum-mod ~prop ~bonus)))
 
 (defmacro vec-mod [prop val & [nm value]]
-  `{::name ~nm
-    ::value ~value
-    ::fn (es/vec-mod ~prop ~val)})
+  `(mod-f ~nm ~value (es/vec-mod ~prop ~val)))
 
 (defmacro set-mod [prop body & [nm value]]
-  `{::name ~nm
-    ::value ~value
-    ::fn (es/set-mod ~prop ~body)})
+  `(mod-f ~nm ~value (es/set-mod ~prop ~body)))
 
 (defmacro map-mod [prop k v & [nm value]]
-  `{::name ~nm
-    ::value ~value
-    ::fn (es/map-mod ~prop ~k ~v)})
+  `(mod-f ~nm ~value (es/map-mod ~prop ~k ~v)))
+
+
