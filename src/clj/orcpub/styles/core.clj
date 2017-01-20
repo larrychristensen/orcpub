@@ -30,8 +30,8 @@
   [:.app-header
    {:background-color "black"
     :background-image "url(../../image/shutterstock_425039560.jpg)"
-    :background-position "0px 900px"
-    :background-size "100%"
+    :background-position "center 780px"
+    :background-size "cover"
     :height (px 227)}]
 
   [:.app-header-bar
@@ -68,7 +68,7 @@
      :width "100%"
      :-webkit-appearance :menulist
      :cursor :pointer
-     :border "3px solid white"}
+     :border "1px solid white"}
     text-color)
 
    [:&:active :&:focus
@@ -131,7 +131,7 @@
   [:.input
    {:background-color :transparent
     :color :white
-    :border "3px solid white"
+    :border "1px solid white"
     :border-radius "5px"
     :margin-top "5px"
     :display :block

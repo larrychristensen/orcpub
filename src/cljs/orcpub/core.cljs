@@ -22,31 +22,6 @@
 
 (enable-console-print!)
 
-(def wizard-cantrips
-  [:acid-splash :blade-ward :light :true-strike])
-
-(def wizard-spells-1
-  [:mage-armor :magic-missile :magic-mouth :shield])
-
-(defn key-to-name [key]
-  (s/join " " (map s/capitalize (s/split (name key) #"-"))))
-
-(def wizard-cantrip-options
-  (map
-   (fn [key]
-     {::t/key key
-      ::t/name (key-to-name key)
-      ::t/modifiers [(mod5e/spells-known2 0 key)]})
-   wizard-cantrips))
-
-(def wizard-spell-options-1
-  (map
-   (fn [key]
-     {::t/key key
-      ::t/name (key-to-name key)
-      ::t/modifiers [(mod5e/spells-known2 1 key)]})
-   wizard-spells-1))
-
 (def arcane-tradition-options
   [(t/option
     "School of Evocation"
@@ -130,64 +105,6 @@
        (swap! app-state update ::character #(assoc-in % (get-option-value-path (::template @app-state) path) (dice/die-roll die))))}
     "Re-Roll"]])
 
-(def skills [{:name "Acrobatics"
-              :key :acrobatics
-              :ability :dex}
-             {:name "Animal Handling"
-              :key :animal-handling
-              :ability :wis}
-             {:name "Arcana"
-              :key :arcana
-              :ability :int}
-             {:name "Athletics"
-              :key :athletics
-              :ability :str}
-             {:name "Deception"
-              :key :deception
-              :ability :cha}
-             {:name "History"
-              :key :history
-              :ability :int}
-             {:name "Insight"
-              :key :insight
-              :ability :wis}
-             {:name "Intimidation"
-              :key :intimidation
-              :ability :cha}
-             {:name "Investigation"
-              :key :investigation
-              :ability :int}
-             {:name "Medicine"
-              :key :medicine
-              :ability :wis}
-             {:name "Nature"
-              :key :nature
-              :ability :int}
-             {:name "Perception"
-              :key :perception
-              :ability :wis}
-             {:name "Performance"
-              :key :performance
-              :ability :cha}
-             {:name "Persuasion"
-              :key :persuasion
-              :ability :cha}
-             {:name "Religion"
-              :key :religion
-              :ability :int}
-             {:name "Sleight of Hand"
-              :key :sleight-of-hand
-              :ability :dex}
-             {:name "Stealth"
-              :key :stealth
-              :ability :dex}
-             {:name "Survival"
-              :key :survival
-              :ability :wis}])
-
-(def skill-abilities
-  (into {} (map (juxt :key :ability)) skills))
-
 (def template
   {::t/base
    (es/make-entity
@@ -206,10 +123,10 @@
                                            (* 2 ?prof-bonus)
                                            ?prof-bonus) 0)))
                           {}
-                          skills)
+                          opt5e/skills)
      ?skill-bonuses (reduce-kv
                      (fn [m k v]
-                       (assoc m k (+ v (?ability-bonuses (skill-abilities k)))))
+                       (assoc m k (+ v (?ability-bonuses (opt5e/skill-abilities k)))))
                      {}
                      ?skill-prof-bonuses)
      ?max-hit-points (* ?total-levels (?ability-bonuses :con))})
@@ -236,9 +153,7 @@
          [(t/option
            "High Elf"
            :high-elf
-           [(t/selection
-             "Cantrip"
-             wizard-cantrip-options)]
+           [(opt5e/wizard-cantrip-selection 1)]
            [(mod5e/subrace2 "High Elf")
             (mod5e/ability2 :int 1)])
           (t/option
@@ -259,7 +174,7 @@
            :hill-dwarf
            [(t/selection
              "Tool Proficiency"
-             wizard-cantrip-options)]
+             [])]
            [(mod5e/subrace2 "Hill Dwarf")
             (mod5e/ability2 :wis 1)])
           (t/option
@@ -287,14 +202,7 @@
      [(t/option
        "Wizard"
        :wizard
-       [(t/selection
-         "Skills"
-         (opt5e/skill-options
-          (filter
-           (comp #{:arcana :history :insight :investigation :medicine :religion} :key)
-           skills))
-         2
-         2)
+       [(opt5e/skill-selection [:arcana :history :insight :investigation :medicine :religion] 2)
         (t/sequential-selection
          "Levels"
          (fn [selection levels]
@@ -302,15 +210,8 @@
          [(t/option
            "1"
            :1
-           [(t/selection "Cantrips Known" wizard-cantrip-options 3 3)
-            (assoc (t/selection*
-                    "1st Level Spells Known"
-                    (fn [selection spells-known]
-                      (prn "NEW ITEM")
-                      {::entity/key :shield})
-                    wizard-spell-options-1)
-                   ::t/key
-                   :spells-known)]
+           [(opt5e/wizard-cantrip-selection 3)
+            (opt5e/wizard-spell-selection-1)]
            [(mod5e/saving-throws2 :int :wis)
             (mod5e/level2 :wizard "Wizard" 1)
             (mod5e/max-hit-points2 6)])
@@ -335,52 +236,12 @@
           (t/option
            "3"
            :3
-           [(assoc
-             (t/selection*
-              "1st Level Spells Known"
-              (fn [] {::entity/key :light})
-              wizard-spell-options-1)
-             ::t/key
-             :spells-known)]
+           [(opt5e/wizard-spell-selection-1)]
            [(mod5e/level2 :wizard "Wizard" 3)])
           (t/option
            "4"
            :4
-           [(t/selection
-             "Ability Score Improvement/Feat"
-             [(t/option
-               "Ability Score Improvement"
-               :ability-score-improvement
-               [(t/selection
-                 "Abilities"
-                 (into
-                  []
-                  (map
-                   (fn [ability]
-                     (t/option
-                      (s/upper-case (name ability))
-                      ability
-                      []
-                      [(mod5e/ability2 ability 1)])))
-                  char5e/ability-keys)
-                 2
-                 2)]
-               [])
-              (t/option
-               "Feat"
-               :feat
-               [(t/selection
-                 "Feat"
-                 (map
-                  (fn [ability]
-                    (let [option (t/option
-                                  (s/upper-case (name ability))
-                                  ability
-                                  nil
-                                  [(mod5e/ability2 ability 1)])]
-                      option))
-                  char5e/ability-keys))]
-               [])])]
+           [(opt5e/ability-score-improvement-selection)]
            [(mod5e/level2 :wizard "Wizard" 3)])])]
        [])
       (t/option
@@ -393,40 +254,7 @@
          [(t/option
            "1"
            :1
-           [(t/selection
-             "Expertise"
-             [(t/option
-               "Two Skills"
-               :two-skills
-               [(t/selection
-                 "Skills"
-                 (map
-                  (fn [skill]
-                    (t/option
-                     (:name skill)
-                     (:key skill)
-                     nil
-                     [(mod5e/skill-expertise2 (:key skill))]))
-                  skills)
-                 2
-                 2)]
-               [])
-              (t/option
-               "One Skill/Theives Tools"
-               :one-skill-thieves-tools
-               [(t/selection
-                 "Skills"
-                 [(t/option
-                   "Athletics"
-                   :athletics
-                   nil
-                   [(mod5e/skill-expertise2 :athletics)])
-                  (t/option
-                   "Acrobatics"
-                   :acrobatics
-                   nil
-                   [(mod5e/skill-expertise2 :acrobatics)])])]
-               [(mod5e/tool-proficiency2 "Thieves Tools" :thieves-tools)])])]
+           [(opt5e/expertise-selection)]
            [(mod5e/saving-throws2 :dex :int)
             (mod5e/level2 :rogue "Rogue" 1)
             (mod5e/max-hit-points2 8)])
