@@ -16,7 +16,6 @@
   (mods/modifier ?subrace nm))
 
 (defn resistance [value]
-  (prn "RESISTANCE VALUE" value)
   (mods/vec-mod ?resistances value))
 
 (defn darkvision [value]
@@ -39,7 +38,11 @@
                             (es/modifier ?abilities abilities))))
 
 (defn saving-throws [& abilities]
-  (mods/modifier ?savings-throws (concat (or ?savings-throws #{}) abilities)))
+  (mods/modifier ?saving-throws (concat (or ?savings-throws #{}) abilities)))
+
+(defn saving-throw-type-advantage [type-nm type-kw]
+  (mods/vec-mod ?saving-throw-type-advantage {:name type-nm
+                                              :key type-kw}))
 
 (defn initiative [bonus]
   (mods/cum-sum-mod ?initiative bonus))
@@ -66,14 +69,21 @@
   (mods/set-mod ?skill-profs skill-kw))
 
 (defn max-hit-points [bonus]
-  (mods/cum-sum-mod ?max-hit-points bonus "HP" bonus))
+  (mods/cum-sum-mod ?max-hit-points bonus "HP" (mods/bonus-str bonus)))
 
 (defn deferred-max-hit-points []
-  (mods/deferred-modifier (fn [v] (es/cum-sum-mod ?max-hit-points v)) "HP"))
+  (mods/deferred-mod
+    "HP"
+    (fn [v] (es/cum-sum-mod ?max-hit-points v))
+    mods/bonus-str))
 
 (defn skill-expertise [key]
   (mods/set-mod ?skill-expertise key))
 
 (defn tool-proficiency [name key]
-  (mods/vec-mod ?tool-proficiencies {:name name
+  (mods/vec-mod ?tool-profs {:name name
                                      :key key}))
+
+(defn weapon-proficiency [name key]
+  (mods/vec-mod ?weapon-profs {:name name
+                               :key key}))

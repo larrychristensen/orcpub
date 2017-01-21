@@ -68,6 +68,16 @@
    {:name "mason's tools"
     :key :masons-tools}])
 
+(def weapons
+  [{:name "battleaxe"
+    :key :battleaxe}
+   {:name "handaxe"
+    :key :handaxe}
+   {:name "light hammer"
+    :key :light-hammer}
+   {:name "warhammer"
+    :key :warhammer}])
+
 (def skill-abilities
   (into {} (map (juxt :key :ability)) skills))
 

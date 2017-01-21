@@ -13,6 +13,7 @@
             [orcpub.dnd.e5.character :as char5e]
             [orcpub.dnd.e5.modifiers :as mod5e]
             [orcpub.dnd.e5.options :as opt5e]
+            [orcpub.dnd.e5.template :as t5e]
 
             [clojure.spec :as spec]
             [clojure.spec.test :as stest]
@@ -20,16 +21,8 @@
             [reagent.core :as r])
   (:require-macros [orcpub.entity-spec :refer [make-entity]]))
 
-(enable-console-print!)
 
-(def arcane-tradition-options
-  [(t/option
-    "School of Evocation"
-    :school-of-evocation
-    nil
-    [(mod5e/subclass :wizard "School of Evocation")
-     (mod5e/trait "Evocation Savant")
-     (mod5e/trait "Sculpt Spells")])])
+(enable-console-print!)
 
 (declare app-state)
 
@@ -41,11 +34,9 @@
         i))
     selection)))
 
-(defn get-option-value-path [template path]
-  (conj (entity/get-entity-path template path) ::entity/value))
-
 (defn get-option-value [template entity path]
-  (get-in entity (get-option-value-path template path)))
+  (get-in entity (entity/get-option-value-path template path)))
+
 
 (defn update-option [template entity path update-fn]
   (update-in entity (entity/get-entity-path template [] path) update-fn))
@@ -59,249 +50,7 @@
                     (fn [i v] (if (not= i index) v))
                     list))))
 
-(defn get-raw-abilities [character]
-  (get-in character [::entity/options :ability-scores ::entity/value]))
-
-(defn abilities-standard [character]
-  [:div
-   [:div
-    {:style {:display :flex
-             :justify-content :space-between}}
-    (for [[k v] (get-raw-abilities character)]
-      ^{:key k} [:div {:style {:margin-top "10px"
-                               :text-align :center}}
-                 [:div {:style {:text-transform :uppercase}} (name k)]
-                 [:div {:style {:font-size "18px"}} v]
-                 [:div
-                  [:i.fa.fa-chevron-circle-left {:style {:font-size "16px"}}]
-                  [:i.fa.fa-chevron-circle-right {:style {:margin-left "5px" :font-size "16px"}}]]])]])
-
-(defn abilities-roller [character]
-  [:div
-   [:div
-    {:style {:display :flex
-             :justify-content :space-between}}
-    (for [[k v] (get-in character [::entity/options :ability-scores ::entity/value])]
-      ^{:key k}
-      [:div {:style {:margin-top "10px"
-                     :margin-bottom "10px"
-                     :text-align :center}}
-       [:div {:style {:text-transform :uppercase}} (name k)]
-       [:div {:style {:font-size "18px"}} v]
-       [:div
-        [:i.fa.fa-chevron-circle-left {:style {:font-size "16px"}}]
-        [:i.fa.fa-chevron-circle-right {:style {:margin-left "5px" :font-size "16px"}}]]])]
-   [:button.form-button
-    {:on-click (fn []
-                 (swap! app-state update ::character #(assoc-in % [::entity/options :ability-scores ::entity/value] (char5e/standard-ability-rolls))))}
-    "Re-Roll"]])
-
-(defn hit-points-roller [die character path]
-  [:div
-   [:button.form-button
-    {:style {:margin-top "10px"}
-     :on-click
-     (fn []
-       (swap! app-state update ::character #(assoc-in % (get-option-value-path (::template @app-state) path) (dice/die-roll die))))}
-    "Re-Roll"]])
-
-(def dwarf-option
-  (t/option
-   "Dwarf"
-   :dwarf
-   [(t/selection
-     "Subrace"
-     [(t/option
-       "Hill Dwarf"
-       :hill-dwarf
-       [(opt5e/tool-selection [:smiths-tools :brewers-supplies :masons-tools] 1)]
-       [(mod5e/subrace "Hill Dwarf")
-        (mod5e/ability :wis 1)])
-      (t/option
-       "Mountain Dwarf"
-       :mountain-dwarf
-       []
-       [(mod5e/subrace "Mountain Dwarf")
-        (mod5e/ability :str 2)])])]
-   [(mod5e/race "Dwarf")
-    (mod5e/ability :con 2)
-    (mod5e/speed 25)
-    (mod5e/darkvision 60)
-    (mod5e/resistance :poison)]))
-
-(def elf-option
-  (t/option
-   "Elf"
-   :elf
-   [(t/selection
-     "Subrace"
-     [(t/option
-       "High Elf"
-       :high-elf
-       [(opt5e/wizard-cantrip-selection 1)]
-       [(mod5e/subrace "High Elf")
-        (mod5e/ability :int 1)])
-      (t/option
-       "Wood Elf"
-       :wood-elf
-       []
-       [(mod5e/subrace "Wood Elf")
-        (mod5e/ability :wis 1)])])]
-   [(mod5e/race "Elf")
-    (mod5e/ability :dex 2)]))
-
-(def template
-  {::t/base
-   (es/make-entity
-    {?armor-class (+ 10 (?ability-bonuses :dex))
-     ?ability-bonuses (reduce-kv
-                       (fn [m k v]
-                         (assoc m k (int (/ (- v 10) 2))))
-                       {}
-                       ?abilities)
-     ?total-levels (apply + (map (fn [[k {l :class-level}]] l) ?levels))
-     ?prof-bonus (+ (int (/ (dec ?total-levels) 4)) 2)
-     ?skill-prof-bonuses (reduce
-                          (fn [m {k :key}]
-                            (assoc m k (if (k ?skill-profs)
-                                         (if (k ?skill-expertise)
-                                           (* 2 ?prof-bonus)
-                                           ?prof-bonus) 0)))
-                          {}
-                          opt5e/skills)
-     ?skill-bonuses (reduce-kv
-                     (fn [m k v]
-                       (assoc m k (+ v (?ability-bonuses (opt5e/skill-abilities k)))))
-                     {}
-                     ?skill-prof-bonuses)
-     ?max-hit-points (* ?total-levels (?ability-bonuses :con))})
-   ::t/selections
-   [(t/selection
-     "Ability Scores"
-     [{::t/name "Standard Roll"
-       ::t/key :standard-roll
-       ::t/ui-fn #(abilities-roller (::character @app-state))
-       ::t/modifiers [(mod5e/deferred-abilities)]}
-      {::t/name "Standard Scores"
-       ::t/key :standard-scores
-       ::t/ui-fn #(abilities-standard (::character @app-state))
-       ::t/select-fn #(swap! app-state update ::character (fn [c] (assoc-in c [::entity/options :ability-scores] {::entity/key :standard-scores
-                                                                                                                  ::entity/value (char5e/abilities 15 14 13 12 10 8)})))
-       ::t/modifiers [(mod5e/deferred-abilities)]}])
-    (t/selection
-     "Race"
-     [elf-option
-      dwarf-option])
-    (t/selection+
-     "Class"
-     (fn [selection classes]
-       (let [current-classes (into #{}
-                                   (map ::entity/key)
-                                   (get-in (::character @app-state)
-                                           (entity/get-entity-path (::template @app-state) [:class])))]
-         {::entity/key (->> selection
-                            ::t/options
-                            (map ::t/key)
-                            (some #(if (-> % current-classes not) %)))
-          ::entity/options {:levels [{::entity/key :1}]}}))
-     [(t/option
-       "Wizard"
-       :wizard
-       [(opt5e/skill-selection [:arcana :history :insight :investigation :medicine :religion] 2)
-        (t/sequential-selection
-         "Levels"
-         (fn [selection levels]
-           {::entity/key (-> levels count inc str keyword)})
-         [(t/option
-           "1"
-           :1
-           [(opt5e/wizard-cantrip-selection 3)
-            (opt5e/wizard-spell-selection-1)]
-           [(mod5e/saving-throws :int :wis)
-            (mod5e/level :wizard "Wizard" 1)
-            (mod5e/max-hit-points 6)])
-          (t/option
-           "2"
-           :2
-           [(t/selection
-             "Arcane Tradition"
-             arcane-tradition-options)
-            (t/selection
-             "Hit Points"
-             [{::t/name "Roll"
-               ::t/key :roll
-               ::t/ui-fn #(hit-points-roller 6 (::character @app-state) %)
-               ::t/modifiers [(mod5e/deferred-max-hit-points)]}
-              (t/option
-               "Average"
-               :average
-               nil
-               [(mod5e/max-hit-points 4)])])]
-           [(mod5e/level :wizard "Wizard" 2)])
-          (t/option
-           "3"
-           :3
-           [(opt5e/wizard-spell-selection-1)]
-           [(mod5e/level :wizard "Wizard" 3)])
-          (t/option
-           "4"
-           :4
-           [(opt5e/ability-score-improvement-selection)]
-           [(mod5e/level :wizard "Wizard" 3)])])]
-       [])
-      (t/option
-       "Rogue"
-       :rogue
-       [(t/sequential-selection
-         "Levels"
-         (fn [selection levels]
-           {::entity/key (-> levels count str keyword)})
-         [(t/option
-           "1"
-           :1
-           [(opt5e/expertise-selection)]
-           [(mod5e/saving-throws :dex :int)
-            (mod5e/level :rogue "Rogue" 1)
-            (mod5e/max-hit-points 8)])
-          (t/option
-           "2"
-           :2
-           [(t/selection
-             "Roguish Archetype"
-             arcane-tradition-options)
-            (t/selection
-             "Hit Points"
-             [(t/option
-               "Average"
-               :average
-               []
-               [(mod5e/max-hit-points 5)])])]
-           [(mod5e/level :rogue "Rogue" 2)])
-          (t/option
-           "3"
-           :3
-           []
-           [(mod5e/level :rogue "rogue" 3)])])]
-       [])])]})
-
-(def character
-  {::entity/options {:ability-scores {::entity/key :standard-roll
-                                      ::entity/value (char5e/abilities 12 13 14 15 16 17)}
-                     :race {::entity/key :elf
-                            ::entity/options {:subrace {::entity/key :high-elf
-                                                        ::entity/options {:cantrip {::entity/key :light}}}}}
-                     :class [{::entity/key :wizard
-                              ::entity/options {:levels [{::entity/key :1
-                                                          ::entity/options {:cantrips-known [{::entity/key :acid-splash}]
-                                                                            :spells-known [{::entity/key :mage-armor} {::entity/key :magic-missile}]}}
-                                                         {::entity/key :2
-                                                          ::entity/options {:arcane-tradition {::entity/key :school-of-evocation}
-                                                                            :hit-points {::entity/key :roll
-                                                                                         ::entity/value 3}}}
-                                                         {::entity/key :3}
-                                                         {::entity/key :4
-                                                          ::entity/options {:ability-score-improvement-feat {::entity/key :ability-score-improvement
-                                                                                                             ::entity/options {:abilities [{::entity/key :cha}]}}}}]}}]}})
+(def character-ref (r/atom t5e/character))
 
 (def text-color
   {:color :white})
@@ -311,8 +60,7 @@
 
 (defonce app-state
   (r/atom
-   {::template template
-    ::character character}))
+   {::template (t5e/template character-ref)}))
 
 (add-watch app-state :log (fn [k r os ns]
                             (js/console.log "OLD" (clj->js os))
@@ -335,7 +83,7 @@
                     (do
                       (if select-fn
                         (select-fn)
-                        (swap! app-state update ::character #(update-option (::template @app-state) % path (fn [o] (assoc o ::entity/key key)))))))
+                        (swap! character-ref #(update-option (::template @app-state) % path (fn [o] (assoc o ::entity/key key)))))))
                   (.stopPropagation e))}
      [:span {:style {:font-weight :bold}} name]
      (if (seq named-mods)
@@ -346,12 +94,15 @@
         (s/join
          ", "
          (map
-          (fn [m]
-            (str
-             (::mod/name m)
-             " "
-             (let [v (or (::mod/value m) (get-option-value (::template @app-state) (::character @app-state) path))]
-               v)))
+          (fn [{:keys [::mod/value ::mod/val-fn] :as m}]
+            (let []
+              (str
+               (::mod/name m)
+               " "
+               (let [v (or value (get-option-value (::template @app-state) @character-ref path))]
+                 (if val-fn
+                   (val-fn v)
+                   v)))))
           named-mods))])
      (if selected?
        [:div
@@ -388,8 +139,7 @@
     {:on-click
      (fn []
        (let [new-item (new-item-fn selection options)]
-         (swap! app-state update ::character
-                #(update-option (::template @app-state) % path
+         (swap! character-ref #(update-option (::template @app-state) % path
                                 (fn [options] (conj (vec options) new-item))))))
      :style {:margin-left "5px"}} (str "Add " name)]])
 
@@ -414,8 +164,7 @@
                       (let [new-path (concat path [key i])
                             option-path (entity/get-entity-path (::template @app-state) new-path)
                             new-value (cljs.reader/read-string (.. e -target -value))]
-                        (swap! app-state update ::character
-                               #(set-option-value % (conj option-path ::entity/key) new-value)))))]
+                        (swap! character-ref #(set-option-value % (conj option-path ::entity/key) new-value)))))]
     [:div
      (if max
        (if (= min max)
@@ -424,7 +173,7 @@
             (let [option-path (conj path key i)
                   entity-path (entity/get-entity-path (::template @app-state) option-path)
                   key-path (conj entity-path ::entity/key)
-                  value (get-in (::character @app-state) key-path)]
+                  value (get-in @character-ref key-path)]
               ^{:key i} [:div (dropdown options value (change-fn i))]))))
        [:div
         (doall
@@ -432,14 +181,14 @@
           (fn [i {value ::entity/key}]
             ^{:key value}
             [:div (dropdown options value (change-fn i))])
-          (get-in (::character @app-state) (entity/get-entity-path (::template @app-state) (conj path key)))))
+          (get-in @character-ref (entity/get-entity-path (::template @app-state) (conj path key)))))
         (add-option-button selection (conj path key) new-item-fn)])]))
 
 (defn remove-option-button [path index]
   [:i.fa.fa-minus-circle.remove-item-button
    {:on-click
     (fn [e]
-      (swap! app-state update ::character #(remove-list-option (::template @app-state) % path index)))}])
+      (swap! character-ref #(remove-list-option (::template @app-state) % path index)))}])
 
 (defn filter-selected [path key option-paths options]
   (filter
@@ -653,18 +402,20 @@
      value]]])
 
 (defn list-display-section [title icon-cls values]
-  (display-section title icon-cls
-                   [:span
-                    {:style {:margin-top "5px" :font-size "14px" :font-weight :normal :font-style :italic}}
-                    (s/join
-                     ", "
-                     values)]
-                   true))
+  (if (seq values)
+    (display-section title icon-cls
+                     [:span
+                      {:style {:margin-top "5px" :font-size "14px" :font-weight :normal :font-style :italic}}
+                      (s/join
+                       ", "
+                       values)]
+                     true)))
+
 
 (defn character-builder []
-  (cljs.pprint/pprint (::character @app-state))
-  (let [option-paths (make-path-map (::character @app-state))
-        built-char (entity/build (::character @app-state) (::template @app-state))]
+  (cljs.pprint/pprint @character-ref)
+  (let [option-paths (make-path-map @character-ref)
+        built-char (entity/build @character-ref (::template @app-state))]
     (print-char built-char)
     [:div.app
      [:div.app-header
@@ -713,7 +464,11 @@
         (let [race (es/entity-val built-char :race)
               subrace (es/entity-val built-char :subrace)
               levels (es/entity-val built-char :levels)
-              darkvision (es/entity-val built-char :darkvision)]
+              darkvision (es/entity-val built-char :darkvision)
+              skill-profs (es/entity-val built-char :skill-profs)
+              tool-profs (es/entity-val built-char :tool-profs)
+              weapon-profs (es/entity-val built-char :weapon-profs)
+              resistances (es/entity-val built-char :resistances)]
           [:div
            [:div {:style {:font-size "24px"
                           :font-weight 600
@@ -745,17 +500,22 @@
                                      (map
                                       (fn [skill-kw]
                                         (str (s/capitalize (name skill-kw)) " " (mod/bonus-str (skill-bonuses skill-kw))))
-                                      (es/entity-val built-char :skill-profs))))
+                                      skill-profs)))
              (list-display-section "Tool Proficiencies" nil
                                    (map
                                     (fn [tool]
                                       (:name tool))
-                                    (es/entity-val built-char :tool-proficiencies)))
+                                    tool-profs))
+             (list-display-section "Weapon Proficiencies" nil
+                                   (map
+                                    (fn [tool]
+                                      (:name tool))
+                                    weapon-profs))
              (list-display-section "Resistances" nil
                                    (map
                                     (fn [resistance-kw]
                                       (name resistance-kw))
-                                    (es/entity-val built-char :resistances)))]]])]]]]))
+                                    resistances))]]])]]]]))
 
 (r/render [character-builder]
           (js/document.getElementById "app"))

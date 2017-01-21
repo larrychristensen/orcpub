@@ -132,3 +132,6 @@
            ::t/key (name-to-kw name)}
     selections (assoc ::t/selections selections)
     modifiers (assoc ::t/modifiers modifiers)))
+
+(defn get-option-value-path [template path]
+  (conj (get-entity-path template path) ::value))

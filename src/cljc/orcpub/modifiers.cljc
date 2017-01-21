@@ -30,16 +30,16 @@
    ::value value
    ::fn fn})
 
-(defn deferred-mod [nm value deferred-fn]
+(defn deferred-mod [nm deferred-fn val-fn]
   {::name nm
-   ::value value
-   ::deferred-fn deferred-fn})
+   ::deferred-fn deferred-fn
+   ::val-fn val-fn})
 
 (defmacro modifier [prop body & [nm value]]
   `(mod-f ~nm ~value (es/modifier ~prop ~body)))
 
-(defn deferred-modifier [fn & [nm value]]
-  (deferred-mod nm value fn))
+(defn deferred-modifier [deferred-fn & [nm val-fn]]
+  (deferred-mod nm deferred-fn val-fn))
 
 (defmacro cum-sum-mod [prop bonus & [nm value]]
   `(mod-f ~nm ~value (es/cum-sum-mod ~prop ~bonus)))
