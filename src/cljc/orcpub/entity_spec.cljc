@@ -78,7 +78,6 @@
 (defn apply-modifiers [entity modifiers]
   (reduce
    (fn [e mod]
-     (prn "MOD " mod)
      (mod e))
    entity
    modifiers))

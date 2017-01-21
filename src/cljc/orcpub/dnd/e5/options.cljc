@@ -60,6 +60,14 @@
               :key :survival
               :ability :wis}])
 
+(def tools
+  [{:name "smith's tools"
+    :key :smiths-tools}
+   {:name "brewer's supplies"
+    :key :brewers-supplies}
+   {:name "mason's tools"
+    :key :masons-tools}])
+
 (def skill-abilities
   (into {} (map (juxt :key :ability)) skills))
 
@@ -70,10 +78,22 @@
    nil
    [(modifiers/skill-proficiency (:key skill))]))
 
+(defn tool-option [tool]
+  (t/option
+   (:name tool)
+   (:key tool)
+   nil
+   [(modifiers/tool-proficiency (:name tool) (:key tool))]))
+
 (defn skill-options [skills]
   (map
    skill-option
    skills))
+
+(defn tool-options [tools]
+  (map
+   tool-option
+   tools))
 
 (def wizard-cantrips
   [:acid-splash :blade-ward :light :true-strike])
@@ -86,7 +106,7 @@
    (fn [key]
      {::t/key key
       ::t/name (key-to-name key)
-      ::t/modifiers [(modifiers/spells-known2 0 key)]})
+      ::t/modifiers [(modifiers/spells-known 0 key)]})
    wizard-cantrips))
 
 (defn wizard-cantrip-selection [num]
@@ -100,7 +120,7 @@
    (fn [key]
      {::t/key key
       ::t/name (key-to-name key)
-      ::t/modifiers [(modifiers/spells-known2 1 key)]})
+      ::t/modifiers [(modifiers/spells-known 1 key)]})
    wizard-spells-1))
 
 (defn wizard-spell-selection-1 []
@@ -128,7 +148,7 @@
             (s/upper-case (name ability))
             ability
             []
-            [(modifiers/ability2 ability 1)])))
+            [(modifiers/ability ability 1)])))
         character/ability-keys)
        2
        2)]
@@ -144,7 +164,7 @@
                         (s/upper-case (name ability))
                         ability
                         nil
-                        [(modifiers/ability2 ability 1)])]
+                        [(modifiers/ability ability 1)])]
             option))
         character/ability-keys))]
      [])]))
@@ -156,6 +176,16 @@
     (filter
      (comp (set options) :key)
      skills))
+   num
+   num))
+
+(defn tool-selection [options num]
+  (t/selection
+   "Tool Proficiency"
+   (tool-options
+    (filter
+     (comp (set options) :key)
+     tools))
    num
    num))
 
@@ -173,7 +203,7 @@
            (:name skill)
            (:key skill)
            nil
-           [(modifiers/skill-expertise2 (:key skill))]))
+           [(modifiers/skill-expertise (:key skill))]))
         skills)
        2
        2)]
@@ -187,10 +217,10 @@
          "Athletics"
          :athletics
          nil
-         [(modifiers/skill-expertise2 :athletics)])
+         [(modifiers/skill-expertise :athletics)])
         (t/option
          "Acrobatics"
          :acrobatics
          nil
-         [(modifiers/skill-expertise2 :acrobatics)])])]
-     [(modifiers/tool-proficiency2 "Thieves Tools" :thieves-tools)])]))
+         [(modifiers/skill-expertise :acrobatics)])])]
+     [(modifiers/tool-proficiency "Thieves Tools" :thieves-tools)])]))

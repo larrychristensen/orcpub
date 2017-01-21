@@ -28,8 +28,8 @@
     :school-of-evocation
     nil
     [(mod5e/subclass :wizard "School of Evocation")
-     (mod5e/trait2 "Evocation Savant")
-     (mod5e/trait2 "Sculpt Spells")])])
+     (mod5e/trait "Evocation Savant")
+     (mod5e/trait "Sculpt Spells")])])
 
 (declare app-state)
 
@@ -105,6 +105,51 @@
        (swap! app-state update ::character #(assoc-in % (get-option-value-path (::template @app-state) path) (dice/die-roll die))))}
     "Re-Roll"]])
 
+(def dwarf-option
+  (t/option
+   "Dwarf"
+   :dwarf
+   [(t/selection
+     "Subrace"
+     [(t/option
+       "Hill Dwarf"
+       :hill-dwarf
+       [(opt5e/tool-selection [:smiths-tools :brewers-supplies :masons-tools] 1)]
+       [(mod5e/subrace "Hill Dwarf")
+        (mod5e/ability :wis 1)])
+      (t/option
+       "Mountain Dwarf"
+       :mountain-dwarf
+       []
+       [(mod5e/subrace "Mountain Dwarf")
+        (mod5e/ability :str 2)])])]
+   [(mod5e/race "Dwarf")
+    (mod5e/ability :con 2)
+    (mod5e/speed 25)
+    (mod5e/darkvision 60)
+    (mod5e/resistance :poison)]))
+
+(def elf-option
+  (t/option
+   "Elf"
+   :elf
+   [(t/selection
+     "Subrace"
+     [(t/option
+       "High Elf"
+       :high-elf
+       [(opt5e/wizard-cantrip-selection 1)]
+       [(mod5e/subrace "High Elf")
+        (mod5e/ability :int 1)])
+      (t/option
+       "Wood Elf"
+       :wood-elf
+       []
+       [(mod5e/subrace "Wood Elf")
+        (mod5e/ability :wis 1)])])]
+   [(mod5e/race "Elf")
+    (mod5e/ability :dex 2)]))
+
 (def template
   {::t/base
    (es/make-entity
@@ -145,47 +190,8 @@
        ::t/modifiers [(mod5e/deferred-abilities)]}])
     (t/selection
      "Race"
-     [(t/option
-       "Elf"
-       :elf
-       [(t/selection
-         "Subrace"
-         [(t/option
-           "High Elf"
-           :high-elf
-           [(opt5e/wizard-cantrip-selection 1)]
-           [(mod5e/subrace2 "High Elf")
-            (mod5e/ability2 :int 1)])
-          (t/option
-           "Wood Elf"
-           :wood-elf
-           []
-           [(mod5e/subrace2 "Wood Elf")
-            (mod5e/ability2 :wis 1)])])]
-       [(mod5e/race2 "Elf")
-        (mod5e/ability2 :dex 2)])
-      (t/option
-       "Dwarf"
-       :dwarf
-       [(t/selection
-         "Subrace"
-         [(t/option
-           "Hill Dwarf"
-           :hill-dwarf
-           [(t/selection
-             "Tool Proficiency"
-             [])]
-           [(mod5e/subrace2 "Hill Dwarf")
-            (mod5e/ability2 :wis 1)])
-          (t/option
-           "Mountain Dwarf"
-           :mountain-dwarf
-           []
-           [(mod5e/subrace2 "Mountain Dwarf")
-            (mod5e/ability2 :str 2)])])]
-       [(mod5e/race2 "Dwarf")
-        (mod5e/ability2 :con 2)
-        (mod5e/speed2 25)])])
+     [elf-option
+      dwarf-option])
     (t/selection+
      "Class"
      (fn [selection classes]
@@ -193,7 +199,6 @@
                                    (map ::entity/key)
                                    (get-in (::character @app-state)
                                            (entity/get-entity-path (::template @app-state) [:class])))]
-         (prn "CURRENT_CLASSES" current-classes classes)
          {::entity/key (->> selection
                             ::t/options
                             (map ::t/key)
@@ -212,9 +217,9 @@
            :1
            [(opt5e/wizard-cantrip-selection 3)
             (opt5e/wizard-spell-selection-1)]
-           [(mod5e/saving-throws2 :int :wis)
-            (mod5e/level2 :wizard "Wizard" 1)
-            (mod5e/max-hit-points2 6)])
+           [(mod5e/saving-throws :int :wis)
+            (mod5e/level :wizard "Wizard" 1)
+            (mod5e/max-hit-points 6)])
           (t/option
            "2"
            :2
@@ -231,18 +236,18 @@
                "Average"
                :average
                nil
-               [(mod5e/max-hit-points2 4)])])]
-           [(mod5e/level2 :wizard "Wizard" 2)])
+               [(mod5e/max-hit-points 4)])])]
+           [(mod5e/level :wizard "Wizard" 2)])
           (t/option
            "3"
            :3
            [(opt5e/wizard-spell-selection-1)]
-           [(mod5e/level2 :wizard "Wizard" 3)])
+           [(mod5e/level :wizard "Wizard" 3)])
           (t/option
            "4"
            :4
            [(opt5e/ability-score-improvement-selection)]
-           [(mod5e/level2 :wizard "Wizard" 3)])])]
+           [(mod5e/level :wizard "Wizard" 3)])])]
        [])
       (t/option
        "Rogue"
@@ -255,9 +260,9 @@
            "1"
            :1
            [(opt5e/expertise-selection)]
-           [(mod5e/saving-throws2 :dex :int)
-            (mod5e/level2 :rogue "Rogue" 1)
-            (mod5e/max-hit-points2 8)])
+           [(mod5e/saving-throws :dex :int)
+            (mod5e/level :rogue "Rogue" 1)
+            (mod5e/max-hit-points 8)])
           (t/option
            "2"
            :2
@@ -270,13 +275,13 @@
                "Average"
                :average
                []
-               [(mod5e/max-hit-points2 5)])])]
-           [(mod5e/level2 :rogue "Rogue" 2)])
+               [(mod5e/max-hit-points 5)])])]
+           [(mod5e/level :rogue "Rogue" 2)])
           (t/option
            "3"
            :3
            []
-           [(mod5e/level2 :rogue "rogue" 3)])])]
+           [(mod5e/level :rogue "rogue" 3)])])]
        [])])]})
 
 (def character
@@ -639,6 +644,23 @@
     {}
     built-char)))
 
+(defn display-section [title icon-cls value & [list?]]
+  [:div {:style {:margin-left "25px" :margin-top "20px"}}
+   [:span {:style {:font-size "16px" :font-weight 600}} title]
+   [:div {:style {:margin-top (if list? "0px" "4px")}}
+    (if icon-cls [:i.fa {:class-name icon-cls :style {:font-size "32px" :margin-right "18px" :color :white}}])
+    [:span {:style {:font-size "24px" :font-weight 600}}
+     value]]])
+
+(defn list-display-section [title icon-cls values]
+  (display-section title icon-cls
+                   [:span
+                    {:style {:margin-top "5px" :font-size "14px" :font-weight :normal :font-style :italic}}
+                    (s/join
+                     ", "
+                     values)]
+                   true))
+
 (defn character-builder []
   (cljs.pprint/pprint (::character @app-state))
   (let [option-paths (make-path-map (::character @app-state))
@@ -688,10 +710,11 @@
          [:div.field
           [:span.personality-label {:style {}} "Flaws"]
           [:select.builder-option.builder-option-dropdown]]]
-        [:div
-         (let [race (es/entity-val built-char :race)
-               subrace (es/entity-val built-char :subrace)
-               levels (es/entity-val built-char :levels)]
+        (let [race (es/entity-val built-char :race)
+              subrace (es/entity-val built-char :subrace)
+              levels (es/entity-val built-char :levels)
+              darkvision (es/entity-val built-char :darkvision)]
+          [:div
            [:div {:style {:font-size "24px"
                           :font-weight 600
                           :margin-bottom "16px"
@@ -707,35 +730,32 @@
                  (map
                   (fn [[cls-k {:keys [class-name class-level subclass]}]]
                     (str class-name " (" class-level ")"))
-                  levels)))])])
-         [:div {:style {:display :flex}}
-          [:div
-           [:img {:src "image/barbarian-girl.png"
-                  :style {:width "267px"}}]
-           (abilities-radar 187 (es/entity-val built-char :abilities) (es/entity-val built-char :ability-bonuses))]
-          [:div {:style {:width "250px"}}
-           [:div {:style {:margin-left "25px" :margin-top "20px"}}
-            [:span {:style {:font-size "16px" :font-weight 600}} "Armor Class"]
-            [:div {:style {:margin-top "4px"}}
-             [:i.fa.fa-shield {:style {:font-size "32px" :color :white}}]
-             [:span {:style {:font-size "24px" :font-weight 600 :margin-left "18px"}} (es/entity-val built-char :armor-class)]
-             [:span {:style {:margin-left "5px"}} "(padded armor)"]]]
-           [:div {:style {:margin-left "25px" :margin-top "20px"}}
-            [:span {:style {:font-size "16px" :font-weight 600}} "Hit Points"]
-            [:div {:style {:margin-top "4px"}}
-             [:i.fa.fa-crosshairs {:style {:font-size "32px" :color :white}}]
-             [:span {:style {:font-size "24px" :font-weight 600 :margin-left "18px"}} (es/entity-val built-char :max-hit-points)]]]
-           [:div {:style {:margin-left "25px" :margin-top "20px"}}
-            [:span {:style {:font-size "16px" :font-weight 600}} "Skills"]
-            [:div {:style {:margin-top "4px"}}
-             [:span {:style {:font-size "14px" :font-weight 600}}
-              (s/join
-               ", "
-               (let [skill-bonuses (es/entity-val built-char :skill-bonuses)]
-                 (map
-                  (fn [skill-kw]
-                    (str (s/capitalize (name skill-kw)) " " (mod/bonus-str (skill-bonuses skill-kw))))
-                  (es/entity-val built-char :skill-profs))))]]]]]]]]]]))
+                  levels)))])]
+           [:div {:style {:display :flex}}
+            [:div
+             [:img {:src "image/barbarian-girl.png"
+                    :style {:width "267px"}}]
+             (abilities-radar 187 (es/entity-val built-char :abilities) (es/entity-val built-char :ability-bonuses))]
+            [:div {:style {:width "250px"}}
+             (display-section "Armor Class" "fa-shield" (es/entity-val built-char :armor-class))
+             (display-section "Hit Points" "fa-crosshairs" (es/entity-val built-char :max-hit-points))
+             (display-section "Darkvision" "fa-low-vision" (if darkvision (str darkvision " ft.") "--"))
+             (list-display-section "Skill Proficiencies" nil
+                                   (let [skill-bonuses (es/entity-val built-char :skill-bonuses)]
+                                     (map
+                                      (fn [skill-kw]
+                                        (str (s/capitalize (name skill-kw)) " " (mod/bonus-str (skill-bonuses skill-kw))))
+                                      (es/entity-val built-char :skill-profs))))
+             (list-display-section "Tool Proficiencies" nil
+                                   (map
+                                    (fn [tool]
+                                      (:name tool))
+                                    (es/entity-val built-char :tool-proficiencies)))
+             (list-display-section "Resistances" nil
+                                   (map
+                                    (fn [resistance-kw]
+                                      (name resistance-kw))
+                                    (es/entity-val built-char :resistances)))]]])]]]]))
 
 (r/render [character-builder]
           (js/document.getElementById "app"))

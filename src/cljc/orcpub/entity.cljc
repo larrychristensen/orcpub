@@ -59,7 +59,6 @@
      (let [modifiers (::t/modifiers (get-in modifier-map path))]
        (map
         (fn [{:keys [::mods/name ::mods/value ::mods/fn ::mods/deferred-fn]}]
-          (prn "MOD" name value fn deferred-fn)
           (if (and deferred-fn option-value)
             (deferred-fn option-value)
             fn))
