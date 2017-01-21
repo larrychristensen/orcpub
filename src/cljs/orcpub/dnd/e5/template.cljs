@@ -278,7 +278,8 @@
                        (assoc m k (+ v (?ability-bonuses (opt5e/skill-abilities k)))))
                      {}
                      ?skill-prof-bonuses)
-     ?max-hit-points (* ?total-levels (?ability-bonuses :con))}))
+     ?max-hit-points (* ?total-levels (?ability-bonuses :con))
+     ?initiative (?ability-bonuses :dex)}))
 
 (defn template [character-ref]
   {::t/base template-base

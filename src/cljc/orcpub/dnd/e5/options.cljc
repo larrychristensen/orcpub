@@ -105,6 +105,35 @@
    tool-option
    tools))
 
+(defn ability-increase-selection [abilities num]
+  (t/selection
+   "Abilities"
+   (into
+    []
+    (map
+     (fn [ability]
+       (t/option
+        (s/upper-case (name ability))
+        ability
+        []
+        [(modifiers/ability ability 1)])))
+    abilities)
+   num
+   num))
+
+(def feat-options
+  [(t/option
+    "Alert"
+    :alert
+    nil
+    [(modifiers/initiative 5)
+     (modifiers/trait "Alert Feat")])
+   (t/option
+    "Athlete"
+    :athlete
+    [(ability-increase-selection [:str :dex] 1)]
+    [(modifiers/trait "Athlete Feat")])])
+
 (def wizard-cantrips
   [:acid-splash :blade-ward :light :true-strike])
 
@@ -148,35 +177,14 @@
    [(t/option
      "Ability Score Improvement"
      :ability-score-improvement
-     [(t/selection
-       "Abilities"
-       (into
-        []
-        (map
-         (fn [ability]
-           (t/option
-            (s/upper-case (name ability))
-            ability
-            []
-            [(modifiers/ability ability 1)])))
-        character/ability-keys)
-       2
-       2)]
+     [(ability-increase-selection character/ability-keys 2)]
      [])
     (t/option
      "Feat"
      :feat
      [(t/selection
        "Feat"
-       (map
-        (fn [ability]
-          (let [option (t/option
-                        (s/upper-case (name ability))
-                        ability
-                        nil
-                        [(modifiers/ability ability 1)])]
-            option))
-        character/ability-keys))]
+       feat-options)]
      [])]))
 
 (defn skill-selection [options num]

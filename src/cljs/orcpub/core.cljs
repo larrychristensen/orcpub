@@ -495,6 +495,7 @@
              (display-section "Armor Class" "fa-shield" (es/entity-val built-char :armor-class))
              (display-section "Hit Points" "fa-crosshairs" (es/entity-val built-char :max-hit-points))
              (display-section "Darkvision" "fa-low-vision" (if darkvision (str darkvision " ft.") "--"))
+             (display-section "Initiative" nil (mod/bonus-str (es/entity-val built-char :initiative)))
              (list-display-section "Skill Proficiencies" nil
                                    (let [skill-bonuses (es/entity-val built-char :skill-bonuses)]
                                      (map
