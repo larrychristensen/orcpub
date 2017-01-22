@@ -159,7 +159,31 @@
     []
     [(modifiers/trait "Defensive Duelist Feat")]
     [{::t/label "Dex 13 or higher"
-      ::t/prereq-fn (min-ability :dex 13)}])])
+      ::t/prereq-fn (min-ability :dex 13)}])
+   (t/option
+    "Dual Wielder"
+    :dual-wielder
+    []
+    [(modifiers/trait "Dual Wielder Feat")])
+   (t/option
+    "Dungeon Delver"
+    :dungeon-delver
+    []
+    [(modifiers/trait "Dungeon Delver Feat")
+     (modifiers/resistance :trap)])
+   (t/option
+    "Durable"
+    :durable
+    []
+    [(modifiers/trait "Durable Feat")
+     (modifiers/ability :con 1)])
+   (t/option
+    "Elemental Adept"
+    :elemental-adept
+    []
+    [(modifiers/trait "Elemental Adept Feat")]
+    [{::t/label "spellcasting ability"
+      ::t/prereq-fn (fn [c] (some (fn [[k v]] (seq v)) (:spells-known c)))}])])
 
 (def wizard-cantrips
   [:acid-splash :blade-ward :light :true-strike])

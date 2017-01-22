@@ -139,9 +139,9 @@
     :value (or (str selected-value) "")}
    [:option.builder-dropdown-item]
    (doall
-    (map
-     (fn [option]
-       ^{:key (::t/key option)} [dropdown-option option])
+    (map-indexed
+     (fn [i option]
+       ^{:key i} [dropdown-option option])
      options))])
 
 (defn add-option-button [{:keys [::t/key ::t/name ::t/options] :as selection} path new-item-fn]
@@ -191,7 +191,7 @@
         (doall
          (map-indexed
           (fn [i {value ::entity/key}]
-            ^{:key value}
+            ^{:key i}
             [:div (dropdown options value (change-fn i))])
           (get-in @character-ref (entity/get-entity-path (::template @app-state) (conj path key)))))
         (add-option-button selection (conj path key) new-item-fn)])]))
