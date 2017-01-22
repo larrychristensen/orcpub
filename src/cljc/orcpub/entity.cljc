@@ -120,7 +120,8 @@
 (defn name-to-kw [name]
   (-> name
       clojure.string/lower-case
-      (clojure.string/replace #"\W" "-")))
+      (clojure.string/replace #"\W" "-")
+      keyword))
 
 (defn selection [name options]
   {::t/name name

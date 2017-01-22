@@ -53,4 +53,7 @@
 (defmacro map-mod [prop k v & [nm value]]
   `(mod-f ~nm ~value (es/map-mod ~prop ~k ~v)))
 
+(defmacro fn-mod [prop func]
+  `(mod-f nil nil (es/modifier ~prop (fn [] ~func))))
+
 

@@ -544,5 +544,6 @@
                                       (name resistance-kw))
                                     resistances))]]])]]]]))
 
+
 (r/render [character-builder]
           (js/document.getElementById "app"))

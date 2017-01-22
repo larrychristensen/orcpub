@@ -1,10 +1,14 @@
 (ns orcpub.dnd.e5.options
   (:require [clojure.string :as s]
+            [orcpub.common :as common]
             [orcpub.template :as t]
             [orcpub.entity :as entity]
             [orcpub.entity-spec :as es]
+            [orcpub.modifiers :as mods]
             [orcpub.dnd.e5.character :as character]
-            [orcpub.dnd.e5.modifiers :as modifiers]))
+            [orcpub.dnd.e5.modifiers :as modifiers]
+            [orcpub.dnd.e5.spells :as spells]
+            [orcpub.dnd.e5.spell-lists :as sl]))
 
 (def skills [{:name "Acrobatics"
               :key :acrobatics
@@ -155,6 +159,65 @@
    nil
    [(modifiers/language name key)]))
 
+(def wizard-cantrips
+  [:acid-splash :blade-ward :light :true-strike])
+
+(defn key-to-name [key]
+  (s/join " " (map s/capitalize (s/split (name key) #"-"))))
+
+(def wizard-cantrip-options
+  (map
+   (fn [key]
+     {::t/key key
+      ::t/name (key-to-name key)
+      ::t/modifiers [(modifiers/spells-known 0 key)]})
+   wizard-cantrips))
+
+(defn wizard-cantrip-selection [num]
+  (t/selection "Cantrips Known" wizard-cantrip-options num num))
+
+(def wizard-spells-1
+  [:mage-armor :magic-missile :magic-mouth :shield])
+
+(defn spell-options [spells level]
+  (map
+   (fn [key]
+     {::t/key key
+      ::t/name (key-to-name key)
+      ::t/modifiers [(modifiers/spells-known level key)]})
+   spells))
+
+(def wizard-spell-options-1
+  (map
+   (fn [key]
+     {::t/key key
+      ::t/name (key-to-name key)
+      ::t/modifiers [(modifiers/spells-known 1 key)]})
+   wizard-spells-1))
+
+(defn wizard-spell-selection-1 []
+  (assoc (t/selection*
+          "1st Level Spells Known"
+          (fn [selection spells-known]
+            {::entity/key :shield})
+          wizard-spell-options-1)
+         ::t/key
+         :spells-known))
+
+(defn magic-initiate-option [class-key spell-lists]
+  (t/option
+   (name class-key)
+   class-key
+   [(t/selection
+     "Cantrip"
+     (spell-options (get-in spell-lists [class-key 0]) 0)
+     2 2)
+    (t/selection
+     "1st Level Spell"
+     (spell-options (get-in spell-lists [class-key 1]) 1)
+     1 1)]
+   []))
+
 (defn language-selection [langs num]
   (t/selection
    "Languages"
@@ -164,6 +227,31 @@
     langs)
    num
    num))
+
+(defn maneuver-option [name]
+  (t/option
+   name
+   (common/name-to-kw name)
+   nil
+   [(modifiers/trait (str name " Maneuver"))]))
+
+(def maneuver-options
+  [(maneuver-option "Commander's Strike")
+   (maneuver-option "Disarming Attack")
+   (maneuver-option "Distracting Strike")
+   (maneuver-option "Evasive Footwork")
+   (maneuver-option "Feinting Attack")
+   (maneuver-option "Goading Attack")
+   (maneuver-option "Lunging Attack")
+   (maneuver-option "Manuevering Attack")
+   (maneuver-option "Menacing Attack")
+   (maneuver-option "Parry")
+   (maneuver-option "Precision Attack")
+   (maneuver-option "Pushing Attack")
+   (maneuver-option "Rally")
+   (maneuver-option "Riposte")
+   (maneuver-option "Sweeping Attack")
+   (maneuver-option "Trip Attack")])
 
 (def feat-options
   [(t/option
@@ -275,44 +363,49 @@
     "Linguist"
     :linguist
     [(language-selection languages 3)]
-    [(modifiers/ability :int 1)])])
-
-(def wizard-cantrips
-  [:acid-splash :blade-ward :light :true-strike])
-
-(defn key-to-name [key]
-  (s/join " " (map s/capitalize (s/split (name key) #"-"))))
-
-(def wizard-cantrip-options
-  (map
-   (fn [key]
-     {::t/key key
-      ::t/name (key-to-name key)
-      ::t/modifiers [(modifiers/spells-known 0 key)]})
-   wizard-cantrips))
-
-(defn wizard-cantrip-selection [num]
-  (t/selection "Cantrips Known" wizard-cantrip-options num num))
-
-(def wizard-spells-1
-  [:mage-armor :magic-missile :magic-mouth :shield])
-
-(def wizard-spell-options-1
-  (map
-   (fn [key]
-     {::t/key key
-      ::t/name (key-to-name key)
-      ::t/modifiers [(modifiers/spells-known 1 key)]})
-   wizard-spells-1))
-
-(defn wizard-spell-selection-1 []
-  (assoc (t/selection*
-          "1st Level Spells Known"
-          (fn [selection spells-known]
-            {::entity/key :shield})
-          wizard-spell-options-1)
-         ::t/key
-         :spells-known))
+    [(modifiers/ability :int 1)])
+   (t/option
+    "Lucky"
+    :lucky
+    nil
+    [(modifiers/trait "Lucky Feat")])
+   (t/option
+    "Mage Slayer"
+    :mage-slayer
+    nil
+    [(modifiers/trait "Mage Slayer Feat")])
+   (t/option
+    "Magic Initiate"
+    :magic-initiate
+    [(t/selection
+      "Spell Class"
+      [(magic-initiate-option :bard sl/spell-lists)
+       (magic-initiate-option :cleric sl/spell-lists)
+       (magic-initiate-option :druid sl/spell-lists)
+       (magic-initiate-option :sorcerer sl/spell-lists)
+       (magic-initiate-option :warlock sl/spell-lists)
+       (magic-initiate-option :wizard sl/spell-lists)])]
+    [])
+   (t/option
+    "Martial Adept"
+    :martial-adept
+    [(t/selection
+      "Martial Maneuvers"
+      maneuver-options
+      2 2)]
+    [(modifiers/trait "Martial Adept Feat")])
+   (t/option
+    "Medium Armor Master"
+    :medium-armor-master
+    []
+    [(modifiers/trait "Medium Armor Master Feat")
+     (mods/modifier ?max-medium-armor-bonus 3)
+     (mods/fn-mod ?armor-stealth-disadvantage?
+                  (fn [armor]
+                    (if (= :medium (:type armor))
+                      false
+                      (?armor-stealth-disadvantage? armor))))]
+    [(armor-prereq :medium)])])
 
 (defn ability-score-improvement-selection []
   (t/selection

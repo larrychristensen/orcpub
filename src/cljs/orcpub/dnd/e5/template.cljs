@@ -259,29 +259,40 @@
 
 (def template-base
   (es/make-entity
-    {?armor-class (+ 10 (?ability-bonuses :dex))
-     ?ability-bonuses (reduce-kv
-                       (fn [m k v]
-                         (assoc m k (int (/ (- v 10) 2))))
-                       {}
-                       ?abilities)
-     ?total-levels (apply + (map (fn [[k {l :class-level}]] l) ?levels))
-     ?prof-bonus (+ (int (/ (dec ?total-levels) 4)) 2)
-     ?skill-prof-bonuses (reduce
-                          (fn [m {k :key}]
-                            (assoc m k (if (k ?skill-profs)
-                                         (if (k ?skill-expertise)
-                                           (* 2 ?prof-bonus)
-                                           ?prof-bonus) 0)))
-                          {}
-                          opt5e/skills)
-     ?skill-bonuses (reduce-kv
-                     (fn [m k v]
-                       (assoc m k (+ v (?ability-bonuses (opt5e/skill-abilities k)))))
-                     {}
-                     ?skill-prof-bonuses)
-     ?max-hit-points (* ?total-levels (?ability-bonuses :con))
-     ?initiative (?ability-bonuses :dex)}))
+   {?armor-class (+ 10 (?ability-bonuses :dex))
+    ?max-medium-armor-bonus 2
+    ?armor-stealth-disadvantage? (fn [armor]
+                                  (:stealth-disadvantage? armor))
+    ?armor-dex-bonus (fn [armor]
+                       (let [dex-bonus (?ability-bonuses :dex)]
+                         (case (:type armor)
+                           :light dex-bonus
+                           :medium (max ?max-medium-armor-bonus dex-bonus)
+                           0)))
+    ?armor-class-with-armor (fn [armor]
+                              (+ (?armor-dex-bonus armor) (:base-ac armor)))
+    ?ability-bonuses (reduce-kv
+                      (fn [m k v]
+                        (assoc m k (int (/ (- v 10) 2))))
+                      {}
+                      ?abilities)
+    ?total-levels (apply + (map (fn [[k {l :class-level}]] l) ?levels))
+    ?prof-bonus (+ (int (/ (dec ?total-levels) 4)) 2)
+    ?skill-prof-bonuses (reduce
+                         (fn [m {k :key}]
+                           (assoc m k (if (k ?skill-profs)
+                                        (if (k ?skill-expertise)
+                                          (* 2 ?prof-bonus)
+                                          ?prof-bonus) 0)))
+                         {}
+                         opt5e/skills)
+    ?skill-bonuses (reduce-kv
+                    (fn [m k v]
+                      (assoc m k (+ v (?ability-bonuses (opt5e/skill-abilities k)))))
+                    {}
+                    ?skill-prof-bonuses)
+    ?max-hit-points (* ?total-levels (?ability-bonuses :con))
+    ?initiative (?ability-bonuses :dex)}))
 
 (defn template [character-ref]
   {::t/base template-base
