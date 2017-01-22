@@ -510,8 +510,10 @@
             [:div {:style {:width "250px"}}
              (display-section "Armor Class" "fa-shield" (es/entity-val built-char :armor-class))
              (display-section "Hit Points" "fa-crosshairs" (es/entity-val built-char :max-hit-points))
+             (display-section "Speed" nil (es/entity-val built-char :speed))
              (display-section "Darkvision" "fa-low-vision" (if darkvision (str darkvision " ft.") "--"))
              (display-section "Initiative" nil (mod/bonus-str (es/entity-val built-char :initiative)))
+             (display-section "Passive Perception" nil (es/entity-val built-char :passive-perception))
              (list-display-section "Skill Proficiencies" nil
                                    (let [skill-bonuses (es/entity-val built-char :skill-bonuses)]
                                      (map
@@ -543,7 +545,6 @@
                                     (fn [resistance-kw]
                                       (name resistance-kw))
                                     resistances))]]])]]]]))
-
 
 (r/render [character-builder]
           (js/document.getElementById "app"))

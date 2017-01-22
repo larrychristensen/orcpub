@@ -405,7 +405,52 @@
                     (if (= :medium (:type armor))
                       false
                       (?armor-stealth-disadvantage? armor))))]
-    [(armor-prereq :medium)])])
+    [(armor-prereq :medium)])
+   (t/option
+    "Mobile"
+    :mobile
+    []
+    [(modifiers/speed 10)
+     (modifiers/trait "Mobile Feat")])
+   (t/option
+    "Moderately Armored"
+    :moderately-armored
+    [(ability-increase-selection [:str :dex] 1)]
+    [(modifiers/medium-armor-proficiency)
+     (modifiers/shield-armor-proficiency)]
+    [(armor-prereq :light)])
+   (t/option
+    "Mounted Combatant"
+    :mounted-combatant
+    []
+    [(modifiers/trait "Mounted Combatant Feat")])
+   (t/option
+    "Observant"
+    :observant
+    [(ability-increase-selection [:int :wis] 1)]
+    [(modifiers/trait "Observant Feat")
+     (modifiers/passive-perception 5)
+     (modifiers/passive-investigation 5)])
+   (t/option
+    "Polearm Master"
+    :polearm-master
+    []
+    [(modifiers/trait "Polearm Master Feat")])
+   (t/option
+    "Resilient"
+    :resilient
+    [(t/selection
+      "Ability"
+      (map
+       (fn [ability-key]
+         (t/option
+          (s/upper-case (name ability-key))
+          ability-key
+          []
+          [(modifiers/ability ability-key 1)
+           (modifiers/saving-throws ability-key)]))
+       character/ability-keys))]
+    [])])
 
 (defn ability-score-improvement-selection []
   (t/selection

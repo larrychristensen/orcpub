@@ -22,7 +22,7 @@
   (mods/modifier ?darkvision value))
 
 (defn speed [value]
-  (mods/modifier ?speed value "Speed" value))
+  (mods/cum-sum-mod ?speed value "Speed" (mods/bonus-str value)))
 
 (defn ability [ability bonus]
   (mods/modifier ?abilities
@@ -81,19 +81,19 @@
   (mods/set-mod ?skill-expertise key))
 
 (defn tool-proficiency [name key]
-  (mods/vec-mod ?tool-profs {:name name
+  (mods/set-mod ?tool-profs {:name name
                              :key key}))
 
 (defn language [name key]
-  (mods/vec-mod ?languages {:name name
+  (mods/set-mod ?languages {:name name
                             :key key}))
 
 (defn weapon-proficiency [name key]
-  (mods/vec-mod ?weapon-profs {:name name
+  (mods/set-mod ?weapon-profs {:name name
                                :key key}))
 
 (defn armor-proficiency [name key]
-  (mods/vec-mod ?armor-profs {:name name
+  (mods/set-mod ?armor-profs {:name name
                               :key key}))
 
 (defn light-armor-proficiency []
@@ -105,6 +105,15 @@
 (defn heavy-armor-proficiency []
   (armor-proficiency "heavy" :heavy))
 
+(defn shield-armor-proficiency []
+  (armor-proficiency "shields" :shields))
+
 (defn action [name & [desc]]
   (mods/vec-mod ?actions {:name name
                           :description desc}))
+
+(defn passive-perception [bonus]
+  (mods/cum-sum-mod ?passive-perception bonus))
+
+(defn passive-investigation [bonus]
+  (mods/cum-sum-mod ?passive-investigation bonus))

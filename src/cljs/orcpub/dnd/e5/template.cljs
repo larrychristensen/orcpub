@@ -291,6 +291,8 @@
                       (assoc m k (+ v (?ability-bonuses (opt5e/skill-abilities k)))))
                     {}
                     ?skill-prof-bonuses)
+    ?passive-perception (+ 10 (?skill-bonuses :perception))
+    ?passive-investigation (+ 10 (?skill-bonuses :investigation))
     ?max-hit-points (* ?total-levels (?ability-bonuses :con))
     ?initiative (?ability-bonuses :dex)}))
 
