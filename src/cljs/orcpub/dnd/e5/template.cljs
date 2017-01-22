@@ -3,6 +3,7 @@
             [orcpub.entity-spec :as es]
             [orcpub.template :as t]
             [orcpub.dice :as dice]
+            [orcpub.modifiers :as mod]
             [orcpub.dnd.e5.character :as char5e]
             [orcpub.dnd.e5.modifiers :as mod5e]
             [orcpub.dnd.e5.options :as opt5e]))
@@ -20,11 +21,7 @@
                                                          {::entity/key :2
                                                           ::entity/options {:arcane-tradition {::entity/key :school-of-evocation}
                                                                             :hit-points {::entity/key :roll
-                                                                                         ::entity/value 3}}}
-                                                         {::entity/key :3}
-                                                         {::entity/key :4
-                                                          ::entity/options {:ability-score-improvement-feat {::entity/key :ability-score-improvement
-                                                                                                             ::entity/options {:abilities [{::entity/key :cha}]}}}}]}}]}})
+                                                                                         ::entity/value 3}}}]}}]}})
 
 (defn get-raw-abilities [character-ref]
   (get-in @character-ref [::entity/options :ability-scores ::entity/value]))
@@ -73,15 +70,18 @@
 
 (declare template-selections)
 
+(defn roll-hit-points [die character-ref path]
+  (let [value-path (entity/get-option-value-path
+                    {::t/selections (template-selections character-ref)}
+                    path)]
+    (swap! character-ref #(assoc-in % value-path (dice/die-roll die)))))
+
 (defn hit-points-roller [die character-ref path]
   [:div
    [:button.form-button
     {:style {:margin-top "10px"}
-     :on-click
-     (fn []
-       (swap! character-ref #(assoc-in % (entity/get-option-value-path {::t/selections (template-selections character-ref)} path) (dice/die-roll die))))}
+     :on-click #(roll-hit-points die character-ref path)}
     "Re-Roll"]])
-
 
 (def dwarf-option
   (t/option
@@ -94,7 +94,8 @@
        :hill-dwarf
        [(opt5e/tool-selection [:smiths-tools :brewers-supplies :masons-tools] 1)]
        [(mod5e/subrace "Hill Dwarf")
-        (mod5e/ability :wis 1)])
+        (mod5e/ability :wis 1)
+        (mod/modifier ?hit-point-level-bonus (+ 1 ?hit-point-level-bonus))])
       (t/option
        "Mountain Dwarf"
        :mountain-dwarf
@@ -158,12 +159,27 @@
      (mod5e/trait "Evocation Savant")
      (mod5e/trait "Sculpt Spells")])])
 
+(defn hit-points-selection [character-ref die]
+  (t/selection
+   "Hit Points"
+   [{::t/name "Roll"
+     ::t/key :roll
+     ::t/ui-fn #(hit-points-roller die character-ref %)
+     ::t/select-fn #(roll-hit-points die character-ref %)
+     ::t/modifiers [(mod5e/deferred-max-hit-points)]}
+    (t/option
+     "Average"
+     :average
+     nil
+     [(mod5e/max-hit-points 4)])]))
+
 (defn template-selections [character-ref]
   [(t/selection
     "Ability Scores"
     [{::t/name "Standard Roll"
       ::t/key :standard-roll
       ::t/ui-fn #(abilities-roller character-ref (reroll-abilities character-ref))
+      ::t/select-fn (reroll-abilities character-ref)
       ::t/modifiers [(mod5e/deferred-abilities)]}
      {::t/name "Standard Scores"
       ::t/key :standard-scores
@@ -192,8 +208,9 @@
       [(opt5e/skill-selection [:arcana :history :insight :investigation :medicine :religion] 2)
        (t/sequential-selection
         "Levels"
-        (fn [selection levels]
-          {::entity/key (-> levels count inc str keyword)})
+        (fn [selection options current-values]
+          (prn "SELECTION LEVELS" current-values)
+          {::entity/key (-> current-values count inc str keyword)})
         [(t/option
           "1"
           :1
@@ -208,27 +225,19 @@
           [(t/selection
             "Arcane Tradition"
             arcane-tradition-options)
-           (t/selection
-            "Hit Points"
-            [{::t/name "Roll"
-              ::t/key :roll
-              ::t/ui-fn #(hit-points-roller 6 character-ref %)
-              ::t/modifiers [(mod5e/deferred-max-hit-points)]}
-             (t/option
-              "Average"
-              :average
-              nil
-              [(mod5e/max-hit-points 4)])])]
+           (hit-points-selection character-ref 6)]
           [(mod5e/level :wizard "Wizard" 2)])
          (t/option
           "3"
           :3
-          [(opt5e/wizard-spell-selection-1)]
+          [(opt5e/wizard-spell-selection-1)
+           (hit-points-selection character-ref 6)]
           [(mod5e/level :wizard "Wizard" 3)])
          (t/option
           "4"
           :4
-          [(opt5e/ability-score-improvement-selection)]
+          [(opt5e/ability-score-improvement-selection)
+           (hit-points-selection character-ref 6)]
           [(mod5e/level :wizard "Wizard" 3)])])]
       [])
      (t/option
@@ -302,7 +311,9 @@
                     ?skill-prof-bonuses)
     ?passive-perception (+ 10 (?skill-bonuses :perception))
     ?passive-investigation (+ 10 (?skill-bonuses :investigation))
-    ?max-hit-points (* ?total-levels (?ability-bonuses :con))
+    ?hit-point-level-bonus (?ability-bonuses :con)
+    ?hit-point-level-increases 0
+    ?max-hit-points (+ ?hit-point-level-increases (* ?total-levels ?hit-point-level-bonus))
     ?initiative (?ability-bonuses :dex)}))
 
 (defn template [character-ref]

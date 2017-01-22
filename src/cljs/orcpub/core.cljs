@@ -91,8 +91,8 @@
                   (if (and meets-prereqs? selectable?)
                     (do
                       (if select-fn
-                        (select-fn)
-                        (swap! character-ref #(update-option (::template @app-state) % path (fn [o] (assoc o ::entity/key key)))))))
+                        (select-fn path))
+                      (swap! character-ref #(update-option (::template @app-state) % path (fn [o] (assoc o ::entity/key key))))))
                   (.stopPropagation e))}
      [:span {:style {:font-weight :bold}} name]
      (if (not meets-prereqs?)
@@ -152,8 +152,12 @@
    [:span
     {:on-click
      (fn []
-       (let [new-item (new-item-fn selection options)]
-         (swap! character-ref #(update-option (::template @app-state) % path
+       (let [template (::template @app-state)
+             value-path (entity/get-entity-path template path)
+             new-item (new-item-fn
+                       selection options
+                       (get-in @character-ref value-path))]
+         (swap! character-ref #(update-option template % path
                                 (fn [options] (conj (vec options) new-item))))))
      :style {:margin-left "5px"}} (str "Add " name)]])
 
@@ -514,6 +518,9 @@
              (display-section "Darkvision" "fa-low-vision" (if darkvision (str darkvision " ft.") "--"))
              (display-section "Initiative" nil (mod/bonus-str (es/entity-val built-char :initiative)))
              (display-section "Passive Perception" nil (es/entity-val built-char :passive-perception))
+             (display-section "Total Levels" nil (es/entity-val built-char :total-levels))
+             (display-section "Hit Point Level Bonus" nil (es/entity-val built-char :hit-point-level-bonus))
+             (display-section "Hit Point Level Increases" nil (es/entity-val built-char :hit-point-level-increases))
              (list-display-section "Skill Proficiencies" nil
                                    (let [skill-bonuses (es/entity-val built-char :skill-bonuses)]
                                      (map

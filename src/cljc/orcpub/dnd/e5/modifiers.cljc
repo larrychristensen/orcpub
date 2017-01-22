@@ -69,12 +69,12 @@
   (mods/set-mod ?skill-profs skill-kw))
 
 (defn max-hit-points [bonus]
-  (mods/cum-sum-mod ?max-hit-points bonus "HP" (mods/bonus-str bonus)))
+  (mods/cum-sum-mod ?hit-point-level-increases bonus "HP" (mods/bonus-str bonus)))
 
 (defn deferred-max-hit-points []
   (mods/deferred-mod
     "HP"
-    (fn [v] (es/cum-sum-mod ?max-hit-points v))
+    (fn [v] (es/cum-sum-mod ?hit-point-level-increases v))
     mods/bonus-str))
 
 (defn skill-expertise [key]
