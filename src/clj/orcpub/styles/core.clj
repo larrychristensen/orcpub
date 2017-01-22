@@ -49,6 +49,11 @@
     :margin-top (px 5)
     :font-weight :normal}]
 
+  [:.disabled-builder-option
+   {:color "rgba(255, 255, 255, 0.5)"
+    :border-color "rgba(255, 255, 255, 0.25)"
+    :cursor :auto}]
+
   [:.selectable-builder-option:hover
    {:border-color "#f1a20f"
     :cursor :pointer}]

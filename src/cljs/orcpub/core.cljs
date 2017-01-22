@@ -50,7 +50,7 @@
                     (fn [i v] (if (not= i index) v))
                     list))))
 
-(def character-ref (r/atom t5e/character))
+(defonce character-ref (r/atom t5e/character))
 
 (def text-color
   {:color :white})
@@ -68,16 +68,24 @@
 
 (declare builder-selector)
 
-(defn option [path option-paths selectable? {:keys [::t/key ::t/name ::t/selections ::t/modifiers ::t/ui-fn ::t/select-fn]}]
+(defn option [path option-paths selectable? {:keys [::t/key ::t/name ::t/selections ::t/modifiers ::t/prereqs ::t/ui-fn ::t/select-fn]} built-char]
   (let [new-path (conj path key)
         selected? (boolean (get-in option-paths new-path))
-        named-mods (filter ::mod/name modifiers)]
+        named-mods (filter ::mod/name modifiers)
+        failed-prereqs (reduce
+                        (fn [failures {:keys [::t/prereq-fn ::t/label]}]
+                          (if (not (prereq-fn built-char))
+                            (conj failures label)))
+                        []
+                        prereqs)
+        meets-prereqs? (empty? failed-prereqs)]
     ^{:key key}
     [:div.builder-option
      {:class-name (clojure.string/join
                    " "
                    [(if selected? "selected-builder-option")
-                    (if selectable? "selectable-builder-option")])
+                    (if (and meets-prereqs? selectable?) "selectable-builder-option")
+                    (if (not meets-prereqs?) "disabled-builder-option")])
       :on-click (fn [e]
                   (if selectable?
                     (do
@@ -86,6 +94,10 @@
                         (swap! character-ref #(update-option (::template @app-state) % path (fn [o] (assoc o ::entity/key key)))))))
                   (.stopPropagation e))}
      [:span {:style {:font-weight :bold}} name]
+     (if (not meets-prereqs?)
+       [:div {:style {:font-style :italic
+                      :font-size "12px"
+                      :font-weight :normal}} (str "Requires " (s/join ", " failed-prereqs))])
      (if (seq named-mods)
        [:span {:style {:font-style :italic
                        :font-size "12px"
@@ -111,7 +123,7 @@
          (map
           (fn [selection]
             ^{:key (::t/key selection)}
-            [builder-selector new-path option-paths selection])
+            [builder-selector new-path option-paths selection built-char])
           selections)]])]))
 
 (def builder-selector-style)
@@ -197,14 +209,14 @@
        (get-in option-paths option-path)))
    options))
 
-(defn list-selector-option [removeable? path option-paths multiple-select? i opt]
+(defn list-selector-option [removeable? path option-paths multiple-select? i opt built-char]
   [:div.list-selector-option
    [:div {:style {:flex-grow 1}}
-    [option path option-paths (not multiple-select?) opt]]
+    [option path option-paths (not multiple-select?) opt built-char]]
    (if (removeable? i)
      [remove-option-button path i])])
 
-(defn list-selector [path option-paths {:keys [::t/options ::t/min ::t/max ::t/key ::t/name ::t/sequential? ::t/new-item-fn] :as selection}]
+(defn list-selector [path option-paths {:keys [::t/options ::t/min ::t/max ::t/key ::t/name ::t/sequential? ::t/new-item-fn] :as selection} built-char]
   (let [no-max? (nil? max)
         multiple-select? (or no-max? (> max 1))
         selected-options (filter-selected path key option-paths options)
@@ -227,14 +239,15 @@
           option-paths
           multiple-select?
           i
-          option])
+          option
+          built-char])
        (if multiple-select?
          selected-options
          options)))
      (if (and addable? new-item-fn)
        (add-option-button selection (conj path key) new-item-fn))]))
 
-(defn builder-selector [path option-paths selection]
+(defn builder-selector [path option-paths selection built-char]
   ^{:key (::t/name selection)}
   [:div.builder-selector
    [:h2.builder-selector-header (::t/name selection)]
@@ -245,7 +258,7 @@
                     (::t/options selection))]
       (if simple-options?
         [dropdown-selector path option-paths selection]
-        [list-selector path option-paths selection]))]])
+        [list-selector path option-paths selection built-char]))]])
 
 
 (def content-style
@@ -437,7 +450,7 @@
          (map
           (fn [selection]
             ^{:key (::t/key selection)}
-            [builder-selector [] option-paths selection])
+            [builder-selector [] option-paths selection built-char])
           (::t/selections (::template @app-state)))]
         [:div {:style {:flex-grow 1
                        :margin-top "10px"

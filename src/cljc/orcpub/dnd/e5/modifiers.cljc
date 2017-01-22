@@ -45,7 +45,7 @@
                                               :key type-kw}))
 
 (defn initiative [bonus]
-  (mods/cum-sum-mod ?initiative bonus))
+  (mods/cum-sum-mod ?initiative bonus "Initiative" (mods/bonus-str bonus)))
 
 (defn level [class-key class-nm level]
   (mods/modifier ?levels (update ?levels class-key merge {:class-name class-nm

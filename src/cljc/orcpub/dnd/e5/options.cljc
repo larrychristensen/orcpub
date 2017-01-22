@@ -2,6 +2,7 @@
   (:require [clojure.string :as s]
             [orcpub.template :as t]
             [orcpub.entity :as entity]
+            [orcpub.entity-spec :as es]
             [orcpub.dnd.e5.character :as character]
             [orcpub.dnd.e5.modifiers :as modifiers]))
 
@@ -121,6 +122,9 @@
    num
    num))
 
+(defn min-ability [ability-kw min-value]
+  (fn [c] (>= (ability-kw (es/entity-val c :abilities)) min-value)))
+
 (def feat-options
   [(t/option
     "Alert"
@@ -132,7 +136,30 @@
     "Athlete"
     :athlete
     [(ability-increase-selection [:str :dex] 1)]
-    [(modifiers/trait "Athlete Feat")])])
+    [(modifiers/trait "Athlete Feat")])
+   (t/option
+    "Actor"
+    :actor
+    []
+    [(modifiers/ability :cha 1)
+     (modifiers/trait "Actor Feat")])
+   (t/option
+    "Charger"
+    :charger
+    []
+    [(modifiers/trait "Charger Feat")])
+   (t/option
+    "Crossbow Expert"
+    :crossbow-expert
+    []
+    [(modifiers/trait "Crossbow Expert Feat")])
+   (t/option
+    "Defensive Duelist"
+    :defensive-duelist
+    []
+    [(modifiers/trait "Defensive Duelist Feat")]
+    [{::t/label "Dex 13 or higher"
+      ::t/prereq-fn (min-ability :dex 13)}])])
 
 (def wizard-cantrips
   [:acid-splash :blade-ward :light :true-strike])

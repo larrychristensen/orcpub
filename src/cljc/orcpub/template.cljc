@@ -58,11 +58,12 @@
 (defn sequential-selection [name new-item-fn options]
   (selection name options 1 nil true new-item-fn))
 
-(defn option [name key selections modifiers]
+(defn option [name key selections modifiers & [prereqs]]
   (cond-> {::name name
            ::key key}
     selections (assoc ::selections selections)
-    modifiers (assoc ::modifiers modifiers)))
+    modifiers (assoc ::modifiers modifiers)
+    prereqs (assoc ::prereqs prereqs)))
 
 (declare make-modifier-map-from-selections)
 
