@@ -29,35 +29,44 @@
 (defn get-raw-abilities [character-ref]
   (get-in @character-ref [::entity/options :ability-scores ::entity/value]))
 
+(defn swap-abilities [character-ref i other-i k v]
+  (fn [e]
+    (swap! character-ref
+           update-in
+           [::entity/options :ability-scores ::entity/value]
+           (fn [a]
+             (let [a-vec (vec a)
+                   other-index (mod other-i (count a-vec))
+                   [other-k other-v] (a-vec other-index)]
+               (assoc a k other-v other-k v))))
+    (.stopPropagation e)))
+
 (defn abilities-standard [character-ref]
   [:div
-   [:div
     {:style {:display :flex
              :justify-content :space-between}}
-    (for [[k v] (get-raw-abilities character-ref)]
-      ^{:key k} [:div {:style {:margin-top "10px"
-                               :text-align :center}}
-                 [:div {:style {:text-transform :uppercase}} (name k)]
-                 [:div {:style {:font-size "18px"}} v]
-                 [:div
-                  [:i.fa.fa-chevron-circle-left {:style {:font-size "16px"}}]
-                  [:i.fa.fa-chevron-circle-right {:style {:margin-left "5px" :font-size "16px"}}]]])]])
+    (let [abilities (get-raw-abilities character-ref)
+          abilities-vec (vec abilities)]
+      (map-indexed
+       (fn [i [k v]]
+         ^{:key k}
+         [:div {:style {:margin-top "10px"
+                        :margin-bottom "10px"
+                        :text-align :center}}
+          [:div {:style {:text-transform :uppercase}} (name k)]
+          [:div {:style {:font-size "18px"}} v]
+          [:div
+           [:i.fa.fa-chevron-circle-left
+            {:style {:font-size "16px"}
+             :on-click (swap-abilities character-ref i (dec i) k v)}]
+           [:i.fa.fa-chevron-circle-right
+            {:style {:margin-left "5px" :font-size "16px"}
+             :on-click (swap-abilities character-ref i (inc i) k v)}]]])
+       abilities-vec))])
 
 (defn abilities-roller [character-ref reroll-fn]
   [:div
-   [:div
-    {:style {:display :flex
-             :justify-content :space-between}}
-    (for [[k v] (get-in @character-ref [::entity/options :ability-scores ::entity/value])]
-      ^{:key k}
-      [:div {:style {:margin-top "10px"
-                     :margin-bottom "10px"
-                     :text-align :center}}
-       [:div {:style {:text-transform :uppercase}} (name k)]
-       [:div {:style {:font-size "18px"}} v]
-       [:div
-        [:i.fa.fa-chevron-circle-left {:style {:font-size "16px"}}]
-        [:i.fa.fa-chevron-circle-right {:style {:margin-left "5px" :font-size "16px"}}]]])]
+   (abilities-standard character-ref)
    [:button.form-button
     {:on-click reroll-fn}
     "Re-Roll"]])
