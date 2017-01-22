@@ -68,6 +68,7 @@
 
 (declare builder-selector)
 
+
 (defn option [path option-paths selectable? {:keys [::t/key ::t/name ::t/selections ::t/modifiers ::t/prereqs ::t/ui-fn ::t/select-fn]} built-char]
   (let [new-path (conj path key)
         selected? (boolean (get-in option-paths new-path))
@@ -87,7 +88,7 @@
                     (if (and meets-prereqs? selectable?) "selectable-builder-option")
                     (if (not meets-prereqs?) "disabled-builder-option")])
       :on-click (fn [e]
-                  (if selectable?
+                  (if (and meets-prereqs? selectable?)
                     (do
                       (if select-fn
                         (select-fn)
@@ -98,7 +99,7 @@
        [:div {:style {:font-style :italic
                       :font-size "12px"
                       :font-weight :normal}} (str "Requires " (s/join ", " failed-prereqs))])
-     (if (seq named-mods)
+     (if (and meets-prereqs? (seq named-mods))
        [:span {:style {:font-style :italic
                        :font-size "12px"
                        :margin-left "10px"
@@ -143,6 +144,7 @@
      (fn [i option]
        ^{:key i} [dropdown-option option])
      options))])
+
 
 (defn add-option-button [{:keys [::t/key ::t/name ::t/options] :as selection} path new-item-fn]
   [:div.add-item-button
@@ -424,7 +426,6 @@
                        values)]
                      true)))
 
-
 (defn character-builder []
   (cljs.pprint/pprint @character-ref)
   (let [option-paths (make-path-map @character-ref)
@@ -481,7 +482,9 @@
               skill-profs (es/entity-val built-char :skill-profs)
               tool-profs (es/entity-val built-char :tool-profs)
               weapon-profs (es/entity-val built-char :weapon-profs)
-              resistances (es/entity-val built-char :resistances)]
+              armor-profs (es/entity-val built-char :armor-profs)
+              resistances (es/entity-val built-char :resistances)
+              languages (es/entity-val built-char :languages)]
           [:div
            [:div {:style {:font-size "24px"
                           :font-weight 600
@@ -515,6 +518,11 @@
                                       (fn [skill-kw]
                                         (str (s/capitalize (name skill-kw)) " " (mod/bonus-str (skill-bonuses skill-kw))))
                                       skill-profs)))
+             (list-display-section "Languages" nil
+                                   (map
+                                    (fn [lang]
+                                      (:name lang))
+                                    languages))
              (list-display-section "Tool Proficiencies" nil
                                    (map
                                     (fn [tool]
@@ -525,6 +533,11 @@
                                     (fn [tool]
                                       (:name tool))
                                     weapon-profs))
+             (list-display-section "Armor Proficiencies" nil
+                                   (map
+                                    (fn [armor]
+                                      (:name armor))
+                                    armor-profs))
              (list-display-section "Resistances" nil
                                    (map
                                     (fn [resistance-kw]

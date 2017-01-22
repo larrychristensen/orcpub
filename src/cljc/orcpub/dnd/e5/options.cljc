@@ -108,7 +108,7 @@
 
 (defn ability-increase-selection [abilities num]
   (t/selection
-   "Abilities"
+   "Ability Score Increase"
    (into
     []
     (map
@@ -124,6 +124,46 @@
 
 (defn min-ability [ability-kw min-value]
   (fn [c] (>= (ability-kw (es/entity-val c :abilities)) min-value)))
+
+(defn ability-prereq [ability-kw min-value]
+  {::t/label (str (s/upper-case (name ability-kw)) " " min-value " or higher")
+   ::t/prereq-fn (min-ability ability-kw min-value)})
+
+(defn prereq [label prereq-fn]
+  {::t/label label
+   ::t/prereq-fn prereq-fn})
+
+(defn armor-prereq [armor-kw]
+  (prereq (str "proficiency with " (name armor-kw) " armor")
+             (fn [c] (let [prof-keys (set (map :key (:armor-profs c)))]
+                       (boolean (prof-keys armor-kw))))))
+
+(def languages
+  [{:name "Common"
+    :key :common}
+   {:name "Dwarvish"
+    :key :dwarvish}
+   {:name "Elvish"
+    :key :elvish}
+   {:name "Giant"
+    :key :giant}])
+
+(defn language-option [{:keys [name key]}]
+  (t/option
+   name
+   key
+   nil
+   [(modifiers/language name key)]))
+
+(defn language-selection [langs num]
+  (t/selection
+   "Languages"
+   (map
+    (fn [lang]
+      (language-option lang))
+    langs)
+   num
+   num))
 
 (def feat-options
   [(t/option
@@ -158,8 +198,7 @@
     :defensive-duelist
     []
     [(modifiers/trait "Defensive Duelist Feat")]
-    [{::t/label "Dex 13 or higher"
-      ::t/prereq-fn (min-ability :dex 13)}])
+    [(ability-prereq :dex 13)])
    (t/option
     "Dual Wielder"
     :dual-wielder
@@ -183,7 +222,60 @@
     []
     [(modifiers/trait "Elemental Adept Feat")]
     [{::t/label "spellcasting ability"
-      ::t/prereq-fn (fn [c] (some (fn [[k v]] (seq v)) (:spells-known c)))}])])
+      ::t/prereq-fn (fn [c] (some (fn [[k v]] (seq v)) (:spells-known c)))}])
+   (t/option
+    "Grappler"
+    :grappler
+    []
+    [(modifiers/trait "Grappler Feat")]
+    [(ability-prereq :str 13)])
+   (t/option
+    "Great Weapon Master"
+    :great-weapon-master
+    []
+    [(modifiers/trait "Great Weapon Master Feat")])
+   (t/option
+    "Healer"
+    :healer
+    []
+    [(modifiers/trait "Healer Feat")
+     (modifiers/action "Healer Feat Action")])
+   (t/option
+    "Heavily Armored"
+    :heavily-armored
+    []
+    [(modifiers/heavy-armor-proficiency)
+     (modifiers/ability :str 1)]
+    [(armor-prereq :medium)])
+   (t/option
+    "Heavy Armor Master"
+    :heavy-armor-master
+    []
+    [(modifiers/ability :str 1)
+     (modifiers/trait "Heavy Armor Master Feat")]
+    [(armor-prereq :heavy)])
+   (t/option
+    "Inspiring Leader"
+    :inspiring-leader
+    []
+    [(modifiers/trait "Inspiring Leader Feat")]
+    [(ability-prereq :cha 13)])
+   (t/option
+    "Keen Mind"
+    :keen-mind
+    []
+    [(modifiers/ability :int 1)
+     (modifiers/trait "Keen Mind Feat")])
+   (t/option
+    "Lightly Armored"
+    :lightly-armored
+    [(ability-increase-selection [:str :dex] 1)]
+    [(modifiers/light-armor-proficiency)])
+   (t/option
+    "Linguist"
+    :linguist
+    [(language-selection languages 3)]
+    [(modifiers/ability :int 1)])])
 
 (def wizard-cantrips
   [:acid-splash :blade-ward :light :true-strike])

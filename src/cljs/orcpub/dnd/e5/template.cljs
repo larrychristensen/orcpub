@@ -91,7 +91,9 @@
        :mountain-dwarf
        []
        [(mod5e/subrace "Mountain Dwarf")
-        (mod5e/ability :str 2)])])]
+        (mod5e/ability :str 2)
+        (mod5e/light-armor-proficiency)
+        (mod5e/medium-armor-proficiency)])])]
    [(mod5e/race "Dwarf")
     (mod5e/ability :con 2)
     (mod5e/speed 25)

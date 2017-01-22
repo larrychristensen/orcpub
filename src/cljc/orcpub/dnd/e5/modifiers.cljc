@@ -82,8 +82,29 @@
 
 (defn tool-proficiency [name key]
   (mods/vec-mod ?tool-profs {:name name
-                                     :key key}))
+                             :key key}))
+
+(defn language [name key]
+  (mods/vec-mod ?languages {:name name
+                            :key key}))
 
 (defn weapon-proficiency [name key]
   (mods/vec-mod ?weapon-profs {:name name
                                :key key}))
+
+(defn armor-proficiency [name key]
+  (mods/vec-mod ?armor-profs {:name name
+                              :key key}))
+
+(defn light-armor-proficiency []
+  (armor-proficiency "light" :light))
+
+(defn medium-armor-proficiency []
+  (armor-proficiency "medium" :medium))
+
+(defn heavy-armor-proficiency []
+  (armor-proficiency "heavy" :heavy))
+
+(defn action [name & [desc]]
+  (mods/vec-mod ?actions {:name name
+                          :description desc}))
