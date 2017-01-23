@@ -4,6 +4,7 @@
             [orcpub.template :as t]
             [orcpub.dice :as dice]
             [orcpub.modifiers :as mod]
+            [orcpub.common :as common]
             [orcpub.dnd.e5.character :as char5e]
             [orcpub.dnd.e5.modifiers :as mod5e]
             [orcpub.dnd.e5.options :as opt5e]))
@@ -166,6 +167,63 @@
     (mod5e/trait "Trance" "Elves don't need to sleep. Instead, they meditate deeply, remaining semiconscious, for 4 hours a day. (The Common word for such meditation is 'trance.') While meditating, you can dream after a fashion; such dreams are actually mental exercises that have become reflexive through years of practice. After resting in this way, you gain the same benefit that a human does from 8 hours of sleep.")
     (mod5e/trait "Darkvision" "Accustomed to twilit forests and the night sky, you have superior vision in dark and dim conditions. You can see in dim light within 60 feet of you as if it were bright light, and in darkness as if it were dim light. You can't discern color in darkness, only shades of gray.")]))
 
+(defn race-option [{:keys [nm
+                           ability
+                           ability-inc
+                           size
+                           speed
+                           subrace-options
+                           modifiers
+                           traits
+                           language]}]
+  (t/option
+   nm
+   (common/name-to-kw nm)
+   [(t/selection
+     "Subrace"
+     subrace-options)]
+   (concat
+    [(mod5e/race nm)
+     (mod5e/ability ability ability-inc)
+     (mod5e/size size)
+     (mod5e/speed speed)
+     (mod5e/language "Common" :common)
+     (mod5e/language language (common/name-to-kw language))]
+    modifiers
+    (into
+     []
+     (map
+      (fn [{:keys [name description]}]
+        (mod5e/trait name description)))
+     traits))))
+
+(def halfling-option
+  (race-option
+   {:nm "Halfling"
+    :ability :dex
+    :ability-inc 2
+    :subrace-options
+    [(t/option
+      "Lightfoot"
+      :lightfoot
+      [(opt5e/language-selection opt5e/languages 1)]
+      [(mod5e/subrace "Lightfoot")
+       (mod5e/ability :cha 1)
+       (mod5e/trait "Naturally Stealthy" "You can attempt to hide even when you are obscured only by a creature that is at least one size larger than you.")])
+     (t/option
+      "Stout"
+      :stout
+      []
+      [(mod5e/subrace "Stout")
+       (mod5e/ability :con 1)
+       (mod5e/trait "Stout Resilience")])]
+    :size :small
+    :speed 25
+    :language "Halfling"
+    :traits [{:name "Lucky" :description "When you roll a 1 on the d20 for an attack roll, ability check, or saving throw, you can reroll the die and must use the new roll."}
+             {:name "Brave" :description "You have advantage on saving throws against being frightened."}
+             {:name "Halfling Nimbleness" :description "You can move through the space of any creature that is of a size larger than yours."}]}))
+
 (defn reroll-abilities [character-ref]
   (fn []
     (swap! character-ref
@@ -220,7 +278,8 @@
    (t/selection
     "Race"
     [elf-option
-     dwarf-option])
+     dwarf-option
+     halfling-option])
    (t/selection+
     "Class"
     (fn [selection classes]

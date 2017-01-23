@@ -57,8 +57,12 @@
 (defn spells-known [level spell-key spellcasting-ability & [min-level]]
   (mods/modifier
    ?spells-known
-   (update ?spells-known level conj {:key spell-key
-                                     :ability spellcasting-ability})))
+   (do
+     (prn ?total-levels min-level)
+     (if (>= ?total-levels (or min-level 0))
+       (update ?spells-known level conj {:key spell-key
+                                         :ability spellcasting-ability})
+       ?spells-known))))
 
 (defn trait [name & [description]]
   (mods/vec-mod ?traits (cond-> {:name name}
@@ -119,3 +123,6 @@
 
 (defn passive-investigation [bonus]
   (mods/cum-sum-mod ?passive-investigation bonus))
+
+(defn size [size]
+  (mods/modifier ?size size))
