@@ -62,7 +62,7 @@
           (if (and deferred-fn option-value)
             (deferred-fn option-value)
             fn))
-        modifiers)))
+        (flatten modifiers))))
    flat-options))
 
 (defn index-of-option [selection option-key]

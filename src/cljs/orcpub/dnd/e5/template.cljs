@@ -112,7 +112,18 @@
     (mod5e/weapon-proficiency "handaxe" :handaxe)
     (mod5e/weapon-proficiency "battleaxe" :battleaxe)
     (mod5e/weapon-proficiency "light hammer" :light-hammer)
-    (mod5e/weapon-proficiency "warhammer" :warhammer)]))
+    (mod5e/weapon-proficiency "warhammer" :warhammer)
+    (mod5e/language "Common" :common)
+    (mod5e/language "Dwarvish" :dwarvish)
+    (mod5e/trait "Dwarven Resilience" "You have advantage on saving throws against poison, and you have resistance against poison damage")
+    (mod5e/trait "Stonecunning" "Whenever you make an Intelligence (History) check related to the origin of stonework you are considered proficient in the History skill and add double your proficiency bonus to the check, instead of your normal proficiency bonus")
+    (mod5e/trait "Darkvision" "Accustomed to life underground, you have superior vision in dark and dim conditions. You can see in dim light within 60 feet of you as if it were bright light, and in darkness as if it were dim light. You can't discern color in darkness, only shades of gray.")]))
+
+(def elf-weapon-training-mods
+  [(mod5e/weapon-proficiency "longsword" :longsword)
+   (mod5e/weapon-proficiency "shortword" :shortsword)
+   (mod5e/weapon-proficiency "shortbow" :shortbow)
+   (mod5e/weapon-proficiency "longbow" :longbow)])
 
 (def elf-option
   (t/option
@@ -123,17 +134,37 @@
      [(t/option
        "High Elf"
        :high-elf
-       [(opt5e/wizard-cantrip-selection 1)]
+       [(opt5e/wizard-cantrip-selection 1)
+        (opt5e/language-selection opt5e/languages 1)]
        [(mod5e/subrace "High Elf")
-        (mod5e/ability :int 1)])
+        (mod5e/ability :int 1)
+        elf-weapon-training-mods])
       (t/option
        "Wood Elf"
        :wood-elf
        []
        [(mod5e/subrace "Wood Elf")
-        (mod5e/ability :wis 1)])])]
+        (mod5e/ability :wis 1)
+        elf-weapon-training-mods])
+      (t/option
+       "Dark Elf (Drow)"
+       :dark-elf
+       []
+       [(mod5e/subrace "Dark Elf")
+        (mod5e/ability :cha 1)
+        (mod5e/spells-known 0 :dancing-lights :cha)
+        (mod5e/spells-known 1 :faerie-fire :cha 3)
+        (mod5e/spells-known 2 :darkness :cha 5)])])]
    [(mod5e/race "Elf")
-    (mod5e/ability :dex 2)]))
+    (mod5e/ability :dex 2)
+    (mod5e/speed 30)
+    (mod5e/darkvision 60)
+    (mod5e/skill-proficiency :perception)
+    (mod5e/language "Common" :common)
+    (mod5e/language "Elvish" :elvish)
+    (mod5e/trait "Fey Ancestry" "You have advantage on saving throws against being charmed, and magic can’t put you to sleep.")
+    (mod5e/trait "Trance" "Elves don't need to sleep. Instead, they meditate deeply, remaining semiconscious, for 4 hours a day. (The Common word for such meditation is 'trance.') While meditating, you can dream after a fashion; such dreams are actually mental exercises that have become reflexive through years of practice. After resting in this way, you gain the same benefit that a human does from 8 hours of sleep.")
+    (mod5e/trait "Darkvision" "Accustomed to twilit forests and the night sky, you have superior vision in dark and dim conditions. You can see in dim light within 60 feet of you as if it were bright light, and in darkness as if it were dim light. You can't discern color in darkness, only shades of gray.")]))
 
 (defn reroll-abilities [character-ref]
   (fn []
@@ -209,7 +240,6 @@
        (t/sequential-selection
         "Levels"
         (fn [selection options current-values]
-          (prn "SELECTION LEVELS" current-values)
           {::entity/key (-> current-values count inc str keyword)})
         [(t/option
           "1"
@@ -238,7 +268,7 @@
           :4
           [(opt5e/ability-score-improvement-selection)
            (hit-points-selection character-ref 6)]
-          [(mod5e/level :wizard "Wizard" 3)])])]
+          [(mod5e/level :wizard "Wizard" 4)])])]
       [])
      (t/option
       "Rogue"

@@ -54,9 +54,11 @@
 (defn spell-slots [level num]
   (mods/map-mod ?spell-slots level num))
 
-(defn spells-known [level spell-key]
-  (mods/modifier ?spells-known
-               (update ?spells-known level conj spell-key)))
+(defn spells-known [level spell-key spellcasting-ability & [min-level]]
+  (mods/modifier
+   ?spells-known
+   (update ?spells-known level conj {:key spell-key
+                                     :ability spellcasting-ability})))
 
 (defn trait [name & [description]]
   (mods/vec-mod ?traits (cond-> {:name name}

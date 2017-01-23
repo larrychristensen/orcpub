@@ -14,6 +14,7 @@
             [orcpub.dnd.e5.modifiers :as mod5e]
             [orcpub.dnd.e5.options :as opt5e]
             [orcpub.dnd.e5.template :as t5e]
+            [orcpub.dnd.e5.spells :as spells]
 
             [clojure.spec :as spec]
             [clojure.spec.test :as stest]
@@ -489,7 +490,7 @@
               armor-profs (es/entity-val built-char :armor-profs)
               resistances (es/entity-val built-char :resistances)
               languages (es/entity-val built-char :languages)]
-          [:div
+          [:div {:style {:width "500px"}}
            [:div {:style {:font-size "24px"
                           :font-weight 600
                           :margin-bottom "16px"
@@ -518,9 +519,6 @@
              (display-section "Darkvision" "fa-low-vision" (if darkvision (str darkvision " ft.") "--"))
              (display-section "Initiative" nil (mod/bonus-str (es/entity-val built-char :initiative)))
              (display-section "Passive Perception" nil (es/entity-val built-char :passive-perception))
-             (display-section "Total Levels" nil (es/entity-val built-char :total-levels))
-             (display-section "Hit Point Level Bonus" nil (es/entity-val built-char :hit-point-level-bonus))
-             (display-section "Hit Point Level Increases" nil (es/entity-val built-char :hit-point-level-increases))
              (list-display-section "Skill Proficiencies" nil
                                    (let [skill-bonuses (es/entity-val built-char :skill-bonuses)]
                                      (map
@@ -551,7 +549,39 @@
                                    (map
                                     (fn [resistance-kw]
                                       (name resistance-kw))
-                                    resistances))]]])]]]]))
+                                    resistances))
+             (display-section "Spells Known" nil
+                                   [:div {:style {:font-size "14px"}}
+                                    (map
+                                     (fn [[level spells]]
+                                       ^{:key level}
+                                       [:div {:style {:margin-top "10px"}}
+                                        [:span {:font-weight 600} (if (zero? level) "Cantrip" (str "Level " level))]
+                                        [:div {:style {:font-style :italic
+                                                       :font-weight :normal}}
+                                         (map
+                                          (fn [spell]
+                                            (let [spell-data (spells/spell-map (:key spell))]
+                                              ^{:key (:key spell)}
+                                              [:div
+                                               (str
+                                                (:name (spells/spell-map (:key spell)))
+                                                " ("
+                                                (s/upper-case (name (:ability spell))) ")")]))
+                                          (filter (fn [{k :key}] (spells/spell-map k)) spells))]])
+                                     (es/entity-val built-char :spells-known))])]]
+           (display-section
+            "Features, Traits, & Feats" nil
+            [:div
+             {:style {:font-size "14px"}}
+             (map
+              (fn [{:keys [name description]}]
+                ^{:key name}
+                [:p {:style {:margin-top "10px"}}
+                 [:span {:style {:font-weight 600 :font-style :italic}} name "."]
+                 [:span {:style {:font-weight :normal :margin-left "10px"}} description]])
+              (es/entity-val built-char :traits))])])]]]]))
+
 
 (r/render [character-builder]
           (js/document.getElementById "app"))

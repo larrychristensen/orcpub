@@ -25,18 +25,19 @@
     (str "+" bonus)
     (str bonus)))
 
-(defn mod-f [nm value fn]
+(defn mod-f [nm value fn & [qualifiers]]
   {::name nm
    ::value value
-   ::fn fn})
+   ::fn fn
+   ::qualifiers qualifiers})
 
 (defn deferred-mod [nm deferred-fn val-fn]
   {::name nm
    ::deferred-fn deferred-fn
    ::val-fn val-fn})
 
-(defmacro modifier [prop body & [nm value]]
-  `(mod-f ~nm ~value (es/modifier ~prop ~body)))
+(defmacro modifier [prop body & [{:keys [name value qualifiers]}]]
+  `(mod-f ~name ~value (es/modifier ~prop ~body) ~qualifiers))
 
 (defn deferred-modifier [deferred-fn & [nm val-fn]]
   (deferred-mod nm deferred-fn val-fn))

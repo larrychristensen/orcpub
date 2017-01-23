@@ -170,7 +170,7 @@
    (fn [key]
      {::t/key key
       ::t/name (key-to-name key)
-      ::t/modifiers [(modifiers/spells-known 0 key)]})
+      ::t/modifiers [(modifiers/spells-known 0 key :int)]})
    wizard-cantrips))
 
 (defn wizard-cantrip-selection [num]
@@ -179,12 +179,12 @@
 (def wizard-spells-1
   [:mage-armor :magic-missile :magic-mouth :shield])
 
-(defn spell-options [spells level]
+(defn spell-options [spells level spellcasting-ability]
   (map
    (fn [key]
      {::t/key key
       ::t/name (key-to-name key)
-      ::t/modifiers [(modifiers/spells-known level key)]})
+      ::t/modifiers [(modifiers/spells-known level key spellcasting-ability)]})
    spells))
 
 (def wizard-spell-options-1
@@ -192,7 +192,7 @@
    (fn [key]
      {::t/key key
       ::t/name (key-to-name key)
-      ::t/modifiers [(modifiers/spells-known 1 key)]})
+      ::t/modifiers [(modifiers/spells-known 1 key :int)]})
    wizard-spells-1))
 
 (defn wizard-spell-selection-1 []
@@ -204,17 +204,17 @@
          ::t/key
          :spells-known))
 
-(defn magic-initiate-option [class-key spell-lists]
+(defn magic-initiate-option [class-key spellcasting-ability spell-lists]
   (t/option
    (name class-key)
    class-key
    [(t/selection
      "Cantrip"
-     (spell-options (get-in spell-lists [class-key 0]) 0)
+     (spell-options (get-in spell-lists [class-key 0]) 0 spellcasting-ability)
      2 2)
     (t/selection
      "1st Level Spell"
-     (spell-options (get-in spell-lists [class-key 1]) 1)
+     (spell-options (get-in spell-lists [class-key 1]) 1 spellcasting-ability)
      1 1)]
    []))
 
@@ -379,12 +379,12 @@
     :magic-initiate
     [(t/selection
       "Spell Class"
-      [(magic-initiate-option :bard sl/spell-lists)
-       (magic-initiate-option :cleric sl/spell-lists)
-       (magic-initiate-option :druid sl/spell-lists)
-       (magic-initiate-option :sorcerer sl/spell-lists)
-       (magic-initiate-option :warlock sl/spell-lists)
-       (magic-initiate-option :wizard sl/spell-lists)])]
+      [(magic-initiate-option :bard :cha sl/spell-lists)
+       (magic-initiate-option :cleric :wis sl/spell-lists)
+       (magic-initiate-option :druid :wis sl/spell-lists)
+       (magic-initiate-option :sorcerer :cha sl/spell-lists)
+       (magic-initiate-option :warlock :cha sl/spell-lists)
+       (magic-initiate-option :wizard :int sl/spell-lists)])]
     [])
    (t/option
     "Martial Adept"
