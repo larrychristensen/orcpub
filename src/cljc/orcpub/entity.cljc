@@ -2,7 +2,8 @@
   (:require [clojure.spec :as spec]
             [orcpub.modifiers :as mods]
             [orcpub.entity-spec :as es]
-            [orcpub.template :as t]))
+            [orcpub.template :as t]
+            [clojure.set :refer [difference union intersection]]))
 
 (spec/def ::key keyword?)
 (spec/def ::option (spec/keys :req [::key]
@@ -15,6 +16,52 @@
 (spec/def ::flat-option (spec/keys :req [::t/path]
                                    :opt [::value]))
 (spec/def ::flat-options (spec/+ ::flat-option))
+
+
+;;============== topo sort ===============
+
+(defn without
+  "Returns set s with x removed."
+  [s x] (difference s #{x}))
+
+(defn take-1
+  "Returns the pair [element, s'] where s' is set s with element removed."
+  [s] {:pre [(not (empty? s))]}
+  (let [item (first s)]
+    [item (without s item)]))
+
+(defn no-incoming
+  "Returns the set of nodes in graph g for which there are no incoming
+  edges, where g is a map of nodes to sets of nodes."
+  [g]
+  (let [nodes (set (keys g))
+        have-incoming (apply union (vals g))]
+    (difference nodes have-incoming)))
+
+(defn normalize
+  "Returns g with empty outgoing edges added for nodes with incoming
+  edges only.  Example: {:a #{:b}} => {:a #{:b}, :b #{}}"
+  [g]
+  (let [have-incoming (apply union (vals g))]
+    (reduce #(if (get % %2) % (assoc % %2 #{})) g have-incoming)))
+
+(defn kahn-sort
+  "Proposes a topological sort for directed graph g using Kahn's
+   algorithm, where g is a map of nodes to sets of nodes. If g is
+   cyclic, returns nil."
+  ([g]
+     (kahn-sort (normalize g) [] (no-incoming g)))
+  ([g l s]
+     (if (empty? s)
+       (when (every? empty? (vals g)) l)
+       (let [[n s'] (take-1 s)
+             m (g n)
+             g' (reduce #(update-in % [n] without %2) g m)]
+         (recur g' (conj l n) (union s' (intersection (no-incoming g') m)))))))
+
+;;==========================================
+
+
 
 (declare build-options-paths)
 
@@ -58,12 +105,20 @@
          :as option}]
      (let [modifiers (::t/modifiers (get-in modifier-map path))]
        (map
-        (fn [{:keys [::mods/name ::mods/value ::mods/fn ::mods/deferred-fn]}]
+        (fn [{:keys [::mods/name ::mods/value ::mods/fn ::mods/deferred-fn ::mods/deps] :as mod}]
           (if (and deferred-fn option-value)
-            (deferred-fn option-value)
-            fn))
+            (assoc mod ::mods/value option-value)
+            mod))
         (flatten modifiers))))
    flat-options))
+
+(defn modifier-functions [modifiers]
+  (map
+   (fn [{:keys [::mods/name ::mods/value ::mods/fn ::mods/deferred-fn ::mods/deps]}]
+     (if (and deferred-fn value)
+       (deferred-fn value)
+       fn))
+   modifiers))
 
 (defn index-of-option [selection option-key]
   (first
@@ -103,11 +158,34 @@
         ks))
      (vec current-path))))
 
+(defn order-modifiers [modifiers order]
+  (let [order-map (zipmap order (range (count order)))]
+    (sort-by (comp order-map ::mods/key) modifiers)))
+
 (defn apply-options [raw-entity template]
   (let [modifier-map (t/make-modifier-map template)
         options (flatten-options (::options raw-entity))
-        modifiers (collect-modifiers options modifier-map)]
-    (es/apply-modifiers (::t/base template) modifiers)))
+        modifiers (collect-modifiers options modifier-map)
+        deps (reduce
+              (fn [m {:keys [::mods/key ::mods/deps]}]
+                (if (seq deps)
+                  (update m key union deps)
+                  m))
+              {}
+              modifiers)
+        _ (prn "DEPS" deps)
+        mod-fns (modifier-functions modifiers)
+        base (::t/base template)
+        base-deps (::es/deps base)
+        _ (prn "BASE DEPS" base-deps)
+        all-deps (merge-with union deps base-deps)
+        _ (prn "ALL DEPS" all-deps)
+        mod-order (rseq (kahn-sort all-deps))
+        _ (prn "MOD ORDER" mod-order)
+        ordered-mods (order-modifiers modifiers mod-order)
+        mod-fns (modifier-functions ordered-mods)]
+    #?(:cljs (js/console.log "ORDERED MODS" (clj->js ordered-mods)))
+    (es/apply-modifiers base mod-fns)))
 
 (defn build [raw-entity template]
   (apply-options raw-entity template))

@@ -259,8 +259,9 @@
   [:div.builder-selector
    [:h2.builder-selector-header (::t/name selection)]
    [:div
-    (let [simple-options?
+    (let [simple-options? 
           (not-any? #(or (seq (::t/selections %))
+                         (some ::mod/name (::t/modifiers %))
                          (::t/ui-fn %))
                     (::t/options selection))]
       (if simple-options?

@@ -167,56 +167,74 @@
     (mod5e/trait "Trance" "Elves don't need to sleep. Instead, they meditate deeply, remaining semiconscious, for 4 hours a day. (The Common word for such meditation is 'trance.') While meditating, you can dream after a fashion; such dreams are actually mental exercises that have become reflexive through years of practice. After resting in this way, you gain the same benefit that a human does from 8 hours of sleep.")
     (mod5e/trait "Darkvision" "Accustomed to twilit forests and the night sky, you have superior vision in dark and dim conditions. You can see in dim light within 60 feet of you as if it were bright light, and in darkness as if it were dim light. You can't discern color in darkness, only shades of gray.")]))
 
-(defn race-option [{:keys [nm
-                           ability
-                           ability-inc
+(defn subrace-option [{:keys [name
+                              abilities
+                              size
+                              speed
+                              subrace-options
+                              modifiers
+                              traits]}]
+  (let [option (t/option
+   name
+   (common/name-to-kw name)
+   []
+   (vec
+    (concat
+     [(mod5e/subrace name)]
+     modifiers
+     (map
+      (fn [[k v]]
+        (mod5e/ability k v))
+      abilities)
+     (map
+      (fn [{:keys [name description]}]
+        (mod5e/trait name description))
+      traits))))]
+    (js/console.log "SUBRACE OPTION" (clj->js option))
+    option))
+
+(defn race-option [{:keys [name
+                           abilities
                            size
                            speed
-                           subrace-options
+                           subraces
                            modifiers
                            traits
                            language]}]
   (t/option
-   nm
-   (common/name-to-kw nm)
+   name
+   (common/name-to-kw name)
    [(t/selection
      "Subrace"
-     subrace-options)]
-   (concat
-    [(mod5e/race nm)
-     (mod5e/ability ability ability-inc)
-     (mod5e/size size)
-     (mod5e/speed speed)
-     (mod5e/language "Common" :common)
-     (mod5e/language language (common/name-to-kw language))]
-    modifiers
-    (into
-     []
+     (map subrace-option subraces))]
+   (vec
+    (concat
+     [(mod5e/race name)
+      (mod5e/size size)
+      (mod5e/speed speed)
+      (mod5e/language "Common" :common)
+      (mod5e/language language (common/name-to-kw language))]
+     (map
+      (fn [[k v]]
+        (mod5e/ability k v))
+      abilities)
+     modifiers
      (map
       (fn [{:keys [name description]}]
-        (mod5e/trait name description)))
-     traits))))
+        (mod5e/trait name description))
+      traits)))))
 
 (def halfling-option
   (race-option
-   {:nm "Halfling"
-    :ability :dex
-    :ability-inc 2
-    :subrace-options
-    [(t/option
-      "Lightfoot"
-      :lightfoot
-      [(opt5e/language-selection opt5e/languages 1)]
-      [(mod5e/subrace "Lightfoot")
-       (mod5e/ability :cha 1)
-       (mod5e/trait "Naturally Stealthy" "You can attempt to hide even when you are obscured only by a creature that is at least one size larger than you.")])
-     (t/option
-      "Stout"
-      :stout
-      []
-      [(mod5e/subrace "Stout")
-       (mod5e/ability :con 1)
-       (mod5e/trait "Stout Resilience")])]
+   {:name "Halfling"
+    :abilities {:dex 2}
+    :subraces
+    [{:name "Lightfoot"
+      :abilities {:cha 1}
+      :traits [{:name "Naturally Stealthy" :description "You can attempt to hide even when you are obscured only by a creature that is at least one size larger than you."}]}
+     {:name "Stout"
+      :abilities {:cha 1}
+      :traits [{:name "Stout Resilience"}]}]
     :size :small
     :speed 25
     :language "Halfling"

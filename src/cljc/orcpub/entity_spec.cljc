@@ -37,14 +37,41 @@
     (map #(replace-refs entity %) body)
     :else (ref-to-kw body entity)))
 
+(defn deps [k body]
+  (let [nodes (tree-seq coll? seq body)]
+    (into
+     #{}
+     (comp
+      (filter
+       #(and (symbol? %)
+             (not= k %)
+             (.startsWith (name %) "?")))
+      (map ref-sym-to-kw))
+     nodes)))
+
+(defmacro dependencies [k body]
+  (deps k body))
+
+(defmacro entity-dependencies [body]
+  (reduce-kv
+   (fn [m k v]
+     (let [kw (ref-sym-to-kw k)]
+       (assoc
+        m
+        kw
+       (deps k v))))
+   {}
+   `~body))
+
 (defmacro make-entity [body]
   (reduce-kv
    (fn [m k v]
      (let [arg (gensym "e")
-           replaced (replace-refs arg v)]
+           replaced (replace-refs arg v)
+           kw (ref-sym-to-kw k)]
        (assoc
-        m
-        (ref-sym-to-kw k)
+        (update m ::deps (fn [d] (update d kw #(clojure.set/union % (deps k v)))))
+        kw
         (concat `(fn [~arg])
                 [replaced]))))
    {}

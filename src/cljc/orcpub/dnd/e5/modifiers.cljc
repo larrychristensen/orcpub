@@ -38,7 +38,7 @@
                             (es/modifier ?abilities abilities))))
 
 (defn saving-throws [& abilities]
-  (mods/modifier ?saving-throws (concat (or ?savings-throws #{}) abilities)))
+  (mods/modifier ?saving-throws (concat (or ?saving-throws #{}) abilities)))
 
 (defn saving-throw-type-advantage [type-nm type-kw]
   (mods/vec-mod ?saving-throw-type-advantage {:name type-nm
