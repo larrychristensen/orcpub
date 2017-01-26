@@ -59,9 +59,11 @@
 (def field-font-size
   {:font-size "14px"})
 
+(def template (t5e/template character-ref))
+
 (defonce app-state
   (r/atom
-   {::template (t5e/template character-ref)}))
+   {::template template}))
 
 (add-watch app-state :log (fn [k r os ns]
                             (js/console.log "OLD" (clj->js os))
@@ -93,7 +95,7 @@
                     (do
                       (if select-fn
                         (select-fn path))
-                      (swap! character-ref #(update-option (::template @app-state) % path (fn [o] (assoc o ::entity/key key))))))
+                      (swap! character-ref #(update-option template % path (fn [o] (assoc o ::entity/key key))))))
                   (.stopPropagation e))}
      [:span {:style {:font-weight :bold}} name]
      (if (not meets-prereqs?)
@@ -113,7 +115,7 @@
               (str
                (::mod/name m)
                " "
-               (let [v (or value (get-option-value (::template @app-state) @character-ref path))]
+               (let [v (or value (get-option-value template @character-ref path))]
                  (if val-fn
                    (val-fn v)
                    v)))))
@@ -153,7 +155,7 @@
    [:span
     {:on-click
      (fn []
-       (let [template (::template @app-state)
+       (let [template template
              value-path (entity/get-entity-path template path)
              new-item (new-item-fn
                        selection options
@@ -181,7 +183,7 @@
   (let [change-fn (fn [i]
                     (fn [e]
                       (let [new-path (concat path [key i])
-                            option-path (entity/get-entity-path (::template @app-state) new-path)
+                            option-path (entity/get-entity-path template new-path)
                             new-value (cljs.reader/read-string (.. e -target -value))]
                         (swap! character-ref #(set-option-value % (conj option-path ::entity/key) new-value)))))]
     [:div
@@ -190,7 +192,7 @@
          (doall
           (for [i (range max)]
             (let [option-path (conj path key i)
-                  entity-path (entity/get-entity-path (::template @app-state) option-path)
+                  entity-path (entity/get-entity-path template option-path)
                   key-path (conj entity-path ::entity/key)
                   value (get-in @character-ref key-path)]
               ^{:key i} [:div (dropdown options value (change-fn i))]))))
@@ -200,14 +202,14 @@
           (fn [i {value ::entity/key}]
             ^{:key i}
             [:div (dropdown options value (change-fn i))])
-          (get-in @character-ref (entity/get-entity-path (::template @app-state) (conj path key)))))
+          (get-in @character-ref (entity/get-entity-path template (conj path key)))))
         (add-option-button selection (conj path key) new-item-fn)])]))
 
 (defn remove-option-button [path index]
   [:i.fa.fa-minus-circle.remove-item-button
    {:on-click
     (fn [e]
-      (swap! character-ref #(remove-list-option (::template @app-state) % path index)))}])
+      (swap! character-ref #(remove-list-option template % path index)))}])
 
 (defn filter-selected [path key option-paths options]
   (filter
@@ -404,8 +406,8 @@
 ;;(stest/instrument `entity/build)
 ;;(stest/instrument `t/make-modifier-map)
 
-;;(prn "MODIFIER MAP" (cljs.pprint/pprint (t/make-modifier-map (::template @app-state))))
-;;(spec/explain ::t/modifier-map (t/make-modifier-map (::template @app-state)))
+;;(prn "MODIFIER MAP" (cljs.pprint/pprint (t/make-modifier-map template)))
+;;(spec/explain ::t/modifier-map (t/make-modifier-map template))
 
 (defn print-char [built-char]
   (cljs.pprint/pprint
@@ -436,7 +438,7 @@
 (defn character-builder []
   (cljs.pprint/pprint @character-ref)
   (let [option-paths (make-path-map @character-ref)
-        built-char (entity/build @character-ref (::template @app-state))]
+        built-char (entity/build @character-ref template)]
     (print-char built-char)
     [:div.app
      [:div.app-header
@@ -459,7 +461,7 @@
           (fn [selection]
             ^{:key (::t/key selection)}
             [builder-selector [] option-paths selection built-char])
-          (::t/selections (::template @app-state)))]
+          (::t/selections template))]
         [:div {:style {:flex-grow 1
                        :margin-top "10px"
                        :margin-left "30px"

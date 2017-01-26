@@ -142,9 +142,10 @@
    name
    (common/name-to-kw name)
    (concat
-    [(t/selection
-      "Subrace"
-      (map subrace-option subraces))]
+    (if subraces
+      [(t/selection
+        "Subrace"
+        (map subrace-option subraces))])
     selections)
    (vec
     (concat
@@ -284,6 +285,116 @@
                      (opt5e/ability-increase-selection char5e/ability-keys 2)]
                     [])])]}))
 
+(defn draconic-ancestry-option [{:keys [name damage-type breath-weapon]}]
+  (t/option
+   name
+   (common/name-to-kw name)
+   []
+   [(mod5e/resistance damage-type)
+    (mod5e/trait "Breath Weapon Details" breath-weapon)]))
+
+(def dragonborn-option
+  (race-option
+   {:name "Dragonborn"
+    :abilities {:str 2 :cha 1}
+    :size :medium
+    :speed 30
+    :languages ["Draconic" "Common"]
+    :selections [(t/selection
+                  "Draconic Ancestry"
+                  (map
+                   draconic-ancestry-option
+                   [{:name "Black"
+                     :damage-type :acid
+                     :breath-weapon "5 by 30 ft. line (Dex. save)"}
+                    {:name "Blue"
+                     :damage-type :lightning
+                     :breath-weapon "5 by 30 ft. line (Dex. save)"}
+                    {:name "Brass"
+                     :damage-type :fire
+                     :breath-weapon "5 by 30 ft. line (Dex. save)"}
+                    {:name "Bronze"
+                     :damage-type :lightning
+                     :breath-weapon "5 by 30 ft. line (Dex. save)"}
+                    {:name "Copper"
+                     :damage-type :acid
+                     :breath-weapon "5 by 30 ft. line (Dex. save)"}
+                    {:name "Gold"
+                     :damage-type :fire
+                     :breath-weapon "15 ft cone (Dex. save)"}
+                    {:name "Green"
+                     :damage-type :poison
+                     :breath-weapon "15 ft cone (Con. save)"}
+                    {:name "Red"
+                     :damage-type :fire
+                     :breath-weapon "15 ft cone (Dex. save)"}
+                    {:name "Silver"
+                     :damage-type :cold
+                     :breath-weapon "15 ft cone (Con. save)"}
+                    {:name "White"
+                     :damage-type :cold
+                     :breath-weapon "15 ft cone (Con. save)"}]))]
+    :traits [{:name "Breath Weapon" :description "You can use your action to 
+exhale destructive energy. Your draconic ancestry 
+determines the size, shape, and damage type of the 
+exhalation.
+When you use your breath weapon, each creature 
+in the area of the exhalation must make a saving 
+throw, the type of which is determined by your 
+draconic ancestry. The DC for this saving throw 
+equals 8 + your Constitution modifier + your 
+proficiency bonus. A creature takes 2d6 damage on a 
+failed save, and half as much damage on a successful one. The damage increases to 3d6 at 6th level, 4d6 at 
+11th level, and 5d6 at 16th level.
+After you use your breath weapon, you can't use it 
+again until you complete a short or long rest."}]}))
+
+(def gnome-option
+  (race-option
+   {:name "Gnome"
+    :abilities {:int 2}
+    :size :small
+    :speed 25
+    :darkvision 60
+    :languages ["Gnomish" "Common"]
+    :subraces
+    [{:name "Rock Gnome"
+      :abilities {:con 1}
+      :modifiers [(mod5e/tool-proficiency "Tinker's Tools" :tinkers-tools)]
+      :traits [{:name "Artificer's Lore" :description "Whenever you make an Intelligence (History) check related to magic items, alchemical objects, or technological devices, you can add twice your proficiency bonus, instead of any proficiency bonus you normally apply."}
+               {:name "Tinker" :description "You have proficiency with artisan's tools 
+(tinker's tools). Using those tools, you can spend 1 
+hour and 10 gp worth of materials to construct a 
+Tiny clockwork device (AC 5, 1 hp). The device 
+ceases to function after 24 hours (unless you spend 
+1 hour repairing it to keep the device functioning), 
+or when you use your action to dismantle it; at that 
+time, you can reclaim the materials used to create it. 
+You can have up to three such devices active at a 
+time.
+When you create a device, choose one of the 
+following options:
+Clockwork Toy. This toy is a clockwork animal, 
+monster, or person, such as a frog, mouse, bird, 
+dragon, or soldier. When placed on the ground, the 
+toy moves 5 feet across the ground on each of your 
+turns in a random direction. It makes noises as 
+appropriate to the creature it represents.
+Fire Starter. The device produces a miniature flame, 
+which you can use to light a candle, torch, or 
+campfire. Using the device requires your action.
+Music Box. When opened, this music box plays a 
+single song at a moderate volume. The box stops 
+playing when it reaches the song's end or when it
+is closed."}]}
+     {:name "Forest Gnome"
+      :abilities {:dex 1}
+      :modifiers [(mod5e/spells-known 0 :minor-illusion :int)]
+      :traits [{:name "Speak with Small Beasts"}]}]
+    :traits [{:name "Gnome Cunning" :description "You have advantage on all 
+Intelligence, Wisdom, and Charisma saving throws against magic."}]
+    :modifiers [(mod5e/darkvision 60)]}))
+
 (defn reroll-abilities [character-ref]
   (fn []
     (swap! character-ref
@@ -340,7 +451,9 @@
     [dwarf-option
      elf-option
      halfling-option
-     human-option])
+     human-option
+     dragonborn-option
+     gnome-option])
    (t/selection+
     "Class"
     (fn [selection classes]
