@@ -282,7 +282,7 @@
                     :variant
                     [(opt5e/feat-selection 1)
                      (opt5e/skill-selection 1)
-                     (opt5e/ability-increase-selection char5e/ability-keys 2)]
+                     (opt5e/ability-increase-selection char5e/ability-keys 2 true)]
                     [])])]}))
 
 (defn draconic-ancestry-option [{:keys [name damage-type breath-weapon]}]
@@ -395,6 +395,59 @@ is closed."}]}
 Intelligence, Wisdom, and Charisma saving throws against magic."}]
     :modifiers [(mod5e/darkvision 60)]}))
 
+(def half-elf-option
+  (race-option
+   {:name "Half Elf"
+    :abilities {:cha 2}
+    :size :medium
+    :speed 30
+    :languages ["Common"]
+    :selections [(opt5e/ability-increase-selection (disj (set char5e/ability-keys) :cha) 1 false)
+                 (opt5e/skill-selection 2)
+                 (opt5e/language-selection opt5e/languages 1)]
+    :modifiers [(mod5e/darkvision 60)]
+    :traits [{:name "Fey Ancestry" :description "You have advantage on saving 
+throws against being charmed, and magic can't put 
+you to sleep."}]}))
+
+(def half-orc-option
+  (race-option
+   {:name "Half Orc"
+    :abilities {:str 2 :con 1}
+    :size :medium
+    :speed 30
+    :languages ["Common" "Orc"]
+    :modifiers [(mod5e/darkvision 60)
+                (mod5e/skill-proficiency :intimidation)]
+    :traits [{:name "Relentless Endurance" :description "When you are reduced to 0 
+hit points but not killed outright, you can drop to 1 
+hit point instead. You can't use this feature again 
+until you finish a long rest."}
+                      {:name "Savage Attacks" :description "When you score a critical hit with 
+a melee weapon attack, you can roll one of the 
+weapon's damage dice one additional time and add it 
+to the extra damage of the critical hit."}]}))
+
+(def tiefling-option
+  (race-option
+   {:name "Tiefling"
+    :abilities {:int 1 :cha 2}
+    :size :medium
+    :speed 30
+    :languages ["Common" "Infernal"]
+    :modifiers [(mod5e/darkvision 60)
+                  (mod5e/spells-known 0 :thaumaturgy :cha)
+                  (mod5e/spells-known 1 :hellish-rebuke :cha 3)
+                  (mod5e/spells-known 2 :darkness :cha 5)]
+    :traits [{:name "Relentless Endurance" :description "When you are reduced to 0 
+hit points but not killed outright, you can drop to 1 
+hit point instead. You can't use this feature again 
+until you finish a long rest."}
+                      {:name "Savage Attacks" :description "When you score a critical hit with 
+a melee weapon attack, you can roll one of the 
+weapon's damage dice one additional time and add it 
+to the extra damage of the critical hit."}]}))
+
 (defn reroll-abilities [character-ref]
   (fn []
     (swap! character-ref
@@ -453,7 +506,10 @@ Intelligence, Wisdom, and Charisma saving throws against magic."}]
      halfling-option
      human-option
      dragonborn-option
-     gnome-option])
+     gnome-option
+     half-elf-option
+     half-orc-option
+     tiefling-option])
    (t/selection+
     "Class"
     (fn [selection classes]

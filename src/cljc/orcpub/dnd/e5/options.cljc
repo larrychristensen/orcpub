@@ -110,7 +110,7 @@
    tool-option
    tools))
 
-(defn ability-increase-selection [abilities num]
+(defn ability-increase-selection [abilities num & [different?]]
   (assoc
    (t/selection
     "Ability Score Increase"
@@ -265,7 +265,7 @@
    (t/option
     "Athlete"
     :athlete
-    [(ability-increase-selection [:str :dex] 1)]
+    [(ability-increase-selection [:str :dex] 1 false)]
     [(modifiers/trait "Athlete Feat")])
    (t/option
     "Actor"
@@ -359,7 +359,7 @@
    (t/option
     "Lightly Armored"
     :lightly-armored
-    [(ability-increase-selection [:str :dex] 1)]
+    [(ability-increase-selection [:str :dex] 1 false)]
     [(modifiers/light-armor-proficiency)])
    (t/option
     "Linguist"
@@ -417,7 +417,7 @@
    (t/option
     "Moderately Armored"
     :moderately-armored
-    [(ability-increase-selection [:str :dex] 1)]
+    [(ability-increase-selection [:str :dex] 1 false)]
     [(modifiers/medium-armor-proficiency)
      (modifiers/shield-armor-proficiency)]
     [(armor-prereq :light)])
@@ -429,7 +429,7 @@
    (t/option
     "Observant"
     :observant
-    [(ability-increase-selection [:int :wis] 1)]
+    [(ability-increase-selection [:int :wis] 1 false)]
     [(modifiers/trait "Observant Feat")
      (modifiers/passive-perception 5)
      (modifiers/passive-investigation 5)])
@@ -467,7 +467,7 @@
    [(t/option
      "Ability Score Improvement"
      :ability-score-improvement
-     [(ability-increase-selection character/ability-keys 2)]
+     [(ability-increase-selection character/ability-keys 2 false)]
      [])
     (t/option
      "Feat"

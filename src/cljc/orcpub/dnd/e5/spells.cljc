@@ -1778,26 +1778,36 @@ At Higher Levels. When you cast this spell using a spell slot of 2nd level or hi
                             :description "Choose a manufactured metal object, such as a metal weapon or a suit of heavy or medium metal armor, that you can see within range. You cause the object to glow red-hot. Any creature in physical contact with the object takes 2d8 fire damage when you cast the spell. Until the spell ends, you can use a bonus action on each of your subsequent turns to cause this damage again.
 If a creature is holding or wearing the object and takes the damage from it, the creature must succeed on a Constitution saving throw or drop the object if it can. If it doesn't drop the object, it has disadvantage on attack rolls and ability checks until the start of your next turn.
 At Higher Levels. When you cast this spell using a spell slot of 3rd level or higher, the damage increases by 1d8 for each slot level above 2nd."
-                            }{
-                              :name "Heroes' Feast"
-                              :school "conjuration"
-                              :level 6
-                              :casting-time "10 minutes"
-                              :range "30 feet"
-                              :components {:verbal true :somatic true :material true :material-component "a gem-encrusted bowl worth at least 1,000 gp, which the spell consumes"}
-                              :duration "Instantaneous You bring forth a great feast, including magnificent food and drink. The feast takes 1 hour to consume and disappears at the end of that time, and the beneficial effects don't set in until this hour is over. Up to twelve other creatures can partake of the feast."
-                              :description "A creature that partakes of the feast gains several benefits. The creature is cured of all diseases and poison, becomes immune to poison and being frightened, and makes all Wisdom saving throws with advantage. Its hit point maximum also increases by 2d10, and it gains the same number of hit points. These benefits last for 24 hours."
-                              }{
-                                :name "Heroism"
-                                :school "enchantment"
-                                :level 1
-                                :casting-time "1 action"
-                                :range "Touch"
-                                :components {:verbal true :somatic true}
-                                :duration "Concentration, up to 1 minute"
-                                :description "A willing creature you touch is imbued with bravery. Until the spell ends, the creature is immune to being frightened and gains temporary hit points equal to your spellcasting ability modifier at the start of each of its turns. When the spell ends, the target loses any remaining temporary hit points from this spell.
+                            } {
+                          :name "Hellish Rebuke"
+                          :school "divination"
+                          :level 1
+                          :casting-time "1 bonus action"
+                          :range "90 feet"
+                          :components {:verbal true}
+                          :duration "Concentration, up to 1 hour"
+                          :description "You point your finger, and the creature that damaged you is momentarily surrounded by hellish flames. The creature must make a Dexterity saving throw. It takes 2d10 fire damage on a failed save, or half as much damage on a successful one.
+At Higher Levels. When you cast this spell using a spell slot of 2nd level or higher, the damage increase by 1d10 for each slot level above 1st."
+                          } {
+                                  :name "Heroes' Feast"
+                                  :school "conjuration"
+                                  :level 6
+                                  :casting-time "10 minutes"
+                                  :range "30 feet"
+                                  :components {:verbal true :somatic true :material true :material-component "a gem-encrusted bowl worth at least 1,000 gp, which the spell consumes"}
+                                  :duration "Instantaneous You bring forth a great feast, including magnificent food and drink. The feast takes 1 hour to consume and disappears at the end of that time, and the beneficial effects don't set in until this hour is over. Up to twelve other creatures can partake of the feast."
+                                  :description "A creature that partakes of the feast gains several benefits. The creature is cured of all diseases and poison, becomes immune to poison and being frightened, and makes all Wisdom saving throws with advantage. Its hit point maximum also increases by 2d10, and it gains the same number of hit points. These benefits last for 24 hours."
+                                  }{
+                                  :name "Heroism"
+                                  :school "enchantment"
+                                  :level 1
+                                  :casting-time "1 action"
+                                  :range "Touch"
+                                  :components {:verbal true :somatic true}
+                                  :duration "Concentration, up to 1 minute"
+                                  :description "A willing creature you touch is imbued with bravery. Until the spell ends, the creature is immune to being frightened and gains temporary hit points equal to your spellcasting ability modifier at the start of each of its turns. When the spell ends, the target loses any remaining temporary hit points from this spell.
 At Higher Levels. When you cast this spell using a spell slot of 2nd level or higher, you can target one additional creature for each slot level above 1st."
-                                }{
+                                  }{
                                   :name "Hideous Laughter"
                                   :school "enchantment"
                                   :level 1
@@ -1808,45 +1818,45 @@ At Higher Levels. When you cast this spell using a spell slot of 2nd level or hi
                                   :description "A creature of your choice that you can see within range perceives everything as hilariously funny and falls into fits of laughter if this spell affects it. The target must succeed on a Wisdom saving throw or fall prone, becoming incapacitated and unable to stand up for the duration. A creature with an Intelligence score of 4 or less isn't affected.
 At the end of each of its turns, and each time it takes damage, the target can make another Wisdom saving throw. The target has advantage on the saving throw if it's triggered by damage. On a success, the spell ends."
                                   }{
-                                    :name "Hold Monster"
-                                    :school "enchantment"
-                                    :level 5
-                                    :casting-time "1 action"
-                                    :range "90 feet"
-                                    :components {:verbal true :somatic true :material true :material-component "a small, straight piece of iron"}
-                                    :duration "Concentration, up to 1 minute"
-                                    :description "Choose a creature that you can see within range. The target must succeed on a Wisdom saving throw or be paralyzed for the duration. This spell has no effect on undead. At the end of each of its turns, the target can make another Wisdom saving throw. On a success, the spell ends on the target.
+                                  :name "Hold Monster"
+                                  :school "enchantment"
+                                  :level 5
+                                  :casting-time "1 action"
+                                  :range "90 feet"
+                                  :components {:verbal true :somatic true :material true :material-component "a small, straight piece of iron"}
+                                  :duration "Concentration, up to 1 minute"
+                                  :description "Choose a creature that you can see within range. The target must succeed on a Wisdom saving throw or be paralyzed for the duration. This spell has no effect on undead. At the end of each of its turns, the target can make another Wisdom saving throw. On a success, the spell ends on the target.
 At Higher Levels. When you cast this spell using a spell slot of 6th level or higher, you can target one additional creature for each slot level above 5th. The creatures must be within 30 feet of each other when you target them."
-                                    }{
-                                      :name "Hold Person"
-                                      :school "enchantment"
-                                      :level 2
-                                      :casting-time "1 action"
-                                      :range "60 feet"
-                                      :components {:verbal true :somatic true :material true :material-component "a small, straight piece of iron"}
-                                      :duration "Concentration, up to 1 minute"
-                                      :description "Choose a humanoid that you can see within range. The target must succeed on a Wisdom saving throw or be paralyzed for the duration. At the end of each of its turns, the target can make another Wisdom saving throw. On a success, the spell ends on the target.
+                                  }{
+                                  :name "Hold Person"
+                                  :school "enchantment"
+                                  :level 2
+                                  :casting-time "1 action"
+                                  :range "60 feet"
+                                  :components {:verbal true :somatic true :material true :material-component "a small, straight piece of iron"}
+                                  :duration "Concentration, up to 1 minute"
+                                  :description "Choose a humanoid that you can see within range. The target must succeed on a Wisdom saving throw or be paralyzed for the duration. At the end of each of its turns, the target can make another Wisdom saving throw. On a success, the spell ends on the target.
 At Higher Levels. When you cast this spell using a spell slot of 3rd level or higher, you can target one additional humanoid for each slot level above 2nd. The humanoids must be within 30 feet of each other when you target them."
-                                      }{
-                                        :name "Holy Aura"
-                                        :school "abjuration"
-                                        :level 8
-                                        :casting-time "1 action"
-                                        :range "Self"
-                                        :components {:verbal true :somatic true :material true :material-component "a tiny reliquary worth at least 1,000 gp containing a sacred relic, such as a scrap of cloth from a saint's robe or a piece of parchment from a religious text"}
-                                        :duration "Concentration, up to 1 minute"
-                                        :description "Divine light washes out from you and coalesces in a soft radiance in a 30-foot radius around you. Creatures of your choice in that radius when you cast this spell shed dim light in a 5-foot radius and have advantage on all saving throws, and other creatures have disadvantage on attack rolls against them until the spell ends. In addition, when a fiend or an undead hits an affected creature with a melee attack, the aura flashes with brilliant light. The attacker must succeed on a Constitution saving throw or be blinded until the spell ends."
-                                        }{
-                                          :name "Hypnotic Pattern"
-                                          :school "illusion"
-                                          :level 3
-                                          :casting-time "1 action"
-                                          :range "120 feet"
-                                          :components {:somatic true :material true :material-component "a glowing stick of incense or a crystal vial filled with phosphorescent material"}
-                                          :duration "Concentration, up to 1 minute"
-                                          :description "You create a twisting pattern of colors that weaves through the air inside a 30-foot cube within range. The pattern appears for a moment and vanishes. Each creature in the area who sees the pattern must make a Wisdom saving throw. On a failed save, the creature becomes charmed for the duration. While charmed by this spell, the creature is incapacitated and has a speed of 0.
+                                  }{
+                                  :name "Holy Aura"
+                                  :school "abjuration"
+                                  :level 8
+                                  :casting-time "1 action"
+                                  :range "Self"
+                                  :components {:verbal true :somatic true :material true :material-component "a tiny reliquary worth at least 1,000 gp containing a sacred relic, such as a scrap of cloth from a saint's robe or a piece of parchment from a religious text"}
+                                  :duration "Concentration, up to 1 minute"
+                                  :description "Divine light washes out from you and coalesces in a soft radiance in a 30-foot radius around you. Creatures of your choice in that radius when you cast this spell shed dim light in a 5-foot radius and have advantage on all saving throws, and other creatures have disadvantage on attack rolls against them until the spell ends. In addition, when a fiend or an undead hits an affected creature with a melee attack, the aura flashes with brilliant light. The attacker must succeed on a Constitution saving throw or be blinded until the spell ends."
+                                  }{
+                                  :name "Hypnotic Pattern"
+                                  :school "illusion"
+                                  :level 3
+                                  :casting-time "1 action"
+                                  :range "120 feet"
+                                  :components {:somatic true :material true :material-component "a glowing stick of incense or a crystal vial filled with phosphorescent material"}
+                                  :duration "Concentration, up to 1 minute"
+                                  :description "You create a twisting pattern of colors that weaves through the air inside a 30-foot cube within range. The pattern appears for a moment and vanishes. Each creature in the area who sees the pattern must make a Wisdom saving throw. On a failed save, the creature becomes charmed for the duration. While charmed by this spell, the creature is incapacitated and has a speed of 0.
 The spell ends for an affected creature if it takes any damage or if someone else uses an action to shake the creature out of its stupor."
-                                          }])
+                                  }])
 
 (def i-spells [{
                 :name "Ice Storm"
