@@ -260,10 +260,11 @@
    [:h2.builder-selector-header (::t/name selection)]
    [:div
     (let [simple-options? 
-          (not-any? #(or (seq (::t/selections %))
-                         (some ::mod/name (::t/modifiers %))
-                         (::t/ui-fn %))
-                    (::t/options selection))]
+          (or (::t/simple? selection)
+              (not-any? #(or (seq (::t/selections %))
+                             (some ::mod/name (::t/modifiers %))
+                             (::t/ui-fn %))
+                        (::t/options selection)))]
       (if simple-options?
         [dropdown-selector path option-paths selection]
         [list-selector path option-paths selection built-char]))]])

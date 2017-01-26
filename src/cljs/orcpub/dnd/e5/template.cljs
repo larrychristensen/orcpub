@@ -84,104 +84,33 @@
      :on-click #(roll-hit-points die character-ref path)}
     "Re-Roll"]])
 
-(def dwarf-option
-  (t/option
-   "Dwarf"
-   :dwarf
-   [(t/selection
-     "Subrace"
-     [(t/option
-       "Hill Dwarf"
-       :hill-dwarf
-       [(opt5e/tool-selection [:smiths-tools :brewers-supplies :masons-tools] 1)]
-       [(mod5e/subrace "Hill Dwarf")
-        (mod5e/ability :wis 1)
-        (mod/modifier ?hit-point-level-bonus (+ 1 ?hit-point-level-bonus))])
-      (t/option
-       "Mountain Dwarf"
-       :mountain-dwarf
-       []
-       [(mod5e/subrace "Mountain Dwarf")
-        (mod5e/ability :str 2)
-        (mod5e/light-armor-proficiency)
-        (mod5e/medium-armor-proficiency)])])]
-   [(mod5e/race "Dwarf")
-    (mod5e/ability :con 2)
-    (mod5e/speed 25)
-    (mod5e/darkvision 60)
-    (mod5e/resistance :poison)
-    (mod5e/weapon-proficiency "handaxe" :handaxe)
-    (mod5e/weapon-proficiency "battleaxe" :battleaxe)
-    (mod5e/weapon-proficiency "light hammer" :light-hammer)
-    (mod5e/weapon-proficiency "warhammer" :warhammer)
-    (mod5e/language "Common" :common)
-    (mod5e/language "Dwarvish" :dwarvish)
-    (mod5e/trait "Dwarven Resilience" "You have advantage on saving throws against poison, and you have resistance against poison damage")
-    (mod5e/trait "Stonecunning" "Whenever you make an Intelligence (History) check related to the origin of stonework you are considered proficient in the History skill and add double your proficiency bonus to the check, instead of your normal proficiency bonus")
-    (mod5e/trait "Darkvision" "Accustomed to life underground, you have superior vision in dark and dim conditions. You can see in dim light within 60 feet of you as if it were bright light, and in darkness as if it were dim light. You can't discern color in darkness, only shades of gray.")]))
-
-(def elf-weapon-training-mods
-  [(mod5e/weapon-proficiency "longsword" :longsword)
-   (mod5e/weapon-proficiency "shortword" :shortsword)
-   (mod5e/weapon-proficiency "shortbow" :shortbow)
-   (mod5e/weapon-proficiency "longbow" :longbow)])
-
-(def elf-option
-  (t/option
-   "Elf"
-   :elf
-   [(t/selection
-     "Subrace"
-     [(t/option
-       "High Elf"
-       :high-elf
-       [(opt5e/wizard-cantrip-selection 1)
-        (opt5e/language-selection opt5e/languages 1)]
-       [(mod5e/subrace "High Elf")
-        (mod5e/ability :int 1)
-        elf-weapon-training-mods])
-      (t/option
-       "Wood Elf"
-       :wood-elf
-       []
-       [(mod5e/subrace "Wood Elf")
-        (mod5e/ability :wis 1)
-        elf-weapon-training-mods])
-      (t/option
-       "Dark Elf (Drow)"
-       :dark-elf
-       []
-       [(mod5e/subrace "Dark Elf")
-        (mod5e/ability :cha 1)
-        (mod5e/spells-known 0 :dancing-lights :cha)
-        (mod5e/spells-known 1 :faerie-fire :cha 3)
-        (mod5e/spells-known 2 :darkness :cha 5)])])]
-   [(mod5e/race "Elf")
-    (mod5e/ability :dex 2)
-    (mod5e/speed 30)
-    (mod5e/darkvision 60)
-    (mod5e/skill-proficiency :perception)
-    (mod5e/language "Common" :common)
-    (mod5e/language "Elvish" :elvish)
-    (mod5e/trait "Fey Ancestry" "You have advantage on saving throws against being charmed, and magic can’t put you to sleep.")
-    (mod5e/trait "Trance" "Elves don't need to sleep. Instead, they meditate deeply, remaining semiconscious, for 4 hours a day. (The Common word for such meditation is 'trance.') While meditating, you can dream after a fashion; such dreams are actually mental exercises that have become reflexive through years of practice. After resting in this way, you gain the same benefit that a human does from 8 hours of sleep.")
-    (mod5e/trait "Darkvision" "Accustomed to twilit forests and the night sky, you have superior vision in dark and dim conditions. You can see in dim light within 60 feet of you as if it were bright light, and in darkness as if it were dim light. You can't discern color in darkness, only shades of gray.")]))
-
 (defn subrace-option [{:keys [name
                               abilities
                               size
                               speed
                               subrace-options
+                              armor-proficiencies
+                              weapon-proficiencies
                               modifiers
+                              selections
                               traits]}]
   (let [option (t/option
    name
    (common/name-to-kw name)
-   []
+   selections
    (vec
     (concat
      [(mod5e/subrace name)]
      modifiers
+     (map
+      (fn [armor-kw]
+        (prn "ARMRO KW" armor-kw)
+        (mod5e/armor-proficiency (clojure.core/name armor-kw) armor-kw))
+      armor-proficiencies)
+     (map
+      (fn [weapon-nm]
+        (mod5e/weapon-proficiency weapon-nm (common/name-to-kw weapon-nm)))
+      weapon-proficiencies)
      (map
       (fn [[k v]]
         (mod5e/ability k v))
@@ -190,8 +119,13 @@
       (fn [{:keys [name description]}]
         (mod5e/trait name description))
       traits))))]
-    (js/console.log "SUBRACE OPTION" (clj->js option))
     option))
+
+(defn ability-modifiers [abilities]
+  (map
+   (fn [[k v]]
+     (mod5e/ability k v))
+   abilities))
 
 (defn race-option [{:keys [name
                            abilities
@@ -199,21 +133,28 @@
                            speed
                            subraces
                            modifiers
+                           selections
                            traits
-                           language]}]
+                           languages
+                           armor-proficiencies
+                           weapon-proficiencies]}]
   (t/option
    name
    (common/name-to-kw name)
-   [(t/selection
-     "Subrace"
-     (map subrace-option subraces))]
+   (concat
+    [(t/selection
+      "Subrace"
+      (map subrace-option subraces))]
+    selections)
    (vec
     (concat
      [(mod5e/race name)
       (mod5e/size size)
-      (mod5e/speed speed)
-      (mod5e/language "Common" :common)
-      (mod5e/language language (common/name-to-kw language))]
+      (mod5e/speed speed)]
+     (map
+      (fn [language]
+        (mod5e/language language (common/name-to-kw language)))
+      languages)
      (map
       (fn [[k v]]
         (mod5e/ability k v))
@@ -222,12 +163,83 @@
      (map
       (fn [{:keys [name description]}]
         (mod5e/trait name description))
-      traits)))))
+      traits)
+     (map
+      (fn [armor-kw]
+        (prn "ARMRO KW" armor-kw)
+        (mod5e/armor-proficiency (clojure.core/name armor-kw) armor-kw))
+      armor-proficiencies)
+     (map
+      (fn [weapon-nm]
+        (mod5e/weapon-proficiency weapon-nm (common/name-to-kw weapon-nm)))
+      weapon-proficiencies)))))
+
+(def elf-weapon-training-mods
+  [(mod5e/weapon-proficiency "longsword" :longsword)
+   (mod5e/weapon-proficiency "shortword" :shortsword)
+   (mod5e/weapon-proficiency "shortbow" :shortbow)
+   (mod5e/weapon-proficiency "longbow" :longbow)])
+
+(def elf-option
+  (race-option
+   {:name "Elf"
+    :abilities {:dex 2}
+    :size :medium
+    :speed 30
+    :languages ["Elvish" "Common"]
+    :subraces
+    [{:name "High Elf"
+      :abilities {:int 1}
+      :selections [(opt5e/wizard-cantrip-selection 1)
+                   (opt5e/language-selection opt5e/languages 1)]
+      :modifiers [elf-weapon-training-mods]}
+     {:name "Wood Elf"
+      :abilities {:cha 1}
+      :traits [{:name "Mask of the Wild"}]
+      :modifiers [(mod5e/speed 35)
+                  elf-weapon-training-mods]}
+     {:name "Dark Elf (Drow)"
+      :abilities {:cha 1}
+      :traits [{:name "Sunlight Sensitivity"}
+               {:name "Drow Magic"}]
+      :modifiers [(mod5e/darkvision 120)
+                  (mod5e/spells-known 0 :dancing-lights :cha)
+                  (mod5e/spells-known 1 :faerie-fire :cha 3)
+                  (mod5e/spells-known 2 :darkness :cha 5)]}]
+    :traits [{:name "Fey Ancestry" :description "You have advantage on saving throws against being charmed and magic can't put you to sleep"}
+             {:name "Trance" :description "Elves don't need to sleep. Instead, they meditate deeply, remaining semiconscious, for 4 hours a day. (The Common word for such meditation is 'trance.') While meditating, you can dream after a fashion; such dreams are actually mental exercises that have become re exive through years of practice. After resting in this way, you gain the same bene t that a human does from 8 hours of sleep."}
+             {:name "Darkvision" :description "Accustomed to twilit forests and the night sky, you have superior vision in dark and dim conditions. You can see in dim light within 60 feet of you as if it were bright light, and in darkness as if it were dim light. You can't discern color in darkness, only shades of gray."}]}))
+
+(def dwarf-option
+  (race-option
+   {:name "Dwarf",
+    :abilities {:con 2},
+    :size :medium
+    :speed 25,
+    :languages ["Dwarvish" "Common"]
+    :weapon-proficiencies ["handaxe" "battleaxe" "light hammer" "warhammer"]
+    :traits [{:name "Dwarven Resilience",
+              :description "You have advantage on saving throws against poison, and you have resistance against poison damage"},
+             {:name "Stonecunning"
+              :description "Whenever you make an Intelligence (History) check related to the origin of stonework you are considered proficient in the History skill and add double your proficiency bonus to the check, instead of your normal proficiency bonus"}
+             {:name "Darkvision" :description "Accustomed to twilit forests and the night sky, you have superior vision in dark and dim conditions. You can see in dim light within 60 feet of you as if it were bright light, and in darkness as if it were dim light. You can't discern color in darkness, only shades of gray."}]
+    :subraces [{:name "Hill Dwarf",
+                :abilities {:wis 1}
+                :selections [(opt5e/tool-selection [:smiths-tools :brewers-supplies :masons-tools] 1)]
+                :modifiers [(mod/modifier ?hit-point-level-bonus (+ 1 ?hit-point-level-bonus))]}
+               {:name "Mountain Dwarf"
+                :abilities {:str 2}
+                :armor-proficiencies [:light :medium]}]
+    :modifiers [(mod5e/darkvision 60)
+                (mod5e/resistance :poison)]}))
 
 (def halfling-option
   (race-option
    {:name "Halfling"
     :abilities {:dex 2}
+    :size :small
+    :speed 25
+    :languages ["Halfling" "Common"]
     :subraces
     [{:name "Lightfoot"
       :abilities {:cha 1}
@@ -235,12 +247,42 @@
      {:name "Stout"
       :abilities {:cha 1}
       :traits [{:name "Stout Resilience"}]}]
-    :size :small
-    :speed 25
-    :language "Halfling"
     :traits [{:name "Lucky" :description "When you roll a 1 on the d20 for an attack roll, ability check, or saving throw, you can reroll the die and must use the new roll."}
              {:name "Brave" :description "You have advantage on saving throws against being frightened."}
              {:name "Halfling Nimbleness" :description "You can move through the space of any creature that is of a size larger than yours."}]}))
+
+(def human-option
+  (race-option
+   {:name "Human"
+    ;; abilities are tied to variant selection below
+    :size :medium
+    :speed 30
+    :languages ["Common"]
+    :subraces
+    [{:name "Calishite"}
+     {:name "Chondathan"}
+     {:name "Damaran"}
+     {:name "Illuskan"}
+     {:name "Mulan"}
+     {:name "Rashemi"}
+     {:name "Shou"}
+     {:name "Tethyrian"}
+     {:name "Turami"}]
+    :selections [(opt5e/language-selection opt5e/languages 1)
+                 (t/selection
+                  "Variant"
+                  [(t/option
+                    "Standard Human"
+                    :standard
+                    []
+                    [(ability-modifiers {:str 1 :con 1 :dex 1 :int 1 :wis 1 :cha 1})])
+                   (t/option
+                    "Variant Human"
+                    :variant
+                    [(opt5e/feat-selection 1)
+                     (opt5e/skill-selection 1)
+                     (opt5e/ability-increase-selection char5e/ability-keys 2)]
+                    [])])]}))
 
 (defn reroll-abilities [character-ref]
   (fn []
@@ -295,9 +337,10 @@
       ::t/modifiers [(mod5e/deferred-abilities)]}])
    (t/selection
     "Race"
-    [elf-option
-     dwarf-option
-     halfling-option])
+    [dwarf-option
+     elf-option
+     halfling-option
+     human-option])
    (t/selection+
     "Class"
     (fn [selection classes]

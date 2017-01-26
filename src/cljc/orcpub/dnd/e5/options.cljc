@@ -111,20 +111,22 @@
    tools))
 
 (defn ability-increase-selection [abilities num]
-  (t/selection
-   "Ability Score Increase"
-   (into
-    []
-    (map
-     (fn [ability]
-       (t/option
-        (s/upper-case (name ability))
-        ability
-        []
-        [(modifiers/ability ability 1)])))
-    abilities)
-   num
-   num))
+  (assoc
+   (t/selection
+    "Ability Score Increase"
+    (into
+     []
+     (map
+      (fn [ability]
+        (t/option
+         (s/upper-case (name ability))
+         ability
+         []
+         [(modifiers/ability ability 1)])))
+     abilities)
+    num
+    num)
+   ::t/simple? (> num 1)))
 
 (defn min-ability [ability-kw min-value]
   (fn [c] (>= (ability-kw (es/entity-val c :abilities)) min-value)))
@@ -452,6 +454,13 @@
        character/ability-keys))]
     [])])
 
+(defn feat-selection [num]
+  (t/selection
+   (if (= 1 num) "Feat" "Feats")
+   feat-options
+   num
+   num))
+
 (defn ability-score-improvement-selection []
   (t/selection
    "Ability Score Improvement/Feat"
@@ -468,15 +477,18 @@
        feat-options)]
      [])]))
 
-(defn skill-selection [options num]
-  (t/selection
-   "Skills"
-   (skill-options
-    (filter
-     (comp (set options) :key)
-     skills))
-   num
-   num))
+(defn skill-selection
+  ([num]
+   (skill-selection (map :key skills) num))
+  ([options num]
+   (t/selection
+    "Skills"
+    (skill-options
+     (filter
+      (comp (set options) :key)
+      skills))
+    num
+    num)))
 
 (defn tool-selection [options num]
   (t/selection
