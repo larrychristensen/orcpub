@@ -246,7 +246,7 @@
       :abilities {:cha 1}
       :traits [{:name "Naturally Stealthy" :description "You can attempt to hide even when you are obscured only by a creature that is at least one size larger than you."}]}
      {:name "Stout"
-      :abilities {:cha 1}
+      :abilities {:con 1}
       :traits [{:name "Stout Resilience"}]}]
     :traits [{:name "Lucky" :description "When you roll a 1 on the d20 for an attack roll, ability check, or saving throw, you can reroll the die and must use the new roll."}
              {:name "Brave" :description "You have advantage on saving throws against being frightened."}
@@ -448,6 +448,230 @@ a melee weapon attack, you can roll one of the
 weapon's damage dice one additional time and add it 
 to the extra damage of the critical hit."}]}))
 
+(defn die-mean [die]
+  (int (Math/ceil (/ (apply + (range 1 (inc die))) die))))
+
+(defn hit-points-selection [character-ref die]
+  (t/selection
+   "Hit Points"
+   [{::t/name "Roll"
+     ::t/key :roll
+     ::t/ui-fn #(hit-points-roller die character-ref %)
+     ::t/select-fn #(roll-hit-points die character-ref %)
+     ::t/modifiers [(mod5e/deferred-max-hit-points)]}
+    (t/option
+     "Average"
+     :average
+     nil
+     [(mod5e/max-hit-points (die-mean die))])]))
+
+(defn class-option [{:keys [name
+                            hit-die
+                            profs
+                            levels
+                            ability-increase-levels]}
+                    character-ref]
+  (let [kw (common/name-to-kw name)
+        {skill-num :choose options :options} (:skill-options profs)
+        skill-kws (keys options)
+        ability-inc-set (set ability-increase-levels)]
+    (t/option
+     name
+     kw
+     [(opt5e/skill-selection skill-kws skill-num)
+      (t/sequential-selection
+       "Levels"
+       (fn [selection options current-values]
+         {::entity/key (-> current-values count inc str keyword)})
+       (vec
+        (map
+         (fn [i]
+           (t/option
+            (str i)
+            (keyword (str i))
+            (concat
+             (some-> levels (get i) :selections)
+             (if (ability-inc-set i)
+               [(opt5e/ability-score-improvement-selection)])
+             (if (> i 1)
+               [(hit-points-selection character-ref hit-die)]))
+            (concat
+             (some-> levels (get i) :modifiers)
+             (if (= i 1) [(mod5e/max-hit-points hit-die)])
+             [(mod5e/level kw name i)])))
+         (range 1 21))))]
+     [])))
+
+(defn barbarian-option [character-ref]
+  (class-option
+   {:name "Barbarian"
+    :hit-die 12
+    :ability-increase-levels [4 8 12 16 19]
+    :profs {:armor {:light true :medium true :shields true}
+            :weapon {:simple true :martial true}
+            :save {:str true :con true}
+            :skill-options {:choose 2 :options {:animal-handling true :athletics true :intimidation true :nature true :perception true :survival true}}}
+    :traits [{:name "Rage"
+              :description "In battle, you fight with primal ferocity. On your turn, 
+you can enter a rage as a bonus action.
+While raging, you gain the following benefits if you 
+aren't wearing heavy armor:
+* You have advantage on Strength checks and 
+Strength saving throws.
+* When you make a melee weapon attack using 
+Strength, you gain a bonus to the damage roll that 
+increases as you gain levels as a barbarian, as 
+shown in the Rage Damage column of the 
+Barbarian table.
+* You have resistance to bludgeoning, piercing, and 
+slashing damage.
+If you are able to cast spells, you can't cast them or 
+concentrate on them while raging.
+Your rage lasts for 1 minute. It ends early if you 
+are knocked unconscious or if your turn ends and 
+you haven't attacked a hostile creature since your 
+last turn or taken damage since then. You can also 
+end your rage on your turn as a bonus action.
+Once you have raged the number of times shown 
+for your barbarian level in the Rages column of the 
+Barbarian table, you must finish a long rest before 
+you can rage again."}
+             {:name "Unarmored Defense"
+              :description "While you are not wearing any armor, your Armor 
+Class equals 10 + your Dexterity modifier + your 
+Constitution modifier. You can use a shield and still 
+gain this benefit."}
+             {:name "Reckless Attack"
+              :level 2
+              :description "Starting at 2nd level, you can throw aside all concern 
+for defense to attack with fierce desperation. When 
+you make your first attack on your turn, you can 
+decide to attack recklessly. Doing so gives you 
+advantage on melee weapon attack rolls using 
+Strength during this turn, but attack rolls against 
+you have advantage until your next turn."}
+             {:name "Danger Sense"
+              :level 2
+              :description "At 2nd level, you gain an uncanny sense of when 
+things nearby aren't as they should be, giving you an 
+edge when you dodge away from danger.
+You have advantage on Dexterity saving throws 
+against effects that you can see, such as traps and 
+spells. To gain this benefit, you can't be blinded, 
+deafened, or incapacitated."}
+             {:name "Extra Attack"
+              :level 5
+              :description "Beginning at 5th level, you can attack twice, instead 
+of once, whenever you take the Attack action on your 
+turn."}
+             {:name "Fast Movement"
+              :level 5
+              :description "Starting at 5th level, your speed increases by 10 feet 
+while you aren't wearing heavy armor."}
+             {:name "Feral Instinct"
+              :level 7
+              :description "By 7th level, your instincts are so honed that you 
+have advantage on initiative rolls.
+Additionally, if you are surprised at the beginning 
+of combat and aren't incapacitated, you can act 
+normally on your first turn, but only if you enter 
+your rage before doing anything else on that turn."}
+             {:name "Brutal Critical"
+              :level 9
+              :description "Beginning at 9th level, you can roll one additional 
+weapon damage die when determining the extra 
+damage for a critical hit with a melee attack.
+This increases to two additional dice at 13th level 
+and three additional dice at 17th level."}
+             {:name "Relentless Rage"
+              :level 11
+              :description "Starting at 11th level, your rage can keep you 
+fighting despite grievous wounds. If you drop to 0 hit 
+points while you're raging and don't die outright, 
+you can make a DC 10 Constitution saving throw. If 
+you succeed, you drop to 1 hit point instead.
+Each time you use this feature after the first, the 
+DC increases by 5. When you finish a short or long 
+rest, the DC resets to 10."}
+             {:name "Persistent Rage"
+              :level 15
+              :description "Beginning at 15th level, your rage is so fierce that it 
+ends early only if you fall unconscious or if you 
+choose to end it."}
+             {:name "Indomitable Might"
+              :level 18
+              :description "Beginning at 18th level, if your total for a Strength 
+check is less than your Strength score, you can use 
+that score in place of the total."}
+             {:name "Primal Champion"
+              :level 20
+              :description "At 20th level, you embody the power of the wilds. 
+Your Strength and Constitution scores increase by 4. 
+Your maximum for those scores is now 24."}]
+    :subclass-level 3
+    :subclass-title "Primal Path"
+    :subclasses [{:name "Path of the Beserker"
+                  :traits [{:name "Frenzy"
+                            :level 3
+                            :description "Starting when you choose this path at 3rd level, you 
+can go into a frenzy when you rage. If you do so, for 
+the duration of your rage you can make a single 
+melee weapon attack as a bonus action on each of 
+your turns after this one. When your rage ends, you 
+suffer one level of exhaustion (as described in 
+appendix A)."}
+                           {:name "Mindless Rage"
+                            :level 6
+                            :description "Beginning at 6th level, you can't be charmed or 
+frightened while raging. If you are charmed or 
+frightened when you enter your rage, the effect is 
+suspended for the duration of the rage."}
+                           {:name "Intimidating Presence"
+                            :level 10
+                            :description "Beginning at 10th level, you can use your action to 
+frighten someone with your menacing presence. 
+When you do so, choose one creature that you can 
+see within 30 feet of you. If the creature can see or 
+hear you, it must succeed on a Wisdom saving throw 
+(DC equal to 8 + your proficiency bonus + your 
+Charisma modifier) or be frightened of you until the 
+end of your next turn. On subsequent turns, you can 
+use your action to extend the duration of this effect 
+on the frightened creature until the end of your next 
+turn. This effect ends if the creature ends its turn out 
+of line of sight or more than 60 feet away from you.
+If the creature succeeds on its saving throw, you 
+can't use this feature on that creature again for 24 
+hours."}
+                           {:name "Retaliation"
+                            :level 14
+                            :description "Starting at 14th level, when you take damage from a 
+creature that is within 5 feet of you, you can use your 
+reaction to make a melee weapon attack against that 
+creature."}]}
+                 {:name "Path of the Totem Warrior"
+                  :traits [{:name "Spirit Seeker"
+                            :level 3}
+                           {:name "Totem Spirit"
+                            :level 3}
+                           {:name "Aspect of the Beast"
+                            :level 6}
+                           {:name "Spirit Walker"
+                            :level 10}
+                           {:name "Totemic Attunement"
+                            :level 14}]}
+                 {:name "Path of the Battlerager"
+                  :source "Sword Coast Adventurer's Guide"
+                  :traits [{:name "Battlerager Armor"
+                            :level 3}
+                           {:name "Reckless Abandon"
+                            :level 6}
+                           {:name "Battlerager Charge"
+                            :level 10}
+                           {:name "Spiked Retribution"
+                            :level 14}]}]}
+   character-ref))
+
 (defn reroll-abilities [character-ref]
   (fn []
     (swap! character-ref
@@ -471,20 +695,6 @@ to the extra damage of the critical hit."}]}))
     [(mod5e/subclass :wizard "School of Evocation")
      (mod5e/trait "Evocation Savant")
      (mod5e/trait "Sculpt Spells")])])
-
-(defn hit-points-selection [character-ref die]
-  (t/selection
-   "Hit Points"
-   [{::t/name "Roll"
-     ::t/key :roll
-     ::t/ui-fn #(hit-points-roller die character-ref %)
-     ::t/select-fn #(roll-hit-points die character-ref %)
-     ::t/modifiers [(mod5e/deferred-max-hit-points)]}
-    (t/option
-     "Average"
-     :average
-     nil
-     [(mod5e/max-hit-points 4)])]))
 
 (defn template-selections [character-ref]
   [(t/selection
@@ -522,7 +732,8 @@ to the extra damage of the critical hit."}]}))
                            (map ::t/key)
                            (some #(if (-> % current-classes not) %)))
          ::entity/options {:levels [{::entity/key :1}]}}))
-    [(t/option
+    [(barbarian-option character-ref)
+     (t/option
       "Wizard"
       :wizard
       [(opt5e/skill-selection [:arcana :history :insight :investigation :medicine :religion] 2)

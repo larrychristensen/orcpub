@@ -22,7 +22,6 @@
             [reagent.core :as r])
   (:require-macros [orcpub.entity-spec :refer [make-entity]]))
 
-
 (enable-console-print!)
 
 (declare app-state)
@@ -124,11 +123,12 @@
        [:div
         (if ui-fn (ui-fn path))
         [:div
-         (map
-          (fn [selection]
-            ^{:key (::t/key selection)}
-            [builder-selector new-path option-paths selection built-char])
-          selections)]])]))
+         (doall
+          (map
+           (fn [selection]
+             ^{:key (::t/key selection)}
+             [builder-selector new-path option-paths selection built-char])
+           selections))]])]))
 
 (def builder-selector-style)
 
@@ -158,8 +158,10 @@
        (let [template template
              value-path (entity/get-entity-path template path)
              new-item (new-item-fn
-                       selection options
+                       selection
+                       options
                        (get-in @character-ref value-path))]
+         (prn "PATH" path value-path)
          (swap! character-ref #(update-option template % path
                                 (fn [options] (conj (vec options) new-item))))))
      :style {:margin-left "5px"}} (str "Add " name)]])
@@ -211,12 +213,21 @@
     (fn [e]
       (swap! character-ref #(remove-list-option template % path index)))}])
 
-(defn filter-selected [path key option-paths options]
-  (filter
-   (fn [opt]
-     (let [option-path (concat path [key (::t/key opt)])]
-       (get-in option-paths option-path)))
-   options))
+(defn filter-selected [path key option-paths options raw-char]
+  (let [options-path (conj path key)
+        entity-opt-path (entity/get-entity-path template options-path)
+        selected (get-in raw-char entity-opt-path)]
+    (if (sequential? selected)
+      (let [options-map (into {} (map (juxt ::t/key identity) options))]
+        (map
+         (fn [{k ::entity/key}]
+           (options-map k))
+         selected))
+      (filter
+       (fn [opt]
+         (let [option-path (concat path [key (::t/key opt)])]
+           (get-in option-paths option-path)))
+       options))))
 
 (defn list-selector-option [removeable? path option-paths multiple-select? i opt built-char]
   [:div.list-selector-option
@@ -225,10 +236,10 @@
    (if (removeable? i)
      [remove-option-button path i])])
 
-(defn list-selector [path option-paths {:keys [::t/options ::t/min ::t/max ::t/key ::t/name ::t/sequential? ::t/new-item-fn] :as selection} built-char]
+(defn list-selector [path option-paths {:keys [::t/options ::t/min ::t/max ::t/key ::t/name ::t/sequential? ::t/new-item-fn] :as selection} built-char raw-char]
   (let [no-max? (nil? max)
         multiple-select? (or no-max? (> max 1))
-        selected-options (filter-selected path key option-paths options)
+        selected-options (filter-selected path key option-paths options raw-char)
         addable? (and multiple-select?
                       (or no-max?
                           (< (count selected-options) max)))
@@ -256,7 +267,7 @@
      (if (and addable? new-item-fn)
        (add-option-button selection (conj path key) new-item-fn))]))
 
-(defn builder-selector [path option-paths selection built-char]
+(defn builder-selector [path option-paths selection built-char raw-char]
   ^{:key (::t/name selection)}
   [:div.builder-selector
    [:h2.builder-selector-header (::t/name selection)]
@@ -269,7 +280,7 @@
                         (::t/options selection)))]
       (if simple-options?
         [dropdown-selector path option-paths selection]
-        [list-selector path option-paths selection built-char]))]])
+        [list-selector path option-paths selection built-char raw-char]))]])
 
 
 (def content-style
@@ -457,11 +468,12 @@
        [:div
         {:style {:display :flex}}
         [:div {:style {:width "300px"}}
-         (map
-          (fn [selection]
-            ^{:key (::t/key selection)}
-            [builder-selector [] option-paths selection built-char])
-          (::t/selections template))]
+         (doall
+          (map
+           (fn [selection]
+             ^{:key (::t/key selection)}
+             [builder-selector [] option-paths selection built-char @character-ref])
+           (::t/selections template)))]
         [:div {:style {:flex-grow 1
                        :margin-top "10px"
                        :margin-left "30px"
