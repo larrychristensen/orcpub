@@ -86,18 +86,12 @@
     (build-options-entry-value-paths new-path value)))
 
 (defn build-options-paths [path options]
-  #_{:pre [(spec/valid? ::options options)]}
   (map (partial build-options-entry-paths path) options))
 
 (defn flatten-options [options]
-  #_{:pre [(spec/valid? ::options options)]
-   :post [(spec/valid? ::flat-options %)]}
   (flatten (build-options-paths [] options)))
 
 (defn collect-modifiers [flat-options modifier-map]
-  #_{:pre [(spec/valid? ::flat-options flat-options)
-         (spec/valid? ::t/modifier-map modifier-map)]
-     :post [(spec/valid? ::mods/modifiers %)]}
   #?(:cljs (cljs.pprint/pprint flat-options))
   (mapcat
    (fn [{path ::t/path
@@ -136,25 +130,36 @@
         [i s]))
     items)))
 
+(defn entity-item-with-key [items item-key]
+  (first
+   (keep-indexed
+    (fn [i s]
+      (if (= (::key s) item-key)
+        [i s]))
+    items)))
+
 (defn get-entity-path
-  ([template option-path]
-   (get-entity-path template [] option-path))
-  ([template current-path [selection-k option-k & ks]]
+  ([template entity option-path]
+   (get-entity-path template entity [] option-path))
+  ([template entity current-path [selection-k option-k & ks :as option-path]]
    (if selection-k
-     (let [[selection-i selection]
-           (template-item-with-key (::t/selections template) selection-k)
+     (let [[selection-i selection] (template-item-with-key (::t/selections template) selection-k)
            {:keys [::t/min ::t/max ::t/options]} selection
-           [option-i option]
-           (template-item-with-key options option-k)]
+           [option-i option] (template-item-with-key options option-k)
+           selection-path (vec (concat current-path [::options selection-k]))
+           entity-items (get-in entity selection-path)
+           [entity-i _] (entity-item-with-key entity-items option-k)
+           path-i (if (and (or option-k entity-i)
+                           (or (nil? max) (> max 1)))
+                    (if (nat-int? option-k)
+                      option-k
+                      entity-i))
+           full-path (if path-i (conj selection-path path-i) selection-path)]
+       (prn "CURRENT_PATH" option-path current-path full-path (get-in entity full-path) entity-i)
        (get-entity-path
         option
-        (concat current-path
-                [::options selection-k]
-                (if (and option-k
-                         (or (nil? max) (> max 1)))
-                  (if (nat-int? option-k)
-                    [option-k]
-                    [option-i])))
+        entity
+        full-path
         ks))
      (vec current-path))))
 
@@ -173,18 +178,13 @@
                   m))
               {}
               modifiers)
-        _ (prn "DEPS" deps)
         mod-fns (modifier-functions modifiers)
         base (::t/base template)
         base-deps (::es/deps base)
-        _ (prn "BASE DEPS" base-deps)
         all-deps (merge-with union deps base-deps)
-        _ (prn "ALL DEPS" all-deps)
         mod-order (rseq (kahn-sort all-deps))
-        _ (prn "MOD ORDER" mod-order)
         ordered-mods (order-modifiers modifiers mod-order)
         mod-fns (modifier-functions ordered-mods)]
-    #?(:cljs (js/console.log "ORDERED MODS" (clj->js ordered-mods)))
     (es/apply-modifiers base mod-fns)))
 
 (defn build [raw-entity template]
@@ -212,5 +212,5 @@
     selections (assoc ::t/selections selections)
     modifiers (assoc ::t/modifiers modifiers)))
 
-(defn get-option-value-path [template path]
-  (conj (get-entity-path template path) ::value))
+(defn get-option-value-path [template entity path]
+  (conj (get-entity-path template entity path) ::value))

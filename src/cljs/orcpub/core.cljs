@@ -35,11 +35,11 @@
     selection)))
 
 (defn get-option-value [template entity path]
-  (get-in entity (entity/get-option-value-path template path)))
+  (get-in entity (entity/get-option-value-path template entity path)))
 
 
 (defn update-option [template entity path update-fn]
-  (update-in entity (entity/get-entity-path template [] path) update-fn))
+  (update-in entity (entity/get-entity-path template entity [] path) update-fn))
 
 (defn remove-list-option [template entity path index]
   (update-option template
@@ -71,7 +71,7 @@
 (declare builder-selector)
 
 
-(defn option [path option-paths selectable? {:keys [::t/key ::t/name ::t/selections ::t/modifiers ::t/prereqs ::t/ui-fn ::t/select-fn]} built-char]
+(defn option [path option-paths selectable? {:keys [::t/key ::t/name ::t/selections ::t/modifiers ::t/prereqs ::t/ui-fn ::t/select-fn]} built-char raw-char]
   (let [new-path (conj path key)
         selected? (boolean (get-in option-paths new-path))
         named-mods (filter ::mod/name modifiers)
@@ -127,7 +127,7 @@
           (map
            (fn [selection]
              ^{:key (::t/key selection)}
-             [builder-selector new-path option-paths selection built-char])
+             [builder-selector new-path option-paths selection built-char raw-char])
            selections))]])]))
 
 (def builder-selector-style)
@@ -149,19 +149,18 @@
      options))])
 
 
-(defn add-option-button [{:keys [::t/key ::t/name ::t/options] :as selection} path new-item-fn]
+(defn add-option-button [{:keys [::t/key ::t/name ::t/options] :as selection} entity path new-item-fn]
   [:div.add-item-button
    [:i.fa.fa-plus-circle]
    [:span
     {:on-click
      (fn []
        (let [template template
-             value-path (entity/get-entity-path template path)
+             value-path (entity/get-entity-path template entity path)
              new-item (new-item-fn
                        selection
                        options
                        (get-in @character-ref value-path))]
-         (prn "PATH" path value-path)
          (swap! character-ref #(update-option template % path
                                 (fn [options] (conj (vec options) new-item))))))
      :style {:margin-left "5px"}} (str "Add " name)]])
@@ -181,11 +180,11 @@
      path
      value)))
 
-(defn dropdown-selector [path option-paths {:keys [::t/options ::t/min ::t/max ::t/key ::t/name ::t/sequential? ::t/new-item-fn] :as selection}]
+(defn dropdown-selector [path option-paths {:keys [::t/options ::t/min ::t/max ::t/key ::t/name ::t/sequential? ::t/new-item-fn] :as selection} entity]
   (let [change-fn (fn [i]
                     (fn [e]
                       (let [new-path (concat path [key i])
-                            option-path (entity/get-entity-path template new-path)
+                            option-path (entity/get-entity-path template entity new-path)
                             new-value (cljs.reader/read-string (.. e -target -value))]
                         (swap! character-ref #(set-option-value % (conj option-path ::entity/key) new-value)))))]
     [:div
@@ -194,7 +193,7 @@
          (doall
           (for [i (range max)]
             (let [option-path (conj path key i)
-                  entity-path (entity/get-entity-path template option-path)
+                  entity-path (entity/get-entity-path template entity option-path)
                   key-path (conj entity-path ::entity/key)
                   value (get-in @character-ref key-path)]
               ^{:key i} [:div (dropdown options value (change-fn i))]))))
@@ -204,8 +203,8 @@
           (fn [i {value ::entity/key}]
             ^{:key i}
             [:div (dropdown options value (change-fn i))])
-          (get-in @character-ref (entity/get-entity-path template (conj path key)))))
-        (add-option-button selection (conj path key) new-item-fn)])]))
+          (get-in @character-ref (entity/get-entity-path template entity (conj path key)))))
+        (add-option-button selection entity (conj path key) new-item-fn)])]))
 
 (defn remove-option-button [path index]
   [:i.fa.fa-minus-circle.remove-item-button
@@ -215,7 +214,7 @@
 
 (defn filter-selected [path key option-paths options raw-char]
   (let [options-path (conj path key)
-        entity-opt-path (entity/get-entity-path template options-path)
+        entity-opt-path (entity/get-entity-path template raw-char options-path)
         selected (get-in raw-char entity-opt-path)]
     (if (sequential? selected)
       (let [options-map (into {} (map (juxt ::t/key identity) options))]
@@ -229,10 +228,10 @@
            (get-in option-paths option-path)))
        options))))
 
-(defn list-selector-option [removeable? path option-paths multiple-select? i opt built-char]
+(defn list-selector-option [removeable? path option-paths multiple-select? i opt built-char raw-char]
   [:div.list-selector-option
    [:div {:style {:flex-grow 1}}
-    [option path option-paths (not multiple-select?) opt built-char]]
+    [option path option-paths (not multiple-select?) opt built-char raw-char]]
    (if (removeable? i)
      [remove-option-button path i])])
 
@@ -260,12 +259,13 @@
           multiple-select?
           i
           option
-          built-char])
+          built-char
+          raw-char])
        (if multiple-select?
          selected-options
          options)))
      (if (and addable? new-item-fn)
-       (add-option-button selection (conj path key) new-item-fn))]))
+       (add-option-button selection raw-char (conj path key) new-item-fn))]))
 
 (defn builder-selector [path option-paths selection built-char raw-char]
   ^{:key (::t/name selection)}
@@ -279,9 +279,8 @@
                              (::t/ui-fn %))
                         (::t/options selection)))]
       (if simple-options?
-        [dropdown-selector path option-paths selection]
+        [dropdown-selector path option-paths selection raw-char]
         [list-selector path option-paths selection built-char raw-char]))]])
-
 
 (def content-style
   {:width 1440})

@@ -74,6 +74,7 @@
 (defn roll-hit-points [die character-ref path]
   (let [value-path (entity/get-option-value-path
                     {::t/selections (template-selections character-ref)}
+                    @character-ref
                     path)]
     (swap! character-ref #(assoc-in % value-path (dice/die-roll die)))))
 
