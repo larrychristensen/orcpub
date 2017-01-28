@@ -155,7 +155,6 @@
                       option-k
                       entity-i))
            full-path (if path-i (conj selection-path path-i) selection-path)]
-       (prn "CURRENT_PATH" option-path current-path full-path (get-in entity full-path) entity-i)
        (get-entity-path
         option
         entity
