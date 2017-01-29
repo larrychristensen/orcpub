@@ -587,7 +587,22 @@
                                                 " ("
                                                 (s/upper-case (name (:ability spell))) ")")]))
                                           (filter (fn [{k :key}] (spells/spell-map k)) spells))]])
-                                     (es/entity-val built-char :spells-known))])]]
+                                     (es/entity-val built-char :spells-known))])
+             (list-display-section "Weapons" nil
+                                   (map
+                                    (fn [[weapon-kw num]]
+                                      (str (name weapon-kw) " (" num ")"))
+                                    (es/entity-val built-char :weapons)))
+             (list-display-section "Armor" nil
+                                   (map
+                                    (fn [[armor-kw num]]
+                                      (str (name armor-kw) " (" num ")"))
+                                    (es/entity-val built-char :armor)))
+             (list-display-section "Equipment" nil
+                                   (map
+                                    (fn [[equipment-kw num]]
+                                      (str (name equipment-kw) " (" num ")"))
+                                    (es/entity-val built-char :equipment)))]]
            (display-section
             "Features, Traits, & Feats" nil
             [:div

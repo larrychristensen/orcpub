@@ -1,6 +1,7 @@
 (ns orcpub.template
   (:require [clojure.spec :as spec]
-            [orcpub.modifiers :as modifiers]))
+            [orcpub.modifiers :as modifiers]
+            [orcpub.common :as common]))
 
 (spec/def ::name string?)
 (spec/def ::key keyword?)
@@ -28,23 +29,23 @@
                                                         :min ::min
                                                         :max ::max)))
 
-(defn name-to-kw [name]
-  (-> name
-      clojure.string/lower-case
-      (clojure.string/replace #"\W" "-")
-      keyword))
-
-(defn selection
-  ([name options]
-   (selection name options 1 1))
-  ([name options min max &[sequential? new-item-fn]]
+(defn selection-with-key
+  ([name key options]
+   (selection-with-key name key options 1 1))
+  ([name key options min max &[sequential? new-item-fn]]
    {::name name
-    ::key (name-to-kw name)
+    ::key key
     ::options options
     ::min min
     ::max max
     ::sequential? (boolean sequential?)
     ::new-item-fn new-item-fn}))
+
+(defn selection
+  ([name options]
+   (selection name options 1 1))
+  ([name options min max &[sequential? new-item-fn]]
+   (selection-with-key name (common/name-to-kw name) options min max sequential? new-item-fn)))
 
 (defn selection? [name options]
   (selection name options 0 1))

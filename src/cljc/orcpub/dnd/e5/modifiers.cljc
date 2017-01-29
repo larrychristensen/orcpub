@@ -126,3 +126,12 @@
 
 (defn size [size]
   (mods/modifier ?size size))
+
+(defn weapon [weapon-kw num]
+  (mods/map-mod ?weapons weapon-kw num))
+
+(defn armor [armor-kw num]
+  (mods/map-mod ?armor armor-kw num))
+
+(defn equipment [equipment-kw num]
+  (mods/map-mod ?equipment equipment-kw num))

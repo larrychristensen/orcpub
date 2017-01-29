@@ -65,23 +65,402 @@
               :key :survival
               :ability :wis}])
 
-(def tools
+(def musical-instruments
+  [{:key :bagpipes
+    :name "Bagpipes"}
+   {:key :drum
+    :name "Drum"}
+   {:key :dulcimer
+    :name "Dulcimer"}
+   {:key :flute
+    :name "Flute"}
+   {:key :lute
+    :name "Lute"}
+   {:key :lyre
+    :name "Lyre"}
+   {:key :horn
+    :name "Horn"}
+   {:key :pan-flute
+    :name "Pan Flute"}
+   {:key :shawm
+    :name "Shawm"}
+   {:key :viol
+    :name "Viol"}])
+
+(def artisans-tools
   [{:name "smith's tools"
-    :key :smiths-tools}
-   {:name "brewer's supplies"
-    :key :brewers-supplies}
-   {:name "mason's tools"
-    :key :masons-tools}])
+     :key :smiths-tools}
+    {:name "brewer's supplies"
+     :key :brewers-supplies}
+    {:name "mason's tools"
+     :key :masons-tools}])
+
+(def tools
+  (concat
+   musical-instruments
+   artisans-tools))
+
+(def tools-map
+  (merge
+   {:artisans-tool {:name "Artisans Tools"
+                    :values artisans-tools}
+    :musical-instrument {:name "Musical Instruments"
+                         :values musical-instruments}}
+   (zipmap (map :key tools) tools)))
+
+(def add-keys-xform
+  (map
+   #(assoc % :key (common/name-to-kw (:name %)))))
+
+(def packs
+  (into
+   []
+   add-keys-xform
+   [{:name "Burgler's Pack"}
+    {:name "Diplomat's Pack"}
+    {:name "Dungeoneer's Pack"}
+    {:name "Entertainer's Pack"}
+    {:name "Explorer's Pack"}
+    {:name "Priest's Pack"}
+    {:name "Scholar's Pack"}]))
+
+(def equipment
+  (concat
+   packs
+   tools))
+
+(def equipment-map
+  (merge
+   {:pack {:name "Equipment Packs"
+           :values packs}}
+   tools-map
+   (zipmap (map :key packs) packs)))
 
 (def weapons
-  [{:name "battleaxe"
-    :key :battleaxe}
-   {:name "handaxe"
+  [{:name "Crossbow, light",
+    :damage-type :piercing,
+    :damage-die 8,
+    :type :simple,
+    :damage-die-count 1,
+    :ranged true,
+    :range {:min 80, :max 320},
+    :key :crossbow--light}
+   {:ranged true,
+    :key :dart,
+    :name "Dart",
+    :damage-die-count 1,
+    :type :simple,
+    :damage-type :piercing,
+    :thrown true,
+    :finesse true,
+    :damage-die 4,
+    :range {:min 20, :max 60}}
+   {:name "Shortbow",
+    :damage-type :piercing,
+    :damage-die 6,
+    :type :simple,
+    :damage-die-count 1,
+    :ranged true,
+    :range {:min 80, :max 320},
+    :key :shortbow}
+   {:name "Sling",
+    :damage-type :bludgeoning,
+    :damage-die 4,
+    :type :simple,
+    :damage-die-count 1,
+    :ranged true,
+    :range {:min 30, :max 120},
+    :key :sling}
+   {:name "Club",
+    :damage-type :bludgeoning,
+    :damage-die 4,
+    :damage-die-count 1,
+    :type :simple,
+    :melee true,
+    :key :club}
+   {:melee true,
+    :key :dagger,
+    :name "Dagger",
+    :damage-die-count 1,
+    :type :simple,
+    :damage-type :piercing,
+    :thrown true,
+    :finesse true,
+    :damage-die 4,
+    :range {:min 20, :max 60}}
+   {:name "Greatclub",
+    :damage-type :bludgeoning,
+    :damage-die 8,
+    :damage-die-count 1,
+    :type :simple,
+    :melee true,
+    :key :greatclub}
+   {:name "Handaxe",
+    :damage-type :slashing,
+    :damage-die 6,
+    :damage-die-count 1,
+    :type :simple,
+    :melee true,
+    :thrown true,
+    :range {:min 20, :max 60},
     :key :handaxe}
-   {:name "light hammer"
+   {:name "Javelin",
+    :damage-type :piercing,
+    :damage-die 6,
+    :damage-die-count 1,
+    :type :simple,
+    :melee true,
+    :thrown true,
+    :range {:min 30, :max 120},
+    :key :javelin}
+   {:name "Light hammer",
+    :damage-type :bludgeoning,
+    :damage-die 4,
+    :damage-die-count 1,
+    :type :simple,
+    :melee true,
+    :thrown true,
+    :range {:min 20, :max 60},
     :key :light-hammer}
-   {:name "warhammer"
-    :key :warhammer}])
+   {:name "Mace",
+    :damage-type :bludgeoning,
+    :type :simple,
+    :damage-die 6,
+    :damage-die-count 1,
+    :melee true,
+    :key :mace}
+   {:name "Quarterstaff",
+    :damage-type :bludgeoning,
+    :type :simple,
+    :damage-die 6,
+    :damage-die-count 1,
+    :versatile {:damage-die 8, :damage-die-count 1},
+    :melee true,
+    :key :quarterstaff}
+   {:name "Sickle",
+    :damage-type :slashing,
+    :damage-die 4,
+    :type :simple,
+    :damage-die-count 1,
+    :melee true,
+    :key :sickle}
+   {:melee true,
+    :versatile {:damage-die 8, :damage-die-count 1},
+    :key :spear,
+    :name "Spear",
+    :damage-die-count 1,
+    :type :simple,
+    :damage-type :piercing,
+    :thrown true,
+    :damage-die 6,
+    :range {:min 20, :max 60}}
+   {:name "Unarmed Strike",
+    :damage-type :bludgeoning,
+    :damage-die 1,
+    :type :simple,
+    :damage-die-count 1,
+    :melee true,
+    :unarmed true,
+    :key :unarmed-strike}
+   {:name "Battleaxe",
+    :damage-type :slashing,
+    :damage-die 8,
+    :type :martial,
+    :damage-die-count 1,
+    :versatile {:damage-die 10, :damage-die-count 1},
+    :melee true,
+    :key :battleaxe}
+   {:name "Flail",
+    :damage-type :bludgeoning,
+    :damage-die 8,
+    :type :martial,
+    :damage-die-count 1,
+    :melee true,
+    :key :flail}
+   {:name "Glaive",
+    :damage-type :slashing,
+    :damage-die 10,
+    :type :martial,
+    :damage-die-count 1,
+    :melee true,
+    :heavy true,
+    :reach true,
+    :key :glaive}
+   {:name "Greataxe",
+    :damage-type :slashing,
+    :damage-die 12,
+    :type :martial,
+    :damage-die-count 1,
+    :heavy true,
+    :melee true,
+    :key :greataxe}
+   {:name "Greatsword",
+    :damage-type :slashing,
+    :damage-die 6,
+    :type :martial,
+    :damage-die-count 2,
+    :heavy true,
+    :melee true,
+    :key :greatsword}
+   {:name "Halberd",
+    :damage-type :slashing,
+    :damage-die 10,
+    :type :martial,
+    :damage-die-count 1,
+    :melee true,
+    :heavy true,
+    :reach true,
+    :key :halberd}
+   {:name "Lance",
+    :damage-type :piercing,
+    :damage-die 12,
+    :type :martial,
+    :damage-die-count 1,
+    :melee true,
+    :reach true,
+    :key :lance}
+   {:name "Longsword",
+    :damage-type :slashing,
+    :damage-die 8,
+    :type :martial,
+    :damage-die-count 1,
+    :versatile {:damage-die 10, :damage-die-count 1},
+    :melee true,
+    :key :longsword}
+   {:name "Maul",
+    :damage-type :bludgeoning,
+    :damage-die 6,
+    :type :martial,
+    :damage-die-count 2,
+    :heavy true,
+    :melee true,
+    :key :maul}
+   {:name "Morningstar",
+    :damage-type :piercing,
+    :damage-die 8,
+    :type :martial,
+    :damage-die-count 1,
+    :melee true,
+    :key :morningstar}
+   {:name "Pike",
+    :damage-type :piercing,
+    :damage-die 10,
+    :type :martial,
+    :damage-die-count 1,
+    :melee true,
+    :heavy true,
+    :reach true,
+    :key :pike}
+   {:name "Rapier",
+    :damage-type :piercing,
+    :damage-die 8,
+    :type :martial,
+    :damage-die-count 1,
+    :finesse true,
+    :melee true,
+    :key :rapier}
+   {:name "Scimitar",
+    :damage-type :slashing,
+    :damage-die 6,
+    :type :martial,
+    :damage-die-count 1,
+    :finesse true,
+    :melee true,
+    :key :scimitar}
+   {:name "Shortsword",
+    :damage-type :piercing,
+    :damage-die 6,
+    :type :martial,
+    :finesse true,
+    :damage-die-count 1,
+    :melee true,
+    :key :shortsword}
+   {:melee true,
+    :versatile {:damage-die 8, :damage-die-count 1},
+    :key :trident,
+    :name "Trident",
+    :damage-die-count 1,
+    :type :martial,
+    :damage-type :piercing,
+    :thrown true,
+    :damage-die 6,
+    :range {:min 20, :max 60}}
+   {:name "War pick",
+    :damage-type :piercing,
+    :damage-die 8,
+    :type :martial,
+    :damage-die-count 1,
+    :melee true,
+    :key :war-pick}
+   {:name "Warhammer",
+    :damage-type :bludgeoning,
+    :damage-die 8,
+    :type :martial,
+    :damage-die-count 1,
+    :versatile {:damage-die 10, :damage-die-count 1},
+    :melee true,
+    :key :warhammer}
+   {:name "Whip",
+    :damage-type :slashing,
+    :damage-die 4,
+    :type :martial,
+    :damage-die-count 1,
+    :melee true,
+    :finesse true,
+    :reach true,
+    :key :whip}
+   {:name "Blowgun",
+    :damage-type :piercing,
+    :damage-die 1,
+    :type :martial,
+    :damage-die-count 1,
+    :ranged true,
+    :range {:min 25, :max 100},
+    :key :blowgun}
+   {:name "Crossbow, hand",
+    :damage-type :piercing,
+    :damage-die 6,
+    :type :martial,
+    :damage-die-count 1,
+    :ranged true,
+    :range {:min 30, :max 120},
+    :key :crossbow--hand}
+   {:name "Crossbow, heavy",
+    :damage-type :piercing,
+    :damage-die 10,
+    :type :martial,
+    :damage-die-count 1,
+    :ranged true,
+    :heavy true,
+    :range {:min 100, :max 400},
+    :key :crossbow--heavy}
+   {:name "Longbow",
+    :damage-type :piercing,
+    :damage-die 8,
+    :type :martial,
+    :damage-die-count 1,
+    :ranged true,
+    :heavy true,
+    :range {:min 150, :max 600},
+    :key :longbow}
+   {:name "Net",
+    :type :martial,
+    :ranged true,
+    :thrown true,
+    :range {:min 5, :max 15},
+    :key :net}])
+
+(def weapons-map
+  (zipmap (map :key weapons) weapons))
+
+(defn weapons-of-type [weapons type]
+  (filter #(= type (:type %)) weapons))
+
+(defn martial-weapons [weapons]
+  (weapons-of-type weapons :martial))
+
+(defn simple-weapons [weapons]
+  (weapons-of-type weapons :simple))
 
 (def skill-abilities
   (into {} (map (juxt :key :ability)) skills))
@@ -99,6 +478,18 @@
    (:key tool)
    nil
    [(modifiers/tool-proficiency (:name tool) (:key tool))]))
+
+(defn weapon-option [weapon & [num]]
+  (t/option
+   (:name weapon)
+   (:key weapon)
+   nil
+   [(modifiers/weapon (:key weapon) (or num 1))]))
+
+(defn weapon-options [weapons & [num]]
+  (map
+   weapon-option
+   weapons))
 
 (defn skill-options [skills]
   (map
@@ -167,6 +558,32 @@
 (defn key-to-name [key]
   (s/join " " (map s/capitalize (s/split (name key) #"-"))))
 
+(defn spell-options [spells level spellcasting-ability]
+  (map
+   (fn [key]
+     (t/option
+      (:name (spells/spell-map key))
+      key
+      []
+      [(modifiers/spells-known level key spellcasting-ability)]))
+   spells))
+
+(defn spell-selection [class-key level spellcasting-ability num]
+  (prn "CLASS KEY" class-key level spellcasting-ability)
+  (t/selection
+   (if (zero? level) "Cantrip" (str "Level " level " Spell"))
+   (spell-options (get-in sl/spell-lists [class-key level]) level spellcasting-ability)
+   num
+   num))
+
+(defn spellcasting-template [class-key level-factor cantrips-known ability]
+  (let [cantrip-selections (reduce
+                            (fn [m [k v]]
+                              (assoc m k [(spell-selection class-key 0 ability v)]))
+                            {}
+                            cantrips-known)]
+    {:selections cantrip-selections}))
+
 (def wizard-cantrip-options
   (map
    (fn [key]
@@ -180,14 +597,6 @@
 
 (def wizard-spells-1
   [:mage-armor :magic-missile :magic-mouth :shield])
-
-(defn spell-options [spells level spellcasting-ability]
-  (map
-   (fn [key]
-     {::t/key key
-      ::t/name (key-to-name key)
-      ::t/modifiers [(modifiers/spells-known level key spellcasting-ability)]})
-   spells))
 
 (def wizard-spell-options-1
   (map

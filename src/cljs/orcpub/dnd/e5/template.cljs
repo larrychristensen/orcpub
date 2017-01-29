@@ -85,6 +85,26 @@
      :on-click #(roll-hit-points die character-ref path)}
     "Re-Roll"]])
 
+(defn traits-modifiers [traits]
+  (map
+   (fn [{:keys [name description]}]
+     (mod5e/trait name description))
+   traits))
+
+(defn armor-prof-modifiers [armor-proficiencies]
+  (map
+   (fn [armor-kw]
+        (mod5e/armor-proficiency (clojure.core/name armor-kw) armor-kw))
+   armor-proficiencies))
+
+(defn weapon-prof-modifiers [weapon-proficiencies]
+  (map
+   (fn [weapon-kw]
+     (if ({:simple :martial} weapon-kw)
+       (mod5e/weapon-proficiency (str (name weapon-kw) " weapons") weapon-kw)
+       (mod5e/weapon-proficiency (-> weapon-kw opt5e/weapons-map :name) weapon-kw)))
+   weapon-proficiencies))
+
 (defn subrace-option [{:keys [name
                               abilities
                               size
@@ -103,23 +123,13 @@
     (concat
      [(mod5e/subrace name)]
      modifiers
-     (map
-      (fn [armor-kw]
-        (prn "ARMRO KW" armor-kw)
-        (mod5e/armor-proficiency (clojure.core/name armor-kw) armor-kw))
-      armor-proficiencies)
-     (map
-      (fn [weapon-nm]
-        (mod5e/weapon-proficiency weapon-nm (common/name-to-kw weapon-nm)))
-      weapon-proficiencies)
+     (armor-prof-modifiers armor-proficiencies)
+     (weapon-prof-modifiers weapon-proficiencies)
      (map
       (fn [[k v]]
         (mod5e/ability k v))
       abilities)
-     (map
-      (fn [{:keys [name description]}]
-        (mod5e/trait name description))
-      traits))))]
+     (traits-modifiers traits))))]
     option))
 
 (defn ability-modifiers [abilities]
@@ -162,25 +172,12 @@
         (mod5e/ability k v))
       abilities)
      modifiers
-     (map
-      (fn [{:keys [name description]}]
-        (mod5e/trait name description))
-      traits)
-     (map
-      (fn [armor-kw]
-        (prn "ARMRO KW" armor-kw)
-        (mod5e/armor-proficiency (clojure.core/name armor-kw) armor-kw))
-      armor-proficiencies)
-     (map
-      (fn [weapon-nm]
-        (mod5e/weapon-proficiency weapon-nm (common/name-to-kw weapon-nm)))
-      weapon-proficiencies)))))
+     (traits-modifiers traits)
+     (armor-prof-modifiers armor-proficiencies)
+     (weapon-prof-modifiers weapon-proficiencies)))))
 
 (def elf-weapon-training-mods
-  [(mod5e/weapon-proficiency "longsword" :longsword)
-   (mod5e/weapon-proficiency "shortword" :shortsword)
-   (mod5e/weapon-proficiency "shortbow" :shortbow)
-   (mod5e/weapon-proficiency "longbow" :longbow)])
+  (weapon-prof-modifiers [:longsword :shortsword :shortbow :longbow]))
 
 (def elf-option
   (race-option
@@ -219,7 +216,7 @@
     :size :medium
     :speed 25,
     :languages ["Dwarvish" "Common"]
-    :weapon-proficiencies ["handaxe" "battleaxe" "light hammer" "warhammer"]
+    :weapon-proficiencies [:handaxe :battleaxe :light-hammer :warhammer]
     :traits [{:name "Dwarven Resilience",
               :description "You have advantage on saving throws against poison, and you have resistance against poison damage"},
              {:name "Stonecunning"
@@ -466,42 +463,195 @@ to the extra damage of the critical hit."}]}))
      nil
      [(mod5e/max-hit-points (die-mean die))])]))
 
+(defn subclass-option [{:keys [name
+                               traits]}]
+  (t/option
+   name
+   (common/name-to-kw name)
+   []
+   (traits-modifiers traits)))
+
+(defn level-option [{:keys [name
+                            hit-die
+                            profs
+                            levels
+                            ability-increase-levels
+                            subclass-title
+                            subclass-level
+                            subclasses]}
+                    kw
+                    character-ref
+                    spellcasting-template
+                    i]
+  (let [ability-inc-set (set ability-increase-levels)]
+    (t/option
+     (str i)
+     (keyword (str i))
+     (concat
+      (some-> levels (get i) :selections)
+      (some-> spellcasting-template :selections (get i))
+      (if (= i subclass-level)
+        [(t/selection-with-key
+          subclass-title
+          :subclass
+          (map
+           subclass-option
+           subclasses))])
+      (if (ability-inc-set i)
+        [(opt5e/ability-score-improvement-selection)])
+      (if (> i 1)
+        [(hit-points-selection character-ref hit-die)]))
+     (concat
+      (some-> levels (get i) :modifiers)
+      (if (= i 1) [(mod5e/max-hit-points hit-die)])
+      [(mod5e/level kw name i)]))))
+
+
+(defn equipment-option [[k num]]
+  (let [equipment (opt5e/equipment-map k)]
+    (if (:values equipment)
+      (t/option
+       (:name equipment)
+       k
+       [(t/selection
+         (:name equipment)
+         (map
+          equipment-option
+          (zipmap (map :key (:values equipment)) (repeat num))))]
+       [])
+      (t/option
+       (-> k opt5e/equipment-map :name (str (if (> num 1) (str " (" num ")") "")))
+       k
+       []
+       [(mod5e/equipment k num)]))))
+
+(defn tool-prof-selection [tool-options]
+  (t/selection
+   "Tool Proficiencies"
+   (map
+    (fn [[k num]]
+      (let [tool (opt5e/tools-map k)]
+        (if (:values tool)
+          (t/option
+           (:name tool)
+           k
+           [(t/selection
+             (:name tool)
+             (map
+              (fn [{:keys [name key]}]
+                (t/option
+                 name
+                 key
+                 []
+                 [(mod5e/tool-proficiency name key)]))
+              (:values tool))
+             num
+             num)]
+           [])
+          (t/option
+           (:name tool)
+           (:key tool)
+           []
+           [(mod5e/tool-proficiency (:name tool) (:key tool))]))))
+    tool-options)))
+
+(defn weapon-option [[k num]]
+  (case k
+    :simple (t/option
+             "Any Simple Weapon"
+             :any-simple
+             [(t/selection
+               "Simple Weapon"
+               (opt5e/weapon-options (opt5e/simple-weapons opt5e/weapons)))]
+             [])
+    :martial (t/option
+              "Any Martial Weapon"
+              :any-martial
+              [(t/selection
+                "Martial Weapon"
+                (opt5e/weapon-options (opt5e/martial-weapons opt5e/weapons)))]
+              [])
+    (t/option
+     (-> k opt5e/weapons-map :name (str (if (> num 1) (str " (" num ")") "")))
+     k
+     []
+     [(mod5e/weapon k num)])))
+
 (defn class-option [{:keys [name
                             hit-die
                             profs
                             levels
-                            ability-increase-levels]}
+                            ability-increase-levels
+                            subclass-title
+                            subclass-level
+                            subclasses
+                            selections
+                            weapon-choices
+                            weapons
+                            equipment
+                            equipment-choices
+                            armor
+                            spellcasting]
+                     :as cls}
                     character-ref]
   (let [kw (common/name-to-kw name)
-        {skill-num :choose options :options} (:skill-options profs)
-        skill-kws (keys options)
-        ability-inc-set (set ability-increase-levels)]
+        {:keys [armor weapon save skill-options tool-options]} profs
+        {skill-num :choose options :options} skill-options
+        skill-kws (if (:any options) (map :key opt5e/skills) (keys options))
+        armor-profs (keys armor)
+        weapon-profs (keys weapon)
+        save-profs (keys save)
+        {:keys [cantrips-known level-factor ability]} spellcasting
+        spellcasting-template (opt5e/spellcasting-template
+                               kw level-factor cantrips-known ability)]
     (t/option
      name
      kw
-     [(opt5e/skill-selection skill-kws skill-num)
-      (t/sequential-selection
-       "Levels"
-       (fn [selection options current-values]
-         {::entity/key (-> current-values count inc str keyword)})
-       (vec
-        (map
-         (fn [i]
-           (t/option
-            (str i)
-            (keyword (str i))
-            (concat
-             (some-> levels (get i) :selections)
-             (if (ability-inc-set i)
-               [(opt5e/ability-score-improvement-selection)])
-             (if (> i 1)
-               [(hit-points-selection character-ref hit-die)]))
-            (concat
-             (some-> levels (get i) :modifiers)
-             (if (= i 1) [(mod5e/max-hit-points hit-die)])
-             [(mod5e/level kw name i)])))
-         (range 1 21))))]
-     [])))
+     (concat
+      selections
+      [(tool-prof-selection tool-options)]
+      (map
+       (fn [{:keys [name options]}]
+         (t/selection
+          name
+          (mapv
+           weapon-option
+           options)))
+       weapon-choices)
+      (map
+       (fn [{:keys [name options]}]
+         (t/selection
+          name
+          (mapv
+           equipment-option
+           options)))
+       equipment-choices)
+      [(opt5e/skill-selection skill-kws skill-num)
+       (t/sequential-selection
+        "Levels"
+        (fn [selection options current-values]
+          {::entity/key (-> current-values count inc str keyword)})
+        (vec
+         (map
+          (partial level-option cls kw character-ref spellcasting-template)
+          (range 1 21))))])
+     (concat
+      (armor-prof-modifiers armor-profs)
+      (weapon-prof-modifiers weapon-profs)
+      (mapv
+       (fn [[k num]]
+         (mod5e/weapon k num))
+       weapons)
+      (mapv
+       (fn [[k num]]
+         (mod5e/armor k num))
+       armor)
+      (mapv
+       (fn [[k num]]
+         (mod5e/equipment k num))
+       equipment)
+      [(apply mod5e/saving-throws save-profs)]))))
+
 
 (defn barbarian-option [character-ref]
   (class-option
@@ -512,6 +662,14 @@ to the extra damage of the critical hit."}]}))
             :weapon {:simple true :martial true}
             :save {:str true :con true}
             :skill-options {:choose 2 :options {:animal-handling true :athletics true :intimidation true :nature true :perception true :survival true}}}
+    :weapon-choices [{:name "Martial Weapon"
+                      :options {:greataxe 1
+                                :martial 1}}
+                     {:name "Simple Weapon"
+                      :options {:handaxe 2
+                                :simple 1}}]
+    :weapons {:javelin 4}
+    :equipment {:explorers-pack 1}
     :traits [{:name "Rage"
               :description "In battle, you fight with primal ferocity. On your turn, 
 you can enter a rage as a bonus action.
@@ -673,6 +831,161 @@ creature."}]}
                             :level 14}]}]}
    character-ref))
 
+(defn bard-option [character-ref]
+  (class-option
+   {:name "Bard"
+    :hit-die 8
+    :ability-increase-levels [4 8 12 16 19]
+    :profs {:armor {:light true}
+            :weapon {:simple true :crossbow--hand true :longsword true :rapier true :shortsword true}
+            :save {:dex true :cha true}
+            :skill-options {:choose 3 :options {:any true}}
+            :tool-options {:musical-instrument 3}}
+    :weapon-choices [{:name "Weapon"
+                      :options {:rapier 1
+                                :longsword 1
+                                :simple 1}}]
+    :weapons {:dagger 1}
+    :equipment-choices [{:name "Equipment Pack"
+                         :options {:diplomats-pack 1
+                                   :entertainers-pack 1}}
+                        {:name "Musical Instrument"
+                         :options {:lute 1
+                                   :musical-instrument 1}}]
+    :armor {:leather 1}
+    :spellcaster true
+    :spellcasting {:level-factor 1
+                   :cantrips-known {1 2 4 1 10 1}
+                   :ability :cha}
+    :traits [{:name "Bardic Inspiration"
+              :description "You can inspire others through stirring words or 
+music. To do so, you use a bonus action on your turn 
+to choose one creature other than yourself within 60 
+feet of you who can hear you. That creature gains 
+one Bardic Inspiration die, a d6.
+Once within the next 10 minutes, the creature can 
+roll the die and add the number rolled to one ability 
+check, attack roll, or saving throw it makes. The 
+creature can wait until after it rolls the d20 before 
+deciding to use the Bardic Inspiration die, but must 
+decide before the GM says whether the roll succeeds 
+or fails. Once the Bardic Inspiration die is rolled, it is 
+lost. A creature can have only one Bardic Inspiration 
+die at a time.
+You can use this feature a number of times equal 
+to your Charisma modifier (a minimum of once). You 
+regain any expended uses when you finish a long 
+rest.
+Your Bardic Inspiration die changes when you 
+reach certain levels in this class. The die becomes a 
+d8 at 5th level, a d10 at 10th level, and a d12 at 15th 
+level."}
+             {:name "Jack of All Trades"
+              :level 2
+              :description "Starting at 2nd level, you can add half your 
+proficiency bonus, rounded down, to any ability 
+check you make that doesn't already include your 
+proficiency bonus."}
+             {:name "Song of Rest"
+              :level 2
+              :description "Beginning at 2nd level, you can use soothing music 
+or oration to help revitalize your wounded allies 
+during a short rest. If you or any friendly creatures 
+who can hear your performance regain hit points at 
+the end of the short rest by spending one or more 
+Hit Dice, each of those creatures regains an extra 
+1d6 hit points.
+The extra hit points increase when you reach 
+certain levels in this class: to 1d8 at 9th level, to 
+1d10 at 13th level, and to 1d12 at 17th level."}
+             {:name "Expertise"
+              :description "At 3rd level, choose two of your skill proficiencies. 
+Your proficiency bonus is doubled for any ability 
+check you make that uses either of the chosen 
+proficiencies.
+At 10th level, you can choose another two skill 
+proficiencies to gain this benefit."}
+             {:name "Font of Inspiration"
+              :level 5
+              :description "Beginning when you reach 5th level, you regain all of 
+your expended uses of Bardic Inspiration when you 
+finish a short or long rest"}
+             {:name "Countercharm"
+              :level 6
+              :description "At 6th level, you gain the ability to use musical notes 
+or words of power to disrupt mind-influencing 
+effects. As an action, you can start a performance 
+that lasts until the end of your next turn. During that 
+time, you and any friendly creatures within 30 feet 
+of you have advantage on saving throws against 
+being frightened or charmed. A creature must be 
+able to hear you to gain this benefit. The 
+performance ends early if you are incapacitated or 
+silenced or if you voluntarily end it (no action 
+required)."}
+             {:name "Magical Secrets"
+              :level 10
+              :description "By 10th level, you have plundered magical 
+knowledge from a wide spectrum of disciplines. 
+Choose two spells from any class, including this one. 
+A spell you choose must be of a level you can cast, as 
+shown on the Bard table, or a cantrip.
+The chosen spells count as bard spells for you and 
+are included in the number in the Spells Known 
+column of the Bard table.
+You learn two additional spells from any class at 
+14th level and again at 18th level."}
+             {:name "Superior Inspiration"
+              :level 20
+              :description "At 20th level, when you roll initiative and have no 
+uses of Bardic Inspiration left, you regain one use."}]
+    :subclass-level 3
+    :subclass-title "Bard College"
+    :subclasses [{:name "College of Lore"
+                  :profs {:skill-options {:choose 3 :options {:any true}}}
+                  :traits [{:name "Cutting Wounds"
+                            :level 3
+                            :description "Also at 3rd level, you learn how to use your wit to 
+distract, confuse, and otherwise sap the confidence 
+and competence of others. When a creature that you 
+can see within 60 feet of you makes an attack roll, an 
+ability check, or a damage roll, you can use your 
+reaction to expend one of your uses of Bardic 
+Inspiration, rolling a Bardic Inspiration die and 
+subtracting the number rolled from the creature's 
+roll. You can choose to use this feature after the 
+creature makes its roll, but before the GM 
+determines whether the attack roll or ability check 
+succeeds or fails, or before the creature deals its 
+damage. The creature is immune if it can't hear you 
+or if it's immune to being charmed."}
+                           {:name "Additional Magical Secrets"
+                            :level 6
+                            :description "At 6th level, you learn two spells of your choice from 
+any class. A spell you choose must be of a level you 
+can cast, as shown on the Bard table, or a cantrip. 
+The chosen spells count as bard spells for you but don't count against the number of bard spells you 
+know."}
+                           {:name "Peerless Skill"
+                            :level 14
+                            :description "Starting at 14th level, when you make an ability 
+check, you can expend one use of Bardic Inspiration. 
+Roll a Bardic Inspiration die and add the number 
+rolled to your ability check. You can choose to do so 
+after you roll the die for the ability check, but before 
+the GM tells you whether you succeed or fail."}]}
+                 {:name "College of Valor"
+                  :profs {:armor {:medium true
+                                  :shields true}
+                          :weapon {:martial true}}
+                  :traits [{:name "Combat Inspiration"
+                            :level 3}
+                           {:name "Extra Attack"
+                            :level 6}
+                           {:name "Battle Magic"
+                            :level 14}]}]}
+   character-ref))
+
 (defn reroll-abilities [character-ref]
   (fn []
     (swap! character-ref
@@ -734,6 +1047,7 @@ creature."}]}
                            (some #(if (-> % current-classes not) %)))
          ::entity/options {:levels [{::entity/key :1}]}}))
     [(barbarian-option character-ref)
+     (bard-option character-ref)
      (t/option
       "Wizard"
       :wizard
