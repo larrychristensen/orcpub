@@ -623,10 +623,14 @@
   (case known-mode
     :schedule (reduce
                (fn [m [k v]]
-                 (let []
-                   (assoc m k [(spell-selection class-key 0 ability v)])))
+                 (let [slots (total-slots k level-factor)]
+                   (assoc m k (mapv
+                               (fn [[lvl _]]
+                                 (spell-selection class-key lvl ability v))
+                               slots))))
                {}
-               spells-known)))
+               spells-known)
+    {}))
 
 (defn spellcasting-template [{:keys [class-key
                                      level-factor
