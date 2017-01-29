@@ -576,13 +576,67 @@
    num
    num))
 
-(defn spellcasting-template [class-key level-factor cantrips-known ability]
-  (let [cantrip-selections (reduce
-                            (fn [m [k v]]
-                              (assoc m k [(spell-selection class-key 0 ability v)]))
-                            {}
-                            cantrips-known)]
-    {:selections cantrip-selections}))
+(defn spell-slot-schedule [level-factor]
+  (case level-factor
+    1 {1 {1 2}
+       2 {1 1}
+       3 {1 1
+          2 2}
+       4 {2 1}
+       5 {3 2}
+       6 {3 1}
+       7 {4 1}
+       8 {4 1}
+       9 {4 1
+          5 1}
+       10 {5 1}
+       11 {6 1}
+       13 {7 1}
+       15 {8 1}
+       17 {9 1}
+       18 {5 1}
+       19 {6 1}
+       20 {7 1}}))
+
+(defn total-slots [level level-factor]
+  (let [schedule (spell-slot-schedule level-factor)]
+    (reduce
+     (fn [m lvl]
+       (merge-with + m (schedule lvl)))
+     {}
+     (range 1 (inc level)))))
+
+(defn cantrip-selections [class-key ability cantrips-known]
+  (reduce
+   (fn [m [k v]]
+     (assoc m k [(spell-selection class-key 0 ability v)]))
+   {}
+   cantrips-known))
+
+(total-slots 10 1)
+
+(defn spells-known-selections [{:keys [class-key
+                                       level-factor
+                                       spells-known
+                                       known-mode
+                                       ability :as cfg]}]
+  (case known-mode
+    :schedule (reduce
+               (fn [m [k v]]
+                 (let []
+                   (assoc m k [(spell-selection class-key 0 ability v)])))
+               {}
+               spells-known)))
+
+(defn spellcasting-template [{:keys [class-key
+                                     level-factor
+                                     cantrips-known
+                                     spells-known
+                                     known-mode
+                                     ability :as cfg]}]
+  {:selections (concat
+                (cantrip-selections class-key ability cantrips-known)
+                (spells-known-selections cfg))})
 
 (def wizard-cantrip-options
   (map
