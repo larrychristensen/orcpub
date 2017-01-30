@@ -569,7 +569,6 @@
    spells))
 
 (defn spell-selection [class-key level spellcasting-ability num]
-  (prn "CLASS KEY" class-key level spellcasting-ability)
   (t/selection
    (if (zero? level) "Cantrip" (str "Level " level " Spell"))
    (spell-options (get-in sl/spell-lists [class-key level]) level spellcasting-ability)
