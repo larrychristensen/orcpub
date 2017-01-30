@@ -163,8 +163,10 @@
          (doall
           (map
            (fn [selection]
-             ^{:key (::t/key (if (fn? selection) (selection built-char) selection))}
-             [builder-selector new-path option-paths selection built-char raw-char])
+             (let [selection (if (fn? selection) (selection built-char) selection)]
+               (if selection
+                 ^{:key (::t/key selection)}
+                 [builder-selector new-path option-paths selection built-char raw-char])))
            selections))]])]))
 
 (def builder-selector-style)
@@ -272,18 +274,20 @@
 
 (defn builder-selector [path option-paths selection built-char raw-char]
   (let [selection (if (fn? selection) (selection built-char) selection)]
-    ^{:key (::t/name selection)} [:div.builder-selector
-     [:h2.builder-selector-header (::t/name selection)]
-     [:div
-      (let [simple-options? 
-            (or (::t/simple? selection)
-                (not-any? #(or (seq (::t/selections %))
-                               (some ::mod/name (::t/modifiers %))
-                               (::t/ui-fn %))
-                          (::t/options selection)))]
-        (if simple-options?
-          [dropdown-selector path option-paths selection raw-char]
-          [list-selector path option-paths selection built-char raw-char]))]]))
+    (if selection
+      ^{:key (::t/name selection)}
+     [:div.builder-selector
+      [:h2.builder-selector-header (::t/name selection)]
+      [:div
+       (let [simple-options? 
+             (or (::t/simple? selection)
+                 (not-any? #(or (seq (::t/selections %))
+                                (some ::mod/name (::t/modifiers %))
+                                (::t/ui-fn %))
+                           (::t/options selection)))]
+         (if simple-options?
+           [dropdown-selector path option-paths selection raw-char]
+           [list-selector path option-paths selection built-char raw-char]))]])))
 
 (def content-style
   {:width 1440})

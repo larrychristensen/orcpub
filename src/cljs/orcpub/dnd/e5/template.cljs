@@ -100,7 +100,7 @@
 (defn weapon-prof-modifiers [weapon-proficiencies]
   (map
    (fn [weapon-kw]
-     (if ({:simple :martial} weapon-kw)
+     (if (#{:simple :martial} weapon-kw)
        (mod5e/weapon-proficiency (str (name weapon-kw) " weapons") weapon-kw)
        (mod5e/weapon-proficiency (-> weapon-kw opt5e/weapons-map :name) weapon-kw)))
    weapon-proficiencies))
@@ -114,7 +114,8 @@
                               weapon-proficiencies
                               modifiers
                               selections
-                              traits]}]
+                              traits]}
+                      character-ref]
   (let [option (t/option
    name
    (common/name-to-kw name)
@@ -463,69 +464,6 @@ to the extra damage of the critical hit."}]}))
      nil
      [(mod5e/max-hit-points (die-mean die))])]))
 
-(defn subclass-option [{:keys [name
-                               traits]}]
-  (t/option
-   name
-   (common/name-to-kw name)
-   []
-   (traits-modifiers traits)))
-
-
-(defn level-option [{:keys [name
-                            hit-die
-                            profs
-                            levels
-                            ability-increase-levels
-                            subclass-title
-                            subclass-level
-                            subclasses]}
-                    kw
-                    character-ref
-                    spellcasting-template
-                    i]
-  (let [ability-inc-set (set ability-increase-levels)]
-    (t/option
-     (str i)
-     (keyword (str i))
-     (concat
-      (some-> levels (get i) :selections)
-      (some-> spellcasting-template :selections (get i))
-      (if (= i subclass-level)
-        [(t/selection-with-key
-          subclass-title
-          :subclass
-          (map
-           subclass-option
-           subclasses))])
-      (if (ability-inc-set i)
-        [(opt5e/ability-score-improvement-selection)])
-      (if (> i 1)
-        [(hit-points-selection character-ref hit-die)]))
-     (concat
-      (some-> levels (get i) :modifiers)
-      (if (= i 1) [(mod5e/max-hit-points hit-die)])
-      [(mod5e/level kw name i)]))))
-
-
-(defn equipment-option [[k num]]
-  (let [equipment (opt5e/equipment-map k)]
-    (if (:values equipment)
-      (t/option
-       (:name equipment)
-       k
-       [(t/selection
-         (:name equipment)
-         (map
-          equipment-option
-          (zipmap (map :key (:values equipment)) (repeat num))))]
-       [])
-      (t/option
-       (-> k opt5e/equipment-map :name (str (if (> num 1) (str " (" num ")") "")))
-       k
-       []
-       [(mod5e/equipment k num)]))))
-
 (defn tool-prof-selection [tool-options]
   (t/selection
    "Tool Proficiencies"
@@ -556,6 +494,84 @@ to the extra damage of the critical hit."}]}))
            [(mod5e/tool-proficiency (:name tool) (:key tool))]))))
     tool-options)))
 
+(defn subclass-option [{:keys [name
+                               profs
+                               selections
+                               spellcasting]
+                        :as cls}
+                       character-ref]
+  (let [kw (common/name-to-kw name)
+        {:keys [armor weapon save skill-options tool-options]} profs
+        {skill-num :choose options :options} skill-options
+        skill-kws (if (:any options) (map :key opt5e/skills) (keys options))
+        armor-profs (keys armor)
+        weapon-profs (keys weapon)
+        spellcasting-template (opt5e/spellcasting-template (assoc spellcasting :class-key kw))]
+    (t/option
+     name
+     kw
+     (concat
+      selections
+      (if (seq tool-options) [(tool-prof-selection tool-options)])
+      (if (seq skill-kws) [(opt5e/skill-selection skill-kws skill-num)]))
+     (concat
+      (armor-prof-modifiers armor-profs)
+      (weapon-prof-modifiers weapon-profs)))))
+
+(defn level-option [{:keys [name
+                            hit-die
+                            profs
+                            levels
+                            ability-increase-levels
+                            subclass-title
+                            subclass-level
+                            subclasses]}
+                    kw
+                    character-ref
+                    spellcasting-template
+                    i]
+  (let [ability-inc-set (set ability-increase-levels)]
+    (t/option
+     (str i)
+     (keyword (str i))
+     (concat
+      (some-> levels (get i) :selections)
+      (some-> spellcasting-template :selections (get i))
+      (if (= i subclass-level)
+        [(t/selection-with-key
+          subclass-title
+          :subclass
+          (map
+           #(subclass-option % character-ref)
+           subclasses))])
+      (if (ability-inc-set i)
+        [(opt5e/ability-score-improvement-selection)])
+      (if (> i 1)
+        [(hit-points-selection character-ref hit-die)]))
+     (concat
+      (some-> levels (get i) :modifiers)
+      (if (= i 1) [(mod5e/max-hit-points hit-die)])
+      [(mod5e/level kw name i)]))))
+
+
+(defn equipment-option [[k num]]
+  (let [equipment (opt5e/equipment-map k)]
+    (if (:values equipment)
+      (t/option
+       (:name equipment)
+       k
+       [(t/selection
+         (:name equipment)
+         (map
+          equipment-option
+          (zipmap (map :key (:values equipment)) (repeat num))))]
+       [])
+      (t/option
+       (-> k opt5e/equipment-map :name (str (if (> num 1) (str " (" num ")") "")))
+       k
+       []
+       [(mod5e/equipment k num)]))))
+
 (defn weapon-option [[k num]]
   (case k
     :simple (t/option
@@ -577,6 +593,22 @@ to the extra damage of the critical hit."}]}))
      k
      []
      [(mod5e/weapon k num)])))
+
+(defn class-options [option-fn choices]
+  (map
+   (fn [{:keys [name options]}]
+     (t/selection
+      name
+      (mapv
+       option-fn
+       options)))
+   choices))
+
+(defn class-weapon-options [weapon-choices]
+  (class-options weapon-option weapon-choices))
+
+(defn class-equipment-options [equipment-choices]
+  (class-options equipment-option equipment-choices))
 
 (defn class-option [{:keys [name
                             hit-die
@@ -608,23 +640,9 @@ to the extra damage of the critical hit."}]}))
      kw
      (concat
       selections
-      [(tool-prof-selection tool-options)]
-      (map
-       (fn [{:keys [name options]}]
-         (t/selection
-          name
-          (mapv
-           weapon-option
-           options)))
-       weapon-choices)
-      (map
-       (fn [{:keys [name options]}]
-         (t/selection
-          name
-          (mapv
-           equipment-option
-           options)))
-       equipment-choices)
+      (if (seq tool-options) [(tool-prof-selection tool-options)])
+      (class-weapon-options weapon-choices)
+      (class-equipment-options equipment-choices)
       [(opt5e/skill-selection skill-kws skill-num)
        (t/sequential-selection
         "Levels"
@@ -875,7 +893,10 @@ creature."}]}
                    :ability :cha}
     :levels {2 {:modifiers [(mod/modifier ?default-skill-bonus (int (/ ?prof-bonus 2)))]}
              3 {:selections [opt5e/expertise-selection]}
-             10 {:selections [opt5e/expertise-selection]}}
+             10 {:selections [opt5e/expertise-selection
+                              (opt5e/raw-bard-magical-secrets 10)]}
+             14 {:selections [(opt5e/raw-bard-magical-secrets 14)]}
+             18 {:selections [(opt5e/raw-bard-magical-secrets 18)]}}
     :traits [{:name "Bardic Inspiration"
               :description "You can inspire others through stirring words or 
 music. To do so, you use a bonus action on your turn 
@@ -962,6 +983,7 @@ uses of Bardic Inspiration left, you regain one use."}]
     :subclass-title "Bard College"
     :subclasses [{:name "College of Lore"
                   :profs {:skill-options {:choose 3 :options {:any true}}}
+                  :selections [(opt5e/bard-magical-secrets 6)]
                   :traits [{:name "Cutting Wounds"
                             :level 3
                             :description "Also at 3rd level, you learn how to use your wit to 

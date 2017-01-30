@@ -573,13 +573,15 @@
 (defn spell-level-title [level]
   (if (zero? level) "Cantrip" (str "Level " level " Spell")))
 
-(defn spell-selection [class-key level spellcasting-ability num]
-  (prn "CLASS KEY" class-key level)
-  (t/selection
-   (spell-level-title level)
-   (spell-options (get-in sl/spell-lists [class-key level]) level spellcasting-ability)
-   num
-   num))
+(defn spell-selection
+  ([class-key level spellcasting-ability num]
+   (spell-selection class-key level (get-in sl/spell-lists [class-key level]) spellcasting-ability num))
+  ([class-key level spell-keys spellcasting-ability num]
+   (t/selection
+    (spell-level-title level)
+    (spell-options spell-keys level spellcasting-ability)
+    num
+    num)))
 
 (defn spell-slot-schedule [level-factor]
   (case level-factor
@@ -610,6 +612,34 @@
        (merge-with + m (schedule lvl)))
      {}
      (range 1 (inc level)))))
+
+(defn raw-bard-magical-secrets [level]
+  (let [spell-slots (total-slots level 1)]
+    (t/selection
+     "Magical Secrets"
+     (map
+      (fn [[lvl _]]
+        (t/option
+         (spell-level-title lvl)
+         (keyword (str lvl))
+         [(spell-selection
+           :bard
+           lvl
+           (reduce-kv
+            (fn [s _ lvls]
+              (clojure.set/union s (lvls lvl)))
+            #{}
+            sl/spell-lists)
+           :cha
+           1)]
+         []))
+      spell-slots))))
+
+(defn bard-magical-secrets [min-level]
+  (fn [built-char]
+    (let [bard-levels (-> (es/entity-val built-char :levels) :bard :class-level)]
+      (if (>= bard-levels min-level)
+        (raw-bard-magical-secrets min-level)))))
 
 (defn cantrip-selections [class-key ability cantrips-known]
   (reduce
