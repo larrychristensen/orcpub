@@ -6,3 +6,6 @@
       (clojure.string/replace #"'" "")
       (clojure.string/replace #"\W" "-")
       keyword))
+
+(defn map-by-key [values]
+  (zipmap (map :key values) values))

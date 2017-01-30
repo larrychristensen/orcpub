@@ -65,6 +65,8 @@
               :key :survival
               :ability :wis}])
 
+(def skills-map (common/map-by-key skills))
+
 (def musical-instruments
   [{:key :bagpipes
     :name "Bagpipes"}
@@ -568,9 +570,13 @@
       [(modifiers/spells-known level key spellcasting-ability)]))
    spells))
 
+(defn spell-level-title [level]
+  (if (zero? level) "Cantrip" (str "Level " level " Spell")))
+
 (defn spell-selection [class-key level spellcasting-ability num]
+  (prn "CLASS KEY" class-key level)
   (t/selection
-   (if (zero? level) "Cantrip" (str "Level " level " Spell"))
+   (spell-level-title level)
    (spell-options (get-in sl/spell-lists [class-key level]) level spellcasting-ability)
    num
    num))
@@ -618,15 +624,23 @@
                                        level-factor
                                        spells-known
                                        known-mode
-                                       ability :as cfg]}]
+                                       ability] :as cfg}]
   (case known-mode
     :schedule (reduce
                (fn [m [k v]]
                  (let [slots (total-slots k level-factor)]
-                   (assoc m k (mapv
-                               (fn [[lvl _]]
-                                 (spell-selection class-key lvl ability v))
-                               slots))))
+                   (assoc m k (if (> (count slots) 1)
+                                [(t/selection
+                                  "Spell"
+                                  (mapv
+                                   (fn [[lvl _]]
+                                     (t/option
+                                      (spell-level-title lvl)
+                                      (keyword (str lvl))
+                                      [(spell-selection class-key lvl ability v)]
+                                      []))
+                                   slots))]
+                                [(spell-selection class-key 1 ability v)]))))
                {}
                spells-known)
     {}))
@@ -636,10 +650,14 @@
                                      cantrips-known
                                      spells-known
                                      known-mode
-                                     ability :as cfg]}]
-  {:selections (concat
-                (cantrip-selections class-key ability cantrips-known)
-                (spells-known-selections cfg))})
+                                     ability] :as cfg}]
+  (let [spell-selections (spells-known-selections cfg)
+        cantrip-selections (cantrip-selections class-key ability cantrips-known)]
+    #?(:cljs (js/console.log "SPELL_SEL" spell-selections cantrip-selections))
+    {:selections (merge-with
+                  concat
+                  cantrip-selections
+                  spell-selections)}))
 
 (def wizard-cantrip-options
   (map
@@ -966,14 +984,11 @@
    num
    num))
 
-(defn expertise-selection []
-  (t/selection
-   "Expertise"
-   [(t/option
-     "Two Skills"
-     :two-skills
-     [(t/selection
-       "Skills"
+(def expertise-selection
+  (fn [built-char]
+    (let [skill-profs (es/entity-val built-char :skill-profs)]
+      (t/selection
+       "Skill Expertise"
        (map
         (fn [skill]
           (t/option
@@ -981,9 +996,17 @@
            (:key skill)
            nil
            [(modifiers/skill-expertise (:key skill))]))
-        skills)
+        (filter #((:key %) skill-profs) skills))
        2
-       2)]
+       2))))
+
+(def rogue-expertise-selection
+  (t/selection
+   "Expertise"
+   [(t/option
+     "Two Skills"
+     :two-skills
+     [expertise-selection]
      [])
     (t/option
      "One Skill/Theives Tools"

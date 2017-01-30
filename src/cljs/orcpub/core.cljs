@@ -163,7 +163,7 @@
          (doall
           (map
            (fn [selection]
-             ^{:key (::t/key selection)}
+             ^{:key (::t/key (if (fn? selection) (selection built-char) selection))}
              [builder-selector new-path option-paths selection built-char raw-char])
            selections))]])]))
 
@@ -271,19 +271,19 @@
        (add-option-button selection raw-char (conj path key) new-item-fn))]))
 
 (defn builder-selector [path option-paths selection built-char raw-char]
-  ^{:key (::t/name selection)}
-  [:div.builder-selector
-   [:h2.builder-selector-header (::t/name selection)]
-   [:div
-    (let [simple-options? 
-          (or (::t/simple? selection)
-              (not-any? #(or (seq (::t/selections %))
-                             (some ::mod/name (::t/modifiers %))
-                             (::t/ui-fn %))
-                        (::t/options selection)))]
-      (if simple-options?
-        [dropdown-selector path option-paths selection raw-char]
-        [list-selector path option-paths selection built-char raw-char]))]])
+  (let [selection (if (fn? selection) (selection built-char) selection)]
+    ^{:key (::t/name selection)} [:div.builder-selector
+     [:h2.builder-selector-header (::t/name selection)]
+     [:div
+      (let [simple-options? 
+            (or (::t/simple? selection)
+                (not-any? #(or (seq (::t/selections %))
+                               (some ::mod/name (::t/modifiers %))
+                               (::t/ui-fn %))
+                          (::t/options selection)))]
+        (if simple-options?
+          [dropdown-selector path option-paths selection raw-char]
+          [list-selector path option-paths selection built-char raw-char]))]]))
 
 (def content-style
   {:width 1440})
@@ -507,7 +507,8 @@
               weapon-profs (es/entity-val built-char :weapon-profs)
               armor-profs (es/entity-val built-char :armor-profs)
               resistances (es/entity-val built-char :resistances)
-              languages (es/entity-val built-char :languages)]
+              languages (es/entity-val built-char :languages)
+              ability-bonuses (es/entity-val built-char :ability-bonuses)]
           [:div {:style {:width "500px"}}
            [:div {:style {:font-size "24px"
                           :font-weight 600
@@ -529,17 +530,24 @@
             [:div
              [:img {:src "image/barbarian-girl.png"
                     :style {:width "267px"}}]
-             (abilities-radar 187 (es/entity-val built-char :abilities) (es/entity-val built-char :ability-bonuses))]
+             (abilities-radar 187 (es/entity-val built-char :abilities) ability-bonuses)]
             [:div {:style {:width "250px"}}
              (display-section "Armor Class" "fa-shield" (es/entity-val built-char :armor-class))
              (display-section "Hit Points" "fa-crosshairs" (es/entity-val built-char :max-hit-points))
              (display-section "Speed" nil (es/entity-val built-char :speed))
              (display-section "Darkvision" "fa-low-vision" (if darkvision (str darkvision " ft.") "--"))
              (display-section "Initiative" nil (mod/bonus-str (es/entity-val built-char :initiative)))
+             (display-section "Proficiency Bonus" nil (mod/bonus-str (es/entity-val built-char :prof-bonus)))
              (display-section "Passive Perception" nil (es/entity-val built-char :passive-perception))
              (list-display-section "Skill Proficiencies" nil
                                    (let [skill-bonuses (es/entity-val built-char :skill-bonuses)]
                                      (map
+                                      (fn [[skill-kw bonus]]
+                                        (str (s/capitalize (name skill-kw)) " " (mod/bonus-str bonus)))
+                                      (filter (fn [[k bonus]]
+                                                (not= bonus (ability-bonuses (:ability (opt5e/skills-map k)))))
+                                              skill-bonuses))
+                                     #_(map
                                       (fn [skill-kw]
                                         (str (s/capitalize (name skill-kw)) " " (mod/bonus-str (skill-bonuses skill-kw))))
                                       skill-profs)))

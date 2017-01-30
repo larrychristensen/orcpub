@@ -471,6 +471,7 @@ to the extra damage of the critical hit."}]}))
    []
    (traits-modifiers traits)))
 
+
 (defn level-option [{:keys [name
                             hit-die
                             profs
@@ -601,7 +602,7 @@ to the extra damage of the critical hit."}]}))
         armor-profs (keys armor)
         weapon-profs (keys weapon)
         save-profs (keys save)
-        spellcasting-template (opt5e/spellcasting-template spellcasting)]
+        spellcasting-template (opt5e/spellcasting-template (assoc spellcasting :class-key kw))]
     (t/option
      name
      kw
@@ -872,6 +873,9 @@ creature."}]}
                                   18 2}
                    :known-mode :schedule
                    :ability :cha}
+    :levels {2 {:modifiers [(mod/modifier ?default-skill-bonus (int (/ ?prof-bonus 2)))]}
+             3 {:selections [opt5e/expertise-selection]}
+             10 {:selections [opt5e/expertise-selection]}}
     :traits [{:name "Bardic Inspiration"
               :description "You can inspire others through stirring words or 
 music. To do so, you use a bonus action on your turn 
@@ -1110,7 +1114,7 @@ the GM tells you whether you succeed or fail."}]}
         [(t/option
           "1"
           :1
-          [(opt5e/expertise-selection)]
+          [opt5e/rogue-expertise-selection]
           [(mod5e/saving-throws :dex :int)
            (mod5e/level :rogue "Rogue" 1)
            (mod5e/max-hit-points 8)])
@@ -1156,12 +1160,14 @@ the GM tells you whether you succeed or fail."}]}
                       ?abilities)
     ?total-levels (apply + (map (fn [[k {l :class-level}]] l) ?levels))
     ?prof-bonus (+ (int (/ (dec ?total-levels) 4)) 2)
+    ?default-skill-bonus 0
     ?skill-prof-bonuses (reduce
                          (fn [m {k :key}]
                            (assoc m k (if (k ?skill-profs)
                                         (if (k ?skill-expertise)
                                           (* 2 ?prof-bonus)
-                                          ?prof-bonus) 0)))
+                                          ?prof-bonus)
+                                        ?default-skill-bonus)))
                          {}
                          opt5e/skills)
     ?skill-bonuses (reduce-kv
