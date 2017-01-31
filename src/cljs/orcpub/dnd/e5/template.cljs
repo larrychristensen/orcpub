@@ -687,6 +687,7 @@ to the extra damage of the critical hit."}]}))
                                 :simple 1}}]
     :weapons {:javelin 4}
     :equipment {:explorers-pack 1}
+    :levels {5 {:modifiers [(mod5e/extra-attack)]}}
     :traits [{:name "Rage"
               :description "In battle, you fight with primal ferocity. On your turn, 
 you can enter a rage as a bonus action.
@@ -893,10 +894,10 @@ creature."}]}
                    :ability :cha}
     :levels {2 {:modifiers [(mod/modifier ?default-skill-bonus (int (/ ?prof-bonus 2)))]}
              3 {:selections [opt5e/expertise-selection]}
-             10 {:selections [opt5e/expertise-selection
-                              (opt5e/raw-bard-magical-secrets 10)]}
-             14 {:selections [(opt5e/raw-bard-magical-secrets 14)]}
-             18 {:selections [(opt5e/raw-bard-magical-secrets 18)]}}
+             10 {:selections (concat [opt5e/expertise-selection]
+                                     (opt5e/raw-bard-magical-secrets 10))}
+             14 {:selections (opt5e/raw-bard-magical-secrets 14)}
+             18 {:selections (opt5e/raw-bard-magical-secrets 18)}}
     :traits [{:name "Bardic Inspiration"
               :description "You can inspire others through stirring words or 
 music. To do so, you use a bonus action on your turn 
@@ -983,7 +984,7 @@ uses of Bardic Inspiration left, you regain one use."}]
     :subclass-title "Bard College"
     :subclasses [{:name "College of Lore"
                   :profs {:skill-options {:choose 3 :options {:any true}}}
-                  :selections [(opt5e/bard-magical-secrets 6)]
+                  :selections (opt5e/bard-magical-secrets 6)
                   :traits [{:name "Cutting Wounds"
                             :level 3
                             :description "Also at 3rd level, you learn how to use your wit to 
@@ -1019,6 +1020,7 @@ the GM tells you whether you succeed or fail."}]}
                   :profs {:armor {:medium true
                                   :shields true}
                           :weapon {:martial true}}
+                  :levels {6 {:modifiers [(mod5e/extra-attack)]}}
                   :traits [{:name "Combat Inspiration"
                             :level 3}
                            {:name "Extra Attack"
@@ -1202,7 +1204,8 @@ the GM tells you whether you succeed or fail."}]}
     ?hit-point-level-bonus (?ability-bonuses :con)
     ?hit-point-level-increases 0
     ?max-hit-points (+ ?hit-point-level-increases (* ?total-levels ?hit-point-level-bonus))
-    ?initiative (?ability-bonuses :dex)}))
+    ?initiative (?ability-bonuses :dex)
+    ?num-attacks 1}))
 
 (defn template [character-ref]
   {::t/base template-base

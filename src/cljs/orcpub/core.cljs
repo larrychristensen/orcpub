@@ -162,11 +162,10 @@
         [:div
          (doall
           (map
-           (fn [selection]
-             (let [selection (if (fn? selection) (selection built-char) selection)]
-               (if selection
-                 ^{:key (::t/key selection)}
-                 [builder-selector new-path option-paths selection built-char raw-char])))
+           (fn [{:keys [::t/prereq-fn ::t/key] :as selection}]
+             (if (or (not prereq-fn) (prereq-fn built-char))
+               ^{:key key}
+               [builder-selector new-path option-paths selection built-char raw-char]))
            selections))]])]))
 
 (def builder-selector-style)
@@ -187,8 +186,11 @@
                                 (fn [options] (conj (vec options) new-item))))))
      :style {:margin-left "5px"}} (str "Add " name)]])
 
-(defn dropdown-selector [path option-paths {:keys [::t/options ::t/min ::t/max ::t/key ::t/name ::t/sequential? ::t/new-item-fn] :as selection} raw-char]
-  (let [change-fn (partial make-dropdown-change-fn path key template raw-char character-ref)]
+(defn dropdown-selector [path option-paths {:keys [::t/options ::t/min ::t/max ::t/key ::t/name ::t/sequential? ::t/new-item-fn] :as selection} built-char raw-char]
+  (let [change-fn (partial make-dropdown-change-fn path key template raw-char character-ref)
+        options (filter (fn [{:keys [::t/prereq-fn]}]
+                          (or (not prereq-fn) (prereq-fn built-char)))
+                        options)]
     [:div
      (if max
        (if (= min max)
@@ -273,21 +275,19 @@
        (add-option-button selection raw-char (conj path key) new-item-fn))]))
 
 (defn builder-selector [path option-paths selection built-char raw-char]
-  (let [selection (if (fn? selection) (selection built-char) selection)]
-    (if selection
-      ^{:key (::t/name selection)}
-     [:div.builder-selector
-      [:h2.builder-selector-header (::t/name selection)]
-      [:div
-       (let [simple-options? 
-             (or (::t/simple? selection)
-                 (not-any? #(or (seq (::t/selections %))
-                                (some ::mod/name (::t/modifiers %))
-                                (::t/ui-fn %))
-                           (::t/options selection)))]
-         (if simple-options?
-           [dropdown-selector path option-paths selection raw-char]
-           [list-selector path option-paths selection built-char raw-char]))]])))
+  ^{:key (::t/name selection)}
+  [:div.builder-selector
+   [:h2.builder-selector-header (::t/name selection)]
+   [:div
+    (let [simple-options? 
+          (or (::t/simple? selection)
+              (not-any? #(or (seq (::t/selections %))
+                             (some ::mod/name (::t/modifiers %))
+                             (::t/ui-fn %))
+                        (::t/options selection)))]
+      (if simple-options?
+        [dropdown-selector path option-paths selection built-char raw-char]
+        [list-selector path option-paths selection built-char raw-char]))]])
 
 (def content-style
   {:width 1440})

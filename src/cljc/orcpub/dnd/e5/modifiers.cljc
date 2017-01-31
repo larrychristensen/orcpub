@@ -135,3 +135,6 @@
 
 (defn equipment [equipment-kw num]
   (mods/map-mod ?equipment equipment-kw num))
+
+(defn extra-attack []
+  (mods/cum-sum-mod ?num-attacks 1))

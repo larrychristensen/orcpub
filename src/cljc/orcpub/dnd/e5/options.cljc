@@ -615,31 +615,35 @@
 
 (defn raw-bard-magical-secrets [level]
   (let [spell-slots (total-slots level 1)]
-    (t/selection
-     "Magical Secrets"
-     (map
-      (fn [[lvl _]]
-        (t/option
-         (spell-level-title lvl)
-         (keyword (str lvl))
-         [(spell-selection
-           :bard
-           lvl
-           (reduce-kv
-            (fn [s _ lvls]
-              (clojure.set/union s (lvls lvl)))
-            #{}
-            sl/spell-lists)
-           :cha
-           1)]
-         []))
-      spell-slots))))
+    (vec
+     (for [i (range 2)]
+       (t/selection
+        (str "Magical Secrets " (inc i))
+        (map
+         (fn [[lvl _]]
+           (t/option
+            (spell-level-title lvl)
+            (keyword (str lvl))
+            [(spell-selection
+              :bard
+              lvl
+              (reduce-kv
+               (fn [s _ lvls]
+                 (clojure.set/union s (lvls lvl)))
+               #{}
+               sl/spell-lists)
+              :cha
+              1)]
+            []))
+         spell-slots))))))
 
 (defn bard-magical-secrets [min-level]
-  (fn [built-char]
-    (let [bard-levels (-> (es/entity-val built-char :levels) :bard :class-level)]
-      (if (>= bard-levels min-level)
-        (raw-bard-magical-secrets min-level)))))
+  (map
+   (fn [s] (assoc s ::t/prereq-fn
+                  (fn [built-char]
+                    (let [bard-levels (-> (es/entity-val built-char :levels) :bard :class-level)]
+                      (>= bard-levels min-level)))))
+   (raw-bard-magical-secrets min-level)))
 
 (defn cantrip-selections [class-key ability cantrips-known]
   (reduce
@@ -1015,20 +1019,23 @@
    num))
 
 (def expertise-selection
-  (fn [built-char]
-    (let [skill-profs (es/entity-val built-char :skill-profs)]
-      (t/selection
-       "Skill Expertise"
-       (map
-        (fn [skill]
-          (t/option
-           (:name skill)
-           (:key skill)
-           nil
-           [(modifiers/skill-expertise (:key skill))]))
-        (filter #((:key %) skill-profs) skills))
-       2
-       2))))
+  (t/selection
+   "Skill Expertise"
+   (map
+    (fn [skill]
+      (assoc
+       (t/option
+        (:name skill)
+        (:key skill)
+        nil
+        [(modifiers/skill-expertise (:key skill))])
+       ::t/prereq-fn
+       (fn [built-char]
+         (let [skill-profs (es/entity-val built-char :skill-profs)]
+           (and skill-profs (skill-profs (:key skill)))))))
+    skills)
+   2
+   2))
 
 (def rogue-expertise-selection
   (t/selection
