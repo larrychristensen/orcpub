@@ -57,16 +57,19 @@
 (defn spells-known [level spell-key spellcasting-ability & [min-level]]
   (mods/modifier
    ?spells-known
-   (do
-     (prn ?total-levels min-level)
-     (if (>= ?total-levels (or min-level 0))
-       (update ?spells-known level conj {:key spell-key
-                                         :ability spellcasting-ability})
-       ?spells-known))))
+   (if (>= ?total-levels (or min-level 0))
+     (update ?spells-known level conj {:key spell-key
+                                       :ability spellcasting-ability})
+     ?spells-known)))
 
-(defn trait [name & [description]]
-  (mods/vec-mod ?traits (cond-> {:name name}
-                               description (assoc :description description))))
+(defn trait [name & [description level]]
+  (mods/modifier ?traits
+                 (if (or (nil? level) (>= ?total-levels level))
+                   (conj
+                    ?traits
+                    (cond-> {:name name}
+                      description (assoc :description description)))
+                   ?traits)))
 
 (defn proficiency-bonus [bonus]
   (mods/modifier ?proficiency-bonus bonus))

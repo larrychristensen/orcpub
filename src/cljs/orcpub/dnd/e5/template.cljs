@@ -85,10 +85,13 @@
      :on-click #(roll-hit-points die character-ref path)}
     "Re-Roll"]])
 
-(defn traits-modifiers [traits]
+(defn traits-modifiers [traits & [include-level?]]
   (map
-   (fn [{:keys [name description]}]
-     (mod5e/trait name description))
+   (fn [{:keys [name description level]}]
+     (if include-level?
+       (mod5e/trait name description level)
+       ;; for subclasses we need to do level checks, for most everything else we do not
+       (mod5e/trait name description)))
    traits))
 
 (defn armor-prof-modifiers [armor-proficiencies]
@@ -96,6 +99,7 @@
    (fn [armor-kw]
         (mod5e/armor-proficiency (clojure.core/name armor-kw) armor-kw))
    armor-proficiencies))
+
 
 (defn weapon-prof-modifiers [weapon-proficiencies]
   (map
@@ -497,7 +501,8 @@ to the extra damage of the critical hit."}]}))
 (defn subclass-option [{:keys [name
                                profs
                                selections
-                               spellcasting]
+                               spellcasting
+                               traits]
                         :as cls}
                        character-ref]
   (let [kw (common/name-to-kw name)
@@ -516,12 +521,14 @@ to the extra damage of the critical hit."}]}))
       (if (seq skill-kws) [(opt5e/skill-selection skill-kws skill-num)]))
      (concat
       (armor-prof-modifiers armor-profs)
-      (weapon-prof-modifiers weapon-profs)))))
+      (weapon-prof-modifiers weapon-profs)
+      (traits-modifiers traits true)))))
 
 (defn level-option [{:keys [name
                             hit-die
                             profs
                             levels
+                            traits
                             ability-increase-levels
                             subclass-title
                             subclass-level
@@ -550,6 +557,11 @@ to the extra damage of the critical hit."}]}))
         [(hit-points-selection character-ref hit-die)]))
      (concat
       (some-> levels (get i) :modifiers)
+      (traits-modifiers
+       (filter
+        (fn [{level :level :or {level 1}}]
+          (= level i))
+        traits))
       (if (= i 1) [(mod5e/max-hit-points hit-die)])
       [(mod5e/level kw name i)]))))
 
@@ -940,6 +952,7 @@ The extra hit points increase when you reach
 certain levels in this class: to 1d8 at 9th level, to 
 1d10 at 13th level, and to 1d12 at 17th level."}
              {:name "Expertise"
+              :level 3
               :description "At 3rd level, choose two of your skill proficiencies. 
 Your proficiency bonus is doubled for any ability 
 check you make that uses either of the chosen 
@@ -1029,6 +1042,123 @@ the GM tells you whether you succeed or fail."}]}
                             :level 14}]}]}
    character-ref))
 
+(defn cleric-option [character-ref]
+  (class-option
+   {:name "Cleric",
+    :spellcasting {:level-factor 1
+                   :cantrips-known {1 3 4 4 10 5}
+                   :known-mode :all
+                   :ability :wis}
+    :spellcaster true
+    :hit-die 8,
+    :ability-increase-levels [4 8 12 16 19]
+    :profs {:armor {:light true :medium true :shields true}
+            :weapon {:simple true}
+            :save {:wis true :cha true}
+            :skill-options {:choose 2 :options {:history true :insight true :medicine true :persuasion true :religion true}}}
+    :traits [{:level 2 :name "Channel Divinity: Turn Undead" :description "As an action, you present your holy symbol and speak a prayer censuring the undead. Each undead that can see or hear you within 30 feet of you must make a Wisdom saving throw. If the creature fails its saving throw, it is turned for 1 minute or until it takes any damage.\nA turned creature must spend its turns trying to move as far away from you as it can, and it can't willingly move to a space within 30 feet of you. It also can't take reactions. For its action, it can use only the Dash action or try to escape from an effect that prevents it from moving. If there's nowhere to move, the creature can use the Dodge action."}
+             {:level 5 :name "Destroy Undead" :description "When an undead fails its saving throw against your Turn Undead feature, the creature is instantly destroyed if its challenge rating is at or below a certain threshold, as shown in the Destroy Undead table."}
+             {:level 10 :name "Divine Intervention" :description "You can call on your deity to intervene on your behalf when your need is great.\nImploring your deity's aid requires you to use your action. Describe the assistance you seek, and roll percentile dice. If you roll a number equal to or lower than your cleric level, your deity intervenes. The DM chooses the nature of the intervention; the e ect of any cleric spell or cleric domain spell would be appropriate.\nIf your deity intervenes, you can't use this feature again for 7 days. Otherwise, you can use it again after you  nish a long rest.\nAt 20th level, your call for intervention succeeds automatically, no roll required."}]
+    :subclass-level 1
+    :subclass-title "Divine Domain"
+    :subclasses [{:name "Life Domain"
+                  :profs {:armor {:heavy true}}
+                  :traits [{:level 1
+                            :name "Disciple of Life"
+                            :description "Also starting at 1st level, your healing spells are more e ective. Whenever you use a spell of 1st level or higher to restore hit points to a creature, the creature regains additional hit points equal to 2 + the spell's level."}
+                           {:level 2
+                            :name "Channel Divinity: Preserve Life"
+                            :description "Starting at 2nd level, you can use your Channel Divinity to heal the badly injured.\nAs an action, you present your holy symbol and evoke healing energy that can restore a number of hit points equal to  ve times your cleric level. Choose any creatures within 30 feet of you, and divide those hit points among them. This feature can restore a creature to no more than half of its hit point maximum. You can't use this feature on an undead or a construct."}
+                           {:level 6
+                            :name "Blessed Healer"
+                            :description "Beginning at 6th level, the healing spells you cast on others heal you as well. When you cast a spell of 1st level or higher that restores hit points to a creature other than you, you regain hit points equal to 2 + the spell's level."}
+                           {:level 8
+                            :name "Divine Strike"
+                            :description "At 8th level, you gain the ability to infuse your weapon strikes with divine energy. Once on each of your turns when you hit a creature with a weapon attack, you can cause the attack to deal an extra 1d8 radiant damage to the target. When you reach 14th level, the extra damage increases to 2d8."}
+                           {:level 17
+                            :name "Supreme Healing"
+                            :description "Starting at 17th level, when you would normally roll one or more dice to restore hit points with a spell, you instead use the highest number possible for each die. For example, instead of restoring 2d6 hit points to a creature, you restore 12."}]}
+                 {:name "Knowledge Domain"
+                  :traits [{:level 1
+                            :name "Blessings of Knowledge"}
+                           {:level 2
+                            :name "Channel Divinity: Knowledge of the Ages"}
+                           {:level 6
+                            :name "Channel Divinity: Read Thoughts"}
+                           {:level 8
+                            :name "Potent Spellcasting"}
+                           {:level 17
+                            :name "Visions of the Past"}]}
+                 {:name "Light Domain"
+                  :traits [{:level 1
+                            :name "Warding Flame"}
+                           {:level 2
+                            :name "Channel Divinity: Radiance of the Dawn"}
+                           {:level 6
+                            :name "Improved Flare"}
+                           {:level 8
+                            :name "Potent Spellcasting"}
+                           {:level 17
+                            :name "Corona of Light"}]}
+                 {:name "Nature Domain"
+                  :profs {:armor {:heavy true}
+                          :skill-options {:choose 1 :options {:animal-handling true :nature true :survival true}}}
+                  :traits [{:name "Channel Divinity: Charm Animals and Plants"
+                            :level 2}
+                           {:name "Dampen Elements"
+                            :level 6}
+                           {:name "Divine Strike"
+                            :level 8}
+                           {:name "Master of Nature"
+                            :level 17}]}
+                 {:name "Tempest Domain"
+                  :profs {:armor {:heavy true}
+                          :weapon {:martial true}}
+                  :traits [{:name "Wrath of the Storm"}
+                           {:name "Channel Divinity: Destructive Wrath"
+                            :level 2}
+                           {:name "Thunderbolt Strike"
+                            :level 6}
+                           {:name "Divine Strike"
+                            :level 8}
+                           {:name "Stormborn"
+                            :level 17}]}
+                 {:name "Trickery Domain"
+                  :traits [{:name "Blessing of the Trickster"
+                            :level 1}
+                           {:name "Channel Divinity: Invoke Duplicity"
+                            :level 2}
+                           {:name "Channel Divinity: Cloak of Shadows"
+                            :level 6}
+                           {:name "Divine Strike"
+                            :level 8}
+                           {:name "Improved Duplicity"
+                            :level 17}]}
+                 {:name "War Domain"
+                  :profs {:armor {:heavy true}
+                          :weapon {:martial true}}
+                  :traits [{:name "War Priest"
+                            :level 1}
+                           {:name "Channel Divinity: Guided Strike"
+                            :level 2}
+                           {:name "Channel Divinity: War God's Blessing"
+                            :level 6}
+                           {:name "Divine Strike"
+                            :level 8}
+                           {:name "Avatar of Battle"
+                            :level 17}]}
+                 {:name "Arcana Domain"
+                  :source "Sword Coast Adventurer's Guide"
+                  :traits [{:name "Arcane Initiate"}
+                           {:name "Channel Divinity: Arcane Abjuration"
+                            :level 2}
+                           {:name "Spell Breaker"
+                            :level 6}
+                           {:name "Potent Spellcasting"
+                            :level 8}
+                           {:name "Arcane Mastery"}]}]}
+   character-ref))
+
 (defn reroll-abilities [character-ref]
   (fn []
     (swap! character-ref
@@ -1091,6 +1221,7 @@ the GM tells you whether you succeed or fail."}]}
          ::entity/options {:levels [{::entity/key :1}]}}))
     [(barbarian-option character-ref)
      (bard-option character-ref)
+     (cleric-option character-ref)
      (t/option
       "Wizard"
       :wizard
