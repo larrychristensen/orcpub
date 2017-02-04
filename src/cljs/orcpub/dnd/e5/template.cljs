@@ -7,7 +7,8 @@
             [orcpub.common :as common]
             [orcpub.dnd.e5.character :as char5e]
             [orcpub.dnd.e5.modifiers :as mod5e]
-            [orcpub.dnd.e5.options :as opt5e]))
+            [orcpub.dnd.e5.options :as opt5e]
+            [orcpub.dnd.e5.spell-lists :as sl]))
 
 (def character
   {::entity/options {:ability-scores {::entity/key :standard-roll
@@ -529,6 +530,7 @@ to the extra damage of the critical hit."}]}))
                             profs
                             levels
                             traits
+                            spellcasting
                             ability-increase-levels
                             subclass-title
                             subclass-level
@@ -556,6 +558,16 @@ to the extra damage of the critical hit."}]}))
       (if (> i 1)
         [(hit-points-selection character-ref hit-die)]))
      (concat
+      (if (= :all (:known-mode spellcasting))
+        (let [slots (opt5e/total-slots i (:level-factor spellcasting))
+              prev-level-slots (opt5e/total-slots (dec i) (:level-factor spellcasting))
+              new-slots (apply dissoc slots (keys prev-level-slots))]
+          (if (seq new-slots)
+            (let [lvl (key (first new-slots))]
+              (map
+               (fn [kw]
+                 (mod5e/spells-known lvl kw (:ability spellcasting)))
+               (get-in sl/spell-lists [kw lvl]))))))
       (some-> levels (get i) :modifiers)
       (traits-modifiers
        (filter
@@ -606,6 +618,13 @@ to the extra damage of the critical hit."}]}))
      []
      [(mod5e/weapon k num)])))
 
+(defn armor-option [[k num]]
+  (t/option
+     (-> k opt5e/armor-map :name)
+     k
+     []
+     [(mod5e/armor k num)]))
+
 (defn class-options [option-fn choices]
   (map
    (fn [{:keys [name options]}]
@@ -618,6 +637,9 @@ to the extra damage of the critical hit."}]}))
 
 (defn class-weapon-options [weapon-choices]
   (class-options weapon-option weapon-choices))
+
+(defn class-armor-options [armor-choices]
+  (class-options armor-option armor-choices))
 
 (defn class-equipment-options [equipment-choices]
   (class-options equipment-option equipment-choices))
@@ -636,15 +658,15 @@ to the extra damage of the critical hit."}]}))
                             equipment
                             equipment-choices
                             armor
+                            armor-choices
                             spellcasting]
                      :as cls}
                     character-ref]
   (let [kw (common/name-to-kw name)
-        {:keys [armor weapon save skill-options tool-options]} profs
+        {:keys [save skill-options tool-options]
+         armor-profs :armor weapon-profs :weapon} profs
         {skill-num :choose options :options} skill-options
         skill-kws (if (:any options) (map :key opt5e/skills) (keys options))
-        armor-profs (keys armor)
-        weapon-profs (keys weapon)
         save-profs (keys save)
         spellcasting-template (opt5e/spellcasting-template (assoc spellcasting :class-key kw))]
     (t/option
@@ -654,6 +676,7 @@ to the extra damage of the critical hit."}]}))
       selections
       (if (seq tool-options) [(tool-prof-selection tool-options)])
       (class-weapon-options weapon-choices)
+      (class-armor-options armor-choices)
       (class-equipment-options equipment-choices)
       [(opt5e/skill-selection skill-kws skill-num)
        (t/sequential-selection
@@ -665,8 +688,8 @@ to the extra damage of the critical hit."}]}))
           (partial level-option cls kw character-ref spellcasting-template)
           (range 1 21))))])
      (concat
-      (armor-prof-modifiers armor-profs)
-      (weapon-prof-modifiers weapon-profs)
+      (armor-prof-modifiers (keys armor-profs))
+      (weapon-prof-modifiers (keys weapon-profs))
       (mapv
        (fn [[k num]]
          (mod5e/weapon k num))
@@ -1056,6 +1079,27 @@ the GM tells you whether you succeed or fail."}]}
             :weapon {:simple true}
             :save {:wis true :cha true}
             :skill-options {:choose 2 :options {:history true :insight true :medicine true :persuasion true :religion true}}}
+    :equipment-choices [{:name "Equipment Pack"
+                         :options {:priests-pack 1
+                                   :explorers-pack 1}}]
+    :weapon-choices [{:name "Cleric Weapon"
+                      :options {:mace 1
+                                :warhammer 1}}]
+    :armor-choices [{:name "Armor"
+                     :options {:scale-mail 1
+                               :leather 1
+                               :chain-mail 1}}]
+    :equipment {:shield 1
+                :holy-symbol 1}
+    :selections [(t/selection
+                  "Additional Weapon"
+                  [(t/option
+                    "Light Crossbow and 20 Bolts"
+                    :light-crossbow
+                    []
+                    [(mod5e/weapon :crossbow--light 1)
+                     (mod5e/equipment :bolt 20)])
+                   (weapon-option [:simple 1])])]
     :traits [{:level 2 :name "Channel Divinity: Turn Undead" :description "As an action, you present your holy symbol and speak a prayer censuring the undead. Each undead that can see or hear you within 30 feet of you must make a Wisdom saving throw. If the creature fails its saving throw, it is turned for 1 minute or until it takes any damage.\nA turned creature must spend its turns trying to move as far away from you as it can, and it can't willingly move to a space within 30 feet of you. It also can't take reactions. For its action, it can use only the Dash action or try to escape from an effect that prevents it from moving. If there's nowhere to move, the creature can use the Dodge action."}
              {:level 5 :name "Destroy Undead" :description "When an undead fails its saving throw against your Turn Undead feature, the creature is instantly destroyed if its challenge rating is at or below a certain threshold, as shown in the Destroy Undead table."}
              {:level 10 :name "Divine Intervention" :description "You can call on your deity to intervene on your behalf when your need is great.\nImploring your deity's aid requires you to use your action. Describe the assistance you seek, and roll percentile dice. If you roll a number equal to or lower than your cleric level, your deity intervenes. The DM chooses the nature of the intervention; the e ect of any cleric spell or cleric domain spell would be appropriate.\nIf your deity intervenes, you can't use this feature again for 7 days. Otherwise, you can use it again after you  nish a long rest.\nAt 20th level, your call for intervention succeeds automatically, no roll required."}]

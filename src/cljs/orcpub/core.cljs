@@ -603,12 +603,12 @@
              (list-display-section "Weapons" nil
                                    (map
                                     (fn [[weapon-kw num]]
-                                      (str (name weapon-kw) " (" num ")"))
+                                      (str (:name (opt5e/weapons-map weapon-kw)) " (" num ")"))
                                     (es/entity-val built-char :weapons)))
              (list-display-section "Armor" nil
                                    (map
                                     (fn [[armor-kw num]]
-                                      (str (name armor-kw) " (" num ")"))
+                                      (str (:name (opt5e/armor-map armor-kw)) " (" num ")"))
                                     (es/entity-val built-char :armor)))
              (list-display-section "Equipment" nil
                                    (map
