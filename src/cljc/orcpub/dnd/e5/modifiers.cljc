@@ -141,3 +141,12 @@
 
 (defn extra-attack []
   (mods/cum-sum-mod ?num-attacks 1))
+
+(defn ranged-attack-bonus [bonus]
+  (mods/cum-sum-mod ?ranged-attack-bonus bonus))
+
+(defn armored-ac-bonus [bonus]
+  (mods/cum-sum-mod ?armor-class-with-armor (+ bonus ?armor-class-with-armor)))
+
+(defn critical [roll-value]
+  (mods/set-mod ?critical roll-value))

@@ -1104,6 +1104,40 @@
        character/ability-keys))]
     [])])
 
+(defn fighting-style-selection [character-ref]
+  (t/selection
+   "Fighting Style"
+   [(t/option
+     "Archery"
+     :archery
+     []
+     [(modifiers/ranged-attack-bonus 2)])
+    (t/option
+     "Defense"
+     :defense
+     []
+     [(modifiers/armored-ac-bonus 1)])
+    (t/option
+     "Dueling"
+     :dueling
+     []
+     [(modifiers/trait "Dueling Fighting Style")])
+    (t/option
+     "Great Weapon Fighting"
+     :great-weapon-fighting
+     []
+     [(modifiers/trait "Great Weapon Fighting Style")])
+    (t/option
+     "Protection"
+     :protection
+     []
+     [(modifiers/trait "Protection Fighting Style")])
+    (t/option
+     "Two Weapon Fighting"
+     :two-weapon-fighting
+     []
+     [(modifiers/trait "Two Weapon Fighting")])]))
+
 (defn feat-selection [num]
   (t/selection
    (if (= 1 num) "Feat" "Feats")

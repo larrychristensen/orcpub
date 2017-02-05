@@ -106,6 +106,14 @@
         (flatten modifiers))))
    flat-options))
 
+(defn collect-plugins [flat-options plugin-map]
+  (mapcat
+   (fn [{path ::t/path
+         option-value ::value
+         :as option}]
+     (::t/plugins (get-in plugin-map path)))
+   flat-options))
+
 (defn modifier-functions [modifiers]
   (map
    (fn [{:keys [::mods/name ::mods/value ::mods/fn ::mods/deferred-fn ::mods/deps]}]
@@ -188,6 +196,80 @@
 
 (defn build [raw-entity template]
   (apply-options raw-entity template))
+
+(declare get-template-selection-path)
+
+(defn get-template-option-path [selection [f & r] current-path]
+  (let [[option option-i]
+        (first (keep-indexed
+                (fn [i s]
+                  (if (= (::t/key s) f)
+                    [s i]))
+                (::t/options selection)))
+        next-path (concat current-path [::t/options option-i])]
+    (if (seq r)
+      (get-template-selection-path option r next-path)
+      next-path)))
+
+(defn get-template-selection-path [template [f & r] current-path]
+  (let [[selection selection-i]
+        (first (keep-indexed
+                (fn [i s]
+                  (if (= (::t/key s) f)
+                    [s i]))
+                (::t/selections template)))
+        next-path (concat current-path [::t/selections selection-i])]
+    (if (seq r)
+      (get-template-option-path selection r next-path)
+      next-path)))
+
+(declare merge-selections)
+
+(defn merge-options [options other-options]
+  (if (or options other-options)
+    (let [opt-map (zipmap (map ::t/key options) other-options)
+          other-opt-map (zipmap (map ::t/key other-options) other-options)]
+      (vals
+       (merge-with
+        (fn [o1 o2]
+          (assoc
+           o1
+           ::t/selections (merge-selections (::t/selections o1) (::t/selections o2))
+           ::t/modifiers (concat (::t/modifiers o1) (::t/modifiers o2))))
+        opt-map
+        other-opt-map)))))
+
+(defn merge-selections [selections other-selections]
+  #?(:cljs (js/console.log "SELECTIONS" (type selections) (type other-selections)))
+  (if (or selections other-selections)
+    (let [sel-map (zipmap (map ::t/key selections) selections)
+          other-sel-map (zipmap (map ::t/key other-selections) other-selections)]
+      (vals
+       (merge-with
+        (fn [s1 s2]
+          (assoc
+           s1
+           ::t/options
+           (merge-options (::t/options s1) (::t/options s2))))
+        sel-map
+        other-sel-map)))))
+
+(defn build-template [raw-entity template]
+  (let [plugin-map (t/make-modifier-map template)
+        options (flatten-options (::options raw-entity))
+        plugins (collect-plugins options plugin-map)]
+    (reduce
+     (fn [templ {:keys [::t/path ::t/selections ::t/modifiers] :as plugin}]
+       (let [template-path (get-template-selection-path templ path [])]
+         (update-in
+          templ
+          template-path
+          #(assoc
+           %
+           ::t/selections (merge-selections (::t/selections %) selections)
+           ::t/modifiers (concat (::t/modifiers %) modifiers)))))
+     template
+     plugins)))
 
 (spec/fdef
  build

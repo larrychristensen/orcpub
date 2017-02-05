@@ -504,12 +504,25 @@ to the extra damage of the critical hit."}]}))
            [(mod5e/tool-proficiency (:name tool) (:key tool))]))))
     tool-options)))
 
+(defn subclass-level-option [{:keys [name
+                                     levels] :as subcls}
+                    kw
+                    character-ref
+                    spellcasting-template
+                    i]
+  (t/option
+   (str i)
+   (keyword (str i))
+   (some-> levels (get i) :selections)
+   (some-> levels (get i) :modifiers)))
+
 (defn subclass-option [cls
                        {:keys [name
                                profs
                                selections
                                spellcasting
                                modifiers
+                               level-modifiers
                                traits]
                         :as subcls}
                        character-ref]
@@ -519,30 +532,44 @@ to the extra damage of the critical hit."}]}))
         skill-kws (if (:any options) (map :key opt5e/skills) (keys options))
         armor-profs (keys armor)
         weapon-profs (keys weapon)
-        spellcasting-template (opt5e/spellcasting-template (assoc spellcasting :class-key (or (:spell-list spellcasting) kw)))]
-    (t/option
-     name
-     kw
-     (concat
-      selections
-      (if (seq tool-options) [(tool-prof-selection tool-options)])
-      (if (seq skill-kws) [(opt5e/skill-selection skill-kws skill-num)])
-      (mapcat
-       (fn [[lvl selections]]
-         (map
-          (fn [selection]
-            (assoc
-             selection
-             ::t/prereq-fn (fn [c] (>= (es/entity-val c :total-levels) lvl))
-             ::t/key (keyword (str (clojure.core/name (::t/key selection)) lvl))
-             ::t/name (str lvl " - " (::t/name selection))))
-          selections))
-       (:selections spellcasting-template)))
-     (concat
-      modifiers
-      (armor-prof-modifiers armor-profs)
-      (weapon-prof-modifiers weapon-profs)
-      (traits-modifiers traits true)))))
+        spellcasting-template (opt5e/spellcasting-template
+                               (assoc
+                                spellcasting
+                                :class-key
+                                (or (:spell-list spellcasting) kw)))]
+    (assoc
+     (t/option
+      name
+      kw
+      (concat
+       selections
+       (if (seq tool-options) [(tool-prof-selection tool-options)])
+       (if (seq skill-kws) [(opt5e/skill-selection skill-kws skill-num)])
+       (mapcat
+        (fn [[lvl selections]]
+          (map
+           (fn [selection]
+             (assoc
+              selection
+              ::t/prereq-fn (fn [c] (>= (es/entity-val c :total-levels) lvl))
+              ::t/key (keyword (str (clojure.core/name (::t/key selection)) lvl))
+              ::t/name (str lvl " - " (::t/name selection))))
+           selections))
+        (:selections spellcasting-template)))
+      (concat
+       modifiers
+       (armor-prof-modifiers armor-profs)
+       (weapon-prof-modifiers weapon-profs)
+       (traits-modifiers traits true)))
+     ::t/plugins [{::t/path [:class (:key cls)]
+                   ::t/selections [(t/sequential-selection
+                                    "Levels"
+                                    (fn [selection options current-values]
+                                      {::entity/key (-> current-values count inc str keyword)})
+                                    (vec
+                                     (map
+                                      (partial subclass-level-option subcls kw character-ref spellcasting-template)
+                                      (range 1 21))))]}])))
 
 (defn level-option [{:keys [name
                             hit-die
@@ -570,7 +597,7 @@ to the extra damage of the critical hit."}]}))
           subclass-title
           :subclass
           (map
-           #(subclass-option cls % character-ref)
+           #(subclass-option (assoc cls :key kw) % character-ref)
            subclasses))])
       (if (ability-inc-set i)
         [(opt5e/ability-score-improvement-selection)])
@@ -662,6 +689,7 @@ to the extra damage of the critical hit."}]}))
 
 (defn class-equipment-options [equipment-choices]
   (class-options equipment-option equipment-choices))
+
 
 (defn class-option [{:keys [name
                             hit-die
@@ -1525,6 +1553,15 @@ its attack against you."}]}
     (or (= school "evocation")
         (= school "abjuration"))))
 
+(defn total-levels-prereq [level]
+  (fn [c] (>= (es/entity-val c :total-levels) level)))
+
+(defn add-level-prereq [template-obj level]
+  (assoc
+   template-obj
+   ::t/prereq-fn
+   (total-levels-prereq level)))
+
 (defn fighter-option [character-ref]
   (class-option
    {:name "Fighter",
@@ -1540,20 +1577,14 @@ its attack against you."}]}
              {:level 9 :name "Indomitable" :description "You can reroll a saving throw that you fail. If you do so, you must use the new roll, and you can't use this feature again until you  nish a long rest.\nYou can use this feature twice between long rests starting at 13th level and three times between long rests starting at 17th level."}]
     :subclass-level 3
     :subclass-title "Martial Archetype"
-    :fighting-styles [{:name "Archery"
-                       :description "You gain a +2 bonus to attack rolls you make with ranged weapons."}
-                      {:name "Defense"
-                       :description "While you are wearing armor, you gain a +1 bonus to AC."}
-                      {:name "Dueling"
-                       :description "When you are wielding a melee weapon in one hand and no other weapons, you gain a +2 bonus to damage rolls with that weapon."}
-                      {:name "Great Weapon Fighting"
-                       :description "When you roll a 1 or 2 on a damage die for an attack you make with a melee weapon that you are wielding with two hands, you can reroll the die and must use the new roll, even if the new roll is a 1 or a 2. The weapon must have the two-handed or versatile property for you to gain this benefit."}
-                      {:name "Protection"
-                       :description "When a creature you can see attacks a target other than you that is within 5 feet of you, you can use your reaction to impose disadvantage on the attack roll. You must be wielding a shield."}
-                      {:name "Two-Weapon Fighting"
-                       :description "When you engage in two-weapon fighting, you can add your ability modifier to the damage of the second attack."}]
-    :fighting-style-levels [1 10]
+    :levels {5 {:modifiers [(mod5e/extra-attack)]}}
+    :selections [(opt5e/fighting-style-selection character-ref)]
     :subclasses [{:name "Champion"
+                  :selections [(add-level-prereq
+                                (opt5e/fighting-style-selection character-ref)
+                                10)]
+                  :levels {3 {:modifiers [(mod5e/critical 19)]}
+                           15 {:modifiers [(mod5e/critical 18)]}}
                   :traits [{:level 3
                             :name "Improved Critical"
                             :description "Your weapon attacks score a critical hit on a roll of 19 or 20."}
@@ -1570,6 +1601,10 @@ its attack against you."}]}
                             :name "Survivor"
                             :description "You attain the pinnacle of resilience in battle. At the start of each of your turns, you regain hit points equal to 5 + your Constitution modifier if you have no more than half of your hit points left. You don't gain this bene t if you have 0 hit points."}]}
                  {:name "Battle Master"
+                  :selections [(t/selection
+                                "Martial Maneuvers"
+                                opt5e/maneuver-options
+                                3 3)]
                   :traits [{:name "Combat Superiority"
                             :level 3}
                            {:name "Student of War"
@@ -1737,7 +1772,8 @@ its attack against you."}]}
     ?hit-point-level-increases 0
     ?max-hit-points (+ ?hit-point-level-increases (* ?total-levels ?hit-point-level-bonus))
     ?initiative (?ability-bonuses :dex)
-    ?num-attacks 1}))
+    ?num-attacks 1
+    ?critical #{20}}))
 
 (defn template [character-ref]
   {::t/base template-base

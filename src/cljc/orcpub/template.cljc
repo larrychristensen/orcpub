@@ -67,13 +67,14 @@
     prereqs (assoc ::prereqs prereqs)))
 
 (declare make-modifier-map-from-selections)
+(declare make-plugin-map-from-selections)
 
 (defn make-modifier-map-entry-from-option [option]
   [(::key option)
    (let [modifiers option
          selections (::selections option)]
      (if selections
-       (merge (make-modifier-map-from-selections (::selections option)) modifiers)
+       (merge (make-modifier-map-from-selections selections) modifiers)
        modifiers))])
 
 (spec/fdef

@@ -456,8 +456,10 @@
 (defn character-builder []
   (cljs.pprint/pprint @character-ref)
   (let [option-paths (make-path-map @character-ref)
+        built-template (entity/build-template @character-ref template)
         built-char (entity/build @character-ref template)]
-    (print-char built-char)
+    (js/console.log "BUILT TEMPLATE" built-template)
+    ;;(print-char built-char)
     [:div.app
      [:div.app-header
       [:div.app-header-bar.container
@@ -477,6 +479,7 @@
         [:div {:style {:width "300px"}}
          (doall
           (map
+           
            (fn [selection]
              ^{:key (::t/key selection)}
              [builder-selector [] option-paths selection built-char @character-ref])
@@ -547,6 +550,10 @@
              (display-section "Initiative" nil (mod/bonus-str (es/entity-val built-char :initiative)))
              (display-section "Proficiency Bonus" nil (mod/bonus-str (es/entity-val built-char :prof-bonus)))
              (display-section "Passive Perception" nil (es/entity-val built-char :passive-perception))
+             (let [criticals (es/entity-val built-char :critical)
+                   min-crit (apply min criticals)
+                   max-crit (apply max criticals)]
+               (display-section "Critical Hit" nil (if (= min-crit max-crit) min-crit (str min-crit "-" max-crit))))
              (list-display-section "Skill Proficiencies" nil
                                    (let [skill-bonuses (es/entity-val built-char :skill-bonuses)]
                                      (map
