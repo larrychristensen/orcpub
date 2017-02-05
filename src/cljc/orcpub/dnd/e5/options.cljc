@@ -718,7 +718,15 @@
        17 {9 1}
        18 {5 1}
        19 {6 1}
-       20 {7 1}}))
+       20 {7 1}}
+    3 {3 {1 2}
+       4 {1 1}
+       7 {1 1
+          2 2}
+       10 {2 1}
+       13 {3 2}
+       16 {3 1}
+       19 {4 1}}))
 
 (defn total-slots [level level-factor]
   (let [schedule (spell-slot-schedule level-factor)]

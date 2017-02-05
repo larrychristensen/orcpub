@@ -1312,7 +1312,7 @@ the GM tells you whether you succeed or fail."}]}
     :spellcasting {:level-factor 1
                    :cantrips-known {:1 2 :4 3 :10 4}
                    :known-mode :all
-                   :ability "Wisdom"}
+                   :ability :wis}
     :ability-increase-levels [4 6 8 12 14 16 19]
     :profs {:armor {:light true :medium true :shields true}
             :weapon {:club true :dagger true :dart true :javelin true :mace true :quarterstaff true :scimitar true :sickle true :sling true :spear true}
@@ -1389,11 +1389,69 @@ Shape."}]
     :subclass-level 2
     :subclass-title "Druid Circle"
     :subclasses [{:name "Circle of the Land"
-                  :traits [{:name "Bonus Cantrip"
-                            :level 2
-                            :description "When you choose this circle at 2nd level, you learn 
-one additional druid cantrip of your choice."}
-                           {:name "Natural Recovery"
+                  :selections [(t/selection
+                                "Bonus Cantrip"
+                                (opt5e/spell-options (get-in sl/spell-lists [:druid 0]) 0 :wis))
+                               (t/selection
+                                "Land Type"
+                                [(t/option
+                                  "Arctic"
+                                  :arctic
+                                  []
+                                  [(mod5e/spells-known 3 :slow :wis 5)
+                                   (mod5e/spells-known 5 :cone-of-cold :wis 9)])
+                                 (t/option
+                                  "Coast"
+                                  :coast
+                                  []
+                                  [(mod5e/spells-known 2 :mirror-image :wis 3)
+                                   (mod5e/spells-known 2 :misty-step :wis 3)])
+                                 (t/option
+                                  "Desert"
+                                  :desert
+                                  []
+                                  [(mod5e/spells-known 2 :blur :wis 3)
+                                   (mod5e/spells-known 2 :silence :wis 3)
+                                   (mod5e/spells-known 3 :create-food-and-water :wis 5)])
+                                 (t/option
+                                  "Forest"
+                                  :forest
+                                  []
+                                  [(mod5e/spells-known 2 :spider-climb :wis 3)
+                                   (mod5e/spells-known 4 :divination :wis 7)])
+                                 (t/option
+                                  "Grassland"
+                                  :grassland
+                                  []
+                                  [(mod5e/spells-known 2 :invisibility :wis 3)
+                                   (mod5e/spells-known 3 :haste :wis 5)
+                                   (mod5e/spells-known 4 :divination :wis 7)
+                                   (mod5e/spells-known 5 :dream :wis 9)])
+                                 (t/option
+                                  "Mountain"
+                                  :mountain
+                                  []
+                                  [(mod5e/spells-known 2 :spider-climb :wis 3)
+                                   (mod5e/spells-known 3 :lightning-bolt :wis 5)])
+                                 (t/option
+                                  "Swamp"
+                                  :swamp
+                                  []
+                                  [(mod5e/spells-known 2 :darkness :wis 3)
+                                   (mod5e/spells-known 2 :melfs-acid-arrow :wis 3)
+                                   (mod5e/spells-known 3 :stinking-cloud :wis 5)])
+                                 (t/option
+                                  "Underdark"
+                                  :underdark
+                                  []
+                                  [(mod5e/spells-known 2 :spider-climb :wis 3)
+                                   (mod5e/spells-known 2 :web :wis 3)
+                                   (mod5e/spells-known 3 :stinking-cloud :wis 5)
+                                   (mod5e/spells-known 3 :gaseous-form :wis 5)
+                                   (mod5e/spells-known 4 :greater-invisibility :wis 7)
+                                   (mod5e/spells-known 5 :cloudkill :wis 9)])])]
+                  :modifiers []
+                  :traits [{:name "Natural Recovery"
                             :level 2
                             :description "Starting at 2nd level, you can regain some of your 
 magical energy by sitting in meditation and 
@@ -1448,6 +1506,101 @@ its attack against you."}]}
                             :level 10}
                            {:name "Thousand Forms"
                             :level 14}]}]}
+   character-ref))
+
+(defn fighter-option [character-ref]
+  (class-option
+   {:name "Fighter",
+    :hit-die 10,
+    :ability-increase-levels [4 8 12 16 19]
+    :profs {:armor {:light true :medium true :heavy true :shields true}
+            :weapon {:simple true :martial true} 
+            :save {:str true :con true}
+            :skill-options {:choose 2 :options {:acrobatics true :animal-handling true :athletics true :history true :insight true :intimidation true :perception true :survival true}}}
+    :traits [{:name "Second Wind" :description "You have a limited well of stamina that you can draw on to protect yourself from harm. On your turn, you can use a bonus action to regain hit points equal to 1d10 + your fighter level.\nOnce you use this feature, you must  nish a short or long rest before you can use it again."}
+             {:level 2 :name "Action Surge" :description "You can push yourself beyond your normal limits for a moment. On your turn, you can take one additional action on top of your regular action and a possible bonus action.\nOnce you use this feature, you must  nish a short or long rest before you can use it again. Starting at 17th level, you can use it twice before a rest, but only once on the same turn."}
+             {:level 5 :name "Extra Attack" :description "You can attack twice, instead of once, whenever you take the Attack action on your turn.\nThe number of attacks increases to three when you reach 11th level in this class and to four when you reach 20th level in this class."}
+             {:level 9 :name "Indomitable" :description "You can reroll a saving throw that you fail. If you do so, you must use the new roll, and you can't use this feature again until you  nish a long rest.\nYou can use this feature twice between long rests starting at 13th level and three times between long rests starting at 17th level."}]
+    :subclass-level 3
+    :subclass-title "Martial Archetype"
+    :fighting-styles [{:name "Archery"
+                       :description "You gain a +2 bonus to attack rolls you make with ranged weapons."}
+                      {:name "Defense"
+                       :description "While you are wearing armor, you gain a +1 bonus to AC."}
+                      {:name "Dueling"
+                       :description "When you are wielding a melee weapon in one hand and no other weapons, you gain a +2 bonus to damage rolls with that weapon."}
+                      {:name "Great Weapon Fighting"
+                       :description "When you roll a 1 or 2 on a damage die for an attack you make with a melee weapon that you are wielding with two hands, you can reroll the die and must use the new roll, even if the new roll is a 1 or a 2. The weapon must have the two-handed or versatile property for you to gain this benefit."}
+                      {:name "Protection"
+                       :description "When a creature you can see attacks a target other than you that is within 5 feet of you, you can use your reaction to impose disadvantage on the attack roll. You must be wielding a shield."}
+                      {:name "Two-Weapon Fighting"
+                       :description "When you engage in two-weapon fighting, you can add your ability modifier to the damage of the second attack."}]
+    :fighting-style-levels [1 10]
+    :subclasses [{:name "Champion"
+                  :traits [{:level 3
+                            :name "Improved Critical"
+                            :description "Your weapon attacks score a critical hit on a roll of 19 or 20."}
+                           {:level 7
+                            :name "Remarkable Athlete"
+                            :description "You can add half your proficiency bonus (round up) to any Strength, Dexterity, or Constitution check you make that doesn't already use your proficiency bonus.\nIn addition, when you make a running long jump, the distance you can cover increases by a number of feet equal to your Strength modifier."}
+                           {:level 10
+                            :name "Additional Fighting Style"
+                            :description "You can choose a second option from the Fighting Style class feature."}
+                           {:level 15
+                            :name "Superior Critical"
+                            :description "Your weapon attacks score a critical hit on a roll of 18-20."}
+                           {:level 18
+                            :name "Survivor"
+                            :description "You attain the pinnacle of resilience in battle. At the start of each of your turns, you regain hit points equal to 5 + your Constitution modifier if you have no more than half of your hit points left. You don't gain this bene t if you have 0 hit points."}]}
+                 {:name "Battle Master"
+                  :traits [{:name "Combat Superiority"
+                            :level 3}
+                           {:name "Student of War"
+                            :level 3}
+                           {:name "Know Your Enemy"
+                            :level 7}
+                           {:name "Improved Combat Superiority"
+                            :level 10}
+                           {:name "Relentless"
+                            :level 15}]}
+                 {:name "Eldritch Knight"
+                  :spellcaster true
+                  :spellcasting {:level-factor 3
+                                 :spell-list :wizard
+                                 :cantrips-known {3 2 10 3}
+                                 :known-mode :schedule
+                                 :spells-known {3 3
+                                                4 1
+                                                7 1
+                                                8 1
+                                                10 1
+                                                11 1
+                                                13 1
+                                                14 1
+                                                16 1
+                                                19 1
+                                                20 1}
+                                 :ability "Intelligence"}
+                  :traits [{:name "Weapon Bond"
+                            :level 3}
+                           {:name "War Magic"
+                            :level 7}
+                           {:name "Eldritch Strike"
+                            :level 10}
+                           {:name "Arcane Charge"
+                            :level 15}
+                           {:name "Improved War Magic"
+                            :level 18}]}
+                 {:name "Purple Dragon Knight"
+                  :source "Sword Coast Adventurer's Guide"
+                  :traits [{:name "Rallying Cry"
+                            :level 3}
+                           {:name "Royal Envoy"
+                            :level 7}
+                           {:name "Inspiring Surge"
+                            :level 10}
+                           {:name "Bulwark"
+                            :level 15}]}]}
    character-ref))
 
 (defn reroll-abilities [character-ref]
@@ -1514,77 +1667,7 @@ its attack against you."}]}
      (bard-option character-ref)
      (cleric-option character-ref)
      (druid-option character-ref)
-     (t/option
-      "Wizard"
-      :wizard
-      [(opt5e/skill-selection [:arcana :history :insight :investigation :medicine :religion] 2)
-       (t/sequential-selection
-        "Levels"
-        (fn [selection options current-values]
-          {::entity/key (-> current-values count inc str keyword)})
-        [(t/option
-          "1"
-          :1
-          [(opt5e/wizard-cantrip-selection 3)
-           (opt5e/wizard-spell-selection-1)]
-          [(mod5e/saving-throws :int :wis)
-           (mod5e/level :wizard "Wizard" 1)
-           (mod5e/max-hit-points 6)])
-         (t/option
-          "2"
-          :2
-          [(t/selection
-            "Arcane Tradition"
-            arcane-tradition-options)
-           (hit-points-selection character-ref 6)]
-          [(mod5e/level :wizard "Wizard" 2)])
-         (t/option
-          "3"
-          :3
-          [(opt5e/wizard-spell-selection-1)
-           (hit-points-selection character-ref 6)]
-          [(mod5e/level :wizard "Wizard" 3)])
-         (t/option
-          "4"
-          :4
-          [(opt5e/ability-score-improvement-selection)
-           (hit-points-selection character-ref 6)]
-          [(mod5e/level :wizard "Wizard" 4)])])]
-      [])
-     (t/option
-      "Rogue"
-      :rogue
-      [(t/sequential-selection
-        "Levels"
-        (fn [selection levels]
-          {::entity/key (-> levels count str keyword)})
-        [(t/option
-          "1"
-          :1
-          [opt5e/rogue-expertise-selection]
-          [(mod5e/saving-throws :dex :int)
-           (mod5e/level :rogue "Rogue" 1)
-           (mod5e/max-hit-points 8)])
-         (t/option
-          "2"
-          :2
-          [(t/selection
-            "Roguish Archetype"
-            arcane-tradition-options)
-           (t/selection
-            "Hit Points"
-            [(t/option
-              "Average"
-              :average
-              []
-              [(mod5e/max-hit-points 5)])])]
-          [(mod5e/level :rogue "Rogue" 2)])
-         (t/option
-          "3"
-          :3
-          []
-          [(mod5e/level :rogue "rogue" 3)])])]
-      [])])])
+     (fighter-option character-ref)])])
 
 (def template-base
   (es/make-entity

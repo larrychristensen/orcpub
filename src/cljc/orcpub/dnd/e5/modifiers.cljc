@@ -16,7 +16,7 @@
   (mods/modifier ?subrace nm))
 
 (defn resistance [value]
-  (mods/vec-mod ?resistances value))
+  (mods/set-mod ?resistances value))
 
 (defn darkvision [value]
   (mods/modifier ?darkvision value))
@@ -26,9 +26,9 @@
 
 (defn ability [ability bonus]
   (mods/modifier ?abilities
-               (update ?abilities ability + bonus)
-               (clojure.string/upper-case (name ability))
-               (mods/bonus-str bonus)))
+                 (update ?abilities ability + bonus)
+                 (clojure.string/upper-case (name ability))
+                 (mods/bonus-str bonus)))
 
 (defn abilities [abilities]
   (mods/modifier ?abilities abilities))
