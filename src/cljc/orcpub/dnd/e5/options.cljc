@@ -574,8 +574,15 @@
 
 (defn weapon-options [weapons & [num]]
   (map
-   weapon-option
+   #(weapon-option % num)
    weapons))
+
+(defn simple-melee-weapon-options [num]
+  (weapon-options
+   (filter
+    #(and (= :simple (:type %)) (:melee %))
+    weapons)
+   num))
 
 (defn skill-options [skills]
   (map
