@@ -489,19 +489,22 @@
           [:input.input {:type :text}]]
          [:div.field
           [:span.personality-label {:style {:font-size "18px"}} "Personality Trait 1"]
-          [:select.builder-option.builder-option-dropdown]]
+          [:input.input {:type :text}]]
          [:div.field
-          [:span.personality-label {:style {}} "Personality Trait 2"]
-          [:select.builder-option.builder-option-dropdown]]
+          [:span.personality-label {:style {:font-size "18px"}} "Personality Trait 2"]
+          [:input.input {:type :text}]]
          [:div.field
-          [:span.personality-label {:style {}} "Ideals"]
-          [:select.builder-option.builder-option-dropdown]]
+          [:span.personality-label {:style {:font-size "18px"}} "Ideals"]
+          [:input.input {:type :text}]]
          [:div.field
-          [:span.personality-label {:style {}} "Bonds"]
-          [:select.builder-option.builder-option-dropdown]]
+          [:span.personality-label {:style {:font-size "18px"}} "Bonds"]
+          [:input.input {:type :text}]]
          [:div.field
-          [:span.personality-label {:style {}} "Flaws"]
-          [:select.builder-option.builder-option-dropdown]]]
+          [:span.personality-label {:style {:font-size "18px"}} "Flaws"]
+          [:input.input {:type :text}]]
+         [:div.field
+          [:span.personality-label {:style {:font-size "18px"}} "Description/Backstory"]
+          [:textarea.input {:style {:height "800px"}}]]]
         (let [race (es/entity-val built-char :race)
               subrace (es/entity-val built-char :subrace)
               levels (es/entity-val built-char :levels)

@@ -629,7 +629,31 @@
    {:name "Elvish"
     :key :elvish}
    {:name "Giant"
-    :key :giant}])
+    :key :giant}
+   {:name "Gnomish"
+    :key :gnomish}
+   {:name "Goblin"
+    :key :goblin}
+   {:name "Halfling"
+    :key :halfling}
+   {:name "Orc"
+    :key :orc}
+   {:name "Abyssal"
+    :key :abyssal}
+   {:name "Celestial"
+    :key :celestial}
+   {:name "Draconic"
+    :key :draconic}
+   {:name "Deep Speech"
+    :key :deep-speech}
+   {:name "Infernal"
+    :key :infernal}
+   {:name "Primordial"
+    :key :primordial}
+   {:name "Sylvan"
+    :key :sylval}
+   {:name "Undercommon"
+    :key :undercommon}])
 
 (defn language-option [{:keys [name key]}]
   (t/option

@@ -503,6 +503,7 @@ to the extra damage of the critical hit."}]}))
                                profs
                                selections
                                spellcasting
+                               modifiers
                                traits]
                         :as cls}
                        character-ref]
@@ -521,6 +522,7 @@ to the extra damage of the critical hit."}]}))
       (if (seq tool-options) [(tool-prof-selection tool-options)])
       (if (seq skill-kws) [(opt5e/skill-selection skill-kws skill-num)]))
      (concat
+      modifiers
       (armor-prof-modifiers armor-profs)
       (weapon-prof-modifiers weapon-profs)
       (traits-modifiers traits true)))))
@@ -1065,6 +1067,15 @@ the GM tells you whether you succeed or fail."}]}
                             :level 14}]}]}
    character-ref))
 
+(defn blessings-of-knowledge-skill [skill-name]
+  (let [skill-kw (common/name-to-kw skill-name)]
+    (t/option
+     skill-name
+     skill-kw
+     []
+     [(mod5e/skill-proficiency skill-kw)
+      (mod5e/skill-expertise skill-kw)])))
+
 (defn cleric-option [character-ref]
   (class-option
    {:name "Cleric",
@@ -1107,6 +1118,16 @@ the GM tells you whether you succeed or fail."}]}
     :subclass-title "Divine Domain"
     :subclasses [{:name "Life Domain"
                   :profs {:armor {:heavy true}}
+                  :modifiers [(mod5e/spells-known 1 :bless :wis 1)
+                              (mod5e/spells-known 1 :cure-wounds :wis 1)
+                              (mod5e/spells-known 2 :lesser-restoration :wis 3)
+                              (mod5e/spells-known 2 :spiritual-weapon :wis 3)
+                              (mod5e/spells-known 3 :beacon-of-hope :wis 5)
+                              (mod5e/spells-known 3 :revivify :wis 5)
+                              (mod5e/spells-known 4 :death-ward :wis 7)
+                              (mod5e/spells-known 4 :guardian-of-faith :wis 7)
+                              (mod5e/spells-known 5 :mass-cure-wounds :wis 9)
+                              (mod5e/spells-known 5 :raise-dead :wis 9)]
                   :traits [{:level 1
                             :name "Disciple of Life"
                             :description "Also starting at 1st level, your healing spells are more e ective. Whenever you use a spell of 1st level or higher to restore hit points to a creature, the creature regains additional hit points equal to 2 + the spell's level."}
@@ -1123,6 +1144,24 @@ the GM tells you whether you succeed or fail."}]}
                             :name "Supreme Healing"
                             :description "Starting at 17th level, when you would normally roll one or more dice to restore hit points with a spell, you instead use the highest number possible for each die. For example, instead of restoring 2d6 hit points to a creature, you restore 12."}]}
                  {:name "Knowledge Domain"
+                  :modifiers [(mod5e/spells-known 1 :command :wis 1)
+                              (mod5e/spells-known 1 :identify :wis 1)
+                              (mod5e/spells-known 2 :augury :wis 3)
+                              (mod5e/spells-known 2 :suggestion :wis 3)
+                              (mod5e/spells-known 3 :nondetection :wis 5)
+                              (mod5e/spells-known 3 :speak-with-dead :wis 5)
+                              (mod5e/spells-known 4 :arcane-eye :wis 7)
+                              (mod5e/spells-known 4 :confusion :wis 7)
+                              (mod5e/spells-known 5 :legend-lore :wis 9)
+                              (mod5e/spells-known 5 :scrying :wis 9)]
+                  :selections [(opt5e/language-selection opt5e/languages 2)
+                               (t/selection
+                                "Blessings of Knowledge Skills"
+                                (map
+                                 blessings-of-knowledge-skill
+                                 ["Arcana" "History" "Nature" "Religion"])
+                                2
+                                2)]
                   :traits [{:level 1
                             :name "Blessings of Knowledge"}
                            {:level 2
@@ -1134,6 +1173,17 @@ the GM tells you whether you succeed or fail."}]}
                            {:level 17
                             :name "Visions of the Past"}]}
                  {:name "Light Domain"
+                  :modifiers [(mod5e/spells-known 0 :light :wis 1)
+                              (mod5e/spells-known 1 :burning-hands :wis 1)
+                              (mod5e/spells-known 1 :faerie-fire :wis 1)
+                              (mod5e/spells-known 2 :flaming-sphere :wis 3)
+                              (mod5e/spells-known 2 :scorching-ray :wis 3)
+                              (mod5e/spells-known 3 :daylight :wis 5)
+                              (mod5e/spells-known 3 :fireball :wis 5)
+                              (mod5e/spells-known 4 :guardian-of-faith :wis 7)
+                              (mod5e/spells-known 4 :wall-of-fire :wis 7)
+                              (mod5e/spells-known 5 :flame-strike :wis 9)
+                              (mod5e/spells-known 5 :scrying :wis 9)]
                   :traits [{:level 1
                             :name "Warding Flame"}
                            {:level 2
@@ -1147,6 +1197,19 @@ the GM tells you whether you succeed or fail."}]}
                  {:name "Nature Domain"
                   :profs {:armor {:heavy true}
                           :skill-options {:choose 1 :options {:animal-handling true :nature true :survival true}}}
+                  :modifiers [(mod5e/spells-known 1 :animal-friendship :wis 1)
+                              (mod5e/spells-known 1 :speak-with-animals :wis 1)
+                              (mod5e/spells-known 2 :barkskin :wis 3)
+                              (mod5e/spells-known 2 :spike-growth :wis 3)
+                              (mod5e/spells-known 3 :plant-growth :wis 5)
+                              (mod5e/spells-known 3 :wind-wall :wis 5)
+                              (mod5e/spells-known 4 :dominate-beast :wis 7)
+                              (mod5e/spells-known 4 :grasping-vine :wis 7)
+                              (mod5e/spells-known 5 :insect-plague :wis 9)
+                              (mod5e/spells-known 5 :tree-stride :wis 9)]
+                  :selections [(t/selection
+                                "Druid Cantrip"
+                                (opt5e/spell-options (get-in sl/spell-lists [:druid 0]) 0 :wis))]
                   :traits [{:name "Channel Divinity: Charm Animals and Plants"
                             :level 2}
                            {:name "Dampen Elements"
@@ -1158,6 +1221,16 @@ the GM tells you whether you succeed or fail."}]}
                  {:name "Tempest Domain"
                   :profs {:armor {:heavy true}
                           :weapon {:martial true}}
+                  :modifiers [(mod5e/spells-known 1 :fog-cloud :wis 1)
+                              (mod5e/spells-known 1 :thunderwave :wis 1)
+                              (mod5e/spells-known 2 :gust-of-wind :wis 3)
+                              (mod5e/spells-known 2 :shatter :wis 3)
+                              (mod5e/spells-known 3 :call-lightning :wis 5)
+                              (mod5e/spells-known 3 :sleet-storm :wis 5)
+                              (mod5e/spells-known 4 :control-water :wis 7)
+                              (mod5e/spells-known 4 :ice-storm :wis 7)
+                              (mod5e/spells-known 5 :destructive-wave :wis 9)
+                              (mod5e/spells-known 5 :insect-plague :wis 9)]
                   :traits [{:name "Wrath of the Storm"}
                            {:name "Channel Divinity: Destructive Wrath"
                             :level 2}
@@ -1168,6 +1241,16 @@ the GM tells you whether you succeed or fail."}]}
                            {:name "Stormborn"
                             :level 17}]}
                  {:name "Trickery Domain"
+                  :modifiers [(mod5e/spells-known 1 :charm-person :wis 1)
+                              (mod5e/spells-known 1 :disguise-self :wis 1)
+                              (mod5e/spells-known 2 :mirror-image :wis 3)
+                              (mod5e/spells-known 2 :pass-without-trace :wis 3)
+                              (mod5e/spells-known 3 :blink :wis 5)
+                              (mod5e/spells-known 3 :dispel-magic :wis 5)
+                              (mod5e/spells-known 4 :dimension-door :wis 7)
+                              (mod5e/spells-known 4 :polymorph :wis 7)
+                              (mod5e/spells-known 5 :dominate-person :wis 9)
+                              (mod5e/spells-known 5 :modify-memory :wis 9)]
                   :traits [{:name "Blessing of the Trickster"
                             :level 1}
                            {:name "Channel Divinity: Invoke Duplicity"
@@ -1181,6 +1264,16 @@ the GM tells you whether you succeed or fail."}]}
                  {:name "War Domain"
                   :profs {:armor {:heavy true}
                           :weapon {:martial true}}
+                  :modifiers [(mod5e/spells-known 1 :divine-favor :wis 1)
+                              (mod5e/spells-known 1 :shield-of-faith :wis 1)
+                              (mod5e/spells-known 2 :magic-weapon :wis 3)
+                              (mod5e/spells-known 2 :spiritual-weapon :wis 3)
+                              (mod5e/spells-known 3 :crusaders-mantle :wis 5)
+                              (mod5e/spells-known 3 :spirits-guardians :wis 5)
+                              (mod5e/spells-known 4 :freedom-of-movement :wis 7)
+                              (mod5e/spells-known 4 :stoneskin :wis 7)
+                              (mod5e/spells-known 5 :flame-strike :wis 9)
+                              (mod5e/spells-known 5 :hold-monster :wis 9)]
                   :traits [{:name "War Priest"
                             :level 1}
                            {:name "Channel Divinity: Guided Strike"
