@@ -137,7 +137,8 @@
      (if (not meets-prereqs?)
        [:div {:style {:font-style :italic
                       :font-size "12px"
-                      :font-weight :normal}} (str "Requires " (s/join ", " failed-prereqs))])
+                      :font-weight :normal}}
+        (str "Requires " (s/join ", " failed-prereqs))])
      (if (and meets-prereqs? (seq named-mods))
        [:span {:style {:font-style :italic
                        :font-size "12px"
@@ -553,11 +554,7 @@
                                         (str (s/capitalize (name skill-kw)) " " (mod/bonus-str bonus)))
                                       (filter (fn [[k bonus]]
                                                 (not= bonus (ability-bonuses (:ability (opt5e/skills-map k)))))
-                                              skill-bonuses))
-                                     #_(map
-                                      (fn [skill-kw]
-                                        (str (s/capitalize (name skill-kw)) " " (mod/bonus-str (skill-bonuses skill-kw))))
-                                      skill-profs)))
+                                              skill-bonuses))))
              (list-display-section "Languages" nil
                                    (map
                                     (fn [lang]

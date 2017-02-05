@@ -775,29 +775,39 @@
    {}
    cantrips-known))
 
-(total-slots 10 1)
+(defn apply-spell-restriction [spell-keys restriction]
+  (if restriction
+    (filter
+     (fn [spell-key]
+       (restriction (spells/spell-map spell-key)))
+     spell-keys)
+    spell-keys))
 
 (defn spells-known-selections [{:keys [class-key
                                        level-factor
                                        spells-known
                                        known-mode
+                                       spell-list
                                        ability] :as cfg}]
   (case known-mode
     :schedule (reduce
                (fn [m [k v]]
-                 (let [slots (total-slots k level-factor)]
+                 (let [[cls-lvl restriction] (if (number? v) [v] ((juxt :num :restriction) v))
+                       slots (total-slots cls-lvl level-factor)]
                    (assoc m k (if (> (count slots) 1)
                                 [(t/selection
                                   "Spell"
                                   (mapv
                                    (fn [[lvl _]]
-                                     (t/option
-                                      (spell-level-title lvl)
-                                      (keyword (str lvl))
-                                      [(spell-selection class-key lvl ability v)]
-                                      []))
+                                     (let [spell-keys (get-in sl/spell-lists [class-key lvl])
+                                           final-spell-keys (apply-spell-restriction spell-keys restriction)]
+                                       (t/option
+                                        (spell-level-title lvl)
+                                        (keyword (str lvl))
+                                        [(spell-selection class-key lvl final-spell-keys ability cls-lvl)]
+                                        [])))
                                    slots))]
-                                [(spell-selection class-key 1 ability v)]))))
+                                [(spell-selection class-key 1 (apply-spell-restriction (get-in sl/spell-lists [class-key 1]) restriction) ability cls-lvl)]))))
                {}
                spells-known)
     {}))
@@ -1122,7 +1132,7 @@
    (skill-selection (map :key skills) num))
   ([options num]
    (t/selection
-    "Skills"
+    "Skill Proficiency"
     (skill-options
      (filter
       (comp (set options) :key)

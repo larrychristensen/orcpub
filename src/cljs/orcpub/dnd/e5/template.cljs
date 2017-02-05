@@ -504,13 +504,14 @@ to the extra damage of the critical hit."}]}))
            [(mod5e/tool-proficiency (:name tool) (:key tool))]))))
     tool-options)))
 
-(defn subclass-option [{:keys [name
+(defn subclass-option [cls
+                       {:keys [name
                                profs
                                selections
                                spellcasting
                                modifiers
                                traits]
-                        :as cls}
+                        :as subcls}
                        character-ref]
   (let [kw (common/name-to-kw name)
         {:keys [armor weapon save skill-options tool-options]} profs
@@ -518,14 +519,25 @@ to the extra damage of the critical hit."}]}))
         skill-kws (if (:any options) (map :key opt5e/skills) (keys options))
         armor-profs (keys armor)
         weapon-profs (keys weapon)
-        spellcasting-template (opt5e/spellcasting-template (assoc spellcasting :class-key kw))]
+        spellcasting-template (opt5e/spellcasting-template (assoc spellcasting :class-key (or (:spell-list spellcasting) kw)))]
     (t/option
      name
      kw
      (concat
       selections
       (if (seq tool-options) [(tool-prof-selection tool-options)])
-      (if (seq skill-kws) [(opt5e/skill-selection skill-kws skill-num)]))
+      (if (seq skill-kws) [(opt5e/skill-selection skill-kws skill-num)])
+      (mapcat
+       (fn [[lvl selections]]
+         (map
+          (fn [selection]
+            (assoc
+             selection
+             ::t/prereq-fn (fn [c] (>= (es/entity-val c :total-levels) lvl))
+             ::t/key (keyword (str (clojure.core/name (::t/key selection)) lvl))
+             ::t/name (str lvl " - " (::t/name selection))))
+          selections))
+       (:selections spellcasting-template)))
      (concat
       modifiers
       (armor-prof-modifiers armor-profs)
@@ -541,7 +553,7 @@ to the extra damage of the critical hit."}]}))
                             ability-increase-levels
                             subclass-title
                             subclass-level
-                            subclasses]}
+                            subclasses] :as cls}
                     kw
                     character-ref
                     spellcasting-template
@@ -558,7 +570,7 @@ to the extra damage of the critical hit."}]}))
           subclass-title
           :subclass
           (map
-           #(subclass-option % character-ref)
+           #(subclass-option cls % character-ref)
            subclasses))])
       (if (ability-inc-set i)
         [(opt5e/ability-score-improvement-selection)])
@@ -1508,6 +1520,11 @@ its attack against you."}]}
                             :level 14}]}]}
    character-ref))
 
+(defn eldritch-knight-spell? [s]
+  (let [school (:school s)]
+    (or (= school "evocation")
+        (= school "abjuration"))))
+
 (defn fighter-option [character-ref]
   (class-option
    {:name "Fighter",
@@ -1569,18 +1586,27 @@ its attack against you."}]}
                                  :spell-list :wizard
                                  :cantrips-known {3 2 10 3}
                                  :known-mode :schedule
-                                 :spells-known {3 3
-                                                4 1
-                                                7 1
+                                 :spells-known {3 {:num 3
+                                                   :restriction eldritch-knight-spell?}
+                                                4 {:num 1
+                                                   :restriction eldritch-knight-spell?}
+                                                7 {:num 1
+                                                   :restriction eldritch-knight-spell?}
                                                 8 1
-                                                10 1
-                                                11 1
-                                                13 1
+                                                10 {:num 1
+                                                   :restriction eldritch-knight-spell?}
+                                                11 {:num 1
+                                                   :restriction eldritch-knight-spell?}
+                                                13 {:num 1
+                                                   :restriction eldritch-knight-spell?}
                                                 14 1
-                                                16 1
-                                                19 1
+                                                16 {:num 1
+                                                   :restriction eldritch-knight-spell?}
+                                                19 {:num 1
+                                                   :restriction eldritch-knight-spell?}
                                                 20 1}
-                                 :ability "Intelligence"}
+                                 :ability :int}
+                  
                   :traits [{:name "Weapon Bond"
                             :level 3}
                            {:name "War Magic"
