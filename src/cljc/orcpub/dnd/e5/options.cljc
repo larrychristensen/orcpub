@@ -90,12 +90,23 @@
     :name "Viol"}])
 
 (def artisans-tools
-  [{:name "smith's tools"
-     :key :smiths-tools}
-    {:name "brewer's supplies"
-     :key :brewers-supplies}
-    {:name "mason's tools"
-     :key :masons-tools}])
+  [{:name "Alchemist's Supplies", :key :alchemists-supplies}
+   {:name "Brewer's Supplies", :key :brewers-supplies}
+   {:name "Calligrapher's Supplies", :key :calligraphers-supplies}
+   {:name "Carpenter's Tools", :key :carpenters-tools}
+   {:name "Cartographer's Tools", :key :cartographers-tools}
+   {:name "Cobbler's Tools", :key :cobblers-tools}
+   {:name "Cook's Utensils", :key :cooks-utensils}
+   {:name "Glassblower's Tools", :key :glassblowers-tools}
+   {:name "Jeweler's Tools", :key :jewelers-tools}
+   {:name "Leatherworker's Tools", :key :leatherworkers-tools}
+   {:name "Mason's Tools", :key :masons-tools}
+   {:name "Painter's Supplies", :key :painters-supplies}
+   {:name "Potter's Tools", :key :potters-tools}
+   {:name "Smith's Tools", :key :smiths-tools}
+   {:name "Tinker's Tools", :key :tinkers-tools}
+   {:name "Weaver's Tools", :key :weavers-tools}
+   {:name "Woodcarver's Tools", :key :woodcarvers-tools}])
 
 (def tools
   (concat
@@ -584,6 +595,13 @@
     weapons)
    num))
 
+(defn martial-weapon-options [num]
+  (weapon-options
+   (filter
+    #(= :martial (:type %))
+    weapons)
+   num))
+
 (defn skill-options [skills]
   (map
    skill-option
@@ -661,6 +679,46 @@
     :key :sylval}
    {:name "Undercommon"
     :key :undercommon}])
+
+(def elemental-disciplines
+  [{:name "Breath of Winter"
+    :level 17}
+   {:name "Clench of the North Wind"
+    :level 6}
+   {:name "Eternal Mountain Defense"
+    :level 17}
+   {:name "Fangs of the Fire Snake"}
+   {:name "Fist of Four Thunders"}
+   {:name "Fist of Unbroken Air"}
+   {:name "Flames of the Phoenix"
+    :level 11}
+   {:name "Gong of the Summit"
+    :level 6}
+   {:name "Mist Stance"
+    :level 11}
+   {:name "Ride the Wind"
+    :level 11}
+   {:name "River of Hungry Flame"
+    :level 17}
+   {:name "Rush of the Gale Spirits"}
+   {:name "Shape of the Flowing River"}
+   {:name "Sweeping Cinder Strike"}
+   {:name "Water Whip"}
+   {:name "Wave of Rolling Earth"
+    :level 17}])
+
+(defn monk-elemental-disciplines []
+  (t/selection
+   "Elemental Disciplines"
+   (mapv
+    (fn [{:keys [name level]}]
+      (t/option
+       name
+       (common/name-to-kw name)
+       []
+       [(modifiers/trait (str "Elemental Discipline: " name))]
+       (if level [(fn [c] (>= (es/entity-val c :total-levels) level))])))
+    elemental-disciplines)))
 
 (defn language-option [{:keys [name key]}]
   (t/option

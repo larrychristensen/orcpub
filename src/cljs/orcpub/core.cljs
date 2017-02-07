@@ -458,8 +458,8 @@
   (let [option-paths (make-path-map @character-ref)
         built-template (entity/build-template @character-ref template)
         built-char (entity/build @character-ref built-template)]
-    (js/console.log "BUILT TEMPLATE" built-template)
-    (print-char built-char)
+    (js/console.log "BUILT TEMPLAT" built-template)
+    ;;(print-char built-char)
     [:div.app
      [:div.app-header
       [:div.app-header-bar.container
@@ -483,7 +483,7 @@
            (fn [selection]
              ^{:key (::t/key selection)}
              [builder-selector [] option-paths selection built-char @character-ref built-template])
-           (::t/selections template)))]
+           (::t/selections built-template)))]
         [:div {:style {:flex-grow 1
                        :margin-top "10px"
                        :margin-left "30px"
@@ -518,6 +518,7 @@
               weapon-profs (es/entity-val built-char :weapon-profs)
               armor-profs (es/entity-val built-char :armor-profs)
               resistances (es/entity-val built-char :resistances)
+              immunities (es/entity-val built-char :immunities)
               languages (es/entity-val built-char :languages)
               ability-bonuses (es/entity-val built-char :ability-bonuses)]
           [:div {:style {:width "500px"}}
@@ -587,6 +588,11 @@
                                     (fn [resistance-kw]
                                       (name resistance-kw))
                                     resistances))
+             (list-display-section "Immunities" nil
+                                   (map
+                                    (fn [immunity-kw]
+                                      (name immunity-kw))
+                                    immunities))
              (display-section "Spells Known" nil
                                    [:div {:style {:font-size "14px"}}
                                     (map

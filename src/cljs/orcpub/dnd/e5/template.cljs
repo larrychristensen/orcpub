@@ -506,17 +506,20 @@ to the extra damage of the critical hit."}]}))
 
 (defn subclass-level-option [{:keys [name
                                      levels] :as subcls}
-                    kw
-                    character-ref
-                    spellcasting-template
-                    i]
-  (t/option
-   (str i)
-   (keyword (str i))
-   (concat
-    (some-> levels (get i) :selections)
-    (some-> spellcasting-template :selections (get i)))
-   (some-> levels (get i) :modifiers)))
+                             kw
+                             character-ref
+                             spellcasting-template
+                             i]
+  (let [selections (some-> levels (get i) :selections)]
+    (if (= name "Way of the Four Elements")
+      (js/console.log "SELECTIONS" selections))
+    (t/option
+     (str i)
+     (keyword (str i))
+     (concat
+      selections      
+      (some-> spellcasting-template :selections (get i)))
+     (some-> levels (get i) :modifiers))))
 
 (defn subclass-option [cls
                        {:keys [name
@@ -546,18 +549,7 @@ to the extra damage of the critical hit."}]}))
       (concat
        selections
        (if (seq tool-options) [(tool-prof-selection tool-options)])
-       (if (seq skill-kws) [(opt5e/skill-selection skill-kws skill-num)])
-       (mapcat
-        (fn [[lvl selections]]
-          (map
-           (fn [selection]
-             (assoc
-              selection
-              ::t/prereq-fn (fn [c] (>= (es/entity-val c :total-levels) lvl))
-              ::t/key (keyword (str (clojure.core/name (::t/key selection)) lvl))
-              ::t/name (str lvl " - " (::t/name selection))))
-           selections))
-        (:selections spellcasting-template)))
+       (if (seq skill-kws) [(opt5e/skill-selection skill-kws skill-num)]))
       (concat
        modifiers
        (armor-prof-modifiers armor-profs)
@@ -979,7 +971,8 @@ creature."}]}
                                   18 2}
                    :known-mode :schedule
                    :ability :cha}
-    :levels {2 {:modifiers [(mod/modifier ?default-skill-bonus (int (/ ?prof-bonus 2)))]}
+    :levels {2 {:modifiers [(mod/modifier ?default-skill-bonus (let [b (int (/ ?prof-bonus 2))]
+                                                                 (zipmap char5e/ability-keys (repeat b))))]}
              3 {:selections [opt5e/expertise-selection]}
              10 {:selections (concat [opt5e/expertise-selection]
                                      (opt5e/raw-bard-magical-secrets 10))}
@@ -1573,6 +1566,9 @@ its attack against you."}]}
             :weapon {:simple true :martial true} 
             :save {:str true :con true}
             :skill-options {:choose 2 :options {:acrobatics true :animal-handling true :athletics true :history true :insight true :intimidation true :perception true :survival true}}}
+    :equipment-choices [{:name "Equipment Pack"
+                         :options {:dungeoneers-pack 1
+                                   :explorers-pack 1}}]
     :traits [{:name "Second Wind" :description "You have a limited well of stamina that you can draw on to protect yourself from harm. On your turn, you can use a bonus action to regain hit points equal to 1d10 + your fighter level.\nOnce you use this feature, you must  nish a short or long rest before you can use it again."}
              {:level 2 :name "Action Surge" :description "You can push yourself beyond your normal limits for a moment. On your turn, you can take one additional action on top of your regular action and a possible bonus action.\nOnce you use this feature, you must  nish a short or long rest before you can use it again. Starting at 17th level, you can use it twice before a rest, but only once on the same turn."}
              {:level 5 :name "Extra Attack" :description "You can attack twice, instead of once, whenever you take the Attack action on your turn.\nThe number of attacks increases to three when you reach 11th level in this class and to four when you reach 20th level in this class."}
@@ -1580,12 +1576,58 @@ its attack against you."}]}
     :subclass-level 3
     :subclass-title "Martial Archetype"
     :levels {5 {:modifiers [(mod5e/extra-attack)]}}
-    :selections [(opt5e/fighting-style-selection character-ref)]
+    :selections [(opt5e/fighting-style-selection character-ref)
+                 (t/selection
+                  "Armor"
+                  [(t/option
+                    "Chain Mail"
+                    :chain-mail
+                    []
+                    [(mod5e/armor :chain-mail 1)])
+                   (t/option
+                    "Leather Armor, Longbow, 20 Arrows"
+                    :leather
+                    []
+                    [(mod5e/armor :leather 1)
+                     (mod5e/weapon :longbow 1)
+                     (mod5e/equipment :arrow 20)])])
+                 (t/selection
+                  "Weapons"
+                  [(t/option
+                    "Martial Weapon and Shield"
+                    :martial-and-shield
+                    [(t/selection
+                      "Martial Weapon"
+                      (opt5e/martial-weapon-options 1))]
+                    [(mod5e/armor :shield 1)])
+                   (t/option
+                    "Two Martial Weapons"
+                    :two-martial
+                    [(t/selection
+                      "Martial Weapons"
+                      (opt5e/martial-weapon-options 1)
+                      2
+                      2)]
+                    [])])
+                 (t/selection
+                  "Additional Weapons"
+                  [(t/option
+                    "Light Crossbow and 20 Bolts"
+                    :light-crossbow
+                    []
+                    [(mod5e/weapon :crossbow--light 1)
+                     (mod5e/equipment :bolt 20)])
+                   (t/option
+                    "Two Handaxes"
+                    :two-handaxes
+                    []
+                    [(mod5e/weapon :handaxe 2)])])]
     :subclasses [{:name "Champion"
                   :selections [(add-level-prereq
                                 (opt5e/fighting-style-selection character-ref)
                                 10)]
                   :levels {3 {:modifiers [(mod5e/critical 19)]}
+                           7 {:modifiers [(mod/modifier ?default-skill-bonus (let [b (int (/ ?prof-bonus 2))] {:str b :dex b :con b}))]}
                            15 {:modifiers [(mod5e/critical 18)]}}
                   :traits [{:level 3
                             :name "Improved Critical"
@@ -1606,7 +1648,8 @@ its attack against you."}]}
                   :selections [(t/selection
                                 "Martial Maneuvers"
                                 opt5e/maneuver-options
-                                3 3)]
+                                3 3)
+                               (opt5e/tool-selection (map :key opt5e/artisans-tools) 1)]
                   :traits [{:name "Combat Superiority"
                             :level 3}
                            {:name "Student of War"
@@ -1664,6 +1707,281 @@ its attack against you."}]}
                             :level 10}
                            {:name "Bulwark"
                             :level 15}]}]}
+   character-ref))
+
+(defn monk-option [character-ref]
+  (class-option
+   {:name "Monk"
+    :hit-die 8
+    :ability-increase-levels [4 8 10 16 19]
+    :unarmored-abilities [:wis]
+    :martial-arts {1 4, 2 4, 3 4, 4 4, 5 6, 6 6, 7 6, 8 6, 9 6, 10 6, 11 8, 12 8, 13 8, 14 8, 15 8, 16 8, 17 10, 18 10, 19 10, 20 10}
+    :profs {:armor {:light true}   
+            :weapon {:simple true :shortsword true}
+            :save {:dex true :str true}
+            :skill-options {:choose 2 :options {:acrobatics true :athletics true :history true :insight true :religion true :stealth true}}}
+    :equipment-choices [{:name "Equipment Pack"
+                         :options {:dungeoneers-pack 1
+                                   :explorers-pack 1}}]
+    :weapon-choices [{:name "Weapon"
+                      :options {:shortsword 1
+                                :simple 1}}]
+    :modifiers [(mod/modifier ?armor-class (+ (?ability-bonuses :wis) ?armor-class))]
+    :levels {5 {:modifiers [(mod5e/extra-attack)]}
+             10 {:modifiers [(mod5e/immunity :poison)
+                             (mod5e/immunity :disease)]}
+             13 {:modifiers (map
+                             (fn [{:keys [name key]}]
+                               (mod5e/language name key))
+                             opt5e/languages)}
+             14 {:modifiers [(mod5e/saving-throws char5e/ability-keys)]}}
+    :equipment {:dart 10}
+    :traits [{:name "Ki"
+              :level 2
+              :description "Starting at 2nd level, your training allows you to 
+harness the mystic energy of ki. Your access to this 
+energy is represented by a number of ki points. Your 
+monk level determines the number of points you 
+have, as shown in the Ki Points column of the Monk 
+table.
+You can spend these points to fuel various ki 
+features. You start knowing three such features: 
+Flurry of Blows, Patient Defense, and Step of the 
+Wind. You learn more ki features as you gain levels 
+in this class.
+When you spend a ki point, it is unavailable until 
+you finish a short or long rest, at the end of which 
+you draw all of your expended ki back into yourself. 
+You must spend at least 30 minutes of the rest 
+meditating to regain your ki points.
+Some of your ki features require your target to 
+make a saving throw to resist the feature's effects. 
+The saving throw DC is calculated as follows:
+Ki save DC = 8 + your proficiency bonus +
+your Wisdom modifier"}
+             {:name "Flurry of Blows"
+              :level 2
+              :description "Immediately after you take the Attack action on your 
+turn, you can spend 1 ki point to make two unarmed 
+strikes as a bonus action."}
+             {:name "Patient Defense"
+              :level 2
+              :description "You can spend 1 ki point to take the Dodge action as 
+a bonus action on your turn."}
+             {:name "Step of the Wind"
+              :level 2
+              :description "You can spend 1 ki point to take the Disengage or 
+Dash action as a bonus action on your turn, and your 
+jump distance is doubled for the turn."}
+             {:name "Unarmored Movement"
+              :level 2
+              :description "Starting at 2nd level, your speed increases by 10 feet 
+while you are not wearing armor or wielding a 
+shield. This bonus increases when you reach certain 
+monk levels, as shown in the Monk table.
+At 9th level, you gain the ability to move along 
+vertical surfaces and across liquids on your turn 
+without falling during the move."}
+             {:name "Deflect Missiles"
+              :level 3
+              :description "Starting at 3rd level, you can use your reaction to 
+deflect or catch the missile when you are hit by a 
+ranged weapon attack. When you do so, the damage 
+you take from the attack is reduced by 1d10 + your 
+Dexterity modifier + your monk level.
+If you reduce the damage to 0, you can catch the 
+missile if it is small enough for you to hold in one 
+hand and you have at least one hand free. If you 
+catch a missile in this way, you can spend 1 ki point 
+to make a ranged attack with the weapon or piece of 
+ammunition you just caught, as part of the same 
+reaction. You make this attack with proficiency, 
+regardless of your weapon proficiencies, and the
+missile counts as a monk weapon for the attack, 
+which has a normal range of 20 feet and a long range 
+of 60 feet."}
+             {:name "Slow Fall"
+              :level 4
+              :description "Beginning at 4th level, you can use your reaction 
+when you fall to reduce any falling damage you take 
+by an amount equal to five times your monk level."}
+             {:name "Extra Attack"
+              :level 5
+              :description "Beginning at 5th level, you can attack twice, instead 
+of once, whenever you take the Attack action on your 
+turn."}
+             {:name "Stunning Strike"
+              :level 5
+              :description "Starting at 5th level, you can interfere with the flow 
+of ki in an opponent's body. When you hit another 
+creature with a melee weapon attack, you can spend 
+1 ki point to attempt a stunning strike. The target 
+must succeed on a Constitution saving throw or be 
+stunned until the end of your next turn."}
+             {:name "Ki-Empowered Strikes"
+              :level 6
+              :description "Starting at 6th level, your unarmed strikes count as 
+magical for the purpose of overcoming resistance 
+and immunity to nonmagical attacks and damage"}
+             {:name "Evasion"
+              :level 7
+              :description "At 7th level, your instinctive agility lets you dodge 
+out of the way of certain area effects, such as a blue 
+dragon's lightning breath or a fireball spell. When 
+you are subjected to an effect that allows you to 
+make a Dexterity saving throw to take only half 
+damage, you instead take no damage if you succeed 
+on the saving throw, and only half damage if you fail."}
+             {:name "Stillness of Mind"
+              :level 7
+              :description "Starting at 7th level, you can use your action to end 
+one effect on yourself that is causing you to be 
+charmed or frightened."}
+             {:name "Purity of Body"
+              :level 10
+              :description "At 10th level, your mastery of the ki flowing through 
+you makes you immune to disease and poison."}
+             {:name "Tongue of the Sun and Moon"
+              :level 13
+              :description "Starting at 13th level, you learn to touch the ki of 
+other minds so that you understand all spoken 
+languages. Moreover, any creature that can 
+understand a language can understand what you say."}
+             {:name "Diamond Soul"
+              :level 14
+              :description "Beginning at 14th level, your mastery of ki grants 
+you proficiency in all saving throws.
+Additionally, whenever you make a saving throw 
+and fail, you can spend 1 ki point to reroll it and take 
+the second result."}
+             {:name "Timeless Body"
+              :level 15
+              :description "At 15th level, your ki sustains you so that you suffer 
+none of the frailty of old age, and you can't be aged 
+magically. You can still die of old age, however. In 
+addition, you no longer need food or water."}
+             {:name "Empty Body"
+              :level 18
+              :description "Beginning at 18th level, you can use your action to 
+spend 4 ki points to become invisible for 1 minute. 
+During that time, you also have resistance to all 
+damage but force damage.
+Additionally, you can spend 8 ki points to cast the 
+astral projection spell, without needing material 
+components. When you do so, you can't take any 
+other creatures with you."}
+             {:name "Perfect Self"
+              :level 20
+              :description "At 20th level, when you roll for initiative and have 
+no ki points remaining, you regain 4 ki points."}]
+    :subclass-level 3
+    :subclass-title "Monastic Tradition"
+    :subclasses [{:name "Way of the Open Hand"
+                  :traits [{:name "Open Hand Technique"
+                            :level 3
+                            :description "Starting when you choose this tradition at 3rd level, 
+you can manipulate your enemy's ki when you 
+harness your own. Whenever you hit a creature with 
+one of the attacks granted by your Flurry of Blows, 
+you can impose one of the following effects on that 
+target:
+* It must succeed on a Dexterity saving throw or be 
+knocked prone.
+* It must make a Strength saving throw. If it fails, 
+you can push it up to 15 feet away from you. 
+* It can't take reactions until the end of your next 
+turn."}
+                           {:name "Wholeness of Body"
+                            :level 6
+                            :description "At 6th level, you gain the ability to heal yourself. As 
+an action, you can regain hit points equal to three 
+times your monk level. You must finish a long rest 
+before you can use this feature again."}
+                           {:name "Tranquility"
+                            :level 11
+                            :description "Beginning at 11th level, you can enter a special 
+meditation that surrounds you with an aura of peace. 
+At the end of a long rest, you gain the effect of a 
+sanctuary spell that lasts until the start of your next 
+long rest (the spell can end early as normal). The 
+saving throw DC for the spell equals 8 + your 
+Wisdom modifier + your proficiency bonus."}
+                           {:name "Quivering Palm"
+                            :level 17
+                            :description "At 17th level, you gain the ability to set up lethal 
+vibrations in someone's body. When you hit a 
+creature with an unarmed strike, you can spend 3 ki 
+points to start these imperceptible vibrations, which 
+last for a number of days equal to your monk level. 
+The vibrations are harmless unless you use your 
+action to end them. To do so, you and the target 
+must be on the same plane of existence. When you 
+use this action, the creature must make a 
+Constitution saving throw. If it fails, it is reduced to 0 
+hit points. If it succeeds, it takes 10d10 necrotic 
+damage.
+You can have only one creature under the effect of 
+this feature at a time. You can choose to end the 
+vibrations harmlessly without using an action."}]}
+                 {:name "Way of Shadow"
+                  :traits [{:name "Shadow Arts"
+                            :level 3}
+                           {:name "Shadow Step"
+                            :level 6}
+                           {:name "Cloak of Shadows"
+                            :level 11}
+                           {:name "Opportunist"
+                            :level 17}]}
+                 {:name "Way of the Four Elements"
+                  :levels {3 {:selections [(opt5e/monk-elemental-disciplines)]}
+                           6 {:selections [(opt5e/monk-elemental-disciplines)]}
+                           11 {:selections [(opt5e/monk-elemental-disciplines)]}
+                           17 {:selections [(opt5e/monk-elemental-disciplines)]}}
+                  :traits [{:name "Disciple of the Elements"
+                            :level 3}
+                           {:name "Elemental Discipline: Elemental Attunement"}]}
+                 {:name "Way of the Long Death"
+                  :source "Sword Coast Adventurer's Guide"
+                  :traits [{:name "Touch of Death"
+                            :level 3}
+                           {:name "Hour of Reaping"
+                            :level 6}
+                           
+                           {:name "Mastery of Death"
+                            :level 11}
+                           {:name "Touch of the Long Death"
+                            :level 17}]}
+                 {:name "Way of the Sun Soul"
+                  :source "Sword Coast Adventurer's Guide"
+                  :traits [{:name "Radiant Sun Bolt"
+                            :level 2}
+                           {:name "Searing Arc Strike"
+                            :level 6}
+                           {:name "Searing Sunburst"
+                            :level 11}
+                           {:name "Sun Shield"
+                            :level 17}]}
+                 {:name "Way of the Kensei"
+                  :source "Unearthed Arcana: Monk"
+                  :traits [{:name "Path of the Kensei"
+                            :level 3}
+                           {:name "One with the Blade"
+                            :level 6}
+                           {:name "Sharpen the Blade"
+                            :level 11}
+                           {:name "Unerring Accuracy"}]}
+                 {:name "Way of the Tranquility"
+                  :source "Unearthed Arcana: Monk"
+                  :traits [{:name "Path of Tranquility"
+                            :level 3}
+                           {:name "Healing Hands"
+                            :level 3}
+                           {:name "Emissary of Peace"
+                            :level 6}
+                           {:name "Douse the Flames of War"
+                            :level 11}
+                           {:name "Anger of a Gentle Soul"
+                            :level 17}]}]}
    character-ref))
 
 (defn reroll-abilities [character-ref]
@@ -1730,7 +2048,8 @@ its attack against you."}]}
      (bard-option character-ref)
      (cleric-option character-ref)
      (druid-option character-ref)
-     (fighter-option character-ref)])])
+     (fighter-option character-ref)
+     (monk-option character-ref)])])
 
 (def template-base
   (es/make-entity
@@ -1753,14 +2072,14 @@ its attack against you."}]}
                       ?abilities)
     ?total-levels (apply + (map (fn [[k {l :class-level}]] l) ?levels))
     ?prof-bonus (+ (int (/ (dec ?total-levels) 4)) 2)
-    ?default-skill-bonus 0
+    ?default-skill-bonus {}
     ?skill-prof-bonuses (reduce
                          (fn [m {k :key}]
                            (assoc m k (if (k ?skill-profs)
                                         (if (k ?skill-expertise)
                                           (* 2 ?prof-bonus)
                                           ?prof-bonus)
-                                        ?default-skill-bonus)))
+                                        (or (?default-skill-bonus (opt5e/skill-abilities k)) 0))))
                          {}
                          opt5e/skills)
     ?skill-bonuses (reduce-kv

@@ -18,6 +18,9 @@
 (defn resistance [value]
   (mods/set-mod ?resistances value))
 
+(defn immunity [value]
+  (mods/set-mod ?immunities value))
+
 (defn darkvision [value]
   (mods/modifier ?darkvision value))
 
