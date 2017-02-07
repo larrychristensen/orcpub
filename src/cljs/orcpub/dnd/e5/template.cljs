@@ -513,7 +513,9 @@ to the extra damage of the critical hit."}]}))
   (t/option
    (str i)
    (keyword (str i))
-   (some-> levels (get i) :selections)
+   (concat
+    (some-> levels (get i) :selections)
+    (some-> spellcasting-template :selections (get i)))
    (some-> levels (get i) :modifiers)))
 
 (defn subclass-option [cls

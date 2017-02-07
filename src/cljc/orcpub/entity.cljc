@@ -227,7 +227,7 @@
 
 (defn merge-options [options other-options]
   (if (or options other-options)
-    (let [opt-map (zipmap (map ::t/key options) other-options)
+    (let [opt-map (zipmap (map ::t/key options) options)
           other-opt-map (zipmap (map ::t/key other-options) other-options)
           merged (merge-with
                   (fn [o1 o2]
@@ -245,20 +245,23 @@
        (vec (vals (apply dissoc merged (map ::t/key options))))))))
 
 (defn merge-selections [selections other-selections]
-  #?(:cljs (js/console.log "SELECTIONS" (type selections) (type other-selections)))
   (if (or selections other-selections)
     (let [sel-map (zipmap (map ::t/key selections) selections)
-          other-sel-map (zipmap (map ::t/key other-selections) other-selections)]
-      (vec
-       (vals
-        (merge-with
-         (fn [s1 s2]
-           (assoc
-            s1
-            ::t/options
-            (merge-options (::t/options s1) (::t/options s2))))
-         sel-map
-         other-sel-map))))))
+          other-sel-map (zipmap (map ::t/key other-selections) other-selections)
+          merged (merge-with
+                  (fn [s1 s2]
+                    (assoc
+                     s1
+                     ::t/options
+                     (merge-options (::t/options s1) (::t/options s2))))
+                  sel-map
+                  other-sel-map)]
+      (concat
+       (mapv
+        (fn [{key ::t/key}]
+          (merged key))
+        selections)
+       (vec (vals (apply dissoc merged (map ::t/key selections))))))))
 
 (defn build-template [raw-entity template]
   (let [plugin-map (t/make-modifier-map template)
