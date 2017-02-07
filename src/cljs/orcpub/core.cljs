@@ -108,7 +108,7 @@
           new-value (cljs.reader/read-string (.. e -target -value))]
       (swap! character-ref #(set-option-value % (conj option-path ::entity/key) new-value)))))
 
-(defn option [path option-paths selectable? {:keys [::t/key ::t/name ::t/selections ::t/modifiers ::t/prereqs ::t/ui-fn ::t/select-fn]} built-char raw-char changeable? options change-fn]
+(defn option [path option-paths selectable? {:keys [::t/key ::t/name ::t/selections ::t/modifiers ::t/prereqs ::t/ui-fn ::t/select-fn]} built-char raw-char changeable? options change-fn built-template]
   (let [new-path (conj path key)
         selected? (boolean (get-in option-paths new-path))
         named-mods (filter ::mod/name modifiers)
@@ -131,7 +131,7 @@
                     (do
                       (if select-fn
                         (select-fn path))
-                      (swap! character-ref #(update-option template % path (fn [o] (assoc o ::entity/key key))))))
+                      (swap! character-ref #(update-option built-template % path (fn [o] (assoc o ::entity/key key))))))
                   (.stopPropagation e))}
      (if changeable? (dropdown options key change-fn) [:span {:style {:font-weight :bold}} name])
      (if (not meets-prereqs?)
@@ -152,7 +152,7 @@
               (str
                (::mod/name m)
                " "
-               (let [v (or value (get-option-value template @character-ref path))]
+               (let [v (or value (get-option-value built-template @character-ref path))]
                  (if val-fn
                    (val-fn v)
                    v)))))
@@ -166,29 +166,28 @@
            (fn [{:keys [::t/prereq-fn ::t/key] :as selection}]
              (if (or (not prereq-fn) (prereq-fn built-char))
                ^{:key key}
-               [builder-selector new-path option-paths selection built-char raw-char]))
+               [builder-selector new-path option-paths selection built-char raw-char built-template]))
            selections))]])]))
 
 (def builder-selector-style)
 
-(defn add-option-button [{:keys [::t/key ::t/name ::t/options] :as selection} entity path new-item-fn]
+(defn add-option-button [{:keys [::t/key ::t/name ::t/options] :as selection} entity path new-item-fn built-template]
   [:div.add-item-button
    [:i.fa.fa-plus-circle]
    [:span
     {:on-click
      (fn []
-       (let [template template
-             value-path (entity/get-entity-path template entity path)
+       (let [value-path (entity/get-entity-path built-template entity path)
              new-item (new-item-fn
                        selection
                        options
                        (get-in @character-ref value-path))]
-         (swap! character-ref #(update-option template % path
+         (swap! character-ref #(update-option built-template % path
                                 (fn [options] (conj (vec options) new-item))))))
      :style {:margin-left "5px"}} (str "Add " name)]])
 
-(defn dropdown-selector [path option-paths {:keys [::t/options ::t/min ::t/max ::t/key ::t/name ::t/sequential? ::t/new-item-fn] :as selection} built-char raw-char]
-  (let [change-fn (partial make-dropdown-change-fn path key template raw-char character-ref)
+(defn dropdown-selector [path option-paths {:keys [::t/options ::t/min ::t/max ::t/key ::t/name ::t/sequential? ::t/new-item-fn] :as selection} built-char raw-char built-template]
+  (let [change-fn (partial make-dropdown-change-fn path key built-template raw-char character-ref)
         options (filter (fn [{:keys [::t/prereq-fn]}]
                           (or (not prereq-fn) (prereq-fn built-char)))
                         options)]
@@ -198,7 +197,7 @@
          (doall
           (for [i (range max)]
             (let [option-path (conj path key i)
-                  entity-path (entity/get-entity-path template raw-char option-path)
+                  entity-path (entity/get-entity-path built-template raw-char option-path)
                   key-path (conj entity-path ::entity/key)
                   value (get-in @character-ref key-path)]
               ^{:key i} [:div (dropdown options value (change-fn i))]))))
@@ -208,18 +207,18 @@
           (fn [i {value ::entity/key}]
             ^{:key i}
             [:div (dropdown options value (change-fn i))])
-          (get-in @character-ref (entity/get-entity-path template raw-char (conj path key)))))
-        (add-option-button selection raw-char (conj path key) new-item-fn)])]))
+          (get-in @character-ref (entity/get-entity-path built-template raw-char (conj path key)))))
+        (add-option-button selection raw-char (conj path key) new-item-fn built-template)])]))
 
-(defn remove-option-button [path index]
+(defn remove-option-button [path built-template index]
   [:i.fa.fa-minus-circle.remove-item-button
    {:on-click
     (fn [e]
-      (swap! character-ref #(remove-list-option template % path index)))}])
+      (swap! character-ref #(remove-list-option built-template % path index)))}])
 
-(defn filter-selected [path key option-paths options raw-char]
+(defn filter-selected [path key option-paths options raw-char built-template]
   (let [options-path (conj path key)
-        entity-opt-path (entity/get-entity-path template raw-char options-path)
+        entity-opt-path (entity/get-entity-path built-template raw-char options-path)
         selected (get-in raw-char entity-opt-path)]
     (if (sequential? selected)
       (let [options-map (into {} (map (juxt ::t/key identity) options))]
@@ -233,17 +232,17 @@
            (get-in option-paths option-path)))
        options))))
 
-(defn list-selector-option [removeable? path option-paths multiple-select? i opt built-char raw-char changeable? options change-fn]
+(defn list-selector-option [removeable? path option-paths multiple-select? i opt built-char raw-char changeable? options change-fn built-template]
   [:div.list-selector-option
    [:div {:style {:flex-grow 1}}
-    [option path option-paths (not multiple-select?) opt built-char raw-char changeable? options change-fn]]
+    [option path option-paths (not multiple-select?) opt built-char raw-char changeable? options change-fn built-template]]
    (if (removeable? i)
-     [remove-option-button path i])])
+     [remove-option-button path built-template i])])
 
-(defn list-selector [path option-paths {:keys [::t/options ::t/min ::t/max ::t/key ::t/name ::t/sequential? ::t/new-item-fn] :as selection} built-char raw-char]
+(defn list-selector [path option-paths {:keys [::t/options ::t/min ::t/max ::t/key ::t/name ::t/sequential? ::t/new-item-fn] :as selection} built-char raw-char built-template]
   (let [no-max? (nil? max)
         multiple-select? (or no-max? (> max 1))
-        selected-options (filter-selected path key option-paths options raw-char)
+        selected-options (filter-selected path key option-paths options raw-char built-template)
         addable? (and multiple-select?
                       (or no-max?
                           (< (count selected-options) max)))
@@ -268,14 +267,15 @@
           raw-char
           (and addable? (not sequential?))
           options
-          (make-dropdown-change-fn path key template raw-char character-ref i)])
+          (make-dropdown-change-fn path key built-template raw-char character-ref i)
+          built-template])
        (if multiple-select?
          selected-options
          options)))
      (if (and addable? new-item-fn)
-       (add-option-button selection raw-char (conj path key) new-item-fn))]))
+       (add-option-button selection raw-char (conj path key) new-item-fn built-template))]))
 
-(defn builder-selector [path option-paths selection built-char raw-char]
+(defn builder-selector [path option-paths selection built-char raw-char built-template]
   ^{:key (::t/name selection)}
   [:div.builder-selector
    [:h2.builder-selector-header (::t/name selection)]
@@ -287,8 +287,8 @@
                              (::t/ui-fn %))
                         (::t/options selection)))]
       (if simple-options?
-        [dropdown-selector path option-paths selection built-char raw-char]
-        [list-selector path option-paths selection built-char raw-char]))]])
+        [dropdown-selector path option-paths selection built-char raw-char built-template]
+        [list-selector path option-paths selection built-char raw-char built-template]))]])
 
 (def content-style
   {:width 1440})
@@ -457,7 +457,7 @@
   (cljs.pprint/pprint @character-ref)
   (let [option-paths (make-path-map @character-ref)
         built-template (entity/build-template @character-ref template)
-        built-char (entity/build @character-ref template)]
+        built-char (entity/build @character-ref built-template)]
     (js/console.log "BUILT TEMPLATE" built-template)
     ;;(print-char built-char)
     [:div.app
@@ -482,7 +482,7 @@
            
            (fn [selection]
              ^{:key (::t/key selection)}
-             [builder-selector [] option-paths selection built-char @character-ref])
+             [builder-selector [] option-paths selection built-char @character-ref built-template])
            (::t/selections template)))]
         [:div {:style {:flex-grow 1
                        :margin-top "10px"
