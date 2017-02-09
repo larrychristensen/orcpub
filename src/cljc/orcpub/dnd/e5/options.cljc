@@ -849,23 +849,24 @@
                                        ability] :as cfg}]
   (case known-mode
     :schedule (reduce
-               (fn [m [k v]]
-                 (let [[cls-lvl restriction] (if (number? v) [v] ((juxt :num :restriction) v))
+               (fn [m [cls-lvl v]]
+                 (let [[num restriction] (if (number? v) [v] ((juxt :num :restriction) v))
                        slots (total-slots cls-lvl level-factor)]
-                   (assoc m k (if (> (count slots) 1)
-                                [(t/selection
-                                  "Spell"
-                                  (mapv
-                                   (fn [[lvl _]]
-                                     (let [spell-keys (get-in sl/spell-lists [class-key lvl])
-                                           final-spell-keys (apply-spell-restriction spell-keys restriction)]
-                                       (t/option
-                                        (spell-level-title lvl)
-                                        (keyword (str lvl))
-                                        [(spell-selection class-key lvl final-spell-keys ability cls-lvl)]
-                                        [])))
-                                   slots))]
-                                [(spell-selection class-key 1 (apply-spell-restriction (get-in sl/spell-lists [class-key 1]) restriction) ability cls-lvl)]))))
+                   (assoc m cls-lvl
+                          (if (> (count slots) 1)
+                            [(t/selection
+                              "Spell"
+                              (mapv
+                               (fn [[lvl _]]
+                                 (let [spell-keys (get-in sl/spell-lists [class-key lvl])
+                                       final-spell-keys (apply-spell-restriction spell-keys restriction)]
+                                   (t/option
+                                    (spell-level-title lvl)
+                                    (keyword (str lvl))
+                                    [(spell-selection class-key lvl final-spell-keys ability num)]
+                                    [])))
+                               slots))]
+                            [(spell-selection class-key 1 (apply-spell-restriction (get-in sl/spell-lists [class-key 1]) restriction) ability num)]))))
                {}
                spells-known)
     {}))
