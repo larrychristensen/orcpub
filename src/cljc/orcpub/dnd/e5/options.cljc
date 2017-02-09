@@ -777,6 +777,18 @@
        18 {5 1}
        19 {6 1}
        20 {7 1}}
+    2 {2 {1 2}
+       3 {1 1}
+       5 {1 1
+          2 2}
+       7 {2 1}
+       9 {3 1}
+       11 {3 1}
+       13 {4 1}
+       15 {4 1}
+       17 {4 1
+           5 1}
+       19 {5 1}}
     3 {3 {1 2}
        4 {1 1}
        7 {1 1
@@ -1163,39 +1175,50 @@
        character/ability-keys))]
     [])])
 
-(defn fighting-style-selection [character-ref]
+
+(def fighting-style-options
+  [(t/option
+    "Archery"
+    :archery
+    []
+    [(modifiers/ranged-attack-bonus 2)
+     (modifiers/trait "Archery Fighting Style" "You gain a +2 bonus to attack rolls you make with ranged weapons.")])
+   (t/option
+    "Defense"
+    :defense
+    []
+    [(modifiers/armored-ac-bonus 1)
+     (modifiers/trait "Defense Fighting Style" "While you are wearing armor, you gain a +1 bonus to AC.")])
+   (t/option
+    "Dueling"
+    :dueling
+    []
+    [(modifiers/trait "Dueling Fighting Style" "When you are wielding a melee weapon in one hand and no other weapons, you gain a +2 bonus to damage rolls with that weapon.")])
+   (t/option
+    "Great Weapon Fighting"
+    :great-weapon-fighting
+    []
+    [(modifiers/trait "Great Weapon Fighting Style" "When you roll a 1 or 2 on a damage die for an attack you make with a melee weapon that you are wielding with two hands, you can reroll the die and must use the new roll, even if the new roll is a 1 or a 2. The weapon must have the two-handed or versatile property for you to gain this benefit.")])
+   (t/option
+    "Protection"
+    :protection
+    []
+    [(modifiers/trait "Protection Fighting Style" "When a creature you can see attacks a target other than you that is within 5 feet of you, you can use your reaction to impose disadvantage on the attack roll. You must be wielding a shield.")])
+   (t/option
+    "Two Weapon Fighting"
+    :two-weapon-fighting
+    []
+    [(modifiers/trait "Two Weapon Fighting" "When you engage in two-weapon fighting, you can add your ability modifier to the damage of the second attack.")])])
+
+(defn fighting-style-selection [character-ref & [restrictions]]
   (t/selection
    "Fighting Style"
-   [(t/option
-     "Archery"
-     :archery
-     []
-     [(modifiers/ranged-attack-bonus 2)])
-    (t/option
-     "Defense"
-     :defense
-     []
-     [(modifiers/armored-ac-bonus 1)])
-    (t/option
-     "Dueling"
-     :dueling
-     []
-     [(modifiers/trait "Dueling Fighting Style")])
-    (t/option
-     "Great Weapon Fighting"
-     :great-weapon-fighting
-     []
-     [(modifiers/trait "Great Weapon Fighting Style")])
-    (t/option
-     "Protection"
-     :protection
-     []
-     [(modifiers/trait "Protection Fighting Style")])
-    (t/option
-     "Two Weapon Fighting"
-     :two-weapon-fighting
-     []
-     [(modifiers/trait "Two Weapon Fighting")])]))
+   (if restrictions
+     (filter
+      (fn [o]
+        (restrictions (::t/key o)))
+      fighting-style-options)
+     fighting-style-options)))
 
 (defn feat-selection [num]
   (t/selection

@@ -1674,16 +1674,16 @@ its attack against you."}]}
                                                    :restriction eldritch-knight-spell?}
                                                 8 1
                                                 10 {:num 1
-                                                   :restriction eldritch-knight-spell?}
+                                                    :restriction eldritch-knight-spell?}
                                                 11 {:num 1
-                                                   :restriction eldritch-knight-spell?}
+                                                    :restriction eldritch-knight-spell?}
                                                 13 {:num 1
-                                                   :restriction eldritch-knight-spell?}
+                                                    :restriction eldritch-knight-spell?}
                                                 14 1
                                                 16 {:num 1
-                                                   :restriction eldritch-knight-spell?}
+                                                    :restriction eldritch-knight-spell?}
                                                 19 {:num 1
-                                                   :restriction eldritch-knight-spell?}
+                                                    :restriction eldritch-knight-spell?}
                                                 20 1}
                                  :ability :int}
                   
@@ -1984,6 +1984,267 @@ vibrations harmlessly without using an action."}]}
                             :level 17}]}]}
    character-ref))
 
+(defn paladin-option [character-ref]
+  (class-option
+   {:name "Paladin"
+    :spellcaster true
+    :spellcasting {:level-factor 2
+                   :known-mode :all
+                   :ability :cha}
+    :hit-die 10
+    :ability-increase-levels [4 8 12 16 19]
+    :profs {:armor {:light true :medium true :heavy true :shields true}
+            :weapon {:simple true :martial true}
+            :save {:wis true :cha true}
+            :skill-options {:choose 2 :options {:athletics true :insight true :intimidation true :medicine true :persuasion true :religion true}}}
+    :equipment-choices [{:name "Equipment Pack"
+                         :options {:priests-pack 1
+                                   :explorers-pack 1}}]
+    :armor {:chain-mail 1}
+    :levels {3 {:modifiers [(mod5e/immunity :disease)]}
+             5 {:modifiers [(mod5e/extra-attack)]}}
+    :selections [(t/selection
+                  "Weapons"
+                  [(t/option
+                    "Martial Weapon and Shield"
+                    :martial-and-shield
+                    [(t/selection
+                      "Martial Weapon"
+                      (opt5e/martial-weapon-options 1))]
+                    [(mod5e/armor :shield 1)])
+                   (t/option
+                    "Two Martial Weapons"
+                    :two-martial
+                    [(t/selection
+                      "Martial Weapons"
+                      (opt5e/martial-weapon-options 1)
+                      2
+                      2)]
+                    [])])
+                 (t/selection
+                  "Melee Weapon"
+                  [(t/option
+                    "Five Javelins"
+                    :javelins
+                    []
+                    [(mod5e/weapon :javelin 5)])
+                   (t/option
+                    "Simple Melee Weapon"
+                    :simple-melee
+                    [(t/selection
+                      "Simple Melee Weapon"
+                      (opt5e/simple-melee-weapon-options 1))]
+                    [])])
+                 (opt5e/fighting-style-selection character-ref #{:defense :dueling :great-weapon-fighting :protection})]
+    :fighting-styles [{:name "Defense"
+                       :description "While you are wearing armor, you gain a +1 bonus to AC."}
+                      {:name "Dueling"
+                       :description "When you are wielding a melee weapon in one hand and no other weapons, you gain a +2 bonus to damage rolls with that weapon."}
+                      {:name "Great Weapon Fighting"
+                       :description "When you roll a 1 or 2 on a damage die for an attack you make with a melee weapon that you are wielding with two hands, you can reroll the die and must use the new roll, even if the new roll is a 1 or a 2. The weapon must have the two-handed or versatile property for you to gain this benefit."}
+                      {:name "Protection"
+                       :description "When a creature you can see attacks a target other than you that is within 5 feet of you, you can use your reaction to impose disadvantage on the attack roll. You must be wielding a shield."}]
+    :fighting-style-levels [2]
+    :traits [{:name "Divine Sense"
+              :description "The presence of strong evil registers on your senses 
+like a noxious odor, and powerful good rings like 
+heavenly music in your ears. As an action, you can 
+open your awareness to detect such forces. Until the 
+end of your next turn, you know the location of any 
+celestial, fiend, or undead within 60 feet of you that 
+is not behind total cover. You know the type 
+(celestial, fiend, or undead) of any being whose 
+presence you sense, but not its identity (the vampire 
+Count Strahd von Zarovich, for instance). Within the 
+same radius, you also detect the presence of any 
+place or object that has been consecrated or 
+desecrated, as with the hallow spell.
+You can use this feature a number of times equal 
+to 1 + your Charisma modifier. When you finish a 
+long rest, you regain all expended uses."}
+             {:name "Lay on Hands"
+              :description "Your blessed touch can heal wounds. You have a 
+pool of healing power that replenishes when you 
+take a long rest. With that pool, you can restore a 
+total number of hit points equal to your paladin level 
+× 5.
+As an action, you can touch a creature and draw 
+power from the pool to restore a number of hit 
+points to that creature, up to the maximum amount 
+remaining in your pool.
+Alternatively, you can expend 5 hit points from 
+your pool of healing to cure the target of one disease 
+or neutralize one poison affecting it. You can cure 
+multiple diseases and neutralize multiple poisons 
+with a single use of Lay on Hands, expending hit 
+points separately for each one.
+This feature has no effect on undead and 
+constructs."}
+             {:name "Divine Smite"
+              :level 2
+              :description "Starting at 2nd level, when you hit a creature with a 
+melee weapon attack, you can expend one spell slot 
+to deal radiant damage to the target, in addition to 
+the weapon's damage. The extra damage is 2d8 for a 
+1st-level spell slot, plus 1d8 for each spell level 
+Not for resale. Permission granted to print or photocopy this document for personal use only. System Reference Document 5.0 32
+higher than 1st, to a maximum of 5d8. The damage 
+increases by 1d8 if the target is an undead or a fiend."}
+             {:name "Divine Health"
+              :level 3
+              :description "By 3rd level, the divine magic flowing through you 
+makes you immune to disease."}
+             {:name "Extra Attack"
+              :level 5
+              :description "Beginning at 5th level, you can attack twice, instead 
+of once, whenever you take the Attack action on your 
+turn."}
+             {:name "Aura of Protection"
+              :level 6
+              :description "Starting at 6th level, whenever you or a friendly 
+creature within 10 feet of you must make a saving 
+throw, the creature gains a bonus to the saving 
+throw equal to your Charisma modifier (with a 
+minimum bonus of +1). You must be conscious to 
+grant this bonus.
+At 18th level, the range of this aura increases to 30 
+feet."}
+             {:name "Aura of Courage"
+              :level 10
+              :description "Starting at 10th level, you and friendly creatures 
+within 10 feet of you can't be frightened while you 
+are conscious.
+At 18th level, the range of this aura increases to 30 
+feet."}
+             {:name "Improved Divine Smite"
+              :level 11
+              :description "By 11th level, you are so suffused with righteous 
+might that all your melee weapon strikes carry 
+divine power with them. Whenever you hit a 
+creature with a melee weapon, the creature takes an 
+extra 1d8 radiant damage. If you also use your 
+Divine Smite with an attack, you add this damage to 
+the extra damage of your Divine Smite."}
+             {:name "Cleansing Touch"
+              :level 14
+              :description "Beginning at 14th level, you can use your action to 
+end one spell on yourself or on one willing creature 
+that you touch.
+You can use this feature a number of times equal 
+to your Charisma modifier (a minimum of once). You 
+regain expended uses when you finish a long rest."}]
+    :subclass-level 3
+    :subclass-title "Sacred Oath"
+    :subclasses [{:name "Oath of Devotion"
+                  :modifiers [(mod5e/spells-known 1 :protection-from-evil-and-good :wis 3)
+                              (mod5e/spells-known 1 :sanctuary :wis 3)
+                              (mod5e/spells-known 2 :lesser-restoration :wis 5)
+                              (mod5e/spells-known 2 :zone-of-truth :wis 5)
+                              (mod5e/spells-known 3 :beacon-of-hope :wis 9)
+                              (mod5e/spells-known 3 :dispel-magic :wis 9)
+                              (mod5e/spells-known 4 :freedom-of-movement :wis 13)
+                              (mod5e/spells-known 4 :guardian-of-faith :wis 13)
+                              (mod5e/spells-known 5 :commune :wis 17)
+                              (mod5e/spells-known 5 :flame-strike :wis 17)]
+                  :traits [{:name "Channel Divinity"
+                            :level 3
+                            :description "When you take this oath at 3rd level, you gain the 
+following two Channel Divinity options.
+Sacred Weapon. As an action, you can imbue one 
+weapon that you are holding with positive energy, 
+using your Channel Divinity. For 1 minute, you add 
+your Charisma modifier to attack rolls made with 
+that weapon (with a minimum bonus of +1). The 
+weapon also emits bright light in a 20-foot radius 
+and dim light 20 feet beyond that. If the weapon is 
+not already magical, it becomes magical for the 
+duration.
+You can end this effect on your turn as part of any 
+other action. If you are no longer holding or carrying 
+this weapon, or if you fall unconscious, this effect 
+ends.
+Turn the Unholy. As an action, you present your 
+holy symbol and speak a prayer censuring fiends 
+and undead, using your Channel Divinity. Each fiend 
+or undead that can see or hear you within 30 feet of 
+you must make a Wisdom saving throw. If the 
+creature fails its saving throw, it is turned for 1 
+minute or until it takes damage.
+A turned creature must spend its turns trying to 
+move as far away from you as it can, and it can't 
+willingly move to a space within 30 feet of you. It 
+also can't take reactions. For its action, it can use 
+only the Dash action or try to escape from an effect 
+that prevents it from moving. If there's nowhere to 
+move, the creature can use the Dodge action."}
+                           {:name "Aura of Devotion"
+                            :level 7
+                            :description "Starting at 7th level, you and friendly creatures 
+within 10 feet of you can't be charmed while you are 
+conscious.
+At 18th level, the range of this aura increases to 30 
+feet."}
+                           {:name "Purity of Spirit"
+                            :level 15
+                            :description "Beginning at 15th level, you are always under the 
+effects of a protection from evil and good spell."}
+                           {:name "Holy Nimbus"
+                            :level 20
+                            :description "At 20th level, as an action, you can emanate an aura 
+of sunlight. For 1 minute, bright light shines from 
+you in a 30-foot radius, and dim light shines 30 feet 
+beyond that.
+Whenever an enemy creature starts its turn in the 
+bright light, the creature takes 10 radiant damage.
+In addition, for the duration, you have advantage 
+on saving throws against spells cast by fiends or 
+undead.
+Once you use this feature, you can't use it again 
+until you finish a long rest."}]}
+                 {:name "Oath of the Ancients"
+                  :modifiers [(mod5e/spells-known 1 :ensnaring-strike :wis 3)
+                              (mod5e/spells-known 1 :speak-with-animals :wis 3)
+                              (mod5e/spells-known 2 :misty-step :wis 5)
+                              (mod5e/spells-known 2 :moonbeam :wis 5)
+                              (mod5e/spells-known 3 :plant-growth :wis 9)
+                              (mod5e/spells-known 3 :protection-from-energy :wis 9)
+                              (mod5e/spells-known 4 :ice-storm :wis 13)
+                              (mod5e/spells-known 4 :stoneskin :wis 13)
+                              (mod5e/spells-known 5 :commune-with-nature :wis 17)
+                              (mod5e/spells-known 5 :tree-stride :wis 17)]
+                  :traits [{:name "Channel Divinity: Nature's Wrath"
+                            :level 3}
+                           {:name "Channel Divinity: Turn the Faithless"
+                            :level 3}
+                           {:name "Aura of Warding"
+                            :level 7}
+                           {:name "Undying Sentinal"
+                            :level 15}
+                           {:name "Elder Champion"
+                            :level 20}]}
+                 {:name "Oath of Vengeance"
+                  :modifiers [(mod5e/spells-known 1 :bane :wis 3)
+                              (mod5e/spells-known 1 :hunters-mark :wis 3)
+                              (mod5e/spells-known 2 :hold-person :wis 5)
+                              (mod5e/spells-known 2 :misty-step :wis 5)
+                              (mod5e/spells-known 3 :haste :wis 9)
+                              (mod5e/spells-known 3 :protection-from-energy :wis 9)
+                              (mod5e/spells-known 4 :banishment :wis 13)
+                              (mod5e/spells-known 4 :dimension-door :wis 13)
+                              (mod5e/spells-known 5 :hold-monster :wis 17)
+                              (mod5e/spells-known 5 :scrying :wis 17)]
+                  :traits [{:name "Channel Divinity: Abjure Enemy"
+                            :level 3}
+                           {:name "Channel Divinity: Vow of Eternity"
+                            :level 3}
+                           {:name "Relentless Avenger"
+                            :level 7}
+                           {:name "Soul of Vengeance"
+                            :level 15}
+                           {:name "Avenging Angel"
+                            :level 20}]}]}
+   character-ref))
+
 (defn reroll-abilities [character-ref]
   (fn []
     (swap! character-ref
@@ -2049,7 +2310,8 @@ vibrations harmlessly without using an action."}]}
      (cleric-option character-ref)
      (druid-option character-ref)
      (fighter-option character-ref)
-     (monk-option character-ref)])])
+     (monk-option character-ref)
+     (paladin-option character-ref)])])
 
 (def template-base
   (es/make-entity
