@@ -2001,7 +2001,8 @@ vibrations harmlessly without using an action."}]}
                          :options {:priests-pack 1
                                    :explorers-pack 1}}]
     :armor {:chain-mail 1}
-    :levels {3 {:modifiers [(mod5e/immunity :disease)]}
+    :levels {2 {:selections [(opt5e/fighting-style-selection character-ref #{:defense :dueling :great-weapon-fighting :protection})]}
+             3 {:modifiers [(mod5e/immunity :disease)]}
              5 {:modifiers [(mod5e/extra-attack)]}}
     :selections [(t/selection
                   "Weapons"
@@ -2034,17 +2035,7 @@ vibrations harmlessly without using an action."}]}
                     [(t/selection
                       "Simple Melee Weapon"
                       (opt5e/simple-melee-weapon-options 1))]
-                    [])])
-                 (opt5e/fighting-style-selection character-ref #{:defense :dueling :great-weapon-fighting :protection})]
-    :fighting-styles [{:name "Defense"
-                       :description "While you are wearing armor, you gain a +1 bonus to AC."}
-                      {:name "Dueling"
-                       :description "When you are wielding a melee weapon in one hand and no other weapons, you gain a +2 bonus to damage rolls with that weapon."}
-                      {:name "Great Weapon Fighting"
-                       :description "When you roll a 1 or 2 on a damage die for an attack you make with a melee weapon that you are wielding with two hands, you can reroll the die and must use the new roll, even if the new roll is a 1 or a 2. The weapon must have the two-handed or versatile property for you to gain this benefit."}
-                      {:name "Protection"
-                       :description "When a creature you can see attacks a target other than you that is within 5 feet of you, you can use your reaction to impose disadvantage on the attack roll. You must be wielding a shield."}]
-    :fighting-style-levels [2]
+                    [])])]
     :traits [{:name "Divine Sense"
               :description "The presence of strong evil registers on your senses 
 like a noxious odor, and powerful good rings like 
@@ -2245,6 +2236,239 @@ until you finish a long rest."}]}
                             :level 20}]}]}
    character-ref))
 
+(defn ranger-option [character-ref]
+  (class-option
+   {:name "Ranger"
+    :hit-die 10
+    :profs {:armor {:light true :medium true}
+            :weapon {:simple true :martial true}
+            :save {:str true :dex true}
+            :skill-options {:choose 3 :options {:animal-handling true :athletics true :insight true :investigation true :nature true :perception true :stealth true :survival true}}}
+    :ability-increase-levels [4 8 10 16 19]
+    :spellcaster true
+    :spellcasting {:level-factor 2
+                   :known-mode :schedule
+                   :spells-known {2 2
+                                  3 1
+                                  5 1
+                                  7 1
+                                  9 1
+                                  11 1
+                                  13 1
+                                  15 1
+                                  17 1
+                                  19 1}
+                   :ability :wis}
+    :levels {2 {:selections [(opt5e/fighting-style-selection character-ref #{:archery :defense :dueling :two-weapon-fighting})]}
+             5 {:modifiers [(mod5e/extra-attack)]}}
+    :traits [{:name "Primeval Awareness"
+              :level 3
+              :description "Beginning at 3rd level, you can use your action and 
+expend one ranger spell slot to focus your 
+awareness on the region around you. For 1 minute 
+per level of the spell slot you expend, you can sense 
+whether the following types of creatures are present 
+within 1 mile of you (or within up to 6 miles if you 
+are in your favored terrain): aberrations, celestials, 
+dragons, elementals, fey, fiends, and undead. This 
+feature doesn't reveal the creatures' location or 
+number."}
+             {:name "Extra Attack"
+              :level 5
+              :description "Beginning at 5th level, you can attack twice, instead 
+of once, whenever you take the Attack action on your 
+turn."}
+             {:name "Land's Stride"
+              :level 8
+              :description "Starting at 8th level, moving through nonmagical 
+difficult terrain costs you no extra movement. You 
+can also pass through nonmagical plants without 
+being slowed by them and without taking damage 
+from them if they have thorns, spines, or a similar 
+hazard.
+In addition, you have advantage on saving throws 
+against plants that are magically created or 
+manipulated to impede movement, such those 
+created by the entangle spell"}
+             {:name "Hide in Plain Sight"
+              :level 10
+              :description "Starting at 10th level, you can spend 1 minute 
+creating camouflage for yourself. You must have 
+access to fresh mud, dirt, plants, soot, and other 
+naturally occurring materials with which to create 
+your camouflage.
+Once you are camouflaged in this way, you can try 
+to hide by pressing yourself up against a solid 
+surface, such as a tree or wall, that is at least as tall 
+and wide as you are. You gain a +10 bonus to 
+Dexterity (Stealth) checks as long as you remain 
+there without moving or taking actions. Once you 
+move or take an action or a reaction, you must 
+camouflage yourself again to gain this benefit."}
+             {:name "Vanish"
+              :level 14
+              :description "Starting at 14th level, you can use the Hide action as 
+a bonus action on your turn. Also, you can't be 
+tracked by nonmagical means, unless you choose to 
+leave a trail."}
+             {:name "Feral Senses"
+              :level 18
+              :description "At 18th level, you gain preternatural senses that help 
+you fight creatures you can't see. When you attack a 
+creature you can't see, your inability to see it doesn't 
+impose disadvantage on your attack rolls against it.
+You are also aware of the location of any invisible 
+creature within 30 feet of you, provided that the 
+creature isn't hidden from you and you aren't 
+blinded or deafened."}
+             {:name "Foe Slayer"
+              :level 20
+              :description "At 20th level, you become an unparalleled hunter of 
+your enemies. Once on each of your turns, you can 
+add your Wisdom modifier to the attack roll or the 
+damage roll of an attack you make against one of 
+your favored enemies. You can choose to use this 
+feature before or after the roll, but before any effects 
+of the roll are applied."}
+             {:name "Natural Explorer"
+              :description "You are particularly familiar with one type of natural 
+environment and are adept at traveling and 
+surviving in such regions. Choose one type of 
+favored terrain: arctic, coast, desert, forest, 
+grassland, mountain, or swamp. When you make an 
+Intelligence or Wisdom check related to your 
+favored terrain, your proficiency bonus is doubled if 
+you are using a skill that you're proficient in.
+While traveling for an hour or more in your 
+favored terrain, you gain the following benefits:
+* Difficult terrain doesn't slow your group's travel.
+* Your group can't become lost except by magical 
+means.
+* Even when you are engaged in another activity 
+while traveling (such as foraging, navigating, or 
+tracking), you remain alert to danger.
+* If you are traveling alone, you can move stealthily 
+at a normal pace.
+* When you forage, you find twice as much food as 
+you normally would.
+* While tracking other creatures, you also learn 
+their exact number, their sizes, and how long ago 
+they passed through the area.
+You choose additional favored terrain types at 6th 
+and 10th level."}]
+    :subclass-level 3
+    :subclass-title "Ranger Archetype"
+    :subclasses [{:name "Hunter"
+                  :levels {3 {:selections [(t/selection
+                                            "Hunter's Prey"
+                                            [(t/option
+                                              "Colossus Slayer"
+                                              :colossus-slayer
+                                              []
+                                              [(mod5e/trait "Colossus Slayer" "Your tenacity can wear down the 
+most potent foes. When you hit a creature with a 
+weapon attack, the creature takes an extra 1d8 
+damage if it's below its hit point maximum. You can 
+deal this extra damage only once per turn.")])
+                                             (t/option
+                                              "Giant Killer"
+                                              :giant-killer
+                                              []
+                                              [(mod5e/trait "Giant Killer" "When a Large or larger creature 
+within 5 feet of you hits or misses you with an attack, 
+you can use your reaction to attack that creature 
+immediately after its attack, provided that you can 
+see the creature.")])
+                                             (t/option
+                                              "Horde Breaker"
+                                              :horde-breaker
+                                              []
+                                              [(mod5e/trait "Horde Breaker" "Once on each of your turns when 
+you make a weapon attack, you can make another 
+attack with the same weapon against a different 
+creature that is within 5 feet of the original target 
+and within range of your weapon")])])]}
+                           7 {:selections [(t/selection
+                                            "Defensive Tactics"
+                                            [(t/option
+                                              "Escape the Horde"
+                                              :escape-the-horde
+                                              []
+                                              [(mod5e/trait "Escape the Horde" "Opportunity attacks against 
+you are made with disadvantage.")])
+                                             (t/option
+                                              "Multiattack Defense"
+                                              :multiattack-defense
+                                              []
+                                              [(mod5e/trait "Multiattack Defense" "When a creature hits you 
+with an attack, you gain a +4 bonus to AC against all 
+subsequent attacks made by that creature for the 
+rest of the turn.")])
+                                             (t/option
+                                              "Steel Will"
+                                              :steel-will
+                                              []
+                                              [(mod5e/trait "Steel Will" "You have advantage on saving throws 
+against being frightened.")])])]}
+                           11 {:selections [(t/selection
+                                            "Multiattack"
+                                            [(t/option
+                                              "Volley"
+                                              :volley
+                                              []
+                                              [(mod5e/trait "Volley" "You can use your action to make a ranged 
+attack against any number of creatures within 10 
+feet of a point you can see within your weapon's 
+range. You must have ammunition for each target, as 
+normal, and you make a separate attack roll for each 
+target.")])
+                                             (t/option
+                                              "Whirlwind Attack"
+                                              :whirlwind-attack
+                                              []
+                                              [(mod5e/trait "Whirlwind Attack" "You can use your action to
+make a melee attack against any number of 
+creatures within 5 feet of you, with a separate attack 
+roll for each target.")])])]}
+                           15 {:selections [(t/selection
+                                            "Superior Hunter's Defense"
+                                            [(t/option
+                                              "Evasion"
+                                              :evasion
+                                              []
+                                              [(mod5e/trait "Evasion" "When you are subjected to an effect, such 
+as a red dragon's fiery breath or a lightning bolt spell, 
+that allows you to make a Dexterity saving throw to 
+take only half damage, you instead take no damage if 
+you succeed on the saving throw, and only half 
+damage if you fail.")])
+                                             (t/option
+                                              "Stand Against the Tide"
+                                              :stand-against-the-tide
+                                              []
+                                              [(mod5e/trait "Stand Against the Tide" "When a hostile creature 
+misses you with a melee attack, you can use your 
+reaction to force that creature to repeat the same 
+attack against another creature (other than itself) of 
+your choice.")])
+                                             (t/option
+                                              "Uncanny Dodge"
+                                              :uncanny-dodge
+                                              []
+                                              [(mod5e/trait "Uncanny Dodge" "When an attacker that you can 
+see hits you with an attack, you can use your 
+reaction to halve the attack's damage against you.")])])]}}}
+                 {:name "Beast Master"
+                  :traits [{:name "Ranger's Companion"
+                            :level 3}
+                           {:name "Exceptional Training"
+                            :level 7}
+                           {:name "Bestial Fury"
+                            :level 11}
+                           {:name "Share Spells"
+                            :level 15}]}]}
+   character-ref))
+
 (defn reroll-abilities [character-ref]
   (fn []
     (swap! character-ref
@@ -2311,7 +2535,8 @@ until you finish a long rest."}]}
      (druid-option character-ref)
      (fighter-option character-ref)
      (monk-option character-ref)
-     (paladin-option character-ref)])])
+     (paladin-option character-ref)
+     (ranger-option character-ref)])])
 
 (def template-base
   (es/make-entity
