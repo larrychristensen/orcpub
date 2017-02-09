@@ -2259,6 +2259,31 @@ until you finish a long rest."}]}
                                   17 1
                                   19 1}
                    :ability :wis}
+    :armor-choices [{:name "Armor"
+                     :options {:scale-mail 1
+                               :leather 1}}]
+    :equipment-choices [{:name "Equipment Pack"
+                         :options {:dungeoneers-pack 1
+                                   :explorers-pack 1}}]
+    :weapons {:longbow 1}
+    :equipment {:quiver 1
+                :arrows 20}
+    :selections [(t/selection
+                  "Melee Weapon"
+                  [(t/option
+                    "Two Shortswords"
+                    :shortswords
+                    []
+                    [(mod5e/weapon :shortsword 2)])
+                   (t/option
+                    "Simple Melee Weapon"
+                    :simple-melee
+                    [(t/selection
+                      "Simple Melee Weapon"
+                      (opt5e/simple-melee-weapon-options 1)
+                      2
+                      2)]
+                    [])])]
     :levels {2 {:selections [(opt5e/fighting-style-selection character-ref #{:archery :defense :dueling :two-weapon-fighting})]}
              5 {:modifiers [(mod5e/extra-attack)]}}
     :traits [{:name "Primeval Awareness"
