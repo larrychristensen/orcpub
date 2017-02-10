@@ -462,7 +462,7 @@
         built-template (entity/build-template @character-ref template)
         built-char (entity/build @character-ref built-template)]
     (js/console.log "BUILT TEMPLAT" built-template)
-    ;;(print-char built-char)
+    (print-char built-char)
     [:div.app
      [:div.app-header
       [:div.app-header-bar.container

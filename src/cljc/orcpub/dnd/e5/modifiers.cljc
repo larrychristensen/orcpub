@@ -61,10 +61,13 @@
   (mods/modifier
    ?spells-known
    (if (>= ?total-levels (or min-level 0))
-     (update ?spells-known level (fn [spells]
-                                   (conj (or spells {})
-                                         {:key spell-key
-                                          :ability spellcasting-ability})))
+     (update
+      ?spells-known
+      level
+      (fn [spells]
+        (conj (or spells #{})
+              {:key spell-key
+               :ability spellcasting-ability})))
      ?spells-known)))
 
 (defn trait [name & [description level]]
