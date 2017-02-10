@@ -532,11 +532,12 @@ to the extra damage of the critical hit."}]}))
                         :as subcls}
                        character-ref]
   (let [kw (common/name-to-kw name)
-        {:keys [armor weapon save skill-options tool-options]} profs
+        {:keys [armor weapon save skill-options tool-options tool]} profs
         {skill-num :choose options :options} skill-options
         skill-kws (if (:any options) (map :key opt5e/skills) (keys options))
         armor-profs (keys armor)
         weapon-profs (keys weapon)
+        tool-profs (keys tool)
         spellcasting-template (opt5e/spellcasting-template
                                (assoc
                                 spellcasting
@@ -554,6 +555,7 @@ to the extra damage of the critical hit."}]}))
        modifiers
        (armor-prof-modifiers armor-profs)
        (weapon-prof-modifiers weapon-profs)
+       (tool-prof-modifiers tool-profs)
        (traits-modifiers traits true)))
      ::t/plugins [{::t/path [:class (:key cls)]
                    ::t/selections [(t/sequential-selection
@@ -973,7 +975,7 @@ creature."}]}
                    :ability :cha}
     :levels {2 {:modifiers [(mod/modifier ?default-skill-bonus (let [b (int (/ ?prof-bonus 2))]
                                                                  (zipmap char5e/ability-keys (repeat b))))]}
-             3 {:selections [opt5e/expertise-selection]}
+             3 {:selections [(opt5e/expertise-selection 2)]}
              10 {:selections (concat [opt5e/expertise-selection]
                                      (opt5e/raw-bard-magical-secrets 10))}
              14 {:selections (opt5e/raw-bard-magical-secrets 14)}
@@ -1547,6 +1549,11 @@ its attack against you."}]}
   (let [school (:school s)]
     (or (= school "evocation")
         (= school "abjuration"))))
+
+(defn arcane-trickster-spell? [s]
+  (let [school (:school s)]
+    (or (= school "enchantment")
+        (= school "illusion"))))
 
 (defn total-levels-prereq [level]
   (fn [c] (>= (es/entity-val c :total-levels) level)))
@@ -2494,6 +2501,132 @@ reaction to halve the attack's damage against you.")])])]}}}
                             :level 15}]}]}
    character-ref))
 
+(defn rogue-option [character-ref]
+  (class-option
+   {:name "Rogue",
+    :hit-die 8
+    :ability-increase-levels [4 8 12 16 19]
+    :expertise true
+    :profs {:armor {:light true}
+            :weapon {:simple true :crossbow--hand true :longsword true :rapier true :shortsword true}
+            :save {:dex true :int true}
+            :tool {:thieves-tools true}
+            :skill-options {:choose 4 :options {:acrobatics true :athletics true :deception true :insight true :intimidation true :investigation true :perception true :performance true :persuasion true :sleight-of-hand true :stealth true}}}
+    :weapon-choices [{:name "Melee Weapon"
+                      :options {:rapier 1
+                                :shortsword 1}}]
+    :armor {:leather 1}
+    :weapons {:dagger 2}
+    :equipment {:thieves-tools 1}
+    :equipment-choices [{:name "Equipment Pack"
+                         :options {:burglers-pack 1
+                                   :dungeoneers-pack 1
+                                   :explorers-pack 1}}]
+    :selections [(t/selection
+                  "Additional Weapon"
+                  [(t/option
+                    "Shortbow, Quiver, 20 Arrows"
+                    :shortbow
+                    []
+                    [(mod5e/weapon :shortbow 5)
+                     (mod5e/equipment :quiver 1)
+                     (mod5e/equipment :arrow 20)])
+                   (t/option
+                    "Shortsword"
+                    :shortsword
+                    []
+                    [(mod5e/weapon :shortsword 1)])])
+                 opt5e/rogue-expertise-selection]
+    :traits [{:name "Sneak Attack" :description "You know how to strike subtly and exploit a foe's distraction. Once per turn, you can deal an extra 1d6 damage to one creature you hit with an attack if you have advantage on the attack roll. The attack must use a finesse or a ranged weapon.\nYou don't need advantage on the attack roll if another enemy of the target is within 5 feet of it, that enemy isn't incapacitated, and you don't have disadvantage on the attack roll.\nThe amount of the extra damage increases as you gain levels in this class, as shown in the Sneak Attack column of the Rogue table."}
+             {:name "Thieves' Cant" :description "During your rogue training you learned thieves' cant, a secret mix of dialect, jargon, and code that allows you to hide messages in seemingly normal conversation. Only another creature that knows thieves' cant understands such messages. It takes four times longer to convey such a message than it does to speak the same idea plainly.\nIn addition, you understand a set of secret signs and symbols used to convey short, simple messages, such as whether an area is dangerous or the territory of a thieves' guild, whether loot is nearby, or whether the people in an area are easy marks or will provide a safe house for thieves on the run."}
+             {:level 2 :name "Cunning Action" :description "Your quick thinking and agility allow you to move and act quickly. You can take a bonus action on each of your turns in combat. This action can be used only to take the Dash, Disengage, or Hide action."}
+             {:level 5 :name "Uncanny Dodge" :description "When an attacker that you can see hits you with an attack, you can use your reaction to halve the attack's damage against you."}
+             {:level 7 :name "Evasion" :description "You can nimbly dodge out of the way of certain area effects, such as a red dragon's fiery breath or an ice storm spell. When you are subjecte to an effect that allows you to make a Dexterity saving throw to take only half damage, you instead take no damage if you succeed on the saving throw, and only half damage if you fail."}
+             {:level 11 :name "Reliable Talent" :description "You have refined your chosen skills until they approach perfection. Whenever you make an ability check that lets you add your pro ciency bonus, you can treat a d20 roll of 9 or lower as a 10."}
+             {:level 14 :name "Blindsense" :description "If you are able to hear, you are aware of the location of any hidden or invisible creature within 10 feet of you."}
+             {:level 18 :name "Elusive" :description "You are so evasive that attackers rarely gain the upper hand against you. No attack roll has advantage against you while you aren't incapacitated."}
+             {:level 20 :name "Stroke of Luck" :description "You have an uncanny knack for succeeding when you need to. If your attack misses a target within range, you can turn the miss into a hit. Alternatively, if you fail an ability check, you can treat the d20 roll as a 20.\nOnce you use this feature, you can't use it again until you  nish a short or long rest."}]
+    :subclass-level 3
+    :subclass-title "Roguish Archetype"
+    :subclasses [{:name "Thief"
+                  :traits [{:level 3 :name "Fast Hands" :description "You can use the bonus action granted by your Cunning Action to make a Dexterity (Sleight of Hand) check, use your thieves' tools to disarm a trap or open a lock, or take the Use an Object action."}
+                           {:level 3 :name "Second-Story Work" :description "You gain the ability to climb faster than normal; climbing no longer costs you extra movement.\nIn addition, when you make a running jump, the distance you cover increases by a number of feet equal to your Dexterity modifier."}
+                           {:level 9 :name "Supreme Sneak" :description "You have advantage on a Dexterity (Stealth) check if you move no more than half your speed on the same turn."}
+                           {:level 13 :name "Use Magic Device" :description "You have learned enough about the workings of magic that you can improvise the use of items even when they are not intended for you. You ignore all class, race, and level requirements on the use of
+magic items."}
+                           {:level 17 :name "Thief's Reflexes" :description "You have learned enough about the workings of magic that you can improvise the use of items even when they are not intended for you. You ignore all class, race, and level requirements on the use of
+magic items."}]}
+                 {:name "Assassin"
+                  :profs {:tool {:disguise-kit true :poisoners-kit true}}
+                  :traits [{:name "Assassinate"
+                            :level 3}
+                           {:name "Infiltration Expertise"
+                            :level 9}
+                           {:name "Impostor"
+                            :level 13}
+                           {:name "Death Strike"
+                            :level 17}]}
+                 {:name "Arcane Trickster"
+                  :spellcaster true
+                  :spellcasting {:level-factor 3
+                                 :spell-list :wizard
+                                 :cantrips-known {3 2 10 3}
+                                 :known-mode :schedule
+                                 :spells-known {3 {:num 3
+                                                   :restriction arcane-trickster-spell?}
+                                                4 {:num 1
+                                                   :restriction arcane-trickster-spell?}
+                                                7 {:num 1
+                                                   :restriction arcane-trickster-spell?}
+                                                8 1
+                                                10 {:num 1
+                                                    :restriction arcane-trickster-spell?}
+                                                11 {:num 1
+                                                    :restriction arcane-trickster-spell?}
+                                                13 {:num 1
+                                                    :restriction arcane-trickster-spell?}
+                                                14 1
+                                                16 {:num 1
+                                                    :restriction arcane-trickster-spell?}
+                                                19 {:num 1
+                                                    :restriction arcane-trickster-spell?}
+                                                20 1}
+                                 :ability :int}
+                  :modifiers [(mod5e/spells-known 0 :mage-hand :int)]
+                  :traits [{:name "Mage Hand Legerdemain"
+                            :level 3}
+                           {:name "Magical Ambush"
+                            :level 9}
+                           {:name "Versatile Trickster"
+                            :level 13}
+                           {:name "Spell Thief"
+                            :level 17}]}
+                 {:name "Mastermind"
+                  :source "Sword Coast Adventurer's Guide"
+                  :traits [{:name "Master of Intrigue"
+                            :level 3}
+                           {:name "Master of Tactics"
+                            :level 3}
+                           {:name "Insightful Manipulator"
+                            :level 9}
+                           {:name "Misdirection"
+                            :level 13}
+                           {:name "Soul of Deceit"
+                            :level 17}]}
+                 {:name "Swashbuckler"
+                  :source "Sword Coast Adventurer's Guide"
+                  :traits [{:name "Fancy Footwork"
+                            :level 3}
+                           {:name "Rakish Audacity"
+                            :level 3}
+                           {:name "Panache"
+                            :level 3}
+                           {:name "Elegance Maneuver"
+                            :level 13}
+                           {:name "Master Duelist"
+                            :level 17}]}]}
+   character-ref))
+
 (defn reroll-abilities [character-ref]
   (fn []
     (swap! character-ref
@@ -2561,7 +2694,8 @@ reaction to halve the attack's damage against you.")])])]}}}
      (fighter-option character-ref)
      (monk-option character-ref)
      (paladin-option character-ref)
-     (ranger-option character-ref)])])
+     (ranger-option character-ref)
+     (rogue-option character-ref)])])
 
 (def template-base
   (es/make-entity

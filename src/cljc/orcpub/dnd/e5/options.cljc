@@ -1266,7 +1266,7 @@
    num
    num))
 
-(def expertise-selection
+(defn expertise-selection [num]
   (t/selection
    "Skill Expertise"
    (map
@@ -1282,8 +1282,8 @@
          (let [skill-profs (es/entity-val built-char :skill-profs)]
            (and skill-profs (skill-profs (:key skill)))))))
     skills)
-   2
-   2))
+   num
+   num))
 
 (def rogue-expertise-selection
   (t/selection
@@ -1291,21 +1291,10 @@
    [(t/option
      "Two Skills"
      :two-skills
-     [expertise-selection]
+     [(expertise-selection 2)]
      [])
     (t/option
      "One Skill/Theives Tools"
      :one-skill-thieves-tools
-     [(t/selection
-       "Skills"
-       [(t/option
-         "Athletics"
-         :athletics
-         nil
-         [(modifiers/skill-expertise :athletics)])
-        (t/option
-         "Acrobatics"
-         :acrobatics
-         nil
-         [(modifiers/skill-expertise :acrobatics)])])]
+     [(expertise-selection 1)]
      [(modifiers/tool-proficiency "Thieves Tools" :thieves-tools)])]))
