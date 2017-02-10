@@ -75,7 +75,7 @@
    {:value (str (::t/key option))}
    (::t/name option)])
 
-(defn dropdown [options selected-value change-fn]
+(defn dropdown [options selected-value change-fn built-char]
   [:select.builder-option.builder-option-dropdown
    {:on-change change-fn
     :value (or (str selected-value) "")}
@@ -84,7 +84,10 @@
     (map-indexed
      (fn [i option]
        ^{:key i} [dropdown-option option])
-     options))])
+     (filter (fn [{:keys [::t/prereqs]}]
+               (or (nil? prereqs)
+                   (every? #(% built-char) prereqs)))
+             options)))])
 
 (defn set-option-value [char path value]
   (let [number-indices (keep-indexed (fn [i v] (if (number? v) i))
@@ -133,7 +136,7 @@
                         (select-fn path))
                       (swap! character-ref #(update-option built-template % path (fn [o] (assoc o ::entity/key key))))))
                   (.stopPropagation e))}
-     (if changeable? (dropdown options key change-fn) [:span {:style {:font-weight :bold}} name])
+     (if changeable? (dropdown options key change-fn built-char) [:span {:style {:font-weight :bold}} name])
      (if (not meets-prereqs?)
        [:div {:style {:font-style :italic
                       :font-size "12px"
@@ -200,13 +203,13 @@
                   entity-path (entity/get-entity-path built-template raw-char option-path)
                   key-path (conj entity-path ::entity/key)
                   value (get-in @character-ref key-path)]
-              ^{:key i} [:div (dropdown options value (change-fn i))]))))
+              ^{:key i} [:div (dropdown options value (change-fn i) built-char)]))))
        [:div
         (doall
          (map-indexed
           (fn [i {value ::entity/key}]
             ^{:key i}
-            [:div (dropdown options value (change-fn i))])
+            [:div (dropdown options value (change-fn i) built-char)])
           (get-in @character-ref (entity/get-entity-path built-template raw-char (conj path key)))))
         (add-option-button selection raw-char (conj path key) new-item-fn built-template)])]))
 

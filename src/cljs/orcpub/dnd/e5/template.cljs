@@ -638,21 +638,28 @@ to the extra damage of the critical hit."}]}))
        []
        [(mod5e/equipment k num)]))))
 
+(defn simple-weapon-selection [num]
+  (t/selection
+   "Simple Weapon"
+   (opt5e/weapon-options (opt5e/simple-weapons opt5e/weapons))
+   num
+   num))
+
 (defn weapon-option [[k num]]
   (case k
     :simple (t/option
              "Any Simple Weapon"
              :any-simple
-             [(t/selection
-               "Simple Weapon"
-               (opt5e/weapon-options (opt5e/simple-weapons opt5e/weapons)))]
+             [(simple-weapon-selection num)]
              [])
     :martial (t/option
               "Any Martial Weapon"
               :any-martial
               [(t/selection
                 "Martial Weapon"
-                (opt5e/weapon-options (opt5e/martial-weapons opt5e/weapons)))]
+                (opt5e/weapon-options (opt5e/martial-weapons opt5e/weapons))
+                num
+                num)]
               [])
     (t/option
      (-> k opt5e/weapons-map :name (str (if (> num 1) (str " (" num ")") "")))
@@ -2867,6 +2874,519 @@ immune to your aura for 24 hours."}]}
                             :level 18}]}]}
    character-ref))
 
+(def pact-of-the-tome-name "Pact Boon: Pact of the Tome")
+(def pact-of-the-chain-name "Pact Boon: Pact of the Chain")
+(def pact-of-the-blade-name "Pact Boon: Pact of the Blade")
+
+(def has-eldritch-blast-prereq
+  (fn [c] (some #(= :eldritch-blast (:key %))
+                   (get (es/entity-val c :spells-known) 0))))
+
+(def pact-boon-options
+  [(t/option
+    "Pact of the Chain"
+    :pact-of-the-chain
+    []
+    [(mod5e/trait pact-of-the-chain-name
+                  "You learn the find familiar spell and can cast it as a 
+ritual. The spell doesn’t count against your number 
+of spells known.
+When you cast the spell, you can choose one of the 
+normal forms for your familiar or one of the 
+following special forms: imp, pseudodragon, quasit, 
+or sprite.
+Additionally, when you take the Attack action, you 
+can forgo one of your own attacks to allow your 
+familiar to make one attack of its own with its 
+reaction.")])
+   (t/option
+    "Pact of the Blade"
+    :pact-of-the-blade
+    []
+    [(mod5e/trait pact-of-the-blade-name
+                  "You can use your action to create a pact weapon in 
+your empty hand. You can choose the form that this 
+melee weapon takes each time you create it. You are 
+proficient with it while you wield it. This weapon 
+counts as magical for the purpose of overcoming 
+resistance and immunity to nonmagical attacks and 
+damage.
+Your pact weapon disappears if it is more than 5 
+feet away from you for 1 minute or more. It also 
+disappears if you use this feature again, if you 
+dismiss the weapon (no action required), or if you 
+die.
+You can transform one magic weapon into your 
+pact weapon by performing a special ritual while 
+you hold the weapon. You perform the ritual over 
+the course of 1 hour, which can be done during a 
+short rest. You can then dismiss the weapon, 
+shunting it into an extradimensional space, and it 
+appears whenever you create your pact weapon 
+thereafter. You can’t affect an artifact or a sentient 
+weapon in this way. The weapon ceases being your pact weapon if you die, if you perform the 1-hour 
+ritual on a different weapon, or if you use a 1-hour 
+ritual to break your bond to it. The weapon appears 
+at your feet if it is in the extradimensional space 
+when the bond breaks.")])
+   (t/option
+    "Pact of the Tome"
+    :pact-of-the-tome
+    []
+    [(mod5e/trait pact-of-the-tome-name
+                  "Your patron gives you a grimoire called a Book of 
+Shadows. When you gain this feature, choose three 
+cantrips from any class’s spell list (the three needn’t 
+be from the same list). While the book is on your 
+person, you can cast those cantrips at will. They 
+don’t count against your number of cantrips known. 
+If they don’t appear on the warlock spell list, they 
+are nonetheless warlock spells for you.
+If you lose your Book of Shadows, you can perform 
+a 1-hour ceremony to receive a replacement from 
+your patron. This ceremony can be performed 
+during a short or long rest, and it destroys the 
+previous book. The book turns to ash when you die.")])])
+
+(defn has-trait-with-name-prereq [name]
+  (fn [c] (some #(= name (:name %)) (es/entity-val c :traits))))
+
+(def eldritch-invocation-options
+  [(t/option
+    "Agonizing Blast"
+    :agonizing-blast
+    []
+    [(mod5e/trait "Eldritch Invocation: Agonizing Blast")]
+    [has-eldritch-blast-prereq])
+   (t/option
+    "Armor of Shadows"
+    :armor-of-shadows
+    []
+    [(mod5e/trait "Eldritch Invocation: Armor of Shadows"
+                  "You can cast mage armor on yourself at will, without 
+expending a spell slot or material components.")])
+   (t/option
+    "Ascendant Step"
+    :ascendant-step
+    []
+    [(mod5e/trait "Eldritch Invocation: Ascendant Step"
+                  "You can cast levitate on yourself at will, without 
+expending a spell slot or material components.")]
+    [(total-levels-prereq 9)])
+   (t/option
+    "Beast Speech"
+    :beast-speech
+    []
+    [(mod5e/trait "Eldritch Invocation: Beast Speech"
+                  "You can cast speak with animals at will, without 
+expending a spell slot")])
+   (t/option
+    "Beguiling Influence"
+    :beguiling-influence
+    []
+    [(mod5e/skill-proficiency :deception)
+     (mod5e/skill-proficiency :persuasion)])
+   (t/option
+    "Bewitching Whispers"
+    :bewitching-whispers
+    []
+    [(mod5e/trait "Eldritch Invocation: Bewitching Whispers"
+                  "You can cast compulsion once using a warlock spell 
+slot. You can’t do so again until you finish a long rest.")])
+   (t/option
+    "Book of Ancient Secrets"
+    :book-of-ancient-secrets
+    []
+    [(mod5e/trait "Eldritch Invocation: Book of Ancient Secrets"
+                  "You can now inscribe magical rituals in your Book of 
+Shadows. Choose two 1st-level spells that have the 
+ritual tag from any class’s spell list (the two needn’t 
+be from the same list). The spells appear in the book 
+and don’t count against the number of spells you 
+know. With your Book of Shadows in hand, you can 
+cast the chosen spells as rituals. You can’t cast the 
+spells except as rituals, unless you’ve learned them 
+by some other means. You can also cast a warlock 
+spell you know as a ritual if it has the ritual tag.
+On your adventures, you can add other ritual 
+spells to your Book of Shadows. When you find such 
+a spell, you can add it to the book if the spell’s level 
+is equal to or less than half your warlock level 
+(rounded up) and if you can spare the time to transcribe the spell. For each level of the spell, the 
+transcription process takes 2 hours and costs 50 gp 
+for the rare inks needed to inscribe it.")]
+    [(has-trait-with-name-prereq pact-of-the-tome-name)])
+   (t/option
+    "Chains of Carceri"
+    :chains-of-carceri
+    []
+    [(mod5e/trait "Eldritch Invocation: Chains of Carceri"
+                  "You can cast hold monster at will—targeting a 
+celestial, fiend, or elemental—without expending a 
+spell slot or material components. You must finish a 
+long rest before you can use this invocation on the 
+same creature again.")]
+    [(has-trait-with-name-prereq pact-of-the-chain-name)
+     (total-levels-prereq 15)])
+   (t/option
+    "Devil's Sight"
+    :devils-sight
+    []
+    [(mod5e/darkvision 120)
+     (mod5e/trait "Eldritch Invocation: Devil's Sight"
+                  "You can see normally in darkness, both magical and 
+nonmagical, to a distance of 120 feet.")])
+   (t/option
+    "Dreadful Word"
+    :dreadful-word
+    []
+    [(mod5e/trait "Eldritch Invocation: Dreadful Word"
+                  "You can cast confusion once using a warlock spell 
+slot. You can’t do so again until you finish a long rest")]
+    [(total-levels-prereq 7)])
+   (t/option
+    "Eldritch Sight"
+    :eldritch-sight
+    []
+    [(mod5e/trait "Eldritch Invocation: Eldritch Sight"
+                  "You can cast detect magic at will, without expending 
+a spell slot.")])
+   (t/option
+    "Eldritch Spear"
+    :eldritch-spear
+    []
+    [(mod5e/trait "Eldritch Invocation: Eldritch Spear"
+                  "When you cast eldritch blast, its range is 300 feet.")]
+    [has-eldritch-blast-prereq])
+   (t/option
+    "Eyes of the Rune Keeper"
+    :eyes-of-the-rune-keeper
+    []
+    [(mod5e/trait "Eldritch Invocation: Eyes of the Rune Keeper"
+                  "You can read all writing.")])
+   (t/option
+    "Fiendish Vigor"
+    :fiendish-vigor
+    []
+    [(mod5e/trait "Eldritch Invocation: Fiendish Vigor"
+                  "You can cast false life on yourself at will as a 1st-level 
+spell, without expending a spell slot or material 
+components")])
+   (t/option
+    "Gaze of Two Minds"
+    :gaze-of-two-minds
+    []
+    [(mod5e/trait "Eldritch Invocation: Gaze of Two Minds"
+                  "You can use your action to touch a willing humanoid 
+and perceive through its senses until the end of your 
+next turn. As long as the creature is on the same 
+plane of existence as you, you can use your action on 
+subsequent turns to maintain this connection, 
+extending the duration until the end of your next 
+turn. While perceiving through the other creature’s 
+senses, you benefit from any special senses 
+possessed by that creature, and you are blinded and 
+deafened to your own surroundings.")])
+   (t/option
+    "Lifedrinker"
+    :lifedrinker
+    []
+    [(mod5e/trait "Eldritch Invocation: Lifedrinker"
+                  "When you hit a creature with your pact weapon, the 
+creature takes extra necrotic damage equal to your 
+Charisma modifier (minimum 1).")]
+    [(total-levels-prereq 12)
+     (has-trait-with-name-prereq pact-of-the-blade-name)])
+   (t/option
+    "Mask of Many Faces"
+    :mask-of-many-faces
+    []
+    [(mod5e/trait "Eldritch Invocation: Mask of Many Faces"
+                  "You can cast disguise self at will, without expending a 
+spell slot.")])
+   (t/option
+    "Master of Myriad Forms"
+    :master-of-myriad-forms
+    []
+    [(mod5e/trait "Eldritch Invocation: Master of Myriad Forms"
+                  "You can cast alter self at will, without expending a spell slot.")]
+    [(total-levels-prereq 15)])
+   (t/option
+    "Minions of Chaos"
+    :minions-of-chaos
+    []
+    [(mod5e/trait "Eldritch Invocation: Minions of Chaos"
+                  "You can cast conjure elemental once using a warlock 
+spell slot. You can’t do so again until you finish a 
+long rest.")]
+    [(total-levels-prereq 9)])
+   (t/option
+    "Mire the Mind"
+    :mire-the-mind
+    []
+    [(mod5e/trait "Eldritch Invocation: Mire the Mind"
+                  "You can cast slow once using a warlock spell slot. 
+You can’t do so again until you finish a long rest.")]
+    [(total-levels-prereq 5)])
+   (t/option
+    "Misty Visions"
+    :misty-visions
+    []
+    [(mod5e/trait "Eldritch Invocation: Misty Visions"
+                  "You can cast silent image at will, without expending a 
+spell slot or material components.")])
+   (t/option
+    "One with Shadows"
+    :one-with-shadows
+    []
+    [(mod5e/trait "Eldritch Invocation: One with Shadows"
+                  "When you are in an area of dim light or darkness, 
+you can use your action to become invisible until you 
+move or take an action or a reaction")]
+    [(total-levels-prereq 5)])
+   (t/option
+    "Otherworldly Leap"
+    :otherworldly-leap
+    []
+    [(mod5e/trait "Eldritch Invocation: Otherworldly Leap"
+                  "You can cast jump on yourself at will, without 
+expending a spell slot or material components.")]
+    [(total-levels-prereq 9)])
+   (t/option
+    "Repelling Blast"
+    :repelling-blast
+    []
+    [(mod5e/trait "Eldritch Invocation: Repelling Blast"
+                  "When you hit a creature with eldritch blast, you can 
+push the creature up to 10 feet away from you in a 
+straight line.")]
+    [has-eldritch-blast-prereq])
+   (t/option
+    "Sculptor of Flesh"
+    :sculptor-of-flesh
+    []
+    [(mod5e/trait "Eldritch Invocation: Sculptor of Flesh"
+                  "You can cast polymorph once using a warlock spell 
+slot. You can’t do so again until you finish a long rest.")]
+    [(total-levels-prereq 7)])
+   (t/option
+    "Sign of Ill Omen"
+    :sign-of-ill-omen
+    []
+    [(mod5e/trait "Eldritch Invocation: Sign of Ill Omen"
+                  "You can cast bestow curse once using a warlock spell 
+slot. You can’t do so again until you finish a long rest.")]
+    [(total-levels-prereq 7)])
+   (t/option
+    "Thief of Five Fates"
+    :thief-of-five-fates
+    []
+    [(mod5e/trait "Eldritch Invocation: Thief of Five Fates"
+                  "You can cast bane once using a warlock spell slot. 
+You can’t do so again until you finish a long rest.")]
+    [(total-levels-prereq 7)])
+   (t/option
+    "Thirsting Blade"
+    :thirsting-blade
+    []
+    [(mod5e/trait "Eldritch Invocation: Thirsting Blade"
+                  "You can attack with your pact weapon twice, instead 
+of once, whenever you take the Attack action on your 
+turn.")]
+    [(total-levels-prereq 5)
+     (has-trait-with-name-prereq pact-of-the-blade-name)])
+   (t/option
+    "Visions of Distant Realms"
+    :visions-of-distant-realms
+    []
+    [(mod5e/trait "Eldritch Invocation: Visions of Distant Realms"
+                  "You can cast arcane eye at will, without expending a 
+spell slot.")]
+    [(total-levels-prereq 15)])
+   (t/option
+    "Voice of the Chain Master"
+    :voice-of-the-chain-master
+    []
+    [(mod5e/trait "Eldritch Invocation: Voice of the Chain Master"
+                  "You can communicate telepathically with your 
+familiar and perceive through your familiar’s senses 
+as long as you are on the same plane of existence.
+Additionally, while perceiving through your 
+familiar’s senses, you can also speak through your 
+familiar in your own voice, even if your familiar is 
+normally incapable of speech.")]
+    [(has-trait-with-name-prereq pact-of-the-chain-name)])
+   (t/option
+    "Whispers of the Grave"
+    :whispers-of-the-grave
+    []
+    [(mod5e/trait "Eldritch Invocation: Whispers of the Grave"
+                  "You can cast speak with dead at will, without 
+expending a spell slot")]
+    [(total-levels-prereq 9)])
+   (t/option
+    "Witch Sight"
+    :witch-sight
+    []
+    [(mod5e/trait "Eldritch Invocation: Witch Sight"
+                  "You can see the true form of any shapechanger or 
+creature concealed by illusion or transmutation 
+magic while the creature is within 30 feet of you and 
+within line of sight.")]
+    [(total-levels-prereq 15)])])
+
+(defn warlock-option [character-ref]
+  (class-option
+   {:name "Warlock"
+    :spellcasting {:level-factor 1
+                   :cantrips-known {1 2 4 1 10 1}
+                   :spells-known {1 2
+                                  2 1
+                                  3 1
+                                  4 1
+                                  5 1
+                                  6 1
+                                  7 1
+                                  8 1
+                                  9 1
+                                  11 1
+                                  13 1
+                                  15 1
+                                  17 1
+                                  19 1}
+                   :known-mode :schedule
+                   :ability :cha},
+    :spellcaster true
+    :hit-die 8
+    :ability-increase-levels [4 8 12 16 19]
+    :profs {:armor {:light true}
+            :weapon {:simple true}
+            :save {:wis true :cha true}
+            :skill-options {:choose 2 :options {:arcana true :deception true :history true :intimidation true :investigation true :nature true :religion true}}}
+    :selections [(t/selection
+                  "Weapon"
+                  [(t/option
+                    "Light Crossbow"
+                    :crossbow
+                    []
+                    [(mod5e/weapon :crossbow--light 1)
+                     (mod5e/equipment :bolt 20)])
+                   (weapon-option [:simple 1])])
+                 (simple-weapon-selection 1)]
+    :equipment-choices [{:name "Equipment Pack"
+                         :options {:scholars-pack 1
+                                   :dungeoneers-pack 1}}
+                        {:name "Spellcasting Equipment"
+                         :options {:component-pouch 1
+                                   :arcane-focus 1}}]
+    :weapons {:dagger 2}
+    :armor {:leather 1}
+    :levels {2 {:selections [(t/selection
+                              "Eldritch Invocations"
+                              eldritch-invocation-options
+                              2
+                              2)]}
+             3 {:modifiers [(mod5e/spells-known 1 :find-familiar :cha)]
+                :selections [(t/selection
+                             "Pact Boon"
+                             pact-boon-options)]}
+             5 {:selections [(t/selection
+                              "Eldritch Invocations"
+                              eldritch-invocation-options)]}
+             8 {:selections [(t/selection
+                              "Eldritch Invocations"
+                              eldritch-invocation-options)]}
+             12 {:selections [(t/selection
+                              "Eldritch Invocations"
+                              eldritch-invocation-options)]}
+             15 {:selections [(t/selection
+                              "Eldritch Invocations"
+                              eldritch-invocation-options)]}
+             18 {:selections [(t/selection
+                              "Eldritch Invocations"
+                              eldritch-invocation-options)]}}
+    :traits [{:name "Mystic Arcanum"
+              :level 11
+              :description "At 11th level, your patron bestows upon you a 
+magical secret called an arcanum. Choose one 6th level
+spell from the warlock spell list as this arcanum.
+You can cast your arcanum spell once without 
+expending a spell slot. You must finish a long rest 
+before you can do so again.
+At higher levels, you gain more warlock spells of 
+your choice that can be cast in this way: one 7thlevel
+spell at 13th level, one 8th-level spell at 15th 
+level, and one 9th-level spell at 17th level. You 
+regain all uses of your Mystic Arcanum when you 
+finish a long rest."}
+             {:name "Eldrich Master"
+              :level 20
+              :description "At 20th level, you can draw on your inner reserve of 
+mystical power while entreating your patron to 
+regain expended spell slots. You can spend 1 minute 
+entreating your patron for aid to regain all your 
+expended spell slots from your Pact Magic feature. 
+Once you regain spell slots with this feature, you 
+must finish a long rest before you can do so again."}]
+    :subclass-level 1
+    :subclass-title "Otherworldly Patron"
+    :subclasses [{:name "The Fiend"
+                  :traits [{:name "Dark One's Blessing"
+                            :description "Starting at 1st level, when you reduce a hostile 
+creature to 0 hit points, you gain temporary hit 
+points equal to your Charisma modifier + your 
+warlock level (minimum of 1)."}
+                           {:name "Dark One's Own Luck"
+                            :level 6
+                            :description "Starting at 6th level, you can call on your patron to 
+alter fate in your favor. When you make an ability 
+check or a saving throw, you can use this feature to 
+Not for resale. Permission granted to print or photocopy this document for personal use only. System Reference Document 5.0 51
+add a d10 to your roll. You can do so after seeing the 
+initial roll but before any of the roll's effects occur.
+Once you use this feature, you can't use it again
+until you finish a short or long rest."}
+                           {:name "Fiendish Resilience"
+                            :level 10
+                            :description "Starting at 10th level, you can choose one damage 
+type when you finish a short or long rest. You gain 
+resistance to that damage type until you choose a 
+different one with this feature. Damage from magical 
+weapons or silver weapons ignores this resistance."}
+                           {:name "Hurl Through Hell"
+                            :level 14
+                            :description "Starting at 14th level, when you hit a creature with 
+an attack, you can use this feature to instantly 
+transport the target through the lower planes. The 
+creature disappears and hurtles through a 
+nightmare landscape.
+At the end of your next turn, the target returns to 
+the space it previously occupied, or the nearest 
+unoccupied space. If the target is not a fiend, it takes 
+10d10 psychic damage as it reels from its horrific 
+experience.
+Once you use this feature, you can't use it again 
+until you finish a long rest."}]}
+                 {:name "The Archfey"
+                  :traits [{:name "Fey Presence"
+                            :level 1}
+                           {:name "Misty Escape"
+                            :level 6}
+                           {:name "Beguiling Defenses"
+                            :level 10}
+                           {:name "Dark Delerium"
+                            :level 14}]}
+                 {:name "The Great Old One"
+                  :traits [{:name "Awakened Mind"
+                            :level 1}
+                           {:name "Entropic Ward"
+                            :level 6}
+                           {:name "Thought Shield"
+                            :level 10}
+                           {:name "Create Thrall"
+                            :level 14}]}]}
+   character-ref))
+
 (defn reroll-abilities [character-ref]
   (fn []
     (swap! character-ref
@@ -2936,7 +3456,8 @@ immune to your aura for 24 hours."}]}
      (paladin-option character-ref)
      (ranger-option character-ref)
      (rogue-option character-ref)
-     (sorcerer-option character-ref)])])
+     (sorcerer-option character-ref)
+     (warlock-option character-ref)])])
 
 (def template-base
   (es/make-entity
