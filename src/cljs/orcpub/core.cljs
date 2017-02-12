@@ -189,6 +189,7 @@
                                 (fn [options] (conj (vec options) new-item))))))
      :style {:margin-left "5px"}} (str "Add " name)]])
 
+
 (defn dropdown-selector [path option-paths {:keys [::t/options ::t/min ::t/max ::t/key ::t/name ::t/sequential? ::t/new-item-fn] :as selection} built-char raw-char built-template]
   (let [change-fn (partial make-dropdown-change-fn path key built-template raw-char character-ref)
         options (filter (fn [{:keys [::t/prereq-fn]}]
@@ -205,12 +206,17 @@
                   value (get-in @character-ref key-path)]
               ^{:key i} [:div (dropdown options value (change-fn i) built-char)]))))
        [:div
-        (doall
-         (map-indexed
-          (fn [i {value ::entity/key}]
-            ^{:key i}
-            [:div (dropdown options value (change-fn i) built-char)])
-          (get-in @character-ref (entity/get-entity-path built-template raw-char (conj path key)))))
+        (let [selected (get-in @character-ref (entity/get-entity-path built-template raw-char (conj path key)))
+              remaining (- min (count selected))
+              final-options (if (pos? remaining)
+                              (concat selected (repeat remaining {}))
+                              selected)]
+          (doall
+           (map-indexed
+            (fn [i {value ::entity/key}]
+              ^{:key i}
+              [:div (dropdown options value (change-fn i) built-char)])
+            selected)))
         (add-option-button selection raw-char (conj path key) new-item-fn built-template)])]))
 
 (defn remove-option-button [path built-template index]

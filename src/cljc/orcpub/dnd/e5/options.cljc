@@ -860,40 +860,67 @@
                                        spell-list
                                        spells
                                        ability] :as cfg}]
-  (prn "SPELLS" spells known-mode)
-  (case known-mode
-    :schedule (reduce
-               (fn [m [cls-lvl v]]
-                 (let [[num restriction] (if (number? v) [v] ((juxt :num :restriction) v))
-                       slots (total-slots cls-lvl level-factor)]
-                   (assoc m cls-lvl
-                          (if (> (count slots) 1)
-                            [(t/selection
-                              "Spell"
-                              (mapv
-                               (fn [[lvl _]]
-                                 (let [spell-keys (if spells
-                                                    (get spells lvl)
-                                                    (get-in sl/spell-lists [class-key lvl]))
-                                       final-spell-keys (apply-spell-restriction spell-keys restriction)]
-                                   (t/option
-                                    (spell-level-title lvl)
-                                    (keyword (str lvl))
-                                    [(spell-selection class-key lvl final-spell-keys ability num)]
-                                    [])))
-                               slots))]
-                            [(spell-selection
-                              class-key
-                              1
-                              (apply-spell-restriction
-                               (if spells
-                                 (get spells 1)
-                                 (get-in sl/spell-lists [class-key 1])) restriction)
-                              ability
-                              num)]))))
-               {}
-               spells-known)
-    {}))
+  (reduce
+   (fn [m [cls-lvl v]]
+     (let [[num restriction] (if (number? v) [v] ((juxt :num :restriction) v))
+           slots (total-slots cls-lvl level-factor)
+           all-spells (select-keys
+                       (or spells (sl/spell-lists (or spell-list class-key)))
+                       (keys slots))
+           acquire? (= :acquire known-mode)]
+       (assoc m cls-lvl
+              [(t/selection
+                "Spells Known"
+                (vec
+                 (flatten
+                  (map
+                   (fn [[lvl spell-keys]]
+                     (map
+                      (fn [spell-key]
+                        (let [spell (spells/spell-map spell-key)]
+                          (t/option
+                           (str lvl " - " (:name spell))
+                           spell-key
+                           []
+                           [(modifiers/spells-known lvl spell-key ability)])))
+                      (apply-spell-restriction spell-keys restriction)))
+                   all-spells)))
+                num
+                (if (not acquire?) num)
+                acquire?
+                (if acquire?
+                  (fn [s o v] {::entity/key nil})))])
+       
+       #_(assoc m cls-lvl
+              (if (> (count slots) 1)
+                (mapv
+                 (fn [i]
+                   (t/selection
+                    (str "Spell " (inc i))
+                    (mapv
+                     (fn [[lvl _]]
+                       (let [spell-keys (if spells
+                                          (get spells lvl)
+                                          (get-in sl/spell-lists [class-key lvl]))
+                             final-spell-keys (apply-spell-restriction spell-keys restriction)]
+                         (t/option
+                          (spell-level-title lvl)
+                          (keyword (str lvl))
+                          [(spell-selection class-key lvl final-spell-keys ability 1)]
+                          [])))
+                     slots)))
+                 (range num))
+                [(spell-selection
+                  class-key
+                  1
+                  (apply-spell-restriction
+                   (if spells
+                     (get spells 1)
+                     (get-in sl/spell-lists [class-key 1])) restriction)
+                  ability
+                  num)]))))
+   {}
+   spells-known))
 
 (defn spellcasting-template [{:keys [class-key
                                      level-factor

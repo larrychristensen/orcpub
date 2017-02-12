@@ -2949,6 +2949,132 @@ your patron. This ceremony can be performed
 during a short or long rest, and it destroys the 
 previous book. The book turns to ash when you die.")])])
 
+
+(defn wizard-option [character-ref]
+  (class-option
+   {:name "Wizard",
+    :spellcasting {:level-factor 1
+                   :cantrips-known {1 3 4 1 10 1}
+                   :known-mode :acquire
+                   :spells-known (zipmap (range 1 21) (repeat 2))
+                   :ability :int}
+    :spellcaster true
+    :hit-die 6
+    :ability-increase-levels [4 8 12 16 19]
+    :profs {:weapon {:dagger true :dart true :sling true :quarterstaff true :crossbow-light true}
+            :save {:int true :wis true}
+            :skill-options {:choose 2 :options {:arcana true :history true :insight true :investigation true :medicine true :religion true}}}
+    :traits [{:level 18 :name "Spell Mastery" :description "You have achieved such mastery over certain spells that you can cast them at will. Choose a 1st-level wizard spell and a 2nd-level wizard spell that are in your spellbook. You can cast those spells at their lowest level without expending a spell slot when you have them prepared. If you want to cast either spell at a higher level, you must expend a spell slot as normal.\nBy spending 8 hours in study, you can exchange one or both of the spells you chose for di erent spells of the same levels."}
+             {:level 20 :name "Signature Spells" :description "You gain mastery over two powerful spells and can cast them with little effort. Choose two 3rd-level wizard spells in your spellbook as your signature spells. You always have these spells prepared, they don't count against the number of spells you have prepared, and you can cast each of them once at 3rd level without expending a spell slot. When you do so, you can't do so again until you  nish a short or long rest.\nIf you want to cast either spell at a higher level, you must expend a spell slot as normal."}]
+    :subclass-level 2
+    :subclass-title "Arcane Tradition"
+    :subclasses [{:name "School of Evocation"
+                  :traits [{:level 2
+                            :name "Evocation Savant"
+                            :description "Beginning when you select this school at 2nd level, the gold and time you must spend to copy an evocation spell into your spellbook is halved."}
+                           {:level 2
+                            :name "Sculpt Spells"
+                            :description "Beginning at 2nd level, you can create pockets of relative safety within the e ects of your evocation spells. When you cast an evocation spell that a ects other creatures that you can see, you can choose a number of them equal to 1 + the spell's level. The chosen creatures automatically succeed on their saving throws against the spell, and they take no damage if they would normally take half damage on a successful save."}
+                           {:level 6
+                            :name "Potent Cantrip"
+                            :description "Starting at 6th level, your damaging cantrips affect even creatures that avoid the brunt of the effect. When a creature succeeds on a saving throw against your cantrip, the creature takes half the cantrip's damage (if any) but su ers no additional e ect from the cantrip."}
+                           {:level 10
+                            :name "Empowered Evocation"
+                            :description "Beginning at 10th level, you can add your Intelligence modi er to one damage roll of any wizard evocation spell you cast."}
+                           {:level 14
+                            :name "Overchannel"
+                            :description "Starting at 14th level, you can increase the power of your simpler spells. When you cast a wizard spell of 1st through 5th level that deals damage, you can deal maximum damage with that spell.\nThe first time you do so, you suffer no adverse effect. If you use this feature again before you  nish a long rest, you take 2d12 necrotic damage for each level of the spell, immediately after you cast it. Each time you use this feature again before finishing a long rest, the necrotic damage per spell level increases by 1d12. This damage ignores resistance and immunity."}]}
+                 {:name "School of Abjuration"
+                  :traits [{:name "Abjuration Savant"
+                            :level 2}
+                           {:name "Arcane Ward"
+                            :level 2}
+                           {:name "Projected Ward"
+                            :level 6}
+                           {:name "Improved Abjuration"
+                            :level 10}
+                           {:name "Spell Resistance"
+                            :level 14}]}
+                 {:name "School of Conjuration"
+                  :traits [{:name "Conjuration Savant"
+                            :level 2}
+                           {:name "Minor Conjuration"
+                            :level 2}
+                           {:name "Benign Transposition"
+                            :level 6}
+                           {:name "Focused Conjuration"
+                            :level 10}
+                           {:name "Durable Summons"
+                            :level 14}]}
+                 {:name "School of Divination"
+                  :traits [{:name "Divination Savant"
+                            :level 2}
+                           {:name "Protent"
+                            :level 2}
+                           {:name "Expert Divination"
+                            :level 6}
+                           {:name "The Third Eye"
+                            :level 10}
+                           {:name "Greater Portent"
+                            :level 14}]}
+                 {:name "School of Enchantment"
+                  :traits [{:name "Enchantment Savant"
+                            :level 2}
+                           {:name "Hypnotic Gaze"
+                            :level 2}
+                           {:name "Instinctive Charm"
+                            :level 6}
+                           {:name "Split Enchantment"
+                            :level 10}
+                           {:name "Alter Memories"
+                            :level 14}]}
+                 {:name "School of Illusion"
+                  :traits [{:name "Illusion Savant"
+                            :level 2}
+                           {:name "Improved Minor Illusion"
+                            :level 2}
+                           {:name "Malleable Illusions"
+                            :level 6}
+                           {:name "Illusory Self"
+                            :level 10}
+                           {:name "Illusory Reality"
+                            :level 14}]}
+                 {:name "School of Necromancy"
+                  :traits [{:name "Necromancy Savant"
+                            :level 2}
+                           {:name "Grim Harvest"
+                            :level 2}
+                           {:name "Undead Thralls"
+                            :level 6}
+                           {:name "Inured to Undeath"
+                            :level 10}
+                           {:name "Command Undead"
+                            :level 14}]}
+                 {:name "School of Transmutation"
+                  :traits [{:name "Transmutation Savant"
+                            :level 2}
+                           {:name "Minor Alchemy"
+                            :level 2}
+                           {:name "Transmuter's Stone"
+                            :level 6}
+                           {:name "Shapechanger"
+                            :level 10}
+                           {:name "Master Transmuter"
+                            :level 14}]}
+                 {:name "Bladesinger"
+                  :source "Sword Coast Adventurer's Guide"
+                  :traits [{:name "Training in War and Song"
+                            :level 2}
+                           {:name "Bladesong"
+                            :level 2}
+                           {:name "Extra Attack"
+                            :level 6}
+                           {:name "Song of Defense"
+                            :level 10}
+                           {:name "Song of Victory"
+                            :level 14}]}]}
+   character-ref))
+
 (defn has-trait-with-name-prereq [name]
   (fn [c] (some #(= name (:name %)) (es/entity-val c :traits))))
 
@@ -3485,7 +3611,8 @@ until you finish a long rest."}]}
      (ranger-option character-ref)
      (rogue-option character-ref)
      (sorcerer-option character-ref)
-     (warlock-option character-ref)])])
+     (warlock-option character-ref)
+     (wizard-option character-ref)])])
 
 (def template-base
   (es/make-entity
