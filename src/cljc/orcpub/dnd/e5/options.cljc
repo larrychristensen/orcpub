@@ -858,7 +858,9 @@
                                        spells-known
                                        known-mode
                                        spell-list
+                                       spells
                                        ability] :as cfg}]
+  (prn "SPELLS" spells known-mode)
   (case known-mode
     :schedule (reduce
                (fn [m [cls-lvl v]]
@@ -870,7 +872,9 @@
                               "Spell"
                               (mapv
                                (fn [[lvl _]]
-                                 (let [spell-keys (get-in sl/spell-lists [class-key lvl])
+                                 (let [spell-keys (if spells
+                                                    (get spells lvl)
+                                                    (get-in sl/spell-lists [class-key lvl]))
                                        final-spell-keys (apply-spell-restriction spell-keys restriction)]
                                    (t/option
                                     (spell-level-title lvl)
@@ -878,7 +882,15 @@
                                     [(spell-selection class-key lvl final-spell-keys ability num)]
                                     [])))
                                slots))]
-                            [(spell-selection class-key 1 (apply-spell-restriction (get-in sl/spell-lists [class-key 1]) restriction) ability num)]))))
+                            [(spell-selection
+                              class-key
+                              1
+                              (apply-spell-restriction
+                               (if spells
+                                 (get spells 1)
+                                 (get-in sl/spell-lists [class-key 1])) restriction)
+                              ability
+                              num)]))))
                {}
                spells-known)
     {}))

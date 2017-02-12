@@ -511,8 +511,6 @@ to the extra damage of the critical hit."}]}))
                              spellcasting-template
                              i]
   (let [selections (some-> levels (get i) :selections)]
-    (if (= name "Way of the Four Elements")
-      (js/console.log "SELECTIONS" selections))
     (t/option
      (str i)
      (keyword (str i))
@@ -542,30 +540,33 @@ to the extra damage of the critical hit."}]}))
                                (assoc
                                 spellcasting
                                 :class-key
-                                (or (:spell-list spellcasting) kw)))]
-    (assoc
-     (t/option
-      name
-      kw
-      (concat
-       selections
-       (if (seq tool-options) [(tool-prof-selection tool-options)])
-       (if (seq skill-kws) [(opt5e/skill-selection skill-kws skill-num)]))
-      (concat
-       modifiers
-       (armor-prof-modifiers armor-profs)
-       (weapon-prof-modifiers weapon-profs)
-       (tool-prof-modifiers tool-profs)
-       (traits-modifiers traits true)))
-     ::t/plugins [{::t/path [:class (:key cls)]
-                   ::t/selections [(t/sequential-selection
-                                    "Levels"
-                                    (fn [selection options current-values]
-                                      {::entity/key (-> current-values count inc str keyword)})
-                                    (vec
-                                     (map
-                                      (partial subclass-level-option subcls kw character-ref spellcasting-template)
-                                      (range 1 21))))]}])))
+                                (or (:spell-list spellcasting) kw)))
+        option (t/option
+                name
+                kw
+                (concat
+                 selections
+                 (if (seq tool-options) [(tool-prof-selection tool-options)])
+                 (if (seq skill-kws) [(opt5e/skill-selection skill-kws skill-num)]))
+                (concat
+                 modifiers
+                 (armor-prof-modifiers armor-profs)
+                 (weapon-prof-modifiers weapon-profs)
+                 (tool-prof-modifiers tool-profs)
+                 (traits-modifiers traits true)))]
+    (if spellcasting-template
+      (assoc
+       option
+       ::t/plugins [{::t/path [:class (:key cls)]
+                     ::t/selections [(t/sequential-selection
+                                      "Levels"
+                                      (fn [selection options current-values]
+                                        {::entity/key (-> current-values count inc str keyword)})
+                                      (vec
+                                       (map
+                                        (partial subclass-level-option subcls kw character-ref spellcasting-template)
+                                        (range 1 21))))]}])
+      option)))
 
 (defn level-option [{:keys [name
                             hit-die
@@ -3235,25 +3236,28 @@ magic while the creature is within 30 feet of you and
 within line of sight.")]
     [(total-levels-prereq 15)])])
 
+(def warlock-spells-known
+  {1 2
+   2 1
+   3 1
+   4 1
+   5 1
+   6 1
+   7 1
+   8 1
+   9 1
+   11 1
+   13 1
+   15 1
+   17 1
+   19 1})
+
 (defn warlock-option [character-ref]
   (class-option
    {:name "Warlock"
     :spellcasting {:level-factor 1
                    :cantrips-known {1 2 4 1 10 1}
-                   :spells-known {1 2
-                                  2 1
-                                  3 1
-                                  4 1
-                                  5 1
-                                  6 1
-                                  7 1
-                                  8 1
-                                  9 1
-                                  11 1
-                                  13 1
-                                  15 1
-                                  17 1
-                                  19 1}
+                   :spells-known warlock-spells-known
                    :known-mode :schedule
                    :ability :cha},
     :spellcaster true
@@ -3331,6 +3335,14 @@ must finish a long rest before you can do so again."}]
     :subclass-level 1
     :subclass-title "Otherworldly Patron"
     :subclasses [{:name "The Fiend"
+                  :spellcasting {:known-mode :schedule
+                                 :spells-known warlock-spells-known
+                                 :level-factor 1
+                                 :spells {1 #{:burning-hands :command}
+                                          2 #{:blindness-deafness :scorching-ray}
+                                          3 #{:fireball :stinking-cloud}
+                                          4 #{:fire-shield :wall-of-fire}
+                                          5 #{:flame-strike :hallow}}}
                   :traits [{:name "Dark One's Blessing"
                             :description "Starting at 1st level, when you reduce a hostile 
 creature to 0 hit points, you gain temporary hit 
@@ -3368,6 +3380,14 @@ experience.
 Once you use this feature, you can't use it again 
 until you finish a long rest."}]}
                  {:name "The Archfey"
+                  :spellcasting {:known-mode :schedule
+                                 :spells-known warlock-spells-known
+                                 :level-factor 1
+                                 :spells {1 #{:faerie-fire :sleep}
+                                          2 #{:calm-emotions :phantasmal-force}
+                                          3 #{:blink :plant-growth}
+                                          4 #{:dominate-beast :greater-invisibility}
+                                          5 #{:dominate-person :seeming}}}
                   :traits [{:name "Fey Presence"
                             :level 1}
                            {:name "Misty Escape"
@@ -3377,6 +3397,14 @@ until you finish a long rest."}]}
                            {:name "Dark Delerium"
                             :level 14}]}
                  {:name "The Great Old One"
+                  :spellcasting {:known-mode :schedule
+                                 :spells-known warlock-spells-known
+                                 :level-factor 1
+                                 :spells {1 #{:dissonant-whispers :tashas-hideous-laughter}
+                                          2 #{:detect-thoughts :phantasmal-force}
+                                          3 #{:clairvoyance :sending}
+                                          4 #{:dominate-beast :evards-black-tentacles}
+                                          5 #{:dominate-person :telekinesis}}}
                   :traits [{:name "Awakened Mind"
                             :level 1}
                            {:name "Entropic Ward"
