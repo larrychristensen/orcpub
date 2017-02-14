@@ -200,7 +200,7 @@
     :subraces
     [{:name "High Elf"
       :abilities {:int 1}
-      :selections [(opt5e/wizard-cantrip-selection 1)
+      :selections [(opt5e/spell-selection :wizard 0 :int 1)
                    (opt5e/language-selection opt5e/languages 1)]
       :modifiers [elf-weapon-training-mods]}
      {:name "Wood Elf"
@@ -2964,7 +2964,7 @@ previous book. The book turns to ash when you die.")])])
     :profs {:weapon {:dagger true :dart true :sling true :quarterstaff true :crossbow-light true}
             :save {:int true :wis true}
             :skill-options {:choose 2 :options {:arcana true :history true :insight true :investigation true :medicine true :religion true}}}
-    :traits [{:level 18 :name "Spell Mastery" :description "You have achieved such mastery over certain spells that you can cast them at will. Choose a 1st-level wizard spell and a 2nd-level wizard spell that are in your spellbook. You can cast those spells at their lowest level without expending a spell slot when you have them prepared. If you want to cast either spell at a higher level, you must expend a spell slot as normal.\nBy spending 8 hours in study, you can exchange one or both of the spells you chose for di erent spells of the same levels."}
+    :traits [{:level 18 :name "Spell Mastery" :description "You have achieved such mastery over certain spells that you can cast them at will. Choose a 1st-level wizard spell and a 2nd-level wizard spell that are in your spellbook. You can cast those spells at their lowest level without expending a spell slot when you have them prepared. If you want to cast either spell at a higher level, you must expend a spell slot as normal.\nBy spending 8 hours in study, you can exchange one or both of the spells you chose for different spells of the same levels."}
              {:level 20 :name "Signature Spells" :description "You gain mastery over two powerful spells and can cast them with little effort. Choose two 3rd-level wizard spells in your spellbook as your signature spells. You always have these spells prepared, they don't count against the number of spells you have prepared, and you can cast each of them once at 3rd level without expending a spell slot. When you do so, you can't do so again until you  nish a short or long rest.\nIf you want to cast either spell at a higher level, you must expend a spell slot as normal."}]
     :subclass-level 2
     :subclass-title "Arcane Tradition"
@@ -3029,6 +3029,7 @@ previous book. The book turns to ash when you die.")])])
                            {:name "Alter Memories"
                             :level 14}]}
                  {:name "School of Illusion"
+                  :selections [(opt5e/spell-selection :wizard 0 :int 1)]
                   :traits [{:name "Illusion Savant"
                             :level 2}
                            {:name "Improved Minor Illusion"
@@ -3040,6 +3041,7 @@ previous book. The book turns to ash when you die.")])])
                            {:name "Illusory Reality"
                             :level 14}]}
                  {:name "School of Necromancy"
+                  :modifiers [(mod5e/resistance :necrotic)]
                   :traits [{:name "Necromancy Savant"
                             :level 2}
                            {:name "Grim Harvest"
@@ -3051,6 +3053,7 @@ previous book. The book turns to ash when you die.")])])
                            {:name "Command Undead"
                             :level 14}]}
                  {:name "School of Transmutation"
+                  :modifiers [(mod5e/spells-known 4 :polymorph :int)]
                   :traits [{:name "Transmutation Savant"
                             :level 2}
                            {:name "Minor Alchemy"
@@ -3565,6 +3568,178 @@ until you finish a long rest."}]}
      (mod5e/trait "Evocation Savant")
      (mod5e/trait "Sculpt Spells")])])
 
+(def backgrounds [{:name "Acolyte"
+                   :profs {:skill {:insight true, :religion true}
+                           :language-options {:choose 2 :options {:any true}}}
+                   :personality ["I idolize a particular hero of my faith, and constantly refer to that person's deeds and example."
+                                 "I can find common ground between the fiercest enemies, empathizing with them and always working toward peace."
+                                 "I see omens in every event and action. The gods try to speak to us, we just need to listen"
+                                 "Nothing can shake my optimistic attitude."
+                                 "I quote (or misquote) sacred texts and proverbs in almost every situation."
+                                 "I am tolerant (or intolerant) of other faiths and respect (or condemn) the worship of other gods."
+                                 "I've enjoyed fine food, drink, and high society among my temple's elite. Rough living grates on me."
+                                 "I've spent so long in the temple that I have little practical experience dealing with people in the outside world."]
+                   :ideal ["Tradition. The ancient traditions of worship and sacrifice must be preserved and upheld. (Lawful)"
+                           "Charity. I always try to help those in need, no matter what the personal cost. (Good)"
+                           "Change. We must help bring about the changes the gods are constantly working in the world. (Chaotic)"
+                           "Power. I hope to one day rise to the top of my faith's religious hierarchy. (Lawful)"
+                           "Faith. I trust that my deity will guide my actions. I have faith that if I work hard, things will go well. (Lawful)"
+                           "Aspiration. I seek to prove myself worthy of my god's favor by matching my actions against his or her teachings. (Any)"]
+                   :bond ["I would die to recover an ancient relic of my faith that was lost long ago."
+                          "I will someday get revenge on the corrupt temple hierarchy who branded me a heretic."
+                          "I owe my life to the priest who took me in when my parents died."
+                          "Everything I do is for the common people."
+                          "I will do anything to protect the temple where I served."
+                          "I seek to preserve a sacred text that my enemies consider heretical and seek to destroy."]
+                   :flaw ["I judge others harshly, and myself even more severely."
+                          "I put too much trust in those who wield power within my temple's hierarchy."
+                          "My piety sometimes leads me to blindly trust those that profess faith in my god."
+                          "I am inflexible in my thinking."
+                          "I am suspicious of strangers and expect the worst of them."
+                          "Once I pick a goal, I become obsessed with it to the detriment of everything else in my life."]},
+                  {:name "Criminal"
+                   :profs {:skill {:deception true, :stealth true}
+                           :tool {:thieves-tools true}
+                           :tool-options {:gaming-set 1}}}
+                  {:name "Folk Hero"
+                   :profs {:skill {:animal-handling true :survival true}
+                           :tool {:land-vehicles true}
+                           :tool-options {:artisans-tool 1}}}
+                  {:name "Noble"
+                   :profs {:skill {:history true :persuasion true}
+                           :tool-options {:gaming-set 1}
+                           :language-options {:choose 1 :options {:any true}}}}
+                  {:name "Sage"
+                   :profs {:skill {:arcana true :history true}
+                           :language {:choose 2 :options {:any true}}}}
+                  {:name "Soldier"
+                   :profs {:skill {:athletics true :intimidation true}
+                           :tool {:land-vehicles true}
+                           :tool-options {:gaming-set 1}}}
+                  {:name "Charlatan"
+                   :profs {:skill {:deception true :sleight-of-hand true}
+                           :tool {:disguise-kit true :forgery-kit true}}}
+                  {:name "Entertainer"
+                   :profs {:skill {:acrobatics true :performance true}
+                           :tool {:disguise-kit true}
+                           :tool-options {:musical-instrument 1}}}
+                  {:name "Guild Artisan"
+                   :profs {:skill {:insight true :persuasion true}
+                           :tool-options {:artisans-tool 1}}}
+                  {:name "Hermit"
+                   :profs {:skill {:medicine true :religion true}
+                           :tool {:herbalism-kit true}}}
+                  {:name "Outlander"
+                   :profs {:skill {:athletics true :survival true}
+                           :tool-options {:musical-instrument 1}}}
+                  {:name "Sailor"
+                   :profs {:skill {:athletics true :perception true}
+                           :tool {:navigators-tools true :water-vehices true}}}
+                  {:name "Urchin"
+                   :profs {:skill {:sleight-of-hand true :stealth true}
+                           :tool {:disguise-kit true :thieves-tools true}}}
+                  {:name "City Watch"
+                   :source "Sword Coast Adventurer's Guide"
+                   :profs {:skill {:athletics true :insight true}}}
+                  {:name "Clan Crafter"
+                   :source "Sword Coast Adventurer's Guide"
+                   :profs {:skill {:history true :insight true}
+                           :tool-options {:artisans-tool true}}}
+                  {:name "Cloistered Scholar"
+                   :source "Sword Coast Adventurer's Guide"
+                   :profs {:skill {:history true}
+                           :skill-options {:choose 1 :options {:arcana true :nature true :religion true}}}}
+                  {:name "Courtier"
+                   :source "Sword Coast Adventurer's Guide"
+                   :profs {:skill {:insight true :persuasion true}}}
+                  {:name "Faction Agent"
+                   :source "Sword Coast Adventurer's Guide"
+                   :profs {:skill {:insight true}
+                           :skill-options {:choose 1 :options {:animal-handling true :arcana true :deception true :history true :insight true :intimidation true :investigation true :medicine true :nature true :perception true :performance true :persuasion true :religion true :survival true}}}}
+                  {:name "Far Traveler"
+                   :source "Sword Coast Adventurer's Guide"
+                   :profs {:skill {:perception true :insight true}
+                           :tool-options {:musical-instrument 1}}}
+                  {:name "Inheritor"
+                   :source "Sword Coast Adventurer's Guide"
+                   :profs {:skill {:survival true}
+                           :skill-options {:choose 1 :options {:arcana true :history true :religion true}}}}
+                  {:name "Knight of the Order"
+                   :source "Sword Coast Adventurer's Guide"
+                   :profs {:skill {:persuasion true}
+                           :skill-options {:choose 1 :options {:arcana true :history true :nature true :religion true}}
+                           :tool-options {:musical-instrument 1}}}
+                  {:name "Mercenary Veteran"
+                   :source "Sword Coast Adventurer's Guide"
+                   :profs {:skill {:athletics true :persuasion true}
+                           :tool {:land-vehicles true}
+                           :tool-options {:gaming-set 1}}}
+                  {:name "Urban Bounty Hunter"
+                   :source "Sword Coast Adventurer's Guide"
+                   :profs {:skill-options {:choose 2 :options {:deception true :insight true :persuasion true :stealth true}}
+                           :tool-options {:gaming-set 1 :musical-instrument 1 :thieves-tools 1}}}
+                  {:name "Uthgardt Tribe Member"
+                   :source "Sword Coast Adventurer's Guide"
+                   :profs {:skill {:athletics true :survival true}
+                           :tool-options {:musical-instrument 1 :artisans-tool 1}}}
+                  {:name "Waterdhavian Noble"
+                   :source "Sword Coast Adventurer's Guide"
+                   :profs {:skill {:history true :persuasion true}
+                           :tool-options {:musical-instrument 1 :gaming-set 1}}}])
+
+(defn background-option [{:keys [name
+                                 profs
+                                 selections
+                                 modifiers
+                                 weapon-choices
+                                 weapons
+                                 equipment
+                                 equipment-choices
+                                 armor
+                                 armor-choices
+                                 spellcasting]
+                          :as cls}
+                         character-ref]
+  (let [kw (common/name-to-kw name)
+        {:keys [skill skill-options tool-options tool language-options]
+         armor-profs :armor weapon-profs :weapon} profs
+        {skill-num :choose options :options} skill-options
+        {lang-num :choose lang-options :options} language-options
+        lang-kws (if (:any lang-options) (map :key opt5e/languages) (keys lang-options))
+        skill-kws (if (:any options) (map :key opt5e/skills) (keys options))]
+    (t/option
+     name
+     kw
+     (concat
+      selections
+      (if (seq tool-options) [(tool-prof-selection tool-options)])
+      (class-weapon-options weapon-choices)
+      (class-armor-options armor-choices)
+      (class-equipment-options equipment-choices)
+      (if (seq skill-kws) [(opt5e/skill-selection skill-kws skill-num)])
+      (if (seq lang-kws) [(opt5e/language-selection (map opt5e/language-map lang-kws) lang-num)]))
+     (concat
+      modifiers
+      (armor-prof-modifiers (keys armor-profs))
+      (weapon-prof-modifiers (keys weapon-profs))
+      (tool-prof-modifiers (keys tool))
+      (mapv
+       (fn [skill-kw]
+         (mod5e/skill-proficiency skill-kw))
+       (keys skill))
+      (mapv
+       (fn [[k num]]
+         (mod5e/weapon k num))
+       weapons)
+      (mapv
+       (fn [[k num]]
+         (mod5e/armor k num))
+       armor)
+      (mapv
+       (fn [[k num]]
+         (mod5e/equipment k num))
+       equipment)))))
+
 (defn template-selections [character-ref]
   [(t/selection
     "Ability Scores"
@@ -3589,6 +3764,11 @@ until you finish a long rest."}]}
      half-elf-option
      half-orc-option
      tiefling-option])
+   (t/selection
+    "Background"
+    (map
+     background-option
+     backgrounds))
    (t/selection+
     "Class"
     (fn [selection classes]

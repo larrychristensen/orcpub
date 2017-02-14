@@ -1,5 +1,6 @@
 (ns orcpub.entity-spec
-  (:require [clojure.string :as s]))
+  (:require [clojure.string :as s]
+            [clojure.set :as sets]))
 
 (defn entity-val [entity k]
   (let [v (entity k)]
@@ -70,7 +71,7 @@
            replaced (replace-refs arg v)
            kw (ref-sym-to-kw k)]
        (assoc
-        (update m ::deps (fn [d] (update d kw #(clojure.set/union % (deps k v)))))
+        (update m ::deps (fn [d] (update d kw #(sets/union % (deps k v)))))
         kw
         (concat `(fn [~arg])
                 [replaced]))))

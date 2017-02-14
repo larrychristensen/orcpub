@@ -92,7 +92,7 @@
   (flatten (build-options-paths [] options)))
 
 (defn collect-modifiers [flat-options modifier-map]
-  #?(:cljs (cljs.pprint/pprint flat-options))
+  ;;#?(:cljs (cljs.pprint/pprint flat-options))
   (mapcat
    (fn [{path ::t/path
          option-value ::value

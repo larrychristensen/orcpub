@@ -477,12 +477,12 @@
                      true)))
 
 (defn character-builder []
-  (cljs.pprint/pprint @character-ref)
+  ;;(cljs.pprint/pprint @character-ref)
   (let [option-paths (make-path-map @character-ref)
         built-template (entity/build-template @character-ref template)
         built-char (entity/build @character-ref built-template)]
-    (js/console.log "BUILT TEMPLAT" built-template)
-    (print-char built-char)
+    ;;(js/console.log "BUILT TEMPLAT" built-template)
+    ;;(print-char built-char)
     [:div.app
      [:div.app-header
       [:div.app-header-bar.container
