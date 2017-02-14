@@ -12,10 +12,7 @@
    :body "Hello from Heroku"})
 
 (defroutes app
-  (GET "/" []
-       (splash))
-  (ANY "*" []
-       (route/not-found (slurp (io/resource "404.html")))))
+  (route/resources "/"))
 
 (defn -main [& [port]]
   (let [port (Integer. (or port (env :port) 5000))]
