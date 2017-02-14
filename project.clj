@@ -130,6 +130,19 @@
                    ;; :plugins [[cider/cider-nrepl "0.12.0"]]
                    :repl-options {; for nREPL dev you really need to limit output
                                   :init (set! *print-length* 50)
-                                  :nrepl-middleware [cemerick.piggieback/wrap-cljs-repl]}}}
+                                  :nrepl-middleware [cemerick.piggieback/wrap-cljs-repl]}}
+             :uberjar {:hooks [leiningen.cljsbuild]
+                       :env {:production true}
+                       :aot :all
+                       :omit-source true
+                       :cljsbuild {:builds
+                                   [{:id "prod"
+                                     :source-paths ["src/clj" "src/cljc" "src/cljs"]
+                                     :figwheel { :on-jsload "orcpub.core/on-js-reload" }
+                                     :compiler {:main orcpub.core
+                                                :asset-path "/js/compiled/out"
+                                                :output-to "resources/public/js/compiled/orcpub.js"
+                                                :optimizations :advanced
+                                                :source-map-timestamp true }}]}}}
 
   )
