@@ -142,7 +142,8 @@
   (first
    (keep-indexed
     (fn [i s]
-      (if (= (::key s) item-key)
+      (if (and item-key
+               (= (::key s) item-key))
         [i s]))
     items)))
 
