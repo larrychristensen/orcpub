@@ -1,5 +1,6 @@
 (ns orcpub.dnd.e5.template
-  (:require [orcpub.entity :as entity]
+  (:require [clojure.string :as s]
+            [orcpub.entity :as entity]
             [orcpub.entity-spec :as es]
             [orcpub.template :as t]
             [orcpub.dice :as dice]
@@ -70,6 +71,26 @@
     {:on-click reroll-fn}
     "Re-Roll"]])
 
+(defn abilities-entry [character-ref]
+  [:div {:style {:display :flex}}
+   (let [abilities (get-raw-abilities character-ref)
+         abilities-vec (vec abilities)]
+     (map-indexed
+      (fn [i [k v]]
+        ^{:key k}
+        [:div {:style {:margin-top "10px"
+                       :text-align :center
+                       :padding "1px"}}
+         [:div {:style {:text-transform :uppercase}} (name k)]
+         [:input.input
+          {:value v
+           :style {:font-size "18px"}
+           :on-change (fn [e] (let [value (.-value (.-target e))
+                                    new-v (if (not (s/blank? value))
+                                            (js/parseInt value))]
+                                (swap! character-ref assoc-in [::entity/options :ability-scores ::entity/value k] new-v)))}]])
+      abilities-vec))])
+
 (declare template-selections)
 
 (defn roll-hit-points [die character-ref path]
@@ -85,6 +106,20 @@
     {:style {:margin-top "10px"}
      :on-click #(roll-hit-points die character-ref path)}
     "Re-Roll"]])
+
+(defn hit-points-entry [character-ref path]
+  (let [value-path (entity/get-option-value-path
+                    {::t/selections (template-selections character-ref)}
+                    @character-ref
+                    path)
+        value (get-in @character-ref value-path)]
+    [:div
+     [:input.input
+      {:value value
+       :on-change (fn [e] (let [value (.-value (.-target e))
+                               new-v (if (not (s/blank? value))
+                                       (js/parseInt value))]
+                           (swap! character-ref assoc-in value-path new-v)))}]]))
 
 (defn traits-modifiers [traits & [include-level?]]
   (map
@@ -463,7 +498,11 @@ to the extra damage of the critical hit."}]}))
 (defn hit-points-selection [character-ref die]
   (t/selection
    "Hit Points"
-   [{::t/name "Roll"
+   [{::t/name "Manual Entry"
+     ::t/key :manual-entry
+     ::t/ui-fn #(hit-points-entry character-ref %)
+     ::t/modifiers [(mod5e/deferred-max-hit-points)]}
+    {::t/name "Roll"
      ::t/key :roll
      ::t/ui-fn #(hit-points-roller die character-ref %)
      ::t/select-fn #(roll-hit-points die character-ref %)
@@ -3743,7 +3782,11 @@ until you finish a long rest."}]}
 (defn template-selections [character-ref]
   [(t/selection
     "Ability Scores"
-    [{::t/name "Standard Roll"
+    [{::t/name "Manual Entry"
+      ::t/key :manual-entry
+      ::t/ui-fn #(abilities-entry character-ref)
+      ::t/modifiers [(mod5e/deferred-abilities)]}
+     {::t/name "Standard Roll"
       ::t/key :standard-roll
       ::t/ui-fn #(abilities-roller character-ref (reroll-abilities character-ref))
       ::t/select-fn (reroll-abilities character-ref)
