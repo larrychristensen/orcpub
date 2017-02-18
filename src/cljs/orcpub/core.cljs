@@ -721,7 +721,7 @@
              (list-display-section "Equipment" nil
                                    (map
                                     (fn [[equipment-kw num]]
-                                      (str (name equipment-kw) " (" num ")"))
+                                      (str (:name (opt5e/equipment-map equipment-kw)) " (" num ")"))
                                     (es/entity-val built-char :equipment)))]]
            (display-section
             "Features, Traits, & Feats" nil
