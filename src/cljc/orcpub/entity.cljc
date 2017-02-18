@@ -93,7 +93,6 @@
   (flatten (build-options-paths [] options)))
 
 (defn collect-modifiers [flat-options modifier-map]
-  #?(:cljs (pp/pprint flat-options))
   (mapcat
    (fn [{path ::t/path
          option-value ::value
@@ -143,7 +142,8 @@
   (first
    (keep-indexed
     (fn [i s]
-      (if (= (::key s) item-key)
+      (if (and item-key
+               (= (::key s) item-key))
         [i s]))
     items)))
 

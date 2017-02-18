@@ -37,6 +37,15 @@
 (defn get-option-value [template entity path]
   (get-in entity (entity/get-option-value-path template entity path)))
 
+(defn update-in-entity [m [k & ks] f & args]
+  (let [current (get m k)
+         val (if (and (int? k)
+                      (>= k (count current)))
+               (vec (concat current (repeat (inc (- k (count current))))))
+               current)]
+     (if ks
+       (assoc m k (apply update-in val ks f args))
+       (assoc m k (apply f val args)))))
 
 (defn update-option [template entity path update-fn]
   (update-in entity (entity/get-entity-path template entity [] path) update-fn))
@@ -92,13 +101,16 @@
 (defn set-option-value [char path value]
   (let [number-indices (keep-indexed (fn [i v] (if (number? v) i))
                                      path)
-        subpaths (map #(subvec path 0 %) number-indices)]
+        subpaths (map #(subvec path 0 (inc %)) number-indices)]
     (assoc-in
      (reduce
       (fn [c p]
-        (if (nil? (get-in c p))
-          (assoc-in c p [])
-          c))
+        (let [vec-path (butlast p)
+              v (get-in c vec-path)
+              remaining (inc (- (last p) (count v)))]
+          (if (nil? v)
+            (assoc-in c vec-path (vec (repeat remaining {})))
+            c)))
       char
       subpaths)
      path
@@ -206,17 +218,19 @@
                   value (get-in @character-ref key-path)]
               ^{:key i} [:div (dropdown options value (change-fn i) built-char)]))))
        [:div
-        (let [selected (get-in @character-ref (entity/get-entity-path built-template raw-char (conj path key)))
+        (let [full-path (conj path key)
+              entity-path (entity/get-entity-path built-template raw-char full-path)
+              selected (get-in @character-ref entity-path)
               remaining (- min (count selected))
               final-options (if (pos? remaining)
-                              (concat selected (repeat remaining {}))
+                              (vec (concat selected (repeat remaining {::entity/key :wish})))
                               selected)]
           (doall
            (map-indexed
             (fn [i {value ::entity/key}]
               ^{:key i}
               [:div (dropdown options value (change-fn i) built-char)])
-            selected)))
+            final-options)))
         (add-option-button selection raw-char (conj path key) new-item-fn built-template)])]))
 
 (defn remove-option-button [path built-template index]
@@ -463,12 +477,12 @@
                      true)))
 
 (defn character-builder []
-  (cljs.pprint/pprint @character-ref)
+  ;;(cljs.pprint/pprint @character-ref)
   (let [option-paths (make-path-map @character-ref)
         built-template (entity/build-template @character-ref template)
         built-char (entity/build @character-ref built-template)]
-    (js/console.log "BUILT TEMPLAT" built-template)
-    (print-char built-char)
+    ;;(js/console.log "BUILT TEMPLAT" built-template)
+    ;;(print-char built-char)
     [:div.app
      [:div.app-header
       [:div.app-header-bar.container

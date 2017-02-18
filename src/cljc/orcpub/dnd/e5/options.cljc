@@ -108,17 +108,52 @@
    {:name "Weaver's Tools", :key :weavers-tools}
    {:name "Woodcarver's Tools", :key :woodcarvers-tools}])
 
+(def misc-tools
+  [{:name "Disguise Kit"
+    :key :disguise-kit}
+   {:name "Forgery Kit"
+    :key :forgery-kit}
+   {:name "Herbalism Kit"
+    :key :herbalism-kit}
+   {:name "Navigator's Tools"
+    :key :navigators-tools}
+   {:name "Poisoner's Tools"
+    :key :poisoners-tools}
+   {:name "Thieves' Tools"
+    :key :thieves-tools}])
+
+(def gaming-sets
+  [{:name "Dice Set"
+    :key :dice-set}
+   {:name "Dragonchess Set"
+    :key :dragonchess-set}
+   {:name "Playing Card Set"
+    :key :playing-card-set}
+   {:name "Three-Dragon Ante Set"
+    :key :three-dragon-ante-set}])
+
+(def vehicles
+  [{:name "Water Vehicles"
+    :key :water-vehicles}
+   {:name "Land Vehicles"
+    :key :land-vehicles}])
+
 (def tools
   (concat
    musical-instruments
-   artisans-tools))
+   artisans-tools
+   misc-tools
+   gaming-sets
+   vehicles))
 
 (def tools-map
   (merge
    {:artisans-tool {:name "Artisans Tools"
                     :values artisans-tools}
     :musical-instrument {:name "Musical Instruments"
-                         :values musical-instruments}}
+                         :values musical-instruments}
+    :gaming-set {:name "Gaming Set"
+                 :values gaming-sets}}
    (zipmap (map :key tools) tools)))
 
 (def add-keys-xform
@@ -680,6 +715,9 @@
    {:name "Undercommon"
     :key :undercommon}])
 
+(def language-map
+  (zipmap (map :key languages) languages))
+
 (def elemental-disciplines
   [{:name "Breath of Winter"
     :level 17}
@@ -726,9 +764,6 @@
    key
    nil
    [(modifiers/language name key)]))
-
-(def wizard-cantrips
-  [:acid-splash :blade-ward :light :true-strike])
 
 (defn key-to-name [key]
   (s/join " " (map s/capitalize (s/split (name key) #"-"))))
@@ -934,37 +969,6 @@
                   concat
                   cantrip-selections
                   spell-selections)}))
-
-(def wizard-cantrip-options
-  (map
-   (fn [key]
-     {::t/key key
-      ::t/name (key-to-name key)
-      ::t/modifiers [(modifiers/spells-known 0 key :int)]})
-   wizard-cantrips))
-
-(defn wizard-cantrip-selection [num]
-  (t/selection "Cantrips Known" wizard-cantrip-options num num))
-
-(def wizard-spells-1
-  [:mage-armor :magic-missile :magic-mouth :shield])
-
-(def wizard-spell-options-1
-  (map
-   (fn [key]
-     {::t/key key
-      ::t/name (key-to-name key)
-      ::t/modifiers [(modifiers/spells-known 1 key :int)]})
-   wizard-spells-1))
-
-(defn wizard-spell-selection-1 []
-  (assoc (t/selection*
-          "1st Level Spells Known"
-          (fn [selection spells-known]
-            {::entity/key :shield})
-          wizard-spell-options-1)
-         ::t/key
-         :spells-known))
 
 (defn magic-initiate-option [class-key spellcasting-ability spell-lists]
   (t/option

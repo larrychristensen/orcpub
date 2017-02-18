@@ -18,7 +18,10 @@
                  [org.omcljs/om "1.0.0-alpha46"]
                  [org.clojure/core.match "0.3.0-alpha4"]
                  [reagent "0.6.0"]
-                 [garden "1.3.2"]]
+                 [garden "1.3.2"]
+                 [compojure "1.4.0"]
+                 [ring/ring-jetty-adapter "1.4.0"]
+                 [environ "1.0.0"]]
 
   :plugins [[lein-figwheel "0.5.8"]
             [lein-cljsbuild "1.1.4" :exclusions [[org.clojure/clojure]]]
@@ -29,6 +32,8 @@
   :test-paths ["test/clj" "test/cljc" "test/cljs"]
 
   :clean-targets ^{:protect false} ["resources/public/js/compiled" "target"]
+
+  :uberjar-name "orcpub.jar"
 
   :garden {:builds [{;; Optional name of the build:
                      :id "screen"
@@ -125,6 +130,19 @@
                    ;; :plugins [[cider/cider-nrepl "0.12.0"]]
                    :repl-options {; for nREPL dev you really need to limit output
                                   :init (set! *print-length* 50)
-                                  :nrepl-middleware [cemerick.piggieback/wrap-cljs-repl]}}}
+                                  :nrepl-middleware [cemerick.piggieback/wrap-cljs-repl]}}
+             :uberjar {:hooks [leiningen.cljsbuild]
+                       :env {:production true}
+                       :aot :all
+                       :omit-source true
+                       :cljsbuild {:builds
+                                   [{:id "prod"
+                                     :source-paths ["src/clj" "src/cljc" "src/cljs"]
+                                     :figwheel { :on-jsload "orcpub.core/on-js-reload" }
+                                     :compiler {:main orcpub.core
+                                                :asset-path "/js/compiled/out"
+                                                :output-to "resources/public/js/compiled/orcpub.js"
+                                                :optimizations :advanced
+                                                :source-map-timestamp true }}]}}}
 
   )
