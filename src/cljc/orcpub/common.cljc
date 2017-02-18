@@ -1,4 +1,5 @@
-(ns orcpub.common)
+(ns orcpub.common
+  (:require [clojure.string :as s]))
 
 (defn name-to-kw [name]
   (-> name

@@ -3,7 +3,8 @@
             [orcpub.modifiers :as mods]
             [orcpub.entity-spec :as es]
             [orcpub.template :as t]
-            [clojure.set :refer [difference union intersection]]))
+            [clojure.set :refer [difference union intersection]]
+            #?(:cljs [cljs.pprint :as pp])))
 
 (spec/def ::key keyword?)
 (spec/def ::option (spec/keys :req [::key]
@@ -92,7 +93,7 @@
   (flatten (build-options-paths [] options)))
 
 (defn collect-modifiers [flat-options modifier-map]
-  #?(:cljs (cljs.pprint/pprint flat-options))
+  #?(:cljs (pp/pprint flat-options))
   (mapcat
    (fn [{path ::t/path
          option-value ::value

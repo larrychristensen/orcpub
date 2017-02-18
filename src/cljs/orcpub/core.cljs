@@ -516,6 +516,11 @@
           [:span.personality-label {:style {:font-size "18px"}} "Flaws"]
           [:input.input {:type :text}]]
          [:div.field
+          [:span.personality-label {:style {:font-size "18px"}} "Image URL"]
+          [:input.input
+           {:type :text
+            :on-change (fn [e] (swap! character-ref assoc-in [::entity/values :image-url] (.-value (.-target e))))}]]
+         [:div.field
           [:span.personality-label {:style {:font-size "18px"}} "Description/Backstory"]
           [:textarea.input {:style {:height "800px"}}]]]
         (let [race (es/entity-val built-char :race)
@@ -549,7 +554,7 @@
                   levels)))])]
            [:div {:style {:display :flex}}
             [:div
-             [:img {:src "image/barbarian-girl.png"
+             [:img {:src (or (get-in @character-ref [::entity/values :image-url]) "image/barbarian-girl.png")
                     :style {:width "267px"}}]
              (abilities-radar 187 (es/entity-val built-char :abilities) ability-bonuses)]
             [:div {:style {:width "250px"}}
