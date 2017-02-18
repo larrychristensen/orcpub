@@ -55,9 +55,10 @@
                  entity
                  path
                  (fn [list]
-                   (keep-indexed
-                    (fn [i v] (if (not= i index) v))
-                    list))))
+                   (vec
+                    (keep-indexed
+                     (fn [i v] (if (not= i index) v))
+                     list)))))
 
 (defonce character-ref (r/atom t5e/character))
 
