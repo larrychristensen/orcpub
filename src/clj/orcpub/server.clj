@@ -13,7 +13,7 @@
    :body "Hello from Heroku"})
 
 (defroutes app
-  (GET "/" [] (resp/resource-response "/index.html"))
+  (GET "/" [] (resp/file-response "index.html"))
   (route/resources "/"))
 
 (defn -main [& [port]]
