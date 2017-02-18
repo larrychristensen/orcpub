@@ -232,6 +232,7 @@
     :size :medium
     :speed 30
     :languages ["Elvish" "Common"]
+    :modifiers [(mod5e/darkvision 60)]
     :subraces
     [{:name "High Elf"
       :abilities {:int 1}
