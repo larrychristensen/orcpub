@@ -446,7 +446,7 @@ Intelligence, Wisdom, and Charisma saving throws against magic."}]
     :size :medium
     :speed 30
     :languages ["Common"]
-    :selections [(opt5e/ability-increase-selection (disj (set char5e/ability-keys) :cha) 1 false)
+    :selections [(opt5e/ability-increase-selection (disj (set char5e/ability-keys) :cha) 2 false)
                  (opt5e/skill-selection 2)
                  (opt5e/language-selection opt5e/languages 1)]
     :modifiers [(mod5e/darkvision 60)]
@@ -3650,7 +3650,7 @@ until you finish a long rest."}]}
                            :language-options {:choose 1 :options {:any true}}}}
                   {:name "Sage"
                    :profs {:skill {:arcana true :history true}
-                           :language {:choose 2 :options {:any true}}}}
+                           :language-options {:choose 2 :options {:any true}}}}
                   {:name "Soldier"
                    :profs {:skill {:athletics true :intimidation true}
                            :tool {:land-vehicles true}

@@ -2,6 +2,8 @@
   (:require [garden.def :refer [defstylesheet defstyles]]
             [garden.units :refer [px]]))
 
+(def button-color "#f0a100")
+
 (def container-style
   {:display :flex
    :justify-content :center})
@@ -49,6 +51,9 @@
     :margin-top (px 5)
     :font-weight :normal}]
 
+  [:.collapsed-list-builder-option
+   {:padding "1px"}]
+
   [:.disabled-builder-option
    {:color "rgba(255, 255, 255, 0.5)"
     :border-color "rgba(255, 255, 255, 0.25)"
@@ -91,14 +96,14 @@
     :font-weight :bold}]
 
   [:.remove-item-button
-   {:color "#f0a100"
+   {:color button-color
     :font-size "16px" 
     :margin-left "5px"
     :cursor :pointer}]
 
   [:.add-item-button
    {:margin-top "19px"
-    :color "#f0a100"
+    :color button-color
     :font-weight 600
     :text-decoration :underline
     :cursor :pointer}]
@@ -108,7 +113,20 @@
     :align-items :center}]
 
   [:.fa
-   {:color "#f0a100"}]
+   {:color button-color}]
+
+  [:.expand-collapse-button
+   {:font-size "18px"
+    :font-weight :lighter
+    :margin-left "10px"
+    :color :white
+    :cursor :pointer}]
+
+  [:.fa-caret-square-o-down
+   {:color button-color}]
+
+  [:.expand-collapse-button:hover
+   {:color button-color}]
 
   [:.abilities-polygon
    {:transition "points 2s"

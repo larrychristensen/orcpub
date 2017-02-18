@@ -71,9 +71,9 @@
 
 (defonce app-state
   (r/atom
-   {::template template}))
+   {:collapsed-paths #{}}))
 
-(add-watch app-state :log (fn [k r os ns]
+#_(add-watch app-state :log (fn [k r os ns]
                             (js/console.log "OLD" (clj->js os))
                             (js/console.log "NEW" (clj->js ns))))
 
@@ -123,9 +123,10 @@
           new-value (cljs.reader/read-string (.. e -target -value))]
       (swap! character-ref #(set-option-value % (conj option-path ::entity/key) new-value)))))
 
-(defn option [path option-paths selectable? {:keys [::t/key ::t/name ::t/selections ::t/modifiers ::t/prereqs ::t/ui-fn ::t/select-fn]} built-char raw-char changeable? options change-fn built-template]
+(defn option [path option-paths selectable? list-collapsed? {:keys [::t/key ::t/name ::t/selections ::t/modifiers ::t/prereqs ::t/ui-fn ::t/select-fn]} built-char raw-char changeable? options change-fn built-template]
   (let [new-path (conj path key)
         selected? (boolean (get-in option-paths new-path))
+        collapsed? (get (:collapsed-paths @app-state) new-path)
         named-mods (filter ::mod/name modifiers)
         failed-prereqs (reduce
                         (fn [failures {:keys [::t/prereq-fn ::t/label]}]
@@ -135,59 +136,75 @@
                         prereqs)
         meets-prereqs? (empty? failed-prereqs)]
     ^{:key key}
-    [:div.builder-option
-     {:class-name (clojure.string/join
-                   " "
-                   [(if selected? "selected-builder-option")
-                    (if (and meets-prereqs? selectable?) "selectable-builder-option")
-                    (if (not meets-prereqs?) "disabled-builder-option")])
-      :on-click (fn [e]
-                  (if (and meets-prereqs? selectable?)
-                    (do
-                      (if select-fn
-                        (select-fn path))
-                      (swap! character-ref #(update-option built-template % path (fn [o] (assoc o ::entity/key key))))))
-                  (.stopPropagation e))}
-     [:div
-      {:style {:display :flex
-               :justify-content :space-between}}
-      [:div
-       (if changeable? (dropdown options key change-fn built-char) [:span {:style {:font-weight :bold}} name])
-       (if (not meets-prereqs?)
-         [:div {:style {:font-style :italic
-                        :font-size "12px"
-                        :font-weight :normal}}
-          (str "Requires " (s/join ", " failed-prereqs))])
-       (if (and meets-prereqs? (seq named-mods))
-         [:span {:style {:font-style :italic
-                         :font-size "12px"
-                         :margin-left "10px"
-                         :font-weight :normal}}
-          (s/join
-           ", "
-           (map
-            (fn [{:keys [::mod/value ::mod/val-fn] :as m}]
-              (let []
-                (str
-                 (::mod/name m)
-                 " "
-                 (let [v (or value (get-option-value built-template @character-ref path))]
-                   (if val-fn
-                     (val-fn v)
-                     v)))))
-            named-mods))])]
-      [:i.fa.fa-caret-square-o-up {:style {:font-size "18px" :font-weight :lighter}}]]
-     (if selected?
+    (if (or selected? (not list-collapsed?))
+      [:div.builder-option
+       {:class-name (clojure.string/join
+                     " "
+                     [(if selected? "selected-builder-option")
+                      (if (and meets-prereqs? selectable?) "selectable-builder-option")
+                      (if (not meets-prereqs?) "disabled-builder-option")])
+        :on-click (fn [e]
+                    (if (and meets-prereqs? selectable?)
+                      (do
+                        (if select-fn
+                          (select-fn path))
+                        (swap! character-ref #(update-option built-template % path (fn [o] (assoc o ::entity/key key))))))
+                    (.stopPropagation e))}
        [:div
-        (if ui-fn (ui-fn path))
+        {:style {:display :flex
+                 :justify-content :space-between
+                 :align-items :center}}
         [:div
-         (doall
-          (map
-           (fn [{:keys [::t/prereq-fn ::t/key] :as selection}]
-             (if (or (not prereq-fn) (prereq-fn built-char))
-               ^{:key key}
-               [builder-selector new-path option-paths selection built-char raw-char built-template]))
-           selections))]])]))
+         {:style {:flex-grow 1}}
+         (if changeable?
+           (dropdown options key change-fn built-char)
+           [:span {:style {:font-weight :bold}} name])
+         (if (not meets-prereqs?)
+           [:div {:style {:font-style :italic
+                          :font-size "12px"
+                          :font-weight :normal}}
+            (str "Requires " (s/join ", " failed-prereqs))])
+         (if (and meets-prereqs? (seq named-mods))
+           [:span {:style {:font-style :italic
+                           :font-size "12px"
+                           :margin-left "10px"
+                           :font-weight :normal}}
+            (s/join
+             ", "
+             (map
+              (fn [{:keys [::mod/value ::mod/val-fn] :as m}]
+                (let []
+                  (str
+                   (::mod/name m)
+                   " "
+                   (let [v (or value (get-option-value built-template @character-ref path))]
+                     (if val-fn
+                       (val-fn v)
+                       v)))))
+              named-mods))])]
+        (if (and selected?
+                 (seq selections))
+          (if collapsed?
+            [:i.fa.fa-caret-square-o-down.expand-collapse-button
+             {:style {:font-size "18px"}
+              :on-click (fn [_]
+                          (swap! app-state update :collapsed-paths disj new-path))}]
+            [:i.fa.fa-caret-square-o-up.expand-collapse-button
+             {:style {:font-size "18px"}
+              :on-click (fn [_]
+                          (swap! app-state update :collapsed-paths conj new-path))}]))]
+       (if (and selected? (not collapsed?))
+         [:div
+          (if ui-fn (ui-fn path))
+          [:div
+           (doall
+            (map
+             (fn [{:keys [::t/prereq-fn ::t/key] :as selection}]
+               (if (or (not prereq-fn) (prereq-fn built-char))
+                 ^{:key key}
+                 [builder-selector new-path option-paths selection built-char raw-char built-template]))
+             selections))]]
+         (if collapsed? [:div.builder-option.collapsed-list-builder-option]))])))
 
 (def builder-selector-style)
 
@@ -260,14 +277,14 @@
            (get-in option-paths option-path)))
        options))))
 
-(defn list-selector-option [removeable? path option-paths multiple-select? i opt built-char raw-char changeable? options change-fn built-template]
+(defn list-selector-option [removeable? path option-paths multiple-select? list-collapsed? i opt built-char raw-char changeable? options change-fn built-template]
   [:div.list-selector-option
    [:div {:style {:flex-grow 1}}
-    [option path option-paths (not multiple-select?) opt built-char raw-char changeable? options change-fn built-template]]
+    [option path option-paths (not multiple-select?) list-collapsed? opt built-char raw-char changeable? options change-fn built-template]]
    (if (removeable? i)
      [remove-option-button path built-template i])])
 
-(defn list-selector [path option-paths {:keys [::t/options ::t/min ::t/max ::t/key ::t/name ::t/sequential? ::t/new-item-fn] :as selection} built-char raw-char built-template]
+(defn list-selector [path option-paths {:keys [::t/options ::t/min ::t/max ::t/key ::t/name ::t/sequential? ::t/new-item-fn] :as selection} collapsed? built-char raw-char built-template]
   (let [no-max? (nil? max)
         multiple-select? (or no-max? (> max 1))
         selected-options (filter-selected path key option-paths options raw-char built-template)
@@ -277,46 +294,67 @@
         more-than-min? (> (count selected-options) min)
         next-path (conj path key)]
     [:div
-     (doall
-      (map-indexed
-       (fn [i option]
-         ^{:key i}
-         [list-selector-option
-          #(and multiple-select?
-                more-than-min?
-                (or (not sequential?)
-                    (= % (dec (count selected-options)))))
-          next-path
-          option-paths
-          multiple-select?
-          i
-          option
-          built-char
-          raw-char
-          (and addable? (not sequential?))
-          options
-          (make-dropdown-change-fn path key built-template raw-char character-ref i)
-          built-template])
-       (if multiple-select?
-         selected-options
-         options)))
+     (if collapsed? [:div.builder-option.collapsed-list-builder-option])
+     [:div
+      (doall
+       (map-indexed
+        (fn [i option]
+          ^{:key i}
+          [list-selector-option
+           #(and multiple-select?
+                 more-than-min?
+                 (or (not sequential?)
+                     (= % (dec (count selected-options)))))
+           next-path
+           option-paths
+           multiple-select?
+           collapsed?
+           i
+           option
+           built-char
+           raw-char
+           (and addable? (not sequential?))
+           options
+           (make-dropdown-change-fn path key built-template raw-char character-ref i)
+           built-template])
+        (if multiple-select?
+          selected-options
+          options)))]
+     (if collapsed? [:div.builder-option.collapsed-list-builder-option])
      (if (and addable? new-item-fn)
        (add-option-button selection raw-char (conj path key) new-item-fn built-template))]))
 
-(defn builder-selector [path option-paths selection built-char raw-char built-template]
-  ^{:key (::t/name selection)}
-  [:div.builder-selector
-   [:h2.builder-selector-header (::t/name selection)]
-   [:div
-    (let [simple-options? 
-          (or (::t/simple? selection)
-              (not-any? #(or (seq (::t/selections %))
-                             (some ::mod/name (::t/modifiers %))
-                             (::t/ui-fn %))
-                        (::t/options selection)))]
-      (if simple-options?
-        [dropdown-selector path option-paths selection built-char raw-char built-template]
-        [list-selector path option-paths selection built-char raw-char built-template]))]])
+(defn builder-selector [path option-paths {:keys [::t/name ::t/key ::t/min ::t/max] :as selection} built-char raw-char built-template]
+  (let [new-path (conj path key)
+        collapsed? (get (:collapsed-paths @app-state) new-path)]
+    ^{:key key}
+    [:div.builder-selector
+     [:div {:style {:display :flex
+                    :justify-content :space-between
+                    :align-items :center}}
+      (if (zero? (count path))
+        [:h1 {:style {:font-size "24px"}} (::t/name selection)]
+        [:h2.builder-selector-header (::t/name selection)])
+      (if (and (not (or (nil? max) (> max min))) (zero? (count path)))
+        (if collapsed?
+          [:i.fa.fa-caret-square-o-down.expand-collapse-button
+           {:style {:font-size "18px"}
+            :on-click (fn [_]
+                        (swap! app-state update :collapsed-paths disj new-path))}]
+          [:i.fa.fa-caret-square-o-up.expand-collapse-button
+           {:style {:font-size "18px"}
+            :on-click (fn [_]
+                        (swap! app-state update :collapsed-paths conj new-path))}]))]
+     [:div
+      (let [simple-options? 
+            (or (::t/simple? selection)
+                (not-any? #(or (seq (::t/selections %))
+                               (some ::mod/name (::t/modifiers %))
+                               (::t/ui-fn %))
+                          (::t/options selection)))]
+        (if simple-options?
+          [dropdown-selector path option-paths selection built-char raw-char built-template]
+          [list-selector path option-paths selection collapsed? built-char raw-char built-template]))]]))
 
 (def content-style
   {:width 1440})
