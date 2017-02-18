@@ -3,8 +3,9 @@
             [clojure.set :as sets]))
 
 (defn entity-val [entity k]
-  (let [v (entity k)]
-    (if (fn? v)
+  (let [v (entity k)
+        entity-fn? (:entity-fn? (meta v))]
+    (if entity-fn?
       (v entity)
       v)))
 
@@ -73,17 +74,21 @@
        (assoc
         (update m ::deps (fn [d] (update d kw #(sets/union % (deps k v)))))
         kw
-        (concat `(fn [~arg])
-                [replaced]))))
+        `(with-meta
+           ~(concat `(fn [~arg])
+                    [replaced])
+           {:entity-fn? true}))))
    {}
    `~body))
 
 (defmacro modifier [k body]
   (let [arg (gensym "e")
         replaced (replace-refs arg body)]
-    (concat
-       `(fn [~arg])
-       `((update ~arg ~(ref-sym-to-kw k) (fn [_#] ~replaced))))))
+    `(with-meta
+       ~(concat
+        `(fn [~arg])
+        `((update ~arg ~(ref-sym-to-kw k) (fn [_#] ~replaced))))
+       {:entity-fn? true})))
 
 (defmacro vec-mod [k val]
   `(modifier ~k (conj (or ~k []) ~val)))

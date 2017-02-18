@@ -545,7 +545,6 @@
         [:div {:style {:width "300px"}}
          (doall
           (map
-           
            (fn [selection]
              ^{:key (::t/key selection)}
              [builder-selector [] option-paths selection built-char @character-ref built-template])
@@ -591,7 +590,8 @@
               resistances (es/entity-val built-char :resistances)
               immunities (es/entity-val built-char :immunities)
               languages (es/entity-val built-char :languages)
-              ability-bonuses (es/entity-val built-char :ability-bonuses)]
+              ability-bonuses (es/entity-val built-char :ability-bonuses)
+              armor (es/entity-val built-char :armor)]
           [:div {:style {:width "500px"}}
            [:div {:style {:font-size "24px"
                           :font-weight 600
@@ -616,7 +616,29 @@
                             :margin-bottom "20px"}}]
              (abilities-radar 187 (es/entity-val built-char :abilities) ability-bonuses)]
             [:div {:style {:width "250px"}}
-             (display-section "Armor Class" "fa-shield" (es/entity-val built-char :armor-class))
+             (display-section
+              "Armor Class"
+              "fa-shield"
+              [:span
+               [:span
+                [:span (es/entity-val built-char :armor-class)]
+                [:span {:style {:font-size "12px"
+                                :margin-left "5px"}} "(unarmored)"]]
+               [:div
+                {:style {:margin-left "40px"}}
+                (doall
+                 (map
+                  (fn [[armor-kw _]]
+                    (let [armor (opt5e/armor-map armor-kw)
+                          ac-fn (es/entity-val built-char :armor-class-with-armor)
+                          _ (prn "AC_NF" ac-fn)
+                          ac (ac-fn armor)]
+                      ^{:key armor-kw}
+                      [:span
+                       [:span ac]
+                       [:span {:style {:font-size "12px"
+                                       :margin-left "5px"}} (str "(" (:name armor) ")")]]))
+                  armor))]])
              (display-section "Hit Points" "fa-crosshairs" (es/entity-val built-char :max-hit-points))
              (display-section "Speed" nil (es/entity-val built-char :speed))
              (display-section "Darkvision" "fa-low-vision" (if darkvision (str darkvision " ft.") "--"))
@@ -694,7 +716,7 @@
                                    (map
                                     (fn [[armor-kw num]]
                                       (str (:name (opt5e/armor-map armor-kw)) " (" num ")"))
-                                    (es/entity-val built-char :armor)))
+                                    armor))
              (list-display-section "Equipment" nil
                                    (map
                                     (fn [[equipment-kw num]]

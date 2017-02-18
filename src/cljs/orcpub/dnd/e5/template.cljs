@@ -445,7 +445,7 @@ Intelligence, Wisdom, and Charisma saving throws against magic."}]
     :abilities {:cha 2}
     :size :medium
     :speed 30
-    :languages ["Common"]
+    :languages ["Common" "Elvish"]
     :selections [(opt5e/ability-increase-selection (disj (set char5e/ability-keys) :cha) 2 false)
                  (opt5e/skill-selection 2)
                  (opt5e/language-selection opt5e/languages 1)]

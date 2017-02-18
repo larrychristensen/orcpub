@@ -154,7 +154,8 @@
   (mods/cum-sum-mod ?ranged-attack-bonus bonus))
 
 (defn armored-ac-bonus [bonus]
-  (mods/cum-sum-mod ?armor-class-with-armor (+ bonus ?armor-class-with-armor)))
+  (mods/modifier ?armor-class-with-armor (fn [armor]
+                                           (+ bonus (?armor-class-with-armor armor)))))
 
 (defn critical [roll-value]
   (mods/set-mod ?critical roll-value))
