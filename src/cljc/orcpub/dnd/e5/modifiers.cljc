@@ -37,8 +37,10 @@
   (mods/modifier ?abilities abilities))
 
 (defn deferred-abilities []
-  (mods/deferred-modifier (fn [abilities]
-                            (es/modifier ?abilities abilities))))
+  (mods/deferred-modifier
+    (fn [abilities]
+      (es/modifier ?abilities abilities))
+    {:str 12 :dex 12 :con 12 :int 12 :wis 12 :cha 12}))
 
 (defn saving-throws [& abilities]
   (mods/modifier ?saving-throws (concat (or ?saving-throws #{}) abilities)))
@@ -92,6 +94,7 @@
   (mods/deferred-mod
     "HP"
     (fn [v] (es/cum-sum-mod ?hit-point-level-increases v))
+    1
     mods/bonus-str))
 
 (defn skill-expertise [key]

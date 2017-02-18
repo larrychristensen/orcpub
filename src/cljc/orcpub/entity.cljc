@@ -99,9 +99,9 @@
          :as option}]
      (let [modifiers (::t/modifiers (get-in modifier-map path))]
        (map
-        (fn [{:keys [::mods/name ::mods/value ::mods/fn ::mods/deferred-fn ::mods/deps] :as mod}]
-          (if (and deferred-fn option-value)
-            (assoc mod ::mods/value option-value)
+        (fn [{:keys [::mods/name ::mods/value ::mods/fn ::mods/deferred-fn ::mods/default-value ::mods/deps] :as mod}]
+          (if deferred-fn
+            (assoc mod ::mods/value (or option-value default-value))
             mod))
         (flatten modifiers))))
    flat-options))
