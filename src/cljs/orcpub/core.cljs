@@ -148,30 +148,35 @@
                         (select-fn path))
                       (swap! character-ref #(update-option built-template % path (fn [o] (assoc o ::entity/key key))))))
                   (.stopPropagation e))}
-     (if changeable? (dropdown options key change-fn built-char) [:span {:style {:font-weight :bold}} name])
-     (if (not meets-prereqs?)
-       [:div {:style {:font-style :italic
-                      :font-size "12px"
-                      :font-weight :normal}}
-        (str "Requires " (s/join ", " failed-prereqs))])
-     (if (and meets-prereqs? (seq named-mods))
-       [:span {:style {:font-style :italic
-                       :font-size "12px"
-                       :margin-left "10px"
-                       :font-weight :normal}}
-        (s/join
-         ", "
-         (map
-          (fn [{:keys [::mod/value ::mod/val-fn] :as m}]
-            (let []
-              (str
-               (::mod/name m)
-               " "
-               (let [v (or value (get-option-value built-template @character-ref path))]
-                 (if val-fn
-                   (val-fn v)
-                   v)))))
-          named-mods))])
+     [:div
+      {:style {:display :flex
+               :justify-content :space-between}}
+      [:div
+       (if changeable? (dropdown options key change-fn built-char) [:span {:style {:font-weight :bold}} name])
+       (if (not meets-prereqs?)
+         [:div {:style {:font-style :italic
+                        :font-size "12px"
+                        :font-weight :normal}}
+          (str "Requires " (s/join ", " failed-prereqs))])
+       (if (and meets-prereqs? (seq named-mods))
+         [:span {:style {:font-style :italic
+                         :font-size "12px"
+                         :margin-left "10px"
+                         :font-weight :normal}}
+          (s/join
+           ", "
+           (map
+            (fn [{:keys [::mod/value ::mod/val-fn] :as m}]
+              (let []
+                (str
+                 (::mod/name m)
+                 " "
+                 (let [v (or value (get-option-value built-template @character-ref path))]
+                   (if val-fn
+                     (val-fn v)
+                     v)))))
+            named-mods))])]
+      [:i.fa.fa-caret-square-o-up {:style {:font-size "18px" :font-weight :lighter}}]]
      (if selected?
        [:div
         (if ui-fn (ui-fn path))
@@ -569,7 +574,8 @@
            [:div {:style {:display :flex}}
             [:div
              [:img {:src (or (get-in @character-ref [::entity/values :image-url]) "image/barbarian-girl.png")
-                    :style {:width "267px"}}]
+                    :style {:width "267px"
+                            :margin-bottom "20px"}}]
              (abilities-radar 187 (es/entity-val built-char :abilities) ability-bonuses)]
             [:div {:style {:width "250px"}}
              (display-section "Armor Class" "fa-shield" (es/entity-val built-char :armor-class))
