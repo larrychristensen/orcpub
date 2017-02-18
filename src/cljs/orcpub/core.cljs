@@ -158,7 +158,7 @@
         [:div
          {:style {:flex-grow 1}}
          (if changeable?
-           (dropdown options key change-fn built-char)
+           [dropdown options key change-fn built-char]
            [:span {:style {:font-weight :bold}} name])
          (if (not meets-prereqs?)
            [:div {:style {:font-style :italic
@@ -252,7 +252,7 @@
            (map-indexed
             (fn [i {value ::entity/key}]
               ^{:key i}
-              [:div (dropdown options value (change-fn i) built-char)])
+              [:div [dropdown options value (change-fn i) built-char]])
             final-options)))
         (add-option-button selection raw-char (conj path key) new-item-fn built-template)])]))
 
@@ -628,18 +628,24 @@
                [:div
                 {:style {:margin-left "40px"}}
                 (doall
-                 (map
-                  (fn [[armor-kw _]]
-                    (let [armor (opt5e/armor-map armor-kw)
-                          ac-fn (es/entity-val built-char :armor-class-with-armor)
-                          _ (prn "AC_NF" ac-fn)
-                          ac (ac-fn armor)]
-                      ^{:key armor-kw}
-                      [:span
-                       [:span ac]
-                       [:span {:style {:font-size "12px"
-                                       :margin-left "5px"}} (str "(" (:name armor) ")")]]))
-                  armor))]])
+                 (let [has-shield? (:shield armor)]
+                   (map
+                    (fn [[armor-kw _]]
+                      (let [armor (opt5e/armor-map armor-kw)
+                            ac-fn (es/entity-val built-char :armor-class-with-armor)
+                            ac (ac-fn armor)]
+                        ^{:key armor-kw}
+                        [:div
+                         [:div
+                          [:span ac]
+                          [:span {:style {:font-size "12px"
+                                          :margin-left "5px"}} (str "(" (:name armor) ")")]]
+                         (if has-shield?
+                           [:div
+                            [:span (+ 2 ac)]
+                            [:span {:style {:font-size "12px"
+                                            :margin-left "5px"}} (str "(" (:name armor) " + shield)")]])]))
+                    (dissoc armor :shield))))]])
              (display-section "Hit Points" "fa-crosshairs" (es/entity-val built-char :max-hit-points))
              (display-section "Speed" nil (es/entity-val built-char :speed))
              (display-section "Darkvision" "fa-low-vision" (if darkvision (str darkvision " ft.") "--"))
