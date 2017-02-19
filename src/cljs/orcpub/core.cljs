@@ -580,6 +580,26 @@
           (filter (fn [{k :key}] (spells/spell-map k)) spells))]])
      spells-known)]])
 
+(defn equipment-section [title equipment equipment-map]
+  [list-display-section title nil
+   (map
+    (fn [[equipment-kw num]]
+      (str (:name (equipment-map equipment-kw)) " (" num ")"))
+    equipment)])
+
+(defn traits-section [traits]
+  (display-section
+   "Features, Traits, & Feats" nil
+   [:div
+    {:style {:font-size "14px"}}
+    (map
+     (fn [{:keys [name description]}]
+       ^{:key name}
+       [:p {:style {:margin-top "10px"}}
+        [:span {:style {:font-weight 600 :font-style :italic}} name "."]
+        [:span {:style {:font-weight :normal :margin-left "10px"}} description]])
+     traits)]))
+
 (defn character-display [built-char]
   (let [race (es/entity-val built-char :race)
         subrace (es/entity-val built-char :subrace)
@@ -596,7 +616,10 @@
         armor-class (es/entity-val built-char :armor-class)
         armor-class-with-armor (es/entity-val built-char :armor-class-with-armor)
         armor (es/entity-val built-char :armor)
-        spells-known (es/entity-val built-char :spells-known)]
+        spells-known (es/entity-val built-char :spells-known)
+        weapons (es/entity-val built-char :weapons)
+        equipment (es/entity-val built-char :equipment)
+        traits (es/entity-val built-char :traits)]
     [:div {:style {:width "500px"}}
      [:div {:style {:font-size "24px"
                     :font-weight 600
@@ -647,32 +670,13 @@
        [list-item-section "Resistances" resistances name]
        [list-item-section "Immunities" immunities name]
        [spells-known-section spells-known]
-       (list-display-section "Weapons" nil
-                             (map
-                              (fn [[weapon-kw num]]
-                                (str (:name (opt5e/weapons-map weapon-kw)) " (" num ")"))
-                              (es/entity-val built-char :weapons)))
-       (list-display-section "Armor" nil
-                             (map
-                              (fn [[armor-kw num]]
-                                (str (:name (opt5e/armor-map armor-kw)) " (" num ")"))
-                              armor))
-       (list-display-section "Equipment" nil
-                             (map
-                              (fn [[equipment-kw num]]
-                                (str (:name (opt5e/equipment-map equipment-kw)) " (" num ")"))
-                              (es/entity-val built-char :equipment)))]]
-     (display-section
-      "Features, Traits, & Feats" nil
-      [:div
-       {:style {:font-size "14px"}}
-       (map
-        (fn [{:keys [name description]}]
-          ^{:key name}
-          [:p {:style {:margin-top "10px"}}
-           [:span {:style {:font-weight 600 :font-style :italic}} name "."]
-           [:span {:style {:font-weight :normal :margin-left "10px"}} description]])
-        (es/entity-val built-char :traits))])]))
+       [equipment-section
+        "Weapons"
+        weapons
+        opt5e/weapons-map]
+       [equipment-section "Armor" armor opt5e/armor-map]
+       [equipment-section "Equipment" equipment opt5e/equipment-map]]]
+     [traits-section traits]]))
 
 (defn character-builder []
   ;;(cljs.pprint/pprint @character-ref)
