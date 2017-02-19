@@ -520,6 +520,160 @@
                        values)]
                      true)))
 
+(defn armor-class-section [armor-class armor-class-with-armor equipped-armor]
+  [display-section
+   "Armor Class"
+   "fa-shield"
+   [:span
+    [:span
+     [:span armor-class]
+     [:span {:style {:font-size "12px"
+                     :margin-left "5px"}} "(unarmored)"]]
+    [:div
+     {:style {:margin-left "40px"}}
+     (let [has-shield? (:shield equipped-armor)]
+      (doall
+       (map
+        (fn [[armor-kw _]]
+          (let [armor (opt5e/armor-map armor-kw)
+                ac-fn armor-class-with-armor
+                ac (ac-fn armor)]
+            ^{:key armor-kw}
+            [:div
+             [:div
+              [:span ac]
+              [:span {:style {:font-size "12px"
+                              :margin-left "5px"}} (str "(" (:name armor) ")")]]
+             (if has-shield?
+               [:div
+                [:span (+ 2 ac)]
+                [:span {:style {:font-size "12px"
+                                :margin-left "5px"}} (str "(" (:name armor) " + shield)")]])]))
+        (dissoc equipped-armor :shield))))]]])
+
+(defn list-item-section [list-name items & [name-fn]]
+  [list-display-section list-name nil
+   (map
+    (fn [item]
+      ((or name-fn :name) item))
+    items)])
+
+(defn spells-known-section [spells-known]
+  [display-section "Spells Known" nil
+   [:div {:style {:font-size "14px"}}
+    (map
+     (fn [[level spells]]
+       ^{:key level}
+       [:div {:style {:margin-top "10px"}}
+        [:span {:font-weight 600} (if (zero? level) "Cantrip" (str "Level " level))]
+        [:div {:style {:font-style :italic
+                       :font-weight :normal}}
+         (map
+          (fn [spell]
+            (let [spell-data (spells/spell-map (:key spell))]
+              ^{:key (:key spell)}
+              [:div
+               (str
+                (:name (spells/spell-map (:key spell)))
+                " ("
+                (s/upper-case (name (:ability spell))) ")")]))
+          (filter (fn [{k :key}] (spells/spell-map k)) spells))]])
+     spells-known)]])
+
+(defn character-display [built-char]
+  (let [race (es/entity-val built-char :race)
+        subrace (es/entity-val built-char :subrace)
+        levels (es/entity-val built-char :levels)
+        darkvision (es/entity-val built-char :darkvision)
+        skill-profs (es/entity-val built-char :skill-profs)
+        tool-profs (es/entity-val built-char :tool-profs)
+        weapon-profs (es/entity-val built-char :weapon-profs)
+        armor-profs (es/entity-val built-char :armor-profs)
+        resistances (es/entity-val built-char :resistances)
+        immunities (es/entity-val built-char :immunities)
+        languages (es/entity-val built-char :languages)
+        ability-bonuses (es/entity-val built-char :ability-bonuses)
+        armor-class (es/entity-val built-char :armor-class)
+        armor-class-with-armor (es/entity-val built-char :armor-class-with-armor)
+        armor (es/entity-val built-char :armor)
+        spells-known (es/entity-val built-char :spells-known)]
+    [:div {:style {:width "500px"}}
+     [:div {:style {:font-size "24px"
+                    :font-weight 600
+                    :margin-bottom "16px"
+                    :text-shadow "1px 2px 1px black"}}
+      [:span race]
+      (if (seq levels)
+        [:span
+         {:style {:margin-left "10px"}}
+         (apply
+          str
+          (interpose
+           " / "
+           (map
+            (fn [[cls-k {:keys [class-name class-level subclass]}]]
+              (str class-name " (" class-level ")"))
+            levels)))])]
+     [:div {:style {:display :flex}}
+      [:div
+       [:img {:src (or (get-in @character-ref [::entity/values :image-url]) "image/barbarian-girl.png")
+              :style {:width "267px"
+                      :margin-bottom "20px"}}]
+       [abilities-radar 187 (es/entity-val built-char :abilities) ability-bonuses]]
+      [:div {:style {:width "250px"}}
+       [armor-class-section armor-class armor-class-with-armor armor]
+       [display-section "Hit Points" "fa-crosshairs" (es/entity-val built-char :max-hit-points)]
+       [display-section "Speed" nil (es/entity-val built-char :speed)]
+       [display-section "Darkvision" "fa-low-vision" (if darkvision (str darkvision " ft.") "--")]
+       [display-section "Initiative" nil (mod/bonus-str (es/entity-val built-char :initiative))]
+       [display-section "Proficiency Bonus" nil (mod/bonus-str (es/entity-val built-char :prof-bonus))]
+       [display-section "Passive Perception" nil (es/entity-val built-char :passive-perception)]
+       (let [criticals (es/entity-val built-char :critical)
+             min-crit (apply min criticals)
+             max-crit (apply max criticals)]
+         (display-section "Critical Hit" nil (if (= min-crit max-crit) min-crit (str min-crit "-" max-crit))))
+       [list-display-section "Skill Proficiencies" nil
+        (let [skill-bonuses (es/entity-val built-char :skill-bonuses)]
+          (map
+           (fn [[skill-kw bonus]]
+             (str (s/capitalize (name skill-kw)) " " (mod/bonus-str bonus)))
+           (filter (fn [[k bonus]]
+                     (not= bonus (ability-bonuses (:ability (opt5e/skills-map k)))))
+                   skill-bonuses)))]
+       [list-item-section "Languages" languages]
+       [list-item-section "Tool Proficiencies" tool-profs]
+       [list-item-section "Weapon Proficiencies" weapon-profs]
+       [list-item-section "Armor Proficiencies"]
+       [list-item-section "Resistances" resistances name]
+       [list-item-section "Immunities" immunities name]
+       [spells-known-section spells-known]
+       (list-display-section "Weapons" nil
+                             (map
+                              (fn [[weapon-kw num]]
+                                (str (:name (opt5e/weapons-map weapon-kw)) " (" num ")"))
+                              (es/entity-val built-char :weapons)))
+       (list-display-section "Armor" nil
+                             (map
+                              (fn [[armor-kw num]]
+                                (str (:name (opt5e/armor-map armor-kw)) " (" num ")"))
+                              armor))
+       (list-display-section "Equipment" nil
+                             (map
+                              (fn [[equipment-kw num]]
+                                (str (:name (opt5e/equipment-map equipment-kw)) " (" num ")"))
+                              (es/entity-val built-char :equipment)))]]
+     (display-section
+      "Features, Traits, & Feats" nil
+      [:div
+       {:style {:font-size "14px"}}
+       (map
+        (fn [{:keys [name description]}]
+          ^{:key name}
+          [:p {:style {:margin-top "10px"}}
+           [:span {:style {:font-weight 600 :font-style :italic}} name "."]
+           [:span {:style {:font-weight :normal :margin-left "10px"}} description]])
+        (es/entity-val built-char :traits))])]))
+
 (defn character-builder []
   ;;(cljs.pprint/pprint @character-ref)
   (let [option-paths (make-path-map @character-ref)
@@ -580,166 +734,7 @@
          [:div.field
           [:span.personality-label {:style {:font-size "18px"}} "Description/Backstory"]
           [:textarea.input {:style {:height "800px"}}]]]
-        (let [race (es/entity-val built-char :race)
-              subrace (es/entity-val built-char :subrace)
-              levels (es/entity-val built-char :levels)
-              darkvision (es/entity-val built-char :darkvision)
-              skill-profs (es/entity-val built-char :skill-profs)
-              tool-profs (es/entity-val built-char :tool-profs)
-              weapon-profs (es/entity-val built-char :weapon-profs)
-              armor-profs (es/entity-val built-char :armor-profs)
-              resistances (es/entity-val built-char :resistances)
-              immunities (es/entity-val built-char :immunities)
-              languages (es/entity-val built-char :languages)
-              ability-bonuses (es/entity-val built-char :ability-bonuses)
-              armor (es/entity-val built-char :armor)]
-          [:div {:style {:width "500px"}}
-           [:div {:style {:font-size "24px"
-                          :font-weight 600
-                          :margin-bottom "16px"
-                          :text-shadow "1px 2px 1px black"}}
-            [:span race]
-            (if (seq levels)
-              [:span
-               {:style {:margin-left "10px"}}
-               (apply
-                str
-                (interpose
-                 " / "
-                 (map
-                  (fn [[cls-k {:keys [class-name class-level subclass]}]]
-                    (str class-name " (" class-level ")"))
-                  levels)))])]
-           [:div {:style {:display :flex}}
-            [:div
-             [:img {:src (or (get-in @character-ref [::entity/values :image-url]) "image/barbarian-girl.png")
-                    :style {:width "267px"
-                            :margin-bottom "20px"}}]
-             (abilities-radar 187 (es/entity-val built-char :abilities) ability-bonuses)]
-            [:div {:style {:width "250px"}}
-             (display-section
-              "Armor Class"
-              "fa-shield"
-              [:span
-               [:span
-                [:span (es/entity-val built-char :armor-class)]
-                [:span {:style {:font-size "12px"
-                                :margin-left "5px"}} "(unarmored)"]]
-               [:div
-                {:style {:margin-left "40px"}}
-                (doall
-                 (let [has-shield? (:shield armor)]
-                   (map
-                    (fn [[armor-kw _]]
-                      (let [armor (opt5e/armor-map armor-kw)
-                            ac-fn (es/entity-val built-char :armor-class-with-armor)
-                            ac (ac-fn armor)]
-                        ^{:key armor-kw}
-                        [:div
-                         [:div
-                          [:span ac]
-                          [:span {:style {:font-size "12px"
-                                          :margin-left "5px"}} (str "(" (:name armor) ")")]]
-                         (if has-shield?
-                           [:div
-                            [:span (+ 2 ac)]
-                            [:span {:style {:font-size "12px"
-                                            :margin-left "5px"}} (str "(" (:name armor) " + shield)")]])]))
-                    (dissoc armor :shield))))]])
-             (display-section "Hit Points" "fa-crosshairs" (es/entity-val built-char :max-hit-points))
-             (display-section "Speed" nil (es/entity-val built-char :speed))
-             (display-section "Darkvision" "fa-low-vision" (if darkvision (str darkvision " ft.") "--"))
-             (display-section "Initiative" nil (mod/bonus-str (es/entity-val built-char :initiative)))
-             (display-section "Proficiency Bonus" nil (mod/bonus-str (es/entity-val built-char :prof-bonus)))
-             (display-section "Passive Perception" nil (es/entity-val built-char :passive-perception))
-             (let [criticals (es/entity-val built-char :critical)
-                   min-crit (apply min criticals)
-                   max-crit (apply max criticals)]
-               (display-section "Critical Hit" nil (if (= min-crit max-crit) min-crit (str min-crit "-" max-crit))))
-             (list-display-section "Skill Proficiencies" nil
-                                   (let [skill-bonuses (es/entity-val built-char :skill-bonuses)]
-                                     (map
-                                      (fn [[skill-kw bonus]]
-                                        (str (s/capitalize (name skill-kw)) " " (mod/bonus-str bonus)))
-                                      (filter (fn [[k bonus]]
-                                                (not= bonus (ability-bonuses (:ability (opt5e/skills-map k)))))
-                                              skill-bonuses))))
-             (list-display-section "Languages" nil
-                                   (map
-                                    (fn [lang]
-                                      (:name lang))
-                                    languages))
-             (list-display-section "Tool Proficiencies" nil
-                                   (map
-                                    (fn [tool]
-                                      (:name tool))
-                                    tool-profs))
-             (list-display-section "Weapon Proficiencies" nil
-                                   (map
-                                    (fn [tool]
-                                      (:name tool))
-                                    weapon-profs))
-             (list-display-section "Armor Proficiencies" nil
-                                   (map
-                                    (fn [armor]
-                                      (:name armor))
-                                    armor-profs))
-             (list-display-section "Resistances" nil
-                                   (map
-                                    (fn [resistance-kw]
-                                      (name resistance-kw))
-                                    resistances))
-             (list-display-section "Immunities" nil
-                                   (map
-                                    (fn [immunity-kw]
-                                      (name immunity-kw))
-                                    immunities))
-             (display-section "Spells Known" nil
-                                   [:div {:style {:font-size "14px"}}
-                                    (map
-                                     (fn [[level spells]]
-                                       ^{:key level}
-                                       [:div {:style {:margin-top "10px"}}
-                                        [:span {:font-weight 600} (if (zero? level) "Cantrip" (str "Level " level))]
-                                        [:div {:style {:font-style :italic
-                                                       :font-weight :normal}}
-                                         (map
-                                          (fn [spell]
-                                            (let [spell-data (spells/spell-map (:key spell))]
-                                              ^{:key (:key spell)}
-                                              [:div
-                                               (str
-                                                (:name (spells/spell-map (:key spell)))
-                                                " ("
-                                                (s/upper-case (name (:ability spell))) ")")]))
-                                          (filter (fn [{k :key}] (spells/spell-map k)) spells))]])
-                                     (es/entity-val built-char :spells-known))])
-             (list-display-section "Weapons" nil
-                                   (map
-                                    (fn [[weapon-kw num]]
-                                      (str (:name (opt5e/weapons-map weapon-kw)) " (" num ")"))
-                                    (es/entity-val built-char :weapons)))
-             (list-display-section "Armor" nil
-                                   (map
-                                    (fn [[armor-kw num]]
-                                      (str (:name (opt5e/armor-map armor-kw)) " (" num ")"))
-                                    armor))
-             (list-display-section "Equipment" nil
-                                   (map
-                                    (fn [[equipment-kw num]]
-                                      (str (:name (opt5e/equipment-map equipment-kw)) " (" num ")"))
-                                    (es/entity-val built-char :equipment)))]]
-           (display-section
-            "Features, Traits, & Feats" nil
-            [:div
-             {:style {:font-size "14px"}}
-             (map
-              (fn [{:keys [name description]}]
-                ^{:key name}
-                [:p {:style {:margin-top "10px"}}
-                 [:span {:style {:font-weight 600 :font-style :italic}} name "."]
-                 [:span {:style {:font-weight :normal :margin-left "10px"}} description]])
-              (es/entity-val built-char :traits))])])]]]]))
+        [character-display built-char]]]]]))
 
 
 (r/render [character-builder]
