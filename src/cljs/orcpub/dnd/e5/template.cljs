@@ -1193,8 +1193,8 @@ the GM tells you whether you succeed or fail."}]}
                      :options {:scale-mail 1
                                :leather 1
                                :chain-mail 1}}]
-    :equipment {:shield 1
-                :holy-symbol 1}
+    :armor {:shield 1}
+    :equipment {:holy-symbol 1}
     :selections [(t/selection
                   "Additional Weapon"
                   [(t/option

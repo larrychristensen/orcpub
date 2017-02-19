@@ -183,7 +183,13 @@
   (concat
    packs
    tools
-   ammunition))
+   ammunition
+   [{:name "Ancane Focus"
+     :key :arcane-focus}
+    {:name "Component Pouch"
+     :key :component-pouch}
+    {:name "Holy Symbol"
+     :key :holy-symbol}]))
 
 (def equipment-map
   (merge
