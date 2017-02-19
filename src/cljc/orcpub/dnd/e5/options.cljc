@@ -160,6 +160,13 @@
   (map
    #(assoc % :key (common/name-to-kw (:name %)))))
 
+(def ammunition
+  (into
+   []
+   add-keys-xform
+   [{:name "Bolt"}
+    {:name "Arrow"}]))
+
 (def packs
   (into
    []
@@ -175,14 +182,14 @@
 (def equipment
   (concat
    packs
-   tools))
+   tools
+   ammunition))
 
 (def equipment-map
   (merge
    {:pack {:name "Equipment Packs"
            :values packs}}
-   tools-map
-   (zipmap (map :key packs) packs)))
+   (zipmap (map :key equipment) equipment)))
 
 (def armor
   [{:name "Shield"
