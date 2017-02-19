@@ -270,7 +270,6 @@
         plugins (collect-plugins options plugin-map)]
     (reduce
      (fn [templ {:keys [::t/path ::t/selections ::t/modifiers] :as plugin}]
-       #?(:cljs (js/console.log "PLUGIN" plugin))
        (let [template-path (get-template-selection-path templ path [])]
          (update-in
           templ

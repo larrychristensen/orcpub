@@ -670,10 +670,7 @@
        [list-item-section "Resistances" resistances name]
        [list-item-section "Immunities" immunities name]
        [spells-known-section spells-known]
-       [equipment-section
-        "Weapons"
-        weapons
-        opt5e/weapons-map]
+       [equipment-section "Weapons" weapons opt5e/weapons-map]
        [equipment-section "Armor" armor opt5e/armor-map]
        [equipment-section "Equipment" equipment opt5e/equipment-map]]]
      [traits-section traits]]))
