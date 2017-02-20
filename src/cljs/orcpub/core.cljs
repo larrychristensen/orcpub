@@ -1,5 +1,6 @@
 (ns orcpub.core
   (:require [goog.dom :as gdom]
+            [goog.labs.userAgent.device :as device]
             [om.next :as om :refer-macros [defui]]
             [om.dom :as dom]
             [cljs.pprint :as pprint]
@@ -72,7 +73,8 @@
 
 (defonce app-state
   (r/atom
-   {:collapsed-paths #{}}))
+   {:collapsed-paths #{}
+    :builder {:character {:tab 0}}}))
 
 #_(add-watch app-state :log (fn [k r os ns]
                             (js/console.log "OLD" (clj->js os))
@@ -372,21 +374,30 @@
 
 (def tabs-style
   (merge
-   {:height 82
+   {;;:height 82
     :text-transform :uppercase
-    :font-weight 600}
-   content-style
+    :font-weight 600
+    :padding "15px"}
+   ;;content-style
    text-color
    field-font-size))
 
-(def tab-style
-  {:padding-top 48
-   :padding-left 25
-   :padding-right 25
-   :padding-bottom 13
+(def base-tab-style
+  {;;:padding-top 48
    :display :inline-block
    :opacity 0.2
-   :border-bottom "5px solid rgba(255, 255, 255, 0.05)"})
+   :border-bottom "5px solid rgba(255, 255, 255, 0.3)"})
+
+(def tab-style
+  (merge
+   base-tab-style
+   { ;;:padding-top 48
+    :padding-left 25
+    :padding-right 25
+    :padding-bottom 13}))
+
+(def tab-spacer-style
+  {:width "10px"})
 
 (def selected-tab-style
   (merge
@@ -399,7 +410,8 @@
    {:font-size 36
     :font-weight :bold
     :margin-top 21
-    :margin-bottom 19}))
+    :margin-bottom 19
+    :margin-left 10}))
 
 (defn make-path-map [character]
   (let [flat-options (entity/flatten-options (::entity/options character))]
@@ -438,7 +450,8 @@
                   {:key i
                    :color c})
                 ["#f4692a" "#f32e50" "#b35c95" "#47eaf8" "#bbe289" "#f9b747"])]
-    [:div {:style {:position :relative}}
+    [:div {:style {:position :relative
+                   :width "100%"}}
      (map
       (fn [[ak av] [x y] {:keys [color]}]
         ^{:key color}
@@ -503,7 +516,7 @@
     built-char)))
 
 (defn display-section [title icon-cls value & [list?]]
-  [:div {:style {:margin-left "25px" :margin-top "20px"}}
+  [:div {:style {:margin-top "20px"}}
    [:span {:style {:font-size "16px" :font-weight 600}} title]
    [:div {:style {:margin-top (if list? "0px" "4px")}}
     (if icon-cls [:i.fa {:class-name icon-cls :style {:font-size "32px" :margin-right "18px" :color :white}}])
@@ -600,7 +613,7 @@
         [:span {:style {:font-weight :normal :margin-left "10px"}} description]])
      traits)]))
 
-(defn character-display [built-char]
+(defn character-display [built-char mobile? tablet? desktop?]
   (let [race (es/entity-val built-char :race)
         subrace (es/entity-val built-char :subrace)
         levels (es/entity-val built-char :levels)
@@ -620,7 +633,9 @@
         weapons (es/entity-val built-char :weapons)
         equipment (es/entity-val built-char :equipment)
         traits (es/entity-val built-char :traits)]
-    [:div {:style {:width "500px"}}
+    [:div (if desktop?
+            {:style {:width "500px"}}
+            {:style {:margin-left "20px" :margin-right "20px"}})
      [:div {:style {:font-size "24px"
                     :font-weight 600
                     :margin-bottom "16px"
@@ -638,12 +653,11 @@
               (str class-name " (" class-level ")"))
             levels)))])]
      [:div {:style {:display :flex}}
-      [:div
-       [:img {:src (or (get-in @character-ref [::entity/values :image-url]) "image/barbarian-girl.png")
-              :style {:width "267px"
-                      :margin-bottom "20px"}}]
-       [abilities-radar 187 (es/entity-val built-char :abilities) ability-bonuses]]
-      [:div {:style {:width "250px"}}
+      [:div {:style {:width (cond mobile? "60%" tablet? "40%" :else "50%")}}
+       [:img.character-image {:src (or (get-in @character-ref [::entity/values :image-url]) "image/barbarian-girl.png")
+              :style {:width "100%"
+                      :margin-bottom "20px"}}]]
+      [:div (if desktop? {:style {:width "250px"}})
        [armor-class-section armor-class armor-class-with-armor armor]
        [display-section "Hit Points" "fa-crosshairs" (es/entity-val built-char :max-hit-points)]
        [display-section "Speed" nil (es/entity-val built-char :speed)]
@@ -654,88 +668,118 @@
        (let [criticals (es/entity-val built-char :critical)
              min-crit (apply min criticals)
              max-crit (apply max criticals)]
-         (display-section "Critical Hit" nil (if (= min-crit max-crit) min-crit (str min-crit "-" max-crit))))
-       [list-display-section "Skill Proficiencies" nil
-        (let [skill-bonuses (es/entity-val built-char :skill-bonuses)]
-          (map
-           (fn [[skill-kw bonus]]
-             (str (s/capitalize (name skill-kw)) " " (mod/bonus-str bonus)))
-           (filter (fn [[k bonus]]
-                     (not= bonus (ability-bonuses (:ability (opt5e/skills-map k)))))
-                   skill-bonuses)))]
-       [list-item-section "Languages" languages]
-       [list-item-section "Tool Proficiencies" tool-profs]
-       [list-item-section "Weapon Proficiencies" weapon-profs]
-       [list-item-section "Armor Proficiencies"]
-       [list-item-section "Resistances" resistances name]
-       [list-item-section "Immunities" immunities name]
-       [spells-known-section spells-known]
-       [equipment-section "Weapons" weapons opt5e/weapons-map]
-       [equipment-section "Armor" armor opt5e/armor-map]
-       [equipment-section "Equipment" equipment opt5e/equipment-map]]]
+         (display-section "Critical Hit" nil (if (= min-crit max-crit) min-crit (str min-crit "-" max-crit))))]]
+     [list-display-section "Skill Proficiencies" nil
+      (let [skill-bonuses (es/entity-val built-char :skill-bonuses)]
+        (map
+         (fn [[skill-kw bonus]]
+           (str (s/capitalize (name skill-kw)) " " (mod/bonus-str bonus)))
+         (filter (fn [[k bonus]]
+                   (not= bonus (ability-bonuses (:ability (opt5e/skills-map k)))))
+                 skill-bonuses)))]
+     [:div {:style {:width "100%"}}
+        [abilities-radar 187 (es/entity-val built-char :abilities) ability-bonuses]]
+     [list-item-section "Languages" languages]
+     [list-item-section "Tool Proficiencies" tool-profs]
+     [list-item-section "Weapon Proficiencies" weapon-profs]
+     [list-item-section "Armor Proficiencies"]
+     [list-item-section "Resistances" resistances name]
+     [list-item-section "Immunities" immunities name]
+     [spells-known-section spells-known]
+     [equipment-section "Weapons" weapons opt5e/weapons-map]
+     [equipment-section "Armor" armor opt5e/armor-map]
+     [equipment-section "Equipment" equipment opt5e/equipment-map]
      [traits-section traits]]))
+
+(def tab-path [:builder :character :tab])
 
 (defn character-builder []
   ;;(cljs.pprint/pprint @character-ref)
   (let [option-paths (make-path-map @character-ref)
         built-template (entity/build-template @character-ref template)
-        built-char (entity/build @character-ref built-template)]
+        built-char (entity/build @character-ref built-template)
+        active-tab (get-in @app-state tab-path)
+        view-width (.-width (gdom/getViewportSize js/window))
+        mobile? (device/isMobile)
+        tablet? (device/isTablet)
+        desktop? (device/isDesktop)]
     ;;(js/console.log "BUILT TEMPLAT" built-template)
     ;;(print-char built-char)
     [:div.app
+     {:class-name (cond mobile? "mobile" tablet? "tablet" :else nil)}
      [:div.app-header
       [:div.app-header-bar.container
        [:div.content
-        [:img {:src "image/orcpub-logo.svg"}]]]]
-     [:div.container
-      [:div {:style tabs-style}
-       [:span {:style selected-tab-style} "Character"]
-       [:span {:style tab-style} "Monster"]]]
+        [:img.orcpub-logo {:src "image/orcpub-logo.svg"}]]]]
+     #_[:div.container
+        [:div {:style tabs-style}
+         [:span {:style selected-tab-style} "Character"]
+         [:span {:style tab-style} "Monster"]]]
      [:div
       {:style container-style}
       [:div
        {:style character-builder-style}
        [:h1 {:style page-header-style} "Character Builder"]
+       (if (not desktop?)
+         [:div
+          [:div.builder-tabs
+           (if mobile? [:span.builder-tab {:class-name (if (= active-tab 0) "selected-builder-tab")
+                               :on-click (fn [_] (swap! app-state assoc-in tab-path 0))} "Options"])
+           (if tablet? [:span.builder-tab {:class-name (if (= active-tab 0) "selected-builder-tab")
+                               :on-click (fn [_] (swap! app-state assoc-in tab-path 0))} "Build"])
+           (if mobile? [:span.builder-tab {:class-name (if (= active-tab 1) "selected-builder-tab")
+                               :on-click (fn [_] (swap! app-state assoc-in tab-path 1))} "Personality"])
+           [:span.builder-tab {:class-name (if (or (and mobile? (= active-tab 2))
+                                  (and tablet? (= active-tab 1))) "selected-builder-tab")
+                   :on-click (fn [_] (swap! app-state assoc-in tab-path (if mobile? 2 1)))} "Details"]]])
        [:div
         {:style {:display :flex}}
-        [:div {:style {:width "300px"}}
-         (doall
-          (map
-           (fn [selection]
-             ^{:key (::t/key selection)}
-             [builder-selector [] option-paths selection built-char @character-ref built-template])
-           (::t/selections built-template)))]
-        [:div {:style {:flex-grow 1
-                       :margin-top "10px"
-                       :margin-left "30px"
-                       :margin-right "80px"}}
-         [:div {:style {:margin-top "5px"}}
-          [:span.personality-label {:style {:font-size "18px"}} "Character Name"]
-          [:input.input {:type :text}]]
-         [:div.field
-          [:span.personality-label {:style {:font-size "18px"}} "Personality Trait 1"]
-          [:input.input {:type :text}]]
-         [:div.field
-          [:span.personality-label {:style {:font-size "18px"}} "Personality Trait 2"]
-          [:input.input {:type :text}]]
-         [:div.field
-          [:span.personality-label {:style {:font-size "18px"}} "Ideals"]
-          [:input.input {:type :text}]]
-         [:div.field
-          [:span.personality-label {:style {:font-size "18px"}} "Bonds"]
-          [:input.input {:type :text}]]
-         [:div.field
-          [:span.personality-label {:style {:font-size "18px"}} "Flaws"]
-          [:input.input {:type :text}]]
-         [:div.field
-          [:span.personality-label {:style {:font-size "18px"}} "Image URL"]
-          [:input.input
-           {:type :text
-            :on-change (fn [e] (swap! character-ref assoc-in [::entity/values :image-url] (.-value (.-target e))))}]]
-         [:div.field
-          [:span.personality-label {:style {:font-size "18px"}} "Description/Backstory"]
-          [:textarea.input {:style {:height "800px"}}]]]
-        [character-display built-char]]]]]))
+        (if (or desktop?
+                (= 0 active-tab))
+          [:div {:style (if mobile? {:width "100%"} {:width "300px"})}
+           (doall
+            (map
+             (fn [selection]
+               ^{:key (::t/key selection)}
+               [builder-selector [] option-paths selection built-char @character-ref built-template])
+             (::t/selections built-template)))])
+        (if (or desktop?
+                (and tablet? (= 0 active-tab))
+                (and mobile? (= 1 active-tab)))
+          [:div {:style {:flex-grow 1
+                         :margin-top "10px"
+                         :margin-left (if desktop? "30px" "5px")
+                         :margin-right (if desktop? "80px" "5px")}}
+           [:div {:style {:margin-top "5px"}}
+            [:span.personality-label {:style {:font-size "18px"}} "Character Name"]
+            [:input.input {:type :text}]]
+           [:div.field
+            [:span.personality-label {:style {:font-size "18px"}} "Personality Trait 1"]
+            [:input.input {:type :text}]]
+           [:div.field
+            [:span.personality-label {:style {:font-size "18px"}} "Personality Trait 2"]
+            [:input.input {:type :text}]]
+           [:div.field
+            [:span.personality-label {:style {:font-size "18px"}} "Ideals"]
+            [:input.input {:type :text}]]
+           [:div.field
+            [:span.personality-label {:style {:font-size "18px"}} "Bonds"]
+            [:input.input {:type :text}]]
+           [:div.field
+            [:span.personality-label {:style {:font-size "18px"}} "Flaws"]
+            [:input.input {:type :text}]]
+           [:div.field
+            [:span.personality-label {:style {:font-size "18px"}} "Image URL"]
+            [:input.input
+             {:type :text
+              :on-change (fn [e] (swap! character-ref assoc-in [::entity/values :image-url] (.-value (.-target e))))}]]
+           [:div.field
+            [:span.personality-label {:style {:font-size "18px"}} "Description/Backstory"]
+            [:textarea.input {:style {:height "800px"}}]]])
+        (if (or desktop?
+                (and mobile? (= 2 active-tab))
+                (and tablet? (= 1 active-tab)))
+          [character-display built-char mobile? tablet? desktop?])]]]]))
 
 
 (r/render [character-builder]

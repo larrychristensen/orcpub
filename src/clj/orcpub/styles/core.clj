@@ -19,7 +19,8 @@
    {:background-image "linear-gradient(182deg, #2c3445, #000000)"
     :font-family "Open Sans, sans-serif"
     :height "100%"
-    :overflow :auto}]
+    :overflow :auto
+    :padding-bottom "40px"}]
 
   [:.container
    container-style]
@@ -30,9 +31,9 @@
     {:display :flex})]
 
   [:.app-header
-   {:background-color "black"
-    :background-image "url(../../image/shutterstock_425039560.jpg)"
-    :background-position "center 780px"
+   {:background-color :black
+    :background-image "url(../../image/header-background.jpg)"
+    :background-position "center"
     :background-size "cover"
     :height (px 227)}]
 
@@ -42,6 +43,18 @@
     :backdrop-filter "blur(5px)"
     :background-color "rgba(0, 0, 0, 0.15)"}]
 
+  [:.app.mobile :.app.tablet
+   [:.app-header
+    {:height (px 81)
+     :background-image :none
+     :background-color "rgba(0, 0, 0, 0.3)"}]
+   [:.app-header-bar
+    {:backdrop-filter :none
+     :-webkit-backdrop-filter :none}]
+   [:.orcpub-logo
+    {:width "220px"
+     :margin-left "20px"}]]
+
   [:.builder-option
    {:border-width (px 1)
     :border-style :solid
@@ -50,6 +63,23 @@
     :padding (px 10)
     :margin-top (px 5)
     :font-weight :normal}]
+
+  [:.builder-tabs
+   {:display :flex
+    :padding "10px"
+    :text-transform :uppercase
+    :font-weight 600}]
+
+  [:.builder-tab
+   {:opacity 0.2
+    :flex-grow 1
+    :padding-bottom "13px"
+    :text-align :center
+    :border-bottom "5px solid rgba(255, 255, 255, 0.3)"}]
+
+  [:.selected-builder-tab
+   {:border-bottom-color "#f1a20f"
+    :opacity 1}]
 
   [:.collapsed-list-builder-option
    {:padding "1px"}]
