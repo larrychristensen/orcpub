@@ -619,6 +619,13 @@
    nil
    [(modifiers/skill-proficiency (:key skill))]))
 
+(defn weapon-proficiency-option [{:keys [name key]}]
+  (t/option
+   name
+   key
+   nil
+   [(modifiers/weapon-proficiency name key)]))
+
 (defn tool-option [tool]
   (t/option
    (:name tool)
@@ -656,6 +663,11 @@
   (map
    skill-option
    skills))
+
+(defn weapon-proficiency-options [weapons]
+  (map
+   weapon-proficiency-option
+   weapons))
 
 (defn tool-options [tools]
   (map
@@ -999,6 +1011,17 @@
      1 1)]
    []))
 
+(defn ritual-caster-option [class-key spellcasting-ability spell-lists]
+  (t/option
+   (name class-key)
+   class-key
+   [(t/selection
+     "1st Level Ritual"
+     (spell-options (filter (fn [spell-kw] (:ritual (spells/spell-map spell-kw))) (get-in spell-lists [class-key 1])) 1 spellcasting-ability)
+     2
+     2)]
+   []))
+
 (defn language-selection [langs num]
   (t/selection
    "Languages"
@@ -1015,6 +1038,63 @@
    (common/name-to-kw name)
    nil
    [(modifiers/trait (str name " Maneuver"))]))
+
+(defn skill-selection
+  ([num]
+   (skill-selection (map :key skills) num))
+  ([options num]
+   (t/selection
+    "Skill Proficiency"
+    (skill-options
+     (filter
+      (comp (set options) :key)
+      skills))
+    num
+    num)))
+
+(defn tool-selection
+  ([num]
+   (t/selection
+    "Tool Proficiency"
+    (tool-options tools)
+    num
+    num))
+  ([options num]
+   (t/selection
+    "Tool Proficiency"
+    (tool-options
+     (filter
+      (comp (set options) :key)
+      tools))
+    num
+    num)))
+
+(defn weapon-proficiency-selection
+  ([num]
+   (t/selection
+    "Weapon Proficiency"
+    (weapon-proficiency-options weapons)
+    num
+    num))
+  ([options num]
+   (t/selection
+    "Tool Proficiency"
+    (weapon-proficiency-options
+     (filter
+      (comp (set options) :key)
+      tools))
+    num
+    num)))
+
+(defn skilled-selection [title]
+  (t/selection
+   title
+   [(t/select-option
+     "Skill"
+     [(skill-selection 1)])
+    (t/select-option
+     "Tool"
+     [(tool-selection 1)])]))
 
 (def maneuver-options
   [(maneuver-option "Commander's Strike")
@@ -1033,6 +1113,10 @@
    (maneuver-option "Riposte")
    (maneuver-option "Sweeping Attack")
    (maneuver-option "Trip Attack")])
+
+(def can-cast-spell-prereq
+  {::t/label "spellcasting ability"
+   ::t/prereq-fn (fn [c] (some (fn [[k v]] (seq v)) (:spells-known c)))})
 
 (def feat-options
   [(t/option
@@ -1090,8 +1174,7 @@
     :elemental-adept
     []
     [(modifiers/trait "Elemental Adept Feat")]
-    [{::t/label "spellcasting ability"
-      ::t/prereq-fn (fn [c] (some (fn [[k v]] (seq v)) (:spells-known c)))}])
+    [can-cast-spell-prereq])
    (t/option
     "Grappler"
     :grappler
@@ -1231,7 +1314,66 @@
           [(modifiers/ability ability-key 1)
            (modifiers/saving-throws ability-key)]))
        character/ability-keys))]
-    [])])
+    [])
+   (t/select-option
+    "Ritual Caster"
+    [(t/selection
+      "Spell Class"
+      [(ritual-caster-option :bard :cha sl/spell-lists)
+       (ritual-caster-option :cleric :wis sl/spell-lists)
+       (ritual-caster-option :druid :wis sl/spell-lists)
+       (ritual-caster-option :sorcerer :cha sl/spell-lists)
+       (ritual-caster-option :warlock :cha sl/spell-lists)
+       (ritual-caster-option :wizard :int sl/spell-lists)])]
+    [{::t/label "Intelligence or Wisdom 13 or higher"
+      ::t/prereq-fn (fn [{{:keys [wis int]} :abilities}]
+                      (or (>= wis 13)
+                          (>= int 13)))}])
+   (t/option
+    "Savage Attacker"
+    :savage-attacker
+    []
+    [(modifiers/trait "Savage Attacker Feat")])
+   (t/option
+    "Sentinal"
+    :sentinal
+    []
+    [(modifiers/trait "Sentinal Feat")])
+   (t/mod-option
+    "Sharpshooter"
+    [(modifiers/trait "Sharpshooter Feat")])
+   (t/mod-option
+    "Shield Master"
+    [(modifiers/trait "Shield Master Feat")])
+   (t/select-option
+    "Skilled"
+    [(skilled-selection "Skill/Tool 1")
+     (skilled-selection "Skill/Tool 2")
+     (skilled-selection "Skill/tool 3")])
+   (t/mod-option
+    "Skulker"
+    [(modifiers/trait "Skulker Feat")]
+    [(ability-prereq :dex 13)])
+   (t/mod-option
+    "Spell Sniper"
+    [(modifiers/trait "Spell Sniper Feat")]
+    [can-cast-spell-prereq])
+   (t/option
+    "Tavern Brawler"
+    :tavern-brawler
+    [(ability-increase-selection [:str :dex] 1 false)]
+    [(modifiers/weapon-proficiency "Improvised Weapons" :improvised)
+     (modifiers/trait "Tavern Brawler Feat")])
+   (t/mod-option
+    "Tough"
+    [(mods/modifier ?hit-point-level-bonus (+ 2 ?hit-point-level-bonus))])
+   (t/mod-option
+    "War Caster"
+    [(modifiers/trait "War Caster Feat")])
+   (t/select-option
+    "Weapon Master"
+    [(ability-increase-selection [:str :dex] 1 false)
+     (weapon-proficiency-selection 4)])])
 
 
 (def fighting-style-options
@@ -1300,29 +1442,6 @@
        "Feat"
        feat-options)]
      [])]))
-
-(defn skill-selection
-  ([num]
-   (skill-selection (map :key skills) num))
-  ([options num]
-   (t/selection
-    "Skill Proficiency"
-    (skill-options
-     (filter
-      (comp (set options) :key)
-      skills))
-    num
-    num)))
-
-(defn tool-selection [options num]
-  (t/selection
-   "Tool Proficiency"
-   (tool-options
-    (filter
-     (comp (set options) :key)
-     tools))
-   num
-   num))
 
 (defn expertise-selection [num]
   (t/selection

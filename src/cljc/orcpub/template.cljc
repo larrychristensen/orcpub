@@ -66,6 +66,12 @@
     modifiers (assoc ::modifiers modifiers)
     prereqs (assoc ::prereqs prereqs)))
 
+(defn select-option [name selections & [prereqs]]
+  (option name (common/name-to-kw name) selections nil prereqs))
+
+(defn mod-option [name modifiers & [prereqs]]
+  (option name (common/name-to-kw name) nil modifiers prereqs))
+
 (declare make-modifier-map-from-selections)
 (declare make-plugin-map-from-selections)
 
