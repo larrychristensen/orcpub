@@ -207,6 +207,7 @@ While affected by this spell, the object is more difficult to break or force ope
     }
    {
     :name "Armor of Agath."
+    :key :armor-of-agathys
     :school "abjuration"
     :level 1
     :casting-time "1 action"
@@ -218,6 +219,7 @@ While affected by this spell, the object is more difficult to break or force ope
     }
    {
     :name "Arms of Had."
+    :key :arms-of-hadar
     :school "conjuration"
     :level 1
     :casting-time "1 action"
@@ -378,6 +380,7 @@ At Higher Levels. If you cast this spell using a spell slot of 4th level or high
     }
    {
     :name "B.'s Hand (Arcane Hand)"
+    :key :bigbys-hand
     :school "evocation"
     :level 5
     :casting-time "1 action"
@@ -1407,6 +1410,7 @@ At Higher Levels. When you cast this spell using a 6th-level spell slot, the dur
                 }
                {
                 :name "Drawm.'s Instant Summons"
+                :key :drawmijs-instant-summons
                 :ritual true
                 :school "conjuration"
                 :level 6
@@ -1560,6 +1564,7 @@ This spell has no effect if you cast it while you are on the Ethereal Plane or a
                 }
                {
                 :name "Ev.'s Black Tentacles"
+                :key :evards-black-tentacles
                 :school "conjuration"
                 :level 4
                 :casting-time "1 action"
@@ -2505,6 +2510,7 @@ The information you learn is accurate but might be couched in figurative languag
     }
    {
     :name "Leo.'s Tiny Hut"
+    :key :leomunds-tiny-hut
     :ritual true
     :school "evocation"
     :level 3
@@ -2518,6 +2524,7 @@ Until the spell ends, you can command the interior to become dimly lit or dark. 
     }
    {
     :name "Leo.'s Secret Chest"
+    :key :leomunds-secret-chest
     :school "conjuration"
     :level 4
     :casting-time "1 action"
@@ -2806,6 +2813,7 @@ Minor physical damage to the stone doesn't harm you, but its partial destruction
     }
    {
     :name "M.'s Acid Arrow"
+    :key :melfs-acid-arrow
     :school "evocation"
     :level 2
     :casting-time "1 action"
@@ -2954,6 +2962,7 @@ At Higher Levels. When you cast this spell using a spell slot of 3rd level or hi
     }
    {
     :name "Mord.'s Faithful Hound"
+    :key :mordenkainens-faithful-hound
     :school "conjuration"
     :level 4
     :casting-time "1 action"
@@ -2966,6 +2975,7 @@ At the start of each of your turns, the hound attempts to bite one creature with
     }
    {
     :name "Mord.'s Magnificent Mansion"
+    :key :mordenkainens-magnificent-mansion
     :school "conjuration"
     :level 7
     :casting-time "1 minute"
@@ -2978,6 +2988,7 @@ You can create any floor plan you like, but the space can't exceed 50 cubes, eac
     }
    {
     :name "Mord.'s Private Sanctum"
+    :key :mordenkainens-private-sanctum
     :school "abjuration"
     :level 4
     :casting-time "10 minutes"
@@ -2998,6 +3009,7 @@ At Higher Levels. When you cast this spell using a spell slot of 5th level or hi
     }
    {
     :name "Mord.'s Sword (Arcane Sword)"
+    :key :mordenkainens-sword
     :school "evocation"
     :level 7
     :casting-time "1 action"
@@ -3035,6 +3047,7 @@ Similarly, this spell doesn't directly affect plant growth. The moved earth carr
     }
    {
     :name "Nyst.'s Magic Aura (Arcanist's Magic Aura)"
+    :key :nystuls-magic-aura
     :school "illusion"
     :level 2
     :casting-time "1 action"
@@ -3050,6 +3063,7 @@ Mask. You change the way the target appears to spells and magical effects that d
 (def o-spells
   [{
     :name "Otil.'s Freezing Sphere"
+    :key :otilukes-freezing-sphere
     :school "evocation"
     :level 6
     :casting-time "1 action"
@@ -3063,6 +3077,7 @@ At Higher Levels. When you cast this spell using a spell slot of 7th level or hi
     }
    {
     :name "Otil.'s Resilient Sphere"
+    :key :otilukes-resilient-sphere
     :school "evocation"
     :level 4
     :casting-time "1 action"
@@ -3076,6 +3091,7 @@ A disintegrate spell targeting the globe destroys it without harming anything in
     }
    {
     :name "O.'s Irresistible Dance"
+    :key :ottos-irresistible-dance
     :school "enchantment"
     :level 6
     :casting-time "1 action"
@@ -4045,6 +4061,7 @@ Stunning. Each target must make a Wisdom saving throw and becomes stunned for 1 
 (def t-spells
   [{
     :name "T.'s Hideous Laughter"
+    :key :tashas-hideous-laughter
     :school "enchantment"
     :level 1
     :casting-time "1 action"
@@ -4127,6 +4144,7 @@ You can create a permanent teleportation circle by casting this spell in the sam
     }
    {
     :name "Tens.'s Floating Disk"
+    :key :tensers-floating-disk
     :ritual true
     :school "conjuration"
     :level 1
@@ -4559,6 +4577,9 @@ An affected creature is aware of the spell and can thus avoid answering question
 (def spell-map
   (into
    {}
-   (map (juxt (comp common/name-to-kw :name)
-              identity))
+   (map
+    (fn [spell]
+      [(or (:key spell)
+           (common/name-to-kw (:name spell)))
+       spell]))
    spells))

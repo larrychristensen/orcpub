@@ -1024,8 +1024,7 @@ creature."}]}
     :levels {2 {:modifiers [(mod/modifier ?default-skill-bonus (let [b (int (/ ?prof-bonus 2))]
                                                                  (zipmap char5e/ability-keys (repeat b))))]}
              3 {:selections [(opt5e/expertise-selection 2)]}
-             10 {:selections (concat [opt5e/expertise-selection]
-                                     (opt5e/raw-bard-magical-secrets 10))}
+             10 {:selections (conj (opt5e/raw-bard-magical-secrets 10) (opt5e/expertise-selection 2))}
              14 {:selections (opt5e/raw-bard-magical-secrets 14)}
              18 {:selections (opt5e/raw-bard-magical-secrets 18)}}
     :traits [{:name "Bardic Inspiration"

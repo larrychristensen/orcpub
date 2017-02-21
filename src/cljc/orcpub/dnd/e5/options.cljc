@@ -803,7 +803,7 @@
       key
       []
       [(modifiers/spells-known level key spellcasting-ability)]))
-   spells))
+   (sort spells)))
 
 (defn spell-level-title [level]
   (if (zero? level) "Cantrip" (str "Level " level " Spell")))
@@ -951,36 +951,7 @@
                 (if (not acquire?) num)
                 acquire?
                 (if acquire?
-                  (fn [s o v] {::entity/key nil})))])
-       
-       #_(assoc m cls-lvl
-              (if (> (count slots) 1)
-                (mapv
-                 (fn [i]
-                   (t/selection
-                    (str "Spell " (inc i))
-                    (mapv
-                     (fn [[lvl _]]
-                       (let [spell-keys (if spells
-                                          (get spells lvl)
-                                          (get-in sl/spell-lists [class-key lvl]))
-                             final-spell-keys (apply-spell-restriction spell-keys restriction)]
-                         (t/option
-                          (spell-level-title lvl)
-                          (keyword (str lvl))
-                          [(spell-selection class-key lvl final-spell-keys ability 1)]
-                          [])))
-                     slots)))
-                 (range num))
-                [(spell-selection
-                  class-key
-                  1
-                  (apply-spell-restriction
-                   (if spells
-                     (get spells 1)
-                     (get-in sl/spell-lists [class-key 1])) restriction)
-                  ability
-                  num)]))))
+                  (fn [s o v] {::entity/key nil})))])))
    {}
    spells-known))
 
@@ -1446,7 +1417,7 @@
 (defn expertise-selection [num]
   (t/selection
    "Skill Expertise"
-   (map
+   (mapv
     (fn [skill]
       (assoc
        (t/option

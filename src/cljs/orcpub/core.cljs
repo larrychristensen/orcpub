@@ -670,6 +670,8 @@
              min-crit (apply min criticals)
              max-crit (apply max criticals)]
          (display-section "Critical Hit" nil (if (= min-crit max-crit) min-crit (str min-crit "-" max-crit))))]]
+     [:div {:style {:width "100%"}}
+      [abilities-radar 187 (es/entity-val built-char :abilities) ability-bonuses]]
      [list-display-section "Skill Proficiencies" nil
       (let [skill-bonuses (es/entity-val built-char :skill-bonuses)]
         (map
@@ -678,8 +680,6 @@
          (filter (fn [[k bonus]]
                    (not= bonus (ability-bonuses (:ability (opt5e/skills-map k)))))
                  skill-bonuses)))]
-     [:div {:style {:width "100%"}}
-        [abilities-radar 187 (es/entity-val built-char :abilities) ability-bonuses]]
      [list-item-section "Languages" languages]
      [list-item-section "Tool Proficiencies" tool-profs]
      [list-item-section "Weapon Proficiencies" weapon-profs]
