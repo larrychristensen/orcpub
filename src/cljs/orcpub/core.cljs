@@ -669,7 +669,9 @@
        (let [criticals (es/entity-val built-char :critical)
              min-crit (apply min criticals)
              max-crit (apply max criticals)]
-         (display-section "Critical Hit" nil (if (= min-crit max-crit) min-crit (str min-crit "-" max-crit))))]]
+         (if (not= min-crit max-crit)
+           (display-section "Critical Hit" nil (str min-crit "-" max-crit))))
+       [list-display-section "Save Proficiencies" nil (map (comp s/upper-case name) (es/entity-val built-char :saving-throws))]]]
      [:div {:style {:width "100%"}}
       [abilities-radar 187 (es/entity-val built-char :abilities) ability-bonuses]]
      [list-display-section "Skill Proficiencies" nil
