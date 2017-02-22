@@ -146,10 +146,11 @@
    {:color button-color}]
 
   [:.expand-collapse-button
-   {:font-size "18px"
-    :font-weight :lighter
+   {:font-size "12px"
+    :max-width "100px"
     :margin-left "10px"
-    :color :white
+    :color "#f0a100"
+    :text-decoration :underline
     :cursor :pointer}]
 
   [:.fa-caret-square-o-down

@@ -73,7 +73,10 @@
 
 (defonce app-state
   (r/atom
-   {:collapsed-paths #{}
+   {:collapsed-paths #{[:ability-scores]
+                       [:background]
+                       [:class :fighter]
+                       [:race]}
     :builder {:character {:tab 0}}}))
 
 #_(add-watch app-state :log (fn [k r os ns]
@@ -125,6 +128,7 @@
           option-path (entity/get-entity-path template raw-char new-path)
           new-value (cljs.reader/read-string (.. e -target -value))]
       (swap! character-ref #(set-option-value % (conj option-path ::entity/key) new-value)))))
+
 
 (defn option [path option-paths selectable? list-collapsed? {:keys [::t/key ::t/name ::t/selections ::t/modifiers ::t/prereqs ::t/ui-fn ::t/select-fn]} built-char raw-char changeable? options change-fn built-template]
   (let [new-path (conj path key)
@@ -188,14 +192,14 @@
         (if (and selected?
                  (seq selections))
           (if collapsed?
-            [:i.fa.fa-caret-square-o-down.expand-collapse-button
-             {:style {:font-size "18px"}
-              :on-click (fn [_]
-                          (swap! app-state update :collapsed-paths disj new-path))}]
-            [:i.fa.fa-caret-square-o-up.expand-collapse-button
-             {:style {:font-size "18px"}
-              :on-click (fn [_]
-                          (swap! app-state update :collapsed-paths conj new-path))}]))]
+            [:span.expand-collapse-button
+             {:on-click (fn [_]
+                          (swap! app-state update :collapsed-paths disj new-path))}
+             "Expand"]
+            [:span.expand-collapse-button
+             {:on-click (fn [_]
+                          (swap! app-state update :collapsed-paths conj new-path))}
+             "Collapse"]))]
        (if (and selected? (not collapsed?))
          [:div
           (if ui-fn (ui-fn path))
@@ -340,14 +344,14 @@
         [:h2.builder-selector-header (::t/name selection)])
       (if (and (not (or (nil? max) (> max min))) (zero? (count path)))
         (if collapsed?
-          [:i.fa.fa-caret-square-o-down.expand-collapse-button
-           {:style {:font-size "18px"}
-            :on-click (fn [_]
-                        (swap! app-state update :collapsed-paths disj new-path))}]
-          [:i.fa.fa-caret-square-o-up.expand-collapse-button
-           {:style {:font-size "18px"}
-            :on-click (fn [_]
-                        (swap! app-state update :collapsed-paths conj new-path))}]))]
+          [:span.expand-collapse-button
+           {:on-click (fn [_]
+                        (swap! app-state update :collapsed-paths disj new-path))}
+           "Show All Options"]
+          [:span.expand-collapse-button
+           {:on-click (fn [_]
+                        (swap! app-state update :collapsed-paths conj new-path))}
+           "Hide Unselected Options"]))]
      [:div
       (let [simple-options? 
             (or (::t/simple? selection)
@@ -698,6 +702,7 @@
 
 (defn character-builder []
   ;;(cljs.pprint/pprint @character-ref)
+  (cljs.pprint/pprint @app-state)
   (let [option-paths (make-path-map @character-ref)
         built-template (entity/build-template @character-ref template)
         built-char (entity/build @character-ref built-template)

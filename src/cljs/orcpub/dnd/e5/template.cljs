@@ -13,18 +13,13 @@
 
 (def character
   {::entity/options {:ability-scores {::entity/key :standard-roll
-                                      ::entity/value (char5e/abilities 12 13 14 15 16 17)}
-                     :race {::entity/key :elf
+                                      ::entity/value (char5e/abilities 15 14 13 12 10 8)}
+                     :race {::entity/key :human
                             ::entity/options {:subrace {::entity/key :high-elf
                                                         ::entity/options {:cantrip {::entity/key :light}}}}}
-                     :class [{::entity/key :wizard
-                              ::entity/options {:levels [{::entity/key :1
-                                                          ::entity/options {:cantrips-known [{::entity/key :acid-splash}]
-                                                                            :spells-known [{::entity/key :mage-armor} {::entity/key :magic-missile}]}}
-                                                         {::entity/key :2
-                                                          ::entity/options {:arcane-tradition {::entity/key :school-of-evocation}
-                                                                            :hit-points {::entity/key :roll
-                                                                                         ::entity/value 3}}}]}}]}})
+                     :background {::entity/key :soldier}
+                     :class [{::entity/key :fighter
+                              ::entity/options {:levels [{::entity/key :1}]}}]}})
 
 (defn get-raw-abilities [character-ref]
   (get-in @character-ref [::entity/options :ability-scores ::entity/value]))
