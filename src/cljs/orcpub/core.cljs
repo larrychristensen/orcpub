@@ -75,7 +75,6 @@
   (r/atom
    {:collapsed-paths #{[:ability-scores]
                        [:background]
-                       [:class :fighter]
                        [:race]}
     :builder {:character {:tab 0}}}))
 
@@ -703,8 +702,15 @@
 (defn character-builder []
   ;;(cljs.pprint/pprint @character-ref)
   ;;(cljs.pprint/pprint @app-state)
-  (let [option-paths (make-path-map @character-ref)
-        built-template (entity/build-template @character-ref template)
+  (let [merged-template (update template
+                                ::t/selections
+                                (fn [s]
+                                  (entity/merge-multiple-selections
+                                   s
+                                   (t5e/sword-coast-adventurers-guide-selections @character-ref)
+                                   (t5e/volos-guide-to-monsters-selections @character-ref))))
+        option-paths (make-path-map @character-ref)
+        built-template (entity/build-template @character-ref merged-template)
         built-char (entity/build @character-ref built-template)
         active-tab (get-in @app-state tab-path)
         view-width (.-width (gdom/getViewportSize js/window))

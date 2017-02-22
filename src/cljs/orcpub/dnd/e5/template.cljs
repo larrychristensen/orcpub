@@ -468,6 +468,30 @@ a melee weapon attack, you can roll one of the
 weapon's damage dice one additional time and add it 
 to the extra damage of the critical hit."}]}))
 
+(def aasimar-option
+  (race-option
+   {:name "Aasimar"
+    :abilities {:cha 2}
+    :size "Medium"
+    :speed 30
+    :darkvision 60
+    :source "Volo's Guide to Monsters"
+    :traits [{:name "Celestial Resistance"}
+             {:name "Healing Hands"}
+             {:name "Light Bearer"}]
+    :subraces [{:name "Protector Aasimar"
+                :abilities {:wis 1}
+                :traits [{:name "Radiant Soul"
+                          :level 3}]}
+               {:name "Scourge Aasimar"
+                :abilities {:con 1}
+                :traits [{:name "Radiant Consumption"
+                          :level 3}]}
+               {:name "Fallen Aasimar"
+                :abilities {:str 1}
+                :traits [{:name "Necrotic Shroud"
+                          :level 3}]}]}))
+
 (def tiefling-option
   (race-option
    {:name "Tiefling"
@@ -960,16 +984,6 @@ creature."}]}
                            {:name "Spirit Walker"
                             :level 10}
                            {:name "Totemic Attunement"
-                            :level 14}]}
-                 {:name "Path of the Battlerager"
-                  :source "Sword Coast Adventurer's Guide"
-                  :traits [{:name "Battlerager Armor"
-                            :level 3}
-                           {:name "Reckless Abandon"
-                            :level 6}
-                           {:name "Battlerager Charge"
-                            :level 10}
-                           {:name "Spiked Retribution"
                             :level 14}]}]}
    character-ref))
 
@@ -3671,55 +3685,7 @@ until you finish a long rest."}]}
                            :tool {:navigators-tools true :water-vehices true}}}
                   {:name "Urchin"
                    :profs {:skill {:sleight-of-hand true :stealth true}
-                           :tool {:disguise-kit true :thieves-tools true}}}
-                  {:name "City Watch"
-                   :source "Sword Coast Adventurer's Guide"
-                   :profs {:skill {:athletics true :insight true}}}
-                  {:name "Clan Crafter"
-                   :source "Sword Coast Adventurer's Guide"
-                   :profs {:skill {:history true :insight true}
-                           :tool-options {:artisans-tool true}}}
-                  {:name "Cloistered Scholar"
-                   :source "Sword Coast Adventurer's Guide"
-                   :profs {:skill {:history true}
-                           :skill-options {:choose 1 :options {:arcana true :nature true :religion true}}}}
-                  {:name "Courtier"
-                   :source "Sword Coast Adventurer's Guide"
-                   :profs {:skill {:insight true :persuasion true}}}
-                  {:name "Faction Agent"
-                   :source "Sword Coast Adventurer's Guide"
-                   :profs {:skill {:insight true}
-                           :skill-options {:choose 1 :options {:animal-handling true :arcana true :deception true :history true :insight true :intimidation true :investigation true :medicine true :nature true :perception true :performance true :persuasion true :religion true :survival true}}}}
-                  {:name "Far Traveler"
-                   :source "Sword Coast Adventurer's Guide"
-                   :profs {:skill {:perception true :insight true}
-                           :tool-options {:musical-instrument 1}}}
-                  {:name "Inheritor"
-                   :source "Sword Coast Adventurer's Guide"
-                   :profs {:skill {:survival true}
-                           :skill-options {:choose 1 :options {:arcana true :history true :religion true}}}}
-                  {:name "Knight of the Order"
-                   :source "Sword Coast Adventurer's Guide"
-                   :profs {:skill {:persuasion true}
-                           :skill-options {:choose 1 :options {:arcana true :history true :nature true :religion true}}
-                           :tool-options {:musical-instrument 1}}}
-                  {:name "Mercenary Veteran"
-                   :source "Sword Coast Adventurer's Guide"
-                   :profs {:skill {:athletics true :persuasion true}
-                           :tool {:land-vehicles true}
-                           :tool-options {:gaming-set 1}}}
-                  {:name "Urban Bounty Hunter"
-                   :source "Sword Coast Adventurer's Guide"
-                   :profs {:skill-options {:choose 2 :options {:deception true :insight true :persuasion true :stealth true}}
-                           :tool-options {:gaming-set 1 :musical-instrument 1 :thieves-tools 1}}}
-                  {:name "Uthgardt Tribe Member"
-                   :source "Sword Coast Adventurer's Guide"
-                   :profs {:skill {:athletics true :survival true}
-                           :tool-options {:musical-instrument 1 :artisans-tool 1}}}
-                  {:name "Waterdhavian Noble"
-                   :source "Sword Coast Adventurer's Guide"
-                   :profs {:skill {:history true :persuasion true}
-                           :tool-options {:musical-instrument 1 :gaming-set 1}}}])
+                           :tool {:disguise-kit true :thieves-tools true}}}])
 
 (defn background-option [{:keys [name
                                  profs
@@ -3773,6 +3739,88 @@ until you finish a long rest."}]}
        (fn [[k num]]
          (mod5e/equipment k num))
        equipment)))))
+
+(defn volos-guide-to-monsters-selections [character-ref]
+  [(t/selection
+    "Race"
+    [aasimar-option])])
+
+(def sword-coast-adventurers-guide-backgrounds
+  [{:name "City Watch"
+    :source "Sword Coast Adventurer's Guide"
+    :profs {:skill {:athletics true :insight true}}}
+   {:name "Clan Crafter"
+    :source "Sword Coast Adventurer's Guide"
+    :profs {:skill {:history true :insight true}
+            :tool-options {:artisans-tool true}}}
+   {:name "Cloistered Scholar"
+    :source "Sword Coast Adventurer's Guide"
+    :profs {:skill {:history true}
+            :skill-options {:choose 1 :options {:arcana true :nature true :religion true}}}}
+   {:name "Courtier"
+    :source "Sword Coast Adventurer's Guide"
+    :profs {:skill {:insight true :persuasion true}}}
+   {:name "Faction Agent"
+    :source "Sword Coast Adventurer's Guide"
+    :profs {:skill {:insight true}
+            :skill-options {:choose 1 :options {:animal-handling true :arcana true :deception true :history true :insight true :intimidation true :investigation true :medicine true :nature true :perception true :performance true :persuasion true :religion true :survival true}}}}
+   {:name "Far Traveler"
+    :source "Sword Coast Adventurer's Guide"
+    :profs {:skill {:perception true :insight true}
+            :tool-options {:musical-instrument 1}}}
+   {:name "Inheritor"
+    :source "Sword Coast Adventurer's Guide"
+    :profs {:skill {:survival true}
+            :skill-options {:choose 1 :options {:arcana true :history true :religion true}}}}
+   {:name "Knight of the Order"
+    :source "Sword Coast Adventurer's Guide"
+    :profs {:skill {:persuasion true}
+            :skill-options {:choose 1 :options {:arcana true :history true :nature true :religion true}}
+            :tool-options {:musical-instrument 1}}}
+   {:name "Mercenary Veteran"
+    :source "Sword Coast Adventurer's Guide"
+    :profs {:skill {:athletics true :persuasion true}
+            :tool {:land-vehicles true}
+            :tool-options {:gaming-set 1}}}
+   {:name "Urban Bounty Hunter"
+    :source "Sword Coast Adventurer's Guide"
+    :profs {:skill-options {:choose 2 :options {:deception true :insight true :persuasion true :stealth true}}
+            :tool-options {:gaming-set 1 :musical-instrument 1 :thieves-tools 1}}}
+   {:name "Uthgardt Tribe Member"
+    :source "Sword Coast Adventurer's Guide"
+    :profs {:skill {:athletics true :survival true}
+            :tool-options {:musical-instrument 1 :artisans-tool 1}}}
+   {:name "Waterdhavian Noble"
+    :source "Sword Coast Adventurer's Guide"
+    :profs {:skill {:history true :persuasion true}
+            :tool-options {:musical-instrument 1 :gaming-set 1}}}])
+
+(defn scag-classes [character-ref]
+  [{:name "Barbarian"
+    :subclass-level 3
+    :subclass-title "Primal Path"
+    :subclasses [{:name "Path of the Battlerager"
+                  :source "Sword Coast Adventurer's Guide"
+                  :traits [{:name "Battlerager Armor"
+                            :level 3}
+                           {:name "Reckless Abandon"
+                            :level 6}
+                           {:name "Battlerager Charge"
+                            :level 10}
+                           {:name "Spiked Retribution"
+                            :level 14}]}]}])
+
+(defn sword-coast-adventurers-guide-selections [character-ref]
+  [(t/selection
+    "Background"
+    (mapv
+     #(background-option % character-ref)
+     sword-coast-adventurers-guide-backgrounds))
+   (t/selection
+    "Class"
+    (mapv
+     #(class-option % character-ref)
+     (scag-classes character-ref)))])
 
 (defn template-selections [character-ref]
   [(t/selection

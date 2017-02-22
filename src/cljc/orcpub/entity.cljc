@@ -264,6 +264,11 @@
         selections)
        (vec (vals (apply dissoc merged (map ::t/key selections))))))))
 
+(defn merge-multiple-selections [& selections]
+  (reduce
+   merge-selections
+   selections))
+
 (defn build-template [raw-entity template]
   (let [plugin-map (t/make-modifier-map template)
         options (flatten-options (::options raw-entity))
