@@ -702,7 +702,7 @@
 
 (defn character-builder []
   ;;(cljs.pprint/pprint @character-ref)
-  (cljs.pprint/pprint @app-state)
+  ;;(cljs.pprint/pprint @app-state)
   (let [option-paths (make-path-map @character-ref)
         built-template (entity/build-template @character-ref template)
         built-char (entity/build @character-ref built-template)
