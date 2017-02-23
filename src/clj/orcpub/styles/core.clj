@@ -163,6 +163,10 @@
    {:transition "points 2s"
     :-webkit-transition "points 2s"}]
 
+  [:.display-section-qualifier-text
+   {:font-size "12px"
+    :margin-left "5px"}]
+
   [:.form-button
    {:color :white
     :font-weight 600

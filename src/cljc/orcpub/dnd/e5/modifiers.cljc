@@ -27,6 +27,9 @@
 (defn speed [value]
   (mods/cum-sum-mod ?speed value "Speed" (mods/bonus-str value)))
 
+(defn unarmored-speed-bonus [value]
+  (mods/cum-sum-mod ?unarmored-speed-bonus value "Unarmored Speed" (mods/bonus-str value)))
+
 (defn ability [ability bonus]
   (mods/modifier ?abilities
                  (update ?abilities ability + bonus)

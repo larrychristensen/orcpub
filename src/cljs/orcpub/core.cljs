@@ -544,8 +544,7 @@
    [:span
     [:span
      [:span armor-class]
-     [:span {:style {:font-size "12px"
-                     :margin-left "5px"}} "(unarmored)"]]
+     [:span.display-section-qualifier-text "(unarmored)"]]
     [:div
      {:style {:margin-left "40px"}}
      (let [has-shield? (:shield equipped-armor)]
@@ -559,13 +558,11 @@
             [:div
              [:div
               [:span ac]
-              [:span {:style {:font-size "12px"
-                              :margin-left "5px"}} (str "(" (:name armor) ")")]]
+              [:span.display-section-qualifier-text (str "(" (:name armor) ")")]]
              (if has-shield?
                [:div
                 [:span (+ 2 ac)]
-                [:span {:style {:font-size "12px"
-                                :margin-left "5px"}} (str "(" (:name armor) " + shield)")]])]))
+                [:span.display-section-qualifier-text (str "(" (:name armor) " + shield)")]])]))
         (dissoc equipped-armor :shield))))]]])
 
 (defn list-item-section [list-name items & [name-fn]]
@@ -664,7 +661,14 @@
       [:div (if desktop? {:style {:width "250px"}})
        [armor-class-section armor-class armor-class-with-armor armor]
        [display-section "Hit Points" "fa-crosshairs" (es/entity-val built-char :max-hit-points)]
-       [display-section "Speed" nil (es/entity-val built-char :speed)]
+       [display-section "Speed" nil
+        (let [unarmored-speed-bonus (es/entity-val built-char :unarmored-speed-bonus)
+              speed (es/entity-val built-char :speed)]
+          (if (and unarmored-speed-bonus (pos? unarmored-speed-bonus))
+            [:div
+             [:div [:span (+ speed unarmored-speed-bonus)] [:span.display-section-qualifier-text "(unarmored)"]]
+             [:div [:span speed] [:span.display-section-qualifier-text "(armored)"]]]
+            speed))]
        [display-section "Darkvision" "fa-low-vision" (if darkvision (str darkvision " ft.") "--")]
        [display-section "Initiative" nil (mod/bonus-str (es/entity-val built-char :initiative))]
        [display-section "Proficiency Bonus" nil (mod/bonus-str (es/entity-val built-char :prof-bonus))]

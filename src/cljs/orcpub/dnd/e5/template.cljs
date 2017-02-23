@@ -1790,14 +1790,19 @@ its attack against you."}]}
                       :options {:shortsword 1
                                 :simple 1}}]
     :modifiers [(mod/modifier ?armor-class (+ (?ability-bonuses :wis) ?armor-class))]
-    :levels {5 {:modifiers [(mod5e/extra-attack)]}
+    :levels {2 {:modifiers [(mod5e/unarmored-speed-bonus 10)]}
+             5 {:modifiers [(mod5e/extra-attack)]}
+             6 {:modifiers [(mod5e/unarmored-speed-bonus 5)]}
              10 {:modifiers [(mod5e/immunity :poison)
-                             (mod5e/immunity :disease)]}
+                             (mod5e/immunity :disease)
+                             (mod5e/unarmored-speed-bonus 5)]}
              13 {:modifiers (map
                              (fn [{:keys [name key]}]
                                (mod5e/language name key))
                              opt5e/languages)}
-             14 {:modifiers [(mod5e/saving-throws char5e/ability-keys)]}}
+             14 {:modifiers [(mod5e/saving-throws char5e/ability-keys)
+                             (mod5e/unarmored-speed-bonus 5)]}
+             18 {:modifiers [(mod5e/unarmored-speed-bonus 5)]}}
     :equipment {:dart 10}
     :traits [{:name "Ki"
               :level 2
