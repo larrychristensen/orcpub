@@ -703,18 +703,35 @@
 
 (def tab-path [:builder :character :tab])
 
+(def plugins
+  [{:name "Sword Coast Adventurer's Guide"
+    :key :sword-coast-adventurers-guide
+    :selections (t5e/sword-coast-adventurers-guide-selections @character-ref)}
+   {:name "Volo's Guide to Monsters"
+    :key :volos-guide-to-monsters
+    :selections (t5e/volos-guide-to-monsters-selections @character-ref)}])
+
+(def plugins-map
+  (zipmap (map :key plugins) plugins))
+
 (defn character-builder []
   ;;(cljs.pprint/pprint @character-ref)
   ;;(cljs.pprint/pprint @app-state)
-  (let [merged-template (update template
+  (let [selected-plugins (map
+                          :selections
+                          (filter
+                           (fn [{:keys [key]}]
+                             (get-in @app-state [:plugins key]))
+                           plugins))
+        merged-template (update template
                                 ::t/selections
                                 (fn [s]
-                                  (entity/merge-multiple-selections
-                                   (t5e/sword-coast-adventurers-guide-selections @character-ref)
-                                   (t5e/volos-guide-to-monsters-selections @character-ref)
-                                   s)))
+                                  (apply
+                                   entity/merge-multiple-selections
+                                   s
+                                   selected-plugins)))
         option-paths (make-path-map @character-ref)
-        built-template (entity/build-template @character-ref template)
+        built-template (entity/build-template @character-ref merged-template)
         built-char (entity/build @character-ref built-template)
         active-tab (get-in @app-state tab-path)
         view-width (.-width (gdom/getViewportSize js/window))
@@ -755,12 +772,31 @@
         (if (or desktop?
                 (= 0 active-tab))
           [:div {:style (if mobile? {:width "100%"} {:width "300px"})}
-           (doall
-            (map
-             (fn [selection]
-               ^{:key (::t/key selection)}
-               [builder-selector [] option-paths selection built-char @character-ref built-template])
-             (::t/selections built-template)))])
+           [:div
+            [:h1 {:style {:font-size "24px"}} "Option Sources"]
+            [:div.builder-option.selected-builder-option
+             [:div.checkbox-parent
+              [:span.checkbox.checked.disabled
+               [:i.fa.fa-check]]
+              [:span.checkbox-text "Player's Handbook"]]
+             (doall
+              (map
+               (fn [{:keys [name key]}]
+                 (let [checked? (get-in @app-state [:plugins key])]
+                   ^{:key key}
+                   [:div.checkbox-parent
+                    [:span.checkbox
+                     {:class-name (if checked? "checked")
+                      :on-click (fn [_] (swap! app-state assoc-in [:plugins key] (not checked?)))}
+                     (if checked? [:i.fa.fa-check])]
+                    [:span.checkbox-text name]]))
+               plugins))]]
+           [:div(doall
+             (map
+              (fn [selection]
+                ^{:key (::t/key selection)}
+                [builder-selector [] option-paths selection built-char @character-ref built-template])
+              (::t/selections built-template)))]])
         (if (or desktop?
                 (and tablet? (= 0 active-tab))
                 (and mobile? (= 1 active-tab)))

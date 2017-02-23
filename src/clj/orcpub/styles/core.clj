@@ -196,4 +196,27 @@
     :padding "10px"
     :width "100%"
     :box-sizing :border-box
-    :font-size "14px"}])
+    :font-size "14px"}]
+
+  [:.checkbox-parent
+   {:display :flex
+    :padding "11px 0"
+    :align-items :center}]
+
+  [:.checkbox
+   {:width "16px"
+    :height "16px"
+    :box-shadow "0 1px 0 0 #f0a100"
+    :background-color :white
+    :cursor :pointer}
+
+   [:.fa-check
+    {:font-size "14px"
+     :margin "1px"}]]
+
+  [:.checkbox.checked.disabled
+   {:background-color "rgba(255, 255, 255, 0.37)"
+    :cursor :not-allowed}]
+
+  [:.checkbox-text
+   {:margin-left "5px"}])

@@ -238,12 +238,13 @@
                      ::t/modifiers (vec (concat (::t/modifiers o1) (::t/modifiers o2)))))
                   opt-map
                   other-opt-map)]
-      (concat
-       (mapv
-        (fn [{key ::t/key}]
-          (merged key))
-        options)
-       (vec (vals (apply dissoc merged (map ::t/key options))))))))
+      (vec
+       (concat
+        (map
+         (fn [{key ::t/key}]
+           (merged key))
+         options)
+        (vals (apply dissoc merged (map ::t/key options))))))))
 
 (defn merge-selections [selections other-selections]
   (if (or selections other-selections)
@@ -257,12 +258,13 @@
                      (merge-options (::t/options s1) (::t/options s2))))
                   sel-map
                   other-sel-map)]
-      (concat
-       (mapv
-        (fn [{key ::t/key}]
-          (merged key))
-        selections)
-       (vec (vals (apply dissoc merged (map ::t/key selections))))))))
+      (vec
+       (concat
+        (map
+         (fn [{key ::t/key}]
+           (merged key))
+         selections)
+        (vals (apply dissoc merged (map ::t/key selections))))))))
 
 (defn merge-multiple-selections [& selections]
   (reduce
