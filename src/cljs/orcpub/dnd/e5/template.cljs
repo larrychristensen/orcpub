@@ -237,7 +237,7 @@
      {:name "Wood Elf"
       :abilities {:cha 1}
       :traits [{:name "Mask of the Wild"}]
-      :modifiers [(mod5e/speed 35)
+      :modifiers [(mod5e/speed 5)
                   elf-weapon-training-mods]}
      {:name "Dark Elf (Drow)"
       :abilities {:cha 1}
