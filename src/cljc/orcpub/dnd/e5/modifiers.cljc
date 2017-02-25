@@ -27,6 +27,12 @@
 (defn speed [value]
   (mods/cum-sum-mod ?speed value "Speed" (mods/bonus-str value)))
 
+(defn swimming-speed [value]
+  (mods/cum-sum-mod ?swimming-speed value "Swim Speed" (mods/bonus-str value)))
+
+(defn climbing-speed [value]
+  (mods/cum-sum-mod ?climbing-speed value "Climb Speed" (mods/bonus-str value)))
+
 (defn unarmored-speed-bonus [value]
   (mods/cum-sum-mod ?unarmored-speed-bonus value "Unarmored Speed" (mods/bonus-str value)))
 

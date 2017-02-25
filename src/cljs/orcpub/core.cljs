@@ -75,10 +75,11 @@
   (r/atom
    {:collapsed-paths #{[:ability-scores]
                        [:background]
-                       [:race]}
+                       [:race]
+                       [:sources]}
     :builder {:character {:tab 0}}}))
 
-#_(add-watch app-state :log (fn [k r os ns]
+(add-watch app-state :log (fn [k r os ns]
                             (js/console.log "OLD" (clj->js os))
                             (js/console.log "NEW" (clj->js ns))))
 
@@ -663,12 +664,17 @@
        [display-section "Hit Points" "fa-crosshairs" (es/entity-val built-char :max-hit-points)]
        [display-section "Speed" nil
         (let [unarmored-speed-bonus (es/entity-val built-char :unarmored-speed-bonus)
-              speed (es/entity-val built-char :speed)]
-          (if (and unarmored-speed-bonus (pos? unarmored-speed-bonus))
-            [:div
-             [:div [:span (+ speed unarmored-speed-bonus)] [:span.display-section-qualifier-text "(unarmored)"]]
-             [:div [:span speed] [:span.display-section-qualifier-text "(armored)"]]]
-            speed))]
+              speed (es/entity-val built-char :speed)
+              swim-speed (es/entity-val built-char :swimming-speed)]
+          [:div
+           [:div
+            (if (and unarmored-speed-bonus (pos? unarmored-speed-bonus))
+              [:div
+               [:div [:span (+ speed unarmored-speed-bonus)] [:span.display-section-qualifier-text "(unarmored)"]]
+               [:div [:span speed] [:span.display-section-qualifier-text "(armored)"]]]
+              speed)]
+           (if swim-speed
+             [:div [:span swim-speed] [:span.display-section-qualifier-text "(swim)"]])])]
        [display-section "Darkvision" "fa-low-vision" (if darkvision (str darkvision " ft.") "--")]
        [display-section "Initiative" nil (mod/bonus-str (es/entity-val built-char :initiative))]
        [display-section "Proficiency Bonus" nil (mod/bonus-str (es/entity-val built-char :prof-bonus))]
@@ -772,26 +778,44 @@
         (if (or desktop?
                 (= 0 active-tab))
           [:div {:style (if mobile? {:width "100%"} {:width "300px"})}
+           (let [path [:sources]
+                 collapsed? (get-in @app-state [:collapsed-paths path])]
+             [:div
+              [:div {:style {:display :flex
+                             :justify-content :space-between
+                             :align-items :center}}
+               [:h1 {:style {:font-size "24px"}} "Option Sources"]
+               (if collapsed?
+                 [:span.expand-collapse-button
+                  {:on-click (fn [_]
+                               (swap! app-state update :collapsed-paths disj path))}
+                  "Show All Options"]
+                 [:span.expand-collapse-button
+                  {:on-click (fn [_]
+                               (swap! app-state update :collapsed-paths conj path))}
+                  "Hide Unselected Options"])]
+              [:div.builder-option.selected-builder-option
+               (if collapsed?
+                 [:span (s/join ", " (conj (map :name (filter #(get-in @app-state [:plugins (:key %)]) plugins)) "Player's Handbook"))]
+                 [:div
+                  [:div.checkbox-parent
+                   [:span.checkbox.checked.disabled
+                    [:i.fa.fa-check]]
+                   [:span.checkbox-text "Player's Handbook"]]
+                  (doall
+                   (map
+                    (fn [{:keys [name key]}]
+                      (let [checked? (get-in @app-state [:plugins key])]
+                        ^{:key key}
+                        [:div.checkbox-parent
+                         [:span.checkbox
+                          {:class-name (if checked? "checked")
+                           :on-click (fn [_] (swap! app-state assoc-in [:plugins key] (not checked?)))}
+                          (if checked? [:i.fa.fa-check])]
+                         [:span.checkbox-text name]]))
+                    plugins))])]])
            [:div
-            [:h1 {:style {:font-size "24px"}} "Option Sources"]
-            [:div.builder-option.selected-builder-option
-             [:div.checkbox-parent
-              [:span.checkbox.checked.disabled
-               [:i.fa.fa-check]]
-              [:span.checkbox-text "Player's Handbook"]]
-             (doall
-              (map
-               (fn [{:keys [name key]}]
-                 (let [checked? (get-in @app-state [:plugins key])]
-                   ^{:key key}
-                   [:div.checkbox-parent
-                    [:span.checkbox
-                     {:class-name (if checked? "checked")
-                      :on-click (fn [_] (swap! app-state assoc-in [:plugins key] (not checked?)))}
-                     (if checked? [:i.fa.fa-check])]
-                    [:span.checkbox-text name]]))
-               plugins))]]
-           [:div(doall
+            (doall
              (map
               (fn [selection]
                 ^{:key (::t/key selection)}

@@ -188,6 +188,7 @@
                            selections
                            traits
                            languages
+                           language-options
                            armor-proficiencies
                            weapon-proficiencies]}]
   (t/option
@@ -198,6 +199,12 @@
       [(t/selection
         "Subrace"
         (map subrace-option subraces))])
+    (if language-options
+      (let [{lang-num :choose lang-options :options} language-options
+            lang-kws (if (:any lang-options)
+                       (map :key opt5e/languages)
+                       (keys lang-options))]
+        [(opt5e/language-selection (map opt5e/language-map lang-kws) lang-num)]))
     selections)
    (vec
     (concat
@@ -472,10 +479,14 @@ to the extra damage of the critical hit."}]}))
   (race-option
    {:name "Aasimar"
     :abilities {:cha 2}
-    :size "Medium"
+    :size :medium
     :speed 30
     :darkvision 60
     :source "Volo's Guide to Monsters"
+    :languages ["Common" "Celestial"]
+    :modifiers [(mod5e/resistance :necrotic)
+                (mod5e/resistance :radiant)
+                (mod5e/spells-known 0 :light :cha)]
     :traits [{:name "Celestial Resistance"}
              {:name "Healing Hands"}
              {:name "Light Bearer"}]
@@ -492,6 +503,97 @@ to the extra damage of the critical hit."}]}))
                 :traits [{:name "Necrotic Shroud"
                           :level 3}]}]}))
 
+(def firbolg-option
+  (race-option
+   {:name "Firbolg"
+    :abilities {:wis 2 :str 1}
+    :size :medium
+    :speed 30
+    :source "Volo's Guide to Monsters"
+    :languages ["Common" "Elvish" "Giant"]
+    :modifiers [(mod5e/spells-known 1 :detect-magic :wis)
+                (mod5e/spells-known 1 :disguise-self :wis)]
+    :traits [{:name "Firbolg Magic"}
+             {:name "Hidden Step"}
+             {:name "Powerful Build"}
+             {:name "Speech of Beast and Leaf"}]}))
+
+(def goliath-option
+  (race-option
+   {:name "Goliath"
+    :abilities {:str 2 :con 1}
+    :size :medium
+    :speed 30
+    :languages ["Common" "Giant"]
+    :profs {:skill {:athletics true}}
+    :source "Volo's Guide to Monsters"
+    :traits [{:name "Stone's Endurance"}
+             {:name "Mountain Born"}
+             {:name "Powerful Build"}]}))
+
+(def kenku-option
+  (race-option
+   {:name "Kenku"
+    :abilities {:dex 2 :wis 1}
+    :size :medium
+    :speed 30
+    :source "Volo's Guide to Monsters"
+    :languages ["Common" "Auran"]
+    :profs {:skill-options {:choose 2 :options {:acrobatics true :deception true :stealth true :sleight-of-hand true}}}
+    :traits [{:name "Expert Forgery"}
+             {:name "Mimicry"}]}))
+
+(def lizardfolk-option
+  (race-option
+   {:name "Lizardfolk"
+    :abilities {:con 2 :wis 1}
+    :size :medium
+    :speed 30
+    :source "Volo's Guide to Monsters"
+    :languages ["Common" "Draconic"]
+    :modifiers [(mod5e/swimming-speed 30)
+                (mod/modifier ?armor-class (+ 3 ?armor-class) "Unarmored AC" (mod/bonus-str 3))
+                (mod/modifier ?armor-class-with-armor (fn [armor] (max ?armor-class (?armor-class-with-armor armor))))]
+    :profs {:skill-options {:choose 2 :options {:animal-handling true :nature true :stealth true :perception true :survival true}}}
+    :traits [{:name "Bite"}
+             {:name "Cunning Artisan"}
+             {:name "Hold Breath"}
+             {:name "Natural Armor"}
+             {:name "Hungry Jaws"}]}))
+
+(def tabaxi-option
+  (race-option
+   {:name "Tabaxi"
+    :abilities {:dex 2 :cha 1}
+    :size :medium
+    :speed 30
+    :darkvision 60
+    :source "Volo's Guide to Monsters"
+    :modifiers [(mod5e/climbing-speed 20)]
+    :language-options {:choose 1 :options {:any true}}
+    :profs {:skill {:perception true :stealth true}}
+    :traits [{:name "Feline Agility"}
+             {:name "Cat's Claws"}
+             {:name "Cat's Talent"}]}))
+
+(def triton-option
+  (race-option
+   {:name "Triton"
+    :abilities {:str 1 :con 1 :cha 1}
+    :size :medium
+    :speed 30
+    :source "Volo's Guide to Monsters"
+    :languages ["Common" "Primordial"]
+    :modifiers [(mod5e/swimming-speed 30)
+                (mod5e/spells-known 1 :fog-cloud :cha)
+                (mod5e/spells-known 2 :gust-of-wind :cha 3)
+                (mod5e/spells-known 3 :wall-of-water :cha 5)
+                (mod5e/resistance :cold)]
+    :traits [{:name "Amphibious"}
+             {:name "Control Air and Water"}
+             {:name "Emissary of the Sea"}
+             {:name "Guardians of the Depths"}]}))
+
 (def tiefling-option
   (race-option
    {:name "Tiefling"
@@ -500,9 +602,9 @@ to the extra damage of the critical hit."}]}))
     :speed 30
     :languages ["Common" "Infernal"]
     :modifiers [(mod5e/darkvision 60)
-                  (mod5e/spells-known 0 :thaumaturgy :cha)
-                  (mod5e/spells-known 1 :hellish-rebuke :cha 3)
-                  (mod5e/spells-known 2 :darkness :cha 5)]
+                (mod5e/spells-known 0 :thaumaturgy :cha)
+                (mod5e/spells-known 1 :hellish-rebuke :cha 3)
+                (mod5e/spells-known 2 :darkness :cha 5)]
     :traits [{:name "Relentless Endurance" :description "When you are reduced to 0 
 hit points but not killed outright, you can drop to 1 
 hit point instead. You can't use this feature again 
@@ -3748,7 +3850,11 @@ until you finish a long rest."}]}
 (defn volos-guide-to-monsters-selections [character-ref]
   [(t/selection
     "Race"
-    [aasimar-option])])
+    [aasimar-option
+     firbolg-option
+     goliath-option
+     lizardfolk-option
+     tabaxi-option])])
 
 (def sword-coast-adventurers-guide-backgrounds
   [{:name "City Watch"
