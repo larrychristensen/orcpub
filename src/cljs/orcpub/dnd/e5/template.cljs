@@ -594,6 +594,95 @@ to the extra damage of the critical hit."}]}))
              {:name "Emissary of the Sea"}
              {:name "Guardians of the Depths"}]}))
 
+(def bugbear-option
+  (race-option
+   {:name "Bugbear"
+    :abilities {:str 2 :dex 1}
+    :size "Medium"
+    :speed 30
+    :darkvision 60
+    :source "Volo's Guide to Monsters"
+    :modifiers [(mod5e/skill-proficiency :stealth)]
+    :languages ["Common" "Goblin"]
+    :traits [{:name "Long Limbed"}
+             {:name "Powerful Build"}
+             {:name "Sneaky"}
+             {:name "Surprise Attack"}]}))
+
+(def goblin-option
+  (race-option
+   {:name "Goblin"
+    :abilities {:dex 2 :con 1}
+    :size "Medium"
+    :speed 30
+    :darkvision 60
+    :source "Volo's Guide to Monsters"
+    :languages ["Common" "Goblin"]
+    :traits [{:name "Fury of the Small"}
+             {:name "Nimble Escape"}]}))
+
+(def hobgoblin-option
+  (race-option
+   {:name "Hobgoblin"
+    :abilities {:con 2 :int 1}
+    :size "Medium"
+    :speed 30
+    :darkvision 60
+    :source "Volo's Guide to Monsters"
+    :selections [(t/selection
+                  "Martial Weapon Proficiencies"
+                  (opt5e/weapon-proficiency-options (opt5e/martial-weapons opt5e/weapons))
+                  2
+                  2)]
+    :modifiers [(mod5e/light-armor-proficiency)]
+    :traits [{:name "Martial Training"}
+             {:name "Saving Face"}]}))
+
+(def kobold-option
+  (race-option
+   {:name "Kobold"
+    :abilities {:dex 2 :str -2}
+    :size "Medium"
+    :speed 30
+    :darkvision 60
+    :source "Volo's Guide to Monsters"
+    :languages ["Common" "Draconic"]
+    :traits [{:name "Grovel, Cower, and Beg"}
+             {:name "Pack Tactics"}
+             {:name "Sunlight Sensitivity"}]}))
+
+(def orc-option
+  (race-option
+   {:name "Orc"
+    :abilities {:str 2 :con 1 :int -2}
+    :size "Medium"
+    :speed 30
+    :darkvision 60
+    :source "Volo's Guide to Monsters"
+    :modifiers [(mod5e/skill-proficiency :intimidation)]
+    :languages ["Common" "Orc"]
+    :traits [{:name "Aggressive"}
+             {:name "Menacing"}
+             {:name "Powerful Build"}]}))
+
+(def yuan-ti-option
+  (race-option
+   {:name "Yuan-Ti"
+    :abilities {:cha 2 :int 1}
+    :size "Medium"
+    :speed 30
+    :darkvision 60
+    :source "Volo's Guide to Monsters"
+    :modifiers [(mod5e/spells-known 0 :poison-spray :cha)
+                (mod5e/spells-known 1 :animal-friendship :cha 1 "unlimited uses, can only target snakes")
+                (mod5e/spells-known 2 :suggestion :cha 3 "one use per long rest")
+                (mod5e/immunity :poison)
+                (mod5e/condition-immunity :poisoned)]
+    :languages ["Common" "Abyssal" "Draconic"]
+    :traits [{:name "Innate Spellcasting"}
+             {:name "Magic Resistance"}
+             {:name "Poison Immunity"}]}))
+
 (def tiefling-option
   (race-option
    {:name "Tiefling"
@@ -3854,7 +3943,14 @@ until you finish a long rest."}]}
      firbolg-option
      goliath-option
      lizardfolk-option
-     tabaxi-option])])
+     tabaxi-option
+     triton-option
+     bugbear-option
+     goblin-option
+     hobgoblin-option
+     kobold-option
+     orc-option
+     yuan-ti-option])])
 
 (def sword-coast-adventurers-guide-backgrounds
   [{:name "City Watch"

@@ -590,8 +590,9 @@
               [:div
                (str
                 (:name (spells/spell-map (:key spell)))
-                " ("
-                (s/upper-case (name (:ability spell))) ")")]))
+                " (" (s/upper-case (name (:ability spell)))
+                (if (:qualifier spell) (str ", " (:qualifier spell)))
+                ")")]))
           (filter (fn [{k :key}] (spells/spell-map k)) spells))]])
      spells-known)]])
 
@@ -626,6 +627,7 @@
         armor-profs (es/entity-val built-char :armor-profs)
         resistances (es/entity-val built-char :resistances)
         immunities (es/entity-val built-char :immunities)
+        condition-immunities (es/entity-val built-char :condition-immunities)
         languages (es/entity-val built-char :languages)
         ability-bonuses (es/entity-val built-char :ability-bonuses)
         armor-class (es/entity-val built-char :armor-class)
@@ -698,9 +700,10 @@
      [list-item-section "Languages" languages]
      [list-item-section "Tool Proficiencies" tool-profs]
      [list-item-section "Weapon Proficiencies" weapon-profs]
-     [list-item-section "Armor Proficiencies"]
-     [list-item-section "Resistances" resistances name]
-     [list-item-section "Immunities" immunities name]
+     [list-item-section "Armor Proficiencies" armor-profs]
+     [list-item-section "Damage Resistances" resistances name]
+     [list-item-section "Damage Immunities" immunities name]
+     [list-item-section "Condition Immunities" condition-immunities name]
      [spells-known-section spells-known]
      [equipment-section "Weapons" weapons opt5e/weapons-map]
      [equipment-section "Armor" armor opt5e/armor-map]

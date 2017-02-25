@@ -21,6 +21,9 @@
 (defn immunity [value]
   (mods/set-mod ?immunities value))
 
+(defn condition-immunity [value]
+  (mods/set-mod ?condition-immunities value))
+
 (defn darkvision [value]
   (mods/modifier ?darkvision value))
 
@@ -68,7 +71,7 @@
 (defn spell-slots [level num]
   (mods/map-mod ?spell-slots level num))
 
-(defn spells-known [level spell-key spellcasting-ability & [min-level]]
+(defn spells-known [level spell-key spellcasting-ability & [min-level qualifier]]
   (mods/modifier
    ?spells-known
    (if (>= ?total-levels (or min-level 0))
@@ -78,7 +81,8 @@
       (fn [spells]
         (conj (or spells #{})
               {:key spell-key
-               :ability spellcasting-ability})))
+               :ability spellcasting-ability
+               :qualifier qualifier})))
      ?spells-known)))
 
 (defn trait [name & [description level]]
