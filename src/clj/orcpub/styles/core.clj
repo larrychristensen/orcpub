@@ -14,209 +14,232 @@
 (def text-color
   {:color :white})
 
-(defstyles app
-  [:.app
-   {:background-image "linear-gradient(182deg, #2c3445, #000000)"
-    :font-family "Open Sans, sans-serif"
-    :height "100%"
-    :overflow :auto
-    :padding-bottom "40px"}]
+(defn px-prop [kw abbr values]
+  (map
+   (fn [v]
+     [(keyword (str "." (name abbr) "-" v))
+      {kw (px v)}])
+   values))
 
-  [:.container
-   container-style]
+(def margin-lefts
+  (px-prop
+   :margin-left
+   :m-l
+   (concat (range 0 10) (range 10 30 5))))
 
-  [:.content
-   (merge
-    content-style
-    {:display :flex})]
+(def props
+  [[:.flex
+    {:display :flex}]])
 
-  [:.app-header
-   {:background-color :black
-    :background-image "url(../../image/header-background.jpg)"
-    :background-position "center"
-    :background-size "cover"
-    :height (px 227)}]
+(prn "MARGIN LEFST" margin-lefts)
 
-  [:.app-header-bar
-   {:height (px 81)
-    :-webkit-backdrop-filter "blur(5px)"
-    :backdrop-filter "blur(5px)"
-    :background-color "rgba(0, 0, 0, 0.15)"}]
+(def app
+  (concat
+   margin-lefts
+   props
+   [[:.app
+     {:background-image "linear-gradient(182deg, #2c3445, #000000)"
+      :font-family "Open Sans, sans-serif"
+      :height "100%"
+      :overflow :auto
+      :padding-bottom "40px"}]
 
-  [:.app.mobile :.app.tablet
-   [:.app-header
-    {:height (px 81)
-     :background-image :none
-     :background-color "rgba(0, 0, 0, 0.3)"}]
-   [:.app-header-bar
-    {:backdrop-filter :none
-     :-webkit-backdrop-filter :none}]
-   [:.orcpub-logo
-    {:width "220px"
-     :margin-left "20px"}]]
+    [:.container
+     container-style]
 
-  [:.builder-option
-   {:border-width (px 1)
-    :border-style :solid
-    :border-color "rgba(255, 255, 255, 0.5)"
-    :border-radius (px 5)
-    :padding (px 10)
-    :margin-top (px 5)
-    :font-weight :normal}]
+    [:.content
+     (merge
+      content-style
+      {:display :flex})]
 
-  [:.builder-tabs
-   {:display :flex
-    :padding "10px"
-    :text-transform :uppercase
-    :font-weight 600}]
+    [:.app-header
+     {:background-color :black
+      :background-image "url(../../image/header-background.jpg)"
+      :background-position "center"
+      :background-size "cover"
+      :height (px 227)}]
 
-  [:.builder-tab
-   {:opacity 0.2
-    :flex-grow 1
-    :padding-bottom "13px"
-    :text-align :center
-    :border-bottom "5px solid rgba(255, 255, 255, 0.3)"}]
+    [:.app-header-bar
+     {:height (px 81)
+      :-webkit-backdrop-filter "blur(5px)"
+      :backdrop-filter "blur(5px)"
+      :background-color "rgba(0, 0, 0, 0.15)"}]
 
-  [:.selected-builder-tab
-   {:border-bottom-color "#f1a20f"
-    :opacity 1}]
+    [:.app.mobile :.app.tablet
+     [:.app-header
+      {:height (px 81)
+       :background-image :none
+       :background-color "rgba(0, 0, 0, 0.3)"}]
+     [:.app-header-bar
+      {:backdrop-filter :none
+       :-webkit-backdrop-filter :none}]
+     [:.orcpub-logo
+      {:width "220px"
+       :margin-left "20px"}]]
 
-  [:.collapsed-list-builder-option
-   {:padding "1px"}]
+    [:.builder-option
+     {:border-width (px 1)
+      :border-style :solid
+      :border-color "rgba(255, 255, 255, 0.5)"
+      :border-radius (px 5)
+      :padding (px 10)
+      :margin-top (px 5)
+      :font-weight :normal}]
 
-  [:.disabled-builder-option
-   {:color "rgba(255, 255, 255, 0.5)"
-    :border-color "rgba(255, 255, 255, 0.25)"
-    :cursor :auto}]
+    [:.builder-tabs
+     {:display :flex
+      :padding "10px"
+      :text-transform :uppercase
+      :font-weight 600}]
 
-  [:.selectable-builder-option:hover
-   {:border-color "#f1a20f"
-    :cursor :pointer}]
+    [:.builder-tab
+     {:opacity 0.2
+      :flex-grow 1
+      :padding-bottom "13px"
+      :text-align :center
+      :border-bottom "5px solid rgba(255, 255, 255, 0.3)"}]
 
-  [:.builder-selector
-   {:padding (px 5)
-   :font-size (px 14)
-    :margin-top (px 10)}]
+    [:.selected-builder-tab
+     {:border-bottom-color "#f1a20f"
+      :opacity 1}]
 
-  [:.builder-selector-header
-   {:font-size (px 18)
-    :font-weight :normal}]
+    [:.collapsed-list-builder-option
+     {:padding "1px"}]
 
-  [:.builder-option-dropdown
-   (merge
-    {:background-color :transparent
-     :width "100%"
-     :-webkit-appearance :menulist
-     :cursor :pointer
-     :border "1px solid white"}
-    text-color)
+    [:.disabled-builder-option
+     {:color "rgba(255, 255, 255, 0.5)"
+      :border-color "rgba(255, 255, 255, 0.25)"
+      :cursor :auto}]
 
-   [:&:active :&:focus
-    {:outline :none}]]
+    [:.selectable-builder-option:hover
+     {:border-color "#f1a20f"
+      :cursor :pointer}]
 
-  [:.builder-dropdown-item
-   {:-webkit-appearance :none
-    :-moz-appearance :none
-    :appearance :none
-    :background-color :black}]
+    [:.builder-selector
+     {:padding (px 5)
+      :font-size (px 14)
+      :margin-top (px 10)}]
 
-  [:.selected-builder-option
-   {:border-width (px 3)
-    :border-color :white
-    :font-weight :bold}]
+    [:.builder-selector-header
+     {:font-size (px 18)
+      :font-weight :normal}]
 
-  [:.remove-item-button
-   {:color button-color
-    :font-size "16px" 
-    :margin-left "5px"
-    :cursor :pointer}]
+    [:.builder-option-dropdown
+     (merge
+      {:background-color :transparent
+       :width "100%"
+       :-webkit-appearance :menulist
+       :cursor :pointer
+       :border "1px solid white"}
+      text-color)
 
-  [:.add-item-button
-   {:margin-top "19px"
-    :color button-color
-    :font-weight 600
-    :text-decoration :underline
-    :cursor :pointer}]
+     [:&:active :&:focus
+      {:outline :none}]]
 
-  [:.list-selector-option
-   {:display :flex
-    :align-items :center}]
+    [:.builder-dropdown-item
+     {:-webkit-appearance :none
+      :-moz-appearance :none
+      :appearance :none
+      :background-color :black}]
 
-  [:.fa
-   {:color button-color}]
+    [:.selected-builder-option
+     {:border-width (px 3)
+      :border-color :white
+      :font-weight :bold}]
 
-  [:.expand-collapse-button
-   {:font-size "12px"
-    :max-width "100px"
-    :margin-left "10px"
-    :color "#f0a100"
-    :text-decoration :underline
-    :cursor :pointer}]
+    [:.remove-item-button
+     {:color button-color
+      :font-size "16px" 
+      :margin-left "5px"
+      :cursor :pointer}]
 
-  [:.fa-caret-square-o-down
-   {:color button-color}]
+    [:.add-item-button
+     {:margin-top "19px"
+      :color button-color
+      :font-weight 600
+      :text-decoration :underline
+      :cursor :pointer}]
 
-  [:.expand-collapse-button:hover
-   {:color button-color}]
+    [:.list-selector-option
+     {:display :flex
+      :align-items :center}]
 
-  [:.abilities-polygon
-   {:transition "points 2s"
-    :-webkit-transition "points 2s"}]
+    [:.fa
+     {:color button-color}]
 
-  [:.display-section-qualifier-text
-   {:font-size "12px"
-    :margin-left "5px"}]
+    [:.expand-collapse-button
+     {:font-size "12px"
+      :max-width "100px"
+      :margin-left "10px"
+      :color "#f0a100"
+      :text-decoration :underline
+      :cursor :pointer
+      :text-align :right}]
 
-  [:.form-button
-   {:color :white
-    :font-weight 600
-    :border :none
-    :border-radius "5px"
-    :text-transform :uppercase
-    :padding "10px 15px"
-    :cursor :pointer
-    :background-image "linear-gradient(to bottom, #f1a20f, #dbab50)"}]
+    [:.fa-caret-square-o-down
+     {:color button-color}]
 
-  [:.field
-   {:margin-top "30px"}]
+    [:.expand-collapse-button:hover
+     {:color button-color}]
 
-  [:.field-label
-   {:font-size "14px"}]
+    [:.abilities-polygon
+     {:transition "points 2s"
+      :-webkit-transition "points 2s"}]
 
-  [:.personality-label
-   {:font-size "18px"}]
+    [:.display-section-qualifier-text
+     {:font-size "12px"
+      :margin-left "5px"}]
 
-  [:.input
-   {:background-color :transparent
-    :color :white
-    :border "1px solid white"
-    :border-radius "5px"
-    :margin-top "5px"
-    :display :block
-    :padding "10px"
-    :width "100%"
-    :box-sizing :border-box
-    :font-size "14px"}]
+    [:.form-button
+     {:color :white
+      :font-weight 600
+      :border :none
+      :border-radius "5px"
+      :text-transform :uppercase
+      :padding "10px 15px"
+      :cursor :pointer
+      :background-image "linear-gradient(to bottom, #f1a20f, #dbab50)"}]
 
-  [:.checkbox-parent
-   {:display :flex
-    :padding "11px 0"
-    :align-items :center}]
+    [:.field
+     {:margin-top "30px"}]
 
-  [:.checkbox
-   {:width "16px"
-    :height "16px"
-    :box-shadow "0 1px 0 0 #f0a100"
-    :background-color :white
-    :cursor :pointer}
+    [:.field-label
+     {:font-size "14px"}]
 
-   [:.fa-check
-    {:font-size "14px"
-     :margin "1px"}]]
+    [:.personality-label
+     {:font-size "18px"}]
 
-  [:.checkbox.checked.disabled
-   {:background-color "rgba(255, 255, 255, 0.37)"
-    :cursor :not-allowed}]
+    [:.input
+     {:background-color :transparent
+      :color :white
+      :border "1px solid white"
+      :border-radius "5px"
+      :margin-top "5px"
+      :display :block
+      :padding "10px"
+      :width "100%"
+      :box-sizing :border-box
+      :font-size "14px"}]
 
-  [:.checkbox-text
-   {:margin-left "5px"}])
+    [:.checkbox-parent
+     {:display :flex
+      :padding "11px 0"
+      :align-items :center}]
+
+    [:.checkbox
+     {:width "16px"
+      :height "16px"
+      :box-shadow "0 1px 0 0 #f0a100"
+      :background-color :white
+      :cursor :pointer}
+
+     [:.fa-check
+      {:font-size "14px"
+       :margin "1px"}]]
+
+    [:.checkbox.checked.disabled
+     {:background-color "rgba(255, 255, 255, 0.37)"
+      :cursor :not-allowed}]
+
+    [:.checkbox-text
+     {:margin-left "5px"}]]))

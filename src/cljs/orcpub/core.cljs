@@ -192,14 +192,18 @@
         (if (and selected?
                  (seq selections))
           (if collapsed?
-            [:span.expand-collapse-button
+            [:div.flex
              {:on-click (fn [_]
                           (swap! app-state update :collapsed-paths disj new-path))}
-             "Expand"]
-            [:span.expand-collapse-button
+             [:span.expand-collapse-button
+              "Expand"]
+             [:i.fa.fa-caret-down.m-l-5]]
+            [:div.flex
              {:on-click (fn [_]
                           (swap! app-state update :collapsed-paths conj new-path))}
-             "Collapse"]))]
+             [:span.expand-collapse-button
+              "Collapse"]
+             [:i.fa.fa-caret-up.m-l-5]]))]
        (if (and selected? (not collapsed?))
          [:div
           (if ui-fn (ui-fn path))
@@ -336,7 +340,7 @@
         collapsed? (get (:collapsed-paths @app-state) new-path)]
     ^{:key key}
     [:div.builder-selector
-     [:div {:style {:display :flex
+     [:div.flex {:style {
                     :justify-content :space-between
                     :align-items :center}}
       (if (zero? (count path))
@@ -344,14 +348,18 @@
         [:h2.builder-selector-header (::t/name selection)])
       (if (and (not (or (nil? max) (> max min))) (zero? (count path)))
         (if collapsed?
-          [:span.expand-collapse-button
+          [:div.flex
            {:on-click (fn [_]
                         (swap! app-state update :collapsed-paths disj new-path))}
-           "Show All Options"]
-          [:span.expand-collapse-button
+           [:div.expand-collapse-button
+            "Show All Options"]
+           [:i.fa.fa-caret-down.m-l-5]]
+          [:div.flex
            {:on-click (fn [_]
                         (swap! app-state update :collapsed-paths conj new-path))}
-           "Hide Unselected Options"]))]
+           [:span.expand-collapse-button
+            "Hide Unselected Options"]
+           [:i.fa.fa-caret-up.m-l-5]]))]
      [:div
       (let [simple-options? 
             (or (::t/simple? selection)
@@ -789,14 +797,18 @@
                              :align-items :center}}
                [:h1 {:style {:font-size "24px"}} "Option Sources"]
                (if collapsed?
-                 [:span.expand-collapse-button
+                 [:div.flex
                   {:on-click (fn [_]
                                (swap! app-state update :collapsed-paths disj path))}
-                  "Show All Options"]
-                 [:span.expand-collapse-button
+                  [:span.expand-collapse-button
+                   "Show All Options"]
+                  [:i.fa.fa-caret-down.m-l-5]]
+                 [:div.flex
                   {:on-click (fn [_]
                                (swap! app-state update :collapsed-paths conj path))}
-                  "Hide Unselected Options"])]
+                  [:span.expand-collapse-button
+                   "Hide Unselected Options"]
+                  [:i.fa.fa-caret-up.m-l-5]])]
               [:div.builder-option.selected-builder-option
                (if collapsed?
                  [:span (s/join ", " (conj (map :name (filter #(get-in @app-state [:plugins (:key %)]) plugins)) "Player's Handbook"))]
