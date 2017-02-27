@@ -207,7 +207,7 @@
                   (if (= (::t/key s) f)
                     [s i]))
                 (::t/options selection)))
-        next-path (concat current-path [::t/options option-i])]
+        next-path (vec (concat current-path [::t/options option-i]))]
     (if (seq r)
       (get-template-selection-path option r next-path)
       next-path)))
@@ -219,7 +219,7 @@
                   (if (= (::t/key s) f)
                     [s i]))
                 (::t/selections template)))
-        next-path (concat current-path [::t/selections selection-i])]
+        next-path (vec (concat current-path [::t/selections selection-i]))]
     (if (seq r)
       (get-template-option-path selection r next-path)
       next-path)))

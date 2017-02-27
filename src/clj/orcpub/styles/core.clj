@@ -27,15 +27,22 @@
    :m-l
    (concat (range 0 10) (range 10 30 5))))
 
+(def margin-tops
+  (px-prop
+   :margin-top
+   :m-t
+   (concat (range 0 10) (range 10 30 5))))
+
 (def props
   [[:.flex
-    {:display :flex}]])
-
-(prn "MARGIN LEFST" margin-lefts)
+    {:display :flex}]
+   [:.f-w-bold
+    {:font-weight :bold}]])
 
 (def app
   (concat
    margin-lefts
+   margin-tops
    props
    [[:.app
      {:background-image "linear-gradient(182deg, #2c3445, #000000)"

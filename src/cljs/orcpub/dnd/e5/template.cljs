@@ -13,13 +13,7 @@
 
 (def character
   {::entity/options {:ability-scores {::entity/key :standard-roll
-                                      ::entity/value (char5e/abilities 15 14 13 12 10 8)}
-                     :race {::entity/key :human
-                            ::entity/options {:subrace {::entity/key :high-elf
-                                                        ::entity/options {:cantrip {::entity/key :light}}}}}
-                     :background {::entity/key :soldier}
-                     :class [{::entity/key :fighter
-                              ::entity/options {:levels [{::entity/key :1}]}}]}})
+                                      ::entity/value (char5e/abilities 15 14 13 12 10 8)}}})
 
 (defn get-raw-abilities [character-ref]
   (get-in @character-ref [::entity/options :ability-scores ::entity/value]))
@@ -194,18 +188,19 @@
   (t/option
    name
    (common/name-to-kw name)
-   (concat
-    (if subraces
-      [(t/selection
-        "Subrace"
-        (map subrace-option subraces))])
-    (if language-options
-      (let [{lang-num :choose lang-options :options} language-options
-            lang-kws (if (:any lang-options)
-                       (map :key opt5e/languages)
-                       (keys lang-options))]
-        [(opt5e/language-selection (map opt5e/language-map lang-kws) lang-num)]))
-    selections)
+   (vec
+    (concat
+     (if subraces
+       [(t/selection
+         "Subrace"
+         (vec (map subrace-option subraces)))])
+     (if language-options
+       (let [{lang-num :choose lang-options :options} language-options
+             lang-kws (if (:any lang-options)
+                        (map :key opt5e/languages)
+                        (keys lang-options))]
+         [(opt5e/language-selection (map opt5e/language-map lang-kws) lang-num)]))
+     selections))
    (vec
     (concat
      [(mod5e/race name)
@@ -724,35 +719,44 @@ to the extra damage of the critical hit."}]}))
      nil
      [(mod5e/max-hit-points (die-mean die))])]))
 
-(defn tool-prof-selection [tool-options]
+(defn tool-prof-selection-aux [tool num]
   (t/selection
-   "Tool Proficiencies"
-   (map
-    (fn [[k num]]
-      (let [tool (opt5e/tools-map k)]
-        (if (:values tool)
-          (t/option
-           (:name tool)
-           k
-           [(t/selection
-             (:name tool)
-             (map
-              (fn [{:keys [name key]}]
-                (t/option
-                 name
-                 key
-                 []
-                 [(mod5e/tool-proficiency name key)]))
-              (:values tool))
-             num
-             num)]
-           [])
-          (t/option
-           (:name tool)
-           (:key tool)
-           []
-           [(mod5e/tool-proficiency (:name tool) (:key tool))]))))
-    tool-options)))
+   (:name tool)
+   (mapv
+    (fn [{:keys [name key]}]
+      (t/option
+       name
+       key
+       []
+       [(mod5e/tool-proficiency name key)]))
+    (:values tool))
+   num
+   num))
+
+
+(defn tool-prof-selection [tool-options]
+  (let [[first-key first-num] (-> tool-options first)
+        first-option (opt5e/tools-map first-key)]
+    (if (and (= 1 (count tool-options))
+             (seq (:values first-option)))
+      (tool-prof-selection-aux first-option first-num)
+      (t/selection
+       "Tool Proficiencies"
+       (map
+        (fn [[k num]]
+          (let [tool (opt5e/tools-map k)]
+            (if (:values tool)
+              (t/option
+               (:name tool)
+               k
+               [(tool-prof-selection-aux tool num)]
+               [])
+              (t/option
+               (:name tool)
+               (:key tool)
+               []
+               [(mod5e/tool-proficiency (:name tool) (:key tool))]))))
+        tool-options)))))
 
 (defn subclass-level-option [{:keys [name
                                      levels] :as subcls}
@@ -764,9 +768,10 @@ to the extra damage of the critical hit."}]}))
     (t/option
      (str i)
      (keyword (str i))
-     (concat
-      selections      
-      (some-> spellcasting-template :selections (get i)))
+     (vec
+      (concat
+       selections      
+       (some-> spellcasting-template :selections (get i))))
      (some-> levels (get i) :modifiers))))
 
 (defn subclass-option [cls
@@ -794,16 +799,18 @@ to the extra damage of the critical hit."}]}))
         option (t/option
                 name
                 kw
-                (concat
-                 selections
-                 (if (seq tool-options) [(tool-prof-selection tool-options)])
-                 (if (seq skill-kws) [(opt5e/skill-selection skill-kws skill-num)]))
-                (concat
-                 modifiers
-                 (armor-prof-modifiers armor-profs)
-                 (weapon-prof-modifiers weapon-profs)
-                 (tool-prof-modifiers tool-profs)
-                 (traits-modifiers traits true)))]
+                (vec
+                 (concat
+                  selections
+                  (if (seq tool-options) [(tool-prof-selection tool-options)])
+                  (if (seq skill-kws) [(opt5e/skill-selection skill-kws skill-num)])))
+                (vec
+                 (concat
+                  modifiers
+                  (armor-prof-modifiers armor-profs)
+                  (weapon-prof-modifiers weapon-profs)
+                  (tool-prof-modifiers tool-profs)
+                  (traits-modifiers traits true))))]
     (if spellcasting-template
       (assoc
        option
@@ -836,39 +843,41 @@ to the extra damage of the critical hit."}]}))
     (t/option
      (str i)
      (keyword (str i))
-     (concat
-      (some-> levels (get i) :selections)
-      (some-> spellcasting-template :selections (get i))
-      (if (= i subclass-level)
-        [(t/selection-with-key
-          subclass-title
-          :subclass
-          (map
-           #(subclass-option (assoc cls :key kw) % character-ref)
-           subclasses))])
-      (if (ability-inc-set i)
-        [(opt5e/ability-score-improvement-selection)])
-      (if (> i 1)
-        [(hit-points-selection character-ref hit-die)]))
-     (concat
-      (if (= :all (:known-mode spellcasting))
-        (let [slots (opt5e/total-slots i (:level-factor spellcasting))
-              prev-level-slots (opt5e/total-slots (dec i) (:level-factor spellcasting))
-              new-slots (apply dissoc slots (keys prev-level-slots))]
-          (if (seq new-slots)
-            (let [lvl (key (first new-slots))]
-              (map
-               (fn [kw]
-                 (mod5e/spells-known lvl kw (:ability spellcasting)))
-               (get-in sl/spell-lists [kw lvl]))))))
-      (some-> levels (get i) :modifiers)
-      (traits-modifiers
-       (filter
-        (fn [{level :level :or {level 1}}]
-          (= level i))
-        traits))
-      (if (= i 1) [(mod5e/max-hit-points hit-die)])
-      [(mod5e/level kw name i)]))))
+     (vec
+      (concat
+       (some-> levels (get i) :selections)
+       (some-> spellcasting-template :selections (get i))
+       (if (= i subclass-level)
+         [(t/selection-with-key
+           subclass-title
+           :subclass
+           (map
+            #(subclass-option (assoc cls :key kw) % character-ref)
+            subclasses))])
+       (if (ability-inc-set i)
+         [(opt5e/ability-score-improvement-selection)])
+       (if (> i 1)
+         [(hit-points-selection character-ref hit-die)])))
+     (vec
+      (concat
+       (if (= :all (:known-mode spellcasting))
+         (let [slots (opt5e/total-slots i (:level-factor spellcasting))
+               prev-level-slots (opt5e/total-slots (dec i) (:level-factor spellcasting))
+               new-slots (apply dissoc slots (keys prev-level-slots))]
+           (if (seq new-slots)
+             (let [lvl (key (first new-slots))]
+               (map
+                (fn [kw]
+                  (mod5e/spells-known lvl kw (:ability spellcasting)))
+                (get-in sl/spell-lists [kw lvl]))))))
+       (some-> levels (get i) :modifiers)
+       (traits-modifiers
+        (filter
+         (fn [{level :level :or {level 1}}]
+           (= level i))
+         traits))
+       (if (= i 1) [(mod5e/max-hit-points hit-die)])
+       [(mod5e/level kw name i)])))))
 
 
 (defn equipment-option [[k num]]
@@ -974,39 +983,41 @@ to the extra damage of the critical hit."}]}))
     (t/option
      name
      kw
-     (concat
-      selections
-      (if (seq tool-options) [(tool-prof-selection tool-options)])
-      (class-weapon-options weapon-choices)
-      (class-armor-options armor-choices)
-      (class-equipment-options equipment-choices)
-      [(opt5e/skill-selection skill-kws skill-num)
-       (t/sequential-selection
-        "Levels"
-        (fn [selection options current-values]
-          {::entity/key (-> current-values count inc str keyword)})
-        (vec
-         (map
-          (partial level-option cls kw character-ref spellcasting-template)
-          (range 1 21))))])
-     (concat
-      modifiers
-      (armor-prof-modifiers (keys armor-profs))
-      (weapon-prof-modifiers (keys weapon-profs))
-      (tool-prof-modifiers (keys tool))
-      (mapv
-       (fn [[k num]]
-         (mod5e/weapon k num))
-       weapons)
-      (mapv
-       (fn [[k num]]
-         (mod5e/armor k num))
-       armor)
-      (mapv
-       (fn [[k num]]
-         (mod5e/equipment k num))
-       equipment)
-      [(apply mod5e/saving-throws save-profs)]))))
+     (vec
+      (concat
+       selections
+       (if (seq tool-options) [(tool-prof-selection tool-options)])
+       (class-weapon-options weapon-choices)
+       (class-armor-options armor-choices)
+       (class-equipment-options equipment-choices)
+       [(opt5e/skill-selection skill-kws skill-num)
+        (t/sequential-selection
+         "Levels"
+         (fn [selection options current-values]
+           {::entity/key (-> current-values count inc str keyword)})
+         (vec
+          (map
+           (partial level-option cls kw character-ref spellcasting-template)
+           (range 1 21))))]))
+     (vec
+      (concat
+       modifiers
+       (armor-prof-modifiers (keys armor-profs))
+       (weapon-prof-modifiers (keys weapon-profs))
+       (tool-prof-modifiers (keys tool))
+       (mapv
+        (fn [[k num]]
+          (mod5e/weapon k num))
+        weapons)
+       (mapv
+        (fn [[k num]]
+          (mod5e/armor k num))
+        armor)
+       (mapv
+        (fn [[k num]]
+          (mod5e/equipment k num))
+        equipment)
+       [(apply mod5e/saving-throws save-profs)])))))
 
 
 (defn barbarian-option [character-ref]
@@ -3906,35 +3917,37 @@ until you finish a long rest."}]}
     (t/option
      name
      kw
-     (concat
-      selections
-      (if (seq tool-options) [(tool-prof-selection tool-options)])
-      (class-weapon-options weapon-choices)
-      (class-armor-options armor-choices)
-      (class-equipment-options equipment-choices)
-      (if (seq skill-kws) [(opt5e/skill-selection skill-kws skill-num)])
-      (if (seq lang-kws) [(opt5e/language-selection (map opt5e/language-map lang-kws) lang-num)]))
-     (concat
-      modifiers
-      (armor-prof-modifiers (keys armor-profs))
-      (weapon-prof-modifiers (keys weapon-profs))
-      (tool-prof-modifiers (keys tool))
-      (mapv
-       (fn [skill-kw]
-         (mod5e/skill-proficiency skill-kw))
-       (keys skill))
-      (mapv
-       (fn [[k num]]
-         (mod5e/weapon k num))
-       weapons)
-      (mapv
-       (fn [[k num]]
-         (mod5e/armor k num))
-       armor)
-      (mapv
-       (fn [[k num]]
-         (mod5e/equipment k num))
-       equipment)))))
+     (vec
+      (concat
+       selections
+       (if (seq tool-options) [(tool-prof-selection tool-options)])
+       (class-weapon-options weapon-choices)
+       (class-armor-options armor-choices)
+       (class-equipment-options equipment-choices)
+       (if (seq skill-kws) [(opt5e/skill-selection skill-kws skill-num)])
+       (if (seq lang-kws) [(opt5e/language-selection (map opt5e/language-map lang-kws) lang-num)])))
+     (vec
+      (concat
+       modifiers
+       (armor-prof-modifiers (keys armor-profs))
+       (weapon-prof-modifiers (keys weapon-profs))
+       (tool-prof-modifiers (keys tool))
+       (mapv
+        (fn [skill-kw]
+          (mod5e/skill-proficiency skill-kw))
+        (keys skill))
+       (mapv
+        (fn [[k num]]
+          (mod5e/weapon k num))
+        weapons)
+       (mapv
+        (fn [[k num]]
+          (mod5e/armor k num))
+        armor)
+       (mapv
+        (fn [[k num]]
+          (mod5e/equipment k num))
+        equipment))))))
 
 (defn volos-guide-to-monsters-selections [character-ref]
   [(t/selection

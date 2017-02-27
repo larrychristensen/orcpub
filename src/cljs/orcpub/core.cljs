@@ -77,6 +77,7 @@
                        [:background]
                        [:race]
                        [:sources]}
+    :stepper-selection-path nil
     :builder {:character {:tab 0}}}))
 
 (add-watch app-state :log (fn [k r os ns]
@@ -731,6 +732,95 @@
 (def plugins-map
   (zipmap (map :key plugins) plugins))
 
+(def option-sources-selection
+  {::t/name "Option Sources"
+   ::t/optional? true
+   ::t/help "Select the sources you want to use for races, classes, etc. Click the 'Show All Options' button to make additional selections. If you are new to the game we recommend just moving on to the next step."})
+
+(defn to-option-path
+  ([template-path template]
+   (to-option-path template-path template []))
+  ([template-path template current-option-path]
+   (let [path-len (count template-path)
+         key (::t/key (get-in template template-path))
+         next-option-path (if key (conj current-option-path key) current-option-path)]
+     (if (and key (> path-len 2))
+       (recur (subvec template-path 0 (- path-len 2))
+              template
+              next-option-path)
+       (vec (reverse next-option-path))))))
+
+(defn get-all-selections [path {:keys [::t/key ::t/selections ::t/options] :as obj} selected-option-paths]
+  (let [children (map
+                  (fn [{:keys [::t/key] :as s}]
+                    (get-all-selections (conj path key) s selected-option-paths))
+                  (or selections options))]
+    (cond
+      selections
+      (if (get-in selected-option-paths path) children)
+    
+      options
+      (if (and key children)
+        (concat
+         [(assoc obj ::path path)]
+         children)
+        children))))
+
+(defn next-selection [current-template-path built-template selected-option-paths]
+  (let [current-path (to-option-path current-template-path built-template)
+        all-selections (remove nil? (flatten (get-all-selections [] built-template selected-option-paths)))
+        up-to-current (drop-while
+                       (fn [s]
+                         (not= (::path s) current-path))
+                       all-selections)
+        next (second up-to-current)
+        next-path (::path next)
+        next-template-path (entity/get-template-selection-path built-template next-path [])]
+    (if next [next-template-path next])))
+
+(defn selection-stepper [built-template option-paths]
+  (let [stepper-selection-path (get @app-state :stepper-selection-path)
+        selection (or (get-in built-template stepper-selection-path) option-sources-selection)]
+    [:div {:style {:width "220px"}}
+     [:div.flex
+      {:style {:align-items :center}}
+      [:div {:style {:width "200px"
+                     :border "1px solid white"
+                     :border-radius "5px"
+                     :padding "10px"
+                     :background-color "#1a1e28"
+                     :box-shadow "5px 5px 5px rgba(0,0,0,0.6)"}}
+       [:h1.f-w-bold {:style
+                      {:font-size "18px"
+                       :color "#f0a100"}} "Step-By-Step"]
+       [:h1.f-w-bold.m-t-10 "Step: " (::t/name selection)
+        (if (::t/optional? selection)
+          [:span.m-l-5 {:style {:font-size "10px"}} "(optional)"])]
+       [:p.m-t-5 {:style {:font-size "14px"
+                          :font-weight 100}} (::t/help selection)]
+       [:div.flex.m-t-10
+        {:style {:justify-content :flex-end}}
+        [:button.form-button
+         {:style {:padding "6px"}
+          :on-click (fn [_]
+                      (let [[next-path {:keys [::t/name]}]
+                            (next-selection
+                             (or (@app-state :stepper-selection-path) [::t/selections 0])
+                             built-template
+                             option-paths)]
+                        (swap!
+                         app-state
+                         assoc
+                         :stepper-selection-path
+                         next-path)))}
+         "Next Step"]]]
+      [:svg {:width "20" :height "24" :style {:margin-left "-1px"}}
+       [:path 
+        {:d "M-2 1.5 L13 14 L-2 22.5"
+         :stroke :white
+         :fill "#1a1e28"
+         :stroke-width "1px"}]]]]))
+
 (defn character-builder []
   ;;(cljs.pprint/pprint @character-ref)
   ;;(cljs.pprint/pprint @app-state)
@@ -763,10 +853,6 @@
       [:div.app-header-bar.container
        [:div.content
         [:img.orcpub-logo {:src "image/orcpub-logo.svg"}]]]]
-     #_[:div.container
-        [:div {:style tabs-style}
-         [:span {:style selected-tab-style} "Character"]
-         [:span {:style tab-style} "Monster"]]]
      [:div
       {:style container-style}
       [:div
@@ -776,16 +862,18 @@
          [:div
           [:div.builder-tabs
            (if mobile? [:span.builder-tab {:class-name (if (= active-tab 0) "selected-builder-tab")
-                               :on-click (fn [_] (swap! app-state assoc-in tab-path 0))} "Options"])
+                                           :on-click (fn [_] (swap! app-state assoc-in tab-path 0))} "Options"])
            (if tablet? [:span.builder-tab {:class-name (if (= active-tab 0) "selected-builder-tab")
-                               :on-click (fn [_] (swap! app-state assoc-in tab-path 0))} "Build"])
+                                           :on-click (fn [_] (swap! app-state assoc-in tab-path 0))} "Build"])
            (if mobile? [:span.builder-tab {:class-name (if (= active-tab 1) "selected-builder-tab")
-                               :on-click (fn [_] (swap! app-state assoc-in tab-path 1))} "Personality"])
+                                           :on-click (fn [_] (swap! app-state assoc-in tab-path 1))} "Personality"])
            [:span.builder-tab {:class-name (if (or (and mobile? (= active-tab 2))
-                                  (and tablet? (= active-tab 1))) "selected-builder-tab")
-                   :on-click (fn [_] (swap! app-state assoc-in tab-path (if mobile? 2 1)))} "Details"]]])
+                                                   (and tablet? (= active-tab 1))) "selected-builder-tab")
+                               :on-click (fn [_] (swap! app-state assoc-in tab-path (if mobile? 2 1)))} "Details"]]])
        [:div
         {:style {:display :flex}}
+        (if desktop?
+          [selection-stepper built-template option-paths])
         (if (or desktop?
                 (= 0 active-tab))
           [:div {:style (if mobile? {:width "100%"} {:width "300px"})}
