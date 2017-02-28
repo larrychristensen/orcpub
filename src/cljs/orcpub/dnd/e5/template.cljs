@@ -851,7 +851,7 @@ to the extra damage of the critical hit."}]}))
          [(t/selection-with-key
            subclass-title
            :subclass
-           (map
+           (mapv
             #(subclass-option (assoc cls :key kw) % character-ref)
             subclasses))])
        (if (ability-inc-set i)

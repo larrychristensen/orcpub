@@ -780,7 +780,7 @@
 
 (defn selection-stepper [built-template option-paths]
   (let [stepper-selection-path (get @app-state :stepper-selection-path)
-        selection (or (get-in built-template stepper-selection-path) option-sources-selection)]
+        selection (get-in built-template stepper-selection-path)]
     [:div {:style {:width "220px"}}
      [:div.flex
       {:style {:align-items :center}}
