@@ -753,7 +753,7 @@
             (if (string? help)
               [:p.m-t-5.selection-stepper-help help]
               help))
-          [:div#mouseover-option.b-1.b-rad-5.b-color-gray.p-10.m-t-10
+          [:div#mouseover-option.b-1.b-rad-5.b-color-gray.p-10.m-t-10.hidden
            [:span#mouseover-option-title.f-w-b]
            [:p#mouseover-option-help]]]
          [:div.m-t-10 "Click 'Get Started' to step through the build process."])
@@ -769,7 +769,6 @@
                   next-template-path (entity/get-template-selection-path built-template next-path [])
                   root-paths (map (fn [s] [(::t/key s)]) (::t/selections built-template))]
               (hide-mouseover-option!)
-              (prn "NEXTPATH" next-path)
               (swap!
                app-state
                (fn [as]
@@ -778,12 +777,13 @@
                      (collapse-paths root-paths)
                      (open-path-and-subpaths (if selection next-path [(::t/key (first (::t/selections built-template)))])))))))}
          (if selection "Next Step" "Get Started")]]]
-      [:svg.m-l--1 {:width "20" :height "24"}
-       [:path 
-        {:d "M-2 1.5 L13 14 L-2 22.5"
-         :stroke :white
-         :fill "#1a1e28"
-         :stroke-width "1px"}]]]]))
+      (if selection
+        [:svg.m-l--1.m-t-10 {:width "20" :height "24"}
+         [:path 
+          {:d "M-2 1.5 L13 14 L-2 22.5"
+           :stroke :white
+           :fill "#1a1e28"
+           :stroke-width "1px"}]])]]))
 
 (defn option-sources [collapsed-paths selected-plugins]
   (let [path [:sources]

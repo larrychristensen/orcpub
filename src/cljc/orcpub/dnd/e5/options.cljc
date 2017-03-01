@@ -1010,52 +1010,60 @@
    nil
    [(modifiers/trait (str name " Maneuver"))]))
 
+(defn proficiency-help [num singular plural]
+  (str "Select additional " (if (> num 1) plural singular) " for which you are proficient."))
+
 (defn skill-selection
   ([num]
    (skill-selection (map :key skills) num))
   ([options num]
-   (t/selection
-    "Skill Proficiency"
-    (skill-options
-     (filter
-      (comp (set options) :key)
-      skills))
-    num
-    num)))
+   (t/selection-cfg
+    {:name "Skill Proficiency"
+     :help (proficiency-help num "a skill" "skills")
+     :options (skill-options
+      (filter
+       (comp (set options) :key)
+       skills))
+     :min num
+     :max num})))
 
 (defn tool-selection
   ([num]
-   (t/selection
-    "Tool Proficiency"
-    (tool-options tools)
-    num
-    num))
+   (t/selection-cfg
+    {:name "Tool Proficiency"
+     :help (proficiency-help num "a tool" "tools")
+     :options (tool-options tools)
+     :min num
+     :max num}))
   ([options num]
-   (t/selection
-    "Tool Proficiency"
-    (tool-options
-     (filter
-      (comp (set options) :key)
-      tools))
-    num
-    num)))
+   (t/selection-cfg
+    {:name "Tool Proficiency"
+     :help (proficiency-help num "a tool" "tools")
+     :options (tool-options
+               (filter
+                (comp (set options) :key)
+                tools))
+     :min num
+     :max num})))
 
 (defn weapon-proficiency-selection
   ([num]
-   (t/selection
-    "Weapon Proficiency"
-    (weapon-proficiency-options weapons)
-    num
-    num))
+   (t/selection-cfg
+    {:name "Weapon Proficiency"
+     :help (proficiency-help num "a weapon" "weapons")
+     :options (weapon-proficiency-options weapons)
+     :min num
+     :max num}))
   ([options num]
-   (t/selection
-    "Tool Proficiency"
-    (weapon-proficiency-options
-     (filter
-      (comp (set options) :key)
-      tools))
-    num
-    num)))
+   (t/selection-cfg
+    {:name "Tool Proficiency"
+     :help (proficiency-help num "a weapon" "weapons")
+     :options (weapon-proficiency-options
+               (filter
+                (comp (set options) :key)
+                tools))
+     :min num
+     :max num})))
 
 (defn skilled-selection [title]
   (t/selection

@@ -154,7 +154,10 @@
     {:border-color "rgba(255,255,255,0.2)"}]
 
    [:ul.list-style-disc
-    {:list-style-type :disc}]])
+    {:list-style-type :disc}]
+
+   [:.hidden
+    {:display :none}]])
 
 (def app
   (concat
@@ -373,8 +376,7 @@
       :top 0}]
 
     [:.selection-stepper-inner
-     {:align-items :center
-      :position :absolute}]
+     {:position :absolute}]
 
     [:.selection-stepper-main
      {:width "200px"

@@ -704,36 +704,41 @@ to the extra damage of the critical hit."}]}))
   (int (Math/ceil (/ (apply + (range 1 (inc die))) die))))
 
 (defn hit-points-selection [character-ref die]
-  (t/selection
-   "Hit Points"
-   [{::t/name "Manual Entry"
-     ::t/key :manual-entry
-     ::t/ui-fn #(hit-points-entry character-ref %)
-     ::t/modifiers [(mod5e/deferred-max-hit-points)]}
-    {::t/name "Roll"
-     ::t/key :roll
-     ::t/ui-fn #(hit-points-roller die character-ref %)
-     ::t/select-fn #(roll-hit-points die character-ref %)
-     ::t/modifiers [(mod5e/deferred-max-hit-points)]}
-    (t/option
-     "Average"
-     :average
-     nil
-     [(mod5e/max-hit-points (die-mean die))])]))
+  (t/selection-cfg
+   {:name "Hit Points"
+    :help "Select the method with which to determine this level's hit points."
+    :options [{::t/name "Manual Entry"
+               ::t/key :manual-entry
+               ::t/help "This option allows you to manually type in the value for this level's hit points. Use this if you want to roll dice yourself or if you already have a character with known hit points for this level."
+               ::t/ui-fn #(hit-points-entry character-ref %)
+               ::t/modifiers [(mod5e/deferred-max-hit-points)]}
+              {::t/name (str "Roll (1D" die ")")
+               ::t/key :roll
+               ::t/help "This option rolls virtual dice for you and sets that value for this level's hit points. It could pay off with a high roll, but you might also roll a 1."
+               ::t/ui-fn #(hit-points-roller die character-ref %)
+               ::t/select-fn #(roll-hit-points die character-ref %)
+               ::t/modifiers [(mod5e/deferred-max-hit-points)]}
+              (let [average (die-mean die)]
+                (t/option-cfg
+                 {:name "Average"
+                  :key :average
+                  :help (str "This option just gives you the average value (" average ") for the die roll (1D" die "). Choose this option if you're not feeling lucky.")
+                  :modifiers [(mod5e/max-hit-points average)]}))]}))
 
 (defn tool-prof-selection-aux [tool num]
-  (t/selection
-   (:name tool)
-   (mapv
-    (fn [{:keys [name key]}]
-      (t/option
-       name
-       key
-       []
-       [(mod5e/tool-proficiency name key)]))
-    (:values tool))
-   num
-   num))
+  (t/selection-cfg
+   {:name (str "Tool Proficiency: " (:name tool))
+    :help (str "Select " (s/lower-case (:name tool)) " for which you are proficient.")
+    :options (mapv
+              (fn [{:keys [name key]}]
+                (t/option
+                 name
+                 key
+                 []
+                 [(mod5e/tool-proficiency name key)]))
+              (:values tool))
+    :min num
+    :max num}))
 
 
 (defn tool-prof-selection [tool-options]
@@ -835,6 +840,7 @@ to the extra damage of the critical hit."}]}))
                             spellcasting
                             ability-increase-levels
                             subclass-title
+                            subclass-help
                             subclass-level
                             subclasses] :as cls}
                     kw
@@ -850,12 +856,13 @@ to the extra damage of the critical hit."}]}))
        (some-> levels (get i) :selections)
        (some-> spellcasting-template :selections (get i))
        (if (= i subclass-level)
-         [(t/selection-with-key
-           subclass-title
-           :subclass
-           (mapv
-            #(subclass-option (assoc cls :key kw) % character-ref)
-            subclasses))])
+         [(t/selection-cfg
+           {:name subclass-title
+            :key :subclass
+            :help subclass-help
+            :options (mapv
+                      #(subclass-option (assoc cls :key kw) % character-ref)
+                      subclasses)})])
        (if (ability-inc-set i)
          [(opt5e/ability-score-improvement-selection)])
        (if (> i 1)
@@ -936,25 +943,25 @@ to the extra damage of the critical hit."}]}))
      []
      [(mod5e/armor k num)]))
 
-(defn class-options [option-fn choices]
+(defn class-options [option-fn choices help]
   (map
    (fn [{:keys [name options]}]
-     (t/selection
-      name
-      (mapv
-       option-fn
-       options)))
+     (t/selection-cfg
+      {:name (str "Starting Equipment: " name)
+       :help help
+       :options (mapv
+                 option-fn
+                 options)}))
    choices))
 
 (defn class-weapon-options [weapon-choices]
-  (class-options weapon-option weapon-choices))
+  (class-options weapon-option weapon-choices "Select a weapon to begin your adventuring career with."))
 
 (defn class-armor-options [armor-choices]
-  (class-options armor-option armor-choices))
+  (class-options armor-option armor-choices "Select armor to begin your adventuring career with."))
 
 (defn class-equipment-options [equipment-choices]
-  (class-options equipment-option equipment-choices))
-
+  (class-options equipment-option equipment-choices "Select equipment to start your adventuring career with."))
 
 (defn class-option [{:keys [name
                             help
@@ -990,19 +997,24 @@ to the extra damage of the critical hit."}]}))
       :selections (vec
                    (concat
                     selections
-                    (if (seq tool-options) [(tool-prof-selection tool-options)])
+                    (if (seq tool-options)
+                      [(tool-prof-selection tool-options)])
                     (class-weapon-options weapon-choices)
                     (class-armor-options armor-choices)
                     (class-equipment-options equipment-choices)
                     [(opt5e/skill-selection skill-kws skill-num)
-                     (t/sequential-selection
-                      "Levels"
-                      (fn [selection options current-values]
-                        {::entity/key (-> current-values count inc str keyword)})
-                      (vec
-                       (map
-                        (partial level-option cls kw character-ref spellcasting-template)
-                        (range 1 21))))]))
+                     (t/selection-cfg
+                      {:name "Levels"
+                       :help "These are your levels in the containing class. You can add levels by clicking the 'Add Levels' button below."
+                       :new-item-fn (fn [selection options current-values]
+                                      {::entity/key (-> current-values count inc str keyword)})
+                       :options (vec
+                                 (map
+                                  (partial level-option cls kw character-ref spellcasting-template)
+                                  (range 1 21)))
+                       :min 1
+                       :sequential? true
+                       :max nil})]))
       :modifiers (vec
                   (concat
                    modifiers
@@ -1141,6 +1153,7 @@ Your Strength and Constitution scores increase by 4.
 Your maximum for those scores is now 24."}]
     :subclass-level 3
     :subclass-title "Primal Path"
+    :subclass-help "Your primal path shapes the nature of your barbarian rage and gives you additional features."
     :subclasses [{:name "Path of the Beserker"
                   :traits [{:name "Frenzy"
                             :level 3
@@ -1327,6 +1340,7 @@ You learn two additional spells from any class at
 uses of Bardic Inspiration left, you regain one use."}]
     :subclass-level 3
     :subclass-title "Bard College"
+    :subclass-help "Your bard college is a loose association that preserves bardic traditions and affords additional features"
     :subclasses [{:name "College of Lore"
                   :profs {:skill-options {:choose 3 :options {:any true}}}
                   :selections (opt5e/bard-magical-secrets 6)
