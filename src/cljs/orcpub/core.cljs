@@ -172,10 +172,11 @@
                           (select-fn path))
                         (swap! character-ref #(update-option built-template % path (fn [o] (assoc o ::entity/key key))))))
                     (.stopPropagation e))
-        :on-mouse-over (fn [e]
+        :on-mouse-enter (fn [e]
                          (let [stepper-selection-path stepper-selection-path
                                selection-path (to-option-path stepper-selection-path built-template)]
-                           (if (= path selection-path) (swap! app-state assoc :mouseover-option opt)))
+                           (if (= path selection-path)
+                             (set! (.-innerHTML (js/document.getElementById "mouseover-option-title")) (::t/name opt))))
                         (.stopPropagation e))}
        [:div.option-header
         [:div.flex-grow-1
@@ -385,44 +386,6 @@
         (if simple-options?
           [dropdown-selector path option-paths selection built-char raw-char built-template]
           [list-selector path option-paths selection collapsed? built-char raw-char built-template collapsed-paths stepper-selection-path]))]]))
-
-
-(def container-style
-  {:display :flex
-   :justify-content :center})
-
-(def tabs-style
-  (merge
-   {;;:height 82
-    :text-transform :uppercase
-    :font-weight 600
-    :padding "15px"}
-   ;;content-style
-   text-color
-   field-font-size))
-
-(def base-tab-style
-  {;;:padding-top 48
-   :display :inline-block
-   :opacity 0.2
-   :border-bottom "5px solid rgba(255, 255, 255, 0.3)"})
-
-(def tab-style
-  (merge
-   base-tab-style
-   { ;;:padding-top 48
-    :padding-left 25
-    :padding-right 25
-    :padding-bottom 13}))
-
-(def tab-spacer-style
-  {:width "10px"})
-
-(def selected-tab-style
-  (merge
-   tab-style
-   {:border-bottom-color "#f1a20f"
-    :opacity 1}))
 
 (defn make-path-map [character]
   (let [flat-options (entity/flatten-options (::entity/options character))]
@@ -762,7 +725,7 @@
    state
    (reductions conj [] path)))
 
-(defn selection-stepper [built-template option-paths stepper-selection-path mouseover-option]
+(defn selection-stepper [built-template option-paths stepper-selection-path]
   (let [selection (if stepper-selection-path (get-in built-template stepper-selection-path))]
     [:div {:id "selection-stepper"}
      [:div.flex.selection-stepper-inner
@@ -775,7 +738,7 @@
              [:span.m-l-5.f-s-10 "(optional)"])]
           [:p.m-t-5.selection-stepper-help (::t/help selection)]
           [:div
-           [:span (::t/name mouseover-option)]]]
+           [:span#mouseover-option-title]]]
          [:div.m-t-10 "Click 'Get Started' to step through the build process."])
        [:div.flex.m-t-10.selection-stepper-footer
         [:button.form-button.selection-stepper-button
@@ -970,8 +933,7 @@
           [selection-stepper
            built-template
            option-paths
-           stepper-selection-path
-           mouseover-option])
+           stepper-selection-path])
         [builder-columns
          built-template
          @character-ref
