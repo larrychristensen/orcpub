@@ -35,7 +35,7 @@
   ([name key options min max &[sequential? new-item-fn]]
    {::name name
     ::key key
-    ::options options
+    ::options (vec options)
     ::min min
     ::max max
     ::sequential? (boolean sequential?)
@@ -62,7 +62,7 @@
 (defn option [name key selections modifiers & [prereqs]]
   (cond-> {::name name
            ::key key}
-    selections (assoc ::selections selections)
+    selections (assoc ::selections (vec selections))
     modifiers (assoc ::modifiers modifiers)
     prereqs (assoc ::prereqs prereqs)))
 

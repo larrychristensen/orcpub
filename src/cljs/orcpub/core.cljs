@@ -78,9 +78,10 @@
                        [:race]
                        [:sources]}
     :stepper-selection-path nil
+    :mouseover-option nil
     :builder {:character {:tab 0}}}))
 
-(add-watch app-state :log (fn [k r os ns]
+#_(add-watch app-state :log (fn [k r os ns]
                             (js/console.log "OLD" (clj->js os))
                             (js/console.log "NEW" (clj->js ns))))
 
@@ -130,11 +131,24 @@
           new-value (cljs.reader/read-string (.. e -target -value))]
       (swap! character-ref #(set-option-value % (conj option-path ::entity/key) new-value)))))
 
+(defn to-option-path
+  ([template-path template]
+   (to-option-path template-path template []))
+  ([template-path template current-option-path]
+   (let [path-len (count template-path)
+         key (::t/key (get-in template template-path))
+         next-option-path (if key (conj current-option-path key) current-option-path)]
+     (if (and key (> path-len 2))
+       (recur (subvec template-path 0 (- path-len 2))
+              template
+              next-option-path)
+       (vec (reverse next-option-path))))))
 
-(defn option [path option-paths selectable? list-collapsed? {:keys [::t/key ::t/name ::t/selections ::t/modifiers ::t/prereqs ::t/ui-fn ::t/select-fn]} built-char raw-char changeable? options change-fn built-template]
+
+(defn option [path option-paths selectable? list-collapsed? {:keys [::t/key ::t/name ::t/selections ::t/modifiers ::t/prereqs ::t/ui-fn ::t/select-fn] :as opt} built-char raw-char changeable? options change-fn built-template collapsed-paths stepper-selection-path]
   (let [new-path (conj path key)
         selected? (boolean (get-in option-paths new-path))
-        collapsed? (get (:collapsed-paths @app-state) new-path)
+        collapsed? (get collapsed-paths new-path)
         named-mods (filter ::mod/name modifiers)
         failed-prereqs (reduce
                         (fn [failures {:keys [::t/prereq-fn ::t/label]}]
@@ -157,7 +171,12 @@
                         (if select-fn
                           (select-fn path))
                         (swap! character-ref #(update-option built-template % path (fn [o] (assoc o ::entity/key key))))))
-                    (.stopPropagation e))}
+                    (.stopPropagation e))
+        :on-mouse-over (fn [e]
+                         (let [stepper-selection-path stepper-selection-path
+                               selection-path (to-option-path stepper-selection-path built-template)]
+                           (if (= path selection-path) (swap! app-state assoc :mouseover-option opt)))
+                        (.stopPropagation e))}
        [:div
         {:style {:display :flex
                  :justify-content :space-between
@@ -214,7 +233,7 @@
              (fn [{:keys [::t/prereq-fn ::t/key] :as selection}]
                (if (or (not prereq-fn) (prereq-fn built-char))
                  ^{:key key}
-                 [builder-selector new-path option-paths selection built-char raw-char built-template]))
+                 [builder-selector new-path option-paths selection built-char raw-char built-template collapsed-paths stepper-selection-path]))
              selections))]]
          (if collapsed? [:div.builder-option.collapsed-list-builder-option]))])))
 
@@ -289,14 +308,14 @@
            (get-in option-paths option-path)))
        options))))
 
-(defn list-selector-option [removeable? path option-paths multiple-select? list-collapsed? i opt built-char raw-char changeable? options change-fn built-template]
+(defn list-selector-option [removeable? path option-paths multiple-select? list-collapsed? i opt built-char raw-char changeable? options change-fn built-template collapsed-paths stepper-selection-path]
   [:div.list-selector-option
    [:div {:style {:flex-grow 1}}
-    [option path option-paths (not multiple-select?) list-collapsed? opt built-char raw-char changeable? options change-fn built-template]]
+    [option path option-paths (not multiple-select?) list-collapsed? opt built-char raw-char changeable? options change-fn built-template collapsed-paths stepper-selection-path]]
    (if (removeable? i)
      [remove-option-button path built-template i])])
 
-(defn list-selector [path option-paths {:keys [::t/options ::t/min ::t/max ::t/key ::t/name ::t/sequential? ::t/new-item-fn] :as selection} collapsed? built-char raw-char built-template]
+(defn list-selector [path option-paths {:keys [::t/options ::t/min ::t/max ::t/key ::t/name ::t/sequential? ::t/new-item-fn] :as selection} collapsed? built-char raw-char built-template collapsed-paths stepper-selection-path]
   (let [no-max? (nil? max)
         multiple-select? (or no-max? (> max 1))
         selected-options (filter-selected path key option-paths options raw-char built-template)
@@ -328,7 +347,9 @@
            (and addable? (not sequential?))
            options
            (make-dropdown-change-fn path key built-template raw-char character-ref i)
-           built-template])
+           built-template
+           collapsed-paths
+           stepper-selection-path])
         (if multiple-select?
           selected-options
           options)))]
@@ -336,14 +357,17 @@
      (if (and addable? new-item-fn)
        (add-option-button selection raw-char (conj path key) new-item-fn built-template))]))
 
-(defn builder-selector [path option-paths {:keys [::t/name ::t/key ::t/min ::t/max] :as selection} built-char raw-char built-template]
+(defn selector-id [path]
+  (s/join "--" (map name path)))
+
+(defn builder-selector [path option-paths {:keys [::t/name ::t/key ::t/min ::t/max] :as selection} built-char raw-char built-template collapsed-paths stepper-selection-path]
   (let [new-path (conj path key)
-        collapsed? (get (:collapsed-paths @app-state) new-path)]
+        collapsed? (get collapsed-paths new-path)]
     ^{:key key}
     [:div.builder-selector
-     [:div.flex {:style {
-                    :justify-content :space-between
-                    :align-items :center}}
+     {:id (selector-id new-path)}
+     [:div.flex {:style {:justify-content :space-between
+                         :align-items :center}}
       (if (zero? (count path))
         [:h1 {:style {:font-size "24px"}} (::t/name selection)]
         [:h2.builder-selector-header (::t/name selection)])
@@ -370,7 +394,7 @@
                           (::t/options selection)))]
         (if simple-options?
           [dropdown-selector path option-paths selection built-char raw-char built-template]
-          [list-selector path option-paths selection collapsed? built-char raw-char built-template]))]]))
+          [list-selector path option-paths selection collapsed? built-char raw-char built-template collapsed-paths stepper-selection-path]))]]))
 
 (def content-style
   {:width 1440})
@@ -737,19 +761,6 @@
    ::t/optional? true
    ::t/help "Select the sources you want to use for races, classes, etc. Click the 'Show All Options' button to make additional selections. If you are new to the game we recommend just moving on to the next step."})
 
-(defn to-option-path
-  ([template-path template]
-   (to-option-path template-path template []))
-  ([template-path template current-option-path]
-   (let [path-len (count template-path)
-         key (::t/key (get-in template template-path))
-         next-option-path (if key (conj current-option-path key) current-option-path)]
-     (if (and key (> path-len 2))
-       (recur (subvec template-path 0 (- path-len 2))
-              template
-              next-option-path)
-       (vec (reverse next-option-path))))))
-
 (defn get-all-selections [path {:keys [::t/key ::t/selections ::t/options] :as obj} selected-option-paths]
   (let [children (map
                   (fn [{:keys [::t/key] :as s}]
@@ -773,53 +784,134 @@
                        (fn [s]
                          (not= (::path s) current-path))
                        all-selections)
-        next (second up-to-current)
-        next-path (::path next)
-        next-template-path (entity/get-template-selection-path built-template next-path [])]
-    (if next [next-template-path next])))
+        next (or (second up-to-current) (first all-selections))
+        next-path (::path next)]
+    (if next [next-path next])))
 
-(defn selection-stepper [built-template option-paths]
-  (let [stepper-selection-path (get @app-state :stepper-selection-path)
-        selection (get-in built-template stepper-selection-path)]
-    [:div {:style {:width "220px"}}
-     [:div.flex
-      {:style {:align-items :center}}
-      [:div {:style {:width "200px"
-                     :border "1px solid white"
-                     :border-radius "5px"
-                     :padding "10px"
-                     :background-color "#1a1e28"
-                     :box-shadow "5px 5px 5px rgba(0,0,0,0.6)"}}
-       [:h1.f-w-bold {:style
-                      {:font-size "18px"
-                       :color "#f0a100"}} "Step-By-Step"]
-       [:h1.f-w-bold.m-t-10 "Step: " (::t/name selection)
-        (if (::t/optional? selection)
-          [:span.m-l-5 {:style {:font-size "10px"}} "(optional)"])]
-       [:p.m-t-5 {:style {:font-size "14px"
-                          :font-weight 100}} (::t/help selection)]
-       [:div.flex.m-t-10
-        {:style {:justify-content :flex-end}}
-        [:button.form-button
-         {:style {:padding "6px"}
-          :on-click (fn [_]
-                      (let [[next-path {:keys [::t/name]}]
-                            (next-selection
-                             (or (@app-state :stepper-selection-path) [::t/selections 0])
-                             built-template
-                             option-paths)]
-                        (swap!
-                         app-state
-                         assoc
-                         :stepper-selection-path
-                         next-path)))}
-         "Next Step"]]]
+(defn collapse-paths [state paths]
+  (reduce
+   (fn [s path]
+     (update s :collapsed-paths conj path))
+   state
+   paths))
+
+(defn open-path-and-subpaths [state path]
+  (reduce
+   (fn [s subpath]
+     (update s :collapsed-paths disj path))
+   state
+   (reductions conj [] path)))
+
+(defn selection-stepper [built-template option-paths stepper-selection-path mouseover-option]
+  (let [selection (if stepper-selection-path (get-in built-template stepper-selection-path))]
+    [:div {:id "selection-stepper"}
+     [:div.flex.selection-stepper-inner
+      [:div.selection-stepper-main
+       [:h1.f-w-bold.selection-stepper-title "Step-By-Step"]
+       (if selection
+         [:div
+          [:h1.f-w-bold.m-t-10 "Step: " (::t/name selection)
+           (if (::t/optional? selection)
+             [:span.m-l-5 {:style {:font-size "10px"}} "(optional)"])]
+          [:p.m-t-5.selection-stepper-help (::t/help selection)]
+          [:div
+           [:span (::t/name mouseover-option)]]]
+         [:div.m-t-10 "Click 'Get Started' to step through the build process."])
+       [:div.flex.m-t-10.selection-stepper-footer
+        [:button.form-button.selection-stepper-button
+         {:on-click
+          (fn [_]
+            (let [[next-path {:keys [::t/name]}]
+                  (next-selection
+                   (or stepper-selection-path [::t/selections 0])
+                   built-template
+                   option-paths)
+                  next-template-path (entity/get-template-selection-path built-template next-path [])
+                  root-paths (map (fn [s] [(::t/key s)]) (::t/selections built-template))]
+              (swap!
+               app-state
+               (fn [as]
+                 (-> as
+                     (assoc :stepper-selection-path (if selection next-template-path [::t/selections 0]))
+                     (collapse-paths root-paths)
+                     (open-path-and-subpaths (if selection next-path [(first (::t/selections built-template))])))))))}
+         (if selection "Next Step" "Get Started")]]]
       [:svg {:width "20" :height "24" :style {:margin-left "-1px"}}
        [:path 
         {:d "M-2 1.5 L13 14 L-2 22.5"
          :stroke :white
          :fill "#1a1e28"
          :stroke-width "1px"}]]]]))
+
+(defn option-sources [collapsed-paths selected-plugins]
+  (let [path [:sources]
+         collapsed? (collapsed-paths path)]
+     [:div
+      [:div {:style {:display :flex
+                     :justify-content :space-between
+                     :align-items :center}}
+       [:h1 {:style {:font-size "24px"}} "Option Sources"]
+       (if collapsed?
+         [:div.flex
+          {:on-click (fn [_]
+                       (swap! app-state update :collapsed-paths disj path))}
+          [:span.expand-collapse-button
+           "Show All Options"]
+          [:i.fa.fa-caret-down.m-l-5]]
+         [:div.flex
+          {:on-click (fn [_]
+                       (swap! app-state update :collapsed-paths conj path))}
+          [:span.expand-collapse-button
+           "Hide Unselected Options"]
+          [:i.fa.fa-caret-up.m-l-5]])]
+      [:div.builder-option.selected-builder-option
+       (if collapsed?
+         [:span (s/join ", " (conj (map :name (filter #((:key %) selected-plugins) plugins)) "Player's Handbook"))]
+         [:div
+          [:div.checkbox-parent
+           [:span.checkbox.checked.disabled
+            [:i.fa.fa-check]]
+           [:span.checkbox-text "Player's Handbook"]]
+          (mapv
+           (fn [{:keys [name key]}]
+             (let [checked? (selected-plugins key)]
+               ^{:key key}
+               [:div.checkbox-parent
+                [:span.checkbox
+                 {:class-name (if checked? "checked")
+                  :on-click (fn [_] (swap! app-state assoc-in [:plugins key] (not checked?)))}
+                 (if checked? [:i.fa.fa-check])]
+                [:span.checkbox-text name]]))
+           plugins)])]]))
+
+(def builder-selector-component
+  (with-meta
+    builder-selector
+    {:component-did-update
+     (fn [this]
+       (let [built-template (get (.-argv (.-props this)) 6)
+             stepper-selection-path (get @app-state :stepper-selection-path)
+             selection (get-in built-template stepper-selection-path)
+             selection-path (to-option-path stepper-selection-path built-template)
+             selection-id (selector-id selection-path)
+             element (js/document.getElementById selection-id)
+             y-offset (.-pageYOffset js/window)
+             top (if element (.-offsetTop element) 0)
+             stepper-element (js/document.getElementById "selection-stepper")
+             options-top (.-offsetTop (js/document.getElementById "options-column"))]
+         (set! (.-top (.-style stepper-element)) (str (- top options-top) "px"))))}))
+
+(defn options-column [built-char built-template option-paths mobile? collapsed-paths stepper-selection-path plugins]
+  [:div {:id "options-column"
+         :style (if mobile? {:width "100%"} {:width "300px"})}
+   [option-sources collapsed-paths plugins]
+   [:div
+    (doall
+     (map
+      (fn [selection]
+        ^{:key (::t/key selection)}
+        [builder-selector-component [] option-paths selection built-char @character-ref built-template collapsed-paths stepper-selection-path])
+      (::t/selections built-template)))]])
 
 (defn character-builder []
   ;;(cljs.pprint/pprint @character-ref)
@@ -873,57 +965,10 @@
        [:div
         {:style {:display :flex}}
         (if desktop?
-          [selection-stepper built-template option-paths])
+          [selection-stepper built-template option-paths (:stepper-selection-path @app-state) (:mouseover-option @app-state)])
         (if (or desktop?
                 (= 0 active-tab))
-          [:div {:style (if mobile? {:width "100%"} {:width "300px"})}
-           (let [path [:sources]
-                 collapsed? (get-in @app-state [:collapsed-paths path])]
-             [:div
-              [:div {:style {:display :flex
-                             :justify-content :space-between
-                             :align-items :center}}
-               [:h1 {:style {:font-size "24px"}} "Option Sources"]
-               (if collapsed?
-                 [:div.flex
-                  {:on-click (fn [_]
-                               (swap! app-state update :collapsed-paths disj path))}
-                  [:span.expand-collapse-button
-                   "Show All Options"]
-                  [:i.fa.fa-caret-down.m-l-5]]
-                 [:div.flex
-                  {:on-click (fn [_]
-                               (swap! app-state update :collapsed-paths conj path))}
-                  [:span.expand-collapse-button
-                   "Hide Unselected Options"]
-                  [:i.fa.fa-caret-up.m-l-5]])]
-              [:div.builder-option.selected-builder-option
-               (if collapsed?
-                 [:span (s/join ", " (conj (map :name (filter #(get-in @app-state [:plugins (:key %)]) plugins)) "Player's Handbook"))]
-                 [:div
-                  [:div.checkbox-parent
-                   [:span.checkbox.checked.disabled
-                    [:i.fa.fa-check]]
-                   [:span.checkbox-text "Player's Handbook"]]
-                  (doall
-                   (map
-                    (fn [{:keys [name key]}]
-                      (let [checked? (get-in @app-state [:plugins key])]
-                        ^{:key key}
-                        [:div.checkbox-parent
-                         [:span.checkbox
-                          {:class-name (if checked? "checked")
-                           :on-click (fn [_] (swap! app-state assoc-in [:plugins key] (not checked?)))}
-                          (if checked? [:i.fa.fa-check])]
-                         [:span.checkbox-text name]]))
-                    plugins))])]])
-           [:div
-            (doall
-             (map
-              (fn [selection]
-                ^{:key (::t/key selection)}
-                [builder-selector [] option-paths selection built-char @character-ref built-template])
-              (::t/selections built-template)))]])
+          [options-column built-char built-template option-paths mobile? (:collapsed-paths @app-state) (:stepper-selection-path @app-state) (:plugins @app-state)])
         (if (or desktop?
                 (and tablet? (= 0 active-tab))
                 (and mobile? (= 1 active-tab)))

@@ -13,7 +13,9 @@
 
 (def character
   {::entity/options {:ability-scores {::entity/key :standard-roll
-                                      ::entity/value (char5e/abilities 15 14 13 12 10 8)}}})
+                                      ::entity/value (char5e/abilities 15 14 13 12 10 8)}
+                     :class [{::entity/key :barbarian
+                              ::entity/options {:levels [{::entity/key :1}]}}]}})
 
 (defn get-raw-abilities [character-ref]
   (get-in @character-ref [::entity/options :ability-scores ::entity/value]))

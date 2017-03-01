@@ -15,8 +15,7 @@
 (spec/def ::type #{cumulative-numeric-modifier-type
                    override-modifier-type
                    cumulative-list-modifier-type})
-(spec/def ::modifier (spec/keys :req [::path ::type]
-                                :opt [::value]))
+(spec/def ::modifier (spec/keys :opt [::name ::value ::fn ::key ::deps ::deferred-fn ::default-value ::val-fn]))
 (spec/def ::modifiers (spec/+ ::modifier))
 (spec/def ::keywords (spec/+ keyword?))
 

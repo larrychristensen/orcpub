@@ -249,4 +249,36 @@
       :cursor :not-allowed}]
 
     [:.checkbox-text
-     {:margin-left "5px"}]]))
+     {:margin-left "5px"}]
+
+    [:#selection-stepper
+     {:transition "top 2s ease-in-out"
+      :width "240px"
+      :position :relative
+      :top 0}]
+
+    [:.selection-stepper-inner
+     {:align-items :center
+      :position :absolute}]
+
+    [:.selection-stepper-main
+     {:width "200px"
+      :border "1px solid white"
+      :border-radius "5px"
+      :padding "10px"
+      :background-color "#1a1e28"
+      :box-shadow "5px 5px 5px rgba(0,0,0,0.6)"}]
+
+    [:.selection-stepper-title
+     {:font-size "18px"
+      :color "#f0a100"}]
+
+    [:.selection-stepper-help
+     {:font-size "14px"
+      :font-weight 100}]
+
+    [:.selection-stepper-footer
+     {:justify-content :flex-end}]
+
+    [:.selection-stepper-button
+     {:padding "6px"}]]))

@@ -3,6 +3,7 @@
             [clojure.spec :as spec]
             [clojure.spec.test :as stest]
             [orcpub.entity :as entity]
+            [orcpub.entity-spec :as es]
             [orcpub.template :as t]
             [orcpub.dnd.e5.modifiers :as modifiers]
             [orcpub.dnd.e5.character :as char5e]))
@@ -29,7 +30,7 @@
 
 (def feats
   [{:name "Fire Resister"
-    :modifiers [(modifiers/resistances :fire)]}
+    :modifiers [(modifiers/resistance :fire)]}
    {:name "Elemental Adept"
     :restrictions [{:path [:spellcaster?]
                     :value true}]}
@@ -71,13 +72,13 @@
                                                              :options wizard-cantrips}}}
                                     {:name "Dark Elf (Drow)"
                                      :key :dark-elf
-                                     :modifiers [(modifiers/spells-known 0 :dancing-lights)
+                                     :modifiers [(modifiers/spells-known 0 :dancing-lights :cha)
                                                  (assoc
-                                                  (modifiers/spells-known 1 :faerie-fire)
+                                                  (modifiers/spells-known 1 :faerie-fire :cha)
                                                   :prereqs
                                                   [(at-least-level? 3)])
                                                  (assoc
-                                                  (modifiers/spells-known 2 :darkness)
+                                                  (modifiers/spells-known 2 :darkness :cha)
                                                   :prereqs
                                                   [(at-least-level? 5)])]}]}}})
 
@@ -85,8 +86,8 @@
   {:name "Dwarf"
    :modifiers [(modifiers/ability :con 2)
                (modifiers/speed 25)
-               (modifiers/resistances :poison)
-               (modifiers/darkvision)]
+               (modifiers/resistance :poison)
+               (modifiers/darkvision 60)]
    :selections [{:name "Subrace"
                  :min 1
                  :max 1
@@ -371,7 +372,7 @@
     options (assoc ::entity/options options)))
 
 (def character
-  {::entity/options {:ability-score-variant {::entity/key :standard-rolls
+  {::entity/options {:ability-score-variant {::entity/key :standard-roll
                                              ::entity/value (char5e/abilities 12 13 14 15 16 17)}
                      :race {::entity/key :elf
                             ::entity/options {:subrace {::entity/key :high-elf
@@ -391,7 +392,7 @@
    (fn [key]
      {::t/key key
       ::t/name (name key)
-      ::t/modifiers [(modifiers/spells-known 0 key)]})
+      ::t/modifiers [(modifiers/spells-known 0 key :int)]})
    wizard-cantrips))
 
 (def arcane-tradition-options
@@ -408,9 +409,9 @@
      "Ability Score Variant"
      [(t/option
        "Standard Rolls"
-       :standard-rolls
+       :standard-roll
        []
-       [(modifiers/abilities nil)])])
+       [(modifiers/deferred-abilities)])])
     (t/selection
      "Race"
      [(t/option
@@ -455,21 +456,23 @@
            "Roll"
            :roll
            []
-           [(modifiers/max-hit-points nil)])])]
+           [(modifiers/max-hit-points 8)])])]
        [(modifiers/level :wizard "Wizard" 2)])])]})
 
-(clojure.pprint/pprint (t/make-modifier-map template))
+;;(clojure.pprint/pprint (t/make-modifier-map template))
 
-(spec/explain-data ::t/template template)
+;;(spec/explain-data ::t/template template)
 
-(stest/instrument `t/make-modifier-map)
+;;(stest/instrument `t/make-modifier-map)
 
 (deftest test-build
-  (let [built (entity/build character (t/make-modifier-map template))]
-    (is (= (::char5e/spells-known built) {0 [:light :acid-splash]}))
-    (is (= (::char5e/savings-throws built) [::char5e/int ::char5e/wis]))
-    (is (= (::char5e/traits built) [{:name "Evocation Savant"} {:name "Sculpt Spells"}]))
-    (is (= (::char5e/abilities built) (char5e/abilities 12 15 14 16 16 17)))
-    (is (= (::char5e/max-hit-points built) 9))
-    (is (= (::char5e/levels built) {:wizard {::char5e/class-name "Wizard" ::char5e/class-level 2}}))))
+  (let [built (entity/build character template)]
+    (prn "BUILT")
+    (clojure.pprint/pprint built)
+    (is (= (es/entity-val built :spells-known) {0 [:light :acid-splash]}))
+    (is (= (es/entity-val built :savings-throws) [::char5e/int ::char5e/wis]))
+    (is (= (es/entity-val built :traits) [{:name "Evocation Savant"} {:name "Sculpt Spells"}]))
+    (is (= (es/entity-val built :abilities) (char5e/abilities 12 15 14 16 16 17)))
+    (is (= (es/entity-val built :max-hit-points) 9))
+    (is (= (es/entity-val built :levels) {:wizard {::char5e/class-name "Wizard" ::char5e/class-level 2}}))))
 
