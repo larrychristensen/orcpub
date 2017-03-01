@@ -33,26 +33,20 @@
     (.stopPropagation e)))
 
 (defn abilities-standard [character-ref]
-  [:div
-    {:style {:display :flex
-             :justify-content :space-between}}
+  [:div.flex.justify-cont-s-b
     (let [abilities (get-raw-abilities character-ref)
           abilities-vec (vec abilities)]
       (map-indexed
        (fn [i [k v]]
          ^{:key k}
-         [:div {:style {:margin-top "10px"
-                        :margin-bottom "10px"
-                        :text-align :center}}
-          [:div {:style {:text-transform :uppercase}} (name k)]
-          [:div {:style {:font-size "18px"}} v]
-          [:div
-           [:i.fa.fa-chevron-circle-left
-            {:style {:font-size "16px"}
-             :on-click (swap-abilities character-ref i (dec i) k v)}]
-           [:i.fa.fa-chevron-circle-right
-            {:style {:margin-left "5px" :font-size "16px"}
-             :on-click (swap-abilities character-ref i (inc i) k v)}]]])
+         [:div.m-t-10.m-b-10.t-a-c
+          [:div.uppercase (name k)]
+          [:div.f-s-18 v]
+          [:div.f-s-16
+           [:i.fa.fa-chevron-circle-left.orange
+            {:on-click (swap-abilities character-ref i (dec i) k v)}]
+           [:i.fa.fa-chevron-circle-right.orange.m-l-5
+            {:on-click (swap-abilities character-ref i (inc i) k v)}]]])
        abilities-vec))])
 
 (defn abilities-roller [character-ref reroll-fn]
@@ -63,19 +57,16 @@
     "Re-Roll"]])
 
 (defn abilities-entry [character-ref]
-  [:div {:style {:display :flex}}
+  [:div.flex
    (let [abilities (get-raw-abilities character-ref)
          abilities-vec (vec abilities)]
      (map-indexed
       (fn [i [k v]]
         ^{:key k}
-        [:div {:style {:margin-top "10px"
-                       :text-align :center
-                       :padding "1px"}}
-         [:div {:style {:text-transform :uppercase}} (name k)]
-         [:input.input
+        [:div.m-t-10.t-a-c.p-1 
+         [:div.uppercase (name k)]
+         [:input.input.f-s-18
           {:value v
-           :style {:font-size "18px"}
            :on-change (fn [e] (let [value (.-value (.-target e))
                                     new-v (if (not (s/blank? value))
                                             (js/parseInt value))]
@@ -93,9 +84,8 @@
 
 (defn hit-points-roller [die character-ref path]
   [:div
-   [:button.form-button
-    {:style {:margin-top "10px"}
-     :on-click #(roll-hit-points die character-ref path)}
+   [:button.form-button.m-t-10
+    {:on-click #(roll-hit-points die character-ref path)}
     "Re-Roll"]])
 
 (defn hit-points-entry [character-ref path]

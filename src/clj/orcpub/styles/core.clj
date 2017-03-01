@@ -25,7 +25,7 @@
   (px-prop
    :margin-left
    :m-l
-   (concat (range 0 10) (range 10 30 5))))
+   (concat (range -1 10) (range 10 45 5))))
 
 (def margin-tops
   (px-prop
@@ -33,16 +33,116 @@
    :m-t
    (concat (range 0 10) (range 10 30 5))))
 
+(def font-sizes
+  [[:.f-s-10
+    {:font-size "10px"}]
+   [:.f-s-12
+    {:font-size "12px"}]
+   [:.f-s-14
+    {:font-size "14px"}]
+   [:.f-s-16
+    {:font-size "16px"}]
+   [:.f-s-18
+    {:font-size "18px"}]
+   [:.f-s-24
+    {:font-size "24px"}]
+   [:.f-s-32
+    {:font-size "32px !important"}]
+   [:.f-s-36
+    {:font-size "36px"}]])
+
 (def props
   [[:.flex
     {:display :flex}]
+   
    [:.f-w-bold
-    {:font-weight :bold}]])
+    {:font-weight :bold}]
+   
+   [:.flex-grow-1
+    {:flex-grow 1}]
+   
+   [:.i
+    {:font-style :italic}]
+   
+   [:.f-w-n
+    {:font-weight :normal}]
+   [:.f-w-b
+    {:font-weight :bold}]
+   [:.f-w-600
+    {:font-weight 600}]
+
+   [:.m-r-5
+    {:margin-right "5px"}]
+   [:.m-r-18
+    {:margin-right "18px"}]
+   [:.m-r-20
+    {:margin-right "20px"}]
+   [:.m-r-80
+    {:margin-right "80px"}]
+
+   [:.m-t-21
+    {:margin-top "21px"}]
+   
+   [:.m-b-10
+    {:margin-bottom "10px"}]
+   [:.m-b-16
+    {:margin-bottom "16px"}]
+   [:.m-b-19
+    {:margin-bottom "19px"}]
+   [:.m-b-20
+    {:margin-bottom "20px"}]
+
+   [:.m-l-30
+    {:margin-left "30px"}]
+
+   [:.text-shadow
+    {:text-shadow "1px 2px 1px black"}]
+   
+   [:.t-a-c
+    {:text-align :center}]
+   [:.justify-cont-s-b
+    {:justify-content :space-between}]
+   [:.justify-cont-c
+    {:justify-content :center}]
+   [:.align-items-c
+    {:align-items :center}]
+
+   [:.w-40-p
+    {:width "40%"}]
+   [:.w-50-p
+    {:width "50%"}]
+   [:.w-60-p
+    {:width "60%"}]
+   [:.w-100-p
+    {:width "100%"}]
+   [:.w-250
+    {:width "250px"}]
+   [:.w-300
+    {:width "300px"}]
+   [:.w-500
+    {:width "500px"}]
+   [:.w-1440
+    {:width "1440px"}]
+
+   [:.h-800
+    {:height "800px"}]
+   
+   [:.posn-rel
+    {:position :relative}]
+   [:.white
+    {:color :white}]
+   [:.orange
+    {:color button-color}]
+   [:.uppercase
+    {:text-transform :uppercase}]
+   [:.p-1
+    {:padding 1}]])
 
 (def app
   (concat
    margin-lefts
    margin-tops
+   font-sizes
    props
    [[:.app
      {:background-image "linear-gradient(182deg, #2c3445, #000000)"
@@ -171,9 +271,6 @@
      {:display :flex
       :align-items :center}]
 
-    [:.fa
-     {:color button-color}]
-
     [:.expand-collapse-button
      {:font-size "12px"
       :max-width "100px"
@@ -281,4 +378,9 @@
      {:justify-content :flex-end}]
 
     [:.selection-stepper-button
-     {:padding "6px"}]]))
+     {:padding "6px"}]
+
+    [:.option-header
+     {:display :flex
+      :justify-content :space-between
+      :align-items :center}]]))
