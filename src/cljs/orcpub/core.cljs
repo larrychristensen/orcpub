@@ -150,7 +150,7 @@
 
 (defn show-mouseover-option! []
   (let [mouseover-option (js/document.getElementById "mouseover-option")]
-    (if mouseover-option (set! (.-display (.-style mouseover-option)) nil))))
+    (if mouseover-option (set! (.-display (.-style mouseover-option)) "block"))))
 
 (defn set-mouseover-option! [opt]
   (show-mouseover-option!)
