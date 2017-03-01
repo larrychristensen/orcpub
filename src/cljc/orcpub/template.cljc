@@ -29,6 +29,19 @@
                                                         :min ::min
                                                         :max ::max)))
 
+(defn selection-cfg [{:keys [name key source page options help min sequential? new-item-fn] :as cfg}]
+  (let [max (if (find cfg :max) (:max cfg) 1)]
+    {::name name
+     ::key (or key (common/name-to-kw name))
+     ::source (or source :phb)
+     ::page page
+     ::options (vec options)
+     ::help help
+     ::min (or min 1)
+     ::max max
+     ::sequential? (boolean sequential?)
+     ::new-item-fn new-item-fn}))
+
 (defn selection-with-key
   ([name key options]
    (selection-with-key name key options 1 1))
@@ -58,6 +71,14 @@
 
 (defn sequential-selection [name new-item-fn options]
   (selection name options 1 nil true new-item-fn))
+
+(defn option-cfg [{:keys [name key help selections modifiers prereqs] :as cfg}]
+  {::name name
+   ::key (or key (common/name-to-kw name))
+   ::help help
+   ::selections selections
+   ::modifiers modifiers
+   ::prereqs prereqs})
 
 (defn option [name key selections modifiers & [prereqs]]
   (cond-> {::name name

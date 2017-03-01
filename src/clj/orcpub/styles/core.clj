@@ -135,8 +135,26 @@
     {:color button-color}]
    [:.uppercase
     {:text-transform :uppercase}]
+   
    [:.p-1
-    {:padding 1}]])
+    {:padding "1px"}]
+   [:.p-10
+    {:padding "10px"}]
+
+   [:.p-l-15
+    {:padding-left "15px"}]
+
+   [:.b-rad-5
+    {:border-radius "5px"}]
+
+   [:.b-1
+    {:border "1px solid"}]
+
+   [:.b-color-gray
+    {:border-color "rgba(255,255,255,0.2)"}]
+
+   [:ul.list-style-disc
+    {:list-style-type :disc}]])
 
 (def app
   (concat

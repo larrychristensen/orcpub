@@ -166,6 +166,7 @@
    abilities))
 
 (defn race-option [{:keys [name
+                           help
                            abilities
                            size
                            speed
@@ -177,39 +178,39 @@
                            language-options
                            armor-proficiencies
                            weapon-proficiencies]}]
-  (t/option
-   name
-   (common/name-to-kw name)
-   (vec
-    (concat
-     (if subraces
-       [(t/selection
-         "Subrace"
-         (vec (map subrace-option subraces)))])
-     (if language-options
-       (let [{lang-num :choose lang-options :options} language-options
-             lang-kws (if (:any lang-options)
-                        (map :key opt5e/languages)
-                        (keys lang-options))]
-         [(opt5e/language-selection (map opt5e/language-map lang-kws) lang-num)]))
-     selections))
-   (vec
-    (concat
-     [(mod5e/race name)
-      (mod5e/size size)
-      (mod5e/speed speed)]
-     (map
-      (fn [language]
-        (mod5e/language language (common/name-to-kw language)))
-      languages)
-     (map
-      (fn [[k v]]
-        (mod5e/ability k v))
-      abilities)
-     modifiers
-     (traits-modifiers traits)
-     (armor-prof-modifiers armor-proficiencies)
-     (weapon-prof-modifiers weapon-proficiencies)))))
+  (t/option-cfg
+   {:name name
+    :help help
+    :selections (vec
+                 (concat
+                  (if subraces
+                    [(t/selection
+                      "Subrace"
+                      (vec (map subrace-option subraces)))])
+                  (if language-options
+                    (let [{lang-num :choose lang-options :options} language-options
+                          lang-kws (if (:any lang-options)
+                                     (map :key opt5e/languages)
+                                     (keys lang-options))]
+                      [(opt5e/language-selection (map opt5e/language-map lang-kws) lang-num)]))
+                  selections))
+    :modifiers (vec
+                (concat
+                 [(mod5e/race name)
+                  (mod5e/size size)
+                  (mod5e/speed speed)]
+                 (map
+                  (fn [language]
+                    (mod5e/language language (common/name-to-kw language)))
+                  languages)
+                 (map
+                  (fn [[k v]]
+                    (mod5e/ability k v))
+                  abilities)
+                 modifiers
+                 (traits-modifiers traits)
+                 (armor-prof-modifiers armor-proficiencies)
+                 (weapon-prof-modifiers weapon-proficiencies)))}))
 
 (def elf-weapon-training-mods
   (weapon-prof-modifiers [:longsword :shortsword :shortbow :longbow]))
@@ -217,6 +218,7 @@
 (def elf-option
   (race-option
    {:name "Elf"
+    :help "Elves are graceful, magical creatures, with a slight build."
     :abilities {:dex 2}
     :size :medium
     :speed 30
@@ -248,6 +250,7 @@
 (def dwarf-option
   (race-option
    {:name "Dwarf",
+    :help "Dwarves are short and stout and tend to be skilled warriors and craftman in stone and metal."
     :abilities {:con 2},
     :size :medium
     :speed 25,
@@ -271,6 +274,7 @@
 (def halfling-option
   (race-option
    {:name "Halfling"
+    :help "Halflings are small, half the height of a human, but fairly stout. They are cheerful and practical."
     :abilities {:dex 2}
     :size :small
     :speed 25
@@ -289,6 +293,7 @@
 (def human-option
   (race-option
    {:name "Human"
+    :help "Humans are physically diverse and highly adaptable."
     ;; abilities are tied to variant selection below
     :size :medium
     :speed 30
@@ -330,6 +335,7 @@
 (def dragonborn-option
   (race-option
    {:name "Dragonborn"
+    :help "Kin to dragons, dragonborn resemble humanoid dragons, without wings or tail and standing erect."
     :abilities {:str 2 :cha 1}
     :size :medium
     :speed 30
@@ -386,6 +392,7 @@ again until you complete a short or long rest."}]}))
 (def gnome-option
   (race-option
    {:name "Gnome"
+    :help "Gnomes are small, intelligent humanoids who live life with the utmost of enthusiasm."
     :abilities {:int 2}
     :size :small
     :speed 25
@@ -947,6 +954,7 @@ to the extra damage of the critical hit."}]}))
 
 
 (defn class-option [{:keys [name
+                            help
                             hit-die
                             profs
                             levels
@@ -972,44 +980,45 @@ to the extra damage of the critical hit."}]}))
         skill-kws (if (:any options) (map :key opt5e/skills) (keys options))
         save-profs (keys save)
         spellcasting-template (opt5e/spellcasting-template (assoc spellcasting :class-key kw))]
-    (t/option
-     name
-     kw
-     (vec
-      (concat
-       selections
-       (if (seq tool-options) [(tool-prof-selection tool-options)])
-       (class-weapon-options weapon-choices)
-       (class-armor-options armor-choices)
-       (class-equipment-options equipment-choices)
-       [(opt5e/skill-selection skill-kws skill-num)
-        (t/sequential-selection
-         "Levels"
-         (fn [selection options current-values]
-           {::entity/key (-> current-values count inc str keyword)})
-         (vec
-          (map
-           (partial level-option cls kw character-ref spellcasting-template)
-           (range 1 21))))]))
-     (vec
-      (concat
-       modifiers
-       (armor-prof-modifiers (keys armor-profs))
-       (weapon-prof-modifiers (keys weapon-profs))
-       (tool-prof-modifiers (keys tool))
-       (mapv
-        (fn [[k num]]
-          (mod5e/weapon k num))
-        weapons)
-       (mapv
-        (fn [[k num]]
-          (mod5e/armor k num))
-        armor)
-       (mapv
-        (fn [[k num]]
-          (mod5e/equipment k num))
-        equipment)
-       [(apply mod5e/saving-throws save-profs)])))))
+    (t/option-cfg
+     {:name name
+      :key kw
+      :help help
+      :selections (vec
+                   (concat
+                    selections
+                    (if (seq tool-options) [(tool-prof-selection tool-options)])
+                    (class-weapon-options weapon-choices)
+                    (class-armor-options armor-choices)
+                    (class-equipment-options equipment-choices)
+                    [(opt5e/skill-selection skill-kws skill-num)
+                     (t/sequential-selection
+                      "Levels"
+                      (fn [selection options current-values]
+                        {::entity/key (-> current-values count inc str keyword)})
+                      (vec
+                       (map
+                        (partial level-option cls kw character-ref spellcasting-template)
+                        (range 1 21))))]))
+      :modifiers (vec
+                  (concat
+                   modifiers
+                   (armor-prof-modifiers (keys armor-profs))
+                   (weapon-prof-modifiers (keys weapon-profs))
+                   (tool-prof-modifiers (keys tool))
+                   (mapv
+                    (fn [[k num]]
+                      (mod5e/weapon k num))
+                    weapons)
+                   (mapv
+                    (fn [[k num]]
+                      (mod5e/armor k num))
+                    armor)
+                   (mapv
+                    (fn [[k num]]
+                      (mod5e/equipment k num))
+                    equipment)
+                   [(apply mod5e/saving-throws save-profs)]))})))
 
 
 (defn barbarian-option [character-ref]
@@ -4034,63 +4043,86 @@ until you finish a long rest."}]}
      #(class-option % character-ref)
      (scag-classes character-ref)))])
 
+(defn ability-item [name abbr desc]
+  [:li.m-t-5 [:span.f-w-b.m-r-5 (str name " (" abbr ")")] desc])
+
 (defn template-selections [character-ref]
-  [(t/selection
-    "Ability Scores"
-    [{::t/name "Manual Entry"
-      ::t/key :manual-entry
-      ::t/ui-fn #(abilities-entry character-ref)
-      ::t/modifiers [(mod5e/deferred-abilities)]}
-     {::t/name "Standard Roll"
-      ::t/key :standard-roll
-      ::t/ui-fn #(abilities-roller character-ref (reroll-abilities character-ref))
-      ::t/select-fn (reroll-abilities character-ref)
-      ::t/modifiers [(mod5e/deferred-abilities)]}
-     {::t/name "Standard Scores"
-      ::t/key :standard-scores
-      ::t/ui-fn #(abilities-standard character-ref)
-      ::t/select-fn (set-standard-abilities character-ref)
-      ::t/modifiers [(mod5e/deferred-abilities)]}])
-   (t/selection
-    "Race"
-    [dwarf-option
-     elf-option
-     halfling-option
-     human-option
-     dragonborn-option
-     gnome-option
-     half-elf-option
-     half-orc-option
-     tiefling-option])
-   (t/selection
-    "Background"
-    (map
-     background-option
-     backgrounds))
-   (t/selection+
-    "Class"
-    (fn [selection classes]
-      (let [current-classes (into #{}
-                                  (map ::entity/key)
-                                  (get-in @character-ref
-                                          [::entity/options :class]))]
-        {::entity/key (->> selection
-                           ::t/options
-                           (map ::t/key)
-                           (some #(if (-> % current-classes not) %)))
-         ::entity/options {:levels [{::entity/key :1}]}}))
-    [(barbarian-option character-ref)
-     (bard-option character-ref)
-     (cleric-option character-ref)
-     (druid-option character-ref)
-     (fighter-option character-ref)
-     (monk-option character-ref)
-     (paladin-option character-ref)
-     (ranger-option character-ref)
-     (rogue-option character-ref)
-     (sorcerer-option character-ref)
-     (warlock-option character-ref)
-     (wizard-option character-ref)])])
+  [(t/selection-cfg
+    {:name "Base Ability Scores"
+     :key :ability-scores
+     :help [:div
+            [:p "Ability scores are your major character traits and affect nearly all aspects of play. These scores range from 1 to 20 for player characters and DO NOT include racial or other bonuses."]
+            [:ul.m-t-10.p-l-15.list-style-disc
+             (ability-item "Strength" "STR" "measures your physical power")
+             (ability-item "Dexterity" "DEX" "measures your agility and nimbleness")
+             (ability-item "Constitution" "CON" "measures your physical health")
+             (ability-item "Intelligence" "INT" "measures your memory and reasoning abilities")
+             (ability-item "Wisdom" "WIS" "measures your connection to your environment, how observant you are.")
+             (ability-item "Charisma" "CHA" "measures how well you interact with others.")]]
+     :options [{::t/name "Manual Entry"
+                ::t/key :manual-entry
+                ::t/help "This option allows you to manually type in the value for each ability. Use this if you want to roll dice yourself or if you already have a character with known ability values."
+                ::t/ui-fn #(abilities-entry character-ref)
+                ::t/modifiers [(mod5e/deferred-abilities)]}
+               {::t/name "Standard Roll"
+                ::t/key :standard-roll
+                ::t/help "This option rolls the dice for you. You can rearrange the values using the left and right arrow buttons."
+                ::t/ui-fn #(abilities-roller character-ref (reroll-abilities character-ref))
+                ::t/select-fn (reroll-abilities character-ref)
+                ::t/modifiers [(mod5e/deferred-abilities)]}
+               {::t/name "Standard Scores"
+                ::t/key :standard-scores
+                ::t/help "If you aren't feeling lucky, use this option, which gives you a standard set of scores. You can reassign the values using the left and right arrow buttons."
+                ::t/ui-fn #(abilities-standard character-ref)
+                ::t/select-fn (set-standard-abilities character-ref)
+                ::t/modifiers [(mod5e/deferred-abilities)]}]})
+   (t/selection-cfg
+    {:name "Race"
+     :help "Race determines your appearance and helps shape your culture and background. It also affects you ability scores, size, speed, languages, and many other crucial inherent traits."
+     :options [dwarf-option
+               elf-option
+               halfling-option
+               human-option
+               dragonborn-option
+               gnome-option
+               half-elf-option
+               half-orc-option
+               tiefling-option]})
+   (t/selection-cfg
+    {:name "Background"
+     :help "Background broadly describes your character origin. It also affords you two skill proficiencies and possibly proficiencies with tools or languages."
+     :options (map
+               background-option
+               backgrounds)})
+   (t/selection-cfg
+    {:name "Class"
+     :help [:div
+            [:p "Class is your adventuring vocation. It determines many of your special talents, including weapon, armor, skill, saving throw, and tool proficiencies. It also provides starting equipment options. When you gain levels, you gain them in a particular class."]
+            [:p.m-t-10 "Select your class using the selector at the top of the 'Class' section. Multiclassing is uncommon, but you may multiclass by clicking the 'Add Class' button at the end of the 'Class' section."]]
+     :max nil
+     :sequential? false
+     :new-item-fn (fn [selection classes]
+                    (let [current-classes (into #{}
+                                                (map ::entity/key)
+                                                (get-in @character-ref
+                                                        [::entity/options :class]))]
+                      {::entity/key (->> selection
+                                         ::t/options
+                                         (map ::t/key)
+                                         (some #(if (-> % current-classes not) %)))
+                       ::entity/options {:levels [{::entity/key :1}]}}))
+     :options [(barbarian-option character-ref)
+               (bard-option character-ref)
+               (cleric-option character-ref)
+               (druid-option character-ref)
+               (fighter-option character-ref)
+               (monk-option character-ref)
+               (paladin-option character-ref)
+               (ranger-option character-ref)
+               (rogue-option character-ref)
+               (sorcerer-option character-ref)
+               (warlock-option character-ref)
+               (wizard-option character-ref)]})])
 
 (def template-base
   (es/make-entity

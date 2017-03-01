@@ -81,7 +81,7 @@
     :mouseover-option nil
     :builder {:character {:tab 0}}}))
 
-#_(add-watch app-state :log (fn [k r os ns]
+(add-watch app-state :log (fn [k r os ns]
                             (js/console.log "OLD" (clj->js os))
                             (js/console.log "NEW" (clj->js ns))))
 
@@ -144,6 +144,18 @@
               next-option-path)
        (vec (reverse next-option-path))))))
 
+(defn hide-mouseover-option! []
+  (let [mouseover-option (js/document.getElementById "mouseover-option")]
+    (if mouseover-option (set! (.-display (.-style mouseover-option)) "none"))))
+
+(defn show-mouseover-option! []
+  (let [mouseover-option (js/document.getElementById "mouseover-option")]
+    (if mouseover-option (set! (.-display (.-style mouseover-option)) nil))))
+
+(defn set-mouseover-option! [opt]
+  (show-mouseover-option!)
+  (set! (.-innerHTML (js/document.getElementById "mouseover-option-title")) (::t/name opt))
+  (set! (.-innerHTML (js/document.getElementById "mouseover-option-help")) (or (::t/help opt) "")))
 
 (defn option [path option-paths selectable? list-collapsed? {:keys [::t/key ::t/name ::t/selections ::t/modifiers ::t/prereqs ::t/ui-fn ::t/select-fn] :as opt} built-char raw-char changeable? options change-fn built-template collapsed-paths stepper-selection-path]
   (let [new-path (conj path key)
@@ -176,7 +188,7 @@
                          (let [stepper-selection-path stepper-selection-path
                                selection-path (to-option-path stepper-selection-path built-template)]
                            (if (= path selection-path)
-                             (set! (.-innerHTML (js/document.getElementById "mouseover-option-title")) (::t/name opt))))
+                             (set-mouseover-option! opt)))
                         (.stopPropagation e))}
        [:div.option-header
         [:div.flex-grow-1
@@ -736,9 +748,14 @@
           [:h1.f-w-bold.m-t-10 "Step: " (::t/name selection)
            (if (::t/optional? selection)
              [:span.m-l-5.f-s-10 "(optional)"])]
-          [:p.m-t-5.selection-stepper-help (::t/help selection)]
-          [:div
-           [:span#mouseover-option-title]]]
+          (let [help (::t/help selection)
+                help-vec (if (vector? help) help [help])]
+            (if (string? help)
+              [:p.m-t-5.selection-stepper-help help]
+              help))
+          [:div#mouseover-option.b-1.b-rad-5.b-color-gray.p-10.m-t-10
+           [:span#mouseover-option-title.f-w-b]
+           [:p#mouseover-option-help]]]
          [:div.m-t-10 "Click 'Get Started' to step through the build process."])
        [:div.flex.m-t-10.selection-stepper-footer
         [:button.form-button.selection-stepper-button
@@ -751,13 +768,15 @@
                    option-paths)
                   next-template-path (entity/get-template-selection-path built-template next-path [])
                   root-paths (map (fn [s] [(::t/key s)]) (::t/selections built-template))]
+              (hide-mouseover-option!)
+              (prn "NEXTPATH" next-path)
               (swap!
                app-state
                (fn [as]
                  (-> as
                      (assoc :stepper-selection-path (if selection next-template-path [::t/selections 0]))
                      (collapse-paths root-paths)
-                     (open-path-and-subpaths (if selection next-path [(first (::t/selections built-template))])))))))}
+                     (open-path-and-subpaths (if selection next-path [(::t/key (first (::t/selections built-template)))])))))))}
          (if selection "Next Step" "Get Started")]]]
       [:svg.m-l--1 {:width "20" :height "24"}
        [:path 
