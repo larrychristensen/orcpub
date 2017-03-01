@@ -839,7 +839,7 @@
              top (if element (.-offsetTop element) 0)
              stepper-element (js/document.getElementById "selection-stepper")
              options-top (.-offsetTop (js/document.getElementById "options-column"))]
-         (set! (.-top (.-style stepper-element)) (str (- top options-top) "px"))))}))
+         (if (pos? top) (set! (.-top (.-style stepper-element)) (str (- top options-top) "px")))))}))
 
 (defn options-column [built-char built-template option-paths mobile? collapsed-paths stepper-selection-path plugins]
   [:div {:id "options-column"
