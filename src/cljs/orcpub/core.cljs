@@ -81,7 +81,7 @@
     :mouseover-option nil
     :builder {:character {:tab 0}}}))
 
-(add-watch app-state :log (fn [k r os ns]
+#_(add-watch app-state :log (fn [k r os ns]
                             (js/console.log "OLD" (clj->js os))
                             (js/console.log "NEW" (clj->js ns))))
 
@@ -221,13 +221,13 @@
                           (swap! app-state update :collapsed-paths disj new-path))}
              [:span.expand-collapse-button
               "Expand"]
-             [:i.fa.fa-caret-down.m-l-5.orange]]
+             [:i.fa.fa-caret-down.m-l-5.orange.pointer]]
             [:div.flex
              {:on-click (fn [_]
                           (swap! app-state update :collapsed-paths conj new-path))}
              [:span.expand-collapse-button
               "Collapse"]
-             [:i.fa.fa-caret-up.m-l-5.orange]]))]
+             [:i.fa.fa-caret-up.m-l-5.orange.pointer]]))]
        (if (and selected? (not collapsed?))
          [:div
           (if ui-fn (ui-fn path))
@@ -381,13 +381,13 @@
                         (swap! app-state update :collapsed-paths disj new-path))}
            [:div.expand-collapse-button
             "Show All Options"]
-           [:i.fa.fa-caret-down.m-l-5.orange]]
+           [:i.fa.fa-caret-down.m-l-5.orange.pointer]]
           [:div.flex
            {:on-click (fn [_]
                         (swap! app-state update :collapsed-paths conj new-path))}
            [:span.expand-collapse-button
             "Hide Unselected Options"]
-           [:i.fa.fa-caret-up.m-l-5.orange]]))]
+           [:i.fa.fa-caret-up.m-l-5.orange.pointer]]))]
      [:div
       (let [simple-options? 
             (or (::t/simple? selection)
@@ -797,13 +797,13 @@
                        (swap! app-state update :collapsed-paths disj path))}
           [:span.expand-collapse-button
            "Show All Options"]
-          [:i.fa.fa-caret-down.m-l-5.orange]]
+          [:i.fa.fa-caret-down.m-l-5.orange.pointer]]
          [:div.flex
           {:on-click (fn [_]
                        (swap! app-state update :collapsed-paths conj path))}
           [:span.expand-collapse-button
            "Hide Unselected Options"]
-          [:i.fa.fa-caret-up.m-l-5.orange]])]
+          [:i.fa.fa-caret-up.m-l-5.orange.pointer]])]
       [:div.builder-option.selected-builder-option
        (if collapsed?
          [:span (s/join ", " (conj (map :name (filter #((:key %) selected-plugins) plugins)) "Player's Handbook"))]
@@ -812,17 +812,18 @@
            [:span.checkbox.checked.disabled
             [:i.fa.fa-check.orange]]
            [:span.checkbox-text "Player's Handbook"]]
-          (mapv
-           (fn [{:keys [name key]}]
-             (let [checked? (selected-plugins key)]
-               ^{:key key}
-               [:div.checkbox-parent
-                [:span.checkbox
-                 {:class-name (if checked? "checked")
-                  :on-click (fn [_] (swap! app-state assoc-in [:plugins key] (not checked?)))}
-                 (if checked? [:i.fa.fa-check.orange])]
-                [:span.checkbox-text name]]))
-           plugins)])]]))
+          (doall
+           (map
+            (fn [{:keys [name key]}]
+              (let [checked? (and selected-plugins (selected-plugins key))]
+                ^{:key key}
+                [:div.checkbox-parent
+                 [:span.checkbox
+                  {:class-name (if checked? "checked")
+                   :on-click (fn [_] (swap! app-state assoc-in [:plugins key] (not checked?)))}
+                  (if checked? [:i.fa.fa-check.orange])]
+                 [:span.checkbox-text name]]))
+            plugins))])]]))
 
 (def builder-selector-component
   (with-meta

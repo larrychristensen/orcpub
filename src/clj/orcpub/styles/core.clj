@@ -157,7 +157,10 @@
     {:list-style-type :disc}]
 
    [:.hidden
-    {:display :none}]])
+    {:display :none}]
+
+   [:.pointer
+    {:cursor :pointer}]])
 
 (def app
   (concat
