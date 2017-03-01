@@ -274,7 +274,7 @@
 (def halfling-option
   (race-option
    {:name "Halfling"
-    :help "Halflings are small, half the height of a human, but fairly stout. They are cheerful and practical."
+    :help "Halflings are small and nimble, half the height of a human, but fairly stout. They are cheerful and practical."
     :abilities {:dex 2}
     :size :small
     :speed 25
@@ -293,7 +293,7 @@
 (def human-option
   (race-option
    {:name "Human"
-    :help "Humans are physically diverse and highly adaptable."
+    :help "Humans are physically diverse and highly adaptable. They excel in nearly every profession."
     ;; abilities are tied to variant selection below
     :size :medium
     :speed 30
@@ -335,7 +335,7 @@
 (def dragonborn-option
   (race-option
    {:name "Dragonborn"
-    :help "Kin to dragons, dragonborn resemble humanoid dragons, without wings or tail and standing erect."
+    :help "Kin to dragons, dragonborn resemble humanoid dragons, without wings or tail and standing erect. They tend to make excellent fighters."
     :abilities {:str 2 :cha 1}
     :size :medium
     :speed 30
@@ -438,7 +438,8 @@ Intelligence, Wisdom, and Charisma saving throws against magic."}]
 
 (def half-elf-option
   (race-option
-   {:name "Half Elf"
+   {:name "Half-Elf"
+    :help "Half-elves are charismatic, and bear a resemblance to both their elvish and human parents and share many of the traits of each."
     :abilities {:cha 2}
     :size :medium
     :speed 30
@@ -453,7 +454,8 @@ you to sleep."}]}))
 
 (def half-orc-option
   (race-option
-   {:name "Half Orc"
+   {:name "Half-Orc"
+    :help "Half-orcs are strong and bear an unmistakable resemblance to their orcish parent. They tend to make excellent warriors, especially Barbarians."
     :abilities {:str 2 :con 1}
     :size :medium
     :speed 30
@@ -680,6 +682,7 @@ to the extra damage of the critical hit."}]}))
 (def tiefling-option
   (race-option
    {:name "Tiefling"
+    :help "Tieflings bear the distinct marks of their infernal ancestry: horns, a tail, pointed teeth, and solid-colored eyes. They are smart and charismatic."
     :abilities {:int 1 :cha 2}
     :size :medium
     :speed 30
@@ -3825,6 +3828,7 @@ until you finish a long rest."}]}
      (mod5e/trait "Sculpt Spells")])])
 
 (def backgrounds [{:name "Acolyte"
+                   :help "Your life has been devoted to serving a god or gods."
                    :profs {:skill {:insight true, :religion true}
                            :language-options {:choose 2 :options {:any true}}}
                    :personality ["I idolize a particular hero of my faith, and constantly refer to that person's deeds and example."
@@ -3854,48 +3858,62 @@ until you finish a long rest."}]}
                           "I am suspicious of strangers and expect the worst of them."
                           "Once I pick a goal, I become obsessed with it to the detriment of everything else in my life."]},
                   {:name "Criminal"
+                   :help "You have a history of criminal activity."
                    :profs {:skill {:deception true, :stealth true}
                            :tool {:thieves-tools true}
                            :tool-options {:gaming-set 1}}}
                   {:name "Folk Hero"
+                   :help "You are regarded as a hero by the people of your home village."
                    :profs {:skill {:animal-handling true :survival true}
                            :tool {:land-vehicles true}
                            :tool-options {:artisans-tool 1}}}
                   {:name "Noble"
+                   :help "You are of noble birth."
                    :profs {:skill {:history true :persuasion true}
                            :tool-options {:gaming-set 1}
                            :language-options {:choose 1 :options {:any true}}}}
                   {:name "Sage"
+                   :help "You spent your life studying lore."
                    :profs {:skill {:arcana true :history true}
                            :language-options {:choose 2 :options {:any true}}}}
                   {:name "Soldier"
+                   :help "You have spent your living by the sword."
                    :profs {:skill {:athletics true :intimidation true}
                            :tool {:land-vehicles true}
                            :tool-options {:gaming-set 1}}}
                   {:name "Charlatan"
+                   :help "You have a history of being able to work people to your advantage."
                    :profs {:skill {:deception true :sleight-of-hand true}
                            :tool {:disguise-kit true :forgery-kit true}}}
                   {:name "Entertainer"
+                   :help "You have a history of entertaining people."
                    :profs {:skill {:acrobatics true :performance true}
                            :tool {:disguise-kit true}
                            :tool-options {:musical-instrument 1}}}
                   {:name "Guild Artisan"
+                   :help "You are an artisan and a member of a guild in a particular field."
                    :profs {:skill {:insight true :persuasion true}
                            :tool-options {:artisans-tool 1}}}
                   {:name "Hermit"
+                   :help "You have lived a secluded life."
                    :profs {:skill {:medicine true :religion true}
                            :tool {:herbalism-kit true}}}
                   {:name "Outlander"
+                   :help "You were raised in the wilds."
                    :profs {:skill {:athletics true :survival true}
                            :tool-options {:musical-instrument 1}}}
                   {:name "Sailor"
+                   :help "You were a member of a crew for a seagoing vessel."
                    :profs {:skill {:athletics true :perception true}
                            :tool {:navigators-tools true :water-vehices true}}}
                   {:name "Urchin"
+                   :help "You were a poor orphan living on the streets."
                    :profs {:skill {:sleight-of-hand true :stealth true}
                            :tool {:disguise-kit true :thieves-tools true}}}])
 
 (defn background-option [{:keys [name
+                                 help
+                                 page
                                  profs
                                  selections
                                  modifiers
@@ -3915,40 +3933,42 @@ until you finish a long rest."}]}
         {lang-num :choose lang-options :options} language-options
         lang-kws (if (:any lang-options) (map :key opt5e/languages) (keys lang-options))
         skill-kws (if (:any options) (map :key opt5e/skills) (keys options))]
-    (t/option
-     name
-     kw
-     (vec
-      (concat
-       selections
-       (if (seq tool-options) [(tool-prof-selection tool-options)])
-       (class-weapon-options weapon-choices)
-       (class-armor-options armor-choices)
-       (class-equipment-options equipment-choices)
-       (if (seq skill-kws) [(opt5e/skill-selection skill-kws skill-num)])
-       (if (seq lang-kws) [(opt5e/language-selection (map opt5e/language-map lang-kws) lang-num)])))
-     (vec
-      (concat
-       modifiers
-       (armor-prof-modifiers (keys armor-profs))
-       (weapon-prof-modifiers (keys weapon-profs))
-       (tool-prof-modifiers (keys tool))
-       (mapv
-        (fn [skill-kw]
-          (mod5e/skill-proficiency skill-kw))
-        (keys skill))
-       (mapv
-        (fn [[k num]]
-          (mod5e/weapon k num))
-        weapons)
-       (mapv
-        (fn [[k num]]
-          (mod5e/armor k num))
-        armor)
-       (mapv
-        (fn [[k num]]
-          (mod5e/equipment k num))
-        equipment))))))
+    (t/option-cfg
+     {:name name
+      :key kw
+      :help help
+      :page page
+      :selections (vec
+                   (concat
+                    selections
+                    (if (seq tool-options) [(tool-prof-selection tool-options)])
+                    (class-weapon-options weapon-choices)
+                    (class-armor-options armor-choices)
+                    (class-equipment-options equipment-choices)
+                    (if (seq skill-kws) [(opt5e/skill-selection skill-kws skill-num)])
+                    (if (seq lang-kws) [(opt5e/language-selection (map opt5e/language-map lang-kws) lang-num)])))
+      :modifiers (vec
+                  (concat
+                   modifiers
+                   (armor-prof-modifiers (keys armor-profs))
+                   (weapon-prof-modifiers (keys weapon-profs))
+                   (tool-prof-modifiers (keys tool))
+                   (mapv
+                    (fn [skill-kw]
+                      (mod5e/skill-proficiency skill-kw))
+                    (keys skill))
+                   (mapv
+                    (fn [[k num]]
+                      (mod5e/weapon k num))
+                    weapons)
+                   (mapv
+                    (fn [[k num]]
+                      (mod5e/armor k num))
+                    armor)
+                   (mapv
+                    (fn [[k num]]
+                      (mod5e/equipment k num))
+                    equipment)))})))
 
 (defn volos-guide-to-monsters-selections [character-ref]
   [(t/selection
