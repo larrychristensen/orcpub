@@ -195,6 +195,8 @@
   (merge
    {:pack {:name "Equipment Packs"
            :values packs}}
+   {:musical-instrument {:name "Musical Instruments"
+                         :values musical-instruments}}
    (zipmap (map :key equipment) equipment)))
 
 (def armor

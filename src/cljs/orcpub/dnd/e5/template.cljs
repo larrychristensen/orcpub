@@ -961,6 +961,7 @@ to the extra damage of the critical hit."}]}))
   (class-options armor-option armor-choices "Select armor to begin your adventuring career with."))
 
 (defn class-equipment-options [equipment-choices]
+  (prn "EQUIPMENT CHOICES" equipment-choices)
   (class-options equipment-option equipment-choices "Select equipment to start your adventuring career with."))
 
 (defn class-option [{:keys [name
@@ -1225,8 +1226,7 @@ creature."}]}
                          :options {:diplomats-pack 1
                                    :entertainers-pack 1}}
                         {:name "Musical Instrument"
-                         :options {:lute 1
-                                   :musical-instrument 1}}]
+                         :options (zipmap (map :key opt5e/musical-instruments) (repeat 1))}]
     :armor {:leather 1}
     :spellcaster true
     :spellcasting {:level-factor 1
