@@ -754,7 +754,7 @@
 (defn open-path-and-subpaths [state path]
   (reduce
    (fn [s subpath]
-     (update s :collapsed-paths disj path))
+     (update s :collapsed-paths disj subpath))
    state
    (reductions conj [] path)))
 
@@ -1001,8 +1001,8 @@
                         :on-click (fn [_] (swap! app-state assoc-in tab-path (if mobile? 2 1)))} "Details"]]])
 
 (defn character-builder []
-  (cljs.pprint/pprint @character-ref)
-  ;;(cljs.pprint/pprint @app-state)
+  ;;(cljs.pprint/pprint @character-ref)
+  (cljs.pprint/pprint @app-state)
   (let [selected-plugins (map
                           :selections
                           (filter
