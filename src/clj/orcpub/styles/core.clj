@@ -139,7 +139,9 @@
     {:background-color :transparent}]
    [:.no-border
     {:border :none}]
-   
+
+   [:.p-b-40
+    {:padding-bottom "40px"}]
    [:.p-1
     {:padding "1px"}]
    [:.p-10
@@ -176,8 +178,7 @@
      {:background-image "linear-gradient(182deg, #2c3445, #000000)"
       :font-family "Open Sans, sans-serif"
       :height "100%"
-      :overflow :auto
-      :padding-bottom "40px"}]
+      :overflow :auto}]
 
     [:.container
      container-style]

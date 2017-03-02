@@ -1036,7 +1036,7 @@
       [:div.app-header-bar.container
        [:div.content
         [:img.orcpub-logo {:src "image/orcpub-logo.svg"}]]]]
-     [:div.flex.justify-cont-c
+     [:div.flex.justify-cont-c.p-b-40
       [:div.f-s-14.white.w-1440
        [:h1.f-s-36.f-w-b.m-t-21.m-b-19.m-l-10 "Character Builder"]
        (if (not desktop?)
