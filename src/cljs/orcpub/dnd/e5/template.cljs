@@ -12,7 +12,7 @@
             [orcpub.dnd.e5.spell-lists :as sl]))
 
 (def character
-  {::entity/options {:ability-scores {::entity/key :standard-roll
+  {::entity/options {#_:ability-scores #_{::entity/key :standard-roll
                                       ::entity/value (char5e/abilities 15 14 13 12 10 8)}
                      :class [{::entity/key :barbarian
                               ::entity/options {:levels [{::entity/key :1}]}}]}})
@@ -61,17 +61,17 @@
    (let [abilities (get-raw-abilities character-ref)
          abilities-vec (vec abilities)]
      (map-indexed
-      (fn [i [k v]]
+      (fn [i k]
         ^{:key k}
         [:div.m-t-10.t-a-c.p-1 
          [:div.uppercase (name k)]
          [:input.input.f-s-18
-          {:value v
+          {:value (k abilities)
            :on-change (fn [e] (let [value (.-value (.-target e))
                                     new-v (if (not (s/blank? value))
                                             (js/parseInt value))]
                                 (swap! character-ref assoc-in [::entity/options :ability-scores ::entity/value k] new-v)))}]])
-      abilities-vec))])
+      char5e/ability-keys))])
 
 (declare template-selections)
 

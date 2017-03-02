@@ -425,13 +425,13 @@
                 [0 (* alpha 2)]
                 [(- beta) alpha]
                 [(- beta) (- alpha)]]
-        offset-abilities (take 6 (drop 1 (cycle abilities)))
+        offset-ability-keys (take 6 (drop 1 (cycle char5e/ability-keys)))
         text-points [[0 55] [106 0] [206 55] [206 190] [106 240] [0 190]]
         abilities-points (map
-                          (fn [[_ av] [x y]]
-                            (let [ratio (double (/ av 20))]
+                          (fn [k [x y]]
+                            (let [ratio (double (/ (k abilities) 20))]
                               [(* x ratio) (* y ratio)]))
-                          offset-abilities
+                          offset-ability-keys
                           points)
         colors (map-indexed
                 (fn [i c]
@@ -440,15 +440,15 @@
                 ["#f4692a" "#f32e50" "#b35c95" "#47eaf8" "#bbe289" "#f9b747"])]
     [:div.posn-rel.w-100-p
      (map
-      (fn [[ak av] [x y] {:keys [color]}]
+      (fn [k [x y] {:keys [color]}]
         ^{:key color}
         [:div {:style {:width 50 :text-align :center :position :absolute :left x :top y}}
          [:div
-          [:span (s/upper-case (name ak))]
-          [:span.m-l-5 {:style {:color color}} av]]
-         [:div {:style {:color color}} (let [bonus (int (/ (- av 10) 2))]
-                                         (str "(" (mod/bonus-str (get ability-bonuses ak)) ")"))]])
-      offset-abilities
+          [:span (s/upper-case (name k))]
+          [:span.m-l-5 {:style {:color color}} (k abilities)]]
+         [:div {:style {:color color}} (let [bonus (int (/ (- (k abilities) 10) 2))]
+                                         (str "(" (mod/bonus-str (k ability-bonuses)) ")"))]])
+      offset-ability-keys
       (take 6 (drop 1 (cycle text-points)))
       colors)
      [:svg {:width (+ 80 double-beta double-point-offset) :height (+ 60 d double-point-offset)}
