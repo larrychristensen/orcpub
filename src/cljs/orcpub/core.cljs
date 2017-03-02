@@ -758,6 +758,9 @@
            [:p#mouseover-option-help]]]
          [:div.m-t-10 "Click 'Get Started' to step through the build process."])
        [:div.flex.m-t-10.selection-stepper-footer
+        [:button.link-button.m-r-5
+         {:on-click (fn [_] (swap! app-state assoc :stepper-dismissed true))}
+         "Dismiss"]
         [:button.form-button.selection-stepper-button
          {:on-click
           (fn [_]
@@ -934,7 +937,8 @@
         stepper-selection-path (:stepper-selection-path @app-state)
         collapsed-paths (:collapsed-paths @app-state)
         mouseover-option (:mouseover-option @app-state)
-        plugins (:plugins @app-state)]
+        plugins (:plugins @app-state)
+        stepper-dismissed? (:stepper-dismissed @app-state)]
     ;;(js/console.log "BUILT TEMPLAT" built-template)
     ;;(print-char built-char)
     [:div.app
@@ -949,7 +953,7 @@
        (if (not desktop?)
          [builder-tabs active-tab mobile? tablet?])
        [:div.flex
-        (if desktop?
+        (if (and desktop? (not stepper-dismissed?))
           [selection-stepper
            built-template
            option-paths

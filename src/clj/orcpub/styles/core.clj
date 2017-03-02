@@ -135,6 +135,10 @@
     {:color button-color}]
    [:.uppercase
     {:text-transform :uppercase}]
+   [:.bg-trans
+    {:background-color :transparent}]
+   [:.no-border
+    {:border :none}]
    
    [:.p-1
     {:padding "1px"}]
@@ -327,6 +331,17 @@
       :padding "10px 15px"
       :cursor :pointer
       :background-image "linear-gradient(to bottom, #f1a20f, #dbab50)"}]
+
+    [:.link-button
+     {:color button-color
+      :border :none
+      :background-color :transparent
+      :text-transform :uppercase
+      :cursor :pointer
+      :border-radius "5px"}]
+
+    [:.link-button:hover
+     {:background-color "rgba(0,0,0,0.2)"}]
 
     [:.field
      {:margin-top "30px"}]
