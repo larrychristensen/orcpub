@@ -759,17 +759,73 @@
   (let [stepper-element (js/document.getElementById "selection-stepper")]
     (set! (.-top (.-style stepper-element)) (str top "px"))))
 
-(defn prn-and-return [& x]
-  (apply prn x)
-  (last x))
+(defn to-selection-path [entity-path entity]
+  (vec
+   (remove
+    nil?
+    (map (fn [path]
+           (let [last-key (last path)]
+             (cond
+               (= last-key ::entity/options) nil
+               (number? last-key) (::entity/key (get-in entity path))
+               :else last-key)))
+         (reductions conj [] entity-path)))))
+
+(defn set-next-template-path! [built-template next-path next-template-path]
+  (let [root-paths (map (fn [s] [(::t/key s)]) (::t/selections built-template))]
+    (swap!
+     app-state
+     (fn [as]
+       (-> as
+           (assoc :stepper-selection-path next-template-path)
+           (collapse-paths root-paths)
+           (open-path-and-subpaths next-path))))))
+
+(defn set-next-selection! [built-template option-paths stepper-selection-path unselected-selections]
+  (let [[next-path {:keys [::t/name]}]
+        (if (nil? stepper-selection-path)
+          (let [s (first unselected-selections)]
+            [(::path s) s])
+          (next-selection
+           stepper-selection-path
+           built-template
+           option-paths))
+        next-template-path (if next-path (entity/get-template-selection-path built-template next-path []))]
+    (hide-mouseover-option!)
+    (if (nil? next-path)
+      (set-stepper-top! 0))
+    (set-next-template-path! built-template next-path next-template-path)))
+
+(defn level-up! [built-template]
+  (let [entity-path [::entity/options :class 0 ::entity/options :levels]
+        lvls (get-in @character-ref entity-path)
+        next-lvl (-> lvls count inc str keyword)
+        selection-path (to-selection-path entity-path @character-ref)
+        next-lvl-path (conj selection-path next-lvl)
+        template-path (entity/get-template-selection-path built-template next-lvl-path [])
+        option (get-in built-template template-path)
+        first-selection (first (::t/selections option))
+        selection-key (::t/key first-selection)
+        next-path (conj next-lvl-path selection-key)
+        next-template-path (conj template-path ::t/selections 0)]
+    (swap!
+     character-ref
+     update-in
+     entity-path
+     conj
+     {::entity/key next-lvl})
+    (set-next-template-path! built-template next-path next-template-path)))
 
 (defn selection-stepper [built-template option-paths stepper-selection-path]
   (let [selection (if stepper-selection-path (get-in built-template stepper-selection-path))
         all-selections (get-all-selections [] built-template option-paths)
         unselected-selections (drop-selected option-paths all-selections)
-        unselected-selections? (pos? (count unselected-selections))]
-    [:div {:id "selection-stepper"}
+        unselected-selections? (pos? (count unselected-selections))
+        level-up? (not (or selection unselected-selections?))
+        complete? (not unselected-selections?)]
+    [:div
      [:div.flex.selection-stepper-inner
+      {:id "selection-stepper"}
       [:div.selection-stepper-main
        [:h1.f-w-bold.selection-stepper-title "Step-By-Step"]
        (if selection
@@ -784,42 +840,31 @@
               help))
           [:div#mouseover-option.b-1.b-rad-5.b-color-gray.p-10.m-t-10.hidden
            [:span#mouseover-option-title.f-w-b]
-           [:p#mouseover-option-help]]]
+           [:p#mouseover-option-help]]])
+       (if (or (not selection) level-up? complete?)
          [:div.m-t-10
           (if unselected-selections?
             "Click 'Get Started' to step through the build process."
-            "All selections complete. Click 'Level Up' to level up your character or 'Dismiss' to hide this guide.")])
+            (str "All selections complete. Click "
+                 (if level-up?
+                   "'Level Up' to your advance character level"
+                   "'Finish' to complete")
+                 " or 'Dismiss' to hide this guide."))])
        [:div.flex.m-t-10.selection-stepper-footer
-        [:button.link-button.m-r-5
-         {:on-click (fn [_] (swap! app-state assoc :stepper-dismissed true))}
+        [:span.link-button.m-r-5
+         {:on-click (fn [_]
+                      (swap! app-state assoc :stepper-dismissed true))}
          "Dismiss"]
         [:button.form-button.selection-stepper-button
          {:on-click
-          (fn [_]
-            (let [[next-path {:keys [::t/name]}]
-                  (if (nil? stepper-selection-path)
-                    (let [s (first unselected-selections)]
-                      [(::path s) s])
-                    (next-selection
-                     stepper-selection-path
-                     built-template
-                     option-paths))
-                  next-template-path (if next-path (entity/get-template-selection-path built-template next-path []))
-                  root-paths (map (fn [s] [(::t/key s)]) (::t/selections built-template))]
-              (hide-mouseover-option!)
-              (if (nil? next-path)
-                (set-stepper-top! 0))
-              (swap!
-               app-state
-               (fn [as]
-                 (-> as
-                     (assoc :stepper-selection-path next-template-path)
-                     (collapse-paths root-paths)
-                     (open-path-and-subpaths next-path))))))}
+          (fn [_] (if level-up?
+                    (level-up! built-template)
+                    (set-next-selection! built-template option-paths stepper-selection-path unselected-selections)))}
          (cond
+           level-up? "Level Up"
+           complete? "Finish"
            selection "Next Step"
-           unselected-selections? "Get Started"
-           :else "Level Up")]]]
+           unselected-selections? "Get Started")]]]
       (if selection
         [:svg.m-l--1.m-t-10 {:width "20" :height "24"}
          [:path 

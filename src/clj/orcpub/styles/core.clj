@@ -325,6 +325,7 @@
     [:.form-button
      {:color :white
       :font-weight 600
+      :font-size "12px"
       :border :none
       :border-radius "5px"
       :text-transform :uppercase
@@ -338,10 +339,12 @@
       :background-color :transparent
       :text-transform :uppercase
       :cursor :pointer
-      :border-radius "5px"}]
+      :font-size "12px"
+      :border-radius "5px"
+      :padding "10px 15px"}]
 
     [:.link-button:hover
-     {:background-color "rgba(0,0,0,0.2)"}]
+     {:text-decoration :underline}]
 
     [:.field
      {:margin-top "30px"}]
@@ -414,9 +417,6 @@
 
     [:.selection-stepper-footer
      {:justify-content :flex-end}]
-
-    [:.selection-stepper-button
-     {:padding "6px"}]
 
     [:.option-header
      {:display :flex
