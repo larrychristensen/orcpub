@@ -156,8 +156,8 @@
   (show-mouseover-option!)
   (let [title-el (js/document.getElementById "mouseover-option-title")]
     (if title-el
-      (set! (.-innerHTML title-el) (::t/name opt))
-      (set! (.-innerHTML (js/document.getElementById "mouseover-option-help")) (or (::t/help opt) "")))))
+      (do (set! (.-innerHTML title-el) (::t/name opt))
+          (set! (.-innerHTML (js/document.getElementById "mouseover-option-help")) (or (::t/help opt) ""))))))
 
 (defn option [path option-paths selectable? list-collapsed? {:keys [::t/key ::t/name ::t/selections ::t/modifiers ::t/prereqs ::t/ui-fn ::t/select-fn] :as opt} built-char raw-char changeable? options change-fn built-template collapsed-paths stepper-selection-path]
   (let [new-path (conj path key)
@@ -698,33 +698,37 @@
    ::t/optional? true
    ::t/help "Select the sources you want to use for races, classes, etc. Click the 'Show All Options' button to make additional selections. If you are new to the game we recommend just moving on to the next step."})
 
-(defn get-all-selections [path {:keys [::t/key ::t/selections ::t/options] :as obj} selected-option-paths]
+(defn get-all-selections-aux [path {:keys [::t/key ::t/selections ::t/options] :as obj} selected-option-paths]
   (let [children (map
                   (fn [{:keys [::t/key] :as s}]
-                    (get-all-selections (conj path key) s selected-option-paths))
+                    (get-all-selections-aux (conj path key) s selected-option-paths))
                   (or selections options))]
     (cond
       selections
       (if (get-in selected-option-paths path) children)
     
       options
-      (if (and key children)
+      (if key
         (concat
          [(assoc obj ::path path)]
          children)
         children))))
 
+(defn get-all-selections [path obj selected-option-paths]
+  (remove nil? (flatten (get-all-selections-aux path obj selected-option-paths))))
+
 (defn selection-made? [selected-option-paths selection]
-  (get-in selected-option-paths (::path selection)))
+  (let [option (get-in selected-option-paths (::path selection))]
+    (and option (>= (count (remove nil? (keys option))) (::t/min selection)))))
 
 (defn drop-selected [selected-option-paths selections]
-  (drop-while
+  (remove
    (partial selection-made? selected-option-paths)
    selections))
 
 (defn next-selection [current-template-path built-template selected-option-paths]
   (let [current-path (to-option-path current-template-path built-template)
-        all-selections (remove nil? (flatten (get-all-selections [] built-template selected-option-paths)))
+        all-selections (get-all-selections [] built-template selected-option-paths)
         up-to-current (drop-while
                        (fn [s]
                          (not= (::path s) current-path))
@@ -755,8 +759,15 @@
   (let [stepper-element (js/document.getElementById "selection-stepper")]
     (set! (.-top (.-style stepper-element)) (str top "px"))))
 
+(defn prn-and-return [& x]
+  (apply prn x)
+  (last x))
+
 (defn selection-stepper [built-template option-paths stepper-selection-path]
-  (let [selection (if stepper-selection-path (get-in built-template stepper-selection-path))]
+  (let [selection (if stepper-selection-path (get-in built-template stepper-selection-path))
+        all-selections (get-all-selections [] built-template option-paths)
+        unselected-selections (drop-selected option-paths all-selections)
+        unselected-selections? (pos? (count unselected-selections))]
     [:div {:id "selection-stepper"}
      [:div.flex.selection-stepper-inner
       [:div.selection-stepper-main
@@ -775,7 +786,7 @@
            [:span#mouseover-option-title.f-w-b]
            [:p#mouseover-option-help]]]
          [:div.m-t-10
-          (if (nil? stepper-selection-path)
+          (if unselected-selections?
             "Click 'Get Started' to step through the build process."
             "All selections complete. Click 'Level Up' to level up your character or 'Dismiss' to hide this guide.")])
        [:div.flex.m-t-10.selection-stepper-footer
@@ -786,11 +797,14 @@
          {:on-click
           (fn [_]
             (let [[next-path {:keys [::t/name]}]
-                  (next-selection
-                   (or stepper-selection-path [::t/selections 0])
-                   built-template
-                   option-paths)
-                  next-template-path (entity/get-template-selection-path built-template next-path [])
+                  (if (nil? stepper-selection-path)
+                    (let [s (first unselected-selections)]
+                      [(::path s) s])
+                    (next-selection
+                     stepper-selection-path
+                     built-template
+                     option-paths))
+                  next-template-path (if next-path (entity/get-template-selection-path built-template next-path []))
                   root-paths (map (fn [s] [(::t/key s)]) (::t/selections built-template))]
               (hide-mouseover-option!)
               (if (nil? next-path)
@@ -799,13 +813,13 @@
                app-state
                (fn [as]
                  (-> as
-                     (assoc :stepper-selection-path (if selection next-template-path [::t/selections 0]))
+                     (assoc :stepper-selection-path next-template-path)
                      (collapse-paths root-paths)
-                     (open-path-and-subpaths (if selection next-path [(::t/key (first (::t/selections built-template)))])))))))}
+                     (open-path-and-subpaths next-path))))))}
          (cond
            selection "Next Step"
-           stepper-selection-path "Level Up"
-           :else "Get Started")]]]
+           unselected-selections? "Get Started"
+           :else "Level Up")]]]
       (if selection
         [:svg.m-l--1.m-t-10 {:width "20" :height "24"}
          [:path 

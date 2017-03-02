@@ -1046,6 +1046,7 @@
      :min num
      :max num})))
 
+
 (defn weapon-proficiency-selection
   ([num]
    (t/selection-cfg
