@@ -76,7 +76,8 @@
    {:collapsed-paths #{[:ability-scores]
                        [:background]
                        [:race]
-                       [:sources]}
+                       [:sources]
+                       [:class :barbarian]}
     :stepper-selection-path nil
     :mouseover-option nil
     :builder {:character {:tab 0}}}))
@@ -368,7 +369,13 @@
 
 (defn builder-selector [path option-paths {:keys [::t/name ::t/key ::t/min ::t/max] :as selection} built-char raw-char built-template collapsed-paths stepper-selection-path]
   (let [new-path (conj path key)
-        collapsed? (get collapsed-paths new-path)]
+        collapsed? (get collapsed-paths new-path)
+        simple-options? 
+        (or (::t/simple? selection)
+            (not-any? #(or (seq (::t/selections %))
+                           (some ::mod/name (::t/modifiers %))
+                           (::t/ui-fn %))
+                      (::t/options selection)))]
     ^{:key key}
     [:div.builder-selector
      {:id (selector-id new-path)}
@@ -376,7 +383,7 @@
       (if (zero? (count path))
         [:h1.f-s-24 (::t/name selection)]
         [:h2.builder-selector-header (::t/name selection)])
-      (if (and (not (or (nil? max) (> max min))) (zero? (count path)))
+      (if (and (not (or (nil? max) (> max min))) (not simple-options?))
         (if collapsed?
           [:div.flex
            {:on-click (fn [_]
@@ -391,15 +398,9 @@
             "Hide Unselected Options"]
            [:i.fa.fa-caret-up.m-l-5.orange.pointer]]))]
      [:div
-      (let [simple-options? 
-            (or (::t/simple? selection)
-                (not-any? #(or (seq (::t/selections %))
-                               (some ::mod/name (::t/modifiers %))
-                               (::t/ui-fn %))
-                          (::t/options selection)))]
-        (if simple-options?
-          [dropdown-selector path option-paths selection built-char raw-char built-template]
-          [list-selector path option-paths selection collapsed? built-char raw-char built-template collapsed-paths stepper-selection-path]))]]))
+      (if simple-options?
+        [dropdown-selector path option-paths selection built-char raw-char built-template]
+        [list-selector path option-paths selection collapsed? built-char raw-char built-template collapsed-paths stepper-selection-path])]]))
 
 (defn make-path-map [character]
   (let [flat-options (entity/flatten-options (::entity/options character))]
@@ -745,11 +746,12 @@
           [(::path next) (first unselected)])))))
 
 (defn collapse-paths [state paths]
-  (reduce
-   (fn [s path]
-     (update s :collapsed-paths conj path))
-   state
-   paths))
+  (let [all-paths (mapcat #(reductions conj [] %) paths)]
+    (reduce
+     (fn [s path]
+       (update s :collapsed-paths conj path))
+     state
+     all-paths)))
 
 (defn open-path-and-subpaths [state path]
   (reduce
@@ -775,9 +777,8 @@
          (reductions conj [] entity-path)))))
 
 (defn set-next-template-path! [built-template next-path next-template-path character]
-  (let [flat-options (entity/flatten-options (::entity/options character))
-        _ (prn "FLAT OPTIONS" flat-options)
-        root-paths (map ::t/path flat-options)]
+  (let [flat-options (entity/flatten-options (::entity/options character))       
+        root-paths (concat [[:ability-scores] [:race] [:background]] (map ::t/path flat-options))]
     (swap!
      app-state
      (fn [as]
@@ -1004,7 +1005,7 @@
 
 (defn character-builder []
   ;;(cljs.pprint/pprint @character-ref)
-  (cljs.pprint/pprint @app-state)
+  ;;(cljs.pprint/pprint @app-state)
   (let [selected-plugins (map
                           :selections
                           (filter
