@@ -154,8 +154,10 @@
 
 (defn set-mouseover-option! [opt]
   (show-mouseover-option!)
-  (set! (.-innerHTML (js/document.getElementById "mouseover-option-title")) (::t/name opt))
-  (set! (.-innerHTML (js/document.getElementById "mouseover-option-help")) (or (::t/help opt) "")))
+  (let [title-el (js/document.getElementById "mouseover-option-title")]
+    (if title-el
+      (set! (.-innerHTML title-el) (::t/name opt))
+      (set! (.-innerHTML (js/document.getElementById "mouseover-option-help")) (or (::t/help opt) "")))))
 
 (defn option [path option-paths selectable? list-collapsed? {:keys [::t/key ::t/name ::t/selections ::t/modifiers ::t/prereqs ::t/ui-fn ::t/select-fn] :as opt} built-char raw-char changeable? options change-fn built-template collapsed-paths stepper-selection-path]
   (let [new-path (conj path key)
