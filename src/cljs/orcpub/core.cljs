@@ -241,7 +241,7 @@
                  ^{:key key}
                  [builder-selector new-path option-paths selection built-char raw-char built-template collapsed-paths stepper-selection-path]))
              selections))]]
-         (if collapsed? [:div.builder-option.collapsed-list-builder-option]))])))
+         (if (and (seq selections) collapsed?) [:div.builder-option.collapsed-list-builder-option]))])))
 
 (def builder-selector-style)
 
@@ -774,8 +774,10 @@
                :else last-key)))
          (reductions conj [] entity-path)))))
 
-(defn set-next-template-path! [built-template next-path next-template-path]
-  (let [root-paths (map (fn [s] [(::t/key s)]) (::t/selections built-template))]
+(defn set-next-template-path! [built-template next-path next-template-path character]
+  (let [flat-options (entity/flatten-options (::entity/options character))
+        _ (prn "FLAT OPTIONS" flat-options)
+        root-paths (map ::t/path flat-options)]
     (swap!
      app-state
      (fn [as]
@@ -798,9 +800,9 @@
     (hide-mouseover-option!)
     (if (nil? next-path)
       (set-stepper-top! 0))
-    (set-next-template-path! built-template next-path next-template-path)))
+    (set-next-template-path! built-template next-path next-template-path character)))
 
-(defn level-up! [built-template]
+(defn level-up! [built-template character]
   (let [entity-path [::entity/options :class 0 ::entity/options :levels]
         lvls (get-in @character-ref entity-path)
         next-lvl (-> lvls count inc str keyword)
@@ -818,7 +820,7 @@
      entity-path
      conj
      {::entity/key next-lvl})
-    (set-next-template-path! built-template next-path next-template-path)))
+    (set-next-template-path! built-template next-path next-template-path character)))
 
 (defn selection-stepper [built-template option-paths character stepper-selection-path]
   (let [selection (if stepper-selection-path (get-in built-template stepper-selection-path))
@@ -862,7 +864,7 @@
         [:button.form-button.selection-stepper-button
          {:on-click
           (fn [_] (if level-up?
-                    (level-up! built-template)
+                    (level-up! built-template character)
                     (set-next-selection! built-template option-paths character stepper-selection-path unselected-selections)))}
          (cond
            level-up? "Level Up"
