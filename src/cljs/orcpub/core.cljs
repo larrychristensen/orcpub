@@ -717,27 +717,30 @@
 (defn get-all-selections [path obj selected-option-paths]
   (remove nil? (flatten (get-all-selections-aux path obj selected-option-paths))))
 
-(defn selection-made? [selected-option-paths selection]
-  (let [option (get-in selected-option-paths (::path selection))]
-    (and option (>= (count (remove nil? (keys option))) (::t/min selection)))))
+(defn selection-made? [built-template selected-option-paths character selection]
+  (let [option (get-in selected-option-paths (::path selection))
+        entity-path (entity/get-entity-path built-template character (::path selection))
+        selections (get-in character entity-path)
+        min-count (::t/min selection)]
+    (and option (or (= min-count 1) (and (vector? selections) (>= (count (filter ::entity/key selections)) min-count))))))
 
-(defn drop-selected [selected-option-paths selections]
+(defn drop-selected [built-template selected-option-paths character selections]
   (remove
-   (partial selection-made? selected-option-paths)
+   (partial selection-made? built-template selected-option-paths character)
    selections))
 
-(defn next-selection [current-template-path built-template selected-option-paths]
+(defn next-selection [current-template-path built-template selected-option-paths character]
   (let [current-path (to-option-path current-template-path built-template)
         all-selections (get-all-selections [] built-template selected-option-paths)
         up-to-current (drop-while
                        (fn [s]
                          (not= (::path s) current-path))
                        all-selections)
-        up-to-next (drop-selected selected-option-paths (drop 1 up-to-current))
+        up-to-next (drop-selected built-template selected-option-paths character (drop 1 up-to-current))
         next (first up-to-next)]
     (if next
       [(::path next) next]
-      (let [unselected (drop-selected selected-option-paths all-selections)]
+      (let [unselected (drop-selected built-template selected-option-paths character all-selections)]
         (if (pos? (count unselected))
           [(::path next) (first unselected)])))))
 
@@ -781,7 +784,7 @@
            (collapse-paths root-paths)
            (open-path-and-subpaths next-path))))))
 
-(defn set-next-selection! [built-template option-paths stepper-selection-path unselected-selections]
+(defn set-next-selection! [built-template option-paths character stepper-selection-path unselected-selections]
   (let [[next-path {:keys [::t/name]}]
         (if (nil? stepper-selection-path)
           (let [s (first unselected-selections)]
@@ -789,7 +792,8 @@
           (next-selection
            stepper-selection-path
            built-template
-           option-paths))
+           option-paths
+           character))
         next-template-path (if next-path (entity/get-template-selection-path built-template next-path []))]
     (hide-mouseover-option!)
     (if (nil? next-path)
@@ -816,10 +820,10 @@
      {::entity/key next-lvl})
     (set-next-template-path! built-template next-path next-template-path)))
 
-(defn selection-stepper [built-template option-paths stepper-selection-path]
+(defn selection-stepper [built-template option-paths character stepper-selection-path]
   (let [selection (if stepper-selection-path (get-in built-template stepper-selection-path))
         all-selections (get-all-selections [] built-template option-paths)
-        unselected-selections (drop-selected option-paths all-selections)
+        unselected-selections (drop-selected built-template option-paths character all-selections)
         unselected-selections? (pos? (count unselected-selections))
         level-up? (not (or selection unselected-selections?))
         complete? (not unselected-selections?)]
@@ -859,7 +863,7 @@
          {:on-click
           (fn [_] (if level-up?
                     (level-up! built-template)
-                    (set-next-selection! built-template option-paths stepper-selection-path unselected-selections)))}
+                    (set-next-selection! built-template option-paths character stepper-selection-path unselected-selections)))}
          (cond
            level-up? "Level Up"
            complete? "Finish"
@@ -997,7 +1001,7 @@
                         :on-click (fn [_] (swap! app-state assoc-in tab-path (if mobile? 2 1)))} "Details"]]])
 
 (defn character-builder []
-  ;;(cljs.pprint/pprint @character-ref)
+  (cljs.pprint/pprint @character-ref)
   ;;(cljs.pprint/pprint @app-state)
   (let [selected-plugins (map
                           :selections
@@ -1042,6 +1046,7 @@
           [selection-stepper
            built-template
            option-paths
+           @character-ref
            stepper-selection-path])
         [builder-columns
          built-template
