@@ -1411,7 +1411,7 @@
 
 (defn ability-score-improvement-selection []
   (t/selection
-   "Ability Score Improvement/Feat"
+   "Ability Score Improvement or Feat"
    [(t/option
      "Ability Score Improvement"
      :ability-score-improvement
