@@ -69,7 +69,8 @@
 (def field-font-size
   {:font-size "14px"})
 
-(def template (t5e/template character-ref))
+(def template (entity/sort-selections
+               (t5e/template character-ref)))
 
 (defonce app-state
   (r/atom
@@ -1006,6 +1007,7 @@
     [:span.builder-tab {:class-name (if (or (and mobile? (= active-tab 2))
                                             (and tablet? (= active-tab 1))) "selected-builder-tab")
                         :on-click (fn [_] (swap! app-state assoc-in tab-path (if mobile? 2 1)))} "Details"]]])
+
 
 (defn character-builder []
   ;;(cljs.pprint/pprint @character-ref)

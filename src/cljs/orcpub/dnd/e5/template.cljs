@@ -988,7 +988,7 @@ to the extra damage of the critical hit."}]}))
   (let [kw (common/name-to-kw name)
         {:keys [save skill-options tool-options tool]
          armor-profs :armor weapon-profs :weapon} profs
-        {skill-num :choose options :options} skill-options
+        {skill-num :choose options :options skill-select-order :order} skill-options
         skill-kws (if (:any options) (map :key opt5e/skills) (keys options))
         save-profs (keys save)
         spellcasting-template (opt5e/spellcasting-template (assoc spellcasting :class-key kw))]
@@ -1004,7 +1004,7 @@ to the extra damage of the critical hit."}]}))
                     (class-weapon-options weapon-choices)
                     (class-armor-options armor-choices)
                     (class-equipment-options equipment-choices)
-                    [(opt5e/skill-selection skill-kws skill-num)
+                    [(opt5e/skill-selection skill-kws skill-num skill-select-order)
                      (t/selection-cfg
                       {:name "Levels"
                        :help "These are your levels in the containing class. You can add levels by clicking the 'Add Levels' button below."
@@ -2793,7 +2793,7 @@ reaction to halve the attack's damage against you.")])])]}}}
             :weapon {:simple true :crossbow--hand true :longsword true :rapier true :shortsword true}
             :save {:dex true :int true}
             :tool {:thieves-tools true}
-            :skill-options {:choose 4 :options {:acrobatics true :athletics true :deception true :insight true :intimidation true :investigation true :perception true :performance true :persuasion true :sleight-of-hand true :stealth true}}}
+            :skill-options {:order 0 :choose 4 :options {:acrobatics true :athletics true :deception true :insight true :intimidation true :investigation true :perception true :performance true :persuasion true :sleight-of-hand true :stealth true}}}
     :weapon-choices [{:name "Melee Weapon"
                       :options {:rapier 1
                                 :shortsword 1}}]
@@ -2818,7 +2818,10 @@ reaction to halve the attack's damage against you.")])])]}}}
                     :shortsword
                     []
                     [(mod5e/weapon :shortsword 1)])])
-                 opt5e/rogue-expertise-selection]
+                 (assoc
+                  opt5e/rogue-expertise-selection
+                  ::t/order
+                  1)]
     :traits [{:name "Sneak Attack" :description "You know how to strike subtly and exploit a foe's distraction. Once per turn, you can deal an extra 1d6 damage to one creature you hit with an attack if you have advantage on the attack roll. The attack must use a finesse or a ranged weapon.\nYou don't need advantage on the attack roll if another enemy of the target is within 5 feet of it, that enemy isn't incapacitated, and you don't have disadvantage on the attack roll.\nThe amount of the extra damage increases as you gain levels in this class, as shown in the Sneak Attack column of the Rogue table."}
              {:name "Thieves' Cant" :description "During your rogue training you learned thieves' cant, a secret mix of dialect, jargon, and code that allows you to hide messages in seemingly normal conversation. Only another creature that knows thieves' cant understands such messages. It takes four times longer to convey such a message than it does to speak the same idea plainly.\nIn addition, you understand a set of secret signs and symbols used to convey short, simple messages, such as whether an area is dangerous or the territory of a thieves' guild, whether loot is nearby, or whether the people in an area are easy marks or will provide a safe house for thieves on the run."}
              {:level 2 :name "Cunning Action" :description "Your quick thinking and agility allow you to move and act quickly. You can take a bonus action on each of your turns in combat. This action can be used only to take the Dash, Disengage, or Hide action."}

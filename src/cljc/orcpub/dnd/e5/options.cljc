@@ -1018,9 +1018,10 @@
 (defn skill-selection
   ([num]
    (skill-selection (map :key skills) num))
-  ([options num]
+  ([options num & [order]]
    (t/selection-cfg
     {:name "Skill Proficiency"
+     :order order
      :help (proficiency-help num "a skill" "skills")
      :options (skill-options
       (filter

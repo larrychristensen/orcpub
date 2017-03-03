@@ -247,6 +247,7 @@
         (vals (apply dissoc merged (map ::t/key options))))))))
 
 (defn merge-selections [selections other-selections]
+  (prn "MERGE SELECTIONS")
   (if (or selections other-selections)
     (let [sel-map (zipmap (map ::t/key selections) selections)
           other-sel-map (zipmap (map ::t/key other-selections) other-selections)
@@ -270,6 +271,33 @@
   (reduce
    merge-selections
    selections))
+
+(declare sort-selections)
+
+(defn sort-options [s]
+  (update
+   s
+   ::t/options
+   (fn [options]
+     (vec
+      (sort-by
+       ::t/name
+       (map
+        sort-selections
+        options))))))
+
+(defn sort-selections [o]
+  (update
+   o
+   ::t/selections
+   (fn [selections]
+     (vec
+      (sort-by
+       (fn [selection]
+         (or (::t/order selection) 1000))
+       (map
+        sort-options
+        selections))))))
 
 (defn build-template [raw-entity template]
   (let [plugin-map (t/make-modifier-map template)
