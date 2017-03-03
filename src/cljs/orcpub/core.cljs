@@ -375,7 +375,9 @@
             (not-any? #(or (seq (::t/selections %))
                            (some ::mod/name (::t/modifiers %))
                            (::t/ui-fn %))
-                      (::t/options selection)))]
+                      (::t/options selection)))
+        collapsible? (and (not (or (nil? max) (> max min)))
+                         (not simple-options?))]
     ^{:key key}
     [:div.builder-selector
      {:id (selector-id new-path)}
@@ -383,7 +385,7 @@
       (if (zero? (count path))
         [:h1.f-s-24 (::t/name selection)]
         [:h2.builder-selector-header (::t/name selection)])
-      (if (and (not (or (nil? max) (> max min))) (not simple-options?))
+      (if collapsible?
         (if collapsed?
           [:div.flex
            {:on-click (fn [_]
@@ -400,7 +402,7 @@
      [:div
       (if simple-options?
         [dropdown-selector path option-paths selection built-char raw-char built-template]
-        [list-selector path option-paths selection collapsed? built-char raw-char built-template collapsed-paths stepper-selection-path])]]))
+        [list-selector path option-paths selection (and collapsible? collapsed?) built-char raw-char built-template collapsed-paths stepper-selection-path])]]))
 
 (defn make-path-map [character]
   (let [flat-options (entity/flatten-options (::entity/options character))]
