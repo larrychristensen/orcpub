@@ -217,7 +217,8 @@
                        v)))))
               named-mods))])]
         (if (and selected?
-                 (seq selections))
+                 (or (seq selections)
+                     ui-fn))
           (if collapsed?
             [:div.flex
              {:on-click (fn [_]
@@ -242,7 +243,8 @@
                  ^{:key key}
                  [builder-selector new-path option-paths selection built-char raw-char built-template collapsed-paths stepper-selection-path]))
              selections))]]
-         (if (and (seq selections) collapsed?) [:div.builder-option.collapsed-list-builder-option]))])))
+         (if (and (seq selections) collapsed?)
+           [:div.builder-option.collapsed-list-builder-option]))])))
 
 (def builder-selector-style)
 
@@ -915,11 +917,11 @@
               (let [checked? (and selected-plugins (selected-plugins key))]
                 ^{:key key}
                 [:div.checkbox-parent
+                 {:on-click (fn [_] (swap! app-state assoc-in [:plugins key] (not checked?)))}
                  [:span.checkbox
-                  {:class-name (if checked? "checked")
-                   :on-click (fn [_] (swap! app-state assoc-in [:plugins key] (not checked?)))}
+                  {:class-name (if checked? "checked")}
                   (if checked? [:i.fa.fa-check.orange])]
-                 [:span.checkbox-text name]]))
+                 [:span.checkbox-text.pointer name]]))
             plugins))])]]))
 
 (def builder-selector-component
