@@ -833,6 +833,7 @@ to the extra damage of the critical hit."}]}))
       option)))
 
 (defn level-option [{:keys [name
+                            plugin?
                             hit-die
                             profs
                             levels
@@ -863,9 +864,9 @@ to the extra damage of the critical hit."}]}))
             :options (mapv
                       #(subclass-option (assoc cls :key kw) % character-ref)
                       subclasses)})])
-       (if (ability-inc-set i)
+       (if (and (not plugin?) (ability-inc-set i))
          [(opt5e/ability-score-improvement-selection)])
-       (if (> i 1)
+       (if (and (not plugin?) (> i 1))
          [(hit-points-selection character-ref hit-die)])))
      (vec
       (concat
@@ -885,7 +886,7 @@ to the extra damage of the critical hit."}]}))
          (fn [{level :level :or {level 1}}]
            (= level i))
          traits))
-       (if (= i 1) [(mod5e/max-hit-points hit-die)])
+       (if (and (not plugin?) (= i 1)) [(mod5e/max-hit-points hit-die)])
        [(mod5e/level kw name i)])))))
 
 
@@ -966,6 +967,7 @@ to the extra damage of the critical hit."}]}))
 (defn class-option [{:keys [name
                             help
                             hit-die
+                            plugin?
                             profs
                             levels
                             ability-increase-levels
@@ -4051,6 +4053,7 @@ until you finish a long rest."}]}
 
 (defn scag-classes [character-ref]
   [{:name "Barbarian"
+    :plugin? true
     :subclass-level 3
     :subclass-title "Primal Path"
     :subclasses [{:name "Path of the Battlerager"
