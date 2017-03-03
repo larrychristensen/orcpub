@@ -94,10 +94,32 @@
    {:value (str (::t/key option))}
    (::t/name option)])
 
+(defn hide-mouseover-option! []
+  (let [mouseover-option (js/document.getElementById "mouseover-option")]
+    (if mouseover-option (set! (.-display (.-style mouseover-option)) "none"))))
+
+(defn show-mouseover-option! []
+  (let [mouseover-option (js/document.getElementById "mouseover-option")]
+    (if mouseover-option (set! (.-display (.-style mouseover-option)) "block"))))
+
+(defn set-mouseover-option! [opt]
+  (show-mouseover-option!)
+  (let [title-el (js/document.getElementById "mouseover-option-title")]
+    (if title-el
+      (do (set! (.-innerHTML title-el) (::t/name opt))
+          (set! (.-innerHTML (js/document.getElementById "mouseover-option-help")) (or (::t/help opt) ""))))))
+
 (defn dropdown [options selected-value change-fn built-char]
   [:select.builder-option.builder-option-dropdown
    {:on-change change-fn
-    :value (or (str selected-value) "")}
+    :value (or (str selected-value) "")
+    :on-mouse-over (fn [_]
+                     (if selected-value
+                       (set-mouseover-option!
+                        (first
+                         (filter
+                          #(= selected-value (::t/key %))
+                          options)))))}
    [:option.builder-dropdown-item]
    (doall
     (map-indexed
@@ -146,21 +168,6 @@
               next-option-path)
        (vec (reverse next-option-path))))))
 
-(defn hide-mouseover-option! []
-  (let [mouseover-option (js/document.getElementById "mouseover-option")]
-    (if mouseover-option (set! (.-display (.-style mouseover-option)) "none"))))
-
-(defn show-mouseover-option! []
-  (let [mouseover-option (js/document.getElementById "mouseover-option")]
-    (if mouseover-option (set! (.-display (.-style mouseover-option)) "block"))))
-
-(defn set-mouseover-option! [opt]
-  (show-mouseover-option!)
-  (let [title-el (js/document.getElementById "mouseover-option-title")]
-    (if title-el
-      (do (set! (.-innerHTML title-el) (::t/name opt))
-          (set! (.-innerHTML (js/document.getElementById "mouseover-option-help")) (or (::t/help opt) ""))))))
-
 (defn option [path option-paths selectable? list-collapsed? {:keys [::t/key ::t/name ::t/selections ::t/modifiers ::t/prereqs ::t/ui-fn ::t/select-fn] :as opt} built-char raw-char changeable? options change-fn built-template collapsed-paths stepper-selection-path]
   (let [new-path (conj path key)
         selected? (boolean (get-in option-paths new-path))
@@ -191,8 +198,7 @@
         :on-mouse-enter (fn [e]
                          (let [stepper-selection-path stepper-selection-path
                                selection-path (to-option-path stepper-selection-path built-template)]
-                           (if (= path selection-path)
-                             (set-mouseover-option! opt)))
+                           (set-mouseover-option! opt))
                         (.stopPropagation e))}
        [:div.option-header
         [:div.flex-grow-1
