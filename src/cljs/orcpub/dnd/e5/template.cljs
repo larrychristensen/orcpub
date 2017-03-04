@@ -1008,6 +1008,7 @@ to the extra damage of the critical hit."}]}))
                      (t/selection-cfg
                       {:name "Levels"
                        :help "These are your levels in the containing class. You can add levels by clicking the 'Add Levels' button below."
+                       :new-item-text "Level Up (Add a Level)"
                        :new-item-fn (fn [selection options current-values]
                                       {::entity/key (-> current-values count inc str keyword)})
                        :options (vec

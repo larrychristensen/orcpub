@@ -255,7 +255,7 @@
 
 (def builder-selector-style)
 
-(defn add-option-button [{:keys [::t/key ::t/name ::t/options] :as selection} entity path new-item-fn built-template]
+(defn add-option-button [{:keys [::t/key ::t/name ::t/options ::t/new-item-text] :as selection} entity path new-item-fn built-template]
   [:div.add-item-button
    [:i.fa.fa-plus-circle.orange]
    [:span.m-l-5
@@ -268,7 +268,7 @@
                        (get-in @character-ref value-path))]
          (swap! character-ref #(update-option built-template % path
                                               (fn [options] (conj (vec options) new-item))))))}
-    (str "Add " name)]])
+    (or new-item-text (str "Add " name))]])
 
 
 (defn dropdown-selector [path option-paths {:keys [::t/options ::t/min ::t/max ::t/key ::t/name ::t/sequential? ::t/new-item-fn] :as selection} built-char raw-char built-template]
