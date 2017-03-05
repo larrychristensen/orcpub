@@ -4090,6 +4090,7 @@ until you finish a long rest."}]}
 (defn inventory-selection [item-type-name items modifier-fn]
   (t/selection-cfg
    {:name item-type-name
+    :min 0
     :max nil
     :sequential? false
     :quantity? true

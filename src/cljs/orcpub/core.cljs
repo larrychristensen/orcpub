@@ -278,6 +278,11 @@
                                               (fn [options] (conj (vec options) new-item))))))}
     (or new-item-text (str "Add " name))]])
 
+(defn remove-option-button [path built-template index]
+  [:i.fa.fa-minus-circle.remove-item-button.orange
+   {:on-click
+    (fn [e]
+      (swap! character-ref #(remove-list-option built-template % path index)))}])
 
 (defn dropdown-selector [path option-paths {:keys [::t/options ::t/min ::t/max ::t/key ::t/name ::t/sequential? ::t/new-item-fn ::t/quantity?] :as selection} built-char raw-char built-template collapsed?]
   (if (not collapsed?)
@@ -307,9 +312,11 @@
             (doall
              (map-indexed
               (fn [i {value ::entity/key
-                      qty-value ::entity/value}]
+                      qty-value ::entity/value
+                      :as option}]
+                (js/console.log "VALUES" i value qty-value name option)
                 ^{:key i}
-                [:div.flex
+                [:div.flex.align-items-c
                  [dropdown options value (change-fn i) built-char]
                  (if quantity?
                    [:input.input.m-l-5
@@ -317,18 +324,13 @@
                      :placeholder "QTY"
                      :value qty-value
                      :on-change (qty-change-fn i)
-                     :style {:width "70px"}}])])
+                     :style {:width "70px"}}])
+                 [remove-option-button full-path built-template i]])
               final-options)))
           (add-option-button selection raw-char (conj path key) new-item-fn built-template)])])
     [:div
      [:div.builder-option.collapsed-list-builder-option]
      [:div.builder-option.collapsed-list-builder-option]]))
-
-(defn remove-option-button [path built-template index]
-  [:i.fa.fa-minus-circle.remove-item-button.orange
-   {:on-click
-    (fn [e]
-      (swap! character-ref #(remove-list-option built-template % path index)))}])
 
 (defn filter-selected [path key option-paths options raw-char built-template]
   (let [options-path (conj path key)
@@ -1041,7 +1043,7 @@
 
 
 (defn character-builder []
-  ;;(cljs.pprint/pprint @character-ref)
+  (cljs.pprint/pprint @character-ref)
   ;;(cljs.pprint/pprint @app-state)
   (let [selected-plugins (map
                           :selections
