@@ -279,46 +279,50 @@
     (or new-item-text (str "Add " name))]])
 
 
-(defn dropdown-selector [path option-paths {:keys [::t/options ::t/min ::t/max ::t/key ::t/name ::t/sequential? ::t/new-item-fn ::t/quantity?] :as selection} built-char raw-char built-template]
-  (let [change-fn (partial make-dropdown-change-fn path key built-template raw-char character-ref)
-        qty-change-fn (partial make-quantity-change-fn path key built-template raw-char character-ref)
-        options (filter (fn [{:keys [::t/prereq-fn]}]
-                          (or (not prereq-fn) (prereq-fn built-char)))
-                        options)]
+(defn dropdown-selector [path option-paths {:keys [::t/options ::t/min ::t/max ::t/key ::t/name ::t/sequential? ::t/new-item-fn ::t/quantity?] :as selection} built-char raw-char built-template collapsed?]
+  (if (not collapsed?)
+    (let [change-fn (partial make-dropdown-change-fn path key built-template raw-char character-ref)
+          qty-change-fn (partial make-quantity-change-fn path key built-template raw-char character-ref)
+          options (filter (fn [{:keys [::t/prereq-fn]}]
+                            (or (not prereq-fn) (prereq-fn built-char)))
+                          options)]
+      [:div
+       (if max
+         (if (= min max)
+           (doall
+            (for [i (range max)]
+              (let [option-path (conj path key i)
+                    entity-path (entity/get-entity-path built-template raw-char option-path)
+                    key-path (conj entity-path ::entity/key)
+                    value (get-in @character-ref key-path)]
+                ^{:key i} [:div [dropdown options value (change-fn i) built-char]]))))
+         [:div
+          (let [full-path (conj path key)
+                entity-path (entity/get-entity-path built-template raw-char full-path)
+                selected (get-in @character-ref entity-path)
+                remaining (- min (count selected))
+                final-options (if (pos? remaining)
+                                (vec (concat selected (repeat remaining {::entity/key nil})))
+                                selected)]
+            (doall
+             (map-indexed
+              (fn [i {value ::entity/key
+                      qty-value ::entity/value}]
+                ^{:key i}
+                [:div.flex
+                 [dropdown options value (change-fn i) built-char]
+                 (if quantity?
+                   [:input.input.m-l-5
+                    {:type :number
+                     :placeholder "QTY"
+                     :value qty-value
+                     :on-change (qty-change-fn i)
+                     :style {:width "70px"}}])])
+              final-options)))
+          (add-option-button selection raw-char (conj path key) new-item-fn built-template)])])
     [:div
-     (if max
-       (if (= min max)
-         (doall
-          (for [i (range max)]
-            (let [option-path (conj path key i)
-                  entity-path (entity/get-entity-path built-template raw-char option-path)
-                  key-path (conj entity-path ::entity/key)
-                  value (get-in @character-ref key-path)]
-              ^{:key i} [:div [dropdown options value (change-fn i) built-char]]))))
-       [:div
-        (let [full-path (conj path key)
-              entity-path (entity/get-entity-path built-template raw-char full-path)
-              selected (get-in @character-ref entity-path)
-              remaining (- min (count selected))
-              final-options (if (pos? remaining)
-                              (vec (concat selected (repeat remaining {::entity/key nil})))
-                              selected)]
-          (doall
-           (map-indexed
-            (fn [i {value ::entity/key
-                    qty-value ::entity/value}]
-              ^{:key i}
-              [:div.flex
-               [dropdown options value (change-fn i) built-char]
-               (if quantity?
-                 [:input.input.m-l-5
-                  {:type :number
-                   :placeholder "QTY"
-                   :value qty-value
-                   :on-change (qty-change-fn i)
-                   :style {:width "70px"}}])])
-            final-options)))
-        (add-option-button selection raw-char (conj path key) new-item-fn built-template)])]))
+     [:div.builder-option.collapsed-list-builder-option]
+     [:div.builder-option.collapsed-list-builder-option]]))
 
 (defn remove-option-button [path built-template index]
   [:i.fa.fa-minus-circle.remove-item-button.orange
@@ -394,7 +398,7 @@
 (defn selector-id [path]
   (s/join "--" (map name path)))
 
-(defn builder-selector [path option-paths {:keys [::t/name ::t/key ::t/min ::t/max ::t/ui-fn] :as selection} built-char raw-char built-template collapsed-paths stepper-selection-path]
+(defn builder-selector [path option-paths {:keys [::t/name ::t/key ::t/min ::t/max ::t/ui-fn ::t/collapsible?] :as selection} built-char raw-char built-template collapsed-paths stepper-selection-path]
   (let [new-path (conj path key)
         collapsed? (get collapsed-paths new-path)
         simple-options? 
@@ -403,8 +407,9 @@
                            (some ::mod/name (::t/modifiers %))
                            (::t/ui-fn %))
                       (::t/options selection)))
-        collapsible? (and (not (or (nil? max) (> max min)))
-                         (not simple-options?))]
+        collapsible? (or collapsible?
+                         (and (not (or (nil? max) (> max min)))
+                              (not simple-options?)))]
     ^{:key key}
     [:div.builder-selector
      {:id (selector-id new-path)}
@@ -418,18 +423,18 @@
            {:on-click (fn [_]
                         (swap! app-state update :collapsed-paths disj new-path))}
            [:div.expand-collapse-button
-            "Show All Options"]
+            (if simple-options? "Expand" "Show All Options")]
            [:i.fa.fa-caret-down.m-l-5.orange.pointer]]
           [:div.flex
            {:on-click (fn [_]
                         (swap! app-state update :collapsed-paths conj new-path))}
            [:span.expand-collapse-button
-            "Hide Unselected Options"]
+            (if simple-options? "Collapse" "Hide Unselected Options")]
            [:i.fa.fa-caret-up.m-l-5.orange.pointer]]))]
      [:div
       (cond
         ui-fn (ui-fn selection)
-        simple-options? [dropdown-selector path option-paths selection built-char raw-char built-template]
+        simple-options? [dropdown-selector path option-paths selection built-char raw-char built-template collapsed?]
         :else [list-selector path option-paths selection (and collapsible? collapsed?) built-char raw-char built-template collapsed-paths stepper-selection-path])]]))
 
 (defn make-path-map [character]

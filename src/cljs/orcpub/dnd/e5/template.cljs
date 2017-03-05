@@ -4093,6 +4093,7 @@ until you finish a long rest."}]}
     :max nil
     :sequential? false
     :quantity? true
+    :collapsible? true
     :new-item-fn (fn [selection selected-items]
                    {::entity/key (-> items first :key)})
     :options (mapv
@@ -4180,7 +4181,7 @@ until you finish a long rest."}]}
                (sorcerer-option character-ref)
                (warlock-option character-ref)
                (wizard-option character-ref)]})
-   (inventory-selection "Weapon" opt5e/weapons mod5e/deferred-weapon)
+   (inventory-selection "Weapons" opt5e/weapons mod5e/deferred-weapon)
    (inventory-selection "Armor" opt5e/armor mod5e/deferred-armor)
    (inventory-selection "Equipment" opt5e/equipment mod5e/deferred-equipment)])
 
