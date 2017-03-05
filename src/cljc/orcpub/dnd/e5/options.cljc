@@ -274,12 +274,128 @@ hazards."}])
   (map
    #(assoc % :key (common/name-to-kw (:name %)))))
 
+(defn add-keys [vals]
+  (into [] add-keys-xform vals))
+
 (def ammunition
-  (into
-   []
-   add-keys-xform
-   [{:name "Bolt"}
-    {:name "Arrow"}]))
+  (add-keys
+   [{:name "Arrow" :sell-qty 20 :cost {:num 1 :type :gp} :weight "1 lb."}
+    {:name "Blowgun needle" :sell-qty 50 :cost {:num 1 :type :gp} :weight "1 lb."}
+    {:name "Crossbow bolt" :sell-qty 20 :cost {:num 1 :type :gp} :weight "1½ lb."}
+    {:name "Sling bullet" :sell-qty 20 :cost {:num 4 :type :cp} :weight "1½ lb."}]))
+
+(def arcane-focuses
+  (add-keys
+   [{:name "Crystal" :cost {:num 10 :type :gp} :weight "1 lb."}
+    {:name "Orb" :cost {:num 20 :type :gp} :weight "3 lb."}
+    {:name "Rod" :cost {:num 10 :type :gp} :weight "2 lb."}
+    {:name "Staff" :cost {:num 5 :type :gp} :weight "4 lb."}
+    {:name "Wand" :cost {:num 10 :type :gp} :weight "1 lb."}]))
+
+(def druidic-focuses
+  (add-keys
+   [{:name "Sprig of mistletoe" :cost {:num 1 :type :gp} :weight "—"}
+    {:name "Totem" :cost {:num 1 :type :gp} :weight "—"}
+    {:name "Wooden staff" :cost {:num 5 :type :gp} :weight "4 lb."}
+    {:name "Yew wand" :cost {:num 10 :type :gp} :weight "1 lb."}]))
+
+(def holy-symbols
+  (add-keys
+   [{:name "Amulet" :cost {:num 5 :type :gp} :weight "1 lb."}
+    {:name "Emblem" :cost {:num 5 :type :gp} :weight "—"}
+    {:name "Reliquary" :cost {:num 5 :type :gp} :weight "2 lb."}]))
+
+
+(def adventuring-gear
+  (concat
+   ammunition
+   arcane-focuses
+   druidic-focuses
+   holy-symbols
+   (add-keys
+    [{:name "Abacus" :cost {:num 2 :type :gp} :weight "2 lb."}
+     {:name "Acid" :sell-container :vial :cost {:num 25 :type :gp} :weight "1 lb."}
+     {:name "Alchemist’s fire" :sell-container :flask :cost {:num 50 :type :gp} :weight "1 lb."}
+     {:name "Antitoxin" :sell-container :vial :cost {:num 50 :type :gp} :weight "—"}
+     {:name "Backpack" :cost {:num 2 :type :gp} :weight "5 lb."}
+     {:name "Ball bearings" :sell-qty 1000 :sell-contiainer "bag" :cost {:num 1 :type :gp} :weight "2 lb."}
+     {:name "Barrel" :cost {:num 2 :type :gp} :weight "70 lb."}
+     {:name "Basket" :cost {:num 4 :type :sp} :weight "2 lb."}
+     {:name "Bedroll" :cost {:num 1 :type :gp} :weight "7 lb."}
+     {:name "Bell" :cost {:num 1 :type :gp} :weight "—"}
+     {:name "Blanket" :cost {:num 5 :type :sp} :weight "3 lb."}
+     {:name "Block and tackle" :cost {:num 1 :type :gp} :weight "5 lb."}
+     {:name "Book" :cost {:num 25 :type :gp} :weight "5 lb."}
+     {:name "Bottle, glass" :cost {:num 2 :type :gp} :weight "2 lb."}
+     {:name "Bucket" :cost {:num 5 :type :cp} :weight "2 lb."}
+     {:name "Caltrops" :sell-qty 20 :sell-container :bag :cost {:num 1 :type :gp} :weight "2 lb."}
+     {:name "Candle" :cost {:num 1 :type :cp} :weight "—"}
+     {:name "Case, crossbow bolt" :cost {:num 1 :type :gp} :weight "1 lb."}
+     {:name "Case, map or scroll" :cost {:num 1 :type :gp} :weight "1 lb."}
+     {:name "Chain" :sell-qty 10 :sell-container :feet :cost {:num 5 :type :gp} :weight "10 lb."}
+     {:name "Chalk" :sell-container :piece :cost {:num 1 :type :cp} :weight "—"}
+     {:name "Chest" :cost {:num 5 :type :gp} :weight "25 lb."}
+     {:name "Climber’s kit" :cost {:num 25 :type :gp} :weight "12 lb."}
+     {:name "Clothes, common" :cost {:num 5 :type :sp} :weight "3 lb."}
+     {:name "Clothes, costume" :cost {:num 5 :type :gp} :weight "4 lb."}
+     {:name "Clothes, fine" :cost {:num 15 :type :gp} :weight "6 lb."}
+     {:name "Clothes, traveler’s" :cost {:num 2 :type :gp} :weight "4 lb."}
+     {:name "Component pouch" :cost {:num 25 :type :gp} :weight "2 lb."}
+     {:name "Crowbar" :cost {:num 2 :type :gp} :weight "5 lb."}
+     {:name "Fishing tackle" :cost {:num 1 :type :gp} :weight "4 lb."}
+     {:name "Flask or tankard" :cost {:num 2 :type :cp} :weight "1 lb."}
+     {:name "Grappling hook" :cost {:num 2 :type :gp} :weight "4 lb."}
+     {:name "Hammer" :cost {:num 1 :type :gp} :weight "3 lb."}
+     {:name "Hammer, sledge" :cost {:num 2 :type :gp} :weight "10 lb."}
+     {:name "Healer’s kit" :cost {:num 5 :type :gp} :weight "3 lb."}
+     {:name "Holy water" :sell-container :flask :cost {:num 25 :type :gp} :weight "1 lb."}
+     {:name "Hourglass" :cost {:num 25 :type :gp} :weight "1 lb."}
+     {:name "Hunting trap" :cost {:num 5 :type :gp} :weight "25 lb."}
+     {:name "Ink" :sell-container "ounce bottle" :cost {:num 10 :type :gp} :weight "—"}
+     {:name "Ink pen" :cost {:num 2 :type :cp} :weight "—"}
+     {:name "Jug or pitcher" :cost {:num 2 :type :cp} :weight "4 lb."}
+     {:name "Ladder (10-foot)" :cost {:num 1 :type :sp} :weight "25 lb."}
+     {:name "Lamp" :cost {:num 5 :type :sp} :weight "1 lb."}
+     {:name "Lantern, bullseye" :cost {:num 10 :type :gp} :weight "2 lb."}
+     {:name "Lantern, hooded" :cost {:num 5 :type :gp} :weight "2 lb."}
+     {:name "Lock" :cost {:num 10 :type :gp} :weight "1 lb."}
+     {:name "Magnifying glass" :cost {:num 100 :type :gp} :weight "—"}
+     {:name "Manacles" :cost {:num 2 :type :gp} :weight "6 lb."}
+     {:name "Mess kit" :cost {:num 2 :type :sp} :weight "1 lb."}
+     {:name "Mirror, steel" :cost {:num 5 :type :gp} :weight "1/2 lb."}
+     {:name "Oil" :sell-container :flask :cost {:num 1 :type :sp} :weight "1 lb."}
+     {:name "Paper" :sell-container :sheet :cost {:num 2 :type :sp} :weight "—"}
+     {:name "Parchment" :sell-container :sheet :cost {:num 1 :type :sp} :weight "—"}
+     {:name "Perfume" :sell-container :vial :cost {:num 5 :type :gp} :weight "—"}
+     {:name "Pick, miner’s" :cost {:num 2 :type :gp} :weight "10 lb."}
+     {:name "Piton" :cost {:num 5 :type :cp} :weight "1/4 lb."}
+     {:name "Poison, basic" :sell-container :vial :cost {:num 100 :type :gp} :weight "—"}
+     {:name "Pole (10-foot)" :cost {:num 5 :type :cp} :weight "7 lb."}
+     {:name "Pot, iron" :cost {:num 2 :type :gp} :weight "10 lb."}
+     {:name "Potion of healing" :cost {:num 50 :type :gp} :weight "1/2 lb."}
+     {:name "Pouch" :cost {:num 5 :type :sp} :weight "1 lb."}
+     {:name "Quiver" :cost {:num 1 :type :gp} :weight "1 lb."}
+     {:name "Ram, portable" :cost {:num 4 :type :gp} :weight "35 lb."}
+     {:name "Rations (1 day)" :cost {:num 5 :type :sp} :weight "2 lb."}
+     {:name "Robes" :cost {:num 1 :type :gp} :weight "4 lb."}
+     {:name "Rope, hempen" :sell-container :feet :sell-qty 50 :cost {:num 1 :type :gp} :weight "10 lb."}
+     {:name "Rope, silk" :sell-container :feet :sell-qty 50 :cost {:num 10 :type :gp} :weight "5 lb."}
+     {:name "Sack" :cost {:num 1 :type :cp} :weight "1/2 lb."}
+     {:name "Scale, merchant’s" :cost {:num 5 :type :gp} :weight "3 lb."}
+     {:name "Sealing wax" :cost {:num 5 :type :sp} :weight "—"}
+     {:name "Shovel" :cost {:num 2 :type :gp} :weight "5 lb."}
+     {:name "Signal whistle" :cost {:num 5 :type :cp} :weight "—"}
+     {:name "Signet ring" :cost {:num 5 :type :gp} :weight "—"}
+     {:name "Soap" :cost {:num 2 :type :cp} :weight "—"}
+     {:name "Spellbook" :cost {:num 50 :type :gp} :weight "3 lb."}
+     {:name "Spikes, iron" :sell-qty 10 :cost {:num 1 :type :gp} :weight "5 lb."}
+     {:name "Spyglass" :cost {:num 1000 :type :gp} :weight "1 lb."}
+     {:name "Tent, two-person" :cost {:num 2 :type :gp} :weight "20 lb."}
+     {:name "Tinderbox" :cost {:num 5 :type :sp} :weight "1 lb."}
+     {:name "Torch" :cost {:num 1 :type :cp} :weight "1 lb."}
+     {:name "Vial" :cost {:num 1 :type :gp} :weight "—"}
+     {:name "Waterskin" :cost {:num 2 :type :sp} :weight "5 lb. (full)"}
+     {:name "Whetstone" :cost {:num 1 :type :cp} :weight "1 lb."}])))
 
 (def packs
   (into
@@ -297,13 +413,7 @@ hazards."}])
   (concat
    packs
    tools
-   ammunition
-   [{:name "Ancane Focus"
-     :key :arcane-focus}
-    {:name "Component Pouch"
-     :key :component-pouch}
-    {:name "Holy Symbol"
-     :key :holy-symbol}]))
+   adventuring-gear))
 
 (def equipment-map
   (merge

@@ -97,6 +97,7 @@
     [:div
      [:input.input
       {:value value
+       :type :number
        :on-change (fn [e] (let [value (.-value (.-target e))
                                new-v (if (not (s/blank? value))
                                        (js/parseInt value))]
@@ -1432,7 +1433,7 @@ the GM tells you whether you succeed or fail."}]}
                     :light-crossbow
                     []
                     [(mod5e/weapon :crossbow--light 1)
-                     (mod5e/equipment :bolt 20)])
+                     (mod5e/equipment :crossbow-bolt 20)])
                    (weapon-option [:simple 1])])]
     :traits [{:level 2 :name "Channel Divinity: Turn Undead" :description "As an action, you present your holy symbol and speak a prayer censuring the undead. Each undead that can see or hear you within 30 feet of you must make a Wisdom saving throw. If the creature fails its saving throw, it is turned for 1 minute or until it takes any damage.\nA turned creature must spend its turns trying to move as far away from you as it can, and it can't willingly move to a space within 30 feet of you. It also can't take reactions. For its action, it can use only the Dash action or try to escape from an effect that prevents it from moving. If there's nowhere to move, the creature can use the Dodge action."}
              {:level 5 :name "Destroy Undead" :description "When an undead fails its saving throw against your Turn Undead feature, the creature is instantly destroyed if its challenge rating is at or below a certain threshold, as shown in the Destroy Undead table."}
@@ -1901,7 +1902,7 @@ its attack against you."}]}
                     :light-crossbow
                     []
                     [(mod5e/weapon :crossbow--light 1)
-                     (mod5e/equipment :bolt 20)])
+                     (mod5e/equipment :crossbow-bolt 20)])
                    (t/option
                     "Two Handaxes"
                     :two-handaxes
@@ -2947,7 +2948,7 @@ magic items."}]}
                     :crossbow
                     []
                     [(mod5e/weapon :crossbow--light 1)
-                     (mod5e/equipment :bolt 20)])
+                     (mod5e/equipment :crossbow-bolt 20)])
                    (weapon-option [:simple 1])])]
     :equipment-choices [{:name "Equipment Pack"
                          :options {:dungeoneers-pack 1
@@ -3681,7 +3682,7 @@ within line of sight.")]
                     :crossbow
                     []
                     [(mod5e/weapon :crossbow--light 1)
-                     (mod5e/equipment :bolt 20)])
+                     (mod5e/equipment :crossbow-bolt 20)])
                    (weapon-option [:simple 1])])
                  (simple-weapon-selection 1)]
     :equipment-choices [{:name "Equipment Pack"
