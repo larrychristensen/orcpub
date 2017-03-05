@@ -434,7 +434,7 @@
      [:div
       (cond
         ui-fn (ui-fn selection)
-        simple-options? [dropdown-selector path option-paths selection built-char raw-char built-template collapsed?]
+        simple-options? [dropdown-selector path option-paths selection built-char raw-char built-template (and collapsible? collapsed?)]
         :else [list-selector path option-paths selection (and collapsible? collapsed?) built-char raw-char built-template collapsed-paths stepper-selection-path])]]))
 
 (defn make-path-map [character]
