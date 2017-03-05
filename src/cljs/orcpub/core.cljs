@@ -314,7 +314,6 @@
               (fn [i {value ::entity/key
                       qty-value ::entity/value
                       :as option}]
-                (js/console.log "VALUES" i value qty-value name option)
                 ^{:key i}
                 [:div.flex.align-items-c
                  [dropdown options value (change-fn i) built-char]
@@ -1043,7 +1042,7 @@
 
 
 (defn character-builder []
-  (cljs.pprint/pprint @character-ref)
+  ;;(cljs.pprint/pprint @character-ref)
   ;;(cljs.pprint/pprint @app-state)
   (let [selected-plugins (map
                           :selections

@@ -247,7 +247,6 @@
         (vals (apply dissoc merged (map ::t/key options))))))))
 
 (defn merge-selections [selections other-selections]
-  (prn "MERGE SELECTIONS")
   (if (or selections other-selections)
     (let [sel-map (zipmap (map ::t/key selections) selections)
           other-sel-map (zipmap (map ::t/key other-selections) other-selections)
