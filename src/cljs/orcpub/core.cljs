@@ -813,7 +813,7 @@
 
 (defn set-next-template-path! [built-template next-path next-template-path character]
   (let [flat-options (entity/flatten-options (::entity/options character))       
-        root-paths (concat [[:ability-scores] [:race] [:background]] (map ::t/path flat-options))]
+        root-paths (concat [[:ability-scores] [:race] [:background] [:weapons] [:armor] [:equipment]] (map ::t/path flat-options))]
     (swap!
      app-state
      (fn [as]
