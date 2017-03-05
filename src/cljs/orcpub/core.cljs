@@ -155,6 +155,14 @@
           new-value (cljs.reader/read-string (.. e -target -value))]
       (swap! character-ref #(set-option-value % (conj option-path ::entity/key) new-value)))))
 
+(defn make-quantity-change-fn [path key template raw-char character-ref i]
+  (fn [e]
+    (let [new-path (concat path [key i])
+          option-path (entity/get-entity-path template raw-char new-path)
+          raw-value (.. e -target -value)
+          new-value (if (not (s/blank? raw-value)) (js/parseInt raw-value) 1)]
+      (swap! character-ref #(set-option-value % (conj option-path ::entity/value) new-value)))))
+
 (defn to-option-path
   ([template-path template]
    (to-option-path template-path template []))
@@ -271,8 +279,9 @@
     (or new-item-text (str "Add " name))]])
 
 
-(defn dropdown-selector [path option-paths {:keys [::t/options ::t/min ::t/max ::t/key ::t/name ::t/sequential? ::t/new-item-fn] :as selection} built-char raw-char built-template]
+(defn dropdown-selector [path option-paths {:keys [::t/options ::t/min ::t/max ::t/key ::t/name ::t/sequential? ::t/new-item-fn ::t/quantity?] :as selection} built-char raw-char built-template]
   (let [change-fn (partial make-dropdown-change-fn path key built-template raw-char character-ref)
+        qty-change-fn (partial make-quantity-change-fn path key built-template raw-char character-ref)
         options (filter (fn [{:keys [::t/prereq-fn]}]
                           (or (not prereq-fn) (prereq-fn built-char)))
                         options)]
@@ -285,20 +294,29 @@
                   entity-path (entity/get-entity-path built-template raw-char option-path)
                   key-path (conj entity-path ::entity/key)
                   value (get-in @character-ref key-path)]
-              ^{:key i} [:div (dropdown options value (change-fn i) built-char)]))))
+              ^{:key i} [:div [dropdown options value (change-fn i) built-char]]))))
        [:div
         (let [full-path (conj path key)
               entity-path (entity/get-entity-path built-template raw-char full-path)
               selected (get-in @character-ref entity-path)
               remaining (- min (count selected))
               final-options (if (pos? remaining)
-                              (vec (concat selected (repeat remaining {::entity/key :wish})))
+                              (vec (concat selected (repeat remaining {::entity/key nil})))
                               selected)]
           (doall
            (map-indexed
-            (fn [i {value ::entity/key}]
+            (fn [i {value ::entity/key
+                    qty-value ::entity/value}]
               ^{:key i}
-              [:div [dropdown options value (change-fn i) built-char]])
+              [:div.flex
+               [dropdown options value (change-fn i) built-char]
+               (if quantity?
+                 [:input.input.m-l-5
+                  {:type :number
+                   :placeholder "QTY"
+                   :value qty-value
+                   :on-change (qty-change-fn i)
+                   :style {:width "70px"}}])])
             final-options)))
         (add-option-button selection raw-char (conj path key) new-item-fn built-template)])]))
 
@@ -376,7 +394,7 @@
 (defn selector-id [path]
   (s/join "--" (map name path)))
 
-(defn builder-selector [path option-paths {:keys [::t/name ::t/key ::t/min ::t/max] :as selection} built-char raw-char built-template collapsed-paths stepper-selection-path]
+(defn builder-selector [path option-paths {:keys [::t/name ::t/key ::t/min ::t/max ::t/ui-fn] :as selection} built-char raw-char built-template collapsed-paths stepper-selection-path]
   (let [new-path (conj path key)
         collapsed? (get collapsed-paths new-path)
         simple-options? 
@@ -409,9 +427,10 @@
             "Hide Unselected Options"]
            [:i.fa.fa-caret-up.m-l-5.orange.pointer]]))]
      [:div
-      (if simple-options?
-        [dropdown-selector path option-paths selection built-char raw-char built-template]
-        [list-selector path option-paths selection (and collapsible? collapsed?) built-char raw-char built-template collapsed-paths stepper-selection-path])]]))
+      (cond
+        ui-fn (ui-fn selection)
+        simple-options? [dropdown-selector path option-paths selection built-char raw-char built-template]
+        :else [list-selector path option-paths selection (and collapsible? collapsed?) built-char raw-char built-template collapsed-paths stepper-selection-path])]]))
 
 (defn make-path-map [character]
   (let [flat-options (entity/flatten-options (::entity/options character))]
@@ -962,6 +981,7 @@
 
 (defn builder-columns [built-template character option-paths collapsed-paths stepper-selection-path plugins desktop? tablet? mobile? active-tab]
   (let [built-char (entity/build character built-template)]
+    ;;(print-char built-char)
     [:div.flex-grow-1.flex
      (if (or desktop?
              (= 0 active-tab))
@@ -1044,7 +1064,6 @@
         plugins (:plugins @app-state)
         stepper-dismissed? (:stepper-dismissed @app-state)]
     ;;(js/console.log "BUILT TEMPLAT" built-template)
-    ;;(print-char built-char)
     [:div.app
      {:class-name (cond mobile? "mobile" tablet? "tablet" :else nil)}
      [:div.app-header

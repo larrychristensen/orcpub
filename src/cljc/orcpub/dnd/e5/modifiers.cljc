@@ -157,11 +157,26 @@
 (defn weapon [weapon-kw num]
   (mods/map-mod ?weapons weapon-kw num))
 
+(defn deferred-weapon [weapon-kw]
+  (mods/deferred-modifier
+    (fn [num] (es/map-mod ?weapons weapon-kw num))
+    1))
+
 (defn armor [armor-kw num]
   (mods/map-mod ?armor armor-kw num))
 
+(defn deferred-armor [armor-kw]
+  (mods/deferred-modifier
+    (fn [num] (es/map-mod ?armor armor-kw num))
+    1))
+
 (defn equipment [equipment-kw num]
   (mods/map-mod ?equipment equipment-kw num))
+
+(defn deferred-equipment [equipment-kw]
+  (mods/deferred-modifier
+    (fn [num] (es/map-mod ?equipment equipment-kw num))
+    1))
 
 (defn extra-attack []
   (mods/cum-sum-mod ?num-attacks 1))

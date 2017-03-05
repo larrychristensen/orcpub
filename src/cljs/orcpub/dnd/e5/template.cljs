@@ -4086,6 +4086,22 @@ until you finish a long rest."}]}
 (defn ability-item [name abbr desc]
   [:li.m-t-5 [:span.f-w-b.m-r-5 (str name " (" abbr ")")] desc])
 
+(defn inventory-selection [item-type-name items modifier-fn]
+  (t/selection-cfg
+   {:name item-type-name
+    :max nil
+    :sequential? false
+    :quantity? true
+    :new-item-fn (fn [selection selected-items]
+                   {::entity/key (-> items first :key)})
+    :options (mapv
+              (fn [{:keys [name key]}]
+                (t/option-cfg
+                 {:name name
+                  :key key
+                  :modifiers [(modifier-fn key)]}))
+              items)}))
+
 (defn template-selections [character-ref]
   [(t/selection-cfg
     {:name "Base Ability Scores"
@@ -4162,7 +4178,10 @@ until you finish a long rest."}]}
                (rogue-option character-ref)
                (sorcerer-option character-ref)
                (warlock-option character-ref)
-               (wizard-option character-ref)]})])
+               (wizard-option character-ref)]})
+   (inventory-selection "Weapon" opt5e/weapons mod5e/deferred-weapon)
+   (inventory-selection "Armor" opt5e/armor mod5e/deferred-armor)
+   (inventory-selection "Equipment" opt5e/equipment mod5e/deferred-equipment)])
 
 (def template-base
   (es/make-entity
