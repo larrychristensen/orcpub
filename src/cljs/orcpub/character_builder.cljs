@@ -2,6 +2,7 @@
   (:require [goog.dom :as gdom]
             [goog.labs.userAgent.device :as device]
             [cljs.pprint :as pprint]
+            [cljs.reader :as reader]
             [clojure.string :as s]
 
             [orcpub.common :as common]
@@ -148,7 +149,7 @@
   (fn [e]
     (let [new-path (concat path [key i])
           option-path (entity/get-entity-path template raw-char new-path)
-          new-value (cljs.reader/read-string (.. e -target -value))]
+          new-value (reader/read-string (.. e -target -value))]
       (swap! character-ref #(set-option-value % (conj option-path ::entity/key) new-value)))))
 
 (defn make-quantity-change-fn [path key template raw-char character-ref i]
