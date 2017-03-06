@@ -115,6 +115,11 @@
     {:width "60%"}]
    [:.w-100-p
     {:width "100%"}]
+
+   [:.w-50
+    {:width "50px"}]
+   [:.w-70
+    {:width "70px"}]
    [:.w-250
     {:width "250px"}]
    [:.w-300
@@ -129,6 +134,8 @@
    
    [:.posn-rel
     {:position :relative}]
+   [:.posn-abs
+    {:position :absolute}]
    [:.white
     {:color :white}]
    [:.orange
@@ -166,14 +173,23 @@
     {:display :none}]
 
    [:.pointer
-    {:cursor :pointer}]])
+    {:cursor :pointer}]
+
+   [:.f4692a
+    {:color "#f4692a"}]
+   [:.f32e50
+    {:color "#f32e50"}]
+   [:.b35c95
+    {:color "#b35c95"}]
+   [:.47eaf8
+    {:color "#47eaf8"}]
+   [:.bbe289
+    {:color "#bbe289"}]
+   [:.f9b747
+    {:color "#f9b747"}]])
 
 (def app
   (concat
-   margin-lefts
-   margin-tops
-   font-sizes
-   props
    [[:.app
      {:background-image "linear-gradient(182deg, #2c3445, #000000)"
       :font-family "Open Sans, sans-serif"
@@ -422,4 +438,8 @@
     [:.option-header
      {:display :flex
       :justify-content :space-between
-      :align-items :center}]]))
+      :align-items :center}]]
+   margin-lefts
+   margin-tops
+   font-sizes
+   props))
