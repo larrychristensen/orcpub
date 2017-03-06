@@ -10,3 +10,7 @@
 
 (defn map-by-key [values]
   (zipmap (map :key values) values))
+
+(defmacro ptime [message body]
+  `(do (prn ~message)
+       (time ~body)))

@@ -3,7 +3,8 @@
             [goog.labs.userAgent.device :as device]
             [cljs.pprint :as pprint]
             [clojure.string :as s]
-            
+
+            [orcpub.common :as common]
             [orcpub.template :as t]
             [orcpub.entity :as entity]
             [orcpub.entity-spec :as es]
@@ -986,8 +987,7 @@
       (::t/selections built-template)))]])
 
 (defn builder-columns [built-template character option-paths collapsed-paths stepper-selection-path plugins desktop? tablet? mobile? active-tab]
-  (let [_ (prn "BUILD CHAR")
-        built-char (time (entity/build character built-template))]
+  (let [built-char (entity/build character built-template)]
     ;;(print-char built-char)
     [:div.flex-grow-1.flex
      (if (or desktop?
@@ -1059,8 +1059,7 @@
                                    s
                                    selected-plugins)))
         option-paths (make-path-map @character-ref)
-        _ (prn "BUILD TEMPLATE")
-        built-template (time (entity/build-template @character-ref merged-template))
+        built-template (entity/build-template @character-ref merged-template)
         active-tab (get-in @app-state tab-path)
         view-width (.-width (gdom/getViewportSize js/window))
         mobile? (device/isMobile)

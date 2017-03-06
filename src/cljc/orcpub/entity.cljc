@@ -1,5 +1,6 @@
 (ns orcpub.entity
   (:require [clojure.spec :as spec]
+            [orcpub.common :as common]
             [orcpub.modifiers :as mods]
             [orcpub.entity-spec :as es]
             [orcpub.template :as t]
@@ -175,8 +176,10 @@
   (let [order-map (zipmap order (range (count order)))]
     (sort-by (comp order-map ::mods/key) modifiers)))
 
+(def memoized-make-modifier-map (memoize t/make-modifier-map))
+
 (defn apply-options [raw-entity template]
-  (let [modifier-map (t/make-modifier-map template)
+  (let [modifier-map (memoized-make-modifier-map template)
         options (flatten-options (::options raw-entity))
         modifiers (collect-modifiers options modifier-map)
         deps (reduce
@@ -298,22 +301,28 @@
         sort-options
         selections))))))
 
+(defn build-template-aux [plugins template]
+  (prn "BUILD TEMPLATE AUX")
+  (reduce
+   (fn [templ {:keys [::t/path ::t/selections ::t/modifiers] :as plugin}]
+     (let [template-path (get-template-selection-path templ path [])]
+       (update-in
+        templ
+        template-path
+        #(assoc
+          %
+          ::t/selections (merge-selections (::t/selections %) selections)
+          ::t/modifiers (concat (::t/modifiers %) modifiers)))))
+   template
+   plugins))
+
+(def memoized-build-template-aux (memoize build-template-aux))
+
 (defn build-template [raw-entity template]
-  (let [plugin-map (t/make-modifier-map template)
+  (let [plugin-map (memoized-make-modifier-map template)
         options (flatten-options (::options raw-entity))
         plugins (collect-plugins options plugin-map)]
-    (reduce
-     (fn [templ {:keys [::t/path ::t/selections ::t/modifiers] :as plugin}]
-       (let [template-path (get-template-selection-path templ path [])]
-         (update-in
-          templ
-          template-path
-          #(assoc
-           %
-           ::t/selections (merge-selections (::t/selections %) selections)
-           ::t/modifiers (concat (::t/modifiers %) modifiers)))))
-     template
-     plugins)))
+    (memoized-build-template-aux plugins template)))
 
 (spec/fdef
  build
