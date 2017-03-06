@@ -987,7 +987,7 @@
       (::t/selections built-template)))]])
 
 (defn builder-columns [built-template character option-paths collapsed-paths stepper-selection-path plugins desktop? tablet? mobile? active-tab]
-  (let [built-char (entity/build character built-template)]
+  (let [built-char (common/ptime "BUILD CHAR" (entity/build character built-template))]
     ;;(print-char built-char)
     [:div.flex-grow-1.flex
      (if (or desktop?
@@ -1059,7 +1059,7 @@
                                    s
                                    selected-plugins)))
         option-paths (make-path-map @character-ref)
-        built-template (entity/build-template @character-ref merged-template)
+        built-template (common/ptime "BUILD TEMPLATE" (entity/build-template @character-ref merged-template))
         active-tab (get-in @app-state tab-path)
         view-width (.-width (gdom/getViewportSize js/window))
         mobile? (device/isMobile)

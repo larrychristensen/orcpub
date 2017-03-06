@@ -302,7 +302,6 @@
         selections))))))
 
 (defn build-template-aux [plugins template]
-  (prn "BUILD TEMPLATE AUX")
   (reduce
    (fn [templ {:keys [::t/path ::t/selections ::t/modifiers] :as plugin}]
      (let [template-path (get-template-selection-path templ path [])]
