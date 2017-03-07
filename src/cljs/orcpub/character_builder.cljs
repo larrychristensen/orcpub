@@ -959,7 +959,7 @@
             plugins))])]]))
 
 (defn get-template-from-props [x]
-  (get (.-argv (.-props this)) 6))
+  (get (.-argv (.-props x)) 6))
 
 (defn on-builder-selector-update [x]
   (let [built-template (get-template-from-props x)
