@@ -958,8 +958,12 @@
                  [:span.checkbox-text.pointer name]]))
             plugins))])]]))
 
-(defn on-builder-selector-update [this]
-  (let [built-template (get (.-argv (.-props this)) 6)
+(defn get-template-from-props [x]
+  (get (.-argv (.-props this)) 6))
+
+(defn on-builder-selector-update [x]
+  (let [built-template (get-template-from-props x)
+        _ (js/console.log "BUILT TEMPLATe" built-template)
         stepper-selection-path (get @app-state :stepper-selection-path)
         _ (prn "STEPPER SELECTION PATH" stepper-selection-path)
         selection (get-in built-template stepper-selection-path)
