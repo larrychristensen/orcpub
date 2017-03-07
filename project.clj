@@ -21,6 +21,8 @@
                  [garden "1.3.2"]
                  [compojure "1.4.0"]
                  [ring/ring-jetty-adapter "1.4.0"]
+                 ;;[org.apache.pdfbox/pdfbox "2.0.4"]
+                 [pdfboxing "0.1.11"]
                  [environ "1.0.0"]]
 
   :plugins [[lein-figwheel "0.5.8"]

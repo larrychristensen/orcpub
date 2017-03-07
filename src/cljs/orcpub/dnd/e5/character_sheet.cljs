@@ -25,11 +25,13 @@
    {:style {:background-color :gray
             :display :flex
             :justify-content :center
-            :height "100%"}}
+            :height "100%"
+            :overflow :auto}}
    [:div
-    {:style {:margin-top "10px"
-             :width "850px"
-             :height "1100px"
+    {:style {:margin-top "30px"
+             :margin-bottom "30px"
+             :width "8.5in"
+             :height "11in"
              :background-color :white
              :box-shadow "5px 5px 5px rgba(0,0,0,0.2)"}}
     [:div

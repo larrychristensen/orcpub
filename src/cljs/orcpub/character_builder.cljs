@@ -443,7 +443,7 @@
      flat-options)))
 
 (defn abilities-radar [size abilities ability-bonuses]
-  #_(let [d size
+  (let [d size
         stroke 1.5
         point-offset 10
         double-point-offset (* point-offset 2)
