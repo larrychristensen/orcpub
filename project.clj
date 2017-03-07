@@ -153,7 +153,6 @@
                                                 :asset-path "/js/compiled/out"
                                                 :output-to "resources/public/js/compiled/orcpub.js"
                                                 :optimizations :advanced
-                                                :pretty-print false
-                                                :source-map false}}]}}}
+                                                :pretty-print false}}]}}}
 
   )
