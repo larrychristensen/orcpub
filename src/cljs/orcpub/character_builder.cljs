@@ -961,7 +961,9 @@
 (defn on-builder-selector-update [this]
   (let [built-template (get (.-argv (.-props this)) 6)
         stepper-selection-path (get @app-state :stepper-selection-path)
+        _ (prn "STEPPER SELECTION PATH" stepper-selection-path)
         selection (get-in built-template stepper-selection-path)
+        _ (prn "SELECTION" selection)
         selection-path (to-option-path stepper-selection-path built-template)
         _ (prn "SELECTOIN_PATH" selection-path)
         selection-id (selector-id selection-path)
@@ -972,7 +974,6 @@
         _ (prn "TOP" top)
         stepper-element (js/document.getElementById "selection-stepper")
         options-top (.-offsetTop (js/document.getElementById "options-column"))]
-    (set-mouseover-option! {::t/name (str "SELECTOR UPDATE" top)})
     (if (pos? top) (set-stepper-top! (- top options-top)))))
 
 (def builder-selector-component
