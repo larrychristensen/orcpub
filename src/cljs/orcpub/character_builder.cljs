@@ -1042,6 +1042,11 @@
                                             (and tablet? (= active-tab 1))) "selected-builder-tab")
                         :on-click (fn [_] (swap! app-state assoc-in tab-path (if mobile? 2 1)))} "Details"]]])
 
+(defn export-pdf []
+  (let [field (.getElementById js/document "fields-input")]
+    (aset field "value" (str {}))
+    (.submit (.getElementById js/document "download-form"))))
+
 
 (defn character-builder []
   ;;(cljs.pprint/pprint @character-ref)
@@ -1074,13 +1079,25 @@
     ;;(js/console.log "BUILT TEMPLAT" built-template)
     [:div.app
      {:class-name (cond mobile? "mobile" tablet? "tablet" :else nil)}
+     #_[:form.download-form
+      {:id "download-form"
+       :action "http://localhost:8890/character.pdf"
+       :method "POST"
+       :target "_blank"}
+      [:input {:type "hidden" :name "body" :value (str {})}]
+      [:input {:type "hidden" :name "fields" :id "fields-input"}]]
      [:div.app-header
       [:div.app-header-bar.container
        [:div.content
         [:img.orcpub-logo {:src "image/orcpub-logo.svg"}]]]]
      [:div.flex.justify-cont-c.p-b-40
       [:div.f-s-14.white.w-1440
-       [:h1.f-s-36.f-w-b.m-t-21.m-b-19.m-l-10 "Character Builder"]
+       [:div.flex.align-items-c.justify-cont-s-b
+        [:h1.f-s-36.f-w-b.m-t-21.m-b-19.m-l-10 "Character Builder"]
+        [:button.form-button
+         {:on-click export-pdf
+          :style {:height "40px"}}
+         [:span.hidden-xs "Print"]]]
        (if (not desktop?)
          [builder-tabs active-tab mobile? tablet?])
        [:div.flex

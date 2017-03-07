@@ -3,7 +3,7 @@
   :url "http://example.com/FIXME"
   :license {:name "Eclipse Public License"
             :url "http://www.eclipse.org/legal/epl-v10.html"}
-  :main orcpub.entity
+  :main orcpub.server-2
 
   :min-lein-version "2.7.1"
 
@@ -14,15 +14,23 @@
                   :exclusions [org.clojure/tools.reader]]
                  [cljsjs/react "15.3.1-0"]
                  [cljsjs/react-dom "15.3.1-0"]
-                 [sablono "0.7.3"]
+                 ;;[sablono "0.7.3"]
                  [org.omcljs/om "1.0.0-alpha46"]
                  [org.clojure/core.match "0.3.0-alpha4"]
                  [reagent "0.6.0"]
                  [garden "1.3.2"]
-                 [compojure "1.4.0"]
-                 [ring/ring-jetty-adapter "1.4.0"]
-                 ;;[org.apache.pdfbox/pdfbox "2.0.4"]
-                 [pdfboxing "0.1.11"]
+                 ;;[compojure "1.4.0"]
+                 ;;[ring/ring-jetty-adapter "1.4.0"]
+                 [org.apache.pdfbox/pdfbox "2.0.4"]
+
+                 [io.pedestal/pedestal.service "0.5.1"]
+                 [io.pedestal/pedestal.route "0.5.1"]
+                 [io.pedestal/pedestal.jetty "0.5.1"]
+                 [org.clojure/data.json "0.2.6"]
+                 [org.slf4j/slf4j-simple "1.7.21"]
+                 
+                 [clj-http "2.3.0"]
+                 ;;[pdfboxing "0.1.11"]
                  [environ "1.0.0"]]
 
   :plugins [[lein-figwheel "0.5.8"]
@@ -145,6 +153,7 @@
                                                 :asset-path "/js/compiled/out"
                                                 :output-to "resources/public/js/compiled/orcpub.js"
                                                 :optimizations :advanced
-                                                :source-map-timestamp true }}]}}}
+                                                :pretty-print false
+                                                :source-map-timestamp false}}]}}}
 
   )
