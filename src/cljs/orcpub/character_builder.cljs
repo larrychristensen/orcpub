@@ -963,13 +963,16 @@
         stepper-selection-path (get @app-state :stepper-selection-path)
         selection (get-in built-template stepper-selection-path)
         selection-path (to-option-path stepper-selection-path built-template)
+        _ (prn "SELECTOIN_PATH" selection-path)
         selection-id (selector-id selection-path)
+        _ (prn "SELECTION ID" selection-id)
         element (js/document.getElementById selection-id)
-        y-offset (.-pageYOffset js/window)
+        _ (js/console.log "ELEMENT" element)
         top (if element (.-offsetTop element) 0)
+        _ (prn "TOP" top)
         stepper-element (js/document.getElementById "selection-stepper")
         options-top (.-offsetTop (js/document.getElementById "options-column"))]
-    (set-mouseover-option! {::t/name "SELECTOR UPDATE"})
+    (set-mouseover-option! {::t/name (str "SELECTOR UPDATE" top)})
     (if (pos? top) (set-stepper-top! (- top options-top)))))
 
 (def builder-selector-component
