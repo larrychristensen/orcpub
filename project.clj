@@ -141,7 +141,7 @@
                    :repl-options {; for nREPL dev you really need to limit output
                                   :init (set! *print-length* 50)
                                   :nrepl-middleware [cemerick.piggieback/wrap-cljs-repl]}}
-             :uberjar {:hooks [leiningen.cljsbuild]
+             :uberjar {:prep-tasks ["clean" "compile" ["cljsbuild" "once"]]
                        :env {:production true}
                        :aot :all
                        :omit-source true
@@ -154,7 +154,6 @@
                                                 :output-to "resources/public/js/compiled/orcpub.js"
                                                 :optimizations :advanced
                                                 :pretty-print false
-                                                :source-map false
-                                                :source-map-timestamp false}}]}}}
+                                                :source-map false}}]}}}
 
   )
