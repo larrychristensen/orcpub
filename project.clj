@@ -141,7 +141,7 @@
                    :repl-options {; for nREPL dev you really need to limit output
                                   :init (set! *print-length* 50)
                                   :nrepl-middleware [cemerick.piggieback/wrap-cljs-repl]}}
-             :uberjar {:prep-tasks ["clean" "compile" ["cljsbuild" "once"]]
+             :uberjar {:prep-tasks ["clean" "compile" ["cljsbuild" "once" "prod"]]
                        :env {:production true}
                        :aot :all
                        :omit-source true
