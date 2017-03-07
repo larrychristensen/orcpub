@@ -958,22 +958,24 @@
                  [:span.checkbox-text.pointer name]]))
             plugins))])]]))
 
+(defn on-builder-selector-update [this]
+  (let [built-template (get (.-argv (.-props this)) 6)
+        stepper-selection-path (get @app-state :stepper-selection-path)
+        selection (get-in built-template stepper-selection-path)
+        selection-path (to-option-path stepper-selection-path built-template)
+        selection-id (selector-id selection-path)
+        element (js/document.getElementById selection-id)
+        y-offset (.-pageYOffset js/window)
+        top (if element (.-offsetTop element) 0)
+        stepper-element (js/document.getElementById "selection-stepper")
+        options-top (.-offsetTop (js/document.getElementById "options-column"))]
+    (set-mouseover-option! {::t/name "SELECTOR UPDATE"})
+    (if (pos? top) (set-stepper-top! (- top options-top)))))
+
 (def builder-selector-component
   (with-meta
     builder-selector
-    {:component-did-update
-     (fn [this]
-       (let [built-template (get (.-argv (.-props this)) 6)
-             stepper-selection-path (get @app-state :stepper-selection-path)
-             selection (get-in built-template stepper-selection-path)
-             selection-path (to-option-path stepper-selection-path built-template)
-             selection-id (selector-id selection-path)
-             element (js/document.getElementById selection-id)
-             y-offset (.-pageYOffset js/window)
-             top (if element (.-offsetTop element) 0)
-             stepper-element (js/document.getElementById "selection-stepper")
-             options-top (.-offsetTop (js/document.getElementById "options-column"))]
-         (if (pos? top) (set-stepper-top! (- top options-top)))))}))
+    {:component-did-update on-builder-selector-update}))
 
 (defn options-column [built-char built-template option-paths mobile? collapsed-paths stepper-selection-path plugins]
   [:div {:id "options-column"
