@@ -149,7 +149,7 @@
                                    [{:id "prod"
                                      :source-paths ["src/clj" "src/cljc" "src/cljs"]
                                      :figwheel { :on-jsload "orcpub.core/on-js-reload" }
-                                     :compiler {:main orcpub.server
+                                     :compiler {:main orcpub.core
                                                 :asset-path "/js/compiled/out"
                                                 :output-to "resources/public/js/compiled/orcpub.js"
                                                 :optimizations :advanced
