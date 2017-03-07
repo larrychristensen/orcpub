@@ -3,7 +3,7 @@
   :url "http://example.com/FIXME"
   :license {:name "Eclipse Public License"
             :url "http://www.eclipse.org/legal/epl-v10.html"}
-  :main orcpub.server-2
+  :main orcpub.server
 
   :min-lein-version "2.7.1"
 
@@ -19,8 +19,8 @@
                  [org.clojure/core.match "0.3.0-alpha4"]
                  [reagent "0.6.0"]
                  [garden "1.3.2"]
-                 ;;[compojure "1.4.0"]
-                 ;;[ring/ring-jetty-adapter "1.4.0"]
+                 [compojure "1.4.0"]
+                 [ring/ring-jetty-adapter "1.4.0"]
                  [org.apache.pdfbox/pdfbox "2.0.4"]
 
                  [io.pedestal/pedestal.service "0.5.1"]
@@ -149,7 +149,7 @@
                                    [{:id "prod"
                                      :source-paths ["src/clj" "src/cljc" "src/cljs"]
                                      :figwheel { :on-jsload "orcpub.core/on-js-reload" }
-                                     :compiler {:main orcpub.core
+                                     :compiler {:main orcpub.server
                                                 :asset-path "/js/compiled/out"
                                                 :output-to "resources/public/js/compiled/orcpub.js"
                                                 :optimizations :advanced
