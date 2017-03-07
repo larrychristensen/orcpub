@@ -154,6 +154,7 @@
                                                 :output-to "resources/public/js/compiled/orcpub.js"
                                                 :optimizations :advanced
                                                 :pretty-print false
+                                                :source-map false
                                                 :source-map-timestamp false}}]}}}
 
   )
