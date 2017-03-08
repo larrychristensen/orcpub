@@ -13,13 +13,13 @@
    {}
    kws))
 
-(defn class-string [built-char]
+(defn class-string [levels]
   (s/join
    " / "
    (map
     (fn [[cls-k {:keys [class-name class-level subclass]}]]
       (str class-name " (" class-level ")"))
-    (char5e/levels built-char))))
+    levels)))
 
 (defn ability-related-bonuses [suffix vals]
   (into {}
@@ -42,7 +42,6 @@
         unarmored-armor-class (es/entity-val built-char :armor-class)
         ac-with-armor-fn (es/entity-val built-char :armor-class-with-armor)
         equipped-armor (es/entity-val built-char :armor)
-        _ (prn "EQUPPED" equipped-armor)
         has-shield? (:shield equipped-armor)
         armored-armor-classes (map
                                (fn [[kw _]]
@@ -50,14 +49,18 @@
                                (dissoc equipped-armor :shield))
         unshielded-armor-classes (conj armored-armor-classes unarmored-armor-class)
         armor-classes (if has-shield? (map (partial + 2) unshielded-armor-classes) unshielded-armor-classes)
-        max-armor-class (apply max armor-classes)]
-    (prn "MAX_ARMOR_CLASS" max-armor-class armor-classes)
+        max-armor-class (apply max armor-classes)
+        levels (char5e/levels built-char)
+        total-hit-dice (apply + (map :class-level (vals levels)))]
     (merge
      {:race (str race (if subrace (str "/" subrace)))
-      :class-level (class-string built-char)
+      :class-level (class-string levels)
       :background (char5e/background built-char)
       :prof-bonus (common/bonus-str (es/entity-val built-char :prof-bonus))
-      :ac max-armor-class}
+      :ac max-armor-class
+      :hd-total total-hit-dice
+      :initiative (common/bonus-str (es/entity-val built-char :initiative))
+      :speed (es/entity-val built-char :speed)}
      abilities
      (ability-bonuses built-char)
      (save-bonuses built-char)
