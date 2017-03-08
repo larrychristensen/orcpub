@@ -34,6 +34,55 @@
 (defn save-bonuses [built-char]
   (ability-related-bonuses "save" (es/entity-val built-char :save-bonuses)))
 
+(defn skill-fields [built-char]
+  (let [skill-bonuses (es/entity-val built-char :skill-bonuses)
+        skill-profs (es/entity-val built-char :skill-profs)]
+    (reduce
+     (fn [m {k :key}]
+       (-> m
+           (assoc k (common/bonus-str (skill-bonuses k)))
+           (assoc (keyword (str (name k) "-check")) (boolean (k skill-profs)))))
+     {}
+     opt5e/skills)))
+
+(defn total-length [traits]
+  (reduce + (map
+             (fn [{:keys [name description]}]
+               (+ (count name) (count description)))
+             traits)))
+
+(defn traits-string [traits]
+  (s/join
+   "\n\n"
+   (map
+    (fn [{:keys [name description]}]
+      (str name ". " description))
+    traits)))
+
+(defn traits-fields [built-char]
+  (let [traits (es/entity-val built-char :traits)
+        total-len (total-length traits)
+        half-len (/ total-len 2)
+        half-traits (reduce
+                     (fn [ht t]
+                       (if (> (total-length ht) half-len)
+                         (reduced ht)
+                         (conj ht t)))
+                     []
+                     traits)
+        other-half-traits (drop (count half-traits) traits)]
+    {:features-and-traits (traits-string traits) ;;(traits-string half-traits)
+     ;;:features-and-traits-2 (traits-string other-half-traits)
+     }))
+
+(defn equipment-fields [built-char]
+  {:equipment (s/join
+    "; "
+    (map
+     (fn [[kw count]]
+       (str (:name (opt5e/equipment-map kw)) " (" count ")"))
+     (es/entity-val built-char :equipment)))})
+
 (defn make-spec [built-char]
   (let [race (es/entity-val built-char :race)
         subrace (es/entity-val built-char :subrace)
@@ -60,7 +109,9 @@
       :ac max-armor-class
       :hd-total total-hit-dice
       :initiative (common/bonus-str (es/entity-val built-char :initiative))
-      :speed (es/entity-val built-char :speed)}
+      :speed (es/entity-val built-char :speed)
+      :hp-max (es/entity-val built-char :max-hit-points)}
+     (skill-fields built-char)
      abilities
      (ability-bonuses built-char)
      (save-bonuses built-char)
@@ -68,4 +119,6 @@
       (fn [saves key]
         (assoc saves (keyword (str (name key) "-save-check")) (boolean (key saving-throws))))
       {}
-      char5e/ability-keys))))
+      char5e/ability-keys)
+     (traits-fields built-char)
+     (equipment-fields built-char))))

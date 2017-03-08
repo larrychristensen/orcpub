@@ -1053,7 +1053,7 @@
 (defn export-pdf [built-char]
   (fn [_]
     (let [field (.getElementById js/document "fields-input")]
-      (aset field "value" (str {}))
+      (aset field "value" (str (pdf-spec/make-spec built-char)))
       (.submit (.getElementById js/document "download-form")))))
 
 (defn download-form [built-char]
@@ -1064,8 +1064,7 @@
       :action "http://localhost:8890/character.pdf"
       :method "POST"
       :target "_blank"}
-     [:input {:type "hidden" :name "body" :value (str (pdf-spec/make-spec built-char))}]
-     [:input {:type "hidden" :name "fields" :id "fields-input" :value (str (pdf-spec/make-spec built-char))}]]))
+     [:input {:type "hidden" :name "body" :id "fields-input"}]]))
 
 
 (defn character-builder []
