@@ -961,21 +961,15 @@
 (defn get-template-from-props [x]
   (get (.-argv (.-props x)) 6))
 
-(defn on-builder-selector-update [x]
-  (let [built-template (get-template-from-props x)
-        _ (js/console.log "BUILT TEMPLATe" built-template)
+
+(defn on-builder-selector-update [x & args]
+  (let [built-template ((vec (first args)) 6)
         stepper-selection-path (get @app-state :stepper-selection-path)
-        _ (prn "STEPPER SELECTION PATH" stepper-selection-path)
         selection (get-in built-template stepper-selection-path)
-        _ (prn "SELECTION" selection)
         selection-path (to-option-path stepper-selection-path built-template)
-        _ (prn "SELECTOIN_PATH" selection-path)
         selection-id (selector-id selection-path)
-        _ (prn "SELECTION ID" selection-id)
         element (js/document.getElementById selection-id)
-        _ (js/console.log "ELEMENT" element)
         top (if element (.-offsetTop element) 0)
-        _ (prn "TOP" top)
         stepper-element (js/document.getElementById "selection-stepper")
         options-top (.-offsetTop (js/document.getElementById "options-column"))]
     (if (pos? top) (set-stepper-top! (- top options-top)))))
