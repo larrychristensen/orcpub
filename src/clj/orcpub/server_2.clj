@@ -120,13 +120,16 @@
         form (.getAcroForm catalog)]
     (doseq [[k v] fields]
       (let [field (.getField form (name k))]
-        (if field
-          (.setValue
-           field
-           (case (type field)
-             PDCheckBox (if v "Yes" "No")
-             PDTextField v
-             nil)))))))
+        (prn "FIELD" field k v)
+        (do
+          (if field
+            (.setValue
+             field
+             (cond 
+               (instance? PDCheckBox field) (if v "Yes" "Off")
+               (instance? PDTextField field) (str v)
+               :else nil)))
+          (prn "FIELD AFTER" field k v))))))
 
 (def character-pdf
   {:name :character-pdf
@@ -134,7 +137,10 @@
    (fn [context]
      (prn "PDF!!!!!!!!!!!!!!!!!!!!")
      (try
-       (let [fields (clojure.edn/read-string (get-in context [:request :query-params :fields]))
+       (let [body-map (io.pedestal.http.route/parse-query-string (slurp (get-in context [:request :body])))
+             _ (prn "BODY STTR" body-map)
+             fields (clojure.edn/read-string (:body body-map))
+             _ (prn "REQUEST" (:request context))
              input (.openStream (io/resource "fillable-char-sheet.pdf"))
              output (ByteArrayOutputStream.)]
          (with-open [doc (PDDocument/load input)]

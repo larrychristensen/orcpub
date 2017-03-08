@@ -3969,6 +3969,7 @@ until you finish a long rest."}]}
                     (if (seq lang-kws) [(opt5e/language-selection (map opt5e/language-map lang-kws) lang-num)])))
       :modifiers (vec
                   (concat
+                   [(mod5e/background name)]
                    modifiers
                    (armor-prof-modifiers (keys armor-profs))
                    (weapon-prof-modifiers (keys weapon-profs))
@@ -4186,6 +4187,7 @@ until you finish a long rest."}]}
    (inventory-selection "Armor" opt5e/armor mod5e/deferred-armor)
    (inventory-selection "Equipment" opt5e/equipment mod5e/deferred-equipment)])
 
+
 (def template-base
   (es/make-entity
    {?armor-class (+ 10 (?ability-bonuses :dex))
@@ -4205,6 +4207,11 @@ until you finish a long rest."}]}
                         (assoc m k (int (/ (- v 10) 2))))
                       {}
                       ?abilities)
+    ?save-bonuses (reduce-kv
+                   (fn [m k v]
+                     (assoc m k (+ v (if (?saving-throws k) ?prof-bonus 0))))
+                   {}
+                   ?ability-bonuses)
     ?total-levels (apply + (map (fn [[k {l :class-level}]] l) ?levels))
     ?prof-bonus (+ (int (/ (dec ?total-levels) 4)) 2)
     ?default-skill-bonus {}

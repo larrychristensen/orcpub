@@ -16,6 +16,7 @@
             [orcpub.dnd.e5.options :as opt5e]
             [orcpub.dnd.e5.template :as t5e]
             [orcpub.dnd.e5.spells :as spells]
+            [orcpub.pdf-spec :as pdf-spec]
 
             [clojure.spec :as spec]
             [clojure.spec.test :as stest]
@@ -533,13 +534,16 @@
 ;;(prn "MODIFIER MAP" (cljs.pprint/pprint (t/make-modifier-map template)))
 ;;(spec/explain ::t/modifier-map (t/make-modifier-map template))
 
+(defn realize-char [built-char]
+  (reduce-kv
+   (fn [m k v]
+     (assoc m k (es/entity-val built-char k)))
+   {}
+   built-char))
+
 (defn print-char [built-char]
   (cljs.pprint/pprint
-   (reduce-kv
-    (fn [m k v]
-      (assoc m k (es/entity-val built-char k)))
-    {}
-    built-char)))
+   (realize-char built-char)))
 
 (defn display-section [title icon-cls value & [list?]]
   [:div.m-t-20
@@ -572,8 +576,7 @@
        (map
         (fn [[armor-kw _]]
           (let [armor (opt5e/armor-map armor-kw)
-                ac-fn armor-class-with-armor
-                ac (ac-fn armor)]
+                ac (armor-class-with-armor armor)]
             ^{:key armor-kw}
             [:div
              [:div
@@ -636,7 +639,7 @@
 (defn character-display [built-char mobile? tablet? desktop?]
   (let [race (es/entity-val built-char :race)
         subrace (es/entity-val built-char :subrace)
-        levels (es/entity-val built-char :levels)
+        levels (char5e/levels built-char)
         darkvision (es/entity-val built-char :darkvision)
         skill-profs (es/entity-val built-char :skill-profs)
         tool-profs (es/entity-val built-char :tool-profs)
@@ -718,6 +721,7 @@
      [equipment-section "Armor" armor opt5e/armor-map]
      [equipment-section "Equipment" equipment opt5e/equipment-map]
      [traits-section traits]]))
+
 
 (def tab-path [:builder :character :tab])
 
@@ -991,47 +995,47 @@
         [builder-selector-component [] option-paths selection built-char @character-ref built-template collapsed-paths stepper-selection-path])
       (::t/selections built-template)))]])
 
-(defn builder-columns [built-template character option-paths collapsed-paths stepper-selection-path plugins desktop? tablet? mobile? active-tab]
-  (let [built-char (entity/build character built-template)]
-    ;;(print-char built-char)
-    [:div.flex-grow-1.flex
-     (if (or desktop?
-             (= 0 active-tab))
-       [options-column built-char built-template option-paths mobile? collapsed-paths stepper-selection-path plugins])
-     (if (or desktop?
-             (and tablet? (= 0 active-tab))
-             (and mobile? (= 1 active-tab)))
-       [:div.flex-grow-1.m-t-10 {:class-name (if desktop? "m-l-30 m-r-80" "m-l-5 m-r-5")}
-        [:div.m-t-5
-         [:span.personality-label.f-s-18 "Character Name"]
-         [:input.input {:type :text}]]
-        [:div.field
-         [:span.personality-label.f-s-18 "Personality Trait 1"]
-         [:input.input {:type :text}]]
-        [:div.field
-         [:span.personality-label.f-s-18 "Personality Trait 2"]
-         [:input.input {:type :text}]]
-        [:div.field
-         [:span.personality-label.f-s-18 "Ideals"]
-         [:input.input {:type :text}]]
-        [:div.field
-         [:span.personality-label.f-s-18 "Bonds"]
-         [:input.input {:type :text}]]
-        [:div.field
-         [:span.personality-label.f-s-18 "Flaws"]
-         [:input.input {:type :text}]]
-        [:div.field
-         [:span.personality-label.f-s-18 "Image URL"]
-         [:input.input
-          {:type :text
-           :on-change (fn [e] (swap! character-ref assoc-in [::entity/values :image-url] (.-value (.-target e))))}]]
-        [:div.field
-         [:span.personality-label.f-s-18 "Description/Backstory"]
-         [:textarea.input.h-800]]])
-     (if (or desktop?
-             (and mobile? (= 2 active-tab))
-             (and tablet? (= 1 active-tab)))
-       [character-display built-char mobile? tablet? desktop?])]))
+(defn builder-columns [built-template built-char option-paths collapsed-paths stepper-selection-path plugins desktop? tablet? mobile? active-tab]
+  ;;(print-char built-char)
+  (js/console.log (realize-char built-char))
+  [:div.flex-grow-1.flex
+   (if (or desktop?
+           (= 0 active-tab))
+     [options-column built-char built-template option-paths mobile? collapsed-paths stepper-selection-path plugins])
+   (if (or desktop?
+           (and tablet? (= 0 active-tab))
+           (and mobile? (= 1 active-tab)))
+     [:div.flex-grow-1.m-t-10 {:class-name (if desktop? "m-l-30 m-r-80" "m-l-5 m-r-5")}
+      [:div.m-t-5
+       [:span.personality-label.f-s-18 "Character Name"]
+       [:input.input {:type :text}]]
+      [:div.field
+       [:span.personality-label.f-s-18 "Personality Trait 1"]
+       [:input.input {:type :text}]]
+      [:div.field
+       [:span.personality-label.f-s-18 "Personality Trait 2"]
+       [:input.input {:type :text}]]
+      [:div.field
+       [:span.personality-label.f-s-18 "Ideals"]
+       [:input.input {:type :text}]]
+      [:div.field
+       [:span.personality-label.f-s-18 "Bonds"]
+       [:input.input {:type :text}]]
+      [:div.field
+       [:span.personality-label.f-s-18 "Flaws"]
+       [:input.input {:type :text}]]
+      [:div.field
+       [:span.personality-label.f-s-18 "Image URL"]
+       [:input.input
+        {:type :text
+         :on-change (fn [e] (swap! character-ref assoc-in [::entity/values :image-url] (.-value (.-target e))))}]]
+      [:div.field
+       [:span.personality-label.f-s-18 "Description/Backstory"]
+       [:textarea.input.h-800]]])
+   (if (or desktop?
+           (and mobile? (= 2 active-tab))
+           (and tablet? (= 1 active-tab)))
+     [character-display built-char mobile? tablet? desktop?])])
 
 (defn builder-tabs [active-tab mobile? tablet?]
   [:div
@@ -1046,10 +1050,22 @@
                                             (and tablet? (= active-tab 1))) "selected-builder-tab")
                         :on-click (fn [_] (swap! app-state assoc-in tab-path (if mobile? 2 1)))} "Details"]]])
 
-(defn export-pdf []
-  (let [field (.getElementById js/document "fields-input")]
-    (aset field "value" (str {}))
-    (.submit (.getElementById js/document "download-form"))))
+(defn export-pdf [built-char]
+  (fn [_]
+    (let [field (.getElementById js/document "fields-input")]
+      (aset field "value" (str {}))
+      (.submit (.getElementById js/document "download-form")))))
+
+(defn download-form [built-char]
+  (let [spec (pdf-spec/make-spec built-char)]
+    (prn "SPEC" spec)
+    [:form.download-form
+     {:id "download-form"
+      :action "http://localhost:8890/character.pdf"
+      :method "POST"
+      :target "_blank"}
+     [:input {:type "hidden" :name "body" :value (str (pdf-spec/make-spec built-char))}]
+     [:input {:type "hidden" :name "fields" :id "fields-input" :value (str (pdf-spec/make-spec built-char))}]]))
 
 
 (defn character-builder []
@@ -1070,6 +1086,7 @@
                                    selected-plugins)))
         option-paths (make-path-map @character-ref)
         built-template (entity/build-template @character-ref merged-template)
+        built-char (entity/build @character-ref built-template)
         active-tab (get-in @app-state tab-path)
         view-width (.-width (gdom/getViewportSize js/window))
         mobile? (device/isMobile)
@@ -1083,13 +1100,7 @@
     ;;(js/console.log "BUILT TEMPLAT" built-template)
     [:div.app
      {:class-name (cond mobile? "mobile" tablet? "tablet" :else nil)}
-     #_[:form.download-form
-      {:id "download-form"
-       :action "http://localhost:8890/character.pdf"
-       :method "POST"
-       :target "_blank"}
-      [:input {:type "hidden" :name "body" :value (str {})}]
-      [:input {:type "hidden" :name "fields" :id "fields-input"}]]
+     [download-form built-char]
      [:div.app-header
       [:div.app-header-bar.container
        [:div.content
@@ -1099,7 +1110,7 @@
        [:div.flex.align-items-c.justify-cont-s-b
         [:h1.f-s-36.f-w-b.m-t-21.m-b-19.m-l-10 "Character Builder"]
         [:button.form-button
-         {:on-click export-pdf
+         {:on-click (export-pdf built-char)
           :style {:height "40px"}}
          [:span.hidden-xs "Print"]]]
        (if (not desktop?)
@@ -1113,7 +1124,7 @@
            stepper-selection-path])
         [builder-columns
          built-template
-         @character-ref
+         built-char
          option-paths
          collapsed-paths
          stepper-selection-path

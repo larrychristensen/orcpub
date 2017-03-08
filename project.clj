@@ -19,8 +19,8 @@
                  [org.clojure/core.match "0.3.0-alpha4"]
                  [reagent "0.6.0"]
                  [garden "1.3.2"]
-                 [compojure "1.4.0"]
-                 [ring/ring-jetty-adapter "1.4.0"]
+                 ;;[compojure "1.4.0"]
+                 ;;[ring/ring-jetty-adapter "1.4.0"]
                  [org.apache.pdfbox/pdfbox "2.0.4"]
 
                  [io.pedestal/pedestal.service "0.5.1"]

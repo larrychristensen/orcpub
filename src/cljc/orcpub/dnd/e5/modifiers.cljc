@@ -12,6 +12,9 @@
 (defn race [nm]
   (mods/modifier ?race nm))
 
+(defn background [nm]
+  (mods/modifier ?background nm))
+
 (defn subrace [nm]
   (mods/modifier ?subrace nm))
 
@@ -55,7 +58,7 @@
     {:str 12 :dex 12 :con 12 :int 12 :wis 12 :cha 12}))
 
 (defn saving-throws [& abilities]
-  (mods/modifier ?saving-throws (concat (or ?saving-throws #{}) abilities)))
+  (mods/modifier ?saving-throws (apply conj (or ?saving-throws #{}) abilities)))
 
 (defn saving-throw-type-advantage [type-nm type-kw]
   (mods/vec-mod ?saving-throw-type-advantage {:name type-nm

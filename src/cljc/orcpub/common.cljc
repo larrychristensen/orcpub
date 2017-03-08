@@ -14,3 +14,6 @@
 (defmacro ptime [message body]
   `(do (prn ~message)
        (time ~body)))
+
+(defn bonus-str [val]
+  (str (if (pos? val) "+") val))

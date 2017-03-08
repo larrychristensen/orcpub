@@ -1,5 +1,6 @@
 (ns orcpub.dnd.e5.character
   (:require [clojure.spec :as spec]
+            [orcpub.entity-spec :as es]
             [orcpub.dice :as dice]
             [orcpub.template :as t]))
 
@@ -54,3 +55,15 @@
   (zipmap
    ability-keys
    as))
+
+(defn levels [built-char]
+  (es/entity-val built-char :levels))
+
+(defn background [built-char]
+  (es/entity-val built-char :background))
+
+(defn ability-values [built-char]
+  (es/entity-val built-char :abilities))
+
+(defn ability-bonuses [built-char]
+  (es/entity-val built-char :ability-bonuses))
