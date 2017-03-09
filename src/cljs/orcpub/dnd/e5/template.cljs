@@ -1800,191 +1800,83 @@ The creature is aware of this effect before it makes its attack against you."}]}
     :equipment {:dart 10}
     :traits [{:name "Ki"
               :level 2
-              :description "Starting at 2nd level, your training allows you to 
-harness the mystic energy of ki. Your access to this 
-energy is represented by a number of ki points. Your 
-monk level determines the number of points you 
-have, as shown in the Ki Points column of the Monk 
-table.
-You can spend these points to fuel various ki 
-features. You start knowing three such features: 
-Flurry of Blows, Patient Defense, and Step of the 
-Wind. You learn more ki features as you gain levels 
-in this class.
-When you spend a ki point, it is unavailable until 
-you finish a short or long rest, at the end of which 
-you draw all of your expended ki back into yourself. 
-You must spend at least 30 minutes of the rest 
-meditating to regain your ki points.
-Some of your ki features require your target to 
-make a saving throw to resist the feature's effects. 
-The saving throw DC is calculated as follows:
-Ki save DC = 8 + your proficiency bonus +
-your Wisdom modifier"}
+              :description "Starting at 2nd level, your training allows you to harness the mystic energy of ki. Your access to this energy is represented by a number of ki points. Your monk level determines the number of points you have, as shown in the Ki Points column of the Monk table.
+You can spend these points to fuel various ki features. You start knowing three such features: Flurry of Blows, Patient Defense, and Step of the Wind. You learn more ki features as you gain levels in this class.
+When you spend a ki point, it is unavailable until you finish a short or long rest, at the end of which you draw all of your expended ki back into yourself. You must spend at least 30 minutes of the rest meditating to regain your ki points.
+Some of your ki features require your target to make a saving throw to resist the feature's effects. The saving throw DC is calculated as follows:
+Ki save DC = 8 + your proficiency bonus + your Wisdom modifier"}
              {:name "Flurry of Blows"
               :level 2
-              :description "Immediately after you take the Attack action on your 
-turn, you can spend 1 ki point to make two unarmed 
-strikes as a bonus action."}
+              :description "Immediately after you take the Attack action on your turn, you can spend 1 ki point to make two unarmed strikes as a bonus action."}
              {:name "Patient Defense"
               :level 2
-              :description "You can spend 1 ki point to take the Dodge action as 
-a bonus action on your turn."}
+              :description "You can spend 1 ki point to take the Dodge action as a bonus action on your turn."}
              {:name "Step of the Wind"
               :level 2
-              :description "You can spend 1 ki point to take the Disengage or 
-Dash action as a bonus action on your turn, and your 
-jump distance is doubled for the turn."}
+              :description "You can spend 1 ki point to take the Disengage or Dash action as a bonus action on your turn, and your jump distance is doubled for the turn."}
              {:name "Unarmored Movement"
               :level 2
-              :description "Starting at 2nd level, your speed increases by 10 feet 
-while you are not wearing armor or wielding a 
-shield. This bonus increases when you reach certain 
-monk levels, as shown in the Monk table.
-At 9th level, you gain the ability to move along 
-vertical surfaces and across liquids on your turn 
-without falling during the move."}
+              :description "Starting at 2nd level, your speed increases by 10 feet while you are not wearing armor or wielding a shield. This bonus increases when you reach certain monk levels, as shown in the Monk table.
+At 9th level, you gain the ability to move along vertical surfaces and across liquids on your turn without falling during the move."}
              {:name "Deflect Missiles"
               :level 3
-              :description "Starting at 3rd level, you can use your reaction to 
-deflect or catch the missile when you are hit by a 
-ranged weapon attack. When you do so, the damage 
-you take from the attack is reduced by 1d10 + your 
-Dexterity modifier + your monk level.
-If you reduce the damage to 0, you can catch the 
-missile if it is small enough for you to hold in one 
-hand and you have at least one hand free. If you 
-catch a missile in this way, you can spend 1 ki point 
-to make a ranged attack with the weapon or piece of 
-ammunition you just caught, as part of the same 
-reaction. You make this attack with proficiency, 
-regardless of your weapon proficiencies, and the
-missile counts as a monk weapon for the attack, 
-which has a normal range of 20 feet and a long range 
-of 60 feet."}
+              :description "Starting at 3rd level, you can use your reaction to deflect or catch the missile when you are hit by a ranged weapon attack. When you do so, the damage you take from the attack is reduced by 1d10 + your Dexterity modifier + your monk level.
+If you reduce the damage to 0, you can catch the missile if it is small enough for you to hold in one hand and you have at least one hand free. If you catch a missile in this way, you can spend 1 ki point to make a ranged attack with the weapon or piece of ammunition you just caught, as part of the same reaction. You make this attack with proficiency, regardless of your weapon proficiencies, and the missile counts as a monk weapon for the attack, which has a normal range of 20 feet and a long range of 60 feet."}
              {:name "Slow Fall"
               :level 4
-              :description "Beginning at 4th level, you can use your reaction 
-when you fall to reduce any falling damage you take 
-by an amount equal to five times your monk level."}
+              :description "Beginning at 4th level, you can use your reaction when you fall to reduce any falling damage you take by an amount equal to five times your monk level."}
              {:name "Extra Attack"
               :level 5
-              :description "Beginning at 5th level, you can attack twice, instead 
-of once, whenever you take the Attack action on your 
-turn."}
+              :description "Beginning at 5th level, you can attack twice, instead of once, whenever you take the Attack action on your turn."}
              {:name "Stunning Strike"
               :level 5
-              :description "Starting at 5th level, you can interfere with the flow 
-of ki in an opponent's body. When you hit another 
-creature with a melee weapon attack, you can spend 
-1 ki point to attempt a stunning strike. The target 
-must succeed on a Constitution saving throw or be 
-stunned until the end of your next turn."}
+              :description "Starting at 5th level, you can interfere with the flow of ki in an opponent's body. When you hit another creature with a melee weapon attack, you can spend 1 ki point to attempt a stunning strike. The target must succeed on a Constitution saving throw or be stunned until the end of your next turn."}
              {:name "Ki-Empowered Strikes"
               :level 6
-              :description "Starting at 6th level, your unarmed strikes count as 
-magical for the purpose of overcoming resistance 
-and immunity to nonmagical attacks and damage"}
+              :description "Starting at 6th level, your unarmed strikes count as magical for the purpose of overcoming resistance and immunity to nonmagical attacks and damage"}
              {:name "Evasion"
               :level 7
-              :description "At 7th level, your instinctive agility lets you dodge 
-out of the way of certain area effects, such as a blue 
-dragon's lightning breath or a fireball spell. When 
-you are subjected to an effect that allows you to 
-make a Dexterity saving throw to take only half 
-damage, you instead take no damage if you succeed 
-on the saving throw, and only half damage if you fail."}
+              :description "At 7th level, your instinctive agility lets you dodge out of the way of certain area effects, such as a blue dragon's lightning breath or a fireball spell. When you are subjected to an effect that allows you to make a Dexterity saving throw to take only half damage, you instead take no damage if you succeed on the saving throw, and only half damage if you fail."}
              {:name "Stillness of Mind"
               :level 7
-              :description "Starting at 7th level, you can use your action to end 
-one effect on yourself that is causing you to be 
-charmed or frightened."}
+              :description "Starting at 7th level, you can use your action to end one effect on yourself that is causing you to be charmed or frightened."}
              {:name "Purity of Body"
               :level 10
-              :description "At 10th level, your mastery of the ki flowing through 
-you makes you immune to disease and poison."}
+              :description "At 10th level, your mastery of the ki flowing through you makes you immune to disease and poison."}
              {:name "Tongue of the Sun and Moon"
               :level 13
-              :description "Starting at 13th level, you learn to touch the ki of 
-other minds so that you understand all spoken 
-languages. Moreover, any creature that can 
-understand a language can understand what you say."}
+              :description "Starting at 13th level, you learn to touch the ki of other minds so that you understand all spoken languages. Moreover, any creature that can understand a language can understand what you say."}
              {:name "Diamond Soul"
               :level 14
-              :description "Beginning at 14th level, your mastery of ki grants 
-you proficiency in all saving throws.
-Additionally, whenever you make a saving throw 
-and fail, you can spend 1 ki point to reroll it and take 
-the second result."}
+              :description "Beginning at 14th level, your mastery of ki grants you proficiency in all saving throws.Additionally, whenever you make a saving throw and fail, you can spend 1 ki point to reroll it and take the second result."}
              {:name "Timeless Body"
               :level 15
-              :description "At 15th level, your ki sustains you so that you suffer 
-none of the frailty of old age, and you can't be aged 
-magically. You can still die of old age, however. In 
-addition, you no longer need food or water."}
+              :description "At 15th level, your ki sustains you so that you suffer none of the frailty of old age, and you can't be aged magically. You can still die of old age, however. In addition, you no longer need food or water."}
              {:name "Empty Body"
               :level 18
-              :description "Beginning at 18th level, you can use your action to 
-spend 4 ki points to become invisible for 1 minute. 
-During that time, you also have resistance to all 
-damage but force damage.
-Additionally, you can spend 8 ki points to cast the 
-astral projection spell, without needing material 
-components. When you do so, you can't take any 
-other creatures with you."}
+              :description "Beginning at 18th level, you can use your action to spend 4 ki points to become invisible for 1 minute. During that time, you also have resistance to all damage but force damage.Additionally, you can spend 8 ki points to cast the astral projection spell, without needing material components. When you do so, you can't take any other creatures with you."}
              {:name "Perfect Self"
               :level 20
-              :description "At 20th level, when you roll for initiative and have 
-no ki points remaining, you regain 4 ki points."}]
+              :description "At 20th level, when you roll for initiative and have no ki points remaining, you regain 4 ki points."}]
     :subclass-level 3
     :subclass-title "Monastic Tradition"
     :subclasses [{:name "Way of the Open Hand"
                   :traits [{:name "Open Hand Technique"
                             :level 3
-                            :description "Starting when you choose this tradition at 3rd level, 
-you can manipulate your enemy's ki when you 
-harness your own. Whenever you hit a creature with 
-one of the attacks granted by your Flurry of Blows, 
-you can impose one of the following effects on that 
-target:
-* It must succeed on a Dexterity saving throw or be 
-knocked prone.
-* It must make a Strength saving throw. If it fails, 
-you can push it up to 15 feet away from you. 
-* It can't take reactions until the end of your next 
-turn."}
+                            :description "Starting when you choose this tradition at 3rd level, you can manipulate your enemy's ki when you harness your own. Whenever you hit a creature with one of the attacks granted by your Flurry of Blows, you can impose one of the following effects on that target:
+* It must succeed on a Dexterity saving throw or be knocked prone.
+* It must make a Strength saving throw. If it fails, you can push it up to 15 feet away from you. 
+* It can't take reactions until the end of your next turn."}
                            {:name "Wholeness of Body"
                             :level 6
-                            :description "At 6th level, you gain the ability to heal yourself. As 
-an action, you can regain hit points equal to three 
-times your monk level. You must finish a long rest 
-before you can use this feature again."}
+                            :description "At 6th level, you gain the ability to heal yourself. As an action, you can regain hit points equal to three times your monk level. You must finish a long rest before you can use this feature again."}
                            {:name "Tranquility"
                             :level 11
-                            :description "Beginning at 11th level, you can enter a special 
-meditation that surrounds you with an aura of peace. 
-At the end of a long rest, you gain the effect of a 
-sanctuary spell that lasts until the start of your next 
-long rest (the spell can end early as normal). The 
-saving throw DC for the spell equals 8 + your 
-Wisdom modifier + your proficiency bonus."}
+                            :description "Beginning at 11th level, you can enter a special meditation that surrounds you with an aura of peace. At the end of a long rest, you gain the effect of a sanctuary spell that lasts until the start of your next long rest (the spell can end early as normal). The saving throw DC for the spell equals 8 + your Wisdom modifier + your proficiency bonus."}
                            {:name "Quivering Palm"
                             :level 17
-                            :description "At 17th level, you gain the ability to set up lethal 
-vibrations in someone's body. When you hit a 
-creature with an unarmed strike, you can spend 3 ki 
-points to start these imperceptible vibrations, which 
-last for a number of days equal to your monk level. 
-The vibrations are harmless unless you use your 
-action to end them. To do so, you and the target 
-must be on the same plane of existence. When you 
-use this action, the creature must make a 
-Constitution saving throw. If it fails, it is reduced to 0 
-hit points. If it succeeds, it takes 10d10 necrotic 
-damage.
-You can have only one creature under the effect of 
-this feature at a time. You can choose to end the 
-vibrations harmlessly without using an action."}]}
+                            :description "At 17th level, you gain the ability to set up lethal vibrations in someone's body. When you hit a creature with an unarmed strike, you can spend 3 ki points to start these imperceptible vibrations, which last for a number of days equal to your monk level. The vibrations are harmless unless you use your action to end them. To do so, you and the target must be on the same plane of existence. When you use this action, the creature must make a Constitution saving throw. If it fails, it is reduced to 0 hit points. If it succeeds, it takes 10d10 necrotic damage.
+You can have only one creature under the effect of this feature at a time. You can choose to end the vibrations harmlessly without using an action."}]}
                  {:name "Way of Shadow"
                   :traits [{:name "Shadow Arts"
                             :level 3}
@@ -2102,93 +1994,35 @@ vibrations harmlessly without using an action."}]}
                       (opt5e/simple-melee-weapon-options 1))]
                     [])])]
     :traits [{:name "Divine Sense"
-              :description "The presence of strong evil registers on your senses 
-like a noxious odor, and powerful good rings like 
-heavenly music in your ears. As an action, you can 
-open your awareness to detect such forces. Until the 
-end of your next turn, you know the location of any 
-celestial, fiend, or undead within 60 feet of you that 
-is not behind total cover. You know the type 
-(celestial, fiend, or undead) of any being whose 
-presence you sense, but not its identity (the vampire 
-Count Strahd von Zarovich, for instance). Within the 
-same radius, you also detect the presence of any 
-place or object that has been consecrated or 
-desecrated, as with the hallow spell.
-You can use this feature a number of times equal 
-to 1 + your Charisma modifier. When you finish a 
-long rest, you regain all expended uses."}
+              :description "The presence of strong evil registers on your senses like a noxious odor, and powerful good rings like heavenly music in your ears. As an action, you can open your awareness to detect such forces. Until the end of your next turn, you know the location of any celestial, fiend, or undead within 60 feet of you that is not behind total cover. You know the type (celestial, fiend, or undead) of any being whose presence you sense, but not its identity (the vampire Count Strahd von Zarovich, for instance). Within the same radius, you also detect the presence of any place or object that has been consecrated or desecrated, as with the hallow spell.You can use this feature a number of times equal to 1 + your Charisma modifier. When you finish a long rest, you regain all expended uses."}
              {:name "Lay on Hands"
-              :description "Your blessed touch can heal wounds. You have a 
-pool of healing power that replenishes when you 
-take a long rest. With that pool, you can restore a 
-total number of hit points equal to your paladin level 
-× 5.
-As an action, you can touch a creature and draw 
-power from the pool to restore a number of hit 
-points to that creature, up to the maximum amount 
-remaining in your pool.
-Alternatively, you can expend 5 hit points from 
-your pool of healing to cure the target of one disease 
-or neutralize one poison affecting it. You can cure 
-multiple diseases and neutralize multiple poisons 
-with a single use of Lay on Hands, expending hit 
-points separately for each one.
-This feature has no effect on undead and 
-constructs."}
+              :description "Your blessed touch can heal wounds. You have a pool of healing power that replenishes when you take a long rest. With that pool, you can restore a total number of hit points equal to your paladin level × 5.
+As an action, you can touch a creature and draw power from the pool to restore a number of hit points to that creature, up to the maximum amount remaining in your pool.
+Alternatively, you can expend 5 hit points from your pool of healing to cure the target of one disease or neutralize one poison affecting it. You can cure multiple diseases and neutralize multiple poisons with a single use of Lay on Hands, expending hit points separately for each one.This feature has no effect on undead and constructs."}
              {:name "Divine Smite"
               :level 2
-              :description "Starting at 2nd level, when you hit a creature with a 
-melee weapon attack, you can expend one spell slot 
-to deal radiant damage to the target, in addition to 
-the weapon's damage. The extra damage is 2d8 for a 
-1st-level spell slot, plus 1d8 for each spell level 
-Not for resale. Permission granted to print or photocopy this document for personal use only. System Reference Document 5.0 32
-higher than 1st, to a maximum of 5d8. The damage 
-increases by 1d8 if the target is an undead or a fiend."}
+              :description "Starting at 2nd level, when you hit a creature with a melee weapon attack, you can expend one spell slot to deal radiant damage to the target, in addition to the weapon's damage. The extra damage is 2d8 for a 1st-level spell slot, plus 1d8 for each spell level higher than 1st, to a maximum of 5d8. The damage increases by 1d8 if the target is an undead or a fiend."}
              {:name "Divine Health"
               :level 3
-              :description "By 3rd level, the divine magic flowing through you 
-makes you immune to disease."}
+              :description "By 3rd level, the divine magic flowing through you makes you immune to disease."}
              {:name "Extra Attack"
               :level 5
-              :description "Beginning at 5th level, you can attack twice, instead 
-of once, whenever you take the Attack action on your 
-turn."}
+              :description "Beginning at 5th level, you can attack twice, instead of once, whenever you take the Attack action on your turn."}
              {:name "Aura of Protection"
               :level 6
-              :description "Starting at 6th level, whenever you or a friendly 
-creature within 10 feet of you must make a saving 
-throw, the creature gains a bonus to the saving 
-throw equal to your Charisma modifier (with a 
-minimum bonus of +1). You must be conscious to 
-grant this bonus.
-At 18th level, the range of this aura increases to 30 
-feet."}
+              :description "Starting at 6th level, whenever you or a friendly creature within 10 feet of you must make a saving throw, the creature gains a bonus to the saving throw equal to your Charisma modifier (with a minimum bonus of +1). You must be conscious to grant this bonus.
+At 18th level, the range of this aura increases to 30 feet."}
              {:name "Aura of Courage"
               :level 10
-              :description "Starting at 10th level, you and friendly creatures 
-within 10 feet of you can't be frightened while you 
-are conscious.
-At 18th level, the range of this aura increases to 30 
-feet."}
+              :description "Starting at 10th level, you and friendly creatures within 10 feet of you can't be frightened while you are conscious.
+At 18th level, the range of this aura increases to 30 feet."}
              {:name "Improved Divine Smite"
               :level 11
-              :description "By 11th level, you are so suffused with righteous 
-might that all your melee weapon strikes carry 
-divine power with them. Whenever you hit a 
-creature with a melee weapon, the creature takes an 
-extra 1d8 radiant damage. If you also use your 
-Divine Smite with an attack, you add this damage to 
-the extra damage of your Divine Smite."}
+              :description "By 11th level, you are so suffused with righteous might that all your melee weapon strikes carry divine power with them. Whenever you hit a creature with a melee weapon, the creature takes an extra 1d8 radiant damage. If you also use your Divine Smite with an attack, you add this damage to the extra damage of your Divine Smite."}
              {:name "Cleansing Touch"
               :level 14
-              :description "Beginning at 14th level, you can use your action to 
-end one spell on yourself or on one willing creature 
-that you touch.
-You can use this feature a number of times equal 
-to your Charisma modifier (a minimum of once). You 
-regain expended uses when you finish a long rest."}]
+              :description "Beginning at 14th level, you can use your action to end one spell on yourself or on one willing creature that you touch.
+You can use this feature a number of times equal to your Charisma modifier (a minimum of once). You regain expended uses when you finish a long rest."}]
     :subclass-level 3
     :subclass-title "Sacred Oath"
     :subclasses [{:name "Oath of Devotion"
@@ -2204,59 +2038,24 @@ regain expended uses when you finish a long rest."}]
                               (paladin-spell 5 :flame-strike 17)]
                   :traits [{:name "Channel Divinity"
                             :level 3
-                            :description "When you take this oath at 3rd level, you gain the 
-following two Channel Divinity options.
-Sacred Weapon. As an action, you can imbue one 
-weapon that you are holding with positive energy, 
-using your Channel Divinity. For 1 minute, you add 
-your Charisma modifier to attack rolls made with 
-that weapon (with a minimum bonus of +1). The 
-weapon also emits bright light in a 20-foot radius 
-and dim light 20 feet beyond that. If the weapon is 
-not already magical, it becomes magical for the 
-duration.
-You can end this effect on your turn as part of any 
-other action. If you are no longer holding or carrying 
-this weapon, or if you fall unconscious, this effect 
-ends.
-Turn the Unholy. As an action, you present your 
-holy symbol and speak a prayer censuring fiends 
-and undead, using your Channel Divinity. Each fiend 
-or undead that can see or hear you within 30 feet of 
-you must make a Wisdom saving throw. If the 
-creature fails its saving throw, it is turned for 1 
-minute or until it takes damage.
-A turned creature must spend its turns trying to 
-move as far away from you as it can, and it can't 
-willingly move to a space within 30 feet of you. It 
-also can't take reactions. For its action, it can use 
-only the Dash action or try to escape from an effect 
-that prevents it from moving. If there's nowhere to 
-move, the creature can use the Dodge action."}
+                            :description "When you take this oath at 3rd level, you gain the following two Channel Divinity options.
+Sacred Weapon. As an action, you can imbue one weapon that you are holding with positive energy, using your Channel Divinity. For 1 minute, you add your Charisma modifier to attack rolls made with that weapon (with a minimum bonus of +1). The weapon also emits bright light in a 20-foot radius and dim light 20 feet beyond that. If the weapon is not already magical, it becomes magical for the duration.
+You can end this effect on your turn as part of any other action. If you are no longer holding or carrying this weapon, or if you fall unconscious, this effect ends.
+Turn the Unholy. As an action, you present your holy symbol and speak a prayer censuring fiends and undead, using your Channel Divinity. Each fiend or undead that can see or hear you within 30 feet of you must make a Wisdom saving throw. If the creature fails its saving throw, it is turned for 1 minute or until it takes damage.
+A turned creature must spend its turns trying to move as far away from you as it can, and it can't willingly move to a space within 30 feet of you. It also can't take reactions. For its action, it can use only the Dash action or try to escape from an effect that prevents it from moving. If there's nowhere to move, the creature can use the Dodge action."}
                            {:name "Aura of Devotion"
                             :level 7
-                            :description "Starting at 7th level, you and friendly creatures 
-within 10 feet of you can't be charmed while you are 
-conscious.
-At 18th level, the range of this aura increases to 30 
-feet."}
+                            :description "Starting at 7th level, you and friendly creatures within 10 feet of you can't be charmed while you are conscious.
+At 18th level, the range of this aura increases to 30 feet."}
                            {:name "Purity of Spirit"
                             :level 15
-                            :description "Beginning at 15th level, you are always under the 
-effects of a protection from evil and good spell."}
+                            :description "Beginning at 15th level, you are always under the effects of a protection from evil and good spell."}
                            {:name "Holy Nimbus"
                             :level 20
-                            :description "At 20th level, as an action, you can emanate an aura 
-of sunlight. For 1 minute, bright light shines from 
-you in a 30-foot radius, and dim light shines 30 feet 
-beyond that.
-Whenever an enemy creature starts its turn in the 
-bright light, the creature takes 10 radiant damage.
-In addition, for the duration, you have advantage 
-on saving throws against spells cast by fiends or 
-undead.
-Once you use this feature, you can't use it again 
-until you finish a long rest."}]}
+                            :description "At 20th level, as an action, you can emanate an aura of sunlight. For 1 minute, bright light shines from you in a 30-foot radius, and dim light shines 30 feet beyond that.
+Whenever an enemy creature starts its turn in the bright light, the creature takes 10 radiant damage.
+In addition, for the duration, you have advantage on saving throws against spells cast by fiends or undead.
+Once you use this feature, you can't use it again until you finish a long rest."}]}
                  {:name "Oath of the Ancients"
                   :modifiers [(paladin-spell 1 :ensnaring-strike 3)
                               (paladin-spell 1 :speak-with-animals 3)
