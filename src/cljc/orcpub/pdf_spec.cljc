@@ -77,7 +77,6 @@
 
 (defn equipment-fields [built-char]
   (let [equipment (es/entity-val built-char :equipment)]
-    (prn "EQUIPEMENT" equipment)
     {:equipment (s/join
                  "; "
                  (map
@@ -175,7 +174,6 @@
         weapon-profs (es/entity-val built-char :weapon-profs)
         armor-profs (es/entity-val built-char :armor-profs)
         languages (es/entity-val built-char :languages)]
-    (prn "WEAPON PROFS" weapon-profs)
     (s/join
      "\n\n"
      [(profs-paragraph tool-profs opt5e/tools-map "Tool")
@@ -201,7 +199,6 @@
         max-armor-class (apply max armor-classes)
         levels (char5e/levels built-char)
         total-hit-dice (apply + (map :class-level (vals levels)))]
-    (prn (es/entity-val built-char :spells-known))
     (merge
      {:race (str race (if subrace (str "/" subrace)))
       :class-level (class-string levels)
