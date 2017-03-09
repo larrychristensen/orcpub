@@ -1491,46 +1491,18 @@ finish a short or long rest"}
                       (opt5e/simple-melee-weapon-options 1))]
                     [])])]
     :traits [{:name "Druidic"
-              :description "You know Druidic, the secret language of druids. You 
-can speak the language and use it to leave hidden 
-messages. You and others who know this language 
-automatically spot such a message. Others spot the 
-message's presence with a successful DC 15 Wisdom 
-(Perception) check but can't decipher it without 
-magic."}
+              :description "You know Druidic, the secret language of druids. You can speak the language and use it to leave hidden messages. You and others who know this language automatically spot such a message. Others spot the message's presence with a successful DC 15 Wisdom (Perception) check but can't decipher it without magic."}
              {:name "Wild Shape"
-              :description "Starting at 2nd level, you can use your action to 
-magically assume the shape of a beast that you have 
-seen before. You can use this feature twice. You 
-regain expended uses when you finish a short or 
-long rest.
-Your druid level determines the beasts you can 
-transform into, as shown in the Beast Shapes table. 
-At 2nd level, for example, you can transform into any 
-beast that has a challenge rating of 1/4 or lower that 
-doesn't have a flying or swimming speed. (see the Players Handbook for further details)"}
+              :description "Starting at 2nd level, you can use your action to magically assume the shape of a beast that you have seen before. You can use this feature twice. You regain expended uses when you finish a short or long rest. Your druid level determines the beasts you can transform into, as shown in the Beast Shapes table. At 2nd level, for example, you can transform into any beast that has a challenge rating of 1/4 or lower that doesn't have a flying or swimming speed. (see the Players Handbook for further details)"}
              {:name "Timeless Body"
               :level 18
-              :description "Starting at 18th level, the primal magic that you 
-wield causes you to age more slowly. For every 10 
-years that pass, your body ages only 1 year."}
+              :description "Starting at 18th level, the primal magic that you wield causes you to age more slowly. For every 10 years that pass, your body ages only 1 year."}
              {:name "Beast Spells"
               :level 18
-              :description "Beginning at 18th level, you can cast many of your 
-druid spells in any shape you assume using Wild 
-Shape. You can perform the somatic and verbal 
-components of a druid spell while in a beast shape, 
-but you aren't able to provide material components."}
+              :description "Beginning at 18th level, you can cast many of your druid spells in any shape you assume using Wild Shape. You can perform the somatic and verbal components of a druid spell while in a beast shape, but you aren't able to provide material components."}
              {:name "Archdruid"
               :level 20
-              :description "At 20th level, you can use your Wild Shape an 
-unlimited number of times.
-Additionally, you can ignore the verbal and 
-somatic components of your druid spells, as well as 
-any material components that lack a cost and aren't 
-consumed by a spell. You gain this benefit in both 
-your normal shape and your beast shape from Wild 
-Shape."}]
+              :description "At 20th level, you can use your Wild Shape an unlimited number of times. Additionally, you can ignore the verbal and somatic components of your druid spells, as well as any material components that lack a cost and aren't consumed by a spell. You gain this benefit in both your normal shape and your beast shape from Wild Shape."}]
     :subclass-level 2
     :subclass-title "Druid Circle"
     :subclasses [{:name "Circle of the Land"
@@ -1598,48 +1570,18 @@ Shape."}]
                   :modifiers []
                   :traits [{:name "Natural Recovery"
                             :level 2
-                            :description "Starting at 2nd level, you can regain some of your 
-magical energy by sitting in meditation and 
-communing with nature. During a short rest, you 
-choose expended spell slots to recover. The spell 
-slots can have a combined level that is equal to or 
-less than half your druid level (rounded up), and 
-none of the slots can be 6th level or higher. You can't 
-use this feature again until you finish a long rest.
-For example, when you are a 4th-level druid, you 
-can recover up to two levels worth of spell slots. You 
-can recover either a 2nd-level slot or two 1st-level 
-slots"}
+                            :description "Starting at 2nd level, you can regain some of your magical energy by sitting in meditation and communing with nature. During a short rest, you choose expended spell slots to recover. The spell slots can have a combined level that is equal to or less than half your druid level (rounded up), and none of the slots can be 6th level or higher. You can't use this feature again until you finish a long rest.For example, when you are a 4th-level druid, you can recover up to two levels worth of spell slots. You can recover either a 2nd-level slot or two 1st-level slots"}
                            {:name "Land's Stride"
                             :level 6
-                            :description "Starting at 6th level, moving through nonmagical 
-difficult terrain costs you no extra movement. You 
-can also pass through nonmagical plants without 
-being slowed by them and without taking damage 
-from them if they have thorns, spines, or a similar 
-hazard.
-In addition, you have advantage on saving throws 
-against plants that are magically created or 
-manipulated to impede movement, such those 
-created by the entangle spell."}
+                            :description "Starting at 6th level, moving through nonmagical difficult terrain costs you no extra movement. You can also pass through nonmagical plants without being slowed by them and without taking damage from them if they have thorns, spines, or a similar hazard.
+In addition, you have advantage on saving throws against plants that are magically created or manipulated to impede movement, such those created by the entangle spell."}
                            {:name "Nature's Ward"
                             :level 10
-                            :description "When you reach 10th level, you can't be charmed or 
-frightened by elementals or fey, and you are immune 
-to poison and disease."}
+                            :description "When you reach 10th level, you can't be charmed or frightened by elementals or fey, and you are immune to poison and disease."}
                            {:name "Nature's Santuary"
                             :level 14
-                            :description "When you reach 14th level, creatures of the natural 
-world sense your connection to nature and become 
-hesitant to attack you. When a beast or plant 
-creature attacks you, that creature must make a 
-Wisdom saving throw against your druid spell save 
-DC. On a failed save, the creature must choose a 
-different target, or the attack automatically misses. 
-On a successful save, the creature is immune to this 
-effect for 24 hours.
-The creature is aware of this effect before it makes 
-its attack against you."}]}
+                            :description "When you reach 14th level, creatures of the natural world sense your connection to nature and become hesitant to attack you. When a beast or plant creature attacks you, that creature must make a Wisdom saving throw against your druid spell save DC. On a failed save, the creature must choose a different target, or the attack automatically misses. On a successful save, the creature is immune to this effect for 24 hours.
+The creature is aware of this effect before it makes its attack against you."}]}
                  {:name "Circle of the Moon"
                   :traits [{:name "Combat Wild Shape"
                             :level 2}
