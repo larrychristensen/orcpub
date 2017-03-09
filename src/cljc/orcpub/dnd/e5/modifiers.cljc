@@ -74,7 +74,7 @@
 (defn spell-slots [level num]
   (mods/map-mod ?spell-slots level num))
 
-(defn spells-known [level spell-key spellcasting-ability & [min-level qualifier]]
+(defn spells-known [level spell-key spellcasting-ability class & [min-level qualifier]]
   (mods/modifier
    ?spells-known
    (if (>= ?total-levels (or min-level 0))
@@ -85,7 +85,8 @@
         (conj (or spells #{})
               {:key spell-key
                :ability spellcasting-ability
-               :qualifier qualifier})))
+               :qualifier qualifier
+               :class class})))
      ?spells-known)))
 
 (defn trait [name & [description level]]

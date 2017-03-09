@@ -228,7 +228,7 @@
     :subraces
     [{:name "High Elf"
       :abilities {:int 1}
-      :selections [(opt5e/spell-selection :wizard 0 :int 1)
+      :selections [(opt5e/spell-selection :wizard 0 :int "High Elf" 1)
                    (opt5e/language-selection opt5e/languages 1)]
       :modifiers [elf-weapon-training-mods]}
      {:name "Wood Elf"
@@ -241,9 +241,9 @@
       :traits [{:name "Sunlight Sensitivity"}
                {:name "Drow Magic"}]
       :modifiers [(mod5e/darkvision 120)
-                  (mod5e/spells-known 0 :dancing-lights :cha)
-                  (mod5e/spells-known 1 :faerie-fire :cha 3)
-                  (mod5e/spells-known 2 :darkness :cha 5)]}]
+                  (mod5e/spells-known 0 :dancing-lights :cha "Dark Elf")
+                  (mod5e/spells-known 1 :faerie-fire :cha "Dark Elf" 3)
+                  (mod5e/spells-known 2 :darkness :cha "Dark Elf" 5)]}]
     :traits [{:name "Fey Ancestry" :description "You have advantage on saving throws against being charmed and magic can't put you to sleep"}
              {:name "Trance" :description "Elves don't need to sleep. Instead, they meditate deeply, remaining semiconscious, for 4 hours a day. (The Common word for such meditation is 'trance.') While meditating, you can dream after a fashion; such dreams are actually mental exercises that have become re exive through years of practice. After resting in this way, you gain the same bene t that a human does from 8 hours of sleep."}
              {:name "Darkvision" :description "Accustomed to twilit forests and the night sky, you have superior vision in dark and dim conditions. You can see in dim light within 60 feet of you as if it were bright light, and in darkness as if it were dim light. You can't discern color in darkness, only shades of gray."}]}))
@@ -431,7 +431,7 @@ playing when it reaches the song's end or when it
 is closed."}]}
      {:name "Forest Gnome"
       :abilities {:dex 1}
-      :modifiers [(mod5e/spells-known 0 :minor-illusion :int)]
+      :modifiers [(mod5e/spells-known 0 :minor-illusion :int "Forest Gnome")]
       :traits [{:name "Speak with Small Beasts"}]}]
     :traits [{:name "Gnome Cunning" :description "You have advantage on all 
 Intelligence, Wisdom, and Charisma saving throws against magic."}]
@@ -483,7 +483,7 @@ to the extra damage of the critical hit."}]}))
     :languages ["Common" "Celestial"]
     :modifiers [(mod5e/resistance :necrotic)
                 (mod5e/resistance :radiant)
-                (mod5e/spells-known 0 :light :cha)]
+                (mod5e/spells-known 0 :light :cha "Aasimar")]
     :traits [{:name "Celestial Resistance"}
              {:name "Healing Hands"}
              {:name "Light Bearer"}]
@@ -508,8 +508,8 @@ to the extra damage of the critical hit."}]}))
     :speed 30
     :source "Volo's Guide to Monsters"
     :languages ["Common" "Elvish" "Giant"]
-    :modifiers [(mod5e/spells-known 1 :detect-magic :wis)
-                (mod5e/spells-known 1 :disguise-self :wis)]
+    :modifiers [(mod5e/spells-known 1 :detect-magic :wis "Firbolg")
+                (mod5e/spells-known 1 :disguise-self :wis "Firbolg")]
     :traits [{:name "Firbolg Magic"}
              {:name "Hidden Step"}
              {:name "Powerful Build"}
@@ -582,9 +582,9 @@ to the extra damage of the critical hit."}]}))
     :source "Volo's Guide to Monsters"
     :languages ["Common" "Primordial"]
     :modifiers [(mod5e/swimming-speed 30)
-                (mod5e/spells-known 1 :fog-cloud :cha)
-                (mod5e/spells-known 2 :gust-of-wind :cha 3)
-                (mod5e/spells-known 3 :wall-of-water :cha 5)
+                (mod5e/spells-known 1 :fog-cloud :cha "Triton")
+                (mod5e/spells-known 2 :gust-of-wind :cha "Triton" 3)
+                (mod5e/spells-known 3 :wall-of-water :cha "Triton" 5)
                 (mod5e/resistance :cold)]
     :traits [{:name "Amphibious"}
              {:name "Control Air and Water"}
@@ -670,9 +670,9 @@ to the extra damage of the critical hit."}]}))
     :speed 30
     :darkvision 60
     :source "Volo's Guide to Monsters"
-    :modifiers [(mod5e/spells-known 0 :poison-spray :cha)
-                (mod5e/spells-known 1 :animal-friendship :cha 1 "unlimited uses, can only target snakes")
-                (mod5e/spells-known 2 :suggestion :cha 3 "one use per long rest")
+    :modifiers [(mod5e/spells-known 0 :poison-spray :cha "Yuan-Ti")
+                (mod5e/spells-known 1 :animal-friendship :cha "Yuan-Ti" 1 "unlimited uses, can only target snakes")
+                (mod5e/spells-known 2 :suggestion :cha "Yuan-Ti" 3 "one use per long rest")
                 (mod5e/immunity :poison)
                 (mod5e/condition-immunity :poisoned)]
     :languages ["Common" "Abyssal" "Draconic"]
@@ -689,9 +689,9 @@ to the extra damage of the critical hit."}]}))
     :speed 30
     :languages ["Common" "Infernal"]
     :modifiers [(mod5e/darkvision 60)
-                (mod5e/spells-known 0 :thaumaturgy :cha)
-                (mod5e/spells-known 1 :hellish-rebuke :cha 3)
-                (mod5e/spells-known 2 :darkness :cha 5)]
+                (mod5e/spells-known 0 :thaumaturgy :cha "Tiefling")
+                (mod5e/spells-known 1 :hellish-rebuke :cha "Tiefling" 3)
+                (mod5e/spells-known 2 :darkness :cha "Tiefling" 5)]
     :traits [{:name "Relentless Endurance" :description "When you are reduced to 0 
 hit points but not killed outright, you can drop to 1 
 hit point instead. You can't use this feature again 
@@ -879,7 +879,7 @@ to the extra damage of the critical hit."}]}))
              (let [lvl (key (first new-slots))]
                (map
                 (fn [kw]
-                  (mod5e/spells-known lvl kw (:ability spellcasting)))
+                  (mod5e/spells-known lvl kw (:ability spellcasting) name))
                 (get-in sl/spell-lists [kw lvl]))))))
        (some-> levels (get i) :modifiers)
        (traits-modifiers
@@ -1400,6 +1400,9 @@ the GM tells you whether you succeed or fail."}]}
      [(mod5e/skill-proficiency skill-kw)
       (mod5e/skill-expertise skill-kw)])))
 
+(defn cleric-spell [spell-level spell-key min-level]
+  (mod5e/spells-known spell-level spell-key :wis "Cleric" min-level))
+
 (defn cleric-option [character-ref]
   (class-option
    {:name "Cleric",
@@ -1442,16 +1445,16 @@ the GM tells you whether you succeed or fail."}]}
     :subclass-title "Divine Domain"
     :subclasses [{:name "Life Domain"
                   :profs {:armor {:heavy true}}
-                  :modifiers [(mod5e/spells-known 1 :bless :wis 1)
-                              (mod5e/spells-known 1 :cure-wounds :wis 1)
-                              (mod5e/spells-known 2 :lesser-restoration :wis 3)
-                              (mod5e/spells-known 2 :spiritual-weapon :wis 3)
-                              (mod5e/spells-known 3 :beacon-of-hope :wis 5)
-                              (mod5e/spells-known 3 :revivify :wis 5)
-                              (mod5e/spells-known 4 :death-ward :wis 7)
-                              (mod5e/spells-known 4 :guardian-of-faith :wis 7)
-                              (mod5e/spells-known 5 :mass-cure-wounds :wis 9)
-                              (mod5e/spells-known 5 :raise-dead :wis 9)]
+                  :modifiers [(cleric-spell 1 :bless 1)
+                              (cleric-spell 1 :cure-wounds 1)
+                              (cleric-spell 2 :lesser-restoration 3)
+                              (cleric-spell 2 :spiritual-weapon 3)
+                              (cleric-spell 3 :beacon-of-hope 5)
+                              (cleric-spell 3 :revivify 5)
+                              (cleric-spell 4 :death-ward 7)
+                              (cleric-spell 4 :guardian-of-faith 7)
+                              (cleric-spell 5 :mass-cure-wounds 9)
+                              (cleric-spell 5 :raise-dead 9)]
                   :traits [{:level 1
                             :name "Disciple of Life"
                             :description "Also starting at 1st level, your healing spells are more e ective. Whenever you use a spell of 1st level or higher to restore hit points to a creature, the creature regains additional hit points equal to 2 + the spell's level."}
@@ -1468,16 +1471,16 @@ the GM tells you whether you succeed or fail."}]}
                             :name "Supreme Healing"
                             :description "Starting at 17th level, when you would normally roll one or more dice to restore hit points with a spell, you instead use the highest number possible for each die. For example, instead of restoring 2d6 hit points to a creature, you restore 12."}]}
                  {:name "Knowledge Domain"
-                  :modifiers [(mod5e/spells-known 1 :command :wis 1)
-                              (mod5e/spells-known 1 :identify :wis 1)
-                              (mod5e/spells-known 2 :augury :wis 3)
-                              (mod5e/spells-known 2 :suggestion :wis 3)
-                              (mod5e/spells-known 3 :nondetection :wis 5)
-                              (mod5e/spells-known 3 :speak-with-dead :wis 5)
-                              (mod5e/spells-known 4 :arcane-eye :wis 7)
-                              (mod5e/spells-known 4 :confusion :wis 7)
-                              (mod5e/spells-known 5 :legend-lore :wis 9)
-                              (mod5e/spells-known 5 :scrying :wis 9)]
+                  :modifiers [(cleric-spell 1 :command 1)
+                              (cleric-spell 1 :identify 1)
+                              (cleric-spell 2 :augury 3)
+                              (cleric-spell 2 :suggestion 3)
+                              (cleric-spell 3 :nondetection 5)
+                              (cleric-spell 3 :speak-with-dead 5)
+                              (cleric-spell 4 :arcane-eye 7)
+                              (cleric-spell 4 :confusion 7)
+                              (cleric-spell 5 :legend-lore 9)
+                              (cleric-spell 5 :scrying 9)]
                   :selections [(opt5e/language-selection opt5e/languages 2)
                                (t/selection
                                 "Blessings of Knowledge Skills"
@@ -1497,17 +1500,17 @@ the GM tells you whether you succeed or fail."}]}
                            {:level 17
                             :name "Visions of the Past"}]}
                  {:name "Light Domain"
-                  :modifiers [(mod5e/spells-known 0 :light :wis 1)
-                              (mod5e/spells-known 1 :burning-hands :wis 1)
-                              (mod5e/spells-known 1 :faerie-fire :wis 1)
-                              (mod5e/spells-known 2 :flaming-sphere :wis 3)
-                              (mod5e/spells-known 2 :scorching-ray :wis 3)
-                              (mod5e/spells-known 3 :daylight :wis 5)
-                              (mod5e/spells-known 3 :fireball :wis 5)
-                              (mod5e/spells-known 4 :guardian-of-faith :wis 7)
-                              (mod5e/spells-known 4 :wall-of-fire :wis 7)
-                              (mod5e/spells-known 5 :flame-strike :wis 9)
-                              (mod5e/spells-known 5 :scrying :wis 9)]
+                  :modifiers [(cleric-spell 0 :light 1)
+                              (cleric-spell 1 :burning-hands 1)
+                              (cleric-spell 1 :faerie-fire 1)
+                              (cleric-spell 2 :flaming-sphere 3)
+                              (cleric-spell 2 :scorching-ray 3)
+                              (cleric-spell 3 :daylight 5)
+                              (cleric-spell 3 :fireball 5)
+                              (cleric-spell 4 :guardian-of-faith 7)
+                              (cleric-spell 4 :wall-of-fire 7)
+                              (cleric-spell 5 :flame-strike 9)
+                              (cleric-spell 5 :scrying 9)]
                   :traits [{:level 1
                             :name "Warding Flame"}
                            {:level 2
@@ -1521,19 +1524,19 @@ the GM tells you whether you succeed or fail."}]}
                  {:name "Nature Domain"
                   :profs {:armor {:heavy true}
                           :skill-options {:choose 1 :options {:animal-handling true :nature true :survival true}}}
-                  :modifiers [(mod5e/spells-known 1 :animal-friendship :wis 1)
-                              (mod5e/spells-known 1 :speak-with-animals :wis 1)
-                              (mod5e/spells-known 2 :barkskin :wis 3)
-                              (mod5e/spells-known 2 :spike-growth :wis 3)
-                              (mod5e/spells-known 3 :plant-growth :wis 5)
-                              (mod5e/spells-known 3 :wind-wall :wis 5)
-                              (mod5e/spells-known 4 :dominate-beast :wis 7)
-                              (mod5e/spells-known 4 :grasping-vine :wis 7)
-                              (mod5e/spells-known 5 :insect-plague :wis 9)
-                              (mod5e/spells-known 5 :tree-stride :wis 9)]
+                  :modifiers [(cleric-spell 1 :animal-friendship 1)
+                              (cleric-spell 1 :speak-with-animals 1)
+                              (cleric-spell 2 :barkskin 3)
+                              (cleric-spell 2 :spike-growth 3)
+                              (cleric-spell 3 :plant-growth 5)
+                              (cleric-spell 3 :wind-wall 5)
+                              (cleric-spell 4 :dominate-beast 7)
+                              (cleric-spell 4 :grasping-vine 7)
+                              (cleric-spell 5 :insect-plague 9)
+                              (cleric-spell 5 :tree-stride 9)]
                   :selections [(t/selection
                                 "Druid Cantrip"
-                                (opt5e/spell-options (get-in sl/spell-lists [:druid 0]) 0 :wis))]
+                                (opt5e/spell-options (get-in sl/spell-lists [:druid 0]) 0 :wis :druid))]
                   :traits [{:name "Channel Divinity: Charm Animals and Plants"
                             :level 2}
                            {:name "Dampen Elements"
@@ -1545,16 +1548,16 @@ the GM tells you whether you succeed or fail."}]}
                  {:name "Tempest Domain"
                   :profs {:armor {:heavy true}
                           :weapon {:martial true}}
-                  :modifiers [(mod5e/spells-known 1 :fog-cloud :wis 1)
-                              (mod5e/spells-known 1 :thunderwave :wis 1)
-                              (mod5e/spells-known 2 :gust-of-wind :wis 3)
-                              (mod5e/spells-known 2 :shatter :wis 3)
-                              (mod5e/spells-known 3 :call-lightning :wis 5)
-                              (mod5e/spells-known 3 :sleet-storm :wis 5)
-                              (mod5e/spells-known 4 :control-water :wis 7)
-                              (mod5e/spells-known 4 :ice-storm :wis 7)
-                              (mod5e/spells-known 5 :destructive-wave :wis 9)
-                              (mod5e/spells-known 5 :insect-plague :wis 9)]
+                  :modifiers [(cleric-spell 1 :fog-cloud 1)
+                              (cleric-spell 1 :thunderwave 1)
+                              (cleric-spell 2 :gust-of-wind 3)
+                              (cleric-spell 2 :shatter 3)
+                              (cleric-spell 3 :call-lightning 5)
+                              (cleric-spell 3 :sleet-storm 5)
+                              (cleric-spell 4 :control-water 7)
+                              (cleric-spell 4 :ice-storm 7)
+                              (cleric-spell 5 :destructive-wave 9)
+                              (cleric-spell 5 :insect-plague 9)]
                   :traits [{:name "Wrath of the Storm"}
                            {:name "Channel Divinity: Destructive Wrath"
                             :level 2}
@@ -1565,16 +1568,16 @@ the GM tells you whether you succeed or fail."}]}
                            {:name "Stormborn"
                             :level 17}]}
                  {:name "Trickery Domain"
-                  :modifiers [(mod5e/spells-known 1 :charm-person :wis 1)
-                              (mod5e/spells-known 1 :disguise-self :wis 1)
-                              (mod5e/spells-known 2 :mirror-image :wis 3)
-                              (mod5e/spells-known 2 :pass-without-trace :wis 3)
-                              (mod5e/spells-known 3 :blink :wis 5)
-                              (mod5e/spells-known 3 :dispel-magic :wis 5)
-                              (mod5e/spells-known 4 :dimension-door :wis 7)
-                              (mod5e/spells-known 4 :polymorph :wis 7)
-                              (mod5e/spells-known 5 :dominate-person :wis 9)
-                              (mod5e/spells-known 5 :modify-memory :wis 9)]
+                  :modifiers [(cleric-spell 1 :charm-person 1)
+                              (cleric-spell 1 :disguise-self 1)
+                              (cleric-spell 2 :mirror-image 3)
+                              (cleric-spell 2 :pass-without-trace 3)
+                              (cleric-spell 3 :blink 5)
+                              (cleric-spell 3 :dispel-magic 5)
+                              (cleric-spell 4 :dimension-door 7)
+                              (cleric-spell 4 :polymorph 7)
+                              (cleric-spell 5 :dominate-person 9)
+                              (cleric-spell 5 :modify-memory 9)]
                   :traits [{:name "Blessing of the Trickster"
                             :level 1}
                            {:name "Channel Divinity: Invoke Duplicity"
@@ -1588,16 +1591,16 @@ the GM tells you whether you succeed or fail."}]}
                  {:name "War Domain"
                   :profs {:armor {:heavy true}
                           :weapon {:martial true}}
-                  :modifiers [(mod5e/spells-known 1 :divine-favor :wis 1)
-                              (mod5e/spells-known 1 :shield-of-faith :wis 1)
-                              (mod5e/spells-known 2 :magic-weapon :wis 3)
-                              (mod5e/spells-known 2 :spiritual-weapon :wis 3)
-                              (mod5e/spells-known 3 :crusaders-mantle :wis 5)
-                              (mod5e/spells-known 3 :spirits-guardians :wis 5)
-                              (mod5e/spells-known 4 :freedom-of-movement :wis 7)
-                              (mod5e/spells-known 4 :stoneskin :wis 7)
-                              (mod5e/spells-known 5 :flame-strike :wis 9)
-                              (mod5e/spells-known 5 :hold-monster :wis 9)]
+                  :modifiers [(cleric-spell 1 :divine-favor 1)
+                              (cleric-spell 1 :shield-of-faith 1)
+                              (cleric-spell 2 :magic-weapon 3)
+                              (cleric-spell 2 :spiritual-weapon 3)
+                              (cleric-spell 3 :crusaders-mantle 5)
+                              (cleric-spell 3 :spirits-guardians 5)
+                              (cleric-spell 4 :freedom-of-movement 7)
+                              (cleric-spell 4 :stoneskin 7)
+                              (cleric-spell 5 :flame-strike 9)
+                              (cleric-spell 5 :hold-monster 9)]
                   :traits [{:name "War Priest"
                             :level 1}
                            {:name "Channel Divinity: Guided Strike"
@@ -1619,6 +1622,9 @@ the GM tells you whether you succeed or fail."}]}
                             :level 8}
                            {:name "Arcane Mastery"}]}]}
    character-ref))
+
+(defn druid-spell [spell-level spell-key min-level]
+  (mod5e/spells-known spell-level spell-key :wis "Druid" min-level))
 
 (defn druid-option [character-ref]
   (class-option
@@ -1707,65 +1713,65 @@ Shape."}]
     :subclasses [{:name "Circle of the Land"
                   :selections [(t/selection
                                 "Bonus Cantrip"
-                                (opt5e/spell-options (get-in sl/spell-lists [:druid 0]) 0 :wis))
+                                (opt5e/spell-options (get-in sl/spell-lists [:druid 0]) 0 :wis :druid))
                                (t/selection
                                 "Land Type"
                                 [(t/option
                                   "Arctic"
                                   :arctic
                                   []
-                                  [(mod5e/spells-known 3 :slow :wis 5)
-                                   (mod5e/spells-known 5 :cone-of-cold :wis 9)])
+                                  [(druid-spell 3 :slow 5)
+                                   (druid-spell 5 :cone-of-cold 9)])
                                  (t/option
                                   "Coast"
                                   :coast
                                   []
-                                  [(mod5e/spells-known 2 :mirror-image :wis 3)
-                                   (mod5e/spells-known 2 :misty-step :wis 3)])
+                                  [(druid-spell 2 :mirror-image 3)
+                                   (druid-spell 2 :misty-step 3)])
                                  (t/option
                                   "Desert"
                                   :desert
                                   []
-                                  [(mod5e/spells-known 2 :blur :wis 3)
-                                   (mod5e/spells-known 2 :silence :wis 3)
-                                   (mod5e/spells-known 3 :create-food-and-water :wis 5)])
+                                  [(druid-spell 2 :blur 3)
+                                   (druid-spell 2 :silence 3)
+                                   (druid-spell 3 :create-food-and-water 5)])
                                  (t/option
                                   "Forest"
                                   :forest
                                   []
-                                  [(mod5e/spells-known 2 :spider-climb :wis 3)
-                                   (mod5e/spells-known 4 :divination :wis 7)])
+                                  [(druid-spell 2 :spider-climb 3)
+                                   (druid-spell 4 :divination 7)])
                                  (t/option
                                   "Grassland"
                                   :grassland
                                   []
-                                  [(mod5e/spells-known 2 :invisibility :wis 3)
-                                   (mod5e/spells-known 3 :haste :wis 5)
-                                   (mod5e/spells-known 4 :divination :wis 7)
-                                   (mod5e/spells-known 5 :dream :wis 9)])
+                                  [(druid-spell 2 :invisibility 3)
+                                   (druid-spell 3 :haste 5)
+                                   (druid-spell 4 :divination 7)
+                                   (druid-spell 5 :dream 9)])
                                  (t/option
                                   "Mountain"
                                   :mountain
                                   []
-                                  [(mod5e/spells-known 2 :spider-climb :wis 3)
-                                   (mod5e/spells-known 3 :lightning-bolt :wis 5)])
+                                  [(druid-spell 2 :spider-climb 3)
+                                   (druid-spell 3 :lightning-bolt 5)])
                                  (t/option
                                   "Swamp"
                                   :swamp
                                   []
-                                  [(mod5e/spells-known 2 :darkness :wis 3)
-                                   (mod5e/spells-known 2 :melfs-acid-arrow :wis 3)
-                                   (mod5e/spells-known 3 :stinking-cloud :wis 5)])
+                                  [(druid-spell 2 :darkness 3)
+                                   (druid-spell 2 :melfs-acid-arrow 3)
+                                   (druid-spell 3 :stinking-cloud 5)])
                                  (t/option
                                   "Underdark"
                                   :underdark
                                   []
-                                  [(mod5e/spells-known 2 :spider-climb :wis 3)
-                                   (mod5e/spells-known 2 :web :wis 3)
-                                   (mod5e/spells-known 3 :stinking-cloud :wis 5)
-                                   (mod5e/spells-known 3 :gaseous-form :wis 5)
-                                   (mod5e/spells-known 4 :greater-invisibility :wis 7)
-                                   (mod5e/spells-known 5 :cloudkill :wis 9)])])]
+                                  [(druid-spell 2 :spider-climb 3)
+                                   (druid-spell 2 :web 3)
+                                   (druid-spell 3 :stinking-cloud 5)
+                                   (druid-spell 3 :gaseous-form 5)
+                                   (druid-spell 4 :greater-invisibility 7)
+                                   (druid-spell 5 :cloudkill 9)])])]
                   :modifiers []
                   :traits [{:name "Natural Recovery"
                             :level 2
@@ -2275,6 +2281,9 @@ vibrations harmlessly without using an action."}]}
                             :level 17}]}]}
    character-ref))
 
+(defn paladin-spell [spell-level key min-level]
+  (mod5e/spells-known spell-level key :wis "Paladin" min-level))
+
 (defn paladin-option [character-ref]
   (class-option
    {:name "Paladin"
@@ -2418,16 +2427,16 @@ regain expended uses when you finish a long rest."}]
     :subclass-level 3
     :subclass-title "Sacred Oath"
     :subclasses [{:name "Oath of Devotion"
-                  :modifiers [(mod5e/spells-known 1 :protection-from-evil-and-good :wis 3)
-                              (mod5e/spells-known 1 :sanctuary :wis 3)
-                              (mod5e/spells-known 2 :lesser-restoration :wis 5)
-                              (mod5e/spells-known 2 :zone-of-truth :wis 5)
-                              (mod5e/spells-known 3 :beacon-of-hope :wis 9)
-                              (mod5e/spells-known 3 :dispel-magic :wis 9)
-                              (mod5e/spells-known 4 :freedom-of-movement :wis 13)
-                              (mod5e/spells-known 4 :guardian-of-faith :wis 13)
-                              (mod5e/spells-known 5 :commune :wis 17)
-                              (mod5e/spells-known 5 :flame-strike :wis 17)]
+                  :modifiers [(paladin-spell 1 :protection-from-evil-and-good 3)
+                              (paladin-spell 1 :sanctuary 3)
+                              (paladin-spell 2 :lesser-restoration 5)
+                              (paladin-spell 2 :zone-of-truth 5)
+                              (paladin-spell 3 :beacon-of-hope 9)
+                              (paladin-spell 3 :dispel-magic 9)
+                              (paladin-spell 4 :freedom-of-movement 13)
+                              (paladin-spell 4 :guardian-of-faith 13)
+                              (paladin-spell 5 :commune 17)
+                              (paladin-spell 5 :flame-strike 17)]
                   :traits [{:name "Channel Divinity"
                             :level 3
                             :description "When you take this oath at 3rd level, you gain the 
@@ -2484,16 +2493,16 @@ undead.
 Once you use this feature, you can't use it again 
 until you finish a long rest."}]}
                  {:name "Oath of the Ancients"
-                  :modifiers [(mod5e/spells-known 1 :ensnaring-strike :wis 3)
-                              (mod5e/spells-known 1 :speak-with-animals :wis 3)
-                              (mod5e/spells-known 2 :misty-step :wis 5)
-                              (mod5e/spells-known 2 :moonbeam :wis 5)
-                              (mod5e/spells-known 3 :plant-growth :wis 9)
-                              (mod5e/spells-known 3 :protection-from-energy :wis 9)
-                              (mod5e/spells-known 4 :ice-storm :wis 13)
-                              (mod5e/spells-known 4 :stoneskin :wis 13)
-                              (mod5e/spells-known 5 :commune-with-nature :wis 17)
-                              (mod5e/spells-known 5 :tree-stride :wis 17)]
+                  :modifiers [(paladin-spell 1 :ensnaring-strike 3)
+                              (paladin-spell 1 :speak-with-animals 3)
+                              (paladin-spell 2 :misty-step 5)
+                              (paladin-spell 2 :moonbeam 5)
+                              (paladin-spell 3 :plant-growth 9)
+                              (paladin-spell 3 :protection-from-energy 9)
+                              (paladin-spell 4 :ice-storm 13)
+                              (paladin-spell 4 :stoneskin 13)
+                              (paladin-spell 5 :commune-with-nature 17)
+                              (paladin-spell 5 :tree-stride 17)]
                   :traits [{:name "Channel Divinity: Nature's Wrath"
                             :level 3}
                            {:name "Channel Divinity: Turn the Faithless"
@@ -2505,16 +2514,16 @@ until you finish a long rest."}]}
                            {:name "Elder Champion"
                             :level 20}]}
                  {:name "Oath of Vengeance"
-                  :modifiers [(mod5e/spells-known 1 :bane :wis 3)
-                              (mod5e/spells-known 1 :hunters-mark :wis 3)
-                              (mod5e/spells-known 2 :hold-person :wis 5)
-                              (mod5e/spells-known 2 :misty-step :wis 5)
-                              (mod5e/spells-known 3 :haste :wis 9)
-                              (mod5e/spells-known 3 :protection-from-energy :wis 9)
-                              (mod5e/spells-known 4 :banishment :wis 13)
-                              (mod5e/spells-known 4 :dimension-door :wis 13)
-                              (mod5e/spells-known 5 :hold-monster :wis 17)
-                              (mod5e/spells-known 5 :scrying :wis 17)]
+                  :modifiers [(paladin-spell 1 :bane 3)
+                              (paladin-spell 1 :hunters-mark 3)
+                              (paladin-spell 2 :hold-person 5)
+                              (paladin-spell 2 :misty-step 5)
+                              (paladin-spell 3 :haste 9)
+                              (paladin-spell 3 :protection-from-energy 9)
+                              (paladin-spell 4 :banishment 13)
+                              (paladin-spell 4 :dimension-door 13)
+                              (paladin-spell 5 :hold-monster 17)
+                              (paladin-spell 5 :scrying 17)]
                   :traits [{:name "Channel Divinity: Abjure Enemy"
                             :level 3}
                            {:name "Channel Divinity: Vow of Eternity"
@@ -2879,7 +2888,7 @@ magic items."}]}
                                                     :restriction arcane-trickster-spell?}
                                                 20 1}
                                  :ability :int}
-                  :modifiers [(mod5e/spells-known 0 :mage-hand :int)]
+                  :modifiers [(mod5e/spells-known 0 :mage-hand :int "Arcane Trickster")]
                   :traits [{:name "Mage Hand Legerdemain"
                             :level 3}
                            {:name "Magical Ambush"
@@ -3308,7 +3317,7 @@ previous book. The book turns to ash when you die.")])])
                            {:name "Alter Memories"
                             :level 14}]}
                  {:name "School of Illusion"
-                  :selections [(opt5e/spell-selection :wizard 0 :int 1)]
+                  :selections [(opt5e/spell-selection :wizard 0 :int 1 "Wizard")]
                   :traits [{:name "Illusion Savant"
                             :level 2}
                            {:name "Improved Minor Illusion"
@@ -3332,7 +3341,7 @@ previous book. The book turns to ash when you die.")])])
                            {:name "Command Undead"
                             :level 14}]}
                  {:name "School of Transmutation"
-                  :modifiers [(mod5e/spells-known 4 :polymorph :int)]
+                  :modifiers [(mod5e/spells-known 4 :polymorph :int "Wizard")]
                   :traits [{:name "Transmutation Savant"
                             :level 2}
                            {:name "Minor Alchemy"
@@ -3698,7 +3707,7 @@ within line of sight.")]
                               eldritch-invocation-options
                               2
                               2)]}
-             3 {:modifiers [(mod5e/spells-known 1 :find-familiar :cha)]
+             3 {:modifiers [(mod5e/spells-known 1 :find-familiar :cha "Warlock")]
                 :selections [(t/selection
                              "Pact Boon"
                              pact-boon-options)]}

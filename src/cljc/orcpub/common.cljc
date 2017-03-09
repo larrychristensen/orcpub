@@ -17,3 +17,10 @@
 
 (defn bonus-str [val]
   (str (if (pos? val) "+") val))
+
+(defn map-vals [val-fn m]
+  (reduce-kv
+   (fn [m2 k v]
+     (assoc m2 k (val-fn k v)))
+   {}
+   m))

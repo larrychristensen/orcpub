@@ -61,7 +61,7 @@
     traits)))
 
 (defn traits-fields [built-char]
-  (let [traits (es/entity-val built-char :traits)
+  (let [traits (sort-by :name (es/entity-val built-char :traits))
         total-len (total-length traits)
         half-len (/ total-len 2)
         half-traits (reduce
@@ -72,7 +72,7 @@
                      []
                      traits)
         other-half-traits (drop (count half-traits) traits)]
-    {:features-and-traits (traits-string traits)
+    {:features-and-traits (traits-string half-traits)
      :features-and-traits-2 (traits-string other-half-traits)}))
 
 (defn equipment-fields [built-char]
@@ -83,37 +83,84 @@
        (str (:name (opt5e/equipment-map kw)) " (" count ")"))
      (es/entity-val built-char :equipment)))})
 
-(defn spellcasting-fields [built-char]
-  (let [spells-known (es/entity-val built-char :spells-known)
-        spell-attack-modifier-fn (es/entity-val built-char :spell-attack-modifier)
-        spell-save-dc-fn (es/entity-val built-char :spell-save-dc)
-        all-abilities (vec
-                       (set
-                        (flatten
-                         (map
-                          (fn [[_ spells]]
-                            (map :ability spells))
-                          spells-known))))
-        _ (prn "ALL_ABILITITE" all-abilities)
-        num-abilities (count all-abilities)]
+(def level-max-spells
+  {0 8
+   1 12
+   2 13
+   3 13
+   4 13
+   5 9
+   6 9
+   7 9
+   8 7
+   9 7})
+
+(defn make-page-map [spells-known]
+  (reduce-kv
+   (fn [m k s]
+     (let [by-ability (group-by :ability s)]
+       (reduce-kv
+        (fn [am a a-s]
+          (assoc-in am [a k] (sort-by (comp :name spells/spell-map :key) a-s)))
+        m
+        by-ability)))
+   {}
+   spells-known))
+
+(defn make-pages [spells]
+  (let [page-map (make-page-map spells)]
+    (mapcat
+     (fn [[ability levels]]
+       (let [ability-classes (into
+                              (sorted-set)
+                              (mapcat
+                               (fn [[_ spells]]
+                                 (map :class spells))
+                               levels))
+             split-levels (common/map-vals
+                           (fn [level spells]
+                             (vec (partition-all (level-max-spells level) spells)))
+                           levels)
+             num-pages (apply max
+                              (map (fn [[level parts]]
+                                     (count parts))
+                                   split-levels))]
+         (for [page-index (range num-pages)]
+           {:ability ability
+            :classes ability-classes
+            :spells (map (fn [level]
+                           {:level level
+                            :spells (get-in split-levels [level page-index])})
+                         (range 10))})))
+     page-map)))
+
+(defn spell-page-fields [spells save-dc-fn attack-mod-fn]
+  (let [spell-pages (make-pages spells)]
     (apply
      merge
      (flatten
-      (for [[level spells] spells-known
-            :let [by-ability (group-by :ability spells)]
-            ability-index (range num-abilities)
-            :let [ability (all-abilities ability-index)
-                  ability-items (vec (by-ability ability))]
-            item-index (range (count ability-items))
-            :let [item (ability-items item-index)
-                  suffix (str "-" (inc ability-index))]]
-        (do
-          (prn level ability-index ability item-index (:key item))
-          [{(keyword (str "spellcasting-ability" suffix)) (:name (opt5e/abilities-map ability))}
-           {(keyword (str "spell-save-dc" suffix)) (spell-save-dc-fn ability)}
-           {(keyword (str "spell-attack-bonus" suffix)) (spell-attack-modifier-fn ability)}
-           {(keyword (str "spells-" level "-" (inc item-index) suffix))
-            (:name (spells/spell-map (:key item)))}]))))))
+      (map-indexed
+       (fn [i {:keys [ability classes spells]}]
+         (let [suffix (str "-" (inc i))]
+           [{(keyword (str "spellcasting-class" suffix)) (s/join ", " classes)
+             (keyword (str "spellcasting-ability" suffix)) (:name (opt5e/abilities-map ability))
+             (keyword (str "spell-save-dc" suffix)) (save-dc-fn ability)
+             (keyword (str "spell-attack-bonus" suffix)) (attack-mod-fn ability)}
+            (map
+             (fn [{:keys [level spells]}]
+               (map-indexed
+                (fn [spell-index spell]
+                  {(keyword (str "spells-" level "-" (inc spell-index) suffix))
+                   (:name (spells/spell-map (:key spell)))})
+                spells))
+             spells)]))
+       spell-pages)))))
+
+(defn spellcasting-fields [built-char]
+  (let [spells-known (es/entity-val built-char :spells-known)
+        spell-attack-modifier-fn (es/entity-val built-char :spell-attack-modifier)
+        spell-save-dc-fn (es/entity-val built-char :spell-save-dc)]
+    (spell-page-fields spells-known spell-save-dc-fn spell-attack-modifier-fn)))
 
 (defn make-spec [built-char]
   (let [race (es/entity-val built-char :race)

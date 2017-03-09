@@ -1035,29 +1035,43 @@ hazards."}])
    nil
    [(modifiers/language name key)]))
 
+(def class-names
+  {:barbarian "Barbarian"
+   :bard "Bard"
+   :cleric "Cleric"
+   :druid "Druid"
+   :fighter "Fighter"
+   :monk "Monk"
+   :paladin "Paladin"
+   :ranger "Ranger"
+   :rogue "Rogue"
+   :sorcerer "Sorcerer"
+   :wizard "Wizard"
+   :warlock "Warlock"})
+
 (defn key-to-name [key]
   (s/join " " (map s/capitalize (s/split (name key) #"-"))))
 
-(defn spell-options [spells level spellcasting-ability]
+(defn spell-options [spells level spellcasting-ability class-name]
   (map
    (fn [key]
      (t/option
       (:name (spells/spell-map key))
       key
       []
-      [(modifiers/spells-known level key spellcasting-ability)]))
+      [(modifiers/spells-known level key spellcasting-ability class-name)]))
    (sort spells)))
 
 (defn spell-level-title [level]
   (if (zero? level) "Cantrip" (str "Level " level " Spell")))
 
 (defn spell-selection
-  ([class-key level spellcasting-ability num]
-   (spell-selection class-key level (get-in sl/spell-lists [class-key level]) spellcasting-ability num))
-  ([class-key level spell-keys spellcasting-ability num]
+  ([class-key level spellcasting-ability class-name num]
+   (spell-selection class-key level (get-in sl/spell-lists [class-key level]) spellcasting-ability class-name num))
+  ([class-key level spell-keys spellcasting-ability class-name num]
    (t/selection
     (spell-level-title level)
-    (spell-options spell-keys level spellcasting-ability)
+    (spell-options spell-keys level spellcasting-ability class-name)
     num
     num)))
 
@@ -1131,6 +1145,7 @@ hazards."}])
                #{}
                sl/spell-lists)
               :cha
+              (class-names :bard)
               1)]
             []))
          spell-slots))))))
@@ -1146,7 +1161,7 @@ hazards."}])
 (defn cantrip-selections [class-key ability cantrips-known]
   (reduce
    (fn [m [k v]]
-     (assoc m k [(spell-selection class-key 0 ability v)]))
+     (assoc m k [(spell-selection class-key 0 ability (class-names class-key) v)]))
    {}
    cantrips-known))
 
@@ -1187,7 +1202,7 @@ hazards."}])
                            (str lvl " - " (:name spell))
                            spell-key
                            []
-                           [(modifiers/spells-known lvl spell-key ability)])))
+                           [(modifiers/spells-known lvl spell-key ability (class-names class-key))])))
                       (apply-spell-restriction spell-keys restriction)))
                    all-spells)))
                 num
@@ -1217,11 +1232,11 @@ hazards."}])
    class-key
    [(t/selection
      "Cantrip"
-     (spell-options (get-in spell-lists [class-key 0]) 0 spellcasting-ability)
+     (spell-options (get-in spell-lists [class-key 0]) 0 spellcasting-ability (class-names class-key))
      2 2)
     (t/selection
      "1st Level Spell"
-     (spell-options (get-in spell-lists [class-key 1]) 1 spellcasting-ability)
+     (spell-options (get-in spell-lists [class-key 1]) 1 spellcasting-ability (class-names class-key))
      1 1)]
    []))
 
@@ -1231,7 +1246,7 @@ hazards."}])
    class-key
    [(t/selection
      "1st Level Ritual"
-     (spell-options (filter (fn [spell-kw] (:ritual (spells/spell-map spell-kw))) (get-in spell-lists [class-key 1])) 1 spellcasting-ability)
+     (spell-options (filter (fn [spell-kw] (:ritual (spells/spell-map spell-kw))) (get-in spell-lists [class-key 1])) 1 spellcasting-ability (class-names class-key))
      2
      2)]
    []))
