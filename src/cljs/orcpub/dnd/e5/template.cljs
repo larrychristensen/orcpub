@@ -1216,7 +1216,7 @@ creature."}]}
     :hit-die 8
     :ability-increase-levels [4 8 12 16 19]
     :profs {:armor {:light true}
-            :weapon {:simple true :crossbow--hand true :longsword true :rapier true :shortsword true}
+            :weapon {:simple true :crossbow-hand true :longsword true :rapier true :shortsword true}
             :save {:dex true :cha true}
             :skill-options {:choose 3 :options {:any true}}
             :tool-options {:musical-instrument 3}}
@@ -1419,7 +1419,9 @@ the GM tells you whether you succeed or fail."}]}
             :skill-options {:choose 2 :options {:history true :insight true :medicine true :persuasion true :religion true}}}
     :equipment-choices [{:name "Equipment Pack"
                          :options {:priests-pack 1
-                                   :explorers-pack 1}}]
+                                   :explorers-pack 1}}
+                        {:name "Holy Symbol"
+                         :options {:holy-symbol 1}}]
     :weapon-choices [{:name "Cleric Weapon"
                       :options {:mace 1
                                 :warhammer 1}}]
@@ -1428,14 +1430,13 @@ the GM tells you whether you succeed or fail."}]}
                                :leather 1
                                :chain-mail 1}}]
     :armor {:shield 1}
-    :equipment {:holy-symbol 1}
     :selections [(t/selection
                   "Additional Weapon"
                   [(t/option
                     "Light Crossbow and 20 Bolts"
                     :light-crossbow
                     []
-                    [(mod5e/weapon :crossbow--light 1)
+                    [(mod5e/weapon :crossbow-light 1)
                      (mod5e/equipment :crossbow-bolt 20)])
                    (weapon-option [:simple 1])])]
     :traits [{:level 2 :name "Channel Divinity: Turn Undead" :description "As an action, you present your holy symbol and speak a prayer censuring the undead. Each undead that can see or hear you within 30 feet of you must make a Wisdom saving throw. If the creature fails its saving throw, it is turned for 1 minute or until it takes any damage.\nA turned creature must spend its turns trying to move as far away from you as it can, and it can't willingly move to a space within 30 feet of you. It also can't take reactions. For its action, it can use only the Dash action or try to escape from an effect that prevents it from moving. If there's nowhere to move, the creature can use the Dodge action."}
@@ -1642,8 +1643,12 @@ the GM tells you whether you succeed or fail."}]}
             :save {:int true :wis true}
             :skill-options {:choose 2 :options {:arcana true :animal-handling true :insight true :medicine true :nature true :perception true :religion true :survival true}}}
     :armor {:leather 1}
-    :equipment {:explorers-pack 1
-                :druidic-focus 1}
+    :equipment-choices [{:name "Equipment Pack"
+                         :options {:priests-pack 1
+                                   :explorers-pack 1}}
+                        {:name "Druidic Focus"
+                         :options {:druidic-focus 1}}]
+    :equipment {:explorers-pack 1}
     :modifiers [(mod5e/language "Druidic" :druidic)]
     :selections [(t/selection
                   "Wooden Shield or Simple Weapon"
@@ -1907,7 +1912,7 @@ its attack against you."}]}
                     "Light Crossbow and 20 Bolts"
                     :light-crossbow
                     []
-                    [(mod5e/weapon :crossbow--light 1)
+                    [(mod5e/weapon :crossbow-light 1)
                      (mod5e/equipment :crossbow-bolt 20)])
                    (t/option
                     "Two Handaxes"
@@ -2801,7 +2806,7 @@ reaction to halve the attack's damage against you.")])])]}}}
     :ability-increase-levels [4 8 12 16 19]
     :expertise true
     :profs {:armor {:light true}
-            :weapon {:simple true :crossbow--hand true :longsword true :rapier true :shortsword true}
+            :weapon {:simple true :crossbow-hand true :longsword true :rapier true :shortsword true}
             :save {:dex true :int true}
             :tool {:thieves-tools true}
             :skill-options {:order 0 :choose 4 :options {:acrobatics true :athletics true :deception true :insight true :intimidation true :investigation true :perception true :performance true :persuasion true :sleight-of-hand true :stealth true}}}
@@ -2956,7 +2961,7 @@ magic items."}]}
                     "Light Crossbow"
                     :crossbow
                     []
-                    [(mod5e/weapon :crossbow--light 1)
+                    [(mod5e/weapon :crossbow-light 1)
                      (mod5e/equipment :crossbow-bolt 20)])
                    (weapon-option [:simple 1])])]
     :equipment-choices [{:name "Equipment Pack"
@@ -3249,6 +3254,12 @@ previous book. The book turns to ash when you die.")])])
     :spellcaster true
     :hit-die 6
     :ability-increase-levels [4 8 12 16 19]
+    :equipment-choices [{:name "Equipment Pack"
+                         :options {:scholars-pack 1
+                                   :explorers-pack 1}}
+                        {:name "Spellcasting Equipment"
+                         :options {:component-pouch 1
+                                   :arcane-focus 1}}]
     :profs {:weapon {:dagger true :dart true :sling true :quarterstaff true :crossbow-light true}
             :save {:int true :wis true}
             :skill-options {:choose 2 :options {:arcana true :history true :insight true :investigation true :medicine true :religion true}}}
@@ -3690,7 +3701,7 @@ within line of sight.")]
                     "Light Crossbow"
                     :crossbow
                     []
-                    [(mod5e/weapon :crossbow--light 1)
+                    [(mod5e/weapon :crossbow-light 1)
                      (mod5e/equipment :crossbow-bolt 20)])
                    (weapon-option [:simple 1])])
                  (simple-weapon-selection 1)]

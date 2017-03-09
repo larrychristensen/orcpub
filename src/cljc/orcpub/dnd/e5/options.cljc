@@ -434,9 +434,15 @@ hazards."}])
 
 (def equipment-map
   (merge
-   {:pack {:name "Equipment Packs"
-           :values packs}}
-   {:musical-instrument {:name "Musical Instruments"
+   {:holy-symbol {:name "Holy Symbol"
+                  :values holy-symbols}
+    :druidic-focus {:name "Druidic Focus"
+                    :values druidic-focuses}
+    :arcane-focus {:name "Arcane Focus"
+                   :values arcane-focuses}
+    :pack {:name "Equipment Packs"
+           :values packs}
+    :musical-instrument {:name "Musical Instruments"
                          :values musical-instruments}}
    (zipmap (map :key equipment) equipment)))
 
@@ -534,7 +540,7 @@ hazards."}])
     :damage-die-count 1,
     :ranged true,
     :range {:min 80, :max 320},
-    :key :crossbow--light}
+    :key :crossbow-light}
    {:ranged true,
     :key :dart,
     :name "Dart",
@@ -814,7 +820,7 @@ hazards."}])
     :damage-die-count 1,
     :ranged true,
     :range {:min 30, :max 120},
-    :key :crossbow--hand}
+    :key :crossbow-hand}
    {:name "Crossbow, heavy",
     :damage-type :piercing,
     :damage-die 10,
@@ -823,7 +829,7 @@ hazards."}])
     :ranged true,
     :heavy true,
     :range {:min 100, :max 400},
-    :key :crossbow--heavy}
+    :key :crossbow-heavy}
    {:name "Longbow",
     :damage-type :piercing,
     :damage-die 8,

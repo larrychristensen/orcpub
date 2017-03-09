@@ -76,12 +76,14 @@
      :features-and-traits-2 (traits-string other-half-traits)}))
 
 (defn equipment-fields [built-char]
-  {:equipment (s/join
-    "; "
-    (map
-     (fn [[kw count]]
-       (str (:name (opt5e/equipment-map kw)) " (" count ")"))
-     (es/entity-val built-char :equipment)))})
+  (let [equipment (es/entity-val built-char :equipment)]
+    (prn "EQUIPEMENT" equipment)
+    {:equipment (s/join
+                 "; "
+                 (map
+                  (fn [[kw count]]
+                    (str (:name (opt5e/equipment-map kw)) " (" count ")"))
+                  equipment))}))
 
 (def level-max-spells
   {0 8
@@ -162,6 +164,25 @@
         spell-save-dc-fn (es/entity-val built-char :spell-save-dc)]
     (spell-page-fields spells-known spell-save-dc-fn spell-attack-modifier-fn)))
 
+(defn profs-paragraph [profs prof-map title]
+  (str
+   title
+   " Proficiencies: "
+   (s/join "; " (sort (map :name profs)))))
+
+(defn other-profs-field [built-char]
+  (let [tool-profs (es/entity-val built-char :tool-profs)
+        weapon-profs (es/entity-val built-char :weapon-profs)
+        armor-profs (es/entity-val built-char :armor-profs)
+        languages (es/entity-val built-char :languages)]
+    (prn "WEAPON PROFS" weapon-profs)
+    (s/join
+     "\n\n"
+     [(profs-paragraph tool-profs opt5e/tools-map "Tool")
+      (profs-paragraph weapon-profs opt5e/weapons-map "Weapon")
+      (profs-paragraph armor-profs opt5e/armor-map "Armor")
+      (profs-paragraph languages opt5e/language-map "Language")])))
+
 (defn make-spec [built-char]
   (let [race (es/entity-val built-char :race)
         subrace (es/entity-val built-char :subrace)
@@ -191,7 +212,8 @@
       :initiative (common/bonus-str (es/entity-val built-char :initiative))
       :speed (es/entity-val built-char :speed)
       :hp-max (es/entity-val built-char :max-hit-points)
-      :passive (es/entity-val built-char :passive-perception)}
+      :passive (es/entity-val built-char :passive-perception)
+      :other-profs (other-profs-field built-char)}
      (skill-fields built-char)
      abilities
      (ability-bonuses built-char)

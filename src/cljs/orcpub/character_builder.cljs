@@ -638,6 +638,8 @@
         [:span.f-w-n.m-l-10 description]])
      traits)]))
 
+
+
 (defn character-display [built-char mobile? tablet? desktop?]
   (let [race (es/entity-val built-char :race)
         subrace (es/entity-val built-char :subrace)
