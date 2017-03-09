@@ -999,8 +999,27 @@
         [builder-selector-component [] option-paths selection built-char @character-ref built-template collapsed-paths stepper-selection-path])
       (::t/selections built-template)))]])
 
+(defn get-event-value [e]
+  (.-value (.-target e)))
+
+(defn character-field [character-ref prop-name type]
+  (let [path [::entity/values prop-name]]
+    [type {:class-name "input"
+           :type :text
+           :value (get-in @character-ref path)
+           :on-change (fn [e]
+                        (swap! character-ref
+                               assoc-in
+                               path
+                               (get-event-value e)))}]))
+
+(defn character-input [character-ref prop-name]
+  (character-field character-ref prop-name :input))
+
+(defn character-textarea [character-ref prop-name]
+  (character-field character-ref prop-name :textarea))
+
 (defn builder-columns [built-template built-char option-paths collapsed-paths stepper-selection-path plugins desktop? tablet? mobile? active-tab]
-  ;;(print-char built-char)
   (js/console.log (realize-char built-char))
   [:div.flex-grow-1.flex
    (if (or desktop?
@@ -1012,22 +1031,22 @@
      [:div.flex-grow-1.m-t-10 {:class-name (if desktop? "m-l-30 m-r-80" "m-l-5 m-r-5")}
       [:div.m-t-5
        [:span.personality-label.f-s-18 "Character Name"]
-       [:input.input {:type :text}]]
+       [character-input character-ref :character-name]]
       [:div.field
        [:span.personality-label.f-s-18 "Personality Trait 1"]
-       [:input.input {:type :text}]]
+       [character-textarea character-ref :personality-trait-1]]
       [:div.field
        [:span.personality-label.f-s-18 "Personality Trait 2"]
-       [:input.input {:type :text}]]
+       [character-textarea character-ref :personality-trait-2]]
       [:div.field
        [:span.personality-label.f-s-18 "Ideals"]
-       [:input.input {:type :text}]]
+       [character-textarea character-ref :ideals]]
       [:div.field
        [:span.personality-label.f-s-18 "Bonds"]
-       [:input.input {:type :text}]]
+       [character-textarea character-ref :bonds]]
       [:div.field
        [:span.personality-label.f-s-18 "Flaws"]
-       [:input.input {:type :text}]]
+       [character-textarea character-ref :flaws]]
       [:div.field
        [:span.personality-label.f-s-18 "Image URL"]
        [:input.input

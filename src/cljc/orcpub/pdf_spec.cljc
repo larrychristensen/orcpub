@@ -210,7 +210,11 @@
       :speed (es/entity-val built-char :speed)
       :hp-max (es/entity-val built-char :max-hit-points)
       :passive (es/entity-val built-char :passive-perception)
-      :other-profs (other-profs-field built-char)}
+      :other-profs (other-profs-field built-char)
+      :personality-traits (s/join "\n\n" [(es/entity-val built-char :personality-trait-1) (es/entity-val built-char :personality-trait-2)])
+      :ideals (es/entity-val built-char :ideals)
+      :bonds (es/entity-val built-char :bonds)
+      :flaws (es/entity-val built-char :flaws)}
      (skill-fields built-char)
      abilities
      (ability-bonuses built-char)

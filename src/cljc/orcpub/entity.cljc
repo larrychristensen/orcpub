@@ -190,7 +190,8 @@
               {}
               modifiers)
         mod-fns (modifier-functions modifiers)
-        base (::t/base template)
+        base (merge (::t/base template)
+                    (::values raw-entity))
         base-deps (::es/deps base)
         all-deps (merge-with union deps base-deps)
         mod-order (rseq (kahn-sort all-deps))
