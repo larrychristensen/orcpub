@@ -4236,7 +4236,11 @@ until you finish a long rest."}]}
     ?max-hit-points (+ ?hit-point-level-increases (* ?total-levels ?hit-point-level-bonus))
     ?initiative (?ability-bonuses :dex)
     ?num-attacks 1
-    ?critical #{20}}))
+    ?critical #{20}
+    ?spell-attack-modifier (fn [ability-kw]
+                             (+ ?prof-bonus (?ability-bonuses ability-kw)))
+    ?spell-save-dc (fn [ability-kw]
+                     (+ 8 ?prof-bonus (?ability-bonuses ability-kw)))}))
 
 (defn template [character-ref]
   {::t/base template-base

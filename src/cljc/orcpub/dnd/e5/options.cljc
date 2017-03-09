@@ -10,6 +10,23 @@
             [orcpub.dnd.e5.spells :as spells]
             [orcpub.dnd.e5.spell-lists :as sl]))
 
+(def abilities
+  [{:key :str
+    :name "Strength"}
+   {:key :con
+    :name "Constitution"}
+   {:key :dex
+    :name "Dexterity"}
+   {:key :int
+    :name "Intelligence"}
+   {:key :wis
+    :name "Wisdom"}
+   {:key :cha
+    :name "Charisma"}])
+
+(def abilities-map
+  (common/map-by-key abilities))
+
 (def skills [{:name "Acrobatics"
               :key :acrobatics
               :ability :dex

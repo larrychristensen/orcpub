@@ -3,7 +3,8 @@
             [orcpub.common :as common]
             [orcpub.entity-spec :as es]
             [orcpub.dnd.e5.character :as char5e]
-            [orcpub.dnd.e5.options :as opt5e]))
+            [orcpub.dnd.e5.options :as opt5e]
+            [orcpub.dnd.e5.spells :as spells]))
 
 (defn entity-vals [built-char kws]
   (reduce
@@ -71,9 +72,8 @@
                      []
                      traits)
         other-half-traits (drop (count half-traits) traits)]
-    {:features-and-traits (traits-string traits) ;;(traits-string half-traits)
-     ;;:features-and-traits-2 (traits-string other-half-traits)
-     }))
+    {:features-and-traits (traits-string traits)
+     :features-and-traits-2 (traits-string other-half-traits)}))
 
 (defn equipment-fields [built-char]
   {:equipment (s/join
@@ -82,6 +82,38 @@
      (fn [[kw count]]
        (str (:name (opt5e/equipment-map kw)) " (" count ")"))
      (es/entity-val built-char :equipment)))})
+
+(defn spellcasting-fields [built-char]
+  (let [spells-known (es/entity-val built-char :spells-known)
+        spell-attack-modifier-fn (es/entity-val built-char :spell-attack-modifier)
+        spell-save-dc-fn (es/entity-val built-char :spell-save-dc)
+        all-abilities (vec
+                       (set
+                        (flatten
+                         (map
+                          (fn [[_ spells]]
+                            (map :ability spells))
+                          spells-known))))
+        _ (prn "ALL_ABILITITE" all-abilities)
+        num-abilities (count all-abilities)]
+    (apply
+     merge
+     (flatten
+      (for [[level spells] spells-known
+            :let [by-ability (group-by :ability spells)]
+            ability-index (range num-abilities)
+            :let [ability (all-abilities ability-index)
+                  ability-items (vec (by-ability ability))]
+            item-index (range (count ability-items))
+            :let [item (ability-items item-index)
+                  suffix (str "-" (inc ability-index))]]
+        (do
+          (prn level ability-index ability item-index (:key item))
+          [{(keyword (str "spellcasting-ability" suffix)) (:name (opt5e/abilities-map ability))}
+           {(keyword (str "spell-save-dc" suffix)) (spell-save-dc-fn ability)}
+           {(keyword (str "spell-attack-bonus" suffix)) (spell-attack-modifier-fn ability)}
+           {(keyword (str "spells-" level "-" (inc item-index) suffix))
+            (:name (spells/spell-map (:key item)))}]))))))
 
 (defn make-spec [built-char]
   (let [race (es/entity-val built-char :race)
@@ -101,6 +133,7 @@
         max-armor-class (apply max armor-classes)
         levels (char5e/levels built-char)
         total-hit-dice (apply + (map :class-level (vals levels)))]
+    (prn (es/entity-val built-char :spells-known))
     (merge
      {:race (str race (if subrace (str "/" subrace)))
       :class-level (class-string levels)
@@ -110,7 +143,8 @@
       :hd-total total-hit-dice
       :initiative (common/bonus-str (es/entity-val built-char :initiative))
       :speed (es/entity-val built-char :speed)
-      :hp-max (es/entity-val built-char :max-hit-points)}
+      :hp-max (es/entity-val built-char :max-hit-points)
+      :passive (es/entity-val built-char :passive-perception)}
      (skill-fields built-char)
      abilities
      (ability-bonuses built-char)
@@ -121,4 +155,5 @@
       {}
       char5e/ability-keys)
      (traits-fields built-char)
-     (equipment-fields built-char))))
+     (equipment-fields built-char)
+     (spellcasting-fields built-char))))

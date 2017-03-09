@@ -118,6 +118,7 @@
   (prn "FIELDS" fields)
   (let [catalog (.getDocumentCatalog doc)
         form (.getAcroForm catalog)]
+    (.setNeedAppearances form true)
     (doseq [[k v] fields]
       (let [field (.getField form (name k))]
         (prn "FIELD" field k v)
@@ -141,7 +142,12 @@
              _ (prn "BODY STTR" body-map)
              fields (clojure.edn/read-string (:body body-map))
              _ (prn "REQUEST" (:request context))
-             input (.openStream (io/resource "fillable-char-sheet.pdf"))
+             input (.openStream (io/resource (cond
+                                               (:spellcasting-ability-4 fields) "fillable-char-sheet-4-spells.pdf"
+                                               (:spellcasting-ability-3 fields) "fillable-char-sheet-3-spells.pdf"
+                                               (:spellcasting-ability-2 fields) "fillable-char-sheet-2-spells.pdf"
+                                               (:spellcasting-ability-1 fields) "fillable-char-sheet-1-spells.pdf"
+                                               :else "fillable-char-sheet-0-spells.pdf")))
              output (ByteArrayOutputStream.)]
          (with-open [doc (PDDocument/load input)]
            (write-fields! doc fields)
