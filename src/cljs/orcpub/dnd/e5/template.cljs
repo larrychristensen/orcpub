@@ -2433,77 +2433,34 @@ magic items."}]}
     :weapons {:dagger 1}
     :traits [{:name "Flexible Casting"
               :level 2
-              :description "You can use your sorcery points to gain additional 
-spell slots, or sacrifice spell slots to gain additional 
-sorcery points. You learn other ways to use your 
-sorcery points as you reach higher levels.
-Creating Spell Slots. You can transform 
-unexpended sorcery points into one spell slot as a 
-bonus action on your turn. The Creating Spell Slots 
-table shows the cost of creating a spell slot of a given 
-level. You can create spell slots no higher in level 
-than 5th.
-Any spell slot you create with this feature vanishes 
-when you finish a long rest."}
+              :description "You can use your sorcery points to gain additional spell slots, or sacrifice spell slots to gain additional sorcery points. You learn other ways to use your sorcery points as you reach higher levels.Creating Spell Slots. You can transform unexpended sorcery points into one spell slot as a bonus action on your turn. The Creating Spell Slots table shows the cost of creating a spell slot of a given level. You can create spell slots no higher in level than 5th.
+Any spell slot you create with this feature vanishes when you finish a long rest."}
              {:name "Careful Spell"
               :level 3
-              :description "When you cast a spell that forces other creatures to 
-make a saving throw, you can protect some of those 
-creatures from the spell's full force. To do so, you 
-spend 1 sorcery point and choose a number of those 
-creatures up to your Charisma modifier (minimum 
-of one creature). A chosen creature automatically 
-succeeds on its saving throw against the spell."}
+              :description "When you cast a spell that forces other creatures to make a saving throw, you can protect some of those creatures from the spell's full force. To do so, you spend 1 sorcery point and choose a number of those creatures up to your Charisma modifier (minimum of one creature). A chosen creature automatically succeeds on its saving throw against the spell."}
              {:name "Distant Spell"
               :level 3
-              :description "When you cast a spell that has a range of 5 feet or 
-greater, you can spend 1 sorcery point to double the 
-range of the spell.
-When you cast a spell that has a range of touch,
-you can spend 1 sorcery point to make the range of 
-the spell 30 feet."}
+              :description "When you cast a spell that has a range of 5 feet or greater, you can spend 1 sorcery point to double the range of the spell.
+When you cast a spell that has a range of touch, you can spend 1 sorcery point to make the range of the spell 30 feet."}
              {:name "Empowered Spell"
               :level 3
-              :description "When you roll damage for a spell, you can spend 1 
-sorcery point to reroll a number of the damage dice 
-up to your Charisma modifier (minimum of one). 
-You must use the new rolls.
-You can use Empowered Spell even if you have 
-already used a different Metamagic option during 
-the casting of the spell."}
+              :description "When you roll damage for a spell, you can spend 1 sorcery point to reroll a number of the damage dice up to your Charisma modifier (minimum of one). You must use the new rolls.
+You can use Empowered Spell even if you have already used a different Metamagic option during the casting of the spell."}
              {:name "Extended Spell"
               :level 3
-              :description "When you cast a spell that has a duration of 1 minute 
-or longer, you can spend 1 sorcery point to double 
-its duration, to a maximum duration of 24 hours."}
+              :description "When you cast a spell that has a duration of 1 minute or longer, you can spend 1 sorcery point to double its duration, to a maximum duration of 24 hours."}
              {:name "Heightened Spell"
               :level 3
-              :description "When you cast a spell that forces a creature to make 
-a saving throw to resist its effects, you can spend 3 
-sorcery points to give one target of the spell 
-disadvantage on its first saving throw made against 
-the spell."}
+              :description "When you cast a spell that forces a creature to make a saving throw to resist its effects, you can spend 3 sorcery points to give one target of the spell disadvantage on its first saving throw made against the spell."}
              {:name "Quickened Spell"
               :level 3
-              :description "When you cast a spell that has a casting time of 1 
-action, you can spend 2 sorcery points to change the 
-casting time to 1 bonus action for this casting."}
+              :description "When you cast a spell that has a casting time of 1 action, you can spend 2 sorcery points to change the casting time to 1 bonus action for this casting."}
              {:name "Subtle Spell"
               :level 3
-              :description "When you cast a spell, you can spend 1 sorcery point 
-to cast it without any somatic or verbal components."}
+              :description "When you cast a spell, you can spend 1 sorcery point to cast it without any somatic or verbal components."}
              {:name "Twinned Spell"
               :level 3
-              :description "When you cast a spell that targets only one creature 
-and doesn't have a range of self, you can spend a 
-number of sorcery points equal to the spell's level to 
-target a second creature in range with the same spell 
-(1 sorcery point if the spell is a cantrip).
-To be eligible, a spell must be incapable of 
-targeting more than one creature at the spell's 
-current level. For example, magic missile and 
-scorching ray aren't eligible, but ray of frost and 
-chromatic orb are"}]
+              :description "When you cast a spell that targets only one creature and doesn't have a range of self, you can spend a number of sorcery points equal to the spell's level to target a second creature in range with the same spell (1 sorcery point if the spell is a cantrip).To be eligible, a spell must be incapable of targeting more than one creature at the spell's current level. For example, magic missile and scorching ray aren't eligible, but ray of frost and chromatic orb are"}]
     :subclass-title "Sorcerous Origin"
     :subclass-level 1
     :subclasses [{:name "Draconic Ancestry"
@@ -2561,49 +2518,18 @@ chromatic orb are"}]
                                   []
                                   [])])]
                   :traits [{:name "Draconic Resilience"
-                            :description "As magic flows through your body, it causes physical 
-traits of your dragon ancestors to emerge. At 1st 
-level, your hit point maximum increases by 1 and 
-increases by 1 again whenever you gain a level in 
-this class.
-Additionally, parts of your skin are covered by a 
-thin sheen of dragon-like scales. When you aren't 
-wearing armor, your AC equals 13 + your Dexterity 
-modifier."}
+                            :description "As magic flows through your body, it causes physical traits of your dragon ancestors to emerge. At 1st level, your hit point maximum increases by 1 and increases by 1 again whenever you gain a level in this class.
+Additionally, parts of your skin are covered by a thin sheen of dragon-like scales. When you aren't wearing armor, your AC equals 13 + your Dexterity modifier."}
                            {:name "Elemental Affinity"
                             :level 6
-                            :description "Starting at 6th level, when you cast a spell that deals 
-damage of the type associated with your draconic 
-ancestry, you can add your Charisma modifier to one 
-damage roll of that spell. At the same time, you can 
-spend 1 sorcery point to gain resistance to that 
-damage type for 1 hour."}
+                            :description "Starting at 6th level, when you cast a spell that deals damage of the type associated with your draconic ancestry, you can add your Charisma modifier to one damage roll of that spell. At the same time, you can spend 1 sorcery point to gain resistance to that damage type for 1 hour."}
                            {:name "Dragon Wings"
                             :level 14
-                            :description "At 14th level, you gain the ability to sprout a pair of 
-dragon wings from your back, gaining a flying speed 
-equal to your current speed. You can create these 
-wings as a bonus action on your turn. They last until 
-you dismiss them as a bonus action on your turn.
-You can't manifest your wings while wearing 
-armor unless the armor is made to accommodate 
-them, and clothing not made to accommodate your 
-wings might be destroyed when you manifest them."}
+                            :description "At 14th level, you gain the ability to sprout a pair of dragon wings from your back, gaining a flying speed equal to your current speed. You can create these wings as a bonus action on your turn. They last until you dismiss them as a bonus action on your turn.
+You can't manifest your wings while wearing armor unless the armor is made to accommodate them, and clothing not made to accommodate your wings might be destroyed when you manifest them."}
                            {:name "Draconic Presence"
                             :level 18
-                            :description "Beginning at 18th level, you can channel the dread 
-presence of your dragon ancestor, causing those 
-around you to become awestruck or frightened. As 
-an action, you can spend 5 sorcery points to draw on 
-this power and exude an aura of awe or fear (your 
-choice) to a distance of 60 feet. For 1 minute or until 
-you lose your concentration (as if you were casting a 
-concentration spell), each hostile creature that starts 
-its turn in this aura must succeed on a Wisdom 
-saving throw or be charmed (if you chose awe) or 
-frightened (if you chose fear) until the aura ends. A 
-creature that succeeds on this saving throw is 
-immune to your aura for 24 hours."}]}
+                            :description "Beginning at 18th level, you can channel the dread presence of your dragon ancestor, causing those around you to become awestruck or frightened. As an action, you can spend 5 sorcery points to draw on this power and exude an aura of awe or fear (your choice) to a distance of 60 feet. For 1 minute or until you lose your concentration (as if you were casting a concentration spell), each hostile creature that starts its turn in this aura must succeed on a Wisdom saving throw or be charmed (if you chose awe) or frightened (if you chose fear) until the aura ends. A creature that succeeds on this saving throw is immune to your aura for 24 hours."}]}
                  {:name "Wild Magic"
                   :traits [{:name "Wild Magic Surge"
                             :level 1}
