@@ -1038,144 +1038,59 @@ to the extra damage of the critical hit."}]}))
     :equipment {:explorers-pack 1}
     :levels {5 {:modifiers [(mod5e/extra-attack)]}}
     :traits [{:name "Rage"
-              :description "In battle, you fight with primal ferocity. On your turn, 
-you can enter a rage as a bonus action.
-While raging, you gain the following benefits if you 
-aren't wearing heavy armor:
-* You have advantage on Strength checks and 
-Strength saving throws.
-* When you make a melee weapon attack using 
-Strength, you gain a bonus to the damage roll that 
-increases as you gain levels as a barbarian, as 
-shown in the Rage Damage column of the 
-Barbarian table.
-* You have resistance to bludgeoning, piercing, and 
-slashing damage.
-If you are able to cast spells, you can't cast them or 
-concentrate on them while raging.
-Your rage lasts for 1 minute. It ends early if you 
-are knocked unconscious or if your turn ends and 
-you haven't attacked a hostile creature since your 
-last turn or taken damage since then. You can also 
-end your rage on your turn as a bonus action.
-Once you have raged the number of times shown 
-for your barbarian level in the Rages column of the 
-Barbarian table, you must finish a long rest before 
-you can rage again."}
+              :description "In battle, you fight with primal ferocity. On your turn, you can enter a rage as a bonus action. While raging, you gain the following benefits if you aren't wearing heavy armor:
+* You have advantage on Strength checks and Strength saving throws.
+* When you make a melee weapon attack using Strength, you gain a bonus to the damage roll that increases as you gain levels as a barbarian, as shown in the Rage Damage column of the Barbarian table.
+* You have resistance to bludgeoning, piercing, and slashing damage.
+If you are able to cast spells, you can't cast them or concentrate on them while raging. Your rage lasts for 1 minute. It ends early if you are knocked unconscious or if your turn ends and you haven't attacked a hostile creature since your last turn or taken damage since then. You can also end your rage on your turn as a bonus action. Once you have raged the number of times shown for your barbarian level in the Rages column of the Barbarian table, you must finish a long rest before you can rage again."}
              {:name "Unarmored Defense"
-              :description "While you are not wearing any armor, your Armor 
-Class equals 10 + your Dexterity modifier + your 
-Constitution modifier. You can use a shield and still 
-gain this benefit."}
+              :description "While you are not wearing any armor, your Armor Class equals 10 + your Dexterity modifier + your Constitution modifier. You can use a shield and still gain this benefit."}
              {:name "Reckless Attack"
               :level 2
-              :description "Starting at 2nd level, you can throw aside all concern 
-for defense to attack with fierce desperation. When 
-you make your first attack on your turn, you can 
-decide to attack recklessly. Doing so gives you 
-advantage on melee weapon attack rolls using 
-Strength during this turn, but attack rolls against 
-you have advantage until your next turn."}
+              :description "Starting at 2nd level, you can throw aside all concern for defense to attack with fierce desperation. When you make your first attack on your turn, you can decide to attack recklessly. Doing so gives you advantage on melee weapon attack rolls using Strength during this turn, but attack rolls against you have advantage until your next turn."}
              {:name "Danger Sense"
               :level 2
-              :description "At 2nd level, you gain an uncanny sense of when 
-things nearby aren't as they should be, giving you an 
-edge when you dodge away from danger.
-You have advantage on Dexterity saving throws 
-against effects that you can see, such as traps and 
-spells. To gain this benefit, you can't be blinded, 
-deafened, or incapacitated."}
+              :description "At 2nd level, you gain an uncanny sense of when things nearby aren't as they should be, giving you an edge when you dodge away from danger. You have advantage on Dexterity saving throws against effects that you can see, such as traps and spells. To gain this benefit, you can't be blinded, deafened, or incapacitated."}
              {:name "Extra Attack"
               :level 5
-              :description "Beginning at 5th level, you can attack twice, instead 
-of once, whenever you take the Attack action on your 
-turn."}
+              :description "Beginning at 5th level, you can attack twice, instead of once, whenever you take the Attack action on your turn."}
              {:name "Fast Movement"
               :level 5
-              :description "Starting at 5th level, your speed increases by 10 feet 
-while you aren't wearing heavy armor."}
+              :description "Starting at 5th level, your speed increases by 10 feet while you aren't wearing heavy armor."}
              {:name "Feral Instinct"
               :level 7
-              :description "By 7th level, your instincts are so honed that you 
-have advantage on initiative rolls.
-Additionally, if you are surprised at the beginning 
-of combat and aren't incapacitated, you can act 
-normally on your first turn, but only if you enter 
-your rage before doing anything else on that turn."}
+              :description "By 7th level, your instincts are so honed that you have advantage on initiative rolls. Additionally, if you are surprised at the beginning of combat and aren't incapacitated, you can act normally on your first turn, but only if you enter your rage before doing anything else on that turn."}
              {:name "Brutal Critical"
               :level 9
-              :description "Beginning at 9th level, you can roll one additional 
-weapon damage die when determining the extra 
-damage for a critical hit with a melee attack.
-This increases to two additional dice at 13th level 
-and three additional dice at 17th level."}
+              :description "Beginning at 9th level, you can roll one additional weapon damage die when determining the extra damage for a critical hit with a melee attack. This increases to two additional dice at 13th level and three additional dice at 17th level."}
              {:name "Relentless Rage"
               :level 11
-              :description "Starting at 11th level, your rage can keep you 
-fighting despite grievous wounds. If you drop to 0 hit 
-points while you're raging and don't die outright, 
-you can make a DC 10 Constitution saving throw. If 
-you succeed, you drop to 1 hit point instead.
-Each time you use this feature after the first, the 
-DC increases by 5. When you finish a short or long 
-rest, the DC resets to 10."}
+              :description "Starting at 11th level, your rage can keep you fighting despite grievous wounds. If you drop to 0 hit points while you're raging and don't die outright, you can make a DC 10 Constitution saving throw. If you succeed, you drop to 1 hit point instead. Each time you use this feature after the first, the DC increases by 5. When you finish a short or long rest, the DC resets to 10."}
              {:name "Persistent Rage"
               :level 15
-              :description "Beginning at 15th level, your rage is so fierce that it 
-ends early only if you fall unconscious or if you 
-choose to end it."}
+              :description "Beginning at 15th level, your rage is so fierce that it ends early only if you fall unconscious or if you choose to end it."}
              {:name "Indomitable Might"
               :level 18
-              :description "Beginning at 18th level, if your total for a Strength 
-check is less than your Strength score, you can use 
-that score in place of the total."}
+              :description "Beginning at 18th level, if your total for a Strength check is less than your Strength score, you can use that score in place of the total."}
              {:name "Primal Champion"
               :level 20
-              :description "At 20th level, you embody the power of the wilds. 
-Your Strength and Constitution scores increase by 4. 
-Your maximum for those scores is now 24."}]
+              :description "At 20th level, you embody the power of the wilds. Your Strength and Constitution scores increase by 4. Your maximum for those scores is now 24."}]
     :subclass-level 3
     :subclass-title "Primal Path"
     :subclass-help "Your primal path shapes the nature of your barbarian rage and gives you additional features."
     :subclasses [{:name "Path of the Beserker"
                   :traits [{:name "Frenzy"
                             :level 3
-                            :description "Starting when you choose this path at 3rd level, you 
-can go into a frenzy when you rage. If you do so, for 
-the duration of your rage you can make a single 
-melee weapon attack as a bonus action on each of 
-your turns after this one. When your rage ends, you 
-suffer one level of exhaustion (as described in 
-appendix A)."}
+                            :description "Starting when you choose this path at 3rd level, you can go into a frenzy when you rage. If you do so, for the duration of your rage you can make a single melee weapon attack as a bonus action on each of your turns after this one. When your rage ends, you suffer one level of exhaustion (as described in appendix A)."}
                            {:name "Mindless Rage"
                             :level 6
-                            :description "Beginning at 6th level, you can't be charmed or 
-frightened while raging. If you are charmed or 
-frightened when you enter your rage, the effect is 
-suspended for the duration of the rage."}
+                            :description "Beginning at 6th level, you can't be charmed or frightened while raging. If you are charmed or frightened when you enter your rage, the effect is suspended for the duration of the rage."}
                            {:name "Intimidating Presence"
                             :level 10
-                            :description "Beginning at 10th level, you can use your action to 
-frighten someone with your menacing presence. 
-When you do so, choose one creature that you can 
-see within 30 feet of you. If the creature can see or 
-hear you, it must succeed on a Wisdom saving throw 
-(DC equal to 8 + your proficiency bonus + your 
-Charisma modifier) or be frightened of you until the 
-end of your next turn. On subsequent turns, you can 
-use your action to extend the duration of this effect 
-on the frightened creature until the end of your next 
-turn. This effect ends if the creature ends its turn out 
-of line of sight or more than 60 feet away from you.
-If the creature succeeds on its saving throw, you 
-can't use this feature on that creature again for 24 
-hours."}
+                            :description "Beginning at 10th level, you can use your action to frighten someone with your menacing presence. When you do so, choose one creature that you can see within 30 feet of you. If the creature can see or hear you, it must succeed on a Wisdom saving throw (DC equal to 8 + your proficiency bonus + your Charisma modifier) or be frightened of you until the end of your next turn. On subsequent turns, you can use your action to extend the duration of this effect on the frightened creature until the end of your next turn. This effect ends if the creature ends its turn out of line of sight or more than 60 feet away from you. If the creature succeeds on its saving throw, you can't use this feature on that creature again for 24 hours."}
                            {:name "Retaliation"
                             :level 14
-                            :description "Starting at 14th level, when you take damage from a 
-creature that is within 5 feet of you, you can use your 
-reaction to make a melee weapon attack against that 
-creature."}]}
+                            :description "Starting at 14th level, when you take damage from a creature that is within 5 feet of you, you can use your reaction to make a melee weapon attack against that creature."}]}
                  {:name "Path of the Totem Warrior"
                   :traits [{:name "Spirit Seeker"
                             :level 3}
@@ -1238,37 +1153,20 @@ creature."}]}
              14 {:selections (opt5e/raw-bard-magical-secrets 14)}
              18 {:selections (opt5e/raw-bard-magical-secrets 18)}}
     :traits [{:name "Bardic Inspiration"
-              :description "You can inspire others through stirring words or music. To do so, you use a bonus action on your turn to choose one creature other than yourself within 60 
-feet of you who can hear you. That creature gains one Bardic Inspiration die, a d6.
+              :description "You can inspire others through stirring words or music. To do so, you use a bonus action on your turn to choose one creature other than yourself within 60 feet of you who can hear you. That creature gains one Bardic Inspiration die, a d6.
 Once within the next 10 minutes, the creature can roll the die and add the number rolled to one ability check, attack roll, or saving throw it makes. The creature can wait until after it rolls the d20 before deciding to use the Bardic Inspiration die, but must decide before the GM says whether the roll succeeds or fails. Once the Bardic Inspiration die is rolled, it is lost. A creature can have only one Bardic Inspiration die at a time.
 You can use this feature a number of times equal to your Charisma modifier (a minimum of once). You regain any expended uses when you finish a long rest.
 Your Bardic Inspiration die changes when you reach certain levels in this class. The die becomes a d8 at 5th level, a d10 at 10th level, and a d12 at 15th level."}
              {:name "Jack of All Trades"
               :level 2
-              :description "Starting at 2nd level, you can add half your 
-proficiency bonus, rounded down, to any ability 
-check you make that doesn't already include your 
-proficiency bonus."}
+              :description "Starting at 2nd level, you can add half your proficiency bonus, rounded down, to any ability check you make that doesn't already include your proficiency bonus."}
              {:name "Song of Rest"
               :level 2
-              :description "Beginning at 2nd level, you can use soothing music 
-or oration to help revitalize your wounded allies 
-during a short rest. If you or any friendly creatures 
-who can hear your performance regain hit points at 
-the end of the short rest by spending one or more 
-Hit Dice, each of those creatures regains an extra 
-1d6 hit points.
-The extra hit points increase when you reach 
-certain levels in this class: to 1d8 at 9th level, to 
-1d10 at 13th level, and to 1d12 at 17th level."}
+              :description "Beginning at 2nd level, you can use soothing music or oration to help revitalize your wounded allies during a short rest. If you or any friendly creatures who can hear your performance regain hit points at the end of the short rest by spending one or more Hit Dice, each of those creatures regains an extra 1d6 hit points.
+The extra hit points increase when you reach certain levels in this class: to 1d8 at 9th level, to 1d10 at 13th level, and to 1d12 at 17th level."}
              {:name "Expertise"
               :level 3
-              :description "At 3rd level, choose two of your skill proficiencies. 
-Your proficiency bonus is doubled for any ability 
-check you make that uses either of the chosen 
-proficiencies.
-At 10th level, you can choose another two skill 
-proficiencies to gain this benefit."}
+              :description "At 3rd level, choose two of your skill proficiencies. Your proficiency bonus is doubled for any ability check you make that uses either of the chosen proficiencies. At 10th level, you can choose another two skill proficiencies to gain this benefit."}
              {:name "Font of Inspiration"
               :level 5
               :description "Beginning when you reach 5th level, you regain all of 
@@ -1276,33 +1174,13 @@ your expended uses of Bardic Inspiration when you
 finish a short or long rest"}
              {:name "Countercharm"
               :level 6
-              :description "At 6th level, you gain the ability to use musical notes 
-or words of power to disrupt mind-influencing 
-effects. As an action, you can start a performance 
-that lasts until the end of your next turn. During that 
-time, you and any friendly creatures within 30 feet 
-of you have advantage on saving throws against 
-being frightened or charmed. A creature must be 
-able to hear you to gain this benefit. The 
-performance ends early if you are incapacitated or 
-silenced or if you voluntarily end it (no action 
-required)."}
+              :description "At 6th level, you gain the ability to use musical notes or words of power to disrupt mind-influencing effects. As an action, you can start a performance that lasts until the end of your next turn. During that time, you and any friendly creatures within 30 feet of you have advantage on saving throws against being frightened or charmed. A creature must be able to hear you to gain this benefit. The performance ends early if you are incapacitated or silenced or if you voluntarily end it (no action required)."}
              {:name "Magical Secrets"
               :level 10
-              :description "By 10th level, you have plundered magical 
-knowledge from a wide spectrum of disciplines. 
-Choose two spells from any class, including this one. 
-A spell you choose must be of a level you can cast, as 
-shown on the Bard table, or a cantrip.
-The chosen spells count as bard spells for you and 
-are included in the number in the Spells Known 
-column of the Bard table.
-You learn two additional spells from any class at 
-14th level and again at 18th level."}
+              :description "By 10th level, you have plundered magical knowledge from a wide spectrum of disciplines. Choose two spells from any class, including this one. A spell you choose must be of a level you can cast, as shown on the Bard table, or a cantrip. The chosen spells count as bard spells for you and are included in the number in the Spells Known column of the Bard table. You learn two additional spells from any class at 14th level and again at 18th level."}
              {:name "Superior Inspiration"
               :level 20
-              :description "At 20th level, when you roll initiative and have no 
-uses of Bardic Inspiration left, you regain one use."}]
+              :description "At 20th level, when you roll initiative and have no uses of Bardic Inspiration left, you regain one use."}]
     :subclass-level 3
     :subclass-title "Bard College"
     :subclass-help "Your bard college is a loose association that preserves bardic traditions and affords additional features"
@@ -1311,35 +1189,13 @@ uses of Bardic Inspiration left, you regain one use."}]
                   :selections (opt5e/bard-magical-secrets 6)
                   :traits [{:name "Cutting Wounds"
                             :level 3
-                            :description "Also at 3rd level, you learn how to use your wit to 
-distract, confuse, and otherwise sap the confidence 
-and competence of others. When a creature that you 
-can see within 60 feet of you makes an attack roll, an 
-ability check, or a damage roll, you can use your 
-reaction to expend one of your uses of Bardic 
-Inspiration, rolling a Bardic Inspiration die and 
-subtracting the number rolled from the creature's 
-roll. You can choose to use this feature after the 
-creature makes its roll, but before the GM 
-determines whether the attack roll or ability check 
-succeeds or fails, or before the creature deals its 
-damage. The creature is immune if it can't hear you 
-or if it's immune to being charmed."}
+                            :description "Also at 3rd level, you learn how to use your wit to distract, confuse, and otherwise sap the confidence and competence of others. When a creature that you can see within 60 feet of you makes an attack roll, an ability check, or a damage roll, you can use your reaction to expend one of your uses of Bardic Inspiration, rolling a Bardic Inspiration die and subtracting the number rolled from the creature's roll. You can choose to use this feature after the creature makes its roll, but before the GM determines whether the attack roll or ability check succeeds or fails, or before the creature deals its damage. The creature is immune if it can't hear you or if it's immune to being charmed."}
                            {:name "Additional Magical Secrets"
                             :level 6
-                            :description "At 6th level, you learn two spells of your choice from 
-any class. A spell you choose must be of a level you 
-can cast, as shown on the Bard table, or a cantrip. 
-The chosen spells count as bard spells for you but don't count against the number of bard spells you 
-know."}
+                            :description "At 6th level, you learn two spells of your choice from any class. A spell you choose must be of a level you can cast, as shown on the Bard table, or a cantrip. The chosen spells count as bard spells for you but don't count against the number of bard spells you know."}
                            {:name "Peerless Skill"
                             :level 14
-                            :description "Starting at 14th level, when you make an ability 
-check, you can expend one use of Bardic Inspiration. 
-Roll a Bardic Inspiration die and add the number 
-rolled to your ability check. You can choose to do so 
-after you roll the die for the ability check, but before 
-the GM tells you whether you succeed or fail."}]}
+                            :description "Starting at 14th level, when you make an ability check, you can expend one use of Bardic Inspiration. Roll a Bardic Inspiration die and add the number rolled to your ability check. You can choose to do so after you roll the die for the ability check, but before the GM tells you whether you succeed or fail."}]}
                  {:name "College of Valor"
                   :profs {:armor {:medium true
                                   :shields true}
