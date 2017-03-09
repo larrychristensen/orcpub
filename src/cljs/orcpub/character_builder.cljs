@@ -597,6 +597,10 @@
       ((or name-fn :name) item))
     items)])
 
+(defn compare-spell [spell-1 spell-2]
+  (let [key-fn (juxt :key :ability)]
+    (compare (key-fn spell-1) (key-fn spell-2))))
+
 (defn spells-known-section [spells-known]
   [display-section "Spells Known" nil
    [:div.f-s-14
@@ -616,7 +620,12 @@
                 " (" (s/upper-case (name (:ability spell)))
                 (if (:qualifier spell) (str ", " (:qualifier spell)))
                 ")")]))
-          (filter (fn [{k :key}] (spells/spell-map k)) spells))]])
+          (into
+           (sorted-set-by compare-spell)
+           (filter
+            (fn [{k :key}]
+              (spells/spell-map k))
+            spells)))]])
      spells-known)]])
 
 (defn equipment-section [title equipment equipment-map]
