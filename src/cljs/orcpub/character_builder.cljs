@@ -1002,9 +1002,9 @@
 (defn get-event-value [e]
   (.-value (.-target e)))
 
-(defn character-field [character-ref prop-name type]
+(defn character-field [character-ref prop-name type & [cls-str]]
   (let [path [::entity/values prop-name]]
-    [type {:class-name "input"
+    [type {:class-name (str "input " cls-str)
            :type :text
            :value (get-in @character-ref path)
            :on-change (fn [e]
@@ -1013,11 +1013,11 @@
                                path
                                (get-event-value e)))}]))
 
-(defn character-input [character-ref prop-name]
-  (character-field character-ref prop-name :input))
+(defn character-input [character-ref prop-name & [cls-str]]
+  (character-field character-ref prop-name :input cls-str))
 
-(defn character-textarea [character-ref prop-name]
-  (character-field character-ref prop-name :textarea))
+(defn character-textarea [character-ref prop-name & [cls-str]]
+  (character-field character-ref prop-name :textarea cls-str))
 
 (defn builder-columns [built-template built-char option-paths collapsed-paths stepper-selection-path plugins desktop? tablet? mobile? active-tab]
   (js/console.log (realize-char built-char))
@@ -1049,12 +1049,10 @@
        [character-textarea character-ref :flaws]]
       [:div.field
        [:span.personality-label.f-s-18 "Image URL"]
-       [:input.input
-        {:type :text
-         :on-change (fn [e] (swap! character-ref assoc-in [::entity/values :image-url] (.-value (.-target e))))}]]
+       [character-input character-ref :image-url]]
       [:div.field
        [:span.personality-label.f-s-18 "Description/Backstory"]
-       [:textarea.input.h-800]]])
+       [character-textarea character-ref :description "h-800"]]])
    (if (or desktop?
            (and mobile? (= 2 active-tab))
            (and tablet? (= 1 active-tab)))
