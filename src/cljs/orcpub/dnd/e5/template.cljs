@@ -375,20 +375,9 @@
                     {:name "White"
                      :damage-type :cold
                      :breath-weapon "15 ft cone (Con. save)"}]))]
-    :traits [{:name "Breath Weapon" :description "You can use your action to 
-exhale destructive energy. Your draconic ancestry 
-determines the size, shape, and damage type of the 
-exhalation.
-When you use your breath weapon, each creature 
-in the area of the exhalation must make a saving 
-throw, the type of which is determined by your 
-draconic ancestry. The DC for this saving throw 
-equals 8 + your Constitution modifier + your 
-proficiency bonus. A creature takes 2d6 damage on a 
-failed save, and half as much damage on a successful one. The damage increases to 3d6 at 6th level, 4d6 at 
-11th level, and 5d6 at 16th level.
-After you use your breath weapon, you can't use it 
-again until you complete a short or long rest."}]}))
+    :traits [{:name "Breath Weapon" :description "You can use your action to exhale destructive energy. Your draconic ancestry determines the size, shape, and damage type of the exhalation.
+When you use your breath weapon, each creature in the area of the exhalation must make a saving throw, the type of which is determined by your draconic ancestry. The DC for this saving throw equals 8 + your Constitution modifier + your proficiency bonus. A creature takes 2d6 damage on a failed save, and half as much damage on a successful one. The damage increases to 3d6 at 6th level, 4d6 at 11th level, and 5d6 at 16th level.
+After you use your breath weapon, you can't use it again until you complete a short or long rest."}]}))
 
 (def gnome-option
   (race-option
@@ -412,8 +401,7 @@ Fire Starter. The device produces a miniature flame, which you can use to light 
       :abilities {:dex 1}
       :modifiers [(mod5e/spells-known 0 :minor-illusion :int "Forest Gnome")]
       :traits [{:name "Speak with Small Beasts"}]}]
-    :traits [{:name "Gnome Cunning" :description "You have advantage on all 
-Intelligence, Wisdom, and Charisma saving throws against magic."}]
+    :traits [{:name "Gnome Cunning" :description "You have advantage on all Intelligence, Wisdom, and Charisma saving throws against magic."}]
     :modifiers [(mod5e/darkvision 60)]}))
 
 (def half-elf-option
@@ -428,9 +416,7 @@ Intelligence, Wisdom, and Charisma saving throws against magic."}]
                  (opt5e/skill-selection 2)
                  (opt5e/language-selection opt5e/languages 1)]
     :modifiers [(mod5e/darkvision 60)]
-    :traits [{:name "Fey Ancestry" :description "You have advantage on saving 
-throws against being charmed, and magic can't put 
-you to sleep."}]}))
+    :traits [{:name "Fey Ancestry" :description "You have advantage on saving throws against being charmed, and magic can't put you to sleep."}]}))
 
 (def half-orc-option
   (race-option
@@ -442,14 +428,8 @@ you to sleep."}]}))
     :languages ["Common" "Orc"]
     :modifiers [(mod5e/darkvision 60)
                 (mod5e/skill-proficiency :intimidation)]
-    :traits [{:name "Relentless Endurance" :description "When you are reduced to 0 
-hit points but not killed outright, you can drop to 1 
-hit point instead. You can't use this feature again 
-until you finish a long rest."}
-                      {:name "Savage Attacks" :description "When you score a critical hit with 
-a melee weapon attack, you can roll one of the 
-weapon's damage dice one additional time and add it 
-to the extra damage of the critical hit."}]}))
+    :traits [{:name "Relentless Endurance" :description "When you are reduced to 0 hit points but not killed outright, you can drop to 1 hit point instead. You can't use this feature again until you finish a long rest."}
+                      {:name "Savage Attacks" :description "When you score a critical hit with a melee weapon attack, you can roll one of the weapon's damage dice one additional time and add it to the extra damage of the critical hit."}]}))
 
 (def aasimar-option
   (race-option
@@ -671,14 +651,8 @@ to the extra damage of the critical hit."}]}))
                 (mod5e/spells-known 0 :thaumaturgy :cha "Tiefling")
                 (mod5e/spells-known 1 :hellish-rebuke :cha "Tiefling" 3)
                 (mod5e/spells-known 2 :darkness :cha "Tiefling" 5)]
-    :traits [{:name "Relentless Endurance" :description "When you are reduced to 0 
-hit points but not killed outright, you can drop to 1 
-hit point instead. You can't use this feature again 
-until you finish a long rest."}
-                      {:name "Savage Attacks" :description "When you score a critical hit with 
-a melee weapon attack, you can roll one of the 
-weapon's damage dice one additional time and add it 
-to the extra damage of the critical hit."}]}))
+    :traits [{:name "Relentless Endurance" :description "When you are reduced to 0 hit points but not killed outright, you can drop to 1 hit point instead. You can't use this feature again until you finish a long rest."}
+                      {:name "Savage Attacks" :description "When you score a critical hit with a melee weapon attack, you can roll one of the weapon's damage dice one additional time and add it to the extra damage of the critical hit."}]}))
 
 (defn die-mean [die]
   (int (Math/ceil (/ (apply + (range 1 (inc die))) die))))

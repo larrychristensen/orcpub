@@ -606,10 +606,10 @@
        [:div.m-t-10
         [:span.f-w-600 (if (zero? level) "Cantrip" (str "Level " level))]
         [:div.i.f-w-n
-         (map
-          (fn [spell]
+         (map-indexed
+          (fn [i spell]
             (let [spell-data (spells/spell-map (:key spell))]
-              ^{:key (:key spell)}
+              ^{:key i}
               [:div
                (str
                 (:name (spells/spell-map (:key spell)))
@@ -1020,7 +1020,6 @@
   (character-field character-ref prop-name :textarea cls-str))
 
 (defn builder-columns [built-template built-char option-paths collapsed-paths stepper-selection-path plugins desktop? tablet? mobile? active-tab]
-  (js/console.log (realize-char built-char))
   [:div.flex-grow-1.flex
    (if (or desktop?
            (= 0 active-tab))
@@ -1079,7 +1078,6 @@
 
 (defn download-form [built-char]
   (let [spec (pdf-spec/make-spec built-char)]
-    (prn "SPEC" spec)
     [:form.download-form
      {:id "download-form"
       :action "http://localhost:8890/character.pdf"
@@ -1118,6 +1116,7 @@
         plugins (:plugins @app-state)
         stepper-dismissed? (:stepper-dismissed @app-state)]
     ;;(js/console.log "BUILT TEMPLAT" built-template)
+    (print-char built-char)
     [:div.app
      {:class-name (cond mobile? "mobile" tablet? "tablet" :else nil)}
      [download-form built-char]

@@ -215,7 +215,9 @@
       :ideals (es/entity-val built-char :ideals)
       :bonds (es/entity-val built-char :bonds)
       :flaws (es/entity-val built-char :flaws)
-      :backstory (es/entity-val built-char :description)}
+      :backstory (es/entity-val built-char :description)
+      :character-name (es/entity-val built-char :character-name)
+      :player-name (es/entity-val built-char :player-name)}
      (skill-fields built-char)
      abilities
      (ability-bonuses built-char)

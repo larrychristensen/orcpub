@@ -82,7 +82,7 @@
       ?spells-known
       level
       (fn [spells]
-        (conj (or spells #{})
+        (conj (or spells)
               {:key spell-key
                :ability spellcasting-ability
                :qualifier qualifier
