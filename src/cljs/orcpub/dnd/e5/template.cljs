@@ -404,31 +404,10 @@ again until you complete a short or long rest."}]}))
       :abilities {:con 1}
       :modifiers [(mod5e/tool-proficiency "Tinker's Tools" :tinkers-tools)]
       :traits [{:name "Artificer's Lore" :description "Whenever you make an Intelligence (History) check related to magic items, alchemical objects, or technological devices, you can add twice your proficiency bonus, instead of any proficiency bonus you normally apply."}
-               {:name "Tinker" :description "You have proficiency with artisan's tools 
-(tinker's tools). Using those tools, you can spend 1 
-hour and 10 gp worth of materials to construct a 
-Tiny clockwork device (AC 5, 1 hp). The device 
-ceases to function after 24 hours (unless you spend 
-1 hour repairing it to keep the device functioning), 
-or when you use your action to dismantle it; at that 
-time, you can reclaim the materials used to create it. 
-You can have up to three such devices active at a 
-time.
-When you create a device, choose one of the 
-following options:
-Clockwork Toy. This toy is a clockwork animal, 
-monster, or person, such as a frog, mouse, bird, 
-dragon, or soldier. When placed on the ground, the 
-toy moves 5 feet across the ground on each of your 
-turns in a random direction. It makes noises as 
-appropriate to the creature it represents.
-Fire Starter. The device produces a miniature flame, 
-which you can use to light a candle, torch, or 
-campfire. Using the device requires your action.
-Music Box. When opened, this music box plays a 
-single song at a moderate volume. The box stops 
-playing when it reaches the song's end or when it
-is closed."}]}
+               {:name "Tinker" :description "You have proficiency with artisan's tools (tinker's tools). Using those tools, you can spend 1 hour and 10 gp worth of materials to construct a Tiny clockwork device (AC 5, 1 hp). The device ceases to function after 24 hours (unless you spend 1 hour repairing it to keep the device functioning), or when you use your action to dismantle it; at that time, you can reclaim the materials used to create it. You can have up to three such devices active at a time.
+When you create a device, choose one of the following options:
+Clockwork Toy. This toy is a clockwork animal, monster, or person, such as a frog, mouse, bird, dragon, or soldier. When placed on the ground, the toy moves 5 feet across the ground on each of your turns in a random direction. It makes noises as appropriate to the creature it represents.
+Fire Starter. The device produces a miniature flame, which you can use to light a candle, torch, or campfire. Using the device requires your action. Music Box. When opened, this music box plays a single song at a moderate volume. The box stops playing when it reaches the song's end or when it is closed."}]}
      {:name "Forest Gnome"
       :abilities {:dex 1}
       :modifiers [(mod5e/spells-known 0 :minor-illusion :int "Forest Gnome")]
@@ -1259,28 +1238,11 @@ creature."}]}
              14 {:selections (opt5e/raw-bard-magical-secrets 14)}
              18 {:selections (opt5e/raw-bard-magical-secrets 18)}}
     :traits [{:name "Bardic Inspiration"
-              :description "You can inspire others through stirring words or 
-music. To do so, you use a bonus action on your turn 
-to choose one creature other than yourself within 60 
-feet of you who can hear you. That creature gains 
-one Bardic Inspiration die, a d6.
-Once within the next 10 minutes, the creature can 
-roll the die and add the number rolled to one ability 
-check, attack roll, or saving throw it makes. The 
-creature can wait until after it rolls the d20 before 
-deciding to use the Bardic Inspiration die, but must 
-decide before the GM says whether the roll succeeds 
-or fails. Once the Bardic Inspiration die is rolled, it is 
-lost. A creature can have only one Bardic Inspiration 
-die at a time.
-You can use this feature a number of times equal 
-to your Charisma modifier (a minimum of once). You 
-regain any expended uses when you finish a long 
-rest.
-Your Bardic Inspiration die changes when you 
-reach certain levels in this class. The die becomes a 
-d8 at 5th level, a d10 at 10th level, and a d12 at 15th 
-level."}
+              :description "You can inspire others through stirring words or music. To do so, you use a bonus action on your turn to choose one creature other than yourself within 60 
+feet of you who can hear you. That creature gains one Bardic Inspiration die, a d6.
+Once within the next 10 minutes, the creature can roll the die and add the number rolled to one ability check, attack roll, or saving throw it makes. The creature can wait until after it rolls the d20 before deciding to use the Bardic Inspiration die, but must decide before the GM says whether the roll succeeds or fails. Once the Bardic Inspiration die is rolled, it is lost. A creature can have only one Bardic Inspiration die at a time.
+You can use this feature a number of times equal to your Charisma modifier (a minimum of once). You regain any expended uses when you finish a long rest.
+Your Bardic Inspiration die changes when you reach certain levels in this class. The die becomes a d8 at 5th level, a d10 at 10th level, and a d12 at 15th level."}
              {:name "Jack of All Trades"
               :level 2
               :description "Starting at 2nd level, you can add half your 
