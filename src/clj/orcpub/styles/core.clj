@@ -480,6 +480,8 @@
 
     (at-media
      xs-query
+     [:.build-tab
+      {:display :none}]
      [:.options-tab-active
       [:.options-column
        {:display :none}]
@@ -506,6 +508,12 @@
 
     (at-media
      sm-or-md-query
+     [:.build-tab
+      {:display :block}]
+     [:.options-tab
+      {:display :none}]
+     [:.personality-tab
+      {:display :none}]
      [:.build-tab-active
       [:.options-column
        {:display :block}]

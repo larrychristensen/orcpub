@@ -1074,16 +1074,16 @@
 (defn builder-tabs [active-tabs]
   [:div.hidden-lg.w-100-p
    [:div.builder-tabs
-    [:span.builder-tab.hidden-sm.hidden-md
+    [:span.builder-tab.options-tab
      {:class-name (if (active-tabs :options) "selected-builder-tab")
       :on-click (fn [_] (swap! app-state assoc-in tab-path #{:build :options}))} "Options"]
-    [:span.builder-tab.hidden-sm.hidden-md
+    [:span.builder-tab.personality-tab
      {:class-name (if (active-tabs :personality) "selected-builder-tab")
       :on-click (fn [_] (swap! app-state assoc-in tab-path #{:build :personality}))} "Personality"]
-    [:span.builder-tab.hidden-xs
+    [:span.builder-tab.build-tab
      {:class-name (if (active-tabs :build) "selected-builder-tab")
       :on-click (fn [_] (swap! app-state assoc-in tab-path #{:build :options}))} "Build"]
-    [:span.builder-tab
+    [:span.builder-tab.details-tab
      {:class-name (if (active-tabs :details) "selected-builder-tab")
       :on-click (fn [_] (swap! app-state assoc-in tab-path #{:details}))} "Details"]]])
 
