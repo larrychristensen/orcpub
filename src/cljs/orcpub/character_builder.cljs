@@ -1142,7 +1142,6 @@
       :on-scroll (fn [e]
                    (let [app-header (js/document.getElementById "app-header")
                          header-height (.-offsetHeight app-header)
-                         _ (prn "HEADER HEIGHT" header-height)
                          scroll-top (.-scrollTop (.-target e))
                          sticky-header (js/document.getElementById "sticky-header")
                          app-main (js/document.getElementById "app-main")
