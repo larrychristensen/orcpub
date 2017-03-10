@@ -506,8 +506,6 @@
 
     (at-media
      sm-or-md-query
-     [:.options-column
-      {:margin-left 0}]
      [:.build-tab-active
       [:.options-column
        {:display :block}]
@@ -555,6 +553,7 @@
       :flex-grow 1
       :padding-bottom "13px"
       :text-align :center
+      :cursor :pointer
       :border-bottom "5px solid rgba(255, 255, 255, 0.3)"}]
 
     [:.selected-builder-tab
