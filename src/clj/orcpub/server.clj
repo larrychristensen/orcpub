@@ -137,7 +137,6 @@
   {:name :character-pdf
    :enter
    (fn [context]
-     (prn "CONTEXT" context)
      (try
        (let [body-map (io.pedestal.http.route/parse-query-string (slurp (get-in context [:request :body])))
              fields (clojure.edn/read-string (:body body-map))
@@ -148,11 +147,8 @@
                                                (:spellcasting-ability-1 fields) "fillable-char-sheet-1-spells.pdf"
                                                :else "fillable-char-sheet-0-spells.pdf")))
              output (ByteArrayOutputStream.)
-             _ (prn "REQUEST" (:request context))
              user-agent (get-in context [:request :headers "user-agent"])
-             _ (prn "USER_AGENT" user-agent)
              ios? (re-matches #".*(iPhone|iPad|iPod).*" user-agent)]
-         (prn "IOS?" ios?)
          (with-open [doc (PDDocument/load input)]
            (write-fields! doc fields ios?)
            (.save doc output))
