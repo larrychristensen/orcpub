@@ -115,14 +115,12 @@
              (assoc-in [:request :path-params :item-id] item-id)))                      
        context))})
 
-(defn write-fields! [doc fields]
-  (prn "FIELDS" fields)
+(defn write-fields! [doc fields flatten]
   (let [catalog (.getDocumentCatalog doc)
         form (.getAcroForm catalog)]
     (.setNeedAppearances form true)
     (doseq [[k v] fields]
       (let [field (.getField form (name k))]
-        (prn "FIELD" field k v)
         (do
           (if field
             (.setValue
@@ -130,31 +128,34 @@
              (cond 
                (instance? PDCheckBox field) (if v "Yes" "Off")
                (instance? PDTextField field) (str v)
-               :else nil)))
-          (prn "FIELD AFTER" field k v))))))
+               :else nil))))))
+    (when flatten
+      (.setNeedAppearances form false)
+      (.flatten form))))
 
 (def character-pdf
   {:name :character-pdf
    :enter
    (fn [context]
-     (prn "PDF!!!!!!!!!!!!!!!!!!!!")
+     (prn "CONTEXT" context)
      (try
        (let [body-map (io.pedestal.http.route/parse-query-string (slurp (get-in context [:request :body])))
-             _ (prn "BODY STTR" body-map)
              fields (clojure.edn/read-string (:body body-map))
-             _ (prn "REQUEST" (:request context))
              input (.openStream (io/resource "fillable-char-sheet-6-spells.pdf" #_(cond
                                                (:spellcasting-ability-4 fields) "fillable-char-sheet-4-spells.pdf"
                                                (:spellcasting-ability-3 fields) "fillable-char-sheet-3-spells.pdf"
                                                (:spellcasting-ability-2 fields) "fillable-char-sheet-2-spells.pdf"
                                                (:spellcasting-ability-1 fields) "fillable-char-sheet-1-spells.pdf"
                                                :else "fillable-char-sheet-0-spells.pdf")))
-             output (ByteArrayOutputStream.)]
+             output (ByteArrayOutputStream.)
+             _ (prn "REQUEST" (:request context))
+             user-agent (get-in context [:request :headers "user-agent"])
+             _ (prn "USER_AGENT" user-agent)
+             ios? (re-matches #".*(iPhone|iPad|iPod).*" user-agent)]
          (with-open [doc (PDDocument/load input)]
-           (write-fields! doc fields)
+           (write-fields! doc fields ios?)
            (.save doc output))
          (let [a (.toByteArray output)]
-           (prn "A" a)
            (assoc context :response {:status 200 :body (ByteArrayInputStream. a)})))
        (catch Throwable e (prn "EXCEPTION!!!!!!!!!!" e))))})
 

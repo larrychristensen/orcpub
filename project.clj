@@ -7,6 +7,8 @@
 
   :min-lein-version "2.7.1"
 
+  :repositories [["apache" "http://repository.apache.org/snapshots/"]]
+
   :dependencies [[org.clojure/clojure "1.9.0-alpha14"]
                  [org.clojure/test.check "0.9.0"]
                  [org.clojure/clojurescript "1.9.229"]
@@ -21,7 +23,7 @@
                  [garden "1.3.2"]
                  ;;[compojure "1.4.0"]
                  ;;[ring/ring-jetty-adapter "1.4.0"]
-                 [org.apache.pdfbox/pdfbox "2.0.0"]
+                 [org.apache.pdfbox/pdfbox "2.0.5-20170309.204221-233"]
 
                  [io.pedestal/pedestal.service "0.5.1"]
                  [io.pedestal/pedestal.route "0.5.1"]
