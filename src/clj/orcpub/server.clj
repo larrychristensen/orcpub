@@ -152,6 +152,7 @@
              user-agent (get-in context [:request :headers "user-agent"])
              _ (prn "USER_AGENT" user-agent)
              ios? (re-matches #".*(iPhone|iPad|iPod).*" user-agent)]
+         (prn "IOS?" ios?)
          (with-open [doc (PDDocument/load input)]
            (write-fields! doc fields ios?)
            (.save doc output))
