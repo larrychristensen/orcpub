@@ -6,7 +6,8 @@
             [clojure.java.io :as io])
   (:import [org.apache.pdfbox.pdmodel.interactive.form PDCheckBox PDComboBox PDListBox PDRadioButton PDTextField]
            [org.apache.pdfbox.pdmodel PDDocument]
-           [java.io ByteArrayOutputStream ByteArrayInputStream]))
+           [java.io ByteArrayOutputStream ByteArrayInputStream])
+  (:gen-class))
 
 (defn response [status body & {:as headers}]
   {:status status :body body :headers headers})
@@ -184,7 +185,7 @@
 (def service
   {::http/routes #(deref #'routes)
    ::http/type :jetty
-   ::http/port 8890
+   ::http/port (or (System/getenv "PORT") 8890)
    ::http/resource-path "/public"})
 
 (defn start []
@@ -222,3 +223,6 @@
 
 (defn test-request [verb url & [body]]
   (io.pedestal.test/response-for (::http/service-fn @server) verb url :body body))
+
+(defn -main []
+  (start))
