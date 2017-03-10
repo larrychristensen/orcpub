@@ -3,7 +3,7 @@
   :url "http://example.com/FIXME"
   :license {:name "Eclipse Public License"
             :url "http://www.eclipse.org/legal/epl-v10.html"}
-  :main orcpub.server
+  :main orcpub.server-2
 
   :min-lein-version "2.7.1"
 
