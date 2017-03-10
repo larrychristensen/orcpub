@@ -4,6 +4,7 @@
             [cljs.pprint :as pprint]
             [cljs.reader :as reader]
             [clojure.string :as s]
+            [clojure.set :as sets]
 
             [orcpub.common :as common]
             [orcpub.constants :as const]
@@ -82,7 +83,7 @@
                        [:class :barbarian]}
     :stepper-selection-path nil
     :mouseover-option nil
-    :builder {:character {:tab 0}}}))
+    :builder {:character {:tab #{:build :options}}}}))
 
 #_(add-watch app-state :log (fn [k r os ns]
                             (js/console.log "OLD" (clj->js os))
@@ -650,7 +651,7 @@
 
 
 
-(defn character-display [built-char mobile? tablet? desktop?]
+(defn character-display [built-char]
   (let [race (es/entity-val built-char :race)
         subrace (es/entity-val built-char :subrace)
         levels (char5e/levels built-char)
@@ -671,7 +672,7 @@
         weapons (es/entity-val built-char :weapons)
         equipment (es/entity-val built-char :equipment)
         traits (es/entity-val built-char :traits)]
-    [:div {:class-name (if desktop? "w-500" "m-l-20 m-r-20")}
+    [:div
      [:div.f-s-24.f-w-600.m-b-16.text-shadow
       [:span race]
       (if (seq levels)
@@ -684,57 +685,60 @@
             (fn [[cls-k {:keys [class-name class-level subclass]}]]
               (str class-name " (" class-level ")"))
             levels)))])]
-     [:div.flex
-      [:div {:class-name (cond mobile? "w-60-p" tablet? "w-40-p" :else "w-50-p")}
-       [:img.character-image.w-100-p.m-b-20 {:src (or (get-in @character-ref [::entity/values :image-url]) "image/barbarian-girl.png")}]]
-      [:div (if desktop? {:class-name "w-250"})
-       [armor-class-section armor-class armor-class-with-armor armor]
-       [display-section "Hit Points" "fa-crosshairs" (es/entity-val built-char :max-hit-points)]
-       [display-section "Speed" nil
-        (let [unarmored-speed-bonus (es/entity-val built-char :unarmored-speed-bonus)
-              speed (es/entity-val built-char :speed)
-              swim-speed (es/entity-val built-char :swimming-speed)]
-          [:div
-           [:div
-            (if (and unarmored-speed-bonus (pos? unarmored-speed-bonus))
-              [:div
-               [:div [:span (+ speed unarmored-speed-bonus)] [:span.display-section-qualifier-text "(unarmored)"]]
-               [:div [:span speed] [:span.display-section-qualifier-text "(armored)"]]]
-              speed)]
-           (if swim-speed
-             [:div [:span swim-speed] [:span.display-section-qualifier-text "(swim)"]])])]
-       [display-section "Darkvision" "fa-low-vision" (if darkvision (str darkvision " ft.") "--")]
-       [display-section "Initiative" nil (mod/bonus-str (es/entity-val built-char :initiative))]
-       [display-section "Proficiency Bonus" nil (mod/bonus-str (es/entity-val built-char :prof-bonus))]
-       [display-section "Passive Perception" nil (es/entity-val built-char :passive-perception)]
-       (let [criticals (es/entity-val built-char :critical)
-             min-crit (apply min criticals)
-             max-crit (apply max criticals)]
-         (if (not= min-crit max-crit)
-           (display-section "Critical Hit" nil (str min-crit "-" max-crit))))
-       [list-display-section "Save Proficiencies" nil (map (comp s/upper-case name) (es/entity-val built-char :saving-throws))]]]
-     [:div.w-100-p
-      [abilities-radar 187 (es/entity-val built-char :abilities) ability-bonuses]]
-     [list-display-section "Skill Proficiencies" nil
-      (let [skill-bonuses (es/entity-val built-char :skill-bonuses)]
-        (map
-         (fn [[skill-kw bonus]]
-           (str (s/capitalize (name skill-kw)) " " (mod/bonus-str bonus)))
-         (filter (fn [[k bonus]]
-                   (not= bonus (ability-bonuses (:ability (opt5e/skills-map k)))))
-                 skill-bonuses)))]
-     [list-item-section "Languages" languages]
-     [list-item-section "Tool Proficiencies" tool-profs]
-     [list-item-section "Weapon Proficiencies" weapon-profs]
-     [list-item-section "Armor Proficiencies" armor-profs]
-     [list-item-section "Damage Resistances" resistances name]
-     [list-item-section "Damage Immunities" immunities name]
-     [list-item-section "Condition Immunities" condition-immunities name]
-     [spells-known-section spells-known]
-     [equipment-section "Weapons" weapons opt5e/weapons-map]
-     [equipment-section "Armor" armor opt5e/armor-map]
-     [equipment-section "Equipment" equipment opt5e/equipment-map]
-     [traits-section traits]]))
+     [:div.details-columns
+      [:div.flex-grow-1.flex-basis-50-p
+       [:div.flex
+        [:div.w-50-p
+         [:img.character-image.w-100-p.m-b-20 {:src (or (get-in @character-ref [::entity/values :image-url]) "image/barbarian-girl.png")}]]
+        [:div.w-50-p
+         [armor-class-section armor-class armor-class-with-armor armor]
+         [display-section "Hit Points" "fa-crosshairs" (es/entity-val built-char :max-hit-points)]
+         [display-section "Speed" nil
+          (let [unarmored-speed-bonus (es/entity-val built-char :unarmored-speed-bonus)
+                speed (es/entity-val built-char :speed)
+                swim-speed (es/entity-val built-char :swimming-speed)]
+            [:div
+             [:div
+              (if (and unarmored-speed-bonus (pos? unarmored-speed-bonus))
+                [:div
+                 [:div [:span (+ speed unarmored-speed-bonus)] [:span.display-section-qualifier-text "(unarmored)"]]
+                 [:div [:span speed] [:span.display-section-qualifier-text "(armored)"]]]
+                speed)]
+             (if swim-speed
+               [:div [:span swim-speed] [:span.display-section-qualifier-text "(swim)"]])])]
+         [display-section "Darkvision" "fa-low-vision" (if darkvision (str darkvision " ft.") "--")]
+         [display-section "Initiative" nil (mod/bonus-str (es/entity-val built-char :initiative))]
+         [display-section "Proficiency Bonus" nil (mod/bonus-str (es/entity-val built-char :prof-bonus))]
+         [display-section "Passive Perception" nil (es/entity-val built-char :passive-perception)]
+         (let [criticals (es/entity-val built-char :critical)
+               min-crit (apply min criticals)
+               max-crit (apply max criticals)]
+           (if (not= min-crit max-crit)
+             (display-section "Critical Hit" nil (str min-crit "-" max-crit))))
+         [list-display-section "Save Proficiencies" nil (map (comp s/upper-case name) (es/entity-val built-char :saving-throws))]]]
+       [:div.w-100-p
+        [abilities-radar 187 (es/entity-val built-char :abilities) ability-bonuses]]]
+      [:div.flex-grow-1.flex-basis-50-p
+       [list-display-section "Skill Proficiencies" nil
+        (let [skill-bonuses (es/entity-val built-char :skill-bonuses)]
+          (map
+           (fn [[skill-kw bonus]]
+             (str (s/capitalize (name skill-kw)) " " (mod/bonus-str bonus)))
+           (filter (fn [[k bonus]]
+                     (not= bonus (ability-bonuses (:ability (opt5e/skills-map k)))))
+                   skill-bonuses)))]
+       [list-item-section "Languages" languages]
+       [list-item-section "Tool Proficiencies" tool-profs]
+       [list-item-section "Weapon Proficiencies" weapon-profs]
+       [list-item-section "Armor Proficiencies" armor-profs]
+       [list-item-section "Damage Resistances" resistances name]
+       [list-item-section "Damage Immunities" immunities name]
+       [list-item-section "Condition Immunities" condition-immunities name]
+       [spells-known-section spells-known]
+       [equipment-section "Weapons" weapons opt5e/weapons-map]
+       [equipment-section "Armor" armor opt5e/armor-map]
+       [equipment-section "Equipment" equipment opt5e/equipment-map]
+       [traits-section traits]]]]))
 
 
 (def tab-path [:builder :character :tab])
@@ -886,55 +890,54 @@
         unselected-selections? (pos? (count unselected-selections))
         level-up? (not (or selection unselected-selections?))
         complete? (not unselected-selections?)]
-    [:div
-     [:div.flex.selection-stepper-inner
-      {:id "selection-stepper"}
-      [:div.selection-stepper-main
-       [:h1.f-w-bold.selection-stepper-title "Step-By-Step"]
-       (if selection
-         [:div
-          [:h1.f-w-bold.m-t-10 "Step: " (::t/name selection)
-           (if (::t/optional? selection)
-             [:span.m-l-5.f-s-10 "(optional)"])]
-          (let [help (::t/help selection)
-                help-vec (if (vector? help) help [help])]
-            (if (string? help)
-              [:p.m-t-5.selection-stepper-help help]
-              help))
-          [:div#mouseover-option.b-1.b-rad-5.b-color-gray.p-10.m-t-10.hidden
-           [:span#mouseover-option-title.f-w-b]
-           [:p#mouseover-option-help]]])
-       (if (or (not selection) level-up? complete?)
-         [:div.m-t-10
-          (if unselected-selections?
-            "Click 'Get Started' to step through the build process."
-            (str "All selections complete. Click "
-                 (if level-up?
-                   "'Level Up' to your advance character level"
-                   "'Finish' to complete")
-                 " or 'Dismiss' to hide this guide."))])
-       [:div.flex.m-t-10.selection-stepper-footer
-        [:span.link-button.m-r-5
-         {:on-click (fn [_]
-                      (swap! app-state assoc :stepper-dismissed true))}
-         "Dismiss"]
-        [:button.form-button.selection-stepper-button
-         {:on-click
-          (fn [_] (if level-up?
-                    (level-up! built-template character)
-                    (set-next-selection! built-template option-paths character stepper-selection-path unselected-selections)))}
-         (cond
-           level-up? "Level Up"
-           complete? "Finish"
-           selection "Next Step"
-           unselected-selections? "Get Started")]]]
+    [:div.flex.selection-stepper-inner
+     {:id "selection-stepper"}
+     [:div.selection-stepper-main
+      [:h1.f-w-bold.selection-stepper-title "Step-By-Step"]
       (if selection
-        [:svg.m-l--1.m-t-10 {:width "20" :height "24"}
-         [:path 
-          {:d "M-2 1.5 L13 14 L-2 22.5"
-           :stroke :white
-           :fill "#1a1e28"
-           :stroke-width "1px"}]])]]))
+        [:div
+         [:h1.f-w-bold.m-t-10 "Step: " (::t/name selection)
+          (if (::t/optional? selection)
+            [:span.m-l-5.f-s-10 "(optional)"])]
+         (let [help (::t/help selection)
+               help-vec (if (vector? help) help [help])]
+           (if (string? help)
+             [:p.m-t-5.selection-stepper-help help]
+             help))
+         [:div#mouseover-option.b-1.b-rad-5.b-color-gray.p-10.m-t-10.hidden
+          [:span#mouseover-option-title.f-w-b]
+          [:p#mouseover-option-help]]])
+      (if (or (not selection) level-up? complete?)
+        [:div.m-t-10
+         (if unselected-selections?
+           "Click 'Get Started' to step through the build process."
+           (str "All selections complete. Click "
+                (if level-up?
+                  "'Level Up' to your advance character level"
+                  "'Finish' to complete")
+                " or 'Dismiss' to hide this guide."))])
+      [:div.flex.m-t-10.selection-stepper-footer
+       [:span.link-button.m-r-5
+        {:on-click (fn [_]
+                     (swap! app-state assoc :stepper-dismissed true))}
+        "Dismiss"]
+       [:button.form-button.selection-stepper-button
+        {:on-click
+         (fn [_] (if level-up?
+                   (level-up! built-template character)
+                   (set-next-selection! built-template option-paths character stepper-selection-path unselected-selections)))}
+        (cond
+          level-up? "Level Up"
+          complete? "Finish"
+          selection "Next Step"
+          unselected-selections? "Get Started")]]]
+     (if selection
+       [:svg.m-l--1.m-t-10 {:width "20" :height "24"}
+        [:path 
+         {:d "M-2 1.5 L13 14 L-2 22.5"
+          :stroke :white
+          :fill "#1a1e28"
+          :stroke-width "1px"}]])]))
 
 (defn option-sources [collapsed-paths selected-plugins]
   (let [path [:sources]
@@ -997,9 +1000,8 @@
     builder-selector
     {:component-did-update on-builder-selector-update}))
 
-(defn options-column [built-char built-template option-paths mobile? collapsed-paths stepper-selection-path plugins]
-  [:div {:id "options-column"
-         :class-name (if mobile? "w-100-p" "w-300")}
+(defn options-column [built-char built-template option-paths collapsed-paths stepper-selection-path plugins]
+  [:div#options-column
    [option-sources collapsed-paths plugins]
    [:div
     (doall
@@ -1029,55 +1031,61 @@
 (defn character-textarea [character-ref prop-name & [cls-str]]
   (character-field character-ref prop-name :textarea cls-str))
 
-(defn builder-columns [built-template built-char option-paths collapsed-paths stepper-selection-path plugins desktop? tablet? mobile? active-tab]
+(defn builder-columns [built-template built-char option-paths collapsed-paths stepper-selection-path plugins active-tabs stepper-dismissed?]
   [:div.flex-grow-1.flex
-   (if (or desktop?
-           (= 0 active-tab))
-     [options-column built-char built-template option-paths mobile? collapsed-paths stepper-selection-path plugins])
-   (if (or desktop?
-           (and tablet? (= 0 active-tab))
-           (and mobile? (= 1 active-tab)))
-     [:div.flex-grow-1.m-t-10 {:class-name (if desktop? "m-l-30 m-r-80" "m-l-5 m-r-5")}
-      [:div.m-t-5
-       [:span.personality-label.f-s-18 "Character Name"]
-       [character-input character-ref :character-name]]
-      [:div.field
-       [:span.personality-label.f-s-18 "Personality Trait 1"]
-       [character-textarea character-ref :personality-trait-1]]
-      [:div.field
-       [:span.personality-label.f-s-18 "Personality Trait 2"]
-       [character-textarea character-ref :personality-trait-2]]
-      [:div.field
-       [:span.personality-label.f-s-18 "Ideals"]
-       [character-textarea character-ref :ideals]]
-      [:div.field
-       [:span.personality-label.f-s-18 "Bonds"]
-       [character-textarea character-ref :bonds]]
-      [:div.field
-       [:span.personality-label.f-s-18 "Flaws"]
-       [character-textarea character-ref :flaws]]
-      [:div.field
-       [:span.personality-label.f-s-18 "Image URL"]
-       [character-input character-ref :image-url]]
-      [:div.field
-       [:span.personality-label.f-s-18 "Description/Backstory"]
-       [character-textarea character-ref :description "h-800"]]])
-   (if (or desktop?
-           (and mobile? (= 2 active-tab))
-           (and tablet? (= 1 active-tab)))
-     [character-display built-char mobile? tablet? desktop?])])
+   {:class-name (s/join " " (map #(str (name %) "-tab-active") active-tabs))}
+   [:div.builder-column.stepper-column
+    (if (not stepper-dismissed?)
+      [selection-stepper
+       built-template
+       option-paths
+       @character-ref
+       stepper-selection-path])]
+   [:div.builder-column.options-column
+    [options-column built-char built-template option-paths collapsed-paths stepper-selection-path plugins]]
+   [:div.flex-grow-1.builder-column.personality-column
+    [:div.m-t-5
+     [:span.personality-label.f-s-18 "Character Name"]
+     [character-input character-ref :character-name]]
+    [:div.field
+     [:span.personality-label.f-s-18 "Personality Trait 1"]
+     [character-textarea character-ref :personality-trait-1]]
+    [:div.field
+     [:span.personality-label.f-s-18 "Personality Trait 2"]
+     [character-textarea character-ref :personality-trait-2]]
+    [:div.field
+     [:span.personality-label.f-s-18 "Ideals"]
+     [character-textarea character-ref :ideals]]
+    [:div.field
+     [:span.personality-label.f-s-18 "Bonds"]
+     [character-textarea character-ref :bonds]]
+    [:div.field
+     [:span.personality-label.f-s-18 "Flaws"]
+     [character-textarea character-ref :flaws]]
+    [:div.field
+     [:span.personality-label.f-s-18 "Image URL"]
+     [character-input character-ref :image-url]]
+    [:div.field
+     [:span.personality-label.f-s-18 "Description/Backstory"]
+     [character-textarea character-ref :description "h-800"]]]
+   [:div.builder-column.details-column
+    [character-display built-char]]])
 
-(defn builder-tabs [active-tab mobile? tablet?]
-  [:div.hidden-lg
+(defn builder-tabs [active-tabs]
+  [:div.hidden-lg.w-100-p
    [:div.builder-tabs
-    [:span.builder-tab {:class-name (if (= active-tab 0) "selected-builder-tab")
-                        :on-click (fn [_] (swap! app-state assoc-in tab-path 0))} "Options"]
-    [:span.builder-tab {:class-name (if (= active-tab 0) "selected-builder-tab")
-                        :on-click (fn [_] (swap! app-state assoc-in tab-path 0))} "Build"]
-    [:span.builder-tab {:class-name (if (= active-tab 1) "selected-builder-tab")
-                        :on-click (fn [_] (swap! app-state assoc-in tab-path 1))} "Personality"]
-    [:span.builder-tab {:class-name "selected-builder-tab"
-                        :on-click (fn [_] (swap! app-state assoc-in tab-path (if mobile? 2 1)))} "Details"]]])
+    [:span.builder-tab.hidden-sm.hidden-md
+     {:class-name (if (active-tabs :options) "selected-builder-tab")
+      :on-click (fn [_] (swap! app-state assoc-in tab-path #{:build :options}))} "Options"]
+    [:span.builder-tab.hidden-sm.hidden-md
+     {:class-name (if (active-tabs :personality) "selected-builder-tab")
+      :on-click (fn [_] (swap! app-state assoc-in tab-path #{:build :personality}))} "Personality"]
+    [:span.builder-tab.hidden-xs
+     {:class-name (if (active-tabs :build) "selected-builder-tab")
+      :on-click (fn [_] (swap! app-state assoc-in tab-path #{:build :options}))} "Build"]
+    [:span.builder-tab
+     {:class-name (if (active-tabs :details) "selected-builder-tab")
+      :on-click (fn [_] (swap! app-state assoc-in tab-path #{:details}))} "Details"]]])
 
 (defn export-pdf [built-char]
   (fn [_]
@@ -1126,9 +1134,6 @@
         built-char (entity/build @character-ref built-template)
         active-tab (get-in @app-state tab-path)
         view-width (.-width (gdom/getViewportSize js/window))
-        mobile? (device/isMobile)
-        tablet? (or (device/isTablet) (< view-width 1455))
-        desktop? (device/isDesktop)
         stepper-selection-path (:stepper-selection-path @app-state)
         collapsed-paths (:collapsed-paths @app-state)
         mouseover-option (:mouseover-option @app-state)
@@ -1137,8 +1142,7 @@
     ;;(js/console.log "BUILT TEMPLAT" built-template)
     ;;(print-char built-char)
     [:div.app
-     {:class-name (cond mobile? "mobile" tablet? "tablet" :else nil)
-      :on-scroll (fn [e]
+     {:on-scroll (fn [e]
                    (let [app-header (js/document.getElementById "app-header")
                          header-height (.-offsetHeight app-header)
                          scroll-top (.-scrollTop (.-target e))
@@ -1161,16 +1165,11 @@
         (header built-char)]]]
      [:div.flex.justify-cont-c.white
       [:div.content (header built-char)]]
+     [:div.flex.justify-cont-c.white
+      [:div.content [builder-tabs active-tab]]]
      [:div#app-main.flex.justify-cont-c.p-b-40
       [:div.f-s-14.white.content
-       [builder-tabs active-tab mobile? tablet?]
-       [:div.flex
-        (if (and desktop? (not stepper-dismissed?))
-          [selection-stepper
-           built-template
-           option-paths
-           @character-ref
-           stepper-selection-path])
+       [:div.flex.w-100-p
         [builder-columns
          built-template
          built-char
@@ -1178,7 +1177,5 @@
          collapsed-paths
          stepper-selection-path
          plugins
-         desktop?
-         tablet?
-         mobile?
-         active-tab]]]]]))
+         active-tab
+         stepper-dismissed?]]]]]))

@@ -11,7 +11,8 @@
    :justify-content :center})
 
 (def content-style
-  {:width (px 1440)})
+  {:max-width (px 1440)
+   :width "100%"})
 
 (def text-color
   {:color :white})
@@ -62,6 +63,9 @@
    
    [:.flex-grow-1
     {:flex-grow 1}]
+
+   [:.flex-basis-50-p
+    {:flex-basis "50%"}]
    
    [:.i
     {:font-style :italic}]
@@ -195,6 +199,28 @@
    [:.bg-light
     {:background-color "#2c3445"}]])
 
+(def sm-min "768px")
+(def md-max "1199px")
+
+(def xs-query
+  {:max-width "767px"})
+
+(def sm-query
+  {:min-width sm-min :max-width "991px"})
+
+(def md-width "992px")
+
+(def md-query
+  {:min-width md-width :max-width md-max})
+
+(def sm-or-md-query
+  {:min-width sm-min :max-width md-max})
+
+(def lg-width "1200px")
+
+(def lg-query
+  {:min-width lg-width})
+
 (def media-queries
   [[:.visible-xs,
     :.visible-sm,
@@ -216,8 +242,7 @@
     :.visible-lg-inline-block 
     {:display "none !important"}]
 
-   (at-media 
-    {:max-width "767px"}
+   (at-media xs-query
     [:.visible-xs {:display "block !important"
                    }]
     [:table.visible-xs {:display "table !important"}]
@@ -229,21 +254,20 @@
                      :display "table-cell !important"
                      }])
 
-   (at-media 
-    {:max-width "767px"}
+   (at-media xs-query
     [:.visible-xs-block
      {:display "block !important"}])
-   (at-media {:max-width "767px"} [
+   (at-media xs-query [
                                    :.visible-xs-inline {
                                                         :display "inline !important"
                                                         }
                                    ])
-   (at-media {:max-width "767px"} [
+   (at-media xs-query [
                                    :.visible-xs-inline-block {
                                                               :display "inline-block !important"
                                                               }
                                    ])
-   (at-media {:min-width "768px) and (max-width: 991px"} [
+   (at-media sm-query [
                                                           :.visible-sm {
                                                                         :display "block !important"
                                                                         }
@@ -258,22 +282,22 @@
                                                                           :display "table-cell !important"
                                                                           }
                                                           ])
-   (at-media {:min-width "768px) and (max-width: 991px"} [
+   (at-media sm-query [
                                                           :.visible-sm-block {
                                                                               :display "block !important"
                                                                               }
                                                           ])
-   (at-media {:min-width "768px) and (max-width: 991px"} [
+   (at-media sm-query [
                                                           :.visible-sm-inline {
                                                                                :display "inline !important"
                                                                                }
                                                           ])
-   (at-media {:min-width "768px) and (max-width: 991px"} [
+   (at-media sm-query [
                                                           :.visible-sm-inline-block {
                                                                                      :display "inline-block !important"
                                                                                      }
                                                           ])
-   (at-media {:min-width "992px" :max-width "1199px"} [
+   (at-media md-query [
                                                            :.visible-md {
                                                                          :display "block !important"
                                                                          }
@@ -288,22 +312,22 @@
                                                                            :display "table-cell !important"
                                                                            }
                                                            ])
-   (at-media {:min-width "992px) and (max-width: 1199px"} [
+   (at-media md-query [
                                                            :.visible-md-block {
                                                                                :display "block !important"
                                                                                }
                                                            ])
-   (at-media {:min-width "992px) and (max-width: 1199px"} [
+   (at-media md-query [
                                                            :.visible-md-inline {
                                                                                 :display "inline !important"
                                                                                 }
                                                            ])
-   (at-media {:min-width "992px) and (max-width: 1199px"} [
+   (at-media md-query [
                                                            :.visible-md-inline-block {
                                                                                       :display "inline-block !important"
                                                                                       }
                                                            ])
-   (at-media {:min-width "1200px"} [
+   (at-media lg-query [
                                     :.visible-lg {
                                                   :display "block !important"
                                                   }
@@ -318,37 +342,37 @@
                                                     :display "table-cell !important"
                                                     }
                                     ])
-   (at-media {:min-width "1200px"} [
+   (at-media  [
                                     :.visible-lg-block {
                                                         :display "block !important"
                                                         }
                                     ])
-   (at-media {:min-width "1200px"} [
+   (at-media lg-query [
                                     :.visible-lg-inline {
                                                          :display "inline !important"
                                                          }
                                     ])
-   (at-media {:min-width "1200px"} [
+   (at-media lg-query [
                                     :.visible-lg-inline-block {
                                                                :display "inline-block !important"
                                                                }
                                     ])
-   (at-media {:max-width "767px"} [
+   (at-media xs-query [
                                    :.hidden-xs {
                                                 :display "none !important"
                                                 }
                                    ])
-   (at-media {:min-width "768px) and (max-width: 991px"} [
+   (at-media sm-query [
                                                           :.hidden-sm {
                                                                        :display "none !important"
                                                                        }
                                                           ])
-   (at-media {:min-width "992px) and (max-width: 1199px"} [
+   (at-media md-query [
                                                            :.hidden-md {
                                                                         :display "none !important"
                                                                         }
                                                            ])
-   (at-media {:min-width "1200px"} [
+   (at-media lg-query [
                                     :.hidden-lg {
                                                  :display "none !important"
                                                  }
@@ -356,50 +380,41 @@
    [:.visible-print
     :display "none !important"
     ]
-   (at-media {:print true} [
-                            :.visible-print {
-                                             :display "block !important"
-                                             }
-                            :table.visible-print {
-                                                  :display "table !important"
-                                                  }
-                            :tr.visible-print {
-                                               :display "table-row !important"
-                                               }
-                            :th.visible-print,
-                            :td.visible-print {
-                                               :display "table-cell !important"
-                                               }
-                            ])
+   (at-media
+    {:print true}
+    [:.visible-print
+     {:display "block !important"}]
+    [:th.visible-print,
+     :td.visible-print
+     {:display "table-cell !important"}]
+    [:table.visible-print
+     {:display "table !important"}]
+    [:tr.visible-print
+     {:display "table-row !important"}])
    [:.visible-print-block
-    :display "none !important"
-    ]
-   (at-media {:print true} [
-                            :.visible-print-block {
-                                                   :display "block !important"
-                                                   }
-                            ])
+    {:display "none !important"}]
+   
+   (at-media
+    {:print true}
+    [:.visible-print-block
+     {:display "block !important"}])
    [:.visible-print-inline
-    :display "none !important"
-    ]
-   (at-media {:print true} [
-                            :.visible-print-inline {
-                                                    :display "inline !important"
-                                                    }
-                            ])
+    {:display "none !important"}]
+   (at-media
+    {:print true}
+    [:.visible-print-inline
+     {:display "inline !important"}
+     ])
    [:.visible-print-inline-block
-    :display "none !important"
-    ]
-   (at-media {:print true} [
-                            :.visible-print-inline-block {
-                                                          :display "inline-block !important"
-                                                          }
-                            ])
-   (at-media {:print true} [
-                            :.hidden-print {
-                                            :display "none !important"
-                                            }
-                            ])])
+    {:display "none !important"}]
+   (at-media
+    {:print true}
+    [:.visible-print-inline-block
+     {:display "inline-block !important"}])
+   (at-media
+    {:print true}
+    [:.hidden-print
+     {:display "none !important"}])])
 
 (def app
   (concat
@@ -436,7 +451,18 @@
       :backdrop-filter "blur(5px)"
       :background-color "rgba(0, 0, 0, 0.15)"}]
 
-    (at-media {:max-width "767px"}
+    [:.options-column
+     {:width "300px"}]
+
+    [:.builder-column
+     {:display :none
+      :margin "0 5px"}]
+
+    [:.stepper-column
+     {:margin-right "-10px"}]
+
+    (at-media
+     xs-query
      [:.app-header
       {:height (px 81)
        :background-image :none
@@ -448,7 +474,66 @@
       {:width "220px"
        :margin-left "20px"}]
      [:.content
+      {:width "100%"}]
+     [:.options-column
       {:width "100%"}])
+
+    (at-media
+     xs-query
+     [:.options-tab-active
+      [:.options-column
+       {:display :none}]
+      [:.options-column
+       {:display :block}]
+      [:.personality-column
+       {:display :none}]
+      [:.details-column
+       {:display :none}]]
+     [:.personality-tab-active
+      [:.options-column
+       {:display :none}]
+      [:.personality-column
+       {:display :block}]
+      [:.details-column
+       {:display :none}]]
+     [:.details-tab-active
+      [:.options-column
+       {:display :none}]
+      [:.personality-column
+       {:display :none}]
+      [:.details-column
+       {:display :block}]])
+
+    (at-media
+     sm-or-md-query
+     [:.options-column
+      {:margin-left 0}]
+     [:.build-tab-active
+      [:.options-column
+       {:display :block}]
+      [:.stepper-column
+       {:display :block}]
+      [:.personality-column
+       {:display :block}]
+      [:.details-column
+       {:display :none}]]
+     [:.details-tab-active
+      [:.options-column
+       {:display :none}]
+      [:.personality-column
+       {:display :none}]
+      [:.details-column
+       {:display :block}]]
+     
+     [:.details-columns
+      {:display :flex}])
+
+    (at-media
+     lg-query
+     [:.builder-column
+      {:display :block}]
+     [:.details-column
+      {:max-width "500px"}])
 
     [:.builder-option
      {:border-width (px 1)
