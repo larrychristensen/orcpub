@@ -1329,7 +1329,7 @@ finish a short or long rest"}
                               (cleric-spell 5 :tree-stride 9)]
                   :selections [(t/selection
                                 "Druid Cantrip"
-                                (opt5e/spell-options (get-in sl/spell-lists [:druid 0]) 0 :wis :druid))]
+                                (opt5e/spell-options (get-in sl/spell-lists [:druid 0]) 0 :wis "Druid"))]
                   :traits [{:name "Channel Divinity: Charm Animals and Plants"
                             :level 2}
                            {:name "Dampen Elements"
@@ -1482,7 +1482,7 @@ finish a short or long rest"}
     :subclasses [{:name "Circle of the Land"
                   :selections [(t/selection
                                 "Bonus Cantrip"
-                                (opt5e/spell-options (get-in sl/spell-lists [:druid 0]) 0 :wis :druid))
+                                (opt5e/spell-options (get-in sl/spell-lists [:druid 0]) 0 :wis "Druid"))
                                (t/selection
                                 "Land Type"
                                 [(t/option
