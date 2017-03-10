@@ -185,7 +185,10 @@
 (def service
   {::http/routes #(deref #'routes)
    ::http/type :jetty
-   ::http/port (or (Integer/parseInt (System/getenv "PORT")) 8890)
+   ::http/port (let [port (System/getenv "PORT")]
+                 (if (clojure.string/blank? port)
+                   8890
+                   (Integer/parseInt port)))
    ::http/resource-path "/public"})
 
 (defn start []
