@@ -1068,16 +1068,15 @@
      [character-display built-char mobile? tablet? desktop?])])
 
 (defn builder-tabs [active-tab mobile? tablet?]
-  [:div
+  [:div.hidden-lg
    [:div.builder-tabs
-    (if mobile? [:span.builder-tab {:class-name (if (= active-tab 0) "selected-builder-tab")
-                                    :on-click (fn [_] (swap! app-state assoc-in tab-path 0))} "Options"])
-    (if tablet? [:span.builder-tab {:class-name (if (= active-tab 0) "selected-builder-tab")
-                                    :on-click (fn [_] (swap! app-state assoc-in tab-path 0))} "Build"])
-    (if mobile? [:span.builder-tab {:class-name (if (= active-tab 1) "selected-builder-tab")
-                                    :on-click (fn [_] (swap! app-state assoc-in tab-path 1))} "Personality"])
-    [:span.builder-tab {:class-name (if (or (and mobile? (= active-tab 2))
-                                            (and tablet? (= active-tab 1))) "selected-builder-tab")
+    [:span.builder-tab {:class-name (if (= active-tab 0) "selected-builder-tab")
+                        :on-click (fn [_] (swap! app-state assoc-in tab-path 0))} "Options"]
+    [:span.builder-tab {:class-name (if (= active-tab 0) "selected-builder-tab")
+                        :on-click (fn [_] (swap! app-state assoc-in tab-path 0))} "Build"]
+    [:span.builder-tab {:class-name (if (= active-tab 1) "selected-builder-tab")
+                        :on-click (fn [_] (swap! app-state assoc-in tab-path 1))} "Personality"]
+    [:span.builder-tab {:class-name "selected-builder-tab"
                         :on-click (fn [_] (swap! app-state assoc-in tab-path (if mobile? 2 1)))} "Details"]]])
 
 (defn export-pdf [built-char]
@@ -1098,7 +1097,7 @@
      [:input {:type "hidden" :name "body" :id "fields-input"}]]))
 
 (defn header [built-char]
-  [:div.flex.align-items-c.justify-cont-s-b
+  [:div.flex.align-items-c.justify-cont-s-b.w-100-p
    [:h1.f-s-36.f-w-b.m-t-21.m-b-19.m-l-10 "Character Builder"]
    [:button.form-button
     {:on-click (export-pdf built-char)
@@ -1128,7 +1127,7 @@
         active-tab (get-in @app-state tab-path)
         view-width (.-width (gdom/getViewportSize js/window))
         mobile? (device/isMobile)
-        tablet? (device/isTablet)
+        tablet? (or (device/isTablet) (< view-width 1455))
         desktop? (device/isDesktop)
         stepper-selection-path (:stepper-selection-path @app-state)
         collapsed-paths (:collapsed-paths @app-state)
@@ -1158,13 +1157,13 @@
         [:img.orcpub-logo {:src "image/orcpub-logo.svg"}]]]]
      [:div#sticky-header.sticky-header.w-100-p.posn-fixed
       [:div.flex.justify-cont-c.bg-light
-       [:div#header-container.f-s-14.white.w-1440
+       [:div#header-container.f-s-14.white.content
         (header built-char)]]]
+     [:div.flex.justify-cont-c.white
+      [:div.content (header built-char)]]
      [:div#app-main.flex.justify-cont-c.p-b-40
-      [:div.f-s-14.white.w-1440
-       (header built-char)
-       (if (not desktop?)
-         [builder-tabs active-tab mobile? tablet?])
+      [:div.f-s-14.white.content
+       [builder-tabs active-tab mobile? tablet?]
        [:div.flex
         (if (and desktop? (not stepper-dismissed?))
           [selection-stepper
