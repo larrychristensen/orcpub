@@ -146,7 +146,7 @@
            [{(keyword (str "spellcasting-class" suffix)) (s/join ", " classes)
              (keyword (str "spellcasting-ability" suffix)) (:name (opt5e/abilities-map ability))
              (keyword (str "spell-save-dc" suffix)) (save-dc-fn ability)
-             (keyword (str "spell-attack-bonus" suffix)) (attack-mod-fn ability)}
+             (keyword (str "spell-attack-bonus" suffix)) (common/bonus-str (attack-mod-fn ability))}
             (map
              (fn [{:keys [level spells]}]
                (map-indexed
