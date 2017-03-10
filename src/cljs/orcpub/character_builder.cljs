@@ -6,6 +6,7 @@
             [clojure.string :as s]
 
             [orcpub.common :as common]
+            [orcpub.constants :as const]
             [orcpub.template :as t]
             [orcpub.entity :as entity]
             [orcpub.entity-spec :as es]
@@ -1096,6 +1097,14 @@
       :target "_blank"}
      [:input {:type "hidden" :name "body" :id "fields-input"}]]))
 
+(defn header [built-char]
+  [:div.flex.align-items-c.justify-cont-s-b
+   [:h1.f-s-36.f-w-b.m-t-21.m-b-19.m-l-10 "Character Builder"]
+   [:button.form-button
+    {:on-click (export-pdf built-char)
+     :style {:height "40px"}}
+    [:span "Print"]]])
+
 
 (defn character-builder []
   ;;(cljs.pprint/pprint @character-ref)
@@ -1129,20 +1138,32 @@
     ;;(js/console.log "BUILT TEMPLAT" built-template)
     ;;(print-char built-char)
     [:div.app
-     {:class-name (cond mobile? "mobile" tablet? "tablet" :else nil)}
+     {:class-name (cond mobile? "mobile" tablet? "tablet" :else nil)
+      :on-scroll (fn [e]
+                   (let [app-header (js/document.getElementById "app-header")
+                         header-height (.-offsetHeight app-header)
+                         _ (prn "HEADER HEIGHT" header-height)
+                         scroll-top (.-scrollTop (.-target e))
+                         sticky-header (js/document.getElementById "sticky-header")
+                         app-main (js/document.getElementById "app-main")
+                         scrollbar-width (- js/window.innerWidth (.-offsetWidth app-main))
+                         header-container (js/document.getElementById "header-container")]
+                     (set! (.-paddingRight (.-style header-container)) (str scrollbar-width "px"))
+                     (if (>= scroll-top header-height)
+                       (set! (.-display (.-style sticky-header)) "block")
+                       (set! (.-display (.-style sticky-header)) "none"))))}
      [download-form built-char]
-     [:div.app-header
+     [:div#app-header.app-header
       [:div.app-header-bar.container
        [:div.content
         [:img.orcpub-logo {:src "image/orcpub-logo.svg"}]]]]
-     [:div.flex.justify-cont-c.p-b-40
+     [:div#sticky-header.sticky-header.w-100-p.posn-fixed
+      [:div.flex.justify-cont-c.bg-light
+       [:div#header-container.f-s-14.white.w-1440
+        (header built-char)]]]
+     [:div#app-main.flex.justify-cont-c.p-b-40
       [:div.f-s-14.white.w-1440
-       [:div.flex.align-items-c.justify-cont-s-b
-        [:h1.f-s-36.f-w-b.m-t-21.m-b-19.m-l-10 "Character Builder"]
-        [:button.form-button
-         {:on-click (export-pdf built-char)
-          :style {:height "40px"}}
-         [:span.hidden-xs "Print"]]]
+       (header built-char)
        (if (not desktop?)
          [builder-tabs active-tab mobile? tablet?])
        [:div.flex

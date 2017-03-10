@@ -50,7 +50,7 @@
   :garden {:builds [{;; Optional name of the build:
                      :id "screen"
                      ;; Source paths where the stylesheet source code is
-                     :source-paths ["src/clj"]
+                     :source-paths ["src/clj" "src/cljc"]
                      ;; The var containing your stylesheet:
                      :stylesheet orcpub.styles.core/app
                      ;; Compiler flags passed to `garden.core/css`:
@@ -61,7 +61,7 @@
 
   :cljsbuild {:builds
               [{:id "dev"
-                :source-paths ["src/clj" "src/cljc" "src/cljs"]
+                :source-paths ["src/cljc" "src/cljs"]
 
                 ;; the presence of a :figwheel configuration here
                 ;; will cause figwheel to inject the figwheel client
@@ -85,7 +85,7 @@
                ;; production. You can build this with:
                ;; lein cljsbuild once min
                {:id "min"
-                :source-paths ["src"]
+                :source-paths ["src/cljc" "src/cljs"]
                 :compiler {:output-to "resources/public/js/compiled/orcpub.js"
                            :main orcpub.core
                            :optimizations :advanced
@@ -149,7 +149,7 @@
                        :omit-source true
                        :cljsbuild {:builds
                                    [{:id "prod"
-                                     :source-paths ["src/clj" "src/cljc" "src/cljs"]
+                                     :source-paths ["src/cljc" "src/cljs"]
                                      :figwheel { :on-jsload "orcpub.core/on-js-reload" }
                                      :compiler {:main orcpub.core
                                                 :asset-path "/js/compiled/out"

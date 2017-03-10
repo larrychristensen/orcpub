@@ -1,6 +1,7 @@
 (ns orcpub.styles.core
   (:require [garden.def :refer [defstylesheet defstyles]]
-            [garden.units :refer [px]]))
+            [garden.units :refer [px]]
+            [orcpub.constants :as const]))
 
 (def button-color "#f0a100")
 
@@ -136,6 +137,8 @@
     {:position :relative}]
    [:.posn-abs
     {:position :absolute}]
+   [:.posn-fixed
+    {:position :fixed}]
    [:.white
     {:color :white}]
    [:.orange
@@ -186,7 +189,10 @@
    [:.bbe289
     {:color "#bbe289"}]
    [:.f9b747
-    {:color "#f9b747"}]])
+    {:color "#f9b747"}]
+   
+   [:.bg-light
+    {:background-color "#2c3445"}]])
 
 (def app
   (concat
@@ -195,6 +201,12 @@
       :font-family "Open Sans, sans-serif"
       :height "100%"
       :overflow :auto}]
+
+    [:.sticky-header
+     {:top 0
+      :box-shadow "0 2px 6px 0 rgba(0, 0, 0, 0.5)"
+      :z-index 100
+      :display :none}]
 
     [:.container
      container-style]
@@ -209,7 +221,7 @@
       :background-image "url(../../image/header-background.jpg)"
       :background-position "center"
       :background-size "cover"
-      :height (px 227)}]
+      :height (px const/header-height)}]
 
     [:.app-header-bar
      {:height (px 81)
@@ -265,6 +277,7 @@
 
     [:.selectable-builder-option:hover
      {:border-color "#f1a20f"
+      :box-shadow "0 2px 6px 0 rgba(0, 0, 0, 0.5)"
       :cursor :pointer}]
 
     [:.builder-selector
@@ -350,6 +363,9 @@
       :cursor :pointer
       :background-image "linear-gradient(to bottom, #f1a20f, #dbab50)"}]
 
+    [:.form-button:hover
+     {:box-shadow "0 2px 6px 0 rgba(0, 0, 0, 0.5)"}]
+
     [:.link-button
      {:color button-color
       :border :none
@@ -422,7 +438,7 @@
       :border-radius "5px"
       :padding "10px"
       :background-color "#1a1e28"
-      :box-shadow "5px 5px 5px rgba(0,0,0,0.6)"}]
+      :box-shadow "0 2px 6px 0 rgba(0, 0, 0, 0.5)"}]
 
     [:.selection-stepper-title
      {:font-size "18px"
