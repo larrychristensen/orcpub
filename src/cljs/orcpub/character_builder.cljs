@@ -1089,7 +1089,9 @@
   (let [spec (pdf-spec/make-spec built-char)]
     [:form.download-form
      {:id "download-form"
-      :action "http://localhost:8890/character.pdf"
+      :action (if (.startsWith js/window.location.href "http://localhost")
+                "http://localhost:8890/character.pdf"
+                "/character.pdf")
       :method "POST"
       :target "_blank"}
      [:input {:type "hidden" :name "body" :id "fields-input"}]]))
@@ -1125,7 +1127,7 @@
         plugins (:plugins @app-state)
         stepper-dismissed? (:stepper-dismissed @app-state)]
     ;;(js/console.log "BUILT TEMPLAT" built-template)
-    (print-char built-char)
+    ;;(print-char built-char)
     [:div.app
      {:class-name (cond mobile? "mobile" tablet? "tablet" :else nil)}
      [download-form built-char]
