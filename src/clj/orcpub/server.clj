@@ -185,7 +185,7 @@
 (def service
   {::http/routes #(deref #'routes)
    ::http/type :jetty
-   ::http/port (or (System/getenv "PORT") 8890)
+   ::http/port (or (Integer/parseInt (System/getenv "PORT")) 8890)
    ::http/resource-path "/public"})
 
 (defn start []
