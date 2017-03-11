@@ -130,7 +130,6 @@
   (map
    (fn [weapon-prof]
      (let [[weapon-kw first-class?] (if (keyword? weapon-prof) [weapon-prof false] weapon-prof)]
-       (prn "CLS_KW" cls-kw weapon-kw first-class?)
        (if (#{:simple :martial} weapon-kw)
          (mod5e/weapon-proficiency (str (name weapon-kw) " weapons") weapon-kw first-class? cls-kw)
          (mod5e/weapon-proficiency (-> weapon-kw opt5e/weapons-map :name) weapon-kw first-class? cls-kw))))
@@ -683,9 +682,10 @@ Fire Starter. The device produces a miniature flame, which you can use to light 
                   :help (str "This option just gives you the average value (" average ") for the die roll (1D" die "). Choose this option if you're not feeling lucky.")
                   :modifiers [(mod5e/max-hit-points average)]}))]}))
 
-(defn tool-prof-selection-aux [tool num]
+(defn tool-prof-selection-aux [tool num & [key prereq-fn]]
   (t/selection-cfg
    {:name (str "Tool Proficiency: " (:name tool))
+    :key (if key (keyword (str (name key) "--" (common/name-to-kw (:name tool)))))
     :help (str "Select " (s/lower-case (:name tool)) " for which you are proficient.")
     :options (mapv
               (fn [{:keys [name key]}]
@@ -696,32 +696,34 @@ Fire Starter. The device produces a miniature flame, which you can use to light 
                  [(mod5e/tool-proficiency name key)]))
               (:values tool))
     :min num
-    :max num}))
+    :max num
+    :prereq-fn prereq-fn}))
 
-
-(defn tool-prof-selection [tool-options]
+(defn tool-prof-selection [tool-options & [key prereq-fn]]
   (let [[first-key first-num] (-> tool-options first)
         first-option (opt5e/tools-map first-key)]
     (if (and (= 1 (count tool-options))
              (seq (:values first-option)))
-      (tool-prof-selection-aux first-option first-num)
-      (t/selection
-       "Tool Proficiencies"
-       (map
-        (fn [[k num]]
-          (let [tool (opt5e/tools-map k)]
-            (if (:values tool)
-              (t/option
-               (:name tool)
-               k
-               [(tool-prof-selection-aux tool num)]
-               [])
-              (t/option
-               (:name tool)
-               (:key tool)
-               []
-               [(mod5e/tool-proficiency (:name tool) (:key tool))]))))
-        tool-options)))))
+      (tool-prof-selection-aux first-option first-num key prereq-fn)
+      (t/selection-cfg
+       {:name "Tool Proficiencies"
+        :key key
+        :options (map
+                  (fn [[k num]]
+                    (let [tool (opt5e/tools-map k)]
+                      (if (:values tool)
+                        (t/option
+                         (:name tool)
+                         k
+                         [(tool-prof-selection-aux tool num key prereq-fn)]
+                         [])
+                        (t/option
+                         (:name tool)
+                         (:key tool)
+                         []
+                         [(mod5e/tool-proficiency (:name tool) (:key tool))]))))
+                  tool-options)
+        :prereq-fn prereq-fn}))))
 
 (defn subclass-level-option [{:keys [name
                                      levels] :as subcls}
@@ -922,6 +924,10 @@ Fire Starter. The device produces a miniature flame, which you can use to light 
 (defn class-equipment-options [equipment-choices]
   (class-options equipment-option equipment-choices "Select equipment to start your adventuring career with."))
 
+(defn class-skill-selection [{skill-num :choose options :options skill-select-order :order} key prereq-fn]
+  (let [skill-kws (if (:any options) (map :key opt5e/skills) (keys options))]
+    (opt5e/skill-selection skill-kws skill-num skill-select-order key prereq-fn)))
+
 (defn class-option [{:keys [name
                             help
                             hit-die
@@ -944,9 +950,10 @@ Fire Starter. The device produces a miniature flame, which you can use to light 
                      :as cls}
                     character-ref]
   (let [kw (common/name-to-kw name)
-        {:keys [save skill-options tool-options tool]
+        {:keys [save skill-options multiclass-skill-options tool-options multiclass-tool-options tool]
          armor-profs :armor weapon-profs :weapon} profs
         {skill-num :choose options :options skill-select-order :order} skill-options
+        {multiclass-skill-num :choose multiclass-skill-options :options} multiclass-skill-options
         skill-kws (if (:any options) (map :key opt5e/skills) (keys options))
         save-profs (keys save)
         spellcasting-template (opt5e/spellcasting-template (assoc spellcasting :class-key kw))]
@@ -958,11 +965,14 @@ Fire Starter. The device produces a miniature flame, which you can use to light 
                    (concat
                     selections
                     (if (seq tool-options)
-                      [(tool-prof-selection tool-options)])
+                      [(tool-prof-selection tool-options :tool-selection (fn [c] (= kw (first (:classes c)))))])
+                    (if (seq multiclass-tool-options)
+                      [(tool-prof-selection multiclass-tool-options :multiclass-tool-selection (fn [c] (not= kw (first (:classes c)))))])
                     (class-weapon-options weapon-choices)
                     (class-armor-options armor-choices)
                     (class-equipment-options equipment-choices)
-                    [(opt5e/skill-selection skill-kws skill-num skill-select-order)
+                    [(class-skill-selection skill-options :skill-proficiency (fn [c] (= kw (first (:classes c)))))
+                     (class-skill-selection multiclass-skill-options :multiclass-skill-proficiency (fn [c] (not= kw (first (:classes c)))))
                      (t/selection-cfg
                       {:name "Levels"
                        :help "These are your levels in the containing class. You can add levels by clicking the 'Add Levels' button below."
@@ -1092,7 +1102,9 @@ If you are able to cast spells, you can't cast them or concentrate on them while
             :weapon {:simple true :crossbow-hand true :longsword true :rapier true :shortsword true}
             :save {:dex true :cha true}
             :skill-options {:choose 3 :options {:any true}}
-            :tool-options {:musical-instrument 3}}
+            :multiclass-skill-options {:choose 1 :options {:any true}}
+            :tool-options {:musical-instrument 3}
+            :multiclass-tool-options {:musical-instrument 1}}
     :weapon-choices [{:name "Weapon"
                       :options {:rapier 1
                                 :longsword 1
@@ -2079,6 +2091,8 @@ Once you use this feature, you can't use it again until you finish a long rest."
                             :level 20}]}]}
    character-ref))
 
+(def ranger-skills {:animal-handling true :athletics true :insight true :investigation true :nature true :perception true :stealth true :survival true})
+
 (defn ranger-option [character-ref]
   (class-option
    {:name "Ranger"
@@ -2086,7 +2100,8 @@ Once you use this feature, you can't use it again until you finish a long rest."
     :profs {:armor {:light false :medium false :shields false}
             :weapon {:simple false :martial false}
             :save {:str true :dex true}
-            :skill-options {:choose 3 :options {:animal-handling true :athletics true :insight true :investigation true :nature true :perception true :stealth true :survival true}}}
+            :skill-options {:choose 3 :options ranger-skills}
+            :multiclass-skill-options {:choose 1 :options ranger-skills}}
     :ability-increase-levels [4 8 10 16 19]
     :spellcaster true
     :spellcasting {:level-factor 2
@@ -2238,6 +2253,8 @@ You choose additional favored terrain types at 6th and 10th level."}]
                             :level 15}]}]}
    character-ref))
 
+(def rogue-skills {:acrobatics true :athletics true :deception true :insight true :intimidation true :investigation true :perception true :performance true :persuasion true :sleight-of-hand true :stealth true})
+
 (defn rogue-option [character-ref]
   (class-option
    {:name "Rogue",
@@ -2248,7 +2265,8 @@ You choose additional favored terrain types at 6th and 10th level."}]
             :weapon {:simple true :crossbow-hand true :longsword true :rapier true :shortsword true}
             :save {:dex true :int true}
             :tool {:thieves-tools false}
-            :skill-options {:order 0 :choose 4 :options {:acrobatics true :athletics true :deception true :insight true :intimidation true :investigation true :perception true :performance true :persuasion true :sleight-of-hand true :stealth true}}}
+            :skill-options {:order 0 :choose 4 :options rogue-skills}
+            :multiclass-skill-options {:order 0 :choose 1 :options rogue-skills}}
     :weapon-choices [{:name "Melee Weapon"
                       :options {:rapier 1
                                 :shortsword 1}}]

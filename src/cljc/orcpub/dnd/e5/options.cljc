@@ -1280,9 +1280,10 @@ hazards."}])
 (defn skill-selection
   ([num]
    (skill-selection (map :key skills) num))
-  ([options num & [order]]
+  ([options num & [order key prereq-fn]]
    (t/selection-cfg
     {:name "Skill Proficiency"
+     :key key
      :order order
      :help (proficiency-help num "a skill" "skills")
      :options (skill-options
@@ -1290,7 +1291,8 @@ hazards."}])
        (comp (set options) :key)
        skills))
      :min num
-     :max num})))
+     :max num
+     :prereq-fn prereq-fn})))
 
 (defn tool-selection
   ([num]
