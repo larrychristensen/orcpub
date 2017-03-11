@@ -112,24 +112,28 @@
        (mod5e/trait name description)))
    traits))
 
-(defn armor-prof-modifiers [armor-proficiencies]
+(defn armor-prof-modifiers [armor-proficiencies & [cls-kw]]
   (map
-   (fn [armor-kw]
-        (mod5e/armor-proficiency (clojure.core/name armor-kw) armor-kw))
+   (fn [armor-prof]
+     (let [[armor-kw first-class?] (if (keyword? armor-prof) [armor-prof false] armor-prof)]
+       (mod5e/armor-proficiency (clojure.core/name armor-kw) armor-kw first-class? cls-kw)))
    armor-proficiencies))
 
-(defn tool-prof-modifiers [tool-proficiencies]
+(defn tool-prof-modifiers [tool-proficiencies & [cls-kw]]
   (map
-   (fn [tool-kw]
-        (mod5e/tool-proficiency (:name (opt5e/tools-map tool-kw)) tool-kw))
+   (fn [tool-prof]
+     (let [[tool-kw first-class?] (if (keyword? tool-prof) [tool-prof false] tool-prof)]
+       (mod5e/tool-proficiency (:name (opt5e/tools-map tool-kw)) tool-kw first-class? cls-kw)))
    tool-proficiencies))
 
-(defn weapon-prof-modifiers [weapon-proficiencies]
+(defn weapon-prof-modifiers [weapon-proficiencies & [cls-kw]]
   (map
-   (fn [weapon-kw]
-     (if (#{:simple :martial} weapon-kw)
-       (mod5e/weapon-proficiency (str (name weapon-kw) " weapons") weapon-kw)
-       (mod5e/weapon-proficiency (-> weapon-kw opt5e/weapons-map :name) weapon-kw)))
+   (fn [weapon-prof]
+     (let [[weapon-kw first-class?] (if (keyword? weapon-prof) [weapon-prof false] weapon-prof)]
+       (prn "CLS_KW" cls-kw weapon-kw first-class?)
+       (if (#{:simple :martial} weapon-kw)
+         (mod5e/weapon-proficiency (str (name weapon-kw) " weapons") weapon-kw first-class? cls-kw)
+         (mod5e/weapon-proficiency (-> weapon-kw opt5e/weapons-map :name) weapon-kw first-class? cls-kw))))
    weapon-proficiencies))
 
 (defn subrace-option [{:keys [name
@@ -975,9 +979,9 @@ Fire Starter. The device produces a miniature flame, which you can use to light 
       :modifiers (vec
                   (concat
                    modifiers
-                   (armor-prof-modifiers (keys armor-profs))
-                   (weapon-prof-modifiers (keys weapon-profs))
-                   (tool-prof-modifiers (keys tool))
+                   (armor-prof-modifiers armor-profs kw)
+                   (weapon-prof-modifiers weapon-profs kw)
+                   (tool-prof-modifiers tool kw)
                    (mapv
                     (fn [[k num]]
                       (mod5e/weapon k num))
@@ -990,7 +994,8 @@ Fire Starter. The device produces a miniature flame, which you can use to light 
                     (fn [[k num]]
                       (mod5e/equipment k num))
                     equipment)
-                   [(apply mod5e/saving-throws save-profs)]))})))
+                   [(mod5e/class kw)
+                    (apply mod5e/saving-throws kw save-profs)]))})))
 
 
 (defn barbarian-option [character-ref]
@@ -998,8 +1003,8 @@ Fire Starter. The device produces a miniature flame, which you can use to light 
    {:name "Barbarian"
     :hit-die 12
     :ability-increase-levels [4 8 12 16 19]
-    :profs {:armor {:light true :medium true :shields true}
-            :weapon {:simple true :martial true}
+    :profs {:armor {:light true :medium true :shields false}
+            :weapon {:simple false :martial false}
             :save {:str true :con true}
             :skill-options {:choose 2 :options {:animal-handling true :athletics true :intimidation true :nature true :perception true :survival true}}}
     :weapon-choices [{:name "Martial Weapon"
@@ -1083,7 +1088,7 @@ If you are able to cast spells, you can't cast them or concentrate on them while
    {:name "Bard"
     :hit-die 8
     :ability-increase-levels [4 8 12 16 19]
-    :profs {:armor {:light true}
+    :profs {:armor {:light false}
             :weapon {:simple true :crossbow-hand true :longsword true :rapier true :shortsword true}
             :save {:dex true :cha true}
             :skill-options {:choose 3 :options {:any true}}
@@ -1205,7 +1210,7 @@ finish a short or long rest"}
     :spellcaster true
     :hit-die 8,
     :ability-increase-levels [4 8 12 16 19]
-    :profs {:armor {:light true :medium true :shields true}
+    :profs {:armor {:light false :medium false :shields false}
             :weapon {:simple true}
             :save {:wis true :cha true}
             :skill-options {:choose 2 :options {:history true :insight true :medicine true :persuasion true :religion true}}}
@@ -1429,7 +1434,7 @@ finish a short or long rest"}
                    :known-mode :all
                    :ability :wis}
     :ability-increase-levels [4 6 8 12 14 16 19]
-    :profs {:armor {:light true :medium true :shields true}
+    :profs {:armor {:light false :medium false :shields false}
             :weapon {:club true :dagger true :dart true :javelin true :mace true :quarterstaff true :scimitar true :sickle true :sling true :spear true}
             :tool {:herbalism-kit true}
             :save {:int true :wis true}
@@ -1593,8 +1598,8 @@ The creature is aware of this effect before it makes its attack against you."}]}
    {:name "Fighter",
     :hit-die 10,
     :ability-increase-levels [4 8 12 16 19]
-    :profs {:armor {:light true :medium true :heavy true :shields true}
-            :weapon {:simple true :martial true} 
+    :profs {:armor {:light false :medium false :heavy true :shields false}
+            :weapon {:simple false :martial false} 
             :save {:str true :con true}
             :skill-options {:choose 2 :options {:acrobatics true :animal-handling true :athletics true :history true :insight true :intimidation true :perception true :survival true}}}
     :equipment-choices [{:name "Equipment Pack"
@@ -1748,7 +1753,7 @@ The creature is aware of this effect before it makes its attack against you."}]}
     :unarmored-abilities [:wis]
     :martial-arts {1 4, 2 4, 3 4, 4 4, 5 6, 6 6, 7 6, 8 6, 9 6, 10 6, 11 8, 12 8, 13 8, 14 8, 15 8, 16 8, 17 10, 18 10, 19 10, 20 10}
     :profs {:armor {:light true}   
-            :weapon {:simple true :shortsword true}
+            :weapon {:simple false :shortsword false}
             :save {:dex true :str true}
             :skill-options {:choose 2 :options {:acrobatics true :athletics true :history true :insight true :religion true :stealth true}}}
     :equipment-choices [{:name "Equipment Pack"
@@ -1924,8 +1929,8 @@ You can have only one creature under the effect of this feature at a time. You c
                    :ability :cha}
     :hit-die 10
     :ability-increase-levels [4 8 12 16 19]
-    :profs {:armor {:light true :medium true :heavy true :shields true}
-            :weapon {:simple true :martial true}
+    :profs {:armor {:light false :medium false :heavy true :shields false}
+            :weapon {:simple false :martial false}
             :save {:wis true :cha true}
             :skill-options {:choose 2 :options {:athletics true :insight true :intimidation true :medicine true :persuasion true :religion true}}}
     :equipment-choices [{:name "Equipment Pack"
@@ -2078,8 +2083,8 @@ Once you use this feature, you can't use it again until you finish a long rest."
   (class-option
    {:name "Ranger"
     :hit-die 10
-    :profs {:armor {:light true :medium true}
-            :weapon {:simple true :martial true}
+    :profs {:armor {:light false :medium false :shields false}
+            :weapon {:simple false :martial false}
             :save {:str true :dex true}
             :skill-options {:choose 3 :options {:animal-handling true :athletics true :insight true :investigation true :nature true :perception true :stealth true :survival true}}}
     :ability-increase-levels [4 8 10 16 19]
@@ -2239,10 +2244,10 @@ You choose additional favored terrain types at 6th and 10th level."}]
     :hit-die 8
     :ability-increase-levels [4 8 12 16 19]
     :expertise true
-    :profs {:armor {:light true}
+    :profs {:armor {:light false}
             :weapon {:simple true :crossbow-hand true :longsword true :rapier true :shortsword true}
             :save {:dex true :int true}
-            :tool {:thieves-tools true}
+            :tool {:thieves-tools false}
             :skill-options {:order 0 :choose 4 :options {:acrobatics true :athletics true :deception true :insight true :intimidation true :investigation true :perception true :performance true :persuasion true :sleight-of-hand true :stealth true}}}
     :weapon-choices [{:name "Melee Weapon"
                       :options {:rapier 1
@@ -2947,8 +2952,8 @@ Additionally, while perceiving through your familiar’s senses, you can also sp
     :spellcaster true
     :hit-die 8
     :ability-increase-levels [4 8 12 16 19]
-    :profs {:armor {:light true}
-            :weapon {:simple true}
+    :profs {:armor {:light false}
+            :weapon {:simple false}
             :save {:wis true :cha true}
             :skill-options {:choose 2 :options {:arcana true :deception true :history true :intimidation true :investigation true :nature true :religion true}}}
     :selections [(t/selection

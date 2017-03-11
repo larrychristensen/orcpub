@@ -39,8 +39,14 @@
    ::val-fn val-fn
    ::deps deps})
 
-(defmacro modifier [prop body & [nm value]]
-  `(mod-f ~nm ~value (es/modifier ~prop ~body) (es/ref-sym-to-kw '~prop) (es/dependencies ~prop ~body)))
+(defmacro modifier [prop body & [nm value conditions]]
+  (let [full-body (if conditions (conj conditions body) body)]
+    `(mod-f ~nm
+            ~value
+            (es/modifier ~prop ~body)
+            (es/ref-sym-to-kw '~prop)
+            (es/dependencies ~prop ~full-body)
+            (es/conditions ~conditions))))
 
 (defmacro deferred-modifier [prop deferred-fn default-value & [nm val-fn]]
   `(deferred-mod ~nm ~deferred-fn ~default-value ~val-fn (es/dependencies ~prop deferred-fn)))
@@ -58,7 +64,7 @@
             (es/set-mod ~prop ~body)
             (es/ref-sym-to-kw '~prop)
             (es/dependencies ~prop ~full-body)
-            (if ~conditions ~(map (fn [c] (es/condition c)) conditions)))))
+            (es/conditions ~conditions))))
 
 (defmacro map-mod [prop k v & [nm value]]
   `(mod-f ~nm ~value (es/map-mod ~prop ~k ~v) (es/ref-sym-to-kw '~prop) (es/dependencies ~prop ~v)))

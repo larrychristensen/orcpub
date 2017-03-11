@@ -87,7 +87,10 @@
     `(fn [~arg] ~replaced)))
 
 (defmacro conditions [conds]
-  (map condition conds))
+  (mapv
+   (fn [cond]
+     `(condition ~cond))
+   conds))
 
 (defmacro modifier [k body]
   (let [arg (gensym "e")

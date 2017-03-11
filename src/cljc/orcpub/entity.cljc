@@ -194,9 +194,8 @@
         base-deps (::es/deps base)
         all-deps (merge-with union deps base-deps)
         mod-order (rseq (kahn-sort all-deps))
-        ordered-mods (order-modifiers modifiers mod-order)
-        mod-fns (modifier-functions ordered-mods)]
-    (mods/apply-modifiers base mod-fns)))
+        ordered-mods (order-modifiers modifiers mod-order)]
+    (mods/apply-modifiers base ordered-mods)))
 
 (defn build [raw-entity template]
   (apply-options raw-entity template))

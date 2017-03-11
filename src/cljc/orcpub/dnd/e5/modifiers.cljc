@@ -1,10 +1,14 @@
 (ns orcpub.dnd.e5.modifiers
   (:require [clojure.spec :as spec]
+            [clojure.string :as s]
             [orcpub.modifiers :as mods]
             [orcpub.entity-spec :as es]
             [orcpub.dnd.e5.character :as char5e])
   #?(:cljs (:require-macros [orcpub.entity-spec :as es]
                             [orcpub.modifiers :as mods])))
+
+(defn class [cls-key]
+  (mods/vec-mod ?classes cls-key))
 
 (defn subclass [cls-key nm]
   (mods/modifier ?levels (assoc-in ?levels [cls-key :subclass] nm)))
@@ -58,8 +62,12 @@
       (es/modifier ?abilities abilities))
     {:str 12 :dex 12 :con 12 :int 12 :wis 12 :cha 12}))
 
-(defn saving-throws [& abilities]
-  (mods/modifier ?saving-throws (apply conj (or ?saving-throws #{}) abilities)))
+(defn saving-throws [cls-kw & abilities]
+  (mods/modifier ?saving-throws
+                 (apply conj (or ?saving-throws #{}) abilities)
+                 nil;;"Saving Throws"
+                 nil;;(s/join ", " (map (comp s/upper-case name) abilities))
+                 [(= cls-kw (first ?classes))]))
 
 (defn saving-throw-type-advantage [type-nm type-kw]
   (mods/vec-mod ?saving-throw-type-advantage {:name type-nm
@@ -120,33 +128,57 @@
 (defn skill-expertise [key]
   (mods/set-mod ?skill-expertise key))
 
-(defn tool-proficiency [name key]
-  (mods/set-mod ?tool-profs {:name name
-                             :key key}))
+(defn tool-proficiency [name key & [first-class? cls-kw]]
+  (if first-class?
+    (mods/set-mod ?tool-profs
+                  {:name name
+                   :key key}
+                  nil
+                  nil
+                  [(= cls-kw (first ?classes))])
+    (mods/set-mod ?tool-profs
+                  {:name name
+                   :key key})))
 
 (defn language [name key]
   (mods/set-mod ?languages {:name name
                             :key key}))
 
-(defn weapon-proficiency [name key]
-  (mods/set-mod ?weapon-profs {:name name
-                               :key key}))
+(defn weapon-proficiency [name key & [first-class? cls-kw]]
+  (if first-class?
+    (mods/set-mod ?weapon-profs
+                  {:name name
+                   :key key}
+                  nil
+                  nil
+                  [(= cls-kw (first ?classes))])
+    (mods/set-mod ?weapon-profs
+                  {:name name
+                   :key key})))
 
-(defn armor-proficiency [name key]
-  (mods/set-mod ?armor-profs {:name name
-                              :key key}))
+(defn armor-proficiency [name key & [first-class? cls-kw]]
+  (if first-class?
+    (mods/set-mod ?armor-profs
+                  {:name name
+                   :key key}
+                  nil
+                  nil
+                  [(= cls-kw (first ?classes))])
+    (mods/set-mod ?armor-profs
+                  {:name name
+                   :key key})))
 
-(defn light-armor-proficiency []
-  (armor-proficiency "light" :light))
+(defn light-armor-proficiency [& [first-class? cls-kw]]
+  (armor-proficiency "light" :light first-class? cls-kw))
 
-(defn medium-armor-proficiency []
-  (armor-proficiency "medium" :medium))
+(defn medium-armor-proficiency [& [first-class? cls-kw]]
+  (armor-proficiency "medium" :medium first-class? cls-kw))
 
-(defn heavy-armor-proficiency []
-  (armor-proficiency "heavy" :heavy))
+(defn heavy-armor-proficiency [& [first-class? cls-kw]]
+  (armor-proficiency "heavy" :heavy first-class? cls-kw))
 
-(defn shield-armor-proficiency []
-  (armor-proficiency "shields" :shields))
+(defn shield-armor-proficiency [& [first-class? cls-kw]]
+  (armor-proficiency "shields" :shields first-class? cls-kw))
 
 (defn action [name & [desc]]
   (mods/vec-mod ?actions {:name name
