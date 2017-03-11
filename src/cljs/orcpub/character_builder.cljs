@@ -541,8 +541,11 @@
 (defn realize-char [built-char]
   (reduce-kv
    (fn [m k v]
-     (assoc m k (es/entity-val built-char k)))
-   {}
+     (let [realized-value (es/entity-val built-char k)]
+       (if (fn? realized-value)
+         m
+         (assoc m k realized-value))))
+   (sorted-map)
    built-char))
 
 (defn print-char [built-char]
@@ -1114,7 +1117,7 @@
 
 
 (defn character-builder []
-  ;;(cljs.pprint/pprint @character-ref)
+  (cljs.pprint/pprint @character-ref)
   ;;(cljs.pprint/pprint @app-state)
   (let [selected-plugins (map
                           :selections
@@ -1140,7 +1143,7 @@
         plugins (:plugins @app-state)
         stepper-dismissed? (:stepper-dismissed @app-state)]
     ;;(js/console.log "BUILT TEMPLAT" built-template)
-    ;;(print-char built-char)
+    (print-char built-char)
     [:div.app
      {:on-scroll (fn [e]
                    (let [app-header (js/document.getElementById "app-header")

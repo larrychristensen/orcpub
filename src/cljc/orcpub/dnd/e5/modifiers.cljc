@@ -53,6 +53,7 @@
 
 (defn deferred-abilities []
   (mods/deferred-modifier
+    ?abilities
     (fn [abilities]
       (es/modifier ?abilities abilities))
     {:str 12 :dex 12 :con 12 :int 12 :wis 12 :cha 12}))
@@ -109,10 +110,11 @@
   (mods/cum-sum-mod ?hit-point-level-increases bonus "HP" (mods/bonus-str bonus)))
 
 (defn deferred-max-hit-points []
-  (mods/deferred-mod
-    "HP"
+  (mods/deferred-modifier
+    ?hit-point-level-increases
     (fn [v] (es/cum-sum-mod ?hit-point-level-increases v))
     1
+    "HP"
     mods/bonus-str))
 
 (defn skill-expertise [key]
@@ -164,6 +166,7 @@
 
 (defn deferred-weapon [weapon-kw]
   (mods/deferred-modifier
+    ?weapons
     (fn [num] (es/map-mod ?weapons weapon-kw num))
     1))
 
@@ -172,6 +175,7 @@
 
 (defn deferred-armor [armor-kw]
   (mods/deferred-modifier
+    ?armor
     (fn [num] (es/map-mod ?armor armor-kw num))
     1))
 
@@ -180,6 +184,7 @@
 
 (defn deferred-equipment [equipment-kw]
   (mods/deferred-modifier
+    ?equipment
     (fn [num] (es/map-mod ?equipment equipment-kw num))
     1))
 

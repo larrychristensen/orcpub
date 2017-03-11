@@ -81,6 +81,14 @@
    {}
    `~body))
 
+(defmacro condition [body]
+  (let [arg (gensym "e")
+        replaced (replace-refs arg body)]
+    `(fn [~arg] ~replaced)))
+
+(defmacro conditions [conds]
+  (map condition conds))
+
 (defmacro modifier [k body]
   (let [arg (gensym "e")
         replaced (replace-refs arg body)]
@@ -107,10 +115,3 @@
    (fn [mod]
      (cons `modifier mod))
    mods))
-
-(defn apply-modifiers [entity modifiers]
-  (reduce
-   (fn [e mod]
-     (mod e))
-   entity
-   modifiers))

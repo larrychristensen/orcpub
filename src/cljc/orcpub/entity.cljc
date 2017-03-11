@@ -100,7 +100,7 @@
          :as option}]
      (let [modifiers (::t/modifiers (get-in modifier-map path))]
        (map
-        (fn [{:keys [::mods/name ::mods/value ::mods/fn ::mods/deferred-fn ::mods/default-value ::mods/deps] :as mod}]
+        (fn [{:keys [::mods/name ::mods/value ::mods/fn ::mods/deferred-fn ::mods/default-value] :as mod}]
           (if deferred-fn
             (assoc mod ::mods/value (or option-value default-value))
             mod))
@@ -117,7 +117,7 @@
 
 (defn modifier-functions [modifiers]
   (map
-   (fn [{:keys [::mods/name ::mods/value ::mods/fn ::mods/deferred-fn ::mods/deps]}]
+   (fn [{:keys [::mods/value ::mods/fn ::mods/deferred-fn]}]
      (if (and deferred-fn value)
        (deferred-fn value)
        fn))
@@ -189,7 +189,6 @@
                   m))
               {}
               modifiers)
-        mod-fns (modifier-functions modifiers)
         base (merge (::t/base template)
                     (::values raw-entity))
         base-deps (::es/deps base)
@@ -197,7 +196,7 @@
         mod-order (rseq (kahn-sort all-deps))
         ordered-mods (order-modifiers modifiers mod-order)
         mod-fns (modifier-functions ordered-mods)]
-    (es/apply-modifiers base mod-fns)))
+    (mods/apply-modifiers base mod-fns)))
 
 (defn build [raw-entity template]
   (apply-options raw-entity template))

@@ -201,8 +201,8 @@
         total-hit-dice (s/join
                         " / "
                         (map
-                         (fn [[die num]] (str num "D" die))
-                         (frequencies (map :hit-die (vals levels)))))]
+                         (fn [{:keys [class-level hit-die]}] (str class-level "D" hit-die))
+                         (vals levels)))]
     (merge
      {:race (str race (if subrace (str "/" subrace)))
       :class-level (class-string levels)
