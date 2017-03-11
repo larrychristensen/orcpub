@@ -198,7 +198,11 @@
         armor-classes (if has-shield? (map (partial + 2) unshielded-armor-classes) unshielded-armor-classes)
         max-armor-class (apply max armor-classes)
         levels (char5e/levels built-char)
-        total-hit-dice (apply + (map :class-level (vals levels)))]
+        total-hit-dice (s/join
+                        " / "
+                        (map
+                         (fn [[die num]] (str num "D" die))
+                         (frequencies (map :hit-die (vals levels)))))]
     (merge
      {:race (str race (if subrace (str "/" subrace)))
       :class-level (class-string levels)

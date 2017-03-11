@@ -67,9 +67,10 @@
 (defn initiative [bonus]
   (mods/cum-sum-mod ?initiative bonus "Initiative" (mods/bonus-str bonus)))
 
-(defn level [class-key class-nm level]
+(defn level [class-key class-nm level hit-die]
   (mods/modifier ?levels (update ?levels class-key merge {:class-name class-nm
-                                                        :class-level level})))
+                                                          :class-level level
+                                                          :hit-die hit-die})))
 
 (defn spell-slots [level num]
   (mods/map-mod ?spell-slots level num))

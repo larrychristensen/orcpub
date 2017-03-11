@@ -841,7 +841,7 @@ Fire Starter. The device produces a miniature flame, which you can use to light 
            (= level i))
          traits))
        (if (and (not plugin?) (= i 1)) [(mod5e/max-hit-points hit-die)])
-       [(mod5e/level kw name i)])))))
+       [(mod5e/level kw name i hit-die)])))))
 
 
 (defn equipment-option [[k num]]
