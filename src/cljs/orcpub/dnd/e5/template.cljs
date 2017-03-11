@@ -952,9 +952,6 @@ Fire Starter. The device produces a miniature flame, which you can use to light 
   (let [kw (common/name-to-kw name)
         {:keys [save skill-options multiclass-skill-options tool-options multiclass-tool-options tool]
          armor-profs :armor weapon-profs :weapon} profs
-        {skill-num :choose options :options skill-select-order :order} skill-options
-        {multiclass-skill-num :choose multiclass-skill-options :options} multiclass-skill-options
-        skill-kws (if (:any options) (map :key opt5e/skills) (keys options))
         save-profs (keys save)
         spellcasting-template (opt5e/spellcasting-template (assoc spellcasting :class-key kw))]
     (t/option-cfg
