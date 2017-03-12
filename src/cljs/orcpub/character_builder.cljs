@@ -577,23 +577,27 @@
     [:span
      [:span armor-class]
      [:span.display-section-qualifier-text "(unarmored)"]]
-    [:div.m-l-40
-     (let [has-shield? (:shield equipped-armor)]
-      (doall
-       (map
-        (fn [[armor-kw _]]
-          (let [armor (opt5e/armor-map armor-kw)
-                ac (armor-class-with-armor armor)]
-            ^{:key armor-kw}
-            [:div
+    (let [has-shield? (:shield equipped-armor)]
+      [:div.m-l-40
+       (if has-shield?
+         [:span
+          [:span (armor-class-with-armor nil true)]
+          [:span.display-section-qualifier-text "(unarmored + shield)"]])
+       (doall
+        (map
+         (fn [[armor-kw _]]
+           (let [armor (opt5e/armor-map armor-kw)
+                 ac (armor-class-with-armor armor)]
+             ^{:key armor-kw}
              [:div
-              [:span ac]
-              [:span.display-section-qualifier-text (str "(" (:name armor) ")")]]
-             (if has-shield?
-               [:div
-                [:span (+ 2 ac)]
-                [:span.display-section-qualifier-text (str "(" (:name armor) " + shield)")]])]))
-        (dissoc equipped-armor :shield))))]]])
+              [:div
+               [:span ac]
+               [:span.display-section-qualifier-text (str "(" (:name armor) ")")]]
+              (if has-shield?
+                [:div
+                 [:span (+ 2 ac)]
+                 [:span.display-section-qualifier-text (str "(" (:name armor) " + shield)")]])]))
+         (dissoc equipped-armor :shield)))])]])
 
 (defn list-item-section [list-name items & [name-fn]]
   [list-display-section list-name nil

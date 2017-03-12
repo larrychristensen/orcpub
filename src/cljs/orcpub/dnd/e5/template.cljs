@@ -1022,6 +1022,7 @@ Fire Starter. The device produces a miniature flame, which you can use to light 
                                 :simple 1}}]
     :weapons {:javelin 4}
     :equipment {:explorers-pack 1}
+    :modifiers [(mod/modifier ?armor-class (+ (?ability-bonuses :con) ?armor-class) nil nil [(= :barbarian (first ?classes))])]
     :levels {5 {:modifiers [(mod5e/extra-attack)]}}
     :traits [{:name "Rage"
               :description "In battle, you fight with primal ferocity. On your turn, you can enter a rage as a bonus action. While raging, you gain the following benefits if you aren't wearing heavy armor:
@@ -1771,7 +1772,21 @@ The creature is aware of this effect before it makes its attack against you."}]}
     :weapon-choices [{:name "Weapon"
                       :options {:shortsword 1
                                 :simple 1}}]
-    :modifiers [(mod/modifier ?armor-class (+ (?ability-bonuses :wis) ?armor-class))]
+    :modifiers [(mod/modifier ?armor-class
+                              (+ (?ability-bonuses :wis) ?armor-class)
+                              nil
+                              nil
+                              [(= :monk (first ?classes))])
+                (mod/modifier ?armor-class-with-armor
+                              (fn [armor & [shield?]]
+                                (if (and (nil? armor) (not shield?))
+                                  ?armor-class
+                                  (+ (if shield? 2 0)
+                                     (?armor-dex-bonus armor)
+                                     (or (:base-ac armor) 10))))
+                              nil
+                              nil
+                              [(= :monk (first ?classes))])]
     :levels {2 {:modifiers [(mod5e/unarmored-speed-bonus 10)]}
              5 {:modifiers [(mod5e/extra-attack)]}
              6 {:modifiers [(mod5e/unarmored-speed-bonus 5)]}
@@ -3457,10 +3472,14 @@ Once you use this feature, you can't use it again until you finish a long rest."
                        (let [dex-bonus (?ability-bonuses :dex)]
                          (case (:type armor)
                            :light dex-bonus
-                           :medium (max ?max-medium-armor-bonus dex-bonus)
+                           :medium (min ?max-medium-armor-bonus dex-bonus)
                            0)))
-    ?armor-class-with-armor (fn [armor]
-                              (+ (?armor-dex-bonus armor) (:base-ac armor)))
+    ?armor-class-with-armor (fn [armor & [shield?]]
+                              (+ (if shield? 2 0)
+                                 (if (nil? armor)
+                                   ?armor-class
+                                   (+ (?armor-dex-bonus armor)
+                                      (:base-ac armor)))))
     ?ability-bonuses (reduce-kv
                       (fn [m k v]
                         (assoc m k (int (/ (- v 10) 2))))
