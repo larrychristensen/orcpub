@@ -1124,7 +1124,7 @@
 
 
 (defn character-builder []
-  (cljs.pprint/pprint @character-ref)
+  ;;(cljs.pprint/pprint @character-ref)
   ;;(cljs.pprint/pprint @app-state)
   (let [selected-plugins (map
                           :selections
