@@ -47,19 +47,19 @@
   (mods/cum-sum-mod ?unarmored-speed-bonus value "Unarmored Speed" (mods/bonus-str value)))
 
 (defn ability [ability bonus]
-  (mods/modifier ?abilities
-                 (update ?abilities ability + bonus)
+  (mods/modifier ?ability-increases
+                 (update ?ability-increases ability + bonus)
                  (clojure.string/upper-case (name ability))
                  (mods/bonus-str bonus)))
 
 (defn abilities [abilities]
-  (mods/modifier ?abilities abilities))
+  (mods/modifier ?base-abilities abilities))
 
 (defn deferred-abilities []
   (mods/deferred-modifier
     ?abilities
     (fn [abilities]
-      (es/modifier ?abilities abilities))
+      (es/modifier ?base-abilities abilities))
     {:str 12 :dex 12 :con 12 :int 12 :wis 12 :cha 12}))
 
 (defn saving-throws [cls-kw & abilities]

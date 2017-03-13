@@ -3480,6 +3480,12 @@ Once you use this feature, you can't use it again until you finish a long rest."
                                    ?armor-class
                                    (+ (?armor-dex-bonus armor)
                                       (:base-ac armor)))))
+    ?abilities (reduce
+                (fn [m k]
+                  (assoc m k (+ (or (k ?base-abilities) 12)
+                                (or (k ?ability-increases) 0))))
+                {}
+                char5e/ability-keys)
     ?ability-bonuses (reduce-kv
                       (fn [m k v]
                         (assoc m k (int (/ (- v 10) 2))))

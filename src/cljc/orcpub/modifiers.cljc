@@ -32,8 +32,9 @@
    ::deps deps
    ::conditions conditions})
 
-(defn deferred-mod [nm deferred-fn default-value val-fn deps]
+(defn deferred-mod [nm deferred-fn k default-value val-fn deps]
   {::name nm
+   ::key k
    ::deferred-fn deferred-fn
    ::default-value default-value
    ::val-fn val-fn
@@ -49,7 +50,7 @@
             (es/conditions ~conditions))))
 
 (defmacro deferred-modifier [prop deferred-fn default-value & [nm val-fn]]
-  `(deferred-mod ~nm ~deferred-fn ~default-value ~val-fn (es/dependencies ~prop deferred-fn)))
+  `(deferred-mod ~nm ~deferred-fn (es/ref-sym-to-kw '~prop) ~default-value ~val-fn (es/dependencies ~prop deferred-fn)))
 
 (defmacro cum-sum-mod [prop bonus & [nm value]]
   `(mod-f ~nm ~value (es/cum-sum-mod ~prop ~bonus) (es/ref-sym-to-kw '~prop) (es/dependencies ~prop ~bonus)))
