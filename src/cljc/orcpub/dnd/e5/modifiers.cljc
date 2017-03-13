@@ -105,15 +105,16 @@
                :class class})))
      ?spells-known)))
 
-(defn trait [name & [description level summary]]
+(defn trait-cfg [{:keys [name description level summary page conditions] :as cfg}]
   (mods/modifier ?traits
                  (if (or (nil? level) (>= ?total-levels level))
                    (conj
                     ?traits
-                    {:name name
-                     :description description
-                     :summary summary})
+                    cfg)
                    ?traits)))
+
+(defn trait [name & [description level summary conditions]]
+  (trait-cfg {:name name :description description :level level :summary summary :conditions conditions}))
 
 (defmacro dependent-trait [name description level summary conditions]
   `(mods/modifier ~'?traits

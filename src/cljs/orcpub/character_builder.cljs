@@ -652,11 +652,11 @@
    "Features, Traits, & Feats" nil
    [:div.f-s-14
     (map
-     (fn [{:keys [name description]}]
+     (fn [{:keys [name description summary page]}]
        ^{:key name}
        [:p.m-t-10
         [:span.f-w-600.i name "."]
-        [:span.f-w-n.m-l-10 description]])
+        [:span.f-w-n.m-l-10 (or summary description)]])
      traits)]))
 
 

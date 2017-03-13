@@ -42,7 +42,7 @@
    ::deps deps})
 
 (defmacro modifier [prop body & [nm value conditions order-number]]
-  (let [full-body (if conditions (conj conditions body) body)]
+  (let [full-body (if conditions [conditions body] body)]
     `(mod-f ~nm
             ~value
             (es/modifier ~prop ~body)
@@ -50,6 +50,7 @@
             (es/dependencies ~prop ~full-body)
             (es/conditions ~conditions)
             ~order-number)))
+
 
 (defmacro deferred-modifier [prop deferred-fn default-value & [nm val-fn]]
   `(deferred-mod ~nm ~deferred-fn (es/ref-sym-to-kw '~prop) ~default-value ~val-fn (es/dependencies ~prop deferred-fn)))

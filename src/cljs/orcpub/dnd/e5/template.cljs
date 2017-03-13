@@ -105,11 +105,8 @@
 
 (defn traits-modifiers [traits & [include-level?]]
   (map
-   (fn [{:keys [name description level]}]
-     (if include-level?
-       (mod5e/trait name description level)
-       ;; for subclasses we need to do level checks, for most everything else we do not
-       (mod5e/trait name description)))
+   (fn [trait]
+     (mod5e/trait-cfg trait))
    traits))
 
 (defn armor-prof-modifiers [armor-proficiencies & [cls-kw]]
@@ -242,19 +239,27 @@
       :modifiers [elf-weapon-training-mods]}
      {:name "Wood Elf"
       :abilities {:cha 1}
-      :traits [{:name "Mask of the Wild"}]
+      :traits [{:name "Mask of the Wild"
+                :page 24
+                :summary "Hide when lightly obscured by natural phenomena."}]
       :modifiers [(mod5e/speed 5)
                   elf-weapon-training-mods]}
      {:name "Dark Elf (Drow)"
       :abilities {:cha 1}
-      :traits [{:name "Sunlight Sensitivity"}
-               {:name "Drow Magic"}]
+      :traits [{:name "Sunlight Sensitivity"
+                :summary "Disadvantage on attack and perception rolls in direct sunlight"
+                :page 24}]
       :modifiers [(mod5e/darkvision 120)
                   (mod5e/spells-known 0 :dancing-lights :cha "Dark Elf")
                   (mod5e/spells-known 1 :faerie-fire :cha "Dark Elf" 3)
                   (mod5e/spells-known 2 :darkness :cha "Dark Elf" 5)]}]
-    :traits [{:name "Fey Ancestry" :description "You have advantage on saving throws against being charmed and magic can't put you to sleep"}
-             {:name "Trance" :description "Elves don't need to sleep. Instead, they meditate deeply, remaining semiconscious, for 4 hours a day. (The Common word for such meditation is 'trance.') While meditating, you can dream after a fashion; such dreams are actually mental exercises that have become re exive through years of practice. After resting in this way, you gain the same beneit that a human does from 8 hours of sleep."}]}))
+    :traits [{:name "Fey Ancestry"
+              :page 23
+              :description "You have advantage on saving throws against being charmed and magic can't put you to sleep"}
+             {:name "Trance"
+              :page 23
+              :summary "Trance 4 hrs. instead of sleep 8"
+              :description "Elves don't need to sleep. Instead, they meditate deeply, remaining semiconscious, for 4 hours a day. (The Common word for such meditation is 'trance.') While meditating, you can dream after a fashion; such dreams are actually mental exercises that have become re exive through years of practice. After resting in this way, you gain the same beneit that a human does from 8 hours of sleep."}]}))
 
 (def dwarf-option
   (race-option
@@ -266,9 +271,13 @@
     :darkvision 60
     :languages ["Dwarvish" "Common"]
     :weapon-proficiencies [:handaxe :battleaxe :light-hammer :warhammer]
-    :traits [{:name "Dwarven Resilience",
+    :traits [{:name "Dwarven Resilience"
+              :summary "Advantage on poison saves, resistance to poison damage"
+              :page 20
               :description "You have advantage on saving throws against poison, and you have resistance against poison damage"},
              {:name "Stonecunning"
+              :summary "2X prof bonus on stonework-related history checks"
+              :page 20
               :description "Whenever you make an Intelligence (History) check related to the origin of stonework you are considered proficient in the History skill and add double your proficiency bonus to the check, instead of your normal proficiency bonus"}]
     :subraces [{:name "Hill Dwarf",
                 :abilities {:wis 1}
@@ -290,13 +299,26 @@
     :subraces
     [{:name "Lightfoot"
       :abilities {:cha 1}
-      :traits [{:name "Naturally Stealthy" :description "You can attempt to hide even when you are obscured only by a creature that is at least one size larger than you."}]}
+      :traits [{:name "Naturally Stealthy"
+                :page 28
+                :summary "Hide behind creatures larger than you"
+                :description "You can attempt to hide even when you are obscured only by a creature that is at least one size larger than you."}]}
      {:name "Stout"
       :abilities {:con 1}
-      :traits [{:name "Stout Resilience"}]}]
-    :traits [{:name "Lucky" :description "When you roll a 1 on the d20 for an attack roll, ability check, or saving throw, you can reroll the die and must use the new roll."}
-             {:name "Brave" :description "You have advantage on saving throws against being frightened."}
-             {:name "Halfling Nimbleness" :description "You can move through the space of any creature that is of a size larger than yours."}]}))
+      :modifiers [(mod5e/resistance :poison)]
+      :traits [{:name "Stout Resilience"
+                :page 28
+                :summary "Advantage on poison saves, resistance to poison damage"}]}]
+    :traits [{:name "Lucky"
+              :page 28
+              :summary "Reroll 1s on d20"
+              :description "When you roll a 1 on the d20 for an attack roll, ability check, or saving throw, you can reroll the die and must use the new roll."}
+             {:name "Brave"
+              :page 28
+              :description "You have advantage on saving throws against being frightened."}
+             {:name "Halfling Nimbleness"
+              :page 28
+              :description "You can move through the space of any creature that is of a size larger than yours."}]}))
 
 (def human-option
   (race-option
@@ -338,7 +360,7 @@
    (common/name-to-kw name)
    []
    [(mod5e/resistance damage-type)
-    (mod5e/trait "Breath Weapon Details" breath-weapon)]))
+    (mod/modifier ?draconic-ancestry-breath-weapon breath-weapon)]))
 
 (def dragonborn-option
   (race-option
@@ -348,43 +370,58 @@
     :size :medium
     :speed 30
     :languages ["Draconic" "Common"]
+    :modifiers [(mod5e/dependent-trait
+                 "Breath Weapon"
+                 "You can use your action to exhale destructive energy. Your draconic ancestry determines the size, shape, and damage type of the exhalation.
+When you use your breath weapon, each creature in the area of the exhalation must make a saving throw, the type of which is determined by your draconic ancestry. The DC for this saving throw equals 8 + your Constitution modifier + your proficiency bonus. A creature takes 2d6 damage on a failed save, and half as much damage on a successful one. The damage increases to 3d6 at 6th level, 4d6 at 11th level, and 5d6 at 16th level.
+After you use your breath weapon, you can't use it again until you complete a short or long rest."
+                 1
+                 (str
+                  ?draconic-ancestry-breath-weapon
+                  "DC "
+                  (+ 8 (:con ?ability-bonuses) ?prof-bonus)
+                  "). "
+                  (condp <= ?total-levels
+                    16 5
+                    11 4
+                    6 3
+                    2)
+                  "D6 damage, half on successful save.")
+                 nil)]
     :selections [(t/selection
                   "Draconic Ancestry"
                   (map
                    draconic-ancestry-option
                    [{:name "Black"
                      :damage-type :acid
-                     :breath-weapon "5 by 30 ft. line (Dex. save)"}
+                     :breath-weapon "5 by 30 ft. line (Dex. save, "}
                     {:name "Blue"
                      :damage-type :lightning
-                     :breath-weapon "5 by 30 ft. line (Dex. save)"}
+                     :breath-weapon "5 by 30 ft. line (Dex. save, "}
                     {:name "Brass"
                      :damage-type :fire
-                     :breath-weapon "5 by 30 ft. line (Dex. save)"}
+                     :breath-weapon "5 by 30 ft. line (Dex. save, "}
                     {:name "Bronze"
                      :damage-type :lightning
-                     :breath-weapon "5 by 30 ft. line (Dex. save)"}
+                     :breath-weapon "5 by 30 ft. line (Dex. save, "}
                     {:name "Copper"
                      :damage-type :acid
-                     :breath-weapon "5 by 30 ft. line (Dex. save)"}
+                     :breath-weapon "5 by 30 ft. line (Dex. save, "}
                     {:name "Gold"
                      :damage-type :fire
-                     :breath-weapon "15 ft cone (Dex. save)"}
+                     :breath-weapon "15 ft cone (Dex. save, "}
                     {:name "Green"
                      :damage-type :poison
-                     :breath-weapon "15 ft cone (Con. save)"}
+                     :breath-weapon "15 ft cone (Con. save, "}
                     {:name "Red"
                      :damage-type :fire
-                     :breath-weapon "15 ft cone (Dex. save)"}
+                     :breath-weapon "15 ft cone (Dex. save, "}
                     {:name "Silver"
                      :damage-type :cold
-                     :breath-weapon "15 ft cone (Con. save)"}
+                     :breath-weapon "15 ft cone (Con. save, "}
                     {:name "White"
                      :damage-type :cold
-                     :breath-weapon "15 ft cone (Con. save)"}]))]
-    :traits [{:name "Breath Weapon" :description "You can use your action to exhale destructive energy. Your draconic ancestry determines the size, shape, and damage type of the exhalation.
-When you use your breath weapon, each creature in the area of the exhalation must make a saving throw, the type of which is determined by your draconic ancestry. The DC for this saving throw equals 8 + your Constitution modifier + your proficiency bonus. A creature takes 2d6 damage on a failed save, and half as much damage on a successful one. The damage increases to 3d6 at 6th level, 4d6 at 11th level, and 5d6 at 16th level.
-After you use your breath weapon, you can't use it again until you complete a short or long rest."}]}))
+                     :breath-weapon "15 ft cone (Con. save, "}]))]}))
 
 (def gnome-option
   (race-option

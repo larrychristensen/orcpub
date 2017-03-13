@@ -56,8 +56,8 @@
   (s/join
    "\n\n"
    (map
-    (fn [{:keys [name description]}]
-      (str name ". " description))
+    (fn [{:keys [name description summary page source]}]
+      (str name ". " (or summary description) (if page (str " (" (or source "PHB ") page ")"))))
     traits)))
 
 (defn traits-fields [built-char]
