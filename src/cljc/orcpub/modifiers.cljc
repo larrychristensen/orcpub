@@ -24,13 +24,14 @@
     (str "+" bonus)
     (str bonus)))
 
-(defn mod-f [nm value fn k deps & [conditions]]
+(defn mod-f [nm value fn k deps & [conditions order-number]]
   {::name nm
    ::value value
    ::fn fn
    ::key k
    ::deps deps
-   ::conditions conditions})
+   ::conditions conditions
+   ::order order-number})
 
 (defn deferred-mod [nm deferred-fn k default-value val-fn deps]
   {::name nm
@@ -40,14 +41,15 @@
    ::val-fn val-fn
    ::deps deps})
 
-(defmacro modifier [prop body & [nm value conditions]]
+(defmacro modifier [prop body & [nm value conditions order-number]]
   (let [full-body (if conditions (conj conditions body) body)]
     `(mod-f ~nm
             ~value
             (es/modifier ~prop ~body)
             (es/ref-sym-to-kw '~prop)
             (es/dependencies ~prop ~full-body)
-            (es/conditions ~conditions))))
+            (es/conditions ~conditions)
+            ~order-number)))
 
 (defmacro deferred-modifier [prop deferred-fn default-value & [nm val-fn]]
   `(deferred-mod ~nm ~deferred-fn (es/ref-sym-to-kw '~prop) ~default-value ~val-fn (es/dependencies ~prop deferred-fn)))

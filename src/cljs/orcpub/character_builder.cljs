@@ -185,7 +185,7 @@
         named-mods (filter ::mod/name modifiers)
         failed-prereqs (reduce
                         (fn [failures {:keys [::t/prereq-fn ::t/label]}]
-                          (if (not (prereq-fn built-char))
+                          (if (and prereq-fn (not (prereq-fn built-char)))
                             (conj failures label)))
                         []
                         prereqs)
@@ -364,6 +364,9 @@
                           (< (count selected-options) max)))
         more-than-min? (> (count selected-options) min)
         next-path (conj path key)]
+    (assert (or (not multiple-select?)
+                new-item-fn)
+            (str "MULTIPLE SELECT LIST SELECTOR REQUIRES UI-FN! Offending selection: " next-path))
     [:div
      (if collapsed? [:div.builder-option.collapsed-list-builder-option])
      [:div
@@ -400,7 +403,7 @@
 (defn selector-id [path]
   (s/join "--" (map name path)))
 
-(defn builder-selector [path option-paths {:keys [::t/name ::t/key ::t/min ::t/max ::t/ui-fn ::t/collapsible?] :as selection} built-char raw-char built-template collapsed-paths stepper-selection-path]
+(defn builder-selector [path option-paths {:keys [::t/name ::t/key ::t/min ::t/max ::t/ui-fn ::t/collapsible? ::t/options] :as selection} built-char raw-char built-template collapsed-paths stepper-selection-path]
   (let [new-path (conj path key)
         collapsed? (get collapsed-paths new-path)
         simple-options? 
@@ -408,7 +411,7 @@
             (not-any? #(or (seq (::t/selections %))
                            (some ::mod/name (::t/modifiers %))
                            (::t/ui-fn %))
-                      (::t/options selection)))
+                      options))
         collapsible? (or collapsible?
                          (and (not (or (nil? max) (> max min)))
                               (not simple-options?)))]
@@ -1121,7 +1124,7 @@
 
 
 (defn character-builder []
-  ;;(cljs.pprint/pprint @character-ref)
+  (cljs.pprint/pprint @character-ref)
   ;;(cljs.pprint/pprint @app-state)
   (let [selected-plugins (map
                           :selections
@@ -1146,7 +1149,7 @@
         mouseover-option (:mouseover-option @app-state)
         plugins (:plugins @app-state)
         stepper-dismissed? (:stepper-dismissed @app-state)]
-    ;;(js/console.log "BUILT TEMPLAT" built-template)
+    ;(js/console.log "BUILT TEMPLAT" built-template)
     ;;(print-char built-char)
     [:div.app
      {:on-scroll (fn [e]

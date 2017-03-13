@@ -169,11 +169,15 @@
      (mod5e/ability k v))
    abilities))
 
+(defn darkvision-modifiers [range]
+  [(mod5e/darkvision range)])
+
 (defn race-option [{:keys [name
                            help
                            abilities
                            size
                            speed
+                           darkvision
                            subraces
                            modifiers
                            selections
@@ -203,6 +207,8 @@
                  [(mod5e/race name)
                   (mod5e/size size)
                   (mod5e/speed speed)]
+                 (if darkvision
+                   (darkvision-modifiers darkvision))
                  (map
                   (fn [language]
                     (mod5e/language language (common/name-to-kw language)))
@@ -227,7 +233,7 @@
     :size :medium
     :speed 30
     :languages ["Elvish" "Common"]
-    :modifiers [(mod5e/darkvision 60)]
+    :darkvision 60
     :subraces
     [{:name "High Elf"
       :abilities {:int 1}
@@ -248,23 +254,22 @@
                   (mod5e/spells-known 1 :faerie-fire :cha "Dark Elf" 3)
                   (mod5e/spells-known 2 :darkness :cha "Dark Elf" 5)]}]
     :traits [{:name "Fey Ancestry" :description "You have advantage on saving throws against being charmed and magic can't put you to sleep"}
-             {:name "Trance" :description "Elves don't need to sleep. Instead, they meditate deeply, remaining semiconscious, for 4 hours a day. (The Common word for such meditation is 'trance.') While meditating, you can dream after a fashion; such dreams are actually mental exercises that have become re exive through years of practice. After resting in this way, you gain the same bene t that a human does from 8 hours of sleep."}
-             {:name "Darkvision" :description "Accustomed to twilit forests and the night sky, you have superior vision in dark and dim conditions. You can see in dim light within 60 feet of you as if it were bright light, and in darkness as if it were dim light. You can't discern color in darkness, only shades of gray."}]}))
+             {:name "Trance" :description "Elves don't need to sleep. Instead, they meditate deeply, remaining semiconscious, for 4 hours a day. (The Common word for such meditation is 'trance.') While meditating, you can dream after a fashion; such dreams are actually mental exercises that have become re exive through years of practice. After resting in this way, you gain the same beneit that a human does from 8 hours of sleep."}]}))
 
 (def dwarf-option
   (race-option
    {:name "Dwarf",
-    :help "Dwarves are short and stout and tend to be skilled warriors and craftman in stone and metal."
+    :help "Dwarves are short and stout and tend to be skilled warriors and craftmen in stone and metal."
     :abilities {:con 2},
     :size :medium
     :speed 25,
+    :darkvision 60
     :languages ["Dwarvish" "Common"]
     :weapon-proficiencies [:handaxe :battleaxe :light-hammer :warhammer]
     :traits [{:name "Dwarven Resilience",
               :description "You have advantage on saving throws against poison, and you have resistance against poison damage"},
              {:name "Stonecunning"
-              :description "Whenever you make an Intelligence (History) check related to the origin of stonework you are considered proficient in the History skill and add double your proficiency bonus to the check, instead of your normal proficiency bonus"}
-             {:name "Darkvision" :description "Accustomed to twilit forests and the night sky, you have superior vision in dark and dim conditions. You can see in dim light within 60 feet of you as if it were bright light, and in darkness as if it were dim light. You can't discern color in darkness, only shades of gray."}]
+              :description "Whenever you make an Intelligence (History) check related to the origin of stonework you are considered proficient in the History skill and add double your proficiency bonus to the check, instead of your normal proficiency bonus"}]
     :subraces [{:name "Hill Dwarf",
                 :abilities {:wis 1}
                 :selections [(opt5e/tool-selection [:smiths-tools :brewers-supplies :masons-tools] 1)]
@@ -272,8 +277,7 @@
                {:name "Mountain Dwarf"
                 :abilities {:str 2}
                 :armor-proficiencies [:light :medium]}]
-    :modifiers [(mod5e/darkvision 60)
-                (mod5e/resistance :poison)]}))
+    :modifiers [(mod5e/resistance :poison)]}))
 
 (def halfling-option
   (race-option
@@ -404,8 +408,7 @@ Fire Starter. The device produces a miniature flame, which you can use to light 
       :abilities {:dex 1}
       :modifiers [(mod5e/spells-known 0 :minor-illusion :int "Forest Gnome")]
       :traits [{:name "Speak with Small Beasts"}]}]
-    :traits [{:name "Gnome Cunning" :description "You have advantage on all Intelligence, Wisdom, and Charisma saving throws against magic."}]
-    :modifiers [(mod5e/darkvision 60)]}))
+    :traits [{:name "Gnome Cunning" :description "You have advantage on all Intelligence, Wisdom, and Charisma saving throws against magic."}]}))
 
 (def half-elf-option
   (race-option
@@ -418,7 +421,6 @@ Fire Starter. The device produces a miniature flame, which you can use to light 
     :selections [(opt5e/ability-increase-selection (disj (set char5e/ability-keys) :cha) 2 false)
                  (opt5e/skill-selection 2)
                  (opt5e/language-selection opt5e/languages 1)]
-    :modifiers [(mod5e/darkvision 60)]
     :traits [{:name "Fey Ancestry" :description "You have advantage on saving throws against being charmed, and magic can't put you to sleep."}]}))
 
 (def half-orc-option
@@ -429,8 +431,7 @@ Fire Starter. The device produces a miniature flame, which you can use to light 
     :size :medium
     :speed 30
     :languages ["Common" "Orc"]
-    :modifiers [(mod5e/darkvision 60)
-                (mod5e/skill-proficiency :intimidation)]
+    :modifiers [(mod5e/skill-proficiency :intimidation)]
     :traits [{:name "Relentless Endurance" :description "When you are reduced to 0 hit points but not killed outright, you can drop to 1 hit point instead. You can't use this feature again until you finish a long rest."}
                       {:name "Savage Attacks" :description "When you score a critical hit with a melee weapon attack, you can roll one of the weapon's damage dice one additional time and add it to the extra damage of the critical hit."}]}))
 
@@ -649,8 +650,9 @@ Fire Starter. The device produces a miniature flame, which you can use to light 
     :abilities {:int 1 :cha 2}
     :size :medium
     :speed 30
+    :darkvision 60
     :languages ["Common" "Infernal"]
-    :modifiers [(mod5e/darkvision 60)
+    :modifiers [
                 (mod5e/spells-known 0 :thaumaturgy :cha "Tiefling")
                 (mod5e/spells-known 1 :hellish-rebuke :cha "Tiefling" 3)
                 (mod5e/spells-known 2 :darkness :cha "Tiefling" 5)]
@@ -2792,7 +2794,7 @@ On your adventures, you can add other ritual spells to your Book of Shadows. Whe
     "Devil's Sight"
     :devils-sight
     []
-    [(mod5e/darkvision 120)
+    [(mod5e/darkvision 120 1)
      (mod5e/trait "Eldritch Invocation: Devil's Sight"
                   "You can see normally in darkness, both magical and nonmagical, to a distance of 120 feet.")])
    (t/option
@@ -2971,6 +2973,14 @@ Additionally, while perceiving through your familiar’s senses, you can also sp
    17 1
    19 1})
 
+(defn eldritch-invocation-selection [& [num]]
+  (t/selection-cfg
+   {:name "Eldritch Invocations"
+    :options eldritch-invocation-options
+    :min (or num 0)
+    :max (or num 0)
+    :simple? true}))
+
 (defn warlock-option [character-ref]
   (class-option
    {:name "Warlock"
@@ -3004,30 +3014,16 @@ Additionally, while perceiving through your familiar’s senses, you can also sp
                                    :arcane-focus 1}}]
     :weapons {:dagger 2}
     :armor {:leather 1}
-    :levels {2 {:selections [(t/selection
-                              "Eldritch Invocations"
-                              eldritch-invocation-options
-                              2
-                              2)]}
+    :levels {2 {:selections [(eldritch-invocation-selection 2)]}
              3 {:modifiers [(mod5e/spells-known 1 :find-familiar :cha "Warlock")]
                 :selections [(t/selection
                              "Pact Boon"
                              pact-boon-options)]}
-             5 {:selections [(t/selection
-                              "Eldritch Invocations"
-                              eldritch-invocation-options)]}
-             8 {:selections [(t/selection
-                              "Eldritch Invocations"
-                              eldritch-invocation-options)]}
-             12 {:selections [(t/selection
-                              "Eldritch Invocations"
-                              eldritch-invocation-options)]}
-             15 {:selections [(t/selection
-                              "Eldritch Invocations"
-                              eldritch-invocation-options)]}
-             18 {:selections [(t/selection
-                              "Eldritch Invocations"
-                              eldritch-invocation-options)]}}
+             5 {:selections [(eldritch-invocation-selection)]}
+             8 {:selections [(eldritch-invocation-selection)]}
+             12 {:selections [(eldritch-invocation-selection)]}
+             15 {:selections [(eldritch-invocation-selection)]}
+             18 {:selections [(eldritch-invocation-selection)]}}
     :traits [{:name "Mystic Arcanum"
               :level 11
               :description "At 11th level, your patron bestows upon you a magical secret called an arcanum. Choose one 6th level spell from the warlock spell list as this arcanum.
@@ -3125,6 +3121,10 @@ Once you use this feature, you can't use it again until you finish a long rest."
                    :help "Your life has been devoted to serving a god or gods."
                    :profs {:skill {:insight true, :religion true}
                            :language-options {:choose 2 :options {:any true}}}
+                   :traits [{:name "Shelter the Faithful"
+                             :summary "You and your companions can expect free healing at an establishment of your faith."
+                             :description "As an acolyte, you command the respect of those who share your faith, and you can perform the religious ceremonies of your deity. You and your adventuring companions can expect to receive free healing and care at a temple, shrine, or other established presence of your faith, though you must provide any material components needed for spells. Those who share your religion will support you (but only you) at a modest lifestyle.
+You might also have ties to a specific temple dedicated to your chosen deity or pantheon, and you have a residence there. This could be the temple where you used to serve, if you remain on good terms with it, or a temple where you have found a new home. While near your temple, you can call upon the priests for assistance, provided the assistance you ask for is not hazardous and you remain in good standing with your temple."}]
                    :personality ["I idolize a particular hero of my faith, and constantly refer to that person's deeds and example."
                                  "I can find common ground between the fiercest enemies, empathizing with them and always working toward peace."
                                  "I see omens in every event and action. The gods try to speak to us, we just need to listen"
@@ -3217,7 +3217,7 @@ Once you use this feature, you can't use it again until you finish a long rest."
                                  equipment-choices
                                  armor
                                  armor-choices
-                                 spellcasting]
+                                 traits]
                           :as cls}
                          character-ref]
   (let [kw (common/name-to-kw name)
@@ -3244,6 +3244,7 @@ Once you use this feature, you can't use it again until you finish a long rest."
       :modifiers (vec
                   (concat
                    [(mod5e/background name)]
+                   (traits-modifiers traits)
                    modifiers
                    (armor-prof-modifiers (keys armor-profs))
                    (weapon-prof-modifiers (keys weapon-profs))

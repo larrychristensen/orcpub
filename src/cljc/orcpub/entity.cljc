@@ -181,7 +181,7 @@
 (defn apply-options [raw-entity template]
   (let [modifier-map (memoized-make-modifier-map template)
         options (flatten-options (::options raw-entity))
-        modifiers (collect-modifiers options modifier-map)
+        modifiers (sort-by ::mods/order (collect-modifiers options modifier-map))
         deps (reduce
               (fn [m {:keys [::mods/key ::mods/deps]}]
                 (if (seq deps)

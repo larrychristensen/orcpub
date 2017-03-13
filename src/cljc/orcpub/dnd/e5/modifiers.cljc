@@ -31,8 +31,14 @@
 (defn condition-immunity [value]
   (mods/set-mod ?condition-immunities value))
 
-(defn darkvision [value]
-  (mods/modifier ?darkvision value))
+(defn darkvision [value & [order-number]]
+  (mods/modifier
+   ?darkvision
+   value
+   "Darkvision"
+   (str value " feet")
+   nil
+   order-number))
 
 (defn speed [value]
   (mods/cum-sum-mod ?speed value "Speed" (mods/bonus-str value)))
@@ -99,14 +105,28 @@
                :class class})))
      ?spells-known)))
 
-(defn trait [name & [description level]]
+(defn trait [name & [description level summary]]
   (mods/modifier ?traits
                  (if (or (nil? level) (>= ?total-levels level))
                    (conj
                     ?traits
-                    (cond-> {:name name}
-                      description (assoc :description description)))
+                    {:name name
+                     :description description
+                     :summary summary})
                    ?traits)))
+
+(defmacro dependent-trait [name description level summary conditions]
+  `(mods/modifier ~'?traits
+                  (if (or (nil? ~level) (>= ~'?total-levels ~level))
+                    (conj
+                     ~'?traits
+                     {:name ~name
+                      :description ~description
+                      :summary ~summary})
+                    ~'?traits)
+                  nil
+                  nil
+                  ~conditions))
 
 (defn proficiency-bonus [bonus]
   (mods/modifier ?proficiency-bonus bonus))
