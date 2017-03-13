@@ -659,6 +659,17 @@
         [:span.f-w-n.m-l-10 (or summary description)]])
      traits)]))
 
+(defn attacks-section [attacks]
+  (display-section
+   "Attacks" nil
+   [:div.f-s-14
+    (map
+     (fn [{:keys [name description page]}]
+       ^{:key name}
+       [:p.m-t-10
+        [:span.f-w-600.i name "."]
+        [:span.f-w-n.m-l-10 description]])
+     attacks)]))
 
 
 (defn character-display [built-char]
@@ -681,7 +692,8 @@
         spells-known (es/entity-val built-char :spells-known)
         weapons (es/entity-val built-char :weapons)
         equipment (es/entity-val built-char :equipment)
-        traits (es/entity-val built-char :traits)]
+        traits (es/entity-val built-char :traits)
+        attacks (es/entity-val built-char :attacks)]
     [:div
      [:div.f-s-24.f-w-600.m-b-16.text-shadow
       [:span race]
@@ -748,6 +760,7 @@
        [equipment-section "Weapons" weapons opt5e/weapons-map]
        [equipment-section "Armor" armor opt5e/armor-map]
        [equipment-section "Equipment" equipment opt5e/equipment-map]
+       [attacks-section attacks]
        [traits-section traits]]]]))
 
 

@@ -75,6 +75,14 @@
     {:features-and-traits (traits-string half-traits)
      :features-and-traits-2 (traits-string other-half-traits)}))
 
+(defn attacks-string [attacks]
+  (s/join
+   "\n\n"
+   (map
+    (fn [{:keys [name description page source]}]
+      (str name ". " description (if page (str " (" (or source "PHB ") page ")"))))
+    attacks)))
+
 (defn equipment-fields [built-char]
   (let [equipment (es/entity-val built-char :equipment)]
     {:equipment (s/join
@@ -164,10 +172,11 @@
     (spell-page-fields spells-known spell-save-dc-fn spell-attack-modifier-fn)))
 
 (defn profs-paragraph [profs prof-map title]
-  (str
-   title
-   " Proficiencies: "
-   (s/join "; " (sort (map :name profs)))))
+  (if (seq profs)
+    (str
+     title
+     " Proficiencies: "
+     (s/join "; " (sort (map :name profs))))))
 
 (defn other-profs-field [built-char]
   (let [tool-profs (es/entity-val built-char :tool-profs)
@@ -176,10 +185,12 @@
         languages (es/entity-val built-char :languages)]
     (s/join
      "\n\n"
-     [(profs-paragraph tool-profs opt5e/tools-map "Tool")
-      (profs-paragraph weapon-profs opt5e/weapons-map "Weapon")
-      (profs-paragraph armor-profs opt5e/armor-map "Armor")
-      (profs-paragraph languages opt5e/language-map "Language")])))
+     (remove
+      nil?
+      [(profs-paragraph tool-profs opt5e/tools-map "Tool")
+       (profs-paragraph weapon-profs opt5e/weapons-map "Weapon")
+       (profs-paragraph armor-profs opt5e/armor-map "Armor")
+       (profs-paragraph languages opt5e/language-map "Language")]))))
 
 (defn make-spec [built-char]
   (let [race (es/entity-val built-char :race)
@@ -221,7 +232,8 @@
       :flaws (es/entity-val built-char :flaws)
       :backstory (es/entity-val built-char :description)
       :character-name (es/entity-val built-char :character-name)
-      :player-name (es/entity-val built-char :player-name)}
+      :player-name (es/entity-val built-char :player-name)
+      :attacks-and-spellcasting (attacks-string (es/entity-val built-char :attacks))}
      (skill-fields built-char)
      abilities
      (ability-bonuses built-char)
