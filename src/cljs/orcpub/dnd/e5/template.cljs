@@ -354,12 +354,12 @@
                      (opt5e/ability-increase-selection char5e/ability-keys 2 true)]
                     [])])]}))
 
-(defn draconic-ancestry-option [{:keys [name damage-type breath-weapon]}]
+(defn draconic-ancestry-option [{:keys [name breath-weapon]}]
   (t/option
    name
    (common/name-to-kw name)
    []
-   [(mod5e/resistance damage-type)
+   [(mod5e/resistance (:damage-type breath-weapon))
     (mod/modifier ?draconic-ancestry-breath-weapon breath-weapon)]))
 
 (def dragonborn-option
@@ -371,52 +371,76 @@
     :speed 30
     :languages ["Draconic" "Common"]
     :modifiers [(mod5e/attack
-                 "Breath Weapon"
-                 (str
+                 (merge
                   ?draconic-ancestry-breath-weapon
-                  "DC "
-                  (+ 8 (:con ?ability-bonuses) ?prof-bonus)
-                  "). "
-                  (condp <= ?total-levels
-                    16 5
-                    11 4
-                    6 3
-                    2)
-                  "D6 damage, half on successful save."))]
+                  {:name "Breath Weapon"
+                   :damage-die 6
+                   :page 34
+                   :damage-die-count (condp <= ?total-levels
+                                       16 5
+                                       11 4
+                                       6 3
+                                       2)
+                   :save-dc (+ 8 (:con ?ability-bonuses) ?prof-bonus)}))]
     :selections [(t/selection
                   "Draconic Ancestry"
                   (map
                    draconic-ancestry-option
                    [{:name "Black"
-                     :damage-type :acid
-                     :breath-weapon "5 by 30 ft. line (Dex. save, "}
+                     :breath-weapon {:damage-type :acid
+                                     :area-type :line
+                                     :line-width 5
+                                     :line-length 30
+                                     :save :dex}}
                     {:name "Blue"
-                     :damage-type :lightning
-                     :breath-weapon "5 by 30 ft. line (Dex. save, "}
+                     :breath-weapon {:damage-type :lightning
+                                     :area-type :line
+                                     :line-width 5
+                                     :line-length 30
+                                     :save :dex}}
                     {:name "Brass"
-                     :damage-type :fire
-                     :breath-weapon "5 by 30 ft. line (Dex. save, "}
+                     :breath-weapon {:damage-type :fire
+                                     :area-type :line
+                                     :line-width 5
+                                     :line-length 30
+                                     :save :dex}}
                     {:name "Bronze"
-                     :damage-type :lightning
-                     :breath-weapon "5 by 30 ft. line (Dex. save, "}
+                     :breath-weapon {:damage-type :lightning
+                                     :area-type :line
+                                     :line-width 5
+                                     :line-length 30
+                                     :save :dex}}
                     {:name "Copper"
-                     :damage-type :acid
-                     :breath-weapon "5 by 30 ft. line (Dex. save, "}
+                     :breath-weapon {:damage-type :acid
+                                     :area-type :line
+                                     :line-width 5
+                                     :line-length 30
+                                     :save :dex}}
                     {:name "Gold"
-                     :damage-type :fire
-                     :breath-weapon "15 ft cone (Dex. save, "}
+                     :breath-weapon {:damage-type :fire
+                                     :area-type :cone
+                                     :length 15
+                                     :save :dex}}
                     {:name "Green"
-                     :damage-type :poison
-                     :breath-weapon "15 ft cone (Con. save, "}
+                     :breath-weapon {:damage-type :poison
+                                     :area-type :cone
+                                     :length 15
+                                     :save :con}}
                     {:name "Red"
-                     :damage-type :fire
-                     :breath-weapon "15 ft cone (Dex. save, "}
+                     :breath-weapon {:damage-type :fire
+                                     :area-type :cone
+                                     :length 15
+                                     :save :dex}}
                     {:name "Silver"
-                     :damage-type :cold
-                     :breath-weapon "15 ft cone (Con. save, "}
+                     :breath-weapon {:damage-type :cold
+                                     :area-type :cone
+                                     :length 15
+                                     :save :con}}
                     {:name "White"
-                     :damage-type :cold
-                     :breath-weapon "15 ft cone (Con. save, "}]))]}))
+                     :breath-weapon {:damage-type :cold
+                                     :area-type :cone
+                                     :length 15
+                                     :save :con}}]))]}))
 
 
 (def gnome-option

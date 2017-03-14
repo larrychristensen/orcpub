@@ -4,7 +4,8 @@
             [orcpub.entity-spec :as es]
             [orcpub.dnd.e5.character :as char5e]
             [orcpub.dnd.e5.options :as opt5e]
-            [orcpub.dnd.e5.spells :as spells]))
+            [orcpub.dnd.e5.spells :as spells]
+            [orcpub.dnd.e5.display :as disp5e]))
 
 (defn entity-vals [built-char kws]
   (reduce
@@ -79,8 +80,8 @@
   (s/join
    "\n\n"
    (map
-    (fn [{:keys [name description page source]}]
-      (str name ". " description (if page (str " (" (or source "PHB ") page ")"))))
+    (fn [attack]
+      (str (:name attack) ". " (disp5e/attack-description attack)))
     attacks)))
 
 (defn equipment-fields [built-char]

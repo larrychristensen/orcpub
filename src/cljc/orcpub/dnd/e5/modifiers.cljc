@@ -251,12 +251,11 @@
   (mods/modifier ?armor-class-with-armor (fn [armor]
                                            (+ bonus (?armor-class-with-armor armor)))))
 
-(defmacro attack [name description]
+(defmacro attack [atk]
   `(mods/modifier ~'?attacks
                   (conj
                    ~'?attacks
-                   {:name ~name
-                    :description ~description})))
+                   ~atk)))
 
 (defn critical [roll-value]
   (mods/set-mod ?critical roll-value))

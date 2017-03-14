@@ -18,6 +18,7 @@
             [orcpub.dnd.e5.options :as opt5e]
             [orcpub.dnd.e5.template :as t5e]
             [orcpub.dnd.e5.spells :as spells]
+            [orcpub.dnd.e5.display :as disp5e]
             [orcpub.pdf-spec :as pdf-spec]
 
             [clojure.spec :as spec]
@@ -664,11 +665,12 @@
    "Attacks" nil
    [:div.f-s-14
     (map
-     (fn [{:keys [name description page]}]
+     (fn [{:keys [name area-type description damage-die damage-die-count damage-type save save-dc] :as attack}]
+       (prn "AREA_TYPE" area-type)
        ^{:key name}
        [:p.m-t-10
         [:span.f-w-600.i name "."]
-        [:span.f-w-n.m-l-10 description]])
+        [:span.f-w-n.m-l-10 (disp5e/attack-description attack)]])
      attacks)]))
 
 
@@ -1137,7 +1139,7 @@
 
 
 (defn character-builder []
-  ;;(cljs.pprint/pprint @character-ref)
+  (cljs.pprint/pprint @character-ref)
   ;;(cljs.pprint/pprint @app-state)
   (let [selected-plugins (map
                           :selections
@@ -1163,7 +1165,7 @@
         plugins (:plugins @app-state)
         stepper-dismissed? (:stepper-dismissed @app-state)]
     ;(js/console.log "BUILT TEMPLAT" built-template)
-    ;;(print-char built-char)
+    (print-char built-char)
     [:div.app
      {:on-scroll (fn [e]
                    (let [app-header (js/document.getElementById "app-header")
