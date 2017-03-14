@@ -675,18 +675,18 @@
           [:span.f-w-n.m-l-10 (disp5e/attack-description attack)]])
        attacks)])))
 
-(defn bonus-actions-section [bonus-actions]
-  (if (seq bonus-actions)
+(defn actions-section [title actions]
+  (if (seq actions)
     (display-section
-     "Bonus Actions" nil
+     title nil
      [:div.f-s-14
       (map
-       (fn [bonus-action]
-         ^{:key name}
+       (fn [action]
+         ^{:key action}
          [:p.m-t-10
-          [:span.f-w-600.i (:name bonus-action) "."]
-          [:span.f-w-n.m-l-10 (disp5e/action-description bonus-action)]])
-       bonus-actions)])))
+          [:span.f-w-600.i (:name action) "."]
+          [:span.f-w-n.m-l-10 (disp5e/action-description action)]])
+       actions)])))
 
 (defn character-display [built-char]
   (let [race (es/entity-val built-char :race)
@@ -710,7 +710,9 @@
         equipment (es/entity-val built-char :equipment)
         traits (es/entity-val built-char :traits)
         attacks (es/entity-val built-char :attacks)
-        bonus-actions (es/entity-val built-char :bonus-actions)]
+        bonus-actions (es/entity-val built-char :bonus-actions)
+        reactions (es/entity-val built-char :reactions)
+        actions (es/entity-val built-char :actions)]
     [:div
      [:div.f-s-24.f-w-600.m-b-16.text-shadow
       [:span race]
@@ -796,7 +798,9 @@
        [equipment-section "Armor" armor opt5e/armor-map]
        [equipment-section "Equipment" equipment opt5e/equipment-map]
        [attacks-section attacks]
-       [bonus-actions-section bonus-actions]
+       [actions-section "Bonus Actions" bonus-actions]
+       [actions-section "Reactions" reactions]
+       [actions-section "Actions" actions]
        [traits-section traits]]]]))
 
 

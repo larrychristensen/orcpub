@@ -119,7 +119,7 @@
 (defn trait [name & [description level summary conditions]]
   (trait-cfg {:name name :description description :level level :summary summary :conditions conditions}))
 
-(defmacro dependent-trait [{:keys [level conditions] :as t}]
+(defmacro dependent-trait [{:keys [level conditions] :or {level 1} :as t}]
   `(mods/modifier ~'?traits
                   (if (or (nil? ~level) (>= ~'?total-levels ~level))
                     (conj
@@ -263,3 +263,9 @@
 
 (defn bonus-action [action]
   (mods/vec-mod ?bonus-actions action))
+
+(defmacro reaction [action]
+  `(mods/modifier ~'?reactions
+                 (conj
+                  ~'?reactions
+                  ~action)))

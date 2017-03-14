@@ -64,20 +64,25 @@
 (defn header-string [title]
   (str "----------" title "----------"))
 
-(defn bonus-actions-string [bonus-actions]
-  (if (seq bonus-actions)
+(defn actions-string [title actions]
+  (if (seq actions)
     (str
-     (header-string "Bonus Actions")
+     (header-string title)
      "\n"
      (s/join
       "\n\n"
       (map
-       (fn [bonus-action]
-         (str (:name bonus-action) ". " (disp5e/action-description bonus-action)))
-       bonus-actions)))))
+       (fn [action]
+         (str (:name action) ". " (disp5e/action-description action)))
+       actions)))))
 
 (defn traits-fields [built-char]
-  {:features-and-traits (bonus-actions-string (sort-by :name (es/entity-val built-char :bonus-actions)))
+  {:features-and-traits (s/join
+                         "\n\n"
+                         (remove nil?
+                                 [(actions-string "Bonus Actions" (sort-by :name (es/entity-val built-char :bonus-actions)))
+                                  (actions-string "Actions" (sort-by :name (es/entity-val built-char :actions)))
+                                  (actions-string "Reactions" (sort-by :name (es/entity-val built-char :reactions)))]))
    :features-and-traits-2 (traits-string (sort-by :name (es/entity-val built-char :traits)))})
 
 (defn attacks-string [attacks]

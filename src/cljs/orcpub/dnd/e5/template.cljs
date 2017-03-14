@@ -554,6 +554,12 @@ Fire Starter. The device produces a miniature flame, which you can use to light 
                               :source :vgm
                               :summary (str "For 1 minute, creatures within 10 ft. must succeed on a DC " (+ 8 ?prof-bonus (:cha ?ability-bonuses)) " cha save or be frightened of you. During that time also deal an additional " ?total-levels " necrotic damage to one target you deal damage to with a spell or attack.")})]}]}))
 
+(def powerful-build
+  {:name "Powerful Build"
+   :page 107
+   :source :vgm
+   :summary "Count as Large for purposes of determining your weight you can carry, push, drag, or lift."})
+
 (def firbolg-option
   (race-option
    {:name "Firbolg"
@@ -567,12 +573,15 @@ Fire Starter. The device produces a miniature flame, which you can use to light 
                 (mod5e/bonus-action
                  {:name "Hidden Step"
                   :duration {:units :round}
+                  :frequency {:units :rest}
                   :page 107
                   :source :vgm
                   :description "Turn invisible"})]
-    :traits [{:name "Hidden Step"}
-             {:name "Powerful Build"}
-             {:name "Speech of Beast and Leaf"}]}))
+    :traits [powerful-build
+             {:name "Speech of Beast and Leaf"
+              :page 107
+              :source :vgm
+              :summary "Beast and plants can understand you and you have advantage on Charisma checks to influence them."}]}))
 
 (def goliath-option
   (race-option
@@ -583,9 +592,17 @@ Fire Starter. The device produces a miniature flame, which you can use to light 
     :languages ["Common" "Giant"]
     :profs {:skill {:athletics true}}
     :source :vgm
-    :traits [{:name "Stone's Endurance"}
-             {:name "Mountain Born"}
-             {:name "Powerful Build"}]}))
+    :modifiers [(mod5e/reaction
+                 {:name "Stone's Endurance"
+                  :frequency {:units :rest}
+                  :page 109
+                  :source :vgm
+                  :description (str "Reduce damage taken by 1d12 + " (:con ?ability-bonuses))})]
+    
+    :traits [{:name "Mountain Born"
+              :page 109
+              :summary "Adapted to high altitude and cold climates."}
+             powerful-build]}))
 
 (def kenku-option
   (race-option
@@ -595,9 +612,15 @@ Fire Starter. The device produces a miniature flame, which you can use to light 
     :speed 30
     :source :vgm
     :languages ["Common" "Auran"]
+    :modifiers [(mod5e/dependent-trait
+                 {:name "Mimicry"
+                  :page 111
+                  :source :vgm
+                  :summary (str "Mimic sounds you've heard, creatures disbelieve it with an insight check opposed to your deception check (1d20" (common/mod-str (:deception ?skill-bonuses)) ").")})]
     :profs {:skill-options {:choose 2 :options {:acrobatics true :deception true :stealth true :sleight-of-hand true}}}
-    :traits [{:name "Expert Forgery"}
-             {:name "Mimicry"}]}))
+    :traits [{:name "Expert Forgery"
+              :page 111
+              :summary "Advantage on checks to duplicate existing objects"}]}))
 
 (def lizardfolk-option
   (race-option
@@ -3368,6 +3391,7 @@ You might also have ties to a specific temple dedicated to your chosen deity or 
     [aasimar-option
      firbolg-option
      goliath-option
+     kenku-option
      lizardfolk-option
      tabaxi-option
      triton-option
