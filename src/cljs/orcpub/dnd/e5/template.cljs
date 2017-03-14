@@ -222,6 +222,7 @@
 (def elf-weapon-training-mods
   (weapon-prof-modifiers [:longsword :shortsword :shortbow :longbow]))
 
+
 (def elf-option
   (race-option
    {:name "Elf"
@@ -231,6 +232,8 @@
     :speed 30
     :languages ["Elvish" "Common"]
     :darkvision 60
+    :modifiers [(mod5e/saving-throw-advantage [:charmed])
+                (mod5e/immunity :magical-sleep)]
     :subraces
     [{:name "High Elf"
       :abilities {:int 1}
@@ -286,7 +289,8 @@
                {:name "Mountain Dwarf"
                 :abilities {:str 2}
                 :armor-proficiencies [:light :medium]}]
-    :modifiers [(mod5e/resistance :poison)]}))
+    :modifiers [(mod5e/damage-resistance :poison)
+                (mod5e/saving-throw-advantage [:poisoned])]}))
 
 (def halfling-option
   (race-option
@@ -296,6 +300,7 @@
     :size :small
     :speed 25
     :languages ["Halfling" "Common"]
+    :modifiers [(mod5e/saving-throw-advantage [:frightened])]
     :subraces
     [{:name "Lightfoot"
       :abilities {:cha 1}
@@ -305,17 +310,12 @@
                 :description "You can attempt to hide even when you are obscured only by a creature that is at least one size larger than you."}]}
      {:name "Stout"
       :abilities {:con 1}
-      :modifiers [(mod5e/resistance :poison)]
-      :traits [{:name "Stout Resilience"
-                :page 28
-                :summary "Advantage on poison saves, resistance to poison damage"}]}]
+      :modifiers [(mod5e/damage-resistance :poison)
+                  (mod5e/saving-throw-advantage [:poisoned])]}]
     :traits [{:name "Lucky"
               :page 28
               :summary "Reroll 1s on d20"
               :description "When you roll a 1 on the d20 for an attack roll, ability check, or saving throw, you can reroll the die and must use the new roll."}
-             {:name "Brave"
-              :page 28
-              :description "You have advantage on saving throws against being frightened."}
              {:name "Halfling Nimbleness"
               :page 28
               :description "You can move through the space of any creature that is of a size larger than yours."}]}))
@@ -359,7 +359,7 @@
    name
    (common/name-to-kw name)
    []
-   [(mod5e/resistance (:damage-type breath-weapon))
+   [(mod5e/damage-resistance (:damage-type breath-weapon))
     (mod/modifier ?draconic-ancestry-breath-weapon breath-weapon)]))
 
 (def dragonborn-option
@@ -501,8 +501,8 @@ Fire Starter. The device produces a miniature flame, which you can use to light 
     :darkvision 60
     :source "Volo's Guide to Monsters"
     :languages ["Common" "Celestial"]
-    :modifiers [(mod5e/resistance :necrotic)
-                (mod5e/resistance :radiant)
+    :modifiers [(mod5e/damage-resistance :necrotic)
+                (mod5e/damage-resistance :radiant)
                 (mod5e/spells-known 0 :light :cha "Aasimar")]
     :traits [{:name "Celestial Resistance"}
              {:name "Healing Hands"}
@@ -605,7 +605,7 @@ Fire Starter. The device produces a miniature flame, which you can use to light 
                 (mod5e/spells-known 1 :fog-cloud :cha "Triton")
                 (mod5e/spells-known 2 :gust-of-wind :cha "Triton" 3)
                 (mod5e/spells-known 3 :wall-of-water :cha "Triton" 5)
-                (mod5e/resistance :cold)]
+                (mod5e/damage-resistance :cold)]
     :traits [{:name "Amphibious"}
              {:name "Control Air and Water"}
              {:name "Emissary of the Sea"}
@@ -693,7 +693,7 @@ Fire Starter. The device produces a miniature flame, which you can use to light 
     :modifiers [(mod5e/spells-known 0 :poison-spray :cha "Yuan-Ti")
                 (mod5e/spells-known 1 :animal-friendship :cha "Yuan-Ti" 1 "unlimited uses, can only target snakes")
                 (mod5e/spells-known 2 :suggestion :cha "Yuan-Ti" 3 "one use per long rest")
-                (mod5e/immunity :poison)
+                (mod5e/damage-immunity :poison)
                 (mod5e/condition-immunity :poisoned)]
     :languages ["Common" "Abyssal" "Draconic"]
     :traits [{:name "Innate Spellcasting"}
@@ -1849,8 +1849,8 @@ The creature is aware of this effect before it makes its attack against you."}]}
     :levels {2 {:modifiers [(mod5e/unarmored-speed-bonus 10)]}
              5 {:modifiers [(mod5e/extra-attack)]}
              6 {:modifiers [(mod5e/unarmored-speed-bonus 5)]}
-             10 {:modifiers [(mod5e/immunity :poison)
-                             (mod5e/immunity :disease)
+             10 {:modifiers [(mod5e/damage-immunity :poison)
+                             (mod5e/damage-immunity :disease)
                              (mod5e/unarmored-speed-bonus 5)]}
              13 {:modifiers (map
                              (fn [{:keys [name key]}]
@@ -2021,7 +2021,7 @@ You can have only one creature under the effect of this feature at a time. You c
                                    :explorers-pack 1}}]
     :armor {:chain-mail 1}
     :levels {2 {:selections [(opt5e/fighting-style-selection character-ref #{:defense :dueling :great-weapon-fighting :protection})]}
-             3 {:modifiers [(mod5e/immunity :disease)]}
+             3 {:modifiers [(mod5e/damage-immunity :disease)]}
              5 {:modifiers [(mod5e/extra-attack)]}}
     :selections [(t/selection
                   "Weapons"
@@ -2753,7 +2753,7 @@ If you lose your Book of Shadows, you can perform a 1-hour ceremony to receive a
                            {:name "Illusory Reality"
                             :level 14}]}
                  {:name "School of Necromancy"
-                  :modifiers [(mod5e/resistance :necrotic)]
+                  :modifiers [(mod5e/damage-resistance :necrotic)]
                   :traits [{:name "Necromancy Savant"
                             :level 2}
                            {:name "Grim Harvest"

@@ -10,6 +10,13 @@
             [orcpub.dnd.e5.spells :as spells]
             [orcpub.dnd.e5.spell-lists :as sl]))
 
+(def add-keys-xform
+  (map
+   #(assoc % :key (common/name-to-kw (:name %)))))
+
+(defn add-keys [vals]
+  (into [] add-keys-xform vals))
+
 (def abilities
   [{:key :str
     :name "Strength"}
@@ -26,6 +33,25 @@
 
 (def abilities-map
   (common/map-by-key abilities))
+
+(def conditions
+  [{:name "Blinded"}
+   {:name "Charmed"}
+   {:name "Deafened"}
+   {:name "Frightened"}
+   {:name "Grappled"}
+   {:name "Incapacitated"}
+   {:name "Invisible"}
+   {:name "Paralyzed"}
+   {:name "Petrified"}
+   {:name "Poisoned"}
+   {:name "Prone"}
+   {:name "Restrained"}
+   {:name "Stunned"}
+   {:name "Unconscious"}])
+
+(def conditions-map
+  (common/map-by-key (add-keys conditions)))
 
 (def skills [{:name "Acrobatics"
               :key :acrobatics
@@ -286,13 +312,6 @@ hazards."}])
     :gaming-set {:name "Gaming Set"
                  :values gaming-sets}}
    (zipmap (map :key tools) tools)))
-
-(def add-keys-xform
-  (map
-   #(assoc % :key (common/name-to-kw (:name %)))))
-
-(defn add-keys [vals]
-  (into [] add-keys-xform vals))
 
 (def ammunition
   (add-keys
@@ -1409,7 +1428,7 @@ hazards."}])
     :dungeon-delver
     []
     [(modifiers/trait "Dungeon Delver Feat")
-     (modifiers/resistance :trap)])
+     (modifiers/damage-resistance :trap)])
    (t/option
     "Durable"
     :durable

@@ -57,6 +57,10 @@
 (def props
   [[:.flex
     {:display :flex}]
+
+   [:.list-style-disc
+    {:list-style-type :disc
+     :list-style-position :inside}]
    
    [:.f-w-bold
     {:font-weight :bold}]

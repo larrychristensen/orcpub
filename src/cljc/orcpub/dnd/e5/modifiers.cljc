@@ -22,8 +22,11 @@
 (defn subrace [nm]
   (mods/modifier ?subrace nm))
 
-(defn resistance [value]
-  (mods/set-mod ?resistances value))
+(defn damage-resistance [value]
+  (mods/set-mod ?damage-resistances value))
+
+(defn damage-immunity [value]
+  (mods/set-mod ?damage-immunities value))
 
 (defn immunity [value]
   (mods/set-mod ?immunities value))
@@ -75,9 +78,9 @@
                  nil;;(s/join ", " (map (comp s/upper-case name) abilities))
                  [(= cls-kw (first ?classes))]))
 
-(defn saving-throw-type-advantage [type-nm type-kw]
-  (mods/vec-mod ?saving-throw-type-advantage {:name type-nm
-                                              :key type-kw}))
+(defn saving-throw-advantage [types & [abilities]]
+  (mods/vec-mod ?saving-throw-advantage {:abilities abilities
+                                         :types types}))
 
 (defn initiative [bonus]
   (mods/cum-sum-mod ?initiative bonus "Initiative" (mods/bonus-str bonus)))

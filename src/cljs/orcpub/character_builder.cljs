@@ -683,8 +683,8 @@
         tool-profs (es/entity-val built-char :tool-profs)
         weapon-profs (es/entity-val built-char :weapon-profs)
         armor-profs (es/entity-val built-char :armor-profs)
-        resistances (es/entity-val built-char :resistances)
-        immunities (es/entity-val built-char :immunities)
+        resistances (es/entity-val built-char :damage-resistances)
+        immunities (es/entity-val built-char :damage-immunities)
         condition-immunities (es/entity-val built-char :condition-immunities)
         languages (es/entity-val built-char :languages)
         ability-bonuses (es/entity-val built-char :ability-bonuses)
@@ -739,7 +739,17 @@
                max-crit (apply max criticals)]
            (if (not= min-crit max-crit)
              (display-section "Critical Hit" nil (str min-crit "-" max-crit))))
-         [list-display-section "Save Proficiencies" nil (map (comp s/upper-case name) (es/entity-val built-char :saving-throws))]]]
+         [:div
+          [list-display-section
+           "Save Proficiencies" nil
+           (map (comp s/upper-case name) (es/entity-val built-char :saving-throws))]
+          (let [save-advantage (es/entity-val built-char :saving-throw-advantage)]
+            [:ul.list-style-disc.m-t-5
+             (doall
+              (map
+               (fn [{:keys [abilities types]}]
+                 [:li (str "advantage on " (s/join ", " (map (comp s/lower-case :name opt5e/abilities-map) abilities)) " saves against being " (s/join ", " (map (comp s/lower-case :name opt5e/conditions-map) types)))])
+               save-advantage))])]]]
        [:div.w-100-p
         [abilities-radar 187 (es/entity-val built-char :abilities) ability-bonuses]]]
       [:div.flex-grow-1.flex-basis-50-p
