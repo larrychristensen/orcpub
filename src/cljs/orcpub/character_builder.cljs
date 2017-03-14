@@ -659,7 +659,7 @@
          [:p.m-t-10
           [:span.f-w-600.i name "."]
           [:span.f-w-n.m-l-10 (common/sentensize (or summary description))]])
-       traits)])))
+       (sort-by :name traits))])))
 
 (defn attacks-section [attacks]
   (if (seq attacks)

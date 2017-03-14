@@ -10,7 +10,7 @@
   (str amount " " (name units) (if (not= 1 amount) "s")))
 
 (defn source-description [source page]
-  (if page (str "see " (or (sources source) :phb) " " page)))
+  (if page (str "see " (sources (or source :phb)) " " page)))
 
 (defn frequency-description [{:keys [units amount] :or {amount 1}}]
   (str

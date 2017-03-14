@@ -225,6 +225,10 @@
 (def elf-weapon-training-mods
   (weapon-prof-modifiers [:longsword :shortsword :shortbow :longbow]))
 
+(defn sunlight-sensitivity [page]
+  {:name "Sunlight Sensitivity"
+   :summary "Disadvantage on attack and perception rolls in direct sunlight"
+   :page 24})
 
 (def elf-option
   (race-option
@@ -252,9 +256,7 @@
                   elf-weapon-training-mods]}
      {:name "Dark Elf (Drow)"
       :abilities {:cha 1}
-      :traits [{:name "Sunlight Sensitivity"
-                :summary "Disadvantage on attack and perception rolls in direct sunlight"
-                :page 24}]
+      :traits [(sunlight-sensitivity 24)]
       :modifiers [(mod5e/darkvision 120)
                   (mod5e/spells-known 0 :dancing-lights :cha "Dark Elf")
                   (mod5e/spells-known 1 :faerie-fire :cha "Dark Elf" 3)
@@ -555,9 +557,9 @@ Fire Starter. The device produces a miniature flame, which you can use to light 
                               :source :vgm
                               :summary (str "For 1 minute, creatures within 10 ft. must succeed on a DC " (+ 8 ?prof-bonus (:cha ?ability-bonuses)) " cha save or be frightened of you. During that time also deal an additional " ?total-levels " necrotic damage to one target you deal damage to with a spell or attack.")})]}]}))
 
-(def powerful-build
+(defn powerful-build [page]
   {:name "Powerful Build"
-   :page 107
+   :page page
    :source :vgm
    :summary "Count as Large for purposes of determining your weight you can carry, push, drag, or lift."})
 
@@ -578,7 +580,7 @@ Fire Starter. The device produces a miniature flame, which you can use to light 
                   :page 107
                   :source :vgm
                   :description "Turn invisible"})]
-    :traits [powerful-build
+    :traits [(powerful-build 107)
              {:name "Speech of Beast and Leaf"
               :page 107
               :source :vgm
@@ -603,7 +605,7 @@ Fire Starter. The device produces a miniature flame, which you can use to light 
     :traits [{:name "Mountain Born"
               :page 109
               :summary "Adapted to high altitude and cold climates."}
-             powerful-build]}))
+             (powerful-build 109)]}))
 
 (def kenku-option
   (race-option
@@ -718,10 +720,13 @@ Fire Starter. The device produces a miniature flame, which you can use to light 
     :source :vgm
     :modifiers [(mod5e/skill-proficiency :stealth)]
     :languages ["Common" "Goblin"]
-    :traits [{:name "Long Limbed"}
-             {:name "Powerful Build"}
-             {:name "Sneaky"}
-             {:name "Surprise Attack"}]}))
+    :traits [{:name "Long Limbed"
+              :page 119
+              :summary "5 ft. additional reach to melee attacks on your turn"}
+             (powerful-build 119)
+             {:name "Surprise Attack"
+              :page 119
+              :summary "Extra 2d6 damage when hitting a surprised creature."}]}))
 
 (def goblin-option
   (race-option
@@ -732,8 +737,14 @@ Fire Starter. The device produces a miniature flame, which you can use to light 
     :darkvision 60
     :source :vgm
     :languages ["Common" "Goblin"]
-    :traits [{:name "Fury of the Small"}
-             {:name "Nimble Escape"}]}))
+    :modifiers [(mod5e/dependent-trait
+                 {:name "Fury of the Small"
+                  :page 119
+                  :summary (str "Extra " ?total-levels " damage to a larger creature (use once per long or short rest)")})
+                (mod5e/bonus-action
+                 {:name "Nimble Escape"
+                  :page 119
+                  :description "Disengage or Hide action as a bonus action."})]}))
 
 (def hobgoblin-option
   (race-option
@@ -749,8 +760,9 @@ Fire Starter. The device produces a miniature flame, which you can use to light 
                   2
                   2)]
     :modifiers [(mod5e/light-armor-proficiency)]
-    :traits [{:name "Martial Training"}
-             {:name "Saving Face"}]}))
+    :traits [{:name "Saving Face"
+              :page 119
+              :summary "Add a bonus to a missed roll for each ally you can see, up to 5."}]}))
 
 (def kobold-option
   (race-option
@@ -761,9 +773,13 @@ Fire Starter. The device produces a miniature flame, which you can use to light 
     :darkvision 60
     :source :vgm
     :languages ["Common" "Draconic"]
-    :traits [{:name "Grovel, Cower, and Beg"}
-             {:name "Pack Tactics"}
-             {:name "Sunlight Sensitivity"}]}))
+    :traits [{:name "Grovel, Cower, and Beg"
+              :page 119
+              :summary "Cower to give allies advantage on attacks against enemies within 10 ft."}
+             {:name "Pack Tactics"
+              :page 119
+              :summary "Advantage on attacks if an ally is within 5 ft. of the target."}
+             (sunlight-sensitivity 119)]}))
 
 (def orc-option
   (race-option

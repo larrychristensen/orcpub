@@ -44,8 +44,9 @@
   (int (Math/ceil (double num))))
 
 (defn sentensize [desc]
-  (str
-   (s/upper-case (subs desc 0 1))
-   (subs desc 1)
-   (if (not (s/ends-with? desc "."))
-     ".")))
+  (if desc
+    (str
+     (s/upper-case (subs desc 0 1))
+     (subs desc 1)
+     (if (not (s/ends-with? desc "."))
+       "."))))
