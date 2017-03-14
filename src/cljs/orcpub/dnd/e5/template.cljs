@@ -377,6 +377,7 @@
                  (merge
                   ?draconic-ancestry-breath-weapon
                   {:name "Breath Weapon"
+                   :attack-type :area
                    :damage-die 6
                    :page 34
                    :damage-die-count (condp <= ?total-levels
@@ -632,13 +633,33 @@ Fire Starter. The device produces a miniature flame, which you can use to light 
     :languages ["Common" "Draconic"]
     :modifiers [(mod5e/swimming-speed 30)
                 (mod/modifier ?armor-class (+ 3 ?armor-class) "Unarmored AC" (mod/bonus-str 3))
-                (mod/modifier ?armor-class-with-armor (fn [armor] (max ?armor-class (?armor-class-with-armor armor))))]
+                (mod/modifier ?armor-class-with-armor
+                              (fn [armor]
+                                (max ?armor-class (?armor-class-with-armor armor))))
+                (mod5e/bonus-action
+                 {:name "Hungry Jaws"
+                  :page 113
+                  :source :vgm
+                  :frequency {:units :rest}
+                  :description (str "Special attack with your bite. If you hit, you gain "
+                                (max 1 (:con ?ability-bonuses))
+                                " temp. hit points")})
+                (mod5e/attack
+                 {:name "Bite"
+                  :page 113
+                  :source :vgm
+                  :attack-type :melee
+                  :damage-type :piercing
+                  :damage-die 6
+                  :damage-die-count 1
+                  :damage-modifier (:str ?ability-bonuses)})]
     :profs {:skill-options {:choose 2 :options {:animal-handling true :nature true :stealth true :perception true :survival true}}}
-    :traits [{:name "Bite"}
-             {:name "Cunning Artisan"}
-             {:name "Hold Breath"}
-             {:name "Natural Armor"}
-             {:name "Hungry Jaws"}]}))
+    :traits [{:name "Cunning Artisan"
+              :page 113
+              :summary "Craft certain weapons and armor from creature remains."}
+             {:name "Hold Breath"
+              :page 113
+              :summary "Up to 15 min."}]}))
 
 (def tabaxi-option
   (race-option

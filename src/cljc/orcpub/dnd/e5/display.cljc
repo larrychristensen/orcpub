@@ -1,4 +1,5 @@
-(ns orcpub.dnd.e5.display)
+(ns orcpub.dnd.e5.display
+  (:require [orcpub.common :as common]))
 
 (def sources
   {:phb "PHB"
@@ -20,19 +21,21 @@
    "/"
    (name units)))
 
-(defn attack-description [{:keys [description area-type damage-type damage-die damage-die-count save save-dc page source] :as attack}]
+(defn attack-description [{:keys [description attack-type area-type damage-type damage-die damage-die-count damage-modifier save save-dc page source] :as attack}]
   (str
    (if description (str description ", "))
-   (case area-type
-     :line (str (:line-width attack) " x " (:line-length attack) " ft. line, ")
-     :cone (str (:length attack) " ft. cone, ")
-     nil)
-   damage-die-count "d" damage-die
+   (case attack-type
+     :area (case area-type
+             :line (str (:line-width attack) " x " (:line-length attack) " ft. line, ")
+             :cone (str (:length attack) " ft. cone, ")
+             nil)
+     "melee, ")
+   damage-die-count "d" damage-die (if damage-modifier (common/mod-str damage-modifier))
    " "
    (clojure.core/name damage-type)
    " damage"
    (if save (str ", DC" save-dc " " (clojure.core/name save) " save"))
-   (source-description source page)))
+   (if source (str " (" (source-description source page) ")"))))
 
 (defn action-description [{:keys [description source page duration frequency]}]
   (str

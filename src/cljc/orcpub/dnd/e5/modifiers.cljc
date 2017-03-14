@@ -202,10 +202,6 @@
 (defn shield-armor-proficiency [& [first-class? cls-kw]]
   (armor-proficiency "shields" :shields first-class? cls-kw))
 
-(defn action [name & [desc]]
-  (mods/vec-mod ?actions {:name name
-                          :description desc}))
-
 (defn passive-perception [bonus]
   (mods/cum-sum-mod ?passive-perception bonus))
 
@@ -261,8 +257,18 @@
 (defn critical [roll-value]
   (mods/set-mod ?critical roll-value))
 
-(defn bonus-action [action]
-  (mods/vec-mod ?bonus-actions action))
+
+(defmacro action [action]
+  `(mods/modifier ~'?actions
+                  (conj
+                   ~'?actions
+                   ~action)))
+
+(defmacro bonus-action [action]
+  `(mods/modifier ~'?bonus-actions
+                  (conj
+                   ~'?bonus-actions
+                   ~action)))
 
 (defmacro reaction [action]
   `(mods/modifier ~'?reactions
