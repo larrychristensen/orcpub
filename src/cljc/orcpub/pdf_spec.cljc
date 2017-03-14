@@ -53,12 +53,15 @@
                (+ (count name) (count description)))
              traits)))
 
+(defn trait-string [nm desc]
+  (str nm ". " (common/sentensize desc)))
+
 (defn traits-string [traits]
   (s/join
    "\n\n"
    (map
     (fn [{:keys [name description summary page source]}]
-      (str name ". " (or summary description) (if page (str " (" (disp5e/sources (or source :phb)) " " page ")"))))
+      (trait-string name (str (or summary description) (if page (str " (" (disp5e/sources (or source :phb)) " " page ")")))))
     traits)))
 
 (defn header-string [title]
@@ -73,7 +76,7 @@
       "\n\n"
       (map
        (fn [action]
-         (str (:name action) ". " (disp5e/action-description action)))
+         (trait-string (:name action) (common/sentensize (disp5e/action-description action))))
        actions)))))
 
 (defn traits-fields [built-char]
@@ -90,7 +93,7 @@
    "\n\n"
    (map
     (fn [attack]
-      (str (:name attack) ". " (disp5e/attack-description attack)))
+      (trait-string (:name attack) (disp5e/attack-description attack)))
     attacks)))
 
 (defn equipment-fields [built-char]

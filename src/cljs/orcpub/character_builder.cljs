@@ -658,7 +658,7 @@
          ^{:key name}
          [:p.m-t-10
           [:span.f-w-600.i name "."]
-          [:span.f-w-n.m-l-10 (or summary description)]])
+          [:span.f-w-n.m-l-10 (common/sentensize (or summary description))]])
        traits)])))
 
 (defn attacks-section [attacks]
@@ -672,7 +672,7 @@
          ^{:key name}
          [:p.m-t-10
           [:span.f-w-600.i name "."]
-          [:span.f-w-n.m-l-10 (disp5e/attack-description attack)]])
+          [:span.f-w-n.m-l-10 (common/sentensize (disp5e/attack-description attack))]])
        attacks)])))
 
 (defn actions-section [title actions]
@@ -685,7 +685,7 @@
          ^{:key action}
          [:p.m-t-10
           [:span.f-w-600.i (:name action) "."]
-          [:span.f-w-n.m-l-10 (disp5e/action-description action)]])
+          [:span.f-w-n.m-l-10 (common/sentensize (disp5e/action-description action))]])
        actions)])))
 
 (defn character-display [built-char]

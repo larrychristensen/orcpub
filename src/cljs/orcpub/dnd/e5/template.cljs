@@ -669,12 +669,21 @@ Fire Starter. The device produces a miniature flame, which you can use to light 
     :speed 30
     :darkvision 60
     :source :vgm
-    :modifiers [(mod5e/climbing-speed 20)]
+    :modifiers [(mod5e/climbing-speed 20)
+                (mod5e/attack
+                 {:name "Cat's Claws"
+                  :page 115
+                  :source :vgm
+                  :attack-type :melee
+                  :damage-type :slashing
+                  :damage-die 4
+                  :damage-die-count 1
+                  :damage-modifier (:str ?ability-bonuses)})]
     :language-options {:choose 1 :options {:any true}}
     :profs {:skill {:perception true :stealth true}}
-    :traits [{:name "Feline Agility"}
-             {:name "Cat's Claws"}
-             {:name "Cat's Talent"}]}))
+    :traits [{:name "Feline Agility"
+              :page 115
+              :summary "Double speed when moving on your turn in combat."}]}))
 
 (def triton-option
   (race-option
@@ -689,10 +698,15 @@ Fire Starter. The device produces a miniature flame, which you can use to light 
                 (mod5e/spells-known 2 :gust-of-wind :cha "Triton" 3)
                 (mod5e/spells-known 3 :wall-of-water :cha "Triton" 5)
                 (mod5e/damage-resistance :cold)]
-    :traits [{:name "Amphibious"}
-             {:name "Control Air and Water"}
-             {:name "Emissary of the Sea"}
-             {:name "Guardians of the Depths"}]}))
+    :traits [{:name "Amphibious"
+              :page 118
+              :summary "Breath water and air"}
+             {:name "Emissary of the Sea"
+              :page 118
+              :summary "Water-breathing beasts can understand your words."}
+             {:name "Guardians of the Depths"
+              :page 118
+              :summary "No negative effects from deep, underwater environment."}]}))
 
 (def bugbear-option
   (race-option
