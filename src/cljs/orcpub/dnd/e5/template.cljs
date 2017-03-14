@@ -561,7 +561,7 @@ Fire Starter. The device produces a miniature flame, which you can use to light 
   {:name "Powerful Build"
    :page page
    :source :vgm
-   :summary "Count as Large for purposes of determining your weight you can carry, push, drag, or lift."})
+   :summary "Count as Large for purposes of determining weight you can carry, push, drag, or lift."})
 
 (def firbolg-option
   (race-option
@@ -789,15 +789,17 @@ Fire Starter. The device produces a miniature flame, which you can use to light 
     :speed 30
     :darkvision 60
     :source :vgm
-    :modifiers [(mod5e/skill-proficiency :intimidation)]
+    :modifiers [(mod5e/skill-proficiency :intimidation)
+                (mod5e/bonus-action
+                 {:name "Aggressive"
+                  :page 120
+                  :description (str "Move up to " ?speed " feet toward and enemy you can see or hear")})]
     :languages ["Common" "Orc"]
-    :traits [{:name "Aggressive"}
-             {:name "Menacing"}
-             {:name "Powerful Build"}]}))
+    :traits [(powerful-build 120)]}))
 
 (def yuan-ti-option
   (race-option
-   {:name "Yuan-Ti"
+   {:name "Yuan-Ti Pureblood"
     :abilities {:cha 2 :int 1}
     :size "Medium"
     :speed 30
@@ -807,11 +809,9 @@ Fire Starter. The device produces a miniature flame, which you can use to light 
                 (mod5e/spells-known 1 :animal-friendship :cha "Yuan-Ti" 1 "unlimited uses, can only target snakes")
                 (mod5e/spells-known 2 :suggestion :cha "Yuan-Ti" 3 "one use per long rest")
                 (mod5e/damage-immunity :poison)
-                (mod5e/condition-immunity :poisoned)]
-    :languages ["Common" "Abyssal" "Draconic"]
-    :traits [{:name "Innate Spellcasting"}
-             {:name "Magic Resistance"}
-             {:name "Poison Immunity"}]}))
+                (mod5e/condition-immunity :poisoned)
+                (mod5e/saving-throw-advantage [:magic])]
+    :languages ["Common" "Abyssal" "Draconic"]}))
 
 (def tiefling-option
   (race-option
