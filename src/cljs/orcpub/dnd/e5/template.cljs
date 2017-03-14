@@ -103,10 +103,10 @@
                                        (js/parseInt value))]
                            (swap! character-ref assoc-in value-path new-v)))}]]))
 
-(defn traits-modifiers [traits & [include-level?]]
+(defn traits-modifiers [traits & [include-level? source]]
   (map
    (fn [trait]
-     (mod5e/trait-cfg trait))
+     (mod5e/trait-cfg (assoc trait :source source)))
    traits))
 
 (defn armor-prof-modifiers [armor-proficiencies & [cls-kw]]
@@ -132,7 +132,9 @@
          (mod5e/weapon-proficiency (-> weapon-kw opt5e/weapons-map :name) weapon-kw first-class? cls-kw))))
    weapon-proficiencies))
 
-(defn subrace-option [{:keys [name
+
+(defn subrace-option [source
+                      {:keys [name
                               abilities
                               size
                               speed
@@ -157,7 +159,7 @@
       (fn [[k v]]
         (mod5e/ability k v))
       abilities)
-     (traits-modifiers traits))))]
+     (traits-modifiers traits false source))))]
     option))
 
 (defn ability-modifiers [abilities]
@@ -179,6 +181,7 @@
                            modifiers
                            selections
                            traits
+                           source
                            languages
                            language-options
                            armor-proficiencies
@@ -191,7 +194,7 @@
                   (if subraces
                     [(t/selection
                       "Subrace"
-                      (vec (map subrace-option subraces)))])
+                      (vec (map (partial subrace-option source) subraces)))])
                   (if language-options
                     (let [{lang-num :choose lang-options :options} language-options
                           lang-kws (if (:any lang-options)
@@ -215,7 +218,7 @@
                     (mod5e/ability k v))
                   abilities)
                  modifiers
-                 (traits-modifiers traits)
+                 (traits-modifiers traits false source)
                  (armor-prof-modifiers armor-proficiencies)
                  (weapon-prof-modifiers weapon-proficiencies)))}))
 
@@ -452,20 +455,28 @@
     :speed 25
     :darkvision 60
     :languages ["Gnomish" "Common"]
+    :modifiers [(mod5e/saving-throw-advantage [:magic] [:int :wis :cha])]
     :subraces
     [{:name "Rock Gnome"
       :abilities {:con 1}
       :modifiers [(mod5e/tool-proficiency "Tinker's Tools" :tinkers-tools)]
-      :traits [{:name "Artificer's Lore" :description "Whenever you make an Intelligence (History) check related to magic items, alchemical objects, or technological devices, you can add twice your proficiency bonus, instead of any proficiency bonus you normally apply."}
-               {:name "Tinker" :description "You have proficiency with artisan's tools (tinker's tools). Using those tools, you can spend 1 hour and 10 gp worth of materials to construct a Tiny clockwork device (AC 5, 1 hp). The device ceases to function after 24 hours (unless you spend 1 hour repairing it to keep the device functioning), or when you use your action to dismantle it; at that time, you can reclaim the materials used to create it. You can have up to three such devices active at a time.
+      :traits [{:name "Artificer's Lore"
+                :page 37
+                :summary "Add 2X prof bonus on magical, alchemical, or technological item-related history checks."
+                :description "Whenever you make an Intelligence (History) check related to magic items, alchemical objects, or technological devices, you can add twice your proficiency bonus, instead of any proficiency bonus you normally apply."}
+               {:name "Tinker"
+                :page 37
+                :summary "Construct tiny clockwork devices."
+                :description "Using tinker's tools, you can spend 1 hour and 10 gp worth of materials to construct a Tiny clockwork device (AC 5, 1 hp). The device ceases to function after 24 hours (unless you spend 1 hour repairing it to keep the device functioning), or when you use your action to dismantle it; at that time, you can reclaim the materials used to create it. You can have up to three such devices active at a time.
 When you create a device, choose one of the following options:
 Clockwork Toy. This toy is a clockwork animal, monster, or person, such as a frog, mouse, bird, dragon, or soldier. When placed on the ground, the toy moves 5 feet across the ground on each of your turns in a random direction. It makes noises as appropriate to the creature it represents.
 Fire Starter. The device produces a miniature flame, which you can use to light a candle, torch, or campfire. Using the device requires your action. Music Box. When opened, this music box plays a single song at a moderate volume. The box stops playing when it reaches the song's end or when it is closed."}]}
      {:name "Forest Gnome"
       :abilities {:dex 1}
       :modifiers [(mod5e/spells-known 0 :minor-illusion :int "Forest Gnome")]
-      :traits [{:name "Speak with Small Beasts"}]}]
-    :traits [{:name "Gnome Cunning" :description "You have advantage on all Intelligence, Wisdom, and Charisma saving throws against magic."}]}))
+      :traits [{:name "Speak with Small Beasts"
+                :page 37
+                :summary "Communicate with Small or smaller beasts."}]}]}))
 
 (def half-elf-option
   (race-option
@@ -478,7 +489,7 @@ Fire Starter. The device produces a miniature flame, which you can use to light 
     :selections [(opt5e/ability-increase-selection (disj (set char5e/ability-keys) :cha) 2 false)
                  (opt5e/skill-selection 2)
                  (opt5e/language-selection opt5e/languages 1)]
-    :traits [{:name "Fey Ancestry" :description "You have advantage on saving throws against being charmed, and magic can't put you to sleep."}]}))
+    :modifiers [(mod5e/saving-throw-advantage [:charmed])]}))
 
 (def half-orc-option
   (race-option
@@ -489,8 +500,14 @@ Fire Starter. The device produces a miniature flame, which you can use to light 
     :speed 30
     :languages ["Common" "Orc"]
     :modifiers [(mod5e/skill-proficiency :intimidation)]
-    :traits [{:name "Relentless Endurance" :description "When you are reduced to 0 hit points but not killed outright, you can drop to 1 hit point instead. You can't use this feature again until you finish a long rest."}
-                      {:name "Savage Attacks" :description "When you score a critical hit with a melee weapon attack, you can roll one of the weapon's damage dice one additional time and add it to the extra damage of the critical hit."}]}))
+    :traits [{:name "Relentless Endurance"
+              :page 41
+              :summary "Drop to 1 hp instead of being reduced to 0."
+              :description "When you are reduced to 0 hit points but not killed outright, you can drop to 1 hit point instead. You can't use this feature again until you finish a long rest."}
+             {:name "Savage Attacks"
+              :page 41
+              :summary "On critical hit, add additional damage dice roll"
+              :description "When you score a critical hit with a melee weapon attack, you can roll one of the weapon's damage dice one additional time and add it to the extra damage of the critical hit."}]}))
 
 (def aasimar-option
   (race-option
@@ -499,26 +516,43 @@ Fire Starter. The device produces a miniature flame, which you can use to light 
     :size :medium
     :speed 30
     :darkvision 60
-    :source "Volo's Guide to Monsters"
+    :source :vgm
     :languages ["Common" "Celestial"]
     :modifiers [(mod5e/damage-resistance :necrotic)
                 (mod5e/damage-resistance :radiant)
                 (mod5e/spells-known 0 :light :cha "Aasimar")]
-    :traits [{:name "Celestial Resistance"}
-             {:name "Healing Hands"}
-             {:name "Light Bearer"}]
+    :traits [{:name "Healing Hands"
+              :page 105
+              :summary "Heal a creature a number of hit points equal to your level"}]
     :subraces [{:name "Protector Aasimar"
                 :abilities {:wis 1}
-                :traits [{:name "Radiant Soul"
-                          :level 3}]}
+                :modifiers [(mod5e/dependent-trait
+                             {:name "Radiant Soul"
+                              :level 3
+                              :page 105
+                              :source :vgm
+                              :summary (str "For 1 minute, sprout wings (30 ft. flying speed) and deal "
+                                            ?total-levels
+                                            " extra radiant damage.") })]}
                {:name "Scourge Aasimar"
                 :abilities {:con 1}
-                :traits [{:name "Radiant Consumption"
-                          :level 3}]}
+                :modifiers [(mod5e/dependent-trait
+                             {:name "Radiant Consumption"
+                              :level 3
+                              :page 105
+                              :source :vgm
+                              :summary (let [level ?total-levels]
+                                         (str "For 1 minute, deal "
+                                              (common/round-up (/ level 2))
+                                              " radiant damage to each creature within 10 ft. and deal an additional " level " radiant damage to one target you deal damage to with a spell or attack"))})]}
                {:name "Fallen Aasimar"
                 :abilities {:str 1}
-                :traits [{:name "Necrotic Shroud"
-                          :level 3}]}]}))
+                :modifiers [(mod5e/dependent-trait
+                             {:name "Necrotic Shroud"
+                              :level 3
+                              :page 105
+                              :source :vgm
+                              :summary (str "For 1 minute, creatures within 10 ft. must succeed on a DC " (+ 8 ?prof-bonus (:cha ?ability-bonuses)) " cha save or be frightened of you. During that time also deal an additional " ?total-levels " necrotic damage to one target you deal damage to with a spell or attack.")})]}]}))
 
 (def firbolg-option
   (race-option
@@ -526,12 +560,17 @@ Fire Starter. The device produces a miniature flame, which you can use to light 
     :abilities {:wis 2 :str 1}
     :size :medium
     :speed 30
-    :source "Volo's Guide to Monsters"
+    :source :vgm
     :languages ["Common" "Elvish" "Giant"]
     :modifiers [(mod5e/spells-known 1 :detect-magic :wis "Firbolg")
-                (mod5e/spells-known 1 :disguise-self :wis "Firbolg")]
-    :traits [{:name "Firbolg Magic"}
-             {:name "Hidden Step"}
+                (mod5e/spells-known 1 :disguise-self :wis "Firbolg" 1 "only to seem 3 ft. shorter")
+                (mod5e/bonus-action
+                 {:name "Hidden Step"
+                  :duration {:units :round}
+                  :page 107
+                  :source :vgm
+                  :description "Turn invisible"})]
+    :traits [{:name "Hidden Step"}
              {:name "Powerful Build"}
              {:name "Speech of Beast and Leaf"}]}))
 
@@ -543,7 +582,7 @@ Fire Starter. The device produces a miniature flame, which you can use to light 
     :speed 30
     :languages ["Common" "Giant"]
     :profs {:skill {:athletics true}}
-    :source "Volo's Guide to Monsters"
+    :source :vgm
     :traits [{:name "Stone's Endurance"}
              {:name "Mountain Born"}
              {:name "Powerful Build"}]}))
@@ -554,7 +593,7 @@ Fire Starter. The device produces a miniature flame, which you can use to light 
     :abilities {:dex 2 :wis 1}
     :size :medium
     :speed 30
-    :source "Volo's Guide to Monsters"
+    :source :vgm
     :languages ["Common" "Auran"]
     :profs {:skill-options {:choose 2 :options {:acrobatics true :deception true :stealth true :sleight-of-hand true}}}
     :traits [{:name "Expert Forgery"}
@@ -566,7 +605,7 @@ Fire Starter. The device produces a miniature flame, which you can use to light 
     :abilities {:con 2 :wis 1}
     :size :medium
     :speed 30
-    :source "Volo's Guide to Monsters"
+    :source :vgm
     :languages ["Common" "Draconic"]
     :modifiers [(mod5e/swimming-speed 30)
                 (mod/modifier ?armor-class (+ 3 ?armor-class) "Unarmored AC" (mod/bonus-str 3))
@@ -585,7 +624,7 @@ Fire Starter. The device produces a miniature flame, which you can use to light 
     :size :medium
     :speed 30
     :darkvision 60
-    :source "Volo's Guide to Monsters"
+    :source :vgm
     :modifiers [(mod5e/climbing-speed 20)]
     :language-options {:choose 1 :options {:any true}}
     :profs {:skill {:perception true :stealth true}}
@@ -599,7 +638,7 @@ Fire Starter. The device produces a miniature flame, which you can use to light 
     :abilities {:str 1 :con 1 :cha 1}
     :size :medium
     :speed 30
-    :source "Volo's Guide to Monsters"
+    :source :vgm
     :languages ["Common" "Primordial"]
     :modifiers [(mod5e/swimming-speed 30)
                 (mod5e/spells-known 1 :fog-cloud :cha "Triton")
@@ -618,7 +657,7 @@ Fire Starter. The device produces a miniature flame, which you can use to light 
     :size "Medium"
     :speed 30
     :darkvision 60
-    :source "Volo's Guide to Monsters"
+    :source :vgm
     :modifiers [(mod5e/skill-proficiency :stealth)]
     :languages ["Common" "Goblin"]
     :traits [{:name "Long Limbed"}
@@ -633,7 +672,7 @@ Fire Starter. The device produces a miniature flame, which you can use to light 
     :size "Medium"
     :speed 30
     :darkvision 60
-    :source "Volo's Guide to Monsters"
+    :source :vgm
     :languages ["Common" "Goblin"]
     :traits [{:name "Fury of the Small"}
              {:name "Nimble Escape"}]}))
@@ -645,7 +684,7 @@ Fire Starter. The device produces a miniature flame, which you can use to light 
     :size "Medium"
     :speed 30
     :darkvision 60
-    :source "Volo's Guide to Monsters"
+    :source :vgm
     :selections [(t/selection
                   "Martial Weapon Proficiencies"
                   (opt5e/weapon-proficiency-options (opt5e/martial-weapons opt5e/weapons))
@@ -662,7 +701,7 @@ Fire Starter. The device produces a miniature flame, which you can use to light 
     :size "Medium"
     :speed 30
     :darkvision 60
-    :source "Volo's Guide to Monsters"
+    :source :vgm
     :languages ["Common" "Draconic"]
     :traits [{:name "Grovel, Cower, and Beg"}
              {:name "Pack Tactics"}
@@ -675,7 +714,7 @@ Fire Starter. The device produces a miniature flame, which you can use to light 
     :size "Medium"
     :speed 30
     :darkvision 60
-    :source "Volo's Guide to Monsters"
+    :source :vgm
     :modifiers [(mod5e/skill-proficiency :intimidation)]
     :languages ["Common" "Orc"]
     :traits [{:name "Aggressive"}
@@ -689,7 +728,7 @@ Fire Starter. The device produces a miniature flame, which you can use to light 
     :size "Medium"
     :speed 30
     :darkvision 60
-    :source "Volo's Guide to Monsters"
+    :source :vgm
     :modifiers [(mod5e/spells-known 0 :poison-spray :cha "Yuan-Ti")
                 (mod5e/spells-known 1 :animal-friendship :cha "Yuan-Ti" 1 "unlimited uses, can only target snakes")
                 (mod5e/spells-known 2 :suggestion :cha "Yuan-Ti" 3 "one use per long rest")

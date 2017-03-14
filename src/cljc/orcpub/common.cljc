@@ -24,3 +24,16 @@
      (assoc m2 k (val-fn k v)))
    {}
    m))
+
+(defn list-print [list]
+  (case (count list)
+    0 ""
+    1 (str (first list))
+    2 (s/join "and" list)
+    (str
+     (s/join ", " (butlast list))
+     ", and "
+     (last list))))
+
+(defn round-up [num]
+  (int (Math/ceil (double num))))

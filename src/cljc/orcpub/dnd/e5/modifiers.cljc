@@ -119,14 +119,12 @@
 (defn trait [name & [description level summary conditions]]
   (trait-cfg {:name name :description description :level level :summary summary :conditions conditions}))
 
-(defmacro dependent-trait [name description level summary conditions]
+(defmacro dependent-trait [{:keys [level conditions] :as t}]
   `(mods/modifier ~'?traits
                   (if (or (nil? ~level) (>= ~'?total-levels ~level))
                     (conj
                      ~'?traits
-                     {:name ~name
-                      :description ~description
-                      :summary ~summary})
+                     ~t)
                     ~'?traits)
                   nil
                   nil
@@ -262,3 +260,6 @@
 
 (defn critical [roll-value]
   (mods/set-mod ?critical roll-value))
+
+(defn bonus-action [action]
+  (mods/vec-mod ?bonus-actions action))

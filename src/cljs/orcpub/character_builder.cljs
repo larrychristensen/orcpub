@@ -649,30 +649,44 @@
     equipment)])
 
 (defn traits-section [traits]
-  (display-section
-   "Features, Traits, & Feats" nil
-   [:div.f-s-14
-    (map
-     (fn [{:keys [name description summary page]}]
-       ^{:key name}
-       [:p.m-t-10
-        [:span.f-w-600.i name "."]
-        [:span.f-w-n.m-l-10 (or summary description)]])
-     traits)]))
+  (if (seq traits)
+    (display-section
+     "Features, Traits, & Feats" nil
+     [:div.f-s-14
+      (map
+       (fn [{:keys [name description summary page]}]
+         ^{:key name}
+         [:p.m-t-10
+          [:span.f-w-600.i name "."]
+          [:span.f-w-n.m-l-10 (or summary description)]])
+       traits)])))
 
 (defn attacks-section [attacks]
-  (display-section
-   "Attacks" nil
-   [:div.f-s-14
-    (map
-     (fn [{:keys [name area-type description damage-die damage-die-count damage-type save save-dc] :as attack}]
-       (prn "AREA_TYPE" area-type)
-       ^{:key name}
-       [:p.m-t-10
-        [:span.f-w-600.i name "."]
-        [:span.f-w-n.m-l-10 (disp5e/attack-description attack)]])
-     attacks)]))
+  (if (seq attacks)
+    (display-section
+     "Attacks" nil
+     [:div.f-s-14
+      (map
+       (fn [{:keys [name area-type description damage-die damage-die-count damage-type save save-dc] :as attack}]
+         (prn "AREA_TYPE" area-type)
+         ^{:key name}
+         [:p.m-t-10
+          [:span.f-w-600.i name "."]
+          [:span.f-w-n.m-l-10 (disp5e/attack-description attack)]])
+       attacks)])))
 
+(defn bonus-actions-section [bonus-actions]
+  (if (seq bonus-actions)
+    (display-section
+     "Bonus Actions" nil
+     [:div.f-s-14
+      (map
+       (fn [bonus-action]
+         ^{:key name}
+         [:p.m-t-10
+          [:span.f-w-600.i (:name bonus-action) "."]
+          [:span.f-w-n.m-l-10 (disp5e/action-description bonus-action)]])
+       bonus-actions)])))
 
 (defn character-display [built-char]
   (let [race (es/entity-val built-char :race)
@@ -695,7 +709,8 @@
         weapons (es/entity-val built-char :weapons)
         equipment (es/entity-val built-char :equipment)
         traits (es/entity-val built-char :traits)
-        attacks (es/entity-val built-char :attacks)]
+        attacks (es/entity-val built-char :attacks)
+        bonus-actions (es/entity-val built-char :bonus-actions)]
     [:div
      [:div.f-s-24.f-w-600.m-b-16.text-shadow
       [:span race]
@@ -748,7 +763,15 @@
              (doall
               (map
                (fn [{:keys [abilities types]}]
-                 [:li (str "advantage on " (s/join ", " (map (comp s/lower-case :name opt5e/abilities-map) abilities)) " saves against being " (s/join ", " (map (comp s/lower-case :name opt5e/conditions-map) types)))])
+                 [:li (str "advantage on "
+                           (common/list-print (map (comp s/lower-case :name opt5e/abilities-map) abilities))
+                           " saves against "
+                           (common/list-print
+                                   (map #(let [cond (opt5e/conditions-map %)]
+                                           (if cond
+                                             (str "being " (s/lower-case (:name cond)))
+                                             (name %)))
+                                        types)))])
                save-advantage))])]]]
        [:div.w-100-p
         [abilities-radar 187 (es/entity-val built-char :abilities) ability-bonuses]]]
@@ -773,6 +796,7 @@
        [equipment-section "Armor" armor opt5e/armor-map]
        [equipment-section "Equipment" equipment opt5e/equipment-map]
        [attacks-section attacks]
+       [bonus-actions-section bonus-actions]
        [traits-section traits]]]]))
 
 

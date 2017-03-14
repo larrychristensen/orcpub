@@ -58,23 +58,27 @@
    "\n\n"
    (map
     (fn [{:keys [name description summary page source]}]
-      (str name ". " (or summary description) (if page (str " (" (or source "PHB ") page ")"))))
+      (str name ". " (or summary description) (if page (str " (" (disp5e/sources (or source :phb)) " " page ")"))))
     traits)))
 
+(defn header-string [title]
+  (str "----------" title "----------"))
+
+(defn bonus-actions-string [bonus-actions]
+  (if (seq bonus-actions)
+    (str
+     (header-string "Bonus Actions")
+     "\n"
+     (s/join
+      "\n\n"
+      (map
+       (fn [bonus-action]
+         (str (:name bonus-action) ". " (disp5e/action-description bonus-action)))
+       bonus-actions)))))
+
 (defn traits-fields [built-char]
-  (let [traits (sort-by :name (es/entity-val built-char :traits))
-        total-len (total-length traits)
-        half-len (/ total-len 2)
-        half-traits (reduce
-                     (fn [ht t]
-                       (if (> (total-length ht) half-len)
-                         (reduced ht)
-                         (conj ht t)))
-                     []
-                     traits)
-        other-half-traits (drop (count half-traits) traits)]
-    {:features-and-traits (traits-string half-traits)
-     :features-and-traits-2 (traits-string other-half-traits)}))
+  {:features-and-traits (bonus-actions-string (sort-by :name (es/entity-val built-char :bonus-actions)))
+   :features-and-traits-2 (traits-string (sort-by :name (es/entity-val built-char :traits)))})
 
 (defn attacks-string [attacks]
   (s/join
@@ -161,7 +165,9 @@
                (map-indexed
                 (fn [spell-index spell]
                   {(keyword (str "spells-" level "-" (inc spell-index) suffix))
-                   (:name (spells/spell-map (:key spell)))})
+                   (str (:name (spells/spell-map (:key spell))) (let [qualifier (:qualifier spell)]
+                                                                  (if qualifier
+                                                                    (str " (" qualifier ")"))))})
                 spells))
              spells)]))
        spell-pages)))))
