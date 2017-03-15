@@ -163,11 +163,15 @@
      (flatten
       (map-indexed
        (fn [i {:keys [ability classes spells]}]
-         (let [suffix (str "-" (inc i))]
-           [{(keyword (str "spellcasting-class" suffix)) (s/join ", " classes)
-             (keyword (str "spellcasting-ability" suffix)) (:name (opt5e/abilities-map ability))
-             (keyword (str "spell-save-dc" suffix)) (save-dc-fn ability)
-             (keyword (str "spell-attack-bonus" suffix)) (common/bonus-str (attack-mod-fn ability))}
+         (let [suffix (str "-" (inc i))
+               class-header {(keyword (str "spellcasting-class" suffix)) (s/join ", " classes)}]
+           [(if ability
+              (merge
+               class-header
+               {(keyword (str "spellcasting-ability" suffix)) (:name (opt5e/abilities-map ability))
+                (keyword (str "spell-save-dc" suffix)) (save-dc-fn ability)
+                (keyword (str "spell-attack-bonus" suffix)) (common/bonus-str (attack-mod-fn ability))})
+              class-header)
             (map
              (fn [{:keys [level spells]}]
                (map-indexed

@@ -669,8 +669,14 @@
               [:div
                (str
                 (:name (spells/spell-map (:key spell)))
-                " (" (s/upper-case (name (:ability spell)))
-                (if (:qualifier spell) (str ", " (:qualifier spell)))
+                " ("
+                (s/join
+                 ", "
+                 (remove
+                  nil?
+                  [(if (:ability spell) (s/upper-case (name (:ability spell))))
+                   (if (:qualifier spell) (:qualifier spell))]))
+                
                 ")")]))
           (into
            (sorted-set-by compare-spell)

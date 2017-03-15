@@ -141,12 +141,12 @@
        (let [body-map (io.pedestal.http.route/parse-query-string (slurp (get-in context [:request :body])))
              fields (clojure.edn/read-string (:body body-map))
              input (.openStream (io/resource (cond
-                                               (:spellcasting-ability-6 fields) "fillable-char-sheet-6-spells.pdf"
-                                               (:spellcasting-ability-5 fields) "fillable-char-sheet-5-spells.pdf"
-                                               (:spellcasting-ability-4 fields) "fillable-char-sheet-4-spells.pdf"
-                                               (:spellcasting-ability-3 fields) "fillable-char-sheet-3-spells.pdf"
-                                               (:spellcasting-ability-2 fields) "fillable-char-sheet-2-spells.pdf"
-                                               (:spellcasting-ability-1 fields) "fillable-char-sheet-1-spells.pdf"
+                                               (find fields :spellcasting-class-6) "fillable-char-sheet-6-spells.pdf"
+                                               (find fields :spellcasting-class-5) "fillable-char-sheet-5-spells.pdf"
+                                               (find fields :spellcasting-class-4) "fillable-char-sheet-4-spells.pdf"
+                                               (find fields :spellcasting-class-3) "fillable-char-sheet-3-spells.pdf"
+                                               (find fields :spellcasting-class-2) "fillable-char-sheet-2-spells.pdf"
+                                               (find fields :spellcasting-class-1) "fillable-char-sheet-1-spells.pdf"
                                                :else "fillable-char-sheet-0-spells.pdf")))
              output (ByteArrayOutputStream.)
              user-agent (get-in context [:request :headers "user-agent"])

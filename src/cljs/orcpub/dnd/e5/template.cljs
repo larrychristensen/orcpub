@@ -1220,7 +1220,30 @@ If you are able to cast spells, you can't cast them or concentrate on them while
     :levels {5 {:modifiers [(mod5e/extra-attack)
                             (mod/modifier ?speed-with-armor (fn [armor] (if (not= :heavy (:type armor))
                                                                             (+ 10 ?speed)
-                                                                            ?speed)))]}}
+                                                                            ?speed)))]}
+             9 {:modifiers [(mod5e/dependent-trait
+                             {:name "Brutal Critical"
+                              :page 49
+                              :summary (let [die-count (condp <= (get-in ?levels [:barbarian :class-level])
+                                                         17 "three"
+                                                         13 "two"
+                                                         "one")]
+                                         (str die-count
+                                              " additional damage "
+                                              (if (= "one" die-count)
+                                                "die"
+                                                "dice")
+                                              " for melee criticals"))
+                              :description "Beginning at 9th level, you can roll one additional weapon damage die when determining the extra damage for a critical hit with a melee attack. This increases to two additional dice at 13th level and three additional dice at 17th level."})]}
+             18 {:modifiers [(mod5e/dependent-trait
+                              {:name "Indomitable Might"
+                               :level 18
+                               :page 49
+                               :summary (let [str-score (:str ?abilities)]
+                                          (str "Min strength check value is " str-score))
+                               :description "Beginning at 18th level, if your total for a Strength check is less than your Strength score, you can use that score in place of the total."})]}
+             20 {:modifiers [(mod5e/ability :str 4)
+                            (mod5e/ability :con 4)]}}
     :traits [{:name "Reckless Attack"
               :level 2
               :page 48
@@ -1233,49 +1256,109 @@ If you are able to cast spells, you can't cast them or concentrate on them while
               :description "At 2nd level, you gain an uncanny sense of when things nearby aren't as they should be, giving you an edge when you dodge away from danger. You have advantage on Dexterity saving throws against effects that you can see, such as traps and spells. To gain this benefit, you can't be blinded, deafened, or incapacitated."}
              {:name "Feral Instinct"
               :level 7
+              :page 49
+              :summary "Advantage on initiative, surprise doesn't keep you from attacking if you enter rage"
               :description "By 7th level, your instincts are so honed that you have advantage on initiative rolls. Additionally, if you are surprised at the beginning of combat and aren't incapacitated, you can act normally on your first turn, but only if you enter your rage before doing anything else on that turn."}
-             {:name "Brutal Critical"
-              :level 9
-              :description "Beginning at 9th level, you can roll one additional weapon damage die when determining the extra damage for a critical hit with a melee attack. This increases to two additional dice at 13th level and three additional dice at 17th level."}
              {:name "Relentless Rage"
               :level 11
+              :page 49
+              :summary "If raging, are reduced to 0 HP, aren't killed, and make a DC 10 save (+5 for each time you've used this feature between rests), you go to 1 HP instead."
               :description "Starting at 11th level, your rage can keep you fighting despite grievous wounds. If you drop to 0 hit points while you're raging and don't die outright, you can make a DC 10 Constitution saving throw. If you succeed, you drop to 1 hit point instead. Each time you use this feature after the first, the DC increases by 5. When you finish a short or long rest, the DC resets to 10."}
              {:name "Persistent Rage"
               :level 15
-              :description "Beginning at 15th level, your rage is so fierce that it ends early only if you fall unconscious or if you choose to end it."}
-             {:name "Indomitable Might"
-              :level 18
-              :description "Beginning at 18th level, if your total for a Strength check is less than your Strength score, you can use that score in place of the total."}
-             {:name "Primal Champion"
-              :level 20
-              :description "At 20th level, you embody the power of the wilds. Your Strength and Constitution scores increase by 4. Your maximum for those scores is now 24."}]
+              :page 49
+              :summary "rage only ends early if you choose to end it or you fall unconscious"
+              :description "Beginning at 15th level, your rage is so fierce that it ends early only if you fall unconscious or if you choose to end it."}]
     :subclass-level 3
     :subclass-title "Primal Path"
     :subclass-help "Your primal path shapes the nature of your barbarian rage and gives you additional features."
     :subclasses [{:name "Path of the Beserker"
+                  :levels {10 {:modifiers [(mod5e/action
+                                            {:name "Intimidating Presence"
+                                             :level 10
+                                             :page 49
+                                             :summary (str "Frighten (Wisdom save DC " (+ 8 (:cha ?ability-bonuses) ?prof-bonus) ") a creature with 30 ft.")
+                                             :description "Beginning at 10th level, you can use your action to frighten someone with your menacing presence. When you do so, choose one creature that you can see within 30 feet of you. If the creature can see or hear you, it must succeed on a Wisdom saving throw (DC equal to 8 + your proficiency bonus + your Charisma modifier) or be frightened of you until the end of your next turn. On subsequent turns, you can use your action to extend the duration of this effect on the frightened creature until the end of your next turn. This effect ends if the creature ends its turn out of line of sight or more than 60 feet away from you. If the creature succeeds on its saving throw, you can't use this feature on that creature again for 24 hours."})]}
+                           14 {:modifiers [(mod5e/reaction
+                                           {:name "Retaliation"
+                                            :page 49
+                                            :level 14
+                                            :summary "Make a melee weapon attack against a creature within 5 ft. that deals damage to you."
+                                            :description "Starting at 14th level, when you take damage from a creature that is within 5 feet of you, you can use your reaction to make a melee weapon attack against that creature."})]}}
                   :traits [{:name "Frenzy"
                             :level 3
+                            :page 49
+                            :summary "You can frenzy when you rage, affording you a single melee weapon attack as a bonus action on each turn until the rage ends. When the rage ends, you suffer 1 level of exhaustrion"
                             :description "Starting when you choose this path at 3rd level, you can go into a frenzy when you rage. If you do so, for the duration of your rage you can make a single melee weapon attack as a bonus action on each of your turns after this one. When your rage ends, you suffer one level of exhaustion (as described in appendix A)."}
                            {:name "Mindless Rage"
                             :level 6
-                            :description "Beginning at 6th level, you can't be charmed or frightened while raging. If you are charmed or frightened when you enter your rage, the effect is suspended for the duration of the rage."}
-                           {:name "Intimidating Presence"
-                            :level 10
-                            :description "Beginning at 10th level, you can use your action to frighten someone with your menacing presence. When you do so, choose one creature that you can see within 30 feet of you. If the creature can see or hear you, it must succeed on a Wisdom saving throw (DC equal to 8 + your proficiency bonus + your Charisma modifier) or be frightened of you until the end of your next turn. On subsequent turns, you can use your action to extend the duration of this effect on the frightened creature until the end of your next turn. This effect ends if the creature ends its turn out of line of sight or more than 60 feet away from you. If the creature succeeds on its saving throw, you can't use this feature on that creature again for 24 hours."}
-                           {:name "Retaliation"
-                            :level 14
-                            :description "Starting at 14th level, when you take damage from a creature that is within 5 feet of you, you can use your reaction to make a melee weapon attack against that creature."}]}
+                            :page 49
+                            :summary "Can't be charmed or frightened while raging."
+                            :description "Beginning at 6th level, you can't be charmed or frightened while raging. If you are charmed or frightened when you enter your rage, the effect is suspended for the duration of the rage."}]}
                  {:name "Path of the Totem Warrior"
-                  :traits [{:name "Spirit Seeker"
-                            :level 3}
-                           {:name "Totem Spirit"
-                            :level 3}
-                           {:name "Aspect of the Beast"
-                            :level 6}
-                           {:name "Spirit Walker"
-                            :level 10}
-                           {:name "Totemic Attunement"
-                            :level 14}]}]}
+                  :levels {3 {:modifiers [(mod5e/spells-known 2 :beast-sense nil "Barbarian" 1 "ritual only")
+                                          (mod5e/spells-known 1 :speak-with-animals nil "Barbarian" 1 "ritual only")]
+                              :selections [(t/selection
+                                            "Totem Spirit"
+                                            [(t/option-cfg
+                                              {:name "Bear"
+                                               :modifiers [(mod5e/trait-cfg
+                                                            {:name "Totem Spirit: Bear"
+                                                             :page 50
+                                                             :summary "While raging, you have resistance to all damage but psychic damage"})]})
+                                             (t/option-cfg
+                                              {:name "Eagle"
+                                               :modifiers [(mod5e/trait-cfg
+                                                            {:name "Totem Spirit: Eagle"
+                                                             :page 50
+                                                             :summary "While raging and not wearing heavy armor, opportunity attacks against you have disadvantage, and you can Dash as a bonus action."})]})
+                                             (t/option-cfg
+                                              {:name "Wolf"
+                                               :modifiers [(mod5e/trait-cfg
+                                                            {:name "Totem Spirit: Wolf"
+                                                             :page 50
+                                                             :summary "While raging, allies have advantage against enemies within 5 ft."})]})])]}
+                           6 {:selections [(t/selection
+                                            "Aspect of the Beast"
+                                            [(t/option-cfg
+                                              {:name "Bear"
+                                               :modifiers [(mod5e/trait-cfg
+                                                            {:name "Aspect of the Beast: Bear"
+                                                             :page 50
+                                                             :summary "2X carrying capacity, advantage lift, push, pull, or break Strength checks."})]})
+                                             (t/option-cfg
+                                              {:name "Eagle"
+                                               :modifiers [(mod5e/trait-cfg
+                                                            {:name "Aspect of the Beast: Eagle"
+                                                             :page 50
+                                                             :summary "See clearly up to a mile as if no more than 100 ft., no disadvantage on perception checks in dim light."})]})
+                                             (t/option-cfg
+                                              {:name "Wolf"
+                                               :modifiers [(mod5e/trait-cfg
+                                                            {:name "Aspect of the Beast: Wolf"
+                                                             :page 50
+                                                             :summary "Track at fast pace, stealthy at normal pace"})]})])]}
+                           10 {:modifiers [(mod5e/spells-known 5 :commune-with-nature nil "Barbarian" 1 "ritual only")]}
+                           14 {:selections [(t/selection
+                                            "Totemic Attunement"
+                                            [(t/option-cfg
+                                              {:name "Bear"
+                                               :modifiers [(mod5e/trait-cfg
+                                                            {:name "Totemic Attunement: Bear"
+                                                             :page 50
+                                                             :summary "While raging, hostile creatures within 5 ft. have disadvantage on attack rolls against anyone but you."})]})
+                                             (t/option-cfg
+                                              {:name "Eagle"
+                                               :modifiers [(mod5e/trait-cfg
+                                                            {:name "Totemic Attunement: Eagle"
+                                                             :page 50
+                                                             :summary "While raging, you gain flying speed equal to your walking speed, falling if you end your turn in the air."})]})
+                                             (t/option-cfg
+                                              {:name "Wolf"
+                                               :modifiers [(mod5e/trait-cfg
+                                                            {:name "Totemic Attunement: Wolf"
+                                                             :page 50
+                                                             :summary "While raging, if you hit a Large or smaller creature, you can use a bonus action to knock it prone."})]})])]}}}]}
    character-ref))
 
 (defn bard-option [character-ref]
