@@ -560,7 +560,7 @@
   [:div.m-t-20
    [:span.f-s-16.f-w-600 title]
    [:div {:class-name (if list? "m-t-0" "m-t-4")}
-    (if icon-cls [:i.fa.f-s-32.m-r-18.white {:class-name icon-cls}])
+    (if icon-cls [:i.fa.m-r-18.white {:class-name icon-cls}])
     [:span.f-s-24.f-w-600
      value]]])
 
@@ -576,7 +576,7 @@
 (defn armor-class-section [armor-class armor-class-with-armor equipped-armor]
   [display-section
    "Armor Class"
-   "fa-shield"
+   "fa-shield f-s-32"
    [:span
     [:span
      [:span armor-class]
@@ -603,28 +603,44 @@
                  [:span.display-section-qualifier-text (str "(" (:name armor) " + shield)")]])]))
          (dissoc equipped-armor :shield)))])]])
 
-(defn speed-section [speed speed-with-armor equipped-armor]
-  [display-section
-   "Speed"
-   "fa-tachometer"
-   (if speed-with-armor
+(defn speed-section [built-char]
+  (let [speed (es/entity-val built-char :speed)
+        speed-with-armor (es/entity-val built-char :speed-with-armor)
+        unarmored-speed-bonus (es/entity-val built-char :unarmored-speed-bonus)
+        equipped-armor (es/entity-val built-char :armor)]
+    [display-section
+     "Speed"
+     "fa-tachometer f-s-24"
      [:span
       [:span
-       [:span (speed-with-armor nil)]
-       [:span.display-section-qualifier-text "(unarmored)"]]
-      [:div.m-l-50
-       (doall
-        (map
-         (fn [[armor-kw _]]
-           (let [armor (opt5e/armor-map armor-kw)
-                 speed (speed-with-armor armor)]
-             ^{:key armor-kw}
-             [:div
-              [:div
-               [:span speed]
-               [:span.display-section-qualifier-text (str "(" (:name armor) " armor)")]]]))
-         (dissoc equipped-armor :shield)))]]
-     speed)])
+       [:span (+ (or unarmored-speed-bonus 0)
+                 (if speed-with-armor
+                   (speed-with-armor nil)
+                   speed))]
+       (if (or unarmored-speed-bonus
+               speed-with-armor)
+         [:span.display-section-qualifier-text "(unarmored)"])]
+      (if speed-with-armor
+        [:div.m-l-40
+         (doall
+          (map
+           (fn [[armor-kw _]]
+             (let [armor (opt5e/armor-map armor-kw)
+                   speed (speed-with-armor armor)]
+               ^{:key armor-kw}
+               [:div
+                [:div
+                 [:span speed]
+                 [:span.display-section-qualifier-text (str "(" (:name armor) " armor)")]]]))
+           (dissoc equipped-armor :shield)))]
+        (if unarmored-speed-bonus
+          [:div.m-l-40
+           [:span
+            [:span speed]
+            [:span.display-section-qualifier-text "(armored)"]]]))]
+     (let [swim-speed (es/entity-val built-char :swimming-speed)]
+       (if swim-speed
+         [:div [:span swim-speed] [:span.display-section-qualifier-text "(swim)"]]))]))
 
 (defn list-item-section [list-name items & [name-fn]]
   [list-display-section list-name nil
@@ -756,8 +772,8 @@
          [:img.character-image.w-100-p.m-b-20 {:src (or (get-in @character-ref [::entity/values :image-url]) "image/barbarian-girl.png")}]]
         [:div.w-50-p
          [armor-class-section armor-class armor-class-with-armor armor]
-         [display-section "Hit Points" "fa-heart-o" (es/entity-val built-char :max-hit-points)]
-         [speed-section (es/entity-val built-char :speed) (es/entity-val built-char :speed-with-armor) armor]
+         [display-section "Hit Points" "fa-heart-o f-s-24" (es/entity-val built-char :max-hit-points)]
+         [speed-section built-char]
          #_[display-section "Speed" nil
           (let [unarmored-speed-bonus (es/entity-val built-char :unarmored-speed-bonus)
                 speed (es/entity-val built-char :speed)

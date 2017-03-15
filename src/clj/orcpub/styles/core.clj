@@ -48,7 +48,9 @@
    [:.f-s-18
     {:font-size "18px"}]
    [:.f-s-24
-    {:font-size "24px"}]
+    {:font-size "24px !important"}]
+   [:.f-s-28
+    {:font-size "28px"}]
    [:.f-s-32
     {:font-size "32px !important"}]
    [:.f-s-36
