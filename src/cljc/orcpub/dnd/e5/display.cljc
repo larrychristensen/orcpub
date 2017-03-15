@@ -23,6 +23,7 @@
    (name units)))
 
 (defn attack-description [{:keys [description attack-type area-type damage-type damage-die damage-die-count damage-modifier save save-dc page source] :as attack}]
+  (prn "SAVE" attack)
   (str
    (if description (str description ", "))
    (case attack-type
@@ -33,7 +34,7 @@
      "melee, ")
    damage-die-count "d" damage-die (if damage-modifier (common/mod-str damage-modifier))
    " "
-   (clojure.core/name damage-type)
+   (if damage-type (clojure.core/name damage-type))
    " damage"
    (if save (str ", DC" save-dc " " (clojure.core/name save) " save"))
    (if source (str " (" (source-description source page) ")"))))

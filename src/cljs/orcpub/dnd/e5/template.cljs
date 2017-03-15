@@ -376,18 +376,22 @@
     :speed 30
     :languages ["Draconic" "Common"]
     :modifiers [(mod5e/attack
-                 (merge
-                  ?draconic-ancestry-breath-weapon
-                  {:name "Breath Weapon"
-                   :attack-type :area
-                   :damage-die 6
-                   :page 34
-                   :damage-die-count (condp <= ?total-levels
-                                       16 5
-                                       11 4
-                                       6 3
-                                       2)
-                   :save-dc (+ 8 (:con ?ability-bonuses) ?prof-bonus)}))]
+                 (let [breath-weapon ?draconic-ancestry-breath-weapon
+                       damage-type (:damage-type breath-weapon)]
+                   (merge
+                    breath-weapon
+                    {:name "Breath Weapon"
+                     :description (if damage-type
+                                    (s/capitalize (name damage-type)))
+                     :attack-type :area
+                     :damage-die 6
+                     :page 34
+                     :damage-die-count (condp <= ?total-levels
+                                         16 5
+                                         11 4
+                                         6 3
+                                         2)
+                     :save-dc (+ 8 (:con ?ability-bonuses) ?prof-bonus)})))]
     :selections [(t/selection
                   "Draconic Ancestry"
                   (map
