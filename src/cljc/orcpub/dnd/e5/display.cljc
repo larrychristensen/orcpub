@@ -26,7 +26,7 @@
      2 "twice"
      (str amount " times"))
    "/"
-   (name units)))
+   (s/replace (common/safe-name units) #"-" " ")))
 
 (defn attack-description [{:keys [description attack-type area-type damage-type damage-die damage-die-count damage-modifier save save-dc page source] :as attack}]
   (prn "SAVE" attack)

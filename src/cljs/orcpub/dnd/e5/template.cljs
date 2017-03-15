@@ -829,9 +829,7 @@ Fire Starter. The device produces a miniature flame, which you can use to light 
     :modifiers [
                 (mod5e/spells-known 0 :thaumaturgy :cha "Tiefling")
                 (mod5e/spells-known 1 :hellish-rebuke :cha "Tiefling" 3)
-                (mod5e/spells-known 2 :darkness :cha "Tiefling" 5)]
-    :traits [{:name "Relentless Endurance" :description "When you are reduced to 0 hit points but not killed outright, you can drop to 1 hit point instead. You can't use this feature again until you finish a long rest."}
-                      {:name "Savage Attacks" :description "When you score a critical hit with a melee weapon attack, you can roll one of the weapon's damage dice one additional time and add it to the extra damage of the critical hit."}]}))
+                (mod5e/spells-known 2 :darkness :cha "Tiefling" 5)]}))
 
 (defn die-mean [die]
   (int (Math/ceil (/ (apply + (range 1 (inc die))) die))))
@@ -1520,6 +1518,18 @@ The extra hit points increase when you reach certain levels in this class: to 1d
                   " to damage from cantrips you cast")
     :name "Potent Spellcasting"}))
 
+(defn divine-strike [damage-desc page]
+  (mod5e/dependent-trait
+   {:level 8
+    :name "Divine Strike"
+    :page 60
+    :summary (str "Once each of your turns, add "
+                  (if (>= (?class-level :cleric) 14) 2 1)
+                  "d8 "
+                  damage-desc
+                  " damage to a successful weapon attack's damage")
+    :description "At 8th level, you gain the ability to infuse your weapon strikes with divine energy. Once on each of your turns when you hit a creature with a weapon attack, you can cause the attack to deal an extra 1d8 radiant damage to the target. When you reach 14th level, the extra damage increases to 2d8."}))
+
 (defn cleric-option [character-ref]
   (class-option
    {:name "Cleric",
@@ -1607,14 +1617,7 @@ The extra hit points increase when you reach certain levels in this class: to 1d
                                                           (* 5 (?class-level :cleric))
                                                           " HPs healing among any creatures within 30 ft., each can be restored to at most 1/2 their HP max")
                                             :description "Starting at 2nd level, you can use your Channel Divinity to heal the badly injured.\nAs an action, you present your holy symbol and evoke healing energy that can restore a number of hit points equal to five times your cleric level. Choose any creatures within 30 feet of you, and divide those hit points among them. This feature can restore a creature to no more than half of its hit point maximum. You can't use this feature on an undead or a construct."})]}
-                           8 {:modifiers [(mod5e/dependent-trait
-                                           {:level 8
-                                            :name "Divine Strike"
-                                            :page 60
-                                            :summary (str "Once each turn, add "
-                                                          (if (>= (?class-level :cleric) 14) 2 1)
-                                                          "d8 radiant damage to a successful weapon attack's damage")
-                                            :description "At 8th level, you gain the ability to infuse your weapon strikes with divine energy. Once on each of your turns when you hit a creature with a weapon attack, you can cause the attack to deal an extra 1d8 radiant damage to the target. When you reach 14th level, the extra damage increases to 2d8."})]}}
+                           8 {:modifiers [(divine-strike "radiant" 60)]}}
                   :traits [{:level 1
                             :name "Disciple of Life"
                             :page 60
@@ -1680,7 +1683,7 @@ The extra hit points increase when you reach certain levels in this class: to 1d
                                {:name "Warding Flare"
                                 :page 61
                                 :summary "impose disadvantage on an attack roll"
-                                :frequency {:units :rest
+                                :frequency {:units :long-rest
                                             :amount (max 1 (?ability-bonuses :wis))}})]
                   :levels {2 {:modifiers [(mod5e/action
                                            {:level 2
@@ -1733,13 +1736,7 @@ The extra hit points increase when you reach certain levels in this class: to 1d
                                             :range {:plural :feet
                                                     :amount 30}
                                             :summary "to a creature that takes fire, cold, acid, lighting, or thunder damage, grant resistance to that damage"})]}
-                           8 {:modifiers [(mod5e/dependent-trait
-                                           {:name "Divine Strike"
-                                            :level 8
-                                            :page 62
-                                            :summary (str "once on your turn, add "
-                                                          (if (>= (?class-level :cleric)) 2 1)
-                                                          "d8 cold, fire, or lighting damage to a successful attack")})]}
+                           8 {:modifiers [(divine-strike "cold, fire, or lighting" 62)]}
                            17 {:modifiers [(mod5e/bonus-action
                                             {:name "Master of Nature"
                                              :level 17
@@ -1762,16 +1759,28 @@ The extra hit points increase when you reach certain levels in this class: to 1d
                               (cleric-spell 4 :control-water 7)
                               (cleric-spell 4 :ice-storm 7)
                               (cleric-spell 5 :destructive-wave 9)
-                              (cleric-spell 5 :insect-plague 9)]
-                  :traits [{:name "Wrath of the Storm"}
-                           {:name "Channel Divinity: Destructive Wrath"
-                            :level 2}
-                           {:name "Thunderbolt Strike"
-                            :level 6}
-                           {:name "Divine Strike"
-                            :level 8}
+                              (cleric-spell 5 :insect-plague 9)
+                              (mod5e/reaction
+                               {:name "Wrath of the Storm"
+                                :page 62
+                                :frequency {:units :long-rest
+                                            :amount (?ability-bonuses :wis)}
+                                :summary (str "When a creature within 5 ft. hits you, you deal 2d8 lightning or thunder damage to them (half that on successful DC "
+                                              (?spell-save-dc :wis)
+                                              " Dexterity save).")})]
+                  :levels {2 {:modifiers [(mod5e/trait-cfg
+                                           {:name "Channel Divinity: Destructive Wrath"
+                                            :page 62
+                                            :level 2
+                                            :summary "Rather than roll lighting or thunder damage, deal max damage"})]}
+                           8 {:modifiers [(divine-strike "thunder" 62)]}}
+                  :traits [{:name "Thunderbolt Strike"
+                            :page 62
+                            :level 6
+                            :summary "Push a Large or smaller creature up to 10 ft. when you deal lightning damage to it"}
                            {:name "Stormborn"
-                            :level 17}]}
+                            :page 62
+                            :summary "Flying speed equal to your walking speed"}]}
                  {:name "Trickery Domain"
                   :modifiers [(cleric-spell 1 :charm-person 1)
                               (cleric-spell 1 :disguise-self 1)
@@ -1782,17 +1791,28 @@ The extra hit points increase when you reach certain levels in this class: to 1d
                               (cleric-spell 4 :dimension-door 7)
                               (cleric-spell 4 :polymorph 7)
                               (cleric-spell 5 :dominate-person 9)
-                              (cleric-spell 5 :modify-memory 9)]
-                  :traits [{:name "Blessing of the Trickster"
-                            :level 1}
-                           {:name "Channel Divinity: Invoke Duplicity"
-                            :level 2}
-                           {:name "Channel Divinity: Cloak of Shadows"
-                            :level 6}
-                           {:name "Divine Strike"
-                            :level 8}
-                           {:name "Improved Duplicity"
-                            :level 17}]}
+                              (cleric-spell 5 :modify-memory 9)
+                              (mod5e/action
+                               {:name "Blessing of the Trickster"
+                                :page 63
+                                :duration {:units :hour}
+                                :summary "Give another creature advantage on stealth checks"})]
+                  :levels {2 {:modifiers [(mod5e/action
+                                           {:name "Channel Divinity: Invoke Duplicity"
+                                            :level 2
+                                            :page 63
+                                            :summary "create illusion of yourself for 1 min. or concentration. Move it 30 ft. as a bonus action, cast spells as if in illusion's space, gain advantage on a creature both you and the illusion are within 5 ft. of"})]}
+                           6 {:modifiers [(mod5e/action
+                                           {:name "Channel Divinity: Cloak of Shadows"
+                                            :level 6
+                                            :page 63
+                                            :summary "become invisible until end of your next turn"})]}
+                           8 {:modifiers [(divine-strike "poison" 63)]}
+                           17 {:modifiers [(mod5e/action
+                                            {:name "Improved Duplicity"
+                                             :level 17
+                                             :page 63
+                                             :summary "when you use Invoke Duplicity, create up to 4 duplicates"})]}}}
                  {:name "War Domain"
                   :profs {:armor {:heavy true}
                           :weapon {:martial true}}

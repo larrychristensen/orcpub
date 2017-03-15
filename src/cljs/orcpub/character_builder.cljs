@@ -702,13 +702,15 @@
      [:div.f-s-14
       (map
        (fn [{:keys [name description summary page source]}]
-         ^{:key name}
-         [:p.m-t-10
-          [:span.f-w-600.i name "."]
-          [:span.f-w-n.m-l-10 (common/sentensize
-                               (str
-                                (or summary description)
-                                (if page (str " (" (disp5e/source-description source page) ")"))))]])
+         (let [desc (or summary description)]
+           ^{:key name}
+           [:p.m-t-10
+            [:span.f-w-600.i name (if desc ".")]
+            [:span.f-w-n.m-l-10 (if (or desc page)
+                                  (common/sentensize
+                                   (str
+                                    desc
+                                    (if page (str " (" (disp5e/source-description source page) ")")))))]]))
        (sort-by :name traits))])))
 
 (defn attacks-section [attacks]
@@ -797,7 +799,7 @@
                 speed)]
              (if swim-speed
                [:div [:span swim-speed] [:span.display-section-qualifier-text "(swim)"]])])]
-         [display-section "Darkvision" "fa-low-vision" (if darkvision (str darkvision " ft.") "--")]
+         [display-section "Darkvision" "fa-low-vision f-s-24" (if darkvision (str darkvision " ft.") "--")]
          [display-section "Initiative" nil (mod/bonus-str (es/entity-val built-char :initiative))]
          [display-section "Proficiency Bonus" nil (mod/bonus-str (es/entity-val built-char :prof-bonus))]
          [display-section "Passive Perception" nil (es/entity-val built-char :passive-perception)]

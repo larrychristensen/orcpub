@@ -52,6 +52,9 @@
 (defn climbing-speed [value]
   (mods/cum-sum-mod ?climbing-speed value "Climb Speed" (mods/bonus-str value)))
 
+(defn flying-speed [value]
+  (mods/cum-sum-mod ?flying-speed value "Flying Speed" (mods/bonus-str value)))
+
 (defn unarmored-speed-bonus [value]
   (mods/cum-sum-mod ?unarmored-speed-bonus value "Unarmored Speed" (mods/bonus-str value)))
 
