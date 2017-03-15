@@ -1825,17 +1825,30 @@ The extra hit points increase when you reach certain levels in this class: to 1d
                               (cleric-spell 4 :freedom-of-movement 7)
                               (cleric-spell 4 :stoneskin 7)
                               (cleric-spell 5 :flame-strike 9)
-                              (cleric-spell 5 :hold-monster 9)]
-                  :traits [{:name "War Priest"
-                            :level 1}
+                              (cleric-spell 5 :hold-monster 9)
+                              (mod5e/bonus-action
+                               {:name "War Priest"
+                                :level 1
+                                :page 63
+                                :frequency {:units :long-rest
+                                            :amount (?ability-bonuses :wis)}
+                                :summary "make one extra weapon attack when you use the Attack action"})]
+                  :levels {6 {:modifiers [(mod5e/reaction
+                                         {:name "Channel Divinity: War God's Blessing"
+                                          :level 6
+                                          :page 63
+                                          :summary "+10 to an attack roll made by a creature within 30 ft."})]}
+                           8 {:modifiers [(divine-strike nil 63)]}}
+                  :traits [
                            {:name "Channel Divinity: Guided Strike"
-                            :level 2}
-                           {:name "Channel Divinity: War God's Blessing"
-                            :level 6}
-                           {:name "Divine Strike"
-                            :level 8}
+                            :page 63
+                            :level 2
+                            :summary "+10 to an attack roll"}
+                           
                            {:name "Avatar of Battle"
-                            :level 17}]}]}
+                            :page 63
+                            :level 17
+                            :summary "from non-magical weapons, resistance to slashing, bludgeoning, and piercing damage"}]}]}
    character-ref))
 
 (defn druid-spell [spell-level spell-key min-level]
