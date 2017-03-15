@@ -391,7 +391,7 @@
                                          11 4
                                          6 3
                                          2)
-                     :save-dc (+ 8 (:con ?ability-bonuses) ?prof-bonus)})))]
+                     :save-dc (?spell-save-dc :con)})))]
     :selections [(t/selection
                   "Draconic Ancestry"
                   (map
@@ -559,7 +559,7 @@ Fire Starter. The device produces a miniature flame, which you can use to light 
                               :level 3
                               :page 105
                               :source :vgm
-                              :summary (str "For 1 minute, creatures within 10 ft. must succeed on a DC " (+ 8 ?prof-bonus (:cha ?ability-bonuses)) " cha save or be frightened of you. During that time also deal an additional " ?total-levels " necrotic damage to one target you deal damage to with a spell or attack.")})]}]}))
+                              :summary (str "For 1 minute, creatures within 10 ft. must succeed on a DC " (?spell-save-dc :cha) " cha save or be frightened of you. During that time also deal an additional " ?total-levels " necrotic damage to one target you deal damage to with a spell or attack.")})]}]}))
 
 (defn powerful-build [page]
   {:name "Powerful Build"
@@ -1284,7 +1284,7 @@ If you are able to cast spells, you can't cast them or concentrate on them while
                                             {:name "Intimidating Presence"
                                              :level 10
                                              :page 49
-                                             :summary (str "Frighten (Wisdom save DC " (+ 8 (:cha ?ability-bonuses) ?prof-bonus) ") a creature with 30 ft.")
+                                             :summary (str "Frighten (Wisdom save DC " (?spell-save-dc :cha) ") a creature with 30 ft.")
                                              :description "Beginning at 10th level, you can use your action to frighten someone with your menacing presence. When you do so, choose one creature that you can see within 30 feet of you. If the creature can see or hear you, it must succeed on a Wisdom saving throw (DC equal to 8 + your proficiency bonus + your Charisma modifier) or be frightened of you until the end of your next turn. On subsequent turns, you can use your action to extend the duration of this effect on the frightened creature until the end of your next turn. This effect ends if the creature ends its turn out of line of sight or more than 60 feet away from you. If the creature succeeds on its saving throw, you can't use this feature on that creature again for 24 hours."})]}
                            14 {:modifiers [(mod5e/reaction
                                            {:name "Retaliation"
@@ -1436,11 +1436,12 @@ Your Bardic Inspiration die changes when you reach certain levels in this class.
                               :page 54
                               :level 2
                               :summary (str "With a song, you and friendly creatures gain 1d"
-                                            (condp <= (class-level ?levels :bard)
-                                              9 8
+                                            (mod5e/level-val
+                                             (class-level ?levels :bard)
+                                             {9 8
                                               13 10
                                               17 12
-                                              6)
+                                              :default 6})
                                             " additional healing at the end of a short rest")
                               :description "Beginning at 2nd level, you can use soothing music or oration to help revitalize your wounded allies during a short rest. If you or any friendly creatures who can hear your performance regain hit points at the end of the short rest by spending one or more Hit Dice, each of those creatures regains an extra 1d6 hit points.
 The extra hit points increase when you reach certain levels in this class: to 1d8 at 9th level, to 1d10 at 13th level, and to 1d12 at 17th level."})]}
@@ -1510,11 +1511,20 @@ The extra hit points increase when you reach certain levels in this class: to 1d
 (defn cleric-spell [spell-level spell-key min-level]
   (mod5e/spells-known spell-level spell-key :wis "Cleric" min-level))
 
+(defn potent-spellcasting [page]
+  (mod5e/dependent-trait
+   {:level 8
+    :page page
+    :summary (str "Add "
+                  (common/bonus-str (?ability-bonuses :wis))
+                  " to damage from cantrips you cast")
+    :name "Potent Spellcasting"}))
+
 (defn cleric-option [character-ref]
   (class-option
    {:name "Cleric",
     :spellcasting {:level-factor 1
-                   :cantrips-known {1 3 4 4 10 5}
+                   :cantrips-known {1 3 4 1 10 1}
                    :known-mode :all
                    :ability :wis}
     :spellcaster true
@@ -1546,9 +1556,37 @@ The extra hit points increase when you reach certain levels in this class: to 1d
                     [(mod5e/weapon :crossbow-light 1)
                      (mod5e/equipment :crossbow-bolt 20)])
                    (weapon-option [:simple 1])])]
-    :traits [{:level 2 :name "Channel Divinity: Turn Undead" :description "As an action, you present your holy symbol and speak a prayer censuring the undead. Each undead that can see or hear you within 30 feet of you must make a Wisdom saving throw. If the creature fails its saving throw, it is turned for 1 minute or until it takes any damage.\nA turned creature must spend its turns trying to move as far away from you as it can, and it can't willingly move to a space within 30 feet of you. It also can't take reactions. For its action, it can use only the Dash action or try to escape from an effect that prevents it from moving. If there's nowhere to move, the creature can use the Dodge action."}
-             {:level 5 :name "Destroy Undead" :description "When an undead fails its saving throw against your Turn Undead feature, the creature is instantly destroyed if its challenge rating is at or below a certain threshold, as shown in the Destroy Undead table."}
-             {:level 10 :name "Divine Intervention" :description "You can call on your deity to intervene on your behalf when your need is great.\nImploring your deity's aid requires you to use your action. Describe the assistance you seek, and roll percentile dice. If you roll a number equal to or lower than your cleric level, your deity intervenes. The DM chooses the nature of the intervention; the e ect of any cleric spell or cleric domain spell would be appropriate.\nIf your deity intervenes, you can't use this feature again for 7 days. Otherwise, you can use it again after you  nish a long rest.\nAt 20th level, your call for intervention succeeds automatically, no roll required."}]
+    :levels {2 {:modifiers [(mod5e/action
+                             {:level 2
+                              :page 59
+                              :name "Channel Divinity: Turn Undead"
+                              :summary (str "undead within 30 feet must make a DC "
+                                            (?spell-save-dc :wis)
+                                            " Wisdom save or be turned for 1 min. or until damaged")
+                              :description "As an action, you present your holy symbol and speak a prayer censuring the undead. Each undead that can see or hear you within 30 feet of you must make a Wisdom saving throw. If the creature fails its saving throw, it is turned for 1 minute or until it takes any damage.\nA turned creature must spend its turns trying to move as far away from you as it can, and it can't willingly move to a space within 30 feet of you. It also can't take reactions. For its action, it can use only the Dash action or try to escape from an effect that prevents it from moving. If there's nowhere to move, the creature can use the Dodge action."})]}
+             5 {:modifiers [(mod5e/dependent-trait
+                             {:level 5
+                              :name "Destroy Undead"
+                              :page 59
+                              :summary (str "Destroy CR "
+                                            (let [level (?class-level :cleric)]
+                                              (mod5e/level-val
+                                               level
+                                               {5 "1/2"
+                                                8 1
+                                                11 2
+                                                14 3
+                                                17 4}))
+                                            " or less creatures who fail turn save.")
+                              :description "When an undead fails its saving throw against your Turn Undead feature, the creature is instantly destroyed if its challenge rating is at or below a certain threshold, as shown in the Destroy Undead table."})]}
+             10 {:modifiers [(mod5e/dependent-trait
+                              {:name "Divine Intervention"
+                               :page 59
+                               :summary (str
+                                         "You call for aid from your deity, succeeding "
+                                         (if (= 20 (class-level ?levels :cleric))
+                                           "automatically"
+                                           "if you make a percentile roll less than or equal to your cleric level"))})]}}
     :subclass-level 1
     :subclass-title "Divine Domain"
     :subclasses [{:name "Life Domain"
@@ -1563,20 +1601,33 @@ The extra hit points increase when you reach certain levels in this class: to 1d
                               (cleric-spell 4 :guardian-of-faith 7)
                               (cleric-spell 5 :mass-cure-wounds 9)
                               (cleric-spell 5 :raise-dead 9)]
+                  :levels {2 {:modifiers [(mod5e/action
+                                           {:name "Channel Divinity: Preserve Life"
+                                            :summary (str "Distribute "
+                                                          (* 5 (?class-level :cleric))
+                                                          " HPs healing among any creatures within 30 ft., each can be restored to at most 1/2 their HP max")
+                                            :description "Starting at 2nd level, you can use your Channel Divinity to heal the badly injured.\nAs an action, you present your holy symbol and evoke healing energy that can restore a number of hit points equal to five times your cleric level. Choose any creatures within 30 feet of you, and divide those hit points among them. This feature can restore a creature to no more than half of its hit point maximum. You can't use this feature on an undead or a construct."})]}
+                           8 {:modifiers [(mod5e/dependent-trait
+                                           {:level 8
+                                            :name "Divine Strike"
+                                            :page 60
+                                            :summary (str "Once each turn, add "
+                                                          (if (>= (?class-level :cleric) 14) 2 1)
+                                                          "d8 radiant damage to a successful weapon attack's damage")
+                                            :description "At 8th level, you gain the ability to infuse your weapon strikes with divine energy. Once on each of your turns when you hit a creature with a weapon attack, you can cause the attack to deal an extra 1d8 radiant damage to the target. When you reach 14th level, the extra damage increases to 2d8."})]}}
                   :traits [{:level 1
                             :name "Disciple of Life"
-                            :description "Also starting at 1st level, your healing spells are more e ective. Whenever you use a spell of 1st level or higher to restore hit points to a creature, the creature regains additional hit points equal to 2 + the spell's level."}
-                           {:level 2
-                            :name "Channel Divinity: Preserve Life"
-                            :description "Starting at 2nd level, you can use your Channel Divinity to heal the badly injured.\nAs an action, you present your holy symbol and evoke healing energy that can restore a number of hit points equal to  ve times your cleric level. Choose any creatures within 30 feet of you, and divide those hit points among them. This feature can restore a creature to no more than half of its hit point maximum. You can't use this feature on an undead or a construct."}
+                            :page 60
+                            :summary "1st level or greater healing spells increase healing by 2 + spell's level HPs"
+                            :description "Also starting at 1st level, your healing spells are more effective. Whenever you use a spell of 1st level or higher to restore hit points to a creature, the creature regains additional hit points equal to 2 + the spell's level."}
                            {:level 6
                             :name "Blessed Healer"
+                            :page 60
+                            :summary "When you cast spells that heal a creature other than you, you regain 2 + spell's level HPs"
                             :description "Beginning at 6th level, the healing spells you cast on others heal you as well. When you cast a spell of 1st level or higher that restores hit points to a creature other than you, you regain hit points equal to 2 + the spell's level."}
-                           {:level 8
-                            :name "Divine Strike"
-                            :description "At 8th level, you gain the ability to infuse your weapon strikes with divine energy. Once on each of your turns when you hit a creature with a weapon attack, you can cause the attack to deal an extra 1d8 radiant damage to the target. When you reach 14th level, the extra damage increases to 2d8."}
                            {:level 17
                             :name "Supreme Healing"
+                            :summary "Instead of rolling healing, use max possible roll value."
                             :description "Starting at 17th level, when you would normally roll one or more dice to restore hit points with a spell, you instead use the highest number possible for each die. For example, instead of restoring 2d6 hit points to a creature, you restore 12."}]}
                  {:name "Knowledge Domain"
                   :modifiers [(cleric-spell 1 :command 1)
@@ -1597,16 +1648,22 @@ The extra hit points increase when you reach certain levels in this class: to 1d
                                  ["Arcana" "History" "Nature" "Religion"])
                                 2
                                 2)]
-                  :traits [{:level 1
-                            :name "Blessings of Knowledge"}
-                           {:level 2
+                  :levels {6 {:modifiers [(mod5e/action
+                                           {:level 6
+                                            :page 59
+                                            :name "Channel Divinity: Read Thoughts"
+                                            :summary (str "a creature within 60 ft. must make a DC "
+                                                          (?spell-save-dc :wis)
+                                                          " Wisdom save or you can read it's thoughts for 1 min, use an action to end the effect and cast suggestion without using a slot and with no save")})]}
+                           8 {:modifiers [(potent-spellcasting 60)]}}
+                  :traits [{:level 2
+                            :page 59
+                            :summary "Become proficient in a tool or skill for 10 mins."
                             :name "Channel Divinity: Knowledge of the Ages"}
-                           {:level 6
-                            :name "Channel Divinity: Read Thoughts"}
-                           {:level 8
-                            :name "Potent Spellcasting"}
                            {:level 17
-                            :name "Visions of the Past"}]}
+                            :page 60
+                            :name "Visions of the Past"
+                            :summary "Learn the history of an object you hold or area you are in"}]}
                  {:name "Light Domain"
                   :modifiers [(cleric-spell 0 :light 1)
                               (cleric-spell 1 :burning-hands 1)
@@ -1618,17 +1675,35 @@ The extra hit points increase when you reach certain levels in this class: to 1d
                               (cleric-spell 4 :guardian-of-faith 7)
                               (cleric-spell 4 :wall-of-fire 7)
                               (cleric-spell 5 :flame-strike 9)
-                              (cleric-spell 5 :scrying 9)]
-                  :traits [{:level 1
-                            :name "Warding Flame"}
-                           {:level 2
-                            :name "Channel Divinity: Radiance of the Dawn"}
-                           {:level 6
-                            :name "Improved Flare"}
-                           {:level 8
-                            :name "Potent Spellcasting"}
-                           {:level 17
-                            :name "Corona of Light"}]}
+                              (cleric-spell 5 :scrying 9)
+                              (mod5e/reaction
+                               {:name "Warding Flare"
+                                :page 61
+                                :summary "impose disadvantage on an attack roll"
+                                :frequency {:units :rest
+                                            :amount (max 1 (?ability-bonuses :wis))}})]
+                  :levels {2 {:modifiers [(mod5e/action
+                                           {:level 2
+                                            :name "Channel Divinity: Radiance of the Dawn"
+                                            :page 61
+                                            :range {:plural :feet
+                                                    :amount 30}
+                                            :summary (str "Dispel magical darkness and deal 2d10 + "
+                                                          (?class-level :cleric)
+                                                          " radiant damage (half on successful DC "
+                                                          (?spell-save-dc :wis)
+                                                          " Constitution save) to hostile creatures")})]}
+                           6 {:modifiers [(mod5e/reaction
+                                           {:level 6
+                                            :name "Improved Flare"
+                                            :page 61
+                                            :summary "use warding flare when another creature within 30 ft. is attacked"})]}
+                           8 {:modifiers [(potent-spellcasting 61)]}
+                           17 {:modifiers [(mod5e/action
+                                            {:level 17
+                                             :page 61
+                                             :name "Corona of Light"
+                                             :summary "emit bright light for 60 ft. and 30 beyond that, enemies in the bright light have disadvantage on saves against spells that deal radiant or fire damage"})]}}}
                  {:name "Nature Domain"
                   :profs {:armor {:heavy true}
                           :skill-options {:choose 1 :options {:animal-handling true :nature true :survival true}}}
@@ -1642,17 +1717,39 @@ The extra hit points increase when you reach certain levels in this class: to 1d
                               (cleric-spell 4 :grasping-vine 7)
                               (cleric-spell 5 :insect-plague 9)
                               (cleric-spell 5 :tree-stride 9)]
+                  :levels {2 {:modifiers [(mod5e/action
+                                           {:name "Channel Divinity: Charm Animals and Plants"
+                                            :level 2
+                                            :page 62
+                                            :range {:plural :feet
+                                                    :amount 30}
+                                            :summary (str "charm beasts and plant creatures unless they succeed on a DC "
+                                                          (?spell-save-dc :wis)
+                                                          " Wisdom save")})]}
+                           6 {:modifiers [(mod5e/reaction
+                                           {:name "Dampen Elements"
+                                            :level 6
+                                            :page 62
+                                            :range {:plural :feet
+                                                    :amount 30}
+                                            :summary "to a creature that takes fire, cold, acid, lighting, or thunder damage, grant resistance to that damage"})]}
+                           8 {:modifiers [(mod5e/dependent-trait
+                                           {:name "Divine Strike"
+                                            :level 8
+                                            :page 62
+                                            :summary (str "once on your turn, add "
+                                                          (if (>= (?class-level :cleric)) 2 1)
+                                                          "d8 cold, fire, or lighting damage to a successful attack")})]}
+                           17 {:modifiers [(mod5e/bonus-action
+                                            {:name "Master of Nature"
+                                             :level 17
+                                             :page 62
+                                             :summary "command creatures charmed with your Charm Animals and Plants"})]}}
                   :selections [(t/selection
                                 "Druid Cantrip"
                                 (opt5e/spell-options (get-in sl/spell-lists [:druid 0]) 0 :wis "Druid"))]
-                  :traits [{:name "Channel Divinity: Charm Animals and Plants"
-                            :level 2}
-                           {:name "Dampen Elements"
-                            :level 6}
-                           {:name "Divine Strike"
-                            :level 8}
-                           {:name "Master of Nature"
-                            :level 17}]}
+                  :traits [
+                           ]}
                  {:name "Tempest Domain"
                   :profs {:armor {:heavy true}
                           :weapon {:martial true}}
@@ -1718,17 +1815,7 @@ The extra hit points increase when you reach certain levels in this class: to 1d
                            {:name "Divine Strike"
                             :level 8}
                            {:name "Avatar of Battle"
-                            :level 17}]}
-                 {:name "Arcana Domain"
-                  :source "Sword Coast Adventurer's Guide"
-                  :traits [{:name "Arcane Initiate"}
-                           {:name "Channel Divinity: Arcane Abjuration"
-                            :level 2}
-                           {:name "Spell Breaker"
-                            :level 6}
-                           {:name "Potent Spellcasting"
-                            :level 8}
-                           {:name "Arcane Mastery"}]}]}
+                            :level 17}]}]}
    character-ref))
 
 (defn druid-spell [spell-level spell-key min-level]
@@ -3797,6 +3884,7 @@ You might also have ties to a specific temple dedicated to your chosen deity or 
                    {}
                    ?ability-bonuses)
     ?total-levels (apply + (map (fn [[k {l :class-level}]] l) ?levels))
+    ?class-level (fn [class-kw] (get-in ?levels [class-kw :class-level]))
     ?prof-bonus (+ (int (/ (dec ?total-levels) 4)) 2)
     ?default-skill-bonus {}
     ?skill-prof-bonuses (reduce
@@ -3817,7 +3905,7 @@ You might also have ties to a specific temple dedicated to your chosen deity or 
     ?passive-investigation (+ 10 (?skill-bonuses :investigation))
     ?hit-point-level-bonus (?ability-bonuses :con)
     ?hit-point-level-increases 0
-    ?max-hit-points (+ ?hit-point-level-increases (* ?total-levels ?hit-point-level-bonus))
+    ?max-hit-points (max 1 (+ ?hit-point-level-increases (* ?total-levels ?hit-point-level-bonus)))
     ?initiative (?ability-bonuses :dex)
     ?num-attacks 1
     ?critical #{20}

@@ -189,17 +189,17 @@
    [:.pointer
     {:cursor :pointer}]
 
-   [:.f4692a
+   [:.c-f4692a
     {:color "#f4692a"}]
-   [:.f32e50
+   [:.c-f32e50
     {:color "#f32e50"}]
-   [:.b35c95
+   [:.c-b35c95
     {:color "#b35c95"}]
-   [:.47eaf8
+   [:.c-47eaf8
     {:color "#47eaf8"}]
-   [:.bbe289
+   [:.c-bbe289
     {:color "#bbe289"}]
-   [:.f9b747
+   [:.c-f9b747
     {:color "#f9b747"}]
    
    [:.bg-light

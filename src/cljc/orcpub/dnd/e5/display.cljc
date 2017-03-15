@@ -7,11 +7,17 @@
    :vgm "VGM"
    :scag "SCAG"})
 
-(defn unit-amount-description [{:keys [units amount] :or {amount 1}}]
-  (str amount " " (name units) (if (not= 1 amount) "s")))
+(defn unit-amount-description [{:keys [units amount singular plural] :or {amount 1}}]
+  (str amount " " (if (not= 1 amount)
+                    (if plural
+                      (common/safe-name plural)
+                      (str (common/safe-name units) "s"))
+                    (if singular
+                      (common/safe-name singular)
+                      (str (common/safe-name units))))))
 
 (defn source-description [source page]
-  (if page (str "see " (sources (or source :phb)) " " page)))
+  (str "see " (sources (or source :phb)) " " page))
 
 (defn frequency-description [{:keys [units amount] :or {amount 1}}]
   (str
@@ -39,16 +45,17 @@
    (if save (str ", DC" save-dc " " (common/safe-name save) " save"))
    (if source (str " (" (source-description source page) ")"))))
 
-(defn action-description [{:keys [description summary source page duration frequency]}]
+(defn action-description [{:keys [description summary source page duration range frequency]}]
   (str
    (or summary description)
-   (if (or duration frequency source)
+   (if (or range duration frequency page)
      (str
       " ("
       (s/join ", "
               (remove
                nil?
-               [(if duration (str "lasts " (unit-amount-description duration)))
+               [(if range (str "range " (unit-amount-description range)))
+                (if duration (str "lasts " (unit-amount-description duration)))
                 (if frequency (str "use " (frequency-description frequency)))
                 (if page (source-description source page))]))
       ")"))))

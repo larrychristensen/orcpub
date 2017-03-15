@@ -275,3 +275,7 @@
                  (conj
                   ~'?reactions
                   ~action)))
+
+(defmacro level-val [level mappings]
+  (let [flat-mappings (conj (vec (flatten (sort-by first > (dissoc mappings :default)))) (:default mappings))]
+    `(condp <= ~level ~@flat-mappings)))

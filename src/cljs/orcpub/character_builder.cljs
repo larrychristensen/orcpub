@@ -488,17 +488,19 @@
     [:div.posn-rel.w-100-p
      (map
       (fn [k [x y] {:keys [color]}]
-        ^{:key color}
-        [:div.t-a-c.w-50.posn-abs {:style {:left x :top y}}
-         [:div
-          [:span (s/upper-case (name k))]
-          [:span.m-l-5 {:class-name color} (k abilities)]]
-         [:div {:class-name color} (let [bonus (int (/ (- (k abilities) 10) 2))]
-                                         (str "(" (mod/bonus-str (k ability-bonuses)) ")"))]])
+        (let [color-class (str "c-" color)]
+          ^{:key color}
+          [:div.t-a-c.w-50.posn-abs {:style {:left x :top y}}
+           [:div
+            [:span (s/upper-case (name k))]
+            [:span.m-l-5 {:class-name color-class} (k abilities)]]
+           [:div {:class-name color-class}
+            (let [bonus (int (/ (- (k abilities) 10) 2))]
+              (str "(" (mod/bonus-str (k ability-bonuses)) ")"))]]))
       offset-ability-keys
       (take 6 (drop 1 (cycle text-points)))
       color-names)
-     [:svg {:width (+ 80 double-beta double-point-offset) :height (+ 60 d double-point-offset)}
+     [:svg {:width 220 :height (+ 60 d double-point-offset)}
       [:defs
        (map
         (fn [[x1 y1] [x2 y2] c1 c2]
@@ -699,11 +701,14 @@
      "Features, Traits, & Feats" nil
      [:div.f-s-14
       (map
-       (fn [{:keys [name description summary page]}]
+       (fn [{:keys [name description summary page source]}]
          ^{:key name}
          [:p.m-t-10
           [:span.f-w-600.i name "."]
-          [:span.f-w-n.m-l-10 (common/sentensize (or summary description))]])
+          [:span.f-w-n.m-l-10 (common/sentensize
+                               (str
+                                (or summary description)
+                                (if page (str " (" (disp5e/source-description source page) ")"))))]])
        (sort-by :name traits))])))
 
 (defn attacks-section [attacks]
@@ -1226,7 +1231,7 @@
 
 
 (defn character-builder []
-  (cljs.pprint/pprint @character-ref)
+  ;;(cljs.pprint/pprint @character-ref)
   ;;(cljs.pprint/pprint @app-state)
   (let [selected-plugins (map
                           :selections
@@ -1252,7 +1257,7 @@
         plugins (:plugins @app-state)
         stepper-dismissed? (:stepper-dismissed @app-state)]
     ;(js/console.log "BUILT TEMPLAT" built-template)
-    (print-char built-char)
+    ;;(print-char built-char)
     [:div.app
      {:on-scroll (fn [e]
                    (let [app-header (js/document.getElementById "app-header")
