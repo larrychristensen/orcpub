@@ -1226,7 +1226,7 @@
 
 
 (defn character-builder []
-  (cljs.pprint/pprint @character-ref)
+  ;;(cljs.pprint/pprint @character-ref)
   ;;(cljs.pprint/pprint @app-state)
   (let [selected-plugins (map
                           :selections
@@ -1252,7 +1252,7 @@
         plugins (:plugins @app-state)
         stepper-dismissed? (:stepper-dismissed @app-state)]
     ;(js/console.log "BUILT TEMPLAT" built-template)
-    (print-char built-char)
+    ;;(print-char built-char)
     [:div.app
      {:on-scroll (fn [e]
                    (let [app-header (js/document.getElementById "app-header")
