@@ -34,9 +34,9 @@
      "melee, ")
    damage-die-count "d" damage-die (if damage-modifier (common/mod-str damage-modifier))
    " "
-   (if damage-type (clojure.core/name damage-type))
+   (if damage-type (common/safe-name damage-type))
    " damage"
-   (if save (str ", DC" save-dc " " (clojure.core/name save) " save"))
+   (if save (str ", DC" save-dc " " (common/safe-name save) " save"))
    (if source (str " (" (source-description source page) ")"))))
 
 (defn action-description [{:keys [description summary source page duration frequency]}]

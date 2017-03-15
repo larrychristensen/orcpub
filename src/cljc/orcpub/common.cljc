@@ -43,6 +43,15 @@
 (defn round-up [num]
   (int (Math/ceil (double num))))
 
+(defn warn [message]
+  #?(:cljs (js/console.warn message))
+  #?(:clj (prn "WARNING: " message)))
+
+(defn safe-name [kw]
+  (if (keyword? kw)
+    (name kw)
+    (warn (str "non-keyword value passed to safe-name: " kw))))
+
 (defn sentensize [desc]
   (if desc
     (str

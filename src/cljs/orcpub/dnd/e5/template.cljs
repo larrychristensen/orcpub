@@ -1181,6 +1181,9 @@ Fire Starter. The device produces a miniature flame, which you can use to light 
                    [(mod5e/class kw)
                     (apply mod5e/saving-throws kw save-profs)]))})))
 
+(defn class-level [levels class-kw]
+  (get-in levels [class-kw :class-level]))
+
 (defn barbarian-option [character-ref]
   (class-option
    {:name "Barbarian"
@@ -1200,7 +1203,7 @@ Fire Starter. The device produces a miniature flame, which you can use to light 
     :equipment {:explorers-pack 1}
     :modifiers [(mod/modifier ?armor-class (+ (?ability-bonuses :con) ?armor-class) nil nil [(= :barbarian (first ?classes))])
                 (mod5e/bonus-action
-                 (let [barbarian-level (get-in ?levels [:barbarian :class-level])
+                 (let [barbarian-level (class-level ?levels :barbarian)
                        attack-bonus (condp <= barbarian-level
                                       16 4
                                       9 3
@@ -1228,7 +1231,7 @@ If you are able to cast spells, you can't cast them or concentrate on them while
              9 {:modifiers [(mod5e/dependent-trait
                              {:name "Brutal Critical"
                               :page 49
-                              :summary (let [die-count (condp <= (get-in ?levels [:barbarian :class-level])
+                              :summary (let [die-count (condp <= (class-level ?levels :barbarian)
                                                          17 "three"
                                                          13 "two"
                                                          "one")]
@@ -1365,6 +1368,13 @@ If you are able to cast spells, you can't cast them or concentrate on them while
                                                              :summary "While raging, if you hit a Large or smaller creature, you can use a bonus action to knock it prone."})]})])]}}}]}
    character-ref))
 
+(defn bardic-inspiration-die [levels]
+  (condp <= (class-level levels :bard)
+    15 12
+    10 10
+    5 8
+    6))
+
 (defn bard-option [character-ref]
   (class-option
    {:name "Bard"
@@ -1409,40 +1419,51 @@ If you are able to cast spells, you can't cast them or concentrate on them while
                                   18 2}
                    :known-mode :schedule
                    :ability :cha}
-    :levels {2 {:modifiers [(mod/modifier ?default-skill-bonus (let [b (int (/ ?prof-bonus 2))]
-                                                                 (zipmap char5e/ability-keys (repeat b))))]}
-             3 {:selections [(opt5e/expertise-selection 2)]}
-             10 {:selections (conj (opt5e/raw-bard-magical-secrets 10) (opt5e/expertise-selection 2))}
-             14 {:selections (opt5e/raw-bard-magical-secrets 14)}
-             18 {:selections (opt5e/raw-bard-magical-secrets 18)}}
-    :traits [{:name "Bardic Inspiration"
-              :description "You can inspire others through stirring words or music. To do so, you use a bonus action on your turn to choose one creature other than yourself within 60 feet of you who can hear you. That creature gains one Bardic Inspiration die, a d6.
+    :modifiers [(mod5e/bonus-action
+                 {:name "Bardic Inspiration"
+                  :page 53
+                  :summary (str "Inspire another creature with a 1d"
+                                (bardic-inspiration-die ?levels)
+                                " that it can, within the next 10 min., add to a d20 roll")
+                  :description "You can inspire others through stirring words or music. To do so, you use a bonus action on your turn to choose one creature other than yourself within 60 feet of you who can hear you. That creature gains one Bardic Inspiration die, a d6.
 Once within the next 10 minutes, the creature can roll the die and add the number rolled to one ability check, attack roll, or saving throw it makes. The creature can wait until after it rolls the d20 before deciding to use the Bardic Inspiration die, but must decide before the GM says whether the roll succeeds or fails. Once the Bardic Inspiration die is rolled, it is lost. A creature can have only one Bardic Inspiration die at a time.
 You can use this feature a number of times equal to your Charisma modifier (a minimum of once). You regain any expended uses when you finish a long rest.
-Your Bardic Inspiration die changes when you reach certain levels in this class. The die becomes a d8 at 5th level, a d10 at 10th level, and a d12 at 15th level."}
-             {:name "Jack of All Trades"
-              :level 2
-              :description "Starting at 2nd level, you can add half your proficiency bonus, rounded down, to any ability check you make that doesn't already include your proficiency bonus."}
-             {:name "Song of Rest"
-              :level 2
-              :description "Beginning at 2nd level, you can use soothing music or oration to help revitalize your wounded allies during a short rest. If you or any friendly creatures who can hear your performance regain hit points at the end of the short rest by spending one or more Hit Dice, each of those creatures regains an extra 1d6 hit points.
-The extra hit points increase when you reach certain levels in this class: to 1d8 at 9th level, to 1d10 at 13th level, and to 1d12 at 17th level."}
-             {:name "Expertise"
-              :level 3
-              :description "At 3rd level, choose two of your skill proficiencies. Your proficiency bonus is doubled for any ability check you make that uses either of the chosen proficiencies. At 10th level, you can choose another two skill proficiencies to gain this benefit."}
-             {:name "Font of Inspiration"
+Your Bardic Inspiration die changes when you reach certain levels in this class. The die becomes a d8 at 5th level, a d10 at 10th level, and a d12 at 15th level."})]
+    :levels {2 {:modifiers [(mod/modifier ?default-skill-bonus (let [b (int (/ ?prof-bonus 2))]
+                                                                 (zipmap char5e/ability-keys (repeat b))))
+                            (mod5e/dependent-trait
+                             {:name "Song of Rest"
+                              :page 54
+                              :level 2
+                              :summary (str "With a song, you and friendly creatures gain 1d"
+                                            (condp <= (class-level ?levels :bard)
+                                              9 8
+                                              13 10
+                                              17 12
+                                              6)
+                                            " additional healing at the end of a short rest")
+                              :description "Beginning at 2nd level, you can use soothing music or oration to help revitalize your wounded allies during a short rest. If you or any friendly creatures who can hear your performance regain hit points at the end of the short rest by spending one or more Hit Dice, each of those creatures regains an extra 1d6 hit points.
+The extra hit points increase when you reach certain levels in this class: to 1d8 at 9th level, to 1d10 at 13th level, and to 1d12 at 17th level."})]}
+             3 {:selections [(opt5e/expertise-selection 2)]}
+             6 {:modifiers [(mod5e/action
+                             {:name "Countercharm"
+                              :level 6
+                              :page 54
+                              :summary "performance during your turn that gives you and friendly creatures within 30 ft. advantage on frightened or charmed saves."
+                              :description "At 6th level, you gain the ability to use musical notes or words of power to disrupt mind-influencing effects. As an action, you can start a performance that lasts until the end of your next turn. During that time, you and any friendly creatures within 30 feet of you have advantage on saving throws against being frightened or charmed. A creature must be able to hear you to gain this benefit. The performance ends early if you are incapacitated or silenced or if you voluntarily end it (no action required)."})]}
+             10 {:selections (conj (opt5e/raw-bard-magical-secrets 10)
+                                   (opt5e/expertise-selection 2))}
+             14 {:selections (opt5e/raw-bard-magical-secrets 14)}
+             18 {:selections (opt5e/raw-bard-magical-secrets 18)}}
+    :traits [{:name "Font of Inspiration"
               :level 5
-              :description "Beginning when you reach 5th level, you regain all of 
-your expended uses of Bardic Inspiration when you 
-finish a short or long rest"}
-             {:name "Countercharm"
-              :level 6
-              :description "At 6th level, you gain the ability to use musical notes or words of power to disrupt mind-influencing effects. As an action, you can start a performance that lasts until the end of your next turn. During that time, you and any friendly creatures within 30 feet of you have advantage on saving throws against being frightened or charmed. A creature must be able to hear you to gain this benefit. The performance ends early if you are incapacitated or silenced or if you voluntarily end it (no action required)."}
-             {:name "Magical Secrets"
-              :level 10
-              :description "By 10th level, you have plundered magical knowledge from a wide spectrum of disciplines. Choose two spells from any class, including this one. A spell you choose must be of a level you can cast, as shown on the Bard table, or a cantrip. The chosen spells count as bard spells for you and are included in the number in the Spells Known column of the Bard table. You learn two additional spells from any class at 14th level and again at 18th level."}
+              :page 54
+              :summary "regain all uses of Bardic Inspiration at the end of a rest"
+              :description "Beginning when you reach 5th level, you regain all of your expended uses of Bardic Inspiration when you finish a short or long rest"}
              {:name "Superior Inspiration"
               :level 20
+              :page 54
+              :summary "regain 1 use of Bardic Inspiration if you have none remaining when rolling initiative"
               :description "At 20th level, when you roll initiative and have no uses of Bardic Inspiration left, you regain one use."}]
     :subclass-level 3
     :subclass-title "Bard College"
@@ -1450,26 +1471,31 @@ finish a short or long rest"}
     :subclasses [{:name "College of Lore"
                   :profs {:skill-options {:choose 3 :options {:any true}}}
                   :selections (opt5e/bard-magical-secrets 6)
-                  :traits [{:name "Cutting Wounds"
-                            :level 3
-                            :description "Also at 3rd level, you learn how to use your wit to distract, confuse, and otherwise sap the confidence and competence of others. When a creature that you can see within 60 feet of you makes an attack roll, an ability check, or a damage roll, you can use your reaction to expend one of your uses of Bardic Inspiration, rolling a Bardic Inspiration die and subtracting the number rolled from the creature's roll. You can choose to use this feature after the creature makes its roll, but before the GM determines whether the attack roll or ability check succeeds or fails, or before the creature deals its damage. The creature is immune if it can't hear you or if it's immune to being charmed."}
-                           {:name "Additional Magical Secrets"
-                            :level 6
-                            :description "At 6th level, you learn two spells of your choice from any class. A spell you choose must be of a level you can cast, as shown on the Bard table, or a cantrip. The chosen spells count as bard spells for you but don't count against the number of bard spells you know."}
-                           {:name "Peerless Skill"
-                            :level 14
-                            :description "Starting at 14th level, when you make an ability check, you can expend one use of Bardic Inspiration. Roll a Bardic Inspiration die and add the number rolled to your ability check. You can choose to do so after you roll the die for the ability check, but before the GM tells you whether you succeed or fail."}]}
+                  :modifiers [(mod5e/reaction
+                               {:name "Cutting Wounds"
+                                :level 3
+                                :page 54
+                                :summary (str "expend a use of Bardic Inspiration to subtract 1d"
+                                              (bardic-inspiration-die ?levels)
+                                              " from an attack, ability, or damage roll made by a creature within 60 ft.")
+                                :description "Also at 3rd level, you learn how to use your wit to distract, confuse, and otherwise sap the confidence and competence of others. When a creature that you can see within 60 feet of you makes an attack roll, an ability check, or a damage roll, you can use your reaction to expend one of your uses of Bardic Inspiration, rolling a Bardic Inspiration die and subtracting the number rolled from the creature's roll. You can choose to use this feature after the creature makes its roll, but before the GM determines whether the attack roll or ability check succeeds or fails, or before the creature deals its damage. The creature is immune if it can't hear you or if it's immune to being charmed."})]
+                  :levels {14 {:modifiers [(mod5e/dependent-trait
+                                            {:name "Peerless Skill"
+                                             :level 14
+                                             :page 55
+                                             :summary (str "expend one use of Bardic Inspiration to add 1d"
+                                                           (bardic-inspiration-die ?levels)
+                                                           " to an ability check")
+                                             :description "Starting at 14th level, when you make an ability check, you can expend one use of Bardic Inspiration. Roll a Bardic Inspiration die and add the number rolled to your ability check. You can choose to do so after you roll the die for the ability check, but before the GM tells you whether you succeed or fail."})]}}}
                  {:name "College of Valor"
                   :profs {:armor {:medium true
                                   :shields true}
                           :weapon {:martial true}}
-                  :levels {6 {:modifiers [(mod5e/extra-attack)]}}
-                  :traits [{:name "Combat Inspiration"
-                            :level 3}
-                           {:name "Extra Attack"
-                            :level 6}
-                           {:name "Battle Magic"
-                            :level 14}]}]}
+                  :levels {6 {:modifiers [(mod5e/extra-attack)]}
+                           14 {:modifiers [(mod5e/bonus-action
+                                           {:name "Battle Magic"
+                                            :page 55
+                                            :summary "make a weapon attack when you use your action to cast a bard spell"})]}}}]}
    character-ref))
 
 (defn blessings-of-knowledge-skill [skill-name]
