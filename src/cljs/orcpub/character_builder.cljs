@@ -603,6 +603,29 @@
                  [:span.display-section-qualifier-text (str "(" (:name armor) " + shield)")]])]))
          (dissoc equipped-armor :shield)))])]])
 
+(defn speed-section [speed speed-with-armor equipped-armor]
+  [display-section
+   "Speed"
+   "fa-tachometer"
+   (if speed-with-armor
+     [:span
+      [:span
+       [:span (speed-with-armor nil)]
+       [:span.display-section-qualifier-text "(unarmored)"]]
+      [:div.m-l-50
+       (doall
+        (map
+         (fn [[armor-kw _]]
+           (let [armor (opt5e/armor-map armor-kw)
+                 speed (speed-with-armor armor)]
+             ^{:key armor-kw}
+             [:div
+              [:div
+               [:span speed]
+               [:span.display-section-qualifier-text (str "(" (:name armor) " armor)")]]]))
+         (dissoc equipped-armor :shield)))]]
+     speed)])
+
 (defn list-item-section [list-name items & [name-fn]]
   [list-display-section list-name nil
    (map
@@ -733,17 +756,17 @@
          [:img.character-image.w-100-p.m-b-20 {:src (or (get-in @character-ref [::entity/values :image-url]) "image/barbarian-girl.png")}]]
         [:div.w-50-p
          [armor-class-section armor-class armor-class-with-armor armor]
-         [display-section "Hit Points" "fa-crosshairs" (es/entity-val built-char :max-hit-points)]
-         [display-section "Speed" nil
+         [display-section "Hit Points" "fa-heart-o" (es/entity-val built-char :max-hit-points)]
+         [speed-section (es/entity-val built-char :speed) (es/entity-val built-char :speed-with-armor) armor]
+         #_[display-section "Speed" nil
           (let [unarmored-speed-bonus (es/entity-val built-char :unarmored-speed-bonus)
                 speed (es/entity-val built-char :speed)
-                swim-speed (es/entity-val built-char :swimming-speed)]
+                swim-speed (es/entity-val built-char :swimming-speed)
+                speed-with-armor (es/entity-val built-char :speed-with-armor)]
             [:div
              [:div
-              (if (and unarmored-speed-bonus (pos? unarmored-speed-bonus))
-                [:div
-                 [:div [:span (+ speed unarmored-speed-bonus)] [:span.display-section-qualifier-text "(unarmored)"]]
-                 [:div [:span speed] [:span.display-section-qualifier-text "(armored)"]]]
+              (if speed-with-armor
+                (speed-section speed-with-armor armor)
                 speed)]
              (if swim-speed
                [:div [:span swim-speed] [:span.display-section-qualifier-text "(swim)"]])])]
@@ -751,6 +774,9 @@
          [display-section "Initiative" nil (mod/bonus-str (es/entity-val built-char :initiative))]
          [display-section "Proficiency Bonus" nil (mod/bonus-str (es/entity-val built-char :prof-bonus))]
          [display-section "Passive Perception" nil (es/entity-val built-char :passive-perception)]
+         (let [num-attacks (es/entity-val built-char :num-attacks)]
+           (if (> num-attacks 1)
+             [display-section "Number of Attacks" nil num-attacks]))
          (let [criticals (es/entity-val built-char :critical)
                min-crit (apply min criticals)
                max-crit (apply max criticals)]
@@ -763,17 +789,18 @@
           (let [save-advantage (es/entity-val built-char :saving-throw-advantage)]
             [:ul.list-style-disc.m-t-5
              (doall
-              (map
-               (fn [{:keys [abilities types]}]
+              (map-indexed
+               (fn [i {:keys [abilities types]}]
+                 ^{:key i}
                  [:li (str "advantage on "
                            (common/list-print (map (comp s/lower-case :name opt5e/abilities-map) abilities))
                            " saves against "
                            (common/list-print
-                                   (map #(let [cond (opt5e/conditions-map %)]
-                                           (if cond
-                                             (str "being " (s/lower-case (:name cond)))
-                                             (name %)))
-                                        types)))])
+                            (map #(let [cond (opt5e/conditions-map %)]
+                                    (if cond
+                                      (str "being " (s/lower-case (:name cond)))
+                                      (name %)))
+                                 types)))])
                save-advantage))])]]]
        [:div.w-100-p
         [abilities-radar 187 (es/entity-val built-char :abilities) ability-bonuses]]]

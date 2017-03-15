@@ -1,5 +1,6 @@
 (ns orcpub.dnd.e5.display
-  (:require [orcpub.common :as common]))
+  (:require [clojure.string :as s]
+            [orcpub.common :as common]))
 
 (def sources
   {:phb "PHB"
@@ -37,11 +38,16 @@
    (if save (str ", DC" save-dc " " (clojure.core/name save) " save"))
    (if source (str " (" (source-description source page) ")"))))
 
-(defn action-description [{:keys [description source page duration frequency]}]
+(defn action-description [{:keys [description summary source page duration frequency]}]
   (str
-   description
-   " ("
-   (if duration (str "lasts " (unit-amount-description duration) ", "))
-   (if frequency (str "use " (frequency-description frequency) ", "))
-   (source-description source page)
-   ")."))
+   (or summary description)
+   (if (or duration frequency source)
+     (str
+      " ("
+      (s/join ", "
+              (remove
+               nil?
+               [(if duration (str "lasts " (unit-amount-description duration)))
+                (if frequency (str "use " (frequency-description frequency)))
+                (if page (source-description source page))]))
+      ")"))))

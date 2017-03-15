@@ -28,7 +28,7 @@
   (px-prop
    :margin-left
    :m-l
-   (concat (range -1 10) (range 10 45 5))))
+   (concat (range -1 10) (range 10 55 5))))
 
 (def margin-tops
   (px-prop

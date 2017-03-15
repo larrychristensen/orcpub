@@ -1112,6 +1112,7 @@ Fire Starter. The device produces a miniature flame, which you can use to light 
                             subclasses
                             selections
                             modifiers
+                            source
                             weapon-choices
                             weapons
                             equipment
@@ -1176,7 +1177,6 @@ Fire Starter. The device produces a miniature flame, which you can use to light 
                    [(mod5e/class kw)
                     (apply mod5e/saving-throws kw save-profs)]))})))
 
-
 (defn barbarian-option [character-ref]
   (class-option
    {:name "Barbarian"
@@ -1194,28 +1194,43 @@ Fire Starter. The device produces a miniature flame, which you can use to light 
                                 :simple 1}}]
     :weapons {:javelin 4}
     :equipment {:explorers-pack 1}
-    :modifiers [(mod/modifier ?armor-class (+ (?ability-bonuses :con) ?armor-class) nil nil [(= :barbarian (first ?classes))])]
-    :levels {5 {:modifiers [(mod5e/extra-attack)]}}
-    :traits [{:name "Rage"
-              :description "In battle, you fight with primal ferocity. On your turn, you can enter a rage as a bonus action. While raging, you gain the following benefits if you aren't wearing heavy armor:
+    :modifiers [(mod/modifier ?armor-class (+ (?ability-bonuses :con) ?armor-class) nil nil [(= :barbarian (first ?classes))])
+                (mod5e/bonus-action
+                 (let [barbarian-level (get-in ?levels [:barbarian :class-level])
+                       attack-bonus (condp <= barbarian-level
+                                      16 4
+                                      9 3
+                                      2)]
+                   {:name "Rage"
+                    :page 48
+                    :duration {:units :minute}
+                    :frequency {:units :rest
+                                :amount (condp <= barbarian-level
+                                          17 6
+                                          12 5
+                                          6 4
+                                          3 3
+                                          2)}
+                    :summary (str "Advantage on Strength checks and saves; melee attack bonus " (common/bonus-str attack-bonus) "; resistance to bludgeoning, piercing, and slashing damage")
+                    :description "In battle, you fight with primal ferocity. On your turn, you can enter a rage as a bonus action. While raging, you gain the following benefits if you aren't wearing heavy armor:
 * You have advantage on Strength checks and Strength saving throws.
 * When you make a melee weapon attack using Strength, you gain a bonus to the damage roll that increases as you gain levels as a barbarian, as shown in the Rage Damage column of the Barbarian table.
 * You have resistance to bludgeoning, piercing, and slashing damage.
-If you are able to cast spells, you can't cast them or concentrate on them while raging. Your rage lasts for 1 minute. It ends early if you are knocked unconscious or if your turn ends and you haven't attacked a hostile creature since your last turn or taken damage since then. You can also end your rage on your turn as a bonus action. Once you have raged the number of times shown for your barbarian level in the Rages column of the Barbarian table, you must finish a long rest before you can rage again."}
-             {:name "Unarmored Defense"
-              :description "While you are not wearing any armor, your Armor Class equals 10 + your Dexterity modifier + your Constitution modifier. You can use a shield and still gain this benefit."}
-             {:name "Reckless Attack"
+If you are able to cast spells, you can't cast them or concentrate on them while raging. Your rage lasts for 1 minute. It ends early if you are knocked unconscious or if your turn ends and you haven't attacked a hostile creature since your last turn or taken damage since then. You can also end your rage on your turn as a bonus action. Once you have raged the number of times shown for your barbarian level in the Rages column of the Barbarian table, you must finish a long rest before you can rage again."}))]
+    :levels {5 {:modifiers [(mod5e/extra-attack)
+                            (mod/modifier ?speed-with-armor (fn [armor] (if (not= :heavy (:type armor))
+                                                                            (+ 10 ?speed)
+                                                                            ?speed)))]}}
+    :traits [{:name "Reckless Attack"
               :level 2
+              :page 48
+              :summary "Advantage on attacks using Strength, attack against you have advantage as well."
               :description "Starting at 2nd level, you can throw aside all concern for defense to attack with fierce desperation. When you make your first attack on your turn, you can decide to attack recklessly. Doing so gives you advantage on melee weapon attack rolls using Strength during this turn, but attack rolls against you have advantage until your next turn."}
              {:name "Danger Sense"
               :level 2
+              :page 48
+              :summary "Advantage on Dexterity saves against effects you can see."
               :description "At 2nd level, you gain an uncanny sense of when things nearby aren't as they should be, giving you an edge when you dodge away from danger. You have advantage on Dexterity saving throws against effects that you can see, such as traps and spells. To gain this benefit, you can't be blinded, deafened, or incapacitated."}
-             {:name "Extra Attack"
-              :level 5
-              :description "Beginning at 5th level, you can attack twice, instead of once, whenever you take the Attack action on your turn."}
-             {:name "Fast Movement"
-              :level 5
-              :description "Starting at 5th level, your speed increases by 10 feet while you aren't wearing heavy armor."}
              {:name "Feral Instinct"
               :level 7
               :description "By 7th level, your instincts are so honed that you have advantage on initiative rolls. Additionally, if you are surprised at the beginning of combat and aren't incapacitated, you can act normally on your first turn, but only if you enter your rage before doing anything else on that turn."}
