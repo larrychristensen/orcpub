@@ -825,10 +825,11 @@
                            (common/list-print (map (comp s/lower-case :name opt5e/abilities-map) abilities))
                            " saves against "
                            (common/list-print
-                            (map #(let [cond (opt5e/conditions-map %)]
-                                    (if cond
-                                      (str "being " (s/lower-case (:name cond)))
-                                      (name %)))
+                            (map #(let [condition (opt5e/conditions-map %)]
+                                    (cond
+                                      condition (str "being " (s/lower-case (:name condition)))
+                                      (keyword? %) (name %)
+                                      :else %))
                                  types)))])
                save-advantage))])]]]
        [:div.w-100-p
@@ -848,7 +849,9 @@
        [list-item-section "Armor Proficiencies" armor-profs]
        [list-item-section "Damage Resistances" resistances name]
        [list-item-section "Damage Immunities" immunities name]
-       [list-item-section "Condition Immunities" condition-immunities name]
+       [list-item-section "Condition Immunities" condition-immunities (fn [{:keys [condition qualifier]}]
+                                                                        (str (name condition)
+                                                                             (if qualifier (str " (" qualifier ")"))))]
        [spells-known-section spells-known]
        [equipment-section "Weapons" weapons opt5e/weapons-map]
        [equipment-section "Armor" armor opt5e/armor-map]
@@ -1259,7 +1262,7 @@
         plugins (:plugins @app-state)
         stepper-dismissed? (:stepper-dismissed @app-state)]
     ;(js/console.log "BUILT TEMPLAT" built-template)
-    ;;(print-char built-char)
+    (print-char built-char)
     [:div.app
      {:on-scroll (fn [e]
                    (let [app-header (js/document.getElementById "app-header")

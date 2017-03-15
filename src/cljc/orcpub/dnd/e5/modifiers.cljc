@@ -10,8 +10,8 @@
 (defn class [cls-key]
   (mods/vec-mod ?classes cls-key))
 
-(defn subclass [cls-key nm]
-  (mods/modifier ?levels (assoc-in ?levels [cls-key :subclass] nm)))
+(defn subclass [cls-key subclass-key]
+  (mods/modifier ?levels (assoc-in ?levels [cls-key :subclass] subclass-key)))
 
 (defn race [nm]
   (mods/modifier ?race nm))
@@ -31,8 +31,9 @@
 (defn immunity [value]
   (mods/set-mod ?immunities value))
 
-(defn condition-immunity [value]
-  (mods/set-mod ?condition-immunities value))
+(defn condition-immunity [value & [qualifier-text]]
+  (mods/set-mod ?condition-immunities {:condition value
+                                       :qualifier qualifier-text}))
 
 (defn darkvision [value & [order-number]]
   (mods/modifier
@@ -51,9 +52,6 @@
 
 (defn climbing-speed [value]
   (mods/cum-sum-mod ?climbing-speed value "Climb Speed" (mods/bonus-str value)))
-
-(defn flying-speed [value]
-  (mods/cum-sum-mod ?flying-speed value "Flying Speed" (mods/bonus-str value)))
 
 (defn unarmored-speed-bonus [value]
   (mods/cum-sum-mod ?unarmored-speed-bonus value "Unarmored Speed" (mods/bonus-str value)))
@@ -280,5 +278,5 @@
                   ~action)))
 
 (defmacro level-val [level mappings]
-  (let [flat-mappings (conj (vec (flatten (sort-by first > (dissoc mappings :default)))) (:default mappings))]
+  (let [flat-mappings (conj (vec (apply concat (sort-by first > (dissoc mappings :default)))) (:default mappings))]
     `(condp <= ~level ~@flat-mappings)))

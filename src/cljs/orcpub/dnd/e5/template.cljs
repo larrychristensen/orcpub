@@ -948,6 +948,7 @@ Fire Starter. The device produces a miniature flame, which you can use to light 
                 (vec
                  (concat
                   modifiers
+                  [(mod5e/subclass (:key cls) kw)]
                   (armor-prof-modifiers armor-profs)
                   (weapon-prof-modifiers weapon-profs)
                   (tool-prof-modifiers tool-profs)
@@ -1834,10 +1835,10 @@ The extra hit points increase when you reach certain levels in this class: to 1d
                                             :amount (?ability-bonuses :wis)}
                                 :summary "make one extra weapon attack when you use the Attack action"})]
                   :levels {6 {:modifiers [(mod5e/reaction
-                                         {:name "Channel Divinity: War God's Blessing"
-                                          :level 6
-                                          :page 63
-                                          :summary "+10 to an attack roll made by a creature within 30 ft."})]}
+                                           {:name "Channel Divinity: War God's Blessing"
+                                            :level 6
+                                            :page 63
+                                            :summary "+10 to an attack roll made by a creature within 30 ft."})]}
                            8 {:modifiers [(divine-strike nil 63)]}}
                   :traits [
                            {:name "Channel Divinity: Guided Strike"
@@ -1877,6 +1878,31 @@ The extra hit points increase when you reach certain levels in this class: to 1d
                          :options {:druidic-focus 1}}]
     :equipment {:explorers-pack 1}
     :modifiers [(mod5e/language "Druidic" :druidic)]
+    :levels {2 {:modifiers [(mod/modifier
+                             ?wild-shape-cr
+                             (mod5e/level-val
+                              (?class-level :druid)
+                              {1 "1/4"
+                               4 "1/2"
+                               8 "1"}))
+                            (mod/modifier
+                             ?wild-shape-limitation
+                             (mod5e/level-val
+                              (?class-level :druid)
+                              {1 "no flying or swimming speed"
+                               4 "no flying speed"
+                               8 nil}))
+                            (mod5e/action
+                             {:name "Wild Shape"
+                              :page 66
+                              :frequency {:units :rest
+                                          :amount 2}
+                              :duration {:units :hour
+                                         :amount (int (/ (?class-level :druid) 2))}
+                              :summary (str "You can transform into a beast you have seen with CR "
+                                            ?wild-shape-cr
+                                            (if ?wild-shape-limitation (str " and " ?wild-shape-limitation)))
+                              :description "Starting at 2nd level, you can use your action to magically assume the shape of a beast that you have seen before. You can use this feature twice. You regain expended uses when you finish a short or long rest. Your druid level determines the beasts you can transform into, as shown in the Beast Shapes table. At 2nd level, for example, you can transform into any beast that has a challenge rating of 1/4 or lower that doesn't have a flying or swimming speed. (see the Players Handbook for further details)"})]}}
     :selections [(t/selection
                   "Wooden Shield or Simple Weapon"
                   [(t/option
@@ -1900,17 +1926,23 @@ The extra hit points increase when you reach certain levels in this class: to 1d
                       (opt5e/simple-melee-weapon-options 1))]
                     [])])]
     :traits [{:name "Druidic"
+              :page 66
+              :summary "You can speak Druidic and use it to leave hidden message and automatically spot messages left by others"
               :description "You know Druidic, the secret language of druids. You can speak the language and use it to leave hidden messages. You and others who know this language automatically spot such a message. Others spot the message's presence with a successful DC 15 Wisdom (Perception) check but can't decipher it without magic."}
-             {:name "Wild Shape"
-              :description "Starting at 2nd level, you can use your action to magically assume the shape of a beast that you have seen before. You can use this feature twice. You regain expended uses when you finish a short or long rest. Your druid level determines the beasts you can transform into, as shown in the Beast Shapes table. At 2nd level, for example, you can transform into any beast that has a challenge rating of 1/4 or lower that doesn't have a flying or swimming speed. (see the Players Handbook for further details)"}
              {:name "Timeless Body"
               :level 18
+              :page 67
+              :summary "age slowly"
               :description "Starting at 18th level, the primal magic that you wield causes you to age more slowly. For every 10 years that pass, your body ages only 1 year."}
              {:name "Beast Spells"
               :level 18
+              :page 67
+              :summary "while in Wild Shape, can perform druid spells' somatic and verbal components"
               :description "Beginning at 18th level, you can cast many of your druid spells in any shape you assume using Wild Shape. You can perform the somatic and verbal components of a druid spell while in a beast shape, but you aren't able to provide material components."}
              {:name "Archdruid"
               :level 20
+              :page 67
+              :summary "Wild Shape unlimited times, ignore verbal and somatic spell components, ignore material components with no cost and aren't consumed by spell"
               :description "At 20th level, you can use your Wild Shape an unlimited number of times. Additionally, you can ignore the verbal and somatic components of your druid spells, as well as any material components that lack a cost and aren't consumed by a spell. You gain this benefit in both your normal shape and your beast shape from Wild Shape."}]
     :subclass-level 2
     :subclass-title "Druid Circle"
@@ -1977,30 +2009,59 @@ The extra hit points increase when you reach certain levels in this class: to 1d
                                    (druid-spell 4 :greater-invisibility 7)
                                    (druid-spell 5 :cloudkill 9)])])]
                   :modifiers []
-                  :traits [{:name "Natural Recovery"
-                            :level 2
-                            :description "Starting at 2nd level, you can regain some of your magical energy by sitting in meditation and communing with nature. During a short rest, you choose expended spell slots to recover. The spell slots can have a combined level that is equal to or less than half your druid level (rounded up), and none of the slots can be 6th level or higher. You can't use this feature again until you finish a long rest.For example, when you are a 4th-level druid, you can recover up to two levels worth of spell slots. You can recover either a 2nd-level slot or two 1st-level slots"}
-                           {:name "Land's Stride"
+                  :levels {2 {:modifiers [(mod5e/dependent-trait
+                                           {:name "Natural Recovery"
+                                            :level 2
+                                            :page 68
+                                            :summary (str "During short rest, recover "
+                                                          (common/round-up (/ (?class-level :druid) 2))
+                                                          " spell slots less than 6th level")
+                                            :description "Starting at 2nd level, you can regain some of your magical energy by sitting in meditation and communing with nature. During a short rest, you choose expended spell slots to recover. The spell slots can have a combined level that is equal to or less than half your druid level (rounded up), and none of the slots can be 6th level or higher. You can't use this feature again until you finish a long rest. For example, when you are a 4th-level druid, you can recover up to two levels worth of spell slots. You can recover either a 2nd-level slot or two 1st-level slots"})]}
+                           6 {:modifiers [(mod5e/saving-throw-advantage ["plants magically created or manipulated to impede movement"])]}
+                           10 {:modifiers [(mod5e/damage-immunity :poison)
+                                           (mod5e/condition-immunity :poisoned)
+                                           (mod5e/condition-immunity :charmed "only by elementals or fey")
+                                           (mod5e/condition-immunity :frightened "only by elementals or fey")
+                                           (mod5e/immunity :disease)]}
+                           14 {:modifiers [(mod5e/dependent-trait
+                                            {:name "Nature's Santuary"
+                                             :level 14
+                                             :page 69
+                                             :summary (str "beast or plant creatures must make a DC "
+                                                           (?spell-save-dc :wis)
+                                                           " Wisdom save or they cannot attack you.")
+                                             :description "When you reach 14th level, creatures of the natural world sense your connection to nature and become hesitant to attack you. When a beast or plant creature attacks you, that creature must make a Wisdom saving throw against your druid spell save DC. On a failed save, the creature must choose a different target, or the attack automatically misses. On a successful save, the creature is immune to this effect for 24 hours.
+The creature is aware of this effect before it makes its attack against you."})]}}
+                  :traits [{:name "Land's Stride"
                             :level 6
+                            :page 69
+                            :summary "moving through nonmagical difficult terrain costs no extra movement, pass through nonmagical plants without being slowed by them and without taking damage from them"
                             :description "Starting at 6th level, moving through nonmagical difficult terrain costs you no extra movement. You can also pass through nonmagical plants without being slowed by them and without taking damage from them if they have thorns, spines, or a similar hazard.
 In addition, you have advantage on saving throws against plants that are magically created or manipulated to impede movement, such those created by the entangle spell."}
-                           {:name "Nature's Ward"
-                            :level 10
-                            :description "When you reach 10th level, you can't be charmed or frightened by elementals or fey, and you are immune to poison and disease."}
-                           {:name "Nature's Santuary"
-                            :level 14
-                            :description "When you reach 14th level, creatures of the natural world sense your connection to nature and become hesitant to attack you. When a beast or plant creature attacks you, that creature must make a Wisdom saving throw against your druid spell save DC. On a failed save, the creature must choose a different target, or the attack automatically misses. On a successful save, the creature is immune to this effect for 24 hours.
-The creature is aware of this effect before it makes its attack against you."}]}
+                           ]}
                  {:name "Circle of the Moon"
-                  :traits [{:name "Combat Wild Shape"
-                            :level 2}
-                           {:name "Circle Forms"
-                            :level 2}
+                  :levels {2 {:modifiers [(mod5e/bonus-action
+                                           {:name "Combat Wild Shape"
+                                            :page 69
+                                            :summary "can Wild Shape as bonus action instead of action, while transformed expend a spell slot and gain 1d8 HP per slot level"})
+                                          (mod/modifier
+                                           ?wild-shape-cr
+                                           (max 1 (int (/ (?class-level :druid) 3))))]}
+                           10 {:modifiers [(mod5e/bonus-action
+                                            {:name "Elemental Wild Shape"
+                                             :level 10
+                                             :page 69
+                                             :summary "expend two Wild Shape uses to transform into an air, earth, fire, or water elemental"})]}}
+                  :traits [
+                           
                            {:name "Primal Strike"
-                            :level 6}
-                           {:name "Elemental Wild Shape"
-                            :level 10}
+                            :level 6
+                            :page 69
+                            :summary "Your beast form attacks count as magical"}
+                          
                            {:name "Thousand Forms"
+                            :page 69
+                            :summary "cast alter self at will"
                             :level 14}]}]}
    character-ref))
 
