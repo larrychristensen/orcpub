@@ -75,7 +75,6 @@
                                           (catch js/Object
                                               e
                                               (remove-stored-char stored-char-str)))))
-(js/console.log "STORED CHAR" stored-char)
 (defonce character-ref (r/atom (if stored-char stored-char t5e/character)))
 
 (def text-color
@@ -603,14 +602,12 @@
     (let [has-shield? (:shield equipped-armor)]
       [:div.m-l-40
        (if has-shield?
-         (do (prn "HAS HSIEL" has-shield?)
-             [:span
-              [:span (armor-class-with-armor nil has-shield?)]
-              [:span.display-section-qualifier-text "(unarmored + shield)"]]))
+         [:span
+          [:span (armor-class-with-armor nil has-shield?)]
+          [:span.display-section-qualifier-text "(unarmored + shield)"]])
        (doall
         (map
          (fn [[armor-kw _]]
-           (prn "ARMRO WK" armor-kw)
            (let [armor (opt5e/armor-map armor-kw)
                  ac (armor-class-with-armor armor)]
              ^{:key armor-kw}
@@ -721,7 +718,6 @@
      [:div.f-s-14
       (map
        (fn [{:keys [name area-type description damage-die damage-die-count damage-type save save-dc] :as attack}]
-         (prn "AREA_TYPE" area-type)
          ^{:key name}
          [:p.m-t-10
           [:span.f-w-600.i name "."]
