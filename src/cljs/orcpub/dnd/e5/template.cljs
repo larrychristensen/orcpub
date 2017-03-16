@@ -4021,7 +4021,6 @@ You might also have ties to a specific temple dedicated to your chosen deity or 
                            :medium (min ?max-medium-armor-bonus dex-bonus)
                            0)))
     ?armor-class-with-armor (fn [armor & [shield?]]
-                              (prn "AC" armor shield? ?armor-class)
                               (+ (if shield? 2 0)
                                  (if (nil? armor)
                                    ?armor-class

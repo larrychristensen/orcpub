@@ -1,5 +1,3 @@
-(ns orcpub.dnd.e5.magic-items)
-
 (defn sword? [w]
   (= :sword (:subtype w)))
 
@@ -8,7 +6,7 @@
 
 (defn slashing-sword? [w]
  (and (= :slashing (:damage-type w))
-      (sword? w)))
+      (sword w)))
 
 (defn weapon? [w] true)
 
@@ -22,7 +20,8 @@
   [{
     :name "Adamantine Armor"
     :type :armor
-    :subtype heavy-metal-armor?
+    :subtype [:medium :heavy]
+    :subtype-exception [:hide]
     :rarity :uncommon
     :description "This suit of armor is reinforced with adamantine, one of the hardest substances in existence. While you’re wearing it, any critical hit against you becomes a normal hit."
     }{
@@ -693,7 +692,7 @@ The gem regains 1d3 expended charges daily at dawn."
     }{
     :name "Giant Slayer"
     :type :weapon
-    :subtype (fn [w] (or (axe? w) (sword? w)))
+    :subtype (fn [w] (or (axe w) (sword w)))
     :rarity :rare
     :description "You gain a +1 bonus to attack and damage rolls made with this magic weapon.
 When you hit a giant with it, the giant takes an extra 2d6 damage of the weapon’s type and must succeed on a DC 15 Strength saving throw or fall prone. For the purpose of this weapon, “giant” refers to any creature with the giant type, including ettins and trolls."
@@ -1003,7 +1002,7 @@ trapped in the mirror. The freed creature appears, along with its possessions, i
     }{
     :name "Mithral Armor"
     :type :armor
-    :subtype heavy-metal-armor?
+    :subtype heavy-metal-armor
     :rarity :uncommon
     :description "Mithral is a light, flexible metal. A mithral chain shirt or breastplate can be worn under normal clothes. If the armor normally imposes disadvantage on Dexterity (Stealth) checks or has a Strength requirement, the mithral version of the armor doesn’t."
     }{
@@ -1571,7 +1570,7 @@ The rope has AC 20 and 20 hit points. It regains 1 hit point every 5 minutes as 
     :attunement [:any]
     :description "You gain a +2 bonus to attack and damage rolls made with this magic weapon. In addition, you can make one attack with it as a bonus action on each of your turns."
     }{
-    :name "Shield, +1, +2, or +3"
+    Shield, +1, +2, or +3
     :type :armor
     :subtype :shield
     :rarity "uncommon (+1), rare (+2), or very rare (+3)"
@@ -1603,7 +1602,7 @@ One ounce of the glue can cover a 1-foot square surface. The glue takes 1 minute
     }{
     :name "Spell Scroll"
 
-    :type :scroll
+    :type scroll
 
     :rarity "varies"
     :description "A spell scroll bears the words of a single spell, written in a mystical cipher. If the spell is on your class’s spell list, you can read the scroll and cast its spell without providing any material components. Otherwise, the scroll is unintelligible. Casting the spell by reading the scroll requires the spell’s normal casting time. Once the spell is cast, the words on the
