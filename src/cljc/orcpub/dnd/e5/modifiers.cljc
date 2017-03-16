@@ -151,45 +151,38 @@
 (defn skill-expertise [key]
   (mods/set-mod ?skill-expertise key))
 
-(defn tool-proficiency [name key & [first-class? cls-kw]]
+(defn tool-proficiency [key & [first-class? cls-kw]]
   (if first-class?
     (mods/set-mod ?tool-profs
-                  {:name name
-                   :key key}
+                  key
                   nil
                   nil
                   [(= cls-kw (first ?classes))])
     (mods/set-mod ?tool-profs
-                  {:name name
-                   :key key})))
+                  key)))
 
-(defn language [name key]
-  (mods/set-mod ?languages {:name name
-                            :key key}))
+(defn language [key]
+  (mods/set-mod ?languages key))
 
-(defn weapon-proficiency [name key & [first-class? cls-kw]]
+(defn weapon-proficiency [key & [first-class? cls-kw]]
   (if first-class?
     (mods/set-mod ?weapon-profs
-                  {:name name
-                   :key key}
+                  key
                   nil
                   nil
                   [(= cls-kw (first ?classes))])
     (mods/set-mod ?weapon-profs
-                  {:name name
-                   :key key})))
+                  key)))
 
-(defn armor-proficiency [name key & [first-class? cls-kw]]
+(defn armor-proficiency [key & [first-class? cls-kw]]
   (if first-class?
     (mods/set-mod ?armor-profs
-                  {:name name
-                   :key key}
+                  key
                   nil
                   nil
                   [(= cls-kw (first ?classes))])
     (mods/set-mod ?armor-profs
-                  {:name name
-                   :key key})))
+                  key)))
 
 (defn light-armor-proficiency [& [first-class? cls-kw]]
   (armor-proficiency "light" :light first-class? cls-kw))
@@ -246,8 +239,7 @@
   (mods/cum-sum-mod ?ranged-attack-bonus bonus))
 
 (defn armored-ac-bonus [bonus]
-  (mods/modifier ?armor-class-with-armor (fn [armor]
-                                           (+ bonus (?armor-class-with-armor armor)))))
+  (mods/cum-sum-mod ?armored-ac-bonus bonus))
 
 (defmacro attack [atk]
   `(mods/modifier ~'?attacks

@@ -9,7 +9,9 @@
             [orcpub.dnd.e5.character :as char5e]
             [orcpub.dnd.e5.modifiers :as mod5e]
             [orcpub.dnd.e5.options :as opt5e]
-            [orcpub.dnd.e5.spell-lists :as sl]))
+            [orcpub.dnd.e5.spell-lists :as sl])
+  #_(:require-macros [orcpub.dnd.e5.options :as opt5e]
+                   [orcpub.dnd.e5.modifiers :as mod5e]))
 
 (def character
   {::entity/options {#_:ability-scores #_{::entity/key :standard-roll
@@ -113,14 +115,14 @@
   (map
    (fn [armor-prof]
      (let [[armor-kw first-class?] (if (keyword? armor-prof) [armor-prof false] armor-prof)]
-       (mod5e/armor-proficiency (clojure.core/name armor-kw) armor-kw first-class? cls-kw)))
+       (mod5e/armor-proficiency armor-kw first-class? cls-kw)))
    armor-proficiencies))
 
 (defn tool-prof-modifiers [tool-proficiencies & [cls-kw]]
   (map
    (fn [tool-prof]
      (let [[tool-kw first-class?] (if (keyword? tool-prof) [tool-prof false] tool-prof)]
-       (mod5e/tool-proficiency (:name (opt5e/tools-map tool-kw)) tool-kw first-class? cls-kw)))
+       (mod5e/tool-proficiency tool-kw first-class? cls-kw)))
    tool-proficiencies))
 
 (defn weapon-prof-modifiers [weapon-proficiencies & [cls-kw]]
@@ -128,8 +130,8 @@
    (fn [weapon-prof]
      (let [[weapon-kw first-class?] (if (keyword? weapon-prof) [weapon-prof false] weapon-prof)]
        (if (#{:simple :martial} weapon-kw)
-         (mod5e/weapon-proficiency (str (name weapon-kw) " weapons") weapon-kw first-class? cls-kw)
-         (mod5e/weapon-proficiency (-> weapon-kw opt5e/weapons-map :name) weapon-kw first-class? cls-kw))))
+         (mod5e/weapon-proficiency weapon-kw first-class? cls-kw)
+         (mod5e/weapon-proficiency weapon-kw first-class? cls-kw))))
    weapon-proficiencies))
 
 
@@ -211,7 +213,7 @@
                    (darkvision-modifiers darkvision))
                  (map
                   (fn [language]
-                    (mod5e/language language (common/name-to-kw language)))
+                    (mod5e/language (common/name-to-kw language)))
                   languages)
                  (map
                   (fn [[k v]]
@@ -466,7 +468,7 @@
     :subraces
     [{:name "Rock Gnome"
       :abilities {:con 1}
-      :modifiers [(mod5e/tool-proficiency "Tinker's Tools" :tinkers-tools)]
+      :modifiers [(mod5e/tool-proficiency :tinkers-tools)]
       :traits [{:name "Artificer's Lore"
                 :page 37
                 :summary "Add 2X prof bonus on magical, alchemical, or technological item-related history checks."
@@ -867,7 +869,7 @@ Fire Starter. The device produces a miniature flame, which you can use to light 
                  name
                  key
                  []
-                 [(mod5e/tool-proficiency name key)]))
+                 [(mod5e/tool-proficiency key)]))
               (:values tool))
     :min num
     :max num
@@ -895,7 +897,7 @@ Fire Starter. The device produces a miniature flame, which you can use to light 
                          (:name tool)
                          (:key tool)
                          []
-                         [(mod5e/tool-proficiency (:name tool) (:key tool))]))))
+                         [(mod5e/tool-proficiency (:key tool))]))))
                   tool-options)
         :prereq-fn prereq-fn}))))
 
@@ -1877,7 +1879,7 @@ The extra hit points increase when you reach certain levels in this class: to 1d
                         {:name "Druidic Focus"
                          :options {:druidic-focus 1}}]
     :equipment {:explorers-pack 1}
-    :modifiers [(mod5e/language "Druidic" :druidic)]
+    :modifiers [(mod5e/language :druidic)]
     :levels {2 {:modifiers [(mod/modifier
                              ?wild-shape-cr
                              (mod5e/level-val
@@ -2096,13 +2098,44 @@ In addition, you have advantage on saving throws against plants that are magical
     :equipment-choices [{:name "Equipment Pack"
                          :options {:dungeoneers-pack 1
                                    :explorers-pack 1}}]
-    :traits [{:name "Second Wind" :description "You have a limited well of stamina that you can draw on to protect yourself from harm. On your turn, you can use a bonus action to regain hit points equal to 1d10 + your fighter level.\nOnce you use this feature, you must  nish a short or long rest before you can use it again."}
-             {:level 2 :name "Action Surge" :description "You can push yourself beyond your normal limits for a moment. On your turn, you can take one additional action on top of your regular action and a possible bonus action.\nOnce you use this feature, you must finish a short or long rest before you can use it again. Starting at 17th level, you can use it twice before a rest, but only once on the same turn."}
-             {:level 5 :name "Extra Attack" :description "You can attack twice, instead of once, whenever you take the Attack action on your turn.\nThe number of attacks increases to three when you reach 11th level in this class and to four when you reach 20th level in this class."}
-             {:level 9 :name "Indomitable" :description "You can reroll a saving throw that you fail. If you do so, you must use the new roll, and you can't use this feature again until you  nish a long rest.\nYou can use this feature twice between long rests starting at 13th level and three times between long rests starting at 17th level."}]
+    :modifiers [(mod5e/bonus-action
+                 {:name "Second Wind"
+                  :page 72
+                  :frequency {:units :rest}
+                  :summary (str "regain 1d10 "
+                                (common/mod-str (?class-level :fighter))
+                                " HPs")
+                  :description "You have a limited well of stamina that you can draw on to protect yourself from harm. On your turn, you can use a bonus action to regain hit points equal to 1d10 + your fighter level.
+Once you use this feature, you must finish a short or long rest before you can use it again."})
+                (mod5e/action
+                 {:level 2
+                  :name "Action Surge"
+                  :page 72
+                  :frequency {:units :rest
+                              :amount (if (>= (?class-level :fighter) 17)
+                                        2
+                                        1)}
+                  :summary "take an extra action"
+                  :description "You can push yourself beyond your normal limits for a moment. On your turn, you can take one additional action on top of your regular action and a possible bonus action.
+Once you use this feature, you must finish a short or long rest before you can use it again. Starting at 17th level, you can use it twice before a rest, but only once on the same turn."})]
+    :levels {5 {:modifiers [(mod5e/extra-attack)]}
+             9 {:modifiers [(mod5e/dependent-trait
+                             {:level 9
+                              :name "Indomitable"
+                              :page 72
+                              :frequency {:units :long-rest
+                                          :amount (mod5e/level-val
+                                                   (?class-level :fighter)
+                                                   {13 2
+                                                    17 3
+                                                    :default 1})}
+                              :summary "reroll a save if you fail"
+                              :description "You can reroll a saving throw that you fail. If you do so, you must use the new roll, and you can't use this feature again until you finish a long rest.
+You can use this feature twice between long rests starting at 13th level and three times between long rests starting at 17th level."})]}
+             11 {:modifiers [(mod5e/extra-attack)]}
+             20 {:modifiers [(mod5e/extra-attack)]}}
     :subclass-level 3
     :subclass-title "Martial Archetype"
-    :levels {5 {:modifiers [(mod5e/extra-attack)]}}
     :selections [(opt5e/fighting-style-selection character-ref)
                  (t/selection
                   "Armor"
@@ -2154,39 +2187,65 @@ In addition, you have advantage on saving throws against plants that are magical
                                 (opt5e/fighting-style-selection character-ref)
                                 10)]
                   :levels {3 {:modifiers [(mod5e/critical 19)]}
-                           7 {:modifiers [(mod/modifier ?default-skill-bonus (let [b (int (/ ?prof-bonus 2))] {:str b :dex b :con b}))]}
-                           15 {:modifiers [(mod5e/critical 18)]}}
-                  :traits [{:level 3
-                            :name "Improved Critical"
-                            :description "Your weapon attacks score a critical hit on a roll of 19 or 20."}
-                           {:level 7
-                            :name "Remarkable Athlete"
-                            :description "You can add half your proficiency bonus (round up) to any Strength, Dexterity, or Constitution check you make that doesn't already use your proficiency bonus.\nIn addition, when you make a running long jump, the distance you can cover increases by a number of feet equal to your Strength modifier."}
-                           {:level 10
-                            :name "Additional Fighting Style"
-                            :description "You can choose a second option from the Fighting Style class feature."}
-                           {:level 15
-                            :name "Superior Critical"
-                            :description "Your weapon attacks score a critical hit on a roll of 18-20."}
-                           {:level 18
-                            :name "Survivor"
-                            :description "You attain the pinnacle of resilience in battle. At the start of each of your turns, you regain hit points equal to 5 + your Constitution modifier if you have no more than half of your hit points left. You don't gain this bene t if you have 0 hit points."}]}
+                           7 {:modifiers [(mod/modifier ?default-skill-bonus (let [b (int (/ ?prof-bonus 2))] {:str b :dex b :con b}))
+                                          (mod5e/dependent-trait
+                                           {:level 7
+                                            :name "Remarkable Athlete"
+                                            :page 72
+                                            :summary (str "+"
+                                                          (common/round-up (/ ?prof-bonus 2))
+                                                          " to STR, DEX, or CON checks that don't already include prof bonus; running long jump increases by "
+                                                          (?ability-bonuses :str)
+                                                          " ft.")
+                                            :description "You can add half your proficiency bonus (round up) to any Strength, Dexterity, or Constitution check you make that doesn't already use your proficiency bonus.
+In addition, when you make a running long jump, the distance you can cover increases by a number of feet equal to your Strength modifier."})]}
+                           15 {:modifiers [(mod5e/critical 18)]}
+                           18 {:modifiers [(mod5e/dependent-trait
+                                            {:level 18
+                                             :page 73
+                                             :name "Survivor"
+                                             :summary (str "At start of your turns, if you have at most "
+                                                           (int (/ ?max-hit-points 2))
+                                                           " HPs left, regain "
+                                                           (+ 5 (?ability-bonuses :con)) " HPs")
+                                             :description "You attain the pinnacle of resilience in battle. At the start of each of your turns, you regain hit points equal to 5 + your Constitution modifier if you have no more than half of your hit points left. You don't gain this benefit if you have 0 hit points."})]}}
+                  :traits []}
                  {:name "Battle Master"
                   :selections [(t/selection
                                 "Martial Maneuvers"
                                 opt5e/maneuver-options
                                 3 3)
                                (opt5e/tool-selection (map :key opt5e/artisans-tools) 1)]
-                  :traits [{:name "Combat Superiority"
-                            :level 3}
-                           {:name "Student of War"
-                            :level 3}
-                           {:name "Know Your Enemy"
-                            :level 7}
-                           {:name "Improved Combat Superiority"
-                            :level 10}
+                  :modifiers [(mod/modifier ?maneuver-save-dc (max (?spell-save-dc :dex)
+                                                                   (?spell-save-dc :str)))
+                              (mod5e/dependent-trait
+                               {:name "Combat Superiority"
+                                :page 73
+                                :level 3
+                                :summary (let [[num-maneuvers num-dice die]
+                                               (mod5e/level-val
+                                                (?class-level :fighter)
+                                                {7 [5 5 8]
+                                                 10 [7 5 10]
+                                                 15 [9 6 10]
+                                                 18 [9 6 12]
+                                                 :default [3 4 8]})]
+                                           (str "You know "
+                                                num-maneuvers
+                                                " martial maneuvers, have "
+                                                num-dice
+                                                " superiority dice (d"
+                                                die
+                                                "s), and maneuver save DC of "
+                                                ?maneuver-save-dc))})]
+                  :traits [{:name "Know Your Enemy"
+                            :level 7
+                            :page 73
+                            :summary "Study a creature outside combat for 1 min. to learn if it is superior, inferior, or equal in STR, DEX, CON, AC, current HP, total levels, fighter levels"}
                            {:name "Relentless"
-                            :level 15}]}
+                            :level 15
+                            :page 74
+                            :summary "you regain 1 superiority die when you roll iniative and have no remaining superiority dice"}]}
                  {:name "Eldritch Knight"
                   :spellcaster true
                   :spellcasting {:level-factor 3
@@ -2213,27 +2272,30 @@ In addition, you have advantage on saving throws against plants that are magical
                                                     :restriction eldritch-knight-spell?}
                                                 20 1}
                                  :ability :int}
-                  
+                  :modifiers [(mod5e/bonus-action
+                               {:name "Summon Bonded Weapon"
+                                :page 75
+                                :summary "If on the same plane of existence, instantly teleport a bonded weapon into your hand"})]
+                  :levels {7 {:modifiers [(mod5e/bonus-action
+                                           {:name "War Magic"
+                                            :page 75
+                                            :summary "make a weapon attack if you used your action to cast a cantrip"})]}
+                           18 {:modifiers [(mod5e/bonus-action
+                                            {:name "Improved War Magic"
+                                             :page 75
+                                             :summary "make a weapon attack if you used your action to cast a spell"})]}}
                   :traits [{:name "Weapon Bond"
-                            :level 3}
-                           {:name "War Magic"
-                            :level 7}
+                            :level 3
+                            :page 75
+                            :summary "Bond with up to two weapons (see Summon Bonded Weapon)"}
                            {:name "Eldritch Strike"
-                            :level 10}
+                            :page 75
+                            :level 10
+                            :summary "a creature has disadvantage on next saving throw against a spell you cast before the end of your next turn if you hit it with a weapon attack"}
                            {:name "Arcane Charge"
-                            :level 15}
-                           {:name "Improved War Magic"
-                            :level 18}]}
-                 {:name "Purple Dragon Knight"
-                  :source "Sword Coast Adventurer's Guide"
-                  :traits [{:name "Rallying Cry"
-                            :level 3}
-                           {:name "Royal Envoy"
-                            :level 7}
-                           {:name "Inspiring Surge"
-                            :level 10}
-                           {:name "Bulwark"
-                            :level 15}]}]}
+                            :level 15
+                            :page 75
+                            :summary "teleport up to 30 ft. when you use Action Surge"}]}]}
    character-ref))
 
 (defn monk-option [character-ref]
@@ -2276,7 +2338,7 @@ In addition, you have advantage on saving throws against plants that are magical
                              (mod5e/unarmored-speed-bonus 5)]}
              13 {:modifiers (map
                              (fn [{:keys [name key]}]
-                               (mod5e/language name key))
+                               (mod5e/language key))
                              opt5e/languages)}
              14 {:modifiers [(mod5e/saving-throws char5e/ability-keys)
                              (mod5e/unarmored-speed-bonus 5)]}
@@ -3956,10 +4018,12 @@ You might also have ties to a specific temple dedicated to your chosen deity or 
                            :medium (min ?max-medium-armor-bonus dex-bonus)
                            0)))
     ?armor-class-with-armor (fn [armor & [shield?]]
+                              (prn "AC" armor shield? ?armor-class)
                               (+ (if shield? 2 0)
                                  (if (nil? armor)
                                    ?armor-class
                                    (+ (?armor-dex-bonus armor)
+                                      (or ?armored-ac-bonus 0)
                                       (:base-ac armor)))))
     ?abilities (reduce
                 (fn [m k]
@@ -4003,6 +4067,27 @@ You might also have ties to a specific temple dedicated to your chosen deity or 
     ?initiative (?ability-bonuses :dex)
     ?num-attacks 1
     ?critical #{20}
+    ?has-weapon-prof? (fn [weapon]
+                       (or (?weapon-profs (:key weapon))
+                           (?weapon-profs (:type weapon))))
+    ?weapon-prof-bonus (fn [weapon]
+                         (if (?has-weapon-prof? weapon)
+                           ?prof-bonus
+                           0))
+    ?weapon-attack-modifier (fn [weapon finesse?]
+                              (+ (?weapon-prof-bonus weapon)
+                                 (or (:attack-bonus weapon) 0)
+                                 (if (:melee? weapon)
+                                   (+ (if (and finesse?
+                                               (:finesse? weapon))
+                                        (?ability-bonuses :dex)
+                                        (?ability-bonuses :str))
+                                      (or ?melee-attack-bonus 0))
+                                   (+ (if (and finesse?
+                                               (:finesse? weapon))
+                                        (?ability-bonuses :str)
+                                        (?ability-bonuses :dex))
+                                      (or ?ranged-attack-bonus 0)))))
     ?spell-attack-modifier (fn [ability-kw]
                              (+ ?prof-bonus (?ability-bonuses ability-kw)))
     ?spell-save-dc (fn [ability-kw]

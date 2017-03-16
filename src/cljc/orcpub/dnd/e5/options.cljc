@@ -557,17 +557,17 @@ hazards."}])
     :damage-die 8,
     :type :simple,
     :damage-die-count 1,
-    :ranged true,
+    :ranged? true,
     :range {:min 80, :max 320},
     :key :crossbow-light}
-   {:ranged true,
+   {:ranged? true,
     :key :dart,
     :name "Dart",
     :damage-die-count 1,
     :type :simple,
     :damage-type :piercing,
     :thrown true,
-    :finesse true,
+    :finesse? true,
     :damage-die 4,
     :range {:min 20, :max 60}}
    {:name "Shortbow",
@@ -575,7 +575,7 @@ hazards."}])
     :damage-die 6,
     :type :simple,
     :damage-die-count 1,
-    :ranged true,
+    :ranged? true,
     :range {:min 80, :max 320},
     :key :shortbow}
    {:name "Sling",
@@ -583,7 +583,7 @@ hazards."}])
     :damage-die 4,
     :type :simple,
     :damage-die-count 1,
-    :ranged true,
+    :ranged? true,
     :range {:min 30, :max 120},
     :key :sling}
    {:name "Club",
@@ -591,16 +591,16 @@ hazards."}])
     :damage-die 4,
     :damage-die-count 1,
     :type :simple,
-    :melee true,
+    :melee? true,
     :key :club}
-   {:melee true,
+   {:melee? true,
     :key :dagger,
     :name "Dagger",
     :damage-die-count 1,
     :type :simple,
     :damage-type :piercing,
     :thrown true,
-    :finesse true,
+    :finesse? true,
     :damage-die 4,
     :range {:min 20, :max 60}}
    {:name "Greatclub",
@@ -608,14 +608,14 @@ hazards."}])
     :damage-die 8,
     :damage-die-count 1,
     :type :simple,
-    :melee true,
+    :melee? true,
     :key :greatclub}
    {:name "Handaxe",
     :damage-type :slashing,
     :damage-die 6,
     :damage-die-count 1,
     :type :simple,
-    :melee true,
+    :melee? true,
     :thrown true,
     :range {:min 20, :max 60},
     :key :handaxe}
@@ -624,7 +624,7 @@ hazards."}])
     :damage-die 6,
     :damage-die-count 1,
     :type :simple,
-    :melee true,
+    :melee? true,
     :thrown true,
     :range {:min 30, :max 120},
     :key :javelin}
@@ -633,7 +633,7 @@ hazards."}])
     :damage-die 4,
     :damage-die-count 1,
     :type :simple,
-    :melee true,
+    :melee? true,
     :thrown true,
     :range {:min 20, :max 60},
     :key :light-hammer}
@@ -642,7 +642,7 @@ hazards."}])
     :type :simple,
     :damage-die 6,
     :damage-die-count 1,
-    :melee true,
+    :melee? true,
     :key :mace}
    {:name "Quarterstaff",
     :damage-type :bludgeoning,
@@ -650,16 +650,16 @@ hazards."}])
     :damage-die 6,
     :damage-die-count 1,
     :versatile {:damage-die 8, :damage-die-count 1},
-    :melee true,
+    :melee? true,
     :key :quarterstaff}
    {:name "Sickle",
     :damage-type :slashing,
     :damage-die 4,
     :type :simple,
     :damage-die-count 1,
-    :melee true,
+    :melee? true,
     :key :sickle}
-   {:melee true,
+   {:melee? true,
     :versatile {:damage-die 8, :damage-die-count 1},
     :key :spear,
     :name "Spear",
@@ -674,7 +674,7 @@ hazards."}])
     :damage-die 1,
     :type :simple,
     :damage-die-count 1,
-    :melee true,
+    :melee? true,
     :unarmed true,
     :key :unarmed-strike}
    {:name "Battleaxe",
@@ -683,21 +683,21 @@ hazards."}])
     :type :martial,
     :damage-die-count 1,
     :versatile {:damage-die 10, :damage-die-count 1},
-    :melee true,
+    :melee? true,
     :key :battleaxe}
    {:name "Flail",
     :damage-type :bludgeoning,
     :damage-die 8,
     :type :martial,
     :damage-die-count 1,
-    :melee true,
+    :melee? true,
     :key :flail}
    {:name "Glaive",
     :damage-type :slashing,
     :damage-die 10,
     :type :martial,
     :damage-die-count 1,
-    :melee true,
+    :melee? true,
     :heavy true,
     :reach true,
     :key :glaive}
@@ -707,7 +707,7 @@ hazards."}])
     :type :martial,
     :damage-die-count 1,
     :heavy true,
-    :melee true,
+    :melee? true,
     :key :greataxe}
    {:name "Greatsword",
     :damage-type :slashing,
@@ -715,14 +715,14 @@ hazards."}])
     :type :martial,
     :damage-die-count 2,
     :heavy true,
-    :melee true,
+    :melee? true,
     :key :greatsword}
    {:name "Halberd",
     :damage-type :slashing,
     :damage-die 10,
     :type :martial,
     :damage-die-count 1,
-    :melee true,
+    :melee? true,
     :heavy true,
     :reach true,
     :key :halberd}
@@ -731,7 +731,7 @@ hazards."}])
     :damage-die 12,
     :type :martial,
     :damage-die-count 1,
-    :melee true,
+    :melee? true,
     :reach true,
     :key :lance}
    {:name "Longsword",
@@ -740,7 +740,7 @@ hazards."}])
     :type :martial,
     :damage-die-count 1,
     :versatile {:damage-die 10, :damage-die-count 1},
-    :melee true,
+    :melee? true,
     :key :longsword}
    {:name "Maul",
     :damage-type :bludgeoning,
@@ -748,21 +748,21 @@ hazards."}])
     :type :martial,
     :damage-die-count 2,
     :heavy true,
-    :melee true,
+    :melee? true,
     :key :maul}
    {:name "Morningstar",
     :damage-type :piercing,
     :damage-die 8,
     :type :martial,
     :damage-die-count 1,
-    :melee true,
+    :melee? true,
     :key :morningstar}
    {:name "Pike",
     :damage-type :piercing,
     :damage-die 10,
     :type :martial,
     :damage-die-count 1,
-    :melee true,
+    :melee? true,
     :heavy true,
     :reach true,
     :key :pike}
@@ -771,26 +771,26 @@ hazards."}])
     :damage-die 8,
     :type :martial,
     :damage-die-count 1,
-    :finesse true,
-    :melee true,
+    :finesse? true,
+    :melee? true,
     :key :rapier}
    {:name "Scimitar",
     :damage-type :slashing,
     :damage-die 6,
     :type :martial,
     :damage-die-count 1,
-    :finesse true,
-    :melee true,
+    :finesse? true,
+    :melee? true,
     :key :scimitar}
    {:name "Shortsword",
     :damage-type :piercing,
     :damage-die 6,
     :type :martial,
-    :finesse true,
+    :finesse? true,
     :damage-die-count 1,
-    :melee true,
+    :melee? true,
     :key :shortsword}
-   {:melee true,
+   {:melee? true,
     :versatile {:damage-die 8, :damage-die-count 1},
     :key :trident,
     :name "Trident",
@@ -805,7 +805,7 @@ hazards."}])
     :damage-die 8,
     :type :martial,
     :damage-die-count 1,
-    :melee true,
+    :melee? true,
     :key :war-pick}
    {:name "Warhammer",
     :damage-type :bludgeoning,
@@ -813,15 +813,15 @@ hazards."}])
     :type :martial,
     :damage-die-count 1,
     :versatile {:damage-die 10, :damage-die-count 1},
-    :melee true,
+    :melee? true,
     :key :warhammer}
    {:name "Whip",
     :damage-type :slashing,
     :damage-die 4,
     :type :martial,
     :damage-die-count 1,
-    :melee true,
-    :finesse true,
+    :melee? true,
+    :finesse? true,
     :reach true,
     :key :whip}
    {:name "Blowgun",
@@ -829,7 +829,7 @@ hazards."}])
     :damage-die 1,
     :type :martial,
     :damage-die-count 1,
-    :ranged true,
+    :ranged? true,
     :range {:min 25, :max 100},
     :key :blowgun}
    {:name "Crossbow, hand",
@@ -837,7 +837,7 @@ hazards."}])
     :damage-die 6,
     :type :martial,
     :damage-die-count 1,
-    :ranged true,
+    :ranged? true,
     :range {:min 30, :max 120},
     :key :crossbow-hand}
    {:name "Crossbow, heavy",
@@ -845,7 +845,7 @@ hazards."}])
     :damage-die 10,
     :type :martial,
     :damage-die-count 1,
-    :ranged true,
+    :ranged? true,
     :heavy true,
     :range {:min 100, :max 400},
     :key :crossbow-heavy}
@@ -854,13 +854,13 @@ hazards."}])
     :damage-die 8,
     :type :martial,
     :damage-die-count 1,
-    :ranged true,
+    :ranged? true,
     :heavy true,
     :range {:min 150, :max 600},
     :key :longbow}
    {:name "Net",
     :type :martial,
-    :ranged true,
+    :ranged? true,
     :thrown true,
     :range {:min 5, :max 15},
     :key :net}])
@@ -892,14 +892,14 @@ hazards."}])
    name
    key
    nil
-   [(modifiers/weapon-proficiency name key)]))
+   [(modifiers/weapon-proficiency key)]))
 
 (defn tool-option [tool]
   (t/option
    (:name tool)
    (:key tool)
    nil
-   [(modifiers/tool-proficiency (:name tool) (:key tool))]))
+   [(modifiers/tool-proficiency (:key tool))]))
 
 (defn weapon-option [weapon & [num]]
   (t/option
@@ -1058,7 +1058,7 @@ hazards."}])
    name
    key
    nil
-   [(modifiers/language name key)]))
+   [(modifiers/language key)]))
 
 (def class-names
   {:barbarian "Barbarian"
@@ -1286,12 +1286,20 @@ hazards."}])
    num
    num))
 
-(defn maneuver-option [name]
+(defn maneuver-option [name & [desc]]
   (t/option
    name
    (common/name-to-kw name)
    nil
-   [(modifiers/trait (str name " Maneuver"))]))
+   [(modifiers/trait (str name " Maneuver")
+                     desc)]))
+
+(defn mod-maneuver-option [name mods]
+  (t/option
+   name
+   (common/name-to-kw name)
+   nil
+   mods))
 
 (defn proficiency-help [num singular plural]
   (str "Select additional " (if (> num 1) plural singular) " for which you are proficient."))
@@ -1363,22 +1371,52 @@ hazards."}])
      [(tool-selection 1)])]))
 
 (def maneuver-options
-  [(maneuver-option "Commander's Strike")
-   (maneuver-option "Disarming Attack")
-   (maneuver-option "Distracting Strike")
-   (maneuver-option "Evasive Footwork")
-   (maneuver-option "Feinting Attack")
-   (maneuver-option "Goading Attack")
-   (maneuver-option "Lunging Attack")
-   (maneuver-option "Manuevering Attack")
-   (maneuver-option "Menacing Attack")
-   (maneuver-option "Parry")
-   (maneuver-option "Precision Attack")
-   (maneuver-option "Pushing Attack")
-   (maneuver-option "Rally")
-   (maneuver-option "Riposte")
-   (maneuver-option "Sweeping Attack")
-   (maneuver-option "Trip Attack")])
+  [(maneuver-option "Commander's Strike"
+                    "When you take Attack action, forgo one attack, expend a superiority die, give a creature an immediate reaction attack, adding superiority die to damage")
+   (maneuver-option "Disarming Attack"
+                    "When you hit with a weapon attack, expend a superiority die and force the target to drop an item of your choice on failed STR save")
+   (maneuver-option "Distracting Strike"
+                    "When you hit with a weapon attack, expend a superiority die, add die to damage, give advantage to next attack roll by someone else against the creature")
+   (maneuver-option "Evasive Footwork"
+                    "Add superiority die to AC when moving")
+   (maneuver-option "Feinting Attack"
+                    "feint attack on a creature and gain advantage on next attack against it, adding superiority die to damage")
+   (maneuver-option "Goading Attack"
+                    "add superiority die to a successful attack's damage, if target fails WIS save, the next attack it makes must be against you or have disadvantage")
+   (maneuver-option "Lunging Attack"
+                    "increase melee attack reach by 5 ft., add superiority die to damage")
+   (maneuver-option "Manuevering Attack"
+                    "add superiority die to a successful attack's damage, choose a friendly creature that can move half it's speed as a reaction without opportunity attack from attack target")
+   (maneuver-option "Menacing Attack"
+                    "add superiority die to a successful attack's damage, if target fails WIS save, it becomes frightened of you until your next turn")
+   (mod-maneuver-option
+    "Parry"
+    [(modifiers/reaction
+      {:name "Parry Maneuver"
+       :page 74
+       :summary (str "reduce melee attack damage dealt to you by superiority die roll " (common/mod-str (?ability-bonuses :dex)))})])
+   (maneuver-option "Precision Attack"
+                    "add superiority die to weapon attack roll")
+   (maneuver-option "Pushing Attack"
+                    "add superiority die to a successful attack's damage, if target is Large or smaller and fails an STR save, it is pushed 15 ft. away")
+   (mod-maneuver-option
+    "Rally"
+    [(modifiers/bonus-action
+      {:name "Rally Maneuver"
+       :page 74
+       :summary (str "give superiority die "
+                     (common/mod-str (?ability-bonuses :cha))
+                     " temp HPs to a friendly creature")})])
+   (mod-maneuver-option
+    "Riposte"
+    [(modifiers/reaction
+      {:name "Riposte Maneuver"
+       :page 74
+       :summary "if a creature misses you with a melee attack, attack as a reaction and add superiority die to damage"})])
+   (maneuver-option "Sweeping Attack"
+                    "if you hit a creature with an attack roll, choose another creature within 5 ft., if the roll would hit the creature, it takes superiority die worth of damage")
+   (maneuver-option "Trip Attack"
+                    "add superiority die to successful attack's damage, if target fails STR save, it is knocked prone")])
 
 (def can-cast-spell-prereq
   {::t/label "spellcasting ability"
@@ -1628,7 +1666,7 @@ hazards."}])
     "Tavern Brawler"
     :tavern-brawler
     [(ability-increase-selection [:str :dex] 1 false)]
-    [(modifiers/weapon-proficiency "Improvised Weapons" :improvised)
+    [(modifiers/weapon-proficiency :improvised)
      (modifiers/trait "Tavern Brawler Feat")])
    (t/mod-option
     "Tough"
@@ -1648,33 +1686,50 @@ hazards."}])
     :archery
     []
     [(modifiers/ranged-attack-bonus 2)
-     (modifiers/trait "Archery Fighting Style" "You gain a +2 bonus to attack rolls you make with ranged weapons.")])
+     (modifiers/trait-cfg
+      {:name "Archery Fighting Style"
+       :page 72
+       :description "You gain a +2 bonus to attack rolls you make with ranged weapons."})])
    (t/option
     "Defense"
     :defense
     []
     [(modifiers/armored-ac-bonus 1)
-     (modifiers/trait "Defense Fighting Style" "While you are wearing armor, you gain a +1 bonus to AC.")])
+     (modifiers/trait-cfg
+      {:name "Defense Fighting Style"
+       :page 72
+       :description "While you are wearing armor, you gain a +1 bonus to AC."})])
    (t/option
     "Dueling"
     :dueling
     []
-    [(modifiers/trait "Dueling Fighting Style" "When you are wielding a melee weapon in one hand and no other weapons, you gain a +2 bonus to damage rolls with that weapon.")])
+    [(modifiers/trait-cfg
+      {:name "Dueling Fighting Style"
+       :page 72
+       :description "When you are wielding a melee weapon in one hand and no other weapons, you gain a +2 bonus to damage rolls with that weapon."})])
    (t/option
     "Great Weapon Fighting"
     :great-weapon-fighting
     []
-    [(modifiers/trait "Great Weapon Fighting Style" "When you roll a 1 or 2 on a damage die for an attack you make with a melee weapon that you are wielding with two hands, you can reroll the die and must use the new roll, even if the new roll is a 1 or a 2. The weapon must have the two-handed or versatile property for you to gain this benefit.")])
+    [(modifiers/trait-cfg
+      {:name "Great Weapon Fighting Style"
+       :page 72
+       :description "When you roll a 1 or 2 on a damage die for an attack you make with a melee weapon that you are wielding with two hands, you can reroll the die and must use the new roll, even if the new roll is a 1 or a 2. The weapon must have the two-handed or versatile property for you to gain this benefit."})])
    (t/option
     "Protection"
     :protection
     []
-    [(modifiers/trait "Protection Fighting Style" "When a creature you can see attacks a target other than you that is within 5 feet of you, you can use your reaction to impose disadvantage on the attack roll. You must be wielding a shield.")])
+    [(modifiers/reaction
+      {:name "Protection Fighting Style"
+       :page 72
+       :description "When a creature you can see attacks a target other than you that is within 5 feet of you, you can use your reaction to impose disadvantage on the attack roll. You must be wielding a shield."})])
    (t/option
     "Two Weapon Fighting"
     :two-weapon-fighting
     []
-    [(modifiers/trait "Two Weapon Fighting" "When you engage in two-weapon fighting, you can add your ability modifier to the damage of the second attack.")])])
+    [(modifiers/trait-cfg
+      {:name "Two Weapon Fighting"
+       :description "When you engage in two-weapon fighting, you can add your ability modifier to the damage of the second attack."})])])
 
 (defn fighting-style-selection [character-ref & [restrictions]]
   (t/selection
@@ -1740,4 +1795,4 @@ hazards."}])
      "One Skill/Theives Tools"
      :one-skill-thieves-tools
      [(expertise-selection 1)]
-     [(modifiers/tool-proficiency "Thieves Tools" :thieves-tools)])]))
+     [(modifiers/tool-proficiency :thieves-tools)])]))

@@ -586,12 +586,14 @@
     (let [has-shield? (:shield equipped-armor)]
       [:div.m-l-40
        (if has-shield?
-         [:span
-          [:span (armor-class-with-armor nil true)]
-          [:span.display-section-qualifier-text "(unarmored + shield)"]])
+         (do (prn "HAS HSIEL" has-shield?)
+             [:span
+              [:span (armor-class-with-armor nil has-shield?)]
+              [:span.display-section-qualifier-text "(unarmored + shield)"]]))
        (doall
         (map
          (fn [[armor-kw _]]
+           (prn "ARMRO WK" armor-kw)
            (let [armor (opt5e/armor-map armor-kw)
                  ac (armor-class-with-armor armor)]
              ^{:key armor-kw}
@@ -695,24 +697,6 @@
       (str (:name (equipment-map equipment-kw)) " (" num ")"))
     equipment)])
 
-(defn traits-section [traits]
-  (if (seq traits)
-    (display-section
-     "Features, Traits, & Feats" nil
-     [:div.f-s-14
-      (map
-       (fn [{:keys [name description summary page source]}]
-         (let [desc (or summary description)]
-           ^{:key name}
-           [:p.m-t-10
-            [:span.f-w-600.i name (if desc ".")]
-            [:span.f-w-n.m-l-10 (if (or desc page)
-                                  (common/sentensize
-                                   (str
-                                    desc
-                                    (if page (str " (" (disp5e/source-description source page) ")")))))]]))
-       (sort-by :name traits))])))
-
 (defn attacks-section [attacks]
   (if (seq attacks)
     (display-section
@@ -739,6 +723,9 @@
           [:span.f-w-600.i (:name action) "."]
           [:span.f-w-n.m-l-10 (common/sentensize (disp5e/action-description action))]])
        actions)])))
+
+(defn prof-name [prof-map prof-kw]
+  (or (-> prof-kw prof-map :name) (common/safe-name prof-kw)))
 
 (defn character-display [built-char]
   (let [race (es/entity-val built-char :race)
@@ -844,9 +831,9 @@
                      (not= bonus (ability-bonuses (:ability (opt5e/skills-map k)))))
                    skill-bonuses)))]
        [list-item-section "Languages" languages]
-       [list-item-section "Tool Proficiencies" tool-profs]
-       [list-item-section "Weapon Proficiencies" weapon-profs]
-       [list-item-section "Armor Proficiencies" armor-profs]
+       [list-item-section "Tool Proficiencies" tool-profs (partial prof-name opt5e/tools-map)]
+       [list-item-section "Weapon Proficiencies" weapon-profs (partial prof-name opt5e/weapons-map)]
+       [list-item-section "Armor Proficiencies" armor-profs (partial prof-name opt5e/armor-map)]
        [list-item-section "Damage Resistances" resistances name]
        [list-item-section "Damage Immunities" immunities name]
        [list-item-section "Condition Immunities" condition-immunities (fn [{:keys [condition qualifier]}]
@@ -860,7 +847,7 @@
        [actions-section "Bonus Actions" bonus-actions]
        [actions-section "Reactions" reactions]
        [actions-section "Actions" actions]
-       [traits-section traits]]]]))
+       [actions-section "Features, Traits, and Feats" traits]]]]))
 
 
 (def tab-path [:builder :character :tab])

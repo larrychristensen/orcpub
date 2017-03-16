@@ -195,7 +195,12 @@
     (str
      title
      " Proficiencies: "
-     (s/join "; " (sort (map :name profs))))))
+     (s/join "; " (map (fn [p]
+                         (let [prof (prof-map p)]
+                           (if prof
+                             (:name prof)
+                             (s/capitalize (name p)))))
+                       (sort profs))))))
 
 (defn other-profs-field [built-char]
   (let [tool-profs (es/entity-val built-char :tool-profs)
