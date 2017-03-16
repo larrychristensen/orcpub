@@ -64,7 +64,19 @@
                      (fn [i v] (if (not= i index) v))
                      list)))))
 
-(defonce character-ref (r/atom t5e/character))
+(def stored-char-str (.getItem js/window.localStorage "char-meta"))
+(defn remove-stored-char [stored-char-str & [more-info]]
+  (js/console.warn (str "Invalid char-meta: " stored-char-str more-info))
+  (.removeItem js/window.localStorage "char-meta"))
+(def stored-char (if stored-char-str (try (let [v (reader/read-string stored-char-str)]
+                                            (if (spec/valid? ::entity/raw-entity v)
+                                              v
+                                              (remove-stored-char stored-char-str (str (spec/explain-data ::entity/raw-entity v)))))
+                                          (catch js/Object
+                                              e
+                                              (remove-stored-char stored-char-str)))))
+(js/console.log "STORED CHAR" stored-char)
+(defonce character-ref (r/atom (if stored-char stored-char t5e/character)))
 
 (def text-color
   {:color :white})
@@ -88,7 +100,12 @@
 
 #_(add-watch app-state :log (fn [k r os ns]
                             (js/console.log "OLD" (clj->js os))
-                            (js/console.log "NEW" (clj->js ns))))
+                              (js/console.log "NEW" (clj->js ns))))
+
+(add-watch character-ref
+           :local-storage
+           (fn [k r os ns]
+             (.setItem js/window.localStorage "char-meta" (str ns))))
 
 (declare builder-selector)
 

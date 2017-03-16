@@ -17,7 +17,7 @@
   {::entity/options {#_:ability-scores #_{::entity/key :standard-roll
                                       ::entity/value (char5e/abilities 15 14 13 12 10 8)}
                      :class [{::entity/key :barbarian
-                              ::entity/options {:levels [{::entity/key :1}]}}]}})
+                              ::entity/options {:levels [{::entity/key :level-1}]}}]}})
 
 (defn get-raw-abilities [character-ref]
   (get-in @character-ref [::entity/options :ability-scores ::entity/value]))
@@ -901,6 +901,9 @@ Fire Starter. The device produces a miniature flame, which you can use to light 
                   tool-options)
         :prereq-fn prereq-fn}))))
 
+(defn level-key [index]
+  (keyword (str "level-" index)))
+
 (defn subclass-level-option [{:keys [name
                                      levels] :as subcls}
                              kw
@@ -910,7 +913,7 @@ Fire Starter. The device produces a miniature flame, which you can use to light 
   (let [selections (some-> levels (get i) :selections)]
     (t/option
      (str i)
-     (keyword (str i))
+     (level-key i)
      (vec
       (concat
        selections      
@@ -988,7 +991,7 @@ Fire Starter. The device produces a miniature flame, which you can use to light 
   (let [ability-inc-set (set ability-increase-levels)]
     (t/option
      (str i)
-     (keyword (str i))
+     (level-key i)
      (vec
       (concat
        (some-> levels (get i) :selections)
@@ -1153,7 +1156,7 @@ Fire Starter. The device produces a miniature flame, which you can use to light 
                        :help "These are your levels in the containing class. You can add levels by clicking the 'Add Levels' button below."
                        :new-item-text "Level Up (Add a Level)"
                        :new-item-fn (fn [selection options current-values]
-                                      {::entity/key (-> current-values count inc str keyword)})
+                                      {::entity/key (-> current-values count inc level-key)})
                        :options (vec
                                  (map
                                   (partial level-option cls kw character-ref spellcasting-template)
