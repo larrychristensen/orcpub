@@ -9,7 +9,8 @@
             [orcpub.dnd.e5.modifiers :as modifiers]
             [orcpub.dnd.e5.weapons :as weapons]
             [orcpub.dnd.e5.spells :as spells]
-            [orcpub.dnd.e5.spell-lists :as sl]))
+            [orcpub.dnd.e5.spell-lists :as sl])
+  #?(:cljs (:require-macros [orcpub.dnd.e5.modifiers :as modifiers])))
 
 (def abilities
   [{:key :str
@@ -477,11 +478,11 @@ hazards."}])
    [(modifiers/tool-proficiency (:key tool))]))
 
 (defn weapon-option [weapon & [num]]
-  (t/option
-   (:name weapon)
-   (:key weapon)
-   nil
-   [(modifiers/weapon (:key weapon) (or num 1))]))
+  (t/option-cfg
+   {:name (:name weapon)
+    :key (:key weapon)
+    :help (:description weapon)
+    :modifiers [(modifiers/weapon (:key weapon) (or num 1))]}))
 
 (defn weapon-options [weapons & [num]]
   (map

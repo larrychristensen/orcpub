@@ -1185,8 +1185,9 @@ Fire Starter. The device produces a miniature flame, which you can use to light 
                     (fn [[k num]]
                       (mod5e/equipment k num))
                     equipment)
-                   [(mod5e/class kw)
+                   [(mod5e/cls kw)
                     (apply mod5e/saving-throws kw save-profs)]))})))
+
 
 (defn class-level [levels class-kw]
   (get-in levels [class-kw :class-level]))
@@ -2144,7 +2145,7 @@ You can use this feature twice between long rests starting at 13th level and thr
     :subclass-title "Martial Archetype"
     :selections [(opt5e/fighting-style-selection character-ref)
                  (t/selection
-                  "Armor"
+                  "Starting Equipment: Armor"
                   [(t/option
                     "Chain Mail"
                     :chain-mail
@@ -2158,7 +2159,7 @@ You can use this feature twice between long rests starting at 13th level and thr
                      (mod5e/weapon :longbow 1)
                      (mod5e/equipment :arrow 20)])])
                  (t/selection
-                  "Weapons"
+                  "Starting Equipment: Weapons"
                   [(t/option
                     "Martial Weapon and Shield"
                     :martial-and-shield
@@ -2176,7 +2177,7 @@ You can use this feature twice between long rests starting at 13th level and thr
                       2)]
                     [])])
                  (t/selection
-                  "Additional Weapons"
+                  "Starting Equipment: Additional Weapons"
                   [(t/option
                     "Light Crossbow and 20 Bolts"
                     :light-crossbow
@@ -3922,10 +3923,11 @@ You might also have ties to a specific temple dedicated to your chosen deity or 
     :new-item-fn (fn [selection selected-items]
                    {::entity/key (-> items first :key)})
     :options (mapv
-              (fn [{:keys [name key]}]
+              (fn [{:keys [name key description]}]
                 (t/option-cfg
                  {:name name
                   :key key
+                  :help description
                   :modifiers [(modifier-fn key)]}))
               items)}))
 
@@ -4009,7 +4011,9 @@ You might also have ties to a specific temple dedicated to your chosen deity or 
    (inventory-selection "Weapons" weapon5e/weapons mod5e/deferred-weapon)
    (inventory-selection "Magic Weapons" mi/magic-weapons mod5e/deferred-magic-weapon)
    (inventory-selection "Armor" armor5e/armor mod5e/deferred-armor)
-   (inventory-selection "Equipment" opt5e/equipment mod5e/deferred-equipment)])
+   (inventory-selection "Magic Armor" mi/magic-armor mod5e/deferred-armor)
+   (inventory-selection "Equipment" opt5e/equipment mod5e/deferred-equipment)
+   (inventory-selection "Other Magic Items" mi/other-magic-items mod5e/deferred-equipment)])
 
 
 (def template-base

@@ -23,7 +23,8 @@
                  [garden "1.3.2"]
                  ;;[compojure "1.4.0"]
                  ;;[ring/ring-jetty-adapter "1.4.0"]
-                 [org.apache.pdfbox/pdfbox "2.1.0-20170309.210827-797"]
+                 [org.apache.pdfbox/pdfbox "2.1.0-20170316.190223-802"]
+                 ;;[org.apache.pdfbox/pdfbox "2.1.0-20170309.210827-797"]
 
                  [io.pedestal/pedestal.service "0.5.1"]
                  [io.pedestal/pedestal.route "0.5.1"]

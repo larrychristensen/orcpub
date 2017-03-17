@@ -609,7 +609,8 @@
        (doall
         (map
          (fn [[armor-kw _]]
-           (let [armor (armor5e/armor-map armor-kw)
+           (let [armor ((merge armor5e/armor-map
+                               mi5e/magic-armor-map) armor-kw)
                  ac (armor-class-with-armor armor)]
              ^{:key armor-kw}
              [:div
@@ -644,7 +645,8 @@
          (doall
           (map
            (fn [[armor-kw _]]
-             (let [armor (armor5e/armor-map armor-kw)
+             (let [armor ((merge armor5e/armor-map
+                                 mi5e/magic-armor-map) armor-kw)
                    speed (speed-with-armor armor)]
                ^{:key armor-kw}
                [:div
@@ -758,10 +760,12 @@
         armor-class (es/entity-val built-char :armor-class)
         armor-class-with-armor (es/entity-val built-char :armor-class-with-armor)
         armor (es/entity-val built-char :armor)
+        magic-armor (es/entity-val built-char :magic-armor)
         spells-known (es/entity-val built-char :spells-known)
         weapons (es/entity-val built-char :weapons)
         magic-weapons (es/entity-val built-char :magic-weapons)
         equipment (es/entity-val built-char :equipment)
+        magic-items (es/entity-val built-char :magic-items)
         traits (es/entity-val built-char :traits)
         attacks (es/entity-val built-char :attacks)
         bonus-actions (es/entity-val built-char :bonus-actions)
@@ -856,8 +860,8 @@
                                                                              (if qualifier (str " (" qualifier ")"))))]
        [spells-known-section spells-known]
        [equipment-section "Weapons" (concat magic-weapons weapons) (merge weapon5e/weapons-map mi5e/magic-weapon-map)]
-       [equipment-section "Armor" armor armor5e/armor-map]
-       [equipment-section "Equipment" equipment opt5e/equipment-map]
+       [equipment-section "Armor" (concat magic-armor armor) (merge armor5e/armor-map mi5e/magic-armor-map)]
+       [equipment-section "Equipment" (concat magic-items equipment) (merge opt5e/equipment-map mi5e/magic-item-map)]
        [attacks-section attacks]
        [actions-section "Bonus Actions" bonus-actions]
        [actions-section "Reactions" reactions]

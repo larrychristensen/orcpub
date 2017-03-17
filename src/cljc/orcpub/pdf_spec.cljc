@@ -66,13 +66,10 @@
       (trait-string name (str (or summary description) (if page (str " (" (disp5e/sources (or source :phb)) " " page ")")))))
     traits)))
 
-(defn header-string [title]
-  (str "----------" title "----------"))
-
 (defn actions-string [title actions]
   (if (seq actions)
     (str
-     (header-string title)
+     title
      "\n"
      (s/join
       "\n\n"
@@ -85,9 +82,9 @@
   {:features-and-traits (s/join
                          "\n\n"
                          (remove nil?
-                                 [(actions-string "Bonus Actions" (sort-by :name (es/entity-val built-char :bonus-actions)))
-                                  (actions-string "Actions" (sort-by :name (es/entity-val built-char :actions)))
-                                  (actions-string "Reactions" (sort-by :name (es/entity-val built-char :reactions)))]))
+                                 [(actions-string "----------Bonus Actions----------" (sort-by :name (es/entity-val built-char :bonus-actions)))
+                                  (actions-string "---------------Actions--------------" (sort-by :name (es/entity-val built-char :actions)))
+                                  (actions-string "-------------Reactions-------------" (sort-by :name (es/entity-val built-char :reactions)))]))
    :features-and-traits-2 (traits-string (sort-by :name (es/entity-val built-char :traits)))})
 
 (defn attacks-string [attacks]
@@ -226,7 +223,8 @@
         saving-throws (set (es/entity-val built-char :saving-throws))
         unarmored-armor-class (es/entity-val built-char :armor-class)
         ac-with-armor-fn (es/entity-val built-char :armor-class-with-armor)
-        equipped-armor (es/entity-val built-char :armor)
+        equipped-armor (merge (es/entity-val built-char :armor)
+                               (es/entity-val built-char :magic-armor))
         has-shield? (:shield equipped-armor)
         armored-armor-classes (map
                                (fn [[kw _]]

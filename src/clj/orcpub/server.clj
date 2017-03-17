@@ -150,9 +150,9 @@
                                                :else "fillable-char-sheet-0-spells.pdf")))
              output (ByteArrayOutputStream.)
              user-agent (get-in context [:request :headers "user-agent"])
-             ios? (re-matches #".*(iPhone|iPad|iPod).*" user-agent)]
+             chrome? (re-matches #".*Chrome.*" user-agent)]
          (with-open [doc (PDDocument/load input)]
-           (write-fields! doc fields ios?)
+           (write-fields! doc fields (not chrome?))
            (.save doc output))
          (let [a (.toByteArray output)]
            (assoc context :response {:status 200 :body (ByteArrayInputStream. a)})))

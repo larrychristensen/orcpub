@@ -7,7 +7,7 @@
   #?(:cljs (:require-macros [orcpub.entity-spec :as es]
                             [orcpub.modifiers :as mods])))
 
-(defn class [cls-key]
+(defn cls [cls-key]
   (mods/vec-mod ?classes cls-key))
 
 (defn subclass [cls-key subclass-key]
@@ -232,6 +232,12 @@
     (fn [num] (es/map-mod ?armor armor-kw num))
     1))
 
+(defn deferred-magic-armor [armor-kw]
+  (mods/deferred-modifier
+    ?armor
+    (fn [num] (es/map-mod ?magic-armor armor-kw num))
+    1))
+
 (defn equipment [equipment-kw num]
   (mods/map-mod ?equipment equipment-kw num))
 
@@ -239,6 +245,12 @@
   (mods/deferred-modifier
     ?equipment
     (fn [num] (es/map-mod ?equipment equipment-kw num))
+    1))
+
+(defn deferred-magic-item [item-kw]
+  (mods/deferred-modifier
+    ?magic-items
+    (fn [num] (es/map-mod ?magic-items item-kw num))
     1))
 
 (defn extra-attack []

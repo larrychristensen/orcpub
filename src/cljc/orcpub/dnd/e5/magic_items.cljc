@@ -38,8 +38,8 @@
     :rarity :uncommon
     :description "This suit of armor is reinforced with adamantine, one of the hardest substances in existence. While you’re wearing it, any critical hit against you becomes a normal hit."
     }{
-   :name "Ammunition, +1"
-   :name-fn plus-1-name
+    :name "Ammunition, +1"
+    :name-fn plus-1-name
     :item-type :weapon
     :item-subtype ammunition?
     :rarity :uncommon
@@ -47,8 +47,8 @@
     :magical-damage-bonus 1
     :description "You have a +1 bonus to attack and damage rolls made with this piece of magic ammunition. Once it hits a target, the ammunition is no longer magical."
     }{
-   :name "Ammunition, +2"
-   :name-fn plus-2-name
+    :name "Ammunition, +2"
+    :name-fn plus-2-name
     :item-type :weapon
     :item-subtype ammunition?
     :rarity :rare
@@ -56,8 +56,8 @@
     :magical-damage-bonus 2
     :description "You have a +2 bonus to attack and damage rolls made with this piece of magic ammunition. Once it hits a target, the ammunition is no longer magical."
     }{
-   :name "Ammunition, +3"
-   :name-fn plus-3-name
+    :name "Ammunition, +3"
+    :name-fn plus-3-name
     :item-type :weapon
     :item-subtype ammunition?
     :rarity :very-rare
@@ -1071,6 +1071,8 @@ trapped in the mirror. The freed creature appears, along with its possessions, i
     :item-type :armor
     :item-subtype heavy-metal-armor?
     :rarity :uncommon
+    :stealth-disadvantage? false
+    :min-str 1
     :description "Mithral is a light, flexible metal. A mithral chain shirt or breastplate can be worn under normal clothes. If the armor normally imposes disadvantage on Dexterity (Stealth) checks or has a Strength requirement, the mithral version of the armor doesn’t."
     }{
     :name "Necklace of Adaptation"
@@ -2073,13 +2075,13 @@ The wand regains 1d6 + 1 expended charges daily at dawn. If you expend the wand�
     :rarity :uncommon
     :attunement [:spellcaster]
     :description "While holding this wand, you gain a +1 bonus to spell attack rolls. In addition, you ignore half cover when making a spell attack."
-      }{
+    }{
     :name "Wand of the War Mage, +2"
     :item-type :wand
     :rarity :rare
     :attunement [:spellcaster]
     :description "While holding this wand, you gain a +2 bonus to spell attack rolls. In addition, you ignore half cover when making a spell attack."
- }{
+    }{
     :name "Wand of the War Mage, +3"
     :item-type :wand
     :rarity :very-rare
@@ -2101,7 +2103,7 @@ The wand regains 1d6 + 1 expended charges daily at dawn. If you expend the wand�
 If the effect causes you to cast a spell from the wand, the spell’s save DC is 15. If the spell normally has a range expressed in feet, its range becomes 120 feet if it isn’t already.
 If an effect covers an area, you must center the spell on and include the target. If an effect has multiple possible subjects, the GM randomly determines which ones are affected.
 The wand regains 1d6 + 1 expended charges daily at dawn. If you expend the wand’s last charge, roll a d20. On a 1, the wand crumbles into dust and is destroyed."
-      }{
+    }{
     :name "Weapon, +1"
     :name-fn plus-1-name
     :item-type :weapon
@@ -2154,7 +2156,7 @@ The boots regain 2 hours of flying capability for every 12 hours they aren’t i
     :rarity :rare
     :attunement [:any]
     :description "While wearing this cloak, you can use an action to speak its command word. This turns the cloak into a pair of bat wings or bird wings on your back for 1 hour or until you repeat the command word as an action. The wings give you a flying speed of 60 feet. When they disappear, you can’t use them again for 1d12 hours."
-      }])
+    }])
 
 (def weapons-and-ammunition
   (concat
@@ -2210,3 +2212,19 @@ The boots regain 2 hours of flying capability for every 12 hours they aren’t i
 
 (def magic-weapon-map
   (common/map-by-key magic-weapons))
+
+(def magic-armor
+  (filter
+   #(= :armor (:item-type %))
+   magic-items))
+
+(def magic-armor-map
+  (common/map-by-key magic-armor))
+
+(def other-magic-items
+  (remove
+   #(#{:armor :weapon} (:item-type %))
+   magic-items))
+
+(def other-magic-item-map
+  (common/map-by-key other-magic-items))
