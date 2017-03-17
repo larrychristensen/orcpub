@@ -5,7 +5,9 @@
             [orcpub.dnd.e5.character :as char5e]
             [orcpub.dnd.e5.options :as opt5e]
             [orcpub.dnd.e5.spells :as spells]
-            [orcpub.dnd.e5.display :as disp5e]))
+            [orcpub.dnd.e5.display :as disp5e]
+            [orcpub.dnd.e5.weapons :as weapon5e]
+            [orcpub.dnd.e5.armor :as armor5e]))
 
 (defn entity-vals [built-char kws]
   (reduce
@@ -212,9 +214,10 @@
      (remove
       nil?
       [(profs-paragraph tool-profs opt5e/tools-map "Tool")
-       (profs-paragraph weapon-profs opt5e/weapons-map "Weapon")
-       (profs-paragraph armor-profs opt5e/armor-map "Armor")
+       (profs-paragraph weapon-profs weapon5e/weapons-map "Weapon")
+       (profs-paragraph armor-profs armor5e/armor-map "Armor")
        (profs-paragraph languages opt5e/language-map "Language")]))))
+
 
 (defn make-spec [built-char]
   (let [race (es/entity-val built-char :race)
@@ -227,7 +230,7 @@
         has-shield? (:shield equipped-armor)
         armored-armor-classes (map
                                (fn [[kw _]]
-                                 (ac-with-armor-fn (opt5e/armor-map kw)))
+                                 (ac-with-armor-fn (armor5e/armor-map kw)))
                                (dissoc equipped-armor :shield))
         unshielded-armor-classes (conj armored-armor-classes unarmored-armor-class)
         armor-classes (if has-shield? (map (partial + 2) unshielded-armor-classes) unshielded-armor-classes)

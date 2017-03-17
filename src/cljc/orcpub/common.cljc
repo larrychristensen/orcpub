@@ -6,6 +6,7 @@
       clojure.string/lower-case
       (clojure.string/replace #"'" "")
       (clojure.string/replace #"\W" "-")
+      (clojure.string/replace #"\-+" "-")
       keyword))
 
 (defn map-by-key [values]
@@ -59,3 +60,10 @@
      (subs desc 1)
      (if (not (s/ends-with? desc "."))
        "."))))
+
+(def add-keys-xform
+  (map
+   #(assoc % :key (name-to-kw (:name %)))))
+
+(defn add-keys [vals]
+  (into [] add-keys-xform vals))

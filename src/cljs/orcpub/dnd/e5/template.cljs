@@ -9,6 +9,8 @@
             [orcpub.dnd.e5.character :as char5e]
             [orcpub.dnd.e5.modifiers :as mod5e]
             [orcpub.dnd.e5.options :as opt5e]
+            [orcpub.dnd.e5.weapons :as weapon5e]
+            [orcpub.dnd.e5.armor :as armor5e]
             [orcpub.dnd.e5.spell-lists :as sl])
   #_(:require-macros [orcpub.dnd.e5.options :as opt5e]
                    [orcpub.dnd.e5.modifiers :as mod5e]))
@@ -762,7 +764,7 @@ Fire Starter. The device produces a miniature flame, which you can use to light 
     :source :vgm
     :selections [(t/selection
                   "Martial Weapon Proficiencies"
-                  (opt5e/weapon-proficiency-options (opt5e/martial-weapons opt5e/weapons))
+                  (opt5e/weapon-proficiency-options (weapon5e/martial-weapons weapon5e/weapons))
                   2
                   2)]
     :modifiers [(mod5e/light-armor-proficiency)]
@@ -1051,7 +1053,7 @@ Fire Starter. The device produces a miniature flame, which you can use to light 
 (defn simple-weapon-selection [num]
   (t/selection
    "Simple Weapon"
-   (opt5e/weapon-options (opt5e/simple-weapons opt5e/weapons))
+   (opt5e/weapon-options (weapon5e/simple-weapons weapon5e/weapons))
    num
    num))
 
@@ -1067,19 +1069,19 @@ Fire Starter. The device produces a miniature flame, which you can use to light 
               :any-martial
               [(t/selection
                 "Martial Weapon"
-                (opt5e/weapon-options (opt5e/martial-weapons opt5e/weapons))
+                (opt5e/weapon-options (weapon5e/martial-weapons weapon5e/weapons))
                 num
                 num)]
               [])
     (t/option
-     (-> k opt5e/weapons-map :name (str (if (> num 1) (str " (" num ")") "")))
+     (-> k weapon5e/weapons-map :name (str (if (> num 1) (str " (" num ")") "")))
      k
      []
      [(mod5e/weapon k num)])))
 
 (defn armor-option [[k num]]
   (t/option
-     (-> k opt5e/armor-map :name)
+     (-> k armor5e/armor-map :name)
      k
      []
      [(mod5e/armor k num)]))
@@ -4003,8 +4005,8 @@ You might also have ties to a specific temple dedicated to your chosen deity or 
                (sorcerer-option character-ref)
                (warlock-option character-ref)
                (wizard-option character-ref)]})
-   (inventory-selection "Weapons" opt5e/weapons mod5e/deferred-weapon)
-   (inventory-selection "Armor" opt5e/armor mod5e/deferred-armor)
+   (inventory-selection "Weapons" weapon5e/weapons mod5e/deferred-weapon)
+   (inventory-selection "Armor" armor5e/armor mod5e/deferred-armor)
    (inventory-selection "Equipment" opt5e/equipment mod5e/deferred-equipment)])
 
 
@@ -4094,6 +4096,7 @@ You might also have ties to a specific temple dedicated to your chosen deity or 
                              (+ ?prof-bonus (?ability-bonuses ability-kw)))
     ?spell-save-dc (fn [ability-kw]
                      (+ 8 ?prof-bonus (?ability-bonuses ability-kw)))}))
+
 
 (defn template [character-ref]
   {::t/base template-base

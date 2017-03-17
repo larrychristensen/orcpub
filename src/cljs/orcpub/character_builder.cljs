@@ -18,6 +18,8 @@
             [orcpub.dnd.e5.options :as opt5e]
             [orcpub.dnd.e5.template :as t5e]
             [orcpub.dnd.e5.spells :as spells]
+            [orcpub.dnd.e5.weapons :as weapon5e]
+            [orcpub.dnd.e5.armor :as armor5e]
             [orcpub.dnd.e5.display :as disp5e]
             [orcpub.pdf-spec :as pdf-spec]
 
@@ -25,8 +27,6 @@
             [clojure.spec.test :as stest]
 
             [reagent.core :as r]))
-
-
 
 (declare app-state)
 
@@ -608,7 +608,7 @@
        (doall
         (map
          (fn [[armor-kw _]]
-           (let [armor (opt5e/armor-map armor-kw)
+           (let [armor (armor5e/armor-map armor-kw)
                  ac (armor-class-with-armor armor)]
              ^{:key armor-kw}
              [:div
@@ -643,7 +643,7 @@
          (doall
           (map
            (fn [[armor-kw _]]
-             (let [armor (opt5e/armor-map armor-kw)
+             (let [armor (armor5e/armor-map armor-kw)
                    speed (speed-with-armor armor)]
                ^{:key armor-kw}
                [:div
@@ -845,16 +845,16 @@
                    skill-bonuses)))]
        [list-item-section "Languages" languages]
        [list-item-section "Tool Proficiencies" tool-profs (partial prof-name opt5e/tools-map)]
-       [list-item-section "Weapon Proficiencies" weapon-profs (partial prof-name opt5e/weapons-map)]
-       [list-item-section "Armor Proficiencies" armor-profs (partial prof-name opt5e/armor-map)]
+       [list-item-section "Weapon Proficiencies" weapon-profs (partial prof-name weapon5e/weapons-map)]
+       [list-item-section "Armor Proficiencies" armor-profs (partial prof-name armor5e/armor-map)]
        [list-item-section "Damage Resistances" resistances name]
        [list-item-section "Damage Immunities" immunities name]
        [list-item-section "Condition Immunities" condition-immunities (fn [{:keys [condition qualifier]}]
                                                                         (str (name condition)
                                                                              (if qualifier (str " (" qualifier ")"))))]
        [spells-known-section spells-known]
-       [equipment-section "Weapons" weapons opt5e/weapons-map]
-       [equipment-section "Armor" armor opt5e/armor-map]
+       [equipment-section "Weapons" weapons weapon5e/weapons-map]
+       [equipment-section "Armor" armor armor5e/armor-map]
        [equipment-section "Equipment" equipment opt5e/equipment-map]
        [attacks-section attacks]
        [actions-section "Bonus Actions" bonus-actions]

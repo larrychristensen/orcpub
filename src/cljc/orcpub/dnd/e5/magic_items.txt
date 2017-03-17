@@ -1,3 +1,8 @@
+(ns orcpub.dnd.e5.magic-items
+  (:require [orcpub.common :as common]
+            [orcpub.dnd.e5.weapons :as weapons]
+            [orcpub.dnd.e5.armor :as armor5e]))
+
 (defn sword? [w]
   (= :sword (:subtype w)))
 
@@ -6,7 +11,7 @@
 
 (defn slashing-sword? [w]
  (and (= :slashing (:damage-type w))
-      (sword w)))
+      (sword? w)))
 
 (defn weapon? [w] true)
 
@@ -16,25 +21,41 @@
 
 (defn not-shield? [a] (#{:light :medium :heavy} (:type a)))
                             
-(defn magic-items
+(def magic-items
   [{
     :name "Adamantine Armor"
     :type :armor
-    :subtype [:medium :heavy]
-    :subtype-exception [:hide]
+    :subtype heavy-metal-armor?
     :rarity :uncommon
     :description "This suit of armor is reinforced with adamantine, one of the hardest substances in existence. While you’re wearing it, any critical hit against you becomes a normal hit."
     }{
-    :name "Ammunition, +1, +2, or +3"
+   :name "Ammunition, +1"
     :type :weapon
     :subtype :ammunition
-    :rarity "uncommon (+1), rare (+2), or very rare (+3)"
-    :description "You have a bonus to attack and damage rolls made with this piece of magic ammunition. The bonus is determined by the rarity of the ammunition. Once it hits a target, the ammunition is no longer magical."
+    :rarity :uncommon
+    :magical-attack-bonus 1
+    :magical-damage-bonus 1
+    :description "You have a +1 bonus to attack and damage rolls made with this piece of magic ammunition. Once it hits a target, the ammunition is no longer magical."
+    }{
+   :name "Ammunition, +2"
+    :type :weapon
+    :subtype :ammunition
+    :rarity :rare
+    :magical-attack-bonus 2
+    :magical-damage-bonus 2
+    :description "You have a +2 bonus to attack and damage rolls made with this piece of magic ammunition. Once it hits a target, the ammunition is no longer magical."
+    }{
+   :name "Ammunition, +3"
+    :type :weapon
+    :subtype :ammunition
+    :rarity :very-rare
+    :magical-attack-bonus 3
+    :magical-damage-bonus 3
+    :description "You have a +3 bonus to attack and damage rolls made with this piece of magic ammunition. The bonus is determined by the rarity of the ammunition. Once it hits a target, the ammunition is no longer magical."
     }{
     :name "Amulet of Health"
     :type :wondrous-item
     :rarity :rare
-
     :attunement [:any]
     :description "Your Constitution score is 19 while you wear this amulet. It has no effect on you if your Constitution is already 19 or higher."
     }{
@@ -180,7 +201,8 @@ Six varieties of this belt exist, corresponding with and having rarity according
     :type :weapon
     :subtype axe?
     :rarity :rare
-
+    :magical-attack-bonus 1
+    :magical-damage-bonus 1
     :attunement [:any]
     :description "You gain a +1 bonus to attack and damage rolls made with this magic weapon. In addition, while you are attuned to this weapon, your hit point maximum increases by 1 for each level you have attained.
 Curse. This axe is cursed, and becoming attuned to it extends the curse to you. As long as you remain cursed, you are unwilling to part with the axe, keeping it within reach at all times. You also have disadvantage on attack rolls with weapons other
@@ -394,6 +416,8 @@ The cube has 3 charges. Each use of the cube expends 1 charge. The cube regains 
     :type :weapon
     :subtype :dagger
     :rarity :rare
+    :magical-attack-bonus 1
+    :magical-damage-bonus 1
     :description "You gain a +1 bonus to attack and damage rolls made with this magic weapon.
 You can use an action to cause thick, black poison to coat the blade. The poison remains for 1 minute or until an attack using this weapon hits a creature. That creature must succeed on a DC 15 Constitution saving throw or take 2d10 poison damage and become poisoned for 1 minute. The dagger can’t be used this way again until the next dawn."
     }{
@@ -468,6 +492,8 @@ The Void. This black card spells disaster. Your soul is drawn from your body and
     :rarity :legendary
 
     :attunement [:any]
+    :magical-attack-bonus 3
+    :magical-damage-bonus 3
     :description "You gain a +3 bonus to attack and damage rolls made with this magic weapon.
 The first time you attack with the sword on each of your turns, you can transfer some or all of the sword’s bonus to your Armor Class, instead of using the bonus on any attacks that turn. For example, you could reduce the bonus to your attack and damage rolls to +1 and gain a +2 bonus to AC. The adjusted bonuses remain in effect until the start of your next turn, although you must hold the sword to gain a bonus to AC from it."
     }{
@@ -692,7 +718,7 @@ The gem regains 1d3 expended charges daily at dawn."
     }{
     :name "Giant Slayer"
     :type :weapon
-    :subtype (fn [w] (or (axe w) (sword w)))
+    :subtype (fn [w] (or (axe? w) (sword? w)))
     :rarity :rare
     :description "You gain a +1 bonus to attack and damage rolls made with this magic weapon.
 When you hit a giant with it, the giant takes an extra 2d6 damage of the weapon’s type and must succeed on a DC 15 Strength saving throw or fall prone. For the purpose of this weapon, “giant” refers to any creature with the giant type, including ettins and trolls."
@@ -1002,7 +1028,7 @@ trapped in the mirror. The freed creature appears, along with its possessions, i
     }{
     :name "Mithral Armor"
     :type :armor
-    :subtype heavy-metal-armor
+    :subtype heavy-metal-armor?
     :rarity :uncommon
     :description "Mithral is a light, flexible metal. A mithral chain shirt or breastplate can be worn under normal clothes. If the armor normally imposes disadvantage on Dexterity (Stealth) checks or has a Strength requirement, the mithral version of the armor doesn’t."
     }{
@@ -1570,7 +1596,7 @@ The rope has AC 20 and 20 hit points. It regains 1 hit point every 5 minutes as 
     :attunement [:any]
     :description "You gain a +2 bonus to attack and damage rolls made with this magic weapon. In addition, you can make one attack with it as a bonus action on each of your turns."
     }{
-    Shield, +1, +2, or +3
+    :name "Shield, +1, +2, or +3"
     :type :armor
     :subtype :shield
     :rarity "uncommon (+1), rare (+2), or very rare (+3)"
@@ -1602,7 +1628,7 @@ One ounce of the glue can cover a 1-foot square surface. The glue takes 1 minute
     }{
     :name "Spell Scroll"
 
-    :type scroll
+    :type :scroll
 
     :rarity "varies"
     :description "A spell scroll bears the words of a single spell, written in a mystical cipher. If the spell is on your class’s spell list, you can read the scroll and cast its spell without providing any material components. Otherwise, the scroll is unintelligible. Casting the spell by reading the scroll requires the spell’s normal casting time. Once the spell is cast, the words on the
@@ -1876,9 +1902,7 @@ on a beast that has an innate swimming speed. The trident regains 1d3 expended c
     :name "Vorpal Sword"
     :type :weapon
     :subtype slashing-sword?
-
     :rarity :legendary
-
     :attunement [:any]
     :description "You gain a +3 bonus to attack and damage rolls made with this magic weapon. In addition, the weapon ignores resistance to slashing damage.
 When you attack a creature that has at least one head with this weapon and roll a 20 on the attack roll, you cut off one of the creature’s heads. The creature dies if it can’t survive without the lost head. A creature is immune to this effect if it is immune to slashing damage, doesn’t have or need a head, has legendary actions, or the GM decides that the creature is too big for its head to be cut off with this weapon. Such a creature instead takes an extra 6d8 slashing damage from the hit."
@@ -1955,11 +1979,8 @@ The wand regains 1d6 + 1 expended charges daily at dawn. If you expend the wand�
     }{
     :name "Wand of Polymorph"
     :type :wand
-
     :rarity :very-rare
-
     :attunement [:spellcaster]
-
     :description "This wand has 7 charges. While holding it, you can use an action to expend 1 of its charges to cast the polymorph spell (save DC 15) from it.
 The wand regains 1d6 + 1 expended charges daily at dawn. If you expend the wand’s last charge, roll a d20. On a 1, the wand crumbles into ashes and is destroyed."
     }{
@@ -1968,21 +1989,27 @@ The wand regains 1d6 + 1 expended charges daily at dawn. If you expend the wand�
     :rarity :uncommon
     :description "The wand has 3 charges. While holding it, you can use an action to expend 1 of its charges, and if a secret door or trap is within 30 feet of you, the wand pulses and points at the one nearest to you. The wand regains 1d3 expended charges daily at dawn."
     }{
-    :name "Wand of the War Mage, +1, +2, or +3"
+    :name "Wand of the War Mage, +1"
     :type :wand
-
-    :rarity "uncommon (+1), rare (+2), or very rare (+3)"
-
-
+    :rarity :uncommon
     :attunement [:spellcaster]
-    :description "While holding this wand, you gain a bonus to spell attack rolls determined by the wand’s rarity. In addition, you ignore half cover when making a spell attack."
+    :description "While holding this wand, you gain a +1 bonus to spell attack rolls. In addition, you ignore half cover when making a spell attack."
+      }{
+    :name "Wand of the War Mage, +2"
+    :type :wand
+    :rarity :rare
+    :attunement [:spellcaster]
+    :description "While holding this wand, you gain a +2 bonus to spell attack rolls. In addition, you ignore half cover when making a spell attack."
+ }{
+    :name "Wand of the War Mage, +3"
+    :type :wand
+    :rarity :very-rare
+    :attunement [:spellcaster]
+    :description "While holding this wand, you gain a +3 bonus to spell attack rolls. In addition, you ignore half cover when making a spell attack."
     }{
     :name "Wand of Web"
     :type :wand
-
     :rarity :uncommon
-
-
     :attunement [:spellcaster]
     :description "This wand has 7 charges. While holding it, you can use an action to expend 1 of its charges to cast the web spell (save DC 15) from it.
 The wand regains 1d6 + 1 expended charges daily at dawn. If you expend the wand’s last charge, roll a d20. On a 1, the wand crumbles into ashes and is destroyed."
@@ -1995,12 +2022,30 @@ The wand regains 1d6 + 1 expended charges daily at dawn. If you expend the wand�
 If the effect causes you to cast a spell from the wand, the spell’s save DC is 15. If the spell normally has a range expressed in feet, its range becomes 120 feet if it isn’t already.
 If an effect covers an area, you must center the spell on and include the target. If an effect has multiple possible subjects, the GM randomly determines which ones are affected.
 The wand regains 1d6 + 1 expended charges daily at dawn. If you expend the wand’s last charge, roll a d20. On a 1, the wand crumbles into dust and is destroyed."
-    }{
-    :name "Weapon, +1, +2, or +3"
+      }{
+    :name "Weapon, +1"
     :type :weapon
     :subtype weapon?
-    :rarity "uncommon (+1), rare (+2), or very rare (+3)"
-    :description "You have a bonus to attack and damage rolls made with this magic weapon. The bonus is determined by the weapon’s rarity."
+    :rarity :uncommon
+    :magical-attack-bonus 1
+    :magical-damage-bonus 1
+    :description "You have a +1 bonus to attack and damage rolls made with this magic weapon."
+    }{
+    :name "Weapon, +2"
+    :type :weapon
+    :subtype weapon?
+    :rarity :rare
+    :magical-attack-bonus 2
+    :magical-damage-bonus 2
+    :description "You have a +2 bonus to attack and damage rolls made with this magic weapon."
+    }{
+    :name "Weapon, +3"
+    :type :weapon
+    :subtype weapon?
+    :rarity :very-rare
+    :magical-attack-bonus 3
+    :magical-damage-bonus 3
+    :description "You have a +3 bonus to attack and damage rolls made with this magic weapon."
     }{
     :name "Well of Many Worlds"
     :type :wondrous-item
@@ -2034,3 +2079,66 @@ The boots regain 2 hours of flying capability for every 12 hours they aren’t i
     :attunement [:any]
     :description "While wearing this cloak, you can use an action to speak its command word. This turns the cloak into a pair of bat wings or bird wings on your back for 1 hour or until you repeat the command word as an action. The wings give you a flying speed of 60 feet. When they disappear, you can’t use them again for 1d12 hours."
     }])
+
+(defn bonus-weapon [bonus weapon desc]
+  (let [bonus-str (common/bonus-str bonus)]
+    (merge
+     weapon
+     {:name (str (:name weapon) ", " bonus-str)
+      :key (keyword (str (:key weapon) bonus-str))
+      :magical true
+      :magical-attack-bonus bonus
+      :magicial-damage-bonus bonus
+      :description desc})))
+
+(def bonus-weapons
+  (flatten
+   (for [bonus [1 2 3]
+         weapon weapons/weapons]
+     (bonus-weapon
+      bonus
+      weapon
+      (str "You have a +" bonus " bonus to attack and damage rolls made with this magic weapon.")))))
+
+(def bonus-ammunition
+  (flatten
+   (for [bonus [1 2 3]
+         ammunition weapons/ammunition]
+     (bonus-weapon
+      bonus
+     ammunition
+     (str "You have a +" bonus " bonus to attack and damage rolls made with this piece of magic ammunition. Once it hits a target, the ammunition is no longer magical.")))))
+
+(def bonus-armor
+  (flatten
+   (for [bonus [1 2 3]
+         armor armor5e/armor]
+     (let [bonus-str (common/bonus-str)]
+       (merge
+        armor
+        {:name (str (:name armor) ", " bonus-str)
+         :key (keyword (str (:key armor) bonus-str))
+         :magical true
+         :magical-ac-bonus bonus
+         :description desc})))))
+
+(def magic-weapons
+  (flatten
+   (map
+    (fn [item]
+      (if (fn? (:subtype item))
+        (map
+         (fn [weapon]
+           (let [nm (str (:name item) ", " (:name weapon))]
+             (merge
+              weapon
+              {:name nm 
+               :key (common/name-to-kw nm)
+               :magical true
+               :attack-bonus (:attack-bonus item)
+               :damage-bonus (:damage-bonus item)})))
+         (filter (:subtype item) weapons/weapons))
+        (assoc item :key (common/name-to-kw (:name item)))))
+    (filter #(and (= :weapon (:type %))
+                  (not= :ammunition (:subtype %)))
+            magic-items))))

@@ -7,15 +7,9 @@
             [orcpub.modifiers :as mods]
             [orcpub.dnd.e5.character :as character]
             [orcpub.dnd.e5.modifiers :as modifiers]
+            [orcpub.dnd.e5.weapons :as weapons]
             [orcpub.dnd.e5.spells :as spells]
             [orcpub.dnd.e5.spell-lists :as sl]))
-
-(def add-keys-xform
-  (map
-   #(assoc % :key (common/name-to-kw (:name %)))))
-
-(defn add-keys [vals]
-  (into [] add-keys-xform vals))
 
 (def abilities
   [{:key :str
@@ -51,7 +45,7 @@
    {:name "Unconscious"}])
 
 (def conditions-map
-  (common/map-by-key (add-keys conditions)))
+  (common/map-by-key (common/add-keys conditions)))
 
 (def skills [{:name "Acrobatics"
               :key :acrobatics
@@ -313,15 +307,8 @@ hazards."}])
                  :values gaming-sets}}
    (zipmap (map :key tools) tools)))
 
-(def ammunition
-  (add-keys
-   [{:name "Arrow" :sell-qty 20 :cost {:num 1 :type :gp} :weight "1 lb."}
-    {:name "Blowgun needle" :sell-qty 50 :cost {:num 1 :type :gp} :weight "1 lb."}
-    {:name "Crossbow bolt" :sell-qty 20 :cost {:num 1 :type :gp} :weight "1½ lb."}
-    {:name "Sling bullet" :sell-qty 20 :cost {:num 4 :type :cp} :weight "1½ lb."}]))
-
 (def arcane-focuses
-  (add-keys
+  (common/add-keys
    [{:name "Crystal" :cost {:num 10 :type :gp} :weight "1 lb."}
     {:name "Orb" :cost {:num 20 :type :gp} :weight "3 lb."}
     {:name "Rod" :cost {:num 10 :type :gp} :weight "2 lb."}
@@ -329,14 +316,14 @@ hazards."}])
     {:name "Wand" :cost {:num 10 :type :gp} :weight "1 lb."}]))
 
 (def druidic-focuses
-  (add-keys
+  (common/add-keys
    [{:name "Sprig of mistletoe" :cost {:num 1 :type :gp} :weight "—"}
     {:name "Totem" :cost {:num 1 :type :gp} :weight "—"}
     {:name "Wooden staff" :cost {:num 5 :type :gp} :weight "4 lb."}
     {:name "Yew wand" :cost {:num 10 :type :gp} :weight "1 lb."}]))
 
 (def holy-symbols
-  (add-keys
+  (common/add-keys
    [{:name "Amulet" :cost {:num 5 :type :gp} :weight "1 lb."}
     {:name "Emblem" :cost {:num 5 :type :gp} :weight "—"}
     {:name "Reliquary" :cost {:num 5 :type :gp} :weight "2 lb."}]))
@@ -344,11 +331,11 @@ hazards."}])
 
 (def adventuring-gear
   (concat
-   ammunition
+   weapons/ammunition
    arcane-focuses
    druidic-focuses
    holy-symbols
-   (add-keys
+   (common/add-keys
     [{:name "Abacus" :cost {:num 2 :type :gp} :weight "2 lb."}
      {:name "Acid" :sell-container :vial :cost {:num 25 :type :gp} :weight "1 lb."}
      {:name "Alchemist’s fire" :sell-container :flask :cost {:num 50 :type :gp} :weight "1 lb."}
@@ -436,7 +423,7 @@ hazards."}])
 (def packs
   (into
    []
-   add-keys-xform
+   common/add-keys-xform
    [{:name "Burgler's Pack"}
     {:name "Diplomat's Pack"}
     {:name "Dungeoneer's Pack"}
@@ -464,418 +451,6 @@ hazards."}])
     :musical-instrument {:name "Musical Instruments"
                          :values musical-instruments}}
    (zipmap (map :key equipment) equipment)))
-
-(def armor
-  [{:name "Shield"
-    :key :shield}
-   {:name "Padded",
-    :type :light,
-    :base-ac 11,
-    :stealth-disadvantage? true,
-    :weight 8,
-    :key :padded}
-   {:name "Leather",
-    :type :light,
-    :base-ac 11,
-    :weight 10,
-    :key :leather}
-   {:name "Studded",
-    :type :light,
-    :base-ac 12,
-    :weight 13,
-    :key :studded}
-   {:name "Hide",
-    :type :medium,
-    :base-ac 12,
-    :max-dex-mod 2,
-    :weight 12,
-    :key :hide}
-   {:name "Chain Shirt",
-    :type :medium,
-    :base-ac 13,
-    :max-dex-mod 2,
-    :weight 20,
-    :key :chain-shirt}
-   {:name "Scale mail",
-    :type :medium,
-    :base-ac 14,
-    :max-dex-mod 2,
-    :stealth-disadvantage? true,
-    :weight 45,
-    :key :scale-mail}
-   {:name "Breastplate",
-    :type :medium,
-    :base-ac 14,
-    :max-dex-mod 2,
-    :weight 20,
-    :key :breastplate}
-   {:name "Half plate",
-    :type :medium,
-    :base-ac 15,
-    :max-dex-mod 2,
-    :stealth-disadvantage? true,
-    :weight 40,
-    :key :half-plate}
-   {:name "Ring mail",
-    :type :heavy,
-    :base-ac 14,
-    :max-dex-mod 0,
-    :stealth-disadvantage? true,
-    :weight 40,
-    :key :ring-mail}
-   {:name "Chain mail",
-    :type :heavy,
-    :base-ac 16,
-    :max-dex-mod 0,
-    :min-str 13,
-    :stealth-disadvantage? true,
-    :weight 55,
-    :key :chain-mail}
-   {:name "Splint",
-    :type :heavy,
-    :base-ac 17,
-    :max-dex-mod 0,
-    :min-str 15,
-    :stealth-disadvantage? true,
-    :weight 60,
-    :key :splint}
-   {:name "Plate",
-    :type :heavy,
-    :base-ac 18,
-    :max-dex-mod 0,
-    :min-str 15,
-    :stealth-disadvantage? true,
-    :weight 65,
-    :key :plate}])
-
-(def armor-map
-  (zipmap (map :key armor) armor))
-
-(def weapons
-  [{:name "Crossbow, light",
-    :damage-type :piercing,
-    :damage-die 8,
-    :type :simple,
-    :damage-die-count 1,
-    :ranged? true,
-    :range {:min 80, :max 320},
-    :key :crossbow-light}
-   {:ranged? true,
-    :key :dart,
-    :name "Dart",
-    :damage-die-count 1,
-    :type :simple,
-    :damage-type :piercing,
-    :thrown true,
-    :finesse? true,
-    :damage-die 4,
-    :range {:min 20, :max 60}}
-   {:name "Shortbow",
-    :damage-type :piercing,
-    :damage-die 6,
-    :type :simple,
-    :damage-die-count 1,
-    :ranged? true,
-    :range {:min 80, :max 320},
-    :key :shortbow}
-   {:name "Sling",
-    :damage-type :bludgeoning,
-    :damage-die 4,
-    :type :simple,
-    :damage-die-count 1,
-    :ranged? true,
-    :range {:min 30, :max 120},
-    :key :sling}
-   {:name "Club",
-    :damage-type :bludgeoning,
-    :damage-die 4,
-    :damage-die-count 1,
-    :type :simple,
-    :melee? true,
-    :key :club}
-   {:melee? true,
-    :key :dagger,
-    :name "Dagger",
-    :damage-die-count 1,
-    :type :simple,
-    :damage-type :piercing,
-    :thrown true,
-    :finesse? true,
-    :damage-die 4,
-    :range {:min 20, :max 60}}
-   {:name "Greatclub",
-    :damage-type :bludgeoning,
-    :damage-die 8,
-    :damage-die-count 1,
-    :type :simple,
-    :melee? true,
-    :key :greatclub}
-   {:name "Handaxe",
-    :damage-type :slashing,
-    :damage-die 6,
-    :damage-die-count 1,
-    :type :simple,
-    :melee? true,
-    :thrown true,
-    :range {:min 20, :max 60},
-    :key :handaxe}
-   {:name "Javelin",
-    :damage-type :piercing,
-    :damage-die 6,
-    :damage-die-count 1,
-    :type :simple,
-    :melee? true,
-    :thrown true,
-    :range {:min 30, :max 120},
-    :key :javelin}
-   {:name "Light hammer",
-    :damage-type :bludgeoning,
-    :damage-die 4,
-    :damage-die-count 1,
-    :type :simple,
-    :melee? true,
-    :thrown true,
-    :range {:min 20, :max 60},
-    :key :light-hammer}
-   {:name "Mace",
-    :damage-type :bludgeoning,
-    :type :simple,
-    :damage-die 6,
-    :damage-die-count 1,
-    :melee? true,
-    :key :mace}
-   {:name "Quarterstaff",
-    :damage-type :bludgeoning,
-    :type :simple,
-    :damage-die 6,
-    :damage-die-count 1,
-    :versatile {:damage-die 8, :damage-die-count 1},
-    :melee? true,
-    :key :quarterstaff}
-   {:name "Sickle",
-    :damage-type :slashing,
-    :damage-die 4,
-    :type :simple,
-    :damage-die-count 1,
-    :melee? true,
-    :key :sickle}
-   {:melee? true,
-    :versatile {:damage-die 8, :damage-die-count 1},
-    :key :spear,
-    :name "Spear",
-    :damage-die-count 1,
-    :type :simple,
-    :damage-type :piercing,
-    :thrown true,
-    :damage-die 6,
-    :range {:min 20, :max 60}}
-   {:name "Unarmed Strike",
-    :damage-type :bludgeoning,
-    :damage-die 1,
-    :type :simple,
-    :damage-die-count 1,
-    :melee? true,
-    :unarmed true,
-    :key :unarmed-strike}
-   {:name "Battleaxe",
-    :damage-type :slashing,
-    :damage-die 8,
-    :type :martial,
-    :damage-die-count 1,
-    :versatile {:damage-die 10, :damage-die-count 1},
-    :melee? true,
-    :key :battleaxe}
-   {:name "Flail",
-    :damage-type :bludgeoning,
-    :damage-die 8,
-    :type :martial,
-    :damage-die-count 1,
-    :melee? true,
-    :key :flail}
-   {:name "Glaive",
-    :damage-type :slashing,
-    :damage-die 10,
-    :type :martial,
-    :damage-die-count 1,
-    :melee? true,
-    :heavy true,
-    :reach true,
-    :key :glaive}
-   {:name "Greataxe",
-    :damage-type :slashing,
-    :damage-die 12,
-    :type :martial,
-    :damage-die-count 1,
-    :heavy true,
-    :melee? true,
-    :key :greataxe}
-   {:name "Greatsword",
-    :damage-type :slashing,
-    :damage-die 6,
-    :type :martial,
-    :damage-die-count 2,
-    :heavy true,
-    :melee? true,
-    :key :greatsword}
-   {:name "Halberd",
-    :damage-type :slashing,
-    :damage-die 10,
-    :type :martial,
-    :damage-die-count 1,
-    :melee? true,
-    :heavy true,
-    :reach true,
-    :key :halberd}
-   {:name "Lance",
-    :damage-type :piercing,
-    :damage-die 12,
-    :type :martial,
-    :damage-die-count 1,
-    :melee? true,
-    :reach true,
-    :key :lance}
-   {:name "Longsword",
-    :damage-type :slashing,
-    :damage-die 8,
-    :type :martial,
-    :damage-die-count 1,
-    :versatile {:damage-die 10, :damage-die-count 1},
-    :melee? true,
-    :key :longsword}
-   {:name "Maul",
-    :damage-type :bludgeoning,
-    :damage-die 6,
-    :type :martial,
-    :damage-die-count 2,
-    :heavy true,
-    :melee? true,
-    :key :maul}
-   {:name "Morningstar",
-    :damage-type :piercing,
-    :damage-die 8,
-    :type :martial,
-    :damage-die-count 1,
-    :melee? true,
-    :key :morningstar}
-   {:name "Pike",
-    :damage-type :piercing,
-    :damage-die 10,
-    :type :martial,
-    :damage-die-count 1,
-    :melee? true,
-    :heavy true,
-    :reach true,
-    :key :pike}
-   {:name "Rapier",
-    :damage-type :piercing,
-    :damage-die 8,
-    :type :martial,
-    :damage-die-count 1,
-    :finesse? true,
-    :melee? true,
-    :key :rapier}
-   {:name "Scimitar",
-    :damage-type :slashing,
-    :damage-die 6,
-    :type :martial,
-    :damage-die-count 1,
-    :finesse? true,
-    :melee? true,
-    :key :scimitar}
-   {:name "Shortsword",
-    :damage-type :piercing,
-    :damage-die 6,
-    :type :martial,
-    :finesse? true,
-    :damage-die-count 1,
-    :melee? true,
-    :key :shortsword}
-   {:melee? true,
-    :versatile {:damage-die 8, :damage-die-count 1},
-    :key :trident,
-    :name "Trident",
-    :damage-die-count 1,
-    :type :martial,
-    :damage-type :piercing,
-    :thrown true,
-    :damage-die 6,
-    :range {:min 20, :max 60}}
-   {:name "War pick",
-    :damage-type :piercing,
-    :damage-die 8,
-    :type :martial,
-    :damage-die-count 1,
-    :melee? true,
-    :key :war-pick}
-   {:name "Warhammer",
-    :damage-type :bludgeoning,
-    :damage-die 8,
-    :type :martial,
-    :damage-die-count 1,
-    :versatile {:damage-die 10, :damage-die-count 1},
-    :melee? true,
-    :key :warhammer}
-   {:name "Whip",
-    :damage-type :slashing,
-    :damage-die 4,
-    :type :martial,
-    :damage-die-count 1,
-    :melee? true,
-    :finesse? true,
-    :reach true,
-    :key :whip}
-   {:name "Blowgun",
-    :damage-type :piercing,
-    :damage-die 1,
-    :type :martial,
-    :damage-die-count 1,
-    :ranged? true,
-    :range {:min 25, :max 100},
-    :key :blowgun}
-   {:name "Crossbow, hand",
-    :damage-type :piercing,
-    :damage-die 6,
-    :type :martial,
-    :damage-die-count 1,
-    :ranged? true,
-    :range {:min 30, :max 120},
-    :key :crossbow-hand}
-   {:name "Crossbow, heavy",
-    :damage-type :piercing,
-    :damage-die 10,
-    :type :martial,
-    :damage-die-count 1,
-    :ranged? true,
-    :heavy true,
-    :range {:min 100, :max 400},
-    :key :crossbow-heavy}
-   {:name "Longbow",
-    :damage-type :piercing,
-    :damage-die 8,
-    :type :martial,
-    :damage-die-count 1,
-    :ranged? true,
-    :heavy true,
-    :range {:min 150, :max 600},
-    :key :longbow}
-   {:name "Net",
-    :type :martial,
-    :ranged? true,
-    :thrown true,
-    :range {:min 5, :max 15},
-    :key :net}])
-
-(def weapons-map
-  (zipmap (map :key weapons) weapons))
-
-(defn weapons-of-type [weapons type]
-  (filter #(= type (:type %)) weapons))
-
-(defn martial-weapons [weapons]
-  (weapons-of-type weapons :martial))
-
-(defn simple-weapons [weapons]
-  (weapons-of-type weapons :simple))
 
 (def skill-abilities
   (into {} (map (juxt :key :ability)) skills))
@@ -917,14 +492,14 @@ hazards."}])
   (weapon-options
    (filter
     #(and (= :simple (:type %)) (:melee %))
-    weapons)
+    weapons/weapons)
    num))
 
 (defn martial-weapon-options [num]
   (weapon-options
    (filter
     #(= :martial (:type %))
-    weapons)
+    weapons/weapons)
    num))
 
 (defn skill-options [skills]
@@ -1346,7 +921,7 @@ hazards."}])
    (t/selection-cfg
     {:name "Weapon Proficiency"
      :help (proficiency-help num "a weapon" "weapons")
-     :options (weapon-proficiency-options weapons)
+     :options (weapon-proficiency-options weapons/weapons)
      :min num
      :max num}))
   ([options num]
