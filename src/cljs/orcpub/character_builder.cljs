@@ -90,6 +90,7 @@
                        [:race]
                        [:sources]
                        [:class :barbarian]}
+    :expanded-paths #{}
     :stepper-selection-path nil
     :mouseover-option nil
     :builder {:character {:tab #{:build :options}}}
@@ -921,10 +922,8 @@
 (defn selection-after [current-path all-selections]
   (let [up-to-current (drop-while
                        (fn [s]
-                         (prn "PATH" (::path s) current-path)
                          (not= (::path s) current-path))
                        all-selections)
-        _ (js/console.log "UP TO CURRENT" up-to-current)
         up-to-next (drop 1 up-to-current)
         next (first up-to-next)]
     (if next
@@ -1164,14 +1163,11 @@
     {:component-did-update on-builder-selector-update}))
 
 (defn options-column [character built-char built-template option-paths collapsed-paths stepper-selection-path plugins]
-  (prn "STEPPER SELECTION PATH" stepper-selection-path)
   (let [all-selections (get-all-selections [] built-template option-paths)
-        _ (js/console.log "ALL SELECTIONS" all-selections)
         {:keys [::t/name ::t/options]} (if stepper-selection-path
                                          (get-in built-template stepper-selection-path)
                                          (first all-selections))
         option-path (to-option-path stepper-selection-path built-template)]
-    (prn "OPTION_PATHS" option-path stepper-selection-path option-paths)
     [:div#options-column.w-100-p.b-1.b-rad-5
      [:div.flex.justify-cont-s-b.p-10.align-items-c
       [:button.form-button.p-5-10.m-r-5
@@ -1205,24 +1201,20 @@
                                 []
                                 prereqs)
                 meets-prereqs? (empty? failed-prereqs)
-                selectable? meets-prereqs?]
-            (prn "OPTIONPATH" new-option-path path selected?)
+                selectable? meets-prereqs?
+                expanded? (get-in @app-state [:expanded-paths new-option-path])]
             ^{:key key}
             [:div.p-10.b-1.b-rad-5.m-5.pointer.b-orange.hover-shadow
              {:class-name (s/join " " (remove nil? [(if selected? "b-w-3") (if (not meets-prereqs?) "opacity-5")]))
               :on-click (fn [e]
-                          (prn "NEW OPTION PATH" new-option-path)
                           (if (and meets-prereqs? selectable?)
                             (do
                               (if select-fn
                                 (select-fn new-option-path))
                               (let [updated-char (update-option built-template character new-option-path (fn [o] (assoc o ::entity/key key)))
                                     next-option-paths (make-path-map updated-char)
-                                    _ (js/console.log "NEXT_OPTON_PATHS" next-option-paths)
                                     next-all-selections (get-all-selections [] built-template next-option-paths)
-                                    _ (js/console.log "NEXT ALL SELECTIONS" next-all-selections)
                                     [next-selection-path _] (selection-after option-path next-all-selections)
-                                    _ (prn "NEXTSELECTIONS" (::path next-selection))
                                     next-template-path (entity/get-template-selection-path built-template next-selection-path [])]
                                 (swap! app-state (fn [as]
                                                    (-> as
@@ -1235,9 +1227,13 @@
                 [:span.f-w-b.f-s-16.flex-grow-1 name]
                 (if help
                   [:span
-                   [:span.underline.orange.p-0.m-r-2 "more"]
-                   [:i.fa.fa-angle-down.orange]])]
-               (if help
+                   {:on-click (fn [e]
+                                (swap! app-state update-in [:expanded-paths new-option-path] not)
+                                (.stopPropagation e))}
+                   [:span.underline.orange.p-0.m-r-2 (if expanded? "hide info" "show info")]
+                   #_[:i.fa.orange
+                    {:class-name (if expanded? "fa-angle-up" "fa-angle-down")}]])]
+               (if (and help expanded?)
                  [:div.m-t-5
                   (doall
                    (map-indexed
@@ -1364,7 +1360,7 @@
 
 
 (defn character-builder []
-  (cljs.pprint/pprint (:character @app-state))
+  ;;(cljs.pprint/pprint (:character @app-state))
   ;;(cljs.pprint/pprint @app-state)
   (let [selected-plugins (map
                           :selections
@@ -1390,7 +1386,7 @@
         plugins (:plugins @app-state)
         stepper-dismissed? (:stepper-dismissed @app-state)]
     ;(js/console.log "BUILT TEMPLAT" built-template)
-    (print-char built-char)
+    ;;(print-char built-char)
     [:div.app
      {:on-scroll (fn [e]
                    (let [app-header (js/document.getElementById "app-header")
