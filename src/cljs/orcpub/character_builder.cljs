@@ -75,17 +75,13 @@
                                               (remove-stored-char stored-char-str (str (spec/explain-data ::entity/raw-entity v)))))
                                           (catch js/Object
                                               e
-                                              (remove-stored-char stored-char-str)))))
-(defonce character-ref (r/atom (if stored-char stored-char t5e/character)))
+                                            (remove-stored-char stored-char-str)))))
 
 (def text-color
   {:color :white})
 
 (def field-font-size
   {:font-size "14px"})
-
-(def template (entity/sort-selections
-               (t5e/template character-ref)))
 
 (defonce app-state
   (r/atom
@@ -96,16 +92,20 @@
                        [:class :barbarian]}
     :stepper-selection-path nil
     :mouseover-option nil
-    :builder {:character {:tab #{:build :options}}}}))
+    :builder {:character {:tab #{:build :options}}}
+    :character (if stored-char stored-char t5e/character)}))
+
+(def template (entity/sort-selections
+               (t5e/template app-state)))
 
 #_(add-watch app-state :log (fn [k r os ns]
                             (js/console.log "OLD" (clj->js os))
                               (js/console.log "NEW" (clj->js ns))))
 
-(add-watch character-ref
+(add-watch app-state
            :local-storage
            (fn [k r os ns]
-             (.setItem js/window.localStorage "char-meta" (str ns))))
+             (.setItem js/window.localStorage "char-meta" (str (:character ns)))))
 
 (declare builder-selector)
 
@@ -168,20 +168,20 @@
      path
      value)))
 
-(defn make-dropdown-change-fn [path key template raw-char character-ref i]
+(defn make-dropdown-change-fn [path key template raw-char app-state i]
   (fn [e]
     (let [new-path (concat path [key i])
           option-path (entity/get-entity-path template raw-char new-path)
           new-value (reader/read-string (.. e -target -value))]
-      (swap! character-ref #(set-option-value % (conj option-path ::entity/key) new-value)))))
+      (swap! app-state #(update % :character (fn [c] (set-option-value c (conj option-path ::entity/key) new-value)))))))
 
-(defn make-quantity-change-fn [path key template raw-char character-ref i]
+(defn make-quantity-change-fn [path key template raw-char app-state i]
   (fn [e]
     (let [new-path (concat path [key i])
           option-path (entity/get-entity-path template raw-char new-path)
           raw-value (.. e -target -value)
           new-value (if (not (s/blank? raw-value)) (js/parseInt raw-value) 1)]
-      (swap! character-ref #(set-option-value % (conj option-path ::entity/value) new-value)))))
+      (swap! app-state #(update % :character (fn [c] (set-option-value c (conj option-path ::entity/value) new-value)))))))
 
 (defn to-option-path
   ([template-path template]
@@ -221,7 +221,7 @@
                       (do
                         (if select-fn
                           (select-fn path))
-                        (swap! character-ref #(update-option built-template % path (fn [o] (assoc o ::entity/key key))))))
+                        (swap! app-state #(update % :character (fn [c] (update-option built-template c path (fn [o] (assoc o ::entity/key key))))))))
                     (.stopPropagation e))
         :on-mouse-enter (fn [e]
                          (let [stepper-selection-path stepper-selection-path
@@ -246,7 +246,7 @@
                   (str
                    (::mod/name m)
                    " "
-                   (let [v (or value (get-option-value built-template @character-ref path))]
+                   (let [v (or value (get-option-value built-template (:character @app-state) path))]
                      (if val-fn
                        (val-fn v)
                        v)))))
@@ -293,21 +293,21 @@
              new-item (new-item-fn
                        selection
                        options
-                       (get-in @character-ref value-path))]
-         (swap! character-ref #(update-option built-template % path
-                                              (fn [options] (conj (vec options) new-item))))))}
+                       (get-in @app-state (concat [:character] value-path)))]
+         (swap! app-state #(update % :character (fn [c] (update-option built-template c path
+                                                                      (fn [options] (conj (vec options) new-item))))))))}
     (or new-item-text (str "Add " name))]])
 
 (defn remove-option-button [path built-template index]
   [:i.fa.fa-minus-circle.remove-item-button.orange
    {:on-click
     (fn [e]
-      (swap! character-ref #(remove-list-option built-template % path index)))}])
+      (swap! app-state #(update % :character (remove-list-option built-template % path index))))}])
 
 (defn dropdown-selector [path option-paths {:keys [::t/options ::t/min ::t/max ::t/key ::t/name ::t/sequential? ::t/new-item-fn ::t/quantity?] :as selection} built-char raw-char built-template collapsed?]
   (if (not collapsed?)
-    (let [change-fn (partial make-dropdown-change-fn path key built-template raw-char character-ref)
-          qty-change-fn (partial make-quantity-change-fn path key built-template raw-char character-ref)
+    (let [change-fn (partial make-dropdown-change-fn path key built-template raw-char app-state)
+          qty-change-fn (partial make-quantity-change-fn path key built-template raw-char app-state)
           options (filter (fn [{:keys [::t/prereq-fn]}]
                             (or (not prereq-fn) (prereq-fn built-char)))
                           options)]
@@ -319,12 +319,12 @@
               (let [option-path (conj path key i)
                     entity-path (entity/get-entity-path built-template raw-char option-path)
                     key-path (conj entity-path ::entity/key)
-                    value (get-in @character-ref key-path)]
+                    value (get-in @app-state (concat [:character] key-path))]
                 ^{:key i} [:div [dropdown options value (change-fn i) built-char]]))))
          [:div
           (let [full-path (conj path key)
                 entity-path (entity/get-entity-path built-template raw-char full-path)
-                selected (get-in @character-ref entity-path)
+                selected (get-in @app-state (concat [:character] entity-path))
                 remaining (- min (count selected))
                 final-options (if (pos? remaining)
                                 (vec (concat selected (repeat remaining {::entity/key nil})))
@@ -407,7 +407,7 @@
            raw-char
            (and addable? (not sequential?))
            options
-           (make-dropdown-change-fn path key built-template raw-char character-ref i)
+           (make-dropdown-change-fn path key built-template raw-char app-state i)
            built-template
            collapsed-paths
            stepper-selection-path])
@@ -788,7 +788,7 @@
       [:div.flex-grow-1.flex-basis-50-p
        [:div.flex
         [:div.w-50-p
-         [:img.character-image.w-100-p.m-b-20 {:src (or (get-in @character-ref [::entity/values :image-url]) "image/barbarian-girl.png")}]]
+         [:img.character-image.w-100-p.m-b-20 {:src (or (get-in @app-state [:character ::entity/values :image-url]) "image/barbarian-girl.png")}]]
         [:div.w-50-p
          [armor-class-section armor-class armor-class-with-armor armor]
          [display-section "Hit Points" "fa-heart-o f-s-24" (es/entity-val built-char :max-hit-points)]
@@ -874,10 +874,10 @@
 (def plugins
   [{:name "Sword Coast Adventurer's Guide"
     :key :sword-coast-adventurers-guide
-    :selections (t5e/sword-coast-adventurers-guide-selections @character-ref)}
+    :selections (t5e/sword-coast-adventurers-guide-selections (:character @app-state))}
    {:name "Volo's Guide to Monsters"
     :key :volos-guide-to-monsters
-    :selections (t5e/volos-guide-to-monsters-selections @character-ref)}])
+    :selections (t5e/volos-guide-to-monsters-selections (:character @app-state))}])
 
 (def plugins-map
   (zipmap (map :key plugins) plugins))
@@ -918,20 +918,37 @@
    (partial selection-made? built-template selected-option-paths character)
    selections))
 
-(defn next-selection [current-template-path built-template selected-option-paths character]
-  (let [current-path (to-option-path current-template-path built-template)
-        all-selections (get-all-selections [] built-template selected-option-paths)
-        up-to-current (drop-while
+(defn selection-after [current-path all-selections]
+  (let [up-to-current (drop-while
                        (fn [s]
+                         (prn "PATH" (::path s) current-path)
                          (not= (::path s) current-path))
                        all-selections)
-        up-to-next (drop-selected built-template selected-option-paths character (drop 1 up-to-current))
+        _ (js/console.log "UP TO CURRENT" up-to-current)
+        up-to-next (drop 1 up-to-current)
         next (first up-to-next)]
     (if next
       [(::path next) next]
-      (let [unselected (drop-selected built-template selected-option-paths character all-selections)]
-        (if (pos? (count unselected))
-          [(::path next) (first unselected)])))))
+      (let [first-selection (first all-selections)]
+        [(::path first-selection) first-selection]))))
+
+(defn next-selection [current-template-path built-template selected-option-paths character]
+  (let [current-path (to-option-path current-template-path built-template)
+        all-selections (get-all-selections [] built-template selected-option-paths)]
+    (selection-after current-path all-selections)))
+
+(defn prev-selection [current-template-path built-template selected-option-paths character]
+  (let [current-path (to-option-path current-template-path built-template)
+        all-selections (get-all-selections [] built-template selected-option-paths)
+        up-to-current (take-while
+                       (fn [s]
+                         (not= (::path s) current-path))
+                       all-selections)
+        prev (last up-to-current)]
+    (if prev
+      [(::path prev) prev]
+      (let [last-selection (last all-selections)]
+        [(::path last-selection) last-selection]))))
 
 (defn collapse-paths [state paths]
   (let [all-paths (mapcat #(reductions conj [] %) paths)]
@@ -965,20 +982,22 @@
          (reductions conj [] entity-path)))))
 
 (defn set-next-template-path! [built-template next-path next-template-path character]
-  (let [flat-options (entity/flatten-options (::entity/options character))       
-        root-paths (concat [[:ability-scores] [:race] [:background] [:weapons] [:armor] [:equipment]] (map ::t/path flat-options))]
+  (let [;;flat-options (entity/flatten-options (::entity/options character))       
+        ;;root-paths (concat [[:ability-scores] [:race] [:background] [:weapons] [:armor] [:equipment]] (map ::t/path flat-options))
+        ]
     (swap!
      app-state
      (fn [as]
        (-> as
            (assoc :stepper-selection-path next-template-path)
-           (collapse-paths root-paths)
-           (open-path-and-subpaths next-path))))))
+           ;;(collapse-paths root-paths)
+           ;;(open-path-and-subpaths next-path)
+           )))))
 
-(defn set-next-selection! [built-template option-paths character stepper-selection-path unselected-selections]
+(defn set-next-selection! [built-template option-paths character stepper-selection-path all-selections]
   (let [[next-path {:keys [::t/name]}]
         (if (nil? stepper-selection-path)
-          (let [s (first unselected-selections)]
+          (let [s (second all-selections)]
             [(::path s) s])
           (next-selection
            stepper-selection-path
@@ -986,16 +1005,32 @@
            option-paths
            character))
         next-template-path (if next-path (entity/get-template-selection-path built-template next-path []))]
-    (hide-mouseover-option!)
-    (if (nil? next-path)
+    #_(hide-mouseover-option!)
+    #_(if (nil? next-path)
       (set-stepper-top! 0))
     (set-next-template-path! built-template next-path next-template-path character)))
 
+(defn set-prev-selection! [built-template option-paths character stepper-selection-path all-selections]
+  (let [[prev-path {:keys [::t/name]}]
+        (if (nil? stepper-selection-path)
+          (let [s (last all-selections)]
+            [(::path s) s])
+          (prev-selection
+           stepper-selection-path
+           built-template
+           option-paths
+           character))
+        prev-template-path (if prev-path (entity/get-template-selection-path built-template prev-path []))]
+    #_(hide-mouseover-option!)
+    #_(if (nil? next-path)
+      (set-stepper-top! 0))
+    (set-next-template-path! built-template prev-path prev-template-path character)))
+
 (defn level-up! [built-template character]
   (let [entity-path [::entity/options :class 0 ::entity/options :levels]
-        lvls (get-in @character-ref entity-path)
+        lvls (get-in @app-state (concat [:character] entity-path))
         next-lvl (-> lvls count inc str keyword)
-        selection-path (to-selection-path entity-path @character-ref)
+        selection-path (to-selection-path entity-path (:character @app-state))
         next-lvl-path (conj selection-path next-lvl)
         template-path (entity/get-template-selection-path built-template next-lvl-path [])
         option (get-in built-template template-path)
@@ -1004,9 +1039,9 @@
         next-path (conj next-lvl-path selection-key)
         next-template-path (conj template-path ::t/selections 0)]
     (swap!
-     character-ref
+     app-state
      update-in
-     entity-path
+     (concat [:character] entity-path)
      conj
      {::entity/key next-lvl})
     (set-next-template-path! built-template next-path next-template-path character)))
@@ -1128,41 +1163,128 @@
     builder-selector
     {:component-did-update on-builder-selector-update}))
 
-(defn options-column [built-char built-template option-paths collapsed-paths stepper-selection-path plugins]
-  [:div#options-column
-   [option-sources collapsed-paths plugins]
-   [:div
-    (doall
-     (map
-      (fn [selection]
-        ^{:key (::t/key selection)}
-        [builder-selector-component [] option-paths selection built-char @character-ref built-template collapsed-paths stepper-selection-path])
-      (::t/selections built-template)))]])
+(defn options-column [character built-char built-template option-paths collapsed-paths stepper-selection-path plugins]
+  (prn "STEPPER SELECTION PATH" stepper-selection-path)
+  (let [all-selections (get-all-selections [] built-template option-paths)
+        _ (js/console.log "ALL SELECTIONS" all-selections)
+        {:keys [::t/name ::t/options]} (if stepper-selection-path
+                                         (get-in built-template stepper-selection-path)
+                                         (first all-selections))
+        option-path (to-option-path stepper-selection-path built-template)]
+    (prn "OPTION_PATHS" option-path stepper-selection-path option-paths)
+    [:div#options-column.w-100-p.b-1.b-rad-5
+     [:div.flex.justify-cont-s-b.p-10.align-items-c
+      [:button.form-button.p-5-10.m-r-5
+       {:on-click
+        (fn [_] (set-prev-selection!
+                 built-template
+                 option-paths
+                 character
+                 stepper-selection-path
+                 all-selections))} "Back"]
+      [:h3.f-w-b.f-s-18.t-a-c name]
+      [:button.form-button.p-5-10.m-l-5
+       {:on-click
+        (fn [_] (set-next-selection!
+                 built-template
+                 option-paths
+                 character
+                 stepper-selection-path
+                 all-selections))}
+       "Next"]]
+     [:div.p-5
+      (doall
+       (map
+        (fn [{:keys [::t/key ::t/name ::t/path ::t/help ::t/selections ::t/prereqs ::t/select-fn]}]
+          (let [new-option-path (conj option-path key)
+                selected? (get-in option-paths new-option-path)
+                failed-prereqs (reduce
+                                (fn [failures {:keys [::t/prereq-fn ::t/label]}]
+                                  (if (and prereq-fn (not (prereq-fn built-char)))
+                                    (conj failures label)))
+                                []
+                                prereqs)
+                meets-prereqs? (empty? failed-prereqs)
+                selectable? meets-prereqs?]
+            (prn "OPTIONPATH" new-option-path path selected?)
+            ^{:key key}
+            [:div.p-10.b-1.b-rad-5.m-5.pointer.b-orange.hover-shadow
+             {:class-name (s/join " " (remove nil? [(if selected? "b-w-3") (if (not meets-prereqs?) "opacity-5")]))
+              :on-click (fn [e]
+                          (prn "NEW OPTION PATH" new-option-path)
+                          (if (and meets-prereqs? selectable?)
+                            (do
+                              (if select-fn
+                                (select-fn new-option-path))
+                              (let [updated-char (update-option built-template character new-option-path (fn [o] (assoc o ::entity/key key)))
+                                    next-option-paths (make-path-map updated-char)
+                                    _ (js/console.log "NEXT_OPTON_PATHS" next-option-paths)
+                                    next-all-selections (get-all-selections [] built-template next-option-paths)
+                                    _ (js/console.log "NEXT ALL SELECTIONS" next-all-selections)
+                                    [next-selection-path _] (selection-after option-path next-all-selections)
+                                    _ (prn "NEXTSELECTIONS" (::path next-selection))
+                                    next-template-path (entity/get-template-selection-path built-template next-selection-path [])]
+                                (swap! app-state (fn [as]
+                                                   (-> as
+                                                       (assoc :character updated-char)
+                                                       (assoc :stepper-selection-path next-template-path)))))))
+                          (.stopPropagation e))}
+             [:div.flex.align-items-c
+              [:div.flex-grow-1
+               [:div.flex
+                [:span.f-w-b.f-s-16.flex-grow-1 name]
+                (if help
+                  [:span
+                   [:span.underline.orange.p-0.m-r-2 "more"]
+                   [:i.fa.fa-angle-down.orange]])]
+               (if help
+                 [:div.m-t-5
+                  (doall
+                   (map-indexed
+                    (fn [i para]
+                      ^{:key i}
+                      [:p.m-b-5 para])
+                    (s/split help #"\n")))])
+               (if (not meets-prereqs?)
+                 [:div.i.f-s-12.f-w-n 
+                  (str "Requires " (s/join ", " failed-prereqs))])]
+              (if (seq selections)
+                [:i.fa.fa-caret-right])]]))
+        options))]]
+    #_[:div#options-column
+       [option-sources collapsed-paths plugins]
+       [:div
+        (doall
+         (map
+          (fn [selection]
+            ^{:key (::t/key selection)}
+            [builder-selector-component [] option-paths selection built-char @character-ref built-template collapsed-paths stepper-selection-path])
+          (::t/selections built-template)))]]))
 
 (defn get-event-value [e]
   (.-value (.-target e)))
 
-(defn character-field [character-ref prop-name type & [cls-str]]
+(defn character-field [app-state prop-name type & [cls-str]]
   (let [path [::entity/values prop-name]]
     [type {:class-name (str "input " cls-str)
            :type :text
-           :value (get-in @character-ref path)
+           :value (get-in @app-state (concat [:character] path))
            :on-change (fn [e]
-                        (swap! character-ref
+                        (swap! app-state
                                assoc-in
-                               path
+                               (concat [:character] path)
                                (get-event-value e)))}]))
 
-(defn character-input [character-ref prop-name & [cls-str]]
-  (character-field character-ref prop-name :input cls-str))
+(defn character-input [app-state prop-name & [cls-str]]
+  (character-field app-state prop-name :input cls-str))
 
-(defn character-textarea [character-ref prop-name & [cls-str]]
-  (character-field character-ref prop-name :textarea cls-str))
+(defn character-textarea [app-state prop-name & [cls-str]]
+  (character-field app-state prop-name :textarea cls-str))
 
 (defn builder-columns [built-template built-char option-paths collapsed-paths stepper-selection-path plugins active-tabs stepper-dismissed?]
   [:div.flex-grow-1.flex
    {:class-name (s/join " " (map #(str (name %) "-tab-active") active-tabs))}
-   [:div.builder-column.stepper-column
+   #_[:div.builder-column.stepper-column
     (if (not stepper-dismissed?)
       [selection-stepper
        built-template
@@ -1170,32 +1292,32 @@
        @character-ref
        stepper-selection-path])]
    [:div.builder-column.options-column
-    [options-column built-char built-template option-paths collapsed-paths stepper-selection-path plugins]]
+    [options-column (:character @app-state) built-char built-template option-paths collapsed-paths stepper-selection-path plugins]]
    [:div.flex-grow-1.builder-column.personality-column
     [:div.m-t-5
      [:span.personality-label.f-s-18 "Character Name"]
-     [character-input character-ref :character-name]]
+     [character-input app-state :character-name]]
     [:div.field
      [:span.personality-label.f-s-18 "Personality Trait 1"]
-     [character-textarea character-ref :personality-trait-1]]
+     [character-textarea app-state :personality-trait-1]]
     [:div.field
      [:span.personality-label.f-s-18 "Personality Trait 2"]
-     [character-textarea character-ref :personality-trait-2]]
+     [character-textarea app-state :personality-trait-2]]
     [:div.field
      [:span.personality-label.f-s-18 "Ideals"]
-     [character-textarea character-ref :ideals]]
+     [character-textarea app-state :ideals]]
     [:div.field
      [:span.personality-label.f-s-18 "Bonds"]
-     [character-textarea character-ref :bonds]]
+     [character-textarea app-state :bonds]]
     [:div.field
      [:span.personality-label.f-s-18 "Flaws"]
-     [character-textarea character-ref :flaws]]
+     [character-textarea app-state :flaws]]
     [:div.field
      [:span.personality-label.f-s-18 "Image URL"]
-     [character-input character-ref :image-url]]
+     [character-input app-state :image-url]]
     [:div.field
      [:span.personality-label.f-s-18 "Description/Backstory"]
-     [character-textarea character-ref :description "h-800"]]]
+     [character-textarea app-state :description "h-800"]]]
    [:div.builder-column.details-column
     [character-display built-char]]])
 
@@ -1242,7 +1364,7 @@
 
 
 (defn character-builder []
-  ;;(cljs.pprint/pprint @character-ref)
+  (cljs.pprint/pprint (:character @app-state))
   ;;(cljs.pprint/pprint @app-state)
   (let [selected-plugins (map
                           :selections
@@ -1257,9 +1379,9 @@
                                    entity/merge-multiple-selections
                                    s
                                    selected-plugins)))
-        option-paths (make-path-map @character-ref)
-        built-template (entity/build-template @character-ref merged-template)
-        built-char (entity/build @character-ref built-template)
+        option-paths (make-path-map (:character @app-state))
+        built-template (entity/build-template (:character @app-state) merged-template)
+        built-char (entity/build (:character @app-state) built-template)
         active-tab (get-in @app-state tab-path)
         view-width (.-width (gdom/getViewportSize js/window))
         stepper-selection-path (:stepper-selection-path @app-state)

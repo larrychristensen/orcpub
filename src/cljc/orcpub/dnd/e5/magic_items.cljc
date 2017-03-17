@@ -13,15 +13,15 @@
  (and (= :slashing (:damage-type w))
       (sword? w)))
 
-(defn weapon? [w] true)
+(defn ammunition? [i] (= :ammunition (:type i)))
+
+(def weapon-not-ammunition? (complement ammunition?))
 
 (defn heavy-metal-armor? [a] 
    (and (#{:medium :heavy} (:type a)) 
            (not= :hide (:key a))))
 
 (defn not-shield? [a] (#{:light :medium :heavy} (:type a)))
-
-(defn ammunition? [i] (= :ammunition (:type i)))
 
 (defn bonus-name-fn [bonus]
   (fn [item] (str (:name item) ", +" bonus)))
@@ -199,13 +199,6 @@ You can use an action to pull the fuzzy object from the bag and throw it up to 2
 lands, it transforms into a creature you determine by rolling a d8 and consulting the table that corresponds to the bag’s color. The creature vanishes at the next dawn or when it is reduced to 0 hit points.
 The creature is friendly to you and your companions, and it acts on your turn. You can use a bonus action to command how the creature moves and what action it takes on its next turn, or to give it general orders, such as to attack your enemies. In the absence of such orders, the creature acts in a fashion appropriate to its nature.
 Once three fuzzy objects have been pulled from the bag, the bag can’t be used again until the next dawn."
-    }{
-    :name "Bead of Force"
-    :item-type :wondrous-item
-    :rarity :rare
-    :description "This small black sphere measures 3/4 of an inch in diameter and weighs an ounce. Typically, 1d4 + 4 beads of force are found together.
-You can use an action to throw the bead up to 60 feet. The bead explodes on impact and is destroyed. Each creature within a 10-foot radius of where the bead landed must succeed on a DC 15 Dexterity saving throw or take 5d4 force damage. A sphere of transparent force then encloses the area for 1 minute. Any creature that failed the save and is completely within the area is trapped inside this sphere. Creatures that succeeded on the save, or are partially within the area, are pushed away from the center of the sphere until they are no longer inside it. Only breathable air can pass through the sphere’s wall. No attack or other effect can.
-An enclosed creature can use its action to push against the sphere’s wall, moving the sphere up to half the creature’s walking speed. The sphere can be picked up, and its magic causes it to weigh only 1 pound, regardless of the weight of creatures inside."
     }{
     :name "Bead of Force"
     :item-type :wondrous-item
@@ -1974,7 +1967,7 @@ on a beast that has an innate swimming speed. The trident regains 1d3 expended c
     }{
     :name "Vicious Weapon"
     :item-type :weapon
-    :item-subtype weapon?
+    :item-subtype weapon-not-ammunition?
     :rarity :rare
     :description "When you roll a 20 on your attack roll with this magic weapon, your critical hit deals an extra 2d6 damage of the weapon’s type."
     }{
@@ -2107,7 +2100,7 @@ The wand regains 1d6 + 1 expended charges daily at dawn. If you expend the wand�
     :name "Weapon, +1"
     :name-fn plus-1-name
     :item-type :weapon
-    :item-subtype weapon?
+    :item-subtype weapon-not-ammunition?
     :rarity :uncommon
     :magical-attack-bonus 1
     :magical-damage-bonus 1
@@ -2116,7 +2109,7 @@ The wand regains 1d6 + 1 expended charges daily at dawn. If you expend the wand�
     :name "Weapon, +2"
     :name-fn plus-2-name
     :item-type :weapon
-    :item-subtype weapon?
+    :item-subtype weapon-not-ammunition?
     :rarity :rare
     :magical-attack-bonus 2
     :magical-damage-bonus 2
@@ -2125,7 +2118,7 @@ The wand regains 1d6 + 1 expended charges daily at dawn. If you expend the wand�
     :name "Weapon, +3"
     :name-fn plus-3-name
     :item-type :weapon
-    :item-subtype weapon?
+    :item-subtype weapon-not-ammunition?
     :rarity :very-rare
     :magical-attack-bonus 3
     :magical-damage-bonus 3

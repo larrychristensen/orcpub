@@ -83,8 +83,12 @@
    [:.f-w-600
     {:font-weight 600}]
 
+   [:.m-r-2
+    {:margin-right "2px"}]
    [:.m-r-5
     {:margin-right "5px"}]
+   [:.m-r-10
+    {:margin-right "10px"}]
    [:.m-r-18
     {:margin-right "18px"}]
    [:.m-r-20
@@ -94,7 +98,12 @@
 
    [:.m-t-21
     {:margin-top "21px"}]
-   
+
+   [:.opacity-5
+    {:opacity "0.5"}]
+
+   [:.m-b-5
+    {:margin-bottom "5px"}]
    [:.m-b-10
     {:margin-bottom "10px"}]
    [:.m-b-16
@@ -107,8 +116,14 @@
    [:.m-l-30
     {:margin-left "30px"}]
 
+   [:.m-5
+    {:margin "5px"}]
+
    [:.text-shadow
     {:text-shadow "1px 2px 1px black"}]
+
+   [:.hover-shadow:hover
+    {:box-shadow "0 2px 6px 0 rgba(0, 0, 0, 0.5)"}]
    
    [:.t-a-c
     {:text-align :center}]
@@ -161,12 +176,21 @@
    [:.no-border
     {:border :none}]
 
+   [:.underline
+    {:text-decoration :underline}]
+
    [:.p-b-40
     {:padding-bottom "40px"}]
+   [:.p-0
+    {:padding "0px"}]
    [:.p-1
     {:padding "1px"}]
+   [:.p-5
+    {:padding "5px"}]
    [:.p-10
     {:padding "10px"}]
+   [:.p-5-10
+    {:padding "5px 10px"}]
 
    [:.p-l-15
     {:padding-left "15px"}]
@@ -176,6 +200,8 @@
 
    [:.b-1
     {:border "1px solid"}]
+     [:.b-w-3
+    {:border-width "3px"}]
 
    [:.b-color-gray
     {:border-color "rgba(255,255,255,0.2)"}]
@@ -201,6 +227,13 @@
     {:color "#bbe289"}]
    [:.c-f9b747
     {:color "#f9b747"}]
+
+   [:.b-orange
+    {:border-color button-color}]
+
+   [:.hover-slight-white:hover
+    {:background-color "#2c3445"
+     :opacity 0.2}]
    
    [:.bg-light
     {:background-color "#2c3445"}]])

@@ -1307,7 +1307,7 @@ hazards."}])
       {:name "Two Weapon Fighting"
        :description "When you engage in two-weapon fighting, you can add your ability modifier to the damage of the second attack."})])])
 
-(defn fighting-style-selection [character-ref & [restrictions]]
+(defn fighting-style-selection [app-state & [restrictions]]
   (t/selection
    "Fighting Style"
    (if restrictions

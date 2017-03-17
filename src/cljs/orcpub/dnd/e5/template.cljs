@@ -22,14 +22,14 @@
                      :class [{::entity/key :barbarian
                               ::entity/options {:levels [{::entity/key :level-1}]}}]}})
 
-(defn get-raw-abilities [character-ref]
-  (get-in @character-ref [::entity/options :ability-scores ::entity/value]))
+(defn get-raw-abilities [app-state]
+  (get-in (:character @app-state) [::entity/options :ability-scores ::entity/value]))
 
-(defn swap-abilities [character-ref i other-i k v]
+(defn swap-abilities [app-state i other-i k v]
   (fn [e]
-    (swap! character-ref
+    (swap! app-state
            update-in
-           [::entity/options :ability-scores ::entity/value]
+           [:character ::entity/options :ability-scores ::entity/value]
            (fn [a]
              (let [a-vec (vec a)
                    other-index (mod other-i (count a-vec))
@@ -37,9 +37,9 @@
                (assoc a k other-v other-k v))))
     (.stopPropagation e)))
 
-(defn abilities-standard [character-ref]
+(defn abilities-standard [app-state]
   [:div.flex.justify-cont-s-b
-    (let [abilities (get-raw-abilities character-ref)
+    (let [abilities (get-raw-abilities app-state)
           abilities-vec (vec abilities)]
       (map-indexed
        (fn [i [k v]]
@@ -49,21 +49,21 @@
           [:div.f-s-18 v]
           [:div.f-s-16
            [:i.fa.fa-chevron-circle-left.orange
-            {:on-click (swap-abilities character-ref i (dec i) k v)}]
+            {:on-click (swap-abilities app-state i (dec i) k v)}]
            [:i.fa.fa-chevron-circle-right.orange.m-l-5
-            {:on-click (swap-abilities character-ref i (inc i) k v)}]]])
+            {:on-click (swap-abilities app-state i (inc i) k v)}]]])
        abilities-vec))])
 
-(defn abilities-roller [character-ref reroll-fn]
+(defn abilities-roller [app-state reroll-fn]
   [:div
-   (abilities-standard character-ref)
+   (abilities-standard app-state)
    [:button.form-button
     {:on-click reroll-fn}
     "Re-Roll"]])
 
-(defn abilities-entry [character-ref]
+(defn abilities-entry [app-state]
   [:div.flex
-   (let [abilities (get-raw-abilities character-ref)
+   (let [abilities (get-raw-abilities app-state)
          abilities-vec (vec abilities)]
      (map-indexed
       (fn [i k]
@@ -75,30 +75,30 @@
            :on-change (fn [e] (let [value (.-value (.-target e))
                                     new-v (if (not (s/blank? value))
                                             (js/parseInt value))]
-                                (swap! character-ref assoc-in [::entity/options :ability-scores ::entity/value k] new-v)))}]])
+                                (swap! app-state assoc-in [:character ::entity/options :ability-scores ::entity/value k] new-v)))}]])
       char5e/ability-keys))])
 
 (declare template-selections)
 
-(defn roll-hit-points [die character-ref path]
+(defn roll-hit-points [die app-state path]
   (let [value-path (entity/get-option-value-path
-                    {::t/selections (template-selections character-ref)}
-                    @character-ref
+                    {::t/selections (template-selections app-state)}
+                    (:character @app-state)
                     path)]
-    (swap! character-ref #(assoc-in % value-path (dice/die-roll die)))))
+    (swap! app-state #(update app-state :character (fn [c] (assoc-in c value-path (dice/die-roll die)))))))
 
-(defn hit-points-roller [die character-ref path]
+(defn hit-points-roller [die app-state path]
   [:div
    [:button.form-button.m-t-10
-    {:on-click #(roll-hit-points die character-ref path)}
+    {:on-click #(roll-hit-points die app-state path)}
     "Re-Roll"]])
 
-(defn hit-points-entry [character-ref path]
+(defn hit-points-entry [app-state path]
   (let [value-path (entity/get-option-value-path
-                    {::t/selections (template-selections character-ref)}
-                    @character-ref
+                    {::t/selections (template-selections app-state)}
+                    (:character @app-state)
                     path)
-        value (get-in @character-ref value-path)]
+        value (get-in (:character @app-state) value-path)]
     [:div
      [:input.input
       {:value value
@@ -106,7 +106,7 @@
        :on-change (fn [e] (let [value (.-value (.-target e))
                                new-v (if (not (s/blank? value))
                                        (js/parseInt value))]
-                           (swap! character-ref assoc-in value-path new-v)))}]]))
+                           (swap! app-state assoc-in (concat [:character] value-path) new-v)))}]]))
 
 (defn traits-modifiers [traits & [include-level? source]]
   (map
@@ -149,7 +149,7 @@
                               modifiers
                               selections
                               traits]}
-                      character-ref]
+                      app-state]
   (let [option (t/option
    name
    (common/name-to-kw name)
@@ -839,20 +839,20 @@ Fire Starter. The device produces a miniature flame, which you can use to light 
 (defn die-mean [die]
   (int (Math/ceil (/ (apply + (range 1 (inc die))) die))))
 
-(defn hit-points-selection [character-ref die]
+(defn hit-points-selection [app-state die]
   (t/selection-cfg
    {:name "Hit Points"
     :help "Select the method with which to determine this level's hit points."
     :options [{::t/name "Manual Entry"
                ::t/key :manual-entry
                ::t/help "This option allows you to manually type in the value for this level's hit points. Use this if you want to roll dice yourself or if you already have a character with known hit points for this level."
-               ::t/ui-fn #(hit-points-entry character-ref %)
+               ::t/ui-fn #(hit-points-entry app-state %)
                ::t/modifiers [(mod5e/deferred-max-hit-points)]}
               {::t/name (str "Roll (1D" die ")")
                ::t/key :roll
                ::t/help "This option rolls virtual dice for you and sets that value for this level's hit points. It could pay off with a high roll, but you might also roll a 1."
-               ::t/ui-fn #(hit-points-roller die character-ref %)
-               ::t/select-fn #(roll-hit-points die character-ref %)
+               ::t/ui-fn #(hit-points-roller die app-state %)
+               ::t/select-fn #(roll-hit-points die app-state %)
                ::t/modifiers [(mod5e/deferred-max-hit-points)]}
               (let [average (die-mean die)]
                 (t/option-cfg
@@ -910,7 +910,7 @@ Fire Starter. The device produces a miniature flame, which you can use to light 
 (defn subclass-level-option [{:keys [name
                                      levels] :as subcls}
                              kw
-                             character-ref
+                             app-state
                              spellcasting-template
                              i]
   (let [selections (some-> levels (get i) :selections)]
@@ -932,7 +932,7 @@ Fire Starter. The device produces a miniature flame, which you can use to light 
                                level-modifiers
                                traits]
                         :as subcls}
-                       character-ref]
+                       app-state]
   (let [kw (common/name-to-kw name)
         {:keys [armor weapon save skill-options tool-options tool]} profs
         {skill-num :choose options :options} skill-options
@@ -971,7 +971,7 @@ Fire Starter. The device produces a miniature flame, which you can use to light 
                                         {::entity/key (-> current-values count inc str keyword)})
                                       (vec
                                        (map
-                                        (partial subclass-level-option subcls kw character-ref spellcasting-template)
+                                        (partial subclass-level-option subcls kw app-state spellcasting-template)
                                         (range 1 21))))]}])
       option)))
 
@@ -988,7 +988,7 @@ Fire Starter. The device produces a miniature flame, which you can use to light 
                             subclass-level
                             subclasses] :as cls}
                     kw
-                    character-ref
+                    app-state
                     spellcasting-template
                     i]
   (let [ability-inc-set (set ability-increase-levels)]
@@ -1005,12 +1005,12 @@ Fire Starter. The device produces a miniature flame, which you can use to light 
             :key :subclass
             :help subclass-help
             :options (mapv
-                      #(subclass-option (assoc cls :key kw) % character-ref)
+                      #(subclass-option (assoc cls :key kw) % app-state)
                       subclasses)})])
        (if (and (not plugin?) (ability-inc-set i))
          [(opt5e/ability-score-improvement-selection)])
        (if (and (not plugin?) (> i 1))
-         [(hit-points-selection character-ref hit-die)])))
+         [(hit-points-selection app-state hit-die)])))
      (vec
       (concat
        (if (= :all (:known-mode spellcasting))
@@ -1132,7 +1132,7 @@ Fire Starter. The device produces a miniature flame, which you can use to light 
                             armor-choices
                             spellcasting]
                      :as cls}
-                    character-ref]
+                    app-state]
   (let [kw (common/name-to-kw name)
         {:keys [save skill-options multiclass-skill-options tool-options multiclass-tool-options tool]
          armor-profs :armor weapon-profs :weapon} profs
@@ -1162,7 +1162,7 @@ Fire Starter. The device produces a miniature flame, which you can use to light 
                                       {::entity/key (-> current-values count inc level-key)})
                        :options (vec
                                  (map
-                                  (partial level-option cls kw character-ref spellcasting-template)
+                                  (partial level-option cls kw app-state spellcasting-template)
                                   (range 1 21)))
                        :min 1
                        :sequential? true
@@ -1192,7 +1192,7 @@ Fire Starter. The device produces a miniature flame, which you can use to light 
 (defn class-level [levels class-kw]
   (get-in levels [class-kw :class-level]))
 
-(defn barbarian-option [character-ref]
+(defn barbarian-option [app-state]
   (class-option
    {:name "Barbarian"
     :hit-die 12
@@ -1374,7 +1374,7 @@ If you are able to cast spells, you can't cast them or concentrate on them while
                                                             {:name "Totemic Attunement: Wolf"
                                                              :page 50
                                                              :summary "While raging, if you hit a Large or smaller creature, you can use a bonus action to knock it prone."})]})])]}}}]}
-   character-ref))
+   app-state))
 
 (defn bardic-inspiration-die [levels]
   (condp <= (class-level levels :bard)
@@ -1383,7 +1383,7 @@ If you are able to cast spells, you can't cast them or concentrate on them while
     5 8
     6))
 
-(defn bard-option [character-ref]
+(defn bard-option [app-state]
   (class-option
    {:name "Bard"
     :hit-die 8
@@ -1505,7 +1505,7 @@ The extra hit points increase when you reach certain levels in this class: to 1d
                                            {:name "Battle Magic"
                                             :page 55
                                             :summary "make a weapon attack when you use your action to cast a bard spell"})]}}}]}
-   character-ref))
+   app-state))
 
 (defn blessings-of-knowledge-skill [skill-name]
   (let [skill-kw (common/name-to-kw skill-name)]
@@ -1540,7 +1540,7 @@ The extra hit points increase when you reach certain levels in this class: to 1d
                   " damage to a successful weapon attack's damage")
     :description "At 8th level, you gain the ability to infuse your weapon strikes with divine energy. Once on each of your turns when you hit a creature with a weapon attack, you can cause the attack to deal an extra 1d8 radiant damage to the target. When you reach 14th level, the extra damage increases to 2d8."}))
 
-(defn cleric-option [character-ref]
+(defn cleric-option [app-state]
   (class-option
    {:name "Cleric",
     :spellcasting {:level-factor 1
@@ -1859,12 +1859,12 @@ The extra hit points increase when you reach certain levels in this class: to 1d
                             :page 63
                             :level 17
                             :summary "from non-magical weapons, resistance to slashing, bludgeoning, and piercing damage"}]}]}
-   character-ref))
+   app-state))
 
 (defn druid-spell [spell-level spell-key min-level]
   (mod5e/spells-known spell-level spell-key :wis "Druid" min-level))
 
-(defn druid-option [character-ref]
+(defn druid-option [app-state]
   (class-option
    {:name "Druid"
     :hit-die 8
@@ -2072,7 +2072,7 @@ In addition, you have advantage on saving throws against plants that are magical
                             :page 69
                             :summary "cast alter self at will"
                             :level 14}]}]}
-   character-ref))
+   app-state))
 
 (defn eldritch-knight-spell? [s]
   (let [school (:school s)]
@@ -2093,7 +2093,7 @@ In addition, you have advantage on saving throws against plants that are magical
    ::t/prereq-fn
    (total-levels-prereq level)))
 
-(defn fighter-option [character-ref]
+(defn fighter-option [app-state]
   (class-option
    {:name "Fighter",
     :hit-die 10,
@@ -2143,7 +2143,7 @@ You can use this feature twice between long rests starting at 13th level and thr
              20 {:modifiers [(mod5e/extra-attack)]}}
     :subclass-level 3
     :subclass-title "Martial Archetype"
-    :selections [(opt5e/fighting-style-selection character-ref)
+    :selections [(opt5e/fighting-style-selection app-state)
                  (t/selection
                   "Starting Equipment: Armor"
                   [(t/option
@@ -2191,7 +2191,7 @@ You can use this feature twice between long rests starting at 13th level and thr
                     [(mod5e/weapon :handaxe 2)])])]
     :subclasses [{:name "Champion"
                   :selections [(add-level-prereq
-                                (opt5e/fighting-style-selection character-ref)
+                                (opt5e/fighting-style-selection app-state)
                                 10)]
                   :levels {3 {:modifiers [(mod5e/critical 19)]}
                            7 {:modifiers [(mod/modifier ?default-skill-bonus (let [b (int (/ ?prof-bonus 2))] {:str b :dex b :con b}))
@@ -2303,9 +2303,9 @@ In addition, when you make a running long jump, the distance you can cover incre
                             :level 15
                             :page 75
                             :summary "teleport up to 30 ft. when you use Action Surge"}]}]}
-   character-ref))
+   app-state))
 
-(defn monk-option [character-ref]
+(defn monk-option [app-state]
   (class-option
    {:name "Monk"
     :hit-die 8
@@ -2489,12 +2489,12 @@ You can have only one creature under the effect of this feature at a time. You c
                             :level 11}
                            {:name "Anger of a Gentle Soul"
                             :level 17}]}]}
-   character-ref))
+   app-state))
 
 (defn paladin-spell [spell-level key min-level]
   (mod5e/spells-known spell-level key :wis "Paladin" min-level))
 
-(defn paladin-option [character-ref]
+(defn paladin-option [app-state]
   (class-option
    {:name "Paladin"
     :spellcaster true
@@ -2511,7 +2511,7 @@ You can have only one creature under the effect of this feature at a time. You c
                          :options {:priests-pack 1
                                    :explorers-pack 1}}]
     :armor {:chain-mail 1}
-    :levels {2 {:selections [(opt5e/fighting-style-selection character-ref #{:defense :dueling :great-weapon-fighting :protection})]}
+    :levels {2 {:selections [(opt5e/fighting-style-selection app-state #{:defense :dueling :great-weapon-fighting :protection})]}
              3 {:modifiers [(mod5e/damage-immunity :disease)]}
              5 {:modifiers [(mod5e/extra-attack)]}}
     :selections [(t/selection
@@ -2651,11 +2651,11 @@ Once you use this feature, you can't use it again until you finish a long rest."
                             :level 15}
                            {:name "Avenging Angel"
                             :level 20}]}]}
-   character-ref))
+   app-state))
 
 (def ranger-skills {:animal-handling true :athletics true :insight true :investigation true :nature true :perception true :stealth true :survival true})
 
-(defn ranger-option [character-ref]
+(defn ranger-option [app-state]
   (class-option
    {:name "Ranger"
     :hit-die 10
@@ -2704,7 +2704,7 @@ Once you use this feature, you can't use it again until you finish a long rest."
                       2
                       2)]
                     [])])]
-    :levels {2 {:selections [(opt5e/fighting-style-selection character-ref #{:archery :defense :dueling :two-weapon-fighting})]}
+    :levels {2 {:selections [(opt5e/fighting-style-selection app-state #{:archery :defense :dueling :two-weapon-fighting})]}
              5 {:modifiers [(mod5e/extra-attack)]}}
     :traits [{:name "Primeval Awareness"
               :level 3
@@ -2813,11 +2813,11 @@ You choose additional favored terrain types at 6th and 10th level."}]
                             :level 11}
                            {:name "Share Spells"
                             :level 15}]}]}
-   character-ref))
+   app-state))
 
 (def rogue-skills {:acrobatics true :athletics true :deception true :insight true :intimidation true :investigation true :perception true :performance true :persuasion true :sleight-of-hand true :stealth true})
 
-(defn rogue-option [character-ref]
+(defn rogue-option [app-state]
   (class-option
    {:name "Rogue",
     :hit-die 8
@@ -2945,9 +2945,9 @@ magic items."}]}
                             :level 13}
                            {:name "Master Duelist"
                             :level 17}]}]}
-   character-ref))
+   app-state))
 
-(defn sorcerer-option [character-ref]
+(defn sorcerer-option [app-state]
   (class-option
    {:name "Sorcerer"
     :spellcasting {:level-factor 1
@@ -3111,7 +3111,7 @@ You can't manifest your wings while wearing armor unless the armor is made to ac
                             :level 14}
                            {:name "Wind Soul"
                             :level 18}]}]}
-   character-ref))
+   app-state))
 
 (def pact-of-the-tome-name "Pact Boon: Pact of the Tome")
 (def pact-of-the-chain-name "Pact Boon: Pact of the Chain")
@@ -3147,7 +3147,7 @@ You can transform one magic weapon into your pact weapon by performing a special
 If you lose your Book of Shadows, you can perform a 1-hour ceremony to receive a replacement from your patron. This ceremony can be performed during a short or long rest, and it destroys the previous book. The book turns to ash when you die.")])])
 
 
-(defn wizard-option [character-ref]
+(defn wizard-option [app-state]
   (class-option
    {:name "Wizard",
     :spellcasting {:level-factor 1
@@ -3279,7 +3279,7 @@ If you lose your Book of Shadows, you can perform a 1-hour ceremony to receive a
                             :level 10}
                            {:name "Song of Victory"
                             :level 14}]}]}
-   character-ref))
+   app-state))
 
 (defn has-trait-with-name-prereq [name]
   (fn [c] (some #(= name (:name %)) (es/entity-val c :traits))))
@@ -3529,7 +3529,7 @@ Additionally, while perceiving through your familiar’s senses, you can also sp
     :max (or num 0)
     :simple? true}))
 
-(defn warlock-option [character-ref]
+(defn warlock-option [app-state]
   (class-option
    {:name "Warlock"
     :spellcasting {:level-factor 1
@@ -3639,20 +3639,20 @@ Once you use this feature, you can't use it again until you finish a long rest."
                             :level 10}
                            {:name "Create Thrall"
                             :level 14}]}]}
-   character-ref))
+   app-state))
 
-(defn reroll-abilities [character-ref]
+(defn reroll-abilities [app-state]
   (fn []
-    (swap! character-ref
+    (swap! app-state
            #(assoc-in %
-                      [::entity/options :ability-scores ::entity/value]
+                      [:character ::entity/options :ability-scores ::entity/value]
                       (char5e/standard-ability-rolls)))))
 
-(defn set-standard-abilities [character-ref]
+(defn set-standard-abilities [app-state]
   (fn []
-    (swap! character-ref
+    (swap! app-state
            (fn [c] (assoc-in c
-                             [::entity/options :ability-scores]
+                             [:character ::entity/options :ability-scores]
                              {::entity/key :standard-scores
                               ::entity/value (char5e/abilities 15 14 13 12 10 8)})))))
 
@@ -3767,7 +3767,7 @@ You might also have ties to a specific temple dedicated to your chosen deity or 
                                  armor-choices
                                  traits]
                           :as cls}
-                         character-ref]
+                         app-state]
   (let [kw (common/name-to-kw name)
         {:keys [skill skill-options tool-options tool language-options]
          armor-profs :armor weapon-profs :weapon} profs
@@ -3814,7 +3814,7 @@ You might also have ties to a specific temple dedicated to your chosen deity or 
                       (mod5e/equipment k num))
                     equipment)))})))
 
-(defn volos-guide-to-monsters-selections [character-ref]
+(defn volos-guide-to-monsters-selections [app-state]
   [(t/selection
     "Race"
     [aasimar-option
@@ -3881,7 +3881,7 @@ You might also have ties to a specific temple dedicated to your chosen deity or 
     :profs {:skill {:history true :persuasion true}
             :tool-options {:musical-instrument 1 :gaming-set 1}}}])
 
-(defn scag-classes [character-ref]
+(defn scag-classes [app-state]
   [{:name "Barbarian"
     :plugin? true
     :subclass-level 3
@@ -3897,17 +3897,17 @@ You might also have ties to a specific temple dedicated to your chosen deity or 
                            {:name "Spiked Retribution"
                             :level 14}]}]}])
 
-(defn sword-coast-adventurers-guide-selections [character-ref]
+(defn sword-coast-adventurers-guide-selections [app-state]
   [(t/selection
     "Background"
     (mapv
-     #(background-option % character-ref)
+     #(background-option % app-state)
      sword-coast-adventurers-guide-backgrounds))
    (t/selection
     "Class"
     (mapv
-     #(class-option % character-ref)
-     (scag-classes character-ref)))])
+     #(class-option % app-state)
+     (scag-classes app-state)))])
 
 (defn ability-item [name abbr desc]
   [:li.m-t-5 [:span.f-w-b.m-r-5 (str name " (" abbr ")")] desc])
@@ -3931,7 +3931,7 @@ You might also have ties to a specific temple dedicated to your chosen deity or 
                   :modifiers [(modifier-fn key)]}))
               items)}))
 
-(defn template-selections [character-ref]
+(defn template-selections [app-state]
   [(t/selection-cfg
     {:name "Base Ability Scores"
      :key :ability-scores
@@ -3947,19 +3947,19 @@ You might also have ties to a specific temple dedicated to your chosen deity or 
      :options [{::t/name "Manual Entry"
                 ::t/key :manual-entry
                 ::t/help "This option allows you to manually type in the value for each ability. Use this if you want to roll dice yourself or if you already have a character with known ability values."
-                ::t/ui-fn #(abilities-entry character-ref)
+                ::t/ui-fn #(abilities-entry app-state)
                 ::t/modifiers [(mod5e/deferred-abilities)]}
                {::t/name "Standard Roll"
                 ::t/key :standard-roll
                 ::t/help "This option rolls the dice for you. You can rearrange the values using the left and right arrow buttons."
-                ::t/ui-fn #(abilities-roller character-ref (reroll-abilities character-ref))
-                ::t/select-fn (reroll-abilities character-ref)
+                ::t/ui-fn #(abilities-roller app-state (reroll-abilities app-state))
+                ::t/select-fn (reroll-abilities app-state)
                 ::t/modifiers [(mod5e/deferred-abilities)]}
                {::t/name "Standard Scores"
                 ::t/key :standard-scores
                 ::t/help "If you aren't feeling lucky, use this option, which gives you a standard set of scores. You can reassign the values using the left and right arrow buttons."
-                ::t/ui-fn #(abilities-standard character-ref)
-                ::t/select-fn (set-standard-abilities character-ref)
+                ::t/ui-fn #(abilities-standard app-state)
+                ::t/select-fn (set-standard-abilities app-state)
                 ::t/modifiers [(mod5e/deferred-abilities)]}]})
    (t/selection-cfg
     {:name "Race"
@@ -3989,31 +3989,31 @@ You might also have ties to a specific temple dedicated to your chosen deity or 
      :new-item-fn (fn [selection classes]
                     (let [current-classes (into #{}
                                                 (map ::entity/key)
-                                                (get-in @character-ref
+                                                (get-in (:character @app-state)
                                                         [::entity/options :class]))]
                       {::entity/key (->> selection
                                          ::t/options
                                          (map ::t/key)
                                          (some #(if (-> % current-classes not) %)))
                        ::entity/options {:levels [{::entity/key :1}]}}))
-     :options [(barbarian-option character-ref)
-               (bard-option character-ref)
-               (cleric-option character-ref)
-               (druid-option character-ref)
-               (fighter-option character-ref)
-               (monk-option character-ref)
-               (paladin-option character-ref)
-               (ranger-option character-ref)
-               (rogue-option character-ref)
-               (sorcerer-option character-ref)
-               (warlock-option character-ref)
-               (wizard-option character-ref)]})
+     :options [(barbarian-option app-state)
+               (bard-option app-state)
+               (cleric-option app-state)
+               (druid-option app-state)
+               (fighter-option app-state)
+               (monk-option app-state)
+               (paladin-option app-state)
+               (ranger-option app-state)
+               (rogue-option app-state)
+               (sorcerer-option app-state)
+               (warlock-option app-state)
+               (wizard-option app-state)]})
    (inventory-selection "Weapons" weapon5e/weapons mod5e/deferred-weapon)
    (inventory-selection "Magic Weapons" mi/magic-weapons mod5e/deferred-magic-weapon)
    (inventory-selection "Armor" armor5e/armor mod5e/deferred-armor)
-   (inventory-selection "Magic Armor" mi/magic-armor mod5e/deferred-armor)
+   (inventory-selection "Magic Armor" mi/magic-armor mod5e/deferred-magic-armor)
    (inventory-selection "Equipment" opt5e/equipment mod5e/deferred-equipment)
-   (inventory-selection "Other Magic Items" mi/other-magic-items mod5e/deferred-equipment)])
+   (inventory-selection "Other Magic Items" mi/other-magic-items mod5e/deferred-magic-item)])
 
 
 (def template-base
@@ -4104,6 +4104,6 @@ You might also have ties to a specific temple dedicated to your chosen deity or 
                      (+ 8 ?prof-bonus (?ability-bonuses ability-kw)))}))
 
 
-(defn template [character-ref]
+(defn template [app-state]
   {::t/base template-base
-   ::t/selections (template-selections character-ref)})
+   ::t/selections (template-selections app-state)})
