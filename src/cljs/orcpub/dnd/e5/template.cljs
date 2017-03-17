@@ -11,7 +11,8 @@
             [orcpub.dnd.e5.options :as opt5e]
             [orcpub.dnd.e5.weapons :as weapon5e]
             [orcpub.dnd.e5.armor :as armor5e]
-            [orcpub.dnd.e5.spell-lists :as sl])
+            [orcpub.dnd.e5.spell-lists :as sl]
+            [orcpub.dnd.e5.magic-items :as mi])
   #_(:require-macros [orcpub.dnd.e5.options :as opt5e]
                    [orcpub.dnd.e5.modifiers :as mod5e]))
 
@@ -4006,6 +4007,7 @@ You might also have ties to a specific temple dedicated to your chosen deity or 
                (warlock-option character-ref)
                (wizard-option character-ref)]})
    (inventory-selection "Weapons" weapon5e/weapons mod5e/deferred-weapon)
+   (inventory-selection "Magic Weapons" mi/magic-weapons mod5e/deferred-magic-weapon)
    (inventory-selection "Armor" armor5e/armor mod5e/deferred-armor)
    (inventory-selection "Equipment" opt5e/equipment mod5e/deferred-equipment)])
 

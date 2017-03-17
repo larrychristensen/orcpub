@@ -2202,3 +2202,11 @@ The boots regain 2 hours of flying capability for every 12 hours they aren’t i
 
 (def magic-item-map
   (into {} (map (fn [i] [(:key i) i])) magic-items))
+
+(def magic-weapons
+  (filter
+   #(= :weapon (:item-type %))
+   magic-items))
+
+(def magic-weapon-map
+  (common/map-by-key magic-weapons))

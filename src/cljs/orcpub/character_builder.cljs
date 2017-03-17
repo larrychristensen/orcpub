@@ -20,6 +20,7 @@
             [orcpub.dnd.e5.spells :as spells]
             [orcpub.dnd.e5.weapons :as weapon5e]
             [orcpub.dnd.e5.armor :as armor5e]
+            [orcpub.dnd.e5.magic-items :as mi5e]
             [orcpub.dnd.e5.display :as disp5e]
             [orcpub.pdf-spec :as pdf-spec]
 
@@ -759,6 +760,7 @@
         armor (es/entity-val built-char :armor)
         spells-known (es/entity-val built-char :spells-known)
         weapons (es/entity-val built-char :weapons)
+        magic-weapons (es/entity-val built-char :magic-weapons)
         equipment (es/entity-val built-char :equipment)
         traits (es/entity-val built-char :traits)
         attacks (es/entity-val built-char :attacks)
@@ -843,7 +845,7 @@
            (filter (fn [[k bonus]]
                      (not= bonus (ability-bonuses (:ability (opt5e/skills-map k)))))
                    skill-bonuses)))]
-       [list-item-section "Languages" languages]
+       [list-item-section "Languages" languages (partial prof-name opt5e/language-map)]
        [list-item-section "Tool Proficiencies" tool-profs (partial prof-name opt5e/tools-map)]
        [list-item-section "Weapon Proficiencies" weapon-profs (partial prof-name weapon5e/weapons-map)]
        [list-item-section "Armor Proficiencies" armor-profs (partial prof-name armor5e/armor-map)]
@@ -853,7 +855,7 @@
                                                                         (str (name condition)
                                                                              (if qualifier (str " (" qualifier ")"))))]
        [spells-known-section spells-known]
-       [equipment-section "Weapons" weapons weapon5e/weapons-map]
+       [equipment-section "Weapons" (concat magic-weapons weapons) (merge weapon5e/weapons-map mi5e/magic-weapon-map)]
        [equipment-section "Armor" armor armor5e/armor-map]
        [equipment-section "Equipment" equipment opt5e/equipment-map]
        [attacks-section attacks]
@@ -1262,7 +1264,7 @@
         plugins (:plugins @app-state)
         stepper-dismissed? (:stepper-dismissed @app-state)]
     ;(js/console.log "BUILT TEMPLAT" built-template)
-    ;;(print-char built-char)
+    (print-char built-char)
     [:div.app
      {:on-scroll (fn [e]
                    (let [app-header (js/document.getElementById "app-header")

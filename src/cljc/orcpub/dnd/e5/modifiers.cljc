@@ -208,10 +208,19 @@
 (defn weapon [weapon-kw num]
   (mods/map-mod ?weapons weapon-kw num))
 
+(defn magic-weapon [weapon-kw num]
+  (mods/map-mod ?magic-weapons weapon-kw num))
+
 (defn deferred-weapon [weapon-kw]
   (mods/deferred-modifier
     ?weapons
     (fn [num] (es/map-mod ?weapons weapon-kw num))
+    1))
+
+(defn deferred-magic-weapon [weapon-kw]
+  (mods/deferred-modifier
+    ?magic-weapons
+    (fn [num] (es/map-mod ?magic-weapons weapon-kw num))
     1))
 
 (defn armor [armor-kw num]
