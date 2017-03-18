@@ -907,6 +907,9 @@ Fire Starter. The device produces a miniature flame, which you can use to light 
 (defn level-key [index]
   (keyword (str "level-" index)))
 
+(defn level-name [index]
+  (str "Level " index))
+
 (defn subclass-level-option [{:keys [name
                                      levels] :as subcls}
                              kw
@@ -915,7 +918,7 @@ Fire Starter. The device produces a miniature flame, which you can use to light 
                              i]
   (let [selections (some-> levels (get i) :selections)]
     (t/option
-     (str i)
+     (level-name i)
      (level-key i)
      (vec
       (concat
@@ -993,7 +996,7 @@ Fire Starter. The device produces a miniature flame, which you can use to light 
                     i]
   (let [ability-inc-set (set ability-increase-levels)]
     (t/option
-     (str i)
+     (level-name i)
      (level-key i)
      (vec
       (concat
@@ -3937,7 +3940,7 @@ You might also have ties to a specific temple dedicated to your chosen deity or 
      :key :ability-scores
      :help [:div
             [:p "Ability scores are your major character traits and affect nearly all aspects of play. These scores range from 1 to 20 for player characters and DO NOT include racial or other bonuses."]
-            [:ul.m-t-10.p-l-15.list-style-disc
+            [:ul.m-t-10.m-l-5
              (ability-item "Strength" "STR" "measures your physical power")
              (ability-item "Dexterity" "DEX" "measures your agility and nimbleness")
              (ability-item "Constitution" "CON" "measures your physical health")

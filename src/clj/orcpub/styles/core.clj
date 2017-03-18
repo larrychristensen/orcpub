@@ -102,6 +102,8 @@
    [:.opacity-5
     {:opacity "0.5"}]
 
+   [:.m-b-0-last:last-child
+    {:margin-bottom "0px"}]
    [:.m-b-5
     {:margin-bottom "5px"}]
    [:.m-b-10
@@ -192,8 +194,13 @@
    [:.p-5-10
     {:padding "5px 10px"}]
 
+   [:.p-l-10
+    {:padding-left "10px"}]
    [:.p-l-15
     {:padding-left "15px"}]
+
+   [:.p-r-10
+    {:padding-right "10px"}]
 
    [:.b-rad-5
     {:border-radius "5px"}]

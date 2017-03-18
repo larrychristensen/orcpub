@@ -549,8 +549,8 @@ hazards."}])
 
 (defn armor-prereq [armor-kw]
   (prereq (str "proficiency with " (name armor-kw) " armor")
-             (fn [c] (let [prof-keys (set (map :key (:armor-profs c)))]
-                       (boolean (prof-keys armor-kw))))))
+          (fn [c] (let [prof-keys (:armor-profs c)]
+                    (boolean (prof-keys armor-kw))))))
 
 (def languages
   [{:name "Common"
