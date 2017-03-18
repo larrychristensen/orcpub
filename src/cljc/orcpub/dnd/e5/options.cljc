@@ -1192,7 +1192,7 @@ hazards."}])
           ability-key
           []
           [(modifiers/ability ability-key 1)
-           (modifiers/saving-throws ability-key)]))
+           (modifiers/saving-throws nil ability-key)]))
        character/ability-keys))]
     [])
    (t/select-option

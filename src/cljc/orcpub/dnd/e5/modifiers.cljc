@@ -77,7 +77,7 @@
                  (apply conj (or ?saving-throws #{}) abilities)
                  nil;;"Saving Throws"
                  nil;;(s/join ", " (map (comp s/upper-case name) abilities))
-                 [(= cls-kw (first ?classes))]))
+                 [(or (nil? cls-kw) (= cls-kw (first ?classes)))]))
 
 (defn saving-throw-advantage [types & [abilities]]
   (mods/vec-mod ?saving-throw-advantage {:abilities abilities

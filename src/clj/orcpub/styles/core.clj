@@ -135,6 +135,8 @@
     {:justify-content :center}]
    [:.align-items-c
     {:align-items :center}]
+   [:.align-items-t
+    {:align-items :flex-start}]
 
    [:.w-40-p
     {:width "40%"}]

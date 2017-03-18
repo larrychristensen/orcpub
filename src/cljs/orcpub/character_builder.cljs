@@ -1231,14 +1231,14 @@
 
 (defn options-column [character built-char built-template option-paths collapsed-paths stepper-selection-path stepper-selection plugins]
   (let [all-selections (get-all-selections [] built-template option-paths)
-        {:keys [::t/name ::t/options ::t/help ::t/min ::t/max ::parent ::path]}
+        {:keys [::t/name ::t/options ::t/help ::t/min ::t/max ::t/sequential? ::parent ::path]}
         (if stepper-selection
           stepper-selection
           (first all-selections))
         option-path path
         expanded? (get-in @app-state [:expanded-paths option-path])]
     [:div#options-column.w-100-p.b-1.b-rad-5
-     [:div.flex.justify-cont-s-b.p-10.align-items-c
+     [:div.flex.justify-cont-s-b.p-10.align-items-t
       [:button.form-button.p-5-10.m-r-5
        {:on-click
         (fn [_] (set-prev-selection!
@@ -1272,10 +1272,13 @@
          [show-info-button expanded? option-path])]
       (if expanded? [help-section help])]
      [:div.p-5
-      (doall
-       (map
-        (partial option-selector character built-char built-template option-paths stepper-selection-path option-path)
-        options))]]))
+      (if sequential?
+        "SEQUENTIAL"
+        (doall
+         (map
+          (partial option-selector character built-char built-template option-paths stepper-selection-path option-path)
+          options))
+        )]]))
 
 (defn get-event-value [e]
   (.-value (.-target e)))
