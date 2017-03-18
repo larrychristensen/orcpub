@@ -36,6 +36,11 @@
    :m-t
    (concat (range 0 10) (range 10 30 5))))
 
+(defn handle-browsers [property value]
+  {(keyword (str "-webkit-" (name property))) value
+   (keyword (str "-moz-" (name property))) value
+   property value})
+
 (def font-sizes
   [[:.f-s-10
     {:font-size "10px"}]
@@ -147,8 +152,12 @@
    [:.w-100-p
     {:width "100%"}]
 
+   [:.w-40
+    {:width "40px"}]
    [:.w-50
     {:width "50px"}]
+   [:.w-60
+    {:width "60px"}]
    [:.w-70
     {:width "70px"}]
    [:.w-250
@@ -642,10 +651,10 @@
      (merge
       {:background-color :transparent
        :width "100%"
-       :-webkit-appearance :menulist
        :cursor :pointer
        :border "1px solid white"}
-      text-color)
+      text-color
+      (handle-browsers :appearance :menulist))
 
      [:&:active :&:focus
       {:outline :none}]]

@@ -2142,6 +2142,7 @@ Once you use this feature, you must finish a short or long rest before you can u
                               :summary "reroll a save if you fail"
                               :description "You can reroll a saving throw that you fail. If you do so, you must use the new roll, and you can't use this feature again until you finish a long rest.
 You can use this feature twice between long rests starting at 13th level and three times between long rests starting at 17th level."})]}
+             10 {:modifers [(opt5e/fighting-style-selection app-state)]}
              11 {:modifiers [(mod5e/extra-attack)]}
              20 {:modifiers [(mod5e/extra-attack)]}}
     :subclass-level 3
@@ -3923,8 +3924,9 @@ You might also have ties to a specific temple dedicated to your chosen deity or 
     :sequential? false
     :quantity? true
     :collapsible? true
-    :new-item-fn (fn [selection selected-items]
-                   {::entity/key (-> items first :key)})
+    :new-item-fn (fn [selection selected-items _ key]
+                   {::entity/key key
+                    ::entity/value 1})
     :options (mapv
               (fn [{:keys [name key description]}]
                 (t/option-cfg
@@ -3989,16 +3991,13 @@ You might also have ties to a specific temple dedicated to your chosen deity or 
             [:p.m-t-10 "Select your class using the selector at the top of the 'Class' section. Multiclassing is uncommon, but you may multiclass by clicking the 'Add Class' button at the end of the 'Class' section."]]
      :max nil
      :sequential? false
-     :new-item-fn (fn [selection classes]
+     :new-item-fn (fn [selection classes _ selected-key]
                     (let [current-classes (into #{}
                                                 (map ::entity/key)
                                                 (get-in (:character @app-state)
                                                         [::entity/options :class]))]
-                      {::entity/key (->> selection
-                                         ::t/options
-                                         (map ::t/key)
-                                         (some #(if (-> % current-classes not) %)))
-                       ::entity/options {:levels [{::entity/key :1}]}}))
+                      {::entity/key selected-key
+                       ::entity/options {:levels [{::entity/key :level-1}]}}))
      :options [(barbarian-option app-state)
                (bard-option app-state)
                (cleric-option app-state)

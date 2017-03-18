@@ -285,13 +285,14 @@
 
 (def builder-selector-style)
 
-(defn add-option-button [{:keys [::t/key ::t/name ::t/options ::t/new-item-text] :as selection} entity path new-item-fn built-template]
-  [:div.add-item-button
+(defn add-option-button [{:keys [::t/key ::t/name ::t/options ::t/new-item-fn ::t/new-item-text] :as selection} entity path built-template]
+  [:div.orange.p-5.underline.pointer
    [:i.fa.fa-plus-circle.orange]
    [:span.m-l-5
     {:on-click
      (fn []
        (let [value-path (entity/get-entity-path built-template entity path)
+             _ (prn "VALUE PATH" path value-path)
              new-item (new-item-fn
                        selection
                        options
@@ -304,7 +305,7 @@
   [:i.fa.fa-minus-circle.remove-item-button.orange
    {:on-click
     (fn [e]
-      (swap! app-state #(update % :character (remove-list-option built-template % path index))))}])
+      (swap! app-state #(update % :character (fn [c] (remove-list-option built-template c path index)))))}])
 
 (defn dropdown-selector [path option-paths {:keys [::t/options ::t/min ::t/max ::t/key ::t/name ::t/sequential? ::t/new-item-fn ::t/quantity?] :as selection} built-char raw-char built-template collapsed?]
   (if (not collapsed?)
@@ -347,7 +348,7 @@
                      :on-change (qty-change-fn i)}])
                  [remove-option-button full-path built-template i]])
               final-options)))
-          (add-option-button selection raw-char (conj path key) new-item-fn built-template)])])
+          (add-option-button selection raw-char (conj path key) built-template)])])
     [:div
      [:div.builder-option.collapsed-list-builder-option]
      [:div.builder-option.collapsed-list-builder-option]]))
@@ -418,7 +419,7 @@
           options)))]
      (if collapsed? [:div.builder-option.collapsed-list-builder-option])
      (if (and addable? new-item-fn)
-       (add-option-button selection raw-char (conj path key) new-item-fn built-template))]))
+       (add-option-button selection raw-char (conj path key) built-template))]))
 
 (defn selector-id [path]
   (s/join "--" (map name path)))
@@ -748,6 +749,7 @@
 (defn character-display [built-char]
   (let [race (es/entity-val built-char :race)
         subrace (es/entity-val built-char :subrace)
+        classes (es/entity-val built-char :classes)
         levels (char5e/levels built-char)
         darkvision (es/entity-val built-char :darkvision)
         skill-profs (es/entity-val built-char :skill-profs)
@@ -783,16 +785,17 @@
           (interpose
            " / "
            (map
-            (fn [[cls-k {:keys [class-name class-level subclass]}]]
-              (str class-name " (" class-level ")"))
-            levels)))])]
+            (fn [cls-key]
+              (let [{:keys [class-name class-level subclass]} (levels cls-key)]
+                (str class-name " (" class-level ")")))
+            classes)))])]
      [:div.details-columns
       [:div.flex-grow-1.flex-basis-50-p
        [:div.flex
         [:div.w-50-p
          [:img.character-image.w-100-p.m-b-20 {:src (or (get-in @app-state [:character ::entity/values :image-url]) "image/barbarian-girl.png")}]]
         [:div.w-50-p
-         [armor-class-section armor-class armor-class-with-armor armor]
+         [armor-class-section armor-class armor-class-with-armor (merge magic-armor armor)]
          [display-section "Hit Points" "fa-heart-o f-s-24" (es/entity-val built-char :max-hit-points)]
          [speed-section built-char]
          #_[display-section "Speed" nil
@@ -862,7 +865,7 @@
                                                                              (if qualifier (str " (" qualifier ")"))))]
        [spells-known-section spells-known]
        [equipment-section "Weapons" (concat magic-weapons weapons) (merge weapon5e/weapons-map mi5e/magic-weapon-map)]
-       [equipment-section "Armor" (concat magic-armor armor) (merge armor5e/armor-map mi5e/magic-armor-map)]
+       [equipment-section "Armor" (merge magic-armor armor) (merge armor5e/armor-map mi5e/magic-armor-map)]
        [equipment-section "Equipment" (concat magic-items equipment) (merge opt5e/equipment-map mi5e/magic-item-map)]
        [attacks-section attacks]
        [actions-section "Bonus Actions" bonus-actions]
@@ -1196,7 +1199,8 @@
                         prereqs)
         meets-prereqs? (empty? failed-prereqs)
         selectable? meets-prereqs?
-        expanded? (get-in @app-state [:expanded-paths new-option-path])]
+        expanded? (get-in @app-state [:expanded-paths new-option-path])
+        has-selections? (seq selections)]
     ^{:key key}
     [:div.p-10.b-1.b-rad-5.m-5.pointer.b-orange.hover-shadow
      {:class-name (s/join " " (remove nil? [(if selected? "b-w-3") (if (not meets-prereqs?) "opacity-5")]))
@@ -1208,12 +1212,13 @@
                       (let [updated-char (update-option built-template character new-option-path (fn [o] (assoc o ::entity/key key)))
                             next-option-paths (make-path-map updated-char)
                             next-all-selections (get-all-selections [] built-template next-option-paths)
-                            [next-selection-path _] (selection-after option-path next-all-selections)
+                            [next-selection-path next-selection] (selection-after option-path next-all-selections)
                             next-template-path (entity/get-template-selection-path built-template next-selection-path [])]
                         (swap! app-state (fn [as]
-                                           (-> as
-                                               (assoc :character updated-char)
-                                               (assoc :stepper-selection-path next-template-path)))))))
+                                           (cond-> as
+                                               true (assoc :character updated-char)
+                                               has-selections? (assoc :stepper-selection-path next-template-path)
+                                               has-selections? (assoc :stepper-selection next-selection)))))))
                   (.stopPropagation e))}
      [:div.flex.align-items-c
       [:div.flex-grow-1
@@ -1226,17 +1231,51 @@
        (if (not meets-prereqs?)
          [:div.i.f-s-12.f-w-n 
           (str "Requires " (s/join ", " failed-prereqs))])]
-      (if (seq selections)
+      (if has-selections?
         [:i.fa.fa-caret-right.m-l-5])]]))
+
+(defn add-option-selector [{:keys [::t/key ::t/name ::t/options ::t/new-item-text ::t/new-item-fn ::t/options] :as selection} entity path built-template]
+  [:select.builder-option.builder-option-dropdown.m-t-0
+   {:value ""
+    :on-change
+    (fn [e]
+      (let [value (.. e -target -value)]
+        (if value
+          (let [kw (keyword value)
+                _ (prn "VALUE" kw)
+                value-path (entity/get-entity-path built-template entity path)
+                new-item (new-item-fn
+                          selection
+                          options
+                          (get-in @app-state (concat [:character] value-path))
+                          kw)]
+            (swap! app-state #(update % :character (fn [c] (update-option
+                                                            built-template c path
+                                                            (fn [options] (conj (vec options) new-item))))))))))}
+   [:option.builder-dropdown-item
+    {:disabled true
+     :value ""}
+    "select to add"]
+   (doall
+    (map
+     (fn [{:keys [::t/key ::t/name]}]
+       ^{:key key}
+       [:option.builder-dropdown-item
+        {:value (if key (clojure.core/name key))}
+        name])
+     options))])
 
 (defn options-column [character built-char built-template option-paths collapsed-paths stepper-selection-path stepper-selection plugins]
   (let [all-selections (get-all-selections [] built-template option-paths)
-        {:keys [::t/name ::t/options ::t/help ::t/min ::t/max ::t/sequential? ::parent ::path]}
+        {:keys [::t/name ::t/options ::t/help ::t/min ::t/max ::t/sequential? ::t/quantity? ::parent ::path] :as selection}
         (if stepper-selection
           stepper-selection
           (first all-selections))
         option-path path
-        expanded? (get-in @app-state [:expanded-paths option-path])]
+        expanded? (get-in @app-state [:expanded-paths option-path])
+        additive? (or (> max min) (nil? max))
+        qty-change-fn (partial make-quantity-change-fn path key built-template character app-state)
+        option-selector-fn (partial option-selector character built-char built-template option-paths stepper-selection-path option-path)]
     [:div#options-column.w-100-p.b-1.b-rad-5
      [:div.flex.justify-cont-s-b.p-10.align-items-t
       [:button.form-button.p-5-10.m-r-5
@@ -1261,22 +1300,45 @@
        "Next"]]
      [:div.p-l-10.p-r-10
       [:div.flex
-       [:span.i.flex-grow-1 (str "Select " (cond
-                                 (= min max) min
-                                 (and (= min 1)
-                                      (> max 1)) (str "up to " max)
-                                 (and (> min 1)
-                                      (> max min)) (str "between " min " and " max)
-                                 (and (nil? max)) "any number"))]
+       [:span.i.flex-grow-1 (cond
+                              (= min max) (str "Select " min)
+                              (and (= min 1)
+                                   (> max 1)) (str "Select up to " max)
+                              (and (> min 1)
+                                   (> max min)) (str "Select between " min " and " max)
+                              (and (nil? max)) "Select to add")]
        (if help
          [show-info-button expanded? option-path])]
       (if expanded? [help-section help])]
      [:div.p-5
-      (if sequential?
-        "SEQUENTIAL"
+      (if additive?
+        [:div
+         (if (not sequential?)
+           [:div.m-5
+            [add-option-selector selection character option-path built-template]])
+         (map-indexed
+          (fn [i {:keys [::t/name ::t/key] :as option}]
+            (let [value-path (entity/get-option-value-path built-template character (conj option-path key))]
+              ^{:key key}
+             [:div.flex.align-items-c.m-5.f-w-b.f-s-14
+              [:div.flex-grow-1.b-1.b-rad-5.pointer.b-orange.hover-shadow
+               [:div.flex.align-items-c
+                [:span.p-10.flex-grow-1 name]
+                (if quantity?
+                  [:input.input.w-60.m-5
+                   {:type :number
+                    :value (get-in character value-path)
+                    :on-change (fn [e]
+                                 (let [value (.. e -target -value)
+                                       int-val (if (not (s/blank? value)) (js/parseInt value))]
+                                   (swap! app-state assoc-in (concat [:character] value-path) int-val)))}])]]
+              [remove-option-button path built-template i]]))
+          (filter-selected option-path key option-paths options character built-template))
+         (if sequential?
+           [add-option-button selection character option-path built-template])]
         (doall
          (map
-          (partial option-selector character built-char built-template option-paths stepper-selection-path option-path)
+          option-selector-fn
           options))
         )]]))
 
@@ -1383,7 +1445,7 @@
 
 
 (defn character-builder []
-  ;;(cljs.pprint/pprint (:character @app-state))
+  (cljs.pprint/pprint (:character @app-state))
   ;;(cljs.pprint/pprint @app-state)
   (let [selected-plugins (map
                           :selections
@@ -1410,7 +1472,7 @@
         plugins (:plugins @app-state)
         stepper-dismissed? (:stepper-dismissed @app-state)]
     ;(js/console.log "BUILT TEMPLAT" built-template)
-    ;;(print-char built-char)
+    (print-char built-char)
     [:div.app
      {:on-scroll (fn [e]
                    (let [app-header (js/document.getElementById "app-header")
