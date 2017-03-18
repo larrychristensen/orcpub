@@ -908,8 +908,11 @@
          children)
         children))))
 
-(defn get-all-selections [path obj selected-option-paths]
-  (remove nil? (flatten (get-all-selections-aux path obj nil selected-option-paths))))
+(defn get-all-selections [path obj selected-option-paths built-char]
+  (remove #(or (nil? %)
+               (let [prereq-fn (::t/prereq-fn %)]
+                 (and prereq-fn (not (prereq-fn built-char)))))
+          (flatten (get-all-selections-aux path obj nil selected-option-paths))))
 
 (defn selection-made? [built-template selected-option-paths character selection]
   (let [option (get-in selected-option-paths (::path selection))
@@ -935,14 +938,14 @@
       (let [first-selection (first all-selections)]
         [(::path first-selection) first-selection]))))
 
-(defn next-selection [current-template-path built-template selected-option-paths character]
+(defn next-selection [current-template-path built-template selected-option-paths character built-char]
   (let [current-path (to-option-path current-template-path built-template)
-        all-selections (get-all-selections [] built-template selected-option-paths)]
+        all-selections (get-all-selections [] built-template selected-option-paths built-char)]
     (selection-after current-path all-selections)))
 
-(defn prev-selection [current-template-path built-template selected-option-paths character]
+(defn prev-selection [current-template-path built-template selected-option-paths character built-char]
   (let [current-path (to-option-path current-template-path built-template)
-        all-selections (get-all-selections [] built-template selected-option-paths)
+        all-selections (get-all-selections [] built-template selected-option-paths built-char)
         up-to-current (take-while
                        (fn [s]
                          (not= (::path s) current-path))
@@ -998,7 +1001,7 @@
            ;;(open-path-and-subpaths next-path)
            )))))
 
-(defn set-next-selection! [built-template option-paths character stepper-selection-path all-selections]
+(defn set-next-selection! [built-template option-paths character stepper-selection-path all-selections built-char]
   (let [[next-path {:keys [::t/name] :as next-selection}]
         (if (nil? stepper-selection-path)
           (let [s (second all-selections)]
@@ -1007,14 +1010,15 @@
            stepper-selection-path
            built-template
            option-paths
-           character))
+           character
+           built-char))
         next-template-path (if next-path (entity/get-template-selection-path built-template next-path []))]
     #_(hide-mouseover-option!)
     #_(if (nil? next-path)
       (set-stepper-top! 0))
     (set-next-template-path! built-template next-path next-template-path next-selection character)))
 
-(defn set-prev-selection! [built-template option-paths character stepper-selection-path all-selections]
+(defn set-prev-selection! [built-template option-paths character stepper-selection-path all-selections built-char]
   (let [[prev-path {:keys [::t/name] :as next-selection}]
         (if (nil? stepper-selection-path)
           (let [s (last all-selections)]
@@ -1023,7 +1027,8 @@
            stepper-selection-path
            built-template
            option-paths
-           character))
+           character
+           built-char))
         prev-template-path (if prev-path (entity/get-template-selection-path built-template prev-path []))]
     #_(hide-mouseover-option!)
     #_(if (nil? next-path)
@@ -1050,7 +1055,7 @@
      {::entity/key next-lvl})
     (set-next-template-path! built-template next-path next-template-path nil character)))
 
-(defn selection-stepper [built-template option-paths character stepper-selection-path]
+#_(defn selection-stepper [built-template option-paths character stepper-selection-path]
   (let [selection (if stepper-selection-path (get-in built-template stepper-selection-path))
         all-selections (get-all-selections [] built-template option-paths)
         unselected-selections (drop-selected built-template option-paths character all-selections)
@@ -1188,6 +1193,8 @@
     {:class-name (if expanded? "fa-angle-up" "fa-angle-down")}]])
 
 (defn option-selector [character built-char built-template option-paths stepper-selection-path option-path
+                       {:keys [::t/min ::t/max] :as selection}
+                       disable-select-new?
                        {:keys [::t/key ::t/name ::t/path ::t/help ::t/selections ::t/prereqs ::t/select-fn]}]
   (let [new-option-path (conj option-path key)
         selected? (get-in option-paths new-option-path)
@@ -1198,20 +1205,41 @@
                         []
                         prereqs)
         meets-prereqs? (empty? failed-prereqs)
-        selectable? meets-prereqs?
+        selectable? (and meets-prereqs?
+                         (or (not disable-select-new?)
+                             selected?))
         expanded? (get-in @app-state [:expanded-paths new-option-path])
         has-selections? (seq selections)]
     ^{:key key}
-    [:div.p-10.b-1.b-rad-5.m-5.pointer.b-orange.hover-shadow
-     {:class-name (s/join " " (remove nil? [(if selected? "b-w-3") (if (not meets-prereqs?) "opacity-5")]))
+    [:div.p-10.b-1.b-rad-5.m-5.b-orange.hover-shadow
+     {:class-name (s/join " " (remove nil? [(if selected? "b-w-3") (if selectable? "pointer") (if (not selectable?) "opacity-5")]))
       :on-click (fn [e]
                   (if (and meets-prereqs? selectable?)
                     (do
                       (if select-fn
                         (select-fn new-option-path))
-                      (let [updated-char (update-option built-template character new-option-path (fn [o] (assoc o ::entity/key key)))
+                      (let [updated-char (let [new-option {::entity/key key}]
+                                           (if (and
+                                                (> min 1)
+                                                (= min max))
+                                             (update-option
+                                              built-template
+                                              character
+                                              option-path
+                                              (fn [parent-vec]
+                                                (if (nil? parent-vec)
+                                                  [new-option]
+                                                  (let [parent-keys (into #{} (map ::entity/key) parent-vec)]
+                                                    (if (parent-keys key)
+                                                      (vec (remove #(= key (::entity/key %)) parent-vec))
+                                                      (conj parent-vec new-option))))))
+                                             (update-option
+                                              built-template
+                                              character
+                                              new-option-path
+                                              (fn [o] (assoc o ::entity/key key)))))
                             next-option-paths (make-path-map updated-char)
-                            next-all-selections (get-all-selections [] built-template next-option-paths)
+                            next-all-selections (get-all-selections [] built-template next-option-paths built-char)
                             [next-selection-path next-selection] (selection-after option-path next-all-selections)
                             next-template-path (entity/get-template-selection-path built-template next-selection-path [])]
                         (swap! app-state (fn [as]
@@ -1266,7 +1294,7 @@
      options))])
 
 (defn options-column [character built-char built-template option-paths collapsed-paths stepper-selection-path stepper-selection plugins]
-  (let [all-selections (get-all-selections [] built-template option-paths)
+  (let [all-selections (get-all-selections [] built-template option-paths built-char)
         {:keys [::t/name ::t/options ::t/help ::t/min ::t/max ::t/sequential? ::t/quantity? ::parent ::path] :as selection}
         (if stepper-selection
           stepper-selection
@@ -1275,7 +1303,18 @@
         expanded? (get-in @app-state [:expanded-paths option-path])
         additive? (or (> max min) (nil? max))
         qty-change-fn (partial make-quantity-change-fn path key built-template character app-state)
-        option-selector-fn (partial option-selector character built-char built-template option-paths stepper-selection-path option-path)]
+        multiselect? (and (> min 1) (= min max))
+        selection-option-path (entity/get-entity-path built-template character option-path)
+        selection-option (get-in character selection-option-path)
+        remaining (if max (- max (count selection-option)))
+        disable-select-new? (and multiselect? (zero? remaining))
+        option-selector-fn (partial option-selector character built-char built-template option-paths stepper-selection-path option-path selection disable-select-new?)
+        parent-path (::path parent)
+        ancestor-paths (reductions conj [] path)
+        ancestors (map (fn [a-p] (get-in built-template (entity/get-template-selection-path built-template a-p [])))
+                       (take-nth 2 (butlast ancestor-paths)))
+        ancestor-names (map ::t/name (remove nil? ancestors))]
+    (js/console.log "SELECTION" selection)
     [:div#options-column.w-100-p.b-1.b-rad-5
      [:div.flex.justify-cont-s-b.p-10.align-items-t
       [:button.form-button.p-5-10.m-r-5
@@ -1285,9 +1324,10 @@
                  option-paths
                  character
                  stepper-selection-path
-                 all-selections))} "Back"]
+                 all-selections
+                 built-char))} "Back"]
       [:div
-       (if parent [:h4.f-s-14.t-a-c.m-b-5 (::t/name parent)])
+       (if parent [:h4.f-s-14.t-a-c.m-b-5 (str (s/join " - " ancestor-names))])
        [:h3.f-w-b.f-s-18.t-a-c name]]
       [:button.form-button.p-5-10.m-l-5
        {:on-click
@@ -1296,12 +1336,15 @@
                  option-paths
                  character
                  stepper-selection-path
-                 all-selections))}
+                 all-selections
+                 built-char))}
        "Next"]]
      [:div.p-l-10.p-r-10
       [:div.flex
        [:span.i.flex-grow-1 (cond
-                              (= min max) (str "Select " min)
+                              (= min max) (str "Select " (if multiselect?
+                                                           remaining
+                                                           min))
                               (and (= min 1)
                                    (> max 1)) (str "Select up to " max)
                               (and (> min 1)
@@ -1317,10 +1360,25 @@
            [:div.m-5
             [add-option-selector selection character option-path built-template]])
          (map-indexed
-          (fn [i {:keys [::t/name ::t/key] :as option}]
-            (let [value-path (entity/get-option-value-path built-template character (conj option-path key))]
+          (fn [i {:keys [::t/name ::t/key ::t/select-fn ::t/selections] :as option}]
+            (let [value-path (entity/get-option-value-path built-template character (conj option-path key))
+                  has-selections? (seq selections)]
               ^{:key key}
-             [:div.flex.align-items-c.m-5.f-w-b.f-s-14
+              [:div.flex.align-items-c.m-5.f-w-b.f-s-14
+               (if has-selections?
+                 {:on-click
+                  (fn [e]
+                    (do
+                      (if select-fn
+                        (select-fn (conj option-path key)))
+                      (prn "NEW PATH" (conj option-path key))
+                      (let [[next-selection-path next-selection] (selection-after (conj option-path key (::t/key (first selections))) all-selections)
+                            next-template-path (entity/get-template-selection-path built-template next-selection-path [])]
+                        (swap! app-state (fn [as]
+                                           (-> as
+                                             (assoc :stepper-selection-path next-template-path)
+                                             (assoc :stepper-selection next-selection))))))
+                    (.stopPropagation e))})
               [:div.flex-grow-1.b-1.b-rad-5.pointer.b-orange.hover-shadow
                [:div.flex.align-items-c
                 [:span.p-10.flex-grow-1 name]
@@ -1331,7 +1389,9 @@
                     :on-change (fn [e]
                                  (let [value (.. e -target -value)
                                        int-val (if (not (s/blank? value)) (js/parseInt value))]
-                                   (swap! app-state assoc-in (concat [:character] value-path) int-val)))}])]]
+                                   (swap! app-state assoc-in (concat [:character] value-path) int-val)))}])
+                (if has-selections?
+                  [:i.fa.fa-caret-right.m-r-10])]]
               [remove-option-button path built-template i]]))
           (filter-selected option-path key option-paths options character built-template))
          (if sequential?
@@ -1339,8 +1399,7 @@
         (doall
          (map
           option-selector-fn
-          options))
-        )]]))
+          options)))]]))
 
 (defn get-event-value [e]
   (.-value (.-target e)))

@@ -5,5 +5,6 @@
 
 (enable-console-print!)
 
+
 (r/render [ch/character-builder]
           (js/document.getElementById "app"))
