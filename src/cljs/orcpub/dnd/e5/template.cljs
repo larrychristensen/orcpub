@@ -26,7 +26,7 @@
   (get-in (:character @app-state) [::entity/options :ability-scores ::entity/value]))
 
 (defn swap-abilities [app-state i other-i k v]
-  (fn [e]
+  (fn []
     (swap! app-state
            update-in
            [:character ::entity/options :ability-scores ::entity/value]
@@ -34,8 +34,7 @@
              (let [a-vec (vec a)
                    other-index (mod other-i (count a-vec))
                    [other-k other-v] (a-vec other-index)]
-               (assoc a k other-v other-k v))))
-    (.stopPropagation e)))
+               (assoc a k other-v other-k v))))))
 
 (defn abilities-standard [app-state]
   [:div.flex.justify-cont-s-b
@@ -59,7 +58,9 @@
   [:div
    (abilities-standard app-state)
    [:button.form-button.m-t-5
-    {:on-click reroll-fn}
+    {:on-click (fn [e]
+                 (reroll-fn)
+                 (.stopPropagation e))}
     "Re-Roll"]])
 
 (defn abilities-entry [app-state]
@@ -83,21 +84,20 @@
 (declare template-selections)
 
 (defn roll-hit-points [die app-state value-path]
-  (let [new-val (time (dice/die-roll die))]
+  (let [new-val (dice/die-roll die)]
     (swap! app-state assoc-in (concat [:character] value-path) new-val)))
 
 (defn hit-points-roller [die app-state path built-template]
-  (let [value-path (time
-                    (entity/get-option-value-path
-                     built-template
-                     (:character @app-state)
-                     path))
+  (let [value-path (entity/get-option-value-path
+                    built-template
+                    (:character @app-state)
+                    path)
         value (get-in (:character @app-state) value-path)]
     [:div
      [:div.f-s-16.m-t-10 (str "Value: " value)]
      [:button.form-button.m-t-10
       {:on-click (fn [e]
-                   (time (roll-hit-points die app-state value-path))
+                   (roll-hit-points die app-state value-path)
                    (.stopPropagation e))}
       "Re-Roll"]]))
 
@@ -3656,12 +3656,11 @@ Once you use this feature, you can't use it again until you finish a long rest."
    app-state))
 
 (defn reroll-abilities [app-state]
-  (fn [e]
+  (fn []
     (swap! app-state
            #(assoc-in %
                       [:character ::entity/options :ability-scores ::entity/value]
-                      (char5e/standard-ability-rolls)))
-    (.stopPropagation e)))
+                      (char5e/standard-ability-rolls)))))
 
 (defn set-standard-abilities [app-state]
   (fn []
