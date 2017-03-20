@@ -39,63 +39,71 @@
 
 (defn abilities-standard [app-state]
   [:div.flex.justify-cont-s-b
-    (let [abilities (get-raw-abilities app-state)
+    (let [abilities (or (get-raw-abilities app-state) (char5e/abilities 15 14 13 12 10 8))
           abilities-vec (vec abilities)]
-      (map-indexed
-       (fn [i [k v]]
-         ^{:key k}
-         [:div.m-t-10.m-b-10.t-a-c
-          [:div.uppercase (name k)]
-          [:div.f-s-18 v]
-          [:div.f-s-16
-           [:i.fa.fa-chevron-circle-left.orange
-            {:on-click (swap-abilities app-state i (dec i) k v)}]
-           [:i.fa.fa-chevron-circle-right.orange.m-l-5
-            {:on-click (swap-abilities app-state i (inc i) k v)}]]])
-       abilities-vec))])
+      (doall
+       (map-indexed
+        (fn [i [k v]]
+          ^{:key k}
+          [:div.m-t-10.t-a-c
+           [:div.uppercase (name k)]
+           [:div.f-s-18 v]
+           [:div.f-s-16
+            [:i.fa.fa-chevron-circle-left.orange
+             {:on-click (swap-abilities app-state i (dec i) k v)}]
+            [:i.fa.fa-chevron-circle-right.orange.m-l-5
+             {:on-click (swap-abilities app-state i (inc i) k v)}]]])
+        abilities-vec)))])
 
 (defn abilities-roller [app-state reroll-fn]
   [:div
    (abilities-standard app-state)
-   [:button.form-button
+   [:button.form-button.m-t-5
     {:on-click reroll-fn}
     "Re-Roll"]])
 
 (defn abilities-entry [app-state]
   [:div.flex
-   (let [abilities (get-raw-abilities app-state)
+   (let [abilities (or (get-raw-abilities app-state) (char5e/abilities 15 14 13 12 10 8))
          abilities-vec (vec abilities)]
-     (map-indexed
-      (fn [i k]
-        ^{:key k}
-        [:div.m-t-10.t-a-c.p-1 
-         [:div.uppercase (name k)]
-         [:input.input.f-s-18
-          {:value (k abilities)
-           :on-change (fn [e] (let [value (.-value (.-target e))
-                                    new-v (if (not (s/blank? value))
-                                            (js/parseInt value))]
-                                (swap! app-state assoc-in [:character ::entity/options :ability-scores ::entity/value k] new-v)))}]])
-      char5e/ability-keys))])
+     (doall
+      (map-indexed
+       (fn [i k]
+         ^{:key k}
+         [:div.m-t-10.t-a-c.p-1 
+          [:div.uppercase (name k)]
+          [:input.input.f-s-18
+           {:value (k abilities)
+            :on-change (fn [e] (let [value (.-value (.-target e))
+                                     new-v (if (not (s/blank? value))
+                                             (js/parseInt value))]
+                                 (swap! app-state assoc-in [:character ::entity/options :ability-scores ::entity/value k] new-v)))}]])
+       char5e/ability-keys)))])
 
 (declare template-selections)
 
-(defn roll-hit-points [die app-state path]
-  (let [value-path (entity/get-option-value-path
-                    {::t/selections (template-selections app-state)}
-                    (:character @app-state)
-                    path)]
-    (swap! app-state #(update app-state :character (fn [c] (assoc-in c value-path (dice/die-roll die)))))))
+(defn roll-hit-points [die app-state value-path]
+  (let [new-val (time (dice/die-roll die))]
+    (swap! app-state assoc-in (concat [:character] value-path) new-val)))
 
-(defn hit-points-roller [die app-state path]
-  [:div
-   [:button.form-button.m-t-10
-    {:on-click #(roll-hit-points die app-state path)}
-    "Re-Roll"]])
+(defn hit-points-roller [die app-state path built-template]
+  (let [value-path (time
+                    (entity/get-option-value-path
+                     built-template
+                     (:character @app-state)
+                     path))
+        value (get-in (:character @app-state) value-path)]
+    [:div
+     [:div.f-s-16.m-t-10 (str "Value: " value)]
+     [:button.form-button.m-t-10
+      {:on-click (fn [e]
+                   (time (roll-hit-points die app-state value-path))
+                   (.stopPropagation e))}
+      "Re-Roll"]]))
 
-(defn hit-points-entry [app-state path]
+(defn hit-points-entry [app-state path built-template]
   (let [value-path (entity/get-option-value-path
-                    {::t/selections (template-selections app-state)}
+                    built-template
                     (:character @app-state)
                     path)
         value (get-in (:character @app-state) value-path)]
@@ -846,12 +854,12 @@ Fire Starter. The device produces a miniature flame, which you can use to light 
     :options [{::t/name "Manual Entry"
                ::t/key :manual-entry
                ::t/help "This option allows you to manually type in the value for this level's hit points. Use this if you want to roll dice yourself or if you already have a character with known hit points for this level."
-               ::t/ui-fn #(hit-points-entry app-state %)
+               ::t/ui-fn #(hit-points-entry app-state % %2)
                ::t/modifiers [(mod5e/deferred-max-hit-points)]}
               {::t/name (str "Roll (1D" die ")")
                ::t/key :roll
                ::t/help "This option rolls virtual dice for you and sets that value for this level's hit points. It could pay off with a high roll, but you might also roll a 1."
-               ::t/ui-fn #(hit-points-roller die app-state %)
+               ::t/ui-fn #(hit-points-roller die app-state % %2)
                ::t/select-fn #(roll-hit-points die app-state %)
                ::t/modifiers [(mod5e/deferred-max-hit-points)]}
               (let [average (die-mean die)]
@@ -1155,9 +1163,11 @@ Fire Starter. The device produces a miniature flame, which you can use to light 
                     (class-weapon-options weapon-choices)
                     (class-armor-options armor-choices)
                     (class-equipment-options equipment-choices)
-                    [(class-skill-selection skill-options :skill-proficiency (fn [c] (= kw (first (:classes c)))))
-                     (class-skill-selection multiclass-skill-options :multiclass-skill-proficiency (fn [c] (not= kw (first (:classes c)))))
-                     (t/selection-cfg
+                    (if skill-options
+                      [(class-skill-selection skill-options :skill-proficiency (fn [c] (= kw (first (:classes c)))))])
+                    (if multiclass-skill-options
+                      [(class-skill-selection multiclass-skill-options :multiclass-skill-proficiency (fn [c] (not= kw (first (:classes c)))))])
+                    [(t/selection-cfg
                       {:name "Levels"
                        :help "These are your levels in the containing class. You can add levels by clicking the 'Add Levels' button below."
                        :new-item-text "Level Up (Add a Level)"
@@ -3646,11 +3656,12 @@ Once you use this feature, you can't use it again until you finish a long rest."
    app-state))
 
 (defn reroll-abilities [app-state]
-  (fn []
+  (fn [e]
     (swap! app-state
            #(assoc-in %
                       [:character ::entity/options :ability-scores ::entity/value]
-                      (char5e/standard-ability-rolls)))))
+                      (char5e/standard-ability-rolls)))
+    (.stopPropagation e)))
 
 (defn set-standard-abilities [app-state]
   (fn []

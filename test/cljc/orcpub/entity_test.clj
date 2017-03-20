@@ -30,7 +30,7 @@
 
 (def feats
   [{:name "Fire Resister"
-    :modifiers [(modifiers/resistance :fire)]}
+    :modifiers [(modifiers/damage-resistance :fire)]}
    {:name "Elemental Adept"
     :restrictions [{:path [:spellcaster?]
                     :value true}]}
@@ -72,13 +72,13 @@
                                                              :options wizard-cantrips}}}
                                     {:name "Dark Elf (Drow)"
                                      :key :dark-elf
-                                     :modifiers [(modifiers/spells-known 0 :dancing-lights :cha)
+                                     :modifiers [(modifiers/spells-known 0 :dancing-lights :cha "Drow" 1)
                                                  (assoc
-                                                  (modifiers/spells-known 1 :faerie-fire :cha)
+                                                  (modifiers/spells-known 1 :faerie-fire :cha "Drow" 3)
                                                   :prereqs
                                                   [(at-least-level? 3)])
                                                  (assoc
-                                                  (modifiers/spells-known 2 :darkness :cha)
+                                                  (modifiers/spells-known 2 :darkness :cha "Drow" 5)
                                                   :prereqs
                                                   [(at-least-level? 5)])]}]}}})
 
@@ -86,7 +86,7 @@
   {:name "Dwarf"
    :modifiers [(modifiers/ability :con 2)
                (modifiers/speed 25)
-               (modifiers/resistance :poison)
+               (modifiers/damage-resistance :poison)
                (modifiers/darkvision 60)]
    :selections [{:name "Subrace"
                  :min 1
@@ -114,14 +114,14 @@
               abilities))})
 
 (def wizard-levels
-  [{:modifiers [(modifiers/level :wizard "Wizard" 1)
+  [{:modifiers [(modifiers/level :wizard "Wizard" 1 6)
                 (modifiers/spell-slots 1 2)
                 (modifiers/proficiency-bonus 2)
                 (modifiers/trait "Arcane Recovery")]
     :selections [{:name "Cantrips Known"
                   :max 3
                   :options wizard-cantrips}]}
-   {:modifiers [(modifiers/level :wizard "Wizard" 2)
+   {:modifiers [(modifiers/level :wizard "Wizard" 2 6)
                 (modifiers/spell-slots 1 1)
                 (modifiers/trait "Arcane Recovery")]
     :selections [{:name "Arcane Tradition"
@@ -130,7 +130,7 @@
                   :min 1
                   :max 1
                   :options :arcane-tradition}]}
-   {:modifiers [(modifiers/level :wizard "Wizard" 2)
+   {:modifiers [(modifiers/level :wizard "Wizard" 2 6)
                 (modifiers/spell-slots 1 1)
                 (modifiers/spell-slots 2 2)]
     :selections [ability-score-improvement]}])
@@ -377,13 +377,15 @@
                      :race {::entity/key :elf
                             ::entity/options {:subrace {::entity/key :high-elf
                                                         ::entity/options {:cantrip {::entity/key :light}}}}}
-                     :levels [{::entity/key :wizard-1
-                               ::entity/options {:cantrips-known {::entity/key :acid-splash}
-                                                 :hit-points {::entity/key :max}}}
-                              {::entity/key :wizard-2
-                               ::entity/options {:arcane-tradition {::entity/key :school-of-evocation}
-                                                 :hit-points {::entity/key :roll
-                                                              ::entity/value 3}}}]}})
+                     :class [{::entity/key :wizard
+                              ::entity/options
+                              {:levels [{::entity/key :level-1
+                                           ::entity/options {:cantrips-known {::entity/key :acid-splash}
+                                                             :hit-points {::entity/key :max}}}
+                                          {::entity/key :level-2
+                                           ::entity/options {:arcane-tradition {::entity/key :school-of-evocation}
+                                                             :hit-points {::entity/key :roll
+                                                                          ::entity/value 3}}}]}}]}})
 
 (spec/explain-data ::entity/raw-entity character)
 
@@ -392,7 +394,7 @@
    (fn [key]
      {::t/key key
       ::t/name (name key)
-      ::t/modifiers [(modifiers/spells-known 0 key :int)]})
+      ::t/modifiers [(modifiers/spells-known 0 key :int "Wizard")]})
    wizard-cantrips))
 
 (def arcane-tradition-options
@@ -427,37 +429,80 @@
              wizard-cantrip-options)]
            [(modifiers/ability ::char5e/int 1)])])]
        [(modifiers/ability ::char5e/dex 2)])])
-    (t/selection
-     "Levels"
-     [(t/option
-       "Wizard 1"
-       :wizard-1
-       [(t/selection
-         "Cantrips Known"
-         wizard-cantrip-options)
-        (t/selection
-         "Hit Points"
-         [(t/option
-           "Max"
-           :max
-           []
-           [(modifiers/max-hit-points 6)])])]
-       [(modifiers/saving-throws ::char5e/int ::char5e/wis)
-        (modifiers/level :wizard "Wizard" 1)])
-      (t/option
-       "Wizard 2"
-       :wizard-2
-       [(t/selection
-         "Arcane Tradition"
-         arcane-tradition-options)
-        (t/selection
-         "Hit Points"
-         [(t/option
-           "Roll"
-           :roll
-           []
-           [(modifiers/max-hit-points 8)])])]
-       [(modifiers/level :wizard "Wizard" 2)])])]})
+    (t/selection-cfg
+     {:name "Class"
+      :max nil
+      :sequential? false
+      :options [(t/option-cfg
+                 {:name "Wizard"
+                  :key :wizard
+                  :selections [(t/selection-cfg
+                                {:name "Levels"
+                                 :max nil
+                                 :options [(t/option
+                                            "Level 1"
+                                            :level-1
+                                            [(t/selection
+                                              "Cantrips Known"
+                                              wizard-cantrip-options)
+                                             (t/selection
+                                              "Hit Points"
+                                              [(t/option
+                                                "Max"
+                                                :max
+                                                []
+                                                [(modifiers/max-hit-points 6)])])]
+                                            [(modifiers/saving-throws ::char5e/int ::char5e/wis)
+                                             (modifiers/level :wizard "Wizard" 1 6)])
+                                           (t/option
+                                            "Level 2"
+                                            :level-2
+                                            [(t/selection
+                                              "Arcane Tradition"
+                                              arcane-tradition-options)
+                                             (t/selection
+                                              "Hit Points"
+                                              [(t/option
+                                                "Roll"
+                                                :roll
+                                                []
+                                                [(modifiers/max-hit-points 8)])])]
+                                            [(modifiers/level :wizard "Wizard" 2 6)])]})]})
+                (t/option-cfg
+                 {:name "Rogue"
+                  :key :rogue
+                  :selections [(t/selection-cfg
+                                {:name "Levels"
+                                 :max nil
+                                 :options [(t/option
+                                            "Level 1"
+                                            :level-1
+                                            [(t/selection
+                                              "Cantrips Known"
+                                              wizard-cantrip-options)
+                                             (t/selection
+                                              "Hit Points"
+                                              [(t/option
+                                                "Max"
+                                                :max
+                                                []
+                                                [(modifiers/max-hit-points 6)])])]
+                                            [(modifiers/saving-throws ::char5e/int ::char5e/wis)
+                                             (modifiers/level :wizard "Wizard" 1 6)])
+                                           (t/option
+                                            "Level 2"
+                                            :level-2
+                                            [(t/selection
+                                              "Arcane Tradition"
+                                              arcane-tradition-options)
+                                             (t/selection
+                                              "Hit Points"
+                                              [(t/option
+                                                "Roll"
+                                                :roll
+                                                []
+                                                [(modifiers/max-hit-points 8)])])]
+                                            [(modifiers/level :wizard "Wizard" 2 6)])]})]})]})]})
 
 ;;(clojure.pprint/pprint (t/make-modifier-map template))
 
@@ -466,7 +511,12 @@
 ;;(stest/instrument `t/make-modifier-map)
 
 (deftest test-build
-  (let [built (entity/build character template)]
+  (testing "get-entity-path"
+    (is (= (entity/get-entity-path-2 template character [:class :wizard])
+         [::entity/options :class 0]))
+    (is (= (time (entity/get-entity-path-2 template character [:class :wizard :levels :level-2 :hit-points :roll]))
+         [::entity/options :class 0 ::entity/options :levels 1 ::entity/options :hit-points :roll])))
+  #_(let [built (entity/build character template)]
     (prn "BUILT")
     (clojure.pprint/pprint built)
     (is (= (es/entity-val built :spells-known) {0 [:light :acid-splash]}))

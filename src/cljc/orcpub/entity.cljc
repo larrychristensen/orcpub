@@ -10,7 +10,7 @@
 (spec/def ::key keyword?)
 (spec/def ::option (spec/keys :req [::key]
                               :opt [::options]))
-(spec/def ::option-vec (spec/+ ::option))
+(spec/def ::option-vec (spec/* ::option))
 (spec/def ::options (spec/map-of keyword? (spec/or :single ::option
                                                    :multiple ::option-vec)))
 (spec/def ::raw-entity (spec/keys :opt [::options]))

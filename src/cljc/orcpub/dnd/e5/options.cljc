@@ -563,11 +563,12 @@ check. The GM might also call for a Dexterity (Sleight of Hand) check to determi
 (defn spell-options [spells level spellcasting-ability class-name]
   (map
    (fn [key]
-     (t/option
-      (:name (spells/spell-map key))
-      key
-      []
-      [(modifiers/spells-known level key spellcasting-ability class-name)]))
+     (let [{:keys [name description]} (spells/spell-map key)]
+       (t/option-cfg
+        {:name name
+         :key key
+         ;;:help description
+         :modifiers [(modifiers/spells-known level key spellcasting-ability class-name)]})))
    (sort spells)))
 
 (defn spell-level-title [level]
