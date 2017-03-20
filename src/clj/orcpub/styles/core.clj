@@ -52,6 +52,8 @@
     {:font-size "16px"}]
    [:.f-s-18
     {:font-size "18px"}]
+   [:.f-s-20
+    {:font-size "20px"}]
    [:.f-s-24
     {:font-size "24px !important"}]
    [:.f-s-28
@@ -138,11 +140,15 @@
     {:justify-content :space-between}]
    [:.justify-cont-c
     {:justify-content :center}]
+   [:.justify-cont-end
+    {:justify-content :flex-end}]
    [:.align-items-c
     {:align-items :center}]
    [:.align-items-t
     {:align-items :flex-start}]
 
+   [:.w-auto
+    {:width :auto}]
    [:.w-40-p
     {:width "40%"}]
    [:.w-50-p
@@ -160,6 +166,10 @@
     {:width "60px"}]
    [:.w-70
     {:width "70px"}]
+   [:.w-100
+    {:width "100px"}]
+   [:.w-200
+    {:width "200px"}]
    [:.w-250
     {:width "250px"}]
    [:.w-300
@@ -169,8 +179,13 @@
    [:.w-1440
     {:width "1440px"}]
 
+   [:.h-25
+    {:height "25px"}]
    [:.h-800
     {:height "800px"}]
+
+   [:.overflow-auto
+    {:overflow :auto}]
    
    [:.posn-rel
     {:position :relative}]
@@ -192,12 +207,19 @@
    [:.underline
     {:text-decoration :underline}]
 
+   [:.fa-caret-down:hover
+    {:background-color :white}]
+
+   [:.p-b-10
+    {:padding-bottom "10px"}]
    [:.p-b-40
     {:padding-bottom "40px"}]
    [:.p-0
     {:padding "0px"}]
    [:.p-1
     {:padding "1px"}]
+   [:.p-2
+    {:padding "2px"}]
    [:.p-5
     {:padding "5px"}]
    [:.p-10
@@ -254,7 +276,10 @@
      :opacity 0.2}]
    
    [:.bg-light
-    {:background-color "#2c3445"}]])
+    {:background-color "#2c3445"}]
+
+   [:.no-appearance
+    (handle-browsers :appearance :none)]])
 
 (def sm-min "768px")
 (def md-max "1199px")
@@ -473,13 +498,23 @@
     [:.hidden-print
      {:display "none !important"}])])
 
+(def font-family "Open Sans, sans-serif !important")
+
 (def app
   (concat
    [[:.app
      {:background-image "linear-gradient(182deg, #2c3445, #000000)"
-      :font-family "Open Sans, sans-serif"
+      :font-family font-family
       :height "100%"
       :overflow :auto}]
+
+    [:select
+     {:font-family font-family
+      :cursor :pointer}]
+
+    [:*:focus
+     {:outline 0}]
+    
 
     [:.sticky-header
      {:top 0

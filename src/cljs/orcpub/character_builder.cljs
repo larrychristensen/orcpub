@@ -1185,6 +1185,14 @@
    [:i.fa.orange
     {:class-name (if expanded? "fa-angle-up" "fa-angle-down")}]])
 
+(defn set-next! [char next-selection next-selection-path]
+  (swap! app-state
+         (fn [as]
+           (cond-> as
+             char (assoc :character char)
+             next-selection-path (assoc :stepper-selection-path next-selection-path)
+             next-selection (assoc :stepper-selection next-selection)))))
+
 (defn option-selector [character built-char built-template option-paths stepper-selection-path option-path
                        {:keys [::t/min ::t/max] :as selection}
                        disable-select-new?
@@ -1233,18 +1241,16 @@
                             next-all-selections (get-all-selections [] built-template next-option-paths built-char)
                             [next-selection-path next-selection] (selection-after option-path next-all-selections)
                             next-template-path (entity/get-template-selection-path built-template next-selection-path [])]
-                        (swap! app-state (fn [as]
-                                           (cond-> as
-                                               true (assoc :character updated-char)
-                                               has-selections? (assoc :stepper-selection-path next-template-path)
-                                               has-selections? (assoc :stepper-selection next-selection)))))
+                        (set-next! updated-char
+                                   (if has-selections? next-selection)
+                                   (if has-selections? next-template-path)))
                       (if select-fn
                         (select-fn new-option-path))))
                   (.stopPropagation e))}
      [:div.flex.align-items-c
       [:div.flex-grow-1
        [:div.flex
-        [:span.f-w-b.f-s-16.flex-grow-1 name]
+        [:span.f-w-b.f-s-14.flex-grow-1 name]
         (if help
           [show-info-button expanded? new-option-path])]
        (if (and help expanded?)
@@ -1349,9 +1355,33 @@
         ancestor-paths (reductions conj [] path)
         ancestors (map (fn [a-p] (get-in built-template (entity/get-template-selection-path built-template a-p [])))
                        (take-nth 2 (butlast ancestor-paths)))
-        ancestor-names (map ::t/name (remove nil? ancestors))]
+        ancestor-names (map ::t/name (remove nil? ancestors))
+        top-level-name (some (fn [s]
+                               (if (= (first option-path)
+                                      (::t/key s))
+                                 (::t/name s)))
+                             (::t/selections built-template))]
+    (prn "STEPPER PATH" stepper-selection-path)
     [:div#options-column.w-100-p.b-1.b-rad-5
-     [:div.flex.justify-cont-s-b.p-10.align-items-t
+     [:div.flex.justify-cont-end
+      [:select.f-s-12.p-2.m-t-0.m-l-5.white.no-border.bg-trans
+       {:value (first option-path)
+        :on-change (fn [e]
+                     (let [value (keyword (.. e -target -value))
+                           selection (some (fn [s]
+                                             (if (= value (::t/key s))
+                                               (assoc s ::path [value])))
+                                           (::t/selections built-template))]
+                       (set-next! nil selection (entity/get-template-selection-path built-template [value] []))))}
+       (doall
+        (map
+         (fn [{:keys [::t/name ::t/key]}]
+           ^{:key key}
+           [:option.builder-dropdown-item.f-s-14
+            {:value (clojure.core/name key)}
+            name])
+         (::t/selections built-template)))]]
+     [:div.flex.justify-cont-s-b.p-t-5.p-10.align-items-t
       [:button.form-button.p-5-10.m-r-5
        {:on-click
         (fn [_] (set-prev-selection!
@@ -1361,9 +1391,9 @@
                  stepper-selection-path
                  all-selections
                  built-char))} "Back"]
-      [:div
+      [:div.flex-grow-1
        (if parent [:h4.f-s-14.t-a-c.m-b-5 (str (s/join " - " ancestor-names))])
-       [:h3.f-w-b.f-s-18.t-a-c name]]
+       [:h3.f-w-b.f-s-20.t-a-c name]]
       [:button.form-button.p-5-10.m-l-5
        {:on-click
         (fn [_] (set-next-selection!

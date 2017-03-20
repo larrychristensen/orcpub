@@ -560,14 +560,28 @@ check. The GM might also call for a Dexterity (Sleight of Hand) check to determi
 (defn key-to-name [key]
   (s/join " " (map s/capitalize (s/split (name key) #"-"))))
 
+(defn spell-field [name value]
+  [:div.m-b-2
+   [:span.f-w-b (str name ": ")]
+   [:span.f-w-n value]])
+
+(defn spell-help [spell]
+  [:div
+   [:div.m-b-5
+    (spell-field "School" (:school spell))
+    (spell-field "Casting Time" (:casting-time spell))
+    (spell-field "Range" (:range spell))
+    (spell-field "Duration" (:duration spell))]
+   [:div.f-w-n (:description spell)]])
+
 (defn spell-options [spells level spellcasting-ability class-name]
   (map
    (fn [key]
-     (let [{:keys [name description]} (spells/spell-map key)]
+     (let [{:keys [name] :as spell} (spells/spell-map key)]
        (t/option-cfg
         {:name name
          :key key
-         ;;:help description
+         :help (spell-help spell)
          :modifiers [(modifiers/spells-known level key spellcasting-ability class-name)]})))
    (sort spells)))
 
@@ -578,11 +592,11 @@ check. The GM might also call for a Dexterity (Sleight of Hand) check to determi
   ([class-key level spellcasting-ability class-name num]
    (spell-selection class-key level (get-in sl/spell-lists [class-key level]) spellcasting-ability class-name num))
   ([class-key level spell-keys spellcasting-ability class-name num]
-   (t/selection
-    (spell-level-title level)
-    (spell-options spell-keys level spellcasting-ability class-name)
-    num
-    num)))
+   (t/selection-cfg
+    {:name (spell-level-title level)
+     :options (spell-options spell-keys level spellcasting-ability class-name)
+     :min num
+     :max num})))
 
 (defn spell-slot-schedule [level-factor]
   (case level-factor
@@ -698,27 +712,29 @@ check. The GM might also call for a Dexterity (Sleight of Hand) check to determi
                        (keys slots))
            acquire? (= :acquire known-mode)]
        (assoc m cls-lvl
-              [(t/selection
-                "Spells Known"
-                (vec
-                 (flatten
-                  (map
-                   (fn [[lvl spell-keys]]
-                     (map
-                      (fn [spell-key]
-                        (let [spell (spells/spell-map spell-key)]
-                          (t/option
-                           (str lvl " - " (:name spell))
-                           spell-key
-                           []
-                           [(modifiers/spells-known lvl spell-key ability (class-names class-key))])))
-                      (apply-spell-restriction spell-keys restriction)))
-                   all-spells)))
-                num
-                (if (not acquire?) num)
-                acquire?
-                (if acquire?
-                  (fn [s o v] {::entity/key nil})))])))
+              [(t/selection-cfg
+                {:name "Spells Known"
+                 :options (vec
+                           (flatten
+                            (map
+                             (fn [[lvl spell-keys]]
+                               (map
+                                (fn [spell-key]
+                                  (let [spell (spells/spell-map spell-key)]
+                                    (t/option-cfg
+                                     {:name (str lvl " - " (:name spell))
+                                      :key spell-key
+                                      :help (spell-help spell)
+                                      :modifiers [(modifiers/spells-known lvl spell-key ability (class-names class-key))]})))
+                                (apply-spell-restriction spell-keys restriction)))
+                             all-spells)))
+                 :min num
+                 :max (if (not acquire?) num)
+                 :new-item-fn (fn [selection selected-items _ key]
+                                {::entity/key key})
+                 ;;acquire?
+                 #_(if acquire?
+                     (fn [s o v] {::entity/key nil}))})])))
    {}
    spells-known))
 
