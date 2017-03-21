@@ -232,6 +232,8 @@
    [:.p-l-15
     {:padding-left "15px"}]
 
+   [:.p-r-5
+    {:padding-right "5px"}]
    [:.p-r-10
     {:padding-right "10px"}]
 
@@ -254,6 +256,8 @@
 
    [:.pointer
     {:cursor :pointer}]
+   [:.cursor-disabled
+    {:cursor :not-allowed}]
 
    [:.c-f4692a
     {:color "#f4692a"}]

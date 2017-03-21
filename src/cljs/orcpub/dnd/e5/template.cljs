@@ -25,6 +25,12 @@
 (defn get-raw-abilities [app-state]
   (get-in (:character @app-state) [::entity/options :ability-scores ::entity/value]))
 
+(defn set-ability! [app-state ability-key ability-value]
+  (swap! app-state
+         assoc-in
+         [:character ::entity/options :ability-scores ::entity/value ability-key]
+         ability-value))
+
 (defn swap-abilities [app-state i other-i k v]
   (fn []
     (swap! app-state
@@ -62,6 +68,45 @@
                  (reroll-fn)
                  (.stopPropagation e))}
     "Re-Roll"]])
+
+(def score-costs
+  {8 0
+   9 1
+   10 2
+   11 3
+   12 4
+   13 5
+   14 7
+   15 9})
+
+(def point-buy-points 27)
+
+(defn point-buy-abilities [app-state]
+  (let [abilities (or (get-raw-abilities app-state)
+                      (char5e/abilities 8 8 8 8 8 8))
+        abilities-vec (vec (map (fn [[a v]] [a (-> v (min 15) (max 8))]) abilities))
+        points-used (apply + (map (comp score-costs second) abilities-vec))
+        points-remaining (- point-buy-points points-used)]
+    [:div
+     [:div.m-t-5
+      [:span.f-w-b "Points Remaining: "]
+      [:span.f-w-n points-remaining]]
+     [:div.flex.justify-cont-s-b
+      (doall
+       (map-indexed
+        (fn [i [k v]]
+          ^{:key k}
+          [:div.m-t-10.t-a-c
+           [:div.uppercase (name k)]
+           [:div.f-s-18 v]
+           [:div.f-s-16
+            [:i.fa.fa-minus-circle.orange
+             {:class-name (if (or (<= v 8) (>= points-remaining point-buy-points)) "opacity-5 cursor-disabled")
+              :on-click (fn [_] (set-ability! app-state k (dec v)))}]
+            [:i.fa.fa-plus-circle.orange.m-l-5
+             {:class-name (if (or (>= v 15) (zero? points-remaining)) "opacity-5 cursor-disabled")
+              :on-click (fn [_] (set-ability! app-state k (inc v)))}]]])
+        abilities-vec))]]))
 
 (defn abilities-entry [app-state]
   [:div.flex
@@ -3963,6 +4008,40 @@ You might also have ties to a specific temple dedicated to your chosen deity or 
                 ::t/key :manual-entry
                 ::t/help "This option allows you to manually type in the value for each ability. Use this if you want to roll dice yourself or if you already have a character with known ability values."
                 ::t/ui-fn #(abilities-entry app-state)
+                ::t/modifiers [(mod5e/deferred-abilities)]}
+               {::t/name "Point Buy"
+                ::t/key :point-buy
+                ::t/help [:div
+                          [:div "This allows you fine-grained control to customize your scores. You get 27 points to assign to the different scores, each value has a cost determined by the table below:"]
+                          [:table.m-t-10
+                           [:thead
+                            [:tr.f-w-b
+                             [:th.p-r-5 "Score"]
+                             [:th.p-r-10 "Cost"]
+                             [:th.p-r-5 "Score"]
+                             [:th "Cost"]]]
+                           [:tbody
+                            [:tr
+                             [:td 8]
+                             [:td 0]
+                             [:td 12]
+                             [:td 4]]
+                            [:tr
+                             [:td 9]
+                             [:td 1]
+                             [:td 13]
+                             [:td 5]]
+                            [:tr
+                             [:td 10]
+                             [:td 2]
+                             [:td 14]
+                             [:td 7]]
+                            [:tr
+                             [:td 11]
+                             [:td 3]
+                             [:td 15]
+                             [:td 9]]]]]
+                ::t/ui-fn #(point-buy-abilities app-state)
                 ::t/modifiers [(mod5e/deferred-abilities)]}
                {::t/name "Standard Roll"
                 ::t/key :standard-roll
