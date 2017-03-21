@@ -925,14 +925,15 @@ Fire Starter. The device produces a miniature flame, which you can use to light 
                              spellcasting-template
                              i]
   (let [selections (some-> levels (get i) :selections)]
-    (t/option
-     (level-name i)
-     (level-key i)
-     (vec
-      (concat
-       selections      
-       (some-> spellcasting-template :selections (get i))))
-     (some-> levels (get i) :modifiers))))
+    (t/option-cfg
+     {:name (level-name i)
+      :key (level-key i)
+      :order i
+      :selections (vec
+                   (concat
+                    selections      
+                    (some-> spellcasting-template :selections (get i))))
+      :modifiers (some-> levels (get i) :modifiers)})))
 
 (defn subclass-option [cls
                        {:keys [name
@@ -1003,45 +1004,46 @@ Fire Starter. The device produces a miniature flame, which you can use to light 
                     spellcasting-template
                     i]
   (let [ability-inc-set (set ability-increase-levels)]
-    (t/option
-     (level-name i)
-     (level-key i)
-     (vec
-      (concat
-       (some-> levels (get i) :selections)
-       (some-> spellcasting-template :selections (get i))
-       (if (= i subclass-level)
-         [(t/selection-cfg
-           {:name subclass-title
-            :key :subclass
-            :help subclass-help
-            :options (mapv
-                      #(subclass-option (assoc cls :key kw) % app-state)
-                      subclasses)})])
-       (if (and (not plugin?) (ability-inc-set i))
-         [(opt5e/ability-score-improvement-selection)])
-       (if (and (not plugin?) (> i 1))
-         [(hit-points-selection app-state hit-die)])))
-     (vec
-      (concat
-       (if (= :all (:known-mode spellcasting))
-         (let [slots (opt5e/total-slots i (:level-factor spellcasting))
-               prev-level-slots (opt5e/total-slots (dec i) (:level-factor spellcasting))
-               new-slots (apply dissoc slots (keys prev-level-slots))]
-           (if (seq new-slots)
-             (let [lvl (key (first new-slots))]
-               (map
-                (fn [kw]
-                  (mod5e/spells-known lvl kw (:ability spellcasting) name))
-                (get-in sl/spell-lists [kw lvl]))))))
-       (some-> levels (get i) :modifiers)
-       (traits-modifiers
-        (filter
-         (fn [{level :level :or {level 1}}]
-           (= level i))
-         traits))
-       (if (and (not plugin?) (= i 1)) [(mod5e/max-hit-points hit-die)])
-       [(mod5e/level kw name i hit-die)])))))
+    (t/option-cfg
+     {:name (level-name i)
+      :key (level-key i)
+      :order i
+      :selections (vec
+                   (concat
+                    (some-> levels (get i) :selections)
+                    (some-> spellcasting-template :selections (get i))
+                    (if (= i subclass-level)
+                      [(t/selection-cfg
+                        {:name subclass-title
+                         :key :subclass
+                         :help subclass-help
+                         :options (mapv
+                                   #(subclass-option (assoc cls :key kw) % app-state)
+                                   subclasses)})])
+                    (if (and (not plugin?) (ability-inc-set i))
+                      [(opt5e/ability-score-improvement-selection)])
+                    (if (and (not plugin?) (> i 1))
+                      [(hit-points-selection app-state hit-die)])))
+      :modifiers (vec
+                  (concat
+                   (if (= :all (:known-mode spellcasting))
+                     (let [slots (opt5e/total-slots i (:level-factor spellcasting))
+                           prev-level-slots (opt5e/total-slots (dec i) (:level-factor spellcasting))
+                           new-slots (apply dissoc slots (keys prev-level-slots))]
+                       (if (seq new-slots)
+                         (let [lvl (key (first new-slots))]
+                           (map
+                            (fn [kw]
+                              (mod5e/spells-known lvl kw (:ability spellcasting) name))
+                            (get-in sl/spell-lists [kw lvl]))))))
+                   (some-> levels (get i) :modifiers)
+                   (traits-modifiers
+                    (filter
+                     (fn [{level :level :or {level 1}}]
+                       (= level i))
+                     traits))
+                   (if (and (not plugin?) (= i 1)) [(mod5e/max-hit-points hit-die)])
+                   [(mod5e/level kw name i hit-die)]))})))
 
 
 (defn equipment-option [[k num]]

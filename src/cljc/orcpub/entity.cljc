@@ -282,7 +282,7 @@
    (fn [options]
      (vec
       (sort-by
-       ::t/name
+       (juxt ::t/order ::t/name)
        (map
         sort-selections
         options))))))

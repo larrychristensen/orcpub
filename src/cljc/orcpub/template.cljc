@@ -79,10 +79,11 @@
 (defn sequential-selection [name new-item-fn options]
   (selection name options 1 nil true new-item-fn))
 
-(defn option-cfg [{:keys [name key help selections modifiers prereqs] :as cfg}]
+(defn option-cfg [{:keys [name key help selections modifiers prereqs order] :as cfg}]
   {::name name
    ::key (or key (common/name-to-kw name))
    ::help help
+   ::order order
    ::selections selections
    ::modifiers modifiers
    ::prereqs prereqs})
