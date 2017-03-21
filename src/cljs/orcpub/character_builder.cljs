@@ -1297,19 +1297,18 @@
       (if has-selections?
         {:on-click
          (fn [e]
-           (do
+           (let [first-selection (first selections)
+                 next-selection-path (conj new-option-path (::t/key first-selection))
+                 next-selection (assoc first-selection
+                                       ::path next-selection-path
+                                       ::parent (assoc option ::path new-option-path))
+                 next-template-path (entity/get-template-selection-path built-template next-selection-path [])]
+             (swap! app-state (fn [as]
+                                (-> as
+                                    (assoc :stepper-selection-path next-template-path)
+                                    (assoc :stepper-selection (assoc next-selection ::path next-selection-path)))))
              (if select-fn
-               (select-fn (conj option-path key)))
-             (let [first-selection (first selections)
-                   next-selection-path (conj new-option-path (::t/key first-selection))
-                   next-selection (assoc first-selection
-                                         ::path next-selection-path
-                                         ::parent (assoc option ::path new-option-path))
-                   next-template-path (entity/get-template-selection-path built-template next-selection-path [])]
-               (swap! app-state (fn [as]
-                                  (-> as
-                                      (assoc :stepper-selection-path next-template-path)
-                                      (assoc :stepper-selection (assoc next-selection ::path next-selection-path)))))))
+               (select-fn new-option-path)))
            (.stopPropagation e))})
       [:div.flex.align-items-c
        [:span.flex-grow-1.m-l-5.m-t-5.m-b-5 name]

@@ -3700,20 +3700,20 @@ Once you use this feature, you can't use it again until you finish a long rest."
                             :level 14}]}]}
    app-state))
 
+(defn set-abilities! [app-state abilities]
+  (swap! app-state assoc-in [:character ::entity/options :ability-scores ::entity/value] abilities))
+
 (defn reroll-abilities [app-state]
   (fn []
-    (swap! app-state
-           #(assoc-in %
-                      [:character ::entity/options :ability-scores ::entity/value]
-                      (char5e/standard-ability-rolls)))))
+    (set-abilities! app-state (char5e/standard-ability-rolls))))
 
 (defn set-standard-abilities [app-state]
   (fn []
-    (swap! app-state
-           (fn [c] (assoc-in c
-                             [:character ::entity/options :ability-scores]
-                             {::entity/key :standard-scores
-                              ::entity/value (char5e/abilities 15 14 13 12 10 8)})))))
+    (set-abilities! app-state (char5e/abilities 15 14 13 12 10 8))))
+
+(defn reset-point-buy-abilities [app-state]
+  (fn []
+    (set-abilities! app-state (char5e/abilities 8 8 8 8 8 8))))
 
 (def arcane-tradition-options
   [(t/option
@@ -4042,6 +4042,7 @@ You might also have ties to a specific temple dedicated to your chosen deity or 
                              [:td 15]
                              [:td 9]]]]]
                 ::t/ui-fn #(point-buy-abilities app-state)
+                ::t/select-fn (reset-point-buy-abilities app-state)
                 ::t/modifiers [(mod5e/deferred-abilities)]}
                {::t/name "Standard Roll"
                 ::t/key :standard-roll
