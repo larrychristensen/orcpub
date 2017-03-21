@@ -24,7 +24,7 @@
 (defn not-shield? [a] (#{:light :medium :heavy} (:type a)))
 
 (defn bonus-name-fn [bonus]
-  (fn [item] (str (:name item) ", +" bonus)))
+  (fn [item] (str (:name item) " +" bonus)))
 
 (def plus-1-name (bonus-name-fn 1))
 (def plus-2-name (bonus-name-fn 2))
@@ -107,25 +107,28 @@ The apparatus floats on water. It can also go underwater to a depth of 900 feet.
 A creature in the compartment can use an action to move as many as two of the apparatus’s levers up or down. After each use, a lever goes back to its neutral position. Each lever, from left to right, functions as shown in the Apparatus of the Crab Levers table."
     }{
     :name "Armor, +1"
-    :name-fn plus-1-name
+      :name-fn plus-1-name
+      :magical-ac-bonus 1
     :item-type :armor
     :item-subtype not-shield?
     :rarity :rare
     :description "You have a +1 bonus to AC while wearing this armor."
     }{
-    :name "Armor, +2"
+      :name "Armor, +2"
+      :magical-ac-bonus 2
     :name-fn plus-2-name
     :item-type :armor
     :item-subtype not-shield?
     :rarity :very-rare
     :description "You have a +2 bonus to AC while wearing this armor."
     }{
-    :name "Armor, +3"
+      :name "Armor, +3"
+      :magical-ac-bonus 3
     :name-fn plus-3-name
     :item-type :armor
     :item-subtype not-shield?
     :rarity :legendary
-    :description "You have a +2 bonus to AC while wearing this armor."
+    :description "You have a +3 bonus to AC while wearing this armor."
     }{
     :name "Armor of Invulnerability"
     :item-type :armor
@@ -156,7 +159,6 @@ Curse. This armor is cursed, a fact that is revealed only when an identify spell
     :item-type :armor
     :item-subtype :shield
     :rarity :rare
-
     :attunement [:any]
     :description "You gain a +2 bonus to AC against ranged attacks while you wield this shield. This bonus is in addition to the shield’s normal bonus to AC. In addition, whenever an attacker makes a ranged attack against a target within 5 feet of you, you can use your reaction to become the target of the attack instead."
     }{
@@ -381,8 +383,8 @@ shifts to camouflage you. Pulling the hood up or down requires an action."
     :item-type :wondrous-item
 
     :rarity :uncommon
-
-    :attunement [:any]
+      :magical-ac-bonus 1
+      :attunement [:any]
     :description "You gain a +1 bonus to AC and saving throws while you wear this cloak."
     }{
     :name "Cloak of the Bat"
@@ -517,12 +519,12 @@ The Void. This black card spells disaster. Your soul is drawn from your body and
     :description "You gain a +3 bonus to attack and damage rolls made with this magic weapon.
 The first time you attack with the sword on each of your turns, you can transfer some or all of the sword’s bonus to your Armor Class, instead of using the bonus on any attacks that turn. For example, you could reduce the bonus to your attack and damage rolls to +1 and gain a +2 bonus to AC. The adjusted bonuses remain in effect until the start of your next turn, although you must hold the sword to gain a bonus to AC from it."
     }{
-    :name "Demon Armor"
+      :name "Demon Armor"
+      :magical-ac-bonus 1
     :item-type :armor
     :item-subtype :plate
 
     :rarity :very-rare
-
     :attunement [:any]
     :description "While wearing this armor, you gain a +1 bonus to AC, and you can understand and speak Abyssal. In addition, the armor’s clawed gauntlets turn unarmed strikes with your hands into magic weapons that deal slashing damage, with a +1 bonus to attack rolls and damage rolls and a damage die of 1d8.
 Curse. Once you don this cursed armor, you can’t doff it unless you are targeted by the remove curse
@@ -534,7 +536,8 @@ spell or similar magic. While wearing the armor, you have disadvantage on attack
     :description "You can use an action to place these shackles on an incapacitated creature. The shackles adjust to fit a creature of Small to Large size. In addition to serving as mundane manacles, the shackles prevent a creature bound by them from using any method of extradimensional movement, including teleportation or travel to a different plane of existence. They don’t prevent the creature from passing through an interdimensional portal.
 You and any creature you designate when you use the shackles can use an action to remove them. Once every 30 days, the bound creature can make a DC 30 Strength (Athletics) check. On a success, the creature breaks free and destroys the shackles."
     }{
-    :name "Dragon Scale Mail"
+      :name "Dragon Scale Mail"
+      :magical-ac-bonus 1
     :item-type :armor
     :item-subtype :scale-mail
 
@@ -579,7 +582,8 @@ spell can also end the effect on a creature.}{"
     :name "Dwarven Plate"
     :item-type :armor
     :item-subtype :plate
-    :rarity :very-rare
+      :rarity :very-rare
+      :magical-ac-bonus 2
     :description "While wearing this armor, you gain a +2 bonus to AC. In addition, if an effect moves you against your will along the ground, you can use your reaction to reduce the distance you are moved by up to 10 feet."
     }{
     :name "Dwarven Thrower"
@@ -614,7 +618,8 @@ spell, and the gem’s magic is lost. The type of gem determines the elemental s
     :name "Elven Chain"
     :item-type :armor
     :item-subtype :chain-shirt
-    :rarity :rare
+      :rarity :rare
+      :magical-ac-bonus 1
     :description "You gain a +1 bonus to AC while you wear this armor. You are considered proficient with this armor even if you lack proficiency with medium armor."
     }{
     :name "Eversmoking Bottle"
@@ -752,7 +757,8 @@ When you hit a giant with it, the giant takes an extra 2d6 damage of the weapon�
     :name "Glamoured Studded Leather"
     :item-type :armor
     :item-subtype :studded-leather
-    :rarity :rare
+      :rarity :rare
+      :magical-ac-bonus 1
     :description "While wearing this armor, you gain a +1 bonus to AC. You can also use a bonus action to speak the armor’s command word and cause the armor to assume the appearance of a normal set of clothing or some other kind of armor. You decide what it looks like, including color, style, and accessories, but the armor retains its normal bulk and weight. The illusory appearance lasts until you use this property again or remove the armor."
     }{
     :name "Gloves of Missile Snaring"
@@ -1389,7 +1395,8 @@ If you die while wearing the ring, your soul enters it, unless it already houses
 
     :rarity :rare
 
-    :attunement [:any]
+      :attunement [:any]
+      :magical-ac-bonus 1
     :description "You gain a +1 bonus to AC and saving throws while wearing this ring."
     }{
     :name "Ring of Regeneration"
@@ -1638,15 +1645,15 @@ The rope has AC 20 and 20 hit points. It regains 1 hit point every 5 minutes as 
     :magical-damage-bonus 2
     :description "You gain a +2 bonus to attack and damage rolls made with this magic weapon. In addition, you can make one attack with it as a bonus action on each of your turns."
     }{
-    :name "Shield, +1"
+    :name "Shield +1"
     :name-fn plus-1-name
     :item-type :armor
     :item-subtype :shield
     :rarity :uncommon
-    :magical-ac-bonus 1
+      :magical-ac-bonus 1
     :description "While holding this shield, you have a +1 bonus to AC. This bonus is in addition to the shield’s normal bonus to AC."
     }{
-    :name "Shield, +2"
+    :name "Shield +2"
     :name-fn plus-2-name
     :item-type :armor
     :item-subtype :shield
@@ -1654,7 +1661,7 @@ The rope has AC 20 and 20 hit points. It regains 1 hit point every 5 minutes as 
     :magical-ac-bonus 1
     :description "While holding this shield, you have a +2 bonus to AC determined by the shield’s rarity."
     }{
-    :name "Shield, +3"
+    :name "Shield +3"
     :name-fn plus-3-name
     :item-type :armor
     :item-subtype :shield
@@ -2173,17 +2180,24 @@ The boots regain 2 hours of flying capability for every 12 hours they aren’t i
     (add-key item)))
 
 (defn expand-armor [{:keys [item-subtype name-fn] :as item}]
-  (if (fn? item-subtype)
-    (for [armor (filter item-subtype armor5e/armor)]
-      (let [name (if name-fn 
-                   (name-fn armor)
-                   (str (:name item) ", " (:name armor)))]
-        (merge
-         armor
-         item
-         {:name name
-          :key (common/name-to-kw name)})))
-    (add-key item)))
+  (let [normal-version (armor5e/armor-map item-subtype)]
+    (cond
+      (fn? item-subtype)
+      (for [armor (filter item-subtype armor5e/armor)]
+        (let [name (if name-fn 
+                     (name-fn armor)
+                     (str (:name item) ", " (:name armor)))]
+          (merge
+           armor
+           item
+           {:name name
+            :key (common/name-to-kw name)})))
+      normal-version
+      (merge
+       normal-version
+       item
+       {:key (common/name-to-kw (:name item))})
+      :else (add-key item))))
 
 (def magic-items
   (flatten

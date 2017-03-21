@@ -2336,18 +2336,16 @@ In addition, when you make a running long jump, the distance you can cover incre
     :weapon-choices [{:name "Weapon"
                       :options {:shortsword 1
                                 :simple 1}}]
-    :modifiers [(mod/modifier ?armor-class
+    :modifiers [(mod/modifier ?monk-armor-class
                               (+ (?ability-bonuses :wis) ?armor-class)
                               nil
                               nil
                               [(= :monk (first ?classes))])
                 (mod/modifier ?armor-class-with-armor
-                              (fn [armor & [shield?]]
-                                (if (and (nil? armor) (not shield?))
-                                  ?armor-class
-                                  (+ (if shield? 2 0)
-                                     (?armor-dex-bonus armor)
-                                     (or (:base-ac armor) 10))))
+                              (fn [armor & [shield]]
+                                (if (and (nil? armor) (not shield))
+                                  ?monk-armor-class
+                                  (?armor-class-with-armor armor shield)))
                               nil
                               nil
                               [(= :monk (first ?classes))])]
@@ -4040,13 +4038,15 @@ You might also have ties to a specific temple dedicated to your chosen deity or 
                            :light dex-bonus
                            :medium (min ?max-medium-armor-bonus dex-bonus)
                            0)))
-    ?armor-class-with-armor (fn [armor & [shield?]]
-                              (+ (if shield? 2 0)
+    ?armor-class-with-armor (fn [armor & [shield]]
+                              (+ (if shield 2 0)
+                                 (or (:magical-ac-bonus shield) 0)
                                  (if (nil? armor)
                                    ?armor-class
                                    (+ (?armor-dex-bonus armor)
                                       (or ?armored-ac-bonus 0)
-                                      (:base-ac armor)))))
+                                      (:base-ac armor)
+                                      (:magical-ac-bonus armor)))))
     ?abilities (reduce
                 (fn [m k]
                   (assoc m k (+ (or (k ?base-abilities) 12)

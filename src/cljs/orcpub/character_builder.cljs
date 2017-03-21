@@ -597,35 +597,29 @@
                      true)))
 
 (defn armor-class-section [armor-class armor-class-with-armor equipped-armor]
-  [display-section
-   "Armor Class"
-   "fa-shield f-s-32"
-   [:span
-    [:span
-     [:span armor-class]
-     [:span.display-section-qualifier-text "(unarmored)"]]
-    (let [has-shield? (:shield equipped-armor)]
+  (let [all-armor (merge armor5e/armor-map
+                         mi5e/magic-armor-map)
+        equipped-armor-full (map (comp all-armor first) equipped-armor)
+        shields (filter #(= :shield (:type %)) equipped-armor-full)
+        armor (filter #(not= :shield (:type %)) equipped-armor-full)
+        display-rows (for [a (conj armor nil)
+                           shield (conj shields nil)]
+                       (let [el (if (= nil a shield) :span :div)]
+                         ^{:key (common/name-to-kw (str (:name a) (:name shield)))}
+                        [el
+                         [el
+                          [:span (armor-class-with-armor a shield)]
+                          [:span.display-section-qualifier-text (str "("
+                                                                     (if a (:name a) "unarmored")
+                                                                     (if shield (str " & " (:name shield)))
+                                                                     ")")]]]))]
+    [display-section
+     "Armor Class"
+     "fa-shield f-s-32"
+     [:span
+      (first display-rows)
       [:div.m-l-40
-       (if has-shield?
-         [:span
-          [:span (armor-class-with-armor nil has-shield?)]
-          [:span.display-section-qualifier-text "(unarmored + shield)"]])
-       (doall
-        (map
-         (fn [[armor-kw _]]
-           (let [armor ((merge armor5e/armor-map
-                               mi5e/magic-armor-map) armor-kw)
-                 ac (armor-class-with-armor armor)]
-             ^{:key armor-kw}
-             [:div
-              [:div
-               [:span ac]
-               [:span.display-section-qualifier-text (str "(" (:name armor) ")")]]
-              (if has-shield?
-                [:div
-                 [:span (+ 2 ac)]
-                 [:span.display-section-qualifier-text (str "(" (:name armor) " + shield)")]])]))
-         (dissoc equipped-armor :shield)))])]])
+       (doall (rest display-rows))]]]))
 
 (defn speed-section [built-char]
   (let [speed (es/entity-val built-char :speed)
@@ -1166,7 +1160,7 @@
     {:component-did-update on-builder-selector-update}))
 
 (defn help-section [help]
-  [:div.m-t-5
+  [:div.m-t-5.f-w-n
    (if (string? help)
      (doall
       (map-indexed
@@ -1215,42 +1209,41 @@
     [:div.p-10.b-1.b-rad-5.m-5.b-orange.hover-shadow
      {:class-name (s/join " " (remove nil? [(if selected? "b-w-3") (if selectable? "pointer") (if (not selectable?) "opacity-5")]))
       :on-click (fn [e]
-                  (if (and meets-prereqs? selectable?)
-                    (do
-                      (let [updated-char (let [new-option {::entity/key key}]
-                                           (if (and
-                                                (> min 1)
-                                                (= min max))
-                                             (update-option
-                                              built-template
-                                              character
-                                              option-path
-                                              (fn [parent-vec]
-                                                (if (nil? parent-vec)
-                                                  [new-option]
-                                                  (let [parent-keys (into #{} (map ::entity/key) parent-vec)]
-                                                    (if (parent-keys key)
-                                                      (vec (remove #(= key (::entity/key %)) parent-vec))
-                                                      (conj parent-vec new-option))))))
-                                             (update-option
-                                              built-template
-                                              character
-                                              new-option-path
-                                              (fn [o] (assoc o ::entity/key key)))))
-                            next-option-paths (make-path-map updated-char)
-                            next-all-selections (get-all-selections [] built-template next-option-paths built-char)
-                            [next-selection-path next-selection] (selection-after option-path next-all-selections)
-                            next-template-path (entity/get-template-selection-path built-template next-selection-path [])]
-                        (set-next! updated-char
-                                   (if has-selections? next-selection)
-                                   (if has-selections? next-template-path)))
-                      (if select-fn
-                        (select-fn new-option-path))))
+                  (when (and (not selected?) meets-prereqs? selectable?)
+                    (let [updated-char (let [new-option {::entity/key key}]
+                                         (if (and
+                                              (> min 1)
+                                              (= min max))
+                                           (update-option
+                                            built-template
+                                            character
+                                            option-path
+                                            (fn [parent-vec]
+                                              (if (nil? parent-vec)
+                                                [new-option]
+                                                (let [parent-keys (into #{} (map ::entity/key) parent-vec)]
+                                                  (if (parent-keys key)
+                                                    (vec (remove #(= key (::entity/key %)) parent-vec))
+                                                    (conj parent-vec new-option))))))
+                                           (update-option
+                                            built-template
+                                            character
+                                            new-option-path
+                                            (fn [o] (assoc o ::entity/key key)))))
+                          next-option-paths (make-path-map updated-char)
+                          next-all-selections (get-all-selections [] built-template next-option-paths built-char)
+                          [next-selection-path next-selection] (selection-after option-path next-all-selections)
+                          next-template-path (entity/get-template-selection-path built-template next-selection-path [])]
+                      (set-next! updated-char
+                                 (if has-selections? next-selection)
+                                 (if has-selections? next-template-path)))
+                    (if select-fn
+                      (select-fn new-option-path)))
                   (.stopPropagation e))}
      [:div.flex.align-items-c
       [:div.flex-grow-1
        [:div.flex
-        [:span.f-w-b.f-s-14.flex-grow-1 name]
+        [:span.f-w-b.f-s-1.flex-grow-1 name]
         (if help
           [show-info-button expanded? new-option-path])]
        (if (and help expanded?)
@@ -1361,7 +1354,6 @@
                                       (::t/key s))
                                  (::t/name s)))
                              (::t/selections built-template))]
-    (prn "STEPPER PATH" stepper-selection-path)
     [:div#options-column.w-100-p.b-1.b-rad-5
      [:div.flex.justify-cont-end
       [:select.f-s-12.p-2.m-t-0.m-l-5.white.no-border.bg-trans
@@ -1427,10 +1419,13 @@
             [add-option-selector selection character option-path built-template]])
          [:div
           (doall
-           (map-indexed
-            (fn [i option]
-              (option-item character built-template option-path all-selections quantity? true selection i option))
-            (filter-selected option-path key option-paths options character built-template)))]
+           (let [filtered (filter-selected option-path key option-paths options character built-template)]
+             (map-indexed
+              (fn [i option]
+                (option-item character built-template option-path all-selections quantity? (or (pos? i)
+                                                                                               (> (count filtered) 1)
+                                                                                               (zero? min)) selection i option))
+              filtered)))]
          (if sequential?
            [add-option-button selection character option-path built-template])]
         [:div
