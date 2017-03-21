@@ -72,6 +72,13 @@
       (es/modifier ?base-abilities abilities))
     {:str 12 :dex 12 :con 12 :int 12 :wis 12 :cha 12}))
 
+(defn deferred-ability-increases []
+  (mods/deferred-modifier
+    ?ability-increases
+    (fn [increases]
+      (es/modifier ?ability-increases (merge-with + increases ?ability-increases)))
+    {:str 0 :dex 0 :con 0 :int 0 :wis 0 :cha 0}))
+
 (defn saving-throws [cls-kw & abilities]
   (mods/modifier ?saving-throws
                  (apply conj (or ?saving-throws #{}) abilities)

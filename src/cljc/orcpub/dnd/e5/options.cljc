@@ -425,23 +425,66 @@ check. The GM might also call for a Dexterity (Sleight of Hand) check to determi
    tool-option
    tools))
 
+(defn ability-bonus-str [ability-value]
+  (common/bonus-str (int (/ (- ability-value 10) 2))))
+
+(defn get-raw-abilities [app-state]
+  (get-in (:character @app-state) [::entity/options :ability-scores ::entity/value]))
+
+(defn abilities-improvement-component [num-increases different? ability-keys path built-template app-state built-char]
+  (let [abilities (es/entity-val built-char :abilities)
+        abilities-vec (vec abilities)
+        increases-path (entity/get-option-value-path built-template (:character @app-state) path)
+        full-path (concat [:character] increases-path)
+        ability-increases (or (get-in @app-state full-path)
+                              (zipmap character/ability-keys (repeat 0)))
+        num-increased (apply + (vals ability-increases))
+        num-remaining (- num-increases num-increased)
+        allowed-abilities (set ability-keys)]
+    (prn "DIFFERENT?" different? ability-increases ability-keys)
+    [:div
+     [:div
+      [:div.m-t-5
+       [:span.f-w-n "Increases Remaining: "]
+       [:span.f-w-b num-remaining]
+       (if different? [:div.f-w-n.i.m-t-5 (str num-increases " different abilities")])]]
+     [:div.flex.justify-cont-s-b
+      (doall
+       (map-indexed
+        (fn [i [k v]]
+          (let [ability-disabled? (not (allowed-abilities k))
+                increase-disabled? (or ability-disabled?
+                                       (zero? num-remaining)
+                                       (and different? (pos? (ability-increases k)))
+                                       (>= (abilities k) 20))
+                decrease-disabled? (or ability-disabled?
+                                       (not (pos? (ability-increases k))))]
+            ^{:key k}
+           [:div.m-t-10.t-a-c
+            {:class-name (if ability-disabled? "opacity-5 cursor-disabled")}
+            [:div.uppercase (name k)]
+            [:div.f-s-18.f-w-b v]
+            [:div.f-6-12.f-w-n (ability-bonus-str v)]
+            [:div.f-s-16
+             [:i.fa.fa-minus-circle.orange
+              {:class-name (if decrease-disabled? "opacity-5 cursor-disabled")
+               :on-click (fn [] (if (not decrease-disabled?) (swap! app-state assoc-in full-path (update ability-increases k dec))))}]
+             [:i.fa.fa-plus-circle.orange.m-l-5
+              {:class-name (if increase-disabled? "opacity-5 cursor-disabled")
+               :on-click (fn [] (if (not increase-disabled?) (swap! app-state assoc-in full-path (update ability-increases k inc))))}]]]))
+        abilities-vec))]]))
+
+(defn ability-increase-option [num-increases different? ability-keys]
+  (t/option-cfg
+   {:name "Ability Score Improvement"
+    :key :ability-score-improvement
+    :ui-fn (fn [path built-template app-state built-char] (abilities-improvement-component num-increases different? ability-keys path built-template app-state built-char))
+    :modifiers [(modifiers/deferred-ability-increases)]}))
+
 (defn ability-increase-selection [abilities num & [different?]]
-  (assoc
-   (t/selection
-    "Ability Score Increase"
-    (into
-     []
-     (map
-      (fn [ability]
-        (t/option
-         (s/upper-case (name ability))
-         ability
-         []
-         [(modifiers/ability ability 1)])))
-     abilities)
-    num
-    num)
-   ::t/simple? (> num 1)))
+  (t/selection-cfg
+   {:name "Ability Score Increase"
+    :options [(ability-increase-option num different? abilities)]}))
 
 (defn min-ability [ability-kw min-value]
   (fn [c] (>= (ability-kw (es/entity-val c :abilities)) min-value)))
@@ -1251,11 +1294,7 @@ check. The GM might also call for a Dexterity (Sleight of Hand) check to determi
 (defn ability-score-improvement-selection []
   (t/selection
    "Ability Score Improvement or Feat"
-   [(t/option
-     "Ability Score Improvement"
-     :ability-score-improvement
-     [(ability-increase-selection character/ability-keys 2 false)]
-     [])
+   [(ability-increase-option 2 false character/ability-keys)
     (t/option
      "Feat"
      :feat

@@ -14,16 +14,14 @@
             [orcpub.dnd.e5.spell-lists :as sl]
             [orcpub.dnd.e5.magic-items :as mi])
   #_(:require-macros [orcpub.dnd.e5.options :as opt5e]
-                   [orcpub.dnd.e5.modifiers :as mod5e]))
+                     [orcpub.dnd.e5.modifiers :as mod5e]))
+
 
 (def character
   {::entity/options {#_:ability-scores #_{::entity/key :standard-roll
                                       ::entity/value (char5e/abilities 15 14 13 12 10 8)}
                      :class [{::entity/key :barbarian
                               ::entity/options {:levels [{::entity/key :level-1}]}}]}})
-
-(defn get-raw-abilities [app-state]
-  (get-in (:character @app-state) [::entity/options :ability-scores ::entity/value]))
 
 (defn set-ability! [app-state ability-key ability-value]
   (swap! app-state
@@ -42,12 +40,9 @@
                    [other-k other-v] (a-vec other-index)]
                (assoc a k other-v other-k v))))))
 
-(defn ability-bonus-str [ability-value]
-  (common/bonus-str (int (/ (- ability-value 10) 2))))
-
 (defn abilities-standard [app-state]
   [:div.flex.justify-cont-s-b
-    (let [abilities (or (get-raw-abilities app-state) (char5e/abilities 15 14 13 12 10 8))
+    (let [abilities (or (opt5e/get-raw-abilities app-state) (char5e/abilities 15 14 13 12 10 8))
           abilities-vec (vec abilities)]
       (doall
        (map-indexed
@@ -56,7 +51,7 @@
           [:div.m-t-10.t-a-c
            [:div.uppercase (name k)]
            [:div.f-s-18.f-w-b v]
-           [:div.f-6-12.f-w-n (ability-bonus-str v)]
+           [:div.f-6-12.f-w-n (opt5e/ability-bonus-str v)]
            [:div.f-s-16
             [:i.fa.fa-chevron-circle-left.orange
              {:on-click (swap-abilities app-state i (dec i) k v)}]
@@ -86,7 +81,7 @@
 (def point-buy-points 27)
 
 (defn point-buy-abilities [app-state]
-  (let [abilities (or (get-raw-abilities app-state)
+  (let [abilities (or (opt5e/get-raw-abilities app-state)
                       (char5e/abilities 8 8 8 8 8 8))
         abilities-vec (vec (map (fn [[a v]] [a (-> v (min 15) (max 8))]) abilities))
         points-used (apply + (map (comp score-costs second) abilities-vec))
@@ -103,7 +98,7 @@
           [:div.m-t-10.t-a-c
            [:div.uppercase (name k)]
            [:div.f-s-18.f-w-b v]
-           [:div.f-6-12.f-w-n (ability-bonus-str v)]
+           [:div.f-6-12.f-w-n (opt5e/ability-bonus-str v)]
            [:div.f-s-16
             [:i.fa.fa-minus-circle.orange
              {:class-name (if (or (<= v 8) (>= points-remaining point-buy-points)) "opacity-5 cursor-disabled")
@@ -115,7 +110,7 @@
 
 (defn abilities-entry [app-state]
   [:div.flex.m-l--10.m-r--10
-   (let [abilities (or (get-raw-abilities app-state) (char5e/abilities 15 14 13 12 10 8))
+   (let [abilities (or (opt5e/get-raw-abilities app-state) (char5e/abilities 15 14 13 12 10 8))
          abilities-vec (vec abilities)]
      (doall
       (map-indexed
@@ -129,7 +124,7 @@
                                      new-v (if (not (s/blank? value))
                                              (js/parseInt value))]
                                  (swap! app-state assoc-in [:character ::entity/options :ability-scores ::entity/value k] new-v)))}]
-          [:div.f-6-12.f-w-n (ability-bonus-str (k abilities))]])
+          [:div.f-6-12.f-w-n (opt5e/ability-bonus-str (k abilities))]])
        char5e/ability-keys)))])
 
 (declare template-selections)

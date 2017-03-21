@@ -1188,7 +1188,7 @@
              next-selection (assoc :stepper-selection next-selection)))))
 
 (defn option-selector [character built-char built-template option-paths stepper-selection-path option-path
-                       {:keys [::t/min ::t/max] :as selection}
+                       {:keys [::t/min ::t/max ::t/options] :as selection}
                        disable-select-new?
                        {:keys [::t/key ::t/name ::t/path ::t/help ::t/selections ::t/prereqs ::t/select-fn ::t/ui-fn]}]
   (let [new-option-path (conj option-path key)
@@ -1209,7 +1209,12 @@
     [:div.p-10.b-1.b-rad-5.m-5.b-orange.hover-shadow
      {:class-name (s/join " " (remove nil? [(if selected? "b-w-3") (if selectable? "pointer") (if (not selectable?) "opacity-5")]))
       :on-click (fn [e]
-                  (when (and (or (> max 1) (nil? max) (not selected?)) meets-prereqs? selectable?)
+                  (when (and (or (> max 1)
+                                 (nil? max)
+                                 (not selected?)
+                                 has-selections?)
+                             meets-prereqs?
+                             selectable?)
                     (let [updated-char (let [new-option {::entity/key key}]
                                          (if (and
                                               (> min 1)
@@ -1248,8 +1253,8 @@
           [show-info-button expanded? new-option-path])]
        (if (and help expanded?)
          [help-section help])
-       (if (and selected? ui-fn)
-         (ui-fn new-option-path built-template))
+       (if (and (or selected? (= 1 (count options))) ui-fn)
+         (ui-fn new-option-path built-template app-state built-char))
        (if (not meets-prereqs?)
          [:div.i.f-s-12.f-w-n 
           (str "Requires " (s/join ", " failed-prereqs))])]
@@ -1397,16 +1402,17 @@
        "Next"]]
      [:div.p-l-10.p-r-10
       [:div.flex
-       [:span.i.flex-grow-1 (cond
-                              (= min max) (str "Select "
-                                               (if multiselect?
-                                                 (str remaining " more")
-                                                 min))
-                              (and (= min 1)
-                                   (> max 1)) (str "Select up to " max)
-                              (and (> min 1)
-                                   (> max min)) (str "Select between " min " and " max)
-                              (and (nil? max)) "Select to add")]
+       (if (> (count options) 1)
+         [:span.i.flex-grow-1 (cond
+                                (= min max) (str "Select "
+                                                 (if multiselect?
+                                                   (str remaining " more")
+                                                   min))
+                                (and (= min 1)
+                                     (> max 1)) (str "Select up to " max)
+                                (and (> min 1)
+                                     (> max min)) (str "Select between " min " and " max)
+                                (and (nil? max)) "Select to add")])
        (if help
          [show-info-button expanded? option-path])]
       (if expanded? [help-section help])]
