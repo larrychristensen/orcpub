@@ -441,7 +441,6 @@ check. The GM might also call for a Dexterity (Sleight of Hand) check to determi
         num-increased (apply + (vals ability-increases))
         num-remaining (- num-increases num-increased)
         allowed-abilities (set ability-keys)]
-    (prn "DIFFERENT?" different? ability-increases ability-keys)
     [:div
      [:div
       [:div.m-t-5

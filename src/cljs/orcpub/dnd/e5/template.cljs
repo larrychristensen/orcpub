@@ -552,7 +552,7 @@ Fire Starter. The device produces a miniature flame, which you can use to light 
     :size :medium
     :speed 30
     :languages ["Common" "Elvish"]
-    :selections [(opt5e/ability-increase-selection (disj (set char5e/ability-keys) :cha) 2 false)
+    :selections [(opt5e/ability-increase-selection (disj (set char5e/ability-keys) :cha) 2 true)
                  (opt5e/skill-selection 2)
                  (opt5e/language-selection opt5e/languages 1)]
     :modifiers [(mod5e/saving-throw-advantage [:charmed])]}))
