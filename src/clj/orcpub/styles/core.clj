@@ -90,6 +90,10 @@
    [:.f-w-600
     {:font-weight 600}]
 
+   [:.m-r--10
+    {:margin-right "-10px"}]
+   [:.m-r--5
+    {:margin-right "-5px"}]
    [:.m-r-2
     {:margin-right "2px"}]
    [:.m-r-5
@@ -122,6 +126,10 @@
    [:.m-b-20
     {:margin-bottom "20px"}]
 
+   [:.m-l--10
+    {:margin-left "-10px"}]
+   [:.m-l--5
+    {:margin-left "-5px"}]
    [:.m-l-30
     {:margin-left "30px"}]
 

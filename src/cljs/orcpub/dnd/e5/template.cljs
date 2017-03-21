@@ -42,6 +42,9 @@
                    [other-k other-v] (a-vec other-index)]
                (assoc a k other-v other-k v))))))
 
+(defn ability-bonus-str [ability-value]
+  (common/bonus-str (int (/ (- ability-value 10) 2))))
+
 (defn abilities-standard [app-state]
   [:div.flex.justify-cont-s-b
     (let [abilities (or (get-raw-abilities app-state) (char5e/abilities 15 14 13 12 10 8))
@@ -52,7 +55,8 @@
           ^{:key k}
           [:div.m-t-10.t-a-c
            [:div.uppercase (name k)]
-           [:div.f-s-18 v]
+           [:div.f-s-18.f-w-b v]
+           [:div.f-6-12.f-w-n (ability-bonus-str v)]
            [:div.f-s-16
             [:i.fa.fa-chevron-circle-left.orange
              {:on-click (swap-abilities app-state i (dec i) k v)}]
@@ -89,8 +93,8 @@
         points-remaining (- point-buy-points points-used)]
     [:div
      [:div.m-t-5
-      [:span.f-w-b "Points Remaining: "]
-      [:span.f-w-n points-remaining]]
+      [:span.f-w-n "Points Remaining: "]
+      [:span.f-w-b points-remaining]]
      [:div.flex.justify-cont-s-b
       (doall
        (map-indexed
@@ -98,7 +102,8 @@
           ^{:key k}
           [:div.m-t-10.t-a-c
            [:div.uppercase (name k)]
-           [:div.f-s-18 v]
+           [:div.f-s-18.f-w-b v]
+           [:div.f-6-12.f-w-n (ability-bonus-str v)]
            [:div.f-s-16
             [:i.fa.fa-minus-circle.orange
              {:class-name (if (or (<= v 8) (>= points-remaining point-buy-points)) "opacity-5 cursor-disabled")
@@ -109,7 +114,7 @@
         abilities-vec))]]))
 
 (defn abilities-entry [app-state]
-  [:div.flex
+  [:div.flex.m-l--10.m-r--10
    (let [abilities (or (get-raw-abilities app-state) (char5e/abilities 15 14 13 12 10 8))
          abilities-vec (vec abilities)]
      (doall
@@ -123,7 +128,8 @@
             :on-change (fn [e] (let [value (.-value (.-target e))
                                      new-v (if (not (s/blank? value))
                                              (js/parseInt value))]
-                                 (swap! app-state assoc-in [:character ::entity/options :ability-scores ::entity/value k] new-v)))}]])
+                                 (swap! app-state assoc-in [:character ::entity/options :ability-scores ::entity/value k] new-v)))}]
+          [:div.f-6-12.f-w-n (ability-bonus-str (k abilities))]])
        char5e/ability-keys)))])
 
 (declare template-selections)
