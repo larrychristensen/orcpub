@@ -80,6 +80,7 @@
 
 (def point-buy-points 27)
 
+
 (defn point-buy-abilities [app-state]
   (let [abilities (or (opt5e/get-raw-abilities app-state)
                       (char5e/abilities 8 8 8 8 8 8))
