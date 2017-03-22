@@ -3,7 +3,9 @@
             [io.pedestal.http.route :as route]
             [io.pedestal.test :as test]
             [io.pedestal.interceptor.error :as error-int]
-            [clojure.java.io :as io])
+            [clojure.java.io :as io]
+            [orcpub.dnd.e5.options :as opt5e]
+            [orcpub.dnd.e5.character :as char5e])
   (:import [org.apache.pdfbox.pdmodel.interactive.form PDCheckBox PDComboBox PDListBox PDRadioButton PDTextField]
            [org.apache.pdfbox.pdmodel PDDocument]
            [java.io ByteArrayOutputStream ByteArrayInputStream])
@@ -116,12 +118,15 @@
        context))})
 
 (def font-sizes
-  {:features-and-traits 8
-   :features-and-traits-2 8
-   :attacks-and-spellcasting 8
-   :backstory 8
-   :other-profs 8
-   :equipment 8})
+  (merge
+   (zipmap (map :key opt5e/skills) (repeat 8))
+   (zipmap (map (fn [k] (keyword (str (name k) "-save"))) char5e/ability-keys) (repeat 8))
+   {:features-and-traits 8
+    :features-and-traits-2 8
+    :attacks-and-spellcasting 8
+    :backstory 8
+    :other-profs 8
+    :equipment 8}))
 
 (defn write-fields! [doc fields flatten]
   (let [catalog (.getDocumentCatalog doc)
@@ -131,8 +136,7 @@
       (let [field (.getField form (name k))]
         (when field
           (if (and (font-sizes k) flatten)
-            (do (prn "FONT SIXE" (font-sizes k))
-             (.setDefaultAppearance field (str "/Helv " (font-sizes k) " Tf 0 0 0 rg"))))
+            (.setDefaultAppearance field (str "/Helv " (font-sizes k) " Tf 0 0 0 rg")))
           (.setValue
            field
            (cond 
