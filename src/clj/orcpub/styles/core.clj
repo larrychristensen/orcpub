@@ -215,9 +215,6 @@
    [:.underline
     {:text-decoration :underline}]
 
-   [:.fa-caret-down:hover
-    {:background-color :white}]
-
    [:.p-b-10
     {:padding-bottom "10px"}]
    [:.p-b-40

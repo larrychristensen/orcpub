@@ -85,7 +85,7 @@
 (defn apply-modifiers [entity modifiers]
   (reduce
    (fn [e {conds ::conditions :as mod}]
-     (if (every? #(% e) conds)
+     (if (and mod (every? #(% e) conds))
        ((modifier-fn mod) e)
        e))
    entity

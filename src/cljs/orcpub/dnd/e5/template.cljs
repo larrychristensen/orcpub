@@ -1208,9 +1208,9 @@ Fire Starter. The device produces a miniature flame, which you can use to light 
                       [(tool-prof-selection tool-options :tool-selection (fn [c] (= kw (first (:classes c)))))])
                     (if (seq multiclass-tool-options)
                       [(tool-prof-selection multiclass-tool-options :multiclass-tool-selection (fn [c] (not= kw (first (:classes c)))))])
-                    (class-weapon-options weapon-choices)
-                    (class-armor-options armor-choices)
-                    (class-equipment-options equipment-choices)
+                    (if weapon-choices (class-weapon-options weapon-choices))
+                    (if armor-choices (class-armor-options armor-choices))
+                    (if equipment-choices (class-equipment-options equipment-choices))
                     (if skill-options
                       [(class-skill-selection skill-options :skill-proficiency (fn [c] (= kw (first (:classes c)))))])
                     (if multiclass-skill-options
@@ -1231,23 +1231,28 @@ Fire Starter. The device produces a miniature flame, which you can use to light 
       :modifiers (vec
                   (concat
                    modifiers
-                   (armor-prof-modifiers armor-profs kw)
-                   (weapon-prof-modifiers weapon-profs kw)
-                   (tool-prof-modifiers tool kw)
-                   (mapv
-                    (fn [[k num]]
-                      (mod5e/weapon k num))
-                    weapons)
-                   (mapv
-                    (fn [[k num]]
-                      (mod5e/armor k num))
-                    armor)
-                   (mapv
-                    (fn [[k num]]
-                      (mod5e/equipment k num))
-                    equipment)
-                   [(mod5e/cls kw)
-                    (apply mod5e/saving-throws kw save-profs)]))})))
+                   (if armor-profs (armor-prof-modifiers armor-profs kw))
+                   (if weapon-profs (weapon-prof-modifiers weapon-profs kw))
+                   (if tool (tool-prof-modifiers tool kw))
+                   (if weapons
+                     (mapv
+                      (fn [[k num]]
+                        (mod5e/weapon k num))
+                      weapons))
+                   (if armor
+                     (mapv
+                      (fn [[k num]]
+                        (mod5e/armor k num))
+                      armor))
+                   (if equipment
+                     (mapv
+                      (fn [[k num]]
+                        (mod5e/equipment k num))
+                      equipment))
+                   (remove
+                    nil?
+                    [(mod5e/cls kw)
+                     (if save-profs (apply mod5e/saving-throws kw save-profs))])))})))
 
 
 (defn class-level [levels class-kw]
@@ -3994,6 +3999,15 @@ You might also have ties to a specific temple dedicated to your chosen deity or 
 
 (defn template-selections [app-state]
   [(t/selection-cfg
+    {:name "Optional Content"
+     :options [(t/option-cfg
+                {:name "Sword Coast Adventurer's Guide"})
+               (t/option-cfg
+                {:name "Volo's Guide to Monsters"})]
+     :multiselect? true
+     :min 0
+     :max nil})
+   (t/selection-cfg
     {:name "Base Ability Scores"
      :key :ability-scores
      :help [:div
@@ -4143,7 +4157,7 @@ You might also have ties to a specific temple dedicated to your chosen deity or 
                       ?abilities)
     ?save-bonuses (reduce-kv
                    (fn [m k v]
-                     (assoc m k (+ v (if (?saving-throws k) ?prof-bonus 0))))
+                     (assoc m k (+ v (if (and ?saving-throws (?saving-throws k)) ?prof-bonus 0))))
                    {}
                    ?ability-bonuses)
     ?total-levels (apply + (map (fn [[k {l :class-level}]] l) ?levels))

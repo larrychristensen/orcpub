@@ -8,7 +8,10 @@
                             [orcpub.modifiers :as mods])))
 
 (defn cls [cls-key]
-  (mods/vec-mod ?classes cls-key))
+  (mods/modifier ?classes
+                 (if (not ((set ?classes) cls-key))
+                   (conj ?classes cls-key)
+                   ?classes)))
 
 (defn subclass [cls-key subclass-key]
   (mods/modifier ?levels (assoc-in ?levels [cls-key :subclass] subclass-key)))
