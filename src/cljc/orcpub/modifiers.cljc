@@ -86,6 +86,7 @@
   (reduce
    (fn [e {conds ::conditions :as mod}]
      (if (nil? mod)
+       #?(:clj (prn "MODIFIER IS NULL!!!!!!!!!!!!!!"))
        #?(:cljs (js/console.warn "MODIFIER IS NULL!!!!!!!!!!")))
      (if (and mod (every? #(% e) conds))
        ((modifier-fn mod) e)
