@@ -115,20 +115,30 @@
              (assoc-in [:request :path-params :item-id] item-id)))                      
        context))})
 
+(def font-sizes
+  {:features-and-traits 8
+   :features-and-traits-2 8
+   :attacks-and-spellcasting 8
+   :backstory 8
+   :other-profs 8
+   :equipment 8})
+
 (defn write-fields! [doc fields flatten]
   (let [catalog (.getDocumentCatalog doc)
         form (.getAcroForm catalog)]
     (.setNeedAppearances form true)
     (doseq [[k v] fields]
       (let [field (.getField form (name k))]
-        (do
-          (if field
-            (.setValue
-             field
-             (cond 
-               (instance? PDCheckBox field) (if v "Yes" "Off")
-               (instance? PDTextField field) (str v)
-               :else nil))))))
+        (when field
+          (if (and (font-sizes k) flatten)
+            (do (prn "FONT SIXE" (font-sizes k))
+             (.setDefaultAppearance field (str "/Helv " (font-sizes k) " Tf 0 0 0 rg"))))
+          (.setValue
+           field
+           (cond 
+             (instance? PDCheckBox field) (if v "Yes" "Off")
+             (instance? PDTextField field) (str v)
+             :else nil)))))
     (when flatten
       (.setNeedAppearances form false)
       (.flatten form))))

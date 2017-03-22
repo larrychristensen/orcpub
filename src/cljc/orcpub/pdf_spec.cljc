@@ -7,7 +7,8 @@
             [orcpub.dnd.e5.spells :as spells]
             [orcpub.dnd.e5.display :as disp5e]
             [orcpub.dnd.e5.weapons :as weapon5e]
-            [orcpub.dnd.e5.armor :as armor5e]))
+            [orcpub.dnd.e5.armor :as armor5e]
+            [orcpub.dnd.e5.magic-items :as mi5e]))
 
 (defn entity-vals [built-char kws]
   (reduce
@@ -79,13 +80,24 @@
        actions)))))
 
 (defn traits-fields [built-char]
-  {:features-and-traits (s/join
-                         "\n\n"
-                         (remove nil?
-                                 [(actions-string "----------Bonus Actions----------" (sort-by :name (es/entity-val built-char :bonus-actions)))
-                                  (actions-string "---------------Actions--------------" (sort-by :name (es/entity-val built-char :actions)))
-                                  (actions-string "-------------Reactions-------------" (sort-by :name (es/entity-val built-char :reactions)))]))
-   :features-and-traits-2 (traits-string (sort-by :name (es/entity-val built-char :traits)))})
+  (let [bonus-actions (sort-by :name (es/entity-val built-char :bonus-actions))
+        actions (sort-by :name (es/entity-val built-char :actions))
+        reactions (sort-by :name (es/entity-val built-char :reactions))
+        traits (sort-by :name (es/entity-val built-char :traits))
+        traits-str (traits-string traits)
+        actions? (or (seq bonus-actions)
+                     (seq actions)
+                     (seq reactions))]
+    {:features-and-traits (if actions?
+                            (s/join
+                             "\n\n"
+                             (remove nil?
+                                     [(actions-string "----------Bonus Actions----------" bonus-actions)
+                                      (actions-string "---------------Actions--------------" actions)
+                                      (actions-string "-------------Reactions-------------" reactions)
+                                      (if traits "\n\n(additional features & traits on page 2)")]))
+                            traits-str)
+     :features-and-traits-2 (if actions? traits-str)}))
 
 (defn attacks-string [attacks]
   (s/join
@@ -96,13 +108,16 @@
     attacks)))
 
 (defn equipment-fields [built-char]
-  (let [equipment (es/entity-val built-char :equipment)]
+  (let [equipment (es/entity-val built-char :equipment)
+        magic-items (es/entity-val built-char :magic-items)
+        all-equipment (merge equipment magic-items)
+        all-equipment-map (merge opt5e/equipment-map mi5e/other-magic-item-map)]
     {:equipment (s/join
                  "; "
                  (map
                   (fn [[kw count]]
-                    (str (:name (opt5e/equipment-map kw)) " (" count ")"))
-                  equipment))}))
+                    (str (:name (all-equipment-map kw)) " (" count ")"))
+                  all-equipment))}))
 
 (def level-max-spells
   {0 8
