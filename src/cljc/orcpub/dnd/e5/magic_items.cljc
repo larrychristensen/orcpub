@@ -1,7 +1,8 @@
 (ns orcpub.dnd.e5.magic-items
   (:require [orcpub.common :as common]
             [orcpub.dnd.e5.weapons :as weapons]
-            [orcpub.dnd.e5.armor :as armor5e]))
+            [orcpub.dnd.e5.armor :as armor5e]
+            [orcpub.dnd.e5.equipment :as equip5e]))
 
 (defn sword? [w]
   (= :sword (:subtype w)))
@@ -2220,6 +2221,11 @@ The boots regain 2 hours of flying capability for every 12 hours they aren’t i
 (def magic-weapon-map
   (common/map-by-key magic-weapons))
 
+(def all-weapons-map
+  (merge
+   weapons/weapons-map
+   magic-weapon-map))
+
 (def magic-armor
   (filter
    #(= :armor (:item-type %))
@@ -2228,6 +2234,11 @@ The boots regain 2 hours of flying capability for every 12 hours they aren’t i
 (def magic-armor-map
   (common/map-by-key magic-armor))
 
+(def all-armor-map
+  (merge
+   armor5e/armor-map
+   magic-armor-map))
+
 (def other-magic-items
   (remove
    #(#{:armor :weapon} (:item-type %))
@@ -2235,3 +2246,8 @@ The boots regain 2 hours of flying capability for every 12 hours they aren’t i
 
 (def other-magic-item-map
   (common/map-by-key other-magic-items))
+
+(def all-equipment-map
+  (merge
+   equip5e/equipment-map
+   other-magic-item-map))

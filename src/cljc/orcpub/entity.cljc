@@ -197,8 +197,13 @@
         ordered-mods (order-modifiers modifiers mod-order)]
     (mods/apply-modifiers base ordered-mods)))
 
-(defn build [raw-entity template]
+(defn build-aux [raw-entity template]
   (apply-options raw-entity template))
+
+(def memoized-build-aux (memoize build-aux))
+
+(defn build [raw-entity template]
+  (memoized-build-aux raw-entity template))
 
 (declare get-template-selection-path)
 

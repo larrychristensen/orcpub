@@ -126,7 +126,10 @@
     :attacks-and-spellcasting 8
     :backstory 8
     :other-profs 8
-    :equipment 8}))
+    :equipment 8
+    :weapon-name-1 8
+    :weapon-name-2 8
+    :weapon-name-3 8}))
 
 (defn write-fields! [doc fields flatten]
   (let [catalog (.getDocumentCatalog doc)

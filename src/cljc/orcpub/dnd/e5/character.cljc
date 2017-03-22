@@ -131,11 +131,19 @@
 (defn magic-armor-inventory [built-char]
   (es/entity-val built-char :magic-armor))
 
+(defn all-armor-inventory [built-char]
+  (merge (normal-armor-inventory built-char)
+         (magic-armor-inventory built-char)))
+
 (defn normal-weapons-inventory [built-char]
   (es/entity-val built-char :weapons))
 
 (defn magic-weapons-inventory [built-char]
   (es/entity-val built-char :magic-weapons))
+
+(defn all-weapons-inventory [built-char]
+  (merge (normal-weapons-inventory built-char)
+         (magic-weapons-inventory built-char)))
 
 (defn normal-equipment-inventory [built-char]
   (es/entity-val built-char :equipment))
@@ -184,3 +192,13 @@
 
 (defn saving-throw-advantages [built-char]
   (es/entity-val built-char :saving-throw-advantage))
+
+(defn weapon-attack-modifier [built-char weapon finesse?]
+  ((es/entity-val built-char :weapon-attack-modifier)
+   weapon
+   finesse?))
+
+(defn weapon-damage-modifier [built-char weapon finesse?]
+  ((es/entity-val built-char :weapon-damage-modifier)
+   weapon
+   finesse?))

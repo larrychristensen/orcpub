@@ -462,13 +462,18 @@
         simple-options? [dropdown-selector path option-paths selection built-char raw-char built-template (and collapsible? collapsed?)]
         :else [list-selector path option-paths selection (and collapsible? collapsed?) built-char raw-char built-template collapsed-paths stepper-selection-path])]]))
 
-(defn make-path-map [character]
+(defn make-path-map-aux [character]
   (let [flat-options (entity/flatten-options (::entity/options character))]
     (reduce
      (fn [m v]
        (update-in m (::t/path v) (fn [c] (or c {}))))
      {}
      flat-options)))
+
+(def memoized-make-path-map-aux (memoize make-path-map-aux))
+
+(defn make-path-map [character]
+  (memoized-make-path-map-aux character))
 
 (defn abilities-radar [size abilities ability-bonuses]
   (let [d size
@@ -596,10 +601,9 @@
                        values)]
                      true)))
 
+
 (defn armor-class-section [armor-class armor-class-with-armor equipped-armor]
-  (let [all-armor (merge armor5e/armor-map
-                         mi5e/magic-armor-map)
-        equipped-armor-full (map (comp all-armor first) equipped-armor)
+  (let [equipped-armor-full (map (comp mi5e/all-armor-map first) equipped-armor)
         shields (filter #(= :shield (:type %)) equipped-armor-full)
         armor (filter #(not= :shield (:type %)) equipped-armor-full)
         display-rows (for [a (conj armor nil)
@@ -643,8 +647,7 @@
          (doall
           (map
            (fn [[armor-kw _]]
-             (let [armor ((merge armor5e/armor-map
-                                 mi5e/magic-armor-map) armor-kw)
+             (let [armor (mi5e/all-armor-map armor-kw)
                    speed (speed-with-armor armor)]
                ^{:key armor-kw}
                [:div
@@ -863,9 +866,9 @@
                                                                         (str (name condition)
                                                                              (if qualifier (str " (" qualifier ")"))))]
        [spells-known-section spells-known]
-       [equipment-section "Weapons" (concat magic-weapons weapons) (merge weapon5e/weapons-map mi5e/magic-weapon-map)]
-       [equipment-section "Armor" (merge magic-armor armor) (merge armor5e/armor-map mi5e/magic-armor-map)]
-       [equipment-section "Equipment" (concat magic-items equipment) (merge opt5e/equipment-map mi5e/magic-item-map)]
+       [equipment-section "Weapons" (concat magic-weapons weapons) mi5e/all-weapons-map]
+       [equipment-section "Armor" (merge magic-armor armor) mi5e/all-armor-map]
+       [equipment-section "Equipment" (concat magic-items equipment) mi5e/all-equipment-map]
        [attacks-section attacks]
        [actions-section "Bonus Actions" bonus-actions]
        [actions-section "Reactions" reactions]
@@ -1529,15 +1532,14 @@
       (.submit (.getElementById js/document "download-form")))))
 
 (defn download-form [built-char]
-  (let [spec (pdf-spec/make-spec built-char)]
-    [:form.download-form
-     {:id "download-form"
-      :action (if (.startsWith js/window.location.href "http://localhost")
-                "http://localhost:8890/character.pdf"
-                "/character.pdf")
-      :method "POST"
-      :target "_blank"}
-     [:input {:type "hidden" :name "body" :id "fields-input"}]]))
+  [:form.download-form
+   {:id "download-form"
+    :action (if (.startsWith js/window.location.href "http://localhost")
+              "http://localhost:8890/character.pdf"
+              "/character.pdf")
+    :method "POST"
+    :target "_blank"}
+   [:input {:type "hidden" :name "body" :id "fields-input"}]])
 
 (defn header [built-char]
   [:div.flex.align-items-c.justify-cont-s-b.w-100-p
@@ -1546,7 +1548,6 @@
     {:on-click (export-pdf built-char)
      :style {:height "40px"}}
     [:span "Print"]]])
-
 
 (defn character-builder []
   ;;(cljs.pprint/pprint (:character @app-state))

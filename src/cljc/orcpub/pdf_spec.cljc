@@ -2,6 +2,7 @@
   (:require [clojure.string :as s]
             [orcpub.common :as common]
             [orcpub.entity-spec :as es]
+            [orcpub.dice :as dice]
             [orcpub.dnd.e5.character :as char5e]
             [orcpub.dnd.e5.options :as opt5e]
             [orcpub.dnd.e5.spells :as spells]
@@ -95,28 +96,29 @@
                                      [(actions-string "----------Bonus Actions----------" bonus-actions)
                                       (actions-string "---------------Actions--------------" actions)
                                       (actions-string "-------------Reactions-------------" reactions)
-                                      (if traits "\n\n(additional features & traits on page 2)")]))
+                                      (if traits "(additional features & traits on page 2)")]))
                             traits-str)
      :features-and-traits-2 (if actions? traits-str)}))
+
+(defn attack-string [attack]
+  (str "- " (trait-string (:name attack) (disp5e/attack-description attack))))
 
 (defn attacks-string [attacks]
   (s/join
    "\n\n"
    (map
-    (fn [attack]
-      (trait-string (:name attack) (disp5e/attack-description attack)))
+    attack-string
     attacks)))
 
 (defn equipment-fields [built-char]
   (let [equipment (es/entity-val built-char :equipment)
         magic-items (es/entity-val built-char :magic-items)
-        all-equipment (merge equipment magic-items)
-        all-equipment-map (merge opt5e/equipment-map mi5e/other-magic-item-map)]
+        all-equipment (merge equipment magic-items)]
     {:equipment (s/join
                  "; "
                  (map
                   (fn [[kw count]]
-                    (str (:name (all-equipment-map kw)) " (" count ")"))
+                    (str (:name (mi5e/all-equipment-map kw)) " (" count ")"))
                   all-equipment))}))
 
 (def level-max-spells
@@ -230,24 +232,66 @@
        (profs-paragraph armor-profs armor5e/armor-map "Armor")
        (profs-paragraph languages opt5e/language-map "Language")]))))
 
+(defn damage-str [die die-count mod damage-type]
+  (str (dice/dice-string die-count die mod)
+       " "
+       (name damage-type)))
+
+(defn attacks-and-spellcasting-fields [built-char]
+  (let [all-weapons (map mi5e/all-weapons-map (keys (char5e/all-weapons-inventory built-char)))
+        weapon-fields (mapcat
+                       (fn [{:keys [name damage-die damage-die-count damage-type] :as weapon}]
+                         (let [versatile (:versatile weapon)
+                               normal-damage-modifier (char5e/weapon-damage-modifier built-char weapon false)
+                               finesse-damage-modifier (char5e/weapon-damage-modifier built-char weapon true)
+                               normal {:name (:name weapon)
+                                       :attack-bonus (char5e/weapon-attack-modifier built-char weapon false)
+                                       :damage (damage-str damage-die damage-die-count normal-damage-modifier damage-type)}]
+                           (remove
+                            nil?
+                            [normal
+                             (if (:versatile weapon)
+                               {:name (str (:name weapon) " (two-handed)")
+                                :attack-bonus (char5e/weapon-attack-modifier built-char weapon false)
+                                :damage (damage-str (:damage-die versatile) (:damage-die-count versatile) normal-damage-modifier damage-type)})
+                             (if (:finesse? weapon)
+                               {:name (str (:name weapon) " (finesse)")
+                                :attack-bonus (char5e/weapon-attack-modifier built-char weapon true)
+                                :damage (damage-str damage-die damage-die-count finesse-damage-modifier damage-type)})])))
+                       all-weapons)
+        first-3-weapons (take 3 weapon-fields)
+        rest-weapons (drop 3 weapon-fields)]
+    (apply merge
+     {:attacks-and-spellcasting (s/join "\n"
+                                        (concat (map
+                                                 attack-string
+                                                 (es/entity-val built-char :attacks))
+                                                (map
+                                                 (fn [{:keys [name attack-bonus damage]}]
+                                                   (str "- " name ". " (common/bonus-str attack-bonus) ", " damage))
+                                                 rest-weapons)))}
+     (map-indexed
+      (fn [i {:keys [name attack-bonus damage]}]
+        {(keyword (str "weapon-name-" (inc i))) name
+         (keyword (str "weapon-attack-bonus-" (inc i))) (common/bonus-str attack-bonus)
+         (keyword (str "weapon-damage-" (inc i))) damage})
+      first-3-weapons))))
 
 (defn make-spec [built-char]
-  (let [race (es/entity-val built-char :race)
-        subrace (es/entity-val built-char :subrace)
+  (let [race (char5e/race built-char)
+        subrace (char5e/subrace built-char)
         abilities (char5e/ability-values built-char)
-        saving-throws (set (es/entity-val built-char :saving-throws))
-        unarmored-armor-class (es/entity-val built-char :armor-class)
-        ac-with-armor-fn (es/entity-val built-char :armor-class-with-armor)
-        equipped-armor (merge (es/entity-val built-char :armor)
-                               (es/entity-val built-char :magic-armor))
+        saving-throws (set (char5e/saving-throws built-char))
+        unarmored-armor-class (char5e/base-armor-class built-char)
+        ac-with-armor-fn (char5e/armor-class-with-armor built-char)
+        all-armor-inventory (map mi5e/all-armor-map (char5e/all-armor-inventory built-char))
+        equipped-armor (armor5e/non-shields all-armor-inventory)
+        equipped-shields (armor5e/shields all-armor-inventory)
         has-shield? (:shield equipped-armor)
-        armored-armor-classes (map
-                               (fn [[kw _]]
-                                 (ac-with-armor-fn (armor5e/armor-map kw)))
-                               (dissoc equipped-armor :shield))
-        unshielded-armor-classes (conj armored-armor-classes unarmored-armor-class)
-        armor-classes (if has-shield? (map (partial + 2) unshielded-armor-classes) unshielded-armor-classes)
-        max-armor-class (apply max armor-classes)
+        all-armor-classes (for [armor (conj equipped-armor nil)
+                                shield (conj equipped-shields nil)]
+                            (ac-with-armor-fn armor shield))
+        max-armor-class (apply max all-armor-classes)
         levels (char5e/levels built-char)
         total-hit-dice (s/join
                         " / "
@@ -272,8 +316,8 @@
       :flaws (es/entity-val built-char :flaws)
       :backstory (es/entity-val built-char :description)
       :character-name (es/entity-val built-char :character-name)
-      :player-name (es/entity-val built-char :player-name)
-      :attacks-and-spellcasting (attacks-string (es/entity-val built-char :attacks))}
+      :player-name (es/entity-val built-char :player-name)}
+     (attacks-and-spellcasting-fields built-char)
      (skill-fields built-char)
      abilities
      (ability-bonuses built-char)

@@ -86,3 +86,9 @@
 
 (def armor-map
   (zipmap (map :key armor) armor))
+
+(defn non-shields [armor]
+  (filter #(not= :shield (:type %)) armor))
+
+(defn shields [armor]
+  (filter #(not= :shield (:type %)) armor))

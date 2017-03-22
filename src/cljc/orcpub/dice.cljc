@@ -1,5 +1,6 @@
 (ns orcpub.dice
-  (:require [clojure.spec :as spec]))
+  (:require [clojure.spec :as spec]
+            [orcpub.common :as common]))
 
 (defn die-roll [sides]
   (inc (rand-int sides)))
@@ -10,6 +11,10 @@
          (drop (or drop-num 0)
                (sort
                 (take num (repeatedly #(die-roll 6)))))))
+
+(defn dice-string [die die-count modifier]
+  (str die "d" die-count (common/mod-str modifier)))
+
 (spec/def ::num pos-int?)
 (spec/def ::sides pos-int?)
 (spec/def ::drop-num pos-int?)

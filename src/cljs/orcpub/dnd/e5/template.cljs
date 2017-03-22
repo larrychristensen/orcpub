@@ -4131,7 +4131,7 @@ You might also have ties to a specific temple dedicated to your chosen deity or 
    {?armor-class (+ 10 (?ability-bonuses :dex))
     ?max-medium-armor-bonus 2
     ?armor-stealth-disadvantage? (fn [armor]
-                                  (:stealth-disadvantage? armor))
+                                   (:stealth-disadvantage? armor))
     ?armor-dex-bonus (fn [armor]
                        (let [dex-bonus (?ability-bonuses :dex)]
                          (case (:type armor)
@@ -4190,26 +4190,36 @@ You might also have ties to a specific temple dedicated to your chosen deity or 
     ?num-attacks 1
     ?critical #{20}
     ?has-weapon-prof? (fn [weapon]
-                       (or (?weapon-profs (:key weapon))
-                           (?weapon-profs (:type weapon))))
+                        (or (?weapon-profs (:key weapon))
+                            (?weapon-profs (:type weapon))))
     ?weapon-prof-bonus (fn [weapon]
                          (if (?has-weapon-prof? weapon)
                            ?prof-bonus
                            0))
     ?weapon-attack-modifier (fn [weapon finesse?]
-                              (+ (?weapon-prof-bonus weapon)
-                                 (or (:attack-bonus weapon) 0)
-                                 (if (:melee? weapon)
-                                   (+ (if (and finesse?
-                                               (:finesse? weapon))
-                                        (?ability-bonuses :dex)
-                                        (?ability-bonuses :str))
-                                      (or ?melee-attack-bonus 0))
-                                   (+ (if (and finesse?
-                                               (:finesse? weapon))
-                                        (?ability-bonuses :str)
-                                        (?ability-bonuses :dex))
-                                      (or ?ranged-attack-bonus 0)))))
+                              (let [definitely-finesse? (and finesse?
+                                                             (:finesse? weapon))]
+                                (+ (?weapon-prof-bonus weapon)
+                                   (or (:magical-attack-bonus weapon) 0)
+                                   (or (:attack-bonus weapon) 0)
+                                   (if (:melee? weapon)
+                                     (+ (?ability-bonuses
+                                         (if definitely-finesse? :dex :str))
+                                        (or ?melee-attack-bonus 0))
+                                     (+ (?ability-bonuses
+                                         (if definitely-finesse? :str :dex))
+                                        (or ?ranged-attack-bonus 0))))))
+    ?weapon-damage-modifier (fn [weapon finesse?]
+                              (let [definitely-finesse? (and finesse?
+                                                             (:finesse? weapon))
+                                    melee? (:melee? weapon)]
+                                (+ (or (:magical-damage-bonus weapon) 0)
+                                   (or (:damage-bonus weapon) 0)
+                                   (?ability-bonuses
+                                    (if (or (and melee? (not definitely-finesse?))
+                                            (and (not melee?) definitely-finesse?))
+                                      :str
+                                      :dex)))))
     ?spell-attack-modifier (fn [ability-kw]
                              (+ ?prof-bonus (?ability-bonuses ability-kw)))
     ?spell-save-dc (fn [ability-kw]
