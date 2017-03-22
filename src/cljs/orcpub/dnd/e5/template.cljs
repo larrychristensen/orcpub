@@ -94,18 +94,20 @@
       (doall
        (map-indexed
         (fn [i [k v]]
-          ^{:key k}
-          [:div.m-t-10.t-a-c
-           [:div.uppercase (name k)]
-           [:div.f-s-18.f-w-b v]
-           [:div.f-6-12.f-w-n (opt5e/ability-bonus-str v)]
-           [:div.f-s-16
-            [:i.fa.fa-minus-circle.orange
-             {:class-name (if (or (<= v 8) (>= points-remaining point-buy-points)) "opacity-5 cursor-disabled")
-              :on-click (fn [_] (set-ability! app-state k (dec v)))}]
-            [:i.fa.fa-plus-circle.orange.m-l-5
-             {:class-name (if (or (>= v 15) (zero? points-remaining)) "opacity-5 cursor-disabled")
-              :on-click (fn [_] (set-ability! app-state k (inc v)))}]]])
+          (let [increase-disabled? (or (>= v 15) (<= points-remaining 0))
+                decrease-disabled? (or (<= v 8) (>= points-remaining point-buy-points))]
+            ^{:key k}
+            [:div.m-t-10.t-a-c
+             [:div.uppercase (name k)]
+             [:div.f-s-18.f-w-b v]
+             [:div.f-6-12.f-w-n (opt5e/ability-bonus-str v)]
+             [:div.f-s-16
+              [:i.fa.fa-minus-circle.orange
+               {:class-name (if decrease-disabled? "opacity-5 cursor-disabled")
+                :on-click (fn [_] (if (not decrease-disabled?) (set-ability! app-state k (dec v))))}]
+              [:i.fa.fa-plus-circle.orange.m-l-5
+               {:class-name (if increase-disabled? "opacity-5 cursor-disabled")
+                :on-click (fn [_] (if (not increase-disabled?) (set-ability! app-state k (inc v))))}]]]))
         abilities-vec))]]))
 
 (defn abilities-entry [app-state]
