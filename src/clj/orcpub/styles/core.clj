@@ -247,8 +247,10 @@
 
    [:.b-1
     {:border "1px solid"}]
-     [:.b-w-3
+   [:.b-w-3
     {:border-width "3px"}]
+   [:.b-w-5
+    {:border-width "5px"}]
 
    [:.b-color-gray
     {:border-color "rgba(255,255,255,0.2)"}]

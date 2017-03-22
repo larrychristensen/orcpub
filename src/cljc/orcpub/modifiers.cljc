@@ -85,6 +85,8 @@
 (defn apply-modifiers [entity modifiers]
   (reduce
    (fn [e {conds ::conditions :as mod}]
+     (if (nil? mod)
+       #?(:cljs (js/console.warn "MODIFIER IS NULL!!!!!!!!!!")))
      (if (and mod (every? #(% e) conds))
        ((modifier-fn mod) e)
        e))

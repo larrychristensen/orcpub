@@ -1206,7 +1206,7 @@
         has-selections? (seq selections)]
     ^{:key key}
     [:div.p-10.b-1.b-rad-5.m-5.b-orange.hover-shadow
-     {:class-name (s/join " " (remove nil? [(if selected? "b-w-3")
+     {:class-name (s/join " " (remove nil? [(if selected? "b-w-5")
                                             (if selectable? "pointer")
                                             (if (not selectable?) "opacity-5")]))
       :on-click (fn [e]
