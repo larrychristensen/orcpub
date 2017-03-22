@@ -1295,7 +1295,6 @@
      options))])
 
 (defn option-item [character built-template option-path all-selections quantity? removeable? parent-selection i {:keys [::t/name ::t/key ::t/help ::t/select-fn ::t/selections] :as option}]
-  (prn "OPTION ITEM")
   (let [new-option-path (conj option-path key)
         value-path (entity/get-option-value-path built-template character new-option-path)
         has-selections? (boolean (seq selections))
@@ -1550,19 +1549,17 @@
 
 
 (defn character-builder []
-  (cljs.pprint/pprint (:character @app-state))
+  ;;(cljs.pprint/pprint (:character @app-state))
   ;;(js/console.log "APP STATE" @app-state)
   (let [selected-plugin-options (into #{}
                                       (map ::entity/key)
                                       (get-in @app-state [:character ::entity/options :optional-content]))
-        _ (prn "SELECTED PLUGINS" selected-plugin-options)
         selected-plugins (map
                           :selections
                           (filter
                            (fn [{:keys [key]}]
                              (selected-plugin-options key))
                            plugins))
-        _ (js/console.log "SELECTED PLGUIGS OBS" selected-plugins)
         merged-template (if (seq selected-plugins)
                           (update template
                                   ::t/selections
@@ -1584,7 +1581,7 @@
         plugins (:plugins @app-state)
         stepper-dismissed? (:stepper-dismissed @app-state)]
     ;(js/console.log "BUILT TEMPLAT" built-template)
-    (print-char built-char)
+    ;(print-char built-char)
     [:div.app
      {:on-scroll (fn [e]
                    (let [app-header (js/document.getElementById "app-header")
