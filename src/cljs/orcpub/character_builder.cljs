@@ -622,10 +622,10 @@
        (doall (rest display-rows))]]]))
 
 (defn speed-section [built-char]
-  (let [speed (es/entity-val built-char :speed)
-        speed-with-armor (es/entity-val built-char :speed-with-armor)
-        unarmored-speed-bonus (es/entity-val built-char :unarmored-speed-bonus)
-        equipped-armor (es/entity-val built-char :armor)]
+  (let [speed (char5e/base-land-speed built-char)
+        speed-with-armor (char5e/land-speed-with-armor built-char)
+        unarmored-speed-bonus (char5e/unarmored-speed-bonus built-char)
+        equipped-armor (char5e/normal-armor-inventory built-char)]
     [display-section
      "Speed"
      "fa-tachometer f-s-24"
@@ -657,7 +657,7 @@
            [:span
             [:span speed]
             [:span.display-section-qualifier-text "(armored)"]]]))]
-     (let [swim-speed (es/entity-val built-char :swimming-speed)]
+     (let [swim-speed (char5e/base-swimming-speed built-char)]
        (if swim-speed
          [:div [:span swim-speed] [:span.display-section-qualifier-text "(swim)"]]))]))
 
@@ -746,34 +746,34 @@
   (or (-> prof-kw prof-map :name) (common/safe-name prof-kw)))
 
 (defn character-display [built-char]
-  (let [race (es/entity-val built-char :race)
-        subrace (es/entity-val built-char :subrace)
-        classes (es/entity-val built-char :classes)
+  (let [race (char5e/race built-char)
+        subrace (char5e/subrace built-char)
+        classes (char5e/classes built-char)
         levels (char5e/levels built-char)
-        darkvision (es/entity-val built-char :darkvision)
-        skill-profs (es/entity-val built-char :skill-profs)
-        tool-profs (es/entity-val built-char :tool-profs)
-        weapon-profs (es/entity-val built-char :weapon-profs)
-        armor-profs (es/entity-val built-char :armor-profs)
-        resistances (es/entity-val built-char :damage-resistances)
-        immunities (es/entity-val built-char :damage-immunities)
-        condition-immunities (es/entity-val built-char :condition-immunities)
-        languages (es/entity-val built-char :languages)
-        ability-bonuses (es/entity-val built-char :ability-bonuses)
-        armor-class (es/entity-val built-char :armor-class)
-        armor-class-with-armor (es/entity-val built-char :armor-class-with-armor)
-        armor (es/entity-val built-char :armor)
-        magic-armor (es/entity-val built-char :magic-armor)
-        spells-known (es/entity-val built-char :spells-known)
-        weapons (es/entity-val built-char :weapons)
-        magic-weapons (es/entity-val built-char :magic-weapons)
-        equipment (es/entity-val built-char :equipment)
-        magic-items (es/entity-val built-char :magic-items)
-        traits (es/entity-val built-char :traits)
-        attacks (es/entity-val built-char :attacks)
-        bonus-actions (es/entity-val built-char :bonus-actions)
-        reactions (es/entity-val built-char :reactions)
-        actions (es/entity-val built-char :actions)]
+        darkvision (char5e/darkvision built-char)
+        skill-profs (char5e/skill-proficiencies built-char)
+        tool-profs (char5e/tool-proficiencies built-char)
+        weapon-profs (char5e/weapon-proficiencies built-char)
+        armor-profs (char5e/armor-proficiencies built-char)
+        resistances (char5e/damage-resistances built-char)
+        immunities (char5e/damage-immunities built-char)
+        condition-immunities (char5e/condition-immunities built-char)
+        languages (char5e/languages built-char)
+        ability-bonuses (char5e/ability-bonuses built-char)
+        armor-class (char5e/base-armor-class built-char)
+        armor-class-with-armor (char5e/armor-class-with-armor built-char)
+        armor (char5e/normal-armor-inventory built-char)
+        magic-armor (char5e/magic-armor-inventory built-char)
+        spells-known (char5e/spells-known built-char)
+        weapons (char5e/normal-weapons-inventory built-char)
+        magic-weapons (char5e/magic-weapons-inventory built-char)
+        equipment (char5e/normal-equipment-inventory built-char)
+        magic-items (char5e/magical-equipment-inventory built-char)
+        traits (char5e/traits built-char)
+        attacks (char5e/attacks built-char)
+        bonus-actions (char5e/bonus-actions built-char)
+        reactions (char5e/reactions built-char)
+        actions (char5e/actions built-char)]
     [:div
      [:div.f-s-24.f-w-600.m-b-16.text-shadow
       [:span race]
@@ -795,13 +795,13 @@
          [:img.character-image.w-100-p.m-b-20 {:src (or (get-in @app-state [:character ::entity/values :image-url]) "image/barbarian-girl.png")}]]
         [:div.w-50-p
          [armor-class-section armor-class armor-class-with-armor (merge magic-armor armor)]
-         [display-section "Hit Points" "fa-heart-o f-s-24" (es/entity-val built-char :max-hit-points)]
+         [display-section "Hit Points" "fa-heart-o f-s-24" (char5e/max-hit-points built-char)]
          [speed-section built-char]
          #_[display-section "Speed" nil
-          (let [unarmored-speed-bonus (es/entity-val built-char :unarmored-speed-bonus)
-                speed (es/entity-val built-char :speed)
-                swim-speed (es/entity-val built-char :swimming-speed)
-                speed-with-armor (es/entity-val built-char :speed-with-armor)]
+          (let [unarmored-speed-bonus (char5e/unarmored-speed-bonus built-char)
+                speed (char5e/base-land-speed built-char)
+                swim-speed (char5e/base-swimming-speed built-char)
+                speed-with-armor (char5e/speed-with-armor built-char)]
             [:div
              [:div
               (if speed-with-armor
@@ -810,13 +810,13 @@
              (if swim-speed
                [:div [:span swim-speed] [:span.display-section-qualifier-text "(swim)"]])])]
          [display-section "Darkvision" "fa-low-vision f-s-24" (if darkvision (str darkvision " ft.") "--")]
-         [display-section "Initiative" nil (mod/bonus-str (es/entity-val built-char :initiative))]
-         [display-section "Proficiency Bonus" nil (mod/bonus-str (es/entity-val built-char :prof-bonus))]
-         [display-section "Passive Perception" nil (es/entity-val built-char :passive-perception)]
-         (let [num-attacks (es/entity-val built-char :num-attacks)]
+         [display-section "Initiative" nil (mod/bonus-str (char5e/initiative built-char))]
+         [display-section "Proficiency Bonus" nil (mod/bonus-str (char5e/proficiency-bonus built-char))]
+         [display-section "Passive Perception" nil (char5e/passive-perception built-char)]
+         (let [num-attacks (char5e/number-of-attacks built-char)]
            (if (> num-attacks 1)
              [display-section "Number of Attacks" nil num-attacks]))
-         (let [criticals (es/entity-val built-char :critical)
+         (let [criticals (char5e/critical-hit-values built-char)
                min-crit (apply min criticals)
                max-crit (apply max criticals)]
            (if (not= min-crit max-crit)
@@ -824,8 +824,8 @@
          [:div
           [list-display-section
            "Save Proficiencies" nil
-           (map (comp s/upper-case name) (es/entity-val built-char :saving-throws))]
-          (let [save-advantage (es/entity-val built-char :saving-throw-advantage)]
+           (map (comp s/upper-case name) (char5e/saving-throws built-char))]
+          (let [save-advantage (char5e/saving-throw-advantages built-char)]
             [:ul.list-style-disc.m-t-5
              (doall
               (map-indexed
@@ -843,10 +843,10 @@
                                  types)))])
                save-advantage))])]]]
        [:div.w-100-p
-        [abilities-radar 187 (es/entity-val built-char :abilities) ability-bonuses]]]
+        [abilities-radar 187 (char5e/ability-values built-char) ability-bonuses]]]
       [:div.flex-grow-1.flex-basis-50-p
        [list-display-section "Skill Proficiencies" nil
-        (let [skill-bonuses (es/entity-val built-char :skill-bonuses)]
+        (let [skill-bonuses (char5e/skill-bonuses built-char)]
           (map
            (fn [[skill-kw bonus]]
              (str (s/capitalize (name skill-kw)) " " (mod/bonus-str bonus)))

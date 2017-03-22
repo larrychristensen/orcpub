@@ -67,3 +67,120 @@
 
 (defn ability-bonuses [built-char]
   (es/entity-val built-char :ability-bonuses))
+
+(defn base-land-speed [built-char]
+  (es/entity-val built-char :speed))
+
+(defn base-swimming-speed [built-char]
+  (es/entity-val built-char :swimming-speed))
+
+(defn land-speed-with-armor [built-char]
+  (es/entity-val built-char :speed-with-armor))
+
+(defn unarmored-speed-bonus [built-char]
+  (es/entity-val built-char :unarmored-speed-bonus))
+
+(defn race [built-char]
+  (es/entity-val built-char :race))
+
+(defn subrace [built-char]
+  (es/entity-val built-char :subrace))
+
+(defn classes [built-char]
+  (es/entity-val built-char :classes))
+
+(defn darkvision [built-char]
+  (es/entity-val built-char :darkvision))
+
+(defn skill-proficiencies [built-char]
+  (es/entity-val built-char :skill-profs))
+
+(defn skill-bonuses [built-char]
+  (es/entity-val built-char :skill-bonuses))
+
+(defn tool-proficiencies [built-char]
+  (es/entity-val built-char :tool-profs))
+
+(defn weapon-proficiencies [built-char]
+  (es/entity-val built-char :weapon-profs))
+
+(defn armor-proficiencies [built-char]
+  (es/entity-val built-char :armor-profs))
+
+(defn damage-resistances [built-char]
+  (es/entity-val built-char :damage-resistances))
+
+(defn damage-immunities [built-char]
+  (es/entity-val built-char :damage-immunities))
+
+(defn condition-immunities [built-char]
+  (es/entity-val built-char :condition-immunities))
+
+(defn languages [built-char]
+  (es/entity-val built-char :languages))
+
+(defn base-armor-class [built-char]
+  (es/entity-val built-char :armor-class))
+
+(defn armor-class-with-armor [built-char]
+  (es/entity-val built-char :armor-class-with-armor))
+
+(defn normal-armor-inventory [built-char]
+  (es/entity-val built-char :armor))
+
+(defn magic-armor-inventory [built-char]
+  (es/entity-val built-char :magic-armor))
+
+(defn normal-weapons-inventory [built-char]
+  (es/entity-val built-char :weapons))
+
+(defn magic-weapons-inventory [built-char]
+  (es/entity-val built-char :magic-weapons))
+
+(defn normal-equipment-inventory [built-char]
+  (es/entity-val built-char :equipment))
+
+(defn magical-equipment-inventory [built-char]
+  (es/entity-val built-char :magic-items))
+
+(defn spells-known [built-char]
+  (es/entity-val built-char :spells-known))
+
+(defn traits [built-char]
+  (es/entity-val built-char :traits))
+
+(defn attacks [built-char]
+  (es/entity-val built-char :attacks))
+
+(defn bonus-actions [built-char]
+  (es/entity-val built-char :bonus-actions))
+
+(defn reactions [built-char]
+  (es/entity-val built-char :reactions))
+
+(defn actions [built-char]
+  (es/entity-val built-char :actions))
+
+(defn max-hit-points [built-char]
+  (es/entity-val built-char :max-hit-points))
+
+(defn initiative [built-char]
+  (es/entity-val built-char :initiative))
+
+(defn proficiency-bonus [built-char]
+  (es/entity-val built-char :prof-bonus))
+
+(defn passive-perception [built-char]
+  (es/entity-val built-char :passive-perception))
+
+(defn number-of-attacks [built-char]
+  (es/entity-val built-char :num-attacks))
+
+(defn critical-hit-values [built-char]
+  (es/entity-val built-char :critical))
+
+(defn saving-throws [built-char]
+  (es/entity-val built-char :saving-throws))
+
+(defn saving-throw-advantages [built-char]
+  (es/entity-val built-char :saving-throw-advantage))
