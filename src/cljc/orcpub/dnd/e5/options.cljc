@@ -425,8 +425,11 @@ check. The GM might also call for a Dexterity (Sleight of Hand) check to determi
    tool-option
    tools))
 
+(defn ability-bonus [ability-value]
+  (- (int (/ ability-value 2)) 5))
+
 (defn ability-bonus-str [ability-value]
-  (common/bonus-str (int (/ (- ability-value 10) 2))))
+  (common/bonus-str (ability-bonus ability-value)))
 
 (defn get-raw-abilities [app-state]
   (get-in (:character @app-state) [::entity/options :ability-scores ::entity/value]))

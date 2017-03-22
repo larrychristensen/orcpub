@@ -4155,7 +4155,7 @@ You might also have ties to a specific temple dedicated to your chosen deity or 
                 char5e/ability-keys)
     ?ability-bonuses (reduce-kv
                       (fn [m k v]
-                        (assoc m k (int (/ (- v 10) 2))))
+                        (assoc m k (opt5e/ability-bonus v)))
                       {}
                       ?abilities)
     ?save-bonuses (reduce-kv
