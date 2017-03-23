@@ -40,6 +40,32 @@
                    [other-k other-v] (a-vec other-index)]
                (assoc a k other-v other-k v))))))
 
+(def ability-icons
+  {:str "strong"
+   :con "caduceus"
+   :dex "body-balance"
+   :int "read"
+   :wis "meditation"
+   :cha "aura"})
+
+(defn ability-icon [k]
+  [:img.h-24.w-24 {:src (str "image/" (ability-icons k) ".svg")}])
+
+(defn ability-modifier [v]
+  [:div.f-6-12.f-w-n.h-24
+   [:div.t-a-c.f-s-10.opacity-5
+    "mod"]
+   [:div.m-t--1
+    (opt5e/ability-bonus-str v)]])
+
+(defn ability-component [k v i app-state controls]
+  [:div.m-t-10.t-a-c
+   (ability-icon k)
+   [:div.uppercase (name k)]
+   [:div.f-s-18.f-w-b v]
+   (ability-modifier v)
+   controls])
+
 (defn abilities-standard [app-state]
   [:div.flex.justify-cont-s-b
     (let [abilities (or (opt5e/get-raw-abilities app-state) (char5e/abilities 15 14 13 12 10 8))
@@ -48,10 +74,7 @@
        (map-indexed
         (fn [i [k v]]
           ^{:key k}
-          [:div.m-t-10.t-a-c
-           [:div.uppercase (name k)]
-           [:div.f-s-18.f-w-b v]
-           [:div.f-6-12.f-w-n (opt5e/ability-bonus-str v)]
+          [ability-component k v i app-state
            [:div.f-s-16
             [:i.fa.fa-chevron-circle-left.orange
              {:on-click (swap-abilities app-state i (dec i) k v)}]
@@ -98,10 +121,7 @@
           (let [increase-disabled? (or (>= v 15) (<= points-remaining 0))
                 decrease-disabled? (or (<= v 8) (>= points-remaining point-buy-points))]
             ^{:key k}
-            [:div.m-t-10.t-a-c
-             [:div.uppercase (name k)]
-             [:div.f-s-18.f-w-b v]
-             [:div.f-6-12.f-w-n (opt5e/ability-bonus-str v)]
+            [ability-component k v i app-state
              [:div.f-s-16
               [:i.fa.fa-minus-circle.orange
                {:class-name (if decrease-disabled? "opacity-5 cursor-disabled")
@@ -121,13 +141,14 @@
          ^{:key k}
          [:div.m-t-10.t-a-c.p-1 
           [:div.uppercase (name k)]
-          [:input.input.f-s-18
+          (ability-icon k)
+          [:input.input.f-s-18.m-b-5.t-a-c
            {:value (k abilities)
             :on-change (fn [e] (let [value (.-value (.-target e))
                                      new-v (if (not (s/blank? value))
                                              (js/parseInt value))]
                                  (swap! app-state assoc-in [:character ::entity/options :ability-scores ::entity/value k] new-v)))}]
-          [:div.f-6-12.f-w-n (opt5e/ability-bonus-str (k abilities))]])
+          (ability-modifier (k abilities))])
        char5e/ability-keys)))])
 
 (declare template-selections)
@@ -2405,7 +2426,21 @@ In addition, when you make a running long jump, the distance you can cover incre
                               nil
                               nil
                               [(= :monk (first ?classes))])]
-    :levels {2 {:modifiers [(mod5e/unarmored-speed-bonus 10)]}
+    :levels {2 {:modifiers [(mod5e/unarmored-speed-bonus 10)
+                            (mod5e/dependent-trait
+                             {:name "Ki"
+                              :level 2
+                              :summary (str "You have " ?total-levels " ki points")
+                              :description "Starting at 2nd level, your training allows you to harness the mystic energy of ki. Your access to this energy is represented by a number of ki points. Your monk level determines the number of points you have, as shown in the Ki Points column of the Monk table.
+You can spend these points to fuel various ki features. You start knowing three such features: Flurry of Blows, Patient Defense, and Step of the Wind. You learn more ki features as you gain levels in this class.
+When you spend a ki point, it is unavailable until you finish a short or long rest, at the end of which you draw all of your expended ki back into yourself. You must spend at least 30 minutes of the rest meditating to regain your ki points.
+Some of your ki features require your target to make a saving throw to resist the feature's effects. The saving throw DC is calculated as follows:
+Ki save DC = 8 + your proficiency bonus + your Wisdom modifier"})
+                            (mod5e/bonus-action
+                             {:name "Flurry of Blows"
+                              :level 2
+                              :summary "After you take Attack action, spend 1 ki to make 2 unarmed strikes"
+                              :description "Immediately after you take the Attack action on your turn, you can spend 1 ki point to make two unarmed strikes as a bonus action."})]}
              5 {:modifiers [(mod5e/extra-attack)]}
              6 {:modifiers [(mod5e/unarmored-speed-bonus 5)]}
              10 {:modifiers [(mod5e/damage-immunity :poison)
@@ -2419,17 +2454,7 @@ In addition, when you make a running long jump, the distance you can cover incre
                              (mod5e/unarmored-speed-bonus 5)]}
              18 {:modifiers [(mod5e/unarmored-speed-bonus 5)]}}
     :equipment {:dart 10}
-    :traits [{:name "Ki"
-              :level 2
-              :description "Starting at 2nd level, your training allows you to harness the mystic energy of ki. Your access to this energy is represented by a number of ki points. Your monk level determines the number of points you have, as shown in the Ki Points column of the Monk table.
-You can spend these points to fuel various ki features. You start knowing three such features: Flurry of Blows, Patient Defense, and Step of the Wind. You learn more ki features as you gain levels in this class.
-When you spend a ki point, it is unavailable until you finish a short or long rest, at the end of which you draw all of your expended ki back into yourself. You must spend at least 30 minutes of the rest meditating to regain your ki points.
-Some of your ki features require your target to make a saving throw to resist the feature's effects. The saving throw DC is calculated as follows:
-Ki save DC = 8 + your proficiency bonus + your Wisdom modifier"}
-             {:name "Flurry of Blows"
-              :level 2
-              :description "Immediately after you take the Attack action on your turn, you can spend 1 ki point to make two unarmed strikes as a bonus action."}
-             {:name "Patient Defense"
+    :traits [{:name "Patient Defense"
               :level 2
               :description "You can spend 1 ki point to take the Dodge action as a bonus action on your turn."}
              {:name "Step of the Wind"

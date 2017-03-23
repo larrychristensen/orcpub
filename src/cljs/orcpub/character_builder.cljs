@@ -584,28 +584,34 @@
   (cljs.pprint/pprint
    (realize-char built-char)))
 
-(defn display-section [title icon-cls value & [list?]]
+(defn svg-icon [icon-name]
+  [:img.h-32.w-32 {:src (str "image/" icon-name ".svg")}])
+
+(defn display-section [title icon-name value & [list?]]
   [:div.m-t-20
-   [:span.f-s-16.f-w-600 title]
+   [:div.flex.align-items-c
+    (if icon-name (svg-icon icon-name))
+    [:span.f-s-16.f-w-600.m-l-5 title]]
    [:div {:class-name (if list? "m-t-0" "m-t-4")}
-    (if icon-cls [:i.fa.m-r-18.white {:class-name icon-cls}])
     [:span.f-s-24.f-w-600
      value]]])
 
-(defn list-display-section [title icon-cls values]
+(defn list-display-section [title image-name values]
   (if (seq values)
-    (display-section title icon-cls
-                     [:span.m-t-5.f-s-14.f-w-n.i
-                      (s/join
-                       ", "
-                       values)]
-                     true)))
+    (display-section
+     title
+     image-name
+     [:span.m-t-5.f-s-14.f-w-n.i
+      (s/join
+       ", "
+       values)]
+     true)))
 
 (defn svg-icon-section [title icon-name content]
   [:div.m-t-20
    [:span.f-s-16.f-w-600 title]
    [:div.flex.align-items-c
-    [:img.h-32.w-32.p-t-10 {:src (str "image/" icon-name ".svg")}]
+    (svg-icon icon-name)
     [:div.f-s-24.m-l-10.f-w-b content]]])
 
 (defn armor-class-section [armor-class armor-class-with-armor equipped-armor]
@@ -625,7 +631,7 @@
                                                                      ")")]]]))]
     (svg-icon-section
      "Armor Class"
-     "breastplate"
+     "checked-shield"
      [:span
        (first display-rows)
        [:div
@@ -649,7 +655,7 @@
                speed-with-armor)
          [:span.display-section-qualifier-text "(unarmored)"])]
       (if speed-with-armor
-        [:div.m-l-40
+        [:div
          (doall
           (map
            (fn [[armor-kw _]]
@@ -662,7 +668,7 @@
                  [:span.display-section-qualifier-text (str "(" (:name armor) " armor)")]]]))
            (dissoc equipped-armor :shield)))]
         (if unarmored-speed-bonus
-          [:div.m-l-40
+          [:div
            [:span
             [:span speed]
             [:span.display-section-qualifier-text "(armored)"]]]))]
@@ -716,8 +722,8 @@
               spells))))]])
       spells-known))]])
 
-(defn equipment-section [title equipment equipment-map]
-  [list-display-section title nil
+(defn equipment-section [title icon-name equipment equipment-map]
+  [list-display-section title icon-name
    (map
     (fn [[equipment-kw num]]
       (str (:name (equipment-map equipment-kw)) " (" num ")"))
@@ -726,7 +732,8 @@
 (defn attacks-section [attacks]
   (if (seq attacks)
     (display-section
-     "Attacks" nil
+     "Attacks"
+     "pointy-sword"
      [:div.f-s-14
       (doall
        (map
@@ -804,7 +811,7 @@
          [:img.character-image.w-100-p.m-b-20 {:src (or (get-in @app-state [:character ::entity/values :image-url]) "image/barbarian-girl.png")}]]
         [:div.w-50-p
          [armor-class-section armor-class armor-class-with-armor (merge magic-armor armor)]
-         [svg-icon-section "Hit Points" "caduceus" (char5e/max-hit-points built-char)]
+         [svg-icon-section "Hit Points" "health-normal" (char5e/max-hit-points built-char)]
          [speed-section built-char]
          #_[display-section "Speed" nil
           (let [unarmored-speed-bonus (char5e/unarmored-speed-bonus built-char)
@@ -872,9 +879,9 @@
                                                                         (str (name condition)
                                                                              (if qualifier (str " (" qualifier ")"))))]
        [spells-known-section spells-known]
-       [equipment-section "Weapons" (concat magic-weapons weapons) mi5e/all-weapons-map]
-       [equipment-section "Armor" (merge magic-armor armor) mi5e/all-armor-map]
-       [equipment-section "Equipment" (concat magic-items equipment) mi5e/all-equipment-map]
+       [equipment-section "Weapons" "plain-dagger" (concat magic-weapons weapons) mi5e/all-weapons-map]
+       [equipment-section "Armor" "breastplate" (merge magic-armor armor) mi5e/all-armor-map]
+       [equipment-section "Equipment" "backpack" (concat magic-items equipment) mi5e/all-equipment-map]
        [attacks-section attacks]
        [actions-section "Bonus Actions" bonus-actions]
        [actions-section "Reactions" reactions]
@@ -1620,10 +1627,14 @@
 (defn header [built-char]
   [:div.flex.align-items-c.justify-cont-s-b.w-100-p
    [:h1.f-s-36.f-w-b.m-t-21.m-b-19.m-l-10 "Character Builder"]
-   [:button.form-button
-    {:on-click (export-pdf built-char)
-     :style {:height "40px"}}
-    [:span "Print"]]])
+   [:div
+    [:button.form-button.h-40.opacity-5
+     {:on-click (export-pdf built-char)}
+     [:span "Save"]
+     [:span.m-l-5 "(coming soon)"]]
+    [:button.form-button.h-40.m-l-5
+     {:on-click (export-pdf built-char)}
+     [:span "Print"]]]])
 
 (defn character-builder []
   ;;(cljs.pprint/pprint (:character @app-state))
