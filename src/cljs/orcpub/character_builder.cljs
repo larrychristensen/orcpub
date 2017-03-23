@@ -601,6 +601,12 @@
                        values)]
                      true)))
 
+(defn svg-icon-section [title icon-name content]
+  [:div.m-t-20
+   [:span.f-s-16.f-w-600 title]
+   [:div.flex.align-items-c
+    [:img.h-32.w-32.p-t-10 {:src (str "image/" icon-name ".svg")}]
+    [:div.f-s-24.m-l-10.f-w-b content]]])
 
 (defn armor-class-section [armor-class armor-class-with-armor equipped-armor]
   (let [equipped-armor-full (map (comp mi5e/all-armor-map first) equipped-armor)
@@ -612,27 +618,27 @@
                          ^{:key (common/name-to-kw (str (:name a) (:name shield)))}
                         [el
                          [el
-                          [:span (armor-class-with-armor a shield)]
+                          [:span.f-s-24.f-w-b (armor-class-with-armor a shield)]
                           [:span.display-section-qualifier-text (str "("
                                                                      (if a (:name a) "unarmored")
                                                                      (if shield (str " & " (:name shield)))
                                                                      ")")]]]))]
-    [display-section
+    (svg-icon-section
      "Armor Class"
-     "fa-shield f-s-32"
+     "breastplate"
      [:span
-      (first display-rows)
-      [:div.m-l-40
-       (doall (rest display-rows))]]]))
+       (first display-rows)
+       [:div
+        (doall (rest display-rows))]])))
 
 (defn speed-section [built-char]
   (let [speed (char5e/base-land-speed built-char)
         speed-with-armor (char5e/land-speed-with-armor built-char)
         unarmored-speed-bonus (char5e/unarmored-speed-bonus built-char)
         equipped-armor (char5e/normal-armor-inventory built-char)]
-    [display-section
+    [svg-icon-section
      "Speed"
-     "fa-tachometer f-s-24"
+     "walking-boot"
      [:span
       [:span
        [:span (+ (or unarmored-speed-bonus 0)
@@ -798,7 +804,7 @@
          [:img.character-image.w-100-p.m-b-20 {:src (or (get-in @app-state [:character ::entity/values :image-url]) "image/barbarian-girl.png")}]]
         [:div.w-50-p
          [armor-class-section armor-class armor-class-with-armor (merge magic-armor armor)]
-         [display-section "Hit Points" "fa-heart-o f-s-24" (char5e/max-hit-points built-char)]
+         [svg-icon-section "Hit Points" "caduceus" (char5e/max-hit-points built-char)]
          [speed-section built-char]
          #_[display-section "Speed" nil
           (let [unarmored-speed-bonus (char5e/unarmored-speed-bonus built-char)
@@ -812,8 +818,8 @@
                 speed)]
              (if swim-speed
                [:div [:span swim-speed] [:span.display-section-qualifier-text "(swim)"]])])]
-         [display-section "Darkvision" "fa-low-vision f-s-24" (if darkvision (str darkvision " ft.") "--")]
-         [display-section "Initiative" nil (mod/bonus-str (char5e/initiative built-char))]
+         [svg-icon-section "Darkvision" "night-vision" (if darkvision (str darkvision " ft.") "--")]
+         [svg-icon-section "Initiative" "sprint" (mod/bonus-str (char5e/initiative built-char))]
          [display-section "Proficiency Bonus" nil (mod/bonus-str (char5e/proficiency-bonus built-char))]
          [display-section "Passive Perception" nil (char5e/passive-perception built-char)]
          (let [num-attacks (char5e/number-of-attacks built-char)]
@@ -1172,14 +1178,19 @@
        (s/split help #"\n")))
      help)])
 
+(defn expand-button [option-path expand-text collapse-text]
+  (let [full-path [:expanded-paths option-path]
+        expanded? (get-in @app-state full-path)]
+    [:span.pointer
+     {:on-click (fn [e]
+                  (swap! app-state update-in full-path not)
+                  (.stopPropagation e))}
+     [:span.underline.orange.p-0.m-r-2 (if expanded? expand-text collapse-text)]
+     [:i.fa.orange
+      {:class-name (if expanded? "fa-angle-up" "fa-angle-down")}]]))
+
 (defn show-info-button [expanded? option-path]
-  [:span.pointer
-   {:on-click (fn [e]
-                (swap! app-state update-in [:expanded-paths option-path] not)
-                (.stopPropagation e))}
-   [:span.underline.orange.p-0.m-r-2 (if expanded? "hide info" "show info")]
-   [:i.fa.orange
-    {:class-name (if expanded? "fa-angle-up" "fa-angle-down")}]])
+  (expand-button option-path "hide info" "show info"))
 
 (defn set-next! [char next-selection next-selection-path]
   (swap! app-state
@@ -1365,11 +1376,10 @@
                                  (::t/name s)))
                              (::t/selections built-template))]
     [:div.w-100-p
-     #_[:div.m-b-10
-      [option-sources collapsed-paths plugins]]
      [:div#options-column.b-1.b-rad-5
       [:div.flex.justify-cont-end
-       [:select.f-s-12.p-2.m-t-0.m-l-5.white.no-border.bg-trans
+       [:span.p-5 (expand-button [:jump-to] "jump to..." "jump to...")]
+       #_[:select.f-s-12.p-2.m-t-0.m-l-5.white.no-border.bg-trans
         {:value (first option-path)
          :on-change (fn [e]
                       (let [value (keyword (.. e -target -value))
@@ -1621,4 +1631,8 @@
          stepper-selection
          plugins
          active-tab
-         stepper-dismissed?]]]]]))
+         stepper-dismissed?]]]]
+     [:div.white.flex.justify-cont-c
+      [:div.content.f-w-n.f-s-14
+       [:div.p-10
+        [:div.m-b-5 "Icons made by Lorc and Caduceus. Available on " [:a.orange {:href "http://game-icons.net"} "http://game-icons.net"]]]]]]))

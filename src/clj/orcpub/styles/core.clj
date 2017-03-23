@@ -166,6 +166,8 @@
    [:.w-100-p
     {:width "100%"}]
 
+   [:.w-32
+    {:width "32px"}]
    [:.w-40
     {:width "40px"}]
    [:.w-50
@@ -189,6 +191,8 @@
 
    [:.h-25
     {:height "25px"}]
+   [:.h-32
+    {:height "32px"}]
    [:.h-800
     {:height "800px"}]
 
@@ -214,6 +218,9 @@
 
    [:.underline
     {:text-decoration :underline}]
+
+   [:.p-t-10
+    {:padding-top "10px"}]
 
    [:.p-b-10
     {:padding-bottom "10px"}]
