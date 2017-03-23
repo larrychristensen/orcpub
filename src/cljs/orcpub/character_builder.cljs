@@ -676,8 +676,8 @@
        (if swim-speed
          [:div [:span swim-speed] [:span.display-section-qualifier-text "(swim)"]]))]))
 
-(defn list-item-section [list-name items & [name-fn]]
-  [list-display-section list-name nil
+(defn list-item-section [list-name icon-name items & [name-fn]]
+  [list-display-section list-name icon-name
    (map
     (fn [item]
       ((or name-fn :name) item))
@@ -688,7 +688,7 @@
     (compare (key-fn spell-1) (key-fn spell-2))))
 
 (defn spells-known-section [spells-known]
-  [display-section "Spells Known" nil
+  [display-section "Spells Known" "spell-book"
    [:div.f-s-14
     (doall
      (map
@@ -744,10 +744,10 @@
            [:span.f-w-n.m-l-10 (common/sentensize (disp5e/attack-description attack))]])
         attacks))])))
 
-(defn actions-section [title actions]
+(defn actions-section [title icon-name actions]
   (if (seq actions)
     (display-section
-     title nil
+     title icon-name
      [:div.f-s-14
       (doall
        (map
@@ -861,7 +861,7 @@
        [:div.w-100-p
         [abilities-radar 187 (char5e/ability-values built-char) ability-bonuses]]]
       [:div.flex-grow-1.flex-basis-50-p
-       [list-display-section "Skill Proficiencies" nil
+       [list-display-section "Skill Proficiencies" "juggler"
         (let [skill-bonuses (char5e/skill-bonuses built-char)]
           (map
            (fn [[skill-kw bonus]]
@@ -869,24 +869,24 @@
            (filter (fn [[k bonus]]
                      (not= bonus (ability-bonuses (:ability (opt5e/skills-map k)))))
                    skill-bonuses)))]
-       [list-item-section "Languages" languages (partial prof-name opt5e/language-map)]
-       [list-item-section "Tool Proficiencies" tool-profs (partial prof-name opt5e/tools-map)]
-       [list-item-section "Weapon Proficiencies" weapon-profs (partial prof-name weapon5e/weapons-map)]
-       [list-item-section "Armor Proficiencies" armor-profs (partial prof-name armor5e/armor-map)]
-       [list-item-section "Damage Resistances" resistances name]
-       [list-item-section "Damage Immunities" immunities name]
-       [list-item-section "Condition Immunities" condition-immunities (fn [{:keys [condition qualifier]}]
+       [list-item-section "Languages" "public-speaker" languages (partial prof-name opt5e/language-map)]
+       [list-item-section "Tool Proficiencies" "stone-crafting" tool-profs (partial prof-name opt5e/tools-map)]
+       [list-item-section "Weapon Proficiencies" "bowman" weapon-profs (partial prof-name weapon5e/weapons-map)]
+       [list-item-section "Armor Proficiencies" "mailed-fist" armor-profs (partial prof-name armor5e/armor-map)]
+       [list-item-section "Damage Resistances" "surrounded-shield" resistances name]
+       [list-item-section "Damage Immunities" nil immunities name]
+       [list-item-section "Condition Immunities" nil condition-immunities (fn [{:keys [condition qualifier]}]
                                                                         (str (name condition)
                                                                              (if qualifier (str " (" qualifier ")"))))]
-       [spells-known-section spells-known]
+       (if (seq spells-known) [spells-known-section spells-known])
        [equipment-section "Weapons" "plain-dagger" (concat magic-weapons weapons) mi5e/all-weapons-map]
        [equipment-section "Armor" "breastplate" (merge magic-armor armor) mi5e/all-armor-map]
        [equipment-section "Equipment" "backpack" (concat magic-items equipment) mi5e/all-equipment-map]
        [attacks-section attacks]
-       [actions-section "Bonus Actions" bonus-actions]
-       [actions-section "Reactions" reactions]
-       [actions-section "Actions" actions]
-       [actions-section "Features, Traits, and Feats" traits]]]]))
+       [actions-section "Bonus Actions" "jump-across" bonus-actions]
+       [actions-section "Reactions" "dodging" reactions]
+       [actions-section "Actions" "run" actions]
+       [actions-section "Features, Traits, and Feats" "vitruvian-man" traits]]]]))
 
 (def tab-path [:builder :character :tab])
 

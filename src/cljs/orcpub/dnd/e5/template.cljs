@@ -2425,7 +2425,22 @@ In addition, when you make a running long jump, the distance you can cover incre
                                   (?armor-class-with-armor armor shield)))
                               nil
                               nil
-                              [(= :monk (first ?classes))])]
+                              [(= :monk (first ?classes))])
+                (mod5e/attack
+                 (let [die (mod5e/level-val
+                                       (?class-level :monk)
+                                       {5 6
+                                        11 8
+                                        17 10
+                                        :default 4})]
+                   {:name "Martial Arts"
+                    :damage-die die
+                    :damage-die-count 1
+                    :damage-modifier (max (?ability-bonuses :str) (?ability-bonuses :dex))
+                    :summary "Unarmed strike or monk weapon"}))
+                (mod5e/bonus-action
+                 {:name "Martial Arts"
+                  :description "Make an unarmed strike when you take Attack action"})]
     :levels {2 {:modifiers [(mod5e/unarmored-speed-bonus 10)
                             (mod5e/dependent-trait
                              {:name "Ki"
@@ -2440,7 +2455,20 @@ Ki save DC = 8 + your proficiency bonus + your Wisdom modifier"})
                              {:name "Flurry of Blows"
                               :level 2
                               :summary "After you take Attack action, spend 1 ki to make 2 unarmed strikes"
-                              :description "Immediately after you take the Attack action on your turn, you can spend 1 ki point to make two unarmed strikes as a bonus action."})]}
+                              :description "Immediately after you take the Attack action on your turn, you can spend 1 ki point to make two unarmed strikes as a bonus action."})
+                            (mod5e/bonus-action
+                             {:name "Patient Defense"
+                              :description "You can spend 1 ki point to take the Dodge action as a bonus action on your turn."
+                              :summary "Spend 1 ki point to take the Dodge action"})
+                            (mod5e/bonus-action
+                             {:name "Step of the Wind"
+                              :description "You can spend 1 ki point to take the Disengage or Dash action as a bonus action on your turn, and your jump distance is doubled for the turn."
+                              :summary "Spend 1 ki point to take the Disengage or Dash action and jump distance is doubled for the turn"})]}
+             3 {:modifiers [(mod5e/reaction
+                             {:name "Deflect Missiles"
+                              :summary (str "When hit by a ranged attack, reduce the damage by 1d10 " (common/mod-str (+ (?ability-bonuses :dex) (?class-level :monk))) ". If you reduce it to 0, you can catch the missile and use it in a ranged attack as a monk weapon with range 20/60") 
+                              :description "Starting at 3rd level, you can use your reaction to deflect or catch the missile when you are hit by a ranged weapon attack. When you do so, the damage you take from the attack is reduced by 1d10 + your Dexterity modifier + your monk level.
+If you reduce the damage to 0, you can catch the missile if it is small enough for you to hold in one hand and you have at least one hand free. If you catch a missile in this way, you can spend 1 ki point to make a ranged attack with the weapon or piece of ammunition you just caught, as part of the same reaction. You make this attack with proficiency, regardless of your weapon proficiencies, and the missile counts as a monk weapon for the attack, which has a normal range of 20 feet and a long range of 60 feet."})]}
              5 {:modifiers [(mod5e/extra-attack)]}
              6 {:modifiers [(mod5e/unarmored-speed-bonus 5)]}
              10 {:modifiers [(mod5e/damage-immunity :poison)
@@ -2454,20 +2482,7 @@ Ki save DC = 8 + your proficiency bonus + your Wisdom modifier"})
                              (mod5e/unarmored-speed-bonus 5)]}
              18 {:modifiers [(mod5e/unarmored-speed-bonus 5)]}}
     :equipment {:dart 10}
-    :traits [{:name "Patient Defense"
-              :level 2
-              :description "You can spend 1 ki point to take the Dodge action as a bonus action on your turn."}
-             {:name "Step of the Wind"
-              :level 2
-              :description "You can spend 1 ki point to take the Disengage or Dash action as a bonus action on your turn, and your jump distance is doubled for the turn."}
-             {:name "Unarmored Movement"
-              :level 2
-              :description "Starting at 2nd level, your speed increases by 10 feet while you are not wearing armor or wielding a shield. This bonus increases when you reach certain monk levels, as shown in the Monk table.
-At 9th level, you gain the ability to move along vertical surfaces and across liquids on your turn without falling during the move."}
-             {:name "Deflect Missiles"
-              :level 3
-              :description "Starting at 3rd level, you can use your reaction to deflect or catch the missile when you are hit by a ranged weapon attack. When you do so, the damage you take from the attack is reduced by 1d10 + your Dexterity modifier + your monk level.
-If you reduce the damage to 0, you can catch the missile if it is small enough for you to hold in one hand and you have at least one hand free. If you catch a missile in this way, you can spend 1 ki point to make a ranged attack with the weapon or piece of ammunition you just caught, as part of the same reaction. You make this attack with proficiency, regardless of your weapon proficiencies, and the missile counts as a monk weapon for the attack, which has a normal range of 20 feet and a long range of 60 feet."}
+    :traits [
              {:name "Slow Fall"
               :level 4
               :description "Beginning at 4th level, you can use your reaction when you fall to reduce any falling damage you take by an amount equal to five times your monk level."}
