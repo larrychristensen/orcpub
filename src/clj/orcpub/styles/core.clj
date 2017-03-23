@@ -107,12 +107,18 @@
    [:.m-r-80
     {:margin-right "80px"}]
 
+   [:.m-t-2
+    {:margin-top "2px"}]
    [:.m-t-21
     {:margin-top "21px"}]
 
    [:.opacity-5
     {:opacity "0.5"}]
 
+   [:.m-b--2
+    {:margin-bottom "-2px"}]
+   [:.m-b--1
+    {:margin-bottom "-1px"}]
    [:.m-b-0-last:last-child
     {:margin-bottom "0px"}]
    [:.m-b-5

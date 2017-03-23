@@ -817,6 +817,7 @@
               (t5e/ability-icon k 32)
               [:div.f-s-20.uppercase (name k)]
               [:div.f-s-24.f-w-b (abilities k)]
+              [:div.f-s-12.opacity-5.m-b--2.m-t-2 "mod"]
               [:div.f-s-18 (common/bonus-str (ability-bonuses k))]])
            char5e/ability-keys))]
         #_[abilities-radar 187 (char5e/ability-values built-char) ability-bonuses]]
