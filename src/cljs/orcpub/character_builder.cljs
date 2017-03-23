@@ -1178,12 +1178,13 @@
        (s/split help #"\n")))
      help)])
 
-(defn expand-button [option-path expand-text collapse-text]
+(defn expand-button [option-path expand-text collapse-text & [handler]]
   (let [full-path [:expanded-paths option-path]
         expanded? (get-in @app-state full-path)]
     [:span.pointer
      {:on-click (fn [e]
                   (swap! app-state update-in full-path not)
+                  (if handler (handler e))
                   (.stopPropagation e))}
      [:span.underline.orange.p-0.m-r-2 (if expanded? expand-text collapse-text)]
      [:i.fa.orange
@@ -1350,6 +1351,61 @@
       (if expanded? [help-section help])]
      (if removeable? [remove-option-button option-path built-template i])]))
 
+(defn jump-to-link [name path option selection built-template subselections?]
+  (let [jump-to-handler (fn [e]
+                          (let [next-selection (assoc selection
+                                                      ::path path
+                                                      ::parent option)
+                                next-template-path (entity/get-template-selection-path built-template path [])]
+                            (swap! app-state (fn [as]
+                                               (-> as
+                                                   (assoc :stepper-selection-path next-template-path)
+                                                   (assoc :stepper-selection next-selection))))))]
+    [:div.p-5
+     (if subselections?
+       (expand-button (concat [:jump-to] path) name name jump-to-handler)
+       [:span.underline
+        {:on-click jump-to-handler}
+        name])]))
+
+(defn jump-to-component [option-path option-paths character built-template selections parent-option]
+  [:div.orange
+   (doall
+    (map
+     (fn [selection]
+       (let [selection-path (conj option-path (::t/key selection))
+             selected-options (filter
+                                (fn [o]
+                                  (seq (::t/selections o)))
+                                (filter-selected selection-path key option-paths (::t/options selection) character built-template))
+             subselections? (some (comp seq ::t/selections) selected-options)]
+         ^{:key (::t/key selection)}
+         [:div.pointer
+          {:class-name (if (seq option-path) "p-l-20")}
+          (jump-to-link (::t/name selection) selection-path parent-option selection built-template subselections?)
+          (if (and (seq selected-options)
+                   (get-in @app-state [:expanded-paths (concat [:jump-to] selection-path)]))
+            (doall
+             (map
+              (fn [option]
+                (let [new-option-path (conj selection-path (::t/key option))
+                      option-selections (::t/selections option)
+                      first-selection (first option-selections)
+                      first-selection-path (conj new-option-path (::t/key first-selection))]
+                  ^{:key (::t/key option)}
+                  [:div.pointer.p-l-20
+                   (jump-to-link (::t/name option) first-selection-path option first-selection built-template true)
+                   (if (get-in @app-state [:expanded-paths (concat [:jump-to] first-selection-path)])
+                     (jump-to-component
+                      new-option-path
+                      option-paths
+                      character
+                      built-template
+                      (::t/selections option)
+                      option))]))
+              selected-options)))]))
+     selections))])
+
 (defn options-column [character built-char built-template option-paths collapsed-paths stepper-selection-path stepper-selection plugins]
   (let [all-selections (get-all-selections [] built-template option-paths built-char)
         {:keys [::t/name ::t/options ::t/help ::t/min ::t/max ::t/sequential? ::t/quantity? ::parent ::path] :as selection}
@@ -1396,6 +1452,9 @@
              {:value (clojure.core/name key)}
              name])
           (::t/selections built-template)))]]
+      (if (get-in @app-state [:expanded-paths [:jump-to]])
+        [:div.p-10
+         (jump-to-component [] option-paths character built-template (::t/selections built-template) nil)])
       [:div.flex.justify-cont-s-b.p-t-5.p-10.align-items-t
        [:button.form-button.p-5-10.m-r-5
         {:on-click

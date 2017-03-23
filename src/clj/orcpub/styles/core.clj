@@ -243,6 +243,8 @@
     {:padding-left "10px"}]
    [:.p-l-15
     {:padding-left "15px"}]
+   [:.p-l-20
+    {:padding-left "20px"}]
 
    [:.p-r-5
     {:padding-right "5px"}]
