@@ -239,6 +239,8 @@
    [:.p-5-10
     {:padding "5px 10px"}]
 
+   [:.p-l-5
+    {:padding-left "5px"}]
    [:.p-l-10
     {:padding-left "10px"}]
    [:.p-l-15
