@@ -1186,12 +1186,12 @@
                   (swap! app-state update-in full-path not)
                   (if handler (handler e))
                   (.stopPropagation e))}
-     [:span.underline.orange.p-0.m-r-2.m-l-5 (if expanded? expand-text collapse-text)]
+     [:span.underline.orange.p-0.m-r-2 (if expanded? expand-text collapse-text)]
      [:i.fa.orange
       {:class-name (if expanded? "fa-angle-up" "fa-angle-down")}]]))
 
 (defn show-info-button [expanded? option-path]
-  [:span.f-w-n (expand-button option-path "hide info" "show info")])
+  [:span.f-w-n.m-l-5 (expand-button option-path "hide info" "show info")])
 
 (defn set-next! [char next-selection next-selection-path]
   (swap! app-state
@@ -1351,7 +1351,7 @@
       (if expanded? [help-section help])]
      (if removeable? [remove-option-button option-path built-template i])]))
 
-(defn jump-to-link [name path option selection built-template subselections?]
+(defn jump-to-link [name path option-path option selection built-template subselections? stepper-selection-path]
   (let [jump-to-handler (fn [e]
                           (let [next-selection (assoc selection
                                                       ::path path
@@ -1360,15 +1360,21 @@
                             (swap! app-state (fn [as]
                                                (-> as
                                                    (assoc :stepper-selection-path next-template-path)
-                                                   (assoc :stepper-selection next-selection))))))]
+                                                   (assoc :stepper-selection next-selection))))))
+        path-to-check (or option-path path)
+        current? (and (>= (count stepper-selection-path) (count path-to-check))
+                      (= path-to-check (subvec stepper-selection-path 0 (count path-to-check))))]
     [:div.p-5
      (if subselections?
-       (expand-button (concat [:jump-to] path) name name jump-to-handler)
+       [:span
+        {:class-name (if current? "f-w-b")}
+        (expand-button (concat [:jump-to] path) name name jump-to-handler)]
        [:span.underline
-        {:on-click jump-to-handler}
+        {:class-name (if current? "f-w-b")
+         :on-click jump-to-handler}
         name])]))
 
-(defn jump-to-component [option-path option-paths character built-template selections parent-option]
+(defn jump-to-component [option-path option-paths character built-template selections parent-option stepper-selection-path]
   [:div.orange
    (doall
     (map
@@ -1382,7 +1388,7 @@
          ^{:key (::t/key selection)}
          [:div.pointer
           {:class-name (if (seq option-path) "p-l-20")}
-          (jump-to-link (::t/name selection) selection-path parent-option selection built-template subselections?)
+          (jump-to-link (::t/name selection) selection-path nil parent-option selection built-template subselections? stepper-selection-path)
           (if (and (seq selected-options)
                    (get-in @app-state [:expanded-paths (concat [:jump-to] selection-path)]))
             (doall
@@ -1394,7 +1400,7 @@
                       first-selection-path (conj new-option-path (::t/key first-selection))]
                   ^{:key (::t/key option)}
                   [:div.pointer.p-l-20
-                   (jump-to-link (::t/name option) first-selection-path option first-selection built-template true)
+                   (jump-to-link (::t/name option) first-selection-path new-option-path option first-selection built-template true stepper-selection-path)
                    (if (get-in @app-state [:expanded-paths (concat [:jump-to] first-selection-path)])
                      (jump-to-component
                       new-option-path
@@ -1402,7 +1408,8 @@
                       character
                       built-template
                       (::t/selections option)
-                      option))]))
+                      option
+                      stepper-selection-path))]))
               selected-options)))]))
      selections))])
 
@@ -1454,7 +1461,7 @@
           (::t/selections built-template)))]]
       (if (get-in @app-state [:expanded-paths [:jump-to]])
         [:div.p-10
-         (jump-to-component [] option-paths character built-template (::t/selections built-template) nil)])
+         (jump-to-component [] option-paths character built-template (::t/selections built-template) nil (to-option-path stepper-selection-path built-template))])
       [:div.flex.justify-cont-s-b.p-t-5.p-10.align-items-t
        [:button.form-button.p-5-10.m-r-5
         {:on-click
