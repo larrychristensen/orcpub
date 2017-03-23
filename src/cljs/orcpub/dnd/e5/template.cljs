@@ -4023,22 +4023,36 @@ You might also have ties to a specific temple dedicated to your chosen deity or 
 (def volos-amazon-frame
   (amazon-frame "//ws-na.amazon-adsystem.com/widgets/q?ServiceVersion=20070822&OneJS=1&Operation=GetAdHtml&MarketPlace=US&source=ac&ref=tf_til&ad_type=product_link&tracking_id=orcpub-20&marketplace=amazon&region=US&placement=0786966017&asins=0786966017&linkId=8c552e7b980d7d944bd12dec57e002e8&show_border=false&link_opens_in_new_window=true&price_color=ffffff&title_color=f0a100&bg_color=2c3445"))
 
+(def phb-amazon-frame
+  (amazon-frame "//ws-na.amazon-adsystem.com/widgets/q?ServiceVersion=20070822&OneJS=1&Operation=GetAdHtml&MarketPlace=US&source=ac&ref=qf_sp_asin_til&ad_type=product_link&tracking_id=orcpub-20&marketplace=amazon&region=US&placement=0786965606&asins=0786965606&linkId=3b5b686390559c31dbc3c20d20f37ec4&show_border=false&link_opens_in_new_window=true&price_color=ffffff&title_color=f0a100&bg_color=2c3445"))
+
+(defn amazon-frame-help [frame content]
+  [:div.flex.m-t-10
+   [:div.flex-grow-1.p-r-5
+    content]
+   frame])
+
+(def srd-link
+  [:a.orange {:href "SRD-OGL_V5.1.pdf" :target "_blank"} "the 5e SRD"])
+
 (defn template-selections [app-state]
   [(t/selection-cfg
     {:name "Optional Content"
+     :help (amazon-frame-help phb-amazon-frame
+                              [:span
+                               "Base options are from the Player's Handbook, although descriptions are either from the "
+                               srd-link
+                               " or are OrcPub summaries. See the Player's Handbook for in-depth, official rules and descriptions."])
      :options [(t/option-cfg
                 {:name "Sword Coast Adventurer's Guide"
-                 :help [:div.flex.m-t-10
-                        [:div.flex-grow-1.p-r-5
-                         [:span "Incudes too many new, exciting subraces, race variants, subclasses, and backgrounds to list, as well as a ton of other info to help you create in-depth characters in the Sword Coast or elsewhere."]]
-                        scag-amazon-frame]})
+                 :help (amazon-frame-help scag-amazon-frame
+                                          [:span "Incudes too many new, exciting subraces, race variants, subclasses, and backgrounds to list, as well as a ton of other info to help you create in-depth characters in the Sword Coast or elsewhere."])})
                (t/option-cfg
                 {:name "Volo's Guide to Monsters"
-                 :help [:div.flex.m-t-10
-                        [:div.flex-grow-1.p-r-5
-                         "Full of great monster race options, including"
-                         (content-list ["Aasimar" "Firbolg" "Goliath" "Kenku" "Lizardfolk" "Tabaxi" "Triton" "Bugbear" "Goblin" "Hobgoblin" "Kobold" "Orc" "Yuan-Ti Pureblood"])]
-                        volos-amazon-frame]})]
+                 :help (amazon-frame-help volos-amazon-frame
+                                          [:div
+                                           "Full of great monster race options, including"
+                                           (content-list ["Aasimar" "Firbolg" "Goliath" "Kenku" "Lizardfolk" "Tabaxi" "Triton" "Bugbear" "Goblin" "Hobgoblin" "Kobold" "Orc" "Yuan-Ti Pureblood"])])})]
      :multiselect? true
      :min 0
      :max nil})
