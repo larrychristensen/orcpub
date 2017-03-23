@@ -1181,17 +1181,17 @@
 (defn expand-button [option-path expand-text collapse-text & [handler]]
   (let [full-path [:expanded-paths option-path]
         expanded? (get-in @app-state full-path)]
-    [:span.pointer
+    [:span.flex.pointer
      {:on-click (fn [e]
                   (swap! app-state update-in full-path not)
                   (if handler (handler e))
                   (.stopPropagation e))}
-     [:span.underline.orange.p-0.m-r-2 (if expanded? expand-text collapse-text)]
+     [:span.underline.orange.p-0.m-r-2.m-l-5 (if expanded? expand-text collapse-text)]
      [:i.fa.orange
       {:class-name (if expanded? "fa-angle-up" "fa-angle-down")}]]))
 
 (defn show-info-button [expanded? option-path]
-  (expand-button option-path "hide info" "show info"))
+  [:span.f-w-n (expand-button option-path "hide info" "show info")])
 
 (defn set-next! [char next-selection next-selection-path]
   (swap! app-state
