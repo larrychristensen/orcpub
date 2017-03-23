@@ -48,8 +48,9 @@
    :wis "meditation"
    :cha "aura"})
 
-(defn ability-icon [k]
-  [:img.h-24.w-24 {:src (str "image/" (ability-icons k) ".svg")}])
+(defn ability-icon [k size]
+  [:img {:class-name (str "h-" size " w-" size)
+         :src (str "image/" (ability-icons k) ".svg")}])
 
 (defn ability-modifier [v]
   [:div.f-6-12.f-w-n.h-24
@@ -60,7 +61,7 @@
 
 (defn ability-component [k v i app-state controls]
   [:div.m-t-10.t-a-c
-   (ability-icon k)
+   (ability-icon k 24)
    [:div.uppercase (name k)]
    [:div.f-s-18.f-w-b v]
    (ability-modifier v)
@@ -141,7 +142,7 @@
          ^{:key k}
          [:div.m-t-10.t-a-c.p-1 
           [:div.uppercase (name k)]
-          (ability-icon k)
+          (ability-icon k 24)
           [:input.input.f-s-18.m-b-5.t-a-c
            {:value (k abilities)
             :on-change (fn [e] (let [value (.-value (.-target e))

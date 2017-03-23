@@ -775,6 +775,7 @@
         immunities (char5e/damage-immunities built-char)
         condition-immunities (char5e/condition-immunities built-char)
         languages (char5e/languages built-char)
+        abilities (char5e/ability-values built-char)
         ability-bonuses (char5e/ability-bonuses built-char)
         armor-class (char5e/base-armor-class built-char)
         armor-class-with-armor (char5e/armor-class-with-armor built-char)
@@ -806,6 +807,19 @@
             classes)))])]
      [:div.details-columns
       [:div.flex-grow-1.flex-basis-50-p
+       [:div.w-100-p.t-a-c
+        [:div.flex.justify-cont-s-b.p-10
+         (doall
+          (map
+           (fn [k]
+             ^{:key k}
+             [:div
+              (t5e/ability-icon k 32)
+              [:div.f-s-20.uppercase (name k)]
+              [:div.f-s-24.f-w-b (abilities k)]
+              [:div.f-s-18 (common/bonus-str (ability-bonuses k))]])
+           char5e/ability-keys))]
+        #_[abilities-radar 187 (char5e/ability-values built-char) ability-bonuses]]
        [:div.flex
         [:div.w-50-p
          [:img.character-image.w-100-p.m-b-20 {:src (or (get-in @app-state [:character ::entity/values :image-url]) "image/barbarian-girl.png")}]]
@@ -857,9 +871,7 @@
                                       (keyword? %) (name %)
                                       :else %))
                                  types)))])
-               save-advantage))])]]]
-       [:div.w-100-p
-        [abilities-radar 187 (char5e/ability-values built-char) ability-bonuses]]]
+               save-advantage))])]]]]
       [:div.flex-grow-1.flex-basis-50-p
        [list-display-section "Skill Proficiencies" "juggler"
         (let [skill-bonuses (char5e/skill-bonuses built-char)]
@@ -1628,7 +1640,7 @@
   [:div.flex.align-items-c.justify-cont-s-b.w-100-p
    [:h1.f-s-36.f-w-b.m-t-21.m-b-19.m-l-10 "Character Builder"]
    [:div
-    [:button.form-button.h-40.opacity-5
+    #_[:button.form-button.h-40.opacity-5
      {:on-click (export-pdf built-char)}
      [:span "Save"]
      [:span.m-l-5 "(coming soon)"]]
