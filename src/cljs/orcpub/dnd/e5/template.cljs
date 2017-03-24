@@ -2708,7 +2708,8 @@ You can use this feature a number of times equal to your Charisma modifier (a mi
                  {:name "Channel Divinity"
                   :page 85
                   :level 3
-                  :summary "your oath provides specific options, each with save DC and can be used once per rest"})]
+                  :frequency {:units :rest}
+                  :summary "your oath provides specific options"})]
     :selections [(t/selection
                   "Starting Equipment: Weapons"
                   [(t/option-cfg
@@ -2760,29 +2761,31 @@ You can use this feature a number of times equal to your Charisma modifier (a mi
                               (mod5e/action
                                {:name "Channel Divinity: Sacred Weapon"
                                 :page 86
+                                :duration {:units :minute}
                                 :summary (str "make a weapon magical, with a " (common/bonus-str (max 1 (?ability-bonuses :cha))) " attack bonus and magical light (20 ft./20 ft.)")})
                               (mod5e/action
                                {:name "Channel Divinity: Turn the Unholy"
                                 :page 86
-                                :summary (str "each undead or fiend within 30 ft. must make a DC " (?spell-save-dc :cha) " WIS save or be turned for 1 min.")})
-                              (mod5e/dependent-trait
-                               {:name "Aura of Devotion"
-                                :level 7
-                                :page 86
-                                :summary (str "you and friendly creatures within " ?paladin-aura " ft. can't be charmed")
-                                :description "Starting at 7th level, you and friendly creatures within 10 feet of you can't be charmed while you are conscious.
-At 18th level, the range of this aura increases to 30 feet."})
-                              (mod5e/action
-                               {:name "Holy Nimbus"
-                                :level 20
-                                :page 86
-                                :frequency {:units :long-rest}
                                 :duration {:units :minute}
-                                :summary "you emanate a bright light with 30 ft radius, an enemy that starts its turn there takes 10 radiant damage. You also have advantage on saves against spells cast by fiends and undead"
-                                :description "At 20th level, as an action, you can emanate an aura of sunlight. For 1 minute, bright light shines from you in a 30-foot radius, and dim light shines 30 feet beyond that.
+                                :summary (str "each undead or fiend within 30 ft. must make a DC " (?spell-save-dc :cha) " WIS save or be turned for 1 min.")})]
+                  :levels {7 {:modifiers [(mod5e/dependent-trait
+                                           {:name "Aura of Devotion"
+                                            :level 7
+                                            :page 86
+                                            :summary (str "you and friendly creatures within " ?paladin-aura " ft. can't be charmed")
+                                            :description "Starting at 7th level, you and friendly creatures within 10 feet of you can't be charmed while you are conscious.
+At 18th level, the range of this aura increases to 30 feet."})]}
+                           20 {:modifiers [(mod5e/action
+                                            {:name "Holy Nimbus"
+                                             :level 20
+                                             :page 86
+                                             :frequency {:units :long-rest}
+                                             :duration {:units :minute}
+                                             :summary "you emanate a bright light with 30 ft radius, an enemy that starts its turn there takes 10 radiant damage. You also have advantage on saves against spells cast by fiends and undead"
+                                             :description "At 20th level, as an action, you can emanate an aura of sunlight. For 1 minute, bright light shines from you in a 30-foot radius, and dim light shines 30 feet beyond that.
 Whenever an enemy creature starts its turn in the bright light, the creature takes 10 radiant damage.
 In addition, for the duration, you have advantage on saving throws against spells cast by fiends or undead.
-Once you use this feature, you can't use it again until you finish a long rest."})]
+Once you use this feature, you can't use it again until you finish a long rest."})]}}
                   :traits [{:name "Purity of Spirit"
                             :level 15
                             :page 86
@@ -2798,17 +2801,34 @@ Once you use this feature, you can't use it again until you finish a long rest."
                               (paladin-spell 4 :ice-storm 13)
                               (paladin-spell 4 :stoneskin 13)
                               (paladin-spell 5 :commune-with-nature 17)
-                              (paladin-spell 5 :tree-stride 17)]
-                  :traits [{:name "Channel Divinity: Nature's Wrath"
-                            :level 3}
-                           {:name "Channel Divinity: Turn the Faithless"
-                            :level 3}
-                           {:name "Aura of Warding"
-                            :level 7}
-                           {:name "Undying Sentinal"
-                            :level 15}
+                              (paladin-spell 5 :tree-stride 17)
+                              (mod5e/action
+                               {:name "Channel Divinity: Nature's Wrath"
+                                :level 3
+                                :page 87
+                                :summary (str "restrain a creature with vines on a failed DC " (?spell-save-dc :cha) " STR or DEX save. It makes the save every turn until freed.")})
+                              (mod5e/action
+                               {:name "Channel Divinity: Turn the Faithless"
+                                :level 3
+                                :page 87
+                                :duration {:units :minute}
+                                :summary "turn and reveal the true form of fey and fiends within 30 ft."})]
+                  :levels {7 {:modifiers [(mod5e/dependent-trait
+                                           {:name "Aura of Warding"
+                                            :level 7
+                                            :page 87
+                                            :summary (str "you and friendly creatures within " ?paladin-aura " have resistance to spell damage")})]}}
+                  :traits [{:name "Undying Sentinal"
+                            :level 15
+                            :page 87
+                            :frequency {:units :long-rest}
+                            :summary "when you are reduced to 0 HP without being killed, you drop to 1 instead"}
                            {:name "Elder Champion"
-                            :level 20}]}
+                            :level 20
+                            :page 87
+                            :frequency {:units :long-rest}
+                            :duration {:units :minute}
+                            :summary "undergo a tranformation where you 1) regain 10 HPs at start of your turns 2) can cast spells with casting time action as bonus action 3) enemies within 10 ft. have disadvantage on saves against your Channel Divinity and spells"}]}
                  {:name "Oath of Vengeance"
                   :modifiers [(paladin-spell 1 :bane 3)
                               (paladin-spell 1 :hunters-mark 3)
@@ -2819,17 +2839,35 @@ Once you use this feature, you can't use it again until you finish a long rest."
                               (paladin-spell 4 :banishment 13)
                               (paladin-spell 4 :dimension-door 13)
                               (paladin-spell 5 :hold-monster 17)
-                              (paladin-spell 5 :scrying 17)]
-                  :traits [{:name "Channel Divinity: Abjure Enemy"
-                            :level 3}
-                           {:name "Channel Divinity: Vow of Eternity"
-                            :level 3}
-                           {:name "Relentless Avenger"
-                            :level 7}
-                           {:name "Soul of Vengeance"
-                            :level 15}
-                           {:name "Avenging Angel"
-                            :level 20}]}]}))
+                              (paladin-spell 5 :scrying 17)
+                              (mod5e/action
+                               {:name "Channel Divinity: Abjure Enemy"
+                                :level 3
+                                :page 88
+                                :duration {:units :minute}
+                                :summary (str "a creature of your choosing within 60 ft. must succeed on a DC " (?spell-save-dc :cha) " WIS save or be frightened and have a speed of 0, speed is halved on successful save")})
+                              (mod5e/bonus-action
+                               {:name "Channel Divinity: Vow of Eternity"
+                                :level 3
+                                :page 88
+                                :duration {:units :minute}
+                                :summary "gain advantage on attacks against a creature"})]
+                  :levels {15 {:modifiers [(mod5e/reaction
+                                            {:name "Soul of Vengeance"
+                                             :level 15
+                                             :page 88
+                                             :summary "when a creature under you Vow of Enmity attacks, make a melee weapon attack against it"})]}
+                           20 {:modifiers [(mod5e/action
+                                            {:name "Avenging Angel"
+                                             :level 20
+                                             :page 88
+                                             :duration {:units :hour}
+                                             :frequency {:units :long-rest}
+                                             :summary (str "transform, gain flying speed of 60 ft., emanate a 30 ft. aura and creatures within it must succeed on a DC " (?spell-save-dc :cha) " WIS or be frightened for 1 min and attacks against them have advantage")})]}}
+                  :traits [{:name "Relentless Avenger"
+                            :level 7
+                            :page 88
+                            :summary "when you hit with opportunity attack, you can also move up to half your speed after the attack without provoking opportunity attacks"}]}]}))
 
 (def ranger-skills {:animal-handling true :athletics true :insight true :investigation true :nature true :perception true :stealth true :survival true})
 
