@@ -2665,57 +2665,60 @@ You can have only one creature under the effect of this feature at a time. You c
     :levels {2 {:selections [(opt5e/fighting-style-selection #{:defense :dueling :great-weapon-fighting :protection})]}
              3 {:modifiers [(mod5e/damage-immunity :disease)]}
              5 {:modifiers [(mod5e/extra-attack)]}}
-    :selections [(t/selection
-                  "Weapons"
-                  [(t/option
-                    "Martial Weapon and Shield"
-                    :martial-and-shield
-                    [(t/selection
-                      "Martial Weapon"
-                      (opt5e/martial-weapon-options 1))]
-                    [(mod5e/armor :shield 1)])
-                   (t/option
-                    "Two Martial Weapons"
-                    :two-martial
-                    [(t/selection
-                      "Martial Weapons"
-                      (opt5e/martial-weapon-options 1)
-                      2
-                      2)]
-                    [])])
-                 (t/selection
-                  "Melee Weapon"
-                  [(t/option
-                    "Five Javelins"
-                    :javelins
-                    []
-                    [(mod5e/weapon :javelin 5)])
-                   (t/option
-                    "Simple Melee Weapon"
-                    :simple-melee
-                    [(t/selection
-                      "Simple Melee Weapon"
-                      (opt5e/simple-melee-weapon-options 1))]
-                    [])])]
-    :traits [{:name "Divine Sense"
-              :description "The presence of strong evil registers on your senses like a noxious odor, and powerful good rings like heavenly music in your ears. As an action, you can open your awareness to detect such forces. Until the end of your next turn, you know the location of any celestial, fiend, or undead within 60 feet of you that is not behind total cover. You know the type (celestial, fiend, or undead) of any being whose presence you sense, but not its identity (the vampire Count Strahd von Zarovich, for instance). Within the same radius, you also detect the presence of any place or object that has been consecrated or desecrated, as with the hallow spell.You can use this feature a number of times equal to 1 + your Charisma modifier. When you finish a long rest, you regain all expended uses."}
-             {:name "Lay on Hands"
-              :description "Your blessed touch can heal wounds. You have a pool of healing power that replenishes when you take a long rest. With that pool, you can restore a total number of hit points equal to your paladin level × 5.
+    :modifiers [(mod5e/action
+                 {:name "Divine Sense"
+                  :page 84
+                  :frequency {:units :long-rest
+                              :amount (inc (?ability-bonuses :cha))}
+                  :summary "within 60 ft., detect presense of undead, celestial, or fiend. Also detect consecrated or desecrated object or place"
+                  :description "The presence of strong evil registers on your senses like a noxious odor, and powerful good rings like heavenly music in your ears. As an action, you can open your awareness to detect such forces. Until the end of your next turn, you know the location of any celestial, fiend, or undead within 60 feet of you that is not behind total cover. You know the type (celestial, fiend, or undead) of any being whose presence you sense, but not its identity (the vampire Count Strahd von Zarovich, for instance). Within the same radius, you also detect the presence of any place or object that has been consecrated or desecrated, as with the hallow spell.You can use this feature a number of times equal to 1 + your Charisma modifier. When you finish a long rest, you regain all expended uses."})
+                (mod5e/action
+                 {:name "Lay on Hands"
+                  :page 84
+                  :frequency {:units :long-rest}
+                  :summary (str "you have a healing pool of " (* 5 (?class-level :paladin)) " HPs, with it you can heal a creature or expend 5 points to cure disease or neutralize poison")
+                  :description "Your blessed touch can heal wounds. You have a pool of healing power that replenishes when you take a long rest. With that pool, you can restore a total number of hit points equal to your paladin level × 5.
 As an action, you can touch a creature and draw power from the pool to restore a number of hit points to that creature, up to the maximum amount remaining in your pool.
-Alternatively, you can expend 5 hit points from your pool of healing to cure the target of one disease or neutralize one poison affecting it. You can cure multiple diseases and neutralize multiple poisons with a single use of Lay on Hands, expending hit points separately for each one.This feature has no effect on undead and constructs."}
+Alternatively, you can expend 5 hit points from your pool of healing to cure the target of one disease or neutralize one poison affecting it. You can cure multiple diseases and neutralize multiple poisons with a single use of Lay on Hands, expending hit points separately for each one.This feature has no effect on undead and constructs."})
+                (mod5e/dependent-trait
+                 {:name "Aura of Protection"
+                  :level 6
+                  :page 85
+                  :summary (str "you and friendly creatures within " (if (< (?class-level :paladin) 18) 10 30) " ft. have a " (common/bonus-str (max 1 (?ability-bonuses :cha))) " bonus to saves")
+                  :description "Starting at 6th level, whenever you or a friendly creature within 10 feet of you must make a saving throw, the creature gains a bonus to the saving throw equal to your Charisma modifier (with a minimum bonus of +1). You must be conscious to grant this bonus.
+At 18th level, the range of this aura increases to 30 feet."})]
+    :selections [(t/selection
+                  "Starting Equipment: Weapons"
+                  [(t/option-cfg
+                    {:name "Martial Weapon and Shield"
+                     :selections [(t/selection
+                                   "Martial Weapon"
+                                   (opt5e/martial-weapon-options 1))]
+                     :modifiers [(mod5e/armor :shield 1)]})
+                   (t/option-cfg
+                    {:name "Two Martial Weapons"
+                     :selections [(t/selection
+                                   "Martial Weapons"
+                                   (opt5e/martial-weapon-options 1)
+                                   2
+                                   2)]})])
+                 (t/selection
+                  "Starting Equipment: Melee Weapon"
+                  [(t/option-cfg
+                    {:name "Five Javelins"
+                     :modifiers [(mod5e/weapon :javelin 5)]})
+                   (t/option-cfg
+                    {:name "Simple Melee Weapon"
+                     :selections [(t/selection
+                                   "Simple Melee Weapon"
+                                   (opt5e/simple-melee-weapon-options 1))]})])]
+    :traits [
+             
              {:name "Divine Smite"
               :level 2
+              :page 85
+              :summary "when you hit with melee weapon attack, you can expend 1 X-th level spell slot to deal extra 1d8 + Xd8 radiant damage, up to 5d8. Additional d8 on fiend or undead."
               :description "Starting at 2nd level, when you hit a creature with a melee weapon attack, you can expend one spell slot to deal radiant damage to the target, in addition to the weapon's damage. The extra damage is 2d8 for a 1st-level spell slot, plus 1d8 for each spell level higher than 1st, to a maximum of 5d8. The damage increases by 1d8 if the target is an undead or a fiend."}
-             {:name "Divine Health"
-              :level 3
-              :description "By 3rd level, the divine magic flowing through you makes you immune to disease."}
-             {:name "Extra Attack"
-              :level 5
-              :description "Beginning at 5th level, you can attack twice, instead of once, whenever you take the Attack action on your turn."}
-             {:name "Aura of Protection"
-              :level 6
-              :description "Starting at 6th level, whenever you or a friendly creature within 10 feet of you must make a saving throw, the creature gains a bonus to the saving throw equal to your Charisma modifier (with a minimum bonus of +1). You must be conscious to grant this bonus.
-At 18th level, the range of this aura increases to 30 feet."}
              {:name "Aura of Courage"
               :level 10
               :description "Starting at 10th level, you and friendly creatures within 10 feet of you can't be frightened while you are conscious.
