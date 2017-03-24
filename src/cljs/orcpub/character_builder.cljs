@@ -1657,7 +1657,7 @@
      [:span "Print"]]]])
 
 (defn character-builder []
-  (cljs.pprint/pprint (:character @app-state))
+  ;;(cljs.pprint/pprint (:character @app-state))
   ;;(js/console.log "APP STATE" @app-state)
   (let [selected-plugin-options (into #{}
                                       (map ::entity/key)
