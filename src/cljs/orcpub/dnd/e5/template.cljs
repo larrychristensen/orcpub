@@ -13,7 +13,8 @@
             [orcpub.dnd.e5.equipment :as equip5e]
             [orcpub.dnd.e5.armor :as armor5e]
             [orcpub.dnd.e5.spell-lists :as sl]
-            [orcpub.dnd.e5.magic-items :as mi])
+            [orcpub.dnd.e5.magic-items :as mi]
+            [orcpub.dnd.e5.monsters :as monst5e])
   #_(:require-macros [orcpub.dnd.e5.options :as opt5e]
                      [orcpub.dnd.e5.modifiers :as mod5e]))
 
@@ -2391,6 +2392,13 @@ In addition, when you make a running long jump, the distance you can cover incre
                             :page 75
                             :summary "teleport up to 30 ft. when you use Action Surge"}]}]}))
 
+(defn evasion [level page]
+  {:name "Evasion"
+   :page page
+   :level level
+   :summary "when you succeed on a DEX save to take half damage, you take none, if you fail, you take half"
+   :description "At 7th level, your instinctive agility lets you dodge out of the way of certain area effects, such as a blue dragon's lightning breath or a fireball spell. When you are subjected to an effect that allows you to make a Dexterity saving throw to take only half damage, you instead take no damage if you succeed on the saving throw, and only half damage if you fail."})
+
 (def monk-option
   (class-option
    {:name "Monk"
@@ -2516,11 +2524,7 @@ If you reduce the damage to 0, you can catch the missile if it is small enough f
               :level 6
               :summary "your unarmed strikes count as magical"
               :description "Starting at 6th level, your unarmed strikes count as magical for the purpose of overcoming resistance and immunity to nonmagical attacks and damage"}
-             {:name "Evasion"
-              :page 79
-              :level 7
-              :summary "when you succeed on a DEX save to take half damage, you take none, if you fail, you take half"
-              :description "At 7th level, your instinctive agility lets you dodge out of the way of certain area effects, such as a blue dragon's lightning breath or a fireball spell. When you are subjected to an effect that allows you to make a Dexterity saving throw to take only half damage, you instead take no damage if you succeed on the saving throw, and only half damage if you fail."}
+             (evasion 7 79)
              {:name "Tongue of the Sun and Moon"
               :page 79
               :level 13
@@ -2954,6 +2958,13 @@ Once you use this feature, you can't use it again until you finish a long rest."
         :modifiers [(mod/set-mod ?ranger-favored-terrain terrain)]}))
     [:arctic :coast :desert :forest :grassland :mountain :swamp :underdark])))
 
+(defn uncanny-dodge-modifier [page]
+  (mod5e/reaction
+   {:name "Uncanny Dodge"
+    :page page
+    :summary "halve the damage from an attacker you can see that hits you"
+    :description "When an attacker that you can see hits you with an attack, you can use your reaction to halve the attack's damage against you."}))
+
 (def ranger-option
   (class-option
    {:name "Ranger"
@@ -3039,10 +3050,12 @@ Once you use this feature, you can't use it again until you finish a long rest."
 Once you are camouflaged in this way, you can try to hide by pressing yourself up against a solid surface, such as a tree or wall, that is at least as tall and wide as you are. You gain a +10 bonus to Dexterity (Stealth) checks as long as you remain there without moving or taking actions. Once you move or take an action or a reaction, you must camouflage yourself again to gain this benefit."}
              {:name "Vanish"
               :level 14
+              :page 92
               :summary "Hide action as a bonus action. You also can't be non-magically tracked"
               :description "Starting at 14th level, you can use the Hide action as a bonus action on your turn. Also, you can't be tracked by nonmagical means, unless you choose to leave a trail."}
              {:name "Feral Senses"
               :level 18
+              :page 92
               :summary "no disadvantage on attacks against creature you can't see, you know location of invisible creatures within 30 ft."
               :description "At 18th level, you gain preternatural senses that help you fight creatures you can't see. When you attack a creature you can't see, your inability to see it doesn't impose disadvantage on your attack rolls against it.You are also aware of the location of any invisible creature within 30 feet of you, provided that the creature isn't hidden from you and you aren't blinded or deafened."}]
     :subclass-level 3
@@ -3050,75 +3063,106 @@ Once you are camouflaged in this way, you can try to hide by pressing yourself u
     :subclasses [{:name "Hunter"
                   :levels {3 {:selections [(t/selection
                                             "Hunter's Prey"
-                                            [(t/option
-                                              "Colossus Slayer"
-                                              :colossus-slayer
-                                              []
-                                              [(mod5e/trait "Colossus Slayer" "Your tenacity can wear down the most potent foes. When you hit a creature with a weapon attack, the creature takes an extra 1d8 damage if it's below its hit point maximum. You can deal this extra damage only once per turn.")])
-                                             (t/option
-                                              "Giant Killer"
-                                              :giant-killer
-                                              []
-                                              [(mod5e/trait "Giant Killer" "When a Large or larger creature within 5 feet of you hits or misses you with an attack, you can use your reaction to attack that creature immediately after its attack, provided that you can see the creature.")])
-                                             (t/option
-                                              "Horde Breaker"
-                                              :horde-breaker
-                                              []
-                                              [(mod5e/trait "Horde Breaker" "Once on each of your turns when you make a weapon attack, you can make another attack with the same weapon against a different creature that is within 5 feet of the original target and within range of your weapon")])])]}
+                                            [(t/option-cfg
+                                              {:name "Colossus Slayer"
+                                               :modifiers [(mod5e/trait-cfg
+                                                            {:name "Colossus Slayer"
+                                                             :page 93
+                                                             :frequency {:units :turn}
+                                                             :summary "deal an extra d8 damage when you hit a creature that is below its HP max with a weapon attack"
+                                                             :description "Your tenacity can wear down the most potent foes. When you hit a creature with a weapon attack, the creature takes an extra 1d8 damage if it's below its hit point maximum. You can deal this extra damage only once per turn."})]})
+                                             (t/option-cfg
+                                              {:name "Giant Killer"
+                                               :modifiers [(mod5e/reaction
+                                                            {:name "Giant Killer"
+                                                             :page 93
+                                                             :summary "attack a Large or larger creature within 5 ft that misses an attack against you"
+                                                             :description "When a Large or larger creature within 5 feet of you hits or misses you with an attack, you can use your reaction to attack that creature immediately after its attack, provided that you can see the creature."})]})
+                                             (t/option-cfg
+                                              {:name "Horde Breaker"
+                                               :modifiers [(mod5e/trait-cfg
+                                                            {:name "Horde Breaker"
+                                                             :page 93
+                                                             :frequency {:units :turn}
+                                                             :summary "when you attack one creature, attack another creature within 5 feet of it with the same action"
+                                                             :description "Once on each of your turns when you make a weapon attack, you can make another attack with the same weapon against a different creature that is within 5 feet of the original target and within range of your weapon"})]})])]}
                            7 {:selections [(t/selection
                                             "Defensive Tactics"
-                                            [(t/option
-                                              "Escape the Horde"
-                                              :escape-the-horde
-                                              []
-                                              [(mod5e/trait "Escape the Horde" "Opportunity attacks against you are made with disadvantage.")])                                             (t/option
-                                              "Multiattack Defense"
-                                              :multiattack-defense
-                                              []
-                                              [(mod5e/trait "Multiattack Defense" "When a creature hits you with an attack, you gain a +4 bonus to AC against all subsequent attacks made by that creature for the rest of the turn.")])
-                                             (t/option
-                                              "Steel Will"
-                                              :steel-will
-                                              []
-                                              [(mod5e/trait "Steel Will" "You have advantage on saving throws against being frightened.")])])]}
+                                            [(t/option-cfg
+                                              {:name "Escape the Horde"
+                                               :modifiers [(mod5e/trait
+                                                            {:name "Escape the Horde"
+                                                             :page 93
+                                                             :description "Opportunity attacks against you are made with disadvantage."})]})                                 (t/option-cfg
+                                              {:name "Multiattack Defense"
+                                               :modifiers [(mod5e/trait
+                                                            {:name "Multiattack Defense"
+                                                             :page 93
+                                                             :description "When a creature hits you with an attack, you gain a +4 bonus to AC against all subsequent attacks made by that creature for the rest of the turn."})]})
+                                             (t/option-cfg
+                                              {:name "Steel Will"
+                                               :modifiers [(mod5e/saving-throw-advantage [:frightened])]})])]}
                            11 {:selections [(t/selection
                                             "Multiattack"
-                                            [(t/option
-                                              "Volley"
-                                              :volley
-                                              []
-                                              [(mod5e/trait "Volley" "You can use your action to make a ranged attack against any number of creatures within 10 feet of a point you can see within your weapon's range. You must have ammunition for each target, as normal, and you make a separate attack roll for each target.")])
-                                             (t/option
-                                              "Whirlwind Attack"
-                                              :whirlwind-attack
-                                              []
-                                              [(mod5e/trait "Whirlwind Attack" "You can use your action to make a melee attack against any number of creatures within 5 feet of you, with a separate attack roll for each target.")])])]}
+                                            [(t/option-cfg
+                                              {:name "Volley"
+                                               :modifiers [(mod5e/action
+                                                            {:name "Volley"
+                                                             :page 93
+                                                             :summary "make a ranged attack against any creatures within a 10 ft of a point" 
+                                                             :description "You can use your action to make a ranged attack against any number of creatures within 10 feet of a point you can see within your weapon's range. You must have ammunition for each target, as normal, and you make a separate attack roll for each target."})]})
+                                             (t/option-cfg
+                                              {:name "Whirlwind Attack"
+                                               :modifiers [(mod5e/action
+                                                            {:name "Whirlwind Attack"
+                                                             :page 93
+                                                             :summary "melee attack against any creatures within 5 ft. of you"
+                                                             :description "You can use your action to make a melee attack against any number of creatures within 5 feet of you, with a separate attack roll for each target."})]})])]}
                            15 {:selections [(t/selection
                                             "Superior Hunter's Defense"
-                                            [(t/option
-                                              "Evasion"
-                                              :evasion
-                                              []
-                                              [(mod5e/trait "Evasion" "When you are subjected to an effect, such as a red dragon's fiery breath or a lightning bolt spell, that allows you to make a Dexterity saving throw to take only half damage, you instead take no damage if you succeed on the saving throw, and only half damage if you fail.")])
-                                             (t/option
-                                              "Stand Against the Tide"
-                                              :stand-against-the-tide
-                                              []
-                                              [(mod5e/trait "Stand Against the Tide" "When a hostile creature misses you with a melee attack, you can use your reaction to force that creature to repeat the same attack against another creature (other than itself) of your choice.")])
-                                             (t/option
-                                              "Uncanny Dodge"
-                                              :uncanny-dodge
-                                              []
-                                              [(mod5e/trait "Uncanny Dodge" "When an attacker that you can see hits you with an attack, you can use your reaction to halve the attack's damage against you.")])])]}}}
+                                            [(t/option-cfg
+                                              {:name "Evasion"
+                                               :modifiers [(mod5e/trait-cfg
+                                                            (evasion 15 93))]})
+                                             (t/option-cfg
+                                              {:name "Stand Against the Tide"
+                                               :modifiers  [(mod5e/reaction
+                                                             {:name "Stand Against the Tide"
+                                                              :page 93
+                                                              :summary "force a creature to repeat its attack on another creature when it misses you"
+                                                              :description "When a hostile creature misses you with a melee attack, you can use your reaction to force that creature to repeat the same attack against another creature (other than itself) of your choice."})]})
+                                             (t/option-cfg
+                                              {:name "Uncanny Dodge"
+                                               :modifiers [(uncanny-dodge-modifier 93)]})])]}}}
                  {:name "Beast Master"
-                  :traits [{:name "Ranger's Companion"
-                            :level 3}
-                           {:name "Exceptional Training"
-                            :level 7}
+                  :selections [(t/selection
+                                "Ranger's Companion"
+                                (mapv
+                                 (fn [monster]
+                                   (t/option-cfg
+                                    {:name (:name monster)
+                                     :modifiers [(mod5e/action
+                                                  {:name "Ranger's Companion"
+                                                   :page 93
+                                                   :summary (str "You have a " (:name monster) " as your companion, you can command it to Attack, Dash, Disengage, Dodge, or Help")})]}))
+                                 (filter #(and (#{"Tiny" "Small" "Medium"} (:size %))
+                                               (= "beast" (:type %))
+                                               (<= (:challenge %) 0.25))
+                                         monst5e/monsters)))]
+                  :levels {7 {:modifiers [(mod5e/bonus-action
+                                           {:name "Exceptional Training"
+                                            :page 93
+                                            :level 7
+                                            :summary "when your companion doesn't attack, you can command it to take the Dash, Disengage, Dodge, or Help action"})]}}
+                  :traits [
                            {:name "Bestial Fury"
-                            :level 11}
+                            :level 11
+                            :page 93
+                            :summary "your companion attacks twice when it takes the Attack action"}
                            {:name "Share Spells"
-                            :level 15}]}]}))
+                            :level 15
+                            :page 93
+                            :summary "when you target yourself with a spell you can also affect your companion if within 30 ft."}]}]}))
 
 (def rogue-skills {:acrobatics true :athletics true :deception true :insight true :intimidation true :investigation true :perception true :performance true :persuasion true :sleight-of-hand true :stealth true})
 
