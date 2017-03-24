@@ -1949,6 +1949,14 @@ The extra hit points increase when you reach certain levels in this class: to 1d
 (defn druid-spell [spell-level spell-key min-level]
   (mod5e/spells-known spell-level spell-key :wis "Druid" min-level))
 
+(defn lands-stride [level]
+  {:name "Land's Stride"
+   :level level
+   :page 69
+   :summary "moving through nonmagical difficult terrain costs no extra movement, pass through nonmagical plants without being slowed by them and without taking damage from them"
+   :description "Starting at 6th level, moving through nonmagical difficult terrain costs you no extra movement. You can also pass through nonmagical plants without being slowed by them and without taking damage from them if they have thorns, spines, or a similar hazard.
+In addition, you have advantage on saving throws against plants that are magically created or manipulated to impede movement, such those created by the entangle spell."})
+
 (def druid-option
   (class-option
    {:name "Druid"
@@ -2126,13 +2134,7 @@ The extra hit points increase when you reach certain levels in this class: to 1d
                                                            " Wisdom save or they cannot attack you.")
                                              :description "When you reach 14th level, creatures of the natural world sense your connection to nature and become hesitant to attack you. When a beast or plant creature attacks you, that creature must make a Wisdom saving throw against your druid spell save DC. On a failed save, the creature must choose a different target, or the attack automatically misses. On a successful save, the creature is immune to this effect for 24 hours.
 The creature is aware of this effect before it makes its attack against you."})]}}
-                  :traits [{:name "Land's Stride"
-                            :level 6
-                            :page 69
-                            :summary "moving through nonmagical difficult terrain costs no extra movement, pass through nonmagical plants without being slowed by them and without taking damage from them"
-                            :description "Starting at 6th level, moving through nonmagical difficult terrain costs you no extra movement. You can also pass through nonmagical plants without being slowed by them and without taking damage from them if they have thorns, spines, or a similar hazard.
-In addition, you have advantage on saving throws against plants that are magically created or manipulated to impede movement, such those created by the entangle spell."}
-                           ]}
+                  :traits [(lands-stride 6)]}
                  {:name "Circle of the Moon"
                   :levels {2 {:modifiers [(mod5e/bonus-action
                                            {:name "Combat Wild Shape"
@@ -2919,6 +2921,39 @@ Once you use this feature, you can't use it again until you finish a long rest."
                     1)]
       :modifiers [(mod/set-mod ?ranger-favored-enemies enemy-type)]})))
 
+(def favored-enemy-selection
+  (t/selection
+   "Favored Enemy"
+   [(t/option-cfg
+     {:name "Type"
+      :selections [(t/selection
+                    "Type"
+                    (mapv
+                     favored-enemy-option
+                     favored-enemy-types))]})
+    (t/option-cfg
+     {:name "Two Humanoid Races"
+      :selections [(t/selection
+                    "Humanoid Race 1"
+                    (mapv
+                     favored-enemy-option
+                     humanoid-enemies))
+                   (t/selection
+                    "Humanoid Race 2"
+                    (mapv
+                     favored-enemy-option
+                     humanoid-enemies))]})]))
+
+(def favored-terrain-selection
+  (t/selection
+   "Favored Terrain"
+   (mapv
+    (fn [terrain]
+      (t/option-cfg
+       {:name (common/kw-to-name terrain)
+        :modifiers [(mod/set-mod ?ranger-favored-terrain terrain)]}))
+    [:arctic :coast :desert :forest :grassland :mountain :swamp :underdark])))
+
 (def ranger-option
   (class-option
    {:name "Ranger"
@@ -2955,79 +2990,61 @@ Once you use this feature, you can't use it again until you finish a long rest."
     :modifiers [(mod5e/dependent-trait
                    {:name "Favored Enemy"
                     :page 91
-                    :summary (str "You have advantage on survival checks to track " (common/list-print (map #(common/kw-to-name % false) ?ranger-favored-enemies)) " creatures and on INT checks to recall info about them")})]
+                    :summary (str "You have advantage on survival checks to track " (common/list-print (map #(common/kw-to-name % false) ?ranger-favored-enemies)) " creatures and on INT checks to recall info about them")})
+                (mod5e/dependent-trait
+                   {:name "Natural Explorer"
+                    :page 91
+                    :summary (let [favored-terrain ?ranger-favored-terrain
+                                   one-terrain? (= 1 (count favored-terrain))]
+                               (str "your favored terrain " (if one-terrain? "type is" "types are") " " (if (seq favored-terrain) (common/list-print (map #(common/kw-to-name % false) ?ranger-favored-terrain)) "not selected") ". Related to the terrain type" (if (not one-terrain?) "s") ": 2X proficiency bonus for INT and WIS checks for which you are proficient, difficult terrain doesn't slow your group, always alert for danger, can move stealthily alone at normal pace, 2x food when foraging, while tracking learn exact number, size, and when they passed through"))})]
     :selections [(t/selection
                   "Melee Weapon"
-                  [(t/option
-                    "Two Shortswords"
-                    :shortswords
-                    []
-                    [(mod5e/weapon :shortsword 2)])
-                   (t/option
-                    "Simple Melee Weapon"
-                    :simple-melee
-                    [(t/selection
-                      "Simple Melee Weapon"
-                      (opt5e/simple-melee-weapon-options 1)
-                      2
-                      2)]
-                    [])])
-                 (t/selection
-                  "Favored Enemy"
                   [(t/option-cfg
-                    {:name "Type"
-                     :selections [(t/selection
-                                  "Type"
-                                  (mapv
-                                   favored-enemy-option
-                                   favored-enemy-types))]})
+                    {:name "Two Shortswords"
+                     :modifiers [(mod5e/weapon :shortsword 2)]})
                    (t/option-cfg
-                    {:name "Two Humanoid Races"
+                    {:name "Simple Melee Weapon"
                      :selections [(t/selection
-                                  "Humanoid Race 1"
-                                  (mapv
-                                   favored-enemy-option
-                                   humanoid-enemies))
-                                  (t/selection
-                                  "Humanoid Race 2"
-                                  (mapv
-                                   favored-enemy-option
-                                   humanoid-enemies))]})])]
+                                   "Simple Melee Weapon"
+                                   (opt5e/simple-melee-weapon-options 1)
+                                   2
+                                   2)]})])
+                 favored-enemy-selection
+                 favored-terrain-selection]
     :levels {2 {:selections [(opt5e/fighting-style-selection #{:archery :defense :dueling :two-weapon-fighting})]}
-             5 {:modifiers [(mod5e/extra-attack)]}}
-    :traits [{:name "Primeval Awareness"
-              :level 3
-              :description "Beginning at 3rd level, you can use your action and expend one ranger spell slot to focus your awareness on the region around you. For 1 minute per level of the spell slot you expend, you can sense whether the following types of creatures are present within 1 mile of you (or within up to 6 miles if you are in your favored terrain): aberrations, celestials, dragons, elementals, fey, fiends, and undead. This feature doesn't reveal the creatures' location or number."}
-             {:name "Extra Attack"
-              :level 5
-              :description "Beginning at 5th level, you can attack twice, instead of once, whenever you take the Attack action on your turn."}
-             {:name "Land's Stride"
-              :level 8
-              :description "Starting at 8th level, moving through nonmagical difficult terrain costs you no extra movement. You can also pass through nonmagical plants without being slowed by them and without taking damage from them if they have thorns, spines, or a similar hazard.
-In addition, you have advantage on saving throws against plants that are magically created or manipulated to impede movement, such those created by the entangle spell"}
+             3 {:modifiers [(mod5e/action
+                             {:name "Primeval Awareness"
+                              :level 3
+                              :page 92
+                              :summary (str "spend an X-level spell slot, for X minutes, you sense the types of creatures within 1 mile" (if (seq ?ranger-favored-terrain) (str "(6 if " (common/list-print (map #(common/kw-to-name % false) ?ranger-favored-terrain))) ")") )
+                              :description "Beginning at 3rd level, you can use your action and expend one ranger spell slot to focus your awareness on the region around you. For 1 minute per level of the spell slot you expend, you can sense whether the following types of creatures are present within 1 mile of you (or within up to 6 miles if you are in your favored terrain): aberrations, celestials, dragons, elementals, fey, fiends, and undead. This feature doesn't reveal the creatures' location or number."})]}
+             5 {:modifiers [(mod5e/extra-attack)]}
+             6 {:selections [favored-enemy-selection
+                             favored-terrain-selection]}
+             10 {:selections [favored-terrain-selection]}
+             14 {:selections [favored-enemy-selection]}
+             20 {:modifiers [(mod5e/dependent-trait
+                              {:name "Foe Slayer"
+                               :frequency {:units :turn}
+                               :level 20
+                               :page 92
+                               :summary (str "add " (common/bonus-str (?ability-bonuses :wis)) " to an attack or damage roll") 
+                               :description "At 20th level, you become an unparalleled hunter of your enemies. Once on each of your turns, you can add your Wisdom modifier to the attack roll or the damage roll of an attack you make against one of your favored enemies. You can choose to use this feature before or after the roll, but before any effects of the roll are applied."})]}}
+    :traits [(lands-stride 8)
              {:name "Hide in Plain Sight"
               :level 10
+              :page 92
+              :summary "spend 1 minute camouflaging yourself to gain +10 to Stealth checks when you don't move"
               :description "Starting at 10th level, you can spend 1 minute creating camouflage for yourself. You must have access to fresh mud, dirt, plants, soot, and other naturally occurring materials with which to create your camouflage.
 Once you are camouflaged in this way, you can try to hide by pressing yourself up against a solid surface, such as a tree or wall, that is at least as tall and wide as you are. You gain a +10 bonus to Dexterity (Stealth) checks as long as you remain there without moving or taking actions. Once you move or take an action or a reaction, you must camouflage yourself again to gain this benefit."}
              {:name "Vanish"
               :level 14
+              :summary "Hide action as a bonus action. You also can't be non-magically tracked"
               :description "Starting at 14th level, you can use the Hide action as a bonus action on your turn. Also, you can't be tracked by nonmagical means, unless you choose to leave a trail."}
              {:name "Feral Senses"
               :level 18
-              :description "At 18th level, you gain preternatural senses that help you fight creatures you can't see. When you attack a creature you can't see, your inability to see it doesn't impose disadvantage on your attack rolls against it.You are also aware of the location of any invisible creature within 30 feet of you, provided that the creature isn't hidden from you and you aren't blinded or deafened."}
-             {:name "Foe Slayer"
-              :level 20
-              :description "At 20th level, you become an unparalleled hunter of your enemies. Once on each of your turns, you can add your Wisdom modifier to the attack roll or the damage roll of an attack you make against one of your favored enemies. You can choose to use this feature before or after the roll, but before any effects of the roll are applied."}
-             {:name "Natural Explorer"
-              :description "You are particularly familiar with one type of natural environment and are adept at traveling and surviving in such regions. Choose one type of favored terrain: arctic, coast, desert, forest, grassland, mountain, or swamp. When you make an Intelligence or Wisdom check related to your favored terrain, your proficiency bonus is doubled if you are using a skill that you're proficient in.
-While traveling for an hour or more in your favored terrain, you gain the following benefits:
-* Difficult terrain doesn't slow your group's travel.
-* Your group can't become lost except by magical means.
-* Even when you are engaged in another activity while traveling (such as foraging, navigating, or tracking), you remain alert to danger.
-* If you are traveling alone, you can move stealthily at a normal pace.
-* When you forage, you find twice as much food as you normally would.
-* While tracking other creatures, you also learn their exact number, their sizes, and how long ago they passed through the area.
-You choose additional favored terrain types at 6th and 10th level."}]
+              :summary "no disadvantage on attacks against creature you can't see, you know location of invisible creatures within 30 ft."
+              :description "At 18th level, you gain preternatural senses that help you fight creatures you can't see. When you attack a creature you can't see, your inability to see it doesn't impose disadvantage on your attack rolls against it.You are also aware of the location of any invisible creature within 30 feet of you, provided that the creature isn't hidden from you and you aren't blinded or deafened."}]
     :subclass-level 3
     :subclass-title "Ranger Archetype"
     :subclasses [{:name "Hunter"
