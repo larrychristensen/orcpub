@@ -10,6 +10,7 @@
             [orcpub.dnd.e5.modifiers :as mod5e]
             [orcpub.dnd.e5.options :as opt5e]
             [orcpub.dnd.e5.weapons :as weapon5e]
+            [orcpub.dnd.e5.equipment :as equip5e]
             [orcpub.dnd.e5.armor :as armor5e]
             [orcpub.dnd.e5.spell-lists :as sl]
             [orcpub.dnd.e5.magic-items :as mi])
@@ -918,20 +919,20 @@ Fire Starter. The device produces a miniature flame, which you can use to light 
 (defn die-mean [die]
   (int (Math/ceil (/ (apply + (range 1 (inc die))) die))))
 
-(defn hit-points-selection [app-state die]
+(defn hit-points-selection [die]
   (t/selection-cfg
    {:name "Hit Points"
     :help "Select the method with which to determine this level's hit points."
     :options [{::t/name "Manual Entry"
                ::t/key :manual-entry
                ::t/help "This option allows you to manually type in the value for this level's hit points. Use this if you want to roll dice yourself or if you already have a character with known hit points for this level."
-               ::t/ui-fn #(hit-points-entry app-state % %2)
+               ::t/ui-fn #(hit-points-entry %3 % %2)
                ::t/modifiers [(mod5e/deferred-max-hit-points)]}
               {::t/name (str "Roll (1D" die ")")
                ::t/key :roll
                ::t/help "This option rolls virtual dice for you and sets that value for this level's hit points. It could pay off with a high roll, but you might also roll a 1."
-               ::t/ui-fn #(hit-points-roller die app-state % %2)
-               ::t/select-fn #(roll-hit-points die app-state %)
+               ::t/ui-fn #(hit-points-roller die %3 % %2)
+               ::t/select-fn #(roll-hit-points die %3 %)
                ::t/modifiers [(mod5e/deferred-max-hit-points)]}
               (let [average (die-mean die)]
                 (t/option-cfg
@@ -959,7 +960,7 @@ Fire Starter. The device produces a miniature flame, which you can use to light 
 
 (defn tool-prof-selection [tool-options & [key prereq-fn]]
   (let [[first-key first-num] (-> tool-options first)
-        first-option (opt5e/tools-map first-key)]
+        first-option (equip5e/tools-map first-key)]
     (if (and (= 1 (count tool-options))
              (seq (:values first-option)))
       (tool-prof-selection-aux first-option first-num key prereq-fn)
@@ -968,7 +969,7 @@ Fire Starter. The device produces a miniature flame, which you can use to light 
         :key key
         :options (map
                   (fn [[k num]]
-                    (let [tool (opt5e/tools-map k)]
+                    (let [tool (equip5e/tools-map k)]
                       (if (:values tool)
                         (t/option
                          (:name tool)
@@ -992,7 +993,6 @@ Fire Starter. The device produces a miniature flame, which you can use to light 
 (defn subclass-level-option [{:keys [name
                                      levels] :as subcls}
                              kw
-                             app-state
                              spellcasting-template
                              i]
   (let [selections (some-> levels (get i) :selections)]
@@ -1014,8 +1014,7 @@ Fire Starter. The device produces a miniature flame, which you can use to light 
                                modifiers
                                level-modifiers
                                traits]
-                        :as subcls}
-                       app-state]
+                        :as subcls}]
   (let [kw (common/name-to-kw name)
         {:keys [armor weapon save skill-options tool-options tool]} profs
         {skill-num :choose options :options} skill-options
@@ -1054,7 +1053,7 @@ Fire Starter. The device produces a miniature flame, which you can use to light 
                                         {::entity/key (-> current-values count inc str keyword)})
                                       (vec
                                        (map
-                                        (partial subclass-level-option subcls kw app-state spellcasting-template)
+                                        (partial subclass-level-option subcls kw spellcasting-template)
                                         (range 1 21))))]}])
       option)))
 
@@ -1089,12 +1088,12 @@ Fire Starter. The device produces a miniature flame, which you can use to light 
                          :key :subclass
                          :help subclass-help
                          :options (mapv
-                                   #(subclass-option (assoc cls :key kw) % app-state)
+                                   #(subclass-option (assoc cls :key kw) %)
                                    subclasses)})])
                     (if (and (not plugin?) (ability-inc-set i))
                       [(opt5e/ability-score-improvement-selection)])
                     (if (and (not plugin?) (> i 1))
-                      [(hit-points-selection app-state hit-die)])))
+                      [(hit-points-selection hit-die)])))
       :modifiers (vec
                   (concat
                    (if (= :all (:known-mode spellcasting))
@@ -1118,7 +1117,7 @@ Fire Starter. The device produces a miniature flame, which you can use to light 
 
 
 (defn equipment-option [[k num]]
-  (let [equipment (opt5e/equipment-map k)]
+  (let [equipment (equip5e/equipment-map k)]
     (if (:values equipment)
       (t/option
        (:name equipment)
@@ -1130,7 +1129,7 @@ Fire Starter. The device produces a miniature flame, which you can use to light 
           (zipmap (map :key (:values equipment)) (repeat num))))]
        [])
       (t/option
-       (-> k opt5e/equipment-map :name (str (if (> num 1) (str " (" num ")") "")))
+       (-> k equip5e/equipment-map :name (str (if (> num 1) (str " (" num ")") "")))
        k
        []
        [(mod5e/equipment k num)]))))
@@ -1215,8 +1214,7 @@ Fire Starter. The device produces a miniature flame, which you can use to light 
                             armor
                             armor-choices
                             spellcasting]
-                     :as cls}
-                    app-state]
+                     :as cls}]
   (let [kw (common/name-to-kw name)
         {:keys [save skill-options multiclass-skill-options tool-options multiclass-tool-options tool]
          armor-profs :armor weapon-profs :weapon} profs
@@ -1248,7 +1246,7 @@ Fire Starter. The device produces a miniature flame, which you can use to light 
                                       {::entity/key (-> current-values count inc level-key)})
                        :options (vec
                                  (map
-                                  (partial level-option cls kw app-state spellcasting-template)
+                                  (partial level-option cls kw spellcasting-template)
                                   (range 1 21)))
                        :min 1
                        :sequential? true
@@ -1283,7 +1281,7 @@ Fire Starter. The device produces a miniature flame, which you can use to light 
 (defn class-level [levels class-kw]
   (get-in levels [class-kw :class-level]))
 
-(defn barbarian-option [app-state]
+(def barbarian-option
   (class-option
    {:name "Barbarian"
     :hit-die 12
@@ -1464,8 +1462,7 @@ If you are able to cast spells, you can't cast them or concentrate on them while
                                                :modifiers [(mod5e/trait-cfg
                                                             {:name "Totemic Attunement: Wolf"
                                                              :page 50
-                                                             :summary "While raging, if you hit a Large or smaller creature, you can use a bonus action to knock it prone."})]})])]}}}]}
-   app-state))
+                                                             :summary "While raging, if you hit a Large or smaller creature, you can use a bonus action to knock it prone."})]})])]}}}]}))
 
 (defn bardic-inspiration-die [levels]
   (condp <= (class-level levels :bard)
@@ -1474,7 +1471,7 @@ If you are able to cast spells, you can't cast them or concentrate on them while
     5 8
     6))
 
-(defn bard-option [app-state]
+(def bard-option
   (class-option
    {:name "Bard"
     :hit-die 8
@@ -1495,7 +1492,7 @@ If you are able to cast spells, you can't cast them or concentrate on them while
                          :options {:diplomats-pack 1
                                    :entertainers-pack 1}}
                         {:name "Musical Instrument"
-                         :options (zipmap (map :key opt5e/musical-instruments) (repeat 1))}]
+                         :options (zipmap (map :key equip5e/musical-instruments) (repeat 1))}]
     :armor {:leather 1}
     :spellcaster true
     :spellcasting {:level-factor 1
@@ -1595,8 +1592,7 @@ The extra hit points increase when you reach certain levels in this class: to 1d
                            14 {:modifiers [(mod5e/bonus-action
                                            {:name "Battle Magic"
                                             :page 55
-                                            :summary "make a weapon attack when you use your action to cast a bard spell"})]}}}]}
-   app-state))
+                                            :summary "make a weapon attack when you use your action to cast a bard spell"})]}}}]}))
 
 (defn blessings-of-knowledge-skill [skill-name]
   (let [skill-kw (common/name-to-kw skill-name)]
@@ -1631,7 +1627,7 @@ The extra hit points increase when you reach certain levels in this class: to 1d
                   " damage to a successful weapon attack's damage")
     :description "At 8th level, you gain the ability to infuse your weapon strikes with divine energy. Once on each of your turns when you hit a creature with a weapon attack, you can cause the attack to deal an extra 1d8 radiant damage to the target. When you reach 14th level, the extra damage increases to 2d8."}))
 
-(defn cleric-option [app-state]
+(def cleric-option
   (class-option
    {:name "Cleric",
     :spellcasting {:level-factor 1
@@ -1949,13 +1945,12 @@ The extra hit points increase when you reach certain levels in this class: to 1d
                            {:name "Avatar of Battle"
                             :page 63
                             :level 17
-                            :summary "from non-magical weapons, resistance to slashing, bludgeoning, and piercing damage"}]}]}
-   app-state))
+                            :summary "from non-magical weapons, resistance to slashing, bludgeoning, and piercing damage"}]}]}))
 
 (defn druid-spell [spell-level spell-key min-level]
   (mod5e/spells-known spell-level spell-key :wis "Druid" min-level))
 
-(defn druid-option [app-state]
+(def druid-option
   (class-option
    {:name "Druid"
     :hit-die 8
@@ -2162,8 +2157,7 @@ In addition, you have advantage on saving throws against plants that are magical
                            {:name "Thousand Forms"
                             :page 69
                             :summary "cast alter self at will"
-                            :level 14}]}]}
-   app-state))
+                            :level 14}]}]}))
 
 (defn eldritch-knight-spell? [s]
   (let [school (:school s)]
@@ -2184,7 +2178,7 @@ In addition, you have advantage on saving throws against plants that are magical
    ::t/prereq-fn
    (total-levels-prereq level)))
 
-(defn fighter-option [app-state]
+(def fighter-option
   (class-option
    {:name "Fighter",
     :hit-die 10,
@@ -2230,12 +2224,12 @@ Once you use this feature, you must finish a short or long rest before you can u
                               :summary "reroll a save if you fail"
                               :description "You can reroll a saving throw that you fail. If you do so, you must use the new roll, and you can't use this feature again until you finish a long rest.
 You can use this feature twice between long rests starting at 13th level and three times between long rests starting at 17th level."})]}
-             10 {:modifers [(opt5e/fighting-style-selection app-state)]}
+             10 {:modifers [(opt5e/fighting-style-selection)]}
              11 {:modifiers [(mod5e/extra-attack)]}
              20 {:modifiers [(mod5e/extra-attack)]}}
     :subclass-level 3
     :subclass-title "Martial Archetype"
-    :selections [(opt5e/fighting-style-selection app-state)
+    :selections [(opt5e/fighting-style-selection)
                  (t/selection
                   "Starting Equipment: Armor"
                   [(t/option
@@ -2283,7 +2277,7 @@ You can use this feature twice between long rests starting at 13th level and thr
                     [(mod5e/weapon :handaxe 2)])])]
     :subclasses [{:name "Champion"
                   :selections [(add-level-prereq
-                                (opt5e/fighting-style-selection app-state)
+                                (opt5e/fighting-style-selection)
                                 10)]
                   :levels {3 {:modifiers [(mod5e/critical 19)]}
                            7 {:modifiers [(mod/modifier ?default-skill-bonus (let [b (int (/ ?prof-bonus 2))] {:str b :dex b :con b}))
@@ -2314,7 +2308,7 @@ In addition, when you make a running long jump, the distance you can cover incre
                                 "Martial Maneuvers"
                                 opt5e/maneuver-options
                                 3 3)
-                               (opt5e/tool-selection (map :key opt5e/artisans-tools) 1)]
+                               (opt5e/tool-selection (map :key equip5e/artisans-tools) 1)]
                   :modifiers [(mod/modifier ?maneuver-save-dc (max (?spell-save-dc :dex)
                                                                    (?spell-save-dc :str)))
                               (mod5e/dependent-trait
@@ -2394,10 +2388,9 @@ In addition, when you make a running long jump, the distance you can cover incre
                            {:name "Arcane Charge"
                             :level 15
                             :page 75
-                            :summary "teleport up to 30 ft. when you use Action Surge"}]}]}
-   app-state))
+                            :summary "teleport up to 30 ft. when you use Action Surge"}]}]}))
 
-(defn monk-option [app-state]
+(def monk-option
   (class-option
    {:name "Monk"
     :hit-die 8
@@ -2597,13 +2590,12 @@ You can have only one creature under the effect of this feature at a time. You c
                            {:name "Douse the Flames of War"
                             :level 11}
                            {:name "Anger of a Gentle Soul"
-                            :level 17}]}]}
-   app-state))
+                            :level 17}]}]}))
 
 (defn paladin-spell [spell-level key min-level]
   (mod5e/spells-known spell-level key :wis "Paladin" min-level))
 
-(defn paladin-option [app-state]
+(def paladin-option
   (class-option
    {:name "Paladin"
     :spellcaster true
@@ -2620,7 +2612,7 @@ You can have only one creature under the effect of this feature at a time. You c
                          :options {:priests-pack 1
                                    :explorers-pack 1}}]
     :armor {:chain-mail 1}
-    :levels {2 {:selections [(opt5e/fighting-style-selection app-state #{:defense :dueling :great-weapon-fighting :protection})]}
+    :levels {2 {:selections [(opt5e/fighting-style-selection #{:defense :dueling :great-weapon-fighting :protection})]}
              3 {:modifiers [(mod5e/damage-immunity :disease)]}
              5 {:modifiers [(mod5e/extra-attack)]}}
     :selections [(t/selection
@@ -2759,12 +2751,11 @@ Once you use this feature, you can't use it again until you finish a long rest."
                            {:name "Soul of Vengeance"
                             :level 15}
                            {:name "Avenging Angel"
-                            :level 20}]}]}
-   app-state))
+                            :level 20}]}]}))
 
 (def ranger-skills {:animal-handling true :athletics true :insight true :investigation true :nature true :perception true :stealth true :survival true})
 
-(defn ranger-option [app-state]
+(def ranger-option
   (class-option
    {:name "Ranger"
     :hit-die 10
@@ -2813,7 +2804,7 @@ Once you use this feature, you can't use it again until you finish a long rest."
                       2
                       2)]
                     [])])]
-    :levels {2 {:selections [(opt5e/fighting-style-selection app-state #{:archery :defense :dueling :two-weapon-fighting})]}
+    :levels {2 {:selections [(opt5e/fighting-style-selection #{:archery :defense :dueling :two-weapon-fighting})]}
              5 {:modifiers [(mod5e/extra-attack)]}}
     :traits [{:name "Primeval Awareness"
               :level 3
@@ -2921,12 +2912,11 @@ You choose additional favored terrain types at 6th and 10th level."}]
                            {:name "Bestial Fury"
                             :level 11}
                            {:name "Share Spells"
-                            :level 15}]}]}
-   app-state))
+                            :level 15}]}]}))
 
 (def rogue-skills {:acrobatics true :athletics true :deception true :insight true :intimidation true :investigation true :perception true :performance true :persuasion true :sleight-of-hand true :stealth true})
 
-(defn rogue-option [app-state]
+(def rogue-option
   (class-option
    {:name "Rogue",
     :hit-die 8
@@ -3053,10 +3043,9 @@ magic items."}]}
                            {:name "Elegance Maneuver"
                             :level 13}
                            {:name "Master Duelist"
-                            :level 17}]}]}
-   app-state))
+                            :level 17}]}]}))
 
-(defn sorcerer-option [app-state]
+(def sorcerer-option
   (class-option
    {:name "Sorcerer"
     :spellcasting {:level-factor 1
@@ -3219,8 +3208,7 @@ You can't manifest your wings while wearing armor unless the armor is made to ac
                            {:name "Storm's Fury"
                             :level 14}
                            {:name "Wind Soul"
-                            :level 18}]}]}
-   app-state))
+                            :level 18}]}]}))
 
 (def pact-of-the-tome-name "Pact Boon: Pact of the Tome")
 (def pact-of-the-chain-name "Pact Boon: Pact of the Chain")
@@ -3256,7 +3244,7 @@ You can transform one magic weapon into your pact weapon by performing a special
 If you lose your Book of Shadows, you can perform a 1-hour ceremony to receive a replacement from your patron. This ceremony can be performed during a short or long rest, and it destroys the previous book. The book turns to ash when you die.")])])
 
 
-(defn wizard-option [app-state]
+(def wizard-option
   (class-option
    {:name "Wizard",
     :spellcasting {:level-factor 1
@@ -3387,8 +3375,7 @@ If you lose your Book of Shadows, you can perform a 1-hour ceremony to receive a
                            {:name "Song of Defense"
                             :level 10}
                            {:name "Song of Victory"
-                            :level 14}]}]}
-   app-state))
+                            :level 14}]}]}))
 
 (defn has-trait-with-name-prereq [name]
   (fn [c] (some #(= name (:name %)) (es/entity-val c :traits))))
@@ -3638,7 +3625,7 @@ Additionally, while perceiving through your familiar’s senses, you can also sp
     :max (or num 0)
     :simple? true}))
 
-(defn warlock-option [app-state]
+(def warlock-option
   (class-option
    {:name "Warlock"
     :spellcasting {:level-factor 1
@@ -3747,8 +3734,7 @@ Once you use this feature, you can't use it again until you finish a long rest."
                            {:name "Thought Shield"
                             :level 10}
                            {:name "Create Thrall"
-                            :level 14}]}]}
-   app-state))
+                            :level 14}]}]}))
 
 (defn set-abilities! [app-state abilities]
   (swap! app-state assoc-in [:character ::entity/options :ability-scores ::entity/value] abilities))
@@ -3875,8 +3861,7 @@ You might also have ties to a specific temple dedicated to your chosen deity or 
                                  armor
                                  armor-choices
                                  traits]
-                          :as cls}
-                         app-state]
+                          :as cls}]
   (let [kw (common/name-to-kw name)
         {:keys [skill skill-options tool-options tool language-options]
          armor-profs :armor weapon-profs :weapon} profs
@@ -4010,12 +3995,12 @@ You might also have ties to a specific temple dedicated to your chosen deity or 
   [(t/selection
     "Background"
     (mapv
-     #(background-option % app-state)
+     background-option
      sword-coast-adventurers-guide-backgrounds))
    (t/selection
     "Class"
     (mapv
-     #(class-option % app-state)
+     class-option
      (scag-classes app-state)))])
 
 (defn ability-item [name abbr desc]
@@ -4193,23 +4178,23 @@ You might also have ties to a specific temple dedicated to your chosen deity or 
                                                         [::entity/options :class]))]
                       {::entity/key selected-key
                        ::entity/options {:levels [{::entity/key :level-1}]}}))
-     :options [(barbarian-option app-state)
-               (bard-option app-state)
-               (cleric-option app-state)
-               (druid-option app-state)
-               (fighter-option app-state)
-               (monk-option app-state)
-               (paladin-option app-state)
-               (ranger-option app-state)
-               (rogue-option app-state)
-               (sorcerer-option app-state)
-               (warlock-option app-state)
-               (wizard-option app-state)]})
+     :options [barbarian-option
+               bard-option
+               cleric-option
+               druid-option
+               fighter-option
+               monk-option
+               paladin-option
+               ranger-option
+               rogue-option
+               sorcerer-option
+               warlock-option
+               wizard-option]})
    (inventory-selection "Weapons" weapon5e/weapons mod5e/deferred-weapon)
    (inventory-selection "Magic Weapons" mi/magic-weapons mod5e/deferred-magic-weapon)
    (inventory-selection "Armor" armor5e/armor mod5e/deferred-armor)
    (inventory-selection "Magic Armor" mi/magic-armor mod5e/deferred-magic-armor)
-   (inventory-selection "Equipment" opt5e/equipment mod5e/deferred-equipment)
+   (inventory-selection "Equipment" equip5e/equipment mod5e/deferred-equipment)
    (inventory-selection "Other Magic Items" mi/other-magic-items mod5e/deferred-magic-item)])
 
 

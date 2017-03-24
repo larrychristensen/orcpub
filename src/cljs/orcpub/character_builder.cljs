@@ -22,6 +22,7 @@
             [orcpub.dnd.e5.armor :as armor5e]
             [orcpub.dnd.e5.magic-items :as mi5e]
             [orcpub.dnd.e5.display :as disp5e]
+            [orcpub.dnd.e5.equipment :as equip5e]
             [orcpub.pdf-spec :as pdf-spec]
 
             [clojure.spec :as spec]
@@ -883,7 +884,7 @@
                      (not= bonus (ability-bonuses (:ability (opt5e/skills-map k)))))
                    skill-bonuses)))]
        [list-item-section "Languages" "public-speaker" languages (partial prof-name opt5e/language-map)]
-       [list-item-section "Tool Proficiencies" "stone-crafting" tool-profs (partial prof-name opt5e/tools-map)]
+       [list-item-section "Tool Proficiencies" "stone-crafting" tool-profs (partial prof-name equip5e/tools-map)]
        [list-item-section "Weapon Proficiencies" "bowman" weapon-profs (partial prof-name weapon5e/weapons-map)]
        [list-item-section "Armor Proficiencies" "mailed-fist" armor-profs (partial prof-name armor5e/armor-map)]
        [list-item-section "Damage Resistances" "surrounded-shield" resistances name]

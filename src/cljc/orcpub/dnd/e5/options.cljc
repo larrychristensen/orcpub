@@ -9,6 +9,7 @@
             [orcpub.dnd.e5.modifiers :as modifiers]
             [orcpub.dnd.e5.weapons :as weapons]
             [orcpub.dnd.e5.spells :as spells]
+            [orcpub.dnd.e5.equipment :as equipment]
             [orcpub.dnd.e5.spell-lists :as sl])
   #?(:cljs (:require-macros [orcpub.dnd.e5.modifiers :as modifiers])))
 
@@ -125,240 +126,6 @@ check. The GM might also call for a Dexterity (Sleight of Hand) check to determi
               :description "The GM might ask you to make a Wisdom (Survival) check to follow tracks, hunt wild game, guide your group through frozen wastelands, identify signs that owlbears live nearby, predict the weather, or avoid quicksand and other natural hazards."}])
 
 (def skills-map (common/map-by-key skills))
-
-(def musical-instruments
-  [{:key :bagpipes
-    :name "Bagpipes"}
-   {:key :drum
-    :name "Drum"}
-   {:key :dulcimer
-    :name "Dulcimer"}
-   {:key :flute
-    :name "Flute"}
-   {:key :lute
-    :name "Lute"}
-   {:key :lyre
-    :name "Lyre"}
-   {:key :horn
-    :name "Horn"}
-   {:key :pan-flute
-    :name "Pan Flute"}
-   {:key :shawm
-    :name "Shawm"}
-   {:key :viol
-    :name "Viol"}])
-
-(def artisans-tools
-  [{:name "Alchemist's Supplies", :key :alchemists-supplies}
-   {:name "Brewer's Supplies", :key :brewers-supplies}
-   {:name "Calligrapher's Supplies", :key :calligraphers-supplies}
-   {:name "Carpenter's Tools", :key :carpenters-tools}
-   {:name "Cartographer's Tools", :key :cartographers-tools}
-   {:name "Cobbler's Tools", :key :cobblers-tools}
-   {:name "Cook's Utensils", :key :cooks-utensils}
-   {:name "Glassblower's Tools", :key :glassblowers-tools}
-   {:name "Jeweler's Tools", :key :jewelers-tools}
-   {:name "Leatherworker's Tools", :key :leatherworkers-tools}
-   {:name "Mason's Tools", :key :masons-tools}
-   {:name "Painter's Supplies", :key :painters-supplies}
-   {:name "Potter's Tools", :key :potters-tools}
-   {:name "Smith's Tools", :key :smiths-tools}
-   {:name "Tinker's Tools", :key :tinkers-tools}
-   {:name "Weaver's Tools", :key :weavers-tools}
-   {:name "Woodcarver's Tools", :key :woodcarvers-tools}])
-
-(def misc-tools
-  [{:name "Disguise Kit"
-    :key :disguise-kit}
-   {:name "Forgery Kit"
-    :key :forgery-kit}
-   {:name "Herbalism Kit"
-    :key :herbalism-kit}
-   {:name "Navigator's Tools"
-    :key :navigators-tools}
-   {:name "Poisoner's Tools"
-    :key :poisoners-tools}
-   {:name "Thieves' Tools"
-    :key :thieves-tools}])
-
-(def gaming-sets
-  [{:name "Dice Set"
-    :key :dice-set}
-   {:name "Dragonchess Set"
-    :key :dragonchess-set}
-   {:name "Playing Card Set"
-    :key :playing-card-set}
-   {:name "Three-Dragon Ante Set"
-    :key :three-dragon-ante-set}])
-
-(def vehicles
-  [{:name "Water Vehicles"
-    :key :water-vehicles}
-   {:name "Land Vehicles"
-    :key :land-vehicles}])
-
-(def tools
-  (concat
-   musical-instruments
-   artisans-tools
-   misc-tools
-   gaming-sets
-   vehicles))
-
-(def tools-map
-  (merge
-   {:artisans-tool {:name "Artisans Tools"
-                    :values artisans-tools}
-    :musical-instrument {:name "Musical Instruments"
-                         :values musical-instruments}
-    :gaming-set {:name "Gaming Set"
-                 :values gaming-sets}}
-   (zipmap (map :key tools) tools)))
-
-(def arcane-focuses
-  (common/add-keys
-   [{:name "Crystal" :cost {:num 10 :type :gp} :weight "1 lb."}
-    {:name "Orb" :cost {:num 20 :type :gp} :weight "3 lb."}
-    {:name "Rod" :cost {:num 10 :type :gp} :weight "2 lb."}
-    {:name "Staff" :cost {:num 5 :type :gp} :weight "4 lb."}
-    {:name "Wand" :cost {:num 10 :type :gp} :weight "1 lb."}]))
-
-(def druidic-focuses
-  (common/add-keys
-   [{:name "Sprig of mistletoe" :cost {:num 1 :type :gp} :weight "—"}
-    {:name "Totem" :cost {:num 1 :type :gp} :weight "—"}
-    {:name "Wooden staff" :cost {:num 5 :type :gp} :weight "4 lb."}
-    {:name "Yew wand" :cost {:num 10 :type :gp} :weight "1 lb."}]))
-
-(def holy-symbols
-  (common/add-keys
-   [{:name "Amulet" :cost {:num 5 :type :gp} :weight "1 lb."}
-    {:name "Emblem" :cost {:num 5 :type :gp} :weight "—"}
-    {:name "Reliquary" :cost {:num 5 :type :gp} :weight "2 lb."}]))
-
-
-(def adventuring-gear
-  (concat
-   weapons/ammunition
-   arcane-focuses
-   druidic-focuses
-   holy-symbols
-   (common/add-keys
-    [{:name "Abacus" :cost {:num 2 :type :gp} :weight "2 lb."}
-     {:name "Acid" :sell-container :vial :cost {:num 25 :type :gp} :weight "1 lb."}
-     {:name "Alchemist’s fire" :sell-container :flask :cost {:num 50 :type :gp} :weight "1 lb."}
-     {:name "Antitoxin" :sell-container :vial :cost {:num 50 :type :gp} :weight "—"}
-     {:name "Backpack" :cost {:num 2 :type :gp} :weight "5 lb."}
-     {:name "Ball bearings" :sell-qty 1000 :sell-contiainer "bag" :cost {:num 1 :type :gp} :weight "2 lb."}
-     {:name "Barrel" :cost {:num 2 :type :gp} :weight "70 lb."}
-     {:name "Basket" :cost {:num 4 :type :sp} :weight "2 lb."}
-     {:name "Bedroll" :cost {:num 1 :type :gp} :weight "7 lb."}
-     {:name "Bell" :cost {:num 1 :type :gp} :weight "—"}
-     {:name "Blanket" :cost {:num 5 :type :sp} :weight "3 lb."}
-     {:name "Block and tackle" :cost {:num 1 :type :gp} :weight "5 lb."}
-     {:name "Book" :cost {:num 25 :type :gp} :weight "5 lb."}
-     {:name "Bottle, glass" :cost {:num 2 :type :gp} :weight "2 lb."}
-     {:name "Bucket" :cost {:num 5 :type :cp} :weight "2 lb."}
-     {:name "Caltrops" :sell-qty 20 :sell-container :bag :cost {:num 1 :type :gp} :weight "2 lb."}
-     {:name "Candle" :cost {:num 1 :type :cp} :weight "—"}
-     {:name "Case, crossbow bolt" :cost {:num 1 :type :gp} :weight "1 lb."}
-     {:name "Case, map or scroll" :cost {:num 1 :type :gp} :weight "1 lb."}
-     {:name "Chain" :sell-qty 10 :sell-container :feet :cost {:num 5 :type :gp} :weight "10 lb."}
-     {:name "Chalk" :sell-container :piece :cost {:num 1 :type :cp} :weight "—"}
-     {:name "Chest" :cost {:num 5 :type :gp} :weight "25 lb."}
-     {:name "Climber’s kit" :cost {:num 25 :type :gp} :weight "12 lb."}
-     {:name "Clothes, common" :cost {:num 5 :type :sp} :weight "3 lb."}
-     {:name "Clothes, costume" :cost {:num 5 :type :gp} :weight "4 lb."}
-     {:name "Clothes, fine" :cost {:num 15 :type :gp} :weight "6 lb."}
-     {:name "Clothes, traveler’s" :cost {:num 2 :type :gp} :weight "4 lb."}
-     {:name "Component pouch" :cost {:num 25 :type :gp} :weight "2 lb."}
-     {:name "Crowbar" :cost {:num 2 :type :gp} :weight "5 lb."}
-     {:name "Fishing tackle" :cost {:num 1 :type :gp} :weight "4 lb."}
-     {:name "Flask or tankard" :cost {:num 2 :type :cp} :weight "1 lb."}
-     {:name "Grappling hook" :cost {:num 2 :type :gp} :weight "4 lb."}
-     {:name "Hammer" :cost {:num 1 :type :gp} :weight "3 lb."}
-     {:name "Hammer, sledge" :cost {:num 2 :type :gp} :weight "10 lb."}
-     {:name "Healer’s kit" :cost {:num 5 :type :gp} :weight "3 lb."}
-     {:name "Holy water" :sell-container :flask :cost {:num 25 :type :gp} :weight "1 lb."}
-     {:name "Hourglass" :cost {:num 25 :type :gp} :weight "1 lb."}
-     {:name "Hunting trap" :cost {:num 5 :type :gp} :weight "25 lb."}
-     {:name "Ink" :sell-container "ounce bottle" :cost {:num 10 :type :gp} :weight "—"}
-     {:name "Ink pen" :cost {:num 2 :type :cp} :weight "—"}
-     {:name "Jug or pitcher" :cost {:num 2 :type :cp} :weight "4 lb."}
-     {:name "Ladder (10-foot)" :cost {:num 1 :type :sp} :weight "25 lb."}
-     {:name "Lamp" :cost {:num 5 :type :sp} :weight "1 lb."}
-     {:name "Lantern, bullseye" :cost {:num 10 :type :gp} :weight "2 lb."}
-     {:name "Lantern, hooded" :cost {:num 5 :type :gp} :weight "2 lb."}
-     {:name "Lock" :cost {:num 10 :type :gp} :weight "1 lb."}
-     {:name "Magnifying glass" :cost {:num 100 :type :gp} :weight "—"}
-     {:name "Manacles" :cost {:num 2 :type :gp} :weight "6 lb."}
-     {:name "Mess kit" :cost {:num 2 :type :sp} :weight "1 lb."}
-     {:name "Mirror, steel" :cost {:num 5 :type :gp} :weight "1/2 lb."}
-     {:name "Oil" :sell-container :flask :cost {:num 1 :type :sp} :weight "1 lb."}
-     {:name "Paper" :sell-container :sheet :cost {:num 2 :type :sp} :weight "—"}
-     {:name "Parchment" :sell-container :sheet :cost {:num 1 :type :sp} :weight "—"}
-     {:name "Perfume" :sell-container :vial :cost {:num 5 :type :gp} :weight "—"}
-     {:name "Pick, miner’s" :cost {:num 2 :type :gp} :weight "10 lb."}
-     {:name "Piton" :cost {:num 5 :type :cp} :weight "1/4 lb."}
-     {:name "Poison, basic" :sell-container :vial :cost {:num 100 :type :gp} :weight "—"}
-     {:name "Pole (10-foot)" :cost {:num 5 :type :cp} :weight "7 lb."}
-     {:name "Pot, iron" :cost {:num 2 :type :gp} :weight "10 lb."}
-     {:name "Potion of healing" :cost {:num 50 :type :gp} :weight "1/2 lb."}
-     {:name "Pouch" :cost {:num 5 :type :sp} :weight "1 lb."}
-     {:name "Quiver" :cost {:num 1 :type :gp} :weight "1 lb."}
-     {:name "Ram, portable" :cost {:num 4 :type :gp} :weight "35 lb."}
-     {:name "Rations (1 day)" :cost {:num 5 :type :sp} :weight "2 lb."}
-     {:name "Robes" :cost {:num 1 :type :gp} :weight "4 lb."}
-     {:name "Rope, hempen" :sell-container :feet :sell-qty 50 :cost {:num 1 :type :gp} :weight "10 lb."}
-     {:name "Rope, silk" :sell-container :feet :sell-qty 50 :cost {:num 10 :type :gp} :weight "5 lb."}
-     {:name "Sack" :cost {:num 1 :type :cp} :weight "1/2 lb."}
-     {:name "Scale, merchant’s" :cost {:num 5 :type :gp} :weight "3 lb."}
-     {:name "Sealing wax" :cost {:num 5 :type :sp} :weight "—"}
-     {:name "Shovel" :cost {:num 2 :type :gp} :weight "5 lb."}
-     {:name "Signal whistle" :cost {:num 5 :type :cp} :weight "—"}
-     {:name "Signet ring" :cost {:num 5 :type :gp} :weight "—"}
-     {:name "Soap" :cost {:num 2 :type :cp} :weight "—"}
-     {:name "Spellbook" :cost {:num 50 :type :gp} :weight "3 lb."}
-     {:name "Spikes, iron" :sell-qty 10 :cost {:num 1 :type :gp} :weight "5 lb."}
-     {:name "Spyglass" :cost {:num 1000 :type :gp} :weight "1 lb."}
-     {:name "Tent, two-person" :cost {:num 2 :type :gp} :weight "20 lb."}
-     {:name "Tinderbox" :cost {:num 5 :type :sp} :weight "1 lb."}
-     {:name "Torch" :cost {:num 1 :type :cp} :weight "1 lb."}
-     {:name "Vial" :cost {:num 1 :type :gp} :weight "—"}
-     {:name "Waterskin" :cost {:num 2 :type :sp} :weight "5 lb. (full)"}
-     {:name "Whetstone" :cost {:num 1 :type :cp} :weight "1 lb."}])))
-
-(def packs
-  (into
-   []
-   common/add-keys-xform
-   [{:name "Burgler's Pack"}
-    {:name "Diplomat's Pack"}
-    {:name "Dungeoneer's Pack"}
-    {:name "Entertainer's Pack"}
-    {:name "Explorer's Pack"}
-    {:name "Priest's Pack"}
-    {:name "Scholar's Pack"}]))
-
-(def equipment
-  (concat
-   packs
-   tools
-   adventuring-gear))
-
-(def equipment-map
-  (merge
-   {:holy-symbol {:name "Holy Symbol"
-                  :values holy-symbols}
-    :druidic-focus {:name "Druidic Focus"
-                    :values druidic-focuses}
-    :arcane-focus {:name "Arcane Focus"
-                   :values arcane-focuses}
-    :pack {:name "Equipment Packs"
-           :values packs}
-    :musical-instrument {:name "Musical Instruments"
-                         :values musical-instruments}}
-   (zipmap (map :key equipment) equipment)))
 
 (def skill-abilities
   (into {} (map (juxt :key :ability)) skills))
@@ -871,7 +638,7 @@ check. The GM might also call for a Dexterity (Sleight of Hand) check to determi
    (t/selection-cfg
     {:name "Tool Proficiency"
      :help (proficiency-help num "a tool" "tools")
-     :options (tool-options tools)
+     :options (tool-options equipment/tools)
      :min num
      :max num}))
   ([options num]
@@ -881,7 +648,7 @@ check. The GM might also call for a Dexterity (Sleight of Hand) check to determi
      :options (tool-options
                (filter
                 (comp (set options) :key)
-                tools))
+                equipment/tools))
      :min num
      :max num})))
 
@@ -901,7 +668,7 @@ check. The GM might also call for a Dexterity (Sleight of Hand) check to determi
      :options (weapon-proficiency-options
                (filter
                 (comp (set options) :key)
-                tools))
+                weapons/weapons))
      :min num
      :max num})))
 
@@ -1276,7 +1043,7 @@ check. The GM might also call for a Dexterity (Sleight of Hand) check to determi
       {:name "Two Weapon Fighting"
        :description "When you engage in two-weapon fighting, you can add your ability modifier to the damage of the second attack."})])])
 
-(defn fighting-style-selection [app-state & [restrictions]]
+(defn fighting-style-selection [& [restrictions]]
   (t/selection
    "Fighting Style"
    (if restrictions
