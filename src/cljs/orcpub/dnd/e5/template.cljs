@@ -2572,22 +2572,33 @@ If you reduce the damage to 0, you can catch the missile if it is small enough f
                                              :description "At 17th level, you gain the ability to set up lethal vibrations in someone's body. When you hit a creature with an unarmed strike, you can spend 3 ki points to start these imperceptible vibrations, which last for a number of days equal to your monk level. The vibrations are harmless unless you use your action to end them. To do so, you and the target must be on the same plane of existence. When you use this action, the creature must make a Constitution saving throw. If it fails, it is reduced to 0 hit points. If it succeeds, it takes 10d10 necrotic damage.
 You can have only one creature under the effect of this feature at a time. You can choose to end the vibrations harmlessly without using an action."})]}}}
                  {:name "Way of Shadow"
-                  :traits [{:name "Shadow Arts"
-                            :level 3}
-                           {:name "Shadow Step"
-                            :level 6}
-                           {:name "Cloak of Shadows"
-                            :level 11}
-                           {:name "Opportunist"
-                            :level 17}]}
+                  :modifiers [(mod5e/spells-known 0 :minor-illusion :wis "Monk (Way of Shadow)")
+                              (mod5e/action
+                               {:name "Shadow Arts"
+                                :page 80
+                                :summary "spend 2 ki to cast darkness, darkvision, pass without trace, or silence spells"})]
+                  :levels {6 {:modfifiers [(mod5e/bonus-action
+                                            {:name "Shadow Step"
+                                             :page 80
+                                             :summary "teleport 60 and gain advantage on first melee attack before end of turn"})]}
+                           11 {:modifiers [(mod5e/action
+                                            {:name "Cloak of Shadows"
+                                             :level 11
+                                             :page 80
+                                             :summary "become invisible"})]}
+                           17 {:modifiers [(mod5e/reaction
+                                            {:name "Opportunist"
+                                             :page 80
+                                             :level 17
+                                             :summary "when a creature within 5 ft. is hit by attack from someone else, make a melee attack"})]}}}
                  {:name "Way of the Four Elements"
                   :levels {3 {:selections [(opt5e/monk-elemental-disciplines)]}
                            6 {:selections [(opt5e/monk-elemental-disciplines)]}
                            11 {:selections [(opt5e/monk-elemental-disciplines)]}
                            17 {:selections [(opt5e/monk-elemental-disciplines)]}}
-                  :traits [{:name "Disciple of the Elements"
-                            :level 3}
-                           {:name "Elemental Discipline: Elemental Attunement"}]}
+                  :traits [{:name "Elemental Attunement"
+                            :page 81
+                            :summary "create minor elemental effect"}]}
                  {:name "Way of the Long Death"
                   :source "Sword Coast Adventurer's Guide"
                   :traits [{:name "Touch of Death"

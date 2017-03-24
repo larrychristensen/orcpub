@@ -309,44 +309,116 @@ check. The GM might also call for a Dexterity (Sleight of Hand) check to determi
   (zipmap (map :key languages) languages))
 
 (def elemental-disciplines
-  [{:name "Breath of Winter"
-    :level 17}
-   {:name "Clench of the North Wind"
-    :level 6}
-   {:name "Eternal Mountain Defense"
-    :level 17}
-   {:name "Fangs of the Fire Snake"}
-   {:name "Fist of Four Thunders"}
-   {:name "Fist of Unbroken Air"}
-   {:name "Flames of the Phoenix"
-    :level 11}
-   {:name "Gong of the Summit"
-    :level 6}
-   {:name "Mist Stance"
-    :level 11}
-   {:name "Ride the Wind"
-    :level 11}
-   {:name "River of Hungry Flame"
-    :level 17}
-   {:name "Rush of the Gale Spirits"}
-   {:name "Shape of the Flowing River"}
-   {:name "Sweeping Cinder Strike"}
-   {:name "Water Whip"}
-   {:name "Wave of Rolling Earth"
-    :level 17}])
+  [(t/option-cfg
+    {:name "Breath of Winter"
+     :modifiers [(modifiers/action
+                  {:name "Breath of Winter"
+                   :level 17
+                   :page 81
+                   :summary "spend 6 ki to cast cone of cold"})]})
+   (t/option-cfg
+    {:name "Clench of the North Wind"
+     :modifiers [(modifiers/action
+                  {:name "Clench of the North Wind"
+                   :page 81
+                   :level 6
+                   :summary "spend 3 ki to cast hold person"})]})
+   (t/option-cfg
+    {:name "Eternal Mountain Defense"
+     :modifiers [(modifiers/action
+                  {:name "Eternal Mountain Defense"
+                   :level 17
+                   :page 81
+                   :summary "spend 5 ki to cast stoneskin on yourself"})]})
+   (t/option-cfg
+    {:name "Fangs of the Fire Snake"
+     :modifiers [(modifiers/trait
+                  {:name "Fangs of the Fire Snake"
+                   :page 81
+                   :summary "spend 1 ki point when you use Attack action to increase your unarmed strike reach by 10 ft. You unarmed strike deals fire damage and if you spend 1 more ki it deals an extra 2d10 damage"})]})
+   (t/option-cfg
+    {:name "Fist of Four Thunders"
+     :modifiers [(modifiers/action
+                  {:name "Fist of Four Thunders"
+                   :page 81
+                   :summary "spend 2 ki to cast thunderwave"})]})
+   (t/option-cfg
+    {:name "Fist of Unbroken Air"
+     :modifiers [(modifiers/action
+                  {:name "Fist of Unbroken Air"
+                   :page 81
+                   :summary (str "spend 2 + X ki, a creature within 30 ft. takes 3d10 + Xd10 damage on failed DC " (?spell-save-dc :wis) " STR save, is pushed up to 20 ft., and is knocked prone. On successful save it just takes half damage.")})]})
+   (t/option-cfg
+    {:name "Flames of the Phoenix"
+     :modifiers [(modifiers/action
+                  {:name "Flames of the Phoenix"
+                   :level 11
+                   :page 81
+                   :summary "spend 4 ki to cast fireball"})]})
+   (t/option-cfg
+    {:name "Gong of the Summit"
+     :modifiers [(modifiers/action
+                  {:name "Gong of the Summit"
+                   :page 81
+                   :level 6
+                   :summary "spend 3 ki to cast shatter"})]})
+   (t/option-cfg
+    {:name "Mist Stance"
+     :modifiers [(modifiers/action
+                  {:name "Mist Stance"
+                   :page 81
+                   :level 11
+                   :summary "spend 4 ki to cast gaseous form on yourself"})]})
+   (t/option-cfg
+    {:name "Ride the Wind"
+     :modifiers [(modifiers/action
+                  {:name "Ride the Wind"
+                   :page 81
+                   :level 11
+                   :summary "spend 4 ki to cast fly on yourself"})]})
+   (t/option-cfg
+    {:name "River of Hungry Flame"
+     :modifiers [(modifiers/action
+                  {:name "River of Hungry Flame"
+                   :page 81
+                   :level 17
+                   :summary "spend 5 ki to cast wall of fire"})]})
+   (t/option-cfg
+    {:name "Rush of the Gale Spirits"
+     :modifiers [(modifiers/action
+                  {:name "Rush of the Gale Spirits"
+                   :page 81
+                   :summary "spend 2 ki to cast gust of wind"})]})
+   (t/option-cfg
+    {:name "Shape of the Flowing River"
+     :modfiers [(modifiers/action
+                 {:name "Shape of the Flowing River"
+                  :page 81
+                  :summary "spend 1 ki to transform ice to water, and vice versa, reshape ice"})]})
+   (t/option-cfg
+    {:name "Sweeping Cinder Strike"
+     :modifiers [(modifiers/action
+                  {:name "Sweeping Cinder Strike"
+                   :page 81
+                   :summary "spend 2 ki to cast burning hands"})]})
+   (t/option-cfg
+    {:name "Water Whip"
+     :modifiers [(modifiers/bonus-action
+                  {:name "Water Whip"
+                   :page 81
+                   :summary (str "spend 2 + X ki, a creature within 30 ft. takes 3d10 + Xd10 damage on failed DC " (?spell-save-dc :wis) " DEX save, is pulled up to 25 ft. or knocked prone. On successful save it just takes half damage.")})]})
+   (t/option-cfg
+    {:name "Wave of Rolling Earth"
+     :modifiers [(modifiers/action
+                  {:name "Wave of Rolling Earth"
+                   :level 17
+                   :page 81
+                   :summary "spend 6 ki to cast wall of stone"})]})])
 
 (defn monk-elemental-disciplines []
   (t/selection
    "Elemental Disciplines"
-   (mapv
-    (fn [{:keys [name level]}]
-      (t/option
-       name
-       (common/name-to-kw name)
-       []
-       [(modifiers/trait (str "Elemental Discipline: " name))]
-       (if level [(fn [c] (>= (es/entity-val c :total-levels) level))])))
-    elemental-disciplines)))
+   elemental-disciplines))
 
 (defn language-option [{:keys [name key]}]
   (t/option
