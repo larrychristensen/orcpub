@@ -1070,7 +1070,6 @@ Fire Starter. The device produces a miniature flame, which you can use to light 
                             subclass-level
                             subclasses] :as cls}
                     kw
-                    app-state
                     spellcasting-template
                     i]
   (let [ability-inc-set (set ability-increase-levels)]
