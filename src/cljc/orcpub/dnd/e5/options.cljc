@@ -1146,24 +1146,26 @@ check. The GM might also call for a Dexterity (Sleight of Hand) check to determi
        feat-options)]
      [])]))
 
-(defn expertise-selection [num]
-  (t/selection
-   "Skill Expertise"
-   (mapv
-    (fn [skill]
-      (assoc
-       (t/option
-        (:name skill)
-        (:key skill)
-        nil
-        [(modifiers/skill-expertise (:key skill))])
-       ::t/prereq-fn
-       (fn [built-char]
-         (let [skill-profs (es/entity-val built-char :skill-profs)]
-           (and skill-profs (skill-profs (:key skill)))))))
-    skills)
-   num
-   num))
+(defn expertise-selection [num & [key]]
+  (t/selection-cfg
+   {:name "Skill Expertise"
+    :key (or key :skill-expertise)
+    :options (mapv
+              (fn [skill]
+                (assoc
+                 (t/option
+                  (:name skill)
+                  (:key skill)
+                  nil
+                  [(modifiers/skill-expertise (:key skill))])
+                 ::t/prereq-fn
+                 (fn [built-char]
+                   (let [skill-profs (es/entity-val built-char :skill-profs)]
+                     (and skill-profs (skill-profs (:key skill)))))))
+              skills)
+    :min num
+    :max num
+    :multiselect? true}))
 
 (def rogue-expertise-selection
   (t/selection
@@ -1171,10 +1173,10 @@ check. The GM might also call for a Dexterity (Sleight of Hand) check to determi
    [(t/option
      "Two Skills"
      :two-skills
-     [(expertise-selection 2)]
+     [(expertise-selection 2 :two-skills)]
      [])
     (t/option
      "One Skill/Theives Tools"
      :one-skill-thieves-tools
-     [(expertise-selection 1)]
+     [(expertise-selection 1 :one-skill-thieves-tools)]
      [(modifiers/tool-proficiency :thieves-tools)])]))

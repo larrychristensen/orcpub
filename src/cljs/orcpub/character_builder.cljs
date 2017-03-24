@@ -936,11 +936,16 @@
          children)
         children))))
 
-(defn get-all-selections [path obj selected-option-paths built-char]
+(defn remove-disqualified-selections [selections built-char]
   (remove #(or (nil? %)
                (let [prereq-fn (::t/prereq-fn %)]
                  (and prereq-fn (not (prereq-fn built-char)))))
-          (flatten (get-all-selections-aux path obj nil selected-option-paths))))
+          selections))
+
+(defn get-all-selections [path obj selected-option-paths built-char]
+  (remove-disqualified-selections
+   (flatten (get-all-selections-aux path obj nil selected-option-paths))
+   built-char))
 
 (defn selection-made? [built-template selected-option-paths character selection]
   (let [option (get-in selected-option-paths (::path selection))
@@ -1395,7 +1400,7 @@
          :on-click jump-to-handler}
         name])]))
 
-(defn jump-to-component [option-path option-paths character built-template selections parent-option stepper-selection-path]
+(defn jump-to-component [option-path option-paths character built-template selections parent-option stepper-selection-path built-char]
   [:div.orange
    (doall
     (map
@@ -1430,9 +1435,10 @@
                       built-template
                       (::t/selections option)
                       option
-                      stepper-selection-path))]))
+                      stepper-selection-path
+                      built-char))]))
               selected-options)))]))
-     selections))])
+     (remove-disqualified-selections selections built-char)))])
 
 (defn options-column [character built-char built-template option-paths collapsed-paths stepper-selection-path stepper-selection plugins]
   (let [all-selections (get-all-selections [] built-template option-paths built-char)
@@ -1482,7 +1488,7 @@
           (::t/selections built-template)))]]
       (if (get-in @app-state [:expanded-paths [:jump-to]])
         [:div.p-10
-         (jump-to-component [] option-paths character built-template (::t/selections built-template) nil (to-option-path stepper-selection-path built-template))])
+         (jump-to-component [] option-paths character built-template (::t/selections built-template) nil (to-option-path stepper-selection-path built-template) built-char)])
       [:div.flex.justify-cont-s-b.p-t-5.p-10.align-items-t
        [:button.form-button.p-5-10.m-r-5
         {:on-click
@@ -1651,7 +1657,7 @@
      [:span "Print"]]]])
 
 (defn character-builder []
-  ;;(cljs.pprint/pprint (:character @app-state))
+  (cljs.pprint/pprint (:character @app-state))
   ;;(js/console.log "APP STATE" @app-state)
   (let [selected-plugin-options (into #{}
                                       (map ::entity/key)
