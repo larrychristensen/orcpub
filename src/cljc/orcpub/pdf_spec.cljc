@@ -9,6 +9,7 @@
             [orcpub.dnd.e5.display :as disp5e]
             [orcpub.dnd.e5.weapons :as weapon5e]
             [orcpub.dnd.e5.armor :as armor5e]
+            [orcpub.dnd.e5.equipment :as equip5e]
             [orcpub.dnd.e5.magic-items :as mi5e]))
 
 (defn entity-vals [built-char kws]
@@ -227,7 +228,7 @@
      "\n\n"
      (remove
       nil?
-      [(profs-paragraph tool-profs opt5e/tools-map "Tool")
+      [(profs-paragraph tool-profs equip5e/tools-map "Tool")
        (profs-paragraph weapon-profs weapon5e/weapons-map "Weapon")
        (profs-paragraph armor-profs armor5e/armor-map "Armor")
        (profs-paragraph languages opt5e/language-map "Language")]))))
