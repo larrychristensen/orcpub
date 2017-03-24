@@ -2665,7 +2665,8 @@ You can have only one creature under the effect of this feature at a time. You c
     :levels {2 {:selections [(opt5e/fighting-style-selection #{:defense :dueling :great-weapon-fighting :protection})]}
              3 {:modifiers [(mod5e/damage-immunity :disease)]}
              5 {:modifiers [(mod5e/extra-attack)]}}
-    :modifiers [(mod5e/action
+    :modifiers [(mod/modifier ?paladin-aura (if (< (?class-level :paladin) 18) 10 30))
+                (mod5e/action
                  {:name "Divine Sense"
                   :page 84
                   :frequency {:units :long-rest
@@ -2684,9 +2685,30 @@ Alternatively, you can expend 5 hit points from your pool of healing to cure the
                  {:name "Aura of Protection"
                   :level 6
                   :page 85
-                  :summary (str "you and friendly creatures within " (if (< (?class-level :paladin) 18) 10 30) " ft. have a " (common/bonus-str (max 1 (?ability-bonuses :cha))) " bonus to saves")
+                  :summary (str "you and friendly creatures within " ?paladin-aura " ft. have a " (common/bonus-str (max 1 (?ability-bonuses :cha))) " bonus to saves")
                   :description "Starting at 6th level, whenever you or a friendly creature within 10 feet of you must make a saving throw, the creature gains a bonus to the saving throw equal to your Charisma modifier (with a minimum bonus of +1). You must be conscious to grant this bonus.
-At 18th level, the range of this aura increases to 30 feet."})]
+At 18th level, the range of this aura increases to 30 feet."})
+                (mod5e/dependent-trait
+                 {:name "Aura of Courage"
+                  :level 10
+                  :page 85
+                  :summary (str (str "you and friendly creatures within " ?paladin-aura " ft. can't be frightened"))
+                  :description "Starting at 10th level, you and friendly creatures within 10 feet of you can't be frightened while you are conscious.
+At 18th level, the range of this aura increases to 30 feet."})
+                (mod5e/action
+                 {:name "Cleansing Touch"
+                  :level 14
+                  :page 85
+                  :frequency {:units :long-rest
+                              :amount (?ability-bonuses :cha)}
+                  :summary "end a spell on yourself or willing creature"
+                  :description "Beginning at 14th level, you can use your action to end one spell on yourself or on one willing creature that you touch.
+You can use this feature a number of times equal to your Charisma modifier (a minimum of once). You regain expended uses when you finish a long rest."})
+                (mod5e/dependent-trait
+                 {:name "Channel Divinity"
+                  :page 85
+                  :level 3
+                  :summary "your oath provides specific options, each with save DC and can be used once per rest"})]
     :selections [(t/selection
                   "Starting Equipment: Weapons"
                   [(t/option-cfg
@@ -2712,24 +2734,16 @@ At 18th level, the range of this aura increases to 30 feet."})]
                      :selections [(t/selection
                                    "Simple Melee Weapon"
                                    (opt5e/simple-melee-weapon-options 1))]})])]
-    :traits [
-             
-             {:name "Divine Smite"
+    :traits [{:name "Divine Smite"
               :level 2
               :page 85
               :summary "when you hit with melee weapon attack, you can expend 1 X-th level spell slot to deal extra 1d8 + Xd8 radiant damage, up to 5d8. Additional d8 on fiend or undead."
               :description "Starting at 2nd level, when you hit a creature with a melee weapon attack, you can expend one spell slot to deal radiant damage to the target, in addition to the weapon's damage. The extra damage is 2d8 for a 1st-level spell slot, plus 1d8 for each spell level higher than 1st, to a maximum of 5d8. The damage increases by 1d8 if the target is an undead or a fiend."}
-             {:name "Aura of Courage"
-              :level 10
-              :description "Starting at 10th level, you and friendly creatures within 10 feet of you can't be frightened while you are conscious.
-At 18th level, the range of this aura increases to 30 feet."}
              {:name "Improved Divine Smite"
               :level 11
-              :description "By 11th level, you are so suffused with righteous might that all your melee weapon strikes carry divine power with them. Whenever you hit a creature with a melee weapon, the creature takes an extra 1d8 radiant damage. If you also use your Divine Smite with an attack, you add this damage to the extra damage of your Divine Smite."}
-             {:name "Cleansing Touch"
-              :level 14
-              :description "Beginning at 14th level, you can use your action to end one spell on yourself or on one willing creature that you touch.
-You can use this feature a number of times equal to your Charisma modifier (a minimum of once). You regain expended uses when you finish a long rest."}]
+              :page 85
+              :summary "whenever you hit with melee weapon, you deal an extra d8 radiant damage"
+              :description "By 11th level, you are so suffused with righteous might that all your melee weapon strikes carry divine power with them. Whenever you hit a creature with a melee weapon, the creature takes an extra 1d8 radiant damage. If you also use your Divine Smite with an attack, you add this damage to the extra damage of your Divine Smite."}]
     :subclass-level 3
     :subclass-title "Sacred Oath"
     :subclasses [{:name "Oath of Devotion"
@@ -2742,27 +2756,38 @@ You can use this feature a number of times equal to your Charisma modifier (a mi
                               (paladin-spell 4 :freedom-of-movement 13)
                               (paladin-spell 4 :guardian-of-faith 13)
                               (paladin-spell 5 :commune 17)
-                              (paladin-spell 5 :flame-strike 17)]
-                  :traits [{:name "Channel Divinity"
-                            :level 3
-                            :description "When you take this oath at 3rd level, you gain the following two Channel Divinity options.
-Sacred Weapon. As an action, you can imbue one weapon that you are holding with positive energy, using your Channel Divinity. For 1 minute, you add your Charisma modifier to attack rolls made with that weapon (with a minimum bonus of +1). The weapon also emits bright light in a 20-foot radius and dim light 20 feet beyond that. If the weapon is not already magical, it becomes magical for the duration.
-You can end this effect on your turn as part of any other action. If you are no longer holding or carrying this weapon, or if you fall unconscious, this effect ends.
-Turn the Unholy. As an action, you present your holy symbol and speak a prayer censuring fiends and undead, using your Channel Divinity. Each fiend or undead that can see or hear you within 30 feet of you must make a Wisdom saving throw. If the creature fails its saving throw, it is turned for 1 minute or until it takes damage.
-A turned creature must spend its turns trying to move as far away from you as it can, and it can't willingly move to a space within 30 feet of you. It also can't take reactions. For its action, it can use only the Dash action or try to escape from an effect that prevents it from moving. If there's nowhere to move, the creature can use the Dodge action."}
-                           {:name "Aura of Devotion"
-                            :level 7
-                            :description "Starting at 7th level, you and friendly creatures within 10 feet of you can't be charmed while you are conscious.
-At 18th level, the range of this aura increases to 30 feet."}
-                           {:name "Purity of Spirit"
-                            :level 15
-                            :description "Beginning at 15th level, you are always under the effects of a protection from evil and good spell."}
-                           {:name "Holy Nimbus"
-                            :level 20
-                            :description "At 20th level, as an action, you can emanate an aura of sunlight. For 1 minute, bright light shines from you in a 30-foot radius, and dim light shines 30 feet beyond that.
+                              (paladin-spell 5 :flame-strike 17)
+                              (mod5e/action
+                               {:name "Channel Divinity: Sacred Weapon"
+                                :page 86
+                                :summary (str "make a weapon magical, with a " (common/bonus-str (max 1 (?ability-bonuses :cha))) " attack bonus and magical light (20 ft./20 ft.)")})
+                              (mod5e/action
+                               {:name "Channel Divinity: Turn the Unholy"
+                                :page 86
+                                :summary (str "each undead or fiend within 30 ft. must make a DC " (?spell-save-dc :cha) " WIS save or be turned for 1 min.")})
+                              (mod5e/dependent-trait
+                               {:name "Aura of Devotion"
+                                :level 7
+                                :page 86
+                                :summary (str "you and friendly creatures within " ?paladin-aura " ft. can't be charmed")
+                                :description "Starting at 7th level, you and friendly creatures within 10 feet of you can't be charmed while you are conscious.
+At 18th level, the range of this aura increases to 30 feet."})
+                              (mod5e/action
+                               {:name "Holy Nimbus"
+                                :level 20
+                                :page 86
+                                :frequency {:units :long-rest}
+                                :duration {:units :minute}
+                                :summary "you emanate a bright light with 30 ft radius, an enemy that starts its turn there takes 10 radiant damage. You also have advantage on saves against spells cast by fiends and undead"
+                                :description "At 20th level, as an action, you can emanate an aura of sunlight. For 1 minute, bright light shines from you in a 30-foot radius, and dim light shines 30 feet beyond that.
 Whenever an enemy creature starts its turn in the bright light, the creature takes 10 radiant damage.
 In addition, for the duration, you have advantage on saving throws against spells cast by fiends or undead.
-Once you use this feature, you can't use it again until you finish a long rest."}]}
+Once you use this feature, you can't use it again until you finish a long rest."})]
+                  :traits [{:name "Purity of Spirit"
+                            :level 15
+                            :page 86
+                            :summary "always under effects of protection from evil and good spell"
+                            :description "Beginning at 15th level, you are always under the effects of a protection from evil and good spell."}]}
                  {:name "Oath of the Ancients"
                   :modifiers [(paladin-spell 1 :ensnaring-strike 3)
                               (paladin-spell 1 :speak-with-animals 3)
