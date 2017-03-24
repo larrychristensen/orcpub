@@ -2871,6 +2871,54 @@ Once you use this feature, you can't use it again until you finish a long rest."
 
 (def ranger-skills {:animal-handling true :athletics true :insight true :investigation true :nature true :perception true :stealth true :survival true})
 
+(def favored-enemy-types
+  {:aberration [:deep-speech :undercommon :grell :slaad]
+   :beast [:giant-elk :giant-eagle :giant-owl]
+   :celestial opt5e/language-keys
+   :construct [:modron]
+   :dragon [:aquan :common :draconic :sylvan]
+   :elemental [:auran :terran :ignan :aquan]
+   :fey [:common :draconic :elvish :sylvan :abyssal :infernal :primoridial :aquan :giant]
+   :fiend opt5e/language-keys
+   :giant [:giant :orc :undercommon :common]
+   :monstrosity [:common :draconic :sylvan :elvish :hook-horror :abyssal :celestial :infernal :primordial :aquan :sphynx :umber-hulk :yeti :winter-wolf :goblin :worg]
+   :ooze []
+   :plant [:common :druidic :elvish :sylvan]
+   :undead opt5e/language-keys})
+
+(def humanoid-enemies
+  {:bugbear [:common :goblin]
+   :bullywug [:bullywug]
+   :githyanki [:gith]
+   :gitzerai [:gith]
+   :gnoll [:gnoll :abyssal]
+   :goblin [:common :goblin]
+   :grimlock [:undercommon]
+   :hobgoblin [:common :goblin]
+   :kobold [:common :draconic]
+   :koa-toa [:undercommon]
+   :lizardfolk [:draconic :abyssal]
+   :merfolk [:aquan :common]
+   :orc [:common :orc]
+   :thri-kreen [:thri-kreen]
+   :troglodyte [:troglodyte]
+   :yuan-ti-pureblood {:name "Yuan-Ti Pureblood"
+                       :languages [:abyssal :common :draconic]}})
+
+(defn favored-enemy-option [[enemy-type info]]
+  (let [vec-info? (sequential? info)
+        languages (if vec-info? info (:languages info))
+        name (if vec-info? (common/kw-to-name enemy-type) (:name info))]
+    (t/option-cfg
+     {:name name
+      :selections [(opt5e/language-selection
+                    (map
+                     (fn [lang]
+                       (or (opt5e/language-map lang) {:key lang :name (common/kw-to-name lang)}))
+                     languages)
+                    1)]
+      :modifiers [(mod/set-mod ?ranger-favored-enemies enemy-type)]})))
+
 (def ranger-option
   (class-option
    {:name "Ranger"
@@ -2904,6 +2952,10 @@ Once you use this feature, you can't use it again until you finish a long rest."
     :weapons {:longbow 1}
     :equipment {:quiver 1
                 :arrows 20}
+    :modifiers [(mod5e/dependent-trait
+                   {:name "Favored Enemy"
+                    :page 91
+                    :summary (str "You have advantage on survival checks to track " (common/list-print (map #(common/kw-to-name % false) ?ranger-favored-enemies)) " creatures and on INT checks to recall info about them")})]
     :selections [(t/selection
                   "Melee Weapon"
                   [(t/option
@@ -2919,7 +2971,28 @@ Once you use this feature, you can't use it again until you finish a long rest."
                       (opt5e/simple-melee-weapon-options 1)
                       2
                       2)]
-                    [])])]
+                    [])])
+                 (t/selection
+                  "Favored Enemy"
+                  [(t/option-cfg
+                    {:name "Type"
+                     :selections [(t/selection
+                                  "Type"
+                                  (mapv
+                                   favored-enemy-option
+                                   favored-enemy-types))]})
+                   (t/option-cfg
+                    {:name "Two Humanoid Races"
+                     :selections [(t/selection
+                                  "Humanoid Race 1"
+                                  (mapv
+                                   favored-enemy-option
+                                   humanoid-enemies))
+                                  (t/selection
+                                  "Humanoid Race 2"
+                                  (mapv
+                                   favored-enemy-option
+                                   humanoid-enemies))]})])]
     :levels {2 {:selections [(opt5e/fighting-style-selection #{:archery :defense :dueling :two-weapon-fighting})]}
              5 {:modifiers [(mod5e/extra-attack)]}}
     :traits [{:name "Primeval Awareness"

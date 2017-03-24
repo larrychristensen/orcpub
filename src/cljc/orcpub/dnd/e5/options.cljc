@@ -305,8 +305,10 @@ check. The GM might also call for a Dexterity (Sleight of Hand) check to determi
    {:name "Undercommon"
     :key :undercommon}])
 
+(def language-keys (map :key languages))
+
 (def language-map
-  (zipmap (map :key languages) languages))
+  (zipmap language-keys languages))
 
 (def elemental-disciplines
   [(t/option-cfg

@@ -11,6 +11,13 @@
       (clojure.string/replace #"\-+" "-")
       keyword))
 
+(defn kw-to-name [kw & [capitalize?]]
+  (as-> kw $
+    (name $)
+    (s/split $ #"\-")
+    (if capitalize? (map s/capitalize $) $)
+    (s/join " " $)))
+
 (defn map-by-key [values]
   (zipmap (map :key values) values))
 
@@ -37,7 +44,7 @@
   (case (count list)
     0 ""
     1 (str (first list))
-    2 (s/join "and" list)
+    2 (s/join " and " list)
     (str
      (s/join ", " (butlast list))
      ", and "

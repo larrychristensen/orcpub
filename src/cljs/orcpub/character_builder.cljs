@@ -760,7 +760,7 @@
         actions))])))
 
 (defn prof-name [prof-map prof-kw]
-  (or (-> prof-kw prof-map :name) (common/safe-name prof-kw)))
+  (or (-> prof-kw prof-map :name) (common/kw-to-name prof-kw)))
 
 (defn character-display [built-char]
   (let [race (char5e/race built-char)
