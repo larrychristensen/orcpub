@@ -473,7 +473,10 @@
                   :key :rogue
                   :selections [(t/selection-cfg
                                 {:name "Levels"
+                                 :min 1
                                  :max nil
+                                 :sequential? true
+                                 :new-item-fn (fn [])
                                  :options [(t/option
                                             "Level 1"
                                             :level-1
@@ -512,10 +515,10 @@
 
 (deftest test-build
   (testing "get-entity-path"
-    (is (= (entity/get-entity-path-2 template character [:class :wizard])
+    (is (= (entity/get-entity-path template character [:class :wizard])
          [::entity/options :class 0]))
-    (is (= (time (entity/get-entity-path-2 template character [:class :wizard :levels :level-2 :hit-points :roll]))
-         [::entity/options :class 0 ::entity/options :levels 1 ::entity/options :hit-points :roll])))
+    (is (= (entity/get-entity-path template character [:class :wizard :levels :level-2 :hit-points])
+         [::entity/options :class 0 ::entity/options :levels 1 ::entity/options :hit-points])))
   #_(let [built (entity/build character template)]
     (prn "BUILT")
     (clojure.pprint/pprint built)

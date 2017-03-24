@@ -2738,7 +2738,7 @@ You can use this feature a number of times equal to your Charisma modifier (a mi
     :traits [{:name "Divine Smite"
               :level 2
               :page 85
-              :summary "when you hit with melee weapon attack, you can expend 1 X-th level spell slot to deal extra 1d8 + Xd8 radiant damage, up to 5d8. Additional d8 on fiend or undead."
+              :summary "when you hit with melee weapon attack, you can expend 1 X-th level spell slot to deal extra (X+1)d8 radiant damage, up to 5d8. Additional d8 on fiend or undead."
               :description "Starting at 2nd level, when you hit a creature with a melee weapon attack, you can expend one spell slot to deal radiant damage to the target, in addition to the weapon's damage. The extra damage is 2d8 for a 1st-level spell slot, plus 1d8 for each spell level higher than 1st, to a maximum of 5d8. The damage increases by 1d8 if the target is an undead or a fiend."}
              {:name "Improved Divine Smite"
               :level 11

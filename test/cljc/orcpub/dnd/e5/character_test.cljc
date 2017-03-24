@@ -9,11 +9,11 @@
             [orcpub.dnd.e5.character :as char5e]))
 
 (def valid-char
-  {::char5e/abilities (char5e/abilities 12 13 1 20 14 12) 
-   ::char5e/savings-throws [:int :con]
-   ::char5e/speed 35
-   ::char5e/darkvision false
-   ::char5e/initiative 12})
+  {:abilities (char5e/abilities 12 13 1 20 14 12) 
+   :savings-throws [:int :con]
+   :speed 35
+   :darkvision false
+   :initiative 12})
 
 (deftest test-character-spec
   (testing "valid character"
