@@ -1,6 +1,8 @@
 (ns orcpub.common
   (:require [clojure.string :as s]))
 
+(def dot-char "•")
+
 (defn name-to-kw [name]
   (-> name
       clojure.string/lower-case

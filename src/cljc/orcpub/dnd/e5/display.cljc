@@ -42,7 +42,7 @@
    (if damage-type (common/safe-name damage-type))
    " damage"
    (if save (str ", DC" save-dc " " (common/safe-name save) " save"))
-   (if source (str " (" (source-description source page) ")"))))
+   (if page (str " (" (source-description source page) ")"))))
 
 (defn action-description [{:keys [description summary source page duration range frequency]}]
   (str

@@ -2395,7 +2395,6 @@ In addition, when you make a running long jump, the distance you can cover incre
     :hit-die 8
     :ability-increase-levels [4 8 10 16 19]
     :unarmored-abilities [:wis]
-    :martial-arts {1 4, 2 4, 3 4, 4 4, 5 6, 6 6, 7 6, 8 6, 9 6, 10 6, 11 8, 12 8, 13 8, 14 8, 15 8, 16 8, 17 10, 18 10, 19 10, 20 10}
     :profs {:armor {:light true}   
             :weapon {:simple false :shortsword false}
             :save {:dex true :str true}
@@ -2433,10 +2432,12 @@ In addition, when you make a running long jump, the distance you can cover incre
                     :summary "Unarmed strike or monk weapon"}))
                 (mod5e/bonus-action
                  {:name "Martial Arts"
-                  :description "Make an unarmed strike when you take Attack action"})]
+                  :page 78
+                  :summary "Make an unarmed strike when you take Attack action"})]
     :levels {2 {:modifiers [(mod5e/unarmored-speed-bonus 10)
                             (mod5e/dependent-trait
                              {:name "Ki"
+                              :page 78
                               :level 2
                               :summary (str "You have " ?total-levels " ki points")
                               :description "Starting at 2nd level, your training allows you to harness the mystic energy of ki. Your access to this energy is represented by a number of ki points. Your monk level determines the number of points you have, as shown in the Ki Points column of the Monk table.
@@ -2446,24 +2447,45 @@ Some of your ki features require your target to make a saving throw to resist th
 Ki save DC = 8 + your proficiency bonus + your Wisdom modifier"})
                             (mod5e/bonus-action
                              {:name "Flurry of Blows"
+                              :page 78
                               :level 2
                               :summary "After you take Attack action, spend 1 ki to make 2 unarmed strikes"
                               :description "Immediately after you take the Attack action on your turn, you can spend 1 ki point to make two unarmed strikes as a bonus action."})
                             (mod5e/bonus-action
                              {:name "Patient Defense"
+                              :page 78
                               :description "You can spend 1 ki point to take the Dodge action as a bonus action on your turn."
                               :summary "Spend 1 ki point to take the Dodge action"})
                             (mod5e/bonus-action
                              {:name "Step of the Wind"
+                              :page 78
                               :description "You can spend 1 ki point to take the Disengage or Dash action as a bonus action on your turn, and your jump distance is doubled for the turn."
                               :summary "Spend 1 ki point to take the Disengage or Dash action and jump distance is doubled for the turn"})]}
              3 {:modifiers [(mod5e/reaction
                              {:name "Deflect Missiles"
+                              :page 78
                               :summary (str "When hit by a ranged attack, reduce the damage by 1d10 " (common/mod-str (+ (?ability-bonuses :dex) (?class-level :monk))) ". If you reduce it to 0, you can catch the missile and use it in a ranged attack as a monk weapon with range 20/60") 
                               :description "Starting at 3rd level, you can use your reaction to deflect or catch the missile when you are hit by a ranged weapon attack. When you do so, the damage you take from the attack is reduced by 1d10 + your Dexterity modifier + your monk level.
 If you reduce the damage to 0, you can catch the missile if it is small enough for you to hold in one hand and you have at least one hand free. If you catch a missile in this way, you can spend 1 ki point to make a ranged attack with the weapon or piece of ammunition you just caught, as part of the same reaction. You make this attack with proficiency, regardless of your weapon proficiencies, and the missile counts as a monk weapon for the attack, which has a normal range of 20 feet and a long range of 60 feet."})]}
-             5 {:modifiers [(mod5e/extra-attack)]}
+             4 {:modifiers [(mod5e/reaction
+                             {:name "Slow Fall"
+                              :page 78
+                             :level 4
+                             :summary (str "reduce falling damage by " (* 5  (?class-level :monk)))
+                             :description "Beginning at 4th level, you can use your reaction when you fall to reduce any falling damage you take by an amount equal to five times your monk level."})]}
+             5 {:modifiers [(mod5e/extra-attack)
+                            (mod5e/dependent-trait
+                             {:name "Stunning Strike"
+                              :page 79
+                              :level 5
+                              :summary (str "when you hit a creature with melee attack, spend 1 ki point to stun the creature if it fails a DC " (?spell-save-dc :wis) " CON save")
+                              :description "Starting at 5th level, you can interfere with the flow of ki in an opponent's body. When you hit another creature with a melee weapon attack, you can spend 1 ki point to attempt a stunning strike. The target must succeed on a Constitution saving throw or be stunned until the end of your next turn."})]}
              6 {:modifiers [(mod5e/unarmored-speed-bonus 5)]}
+             7 {:modifiers [(mod5e/action
+                             {:name "Stillness of Mind"
+                              :page 79
+                              :summary "end one effect causing you to be charmed or frightened"
+                              :description "Starting at 7th level, you can use your action to end one effect on yourself that is causing you to be charmed or frightened."})]}
              10 {:modifiers [(mod5e/damage-immunity :poison)
                              (mod5e/damage-immunity :disease)
                              (mod5e/unarmored-speed-bonus 5)]}
@@ -2473,64 +2495,82 @@ If you reduce the damage to 0, you can catch the missile if it is small enough f
                              opt5e/languages)}
              14 {:modifiers [(mod5e/saving-throws char5e/ability-keys)
                              (mod5e/unarmored-speed-bonus 5)]}
-             18 {:modifiers [(mod5e/unarmored-speed-bonus 5)]}}
+             18 {:modifiers [(mod5e/unarmored-speed-bonus 5)
+                             (mod5e/action
+                              {:name "Empty Body: Invisibility"
+                               :level 18
+                               :page 79
+                               :duration {:units :minute}
+                               :summary "spend 4 ki points to become invisible and have resistance to all damage but force damage"
+                               :description "Beginning at 18th level, you can use your action to spend 4 ki points to become invisible for 1 minute. During that time, you also have resistance to all damage but force damage. Additionally, you can spend 8 ki points to cast the astral projection spell, without needing material components. When you do so, you can't take any other creatures with you."})
+                             (mod5e/action
+                              {:name "Empty Body: Astral Projection"
+                               :page 79
+                               :level 18
+                               :summary "use 8 ki points to cast the astral projection spell"})]}}
     :equipment {:dart 10}
-    :traits [
-             {:name "Slow Fall"
-              :level 4
-              :description "Beginning at 4th level, you can use your reaction when you fall to reduce any falling damage you take by an amount equal to five times your monk level."}
-             {:name "Extra Attack"
-              :level 5
-              :description "Beginning at 5th level, you can attack twice, instead of once, whenever you take the Attack action on your turn."}
-             {:name "Stunning Strike"
-              :level 5
-              :description "Starting at 5th level, you can interfere with the flow of ki in an opponent's body. When you hit another creature with a melee weapon attack, you can spend 1 ki point to attempt a stunning strike. The target must succeed on a Constitution saving throw or be stunned until the end of your next turn."}
-             {:name "Ki-Empowered Strikes"
+    :traits [{:name "Ki-Empowered Strikes"
+              :page 79
               :level 6
+              :summary "your unarmed strikes count as magical"
               :description "Starting at 6th level, your unarmed strikes count as magical for the purpose of overcoming resistance and immunity to nonmagical attacks and damage"}
              {:name "Evasion"
+              :page 79
               :level 7
+              :summary "when you succeed on a DEX save to take half damage, you take none, if you fail, you take half"
               :description "At 7th level, your instinctive agility lets you dodge out of the way of certain area effects, such as a blue dragon's lightning breath or a fireball spell. When you are subjected to an effect that allows you to make a Dexterity saving throw to take only half damage, you instead take no damage if you succeed on the saving throw, and only half damage if you fail."}
-             {:name "Stillness of Mind"
-              :level 7
-              :description "Starting at 7th level, you can use your action to end one effect on yourself that is causing you to be charmed or frightened."}
-             {:name "Purity of Body"
-              :level 10
-              :description "At 10th level, your mastery of the ki flowing through you makes you immune to disease and poison."}
              {:name "Tongue of the Sun and Moon"
+              :page 79
               :level 13
+              :summary "you understand all languages and can communicate with any creature that can understand a language"
               :description "Starting at 13th level, you learn to touch the ki of other minds so that you understand all spoken languages. Moreover, any creature that can understand a language can understand what you say."}
              {:name "Diamond Soul"
               :level 14
-              :description "Beginning at 14th level, your mastery of ki grants you proficiency in all saving throws.Additionally, whenever you make a saving throw and fail, you can spend 1 ki point to reroll it and take the second result."}
+              :page 79
+              :summary "you are proficient in all saves. You can spend 1 ki point to reroll failed saves."
+              :description "Beginning at 14th level, your mastery of ki grants you proficiency in all saving throws. Additionally, whenever you make a saving throw and fail, you can spend 1 ki point to reroll it and take the second result."}
              {:name "Timeless Body"
+              :page 79
               :level 15
+              :summary "you can't be aged magically and you need no food or water"
               :description "At 15th level, your ki sustains you so that you suffer none of the frailty of old age, and you can't be aged magically. You can still die of old age, however. In addition, you no longer need food or water."}
-             {:name "Empty Body"
-              :level 18
-              :description "Beginning at 18th level, you can use your action to spend 4 ki points to become invisible for 1 minute. During that time, you also have resistance to all damage but force damage.Additionally, you can spend 8 ki points to cast the astral projection spell, without needing material components. When you do so, you can't take any other creatures with you."}
+             
              {:name "Perfect Self"
+              :page 79
               :level 20
+              :summary "regain 4 ki when you have none and roll initiative"
               :description "At 20th level, when you roll for initiative and have no ki points remaining, you regain 4 ki points."}]
     :subclass-level 3
     :subclass-title "Monastic Tradition"
     :subclasses [{:name "Way of the Open Hand"
-                  :traits [{:name "Open Hand Technique"
-                            :level 3
-                            :description "Starting when you choose this tradition at 3rd level, you can manipulate your enemy's ki when you harness your own. Whenever you hit a creature with one of the attacks granted by your Flurry of Blows, you can impose one of the following effects on that target:
+                  :modifiers [(mod5e/dependent-trait
+                               {:name "Open Hand Technique"
+                                :page 79
+                                :summary (str "when you hit with Flurry of Blows, you impose one of the effects on the target: 1) must make a DC "(?spell-save-dc :wis) " DEX save or be knocked prone. 2) make a DC " (?spell-save-dc :wis) " STR save or be pushed 15 ft. 3) can't take reactions until end of your next turn")
+                                :description "Starting when you choose this tradition at 3rd level, you can manipulate your enemy's ki when you harness your own. Whenever you hit a creature with one of the attacks granted by your Flurry of Blows, you can impose one of the following effects on that target:
 * It must succeed on a Dexterity saving throw or be knocked prone.
 * It must make a Strength saving throw. If it fails, you can push it up to 15 feet away from you. 
-* It can't take reactions until the end of your next turn."}
-                           {:name "Wholeness of Body"
-                            :level 6
-                            :description "At 6th level, you gain the ability to heal yourself. As an action, you can regain hit points equal to three times your monk level. You must finish a long rest before you can use this feature again."}
-                           {:name "Tranquility"
-                            :level 11
-                            :description "Beginning at 11th level, you can enter a special meditation that surrounds you with an aura of peace. At the end of a long rest, you gain the effect of a sanctuary spell that lasts until the start of your next long rest (the spell can end early as normal). The saving throw DC for the spell equals 8 + your Wisdom modifier + your proficiency bonus."}
-                           {:name "Quivering Palm"
-                            :level 17
-                            :description "At 17th level, you gain the ability to set up lethal vibrations in someone's body. When you hit a creature with an unarmed strike, you can spend 3 ki points to start these imperceptible vibrations, which last for a number of days equal to your monk level. The vibrations are harmless unless you use your action to end them. To do so, you and the target must be on the same plane of existence. When you use this action, the creature must make a Constitution saving throw. If it fails, it is reduced to 0 hit points. If it succeeds, it takes 10d10 necrotic damage.
-You can have only one creature under the effect of this feature at a time. You can choose to end the vibrations harmlessly without using an action."}]}
+* It can't take reactions until the end of your next turn."})]
+                  :levels {6 {:modifiers [(mod5e/action
+                                           {:name "Wholeness of Body"
+                                            :page 79
+                                            :level 6
+                                            :frequency {:units :long-rest}
+                                            :summary (str "heal yourself " (* 3 (?class-level :monk)) " HPs")
+                                            :description "At 6th level, you gain the ability to heal yourself. As an action, you can regain hit points equal to three times your monk level. You must finish a long rest before you can use this feature again."})]}
+                           11 {:modifiers [(mod5e/dependent-trait
+                                            {:name "Tranquility"
+                                             :page 80
+                                             :level 11
+                                             :summary (str "gain effects of sanctuary spell (save DC " (?spell-save-dc :wis) ") between rests")
+                                             :description "Beginning at 11th level, you can enter a special meditation that surrounds you with an aura of peace. At the end of a long rest, you gain the effect of a sanctuary spell that lasts until the start of your next long rest (the spell can end early as normal). The saving throw DC for the spell equals 8 + your Wisdom modifier + your proficiency bonus."})]}
+                           17 {:modifiers [(mod5e/dependent-trait
+                                            {:name "Quivering Palm"
+                                             :level 17
+                                             :page 80
+                                             :summary (str "when you hit a creature with unarmed strike, set up vibrations that last " (?class-level :monk) " days. Use an action to end the vibrations, reducing the target to 0 HPs on failed DC " (?spell-save-dc :wis) " CON save. It takes 10d10 necrotic damage on successful save.")
+                                             :description "At 17th level, you gain the ability to set up lethal vibrations in someone's body. When you hit a creature with an unarmed strike, you can spend 3 ki points to start these imperceptible vibrations, which last for a number of days equal to your monk level. The vibrations are harmless unless you use your action to end them. To do so, you and the target must be on the same plane of existence. When you use this action, the creature must make a Constitution saving throw. If it fails, it is reduced to 0 hit points. If it succeeds, it takes 10d10 necrotic damage.
+You can have only one creature under the effect of this feature at a time. You can choose to end the vibrations harmlessly without using an action."})]}}}
                  {:name "Way of Shadow"
                   :traits [{:name "Shadow Arts"
                             :level 3}
@@ -4039,7 +4079,7 @@ You might also have ties to a specific temple dedicated to your chosen deity or 
     (map
      (fn [nm]
        ^{:key nm}
-       [:li.p-2 (str "• " nm)])
+       [:li.p-2 (str common/dot-char " " nm)])
      options))])
 
 (def scag-amazon-frame
