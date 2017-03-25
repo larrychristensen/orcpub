@@ -3344,6 +3344,42 @@ magic items."}
                             :page 98
                             :summary "creatures have disadvantage on saves against your spells (only on the turn you cast them) if you are hidden from them"}]}]}))
 
+(defn metamagic-selection [num]
+  (t/selection
+   "Metamagic"
+   [(t/option-cfg
+     {:name "Careful Spell"
+      :modifiers [(mod5e/dependent-trait
+                   {:name "Careful Spell"
+                    :page 102
+                    :summary (str "When you cast a spell that requires a save, spend 1 sorcery pt. to allow up to " (?ability-bonuses :cha) " creatures to automatically succeed")
+                    :description "When you cast a spell that forces other creatures to make a saving throw, you can protect some of those creatures from the spell's full force. To do so, you spend 1 sorcery point and choose a number of those creatures up to your Charisma modifier (minimum of one creature). A chosen creature automatically succeeds on its saving throw against the spell."})]})
+    (t/option-cfg
+     {:name "Distant Spell"
+      :modifiers [(mod5e/trait-cfg
+                   {:name "Distant Spell"
+                    :page 102
+                    :summary "spend 1 sorcery pt. double the range of a spell with range 5 ft. or greater or make the range of a touch spell 30 ft."
+                    :description "When you cast a spell that has a range of 5 feet or greater, you can spend 1 sorcery point to double the range of the spell.
+When you cast a spell that has a range of touch, you can spend 1 sorcery point to make the range of the spell 30 feet."})]})
+    (t/option-cfg
+     {:name "Empowered Spell"
+      :modifiers [(mod5e/dependent-trait
+                   {:name "Empowered Spell"
+                    :page 102
+                    :summary (str "spend 1 sorcery pt. to reroll up to " (?ability-bonuses :cha) " spell damage dice")
+                    :description "When you roll damage for a spell, you can spend 1 sorcery point to reroll a number of the damage dice up to your Charisma modifier (minimum of one). You must use the new rolls.
+You can use Empowered Spell even if you have already used a different Metamagic option during the casting of the spell."})]})
+    (t/option-cfg
+     {:name "Extended Spell"
+      :modifiers [(mod5e/trait-cfg
+                   {:name "Extended Spell"
+                    :page 102
+                    :summary "spend 1 sorcery pt. to double the duration of a spell to a max 24 hrs."
+                    :description "When you cast a spell that has a duration of 1 minute or longer, you can spend 1 sorcery point to double its duration, to a maximum duration of 24 hours."})]})]
+   2
+   2))
+
 (def sorcerer-option
   (class-option
    {:name "Sorcerer"
@@ -3380,6 +3416,19 @@ magic items."}
                     [(mod5e/weapon :crossbow-light 1)
                      (mod5e/equipment :crossbow-bolt 20)])
                    (weapon-option [:simple 1])])]
+    :levels {2 {:modifiers [(mod5e/dependent-trait
+                             {:name "Sorcery Points"
+                              :level 2
+                              :page 101
+                              :summary (str "You have " (?class-level :sorcerer) " sorcery points")})
+                            (mod5e/bonus-action
+                             {:name "Flexible Casting"
+                              :level 2
+                              :page 101
+                              :summary "you can convert sorcery points into spell slots (level - point cost: 1st - 2, 2nd - 3, 3rd - 5, 4th - 6, 5th - 7). You can also convert spell slots into sorcery points equal to the slot's level"})]}
+             3 {:selections [(metamagic-selection 2)]}
+             10 {:selections [(metamagic-selection 1)]}
+             17 {:selections [(metamagic-selection 1)]}}
     :equipment-choices [{:name "Equipment Pack"
                          :options {:dungeoneers-pack 1
                                    :explorers-pack 1}}
@@ -3387,24 +3436,9 @@ magic items."}
                          :options {:component-pouch 1
                                    :arcane-focus 1}}]
     :weapons {:dagger 1}
-    :traits [{:name "Flexible Casting"
-              :level 2
-              :description "You can use your sorcery points to gain additional spell slots, or sacrifice spell slots to gain additional sorcery points. You learn other ways to use your sorcery points as you reach higher levels.Creating Spell Slots. You can transform unexpended sorcery points into one spell slot as a bonus action on your turn. The Creating Spell Slots table shows the cost of creating a spell slot of a given level. You can create spell slots no higher in level than 5th.
-Any spell slot you create with this feature vanishes when you finish a long rest."}
-             {:name "Careful Spell"
-              :level 3
-              :description "When you cast a spell that forces other creatures to make a saving throw, you can protect some of those creatures from the spell's full force. To do so, you spend 1 sorcery point and choose a number of those creatures up to your Charisma modifier (minimum of one creature). A chosen creature automatically succeeds on its saving throw against the spell."}
-             {:name "Distant Spell"
-              :level 3
-              :description "When you cast a spell that has a range of 5 feet or greater, you can spend 1 sorcery point to double the range of the spell.
-When you cast a spell that has a range of touch, you can spend 1 sorcery point to make the range of the spell 30 feet."}
-             {:name "Empowered Spell"
-              :level 3
-              :description "When you roll damage for a spell, you can spend 1 sorcery point to reroll a number of the damage dice up to your Charisma modifier (minimum of one). You must use the new rolls.
-You can use Empowered Spell even if you have already used a different Metamagic option during the casting of the spell."}
-             {:name "Extended Spell"
-              :level 3
-              :description "When you cast a spell that has a duration of 1 minute or longer, you can spend 1 sorcery point to double its duration, to a maximum duration of 24 hours."}
+    :traits [
+             
+             
              {:name "Heightened Spell"
               :level 3
               :description "When you cast a spell that forces a creature to make a saving throw to resist its effects, you can spend 3 sorcery points to give one target of the spell disadvantage on its first saving throw made against the spell."}
