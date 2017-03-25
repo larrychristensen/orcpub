@@ -3376,9 +3376,37 @@ You can use Empowered Spell even if you have already used a different Metamagic 
                    {:name "Extended Spell"
                     :page 102
                     :summary "spend 1 sorcery pt. to double the duration of a spell to a max 24 hrs."
-                    :description "When you cast a spell that has a duration of 1 minute or longer, you can spend 1 sorcery point to double its duration, to a maximum duration of 24 hours."})]})]
-   2
-   2))
+                    :description "When you cast a spell that has a duration of 1 minute or longer, you can spend 1 sorcery point to double its duration, to a maximum duration of 24 hours."})]})
+    (t/option-cfg
+     {:name "Heightened Spell"
+      :modifiers [(mod5e/trait-cfg
+                   {:name "Heightened Spell"
+                    :page 102
+                    :summary "when you cast a spell with a save to resist it's effects, spend 3 sorcery pts. to give one target disadvantage on its first save against it"
+                    :description "When you cast a spell that forces a creature to make a saving throw to resist its effects, you can spend 3 sorcery points to give one target of the spell disadvantage on its first saving throw made against the spell."})]})
+    (t/option-cfg
+     {:name "Quickened Spell"
+      :modifiers [(mod5e/trait-cfg
+                   {:name "Quickened Spell"
+                    :page 102
+                    :summary "spend 2 sorcery pts. to convert a casting of a spell with 1 action casting time to 1 bonus-action"
+                    :description "When you cast a spell that has a casting time of 1 action, you can spend 2 sorcery points to change the casting time to 1 bonus action for this casting."})]})
+    (t/option-cfg
+     {:name "Subtle Spell"
+      :modifiers [(mod5e/trait-cfg
+                   {:name "Subtle Spell"
+                    :page 102
+                    :summary "spend 1 sorcery pt. to cast a spell without somatic or verbal components"
+                    :description "When you cast a spell, you can spend 1 sorcery point to cast it without any somatic or verbal components."})]})
+    (t/option-cfg
+     {:name "Twinned Spell"
+      :modifiers [(mod5e/trait-cfg
+                  {:name "Twinned Spell"
+                   :page 102
+                   :summary "spend X sorcery pts. (min 1) to target two creatures with a single target spell, where X is the spell level"
+                   :description "When you cast a spell that targets only one creature and doesn't have a range of self, you can spend a number of sorcery points equal to the spell's level to target a second creature in range with the same spell (1 sorcery point if the spell is a cantrip). To be eligible, a spell must be incapable of targeting more than one creature at the spell's current level. For example, magic missile and scorching ray aren't eligible, but ray of frost and chromatic orb are"})]})]
+   num
+   num))
 
 (def sorcerer-option
   (class-option
@@ -3436,21 +3464,6 @@ You can use Empowered Spell even if you have already used a different Metamagic 
                          :options {:component-pouch 1
                                    :arcane-focus 1}}]
     :weapons {:dagger 1}
-    :traits [
-             
-             
-             {:name "Heightened Spell"
-              :level 3
-              :description "When you cast a spell that forces a creature to make a saving throw to resist its effects, you can spend 3 sorcery points to give one target of the spell disadvantage on its first saving throw made against the spell."}
-             {:name "Quickened Spell"
-              :level 3
-              :description "When you cast a spell that has a casting time of 1 action, you can spend 2 sorcery points to change the casting time to 1 bonus action for this casting."}
-             {:name "Subtle Spell"
-              :level 3
-              :description "When you cast a spell, you can spend 1 sorcery point to cast it without any somatic or verbal components."}
-             {:name "Twinned Spell"
-              :level 3
-              :description "When you cast a spell that targets only one creature and doesn't have a range of self, you can spend a number of sorcery points equal to the spell's level to target a second creature in range with the same spell (1 sorcery point if the spell is a cantrip).To be eligible, a spell must be incapable of targeting more than one creature at the spell's current level. For example, magic missile and scorching ray aren't eligible, but ray of frost and chromatic orb are"}]
     :subclass-title "Sorcerous Origin"
     :subclass-level 1
     :subclasses [{:name "Draconic Ancestry"
