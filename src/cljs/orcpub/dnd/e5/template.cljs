@@ -3188,6 +3188,22 @@ Once you are camouflaged in this way, you can try to hide by pressing yourself u
                          :options {:burglers-pack 1
                                    :dungeoneers-pack 1
                                    :explorers-pack 1}}]
+    :modifiers [(mod5e/dependent-trait
+                 {:name "Sneak Attack"
+                  :page 96
+                  :frequency {:units :turn}
+                  :summary (str (common/round-up (/ (?class-level :rogue) 2)) "d6 extra damage on attack where you have advantage or another enemy of creature is within 5 ft.")
+                  :description "You know how to strike subtly and exploit a foe's distraction. Once per turn, you can deal an extra 1d6 damage to one creature you hit with an attack if you have advantage on the attack roll. The attack must use a finesse or a ranged weapon.
+You don't need advantage on the attack roll if another enemy of the target is within 5 feet of it, that enemy isn't incapacitated, and you don't have disadvantage on the attack roll.
+The amount of the extra damage increases as you gain levels in this class, as shown in the Sneak Attack column of the Rogue table."})]
+    :levels {2 {:modifiers [(mod5e/bonus-action
+                             {:level 2
+                              :name "Cunning Action"
+                              :page 96
+                              :frequency {:units :turn}
+                              :summary "Dash, Disengage or Hide"
+                              :description "Your quick thinking and agility allow you to move and act quickly. You can take a bonus action on each of your turns in combat. This action can be used only to take the Dash, Disengage, or Hide action."})]}
+             5 {:modifiers [(uncanny-dodge-modifier 96)]}}
     :selections [(t/selection
                   "Additional Weapon"
                   [(t/option
@@ -3206,35 +3222,82 @@ Once you are camouflaged in this way, you can try to hide by pressing yourself u
                   opt5e/rogue-expertise-selection
                   ::t/order
                   1)]
-    :traits [{:name "Sneak Attack" :description "You know how to strike subtly and exploit a foe's distraction. Once per turn, you can deal an extra 1d6 damage to one creature you hit with an attack if you have advantage on the attack roll. The attack must use a finesse or a ranged weapon.\nYou don't need advantage on the attack roll if another enemy of the target is within 5 feet of it, that enemy isn't incapacitated, and you don't have disadvantage on the attack roll.\nThe amount of the extra damage increases as you gain levels in this class, as shown in the Sneak Attack column of the Rogue table."}
-             {:name "Thieves' Cant" :description "During your rogue training you learned thieves' cant, a secret mix of dialect, jargon, and code that allows you to hide messages in seemingly normal conversation. Only another creature that knows thieves' cant understands such messages. It takes four times longer to convey such a message than it does to speak the same idea plainly.\nIn addition, you understand a set of secret signs and symbols used to convey short, simple messages, such as whether an area is dangerous or the territory of a thieves' guild, whether loot is nearby, or whether the people in an area are easy marks or will provide a safe house for thieves on the run."}
-             {:level 2 :name "Cunning Action" :description "Your quick thinking and agility allow you to move and act quickly. You can take a bonus action on each of your turns in combat. This action can be used only to take the Dash, Disengage, or Hide action."}
-             {:level 5 :name "Uncanny Dodge" :description "When an attacker that you can see hits you with an attack, you can use your reaction to halve the attack's damage against you."}
-             {:level 7 :name "Evasion" :description "You can nimbly dodge out of the way of certain area effects, such as a red dragon's fiery breath or an ice storm spell. When you are subjecte to an effect that allows you to make a Dexterity saving throw to take only half damage, you instead take no damage if you succeed on the saving throw, and only half damage if you fail."}
-             {:level 11 :name "Reliable Talent" :description "You have refined your chosen skills until they approach perfection. Whenever you make an ability check that lets you add your pro ciency bonus, you can treat a d20 roll of 9 or lower as a 10."}
-             {:level 14 :name "Blindsense" :description "If you are able to hear, you are aware of the location of any hidden or invisible creature within 10 feet of you."}
-             {:level 18 :name "Elusive" :description "You are so evasive that attackers rarely gain the upper hand against you. No attack roll has advantage against you while you aren't incapacitated."}
-             {:level 20 :name "Stroke of Luck" :description "You have an uncanny knack for succeeding when you need to. If your attack misses a target within range, you can turn the miss into a hit. Alternatively, if you fail an ability check, you can treat the d20 roll as a 20.\nOnce you use this feature, you can't use it again until you  nish a short or long rest."}]
+    :traits [{:name "Thieves' Cant"
+              :page 96
+              :summary "convey secret messages hidden in normal conversation"
+              :description "During your rogue training you learned thieves' cant, a secret mix of dialect, jargon, and code that allows you to hide messages in seemingly normal conversation. Only another creature that knows thieves' cant understands such messages. It takes four times longer to convey such a message than it does to speak the same idea plainly.
+In addition, you understand a set of secret signs and symbols used to convey short, simple messages, such as whether an area is dangerous or the territory of a thieves' guild, whether loot is nearby, or whether the people in an area are easy marks or will provide a safe house for thieves on the run."}
+             (evasion 7 96)
+             {:level 11
+              :name "Reliable Talent"
+              :page 96
+              :summary "when you make an ability check with proficiency, treat a roll less than 10 as a 10"
+              :description "You have refined your chosen skills until they approach perfection. Whenever you make an ability check that lets you add your proficiency bonus, you can treat a d20 roll of 9 or lower as a 10."}
+             {:level 14
+              :name "Blindsense"
+              :page 96
+              :summary "know location of hidden or invisible creatures within 10 ft."
+              :description "If you are able to hear, you are aware of the location of any hidden or invisible creature within 10 feet of you."}
+             {:level 18
+              :name "Elusive"
+              :page 96
+              :summary "attack rolls only have disadvantage on you if you are incapacitated"
+              :description "You are so evasive that attackers rarely gain the upper hand against you. No attack roll has advantage against you while you aren't incapacitated."}
+             {:level 20
+              :name "Stroke of Luck"
+              :page 97
+              :frequency {:units :rest}
+              :summary "turn missed attack into a hit or a failed ability check roll as 20"
+              :description "You have an uncanny knack for succeeding when you need to. If your attack misses a target within range, you can turn the miss into a hit. Alternatively, if you fail an ability check, you can treat the d20 roll as a 20.\nOnce you use this feature, you can't use it again until you finish a short or long rest."}]
     :subclass-level 3
     :subclass-title "Roguish Archetype"
     :subclasses [{:name "Thief"
-                  :traits [{:level 3 :name "Fast Hands" :description "You can use the bonus action granted by your Cunning Action to make a Dexterity (Sleight of Hand) check, use your thieves' tools to disarm a trap or open a lock, or take the Use an Object action."}
-                           {:level 3 :name "Second-Story Work" :description "You gain the ability to climb faster than normal; climbing no longer costs you extra movement.\nIn addition, when you make a running jump, the distance you cover increases by a number of feet equal to your Dexterity modifier."}
-                           {:level 9 :name "Supreme Sneak" :description "You have advantage on a Dexterity (Stealth) check if you move no more than half your speed on the same turn."}
-                           {:level 13 :name "Use Magic Device" :description "You have learned enough about the workings of magic that you can improvise the use of items even when they are not intended for you. You ignore all class, race, and level requirements on the use of
+                  :modifiers [(mod5e/bonus-action
+                               {:level 3
+                                :name "Fast Hands"
+                                :page 96
+                                :summary "use your Cunning Action to make Sleight of Hand checks, use thieves' tools, or take Use and Object action"
+                                :description "You can use the bonus action granted by your Cunning Action to make a Dexterity (Sleight of Hand) check, use your thieves' tools to disarm a trap or open a lock, or take the Use an Object action."})
+                              (mod5e/dependent-trait
+                               {:level 3
+                                :name "Second-Story Work"
+                                :page 97
+                                :summary (str "climbing costs no extra movement, your running jump distance increases by " (?ability-bonuses :dex) " ft.")
+                                :description "You gain the ability to climb faster than normal; climbing no longer costs you extra movement.\nIn addition, when you make a running jump, the distance you cover increases by a number of feet equal to your Dexterity modifier."})]
+                  :traits [{:level 9
+                            :name "Supreme Sneak"
+                            :page 97
+                            :summary "advantage on Stealth checks if you move no more than half your speed"
+                            :description "You have advantage on a Dexterity (Stealth) check if you move no more than half your speed on the same turn."}
+                           {:level 13
+                            :name "Use Magic Device"
+                            :page 97
+                            :summary "ignore race, class, level requirements to use magic items"
+                            :description "You have learned enough about the workings of magic that you can improvise the use of items even when they are not intended for you. You ignore all class, race, and level requirements on the use of
 magic items."}
-                           {:level 17 :name "Thief's Reflexes" :description "You have learned enough about the workings of magic that you can improvise the use of items even when they are not intended for you. You ignore all class, race, and level requirements on the use of
-magic items."}]}
+                           {:level 17
+                            :name "Thief's Reflexes"
+                            :page 97
+                            :summary "when not surprised, take 2 turns in first round of combat, one at your normal initiative and the next at your initiative minus 10"}]}
                  {:name "Assassin"
                   :profs {:tool {:disguise-kit true :poisoners-kit true}}
+                  :levels {17 {:modifiers [(mod5e/dependent-trait
+                                            {:name "Death Strike"
+                                             :level 17
+                                             :page 97
+                                             :summary (str "double damage against a surpised creature if it fails a DC " (?spell-save-dc :dex) " CON save")})]}}
                   :traits [{:name "Assassinate"
-                            :level 3}
+                            :level 3
+                            :page 97
+                            :summary "advantage on attack against creatures that haven't taken a turn yet. Hits against surprised creatures are critical"}
                            {:name "Infiltration Expertise"
-                            :level 9}
+                            :level 9
+                            :page 97
+                            :summary "spend 25 gp and 7 days to establish a false identity"}
                            {:name "Impostor"
-                            :level 13}
-                           {:name "Death Strike"
-                            :level 17}]}
+                            :level 13
+                            :page 97
+                            :summary "accurately mimic the behavior, speech, and writing of another person"}]}
                  {:name "Arcane Trickster"
                   :spellcaster true
                   :spellcasting {:level-factor 3
@@ -3262,38 +3325,24 @@ magic items."}]}
                                                 20 1}
                                  :ability :int}
                   :modifiers [(mod5e/spells-known 0 :mage-hand :int "Arcane Trickster")]
+                  :levels {13 {:modifiers [(mod5e/bonus-action
+                                            {:name "Versatile Trickster"
+                                             :level 13
+                                             :page 98
+                                             :summary "use mage hand to gain advantage on attack rolls against a creature within 5 ft. of the hand"})]}
+                           17 {:modifiers [(mod5e/reaction
+                                            {:name "Spell Thief"
+                                             :level 17
+                                             :page 98
+                                             :summary (str "steal a spell for 8 hours if it is cast on you and the spellcaster fails a DC " (?spell-save-dc :int) " save with its spellcasting ability")})]}}
                   :traits [{:name "Mage Hand Legerdemain"
-                            :level 3}
+                            :level 3
+                            :page 98
+                            :summary "when you cast mage hand, you can make it invisible and perform Sleight of Hand tasks"}
                            {:name "Magical Ambush"
-                            :level 9}
-                           {:name "Versatile Trickster"
-                            :level 13}
-                           {:name "Spell Thief"
-                            :level 17}]}
-                 {:name "Mastermind"
-                  :source "Sword Coast Adventurer's Guide"
-                  :traits [{:name "Master of Intrigue"
-                            :level 3}
-                           {:name "Master of Tactics"
-                            :level 3}
-                           {:name "Insightful Manipulator"
-                            :level 9}
-                           {:name "Misdirection"
-                            :level 13}
-                           {:name "Soul of Deceit"
-                            :level 17}]}
-                 {:name "Swashbuckler"
-                  :source "Sword Coast Adventurer's Guide"
-                  :traits [{:name "Fancy Footwork"
-                            :level 3}
-                           {:name "Rakish Audacity"
-                            :level 3}
-                           {:name "Panache"
-                            :level 3}
-                           {:name "Elegance Maneuver"
-                            :level 13}
-                           {:name "Master Duelist"
-                            :level 17}]}]}))
+                            :level 9
+                            :page 98
+                            :summary "creatures have disadvantage on saves against your spells (only on the turn you cast them) if you are hidden from them"}]}]}))
 
 (def sorcerer-option
   (class-option
@@ -4239,7 +4288,35 @@ You might also have ties to a specific temple dedicated to your chosen deity or 
                            {:name "Battlerager Charge"
                             :level 10}
                            {:name "Spiked Retribution"
-                            :level 14}]}]}])
+                            :level 14}]}]}
+   {:name "Rogue"
+    :plugin? true
+    :subclass-level 3
+    :subclass-title "Roguish Archetypes"
+    :subclasses [{:name "Mastermind"
+                  :source "Sword Coast Adventurer's Guide"
+                  :traits [{:name "Master of Intrigue"
+                            :level 3}
+                           {:name "Master of Tactics"
+                            :level 3}
+                           {:name "Insightful Manipulator"
+                            :level 9}
+                           {:name "Misdirection"
+                            :level 13}
+                           {:name "Soul of Deceit"
+                            :level 17}]}
+                 {:name "Swashbuckler"
+                  :source "Sword Coast Adventurer's Guide"
+                  :traits [{:name "Fancy Footwork"
+                            :level 3}
+                           {:name "Rakish Audacity"
+                            :level 3}
+                           {:name "Panache"
+                            :level 3}
+                           {:name "Elegance Maneuver"
+                            :level 13}
+                           {:name "Master Duelist"
+                            :level 17}]}]}])
 
 (defn sword-coast-adventurers-guide-selections [app-state]
   [(t/selection
