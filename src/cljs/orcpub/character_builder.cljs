@@ -583,7 +583,7 @@
 
 (defn print-char [built-char]
   (cljs.pprint/pprint
-   (realize-char built-char)))
+   (dissoc (realize-char built-char) ::es/deps)))
 
 (defn svg-icon [icon-name]
   [:img.h-32.w-32 {:src (str "image/" icon-name ".svg")}])
@@ -1657,7 +1657,7 @@
      [:span "Print"]]]])
 
 (defn character-builder []
-  ;;(cljs.pprint/pprint (:character @app-state))
+  (cljs.pprint/pprint (:character @app-state))
   ;;(js/console.log "APP STATE" @app-state)
   (let [selected-plugin-options (into #{}
                                       (map ::entity/key)
@@ -1689,7 +1689,7 @@
         plugins (:plugins @app-state)
         stepper-dismissed? (:stepper-dismissed @app-state)]
     ;(js/console.log "BUILT TEMPLAT" built-template)
-    ;(print-char built-char)
+    (print-char built-char)
     [:div.app
      {:on-scroll (fn [e]
                    (let [app-header (js/document.getElementById "app-header")

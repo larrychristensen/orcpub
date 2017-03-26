@@ -55,8 +55,13 @@
 (defmacro deferred-modifier [prop deferred-fn default-value & [nm val-fn]]
   `(deferred-mod ~nm ~deferred-fn (es/ref-sym-to-kw '~prop) ~default-value ~val-fn (es/dependencies ~prop deferred-fn)))
 
-(defmacro cum-sum-mod [prop bonus & [nm value]]
-  `(mod-f ~nm ~value (es/cum-sum-mod ~prop ~bonus) (es/ref-sym-to-kw '~prop) (es/dependencies ~prop ~bonus)))
+(defmacro cum-sum-mod [prop bonus & [nm value conditions]]
+  `(mod-f ~nm
+          ~value
+          (es/cum-sum-mod ~prop ~bonus)
+          (es/ref-sym-to-kw '~prop)
+          (es/dependencies ~prop ~bonus)
+          (es/conditions ~conditions)))
 
 (defmacro vec-mod [prop val & [nm value]]
   `(mod-f ~nm ~value (es/vec-mod ~prop ~val) (es/ref-sym-to-kw '~prop) (es/dependencies ~prop ~val)))

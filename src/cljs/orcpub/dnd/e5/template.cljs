@@ -724,10 +724,14 @@ Fire Starter. The device produces a miniature flame, which you can use to light 
     :source :vgm
     :languages ["Common" "Draconic"]
     :modifiers [(mod5e/swimming-speed 30)
-                (mod/modifier ?armor-class (+ 3 ?armor-class) "Unarmored AC" (mod/bonus-str 3))
+                (mod/cum-sum-mod ?unarmored-ac-bonus 3)
+                (mod/cum-sum-mod ?unarmored-with-shield-ac-bonus 3)
                 (mod/modifier ?armor-class-with-armor
-                              (fn [armor]
-                                (max ?armor-class (?armor-class-with-armor armor))))
+                              (fn [armor & [shield]]
+                                (max (+ 3
+                                        ?base-armor-class
+                                        (if shield (?shield-ac-bonus shield) 0))
+                                     (?armor-class-with-armor armor shield))))
                 (mod5e/bonus-action
                  {:name "Hungry Jaws"
                   :page 113
@@ -1298,7 +1302,15 @@ Fire Starter. The device produces a miniature flame, which you can use to light 
                                 :simple 1}}]
     :weapons {:javelin 4}
     :equipment {:explorers-pack 1}
-    :modifiers [(mod/modifier ?armor-class (+ (?ability-bonuses :con) ?armor-class) nil nil [(= :barbarian (first ?classes))])
+    :modifiers [(mod/vec-mod ?unarmored-defense :barbarian)
+                (mod/cum-sum-mod ?unarmored-ac-bonus (?ability-bonuses :con)
+                                 nil
+                                 nil
+                                 [(= :barbarian (first ?unarmored-defense))])
+                (mod/cum-sum-mod ?unarmored-with-shield-ac-bonus (?ability-bonuses :con)
+                                 nil
+                                 nil
+                                 [(= :barbarian (first ?unarmored-defense))])
                 (mod5e/bonus-action
                  (let [barbarian-level (class-level ?levels :barbarian)
                        attack-bonus (condp <= barbarian-level
@@ -2415,19 +2427,11 @@ In addition, when you make a running long jump, the distance you can cover incre
     :weapon-choices [{:name "Weapon"
                       :options {:shortsword 1
                                 :simple 1}}]
-    :modifiers [(mod/modifier ?monk-armor-class
-                              (+ (?ability-bonuses :wis) ?armor-class)
-                              nil
-                              nil
-                              [(= :monk (first ?classes))])
-                (mod/modifier ?armor-class-with-armor
-                              (fn [armor & [shield]]
-                                (if (and (nil? armor) (not shield))
-                                  ?monk-armor-class
-                                  (?armor-class-with-armor armor shield)))
-                              nil
-                              nil
-                              [(= :monk (first ?classes))])
+    :modifiers [(mod/vec-mod ?unarmored-defense :monk)
+                (mod/cum-sum-mod ?unarmored-ac-bonus (?ability-bonuses :wis)
+                                 nil
+                                 nil
+                                 [(= :monk (first ?unarmored-defense))])
                 (mod5e/attack
                  (let [die (mod5e/level-val
                                        (?class-level :monk)
@@ -4575,6 +4579,10 @@ You might also have ties to a specific temple dedicated to your chosen deity or 
 (def template-base
   (es/make-entity
    {?armor-class (+ 10 (?ability-bonuses :dex))
+    ?base-armor-class (+ 10 (?ability-bonuses :dex))
+    ?unarmored-ac-bonus 0
+    ?unarmored-with-shield-ac-bonus 0
+    ?armored-ac-bonus 0
     ?max-medium-armor-bonus 2
     ?armor-stealth-disadvantage? (fn [armor]
                                    (:stealth-disadvantage? armor))
@@ -4584,15 +4592,22 @@ You might also have ties to a specific temple dedicated to your chosen deity or 
                            :light dex-bonus
                            :medium (min ?max-medium-armor-bonus dex-bonus)
                            0)))
+    ?shield-ac-bonus (fn [shield]
+                    (+ 2 (or (:magical-ac-bonus shield) 0)))
+    ?unarmored-armor-class (+ ?base-armor-class ?unarmored-ac-bonus)
+    ?unarmored-with-shield-armor-class (fn [shield]
+                                         (+ ?base-armor-class
+                                            ?unarmored-with-shield-ac-bonus
+                                            (?shield-ac-bonus shield)))
     ?armor-class-with-armor (fn [armor & [shield]]
-                              (+ (if shield 2 0)
-                                 (or (:magical-ac-bonus shield) 0)
-                                 (if (nil? armor)
-                                   ?armor-class
-                                   (+ (?armor-dex-bonus armor)
-                                      (or ?armored-ac-bonus 0)
-                                      (:base-ac armor)
-                                      (:magical-ac-bonus armor)))))
+                              (cond (and (nil? armor)
+                                         (nil? shield)) ?unarmored-armor-class
+                                    (nil? armor) (?unarmored-with-shield-armor-class shield)
+                                    :else (+ (if shield (?shield-ac-bonus shield) 0)
+                                             (+ (?armor-dex-bonus armor)
+                                                (or ?armored-ac-bonus 0)
+                                                (:base-ac armor)
+                                                (:magical-ac-bonus armor)))))
     ?abilities (reduce
                 (fn [m k]
                   (assoc m k (+ (or (k ?base-abilities) 12)

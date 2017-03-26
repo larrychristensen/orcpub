@@ -272,6 +272,12 @@
 (defn armored-ac-bonus [bonus]
   (mods/cum-sum-mod ?armored-ac-bonus bonus))
 
+(defn unarmored-ac-bonus [bonus]
+  (mods/cum-sum-mod ?unarmored-ac-bonus bonus))
+
+(defn unarmored-with-shield-ac-bonus [bonus]
+  (mods/cum-sum-mod ?unarmored-with-shield-ac-bonus bonus))
+
 (defmacro attack [atk]
   `(mods/modifier ~'?attacks
                   (conj
