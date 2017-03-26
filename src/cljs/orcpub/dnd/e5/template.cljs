@@ -20,7 +20,7 @@
 
 
 (def character
-  {::entity/options {#_:ability-scores #_{::entity/key :standard-roll
+  {::entity/options {:ability-scores {::entity/key :standard-scores
                                       ::entity/value (char5e/abilities 15 14 13 12 10 8)}
                      :class [{::entity/key :barbarian
                               ::entity/options {:levels [{::entity/key :level-1}]}}]}})
@@ -724,12 +724,10 @@ Fire Starter. The device produces a miniature flame, which you can use to light 
     :source :vgm
     :languages ["Common" "Draconic"]
     :modifiers [(mod5e/swimming-speed 30)
-                (mod/cum-sum-mod ?unarmored-ac-bonus 3)
-                (mod/cum-sum-mod ?unarmored-with-shield-ac-bonus 3)
+                (mod/modifier ?natural-ac-bonus 3)
                 (mod/modifier ?armor-class-with-armor
                               (fn [armor & [shield]]
-                                (max (+ 3
-                                        ?base-armor-class
+                                (max (+ ?base-armor-class
                                         (if shield (?shield-ac-bonus shield) 0))
                                      (?armor-class-with-armor armor shield))))
                 (mod5e/bonus-action
@@ -916,8 +914,7 @@ Fire Starter. The device produces a miniature flame, which you can use to light 
     :speed 30
     :darkvision 60
     :languages ["Common" "Infernal"]
-    :modifiers [
-                (mod5e/spells-known 0 :thaumaturgy :cha "Tiefling")
+    :modifiers [(mod5e/spells-known 0 :thaumaturgy :cha "Tiefling")
                 (mod5e/spells-known 1 :hellish-rebuke :cha "Tiefling" 3)
                 (mod5e/spells-known 2 :darkness :cha "Tiefling" 5)]}))
 
@@ -2428,7 +2425,8 @@ In addition, when you make a running long jump, the distance you can cover incre
                       :options {:shortsword 1
                                 :simple 1}}]
     :modifiers [(mod/vec-mod ?unarmored-defense :monk)
-                (mod/cum-sum-mod ?unarmored-ac-bonus (?ability-bonuses :wis)
+                (mod/cum-sum-mod ?unarmored-ac-bonus
+                                 (?ability-bonuses :wis)
                                  nil
                                  nil
                                  [(= :monk (first ?unarmored-defense))])
@@ -3448,6 +3446,7 @@ You can use Empowered Spell even if you have already used a different Metamagic 
                     [(mod5e/weapon :crossbow-light 1)
                      (mod5e/equipment :crossbow-bolt 20)])
                    (weapon-option [:simple 1])])]
+    :modifiers [(mod/modifier ?natural-ac-bonus 3)]
     :levels {2 {:modifiers [(mod5e/dependent-trait
                              {:name "Sorcery Points"
                               :level 2
@@ -4525,6 +4524,14 @@ You might also have ties to a specific temple dedicated to your chosen deity or 
                 ::t/select-fn (set-standard-abilities app-state)
                 ::t/modifiers [(mod5e/deferred-abilities)]}]})
    (t/selection-cfg
+    {:name "Alignment"
+     :options (mapv
+               (fn [alignment]
+                 (t/option-cfg
+                  {:name alignment
+                   :modifiers [(mod5e/alignment alignment)]}))
+               ["Lawful Good" "Lawful Neutral" "Lawful Evil" "Neutral Good" "Neutral" "Neutral Evil" "Chaotic Good" "Chaotic Neutral" "Chaotic Evil"])})
+   (t/selection-cfg
     {:name "Race"
      :help "Race determines your appearance and helps shape your culture and background. It also affects you ability scores, size, speed, languages, and many other crucial inherent traits."
      :options [dwarf-option
@@ -4579,7 +4586,8 @@ You might also have ties to a specific temple dedicated to your chosen deity or 
 (def template-base
   (es/make-entity
    {?armor-class (+ 10 (?ability-bonuses :dex))
-    ?base-armor-class (+ 10 (?ability-bonuses :dex))
+    ?base-armor-class (+ 10 (?ability-bonuses :dex) ?natural-ac-bonus)
+    ?natural-ac-bonus 0
     ?unarmored-ac-bonus 0
     ?unarmored-with-shield-ac-bonus 0
     ?armored-ac-bonus 0

@@ -592,7 +592,7 @@
   [:div.m-t-20
    [:div.flex.align-items-c
     (if icon-name (svg-icon icon-name))
-    [:span.f-s-16.f-w-600.m-l-5 title]]
+    [:span.f-s-16.f-w-600 title]]
    [:div {:class-name (if list? "m-t-0" "m-t-4")}
     [:span.f-s-24.f-w-600
      value]]])
@@ -765,6 +765,8 @@
 (defn character-display [built-char]
   (let [race (char5e/race built-char)
         subrace (char5e/subrace built-char)
+        alignment (char5e/alignment built-char)
+        background (char5e/background built-char)
         classes (char5e/classes built-char)
         levels (char5e/levels built-char)
         darkvision (char5e/darkvision built-char)
@@ -793,18 +795,23 @@
         reactions (char5e/reactions built-char)
         actions (char5e/actions built-char)]
     [:div
-     [:div.f-s-24.f-w-600.m-b-16.text-shadow
-      [:span race]
+     [:div.f-s-24.f-w-600.m-b-16.text-shadow.flex
+      [:span
+       [:span race]
+       [:div.f-s-12.m-t-5 subrace]]
       (if (seq levels)
-        [:span.m-l-10
-         (apply
-          str
+        [:span.m-l-10.flex
+         (map-indexed
+          (fn [i v]
+            (with-meta v {:key i}))
           (interpose
-           " / "
+           [:span.m-l-5.m-r-5 "/"]
            (map
             (fn [cls-key]
               (let [{:keys [class-name class-level subclass]} (levels cls-key)]
-                (str class-name " (" class-level ")")))
+                [:span
+                 [:span (str class-name " (" class-level ")")]
+                 [:div.f-s-12.m-t-5 (if subclass (common/kw-to-name subclass true))]]))
             classes)))])]
      [:div.details-columns
       [:div.flex-grow-1.flex-basis-50-p
@@ -826,6 +833,8 @@
         [:div.w-50-p
          [:img.character-image.w-100-p.m-b-20 {:src (or (get-in @app-state [:character ::entity/values :image-url]) "image/barbarian-girl.png")}]]
         [:div.w-50-p
+         (if background [display-section "Background" nil [:span.f-s-18.f-w-n background]])
+         (if alignment [svg-icon-section "Alignment" "yin-yang" [:span.f-s-18.f-w-n alignment]])
          [armor-class-section armor-class armor-class-with-armor (merge magic-armor armor)]
          [svg-icon-section "Hit Points" "health-normal" (char5e/max-hit-points built-char)]
          [speed-section built-char]

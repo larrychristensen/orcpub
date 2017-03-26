@@ -301,6 +301,7 @@
                          (vals levels)))]
     (merge
      {:race (str race (if subrace (str "/" subrace)))
+      :alignment (char5e/alignment built-char)
       :class-level (class-string levels)
       :background (char5e/background built-char)
       :prof-bonus (common/bonus-str (es/entity-val built-char :prof-bonus))

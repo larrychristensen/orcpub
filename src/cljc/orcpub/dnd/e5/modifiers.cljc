@@ -16,6 +16,9 @@
 (defn subclass [cls-key subclass-key]
   (mods/modifier ?levels (assoc-in ?levels [cls-key :subclass] subclass-key)))
 
+(defn alignment [alignment]
+  (mods/modifier ?alignment alignment))
+
 (defn race [nm]
   (mods/modifier ?race nm))
 
@@ -272,11 +275,8 @@
 (defn armored-ac-bonus [bonus]
   (mods/cum-sum-mod ?armored-ac-bonus bonus))
 
-(defn unarmored-ac-bonus [bonus]
-  (mods/cum-sum-mod ?unarmored-ac-bonus bonus))
-
-(defn unarmored-with-shield-ac-bonus [bonus]
-  (mods/cum-sum-mod ?unarmored-with-shield-ac-bonus bonus))
+(defn unarmored-defense [cls]
+  (mods/vec-mod ?unarmored-defense cls))
 
 (defmacro attack [atk]
   `(mods/modifier ~'?attacks

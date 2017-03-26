@@ -56,6 +56,9 @@
    ability-keys
    as))
 
+(defn alignment [built-char]
+  (es/entity-val built-char :alignment))
+
 (defn levels [built-char]
   (es/entity-val built-char :levels))
 
