@@ -349,11 +349,10 @@
                   (mod5e/spells-known 2 :darkness :cha "Dark Elf" 5)]}]
     :traits [{:name "Fey Ancestry"
               :page 23
-              :description "You have advantage on saving throws against being charmed and magic can't put you to sleep"}
+              :summary "advantage on charmed saves and immune to sleep magic"}
              {:name "Trance"
               :page 23
-              :summary "Trance 4 hrs. instead of sleep 8"
-              :description "Elves don't need to sleep. Instead, they meditate deeply, remaining semiconscious, for 4 hours a day. (The Common word for such meditation is 'trance.') While meditating, you can dream after a fashion; such dreams are actually mental exercises that have become re exive through years of practice. After resting in this way, you gain the same beneit that a human does from 8 hours of sleep."}]}))
+              :summary "Trance 4 hrs. instead of sleep 8"}]}))
 
 (def dwarf-option
   (race-option
@@ -367,12 +366,10 @@
     :weapon-proficiencies [:handaxe :battleaxe :light-hammer :warhammer]
     :traits [{:name "Dwarven Resilience"
               :summary "Advantage on poison saves, resistance to poison damage"
-              :page 20
-              :description "You have advantage on saving throws against poison, and you have resistance against poison damage"},
+              :page 20},
              {:name "Stonecunning"
               :summary "2X prof bonus on stonework-related history checks"
-              :page 20
-              :description "Whenever you make an Intelligence (History) check related to the origin of stonework you are considered proficient in the History skill and add double your proficiency bonus to the check, instead of your normal proficiency bonus"}]
+              :page 20}]
     :subraces [{:name "Hill Dwarf",
                 :abilities {:wis 1}
                 :selections [(opt5e/tool-selection [:smiths-tools :brewers-supplies :masons-tools] 1)]
@@ -397,25 +394,22 @@
       :abilities {:cha 1}
       :traits [{:name "Naturally Stealthy"
                 :page 28
-                :summary "Hide behind creatures larger than you"
-                :description "You can attempt to hide even when you are obscured only by a creature that is at least one size larger than you."}]}
+                :summary "Hide behind creatures larger than you"}]}
      {:name "Stout"
       :abilities {:con 1}
       :modifiers [(mod5e/damage-resistance :poison)
                   (mod5e/saving-throw-advantage [:poisoned])]}]
     :traits [{:name "Lucky"
               :page 28
-              :summary "Reroll 1s on d20"
-              :description "When you roll a 1 on the d20 for an attack roll, ability check, or saving throw, you can reroll the die and must use the new roll."}
+              :summary "Reroll 1s on d20"}
              {:name "Halfling Nimbleness"
               :page 28
-              :description "You can move through the space of any creature that is of a size larger than yours."}]}))
+              :summary "move through the space of larger creatures"}]}))
 
 (def human-option
   (race-option
    {:name "Human"
     :help "Humans are physically diverse and highly adaptable. They excel in nearly every profession."
-    ;; abilities are tied to variant selection below
     :size :medium
     :speed 30
     :languages ["Common"]
@@ -456,7 +450,7 @@
 (def dragonborn-option
   (race-option
    {:name "Dragonborn"
-    :help "Kin to dragons, dragonborn resemble humanoid dragons, without wings or tail and standing erect. They tend to make excellent fighters."
+    :help "Kin to dragons, dragonborn resemble humanoid dragons, without wings or tail and standing erect. They tend to make excellent warriors."
     :abilities {:str 2 :cha 1}
     :size :medium
     :speed 30
@@ -467,7 +461,7 @@
                    (merge
                     breath-weapon
                     {:name "Breath Weapon"
-                     :description (if damage-type
+                     :summary (if damage-type
                                     (s/capitalize (name damage-type)))
                      :attack-type :area
                      :damage-die 6
@@ -555,15 +549,10 @@
       :modifiers [(mod5e/tool-proficiency :tinkers-tools)]
       :traits [{:name "Artificer's Lore"
                 :page 37
-                :summary "Add 2X prof bonus on magical, alchemical, or technological item-related history checks."
-                :description "Whenever you make an Intelligence (History) check related to magic items, alchemical objects, or technological devices, you can add twice your proficiency bonus, instead of any proficiency bonus you normally apply."}
+                :summary "Add 2X prof bonus on magical, alchemical, or technological item-related history checks."}
                {:name "Tinker"
                 :page 37
-                :summary "Construct tiny clockwork devices."
-                :description "Using tinker's tools, you can spend 1 hour and 10 gp worth of materials to construct a Tiny clockwork device (AC 5, 1 hp). The device ceases to function after 24 hours (unless you spend 1 hour repairing it to keep the device functioning), or when you use your action to dismantle it; at that time, you can reclaim the materials used to create it. You can have up to three such devices active at a time.
-When you create a device, choose one of the following options:
-Clockwork Toy. This toy is a clockwork animal, monster, or person, such as a frog, mouse, bird, dragon, or soldier. When placed on the ground, the toy moves 5 feet across the ground on each of your turns in a random direction. It makes noises as appropriate to the creature it represents.
-Fire Starter. The device produces a miniature flame, which you can use to light a candle, torch, or campfire. Using the device requires your action. Music Box. When opened, this music box plays a single song at a moderate volume. The box stops playing when it reaches the song's end or when it is closed."}]}
+                :summary "Construct tiny clockwork devices."}]}
      {:name "Forest Gnome"
       :abilities {:dex 1}
       :modifiers [(mod5e/spells-known 0 :minor-illusion :int "Forest Gnome")]
@@ -595,12 +584,10 @@ Fire Starter. The device produces a miniature flame, which you can use to light 
     :modifiers [(mod5e/skill-proficiency :intimidation)]
     :traits [{:name "Relentless Endurance"
               :page 41
-              :summary "Drop to 1 hp instead of being reduced to 0."
-              :description "When you are reduced to 0 hit points but not killed outright, you can drop to 1 hit point instead. You can't use this feature again until you finish a long rest."}
+              :summary "Drop to 1 hp instead of being reduced to 0."}
              {:name "Savage Attacks"
               :page 41
-              :summary "On critical hit, add additional damage dice roll"
-              :description "When you score a critical hit with a melee weapon attack, you can roll one of the weapon's damage dice one additional time and add it to the extra damage of the critical hit."}]}))
+              :summary "On critical hit, add additional damage dice roll"}]}))
 
 (def aasimar-option
   (race-option
@@ -669,7 +656,7 @@ Fire Starter. The device produces a miniature flame, which you can use to light 
                   :frequency {:units :rest}
                   :page 107
                   :source :vgm
-                  :description "Turn invisible"})]
+                  :summary "Turn invisible"})]
     :traits [(powerful-build 107)
              {:name "Speech of Beast and Leaf"
               :page 107
@@ -690,7 +677,7 @@ Fire Starter. The device produces a miniature flame, which you can use to light 
                   :frequency {:units :rest}
                   :page 109
                   :source :vgm
-                  :description (str "Reduce damage taken by 1d12 + " (:con ?ability-bonuses))})]
+                  :summary (str "Reduce damage taken by 1d12 + " (:con ?ability-bonuses))})]
     
     :traits [{:name "Mountain Born"
               :page 109
@@ -735,7 +722,7 @@ Fire Starter. The device produces a miniature flame, which you can use to light 
                   :page 113
                   :source :vgm
                   :frequency {:units :rest}
-                  :description (str "Special attack with your bite. If you hit, you gain "
+                  :summary (str "Special attack with your bite. If you hit, you gain "
                                 (max 1 (:con ?ability-bonuses))
                                 " temp. hit points")})
                 (mod5e/attack
@@ -836,7 +823,7 @@ Fire Starter. The device produces a miniature flame, which you can use to light 
                 (mod5e/bonus-action
                  {:name "Nimble Escape"
                   :page 119
-                  :description "Disengage or Hide action as a bonus action."})]}))
+                  :summary "Disengage or Hide action as a bonus action."})]}))
 
 (def hobgoblin-option
   (race-option
@@ -885,7 +872,7 @@ Fire Starter. The device produces a miniature flame, which you can use to light 
                 (mod5e/bonus-action
                  {:name "Aggressive"
                   :page 120
-                  :description (str "Move up to " ?speed " feet toward and enemy you can see or hear")})]
+                  :summary (str "Move up to " ?speed " feet toward and enemy you can see or hear")})]
     :languages ["Common" "Orc"]
     :traits [(powerful-build 120)]}))
 
@@ -1324,12 +1311,7 @@ Fire Starter. The device produces a miniature flame, which you can use to light 
                                           6 4
                                           3 3
                                           2)}
-                    :summary (str "Advantage on Strength checks and saves; melee attack bonus " (common/bonus-str attack-bonus) "; resistance to bludgeoning, piercing, and slashing damage")
-                    :description "In battle, you fight with primal ferocity. On your turn, you can enter a rage as a bonus action. While raging, you gain the following benefits if you aren't wearing heavy armor:
-* You have advantage on Strength checks and Strength saving throws.
-* When you make a melee weapon attack using Strength, you gain a bonus to the damage roll that increases as you gain levels as a barbarian, as shown in the Rage Damage column of the Barbarian table.
-* You have resistance to bludgeoning, piercing, and slashing damage.
-If you are able to cast spells, you can't cast them or concentrate on them while raging. Your rage lasts for 1 minute. It ends early if you are knocked unconscious or if your turn ends and you haven't attacked a hostile creature since your last turn or taken damage since then. You can also end your rage on your turn as a bonus action. Once you have raged the number of times shown for your barbarian level in the Rages column of the Barbarian table, you must finish a long rest before you can rage again."}))]
+                    :summary (str "Advantage on Strength checks and saves; melee attack bonus " (common/bonus-str attack-bonus) "; resistance to bludgeoning, piercing, and slashing damage")}))]
     :levels {5 {:modifiers [(mod5e/extra-attack)
                             (mod/modifier ?speed-with-armor (fn [armor] (if (not= :heavy (:type armor))
                                                                             (+ 10 ?speed)
@@ -1346,42 +1328,35 @@ If you are able to cast spells, you can't cast them or concentrate on them while
                                               (if (= "one" die-count)
                                                 "die"
                                                 "dice")
-                                              " for melee criticals"))
-                              :description "Beginning at 9th level, you can roll one additional weapon damage die when determining the extra damage for a critical hit with a melee attack. This increases to two additional dice at 13th level and three additional dice at 17th level."})]}
+                                              " for melee criticals"))})]}
              18 {:modifiers [(mod5e/dependent-trait
                               {:name "Indomitable Might"
                                :level 18
                                :page 49
                                :summary (let [str-score (:str ?abilities)]
-                                          (str "Min strength check value is " str-score))
-                               :description "Beginning at 18th level, if your total for a Strength check is less than your Strength score, you can use that score in place of the total."})]}
+                                          (str "Min strength check value is " str-score))})]}
              20 {:modifiers [(mod5e/ability :str 4)
                             (mod5e/ability :con 4)]}}
     :traits [{:name "Reckless Attack"
               :level 2
               :page 48
-              :summary "Advantage on attacks using Strength, attack against you have advantage as well."
-              :description "Starting at 2nd level, you can throw aside all concern for defense to attack with fierce desperation. When you make your first attack on your turn, you can decide to attack recklessly. Doing so gives you advantage on melee weapon attack rolls using Strength during this turn, but attack rolls against you have advantage until your next turn."}
+              :summary "Advantage on attacks using Strength, attack against you have advantage as well."}
              {:name "Danger Sense"
               :level 2
               :page 48
-              :summary "Advantage on Dexterity saves against effects you can see."
-              :description "At 2nd level, you gain an uncanny sense of when things nearby aren't as they should be, giving you an edge when you dodge away from danger. You have advantage on Dexterity saving throws against effects that you can see, such as traps and spells. To gain this benefit, you can't be blinded, deafened, or incapacitated."}
+              :summary "Advantage on Dexterity saves against effects you can see."}
              {:name "Feral Instinct"
               :level 7
               :page 49
-              :summary "Advantage on initiative, surprise doesn't keep you from attacking if you enter rage"
-              :description "By 7th level, your instincts are so honed that you have advantage on initiative rolls. Additionally, if you are surprised at the beginning of combat and aren't incapacitated, you can act normally on your first turn, but only if you enter your rage before doing anything else on that turn."}
+              :summary "Advantage on initiative, surprise doesn't keep you from attacking if you enter rage"}
              {:name "Relentless Rage"
               :level 11
               :page 49
-              :summary "If raging, are reduced to 0 HP, aren't killed, and make a DC 10 save (+5 for each time you've used this feature between rests), you go to 1 HP instead."
-              :description "Starting at 11th level, your rage can keep you fighting despite grievous wounds. If you drop to 0 hit points while you're raging and don't die outright, you can make a DC 10 Constitution saving throw. If you succeed, you drop to 1 hit point instead. Each time you use this feature after the first, the DC increases by 5. When you finish a short or long rest, the DC resets to 10."}
+              :summary "If raging, are reduced to 0 HP, aren't killed, and make a DC 10 save (+5 for each time you've used this feature between rests), you go to 1 HP instead."}
              {:name "Persistent Rage"
               :level 15
               :page 49
-              :summary "rage only ends early if you choose to end it or you fall unconscious"
-              :description "Beginning at 15th level, your rage is so fierce that it ends early only if you fall unconscious or if you choose to end it."}]
+              :summary "rage only ends early if you choose to end it or you fall unconscious"}]
     :subclass-level 3
     :subclass-title "Primal Path"
     :subclass-help "Your primal path shapes the nature of your barbarian rage and gives you additional features."
@@ -1390,24 +1365,20 @@ If you are able to cast spells, you can't cast them or concentrate on them while
                                             {:name "Intimidating Presence"
                                              :level 10
                                              :page 49
-                                             :summary (str "Frighten (Wisdom save DC " (?spell-save-dc :cha) ") a creature with 30 ft.")
-                                             :description "Beginning at 10th level, you can use your action to frighten someone with your menacing presence. When you do so, choose one creature that you can see within 30 feet of you. If the creature can see or hear you, it must succeed on a Wisdom saving throw (DC equal to 8 + your proficiency bonus + your Charisma modifier) or be frightened of you until the end of your next turn. On subsequent turns, you can use your action to extend the duration of this effect on the frightened creature until the end of your next turn. This effect ends if the creature ends its turn out of line of sight or more than 60 feet away from you. If the creature succeeds on its saving throw, you can't use this feature on that creature again for 24 hours."})]}
+                                             :summary (str "Frighten (Wisdom save DC " (?spell-save-dc :cha) ") a creature with 30 ft.")})]}
                            14 {:modifiers [(mod5e/reaction
                                            {:name "Retaliation"
                                             :page 49
                                             :level 14
-                                            :summary "Make a melee weapon attack against a creature within 5 ft. that deals damage to you."
-                                            :description "Starting at 14th level, when you take damage from a creature that is within 5 feet of you, you can use your reaction to make a melee weapon attack against that creature."})]}}
+                                            :summary "Make a melee weapon attack against a creature within 5 ft. that deals damage to you."})]}}
                   :traits [{:name "Frenzy"
                             :level 3
                             :page 49
-                            :summary "You can frenzy when you rage, affording you a single melee weapon attack as a bonus action on each turn until the rage ends. When the rage ends, you suffer 1 level of exhaustrion"
-                            :description "Starting when you choose this path at 3rd level, you can go into a frenzy when you rage. If you do so, for the duration of your rage you can make a single melee weapon attack as a bonus action on each of your turns after this one. When your rage ends, you suffer one level of exhaustion (as described in appendix A)."}
+                            :summary "You can frenzy when you rage, affording you a single melee weapon attack as a bonus action on each turn until the rage ends. When the rage ends, you suffer 1 level of exhaustrion"}
                            {:name "Mindless Rage"
                             :level 6
                             :page 49
-                            :summary "Can't be charmed or frightened while raging."
-                            :description "Beginning at 6th level, you can't be charmed or frightened while raging. If you are charmed or frightened when you enter your rage, the effect is suspended for the duration of the rage."}]}
+                            :summary "Can't be charmed or frightened while raging."}]}
                  {:name "Path of the Totem Warrior"
                   :levels {3 {:modifiers [(mod5e/spells-known 2 :beast-sense nil "Barbarian" 1 "ritual only")
                                           (mod5e/spells-known 1 :speak-with-animals nil "Barbarian" 1 "ritual only")]
@@ -1529,11 +1500,7 @@ If you are able to cast spells, you can't cast them or concentrate on them while
                   :page 53
                   :summary (str "Inspire another creature with a 1d"
                                 (bardic-inspiration-die ?levels)
-                                " that it can, within the next 10 min., add to a d20 roll")
-                  :description "You can inspire others through stirring words or music. To do so, you use a bonus action on your turn to choose one creature other than yourself within 60 feet of you who can hear you. That creature gains one Bardic Inspiration die, a d6.
-Once within the next 10 minutes, the creature can roll the die and add the number rolled to one ability check, attack roll, or saving throw it makes. The creature can wait until after it rolls the d20 before deciding to use the Bardic Inspiration die, but must decide before the GM says whether the roll succeeds or fails. Once the Bardic Inspiration die is rolled, it is lost. A creature can have only one Bardic Inspiration die at a time.
-You can use this feature a number of times equal to your Charisma modifier (a minimum of once). You regain any expended uses when you finish a long rest.
-Your Bardic Inspiration die changes when you reach certain levels in this class. The die becomes a d8 at 5th level, a d10 at 10th level, and a d12 at 15th level."})]
+                                " that it can, within the next 10 min., add to a d20 roll")})]
     :levels {2 {:modifiers [(mod/modifier ?default-skill-bonus (let [b (int (/ ?prof-bonus 2))]
                                                                  (zipmap char5e/ability-keys (repeat b))))
                             (mod5e/dependent-trait
@@ -1547,16 +1514,13 @@ Your Bardic Inspiration die changes when you reach certain levels in this class.
                                               13 10
                                               17 12
                                               :default 6})
-                                            " additional healing at the end of a short rest")
-                              :description "Beginning at 2nd level, you can use soothing music or oration to help revitalize your wounded allies during a short rest. If you or any friendly creatures who can hear your performance regain hit points at the end of the short rest by spending one or more Hit Dice, each of those creatures regains an extra 1d6 hit points.
-The extra hit points increase when you reach certain levels in this class: to 1d8 at 9th level, to 1d10 at 13th level, and to 1d12 at 17th level."})]}
+                                            " additional healing at the end of a short rest")})]}
              3 {:selections [(opt5e/expertise-selection 2)]}
              6 {:modifiers [(mod5e/action
                              {:name "Countercharm"
                               :level 6
                               :page 54
-                              :summary "performance during your turn that gives you and friendly creatures within 30 ft. advantage on frightened or charmed saves."
-                              :description "At 6th level, you gain the ability to use musical notes or words of power to disrupt mind-influencing effects. As an action, you can start a performance that lasts until the end of your next turn. During that time, you and any friendly creatures within 30 feet of you have advantage on saving throws against being frightened or charmed. A creature must be able to hear you to gain this benefit. The performance ends early if you are incapacitated or silenced or if you voluntarily end it (no action required)."})]}
+                              :summary "performance during your turn that gives you and friendly creatures within 30 ft. advantage on frightened or charmed saves."})]}
              10 {:selections (conj (opt5e/raw-bard-magical-secrets 10)
                                    (opt5e/expertise-selection 2))}
              14 {:selections (opt5e/raw-bard-magical-secrets 14)}
@@ -1564,13 +1528,12 @@ The extra hit points increase when you reach certain levels in this class: to 1d
     :traits [{:name "Font of Inspiration"
               :level 5
               :page 54
-              :summary "regain all uses of Bardic Inspiration at the end of a rest"
-              :description "Beginning when you reach 5th level, you regain all of your expended uses of Bardic Inspiration when you finish a short or long rest"}
+              :summary "regain all uses of Bardic Inspiration at the end of a rest"}
              {:name "Superior Inspiration"
               :level 20
               :page 54
               :summary "regain 1 use of Bardic Inspiration if you have none remaining when rolling initiative"
-              :description "At 20th level, when you roll initiative and have no uses of Bardic Inspiration left, you regain one use."}]
+}]
     :subclass-level 3
     :subclass-title "Bard College"
     :subclass-help "Your bard college is a loose association that preserves bardic traditions and affords additional features"
@@ -1583,16 +1546,14 @@ The extra hit points increase when you reach certain levels in this class: to 1d
                                 :page 54
                                 :summary (str "expend a use of Bardic Inspiration to subtract 1d"
                                               (bardic-inspiration-die ?levels)
-                                              " from an attack, ability, or damage roll made by a creature within 60 ft.")
-                                :description "Also at 3rd level, you learn how to use your wit to distract, confuse, and otherwise sap the confidence and competence of others. When a creature that you can see within 60 feet of you makes an attack roll, an ability check, or a damage roll, you can use your reaction to expend one of your uses of Bardic Inspiration, rolling a Bardic Inspiration die and subtracting the number rolled from the creature's roll. You can choose to use this feature after the creature makes its roll, but before the GM determines whether the attack roll or ability check succeeds or fails, or before the creature deals its damage. The creature is immune if it can't hear you or if it's immune to being charmed."})]
+                                              " from an attack, ability, or damage roll made by a creature within 60 ft.")})]
                   :levels {14 {:modifiers [(mod5e/dependent-trait
                                             {:name "Peerless Skill"
                                              :level 14
                                              :page 55
                                              :summary (str "expend one use of Bardic Inspiration to add 1d"
                                                            (bardic-inspiration-die ?levels)
-                                                           " to an ability check")
-                                             :description "Starting at 14th level, when you make an ability check, you can expend one use of Bardic Inspiration. Roll a Bardic Inspiration die and add the number rolled to your ability check. You can choose to do so after you roll the die for the ability check, but before the GM tells you whether you succeed or fail."})]}}}
+                                                           " to an ability check")})]}}}
                  {:name "College of Valor"
                   :profs {:armor {:medium true
                                   :shields true}
@@ -1633,8 +1594,7 @@ The extra hit points increase when you reach certain levels in this class: to 1d
                   (if (>= (?class-level :cleric) 14) 2 1)
                   "d8 "
                   damage-desc
-                  " damage to a successful weapon attack's damage")
-    :description "At 8th level, you gain the ability to infuse your weapon strikes with divine energy. Once on each of your turns when you hit a creature with a weapon attack, you can cause the attack to deal an extra 1d8 radiant damage to the target. When you reach 14th level, the extra damage increases to 2d8."}))
+                  " damage to a successful weapon attack's damage")}))
 
 (def cleric-option
   (class-option
@@ -1678,8 +1638,7 @@ The extra hit points increase when you reach certain levels in this class: to 1d
                               :name "Channel Divinity: Turn Undead"
                               :summary (str "undead within 30 feet must make a DC "
                                             (?spell-save-dc :wis)
-                                            " Wisdom save or be turned for 1 min. or until damaged")
-                              :description "As an action, you present your holy symbol and speak a prayer censuring the undead. Each undead that can see or hear you within 30 feet of you must make a Wisdom saving throw. If the creature fails its saving throw, it is turned for 1 minute or until it takes any damage.\nA turned creature must spend its turns trying to move as far away from you as it can, and it can't willingly move to a space within 30 feet of you. It also can't take reactions. For its action, it can use only the Dash action or try to escape from an effect that prevents it from moving. If there's nowhere to move, the creature can use the Dodge action."})]}
+                                            " Wisdom save or be turned for 1 min. or until damaged")})]}
              5 {:modifiers [(mod5e/dependent-trait
                              {:level 5
                               :name "Destroy Undead"
@@ -1693,8 +1652,7 @@ The extra hit points increase when you reach certain levels in this class: to 1d
                                                 11 2
                                                 14 3
                                                 17 4}))
-                                            " or less creatures who fail turn save.")
-                              :description "When an undead fails its saving throw against your Turn Undead feature, the creature is instantly destroyed if its challenge rating is at or below a certain threshold, as shown in the Destroy Undead table."})]}
+                                            " or less creatures who fail turn save.")})]}
              10 {:modifiers [(mod5e/dependent-trait
                               {:name "Divine Intervention"
                                :page 59
@@ -1721,23 +1679,19 @@ The extra hit points increase when you reach certain levels in this class: to 1d
                                            {:name "Channel Divinity: Preserve Life"
                                             :summary (str "Distribute "
                                                           (* 5 (?class-level :cleric))
-                                                          " HPs healing among any creatures within 30 ft., each can be restored to at most 1/2 their HP max")
-                                            :description "Starting at 2nd level, you can use your Channel Divinity to heal the badly injured.\nAs an action, you present your holy symbol and evoke healing energy that can restore a number of hit points equal to five times your cleric level. Choose any creatures within 30 feet of you, and divide those hit points among them. This feature can restore a creature to no more than half of its hit point maximum. You can't use this feature on an undead or a construct."})]}
+                                                          " HPs healing among any creatures within 30 ft., each can be restored to at most 1/2 their HP max")})]}
                            8 {:modifiers [(divine-strike "radiant" 60)]}}
                   :traits [{:level 1
                             :name "Disciple of Life"
                             :page 60
-                            :summary "1st level or greater healing spells increase healing by 2 + spell's level HPs"
-                            :description "Also starting at 1st level, your healing spells are more effective. Whenever you use a spell of 1st level or higher to restore hit points to a creature, the creature regains additional hit points equal to 2 + the spell's level."}
+                            :summary "1st level or greater healing spells increase healing by 2 + spell's level HPs"}
                            {:level 6
                             :name "Blessed Healer"
                             :page 60
-                            :summary "When you cast spells that heal a creature other than you, you regain 2 + spell's level HPs"
-                            :description "Beginning at 6th level, the healing spells you cast on others heal you as well. When you cast a spell of 1st level or higher that restores hit points to a creature other than you, you regain hit points equal to 2 + the spell's level."}
+                            :summary "When you cast spells that heal a creature other than you, you regain 2 + spell's level HPs"}
                            {:level 17
                             :name "Supreme Healing"
-                            :summary "Instead of rolling healing, use max possible roll value."
-                            :description "Starting at 17th level, when you would normally roll one or more dice to restore hit points with a spell, you instead use the highest number possible for each die. For example, instead of restoring 2d6 hit points to a creature, you restore 12."}]}
+                            :summary "Instead of rolling healing, use max possible roll value." }]}
                  {:name "Knowledge Domain"
                   :modifiers [(cleric-spell 1 :command 1)
                               (cleric-spell 1 :identify 1)
@@ -1963,9 +1917,7 @@ The extra hit points increase when you reach certain levels in this class: to 1d
   {:name "Land's Stride"
    :level level
    :page 69
-   :summary "moving through nonmagical difficult terrain costs no extra movement, pass through nonmagical plants without being slowed by them and without taking damage from them"
-   :description "Starting at 6th level, moving through nonmagical difficult terrain costs you no extra movement. You can also pass through nonmagical plants without being slowed by them and without taking damage from them if they have thorns, spines, or a similar hazard.
-In addition, you have advantage on saving throws against plants that are magically created or manipulated to impede movement, such those created by the entangle spell."})
+   :summary "moving through nonmagical difficult terrain costs no extra movement, pass through nonmagical plants without being slowed by them and without taking damage from them"})
 
 (def druid-option
   (class-option
@@ -2013,8 +1965,7 @@ In addition, you have advantage on saving throws against plants that are magical
                                          :amount (int (/ (?class-level :druid) 2))}
                               :summary (str "You can transform into a beast you have seen with CR "
                                             ?wild-shape-cr
-                                            (if ?wild-shape-limitation (str " and " ?wild-shape-limitation)))
-                              :description "Starting at 2nd level, you can use your action to magically assume the shape of a beast that you have seen before. You can use this feature twice. You regain expended uses when you finish a short or long rest. Your druid level determines the beasts you can transform into, as shown in the Beast Shapes table. At 2nd level, for example, you can transform into any beast that has a challenge rating of 1/4 or lower that doesn't have a flying or swimming speed. (see the Players Handbook for further details)"})]}}
+                                            (if ?wild-shape-limitation (str " and " ?wild-shape-limitation)))})]}}
     :selections [(t/selection
                   "Wooden Shield or Simple Weapon"
                   [(t/option
@@ -2039,23 +1990,19 @@ In addition, you have advantage on saving throws against plants that are magical
                     [])])]
     :traits [{:name "Druidic"
               :page 66
-              :summary "You can speak Druidic and use it to leave hidden message and automatically spot messages left by others"
-              :description "You know Druidic, the secret language of druids. You can speak the language and use it to leave hidden messages. You and others who know this language automatically spot such a message. Others spot the message's presence with a successful DC 15 Wisdom (Perception) check but can't decipher it without magic."}
+              :summary "You can speak Druidic and use it to leave hidden message and automatically spot messages left by others"}
              {:name "Timeless Body"
               :level 18
               :page 67
-              :summary "age slowly"
-              :description "Starting at 18th level, the primal magic that you wield causes you to age more slowly. For every 10 years that pass, your body ages only 1 year."}
+              :summary "age slowly"}
              {:name "Beast Spells"
               :level 18
               :page 67
-              :summary "while in Wild Shape, can perform druid spells' somatic and verbal components"
-              :description "Beginning at 18th level, you can cast many of your druid spells in any shape you assume using Wild Shape. You can perform the somatic and verbal components of a druid spell while in a beast shape, but you aren't able to provide material components."}
+              :summary "while in Wild Shape, can perform druid spells' somatic and verbal components"}
              {:name "Archdruid"
               :level 20
               :page 67
-              :summary "Wild Shape unlimited times, ignore verbal and somatic spell components, ignore material components with no cost and aren't consumed by spell"
-              :description "At 20th level, you can use your Wild Shape an unlimited number of times. Additionally, you can ignore the verbal and somatic components of your druid spells, as well as any material components that lack a cost and aren't consumed by a spell. You gain this benefit in both your normal shape and your beast shape from Wild Shape."}]
+              :summary "Wild Shape unlimited times, ignore verbal and somatic spell components, ignore material components with no cost and aren't consumed by spell"}]
     :subclass-level 2
     :subclass-title "Druid Circle"
     :subclasses [{:name "Circle of the Land"
@@ -2127,8 +2074,7 @@ In addition, you have advantage on saving throws against plants that are magical
                                             :page 68
                                             :summary (str "During short rest, recover "
                                                           (common/round-up (/ (?class-level :druid) 2))
-                                                          " spell slots less than 6th level")
-                                            :description "Starting at 2nd level, you can regain some of your magical energy by sitting in meditation and communing with nature. During a short rest, you choose expended spell slots to recover. The spell slots can have a combined level that is equal to or less than half your druid level (rounded up), and none of the slots can be 6th level or higher. You can't use this feature again until you finish a long rest. For example, when you are a 4th-level druid, you can recover up to two levels worth of spell slots. You can recover either a 2nd-level slot or two 1st-level slots"})]}
+                                                          " spell slots less than 6th level")})]}
                            6 {:modifiers [(mod5e/saving-throw-advantage ["plants magically created or manipulated to impede movement"])]}
                            10 {:modifiers [(mod5e/damage-immunity :poison)
                                            (mod5e/condition-immunity :poisoned)
@@ -2141,9 +2087,7 @@ In addition, you have advantage on saving throws against plants that are magical
                                              :page 69
                                              :summary (str "beast or plant creatures must make a DC "
                                                            (?spell-save-dc :wis)
-                                                           " Wisdom save or they cannot attack you.")
-                                             :description "When you reach 14th level, creatures of the natural world sense your connection to nature and become hesitant to attack you. When a beast or plant creature attacks you, that creature must make a Wisdom saving throw against your druid spell save DC. On a failed save, the creature must choose a different target, or the attack automatically misses. On a successful save, the creature is immune to this effect for 24 hours.
-The creature is aware of this effect before it makes its attack against you."})]}}
+                                                           " Wisdom save or they cannot attack you.")})]}}
                   :traits [(lands-stride 6)]}
                  {:name "Circle of the Moon"
                   :levels {2 {:modifiers [(mod5e/bonus-action
@@ -2207,9 +2151,7 @@ The creature is aware of this effect before it makes its attack against you."})]
                   :frequency {:units :rest}
                   :summary (str "regain 1d10 "
                                 (common/mod-str (?class-level :fighter))
-                                " HPs")
-                  :description "You have a limited well of stamina that you can draw on to protect yourself from harm. On your turn, you can use a bonus action to regain hit points equal to 1d10 + your fighter level.
-Once you use this feature, you must finish a short or long rest before you can use it again."})
+                                " HPs")})
                 (mod5e/action
                  {:level 2
                   :name "Action Surge"
@@ -2218,9 +2160,7 @@ Once you use this feature, you must finish a short or long rest before you can u
                               :amount (if (>= (?class-level :fighter) 17)
                                         2
                                         1)}
-                  :summary "take an extra action"
-                  :description "You can push yourself beyond your normal limits for a moment. On your turn, you can take one additional action on top of your regular action and a possible bonus action.
-Once you use this feature, you must finish a short or long rest before you can use it again. Starting at 17th level, you can use it twice before a rest, but only once on the same turn."})]
+                  :summary "take an extra action"})]
     :levels {5 {:modifiers [(mod5e/extra-attack)]}
              9 {:modifiers [(mod5e/dependent-trait
                              {:level 9
@@ -2232,9 +2172,7 @@ Once you use this feature, you must finish a short or long rest before you can u
                                                    {13 2
                                                     17 3
                                                     :default 1})}
-                              :summary "reroll a save if you fail"
-                              :description "You can reroll a saving throw that you fail. If you do so, you must use the new roll, and you can't use this feature again until you finish a long rest.
-You can use this feature twice between long rests starting at 13th level and three times between long rests starting at 17th level."})]}
+                              :summary "reroll a save if you fail"})]}
              10 {:modifers [(opt5e/fighting-style-selection)]}
              11 {:modifiers [(mod5e/extra-attack)]}
              20 {:modifiers [(mod5e/extra-attack)]}}
@@ -2300,9 +2238,7 @@ You can use this feature twice between long rests starting at 13th level and thr
                                                           (common/round-up (/ ?prof-bonus 2))
                                                           " to STR, DEX, or CON checks that don't already include prof bonus; running long jump increases by "
                                                           (?ability-bonuses :str)
-                                                          " ft.")
-                                            :description "You can add half your proficiency bonus (round up) to any Strength, Dexterity, or Constitution check you make that doesn't already use your proficiency bonus.
-In addition, when you make a running long jump, the distance you can cover increases by a number of feet equal to your Strength modifier."})]}
+                                                          " ft.")})]}
                            15 {:modifiers [(mod5e/critical 18)]}
                            18 {:modifiers [(mod5e/dependent-trait
                                             {:level 18
@@ -2311,8 +2247,7 @@ In addition, when you make a running long jump, the distance you can cover incre
                                              :summary (str "At start of your turns, if you have at most "
                                                            (int (/ ?max-hit-points 2))
                                                            " HPs left, regain "
-                                                           (+ 5 (?ability-bonuses :con)) " HPs")
-                                             :description "You attain the pinnacle of resilience in battle. At the start of each of your turns, you regain hit points equal to 5 + your Constitution modifier if you have no more than half of your hit points left. You don't gain this benefit if you have 0 hit points."})]}}
+                                                           (+ 5 (?ability-bonuses :con)) " HPs")})]}}
                   :traits []}
                  {:name "Battle Master"
                   :selections [(t/selection
@@ -2405,8 +2340,7 @@ In addition, when you make a running long jump, the distance you can cover incre
   {:name "Evasion"
    :page page
    :level level
-   :summary "when you succeed on a DEX save to take half damage, you take none, if you fail, you take half"
-   :description "At 7th level, your instinctive agility lets you dodge out of the way of certain area effects, such as a blue dragon's lightning breath or a fireball spell. When you are subjected to an effect that allows you to make a Dexterity saving throw to take only half damage, you instead take no damage if you succeed on the saving throw, and only half damage if you fail."})
+   :summary "when you succeed on a DEX save to take half damage, you take none, if you fail, you take half"})
 
 (def monk-option
   (class-option
@@ -2451,53 +2385,40 @@ In addition, when you make a running long jump, the distance you can cover incre
                              {:name "Ki"
                               :page 78
                               :level 2
-                              :summary (str "You have " ?total-levels " ki points")
-                              :description "Starting at 2nd level, your training allows you to harness the mystic energy of ki. Your access to this energy is represented by a number of ki points. Your monk level determines the number of points you have, as shown in the Ki Points column of the Monk table.
-You can spend these points to fuel various ki features. You start knowing three such features: Flurry of Blows, Patient Defense, and Step of the Wind. You learn more ki features as you gain levels in this class.
-When you spend a ki point, it is unavailable until you finish a short or long rest, at the end of which you draw all of your expended ki back into yourself. You must spend at least 30 minutes of the rest meditating to regain your ki points.
-Some of your ki features require your target to make a saving throw to resist the feature's effects. The saving throw DC is calculated as follows:
-Ki save DC = 8 + your proficiency bonus + your Wisdom modifier"})
+                              :summary (str "You have " ?total-levels " ki points")})
                             (mod5e/bonus-action
                              {:name "Flurry of Blows"
                               :page 78
                               :level 2
-                              :summary "After you take Attack action, spend 1 ki to make 2 unarmed strikes"
-                              :description "Immediately after you take the Attack action on your turn, you can spend 1 ki point to make two unarmed strikes as a bonus action."})
+                              :summary "After you take Attack action, spend 1 ki to make 2 unarmed strikes"})
                             (mod5e/bonus-action
                              {:name "Patient Defense"
                               :page 78
-                              :description "You can spend 1 ki point to take the Dodge action as a bonus action on your turn."
                               :summary "Spend 1 ki point to take the Dodge action"})
                             (mod5e/bonus-action
                              {:name "Step of the Wind"
                               :page 78
-                              :description "You can spend 1 ki point to take the Disengage or Dash action as a bonus action on your turn, and your jump distance is doubled for the turn."
                               :summary "Spend 1 ki point to take the Disengage or Dash action and jump distance is doubled for the turn"})]}
              3 {:modifiers [(mod5e/reaction
                              {:name "Deflect Missiles"
                               :page 78
-                              :summary (str "When hit by a ranged attack, reduce the damage by 1d10 " (common/mod-str (+ (?ability-bonuses :dex) (?class-level :monk))) ". If you reduce it to 0, you can catch the missile and use it in a ranged attack as a monk weapon with range 20/60") 
-                              :description "Starting at 3rd level, you can use your reaction to deflect or catch the missile when you are hit by a ranged weapon attack. When you do so, the damage you take from the attack is reduced by 1d10 + your Dexterity modifier + your monk level.
-If you reduce the damage to 0, you can catch the missile if it is small enough for you to hold in one hand and you have at least one hand free. If you catch a missile in this way, you can spend 1 ki point to make a ranged attack with the weapon or piece of ammunition you just caught, as part of the same reaction. You make this attack with proficiency, regardless of your weapon proficiencies, and the missile counts as a monk weapon for the attack, which has a normal range of 20 feet and a long range of 60 feet."})]}
+                              :summary (str "When hit by a ranged attack, reduce the damage by 1d10 " (common/mod-str (+ (?ability-bonuses :dex) (?class-level :monk))) ". If you reduce it to 0, you can catch the missile and use it in a ranged attack as a monk weapon with range 20/60")})]}
              4 {:modifiers [(mod5e/reaction
                              {:name "Slow Fall"
                               :page 78
                              :level 4
-                             :summary (str "reduce falling damage by " (* 5  (?class-level :monk)))
-                             :description "Beginning at 4th level, you can use your reaction when you fall to reduce any falling damage you take by an amount equal to five times your monk level."})]}
+                             :summary (str "reduce falling damage by " (* 5  (?class-level :monk)))})]}
              5 {:modifiers [(mod5e/extra-attack)
                             (mod5e/dependent-trait
                              {:name "Stunning Strike"
                               :page 79
                               :level 5
-                              :summary (str "when you hit a creature with melee attack, spend 1 ki point to stun the creature if it fails a DC " (?spell-save-dc :wis) " CON save")
-                              :description "Starting at 5th level, you can interfere with the flow of ki in an opponent's body. When you hit another creature with a melee weapon attack, you can spend 1 ki point to attempt a stunning strike. The target must succeed on a Constitution saving throw or be stunned until the end of your next turn."})]}
+                              :summary (str "when you hit a creature with melee attack, spend 1 ki point to stun the creature if it fails a DC " (?spell-save-dc :wis) " CON save")})]}
              6 {:modifiers [(mod5e/unarmored-speed-bonus 5)]}
              7 {:modifiers [(mod5e/action
                              {:name "Stillness of Mind"
                               :page 79
-                              :summary "end one effect causing you to be charmed or frightened"
-                              :description "Starting at 7th level, you can use your action to end one effect on yourself that is causing you to be charmed or frightened."})]}
+                              :summary "end one effect causing you to be charmed or frightened"})]}
              10 {:modifiers [(mod5e/damage-immunity :poison)
                              (mod5e/damage-immunity :disease)
                              (mod5e/unarmored-speed-bonus 5)]}
@@ -2513,8 +2434,7 @@ If you reduce the damage to 0, you can catch the missile if it is small enough f
                                :level 18
                                :page 79
                                :duration {:units :minute}
-                               :summary "spend 4 ki points to become invisible and have resistance to all damage but force damage"
-                               :description "Beginning at 18th level, you can use your action to spend 4 ki points to become invisible for 1 minute. During that time, you also have resistance to all damage but force damage. Additionally, you can spend 8 ki points to cast the astral projection spell, without needing material components. When you do so, you can't take any other creatures with you."})
+                               :summary "spend 4 ki points to become invisible and have resistance to all damage but force damage"})
                              (mod5e/action
                               {:name "Empty Body: Astral Projection"
                                :page 79
@@ -2524,61 +2444,48 @@ If you reduce the damage to 0, you can catch the missile if it is small enough f
     :traits [{:name "Ki-Empowered Strikes"
               :page 79
               :level 6
-              :summary "your unarmed strikes count as magical"
-              :description "Starting at 6th level, your unarmed strikes count as magical for the purpose of overcoming resistance and immunity to nonmagical attacks and damage"}
+              :summary "your unarmed strikes count as magical"}
              (evasion 7 79)
              {:name "Tongue of the Sun and Moon"
               :page 79
               :level 13
-              :summary "you understand all languages and can communicate with any creature that can understand a language"
-              :description "Starting at 13th level, you learn to touch the ki of other minds so that you understand all spoken languages. Moreover, any creature that can understand a language can understand what you say."}
+              :summary "you understand all languages and can communicate with any creature that can understand a language"}
              {:name "Diamond Soul"
               :level 14
               :page 79
-              :summary "you are proficient in all saves. You can spend 1 ki point to reroll failed saves."
-              :description "Beginning at 14th level, your mastery of ki grants you proficiency in all saving throws. Additionally, whenever you make a saving throw and fail, you can spend 1 ki point to reroll it and take the second result."}
+              :summary "you are proficient in all saves. You can spend 1 ki point to reroll failed saves."}
              {:name "Timeless Body"
               :page 79
               :level 15
-              :summary "you can't be aged magically and you need no food or water"
-              :description "At 15th level, your ki sustains you so that you suffer none of the frailty of old age, and you can't be aged magically. You can still die of old age, however. In addition, you no longer need food or water."}
+              :summary "you can't be aged magically and you need no food or water"}
              
              {:name "Perfect Self"
               :page 79
               :level 20
-              :summary "regain 4 ki when you have none and roll initiative"
-              :description "At 20th level, when you roll for initiative and have no ki points remaining, you regain 4 ki points."}]
+              :summary "regain 4 ki when you have none and roll initiative"}]
     :subclass-level 3
     :subclass-title "Monastic Tradition"
     :subclasses [{:name "Way of the Open Hand"
                   :modifiers [(mod5e/dependent-trait
                                {:name "Open Hand Technique"
                                 :page 79
-                                :summary (str "when you hit with Flurry of Blows, you impose one of the effects on the target: 1) must make a DC "(?spell-save-dc :wis) " DEX save or be knocked prone. 2) make a DC " (?spell-save-dc :wis) " STR save or be pushed 15 ft. 3) can't take reactions until end of your next turn")
-                                :description "Starting when you choose this tradition at 3rd level, you can manipulate your enemy's ki when you harness your own. Whenever you hit a creature with one of the attacks granted by your Flurry of Blows, you can impose one of the following effects on that target:
-* It must succeed on a Dexterity saving throw or be knocked prone.
-* It must make a Strength saving throw. If it fails, you can push it up to 15 feet away from you. 
-* It can't take reactions until the end of your next turn."})]
+                                :summary (str "when you hit with Flurry of Blows, you impose one of the effects on the target: 1) must make a DC "(?spell-save-dc :wis) " DEX save or be knocked prone. 2) make a DC " (?spell-save-dc :wis) " STR save or be pushed 15 ft. 3) can't take reactions until end of your next turn")})]
                   :levels {6 {:modifiers [(mod5e/action
                                            {:name "Wholeness of Body"
                                             :page 79
                                             :level 6
                                             :frequency {:units :long-rest}
-                                            :summary (str "heal yourself " (* 3 (?class-level :monk)) " HPs")
-                                            :description "At 6th level, you gain the ability to heal yourself. As an action, you can regain hit points equal to three times your monk level. You must finish a long rest before you can use this feature again."})]}
+                                            :summary (str "heal yourself " (* 3 (?class-level :monk)) " HPs")})]}
                            11 {:modifiers [(mod5e/dependent-trait
                                             {:name "Tranquility"
                                              :page 80
                                              :level 11
-                                             :summary (str "gain effects of sanctuary spell (save DC " (?spell-save-dc :wis) ") between rests")
-                                             :description "Beginning at 11th level, you can enter a special meditation that surrounds you with an aura of peace. At the end of a long rest, you gain the effect of a sanctuary spell that lasts until the start of your next long rest (the spell can end early as normal). The saving throw DC for the spell equals 8 + your Wisdom modifier + your proficiency bonus."})]}
+                                             :summary (str "gain effects of sanctuary spell (save DC " (?spell-save-dc :wis) ") between rests")})]}
                            17 {:modifiers [(mod5e/dependent-trait
                                             {:name "Quivering Palm"
                                              :level 17
                                              :page 80
-                                             :summary (str "when you hit a creature with unarmed strike, set up vibrations that last " (?class-level :monk) " days. Use an action to end the vibrations, reducing the target to 0 HPs on failed DC " (?spell-save-dc :wis) " CON save. It takes 10d10 necrotic damage on successful save.")
-                                             :description "At 17th level, you gain the ability to set up lethal vibrations in someone's body. When you hit a creature with an unarmed strike, you can spend 3 ki points to start these imperceptible vibrations, which last for a number of days equal to your monk level. The vibrations are harmless unless you use your action to end them. To do so, you and the target must be on the same plane of existence. When you use this action, the creature must make a Constitution saving throw. If it fails, it is reduced to 0 hit points. If it succeeds, it takes 10d10 necrotic damage.
-You can have only one creature under the effect of this feature at a time. You can choose to end the vibrations harmlessly without using an action."})]}}}
+                                             :summary (str "when you hit a creature with unarmed strike, set up vibrations that last " (?class-level :monk) " days. Use an action to end the vibrations, reducing the target to 0 HPs on failed DC " (?spell-save-dc :wis) " CON save. It takes 10d10 necrotic damage on successful save.")})]}}}
                  {:name "Way of Shadow"
                   :modifiers [(mod5e/spells-known 0 :minor-illusion :wis "Monk (Way of Shadow)")
                               (mod5e/action
@@ -2679,39 +2586,29 @@ You can have only one creature under the effect of this feature at a time. You c
                   :page 84
                   :frequency {:units :long-rest
                               :amount (inc (?ability-bonuses :cha))}
-                  :summary "within 60 ft., detect presense of undead, celestial, or fiend. Also detect consecrated or desecrated object or place"
-                  :description "The presence of strong evil registers on your senses like a noxious odor, and powerful good rings like heavenly music in your ears. As an action, you can open your awareness to detect such forces. Until the end of your next turn, you know the location of any celestial, fiend, or undead within 60 feet of you that is not behind total cover. You know the type (celestial, fiend, or undead) of any being whose presence you sense, but not its identity (the vampire Count Strahd von Zarovich, for instance). Within the same radius, you also detect the presence of any place or object that has been consecrated or desecrated, as with the hallow spell.You can use this feature a number of times equal to 1 + your Charisma modifier. When you finish a long rest, you regain all expended uses."})
+                  :summary "within 60 ft., detect presense of undead, celestial, or fiend. Also detect consecrated or desecrated object or place"})
                 (mod5e/action
                  {:name "Lay on Hands"
                   :page 84
                   :frequency {:units :long-rest}
-                  :summary (str "you have a healing pool of " (* 5 (?class-level :paladin)) " HPs, with it you can heal a creature or expend 5 points to cure disease or neutralize poison")
-                  :description "Your blessed touch can heal wounds. You have a pool of healing power that replenishes when you take a long rest. With that pool, you can restore a total number of hit points equal to your paladin level × 5.
-As an action, you can touch a creature and draw power from the pool to restore a number of hit points to that creature, up to the maximum amount remaining in your pool.
-Alternatively, you can expend 5 hit points from your pool of healing to cure the target of one disease or neutralize one poison affecting it. You can cure multiple diseases and neutralize multiple poisons with a single use of Lay on Hands, expending hit points separately for each one.This feature has no effect on undead and constructs."})
+                  :summary (str "you have a healing pool of " (* 5 (?class-level :paladin)) " HPs, with it you can heal a creature or expend 5 points to cure disease or neutralize poison")})
                 (mod5e/dependent-trait
                  {:name "Aura of Protection"
                   :level 6
                   :page 85
-                  :summary (str "you and friendly creatures within " ?paladin-aura " ft. have a " (common/bonus-str (max 1 (?ability-bonuses :cha))) " bonus to saves")
-                  :description "Starting at 6th level, whenever you or a friendly creature within 10 feet of you must make a saving throw, the creature gains a bonus to the saving throw equal to your Charisma modifier (with a minimum bonus of +1). You must be conscious to grant this bonus.
-At 18th level, the range of this aura increases to 30 feet."})
+                  :summary (str "you and friendly creatures within " ?paladin-aura " ft. have a " (common/bonus-str (max 1 (?ability-bonuses :cha))) " bonus to saves")})
                 (mod5e/dependent-trait
                  {:name "Aura of Courage"
                   :level 10
                   :page 85
-                  :summary (str (str "you and friendly creatures within " ?paladin-aura " ft. can't be frightened"))
-                  :description "Starting at 10th level, you and friendly creatures within 10 feet of you can't be frightened while you are conscious.
-At 18th level, the range of this aura increases to 30 feet."})
+                  :summary (str (str "you and friendly creatures within " ?paladin-aura " ft. can't be frightened"))})
                 (mod5e/action
                  {:name "Cleansing Touch"
                   :level 14
                   :page 85
                   :frequency {:units :long-rest
                               :amount (?ability-bonuses :cha)}
-                  :summary "end a spell on yourself or willing creature"
-                  :description "Beginning at 14th level, you can use your action to end one spell on yourself or on one willing creature that you touch.
-You can use this feature a number of times equal to your Charisma modifier (a minimum of once). You regain expended uses when you finish a long rest."})
+                  :summary "end a spell on yourself or willing creature"})
                 (mod5e/dependent-trait
                  {:name "Channel Divinity"
                   :page 85
@@ -2746,13 +2643,11 @@ You can use this feature a number of times equal to your Charisma modifier (a mi
     :traits [{:name "Divine Smite"
               :level 2
               :page 85
-              :summary "when you hit with melee weapon attack, you can expend 1 X-th level spell slot to deal extra (X+1)d8 radiant damage, up to 5d8. Additional d8 on fiend or undead."
-              :description "Starting at 2nd level, when you hit a creature with a melee weapon attack, you can expend one spell slot to deal radiant damage to the target, in addition to the weapon's damage. The extra damage is 2d8 for a 1st-level spell slot, plus 1d8 for each spell level higher than 1st, to a maximum of 5d8. The damage increases by 1d8 if the target is an undead or a fiend."}
+              :summary "when you hit with melee weapon attack, you can expend 1 X-th level spell slot to deal extra (X+1)d8 radiant damage, up to 5d8. Additional d8 on fiend or undead."}
              {:name "Improved Divine Smite"
               :level 11
               :page 85
-              :summary "whenever you hit with melee weapon, you deal an extra d8 radiant damage"
-              :description "By 11th level, you are so suffused with righteous might that all your melee weapon strikes carry divine power with them. Whenever you hit a creature with a melee weapon, the creature takes an extra 1d8 radiant damage. If you also use your Divine Smite with an attack, you add this damage to the extra damage of your Divine Smite."}]
+              :summary "whenever you hit with melee weapon, you deal an extra d8 radiant damage"}]
     :subclass-level 3
     :subclass-title "Sacred Oath"
     :subclasses [{:name "Oath of Devotion"
@@ -2780,25 +2675,18 @@ You can use this feature a number of times equal to your Charisma modifier (a mi
                                            {:name "Aura of Devotion"
                                             :level 7
                                             :page 86
-                                            :summary (str "you and friendly creatures within " ?paladin-aura " ft. can't be charmed")
-                                            :description "Starting at 7th level, you and friendly creatures within 10 feet of you can't be charmed while you are conscious.
-At 18th level, the range of this aura increases to 30 feet."})]}
+                                            :summary (str "you and friendly creatures within " ?paladin-aura " ft. can't be charmed")})]}
                            20 {:modifiers [(mod5e/action
                                             {:name "Holy Nimbus"
                                              :level 20
                                              :page 86
                                              :frequency {:units :long-rest}
                                              :duration {:units :minute}
-                                             :summary "you emanate a bright light with 30 ft radius, an enemy that starts its turn there takes 10 radiant damage. You also have advantage on saves against spells cast by fiends and undead"
-                                             :description "At 20th level, as an action, you can emanate an aura of sunlight. For 1 minute, bright light shines from you in a 30-foot radius, and dim light shines 30 feet beyond that.
-Whenever an enemy creature starts its turn in the bright light, the creature takes 10 radiant damage.
-In addition, for the duration, you have advantage on saving throws against spells cast by fiends or undead.
-Once you use this feature, you can't use it again until you finish a long rest."})]}}
+                                             :summary "you emanate a bright light with 30 ft radius, an enemy that starts its turn there takes 10 radiant damage. You also have advantage on saves against spells cast by fiends and undead"})]}}
                   :traits [{:name "Purity of Spirit"
                             :level 15
                             :page 86
-                            :summary "always under effects of protection from evil and good spell"
-                            :description "Beginning at 15th level, you are always under the effects of a protection from evil and good spell."}]}
+                            :summary "always under effects of protection from evil and good spell"}]}
                  {:name "Oath of the Ancients"
                   :modifiers [(paladin-spell 1 :ensnaring-strike 3)
                               (paladin-spell 1 :speak-with-animals 3)
@@ -2964,8 +2852,7 @@ Once you use this feature, you can't use it again until you finish a long rest."
   (mod5e/reaction
    {:name "Uncanny Dodge"
     :page page
-    :summary "halve the damage from an attacker you can see that hits you"
-    :description "When an attacker that you can see hits you with an attack, you can use your reaction to halve the attack's damage against you."}))
+    :summary "halve the damage from an attacker you can see that hits you"}))
 
 (def ranger-option
   (class-option
@@ -3029,8 +2916,7 @@ Once you use this feature, you can't use it again until you finish a long rest."
                              {:name "Primeval Awareness"
                               :level 3
                               :page 92
-                              :summary (str "spend an X-level spell slot, for X minutes, you sense the types of creatures within 1 mile" (if (seq ?ranger-favored-terrain) (str "(6 if " (common/list-print (map #(common/kw-to-name % false) ?ranger-favored-terrain))) ")") )
-                              :description "Beginning at 3rd level, you can use your action and expend one ranger spell slot to focus your awareness on the region around you. For 1 minute per level of the spell slot you expend, you can sense whether the following types of creatures are present within 1 mile of you (or within up to 6 miles if you are in your favored terrain): aberrations, celestials, dragons, elementals, fey, fiends, and undead. This feature doesn't reveal the creatures' location or number."})]}
+                              :summary (str "spend an X-level spell slot, for X minutes, you sense the types of creatures within 1 mile" (if (seq ?ranger-favored-terrain) (str "(6 if " (common/list-print (map #(common/kw-to-name % false) ?ranger-favored-terrain))) ")") )})]}
              5 {:modifiers [(mod5e/extra-attack)]}
              6 {:selections [favored-enemy-selection
                              favored-terrain-selection]}
@@ -3041,25 +2927,20 @@ Once you use this feature, you can't use it again until you finish a long rest."
                                :frequency {:units :turn}
                                :level 20
                                :page 92
-                               :summary (str "add " (common/bonus-str (?ability-bonuses :wis)) " to an attack or damage roll") 
-                               :description "At 20th level, you become an unparalleled hunter of your enemies. Once on each of your turns, you can add your Wisdom modifier to the attack roll or the damage roll of an attack you make against one of your favored enemies. You can choose to use this feature before or after the roll, but before any effects of the roll are applied."})]}}
+                               :summary (str "add " (common/bonus-str (?ability-bonuses :wis)) " to an attack or damage roll") })]}}
     :traits [(lands-stride 8)
              {:name "Hide in Plain Sight"
               :level 10
               :page 92
-              :summary "spend 1 minute camouflaging yourself to gain +10 to Stealth checks when you don't move"
-              :description "Starting at 10th level, you can spend 1 minute creating camouflage for yourself. You must have access to fresh mud, dirt, plants, soot, and other naturally occurring materials with which to create your camouflage.
-Once you are camouflaged in this way, you can try to hide by pressing yourself up against a solid surface, such as a tree or wall, that is at least as tall and wide as you are. You gain a +10 bonus to Dexterity (Stealth) checks as long as you remain there without moving or taking actions. Once you move or take an action or a reaction, you must camouflage yourself again to gain this benefit."}
+              :summary "spend 1 minute camouflaging yourself to gain +10 to Stealth checks when you don't move"}
              {:name "Vanish"
               :level 14
               :page 92
-              :summary "Hide action as a bonus action. You also can't be non-magically tracked"
-              :description "Starting at 14th level, you can use the Hide action as a bonus action on your turn. Also, you can't be tracked by nonmagical means, unless you choose to leave a trail."}
+              :summary "Hide action as a bonus action. You also can't be non-magically tracked"}
              {:name "Feral Senses"
               :level 18
               :page 92
-              :summary "no disadvantage on attacks against creature you can't see, you know location of invisible creatures within 30 ft."
-              :description "At 18th level, you gain preternatural senses that help you fight creatures you can't see. When you attack a creature you can't see, your inability to see it doesn't impose disadvantage on your attack rolls against it.You are also aware of the location of any invisible creature within 30 feet of you, provided that the creature isn't hidden from you and you aren't blinded or deafened."}]
+              :summary "no disadvantage on attacks against creature you can't see, you know location of invisible creatures within 30 ft."}]
     :subclass-level 3
     :subclass-title "Ranger Archetype"
     :subclasses [{:name "Hunter"
@@ -3071,36 +2952,32 @@ Once you are camouflaged in this way, you can try to hide by pressing yourself u
                                                             {:name "Colossus Slayer"
                                                              :page 93
                                                              :frequency {:units :turn}
-                                                             :summary "deal an extra d8 damage when you hit a creature that is below its HP max with a weapon attack"
-                                                             :description "Your tenacity can wear down the most potent foes. When you hit a creature with a weapon attack, the creature takes an extra 1d8 damage if it's below its hit point maximum. You can deal this extra damage only once per turn."})]})
+                                                             :summary "deal an extra d8 damage when you hit a creature that is below its HP max with a weapon attack"})]})
                                              (t/option-cfg
                                               {:name "Giant Killer"
                                                :modifiers [(mod5e/reaction
                                                             {:name "Giant Killer"
                                                              :page 93
-                                                             :summary "attack a Large or larger creature within 5 ft that misses an attack against you"
-                                                             :description "When a Large or larger creature within 5 feet of you hits or misses you with an attack, you can use your reaction to attack that creature immediately after its attack, provided that you can see the creature."})]})
+                                                             :summary "attack a Large or larger creature within 5 ft that misses an attack against you"})]})
                                              (t/option-cfg
                                               {:name "Horde Breaker"
                                                :modifiers [(mod5e/trait-cfg
                                                             {:name "Horde Breaker"
                                                              :page 93
                                                              :frequency {:units :turn}
-                                                             :summary "when you attack one creature, attack another creature within 5 feet of it with the same action"
-                                                             :description "Once on each of your turns when you make a weapon attack, you can make another attack with the same weapon against a different creature that is within 5 feet of the original target and within range of your weapon"})]})])]}
+                                                             :summary "when you attack one creature, attack another creature within 5 feet of it with the same action"})]})])]}
                            7 {:selections [(t/selection
                                             "Defensive Tactics"
                                             [(t/option-cfg
                                               {:name "Escape the Horde"
                                                :modifiers [(mod5e/trait
                                                             {:name "Escape the Horde"
-                                                             :page 93
-                                                             :description "Opportunity attacks against you are made with disadvantage."})]})                                 (t/option-cfg
+                                                             :page 93})]})
+                                             (t/option-cfg
                                               {:name "Multiattack Defense"
                                                :modifiers [(mod5e/trait
                                                             {:name "Multiattack Defense"
-                                                             :page 93
-                                                             :description "When a creature hits you with an attack, you gain a +4 bonus to AC against all subsequent attacks made by that creature for the rest of the turn."})]})
+                                                             :page 93})]})
                                              (t/option-cfg
                                               {:name "Steel Will"
                                                :modifiers [(mod5e/saving-throw-advantage [:frightened])]})])]}
@@ -3112,14 +2989,13 @@ Once you are camouflaged in this way, you can try to hide by pressing yourself u
                                                             {:name "Volley"
                                                              :page 93
                                                              :summary "make a ranged attack against any creatures within a 10 ft of a point" 
-                                                             :description "You can use your action to make a ranged attack against any number of creatures within 10 feet of a point you can see within your weapon's range. You must have ammunition for each target, as normal, and you make a separate attack roll for each target."})]})
+})]})
                                              (t/option-cfg
                                               {:name "Whirlwind Attack"
                                                :modifiers [(mod5e/action
                                                             {:name "Whirlwind Attack"
                                                              :page 93
-                                                             :summary "melee attack against any creatures within 5 ft. of you"
-                                                             :description "You can use your action to make a melee attack against any number of creatures within 5 feet of you, with a separate attack roll for each target."})]})])]}
+                                                             :summary "melee attack against any creatures within 5 ft. of you"})]})])]}
                            15 {:selections [(t/selection
                                             "Superior Hunter's Defense"
                                             [(t/option-cfg
@@ -3132,7 +3008,7 @@ Once you are camouflaged in this way, you can try to hide by pressing yourself u
                                                              {:name "Stand Against the Tide"
                                                               :page 93
                                                               :summary "force a creature to repeat its attack on another creature when it misses you"
-                                                              :description "When a hostile creature misses you with a melee attack, you can use your reaction to force that creature to repeat the same attack against another creature (other than itself) of your choice."})]})
+})]})
                                              (t/option-cfg
                                               {:name "Uncanny Dodge"
                                                :modifiers [(uncanny-dodge-modifier 93)]})])]}}}
@@ -3140,17 +3016,14 @@ Once you are camouflaged in this way, you can try to hide by pressing yourself u
                   :selections [(t/selection
                                 "Ranger's Companion"
                                 (mapv
-                                 (fn [monster]
+                                 (fn [monster-name]
                                    (t/option-cfg
-                                    {:name (:name monster)
+                                    {:name monster-name
                                      :modifiers [(mod5e/action
                                                   {:name "Ranger's Companion"
                                                    :page 93
-                                                   :summary (str "You have a " (:name monster) " as your companion, you can command it to Attack, Dash, Disengage, Dodge, or Help")})]}))
-                                 (filter #(and (#{"Tiny" "Small" "Medium"} (:size %))
-                                               (= "beast" (:type %))
-                                               (<= (:challenge %) 0.25))
-                                         monst5e/monsters)))]
+                                                   :summary (str "You have a " monster-name " as your companion, you can command it to Attack, Dash, Disengage, Dodge, or Help")})]}))
+                                 ["Stirge" "Baboon" "Bat" "Badger" "Blood Hawk" "Boar" "Cat" "Crab" "Deer" "Eagle" "Flying Snake" "Frog" "Giant Badger" "Giant Centipede" "Giant Crab" "Giant Fire Beetle" "Giant Frog" "Giant Poisonous Snake" "Giant Rat" "Giant Wolf Spider" "Goat" "Hawk" "Hyena" "Jackal" "Lizard" "Mastiff" "Mule" "Octopus" "Panther" "Owl" "Poisonous Snake" "Pony" "Quipper" "Rat" "Raven" "Scorpion" "Sea Horse" "Spider" "Vulture" "Weasel" "Wolf"]))]
                   :levels {7 {:modifiers [(mod5e/bonus-action
                                            {:name "Exceptional Training"
                                             :page 93
@@ -3195,16 +3068,14 @@ Once you are camouflaged in this way, you can try to hide by pressing yourself u
                   :page 96
                   :frequency {:units :turn}
                   :summary (str (common/round-up (/ (?class-level :rogue) 2)) "d6 extra damage on attack where you have advantage or another enemy of creature is within 5 ft.")
-                  :description "You know how to strike subtly and exploit a foe's distraction. Once per turn, you can deal an extra 1d6 damage to one creature you hit with an attack if you have advantage on the attack roll. The attack must use a finesse or a ranged weapon.
-You don't need advantage on the attack roll if another enemy of the target is within 5 feet of it, that enemy isn't incapacitated, and you don't have disadvantage on the attack roll.
-The amount of the extra damage increases as you gain levels in this class, as shown in the Sneak Attack column of the Rogue table."})]
+})]
     :levels {2 {:modifiers [(mod5e/bonus-action
                              {:level 2
                               :name "Cunning Action"
                               :page 96
                               :frequency {:units :turn}
                               :summary "Dash, Disengage or Hide"
-                              :description "Your quick thinking and agility allow you to move and act quickly. You can take a bonus action on each of your turns in combat. This action can be used only to take the Dash, Disengage, or Hide action."})]}
+})]}
              5 {:modifiers [(uncanny-dodge-modifier 96)]}}
     :selections [(t/selection
                   "Additional Weapon"
@@ -3227,30 +3098,29 @@ The amount of the extra damage increases as you gain levels in this class, as sh
     :traits [{:name "Thieves' Cant"
               :page 96
               :summary "convey secret messages hidden in normal conversation"
-              :description "During your rogue training you learned thieves' cant, a secret mix of dialect, jargon, and code that allows you to hide messages in seemingly normal conversation. Only another creature that knows thieves' cant understands such messages. It takes four times longer to convey such a message than it does to speak the same idea plainly.
-In addition, you understand a set of secret signs and symbols used to convey short, simple messages, such as whether an area is dangerous or the territory of a thieves' guild, whether loot is nearby, or whether the people in an area are easy marks or will provide a safe house for thieves on the run."}
+}
              (evasion 7 96)
              {:level 11
               :name "Reliable Talent"
               :page 96
               :summary "when you make an ability check with proficiency, treat a roll less than 10 as a 10"
-              :description "You have refined your chosen skills until they approach perfection. Whenever you make an ability check that lets you add your proficiency bonus, you can treat a d20 roll of 9 or lower as a 10."}
+}
              {:level 14
               :name "Blindsense"
               :page 96
               :summary "know location of hidden or invisible creatures within 10 ft."
-              :description "If you are able to hear, you are aware of the location of any hidden or invisible creature within 10 feet of you."}
+}
              {:level 18
               :name "Elusive"
               :page 96
               :summary "attack rolls only have disadvantage on you if you are incapacitated"
-              :description "You are so evasive that attackers rarely gain the upper hand against you. No attack roll has advantage against you while you aren't incapacitated."}
+}
              {:level 20
               :name "Stroke of Luck"
               :page 97
               :frequency {:units :rest}
               :summary "turn missed attack into a hit or a failed ability check roll as 20"
-              :description "You have an uncanny knack for succeeding when you need to. If your attack misses a target within range, you can turn the miss into a hit. Alternatively, if you fail an ability check, you can treat the d20 roll as a 20.\nOnce you use this feature, you can't use it again until you finish a short or long rest."}]
+}]
     :subclass-level 3
     :subclass-title "Roguish Archetype"
     :subclasses [{:name "Thief"
@@ -3259,24 +3129,21 @@ In addition, you understand a set of secret signs and symbols used to convey sho
                                 :name "Fast Hands"
                                 :page 96
                                 :summary "use your Cunning Action to make Sleight of Hand checks, use thieves' tools, or take Use and Object action"
-                                :description "You can use the bonus action granted by your Cunning Action to make a Dexterity (Sleight of Hand) check, use your thieves' tools to disarm a trap or open a lock, or take the Use an Object action."})
+})
                               (mod5e/dependent-trait
                                {:level 3
                                 :name "Second-Story Work"
                                 :page 97
                                 :summary (str "climbing costs no extra movement, your running jump distance increases by " (?ability-bonuses :dex) " ft.")
-                                :description "You gain the ability to climb faster than normal; climbing no longer costs you extra movement.\nIn addition, when you make a running jump, the distance you cover increases by a number of feet equal to your Dexterity modifier."})]
+})]
                   :traits [{:level 9
                             :name "Supreme Sneak"
                             :page 97
-                            :summary "advantage on Stealth checks if you move no more than half your speed"
-                            :description "You have advantage on a Dexterity (Stealth) check if you move no more than half your speed on the same turn."}
+                            :summary "advantage on Stealth checks if you move no more than half your speed"}
                            {:level 13
                             :name "Use Magic Device"
                             :page 97
-                            :summary "ignore race, class, level requirements to use magic items"
-                            :description "You have learned enough about the workings of magic that you can improvise the use of items even when they are not intended for you. You ignore all class, race, and level requirements on the use of
-magic items."}
+                            :summary "ignore race, class, level requirements to use magic items"}
                            {:level 17
                             :name "Thief's Reflexes"
                             :page 97
@@ -3354,59 +3221,49 @@ magic items."}
       :modifiers [(mod5e/dependent-trait
                    {:name "Careful Spell"
                     :page 102
-                    :summary (str "When you cast a spell that requires a save, spend 1 sorcery pt. to allow up to " (?ability-bonuses :cha) " creatures to automatically succeed")
-                    :description "When you cast a spell that forces other creatures to make a saving throw, you can protect some of those creatures from the spell's full force. To do so, you spend 1 sorcery point and choose a number of those creatures up to your Charisma modifier (minimum of one creature). A chosen creature automatically succeeds on its saving throw against the spell."})]})
+                    :summary (str "When you cast a spell that requires a save, spend 1 sorcery pt. to allow up to " (?ability-bonuses :cha) " creatures to automatically succeed")})]})
     (t/option-cfg
      {:name "Distant Spell"
       :modifiers [(mod5e/trait-cfg
                    {:name "Distant Spell"
                     :page 102
-                    :summary "spend 1 sorcery pt. double the range of a spell with range 5 ft. or greater or make the range of a touch spell 30 ft."
-                    :description "When you cast a spell that has a range of 5 feet or greater, you can spend 1 sorcery point to double the range of the spell.
-When you cast a spell that has a range of touch, you can spend 1 sorcery point to make the range of the spell 30 feet."})]})
+                    :summary "spend 1 sorcery pt. double the range of a spell with range 5 ft. or greater or make the range of a touch spell 30 ft."})]})
     (t/option-cfg
      {:name "Empowered Spell"
       :modifiers [(mod5e/dependent-trait
                    {:name "Empowered Spell"
                     :page 102
-                    :summary (str "spend 1 sorcery pt. to reroll up to " (?ability-bonuses :cha) " spell damage dice")
-                    :description "When you roll damage for a spell, you can spend 1 sorcery point to reroll a number of the damage dice up to your Charisma modifier (minimum of one). You must use the new rolls.
-You can use Empowered Spell even if you have already used a different Metamagic option during the casting of the spell."})]})
+                    :summary (str "spend 1 sorcery pt. to reroll up to " (?ability-bonuses :cha) " spell damage dice")})]})
     (t/option-cfg
      {:name "Extended Spell"
       :modifiers [(mod5e/trait-cfg
                    {:name "Extended Spell"
                     :page 102
-                    :summary "spend 1 sorcery pt. to double the duration of a spell to a max 24 hrs."
-                    :description "When you cast a spell that has a duration of 1 minute or longer, you can spend 1 sorcery point to double its duration, to a maximum duration of 24 hours."})]})
+                    :summary "spend 1 sorcery pt. to double the duration of a spell to a max 24 hrs."})]})
     (t/option-cfg
      {:name "Heightened Spell"
       :modifiers [(mod5e/trait-cfg
                    {:name "Heightened Spell"
                     :page 102
-                    :summary "when you cast a spell with a save to resist it's effects, spend 3 sorcery pts. to give one target disadvantage on its first save against it"
-                    :description "When you cast a spell that forces a creature to make a saving throw to resist its effects, you can spend 3 sorcery points to give one target of the spell disadvantage on its first saving throw made against the spell."})]})
+                    :summary "when you cast a spell with a save to resist it's effects, spend 3 sorcery pts. to give one target disadvantage on its first save against it"})]})
     (t/option-cfg
      {:name "Quickened Spell"
       :modifiers [(mod5e/trait-cfg
                    {:name "Quickened Spell"
                     :page 102
-                    :summary "spend 2 sorcery pts. to convert a casting of a spell with 1 action casting time to 1 bonus-action"
-                    :description "When you cast a spell that has a casting time of 1 action, you can spend 2 sorcery points to change the casting time to 1 bonus action for this casting."})]})
+                    :summary "spend 2 sorcery pts. to convert a casting of a spell with 1 action casting time to 1 bonus-action"})]})
     (t/option-cfg
      {:name "Subtle Spell"
       :modifiers [(mod5e/trait-cfg
                    {:name "Subtle Spell"
                     :page 102
-                    :summary "spend 1 sorcery pt. to cast a spell without somatic or verbal components"
-                    :description "When you cast a spell, you can spend 1 sorcery point to cast it without any somatic or verbal components."})]})
+                    :summary "spend 1 sorcery pt. to cast a spell without somatic or verbal components"})]})
     (t/option-cfg
      {:name "Twinned Spell"
       :modifiers [(mod5e/trait-cfg
                   {:name "Twinned Spell"
                    :page 102
-                   :summary "spend X sorcery pts. (min 1) to target two creatures with a single target spell, where X is the spell level"
-                   :description "When you cast a spell that targets only one creature and doesn't have a range of self, you can spend a number of sorcery points equal to the spell's level to target a second creature in range with the same spell (1 sorcery point if the spell is a cantrip). To be eligible, a spell must be incapable of targeting more than one creature at the spell's current level. For example, magic missile and scorching ray aren't eligible, but ray of frost and chromatic orb are"})]})]
+                   :summary "spend X sorcery pts. (min 1) to target two creatures with a single target spell, where X is the spell level"})]})]
    num
    num))
 
@@ -3523,19 +3380,13 @@ You can use Empowered Spell even if you have already used a different Metamagic 
                                   :white
                                   []
                                   [])])]
-                  :traits [{:name "Draconic Resilience"
-                            :description "As magic flows through your body, it causes physical traits of your dragon ancestors to emerge. At 1st level, your hit point maximum increases by 1 and increases by 1 again whenever you gain a level in this class.
-Additionally, parts of your skin are covered by a thin sheen of dragon-like scales. When you aren't wearing armor, your AC equals 13 + your Dexterity modifier."}
+                  :traits [{:name "Draconic Resilience"}
                            {:name "Elemental Affinity"
-                            :level 6
-                            :description "Starting at 6th level, when you cast a spell that deals damage of the type associated with your draconic ancestry, you can add your Charisma modifier to one damage roll of that spell. At the same time, you can spend 1 sorcery point to gain resistance to that damage type for 1 hour."}
+                            :level 6}
                            {:name "Dragon Wings"
-                            :level 14
-                            :description "At 14th level, you gain the ability to sprout a pair of dragon wings from your back, gaining a flying speed equal to your current speed. You can create these wings as a bonus action on your turn. They last until you dismiss them as a bonus action on your turn.
-You can't manifest your wings while wearing armor unless the armor is made to accommodate them, and clothing not made to accommodate your wings might be destroyed when you manifest them."}
+                            :level 14}
                            {:name "Draconic Presence"
-                            :level 18
-                            :description "Beginning at 18th level, you can channel the dread presence of your dragon ancestor, causing those around you to become awestruck or frightened. As an action, you can spend 5 sorcery points to draw on this power and exude an aura of awe or fear (your choice) to a distance of 60 feet. For 1 minute or until you lose your concentration (as if you were casting a concentration spell), each hostile creature that starts its turn in this aura must succeed on a Wisdom saving throw or be charmed (if you chose awe) or frightened (if you chose fear) until the aura ends. A creature that succeeds on this saving throw is immune to your aura for 24 hours."}]}
+                            :level 18}]}
                  {:name "Wild Magic"
                   :traits [{:name "Wild Magic Surge"
                             :level 1}
@@ -3613,26 +3464,21 @@ If you lose your Book of Shadows, you can perform a 1-hour ceremony to receive a
     :profs {:weapon {:dagger true :dart true :sling true :quarterstaff true :crossbow-light true}
             :save {:int true :wis true}
             :skill-options {:choose 2 :options {:arcana true :history true :insight true :investigation true :medicine true :religion true}}}
-    :traits [{:level 18 :name "Spell Mastery" :description "You have achieved such mastery over certain spells that you can cast them at will. Choose a 1st-level wizard spell and a 2nd-level wizard spell that are in your spellbook. You can cast those spells at their lowest level without expending a spell slot when you have them prepared. If you want to cast either spell at a higher level, you must expend a spell slot as normal.\nBy spending 8 hours in study, you can exchange one or both of the spells you chose for different spells of the same levels."}
-             {:level 20 :name "Signature Spells" :description "You gain mastery over two powerful spells and can cast them with little effort. Choose two 3rd-level wizard spells in your spellbook as your signature spells. You always have these spells prepared, they don't count against the number of spells you have prepared, and you can cast each of them once at 3rd level without expending a spell slot. When you do so, you can't do so again until you  nish a short or long rest.\nIf you want to cast either spell at a higher level, you must expend a spell slot as normal."}]
+    :traits [{:level 18 :name "Spell Mastery"}
+             {:level 20 :name "Signature Spells"}]
     :subclass-level 2
     :subclass-title "Arcane Tradition"
     :subclasses [{:name "School of Evocation"
                   :traits [{:level 2
-                            :name "Evocation Savant"
-                            :description "Beginning when you select this school at 2nd level, the gold and time you must spend to copy an evocation spell into your spellbook is halved."}
+                            :name "Evocation Savant"}
                            {:level 2
-                            :name "Sculpt Spells"
-                            :description "Beginning at 2nd level, you can create pockets of relative safety within the e ects of your evocation spells. When you cast an evocation spell that a ects other creatures that you can see, you can choose a number of them equal to 1 + the spell's level. The chosen creatures automatically succeed on their saving throws against the spell, and they take no damage if they would normally take half damage on a successful save."}
+                            :name "Sculpt Spells"}
                            {:level 6
-                            :name "Potent Cantrip"
-                            :description "Starting at 6th level, your damaging cantrips affect even creatures that avoid the brunt of the effect. When a creature succeeds on a saving throw against your cantrip, the creature takes half the cantrip's damage (if any) but su ers no additional e ect from the cantrip."}
+                            :name "Potent Cantrip"}
                            {:level 10
-                            :name "Empowered Evocation"
-                            :description "Beginning at 10th level, you can add your Intelligence modi er to one damage roll of any wizard evocation spell you cast."}
+                            :name "Empowered Evocation"}
                            {:level 14
-                            :name "Overchannel"
-                            :description "Starting at 14th level, you can increase the power of your simpler spells. When you cast a wizard spell of 1st through 5th level that deals damage, you can deal maximum damage with that spell.\nThe first time you do so, you suffer no adverse effect. If you use this feature again before you  nish a long rest, you take 2d12 necrotic damage for each level of the spell, immediately after you cast it. Each time you use this feature again before finishing a long rest, the necrotic damage per spell level increases by 1d12. This damage ignores resistance and immunity."}]}
+                            :name "Overchannel"}]}
                  {:name "School of Abjuration"
                   :traits [{:name "Abjuration Savant"
                             :level 2}
@@ -4018,13 +3864,9 @@ Additionally, while perceiving through your familiar’s senses, you can also sp
              15 {:selections [(eldritch-invocation-selection)]}
              18 {:selections [(eldritch-invocation-selection)]}}
     :traits [{:name "Mystic Arcanum"
-              :level 11
-              :description "At 11th level, your patron bestows upon you a magical secret called an arcanum. Choose one 6th level spell from the warlock spell list as this arcanum.
-You can cast your arcanum spell once without expending a spell slot. You must finish a long rest before you can do so again.
-At higher levels, you gain more warlock spells of your choice that can be cast in this way: one 7th level spell at 13th level, one 8th-level spell at 15th level, and one 9th-level spell at 17th level. You regain all uses of your Mystic Arcanum when you finish a long rest."}
+              :level 11}
              {:name "Eldrich Master"
-              :level 20
-              :description "At 20th level, you can draw on your inner reserve of mystical power while entreating your patron to regain expended spell slots. You can spend 1 minute entreating your patron for aid to regain all your expended spell slots from your Pact Magic feature. Once you regain spell slots with this feature, you must finish a long rest before you can do so again."}]
+              :level 20}]
     :subclass-level 1
     :subclass-title "Otherworldly Patron"
     :subclasses [{:name "The Fiend"
@@ -4036,20 +3878,13 @@ At higher levels, you gain more warlock spells of your choice that can be cast i
                                           3 #{:fireball :stinking-cloud}
                                           4 #{:fire-shield :wall-of-fire}
                                           5 #{:flame-strike :hallow}}}
-                  :traits [{:name "Dark One's Blessing"
-                            :description "Starting at 1st level, when you reduce a hostile creature to 0 hit points, you gain temporary hit points equal to your Charisma modifier + your warlock level (minimum of 1)."}
+                  :traits [{:name "Dark One's Blessing"}
                            {:name "Dark One's Own Luck"
-                            :level 6
-                            :description "Starting at 6th level, you can call on your patron to alter fate in your favor. When you make an ability check or a saving throw, you can use this feature to Not for resale. Permission granted to print or photocopy this document for personal use only. System Reference Document 5.0 51 add a d10 to your roll. You can do so after seeing the initial roll but before any of the roll's effects occur.
-Once you use this feature, you can't use it again until you finish a short or long rest."}
+                            :level 6}
                            {:name "Fiendish Resilience"
-                            :level 10
-                            :description "Starting at 10th level, you can choose one damage type when you finish a short or long rest. You gain resistance to that damage type until you choose a different one with this feature. Damage from magical weapons or silver weapons ignores this resistance."}
+                            :level 10}
                            {:name "Hurl Through Hell"
-                            :level 14
-                            :description "Starting at 14th level, when you hit a creature with an attack, you can use this feature to instantly transport the target through the lower planes. The creature disappears and hurtles through a nightmare landscape.
-At the end of your next turn, the target returns to the space it previously occupied, or the nearest unoccupied space. If the target is not a fiend, it takes 10d10 psychic damage as it reels from its horrific experience.
-Once you use this feature, you can't use it again until you finish a long rest."}]}
+                            :level 14}]}
                  {:name "The Archfey"
                   :spellcasting {:known-mode :schedule
                                  :spells-known warlock-spells-known
@@ -4114,9 +3949,7 @@ Once you use this feature, you can't use it again until you finish a long rest."
                    :profs {:skill {:insight true, :religion true}
                            :language-options {:choose 2 :options {:any true}}}
                    :traits [{:name "Shelter the Faithful"
-                             :summary "You and your companions can expect free healing at an establishment of your faith."
-                             :description "As an acolyte, you command the respect of those who share your faith, and you can perform the religious ceremonies of your deity. You and your adventuring companions can expect to receive free healing and care at a temple, shrine, or other established presence of your faith, though you must provide any material components needed for spells. Those who share your religion will support you (but only you) at a modest lifestyle.
-You might also have ties to a specific temple dedicated to your chosen deity or pantheon, and you have a residence there. This could be the temple where you used to serve, if you remain on good terms with it, or a temple where you have found a new home. While near your temple, you can call upon the priests for assistance, provided the assistance you ask for is not hazardous and you remain in good standing with your temple."}]
+                             :summary "You and your companions can expect free healing at an establishment of your faith."}]
                    :personality ["I idolize a particular hero of my faith, and constantly refer to that person's deeds and example."
                                  "I can find common ground between the fiercest enemies, empathizing with them and always working toward peace."
                                  "I see omens in every event and action. The gods try to speak to us, we just need to listen"

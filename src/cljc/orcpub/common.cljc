@@ -3,13 +3,18 @@
 
 (def dot-char "•")
 
-(defn name-to-kw [name]
+(defn- name-to-kw-aux [name]
   (-> name
       clojure.string/lower-case
       (clojure.string/replace #"'" "")
       (clojure.string/replace #"\W" "-")
       (clojure.string/replace #"\-+" "-")
       keyword))
+
+(def memoized-name-to-kw (memoize name-to-kw-aux))
+
+(defn name-to-kw [name]
+  (memoized-name-to-kw name))
 
 (defn kw-to-name [kw & [capitalize?]]
   (as-> kw $
