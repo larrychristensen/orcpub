@@ -1,365 +1,375 @@
 (ns orcpub.dnd.e5.spells
   (:require [orcpub.common :as common]))
 
+(def spells
+  [{:name "Acid Splash"}
+   {:name "Aid"}
+   {:name "Alarm"}
+   {:name "Alter Self"}
+   {:name "Animal Friendship"}
+   {:name "Animal Messenger"}
+   {:name "Animal Shapes"}
+   {:name "Animate Dead"}
+   {:name "Animate Objects"}
+   {:name "Antilife Shell"}
+   {:name "Antimagic Field"}
+   {:name "Antipathy/Sympathy"}
+   {:name "Arcane Eye"}
+   {:name "Arcane Gate"}
+   {:name "Arcane Lock"}
+   {:key :armor-of-agathys, :name "Armor of Agath."}
+   {:key :arms-of-hadar, :name "Arms of Had."}
+   {:name "Astral Projection"}
+   {:name "Augury"}
+   {:name "Aura of Life"}
+   {:name "Aura of Purity"}
+   {:name "Awaken"}
+   {:name "Bane"}
+   {:name "Banishing Smite"}
+   {:name "Banishment"}
+   {:name "Barkskin"}
+   {:name "Beacon of Hope"}
+   {:name "Beast Sense"}
+   {:name "Bestow Curse"}
+   {:key :bigbys-hand, :name "B.'s Hand (Arcane Hand)"}
+   {:name "Blade Barrier"}
+   {:name "Blade Ward"}
+   {:name "Bless"}
+   {:name "Blight"}
+   {:name "Blinding Smite"}
+   {:name "Blindness/Deafness"}
+   {:name "Blink"}
+   {:name "Blur"}
+   {:name "Branding Smite"}
+   {:name "Burning Hands"}
+   {:name "Call Lightning"}
+   {:name "Calm Emotions"}
+   {:name "Chain Lightning"}
+   {:name "Charm Person"}
+   {:name "Chill Touch"}
+   {:name "Chromatic Orb"}
+   {:name "Circle of Death"}
+   {:name "Circle of Power"}
+   {:name "Clairvoyance"}
+   {:name "Clone"}
+   {:name "Cloud of Daggers"}
+   {:name "Cloudkill"}
+   {:name "Color Spray"}
+   {:name "Command"}
+   {:name "Commune"}
+   {:name "Commune with Nature"}
+   {:name "Compelling Duel"}
+   {:name "Comprehend Languages"}
+   {:name "Compulsion"}
+   {:name "Cone of Cold"}
+   {:name "Confusion"}
+   {:name "Conjure Animals"}
+   {:name "Conjure Barrage"}
+   {:name "Conjure Celestial"}
+   {:name "Conjure Elemental"}
+   {:name "Conjure Fey"}
+   {:name "Conjure Minor Elementals"}
+   {:name "Conjure Volley"}
+   {:name "Conjure Woodland Beings"}
+   {:name "Contact Other Plane"}
+   {:name "Contagion"}
+   {:name "Contingency"}
+   {:name "Continual Flame"}
+   {:name "Control Water"}
+   {:name "Control Weather"}
+   {:name "Cordon of Arrows"}
+   {:name "Counterspell"}
+   {:name "Create Food and Water"}
+   {:name "Create or Destroy Water"}
+   {:name "Create Undead"}
+   {:name "Creation"}
+   {:name "Crown of Madness"}
+   {:name "Crusader's Mantle"}
+   {:name "Cure Wounds"}
+   {:name "Dancing Lights"}
+   {:name "Darkness"}
+   {:name "Darkvision"}
+   {:name "Daylight"}
+   {:name "Death Ward"}
+   {:name "Delayed Blast Fireball"}
+   {:name "Demiplane"}
+   {:name "Destructive Wave"}
+   {:name "Detect Evil and Good"}
+   {:name "Detect Magic"}
+   {:name "Detect Poison and Disease"}
+   {:name "Detect Thoughts"}
+   {:name "Dimension Door"}
+   {:name "Disguise Self"}
+   {:name "Disintegrate"}
+   {:name "Dispel Evil and Good"}
+   {:name "Dispel Magic"}
+   {:name "Dissonant Whispers"}
+   {:name "Divination"}
+   {:name "Divine Favor"}
+   {:name "Divine Word"}
+   {:name "Dominate Beast"}
+   {:name "Dominate Monster"}
+   {:name "Dominate Person"}
+   {:key :drawmijs-instant-summons, :name "Drawm.'s Instant Summons"}
+   {:name "Dream"}
+   {:name "Druidcraft"}
+   {:name "Earthquake"}
+   {:name "Eldritch Blast"}
+   {:name "Elemental Weapon"}
+   {:name "Enhance Ability"}
+   {:name "Enlarge/Reduce"}
+   {:name "Ensnaring Strike"}
+   {:name "Entangle"}
+   {:name "Enthrall"}
+   {:name "Etherealness"}
+   {:key :evards-black-tentacles, :name "Ev.'s Black Tentacles"}
+   {:name "Expeditious Retreat"}
+   {:name "Eyebite"}
+   {:name "Fabricate"}
+   {:name "Faerie Fire"}
+   {:name "False Life"}
+   {:name "Fear"}
+   {:name "Feather Fall"}
+   {:name "Feeblemind"}
+   {:name "Feign Death"}
+   {:name "Find Familiar"}
+   {:name "Find Steed"}
+   {:name "Find the Path"}
+   {:name "Find Traps"}
+   {:name "Finger of Death"}
+   {:name "Fireball"}
+   {:name "Fire Bolt"}
+   {:name "Fire Shield"}
+   {:name "Fire Storm"}
+   {:name "Flame Blade"}
+   {:name "Flame Strike"}
+   {:name "Flaming Sphere"}
+   {:name "Flesh to Stone"}
+   {:name "Fly"}
+   {:name "Fog Cloud"}
+   {:name "Forbiddance"}
+   {:name "Forcecage"}
+   {:name "Foresight"}
+   {:name "Freedom of Movement"}
+   {:name "Friends"}
+   {:name "Gaseous Form"}
+   {:name "Gate"}
+   {:name "Geas"}
+   {:name "Gentle Repose"}
+   {:name "Giant Insect"}
+   {:name "Glibness"}
+   {:name "Globe of Invulnerability"}
+   {:name "Glyph of Warding"}
+   {:name "Goodberry"}
+   {:name "Grasping Vine"}
+   {:name "Grease"}
+   {:name "Greater Invisibility"}
+   {:name "Greater Restoration"}
+   {:name "Guardian of Faith"}
+   {:name "Guards and Wards"}
+   {:name "Guidance"}
+   {:name "Guiding Bolt"}
+   {:name "Gust of Wind"}
+   {:name "Hail of Thorns"}
+   {:name "Hallow"}
+   {:name "Hallucinatory Terrain"}
+   {:name "Harm"}
+   {:name "Haste"}
+   {:name "Heal"}
+   {:name "Healing Word"}
+   {:name "Heat Metal"}
+   {:name "Hellish Rebuke"}
+   {:name "Heroes' Feast"}
+   {:name "Heroism"}
+   {:name "Hex"}
+   {:name "Hold Monster"}
+   {:name "Hold Person"}
+   {:name "Holy Aura"}
+   {:name "Hunger of Had."}
+   {:name "Hunter's Mark"}
+   {:name "Hypnotic Pattern"}
+   {:name "Ice Storm"}
+   {:name "Identify"}
+   {:name "Illusory Script"}
+   {:name "Imprisonment"}
+   {:name "Incendiary Cloud"}
+   {:name "Inflict Wounds"}
+   {:name "Insect Plague"}
+   {:name "Invisibility"}
+   {:name "Jump"}
+   {:name "Knock"}
+   {:name "Legend Lore"}
+   {:key :leomunds-tiny-hut, :name "Leo.'s Tiny Hut"}
+   {:key :leomunds-secret-chest, :name "Leo.'s Secret Chest"}
+   {:name "Lesser Restoration"}
+   {:name "Levitate"}
+   {:name "Light"}
+   {:name "Lightning Arrow"}
+   {:name "Lightning Bolt"}
+   {:name "Locate Animals or Plants"}
+   {:name "Locate Creature"}
+   {:name "Locate Object"}
+   {:name "Longstrider"}
+   {:name "Mage Armor"}
+   {:name "Mage Hand"}
+   {:name "Magic Circle"}
+   {:name "Magic Jar"}
+   {:name "Magic Missile"}
+   {:name "Magic Mouth"}
+   {:name "Magic Weapon"}
+   {:name "Major Image"}
+   {:name "Mass Cure Wounds"}
+   {:name "Mass Heal"}
+   {:name "Mass Healing Word"}
+   {:name "Mass Suggestion"}
+   {:name "Maze"}
+   {:name "Meld into Stone"}
+   {:key :melfs-acid-arrow, :name "M.'s Acid Arrow"}
+   {:name "Mending"}
+   {:name "Message"}
+   {:name "Meteor Swarm"}
+   {:name "Mind Blank"}
+   {:name "Minor Illusion"}
+   {:name "Mirage Arcane"}
+   {:name "Mirror Image"}
+   {:name "Mislead"}
+   {:name "Misty Step"}
+   {:name "Modify Memory"}
+   {:name "Moonbeam"}
+   {:key :mordenkainens-faithful-hound, :name "Mord.'s Faithful Hound"}
+   {:key :mordenkainens-magnificent-mansion,
+    :name "Mord.'s Magnificent Mansion"}
+   {:key :mordenkainens-private-sanctum, :name "Mord.'s Private Sanctum"}
+   {:key :mordenkainens-sword, :name "Mord.'s Sword (Arcane Sword)"}
+   {:name "Move Earth"}
+   {:name "Nondetection"}
+   {:key :nystuls-magic-aura,
+    :name "Nyst.'s Magic Aura (Arcanist's Magic Aura)"}
+   {:name "Pass without Trace"}
+   {:name "Passwall"}
+   {:name "Phantasmal Force"}
+   {:name "Phantasmal Killer"}
+   {:name "Phantom Steed"}
+   {:name "Planar Ally"}
+   {:name "Planar Binding"}
+   {:name "Plane Shift"}
+   {:name "Plant Growth"}
+   {:name "Poison Spray"}
+   {:name "Polymorph"}
+   {:name "Power Word Heal"}
+   {:name "Power Word Kill"}
+   {:name "Power Word Stun"}
+   {:name "Prayer of Healing"}
+   {:name "Prestidigitation"}
+   {:name "Prismatic Spray"}
+   {:name "Prismatic Wall"}
+   {:name "Produce Flame"}
+   {:name "Programmed Illusion"}
+   {:name "Project Image"}
+   {:name "Protection from Energy"}
+   {:name "Protection from Evil and Good"}
+   {:name "Protection from Poison"}
+   {:name "Purify Food and Drink"}
+   {:key :otilukes-freezing-sphere, :name "Otil.'s Freezing Sphere"}
+   {:key :otilukes-resilient-sphere, :name "Otil.'s Resilient Sphere"}
+   {:key :ottos-irresistible-dance, :name "O.'s Irresistible Dance"}
+   {:name "Raise Dead"}
+   {:name "Rar.'s Telepathic Bond"}
+   {:name "Ray of Enfeeblement"}
+   {:name "Ray of Frost"}
+   {:name "Ray of Sickness"}
+   {:name "Regenerate"}
+   {:name "Reincarnate"}
+   {:name "Remove Curse"}
+   {:name "Resistance"}
+   {:name "Resurrection"}
+   {:name "Reverse Gravity"}
+   {:name "Revivify"}
+   {:name "Rope Trick"}
+   {:name "Sacred Flame"}
+   {:name "Sanctuary"}
+   {:name "Scorching Ray"}
+   {:name "Scrying"}
+   {:name "Searing Smite"}
+   {:name "See Invisibility"}
+   {:name "Seeming"}
+   {:name "Sending"}
+   {:name "Sequester"}
+   {:name "Shapechange"}
+   {:name "Shatter"}
+   {:name "Shield"}
+   {:name "Shield of Faith"}
+   {:name "Shillelagh"}
+   {:name "Shocking Grasp"}
+   {:name "Silence"}
+   {:name "Silent Image"}
+   {:name "Simulacrum"}
+   {:name "Sleep"}
+   {:name "Sleet Storm"}
+   {:name "Slow"}
+   {:name "Spare the Dying"}
+   {:name "Speak with Animals"}
+   {:name "Speak with Dead"}
+   {:name "Speak with Plants"}
+   {:name "Spider Climb"}
+   {:name "Spike Growth"}
+   {:name "Spirit Guardians"}
+   {:name "Spiritual Weapon"}
+   {:name "Staggering Smite"}
+   {:name "Stinking Cloud"}
+   {:name "Stone Shape"}
+   {:name "Stoneskin"}
+   {:name "Storm of Vengeance"}
+   {:name "Suggestion"}
+   {:name "Sunbeam"}
+   {:name "Sunburst"}
+   {:name "Swift Quiver"}
+   {:name "Symbol"}
+   {:key :tashas-hideous-laughter, :name "T.'s Hideous Laughter"}
+   {:name "Telekinesis"}
+   {:name "Telepathy"}
+   {:name "Teleport"}
+   {:name "Teleportation Circle"}
+   {:key :tensers-floating-disk, :name "Tens.'s Floating Disk"}
+   {:name "Thaumaturgy"}
+   {:name "Thorn Whip"}
+   {:name "Thunderwave"}
+   {:name "Time Stop"}
+   {:name "Tongues"}
+   {:name "Transport via Plants"}
+   {:name "Tree Stride"}
+   {:name "True Polymorph"}
+   {:name "True Resurrection"}
+   {:name "True Seeing"}
+   {:name "True Strike"}
+   {:name "Tsunami"}
+   {:name "Unseen Servant"}
+   {:name "Vampiric Touch"}
+   {:name "Vicious Mockery"}
+   {:name "Wall of Fire"}
+   {:name "Wall of Force"}
+   {:name "Wall of Ice"}
+   {:name "Wall of Stone"}
+   {:name "Wall of Thorns"}
+   {:name "Warding Bond"}
+   {:name "Water Breathing"}
+   {:name "Water Walk"}
+   {:name "Web"}
+   {:name "Weird"}
+   {:name "Wind Walk"}
+   {:name "Wind Wall"}
+   {:name "Wish"}
+   {:name "Witch Bolt"}
+   {:name "Word of Recall"}
+   {:name "Wrathful Smite"}
+   {:name "Zone of Truth"}])
+
 (def spell-map
-  {:dimension-door {:name "Dimension Door"},
- :mord-s-private-sanctum {:name "Mord.'s Private Sanctum"},
- :elemental-weapon {:name "Elemental Weapon"},
- :creation {:name "Creation"},
- :glibness {:name "Glibness"},
- :cordon-of-arrows {:name "Cordon of Arrows"},
- :magic-mouth {:name "Magic Mouth"},
- :transport-via-plants {:name "Transport via Plants"},
- :greater-restoration {:name "Greater Restoration"},
- :move-earth {:name "Move Earth"},
- :thunderwave {:name "Thunderwave"},
- :crown-of-madness {:name "Crown of Madness"},
- :animate-dead {:name "Animate Dead"},
- :storm-of-vengeance {:name "Storm of Vengeance"},
- :augury {:name "Augury"},
- :calm-emotions {:name "Calm Emotions"},
- :sequester {:name "Sequester"},
- :fabricate {:name "Fabricate"},
- :planar-ally {:name "Planar Ally"},
- :daylight {:name "Daylight"},
- :globe-of-invulnerability {:name "Globe of Invulnerability"},
- :dancing-lights {:name "Dancing Lights"},
- :seeming {:name "Seeming"},
- :alarm {:name "Alarm"},
- :ice-storm {:name "Ice Storm"},
- :meteor-swarm {:name "Meteor Swarm"},
- :create-or-destroy-water {:name "Create or Destroy Water"},
- :sending {:name "Sending"},
- :ray-of-frost {:name "Ray of Frost"},
- :arcane-lock {:name "Arcane Lock"},
- :spiritual-weapon {:name "Spiritual Weapon"},
- :counterspell {:name "Counterspell"},
- :acid-splash {:name "Acid Splash"},
- :passwall {:name "Passwall"},
- :cloudkill {:name "Cloudkill"},
- :commune-with-nature {:name "Commune with Nature"},
- :imprisonment {:name "Imprisonment"},
- :programmed-illusion {:name "Programmed Illusion"},
- :blink {:name "Blink"},
- :gentle-repose {:name "Gentle Repose"},
- :sleet-storm {:name "Sleet Storm"},
- :animate-objects {:name "Animate Objects"},
- :chain-lightning {:name "Chain Lightning"},
- :conjure-animals {:name "Conjure Animals"},
- :simulacrum {:name "Simulacrum"},
- :mage-hand {:name "Mage Hand"},
- :ray-of-sickness {:name "Ray of Sickness"},
- :confusion {:name "Confusion"},
- :detect-magic {:name "Detect Magic"},
- :mord-s-magnificent-mansion {:name "Mord.'s Magnificent Mansion"},
- :water-breathing {:name "Water Breathing"},
- :mass-suggestion {:name "Mass Suggestion"},
- :blindness-deafness {:name "Blindness/Deafness"},
- :hallucinatory-terrain {:name "Hallucinatory Terrain"},
- :magic-jar {:name "Magic Jar"},
- :prayer-of-healing {:name "Prayer of Healing"},
- :wall-of-ice {:name "Wall of Ice"},
- :stinking-cloud {:name "Stinking Cloud"},
- :feeblemind {:name "Feeblemind"},
- :thorn-whip {:name "Thorn Whip"},
- :prismatic-spray {:name "Prismatic Spray"},
- :crusaders-mantle {:name "Crusader's Mantle"},
- :remove-curse {:name "Remove Curse"},
- :sunbeam {:name "Sunbeam"},
- :mass-cure-wounds {:name "Mass Cure Wounds"},
- :clairvoyance {:name "Clairvoyance"},
- :blight {:name "Blight"},
- :dispel-magic {:name "Dispel Magic"},
- :scorching-ray {:name "Scorching Ray"},
- :blinding-smite {:name "Blinding Smite"},
- :zone-of-truth {:name "Zone of Truth"},
- :conjure-barrage {:name "Conjure Barrage"},
- :dominate-beast {:name "Dominate Beast"},
- :create-food-and-water {:name "Create Food and Water"},
- :hail-of-thorns {:name "Hail of Thorns"},
- :minor-illusion {:name "Minor Illusion"},
- :commune {:name "Commune"},
- :shield {:name "Shield"},
- :conjure-celestial {:name "Conjure Celestial"},
- :compelling-duel {:name "Compelling Duel"},
- :ev-s-black-tentacles {:name "Ev.'s Black Tentacles"},
- :conjure-minor-elementals {:name "Conjure Minor Elementals"},
- :vampiric-touch {:name "Vampiric Touch"},
- :awaken {:name "Awaken"},
- :branding-smite {:name "Branding Smite"},
- :banishment {:name "Banishment"},
- :silence {:name "Silence"},
- :rope-trick {:name "Rope Trick"},
- :fire-bolt {:name "Fire Bolt"},
- :spirit-guardians {:name "Spirit Guardians"},
- :purify-food-and-drink {:name "Purify Food and Drink"},
- :symbol {:name "Symbol"},
- :searing-smite {:name "Searing Smite"},
- :protection-from-poison {:name "Protection from Poison"},
- :feather-fall {:name "Feather Fall"},
- :polymorph {:name "Polymorph"},
- :tsunami {:name "Tsunami"},
- :locate-creature {:name "Locate Creature"},
- :detect-evil-and-good {:name "Detect Evil and Good"},
- :continual-flame {:name "Continual Flame"},
- :enhance-ability {:name "Enhance Ability"},
- :grease {:name "Grease"},
- :lesser-restoration {:name "Lesser Restoration"},
- :astral-projection {:name "Astral Projection"},
- :divine-word {:name "Divine Word"},
- :dispel-evil-and-good {:name "Dispel Evil and Good"},
- :antilife-shell {:name "Antilife Shell"},
- :barkskin {:name "Barkskin"},
- :magic-missile {:name "Magic Missile"},
- :enlarge-reduce {:name "Enlarge/Reduce"},
- :raise-dead {:name "Raise Dead"},
- :shatter {:name "Shatter"},
- :nondetection {:name "Nondetection"},
- :fire-shield {:name "Fire Shield"},
- :mass-healing-word {:name "Mass Healing Word"},
- :dominate-person {:name "Dominate Person"},
- :regenerate {:name "Regenerate"},
- :power-word-kill {:name "Power Word Kill"},
- :enthrall {:name "Enthrall"},
- :protection-from-evil-and-good
- {:name "Protection from Evil and Good"},
- :darkvision {:name "Darkvision"},
- :witch-bolt {:name "Witch Bolt"},
- :hypnotic-pattern {:name "Hypnotic Pattern"},
- :drawm-s-instant-summons {:name "Drawm.'s Instant Summons"},
- :forcecage {:name "Forcecage"},
- :alter-self {:name "Alter Self"},
- :grasping-vine {:name "Grasping Vine"},
- :ray-of-enfeeblement {:name "Ray of Enfeeblement"},
- :forbiddance {:name "Forbiddance"},
- :command {:name "Command"},
- :insect-plague {:name "Insect Plague"},
- :feign-death {:name "Feign Death"},
- :otil-s-freezing-sphere {:name "Otil.'s Freezing Sphere"},
- :harm {:name "Harm"},
- :guidance {:name "Guidance"},
- :meld-into-stone {:name "Meld into Stone"},
- :delayed-blast-fireball {:name "Delayed Blast Fireball"},
- :suggestion {:name "Suggestion"},
- :glyph-of-warding {:name "Glyph of Warding"},
- :animal-messenger {:name "Animal Messenger"},
- :beast-sense {:name "Beast Sense"},
- :moonbeam {:name "Moonbeam"},
- :true-polymorph {:name "True Polymorph"},
- :fog-cloud {:name "Fog Cloud"},
- :blade-barrier {:name "Blade Barrier"},
- :ensnaring-strike {:name "Ensnaring Strike"},
- :control-water {:name "Control Water"},
- :plane-shift {:name "Plane Shift"},
- :see-invisibility {:name "See Invisibility"},
- :identify {:name "Identify"},
- :cone-of-cold {:name "Cone of Cold"},
- :wish {:name "Wish"},
- :arcane-gate {:name "Arcane Gate"},
- :mending {:name "Mending"},
- :bless {:name "Bless"},
- :sacred-flame {:name "Sacred Flame"},
- :magic-weapon {:name "Magic Weapon"},
- :hold-monster {:name "Hold Monster"},
- :control-weather {:name "Control Weather"},
- :antipathy-sympathy {:name "Antipathy/Sympathy"},
- :wall-of-fire {:name "Wall of Fire"},
- :detect-thoughts {:name "Detect Thoughts"},
- :levitate {:name "Levitate"},
- :longstrider {:name "Longstrider"},
- :time-stop {:name "Time Stop"},
- :true-seeing {:name "True Seeing"},
- :comprehend-languages {:name "Comprehend Languages"},
- :locate-object {:name "Locate Object"},
- :resistance {:name "Resistance"},
- :find-the-path {:name "Find the Path"},
- :shocking-grasp {:name "Shocking Grasp"},
- :wrathful-smite {:name "Wrathful Smite"},
- :otil-s-resilient-sphere {:name "Otil.'s Resilient Sphere"},
- :bane {:name "Bane"},
- :haste {:name "Haste"},
- :spike-growth {:name "Spike Growth"},
- :aura-of-life {:name "Aura of Life"},
- :mirror-image {:name "Mirror Image"},
- :b-s-hand-arcane-hand- {:name "B.'s Hand (Arcane Hand)"},
- :cloud-of-daggers {:name "Cloud of Daggers"},
- :project-image {:name "Project Image"},
- :mass-heal {:name "Mass Heal"},
- :disguise-self {:name "Disguise Self"},
- :weird {:name "Weird"},
- :phantasmal-force {:name "Phantasmal Force"},
- :rar-s-telepathic-bond {:name "Rar.'s Telepathic Bond"},
- :flaming-sphere {:name "Flaming Sphere"},
- :fly {:name "Fly"},
- :giant-insect {:name "Giant Insect"},
- :swift-quiver {:name "Swift Quiver"},
- :heroes-feast {:name "Heroes' Feast"},
- :tongues {:name "Tongues"},
- :revivify {:name "Revivify"},
- :o-s-irresistible-dance {:name "O.'s Irresistible Dance"},
- :magic-circle {:name "Magic Circle"},
- :hex {:name "Hex"},
- :divination {:name "Divination"},
- :warding-bond {:name "Warding Bond"},
- :teleportation-circle {:name "Teleportation Circle"},
- :major-image {:name "Major Image"},
- :holy-aura {:name "Holy Aura"},
- :aura-of-purity {:name "Aura of Purity"},
- :leo-s-secret-chest {:name "Leo.'s Secret Chest"},
- :friends {:name "Friends"},
- :find-traps {:name "Find Traps"},
- :flesh-to-stone {:name "Flesh to Stone"},
- :slow {:name "Slow"},
- :shield-of-faith {:name "Shield of Faith"},
- :blur {:name "Blur"},
- :produce-flame {:name "Produce Flame"},
- :planar-binding {:name "Planar Binding"},
- :wall-of-thorns {:name "Wall of Thorns"},
- :reverse-gravity {:name "Reverse Gravity"},
- :dominate-monster {:name "Dominate Monster"},
- :leo-s-tiny-hut {:name "Leo.'s Tiny Hut"},
- :vicious-mockery {:name "Vicious Mockery"},
- :heroism {:name "Heroism"},
- :dream {:name "Dream"},
- :animal-friendship {:name "Animal Friendship"},
- :unseen-servant {:name "Unseen Servant"},
- :speak-with-animals {:name "Speak with Animals"},
- :shillelagh {:name "Shillelagh"},
- :druidcraft {:name "Druidcraft"},
- :inflict-wounds {:name "Inflict Wounds"},
- :faerie-fire {:name "Faerie Fire"},
- :clone {:name "Clone"},
- :chill-touch {:name "Chill Touch"},
- :freedom-of-movement {:name "Freedom of Movement"},
- :hunger-of-had- {:name "Hunger of Had."},
- :false-life {:name "False Life"},
- :invisibility {:name "Invisibility"},
- :gate {:name "Gate"},
- :dissonant-whispers {:name "Dissonant Whispers"},
- :tree-stride {:name "Tree Stride"},
- :telepathy {:name "Telepathy"},
- :healing-word {:name "Healing Word"},
- :flame-strike {:name "Flame Strike"},
- :maze {:name "Maze"},
- :lightning-bolt {:name "Lightning Bolt"},
- :expeditious-retreat {:name "Expeditious Retreat"},
- :prismatic-wall {:name "Prismatic Wall"},
- :plant-growth {:name "Plant Growth"},
- :entangle {:name "Entangle"},
- :true-strike {:name "True Strike"},
- :eldritch-blast {:name "Eldritch Blast"},
- :etherealness {:name "Etherealness"},
- :legend-lore {:name "Legend Lore"},
- :earthquake {:name "Earthquake"},
- :protection-from-energy {:name "Protection from Energy"},
- :destructive-wave {:name "Destructive Wave"},
- :wind-walk {:name "Wind Walk"},
- :wall-of-force {:name "Wall of Force"},
- :heal {:name "Heal"},
- :arms-of-had- {:name "Arms of Had."},
- :hallow {:name "Hallow"},
- :locate-animals-or-plants {:name "Locate Animals or Plants"},
- :m-s-acid-arrow {:name "M.'s Acid Arrow"},
- :disintegrate {:name "Disintegrate"},
- :charm-person {:name "Charm Person"},
- :spare-the-dying {:name "Spare the Dying"},
- :sunburst {:name "Sunburst"},
- :lightning-arrow {:name "Lightning Arrow"},
- :teleport {:name "Teleport"},
- :mislead {:name "Mislead"},
- :conjure-elemental {:name "Conjure Elemental"},
- :word-of-recall {:name "Word of Recall"},
- :fireball {:name "Fireball"},
- :animal-shapes {:name "Animal Shapes"},
- :power-word-heal {:name "Power Word Heal"},
- :guardian-of-faith {:name "Guardian of Faith"},
- :foresight {:name "Foresight"},
- :nyst-s-magic-aura-arcanists-magic-aura-
- {:name "Nyst.'s Magic Aura (Arcanist's Magic Aura)"},
- :contingency {:name "Contingency"},
- :aid {:name "Aid"},
- :guiding-bolt {:name "Guiding Bolt"},
- :flame-blade {:name "Flame Blade"},
- :wind-wall {:name "Wind Wall"},
- :demiplane {:name "Demiplane"},
- :mind-blank {:name "Mind Blank"},
- :find-familiar {:name "Find Familiar"},
- :tens-s-floating-disk {:name "Tens.'s Floating Disk"},
- :bestow-curse {:name "Bestow Curse"},
- :poison-spray {:name "Poison Spray"},
- :true-resurrection {:name "True Resurrection"},
- :speak-with-dead {:name "Speak with Dead"},
- :conjure-fey {:name "Conjure Fey"},
- :wall-of-stone {:name "Wall of Stone"},
- :hold-person {:name "Hold Person"},
- :power-word-stun {:name "Power Word Stun"},
- :contact-other-plane {:name "Contact Other Plane"},
- :mirage-arcane {:name "Mirage Arcane"},
- :armor-of-agath- {:name "Armor of Agath."},
- :gust-of-wind {:name "Gust of Wind"},
- :mord-s-faithful-hound {:name "Mord.'s Faithful Hound"},
- :reincarnate {:name "Reincarnate"},
- :conjure-woodland-beings {:name "Conjure Woodland Beings"},
- :modify-memory {:name "Modify Memory"},
- :telekinesis {:name "Telekinesis"},
- :contagion {:name "Contagion"},
- :beacon-of-hope {:name "Beacon of Hope"},
- :sanctuary {:name "Sanctuary"},
- :light {:name "Light"},
- :blade-ward {:name "Blade Ward"},
- :fire-storm {:name "Fire Storm"},
- :mord-s-sword-arcane-sword- {:name "Mord.'s Sword (Arcane Sword)"},
- :illusory-script {:name "Illusory Script"},
- :shapechange {:name "Shapechange"},
- :guards-and-wards {:name "Guards and Wards"},
- :t-s-hideous-laughter {:name "T.'s Hideous Laughter"},
- :detect-poison-and-disease {:name "Detect Poison and Disease"},
- :cure-wounds {:name "Cure Wounds"},
- :speak-with-plants {:name "Speak with Plants"},
- :mage-armor {:name "Mage Armor"},
- :thaumaturgy {:name "Thaumaturgy"},
- :eyebite {:name "Eyebite"},
- :hellish-rebuke {:name "Hellish Rebuke"},
- :scrying {:name "Scrying"},
- :greater-invisibility {:name "Greater Invisibility"},
- :pass-without-trace {:name "Pass without Trace"},
- :banishing-smite {:name "Banishing Smite"},
- :phantasmal-killer {:name "Phantasmal Killer"},
- :antimagic-field {:name "Antimagic Field"},
- :burning-hands {:name "Burning Hands"},
- :water-walk {:name "Water Walk"},
- :fear {:name "Fear"},
- :arcane-eye {:name "Arcane Eye"},
- :sleep {:name "Sleep"},
- :find-steed {:name "Find Steed"},
- :spider-climb {:name "Spider Climb"},
- :finger-of-death {:name "Finger of Death"},
- :darkness {:name "Darkness"},
- :heat-metal {:name "Heat Metal"},
- :call-lightning {:name "Call Lightning"},
- :color-spray {:name "Color Spray"},
- :geas {:name "Geas"},
- :prestidigitation {:name "Prestidigitation"},
- :knock {:name "Knock"},
- :phantom-steed {:name "Phantom Steed"},
- :create-undead {:name "Create Undead"},
- :jump {:name "Jump"},
- :resurrection {:name "Resurrection"},
- :circle-of-death {:name "Circle of Death"},
- :death-ward {:name "Death Ward"},
- :circle-of-power {:name "Circle of Power"},
- :conjure-volley {:name "Conjure Volley"},
- :hunters-mark {:name "Hunter's Mark"},
- :stone-shape {:name "Stone Shape"},
- :message {:name "Message"},
- :divine-favor {:name "Divine Favor"},
- :compulsion {:name "Compulsion"},
- :goodberry {:name "Goodberry"},
- :web {:name "Web"},
- :stoneskin {:name "Stoneskin"},
- :silent-image {:name "Silent Image"},
- :incendiary-cloud {:name "Incendiary Cloud"},
- :staggering-smite {:name "Staggering Smite"},
- :chromatic-orb {:name "Chromatic Orb"},
- :misty-step {:name "Misty Step"},
- :gaseous-form {:name "Gaseous Form"}})
+  (into
+   {}
+   (map
+    (fn [spell]
+      [(or (:key spell)
+           (common/name-to-kw (:name spell)))
+       spell]))
+   spells))
