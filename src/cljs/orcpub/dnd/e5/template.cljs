@@ -13,8 +13,7 @@
             [orcpub.dnd.e5.equipment :as equip5e]
             [orcpub.dnd.e5.armor :as armor5e]
             [orcpub.dnd.e5.spell-lists :as sl]
-            [orcpub.dnd.e5.magic-items :as mi]
-            [orcpub.dnd.e5.monsters :as monst5e])
+            [orcpub.dnd.e5.magic-items :as mi])
   #_(:require-macros [orcpub.dnd.e5.options :as opt5e]
                      [orcpub.dnd.e5.modifiers :as mod5e]))
 
