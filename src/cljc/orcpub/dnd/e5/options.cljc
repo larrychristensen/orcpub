@@ -592,7 +592,8 @@ check. The GM might also call for a Dexterity (Sleight of Hand) check to determi
                                        known-mode
                                        spell-list
                                        spells
-                                       ability] :as cfg}]
+                                       ability] :as cfg}
+                               cls-cfg]
   (reduce
    (fn [m [cls-lvl v]]
      (let [[num restriction] (if (number? v) [v] ((juxt :num :restriction) v))
@@ -601,30 +602,31 @@ check. The GM might also call for a Dexterity (Sleight of Hand) check to determi
                        (or spells (sl/spell-lists (or spell-list class-key)))
                        (keys slots))
            acquire? (= :acquire known-mode)]
-       (assoc m cls-lvl
-              [(t/selection-cfg
-                {:name "Spells Known"
-                 :options (vec
-                           (flatten
-                            (map
-                             (fn [[lvl spell-keys]]
-                               (map
-                                (fn [spell-key]
-                                  (let [spell (spells/spell-map spell-key)]
-                                    (t/option-cfg
-                                     {:name (str lvl " - " (:name spell))
-                                      :key spell-key
-                                      :help (spell-help spell)
-                                      :modifiers [(modifiers/spells-known lvl spell-key ability (class-names class-key))]})))
-                                (apply-spell-restriction spell-keys restriction)))
-                             all-spells)))
-                 :min num
-                 :max (if (not acquire?) num)
-                 :new-item-fn (fn [selection selected-items _ key]
-                                {::entity/key key})
-                 ;;acquire?
-                 #_(if acquire?
-                     (fn [s o v] {::entity/key nil}))})])))
+       (let [options (vec
+                      (flatten
+                       (map
+                        (fn [[lvl spell-keys]]
+                          (map
+                           (fn [spell-key]
+                             (let [spell (spells/spell-map spell-key)]
+                               (t/option-cfg
+                                {:name (str lvl " - " (:name spell))
+                                 :key spell-key
+                                 :help (spell-help spell)
+                                 :modifiers [(modifiers/spells-known lvl spell-key ability (class-names class-key))]})))
+                           (apply-spell-restriction spell-keys restriction)))
+                        all-spells)))]
+         (assoc m cls-lvl
+                [(t/selection-cfg
+                  {:name "Spells Known"
+                   :options options
+                   :min num
+                   :max (if (not acquire?) num)
+                   :new-item-fn (fn [selection selected-items _ key]
+                                  {::entity/key key})
+                   ;;acquire?
+                   #_(if acquire?
+                       (fn [s o v] {::entity/key nil}))})]))))
    {}
    spells-known))
 
@@ -633,8 +635,9 @@ check. The GM might also call for a Dexterity (Sleight of Hand) check to determi
                                      cantrips-known
                                      spells-known
                                      known-mode
-                                     ability] :as cfg}]
-  (let [spell-selections (spells-known-selections cfg)
+                                     ability] :as cfg}
+                             cls-cfg]
+  (let [spell-selections (spells-known-selections cfg cls-cfg)
         cantrip-selections (cantrip-selections class-key ability cantrips-known)]
     {:selections (merge-with
                   concat
@@ -709,6 +712,7 @@ check. The GM might also call for a Dexterity (Sleight of Hand) check to determi
        skills))
      :min num
      :max num
+     :tags #{:skill-profs :profs}
      :prereq-fn prereq-fn})))
 
 (defn tool-selection
@@ -718,7 +722,8 @@ check. The GM might also call for a Dexterity (Sleight of Hand) check to determi
      :help (proficiency-help num "a tool" "tools")
      :options (tool-options equipment/tools)
      :min num
-     :max num}))
+     :max num
+     :tags #{:tool-profs :profs}}))
   ([options num]
    (t/selection-cfg
     {:name "Tool Proficiency"
@@ -728,7 +733,8 @@ check. The GM might also call for a Dexterity (Sleight of Hand) check to determi
                 (comp (set options) :key)
                 equipment/tools))
      :min num
-     :max num})))
+     :max num
+     :tags #{:tool-profs :profs}})))
 
 
 (defn weapon-proficiency-selection
@@ -738,17 +744,19 @@ check. The GM might also call for a Dexterity (Sleight of Hand) check to determi
      :help (proficiency-help num "a weapon" "weapons")
      :options (weapon-proficiency-options weapons/weapons)
      :min num
-     :max num}))
+     :max num
+     :tags #{:weapon-profs :profs}}))
   ([options num]
    (t/selection-cfg
-    {:name "Tool Proficiency"
+    {:name "Weapon Proficiency"
      :help (proficiency-help num "a weapon" "weapons")
      :options (weapon-proficiency-options
                (filter
                 (comp (set options) :key)
                 weapons/weapons))
      :min num
-     :max num})))
+     :max num
+     :tags #{:weapon-profs :profs}})))
 
 (defn skilled-selection [title]
   (t/selection
@@ -1169,18 +1177,20 @@ check. The GM might also call for a Dexterity (Sleight of Hand) check to determi
               skills)
     :min num
     :max num
-    :multiselect? true}))
+    :multiselect? true
+    :tags #{:profs :skill-profs :expertise}}))
 
 (def rogue-expertise-selection
-  (t/selection
-   "Expertise"
-   [(t/option
-     "Two Skills"
-     :two-skills
-     [(expertise-selection 2 :two-skills)]
-     [])
-    (t/option
-     "One Skill/Theives Tools"
-     :one-skill-thieves-tools
-     [(expertise-selection 1 :one-skill-thieves-tools)]
-     [(modifiers/tool-proficiency :thieves-tools)])]))
+  (t/selection-cfg
+   {:name "Expertise"
+    :tags #{:profs :skill-profs :expertise}
+    :options [(t/option
+               "Two Skills"
+               :two-skills
+               [(expertise-selection 2 :two-skills)]
+               [])
+              (t/option
+               "One Skill/Theives Tools"
+               :one-skill-thieves-tools
+               [(expertise-selection 1 :one-skill-thieves-tools)]
+               [(modifiers/tool-proficiency :thieves-tools)])]}))

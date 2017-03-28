@@ -1,5 +1,6 @@
 (ns orcpub.dnd.e5.template
   (:require [clojure.string :as s]
+            [clojure.set :as sets]
             [orcpub.entity :as entity]
             [orcpub.entity-spec :as es]
             [orcpub.template :as t]
@@ -16,6 +17,8 @@
             [orcpub.dnd.e5.magic-items :as mi])
   #_(:require-macros [orcpub.dnd.e5.options :as opt5e]
                      [orcpub.dnd.e5.modifiers :as mod5e]))
+
+(enable-console-print!)
 
 
 (def character
@@ -277,9 +280,10 @@
     :selections (vec
                  (concat
                   (if subraces
-                    [(t/selection
-                      "Subrace"
-                      (vec (map (partial subrace-option source) subraces)))])
+                    [(t/selection-cfg
+                      {:name "Subrace"
+                       :tags #{:subrace}
+                       :options (vec (map (partial subrace-option source) subraces))})])
                   (if language-options
                     (let [{lang-num :choose lang-options :options} language-options
                           lang-kws (if (:any lang-options)
@@ -471,65 +475,66 @@
                                          6 3
                                          2)
                      :save-dc (?spell-save-dc :con)})))]
-    :selections [(t/selection
-                  "Draconic Ancestry"
-                  (map
-                   draconic-ancestry-option
-                   [{:name "Black"
-                     :breath-weapon {:damage-type :acid
-                                     :area-type :line
-                                     :line-width 5
-                                     :line-length 30
-                                     :save :dex}}
-                    {:name "Blue"
-                     :breath-weapon {:damage-type :lightning
-                                     :area-type :line
-                                     :line-width 5
-                                     :line-length 30
-                                     :save :dex}}
-                    {:name "Brass"
-                     :breath-weapon {:damage-type :fire
-                                     :area-type :line
-                                     :line-width 5
-                                     :line-length 30
-                                     :save :dex}}
-                    {:name "Bronze"
-                     :breath-weapon {:damage-type :lightning
-                                     :area-type :line
-                                     :line-width 5
-                                     :line-length 30
-                                     :save :dex}}
-                    {:name "Copper"
-                     :breath-weapon {:damage-type :acid
-                                     :area-type :line
-                                     :line-width 5
-                                     :line-length 30
-                                     :save :dex}}
-                    {:name "Gold"
-                     :breath-weapon {:damage-type :fire
-                                     :area-type :cone
-                                     :length 15
-                                     :save :dex}}
-                    {:name "Green"
-                     :breath-weapon {:damage-type :poison
-                                     :area-type :cone
-                                     :length 15
-                                     :save :con}}
-                    {:name "Red"
-                     :breath-weapon {:damage-type :fire
-                                     :area-type :cone
-                                     :length 15
-                                     :save :dex}}
-                    {:name "Silver"
-                     :breath-weapon {:damage-type :cold
-                                     :area-type :cone
-                                     :length 15
-                                     :save :con}}
-                    {:name "White"
-                     :breath-weapon {:damage-type :cold
-                                     :area-type :cone
-                                     :length 15
-                                     :save :con}}]))]}))
+    :selections [(t/selection-cfg
+                  {:name "Draconic Ancestry"
+                   :tags #{:subrace}
+                   :options (map
+                             draconic-ancestry-option
+                             [{:name "Black"
+                               :breath-weapon {:damage-type :acid
+                                               :area-type :line
+                                               :line-width 5
+                                               :line-length 30
+                                               :save :dex}}
+                              {:name "Blue"
+                               :breath-weapon {:damage-type :lightning
+                                               :area-type :line
+                                               :line-width 5
+                                               :line-length 30
+                                               :save :dex}}
+                              {:name "Brass"
+                               :breath-weapon {:damage-type :fire
+                                               :area-type :line
+                                               :line-width 5
+                                               :line-length 30
+                                               :save :dex}}
+                              {:name "Bronze"
+                               :breath-weapon {:damage-type :lightning
+                                               :area-type :line
+                                               :line-width 5
+                                               :line-length 30
+                                               :save :dex}}
+                              {:name "Copper"
+                               :breath-weapon {:damage-type :acid
+                                               :area-type :line
+                                               :line-width 5
+                                               :line-length 30
+                                               :save :dex}}
+                              {:name "Gold"
+                               :breath-weapon {:damage-type :fire
+                                               :area-type :cone
+                                               :length 15
+                                               :save :dex}}
+                              {:name "Green"
+                               :breath-weapon {:damage-type :poison
+                                               :area-type :cone
+                                               :length 15
+                                               :save :con}}
+                              {:name "Red"
+                               :breath-weapon {:damage-type :fire
+                                               :area-type :cone
+                                               :length 15
+                                               :save :dex}}
+                              {:name "Silver"
+                               :breath-weapon {:damage-type :cold
+                                               :area-type :cone
+                                               :length 15
+                                               :save :con}}
+                              {:name "White"
+                               :breath-weapon {:damage-type :cold
+                                               :area-type :cone
+                                               :length 15
+                                               :save :con}}])})]}))
 
 
 (def gnome-option
@@ -944,7 +949,8 @@
               (:values tool))
     :min num
     :max num
-    :prereq-fn prereq-fn}))
+    :prereq-fn prereq-fn
+    :tags #{:tool-profs :profs}}))
 
 (defn tool-prof-selection [tool-options & [key prereq-fn]]
   (let [[first-key first-num] (-> tool-options first)
@@ -994,6 +1000,15 @@
                     (some-> spellcasting-template :selections (get i))))
       :modifiers (some-> levels (get i) :modifiers)})))
 
+(defn total-levels-prereq [level]
+  (fn [c] (>= (es/entity-val c :total-levels) level)))
+
+(defn add-level-prereq [template-obj level]
+  (assoc
+   template-obj
+   ::t/prereq-fn
+   (total-levels-prereq level)))
+
 (defn subclass-option [cls
                        {:keys [name
                                profs
@@ -1001,7 +1016,8 @@
                                spellcasting
                                modifiers
                                level-modifiers
-                               traits]
+                               traits
+                               levels]
                         :as subcls}]
   (let [kw (common/name-to-kw name)
         {:keys [armor weapon save skill-options tool-options tool]} profs
@@ -1010,28 +1026,52 @@
         armor-profs (keys armor)
         weapon-profs (keys weapon)
         tool-profs (keys tool)
-        spellcasting-template (opt5e/spellcasting-template
+        #_spellcasting-template #_(opt5e/spellcasting-template
                                (assoc
                                 spellcasting
                                 :class-key
-                                (or (:spell-list spellcasting) kw)))
-        option (t/option
-                name
-                kw
-                (vec
-                 (concat
-                  selections
-                  (if (seq tool-options) [(tool-prof-selection tool-options)])
-                  (if (seq skill-kws) [(opt5e/skill-selection skill-kws skill-num)])))
-                (vec
-                 (concat
-                  modifiers
-                  [(mod5e/subclass (:key cls) kw)]
-                  (armor-prof-modifiers armor-profs)
-                  (weapon-prof-modifiers weapon-profs)
-                  (tool-prof-modifiers tool-profs)
-                  (traits-modifiers traits true))))]
-    (if spellcasting-template
+                                (or (:spell-list spellcasting) kw))
+                               subcls)
+        #_spell-selections #_(mapcat
+                          (fn [[lvl selections]]
+                            (if (= kw :eldritch-knight) (prn "LEVEL" lvl))
+                            (map
+                             (fn [selection]
+                               (assoc selection ::t/prereq-fn (fn [c] (let [total-levels (es/entity-val c :total-levels)]
+                                                                        (prn "TOTAL LEVELS" total-levels lvl)
+                                                                        (>= lvl total-levels)))))
+                             selections))
+                          (:selections spellcasting-template))
+        level-selections (mapcat
+                          (fn [[lvl {selections :selections}]]
+                            (map
+                             (fn [selection]
+                               (assoc
+                                selection
+                                ::t/prereq-fn
+                                (total-levels-prereq lvl)))
+                             selections))
+                          levels)]
+    (t/option
+     name
+     kw
+     (map
+      (fn [selection]
+        (update selection ::t/tags sets/union #{(:key cls) kw}))
+      (concat
+       selections
+       level-selections
+       (if (seq tool-options) [(tool-prof-selection tool-options)])
+       (if (seq skill-kws) [(opt5e/skill-selection skill-kws skill-num)])))
+     (vec
+      (concat
+       modifiers
+       [(mod5e/subclass (:key cls) kw)]
+       (armor-prof-modifiers armor-profs)
+       (weapon-prof-modifiers weapon-profs)
+       (tool-prof-modifiers tool-profs)
+       (traits-modifiers traits true))))
+    #_(if spellcasting-template
       (assoc
        option
        ::t/plugins [{::t/path [:class (:key cls)]
@@ -1060,12 +1100,15 @@
                     kw
                     spellcasting-template
                     i]
-  (let [ability-inc-set (set ability-increase-levels)]
+  (let [ability-inc-set (set ability-increase-levels)
+        level-kw (level-key i)]
     (t/option-cfg
      {:name (level-name i)
-      :key (level-key i)
+      :key level-kw
       :order i
-      :selections (vec
+      :selections (mapv
+                   (fn [selection]
+                     (update selection ::t/tags sets/union #{:level level-kw}))
                    (concat
                     (some-> levels (get i) :selections)
                     (some-> spellcasting-template :selections (get i))
@@ -1074,6 +1117,7 @@
                         {:name subclass-title
                          :key :subclass
                          :help subclass-help
+                         :tags #{:subclass}
                          :options (mapv
                                    #(subclass-option (assoc cls :key kw) %)
                                    subclasses)})])
@@ -1163,6 +1207,7 @@
      (t/selection-cfg
       {:name (str "Starting Equipment: " name)
        :help help
+       :tags #{:starting-equipment}
        :options (mapv
                  option-fn
                  options)}))
@@ -1206,12 +1251,14 @@
         {:keys [save skill-options multiclass-skill-options tool-options multiclass-tool-options tool]
          armor-profs :armor weapon-profs :weapon} profs
         save-profs (keys save)
-        spellcasting-template (opt5e/spellcasting-template (assoc spellcasting :class-key kw))]
+        spellcasting-template (opt5e/spellcasting-template (assoc spellcasting :class-key kw) cls)]
     (t/option-cfg
      {:name name
       :key kw
       :help help
-      :selections (vec
+      :selections (mapv
+                   (fn [selection]
+                     (update selection ::t/tags sets/union #{kw}))
                    (concat
                     selections
                     (if (seq tool-options)
@@ -1226,11 +1273,13 @@
                     (if multiclass-skill-options
                       [(class-skill-selection multiclass-skill-options :multiclass-skill-proficiency (fn [c] (not= kw (first (:classes c)))))])
                     [(t/selection-cfg
-                      {:name "Levels"
+                      {:name (str name " Levels")
+                       :key :levels
                        :help "These are your levels in the containing class. You can add levels by clicking the 'Add Levels' button below."
                        :new-item-text "Level Up (Add a Level)"
                        :new-item-fn (fn [selection options current-values]
                                       {::entity/key (-> current-values count inc level-key)})
+                       :tags #{kw}
                        :options (vec
                                  (map
                                   (partial level-option cls kw spellcasting-template)
@@ -2123,14 +2172,66 @@
     (or (= school "enchantment")
         (= school "illusion"))))
 
-(defn total-levels-prereq [level]
-  (fn [c] (>= (es/entity-val c :total-levels) level)))
-
-(defn add-level-prereq [template-obj level]
-  (assoc
-   template-obj
-   ::t/prereq-fn
-   (total-levels-prereq level)))
+(def eldritch-knight-cfg
+  {:name "Eldritch Knight"
+   :spellcaster true
+   :spellcasting {:level-factor 3
+                  :spell-list :wizard
+                  :cantrips-known {3 2 10 3}
+                  :known-mode :schedule
+                  :spells-known {3 {:num 3
+                                    :restriction eldritch-knight-spell?}
+                                 4 {:num 1
+                                    :restriction eldritch-knight-spell?}
+                                 7 {:num 1
+                                    :restriction eldritch-knight-spell?}
+                                 8 1
+                                 10 {:num 1
+                                     :restriction eldritch-knight-spell?}
+                                 11 {:num 1
+                                     :restriction eldritch-knight-spell?}
+                                 13 {:num 1
+                                     :restriction eldritch-knight-spell?}
+                                 14 1
+                                 16 {:num 1
+                                     :restriction eldritch-knight-spell?}
+                                 19 {:num 1
+                                     :restriction eldritch-knight-spell?}
+                                 20 1}
+                  :ability :int}
+   :modifiers [(mod5e/bonus-action
+                {:name "Summon Bonded Weapon"
+                 :page 75
+                 :summary "If on the same plane of existence, instantly teleport a bonded weapon into your hand"})]
+   :levels {3 {:selections [(assoc
+                             (opt5e/spell-selection
+                              :wizard
+                              1
+                              :int
+                              "Eldritch Knight"
+                              3)
+                             ::t/name "Eldritch Knight: Level 1 Spell"
+                             ::t/tags #{:spells})]}
+            7 {:modifiers [(mod5e/bonus-action
+                            {:name "War Magic"
+                             :page 75
+                             :summary "make a weapon attack if you used your action to cast a cantrip"})]}
+            18 {:modifiers [(mod5e/bonus-action
+                             {:name "Improved War Magic"
+                              :page 75
+                              :summary "make a weapon attack if you used your action to cast a spell"})]}}
+   :traits [{:name "Weapon Bond"
+             :level 3
+             :page 75
+             :summary "Bond with up to two weapons (see Summon Bonded Weapon)"}
+            {:name "Eldritch Strike"
+             :page 75
+             :level 10
+             :summary "a creature has disadvantage on next saving throw against a spell you cast before the end of your next turn if you hit it with a weapon attack"}
+            {:name "Arcane Charge"
+             :level 15
+             :page 75
+             :summary "teleport up to 30 ft. when you use Action Surge"}]})
 
 (def fighter-option
   (class-option
@@ -2284,56 +2385,7 @@
                             :level 15
                             :page 74
                             :summary "you regain 1 superiority die when you roll iniative and have no remaining superiority dice"}]}
-                 {:name "Eldritch Knight"
-                  :spellcaster true
-                  :spellcasting {:level-factor 3
-                                 :spell-list :wizard
-                                 :cantrips-known {3 2 10 3}
-                                 :known-mode :schedule
-                                 :spells-known {3 {:num 3
-                                                   :restriction eldritch-knight-spell?}
-                                                4 {:num 1
-                                                   :restriction eldritch-knight-spell?}
-                                                7 {:num 1
-                                                   :restriction eldritch-knight-spell?}
-                                                8 1
-                                                10 {:num 1
-                                                    :restriction eldritch-knight-spell?}
-                                                11 {:num 1
-                                                    :restriction eldritch-knight-spell?}
-                                                13 {:num 1
-                                                    :restriction eldritch-knight-spell?}
-                                                14 1
-                                                16 {:num 1
-                                                    :restriction eldritch-knight-spell?}
-                                                19 {:num 1
-                                                    :restriction eldritch-knight-spell?}
-                                                20 1}
-                                 :ability :int}
-                  :modifiers [(mod5e/bonus-action
-                               {:name "Summon Bonded Weapon"
-                                :page 75
-                                :summary "If on the same plane of existence, instantly teleport a bonded weapon into your hand"})]
-                  :levels {7 {:modifiers [(mod5e/bonus-action
-                                           {:name "War Magic"
-                                            :page 75
-                                            :summary "make a weapon attack if you used your action to cast a cantrip"})]}
-                           18 {:modifiers [(mod5e/bonus-action
-                                            {:name "Improved War Magic"
-                                             :page 75
-                                             :summary "make a weapon attack if you used your action to cast a spell"})]}}
-                  :traits [{:name "Weapon Bond"
-                            :level 3
-                            :page 75
-                            :summary "Bond with up to two weapons (see Summon Bonded Weapon)"}
-                           {:name "Eldritch Strike"
-                            :page 75
-                            :level 10
-                            :summary "a creature has disadvantage on next saving throw against a spell you cast before the end of your next turn if you hit it with a weapon attack"}
-                           {:name "Arcane Charge"
-                            :level 15
-                            :page 75
-                            :summary "teleport up to 30 ft. when you use Action Surge"}]}]}))
+                 eldritch-knight-cfg]}))
 
 (defn evasion [level page]
   {:name "Evasion"
@@ -4200,17 +4252,29 @@ Additionally, while perceiving through your familiar’s senses, you can also sp
                            {:name "Master Duelist"
                             :level 17}]}]}])
 
+(defn background-selection [cfg]
+  (t/selection-cfg
+   (merge
+    {:name "Background"
+     :tags #{:background}}
+    cfg)))
+
+(defn class-selection [cfg]
+  (t/selection-cfg
+   (merge
+    {:name "Class"
+     :tags #{:class}}
+    cfg)))
+
 (defn sword-coast-adventurers-guide-selections [app-state]
-  [(t/selection
-    "Background"
-    (mapv
-     background-option
-     sword-coast-adventurers-guide-backgrounds))
-   (t/selection
-    "Class"
-    (mapv
-     class-option
-     (scag-classes app-state)))])
+  [(background-selection
+    {:options (mapv
+               background-option
+               sword-coast-adventurers-guide-backgrounds)})
+   (class-selection
+    {:options (mapv
+               class-option
+               (scag-classes app-state))})])
 
 (defn ability-item [name abbr desc]
   [:li.m-t-5 [:span.f-w-b.m-r-5 (str name " (" abbr ")")] desc])
@@ -4226,6 +4290,7 @@ Additionally, while perceiving through your familiar’s senses, you can also sp
     :new-item-fn (fn [selection selected-items _ key]
                    {::entity/key key
                     ::entity/value 1})
+    :tags #{:equipment}
     :options (mapv
               (fn [{:keys [name key description]}]
                 (t/option-cfg
@@ -4273,6 +4338,7 @@ Additionally, while perceiving through your familiar’s senses, you can also sp
 (defn template-selections [app-state]
   [(t/selection-cfg
     {:name "Optional Content"
+     :tags #{:optional-content}
      :help (amazon-frame-help phb-amazon-frame
                               [:span
                                "Base options are from the Player's Handbook, although descriptions are either from the "
@@ -4294,6 +4360,7 @@ Additionally, while perceiving through your familiar’s senses, you can also sp
    (t/selection-cfg
     {:name "Base Ability Scores"
      :key :ability-scores
+     :tags #{:ability-scores}
      :help [:div
             [:p "Ability scores are your major character traits and affect nearly all aspects of play. These scores range from 1 to 20 for player characters and DO NOT include racial or other bonuses."]
             [:ul.m-t-10.m-l-5
@@ -4357,6 +4424,7 @@ Additionally, while perceiving through your familiar’s senses, you can also sp
                 ::t/modifiers [(mod5e/deferred-abilities)]}]})
    (t/selection-cfg
     {:name "Alignment"
+     :tags #{:description}
      :options (mapv
                (fn [alignment]
                  (t/option-cfg
@@ -4366,6 +4434,7 @@ Additionally, while perceiving through your familiar’s senses, you can also sp
    (t/selection-cfg
     {:name "Race"
      :help "Race determines your appearance and helps shape your culture and background. It also affects you ability scores, size, speed, languages, and many other crucial inherent traits."
+     :tags #{:race}
      :options [dwarf-option
                elf-option
                halfling-option
@@ -4375,15 +4444,13 @@ Additionally, while perceiving through your familiar’s senses, you can also sp
                half-elf-option
                half-orc-option
                tiefling-option]})
-   (t/selection-cfg
-    {:name "Background"
-     :help "Background broadly describes your character origin. It also affords you two skill proficiencies and possibly proficiencies with tools or languages."
+   (background-selection
+    {:help "Background broadly describes your character origin. It also affords you two skill proficiencies and possibly proficiencies with tools or languages."
      :options (map
                background-option
                backgrounds)})
-   (t/selection-cfg
-    {:name "Class"
-     :help [:div
+   (class-selection
+    {:help [:div
             [:p "Class is your adventuring vocation. It determines many of your special talents, including weapon, armor, skill, saving throw, and tool proficiencies. It also provides starting equipment options. When you gain levels, you gain them in a particular class."]
             [:p.m-t-10 "Select your class using the selector at the top of the 'Class' section. Multiclassing is uncommon, but you may multiclass by clicking the 'Add Class' button at the end of the 'Class' section."]]
      :max nil

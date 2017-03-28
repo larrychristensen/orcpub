@@ -29,7 +29,7 @@
                                                         :min ::min
                                                         :max ::max)))
 
-(defn selection-cfg [{:keys [name key source page order options help min sequential? multiselect? quantity? collapsible? ui-fn new-item-text new-item-fn prereq-fn simple?] :as cfg}]
+(defn selection-cfg [{:keys [name key source page order options help min sequential? multiselect? quantity? collapsible? ui-fn new-item-text new-item-fn prereq-fn simple? tags] :as cfg}]
   (let [max (if (find cfg :max) (:max cfg) 1)]
     {::name name
      ::key (or key (common/name-to-kw name))
@@ -45,6 +45,7 @@
      ::quantity? quantity?
      ::multiselect? multiselect?
      ::ui-fn ui-fn
+     ::tags tags
      ::new-item-text new-item-text
      ::new-item-fn new-item-fn
      ::prereq-fn prereq-fn

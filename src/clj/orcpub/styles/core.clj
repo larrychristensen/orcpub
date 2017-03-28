@@ -49,11 +49,11 @@
    [:.f-s-14
     {:font-size "14px"}]
    [:.f-s-16
-    {:font-size "16px"}]
+    {:font-size "16px !important"}]
    [:.f-s-18
-    {:font-size "18px"}]
+    {:font-size "18px !important"}]
    [:.f-s-20
-    {:font-size "20px"}]
+    {:font-size "20px !important"}]
    [:.f-s-24
     {:font-size "24px !important"}]
    [:.f-s-28

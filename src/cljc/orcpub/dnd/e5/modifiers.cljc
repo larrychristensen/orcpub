@@ -10,7 +10,7 @@
 (defn cls [cls-key]
   (mods/modifier ?classes
                  (if (not ((set ?classes) cls-key))
-                   (conj ?classes cls-key)
+                   (conj (or ?classes []) cls-key)
                    ?classes)))
 
 (defn subclass [cls-key subclass-key]

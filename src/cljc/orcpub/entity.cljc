@@ -319,6 +319,57 @@
    template
    plugins))
 
+(defn make-path-map-aux [character]
+  (let [flat-options (flatten-options (::options character))]
+    (reduce
+     (fn [m v]
+       (update-in m (::t/path v) (fn [c] (or c {}))))
+     {}
+     flat-options)))
+
+(def memoized-make-path-map-aux (memoize make-path-map-aux))
+
+(defn make-path-map [character]
+  (memoized-make-path-map-aux character))
+
+(defn get-all-selections-aux [path {:keys [::t/key ::t/selections ::t/options] :as obj} parent selected-option-paths]
+  (let [children (map
+                  (fn [{:keys [::t/key] :as s}]
+                    (get-all-selections-aux (conj path key) s obj selected-option-paths))
+                  (or selections options))]
+    (cond
+      selections
+      (if (get-in selected-option-paths path) children)
+      
+      options
+      (if key
+        (concat
+         [(assoc obj ::path path ::parent parent)]
+         children)
+        children))))
+
+(defn remove-disqualified-selections [selections built-char]
+  (remove #(or (nil? %)
+               (let [prereq-fn (::t/prereq-fn %)]
+                 (and prereq-fn (not (prereq-fn built-char)))))
+          selections))
+
+(defn get-all-selections [path obj selected-option-paths built-char]
+  (remove-disqualified-selections
+   (flatten (get-all-selections-aux path obj nil selected-option-paths))
+   built-char))
+
+(defn available-selections [raw-entity built-entity template]
+  (let [path-map (make-path-map raw-entity)
+        _ (prn "OPTION_PATHS" path-map)
+        all-selections (get-all-selections [] template path-map built-entity)]
+    all-selections))
+
+(defn tagged-selections [available-selections tags]
+  (filter
+   #(seq (intersection tags (::t/tags %)))
+   available-selections))
+
 (def memoized-build-template-aux (memoize build-template-aux))
 
 (defn build-template [raw-entity template]
