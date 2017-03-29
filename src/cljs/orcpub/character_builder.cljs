@@ -820,7 +820,7 @@
         [:div.w-50-p
          [:img.character-image.w-100-p.m-b-20 {:src (or (get-in @app-state [:character ::entity/values :image-url]) "image/barbarian-girl.png")}]]
         [:div.w-50-p
-         (if background [display-section "Background" nil [:span.f-s-18.f-w-n background]])
+         (if background [svg-icon-section "Background" "ages" [:span.f-s-18.f-w-n background]])
          (if alignment [svg-icon-section "Alignment" "yin-yang" [:span.f-s-18.f-w-n alignment]])
          [armor-class-section armor-class armor-class-with-armor (merge magic-armor armor)]
          [svg-icon-section "Hit Points" "health-normal" (char5e/max-hit-points built-char)]
@@ -1684,6 +1684,9 @@
     :icon "battle-gear"
     :tags #{:class :subclass}
     :ui-fns {:class class-levels-selector}}
+   {:name "Spells"
+    :icon "spell-book"
+    :tags #{:spells}}
    {:name "Proficiencies"
     :icon "juggler"
     :tags #{:profs}}
@@ -1823,13 +1826,19 @@
            (let [actual-path (if ref [ref] path)
                  entity-path (entity/get-entity-path built-template character actual-path)
                  selected-options (get-in character entity-path)
-                 selected-count (count selected-options)
+                 selected-count (cond
+                                  (sequential? selected-options)
+                                  (count selected-options)
+
+                                  (map? selected-options)
+                                  1
+                                  :else 0)
                  remaining (- min selected-count)]
              ^{:key name}
              [:div.p-5
               [:div.flex.justify-cont-s-b
                [:span.f-s-18.f-w-b name]
-               (if (pos? min)
+               (if (and max (pos? min))
                  [:div.m-l-10
                   (cond
                     (pos? remaining)
@@ -2025,4 +2034,4 @@
      [:div.white.flex.justify-cont-c
       [:div.content.f-w-n.f-s-12
        [:div.p-10
-        [:div.m-b-5 "Icons made by Lorc and Caduceus. Available on " [:a.orange {:href "http://game-icons.net"} "http://game-icons.net"]]]]]]))
+        [:div.m-b-5 "Icons made by Lorc, Caduceus, and Delapouite. Available on " [:a.orange {:href "http://game-icons.net"} "http://game-icons.net"]]]]]]))

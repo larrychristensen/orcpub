@@ -486,7 +486,8 @@ check. The GM might also call for a Dexterity (Sleight of Hand) check to determi
     {:name (spell-level-title level)
      :options (spell-options spell-keys level spellcasting-ability class-name)
      :min num
-     :max num})))
+     :max num
+     :tags #{:spells}})))
 
 (defn spell-slot-schedule [level-factor]
   (case level-factor
@@ -624,6 +625,7 @@ check. The GM might also call for a Dexterity (Sleight of Hand) check to determi
                    :max (if (not acquire?) num)
                    :new-item-fn (fn [selection selected-items _ key]
                                   {::entity/key key})
+                   :tags #{:spells}
                    ;;acquire?
                    #_(if acquire?
                        (fn [s o v] {::entity/key nil}))})]))))
