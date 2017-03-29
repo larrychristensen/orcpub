@@ -707,11 +707,12 @@ check. The GM might also call for a Dexterity (Sleight of Hand) check to determi
      :order order
      :help (proficiency-help num "a skill" "skills")
      :options (skill-options
-      (filter
-       (comp (set options) :key)
-       skills))
+               (filter
+                (comp (set options) :key)
+                skills))
      :min num
      :max num
+     :ref :skill-profs
      :tags #{:skill-profs :profs}
      :prereq-fn prereq-fn})))
 

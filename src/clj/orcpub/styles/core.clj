@@ -5,6 +5,7 @@
             [orcpub.constants :as const]))
 
 (def button-color "#f0a100")
+(def red "#780028")
 
 (def container-style
   {:display :flex
@@ -45,9 +46,9 @@
   [[:.f-s-10
     {:font-size "10px"}]
    [:.f-s-12
-    {:font-size "12px"}]
+    {:font-size "12px !important"}]
    [:.f-s-14
-    {:font-size "14px"}]
+    {:font-size "14px !important"}]
    [:.f-s-16
     {:font-size "16px !important"}]
    [:.f-s-18
@@ -66,6 +67,8 @@
 (def props
   [[:.flex
     {:display :flex}]
+   [:.inline-block
+    {:display :inline-block}]
 
    [:.list-style-disc
     {:list-style-type :disc
@@ -114,6 +117,8 @@
 
    [:.opacity-5
     {:opacity "0.5"}]
+   [:.opacity-6
+    {:opacity "0.6"}]
 
    [:.m-b--2
     {:margin-bottom "-2px"}]
@@ -152,6 +157,8 @@
     {:text-align :center}]
    [:.justify-cont-s-b
     {:justify-content :space-between}]
+   [:.justify-cont-s-a
+    {:justify-content :space-around}]
    [:.justify-cont-c
     {:justify-content :center}]
    [:.justify-cont-end
@@ -172,6 +179,12 @@
    [:.w-100-p
     {:width "100%"}]
 
+   [:.w-15
+    {:width "15px"}]
+   [:.w-18
+    {:width "18px"}]
+   [:.w-20
+    {:width "20px"}]
    [:.w-24
     {:width "24px"}]
    [:.w-32
@@ -184,6 +197,8 @@
     {:width "60px"}]
    [:.w-70
     {:width "70px"}]
+   [:.w-80
+    {:width "80px"}]
    [:.w-100
     {:width "100px"}]
    [:.w-200
@@ -197,6 +212,12 @@
    [:.w-1440
     {:width "1440px"}]
 
+   [:.h-15
+    {:height "15px"}]
+   [:.h-18
+    {:height "18px"}]
+   [:.h-20
+    {:height "20px"}]
    [:.h-24
     {:height "24px"}]
    [:.h-25
@@ -217,6 +238,8 @@
     {:position :fixed}]
    [:.white
     {:color :white}]
+   [:.black
+    {:color :black}]
    [:.orange
     {:color button-color}]
    [:.uppercase
@@ -229,6 +252,12 @@
    [:.underline
     {:text-decoration :underline}]
 
+   [:.p-t-2
+    {:padding-top "2px"}]
+   [:.p-t-3
+    {:padding-top "3px"}]
+   [:.p-t-4
+    {:padding-top "4px"}]
    [:.p-t-10
     {:padding-top "10px"}]
 
@@ -263,11 +292,17 @@
    [:.p-r-10
     {:padding-right "10px"}]
 
+   [:.b-rad-50-p
+    {:border-radius "50%"}]
    [:.b-rad-5
     {:border-radius "5px"}]
 
    [:.b-1
     {:border "1px solid"}]
+
+   [:.b-b-2
+    {:border-bottom "2px solid"}]
+   
    [:.b-w-3
     {:border-width "3px"}]
    [:.b-w-5
@@ -302,13 +337,22 @@
 
    [:.b-orange
     {:border-color button-color}]
+   [:.b-red
+    {:border-color red}]
 
    [:.hover-slight-white:hover
     {:background-color "#2c3445"
      :opacity 0.2}]
+
+   [:.hover-opacity-full:hover
+    {:opacity 1.0}]
    
    [:.bg-light
     {:background-color "#2c3445"}]
+   [:.bg-red
+    {:background-color red}]
+   [:.bg-green
+    {:background-color "#70a800"}]
 
    [:.no-appearance
     (handle-browsers :appearance :none)]])

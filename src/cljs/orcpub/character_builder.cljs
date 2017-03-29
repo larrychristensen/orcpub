@@ -785,7 +785,7 @@
      [:div.f-s-24.f-w-600.m-b-16.text-shadow.flex
       [:span
        [:span race]
-       [:div.f-s-12.m-t-5 subrace]]
+       [:div.f-s-12.m-t-5.opacity-6 subrace]]
       (if (seq levels)
         [:span.m-l-10.flex
          (map-indexed
@@ -798,7 +798,7 @@
               (let [{:keys [class-name class-level subclass]} (levels cls-key)]
                 [:span
                  [:span (str class-name " (" class-level ")")]
-                 [:div.f-s-12.m-t-5 (if subclass (common/kw-to-name subclass true))]]))
+                 [:div.f-s-12.m-t-5.opacity-6 (if subclass (common/kw-to-name subclass true))]]))
             classes)))])]
      [:div.details-columns
       [:div.flex-grow-1.flex-basis-50-p
@@ -1176,7 +1176,7 @@
 (defn expand-button [option-path expand-text collapse-text & [handler]]
   (let [full-path [:expanded-paths option-path]
         expanded? (get-in @app-state full-path)]
-    [:span.flex.pointer
+    [:span.flex.pointer.align-items-c.justify-cont-end
      {:on-click (fn [e]
                   (swap! app-state update-in full-path not)
                   (if handler (handler e))
@@ -1186,7 +1186,7 @@
       {:class-name (if expanded? "fa-angle-up" "fa-angle-down")}]]))
 
 (defn show-info-button [expanded? option-path]
-  [:span.f-w-n.m-l-5 (expand-button option-path "hide info" "show info")])
+  [:div.f-w-n.m-l-5 (expand-button option-path "hide info" "show info")])
 
 (defn set-next! [char next-selection next-selection-path]
   (swap! app-state
@@ -1586,7 +1586,6 @@
                           [:character ::entity/options :class i ::entity/options :levels]
                           (fn [levels]
                             (let [current-highest-level (inc (count levels))]
-                              (prn "NEW HIGHEST LEVEL" new-highest-level current-highest-level)
                               (cond
                                 (> new-highest-level current-highest-level)
                                 (vec (concat levels (map
@@ -1620,20 +1619,83 @@
             (swap! app-state update-in [:character ::entity/options :class] conj {::entity/key first-unselected ::entity/options {:levels [{::entity/key :level-1}]}})))}
        "Add Class"]]]))
 
+(defn inventory-selector [item-map character {:keys [::t/key ::t/options]}]
+  (let [selected-items (get-in @app-state [:character ::entity/options key])
+        selected-keys (into #{} (map ::entity/key selected-items))]
+    [:div
+     [:select.builder-option.builder-option-dropdown
+      {:value ""
+       :on-change
+       (fn [e]
+         (let [kw (keyword (.. e -target -value))]
+           (swap! app-state
+                  update-in
+                  [:character ::entity/options key]
+                  conj
+                  {::entity/key kw
+                   ::entity/value 1})))}
+      [:option.builder-dropdown-item
+       {:value ""
+        :disabled true}
+       "<select to add>"]
+      (doall
+       (map
+        (fn [{:keys [::t/key ::t/name]}]
+          ^{:key key}
+          [:option.builder-dropdown-item
+           {:value key}
+           name])
+        (remove #(selected-keys (::t/key %)) options)))]
+     [:div.m-t-5
+      (doall
+       (map
+        (fn [{item-key ::entity/key item-qty ::entity/value}]
+          (let [item (item-map item-key)
+                item-name (:name item)
+                item-description (:description item)
+                expanded? (get-in @app-state [:expanded-paths [key item-key]])]
+            ^{:key item-key}
+            [:div.p-5
+             [:div.f-w-b.flex.align-items-c
+              [:div.flex-grow-1 item-name]
+              (if item-description [:div.w-60 [show-info-button expanded? [key item-key]]])
+              [:input.input.w-60.m-l-5.m-t-0
+               {:type :number
+                :value item-qty}]
+              [:i.fa.fa-minus-circle.orange.f-s-16.m-l-5.pointer
+               {:on-click (fn [_] (swap! app-state
+                                         update-in
+                                         [:character ::entity/options key]
+                                         (fn [items] (vec (remove #(= item-key (::entity/key %)) items)))))}]]
+             (if expanded? [:div.m-t-5 item-description])]))
+        selected-items))]]))
+
 (def pages
   [{:name "Ability Scores"
+    :icon "strong"
     :tags #{:ability-scores}}
    {:name "Race"
+    :icon "woman-elf-face"
     :tags #{:race :subrace}}
    {:name "Background"
+    :icon "ages"
     :tags #{:background}}
    {:name "Class"
+    :icon "battle-gear"
     :tags #{:class :subclass}
     :ui-fns {:class class-levels-selector}}
    {:name "Proficiencies"
+    :icon "juggler"
     :tags #{:profs}}
    {:name "Equipment"
-    :tags #{:equipment}}])
+    :icon "backpack"
+    :tags #{:equipment}
+    :ui-fns {:weapons (partial inventory-selector weapon5e/weapons-map)
+             :magic-weapons (partial inventory-selector mi5e/magic-weapon-map)
+             :armor (partial inventory-selector armor5e/armor-map)
+             :magic-armor (partial inventory-selector mi5e/magic-armor-map)
+             :equipment (partial inventory-selector equip5e/equipment-map)
+             :other-magic-items (partial inventory-selector mi5e/other-magic-item-map)}}])
 
 (defn new-option-selector [character built-char built-template option-paths stepper-selection-path option-path
                        {:keys [::t/min ::t/max ::t/options] :as selection}
@@ -1687,7 +1749,7 @@
                                             built-template
                                             character
                                             new-option-path
-                                            (fn [o] (assoc o ::entity/key key)))))]
+                                            (fn [o] {::entity/key key}))))]
                       (swap! app-state assoc :character updated-char))
                     (if select-fn
                       (select-fn new-option-path)))
@@ -1706,11 +1768,37 @@
          [:div.i.f-s-12.f-w-n 
           (str "Requires " (s/join ", " failed-prereqs))])]]]))
 
+(defn combine-ref-selections [selections]
+  (let [first-selection (first selections)]
+    (if first-selection
+      (assoc
+       first-selection
+       ::t/min (apply + (map ::t/min selections))
+       ::t/max (if (every? ::t/max selections) (apply + (map ::t/max selections)))
+       ::t/options (into (sorted-set-by #(< (::t/key %) (::t/key %2))) (apply concat (map ::t/options selections)))))))
+
 (defn new-options-column [character built-char built-template available-selections page-index option-paths stepper-selection-path]
   (let [{:keys [tags ui-fns] :as page} (pages page-index)
-        selections (entity/tagged-selections available-selections tags)]
+        selections (entity/tagged-selections available-selections tags)
+        by-ref (group-by ::t/ref selections)
+        non-ref-selections (get by-ref nil)
+        combined-ref-selections (map
+                                 (fn [[_ ref-selections]]
+                                   (combine-ref-selections ref-selections))
+                                 (dissoc by-ref nil))
+        final-selections (concat non-ref-selections combined-ref-selections)]
     [:div.w-100-p
      [:div#options-column.b-1.b-rad-5
+      [:div.flex.justify-cont-s-a
+       (doall
+        (map-indexed
+         (fn [i {:keys [name icon]}]
+           ^{:key name}
+           [:div.p-5.hover-opacity-full.pointer
+            {:class-name (if (= i page-index) "selected-tab b-b-2 b-orange" "opacity-5")
+             :on-click (fn [_] (swap! app-state assoc :page i))}
+            (svg-icon icon)])
+         pages))]
       [:div.flex.justify-cont-s-b.p-t-5.p-10.align-items-t
        [:button.form-button.p-5-10.m-r-5
         {:on-click
@@ -1731,18 +1819,48 @@
       [:div.p-5
        (doall
         (map
-         (fn [{:keys [::t/key ::t/name ::t/options] :as selection}]
-           ^{:key name}
-           [:div.p-5
-            [:span.f-s-18 name]
-            (if (and ui-fns (ui-fns key))
-              ((ui-fns key) character selection)
-              (doall
-               (map
-                (fn [option]
-                  (new-option-selector character built-char built-template option-paths stepper-selection-path (::entity/path selection) selection false option))
-                options)))])
-         selections))]]]))
+         (fn [{:keys [::t/key ::t/name ::t/options ::t/min ::t/max ::t/ref ::entity/path] :as selection}]
+           (let [actual-path (if ref [ref] path)
+                 entity-path (entity/get-entity-path built-template character actual-path)
+                 selected-options (get-in character entity-path)
+                 selected-count (count selected-options)
+                 remaining (- min selected-count)]
+             ^{:key name}
+             [:div.p-5
+              [:div.flex.justify-cont-s-b
+               [:span.f-s-18.f-w-b name]
+               (if (pos? min)
+                 [:div.m-l-10
+                  (cond
+                    (pos? remaining)
+                    [:div.flex.align-items-c
+                     [:span.bg-red.t-a-c.w-18.h-18.p-t-4.b-rad-50-p.inline-block.f-w-b remaining]
+                     [:span.i.m-l-5 "remaining"]]
+
+                    (zero? remaining)
+                    [:div.flex.align-items-c
+                     [:span.bg-green.t-a-c.w-18.h-18.p-t-2.b-rad-50-p.inline-block.f-w-b
+                      [:i.fa.fa-check.f-s-12]]
+                     [:span.i.m-l-5 "complete"]]
+
+                    (neg? remaining)
+                    [:div.flex.align-items-c
+                     [:span.i.m-r-5 "remove"]
+                     [:span.bg-red.t-a-c.w-18.h-18.p-t-4.b-rad-50-p.inline-block.f-w-b (Math/abs remaining)]])])]
+              [:div.p-5.f-s-16
+               (if (pos? min)
+                 [:div.flex.align-items-c
+                  [:span.i.m-r-10 (str "select " (if (= min max)
+                                                   min
+                                                   (str "at least " min)))]])]
+              (if (and ui-fns (ui-fns key))
+                ((ui-fns key) character selection)
+                (doall
+                 (map
+                  (fn [option]
+                    (new-option-selector character built-char built-template option-paths stepper-selection-path actual-path selection (and (> min 1) (zero? remaining)) option))
+                  options)))]))
+         final-selections))]]]))
 
 (defn builder-columns [built-template built-char option-paths collapsed-paths stepper-selection-path stepper-selection plugins active-tabs stepper-dismissed? available-selections]
   [:div.flex-grow-1.flex

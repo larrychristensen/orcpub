@@ -29,7 +29,7 @@
                                                         :min ::min
                                                         :max ::max)))
 
-(defn selection-cfg [{:keys [name key source page order options help min sequential? multiselect? quantity? collapsible? ui-fn new-item-text new-item-fn prereq-fn simple? tags] :as cfg}]
+(defn selection-cfg [{:keys [name key source page order options help min sequential? multiselect? quantity? collapsible? ui-fn new-item-text new-item-fn prereq-fn simple? tags ref] :as cfg}]
   (let [max (if (find cfg :max) (:max cfg) 1)]
     {::name name
      ::key (or key (common/name-to-kw name))
@@ -46,6 +46,7 @@
      ::multiselect? multiselect?
      ::ui-fn ui-fn
      ::tags tags
+     ::ref ref
      ::new-item-text new-item-text
      ::new-item-fn new-item-fn
      ::prereq-fn prereq-fn
@@ -121,7 +122,8 @@
  :ret ::modifier-map-entry)
 
 (defn make-modifier-map-entry-from-selection [selection]
-  [(::key selection)
+  [(or (::ref selection)
+       (::key selection))
    (into (select-keys selection [::min ::max])
          (map make-modifier-map-entry-from-option (::options selection)))])
 
@@ -129,6 +131,17 @@
  make-modifier-map-entry-from-selection
  :args ::selection
  :ret ::modifier-map-entry)
+
+(defn selections-or-options [item]
+  (or (::selections item)
+      (::options item)))
+
+(defn get-ref-selections [template]
+  (filter
+   ::ref
+   (tree-seq selections-or-options
+             selections-or-options
+             template)))
 
 (defn make-modifier-map-from-selections [selections]
   (into {} (map make-modifier-map-entry-from-selection selections)))
@@ -139,7 +152,10 @@
  :ret ::modifier-map)
 
 (defn make-modifier-map [template]
-  (make-modifier-map-from-selections (::selections template)))
+  (let [ref-selections (get-ref-selections template)]
+    (merge
+     (make-modifier-map-from-selections ref-selections)
+     (make-modifier-map-from-selections (::selections template)))))
 
 (spec/fdef
  make-modifier-map

@@ -427,20 +427,21 @@
      {:name "Tethyrian"}
      {:name "Turami"}]
     :selections [(opt5e/language-selection opt5e/languages 1)
-                 (t/selection
-                  "Variant"
-                  [(t/option
-                    "Standard Human"
-                    :standard
-                    []
-                    [(ability-modifiers {:str 1 :con 1 :dex 1 :int 1 :wis 1 :cha 1})])
-                   (t/option
-                    "Variant Human"
-                    :variant
-                    [(opt5e/feat-selection 1)
-                     (opt5e/skill-selection 1)
-                     (opt5e/ability-increase-selection char5e/ability-keys 2 true)]
-                    [])])]}))
+                 (t/selection-cfg
+                  {:name "Variant"
+                   :tags #{:subrace}
+                   :options [(t/option
+                              "Standard Human"
+                              :standard
+                              []
+                              [(ability-modifiers {:str 1 :con 1 :dex 1 :int 1 :wis 1 :cha 1})])
+                             (t/option
+                              "Variant Human"
+                              :variant
+                              [(opt5e/feat-selection 1)
+                               (opt5e/skill-selection 1)
+                               (opt5e/ability-increase-selection char5e/ability-keys 2 true)]
+                              [])]})]}))
 
 (defn draconic-ancestry-option [{:keys [name breath-weapon]}]
   (t/option
