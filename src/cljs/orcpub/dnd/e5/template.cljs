@@ -2431,7 +2431,7 @@
                 (mod5e/bonus-action
                  {:name "Martial Arts"
                   :page 78
-                  :summary "Make an unarmed strike when you take Attack action"})]
+                  :summary "Make an extra unarmed strike when you take Attack action"})]
     :levels {2 {:modifiers [(mod5e/unarmored-speed-bonus 10)
                             (mod5e/dependent-trait
                              {:name "Ki"
@@ -4158,6 +4158,7 @@ Additionally, while perceiving through your familiar’s senses, you can also sp
      kobold-option
      orc-option
      yuan-ti-option])])
+
 
 (def sword-coast-adventurers-guide-backgrounds
   [{:name "City Watch"

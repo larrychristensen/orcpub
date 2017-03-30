@@ -57,7 +57,7 @@
              {:name "Animal Handling"
               :key :animal-handling
               :ability :wis
-              :icon "hound"
+              :icon "horse-head"
               :description "When there is any question whether you can calm down a domesticated animal, keep a mount from getting spooked, or intuit an animal’s intentions, the GM might call for a Wisdom (Animal Handling) check. You also make a Wisdom (Animal Handling) check to control your mount when you attempt a risky maneuver"}
              {:name "Arcana"
               :key :arcana
@@ -613,6 +613,7 @@ check. The GM might also call for a Dexterity (Sleight of Hand) check to determi
                                        spells
                                        ability] :as cfg}
                                cls-cfg]
+  (prn "CLS_CFG" cls-cfg)
   (reduce
    (fn [m [cls-lvl v]]
      (let [[num restriction] (if (number? v) [v] ((juxt :num :restriction) v))
@@ -621,7 +622,33 @@ check. The GM might also call for a Dexterity (Sleight of Hand) check to determi
                        (or spells (sl/spell-lists (or spell-list class-key)))
                        (keys slots))
            acquire? (= :acquire known-mode)]
-       (let [options (vec
+       (assoc m
+              cls-lvl
+              (map
+               (fn [[lvl spell-keys]]
+                 (let [cls-key-nm (if (:key cls-cfg)
+                                    (name (:key cls-cfg))
+                                    (common/name-to-kw (:name cls-cfg)))
+                       kw (keyword (str cls-key-nm "-spells-known-" lvl))]
+                   (t/selection-cfg
+                    {:name (str "Spells Known: " (:name cls-cfg) " Level " lvl)
+                     :key kw
+                     :ref kw
+                     :min num
+                     :max (if (not acquire?) num)
+                     :tags #{:spells (keyword (str cls-key-nm "-spells")) (keyword (str "spells-" lvl))}
+                     :options (map
+                               (fn [spell-key]
+                                 (let [spell (spells/spell-map spell-key)]
+                                   (t/option-cfg
+                                    {:name (:name spell)
+                                     :key spell-key
+                                     :help (spell-help spell)
+                                     :modifiers [(modifiers/spells-known lvl spell-key ability (class-names class-key))]})))
+                               (apply-spell-restriction spell-keys restriction))})))
+               all-spells))
+       
+       #_(let [options (vec
                       (flatten
                        (map
                         (fn [[lvl spell-keys]]
@@ -643,10 +670,7 @@ check. The GM might also call for a Dexterity (Sleight of Hand) check to determi
                    :max (if (not acquire?) num)
                    :new-item-fn (fn [selection selected-items _ key]
                                   {::entity/key key})
-                   :tags #{:spells}
-                   ;;acquire?
-                   #_(if acquire?
-                       (fn [s o v] {::entity/key nil}))})]))))
+                   :tags #{:spells}})]))))
    {}
    spells-known))
 
