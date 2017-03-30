@@ -1781,7 +1781,6 @@
                        {:keys [::t/min ::t/max ::t/options] :as selection}
                        disable-select-new?
                            {:keys [::t/key ::t/name ::t/path ::t/help ::t/selections ::t/prereqs ::t/select-fn ::t/ui-fn ::t/icon] :as option}]
-  (if icon (prn "ICON" icon))
   (let [new-option-path (conj option-path key)
         selected? (get-in option-paths new-option-path)
         failed-prereqs (reduce
@@ -1812,6 +1811,7 @@
                               (let [updated-char (let [new-option {::entity/key key}]
                                                    (if (or
                                                         (::t/multiselect? selection)
+                                                        (nil? max)
                                                         (and
                                                          (> min 1)
                                                          (= min max)))
@@ -1859,7 +1859,7 @@
                                  (fn [[_ ref-selections]]
                                    (combine-ref-selections ref-selections))
                                  (dissoc by-ref nil))
-        final-selections (concat non-ref-selections combined-ref-selections)]
+        final-selections (sort-by ::t/name (concat non-ref-selections combined-ref-selections))]
     [:div.w-100-p
      [:div#options-column.b-1.b-rad-5
       [:div.flex.justify-cont-s-a
@@ -1909,7 +1909,7 @@
               [:div.flex.align-items-c
                (if icon (svg-icon icon 24))
                [:span.m-l-5.f-s-18.f-w-b.flex-grow-1 name]
-               (if (and max (pos? min))
+               (if (and min (pos? min))
                  [:div.m-l-10
                   (cond
                     (pos? remaining)
@@ -1917,7 +1917,9 @@
                      [:span.bg-red.t-a-c.w-18.h-18.p-t-4.b-rad-50-p.inline-block.f-w-b remaining]
                      [:span.i.m-l-5 "remaining"]]
 
-                    (zero? remaining)
+                    (or (zero? remaining)
+                        (and (nil? max)
+                             (neg? remaining)))
                     [:div.flex.align-items-c
                      [:span.bg-green.t-a-c.w-18.h-18.p-t-2.b-rad-50-p.inline-block.f-w-b
                       [:i.fa.fa-check.f-s-12]]
@@ -1938,8 +1940,8 @@
                 (doall
                  (map
                   (fn [option]
-                    (new-option-selector character built-char built-template option-paths stepper-selection-path actual-path selection (and (> min 1) (zero? remaining)) option))
-                  options)))]))
+                    (new-option-selector character built-char built-template option-paths stepper-selection-path actual-path selection (and max (> min 1) (zero? remaining)) option))
+                  (sort-by ::t/name options))))]))
          final-selections))]]]))
 
 (defn builder-columns [built-template built-char option-paths collapsed-paths stepper-selection-path stepper-selection plugins active-tabs stepper-dismissed? available-selections]
