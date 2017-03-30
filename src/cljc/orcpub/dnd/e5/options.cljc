@@ -163,11 +163,11 @@ check. The GM might also call for a Dexterity (Sleight of Hand) check to determi
    [(modifiers/weapon-proficiency key)]))
 
 (defn tool-option [tool]
-  (t/option
-   (:name tool)
-   (:key tool)
-   nil
-   [(modifiers/tool-proficiency (:key tool))]))
+  (t/option-cfg
+   {:name (:name tool)
+    :key (:key tool)
+    :icon (:icon tool)
+    :options [(modifiers/tool-proficiency (:key tool))]}))
 
 (defn weapon-option [weapon & [num]]
   (t/option-cfg

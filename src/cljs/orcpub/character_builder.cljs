@@ -582,7 +582,7 @@
   [:div.m-t-20
    [:div.flex.align-items-c
     (if icon-name (svg-icon icon-name))
-    [:span.f-s-16.f-w-600 title]]
+    [:span.m-l-5.f-s-16.f-w-600 title]]
    [:div {:class-name (if list? "m-t-0" "m-t-4")}
     [:span.f-s-24.f-w-600
      value]]])
@@ -1649,7 +1649,7 @@
            {:value key}
            name])
         (remove #(selected-keys (::t/key %)) options)))]
-     [:div.m-t-5
+     [:div
       (doall
        (map
         (fn [{item-key ::entity/key item-qty ::entity/value}]
@@ -1719,25 +1719,27 @@
       (fn [{:keys [name key ability icon description]}]
         (let [selected? (selected-skill-keys key)
               selectable? (available-skills key)
-              bad-selection? (and selected? (not selectable?))]
+              bad-selection? (and selected? (not selectable?))
+              allow-select? (or selected?
+                                (and (not selected?)
+                                     (pos? remaining)
+                                     selectable?)
+                                bad-selection?)]
           (option-selector-base name
                                 key
                                 (skill-help name key ability icon description)
                                 selected?
-                                (or selected?
-                                    (and (not selected?)
-                                         (pos? remaining)
-                                         selectable?)
-                                    bad-selection?)
+                                allow-select?
                                 [:skill-profs key]
                                 (fn [_]
-                                  (swap! app-state
-                                         update-in
-                                         path
-                                         (fn [skills]
-                                           (if selected?                                             
-                                             (vec (remove (fn [s] (= key (::entity/key s))) skills))
-                                             (vec (conj skills {::entity/key key}))))))
+                                  (if allow-select?
+                                    (swap! app-state
+                                           update-in
+                                           path
+                                           (fn [skills]
+                                             (if selected?                                             
+                                               (vec (remove (fn [s] (= key (::entity/key s))) skills))
+                                               (vec (conj skills {::entity/key key})))))))
                                 nil
                                 nil
                                 icon
@@ -1778,7 +1780,8 @@
 (defn new-option-selector [character built-char built-template option-paths stepper-selection-path option-path
                        {:keys [::t/min ::t/max ::t/options] :as selection}
                        disable-select-new?
-                       {:keys [::t/key ::t/name ::t/path ::t/help ::t/selections ::t/prereqs ::t/select-fn ::t/ui-fn] :as option}]
+                           {:keys [::t/key ::t/name ::t/path ::t/help ::t/selections ::t/prereqs ::t/select-fn ::t/ui-fn ::t/icon] :as option}]
+  (if icon (prn "ICON" icon))
   (let [new-option-path (conj option-path key)
         selected? (get-in option-paths new-option-path)
         failed-prereqs (reduce
@@ -1835,7 +1838,8 @@
                           (if (and (or selected? (= 1 (count options))) ui-fn)
                             (ui-fn new-option-path built-template app-state built-char))
                           (if (not meets-prereqs?)
-                            (str "Requires " (s/join ", " failed-prereqs))))))
+                            (str "Requires " (s/join ", " failed-prereqs)))
+                          icon)))
 
 (defn combine-ref-selections [selections]
   (let [first-selection (first selections)]
@@ -1888,7 +1892,7 @@
       [:div.p-5
        (doall
         (map
-         (fn [{:keys [::t/key ::t/name ::t/options ::t/min ::t/max ::t/ref ::entity/path] :as selection}]
+         (fn [{:keys [::t/key ::t/name ::t/options ::t/min ::t/max ::t/ref ::t/icon ::entity/path] :as selection}]
            (let [actual-path (if ref [ref] path)
                  entity-path (entity/get-entity-path built-template character actual-path)
                  selected-options (get-in character entity-path)
@@ -1902,8 +1906,9 @@
                  remaining (- min selected-count)]
              ^{:key name}
              [:div.p-5
-              [:div.flex.justify-cont-s-b
-               [:span.f-s-18.f-w-b name]
+              [:div.flex.align-items-c
+               (if icon (svg-icon icon 24))
+               [:span.m-l-5.f-s-18.f-w-b.flex-grow-1 name]
                (if (and max (pos? min))
                  [:div.m-l-10
                   (cond
@@ -1922,12 +1927,12 @@
                     [:div.flex.align-items-c
                      [:span.i.m-r-5 "remove"]
                      [:span.bg-red.t-a-c.w-18.h-18.p-t-4.b-rad-50-p.inline-block.f-w-b (Math/abs remaining)]])])]
-              [:div.p-5.f-s-16
-               (if (pos? min)
+              (if (pos? min)
+                [:div.p-5.f-s-16
                  [:div.flex.align-items-c
                   [:span.i.m-r-10 (str "select " (if (= min max)
                                                    min
-                                                   (str "at least " min)))]])]
+                                                   (str "at least " min)))]]])
               (if (and ui-fns (ui-fns (or ref key)))
                 ((ui-fns (or ref key)) character selection)
                 (doall

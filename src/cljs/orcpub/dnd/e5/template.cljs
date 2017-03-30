@@ -941,12 +941,12 @@
     :key (if key (keyword (str (name key) "--" (common/name-to-kw (:name tool)))))
     :help (str "Select " (s/lower-case (:name tool)) " for which you are proficient.")
     :options (mapv
-              (fn [{:keys [name key]}]
-                (t/option
-                 name
-                 key
-                 []
-                 [(mod5e/tool-proficiency key)]))
+              (fn [{:keys [name key icon]}]
+                (t/option-cfg
+                 {:name name
+                  :key key
+                  :icon icon
+                  :modifiers [(mod5e/tool-proficiency key)]}))
               (:values tool))
     :min num
     :max num
@@ -971,11 +971,11 @@
                          k
                          [(tool-prof-selection-aux tool num key prereq-fn)]
                          [])
-                        (t/option
-                         (:name tool)
-                         (:key tool)
-                         []
-                         [(mod5e/tool-proficiency (:key tool))]))))
+                        (t/option-cfg
+                         {:name (:name tool)
+                          :key (:key tool)
+                          :icon (:icon tool)
+                          :modifiers [(mod5e/tool-proficiency (:key tool))]}))))
                   tool-options)
         :prereq-fn prereq-fn}))))
 
@@ -4280,7 +4280,7 @@ Additionally, while perceiving through your familiar’s senses, you can also sp
 (defn ability-item [name abbr desc]
   [:li.m-t-5 [:span.f-w-b.m-r-5 (str name " (" abbr ")")] desc])
 
-(defn inventory-selection [item-type-name items modifier-fn]
+(defn inventory-selection [item-type-name icon items modifier-fn]
   (t/selection-cfg
    {:name item-type-name
     :min 0
@@ -4288,6 +4288,7 @@ Additionally, while perceiving through your familiar’s senses, you can also sp
     :sequential? false
     :quantity? true
     :collapsible? true
+    :icon icon
     :new-item-fn (fn [selection selected-items _ key]
                    {::entity/key key
                     ::entity/value 1})
@@ -4475,12 +4476,12 @@ Additionally, while perceiving through your familiar’s senses, you can also sp
                sorcerer-option
                warlock-option
                wizard-option]})
-   (inventory-selection "Weapons" weapon5e/weapons mod5e/deferred-weapon)
-   (inventory-selection "Magic Weapons" mi/magic-weapons mod5e/deferred-magic-weapon)
-   (inventory-selection "Armor" armor5e/armor mod5e/deferred-armor)
-   (inventory-selection "Magic Armor" mi/magic-armor mod5e/deferred-magic-armor)
-   (inventory-selection "Equipment" equip5e/equipment mod5e/deferred-equipment)
-   (inventory-selection "Other Magic Items" mi/other-magic-items mod5e/deferred-magic-item)])
+   (inventory-selection "Weapons" "plain-dagger" weapon5e/weapons mod5e/deferred-weapon)
+   (inventory-selection "Magic Weapons" "lightning-bow" mi/magic-weapons mod5e/deferred-magic-weapon)
+   (inventory-selection "Armor" "breastplate" armor5e/armor mod5e/deferred-armor)
+   (inventory-selection "Magic Armor" "magic-shield" mi/magic-armor mod5e/deferred-magic-armor)
+   (inventory-selection "Equipment" "backpack" equip5e/equipment mod5e/deferred-equipment)
+   (inventory-selection "Other Magic Items" "orb-wand" mi/other-magic-items mod5e/deferred-magic-item)])
 
 
 (def template-base

@@ -25,23 +25,23 @@
     :name "Viol"}])
 
 (def artisans-tools
-  [{:name "Alchemist's Supplies", :key :alchemists-supplies}
-   {:name "Brewer's Supplies", :key :brewers-supplies}
-   {:name "Calligrapher's Supplies", :key :calligraphers-supplies}
-   {:name "Carpenter's Tools", :key :carpenters-tools}
-   {:name "Cartographer's Tools", :key :cartographers-tools}
-   {:name "Cobbler's Tools", :key :cobblers-tools}
-   {:name "Cook's Utensils", :key :cooks-utensils}
-   {:name "Glassblower's Tools", :key :glassblowers-tools}
-   {:name "Jeweler's Tools", :key :jewelers-tools}
-   {:name "Leatherworker's Tools", :key :leatherworkers-tools}
-   {:name "Mason's Tools", :key :masons-tools}
-   {:name "Painter's Supplies", :key :painters-supplies}
-   {:name "Potter's Tools", :key :potters-tools}
-   {:name "Smith's Tools", :key :smiths-tools}
-   {:name "Tinker's Tools", :key :tinkers-tools}
-   {:name "Weaver's Tools", :key :weavers-tools}
-   {:name "Woodcarver's Tools", :key :woodcarvers-tools}])
+  [{:name "Alchemist's Supplies", :key :alchemists-supplies :icon "fire-bottle"}
+   {:name "Brewer's Supplies", :key :brewers-supplies :icon "beer-stein"}
+   {:name "Calligrapher's Supplies", :key :calligraphers-supplies :icon "quill-ink"}
+   {:name "Carpenter's Tools", :key :carpenters-tools :icon "hand-saw"}
+   {:name "Cartographer's Tools", :key :cartographers-tools :icon "compass"}
+   {:name "Cobbler's Tools", :key :cobblers-tools :icon "leather-boot"}
+   {:name "Cook's Utensils", :key :cooks-utensils :icon "kitchen-knives"}
+   {:name "Glassblower's Tools", :key :glassblowers-tools :icon "potion-ball"}
+   {:name "Jeweler's Tools", :key :jewelers-tools :icon "cut-diamond"}
+   {:name "Leatherworker's Tools", :key :leatherworkers-tools :icon "animal-hide"}
+   {:name "Mason's Tools", :key :masons-tools :icon "freemasonry"}
+   {:name "Painter's Supplies", :key :painters-supplies :icon "paint-brush"}
+   {:name "Potter's Tools", :key :potters-tools :icon "amphora"}
+   {:name "Smith's Tools", :key :smiths-tools :icon "anvil-impact"}
+   {:name "Tinker's Tools", :key :tinkers-tools :icon "tinker"}
+   {:name "Weaver's Tools", :key :weavers-tools :icon "wool"}
+   {:name "Woodcarver's Tools", :key :woodcarvers-tools :icon "wood-axe"}])
 
 (def misc-tools
   [{:name "Disguise Kit"
