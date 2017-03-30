@@ -1,11 +1,11 @@
 (ns orcpub.styles.core
   (:require [garden.def :refer [defstylesheet defstyles]]
-            [garden.stylesheet :refer [at-media]]
+            [garden.stylesheet :refer [at-media at-keyframes]]
             [garden.units :refer [px]]
             [orcpub.constants :as const]))
 
 (def button-color "#f0a100")
-(def red "#780028")
+(def red "#9a031e")
 
 (def container-style
   {:display :flex
@@ -191,6 +191,8 @@
     {:width "32px"}]
    [:.w-40
     {:width "40px"}]
+   [:.w-48
+    {:width "48px"}]
    [:.w-50
     {:width "50px"}]
    [:.w-60
@@ -224,6 +226,10 @@
     {:height "25px"}]
    [:.h-32
     {:height "32px"}]
+   [:.h-40
+    {:height "40px"}]
+   [:.h-48
+    {:height "48px"}]
    [:.h-800
     {:height "800px"}]
 
@@ -353,6 +359,11 @@
     {:background-color red}]
    [:.bg-green
     {:background-color "#70a800"}]
+
+   (at-keyframes
+    :bling-animation
+    [:from {:text-shadow "0 0 10px black"}]
+    [:to {:text-shadow "0 0 10px red"}])
 
    [:.no-appearance
     (handle-browsers :appearance :none)]])

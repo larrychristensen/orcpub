@@ -572,8 +572,11 @@
   (cljs.pprint/pprint
    (dissoc (realize-char built-char) ::es/deps)))
 
-(defn svg-icon [icon-name]
-  [:img.h-32.w-32 {:src (str "image/" icon-name ".svg")}])
+(defn svg-icon [icon-name & [size]]
+  (let [size (or size 32)]
+    [:img
+     {:class-name (str "h-" size " w-" size)
+      :src (str "image/" icon-name ".svg")}]))
 
 (defn display-section [title icon-name value & [list?]]
   [:div.m-t-20
@@ -840,7 +843,7 @@
          [svg-icon-section "Darkvision" "night-vision" (if darkvision (str darkvision " ft.") "--")]
          [svg-icon-section "Initiative" "sprint" (mod/bonus-str (char5e/initiative built-char))]
          [display-section "Proficiency Bonus" nil (mod/bonus-str (char5e/proficiency-bonus built-char))]
-         [display-section "Passive Perception" nil (char5e/passive-perception built-char)]
+         [svg-icon-section "Passive Perception" "awareness" (char5e/passive-perception built-char)]
          (let [num-attacks (char5e/number-of-attacks built-char)]
            (if (> num-attacks 1)
              [display-section "Number of Attacks" nil num-attacks]))
@@ -851,7 +854,7 @@
              (display-section "Critical Hit" nil (str min-crit "-" max-crit))))
          [:div
           [list-display-section
-           "Save Proficiencies" nil
+           "Save Proficiencies" "dodging"
            (map (comp s/upper-case name) (char5e/saving-throws built-char))]
           (let [save-advantage (char5e/saving-throw-advantages built-char)]
             [:ul.list-style-disc.m-t-5
@@ -893,9 +896,9 @@
        [equipment-section "Armor" "breastplate" (merge magic-armor armor) mi5e/all-armor-map]
        [equipment-section "Equipment" "backpack" (concat magic-items equipment) mi5e/all-equipment-map]
        [attacks-section attacks]
-       [actions-section "Bonus Actions" "jump-across" bonus-actions]
-       [actions-section "Reactions" "dodging" reactions]
-       [actions-section "Actions" "run" actions]
+       [actions-section "Actions" "beams-aura" actions]
+       [actions-section "Bonus Actions" "run" bonus-actions]
+       [actions-section "Reactions" "van-damme-split" reactions]
        [actions-section "Features, Traits, and Feats" "vitruvian-man" traits]]]]))
 
 (def tab-path [:builder :character :tab])
@@ -1670,6 +1673,77 @@
              (if expanded? [:div.m-t-5 item-description])]))
         selected-items))]]))
 
+(defn option-selector-base [name key help selected? selectable? option-path select-fn & [content explanation-text icon classes]]
+  (let [expanded? (get-in @app-state [:expanded-paths option-path])]
+    ^{:key key}
+    [:div.p-10.b-1.b-rad-5.m-5.b-orange.hover-shadow
+     {:class-name (s/join " " (conj
+                               (remove nil? [(if selected? "b-w-5")
+                                             (if selectable? "pointer")
+                                             (if (not selectable?) "opacity-5")])
+                               classes))
+      :on-click select-fn}
+     [:div.flex.align-items-c
+      [:div.flex-grow-1
+       [:div.flex.align-items-c
+        (if icon [:div.m-r-5 (svg-icon icon 24)])
+        [:span.f-w-b.f-s-1.flex-grow-1 name]
+        (if help
+          [show-info-button expanded? option-path])]
+       (if (and help expanded?)
+         [help-section help])
+       (if content
+         content)
+       (if explanation-text
+         [:div.i.f-s-12.f-w-n 
+          explanation-text])]]]))
+
+(defn skill-help [name key ability icon description]
+  [:div
+   [:div.flex.align-items-c
+    (svg-icon icon 48)
+    [:div.f-s-18.f-w-b.m-l-5
+     [:div name]
+     [:div.i (str "(" (:name (opt5e/abilities-map ability)) ")")]]]
+   [:p description]])
+
+(defn skills-selector [character {:keys [::t/ref ::t/max ::t/options]}]
+  (let [path [:character ::entity/options ref]
+        selected-skills (get-in @app-state path)
+        selected-count (count selected-skills)
+        remaining (- max selected-count)
+        available-skills (into #{} (map ::t/key options))
+        selected-skill-keys (into #{} (map ::entity/key selected-skills))]
+    (doall
+     (map
+      (fn [{:keys [name key ability icon description]}]
+        (let [selected? (selected-skill-keys key)
+              selectable? (available-skills key)
+              bad-selection? (and selected? (not selectable?))]
+          (option-selector-base name
+                                key
+                                (skill-help name key ability icon description)
+                                selected?
+                                (or selected?
+                                    (and (not selected?)
+                                         (pos? remaining)
+                                         selectable?)
+                                    bad-selection?)
+                                [:skill-profs key]
+                                (fn [_]
+                                  (swap! app-state
+                                         update-in
+                                         path
+                                         (fn [skills]
+                                           (if selected?                                             
+                                             (vec (remove (fn [s] (= key (::entity/key s))) skills))
+                                             (vec (conj skills {::entity/key key}))))))
+                                nil
+                                nil
+                                icon
+                                (if bad-selection? "b-red"))))
+      opt5e/skills))))
+
 (def pages
   [{:name "Ability Scores"
     :icon "strong"
@@ -1681,7 +1755,7 @@
     :icon "ages"
     :tags #{:background}}
    {:name "Class"
-    :icon "battle-gear"
+    :icon "mounted-knight"
     :tags #{:class :subclass}
     :ui-fns {:class class-levels-selector}}
    {:name "Spells"
@@ -1689,7 +1763,8 @@
     :tags #{:spells}}
    {:name "Proficiencies"
     :icon "juggler"
-    :tags #{:profs}}
+    :tags #{:profs}
+    :ui-fns {:skill-profs skills-selector}}
    {:name "Equipment"
     :icon "backpack"
     :tags #{:equipment}
@@ -1703,7 +1778,7 @@
 (defn new-option-selector [character built-char built-template option-paths stepper-selection-path option-path
                        {:keys [::t/min ::t/max ::t/options] :as selection}
                        disable-select-new?
-                       {:keys [::t/key ::t/name ::t/path ::t/help ::t/selections ::t/prereqs ::t/select-fn ::t/ui-fn]}]
+                       {:keys [::t/key ::t/name ::t/path ::t/help ::t/selections ::t/prereqs ::t/select-fn ::t/ui-fn] :as option}]
   (let [new-option-path (conj option-path key)
         selected? (get-in option-paths new-option-path)
         failed-prereqs (reduce
@@ -1718,58 +1793,49 @@
                              selected?))
         expanded? (get-in @app-state [:expanded-paths new-option-path])
         has-selections? (seq selections)]
-    ^{:key key}
-    [:div.p-10.b-1.b-rad-5.m-5.b-orange.hover-shadow
-     {:class-name (s/join " " (remove nil? [(if selected? "b-w-5")
-                                            (if selectable? "pointer")
-                                            (if (not selectable?) "opacity-5")]))
-      :on-click (fn [e]
-                  (prn "OPTION_PATH" option-path)
-                  (when (and (or (> max 1)
-                                 (nil? max)
-                                 (not selected?)
-                                 has-selections?)
-                             meets-prereqs?
-                             selectable?)
-                    (let [updated-char (let [new-option {::entity/key key}]
-                                         (if (or
-                                              (::t/multiselect? selection)
-                                              (and
-                                               (> min 1)
-                                               (= min max)))
-                                           (update-option
-                                            built-template
-                                            character
-                                            option-path
-                                            (fn [parent-vec]
-                                              (if (nil? parent-vec)
-                                                [new-option]
-                                                (let [parent-keys (into #{} (map ::entity/key) parent-vec)]
-                                                  (if (parent-keys key)
-                                                    (vec (remove #(= key (::entity/key %)) parent-vec))
-                                                    (conj parent-vec new-option))))))
-                                           (update-option
-                                            built-template
-                                            character
-                                            new-option-path
-                                            (fn [o] {::entity/key key}))))]
-                      (swap! app-state assoc :character updated-char))
-                    (if select-fn
-                      (select-fn new-option-path)))
-                  (.stopPropagation e))}
-     [:div.flex.align-items-c
-      [:div.flex-grow-1
-       [:div.flex
-        [:span.f-w-b.f-s-1.flex-grow-1 name]
-        (if help
-          [show-info-button expanded? new-option-path])]
-       (if (and help expanded?)
-         [help-section help])
-       (if (and (or selected? (= 1 (count options))) ui-fn)
-         (ui-fn new-option-path built-template app-state built-char))
-       (if (not meets-prereqs?)
-         [:div.i.f-s-12.f-w-n 
-          (str "Requires " (s/join ", " failed-prereqs))])]]]))
+    (option-selector-base name
+                          key
+                          help
+                          selected?
+                          selectable?
+                          new-option-path
+                          (fn [e]
+                            (when (and (or (> max 1)
+                                           (nil? max)
+                                           (not selected?)
+                                           has-selections?)
+                                       meets-prereqs?
+                                       selectable?)
+                              (let [updated-char (let [new-option {::entity/key key}]
+                                                   (if (or
+                                                        (::t/multiselect? selection)
+                                                        (and
+                                                         (> min 1)
+                                                         (= min max)))
+                                                     (update-option
+                                                      built-template
+                                                      character
+                                                      option-path
+                                                      (fn [parent-vec]
+                                                        (if (nil? parent-vec)
+                                                          [new-option]
+                                                          (let [parent-keys (into #{} (map ::entity/key) parent-vec)]
+                                                            (if (parent-keys key)
+                                                              (vec (remove #(= key (::entity/key %)) parent-vec))
+                                                              (conj parent-vec new-option))))))
+                                                     (update-option
+                                                      built-template
+                                                      character
+                                                      new-option-path
+                                                      (fn [o] {::entity/key key}))))]
+                                (swap! app-state assoc :character updated-char))
+                              (if select-fn
+                                (select-fn new-option-path)))
+                            (.stopPropagation e))
+                          (if (and (or selected? (= 1 (count options))) ui-fn)
+                            (ui-fn new-option-path built-template app-state built-char))
+                          (if (not meets-prereqs?)
+                            (str "Requires " (s/join ", " failed-prereqs))))))
 
 (defn combine-ref-selections [selections]
   (let [first-selection (first selections)]
@@ -1862,8 +1928,8 @@
                   [:span.i.m-r-10 (str "select " (if (= min max)
                                                    min
                                                    (str "at least " min)))]])]
-              (if (and ui-fns (ui-fns key))
-                ((ui-fns key) character selection)
+              (if (and ui-fns (ui-fns (or ref key)))
+                ((ui-fns (or ref key)) character selection)
                 (doall
                  (map
                   (fn [option]
@@ -1953,7 +2019,8 @@
      [:span.m-l-5 "(coming soon)"]]
     [:button.form-button.h-40.m-l-5
      {:on-click (export-pdf built-char)}
-     [:span "Print"]]]])
+     [:i.fa.fa-print.f-s-18]
+     [:span.m-l-5 "Print"]]]])
 
 (defn character-builder []
   (cljs.pprint/pprint (:character @app-state))
