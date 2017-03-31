@@ -913,10 +913,12 @@
 (defn die-mean [die]
   (int (Math/ceil (/ (apply + (range 1 (inc die))) die))))
 
-(defn hit-points-selection [die]
+(defn hit-points-selection [die class-nm level]
   (t/selection-cfg
    {:name "Hit Points"
+    :key (keyword (str "hit-points-" (s/lower-case class-nm) "-" level))
     :help "Select the method with which to determine this level's hit points."
+    :tags #{:class}
     :options [{::t/name "Manual Entry"
                ::t/key :manual-entry
                ::t/help "This option allows you to manually type in the value for this level's hit points. Use this if you want to roll dice yourself or if you already have a character with known hit points for this level."
@@ -1116,16 +1118,16 @@
                     (if (= i subclass-level)
                       [(t/selection-cfg
                         {:name subclass-title
-                         :key :subclass
+                         :key (common/name-to-kw subclass-title)
                          :help subclass-help
                          :tags #{:subclass}
                          :options (mapv
                                    #(subclass-option (assoc cls :key kw) %)
                                    subclasses)})])
                     (if (and (not plugin?) (ability-inc-set i))
-                      [(opt5e/ability-score-improvement-selection)])
+                      [(opt5e/ability-score-improvement-selection name i)])
                     (if (and (not plugin?) (> i 1))
-                      [(hit-points-selection hit-die)])))
+                      [(hit-points-selection hit-die name i)])))
       :modifiers (vec
                   (concat
                    (if (= :all (:known-mode spellcasting))
@@ -3380,58 +3382,59 @@
     :subclass-level 1
     :subclasses [{:name "Draconic Ancestry"
                   :modifiers [(mod/modifier ?hit-point-level-bonus (+ 1 ?hit-point-level-bonus))]
-                  :selections [(t/selection
-                                "Draconic Ancestry Type"
-                                [(t/option
-                                  "Black"
-                                  :black
-                                  []
-                                  [])
-                                 (t/option
-                                  "Blue"
-                                  :blue
-                                  []
-                                  [])
-                                 (t/option
-                                  "Brass"
-                                  :brass
-                                  []
-                                  [])
-                                 (t/option
-                                  "Bronze"
-                                  :bronze
-                                  []
-                                  [])
-                                 (t/option
-                                  "Copper"
-                                  :copper
-                                  []
-                                  [])
-                                 (t/option
-                                  "Gold"
-                                  :gold
-                                  []
-                                  [])
-                                 (t/option
-                                  "Green"
-                                  :green
-                                  []
-                                  [])
-                                 (t/option
-                                  "Red"
-                                  :red
-                                  []
-                                  [])
-                                 (t/option
-                                  "Silver"
-                                  :silver
-                                  []
-                                  [])
-                                 (t/option
-                                  "White"
-                                  :white
-                                  []
-                                  [])])]
+                  :selections [(t/selection-cfg
+                                {:name "Draconic Ancestry Type"
+                                 :tags #{:class}
+                                 :options [(t/option
+                                            "Black"
+                                            :black
+                                            []
+                                            [])
+                                           (t/option
+                                            "Blue"
+                                            :blue
+                                            []
+                                            [])
+                                           (t/option
+                                            "Brass"
+                                            :brass
+                                            []
+                                            [])
+                                           (t/option
+                                            "Bronze"
+                                            :bronze
+                                            []
+                                            [])
+                                           (t/option
+                                            "Copper"
+                                            :copper
+                                            []
+                                            [])
+                                           (t/option
+                                            "Gold"
+                                            :gold
+                                            []
+                                            [])
+                                           (t/option
+                                            "Green"
+                                            :green
+                                            []
+                                            [])
+                                           (t/option
+                                            "Red"
+                                            :red
+                                            []
+                                            [])
+                                           (t/option
+                                            "Silver"
+                                            :silver
+                                            []
+                                            [])
+                                           (t/option
+                                            "White"
+                                            :white
+                                            []
+                                            [])]})]
                   :traits [{:name "Draconic Resilience"}
                            {:name "Elemental Affinity"
                             :level 6}
@@ -4265,6 +4268,7 @@ Additionally, while perceiving through your familiar’s senses, you can also sp
   (t/selection-cfg
    (merge
     {:name "Class"
+     :order 0
      :tags #{:class}}
     cfg)))
 
@@ -4363,6 +4367,7 @@ Additionally, while perceiving through your familiar’s senses, you can also sp
    (t/selection-cfg
     {:name "Base Ability Scores"
      :key :ability-scores
+     :order 0
      :tags #{:ability-scores}
      :help [:div
             [:p "Ability scores are your major character traits and affect nearly all aspects of play. These scores range from 1 to 20 for player characters and DO NOT include racial or other bonuses."]
@@ -4436,6 +4441,7 @@ Additionally, while perceiving through your familiar’s senses, you can also sp
                ["Lawful Good" "Lawful Neutral" "Lawful Evil" "Neutral Good" "Neutral" "Neutral Evil" "Chaotic Good" "Chaotic Neutral" "Chaotic Evil"])})
    (t/selection-cfg
     {:name "Race"
+     :order 0
      :help "Race determines your appearance and helps shape your culture and background. It also affects you ability scores, size, speed, languages, and many other crucial inherent traits."
      :tags #{:race}
      :options [dwarf-option

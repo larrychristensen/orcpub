@@ -882,7 +882,7 @@
            (filter (fn [[k bonus]]
                      (not= bonus (ability-bonuses (:ability (opt5e/skills-map k)))))
                    skill-bonuses)))]
-       [list-item-section "Languages" "public-speaker" languages (partial prof-name opt5e/language-map)]
+       [list-item-section "Languages" "lips" languages (partial prof-name opt5e/language-map)]
        [list-item-section "Tool Proficiencies" "stone-crafting" tool-profs (partial prof-name equip5e/tools-map)]
        [list-item-section "Weapon Proficiencies" "bowman" weapon-profs (partial prof-name weapon5e/weapons-map)]
        [list-item-section "Armor Proficiencies" "mailed-fist" armor-profs (partial prof-name armor5e/armor-map)]
@@ -1784,7 +1784,7 @@
              :treasure (partial inventory-selector equip5e/treasure-map 100)}}])
 
 (defn new-option-selector [character built-char built-template option-paths stepper-selection-path option-path
-                       {:keys [::t/min ::t/max ::t/options] :as selection}
+                       {:keys [::t/min ::t/max ::t/options ::t/multiselect?] :as selection}
                        disable-select-new?
                            {:keys [::t/key ::t/name ::t/path ::t/help ::t/selections ::t/prereqs ::t/select-fn ::t/ui-fn ::t/icon] :as option}]
   (let [new-option-path (conj option-path key)
@@ -1810,13 +1810,13 @@
                           (fn [e]
                             (when (and (or (> max 1)
                                            (nil? max)
+                                           multiselect?
                                            (not selected?)
                                            has-selections?)
                                        meets-prereqs?
                                        selectable?)
                               (let [updated-char (let [new-option {::entity/key key}]
                                                    (if (or
-                                                        (::t/multiselect? selection)
                                                         (nil? max)
                                                         (and
                                                          (> min 1)
@@ -1836,7 +1836,7 @@
                                                       built-template
                                                       character
                                                       new-option-path
-                                                      (fn [o] {::entity/key key}))))]
+                                                      (fn [o] (if multiselect? [new-option] new-option)))))]
                                 (swap! app-state assoc :character updated-char))
                               (if select-fn
                                 (select-fn new-option-path)))
@@ -1865,7 +1865,7 @@
                                  (fn [[_ ref-selections]]
                                    (combine-ref-selections ref-selections))
                                  (dissoc by-ref nil))
-        final-selections (sort-by ::t/name (concat non-ref-selections combined-ref-selections))]
+        final-selections (sort-by (fn [s] [(or (::t/order s) 1000) (::t/name s)]) (concat non-ref-selections combined-ref-selections))]
     [:div.w-100-p
      [:div#options-column.b-1.b-rad-5
       [:div.flex.justify-cont-s-a
@@ -1876,7 +1876,7 @@
            [:div.p-5.hover-opacity-full.pointer
             {:class-name (if (= i page-index) "selected-tab b-b-2 b-orange" "opacity-5")
              :on-click (fn [_] (swap! app-state assoc :page i))}
-            (svg-icon icon)])
+            (svg-icon icon 24)])
          pages))]
       [:div.flex.justify-cont-s-b.p-t-5.p-10.align-items-t
        [:button.form-button.p-5-10.m-r-5
@@ -1898,21 +1898,28 @@
       [:div.p-5
        (doall
         (map
-         (fn [{:keys [::t/key ::t/name ::t/help ::t/options ::t/min ::t/max ::t/ref ::t/icon ::entity/path] :as selection}]
+         (fn [{:keys [::t/key ::t/name ::t/help ::t/options ::t/min ::t/max ::t/ref ::t/icon ::t/multiselect? ::entity/path ::entity/parent] :as selection}]
            (let [actual-path (if ref [ref] path)
                  entity-path (entity/get-entity-path built-template character actual-path)
                  selected-options (get-in character entity-path)
                  selected-count (cond
                                   (sequential? selected-options)
                                   (count selected-options)
-
                                   (map? selected-options)
                                   1
                                   :else 0)
                  remaining (- min selected-count)
-                 expanded? (get-in @app-state [:expanded-paths actual-path])]
-             ^{:key name}
+                 expanded? (get-in @app-state [:expanded-paths actual-path])
+                 ancestor-paths (reductions conj [] actual-path)
+                 ancestors (map (fn [a-p]
+                                  (get-in built-template
+                                          (entity/get-template-selection-path built-template a-p [])))
+                                (take-nth 2 (butlast ancestor-paths)))
+                 ancestor-names (map ::t/name (remove nil? ancestors))]
+             ^{:key (keyword (s/join "-" (map clojure.core/name actual-path)))}
              [:div.p-5.m-b-20.m-b-0-last
+              (if parent
+                [:span.i.f-s-14.f-w-n.m-l-5.m-b-2 (s/join " - " ancestor-names)])
               [:div.flex.align-items-c
                (if icon (svg-icon icon 24))
                [:span.m-l-5.f-s-18.f-w-b.flex-grow-1 name]
