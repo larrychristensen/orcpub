@@ -1752,7 +1752,7 @@
       opt5e/skills))))
 
 (def pages
-  [{:name "Ability Scores"
+  [{:name "Ability Scores / Feats"
     :icon "strong"
     :tags #{:ability-scores}}
    {:name "Race"
@@ -1796,7 +1796,8 @@
                         []
                         prereqs)
         meets-prereqs? (empty? failed-prereqs)
-        selectable? (and meets-prereqs?
+        selectable? (and (or selected?
+                             meets-prereqs?)
                          (or (not disable-select-new?)
                              selected?))
         expanded? (get-in @app-state [:expanded-paths new-option-path])
@@ -1813,7 +1814,8 @@
                                            multiselect?
                                            (not selected?)
                                            has-selections?)
-                                       meets-prereqs?
+                                       (or selected?
+                                           meets-prereqs?)
                                        selectable?)
                               (let [updated-char (let [new-option {::entity/key key}]
                                                    (if (or
@@ -1843,7 +1845,8 @@
                             (.stopPropagation e))
                           (if (and (or selected? (= 1 (count options))) ui-fn)
                             (ui-fn new-option-path built-template app-state built-char))
-                          (if (not meets-prereqs?)
+                          (if (and (not meets-prereqs?)
+                                   (not selected?))
                             (str "Requires " (s/join ", " failed-prereqs)))
                           icon)))
 

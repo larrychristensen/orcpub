@@ -855,112 +855,111 @@ check. The GM might also call for a Dexterity (Sleight of Hand) check to determi
                     "add superiority die to successful attack's damage, if target fails STR save, it is knocked prone")])
 
 (def can-cast-spell-prereq
-  {::t/label "spellcasting ability"
-   ::t/prereq-fn (fn [c] (some (fn [[k v]] (seq v)) (:spells-known c)))})
+  {::t/label "spellcasting ability."
+   ::t/prereq-fn (fn [c] (some (fn [[k v]] (seq v)) (es/entity-val c :spells-known)))})
+
+(defn does-not-have-feat-prereq [kw]
+  {::t/label "that you not already have this feat."
+   ::t/prereq-fn (fn [c] (let [feats (es/entity-val c :feats)]
+                           (not (and feats (feats kw)))))})
+
+(defn feat-option [cfg & [multiselect?]]
+  (let [kw (common/name-to-kw (:name cfg))]
+    (t/option-cfg
+     (cond-> cfg
+       true (assoc :key kw)
+       true (update :modifiers
+                    conj
+                    (modifiers/trait (str (:name cfg) " Feat"))
+                    (mods/set-mod ?feats kw))
+       (not multiselect?) (update :prereqs conj (does-not-have-feat-prereq kw))))))
 
 (def feat-options
-  [(t/option-cfg
+  [(feat-option
     {:name "Alert"
      :icon "look-at"
-     :modifiers [(modifiers/initiative 5)
-                 (modifiers/trait "Alert Feat")]})
-   (t/option-cfg
+     :modifiers [(modifiers/initiative 5)]})
+   (feat-option
     {:name "Athlete"
      :icon "weight-lifting-up"
-     :selections [(ability-increase-selection [:str :dex] 1 false)]
-     :modifiers [(modifiers/trait "Athlete Feat")]})
-   (t/option-cfg
+     :selections [(ability-increase-selection [:str :dex] 1 false)]})
+   (feat-option
     {:name "Actor"
      :icon "drama-masks"
-     :modifiers [(modifiers/ability :cha 1)
-                 (modifiers/trait "Actor Feat")]})
-   (t/option-cfg
+     :modifiers [(modifiers/ability :cha 1)]})
+   (feat-option
     {:name "Charger"
-     :icon "charging-bull"
-     :modifiers [(modifiers/trait "Charger Feat")]})
-   (t/option-cfg
+     :icon "charging-bull"})
+   (feat-option
     {:name "Crossbow Expert"
-     :icon "crossbow"
-     :modifiers [(modifiers/trait "Crossbow Expert Feat")]})
-   (t/option-cfg
+     :icon "crossbow"})
+   (feat-option
     {:name "Defensive Duelist"
      :icon "spinning-sword"
-     :modifiers [(modifiers/trait "Defensive Duelist Feat")]
      :prereqs [(ability-prereq :dex 13)]})
-   (t/option-cfg
+   (feat-option
     {:name "Dual Wielder"
-     :icon "rogue"
-     :modifiers [(modifiers/trait "Dual Wielder Feat")]})
-   (t/option-cfg
+     :icon "rogue"})
+   (feat-option
     {:name "Dungeon Delver"
      :icon "dungeon-gate"
-     :modifiers [(modifiers/trait "Dungeon Delver Feat")
-                 (modifiers/damage-resistance :trap)]})
-   (t/option-cfg
+     :modifiers [(modifiers/damage-resistance :trap)]})
+   (feat-option
     {:name "Durable"
      :icon "hospital-cross"
-     :modifiers [(modifiers/trait "Durable Feat")
-                 (modifiers/ability :con 1)]})
-   (t/option-cfg
+     :modifiers [(modifiers/ability :con 1)]})
+   (feat-option
     {:name "Elemental Adept"
      :icon "wind-hole"
-     :modifiers [(modifiers/trait "Elemental Adept Feat")]
-     :prereqs [can-cast-spell-prereq]})
-   (t/option-cfg
+     :prereqs [can-cast-spell-prereq]}
+    true)
+   (feat-option
     {:name "Grappler"
      :icon "muscle-up"
-     :modifiers [(modifiers/trait "Grappler Feat")]
      :prereqs [(ability-prereq :str 13)]})
-   (t/option-cfg
+   (feat-option
     {:name "Great Weapon Master"
-     :icon "broadsword"
-     :modifiers [(modifiers/trait "Great Weapon Master Feat")]})
-   (t/option-cfg
+     :icon "broadsword"})
+   (feat-option
     {:name "Healer"
      :icon "medical-pack-alt"
-     :modifiers [(modifiers/trait "Healer Feat")
-                 (modifiers/action "Healer Feat Action")]})
-   (t/option-cfg
+     :modifiers [(modifiers/action "Healer Feat Action")]})
+   (feat-option
     {:name "Heavily Armored"
      :icon "lamellar"
      :modifiers [(modifiers/heavy-armor-proficiency)
                  (modifiers/ability :str 1)]
      :prereqs [(armor-prereq :medium)]})
-   (t/option-cfg
+   (feat-option
     {:name "Heavy Armor Master"
      :icon "gauntlet"
-     :modifiers [(modifiers/ability :str 1)
-                 (modifiers/trait "Heavy Armor Master Feat")]
+     :modifiers [(modifiers/ability :str 1)]
      :prereqs [(armor-prereq :heavy)]})
-   (t/option-cfg
+   (feat-option
     {:name "Inspiring Leader"
      :icon "public-speaker"
-     :modfifiers [(modifiers/trait "Inspiring Leader Feat")]
      :prereqs [(ability-prereq :cha 13)]})
-   (t/option-cfg
+   (feat-option
     {:name "Keen Mind"
      :icon "brain"
-     :modifiers [(modifiers/ability :int 1)
-                 (modifiers/trait "Keen Mind Feat")]})
-   (t/option-cfg
+     :modifiers [(modifiers/ability :int 1)]})
+   (feat-option
     {:name "Lightly Armored"
      :icon "scale-mail"
      :selections [(ability-increase-selection [:str :dex] 1 false)]
      :prereqs [(modifiers/light-armor-proficiency)]})
-   (t/option-cfg
+   (feat-option
     {:name "Linguist"
      :icon "lips"
      :selections [(language-selection languages 3)]
      :prereqs [(modifiers/ability :int 1)]})
-   (t/option-cfg
+   (feat-option
     {:name "Lucky"
-     :icon "clover"
-     :modifiers [(modifiers/trait "Lucky Feat")]})
-   (t/option-cfg
+     :icon "clover"})
+   (feat-option
     {:name "Mage Slayer"
-     :icon "zeus-sword"
-     :modifiers [(modifiers/trait "Mage Slayer Feat")]})
-   (t/option-cfg
+     :icon "zeus-sword"})
+   (feat-option
     {:name "Magic Initiate"
      :icon "magic-palm"
      :selections [(t/selection-cfg
@@ -972,53 +971,47 @@ check. The GM might also call for a Dexterity (Sleight of Hand) check to determi
                               (magic-initiate-option :sorcerer :cha sl/spell-lists)
                               (magic-initiate-option :warlock :cha sl/spell-lists)
                               (magic-initiate-option :wizard :int sl/spell-lists)]})]})
-   (t/option-cfg
+   (feat-option
     {:name "Martial Adept"
      :icon "visored-helm"
      :selections [(t/selection
                    "Martial Maneuvers"
                    maneuver-options
-                   2 2)]
-     :modifiers [(modifiers/trait "Martial Adept Feat")]})
-   (t/option-cfg
+                   2 2)]})
+   (feat-option
     {:name "Medium Armor Master"
      :icon "bracers"
-     :modifiers [(modifiers/trait "Medium Armor Master Feat")
-                 (mods/modifier ?max-medium-armor-bonus 3)
+     :modifiers [(mods/modifier ?max-medium-armor-bonus 3)
                  (mods/fn-mod ?armor-stealth-disadvantage?
                               (fn [armor]
                                 (if (= :medium (:type armor))
                                   false
                                   (?armor-stealth-disadvantage? armor))))]
      :prereqs [(armor-prereq :medium)]})
-   (t/option-cfg
+   (feat-option
     {:name "Mobile"
      :icon "move"
-     :modifiers [(modifiers/speed 10)
-                 (modifiers/trait "Mobile Feat")]})
-   (t/option-cfg
+     :modifiers [(modifiers/speed 10)]})
+   (feat-option
     {:name "Moderately Armored"
      :icon "shoulder-armor"
      :selections [(ability-increase-selection [:str :dex] 1 false)]
      :modifiers [(modifiers/medium-armor-proficiency)
                  (modifiers/shield-armor-proficiency)]
      :prereqs [(armor-prereq :light)]})
-   (t/option-cfg
+   (feat-option
     {:name "Mounted Combatant"
-     :icon "cavalry"
-     :modifiers [(modifiers/trait "Mounted Combatant Feat")]})
-   (t/option-cfg
+     :icon "cavalry"})
+   (feat-option
     {:name "Observant"
      :icon "surrounded-eye"
      :selections [(ability-increase-selection [:int :wis] 1 false)]
-     :modifiers [(modifiers/trait "Observant Feat")
-                 (modifiers/passive-perception 5)
+     :modifiers [(modifiers/passive-perception 5)
                  (modifiers/passive-investigation 5)]})
-   (t/option-cfg
+   (feat-option
     {:name "Polearm Master"
-     :icon "halberd"
-     :modifiers [(modifiers/trait "Polearm Master Feat")]})
-   (t/option-cfg
+     :icon "halberd"})
+   (feat-option
     {:name "Resilient"
      :icon "dodging"
      :selections [(t/selection
@@ -1032,7 +1025,7 @@ check. The GM might also call for a Dexterity (Sleight of Hand) check to determi
            [(modifiers/ability ability-key 1)
             (modifiers/saving-throws nil ability-key)]))
         character/ability-keys))]})
-   (t/option-cfg
+   (feat-option
     {:name "Ritual Caster"
      :icon "gift-of-knowledge"
      :selections [(t/selection
@@ -1047,58 +1040,49 @@ check. The GM might also call for a Dexterity (Sleight of Hand) check to determi
                 ::t/prereq-fn (fn [{{:keys [wis int]} :abilities}]
                                 (or (>= wis 13)
                                     (>= int 13)))}]})
-   (t/option-cfg
+   (feat-option
     {:name "Savage Attacker"
-     :icon "saber-slash"
-     :modifiers [(modifiers/trait "Savage Attacker Feat")]})
-   (t/option-cfg
+     :icon "saber-slash"})
+   (feat-option
     {:name "Sentinal"
-     :icon "guards"
-     :modifiers [(modifiers/trait "Sentinal Feat")]})
-   (t/option-cfg
+     :icon "guards"})
+   (feat-option
     {:name "Sharpshooter"
-     :icon "bullseye"
-     :modifiers [(modifiers/trait "Sharpshooter Feat")]})
-   (t/option-cfg
+     :icon "bullseye"})
+   (feat-option
     {:name "Shield Master"
-     :icon "attached-shield"
-     :modifiers [(modifiers/trait "Shield Master Feat")]})
-   (t/option-cfg
+     :icon "attached-shield"})
+   (feat-option
     {:name "Skilled"
      :icon "juggling"
      :selections [(skilled-selection "Skill/Tool 1")
                   (skilled-selection "Skill/Tool 2")
                   (skilled-selection "Skill/tool 3")]})
-   (t/option-cfg
+   (feat-option
     {:name "Skulker"
      :icon "ghost-ally"
-     :modififiers [(modifiers/trait "Skulker Feat")]
      :prereqs [(ability-prereq :dex 13)]})
-   (t/option-cfg
+   (feat-option
     {:name "Spell Sniper"
      :icon "laser-precision"
-     :modifiers [(modifiers/trait "Spell Sniper Feat")]
      :prereqs [can-cast-spell-prereq]})
-   (t/option-cfg
+   (feat-option
     {:name "Tavern Brawler"
      :icon "broken-bottle"
      :selections [(ability-increase-selection [:str :dex] 1 false)]
-     :modifiers [(modifiers/weapon-proficiency :improvised)
-                 (modifiers/trait "Tavern Brawler Feat")]})
-   (t/option-cfg
+     :modifiers [(modifiers/weapon-proficiency :improvised)]})
+   (feat-option
     {:name "Tough"
      :icon "defensive-wall"
      :modifiers [(mods/modifier ?hit-point-level-bonus (+ 2 ?hit-point-level-bonus))]})
-   (t/option-cfg
+   (feat-option
     {:name "War Caster"
-     :icon "deadly-strike"
-     :modifiers [(modifiers/trait "War Caster Feat")]})
-   (t/option-cfg
+     :icon "deadly-strike"})
+   (feat-option
     {:name "Weapon Master"
      :icon "sword-slice"
      :selections [(ability-increase-selection [:str :dex] 1 false)
                   (weapon-proficiency-selection 4)]})])
-
 
 (def fighting-style-options
   [(t/option
@@ -1166,7 +1150,7 @@ check. The GM might also call for a Dexterity (Sleight of Hand) check to determi
   (t/selection-cfg
    {:name (if (= 1 num) "Feat" "Feats")
     :options feat-options
-    :multiselect? true
+    ;;:multiselect? true
     :tags #{:ability-scores}
     :min num
     :max num}))
