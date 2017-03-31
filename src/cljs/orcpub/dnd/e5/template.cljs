@@ -4477,6 +4477,7 @@ Additionally, while perceiving through your familiar’s senses, you can also sp
                sorcerer-option
                warlock-option
                wizard-option]})
+   (inventory-selection "Treasure" "cash" equip5e/treasure mod5e/deferred-treasure)
    (inventory-selection "Weapons" "plain-dagger" weapon5e/weapons mod5e/deferred-weapon)
    (inventory-selection "Magic Weapons" "lightning-bow" mi/magic-weapons mod5e/deferred-magic-weapon)
    (inventory-selection "Armor" "breastplate" armor5e/armor mod5e/deferred-armor)

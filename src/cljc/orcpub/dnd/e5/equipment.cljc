@@ -236,3 +236,18 @@
                          :values musical-instruments}}
    (zipmap (map :key equipment) equipment)))
 
+(def treasure
+  [{:key :cp
+    :name "Copper Pieces (CP)"}
+   {:key :sp
+    :name "Silver Pieces (SP)"}
+   {:key :ep
+    :name "Electrum Pieces (EP)"}
+   {:key :gp
+    :name "Gold Pieces (GP)"}
+   {:key :pp
+    :name "Platinum Pieces (PP)"}])
+
+(def treasure-map
+  (zipmap (map :key treasure) treasure))
+

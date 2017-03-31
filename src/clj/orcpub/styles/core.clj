@@ -264,9 +264,13 @@
     {:padding-top "3px"}]
    [:.p-t-4
     {:padding-top "4px"}]
+   [:.p-t-5
+    {:padding-top "5px"}]
    [:.p-t-10
     {:padding-top "10px"}]
 
+   [:.p-b-5
+    {:padding-bottom "5px"}]
    [:.p-b-10
     {:padding-bottom "10px"}]
    [:.p-b-40

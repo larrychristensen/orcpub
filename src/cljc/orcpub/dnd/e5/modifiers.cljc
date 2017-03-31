@@ -260,6 +260,12 @@
     (fn [num] (es/map-mod ?equipment equipment-kw num))
     1))
 
+(defn deferred-treasure [treasure-kw]
+  (mods/deferred-modifier
+    ?treasure
+    (fn [num] (es/map-mod ?treasure treasure-kw num))
+    1))
+
 (defn deferred-magic-item [item-kw]
   (mods/deferred-modifier
     ?magic-items

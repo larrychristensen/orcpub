@@ -1622,7 +1622,7 @@
             (swap! app-state update-in [:character ::entity/options :class] conj {::entity/key first-unselected ::entity/options {:levels [{::entity/key :level-1}]}})))}
        "Add Class"]]]))
 
-(defn inventory-selector [item-map character {:keys [::t/key ::t/options]}]
+(defn inventory-selector [item-map qty-input-width character {:keys [::t/key ::t/options]}]
   (let [selected-items (get-in @app-state [:character ::entity/options key])
         selected-keys (into #{} (map ::entity/key selected-items))]
     [:div
@@ -1634,9 +1634,12 @@
            (swap! app-state
                   update-in
                   [:character ::entity/options key]
-                  conj
-                  {::entity/key kw
-                   ::entity/value 1})))}
+                  (fn [items]
+                    (vec
+                     (conj
+                      items
+                      {::entity/key kw
+                       ::entity/value 1}))))))}
       [:option.builder-dropdown-item
        {:value ""
         :disabled true}
@@ -1651,8 +1654,8 @@
         (remove #(selected-keys (::t/key %)) options)))]
      [:div
       (doall
-       (map
-        (fn [{item-key ::entity/key item-qty ::entity/value}]
+       (map-indexed
+        (fn [i {item-key ::entity/key item-qty ::entity/value}]
           (let [item (item-map item-key)
                 item-name (:name item)
                 item-description (:description item)
@@ -1662,9 +1665,11 @@
              [:div.f-w-b.flex.align-items-c
               [:div.flex-grow-1 item-name]
               (if item-description [:div.w-60 [show-info-button expanded? [key item-key]]])
-              [:input.input.w-60.m-l-5.m-t-0
-               {:type :number
-                :value item-qty}]
+              [:input.input.m-l-5.m-t-0
+               {:class-name (str "w-" (or qty-input-width 60))
+                :type :number
+                :value item-qty
+                :on-change (fn [e] (swap! app-state assoc-in [:character ::entity/options key i ::entity/value] (.. e -target -value)))}]
               [:i.fa.fa-minus-circle.orange.f-s-16.m-l-5.pointer
                {:on-click (fn [_] (swap! app-state
                                          update-in
@@ -1770,12 +1775,13 @@
    {:name "Equipment"
     :icon "backpack"
     :tags #{:equipment}
-    :ui-fns {:weapons (partial inventory-selector weapon5e/weapons-map)
-             :magic-weapons (partial inventory-selector mi5e/magic-weapon-map)
-             :armor (partial inventory-selector armor5e/armor-map)
-             :magic-armor (partial inventory-selector mi5e/magic-armor-map)
-             :equipment (partial inventory-selector equip5e/equipment-map)
-             :other-magic-items (partial inventory-selector mi5e/other-magic-item-map)}}])
+    :ui-fns {:weapons (partial inventory-selector weapon5e/weapons-map 60)
+             :magic-weapons (partial inventory-selector mi5e/magic-weapon-map 60)
+             :armor (partial inventory-selector armor5e/armor-map 60)
+             :magic-armor (partial inventory-selector mi5e/magic-armor-map 60)
+             :equipment (partial inventory-selector equip5e/equipment-map 60)
+             :other-magic-items (partial inventory-selector mi5e/other-magic-item-map 60)
+             :treasure (partial inventory-selector equip5e/treasure-map 100)}}])
 
 (defn new-option-selector [character built-char built-template option-paths stepper-selection-path option-path
                        {:keys [::t/min ::t/max ::t/options] :as selection}
@@ -1892,7 +1898,7 @@
       [:div.p-5
        (doall
         (map
-         (fn [{:keys [::t/key ::t/name ::t/options ::t/min ::t/max ::t/ref ::t/icon ::entity/path] :as selection}]
+         (fn [{:keys [::t/key ::t/name ::t/help ::t/options ::t/min ::t/max ::t/ref ::t/icon ::entity/path] :as selection}]
            (let [actual-path (if ref [ref] path)
                  entity-path (entity/get-entity-path built-template character actual-path)
                  selected-options (get-in character entity-path)
@@ -1903,12 +1909,15 @@
                                   (map? selected-options)
                                   1
                                   :else 0)
-                 remaining (- min selected-count)]
+                 remaining (- min selected-count)
+                 expanded? (get-in @app-state [:expanded-paths actual-path])]
              ^{:key name}
-             [:div.p-5
+             [:div.p-5.m-b-20.m-b-0-last
               [:div.flex.align-items-c
                (if icon (svg-icon icon 24))
                [:span.m-l-5.f-s-18.f-w-b.flex-grow-1 name]
+               (if help
+                 [show-info-button expanded? actual-path])
                (if (and min (pos? min))
                  [:div.m-l-10
                   (cond
@@ -1929,6 +1938,8 @@
                     [:div.flex.align-items-c
                      [:span.i.m-r-5 "remove"]
                      [:span.bg-red.t-a-c.w-18.h-18.p-t-4.b-rad-50-p.inline-block.f-w-b (Math/abs remaining)]])])]
+              (if (and help expanded?)
+                 [help-section help])
               (if (pos? min)
                 [:div.p-5.f-s-16
                  [:div.flex.align-items-c
