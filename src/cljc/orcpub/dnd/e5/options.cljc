@@ -507,6 +507,7 @@ check. The GM might also call for a Dexterity (Sleight of Hand) check to determi
       {:name title
        :key kw
        :ref kw
+       :order (if (zero? level) 0 1)
        :options (spell-options spell-keys level spellcasting-ability class-name)
        :min num
        :max num
@@ -563,7 +564,7 @@ check. The GM might also call for a Dexterity (Sleight of Hand) check to determi
      (range 1 (inc level)))))
 
 (defn bard-magical-secrets [min-level]
-  (let [max-level (val (last (total-slots min-level 1)))
+  (let [max-level (key (last (total-slots min-level 1)))
         spells-by-level (group-by :level spells/spells)
         filtered-spells-by-level (select-keys spells-by-level (range 1 (inc max-level)))]
     (t/selection-cfg
@@ -574,20 +575,12 @@ check. The GM might also call for a Dexterity (Sleight of Hand) check to determi
       :options (vec
                 (mapcat
                  (fn [[lvl spells]]
-                   (prn "BMS" lvl)
                    (map
                     (fn [{:keys [name] :as spell}]
                       (let [key (or (:key spell) (common/name-to-kw name))]
-                        (prn "SPELL" name key)
                         (spell-option lvl :cha "Bard" key true)))
                     spells))
-                 filtered-spells-by-level))}))
-  #_(map
-   (fn [s] (assoc s ::t/prereq-fn
-                  (fn [built-char]
-                    (let [bard-levels (-> (es/entity-val built-char :levels) :bard :class-level)]
-                      (>= bard-levels min-level)))))
-   (raw-bard-magical-secrets min-level)))
+                 filtered-spells-by-level))})))
 
 (defn cantrip-selections [class-key ability cantrips-known]
   (reduce
@@ -654,8 +647,9 @@ check. The GM might also call for a Dexterity (Sleight of Hand) check to determi
                    (t/selection-cfg
                     {:name (str (:name cls-cfg) " Spells Known")
                      :key kw
-                     :ref kw
+                     :ref [:class class-key :spells-known]
                      :options options
+                     :order 1
                      :min num
                      :max (if (not acquire?) num)
                      :new-item-fn (fn [selection selected-items _ key]

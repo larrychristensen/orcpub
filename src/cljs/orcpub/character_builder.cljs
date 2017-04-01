@@ -1725,7 +1725,7 @@
      (map
       (fn [{:keys [name key ability icon description]}]
         (let [skill-profs (es/entity-val built-char :skill-profs)
-              has-prof? (skill-profs key)
+              has-prof? (and skill-profs (skill-profs key))
               selected? (selected-skill-keys key)
               selectable? (available-skills key)
               bad-selection? (and selected? (not selectable?))
@@ -1871,7 +1871,7 @@
        ::t/options (into (sorted-set-by #(< (::t/key %) (::t/key %2))) (apply concat (map ::t/options selections)))))))
 
 (defn actual-path [{:keys [::t/ref ::entity/path] :as selection}]
-  (if ref [ref] path))
+  (if ref (if (sequential? ref) ref [ref]) path))
 
 (defn count-remaining [built-template character {:keys [::t/min ::t/max] :as selection}]
   (let [actual-path (actual-path selection)

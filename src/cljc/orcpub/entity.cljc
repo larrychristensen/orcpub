@@ -335,7 +335,7 @@
   (memoized-make-path-map-aux character))
 
 
-(defn get-all-selections-aux [path {:keys [::t/key ::t/ref ::t/selections ::t/options] :as obj} parent selected-option-paths]
+(defn get-all-selections-aux [path {:keys [::t/key ::t/selections ::t/options] :as obj} parent selected-option-paths]
   (let [children (map
                   (fn [{:keys [::t/key] :as s}]
                     (let [child-path (conj path key)]

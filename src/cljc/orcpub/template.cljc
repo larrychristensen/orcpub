@@ -123,13 +123,14 @@
  :args ::option
  :ret ::modifier-map-entry)
 
-(defn make-modifier-map-entry-from-selection [selection]
-  [(or (::ref selection)
-       (::key selection))
+#_(defn make-modifier-map-entry-from-selection [{:keys [ref key min max options]}]
+  (let [path (or ref key)]
+    (assoc-in {} ))
+  [(or ref key)
    (into (select-keys selection [::min ::max])
          (map make-modifier-map-entry-from-option (::options selection)))])
 
-(spec/fdef
+#_(spec/fdef
  make-modifier-map-entry-from-selection
  :args ::selection
  :ret ::modifier-map-entry)
@@ -146,7 +147,16 @@
              template)))
 
 (defn make-modifier-map-from-selections [selections]
-  (into {} (map make-modifier-map-entry-from-selection selections)))
+  (reduce
+   (fn [m {:keys [::ref ::key ::min ::max ::options] :as selection}]
+     (let [path (if ref (if (sequential? ref) ref [ref]) [key])]
+       (assoc-in m
+                 path
+                 (into (select-keys selection [::min ::max])
+                       (map make-modifier-map-entry-from-option options)))))
+   {}
+   selections)
+  #_(into {} (map make-modifier-map-entry-from-selection selections)))
 
 (spec/fdef
  make-modifier-map-entry-from-selections
@@ -155,9 +165,7 @@
 
 (defn make-modifier-map [template]
   (let [ref-selections (get-ref-selections template)]
-    (merge
-     (make-modifier-map-from-selections ref-selections)
-     (make-modifier-map-from-selections (::selections template)))))
+    (make-modifier-map-from-selections (concat (::selections template) ref-selections))))
 
 (spec/fdef
  make-modifier-map

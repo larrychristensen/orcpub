@@ -1650,6 +1650,12 @@
                   damage-desc
                   " damage to a successful weapon attack's damage")}))
 
+(defn starting-equipment-option [{:keys [name] :as cfg}]
+  (-> cfg
+      (assoc :name (str "Starting Equipment: " name))
+      (assoc :tags #{:equipment :starting-equipment})
+      t/selection-cfg))
+
 (def cleric-option
   (class-option
    {:name "Cleric",
@@ -1677,15 +1683,15 @@
                                :leather 1
                                :chain-mail 1}}]
     :armor {:shield 1}
-    :selections [(t/selection
-                  "Additional Weapon"
-                  [(t/option
-                    "Light Crossbow and 20 Bolts"
-                    :light-crossbow
-                    []
-                    [(mod5e/weapon :crossbow-light 1)
-                     (mod5e/equipment :crossbow-bolt 20)])
-                   (weapon-option [:simple 1])])]
+    :selections [(starting-equipment-option
+                  {:name "Additional Weapon"
+                   :options [(t/option
+                     "Light Crossbow and 20 Bolts"
+                     :light-crossbow
+                     []
+                     [(mod5e/weapon :crossbow-light 1)
+                      (mod5e/equipment :crossbow-bolt 20)])
+                    (weapon-option [:simple 1])]})]
     :levels {2 {:modifiers [(mod5e/action
                              {:level 2
                               :page 59
