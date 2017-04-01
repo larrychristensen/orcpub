@@ -19,7 +19,7 @@
      :see-invisibility :shatter :silence :suggestion :zone-of-truth],
     3
     [:bestow-curse :clairvoyance :dispel-magic :fear :feign-death :glyph-of-warding
-     :hypnotic-pattern :leomonds-tiny-hut :major-image :nondetection :plant-growth :sending
+     :hypnotic-pattern :leomunds-tiny-hut :major-image :nondetection :plant-growth :sending
      :speak-with-dead :speak-with-plants :stinking-cloud
      :tongues],
     4

@@ -495,7 +495,7 @@ check. The GM might also call for a Dexterity (Sleight of Hand) check to determi
    (sort spells)))
 
 (defn spell-level-title [class-name level]
-  (str class-name (if (zero? level) " Cantrips Known" "Spells Known")))
+  (str class-name (if (zero? level) " Cantrips Known" (str " Spells Known " level))))
 
 (defn spell-selection
   ([class-key level spellcasting-ability class-name num]
@@ -566,26 +566,27 @@ check. The GM might also call for a Dexterity (Sleight of Hand) check to determi
   (let [spell-slots (total-slots level 1)]
     (vec
      (for [i (range 2)]
-       (t/selection
-        (str "Magical Secrets " (inc i))
-        (map
-         (fn [[lvl _]]
-           (t/option
-            (spell-level-title lvl "Bard")
-            (keyword (str lvl))
-            [(spell-selection
-              :bard
-              lvl
-              (reduce-kv
-               (fn [s _ lvls]
-                 (clojure.set/union s (lvls lvl)))
-               #{}
-               sl/spell-lists)
-              :cha
-              (class-names :bard)
-              1)]
-            []))
-         spell-slots))))))
+       (t/selection-cfg
+        {:name (str "Magical Secrets " (inc i))
+         :tags #{:spells}
+         :options (map
+                   (fn [[lvl _]]
+                     (t/option
+                      (spell-level-title "Bard" lvl)
+                      (keyword (str lvl))
+                      [(spell-selection
+                        :bard
+                        lvl
+                        (reduce-kv
+                         (fn [s _ lvls]
+                           (clojure.set/union s (lvls lvl)))
+                         #{}
+                         sl/spell-lists)
+                        :cha
+                        (class-names :bard)
+                        1)]
+                      []))
+                   spell-slots)})))))
 
 (defn bard-magical-secrets [min-level]
   (map
@@ -644,6 +645,7 @@ check. The GM might also call for a Dexterity (Sleight of Hand) check to determi
                           (map
                            (fn [spell-key]
                              (let [spell (spells/spell-map spell-key)]
+                               #?(:cljs (if (nil? spell) (js/console.warn (str "No spell found for key: " spell-key))))
                                (t/option-cfg
                                 {:name (str lvl " - " (:name spell))
                                  :key spell-key
