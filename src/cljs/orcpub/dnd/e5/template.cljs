@@ -1573,10 +1573,10 @@
                               :level 6
                               :page 54
                               :summary "performance during your turn that gives you and friendly creatures within 30 ft. advantage on frightened or charmed saves."})]}
-             10 {:selections (conj (opt5e/raw-bard-magical-secrets 10)
+             10 {:selections (conj [(opt5e/bard-magical-secrets 10)]
                                    (opt5e/expertise-selection 2))}
-             14 {:selections (opt5e/raw-bard-magical-secrets 14)}
-             18 {:selections (opt5e/raw-bard-magical-secrets 18)}}
+             14 {:selections [(opt5e/bard-magical-secrets 14)]}
+             18 {:selections [(opt5e/bard-magical-secrets 18)]}}
     :traits [{:name "Font of Inspiration"
               :level 5
               :page 54
@@ -1585,13 +1585,13 @@
               :level 20
               :page 54
               :summary "regain 1 use of Bardic Inspiration if you have none remaining when rolling initiative"
-}]
+              }]
+    
     :subclass-level 3
     :subclass-title "Bard College"
     :subclass-help "Your bard college is a loose association that preserves bardic traditions and affords additional features"
     :subclasses [{:name "College of Lore"
                   :profs {:skill-options {:choose 3 :options {:any true}}}
-                  :selections (opt5e/bard-magical-secrets 6)
                   :modifiers [(mod5e/reaction
                                {:name "Cutting Wounds"
                                 :level 3
@@ -1599,7 +1599,9 @@
                                 :summary (str "expend a use of Bardic Inspiration to subtract 1d"
                                               (bardic-inspiration-die ?levels)
                                               " from an attack, ability, or damage roll made by a creature within 60 ft.")})]
-                  :levels {14 {:modifiers [(mod5e/dependent-trait
+                  
+                  :levels {6 {:selections [(opt5e/bard-magical-secrets 6)]}
+                           14 {:modifiers [(mod5e/dependent-trait
                                             {:name "Peerless Skill"
                                              :level 14
                                              :page 55

@@ -479,10 +479,10 @@ check. The GM might also call for a Dexterity (Sleight of Hand) check to determi
     (spell-field "Duration" (:duration spell))]
    [:div.f-w-n (:description spell)]])
 
-(defn spell-option [level spellcasting-ability class-name key]
+(defn spell-option [level spellcasting-ability class-name key & [prepend-level?]]
   (let [{:keys [name] :as spell} (spells/spell-map key)]
     (t/option-cfg
-     {:name name
+     {:name (if prepend-level? (str level " - " name) name)
       :key key
       :help (spell-help spell)
       :modifiers [(modifiers/spells-known level key spellcasting-ability class-name)]})))
@@ -562,34 +562,27 @@ check. The GM might also call for a Dexterity (Sleight of Hand) check to determi
      {}
      (range 1 (inc level)))))
 
-(defn raw-bard-magical-secrets [level]
-  (let [spell-slots (total-slots level 1)]
-    (vec
-     (for [i (range 2)]
-       (t/selection-cfg
-        {:name (str "Magical Secrets " (inc i))
-         :tags #{:spells}
-         :options (map
-                   (fn [[lvl _]]
-                     (t/option
-                      (spell-level-title "Bard" lvl)
-                      (keyword (str lvl))
-                      [(spell-selection
-                        :bard
-                        lvl
-                        (reduce-kv
-                         (fn [s _ lvls]
-                           (clojure.set/union s (lvls lvl)))
-                         #{}
-                         sl/spell-lists)
-                        :cha
-                        (class-names :bard)
-                        1)]
-                      []))
-                   spell-slots)})))))
-
 (defn bard-magical-secrets [min-level]
-  (map
+  (let [max-level (val (last (total-slots min-level 1)))
+        spells-by-level (group-by :level spells/spells)
+        filtered-spells-by-level (select-keys spells-by-level (range 1 (inc max-level)))]
+    (t/selection-cfg
+     {:name "Bard Magical Secrets"
+      :tags #{:spells}
+      :min 2
+      :max 2
+      :options (vec
+                (mapcat
+                 (fn [[lvl spells]]
+                   (prn "BMS" lvl)
+                   (map
+                    (fn [{:keys [name] :as spell}]
+                      (let [key (or (:key spell) (common/name-to-kw name))]
+                        (prn "SPELL" name key)
+                        (spell-option lvl :cha "Bard" key true)))
+                    spells))
+                 filtered-spells-by-level))}))
+  #_(map
    (fn [s] (assoc s ::t/prereq-fn
                   (fn [built-char]
                     (let [bard-levels (-> (es/entity-val built-char :levels) :bard :class-level)]
@@ -645,7 +638,9 @@ check. The GM might also call for a Dexterity (Sleight of Hand) check to determi
                           (map
                            (fn [spell-key]
                              (let [spell (spells/spell-map spell-key)]
-                               #?(:cljs (if (nil? spell) (js/console.warn (str "No spell found for key: " spell-key))))
+                               #?@(:cljs
+                                  [(if (nil? spell) (js/console.warn (str "No spell found for key: " spell-key)))
+                                   (if (nil? (:name spell)) (js/console.warn (str "Spell is missing name: " spell-key)))])
                                (t/option-cfg
                                 {:name (str lvl " - " (:name spell))
                                  :key spell-key

@@ -1583,17 +1583,19 @@
                :on-change
                (fn [e]
                  (let [new-highest-level-str (.. e -target -value)
+                       _ (prn "NEW HIGHEST LEVEL STR" new-highest-level-str)
                        new-highest-level (js/parseInt (last (s/split new-highest-level-str #"-")))]
                    (swap! app-state
                           update-in
                           [:character ::entity/options :class i ::entity/options :levels]
                           (fn [levels]
-                            (let [current-highest-level (inc (count levels))]
+                            (let [current-highest-level (count levels)]
+                              (prn "CURRENT " current-highest-level)
                               (cond
                                 (> new-highest-level current-highest-level)
                                 (vec (concat levels (map
-                                                     (fn [lvl] {::entity/key (keyword (str "level-" lvl))})
-                                                     (range current-highest-level (inc new-highest-level)))))
+                                                     (fn [lvl] {::entity/key (keyword (str "level-" (inc lvl)))})
+                                                     (range current-highest-level new-highest-level))))
                                 
                                 (< new-highest-level current-highest-level)
                                 (vec (take new-highest-level levels))
