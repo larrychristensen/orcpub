@@ -45,6 +45,8 @@
 (def font-sizes
   [[:.f-s-10
     {:font-size "10px"}]
+   [:.f-s-11
+    {:font-size "11px"}]
    [:.f-s-12
     {:font-size "12px !important"}]
    [:.f-s-14
@@ -110,6 +112,10 @@
    [:.m-r-80
     {:margin-right "80px"}]
 
+   [:.m-t--10
+    {:margin-top "-10px"}]
+   [:.m-t--5
+    {:margin-top "-5px"}]
    [:.m-t-2
     {:margin-top "2px"}]
    [:.m-t-21
@@ -179,6 +185,10 @@
    [:.w-100-p
     {:width "100%"}]
 
+   [:.w-12
+    {:width "12px"}]
+   [:.w-14
+    {:width "14px"}]
    [:.w-15
     {:width "15px"}]
    [:.w-18
@@ -214,6 +224,10 @@
    [:.w-1440
     {:width "1440px"}]
 
+   [:.h-12
+    {:height "12px"}]
+   [:.h-14
+    {:height "14px"}]
    [:.h-15
     {:height "15px"}]
    [:.h-18

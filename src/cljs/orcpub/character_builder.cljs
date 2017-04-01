@@ -1863,28 +1863,64 @@
        ::t/max (if (every? ::t/max selections) (apply + (map ::t/max selections)))
        ::t/options (into (sorted-set-by #(< (::t/key %) (::t/key %2))) (apply concat (map ::t/options selections)))))))
 
-(defn new-options-column [character built-char built-template available-selections page-index option-paths stepper-selection-path]
-  (let [{:keys [tags ui-fns] :as page} (pages page-index)
-        selections (entity/tagged-selections available-selections tags)
-        by-ref (group-by ::t/ref selections)
+(defn actual-path [{:keys [::t/ref ::entity/path] :as selection}]
+  (if ref [ref] path))
+
+(defn count-remaining [built-template character selection]
+  (let [actual-path (actual-path selection)
+        entity-path (entity/get-entity-path built-template character actual-path)
+        selected-options (get-in character entity-path)
+        selected-count (cond
+                         (sequential? selected-options)
+                         (count selected-options)
+                         (map? selected-options)
+                         1
+                         :else 0)]
+    (- (::t/min selection) selected-count)))
+
+(defn remaining-indicator [remaining & [size font-size]]
+  [:span.bg-red.t-a-c.p-t-4.b-rad-50-p.inline-block.f-w-b
+   (let [size (or size 18)
+         font-size (or font-size 14)]
+     {:class-name (str "h-" size " w-" size " f-s-" font-size)})
+   remaining])
+
+(defn combine-selections [selections]
+  (let [by-ref (group-by ::t/ref selections)
         non-ref-selections (get by-ref nil)
         combined-ref-selections (map
                                  (fn [[_ ref-selections]]
                                    (combine-ref-selections ref-selections))
-                                 (dissoc by-ref nil))
-        final-selections (sort-by (fn [s] [(or (::t/order s) 1000) (::t/name s)]) (concat non-ref-selections combined-ref-selections))]
+                                 (dissoc by-ref nil))]
+    (sort-by (fn [s] [(or (::t/order s) 1000) (::t/name s)])
+             (concat non-ref-selections combined-ref-selections))))
+
+(defn section-tabs [available-selections built-template character page-index]
+  [:div.flex.justify-cont-s-a
+   (doall
+    (map-indexed
+     (fn [i {:keys [name icon tags]}]
+       (let [selections (entity/tagged-selections available-selections tags)
+             combined-selections (combine-selections selections)
+             total-remaining (apply + (map (partial count-remaining built-template character) combined-selections))]
+         ^{:key name}
+         [:div.p-5.hover-opacity-full.pointer
+          {:class-name (if (= i page-index) "b-b-2 b-orange" "")
+           :on-click (fn [_] (swap! app-state assoc :page i))}
+          [:div
+           {:class-name (if (= i page-index) "selected-tab" "opacity-5 hover-opacity-full")}
+           (svg-icon icon 32)]
+          (if (not (= total-remaining 0))
+            [:div.flex.justify-cont-end.m-t--10 (remaining-indicator total-remaining 12 11)])]))
+     pages))])
+
+(defn new-options-column [character built-char built-template available-selections page-index option-paths stepper-selection-path]
+  (let [{:keys [tags ui-fns] :as page} (pages page-index)
+        selections (entity/tagged-selections available-selections tags)
+        final-selections (combine-selections selections)]
     [:div.w-100-p
      [:div#options-column.b-1.b-rad-5
-      [:div.flex.justify-cont-s-a
-       (doall
-        (map-indexed
-         (fn [i {:keys [name icon]}]
-           ^{:key name}
-           [:div.p-5.hover-opacity-full.pointer
-            {:class-name (if (= i page-index) "selected-tab b-b-2 b-orange" "opacity-5")
-             :on-click (fn [_] (swap! app-state assoc :page i))}
-            (svg-icon icon 24)])
-         pages))]
+      [section-tabs available-selections built-template character page-index]
       [:div.flex.justify-cont-s-b.p-t-5.p-10.align-items-t
        [:button.form-button.p-5-10.m-r-5
         {:on-click
@@ -1906,16 +1942,8 @@
        (doall
         (map
          (fn [{:keys [::t/key ::t/name ::t/help ::t/options ::t/min ::t/max ::t/ref ::t/icon ::t/multiselect? ::entity/path ::entity/parent] :as selection}]
-           (let [actual-path (if ref [ref] path)
-                 entity-path (entity/get-entity-path built-template character actual-path)
-                 selected-options (get-in character entity-path)
-                 selected-count (cond
-                                  (sequential? selected-options)
-                                  (count selected-options)
-                                  (map? selected-options)
-                                  1
-                                  :else 0)
-                 remaining (- min selected-count)
+           (let [actual-path (actual-path selection)
+                 remaining (count-remaining built-template character selection)
                  expanded? (get-in @app-state [:expanded-paths actual-path])
                  ancestor-paths (reductions conj [] actual-path)
                  ancestors (map (fn [a-p]
@@ -1937,7 +1965,7 @@
                   (cond
                     (pos? remaining)
                     [:div.flex.align-items-c
-                     [:span.bg-red.t-a-c.w-18.h-18.p-t-4.b-rad-50-p.inline-block.f-w-b remaining]
+                     (remaining-indicator remaining)
                      [:span.i.m-l-5 "remaining"]]
 
                     (or (zero? remaining)
