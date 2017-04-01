@@ -748,7 +748,7 @@ check. The GM might also call for a Dexterity (Sleight of Hand) check to determi
    (t/selection-cfg
     {:name "Skill Proficiency"
      :key key
-     :order order
+     :order (or order 0)
      :help (proficiency-help num "a skill" "skills")
      :options (skill-options
                (filter
@@ -1179,15 +1179,16 @@ check. The GM might also call for a Dexterity (Sleight of Hand) check to determi
     :key (or key :skill-expertise)
     :order 2
     :options (mapv
-              (fn [skill]
+              (fn [{:keys [name key icon]}]
                 (t/option-cfg
-                 {:name (:name skill)
-                  :key (:key skill)
-                  :icon (:icon skill)
-                  :modifiers [(modifiers/skill-expertise (:key skill))]
-                  :prereq-fn (fn [built-char]
-                               (let [skill-profs (es/entity-val built-char :skill-profs)]
-                                 (and skill-profs (skill-profs (:key skill)))))}))
+                 {:name name
+                  :key key
+                  :icon icon
+                  :modifiers [(modifiers/skill-expertise key)]
+                  :prereqs [{::t/label (str "proficiency in " name)
+                             ::t/prereq-fn (fn [built-char]
+                                             (let [skill-profs (es/entity-val built-char :skill-profs)]
+                                               (and skill-profs (skill-profs key))))}]}))
               skills)
     :min num
     :max num

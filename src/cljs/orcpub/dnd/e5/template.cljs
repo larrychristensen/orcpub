@@ -1210,6 +1210,7 @@
      (t/selection-cfg
       {:name (str "Starting Equipment: " name)
        :help help
+       :order 0
        :tags #{:starting-equipment}
        :options (mapv
                  option-fn

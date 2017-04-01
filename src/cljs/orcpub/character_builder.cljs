@@ -1578,7 +1578,7 @@
                  levels-selection (some #(if (= :levels (::t/key %)) %) (::t/selections class-template-option))
                  available-levels (::t/options levels-selection)
                  last-level-key (::entity/key (last selected-levels))]
-             [:select.builder-option.builder-option-dropdown.m-t-0.m-l-5.w-60
+             [:select.builder-option.builder-option-dropdown.m-t-0.m-l-5.w-80
               {:value last-level-key
                :on-change
                (fn [e]
@@ -1712,7 +1712,7 @@
      [:div.i (str "(" (:name (opt5e/abilities-map ability)) ")")]]]
    [:p description]])
 
-(defn skills-selector [character {:keys [::t/ref ::t/max ::t/options]}]
+(defn skills-selector [character {:keys [::t/ref ::t/max ::t/options]} built-char]
   (let [path [:character ::entity/options ref]
         selected-skills (get-in @app-state path)
         selected-count (count selected-skills)
@@ -1722,13 +1722,16 @@
     (doall
      (map
       (fn [{:keys [name key ability icon description]}]
-        (let [selected? (selected-skill-keys key)
+        (let [skill-profs (es/entity-val built-char :skill-profs)
+              has-prof? (skill-profs key)
+              selected? (selected-skill-keys key)
               selectable? (available-skills key)
               bad-selection? (and selected? (not selectable?))
               allow-select? (or selected?
                                 (and (not selected?)
                                      (pos? remaining)
-                                     selectable?)
+                                     selectable?
+                                     (not has-prof?))
                                 bad-selection?)]
           (option-selector-base name
                                 key
@@ -1746,7 +1749,9 @@
                                                (vec (remove (fn [s] (= key (::entity/key s))) skills))
                                                (vec (conj skills {::entity/key key})))))))
                                 nil
-                                nil
+                                (if (and has-prof?
+                                         (not selected?))
+                                  "You already have this skill proficiency")
                                 icon
                                 (if bad-selection? "b-red"))))
       opt5e/skills))))
@@ -1774,7 +1779,7 @@
     :ui-fns {:skill-profs skills-selector}}
    {:name "Equipment"
     :icon "backpack"
-    :tags #{:equipment}
+    :tags #{:equipment :starting-equipment}
     :ui-fns {:weapons (partial inventory-selector weapon5e/weapons-map 60)
              :magic-weapons (partial inventory-selector mi5e/magic-weapon-map 60)
              :armor (partial inventory-selector armor5e/armor-map 60)
@@ -1866,7 +1871,7 @@
 (defn actual-path [{:keys [::t/ref ::entity/path] :as selection}]
   (if ref [ref] path))
 
-(defn count-remaining [built-template character selection]
+(defn count-remaining [built-template character {:keys [::t/min ::t/max] :as selection}]
   (let [actual-path (actual-path selection)
         entity-path (entity/get-entity-path built-template character actual-path)
         selected-options (get-in character entity-path)
@@ -1876,7 +1881,7 @@
                          (map? selected-options)
                          1
                          :else 0)]
-    (- (::t/min selection) selected-count)))
+    (if max (- min selected-count) 0)))
 
 (defn remaining-indicator [remaining & [size font-size]]
   [:span.bg-red.t-a-c.p-t-4.b-rad-50-p.inline-block.f-w-b
@@ -1989,7 +1994,7 @@
                                                    min
                                                    (str "at least " min)))]]])
               (if (and ui-fns (ui-fns (or ref key)))
-                ((ui-fns (or ref key)) character selection)
+                ((ui-fns (or ref key)) character selection built-char)
                 (doall
                  (map
                   (fn [option]
