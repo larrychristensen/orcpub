@@ -928,7 +928,7 @@
                ::t/key :roll
                ::t/help "This option rolls virtual dice for you and sets that value for this level's hit points. It could pay off with a high roll, but you might also roll a 1."
                ::t/ui-fn #(hit-points-roller die %3 % %2)
-               ::t/select-fn #(roll-hit-points die %3 %)
+               ::t/select-fn #(roll-hit-points die %2 %)
                ::t/modifiers [(mod5e/deferred-max-hit-points)]}
               (let [average (die-mean die)]
                 (t/option-cfg

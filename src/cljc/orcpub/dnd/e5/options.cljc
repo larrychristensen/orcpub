@@ -682,39 +682,46 @@ check. The GM might also call for a Dexterity (Sleight of Hand) check to determi
                   spell-selections)}))
 
 (defn magic-initiate-option [class-key spellcasting-ability spell-lists]
-  (t/option
-   (name class-key)
-   class-key
-   [(t/selection
-     "Cantrip"
-     (spell-options (get-in spell-lists [class-key 0]) 0 spellcasting-ability (class-names class-key))
-     2 2)
-    (t/selection
-     "1st Level Spell"
-     (spell-options (get-in spell-lists [class-key 1]) 1 spellcasting-ability (class-names class-key))
-     1 1)]
-   []))
+  (t/option-cfg
+   {:name (name class-key)
+    :kye class-key
+    :selections [(t/selection-cfg
+                  {:name "Cantrip"
+                   :order 1
+                   :tags #{:spells}
+                   :options (spell-options (get-in spell-lists [class-key 0]) 0 spellcasting-ability (class-names class-key))
+                   :min 2
+                   :max 2})
+                 (t/selection-cfg
+                  {:name "1st Level Spell"
+                   :order 2
+                   :tags #{:spells}
+                   :options (spell-options (get-in spell-lists [class-key 1]) 1 spellcasting-ability (class-names class-key))
+                   :min 1
+                   :max 1})]}))
 
 (defn ritual-caster-option [class-key spellcasting-ability spell-lists]
   (t/option
    (name class-key)
    class-key
-   [(t/selection
-     "1st Level Ritual"
-     (spell-options (filter (fn [spell-kw] (:ritual (spells/spell-map spell-kw))) (get-in spell-lists [class-key 1])) 1 spellcasting-ability (class-names class-key))
-     2
-     2)]
+   [(t/selection-cfg
+     {:name "1st Level Ritual"
+      :tags #{:spells}
+      :options (spell-options (filter (fn [spell-kw] (:ritual (spells/spell-map spell-kw))) (get-in spell-lists [class-key 1])) 1 spellcasting-ability (class-names class-key))
+      :min 2
+      :max 2})]
    []))
 
 (defn language-selection [langs num]
-  (t/selection
-   "Languages"
-   (map
-    (fn [lang]
-      (language-option lang))
-    langs)
-   num
-   num))
+  (t/selection-cfg
+   {:name "Languages"
+    :options (map
+     (fn [lang]
+       (language-option lang))
+     langs)
+    :tags #{:profs :language-profs}
+    :min num
+    :max num}))
 
 (defn maneuver-option [name & [desc]]
   (t/option
@@ -964,6 +971,7 @@ check. The GM might also call for a Dexterity (Sleight of Hand) check to determi
      :icon "magic-palm"
      :selections [(t/selection-cfg
                    {:name "Spell Class"
+                    :order 0
                     :tags #{:spells}
                     :options [(magic-initiate-option :bard :cha sl/spell-lists)
                               (magic-initiate-option :cleric :wis sl/spell-lists)
@@ -1054,7 +1062,7 @@ check. The GM might also call for a Dexterity (Sleight of Hand) check to determi
      :icon "attached-shield"})
    (feat-option
     {:name "Skilled"
-     :icon "juggling"
+     :icon "juggler"
      :selections [(skilled-selection "Skill/Tool 1")
                   (skilled-selection "Skill/Tool 2")
                   (skilled-selection "Skill/tool 3")]})

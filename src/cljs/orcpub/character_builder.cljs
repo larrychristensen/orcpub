@@ -1841,7 +1841,11 @@
                                                       (fn [o] (if multiselect? [new-option] new-option)))))]
                                 (swap! app-state assoc :character updated-char))
                               (if select-fn
-                                (select-fn new-option-path)))
+                                (select-fn (entity/get-option-value-path
+                                            built-template
+                                            (:character @app-state)
+                                            new-option-path)
+                                           app-state)))
                             (.stopPropagation e))
                           (if (and (or selected? (= 1 (count options))) ui-fn)
                             (ui-fn new-option-path built-template app-state built-char))
