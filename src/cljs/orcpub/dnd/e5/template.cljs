@@ -147,7 +147,7 @@
          [:div.m-t-10.t-a-c.p-1 
           [:div.uppercase (name k)]
           (ability-icon k 24)
-          [:input.input.f-s-18.m-b-5.t-a-c
+          [:input.input.f-s-18.m-b-5.t-a-c.p-l-0
            {:value (k abilities)
             :on-change (fn [e] (let [value (.-value (.-target e))
                                      new-v (if (not (s/blank? value))
@@ -1650,11 +1650,22 @@
                   damage-desc
                   " damage to a successful weapon attack's damage")}))
 
-(defn starting-equipment-option [{:keys [name] :as cfg}]
-  (-> cfg
-      (assoc :name (str "Starting Equipment: " name))
-      (assoc :tags #{:equipment :starting-equipment})
-      t/selection-cfg))
+(defn starting-equipment-option [equipment num]
+  (t/option-cfg
+   {:name (:name equipment)
+    :key (:key equipment)
+    :modifiers [(mod5e/equipment (:key equipment) num)]}))
+
+(defn starting-equipment-selection [{:keys [name options] :as cfg}]
+  (t/selection-cfg
+   (merge cfg
+          {:name (str "Starting Equipment: " name)
+           :tags #{:equipment :starting-equipment}
+           :order 0
+           :options (conj options
+                          (t/option-cfg
+                           {:name "<none>"
+                            :key :none}))})))
 
 (def cleric-option
   (class-option
@@ -1672,9 +1683,7 @@
             :skill-options {:choose 2 :options {:history true :insight true :medicine true :persuasion true :religion true}}}
     :equipment-choices [{:name "Equipment Pack"
                          :options {:priests-pack 1
-                                   :explorers-pack 1}}
-                        {:name "Holy Symbol"
-                         :options {:holy-symbol 1}}]
+                                   :explorers-pack 1}}]
     :weapon-choices [{:name "Cleric Weapon"
                       :options {:mace 1
                                 :warhammer 1}}]
@@ -1683,15 +1692,18 @@
                                :leather 1
                                :chain-mail 1}}]
     :armor {:shield 1}
-    :selections [(starting-equipment-option
+    :selections [(starting-equipment-selection
                   {:name "Additional Weapon"
-                   :options [(t/option
-                     "Light Crossbow and 20 Bolts"
-                     :light-crossbow
-                     []
-                     [(mod5e/weapon :crossbow-light 1)
-                      (mod5e/equipment :crossbow-bolt 20)])
-                    (weapon-option [:simple 1])]})]
+                   :options [(t/option-cfg
+                              {:name "Light Crossbow and 20 Bolts"
+                               :modifiers [(mod5e/weapon :crossbow-light 1)
+                                           (mod5e/equipment :crossbow-bolt 20)]})
+                             (weapon-option [:simple 1])]})
+                 (starting-equipment-selection
+                  {:name "Holy Symbol"
+                   :options (mapv
+                             starting-equipment-option
+                             equip5e/holy-symbols)})]
     :levels {2 {:modifiers [(mod5e/action
                              {:level 2
                               :page 59
