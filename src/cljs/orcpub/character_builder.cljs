@@ -2043,8 +2043,7 @@
               [:i.fa.fa-plus-circle.orange.m-l-5
                {:class-name (if increase-disabled? "opacity-5 cursor-disabled")
                 :on-click (fn [_]
-                            (if (not increase-disabled?) (set-abilities! app-state (update abilities k inc))))}]]
-             [:div.m-t-10 "+"]]))
+                            (if (not increase-disabled?) (set-abilities! app-state (update abilities k inc))))}]]]))
         abilities-vec))]
      [:div
       (doall
@@ -2059,7 +2058,9 @@
                 allowed-abilities (into #{} (map ::t/key options))]
             ^{:key i}
             [:div
-             [:div.flex.justify-cont-s-b.m-t-10.align-items-c
+             [:div.flex.justify-cont-s-a
+              (doall (for [_ (range 6)] [:div.m-t-10 "+"]))]
+             [:div.flex.justify-cont-s-a.m-t-10.align-items-c
               [:div.m-l-5 (str "Increases: " (ancestor-names-string built-template (butlast path)))]
               (remaining-component 2 num-remaining)]
              [:div.flex.justify-cont-s-a
@@ -2102,8 +2103,7 @@
                                              update-in
                                              full-path
                                              conj
-                                             {::entity/key k})))}]]
-                     [:div.m-t-10 "+"]]))
+                                             {::entity/key k})))}]]]))
                 abilities-vec))]]))
          asi-selections))]
      [:div.flex.justify-cont-s-a
@@ -2112,19 +2112,24 @@
         (fn [i [k v]]
           ^{:key k}
           [:div.t-a-c
-           (ability-subtitle "race")
-           (let [race-v (get race-ability-increases k 0)]
+           (if (seq race-ability-increases)
              [:div
-              {:class-name (if (zero? race-v)
-                             "opacity-5")}
-              (ability-value race-v)])
-           [:div.m-t-10.m-b-10 "+"]
-           (ability-subtitle "subrace")
-           (let [subrace-v (get subrace-ability-increases k 0)]
+              [:div.m-t-10.m-b-10 "+"]
+              (ability-subtitle "race")
+              (let [race-v (get race-ability-increases k 0)]
+                [:div
+                 {:class-name (if (zero? race-v)
+                                "opacity-5")}
+                 (ability-value race-v)])])
+           (if (seq subrace-ability-increases)
              [:div
-              {:class-name (if (zero? subrace-v)
-                             "opacity-5")}
-              (ability-value subrace-v)])
+              [:div.m-t-10.m-b-10 "+"]
+              (ability-subtitle "subrace")
+              (let [subrace-v (get subrace-ability-increases k 0)]
+                [:div
+                 {:class-name (if (zero? subrace-v)
+                                "opacity-5")}
+                 (ability-value subrace-v)])])
            [:div.m-t-10.m-b-10 "="]
            (ability-subtitle "total")
            [:div.f-s-24.f-w-b (total-abilities k)]
