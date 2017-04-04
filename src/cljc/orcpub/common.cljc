@@ -81,3 +81,8 @@
 
 (defn add-keys [vals]
   (into [] add-keys-xform vals))
+
+(defn remove-first [f v]
+  (concat
+   (take-while (complement f) v)
+   (rest (drop-while (complement f) v))))

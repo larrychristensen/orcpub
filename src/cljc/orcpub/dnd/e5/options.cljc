@@ -265,7 +265,21 @@ check. The GM might also call for a Dexterity (Sleight of Hand) check to determi
   (t/option-cfg
    {:name "Ability Score Improvement"
     :key :ability-score-improvement
-    :ui-fn (fn [path built-template app-state built-char] (abilities-improvement-component num-increases different? ability-keys path built-template app-state built-char))
+    :selections [(t/selection-cfg
+                  {:name "Ability Score Improvement"
+                   :key :asi
+                   :min num-increases
+                   :max num-increases
+                   :tags #{:ability-scores}
+                   :different? false
+                   :options (mapv
+                             (fn [k]
+                               (t/option-cfg
+                                {:name (:name (abilities-map k))
+                                 :key k
+                                 :modifiers [(modifiers/level-ability-increase k 1)]}))
+                             ability-keys)})]
+    ;;:ui-fn (fn [path built-template app-state built-char] (abilities-improvement-component num-increases different? ability-keys path built-template app-state built-char))
     :modifiers [(modifiers/deferred-ability-increases)]}))
 
 (defn ability-increase-selection [abilities num & [different?]]
@@ -1157,7 +1171,7 @@ check. The GM might also call for a Dexterity (Sleight of Hand) check to determi
 (defn ability-score-improvement-selection [cls lvl]
   (t/selection-cfg
    {:name "Ability Score Improvement or Feat"
-    :key (keyword (str "asi-" (s/lower-case cls) "-" lvl))
+    :key :asi-or-feat
     :tags #{:ability-scores}
     :options [(ability-increase-option 2 false character/ability-keys)
               (t/option-cfg

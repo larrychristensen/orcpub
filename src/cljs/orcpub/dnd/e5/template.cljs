@@ -245,7 +245,7 @@
      (weapon-prof-modifiers weapon-proficiencies)
      (map
       (fn [[k v]]
-        (mod5e/ability k v))
+        (mod5e/subrace-ability k v))
       abilities)
      (traits-modifiers traits false source))))]
     option))
@@ -304,7 +304,7 @@
                   languages)
                  (map
                   (fn [[k v]]
-                    (mod5e/ability k v))
+                    (mod5e/race-ability k v))
                   abilities)
                  modifiers
                  (traits-modifiers traits false source)
@@ -3996,21 +3996,6 @@ Additionally, while perceiving through your familiar’s senses, you can also sp
                            {:name "Create Thrall"
                             :level 14}]}]}))
 
-(defn set-abilities! [app-state abilities]
-  (swap! app-state assoc-in [:character ::entity/options :ability-scores ::entity/value] abilities))
-
-(defn reroll-abilities [app-state]
-  (fn []
-    (set-abilities! app-state (char5e/standard-ability-rolls))))
-
-(defn set-standard-abilities [app-state]
-  (fn []
-    (set-abilities! app-state (char5e/abilities 15 14 13 12 10 8))))
-
-(defn reset-point-buy-abilities [app-state]
-  (fn []
-    (set-abilities! app-state (char5e/abilities 8 8 8 8 8 8))))
-
 (def arcane-tradition-options
   [(t/option
     "School of Evocation"
@@ -4436,20 +4421,14 @@ Additionally, while perceiving through your familiar’s senses, you can also sp
                              [:td 3]
                              [:td 15]
                              [:td 9]]]]]
-                ::t/ui-fn #(point-buy-abilities app-state)
-                ::t/select-fn (reset-point-buy-abilities app-state)
                 ::t/modifiers [(mod5e/deferred-abilities)]}
                {::t/name "Standard Roll"
                 ::t/key :standard-roll
                 ::t/help "This option rolls the dice for you. You can rearrange the values using the left and right arrow buttons."
-                ::t/ui-fn #(abilities-roller app-state (reroll-abilities app-state))
-                ::t/select-fn (reroll-abilities app-state)
                 ::t/modifiers [(mod5e/deferred-abilities)]}
                {::t/name "Standard Scores"
                 ::t/key :standard-scores
                 ::t/help "If you aren't feeling lucky, use this option, which gives you a standard set of scores. You can reassign the values using the left and right arrow buttons."
-                ::t/ui-fn #(abilities-standard app-state)
-                ::t/select-fn (set-standard-abilities app-state)
                 ::t/modifiers [(mod5e/deferred-abilities)]}]})
    (t/selection-cfg
     {:name "Alignment"
@@ -4549,7 +4528,8 @@ Additionally, while perceiving through your familiar’s senses, you can also sp
     ?abilities (reduce
                 (fn [m k]
                   (assoc m k (+ (or (k ?base-abilities) 12)
-                                (or (k ?ability-increases) 0))))
+                                (or (k ?ability-increases) 0)
+                                (or (k ?level-ability-increases) 0))))
                 {}
                 char5e/ability-keys)
     ?ability-bonuses (reduce-kv

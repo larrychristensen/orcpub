@@ -68,6 +68,22 @@
                  (clojure.string/upper-case (name ability))
                  (mods/bonus-str bonus)))
 
+(defn level-ability-increase [ability bonus]
+  (mods/modifier ?level-ability-increases
+                 (update ?level-ability-increases ability + bonus)
+                 (clojure.string/upper-case (name ability))
+                 (mods/bonus-str bonus)))
+
+(defn race-ability [ability-kw bonus]
+  [(ability ability-kw bonus)
+   (mods/modifier ?race-ability-increases
+                  (update ?race-ability-increases ability-kw + bonus))])
+
+(defn subrace-ability [ability-kw bonus]
+  [(ability ability-kw bonus)
+   (mods/modifier ?subrace-ability-increases
+                  (update ?subrace-ability-increases ability-kw + bonus))])
+
 (defn abilities [abilities]
   (mods/modifier ?base-abilities abilities))
 
