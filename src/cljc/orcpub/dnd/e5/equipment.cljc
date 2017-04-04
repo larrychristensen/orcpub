@@ -220,11 +220,7 @@
   (concat
    packs
    tools
-   adventuring-gear
-   holy-symbols
-   druidic-focuses
-   arcane-focuses
-   musical-instruments))
+   adventuring-gear))
 
 (def equipment-map
   (merge

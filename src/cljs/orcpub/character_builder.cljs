@@ -32,6 +32,14 @@
 
 (declare app-state)
 
+(defn stop-propagation [e]
+  (.stopPropagation e))
+
+(defn stop-prop-fn [func]
+  (fn [e]
+    (func e)
+    (stop-propagation e)))
+
 (defn index-of-option [selection option-key]
   (first
    (keep-indexed
@@ -259,14 +267,16 @@
                      ui-fn))
           (if collapsed?
             [:div.flex
-             {:on-click (fn [_]
-                          (swap! app-state update :collapsed-paths disj new-path))}
+             {:on-click (stop-prop-fn
+                         (fn [_]
+                           (swap! app-state update :collapsed-paths disj new-path)))}
              [:span.expand-collapse-button
               "Expand"]
              [:i.fa.fa-caret-down.m-l-5.orange.pointer]]
             [:div.flex
-             {:on-click (fn [_]
-                          (swap! app-state update :collapsed-paths conj new-path))}
+             {:on-click (stop-prop-fn
+                         (fn [_]
+                           (swap! app-state update :collapsed-paths conj new-path)))}
              [:span.expand-collapse-button
               "Collapse"]
              [:i.fa.fa-caret-up.m-l-5.orange.pointer]]))]
@@ -1432,7 +1442,7 @@
         ancestor-paths (reductions conj [] path)
         ancestors (map (fn [a-p] (get-in built-template (entity/get-template-selection-path built-template a-p [])))
                        (take-nth 2 (butlast ancestor-paths)))
-        ancestor-names (map ::t/name (remove nil? ancestors))
+        ancestor-names (remove s/blank? (map ::t/name ancestors))
         top-level-name (some (fn [s]
                                (if (= (first option-path)
                                       (::t/key s))
@@ -1699,7 +1709,7 @@
           [show-info-button expanded? option-path])]
        (if (and help expanded?)
          [help-section help])
-       (if content
+       (if (and content selected?)
          content)
        (if explanation-text
          [:div.i.f-s-12.f-w-n 
@@ -1859,10 +1869,13 @@
 
 (defn ancestor-names-string [built-template path]
   (let [ancestor-paths (reductions conj [] path)
+        _ (prn "ANXCESTOR PATHS" ancestor-paths)
         ancestors (map (fn [a-p]
                          (get-in built-template
                                  (entity/get-template-selection-path built-template a-p [])))
                        (take-nth 2 (butlast ancestor-paths)))
+        _ (js/console.log "ANCESTORS" ancestors)
+        _ (prn "ANCESTORS K N" (map (juxt ::t/key ::t/name) ancestors))
         ancestor-names (map ::t/name (remove nil? ancestors))]
     (s/join " - " ancestor-names)))
 
@@ -1896,9 +1909,7 @@
   (swap! app-state assoc-in [:character ::entity/options :ability-scores ::entity/value] abilities))
 
 (defn reroll-abilities [app-state]
-  (prn "REROLL ABILITIES")
-  (fn []
-    (set-abilities! app-state (char5e/standard-ability-rolls))))
+  (set-abilities! app-state (char5e/standard-ability-rolls)))
 
 (defn set-standard-abilities [app-state]
   (fn []
@@ -1909,15 +1920,16 @@
     (set-abilities! app-state (char5e/abilities 8 8 8 8 8 8))))
 
 (defn swap-abilities [app-state i other-i k v]
-  (fn []
-    (swap! app-state
-           update-in
-           [:character ::entity/options :ability-scores ::entity/value]
-           (fn [a]
-             (let [a-vec (vec a)
-                   other-index (mod other-i (count a-vec))
-                   [other-k other-v] (a-vec other-index)]
-               (assoc a k other-v other-k v))))))
+  (stop-prop-fn
+   (fn []
+     (swap! app-state
+            update-in
+            [:character ::entity/options :ability-scores ::entity/value]
+            (fn [a]
+              (let [a-vec (vec a)
+                    other-index (mod other-i (count a-vec))
+                    [other-k other-v] (a-vec other-index)]
+                (assoc a k other-v other-k v)))))))
 
 (def ability-icons
   {:str "strong"
@@ -1941,37 +1953,9 @@
     (opt5e/ability-bonus-str v)]])
 
 (defn ability-component [k v i app-state controls]
-  [:div.m-t-10.t-a-c
-   (ability-icon k 24)
-   [:div.uppercase (name k)]
+  [:div.t-a-c
    [:div.f-s-18.f-w-b v]
-   (ability-modifier v)
    controls])
-
-(defn abilities-standard [app-state]
-  [:div.flex.justify-cont-s-b
-    (let [abilities (or (opt5e/get-raw-abilities app-state) (char5e/abilities 15 14 13 12 10 8))
-          abilities-vec (vec abilities)]
-      (doall
-       (map-indexed
-        (fn [i [k v]]
-          ^{:key k}
-          [ability-component k v i app-state
-           [:div.f-s-16
-            [:i.fa.fa-chevron-circle-left.orange
-             {:on-click (swap-abilities app-state i (dec i) k v)}]
-            [:i.fa.fa-chevron-circle-right.orange.m-l-5
-             {:on-click (swap-abilities app-state i (inc i) k v)}]]])
-        abilities-vec)))])
-
-(defn abilities-roller [app-state reroll-fn]
-  [:div
-   (abilities-standard app-state)
-   [:button.form-button.m-t-5
-    {:on-click (fn [e]
-                 (reroll-fn)
-                 (.stopPropagation e))}
-    "Re-Roll"]])
 
 (def score-costs
   {8 0
@@ -1988,104 +1972,55 @@
 (defn ability-value [v]
   [:div.f-s-18.f-w-b v])
 
-(defn point-buy-abilities [app-state built-char built-template asi-selections]
-  (let [abilities (or (opt5e/get-raw-abilities app-state)
-                      (char5e/abilities 8 8 8 8 8 8))
-        abilities-vec (vec (map (fn [[a v]] [a (-> v (min 15) (max 8))]) abilities))
-        points-used (apply + (map (comp score-costs second) abilities-vec))
-        points-remaining (- point-buy-points points-used)
-        race-ability-increases (es/entity-val built-char :race-ability-increases)
-        subrace-ability-increases (es/entity-val built-char :subrace-ability-increases)
-        total-abilities (es/entity-val built-char :abilities)]
+(defn ability-increases-component [app-state built-char built-template asi-selections ability-keys]
+  (let [total-abilities (es/entity-val built-char :abilities)]
     [:div
-     [:div.flex.justify-cont-s-a
-      (doall
-       (map-indexed
-        (fn [i [k v]]
-          (let [increase-disabled? (or (zero? points-remaining)
-                                       (= 15 v)
-                                       (> (- (score-costs (inc v))
-                                             (score-costs v))
-                                          points-remaining))
-                decrease-disabled? (or (<= v 8) (>= points-remaining point-buy-points))]
-            ^{:key k}
-            [:div.m-t-10.t-a-c
-             (ability-icon k 24)
-             [:div.uppercase (name k)]
-             (ability-subtitle "base")
-             (ability-value 8)
-             [:div.m-t-10 "+"]]))
-        abilities-vec))]
-     [:div.flex.justify-cont-s-b.m-t-10.align-items-c
-      [:div.m-l-5 "Point Buys"]
-      (remaining-component 27 points-remaining)]
-     [:div.flex.justify-cont-s-a
-      (doall
-       (map-indexed
-        (fn [i [k v]]
-          (let [increase-disabled? (or (zero? points-remaining)
-                                       (= 15 v)
-                                       (>= (total-abilities k) 20)
-                                       (> (- (score-costs (inc v))
-                                             (score-costs v))
-                                          points-remaining))
-                decrease-disabled? (or (<= v 8) (>= points-remaining point-buy-points))]
-            ^{:key k}
-            [:div.t-a-c
-             (ability-subtitle "bought")
-             (ability-value (- v 8))
-             [:div.f-s-11.f-w-b (str "(" (score-costs v) " pts)")]
-             [:div.f-s-16
-              [:i.fa.fa-minus-circle.orange
-               {:class-name (if decrease-disabled? "opacity-5 cursor-disabled")
-                :on-click (fn [_]
-                            (if (not decrease-disabled?) (set-abilities! app-state (update abilities k dec))))}]
-              [:i.fa.fa-plus-circle.orange.m-l-5
-               {:class-name (if increase-disabled? "opacity-5 cursor-disabled")
-                :on-click (fn [_]
-                            (if (not increase-disabled?) (set-abilities! app-state (update abilities k inc))))}]]]))
-        abilities-vec))]
-     [:div
-      (doall
-       (map-indexed
-        (fn [i {:keys [::t/key ::t/min ::t/options ::t/different? ::entity/path] :as selection}]
-          (let [increases-path (entity/get-entity-path built-template (:character @app-state) path)
-                full-path (concat [:character] increases-path)
-                selected-options (get-in @app-state full-path)
-                ability-increases (frequencies (map ::entity/key selected-options))
-                num-increased (apply + (vals ability-increases))
-                num-remaining (- min num-increased)
-                allowed-abilities (into #{} (map ::t/key options))]
-            ^{:key i}
-            [:div
-             [:div.flex.justify-cont-s-a
-              (doall (for [_ (range 6)] [:div.m-t-10 "+"]))]
-             [:div.flex.justify-cont-s-a.m-t-10.align-items-c
-              [:div.m-l-5 (str "Increases: " (ancestor-names-string built-template (butlast path)))]
-              (remaining-component 2 num-remaining)]
-             [:div.flex.justify-cont-s-a
-              (doall
-               (map-indexed
-                (fn [i [k v]]
-                  (let [ability-disabled? (not (allowed-abilities k))
-                        increase-disabled? (or ability-disabled?
-                                               (zero? num-remaining)
-                                               (and different? (pos? (ability-increases k)))
-                                               (>= (total-abilities k) 20))
-                        decrease-disabled? (or ability-disabled?
-                                               (not (pos? (ability-increases k))))]
-                    ^{:key k}
-                    [:div.t-a-c
-                     {:class-name (if ability-disabled? "opacity-5 cursor-disabled")}
-                     [:div
-                      {:class-name (if (and (not ability-disabled?)
-                                            (zero? (ability-increases k 0)))
-                                     "opacity-5")}
-                      (ability-value (ability-increases k 0))] 
-                     [:div.f-s-16
-                      [:i.fa.fa-minus-circle.orange
-                       {:class-name (if decrease-disabled? "opacity-5 cursor-disabled")
-                        :on-click (fn []
+     (doall
+      (map-indexed
+       (fn [i {:keys [::t/key ::t/min ::t/options ::t/different? ::entity/path] :as selection}]
+         (let [increases-path (entity/get-entity-path built-template (:character @app-state) path)
+               full-path (concat [:character] increases-path)
+               selected-options (get-in @app-state full-path)
+               ability-increases (frequencies (map ::entity/key selected-options))
+               num-increased (apply + (vals ability-increases))
+               num-remaining (- min num-increased)
+               allowed-abilities (into #{} (map ::t/key options))
+               _ (prn "INMCRES PATH" path)
+               ancestors-title (ancestor-names-string built-template (butlast path))
+               ancestors-title (if (s/blank? ancestors-title)
+                                 (ancestor-names-string built-template path)
+                                 ancestors-title)]
+           ^{:key i}
+           [:div
+            [:div.flex.justify-cont-s-a
+             (doall (for [i (range 6)] ^{:key i} [:div.m-t-10 "+"]))]
+            [:div.flex.justify-cont-s-b.m-t-10.align-items-c
+             [:div.m-l-5 (str "Increases: " ancestors-title)]
+             (remaining-component 2 num-remaining)]
+            [:div.flex.justify-cont-s-a
+             (doall
+              (map-indexed
+               (fn [i k]
+                 (let [ability-disabled? (not (allowed-abilities k))
+                       increase-disabled? (or ability-disabled?
+                                              (zero? num-remaining)
+                                              (and different? (pos? (ability-increases k)))
+                                              (>= (total-abilities k) 20))
+                       decrease-disabled? (or ability-disabled?
+                                              (not (pos? (ability-increases k))))]
+                   ^{:key k}
+                   [:div.t-a-c
+                    {:class-name (if ability-disabled? "opacity-5 cursor-disabled")}
+                    [:div
+                     {:class-name (if (and (not ability-disabled?)
+                                           (zero? (ability-increases k 0)))
+                                    "opacity-5")}
+                     (ability-value (ability-increases k 0))] 
+                    [:div.f-s-16
+                     [:i.fa.fa-minus-circle.orange
+                      {:class-name (if decrease-disabled? "opacity-5 cursor-disabled")
+                       :on-click (stop-prop-fn
+                                  (fn []
                                     (if (not decrease-disabled?)
                                       (swap! app-state
                                              update-in
@@ -2094,75 +2029,232 @@
                                                (common/remove-first
                                                 (fn [{inc-key ::entity/key}]
                                                   (= inc-key k))
-                                                incs)))))}]
-                      [:i.fa.fa-plus-circle.orange.m-l-5
-                       {:class-name (if increase-disabled? "opacity-5 cursor-disabled")
-                        :on-click (fn []
+                                                incs))))))}]
+                     [:i.fa.fa-plus-circle.orange.m-l-5
+                      {:class-name (if increase-disabled? "opacity-5 cursor-disabled")
+                       :on-click (stop-prop-fn
+                                  (fn []
                                     (if (not increase-disabled?)
                                       (swap! app-state
                                              update-in
                                              full-path
                                              conj
-                                             {::entity/key k})))}]]]))
-                abilities-vec))]]))
-         asi-selections))]
-     [:div.flex.justify-cont-s-a
-      (doall
-       (map-indexed
-        (fn [i [k v]]
-          ^{:key k}
-          [:div.t-a-c
-           (if (seq race-ability-increases)
-             [:div
-              [:div.m-t-10.m-b-10 "+"]
-              (ability-subtitle "race")
-              (let [race-v (get race-ability-increases k 0)]
-                [:div
-                 {:class-name (if (zero? race-v)
-                                "opacity-5")}
-                 (ability-value race-v)])])
-           (if (seq subrace-ability-increases)
-             [:div
-              [:div.m-t-10.m-b-10 "+"]
-              (ability-subtitle "subrace")
-              (let [subrace-v (get subrace-ability-increases k 0)]
-                [:div
-                 {:class-name (if (zero? subrace-v)
-                                "opacity-5")}
-                 (ability-value subrace-v)])])
-           [:div.m-t-10.m-b-10 "="]
-           (ability-subtitle "total")
-           [:div.f-s-24.f-w-b (total-abilities k)]
-           (ability-modifier (total-abilities k))])
-        abilities-vec))]]))
+                                             {::entity/key k}))))}]]]))
+               ability-keys))]]))
+       asi-selections))]))
 
-(defn abilities-entry [app-state]
-  [:div.flex.m-l--10.m-r--10
-   (let [abilities (or (opt5e/get-raw-abilities app-state) (char5e/abilities 15 14 13 12 10 8))
-         abilities-vec (vec abilities)]
+(defn abilities-matrix-footer [built-char ability-keys]
+  (let [race-ability-increases (es/entity-val built-char :race-ability-increases)
+        subrace-ability-increases (es/entity-val built-char :subrace-ability-increases)
+        total-abilities (es/entity-val built-char :abilities)]
+    [:div.flex.justify-cont-s-a
      (doall
       (map-indexed
        (fn [i k]
          ^{:key k}
-         [:div.m-t-10.t-a-c.p-1 
-          [:div.uppercase (name k)]
-          (ability-icon k 24)
-          [:input.input.f-s-18.m-b-5.t-a-c.p-l-0
-           {:value (k abilities)
-            :on-change (fn [e] (let [value (.-value (.-target e))
-                                     new-v (if (not (s/blank? value))
-                                             (js/parseInt value))]
-                                 (swap! app-state assoc-in [:character ::entity/options :ability-scores ::entity/value k] new-v)))}]
-          (ability-modifier (k abilities))])
-       char5e/ability-keys)))])
+         [:div.t-a-c
+          (if (seq race-ability-increases)
+            [:div
+             [:div.m-t-10.m-b-10 "+"]
+             (ability-subtitle "race")
+             (let [race-v (get race-ability-increases k 0)]
+               [:div
+                {:class-name (if (zero? race-v)
+                               "opacity-5")}
+                (ability-value race-v)])])
+          (if (seq subrace-ability-increases)
+            [:div
+             [:div.m-t-10.m-b-10 "+"]
+             (ability-subtitle "subrace")
+             (let [subrace-v (get subrace-ability-increases k 0)]
+               [:div
+                {:class-name (if (zero? subrace-v)
+                               "opacity-5")}
+                (ability-value subrace-v)])])
+          [:div.m-t-10.m-b-10 "="]
+          (ability-subtitle "total")
+          [:div.f-s-24.f-w-b (total-abilities k)]
+          (ability-modifier (total-abilities k))])
+       ability-keys))]))
+
+(defn abilities-header [ability-keys]
+  [:div.flex.justify-cont-s-a
+   (doall
+    (map-indexed
+     (fn [i k]
+       ^{:key k}
+       [:div.m-t-10.t-a-c
+        (ability-icon k 24)
+        [:div.uppercase (name k)]
+        (ability-subtitle "base")])
+     ability-keys))])
+
+(defn abilities-component [app-state
+                           built-char
+                           built-template
+                           asi-selections
+                           content]
+  (let [total-abilities (es/entity-val built-char :abilities)]
+    [:div
+     (abilities-header char5e/ability-keys)
+     content
+     (ability-increases-component app-state built-char built-template asi-selections char5e/ability-keys)
+     (abilities-matrix-footer built-char char5e/ability-keys)]))
+
+
+(defn point-buy-abilities [app-state built-char built-template asi-selections]
+  (let [default-base-abilities (char5e/abilities 8 8 8 8 8 8)
+        abilities (or (opt5e/get-raw-abilities app-state)
+                      default-base-abilities)
+        points-used (apply + (map (comp score-costs second) abilities))
+        points-remaining (- point-buy-points points-used)
+        total-abilities (es/entity-val built-char :abilities)]
+    (abilities-component
+     app-state
+     built-char
+     built-template
+     asi-selections
+     [:div
+      [:div.flex.justify-cont-s-a
+       (for [i (range 6)]
+         ^{:key i}
+         [:div
+          (ability-value 8)
+          [:div.m-t-10 "+"]])]
+      [:div.flex.justify-cont-s-b.m-t-10.align-items-c
+       [:div.m-l-5 "Point Buys"]
+       (remaining-component 27 points-remaining)]
+      [:div.flex.justify-cont-s-a
+       (doall
+        (map-indexed
+         (fn [i [k v]]
+           (let [increase-disabled? (or (zero? points-remaining)
+                                        (= 15 v)
+                                        (>= (total-abilities k) 20)
+                                        (> (- (score-costs (inc v))
+                                              (score-costs v))
+                                           points-remaining))
+                 decrease-disabled? (or (<= v 8) (>= points-remaining point-buy-points))]
+             ^{:key k}
+             [:div.t-a-c
+              (ability-subtitle "bought")
+              (ability-value (- v 8))
+              [:div.f-s-11.f-w-b (str "(" (score-costs v) " pts)")]
+              [:div.f-s-16
+               [:i.fa.fa-minus-circle.orange
+                {:class-name (if decrease-disabled? "opacity-5 cursor-disabled")
+                 :on-click (stop-prop-fn
+                            (fn [e]
+                              (if (not decrease-disabled?)
+                                (set-abilities! app-state (update abilities k dec)))))}]
+               [:i.fa.fa-plus-circle.orange.m-l-5
+                {:class-name (if increase-disabled? "opacity-5 cursor-disabled")
+                 :on-click (stop-prop-fn
+                            (fn [_]
+                              (if (not increase-disabled?) (set-abilities! app-state (update abilities k inc)))))}]]]))
+         abilities))]])))
+
+(defn abilities-standard [app-state]
+  [:div.flex.justify-cont-s-a
+   (let [abilities (or (opt5e/get-raw-abilities app-state)
+                       (char5e/abilities 15 14 13 12 10 8))
+          abilities-vec (vec abilities)]
+      (doall
+       (map-indexed
+        (fn [i [k v]]
+          ^{:key k}
+          [ability-component k v i app-state
+           [:div.f-s-16
+            [:i.fa.fa-chevron-circle-left.orange
+             {:on-click (swap-abilities app-state i (dec i) k v)}]
+            [:i.fa.fa-chevron-circle-right.orange.m-l-5
+             {:on-click (swap-abilities app-state i (inc i) k v)}]]])
+        abilities-vec)))])
+
+(defn abilities-roller [app-state built-char built-template asi-selections]
+  (abilities-component
+   app-state
+   built-char
+   built-template
+   asi-selections
+   [:div
+    (abilities-standard app-state)
+    [:button.form-button.m-t-5
+     {:on-click (stop-prop-fn
+                 (fn [e]
+                   (reroll-abilities app-state)))}
+     "Re-Roll"]]))
+
+(defn abilities-standard-editor [app-state built-char built-template asi-selections]
+  (abilities-component
+   app-state
+   built-char
+   built-template
+   asi-selections
+   (abilities-standard app-state)))
+
+(defn abilities-entry [app-state built-char built-template asi-selections]
+  (let [abilities (or (opt5e/get-raw-abilities app-state)
+                      (char5e/abilities 15 14 13 12 10 8))
+        total-abilities (es/entity-val built-char :abilities)]
+    [:div
+     (abilities-header char5e/ability-keys)
+     [:div.flex.justify-cont-s-a
+      (doall
+       (map
+        (fn [k]
+          ^{:key k}
+          [:div.p-1
+           [:input.input.f-s-18.m-b-5.p-l-0
+            {:value (k abilities)
+             :on-change (fn [e] (let [value (.-value (.-target e))
+                                      new-v (if (not (s/blank? value))
+                                              (js/parseInt value))]
+                                  (swap! app-state assoc-in [:character ::entity/options :ability-scores ::entity/value k] new-v)))}]])
+        char5e/ability-keys))]
+     (ability-increases-component app-state built-char built-template asi-selections char5e/ability-keys)
+     [:div.flex.justify-cont-s-a
+      (doall
+       (map
+        (fn [[k v]]
+          ^{:key k}
+          [:div.t-a-c.p-1
+           [:div.m-t-10.m-b-10 "="]
+           [:div "total"]
+           [:input.input.f-s-18.m-b-5.p-l-0
+            {:value (if (abilities k)
+                      (total-abilities k))
+             :on-change (fn [e] (let [total (total-abilities k)
+                                      _ (prn "TOTAL" total)
+                                      value (.-value (.-target e))
+                                      _ (prn "VALUE" value)
+                                      diff (- total
+                                              (abilities k))
+                                      _ (prn "DIFF" diff)
+                                      new-v (if (not (s/blank? value))
+                                              (- (js/parseInt value) (or diff 0)))
+                                      _ (prn "NEW V " new-v)]
+                                  (swap! app-state assoc-in [:character ::entity/options :ability-scores ::entity/value k] new-v)))}]])
+        total-abilities))]]))
+
+(defn ability-variant-option-selector [name key selected-key content & [select-fn]]
+  (option-selector-base
+   {:name name
+    :key key
+    :selected? (= selected-key key)
+    :selectable? true
+    :option-path [:ability-scores key]
+    :content content
+    :select-fn (fn [_]
+                 (if select-fn (select-fn))
+                 (swap! app-state assoc-in [:character ::entity/options :ability-scores ::entity/key] key))}))
 
 (defn abilities-editor [character built-char built-template option-paths selections]
-  (js/console.log "FILTERED" (filter (fn [s] (= :asi (::t/key s))) selections))
   [:div
    [:div.m-l-5 (selection-section-title "Ability Score Improvements")]
    (doall
     (map
-     (fn [{:keys [::t/min ::t/max ::t/options ::entity/path] :as selection}]
+     (fn [{:keys [::t/key ::t/min ::t/max ::t/options ::entity/path] :as selection}]
        (let [remaining (count-remaining built-template character selection)]
          (selection-section-base
           {:path path
@@ -2178,41 +2270,37 @@
       (fn [s]
         (= :asi-or-feat (::t/key s)))
       selections)))
-   (let [asi-selections (filter (fn [s] (= :asi (::t/key s))) selections)]
+   (let [asi-selections (filter (fn [s] (= :asi (::t/key s))) selections)
+         selected-variant (get-in @app-state [:character ::entity/options :ability-scores ::entity/key])]
      (selection-section-base
       {:path [:ability-scores]
        :name "Abilities Variant"
        :min 1
        :max 1
        :body [:div
-              (option-selector-base
-               {:name "Point Buy"
-                :key :point-buy
-                :selected? false
-                :selectable? true
-                :option-path [:ability-scores :point-buy]
-                :content (point-buy-abilities app-state built-char built-template asi-selections)
-                :select-fn (fn [_] (swap! app-state assoc-in [:character ::entity/options :ability-scores ::entity/key] :point-buy))})
-              (option-selector-base
-               {:name "Dice Roll"
-                :key :standard-roll
-                :selected? false
-                :selectable? true
-                :option-path [:ability-scores :standard-roll]
-                :content (abilities-roller app-state (reroll-abilities app-state))
-                :select-fn (fn [_] (swap! app-state assoc-in [:character ::entity/options :ability-scores ::entity/key] :standard-roll))})
-              (option-selector-base
-               {:name "Set Scores"
-                :key :standard-scores
-                :selected? false
-                :selectable? true
-                :option-path [:ability-scores :standard-scores]})
-              (option-selector-base
-               {:name "Manual Entry"
-                :key :manual-entry
-                :selected? false
-                :selectable? true
-                :option-path [:ability-scores :manual-entry]})]}))])
+              (ability-variant-option-selector
+               "Point Buy"
+               :point-buy
+               selected-variant
+               (point-buy-abilities app-state built-char built-template asi-selections)
+               #(set-abilities! app-state (char5e/abilities 8 8 8 8 8 8)))
+              (ability-variant-option-selector
+               "Dice Roll"
+               :standard-roll
+               selected-variant
+               (abilities-roller app-state built-char built-template asi-selections)
+               #(reroll-abilities app-state))
+              (ability-variant-option-selector
+               "Standard Scores"
+               :standard-scores
+               selected-variant
+               (abilities-standard-editor app-state built-char built-template asi-selections)
+               #(set-abilities! app-state (char5e/abilities 15 14 13 12 10 8)))
+              (ability-variant-option-selector
+               "Manual Entry"
+               :manual-entry
+               selected-variant
+               (abilities-entry app-state built-char built-template asi-selections))]}))])
 
 (defn skills-selector [character {:keys [::t/ref ::t/max ::t/options]} built-char]
   (let [path [:character ::entity/options ref]
@@ -2251,20 +2339,20 @@
                                                            (vec (remove (fn [s] (= key (::entity/key s))) skills))
                                                            (vec (conj skills {::entity/key key})))))))
                                  :explanation-text (if (and has-prof?
-                                                   (not selected?))
-                                            "You already have this skill proficiency")
+                                                            (not selected?))
+                                                     "You already have this skill proficiency")
                                  :icon icon
                                  :classes (if bad-selection? "b-red")})))
       opt5e/skills))))
 
 (def pages
-  [{:name "Ability Scores / Feats"
+  [{:name "Race"
+    :icon "woman-elf-face"
+    :tags #{:race :subrace}}
+   {:name "Ability Scores / Feats"
     :icon "strong"
     :tags #{:ability-scores}
     :ui-fn abilities-editor}
-   {:name "Race"
-    :icon "woman-elf-face"
-    :tags #{:race :subrace}}
    {:name "Background"
     :icon "ages"
     :tags #{:background}}

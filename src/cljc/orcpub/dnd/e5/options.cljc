@@ -261,32 +261,29 @@ check. The GM might also call for a Dexterity (Sleight of Hand) check to determi
                :on-click (fn [] (if (not increase-disabled?) (swap! app-state assoc-in full-path (update ability-increases k inc))))}]]]))
         abilities-vec))]]))
 
+(defn ability-increase-selection [ability-keys num-increases & [different?]]
+  (t/selection-cfg
+   {:name "Ability Score Improvement"
+    :key :asi
+    :min num-increases
+    :max num-increases
+    :tags #{:ability-scores}
+    :different? different?
+    :options (mapv
+              (fn [k]
+                (t/option-cfg
+                 {:name (:name (abilities-map k))
+                  :key k
+                  :modifiers [(modifiers/level-ability-increase k 1)]}))
+              ability-keys)}))
+
 (defn ability-increase-option [num-increases different? ability-keys]
   (t/option-cfg
    {:name "Ability Score Improvement"
     :key :ability-score-improvement
-    :selections [(t/selection-cfg
-                  {:name "Ability Score Improvement"
-                   :key :asi
-                   :min num-increases
-                   :max num-increases
-                   :tags #{:ability-scores}
-                   :different? false
-                   :options (mapv
-                             (fn [k]
-                               (t/option-cfg
-                                {:name (:name (abilities-map k))
-                                 :key k
-                                 :modifiers [(modifiers/level-ability-increase k 1)]}))
-                             ability-keys)})]
+    :selections [(ability-increase-selection ability-keys num-increases different?)]
     ;;:ui-fn (fn [path built-template app-state built-char] (abilities-improvement-component num-increases different? ability-keys path built-template app-state built-char))
     :modifiers [(modifiers/deferred-ability-increases)]}))
-
-(defn ability-increase-selection [abilities num & [different?]]
-  (t/selection-cfg
-   {:name "Ability Score Increase"
-    :tags #{:ability-scores}
-    :options [(ability-increase-option num different? abilities)]}))
 
 (defn min-ability [ability-kw min-value]
   (fn [c] (>= (ability-kw (es/entity-val c :abilities)) min-value)))
@@ -724,6 +721,7 @@ check. The GM might also call for a Dexterity (Sleight of Hand) check to determi
      (fn [lang]
        (language-option lang))
      langs)
+    :ref :languages
     :tags #{:profs :language-profs}
     :min num
     :max num}))

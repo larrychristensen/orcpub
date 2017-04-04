@@ -434,7 +434,12 @@
                               "Standard Human"
                               :standard
                               []
-                              [(ability-modifiers {:str 1 :con 1 :dex 1 :int 1 :wis 1 :cha 1})])
+                              [(mod5e/race-ability :str 1)
+                               (mod5e/race-ability :con 1)
+                               (mod5e/race-ability :dex 1)
+                               (mod5e/race-ability :int 1)
+                               (mod5e/race-ability :wis 1)
+                               (mod5e/race-ability :cha 1)])
                              (t/option
                               "Variant Human"
                               :variant
@@ -4527,7 +4532,7 @@ Additionally, while perceiving through your familiar’s senses, you can also sp
                                                 (:magical-ac-bonus armor)))))
     ?abilities (reduce
                 (fn [m k]
-                  (assoc m k (+ (or (k ?base-abilities) 12)
+                  (assoc m k (+ (or (k ?base-abilities) 0)
                                 (or (k ?ability-increases) 0)
                                 (or (k ?level-ability-increases) 0))))
                 {}
