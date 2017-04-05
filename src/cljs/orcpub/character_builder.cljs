@@ -2051,7 +2051,7 @@
                ability-keys))]]))
        asi-selections))]))
 
-(defn abilities-matrix-footer [built-char ability-keys]
+(defn race-abilities-component [built-char ability-keys]
   (let [race-ability-increases (es/entity-val built-char :race-ability-increases)
         subrace-ability-increases (es/entity-val built-char :subrace-ability-increases)
         total-abilities (es/entity-val built-char :abilities)]
@@ -2078,12 +2078,24 @@
                [:div
                 {:class-name (if (zero? subrace-v)
                                "opacity-5")}
-                (ability-value subrace-v)])])
-          [:div.m-t-10.m-b-10 "="]
-          (ability-subtitle "total")
-          [:div.f-s-24.f-w-b (total-abilities k)]
-          (ability-modifier (total-abilities k))])
+                (ability-value subrace-v)])])])
        ability-keys))]))
+
+(defn abilities-matrix-footer [built-char ability-keys]
+  (let [total-abilities (es/entity-val built-char :abilities)]
+    [:div
+     (race-abilities-component built-char ability-keys)
+     [:div.flex.justify-cont-s-a
+      (doall
+       (map-indexed
+        (fn [i k]
+          ^{:key k}
+          [:div.t-a-c
+           [:div.m-t-10.m-b-10 "="]
+           (ability-subtitle "total")
+           [:div.f-s-24.f-w-b (total-abilities k)]
+           (ability-modifier (total-abilities k))])
+        ability-keys))]]))
 
 (defn abilities-header [ability-keys]
   [:div.flex.justify-cont-s-a
@@ -2221,6 +2233,7 @@
                                   (swap! app-state assoc-in [:character ::entity/options :ability-scores ::entity/value k] new-v)))}]])
         char5e/ability-keys))]
      (ability-increases-component app-state built-char built-template asi-selections char5e/ability-keys)
+     (race-abilities-component built-char char5e/ability-keys)
      [:div.flex.justify-cont-s-a
       (doall
        (map
@@ -2250,8 +2263,9 @@
     :option-path [:ability-scores key]
     :content content
     :select-fn (fn [_]
-                 (if select-fn (select-fn))
-                 (swap! app-state assoc-in [:character ::entity/options :ability-scores ::entity/key] key))}))
+                 (when (not= selected-key key)
+                   (if select-fn (select-fn))
+                   (swap! app-state assoc-in [:character ::entity/options :ability-scores ::entity/key] key)))}))
 
 (defn abilities-editor [character built-char built-template option-paths selections]
   [:div
