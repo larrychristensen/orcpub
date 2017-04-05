@@ -161,6 +161,10 @@
    
    [:.t-a-c
     {:text-align :center}]
+   [:.t-a-l
+    {:text-align :left}]
+   [:.t-a-r
+    {:text-align :right}]
    [:.justify-cont-s-b
     {:justify-content :space-between}]
    [:.justify-cont-s-a

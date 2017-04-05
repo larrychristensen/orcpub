@@ -920,8 +920,8 @@
 
 (defn hit-points-selection [die class-nm level]
   (t/selection-cfg
-   {:name "Hit Points"
-    :key (keyword (str "hit-points-" (s/lower-case class-nm) "-" level))
+   {:name (str "Hit Points: " class-nm " " level)
+    :key :hit-points
     :help "Select the method with which to determine this level's hit points."
     :tags #{:class}
     :options [{::t/name "Manual Entry"
@@ -1093,6 +1093,9 @@
                                         (range 1 21))))]}])
       option)))
 
+(defn first-class? [class-kw]
+  (fn [c] (= class-kw (first (es/entity-val c :classes)))))
+
 (defn level-option [{:keys [name
                             plugin?
                             hit-die
@@ -1131,8 +1134,12 @@
                                    subclasses)})])
                     (if (and (not plugin?) (ability-inc-set i))
                       [(opt5e/ability-score-improvement-selection name i)])
-                    (if (and (not plugin?) (> i 1))
-                      [(hit-points-selection hit-die name i)])))
+                    (if (not plugin?)
+                      [(assoc
+                        (hit-points-selection hit-die name i)
+                        ::t/prereq-fn
+                        (fn [c] (or (not (= kw (first (es/entity-val c :classes))))
+                                    (> i 1))))])))
       :modifiers (vec
                   (concat
                    (if (= :all (:known-mode spellcasting))
@@ -1151,7 +1158,10 @@
                      (fn [{level :level :or {level 1}}]
                        (= level i))
                      traits))
-                   (if (and (not plugin?) (= i 1)) [(mod5e/max-hit-points hit-die)])
+                   (if (and (not plugin?) (= i 1)) [(assoc
+                                                     (mod5e/max-hit-points hit-die)
+                                                     ::mod/conditions
+                                                     [(first-class? kw)])])
                    [(mod5e/level kw name i hit-die)]))})))
 
 

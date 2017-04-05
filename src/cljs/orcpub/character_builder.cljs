@@ -1986,7 +1986,7 @@
     [:div
      (doall
       (map-indexed
-       (fn [i {:keys [::t/key ::t/min ::t/options ::t/different? ::entity/path] :as selection}]
+       (fn [i {:keys [::t/name ::t/key ::t/min ::t/options ::t/different? ::entity/path] :as selection}]
          (let [increases-path (entity/get-entity-path built-template (:character @app-state) path)
                full-path (concat [:character] increases-path)
                selected-options (get-in @app-state full-path)
@@ -1994,18 +1994,16 @@
                num-increased (apply + (vals ability-increases))
                num-remaining (- min num-increased)
                allowed-abilities (into #{} (map ::t/key options))
-               ancestors-title (ancestor-names-string built-template (butlast path))
-               ancestors-title (if (s/blank? ancestors-title)
-                                 (ancestor-names-string built-template path)
-                                 ancestors-title)]
+               ancestors-title (ancestor-names-string built-template path)]
            ^{:key i}
            [:div
             [:div.flex.justify-cont-s-a
              (doall (for [i (range 6)] ^{:key i} [:div.m-t-10 "+"]))]
             [:div.flex.justify-cont-s-b.m-t-10.align-items-c
-             [:div.m-l-5 (str "Increases: " ancestors-title)]
+             [:div
+              [:div.m-l-5.i (str "Improvement: " ancestors-title)]]
              (remaining-component 2 num-remaining)]
-            [:div.flex.justify-cont-s-a
+            [:div.flex.justify-cont-s-a.m-t-5
              (doall
               (map-indexed
                (fn [i k]
@@ -2363,21 +2361,145 @@
                                  :classes (if bad-selection? "b-red")})))
       opt5e/skills))))
 
+(defn hp-selection-name-level [selection]
+  (let [[_ class-kw _ level-kw _] (::entity/path selection)
+        class-name (s/capitalize (name class-kw))]
+    {:name class-name
+     :level (js/parseInt (last (s/split (name level-kw) #"-")))
+     :key class-kw}))
+
+(defn hit-points-roller [character selections built-char built-template]
+  (let [classes (es/entity-val built-char :classes)
+        levels (es/entity-val built-char :levels)
+        first-class (levels (first classes))
+        level-bonus (es/entity-val built-char :hit-point-level-bonus)
+        level-bonus-str (common/bonus-str level-bonus)
+        all-level-values (map
+                      (fn [selection]
+                        (let [name-level (hp-selection-name-level selection)
+                              value (get-in character (entity/get-option-value-path built-template character (::entity/path selection)))]
+                          {:name (str (:name name-level) (:level name-level))
+                           :level (:level name-level)
+                           :class (:key name-level)
+                           :class-name (:name name-level)
+                           :value value}))
+                      (sort-by (fn [s] ((juxt :name :level)
+                                        (hp-selection-name-level s))) selections))
+        total-base-hps (apply + (:hit-die first-class) (map :value all-level-values))
+        total-level-bonus (* level-bonus (inc (count selections)))
+        by-class (group-by :class all-level-values)]
+    [:div.m-t-5.w-100-p
+     [:div.f-s-16.m-t-10.m-b-5
+      [:span.f-w-b "Total:"]
+      [:span.m-l-5 (es/entity-val built-char :max-hit-points)]]
+     [:button.form-button
+      {:on-click (fn [_]
+                   (doseq [selection selections]
+                     (let [[_ class-kw :as path] (::entity/path selection)]
+                       (swap! app-state
+                              assoc-in
+                              (concat [:character] (entity/get-entity-path built-template character path))
+                              {::entity/key :roll
+                               ::entity/value (dice/die-roll (-> levels class-kw :hit-die))}))))}
+      "Re-Roll All"]
+     (doall
+      (map-indexed
+       (fn [i cls]
+         (let [level-values (by-class cls)
+               total-base-hps (apply + (if (zero? i)
+                                         (:hit-die first-class)
+                                         0)
+                                     (map :value level-values))
+               num-level-values (count level-values)
+               total-level-bonus (* level-bonus (if (zero? i) (inc num-level-values) num-level-values))]
+           ^{:key i}
+           [:div.m-t-20
+            [:div.f-s-16.m-l-5.f-w-b
+             (s/capitalize (name cls))]
+            [:table.w-100-p
+             [:thead
+              [:tr.f-w-b.t-a-l
+               [:th.p-5 "Level"]
+               [:th.p-5 "Value"]
+               [:th.p-5 "Con"]
+               [:th.p-5 "Total"]]]
+             [:tbody
+              (if (zero? i)
+                [:tr
+                 [:td.p-5 1]
+                 [:td.p-5 (:hit-die first-class)]
+                 [:td.p-5 level-bonus-str]
+                 [:td.p-5 (+ (:hit-die first-class) level-bonus)]])
+              (doall
+               (map
+                (fn [level-value]
+                  ^{:key (:name level-value)}
+                  [:tr
+                   [:td.p-5 (:level level-value)]
+                   [:td.p-5 (:value level-value)]
+                   [:td.p-5 level-bonus-str]
+                   [:td.p-5 (+ (:value level-value) level-bonus)]])
+                level-values))
+              [:tr
+               [:td.p-5 "Total"]
+               [:td.p-5 total-base-hps]
+               [:td.p-5 (common/bonus-str total-level-bonus)]
+               [:td.p-5 (+ total-base-hps total-level-bonus)]]]]]))
+       classes))
+     [:div.m-t-20
+      [:div.f-s-16.m-l-5.f-w-b "Total"]
+      [:table.w-100-p
+       [:thead
+        [:tr.f-w-b.t-a-l
+         [:th.p-5 "Level"]
+         [:th.p-5 "Value"]
+         [:th.p-5 "Con"]
+         [:th.p-5 "Total"]]]
+       [:tbody
+        [:tr
+         [:td.p-5 "Total"]
+         [:td.p-5 total-base-hps]
+         [:td.p-5 (common/bonus-str total-level-bonus)]
+         [:td.p-5 (+ total-level-bonus total-base-hps)]]]]]]))
+
+(defn hit-points-editor [character built-char built-template option-paths selections]
+  (selection-section-base
+   {:name "Hit Points"
+    :min 1
+    :body [:div
+           (option-selector-base {:name "Roll"
+                                  :key :roll
+                                  :selected? true
+                                  :selectable? true
+                                  :option-path [:hit-points :roll]
+                                  :content (hit-points-roller character selections built-char built-template)})
+           (option-selector-base {:name "Average"
+                                  :key :average
+                                  :selected? false
+                                  :selectable? true
+                                  :option-path [:hit-points :roll]})
+           (option-selector-base {:name "Manual Entry"
+                                  :key :manual-entry
+                                  :selected? false
+                                  :selectable? true
+                                  :option-path [:hit-points :roll]})]}))
+
 (def pages
   [{:name "Race"
     :icon "woman-elf-face"
     :tags #{:race :subrace}}
    {:name "Ability Scores / Feats"
     :icon "strong"
-    :tags #{:ability-scores}
-    :ui-fn abilities-editor}
+    :tags #{:ability-scores :feats}
+    :group-ui-fns {:ability-scores abilities-editor}}
    {:name "Background"
     :icon "ages"
     :tags #{:background}}
    {:name "Class"
     :icon "mounted-knight"
     :tags #{:class :subclass}
-    :ui-fns {:class class-levels-selector}}
+    :ui-fns {:class class-levels-selector}
+    :group-ui-fns {:hit-points hit-points-editor}}
    {:name "Spells"
     :icon "spell-book"
     :tags #{:spells}}
@@ -2435,7 +2557,7 @@
      pages))])
 
 (defn new-options-column [character built-char built-template available-selections page-index option-paths stepper-selection-path]
-  (let [{:keys [tags ui-fns ui-fn] :as page} (pages page-index)
+  (let [{:keys [tags ui-fns group-ui-fns] :as page} (pages page-index)
         selections (entity/tagged-selections available-selections tags)
         final-selections (combine-selections selections)]
     [:div.w-100-p
@@ -2459,12 +2581,24 @@
                                                   next))))}
         "Next"]]
       [:div.p-5
-       (if ui-fn
-         (ui-fn character built-char built-template option-paths selections)
-         (doall
-          (map
-           (partial selection-section character built-char built-template option-paths ui-fns)
-           final-selections)))]]]))
+       (let [group-keys (set (keys group-ui-fns))
+             groups (group-by (fn [s]
+                                (or (group-keys (::t/key s))
+                                    (first (sets/intersection group-keys (::t/tags s)))))
+                              final-selections)]
+         [:div
+          [:div
+           (doall
+            (map
+             (fn [k]
+               ^{:key k}
+               [:div ((group-ui-fns k) character built-char built-template option-paths (groups k))])
+             group-keys))]
+          [:div
+           (doall
+            (map
+             (partial selection-section character built-char built-template option-paths ui-fns)
+             (groups nil)))]])]]]))
 
 (defn builder-columns [built-template built-char option-paths collapsed-paths stepper-selection-path stepper-selection plugins active-tabs stepper-dismissed? available-selections]
   [:div.flex-grow-1.flex
