@@ -2368,12 +2368,16 @@
      :level (js/parseInt (last (s/split (name level-kw) #"-")))
      :key class-kw}))
 
-(defn hit-points-roller [character selections built-char built-template]
+(defn hit-points-entry [character selections built-char built-template]
   (let [classes (es/entity-val built-char :classes)
         levels (es/entity-val built-char :levels)
         first-class (levels (first classes))
+        first-class-hit-die (:hit-die first-class)
         level-bonus (es/entity-val built-char :hit-point-level-bonus)
-        level-bonus-str (common/bonus-str level-bonus)
+        con-bonus (:con (es/entity-val built-char :ability-bonuses))
+        con-bonus-str (common/bonus-str con-bonus)
+        misc-bonus (- level-bonus con-bonus)
+        misc-bonus-str (common/bonus-str misc-bonus)
         all-level-values (map
                       (fn [selection]
                         (let [name-level (hp-selection-name-level selection)
@@ -2382,26 +2386,60 @@
                            :level (:level name-level)
                            :class (:key name-level)
                            :class-name (:name name-level)
-                           :value value}))
+                           :value value
+                           :path (::entity/path selection)}))
                       (sort-by (fn [s] ((juxt :name :level)
                                         (hp-selection-name-level s))) selections))
         total-base-hps (apply + (:hit-die first-class) (map :value all-level-values))
-        total-level-bonus (* level-bonus (inc (count selections)))
+        total-con-bonus (* con-bonus (inc (count selections)))
+        total-misc-bonus (* misc-bonus (inc (count selections)))
+        total-level-bonus (+ total-con-bonus total-misc-bonus)
         by-class (group-by :class all-level-values)]
-    [:div.m-t-5.w-100-p
-     [:div.f-s-16.m-t-10.m-b-5
-      [:span.f-w-b "Total:"]
-      [:span.m-l-5 (es/entity-val built-char :max-hit-points)]]
-     [:button.form-button
-      {:on-click (fn [_]
-                   (doseq [selection selections]
-                     (let [[_ class-kw :as path] (::entity/path selection)]
-                       (swap! app-state
-                              assoc-in
-                              (concat [:character] (entity/get-entity-path built-template character path))
-                              {::entity/key :roll
-                               ::entity/value (dice/die-roll (-> levels class-kw :hit-die))}))))}
-      "Re-Roll All"]
+    [:div.m-t-5.p-5
+     [:div.flex.align-items-c.justify-cont-s-b
+      [:div.f-s-16.m-b-5
+       [:span.f-w-b "Total:"]
+       [:span.m-l-5 (if (seq selections)
+                      [:input.input.w-70.b-3.f-w-b.f-s-16
+                       {:type :number
+                        :value (+ total-con-bonus total-misc-bonus total-base-hps)
+                        :on-change (fn [e]
+                                     (let [value (js/parseInt (.. e -target -value))
+                                           total-value (if (js/isNaN value) 0 (- value first-class-hit-die total-level-bonus))
+                                           average-value (int (/ total-value (count selections)))
+                                           remainder (rem total-value (count selections))
+                                           first-selection (first selections)]
+                                       (doseq [selection selections]
+                                         (let [entity-path (entity/get-entity-path built-template character (::entity/path selection))
+                                               full-path (concat [:character] entity-path)]                                         
+                                           (swap! app-state
+                                                  assoc-in
+                                                  full-path
+                                                  {::entity/key :manual-entry
+                                                   ::entity/value (if (= first-selection selection)
+                                                                    (+ average-value remainder)
+                                                                    average-value)})))))}]
+                      total-base-hps)]]
+      [:button.form-button.p-10
+       {:on-click (fn [_]
+                    (doseq [selection selections]
+                      (let [[_ class-kw :as path] (::entity/path selection)]
+                        (swap! app-state
+                               assoc-in
+                               (concat [:character] (entity/get-entity-path built-template character path))
+                               {::entity/key :roll
+                                ::entity/value (dice/die-roll (-> levels class-kw :hit-die))}))))}
+       "Random"]
+      [:button.form-button.p-10
+       {:on-click (fn [_]
+                    (doseq [selection selections]
+                      (let [[_ class-kw :as path] (::entity/path selection)]
+                        (swap! app-state
+                               assoc-in
+                               (concat [:character] (entity/get-entity-path built-template character path))
+                               {::entity/key :manual-entry
+                                ::entity/value (dice/die-mean (-> levels class-kw :hit-die))}))))}
+       "Average"]]
      (doall
       (map-indexed
        (fn [i cls]
@@ -2411,78 +2449,85 @@
                                          0)
                                      (map :value level-values))
                num-level-values (count level-values)
-               total-level-bonus (* level-bonus (if (zero? i) (inc num-level-values) num-level-values))]
+               level-num (if (zero? i) (inc num-level-values) num-level-values)
+               total-con-bonus (* con-bonus level-num)
+               total-misc-bonus (* misc-bonus level-num)]
            ^{:key i}
-           [:div.m-t-20
+           [:div.m-b-20
             [:div.f-s-16.m-l-5.f-w-b
-             (s/capitalize (name cls))]
-            [:table.w-100-p
-             [:thead
+             (str (s/capitalize (name cls))
+                  " ("
+                  "D"
+                  (-> levels cls :hit-die) ")")]
+            [:table.w-100-p.striped
+             [:tbody
               [:tr.f-w-b.t-a-l
                [:th.p-5 "Level"]
-               [:th.p-5 "Value"]
+               [:th.p-5 "Base"]
                [:th.p-5 "Con"]
-               [:th.p-5 "Total"]]]
-             [:tbody
+               [:th.p-5 "Misc."]
+               [:th.p-5 "Total"]]
               (if (zero? i)
                 [:tr
                  [:td.p-5 1]
-                 [:td.p-5 (:hit-die first-class)]
-                 [:td.p-5 level-bonus-str]
+                 [:td.p-5 first-class-hit-die]
+                 [:td.p-5 con-bonus-str]
+                 [:td.p-5 misc-bonus-str]
                  [:td.p-5 (+ (:hit-die first-class) level-bonus)]])
               (doall
-               (map
-                (fn [level-value]
+               (map-indexed
+                (fn [j level-value]
                   ^{:key (:name level-value)}
                   [:tr
                    [:td.p-5 (:level level-value)]
-                   [:td.p-5 (:value level-value)]
-                   [:td.p-5 level-bonus-str]
+                   [:td.p-5 [:input.input.m-t-0
+                             {:type :number
+                              :class-name (if (or (nil? (:value level-value))
+                                                  (not (pos? (:value level-value))))
+                                            "b-red")
+                              :on-change (fn [e]
+                                           (let [value (js/parseInt (.. e -target -value))]
+                                             (swap! app-state
+                                                    assoc-in
+                                                    (concat [:character] (entity/get-entity-path built-template character (:path level-value)))
+                                                    {::entity/key :manual-entry
+                                                     ::entity/value (if (not (js/isNaN value)) value)})))
+                              :value (:value level-value)}]]
+                   [:td.p-5 con-bonus-str]
+                   [:td.p-5 misc-bonus-str]
                    [:td.p-5 (+ (:value level-value) level-bonus)]])
                 level-values))
               [:tr
                [:td.p-5 "Total"]
                [:td.p-5 total-base-hps]
-               [:td.p-5 (common/bonus-str total-level-bonus)]
-               [:td.p-5 (+ total-base-hps total-level-bonus)]]]]]))
+               [:td.p-5 (common/bonus-str total-con-bonus)]
+               [:td.p-5 (common/bonus-str total-misc-bonus)]
+               [:td.p-5 (+ total-base-hps total-con-bonus total-misc-bonus)]]]]]))
        classes))
-     [:div.m-t-20
-      [:div.f-s-16.m-l-5.f-w-b "Total"]
-      [:table.w-100-p
-       [:thead
-        [:tr.f-w-b.t-a-l
-         [:th.p-5 "Level"]
-         [:th.p-5 "Value"]
-         [:th.p-5 "Con"]
-         [:th.p-5 "Total"]]]
-       [:tbody
-        [:tr
-         [:td.p-5 "Total"]
-         [:td.p-5 total-base-hps]
-         [:td.p-5 (common/bonus-str total-level-bonus)]
-         [:td.p-5 (+ total-level-bonus total-base-hps)]]]]]]))
+     (if (> (count classes) 1)
+       [:div.m-t-20
+        [:div.f-s-16.m-l-5.f-w-b "Total"]
+        [:table.w-100-p.striped
+         [:tbody
+          [:tr.f-w-b.t-a-l
+           [:th.p-5 "Level"]
+           [:th.p-5 "Base"]
+           [:th.p-5 "Con"]
+           [:th.p-5 "Misc"]
+           [:th.p-5 "Total"]]
+          [:tr
+           [:td.p-5 "Total"]
+           [:td.p-5 total-base-hps]
+           [:td.p-5 (common/bonus-str total-con-bonus)]
+           [:td.p-5 (common/bonus-str total-misc-bonus)]
+           [:td.p-5 (+ total-base-hps total-con-bonus total-misc-bonus)]]]]])]))
 
 (defn hit-points-editor [character built-char built-template option-paths selections]
   (selection-section-base
    {:name "Hit Points"
     :min 1
-    :body [:div
-           (option-selector-base {:name "Roll"
-                                  :key :roll
-                                  :selected? true
-                                  :selectable? true
-                                  :option-path [:hit-points :roll]
-                                  :content (hit-points-roller character selections built-char built-template)})
-           (option-selector-base {:name "Average"
-                                  :key :average
-                                  :selected? false
-                                  :selectable? true
-                                  :option-path [:hit-points :roll]})
-           (option-selector-base {:name "Manual Entry"
-                                  :key :manual-entry
-                                  :selected? false
-                                  :selectable? true
-                                  :option-path [:hit-points :roll]})]}))
+    :max 1
+    :body (hit-points-entry character selections built-char built-template)}))
 
 (def pages
   [{:name "Race"

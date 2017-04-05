@@ -2,7 +2,8 @@
   (:require [garden.def :refer [defstylesheet defstyles]]
             [garden.stylesheet :refer [at-media at-keyframes]]
             [garden.units :refer [px]]
-            [orcpub.constants :as const]))
+            [orcpub.constants :as const]
+            [garden.selectors :as s]))
 
 (def button-color "#f0a100")
 (def red "#9a031e")
@@ -665,6 +666,11 @@
 
     [:.stepper-column
      {:margin-right "-10px"}]
+
+    [:table.striped
+     [:tr
+      [(s/& (s/nth-child :even))
+       {:background-color "rgba(255, 255, 255, 0.1)"}]]]
 
     (at-media
      xs-query

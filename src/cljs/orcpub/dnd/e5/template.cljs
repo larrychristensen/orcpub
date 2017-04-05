@@ -915,9 +915,6 @@
                 (mod5e/spells-known 1 :hellish-rebuke :cha "Tiefling" 3)
                 (mod5e/spells-known 2 :darkness :cha "Tiefling" 5)]}))
 
-(defn die-mean [die]
-  (int (Math/ceil (/ (apply + (range 1 (inc die))) die))))
-
 (defn hit-points-selection [die class-nm level]
   (t/selection-cfg
    {:name (str "Hit Points: " class-nm " " level)
@@ -935,7 +932,7 @@
                ::t/ui-fn #(hit-points-roller die %3 % %2)
                ::t/select-fn #(roll-hit-points die %2 %)
                ::t/modifiers [(mod5e/deferred-max-hit-points)]}
-              (let [average (die-mean die)]
+              (let [average (dice/die-mean die)]
                 (t/option-cfg
                  {:name "Average"
                   :key :average

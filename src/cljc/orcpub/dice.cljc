@@ -15,6 +15,9 @@
 (defn dice-string [die die-count modifier]
   (str die "d" die-count (common/mod-str modifier)))
 
+(defn die-mean [die]
+  (int (Math/ceil (/ (apply + (range 1 (inc die))) die))))
+
 (spec/def ::num pos-int?)
 (spec/def ::sides pos-int?)
 (spec/def ::drop-num pos-int?)
