@@ -325,6 +325,8 @@
 
    [:.b-1
     {:border "1px solid"}]
+   [:.b-3
+    {:border "3px solid"}]
 
    [:.b-b-2
     {:border-bottom "2px solid"}]

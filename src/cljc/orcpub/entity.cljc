@@ -180,9 +180,7 @@
 
 (defn apply-options [raw-entity template]
   (let [modifier-map (memoized-make-modifier-map template)
-        #?@(:cljs [_ (js/console.log "MODIIFER MAP" modifier-map)])
         options (flatten-options (::options raw-entity))
-        _ (prn "FLAT OPTIONS" options)
         modifiers (sort-by ::mods/order (collect-modifiers options modifier-map))
         deps (reduce
               (fn [m {:keys [::mods/key ::mods/deps]}]
@@ -369,7 +367,6 @@
 
 (defn available-selections [raw-entity built-entity template]
   (let [path-map (make-path-map raw-entity)
-        _ (prn "OPTION_PATHS" path-map)
         all-selections (get-all-selections [] template path-map built-entity)]
     all-selections))
 

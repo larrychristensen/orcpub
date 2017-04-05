@@ -289,17 +289,13 @@ check. The GM might also call for a Dexterity (Sleight of Hand) check to determi
   (fn [c] (>= (ability-kw (es/entity-val c :abilities)) min-value)))
 
 (defn ability-prereq [ability-kw min-value]
-  {::t/label (str (s/upper-case (name ability-kw)) " " min-value " or higher")
-   ::t/prereq-fn (min-ability ability-kw min-value)})
-
-(defn prereq [label prereq-fn]
-  {::t/label label
-   ::t/prereq-fn prereq-fn})
+  (t/option-prereq (str (s/upper-case (name ability-kw)) " " min-value " or higher")
+                   (min-ability ability-kw min-value)))
 
 (defn armor-prereq [armor-kw]
-  (prereq (str "proficiency with " (name armor-kw) " armor")
-          (fn [c] (let [prof-keys (:armor-profs c)]
-                    (boolean (and prof-keys (prof-keys armor-kw)))))))
+  (t/option-prereq (str "proficiency with " (name armor-kw) " armor")
+                   (fn [c] (let [prof-keys (:armor-profs c)]
+                             (boolean (and prof-keys (prof-keys armor-kw)))))))
 
 (def languages
   [{:name "Common"
@@ -496,6 +492,12 @@ check. The GM might also call for a Dexterity (Sleight of Hand) check to determi
      {:name (if prepend-level? (str level " - " name) name)
       :key key
       :help (spell-help spell)
+      :prereqs [(t/option-prereq
+                 "You already know this spell"
+                 (fn [c] (let [spells-known (es/entity-val c :spells-known)]
+                           (or (not spells-known)
+                               (not (some #(= key (:key %))
+                                           (spells-known level)))))))]
       :modifiers [(modifiers/spells-known level key spellcasting-ability class-name)]})))
 
 (def memoized-spell-option (memoize spell-option))
@@ -865,11 +867,11 @@ check. The GM might also call for a Dexterity (Sleight of Hand) check to determi
                     "add superiority die to successful attack's damage, if target fails STR save, it is knocked prone")])
 
 (def can-cast-spell-prereq
-  {::t/label "spellcasting ability."
+  {::t/label "Require spellcasting ability."
    ::t/prereq-fn (fn [c] (some (fn [[k v]] (seq v)) (es/entity-val c :spells-known)))})
 
 (defn does-not-have-feat-prereq [kw]
-  {::t/label "that you not already have this feat."
+  {::t/label "You already have this feat."
    ::t/prereq-fn (fn [c] (let [feats (es/entity-val c :feats)]
                            (not (and feats (feats kw)))))})
 
@@ -1047,10 +1049,10 @@ check. The GM might also call for a Dexterity (Sleight of Hand) check to determi
                     (ritual-caster-option :sorcerer :cha sl/spell-lists)
                     (ritual-caster-option :warlock :cha sl/spell-lists)
                     (ritual-caster-option :wizard :int sl/spell-lists)])]
-     :prereqs [{::t/label "Intelligence or Wisdom 13 or higher"
-                ::t/prereq-fn (fn [{{:keys [wis int]} :abilities}]
-                                (or (>= wis 13)
-                                    (>= int 13)))}]})
+     :prereqs [(t/option-prereq "Intelligence or Wisdom 13 or higher"
+                                (fn [{{:keys [wis int]} :abilities}]
+                                  (or (>= wis 13)
+                                      (>= int 13))))]})
    (feat-option
     {:name "Savage Attacker"
      :icon "saber-slash"})
@@ -1188,10 +1190,10 @@ check. The GM might also call for a Dexterity (Sleight of Hand) check to determi
                   :key key
                   :icon icon
                   :modifiers [(modifiers/skill-expertise key)]
-                  :prereqs [{::t/label (str "proficiency in " name)
-                             ::t/prereq-fn (fn [built-char]
-                                             (let [skill-profs (es/entity-val built-char :skill-profs)]
-                                               (and skill-profs (skill-profs key))))}]}))
+                  :prereqs [(t/option-prereq (str "proficiency in " name)
+                                             (fn [built-char]
+                                               (let [skill-profs (es/entity-val built-char :skill-profs)]
+                                                 (and skill-profs (skill-profs key)))))]}))
               skills)
     :min num
     :max num

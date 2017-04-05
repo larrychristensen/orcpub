@@ -1672,6 +1672,7 @@
                            {:name "<none>"
                             :key :none}))})))
 
+
 (def cleric-option
   (class-option
    {:name "Cleric",

@@ -106,8 +106,16 @@
     :builder {:character {:tab #{:build :options}}}
     :character (if stored-char stored-char t5e/character)}))
 
+(defonce history
+  (r/atom (list @app-state)))
+
 (def template (entity/sort-selections
                (t5e/template app-state)))
+
+(defn undo! []
+  (when (> (count @history) 1)
+    (swap! history pop)
+    (swap! app-state #(peek @history))))
 
 #_(add-watch app-state :log (fn [k r os ns]
                             (js/console.log "OLD" (clj->js os))
@@ -117,6 +125,12 @@
            :local-storage
            (fn [k r os ns]
              (.setItem js/window.localStorage "char-meta" (str (:character ns)))))
+
+(add-watch app-state
+           :history
+           (fn [k r os ns]
+             (if (not= ns (peek @history))
+               (swap! history conj ns))))
 
 (declare builder-selector)
 
@@ -207,6 +221,7 @@
               next-option-path)
        (vec (reverse next-option-path))))))
 
+
 (defn option [path option-paths selectable? list-collapsed? {:keys [::t/key ::t/name ::t/selections ::t/modifiers ::t/prereqs ::t/ui-fn ::t/select-fn] :as opt} built-char raw-char changeable? options change-fn built-template collapsed-paths stepper-selection-path]
   (let [new-path (conj path key)
         selected? (boolean (get-in option-paths new-path))
@@ -246,7 +261,7 @@
            [:span.f-w-b name])
          (if (not meets-prereqs?)
            [:div.i.f-s-12.f-w-n 
-            (str "Requires " (s/join ", " failed-prereqs))])
+            (str (s/join ", " failed-prereqs))])
          (if (and meets-prereqs? (seq named-mods))
            [:span.m-l-10.i.f-s-12.f-w-n
             (s/join
@@ -1233,7 +1248,6 @@
                                             (if selectable? "pointer")
                                             (if (not selectable?) "opacity-5")]))
       :on-click (fn [e]
-                  (prn "OPTION_PATH" option-path)
                   (when (and (or (> max 1)
                                  (nil? max)
                                  (not selected?)
@@ -1593,14 +1607,12 @@
                :on-change
                (fn [e]
                  (let [new-highest-level-str (.. e -target -value)
-                       _ (prn "NEW HIGHEST LEVEL STR" new-highest-level-str)
                        new-highest-level (js/parseInt (last (s/split new-highest-level-str #"-")))]
                    (swap! app-state
                           update-in
                           [:character ::entity/options :class i ::entity/options :levels]
                           (fn [levels]
                             (let [current-highest-level (count levels)]
-                              (prn "CURRENT " current-highest-level)
                               (cond
                                 (> new-highest-level current-highest-level)
                                 (vec (concat levels (map
@@ -1869,13 +1881,10 @@
 
 (defn ancestor-names-string [built-template path]
   (let [ancestor-paths (reductions conj [] path)
-        _ (prn "ANXCESTOR PATHS" ancestor-paths)
         ancestors (map (fn [a-p]
                          (get-in built-template
                                  (entity/get-template-selection-path built-template a-p [])))
                        (take-nth 2 (butlast ancestor-paths)))
-        _ (js/console.log "ANCESTORS" ancestors)
-        _ (prn "ANCESTORS K N" (map (juxt ::t/key ::t/name) ancestors))
         ancestor-names (map ::t/name (remove nil? ancestors))]
     (s/join " - " ancestor-names)))
 
@@ -1985,7 +1994,6 @@
                num-increased (apply + (vals ability-increases))
                num-remaining (- min num-increased)
                allowed-abilities (into #{} (map ::t/key options))
-               _ (prn "INMCRES PATH" path)
                ancestors-title (ancestor-names-string built-template (butlast path))
                ancestors-title (if (s/blank? ancestors-title)
                                  (ancestor-names-string built-template path)
@@ -2220,20 +2228,16 @@
           ^{:key k}
           [:div.t-a-c.p-1
            [:div.m-t-10.m-b-10 "="]
-           [:div "total"]
-           [:input.input.f-s-18.m-b-5.p-l-0
+           [:div.f-w-b "total"]
+           [:input.input.b-3.f-s-18.m-b-5.p-l-0
             {:value (if (abilities k)
                       (total-abilities k))
-             :on-change (fn [e] (let [total (total-abilities k)
-                                      _ (prn "TOTAL" total)
+             :on-change (fn [e] (let [total (total-abilities k)                                     
                                       value (.-value (.-target e))
-                                      _ (prn "VALUE" value)
                                       diff (- total
                                               (abilities k))
-                                      _ (prn "DIFF" diff)
                                       new-v (if (not (s/blank? value))
-                                              (- (js/parseInt value) (or diff 0)))
-                                      _ (prn "NEW V " new-v)]
+                                              (- (js/parseInt value) (or diff 0)))]
                                   (swap! app-state assoc-in [:character ::entity/options :ability-scores ::entity/value k] new-v)))}]])
         total-abilities))]]))
 
@@ -2527,11 +2531,16 @@
     #_[:button.form-button.h-40.opacity-5
      {:on-click (export-pdf built-char)}
      [:span "Save"]
-     [:span.m-l-5 "(coming soon)"]]
+       [:span.m-l-5 "(coming soon)"]]
+    [:button.form-button.h-40.m-l-5
+     {:class-name (if (<= (count @history) 1) "opacity-5")
+      :on-click undo!}
+     [:i.fa.fa-undo.f-s-18]
+     [:span.m-l-5.hidden-xs "Undo"]]
     [:button.form-button.h-40.m-l-5
      {:on-click (export-pdf built-char)}
      [:i.fa.fa-print.f-s-18]
-     [:span.m-l-5 "Print"]]]])
+     [:span.m-l-5.hidden-xs "Print"]]]])
 
 (defn character-builder []
   (cljs.pprint/pprint (:character @app-state))
@@ -2566,7 +2575,6 @@
         plugins (:plugins @app-state)
         stepper-dismissed? (:stepper-dismissed @app-state)
         all-selections (entity/available-selections (:character @app-state) built-char built-template)]
-    (js/console.log "ALL SELECTOINS" all-selections)
     (print-char built-char)
     [:div.app
      {:on-scroll (fn [e]

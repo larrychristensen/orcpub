@@ -84,6 +84,10 @@
 (defn sequential-selection [name new-item-fn options]
   (selection name options 1 nil true new-item-fn))
 
+(defn option-prereq [explanation func]
+  {::label explanation
+   ::prereq-fn func})
+
 (defn option-cfg [{:keys [name key help selections modifiers prereqs order ui-fn icon] :as cfg}]
   {::name name
    ::key (or key (common/name-to-kw name))
