@@ -2633,9 +2633,11 @@
            (= (::t/ref %) key)) %))
 
 (defn new-options-column [character built-char built-template available-selections page-index option-paths stepper-selection-path]
+  (js/console.log "AVAILABLE SELECTIONS" available-selections)
   (let [{:keys [tags ui-fns] :as page} (pages page-index)
         selections (entity/tagged-selections available-selections tags)
         final-selections (combine-selections selections)]
+    (js/console.log "FINAL SELECTIONS" final-selections)
     [:div.w-100-p
      [:div#options-column.b-1.b-rad-5
       [section-tabs available-selections built-template character page-index]
@@ -2673,7 +2675,7 @@
            (map
             (fn [{:keys [key group? ui-fn]}]
               ^{:key key}
-              [:div
+              [:div.m-t-20
                (if group?
                  (let [group (filter
                               (matches-group-fn key)

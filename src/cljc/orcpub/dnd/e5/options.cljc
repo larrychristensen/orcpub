@@ -444,9 +444,10 @@ check. The GM might also call for a Dexterity (Sleight of Hand) check to determi
                    :summary "spend 6 ki to cast wall of stone"})]})])
 
 (defn monk-elemental-disciplines []
-  (t/selection
-   "Elemental Disciplines"
-   elemental-disciplines))
+  (t/selection-cfg
+   {:name "Elemental Disciplines"
+    :tags #{:class}
+    :options elemental-disciplines}))
 
 (defn language-option [{:keys [name key]}]
   (t/option
@@ -809,14 +810,15 @@ check. The GM might also call for a Dexterity (Sleight of Hand) check to determi
      :tags #{:weapon-profs :profs}})))
 
 (defn skilled-selection [title]
-  (t/selection
-   title
-   [(t/select-option
-     "Skill"
-     [(skill-selection 1)])
-    (t/select-option
-     "Tool"
-     [(tool-selection 1)])]))
+  (t/selection-cfg
+   {:name title
+    :tags #{:profs}
+    :options [(t/select-option
+              "Skill"
+              [(skill-selection 1)])
+             (t/select-option
+              "Tool"
+              [(tool-selection 1)])]}))
 
 (def maneuver-options
   [(maneuver-option "Commander's Strike"
@@ -987,10 +989,12 @@ check. The GM might also call for a Dexterity (Sleight of Hand) check to determi
    (feat-option
     {:name "Martial Adept"
      :icon "visored-helm"
-     :selections [(t/selection
-                   "Martial Maneuvers"
-                   maneuver-options
-                   2 2)]})
+     :selections [(t/selection-cfg
+                   {:name "Martial Maneuvers"
+                    :tags #{:class}
+                    :options maneuver-options
+                    :min 2
+                    :max 2})]})
    (feat-option
     {:name "Medium Armor Master"
      :icon "bracers"
@@ -1027,28 +1031,30 @@ check. The GM might also call for a Dexterity (Sleight of Hand) check to determi
    (feat-option
     {:name "Resilient"
      :icon "dodging"
-     :selections [(t/selection
-       "Ability"
-       (map
-        (fn [ability-key]
-          (t/option
-           (s/upper-case (name ability-key))
-           ability-key
-           []
-           [(modifiers/ability ability-key 1)
-            (modifiers/saving-throws nil ability-key)]))
-        character/ability-keys))]})
+     :selections [(t/selection-cfg
+                   {:name "Ability"
+                    :tags #{:ability-scores}
+                    :options (map
+                              (fn [ability-key]
+                                (t/option
+                                 (s/upper-case (name ability-key))
+                                 ability-key
+                                 []
+                                 [(modifiers/ability ability-key 1)
+                                  (modifiers/saving-throws nil ability-key)]))
+                              character/ability-keys)})]})
    (feat-option
     {:name "Ritual Caster"
      :icon "gift-of-knowledge"
-     :selections [(t/selection
-                   "Spell Class"
-                   [(ritual-caster-option :bard :cha sl/spell-lists)
-                    (ritual-caster-option :cleric :wis sl/spell-lists)
-                    (ritual-caster-option :druid :wis sl/spell-lists)
-                    (ritual-caster-option :sorcerer :cha sl/spell-lists)
-                    (ritual-caster-option :warlock :cha sl/spell-lists)
-                    (ritual-caster-option :wizard :int sl/spell-lists)])]
+     :selections [(t/selection-cfg
+                   {:name "Gift of Knowledge: Spell Class"
+                    :tags #{:spells}
+                    :options [(ritual-caster-option :bard :cha sl/spell-lists)
+                              (ritual-caster-option :cleric :wis sl/spell-lists)
+                              (ritual-caster-option :druid :wis sl/spell-lists)
+                              (ritual-caster-option :sorcerer :cha sl/spell-lists)
+                              (ritual-caster-option :warlock :cha sl/spell-lists)
+                              (ritual-caster-option :wizard :int sl/spell-lists)]})]
      :prereqs [(t/option-prereq "Intelligence or Wisdom 13 or higher"
                                 (fn [{{:keys [wis int]} :abilities}]
                                   (or (>= wis 13)
@@ -1165,7 +1171,7 @@ check. The GM might also call for a Dexterity (Sleight of Hand) check to determi
     :options feat-options
     ;;:multiselect? true
     :tags #{:feats}
-    :ref :feats
+    ;;:ref :feats
     :min num
     :max num}))
 
