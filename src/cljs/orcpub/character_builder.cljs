@@ -1702,7 +1702,7 @@
              (if expanded? [:div.m-t-5 item-description])]))
         selected-items))]]))
 
-(defn option-selector-base [{:keys [name key help selected? selectable? option-path select-fn content explanation-text icon classes]}]
+(defn option-selector-base [{:keys [name key help selected? selectable? option-path select-fn content explanation-text icon classes multiselect?]}]
   (let [expanded? (get-in @app-state [:expanded-paths option-path])]
     ^{:key key}
     [:div.p-10.b-1.b-rad-5.m-5.b-orange.hover-shadow
@@ -1715,6 +1715,9 @@
      [:div.flex.align-items-c
       [:div.flex-grow-1
        [:div.flex.align-items-c
+        (if multiselect?
+          [:i.fa.fa-check.f-s-14.bg-white.orange-shadow.m-r-10
+           {:class-name (if selected? "black slight-text-shadow" "transparent")}])
         (if icon [:div.m-r-5 (svg-icon icon 24)])
         [:span.f-w-b.f-s-1.flex-grow-1 name]
         (if help
@@ -1790,6 +1793,9 @@
                            :selected? selected?
                            :selectable? selectable?
                            :option-path new-option-path
+                           :multiselect? (or multiselect?
+                                             (> min 1)
+                                             (nil? max))
                            :select-fn (fn [e]
                                         (when (and (or (> max 1)
                                                        (nil? max)
@@ -2365,7 +2371,8 @@
                                                             (not selected?))
                                                      "You already have this skill proficiency")
                                  :icon icon
-                                 :classes (if bad-selection? "b-red")})))
+                                 :classes (if bad-selection? "b-red")
+                                 :multiselect? true})))
       opt5e/skills))))
 
 (def hit-points-headers
@@ -2576,7 +2583,7 @@
              {:key :magic-armor :ui-fn (partial inventory-selector mi5e/magic-armor-map 60)}
              {:key :equipment :ui-fn (partial inventory-selector equip5e/equipment-map 60)}
              {:key :other-magic-items :ui-fn (partial inventory-selector mi5e/other-magic-item-map 60)}
-             [:key :treasure :ui-fn (partial inventory-selector equip5e/treasure-map 100)]]}])
+             {:key :treasure :ui-fn (partial inventory-selector equip5e/treasure-map 100)}]}])
 
 (defn combine-ref-selections [selections]
   (let [first-selection (first selections)]
@@ -2621,6 +2628,10 @@
     (or (= key s-key)
         (get tags key))))
 
+(defn matches-non-group-fn [key]
+  #(if (or (= (::t/key %) key)
+           (= (::t/ref %) key)) %))
+
 (defn new-options-column [character built-char built-template available-selections page-index option-paths stepper-selection-path]
   (let [{:keys [tags ui-fns] :as page} (pages page-index)
         selections (entity/tagged-selections available-selections tags)
@@ -2645,54 +2656,41 @@
                                                   0
                                                   next))))}
         "Next"]]
-      [:div.p-5
-       [:div
-        (doall
-         (map
-          (fn [{:keys [key group? ui-fn]}]
-            (if group?
-              (let [group (filter
-                           (matches-group-fn key)
-                           final-selections)]
-                (ui-fn character built-char built-template option-paths group))
-              (let [selection (some
-                               #(if (or (= (::t/key %) key)
-                                        (= (::t/ref %) key)) %)
-                               final-selections)]
-                (selection-section character built-char built-template option-paths {key ui-fn} selection))))
-          ui-fns))]
-       (let [ui-fn-keys (into #{} (map :key ui-fns))
-             no-ui-fn-selections (filter
-                                  (fn [s]
-                                    (empty? (sets/intersection ui-fn-keys (conj (::t/tags s) (::t/ref s) (::t/key s)))))
+      (let [ui-fn-selections (mapcat
+                              (fn [{:keys [key group? ui-fn]}]
+                                (if group?
+                                  (filter
+                                   (matches-group-fn key)
+                                   final-selections)
+                                  [(some
+                                    (matches-non-group-fn key)
+                                    final-selections)]))
+                              ui-fns)
+            non-ui-fn-selections (sets/difference (set final-selections) (set ui-fn-selections))]
+        [:div.p-5
+         [:div
+          (doall
+           (map
+            (fn [{:keys [key group? ui-fn]}]
+              ^{:key key}
+              [:div
+               (if group?
+                 (let [group (filter
+                              (matches-group-fn key)
+                              final-selections)]
+                   (ui-fn character built-char built-template option-paths group))
+                 (let [selection (some
+                                  (matches-non-group-fn key)
                                   final-selections)]
-         (if (seq no-ui-fn-selections)
+                   (selection-section character built-char built-template option-paths {key ui-fn} selection)))])
+            ui-fns))]
+         (if (seq non-ui-fn-selections)
            [:div.m-t-20
             (doall
              (map
               (fn [selection]
                 (selection-section character built-char built-template option-paths nil selection))
-              no-ui-fn-selections))]))
-       
-       #_(let [group-keys (set (keys group-ui-fns))
-             groups (group-by (fn [s]
-                                (or (group-keys (::t/key s))
-                                    (first (sets/intersection group-keys (::t/tags s)))))
-                              final-selections)]
-         [:div
-          [:div
-           (doall
-            (map
-             (partial selection-section character built-char built-template option-paths ui-fns)
-             (groups nil)))]
-          (if (seq group-keys)
-            [:div.m-t-20
-             (doall
-              (map
-               (fn [k]
-                 ^{:key k}
-                 [:div ((group-ui-fns k) character built-char built-template option-paths (groups k))])
-               group-keys))])])]]]))
+              non-ui-fn-selections))])])]]))
 
 (defn builder-columns [built-template built-char option-paths collapsed-paths stepper-selection-path stepper-selection plugins active-tabs stepper-dismissed? available-selections]
   [:div.flex-grow-1.flex

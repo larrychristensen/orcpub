@@ -1165,6 +1165,7 @@ check. The GM might also call for a Dexterity (Sleight of Hand) check to determi
     :options feat-options
     ;;:multiselect? true
     :tags #{:feats}
+    :ref :feats
     :min num
     :max num}))
 

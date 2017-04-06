@@ -7,6 +7,7 @@
 
 (def button-color "#f0a100")
 (def red "#9a031e")
+(def green "#70a800")
 
 (def container-style
   {:display :flex
@@ -157,8 +158,14 @@
    [:.text-shadow
     {:text-shadow "1px 2px 1px black"}]
 
+   [:.slight-text-shadow
+    {:text-shadow "1px 1px 1px rgba(0,0,0,0.8)"}]
+
    [:.hover-shadow:hover
     {:box-shadow "0 2px 6px 0 rgba(0, 0, 0, 0.5)"}]
+
+   [:.orange-shadow
+    {:box-shadow "0 1px 0 0 #f0a100"}]
    
    [:.t-a-c
     {:text-align :center}]
@@ -267,10 +274,14 @@
     {:color :black}]
    [:.orange
     {:color button-color}]
+   [:.green
+    {:color green}]
    [:.uppercase
     {:text-transform :uppercase}]
    [:.bg-trans
     {:background-color :transparent}]
+   [:.bg-white
+    {:background-color :white}]
    [:.no-border
     {:border :none}]
 

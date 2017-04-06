@@ -1182,11 +1182,12 @@
        [(mod5e/equipment k num)]))))
 
 (defn simple-weapon-selection [num]
-  (t/selection
-   "Simple Weapon"
-   (opt5e/weapon-options (weapon5e/simple-weapons weapon5e/weapons))
-   num
-   num))
+  (t/selection-cfg
+   {:name "Starting Equipment: Simple Weapon"
+    :tags #{:starting-equipment}
+    :options (opt5e/weapon-options (weapon5e/simple-weapons weapon5e/weapons))
+    :min num
+    :max num}))
 
 (defn weapon-option [[k num]]
   (case k
@@ -1198,11 +1199,12 @@
     :martial (t/option
               "Any Martial Weapon"
               :any-martial
-              [(t/selection
-                "Martial Weapon"
-                (opt5e/weapon-options (weapon5e/martial-weapons weapon5e/weapons))
-                num
-                num)]
+              [(t/selection-cfg
+                {:name "Starting Equipment: Martial Weapon"
+                 :tags #{:starting-equipment}
+                 :options (opt5e/weapon-options (weapon5e/martial-weapons weapon5e/weapons))
+                 :min num
+                 :max num})]
               [])
     (t/option
      (-> k weapon5e/weapons-map :name (str (if (> num 1) (str " (" num ")") "")))
@@ -1447,67 +1449,70 @@
                  {:name "Path of the Totem Warrior"
                   :levels {3 {:modifiers [(mod5e/spells-known 2 :beast-sense nil "Barbarian" 1 "ritual only")
                                           (mod5e/spells-known 1 :speak-with-animals nil "Barbarian" 1 "ritual only")]
-                              :selections [(t/selection
-                                            "Totem Spirit"
-                                            [(t/option-cfg
-                                              {:name "Bear"
-                                               :modifiers [(mod5e/trait-cfg
-                                                            {:name "Totem Spirit: Bear"
-                                                             :page 50
-                                                             :summary "While raging, you have resistance to all damage but psychic damage"})]})
-                                             (t/option-cfg
-                                              {:name "Eagle"
-                                               :modifiers [(mod5e/trait-cfg
-                                                            {:name "Totem Spirit: Eagle"
-                                                             :page 50
-                                                             :summary "While raging and not wearing heavy armor, opportunity attacks against you have disadvantage, and you can Dash as a bonus action."})]})
-                                             (t/option-cfg
-                                              {:name "Wolf"
-                                               :modifiers [(mod5e/trait-cfg
-                                                            {:name "Totem Spirit: Wolf"
-                                                             :page 50
-                                                             :summary "While raging, allies have advantage against enemies within 5 ft."})]})])]}
-                           6 {:selections [(t/selection
-                                            "Aspect of the Beast"
-                                            [(t/option-cfg
-                                              {:name "Bear"
-                                               :modifiers [(mod5e/trait-cfg
-                                                            {:name "Aspect of the Beast: Bear"
-                                                             :page 50
-                                                             :summary "2X carrying capacity, advantage lift, push, pull, or break Strength checks."})]})
-                                             (t/option-cfg
-                                              {:name "Eagle"
-                                               :modifiers [(mod5e/trait-cfg
-                                                            {:name "Aspect of the Beast: Eagle"
-                                                             :page 50
-                                                             :summary "See clearly up to a mile as if no more than 100 ft., no disadvantage on perception checks in dim light."})]})
-                                             (t/option-cfg
-                                              {:name "Wolf"
-                                               :modifiers [(mod5e/trait-cfg
-                                                            {:name "Aspect of the Beast: Wolf"
-                                                             :page 50
-                                                             :summary "Track at fast pace, stealthy at normal pace"})]})])]}
+                              :selections [(t/selection-cfg
+                                            {:name "Totem Spirit"
+                                             :tags #{:class}
+                                             :options [(t/option-cfg
+                                               {:name "Bear"
+                                                :modifiers [(mod5e/trait-cfg
+                                                             {:name "Totem Spirit: Bear"
+                                                              :page 50
+                                                              :summary "While raging, you have resistance to all damage but psychic damage"})]})
+                                              (t/option-cfg
+                                               {:name "Eagle"
+                                                :modifiers [(mod5e/trait-cfg
+                                                             {:name "Totem Spirit: Eagle"
+                                                              :page 50
+                                                              :summary "While raging and not wearing heavy armor, opportunity attacks against you have disadvantage, and you can Dash as a bonus action."})]})
+                                              (t/option-cfg
+                                               {:name "Wolf"
+                                                :modifiers [(mod5e/trait-cfg
+                                                             {:name "Totem Spirit: Wolf"
+                                                              :page 50
+                                                              :summary "While raging, allies have advantage against enemies within 5 ft."})]})]})]}
+                           6 {:selections [(t/selection-cfg
+                                            {:name "Aspect of the Beast"
+                                             :tags #{:class}
+                                             :options [(t/option-cfg
+                                               {:name "Bear"
+                                                :modifiers [(mod5e/trait-cfg
+                                                             {:name "Aspect of the Beast: Bear"
+                                                              :page 50
+                                                              :summary "2X carrying capacity, advantage lift, push, pull, or break Strength checks."})]})
+                                              (t/option-cfg
+                                               {:name "Eagle"
+                                                :modifiers [(mod5e/trait-cfg
+                                                             {:name "Aspect of the Beast: Eagle"
+                                                              :page 50
+                                                              :summary "See clearly up to a mile as if no more than 100 ft., no disadvantage on perception checks in dim light."})]})
+                                              (t/option-cfg
+                                               {:name "Wolf"
+                                                :modifiers [(mod5e/trait-cfg
+                                                             {:name "Aspect of the Beast: Wolf"
+                                                              :page 50
+                                                              :summary "Track at fast pace, stealthy at normal pace"})]})]})]}
                            10 {:modifiers [(mod5e/spells-known 5 :commune-with-nature nil "Barbarian" 1 "ritual only")]}
-                           14 {:selections [(t/selection
-                                            "Totemic Attunement"
-                                            [(t/option-cfg
-                                              {:name "Bear"
-                                               :modifiers [(mod5e/trait-cfg
-                                                            {:name "Totemic Attunement: Bear"
-                                                             :page 50
-                                                             :summary "While raging, hostile creatures within 5 ft. have disadvantage on attack rolls against anyone but you."})]})
-                                             (t/option-cfg
-                                              {:name "Eagle"
-                                               :modifiers [(mod5e/trait-cfg
-                                                            {:name "Totemic Attunement: Eagle"
-                                                             :page 50
-                                                             :summary "While raging, you gain flying speed equal to your walking speed, falling if you end your turn in the air."})]})
-                                             (t/option-cfg
-                                              {:name "Wolf"
-                                               :modifiers [(mod5e/trait-cfg
-                                                            {:name "Totemic Attunement: Wolf"
-                                                             :page 50
-                                                             :summary "While raging, if you hit a Large or smaller creature, you can use a bonus action to knock it prone."})]})])]}}}]}))
+                           14 {:selections [(t/selection-cfg
+                                             {:name "Totemic Attunement"
+                                              :tags #{:class}
+                                              :options [(t/option-cfg
+                                                        {:name "Bear"
+                                                         :modifiers [(mod5e/trait-cfg
+                                                                      {:name "Totemic Attunement: Bear"
+                                                                       :page 50
+                                                                       :summary "While raging, hostile creatures within 5 ft. have disadvantage on attack rolls against anyone but you."})]})
+                                                       (t/option-cfg
+                                                        {:name "Eagle"
+                                                         :modifiers [(mod5e/trait-cfg
+                                                                      {:name "Totemic Attunement: Eagle"
+                                                                       :page 50
+                                                                       :summary "While raging, you gain flying speed equal to your walking speed, falling if you end your turn in the air."})]})
+                                                       (t/option-cfg
+                                                        {:name "Wolf"
+                                                         :modifiers [(mod5e/trait-cfg
+                                                                      {:name "Totemic Attunement: Wolf"
+                                                                       :page 50
+                                                                       :summary "While raging, if you hit a Large or smaller creature, you can use a bonus action to knock it prone."})]})]})]}}}]}))
 
 (defn bardic-inspiration-die [levels]
   (condp <= (class-level levels :bard)
@@ -1790,13 +1795,14 @@
                               (cleric-spell 5 :legend-lore 9)
                               (cleric-spell 5 :scrying 9)]
                   :selections [(opt5e/language-selection opt5e/languages 2)
-                               (t/selection
-                                "Blessings of Knowledge Skills"
-                                (map
-                                 blessings-of-knowledge-skill
-                                 ["Arcana" "History" "Nature" "Religion"])
-                                2
-                                2)]
+                               (t/selection-cfg
+                                {:name "Blessings of Knowledge Skills"
+                                 :tags #{:class}
+                                 :options (map
+                                           blessings-of-knowledge-skill
+                                           ["Arcana" "History" "Nature" "Religion"])
+                                 :min 2
+                                 :max 2})]
                   :levels {6 {:modifiers [(mod5e/action
                                            {:level 6
                                             :page 59
@@ -1888,11 +1894,10 @@
                                              :level 17
                                              :page 62
                                              :summary "command creatures charmed with your Charm Animals and Plants"})]}}
-                  :selections [(t/selection
-                                "Druid Cantrip"
-                                (opt5e/spell-options (get-in sl/spell-lists [:druid 0]) 0 :wis "Druid"))]
-                  :traits [
-                           ]}
+                  :selections [(t/selection-cfg
+                                {:name "Druid Cantrip"
+                                 :tags #{:spells}
+                                 :options (opt5e/spell-options (get-in sl/spell-lists [:druid 0]) 0 :wis "Druid")})]}
                  {:name "Tempest Domain"
                   :profs {:armor {:heavy true}
                           :weapon {:martial true}}
@@ -3383,15 +3388,16 @@
     :profs {:weapon {:dagger true :dart true :sling true :quarterstaff true :crossbow-light true}
             :save {:con true :cha true}
             :skill-options {:choose 2 :options {:arcana true :deception true :insight true :intimidation true :persuasion true :religion true}}}
-    :selections [(t/selection
-                  "Weapon"
-                  [(t/option
-                    "Light Crossbow"
-                    :crossbow
-                    []
-                    [(mod5e/weapon :crossbow-light 1)
-                     (mod5e/equipment :crossbow-bolt 20)])
-                   (weapon-option [:simple 1])])]
+    :selections [(t/selection-cfg
+                  {:name "Starting Equipment: Weapon"
+                   :tags #{:equipment :starting-equipment}
+                   :options [(t/option
+                              "Light Crossbow"
+                              :crossbow
+                              []
+                              [(mod5e/weapon :crossbow-light 1)
+                               (mod5e/equipment :crossbow-bolt 20)])
+                             (weapon-option [:simple 1])]})]
     :modifiers [(mod/modifier ?natural-ac-bonus 3)]
     :levels {2 {:modifiers [(mod5e/dependent-trait
                              {:name "Sorcery Points"
@@ -3908,6 +3914,7 @@ Additionally, while perceiving through your familiar’s senses, you can also sp
     :options eldritch-invocation-options
     :min (or num 0)
     :max (or num 0)
+    :tags #{:spells}
     :simple? true}))
 
 (def warlock-option
@@ -3925,15 +3932,16 @@ Additionally, while perceiving through your familiar’s senses, you can also sp
             :weapon {:simple false}
             :save {:wis true :cha true}
             :skill-options {:choose 2 :options {:arcana true :deception true :history true :intimidation true :investigation true :nature true :religion true}}}
-    :selections [(t/selection
-                  "Weapon"
-                  [(t/option
-                    "Light Crossbow"
-                    :crossbow
-                    []
-                    [(mod5e/weapon :crossbow-light 1)
-                     (mod5e/equipment :crossbow-bolt 20)])
-                   (weapon-option [:simple 1])])
+    :selections [(t/selection-cfg
+                  {:name "Starting Equipment: Weapon"
+                   :tags #{:equipment :starting-equipment}
+                   :options [(t/option
+                              "Light Crossbow"
+                              :crossbow
+                              []
+                              [(mod5e/weapon :crossbow-light 1)
+                               (mod5e/equipment :crossbow-bolt 20)])
+                             (weapon-option [:simple 1])]})
                  (simple-weapon-selection 1)]
     :equipment-choices [{:name "Equipment Pack"
                          :options {:scholars-pack 1
@@ -3945,9 +3953,10 @@ Additionally, while perceiving through your familiar’s senses, you can also sp
     :armor {:leather 1}
     :levels {2 {:selections [(eldritch-invocation-selection 2)]}
              3 {:modifiers [(mod5e/spells-known 1 :find-familiar :cha "Warlock")]
-                :selections [(t/selection
-                             "Pact Boon"
-                             pact-boon-options)]}
+                :selections [(t/selection-cfg
+                              {:name "Pact Boon"
+                               :tags #{:class}
+                               :options pact-boon-options})]}
              5 {:selections [(eldritch-invocation-selection)]}
              8 {:selections [(eldritch-invocation-selection)]}
              12 {:selections [(eldritch-invocation-selection)]}
@@ -4166,21 +4175,22 @@ Additionally, while perceiving through your familiar’s senses, you can also sp
                     equipment)))})))
 
 (defn volos-guide-to-monsters-selections [app-state]
-  [(t/selection
-    "Race"
-    [aasimar-option
-     firbolg-option
-     goliath-option
-     kenku-option
-     lizardfolk-option
-     tabaxi-option
-     triton-option
-     bugbear-option
-     goblin-option
-     hobgoblin-option
-     kobold-option
-     orc-option
-     yuan-ti-option])])
+  [(t/selection-cfg
+    {:name "Race"
+     :tags #{:race}
+     :options [aasimar-option
+               firbolg-option
+               goliath-option
+               kenku-option
+               lizardfolk-option
+               tabaxi-option
+               triton-option
+               bugbear-option
+               goblin-option
+               hobgoblin-option
+               kobold-option
+               orc-option
+               yuan-ti-option]})])
 
 
 (def sword-coast-adventurers-guide-backgrounds
@@ -4447,7 +4457,7 @@ Additionally, while perceiving through your familiar’s senses, you can also sp
                 ::t/modifiers [(mod5e/deferred-abilities)]}]})
    (t/selection-cfg
     {:name "Alignment"
-     :tags #{:description}
+     :tags #{:description :background}
      :options (mapv
                (fn [alignment]
                  (t/option-cfg
