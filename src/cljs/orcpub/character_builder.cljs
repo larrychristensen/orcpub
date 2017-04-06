@@ -1746,15 +1746,22 @@
 (defn actual-path [{:keys [::t/ref ::entity/path] :as selection}]
   (if ref (if (sequential? ref) ref [ref]) path))
 
-(defn count-remaining [built-template character {:keys [::t/min ::t/max] :as selection}]
+(defn count-remaining [built-template character {:keys [::t/min ::t/max ::t/require-value?] :as selection}]
   (let [actual-path (actual-path selection)
         entity-path (entity/get-entity-path built-template character actual-path)
         selected-options (get-in character entity-path)
         selected-count (cond
                          (sequential? selected-options)
-                         (count selected-options)
+                         (count (if require-value?
+                                  (filter ::entity/value selected-options)
+                                  selected-options))
+                         
                          (map? selected-options)
-                         1
+                         (if (or (::entity/value selected-options)
+                                 (not require-value?))
+                           1
+                           0)
+                         
                          :else 0)]
     (if max (- min selected-count) 0)))
 
@@ -2361,6 +2368,14 @@
                                  :classes (if bad-selection? "b-red")})))
       opt5e/skills))))
 
+(def hit-points-headers
+  [:tr.f-w-b.t-a-l
+   [:th.p-5 "Level"]
+   [:th.p-5 "Base"]
+   [:th.p-5 "Con"]
+   [:th.p-5 "Misc"]
+   [:th.p-5 "Total"]])
+
 (defn hp-selection-name-level [selection]
   (let [[_ class-kw _ level-kw _] (::entity/path selection)
         class-name (s/capitalize (name class-kw))]
@@ -2461,12 +2476,7 @@
                   (-> levels cls :hit-die) ")")]
             [:table.w-100-p.striped
              [:tbody
-              [:tr.f-w-b.t-a-l
-               [:th.p-5 "Level"]
-               [:th.p-5 "Base"]
-               [:th.p-5 "Con"]
-               [:th.p-5 "Misc."]
-               [:th.p-5 "Total"]]
+              hit-points-headers
               (if (zero? i)
                 [:tr
                  [:td.p-5 1]
@@ -2484,7 +2494,7 @@
                              {:type :number
                               :class-name (if (or (nil? (:value level-value))
                                                   (not (pos? (:value level-value))))
-                                            "b-red")
+                                            "b-red b-3")
                               :on-change (fn [e]
                                            (let [value (js/parseInt (.. e -target -value))]
                                              (swap! app-state
@@ -2509,12 +2519,7 @@
         [:div.f-s-16.m-l-5.f-w-b "Total"]
         [:table.w-100-p.striped
          [:tbody
-          [:tr.f-w-b.t-a-l
-           [:th.p-5 "Level"]
-           [:th.p-5 "Base"]
-           [:th.p-5 "Con"]
-           [:th.p-5 "Misc"]
-           [:th.p-5 "Total"]]
+          hit-points-headers
           [:tr
            [:td.p-5 "Total"]
            [:td.p-5 total-base-hps]
@@ -2522,12 +2527,17 @@
            [:td.p-5 (common/bonus-str total-misc-bonus)]
            [:td.p-5 (+ total-base-hps total-con-bonus total-misc-bonus)]]]]])]))
 
+(defn sum-remaining [built-template character selections]
+  (apply + (map (partial count-remaining built-template character) selections)))
+
 (defn hit-points-editor [character built-char built-template option-paths selections]
-  (selection-section-base
-   {:name "Hit Points"
-    :min 1
-    :max 1
-    :body (hit-points-entry character selections built-char built-template)}))
+  (let [num-selections (count selections)]
+    (selection-section-base
+     {:name "Hit Points"
+      :min num-selections
+      :max num-selections
+      :remaining (sum-remaining built-template character selections) 
+      :body (hit-points-entry character selections built-char built-template)})))
 
 (def pages
   [{:name "Race"
@@ -2536,32 +2546,37 @@
    {:name "Ability Scores / Feats"
     :icon "strong"
     :tags #{:ability-scores :feats}
-    :group-ui-fns {:ability-scores abilities-editor}}
+    :ui-fns [{:key :ability-scores :group? true :ui-fn abilities-editor}]
+    ;;:group-ui-fns {:ability-scores abilities-editor}
+    }
    {:name "Background"
     :icon "ages"
     :tags #{:background}}
    {:name "Class"
     :icon "mounted-knight"
     :tags #{:class :subclass}
-    :ui-fns {:class class-levels-selector}
-    :group-ui-fns {:hit-points hit-points-editor}}
+    :ui-fns [{:key :class :ui-fn class-levels-selector}
+             {:key :hit-points :group? true :ui-fn hit-points-editor}]
+    ;;:ui-fns {:class class-levels-selector}
+    ;;:group-ui-fns {:hit-points hit-points-editor}
+    }
    {:name "Spells"
     :icon "spell-book"
     :tags #{:spells}}
    {:name "Proficiencies"
     :icon "juggler"
     :tags #{:profs}
-    :ui-fns {:skill-profs skills-selector}}
+    :ui-fns [{:key :skill-profs :ui-fn skills-selector}]}
    {:name "Equipment"
     :icon "backpack"
     :tags #{:equipment :starting-equipment}
-    :ui-fns {:weapons (partial inventory-selector weapon5e/weapons-map 60)
-             :magic-weapons (partial inventory-selector mi5e/magic-weapon-map 60)
-             :armor (partial inventory-selector armor5e/armor-map 60)
-             :magic-armor (partial inventory-selector mi5e/magic-armor-map 60)
-             :equipment (partial inventory-selector equip5e/equipment-map 60)
-             :other-magic-items (partial inventory-selector mi5e/other-magic-item-map 60)
-             :treasure (partial inventory-selector equip5e/treasure-map 100)}}])
+    :ui-fns [{:key :weapons :ui-fn (partial inventory-selector weapon5e/weapons-map 60)}
+             {:key :magic-weapons :ui-fn (partial inventory-selector mi5e/magic-weapon-map 60)}
+             {:key :armor :ui-fn (partial inventory-selector armor5e/armor-map 60)}
+             {:key :magic-armor :ui-fn (partial inventory-selector mi5e/magic-armor-map 60)}
+             {:key :equipment :ui-fn (partial inventory-selector equip5e/equipment-map 60)}
+             {:key :other-magic-items :ui-fn (partial inventory-selector mi5e/other-magic-item-map 60)}
+             [:key :treasure :ui-fn (partial inventory-selector equip5e/treasure-map 100)]]}])
 
 (defn combine-ref-selections [selections]
   (let [first-selection (first selections)]
@@ -2589,7 +2604,7 @@
      (fn [i {:keys [name icon tags]}]
        (let [selections (entity/tagged-selections available-selections tags)
              combined-selections (combine-selections selections)
-             total-remaining (apply + (map (partial count-remaining built-template character) combined-selections))]
+             total-remaining (sum-remaining built-template character combined-selections)]
          ^{:key name}
          [:div.p-5.hover-opacity-full.pointer
           {:class-name (if (= i page-index) "b-b-2 b-orange" "")
@@ -2601,8 +2616,13 @@
             [:div.flex.justify-cont-end.m-t--10 (remaining-indicator total-remaining 12 11)])]))
      pages))])
 
+(defn matches-group-fn [key]
+  (fn [{s-key ::t/key tags ::t/tags}]
+    (or (= key s-key)
+        (get tags key))))
+
 (defn new-options-column [character built-char built-template available-selections page-index option-paths stepper-selection-path]
-  (let [{:keys [tags ui-fns group-ui-fns] :as page} (pages page-index)
+  (let [{:keys [tags ui-fns] :as page} (pages page-index)
         selections (entity/tagged-selections available-selections tags)
         final-selections (combine-selections selections)]
     [:div.w-100-p
@@ -2626,7 +2646,35 @@
                                                   next))))}
         "Next"]]
       [:div.p-5
-       (let [group-keys (set (keys group-ui-fns))
+       [:div
+        (doall
+         (map
+          (fn [{:keys [key group? ui-fn]}]
+            (if group?
+              (let [group (filter
+                           (matches-group-fn key)
+                           final-selections)]
+                (ui-fn character built-char built-template option-paths group))
+              (let [selection (some
+                               #(if (or (= (::t/key %) key)
+                                        (= (::t/ref %) key)) %)
+                               final-selections)]
+                (selection-section character built-char built-template option-paths {key ui-fn} selection))))
+          ui-fns))]
+       (let [ui-fn-keys (into #{} (map :key ui-fns))
+             no-ui-fn-selections (filter
+                                  (fn [s]
+                                    (empty? (sets/intersection ui-fn-keys (conj (::t/tags s) (::t/ref s) (::t/key s)))))
+                                  final-selections)]
+         (if (seq no-ui-fn-selections)
+           [:div.m-t-20
+            (doall
+             (map
+              (fn [selection]
+                (selection-section character built-char built-template option-paths nil selection))
+              no-ui-fn-selections))]))
+       
+       #_(let [group-keys (set (keys group-ui-fns))
              groups (group-by (fn [s]
                                 (or (group-keys (::t/key s))
                                     (first (sets/intersection group-keys (::t/tags s)))))
@@ -2635,15 +2683,16 @@
           [:div
            (doall
             (map
-             (fn [k]
-               ^{:key k}
-               [:div ((group-ui-fns k) character built-char built-template option-paths (groups k))])
-             group-keys))]
-          [:div
-           (doall
-            (map
              (partial selection-section character built-char built-template option-paths ui-fns)
-             (groups nil)))]])]]]))
+             (groups nil)))]
+          (if (seq group-keys)
+            [:div.m-t-20
+             (doall
+              (map
+               (fn [k]
+                 ^{:key k}
+                 [:div ((group-ui-fns k) character built-char built-template option-paths (groups k))])
+               group-keys))])])]]]))
 
 (defn builder-columns [built-template built-char option-paths collapsed-paths stepper-selection-path stepper-selection plugins active-tabs stepper-dismissed? available-selections]
   [:div.flex-grow-1.flex

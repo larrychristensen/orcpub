@@ -919,6 +919,7 @@
   (t/selection-cfg
    {:name (str "Hit Points: " class-nm " " level)
     :key :hit-points
+    :require-value? true
     :help "Select the method with which to determine this level's hit points."
     :tags #{:class}
     :options [{::t/name "Manual Entry"
@@ -4386,6 +4387,7 @@ Additionally, while perceiving through your familiar’s senses, you can also sp
    (t/selection-cfg
     {:name "Base Ability Scores"
      :key :ability-scores
+     :require-value? true
      :order 0
      :tags #{:ability-scores}
      :help [:div

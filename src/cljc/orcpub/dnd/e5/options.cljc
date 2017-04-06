@@ -1199,7 +1199,7 @@ check. The GM might also call for a Dexterity (Sleight of Hand) check to determi
     :max num
     :multiselect? true
     :ref :skill-expertise
-    :tags #{:profs :skill-profs :expertise}}))
+    :tags #{:profs :expertise}}))
 
 (def rogue-expertise-selection
   (t/selection-cfg
