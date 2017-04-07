@@ -1168,10 +1168,11 @@ check. The GM might also call for a Dexterity (Sleight of Hand) check to determi
 (defn feat-selection [num]
   (t/selection-cfg
    {:name (if (= 1 num) "Feat" "Feats")
-    :options feat-options
-    ;;:multiselect? true
+    ;;:options feat-options
+    :option-refs (map :key feat-options)
+    :multiselect? true
     :tags #{:feats}
-    ;;:ref :feats
+    :ref :feats
     :min num
     :max num}))
 

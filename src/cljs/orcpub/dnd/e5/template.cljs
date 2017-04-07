@@ -4372,7 +4372,7 @@ Additionally, while perceiving through your familiar’s senses, you can also sp
 (def srd-link
   [:a.orange {:href "SRD-OGL_V5.1.pdf" :target "_blank"} "the 5e SRD"])
 
-(defn template-selections [app-state]
+(def template-selections
   [(t/selection-cfg
     {:name "Optional Content"
      :tags #{:optional-content}
@@ -4412,7 +4412,6 @@ Additionally, while perceiving through your familiar’s senses, you can also sp
      :options [{::t/name "Manual Entry"
                 ::t/key :manual-entry
                 ::t/help "This option allows you to manually type in the value for each ability. Use this if you want to roll dice yourself or if you already have a character with known ability values."
-                ::t/ui-fn #(abilities-entry app-state)
                 ::t/modifiers [(mod5e/deferred-abilities)]}
                {::t/name "Point Buy"
                 ::t/key :point-buy
@@ -4483,19 +4482,20 @@ Additionally, while perceiving through your familiar’s senses, you can also sp
      :options (map
                background-option
                backgrounds)})
+   (t/selection-cfg
+    {:name "Feats"
+     :ref :feats
+     :tags #{:feats}
+     :options opt5e/feat-options
+     :multiselect? true
+     :min 0
+     :max 0})
    (class-selection
     {:help [:div
             [:p "Class is your adventuring vocation. It determines many of your special talents, including weapon, armor, skill, saving throw, and tool proficiencies. It also provides starting equipment options. When you gain levels, you gain them in a particular class."]
             [:p.m-t-10 "Select your class using the selector at the top of the 'Class' section. Multiclassing is uncommon, but you may multiclass by clicking the 'Add Class' button at the end of the 'Class' section."]]
      :max nil
      :sequential? false
-     :new-item-fn (fn [selection classes _ selected-key]
-                    (let [current-classes (into #{}
-                                                (map ::entity/key)
-                                                (get-in (:character @app-state)
-                                                        [::entity/options :class]))]
-                      {::entity/key selected-key
-                       ::entity/options {:levels [{::entity/key :level-1}]}}))
      :options [barbarian-option
                bard-option
                cleric-option
@@ -4632,4 +4632,4 @@ Additionally, while perceiving through your familiar’s senses, you can also sp
 
 (defn template [app-state]
   {::t/base template-base
-   ::t/selections (template-selections app-state)})
+   ::t/selections template-selections})

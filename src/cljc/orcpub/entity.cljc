@@ -154,13 +154,15 @@
   ([template entity current-path [selection-k option-k & ks :as option-path]]
    (if selection-k
      (let [[selection-i selection] (template-item-with-key (::t/selections template) selection-k)
-           {:keys [::t/min ::t/max ::t/options]} selection
+           {:keys [::t/min ::t/max ::t/options ::t/multiselect?]} selection
            [option-i option] (template-item-with-key options option-k)
            selection-path (vec (concat current-path [::options selection-k]))
            entity-items (get-in entity selection-path)
            [entity-i _] (entity-item-with-key entity-items option-k)
            path-i (if (and (or option-k entity-i)
-                           (or (nil? max) (> max 1)))
+                           (or (nil? max)
+                               (> max 1)
+                               multiselect?))
                     (if (nat-int? option-k)
                       option-k
                       entity-i))
@@ -333,7 +335,7 @@
   (memoized-make-path-map-aux character))
 
 
-(defn get-all-selections-aux [path {:keys [::t/key ::t/selections ::t/options] :as obj} parent selected-option-paths]
+(defn get-all-selections-aux [path {:keys [::t/ref ::t/key ::t/selections ::t/options] :as obj} parent selected-option-paths]
   (let [children (map
                   (fn [{:keys [::t/key] :as s}]
                     (let [child-path (conj path key)]
