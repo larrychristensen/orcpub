@@ -520,7 +520,7 @@ check. The GM might also call for a Dexterity (Sleight of Hand) check to determi
      (t/selection-cfg
       {:name title
        :key kw
-       :ref kw
+       :ref [:class class-key (if (zero? level) :cantrips-known :spells-known)]
        :order (if (zero? level) 0 1)
        :options (spell-options spell-keys level spellcasting-ability class-name)
        :min num
