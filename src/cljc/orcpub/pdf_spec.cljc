@@ -241,7 +241,6 @@
   (let [all-weapons (map mi5e/all-weapons-map (keys (char5e/all-weapons-inventory built-char)))
         weapon-fields (mapcat
                        (fn [{:keys [name damage-die damage-die-count damage-type] :as weapon}]
-                         (prn "WEAPON" weapon)
                          (let [versatile (:versatile weapon)
                                normal-damage-modifier (char5e/weapon-damage-modifier built-char weapon false)
                                finesse-damage-modifier (char5e/weapon-damage-modifier built-char weapon true)
