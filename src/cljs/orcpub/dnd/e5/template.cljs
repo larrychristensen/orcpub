@@ -3476,13 +3476,21 @@
                                             :white
                                             []
                                             [])]})]
-                  :traits [{:name "Draconic Resilience"}
+                  :traits [{:name "Draconic Resilience"
+                            :page 102
+                            :summary "+1 HP/level, unarmored AC 13 + DEX modifier"}
                            {:name "Elemental Affinity"
-                            :level 6}
-                           {:name "Dragon Wings"
-                            :level 14}
-                           {:name "Draconic Presence"
-                            :level 18}]}
+                            :level 6
+                            :page 102
+                            :summary "Add CHA mod to one damage roll of a spell that deals the damage type of your draconic ancestry, may also spend 1 sorcery pt. to gain resistance to that damage type for an hr."}]
+                  :levels {14 {:modifiers [(mod5e/bonus-action
+                                            {:name "Dragon Wings"
+                                             :page 103
+                                             :summary "Sprout wings and gain flying speed equal to land speed"})]}
+                           18 {:modifiers [(mod5e/action
+                                            {:name "Draconic Presence"
+                                             :page 103
+                                             :summary (str "Spend 5 sorcery pts. and create an aura that causes hostile creatures that start their turn within it to be charmed or afraid if they fail a DC " (?spell-save-dc :cha) " Wisdom save.")})]}}}
                  {:name "Wild Magic"
                   :traits [{:name "Wild Magic Surge"
                             :level 1}
@@ -3493,17 +3501,6 @@
                            {:name "Controlled Chaos"
                             :level 14}
                            {:name "Spell Bombardment"
-                            :level 18}]}
-                 {:name "Storm Sorcery"
-                  :source "Sword Coast Adventurer's Guide"
-                  :traits [{:name "Tempestuous Magic"}
-                           {:name "Heart of the Storm"
-                            :level 6}
-                           {:name "Storm Guide"
-                            :level 6}
-                           {:name "Storm's Fury"
-                            :level 14}
-                           {:name "Wind Soul"
                             :level 18}]}]}))
 
 (def pact-of-the-tome-name "Pact Boon: Pact of the Tome")
@@ -4372,28 +4369,44 @@ Additionally, while perceiving through your familiar’s senses, you can also sp
 (def srd-link
   [:a.orange {:href "SRD-OGL_V5.1.pdf" :target "_blank"} "the 5e SRD"])
 
+(def phb-url "https://www.amazon.com/gp/product/0786965606/ref=as_li_tl?ie=UTF8&tag=orcpub-20&camp=1789&creative=9325&linkCode=as2&creativeASIN=0786965606&linkId=9cd9647802c714f226bd591d61058143")
+
+(def plugins
+  [{:name "Sword Coast Adventurer's Guide"
+    :key :sword-coast-adventurers-guide
+    :url "https://www.amazon.com/gp/product/0786965800/ref=as_li_tl?ie=UTF8&tag=orcpub-20&camp=1789&creative=9325&linkCode=as2&creativeASIN=0786965800&linkId=9b93efa0fc7239ebbf005d0b17367233"
+    :help (amazon-frame-help scag-amazon-frame
+                             [:span "Incudes too many new, exciting subraces, race variants, subclasses, and backgrounds to list, as well as a ton of other info to help you create in-depth characters in the Sword Coast or elsewhere."])}
+   {:name "Volo's Guide to Monsters"
+    :key :volos-guide-to-monsters
+    :url "https://www.amazon.com/gp/product/0786966017/ref=as_li_tl?ie=UTF8&tag=orcpub-20&camp=1789&creative=9325&linkCode=as2&creativeASIN=0786966017&linkId=506a1b33174f884dcec5db8c6c07ad31"
+    :help (amazon-frame-help volos-amazon-frame
+                             [:div
+                              "Full of great monster race options, including"
+                              (content-list ["Aasimar" "Firbolg" "Goliath" "Kenku" "Lizardfolk" "Tabaxi" "Triton" "Bugbear" "Goblin" "Hobgoblin" "Kobold" "Orc" "Yuan-Ti Pureblood"])])}])
+
+(def optional-content-selection
+  (t/selection-cfg
+   {:name "Optional Content"
+    :tags #{:optional-content}
+    :help (amazon-frame-help phb-amazon-frame
+                             [:span
+                              "Base options are from the Player's Handbook, although descriptions are either from the "
+                              srd-link
+                              " or are OrcPub summaries. See the Player's Handbook for in-depth, official rules and descriptions."])
+    :options (mapv
+              #(t/option-cfg
+               (select-keys % [:name :key :help]))
+              plugins)
+    :multiselect? true
+    :min 0
+    :max nil}))
+
+(def plugin-map
+  (into {} (map (juxt :key identity) plugins)))
+
 (def template-selections
-  [(t/selection-cfg
-    {:name "Optional Content"
-     :tags #{:optional-content}
-     :help (amazon-frame-help phb-amazon-frame
-                              [:span
-                               "Base options are from the Player's Handbook, although descriptions are either from the "
-                               srd-link
-                               " or are OrcPub summaries. See the Player's Handbook for in-depth, official rules and descriptions."])
-     :options [(t/option-cfg
-                {:name "Sword Coast Adventurer's Guide"
-                 :help (amazon-frame-help scag-amazon-frame
-                                          [:span "Incudes too many new, exciting subraces, race variants, subclasses, and backgrounds to list, as well as a ton of other info to help you create in-depth characters in the Sword Coast or elsewhere."])})
-               (t/option-cfg
-                {:name "Volo's Guide to Monsters"
-                 :help (amazon-frame-help volos-amazon-frame
-                                          [:div
-                                           "Full of great monster race options, including"
-                                           (content-list ["Aasimar" "Firbolg" "Goliath" "Kenku" "Lizardfolk" "Tabaxi" "Triton" "Bugbear" "Goblin" "Hobgoblin" "Kobold" "Orc" "Yuan-Ti Pureblood"])])})]
-     :multiselect? true
-     :min 0
-     :max nil})
+  [optional-content-selection
    (t/selection-cfg
     {:name "Base Ability Scores"
      :key :ability-scores

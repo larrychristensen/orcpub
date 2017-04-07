@@ -1058,7 +1058,6 @@ check. The GM might also call for a Dexterity (Sleight of Hand) check to determi
      :prereqs [(t/option-prereq "Intelligence or Wisdom 13 or higher"
                                 (fn [c]
                                   (let [{:keys [:wis :int] :as abilities} (es/entity-val c :abilities)]
-                                    (prn "CHARAXTER" abilities)
                                     (or (and wis (>= wis 13))
                                         (and int (>= int 13))))))]})
    (feat-option

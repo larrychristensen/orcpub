@@ -5,7 +5,8 @@
             [orcpub.constants :as const]
             [garden.selectors :as s]))
 
-(def button-color "#f0a100")
+(def orange "#f0a100")
+(def button-color orange)
 (def red "#9a031e")
 (def green "#70a800")
 
@@ -632,6 +633,9 @@
       :font-family font-family
       :height "100%"
       :overflow :auto}]
+
+    [:a :a:visited
+     {:color orange}]
 
     [:select
      {:font-family font-family

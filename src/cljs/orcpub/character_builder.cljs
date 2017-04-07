@@ -63,7 +63,6 @@
 
 (defn update-option [template entity path update-fn]
   (let [entity-path (entity/get-entity-path template entity path)]
-    (prn "PATH" path entity-path)
     (update-in entity entity-path update-fn)))
 
 
@@ -1532,7 +1531,7 @@
              (if expanded? [:div.m-t-5 item-description])]))
         selected-items))]]))
 
-(defn option-selector-base [{:keys [name key help selected? selectable? option-path select-fn content explanation-text icon classes multiselect?]}]
+(defn option-selector-base [{:keys [name key help selected? selectable? option-path select-fn content explanation-text icon classes multiselect? disable-checkbox?]}]
   (let [expanded? (get-in @app-state [:expanded-paths option-path])]
     ^{:key key}
     [:div.p-10.b-1.b-rad-5.m-5.b-orange.hover-shadow
@@ -1547,7 +1546,10 @@
        [:div.flex.align-items-c
         (if multiselect?
           [:i.fa.fa-check.f-s-14.bg-white.orange-shadow.m-r-10
-           {:class-name (if selected? "black slight-text-shadow" "transparent")}])
+           {:class-name (str (if selected? "black slight-text-shadow" "transparent")
+                             " "
+                             (if disable-checkbox?
+                               "opacity-5"))}])
         (if icon [:div.m-r-5 (svg-icon icon 24)])
         [:span.f-w-b.f-s-1.flex-grow-1 name]
         (if help
@@ -2474,16 +2476,57 @@
   #(if (or (= (::t/key %) key)
            (= (::t/ref %) key)) %))
 
+(defn get-selected-plugin-options [app-state]
+  (into #{}
+        (map ::entity/key)
+        (get-in @app-state [:character ::entity/options :optional-content])))
+
 (defn new-options-column [character built-char built-template available-selections page-index option-paths stepper-selection-path]
-  (js/console.log "AVAILABLE SELECTIONS" available-selections)
   (let [{:keys [tags ui-fns] :as page} (pages page-index)
         selections (entity/tagged-selections available-selections tags)
         final-selections (remove #(and (zero? (::t/min %))
                                        (zero? (::t/max %))
                                        (zero? (count-remaining built-template character %))) (combine-selections selections))]
-    (js/console.log "FINAL SELECTIONS" final-selections)
-    (js/console.log "OPTION_PATHS" option-paths)
     [:div.w-100-p
+     [:div.m-b-20
+      [:div.flex.align-items-c
+       (svg-icon "bookshelf")
+       (selection-section-title "Option Sources")
+       (expand-button [:option-sources] "collapse" "select sources")]
+      (if (get-in @app-state [:expanded-paths [:option-sources]])
+        [:div
+         (option-selector-base {:name "Player's Handbook"
+                                :help (t5e/amazon-frame-help t5e/phb-amazon-frame
+                                                         [:span
+                                                          "Base options are from the Player's Handbook, although descriptions are either from the "
+                                                          t5e/srd-link
+                                                          " or are OrcPub summaries. See the Player's Handbook for in-depth, official rules and descriptions."])
+                                :selected? true
+                                :selectable? true
+                                :multiselect? true
+                                :disable-checkbox? true})
+         (doall
+          (map
+           (fn [option]
+             (new-option-selector character built-char built-template option-paths [(::t/key t5e/optional-content-selection)]
+                                  t5e/optional-content-selection
+                                  false
+                                  option))
+           (::t/options t5e/optional-content-selection)))]
+        [:div
+         (doall
+          (map-indexed
+           (fn [i el]
+             (with-meta el {:key i}))
+           (interpose
+            [:span.orange ", "]
+            (map
+             (fn [{:keys [name url]}]
+               [:a {:href url} name])
+             (cons {:name "Player's Handbook"
+                    :url t5e/phb-url}
+                   (map t5e/plugin-map (get-selected-plugin-options app-state)))))))])]
+     
      [:div#options-column.b-1.b-rad-5
       [section-tabs available-selections built-template character page-index]
       [:div.flex.justify-cont-s-b.p-t-5.p-10.align-items-t
@@ -2514,8 +2557,6 @@
                                     final-selections)]))
                               ui-fns)
             non-ui-fn-selections (sets/difference (set final-selections) (set ui-fn-selections))]
-        (js/console.log "UI FN SELLECTIONS" ui-fn-selections)
-        (js/console.log "NON_ UI FN SELECTIONS" non-ui-fn-selections)
         [:div.p-5
          [:div
           (doall
@@ -2632,11 +2673,9 @@
      [:span.m-l-5.hidden-xs "Print"]]]])
 
 (defn character-builder []
-  (cljs.pprint/pprint (:character @app-state))
+  ;;(cljs.pprint/pprint (:character @app-state))
   ;;(js/console.log "APP STATE" @app-state)
-  (let [selected-plugin-options (into #{}
-                                      (map ::entity/key)
-                                      (get-in @app-state [:character ::entity/options :optional-content]))
+  (let [selected-plugin-options (get-selected-plugin-options app-state)
         selected-plugins (map
                           :selections
                           (filter
@@ -2664,7 +2703,7 @@
         plugins (:plugins @app-state)
         stepper-dismissed? (:stepper-dismissed @app-state)
         all-selections (entity/available-selections (:character @app-state) built-char built-template)]
-    (print-char built-char)
+    ;;(print-char built-char)
     [:div.app
      {:on-scroll (fn [e]
                    (let [app-header (js/document.getElementById "app-header")
