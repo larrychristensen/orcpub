@@ -14,7 +14,7 @@
                  [org.clojure/clojurescript "1.9.229"]
                  [org.clojure/core.async "0.2.391"
                   :exclusions [org.clojure/tools.reader]]
-                 [cljsjs/react-with-addons "15.3.1-0"]
+                 [cljsjs/react "15.3.1-0"]
                  [cljsjs/react-dom "15.3.1-0"]
                  ;;[sablono "0.7.3"]
                  [org.omcljs/om "1.0.0-alpha46"]
