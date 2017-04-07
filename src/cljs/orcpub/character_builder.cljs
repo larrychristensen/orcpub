@@ -1303,7 +1303,7 @@
          (ui-fn new-option-path built-template app-state built-char))
        (if (not meets-prereqs?)
          [:div.i.f-s-12.f-w-n 
-          (str "Requires " (s/join ", " failed-prereqs))])]
+          (s/join ", " failed-prereqs)])]
       (if has-selections?
         [:i.fa.fa-caret-right.m-l-5])]]))
 
@@ -1607,7 +1607,8 @@
         failed-prereqs (reduce
                         (fn [failures {:keys [::t/prereq-fn ::t/label]}]
                           (if (and prereq-fn (not (prereq-fn built-char)))
-                            (conj failures label)))
+                            (conj failures label)
+                            failures))
                         []
                         prereqs)
         meets-prereqs? (empty? failed-prereqs)
@@ -1668,9 +1669,10 @@
                                         (.stopPropagation e))
                            :content (if (and (or selected? (= 1 (count options))) ui-fn)
                                       (ui-fn new-option-path built-template app-state built-char))
-                           :explanation-text (if (and (not meets-prereqs?)
-                                                      (not selected?))
-                                               (str "Requires " (s/join ", " failed-prereqs)))
+                           :explanation-text (let [explanation-text (if (and (not meets-prereqs?)
+                                                                             (not selected?))
+                                                                      (s/join ", " failed-prereqs))]                      
+                                               explanation-text)
                            :icon icon})))
 
 (defn selection-section-title [title]

@@ -869,8 +869,8 @@ check. The GM might also call for a Dexterity (Sleight of Hand) check to determi
                     "add superiority die to successful attack's damage, if target fails STR save, it is knocked prone")])
 
 (def can-cast-spell-prereq
-  {::t/label "Require spellcasting ability."
-   ::t/prereq-fn (fn [c] (some (fn [[k v]] (seq v)) (es/entity-val c :spells-known)))})
+  (t/option-prereq "Requires spellcasting ability."
+                   (fn [c] (some (fn [[k v]] (seq v)) (es/entity-val c :spells-known)))))
 
 (defn does-not-have-feat-prereq [kw]
   {::t/label "You already have this feat."
@@ -1056,9 +1056,11 @@ check. The GM might also call for a Dexterity (Sleight of Hand) check to determi
                               (ritual-caster-option :warlock :cha sl/spell-lists)
                               (ritual-caster-option :wizard :int sl/spell-lists)]})]
      :prereqs [(t/option-prereq "Intelligence or Wisdom 13 or higher"
-                                (fn [{{:keys [wis int]} :abilities}]
-                                  (or (>= wis 13)
-                                      (>= int 13))))]})
+                                (fn [c]
+                                  (let [{:keys [:wis :int] :as abilities} (es/entity-val c :abilities)]
+                                    (prn "CHARAXTER" abilities)
+                                    (or (and wis (>= wis 13))
+                                        (and int (>= int 13))))))]})
    (feat-option
     {:name "Savage Attacker"
      :icon "saber-slash"})
