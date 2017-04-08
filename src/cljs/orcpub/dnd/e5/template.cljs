@@ -14,6 +14,7 @@
             [orcpub.dnd.e5.equipment :as equip5e]
             [orcpub.dnd.e5.armor :as armor5e]
             [orcpub.dnd.e5.spell-lists :as sl]
+            [orcpub.dnd.e5.spells :as spells]
             [orcpub.dnd.e5.magic-items :as mi])
   #_(:require-macros [orcpub.dnd.e5.options :as opt5e]
                      [orcpub.dnd.e5.modifiers :as mod5e]))
@@ -3487,40 +3488,6 @@
                             :summary "When you roll a die for spell damage, roll max rolls an additional time"
                             :frequency {:units :turn}}]}]}))
 
-(def pact-of-the-tome-name "Pact Boon: Pact of the Tome")
-(def pact-of-the-chain-name "Pact Boon: Pact of the Chain")
-(def pact-of-the-blade-name "Pact Boon: Pact of the Blade")
-
-(def has-eldritch-blast-prereq
-  (fn [c] (some #(= :eldritch-blast (:key %))
-                   (get (es/entity-val c :spells-known) 0))))
-
-(def pact-boon-options
-  [(t/option
-    "Pact of the Chain"
-    :pact-of-the-chain
-    []
-    [(mod5e/trait pact-of-the-chain-name
-                  "You learn the find familiar spell and can cast it as a ritual. The spell doesn’t count against your number of spells known.
-When you cast the spell, you can choose one of the normal forms for your familiar or one of the following special forms: imp, pseudodragon, quasit, or sprite.
-Additionally, when you take the Attack action, you can forgo one of your own attacks to allow your familiar to make one attack of its own with its reaction.")])
-   (t/option
-    "Pact of the Blade"
-    :pact-of-the-blade
-    []
-    [(mod5e/trait pact-of-the-blade-name
-                  "You can use your action to create a pact weapon in your empty hand. You can choose the form that this melee weapon takes each time you create it. You are proficient with it while you wield it. This weapon counts as magical for the purpose of overcoming resistance and immunity to nonmagical attacks and damage.
-Your pact weapon disappears if it is more than 5 feet away from you for 1 minute or more. It also disappears if you use this feature again, if you dismiss the weapon (no action required), or if you die.
-You can transform one magic weapon into your pact weapon by performing a special ritual while you hold the weapon. You perform the ritual over the course of 1 hour, which can be done during a short rest. You can then dismiss the weapon, hunting it into an extradimensional space, and it appears whenever you create your pact weapon thereafter. You can’t affect an artifact or a sentient weapon in this way. The weapon ceases being your pact weapon if you die, if you perform the 1-hour ritual on a different weapon, or if you use a 1-hour ritual to break your bond to it. The weapon appears at your feet if it is in the extradimensional space when the bond breaks.")])
-   (t/option
-    "Pact of the Tome"
-    :pact-of-the-tome
-    []
-    [(mod5e/trait pact-of-the-tome-name
-                  "Your patron gives you a grimoire called a Book of Shadows. When you gain this feature, choose three cantrips from any class’s spell list (the three needn’t be from the same list). While the book is on your person, you can cast those cantrips at will. They don’t count against your number of cantrips known. If they don’t appear on the warlock spell list, they are nonetheless warlock spells for you.
-If you lose your Book of Shadows, you can perform a 1-hour ceremony to receive a replacement from your patron. This ceremony can be performed during a short or long rest, and it destroys the previous book. The book turns to ash when you die.")])])
-
-
 (def wizard-option
   (class-option
    {:name "Wizard",
@@ -3635,22 +3602,57 @@ If you lose your Book of Shadows, you can perform a 1-hour ceremony to receive a
                            {:name "Shapechanger"
                             :level 10}
                            {:name "Master Transmuter"
-                            :level 14}]}
-                 {:name "Bladesinger"
-                  :source "Sword Coast Adventurer's Guide"
-                  :traits [{:name "Training in War and Song"
-                            :level 2}
-                           {:name "Bladesong"
-                            :level 2}
-                           {:name "Extra Attack"
-                            :level 6}
-                           {:name "Song of Defense"
-                            :level 10}
-                           {:name "Song of Victory"
                             :level 14}]}]}))
 
 (defn has-trait-with-name-prereq [name]
   (fn [c] (some #(= name (:name %)) (es/entity-val c :traits))))
+
+(def pact-of-the-tome-name "Pact Boon: Pact of the Tome")
+(def pact-of-the-chain-name "Pact Boon: Pact of the Chain")
+(def pact-of-the-blade-name "Pact Boon: Pact of the Blade")
+
+(def has-eldritch-blast-prereq
+  (fn [c] (some #(= :eldritch-blast (:key %))
+                   (get (es/entity-val c :spells-known) 0))))
+
+(def pact-boon-options
+  [(t/option
+    "Pact of the Chain"
+    :pact-of-the-chain
+    []
+    [(mod5e/trait-cfg
+      {:name pact-of-the-chain-name
+       :page 107
+       :summary "Can cast find familiar as a ritual, use your attack action to give your familiar an attack as a reaction"})])
+   (t/option
+    "Pact of the Blade"
+    :pact-of-the-blade
+    []
+    [(mod5e/trait-cfg
+      {:name pact-of-the-blade-name
+       :page 107
+       :summary "summon a magical weapon"})])
+   (t/option
+    "Pact of the Tome"
+    :pact-of-the-tome
+    [(t/selection-cfg
+      {:name "Book of Shadows Cantrips"
+       :tags #{:spells}
+       :options (opt5e/spell-options (into
+                                      #{}
+                                      (mapcat
+                                       (fn [[cls-kw spells-by-level]]
+                                         (spells-by-level 0))
+                                       sl/spell-lists))
+                                     0
+                                     :cha
+                                     "Warlock"
+                                     "Book of Shadows")})]
+    [(mod5e/trait-cfg
+      {:name pact-of-the-tome-name
+       :page 108
+       :summary "you have a spellbook with 3 extra cantrips"})])])
+
 
 (def eldritch-invocation-options
   [(t/option

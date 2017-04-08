@@ -487,7 +487,7 @@ check. The GM might also call for a Dexterity (Sleight of Hand) check to determi
     (spell-field "Duration" (:duration spell))]
    [:div.f-w-n (:description spell)]])
 
-(defn spell-option [level spellcasting-ability class-name key & [prepend-level?]]
+(defn spell-option [level spellcasting-ability class-name key & [prepend-level? qualifier]]
   (let [{:keys [name] :as spell} (spells/spell-map key)]
     (t/option-cfg
      {:name (if prepend-level? (str level " - " name) name)
@@ -499,11 +499,11 @@ check. The GM might also call for a Dexterity (Sleight of Hand) check to determi
                            (or (not spells-known)
                                (not (some #(= key (:key %))
                                            (spells-known level)))))))]
-      :modifiers [(modifiers/spells-known level key spellcasting-ability class-name)]})))
+      :modifiers [(modifiers/spells-known level key spellcasting-ability class-name nil qualifier)]})))
 
 (def memoized-spell-option (memoize spell-option))
 
-(defn spell-options [spells level spellcasting-ability class-name]
+(defn spell-options [spells level spellcasting-ability class-name & [qualifier]]
   (map
    (partial memoized-spell-option level spellcasting-ability class-name)
    (sort spells)))
