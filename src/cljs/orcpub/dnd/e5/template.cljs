@@ -3900,6 +3900,17 @@ Additionally, while perceiving through your familiar’s senses, you can also sp
     :tags #{:spells}
     :simple? true}))
 
+(defn mystic-arcanum-selection [spell-level]
+  (t/selection-cfg
+   {:name (str "Mystic Arcanum: Spell Level " spell-level)
+    :tags #{:spells}
+    :options (opt5e/spell-options
+              (get-in sl/spell-lists [:warlock spell-level])
+              spell-level
+              :cha
+              "Warlock"
+              "uses Mystic Arcanum")}))
+
 (def warlock-option
   (class-option
    {:name "Warlock"
@@ -3942,13 +3953,26 @@ Additionally, while perceiving through your familiar’s senses, you can also sp
                                :options pact-boon-options})]}
              5 {:selections [(eldritch-invocation-selection)]}
              8 {:selections [(eldritch-invocation-selection)]}
+             11 {:selections [(mystic-arcanum-selection 6)]
+                 :modifiers [(mod5e/dependent-trait
+                              {:name "Mystic Arcanum"
+                               :level 11
+                               :page 108
+                               :summary "You gain a 6th level spell you can cast without expending a slot, more at higher levels"
+                               :frequency {:units :long-rest
+                                           :amount (mod5e/level-val
+                                                    (?class-level :warlock)
+                                                    {13 2
+                                                     15 3
+                                                     17 4
+                                                     :default 1})}})]}
              12 {:selections [(eldritch-invocation-selection)]}
-             15 {:selections [(eldritch-invocation-selection)]}
+             13 {:selections [(mystic-arcanum-selection 7)]}
+             15 {:selections [(eldritch-invocation-selection)
+                              (mystic-arcanum-selection 8)]}
+             17 {:selections [(mystic-arcanum-selection 9)]}
              18 {:selections [(eldritch-invocation-selection)]}}
-    :traits [{:name "Mystic Arcanum"
-              :level 11
-              }
-             {:name "Eldrich Master"
+    :traits [{:name "Eldrich Master"
               :level 20}]
     :subclass-level 1
     :subclass-title "Otherworldly Patron"
