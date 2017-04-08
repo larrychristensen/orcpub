@@ -3463,16 +3463,29 @@
                                              :page 103
                                              :summary (str "Spend 5 sorcery pts. and create an aura that causes hostile creatures that start their turn within it to be charmed or afraid if they fail a DC " (?spell-save-dc :cha) " Wisdom save.")})]}}}
                  {:name "Wild Magic"
+                  :levels {6 {:modifiers [(mod5e/reaction
+                                           {:name "Bend Luck"
+                                            :level 6
+                                            :page 103
+                                            :summary "spend 2 sorcery pts. to add or subtract 1d4 from a creature's d20 roll"})]}}
                   :traits [{:name "Wild Magic Surge"
-                            :level 1}
+                            :level 1
+                            :summary "Do a d20 check when casting sorcerer spells, on a 1 roll on the Wild Magic Surge table"
+                            :page 103}
                            {:name "Tides of Chaos"
-                            :level 1}
-                           {:name "Bend Luck"
-                            :level 6}
+                            :level 1
+                            :summary "Gain advantage on a roll"
+                            :page 103
+                            :frequency {:units :long-rest}}
                            {:name "Controlled Chaos"
-                            :level 14}
+                            :level 14
+                            :page 103
+                            :summary "When rolling on Wild Magic Surge table, roll twice and use either roll"}
                            {:name "Spell Bombardment"
-                            :level 18}]}]}))
+                            :level 18
+                            :page 103
+                            :summary "When you roll a die for spell damage, roll max rolls an additional time"
+                            :frequency {:units :turn}}]}]}))
 
 (def pact-of-the-tome-name "Pact Boon: Pact of the Tome")
 (def pact-of-the-chain-name "Pact Boon: Pact of the Chain")

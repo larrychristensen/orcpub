@@ -749,14 +749,17 @@
 (defn add-links [desc]
   desc
   (let [{:keys [abbr url]} (some (fn [[_ source]]
-                           (if (re-matches (re-pattern (str ".*" (:abbr source) ".*")) desc)
+                                   (if (and (:abbr source)
+                                            (re-matches (re-pattern (str ".*" (:abbr source) ".*")) desc))
                              source))
                  disp5e/sources)
-        [before after] (s/split desc (re-pattern abbr))]
-    [:span
-     [:span before]
-     [:a {:href url} abbr]
-     [:span after]]))
+        [before after] (if abbr (s/split desc (re-pattern abbr)))]
+    (if abbr
+      [:span
+       [:span before]
+       [:a {:href url} abbr]
+       [:span after]]
+      desc)))
 
 (defn attacks-section [attacks]
   (if (seq attacks)
