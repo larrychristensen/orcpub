@@ -2,10 +2,19 @@
   (:require [clojure.string :as s]
             [orcpub.common :as common]))
 
+(def phb-url "https://www.amazon.com/gp/product/0786965606/ref=as_li_tl?ie=UTF8&tag=orcpub-20&camp=1789&creative=9325&linkCode=as2&creativeASIN=0786965606&linkId=9cd9647802c714f226bd591d61058143")
+
+(def scag-url "https://www.amazon.com/gp/product/0786965800/ref=as_li_tl?ie=UTF8&tag=orcpub-20&camp=1789&creative=9325&linkCode=as2&creativeASIN=0786965800&linkId=9b93efa0fc7239ebbf005d0b17367233")
+
+(def vgm-url "https://www.amazon.com/gp/product/0786966017/ref=as_li_tl?ie=UTF8&tag=orcpub-20&camp=1789&creative=9325&linkCode=as2&creativeASIN=0786966017&linkId=506a1b33174f884dcec5db8c6c07ad31")
+
 (def sources
-  {:phb "PHB"
-   :vgm "VGM"
-   :scag "SCAG"})
+  {:phb {:abbr "PHB"
+         :url phb-url}
+   :vgm {:abbr "VGM"
+         :url vgm-url}
+   :scag {:abbr "SCAG"
+          :url scag-url}})
 
 (defn unit-amount-description [{:keys [units amount singular plural] :or {amount 1}}]
   (str amount " " (if (not= 1 amount)
@@ -17,7 +26,7 @@
                       (str (common/safe-name units))))))
 
 (defn source-description [source page]
-  (str "see " (sources (or source :phb)) " " page))
+  (str "see " (:abbr (sources (or source :phb))) " " page))
 
 (defn frequency-description [{:keys [units amount] :or {amount 1}}]
   (str

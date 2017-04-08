@@ -746,6 +746,18 @@
       (str (:name (equipment-map equipment-kw)) " (" num ")"))
     equipment)])
 
+(defn add-links [desc]
+  desc
+  (let [{:keys [abbr url]} (some (fn [[_ source]]
+                           (if (re-matches (re-pattern (str ".*" (:abbr source) ".*")) desc)
+                             source))
+                 disp5e/sources)
+        [before after] (s/split desc (re-pattern abbr))]
+    [:span
+     [:span before]
+     [:a {:href url} abbr]
+     [:span after]]))
+
 (defn attacks-section [attacks]
   (if (seq attacks)
     (display-section
@@ -758,7 +770,7 @@
           ^{:key name}
           [:p.m-t-10
            [:span.f-w-600.i name "."]
-           [:span.f-w-n.m-l-10 (common/sentensize (disp5e/attack-description attack))]])
+           [:span.f-w-n.m-l-10 (add-links (common/sentensize (disp5e/attack-description attack)))]])
         attacks))])))
 
 (defn actions-section [title icon-name actions]
@@ -772,7 +784,7 @@
           ^{:key action}
           [:p.m-t-10
            [:span.f-w-600.i (:name action) "."]
-           [:span.f-w-n.m-l-10 (common/sentensize (disp5e/action-description action))]])
+           [:span.f-w-n.m-l-10 (add-links (common/sentensize (disp5e/action-description action)))]])
         actions))])))
 
 (defn prof-name [prof-map prof-kw]
@@ -2523,7 +2535,7 @@
              (fn [{:keys [name url]}]
                [:a {:href url} name])
              (cons {:name "Player's Handbook"
-                    :url t5e/phb-url}
+                    :url disp5e/phb-url}
                    (map t5e/plugin-map (get-selected-plugin-options app-state)))))))])]
      
      [:div#options-column.b-1.b-rad-5

@@ -1072,7 +1072,6 @@
                                (total-levels-prereq lvl)))
                             modifiers))
                          levels)]
-    (js/console.log "LEVEL MODIFIERS" level-modifiers)
     (t/option
      name
      kw
@@ -4340,8 +4339,6 @@ Additionally, while perceiving through your familiar’s senses, you can also sp
 
 (def srd-link
   [:a.orange {:href "SRD-OGL_V5.1.pdf" :target "_blank"} "the 5e SRD"])
-
-(def phb-url "https://www.amazon.com/gp/product/0786965606/ref=as_li_tl?ie=UTF8&tag=orcpub-20&camp=1789&creative=9325&linkCode=as2&creativeASIN=0786965606&linkId=9cd9647802c714f226bd591d61058143")
 
 (def plugins
   [{:name "Sword Coast Adventurer's Guide"
