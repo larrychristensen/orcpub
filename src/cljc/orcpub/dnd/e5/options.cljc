@@ -505,7 +505,7 @@ check. The GM might also call for a Dexterity (Sleight of Hand) check to determi
 
 (defn spell-options [spells level spellcasting-ability class-name & [qualifier]]
   (map
-   (partial memoized-spell-option level spellcasting-ability class-name)
+   #(memoized-spell-option level spellcasting-ability class-name % false qualifier)
    (sort spells)))
 
 (defn spell-level-title [class-name level]

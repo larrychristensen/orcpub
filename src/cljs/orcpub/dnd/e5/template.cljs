@@ -3647,7 +3647,7 @@
                                      0
                                      :cha
                                      "Warlock"
-                                     "Book of Shadows")})]
+                                     "uses Book of Shadows")})]
     [(mod5e/trait-cfg
       {:name pact-of-the-tome-name
        :page 108
@@ -3946,7 +3946,8 @@ Additionally, while perceiving through your familiar’s senses, you can also sp
              15 {:selections [(eldritch-invocation-selection)]}
              18 {:selections [(eldritch-invocation-selection)]}}
     :traits [{:name "Mystic Arcanum"
-              :level 11}
+              :level 11
+              }
              {:name "Eldrich Master"
               :level 20}]
     :subclass-level 1

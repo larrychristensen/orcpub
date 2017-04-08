@@ -65,8 +65,8 @@
   (s/join
    "\n\n"
    (map
-    (fn [{:keys [name description summary page source]}]
-      (trait-string name (str (or summary description) (if page (str " (" (disp5e/sources (or source :phb)) " " page ")")))))
+    (fn [{:keys [name description summary page source] :as trait}]
+      (trait-string name (disp5e/action-description trait)))
     traits)))
 
 (defn actions-string [title actions]
