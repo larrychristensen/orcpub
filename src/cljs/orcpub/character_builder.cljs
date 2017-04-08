@@ -111,8 +111,7 @@
 (defonce history
   (r/atom (list @app-state)))
 
-(def template (entity/sort-selections
-               (t5e/template app-state)))
+(def template t5e/template)
 
 (defn undo! []
   (when (> (count @history) 1)

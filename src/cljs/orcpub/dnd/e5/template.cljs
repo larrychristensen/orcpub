@@ -456,6 +456,63 @@
    [(mod5e/damage-resistance (:damage-type breath-weapon))
     (mod/modifier ?draconic-ancestry-breath-weapon breath-weapon)]))
 
+(def draconic-ancestries
+  [{:name "Black"
+    :breath-weapon {:damage-type :acid
+                    :area-type :line
+                    :line-width 5
+                    :line-length 30
+                    :save :dex}}
+   {:name "Blue"
+    :breath-weapon {:damage-type :lightning
+                    :area-type :line
+                    :line-width 5
+                    :line-length 30
+                    :save :dex}}
+   {:name "Brass"
+    :breath-weapon {:damage-type :fire
+                    :area-type :line
+                    :line-width 5
+                    :line-length 30
+                    :save :dex}}
+   {:name "Bronze"
+    :breath-weapon {:damage-type :lightning
+                    :area-type :line
+                    :line-width 5
+                    :line-length 30
+                    :save :dex}}
+   {:name "Copper"
+    :breath-weapon {:damage-type :acid
+                    :area-type :line
+                    :line-width 5
+                    :line-length 30
+                    :save :dex}}
+   {:name "Gold"
+    :breath-weapon {:damage-type :fire
+                    :area-type :cone
+                    :length 15
+                    :save :dex}}
+   {:name "Green"
+    :breath-weapon {:damage-type :poison
+                    :area-type :cone
+                    :length 15
+                    :save :con}}
+   {:name "Red"
+    :breath-weapon {:damage-type :fire
+                    :area-type :cone
+                    :length 15
+                    :save :dex}}
+   {:name "Silver"
+    :breath-weapon {:damage-type :cold
+                    :area-type :cone
+                    :length 15
+                    :save :con}}
+   {:name "White"
+    :breath-weapon {:damage-type :cold
+                    :area-type :cone
+                    :length 15
+                    :save :con}}])
+
 (def dragonborn-option
   (race-option
    {:name "Dragonborn"
@@ -484,63 +541,9 @@
     :selections [(t/selection-cfg
                   {:name "Draconic Ancestry"
                    :tags #{:subrace}
-                   :options (map
+                   :options (mapv
                              draconic-ancestry-option
-                             [{:name "Black"
-                               :breath-weapon {:damage-type :acid
-                                               :area-type :line
-                                               :line-width 5
-                                               :line-length 30
-                                               :save :dex}}
-                              {:name "Blue"
-                               :breath-weapon {:damage-type :lightning
-                                               :area-type :line
-                                               :line-width 5
-                                               :line-length 30
-                                               :save :dex}}
-                              {:name "Brass"
-                               :breath-weapon {:damage-type :fire
-                                               :area-type :line
-                                               :line-width 5
-                                               :line-length 30
-                                               :save :dex}}
-                              {:name "Bronze"
-                               :breath-weapon {:damage-type :lightning
-                                               :area-type :line
-                                               :line-width 5
-                                               :line-length 30
-                                               :save :dex}}
-                              {:name "Copper"
-                               :breath-weapon {:damage-type :acid
-                                               :area-type :line
-                                               :line-width 5
-                                               :line-length 30
-                                               :save :dex}}
-                              {:name "Gold"
-                               :breath-weapon {:damage-type :fire
-                                               :area-type :cone
-                                               :length 15
-                                               :save :dex}}
-                              {:name "Green"
-                               :breath-weapon {:damage-type :poison
-                                               :area-type :cone
-                                               :length 15
-                                               :save :con}}
-                              {:name "Red"
-                               :breath-weapon {:damage-type :fire
-                                               :area-type :cone
-                                               :length 15
-                                               :save :dex}}
-                              {:name "Silver"
-                               :breath-weapon {:damage-type :cold
-                                               :area-type :cone
-                                               :length 15
-                                               :save :con}}
-                              {:name "White"
-                               :breath-weapon {:damage-type :cold
-                                               :area-type :cone
-                                               :length 15
-                                               :save :con}}])})]}))
+                             draconic-ancestries)})]}))
 
 
 (def gnome-option
@@ -1057,7 +1060,19 @@
                                 ::t/prereq-fn
                                 (total-levels-prereq lvl)))
                              selections))
-                          levels)]
+                          levels)
+        level-modifiers (mapcat
+                         (fn [[lvl {modifiers :modifiers}]]
+                           (map
+                            (fn [modifier]
+                              (update
+                               modifier
+                               ::mod/conditions
+                               conj
+                               (total-levels-prereq lvl)))
+                            modifiers))
+                         levels)]
+    (js/console.log "LEVEL MODIFIERS" level-modifiers)
     (t/option
      name
      kw
@@ -1072,6 +1087,7 @@
      (vec
       (concat
        modifiers
+       level-modifiers
        [(mod5e/subclass (:key cls) kw)]
        (armor-prof-modifiers armor-profs)
        (weapon-prof-modifiers weapon-profs)
@@ -3421,69 +3437,25 @@
     :weapons {:dagger 1}
     :subclass-title "Sorcerous Origin"
     :subclass-level 1
-    :subclasses [{:name "Draconic Ancestry"
+    :subclasses [{:name "Draconic Bloodline"
                   :modifiers [(mod/modifier ?hit-point-level-bonus (+ 1 ?hit-point-level-bonus))]
                   :selections [(t/selection-cfg
                                 {:name "Draconic Ancestry Type"
                                  :tags #{:class}
-                                 :options [(t/option
-                                            "Black"
-                                            :black
-                                            []
-                                            [])
-                                           (t/option
-                                            "Blue"
-                                            :blue
-                                            []
-                                            [])
-                                           (t/option
-                                            "Brass"
-                                            :brass
-                                            []
-                                            [])
-                                           (t/option
-                                            "Bronze"
-                                            :bronze
-                                            []
-                                            [])
-                                           (t/option
-                                            "Copper"
-                                            :copper
-                                            []
-                                            [])
-                                           (t/option
-                                            "Gold"
-                                            :gold
-                                            []
-                                            [])
-                                           (t/option
-                                            "Green"
-                                            :green
-                                            []
-                                            [])
-                                           (t/option
-                                            "Red"
-                                            :red
-                                            []
-                                            [])
-                                           (t/option
-                                            "Silver"
-                                            :silver
-                                            []
-                                            [])
-                                           (t/option
-                                            "White"
-                                            :white
-                                            []
-                                            [])]})]
+                                 :options (mapv
+                                           (fn [{:keys [name] :as ancestry}]
+                                             (t/option-cfg
+                                              {:name name
+                                               :modifiers [(mod/modifier ?sorcerer-draconic-ancestry ancestry)]}))
+                                           draconic-ancestries)})]
                   :traits [{:name "Draconic Resilience"
                             :page 102
-                            :summary "+1 HP/level, unarmored AC 13 + DEX modifier"}
-                           {:name "Elemental Affinity"
-                            :level 6
-                            :page 102
-                            :summary "Add CHA mod to one damage roll of a spell that deals the damage type of your draconic ancestry, may also spend 1 sorcery pt. to gain resistance to that damage type for an hr."}]
-                  :levels {14 {:modifiers [(mod5e/bonus-action
+                            :summary "+1 HP/level, unarmored AC 13 + DEX modifier"}]
+                  :levels {6 {:modifiers [(mod5e/dependent-trait
+                                           {:name "Elemental Affinity"
+                                            :page 102
+                                            :summary (str "Add CHA mod to one damage roll of a spell that deals " (common/safe-name (get-in ?sorcerer-draconic-ancestry [:breath-weapon :damage-type]))  " damage, you may also spend 1 sorcery pt. to gain resistance to that damage type for an hr.")})]}
+                           14 {:modifiers [(mod5e/bonus-action
                                             {:name "Dragon Wings"
                                              :page 103
                                              :summary "Sprout wings and gain flying speed equal to land speed"})]}
@@ -4643,6 +4615,6 @@ Additionally, while perceiving through your familiar’s senses, you can also sp
                      (+ 8 ?prof-bonus (?ability-bonuses ability-kw)))}))
 
 
-(defn template [app-state]
+(def template
   {::t/base template-base
    ::t/selections template-selections})
