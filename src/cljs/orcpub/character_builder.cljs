@@ -2500,11 +2500,13 @@
         (get-in @app-state [:character ::entity/options :optional-content])))
 
 (defn new-options-column [character built-char built-template available-selections page-index option-paths stepper-selection-path]
+  (js/console.log "AVAILABLE SELECTIONS" available-selections)
   (let [{:keys [tags ui-fns] :as page} (pages page-index)
         selections (entity/tagged-selections available-selections tags)
         final-selections (remove #(and (zero? (::t/min %))
                                        (zero? (::t/max %))
                                        (zero? (count-remaining built-template character %))) (combine-selections selections))]
+    (js/console.log "FINAL SELECTIONS" final-selections)
     [:div.w-100-p
      [:div.m-b-20
       [:div.flex.align-items-c

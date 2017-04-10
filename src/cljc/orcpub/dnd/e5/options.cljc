@@ -718,6 +718,9 @@ check. The GM might also call for a Dexterity (Sleight of Hand) check to determi
                    :min 1
                    :max 1})]}))
 
+(defn ritual-spell? [spell]
+  (:ritual spell))
+
 (defn ritual-caster-option [class-key spellcasting-ability spell-lists]
   (t/option
    (name class-key)
@@ -725,7 +728,7 @@ check. The GM might also call for a Dexterity (Sleight of Hand) check to determi
    [(t/selection-cfg
      {:name "1st Level Ritual"
       :tags #{:spells}
-      :options (spell-options (filter (fn [spell-kw] (:ritual (spells/spell-map spell-kw))) (get-in spell-lists [class-key 1])) 1 spellcasting-ability (class-names class-key))
+      :options (spell-options (filter (fn [spell-kw] (ritual-spell? (spells/spell-map spell-kw))) (get-in spell-lists [class-key 1])) 1 spellcasting-ability (class-names class-key))
       :min 2
       :max 2})]
    []))
