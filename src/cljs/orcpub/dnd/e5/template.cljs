@@ -1394,7 +1394,7 @@
                                           6 4
                                           3 3
                                           2)}
-                    :summary (str "Advantage on Strength checks and saves; melee attack bonus " (common/bonus-str attack-bonus) "; resistance to bludgeoning, piercing, and slashing damage")}))]
+                    :summary (str "Advantage on Strength checks and saves; melee damage bonus " (common/bonus-str attack-bonus) "; resistance to bludgeoning, piercing, and slashing damage")}))]
     :levels {5 {:modifiers [(mod5e/extra-attack)
                             (mod/modifier ?speed-with-armor (fn [armor] (if (not= :heavy (:type armor))
                                                                             (+ 10 ?speed)
@@ -3973,7 +3973,10 @@ Additionally, while perceiving through your familiar’s senses, you can also sp
              17 {:selections [(mystic-arcanum-selection 9)]}
              18 {:selections [(eldritch-invocation-selection)]}}
     :traits [{:name "Eldrich Master"
-              :level 20}]
+              :level 20
+              :page 108
+              :summary "Regain all Pact Magic spell slots"
+              :frequency {:units :long-rest}}]
     :subclass-level 1
     :subclass-title "Otherworldly Patron"
     :subclasses [{:name "The Fiend"
@@ -4001,14 +4004,29 @@ Additionally, while perceiving through your familiar’s senses, you can also sp
                                           3 #{:blink :plant-growth}
                                           4 #{:dominate-beast :greater-invisibility}
                                           5 #{:dominate-person :seeming}}}
-                  :traits [{:name "Fey Presence"
-                            :level 1}
-                           {:name "Misty Escape"
-                            :level 6}
-                           {:name "Beguiling Defenses"
-                            :level 10}
-                           {:name "Dark Delerium"
-                            :level 14}]}
+                  :modifiers [(mod5e/action
+                               {:name "Fey Presence"
+                                :page 109
+                                :summary (str "charm or frighten creatures in a 10 ft cube from you unless the succeed on a DC " (?spell-save-dc :cha) " WIS save.")
+                                :duration {:units :turn}
+                                :frequency {:units :rest}})]
+                  :levels {6 {:modifiers [(mod5e/reaction
+                                           {:name "Misty Escape"
+                                            :page 109
+                                            :frequency {:units :rest}
+                                            :duration {:units :round}
+                                            :summary "when you take damage, turn invisible and teleport up to 60 ft."})]}
+                           10 {:modifiers [(mod5e/condition-immunity :charmed)
+                                           (mod5e/reaction
+                                            {:name "Beguiling Defenses"
+                                             :page 109
+                                             :duration {:units :minute}
+                                             :summary (str "when a creature attempts to charm you, you can turn it back on them with a spell save DC " (?spell-save-dc :cha) " WIS save")})]}
+                           14 {:modifiers [(mod5e/action
+                                            {:name "Dark Delerium"
+                                             :page 109
+                                             :summary (str "charm or frighten a creature within 60 ft., spell save DC " (?spell-save-dc :cha) "WIS save")
+                                             :frequency {:units :rest}})]}}}
                  {:name "The Great Old One"
                   :spellcasting {:known-mode :schedule
                                  :spells-known warlock-spells-known
@@ -4649,7 +4667,15 @@ Additionally, while perceiving through your familiar’s senses, you can also sp
     ?spell-attack-modifier (fn [ability-kw]
                              (+ ?prof-bonus (?ability-bonuses ability-kw)))
     ?spell-save-dc (fn [ability-kw]
-                     (+ 8 ?prof-bonus (?ability-bonuses ability-kw)))}))
+                     (+ 8 ?prof-bonus (?ability-bonuses ability-kw)))
+    ?reactions []
+    ?actions []
+    ?bonus-actions []
+    ?traits []
+    ?condition-immunities #{}
+    ?immunities #{}
+    ?damage-immunities #{}
+    ?damage-resistances #{}}))
 
 
 (def template

@@ -2687,7 +2687,7 @@
      [:span.m-l-5.hidden-xs "Print"]]]])
 
 (defn character-builder []
-  ;;(cljs.pprint/pprint (:character @app-state))
+  (cljs.pprint/pprint (:character @app-state))
   ;;(js/console.log "APP STATE" @app-state)
   (let [selected-plugin-options (get-selected-plugin-options app-state)
         selected-plugins (map
@@ -2717,7 +2717,7 @@
         plugins (:plugins @app-state)
         stepper-dismissed? (:stepper-dismissed @app-state)
         all-selections (entity/available-selections (:character @app-state) built-char built-template)]
-    ;;(print-char built-char)
+    (print-char built-char)
     [:div.app
      {:on-scroll (fn [e]
                    (let [app-header (js/document.getElementById "app-header")

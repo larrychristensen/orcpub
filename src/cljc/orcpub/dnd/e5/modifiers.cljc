@@ -323,10 +323,8 @@
                    ~action)))
 
 (defmacro reaction [action]
-  `(mods/modifier ~'?reactions
-                 (conj
-                  ~'?reactions
-                  ~action)))
+  `(mods/vec-mod ~'?reactions
+                  ~action))
 
 (defmacro level-val [level mappings]
   (let [flat-mappings (conj (vec (apply concat (sort-by first > (dissoc mappings :default)))) (:default mappings))]
