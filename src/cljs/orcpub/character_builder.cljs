@@ -1428,7 +1428,11 @@
            [:select.builder-option.builder-option-dropdown.flex-grow-1.m-t-0
             {:value key
              :on-change (fn [e] (let [new-key (keyword (.. e -target -value))]
-                                  (swap! app-state assoc-in [:character ::entity/options :class i ::entity/key] new-key)))}
+                                  (swap! app-state
+                                         assoc-in
+                                         [:character ::entity/options :class i] {::entity/key new-key
+                                                                                 ::entity/options
+                                                                                 {:levels [{::entity/key :level-1}]}})))}
             (doall
              (map
               (fn [{:keys [::t/key ::t/name]}]

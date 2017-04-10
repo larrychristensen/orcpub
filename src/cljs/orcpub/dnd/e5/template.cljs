@@ -334,7 +334,12 @@
     :subraces
     [{:name "High Elf"
       :abilities {:int 1}
-      :selections [(opt5e/spell-selection :wizard 0 :int "High Elf" 1)
+      :selections [(opt5e/spell-selection
+                    {:class-key :wizard
+                     :level 0
+                     :spellcasting-ability :int
+                     :class-name "High Elf"
+                     :num 1})
                    (opt5e/language-selection opt5e/languages 1)]
       :modifiers [elf-weapon-training-mods]}
      {:name "Wood Elf"
@@ -1036,19 +1041,20 @@
         armor-profs (keys armor)
         weapon-profs (keys weapon)
         tool-profs (keys tool)
-        #_spellcasting-template #_(opt5e/spellcasting-template
+        spellcasting-template (opt5e/spellcasting-template
                                (assoc
                                 spellcasting
                                 :class-key
                                 (or (:spell-list spellcasting) kw))
                                subcls)
-        #_spell-selections #_(mapcat
+        spell-selections (mapcat
                           (fn [[lvl selections]]
-                            (if (= kw :eldritch-knight) (prn "LEVEL" lvl))
+                            (if (= kw :the-archfey) (prn "LEVEL" lvl))
                             (map
                              (fn [selection]
+                               (if (= kw :the-archfey) (prn "SELECTION ANME" (::t/name selection)))
                                (assoc selection ::t/prereq-fn (fn [c] (let [total-levels (es/entity-val c :total-levels)]
-                                                                        (prn "TOTAL LEVELS" total-levels lvl)
+                                                                        ;;(prn "TOTAL LEVELS" total-levels lvl)
                                                                         (>= lvl total-levels)))))
                              selections))
                           (:selections spellcasting-template))
@@ -1082,6 +1088,7 @@
       (concat
        selections
        level-selections
+       ;;spell-selections
        (if (seq tool-options) [(tool-prof-selection tool-options)])
        (if (seq skill-kws) [(opt5e/skill-selection skill-kws skill-num)])))
      (vec
@@ -2264,11 +2271,11 @@
                  :summary "If on the same plane of existence, instantly teleport a bonded weapon into your hand"})]
    :levels {3 {:selections [(assoc
                              (opt5e/spell-selection
-                              :wizard
-                              1
-                              :int
-                              "Eldritch Knight"
-                              3)
+                              {:class-key :wizard
+                               :level 1
+                               :spellcasting-ability :int
+                               :class-name "Eldritch Knight"
+                               :num 3})
                              ::t/name "Eldritch Knight: Level 1 Spell"
                              ::t/tags #{:spells})]}
             7 {:modifiers [(mod5e/bonus-action
@@ -3568,7 +3575,6 @@
                            {:name "Alter Memories"
                             :level 14}]}
                  {:name "School of Illusion"
-                  :selections [(opt5e/spell-selection :wizard 0 :int 1 "Wizard")]
                   :traits [{:name "Illusion Savant"
                             :level 2}
                            {:name "Improved Minor Illusion"
@@ -3647,6 +3653,7 @@
                                      0
                                      :cha
                                      "Warlock"
+                                     false
                                      "uses Book of Shadows")})]
     [(mod5e/trait-cfg
       {:name pact-of-the-tome-name
@@ -3909,7 +3916,40 @@ Additionally, while perceiving through your familiar’s senses, you can also sp
               spell-level
               :cha
               "Warlock"
+              false
               "uses Mystic Arcanum")}))
+
+(def warlock-spell-slot-schedule
+  {1 1
+   2 2
+   3 2
+   4 2
+   5 2
+   6 2
+   7 2
+   8 2
+   9 2
+   10 2
+   11 3
+   12 3
+   13 3
+   14 3
+   15 3
+   16 3
+   17 4
+   18 4
+   19 4
+   20 4})
+
+(defn warlock-subclass-spell-selection [level spells]
+  (opt5e/spell-selection
+   {:class-key :warlock
+    :level level
+    :spell-keys spells
+    :spellcasting-ability :cha
+    :class-name "Warlock"
+    :num 0
+    :prepend-level? true}))
 
 (def warlock-option
   (class-option
@@ -3918,6 +3958,7 @@ Additionally, while perceiving through your familiar’s senses, you can also sp
                    :cantrips-known {1 2 4 1 10 1}
                    :spells-known warlock-spells-known
                    :known-mode :schedule
+                   :slot-schedule warlock-spell-slot-schedule
                    :ability :cha},
     :spellcaster true
     :hit-die 8
@@ -3980,42 +4021,48 @@ Additionally, while perceiving through your familiar’s senses, you can also sp
     :subclass-level 1
     :subclass-title "Otherworldly Patron"
     :subclasses [{:name "The Fiend"
-                  :spellcasting {:known-mode :schedule
-                                 :spells-known warlock-spells-known
-                                 :level-factor 1
-                                 :spells {1 #{:burning-hands :command}
-                                          2 #{:blindness-deafness :scorching-ray}
-                                          3 #{:fireball :stinking-cloud}
-                                          4 #{:fire-shield :wall-of-fire}
-                                          5 #{:flame-strike :hallow}}}
-                  :traits [{:name "Dark One's Blessing"}
-                           {:name "Dark One's Own Luck"
-                            :level 6}
+                  :traits [{:name "Dark One's Own Luck"
+                            :level 6
+                            :page 109
+                            :summary "add d10 to an attack or save roll"
+                            :frequency {:units :rest}}
                            {:name "Fiendish Resilience"
-                            :level 10}
+                            :level 10
+                            :page 109
+                            :summary "resistance to a chosen damage type"}
                            {:name "Hurl Through Hell"
-                            :level 14}]}
+                            :level 14
+                            :page 109
+                            :summary "deal 10d10 psychic damage when you hit with an attack"
+                            :frequency {:units :rest}}]
+                  :levels {1 {:modifiers [(mod5e/dependent-trait
+                                           {:name "Dark One's Blessing"
+                                            :page 109
+                                            :summary (str "gain " (+ (?class-level :warlock)
+                                                                     (?ability-bonuses :cha)) " temp HPs when you reduce a hostile creature to 0 HPs")})]
+                              :selections [(warlock-subclass-spell-selection 1 [:burning-hands :command])]}
+                           3 {:selections [(warlock-subclass-spell-selection 2 [:blindness-deafness :scorching-ray])]}
+                           5 {:selections [(warlock-subclass-spell-selection 3 [:fireball :stinking-cloud])]}
+                           7 {:selections [(warlock-subclass-spell-selection 4 [:fire-shield :wall-of-fire])]}
+                           9 {:selections [(warlock-subclass-spell-selection 5 [:flame-strike :hallow])]}}}
                  {:name "The Archfey"
-                  :spellcasting {:known-mode :schedule
-                                 :spells-known warlock-spells-known
-                                 :level-factor 1
-                                 :spells {1 #{:faerie-fire :sleep}
-                                          2 #{:calm-emotions :phantasmal-force}
-                                          3 #{:blink :plant-growth}
-                                          4 #{:dominate-beast :greater-invisibility}
-                                          5 #{:dominate-person :seeming}}}
                   :modifiers [(mod5e/action
                                {:name "Fey Presence"
                                 :page 109
                                 :summary (str "charm or frighten creatures in a 10 ft cube from you unless the succeed on a DC " (?spell-save-dc :cha) " WIS save.")
                                 :duration {:units :turn}
                                 :frequency {:units :rest}})]
-                  :levels {6 {:modifiers [(mod5e/reaction
+                  :levels {1 {:selections [(warlock-subclass-spell-selection 1 [:faerie-fire :sleep])]}
+                           3 {:selections [(warlock-subclass-spell-selection 2 [:calm-emotions :phantasmal-force])]}
+                           5 {:selections [(warlock-subclass-spell-selection 3 [:blink :plant-growth])]}
+                           6 {:modifiers [(mod5e/reaction
                                            {:name "Misty Escape"
                                             :page 109
                                             :frequency {:units :rest}
                                             :duration {:units :round}
                                             :summary "when you take damage, turn invisible and teleport up to 60 ft."})]}
+                           7 {:selections [(warlock-subclass-spell-selection 4 [:dominate-beast :greater-invisibility])]}
+                           9 {:selections [(warlock-subclass-spell-selection 5 [:dominate-person :seeming])]}
                            10 {:modifiers [(mod5e/condition-immunity :charmed)
                                            (mod5e/reaction
                                             {:name "Beguiling Defenses"
@@ -4028,22 +4075,31 @@ Additionally, while perceiving through your familiar’s senses, you can also sp
                                              :summary (str "charm or frighten a creature within 60 ft., spell save DC " (?spell-save-dc :cha) "WIS save")
                                              :frequency {:units :rest}})]}}}
                  {:name "The Great Old One"
-                  :spellcasting {:known-mode :schedule
-                                 :spells-known warlock-spells-known
-                                 :level-factor 1
-                                 :spells {1 #{:dissonant-whispers :tashas-hideous-laughter}
-                                          2 #{:detect-thoughts :phantasmal-force}
-                                          3 #{:clairvoyance :sending}
-                                          4 #{:dominate-beast :evards-black-tentacles}
-                                          5 #{:dominate-person :telekinesis}}}
+                  :levels {1 {:selections [(warlock-subclass-spell-selection 1 [:dissonant-whispers :tashas-hideous-laughter])]}
+                           3 {:selections [(warlock-subclass-spell-selection 2 [:detect-thoughts :phantasmal-force])]}
+                           5 {:selections [(warlock-subclass-spell-selection 3 [:clairvoyance :sending])]}
+                           6 {:modifiers [(mod5e/reaction
+                                           {:name "Entropic Ward"
+                                            :page 110
+                                            :frequency {:units :rest}
+                                            :summary "impose disadvantage on an attack roll against you, if it misses, gain advantage on your next attack roll against the attacker"})]}
+                           7 {:selections [(warlock-subclass-spell-selection 4 [:dominate-beast :evards-black-tentacles])]}
+                           9 {:selections [(warlock-subclass-spell-selection 5 [:dominate-person :telekinesis])]}
+                           10 {:modifiers [(mod5e/damage-resistance :psychic)]}}
                   :traits [{:name "Awakened Mind"
-                            :level 1}
-                           {:name "Entropic Ward"
-                            :level 6}
+                            :level 1
+                            :page 110
+                            :summary "speak telepathically to a creature"
+                            :range {:units :feet
+                                    :amount 30}}
                            {:name "Thought Shield"
-                            :level 10}
+                            :level 10
+                            :page 110
+                            :summary "your thoughts can't be read; resistance to psychic damage; when a creature deals psychic damage to you it takes the same amount"}
                            {:name "Create Thrall"
-                            :level 14}]}]}))
+                            :level 14
+                            :page 110
+                            :summary "charm incapacitated creature, it becomes charmed by you, you can communicate with it telepathically"}]}]}))
 
 (def arcane-tradition-options
   [(t/option
