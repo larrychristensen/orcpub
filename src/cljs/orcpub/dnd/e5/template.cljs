@@ -1085,7 +1085,7 @@
       (concat
        selections
        level-selections
-       ;;spell-selections
+       spell-selections
        (if (seq tool-options) [(tool-prof-selection tool-options)])
        (if (seq skill-kws) [(opt5e/skill-selection skill-kws skill-num)])))
      (vec
@@ -1917,7 +1917,7 @@
                   :selections [(t/selection-cfg
                                 {:name "Druid Cantrip"
                                  :tags #{:spells}
-                                 :options (opt5e/spell-options (get-in sl/spell-lists [:druid 0]) 0 :wis "Druid")})]}
+                                 :options (opt5e/spell-options (get-in sl/spell-lists [:druid 0]) :wis "Druid")})]}
                  {:name "Tempest Domain"
                   :profs {:armor {:heavy true}
                           :weapon {:martial true}}
@@ -2119,7 +2119,7 @@
     :subclasses [{:name "Circle of the Land"
                   :selections [(t/selection
                                 "Bonus Cantrip"
-                                (opt5e/spell-options (get-in sl/spell-lists [:druid 0]) 0 :wis "Druid"))
+                                (opt5e/spell-options (get-in sl/spell-lists [:druid 0]) :wis "Druid"))
                                (t/selection
                                 "Land Type"
                                 [(t/option
@@ -2235,54 +2235,72 @@
     (or (= school "enchantment")
         (= school "illusion"))))
 
+(defn subclass-spell-selection [class-key class-name ability level spells num]
+  (opt5e/spell-selection
+   {:class-key class-key
+    :level level
+    :spell-keys spells
+    :spellcasting-ability ability
+    :class-name class-name
+    :num num
+    :prepend-level? true}))
+
+(defn eldritch-knight-spell-selection [num spell-levels]
+  (opt5e/spell-selection {:title "Eldritch Knight Abjuration or Evocation Spell"
+                          :class-key :fighter
+                          :spellcasting-ability :int
+                          :class-name "Eldritch Knight"
+                          :num num
+                          :prepend-level? true
+                          :spell-keys (filter
+                                       (fn [spell-key]
+                                         (eldritch-knight-spell? (spells/spell-map spell-key)))
+                                       (mapcat
+                                        (fn [lvl] (get-in sl/spell-lists [:wizard lvl]))
+                                        spell-levels))}))
+
+(defn eldritch-knight-any-spell-selection [num spell-levels]
+  (opt5e/spell-selection {:title "Eldritch Knight Spell: Any School"
+                          :class-key :fighter
+                          :spellcasting-ability :int
+                          :class-name "Eldritch Knight"
+                          :num num
+                          :prepend-level? true
+                          :spell-keys (mapcat
+                                        (fn [lvl] (get-in sl/spell-lists [:wizard lvl]))
+                                        spell-levels)}))
+
 (def eldritch-knight-cfg
   {:name "Eldritch Knight"
-   :spellcaster true
-   :spellcasting {:level-factor 3
-                  :spell-list :wizard
-                  :cantrips-known {3 2 10 3}
-                  :known-mode :schedule
-                  :spells-known {3 {:num 3
-                                    :restriction eldritch-knight-spell?}
-                                 4 {:num 1
-                                    :restriction eldritch-knight-spell?}
-                                 7 {:num 1
-                                    :restriction eldritch-knight-spell?}
-                                 8 1
-                                 10 {:num 1
-                                     :restriction eldritch-knight-spell?}
-                                 11 {:num 1
-                                     :restriction eldritch-knight-spell?}
-                                 13 {:num 1
-                                     :restriction eldritch-knight-spell?}
-                                 14 1
-                                 16 {:num 1
-                                     :restriction eldritch-knight-spell?}
-                                 19 {:num 1
-                                     :restriction eldritch-knight-spell?}
-                                 20 1}
-                  :ability :int}
    :modifiers [(mod5e/bonus-action
                 {:name "Summon Bonded Weapon"
                  :page 75
                  :summary "If on the same plane of existence, instantly teleport a bonded weapon into your hand"})]
-   :levels {3 {:selections [(assoc
-                             (opt5e/spell-selection
-                              {:class-key :wizard
-                               :level 1
-                               :spellcasting-ability :int
-                               :class-name "Eldritch Knight"
-                               :num 3})
-                             ::t/name "Eldritch Knight: Level 1 Spell"
-                             ::t/tags #{:spells})]}
-            7 {:modifiers [(mod5e/bonus-action
+   :levels {3 {:selections [(opt5e/spell-selection {:class-key :fighter
+                                                    :level 0
+                                                    :spellcasting-ability :int
+                                                    :class-name "Eldritch Knight"
+                                                    :num 2
+                                                    :spell-keys (get-in sl/spell-lists [:wizard 0])})
+                            (eldritch-knight-spell-selection 3 [1])]}
+            4 {:selections [(eldritch-knight-spell-selection 1 [1])]}
+            7 {:selections [(eldritch-knight-spell-selection 1 [1 2])]
+               :modifiers [(mod5e/bonus-action
                             {:name "War Magic"
                              :page 75
                              :summary "make a weapon attack if you used your action to cast a cantrip"})]}
+            8 {:selections [(eldritch-knight-any-spell-selection 1 [1 2])]}
+            10 {:selections [(eldritch-knight-spell-selection 1 [1 2])]}
+            11 {:selections [(eldritch-knight-spell-selection 1 [1 2])]}
+            13 {:selections [(eldritch-knight-spell-selection 1 [1 2 3])]}
+            14 {:selections [(eldritch-knight-any-spell-selection 1 [1 2 3])]}
+            16 {:selections [(eldritch-knight-spell-selection 1 [1 2 3])]}
             18 {:modifiers [(mod5e/bonus-action
                              {:name "Improved War Magic"
                               :page 75
-                              :summary "make a weapon attack if you used your action to cast a spell"})]}}
+                              :summary "make a weapon attack if you used your action to cast a spell"})]}
+            19 {:selections [(eldritch-knight-spell-selection 1 [1 2 3 4])]}
+            20 {:selections [(eldritch-knight-any-spell-selection 1 [1 2 3 4])]}}
    :traits [{:name "Weapon Bond"
              :level 3
              :page 75
@@ -3651,7 +3669,7 @@
                                 {:name "Illusionist Cantrip"
                                  :order 0
                                  :tags (opt5e/spell-tags :wizard 0)
-                                 :options (opt5e/spell-options (get-in sl/spell-lists [:wizard 0]) 0 :int "Wizard")
+                                 :options (opt5e/spell-options (get-in sl/spell-lists [:wizard 0]) :int "Wizard")
                                  :prereq-fn (fn [c]
                                               (let [spells-known (es/entity-val c :spells-known)
                                                     passes? (or (nil? spells-known)
@@ -3759,7 +3777,6 @@
                                        (fn [[cls-kw spells-by-level]]
                                          (spells-by-level 0))
                                        sl/spell-lists))
-                                     0
                                      :cha
                                      "Warlock"
                                      false
@@ -3828,7 +3845,6 @@
                                (filter
                                 (fn [s] (and (= 1 (:level s)) (opt5e/ritual-spell? s)))
                                 spells/spells))
-                              1
                               :cha
                               "Warlock"
                               false
@@ -4050,7 +4066,6 @@ long rest."})]
     :tags #{:spells}
     :options (opt5e/spell-options
               (get-in sl/spell-lists [:warlock spell-level])
-              spell-level
               :cha
               "Warlock"
               false
@@ -4079,14 +4094,7 @@ long rest."})]
    20 4})
 
 (defn warlock-subclass-spell-selection [level spells]
-  (opt5e/spell-selection
-   {:class-key :warlock
-    :level level
-    :spell-keys spells
-    :spellcasting-ability :cha
-    :class-name "Warlock"
-    :num 0
-    :prepend-level? true}))
+  (subclass-spell-selection :warlock "Warlock" :cha level spells 0))
 
 (def warlock-option
   (class-option

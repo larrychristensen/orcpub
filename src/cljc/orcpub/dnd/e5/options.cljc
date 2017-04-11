@@ -487,8 +487,8 @@ check. The GM might also call for a Dexterity (Sleight of Hand) check to determi
     (spell-field "Duration" (:duration spell))]
    [:div.f-w-n (:description spell)]])
 
-(defn spell-option [level spellcasting-ability class-name key & [prepend-level? qualifier]]
-  (let [{:keys [name] :as spell} (spells/spell-map key)]
+(defn spell-option [spellcasting-ability class-name key & [prepend-level? qualifier]]
+  (let [{:keys [name level] :as spell} (spells/spell-map key)]
     (t/option-cfg
      {:name (if prepend-level? (str level " - " name) name)
       :key key
@@ -503,26 +503,27 @@ check. The GM might also call for a Dexterity (Sleight of Hand) check to determi
 
 (def memoized-spell-option (memoize spell-option))
 
-(defn spell-options [spells level spellcasting-ability class-name & [prepend-level? qualifier]]
+(defn spell-options [spells spellcasting-ability class-name & [prepend-level? qualifier]]
   (map
-   #(memoized-spell-option level spellcasting-ability class-name % prepend-level? qualifier)
+   #(memoized-spell-option spellcasting-ability class-name % prepend-level? qualifier)
    (sort spells)))
 
 (defn spell-level-title [class-name level]
   (str class-name (if (zero? level) " Cantrips Known" (str " Spells Known " level))))
 
-(defn spell-selection [{:keys [class-key level spellcasting-ability class-name num prepend-level? spell-keys options min max]}]
-  (let [title (spell-level-title class-name level)
-         kw (common/name-to-kw title)]
+(defn spell-selection [{:keys [title class-key level spellcasting-ability class-name num prepend-level? spell-keys options min max]}]
+  (let [title (or title (spell-level-title class-name level))
+        kw (common/name-to-kw title)
+        ref [:class class-key kw]]
+    (if (= "Eldritch Knight" class-name) (prn "REF" ref))
      (t/selection-cfg
       {:name title
        :key kw
-       :ref [:class class-key (if (zero? level) :cantrips-known :spells-known)]
+       :ref ref
        :order (if (zero? level) 0 1)
        :options (or options
                     (spell-options
                      (or spell-keys (get-in sl/spell-lists [class-key level]))
-                     level
                      spellcasting-ability
                      class-name
                      prepend-level?))
@@ -580,6 +581,9 @@ check. The GM might also call for a Dexterity (Sleight of Hand) check to determi
      {}
      (range 1 (inc level)))))
 
+(defn spell-tags [cls-key-nm level]
+  #{:spells (keyword (str cls-key-nm "-spells")) (keyword (str "level-" level))})
+
 (defn bard-magical-secrets [min-level]
   (let [max-level (key (last (total-slots min-level 1)))
         spells-by-level (group-by :level spells/spells)
@@ -595,7 +599,7 @@ check. The GM might also call for a Dexterity (Sleight of Hand) check to determi
                    (map
                     (fn [{:keys [name] :as spell}]
                       (let [key (or (:key spell) (common/name-to-kw name))]
-                        (spell-option lvl :cha "Bard" key true)))
+                        (spell-option :cha "Bard" key true)))
                     spells))
                  filtered-spells-by-level))})))
 
@@ -617,9 +621,6 @@ check. The GM might also call for a Dexterity (Sleight of Hand) check to determi
        (restriction (spells/spell-map spell-key)))
      spell-keys)
     spell-keys))
-
-(defn spell-tags [cls-key-nm level]
-  #{:spells (keyword (str cls-key-nm "-spells")) (keyword (str "level-" level))})
 
 (defn class-key-name [cls-key cls-nm]
   (if cls-key
@@ -657,7 +658,6 @@ check. The GM might also call for a Dexterity (Sleight of Hand) check to determi
                                   [(if (nil? spell) (js/console.warn (str "No spell found for key: " spell-key)))
                                    (if (nil? (:name spell)) (js/console.warn (str "Spell is missing name: " spell-key)))])
                                (spell-option
-                                lvl
                                 ability
                                 (class-names class-key)
                                 spell-key
@@ -707,14 +707,14 @@ check. The GM might also call for a Dexterity (Sleight of Hand) check to determi
                   {:name "Cantrip"
                    :order 1
                    :tags #{:spells}
-                   :options (spell-options (get-in spell-lists [class-key 0]) 0 spellcasting-ability (class-names class-key))
+                   :options (spell-options (get-in spell-lists [class-key 0]) spellcasting-ability (class-names class-key))
                    :min 2
                    :max 2})
                  (t/selection-cfg
                   {:name "1st Level Spell"
                    :order 2
                    :tags #{:spells}
-                   :options (spell-options (get-in spell-lists [class-key 1]) 1 spellcasting-ability (class-names class-key))
+                   :options (spell-options (get-in spell-lists [class-key 1]) spellcasting-ability (class-names class-key))
                    :min 1
                    :max 1})]}))
 
@@ -728,7 +728,7 @@ check. The GM might also call for a Dexterity (Sleight of Hand) check to determi
    [(t/selection-cfg
      {:name "1st Level Ritual"
       :tags #{:spells}
-      :options (spell-options (filter (fn [spell-kw] (ritual-spell? (spells/spell-map spell-kw))) (get-in spell-lists [class-key 1])) 1 spellcasting-ability (class-names class-key))
+      :options (spell-options (filter (fn [spell-kw] (ritual-spell? (spells/spell-map spell-kw))) (get-in spell-lists [class-key 1])) spellcasting-ability (class-names class-key))
       :min 2
       :max 2})]
    []))
