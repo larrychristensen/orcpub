@@ -278,20 +278,19 @@
   (t/option-cfg
    {:name name
     :help help
-    :selections (vec
-                 (concat
-                  (if subraces
-                    [(t/selection-cfg
-                      {:name "Subrace"
-                       :tags #{:subrace}
-                       :options (vec (map (partial subrace-option source) subraces))})])
-                  (if language-options
-                    (let [{lang-num :choose lang-options :options} language-options
-                          lang-kws (if (:any lang-options)
-                                     (map :key opt5e/languages)
-                                     (keys lang-options))]
-                      [(opt5e/language-selection (map opt5e/language-map lang-kws) lang-num)]))
-                  selections))
+    :selections (concat
+                 (if subraces
+                   [(t/selection-cfg
+                     {:name "Subrace"
+                      :tags #{:subrace}
+                      :options (map (partial subrace-option source) subraces)})])
+                 (if language-options
+                   (let [{lang-num :choose lang-options :options} language-options
+                         lang-kws (if (:any lang-options)
+                                    (map :key opt5e/languages)
+                                    (keys lang-options))]
+                     [(opt5e/language-selection (map opt5e/language-map lang-kws) lang-num)]))
+                 selections)
     :modifiers (vec
                 (concat
                  [(mod5e/race name)
@@ -1284,7 +1283,8 @@
                             equipment-choices
                             armor
                             armor-choices
-                            spellcasting]
+                            spellcasting
+                            multiclass-prereqs]
                      :as cls}]
   (let [kw (common/name-to-kw name)
         {:keys [save skill-options multiclass-skill-options tool-options multiclass-tool-options tool]
@@ -1295,6 +1295,7 @@
      {:name name
       :key kw
       :help help
+      :prereqs multiclass-prereqs
       :selections (mapv
                    (fn [selection]
                      (update selection ::t/tags sets/union #{kw}))
@@ -1365,6 +1366,7 @@
             :weapon {:simple false :martial false}
             :save {:str true :con true}
             :skill-options {:choose 2 :options {:animal-handling true :athletics true :intimidation true :nature true :perception true :survival true}}}
+    :multiclass-prereqs [(opt5e/ability-prereq :str 13)]
     :weapon-choices [{:name "Martial Weapon"
                       :options {:greataxe 1
                                 :martial 1}}
@@ -1546,6 +1548,7 @@
    {:name "Bard"
     :hit-die 8
     :ability-increase-levels [4 8 12 16 19]
+    :multiclass-prereqs [(opt5e/ability-prereq :cha 13)]
     :profs {:armor {:light false}
             :weapon {:simple true :crossbow-hand true :longsword true :rapier true :shortsword true}
             :save {:dex true :cha true}
@@ -1713,6 +1716,7 @@
                    :cantrips-known {1 3 4 1 10 1}
                    :known-mode :all
                    :ability :wis}
+    :multiclass-prereqs [(opt5e/ability-prereq :wis 13)]
     :spellcaster true
     :hit-die 8,
     :ability-increase-levels [4 8 12 16 19]
@@ -2039,6 +2043,7 @@
                    :cantrips-known {:1 2 :4 3 :10 4}
                    :known-mode :all
                    :ability :wis}
+    :multiclass-prereqs [(opt5e/ability-prereq :wis 13)]
     :ability-increase-levels [4 6 8 12 14 16 19]
     :profs {:armor {:light false :medium false :shields false}
             :weapon {:club true :dagger true :dart true :javelin true :mace true :quarterstaff true :scimitar true :sickle true :sling true :spear true}
@@ -2346,6 +2351,11 @@
             :weapon {:simple false :martial false} 
             :save {:str true :con true}
             :skill-options {:choose 2 :options {:acrobatics true :animal-handling true :athletics true :history true :insight true :intimidation true :perception true :survival true}}}
+    :multiclass-prereqs [(t/option-prereq "Requires Strength 13 or Dexterity 13"
+                                          (fn [c]
+                                            (let [abilities (es/entity-val c :abilities)]
+                                              (or (>= (:str abilities) 13)
+                                                  (>= (:dex abilities) 13)))))]
     :equipment-choices [{:name "Equipment Pack"
                          :options {:dungeoneers-pack 1
                                    :explorers-pack 1}}]
@@ -2507,6 +2517,11 @@
             :weapon {:simple false :shortsword false}
             :save {:dex true :str true}
             :skill-options {:choose 2 :options {:acrobatics true :athletics true :history true :insight true :religion true :stealth true}}}
+    :multiclass-prereqs [(t/option-prereq "Requires Wisdom 13 and Dexterity 13"
+                                          (fn [c]
+                                            (let [abilities (es/entity-val c :abilities)]
+                                              (and (>= (:wis abilities) 13)
+                                                  (>= (:dex abilities) 13)))))]
     :equipment-choices [{:name "Equipment Pack"
                          :options {:dungeoneers-pack 1
                                    :explorers-pack 1}}]
@@ -2728,6 +2743,11 @@
             :weapon {:simple false :martial false}
             :save {:wis true :cha true}
             :skill-options {:choose 2 :options {:athletics true :insight true :intimidation true :medicine true :persuasion true :religion true}}}
+    :multiclass-prereqs [(t/option-prereq "Requires Strength 13 or Charisma 13"
+                                          (fn [c]
+                                            (let [abilities (es/entity-val c :abilities)]
+                                              (and (>= (:str abilities) 13)
+                                                  (>= (:cha abilities) 13)))))]
     :equipment-choices [{:name "Equipment Pack"
                          :options {:priests-pack 1
                                    :explorers-pack 1}}]
@@ -3018,6 +3038,11 @@
             :save {:str true :dex true}
             :skill-options {:choose 3 :options ranger-skills}
             :multiclass-skill-options {:choose 1 :options ranger-skills}}
+    :multiclass-prereqs [(t/option-prereq "Requires Wisdom 13 and Dexterity 13"
+                                          (fn [c]
+                                            (let [abilities (es/entity-val c :abilities)]
+                                              (and (>= (:wis abilities) 13)
+                                                  (>= (:dex abilities) 13)))))]
     :ability-increase-levels [4 8 10 16 19]
     :spellcaster true
     :spellcasting {:level-factor 2
@@ -3208,6 +3233,7 @@
             :tool {:thieves-tools false}
             :skill-options {:order 0 :choose 4 :options rogue-skills}
             :multiclass-skill-options {:order 0 :choose 1 :options rogue-skills}}
+    :multiclass-prereqs [(opt5e/ability-prereq :dex 13)]
     :weapon-choices [{:name "Melee Weapon"
                       :options {:rapier 1
                                 :shortsword 1}}]
@@ -3435,6 +3461,7 @@
                                   15 1
                                   17 1}
                    :ability :cha}
+    :multiclass-prereqs [(opt5e/ability-prereq :cha 13)]
     :spellcaster true
     :hit-die 6
     :ability-increase-levels [4 8 12 16 19]
@@ -3552,6 +3579,7 @@
                    :spells-known (zipmap (range 1 21) (repeat 2))
                    :ability :int}
     :spellcaster true
+    :multiclass-prereqs [(opt5e/ability-prereq :int 13)]
     :hit-die 6
     :ability-increase-levels [4 8 12 16 19]
     :equipment-choices [{:name "Equipment Pack"
@@ -4119,7 +4147,8 @@ long rest."})]
                    :spells-known warlock-spells-known
                    :known-mode :schedule
                    :slot-schedule warlock-spell-slot-schedule
-                   :ability :cha},
+                   :ability :cha}
+    :multiclass-prereqs [(opt5e/ability-prereq :cha 13)]
     :spellcaster true
     :hit-die 8
     :ability-increase-levels [4 8 12 16 19]

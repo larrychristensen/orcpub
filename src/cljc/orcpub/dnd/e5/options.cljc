@@ -289,7 +289,7 @@ check. The GM might also call for a Dexterity (Sleight of Hand) check to determi
   (fn [c] (>= (ability-kw (es/entity-val c :abilities)) min-value)))
 
 (defn ability-prereq [ability-kw min-value]
-  (t/option-prereq (str (s/upper-case (name ability-kw)) " " min-value " or higher")
+  (t/option-prereq (str "Requires " (s/upper-case (name ability-kw)) " " min-value " or higher")
                    (min-ability ability-kw min-value)))
 
 (defn armor-prereq [armor-kw]

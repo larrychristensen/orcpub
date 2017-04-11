@@ -1412,7 +1412,7 @@
 (defn character-textarea [app-state prop-name & [cls-str]]
   (character-field app-state prop-name :textarea cls-str))
 
-(defn class-levels-selector [character {:keys [::t/options] :as selection}]
+(defn class-levels-selector [character {:keys [::t/options] :as selection} built-char]
   (let [selected-classes (get-in character [::entity/options :class])
         unselected-classes (remove
                             (into #{} (map ::entity/key selected-classes))
@@ -1441,8 +1441,11 @@
                  {:value key}
                  name])
               (filter
-               #(or (= key (::t/key %))
-                    (unselected-classes-set (::t/key %)))
+               #(and
+                 (or (= key (::t/key %))
+                     (unselected-classes-set (::t/key %)))
+                 (or (zero? i)
+                     (every? (fn [prereq] ((::t/prereq-fn prereq) built-char)) (::t/prereqs %))))
                options)))]
            (let [selected-levels (get-in selected-class [::entity/options :levels])
                  class-template-option (some #(if (= key (::t/key %)) %) options)
