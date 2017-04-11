@@ -3661,39 +3661,63 @@
                                                                         (not (:illusionist-cantrip? s))))
                                                                  (spells-known 0)))]
                                                 passes?))})]
+                  :levels {6 {:modifiers [(mod5e/action
+                                           {:name "Malleable Illusions"
+                                            :page 118
+                                            :summary "change the nature of an illusion you cast"})]}
+                           10 {:modifiers [(mod5e/reaction
+                                            {:name "Illusory Self"
+                                             :page 118
+                                             :frequency {:units :rest}
+                                             :summary "attacker hits an illusion of you instead of you"})]}
+                           14 {:modifiers [(mod5e/bonus-action
+                                            {:name "Illusory Reality"
+                                             :page 119
+                                             :summary "make an illusory object real for 1 minute"})]}}
                   :traits [(spell-school-savant "illusion" 118)
                            {:name "Improved Minor Illusion"
-                            :level 2}
-                           {:name "Malleable Illusions"
-                            :level 6}
-                           {:name "Illusory Self"
-                            :level 10}
-                           {:name "Illusory Reality"
-                            :level 14}]}
+                            :page 118
+                            :summary "can create a sound and an image with the same casting of minor illusion"}]}
                  {:name "School of Necromancy"
                   :modifiers [(mod5e/damage-resistance :necrotic)]
-                  :traits [{:name "Necromancy Savant"
-                            :level 2}
+                  :levels {14 {:modifiers [(mod5e/action
+                                            {:name "Command Undead"
+                                             :page 119
+                                             :summary (str "bring undead under your control unless it succeeds on a DC " (?spell-save-dc :int) " CHA save")})]}}
+                  :traits [(spell-school-savant "necromancy" 118)
                            {:name "Grim Harvest"
-                            :level 2}
+                            :level 2
+                            :page 118
+                            :frequency {:units :turn}
+                            :summary "when you kill a creature with a spell, you regain HPs equal to 2X the spell level or 3X the spell level for necromancy spells"}
                            {:name "Undead Thralls"
-                            :level 6}
+                            :page 119
+                            :level 6
+                            :summary (str "target one additional corpse or pile of bones for animate dead; whenever you create an undead it's HP max is increased by your wizard level amount and it adds your prof bonus to weapon damage rolls")}
                            {:name "Inured to Undeath"
-                            :level 10}
-                           {:name "Command Undead"
-                            :level 14}]}
+                            :level 10
+                            :summary "resistant to necrotic damage; your HP max cannot be reduced"}]}
                  {:name "School of Transmutation"
                   :modifiers [(mod5e/spells-known 4 :polymorph :int "Wizard")]
-                  :traits [{:name "Transmutation Savant"
-                            :level 2}
+                  :levels {14 {:modifiers [(mod5e/action
+                                            {:name "Master Transmuter"
+                                             :page 119
+                                             :summary "expend your transmuter's stone for 1 effect: 1) convert a non-magical object into another non-magical object, 2) remove curses, poisons, diseases and damage from a creature 3) raise dead 4) reduce a willing creature's apparent age by 3d10"})]}}
+                  :traits [(spell-school-savant "transmutation" 119)
                            {:name "Minor Alchemy"
-                            :level 2}
+                            :level 2
+                            :page 119
+                            :duration {:units :hour}
+                            :summary "transform an object of one substance to another substance"}
                            {:name "Transmuter's Stone"
-                            :level 6}
+                            :level 6
+                            :page 119
+                            :summary "create a stone with 1 benefit: 1) darkvision 60 ft. 2) +10 speed 3) prof in CON saves 4) resistance to acid, fire, cold, lightning, or thunder damage"}
                            {:name "Shapechanger"
-                            :level 10}
-                           {:name "Master Transmuter"
-                            :level 14}]}]}))
+                            :level 10
+                            :page 119
+                            :frequency {:units :long-rest}
+                            :summary "cast polymorph without a spell slot to turn into a CR 1 or less beast"}]}]}))
 
 (defn has-trait-with-name-prereq [name]
   (fn [c] (some #(= name (:name %)) (es/entity-val c :traits))))
