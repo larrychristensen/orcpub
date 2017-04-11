@@ -2245,30 +2245,53 @@
     :num num
     :prepend-level? true}))
 
-(defn eldritch-knight-spell-selection [num spell-levels]
-  (opt5e/spell-selection {:title "Eldritch Knight Abjuration or Evocation Spell"
-                          :class-key :fighter
+(defn subclass-wizard-spell-selection [title class-key class-name num spell-levels & [filter-fn]]
+  (opt5e/spell-selection {:title title
+                          :class-key class-key
                           :spellcasting-ability :int
-                          :class-name "Eldritch Knight"
+                          :class-name class-name
                           :num num
                           :prepend-level? true
-                          :spell-keys (filter
-                                       (fn [spell-key]
-                                         (eldritch-knight-spell? (spells/spell-map spell-key)))
-                                       (mapcat
-                                        (fn [lvl] (get-in sl/spell-lists [:wizard lvl]))
-                                        spell-levels))}))
+                          :spell-keys (let [spell-keys
+                                            (mapcat
+                                             (fn [lvl] (get-in sl/spell-lists [:wizard lvl]))
+                                             spell-levels)]
+                                        (if filter-fn
+                                          (filter
+                                           (fn [spell-key]
+                                             (filter-fn (spells/spell-map spell-key)))
+                                           spell-keys)
+                                          spell-keys))}))
+
+(defn eldritch-knight-spell-selection [num spell-levels]
+  (subclass-wizard-spell-selection "Eldritch Knight Abjuration or Evocation Spell"
+                                   :fighter
+                                   "Eldritch Knight"
+                                   num
+                                   spell-levels
+                                   eldritch-knight-spell?))
+
+(defn arcane-trickster-spell-selection [num spell-levels]
+  (subclass-wizard-spell-selection "Arcane Trickster Enchantment or Illusion Spell"
+                                   :rogue
+                                   "Arcane Trickster"
+                                   num
+                                   spell-levels
+                                   arcane-trickster-spell?))
 
 (defn eldritch-knight-any-spell-selection [num spell-levels]
-  (opt5e/spell-selection {:title "Eldritch Knight Spell: Any School"
-                          :class-key :fighter
-                          :spellcasting-ability :int
-                          :class-name "Eldritch Knight"
-                          :num num
-                          :prepend-level? true
-                          :spell-keys (mapcat
-                                        (fn [lvl] (get-in sl/spell-lists [:wizard lvl]))
-                                        spell-levels)}))
+  (subclass-wizard-spell-selection "Eldritch Knight Spell: Any School"
+                                   :fighter
+                                   "Eldritch Knight"
+                                   num
+                                   spell-levels))
+
+(defn arcane-trickster-any-spell-selection [num spell-levels]
+  (subclass-wizard-spell-selection "Arcane Trickster Spell: Any School"
+                                   :rogue
+                                   "Arcane Trickster"
+                                   num
+                                   spell-levels))
 
 (def eldritch-knight-cfg
   {:name "Eldritch Knight"
@@ -3300,42 +3323,34 @@
                             :page 97
                             :summary "accurately mimic the behavior, speech, and writing of another person"}]}
                  {:name "Arcane Trickster"
-                  :spellcaster true
-                  :spellcasting {:level-factor 3
-                                 :spell-list :wizard
-                                 :cantrips-known {3 2 10 3}
-                                 :known-mode :schedule
-                                 :spells-known {3 {:num 3
-                                                   :restriction arcane-trickster-spell?}
-                                                4 {:num 1
-                                                   :restriction arcane-trickster-spell?}
-                                                7 {:num 1
-                                                   :restriction arcane-trickster-spell?}
-                                                8 1
-                                                10 {:num 1
-                                                    :restriction arcane-trickster-spell?}
-                                                11 {:num 1
-                                                    :restriction arcane-trickster-spell?}
-                                                13 {:num 1
-                                                    :restriction arcane-trickster-spell?}
-                                                14 1
-                                                16 {:num 1
-                                                    :restriction arcane-trickster-spell?}
-                                                19 {:num 1
-                                                    :restriction arcane-trickster-spell?}
-                                                20 1}
-                                 :ability :int}
                   :modifiers [(mod5e/spells-known 0 :mage-hand :int "Arcane Trickster")]
-                  :levels {13 {:modifiers [(mod5e/bonus-action
+                  :levels {3 {:selections [(opt5e/spell-selection {:class-key :rogue
+                                                                   :level 0
+                                                                   :spellcasting-ability :int
+                                                                   :class-name "Arcane Trickster"
+                                                                   :num 2
+                                                                   :spell-keys (get-in sl/spell-lists [:wizard 0])})
+                                           (arcane-trickster-spell-selection 3 [1])]}
+                           4 {:selections [(arcane-trickster-spell-selection 1 [1])]}
+                           7 {:selections [(arcane-trickster-spell-selection 1 [1 2])]}
+                           8 {:selections [(arcane-trickster-any-spell-selection 1 [1 2])]}
+                           10 {:selections [(arcane-trickster-spell-selection 1 [1 2])]}
+                           11 {:selections [(arcane-trickster-spell-selection 1 [1 2])]}
+                           13 {:selections [(arcane-trickster-spell-selection 1 [1 2 3])]
+                               :modifiers [(mod5e/bonus-action
                                             {:name "Versatile Trickster"
                                              :level 13
                                              :page 98
                                              :summary "use mage hand to gain advantage on attack rolls against a creature within 5 ft. of the hand"})]}
+                           14 {:selections [(arcane-trickster-any-spell-selection 1 [1 2 3])]}
+                           16 {:selections [(arcane-trickster-spell-selection 1 [1 2 3])]}
                            17 {:modifiers [(mod5e/reaction
                                             {:name "Spell Thief"
                                              :level 17
                                              :page 98
-                                             :summary (str "steal a spell for 8 hours if it is cast on you and the spellcaster fails a DC " (?spell-save-dc :int) " save with its spellcasting ability")})]}}
+                                             :summary (str "steal a spell for 8 hours if it is cast on you and the spellcaster fails a DC " (?spell-save-dc :int) " save with its spellcasting ability")})]}
+                           19 {:selections [(arcane-trickster-spell-selection 1 [1 2 3 4])]}
+                           20 {:selections [(arcane-trickster-any-spell-selection 1 [1 2 3 4])]}}
                   :traits [{:name "Mage Hand Legerdemain"
                             :level 3
                             :page 98
