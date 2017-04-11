@@ -1616,7 +1616,7 @@
                            0)
                          
                          :else 0)]
-    (if max (- min selected-count) 0)))
+    (- min selected-count)))
 
 (defn new-option-selector [character built-char built-template option-paths option-path
                            {:keys [::t/min ::t/max ::t/options ::t/multiselect?] :as selection}
