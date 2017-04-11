@@ -447,6 +447,7 @@ check. The GM might also call for a Dexterity (Sleight of Hand) check to determi
   (t/selection-cfg
    {:name "Elemental Disciplines"
     :tags #{:class}
+    :ref [:class :monk :elemental-disciplines]
     :options elemental-disciplines}))
 
 (defn language-option [{:keys [name key]}]
@@ -515,7 +516,6 @@ check. The GM might also call for a Dexterity (Sleight of Hand) check to determi
   (let [title (or title (spell-level-title class-name level))
         kw (common/name-to-kw title)
         ref [:class class-key kw]]
-    (if (= "Eldritch Knight" class-name) (prn "REF" ref))
      (t/selection-cfg
       {:name title
        :key kw
