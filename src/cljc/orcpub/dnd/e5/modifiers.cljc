@@ -123,20 +123,35 @@
 (defn spell-slots [level num]
   (mods/map-mod ?spell-slots level num))
 
+(defmacro spells-known-cfg [level spell-cfg min-level conditions]
+  `(mods/modifier
+    ~'?spells-known
+    (if (or (nil? ~min-level)
+            (>= ~'?total-levels ~min-level))
+      (update
+       ~'?spells-known
+       ~level
+       conj
+       ~spell-cfg)
+      ~'?spells-known)
+    nil
+    nil
+    ~conditions))
+
 (defn spells-known [level spell-key spellcasting-ability class & [min-level qualifier]]
   (mods/modifier
-   ?spells-known
-   (if (>= ?total-levels (or min-level 0))
-     (update
-      ?spells-known
-      level
-      (fn [spells]
-        (conj (or spells)
-              {:key spell-key
-               :ability spellcasting-ability
-               :qualifier qualifier
-               :class class})))
-     ?spells-known)))
+    ?spells-known
+    (if (or (nil? min-level)
+            (>= ?total-levels min-level))
+      (update
+       ?spells-known
+       level
+       conj
+       {:key spell-key
+        :ability spellcasting-ability
+        :qualifier qualifier
+        :class class})
+      ?spells-known)))
 
 (defn trait-cfg [{:keys [name description level summary page conditions] :as cfg}]
   (mods/modifier ?traits

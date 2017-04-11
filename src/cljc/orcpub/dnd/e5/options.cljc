@@ -618,8 +618,8 @@ check. The GM might also call for a Dexterity (Sleight of Hand) check to determi
      spell-keys)
     spell-keys))
 
-(defn spell-tags [cls-key-nm]
-  #{:spells (keyword (str cls-key-nm "-spells"))})
+(defn spell-tags [cls-key-nm level]
+  #{:spells (keyword (str cls-key-nm "-spells")) (keyword (str "level-" level))})
 
 (defn class-key-name [cls-key cls-nm]
   (if cls-key

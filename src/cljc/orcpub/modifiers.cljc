@@ -51,7 +51,6 @@
             (es/conditions ~conditions)
             ~order-number)))
 
-
 (defmacro deferred-modifier [prop deferred-fn default-value & [nm val-fn]]
   `(deferred-mod ~nm ~deferred-fn (es/ref-sym-to-kw '~prop) ~default-value ~val-fn (es/dependencies ~prop deferred-fn)))
 

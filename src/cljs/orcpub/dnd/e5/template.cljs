@@ -1049,12 +1049,9 @@
                                subcls)
         spell-selections (mapcat
                           (fn [[lvl selections]]
-                            (if (= kw :the-archfey) (prn "LEVEL" lvl))
                             (map
                              (fn [selection]
-                               (if (= kw :the-archfey) (prn "SELECTION ANME" (::t/name selection)))
                                (assoc selection ::t/prereq-fn (fn [c] (let [total-levels (es/entity-val c :total-levels)]
-                                                                        ;;(prn "TOTAL LEVELS" total-levels lvl)
                                                                         (>= lvl total-levels)))))
                              selections))
                           (:selections spellcasting-template))
@@ -3495,6 +3492,24 @@
                             :summary "When you roll a die for spell damage, roll max rolls an additional time"
                             :frequency {:units :turn}}]}]}))
 
+(defn spell-school-savant [school page]
+  {:level 2
+   :name (str (s/capitalize school) " Savant")
+   :page page
+   :description (str "time and money to copy an " school " spell is halved")})
+
+(defn spell-in-spells-known? [known level spell-key]
+  (and known (some #(= spell-key (:key %)) (known level))))
+
+(defn has-spell? [c level spell-key]
+  (spell-in-spells-known? (es/entity-val c :spells-known) level spell-key))
+
+(defn has-illusionist-cantrip? [c]
+  (es/entity-val c :illusionist-cantrip))
+
+(defn has-minor-illusion? [c]
+  (has-spell? c 0 :minor-illusion))
+
 (def wizard-option
   (class-option
    {:name "Wizard",
@@ -3520,63 +3535,133 @@
     :subclass-level 2
     :subclass-title "Arcane Tradition"
     :subclasses [{:name "School of Evocation"
-                  :traits [{:level 2
-                            :name "Evocation Savant"}
+                  :levels {10 {:modifiers [(mod5e/dependent-trait
+                                            {:level 10
+                                             :name "Empowered Evocation"
+                                             :page 117
+                                             :summary (str "add your INT mod (" (?ability-bonuses :int) ") to one damage roll of evocation spell you cast")})]}}
+                  :traits [(spell-school-savant "evocation" 117)
                            {:level 2
-                            :name "Sculpt Spells"}
+                            :name "Sculpt Spells"
+                            :page 117
+                            :summary "can choose up to 1 + spell's level creatures to automatically save against your evocation spells and take no damage"}
                            {:level 6
-                            :name "Potent Cantrip"}
-                           {:level 10
-                            :name "Empowered Evocation"}
+                            :name "Potent Cantrip"
+                            :page 117
+                            :summary "creature take half damage on sucessful saves against your cantrips"}
                            {:level 14
-                            :name "Overchannel"}]}
+                            :name "Overchannel"
+                            :page 118
+                            :summary "deal max damage with evocation spells 1st-5th level. You take necrotic damage if you use this feature more than once per long rest"}]}
                  {:name "School of Abjuration"
-                  :traits [{:name "Abjuration Savant"
-                            :level 2}
-                           {:name "Arcane Ward"
-                            :level 2}
-                           {:name "Projected Ward"
-                            :level 6}
-                           {:name "Improved Abjuration"
-                            :level 10}
+                  :modifiers [(mod5e/dependent-trait
+                               {:name "Arcane Ward"
+                                :page 115
+                                :summary (str "magical ward with HP max " (+ (?class-level :wizard) (?ability-bonuses :int)) ", casting X-th level abjuration spells restores 2X HPs to it")})]
+                  :levels {6 {:modifiers [(mod5e/reaction
+                                           {:name "Projected Ward"
+                                            :page 115
+                                            :range {:units :feet
+                                                    :amount 30}
+                                            :summary "shield a creature using your ward"})]}
+                           10 {:modifiers [(mod5e/dependent-trait
+                                            {:name "Improved Abjuration"
+                                             :page 115
+                                             :summary (str "add your proficiency bonus (" (common/bonus-str ?prof-bonus) ") to ability checks required by abjuration spells")})]}
+                           14 {:modifiers [(mod5e/saving-throw-advantage [:spells])]}}
+                  :traits [(spell-school-savant "abjuration" 115)
                            {:name "Spell Resistance"
-                            :level 14}]}
+                            :level 14
+                            :page 116
+                            :summary "advantage on saves against spells, resistance to damage from spells"}]}
                  {:name "School of Conjuration"
-                  :traits [{:name "Conjuration Savant"
-                            :level 2}
+                  :levels {6 {:modifiers [(mod5e/action
+                                           {:name "Benign Transposition"
+                                            :page 116
+                                            :range {:units :feet
+                                                    :amount 30}
+                                            :summary "Teleport to unoccupied space or swap spaces with willing Small or Medium creature"})]}}
+                  :traits [(spell-school-savant "conjuration" 116)
                            {:name "Minor Conjuration"
-                            :level 2}
-                           {:name "Benign Transposition"
-                            :level 6}
+                            :level 2
+                            :page 116
+                            :duration {:units :hour}
+                            :summary "conjure an inanimate object 3 ft per side or less and 15 lbs or less, it radiates dim light to 5 ft."}
                            {:name "Focused Conjuration"
-                            :level 10}
+                            :level 10
+                            :page 116
+                            :summary "concentration on conjuration spells cannot be broken by taking damage"}
                            {:name "Durable Summons"
-                            :level 14}]}
+                            :level 14
+                            :summary "creatures you conjure have 30 temp hit points"}]}
                  {:name "School of Divination"
-                  :traits [{:name "Divination Savant"
-                            :level 2}
-                           {:name "Protent"
-                            :level 2}
+                  :levels {10 {:modifiers [(mod5e/action
+                                            {:name "The Third Eye"
+                                             :level 10
+                                             :page 117
+                                             :frequency {:units :long-rest}
+                                             :summary "gain one: 1) darkvision 60 ft., 2) see etherial plane 60 ft. 3) read any language 4) see invisible within 10 ft."})]}}
+                  :traits [(spell-school-savant "divination" 116)
+                           {:name "Portent"
+                            :level 2
+                            :frequency {:units :long-rest}
+                            :summary "roll 2 d20s after long rest, can replace rolls you or a creature you can see make with these"}
                            {:name "Expert Divination"
-                            :level 6}
-                           {:name "The Third Eye"
-                            :level 10}
+                            :level 6
+                            :page 117
+                            :summary "when you cast divination spell 2nd level or higher, regain a spell slot of lower level (max 5th level)"}
                            {:name "Greater Portent"
-                            :level 14}]}
+                            :level 14
+                            :page 117
+                            :summary "roll 3 d20s for your Portent feature"}]}
                  {:name "School of Enchantment"
-                  :traits [{:name "Enchantment Savant"
-                            :level 2}
-                           {:name "Hypnotic Gaze"
-                            :level 2}
-                           {:name "Instinctive Charm"
-                            :level 6}
+                  :levels {2 {:modifiers [(mod5e/action
+                                           {:name "Hypnotic Gaze"
+                                            :level 2
+                                            :page 117
+                                            :range {:units :feet
+                                                    :amount 5}
+                                            :summary (str "charm a creature until end of your next turn unless it succeeds on a DC " (?spell-save-dc :int) " WIS save, it is incapacitated and dazed")})]}
+                           6 {:modifiers [(mod5e/reaction
+                                           {:name "Instinctive Charm"
+                                            :page 117
+                                            :range {:units :feet
+                                                    :amount 30}
+                                            :frequency {:units :long-rest}
+                                            :summary (str "redirect a creature's attack against you to the creature closest to it, not including you, if it fails a DC " (?spell-save-dc :int) " WIS save")})]}
+                           14 {:modifiers [(mod5e/dependent-trait
+                                            {:name "Alter Memories"
+                                             :level 14
+                                             :page 117
+                                             :summary (str "make a creature unaware of your charm on it, can also use your action to erase up to " (inc (?ability-bonuses :cha)) " hours from it's memory if it fails a DC " (?spell-save-dc :int) " INT check")})]}}
+                  :traits [(spell-school-savant "enchantment" 117)
                            {:name "Split Enchantment"
-                            :level 10}
-                           {:name "Alter Memories"
-                            :level 14}]}
+                            :level 10
+                            :page 117
+                            :summary "target 2 creatures with an enchantment spell that normally targets 1"}]}
                  {:name "School of Illusion"
-                  :traits [{:name "Illusion Savant"
-                            :level 2}
+                  :modifiers [(mod5e/spells-known-cfg 0
+                                                      {:key :minor-illusion
+                                                       :ability :int
+                                                       :class "Wizard"
+                                                       :illusionist-cantrip? true}
+                                                      0
+                                                      [(not (spell-in-spells-known? ?spells-known 0 :minor-illusion))])]
+                  :selections [(t/selection-cfg
+                                {:name "Illusionist Cantrip"
+                                 :order 0
+                                 :tags (opt5e/spell-tags :wizard 0)
+                                 :options (opt5e/spell-options (get-in sl/spell-lists [:wizard 0]) 0 :int "Wizard")
+                                 :prereq-fn (fn [c]
+                                              (let [spells-known (es/entity-val c :spells-known)
+                                                    passes? (or (nil? spells-known)
+                                                                (some
+                                                                 (fn [s]
+                                                                   (and (= :minor-illusion (:key s))
+                                                                        (not (:illusionist-cantrip? s))))
+                                                                 (spells-known 0)))]
+                                                passes?))})]
+                  :traits [(spell-school-savant "illusion" 118)
                            {:name "Improved Minor Illusion"
                             :level 2}
                            {:name "Malleable Illusions"
@@ -3760,7 +3845,7 @@
                    :page 110
                    :summary "cast detect magic at will"})]})
    (t/option-cfg
-    {:Name "Eldritch Spear"
+    {:name "Eldritch Spear"
      :modifiers [(mod5e/trait-cfg
                   {:name "Eldritch Invocation: Eldritch Spear"
                    :page 111
@@ -4759,7 +4844,9 @@ long rest."})]
     ?condition-immunities #{}
     ?immunities #{}
     ?damage-immunities #{}
-    ?damage-resistances #{}}))
+    ?damage-resistances #{}
+    ?saving-throw-advantage []
+    ?spells-known {}}))
 
 
 (def template
