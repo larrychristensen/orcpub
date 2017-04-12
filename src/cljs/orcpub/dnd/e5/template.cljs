@@ -4278,84 +4278,95 @@ long rest."})]
                    :profs {:skill {:insight true, :religion true}
                            :language-options {:choose 2 :options {:any true}}}
                    :traits [{:name "Shelter the Faithful"
-                             :summary "You and your companions can expect free healing at an establishment of your faith."}]
-                   :personality ["I idolize a particular hero of my faith, and constantly refer to that person's deeds and example."
-                                 "I can find common ground between the fiercest enemies, empathizing with them and always working toward peace."
-                                 "I see omens in every event and action. The gods try to speak to us, we just need to listen"
-                                 "Nothing can shake my optimistic attitude."
-                                 "I quote (or misquote) sacred texts and proverbs in almost every situation."
-                                 "I am tolerant (or intolerant) of other faiths and respect (or condemn) the worship of other gods."
-                                 "I've enjoyed fine food, drink, and high society among my temple's elite. Rough living grates on me."
-                                 "I've spent so long in the temple that I have little practical experience dealing with people in the outside world."]
-                   :ideal ["Tradition. The ancient traditions of worship and sacrifice must be preserved and upheld. (Lawful)"
-                           "Charity. I always try to help those in need, no matter what the personal cost. (Good)"
-                           "Change. We must help bring about the changes the gods are constantly working in the world. (Chaotic)"
-                           "Power. I hope to one day rise to the top of my faith's religious hierarchy. (Lawful)"
-                           "Faith. I trust that my deity will guide my actions. I have faith that if I work hard, things will go well. (Lawful)"
-                           "Aspiration. I seek to prove myself worthy of my god's favor by matching my actions against his or her teachings. (Any)"]
-                   :bond ["I would die to recover an ancient relic of my faith that was lost long ago."
-                          "I will someday get revenge on the corrupt temple hierarchy who branded me a heretic."
-                          "I owe my life to the priest who took me in when my parents died."
-                          "Everything I do is for the common people."
-                          "I will do anything to protect the temple where I served."
-                          "I seek to preserve a sacred text that my enemies consider heretical and seek to destroy."]
-                   :flaw ["I judge others harshly, and myself even more severely."
-                          "I put too much trust in those who wield power within my temple's hierarchy."
-                          "My piety sometimes leads me to blindly trust those that profess faith in my god."
-                          "I am inflexible in my thinking."
-                          "I am suspicious of strangers and expect the worst of them."
-                          "Once I pick a goal, I become obsessed with it to the detriment of everything else in my life."]},
+                             :page 127
+                             :summary "You and your companions can expect free healing at an establishment of your faith."}]},
                   {:name "Criminal"
                    :help "You have a history of criminal activity."
+                   :traits [{:name "Criminal Contact"
+                             :page 129
+                             :summary "You have a contact into a network of criminals"}]
                    :profs {:skill {:deception true, :stealth true}
                            :tool {:thieves-tools true}
                            :tool-options {:gaming-set 1}}}
                   {:name "Folk Hero"
                    :help "You are regarded as a hero by the people of your home village."
+                   :traits [{:name "Rustic Hospitality"
+                             :page 131
+                             :summary "find a place to rest, hide, or recuperate among commoners"}]
                    :profs {:skill {:animal-handling true :survival true}
                            :tool {:land-vehicles true}
                            :tool-options {:artisans-tool 1}}}
                   {:name "Noble"
                    :help "You are of noble birth."
+                   :traits [{:name "Position of Priviledge"
+                             :page 135
+                             :summary "you are welcome in high society and common folk try to accomodate you"}]
                    :profs {:skill {:history true :persuasion true}
                            :tool-options {:gaming-set 1}
                            :language-options {:choose 1 :options {:any true}}}}
                   {:name "Sage"
                    :help "You spent your life studying lore."
+                   :traits [{:name "Researcher"
+                             :page 139
+                             :summary "If you don't know a piece of info you often know where to find it"}]
                    :profs {:skill {:arcana true :history true}
                            :language-options {:choose 2 :options {:any true}}}}
                   {:name "Soldier"
                    :help "You have spent your living by the sword."
+                   :traits [{:name "Military Rank"
+                             :page 140
+                             :summary "Where recognized, your previous rank provides influence among military"}]
                    :profs {:skill {:athletics true :intimidation true}
                            :tool {:land-vehicles true}
                            :tool-options {:gaming-set 1}}}
                   {:name "Charlatan"
                    :help "You have a history of being able to work people to your advantage."
+                   :traits [{:name "False Identity"
+                             :page 128
+                             :summary "you have a false identity; you can forge documents"}]
                    :profs {:skill {:deception true :sleight-of-hand true}
                            :tool {:disguise-kit true :forgery-kit true}}}
                   {:name "Entertainer"
                    :help "You have a history of entertaining people."
+                   :traits [{:name "By Popular Demand"
+                             :page 130
+                             :summary "you are able to find a place to perform, in which you will recieve free food and lodging"}]
                    :profs {:skill {:acrobatics true :performance true}
                            :tool {:disguise-kit true}
                            :tool-options {:musical-instrument 1}}}
                   {:name "Guild Artisan"
                    :help "You are an artisan and a member of a guild in a particular field."
+                   :traits [{:name "Guild Membership"
+                             :page 133
+                             :summary "fellow guild members will provide you with food and lodging; you have powerful political connections through your guild"}]
                    :profs {:skill {:insight true :persuasion true}
                            :tool-options {:artisans-tool 1}}}
                   {:name "Hermit"
                    :help "You have lived a secluded life."
+                   :traits [{:name "Discovery"
+                             :page 134
+                             :summary "You have made a powerful and unique discovery"}]
                    :profs {:skill {:medicine true :religion true}
                            :tool {:herbalism-kit true}}}
                   {:name "Outlander"
                    :help "You were raised in the wilds."
+                   :traits [{:name "Wanderer"
+                             :page 136
+                             :summary "Your memory of maps, geography, settlements, and terrain is excellent. You can find fresh food and water for you and 5 other people."}]
                    :profs {:skill {:athletics true :survival true}
                            :tool-options {:musical-instrument 1}}}
                   {:name "Sailor"
                    :help "You were a member of a crew for a seagoing vessel."
+                   :traits [{:name "Ship's Passage"
+                             :page 139
+                             :summary "You are able to secure free passage on a sailing ship"}]
                    :profs {:skill {:athletics true :perception true}
                            :tool {:navigators-tools true :water-vehices true}}}
                   {:name "Urchin"
                    :help "You were a poor orphan living on the streets."
+                   :traits [{:name "City Streets"
+                             :page 141
+                             :summary "You can travel twice your normal speed between city locations"}]
                    :profs {:skill {:sleight-of-hand true :stealth true}
                            :tool {:disguise-kit true :thieves-tools true}}}])
 
