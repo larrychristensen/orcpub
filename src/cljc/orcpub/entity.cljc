@@ -93,19 +93,39 @@
 (defn flatten-options [options]
   (flatten (build-options-paths [] options)))
 
-(defn collect-modifiers [flat-options modifier-map]
-  (mapcat
-   (fn [{path ::t/path
-         option-value ::value
-         :as option}]
-     (let [modifiers (::t/modifiers (get-in modifier-map path))]
-       (map
-        (fn [{:keys [::mods/name ::mods/value ::mods/fn ::mods/deferred-fn ::mods/default-value] :as mod}]
-          (if deferred-fn
-            (assoc mod ::mods/value (or option-value default-value))
-            mod))
-        (flatten modifiers))))
-   flat-options))
+(declare get-template-selection-path)
+
+(defn get-template-option-path [selection [f & r] current-path]
+  (let [[option option-i]
+        (first (keep-indexed
+                (fn [i s]
+                  (if (= (::t/key s) f)
+                    [s i]))
+                (::t/options selection)))
+        next-path (vec (concat current-path [::t/options option-i]))]
+    (if (seq r)
+      (get-template-selection-path option r next-path)
+      next-path)))
+
+(defn get-template-selection-path [template [f & r] current-path]
+  (let [[selection selection-i]
+        (first (keep-indexed
+                (fn [i s]
+                  (if (= (::t/key s) f)
+                    [s i]))
+                (::t/selections template)))
+        next-path (vec (concat current-path [::t/selections selection-i]))]
+    (if (seq r)
+      (get-template-option-path selection r next-path)
+      next-path)))
+
+(defn get-lazy [a k]
+  (if (and (seq? a) (int? k))
+    (first (drop k a))
+    (get a k)))
+
+(defn get-in-lazy [m ks]
+  (reduce get-lazy m ks))
 
 (defn collect-plugins [flat-options plugin-map]
   (mapcat
@@ -178,12 +198,126 @@
   (let [order-map (zipmap order (range (count order)))]
     (sort-by (comp order-map ::mods/key) modifiers)))
 
+(defn combine-ref-selections [selections]
+  (let [first-selection (first selections)]
+    (if first-selection
+      (assoc
+       first-selection
+       ::t/min (apply + (map ::t/min selections))
+       ::t/max (if (every? ::t/max selections) (apply + (map ::t/max selections)))
+       ::t/options (into (sorted-set-by #(< (::t/key %) (::t/key %2))) (apply concat (map ::t/options selections)))))))
+
+(defn combine-selections [selections]
+  (let [by-ref (group-by ::t/ref selections)
+        non-ref-selections (get by-ref nil)
+        combined-ref-selections (map
+                                 (fn [[_ ref-selections]]
+                                   (combine-ref-selections ref-selections))
+                                 (dissoc by-ref nil))]
+    (sort-by (fn [s] [(or (::t/order s) 1000) (::t/name s)])
+             (concat non-ref-selections combined-ref-selections))))
+
+(defn get-all-selections-aux [path {:keys [::t/ref ::t/key ::t/selections ::t/options] :as obj} parent selected-option-paths]
+  (let [children (map
+                  (fn [{:keys [::t/key] :as s}]
+                    (let [child-path (conj path key)]
+                      (get-all-selections-aux child-path
+                                              s
+                                              obj
+                                              selected-option-paths)))
+                  (or selections options))]
+    (cond
+      selections
+      (if (get-in selected-option-paths path)
+        children)
+      
+      options
+      (if key
+        (concat
+         [(assoc obj ::path path ::parent parent)]
+         children)
+        children))))
+
+(defn remove-disqualified-selections [selections built-char]
+  (remove #(or (nil? %)
+               (let [prereq-fn (::t/prereq-fn %)]
+                 (and prereq-fn (not (prereq-fn built-char)))))
+          selections))
+
+(defn get-all-selections [path obj selected-option-paths built-char]
+  (remove-disqualified-selections
+   (flatten (get-all-selections-aux path obj nil selected-option-paths))
+   built-char))
+
+(defn make-path-map-aux [character]
+  (let [flat-options (flatten-options (::options character))]
+    (reduce
+     (fn [m v]
+       (update-in m (::t/path v) (fn [c] (or c {}))))
+     {}
+     flat-options)))
+
+(def memoized-make-path-map-aux (memoize make-path-map-aux))
+
+(defn make-path-map [character]
+  (memoized-make-path-map-aux character))
+
+(defn available-selections [raw-entity built-entity template]
+  (let [path-map (make-path-map raw-entity)
+        all-selections (get-all-selections [] template path-map built-entity)]
+    all-selections))
+
+(defn tagged-selections [available-selections tags]
+  (filter
+   #(seq (intersection tags (::t/tags %)))
+   available-selections))
+
+(defn make-ref-selection-map [raw-entity template]
+  (let [path-map (make-path-map raw-entity)
+        all-selections (remove nil? (flatten (get-all-selections-aux [] template nil path-map)))
+        by-ref (group-by ::t/ref all-selections)]
+    (reduce-kv
+     (fn [m ref selections]
+       (if ref
+         (assoc m (if (sequential? ref) ref [ref]) (combine-ref-selections selections))
+         m))
+     {}
+     by-ref)))
+
+(defn get-modifiers [template ref-selection-map path]
+  (let [selection-path (butlast path)
+        option-key (last path)
+        ref-selection (ref-selection-map selection-path)
+        option (if ref-selection
+                 (first
+                  (filter
+                   (fn [{:keys [::t/key] :as option}]
+                     (= option-key key))
+                   (vec (::t/options ref-selection))))
+                 (let [template-path (get-template-selection-path template path [])]
+                   (get-in-lazy template template-path)))]
+    (::t/modifiers option)))
+
+(defn collect-modifiers-2 [raw-entity flat-options template]
+  (let [ref-selection-map (make-ref-selection-map raw-entity template)]
+    (mapcat
+     (fn [{path ::t/path
+           option-value ::value
+           :as option}]
+       (let [modifiers (get-modifiers template ref-selection-map path)]
+         (map
+          (fn [{:keys [::mods/name ::mods/value ::mods/fn ::mods/deferred-fn ::mods/default-value] :as mod}]
+            (if deferred-fn
+              (assoc mod ::mods/value (or option-value default-value))
+              mod))
+          (flatten modifiers))))
+     flat-options)))
+
 (def memoized-make-modifier-map (memoize t/make-modifier-map))
 
 (defn apply-options [raw-entity template]
-  (let [modifier-map (memoized-make-modifier-map template)
-        options (flatten-options (::options raw-entity))
-        modifiers (sort-by ::mods/order (collect-modifiers options modifier-map))
+  (let [options (flatten-options (::options raw-entity))
+        modifiers (sort-by ::mods/order (collect-modifiers-2 raw-entity options template))
         deps (reduce
               (fn [m {:keys [::mods/key ::mods/deps]}]
                 (if (seq deps)
@@ -206,32 +340,6 @@
 
 (defn build [raw-entity template]
   (memoized-build-aux raw-entity template))
-
-(declare get-template-selection-path)
-
-(defn get-template-option-path [selection [f & r] current-path]
-  (let [[option option-i]
-        (first (keep-indexed
-                (fn [i s]
-                  (if (= (::t/key s) f)
-                    [s i]))
-                (::t/options selection)))
-        next-path (vec (concat current-path [::t/options option-i]))]
-    (if (seq r)
-      (get-template-selection-path option r next-path)
-      next-path)))
-
-(defn get-template-selection-path [template [f & r] current-path]
-  (let [[selection selection-i]
-        (first (keep-indexed
-                (fn [i s]
-                  (if (= (::t/key s) f)
-                    [s i]))
-                (::t/selections template)))
-        next-path (vec (concat current-path [::t/selections selection-i]))]
-    (if (seq r)
-      (get-template-option-path selection r next-path)
-      next-path)))
 
 (declare merge-selections)
 
@@ -321,62 +429,6 @@
    template
    plugins))
 
-(defn make-path-map-aux [character]
-  (let [flat-options (flatten-options (::options character))]
-    (reduce
-     (fn [m v]
-       (update-in m (::t/path v) (fn [c] (or c {}))))
-     {}
-     flat-options)))
-
-(def memoized-make-path-map-aux (memoize make-path-map-aux))
-
-(defn make-path-map [character]
-  (memoized-make-path-map-aux character))
-
-
-(defn get-all-selections-aux [path {:keys [::t/ref ::t/key ::t/selections ::t/options] :as obj} parent selected-option-paths]
-  (let [children (map
-                  (fn [{:keys [::t/key] :as s}]
-                    (let [child-path (conj path key)]
-                      (get-all-selections-aux child-path
-                                              s
-                                              obj
-                                              selected-option-paths)))
-                  (or selections options))]
-    (cond
-      selections
-      (if (get-in selected-option-paths path)
-        children)
-      
-      options
-      (if key
-        (concat
-         [(assoc obj ::path path ::parent parent)]
-         children)
-        children))))
-
-(defn remove-disqualified-selections [selections built-char]
-  (remove #(or (nil? %)
-               (let [prereq-fn (::t/prereq-fn %)]
-                 (and prereq-fn (not (prereq-fn built-char)))))
-          selections))
-
-(defn get-all-selections [path obj selected-option-paths built-char]
-  (remove-disqualified-selections
-   (flatten (get-all-selections-aux path obj nil selected-option-paths))
-   built-char))
-
-(defn available-selections [raw-entity built-entity template]
-  (let [path-map (make-path-map raw-entity)
-        all-selections (get-all-selections [] template path-map built-entity)]
-    all-selections))
-
-(defn tagged-selections [available-selections tags]
-  (filter
-   #(seq (intersection tags (::t/tags %)))
-   available-selections))
-
 (def memoized-build-template-aux (memoize build-template-aux))
 
 (defn build-template [raw-entity template]
@@ -395,17 +447,6 @@
       clojure.string/lower-case
       (clojure.string/replace #"\W" "-")
       keyword))
-
-(defn selection [name options]
-  {::t/name name
-   ::t/key (name-to-kw name)
-   ::t/options options})
-
-(defn option [name & [selections modifiers]]
-  (cond-> {::t/name name
-           ::t/key (name-to-kw name)}
-    selections (assoc ::t/selections selections)
-    modifiers (assoc ::t/modifiers modifiers)))
 
 (defn get-option-value-path [template entity path]
   (conj (get-entity-path template entity path) ::value))

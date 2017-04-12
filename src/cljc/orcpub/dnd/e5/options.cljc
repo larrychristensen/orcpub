@@ -269,7 +269,7 @@ check. The GM might also call for a Dexterity (Sleight of Hand) check to determi
     :max num-increases
     :tags #{:ability-scores}
     :different? different?
-    :options (mapv
+    :options (map
               (fn [k]
                 (t/option-cfg
                  {:name (:name (abilities-map k))
@@ -512,10 +512,10 @@ check. The GM might also call for a Dexterity (Sleight of Hand) check to determi
 (defn spell-level-title [class-name level]
   (str class-name (if (zero? level) " Cantrips Known" (str " Spells Known " level))))
 
-(defn spell-selection [{:keys [title class-key level spellcasting-ability class-name num prepend-level? spell-keys options min max]}]
+(defn spell-selection [{:keys [title class-key level spellcasting-ability class-name num prepend-level? spell-keys options min max exclude-ref?]}]
   (let [title (or title (spell-level-title class-name level))
         kw (common/name-to-kw title)
-        ref [:class class-key kw]]
+        ref (if (not exclude-ref?) [:class class-key kw])]
      (t/selection-cfg
       {:name title
        :key kw
@@ -593,15 +593,14 @@ check. The GM might also call for a Dexterity (Sleight of Hand) check to determi
       :tags #{:spells}
       :min 2
       :max 2
-      :options (vec
-                (mapcat
-                 (fn [[lvl spells]]
-                   (map
-                    (fn [{:keys [name] :as spell}]
-                      (let [key (or (:key spell) (common/name-to-kw name))]
-                        (spell-option :cha "Bard" key true)))
-                    spells))
-                 filtered-spells-by-level))})))
+      :options (mapcat
+                (fn [[lvl spells]]
+                  (map
+                   (fn [{:keys [name] :as spell}]
+                     (let [key (or (:key spell) (common/name-to-kw name))]
+                       (spell-option :cha "Bard" key true)))
+                   spells))
+                filtered-spells-by-level)})))
 
 (defn cantrip-selections [class-key ability cantrips-known]
   (reduce
@@ -647,23 +646,22 @@ check. The GM might also call for a Dexterity (Sleight of Hand) check to determi
                        (or spells (sl/spell-lists (or spell-list class-key)))
                        (keys slots))
            acquire? (= :acquire known-mode)]
-       (let [options (vec
-                      (flatten
-                       (map
-                        (fn [[lvl spell-keys]]
-                          (map
-                           (fn [spell-key]
-                             (let [spell (spells/spell-map spell-key)]
-                               #?@(:cljs
+       (let [options (flatten
+                      (map
+                       (fn [[lvl spell-keys]]
+                         (map
+                          (fn [spell-key]
+                            (let [spell (spells/spell-map spell-key)]
+                              #?@(:cljs
                                   [(if (nil? spell) (js/console.warn (str "No spell found for key: " spell-key)))
                                    (if (nil? (:name spell)) (js/console.warn (str "Spell is missing name: " spell-key)))])
-                               (spell-option
-                                ability
-                                (class-names class-key)
-                                spell-key
-                                true)))
-                           (apply-spell-restriction spell-keys restriction)))
-                        all-spells)))]
+                              (spell-option
+                               ability
+                               (class-names class-key)
+                               spell-key
+                               true)))
+                          (apply-spell-restriction spell-keys restriction)))
+                       all-spells))]
          (assoc m cls-lvl
                 [(let [cls-key-nm (class-key-name (:key cls-cfg) (:name cls-cfg))
                        kw (spell-selection-key cls-key-nm)]
@@ -1208,7 +1206,7 @@ check. The GM might also call for a Dexterity (Sleight of Hand) check to determi
    {:name "Skill Expertise"
     :key (or key :skill-expertise)
     :order 2
-    :options (mapv
+    :options (map
               (fn [{:keys [name key icon]}]
                 (t/option-cfg
                  {:name name

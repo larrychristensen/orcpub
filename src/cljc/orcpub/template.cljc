@@ -36,7 +36,7 @@
      ::source (or source :phb)
      ::page page
      ::order order
-     ::options (vec options)
+     ::options options
      ::help help
      ::min (or min 1)
      ::max max
@@ -61,7 +61,7 @@
   ([name key options min max &[sequential? new-item-fn]]
    {::name name
     ::key key
-    ::options (vec options)
+    ::options options
     ::min min
     ::max max
     ::sequential? (boolean sequential?)
@@ -103,7 +103,7 @@
 (defn option [name key selections modifiers & [prereqs]]
   (cond-> {::name name
            ::key key}
-    selections (assoc ::selections (vec selections))
+    selections (assoc ::selections selections)
     modifiers (assoc ::modifiers modifiers)
     prereqs (assoc ::prereqs prereqs)))
 

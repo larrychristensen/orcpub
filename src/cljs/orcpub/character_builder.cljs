@@ -2450,32 +2450,13 @@
              {:key :other-magic-items :ui-fn (partial inventory-selector mi5e/other-magic-item-map 60)}
              {:key :treasure :ui-fn (partial inventory-selector equip5e/treasure-map 100)}]}])
 
-(defn combine-ref-selections [selections]
-  (let [first-selection (first selections)]
-    (if first-selection
-      (assoc
-       first-selection
-       ::t/min (apply + (map ::t/min selections))
-       ::t/max (if (every? ::t/max selections) (apply + (map ::t/max selections)))
-       ::t/options (into (sorted-set-by #(< (::t/key %) (::t/key %2))) (apply concat (map ::t/options selections)))))))
-
-(defn combine-selections [selections]
-  (let [by-ref (group-by ::t/ref selections)
-        non-ref-selections (get by-ref nil)
-        combined-ref-selections (map
-                                 (fn [[_ ref-selections]]
-                                   (combine-ref-selections ref-selections))
-                                 (dissoc by-ref nil))]
-    (sort-by (fn [s] [(or (::t/order s) 1000) (::t/name s)])
-             (concat non-ref-selections combined-ref-selections))))
-
 (defn section-tabs [available-selections built-template character page-index]
   [:div.flex.justify-cont-s-a
    (doall
     (map-indexed
      (fn [i {:keys [name icon tags]}]
        (let [selections (entity/tagged-selections available-selections tags)
-             combined-selections (combine-selections selections)
+             combined-selections (entity/combine-selections selections)
              total-remaining (sum-remaining built-template character combined-selections)]
          ^{:key name}
          [:div.p-5.hover-opacity-full.pointer
@@ -2503,13 +2484,14 @@
         (get-in @app-state [:character ::entity/options :optional-content])))
 
 (defn new-options-column [character built-char built-template available-selections page-index option-paths stepper-selection-path]
-  (js/console.log "AVAILABLE SELECTIONS" available-selections)
+  ;;(js/console.log "AVAILABLE SELECTIONS" available-selections)
   (let [{:keys [tags ui-fns] :as page} (pages page-index)
         selections (entity/tagged-selections available-selections tags)
         final-selections (remove #(and (zero? (::t/min %))
                                        (zero? (::t/max %))
-                                       (zero? (count-remaining built-template character %))) (combine-selections selections))]
-    (js/console.log "FINAL SELECTIONS" final-selections)
+                                       (zero? (count-remaining built-template character %)))
+                                 (entity/combine-selections selections))]
+    ;;(js/console.log "FINAL SELECTIONS" final-selections)
     [:div.w-100-p
      [:div.m-b-20
       [:div.flex.align-items-c
@@ -2605,6 +2587,7 @@
                 (selection-section character built-char built-template option-paths nil selection))
               non-ui-fn-selections))])])]]))
 
+
 (defn builder-columns [built-template built-char option-paths collapsed-paths stepper-selection-path stepper-selection plugins active-tabs stepper-dismissed? available-selections]
   [:div.flex-grow-1.flex
    {:class-name (s/join " " (map #(str (name %) "-tab-active") active-tabs))}
@@ -2695,8 +2678,9 @@
      [:i.fa.fa-print.f-s-18]
      [:span.m-l-5.hidden-xs "Print"]]]])
 
+
 (defn character-builder []
-  (cljs.pprint/pprint (:character @app-state))
+  ;;(cljs.pprint/pprint (:character @app-state))
   ;;(js/console.log "APP STATE" @app-state)
   (let [selected-plugin-options (get-selected-plugin-options app-state)
         selected-plugins (map
@@ -2715,7 +2699,7 @@
                                      selected-plugins)))
                           template)
         option-paths (entity/make-path-map (:character @app-state))
-        built-template (entity/build-template (:character @app-state) merged-template)
+        built-template merged-template ;;(entity/build-template (:character @app-state) merged-template)
         built-char (entity/build (:character @app-state) built-template)
         active-tab (get-in @app-state tab-path)
         view-width (.-width (gdom/getViewportSize js/window))
@@ -2726,7 +2710,7 @@
         plugins (:plugins @app-state)
         stepper-dismissed? (:stepper-dismissed @app-state)
         all-selections (entity/available-selections (:character @app-state) built-char built-template)]
-    (print-char built-char)
+    ;;(print-char built-char)
     [:div.app
      {:on-scroll (fn [e]
                    (let [app-header (js/document.getElementById "app-header")

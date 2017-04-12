@@ -238,17 +238,16 @@
    name
    (common/name-to-kw name)
    selections
-   (vec
-    (concat
-     [(mod5e/subrace name)]
-     modifiers
-     (armor-prof-modifiers armor-proficiencies)
-     (weapon-prof-modifiers weapon-proficiencies)
-     (map
-      (fn [[k v]]
-        (mod5e/subrace-ability k v))
-      abilities)
-     (traits-modifiers traits false source))))]
+   (concat
+    [(mod5e/subrace name)]
+    modifiers
+    (armor-prof-modifiers armor-proficiencies)
+    (weapon-prof-modifiers weapon-proficiencies)
+    (map
+     (fn [[k v]]
+       (mod5e/subrace-ability k v))
+     abilities)
+    (traits-modifiers traits false source)))]
     option))
 
 (defn ability-modifiers [abilities]
@@ -259,6 +258,7 @@
 
 (defn darkvision-modifiers [range]
   [(mod5e/darkvision range)])
+
 
 (defn race-option [{:keys [name
                            help
@@ -291,25 +291,24 @@
                                     (keys lang-options))]
                      [(opt5e/language-selection (map opt5e/language-map lang-kws) lang-num)]))
                  selections)
-    :modifiers (vec
-                (concat
-                 [(mod5e/race name)
-                  (mod5e/size size)
-                  (mod5e/speed speed)]
-                 (if darkvision
-                   (darkvision-modifiers darkvision))
-                 (map
-                  (fn [language]
-                    (mod5e/language (common/name-to-kw language)))
-                  languages)
-                 (map
-                  (fn [[k v]]
-                    (mod5e/race-ability k v))
-                  abilities)
-                 modifiers
-                 (traits-modifiers traits false source)
-                 (armor-prof-modifiers armor-proficiencies)
-                 (weapon-prof-modifiers weapon-proficiencies)))}))
+    :modifiers (concat
+                [(mod5e/race name)
+                 (mod5e/size size)
+                 (mod5e/speed speed)]
+                (if darkvision
+                  (darkvision-modifiers darkvision))
+                (map
+                 (fn [language]
+                   (mod5e/language (common/name-to-kw language)))
+                 languages)
+                (map
+                 (fn [[k v]]
+                   (mod5e/race-ability k v))
+                 abilities)
+                modifiers
+                (traits-modifiers traits false source)
+                (armor-prof-modifiers armor-proficiencies)
+                (weapon-prof-modifiers weapon-proficiencies))}))
 
 (def elf-weapon-training-mods
   (weapon-prof-modifiers [:longsword :shortsword :shortbow :longbow]))
@@ -319,139 +318,136 @@
    :summary "Disadvantage on attack and perception rolls in direct sunlight"
    :page 24})
 
-(def elf-option
-  (race-option
-   {:name "Elf"
-    :help "Elves are graceful, magical creatures, with a slight build."
-    :abilities {:dex 2}
-    :size :medium
-    :speed 30
-    :languages ["Elvish" "Common"]
-    :darkvision 60
-    :modifiers [(mod5e/saving-throw-advantage [:charmed])
-                (mod5e/immunity :magical-sleep)]
-    :subraces
-    [{:name "High Elf"
-      :abilities {:int 1}
-      :selections [(opt5e/spell-selection
-                    {:class-key :wizard
-                     :level 0
-                     :spellcasting-ability :int
-                     :class-name "High Elf"
-                     :num 1})
-                   (opt5e/language-selection opt5e/languages 1)]
-      :modifiers [elf-weapon-training-mods]}
-     {:name "Wood Elf"
-      :abilities {:cha 1}
-      :traits [{:name "Mask of the Wild"
-                :page 24
-                :summary "Hide when lightly obscured by natural phenomena."}]
-      :modifiers [(mod5e/speed 5)
-                  elf-weapon-training-mods]}
-     {:name "Dark Elf (Drow)"
-      :abilities {:cha 1}
-      :traits [(sunlight-sensitivity 24)]
-      :modifiers [(mod5e/darkvision 120)
-                  (mod5e/spells-known 0 :dancing-lights :cha "Dark Elf")
-                  (mod5e/spells-known 1 :faerie-fire :cha "Dark Elf" 3)
-                  (mod5e/spells-known 2 :darkness :cha "Dark Elf" 5)]}]
-    :traits [{:name "Fey Ancestry"
-              :page 23
-              :summary "advantage on charmed saves and immune to sleep magic"}
-             {:name "Trance"
-              :page 23
-              :summary "Trance 4 hrs. instead of sleep 8"}]}))
+(def elf-option-cfg
+  {:name "Elf"
+   :help "Elves are graceful, magical creatures, with a slight build."
+   :abilities {:dex 2}
+   :size :medium
+   :speed 30
+   :languages ["Elvish" "Common"]
+   :darkvision 60
+   :modifiers [(mod5e/saving-throw-advantage [:charmed])
+               (mod5e/immunity :magical-sleep)]
+   :subraces
+   [{:name "High Elf"
+     :abilities {:int 1}
+     :selections [(opt5e/spell-selection
+                   {:class-key :wizard
+                    :level 0
+                    :exclude-ref? true
+                    :spellcasting-ability :int
+                    :class-name "High Elf"
+                    :num 1})
+                  (opt5e/language-selection opt5e/languages 1)]
+     :modifiers [elf-weapon-training-mods]}
+    {:name "Wood Elf"
+     :abilities {:cha 1}
+     :traits [{:name "Mask of the Wild"
+               :page 24
+               :summary "Hide when lightly obscured by natural phenomena."}]
+     :modifiers [(mod5e/speed 5)
+                 elf-weapon-training-mods]}
+    {:name "Dark Elf (Drow)"
+     :abilities {:cha 1}
+     :traits [(sunlight-sensitivity 24)]
+     :modifiers [(mod5e/darkvision 120)
+                 (mod5e/spells-known 0 :dancing-lights :cha "Dark Elf")
+                 (mod5e/spells-known 1 :faerie-fire :cha "Dark Elf" 3)
+                 (mod5e/spells-known 2 :darkness :cha "Dark Elf" 5)]}]
+   :traits [{:name "Fey Ancestry"
+             :page 23
+             :summary "advantage on charmed saves and immune to sleep magic"}
+            {:name "Trance"
+             :page 23
+             :summary "Trance 4 hrs. instead of sleep 8"}]})
 
-(def dwarf-option
-  (race-option
-   {:name "Dwarf",
-    :help "Dwarves are short and stout and tend to be skilled warriors and craftmen in stone and metal."
-    :abilities {:con 2},
-    :size :medium
-    :speed 25,
-    :darkvision 60
-    :languages ["Dwarvish" "Common"]
-    :weapon-proficiencies [:handaxe :battleaxe :light-hammer :warhammer]
-    :traits [{:name "Dwarven Resilience"
-              :summary "Advantage on poison saves, resistance to poison damage"
-              :page 20},
-             {:name "Stonecunning"
-              :summary "2X prof bonus on stonework-related history checks"
-              :page 20}]
-    :subraces [{:name "Hill Dwarf",
-                :abilities {:wis 1}
-                :selections [(opt5e/tool-selection [:smiths-tools :brewers-supplies :masons-tools] 1)]
-                :modifiers [(mod/modifier ?hit-point-level-bonus (+ 1 ?hit-point-level-bonus))]}
-               {:name "Mountain Dwarf"
-                :abilities {:str 2}
-                :armor-proficiencies [:light :medium]}]
-    :modifiers [(mod5e/damage-resistance :poison)
-                (mod5e/saving-throw-advantage [:poisoned])]}))
+(def dwarf-option-cfg
+  {:name "Dwarf",
+   :help "Dwarves are short and stout and tend to be skilled warriors and craftmen in stone and metal."
+   :abilities {:con 2},
+   :size :medium
+   :speed 25,
+   :darkvision 60
+   :languages ["Dwarvish" "Common"]
+   :weapon-proficiencies [:handaxe :battleaxe :light-hammer :warhammer]
+   :traits [{:name "Dwarven Resilience"
+             :summary "Advantage on poison saves, resistance to poison damage"
+             :page 20},
+            {:name "Stonecunning"
+             :summary "2X prof bonus on stonework-related history checks"
+             :page 20}]
+   :subraces [{:name "Hill Dwarf",
+               :abilities {:wis 1}
+               :selections [(opt5e/tool-selection [:smiths-tools :brewers-supplies :masons-tools] 1)]
+               :modifiers [(mod/modifier ?hit-point-level-bonus (+ 1 ?hit-point-level-bonus))]}
+              {:name "Mountain Dwarf"
+               :abilities {:str 2}
+               :armor-proficiencies [:light :medium]}]
+   :modifiers [(mod5e/damage-resistance :poison)
+               (mod5e/saving-throw-advantage [:poisoned])]})
 
-(def halfling-option
-  (race-option
-   {:name "Halfling"
-    :help "Halflings are small and nimble, half the height of a human, but fairly stout. They are cheerful and practical."
-    :abilities {:dex 2}
-    :size :small
-    :speed 25
-    :languages ["Halfling" "Common"]
-    :modifiers [(mod5e/saving-throw-advantage [:frightened])]
-    :subraces
-    [{:name "Lightfoot"
-      :abilities {:cha 1}
-      :traits [{:name "Naturally Stealthy"
-                :page 28
-                :summary "Hide behind creatures larger than you"}]}
-     {:name "Stout"
-      :abilities {:con 1}
-      :modifiers [(mod5e/damage-resistance :poison)
-                  (mod5e/saving-throw-advantage [:poisoned])]}]
-    :traits [{:name "Lucky"
-              :page 28
-              :summary "Reroll 1s on d20"}
-             {:name "Halfling Nimbleness"
-              :page 28
-              :summary "move through the space of larger creatures"}]}))
+(def halfling-option-cfg
+  {:name "Halfling"
+   :help "Halflings are small and nimble, half the height of a human, but fairly stout. They are cheerful and practical."
+   :abilities {:dex 2}
+   :size :small
+   :speed 25
+   :languages ["Halfling" "Common"]
+   :modifiers [(mod5e/saving-throw-advantage [:frightened])]
+   :subraces
+   [{:name "Lightfoot"
+     :abilities {:cha 1}
+     :traits [{:name "Naturally Stealthy"
+               :page 28
+               :summary "Hide behind creatures larger than you"}]}
+    {:name "Stout"
+     :abilities {:con 1}
+     :modifiers [(mod5e/damage-resistance :poison)
+                 (mod5e/saving-throw-advantage [:poisoned])]}]
+   :traits [{:name "Lucky"
+             :page 28
+             :summary "Reroll 1s on d20"}
+            {:name "Halfling Nimbleness"
+             :page 28
+             :summary "move through the space of larger creatures"}]})
 
-(def human-option
-  (race-option
-   {:name "Human"
-    :help "Humans are physically diverse and highly adaptable. They excel in nearly every profession."
-    :size :medium
-    :speed 30
-    :languages ["Common"]
-    :subraces
-    [{:name "Calishite"}
-     {:name "Chondathan"}
-     {:name "Damaran"}
-     {:name "Illuskan"}
-     {:name "Mulan"}
-     {:name "Rashemi"}
-     {:name "Shou"}
-     {:name "Tethyrian"}
-     {:name "Turami"}]
-    :selections [(opt5e/language-selection opt5e/languages 1)
-                 (t/selection-cfg
-                  {:name "Variant"
-                   :tags #{:subrace}
-                   :options [(t/option
-                              "Standard Human"
-                              :standard
-                              []
-                              [(mod5e/race-ability :str 1)
-                               (mod5e/race-ability :con 1)
-                               (mod5e/race-ability :dex 1)
-                               (mod5e/race-ability :int 1)
-                               (mod5e/race-ability :wis 1)
-                               (mod5e/race-ability :cha 1)])
-                             (t/option
-                              "Variant Human"
-                              :variant
-                              [(opt5e/feat-selection 1)
-                               (opt5e/skill-selection 1)
-                               (opt5e/ability-increase-selection char5e/ability-keys 2 true)]
-                              [])]})]}))
+(def human-option-cfg
+  {:name "Human"
+   :help "Humans are physically diverse and highly adaptable. They excel in nearly every profession."
+   :size :medium
+   :speed 30
+   :languages ["Common"]
+   :subraces
+   [{:name "Calishite"}
+    {:name "Chondathan"}
+    {:name "Damaran"}
+    {:name "Illuskan"}
+    {:name "Mulan"}
+    {:name "Rashemi"}
+    {:name "Shou"}
+    {:name "Tethyrian"}
+    {:name "Turami"}]
+   :selections [(opt5e/language-selection opt5e/languages 1)
+                (t/selection-cfg
+                 {:name "Variant"
+                  :tags #{:subrace}
+                  :options [(t/option
+                             "Standard Human"
+                             :standard
+                             []
+                             [(mod5e/race-ability :str 1)
+                              (mod5e/race-ability :con 1)
+                              (mod5e/race-ability :dex 1)
+                              (mod5e/race-ability :int 1)
+                              (mod5e/race-ability :wis 1)
+                              (mod5e/race-ability :cha 1)])
+                            (t/option
+                             "Variant Human"
+                             :variant
+                             [(opt5e/feat-selection 1)
+                              (opt5e/skill-selection 1)
+                              (opt5e/ability-increase-selection char5e/ability-keys 2 true)]
+                             [])]})]})
 
 (defn draconic-ancestry-option [{:keys [name breath-weapon]}]
   (t/option
@@ -518,139 +514,134 @@
                     :length 15
                     :save :con}}])
 
-(def dragonborn-option
-  (race-option
-   {:name "Dragonborn"
-    :help "Kin to dragons, dragonborn resemble humanoid dragons, without wings or tail and standing erect. They tend to make excellent warriors."
-    :abilities {:str 2 :cha 1}
-    :size :medium
-    :speed 30
-    :languages ["Draconic" "Common"]
-    :modifiers [(mod5e/attack
-                 (let [breath-weapon ?draconic-ancestry-breath-weapon
-                       damage-type (:damage-type breath-weapon)]
-                   (merge
-                    breath-weapon
-                    {:name "Breath Weapon"
-                     :summary (if damage-type
-                                    (s/capitalize (name damage-type)))
-                     :attack-type :area
-                     :damage-die 6
-                     :page 34
-                     :damage-die-count (condp <= ?total-levels
-                                         16 5
-                                         11 4
-                                         6 3
-                                         2)
-                     :save-dc (?spell-save-dc :con)})))]
-    :selections [(t/selection-cfg
-                  {:name "Draconic Ancestry"
-                   :tags #{:subrace}
-                   :options (mapv
-                             draconic-ancestry-option
-                             draconic-ancestries)})]}))
+(def dragonborn-option-cfg
+  {:name "Dragonborn"
+   :help "Kin to dragons, dragonborn resemble humanoid dragons, without wings or tail and standing erect. They tend to make excellent warriors."
+   :abilities {:str 2 :cha 1}
+   :size :medium
+   :speed 30
+   :languages ["Draconic" "Common"]
+   :modifiers [(mod5e/attack
+                (let [breath-weapon ?draconic-ancestry-breath-weapon
+                      damage-type (:damage-type breath-weapon)]
+                  (merge
+                   breath-weapon
+                   {:name "Breath Weapon"
+                    :summary (if damage-type
+                               (s/capitalize (name damage-type)))
+                    :attack-type :area
+                    :damage-die 6
+                    :page 34
+                    :damage-die-count (condp <= ?total-levels
+                                        16 5
+                                        11 4
+                                        6 3
+                                        2)
+                    :save-dc (?spell-save-dc :con)})))]
+   :selections [(t/selection-cfg
+                 {:name "Draconic Ancestry"
+                  :tags #{:subrace}
+                  :options (map
+                            draconic-ancestry-option
+                            draconic-ancestries)})]})
 
 
-(def gnome-option
-  (race-option
-   {:name "Gnome"
-    :help "Gnomes are small, intelligent humanoids who live life with the utmost of enthusiasm."
-    :abilities {:int 2}
-    :size :small
-    :speed 25
-    :darkvision 60
-    :languages ["Gnomish" "Common"]
-    :modifiers [(mod5e/saving-throw-advantage [:magic] [:int :wis :cha])]
-    :subraces
-    [{:name "Rock Gnome"
-      :abilities {:con 1}
-      :modifiers [(mod5e/tool-proficiency :tinkers-tools)]
-      :traits [{:name "Artificer's Lore"
-                :page 37
-                :summary "Add 2X prof bonus on magical, alchemical, or technological item-related history checks."}
-               {:name "Tinker"
-                :page 37
-                :summary "Construct tiny clockwork devices."}]}
-     {:name "Forest Gnome"
-      :abilities {:dex 1}
-      :modifiers [(mod5e/spells-known 0 :minor-illusion :int "Forest Gnome")]
-      :traits [{:name "Speak with Small Beasts"
-                :page 37
-                :summary "Communicate with Small or smaller beasts."}]}]}))
+(def gnome-option-cfg
+  {:name "Gnome"
+   :help "Gnomes are small, intelligent humanoids who live life with the utmost of enthusiasm."
+   :abilities {:int 2}
+   :size :small
+   :speed 25
+   :darkvision 60
+   :languages ["Gnomish" "Common"]
+   :modifiers [(mod5e/saving-throw-advantage [:magic] [:int :wis :cha])]
+   :subraces
+   [{:name "Rock Gnome"
+     :abilities {:con 1}
+     :modifiers [(mod5e/tool-proficiency :tinkers-tools)]
+     :traits [{:name "Artificer's Lore"
+               :page 37
+               :summary "Add 2X prof bonus on magical, alchemical, or technological item-related history checks."}
+              {:name "Tinker"
+               :page 37
+               :summary "Construct tiny clockwork devices."}]}
+    {:name "Forest Gnome"
+     :abilities {:dex 1}
+     :modifiers [(mod5e/spells-known 0 :minor-illusion :int "Forest Gnome")]
+     :traits [{:name "Speak with Small Beasts"
+               :page 37
+               :summary "Communicate with Small or smaller beasts."}]}]})
 
-(def half-elf-option
-  (race-option
-   {:name "Half-Elf"
-    :help "Half-elves are charismatic, and bear a resemblance to both their elvish and human parents and share many of the traits of each."
-    :abilities {:cha 2}
-    :size :medium
-    :speed 30
-    :languages ["Common" "Elvish"]
-    :selections [(opt5e/ability-increase-selection (disj (set char5e/ability-keys) :cha) 2 true)
-                 (opt5e/skill-selection 2)
-                 (opt5e/language-selection opt5e/languages 1)]
-    :modifiers [(mod5e/saving-throw-advantage [:charmed])]}))
+(def half-elf-option-cfg
+  {:name "Half-Elf"
+   :help "Half-elves are charismatic, and bear a resemblance to both their elvish and human parents and share many of the traits of each."
+   :abilities {:cha 2}
+   :size :medium
+   :speed 30
+   :languages ["Common" "Elvish"]
+   :selections [(opt5e/ability-increase-selection (disj (set char5e/ability-keys) :cha) 2 true)
+                (opt5e/skill-selection 2)
+                (opt5e/language-selection opt5e/languages 1)]
+   :modifiers [(mod5e/saving-throw-advantage [:charmed])]})
 
-(def half-orc-option
-  (race-option
-   {:name "Half-Orc"
-    :help "Half-orcs are strong and bear an unmistakable resemblance to their orcish parent. They tend to make excellent warriors, especially Barbarians."
-    :abilities {:str 2 :con 1}
-    :size :medium
-    :speed 30
-    :languages ["Common" "Orc"]
-    :modifiers [(mod5e/skill-proficiency :intimidation)]
-    :traits [{:name "Relentless Endurance"
-              :page 41
-              :summary "Drop to 1 hp instead of being reduced to 0."}
-             {:name "Savage Attacks"
-              :page 41
-              :summary "On critical hit, add additional damage dice roll"}]}))
+(def half-orc-option-cfg
+  {:name "Half-Orc"
+   :help "Half-orcs are strong and bear an unmistakable resemblance to their orcish parent. They tend to make excellent warriors, especially Barbarians."
+   :abilities {:str 2 :con 1}
+   :size :medium
+   :speed 30
+   :languages ["Common" "Orc"]
+   :modifiers [(mod5e/skill-proficiency :intimidation)]
+   :traits [{:name "Relentless Endurance"
+             :page 41
+             :summary "Drop to 1 hp instead of being reduced to 0."}
+            {:name "Savage Attacks"
+             :page 41
+             :summary "On critical hit, add additional damage dice roll"}]})
 
-(def aasimar-option
-  (race-option
-   {:name "Aasimar"
-    :abilities {:cha 2}
-    :size :medium
-    :speed 30
-    :darkvision 60
-    :source :vgm
-    :languages ["Common" "Celestial"]
-    :modifiers [(mod5e/damage-resistance :necrotic)
-                (mod5e/damage-resistance :radiant)
-                (mod5e/spells-known 0 :light :cha "Aasimar")]
-    :traits [{:name "Healing Hands"
-              :page 105
-              :summary "Heal a creature a number of hit points equal to your level"}]
-    :subraces [{:name "Protector Aasimar"
-                :abilities {:wis 1}
-                :modifiers [(mod5e/dependent-trait
-                             {:name "Radiant Soul"
-                              :level 3
-                              :page 105
-                              :source :vgm
-                              :summary (str "For 1 minute, sprout wings (30 ft. flying speed) and deal "
-                                            ?total-levels
-                                            " extra radiant damage.") })]}
-               {:name "Scourge Aasimar"
-                :abilities {:con 1}
-                :modifiers [(mod5e/dependent-trait
-                             {:name "Radiant Consumption"
-                              :level 3
-                              :page 105
-                              :source :vgm
-                              :summary (let [level ?total-levels]
-                                         (str "For 1 minute, deal "
-                                              (common/round-up (/ level 2))
-                                              " radiant damage to each creature within 10 ft. and deal an additional " level " radiant damage to one target you deal damage to with a spell or attack"))})]}
-               {:name "Fallen Aasimar"
-                :abilities {:str 1}
-                :modifiers [(mod5e/dependent-trait
-                             {:name "Necrotic Shroud"
-                              :level 3
-                              :page 105
-                              :source :vgm
-                              :summary (str "For 1 minute, creatures within 10 ft. must succeed on a DC " (?spell-save-dc :cha) " cha save or be frightened of you. During that time also deal an additional " ?total-levels " necrotic damage to one target you deal damage to with a spell or attack.")})]}]}))
+(def aasimar-option-cfg
+  {:name "Aasimar"
+   :abilities {:cha 2}
+   :size :medium
+   :speed 30
+   :darkvision 60
+   :source :vgm
+   :languages ["Common" "Celestial"]
+   :modifiers [(mod5e/damage-resistance :necrotic)
+               (mod5e/damage-resistance :radiant)
+               (mod5e/spells-known 0 :light :cha "Aasimar")]
+   :traits [{:name "Healing Hands"
+             :page 105
+             :summary "Heal a creature a number of hit points equal to your level"}]
+   :subraces [{:name "Protector Aasimar"
+               :abilities {:wis 1}
+               :modifiers [(mod5e/dependent-trait
+                            {:name "Radiant Soul"
+                             :level 3
+                             :page 105
+                             :source :vgm
+                             :summary (str "For 1 minute, sprout wings (30 ft. flying speed) and deal "
+                                           ?total-levels
+                                           " extra radiant damage.") })]}
+              {:name "Scourge Aasimar"
+               :abilities {:con 1}
+               :modifiers [(mod5e/dependent-trait
+                            {:name "Radiant Consumption"
+                             :level 3
+                             :page 105
+                             :source :vgm
+                             :summary (let [level ?total-levels]
+                                        (str "For 1 minute, deal "
+                                             (common/round-up (/ level 2))
+                                             " radiant damage to each creature within 10 ft. and deal an additional " level " radiant damage to one target you deal damage to with a spell or attack"))})]}
+              {:name "Fallen Aasimar"
+               :abilities {:str 1}
+               :modifiers [(mod5e/dependent-trait
+                            {:name "Necrotic Shroud"
+                             :level 3
+                             :page 105
+                             :source :vgm
+                             :summary (str "For 1 minute, creatures within 10 ft. must succeed on a DC " (?spell-save-dc :cha) " cha save or be frightened of you. During that time also deal an additional " ?total-levels " necrotic damage to one target you deal damage to with a spell or attack.")})]}]})
 
 (defn powerful-build [page]
   {:name "Powerful Build"
@@ -658,270 +649,257 @@
    :source :vgm
    :summary "Count as Large for purposes of determining weight you can carry, push, drag, or lift."})
 
-(def firbolg-option
-  (race-option
-   {:name "Firbolg"
-    :abilities {:wis 2 :str 1}
-    :size :medium
-    :speed 30
-    :source :vgm
-    :languages ["Common" "Elvish" "Giant"]
-    :modifiers [(mod5e/spells-known 1 :detect-magic :wis "Firbolg")
-                (mod5e/spells-known 1 :disguise-self :wis "Firbolg" 1 "only to seem 3 ft. shorter")
-                (mod5e/bonus-action
-                 {:name "Hidden Step"
-                  :duration {:units :round}
-                  :frequency {:units :rest}
-                  :page 107
-                  :source :vgm
-                  :summary "Turn invisible"})]
-    :traits [(powerful-build 107)
-             {:name "Speech of Beast and Leaf"
-              :page 107
-              :source :vgm
-              :summary "Beast and plants can understand you and you have advantage on Charisma checks to influence them."}]}))
+(def firbolg-option-cfg
+  {:name "Firbolg"
+   :abilities {:wis 2 :str 1}
+   :size :medium
+   :speed 30
+   :source :vgm
+   :languages ["Common" "Elvish" "Giant"]
+   :modifiers [(mod5e/spells-known 1 :detect-magic :wis "Firbolg")
+               (mod5e/spells-known 1 :disguise-self :wis "Firbolg" 1 "only to seem 3 ft. shorter")
+               (mod5e/bonus-action
+                {:name "Hidden Step"
+                 :duration {:units :round}
+                 :frequency {:units :rest}
+                 :page 107
+                 :source :vgm
+                 :summary "Turn invisible"})]
+   :traits [(powerful-build 107)
+            {:name "Speech of Beast and Leaf"
+             :page 107
+             :source :vgm
+             :summary "Beast and plants can understand you and you have advantage on Charisma checks to influence them."}]})
 
-(def goliath-option
-  (race-option
-   {:name "Goliath"
-    :abilities {:str 2 :con 1}
-    :size :medium
-    :speed 30
-    :languages ["Common" "Giant"]
-    :profs {:skill {:athletics true}}
-    :source :vgm
-    :modifiers [(mod5e/reaction
-                 {:name "Stone's Endurance"
-                  :frequency {:units :rest}
-                  :page 109
-                  :source :vgm
-                  :summary (str "Reduce damage taken by 1d12 + " (:con ?ability-bonuses))})]
-    
-    :traits [{:name "Mountain Born"
-              :page 109
-              :summary "Adapted to high altitude and cold climates."}
-             (powerful-build 109)]}))
+(def goliath-option-cfg
+  {:name "Goliath"
+   :abilities {:str 2 :con 1}
+   :size :medium
+   :speed 30
+   :languages ["Common" "Giant"]
+   :profs {:skill {:athletics true}}
+   :source :vgm
+   :modifiers [(mod5e/reaction
+                {:name "Stone's Endurance"
+                 :frequency {:units :rest}
+                 :page 109
+                 :source :vgm
+                 :summary (str "Reduce damage taken by 1d12 + " (:con ?ability-bonuses))})]
+   
+   :traits [{:name "Mountain Born"
+             :page 109
+             :summary "Adapted to high altitude and cold climates."}
+            (powerful-build 109)]})
 
-(def kenku-option
-  (race-option
-   {:name "Kenku"
-    :abilities {:dex 2 :wis 1}
-    :size :medium
-    :speed 30
-    :source :vgm
-    :languages ["Common" "Auran"]
-    :modifiers [(mod5e/dependent-trait
-                 {:name "Mimicry"
-                  :page 111
-                  :source :vgm
-                  :summary (str "Mimic sounds you've heard, creatures disbelieve it with an insight check opposed to your deception check (1d20" (common/mod-str (:deception ?skill-bonuses)) ").")})]
-    :profs {:skill-options {:choose 2 :options {:acrobatics true :deception true :stealth true :sleight-of-hand true}}}
-    :traits [{:name "Expert Forgery"
-              :page 111
-              :summary "Advantage on checks to duplicate existing objects"}]}))
+(def kenku-option-cfg
+  {:name "Kenku"
+   :abilities {:dex 2 :wis 1}
+   :size :medium
+   :speed 30
+   :source :vgm
+   :languages ["Common" "Auran"]
+   :modifiers [(mod5e/dependent-trait
+                {:name "Mimicry"
+                 :page 111
+                 :source :vgm
+                 :summary (str "Mimic sounds you've heard, creatures disbelieve it with an insight check opposed to your deception check (1d20" (common/mod-str (:deception ?skill-bonuses)) ").")})]
+   :profs {:skill-options {:choose 2 :options {:acrobatics true :deception true :stealth true :sleight-of-hand true}}}
+   :traits [{:name "Expert Forgery"
+             :page 111
+             :summary "Advantage on checks to duplicate existing objects"}]})
 
-(def lizardfolk-option
-  (race-option
-   {:name "Lizardfolk"
-    :abilities {:con 2 :wis 1}
-    :size :medium
-    :speed 30
-    :source :vgm
-    :languages ["Common" "Draconic"]
-    :modifiers [(mod5e/swimming-speed 30)
-                (mod/modifier ?natural-ac-bonus 3)
-                (mod/modifier ?armor-class-with-armor
-                              (fn [armor & [shield]]
-                                (max (+ ?base-armor-class
-                                        (if shield (?shield-ac-bonus shield) 0))
-                                     (?armor-class-with-armor armor shield))))
-                (mod5e/bonus-action
-                 {:name "Hungry Jaws"
-                  :page 113
-                  :source :vgm
-                  :frequency {:units :rest}
-                  :summary (str "Special attack with your bite. If you hit, you gain "
-                                (max 1 (:con ?ability-bonuses))
-                                " temp. hit points")})
-                (mod5e/attack
-                 {:name "Bite"
-                  :page 113
-                  :source :vgm
-                  :attack-type :melee
-                  :damage-type :piercing
-                  :damage-die 6
-                  :damage-die-count 1
-                  :damage-modifier (:str ?ability-bonuses)})]
-    :profs {:skill-options {:choose 2 :options {:animal-handling true :nature true :stealth true :perception true :survival true}}}
-    :traits [{:name "Cunning Artisan"
-              :page 113
-              :summary "Craft certain weapons and armor from creature remains."}
-             {:name "Hold Breath"
-              :page 113
-              :summary "Up to 15 min."}]}))
+(def lizardfolk-option-cfg
+  {:name "Lizardfolk"
+   :abilities {:con 2 :wis 1}
+   :size :medium
+   :speed 30
+   :source :vgm
+   :languages ["Common" "Draconic"]
+   :modifiers [(mod5e/swimming-speed 30)
+               (mod/modifier ?natural-ac-bonus 3)
+               (mod/modifier ?armor-class-with-armor
+                             (fn [armor & [shield]]
+                               (max (+ ?base-armor-class
+                                       (if shield (?shield-ac-bonus shield) 0))
+                                    (?armor-class-with-armor armor shield))))
+               (mod5e/bonus-action
+                {:name "Hungry Jaws"
+                 :page 113
+                 :source :vgm
+                 :frequency {:units :rest}
+                 :summary (str "Special attack with your bite. If you hit, you gain "
+                               (max 1 (:con ?ability-bonuses))
+                               " temp. hit points")})
+               (mod5e/attack
+                {:name "Bite"
+                 :page 113
+                 :source :vgm
+                 :attack-type :melee
+                 :damage-type :piercing
+                 :damage-die 6
+                 :damage-die-count 1
+                 :damage-modifier (:str ?ability-bonuses)})]
+   :profs {:skill-options {:choose 2 :options {:animal-handling true :nature true :stealth true :perception true :survival true}}}
+   :traits [{:name "Cunning Artisan"
+             :page 113
+             :summary "Craft certain weapons and armor from creature remains."}
+            {:name "Hold Breath"
+             :page 113
+             :summary "Up to 15 min."}]})
 
-(def tabaxi-option
-  (race-option
-   {:name "Tabaxi"
-    :abilities {:dex 2 :cha 1}
-    :size :medium
-    :speed 30
-    :darkvision 60
-    :source :vgm
-    :modifiers [(mod5e/climbing-speed 20)
-                (mod5e/attack
-                 {:name "Cat's Claws"
-                  :page 115
-                  :source :vgm
-                  :attack-type :melee
-                  :damage-type :slashing
-                  :damage-die 4
-                  :damage-die-count 1
-                  :damage-modifier (:str ?ability-bonuses)})]
-    :language-options {:choose 1 :options {:any true}}
-    :profs {:skill {:perception true :stealth true}}
-    :traits [{:name "Feline Agility"
-              :page 115
-              :summary "Double speed when moving on your turn in combat."}]}))
+(def tabaxi-option-cfg
+  {:name "Tabaxi"
+   :abilities {:dex 2 :cha 1}
+   :size :medium
+   :speed 30
+   :darkvision 60
+   :source :vgm
+   :modifiers [(mod5e/climbing-speed 20)
+               (mod5e/attack
+                {:name "Cat's Claws"
+                 :page 115
+                 :source :vgm
+                 :attack-type :melee
+                 :damage-type :slashing
+                 :damage-die 4
+                 :damage-die-count 1
+                 :damage-modifier (:str ?ability-bonuses)})]
+   :language-options {:choose 1 :options {:any true}}
+   :profs {:skill {:perception true :stealth true}}
+   :traits [{:name "Feline Agility"
+             :page 115
+             :summary "Double speed when moving on your turn in combat."}]})
 
-(def triton-option
-  (race-option
-   {:name "Triton"
-    :abilities {:str 1 :con 1 :cha 1}
-    :size :medium
-    :speed 30
-    :source :vgm
-    :languages ["Common" "Primordial"]
-    :modifiers [(mod5e/swimming-speed 30)
-                (mod5e/spells-known 1 :fog-cloud :cha "Triton")
-                (mod5e/spells-known 2 :gust-of-wind :cha "Triton" 3)
-                (mod5e/spells-known 3 :wall-of-water :cha "Triton" 5)
-                (mod5e/damage-resistance :cold)]
-    :traits [{:name "Amphibious"
-              :page 118
-              :summary "Breath water and air"}
-             {:name "Emissary of the Sea"
-              :page 118
-              :summary "Water-breathing beasts can understand your words."}
-             {:name "Guardians of the Depths"
-              :page 118
-              :summary "No negative effects from deep, underwater environment."}]}))
+(def triton-option-cfg
+  {:name "Triton"
+   :abilities {:str 1 :con 1 :cha 1}
+   :size :medium
+   :speed 30
+   :source :vgm
+   :languages ["Common" "Primordial"]
+   :modifiers [(mod5e/swimming-speed 30)
+               (mod5e/spells-known 1 :fog-cloud :cha "Triton")
+               (mod5e/spells-known 2 :gust-of-wind :cha "Triton" 3)
+               (mod5e/spells-known 3 :wall-of-water :cha "Triton" 5)
+               (mod5e/damage-resistance :cold)]
+   :traits [{:name "Amphibious"
+             :page 118
+             :summary "Breath water and air"}
+            {:name "Emissary of the Sea"
+             :page 118
+             :summary "Water-breathing beasts can understand your words."}
+            {:name "Guardians of the Depths"
+             :page 118
+             :summary "No negative effects from deep, underwater environment."}]})
 
-(def bugbear-option
-  (race-option
-   {:name "Bugbear"
-    :abilities {:str 2 :dex 1}
-    :size "Medium"
-    :speed 30
-    :darkvision 60
-    :source :vgm
-    :modifiers [(mod5e/skill-proficiency :stealth)]
-    :languages ["Common" "Goblin"]
-    :traits [{:name "Long Limbed"
-              :page 119
-              :summary "5 ft. additional reach to melee attacks on your turn"}
-             (powerful-build 119)
-             {:name "Surprise Attack"
-              :page 119
-              :summary "Extra 2d6 damage when hitting a surprised creature."}]}))
+(def bugbear-option-cfg
+  {:name "Bugbear"
+   :abilities {:str 2 :dex 1}
+   :size "Medium"
+   :speed 30
+   :darkvision 60
+   :source :vgm
+   :modifiers [(mod5e/skill-proficiency :stealth)]
+   :languages ["Common" "Goblin"]
+   :traits [{:name "Long Limbed"
+             :page 119
+             :summary "5 ft. additional reach to melee attacks on your turn"}
+            (powerful-build 119)
+            {:name "Surprise Attack"
+             :page 119
+             :summary "Extra 2d6 damage when hitting a surprised creature."}]})
 
-(def goblin-option
-  (race-option
-   {:name "Goblin"
-    :abilities {:dex 2 :con 1}
-    :size "Medium"
-    :speed 30
-    :darkvision 60
-    :source :vgm
-    :languages ["Common" "Goblin"]
-    :modifiers [(mod5e/dependent-trait
-                 {:name "Fury of the Small"
-                  :page 119
-                  :summary (str "Extra " ?total-levels " damage to a larger creature (use once per long or short rest)")})
-                (mod5e/bonus-action
-                 {:name "Nimble Escape"
-                  :page 119
-                  :summary "Disengage or Hide action as a bonus action."})]}))
+(def goblin-option-cfg
+  {:name "Goblin"
+   :abilities {:dex 2 :con 1}
+   :size "Medium"
+   :speed 30
+   :darkvision 60
+   :source :vgm
+   :languages ["Common" "Goblin"]
+   :modifiers [(mod5e/dependent-trait
+                {:name "Fury of the Small"
+                 :page 119
+                 :summary (str "Extra " ?total-levels " damage to a larger creature (use once per long or short rest)")})
+               (mod5e/bonus-action
+                {:name "Nimble Escape"
+                 :page 119
+                 :summary "Disengage or Hide action as a bonus action."})]})
 
-(def hobgoblin-option
-  (race-option
-   {:name "Hobgoblin"
-    :abilities {:con 2 :int 1}
-    :size "Medium"
-    :speed 30
-    :darkvision 60
-    :source :vgm
-    :selections [(t/selection
-                  "Martial Weapon Proficiencies"
-                  (opt5e/weapon-proficiency-options (weapon5e/martial-weapons weapon5e/weapons))
-                  2
-                  2)]
-    :modifiers [(mod5e/light-armor-proficiency)]
-    :traits [{:name "Saving Face"
-              :page 119
-              :summary "Add a bonus to a missed roll for each ally you can see, up to 5."}]}))
+(def hobgoblin-option-cfg
+  {:name "Hobgoblin"
+   :abilities {:con 2 :int 1}
+   :size "Medium"
+   :speed 30
+   :darkvision 60
+   :source :vgm
+   :selections [(t/selection
+                 "Martial Weapon Proficiencies"
+                 (opt5e/weapon-proficiency-options (weapon5e/martial-weapons weapon5e/weapons))
+                 2
+                 2)]
+   :modifiers [(mod5e/light-armor-proficiency)]
+   :traits [{:name "Saving Face"
+             :page 119
+             :summary "Add a bonus to a missed roll for each ally you can see, up to 5."}]})
 
-(def kobold-option
-  (race-option
-   {:name "Kobold"
-    :abilities {:dex 2 :str -2}
-    :size "Medium"
-    :speed 30
-    :darkvision 60
-    :source :vgm
-    :languages ["Common" "Draconic"]
-    :traits [{:name "Grovel, Cower, and Beg"
-              :page 119
-              :summary "Cower to give allies advantage on attacks against enemies within 10 ft."}
-             {:name "Pack Tactics"
-              :page 119
-              :summary "Advantage on attacks if an ally is within 5 ft. of the target."}
-             (sunlight-sensitivity 119)]}))
+(def kobold-option-cfg
+  {:name "Kobold"
+   :abilities {:dex 2 :str -2}
+   :size "Medium"
+   :speed 30
+   :darkvision 60
+   :source :vgm
+   :languages ["Common" "Draconic"]
+   :traits [{:name "Grovel, Cower, and Beg"
+             :page 119
+             :summary "Cower to give allies advantage on attacks against enemies within 10 ft."}
+            {:name "Pack Tactics"
+             :page 119
+             :summary "Advantage on attacks if an ally is within 5 ft. of the target."}
+            (sunlight-sensitivity 119)]})
 
-(def orc-option
-  (race-option
-   {:name "Orc"
-    :abilities {:str 2 :con 1 :int -2}
-    :size "Medium"
-    :speed 30
-    :darkvision 60
-    :source :vgm
-    :modifiers [(mod5e/skill-proficiency :intimidation)
-                (mod5e/bonus-action
-                 {:name "Aggressive"
-                  :page 120
-                  :summary (str "Move up to " ?speed " feet toward and enemy you can see or hear")})]
-    :languages ["Common" "Orc"]
-    :traits [(powerful-build 120)]}))
+(def orc-option-cfg
+  {:name "Orc"
+   :abilities {:str 2 :con 1 :int -2}
+   :size "Medium"
+   :speed 30
+   :darkvision 60
+   :source :vgm
+   :modifiers [(mod5e/skill-proficiency :intimidation)
+               (mod5e/bonus-action
+                {:name "Aggressive"
+                 :page 120
+                 :summary (str "Move up to " ?speed " feet toward and enemy you can see or hear")})]
+   :languages ["Common" "Orc"]
+   :traits [(powerful-build 120)]})
 
-(def yuan-ti-option
-  (race-option
-   {:name "Yuan-Ti Pureblood"
-    :abilities {:cha 2 :int 1}
-    :size "Medium"
-    :speed 30
-    :darkvision 60
-    :source :vgm
-    :modifiers [(mod5e/spells-known 0 :poison-spray :cha "Yuan-Ti")
-                (mod5e/spells-known 1 :animal-friendship :cha "Yuan-Ti" 1 "unlimited uses, can only target snakes")
-                (mod5e/spells-known 2 :suggestion :cha "Yuan-Ti" 3 "one use per long rest")
-                (mod5e/damage-immunity :poison)
-                (mod5e/condition-immunity :poisoned)
-                (mod5e/saving-throw-advantage [:magic])]
-    :languages ["Common" "Abyssal" "Draconic"]}))
+(def yuan-ti-option-cfg
+  {:name "Yuan-Ti Pureblood"
+   :abilities {:cha 2 :int 1}
+   :size "Medium"
+   :speed 30
+   :darkvision 60
+   :source :vgm
+   :modifiers [(mod5e/spells-known 0 :poison-spray :cha "Yuan-Ti")
+               (mod5e/spells-known 1 :animal-friendship :cha "Yuan-Ti" 1 "unlimited uses, can only target snakes")
+               (mod5e/spells-known 2 :suggestion :cha "Yuan-Ti" 3 "one use per long rest")
+               (mod5e/damage-immunity :poison)
+               (mod5e/condition-immunity :poisoned)
+               (mod5e/saving-throw-advantage [:magic])]
+   :languages ["Common" "Abyssal" "Draconic"]})
 
-(def tiefling-option
-  (race-option
-   {:name "Tiefling"
-    :help "Tieflings bear the distinct marks of their infernal ancestry: horns, a tail, pointed teeth, and solid-colored eyes. They are smart and charismatic."
-    :abilities {:int 1 :cha 2}
-    :size :medium
-    :speed 30
-    :darkvision 60
-    :languages ["Common" "Infernal"]
-    :modifiers [(mod5e/spells-known 0 :thaumaturgy :cha "Tiefling")
-                (mod5e/spells-known 1 :hellish-rebuke :cha "Tiefling" 3)
-                (mod5e/spells-known 2 :darkness :cha "Tiefling" 5)]}))
+(def tiefling-option-cfg
+  {:name "Tiefling"
+   :help "Tieflings bear the distinct marks of their infernal ancestry: horns, a tail, pointed teeth, and solid-colored eyes. They are smart and charismatic."
+   :abilities {:int 1 :cha 2}
+   :size :medium
+   :speed 30
+   :darkvision 60
+   :languages ["Common" "Infernal"]
+   :modifiers [(mod5e/spells-known 0 :thaumaturgy :cha "Tiefling")
+               (mod5e/spells-known 1 :hellish-rebuke :cha "Tiefling" 3)
+               (mod5e/spells-known 2 :darkness :cha "Tiefling" 5)]})
 
 (defn hit-points-selection [die class-nm level]
   (t/selection-cfg
@@ -953,7 +931,7 @@
    {:name (str "Tool Proficiency: " (:name tool))
     :key (if key (keyword (str (name key) "--" (common/name-to-kw (:name tool)))))
     :help (str "Select " (s/lower-case (:name tool)) " for which you are proficient.")
-    :options (mapv
+    :options (map
               (fn [{:keys [name key icon]}]
                 (t/option-cfg
                  {:name name
@@ -1008,10 +986,9 @@
      {:name (level-name i)
       :key (level-key i)
       :order i
-      :selections (vec
-                   (concat
-                    selections      
-                    (some-> spellcasting-template :selections (get i))))
+      :selections (concat
+                   selections      
+                   (some-> spellcasting-template :selections (get i)))
       :modifiers (some-> levels (get i) :modifiers)})))
 
 (defn total-levels-prereq [level]
@@ -1087,15 +1064,14 @@
        spell-selections
        (if (seq tool-options) [(tool-prof-selection tool-options)])
        (if (seq skill-kws) [(opt5e/skill-selection skill-kws skill-num)])))
-     (vec
-      (concat
-       modifiers
-       level-modifiers
-       [(mod5e/subclass (:key cls) kw)]
-       (armor-prof-modifiers armor-profs)
-       (weapon-prof-modifiers weapon-profs)
-       (tool-prof-modifiers tool-profs)
-       (traits-modifiers traits true))))
+     (concat
+      modifiers
+      level-modifiers
+      [(mod5e/subclass (:key cls) kw)]
+      (armor-prof-modifiers armor-profs)
+      (weapon-prof-modifiers weapon-profs)
+      (tool-prof-modifiers tool-profs)
+      (traits-modifiers traits true)))
     #_(if spellcasting-template
       (assoc
        option
@@ -1134,7 +1110,7 @@
      {:name (level-name i)
       :key level-kw
       :order i
-      :selections (mapv
+      :selections (map
                    (fn [selection]
                      (update selection ::t/tags sets/union #{:level level-kw}))
                    (concat
@@ -1146,7 +1122,7 @@
                          :key (common/name-to-kw subclass-title)
                          :help subclass-help
                          :tags #{:subclass}
-                         :options (mapv
+                         :options (map
                                    #(subclass-option (assoc cls :key kw) %)
                                    subclasses)})])
                     (if (and (not plugin?) (ability-inc-set i))
@@ -1157,29 +1133,28 @@
                         ::t/prereq-fn
                         (fn [c] (or (not (= kw (first (es/entity-val c :classes))))
                                     (> i 1))))])))
-      :modifiers (vec
-                  (concat
-                   (if (= :all (:known-mode spellcasting))
-                     (let [slots (opt5e/total-slots i (:level-factor spellcasting))
-                           prev-level-slots (opt5e/total-slots (dec i) (:level-factor spellcasting))
-                           new-slots (apply dissoc slots (keys prev-level-slots))]
-                       (if (seq new-slots)
-                         (let [lvl (key (first new-slots))]
-                           (map
-                            (fn [kw]
-                              (mod5e/spells-known lvl kw (:ability spellcasting) name))
-                            (get-in sl/spell-lists [kw lvl]))))))
-                   (some-> levels (get i) :modifiers)
-                   (traits-modifiers
-                    (filter
-                     (fn [{level :level :or {level 1}}]
-                       (= level i))
-                     traits))
-                   (if (and (not plugin?) (= i 1)) [(assoc
-                                                     (mod5e/max-hit-points hit-die)
-                                                     ::mod/conditions
-                                                     [(first-class? kw)])])
-                   [(mod5e/level kw name i hit-die)]))})))
+      :modifiers (concat
+                  (if (= :all (:known-mode spellcasting))
+                    (let [slots (opt5e/total-slots i (:level-factor spellcasting))
+                          prev-level-slots (opt5e/total-slots (dec i) (:level-factor spellcasting))
+                          new-slots (apply dissoc slots (keys prev-level-slots))]
+                      (if (seq new-slots)
+                        (let [lvl (key (first new-slots))]
+                          (map
+                           (fn [kw]
+                             (mod5e/spells-known lvl kw (:ability spellcasting) name))
+                           (get-in sl/spell-lists [kw lvl]))))))
+                  (some-> levels (get i) :modifiers)
+                  (traits-modifiers
+                   (filter
+                    (fn [{level :level :or {level 1}}]
+                      (= level i))
+                    traits))
+                  (if (and (not plugin?) (= i 1)) [(assoc
+                                                    (mod5e/max-hit-points hit-die)
+                                                    ::mod/conditions
+                                                    [(first-class? kw)])])
+                  [(mod5e/level kw name i hit-die)])})))
 
 
 (defn equipment-option [[k num]]
@@ -1246,7 +1221,7 @@
        :help help
        :order 0
        :tags #{:starting-equipment}
-       :options (mapv
+       :options (map
                  option-fn
                  options)}))
    choices))
@@ -1296,7 +1271,7 @@
       :key kw
       :help help
       :prereqs multiclass-prereqs
-      :selections (mapv
+      :selections (map
                    (fn [selection]
                      (update selection ::t/tags sets/union #{kw}))
                    (concat
@@ -1320,38 +1295,36 @@
                        :new-item-fn (fn [selection options current-values]
                                       {::entity/key (-> current-values count inc level-key)})
                        :tags #{kw}
-                       :options (vec
-                                 (map
-                                  (partial level-option cls kw spellcasting-template)
-                                  (range 1 21)))
+                       :options (map
+                                 (partial level-option cls kw spellcasting-template)
+                                 (range 1 21))
                        :min 1
                        :sequential? true
                        :max nil})]))
-      :modifiers (vec
-                  (concat
-                   modifiers
-                   (if armor-profs (armor-prof-modifiers armor-profs kw))
-                   (if weapon-profs (weapon-prof-modifiers weapon-profs kw))
-                   (if tool (tool-prof-modifiers tool kw))
-                   (if weapons
-                     (mapv
-                      (fn [[k num]]
-                        (mod5e/weapon k num))
-                      weapons))
-                   (if armor
-                     (mapv
-                      (fn [[k num]]
-                        (mod5e/armor k num))
-                      armor))
-                   (if equipment
-                     (mapv
-                      (fn [[k num]]
-                        (mod5e/equipment k num))
-                      equipment))
-                   (remove
-                    nil?
-                    [(mod5e/cls kw)
-                     (if save-profs (apply mod5e/saving-throws kw save-profs))])))})))
+      :modifiers (concat
+                  modifiers
+                  (if armor-profs (armor-prof-modifiers armor-profs kw))
+                  (if weapon-profs (weapon-prof-modifiers weapon-profs kw))
+                  (if tool (tool-prof-modifiers tool kw))
+                  (if weapons
+                    (map
+                     (fn [[k num]]
+                       (mod5e/weapon k num))
+                     weapons))
+                  (if armor
+                    (map
+                     (fn [[k num]]
+                       (mod5e/armor k num))
+                     armor))
+                  (if equipment
+                    (map
+                     (fn [[k num]]
+                       (mod5e/equipment k num))
+                     equipment))
+                  (remove
+                   nil?
+                   [(mod5e/cls kw)
+                    (if save-profs (apply mod5e/saving-throws kw save-profs))]))})))
 
 
 (defn class-level [levels class-kw]
@@ -1744,7 +1717,7 @@
                              (weapon-option [:simple 1])]})
                  (starting-equipment-selection
                   {:name "Holy Symbol"
-                   :options (mapv
+                   :options (map
                              starting-equipment-option
                              equip5e/holy-symbols)})]
     :levels {2 {:modifiers [(mod5e/action
@@ -2306,6 +2279,7 @@
                  :summary "If on the same plane of existence, instantly teleport a bonded weapon into your hand"})]
    :levels {3 {:selections [(opt5e/spell-selection {:class-key :fighter
                                                     :level 0
+                                                    :exclude-ref? true
                                                     :spellcasting-ability :int
                                                     :class-name "Eldritch Knight"
                                                     :num 2
@@ -2997,26 +2971,26 @@
      {:name "Type"
       :selections [(t/selection
                     "Type"
-                    (mapv
+                    (map
                      favored-enemy-option
                      favored-enemy-types))]})
     (t/option-cfg
      {:name "Two Humanoid Races"
       :selections [(t/selection
                     "Humanoid Race 1"
-                    (mapv
+                    (map
                      favored-enemy-option
                      humanoid-enemies))
                    (t/selection
                     "Humanoid Race 2"
-                    (mapv
+                    (map
                      favored-enemy-option
                      humanoid-enemies))]})]))
 
 (def favored-terrain-selection
   (t/selection
    "Favored Terrain"
-   (mapv
+   (map
     (fn [terrain]
       (t/option-cfg
        {:name (common/kw-to-name terrain)
@@ -3195,7 +3169,7 @@
                  {:name "Beast Master"
                   :selections [(t/selection
                                 "Ranger's Companion"
-                                (mapv
+                                (map
                                  (fn [monster-name]
                                    (t/option-cfg
                                     {:name monster-name
@@ -3506,7 +3480,7 @@
                   :selections [(t/selection-cfg
                                 {:name "Draconic Ancestry Type"
                                  :tags #{:class}
-                                 :options (mapv
+                                 :options (map
                                            (fn [{:keys [name] :as ancestry}]
                                              (t/option-cfg
                                               {:name name
@@ -4411,57 +4385,57 @@ long rest."})]
       :key kw
       :help help
       :page page
-      :selections (vec
-                   (concat
-                    selections
-                    (if (seq tool-options) [(tool-prof-selection tool-options)])
-                    (class-weapon-options weapon-choices)
-                    (class-armor-options armor-choices)
-                    (class-equipment-options equipment-choices)
-                    (if (seq skill-kws) [(opt5e/skill-selection skill-kws skill-num)])
-                    (if (seq lang-kws) [(opt5e/language-selection (map opt5e/language-map lang-kws) lang-num)])))
-      :modifiers (vec
-                  (concat
-                   [(mod5e/background name)]
-                   (traits-modifiers traits)
-                   modifiers
-                   (armor-prof-modifiers (keys armor-profs))
-                   (weapon-prof-modifiers (keys weapon-profs))
-                   (tool-prof-modifiers (keys tool))
-                   (mapv
-                    (fn [skill-kw]
-                      (mod5e/skill-proficiency skill-kw))
-                    (keys skill))
-                   (mapv
-                    (fn [[k num]]
-                      (mod5e/weapon k num))
-                    weapons)
-                   (mapv
-                    (fn [[k num]]
-                      (mod5e/armor k num))
-                    armor)
-                   (mapv
-                    (fn [[k num]]
-                      (mod5e/equipment k num))
-                    equipment)))})))
+      :selections (concat
+                   selections
+                   (if (seq tool-options) [(tool-prof-selection tool-options)])
+                   (class-weapon-options weapon-choices)
+                   (class-armor-options armor-choices)
+                   (class-equipment-options equipment-choices)
+                   (if (seq skill-kws) [(opt5e/skill-selection skill-kws skill-num)])
+                   (if (seq lang-kws) [(opt5e/language-selection (map opt5e/language-map lang-kws) lang-num)]))
+      :modifiers (concat
+                  [(mod5e/background name)]
+                  (traits-modifiers traits)
+                  modifiers
+                  (armor-prof-modifiers (keys armor-profs))
+                  (weapon-prof-modifiers (keys weapon-profs))
+                  (tool-prof-modifiers (keys tool))
+                  (map
+                   (fn [skill-kw]
+                     (mod5e/skill-proficiency skill-kw))
+                   (keys skill))
+                  (map
+                   (fn [[k num]]
+                     (mod5e/weapon k num))
+                   weapons)
+                  (map
+                   (fn [[k num]]
+                     (mod5e/armor k num))
+                   armor)
+                  (map
+                   (fn [[k num]]
+                     (mod5e/equipment k num))
+                   equipment))})))
 
 (defn volos-guide-to-monsters-selections [app-state]
   [(t/selection-cfg
     {:name "Race"
      :tags #{:race}
-     :options [aasimar-option
-               firbolg-option
-               goliath-option
-               kenku-option
-               lizardfolk-option
-               tabaxi-option
-               triton-option
-               bugbear-option
-               goblin-option
-               hobgoblin-option
-               kobold-option
-               orc-option
-               yuan-ti-option]})])
+     :options (map
+               race-option
+               [aasimar-option-cfg
+                firbolg-option-cfg
+                goliath-option-cfg
+                kenku-option-cfg
+                lizardfolk-option-cfg
+                tabaxi-option-cfg
+                triton-option-cfg
+                bugbear-option-cfg
+                goblin-option-cfg
+                hobgoblin-option-cfg
+                kobold-option-cfg
+                orc-option-cfg
+                yuan-ti-option-cfg])})])
 
 
 (def sword-coast-adventurers-guide-backgrounds
@@ -4575,11 +4549,11 @@ long rest."})]
 
 (defn sword-coast-adventurers-guide-selections [app-state]
   [(background-selection
-    {:options (mapv
+    {:options (map
                background-option
                sword-coast-adventurers-guide-backgrounds)})
    (class-selection
-    {:options (mapv
+    {:options (map
                class-option
                (scag-classes app-state))})])
 
@@ -4599,7 +4573,7 @@ long rest."})]
                    {::entity/key key
                     ::entity/value 1})
     :tags #{:equipment}
-    :options (mapv
+    :options (map
               (fn [{:keys [name key description]}]
                 (t/option-cfg
                  {:name name
@@ -4666,7 +4640,7 @@ long rest."})]
                               "Base options are from the Player's Handbook, although descriptions are either from the "
                               srd-link
                               " or are OrcPub summaries. See the Player's Handbook for in-depth, official rules and descriptions."])
-    :options (mapv
+    :options (map
               #(t/option-cfg
                (select-keys % [:name :key :help]))
               plugins)
@@ -4742,7 +4716,7 @@ long rest."})]
    (t/selection-cfg
     {:name "Alignment"
      :tags #{:description :background}
-     :options (mapv
+     :options (map
                (fn [alignment]
                  (t/option-cfg
                   {:name alignment
@@ -4753,15 +4727,17 @@ long rest."})]
      :order 0
      :help "Race determines your appearance and helps shape your culture and background. It also affects you ability scores, size, speed, languages, and many other crucial inherent traits."
      :tags #{:race}
-     :options [dwarf-option
-               elf-option
-               halfling-option
-               human-option
-               dragonborn-option
-               gnome-option
-               half-elf-option
-               half-orc-option
-               tiefling-option]})
+     :options (map
+               race-option
+               [dwarf-option-cfg
+                elf-option-cfg
+                halfling-option-cfg
+                human-option-cfg
+                dragonborn-option-cfg
+                gnome-option-cfg
+                half-elf-option-cfg
+                half-orc-option-cfg
+                tiefling-option-cfg])})
    (background-selection
     {:help "Background broadly describes your character origin. It also affords you two skill proficiencies and possibly proficiencies with tools or languages."
      :options (map
