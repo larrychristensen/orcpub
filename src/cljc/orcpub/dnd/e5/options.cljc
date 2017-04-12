@@ -897,66 +897,127 @@ check. The GM might also call for a Dexterity (Sleight of Hand) check to determi
     (t/option-cfg
      (cond-> cfg
        true (assoc :key kw :help summary)
+       (not (:exclude-trait? cfg)) (update :modifiers
+                                           conj
+                                           (modifiers/trait-cfg
+                                            {:name (str (:name cfg) " Feat")
+                                             :page (:page cfg)
+                                             :summary summary}))
        true (update :modifiers
                     conj
-                    (modifiers/trait-cfg
-                     {:name (str (:name cfg) " Feat")
-                      :page (:page cfg)
-                      :summary summary})
                     (mods/set-mod ?feats kw))
        (not multiselect?) (update :prereqs conj (does-not-have-feat-prereq kw))))))
+
+(def charge-summary "when you Dash, you can make 1 melee attack or shove as a bonus action; if you move 10 ft. before taking this bonus action you gain +5 damage to attack or shove 10 ft.")
+
+(def defensive-duelist-summary "when you are hit with a melee attack, you can add your prof bonus to AC for the attack if you are wielding a finesse weapon you are proficient with")
 
 (def feat-options
   [(feat-option
     {:name "Alert"
      :icon "look-at"
+     :page 165
      :summary "+5 initiative; can't be surprised; creatures don't gain advantage on attacks against you for being hidden"
      :modifiers [(modifiers/initiative 5)]})
    (feat-option
     {:name "Athlete"
      :icon "weight-lifting-up"
+     :page 165
+     :summary "standing up only uses 5 ft movement; climbing doesn't cost extra movement; make running long or high jump after moving only 5 ft."
      :selections [(ability-increase-selection [:str :dex] 1 false)]})
    (feat-option
     {:name "Actor"
      :icon "drama-masks"
+     :page 165
+     :summary "advantage on Deception and Performance when trying to pass as someone else; mimic the speech of a person you have heard"
      :modifiers [(modifiers/ability :cha 1)]})
    (feat-option
     {:name "Charger"
-     :icon "charging-bull"})
+     :icon "charging-bull"
+     :page 165
+     :summary charge-summary
+     :modifiers [(modifiers/bonus-action
+                  {:name "Charge"
+                   :page 165
+                   :summary charge-summary})]})
    (feat-option
     {:name "Crossbow Expert"
-     :icon "crossbow"})
+     :icon "crossbow"
+     :page 165
+     :summary "ignore loading property of crossbows you are proficient with; don't have disadvantage from being within 5 ft of hostile creature; when you Attack with 1 hand weapon, you can attack with a hand crossbow as bonus action"
+     :modifiers [(modifiers/bonus-action
+                  {:name "Crossbow Expert"
+                   :page 165
+                   :summary "when you Attack with 1 hand weapon, you can attack with a hand crossbow"})]})
    (feat-option
     {:name "Defensive Duelist"
      :icon "spinning-sword"
+     :page 165
+     :exclude-trait? true
+     :summary defensive-duelist-summary
+     :modifiers [(modifiers/reaction
+                  {:name "Defensive Duelist"
+                   :page 165
+                   :summary defensive-duelist-summary})]
      :prereqs [(ability-prereq :dex 13)]})
    (feat-option
     {:name "Dual Wielder"
-     :icon "rogue"})
+     :icon "rogue"
+     :page 165
+     :summary "+1 AC bonus when wielding two melee weapons; two-weapon fighting with any one-handed melee weapon"})
    (feat-option
     {:name "Dungeon Delver"
      :icon "dungeon-gate"
-     :modifiers [(modifiers/damage-resistance :trap)]})
+     :page 166
+     :summary "advantage to detect secret doors; advantage on saves against and resistance to trap damage; search for traps at normal pace"
+     :modifiers [(modifiers/damage-resistance :trap)
+                 (modifiers/saving-throw-advantage [:traps])]})
    (feat-option
     {:name "Durable"
      :icon "hospital-cross"
-     :modifiers [(modifiers/ability :con 1)]})
+     :page 166
+     :exclude-trait? true
+     :summary "when you roll Hit Die to regain HPs, the min points regained is 2X your CON modifier"
+     :modifiers [(modifiers/ability :con 1)
+                 (modifiers/dependent-trait
+                  {:name "Durable"
+                   :page 166
+                   :summary (str "when you roll Hit Die to regain HPs, the min points regained is " (* 2 (?ability-bonuses :con)))})]})
    (feat-option
     {:name "Elemental Adept"
      :icon "wind-hole"
+     :page 166
+     :summary "select a damage type, your spells ignore resistance to that type and min damage die roll is 2"
      :prereqs [can-cast-spell-prereq]}
     true)
    (feat-option
     {:name "Grappler"
      :icon "muscle-up"
+     :page 167
+     :summary "advantage on attacks against creature you grapple; can use an action to pin the creature"
+     :modifiers [(modifiers/action
+                  {:name "Grappler"
+                   :page 167
+                   :summary "restrain a creature you are grappling"})]
      :prereqs [(ability-prereq :str 13)]})
    (feat-option
     {:name "Great Weapon Master"
-     :icon "broadsword"})
+     :icon "broadsword"
+     :page 167
+     :summary "When you critical or reduce a creature to 0 HPs with melee weapon, make one melee weapon attack as bonus action. When you melee Attack with heavy weapon, you can take -5 on attack to deal +10 damage."
+     :modifiers [(modifiers/bonus-action
+                  {:name "Great Weapon Master"
+                   :page 167
+                   :summary "When you critical or reduce a creature to 0 HPs with melee weapon, make one melee weapon attack"})]})
    (feat-option
     {:name "Healer"
      :icon "medical-pack-alt"
-     :modifiers [(modifiers/action "Healer Feat Action")]})
+     :page 167
+     :summary "When you stabilize with healer's kit, the creature regains 1 HP; use a healer's kit to restore 1d6 + 4 + creature's max hit dice HPs"
+     :modifiers [(modifiers/action
+                  {:name "Healer Feat"
+                   :page 167
+                   :summary "use a healer's kit to restore 1d6 + 4 + creature's max hit dice HPs"})]})
    (feat-option
     {:name "Heavily Armored"
      :icon "lamellar"

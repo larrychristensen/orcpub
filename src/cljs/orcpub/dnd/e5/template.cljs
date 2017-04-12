@@ -2438,10 +2438,12 @@
                                                            (+ 5 (?ability-bonuses :con)) " HPs")})]}}
                   :traits []}
                  {:name "Battle Master"
-                  :selections [(t/selection
-                                "Martial Maneuvers"
-                                opt5e/maneuver-options
-                                3 3)
+                  :selections [(t/selection-cfg
+                                {:name "Martial Maneuvers"
+                                 :options opt5e/maneuver-options
+                                 :tags #{:class}
+                                 :min 3
+                                 :max 3})
                                (opt5e/tool-selection (map :key equip5e/artisans-tools) 1)]
                   :modifiers [(mod/modifier ?maneuver-save-dc (max (?spell-save-dc :dex)
                                                                    (?spell-save-dc :str)))

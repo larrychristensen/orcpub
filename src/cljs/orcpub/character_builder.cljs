@@ -2484,7 +2484,7 @@
         (get-in @app-state [:character ::entity/options :optional-content])))
 
 (defn new-options-column [character built-char built-template available-selections page-index option-paths stepper-selection-path]
-  (js/console.log "AVAILABLE SELECTIONS" available-selections)
+  ;;(js/console.log "AVAILABLE SELECTIONS" available-selections)
   (let [{:keys [tags ui-fns] :as page} (pages page-index)
         selections (entity/tagged-selections available-selections tags)
         combined-selections (entity/combine-selections selections)
@@ -2492,9 +2492,7 @@
                                        (zero? (::t/max %))
                                        (zero? (count-remaining built-template character %)))
                                  combined-selections)]
-    (js/console.log "TAGGED SELECTIONs" (vec selections) (map ::t/key selections))
-    (js/console.log "FINAL SELECTIONS" (vec final-selections) (map ::t/key final-selections))
-    (js/console.log "COMBINED SELECTIONS" (vec combined-selections) (map ::t/key combined-selections))
+    ;;(js/console.log "FINAL SELECTIONS" (vec final-selections) (map ::t/key final-selections))
     [:div.w-100-p
      [:div.m-b-20
       [:div.flex.align-items-c
