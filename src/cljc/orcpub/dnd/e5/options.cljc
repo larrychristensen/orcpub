@@ -892,13 +892,17 @@ check. The GM might also call for a Dexterity (Sleight of Hand) check to determi
                            (not (and feats (feats kw)))))})
 
 (defn feat-option [cfg & [multiselect?]]
-  (let [kw (common/name-to-kw (:name cfg))]
+  (let [kw (common/name-to-kw (:name cfg))
+        summary (:summary cfg)]
     (t/option-cfg
      (cond-> cfg
-       true (assoc :key kw)
+       true (assoc :key kw :help summary)
        true (update :modifiers
                     conj
-                    (modifiers/trait (str (:name cfg) " Feat"))
+                    (modifiers/trait-cfg
+                     {:name (str (:name cfg) " Feat")
+                      :page (:page cfg)
+                      :summary summary})
                     (mods/set-mod ?feats kw))
        (not multiselect?) (update :prereqs conj (does-not-have-feat-prereq kw))))))
 
@@ -906,6 +910,7 @@ check. The GM might also call for a Dexterity (Sleight of Hand) check to determi
   [(feat-option
     {:name "Alert"
      :icon "look-at"
+     :summary "+5 initiative; can't be surprised; creatures don't gain advantage on attacks against you for being hidden"
      :modifiers [(modifiers/initiative 5)]})
    (feat-option
     {:name "Athlete"
@@ -1183,8 +1188,7 @@ check. The GM might also call for a Dexterity (Sleight of Hand) check to determi
 (defn feat-selection [num]
   (t/selection-cfg
    {:name (if (= 1 num) "Feat" "Feats")
-    ;;:options feat-options
-    :option-refs (map :key feat-options)
+    :options feat-options
     :multiselect? true
     :tags #{:feats}
     :ref :feats
