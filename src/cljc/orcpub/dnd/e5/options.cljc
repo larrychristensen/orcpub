@@ -923,13 +923,13 @@ check. The GM might also call for a Dexterity (Sleight of Hand) check to determi
     {:name "Athlete"
      :icon "weight-lifting-up"
      :page 165
-     :summary "standing up only uses 5 ft movement; climbing doesn't cost extra movement; make running long or high jump after moving only 5 ft."
+     :summary "increase STR or DEX by 1; standing up only uses 5 ft movement; climbing doesn't cost extra movement; make running long or high jump after moving only 5 ft."
      :selections [(ability-increase-selection [:str :dex] 1 false)]})
    (feat-option
     {:name "Actor"
      :icon "drama-masks"
      :page 165
-     :summary "advantage on Deception and Performance when trying to pass as someone else; mimic the speech of a person you have heard"
+     :summary "increase CHA by 1; advantage on Deception and Performance when trying to pass as someone else; mimic the speech of a person you have heard"
      :modifiers [(modifiers/ability :cha 1)]})
    (feat-option
     {:name "Charger"
@@ -977,7 +977,7 @@ check. The GM might also call for a Dexterity (Sleight of Hand) check to determi
      :icon "hospital-cross"
      :page 166
      :exclude-trait? true
-     :summary "when you roll Hit Die to regain HPs, the min points regained is 2X your CON modifier"
+     :summary "increase CON by 1; when you roll Hit Die to regain HPs, the min points regained is 2X your CON modifier"
      :modifiers [(modifiers/ability :con 1)
                  (modifiers/dependent-trait
                   {:name "Durable"
@@ -1021,41 +1021,65 @@ check. The GM might also call for a Dexterity (Sleight of Hand) check to determi
    (feat-option
     {:name "Heavily Armored"
      :icon "lamellar"
+     :summary "increase STR by 1; proficiency in heavy armor"
+     :page 167
      :modifiers [(modifiers/heavy-armor-proficiency)
                  (modifiers/ability :str 1)]
      :prereqs [(armor-prereq :medium)]})
    (feat-option
     {:name "Heavy Armor Master"
      :icon "gauntlet"
+     :page 167
+     :summary "increase STR by 1; when wearing heavy armor, slashing, piercing, and bludgeoning damage from non-magical weapons is 3 less"
      :modifiers [(modifiers/ability :str 1)]
      :prereqs [(armor-prereq :heavy)]})
    (feat-option
     {:name "Inspiring Leader"
      :icon "public-speaker"
+     :page 167
+     :summary "increase CHA by 1; give 6 friendly creatures within 30 ft. temp HPs equal to you CHA mod + your level"
      :prereqs [(ability-prereq :cha 13)]})
    (feat-option
     {:name "Keen Mind"
      :icon "brain"
+     :page 167
+     :summary "increase INT by 1; always know which direction is north; know hours before sunset or sunrise; recall anything heard or seen within a month"
      :modifiers [(modifiers/ability :int 1)]})
    (feat-option
     {:name "Lightly Armored"
      :icon "scale-mail"
+     :page 167
+     :summary "increase STR or DEX by 1; proficiency in light armor"
      :selections [(ability-increase-selection [:str :dex] 1 false)]
      :prereqs [(modifiers/light-armor-proficiency)]})
    (feat-option
     {:name "Linguist"
      :icon "lips"
+     :page 167
+     :summary "increase INT by 1; learn 3 languages; create written ciphers"
      :selections [(language-selection languages 3)]
      :prereqs [(modifiers/ability :int 1)]})
    (feat-option
     {:name "Lucky"
-     :icon "clover"})
+     :icon "clover"
+     :page 167
+     :summary "3 luck points, which you can use to roll an additional d20 when rolling an attack, save, or ability check, and choose which one to use"})
    (feat-option
     {:name "Mage Slayer"
-     :icon "zeus-sword"})
+     :icon "zeus-sword"
+     :page 168
+     :summary "use reaction to attack a caster within 5 ft.; impose disadvantage to a caster's concentration check when you attack; advantage on saves against spells cast within 5ft."
+     :modifiers [(modifiers/reaction
+                  {:name "Mage Slayer"
+                   :range {:units :feet
+                           :amount 5}
+                   :page 168
+                   :summary "attack a creature that casts a spell"})]})
    (feat-option
     {:name "Magic Initiate"
      :icon "magic-palm"
+     :page 168
+     :summary "gain 2 cantrips and 1 1st level spell from a chosen class"
      :selections [(t/selection-cfg
                    {:name "Spell Class"
                     :order 0
@@ -1069,6 +1093,8 @@ check. The GM might also call for a Dexterity (Sleight of Hand) check to determi
    (feat-option
     {:name "Martial Adept"
      :icon "visored-helm"
+     :page 168
+     :summary "learn two Battle Master martial maneuvers using 1 d6 superiority die"
      :selections [(t/selection-cfg
                    {:name "Martial Maneuvers"
                     :tags #{:class}
@@ -1078,6 +1104,8 @@ check. The GM might also call for a Dexterity (Sleight of Hand) check to determi
    (feat-option
     {:name "Medium Armor Master"
      :icon "bracers"
+     :page 168
+     :summary "medium armor doesn't give disadvantage to Stealth; max DEX bonus to AC is 3 for medium armor"
      :modifiers [(mods/modifier ?max-medium-armor-bonus 3)
                  (mods/fn-mod ?armor-stealth-disadvantage?
                               (fn [armor]
@@ -1088,20 +1116,28 @@ check. The GM might also call for a Dexterity (Sleight of Hand) check to determi
    (feat-option
     {:name "Mobile"
      :icon "move"
+     :page 168
+     :summary "speed increases by 10 ft.; Dash through difficult terrain doesn't cost extra movement; don't provoke opportunity attacks from a creature you made a melee attack against"
      :modifiers [(modifiers/speed 10)]})
    (feat-option
     {:name "Moderately Armored"
      :icon "shoulder-armor"
+     :page 168
+     :summary "increase STR or DEX by 1; gain proficiency with shields and medium armor"
      :selections [(ability-increase-selection [:str :dex] 1 false)]
      :modifiers [(modifiers/medium-armor-proficiency)
                  (modifiers/shield-armor-proficiency)]
      :prereqs [(armor-prereq :light)]})
    (feat-option
     {:name "Mounted Combatant"
-     :icon "cavalry"})
+     :icon "cavalry"
+     :page 168
+     :summary "while mounted: advantage on attacks against unmounted creatures smaller than mount, force attack on mount to target you; mount takes no damage on sucessful DEX saves and half on failed"})
    (feat-option
     {:name "Observant"
      :icon "surrounded-eye"
+     :page 168
+     :summary "increase INT or WIS by 1; read lips; +5 bonus to passive Perception and passive Investigation"
      :selections [(ability-increase-selection [:int :wis] 1 false)]
      :modifiers [(modifiers/passive-perception 5)
                  (modifiers/passive-investigation 5)]})
