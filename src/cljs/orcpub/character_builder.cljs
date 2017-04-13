@@ -2483,6 +2483,7 @@
         (map ::entity/key)
         (get-in @app-state [:character ::entity/options :optional-content])))
 
+
 (defn new-options-column [character built-char built-template available-selections page-index option-paths stepper-selection-path]
   ;;(js/console.log "AVAILABLE SELECTIONS" available-selections)
   (let [{:keys [tags ui-fns] :as page} (pages page-index)

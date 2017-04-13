@@ -567,6 +567,7 @@ At Higher Levels. When you cast this spell using a spell slot of 2nd level or hi
     :range "120 feet"
     :components {:verbal true :somatic true}
     :duration "1 round"
+    :attack-roll? true
     :description "You create a ghostly, skeletal hand in the space of a creature within range. Make a ranged spell attack against the creature to assail it with the chill of the grave. On a hit, the target takes 1d8 necrotic damage, and it can't regain hit points until the start of your next turn. Until then, the hand clings to the target.
 If you hit an undead target, it also has disadvantage on attack rolls against you until the end of your next turn.
 This spell's damage increases by 1d8 when you reach 5th level (2d8), 11th level (3d8), and 17th level (4d8)."
@@ -1471,6 +1472,7 @@ Structures. The tremor deals 50 bludgeoning damage to any structure in contact w
                 :range "120 feet"
                 :components {:verbal true :somatic true}
                 :duration "Instantaneous"
+                :attack-roll? true
                 :description "A beam of crackling energy streak toward a creature within range. Make a ranged spell attack against the target. On a hit, the target takes 1d10 force damage.
 The spell creates more than one beam when you reach higher levels: two beams at 5th level, three beams at 11th level, and four beams at 17th level. You can direct the beams at the same target or at different ones. Make a separate attack roll for each beam."}
                {
@@ -1761,6 +1763,7 @@ At Higher Levels. When you cast this spell using a spell slot of 4th level or hi
     :range "120 feet"
     :components {:verbal true :somatic true}
     :duration "Instantaneous"
+    :attack-roll? true
     :description "You hurl a mote of fire at a creature or object within
 range. Make a ranged spell attack against the target. On a
 hit, the target takes 1d10 fire damage. A flammable object
@@ -3341,6 +3344,7 @@ While this layer is in place, spells can't be cast through the wall. The layer i
     :range "Self"
     :components {:verbal true :somatic true}
     :duration "10 minutes"
+    :attack-roll? true
     :description "A flickering flame appears in your hand. The flame remains there for the duration and harms neither you nor your equipment. The flame sheds bright light in a 10-foot radius and dim light for an additional 10 feet. The spell ends if you dismiss it as an action or if you cast it again.
 You can also attack with the flame, although doing so ends the spell. When you cast this spell, or as an action on a later turn, you can hurl the flame at a creature within 30 feet of you. Make a ranged spell attack. On a hit, the target takes 1d8 fire damage.
 This spell's damage increases by 1d8 when you reach 5th level (2d8), 11th level (3d8), and 17th level (4d8)."
@@ -3460,6 +3464,7 @@ At the end of each of the target's turns, it can make a Constitution saving thro
     :range "60 feet"
     :components {:verbal true :somatic true}
     :duration "Instantaneous"
+    :attack-roll? true
     :description "A frigid beam of blue-white light streaks toward a creature within range. Make a ranged spell attack against the target. On a hit, it takes 1d8 cold damage, and its speed is reduced by 10 feet until the start of your next turn.
 The spell's damage increases by 1d8 when you reach 5th level (2d8), 11th level (3d8), and 17th level (4d8)."
     }
@@ -3762,6 +3767,7 @@ magic missile."
     :range "Touch"
     :components {:verbal true :somatic true}
     :duration "Instantaneous"
+    :attack-roll? true
     :description "Lightning springs from your hand to deliver a shock to a creature you try to touch. Make a melee spell attack against the target. You have advantage on the attack roll if the target is wearing armor made of metal. On a hit, the target takes 1d8 lightning damage, and it can't take reactions until the start of its next turn.
 The spell's damage increases by 1d8 when you reach 5th level (2d8), 11th level (3d8), and 17th level (4d8)."
     }
@@ -4183,6 +4189,7 @@ If you cast this spell multiple times, you can have up to three of its 1-minute 
     :duration "Instantaneous"
     :source :phb
     :page 282
+    :attack-roll? true
     }
    {
     :name "Thunderwave"

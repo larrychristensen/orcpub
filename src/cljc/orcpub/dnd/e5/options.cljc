@@ -720,16 +720,24 @@ check. The GM might also call for a Dexterity (Sleight of Hand) check to determi
   (:ritual spell))
 
 (defn ritual-caster-option [class-key spellcasting-ability spell-lists]
-  (t/option
-   (name class-key)
-   class-key
-   [(t/selection-cfg
-     {:name "1st Level Ritual"
-      :tags #{:spells}
-      :options (spell-options (filter (fn [spell-kw] (ritual-spell? (spells/spell-map spell-kw))) (get-in spell-lists [class-key 1])) spellcasting-ability (class-names class-key))
-      :min 2
-      :max 2})]
-   []))
+  (t/option-cfg
+   {:name (name class-key)
+    :key class-key
+    :selections [(t/selection-cfg
+                  {:name "1st Level Ritual"
+                   :tags #{:spells}
+                   :options (spell-options (filter (fn [spell-kw] (ritual-spell? (spells/spell-map spell-kw))) (get-in spell-lists [class-key 1])) spellcasting-ability (class-names class-key))
+                   :min 2
+                   :max 2})]}))
+
+(defn spell-sniper-option [class-key spellcasting-ability spell-lists]
+  (t/option-cfg
+   {:name (name class-key)
+    :key class-key
+    :selections [(t/selection-cfg
+                  {:name "Attack Cantrip"
+                   :tags #{:spells}
+                   :options (spell-options (filter (fn [spell-kw] (:attack-roll? (spells/spell-map spell-kw))) (get-in spell-lists [class-key 0])) spellcasting-ability (class-names class-key))})]}))
 
 (defn language-selection [langs num]
   (t/selection-cfg
@@ -1174,7 +1182,7 @@ check. The GM might also call for a Dexterity (Sleight of Hand) check to determi
      :page 169
      :summary "choose a spellcaster class and learn 2 rituals from that class"
      :selections [(t/selection-cfg
-                   {:name "Gift of Knowledge: Spell Class"
+                   {:name "Ritual Caster: Spell Class"
                     :tags #{:spells}
                     :options [(ritual-caster-option :bard :cha sl/spell-lists)
                               (ritual-caster-option :cleric :wis sl/spell-lists)
@@ -1205,21 +1213,41 @@ check. The GM might also call for a Dexterity (Sleight of Hand) check to determi
    (feat-option
     {:name "Shield Master"
      :icon "attached-shield"
-     :page 170})
+     :page 170
+     :summary "when Attacking use bonus action to shove; add shield's AC bonus to saves that target just you; take no damage on a sucessful save"
+     :modifiers [(modifiers/bonus-action
+                  {:name "Shield Master: Shove"
+                   :page 170
+                   :summary "make a shove with shield when taking the Attack action"})]})
    (feat-option
     {:name "Skilled"
      :icon "juggler"
+     :page 170
+     :summary "proficiency in three skills and/or tools"
      :selections [(skilled-selection "Skill/Tool 1")
                   (skilled-selection "Skill/Tool 2")
                   (skilled-selection "Skill/tool 3")]})
    (feat-option
     {:name "Skulker"
      :icon "ghost-ally"
+     :page 170
+     :summary "hide when lightly obscured; when hiding, missing an attack doesn't reveal you; no disadvantage on Perception checks in dim light"
      :prereqs [(ability-prereq :dex 13)]})
    (feat-option
     {:name "Spell Sniper"
      :icon "laser-precision"
-     :prereqs [can-cast-spell-prereq]})
+     :page 170
+     :summary "attack spells have double range; ignore half and 3/4 cover; learn a cantrip that requires an attack roll"
+     :prereqs [can-cast-spell-prereq]
+     :selections [(t/selection-cfg
+                   {:name "Spell Sniper: Spell Class"
+                    :tags #{:spells}
+                    :options [(spell-sniper-option :bard :cha sl/spell-lists)
+                              (spell-sniper-option :cleric :wis sl/spell-lists)
+                              (spell-sniper-option :druid :wis sl/spell-lists)
+                              (spell-sniper-option :sorcerer :cha sl/spell-lists)
+                              (spell-sniper-option :warlock :cha sl/spell-lists)
+                              (spell-sniper-option :wizard :int sl/spell-lists)]})]})
    (feat-option
     {:name "Tavern Brawler"
      :icon "broken-bottle"
