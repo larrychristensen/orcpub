@@ -2241,7 +2241,7 @@
                                           spell-keys))}))
 
 (defn eldritch-knight-spell-selection [num spell-levels]
-  (subclass-wizard-spell-selection "Eldritch Knight Abjuration or Evocation Spell"
+  (subclass-wizard-spell-selection "Eldritch Knight Abjuration or Evocation Spells"
                                    :fighter
                                    "Eldritch Knight"
                                    num
@@ -2249,7 +2249,7 @@
                                    eldritch-knight-spell?))
 
 (defn arcane-trickster-spell-selection [num spell-levels]
-  (subclass-wizard-spell-selection "Arcane Trickster Enchantment or Illusion Spell"
+  (subclass-wizard-spell-selection "Arcane Trickster Enchantment or Illusion Spells"
                                    :rogue
                                    "Arcane Trickster"
                                    num
@@ -2257,14 +2257,14 @@
                                    arcane-trickster-spell?))
 
 (defn eldritch-knight-any-spell-selection [num spell-levels]
-  (subclass-wizard-spell-selection "Eldritch Knight Spell: Any School"
+  (subclass-wizard-spell-selection "Eldritch Knight Spells: Any School"
                                    :fighter
                                    "Eldritch Knight"
                                    num
                                    spell-levels))
 
 (defn arcane-trickster-any-spell-selection [num spell-levels]
-  (subclass-wizard-spell-selection "Arcane Trickster Spell: Any School"
+  (subclass-wizard-spell-selection "Arcane Trickster Spells: Any School"
                                    :rogue
                                    "Arcane Trickster"
                                    num
@@ -2283,7 +2283,8 @@
                                                     :class-name "Eldritch Knight"
                                                     :num 2
                                                     :spell-keys (get-in sl/spell-lists [:wizard 0])})
-                            (eldritch-knight-spell-selection 3 [1])]}
+                            (eldritch-knight-spell-selection 2 [1])
+                            (eldritch-knight-any-spell-selection 1 [1])]}
             4 {:selections [(eldritch-knight-spell-selection 1 [1])]}
             7 {:selections [(eldritch-knight-spell-selection 1 [1 2])]
                :modifiers [(mod5e/bonus-action
@@ -3326,7 +3327,8 @@
                                                                    :class-name "Arcane Trickster"
                                                                    :num 2
                                                                    :spell-keys (get-in sl/spell-lists [:wizard 0])})
-                                           (arcane-trickster-spell-selection 3 [1])]}
+                                           (arcane-trickster-spell-selection 2 [1])
+                                           (arcane-trickster-any-spell-selection 1 [1])]}
                            4 {:selections [(arcane-trickster-spell-selection 1 [1])]}
                            7 {:selections [(arcane-trickster-spell-selection 1 [1 2])]}
                            8 {:selections [(arcane-trickster-any-spell-selection 1 [1 2])]}
