@@ -633,7 +633,7 @@
     [:div.f-s-24.m-l-10.f-w-b content]]])
 
 (defn armor-class-section [armor-class armor-class-with-armor equipped-armor]
-  (let [equipped-armor-full (map (comp mi5e/all-armor-map first) equipped-armor)
+  (let [equipped-armor-full (mi5e/equipped-armor-details equipped-armor)
         shields (filter #(= :shield (:type %)) equipped-armor-full)
         armor (filter #(not= :shield (:type %)) equipped-armor-full)
         display-rows (for [a (conj armor nil)
@@ -743,8 +743,8 @@
 (defn equipment-section [title icon-name equipment equipment-map]
   [list-display-section title icon-name
    (map
-    (fn [[equipment-kw num]]
-      (str (:name (equipment-map equipment-kw)) " (" num ")"))
+    (fn [[equipment-kw {item-qty :quantity equipped? :equipped? :as num}]]
+      (str (:name (equipment-map equipment-kw)) " (" (or item-qty num) ")"))
     equipment)])
 
 (defn add-links [desc]
@@ -1497,6 +1497,14 @@
             (swap! app-state update-in [:character ::entity/options :class] conj {::entity/key first-unselected ::entity/options {:levels [{::entity/key :level-1}]}})))}
        "Add Class"]]]))
 
+(defn checkbox [selected? disable?]
+  [:i.fa.fa-check.f-s-14.bg-white.orange-shadow.m-r-10
+   {:class-name (str (if selected? "black slight-text-shadow" "transparent")
+                     " "
+                     (if disable?
+                       "opacity-5"))}])
+
+
 (defn inventory-selector [item-map qty-input-width character {:keys [::t/key ::t/options]}]
   (let [selected-items (get-in @app-state [:character ::entity/options key])
         selected-keys (into #{} (map ::entity/key selected-items))]
@@ -1514,7 +1522,7 @@
                      (conj
                       items
                       {::entity/key kw
-                       ::entity/value 1}))))))}
+                       ::entity/value {:quantity 1 :equipped? false}}))))))}
       [:option.builder-dropdown-item
        {:value ""
         :disabled true}
@@ -1527,10 +1535,14 @@
            {:value key}
            name])
         (remove #(selected-keys (::t/key %)) options)))]
+     (if (seq selected-items)
+       [:div.flex.f-s-12.opacity-5.m-t-10.justify-cont-s-b
+        [:div.m-r-10 "Equipped?"]
+        [:div.m-r-30 "Quantity"]])
      [:div
       (doall
        (map-indexed
-        (fn [i {item-key ::entity/key item-qty ::entity/value}]
+        (fn [i {item-key ::entity/key {item-qty :quantity equipped? :equipped?} ::entity/value}]
           (let [item (item-map item-key)
                 item-name (:name item)
                 item-description (:description item)
@@ -1538,13 +1550,19 @@
             ^{:key item-key}
             [:div.p-5
              [:div.f-w-b.flex.align-items-c
+              [:div.pointer.m-l-5
+               {:on-click (fn [_] (swap! app-state
+                                         update-in
+                                         [:character ::entity/options key i ::entity/value :equipped?]
+                                         not))}
+               (checkbox equipped? false)]
               [:div.flex-grow-1 item-name]
               (if item-description [:div.w-60 [show-info-button expanded? [key item-key]]])
               [:input.input.m-l-5.m-t-0
                {:class-name (str "w-" (or qty-input-width 60))
                 :type :number
                 :value item-qty
-                :on-change (fn [e] (swap! app-state assoc-in [:character ::entity/options key i ::entity/value] (.. e -target -value)))}]
+                :on-change (fn [e] (swap! app-state assoc-in [:character ::entity/options key i ::entity/value :quantity] (.. e -target -value)))}]
               [:i.fa.fa-minus-circle.orange.f-s-16.m-l-5.pointer
                {:on-click (fn [_] (swap! app-state
                                          update-in
@@ -1567,11 +1585,7 @@
       [:div.flex-grow-1
        [:div.flex.align-items-c
         (if multiselect?
-          [:i.fa.fa-check.f-s-14.bg-white.orange-shadow.m-r-10
-           {:class-name (str (if selected? "black slight-text-shadow" "transparent")
-                             " "
-                             (if disable-checkbox?
-                               "opacity-5"))}])
+          (checkbox selected? disable-checkbox?))
         (if icon [:div.m-r-5 (svg-icon icon 24)])
         [:span.f-w-b.f-s-1.flex-grow-1 name]
         (if help
@@ -2486,7 +2500,7 @@
 
 
 (defn new-options-column [character built-char built-template available-selections page-index option-paths stepper-selection-path]
-  (js/console.log "AVAILABLE SELECTIONS" available-selections)
+  ;;(js/console.log "AVAILABLE SELECTIONS" available-selections)
   (let [{:keys [tags ui-fns] :as page} (pages page-index)
         selections (entity/tagged-selections available-selections tags)
         combined-selections (entity/combine-selections selections)
@@ -2494,7 +2508,7 @@
                                        (zero? (::t/max %))
                                        (zero? (count-remaining built-template character %)))
                                  combined-selections)]
-    (js/console.log "FINAL SELECTIONS" (vec final-selections) (map ::t/key final-selections))
+    ;;(js/console.log "FINAL SELECTIONS" (vec final-selections) (map ::t/key final-selections))
     [:div.w-100-p
      [:div.m-b-20
       [:div.flex.align-items-c
@@ -2683,7 +2697,7 @@
 
 
 (defn character-builder []
-  (cljs.pprint/pprint (:character @app-state))
+  ;;(cljs.pprint/pprint (:character @app-state))
   ;;(js/console.log "APP STATE" @app-state)
   (let [selected-plugin-options (get-selected-plugin-options app-state)
         selected-plugins (map
@@ -2713,7 +2727,7 @@
         plugins (:plugins @app-state)
         stepper-dismissed? (:stepper-dismissed @app-state)
         all-selections (entity/available-selections (:character @app-state) built-char built-template)]
-    (print-char built-char)
+    ;;(print-char built-char)
     [:div.app
      {:on-scroll (fn [e]
                    (let [app-header (js/document.getElementById "app-header")

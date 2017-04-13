@@ -14,6 +14,12 @@
  (and (= :slashing (:damage-type w))
       (sword? w)))
 
+(defn javelin? [w]
+  (= :javelin (:key w)))
+
+(defn mace? [w]
+  (= :mace (:key w)))
+
 (defn ammunition? [i] (= :ammunition (:type i)))
 
 (def weapon-not-ammunition? (complement ammunition?))
@@ -953,7 +959,7 @@ An identify spell reveals that a creature is inside the flask, but the only way 
     }{
     :name "Javelin of Lightning"
     :item-type :weapon
-    :item-subtype :javelin
+      :item-subtype javelin?
     :rarity :uncommon
     :description "This javelin is a magic weapon. When you hurl it and speak its command word, it transforms into a bolt of lightning, forming a line 5 feet wide that extends out from you to a target within 120 feet. Each creature in the line excluding you and the target must make a DC 13 Dexterity saving throw, taking 4d6 lightning damage on a failed save, and half as much damage on a successful one. The lightning bolt turns back into a javelin when it reaches the target. Make a ranged weapon attack against the target. On a hit, the target takes damage from the javelin plus 4d6 lightning damage.
 The javelin’s property can’t be used again until the next dawn. In the meantime, the javelin can still be used as a magic weapon."
@@ -2169,15 +2175,18 @@ The boots regain 2 hours of flying capability for every 12 hours they aren’t i
 
 (defn expand-weapon [{:keys [item-subtype name-fn] :as item}]
   (if (fn? item-subtype)
-    (for [weapon (filter item-subtype weapons-and-ammunition)]
-      (let [name (if name-fn 
-                   (name-fn weapon)
-                   (str (:name item) ", " (:name weapon)))]
-        (merge
-         weapon
-         item
-         {:name name
-          :key (common/name-to-kw name)})))
+    (let [of-type (filter item-subtype weapons-and-ammunition)]
+      (for [weapon of-type]
+        (let [name (if name-fn 
+                     (name-fn weapon)
+                     (if (> (count of-type) 1)
+                       (str (:name item) ", " (:name weapon))
+                       (:name item)))]
+          (merge
+           weapon
+           item
+           {:name name
+            :key (common/name-to-kw name)}))))
     (add-key item)))
 
 (defn expand-armor [{:keys [item-subtype name-fn] :as item}]
@@ -2251,3 +2260,16 @@ The boots regain 2 hours of flying capability for every 12 hours they aren’t i
   (merge
    equip5e/equipment-map
    other-magic-item-map))
+
+(defn equipped-items-details [items item-map]
+  (filter
+   :equipped?
+   (map
+    (fn [[item-kw cfg]]
+      (merge
+       cfg
+       (item-map item-kw)))
+    items)))
+
+(defn equipped-armor-details [armor]
+  (equipped-items-details armor all-armor-map))

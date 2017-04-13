@@ -91,4 +91,4 @@
   (filter #(not= :shield (:type %)) armor))
 
 (defn shields [armor]
-  (filter #(not= :shield (:type %)) armor))
+  (filter #(= :shield (:type %)) armor))

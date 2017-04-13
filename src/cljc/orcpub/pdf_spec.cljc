@@ -238,7 +238,7 @@
        (if damage-type (str " " (name damage-type)))))
 
 (defn attacks-and-spellcasting-fields [built-char]
-  (let [all-weapons (map mi5e/all-weapons-map (keys (char5e/all-weapons-inventory built-char)))
+  (let [all-weapons (mi5e/equipped-items-details (char5e/all-weapons-inventory built-char) mi5e/all-weapons-map)
         weapon-fields (mapcat
                        (fn [{:keys [name damage-die damage-die-count damage-type] :as weapon}]
                          (let [versatile (:versatile weapon)
@@ -284,10 +284,9 @@
         saving-throws (set (char5e/saving-throws built-char))
         unarmored-armor-class (char5e/base-armor-class built-char)
         ac-with-armor-fn (char5e/armor-class-with-armor built-char)
-        all-armor-inventory (map mi5e/all-armor-map (char5e/all-armor-inventory built-char))
+        all-armor-inventory (mi5e/equipped-armor-details (char5e/all-armor-inventory built-char))
         equipped-armor (armor5e/non-shields all-armor-inventory)
         equipped-shields (armor5e/shields all-armor-inventory)
-        has-shield? (:shield equipped-armor)
         all-armor-classes (for [armor (conj equipped-armor nil)
                                 shield (conj equipped-shields nil)]
                             (ac-with-armor-fn armor shield))

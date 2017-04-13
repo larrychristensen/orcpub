@@ -112,6 +112,9 @@
     {:margin-right "18px"}]
    [:.m-r-20
     {:margin-right "20px"}]
+   [:.m-r-30
+    {:margin-right "30px"}]
+   
    [:.m-r-80
     {:margin-right "80px"}]
 

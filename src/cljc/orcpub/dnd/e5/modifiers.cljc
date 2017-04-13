@@ -249,58 +249,61 @@
 (defn size [size]
   (mods/modifier ?size size))
 
-(defn weapon [weapon-kw num]
-  (mods/map-mod ?weapons weapon-kw num))
+(defn equipment-cfg [cfg]
+  (if (int? cfg) {:quantity cfg :equipped? false} cfg))
 
-(defn magic-weapon [weapon-kw num]
-  (mods/map-mod ?magic-weapons weapon-kw num))
+(defn weapon [weapon-kw cfg]
+  (mods/map-mod ?weapons weapon-kw (equipment-cfg cfg)))
+
+(defn magic-weapon [weapon-kw cfg]
+  (mods/map-mod ?magic-weapons weapon-kw (equipment-cfg cfg)))
 
 (defn deferred-weapon [weapon-kw]
   (mods/deferred-modifier
     ?weapons
-    (fn [num] (es/map-mod ?weapons weapon-kw num))
+    (fn [cfg] (es/map-mod ?weapons weapon-kw (equipment-cfg cfg)))
     1))
 
 (defn deferred-magic-weapon [weapon-kw]
   (mods/deferred-modifier
     ?magic-weapons
-    (fn [num] (es/map-mod ?magic-weapons weapon-kw num))
+    (fn [cfg] (es/map-mod ?magic-weapons weapon-kw (equipment-cfg cfg)))
     1))
 
-(defn armor [armor-kw num]
-  (mods/map-mod ?armor armor-kw num))
+(defn armor [armor-kw cfg]
+  (mods/map-mod ?armor armor-kw (equipment-cfg cfg)))
 
 (defn deferred-armor [armor-kw]
   (mods/deferred-modifier
     ?armor
-    (fn [num] (es/map-mod ?armor armor-kw num))
+    (fn [cfg] (es/map-mod ?armor armor-kw (equipment-cfg cfg)))
     1))
 
 (defn deferred-magic-armor [armor-kw]
   (mods/deferred-modifier
     ?armor
-    (fn [num] (es/map-mod ?magic-armor armor-kw num))
+    (fn [cfg] (es/map-mod ?magic-armor armor-kw (equipment-cfg cfg)))
     1))
 
-(defn equipment [equipment-kw num]
-  (mods/map-mod ?equipment equipment-kw num))
+(defn equipment [equipment-kw cfg]
+  (mods/map-mod ?equipment equipment-kw (equipment-cfg cfg)))
 
 (defn deferred-equipment [equipment-kw]
   (mods/deferred-modifier
     ?equipment
-    (fn [num] (es/map-mod ?equipment equipment-kw num))
+    (fn [cfg] (es/map-mod ?equipment equipment-kw (equipment-cfg cfg)))
     1))
 
 (defn deferred-treasure [treasure-kw]
   (mods/deferred-modifier
     ?treasure
-    (fn [num] (es/map-mod ?treasure treasure-kw num))
+    (fn [cfg] (es/map-mod ?treasure treasure-kw (equipment-cfg cfg)))
     1))
 
 (defn deferred-magic-item [item-kw]
   (mods/deferred-modifier
     ?magic-items
-    (fn [num] (es/map-mod ?magic-items item-kw num))
+    (fn [cfg] (es/map-mod ?magic-items item-kw (equipment-cfg cfg)))
     1))
 
 (defn extra-attack []
