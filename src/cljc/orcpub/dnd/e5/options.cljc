@@ -521,6 +521,7 @@ check. The GM might also call for a Dexterity (Sleight of Hand) check to determi
        :key kw
        :ref ref
        :order (if (zero? level) 0 1)
+       :multiselect? true
        :options (or options
                     (spell-options
                      (or spell-keys (get-in sl/spell-lists [class-key level]))

@@ -2486,7 +2486,7 @@
 
 
 (defn new-options-column [character built-char built-template available-selections page-index option-paths stepper-selection-path]
-  ;;(js/console.log "AVAILABLE SELECTIONS" available-selections)
+  (js/console.log "AVAILABLE SELECTIONS" available-selections)
   (let [{:keys [tags ui-fns] :as page} (pages page-index)
         selections (entity/tagged-selections available-selections tags)
         combined-selections (entity/combine-selections selections)
@@ -2494,7 +2494,7 @@
                                        (zero? (::t/max %))
                                        (zero? (count-remaining built-template character %)))
                                  combined-selections)]
-    ;;(js/console.log "FINAL SELECTIONS" (vec final-selections) (map ::t/key final-selections))
+    (js/console.log "FINAL SELECTIONS" (vec final-selections) (map ::t/key final-selections))
     [:div.w-100-p
      [:div.m-b-20
       [:div.flex.align-items-c
@@ -2683,7 +2683,7 @@
 
 
 (defn character-builder []
-  ;;(cljs.pprint/pprint (:character @app-state))
+  (cljs.pprint/pprint (:character @app-state))
   ;;(js/console.log "APP STATE" @app-state)
   (let [selected-plugin-options (get-selected-plugin-options app-state)
         selected-plugins (map
@@ -2713,7 +2713,7 @@
         plugins (:plugins @app-state)
         stepper-dismissed? (:stepper-dismissed @app-state)
         all-selections (entity/available-selections (:character @app-state) built-char built-template)]
-    ;;(print-char built-char)
+    (print-char built-char)
     [:div.app
      {:on-scroll (fn [e]
                    (let [app-header (js/document.getElementById "app-header")
