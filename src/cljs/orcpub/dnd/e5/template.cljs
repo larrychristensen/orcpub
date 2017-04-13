@@ -2213,10 +2213,9 @@
     (or (= school "enchantment")
         (= school "illusion"))))
 
-(defn subclass-spell-selection [class-key class-name ability level spells num]
+(defn subclass-spell-selection [class-key class-name ability spells num]
   (opt5e/spell-selection
    {:class-key class-key
-    :level level
     :spell-keys spells
     :spellcasting-ability ability
     :class-name class-name
@@ -3785,6 +3784,8 @@
     [(t/selection-cfg
       {:name "Book of Shadows Cantrips"
        :tags #{:spells}
+       :min 3
+       :max 3
        :options (opt5e/spell-options (into
                                       #{}
                                       (mapcat
@@ -4107,8 +4108,8 @@ long rest."})]
    19 4
    20 4})
 
-(defn warlock-subclass-spell-selection [level spells]
-  (subclass-spell-selection :warlock "Warlock" :cha level spells 0))
+(defn warlock-subclass-spell-selection [spells]
+  (subclass-spell-selection :warlock "Warlock" :cha spells 0))
 
 (def warlock-option
   (class-option
@@ -4117,7 +4118,6 @@ long rest."})]
                    :cantrips-known {1 2 4 1 10 1}
                    :spells-known warlock-spells-known
                    :known-mode :schedule
-                   :slot-schedule warlock-spell-slot-schedule
                    :ability :cha}
     :multiclass-prereqs [(opt5e/ability-prereq :cha 13)]
     :spellcaster true
@@ -4200,11 +4200,11 @@ long rest."})]
                                             :page 109
                                             :summary (str "gain " (+ (?class-level :warlock)
                                                                      (?ability-bonuses :cha)) " temp HPs when you reduce a hostile creature to 0 HPs")})]
-                              :selections [(warlock-subclass-spell-selection 1 [:burning-hands :command])]}
-                           3 {:selections [(warlock-subclass-spell-selection 2 [:blindness-deafness :scorching-ray])]}
-                           5 {:selections [(warlock-subclass-spell-selection 3 [:fireball :stinking-cloud])]}
-                           7 {:selections [(warlock-subclass-spell-selection 4 [:fire-shield :wall-of-fire])]}
-                           9 {:selections [(warlock-subclass-spell-selection 5 [:flame-strike :hallow])]}}}
+                              :selections [(warlock-subclass-spell-selection [:burning-hands :command])]}
+                           3 {:selections [(warlock-subclass-spell-selection [:blindness-deafness :scorching-ray])]}
+                           5 {:selections [(warlock-subclass-spell-selection [:fireball :stinking-cloud])]}
+                           7 {:selections [(warlock-subclass-spell-selection [:fire-shield :wall-of-fire])]}
+                           9 {:selections [(warlock-subclass-spell-selection [:flame-strike :hallow])]}}}
                  {:name "The Archfey"
                   :modifiers [(mod5e/action
                                {:name "Fey Presence"
@@ -4212,17 +4212,17 @@ long rest."})]
                                 :summary (str "charm or frighten creatures in a 10 ft cube from you unless the succeed on a DC " (?spell-save-dc :cha) " WIS save.")
                                 :duration {:units :turn}
                                 :frequency {:units :rest}})]
-                  :levels {1 {:selections [(warlock-subclass-spell-selection 1 [:faerie-fire :sleep])]}
-                           3 {:selections [(warlock-subclass-spell-selection 2 [:calm-emotions :phantasmal-force])]}
-                           5 {:selections [(warlock-subclass-spell-selection 3 [:blink :plant-growth])]}
+                  :levels {1 {:selections [(warlock-subclass-spell-selection [:faerie-fire :sleep])]}
+                           3 {:selections [(warlock-subclass-spell-selection [:calm-emotions :phantasmal-force])]}
+                           5 {:selections [(warlock-subclass-spell-selection [:blink :plant-growth])]}
                            6 {:modifiers [(mod5e/reaction
                                            {:name "Misty Escape"
                                             :page 109
                                             :frequency {:units :rest}
                                             :duration {:units :round}
                                             :summary "when you take damage, turn invisible and teleport up to 60 ft."})]}
-                           7 {:selections [(warlock-subclass-spell-selection 4 [:dominate-beast :greater-invisibility])]}
-                           9 {:selections [(warlock-subclass-spell-selection 5 [:dominate-person :seeming])]}
+                           7 {:selections [(warlock-subclass-spell-selection [:dominate-beast :greater-invisibility])]}
+                           9 {:selections [(warlock-subclass-spell-selection [:dominate-person :seeming])]}
                            10 {:modifiers [(mod5e/condition-immunity :charmed)
                                            (mod5e/reaction
                                             {:name "Beguiling Defenses"
@@ -4235,16 +4235,16 @@ long rest."})]
                                              :summary (str "charm or frighten a creature within 60 ft., spell save DC " (?spell-save-dc :cha) "WIS save")
                                              :frequency {:units :rest}})]}}}
                  {:name "The Great Old One"
-                  :levels {1 {:selections [(warlock-subclass-spell-selection 1 [:dissonant-whispers :tashas-hideous-laughter])]}
-                           3 {:selections [(warlock-subclass-spell-selection 2 [:detect-thoughts :phantasmal-force])]}
-                           5 {:selections [(warlock-subclass-spell-selection 3 [:clairvoyance :sending])]}
+                  :levels {1 {:selections [(warlock-subclass-spell-selection [:dissonant-whispers :tashas-hideous-laughter])]}
+                           3 {:selections [(warlock-subclass-spell-selection [:detect-thoughts :phantasmal-force])]}
+                           5 {:selections [(warlock-subclass-spell-selection [:clairvoyance :sending])]}
                            6 {:modifiers [(mod5e/reaction
                                            {:name "Entropic Ward"
                                             :page 110
                                             :frequency {:units :rest}
                                             :summary "impose disadvantage on an attack roll against you, if it misses, gain advantage on your next attack roll against the attacker"})]}
-                           7 {:selections [(warlock-subclass-spell-selection 4 [:dominate-beast :evards-black-tentacles])]}
-                           9 {:selections [(warlock-subclass-spell-selection 5 [:dominate-person :telekinesis])]}
+                           7 {:selections [(warlock-subclass-spell-selection [:dominate-beast :evards-black-tentacles])]}
+                           9 {:selections [(warlock-subclass-spell-selection [:dominate-person :telekinesis])]}
                            10 {:modifiers [(mod5e/damage-resistance :psychic)]}}
                   :traits [{:name "Awakened Mind"
                             :level 1

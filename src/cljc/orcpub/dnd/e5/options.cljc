@@ -510,7 +510,7 @@ check. The GM might also call for a Dexterity (Sleight of Hand) check to determi
    (sort spells)))
 
 (defn spell-level-title [class-name level]
-  (str class-name (if (zero? level) " Cantrips Known" (str " Spells Known " level))))
+  (str class-name (if (zero? level) " Cantrips Known" (str " Spells Known" (if level (str " " level))))))
 
 (defn spell-selection [{:keys [title class-key level spellcasting-ability class-name num prepend-level? spell-keys options min max exclude-ref?]}]
   (let [title (or title (spell-level-title class-name level))
