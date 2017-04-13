@@ -1251,18 +1251,31 @@ check. The GM might also call for a Dexterity (Sleight of Hand) check to determi
    (feat-option
     {:name "Tavern Brawler"
      :icon "broken-bottle"
+     :page 170
+     :summary "increase STR or CON by 1; improvised weapon proficiency; d4 damage on unarmed strike; grapple as bonus action"
      :selections [(ability-increase-selection [:str :dex] 1 false)]
-     :modifiers [(modifiers/weapon-proficiency :improvised)]})
+     :modifiers [(modifiers/weapon-proficiency :improvised)
+                 (modifiers/bonus-action
+                  {:name "Tavern Brawler: Grapple"
+                   :page 170
+                   :summary "attempt grapple when you hit with improvised weapon or unarmed strike"})]})
    (feat-option
     {:name "Tough"
      :icon "defensive-wall"
+     :page 170
+     :summary "2 extra HPs per level"
      :modifiers [(mods/modifier ?hit-point-level-bonus (+ 2 ?hit-point-level-bonus))]})
    (feat-option
     {:name "War Caster"
-     :icon "deadly-strike"})
+     :icon "deadly-strike"
+     :page 170
+     :summary "adv. on CON saves for spell concentration; somatic components with weapons or shield in hand; cast spell as opporunity attack"
+     :prereqs [can-cast-spell-prereq]})
    (feat-option
     {:name "Weapon Master"
      :icon "sword-slice"
+     :page 170
+     :summary "increase STR or DEX by 1; proficiency with 4 weapons"
      :selections [(ability-increase-selection [:str :dex] 1 false)
                   (weapon-proficiency-selection 4)]})])
 

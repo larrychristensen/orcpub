@@ -30,6 +30,7 @@
 
             [reagent.core :as r]))
 
+
 (declare app-state)
 
 (defn stop-propagation [e]
