@@ -118,7 +118,7 @@
     {:equipment (s/join
                  "; "
                  (map
-                  (fn [[kw count]]
+                  (fn [[kw {count :quantity}]]
                     (str (:name (mi5e/all-equipment-map kw)) " (" count ")"))
                   all-equipment))}))
 
