@@ -1143,10 +1143,19 @@ check. The GM might also call for a Dexterity (Sleight of Hand) check to determi
                  (modifiers/passive-investigation 5)]})
    (feat-option
     {:name "Polearm Master"
-     :icon "halberd"})
+     :icon "halberd"
+     :page 168
+     :exclude-trait? true
+     :summary "bonus attack with opposite end of quarterstaff, glaive, or halberd; opportunity attacks have the reach of glaive, pike, halberd, or quarterstaff"
+     :modifiers [(modifiers/bonus-action
+                  {:name "Polearm Master"
+                   :page 168
+                   :summary "when you make an Attack with a glaive, quarterstaff, or halberd, make an additionaal melee attack with the other end of the weapon, dealing d4 bludgeoning damage"})]})
    (feat-option
     {:name "Resilient"
      :icon "dodging"
+     :page 168
+     :summary "increase ability by 1 and gain proficiency in saves with that ability"
      :selections [(t/selection-cfg
                    {:name "Ability"
                     :tags #{:ability-scores}
@@ -1162,6 +1171,8 @@ check. The GM might also call for a Dexterity (Sleight of Hand) check to determi
    (feat-option
     {:name "Ritual Caster"
      :icon "gift-of-knowledge"
+     :page 169
+     :summary "choose a spellcaster class and learn 2 rituals from that class"
      :selections [(t/selection-cfg
                    {:name "Gift of Knowledge: Spell Class"
                     :tags #{:spells}
@@ -1178,16 +1189,23 @@ check. The GM might also call for a Dexterity (Sleight of Hand) check to determi
                                         (and int (>= int 13))))))]})
    (feat-option
     {:name "Savage Attacker"
-     :icon "saber-slash"})
+     :icon "saber-slash"
+     :page 169
+     :summary "reroll melee weapon attack damage and use either total"})
    (feat-option
     {:name "Sentinal"
-     :icon "guards"})
+     :icon "guards"
+     :page 169
+     :summary "reduce target's speed to 0 when you hit with opportunity attack; opportunity attacks even when target Disengages; use reaction to make a weapon attack against a creature within 5 ft. that attacks another target"})
    (feat-option
     {:name "Sharpshooter"
-     :icon "bullseye"})
+     :icon "bullseye"
+     :page 170
+     :summary "no disadvantage for long range; ignore half and 3/4 cover; take -5 to ranged attack to gain +10 on damage"})
    (feat-option
     {:name "Shield Master"
-     :icon "attached-shield"})
+     :icon "attached-shield"
+     :page 170})
    (feat-option
     {:name "Skilled"
      :icon "juggler"

@@ -2316,6 +2316,7 @@
              :page 75
              :summary "teleport up to 30 ft. when you use Action Surge"}]})
 
+
 (def fighter-option
   (class-option
    {:name "Fighter",
@@ -2367,51 +2368,45 @@
     :subclass-level 3
     :subclass-title "Martial Archetype"
     :selections [(opt5e/fighting-style-selection)
-                 (t/selection
-                  "Starting Equipment: Armor"
-                  [(t/option
-                    "Chain Mail"
-                    :chain-mail
-                    []
-                    [(mod5e/armor :chain-mail 1)])
-                   (t/option
-                    "Leather Armor, Longbow, 20 Arrows"
-                    :leather
-                    []
-                    [(mod5e/armor :leather 1)
-                     (mod5e/weapon :longbow 1)
-                     (mod5e/equipment :arrow 20)])])
-                 (t/selection
-                  "Starting Equipment: Weapons"
-                  [(t/option
-                    "Martial Weapon and Shield"
-                    :martial-and-shield
-                    [(t/selection
-                      "Martial Weapon"
-                      (opt5e/martial-weapon-options 1))]
-                    [(mod5e/armor :shield 1)])
-                   (t/option
-                    "Two Martial Weapons"
-                    :two-martial
-                    [(t/selection
-                      "Martial Weapons"
-                      (opt5e/martial-weapon-options 1)
-                      2
-                      2)]
-                    [])])
-                 (t/selection
-                  "Starting Equipment: Additional Weapons"
-                  [(t/option
-                    "Light Crossbow and 20 Bolts"
-                    :light-crossbow
-                    []
-                    [(mod5e/weapon :crossbow-light 1)
-                     (mod5e/equipment :crossbow-bolt 20)])
-                   (t/option
-                    "Two Handaxes"
-                    :two-handaxes
-                    []
-                    [(mod5e/weapon :handaxe 2)])])]
+                 (t/selection-cfg
+                  {:name "Starting Equipment: Armor"
+                   :tags #{:equipment :starting-equipment}
+                   :options [(t/option-cfg
+                              {:name "Chain Mail"
+                               :modifiers [(mod5e/armor :chain-mail 1)]})
+                             (t/option-cfg
+                              {:name "Leather Armor, Longbow, 20 Arrows"
+                               :options [(mod5e/armor :leather 1)
+                                         (mod5e/weapon :longbow 1)
+                                         (mod5e/equipment :arrow 20)]})]})
+                 (t/selection-cfg
+                  {:name "Starting Equipment: Weapons"
+                   :tags #{:equipment :starting-equipment}
+                   :options [(t/option-cfg
+                              {:name "Martial Weapon and Shield"
+                               :selections [(t/selection-cfg
+                                             {:name "Martial Weapon"
+                                              :tags #{:equipment :starting-equipment}
+                                              :options (opt5e/martial-weapon-options 1)})]
+                               :modifiers [(mod5e/armor :shield 1)]})
+                             (t/option-cfg
+                              {:name "Two Martial Weapons"
+                               :selections [(t/selection-cfg
+                                             {:name "Martial Weapons"
+                                              :tags #{:equipment :starting-equipment}
+                                              :options (opt5e/martial-weapon-options 1)
+                                              :min 2
+                                              :max 2})]})]})
+                 (t/selection-cfg
+                  {:name "Starting Equipment: Additional Weapons"
+                   :tags #{:equipment :starting-equipment}
+                   :options [(t/option-cfg
+                              {:name "Light Crossbow and 20 Bolts"
+                               :modifiers [(mod5e/weapon :crossbow-light 1)
+                                           (mod5e/equipment :crossbow-bolt 20)]})
+                             (t/option-cfg
+                              {:name "Two Handaxes"
+                               :modifiers [(mod5e/weapon :handaxe 2)]})]})]
     :subclasses [{:name "Champion"
                   :selections [(add-level-prereq
                                 (opt5e/fighting-style-selection)
