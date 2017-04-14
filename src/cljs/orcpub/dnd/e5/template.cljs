@@ -4567,7 +4567,56 @@ long rest."})]
                             :level 14
                             :page 121
                             :source :scag
-                            :summary "while raging and in spiked armor, creatures within 5 ft. that hit with melee attack take 3 damage"}]}]}
+                            :summary "while raging and in spiked armor, creatures within 5 ft. that hit with melee attack take 3 damage"}]}
+                 {:name "Path of the Totem Warrior"
+                  :source "Sword Coast Adventurer's Guide"
+                  :levels {3 {:selections [(t/selection-cfg
+                                            {:name "Totem Spirit"
+                                             :tags #{:class}
+                                             :options [(t/option-cfg
+                                               {:name "Elk"
+                                                :modifiers [(mod5e/trait-cfg
+                                                             {:name "Totem Spirit: Elk"
+                                                              :page 122
+                                                              :source :scag
+                                                              :summary "When raging without heavy armor, your speed increases by 15 ft."})]})
+                                              (t/option-cfg
+                                               {:name "Tiger"
+                                                :modifiers [(mod5e/trait-cfg
+                                                             {:name "Totem Spirit: Tiger"
+                                                              :page 122
+                                                              :source :scag
+                                                              :summary "When raging, +10 ft long jump, +3 ft high jump"})]})]})]}
+                           6 {:selections [(t/selection-cfg
+                                            {:name "Aspect of the Beast"
+                                             :tags #{:class}
+                                             :options [(t/option-cfg
+                                               {:name "Elk"
+                                                :modifiers [(mod5e/trait-cfg
+                                                             {:name "Aspect of the Beast: Elk"
+                                                              :page 122
+                                                              :source :scag
+                                                              :summary "double travel pace"})]})
+                                              (t/option-cfg
+                                               {:name "Tiger"
+                                                :selections [(opt5e/skill-selection [:athletics :acrobatics :stealth :survival] 2)]})]})]}
+                           14 {:selections [(t/selection-cfg
+                                             {:name "Totemic Attunement"
+                                              :tags #{:class}
+                                              :options [(t/option-cfg
+                                                        {:name "Elk"
+                                                         :modifiers [(mod5e/bonus-action
+                                                                      {:name "Totemic Attunement: Elk"
+                                                                       :page 122
+                                                                       :source :scag
+                                                                       :summary (str "pass through space of Large or smaller creature, if it fails a DC " (?spell-save-dc :str) " STR save it is knocked prone and takes 1d12 " (common/mod-str (?ability-bonuses :str)) " damage")})]})
+                                                       (t/option-cfg
+                                                        {:name "Tiger"
+                                                         :modifiers [(mod5e/bonus-action
+                                                                      {:name "Totemic Attunement: Tiger"
+                                                                       :page 122
+                                                                       :source :scag
+                                                                       :summary "make an additional melee weapon attack when you move 20+ ft. in a line and make a melee weapon attack"})]})]})]}}}]}
    {:name "Rogue"
     :plugin? true
     :subclass-level 3
