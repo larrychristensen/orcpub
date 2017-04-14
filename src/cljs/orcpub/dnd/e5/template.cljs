@@ -195,7 +195,8 @@
 (defn traits-modifiers [traits & [include-level? source]]
   (map
    (fn [trait]
-     (mod5e/trait-cfg (assoc trait :source source)))
+     (prn "TRAT" trait)
+     (mod5e/trait-cfg (if source (assoc trait :source source) trait)))
    traits))
 
 (defn armor-prof-modifiers [armor-proficiencies & [cls-kw]]
@@ -4449,54 +4450,90 @@ long rest."})]
 
 
 (def sword-coast-adventurers-guide-backgrounds
-  [{:name "City Watch"
-    :source "Sword Coast Adventurer's Guide"
-    :profs {:skill {:athletics true :insight true}}}
-   {:name "Clan Crafter"
-    :source "Sword Coast Adventurer's Guide"
-    :profs {:skill {:history true :insight true}
-            :tool-options {:artisans-tool true}}}
-   {:name "Cloistered Scholar"
-    :source "Sword Coast Adventurer's Guide"
-    :profs {:skill {:history true}
-            :skill-options {:choose 1 :options {:arcana true :nature true :religion true}}}}
-   {:name "Courtier"
-    :source "Sword Coast Adventurer's Guide"
-    :profs {:skill {:insight true :persuasion true}}}
-   {:name "Faction Agent"
-    :source "Sword Coast Adventurer's Guide"
-    :profs {:skill {:insight true}
-            :skill-options {:choose 1 :options {:animal-handling true :arcana true :deception true :history true :insight true :intimidation true :investigation true :medicine true :nature true :perception true :performance true :persuasion true :religion true :survival true}}}}
-   {:name "Far Traveler"
-    :source "Sword Coast Adventurer's Guide"
-    :profs {:skill {:perception true :insight true}
-            :tool-options {:musical-instrument 1}}}
-   {:name "Inheritor"
-    :source "Sword Coast Adventurer's Guide"
-    :profs {:skill {:survival true}
-            :skill-options {:choose 1 :options {:arcana true :history true :religion true}}}}
-   {:name "Knight of the Order"
-    :source "Sword Coast Adventurer's Guide"
-    :profs {:skill {:persuasion true}
-            :skill-options {:choose 1 :options {:arcana true :history true :nature true :religion true}}
-            :tool-options {:musical-instrument 1}}}
-   {:name "Mercenary Veteran"
-    :source "Sword Coast Adventurer's Guide"
-    :profs {:skill {:athletics true :persuasion true}
-            :tool {:land-vehicles true}
-            :tool-options {:gaming-set 1}}}
-   {:name "Urban Bounty Hunter"
-    :source "Sword Coast Adventurer's Guide"
-    :profs {:skill-options {:choose 2 :options {:deception true :insight true :persuasion true :stealth true}}
-            :tool-options {:gaming-set 1 :musical-instrument 1 :thieves-tools 1}}}
-   {:name "Uthgardt Tribe Member"
-    :source "Sword Coast Adventurer's Guide"
-    :profs {:skill {:athletics true :survival true}
-            :tool-options {:musical-instrument 1 :artisans-tool 1}}}
-   {:name "Waterdhavian Noble"
-    :source "Sword Coast Adventurer's Guide"
-    :profs {:skill {:history true :persuasion true}
-            :tool-options {:musical-instrument 1 :gaming-set 1}}}])
+  (map
+   (fn [background]
+     (-> background
+         (assoc :source "Sword Coast Adventurer's Guide")
+         (update :traits (fn [traits] (map (fn [t] (assoc t :source :scag)) traits)))))
+   [{:name "City Watch"
+     :profs {:skill {:athletics true :insight true}}
+     :traits [{:name "Watcher's Eye"
+               :page 145
+               :summary "can easily find local watch and criminal outposts"}]}
+    {:name "Clan Crafter"
+     :profs {:skill {:history true :insight true}
+             :tool-options {:artisans-tool true}}
+     :traits [{:name "Respect of the Stout Folk"
+               :page 145
+               :summary "free room and board among shield and gold dwarves"}]}
+    {:name "Cloistered Scholar"
+     :profs {:skill {:history true}
+             :skill-options {:choose 1 :options {:arcana true :nature true :religion true}}}
+     :traits [{:name "Library Access"
+               :page 146
+               :summary "free access to most of the library where you apprenticed"}]}
+    {:name "Courtier"
+     :profs {:skill {:insight true :persuasion true}}
+     :traits [{:name "Court Functionary"
+               :page 147
+               :summary "access to the workings of a government or court"}]}
+    {:name "Faction Agent"
+     :profs {:skill {:insight true}
+             :skill-options {:choose 1 :options {:animal-handling true :arcana true :deception true :history true :insight true :intimidation true :investigation true :medicine true :nature true :perception true :performance true :persuasion true :religion true :survival true}}}
+     :traits [{:name "Safe Haven"
+               :page 148
+               :summary "receive safe haven, room and board, or info from your network"}]}
+    {:name "Far Traveler"
+     :source "Sword Coast Adventurer's Guide"
+     :profs {:skill {:perception true :insight true}
+             :tool-options {:musical-instrument 1}}
+     :traits [{:name "All Eyes on You"
+               :page 149
+               :summary "interest of scholars, nobles, and merchants"}]}
+    {:name "Inheritor"
+     :source "Sword Coast Adventurer's Guide"
+     :profs {:skill {:survival true}
+             :skill-options {:choose 1 :options {:arcana true :history true :religion true}}}
+     :traits [{:name "Inheritance"
+               :page 150
+               :summary "an inherited item"}]}
+    {:name "Knight of the Order"
+     :source "Sword Coast Adventurer's Guide"
+     :profs {:skill {:persuasion true}
+             :skill-options {:choose 1 :options {:arcana true :history true :nature true :religion true}}
+             :tool-options {:musical-instrument 1}}
+     :traits [{:name "Knightly Regard"
+               :page 151
+               :summary "shelter and aid from your order and supporters"}]}
+    {:name "Mercenary Veteran"
+     :source "Sword Coast Adventurer's Guide"
+     :profs {:skill {:athletics true :persuasion true}
+             :tool {:land-vehicles true}
+             :tool-options {:gaming-set 1}}
+     :traits [{:name "Mercenary Life"
+               :page 152
+               :summary "can recall or find info about mercenary groups and can find mercenary work"}]}
+    {:name "Urban Bounty Hunter"
+     :source "Sword Coast Adventurer's Guide"
+     :profs {:skill-options {:choose 2 :options {:deception true :insight true :persuasion true :stealth true}}
+             :tool-options {:gaming-set 1 :musical-instrument 1 :thieves-tools 1}}
+     :traits [{:name "Ear to the Ground"
+               :page 153
+               :summary "you have contacts in any city that can provide info about people and places"}]}
+    {:name "Uthgardt Tribe Member"
+     :source "Sword Coast Adventurer's Guide"
+     :profs {:skill {:athletics true :survival true}
+             :tool-options {:musical-instrument 1 :artisans-tool 1}}
+     :traits [{:name "Uthgardt Heritage"
+               :page 154
+               :summary "you are familiar with the wilderness of the North; can find 2X food and water when foraging; hospitality of your tribe and allies"}]}
+    {:name "Waterdhavian Noble"
+     :source "Sword Coast Adventurer's Guide"
+     :profs {:skill {:history true :persuasion true}
+             :tool-options {:musical-instrument 1 :gaming-set 1}}
+     :traits [{:name "Kept in Style"
+               :page 154
+               :summary "2 GP per day of living expenses in the North are covered"}]}]))
 
 (defn scag-classes [app-state]
   [{:name "Barbarian"
