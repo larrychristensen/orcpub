@@ -195,7 +195,6 @@
 (defn traits-modifiers [traits & [include-level? source]]
   (map
    (fn [trait]
-     (prn "TRAT" trait)
      (mod5e/trait-cfg (if source (assoc trait :source source) trait)))
    traits))
 
@@ -1151,11 +1150,13 @@
                     (fn [{level :level :or {level 1}}]
                       (= level i))
                     traits))
-                  (if (and (not plugin?) (= i 1)) [(assoc
-                                                    (mod5e/max-hit-points hit-die)
-                                                    ::mod/conditions
-                                                    [(first-class? kw)])])
-                  [(mod5e/level kw name i hit-die)])})))
+                  (if (and (not plugin?)
+                           (= i 1)) [(assoc
+                                      (mod5e/max-hit-points hit-die)
+                                      ::mod/conditions
+                                      [(first-class? kw)])])
+                  (if (not plugin?)
+                    [(mod5e/level kw name i hit-die)]))})))
 
 
 (defn equipment-option [[k num]]
@@ -4542,18 +4543,35 @@ long rest."})]
     :subclass-title "Primal Path"
     :subclasses [{:name "Path of the Battlerager"
                   :source "Sword Coast Adventurer's Guide"
+                  :modifiers [(mod5e/bonus-action
+                               {:name "Spiked Armor Attack"
+                                :page 121
+                                :source :scag
+                                :summary "while raging, attack with spiked armor (1d4 piercing damage); grapple deals 3 piercing damage"})]
+                  :levels {6 {:modifiers [(mod5e/dependent-trait
+                                           {:name "Reckless Abandon"
+                                            :page 121
+                                            :source :scag
+                                            :summary (str "gain " (?ability-bonuses :con) " temp HPs when you Reckless Attack")})]}
+                           10 {:modifiers [(mod5e/bonus-action
+                                            {:name "Battlerager Charge"
+                                             :page 121
+                                             :source :scag
+                                             :summary "Dash while raging"})]}}
                   :traits [{:name "Battlerager Armor"
-                            :level 3}
-                           {:name "Reckless Abandon"
-                            :level 6}
-                           {:name "Battlerager Charge"
-                            :level 10}
+                            :level 3
+                            :page 121
+                            :source :scag
+                            :summary "can use spiked armor as a weapon"}
                            {:name "Spiked Retribution"
-                            :level 14}]}]}
+                            :level 14
+                            :page 121
+                            :source :scag
+                            :summary "while raging and in spiked armor, creatures within 5 ft. that hit with melee attack take 3 damage"}]}]}
    {:name "Rogue"
     :plugin? true
     :subclass-level 3
-    :subclass-title "Roguish Archetypes"
+    :subclass-title "Roguish Archetype"
     :subclasses [{:name "Mastermind"
                   :source "Sword Coast Adventurer's Guide"
                   :traits [{:name "Master of Intrigue"
