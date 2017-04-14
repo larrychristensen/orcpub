@@ -16,7 +16,10 @@
    :scag {:abbr "SCAG"
           :url scag-url}})
 
-(defn unit-amount-description [{:keys [units amount singular plural] :or {amount 1}}]
+(def plural-map
+  {:feet :feet})
+
+(defn unit-amount-description [{:keys [units amount singular plural] :or {amount 1 plural (plural-map units)}}]
   (str amount " " (if (not= 1 amount)
                     (if plural
                       (common/safe-name plural)
@@ -45,6 +48,7 @@
              :line (str (:line-width attack) " x " (:line-length attack) " ft. line, ")
              :cone (str (:length attack) " ft. cone, ")
              nil)
+     :ranged "ranged, "
      "melee, ")
    damage-die-count "d" damage-die (if damage-modifier (common/mod-str damage-modifier))
    " "

@@ -2507,18 +2507,18 @@
                                  nil
                                  nil
                                  [(= :monk (first ?unarmored-defense))])
+                (mod/modifier ?martial-arts-die (mod5e/level-val
+                                                 (?class-level :monk)
+                                                 {5 6
+                                                  11 8
+                                                  17 10
+                                                  :default 4}))
                 (mod5e/attack
-                 (let [die (mod5e/level-val
-                                       (?class-level :monk)
-                                       {5 6
-                                        11 8
-                                        17 10
-                                        :default 4})]
-                   {:name "Martial Arts"
-                    :damage-die die
-                    :damage-die-count 1
-                    :damage-modifier (max (?ability-bonuses :str) (?ability-bonuses :dex))
-                    :summary "Unarmed strike or monk weapon"}))
+                 {:name "Martial Arts"
+                  :damage-die ?martial-arts-die
+                  :damage-die-count 1
+                  :damage-modifier (max (?ability-bonuses :str) (?ability-bonuses :dex))
+                  :summary "Unarmed strike or monk weapon"})
                 (mod5e/bonus-action
                  {:name "Martial Arts"
                   :page 78
@@ -2638,7 +2638,7 @@
                   :levels {6 {:modfifiers [(mod5e/bonus-action
                                             {:name "Shadow Step"
                                              :page 80
-                                             :summary "teleport 60 and gain advantage on first melee attack before end of turn"})]}
+                                             :summary "teleport 60 ft. and gain advantage on first melee attack before end of turn"})]}
                            11 {:modifiers [(mod5e/action
                                             {:name "Cloak of Shadows"
                                              :level 11
@@ -2657,27 +2657,6 @@
                   :traits [{:name "Elemental Attunement"
                             :page 81
                             :summary "create minor elemental effect"}]}
-                 {:name "Way of the Long Death"
-                  :source "Sword Coast Adventurer's Guide"
-                  :traits [{:name "Touch of Death"
-                            :level 3}
-                           {:name "Hour of Reaping"
-                            :level 6}
-                           
-                           {:name "Mastery of Death"
-                            :level 11}
-                           {:name "Touch of the Long Death"
-                            :level 17}]}
-                 {:name "Way of the Sun Soul"
-                  :source "Sword Coast Adventurer's Guide"
-                  :traits [{:name "Radiant Sun Bolt"
-                            :level 2}
-                           {:name "Searing Arc Strike"
-                            :level 6}
-                           {:name "Searing Sunburst"
-                            :level 11}
-                           {:name "Sun Shield"
-                            :level 17}]}
                  {:name "Way of the Kensei"
                   :source "Unearthed Arcana: Monk"
                   :traits [{:name "Path of the Kensei"
@@ -4691,10 +4670,108 @@ long rest."})]
                                                              1)
                                                            " allies to gain an attack as reaction")})]}
                            15 {:modifiers [(mod5e/trait-cfg
-                                            {:level 18
-                                             :page 73
-                                             :name "Survivor"
+                                            {:page 128
+                                             :source :scag
+                                             :name "Bulwark"
                                              :summary "When you use Indomitable, extend the benefit to 1 ally"})]}}}]}
+   {:name "Monk"
+    :subclass-level 3
+    :plugin? true
+    :subclass-title "Monastic Tradition"
+    :subclasses [{:name "Way of the Long Death"
+                  :modifiers [(mod5e/dependent-trait
+                               {:name "Touch of Death"
+                                :page 130
+                                :source :scag
+                                :summary (str "when you reduce a creature within 5 ft. to 0 HPs, you gain " (max 1 (+ (?ability-bonuses :wis) (?class-level :monk))) " temp HPs")})]
+                  :levels {6 {:modifiers [(mod5e/action
+                                           {:name "Hour of Reaping"
+                                            :page 130
+                                            :source :scag
+                                            :duration {:units :turn}
+                                            :summary (str "creatures within 30 ft. are frightened of you on failed DC " (?spell-save-dc :wis) " WIS save")})]}
+                           11 {:modifiers [(mod5e/trait-cfg
+                                            {:name "Mastery of Death"
+                                             :page 131
+                                             :source :scag
+                                             :summary "when reduced to 0 HP, spend 1 ki point to reduce to 1 instead"})]}
+                           17 {:modifiers [(mod5e/action
+                                            {:name "Touch of the Long Death"
+                                             :source :scag
+                                             :page 131
+                                             :summary (str "spend X (up to 10) ki points to deal 2Xd10 necrotic damage on failed DC " (?spell-save-dc :wis) " CON save, half as much on successful save")})]}}}
+                 {:name "Way of the Sun Soul"
+                  :modifiers [(mod5e/attack
+                               {:name "Radiant Sun Bolt"
+                                :page 131
+                                :source :scag
+                                :attack-type :ranged
+                                :range {:units :feet
+                                        :amount 30}
+                                :damage-die ?martial-arts-die
+                                :damage-die-count 1
+                                :damage-type :radiant
+                                :damage-modifier (?ability-bonuses :dex)})]
+                  :levels {6 {:modifiers [(mod5e/bonus-action
+                                            {:name "Searing Arc Strike"
+                                             :page 131
+                                             :source :scag
+                                             :summary (str "after taking Attack action, spend 2 + X ki points to cast level X burning hands (max X of " (int (/ (?class-level :monk) 2)) ")")})]}
+                           11 {:modifiers [(mod5e/action
+                                            {:name "Searing Sunburst"
+                                             :level 11
+                                             :page 131
+                                             :source :scag
+                                             :summary (str "create an exploding orb, dealing 2d6 damage to creatures in a 20 ft sphere that fail a DC " (?spell-save-dc :wis) " CON save, you can spend X ki to increase by 2Xd6 damage (up to 3 ki)")})]}
+                           17 {:modifiers [(mod5e/reaction
+                                            {:name "Sun Shield"
+                                             :page 131
+                                             :source :scag
+                                             :summary (str "when hit with melee attack, deal " (+ 5 (?ability-bonuses :wis)) " radiant damage to attacker; you also shed 30 ft. light")})]}}}]}
+   {:name "Paladin"
+    :plugin? true
+    :subclass-level 3
+    :subclass-title "Sacred Oath"
+    :subclasses [{:name "Oath of the Crown"
+                  :modifiers [(paladin-spell 1 :command 3)
+                              (paladin-spell 1 :compelling-duel 3)
+                              (paladin-spell 2 :warding-bond 5)
+                              (paladin-spell 2 :zone-of-truth 5)
+                              (paladin-spell 3 :aura-of-vitality 9)
+                              (paladin-spell 3 :spirit-guardians 9)
+                              (paladin-spell 4 :banishment 13)
+                              (paladin-spell 4 :guardian-of-faith 13)
+                              (paladin-spell 5 :circle-of-power 17)
+                              (paladin-spell 5 :geas 17)
+                              (mod5e/dependent-trait
+                               {:name "Channel Divinity: Champion Challenge"
+                                :source :scag
+                                :page 133
+                                :summary (str "creatures of your choice within 30 ft. cannot move more than 30 ft. from you on failed DC " (?spell-save-dc :cha) " WIS save")})
+                              (mod5e/bonus-action
+                               {:name "Channel Divinity: Turn the Tide"
+                                :page 133
+                                :source :scag
+                                :summary (str "creatures of your choice within 30 ft. and with half or less HPs regain 1d6 " (common/mod-str (?ability-bonuses :cha)))})]
+                  :levels {7 {:modifiers [(mod5e/reaction
+                                           {:name "Divine Allegience"
+                                            :level 7
+                                            :page 133
+                                            :source :scag
+                                            :summary "take damage another creature would take"})]}
+                           15 {:modifier [(mod5e/saving-throw-advantage [:paralyzed :stunned])
+                                          (mod5e/trait-cfg
+                                           {:name "Unyielding Spirit"
+                                            :page 133
+                                            :source :scag
+                                            :summary "advantage on saves against being stunned or paralyzed"})]}
+                           20 {:modifiers [(mod5e/action
+                                            {:name "Exalted Champion"
+                                             :page 86
+                                             :source :scag
+                                             :frequency {:units :long-rest}
+                                             :duration {:units :hour}
+                                             :summary "resistance to non-magical weapon slashing, bludgeoning, and piercing damage; allies within 30 ft. have advantage on death saves; you and allies have advantage on WIS saves"})]}}}]}
    {:name "Rogue"
     :plugin? true
     :subclass-level 3
@@ -4746,7 +4823,7 @@ long rest."})]
                sword-coast-adventurers-guide-backgrounds)})
    (class-selection
     {:options (map
-               class-option
+               (fn [cfg] (class-option (assoc cfg :plugin? true)))
                (scag-classes app-state))})])
 
 (defn ability-item [name abbr desc]
