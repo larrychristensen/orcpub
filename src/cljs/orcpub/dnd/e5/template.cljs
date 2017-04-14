@@ -4667,6 +4667,34 @@ long rest."})]
                            {:level 17
                             :name "Supreme Healing"
                             :summary "Instead of rolling healing, use max possible roll value." }]}]}
+   {:name "Fighter",
+    :plugin? true
+    :subclass-level 3
+    :subclass-title "Martial Archetype"
+    :subclasses [{:name "Purple Dragon Knight"
+                  :levels {3 {:modifiers [(mod5e/dependent-trait
+                                           {:name "Rallying Cry"
+                                            :page 128
+                                            :source :scag
+                                            :summary (str "When you Second Wind, choose up to 3 allies to regain " (?class-level :fighter) " HPs")})]}
+                           7 {:modifiers [(mod5e/skill-expertise :persuasion)]
+                              :selections [(opt5e/skill-selection [:persuasion :animal-handling :insight :intimidation :performance] 1)]}
+                           10 {:modifiers [(mod5e/dependent-trait
+                                            {:name "Inspiring Surge"
+                                             :page 128
+                                             :source :scag
+                                             :range {:unit :feet
+                                                     :amount 60}
+                                             :summary (str "When you Action Surge, choose "
+                                                           (if (>= (?class-levels) 17)
+                                                             2
+                                                             1)
+                                                           " allies to gain an attack as reaction")})]}
+                           15 {:modifiers [(mod5e/trait-cfg
+                                            {:level 18
+                                             :page 73
+                                             :name "Survivor"
+                                             :summary "When you use Indomitable, extend the benefit to 1 ally"})]}}}]}
    {:name "Rogue"
     :plugin? true
     :subclass-level 3
