@@ -151,9 +151,10 @@
     5 [:commune-with-nature :conjure-volley :swift-quiver :tree-stride]},
    :sorcerer
    {0
-    [:acid-splash :blade-ward :chill-touch :dancing-lights :fire-bolt :friends :light :mage-hand
+    [:acid-splash :blade-ward :booming-blade :chill-touch :dancing-lights :fire-bolt
+     :friends :green-flame-blade :light :lightning-lure :mage-hand
      :mending :message :minor-illusion :poison-spray :prestidigitation :ray-of-frost
-     :shocking-grasp :true-strike],
+     :shocking-grasp :sword-burst :true-strike],
     1
     [:burning-hands :charm-person :chromatic-orb :color-spray :comprehend-languages
      :detect-magic :disguise-self :expeditious-retreat :false-life
@@ -192,7 +193,8 @@
    :warlock
    {0
     [:blade-ward :chill-touch :eldritch-blast :friends :mage-hand :minor-illusion :prestidigitation
-     :true-strike],
+     :true-strike
+     :booming-blade :green-flame-blade :lightning-lure :sword-burst],
     1
     [:armor-of-agathys :arms-of-hadar :charm-person :comprehend-languages :expeditious-retreat
      :hellish-rebuke :hex
@@ -218,7 +220,8 @@
    {0
     [:acid-splash :blade-ward :chill-touch :dancing-lights :fire-bolt :friends :light :mage-hand
      :mending :message :minor-illusion :poison-spray :prestidigitation :ray-of-frost
-     :shocking-grasp :true-strike],
+     :shocking-grasp :true-strike
+     :booming-blade :green-flame-blade :lightning-lure :sword-burst],
     1
     [:alarm :burning-hands :charm-person :chromatic-orb :color-spray
      :comprehend-languages :detect-magic :disguise-self

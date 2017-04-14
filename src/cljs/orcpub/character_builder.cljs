@@ -30,7 +30,7 @@
 
             [reagent.core :as r]))
 
-(def print-enabled? false)
+(def print-enabled? true)
 
 (declare app-state)
 
@@ -224,94 +224,6 @@
               next-option-path)
        (vec (reverse next-option-path))))))
 
-
-(defn option [path option-paths selectable? list-collapsed? {:keys [::t/key ::t/name ::t/selections ::t/modifiers ::t/prereqs ::t/ui-fn ::t/select-fn] :as opt} built-char raw-char changeable? options change-fn built-template collapsed-paths stepper-selection-path]
-  (let [new-path (conj path key)
-        selected? (boolean (get-in option-paths new-path))
-        collapsed? (get collapsed-paths new-path)
-        named-mods (filter ::mod/name modifiers)
-        failed-prereqs (reduce
-                        (fn [failures {:keys [::t/prereq-fn ::t/label]}]
-                          (if (and prereq-fn (not (prereq-fn built-char)))
-                            (conj failures label)))
-                        []
-                        prereqs)
-        meets-prereqs? (empty? failed-prereqs)]
-    ^{:key key}
-    (if (or selected? (not list-collapsed?))
-      [:div.builder-option
-       {:class-name (clojure.string/join
-                     " "
-                     [(if selected? "selected-builder-option")
-                      (if (and meets-prereqs? selectable?) "selectable-builder-option")
-                      (if (not meets-prereqs?) "disabled-builder-option")])
-        :on-click (fn [e]
-                    (if (and meets-prereqs? selectable?)
-                      (do
-                        (if select-fn
-                          (select-fn path))
-                        (swap! app-state #(update % :character (fn [c] (update-option built-template c path (fn [o] (assoc o ::entity/key key))))))))
-                    (.stopPropagation e))
-        :on-mouse-enter (fn [e]
-                         (let [stepper-selection-path stepper-selection-path
-                               selection-path (to-option-path stepper-selection-path built-template)]
-                           (set-mouseover-option! opt))
-                        (.stopPropagation e))}
-       [:div.option-header
-        [:div.flex-grow-1
-         (if changeable?
-           [dropdown options key change-fn built-char]
-           [:span.f-w-b name])
-         (if (not meets-prereqs?)
-           [:div.i.f-s-12.f-w-n 
-            (str (s/join ", " failed-prereqs))])
-         (if (and meets-prereqs? (seq named-mods))
-           [:span.m-l-10.i.f-s-12.f-w-n
-            (s/join
-             ", "
-             (map
-              (fn [{:keys [::mod/value ::mod/val-fn] :as m}]
-                (let []
-                  (str
-                   (::mod/name m)
-                   " "
-                   (let [v (or value (get-option-value built-template (:character @app-state) path))]
-                     (if val-fn
-                       (val-fn v)
-                       v)))))
-              named-mods))])]
-        (if (and selected?
-                 (or (seq selections)
-                     ui-fn))
-          (if collapsed?
-            [:div.flex
-             {:on-click (stop-prop-fn
-                         (fn [_]
-                           (swap! app-state update :collapsed-paths disj new-path)))}
-             [:span.expand-collapse-button
-              "Expand"]
-             [:i.fa.fa-caret-down.m-l-5.orange.pointer]]
-            [:div.flex
-             {:on-click (stop-prop-fn
-                         (fn [_]
-                           (swap! app-state update :collapsed-paths conj new-path)))}
-             [:span.expand-collapse-button
-              "Collapse"]
-             [:i.fa.fa-caret-up.m-l-5.orange.pointer]]))]
-       (if (and selected? (not collapsed?))
-         [:div
-          (if ui-fn (ui-fn path))
-          [:div
-           (doall
-            (map
-             (fn [{:keys [::t/prereq-fn ::t/key] :as selection}]
-               (if (or (not prereq-fn) (prereq-fn built-char))
-                 ^{:key key}
-                 [builder-selector new-path option-paths selection built-char raw-char built-template collapsed-paths stepper-selection-path]))
-             selections))]]
-         (if (and (seq selections) collapsed?)
-           [:div.builder-option.collapsed-list-builder-option]))])))
-
 (def builder-selector-style)
 
 (defn add-option-button [{:keys [::t/key ::t/name ::t/options ::t/new-item-fn ::t/new-item-text] :as selection} entity path built-template]
@@ -397,188 +309,8 @@
            (get-in option-paths option-path)))
        options))))
 
-(defn list-selector-option [removeable? path option-paths multiple-select? list-collapsed? i opt built-char raw-char changeable? options change-fn built-template collapsed-paths stepper-selection-path]
-  [:div.list-selector-option
-   [:div.flex-grow-1
-    [option path option-paths (not multiple-select?) list-collapsed? opt built-char raw-char changeable? options change-fn built-template collapsed-paths stepper-selection-path]]
-   (if (removeable? i)
-     [remove-option-button path built-template i])])
-
-(defn list-selector [path option-paths {:keys [::t/options ::t/min ::t/max ::t/key ::t/name ::t/sequential? ::t/new-item-fn] :as selection} collapsed? built-char raw-char built-template collapsed-paths stepper-selection-path]
-  (let [no-max? (nil? max)
-        multiple-select? (or no-max? (> max 1))
-        selected-options (filter-selected path key option-paths options raw-char built-template)
-        addable? (and multiple-select?
-                      (or no-max?
-                          (< (count selected-options) max)))
-        more-than-min? (> (count selected-options) min)
-        next-path (conj path key)]
-    (assert (or (not multiple-select?)
-                new-item-fn)
-            (str "MULTIPLE SELECT LIST SELECTOR REQUIRES UI-FN! Offending selection: " next-path))
-    [:div
-     (if collapsed? [:div.builder-option.collapsed-list-builder-option])
-     [:div
-      (doall
-       (map-indexed
-        (fn [i option]
-          ^{:key i}
-          [list-selector-option
-           #(and multiple-select?
-                 more-than-min?
-                 (or (not sequential?)
-                     (= % (dec (count selected-options)))))
-           next-path
-           option-paths
-           multiple-select?
-           collapsed?
-           i
-           option
-           built-char
-           raw-char
-           (and addable? (not sequential?))
-           options
-           (make-dropdown-change-fn path key built-template raw-char app-state i)
-           built-template
-           collapsed-paths
-           stepper-selection-path])
-        (if multiple-select?
-          selected-options
-          options)))]
-     (if collapsed? [:div.builder-option.collapsed-list-builder-option])
-     (if (and addable? new-item-fn)
-       (add-option-button selection raw-char (conj path key) built-template))]))
-
 (defn selector-id [path]
   (s/join "--" (map name path)))
-
-(defn builder-selector [path option-paths {:keys [::t/name ::t/key ::t/min ::t/max ::t/ui-fn ::t/collapsible? ::t/options] :as selection} built-char raw-char built-template collapsed-paths stepper-selection-path]
-  (let [new-path (conj path key)
-        collapsed? (get collapsed-paths new-path)
-        simple-options? 
-        (or (::t/simple? selection)
-            (not-any? #(or (seq (::t/selections %))
-                           (some ::mod/name (::t/modifiers %))
-                           (::t/ui-fn %))
-                      options))
-        collapsible? (or collapsible?
-                         (and (not (or (nil? max) (> max min)))
-                              (not simple-options?)))]
-    ^{:key key}
-    [:div.builder-selector
-     {:id (selector-id new-path)}
-     [:div.flex.justify-cont-s-b.align-items-c
-      (if (zero? (count path))
-        [:h1.f-s-24 (::t/name selection)]
-        [:h2.builder-selector-header (::t/name selection)])
-      (if collapsible?
-        (if collapsed?
-          [:div.flex
-           {:on-click (fn [_]
-                        (swap! app-state update :collapsed-paths disj new-path))}
-           [:div.expand-collapse-button
-            (if simple-options? "Expand" "Show All Options")]
-           [:i.fa.fa-caret-down.m-l-5.orange.pointer]]
-          [:div.flex
-           {:on-click (fn [_]
-                        (swap! app-state update :collapsed-paths conj new-path))}
-           [:span.expand-collapse-button
-            (if simple-options? "Collapse" "Hide Unselected Options")]
-           [:i.fa.fa-caret-up.m-l-5.orange.pointer]]))]
-     [:div
-      (cond
-        ui-fn (ui-fn selection)
-        simple-options? [dropdown-selector path option-paths selection built-char raw-char built-template (and collapsible? collapsed?)]
-        :else [list-selector path option-paths selection (and collapsible? collapsed?) built-char raw-char built-template collapsed-paths stepper-selection-path])]]))
-
-(defn abilities-radar [size abilities ability-bonuses]
-  (let [d size
-        stroke 1.5
-        point-offset 10
-        double-point-offset (* point-offset 2)
-        double-stroke (* 2 stroke)
-        alpha (/ d 4)
-        triple-alpha (* alpha 3)
-        beta (* alpha (Math/sqrt 3))
-        double-beta (* beta 2)
-        points [[0 (- (* alpha 2))]
-                [beta (- alpha)]
-                [beta alpha]
-                [0 (* alpha 2)]
-                [(- beta) alpha]
-                [(- beta) (- alpha)]]
-        offset-ability-keys (take 6 (drop 1 (cycle char5e/ability-keys)))
-        text-points [[0 55] [106 0] [206 55] [206 190] [106 240] [0 190]]
-        abilities-points (map
-                          (fn [k [x y]]
-                            (let [ratio (double (/ (k abilities) 20))]
-                              [(* x ratio) (* y ratio)]))
-                          offset-ability-keys
-                          points)
-        color-names (map-indexed
-                     (fn [i c]
-                       {:key i
-                        :color c})
-                     ["f4692a" "f32e50" "b35c95" "47eaf8" "bbe289" "f9b747"])
-        colors (map
-                (fn [{:keys [key color]}]
-                  {:key key
-                   :color (str "#" color)})
-                color-names)]
-    [:div.posn-rel.w-100-p
-     (doall
-      (map
-       (fn [k [x y] {:keys [color]}]
-         (let [color-class (str "c-" color)]
-           ^{:key color}
-           [:div.t-a-c.w-50.posn-abs {:style {:left x :top y}}
-            [:div
-             [:span (s/upper-case (name k))]
-             [:span.m-l-5 {:class-name color-class} (k abilities)]]
-            [:div {:class-name color-class}
-             (let [bonus (int (/ (- (k abilities) 10) 2))]
-               (str "(" (mod/bonus-str (k ability-bonuses)) ")"))]]))
-       offset-ability-keys
-       (take 6 (drop 1 (cycle text-points)))
-       color-names))
-     [:svg {:width 220 :height (+ 60 d double-point-offset)}
-      [:defs
-       (doall
-        (map
-         (fn [[x1 y1] [x2 y2] c1 c2]
-           ^{:key (:key c1)}
-           [:g
-            [:linearGradient {:id (str "lg-" (:key c1) "-o")
-                              :x1 x1 :y1 y1 :x2 0 :y2 0
-                              :gradientUnits :userSpaceOnUse}
-             [:stop {:offset "0%" :stop-color (:color c1)}]
-             [:stop {:offset "70%" :stop-color (:color c2) :stop-opacity 0}]]
-            [:linearGradient {:id (str "lg-" (:key c1) "-" (:key c2))
-                              :x1 x1 :y1 y1 :x2 x2 :y2 y2
-                              :gradientUnits :userSpaceOnUse}
-             [:stop {:offset "0%" :stop-color (:color c1)}]
-             [:stop {:offset "100%" :stop-color (:color c2)}]]])
-         points
-         (drop 1 (cycle points))
-         colors
-         (drop 1 (cycle colors))))]
-      [:g {:transform (str "translate(" (+ 40 beta point-offset) "," (+ 30 (* alpha 2) point-offset) ")")}
-       [:polygon.abilities-polygon
-        {:stroke "#31bef8"
-         :fill "rgba(48, 189, 248, 0.2)"
-         :points (s/join " " (map (partial s/join ",") abilities-points))}]
-       (doall
-        (map
-         (fn [[x1 y1] [x2 y2] c1 c2]
-           ^{:key (:key c1)}
-           [:g
-            [:line {:x1 x1 :y1 y1 :x2 0 :y2 0 :stroke (str "url(#lg-" (:key c1) "-o)")}]
-            [:line {:x1 x1 :y1 y1 :x2 x2 :y2 y2 :stroke (str "url(#lg-" (:key c1) "-" (:key c2) ")") :stroke-width 1.5}]
-            [:circle {:cx (* x1 1.05) :cy (* y1 1.05) :r 1 :fill (:color c1)}]])
-         points
-         (drop 1 (cycle points))
-         colors
-         (drop 1 (cycle colors))))]]]))
 
 ;;(stest/instrument `entity/build)
 ;;(stest/instrument `t/make-modifier-map)
@@ -1091,102 +823,6 @@
      {::entity/key next-lvl})
     (set-next-template-path! built-template next-path next-template-path nil character)))
 
-#_(defn selection-stepper [built-template option-paths character stepper-selection-path]
-  (let [selection (if stepper-selection-path (get-in built-template stepper-selection-path))
-        all-selections (get-all-selections [] built-template option-paths)
-        unselected-selections (drop-selected built-template option-paths character all-selections)
-        unselected-selections? (pos? (count unselected-selections))
-        level-up? (not (or selection unselected-selections?))
-        complete? (not unselected-selections?)]
-    [:div.flex.selection-stepper-inner
-     {:id "selection-stepper"}
-     [:div.selection-stepper-main
-      [:h1.f-w-bold.selection-stepper-title "Step-By-Step"]
-      (if selection
-        [:div
-         [:h1.f-w-bold.m-t-10 "Step: " (::t/name selection)
-          (if (::t/optional? selection)
-            [:span.m-l-5.f-s-10 "(optional)"])]
-         (let [help (::t/help selection)
-               help-vec (if (vector? help) help [help])]
-           (if (string? help)
-             [:p.m-t-5.selection-stepper-help help]
-             help))
-         [:div#mouseover-option.b-1.b-rad-5.b-color-gray.p-10.m-t-10.hidden
-          [:span#mouseover-option-title.f-w-b]
-          [:p#mouseover-option-help]]])
-      (if (or (not selection) level-up? complete?)
-        [:div.m-t-10
-         (if unselected-selections?
-           "Click 'Get Started' to step through the build process."
-           (str "All selections complete. Click "
-                (if level-up?
-                  "'Level Up' to your advance character level"
-                  "'Finish' to complete")
-                " or 'Dismiss' to hide this guide."))])
-      [:div.flex.m-t-10.selection-stepper-footer
-       [:span.link-button.m-r-5
-        {:on-click (fn [_]
-                     (swap! app-state assoc :stepper-dismissed true))}
-        "Dismiss"]
-       [:button.form-button.selection-stepper-button
-        {:on-click
-         (fn [_] (if level-up?
-                   (level-up! built-template character)
-                   (set-next-selection! built-template option-paths character stepper-selection-path unselected-selections)))}
-        (cond
-          level-up? "Level Up"
-          complete? "Finish"
-          selection "Next Step"
-          unselected-selections? "Get Started")]]]
-     (if selection
-       [:svg.m-l--1.m-t-10 {:width "20" :height "24"}
-        [:path 
-         {:d "M-2 1.5 L13 14 L-2 22.5"
-          :stroke :white
-          :fill "#1a1e28"
-          :stroke-width "1px"}]])]))
-
-(defn option-sources [collapsed-paths selected-plugins]
-  (let [path [:sources]
-         collapsed? (collapsed-paths path)]
-     [:div.w-100-p
-      [:div.flex.justify-cont-s-b.align-items-c.m-b-5
-       [:h1.f-s-16 "Option Sources"]
-       (if collapsed?
-         [:div
-          {:on-click (fn [_]
-                       (swap! app-state update :collapsed-paths disj path))}
-          [:span.expand-collapse-button
-           "Show All Options"]
-          [:i.fa.fa-caret-down.m-l-5.orange.pointer]]
-         [:div.flex
-          {:on-click (fn [_]
-                       (swap! app-state update :collapsed-paths conj path))}
-          [:span.expand-collapse-button
-           "Hide Unselected Options"]
-          [:i.fa.fa-caret-up.m-l-5.orange.pointer]])]
-      [:div.b-1.b-rad-5.p-10
-       (if collapsed?
-         [:span (s/join ", " (conj (map :name (filter #((:key %) selected-plugins) plugins)) "Player's Handbook"))]
-         [:div
-          [:div.checkbox-parent
-           [:span.checkbox.checked.disabled
-            [:i.fa.fa-check.orange]]
-           [:span.checkbox-text "Player's Handbook"]]
-          (doall
-           (map
-            (fn [{:keys [name key]}]
-              (let [checked? (and selected-plugins (selected-plugins key))]
-                ^{:key key}
-                [:div.checkbox-parent
-                 {:on-click (fn [_] (swap! app-state assoc-in [:plugins key] (not checked?)))}
-                 [:span.checkbox
-                  {:class-name (if checked? "checked")}
-                  (if checked? [:i.fa.fa-check.orange])]
-                 [:span.checkbox-text.pointer name]]))
-            plugins))])]]))
-
 (defn get-template-from-props [x]
   (get (.-argv (.-props x)) 6))
 
@@ -1247,152 +883,6 @@
       (and (> min 1)
            (= min max))
       (nil? max)))
-
-(defn option-selector [character built-char built-template option-paths stepper-selection-path option-path
-                       {:keys [::t/min ::t/max ::t/options] :as selection}
-                       disable-select-new?
-                       {:keys [::t/key ::t/name ::t/path ::t/help ::t/selections ::t/prereqs ::t/select-fn ::t/ui-fn]}]
-  (let [new-option-path (conj option-path key)
-        selected? (get-in option-paths new-option-path)
-        failed-prereqs (reduce
-                        (fn [failures {:keys [::t/prereq-fn ::t/label]}]
-                          (if (and prereq-fn (not (prereq-fn built-char)))
-                            (conj failures label)))
-                        []
-                        prereqs)
-        meets-prereqs? (empty? failed-prereqs)
-        selectable? (and meets-prereqs?
-                         (or (not disable-select-new?)
-                             selected?))
-        expanded? (get-in @app-state [:expanded-paths new-option-path])
-        has-selections? (seq selections)]
-    ^{:key key}
-    [:div.p-10.b-1.b-rad-5.m-5.b-orange.hover-shadow
-     {:class-name (s/join " " (remove nil? [(if selected? "b-w-5")
-                                            (if selectable? "pointer")
-                                            (if (not selectable?) "opacity-5")]))
-      :on-click (fn [e]
-                  (when (and (or (> max 1)
-                                 (nil? max)
-                                 (not selected?)
-                                 has-selections?)
-                             meets-prereqs?
-                             selectable?)
-                    (let [updated-char (let [new-option {::entity/key key}]
-                                         (if (multiselection? selection)
-                                           (update-option
-                                            built-template
-                                            character
-                                            option-path
-                                            (fn [parent-vec]
-                                              (if (nil? parent-vec)
-                                                [new-option]
-                                                (let [parent-keys (into #{} (map ::entity/key) parent-vec)]
-                                                  (if (parent-keys key)
-                                                    (vec (remove #(= key (::entity/key %)) parent-vec))
-                                                    (conj parent-vec new-option))))))
-                                           (update-option
-                                            built-template
-                                            character
-                                            new-option-path
-                                            (fn [o] (assoc o ::entity/key key)))))
-                          next-option-paths (entity/make-path-map updated-char)
-                          next-all-selections (entity/get-all-selections [] built-template next-option-paths built-char)
-                          [next-selection-path next-selection] (selection-after option-path next-all-selections)
-                          next-template-path (entity/get-template-selection-path built-template next-selection-path [])]
-                      (set-next! updated-char
-                                 (if has-selections? next-selection)
-                                 (if has-selections? next-template-path)))
-                    (if select-fn
-                      (select-fn new-option-path)))
-                  (.stopPropagation e))}
-     [:div.flex.align-items-c
-      [:div.flex-grow-1
-       [:div.flex
-        [:span.f-w-b.f-s-1.flex-grow-1 name]
-        (if help
-          [show-info-button expanded? new-option-path])]
-       (if (and help expanded?)
-         [help-section help])
-       (if (and (or selected? (= 1 (count options))) ui-fn)
-         (ui-fn new-option-path built-template app-state built-char))
-       (if (not meets-prereqs?)
-         [:div.i.f-s-12.f-w-n 
-          (s/join ", " failed-prereqs)])]
-      (if has-selections?
-        [:i.fa.fa-caret-right.m-l-5])]]))
-
-(defn add-option-selector [{:keys [::t/key ::t/name ::t/options ::t/new-item-text ::t/new-item-fn ::t/options] :as selection} entity path built-template]
-  [:select.builder-option.builder-option-dropdown.m-t-0
-   {:value ""
-    :on-change
-    (fn [e]
-      (let [value (.. e -target -value)]
-        (if value
-          (let [kw (keyword value)
-                value-path (entity/get-entity-path built-template entity path)
-                new-item (new-item-fn
-                          selection
-                          options
-                          (get-in @app-state (concat [:character] value-path))
-                          kw)]
-            (swap! app-state #(update % :character (fn [c] (update-option
-                                                            built-template c path
-                                                            (fn [options] (conj (vec options) new-item))))))))))}
-   [:option.builder-dropdown-item
-    {:disabled true
-     :value ""}
-    "select to add"]
-   (doall
-    (map
-     (fn [{:keys [::t/key ::t/name]}]
-       ^{:key key}
-       [:option.builder-dropdown-item
-        {:value (if key (clojure.core/name key))}
-        name])
-     options))])
-
-(defn option-item [character built-template option-path all-selections quantity? removeable? parent-selection i {:keys [::t/name ::t/key ::t/help ::t/select-fn ::t/selections] :as option}]
-  (let [new-option-path (conj option-path key)
-        value-path (entity/get-option-value-path built-template character new-option-path)
-        has-selections? (boolean (seq selections))
-        expanded? (get-in @app-state [:expanded-paths new-option-path])]
-    ^{:key key}
-    [:div.flex.align-items-c.m-5.f-w-b.f-s-14
-     [:div.flex-grow-1.b-1.b-rad-5.pointer.b-orange.hover-shadow.p-5
-      (if has-selections?
-        {:on-click
-         (fn [e]
-           (let [first-selection (first selections)
-                 next-selection-path (conj new-option-path (::t/key first-selection))
-                 next-selection (assoc first-selection
-                                       ::path next-selection-path
-                                       ::parent (assoc option ::path new-option-path))
-                 next-template-path (entity/get-template-selection-path built-template next-selection-path [])]
-             (swap! app-state (fn [as]
-                                (-> as
-                                    (assoc :stepper-selection-path next-template-path)
-                                    (assoc :stepper-selection (assoc next-selection ::path next-selection-path)))))
-             (if select-fn
-               (select-fn new-option-path)))
-           (.stopPropagation e))})
-      [:div.flex.align-items-c
-       [:span.flex-grow-1.m-l-5.m-t-5.m-b-5 name]
-       (if help
-         [show-info-button expanded? new-option-path])
-       (if quantity?
-         [:input.input.w-60.m-t-0.m-l-5
-          {:type :number
-           :value (get-in character value-path)
-           :on-change (fn [e]
-                        (let [value (.. e -target -value)
-                              int-val (if (not (s/blank? value)) (js/parseInt value))]
-                          (swap! app-state assoc-in (concat [:character] value-path) int-val))
-                        (.stopPropagation e))}])
-       (if has-selections?
-         [:i.fa.fa-caret-right.m-r-5])]
-      (if expanded? [help-section help])]
-     (if removeable? [remove-option-button option-path built-template i])]))
 
 (defn get-event-value [e]
   (.-value (.-target e)))
@@ -1644,9 +1134,9 @@
   (let [new-option-path (conj option-path key)
         selected? (get-in option-paths new-option-path)
         failed-prereqs (reduce
-                        (fn [failures {:keys [::t/prereq-fn ::t/label]}]
+                        (fn [failures {:keys [::t/prereq-fn ::t/label ::t/hide-if-fail?] :as prereq}]
                           (if (and prereq-fn (not (prereq-fn built-char)))
-                            (conj failures label)
+                            (conj failures prereq)
                             failures))
                         []
                         prereqs)
@@ -1657,62 +1147,63 @@
                              selected?))
         expanded? (get-in @app-state [:expanded-paths new-option-path])
         has-selections? (seq selections)]
-    (option-selector-base {:name name
-                           :key key
-                           :help help
-                           :selected? selected?
-                           :selectable? selectable?
-                           :option-path new-option-path
-                           :multiselect? (or multiselect?
-                                             (> min 1)
-                                             (nil? max))
-                           :select-fn (fn [e]
-                                        (when (and (or (> max 1)
-                                                       (nil? max)
-                                                       multiselect?
-                                                       (not selected?)
-                                                       has-selections?)
-                                                   (or selected?
-                                                       meets-prereqs?)
-                                                   selectable?)
-                                          (let [updated-char (let [new-option {::entity/key key}]
-                                                               (if (or
-                                                                    multiselect?
-                                                                    (nil? max)
-                                                                    (and
-                                                                     (> min 1)
-                                                                     (= min max)))
-                                                                 (update-option
-                                                                  built-template
-                                                                  character
-                                                                  option-path
-                                                                  (fn [parent-vec]
-                                                                    (if (or (nil? parent-vec) (map? parent-vec))
-                                                                      [new-option]
-                                                                      (let [parent-keys (into #{} (map ::entity/key) parent-vec)]
-                                                                        (if (parent-keys key)
-                                                                          (vec (remove #(= key (::entity/key %)) parent-vec))
-                                                                          (conj parent-vec new-option))))))
-                                                                 (update-option
-                                                                  built-template
-                                                                  character
-                                                                  new-option-path
-                                                                  (fn [o] (if multiselect? [new-option] new-option)))))]
-                                            (swap! app-state assoc :character updated-char))
-                                          (if select-fn
-                                            (select-fn (entity/get-option-value-path
-                                                        built-template
-                                                        (:character @app-state)
-                                                        new-option-path)
-                                                       app-state)))
-                                        (.stopPropagation e))
-                           :content (if (and (or selected? (= 1 (count options))) ui-fn)
-                                      (ui-fn new-option-path built-template app-state built-char))
-                           :explanation-text (let [explanation-text (if (and (not meets-prereqs?)
-                                                                             (not selected?))
-                                                                      (s/join ", " failed-prereqs))]                      
-                                               explanation-text)
-                           :icon icon})))
+    (if (not-any? ::t/hide-if-fail? failed-prereqs)
+      (option-selector-base {:name name
+                             :key key
+                             :help help
+                             :selected? selected?
+                             :selectable? selectable?
+                             :option-path new-option-path
+                             :multiselect? (or multiselect?
+                                               (> min 1)
+                                               (nil? max))
+                             :select-fn (fn [e]
+                                          (when (and (or (> max 1)
+                                                         (nil? max)
+                                                         multiselect?
+                                                         (not selected?)
+                                                         has-selections?)
+                                                     (or selected?
+                                                         meets-prereqs?)
+                                                     selectable?)
+                                            (let [updated-char (let [new-option {::entity/key key}]
+                                                                 (if (or
+                                                                      multiselect?
+                                                                      (nil? max)
+                                                                      (and
+                                                                       (> min 1)
+                                                                       (= min max)))
+                                                                   (update-option
+                                                                    built-template
+                                                                    character
+                                                                    option-path
+                                                                    (fn [parent-vec]
+                                                                      (if (or (nil? parent-vec) (map? parent-vec))
+                                                                        [new-option]
+                                                                        (let [parent-keys (into #{} (map ::entity/key) parent-vec)]
+                                                                          (if (parent-keys key)
+                                                                            (vec (remove #(= key (::entity/key %)) parent-vec))
+                                                                            (conj parent-vec new-option))))))
+                                                                   (update-option
+                                                                    built-template
+                                                                    character
+                                                                    new-option-path
+                                                                    (fn [o] (if multiselect? [new-option] new-option)))))]
+                                              (swap! app-state assoc :character updated-char))
+                                            (if select-fn
+                                              (select-fn (entity/get-option-value-path
+                                                          built-template
+                                                          (:character @app-state)
+                                                          new-option-path)
+                                                         app-state)))
+                                          (.stopPropagation e))
+                             :content (if (and (or selected? (= 1 (count options))) ui-fn)
+                                        (ui-fn new-option-path built-template app-state built-char))
+                             :explanation-text (let [explanation-text (if (and (not meets-prereqs?)
+                                                                               (not selected?))
+                                                                        (s/join ", " (map ::t/label failed-prereqs)))]                      
+                                                 explanation-text)
+                             :icon icon}))))
 
 (defn selection-section-title [title]
   [:span.m-l-5.f-s-18.f-w-b.flex-grow-1 title])

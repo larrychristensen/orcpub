@@ -4517,7 +4517,7 @@ long rest."})]
                :page 154
                :summary "2 GP per day of living expenses in the North are covered"}]}]))
 
-(defn scag-classes [app-state]
+(def scag-classes
   [{:name "Barbarian"
     :plugin? true
     :subclass-level 3
@@ -4984,7 +4984,7 @@ long rest."})]
    (class-selection
     {:options (map
                (fn [cfg] (class-option (assoc cfg :plugin? true)))
-               (scag-classes app-state))})])
+               scag-classes)})])
 
 (defn ability-item [name abbr desc]
   [:li.m-t-5 [:span.f-w-b.m-r-5 (str name " (" abbr ")")] desc])
@@ -5048,12 +5048,12 @@ long rest."})]
 
 (def plugins
   [{:name "Sword Coast Adventurer's Guide"
-    :key :sword-coast-adventurers-guide
+    :key :scag
     :url "https://www.amazon.com/gp/product/0786965800/ref=as_li_tl?ie=UTF8&tag=orcpub-20&camp=1789&creative=9325&linkCode=as2&creativeASIN=0786965800&linkId=9b93efa0fc7239ebbf005d0b17367233"
     :help (amazon-frame-help scag-amazon-frame
                              [:span "Incudes too many new, exciting subraces, race variants, subclasses, and backgrounds to list, as well as a ton of other info to help you create in-depth characters in the Sword Coast or elsewhere."])}
    {:name "Volo's Guide to Monsters"
-    :key :volos-guide-to-monsters
+    :key :vgm
     :url "https://www.amazon.com/gp/product/0786966017/ref=as_li_tl?ie=UTF8&tag=orcpub-20&camp=1789&creative=9325&linkCode=as2&creativeASIN=0786966017&linkId=506a1b33174f884dcec5db8c6c07ad31"
     :help (amazon-frame-help volos-amazon-frame
                              [:div
@@ -5071,7 +5071,9 @@ long rest."})]
                               " or are OrcPub summaries. See the Player's Handbook for in-depth, official rules and descriptions."])
     :options (map
               #(t/option-cfg
-               (select-keys % [:name :key :help]))
+                (merge
+                 {:modifiers [(mod/set-mod ?option-sources (:key %))]}
+                 (select-keys % [:name :key :help])))
               plugins)
     :multiselect? true
     :min 0

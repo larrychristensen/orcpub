@@ -10,7 +10,8 @@
             [orcpub.dnd.e5.weapons :as weapons]
             [orcpub.dnd.e5.spells :as spells]
             [orcpub.dnd.e5.equipment :as equipment]
-            [orcpub.dnd.e5.spell-lists :as sl])
+            [orcpub.dnd.e5.spell-lists :as sl]
+            [orcpub.dnd.e5.display :as disp])
   #?(:cljs (:require-macros [orcpub.dnd.e5.modifiers :as modifiers])))
 
 (def abilities
@@ -448,6 +449,7 @@ check. The GM might also call for a Dexterity (Sleight of Hand) check to determi
    {:name "Elemental Disciplines"
     :tags #{:class}
     :ref [:class :monk :elemental-disciplines]
+    :multiselect? true
     :options elemental-disciplines}))
 
 (defn language-option [{:keys [name key]}]
@@ -479,17 +481,24 @@ check. The GM might also call for a Dexterity (Sleight of Hand) check to determi
    [:span.f-w-b (str name ": ")]
    [:span.f-w-n value]])
 
-(defn spell-help [spell]
+(defn spell-help [{:keys [school casting-time range duration description source page]}]
   [:div
    [:div.m-b-5
-    (spell-field "School" (:school spell))
-    (spell-field "Casting Time" (:casting-time spell))
-    (spell-field "Range" (:range spell))
-    (spell-field "Duration" (:duration spell))]
-   [:div.f-w-n (:description spell)]])
+    (spell-field "School" school)
+    (spell-field "Casting Time" casting-time)
+    (spell-field "Range" range)
+    (spell-field "Duration" duration)]
+   [:div.f-w-n (if description
+                 description
+                 (if source
+                   (let [{:keys [abbr url]} (disp/sources source)]
+                     [:div
+                      [:span "See"]
+                      [:a.m-l-5 {:href url} abbr]
+                      [:span.m-l-5 (str "page " page)]])))]])
 
 (defn spell-option [spellcasting-ability class-name key & [prepend-level? qualifier]]
-  (let [{:keys [name level] :as spell} (spells/spell-map key)]
+  (let [{:keys [name level source] :as spell} (spells/spell-map key)]
     (t/option-cfg
      {:name (if prepend-level? (str level " - " name) name)
       :key key
@@ -499,7 +508,13 @@ check. The GM might also call for a Dexterity (Sleight of Hand) check to determi
                  (fn [c] (let [spells-known (es/entity-val c :spells-known)]
                            (or (not spells-known)
                                (not (some #(= key (:key %))
-                                           (spells-known level)))))))]
+                                          (spells-known level)))))))
+                (t/option-prereq
+                 "You aren't using this source"
+                 (fn [c] (or (nil? source)
+                             (= :phb source)
+                             (get (es/entity-val c :option-sources) source)))
+                 true)]
       :modifiers [(modifiers/spells-known level key spellcasting-ability class-name nil qualifier)]})))
 
 (def memoized-spell-option (memoize spell-option))
@@ -671,16 +686,7 @@ check. The GM might also call for a Dexterity (Sleight of Hand) check to determi
                      :class-name (:name cls-cfg)
                      :min num
                      :max (if (not acquire?) num)
-                     :options options})
-                   #_(t/selection-cfg
-                    {:name (str (:name cls-cfg) " Spells Known")
-                     :key kw
-                     :ref [:class class-key :spells-known]
-                     :options options
-                     :order 1
-                     :min num
-                     :max (if (not acquire?) num)
-                     :tags (spell-tags cls-key-nm)}))]))))
+                     :options options}))]))))
    {}
    spells-known))
 
@@ -748,6 +754,7 @@ check. The GM might also call for a Dexterity (Sleight of Hand) check to determi
        (language-option lang))
      langs)
     :ref :languages
+    :multiselect? true
     :tags #{:profs :language-profs}
     :min num
     :max num}))
@@ -785,6 +792,7 @@ check. The GM might also call for a Dexterity (Sleight of Hand) check to determi
                 skills))
      :min num
      :max num
+     :multiselect? true
      :ref :skill-profs
      :tags #{:skill-profs :profs}
      :prereq-fn prereq-fn})))

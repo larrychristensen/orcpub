@@ -407,7 +407,8 @@ At Higher Levels. When you cast this spell using a spell slot of 6th level or hi
     :duration "Concentration, up to 10 minutes"
     :description "You create a vertical wall of whirling, razor-sharp blades made of magical energy. The wall appears within range and lasts for the duration. You can make a straight wall up to 100 feet long, 20 feet high, and 5 feet thick, or a ringed wall up to 60 feet in diameter, 20 feet high, and 5 feet thick. The wall provides three-quarters cover to creatures behind it, and its space is difficult terrain.
 When a creature enters the wall's area for the first time on a turn or starts its turn there, the creature must make a Dexterity saving throw. On a failed save, the creature takes 6d10 slashing damage. On a successful save, the creature takes half as much damage."
-    } {
+    }
+   {
     :name "Blade Ward"
     :school "abjuration"
     :level 0
@@ -486,6 +487,15 @@ While on the Ethereal Plane, you can see and hear the plane you originated from,
     :duration "Concentration, up to 1 minute"
     :description "Your body becomes blurred, shifting and wavering to all who can see you. For the duration, any creature has disadvantage on attack rolls against you. An attacker is immune to this effect if it doesn't rely on sight, as with blindsight, or can see through illusions, as with truesight."
     }
+   {:name "Booming Blade"
+    :level 0
+    :school "evocation"
+    :casting-time "1 action"
+    :range "5 feet"
+    :components {:verbal true :material true :material-component "a weapon"}
+    :duration "1 round"
+    :source :scag
+    :page 142}
    {
     :name "Branding Smite"
     :school "evocation"
@@ -2088,6 +2098,15 @@ When the grease appears, each creature standing in its area must succeed on a De
 • Any reduction to one of the target's ability scores
 • One effect reducing the target's hit point maximum"
     }
+   {:name "Green-Flame Blade"
+    :school "evocation"
+    :level 0
+    :casting-time "1 action"
+    :range "Self"
+    :components {:verbal true :material true :material-component "a weapon"}
+    :duration "Instantaneous"
+    :source :scag
+    :page 143}
    {
     :name "Guardian of Faith"
     :school "conjuration"
@@ -2594,6 +2613,15 @@ If you target an object held or worn by a hostile creature, that creature must s
 The lightning ignites flammable objects in the area that aren't being worn or carried.
 At Higher Levels. When you cast this spell using a spell slot of 4th level or higher, the damage increases by 1d6 for each slot level above 3rd."
     }
+   {:name "Lightning Lure"
+    :school "evocation"
+    :level 0
+    :casting-time "1 action"
+    :range "15 feet"
+    :components {:verbal true}
+    :duration "Instantaneous"
+    :source :scag
+    :page 143}
    {
     :name "Locate Animals or Plants"
     :ritual true
@@ -4042,6 +4070,15 @@ This spell dispels any darkness in its area that was created by a spell."
     :source :phb
     :page 279
     }
+   {:name "Sword Burst"
+    :school "conjuration"
+    :level 0
+    :casting-time "1 action"
+    :range "5 feet"
+    :components {:verbal true}
+    :duration "Instantaneous"
+    :source :scag
+    :page 143}
    {
     :name "Symbol"
     :school "abjuration"
