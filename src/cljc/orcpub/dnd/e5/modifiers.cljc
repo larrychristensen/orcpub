@@ -53,6 +53,9 @@
 (defn speed [value]
   (mods/cum-sum-mod ?speed value "Speed" (mods/bonus-str value)))
 
+(defn flying-speed [value]
+  (mods/cum-sum-mod ?flying-speed value "Flying Speed" (mods/bonus-str value)))
+
 (defn swimming-speed [value]
   (mods/cum-sum-mod ?swimming-speed value "Swim Speed" (mods/bonus-str value)))
 

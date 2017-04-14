@@ -9,7 +9,8 @@
     :damage-die-count 1,
     :ranged? true,
     :range {:min 80, :max 320},
-    :key :crossbow-light}
+    :key :crossbow-light
+    :two-handed? true}
    {:ranged? true,
     :key :dart,
     :name "Dart",
@@ -27,7 +28,8 @@
     :damage-die-count 1,
     :ranged? true,
     :range {:min 80, :max 320},
-    :key :shortbow}
+    :key :shortbow
+    :two-handed? true}
    {:name "Sling",
     :damage-type :bludgeoning,
     :damage-die 4,
@@ -59,7 +61,8 @@
     :damage-die-count 1,
     :type :simple,
     :melee? true,
-    :key :greatclub}
+    :key :greatclub
+    :two-handed? true}
    {:name "Handaxe",
     :damage-type :slashing,
     :damage-die 6,
@@ -142,7 +145,8 @@
     :melee? true,
     :heavy true,
     :reach true,
-    :key :glaive}
+    :key :glaive
+    :two-handed? true}
    {:name "Greataxe",
     :damage-type :slashing,
     :damage-die 12,
@@ -151,7 +155,8 @@
     :damage-die-count 1,
     :heavy true,
     :melee? true,
-    :key :greataxe}
+    :key :greataxe
+    :two-handed? true}
    {:name "Greatsword",
     :subtype :sword
     :damage-type :slashing,
@@ -160,7 +165,8 @@
     :damage-die-count 2,
     :heavy true,
     :melee? true,
-    :key :greatsword}
+    :key :greatsword
+    :two-handed? true}
    {:name "Halberd",
     :damage-type :slashing,
     :damage-die 10,
@@ -169,7 +175,8 @@
     :melee? true,
     :heavy true,
     :reach true,
-    :key :halberd}
+    :key :halberd
+    :two-handed? true}
    {:name "Lance",
     :damage-type :piercing,
     :damage-die 12,
@@ -194,7 +201,8 @@
     :damage-die-count 2,
     :heavy true,
     :melee? true,
-    :key :maul}
+    :key :maul
+    :two-handed? true}
    {:name "Morningstar",
     :damage-type :piercing,
     :damage-die 8,
@@ -210,7 +218,8 @@
     :melee? true,
     :heavy true,
     :reach true,
-    :key :pike}
+    :key :pike
+    :two-handed? true}
    {:name "Rapier",
     :damage-type :piercing,
     :damage-die 8,
@@ -296,7 +305,8 @@
     :ranged? true,
     :heavy true,
     :range {:min 100, :max 400},
-    :key :crossbow-heavy}
+    :key :crossbow-heavy
+    :two-handed? true}
    {:name "Longbow",
     :damage-type :piercing,
     :damage-die 8,
@@ -305,7 +315,8 @@
     :ranged? true,
     :heavy true,
     :range {:min 150, :max 600},
-    :key :longbow}
+    :key :longbow
+    :two-handed? true}
    {:name "Net",
     :type :martial,
     :ranged? true,

@@ -4837,7 +4837,129 @@ long rest."})]
                             :page 136
                             :source :scag
                             :frequency {:units :rest}
-                            :summary "reroll a missed attack roll, this time with advantage"}]}]}])
+                            :summary "reroll a missed attack roll, this time with advantage"}]}]}
+   {:name "Sorcerer"
+    :subclass-title "Sorcerous Origin"
+    :subclass-level 1
+    :subclasses [{:name "Storm Sorcery"
+                  :modifiers [(mod5e/language :primordial)
+                              (mod5e/bonus-action
+                               {:name "Tempestuous Magic"
+                                :page 137
+                                :source :scag
+                                :summary "before or after casting a first level spell or higher, fly up to 10 ft. without provoking opportunity attacks"})]
+                  :levels {6 {:modifiers [(mod5e/damage-resistance :lightning)
+                                          (mod5e/damage-resistance :thunder)
+                                          (mod5e/dependent-trait
+                                           {:name "Heart of the Storm"
+                                            :page 137
+                                            :source :scag
+                                            :summary (str "When you cast 1st level spell or higher deal " (int (/ (?class-level :sorcerer) 2)) " lightning or thunder damage to creatures of your choice within 10 ft.")})
+                                          (mod5e/action
+                                            {:name "Storm Guide: Rain"
+                                             :page 137
+                                             :source :scag
+                                             :summary "cause rain to stop falling in a 20 ft. radius sphere around you"})
+                                          (mod5e/bonus-action
+                                            {:name "Storm Guide: Wind"
+                                             :page 137
+                                             :source :scag
+                                             :duration {:units :round}
+                                             :summary "if windy, choose the direction of wind within 100 foot radius sphere around you"})]}
+                           14 {:modifiers [(mod5e/reaction
+                                            {:name "Storm's Fury"
+                                             :page 137
+                                             :source :scag
+                                             :summary (str "when hit with melee attack, deal " (?class-level :sorcerer) " lightning damage to attacker, if it fails a DC " (?spell-save-dc :cha) " STR save it is pushed 20 ft. from you")})]}
+                           18 {:modifiers [(mod5e/damage-immunity :lightning)
+                                           (mod5e/damage-immunity :thunder)
+                                           (mod5e/flying-speed 60)
+                                           (mod5e/action
+                                            {:name "Wind Soul"
+                                             :page 137
+                                             :source :scag
+                                             :duration {:units :hour}
+                                             :frequency {:units :rest}
+                                             :summary (str "temporarily sacrifice 30 ft. of your flying speed to give 30 ft. to up to " (+ 3 (?ability-bonuses :cha)) " other creatures")})]}}}]}
+   {:name "Warlock"
+    :subclass-level 1
+    :subclass-title "Otherworldly Patron"
+    :subclasses [{:name "The Undying"
+                  :traits [
+                           {:name "Undying Nature"
+                            :level 10
+                            :page 140
+                            :source :scag
+                            :summary "don't need to breath, eat, drink, or sleep"}]
+                  :levels {1 {:modifiers [(mod5e/spells-known 0 :spare-the-dying :cha "Warlock")
+                                          (mod5e/saving-throw-advantage [:disease])
+                                          (mod5e/dependent-trait
+                                           {:name "Among the Dead"
+                                            :page 139
+                                            :source :scag
+                                            :summary (str "if an undead targets you, it must make a DC " (?spell-save-dc :cha) " WIS save or choose another target")})]
+                              :selections [(warlock-subclass-spell-selection [:false-life :ray-of-sickness])]}
+                           3 {:selections [(warlock-subclass-spell-selection [:blindness-deafness :silence])]}
+                           5 {:selections [(warlock-subclass-spell-selection [:feign-death :speak-with-dead])]}
+                           6 {:selections [(mod5e/dependent-trait
+                                            {:name "Defy Death"
+                                             :level 6
+                                             :page 140
+                                             :source :scag
+                                             :frequency {:units :long-rest}
+                                             :summary (str "regain 1d8 " (common/bonus-str (?ability-bonuses :con)) " HPs when you succeed on a death save or stabilize with spare the dying")})]}
+                           7 {:selections [(warlock-subclass-spell-selection [:aura-of-life :death-ward])]}
+                           9 {:selections [(warlock-subclass-spell-selection [:contagion :legend-lore])]}
+                           14 {:modifiers [(mod5e/bonus-action
+                                            {:name "Indestructible Life"
+                                             :level 14
+                                             :page 140
+                                             :source :scag
+                                             :summary (str "regain 1d8 " (common/bonus-str (?class-level :warlock)) " HPs and reattach severed parts")
+                                             :frequency {:units :rest}})]}}}]}
+   {:name "Wizard",
+    :subclass-level 2
+    :subclass-title "Arcane Tradition"
+    :subclasses [{:name "Bladesinger"
+                  :profs {:armor {:light false}
+                          :save {:dex true :int true}
+                          :tool {:thieves-tools false}}
+                  :modifiers [(mod5e/skill-proficiency :performance)]
+                  :selections [(opt5e/weapon-proficiency-selection
+                                (map
+                                 :key
+                                 (filter
+                                  (fn [weapon]
+                                    (and (:melee? weapon)
+                                         (not (:two-handed? weapon))))
+                                  weapon5e/weapons))
+                                1)]
+                  :levels {2 {:modifiers [(mod5e/bonus-action
+                                           {:level 2
+                                            :name "Bladesong"
+                                            :page 142
+                                            :source :scag
+                                            :duration {:units :minute}
+                                            :frequency {:units :rest
+                                                        :amount 2}
+                                            :summary (let [bonus (common/bonus-str (max 1 (?ability-bonuses :int)))] (str bonus " AC; +10 speed; advantage on Acrobatics; " bonus " on concentration saves"))})]}
+                           6 {:modifiers [(mod5e/extra-attack)
+                                          (mod5e/trait-cfg
+                                           {:name "Extra Attack"
+                                            :page 142
+                                            :source :scag
+                                            :summary "you can attack twice when taking Attack action"})]}
+                           10 {:modifiers [(mod5e/reaction
+                                            {:name "Song of Defense"
+                                             :page 142
+                                             :source :scag
+                                             :summary "expend an X-th level spell slot, reduce damage to you by 5X"})]}
+                           14 {:modifiers [(mod5e/dependent-trait
+                                            {:name "Song of Victory"
+                                             :page 142
+                                             :source :scag
+                                             :summary (str "while bladesinging, add " (common/bonus-str (max 1 (?ability-bonuses :int))) " to melee weapon attack damage")})]}}}]}])
+
 
 (defn background-selection [cfg]
   (t/selection-cfg
