@@ -4617,6 +4617,56 @@ long rest."})]
                                                                        :page 122
                                                                        :source :scag
                                                                        :summary "make an additional melee weapon attack when you move 20+ ft. in a line and make a melee weapon attack"})]})]})]}}}]}
+   {:name "Cleric"
+    :plugin true
+    :subclass-level 1
+    :subclass-title "Divine Domain"
+    :subclasses [{:name "Arcana Domain"
+                  :profs {:armor {:heavy true}}
+                  :modifiers [(mod5e/skill-proficiency :arcana)
+                              (cleric-spell 1 :detect-magic 1)
+                              (cleric-spell 1 :magic-missile 1)
+                              (cleric-spell 2 :magic-weapon 3)
+                              (cleric-spell 2 :nystuls-magic-aura 3)
+                              (cleric-spell 3 :dispel-magic 5)
+                              (cleric-spell 3 :magic-circle 5)
+                              (cleric-spell 4 :arcane-eye 7)
+                              (cleric-spell 4 :leomunds-secret-chest 7)
+                              (cleric-spell 5 :planar-binding 9)
+                              (cleric-spell 5 :teleportation-circle 9)]
+                  :selections [(opt5e/spell-selection {:title "Wizard Cantrips"
+                                                       :spellcasting-ability :wis
+                                                       :class-name "Cleric"
+                                                       :num 2
+                                                       :spell-keys (get-in sl/spell-lists [:wizard 0])
+                                                       :exclude-ref? true})]
+                  :levels {2 {:modifiers [(mod5e/action
+                                           {:name "Channel Divinity: Arcane Abjuration"
+                                            :page 126
+                                            :source :scag
+                                            :summary (str "turn celestial, elemental, fey, or fiend on failed DC " (?spell-save-dc :wis) " WIS save.")})]}
+                           8 {:modifiers [(mod5e/dependent-trait
+                                           {:name "Potent Spellcasting"
+                                            :page 126
+                                            :source :scag
+                                            :summary (str (common/bonus-str :wis) " extra damage from your cleric cantrips")})]}
+                           17 {:selections (map
+                                            (fn [level]
+                                              (opt5e/spell-selection {:title (str "Wizard Spell: Level " level)
+                                                                      :spellcasting-ability :wis
+                                                                      :class-name "Cleric"
+                                                                      :num 1
+                                                                      :spell-keys (get-in sl/spell-lists [:wizard level])
+                                                                      :exclude-ref? true}))
+                                            [6 7 8 9])}}
+                  :traits [{:level 6
+                            :name "Spell Breaker"
+                            :page 126
+                            :souce :scag
+                            :summary "when casting a healing spell on a creature, also end a spell of equal or lesser level on it"}
+                           {:level 17
+                            :name "Supreme Healing"
+                            :summary "Instead of rolling healing, use max possible roll value." }]}]}
    {:name "Rogue"
     :plugin? true
     :subclass-level 3
