@@ -1686,7 +1686,7 @@
                                                                   character
                                                                   option-path
                                                                   (fn [parent-vec]
-                                                                    (if (nil? parent-vec)
+                                                                    (if (or (nil? parent-vec) (map? parent-vec))
                                                                       [new-option]
                                                                       (let [parent-keys (into #{} (map ::entity/key) parent-vec)]
                                                                         (if (parent-keys key)

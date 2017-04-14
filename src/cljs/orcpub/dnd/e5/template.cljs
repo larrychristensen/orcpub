@@ -259,6 +259,13 @@
 (defn darkvision-modifiers [range]
   [(mod5e/darkvision range)])
 
+(defn language-selection [language-options]
+  (let [{lang-num :choose lang-options :options} language-options
+        lang-kws (if (:any lang-options)
+                   (map :key opt5e/languages)
+                   (keys lang-options))]
+    (opt5e/language-selection (map opt5e/language-map lang-kws) lang-num)))
+
 
 (defn race-option [{:keys [name
                            help
@@ -285,11 +292,7 @@
                       :tags #{:subrace}
                       :options (map (partial subrace-option source) subraces)})])
                  (if language-options
-                   (let [{lang-num :choose lang-options :options} language-options
-                         lang-kws (if (:any lang-options)
-                                    (map :key opt5e/languages)
-                                    (keys lang-options))]
-                     [(opt5e/language-selection (map opt5e/language-map lang-kws) lang-num)]))
+                   (language-selection language-options))
                  selections)
     :modifiers (concat
                 [(mod5e/race name)
@@ -1011,7 +1014,7 @@
                                levels]
                         :as subcls}]
   (let [kw (common/name-to-kw name)
-        {:keys [armor weapon save skill-options tool-options tool]} profs
+        {:keys [armor weapon save skill-options tool-options tool language-options]} profs
         {skill-num :choose options :options} skill-options
         skill-kws (if (:any options) (map :key opt5e/skills) (keys options))
         armor-profs (keys armor)
@@ -1063,7 +1066,8 @@
        level-selections
        spell-selections
        (if (seq tool-options) [(tool-prof-selection tool-options)])
-       (if (seq skill-kws) [(opt5e/skill-selection skill-kws skill-num)])))
+       (if (seq skill-kws) [(opt5e/skill-selection skill-kws skill-num)])
+       (if (seq language-options) [(language-selection language-options)])))
      (concat
       modifiers
       level-modifiers
@@ -4368,8 +4372,6 @@ long rest."})]
         {:keys [skill skill-options tool-options tool language-options]
          armor-profs :armor weapon-profs :weapon} profs
         {skill-num :choose options :options} skill-options
-        {lang-num :choose lang-options :options} language-options
-        lang-kws (if (:any lang-options) (map :key opt5e/languages) (keys lang-options))
         skill-kws (if (:any options) (map :key opt5e/skills) (keys options))]
     (t/option-cfg
      {:name name
@@ -4383,7 +4385,7 @@ long rest."})]
                    (class-armor-options armor-choices)
                    (class-equipment-options equipment-choices)
                    (if (seq skill-kws) [(opt5e/skill-selection skill-kws skill-num)])
-                   (if (seq lang-kws) [(opt5e/language-selection (map opt5e/language-map lang-kws) lang-num)]))
+                   (if (seq language-options) [(language-selection language-options)]))
       :modifiers (concat
                   [(mod5e/background name)]
                   (traits-modifiers traits)
@@ -4676,7 +4678,6 @@ long rest."})]
                                              :summary "When you use Indomitable, extend the benefit to 1 ally"})]}}}]}
    {:name "Monk"
     :subclass-level 3
-    :plugin? true
     :subclass-title "Monastic Tradition"
     :subclasses [{:name "Way of the Long Death"
                   :modifiers [(mod5e/dependent-trait
@@ -4729,7 +4730,6 @@ long rest."})]
                                              :source :scag
                                              :summary (str "when hit with melee attack, deal " (+ 5 (?ability-bonuses :wis)) " radiant damage to attacker; you also shed 30 ft. light")})]}}}]}
    {:name "Paladin"
-    :plugin? true
     :subclass-level 3
     :subclass-title "Sacred Oath"
     :subclasses [{:name "Oath of the Crown"
@@ -4773,33 +4773,71 @@ long rest."})]
                                              :duration {:units :hour}
                                              :summary "resistance to non-magical weapon slashing, bludgeoning, and piercing damage; allies within 30 ft. have advantage on death saves; you and allies have advantage on WIS saves"})]}}}]}
    {:name "Rogue"
-    :plugin? true
     :subclass-level 3
     :subclass-title "Roguish Archetype"
     :subclasses [{:name "Mastermind"
                   :source "Sword Coast Adventurer's Guide"
+                  :profs {:tool {:disguise-kit false
+                                 :forgery-kit false}
+                          :tool-options {:gaming-set 1}
+                          :language-options {:choose 2 :options {:any true}}}
+                  :levels {3 {:modifiers [(mod5e/bonus-action
+                                           {:name "Master of Tactics"
+                                            :page 135
+                                            :source :scag
+                                            :summary "Help as bonus action"})]}
+                           13 {:modifiers [(mod5e/reaction
+                                            {:name "Misdirection"
+                                             :page 135
+                                             :source :scag
+                                             :summary "when you are attacked and a creature within 5 ft is providing cover, you can have the attack target that creature instead"})]}}
                   :traits [{:name "Master of Intrigue"
-                            :level 3}
-                           {:name "Master of Tactics"
-                            :level 3}
+                            :level 3
+                            :page 135
+                            :source :scag
+                            :summary "unerringly mimic the speech of a creature you have heard for 1 min or more"}
                            {:name "Insightful Manipulator"
-                            :level 9}
-                           {:name "Misdirection"
-                            :level 13}
+                            :level 9
+                            :page 135
+                            :source :scag
+                            :summary "learn if superior or inferior to a creature you have observed for 1 min or more in these aspects: INT, WIS, CHA, class levels"}
                            {:name "Soul of Deceit"
-                            :level 17}]}
+                            :level 17
+                            :page 135
+                            :source :scag
+                            :summary "your thoughts can't be read telepathically; when an attempt is made you can provide false thoughts; magical attempts to determine your truthfulness always result in true"}]}
                  {:name "Swashbuckler"
                   :source "Sword Coast Adventurer's Guide"
+                  :levels {3 {:modifiers [(mod5e/dependent-trait
+                                           {:name "Rakish Audacity"
+                                            :level 3
+                                            :page 136
+                                            :source :scag
+                                            :summary (str "can add CON mod (" (common/bonus-str (?ability-bonuses :cha)) ") to initiative; don't need advantage for Sneak Attack")})]}
+                           9 {:modifiers [(mod5e/action
+                                           {:name "Panache"
+                                            :level 3
+                                            :page 136
+                                            :source :scag
+                                            :duration {:units :minute}
+                                            :summary "impose disadvantage on creature's attacks on others besides you if you success a CHA check contested by it's WIS check; it can only take opportunity attacks against you"})]}
+                           13 {:modifiers [(mod5e/bonus-action
+                                            {:name "Elegance Maneuver"
+                                             :level 13
+                                             :page 136
+                                             :source :scag
+                                             :summary "gain advantage to your next DEX or STR check during the turn"})]}}
                   :traits [{:name "Fancy Footwork"
-                            :level 3}
-                           {:name "Rakish Audacity"
-                            :level 3}
-                           {:name "Panache"
-                            :level 3}
-                           {:name "Elegance Maneuver"
-                            :level 13}
+                            :level 3
+                            :page 135
+                            :source :scag
+                            :summary "when you make a melee attack the target cannot make opportunity attacks for the rest of the turn"}
                            {:name "Master Duelist"
-                            :level 17}]}]}])
+                            :level 17
+                            :page 136
+                            :source :scag
+                            :frequency {:units :rest}
+                            :summary "reroll a missed attack roll, this time with advantage"}]}]}])
 
 (defn background-selection [cfg]
   (t/selection-cfg
