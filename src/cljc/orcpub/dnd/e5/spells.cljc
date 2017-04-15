@@ -2,7 +2,23 @@
   (:require [orcpub.common :as common]))
 
 (def a-spells
-  [{
+  [{:name "Abi-Dalzim's Horrid Wilting"
+    :school "necromancy"
+    :level 8
+    :casting-time "1 action"
+    :range "150 feet"
+    :duration "Instantaneous"
+    :components {:verbal true :somatic true :material true :material-component "bit of sponge"}
+    :source :ee
+    :page 14}
+   {:name "Absorb Elements"
+    :school "abjuration"
+    :level 1
+    :casting-time "1 reaction, when you take thunder, lightning, cold, or fire damage"
+    :range "Self"
+    :duration "1 round"
+    :components {:somatic true}}
+   {
     :name "Acid Splash"
     :school "conjuration"
     :level 0
@@ -25,6 +41,15 @@ This spell's damage increases by 1d6 when you reach 5th level (2d6), 11th level 
 At Higher Levels. When you cast this spell using a spell slot of 3rd level or higher, a target's hit points
 increase by an additional 5 for each slot level above 2nd."
     }
+   {:name "Aganazzar's Scorcher"
+    :school "evocation"
+    :level 2
+    :casting-time "1 action"
+    :range "30 feet"
+    :duration "Instantaneous"
+    :components {:verbal true :somatic true :material true :material-component "red dragon scale"}
+    :page 15
+    :source :ee}
    {
     :name "Alarm"
     :ritual true
@@ -350,6 +375,15 @@ If the target is native to a different plane of existence than the one you're on
     :duration "Concentration, up to 1 minute"
     :description "This spell bestows hope and vitality. Choose any number of creatures within range. For the duration, each target has advantage on Wisdom saving throws and death saving throws, and regains the maximum number of hit points possible from any healing."
     }
+   {:name "Beast Bond"
+    :school "divination"
+    :level 1
+    :casting-time "1 action"
+    :range "Touch"
+    :duration "Concentration, up to 10 minutes"
+    :components {:verbal true :somatic true :material true :material-component "fur wrapped in cloth"}
+    :page 15
+    :source :ee}
    {
     :name "Beast Sense"
     :ritual true
@@ -487,6 +521,15 @@ While on the Ethereal Plane, you can see and hear the plane you originated from,
     :duration "Concentration, up to 1 minute"
     :description "Your body becomes blurred, shifting and wavering to all who can see you. For the duration, any creature has disadvantage on attack rolls against you. An attacker is immune to this effect if it doesn't rely on sight, as with blindsight, or can see through illusions, as with truesight."
     }
+   {:name "Bones of the Earth"
+    :school "transmutation"
+    :level 6
+    :casting-time "1 action"
+    :range "120 feet"
+    :duration "Instantaneous"
+    :components {:verbal true :somatic true}
+    :page 15
+    :source :ee}
    {:name "Booming Blade"
     :level 0
     :school "evocation"
@@ -546,6 +589,15 @@ At Higher Levels. When you cast this spell using a spell slot of 4th or higher l
 You can suppress any effect causing a target to be charmed or frightened. When this spell ends, any suppressed effect resumes, provided that its duration has not expired in the meantime.
 Alternatively, you can make a target indifferent about creatures of your choice that it is hostile toward. This indifference ends if the target is attacked or harmed by a spell or if it witnesses any of its friends being harmed. When the spell ends, the creature becomes hostile again, unless the GM rules otherwise."
     }
+   {:name "Catapult"
+    :school "transmutation"
+    :level 1
+    :casting-time "1 action"
+    :range "150 feet"
+    :duration "Instantaneous"
+    :components {:somatic true}
+    :page 15
+    :source :ee}
    {
     :name "Chain Lightning"
     :school "evocation"
@@ -957,6 +1009,15 @@ The contingent spell takes effect only on you, even if it can normally target ot
     :duration "Until dispelled"
     :description "A flame, equivalent in brightness to a torch, springs forth from an object that you touch. The effect looks like a regular flame, but it creates no heat and doesn't use oxygen. A continual flame can be covered or hidden but not smothered or quenched."
     }
+   {:name "Control Flames"
+    :school "transmutation"
+    :level 0
+    :casting-time "1 action"
+    :range "Touch"
+    :duration "Instantaneous or 1 hour"
+    :components {:somatic true}
+    :page 16
+    :source :ee}
    {
     :name "Control Water"
     :school "transmutation"
@@ -1008,6 +1069,15 @@ Stage Condition
 4 Gale
 5 Storm"
     }
+   {:name "Control Winds"
+    :school "transmutation"
+    :level 5
+    :casting-time "1 action"
+    :range "300 feet"
+    :duration "Concentration, up to 1 hour"
+    :components {:verbal true :somatic true}
+    :page 16
+    :source :ee}
    {
     :name "Cordon of Arrows"
     :school "transmutation"
@@ -1030,6 +1100,15 @@ Stage Condition
     :source :phb
     :page 228
     }
+   {:name "Create Bonfire"
+    :school "conjuration"
+    :level 0
+    :casting-time "1 action"
+    :range "60 feet"
+    :duration "Concentration, up to 1 minute"
+    :components {:verbal true :somatic true}
+    :page 16
+    :source :ee}
    {
     :name "Create Food and Water"
     :school "conjuration"
@@ -1457,9 +1536,27 @@ If you have a body part, lock of hair, clipping from a nail, or similar portion 
                 :duration "Instantaneous"
                 :source :phb
                 :page 236
-                }])
+                }
+               {:name "Dust Devil"
+                :school "conjuration"
+                :level 2
+                :casting-time "1 action"
+                :range "60 feet"
+                :duration "Concentration, up to 1 minute"
+                :components {:verbal true :somatic true :material true :material-component "fur wrapped in cloth"}
+                :page 17
+                :source :ee}])
 
-(def e-spells [{
+(def e-spells [{:name "Earthbind"
+                :school "transmutation"
+                :level 2
+                :casting-time "1 action"
+                :range "300 feet"
+                :duration "Concentration, up to 1 minute"
+                :components {:verbal true}
+                :page 17
+                :source :ee}
+               {
                 :name "Earthquake"
                 :school "evocation"
                 :level 8
@@ -1475,6 +1572,15 @@ Fissures. Fissures open throughout the spell's area at the start of your next tu
 A fissure that opens beneath a structure causes it to automatically collapse (see below).
 Structures. The tremor deals 50 bludgeoning damage to any structure in contact with the ground in the area when you cast the spell and at the start of each of your turns until the spell ends. If a structure drops to 0 hit points, it collapses and potentially damages nearby creatures. A creature within half the distance of a structure's height must make a Dexterity saving throw. On a failed save, the creature takes 5d6 bludgeoning damage, is knocked prone, and is buried in the rubble, requiring a DC 20 Strength (Athletics) check as an action to escape. The GM can adjust the DC higher or lower, depending on the nature of the rubble. On a successful save, the creature takes half as much damage and doesn't fall prone or become buried."
                 }
+               {:name "Earth Tremor"
+                :school "evocation"
+                :level 1
+                :casting-time "1 action"
+                :range "Self (10-foot radius)"
+                :duration "Instantaneous"
+                :components {:verbal true :somatic true}
+                :page 17
+                :source :ee}
                {:name "Eldritch Blast"
                 :school "evocation"
                 :level 0
@@ -1485,6 +1591,15 @@ Structures. The tremor deals 50 bludgeoning damage to any structure in contact w
                 :attack-roll? true
                 :description "A beam of crackling energy streak toward a creature within range. Make a ranged spell attack against the target. On a hit, the target takes 1d10 force damage.
 The spell creates more than one beam when you reach higher levels: two beams at 5th level, three beams at 11th level, and four beams at 17th level. You can direct the beams at the same target or at different ones. Make a separate attack roll for each beam."}
+               {:name "Elemental Bane"
+                :school "transmutation"
+                :level 4
+                :casting-time "1 action"
+                :range "90 feet"
+                :duration "Concentration, up to 10 minutes"
+                :components {:verbal true :somatic true}
+                :page 17
+                :source :ee}
                {
                 :name "Elemental Weapon"
                 :school "transmutation"
@@ -1560,6 +1675,15 @@ When the spell ends, the conjured plants wilt away."
                 :duration "1 minute"
                 :description "You weave a distracting string of words, causing creatures of your choice that you can see within range and that can hear you to make a Wisdom saving throw. Any creature that can't be charmed succeeds on this saving throw automatically, and if you or your companions are fighting a creature, it has advantage on the save. On a failed save, the target has disadvantage on Wisdom (Perception) checks made to perceive any creature other than you until the spell ends or until the target can no longer hear you. The spell ends if you are incapacitated or can no longer speak."
                 }
+               {:name "Erupting Earth"
+                :school "transmutation"
+                :level 3
+                :casting-time "1 action"
+                :range "120 feet"
+                :duration "Instantaneous"
+                :components {:verbal true :somatic true :material true :material-component "piece of obsidion"}
+                :page 17
+                :source :ee}
                {
                 :name "Etherealness"
                 :school "transmutation"
@@ -1803,6 +1927,15 @@ In addition, whenever a creature within 5 feet of you hits you with a melee atta
     :description "A storm made up of sheets of roaring flame appears in a location you choose within range. The area of the storm consists of up to ten 10-foot cubes, which you can arrange as you wish. Each cube must have at least one face adjacent to the face of another cube. Each creature in the area must make a Dexterity saving throw. It takes 7d10 fire damage on a failed save, or half as much damage on a successful one.
 The fire damages objects in the area and ignites flammable objects that aren't being worn or carried. If you choose, plant life in the area is unaffected by this spell."
     }
+   {:name "Flame Arrows"
+    :school "transmutation"
+    :level 3
+    :casting-time "1 action"
+    :range "Touch"
+    :duration "Concentration, up to 1 hour"
+    :components {:verbal true :somatic true}
+    :page 18
+    :source :ee}
    {
     :name "Flame Blade"
     :school "evocation"
@@ -1936,7 +2069,16 @@ The target can also spend 5 feet of movement to automatically escape from nonmag
     :components {:somatic true :material true :material-component "apply a bit of makeup while casting the spell"}
     :duration "Concentration, up to 1 minute"
     :source :phb
-    :page 244}])
+    :page 244}
+   {:name "Frostbite"
+    :school "evocation"
+    :level 0
+    :casting-time "1 action"
+    :range "60 feet"
+    :duration "Instantaneous"
+    :components {:verbal true :somatic true}
+    :page 18
+    :source :ee}])
 
 (def g-spells
   [{
@@ -2163,6 +2305,15 @@ You can create a permanently guarded and warded structure by casting this spell 
     :description "A flash of light streaks toward a creature of your choice within range. Make a ranged spell attack against the target. On a hit, the target takes 4d6 radiant damage, and the next attack roll made against this target before the end of your next turn has advantage, thanks to the mystical dim light glittering on the target until then.
 At Higher Levels. When you cast this spell using a spell slot of 2nd level or higher, the damage increases by 1d6 for each slot level above 1st."
     }
+   {:name "Gust"
+    :school "transmutation"
+    :level 0
+    :casting-time "1 action"
+    :range "30 feet"
+    :duration "Instantaneous"
+    :components {:verbal true :somatic true}
+    :page 19
+    :source :ee}
    {
     :name "Gust of Wind"
     :school "evocation"
@@ -2384,7 +2535,16 @@ The spell ends for an affected creature if it takes any damage or if someone els
     }])
 
 (def i-spells
-  [{
+  [{:name "Ice Knife"
+    :school "conjuration"
+    :level 1
+    :casting-time "1 action"
+    :range "60 feet"
+    :duration "Instantaneous"
+    :components {:somatic true :material true :material-component "drop of water or piece of ice"}
+    :page 19
+    :source :ee}
+   {
     :name "Ice Storm"
     :school "evocation"
     :level 4
@@ -2423,6 +2583,15 @@ To you and any creatures you designate when you cast the spell, the writing appe
 Should the spell be dispelled, the original script and the illusion both disappear.
 A creature with truesight can read the hidden message."
     }
+   {:name "Immolation"
+    :school "evocation"
+    :level 5
+    :casting-time "1 action"
+    :range "90 feet"
+    :duration "Instantaneous"
+    :components {:verbal true}
+    :page 19
+    :source :ee}
    {
     :name "Imprisonment"
     :school "abjuration"
@@ -2480,6 +2649,42 @@ At Higher Levels. When you cast this spell using a spell slot of 2nd level or hi
 When the area appears, each creature in it must make a Constitution saving throw. A creature takes 4d10 piercing damage on a failed save, or half as much damage on a successful one. A creature must also make this saving throw when it enters the spell's area for the first time on a turn or ends its turn there.
 At Higher Levels. When you cast this spell using a spell slot of 6th level or higher, the damage increases by 1d10 for each slot level above 5th."
     }
+   {:name "Investiture of Flame"
+    :school "transmutation"
+    :level 6
+    :casting-time "1 action"
+    :range "Self"
+    :duration "Concentration, up to 10 minutes"
+    :components {:verbal true :somatic true}
+    :page 19
+    :source :ee}
+   {:name "Investiture of Ice"
+    :school "transmutation"
+    :level 6
+    :casting-time "1 action"
+    :range "Self"
+    :duration "Concentration, up to 10 minutes"
+    :components {:verbal true :somatic true}
+    :page 19
+    :source :ee}
+   {:name "Investiture of Stone"
+    :school "transmutation"
+    :level 6
+    :casting-time "1 action"
+    :range "Self"
+    :duration "Concentration, up to 10 minutes"
+    :components {:verbal true :somatic true}
+    :page 19
+    :source :ee}
+   {:name "Investiture of Wind"
+    :school "transmutation"
+    :level 6
+    :casting-time "1 action"
+    :range "Self"
+    :duration "Concentration, up to 10 minutes"
+    :components {:verbal true :somatic true}
+    :page 20
+    :source :ee}
    {
     :name "Invisibility"
     :school "illusion"
@@ -2670,7 +2875,16 @@ At Higher Levels. When you cast this spell using a spell slot of 2nd level or hi
     }])
 
 (def m-spells
-  [{
+  [{:name "Maelstrom"
+    :school "evocation"
+    :level 5
+    :casting-time "1 action"
+    :range "120 feet"
+    :duration "Concentration, up to 1 minute"
+    :components {:verbal true :somatic true :material true :material-component "paper or leaf funnel"}
+    :page 19
+    :source :ee}
+   {
     :name "Mage Armor"
     :school "abjuration"
     :level 1
@@ -2747,6 +2961,15 @@ When the spell ends, the container is destroyed."
 When that circumstance occurs, a magical mouth appears on the object and recites the message in your voice and at the same volume you spoke. If the object you chose has a mouth or something that looks like a mouth (for example, the mouth of a statue), the magical mouth appears there so that the words appear to come from the object's mouth. When you cast this spell, you can have the spell end after it delivers its message, or it can remain and repeat its message whenever the trigger occurs.
 The triggering circumstance can be as general or as detailed as you like, though it must be based on visual or audible conditions that occur within 30 feet of the object. For example, you could instruct the mouth to speak when any creature moves within 30 feet of the object or when a silver bell rings within 30 feet of it."
     }
+   {:name "Magic Stone"
+    :school "transmutation"
+    :level 0
+    :casting-time "1 bonus action"
+    :range "Touch"
+    :duration "1 minute"
+    :components {:verbal true :somatic true}
+    :page 20
+    :source :ee}
    {
     :name "Magic Weapon"
     :school "transmutation"
@@ -2817,6 +3040,15 @@ You can also specify conditions that will trigger a special activity during the 
 If you or any of your companions damage a creature affected by this spell, the spell ends for that creature.
 At Higher Levels. When you cast this spell using a 7th-level spell slot, the duration is 10 days. When you use an 8th-level spell slot, the duration is 30 days. When you use a 9th-level spell slot, the duration is a year and a day."
     }
+   {:name "Maximilian's Earthen Grasp"
+    :school "transmutation"
+    :level 2
+    :casting-time "1 action"
+    :range "30 feet"
+    :duration "Concentration, up to 1 minute"
+    :components {:verbal true :somatic true :material true :material-component "hand-sculpted clay miniature"}
+    :page 20
+    :source :ee}
    {
     :name "Maze"
     :school "conjuration"
@@ -2843,7 +3075,7 @@ While merged with the stone, you can't see what occurs outside it, and any Wisdo
 Minor physical damage to the stone doesn't harm you, but its partial destruction or a change in its shape (to the extent that you no longer fit within it) expels you and deals 6d6 bludgeoning damage to you. The stone's complete destruction (or transmutation into a different substance) expels you and deals 50 bludgeoning damage to you. If expelled, you fall prone in an unoccupied space closest to where you first entered."
     }
    {
-    :name "M.'s Acid Arrow"
+    :name "Mel.'s Acid Arrow"
     :key :melfs-acid-arrow
     :school "evocation"
     :level 2
@@ -2854,6 +3086,16 @@ Minor physical damage to the stone doesn't harm you, but its partial destruction
     :description "A shimmering green arrow streaks toward a target within range and bursts in a spray of acid. Make a ranged spell attack against the target. On a hit, the target takes 4d4 acid damage immediately and 2d4 acid damage at the end of its next turn. On a miss, the arrow splashes the target with acid for half as much of the initial damage and no damage at the end of its next turn.
 At Higher Levels. When you cast this spell using a spell slot of 3rd level or higher, the damage (both initial and later) increases by 1d4 for each slot level above 2nd."
     }
+   {:name "Mel.'s Minute Meteors"
+    :key :melfs-minute-meteors
+    :school "evocation"
+    :level 3
+    :casting-time "1 action"
+    :range "Self"
+    :duration "Concentration, up to 10 minutes"
+    :components {:verbal true :somatic true :material true :material-component "niter, sulfur, and bead of pine tar"}
+    :page 20
+    :source :ee}
    {
     :name "Mending"
     :school "transmutation"
@@ -2976,6 +3218,15 @@ A modified memory doesn't necessarily affect how a creature behaves, particularl
 A remove curse or greater restoration spell cast on the target restores the creature's true memory.
 At Higher Levels. If you cast this spell using a spell slot of 6th level or higher, you can alter the target's memories of an event that took place up to 7 days ago (6th level), 30 days ago (7th level), 1 year ago (8th level), or any time in the creature's past (9th level)."
     }
+   {:name "Mold Earth"
+    :school "transmutation"
+    :level 0
+    :casting-time "1 action"
+    :range "30 feet"
+    :duration "Instantaneous or 1 hour"
+    :components {:somatic true}
+    :page 21
+    :source :ee}
    {
     :name "Moonbeam"
     :school "evocation"
@@ -3325,6 +3576,15 @@ At Higher Levels. When you cast this spell using a spell slot of 3rd level or hi
 • You make a color, a small mark, or a symbol appear on an object or a surface for 1 hour.
 • You create a nonmagical trinket or an illusory image that can fit in your hand and that lasts until the end of your next turn. If you cast this spell multiple times, you can have up to three of its non-instantaneous effects active at a time, and you can dismiss such an effect as an action."
     }
+   {:name "Primordial Ward"
+    :school "abjuration"
+    :level 6
+    :casting-time "1 action"
+    :range "Self"
+    :duration "Concentration, up to 1 minute"
+    :components {:verbal true :somatic true}
+    :page 21
+    :source :ee}
    {
     :name "Prismatic Spray"
     :school "evocation"
@@ -3445,7 +3705,16 @@ For the duration, the target has advantage on saving throws against being poison
     :components {:verbal true :somatic true}
     :duration "Instantaneous"
     :description "All nonmagical food and drink within a 5-foot-radius sphere centered on a point of your choice within range is purified and rendered free of poison and disease."
-    }])
+    }
+   {:name "Pyrotechnics"
+    :school "transmutation"
+    :level 2
+    :casting-time "1 action"
+    :range "60 feet"
+    :duration "Instantaneous"
+    :components {:verbal true :somatic true}
+    :page 21
+    :source :ee}])
 
 (def r-spells
   [{
@@ -3744,6 +4013,15 @@ You retain the benefit of any features from your class, race, or other source an
 When you transform, you choose whether your equipment falls to the ground, merges into the new form, or is worn by it. Worn equipment functions as normal. The GM determines whether it is practical for the new form to wear a piece of equipment, based on the creature's shape and size. Your equipment doesn't change shape or size to match the new form, and any equipment that the new form can't wear must either fall to the ground or merge into your new form. Equipment that merges has no effect in that state.
 During this spell's duration, you can use your action to assume a different form following the same restrictions and rules for the original form, with one exception: if your new form has more hit points than your current one, your hit points remain at their current value."
     }
+   {:name "Shape Water"
+    :school "transmutation"
+    :level 0
+    :casting-time "1 action"
+    :range "30 feet"
+    :duration "Instantaneous or 1 hour"
+    :components {:somatic true}
+    :page 21
+    :source :ee}
    {
     :name "Shatter"
     :school "evocation"
@@ -3835,6 +4113,16 @@ The simulacrum is friendly to you and creatures you designate. It obeys your spo
 If the simulacrum is damaged, you can repair it in an alchemical laboratory, using rare herbs and minerals worth 100 gp per hit point it regains. The simulacrum lasts until it drops to 0 hit points, at which point it reverts to snow and melts instantly.
 If you cast this spell again, any currently active duplicates you created with this spell are instantly destroyed."
     }
+   {:name "Skywrite"
+    :school "transmutation"
+    :ritual true
+    :level 2
+    :casting-time "1 action"
+    :range "Sight"
+    :duration "Concentration, up to 1 hour"
+    :components {:verbal true :somatic true}
+    :page 22
+    :source :ee}
    {
     :name "Sleep"
     :school "enchantment"
@@ -3872,6 +4160,15 @@ An affected target's speed is halved, it takes a −2 penalty to AC and Dexterit
 If the creature attempts to cast a spell with a casting time of 1 action, roll a d20. On an 11 or higher, the spell doesn't take effect until the creature's next turn, and the creature must use its action on that turn to complete the spell. If it can't, the spell is wasted.
 A creature affected by this spell makes another Wisdom saving throw at the end of its turn. On a successful save, the effect ends for it."
     }
+   {:name "Snilloc's Snowball Swarm"
+    :school "evocation"
+    :level 2
+    :casting-time "1 action"
+    :range "90 feet"
+    :duration "Instantaneous"
+    :components {:verbal true :somatic true :material true :material-component "a piece of ice or small white rock chip"}
+    :page 21
+    :source :ee}
    {
     :name "Spare the Dying"
     :school "necromancy"
@@ -4022,6 +4319,15 @@ Round 3. You call six bolts of lightning from the cloud to strike six creatures 
 Round 4. Hailstones rain down from the cloud. Each creature under the cloud takes 2d6 bludgeoning damage.
 Round 5–10. Gusts and freezing rain assail the area under the cloud. The area becomes difficult terrain and is heavily obscured. Each creature there takes 1d6 cold damage. Ranged weapon attacks in the area are impossible. The wind and rain count as a severe distraction for the purposes of maintaining concentration on spells. Finally, gusts of strong wind (ranging from 20 to 50 miles per hour) automatically disperse fog, mists, and similar phenomena in the area, whether mundane or magical."
     }
+   {:name "Storm Sphere"
+    :school "evocation"
+    :level 4
+    :casting-time "1 action"
+    :range "150 feet"
+    :duration "Concentration, up to 1 minute"
+    :components {:verbal true :somatic true}
+    :page 22
+    :source :ee}
    {
     :name "Suggestion"
     :school "enchantment"
@@ -4228,6 +4534,15 @@ If you cast this spell multiple times, you can have up to three of its 1-minute 
     :page 282
     :attack-roll? true
     }
+   {:name "Thunderclap"
+    :school "evocation"
+    :level 0
+    :casting-time "1 action"
+    :range "Self (5-foot radius)"
+    :duration "Instantaneous"
+    :components {:somatic true}
+    :page 22
+    :source :ee}
    {
     :name "Thunderwave"
     :school "evocation"
@@ -4240,6 +4555,15 @@ If you cast this spell multiple times, you can have up to three of its 1-minute 
 In addition, unsecured objects that are completely within the area of effect are automatically pushed 10 feet away from you by the spell's effect, and the spell emits a thunderous boom audible out to 300 feet.
 At Higher Levels. When you cast this spell using a spell slot of 2nd level or higher, the damage increases by 1d8 for each slot level above 1st."
     }
+   {:name "Tidal Wave"
+    :school "conjuration"
+    :level 3
+    :casting-time "1 action"
+    :range "120 feet"
+    :duration "Concentration, up to 10 minutes"
+    :components {:verbal true :somatic true :material true :material-component "drop of water"}
+    :page 22
+    :source :ee}
    {
     :name "Time Stop"
     :school "transmutation"
@@ -4261,6 +4585,15 @@ This spell ends if one of the actions you use during this period, or any effects
     :duration "1 hour"
     :description "This spell grants the creature you touch the ability to understand any spoken language it hears. Moreover, when the target speaks, any creature that knows at least one language and can hear the target understands what it says."
     }
+   {:name "Transmute Rock"
+    :school "transmutation"
+    :level 5
+    :casting-time "1 action"
+    :range "120 feet"
+    :duration "Instantaneous"
+    :components {:verbal true :somatic true :material true :material-component "clay and water"}
+    :page 22
+    :source :ee}
    {
     :name "Transport via Plants"
     :school "conjuration"
@@ -4378,7 +4711,16 @@ At Higher Levels. When you cast this spell using a spell slot of 4th level or hi
                 :duration "Instantaneous"
                 :source :phb
                 :page 285
-                }])
+                }
+               {:name "Vitriolic Sphere"
+                :school "evocation"
+                :level 4
+                :casting-time "1 action"
+                :range "150 feet"
+                :duration "Instantaneous"
+                :components {:verbal true :somatic true :material true :material-component "giant slug bile"}
+                :page 23
+                :source :ee}])
 
 (def w-spells [{
                 :name "Wall of Fire"
@@ -4416,6 +4758,15 @@ Nothing can physically pass through the wall. It is immune to all damage and can
 If the wall cuts through a creature's space when it appears, the creature within its area is pushed to one side of the wall and must make a Dexterity saving throw. On a failed save, the creature takes 10d6 cold damage, or half as much damage on a successful save. The wall is an object that can be damaged and thus breached. It has AC 12 and 30 hit points per 10-foot section, and it is vulnerable to fire damage. Reducing a 10-foot section of wall to 0 hit points destroys it and leaves behind a sheet of frigid air in the space the wall occupied. A creature moving through the sheet of frigid air for the first time on a turn must make a Constitution saving throw. That creature takes 5d6 cold damage on a failed save, or half as much damage on a successful one.
 At Higher Levels. When you cast this spell using a spell slot of 7th level or higher, the damage the wall deals when it appears increases by 2d6, and the damage from passing through the sheet of frigid air increases by 1d6, for each slot level above 6th."
                 }
+               {:name "Wall of Sand"
+                :school "evocation"
+                :level 3
+                :casting-time "1 action"
+                :range "Self"
+                :duration "Concentration, up to 10 minutes"
+                :components {:verbal true :somatic true :material true :material-component "handful of sand"}
+                :page 23
+                :source :ee}
                {
                 :name "Wall of Stone"
                 :school "evocation"
@@ -4453,7 +4804,7 @@ At Higher Levels. When you cast this spell using a spell slot of 7th level or hi
                 :range "60 feet"
                 :components {:verbal true :somatic true :material true :material-component "drop of water"}
                 :duration "Concentration, up to 10 minutes"
-                :source :vgm
+                :source :ee
                 :page 116
                 }
                {
@@ -4467,6 +4818,15 @@ At Higher Levels. When you cast this spell using a spell slot of 7th level or hi
                 :description "This spell wards a willing creature you touch and creates a mystic connection between you and the target until the spell ends. While the target is within 60 feet of you, it gains a +1 bonus to AC and saving throws, and it has resistance to all damage. Also, each time it takes damage, you take the same amount of damage.
 The spell ends if you drop to 0 hit points or if you and the target become separated by more than 60 feet. It also ends if the spell is cast again on either of the connected creatures. You can also dismiss the spell as an action."
                 }
+               {:name "Warding Wind"
+                :school "evocation"
+                :level 2
+                :casting-time "1 action"
+                :range "Self"
+                :duration "Concentration, up to 10 minutes"
+                :components {:verbal true}
+                :page 23
+                :source :ee}
                {
                 :name "Water Breathing"
                 :ritual true
@@ -4490,6 +4850,15 @@ The spell ends if you drop to 0 hit points or if you and the target become separ
                 :description "This spell grants the ability to move across any liquid surface—such as water, acid, mud, snow, quicksand, or lava—as if it were harmless solid ground (creatures crossing molten lava can still take damage from the heat). Up to ten willing creatures you can see within range gain this ability for the duration.
 If you target a creature submerged in a liquid, the spell carries the target to the surface of the liquid at a rate of 60 feet per round."
                 }
+               {:name "Watery Sphere"
+                :school "conjuration"
+                :level 4
+                :casting-time "1 action"
+                :range "90 feet"
+                :duration "Concentration, up to 1 minute"
+                :components {:verbal true :somatic true :material true :material-component "drop of water"}
+                :page 23
+                :source :ee}
                {
                 :name "Web"
                 :school "conjuration"
@@ -4515,6 +4884,15 @@ The webs are flammable. Any 5-foot cube of webs exposed to fire burns away in 1 
                 :duration "Concentration, up to one minute"
                 :description "Drawing on the deepest fears of a group of creatures, you create illusory creatures in their minds, visible only to them. Each creature in a 30-foot-radius sphere centered on a point of your choice within range must make a Wisdom saving throw. On a failed save, a creature becomes frightened for the duration. The illusion calls on the creature's deepest fears, manifesting its worst nightmares as an implacable threat. At the end of each of the frightened creature's turns, it must succeed on a Wisdom saving throw or take 4d10 psychic damage. On a successful save, the spell ends for that creature."
                 }
+               {:name "Whirlwind"
+                :school "evocation"
+                :level 7
+                :casting-time "1 action"
+                :range "300 feet"
+                :duration "Concentration, up to 1 minute"
+                :components {:verbal true :material true :material-component "piece of straw"}
+                :page 24
+                :source :ee}
                {
                 :name "Wind Walk"
                 :school "transmutation"

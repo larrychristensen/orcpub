@@ -14,7 +14,9 @@
    :vgm {:abbr "VGM"
          :url vgm-url}
    :scag {:abbr "SCAG"
-          :url scag-url}})
+          :url scag-url}
+   :ee {:abbr "EE"
+        :url "https://media.wizards.com/2015/downloads/dnd/EE_PlayersCompanion.pdf"}})
 
 (def plural-map
   {:feet :feet})
