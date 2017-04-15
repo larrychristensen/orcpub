@@ -113,14 +113,36 @@
 
 (defn equipment-fields [built-char]
   (let [equipment (es/entity-val built-char :equipment)
+        armor (es/entity-val built-char :armor)
+        magic-armor (es/entity-val built-char :magic-armor)
         magic-items (es/entity-val built-char :magic-items)
-        all-equipment (merge equipment magic-items)]
-    {:equipment (s/join
-                 "; "
-                 (map
-                  (fn [[kw {count :quantity}]]
-                    (str (:name (mi5e/all-equipment-map kw)) " (" count ")"))
-                  all-equipment))}))
+        weapons (es/entity-val built-char :weapons)
+        magic-weapons (es/entity-val built-char :magic-weapons)
+        all-equipment (merge equipment magic-items armor magic-armor)
+        treasure (es/entity-val built-char :treasure)
+        treasure-map (into {} (map (fn [[kw {qty :quantity}]] [kw qty]) treasure))
+        unequipped-items (filter
+                          (fn [[kw {:keys [equipped? quantity]}]]
+                            (and (not equipped?)
+                                 (pos? quantity)))
+                          (merge all-equipment weapons magic-weapons))]
+    (prn "AL EQUS" unequipped-items)
+    (merge
+     (select-keys treasure-map [:cp :sp :ep :gp :pp])
+     {:equipment (s/join
+                  "; "
+                  (map
+                   (fn [[kw {count :quantity}]]
+                     (str (:name (mi5e/all-equipment-map kw)) " (" count ")"))
+                   (filter
+                    (fn [[kw {:keys [equipped? quantity]}]] (and equipped? (pos? quantity)))
+                    all-equipment)))
+      :treasure (s/join
+                  "; "
+                  (map
+                   (fn [[kw {count :quantity}]]
+                     (str (:name (mi5e/all-equipment-map kw)) " (" count ")"))
+                   unequipped-items))})))
 
 (def level-max-spells
   {0 8

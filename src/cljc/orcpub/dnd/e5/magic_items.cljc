@@ -2259,7 +2259,9 @@ The boots regain 2 hours of flying capability for every 12 hours they aren’t i
 (def all-equipment-map
   (merge
    equip5e/equipment-map
-   other-magic-item-map))
+   other-magic-item-map
+   all-armor-map
+   all-weapons-map))
 
 (defn equipped-items-details [items item-map]
   (filter

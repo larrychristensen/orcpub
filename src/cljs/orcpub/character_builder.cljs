@@ -30,7 +30,7 @@
 
             [reagent.core :as r]))
 
-(def print-enabled? true)
+(def print-enabled? false)
 
 (declare app-state)
 
@@ -2185,11 +2185,17 @@
      {:class-name (if (<= (count @history) 1) "opacity-5")
       :on-click undo!}
      [:i.fa.fa-undo.f-s-18]
-     [:span.m-l-5.hidden-xs "Undo"]]
+     [:span.m-l-5.hidden-sm.hidden-xs "Undo"]]
     [:button.form-button.h-40.m-l-5
      {:on-click (export-pdf built-char)}
      [:i.fa.fa-print.f-s-18]
-     [:span.m-l-5.hidden-xs "Print"]]]])
+     [:span.m-l-5.hidden-sm.hidden-xs "Print"]]
+    [:button.form-button.h-40.m-l-5
+     [:i.fa.fa-floppy-o.f-s-18]
+     [:span.m-l-5.hidden-sm.hidden-xs "Browser Save"]]
+    [:button.form-button.h-40.m-l-5.opacity-5
+     [:i.fa.fa-cloud-upload.f-s-18]
+     [:span.m-l-5.hidden-sm.hidden-xs "Save" [:span.i.m-l-5 "(Coming Soon)"]]]]])
 
 
 (defn character-builder []
