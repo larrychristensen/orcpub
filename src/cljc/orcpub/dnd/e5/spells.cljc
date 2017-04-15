@@ -4446,6 +4446,17 @@ A creature can move through the wall, albeit slowly and painfully. For every 1 f
 At Higher Levels. When you cast this spell using a spell slot of 7th level or higher, both types of damage increase by 1d8 for each slot level above 6th."
                 }
                {
+                :name "Wall of Water"
+                :school "evocation"
+                :level 3
+                :casting-time "1 action"
+                :range "60 feet"
+                :components {:verbal true :somatic true :material true :material-component "drop of water"}
+                :duration "Concentration, up to 10 minutes"
+                :source :vgm
+                :page 116
+                }
+               {
                 :name "Warding Bond"
                 :school "abjuration"
                 :level 2

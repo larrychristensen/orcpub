@@ -680,11 +680,14 @@
 
 (def plugins
   [{:name "Sword Coast Adventurer's Guide"
-    :key :sword-coast-adventurers-guide
+    :key :scag
     :selections (t5e/sword-coast-adventurers-guide-selections (:character @app-state))}
    {:name "Volo's Guide to Monsters"
-    :key :volos-guide-to-monsters
-    :selections (t5e/volos-guide-to-monsters-selections (:character @app-state))}])
+    :key :vgm
+    :selections (t5e/volos-guide-to-monsters-selections (:character @app-state))}
+   {:name "Elemental Evil Player's Companion"
+    :key :ee
+    :selections (t5e/elemental-evil-selections (:character @app-state))}])
 
 (def plugins-map
   (zipmap (map :key plugins) plugins))

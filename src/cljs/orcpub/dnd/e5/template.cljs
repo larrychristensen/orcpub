@@ -904,6 +904,102 @@
                (mod5e/spells-known 1 :hellish-rebuke :cha "Tiefling" 3)
                (mod5e/spells-known 2 :darkness :cha "Tiefling" 5)]})
 
+(def aarakocra-option-cfg
+  {:name "Aarakocra"
+   :abilities {:dex 2 :wis 1}
+   :size :medium
+   :speed 25
+   :languages ["Common" "Aarakocra" "Auran"]
+   :modifiers [(mod5e/flying-speed 50)
+               (mod5e/attack
+                {:name "Talons"
+                 :source :ee
+                 :page 3
+                 :damage-die 4
+                 :damage-die-count 1
+                 :damage-type :slashing
+                 :damage-modifier (?ability-bonuses :str)})]})
+
+(def ee-gnome-option-cfg
+  {:name "Gnome"
+   :subraces
+   [{:name "Deep Gnome"
+     :abilities {:dex 1}
+     :modifiers [(mod5e/darkvision 120)]
+     :traits [{:name "Stone Camouflage"
+               :source :ee
+               :page 5
+               :summary "Advantage on hide checks in rocky terrain"}]}]})
+
+(def genasi-option-cfg
+  {:name "Genasi"
+   :source "Elemental Evil Player's Companion"
+   :abilities {:con 2}
+   :size "Medium"
+   :speed 30
+   :languages ["Common" "Primordial"]
+   :subraces [{:name "Air Genasi"
+               :abilities {:dex 1}
+               :modifiers [(mod5e/spells-known 2 :levitate :con "Air Genasi" nil "once/long rest")]
+               :traits [{:name "Unending Breath"
+                         :page 9
+                         :source :ee
+                         :summary "hold breath indefinitely"}
+                        {:name "Mingle with the Wind"
+                         :page 9
+                         :source :ee
+                         :frequency {:units :long-rest}
+                         :summary "cast levitate without material components"}]}
+              {:name "Earth Genasi"
+               :abilities {:str 1}
+               :modifiers [(mod5e/spells-known 2 :pass-without-trace :con "Earth Genasi" nil "once/long rest")]
+               :traits [{:name "Earth Walk"
+                         :page 9
+                         :source :ee
+                         :summary "walk on difficult earth or stone terrain without extra movement"}
+                        {:name "Merge with Stone"
+                         :page 9
+                         :source :ee
+                         :frequency {:units :long-rest}
+                         :summary "cast pass without trace without material components"}]}
+              {:name "Fire Genasi"
+               :abilities {:int 1}
+               :modifiers [(mod5e/damage-resistance :fire)
+                           (mod5e/spells-known 0 :produce-flame :con "Fire Genasi")
+                           (mod5e/spells-known 1 :burning-hands :con "Fire Genasi" 3 "once/long rest")]
+               :traits [{:name "Fire Resistance"
+                         :page 10
+                         :source :ee
+                         :summary "resistance to fire damage"}
+                        {:name "Reach to the Blaze"
+                         :page 10
+                         :source :ee
+                         :frequency {:units :long-rest}
+                         :summary "have 'produce flame' cantrip; at level 3 can cast burning hands"}]}
+              {:name "Water Genasi"
+               :abilities {:wis 1}
+               :modifiers [(mod5e/damage-resistance :acid)
+                           (mod5e/swimming-speed 30)
+                           (mod5e/spells-known 0 :shape-water :con "Water Genasi")
+                           (mod5e/spells-known 1 :create-or-destroy-water :con "Water Genasi" 3 "once/long rest")]
+               :traits [{:name "Acid Resistance"
+                         :page 10
+                         :source :ee
+                         :summary "resistant to acid damage"}
+                        {:name "Amphibious"
+                         :page 10
+                         :source :ee
+                         :summary "breathe in air and water"}
+                        {:name "Swim"
+                         :page 10
+                         :source :ee
+                         :summary "swimming speed of 30 ft."}
+                        {:name "Call to the Wave"
+                         :page 10
+                         :source :ee
+                         :frequency {:units :long-rest}
+                         :summary "have 'shape water' cantrip; at level 3 can cast create or destroy water as 2nd level"}]}]})
+
 (defn hit-points-selection [die class-nm level]
   (t/selection-cfg
    {:name (str "Hit Points: " class-nm " " level)
@@ -4976,6 +5072,24 @@ long rest."})]
      :tags #{:class}}
     cfg)))
 
+(defn race-selection [cfg]
+  (t/selection-cfg
+   (merge
+    {:name "Race"
+     :order 0
+     :help "Race determines your appearance and helps shape your culture and background. It also affects you ability scores, size, speed, languages, and many other crucial inherent traits."
+     :tags #{:race}}
+    cfg)))
+
+(defn elemental-evil-selections [app-state]
+  [(race-selection
+    {:options (map
+               race-option
+               [aarakocra-option-cfg
+                ee-gnome-option-cfg
+                genasi-option-cfg
+                goliath-option-cfg])})])
+
 (defn sword-coast-adventurers-guide-selections [app-state]
   [(background-selection
     {:options (map
@@ -5058,7 +5172,11 @@ long rest."})]
     :help (amazon-frame-help volos-amazon-frame
                              [:div
                               "Full of great monster race options, including"
-                              (content-list ["Aasimar" "Firbolg" "Goliath" "Kenku" "Lizardfolk" "Tabaxi" "Triton" "Bugbear" "Goblin" "Hobgoblin" "Kobold" "Orc" "Yuan-Ti Pureblood"])])}])
+                              (content-list ["Aasimar" "Firbolg" "Goliath" "Kenku" "Lizardfolk" "Tabaxi" "Triton" "Bugbear" "Goblin" "Hobgoblin" "Kobold" "Orc" "Yuan-Ti Pureblood"])])}
+   {:name "Elemental Evil Player's Companion"
+    :key :ee
+    :url "https://media.wizards.com/2015/downloads/dnd/EE_PlayersCompanion.pdf"
+    :help [:div "Race options from the " [:a {:href "https://media.wizards.com/2015/downloads/dnd/EE_PlayersCompanion.pdf"} "player's companion to Prince's of the Apocalypse"]]}])
 
 (def optional-content-selection
   (t/selection-cfg
@@ -5153,12 +5271,8 @@ long rest."})]
                   {:name alignment
                    :modifiers [(mod5e/alignment alignment)]}))
                ["Lawful Good" "Lawful Neutral" "Lawful Evil" "Neutral Good" "Neutral" "Neutral Evil" "Chaotic Good" "Chaotic Neutral" "Chaotic Evil"])})
-   (t/selection-cfg
-    {:name "Race"
-     :order 0
-     :help "Race determines your appearance and helps shape your culture and background. It also affects you ability scores, size, speed, languages, and many other crucial inherent traits."
-     :tags #{:race}
-     :options (map
+   (race-selection
+    {:options (map
                race-option
                [dwarf-option-cfg
                 elf-option-cfg
