@@ -5169,7 +5169,7 @@ long rest."})]
    {:name "Elemental Evil Player's Companion"
     :key :ee
     :url "https://media.wizards.com/2015/downloads/dnd/EE_PlayersCompanion.pdf"
-    :help [:div "Race options from the " [:a {:href "https://media.wizards.com/2015/downloads/dnd/EE_PlayersCompanion.pdf"} "player's companion to Prince's of the Apocalypse"]]}])
+    :help [:div "Race and spell options from the " [:a {:href "https://media.wizards.com/2015/downloads/dnd/EE_PlayersCompanion.pdf"} "player's companion to Prince's of the Apocalypse"]]}])
 
 (def optional-content-selection
   (t/selection-cfg
