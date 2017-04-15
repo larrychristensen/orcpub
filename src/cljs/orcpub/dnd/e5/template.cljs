@@ -1112,6 +1112,7 @@
   (let [kw (common/name-to-kw name)
         {:keys [armor weapon save skill-options tool-options tool language-options]} profs
         {skill-num :choose options :options} skill-options
+        {level-factor :level-factor} spellcasting
         skill-kws (if (:any options) (map :key opt5e/skills) (keys options))
         armor-profs (keys armor)
         weapon-profs (keys weapon)
@@ -1171,20 +1172,8 @@
       (armor-prof-modifiers armor-profs)
       (weapon-prof-modifiers weapon-profs)
       (tool-prof-modifiers tool-profs)
-      (traits-modifiers traits true)))
-    #_(if spellcasting-template
-      (assoc
-       option
-       ::t/plugins [{::t/path [:class (:key cls)]
-                     ::t/selections [(t/sequential-selection
-                                      "Levels"
-                                      (fn [selection options current-values]
-                                        {::entity/key (-> current-values count inc str keyword)})
-                                      (vec
-                                       (map
-                                        (partial subclass-level-option subcls kw spellcasting-template)
-                                        (range 1 21))))]}])
-      option)))
+      (traits-modifiers traits true)
+      (if level-factor [(mod5e/spell-slot-factor (:key cls) level-factor)])))))
 
 (defn first-class? [class-kw]
   (fn [c] (= class-kw (first (es/entity-val c :classes)))))
@@ -1366,6 +1355,7 @@
   (let [kw (common/name-to-kw name)
         {:keys [save skill-options multiclass-skill-options tool-options multiclass-tool-options tool]
          armor-profs :armor weapon-profs :weapon} profs
+        {level-factor :level-factor} spellcasting
         save-profs (keys save)
         spellcasting-template (opt5e/spellcasting-template (assoc spellcasting :class-key kw) cls)]
     (t/option-cfg
@@ -1408,6 +1398,7 @@
                   (if armor-profs (armor-prof-modifiers armor-profs kw))
                   (if weapon-profs (weapon-prof-modifiers weapon-profs kw))
                   (if tool (tool-prof-modifiers tool kw))
+                  (if level-factor [(mod5e/spell-slot-factor kw level-factor)])
                   (if weapons
                     (map
                      (fn [[k num]]
@@ -2374,6 +2365,7 @@
 
 (def eldritch-knight-cfg
   {:name "Eldritch Knight"
+   :spellcasting {:level-factor 3}
    :modifiers [(mod5e/bonus-action
                 {:name "Summon Bonded Weapon"
                  :page 75
@@ -3401,6 +3393,7 @@
                             :page 97
                             :summary "accurately mimic the behavior, speech, and writing of another person"}]}
                  {:name "Arcane Trickster"
+                  :spellcasting {:level-factor 3}
                   :modifiers [(mod5e/spells-known 0 :mage-hand :int "Arcane Trickster")]
                   :levels {3 {:selections [(opt5e/spell-selection {:class-key :rogue
                                                                    :level 0
@@ -5434,6 +5427,13 @@ long rest."})]
                              (+ ?prof-bonus (?ability-bonuses ability-kw)))
     ?spell-save-dc (fn [ability-kw]
                      (+ 8 ?prof-bonus (?ability-bonuses ability-kw)))
+    ?spell-slots (opt5e/total-slots (apply + (map (fn [[cls-kw factor]]
+                                                    (-> ?levels
+                                                        cls-kw
+                                                        :class-level
+                                                        (/ factor)
+                                                        int))
+                                                  ?spell-slot-factors)) 1)
     ?reactions []
     ?actions []
     ?bonus-actions []

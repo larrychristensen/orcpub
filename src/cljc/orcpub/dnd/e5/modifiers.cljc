@@ -123,9 +123,6 @@
                                                           :class-level level
                                                           :hit-die hit-die})))
 
-(defn spell-slots [level num]
-  (mods/map-mod ?spell-slots level num))
-
 (defmacro spells-known-cfg [level spell-cfg min-level conditions]
   `(mods/modifier
     ~'?spells-known
@@ -155,6 +152,9 @@
         :qualifier qualifier
         :class class})
       ?spells-known)))
+
+(defn spell-slot-factor [class-key factor]
+  (mods/map-mod ?spell-slot-factors class-key factor))
 
 (defn trait-cfg [{:keys [name description level summary page conditions] :as cfg}]
   (mods/modifier ?traits

@@ -30,7 +30,7 @@
 
             [reagent.core :as r]))
 
-(def print-enabled? false)
+(def print-enabled? true)
 
 (declare app-state)
 
@@ -1990,7 +1990,8 @@
 
 (defn get-selected-plugin-options [app-state]
   (into #{}
-        (map ::entity/key)
+        (comp (map ::entity/key)
+              (remove nil?))
         (get-in @app-state [:character ::entity/options :optional-content])))
 
 

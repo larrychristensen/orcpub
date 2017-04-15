@@ -173,7 +173,7 @@
                          (range 10))})))
      page-map)))
 
-(defn spell-page-fields [spells save-dc-fn attack-mod-fn]
+(defn spell-page-fields [spells spell-slots save-dc-fn attack-mod-fn]
   (let [spell-pages (make-pages spells)]
     (apply
      merge
@@ -191,21 +191,25 @@
               class-header)
             (map
              (fn [{:keys [level spells]}]
-               (map-indexed
-                (fn [spell-index spell]
-                  {(keyword (str "spells-" level "-" (inc spell-index) suffix))
-                   (str (:name (spells/spell-map (:key spell))) (let [qualifier (:qualifier spell)]
-                                                                  (if qualifier
-                                                                    (str " (" qualifier ")"))))})
-                spells))
+               (conj
+                (map-indexed
+                 (fn [spell-index spell]
+                   {(keyword (str "spells-" level "-" (inc spell-index) suffix))
+                    (str (:name (spells/spell-map (:key spell))) (let [qualifier (:qualifier spell)]
+                                                                   (if qualifier
+                                                                     (str " (" qualifier ")"))))})
+                 spells)
+                {(keyword (str "spell-slots-" level suffix))
+                 (spell-slots level)}))
              spells)]))
        spell-pages)))))
 
 (defn spellcasting-fields [built-char]
   (let [spells-known (es/entity-val built-char :spells-known)
         spell-attack-modifier-fn (es/entity-val built-char :spell-attack-modifier)
-        spell-save-dc-fn (es/entity-val built-char :spell-save-dc)]
-    (spell-page-fields spells-known spell-save-dc-fn spell-attack-modifier-fn)))
+        spell-save-dc-fn (es/entity-val built-char :spell-save-dc)
+        spell-slots (es/entity-val built-char :spell-slots)]
+    (spell-page-fields spells-known spell-slots spell-save-dc-fn spell-attack-modifier-fn)))
 
 (defn profs-paragraph [profs prof-map title]
   (if (seq profs)
