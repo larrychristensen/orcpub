@@ -391,7 +391,11 @@
     (spell-field "Range" range)
     (spell-field "Duration" duration)]
    [:div.f-w-n (if description
-                 description
+                 (doall
+                  (map-indexed
+                   (fn [i p]
+                     ^{:key i} [:p.m-t-5 p])
+                   (s/split description #"\n")))
                  (if source
                    (let [{:keys [abbr url]} (disp/sources source)]
                      [:div

@@ -1208,8 +1208,7 @@ At Higher Levels. When you cast this spell using a spell slot of 2nd level or hi
                 :range "120 feet"
                 :components {:verbal true :somatic true :material true :material-component "a bit of phosphorus or wychwood, or a glowworm"}
                 :duration "Concentration, up to 1 minute"
-                :description "You create up to four torch-sized lights within range, making them appear as torches, lanterns, or glowing orbs that hover in the air for the duration. You can also combine the four lights into one glowing vaguely humanoid form of Medium size. Whichever form you choose, each light sheds dim light in a 10-
-foot radius.
+                :description "You create up to four torch-sized lights within range, making them appear as torches, lanterns, or glowing orbs that hover in the air for the duration. You can also combine the four lights into one glowing vaguely humanoid form of Medium size. Whichever form you choose, each light sheds dim light in a 10-foot radius.
 As a bonus action on your turn, you can move the lights up to 60 feet to a new spot within range. A light must be within 20 feet of another light created by this spell, and a light winks out if it exceeds the spell's range."
                 }
                {
@@ -3497,12 +3496,8 @@ If you cast this spell over 8 hours, you enrich the land. All plants in a half-m
     :range "10 feet"
     :components {:verbal true :somatic true}
     :duration "Instantaneous"
-    :description "You extend your hand toward a creature you can see
-within range and project a puff of noxious gas from your
-palm. The creature must succeed on a Constitution
-saving throw or take 1d12 poison damage.
-This spell’s damage increases by 1d12 when you reach
-5th level (2d12), 11th level (3d12), and 17th level (4d12)."
+    :description "You extend your hand toward a creature you can see within range and project a puff of noxious gas from your palm. The creature must succeed on a Constitution saving throw or take 1d12 poison damage.
+This spell’s damage increases by 1d12 when you reach 5th level (2d12), 11th level (3d12), and 17th level (4d12)."
     } {
     :name "Polymorph"
     :school "transmutation"

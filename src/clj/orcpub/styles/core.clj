@@ -127,6 +127,8 @@
    [:.m-t-21
     {:margin-top "21px"}]
 
+   [:.opacity-1
+    {:opacity "0.1"}]
    [:.opacity-5
     {:opacity "0.5"}]
    [:.opacity-6
@@ -286,12 +288,16 @@
     {:background-color :transparent}]
    [:.bg-white
     {:background-color :white}]
+   [:.bg-slight-white
+    {:background-color "rgba(255,255,255,0.05)"}]
    [:.no-border
     {:border :none}]
 
    [:.underline
     {:text-decoration :underline}]
 
+   [:.p-t-0
+    {:padding-top "0px"}]
    [:.p-t-2
     {:padding-top "2px"}]
    [:.p-t-3

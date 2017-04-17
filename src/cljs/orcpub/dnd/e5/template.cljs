@@ -1331,6 +1331,18 @@
   (let [skill-kws (if (:any options) (map :key skill5e/skills) (keys options))]
     (opt5e/skill-selection skill-kws skill-num skill-select-order key prereq-fn)))
 
+(defn class-help-field [name value]
+  [:div.m-t-5
+    [:span.f-w-b (str name ":")]
+    [:span.m-l-10 value]])
+
+(defn class-help [hd saves weapon-profs armor-profs]
+  [:div
+   (class-help-field "Hit Die" (str "d" hd))
+   (class-help-field "Saving Throw Proficiencies" (s/join ", " (map (comp s/upper-case name) saves)))
+   (class-help-field "Weapon Proficiencies" (s/join ", " (map (comp name key) weapon-profs)))
+   (class-help-field "Armor Proficiencies" (s/join ", " (map (comp name key) armor-profs)))])
+
 (defn class-option [{:keys [name
                             help
                             hit-die
@@ -1362,7 +1374,9 @@
     (t/option-cfg
      {:name name
       :key kw
-      :help help
+      :help [:div.p-t-5.p-l-10.p-r-10
+             (class-help hit-die save-profs weapon-profs armor-profs)
+             [:div.m-t-10 help]]
       :prereqs multiclass-prereqs
       :selections (map
                    (fn [selection]
@@ -2107,7 +2121,7 @@
     :hit-die 8
     :spellcaster true
     :spellcasting {:level-factor 1
-                   :cantrips-known {:1 2 :4 3 :10 4}
+                   :cantrips-known {1 2 4 1 10 1}
                    :known-mode :all
                    :ability :wis}
     :multiclass-prereqs [(opt5e/ability-prereq :wis 13)]

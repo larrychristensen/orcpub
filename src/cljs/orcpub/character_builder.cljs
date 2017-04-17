@@ -31,7 +31,7 @@
 
             [reagent.core :as r]))
 
-(def print-enabled? true)
+(def print-enabled? false)
 
 (declare app-state)
 
@@ -849,7 +849,7 @@
     {:component-did-update on-builder-selector-update}))
 
 (defn help-section [help]
-  [:div.m-t-5.f-w-n
+  [:div.m-t-10.f-w-n
    (if (string? help)
      (doall
       (map-indexed
@@ -928,69 +928,77 @@
       (doall
        (map-indexed
         (fn [i {:keys [::entity/key] :as selected-class}]
-          ^{:key key}
-          [:div.flex.align-items-c.m-t-5
-           [:select.builder-option.builder-option-dropdown.flex-grow-1.m-t-0
-            {:value key
-             :on-change (fn [e] (let [new-key (keyword (.. e -target -value))]
-                                  (swap! app-state
-                                         assoc-in
-                                         [:character ::entity/options :class i] {::entity/key new-key
-                                                                                 ::entity/options
-                                                                                 {:levels [{::entity/key :level-1}]}})))}
-            (doall
-             (map
-              (fn [{:keys [::t/key ::t/name]}]
-                ^{:key key}
-                [:option.builder-dropdown-item
-                 {:value key}
-                 name])
-              (filter
-               #(and
-                 (or (= key (::t/key %))
-                     (unselected-classes-set (::t/key %)))
-                 (or (zero? i)
-                     (every? (fn [prereq] ((::t/prereq-fn prereq) built-char)) (::t/prereqs %))))
-               options)))]
-           (let [selected-levels (get-in selected-class [::entity/options :levels])
-                 class-template-option (some #(if (= key (::t/key %)) %) options)
-                 levels-selection (some #(if (= :levels (::t/key %)) %) (::t/selections class-template-option))
-                 available-levels (::t/options levels-selection)
-                 last-level-key (::entity/key (last selected-levels))]
-             [:select.builder-option.builder-option-dropdown.m-t-0.m-l-5.w-80
-              {:value last-level-key
-               :on-change
-               (fn [e]
-                 (let [new-highest-level-str (.. e -target -value)
-                       new-highest-level (js/parseInt (last (s/split new-highest-level-str #"-")))]
-                   (swap! app-state
-                          update-in
-                          [:character ::entity/options :class i ::entity/options :levels]
-                          (fn [levels]
-                            (let [current-highest-level (count levels)]
-                              (cond
-                                (> new-highest-level current-highest-level)
-                                (vec (concat levels (map
-                                                     (fn [lvl] {::entity/key (keyword (str "level-" (inc lvl)))})
-                                                     (range current-highest-level new-highest-level))))
+          (let [class-template-option (some #(if (= key (::t/key %)) %) options)
+                expanded-path [:class-levels key]
+                expanded? (get-in @app-state [:expanded-paths expanded-path])]
+            ^{:key key}
+            [:div.m-b-5
+             {:class-name (if expanded? "b-1 b-rad-5 p-5")}
+             [:div.flex.align-items-c
+              [:select.builder-option.builder-option-dropdown.flex-grow-1.m-t-0
+               {:value key
+                :on-change (fn [e] (let [new-key (keyword (.. e -target -value))]
+                                     (swap! app-state
+                                            assoc-in
+                                            [:character ::entity/options :class i] {::entity/key new-key
+                                                                                    ::entity/options
+                                                                                    {:levels [{::entity/key :level-1}]}})))}
+               (doall
+                (map
+                 (fn [{:keys [::t/key ::t/name]}]
+                   ^{:key key}
+                   [:option.builder-dropdown-item
+                    {:value key}
+                    name])
+                 (filter
+                  #(and
+                    (or (= key (::t/key %))
+                        (unselected-classes-set (::t/key %)))
+                    (or (zero? i)
+                        (every? (fn [prereq] ((::t/prereq-fn prereq) built-char)) (::t/prereqs %))))
+                  options)))]
+              (if (::t/help class-template-option)
+                (show-info-button expanded? expanded-path))
+              (let [selected-levels (get-in selected-class [::entity/options :levels])
+                    levels-selection (some #(if (= :levels (::t/key %)) %) (::t/selections class-template-option))
+                    available-levels (::t/options levels-selection)
+                    last-level-key (::entity/key (last selected-levels))]
+                [:select.builder-option.builder-option-dropdown.m-t-0.m-l-5.w-80
+                 {:value last-level-key
+                  :on-change
+                  (fn [e]
+                    (let [new-highest-level-str (.. e -target -value)
+                          new-highest-level (js/parseInt (last (s/split new-highest-level-str #"-")))]
+                      (swap! app-state
+                             update-in
+                             [:character ::entity/options :class i ::entity/options :levels]
+                             (fn [levels]
+                               (let [current-highest-level (count levels)]
+                                 (cond
+                                   (> new-highest-level current-highest-level)
+                                   (vec (concat levels (map
+                                                        (fn [lvl] {::entity/key (keyword (str "level-" (inc lvl)))})
+                                                        (range current-highest-level new-highest-level))))
                                 
-                                (< new-highest-level current-highest-level)
-                                (vec (take new-highest-level levels))
+                                   (< new-highest-level current-highest-level)
+                                   (vec (take new-highest-level levels))
                                 
-                                :else levels))))))}
-              (doall
-               (map-indexed
-                (fn [i {level-key ::t/key}]
-                  ^{:key level-key}
-                  [:option.builder-dropdown-item
-                   {:value level-key}
-                   (inc i)])
-                available-levels))])
-           [:i.fa.fa-minus-circle.orange.f-s-16.m-l-5.pointer
-            {:on-click (fn [_] (swap! app-state
-                                      update-in
-                                      [:character ::entity/options :class]
-                                      (fn [classes] (vec (remove #(= key (::entity/key %)) classes)))))}]])
+                                   :else levels))))))}
+                 (doall
+                  (map-indexed
+                   (fn [i {level-key ::t/key}]
+                     ^{:key level-key}
+                     [:option.builder-dropdown-item
+                      {:value level-key}
+                      (inc i)])
+                   available-levels))])
+              [:i.fa.fa-minus-circle.orange.f-s-16.m-l-5.pointer
+               {:on-click (fn [_] (swap! app-state
+                                         update-in
+                                         [:character ::entity/options :class]
+                                         (fn [classes] (vec (remove #(= key (::entity/key %)) classes)))))}]]
+             (if expanded?
+              [:div.m-t-5.m-b-10 (::t/help class-template-option)])]))
         selected-classes))]
      (if (seq remaining-classes)
        [:div.orange.p-5.underline.pointer
@@ -1173,14 +1181,15 @@
         named-modifiers (map (fn [{:keys [::mod/name ::mod/value]}]
                                (str name " " value))
                              (filter ::mod/name (flatten modifiers)))
+        has-named-mods? (seq named-modifiers)
         modifiers-str (s/join ", " named-modifiers)]
     (if (not-any? ::t/hide-if-fail? failed-prereqs)
       (option-selector-base {:name name
                              :key key
-                             :help (if (or help (seq named-modifiers))
+                             :help (if (or help has-named-mods?)
                                      [:div
-                                      [:div.i modifiers-str]
-                                      [:div.m-t-5 help]])
+                                      (if has-named-mods? [:div.i modifiers-str])
+                                      [:div {:class-name (if has-named-mods? "m-t-5")} help]])
                              :selected? selected?
                              :selectable? selectable?
                              :option-path new-option-path
