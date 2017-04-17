@@ -3,7 +3,8 @@
             [clojure.string :as s]
             [orcpub.modifiers :as mods]
             [orcpub.entity-spec :as es]
-            [orcpub.dnd.e5.character :as char5e])
+            [orcpub.dnd.e5.character :as char5e]
+            [orcpub.dnd.e5.skills :as skill5e])
   #?(:cljs (:require-macros [orcpub.entity-spec :as es]
                             [orcpub.modifiers :as mods])))
 
@@ -29,13 +30,13 @@
   (mods/modifier ?subrace nm))
 
 (defn damage-resistance [value]
-  (mods/set-mod ?damage-resistances value))
+  (mods/set-mod ?damage-resistances value (name value) "damage resistance"))
 
 (defn damage-immunity [value]
-  (mods/set-mod ?damage-immunities value))
+  (mods/set-mod ?damage-immunities value (name value) "damage immunity"))
 
 (defn immunity [value]
-  (mods/set-mod ?immunities value))
+  (mods/set-mod ?immunities value (name value) "immunity"))
 
 (defn condition-immunity [value & [qualifier-text]]
   (mods/set-mod ?condition-immunities {:condition value
@@ -51,19 +52,19 @@
    order-number))
 
 (defn speed [value]
-  (mods/cum-sum-mod ?speed value "Speed" (mods/bonus-str value)))
+  (mods/cum-sum-mod ?speed value "speed" (mods/bonus-str value)))
 
 (defn flying-speed [value]
-  (mods/cum-sum-mod ?flying-speed value "Flying Speed" (mods/bonus-str value)))
+  (mods/cum-sum-mod ?flying-speed value "flying" (mods/bonus-str value)))
 
 (defn swimming-speed [value]
-  (mods/cum-sum-mod ?swimming-speed value "Swim Speed" (mods/bonus-str value)))
+  (mods/cum-sum-mod ?swimming-speed value "swimming" (mods/bonus-str value)))
 
 (defn climbing-speed [value]
-  (mods/cum-sum-mod ?climbing-speed value "Climb Speed" (mods/bonus-str value)))
+  (mods/cum-sum-mod ?climbing-speed value "climbing" (mods/bonus-str value)))
 
 (defn unarmored-speed-bonus [value]
-  (mods/cum-sum-mod ?unarmored-speed-bonus value "Unarmored Speed" (mods/bonus-str value)))
+  (mods/cum-sum-mod ?unarmored-speed-bonus value "unarmored speed" (mods/bonus-str value)))
 
 (defn ability [ability bonus]
   (mods/modifier ?ability-increases
@@ -182,7 +183,7 @@
   (mods/modifier ?proficiency-bonus bonus))
 
 (defn skill-proficiency [skill-kw]
-  (mods/set-mod ?skill-profs skill-kw))
+  (mods/set-mod ?skill-profs skill-kw (s/capitalize (-> skill-kw skill5e/skills-map :name)) "proficiency"))
 
 (defn max-hit-points [bonus]
   (mods/cum-sum-mod ?hit-point-level-increases bonus "HP" (mods/bonus-str bonus)))

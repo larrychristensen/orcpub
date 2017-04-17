@@ -15,7 +15,8 @@
             [orcpub.dnd.e5.armor :as armor5e]
             [orcpub.dnd.e5.spell-lists :as sl]
             [orcpub.dnd.e5.spells :as spells]
-            [orcpub.dnd.e5.magic-items :as mi])
+            [orcpub.dnd.e5.magic-items :as mi]
+            [orcpub.dnd.e5.skills :as skill5e])
   #_(:require-macros [orcpub.dnd.e5.options :as opt5e]
                      [orcpub.dnd.e5.modifiers :as mod5e]))
 
@@ -1113,7 +1114,7 @@
         {:keys [armor weapon save skill-options tool-options tool language-options]} profs
         {skill-num :choose options :options} skill-options
         {level-factor :level-factor} spellcasting
-        skill-kws (if (:any options) (map :key opt5e/skills) (keys options))
+        skill-kws (if (:any options) (map :key skill5e/skills) (keys options))
         armor-profs (keys armor)
         weapon-profs (keys weapon)
         tool-profs (keys tool)
@@ -1327,7 +1328,7 @@
   (class-options equipment-option equipment-choices "Select equipment to start your adventuring career with."))
 
 (defn class-skill-selection [{skill-num :choose options :options skill-select-order :order} key prereq-fn]
-  (let [skill-kws (if (:any options) (map :key opt5e/skills) (keys options))]
+  (let [skill-kws (if (:any options) (map :key skill5e/skills) (keys options))]
     (opt5e/skill-selection skill-kws skill-num skill-select-order key prereq-fn)))
 
 (defn class-option [{:keys [name
@@ -4461,7 +4462,7 @@ long rest."})]
         {:keys [skill skill-options tool-options tool language-options]
          armor-profs :armor weapon-profs :weapon} profs
         {skill-num :choose options :options} skill-options
-        skill-kws (if (:any options) (map :key opt5e/skills) (keys options))]
+        skill-kws (if (:any options) (map :key skill5e/skills) (keys options))]
     (t/option-cfg
      {:name name
       :key kw
@@ -5376,12 +5377,12 @@ long rest."})]
                                         (if (k ?skill-expertise)
                                           (* 2 ?prof-bonus)
                                           ?prof-bonus)
-                                        (or (?default-skill-bonus (opt5e/skill-abilities k)) 0))))
+                                        (or (?default-skill-bonus (skill5e/skill-abilities k)) 0))))
                          {}
-                         opt5e/skills)
+                         skill5e/skills)
     ?skill-bonuses (reduce-kv
                     (fn [m k v]
-                      (assoc m k (+ v (?ability-bonuses (opt5e/skill-abilities k)))))
+                      (assoc m k (+ v (?ability-bonuses (skill5e/skill-abilities k)))))
                     {}
                     ?skill-prof-bonuses)
     ?passive-perception (+ 10 (?skill-bonuses :perception))

@@ -23,6 +23,7 @@
             [orcpub.dnd.e5.magic-items :as mi5e]
             [orcpub.dnd.e5.display :as disp5e]
             [orcpub.dnd.e5.equipment :as equip5e]
+            [orcpub.dnd.e5.skills :as skill5e]
             [orcpub.pdf-spec :as pdf-spec]
 
             [clojure.spec :as spec]
@@ -30,7 +31,7 @@
 
             [reagent.core :as r]))
 
-(def print-enabled? false)
+(def print-enabled? true)
 
 (declare app-state)
 
@@ -655,7 +656,7 @@
            (fn [[skill-kw bonus]]
              (str (s/capitalize (name skill-kw)) " " (mod/bonus-str bonus)))
            (filter (fn [[k bonus]]
-                     (not= bonus (ability-bonuses (:ability (opt5e/skills-map k)))))
+                     (not= bonus (ability-bonuses (:ability (skill5e/skills-map k)))))
                    skill-bonuses)))]
        [list-item-section "Languages" "lips" languages (partial prof-name opt5e/language-map)]
        [list-item-section "Tool Proficiencies" "stone-crafting" tool-profs (partial prof-name equip5e/tools-map)]
@@ -1128,12 +1129,21 @@
                            0)
                          
                          :else 0)]
-    (- min selected-count)))
+    (cond (< selected-count min)
+          (- min selected-count)
+
+          (and max (> selected-count max))
+          (- max selected-count)
+
+          :else
+          0)))
+
 
 (defn new-option-selector [character built-char built-template option-paths option-path
                            {:keys [::t/min ::t/max ::t/options ::t/multiselect?] :as selection}
                            disable-select-new?
-                           {:keys [::t/key ::t/name ::t/path ::t/help ::t/selections ::t/prereqs ::t/select-fn ::t/ui-fn ::t/icon] :as option}]
+                           {:keys [::t/key ::t/name ::t/path ::t/help ::t/selections ::t/prereqs
+                                   ::t/modifiers ::t/select-fn ::t/ui-fn ::t/icon] :as option}]
   (let [new-option-path (conj option-path key)
         selected? (get-in option-paths new-option-path)
         failed-prereqs (reduce
@@ -1149,11 +1159,18 @@
                          (or (not disable-select-new?)
                              selected?))
         expanded? (get-in @app-state [:expanded-paths new-option-path])
-        has-selections? (seq selections)]
+        has-selections? (seq selections)
+        named-modifiers (map (fn [{:keys [::mod/name ::mod/value]}]
+                               (str name " " value))
+                             (filter ::mod/name (flatten modifiers)))
+        modifiers-str (s/join ", " named-modifiers)]
     (if (not-any? ::t/hide-if-fail? failed-prereqs)
       (option-selector-base {:name name
                              :key key
-                             :help help
+                             :help (if (or help (seq named-modifiers))
+                                     [:div
+                                      [:div.i modifiers-str]
+                                      [:div.m-t-5 help]])
                              :selected? selected?
                              :selectable? selectable?
                              :option-path new-option-path
@@ -1748,7 +1765,7 @@
                                  :icon icon
                                  :classes (if bad-selection? "b-red")
                                  :multiselect? true})))
-      opt5e/skills))))
+      skill5e/skills))))
 
 (def hit-points-headers
   [:tr.f-w-b.t-a-l
@@ -1967,6 +1984,7 @@
      (fn [i {:keys [name icon tags]}]
        (let [selections (entity/tagged-selections available-selections tags)
              combined-selections (entity/combine-selections selections)
+             _ (js/console.log "COMBINED SELECTIONS" (count combined-selections) (mapv (juxt ::t/name ::t/min ::t/max) combined-selections))
              total-remaining (sum-remaining built-template character combined-selections)]
          ^{:key name}
          [:div.p-5.hover-opacity-full.pointer

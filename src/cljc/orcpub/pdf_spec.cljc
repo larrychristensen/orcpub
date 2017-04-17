@@ -10,7 +10,8 @@
             [orcpub.dnd.e5.weapons :as weapon5e]
             [orcpub.dnd.e5.armor :as armor5e]
             [orcpub.dnd.e5.equipment :as equip5e]
-            [orcpub.dnd.e5.magic-items :as mi5e]))
+            [orcpub.dnd.e5.magic-items :as mi5e]
+            [orcpub.dnd.e5.skills :as skill5e]))
 
 (defn entity-vals [built-char kws]
   (reduce
@@ -50,7 +51,7 @@
            (assoc k (common/bonus-str (skill-bonuses k)))
            (assoc (keyword (str (name k) "-check")) (boolean (k skill-profs)))))
      {}
-     opt5e/skills)))
+     skill5e/skills)))
 
 (defn total-length [traits]
   (reduce + (map
