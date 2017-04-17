@@ -913,7 +913,16 @@
         unselected-classes (remove
                             (into #{} (map ::entity/key selected-classes))
                             (map ::t/key options))
-        unselected-classes-set (set unselected-classes)]
+        unselected-classes-set (set unselected-classes)
+        remaining-classes (filter
+                           (fn [option]
+                             (and
+                              (unselected-classes-set (::t/key option))
+                              (every?
+                               (fn [prereq]
+                                 ((::t/prereq-fn prereq) built-char))
+                               (::t/prereqs option))))
+                           options)]
     [:div
      [:div
       (doall
@@ -983,14 +992,15 @@
                                       [:character ::entity/options :class]
                                       (fn [classes] (vec (remove #(= key (::entity/key %)) classes)))))}]])
         selected-classes))]
-     [:div.orange.p-5.underline.pointer
-      [:i.fa.fa-plus-circle.orange.f-s-16]
-      [:span.m-l-5
-       {:on-click
-        (fn [_]
-          (let [first-unselected (first unselected-classes)]
-            (swap! app-state update-in [:character ::entity/options :class] conj {::entity/key first-unselected ::entity/options {:levels [{::entity/key :level-1}]}})))}
-       "Add Class"]]]))
+     (if (seq remaining-classes)
+       [:div.orange.p-5.underline.pointer
+        [:i.fa.fa-plus-circle.orange.f-s-16]
+        [:span.m-l-5
+         {:on-click
+          (fn [_]
+            (let [first-unselected (::t/key (first remaining-classes))]
+              (swap! app-state update-in [:character ::entity/options :class] conj {::entity/key first-unselected ::entity/options {:levels [{::entity/key :level-1}]}})))}
+         "Add Class"]])]))
 
 (defn checkbox [selected? disable?]
   [:i.fa.fa-check.f-s-14.bg-white.orange-shadow.m-r-10
@@ -1262,18 +1272,18 @@
       (if icon (svg-icon icon 24))
       (selection-section-title name)
       (if (and path help)
-        [show-info-button expanded? path])
-      (remaining-component max remaining)]
+        [show-info-button expanded? path])]
      (if (and help expanded?)
        [help-section help])
      (if (or (and (pos? min)
                   (nil? max))
              (= min max))
        [:div.p-5.f-s-16
-        [:div.flex.align-items-c
+        [:div.flex.align-items-c.justify-cont-s-b
          [:span.i.m-r-10 (str "select " (if (= min max)
                                           min
-                                          (str "at least " min)))]]])
+                                          (str "at least " min)))]
+         (remaining-component max remaining)]])
      body]))
 
 (defn ancestor-names-string [built-template path]
@@ -1682,6 +1692,7 @@
            :parent-title (ancestor-names-string built-template path)
            :max 1
            :min 1
+           :remaining remaining
            :body (doall
                   (map
                    (fn [option]
@@ -1984,7 +1995,6 @@
      (fn [i {:keys [name icon tags]}]
        (let [selections (entity/tagged-selections available-selections tags)
              combined-selections (entity/combine-selections selections)
-             _ (js/console.log "COMBINED SELECTIONS" (count combined-selections) (mapv (juxt ::t/name ::t/min ::t/max) combined-selections))
              total-remaining (sum-remaining built-template character combined-selections)]
          ^{:key name}
          [:div.p-5.hover-opacity-full.pointer
