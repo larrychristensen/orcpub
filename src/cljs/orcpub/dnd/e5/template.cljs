@@ -191,12 +191,12 @@
        :on-change (fn [e] (let [value (.-value (.-target e))
                                new-v (if (not (s/blank? value))
                                        (js/parseInt value))]
-                           (swap! app-state assoc-in (concat [:character] value-path) new-v)))}]]))
+                            (swap! app-state assoc-in (concat [:character] value-path) new-v)))}]]))
 
-(defn traits-modifiers [traits & [include-level? source]]
+(defn traits-modifiers [traits & [class-key source]]
   (map
    (fn [trait]
-     (mod5e/trait-cfg (if source (assoc trait :source source) trait)))
+     (mod5e/trait-cfg (assoc trait :source source :class-key class-key)))
    traits))
 
 (defn armor-prof-modifiers [armor-proficiencies & [cls-kw]]
@@ -248,7 +248,7 @@
      (fn [[k v]]
        (mod5e/subrace-ability k v))
      abilities)
-    (traits-modifiers traits false source)))]
+    (traits-modifiers traits nil source)))]
     option))
 
 (defn ability-modifiers [abilities]
@@ -310,7 +310,7 @@
                    (mod5e/race-ability k v))
                  abilities)
                 modifiers
-                (traits-modifiers traits false source)
+                (traits-modifiers traits nil source)
                 (armor-prof-modifiers armor-proficiencies)
                 (weapon-prof-modifiers weapon-proficiencies))}))
 
@@ -1173,7 +1173,7 @@
       (armor-prof-modifiers armor-profs)
       (weapon-prof-modifiers weapon-profs)
       (tool-prof-modifiers tool-profs)
-      (traits-modifiers traits true)
+      (traits-modifiers traits (:key cls))
       (if level-factor [(mod5e/spell-slot-factor (:key cls) level-factor)])))))
 
 (defn first-class? [class-kw]
@@ -1239,7 +1239,8 @@
                    (filter
                     (fn [{level :level :or {level 1}}]
                       (= level i))
-                    traits))
+                    traits)
+                   kw)
                   (if (and (not plugin?)
                            (= i 1)) [(assoc
                                       (mod5e/max-hit-points hit-die)
@@ -2574,10 +2575,12 @@
                   :traits [{:name "Know Your Enemy"
                             :level 7
                             :page 73
+                            :class-key :fighter
                             :summary "Study a creature outside combat for 1 min. to learn if it is superior, inferior, or equal in STR, DEX, CON, AC, current HP, total levels, fighter levels"}
                            {:name "Relentless"
                             :level 15
                             :page 74
+                            :class-key :fighter
                             :summary "you regain 1 superiority die when you roll iniative and have no remaining superiority dice"}]}
                  eldritch-knight-cfg]}))
 
@@ -3197,6 +3200,7 @@
                                                :modifiers [(mod5e/reaction
                                                             {:name "Giant Killer"
                                                              :page 93
+                                                             :frequency {:units :turn}
                                                              :summary "attack a Large or larger creature within 5 ft that misses an attack against you"})]})
                                              (t/option-cfg
                                               {:name "Horde Breaker"
@@ -3209,13 +3213,15 @@
                                             "Defensive Tactics"
                                             [(t/option-cfg
                                               {:name "Escape the Horde"
-                                               :modifiers [(mod5e/trait
+                                               :modifiers [(mod5e/trait-cfg
                                                             {:name "Escape the Horde"
+                                                             :frequency {:units :turn}
                                                              :page 93})]})
                                              (t/option-cfg
                                               {:name "Multiattack Defense"
-                                               :modifiers [(mod5e/trait
+                                               :modifiers [(mod5e/trait-cfg
                                                             {:name "Multiattack Defense"
+                                                             :frequency {:units :turn}
                                                              :page 93})]})
                                              (t/option-cfg
                                               {:name "Steel Will"
@@ -3268,8 +3274,7 @@
                                             :page 93
                                             :level 7
                                             :summary "when your companion doesn't attack, you can command it to take the Dash, Disengage, Dodge, or Help action"})]}}
-                  :traits [
-                           {:name "Bestial Fury"
+                  :traits [{:name "Bestial Fury"
                             :level 11
                             :page 93
                             :summary "your companion attacks twice when it takes the Attack action"}
@@ -3456,6 +3461,7 @@
       :modifiers [(mod5e/dependent-trait
                    {:name "Careful Spell"
                     :page 102
+                    :class-key :sorcerer
                     :summary (str "When you cast a spell that requires a save, spend 1 sorcery pt. to allow up to " (?ability-bonuses :cha) " creatures to automatically succeed")})]})
     (t/option-cfg
      {:name "Distant Spell"
@@ -4762,12 +4768,14 @@ long rest."})]
                                            {:name "Rallying Cry"
                                             :page 128
                                             :source :scag
+                                            :class-key :fighter
                                             :summary (str "When you Second Wind, choose up to 3 allies to regain " (?class-level :fighter) " HPs")})]}
                            7 {:modifiers [(mod5e/skill-expertise :persuasion)]
                               :selections [(opt5e/skill-selection [:persuasion :animal-handling :insight :intimidation :performance] 1)]}
                            10 {:modifiers [(mod5e/dependent-trait
                                             {:name "Inspiring Surge"
                                              :page 128
+                                             :class-key :fighter
                                              :source :scag
                                              :range {:unit :feet
                                                      :amount 60}
@@ -4779,6 +4787,7 @@ long rest."})]
                            15 {:modifiers [(mod5e/trait-cfg
                                             {:page 128
                                              :source :scag
+                                             :class-key :fighter
                                              :name "Bulwark"
                                              :summary "When you use Indomitable, extend the benefit to 1 ally"})]}}}]}
    {:name "Monk"

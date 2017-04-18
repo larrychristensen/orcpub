@@ -157,27 +157,37 @@
 (defn spell-slot-factor [class-key factor]
   (mods/map-mod ?spell-slot-factors class-key factor))
 
-(defn trait-cfg [{:keys [name description level summary page conditions] :as cfg}]
-  (mods/modifier ?traits
-                 (if (or (nil? level) (>= ?total-levels level))
-                   (conj
-                    ?traits
-                    cfg)
-                   ?traits)))
+(defn trait-cfg [{:keys [name description class-key level summary page conditions] :as cfg}]
+  (let [class-key? (not (nil? class-key))]
+    (mods/modifier ?traits
+                   (if (or (nil? level)
+                           (>= (if class-key?
+                                 (?class-level class-key)
+                                 ?total-levels)
+                               level))
+                     (conj
+                      ?traits
+                      cfg)
+                     ?traits))))
+
 
 (defn trait [name & [description level summary conditions]]
   (trait-cfg {:name name :description description :level level :summary summary :conditions conditions}))
 
-(defmacro dependent-trait [{:keys [level conditions] :or {level 1} :as t}]
-  `(mods/modifier ~'?traits
-                  (if (or (nil? ~level) (>= ~'?total-levels ~level))
-                    (conj
-                     ~'?traits
-                     ~t)
-                    ~'?traits)
-                  nil
-                  nil
-                  ~conditions))
+(defmacro dependent-trait [{:keys [level conditions class-key] :or {level 1} :as t}]
+  (let [class-key? (not (nil? class-key))]
+    `(mods/modifier ~'?traits
+                    (if (or (nil? ~level) (>= (if ~class-key?
+                                                (~'?class-level ~class-key)
+                                                ~'?total-levels)
+                                              ~level))
+                      (conj
+                       ~'?traits
+                       ~t)
+                      ~'?traits)
+                    nil
+                    nil
+                    ~conditions)))
 
 (defn proficiency-bonus [bonus]
   (mods/modifier ?proficiency-bonus bonus))
