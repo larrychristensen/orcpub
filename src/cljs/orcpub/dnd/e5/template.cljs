@@ -322,6 +322,26 @@
    :summary "Disadvantage on attack and perception rolls in direct sunlight"
    :page 24})
 
+(def mask-of-the-wild-mod
+  (mod5e/trait-cfg
+   {:name "Mask of the Wild"
+    :page 24
+    :summary "Hide when lightly obscured by natural phenomena."}))
+
+(def high-elf-cantrip-selection
+  (opt5e/spell-selection
+   {:class-key :wizard
+    :level 0
+    :exclude-ref? true
+    :spellcasting-ability :int
+    :class-name "High Elf"
+    :num 1}))
+
+(def drow-magic-mods
+  [(mod5e/spells-known 0 :dancing-lights :cha "Dark Elf")
+   (mod5e/spells-known 1 :faerie-fire :cha "Dark Elf" 3)
+   (mod5e/spells-known 2 :darkness :cha "Dark Elf" 5)])
+
 (def elf-option-cfg
   {:name "Elf"
    :help "Elves are graceful, magical creatures, with a slight build."
@@ -335,29 +355,18 @@
    :subraces
    [{:name "High Elf"
      :abilities {:int 1}
-     :selections [(opt5e/spell-selection
-                   {:class-key :wizard
-                    :level 0
-                    :exclude-ref? true
-                    :spellcasting-ability :int
-                    :class-name "High Elf"
-                    :num 1})
+     :selections [high-elf-cantrip-selection
                   (opt5e/language-selection opt5e/languages 1)]
      :modifiers [elf-weapon-training-mods]}
     {:name "Wood Elf"
      :abilities {:cha 1}
-     :traits [{:name "Mask of the Wild"
-               :page 24
-               :summary "Hide when lightly obscured by natural phenomena."}]
      :modifiers [(mod5e/speed 5)
+                 mask-of-the-wild-mod
                  elf-weapon-training-mods]}
     {:name "Dark Elf (Drow)"
      :abilities {:cha 1}
      :traits [(sunlight-sensitivity 24)]
-     :modifiers [(mod5e/darkvision 120)
-                 (mod5e/spells-known 0 :dancing-lights :cha "Dark Elf")
-                 (mod5e/spells-known 1 :faerie-fire :cha "Dark Elf" 3)
-                 (mod5e/spells-known 2 :darkness :cha "Dark Elf" 5)]}]
+     :modifiers (conj drow-magic-mods (mod5e/darkvision 120))}]
    :traits [{:name "Fey Ancestry"
              :page 23
              :summary "advantage on charmed saves and immune to sleep magic"}
@@ -5108,11 +5117,84 @@ long rest."})]
                 genasi-option-cfg
                 goliath-option-cfg])})])
 
+(def keen-senses-option
+  (t/option-cfg
+   {:name "Keen Senses"
+    :modifiers [(mod5e/skill-proficiency :perception)]}))
+
+(defn elf-parentage-option [name trait-options]
+  (t/option-cfg
+   {:name name
+    :selections [(t/selection-cfg
+                  {:name "Elf Trait"
+                   :tags #{:race}
+                   :order 3
+                   :options trait-options})]}))
+
+(def elf-weapon-training-option
+  (t/option-cfg
+   {:name "Elf Weapon Training"
+    :modifiers elf-weapon-training-mods}))
+
+(defn high-elf-parentage-option [name]
+  (elf-parentage-option name
+                        [keen-senses-option
+                         elf-weapon-training-option
+                         (t/option-cfg
+                          {:name "High Elf Cantrip"
+                           :selections [high-elf-cantrip-selection]})]))
+
+(def scag-half-elf-option-cfg
+  {:name "Half-Elf"
+   :selections [(t/selection-cfg
+                 {:name "Half-Elf Variant"
+                  :tags #{:race}
+                  :order 1
+                  :options [(t/option-cfg
+                             {:name "Standard"
+                              :help [:div "This is the standard half-elf presented in the Player's Handbook"]})
+                            (t/option-cfg
+                             {:name "Sword Coast Variant"
+                              :help "The half-elf variants presented in the Sword Coast Adventurer's Guide"
+                              :selections [(opt5e/skill-selection -2)
+                                           (t/selection-cfg
+                                            {:name "Elf Parentage"
+                                             :tags #{:race}
+                                             :order 2
+                                             :options [(elf-parentage-option
+                                                        "Wood Elf"
+                                                        [keen-senses-option
+                                                         elf-weapon-training-option
+                                                         (t/option-cfg
+                                                          {:name "Fleet of Foot"
+                                                           :modifiers [(mod5e/speed 5)]})
+                                                         (t/option-cfg
+                                                          {:name "Mask of the Wild"
+                                                           :modifiers [mask-of-the-wild-mod]})])
+                                                       (high-elf-parentage-option "Moon Elf")
+                                                       (high-elf-parentage-option "Sun Elf")
+                                                       (elf-parentage-option
+                                                        "Drow"
+                                                        [keen-senses-option
+                                                         (t/option-cfg
+                                                          {:name "Drow Magic"
+                                                           :modifiers drow-magic-mods})])
+                                                       (elf-parentage-option
+                                                        "Aquatic Elf"
+                                                        [keen-senses-option
+                                                         (t/option-cfg
+                                                          {:name "Swimming Speed"
+                                                           :modifiers [(mod5e/swimming-speed 30)]})])]})]})]})]})
+
 (defn sword-coast-adventurers-guide-selections [app-state]
   [(background-selection
     {:options (map
                background-option
                sword-coast-adventurers-guide-backgrounds)})
+   (race-selection
+    {:options (map
+               race-option
+               [scag-half-elf-option-cfg])})
    (class-selection
     {:options (map
                (fn [cfg] (class-option (assoc cfg :plugin? true)))

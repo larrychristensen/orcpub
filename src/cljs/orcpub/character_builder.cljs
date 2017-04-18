@@ -31,7 +31,7 @@
 
             [reagent.core :as r]))
 
-(def print-enabled? false)
+(def print-enabled? true)
 
 (declare app-state)
 
@@ -423,10 +423,13 @@
           [:div
            [:span
             [:span speed]
-            [:span.display-section-qualifier-text "(armored)"]]]))]
-     (let [swim-speed (char5e/base-swimming-speed built-char)]
-       (if swim-speed
-         [:div [:span swim-speed] [:span.display-section-qualifier-text "(swim)"]]))]))
+            [:span.display-section-qualifier-text "(armored)"]]]))
+      (let [swim-speed (char5e/base-swimming-speed built-char)]
+        (if swim-speed
+          [:div [:span swim-speed] [:span.display-section-qualifier-text "(swim)"]]))
+      (let [flying-speed (char5e/base-flying-speed built-char)]
+        (if flying-speed
+          [:div [:span flying-speed] [:span.display-section-qualifier-text "(fly)"]]))]]))
 
 (defn list-item-section [list-name icon-name items & [name-fn]]
   [list-display-section list-name icon-name

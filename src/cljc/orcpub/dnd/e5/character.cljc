@@ -77,6 +77,9 @@
 (defn base-swimming-speed [built-char]
   (es/entity-val built-char :swimming-speed))
 
+(defn base-flying-speed [built-char]
+  (es/entity-val built-char :flying-speed))
+
 (defn land-speed-with-armor [built-char]
   (es/entity-val built-char :speed-with-armor))
 
