@@ -139,6 +139,12 @@
     nil
     ~conditions))
 
+(defn spell-data [spell-key spellcasting-ability qualifier class]
+  {:key spell-key
+   :ability spellcasting-ability
+   :qualifier qualifier
+   :class class})
+
 (defn spells-known [level spell-key spellcasting-ability class & [min-level qualifier]]
   (mods/modifier
     ?spells-known
@@ -148,10 +154,11 @@
        ?spells-known
        level
        conj
-       {:key spell-key
-        :ability spellcasting-ability
-        :qualifier qualifier
-        :class class})
+       (spell-data
+        spell-key
+        spellcasting-ability
+        qualifier
+        class))
       ?spells-known)))
 
 (defn spell-slot-factor [class-key factor]

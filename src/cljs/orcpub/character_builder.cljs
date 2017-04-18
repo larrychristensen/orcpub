@@ -475,7 +475,9 @@
               (fn [{k :key}]
                 (spells/spell-map k))
               spells))))]])
-      spells-known))]])
+      (filter
+       (comp seq second)
+       spells-known)))]])
 
 (defn equipment-section [title icon-name equipment equipment-map]
   [list-display-section title icon-name

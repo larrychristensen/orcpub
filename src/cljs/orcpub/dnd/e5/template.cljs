@@ -5186,6 +5186,67 @@ long rest."})]
                                                           {:name "Swimming Speed"
                                                            :modifiers [(mod5e/swimming-speed 30)]})])]})]})]})]})
 
+(defn tiefling-spell-removal-modifier [level spell-key]
+  (mod/modifier ?spells-known
+                (update
+                 ?spells-known
+                 level
+                 #(remove (fn [s] (= spell-key (:key s))) %))))
+
+(def scag-tiefling-option-cfg
+  {:name "Tiefling"
+   :selections [(t/selection-cfg
+                 {:name "Tiefling Variant"
+                  :tags #{:race}
+                  :order 1
+                  :options [(t/option-cfg
+                             {:name "Standard"
+                              :help [:div "This is the standard tiefling presented in the Player's Handbook"]})
+                            (t/option-cfg
+                             {:name "Sword Coast Variant"
+                              :help "The tiefling variants presented in the Sword Coast Adventurer's Guide"
+                              :selections [(t/selection-cfg
+                                            {:name "Ability Scores"
+                                             :tags #{:race}
+                                             :order 2
+                                             :options [(t/option-cfg
+                                                        {:name "Standard"
+                                                         :help "The 'Ability Score Increase' trait from the Player's Handbook"})
+                                                       (t/option-cfg
+                                                        {:name "Feral"
+                                                         :help "The ability increases from the Sword Coast Adventurer's Guide"
+                                                         :modifiers [(mod5e/race-ability :dex 2)
+                                                                     (mod5e/race-ability :cha -2)]})]})
+                                           (t/selection-cfg
+                                            {:name "Variant Features"
+                                             :tags #{:race}
+                                             :order 3
+                                             :options [(t/option-cfg
+                                                        {:name "None"
+                                                         :help "Keep the other standard tiefling traits"})
+                                                       (t/option-cfg
+                                                        {:name "Devil's Tongue"
+                                                         :modifiers [(mod5e/spells-known 0 :vicious-mockery :cha "Tiefling")
+                                                                     (mod5e/spells-known 1 :charm-person :cha "Tiefling" 3)
+                                                                     (mod5e/spells-known 2 :enthrall :cha "Tiefling" 5)
+                                                                     (tiefling-spell-removal-modifier 0 :thaumaturgy)
+                                                                     (tiefling-spell-removal-modifier 1 :hellish-rebuke)
+                                                                     (tiefling-spell-removal-modifier 2 :darkness)]})
+                                                       (t/option-cfg
+                                                        {:name "Hellfire"
+                                                         :modifiers [(mod5e/spells-known 1 :burning-hands :cha "Tiefling" 3)
+                                                                     (tiefling-spell-removal-modifier 1 :hellish-rebuke)]})
+                                                       (t/option-cfg
+                                                        {:name "Winged"
+                                                         :modifiers [(mod5e/flying-speed 30)
+                                                                     (tiefling-spell-removal-modifier 0 :thaumaturgy)
+                                                                     (tiefling-spell-removal-modifier 1 :hellish-rebuke)
+                                                                     (tiefling-spell-removal-modifier 2 :darkness)]})]})]})]})]
+   :modifiers [(mod5e/spells-known 0 :thaumaturgy :cha "Tiefling")
+               (mod5e/spells-known 1 :hellish-rebuke :cha "Tiefling" 3)
+               (mod5e/spells-known 2 :darkness :cha "Tiefling" 5)]})
+
+
 (defn sword-coast-adventurers-guide-selections [app-state]
   [(background-selection
     {:options (map
@@ -5194,7 +5255,8 @@ long rest."})]
    (race-selection
     {:options (map
                race-option
-               [scag-half-elf-option-cfg])})
+               [scag-half-elf-option-cfg
+                scag-tiefling-option-cfg])})
    (class-selection
     {:options (map
                (fn [cfg] (class-option (assoc cfg :plugin? true)))
