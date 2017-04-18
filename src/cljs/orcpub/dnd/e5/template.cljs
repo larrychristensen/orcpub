@@ -3284,7 +3284,7 @@
   (class-option
    {:name "Rogue",
     :hit-die 8
-    :ability-increase-levels [4 8 12 16 19]
+    :ability-increase-levels [4 8 10 12 16 19]
     :expertise true
     :profs {:armor {:light false}
             :weapon {:simple true :crossbow-hand true :longsword true :rapier true :shortsword true}
@@ -3316,7 +3316,8 @@
                               :frequency {:units :turn}
                               :summary "Dash, Disengage or Hide"
 })]}
-             5 {:modifiers [(uncanny-dodge-modifier 96)]}}
+             5 {:modifiers [(uncanny-dodge-modifier 96)]}
+             15 {:modifiers [(mod5e/saving-throws nil :wis)]}}
     :selections [(t/selection
                   "Additional Weapon"
                   [(t/option
@@ -5458,6 +5459,7 @@ long rest."})]
     ?damage-immunities #{}
     ?damage-resistances #{}
     ?saving-throw-advantage []
+    ?saving-throws #{}
     ?spells-known {}}))
 
 
