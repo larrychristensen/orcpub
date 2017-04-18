@@ -4,7 +4,7 @@
             [io.pedestal.test :as test]
             [io.pedestal.interceptor.error :as error-int]
             [clojure.java.io :as io]
-            [orcpub.dnd.e5.options :as opt5e]
+            [orcpub.dnd.e5.skills :as skill5e]
             [orcpub.dnd.e5.character :as char5e])
   (:import [org.apache.pdfbox.pdmodel.interactive.form PDCheckBox PDComboBox PDListBox PDRadioButton PDTextField]
            [org.apache.pdfbox.pdmodel PDDocument]
@@ -119,7 +119,7 @@
 
 (def font-sizes
   (merge
-   (zipmap (map :key opt5e/skills) (repeat 8))
+   (zipmap (map :key skill5e/skills) (repeat 8))
    (zipmap (map (fn [k] (keyword (str (name k) "-save"))) char5e/ability-keys) (repeat 8))
    {:features-and-traits 8
     :features-and-traits-2 8

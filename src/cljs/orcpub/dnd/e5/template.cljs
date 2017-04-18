@@ -3637,7 +3637,7 @@
     :spellcasting {:level-factor 1
                    :cantrips-known {1 3 4 1 10 1}
                    :known-mode :acquire
-                   :spells-known (zipmap (range 1 21) (repeat 2))
+                   :spells-known (zipmap (range 1 21) (cons 6 (repeat 2)))
                    :ability :int}
     :spellcaster true
     :multiclass-prereqs [(opt5e/ability-prereq :int 13)]
