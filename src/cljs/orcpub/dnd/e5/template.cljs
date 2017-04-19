@@ -1100,8 +1100,11 @@
                    (some-> spellcasting-template :selections (get i)))
       :modifiers (some-> levels (get i) :modifiers)})))
 
-(defn total-levels-prereq [level]
-  (fn [c] (>= (es/entity-val c :total-levels) level)))
+(defn total-levels-prereq [level & [class-key]]
+  (fn [c] (>= (if class-key
+                ((es/entity-val c :class-level) class-key)
+                (es/entity-val c :total-levels))
+              level)))
 
 (defn add-level-prereq [template-obj level]
   (assoc
@@ -1148,7 +1151,7 @@
                                (assoc
                                 selection
                                 ::t/prereq-fn
-                                (total-levels-prereq lvl)))
+                                (total-levels-prereq lvl (:key cls))))
                              selections))
                           levels)
         level-modifiers (mapcat
@@ -1159,7 +1162,7 @@
                                modifier
                                ::mod/conditions
                                conj
-                               (total-levels-prereq lvl)))
+                               (total-levels-prereq lvl (:key cls))))
                             modifiers))
                          levels)]
     (t/option
@@ -1485,22 +1488,22 @@
                                  nil
                                  [(= :barbarian (first ?unarmored-defense))])
                 (mod5e/bonus-action
-                 (let [barbarian-level (class-level ?levels :barbarian)
-                       attack-bonus (condp <= barbarian-level
-                                      16 4
-                                      9 3
-                                      2)]
-                   {:name "Rage"
-                    :page 48
-                    :duration {:units :minute}
-                    :frequency {:units :rest
-                                :amount (condp <= barbarian-level
-                                          17 6
-                                          12 5
-                                          6 4
-                                          3 3
-                                          2)}
-                    :summary (str "Advantage on Strength checks and saves; melee damage bonus " (common/bonus-str attack-bonus) "; resistance to bludgeoning, piercing, and slashing damage")}))]
+                 {:name "Rage"
+                  :page 48
+                  :duration {:units :minute}
+                  :frequency {:units :rest
+                              :amount (condp <= (?class-level ?levels :barbarian)
+                                        17 6
+                                        12 5
+                                        6 4
+                                        3 3
+                                        2)}
+                  :summary (str "Advantage on Strength checks and saves; melee damage bonus "
+                                (common/bonus-str (condp <= (?class-level ?levels :barbarian)
+                                                    16 4
+                                                    9 3
+                                                    2))
+                                "; resistance to bludgeoning, piercing, and slashing damage")})]
     :levels {5 {:modifiers [(mod5e/extra-attack)
                             (mod/modifier ?speed-with-armor (fn [armor] (if (not= :heavy (:type armor))
                                                                             (+ 10 ?speed)
@@ -1769,7 +1772,7 @@
       (mod5e/skill-expertise skill-kw)])))
 
 (defn cleric-spell [spell-level spell-key min-level]
-  (mod5e/spells-known spell-level spell-key :wis "Cleric" min-level))
+  (mod5e/spells-known spell-level spell-key :wis "Cleric" min-level nil :cleric))
 
 (defn potent-spellcasting [page]
   (mod5e/dependent-trait
@@ -1859,6 +1862,7 @@
                                                 14 3
                                                 17 4}))
                                             " or less creatures who fail turn save.")})]}
+             
              10 {:modifiers [(mod5e/dependent-trait
                               {:name "Divine Intervention"
                                :page 59
@@ -1954,6 +1958,7 @@
                                             :amount (max 1 (?ability-bonuses :wis))}})]
                   :levels {2 {:modifiers [(mod5e/action
                                            {:level 2
+                                            :class-key :cleric
                                             :name "Channel Divinity: Radiance of the Dawn"
                                             :page 61
                                             :range {:plural :feet
@@ -2117,7 +2122,7 @@
                             :summary "from non-magical weapons, resistance to slashing, bludgeoning, and piercing damage"}]}]}))
 
 (defn druid-spell [spell-level spell-key min-level]
-  (mod5e/spells-known spell-level spell-key :wis "Druid" min-level))
+  (mod5e/spells-known spell-level spell-key :wis "Druid" min-level nil :druid))
 
 (defn lands-stride [level]
   {:name "Land's Stride"
@@ -2647,7 +2652,7 @@
                              {:name "Ki"
                               :page 78
                               :level 2
-                              :summary (str "You have " ?total-levels " ki points")})
+                              :summary (str "You have " (?class-level :monk) " ki points")})
                             (mod5e/bonus-action
                              {:name "Flurry of Blows"
                               :page 78
@@ -2799,7 +2804,7 @@
                             :level 17}]}]}))
 
 (defn paladin-spell [spell-level key min-level]
-  (mod5e/spells-known spell-level key :wis "Paladin" min-level))
+  (mod5e/spells-known spell-level key :wis "Paladin" min-level nil :paladin))
 
 (def paladin-option
   (class-option
@@ -3333,6 +3338,10 @@
                               :summary "Dash, Disengage or Hide"
 })]}
              5 {:modifiers [(uncanny-dodge-modifier 96)]}
+             6 {:selections [(assoc
+                              opt5e/rogue-expertise-selection
+                              ::t/order
+                              1)]}
              15 {:modifiers [(mod5e/saving-throws nil :wis)]}}
     :selections [(t/selection
                   "Additional Weapon"

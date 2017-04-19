@@ -1810,7 +1810,7 @@
 (defn hit-points-entry [character selections built-char built-template]
   (let [classes (es/entity-val built-char :classes)
         levels (es/entity-val built-char :levels)
-        first-class (levels (first classes))
+        first-class (if levels (levels (first classes)))
         first-class-hit-die (:hit-die first-class)
         level-bonus (es/entity-val built-char :hit-point-level-bonus)
         con-bonus (:con (es/entity-val built-char :ability-bonuses))
@@ -1818,17 +1818,17 @@
         misc-bonus (- level-bonus con-bonus)
         misc-bonus-str (common/bonus-str misc-bonus)
         all-level-values (map
-                      (fn [selection]
-                        (let [name-level (hp-selection-name-level selection)
-                              value (get-in character (entity/get-option-value-path built-template character (::entity/path selection)))]
-                          {:name (str (:name name-level) (:level name-level))
-                           :level (:level name-level)
-                           :class (:key name-level)
-                           :class-name (:name name-level)
-                           :value value
-                           :path (::entity/path selection)}))
-                      (sort-by (fn [s] ((juxt :name :level)
-                                        (hp-selection-name-level s))) selections))
+                          (fn [selection]
+                            (let [name-level (hp-selection-name-level selection)
+                                  value (get-in character (entity/get-option-value-path built-template character (::entity/path selection)))]
+                              {:name (str (:name name-level) (:level name-level))
+                               :level (:level name-level)
+                               :class (:key name-level)
+                               :class-name (:name name-level)
+                               :value value
+                               :path (::entity/path selection)}))
+                          (sort-by (fn [s] ((juxt :name :level)
+                                            (hp-selection-name-level s))) selections))
         total-base-hps (apply + (:hit-die first-class) (map :value all-level-values))
         total-con-bonus (* con-bonus (inc (count selections)))
         total-misc-bonus (* misc-bonus (inc (count selections)))
@@ -1838,27 +1838,28 @@
      [:div.flex.align-items-c.justify-cont-s-b
       [:div.f-s-16.m-b-5
        [:span.f-w-b "Total:"]
-       [:span.m-l-5 (if (seq selections)
-                      [:input.input.w-70.b-3.f-w-b.f-s-16
-                       {:type :number
-                        :value (+ total-con-bonus total-misc-bonus total-base-hps)
-                        :on-change (fn [e]
-                                     (let [value (js/parseInt (.. e -target -value))
-                                           total-value (if (js/isNaN value) 0 (- value first-class-hit-die total-level-bonus))
-                                           average-value (int (/ total-value (count selections)))
-                                           remainder (rem total-value (count selections))
-                                           first-selection (first selections)]
-                                       (doseq [selection selections]
-                                         (let [entity-path (entity/get-entity-path built-template character (::entity/path selection))
-                                               full-path (concat [:character] entity-path)]                                         
-                                           (swap! app-state
-                                                  assoc-in
-                                                  full-path
-                                                  {::entity/key :manual-entry
-                                                   ::entity/value (if (= first-selection selection)
-                                                                    (+ average-value remainder)
-                                                                    average-value)})))))}]
-                      total-base-hps)]]
+       [:span.m-l-5
+        (if (seq selections)
+          [:input.input.w-70.b-3.f-w-b.f-s-16
+           {:type :number
+            :value (+ total-con-bonus total-misc-bonus total-base-hps)
+            :on-change (fn [e]
+                         (let [value (js/parseInt (.. e -target -value))
+                               total-value (if (js/isNaN value) 0 (- value first-class-hit-die total-level-bonus))
+                               average-value (int (/ total-value (count selections)))
+                               remainder (rem total-value (count selections))
+                               first-selection (first selections)]
+                           (doseq [selection selections]
+                             (let [entity-path (entity/get-entity-path built-template character (::entity/path selection))
+                                   full-path (concat [:character] entity-path)]                                         
+                               (swap! app-state
+                                      assoc-in
+                                      full-path
+                                      {::entity/key :manual-entry
+                                       ::entity/value (if (= first-selection selection)
+                                                        (+ average-value remainder)
+                                                        average-value)})))))}]
+          total-base-hps)]]
       [:button.form-button.p-10
        {:on-click (fn [_]
                     (doseq [selection selections]
@@ -1956,12 +1957,13 @@
 
 (defn hit-points-editor [character built-char built-template option-paths selections]
   (let [num-selections (count selections)]
-    (selection-section-base
-     {:name "Hit Points"
-      :min num-selections
-      :max num-selections
-      :remaining (sum-remaining built-template character selections) 
-      :body (hit-points-entry character selections built-char built-template)})))
+    (if (es/entity-val built-char :levels)
+      (selection-section-base
+       {:name "Hit Points"
+        :min num-selections
+        :max num-selections
+        :remaining (sum-remaining built-template character selections) 
+        :body (hit-points-entry character selections built-char built-template)}))))
 
 (def pages
   [{:name "Race"

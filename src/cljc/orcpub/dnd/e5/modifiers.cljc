@@ -124,11 +124,17 @@
                                                           :class-level level
                                                           :hit-die hit-die})))
 
-(defmacro spells-known-cfg [level spell-cfg min-level conditions]
+(defn enough-levels? [class-key total-levels class-level level]
+  (or (nil? level)
+      (>= (if class-key
+            (class-level class-key)
+            total-levels)
+          level)))
+
+(defmacro spells-known-cfg [level {class-key :class-key :as spell-cfg} min-level conditions]
   `(mods/modifier
     ~'?spells-known
-    (if (or (nil? ~min-level)
-            (>= ~'?total-levels ~min-level))
+    (if (enough-levels? ~class-key ~'?total-levels ~'?class-level ~min-level)
       (update
        ~'?spells-known
        ~level
@@ -145,11 +151,10 @@
    :qualifier qualifier
    :class class})
 
-(defn spells-known [level spell-key spellcasting-ability class & [min-level qualifier]]
+(defn spells-known [level spell-key spellcasting-ability class & [min-level qualifier class-key]]
   (mods/modifier
     ?spells-known
-    (if (or (nil? min-level)
-            (>= ?total-levels min-level))
+    (if (enough-levels? class-key ?total-levels ?class-level min-level)
       (update
        ?spells-known
        level
@@ -177,24 +182,38 @@
                       cfg)
                      ?traits))))
 
-
 (defn trait [name & [description level summary conditions]]
   (trait-cfg {:name name :description description :level level :summary summary :conditions conditions}))
 
-(defmacro dependent-trait [{:keys [level conditions class-key] :or {level 1} :as t}]
-  (let [class-key? (not (nil? class-key))]
-    `(mods/modifier ~'?traits
-                    (if (or (nil? ~level) (>= (if ~class-key?
-                                                (~'?class-level ~class-key)
-                                                ~'?total-levels)
-                                              ~level))
-                      (conj
-                       ~'?traits
-                       ~t)
-                      ~'?traits)
-                    nil
-                    nil
-                    ~conditions)))
+(defmacro prop-trait [prop {:keys [level conditions class-key] :or {level 1} :as t}]
+  (let [all-conditions (conj conditions `(enough-levels? ~class-key ~'?total-levels ~'?class-level ~level))]
+    `(mods/modifier
+      ~prop
+      (conj ~prop ~t)
+      nil
+      nil
+      ~all-conditions)))
+
+(defmacro dependent-trait [t]
+  `(prop-trait ~'?traits ~t))
+
+#_(prop-trait
+ ?traits
+ {:name "Juancho"
+  :level 2
+  :class-key :fighter
+  :summary (str "X " ?total-levels)})
+
+(defmacro dependent-trait-2 [{:keys [level conditions class-key] :or {level 1} :as t}]
+  `(mods/modifier ~'?traits
+                  (if (enough-levels? ~class-key ~'?total-levels ~'?class-level ~level)
+                    (conj
+                     ~'?traits
+                     ~t)
+                    ~'?traits)
+                  nil
+                  nil
+                  ~conditions))
 
 (defn proficiency-bonus [bonus]
   (mods/modifier ?proficiency-bonus bonus))
@@ -356,14 +375,10 @@
                    ~action)))
 
 (defmacro bonus-action [action]
-  `(mods/modifier ~'?bonus-actions
-                  (conj
-                   ~'?bonus-actions
-                   ~action)))
+  `(prop-trait ~'?bonus-actions ~action))
 
 (defmacro reaction [action]
-  `(mods/vec-mod ~'?reactions
-                  ~action))
+  `(prop-trait ~'?reactions ~action))
 
 (defmacro level-val [level mappings]
   (let [flat-mappings (conj (vec (apply concat (sort-by first > (dissoc mappings :default)))) (:default mappings))]
