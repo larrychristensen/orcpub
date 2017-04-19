@@ -8,6 +8,13 @@
   #?(:cljs (:require-macros [orcpub.entity-spec :as es]
                             [orcpub.modifiers :as mods])))
 
+(defn al-illegal [reason]
+  (mods/set-mod ?al-illegal-reasons reason))
+
+(defn used-resource [resource option-name]
+  (mods/set-mod ?used-resources {:resource-key resource
+                                 :option-name option-name}))
+
 (defn cls [cls-key]
   (mods/modifier ?classes
                  (if (not ((set ?classes) cls-key))
@@ -55,7 +62,7 @@
   (mods/cum-sum-mod ?speed value "speed" (mods/bonus-str value)))
 
 (defn flying-speed [value]
-  (mods/cum-sum-mod ?flying-speed value "flying" (mods/bonus-str value)))
+  [(mods/cum-sum-mod ?flying-speed value "flying" (mods/bonus-str value))])
 
 (defn swimming-speed [value]
   (mods/cum-sum-mod ?swimming-speed value "swimming" (mods/bonus-str value)))

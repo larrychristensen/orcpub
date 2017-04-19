@@ -31,7 +31,7 @@
 
             [reagent.core :as r]))
 
-(def print-enabled? false)
+(def print-enabled? true)
 
 (declare app-state)
 
@@ -1877,7 +1877,7 @@
                         (swap! app-state
                                assoc-in
                                (concat [:character] (entity/get-entity-path built-template character path))
-                               {::entity/key :manual-entry
+                               {::entity/key :average
                                 ::entity/value (dice/die-mean (-> levels class-kw :hit-die))}))))}
        "Average"]]
      (doall
@@ -2218,28 +2218,31 @@
    [:input {:type "hidden" :name "body" :id "fields-input"}]])
 
 (defn header [built-char]
-  [:div.flex.align-items-c.justify-cont-s-b.w-100-p
-   [:h1.f-s-36.f-w-b.m-t-21.m-b-19.m-l-10 "Character Builder"]
-   [:div
-    #_[:button.form-button.h-40.opacity-5
-     {:on-click (export-pdf built-char)}
-     [:span "Save"]
-       [:span.m-l-5 "(coming soon)"]]
-    [:button.form-button.h-40.m-l-5
-     {:class-name (if (<= (count @history) 1) "opacity-5")
-      :on-click undo!}
-     [:i.fa.fa-undo.f-s-18]
-     [:span.m-l-5.hidden-sm.hidden-xs "Undo"]]
-    [:button.form-button.h-40.m-l-5
-     {:on-click (export-pdf built-char)}
-     [:i.fa.fa-print.f-s-18]
-     [:span.m-l-5.hidden-sm.hidden-xs "Print"]]
-    [:button.form-button.h-40.m-l-5
-     [:i.fa.fa-floppy-o.f-s-18]
-     [:span.m-l-5.hidden-sm.hidden-xs "Browser Save"]]
-    [:button.form-button.h-40.m-l-5.opacity-5
-     [:i.fa.fa-cloud-upload.f-s-18]
-     [:span.m-l-5.hidden-sm.hidden-xs "Save" [:span.i.m-l-5 "(Coming Soon)"]]]]])
+  [:div.w-100-p
+   [:div.flex.align-items-c.justify-cont-s-b
+    [:h1.f-s-36.f-w-b.m-t-21.m-b-19.m-l-10 "Character Builder"]
+    [:div.flex.align-items-c.justify-cont-end.m-r-10
+     [:button.form-button.h-40.m-l-5
+      {:class-name (if (<= (count @history) 1) "opacity-5")
+       :on-click undo!}
+      [:i.fa.fa-undo.f-s-18]
+      [:span.m-l-5.hidden-sm.hidden-xs.hidden-md "Undo"]]
+     [:button.form-button.h-40.m-l-5
+      {:on-click (fn [_] (swap! app-state assoc :character t5e/character :page 0))}
+      [:span
+       [:i.fa.fa-undo.f-s-18]
+       [:i.fa.fa-undo.f-s-18]]
+      [:span.m-l-5.hidden-sm.hidden-xs.hidden-md "Reset"]]
+     [:button.form-button.h-40.m-l-5
+      {:on-click (export-pdf built-char)}
+      [:i.fa.fa-print.f-s-18]
+      [:span.m-l-5.hidden-sm.hidden-xs.hidden-md "Print"]]
+     [:button.form-button.h-40.m-l-5
+      [:i.fa.fa-floppy-o.f-s-18]
+      [:span.m-l-5.hidden-sm.hidden-xs.hidden-md "Browser Save"]]
+     [:button.form-button.h-40.m-l-5.opacity-5
+      [:i.fa.fa-cloud-upload.f-s-18]
+      [:span.m-l-5.hidden-sm.hidden-xs.hidden-md "Save" [:span.i.m-l-5 "(Coming Soon)"]]]]]])
 
 
 (defn character-builder []
@@ -2272,7 +2275,14 @@
         mouseover-option (:mouseover-option @app-state)
         plugins (:plugins @app-state)
         stepper-dismissed? (:stepper-dismissed @app-state)
-        all-selections (entity/available-selections (:character @app-state) built-char built-template)]
+        all-selections (entity/available-selections (:character @app-state) built-char built-template)
+        al-illegal-reasons (es/entity-val built-char :al-illegal-reasons)
+        used-resources (es/entity-val built-char :used-resources)
+        num-resources (count used-resources)
+        multiple-resources? (> num-resources 1)
+        al-legal? (and (empty? al-illegal-reasons)
+                       (not multiple-resources?))
+        al-illegal-reasons-path [:al-illegal-reasons]]
     (if print-enabled? (print-char built-char))
     [:div.app
      {:on-scroll (fn [e]
@@ -2299,6 +2309,46 @@
         (header built-char)]]]
      [:div.flex.justify-cont-c.white
       [:div.content (header built-char)]]
+     [:div.container
+      [:div.content
+       [:div.m-l-20.m-b-20
+        [:div.flex
+         [:div.i
+          {:class-name
+           (if al-legal?
+             "green"
+             "red")}
+          [:i.fa.f-s-18
+           {:class-name
+            (if al-legal?
+              "fa-check"
+              "fa-times")}]
+          [:span.m-l-5.f-w-b
+           (str "Adventurer's League "
+                (if al-legal?
+                  "Legal"
+                  "Illegal"))]]
+         (if (not al-legal?)
+           [:span.m-l-10.f-s-14
+            (expand-button al-illegal-reasons-path "hide reasons" "show reasons")])]
+        (if (and (get-in @app-state [:expanded-paths al-illegal-reasons-path])
+                 (not al-legal?))
+          [:div.i.red.m-t-5
+           (map-indexed
+            (fn [i reason]
+              ^{:key i} [:div (str common/dot-char " " reason)])
+            (if multiple-resources?
+              (conj al-illegal-reasons
+                    (str "You are only allowed to use content from one resource beyond the Player's Handbook, you are using "
+                         num-resources
+                         ": "
+                         (s/join
+                          ", "
+                          (map
+                           (fn [{:keys [resource-key option-name]}]
+                             (str option-name " from " (:abbr (disp5e/sources resource-key))))
+                           used-resources))))
+              al-illegal-reasons))])]]]
      [:div.flex.justify-cont-c.white
       [:div.content [builder-tabs active-tab]]]
      [:div#app-main.flex.justify-cont-c.p-b-40

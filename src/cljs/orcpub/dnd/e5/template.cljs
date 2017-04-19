@@ -160,39 +160,6 @@
 
 (declare template-selections)
 
-(defn roll-hit-points [die app-state value-path]
-  (let [new-val (dice/die-roll die)]
-    (swap! app-state assoc-in (concat [:character] value-path) new-val)))
-
-(defn hit-points-roller [die app-state path built-template]
-  (let [value-path (entity/get-option-value-path
-                    built-template
-                    (:character @app-state)
-                    path)
-        value (get-in (:character @app-state) value-path)]
-    [:div
-     [:div.f-s-16.m-t-10 (str "Value: " value)]
-     [:button.form-button.m-t-10
-      {:on-click (fn [e]
-                   (roll-hit-points die app-state value-path)
-                   (.stopPropagation e))}
-      "Re-Roll"]]))
-
-(defn hit-points-entry [app-state path built-template]
-  (let [value-path (entity/get-option-value-path
-                    built-template
-                    (:character @app-state)
-                    path)
-        value (get-in (:character @app-state) value-path)]
-    [:div
-     [:input.input
-      {:value value
-       :type :number
-       :on-change (fn [e] (let [value (.-value (.-target e))
-                               new-v (if (not (s/blank? value))
-                                       (js/parseInt value))]
-                            (swap! app-state assoc-in (concat [:character] value-path) new-v)))}]]))
-
 (defn traits-modifiers [traits & [class-key source]]
   (map
    (fn [trait]
@@ -233,7 +200,8 @@
                               weapon-proficiencies
                               modifiers
                               selections
-                              traits]}
+                              traits
+                              source]}
                       app-state]
   (let [option (t/option
    name
@@ -248,7 +216,8 @@
      (fn [[k v]]
        (mod5e/subrace-ability k v))
      abilities)
-    (traits-modifiers traits nil source)))]
+    (traits-modifiers traits nil source)
+    (if source [(mod5e/used-resource source name)])))]
     option))
 
 (defn ability-modifiers [abilities]
@@ -282,7 +251,8 @@
                            languages
                            language-options
                            armor-proficiencies
-                           weapon-proficiencies]}]
+                           weapon-proficiencies
+                           source]}]
   (t/option-cfg
    {:name name
     :help help
@@ -312,7 +282,8 @@
                 modifiers
                 (traits-modifiers traits nil source)
                 (armor-prof-modifiers armor-proficiencies)
-                (weapon-prof-modifiers weapon-proficiencies))}))
+                (weapon-prof-modifiers weapon-proficiencies)
+                (if source [(mod5e/used-resource source name)]))}))
 
 (def elf-weapon-training-mods
   (weapon-prof-modifiers [:longsword :shortsword :shortbow :longbow]))
@@ -359,7 +330,7 @@
                   (opt5e/language-selection opt5e/languages 1)]
      :modifiers [elf-weapon-training-mods]}
     {:name "Wood Elf"
-     :abilities {:cha 1}
+     :abilities {:wis 1}
      :modifiers [(mod5e/speed 5)
                  mask-of-the-wild-mod
                  elf-weapon-training-mods]}
@@ -914,13 +885,18 @@
                (mod5e/spells-known 1 :hellish-rebuke :cha "Tiefling" 3)
                (mod5e/spells-known 2 :darkness :cha "Tiefling" 5)]})
 
+(defn al-illegal-flying-mod [name]
+  (mod5e/al-illegal (str name " gains flying speed a 1st level, which is not legal")))
+
 (def aarakocra-option-cfg
   {:name "Aarakocra"
    :abilities {:dex 2 :wis 1}
    :size :medium
    :speed 25
    :languages ["Common" "Aarakocra" "Auran"]
+   :source :ee
    :modifiers [(mod5e/flying-speed 50)
+               (al-illegal-flying-mod "Aarakocra")
                (mod5e/attack
                 {:name "Talons"
                  :source :ee
@@ -936,6 +912,7 @@
    [{:name "Deep Gnome"
      :abilities {:dex 1}
      :modifiers [(mod5e/darkvision 120)]
+     :source :ee
      :traits [{:name "Stone Camouflage"
                :source :ee
                :page 5
@@ -943,7 +920,7 @@
 
 (def genasi-option-cfg
   {:name "Genasi"
-   :source "Elemental Evil Player's Companion"
+   :source :ee
    :abilities {:con 2}
    :size "Medium"
    :speed 30
@@ -1010,6 +987,9 @@
                          :frequency {:units :long-rest}
                          :summary "have 'shape water' cantrip; at level 3 can cast create or destroy water as 2nd level"}]}]})
 
+(defn al-illegal-hit-points-mod [reason]
+  (mod5e/al-illegal (str reason " The only legal option is 'Average'.")))
+
 (defn hit-points-selection [die class-nm level]
   (t/selection-cfg
    {:name (str "Hit Points: " class-nm " " level)
@@ -1020,14 +1000,13 @@
     :options [{::t/name "Manual Entry"
                ::t/key :manual-entry
                ::t/help "This option allows you to manually type in the value for this level's hit points. Use this if you want to roll dice yourself or if you already have a character with known hit points for this level."
-               ::t/ui-fn #(hit-points-entry %3 % %2)
-               ::t/modifiers [(mod5e/deferred-max-hit-points)]}
+               ::t/modifiers [(mod5e/deferred-max-hit-points)
+                              (al-illegal-hit-points-mod "Manual entry for hit points is not legal.")]}
               {::t/name (str "Roll (1D" die ")")
                ::t/key :roll
                ::t/help "This option rolls virtual dice for you and sets that value for this level's hit points. It could pay off with a high roll, but you might also roll a 1."
-               ::t/ui-fn #(hit-points-roller die %3 % %2)
-               ::t/select-fn #(roll-hit-points die %2 %)
-               ::t/modifiers [(mod5e/deferred-max-hit-points)]}
+               ::t/modifiers [(mod5e/deferred-max-hit-points)
+                              (al-illegal-hit-points-mod "Rolling for hit points is not legal.")]}
               (let [average (dice/die-mean die)]
                 (t/option-cfg
                  {:name "Average"
@@ -1112,8 +1091,20 @@
    ::t/prereq-fn
    (total-levels-prereq level)))
 
+(defn add-mod-total-levels-prereq [lvl cls modifier]
+  (if (sequential? modifier)
+    (map
+     add-mod-total-levels-prereq
+     modifier)
+    (update
+     modifier
+     ::mod/conditions
+     conj
+     (total-levels-prereq lvl (:key cls)))))
+
 (defn subclass-option [cls
                        {:keys [name
+                               source
                                profs
                                selections
                                spellcasting
@@ -1157,12 +1148,7 @@
         level-modifiers (mapcat
                          (fn [[lvl {modifiers :modifiers}]]
                            (map
-                            (fn [modifier]
-                              (update
-                               modifier
-                               ::mod/conditions
-                               conj
-                               (total-levels-prereq lvl (:key cls))))
+                            (partial add-mod-total-levels-prereq lvl cls)
                             modifiers))
                          levels)]
     (t/option
@@ -1186,7 +1172,8 @@
       (weapon-prof-modifiers weapon-profs)
       (tool-prof-modifiers tool-profs)
       (traits-modifiers traits (:key cls))
-      (if level-factor [(mod5e/spell-slot-factor (:key cls) level-factor)])))))
+      (if level-factor [(mod5e/spell-slot-factor (:key cls) level-factor)])
+      (if source [(mod5e/used-resource source name)])))))
 
 (defn first-class? [class-kw]
   (fn [c] (= class-kw (first (es/entity-val c :classes)))))
@@ -1202,7 +1189,8 @@
                             subclass-title
                             subclass-help
                             subclass-level
-                            subclasses] :as cls}
+                            subclasses
+                            source] :as cls}
                     kw
                     spellcasting-template
                     i]
@@ -1436,6 +1424,8 @@
                   (if weapon-profs (weapon-prof-modifiers weapon-profs kw))
                   (if tool (tool-prof-modifiers tool kw))
                   (if level-factor [(mod5e/spell-slot-factor kw level-factor)])
+                  (if (and source (not plugin?))
+                    [(mod5e/used-resource source name)])
                   (if weapons
                     (map
                      (fn [[k num]]
@@ -4546,7 +4536,8 @@ long rest."})]
     {:name "Race"
      :tags #{:race}
      :options (map
-               race-option
+               (fn [race]
+                 (race-option (assoc race :source :scag)))
                [aasimar-option-cfg
                 firbolg-option-cfg
                 goliath-option-cfg
@@ -4566,7 +4557,7 @@ long rest."})]
   (map
    (fn [background]
      (-> background
-         (assoc :source "Sword Coast Adventurer's Guide")
+         (assoc :source :scag)
          (update :traits (fn [traits] (map (fn [t] (assoc t :source :scag)) traits)))))
    [{:name "City Watch"
      :profs {:skill {:athletics true :insight true}}
@@ -4654,7 +4645,7 @@ long rest."})]
     :subclass-level 3
     :subclass-title "Primal Path"
     :subclasses [{:name "Path of the Battlerager"
-                  :source "Sword Coast Adventurer's Guide"
+                  :source :scag
                   :modifiers [(mod5e/bonus-action
                                {:name "Spiked Armor Attack"
                                 :page 121
@@ -4681,54 +4672,59 @@ long rest."})]
                             :source :scag
                             :summary "while raging and in spiked armor, creatures within 5 ft. that hit with melee attack take 3 damage"}]}
                  {:name "Path of the Totem Warrior"
-                  :source "Sword Coast Adventurer's Guide"
                   :levels {3 {:selections [(t/selection-cfg
                                             {:name "Totem Spirit"
                                              :tags #{:class}
                                              :options [(t/option-cfg
-                                               {:name "Elk"
-                                                :modifiers [(mod5e/trait-cfg
-                                                             {:name "Totem Spirit: Elk"
-                                                              :page 122
-                                                              :source :scag
-                                                              :summary "When raging without heavy armor, your speed increases by 15 ft."})]})
-                                              (t/option-cfg
-                                               {:name "Tiger"
-                                                :modifiers [(mod5e/trait-cfg
-                                                             {:name "Totem Spirit: Tiger"
-                                                              :page 122
-                                                              :source :scag
-                                                              :summary "When raging, +10 ft long jump, +3 ft high jump"})]})]})]}
+                                                        {:name "Elk"
+                                                         :modifiers [(mod5e/used-resource :scag "Totem Spirit: Elk")
+                                                                     (mod5e/trait-cfg
+                                                                      {:name "Totem Spirit: Elk"
+                                                                       :page 122
+                                                                       :source :scag
+                                                                       :summary "When raging without heavy armor, your speed increases by 15 ft."})]})
+                                                       (t/option-cfg
+                                                        {:name "Tiger"
+                                                         :modifiers [(mod5e/used-resource :scag "Totem Spirit: Tiger")
+                                                                     (mod5e/trait-cfg
+                                                                      {:name "Totem Spirit: Tiger"
+                                                                       :page 122
+                                                                       :source :scag
+                                                                       :summary "When raging, +10 ft long jump, +3 ft high jump"})]})]})]}
                            6 {:selections [(t/selection-cfg
                                             {:name "Aspect of the Beast"
                                              :tags #{:class}
                                              :options [(t/option-cfg
-                                               {:name "Elk"
-                                                :modifiers [(mod5e/trait-cfg
-                                                             {:name "Aspect of the Beast: Elk"
-                                                              :page 122
-                                                              :source :scag
-                                                              :summary "double travel pace"})]})
-                                              (t/option-cfg
-                                               {:name "Tiger"
-                                                :selections [(opt5e/skill-selection [:athletics :acrobatics :stealth :survival] 2)]})]})]}
+                                                        {:name "Elk"
+                                                         :modifiers [(mod5e/used-resource :scag "Aspect of the Beast: Elk")
+                                                                     (mod5e/trait-cfg
+                                                                      {:name "Aspect of the Beast: Elk"
+                                                                       :page 122
+                                                                       :source :scag
+                                                                       :summary "double travel pace"})]})
+                                                       (t/option-cfg
+                                                        {:name "Tiger"
+                                                         :modifiers [(mod5e/used-resource :scag "Aspect of the Beast: Elk")]
+                                                         :selections [(opt5e/skill-selection [:athletics :acrobatics :stealth :survival] 2)]})]})]}
                            14 {:selections [(t/selection-cfg
                                              {:name "Totemic Attunement"
                                               :tags #{:class}
                                               :options [(t/option-cfg
-                                                        {:name "Elk"
-                                                         :modifiers [(mod5e/bonus-action
-                                                                      {:name "Totemic Attunement: Elk"
-                                                                       :page 122
-                                                                       :source :scag
-                                                                       :summary (str "pass through space of Large or smaller creature, if it fails a DC " (?spell-save-dc :str) " STR save it is knocked prone and takes 1d12 " (common/mod-str (?ability-bonuses :str)) " damage")})]})
-                                                       (t/option-cfg
-                                                        {:name "Tiger"
-                                                         :modifiers [(mod5e/bonus-action
-                                                                      {:name "Totemic Attunement: Tiger"
-                                                                       :page 122
-                                                                       :source :scag
-                                                                       :summary "make an additional melee weapon attack when you move 20+ ft. in a line and make a melee weapon attack"})]})]})]}}}]}
+                                                         {:name "Elk"
+                                                          :modifiers [(mod5e/used-resource :scag "Totemic Attunement: Elk")
+                                                                      (mod5e/bonus-action
+                                                                       {:name "Totemic Attunement: Elk"
+                                                                        :page 122
+                                                                        :source :scag
+                                                                        :summary (str "pass through space of Large or smaller creature, if it fails a DC " (?spell-save-dc :str) " STR save it is knocked prone and takes 1d12 " (common/mod-str (?ability-bonuses :str)) " damage")})]})
+                                                        (t/option-cfg
+                                                         {:name "Tiger"
+                                                          :modifiers [(mod5e/used-resource :scag "Totemic Attunement: Tiger")
+                                                                      (mod5e/bonus-action
+                                                                       {:name "Totemic Attunement: Tiger"
+                                                                        :page 122
+                                                                        :source :scag
+                                                                        :summary "make an additional melee weapon attack when you move 20+ ft. in a line and make a melee weapon attack"})]})]})]}}}]}
    {:name "Cleric"
     :plugin true
     :subclass-level 1
@@ -4848,10 +4844,10 @@ long rest."})]
                                 :damage-type :radiant
                                 :damage-modifier (?ability-bonuses :dex)})]
                   :levels {6 {:modifiers [(mod5e/bonus-action
-                                            {:name "Searing Arc Strike"
-                                             :page 131
-                                             :source :scag
-                                             :summary (str "after taking Attack action, spend 2 + X ki points to cast level X burning hands (max X of " (int (/ (?class-level :monk) 2)) ")")})]}
+                                           {:name "Searing Arc Strike"
+                                            :page 131
+                                            :source :scag
+                                            :summary (str "after taking Attack action, spend 2 + X ki points to cast level X burning hands (max X of " (int (/ (?class-level :monk) 2)) ")")})]}
                            11 {:modifiers [(mod5e/action
                                             {:name "Searing Sunburst"
                                              :level 11
@@ -4990,16 +4986,16 @@ long rest."})]
                                             :source :scag
                                             :summary (str "When you cast 1st level spell or higher deal " (int (/ (?class-level :sorcerer) 2)) " lightning or thunder damage to creatures of your choice within 10 ft.")})
                                           (mod5e/action
-                                            {:name "Storm Guide: Rain"
-                                             :page 137
-                                             :source :scag
-                                             :summary "cause rain to stop falling in a 20 ft. radius sphere around you"})
+                                           {:name "Storm Guide: Rain"
+                                            :page 137
+                                            :source :scag
+                                            :summary "cause rain to stop falling in a 20 ft. radius sphere around you"})
                                           (mod5e/bonus-action
-                                            {:name "Storm Guide: Wind"
-                                             :page 137
-                                             :source :scag
-                                             :duration {:units :round}
-                                             :summary "if windy, choose the direction of wind within 100 foot radius sphere around you"})]}
+                                           {:name "Storm Guide: Wind"
+                                            :page 137
+                                            :source :scag
+                                            :duration {:units :round}
+                                            :summary "if windy, choose the direction of wind within 100 foot radius sphere around you"})]}
                            14 {:modifiers [(mod5e/reaction
                                             {:name "Storm's Fury"
                                              :page 137
@@ -5250,6 +5246,7 @@ long rest."})]
                                                        (t/option-cfg
                                                         {:name "Winged"
                                                          :modifiers [(mod5e/flying-speed 30)
+                                                                     (al-illegal-flying-mod "Winged Tiefling Variant")
                                                                      (tiefling-spell-removal-modifier 0 :thaumaturgy)
                                                                      (tiefling-spell-removal-modifier 1 :hellish-rebuke)
                                                                      (tiefling-spell-removal-modifier 2 :darkness)]})]})]})]})]
@@ -5264,12 +5261,12 @@ long rest."})]
                sword-coast-adventurers-guide-backgrounds)})
    (race-selection
     {:options (map
-               race-option
+               (fn [race] (race-option (assoc race :source :scag)))
                [scag-half-elf-option-cfg
                 scag-tiefling-option-cfg])})
    (class-selection
     {:options (map
-               (fn [cfg] (class-option (assoc cfg :plugin? true)))
+               (fn [cfg] (class-option (assoc cfg :plugin? true :source :scag)))
                scag-classes)})])
 
 (defn ability-item [name abbr desc]
@@ -5372,6 +5369,9 @@ long rest."})]
 (def plugin-map
   (into {} (map (juxt :key identity) plugins)))
 
+(defn al-illegal-abilities-mod [reason]
+  (mod5e/al-illegal (str reason " The only legal options are 'Point Buy' or 'Standard Scores'")))
+
 (def template-selections
   [optional-content-selection
    (t/selection-cfg
@@ -5392,7 +5392,8 @@ long rest."})]
      :options [{::t/name "Manual Entry"
                 ::t/key :manual-entry
                 ::t/help "This option allows you to manually type in the value for each ability. Use this if you want to roll dice yourself or if you already have a character with known ability values."
-                ::t/modifiers [(mod5e/deferred-abilities)]}
+                ::t/modifiers [(mod5e/deferred-abilities)
+                               (al-illegal-abilities-mod "You may not choose 'Manual Entry' for abilities.")]}
                {::t/name "Point Buy"
                 ::t/key :point-buy
                 ::t/help [:div
@@ -5429,7 +5430,8 @@ long rest."})]
                {::t/name "Standard Roll"
                 ::t/key :standard-roll
                 ::t/help "This option rolls the dice for you. You can rearrange the values using the left and right arrow buttons."
-                ::t/modifiers [(mod5e/deferred-abilities)]}
+                ::t/modifiers [(mod5e/deferred-abilities)
+                               (al-illegal-abilities-mod "You may not choose 'Standard Roll' for your abilities.")]}
                {::t/name "Standard Scores"
                 ::t/key :standard-scores
                 ::t/help "If you aren't feeling lucky, use this option, which gives you a standard set of scores. You can reassign the values using the left and right arrow buttons."

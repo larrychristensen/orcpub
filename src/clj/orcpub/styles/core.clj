@@ -164,6 +164,9 @@
    [:.text-shadow
     {:text-shadow "1px 2px 1px black"}]
 
+   [:.white-text-shadow
+    {:text-shadow "1px 2px 1px white"}]
+
    [:.slight-text-shadow
     {:text-shadow "1px 1px 1px rgba(0,0,0,0.8)"}]
 
@@ -282,6 +285,8 @@
     {:color button-color}]
    [:.green
     {:color green}]
+   [:.red
+    {:color red}]
    [:.uppercase
     {:text-transform :uppercase}]
    [:.bg-trans
@@ -642,6 +647,14 @@
       :font-family font-family
       :height "100%"
       :overflow :auto}]
+
+    #_["input::-webkit-outer-spin-button"
+     "input::-webkit-inner-spin-button"
+     {:-webkit-appearance :none
+      :margin 0}]
+
+    #_["input[type=number]"
+     {:-moz-appearance :textfield}]
 
     [:a :a:visited
      {:color orange}]
