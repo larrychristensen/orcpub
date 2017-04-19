@@ -123,8 +123,10 @@
     [{:name "Abacus" :cost {:num 2 :type :gp} :weight "2 lb."}
      {:name "Acid" :sell-container :vial :cost {:num 25 :type :gp} :weight "1 lb."}
      {:name "Alchemist’s fire" :sell-container :flask :cost {:num 50 :type :gp} :weight "1 lb."}
+     {:name "Alms Box"}
      {:name "Antitoxin" :sell-container :vial :cost {:num 50 :type :gp} :weight "—"}
      {:name "Backpack" :cost {:num 2 :type :gp} :weight "5 lb."}
+     {:name "Bag of Sand"}
      {:name "Ball bearings" :sell-qty 1000 :sell-contiainer "bag" :cost {:num 1 :type :gp} :weight "2 lb."}
      {:name "Barrel" :cost {:num 2 :type :gp} :weight "70 lb."}
      {:name "Basket" :cost {:num 4 :type :sp} :weight "2 lb."}
@@ -139,6 +141,7 @@
      {:name "Candle" :cost {:num 1 :type :cp} :weight "—"}
      {:name "Case, crossbow bolt" :cost {:num 1 :type :gp} :weight "1 lb."}
      {:name "Case, map or scroll" :cost {:num 1 :type :gp} :weight "1 lb."}
+     {:name "Censer"}
      {:name "Chain" :sell-qty 10 :sell-container :feet :cost {:num 5 :type :gp} :weight "10 lb."}
      {:name "Chalk" :sell-container :piece :cost {:num 1 :type :cp} :weight "—"}
      {:name "Chest" :cost {:num 5 :type :gp} :weight "25 lb."}
@@ -148,6 +151,7 @@
      {:name "Clothes, fine" :cost {:num 15 :type :gp} :weight "6 lb."}
      {:name "Clothes, traveler’s" :cost {:num 2 :type :gp} :weight "4 lb."}
      {:name "Component pouch" :cost {:num 25 :type :gp} :weight "2 lb."}
+     {:name "Costume"}
      {:name "Crowbar" :cost {:num 2 :type :gp} :weight "5 lb."}
      {:name "Fishing tackle" :cost {:num 1 :type :gp} :weight "4 lb."}
      {:name "Flask or tankard" :cost {:num 2 :type :cp} :weight "1 lb."}
@@ -160,7 +164,9 @@
      {:name "Hunting trap" :cost {:num 5 :type :gp} :weight "25 lb."}
      {:name "Ink" :sell-container "ounce bottle" :cost {:num 10 :type :gp} :weight "—"}
      {:name "Ink pen" :cost {:num 2 :type :cp} :weight "—"}
+     {:name "Incense" :sell-container :block}
      {:name "Jug or pitcher" :cost {:num 2 :type :cp} :weight "4 lb."}
+     {:name "Knife, Small"}
      {:name "Ladder (10-foot)" :cost {:num 1 :type :sp} :weight "25 lb."}
      {:name "Lamp" :cost {:num 5 :type :sp} :weight "1 lb."}
      {:name "Lantern, bullseye" :cost {:num 10 :type :gp} :weight "2 lb."}
@@ -197,10 +203,12 @@
      {:name "Spellbook" :cost {:num 50 :type :gp} :weight "3 lb."}
      {:name "Spikes, iron" :sell-qty 10 :cost {:num 1 :type :gp} :weight "5 lb."}
      {:name "Spyglass" :cost {:num 1000 :type :gp} :weight "1 lb."}
+     {:name "String" :sell-container :feet :sell-qty 10}
      {:name "Tent, two-person" :cost {:num 2 :type :gp} :weight "20 lb."}
      {:name "Tinderbox" :cost {:num 5 :type :sp} :weight "1 lb."}
      {:name "Torch" :cost {:num 1 :type :cp} :weight "1 lb."}
      {:name "Vial" :cost {:num 1 :type :gp} :weight "—"}
+     {:name "Vestements"}
      {:name "Waterskin" :cost {:num 2 :type :sp} :weight "5 lb. (full)"}
      {:name "Whetstone" :cost {:num 1 :type :cp} :weight "1 lb."}])))
 
@@ -208,13 +216,79 @@
   (into
    []
    common/add-keys-xform
-   [{:name "Burgler's Pack"}
-    {:name "Diplomat's Pack"}
-    {:name "Dungeoneer's Pack"}
-    {:name "Entertainer's Pack"}
-    {:name "Explorer's Pack"}
-    {:name "Priest's Pack"}
-    {:name "Scholar's Pack"}]))
+   [{:name "Burgler's Pack"
+     :items {:backpack 1
+             :ball-bearings 1
+             :string 1
+             :bell 1
+             :candle 5
+             :crowbar 1
+             :hammer 1
+             :piton 10
+             :lantern-hooded 1
+             :oil 2
+             :rations-1-day- 5
+             :tinderbox 1
+             :waterskin 1
+             :rope-hempen 1}}
+    {:name "Diplomat's Pack"
+     :items {:chest 1
+             :case-map-or-scroll 1
+             :clothes-fine 1
+             :ink 1
+             :ink-pen 1
+             :lamp 1
+             :oil 2
+             :paper 5
+             :perfume 1
+             :sealing-wax 1
+             :soap 1}}
+    {:name "Dungeoneer's Pack"
+     :items {:backpack 1
+             :crowbar 1
+             :hammer 1
+             :piton 10
+             :torch 10
+             :tinderbox 1
+             :rations-1-day- 10
+             :waterskin 1
+             :rope-hempen 1}}
+    {:name "Entertainer's Pack"
+     :items {:backpack 1
+             :bedroll 1
+             :costume 2
+             :candle 5
+             :rations-1-day- 5
+             :waterskin 1
+             :disguise-kit 1}}
+    {:name "Explorer's Pack"
+     :items {:backpack 1
+             :bedroll 1
+             :mess-kit 1
+             :tinderbox 1
+             :torch 10
+             :rations-1-day- 10
+             :waterskin 1
+             :rope-hempen 1}}
+    {:name "Priest's Pack"
+     :items {:backpack 1
+             :blanket 1
+             :candle 10
+             :tinderbox 1
+             :alms-box 1
+             :incense 2
+             :censer 1
+             :vestements 1
+             :rations-1-day- 2
+             :waterskin 1}}
+    {:name "Scholar's Pack"
+     :items {:backpack 1
+             :book 1
+             :ink 1
+             :ink-pen 1
+             :parchment 10
+             :bag-of-sand 1
+             :knife-small 1}}]))
 
 (def equipment
   (concat

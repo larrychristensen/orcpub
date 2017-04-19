@@ -1258,55 +1258,65 @@
                   (if (not plugin?)
                     [(mod5e/level kw name i hit-die)]))})))
 
+(defn new-starting-equipment-selection [class-kw {:keys [name options] :as cfg}]
+  (t/selection-cfg
+   (merge
+    cfg
+    {:name (str "Starting Equipment: " name)
+     :tags #{:equipment :starting-equipment}
+     :order 1
+     :options (conj options
+                    (t/option-cfg
+                     {:name "<none>"
+                      :key :none}))
+     :prereq-fn (first-class? class-kw)})))
 
-(defn equipment-option [[k num]]
+(defn equipment-option [class-kw [k num]]
   (let [equipment (equip5e/equipment-map k)]
     (if (:values equipment)
-      (t/option
-       (:name equipment)
-       k
-       [(t/selection
-         (:name equipment)
-         (map
-          equipment-option
-          (zipmap (map :key (:values equipment)) (repeat num))))]
-       [])
-      (t/option
-       (-> k equip5e/equipment-map :name (str (if (> num 1) (str " (" num ")") "")))
-       k
-       []
-       [(mod5e/equipment k num)]))))
+      (t/option-cfg
+       {:name (:name equipment)
+        :selections [(t/selection-cfg
+                      {:name (:name equipment)
+                       :options (map
+                                 equipment-option
+                                 (zipmap (map :key (:values equipment)) (repeat num)))
+                       :prereq-fn (first-class? class-kw)})]})
+      (t/option-cfg
+       {:name (-> equipment :name (str (if (> num 1) (str " (" num ")") "")))
+        :modifiers (if (:items equipment)
+                     (map
+                      (fn [[kw num]]
+                        (mod5e/equipment kw num))
+                      (:items equipment))
+                     [(mod5e/equipment k num)])}))))
 
-(defn simple-weapon-selection [num]
-  (t/selection-cfg
-   {:name "Starting Equipment: Simple Weapon"
+(defn simple-weapon-selection [num class-kw]
+  (new-starting-equipment-selection
+   class-kw
+   {:name "Simple Weapon"
     :tags #{:starting-equipment}
     :options (opt5e/weapon-options (weapon5e/simple-weapons weapon5e/weapons))
     :min num
-    :max num}))
+    :max num
+    :prereq-fn (first-class? class-kw)}))
 
-(defn weapon-option [[k num]]
+(defn weapon-option [class-kw [k num]]
   (case k
-    :simple (t/option
-             "Any Simple Weapon"
-             :any-simple
-             [(simple-weapon-selection num)]
-             [])
-    :martial (t/option
-              "Any Martial Weapon"
-              :any-martial
-              [(t/selection-cfg
-                {:name "Starting Equipment: Martial Weapon"
-                 :tags #{:starting-equipment}
-                 :options (opt5e/weapon-options (weapon5e/martial-weapons weapon5e/weapons))
-                 :min num
-                 :max num})]
-              [])
-    (t/option
-     (-> k weapon5e/weapons-map :name (str (if (> num 1) (str " (" num ")") "")))
-     k
-     []
-     [(mod5e/weapon k num)])))
+    :simple (t/option-cfg
+             {:name "Any Simple Weapon"
+              :selections [(simple-weapon-selection num class-kw)]})
+    :martial (t/option-cfg
+              {:name "Any Martial Weapon"
+               :selections [(new-starting-equipment-selection
+                             class-kw
+                             {:name "Martial Weapon"
+                              :options (opt5e/weapon-options (weapon5e/martial-weapons weapon5e/weapons))
+                              :min num
+                              :max num})]})
+    (t/option-cfg
+     {:name (-> k weapon5e/weapons-map :name (str (if (> num 1) (str " (" num ")") "")))
+      :modifiers [(mod5e/weapon k num)]})))
 
 (defn armor-option [[k num]]
   (t/option
@@ -1315,27 +1325,26 @@
      []
      [(mod5e/armor k num)]))
 
-(defn class-options [option-fn choices help]
+(defn class-options [class-kw option-fn choices help]
   (map
    (fn [{:keys [name options]}]
-     (t/selection-cfg
-      {:name (str "Starting Equipment: " name)
+     (new-starting-equipment-selection
+      class-kw
+      {:name name
        :help help
-       :order 0
-       :tags #{:starting-equipment}
        :options (map
                  option-fn
                  options)}))
    choices))
 
-(defn class-weapon-options [weapon-choices]
-  (class-options weapon-option weapon-choices "Select a weapon to begin your adventuring career with."))
+(defn class-weapon-options [weapon-choices class-kw]
+  (class-options class-kw (partial weapon-option class-kw) weapon-choices "Select a weapon to begin your adventuring career with."))
 
-(defn class-armor-options [armor-choices]
-  (class-options armor-option armor-choices "Select armor to begin your adventuring career with."))
+(defn class-armor-options [armor-choices class-kw]
+  (class-options class-kw armor-option armor-choices "Select armor to begin your adventuring career with."))
 
-(defn class-equipment-options [equipment-choices]
-  (class-options equipment-option equipment-choices "Select equipment to start your adventuring career with."))
+(defn class-equipment-options [equipment-choices class-kw]
+  (class-options class-kw (partial equipment-option class-kw) equipment-choices "Select equipment to start your adventuring career with."))
 
 (defn class-skill-selection [{skill-num :choose options :options skill-select-order :order} key prereq-fn]
   (let [skill-kws (if (:any options) (map :key skill5e/skills) (keys options))]
@@ -1397,9 +1406,9 @@
                       [(tool-prof-selection tool-options :tool-selection (fn [c] (= kw (first (:classes c)))))])
                     (if (seq multiclass-tool-options)
                       [(tool-prof-selection multiclass-tool-options :multiclass-tool-selection (fn [c] (not= kw (first (:classes c)))))])
-                    (if weapon-choices (class-weapon-options weapon-choices))
-                    (if armor-choices (class-armor-options armor-choices))
-                    (if equipment-choices (class-equipment-options equipment-choices))
+                    (if weapon-choices (class-weapon-options weapon-choices kw))
+                    (if armor-choices (class-armor-options armor-choices kw))
+                    (if equipment-choices (class-equipment-options equipment-choices kw))
                     (if skill-options
                       [(class-skill-selection skill-options :skill-proficiency (fn [c] (= kw (first (:classes c)))))])
                     (if multiclass-skill-options
@@ -1788,17 +1797,6 @@
     :key (:key equipment)
     :modifiers [(mod5e/equipment (:key equipment) num)]}))
 
-(defn starting-equipment-selection [{:keys [name options] :as cfg}]
-  (t/selection-cfg
-   (merge cfg
-          {:name (str "Starting Equipment: " name)
-           :tags #{:equipment :starting-equipment}
-           :order 0
-           :options (conj options
-                          (t/option-cfg
-                           {:name "<none>"
-                            :key :none}))})))
-
 
 (def cleric-option
   (class-option
@@ -1826,14 +1824,16 @@
                                :leather 1
                                :chain-mail 1}}]
     :armor {:shield 1}
-    :selections [(starting-equipment-selection
+    :selections [(new-starting-equipment-selection
+                  :cleric
                   {:name "Additional Weapon"
                    :options [(t/option-cfg
                               {:name "Light Crossbow and 20 Bolts"
                                :modifiers [(mod5e/weapon :crossbow-light 1)
                                            (mod5e/equipment :crossbow-bolt 20)]})
-                             (weapon-option [:simple 1])]})
-                 (starting-equipment-selection
+                             (weapon-option :cleric [:simple 1])]})
+                 (new-starting-equipment-selection
+                  :cleric
                   {:name "Holy Symbol"
                    :options (map
                              starting-equipment-option
@@ -2180,7 +2180,7 @@
                     :shield
                     []
                     [(mod5e/armor :shield 1)])
-                   (weapon-option [:simple 1])])
+                   (weapon-option :druid [:simple 1])])
                  (t/selection
                   "Melee Weapon"
                   [(t/option
@@ -2487,9 +2487,9 @@
     :subclass-level 3
     :subclass-title "Martial Archetype"
     :selections [(opt5e/fighting-style-selection)
-                 (t/selection-cfg
-                  {:name "Starting Equipment: Armor"
-                   :tags #{:equipment :starting-equipment}
+                 (new-starting-equipment-selection
+                  :fighter
+                  {:name "Armor"
                    :options [(t/option-cfg
                               {:name "Chain Mail"
                                :modifiers [(mod5e/armor :chain-mail 1)]})
@@ -2498,9 +2498,9 @@
                                :options [(mod5e/armor :leather 1)
                                          (mod5e/weapon :longbow 1)
                                          (mod5e/equipment :arrow 20)]})]})
-                 (t/selection-cfg
-                  {:name "Starting Equipment: Weapons"
-                   :tags #{:equipment :starting-equipment}
+                 (new-starting-equipment-selection
+                  :fighter
+                  {:name "Weapons"
                    :options [(t/option-cfg
                               {:name "Martial Weapon and Shield"
                                :selections [(t/selection-cfg
@@ -2516,9 +2516,9 @@
                                               :options (opt5e/martial-weapon-options 1)
                                               :min 2
                                               :max 2})]})]})
-                 (t/selection-cfg
-                  {:name "Starting Equipment: Additional Weapons"
-                   :tags #{:equipment :starting-equipment}
+                 (new-starting-equipment-selection
+                  :fighter
+                  {:name "Additional Weapons"
                    :options [(t/option-cfg
                               {:name "Light Crossbow and 20 Bolts"
                                :modifiers [(mod5e/weapon :crossbow-light 1)
@@ -2861,31 +2861,33 @@
                   :level 3
                   :frequency {:units :rest}
                   :summary "your oath provides specific options"})]
-    :selections [(t/selection
-                  "Starting Equipment: Weapons"
-                  [(t/option-cfg
-                    {:name "Martial Weapon and Shield"
-                     :selections [(t/selection
-                                   "Martial Weapon"
-                                   (opt5e/martial-weapon-options 1))]
-                     :modifiers [(mod5e/armor :shield 1)]})
-                   (t/option-cfg
-                    {:name "Two Martial Weapons"
-                     :selections [(t/selection
-                                   "Martial Weapons"
-                                   (opt5e/martial-weapon-options 1)
-                                   2
-                                   2)]})])
-                 (t/selection
-                  "Starting Equipment: Melee Weapon"
-                  [(t/option-cfg
-                    {:name "Five Javelins"
-                     :modifiers [(mod5e/weapon :javelin 5)]})
-                   (t/option-cfg
-                    {:name "Simple Melee Weapon"
-                     :selections [(t/selection
-                                   "Simple Melee Weapon"
-                                   (opt5e/simple-melee-weapon-options 1))]})])]
+    :selections [(new-starting-equipment-selection
+                  :paladin
+                  {:name "Weapons"
+                   :options [(t/option-cfg
+                              {:name "Martial Weapon and Shield"
+                               :selections [(t/selection
+                                             "Martial Weapon"
+                                             (opt5e/martial-weapon-options 1))]
+                               :modifiers [(mod5e/armor :shield 1)]})
+                             (t/option-cfg
+                              {:name "Two Martial Weapons"
+                               :selections [(t/selection
+                                             "Martial Weapons"
+                                             (opt5e/martial-weapon-options 1)
+                                             2
+                                             2)]})]})
+                 (new-starting-equipment-selection
+                  :paladin
+                  {:name "Melee Weapon"
+                   :options [(t/option-cfg
+                              {:name "Five Javelins"
+                               :modifiers [(mod5e/weapon :javelin 5)]})
+                             (t/option-cfg
+                              {:name "Simple Melee Weapon"
+                               :selections [(t/selection
+                                             "Simple Melee Weapon"
+                                             (opt5e/simple-melee-weapon-options 1))]})]})]
     :traits [{:name "Divine Smite"
               :level 2
               :page 85
@@ -3545,16 +3547,16 @@
     :profs {:weapon {:dagger true :dart true :sling true :quarterstaff true :crossbow-light true}
             :save {:con true :cha true}
             :skill-options {:choose 2 :options {:arcana true :deception true :insight true :intimidation true :persuasion true :religion true}}}
-    :selections [(t/selection-cfg
-                  {:name "Starting Equipment: Weapon"
-                   :tags #{:equipment :starting-equipment}
+    :selections [(new-starting-equipment-selection
+                  :sorcerer
+                  {:name "Weapon"
                    :options [(t/option
                               "Light Crossbow"
                               :crossbow
                               []
                               [(mod5e/weapon :crossbow-light 1)
                                (mod5e/equipment :crossbow-bolt 20)])
-                             (weapon-option [:simple 1])]})]
+                             (weapon-option :sorcerer [:simple 1])]})]
     :modifiers [(mod/modifier ?natural-ac-bonus 3)]
     :levels {2 {:modifiers [(mod5e/dependent-trait
                              {:name "Sorcery Points"
@@ -4234,17 +4236,17 @@ long rest."})]
             :weapon {:simple false}
             :save {:wis true :cha true}
             :skill-options {:choose 2 :options {:arcana true :deception true :history true :intimidation true :investigation true :nature true :religion true}}}
-    :selections [(t/selection-cfg
-                  {:name "Starting Equipment: Weapon"
-                   :tags #{:equipment :starting-equipment}
+    :selections [(new-starting-equipment-selection
+                  :warlock
+                  {:name "Weapon"
                    :options [(t/option
                               "Light Crossbow"
                               :crossbow
                               []
                               [(mod5e/weapon :crossbow-light 1)
                                (mod5e/equipment :crossbow-bolt 20)])
-                             (weapon-option [:simple 1])]})
-                 (simple-weapon-selection 1)]
+                             (weapon-option :warlock [:simple 1])]})
+                 (simple-weapon-selection 1 :warlock)]
     :equipment-choices [{:name "Equipment Pack"
                          :options {:scholars-pack 1
                                    :dungeoneers-pack 1}}
@@ -4501,9 +4503,9 @@ long rest."})]
       :selections (concat
                    selections
                    (if (seq tool-options) [(tool-prof-selection tool-options)])
-                   (class-weapon-options weapon-choices)
-                   (class-armor-options armor-choices)
-                   (class-equipment-options equipment-choices)
+                   (class-weapon-options weapon-choices nil)
+                   (class-armor-options armor-choices nil)
+                   (class-equipment-options equipment-choices nil)
                    (if (seq skill-kws) [(opt5e/skill-selection skill-kws skill-num)])
                    (if (seq language-options) [(language-selection language-options)]))
       :modifiers (concat
@@ -5245,7 +5247,6 @@ long rest."})]
    :modifiers [(mod5e/spells-known 0 :thaumaturgy :cha "Tiefling")
                (mod5e/spells-known 1 :hellish-rebuke :cha "Tiefling" 3)
                (mod5e/spells-known 2 :darkness :cha "Tiefling" 5)]})
-
 
 (defn sword-coast-adventurers-guide-selections [app-state]
   [(background-selection
