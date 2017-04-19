@@ -1292,12 +1292,13 @@
      (if (or (and (pos? min)
                   (nil? max))
              (= min max))
-       [:div.p-5.f-s-16
-        [:div.flex.align-items-c.justify-cont-s-b
-         [:span.i.m-r-10 (str "select " (if (= min max)
-                                          min
-                                          (str "at least " min)))]
-         (remaining-component max remaining)]])
+       (if (int? min)
+         [:div.p-5.f-s-16
+          [:div.flex.align-items-c.justify-cont-s-b
+           [:span.i.m-r-10 (str "select " (if (= min max)
+                                            min
+                                            (str "at least " min)))]
+           (remaining-component max remaining)]]))
      body]))
 
 (defn ancestor-names-string [built-template path]

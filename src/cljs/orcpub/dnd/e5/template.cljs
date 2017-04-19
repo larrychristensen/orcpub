@@ -4566,7 +4566,7 @@ long rest."})]
                :summary "can easily find local watch and criminal outposts"}]}
     {:name "Clan Crafter"
      :profs {:skill {:history true :insight true}
-             :tool-options {:artisans-tool true}}
+             :tool-options {:artisans-tool 1}}
      :traits [{:name "Respect of the Stout Folk"
                :page 145
                :summary "free room and board among shield and gold dwarves"}]}
