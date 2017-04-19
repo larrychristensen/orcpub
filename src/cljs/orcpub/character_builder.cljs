@@ -31,7 +31,7 @@
 
             [reagent.core :as r]))
 
-(def print-enabled? true)
+(def print-enabled? false)
 
 (declare app-state)
 
@@ -1076,7 +1076,7 @@
                (checkbox equipped? false)]
               [:div.flex-grow-1 item-name]
               (if item-description [:div.w-60 [show-info-button expanded? [key item-key]]])
-              [:input.input.m-l-5.m-t-0
+              [:input.input.m-l-5.m-t-0.
                {:class-name (str "w-" (or qty-input-width 60))
                 :type :number
                 :value item-qty
