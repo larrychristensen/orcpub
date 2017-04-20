@@ -2222,26 +2222,26 @@
   [:div.w-100-p
    [:div.flex.align-items-c.justify-cont-s-b
     [:h1.f-s-36.f-w-b.m-t-21.m-b-19.m-l-10 "Character Builder"]
-    [:div.flex.align-items-c.justify-cont-end.m-r-10
-     [:button.form-button.h-40.m-l-5
+    [:div.flex.align-items-c.justify-cont-end.flex-wrap.m-r-10
+     [:button.form-button.h-40.m-l-5.m-t-5.m-b-5
       {:class-name (if (<= (count @history) 1) "opacity-5")
        :on-click undo!}
       [:i.fa.fa-undo.f-s-18]
       [:span.m-l-5.hidden-sm.hidden-xs.hidden-md "Undo"]]
-     [:button.form-button.h-40.m-l-5
+     [:button.form-button.h-40.m-l-5.m-t-5.m-b-5
       {:on-click (fn [_] (swap! app-state assoc :character t5e/character :page 0))}
       [:span
        [:i.fa.fa-undo.f-s-18]
        [:i.fa.fa-undo.f-s-18]]
       [:span.m-l-5.hidden-sm.hidden-xs.hidden-md "Reset"]]
-     [:button.form-button.h-40.m-l-5
+     [:button.form-button.h-40.m-l-5.m-t-5.m-b-5
       {:on-click (export-pdf built-char)}
       [:i.fa.fa-print.f-s-18]
       [:span.m-l-5.hidden-sm.hidden-xs.hidden-md "Print"]]
-     [:button.form-button.h-40.m-l-5
+     [:button.form-button.h-40.m-l-5.m-t-5.m-b-5
       [:i.fa.fa-floppy-o.f-s-18]
       [:span.m-l-5.hidden-sm.hidden-xs.hidden-md "Browser Save"]]
-     [:button.form-button.h-40.m-l-5.opacity-5
+     [:button.form-button.h-40.m-l-5.opacity-5.m-t-5.m-b-5
       [:i.fa.fa-cloud-upload.f-s-18]
       [:span.m-l-5.hidden-sm.hidden-xs.hidden-md "Save" [:span.i.m-l-5 "(Coming Soon)"]]]]]])
 

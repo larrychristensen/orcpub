@@ -2454,17 +2454,17 @@
                   :frequency {:units :rest}
                   :summary (str "regain 1d10 "
                                 (common/mod-str (?class-level :fighter))
-                                " HPs")})
-                (mod5e/action
-                 {:level 2
-                  :name "Action Surge"
-                  :page 72
-                  :frequency {:units :rest
-                              :amount (if (>= (?class-level :fighter) 17)
-                                        2
-                                        1)}
-                  :summary "take an extra action"})]
-    :levels {5 {:modifiers [(mod5e/extra-attack)]}
+                                " HPs")})]
+    :levels {2 {:modifiers [(mod5e/action
+                             {:level 2
+                              :name "Action Surge"
+                              :page 72
+                              :frequency {:units :rest
+                                          :amount (if (>= (?class-level :fighter) 17)
+                                                    2
+                                                    1)}
+                              :summary "take an extra action"})]}
+             5 {:modifiers [(mod5e/extra-attack)]}
              9 {:modifiers [(mod5e/dependent-trait
                              {:level 9
                               :name "Indomitable"

@@ -194,6 +194,8 @@
     {:align-items :center}]
    [:.align-items-t
     {:align-items :flex-start}]
+   [:.flex-wrap
+    {:flex-wrap :wrap}]
 
    [:.w-auto
     {:width :auto}]
