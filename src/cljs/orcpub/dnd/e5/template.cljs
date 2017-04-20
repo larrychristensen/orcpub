@@ -2819,7 +2819,11 @@
                                    :explorers-pack 1}}]
     :armor {:chain-mail 1}
     :levels {2 {:selections [(opt5e/fighting-style-selection #{:defense :dueling :great-weapon-fighting :protection})]}
-             3 {:modifiers [(mod5e/damage-immunity :disease)]}
+             3 {:modifiers [(mod5e/damage-immunity :disease)
+                            (mod5e/trait-cfg
+                             {:name "Divine Health"
+                              :page 85
+                              :summary "immune to disease"})]}
              5 {:modifiers [(mod5e/extra-attack)]}
              14 {:modifiers [(mod5e/action
                               {:name "Cleansing Touch"
