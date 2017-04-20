@@ -2600,7 +2600,7 @@
     :hit-die 8
     :ability-increase-levels [4 8 10 16 19]
     :unarmored-abilities [:wis]
-    :profs {:armor {:light true}   
+    :profs {:armor {:light true}
             :weapon {:simple false :shortsword false}
             :save {:dex true :str true}
             :skill-options {:choose 2 :options {:acrobatics true :athletics true :history true :insight true :religion true :stealth true}}}
@@ -2820,7 +2820,14 @@
     :armor {:chain-mail 1}
     :levels {2 {:selections [(opt5e/fighting-style-selection #{:defense :dueling :great-weapon-fighting :protection})]}
              3 {:modifiers [(mod5e/damage-immunity :disease)]}
-             5 {:modifiers [(mod5e/extra-attack)]}}
+             5 {:modifiers [(mod5e/extra-attack)]}
+             14 {:modifiers [(mod5e/action
+                              {:name "Cleansing Touch"
+                               :level 14
+                               :page 85
+                               :frequency {:units :long-rest
+                                           :amount (?ability-bonuses :cha)}
+                               :summary "end a spell on yourself or willing creature"})]}}
     :modifiers [(mod/modifier ?paladin-aura (if (< (?class-level :paladin) 18) 10 30))
                 (mod5e/action
                  {:name "Divine Sense"
@@ -2843,13 +2850,6 @@
                   :level 10
                   :page 85
                   :summary (str (str "you and friendly creatures within " ?paladin-aura " ft. can't be frightened"))})
-                (mod5e/action
-                 {:name "Cleansing Touch"
-                  :level 14
-                  :page 85
-                  :frequency {:units :long-rest
-                              :amount (?ability-bonuses :cha)}
-                  :summary "end a spell on yourself or willing creature"})
                 (mod5e/dependent-trait
                  {:name "Channel Divinity"
                   :page 85

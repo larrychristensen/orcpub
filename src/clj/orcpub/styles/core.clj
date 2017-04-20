@@ -284,11 +284,20 @@
    [:.black
     {:color :black}]
    [:.orange
-    {:color button-color}]
+    {:color button-color}
+
+    [:a :a:visited
+     {:color button-color}]]
    [:.green
-    {:color green}]
+    {:color green}
+
+    [:a :a:visited
+     {:color green}]]
    [:.red
-    {:color red}]
+    {:color red}
+
+    [:a :a:visited
+     {:color red}]]
    [:.uppercase
     {:text-transform :uppercase}]
    [:.bg-trans

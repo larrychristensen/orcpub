@@ -2085,7 +2085,7 @@
             [:span.orange ", "]
             (map
              (fn [{:keys [name url]}]
-               [:a {:href url} name])
+               [:a.orange {:href url} name])
              (cons {:name "Player's Handbook"
                     :url disp5e/phb-url}
                    (map t5e/plugin-map (get-selected-plugin-options app-state)))))))])]
@@ -2324,7 +2324,8 @@
             (if al-legal?
               "fa-check"
               "fa-times")}]
-          [:span.m-l-5.f-w-b
+          [:a.m-l-5.f-w-b
+           {:href "https://media.wizards.com/2016/dnd/downloads/AL_PH_SKT.pdf"}
            (str "Adventurer's League "
                 (if al-legal?
                   "Legal"
