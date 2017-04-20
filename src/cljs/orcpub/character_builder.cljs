@@ -933,7 +933,8 @@
       (doall
        (map-indexed
         (fn [i {:keys [::entity/key] :as selected-class}]
-          (let [class-template-option (some #(if (= key (::t/key %)) %) options)
+          (let [options-map (zipmap (map ::t/key options) options)
+                class-template-option (options-map key)
                 expanded-path [:class-levels key]
                 expanded? (get-in @app-state [:expanded-paths expanded-path])]
             ^{:key key}
@@ -944,10 +945,41 @@
                {:value key
                 :on-change (fn [e] (let [new-key (keyword (.. e -target -value))]
                                      (swap! app-state
-                                            assoc-in
-                                            [:character ::entity/options :class i] {::entity/key new-key
-                                                                                    ::entity/options
-                                                                                    {:levels [{::entity/key :level-1}]}})))}
+                                            (fn [s]
+                                              (let [new-class-option (options-map new-key)
+                                                    associated-options (::t/associated-options new-class-option)
+                                                    with-new-class (-> s
+                                                                       (assoc-in
+                                                                        [:character ::entity/options :class i]
+                                                                        {::entity/key new-key
+                                                                         ::entity/options
+                                                                         {:levels [{::entity/key :level-1}]}})
+                                                                       (update-in
+                                                                        [:character ::entity/options]
+                                                                        (fn [options]
+                                                                          (into {}
+                                                                                (map
+                                                                                 (fn [[k v]]
+                                                                                   [k
+                                                                                    (if (sequential? v)
+                                                                                      (vec
+                                                                                       (remove
+                                                                                        (comp :class-starting-equipment? ::entity/value)
+                                                                                        v))
+                                                                                      v)])
+                                                                                 options)))))]
+                                                (reduce
+                                                 (fn [new-s associated-option]
+                                                   (update-in
+                                                    new-s
+                                                    [:character ::entity/options]
+                                                    (fn [options]
+                                                      (merge-with
+                                                       (comp vec concat)
+                                                       associated-option
+                                                       options))))
+                                                 with-new-class
+                                                 associated-options))))))}
                (doall
                 (map
                  (fn [{:keys [::t/key ::t/name]}]
@@ -1052,7 +1084,7 @@
           [:option.builder-dropdown-item
            {:value key}
            name])
-        (remove #(selected-keys (::t/key %)) options)))]
+        (sort-by ::t/name (remove #(selected-keys (::t/key %)) options))))]
      (if (seq selected-items)
        [:div.flex.f-s-12.opacity-5.m-t-10.justify-cont-s-b
         [:div.m-r-10 "Equipped?"]
@@ -1834,7 +1866,8 @@
         total-con-bonus (* con-bonus (inc (count selections)))
         total-misc-bonus (* misc-bonus (inc (count selections)))
         total-level-bonus (+ total-con-bonus total-misc-bonus)
-        by-class (group-by :class all-level-values)]
+        by-class (group-by :class all-level-values)
+        total-hps (+ total-con-bonus total-misc-bonus total-base-hps)]
     [:div.m-t-5.p-5
      [:div.flex.align-items-c.justify-cont-s-b
       [:div.f-s-16.m-b-5
@@ -1843,7 +1876,7 @@
         (if (seq selections)
           [:input.input.w-70.b-3.f-w-b.f-s-16
            {:type :number
-            :value (+ total-con-bonus total-misc-bonus total-base-hps)
+            :value total-hps
             :on-change (fn [e]
                          (let [value (js/parseInt (.. e -target -value))
                                total-value (if (js/isNaN value) 0 (- value first-class-hit-die total-level-bonus))
@@ -1860,7 +1893,7 @@
                                        ::entity/value (if (= first-selection selection)
                                                         (+ average-value remainder)
                                                         average-value)})))))}]
-          total-base-hps)]]
+          total-hps)]]
       [:button.form-button.p-10
        {:on-click (fn [_]
                     (doseq [selection selections]
@@ -1951,7 +1984,7 @@
            [:td.p-5 total-base-hps]
            [:td.p-5 (common/bonus-str total-con-bonus)]
            [:td.p-5 (common/bonus-str total-misc-bonus)]
-           [:td.p-5 (+ total-base-hps total-con-bonus total-misc-bonus)]]]]])]))
+           [:td.p-5 total-hps]]]]])]))
 
 (defn sum-remaining [built-template character selections]
   (apply + (map #(Math/abs (count-remaining built-template character %)) selections)))

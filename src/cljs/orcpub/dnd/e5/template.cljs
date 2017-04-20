@@ -1353,6 +1353,18 @@
    (class-help-field "Weapon Proficiencies" (s/join ", " (map (comp name key) weapon-profs)))
    (class-help-field "Armor Proficiencies" (s/join ", " (map (comp name key) armor-profs)))])
 
+(defn class-starting-equipment-entity-option [[k num]]
+  {::entity/key k
+   ::entity/value {:quantity num :equipped? true :class-starting-equipment? true}})
+
+(defn class-starting-equipment-entity-options [key items]
+  (prn "STARTING EQUIPMENT ENTITYOPTIOSN" key items)
+  (if items
+    {key
+     (mapv
+      class-starting-equipment-entity-option
+      items)}))
+
 (defn class-option [{:keys [name
                             help
                             hit-die
@@ -1418,6 +1430,11 @@
                        :min 1
                        :sequential? true
                        :max nil})]))
+      :associated-options (remove
+                           nil?
+                           [(class-starting-equipment-entity-options :weapons weapons)
+                            (class-starting-equipment-entity-options :armor armor)
+                            (class-starting-equipment-entity-options :equipment equipment)])
       :modifiers (concat
                   modifiers
                   (if armor-profs (armor-prof-modifiers armor-profs kw))
@@ -1426,21 +1443,6 @@
                   (if level-factor [(mod5e/spell-slot-factor kw level-factor)])
                   (if (and source (not plugin?))
                     [(mod5e/used-resource source name)])
-                  (if weapons
-                    (map
-                     (fn [[k num]]
-                       (mod5e/weapon k num))
-                     weapons))
-                  (if armor
-                    (map
-                     (fn [[k num]]
-                       (mod5e/armor k num))
-                     armor))
-                  (if equipment
-                    (map
-                     (fn [[k num]]
-                       (mod5e/equipment k num))
-                     equipment))
                   (remove
                    nil?
                    [(mod5e/cls kw)
@@ -2697,7 +2699,7 @@
                                :page 79
                                :level 18
                                :summary "use 8 ki points to cast the astral projection spell"})]}}
-    :equipment {:dart 10}
+    :weapons {:dart 10}
     :traits [{:name "Ki-Empowered Strikes"
               :page 79
               :level 6
@@ -3138,7 +3140,7 @@
                                    :explorers-pack 1}}]
     :weapons {:longbow 1}
     :equipment {:quiver 1
-                :arrows 20}
+                :arrow 20}
     :modifiers [(mod5e/dependent-trait
                    {:name "Favored Enemy"
                     :page 91
@@ -3580,7 +3582,7 @@
                         {:name "Spellcasting Equipment"
                          :options {:component-pouch 1
                                    :arcane-focus 1}}]
-    :weapons {:dagger 1}
+    :weapons {:dagger 2}
     :subclass-title "Sorcerous Origin"
     :subclass-level 1
     :subclasses [{:name "Draconic Bloodline"
@@ -3670,6 +3672,7 @@
                         {:name "Spellcasting Equipment"
                          :options {:component-pouch 1
                                    :arcane-focus 1}}]
+    :equipment {:spellbook 1}
     :profs {:weapon {:dagger true :dart true :sling true :quarterstaff true :crossbow-light true}
             :save {:int true :wis true}
             :skill-options {:choose 2 :options {:arcana true :history true :insight true :investigation true :medicine true :religion true}}}
