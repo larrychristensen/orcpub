@@ -355,11 +355,10 @@
     :options elemental-disciplines}))
 
 (defn language-option [{:keys [name key]}]
-  (t/option
-   name
-   key
-   nil
-   [(modifiers/language key)]))
+  (t/option-cfg
+   {:name name
+    :modifiers [(modifiers/language key)]
+    :prereqs [(t/option-prereq "You already have this language" (fn [c] (not ((es/entity-val c :languages) key))))]}))
 
 (def class-names
   {:barbarian "Barbarian"
