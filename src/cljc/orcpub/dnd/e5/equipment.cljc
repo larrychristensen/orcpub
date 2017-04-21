@@ -112,6 +112,13 @@
     {:name "Emblem" :cost {:num 5 :type :gp} :weight "—"}
     {:name "Reliquary" :cost {:num 5 :type :gp} :weight "2 lb."}]))
 
+(def clothes
+  (common/add-keys
+   [{:name "Clothes, common" :cost {:num 5 :type :sp} :weight "3 lb."}
+    {:name "Clothes, costume" :cost {:num 5 :type :gp} :weight "4 lb."}
+    {:name "Clothes, fine" :cost {:num 15 :type :gp} :weight "6 lb."}
+    {:name "Clothes, traveler’s" :cost {:num 2 :type :gp} :weight "4 lb."}]))
+
 
 (def adventuring-gear
   (concat
@@ -119,6 +126,7 @@
    arcane-focuses
    druidic-focuses
    holy-symbols
+   clothes
    (common/add-keys
     [{:name "Abacus" :cost {:num 2 :type :gp} :weight "2 lb."}
      {:name "Acid" :sell-container :vial :cost {:num 25 :type :gp} :weight "1 lb."}
@@ -146,10 +154,6 @@
      {:name "Chalk" :sell-container :piece :cost {:num 1 :type :cp} :weight "—"}
      {:name "Chest" :cost {:num 5 :type :gp} :weight "25 lb."}
      {:name "Climber’s kit" :cost {:num 25 :type :gp} :weight "12 lb."}
-     {:name "Clothes, common" :cost {:num 5 :type :sp} :weight "3 lb."}
-     {:name "Clothes, costume" :cost {:num 5 :type :gp} :weight "4 lb."}
-     {:name "Clothes, fine" :cost {:num 15 :type :gp} :weight "6 lb."}
-     {:name "Clothes, traveler’s" :cost {:num 2 :type :gp} :weight "4 lb."}
      {:name "Component pouch" :cost {:num 25 :type :gp} :weight "2 lb."}
      {:name "Costume"}
      {:name "Crowbar" :cost {:num 2 :type :gp} :weight "5 lb."}
@@ -323,7 +327,19 @@
    {:key :gp
     :name "Gold Pieces (GP)"}
    {:key :pp
-    :name "Platinum Pieces (PP)"}])
+    :name "Platinum Pieces (PP)"}
+   {:key :gem-10-gp
+    :name "Gem (10 GP)"}
+   {:key :gem-50-gp
+    :name "Gem (50 GP)"}
+   {:key :gem-100-gp
+    :name "Gem (100 GP)"}
+   {:key :gem-500-gp
+    :name "Gem (500 GP)"}
+   {:key :gem-1000-gp
+    :name "Gem (1000 GP)"}
+   {:key :gem-5000-gp
+    :name "Gem (5000 GP)"}])
 
 (def treasure-map
   (zipmap (map :key treasure) treasure))

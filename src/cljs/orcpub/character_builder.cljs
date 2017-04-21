@@ -2077,7 +2077,7 @@
              {:key :magic-armor :ui-fn (partial inventory-selector mi5e/magic-armor-map 60)}
              {:key :equipment :ui-fn #(inventory-selector equip5e/equipment-map 60 % %2 :custom-equipment)}
              {:key :other-magic-items :ui-fn (partial inventory-selector mi5e/other-magic-item-map 60)}
-             {:key :treasure :ui-fn (partial inventory-selector equip5e/treasure-map 100)}]}])
+             {:key :treasure :ui-fn #(inventory-selector equip5e/treasure-map 100 % %2 :custom-treasure)}]}])
 
 (defn section-tabs [available-selections built-template character page-index]
   [:div.flex.justify-cont-s-a
