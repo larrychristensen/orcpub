@@ -4486,9 +4486,10 @@ long rest."})]
                    :profs {:skill {:medicine true :religion true}
                            :tool {:herbalism-kit true}}
                    :equipment {:case-map-or-scroll 1
-                               :blanket 1
                                :clothes-common 1
                                :herbalism-kit 1}
+                   :custom-equipment {"Winter Blanket" 1
+                                      "Notes from studies/prayers" 1}
                    :treasure {:gp 5}}
                   {:name "Noble"
                    :help "You are of noble birth."
@@ -4503,13 +4504,47 @@ long rest."})]
                                :purse 1}
                    :custom-equipment {"Scoll of Pedigree" 1}
                    :treasure {:gp 25}}
+                  {:name "Outlander"
+                   :help "You were raised in the wilds."
+                   :traits [{:name "Wanderer"
+                             :page 136
+                             :summary "Your memory of maps, geography, settlements, and terrain is excellent. You can find fresh food and water for you and 5 other people."}]
+                   :profs {:skill {:athletics true :survival true}
+                           :tool-options {:musical-instrument 1}}
+                   :equipment {:staff 1
+                               :clothes-traveler-s 1
+                               :pouch 1}
+                   :custom-equipment {"Hunting Trap" 1
+                                      "Trophy from Animal You Killed" 1}
+                   :treasure {:gp 10}}
                   {:name "Sage"
                    :help "You spent your life studying lore."
                    :traits [{:name "Researcher"
                              :page 139
                              :summary "If you don't know a piece of info you often know where to find it"}]
                    :profs {:skill {:arcana true :history true}
-                           :language-options {:choose 2 :options {:any true}}}}
+                           :language-options {:choose 2 :options {:any true}}}
+                   :equipment {:ink 1
+                               :clothes-common 1
+                               :pouch 1
+                               :knife-small 1}
+                   :custom-equipment {"Quill" 1
+                                      "Letter with question from dead colleague" 1}
+                   :treasure {:gp 10}}
+                  {:name "Sailor"
+                   :help "You were a member of a crew for a seagoing vessel."
+                   :traits [{:name "Ship's Passage"
+                             :page 139
+                             :summary "You are able to secure free passage on a sailing ship"}]
+                   :profs {:skill {:athletics true :perception true}
+                           :tool {:navigators-tools true :water-vehices true}}
+                   :weapons {:club 1}
+                   :equipment {:rope-silk 1
+                               :clothes-common 1
+                               :pouch 1}
+                   :custom-equipment {"Belaying Pin" 1
+                                      "Lucky Charm" 1}
+                   :treasure {:gp 10}}
                   {:name "Soldier"
                    :help "You have spent your living by the sword."
                    :traits [{:name "Military Rank"
@@ -4517,28 +4552,29 @@ long rest."})]
                              :summary "Where recognized, your previous rank provides influence among military"}]
                    :profs {:skill {:athletics true :intimidation true}
                            :tool {:land-vehicles true}
-                           :tool-options {:gaming-set 1}}}
-                  {:name "Outlander"
-                   :help "You were raised in the wilds."
-                   :traits [{:name "Wanderer"
-                             :page 136
-                             :summary "Your memory of maps, geography, settlements, and terrain is excellent. You can find fresh food and water for you and 5 other people."}]
-                   :profs {:skill {:athletics true :survival true}
-                           :tool-options {:musical-instrument 1}}}
-                  {:name "Sailor"
-                   :help "You were a member of a crew for a seagoing vessel."
-                   :traits [{:name "Ship's Passage"
-                             :page 139
-                             :summary "You are able to secure free passage on a sailing ship"}]
-                   :profs {:skill {:athletics true :perception true}
-                           :tool {:navigators-tools true :water-vehices true}}}
+                           :tool-options {:gaming-set 1}}
+                   :equipment {:clothes-common 1
+                               :pouch 1}
+                   :equipment-choices [{:name "Dice or Cards"
+                                        :options {:dice-set 1
+                                                  :playing-card-set 1}}]
+                   :custom-equipment {"Insignia of Rank" 1
+                                      "Trophy from Fallen Enemy" 1}
+                   :treasure {:gp 10}}
                   {:name "Urchin"
                    :help "You were a poor orphan living on the streets."
                    :traits [{:name "City Streets"
                              :page 141
                              :summary "You can travel twice your normal speed between city locations"}]
                    :profs {:skill {:sleight-of-hand true :stealth true}
-                           :tool {:disguise-kit true :thieves-tools true}}}])
+                           :tool {:disguise-kit true :thieves-tools true}}
+                   :equipment {:knife-small 1
+                               :clothes-common 1
+                               :pouch 1}
+                   :custom-equipment {"Map of city you grew up in" 1
+                                      "Pet mouse" 1
+                                      "Token to remember your parents" 1}
+                   :treasure {:gp 10}}])
 
 (def custom-equipment-path [:character ::entity/values :custom-equipment])
 
