@@ -31,7 +31,7 @@
 
             [reagent.core :as r]))
 
-(def print-enabled? true)
+(def print-enabled? false)
 
 (declare app-state)
 
@@ -483,7 +483,8 @@
   [list-display-section title icon-name
    (map
     (fn [[equipment-kw {item-qty :quantity equipped? :equipped? :as num}]]
-      (str (:name (equipment-map equipment-kw)) " (" (or item-qty num) ")"))
+      (str (disp5e/equipment-name equipment-map equipment-kw)
+           " (" (or item-qty num) ")"))
     equipment)])
 
 (defn add-links [desc]
@@ -675,7 +676,11 @@
        (if (seq spells-known) [spells-known-section spells-known])
        [equipment-section "Weapons" "plain-dagger" (concat magic-weapons weapons) mi5e/all-weapons-map]
        [equipment-section "Armor" "breastplate" (merge magic-armor armor) mi5e/all-armor-map]
-       [equipment-section "Equipment" "backpack" (concat magic-items equipment) mi5e/all-equipment-map]
+       [equipment-section "Equipment" "backpack" (concat magic-items
+                                                         equipment
+                                                         (map
+                                                          (juxt :name identity)
+                                                          (es/entity-val built-char :custom-equipment))) mi5e/all-equipment-map]
        [attacks-section attacks]
        [actions-section "Actions" "beams-aura" actions]
        [actions-section "Bonus Actions" "run" bonus-actions]
@@ -948,38 +953,16 @@
                                             (fn [s]
                                               (let [new-class-option (options-map new-key)
                                                     associated-options (::t/associated-options new-class-option)
-                                                    with-new-class (-> s
-                                                                       (assoc-in
-                                                                        [:character ::entity/options :class i]
-                                                                        {::entity/key new-key
-                                                                         ::entity/options
-                                                                         {:levels [{::entity/key :level-1}]}})
-                                                                       (update-in
-                                                                        [:character ::entity/options]
-                                                                        (fn [options]
-                                                                          (into {}
-                                                                                (map
-                                                                                 (fn [[k v]]
-                                                                                   [k
-                                                                                    (if (sequential? v)
-                                                                                      (vec
-                                                                                       (remove
-                                                                                        (comp :class-starting-equipment? ::entity/value)
-                                                                                        v))
-                                                                                      v)])
-                                                                                 options)))))]
-                                                (reduce
-                                                 (fn [new-s associated-option]
-                                                   (update-in
-                                                    new-s
-                                                    [:character ::entity/options]
-                                                    (fn [options]
-                                                      (merge-with
-                                                       (comp vec concat)
-                                                       associated-option
-                                                       options))))
-                                                 with-new-class
-                                                 associated-options))))))}
+                                                    with-new-class (assoc-in
+                                                                    s
+                                                                    [:character ::entity/options :class i]
+                                                                    {::entity/key new-key
+                                                                     ::entity/options
+                                                                     {:levels [{::entity/key :level-1}]}})
+                                                    without-starting-equipment (t5e/remove-starting-equipment with-new-class :class-starting-equipment)]
+                                                (if (zero? i)
+                                                  (t5e/add-associated-options without-starting-equipment associated-options)
+                                                  with-new-class))))))}
                (doall
                 (map
                  (fn [{:keys [::t/key ::t/name]}]
@@ -1054,8 +1037,36 @@
                      (if disable?
                        "opacity-5"))}])
 
+(defn inventory-item [{:keys [selection-key
+                              item-key
+                              item-name
+                              item-qty
+                              item-description
+                              equipped?
+                              expanded?
+                              i
+                              qty-input-width
+                              check-fn
+                              qty-change-fn
+                              remove-fn]}]
+  ^{:key item-key}
+  [:div.p-5
+   [:div.f-w-b.flex.align-items-c
+    [:div.pointer.m-l-5
+     {:on-click check-fn}
+     (checkbox equipped? false)]
+    [:div.flex-grow-1 item-name]
+    (if item-description [:div.w-60 [show-info-button expanded? [selection-key item-key]]])
+    [:input.input.m-l-5.m-t-0.
+     {:class-name (str "w-" (or qty-input-width 60))
+      :type :number
+      :value item-qty
+      :on-change qty-change-fn}]
+    [:i.fa.fa-minus-circle.orange.f-s-16.m-l-5.pointer
+     {:on-click remove-fn}]]
+   (if expanded? [:div.m-t-5 item-description])])
 
-(defn inventory-selector [item-map qty-input-width character {:keys [::t/key ::t/options]}]
+(defn inventory-selector [item-map qty-input-width character {:keys [::t/key ::t/options]} & [custom-equipment-key]]
   (let [selected-items (get-in @app-state [:character ::entity/options key])
         selected-keys (into #{} (map ::entity/key selected-items))]
     [:div
@@ -1092,34 +1103,64 @@
      [:div
       (doall
        (map-indexed
-        (fn [i {item-key ::entity/key {item-qty :quantity equipped? :equipped?} ::entity/value}]
+        (fn [i {item-key ::entity/key {item-qty :quantity equipped? :equipped? item-name :name} ::entity/value}]
           (let [item (item-map item-key)
-                item-name (:name item)
+                item-name (or item-name (:name item))
                 item-description (:description item)
                 expanded? (get-in @app-state [:expanded-paths [key item-key]])]
-            ^{:key item-key}
-            [:div.p-5
-             [:div.f-w-b.flex.align-items-c
-              [:div.pointer.m-l-5
-               {:on-click (fn [_] (swap! app-state
-                                         update-in
-                                         [:character ::entity/options key i ::entity/value :equipped?]
-                                         not))}
-               (checkbox equipped? false)]
-              [:div.flex-grow-1 item-name]
-              (if item-description [:div.w-60 [show-info-button expanded? [key item-key]]])
-              [:input.input.m-l-5.m-t-0.
-               {:class-name (str "w-" (or qty-input-width 60))
-                :type :number
-                :value item-qty
-                :on-change (fn [e] (swap! app-state assoc-in [:character ::entity/options key i ::entity/value :quantity] (.. e -target -value)))}]
-              [:i.fa.fa-minus-circle.orange.f-s-16.m-l-5.pointer
-               {:on-click (fn [_] (swap! app-state
-                                         update-in
-                                         [:character ::entity/options key]
-                                         (fn [items] (vec (remove #(= item-key (::entity/key %)) items)))))}]]
-             (if expanded? [:div.m-t-5 item-description])]))
-        selected-items))]]))
+            (inventory-item {:selection-key key
+                             :item-key item-key
+                             :item-name item-name
+                             :item-qty item-qty
+                             :item-description item-description
+                             :equipped? equipped?
+                             :expanded? expanded?
+                             :i i
+                             :qty-input-width qty-input-width
+                             :check-fn (fn [_]
+                                         (swap! app-state
+                                                update-in
+                                                [:character ::entity/options key i ::entity/value :equipped?]
+                                                not))
+                             :qty-change-fn (fn [e] (swap! app-state
+                                                           assoc-in
+                                                           [:character ::entity/options key i ::entity/value]
+                                                           {:equipped? equipped? :quantity (.. e -target -value)}))
+                             :remove-fn (fn [_] (swap! app-state
+                                                       update-in
+                                                       [:character ::entity/options key]
+                                                       (fn [items] (vec (remove #(= item-key (::entity/key %)) items)))))})))
+        selected-items))]
+     (if custom-equipment-key
+       [:div
+        (doall
+         (map-indexed
+          (fn [i {:keys [name quantity equipped?]}]
+            (let [item-key (common/name-to-kw name)]
+              (inventory-item {:selection-key custom-equipment-key
+                               :item-key item-key
+                               :item-name name
+                               :item-qty quantity
+                               :equipped? equipped?
+                               :i i
+                               :qty-input-width qty-input-width
+                               :check-fn (fn [_]
+                                           (swap! app-state
+                                                  update-in
+                                                  [:character ::entity/values custom-equipment-key i :equipped?]
+                                                  not))
+                               :qty-change-fn (fn [e]
+                                                (swap! app-state
+                                                       assoc-in
+                                                       [:character ::entity/values custom-equipment-key i]
+                                                       {:name name :quantity (.. e -target -value) :equipped? equipped?}))
+                               :remove-fn (fn [_]
+                                            (swap! app-state
+                                                   update-in
+                                                   [:character ::entity/values custom-equipment-key]
+                                                   (fn [items]
+                                                     (vec (remove #(= name (:name %)) items)))))})))
+          (get-in @app-state [:character ::entity/values custom-equipment-key])))])]))
 
 (defn option-selector-base [{:keys [name key help selected? selectable? option-path select-fn content explanation-text icon classes multiselect? disable-checkbox?]}]
   (let [expanded? (get-in @app-state [:expanded-paths option-path])]
@@ -2034,7 +2075,7 @@
              {:key :magic-weapons :ui-fn (partial inventory-selector mi5e/magic-weapon-map 60)}
              {:key :armor :ui-fn (partial inventory-selector armor5e/armor-map 60)}
              {:key :magic-armor :ui-fn (partial inventory-selector mi5e/magic-armor-map 60)}
-             {:key :equipment :ui-fn (partial inventory-selector equip5e/equipment-map 60)}
+             {:key :equipment :ui-fn #(inventory-selector equip5e/equipment-map 60 % %2 :custom-equipment)}
              {:key :other-magic-items :ui-fn (partial inventory-selector mi5e/other-magic-item-map 60)}
              {:key :treasure :ui-fn (partial inventory-selector equip5e/treasure-map 100)}]}])
 

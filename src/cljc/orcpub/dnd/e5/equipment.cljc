@@ -187,6 +187,9 @@
      {:name "Pot, iron" :cost {:num 2 :type :gp} :weight "10 lb."}
      {:name "Potion of healing" :cost {:num 50 :type :gp} :weight "1/2 lb."}
      {:name "Pouch" :cost {:num 5 :type :sp} :weight "1 lb."}
+     {:name "Prayer Book"}
+     {:name "Prayer Wheel"}
+     {:name "Purse"}
      {:name "Quiver" :cost {:num 1 :type :gp} :weight "1 lb."}
      {:name "Ram, portable" :cost {:num 4 :type :gp} :weight "35 lb."}
      {:name "Rations (1 day)" :cost {:num 5 :type :sp} :weight "2 lb."}

@@ -298,7 +298,7 @@
                    (get-in-lazy template template-path)))]
     (::t/modifiers option)))
 
-(defn collect-modifiers-2 [raw-entity flat-options template]
+(defn collect-modifiers [raw-entity flat-options template]
   (let [ref-selection-map (make-ref-selection-map raw-entity template)]
     (mapcat
      (fn [{path ::t/path
@@ -317,7 +317,7 @@
 
 (defn apply-options [raw-entity template]
   (let [options (flatten-options (::options raw-entity))
-        modifiers (sort-by ::mods/order (collect-modifiers-2 raw-entity options template))
+        modifiers (sort-by ::mods/order (collect-modifiers raw-entity options template))
         deps (reduce
               (fn [m {:keys [::mods/key ::mods/deps]}]
                 (if (seq deps)

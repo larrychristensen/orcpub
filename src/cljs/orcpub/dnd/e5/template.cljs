@@ -1260,7 +1260,7 @@
                     (t/option-cfg
                      {:name "<none>"
                       :key :none}))
-     :prereq-fn (first-class? class-kw)})))
+     :prereq-fn (if class-kw (first-class? class-kw))})))
 
 (defn equipment-option [class-kw [k num]]
   (let [equipment (equip5e/equipment-map k)]
@@ -1353,17 +1353,24 @@
    (class-help-field "Weapon Proficiencies" (s/join ", " (map (comp name key) weapon-profs)))
    (class-help-field "Armor Proficiencies" (s/join ", " (map (comp name key) armor-profs)))])
 
-(defn class-starting-equipment-entity-option [[k num]]
+(defn starting-equipment-entity-option [indicator-key [k num]]
   {::entity/key k
-   ::entity/value {:quantity num :equipped? true :class-starting-equipment? true}})
+   ::entity/value {:quantity num
+                   :equipped? true
+                   indicator-key true}})
 
-(defn class-starting-equipment-entity-options [key items]
-  (prn "STARTING EQUIPMENT ENTITYOPTIOSN" key items)
+(defn starting-equipment-entity-options [indicator-key key items]
   (if items
     {key
      (mapv
-      class-starting-equipment-entity-option
+      (partial starting-equipment-entity-option indicator-key)
       items)}))
+
+(defn class-starting-equipment-entity-options [key items]
+  (starting-equipment-entity-options :class-starting-equipment? key items))
+
+(defn background-starting-equipment-entity-options [key items]
+  (starting-equipment-entity-options :background-starting-equipment? key items))
 
 (defn class-option [{:keys [name
                             help
@@ -1638,6 +1645,10 @@
     5 8
     6))
 
+(def musical-instrument-choice-cfg
+  {:name "Musical Instrument"
+   :options (zipmap (map :key equip5e/musical-instruments) (repeat 1))})
+
 (def bard-option
   (class-option
    {:name "Bard"
@@ -1659,8 +1670,7 @@
     :equipment-choices [{:name "Equipment Pack"
                          :options {:diplomats-pack 1
                                    :entertainers-pack 1}}
-                        {:name "Musical Instrument"
-                         :options (zipmap (map :key equip5e/musical-instruments) (repeat 1))}]
+                        musical-instrument-choice-cfg]
     :armor {:leather 1}
     :spellcaster true
     :spellcasting {:level-factor 1
@@ -1831,7 +1841,7 @@
                   :cleric
                   {:name "Holy Symbol"
                    :options (map
-                             starting-equipment-option
+                             #(starting-equipment-option % 1)
                              equip5e/holy-symbols)})]
     :levels {2 {:modifiers [(mod5e/action
                              {:level 2
@@ -4385,13 +4395,40 @@ long rest."})]
      (mod5e/trait "Evocation Savant")
      (mod5e/trait "Sculpt Spells")])])
 
+(def artisans-tools-choice-cfg)
+
 (def backgrounds [{:name "Acolyte"
                    :help "Your life has been devoted to serving a god or gods."
                    :profs {:skill {:insight true, :religion true}
                            :language-options {:choose 2 :options {:any true}}}
+                   :equipment {:clothes-common 1
+                               :pouch 1
+                               :incense 5
+                               :vestements 1}
+                   :selections [(new-starting-equipment-selection
+                                 nil
+                                 {:name "Holy Symbol"
+                                  :options (map
+                                            #(starting-equipment-option % 1)
+                                            equip5e/holy-symbols)})]
+                   :equipment-choices [{:name "Prayer Book/Wheel"
+                                        :options {:prayer-book 1
+                                                  :prayer-wheel 1}}]
+                   :treasure {:gp 15}
                    :traits [{:name "Shelter the Faithful"
                              :page 127
-                             :summary "You and your companions can expect free healing at an establishment of your faith."}]},
+                             :summary "You and your companions can expect free healing at an establishment of your faith."}]}
+                  {:name "Charlatan"
+                   :help "You have a history of being able to work people to your advantage."
+                   :traits [{:name "False Identity"
+                             :page 128
+                             :summary "you have a false identity; you can forge documents"}]
+                   :profs {:skill {:deception true :sleight-of-hand true}
+                           :tool {:disguise-kit true :forgery-kit true}}
+                   :equipment {:clothes-fine 1
+                               :disguise-kit 1
+                               :pouch 1}
+                   :treasure {:gp 15}}
                   {:name "Criminal"
                    :help "You have a history of criminal activity."
                    :traits [{:name "Criminal Contact"
@@ -4399,7 +4436,23 @@ long rest."})]
                              :summary "You have a contact into a network of criminals"}]
                    :profs {:skill {:deception true, :stealth true}
                            :tool {:thieves-tools true}
-                           :tool-options {:gaming-set 1}}}
+                           :tool-options {:gaming-set 1}}
+                   :equipment {:crowbar 1
+                               :clothes-common 1
+                               :pouch 1}
+                   :treasure {:gp 15}}
+                  {:name "Entertainer"
+                   :help "You have a history of entertaining people."
+                   :traits [{:name "By Popular Demand"
+                             :page 130
+                             :summary "you are able to find a place to perform, in which you will recieve free food and lodging"}]
+                   :profs {:skill {:acrobatics true :performance true}
+                           :tool {:disguise-kit true}
+                           :tool-options {:musical-instrument 1}}
+                   :equipment-choices [musical-instrument-choice-cfg]
+                   :equipment {:costume 1
+                               :pouch 1}
+                   :treasure {:gp 15}}
                   {:name "Folk Hero"
                    :help "You are regarded as a hero by the people of your home village."
                    :traits [{:name "Rustic Hospitality"
@@ -4407,7 +4460,36 @@ long rest."})]
                              :summary "find a place to rest, hide, or recuperate among commoners"}]
                    :profs {:skill {:animal-handling true :survival true}
                            :tool {:land-vehicles true}
-                           :tool-options {:artisans-tool 1}}}
+                           :tool-options {:artisans-tool 1}}
+                   :equipment-choices [artisans-tools-choice-cfg]
+                   :equipment {:shovel 1
+                               :pot-iron 1
+                               :clothes-common 1
+                               :pouch 1}
+                   :treasure {:gp 10}}
+                  {:name "Guild Artisan"
+                   :help "You are an artisan and a member of a guild in a particular field."
+                   :traits [{:name "Guild Membership"
+                             :page 133
+                             :summary "fellow guild members will provide you with food and lodging; you have powerful political connections through your guild"}]
+                   :profs {:skill {:insight true :persuasion true}
+                           :tool-options {:artisans-tool 1}}
+                   :equipment-choices [artisans-tools-choice-cfg]
+                   :equipment {:clothes-traveler-s 1
+                               :pouch 1}
+                   :treasure {:gp 15}}
+                  {:name "Hermit"
+                   :help "You have lived a secluded life."
+                   :traits [{:name "Discovery"
+                             :page 134
+                             :summary "You have made a powerful and unique discovery"}]
+                   :profs {:skill {:medicine true :religion true}
+                           :tool {:herbalism-kit true}}
+                   :equipment {:case-map-or-scroll 1
+                               :blanket 1
+                               :clothes-common 1
+                               :herbalism-kit 1}
+                   :treasure {:gp 5}}
                   {:name "Noble"
                    :help "You are of noble birth."
                    :traits [{:name "Position of Priviledge"
@@ -4415,7 +4497,12 @@ long rest."})]
                              :summary "you are welcome in high society and common folk try to accomodate you"}]
                    :profs {:skill {:history true :persuasion true}
                            :tool-options {:gaming-set 1}
-                           :language-options {:choose 1 :options {:any true}}}}
+                           :language-options {:choose 1 :options {:any true}}}
+                   :equipment {:clothes-fine 1
+                               :signet-ring 1
+                               :purse 1}
+                   :custom-equipment {"Scoll of Pedigree" 1}
+                   :treasure {:gp 25}}
                   {:name "Sage"
                    :help "You spent your life studying lore."
                    :traits [{:name "Researcher"
@@ -4431,35 +4518,6 @@ long rest."})]
                    :profs {:skill {:athletics true :intimidation true}
                            :tool {:land-vehicles true}
                            :tool-options {:gaming-set 1}}}
-                  {:name "Charlatan"
-                   :help "You have a history of being able to work people to your advantage."
-                   :traits [{:name "False Identity"
-                             :page 128
-                             :summary "you have a false identity; you can forge documents"}]
-                   :profs {:skill {:deception true :sleight-of-hand true}
-                           :tool {:disguise-kit true :forgery-kit true}}}
-                  {:name "Entertainer"
-                   :help "You have a history of entertaining people."
-                   :traits [{:name "By Popular Demand"
-                             :page 130
-                             :summary "you are able to find a place to perform, in which you will recieve free food and lodging"}]
-                   :profs {:skill {:acrobatics true :performance true}
-                           :tool {:disguise-kit true}
-                           :tool-options {:musical-instrument 1}}}
-                  {:name "Guild Artisan"
-                   :help "You are an artisan and a member of a guild in a particular field."
-                   :traits [{:name "Guild Membership"
-                             :page 133
-                             :summary "fellow guild members will provide you with food and lodging; you have powerful political connections through your guild"}]
-                   :profs {:skill {:insight true :persuasion true}
-                           :tool-options {:artisans-tool 1}}}
-                  {:name "Hermit"
-                   :help "You have lived a secluded life."
-                   :traits [{:name "Discovery"
-                             :page 134
-                             :summary "You have made a powerful and unique discovery"}]
-                   :profs {:skill {:medicine true :religion true}
-                           :tool {:herbalism-kit true}}}
                   {:name "Outlander"
                    :help "You were raised in the wilds."
                    :traits [{:name "Wanderer"
@@ -4482,6 +4540,73 @@ long rest."})]
                    :profs {:skill {:sleight-of-hand true :stealth true}
                            :tool {:disguise-kit true :thieves-tools true}}}])
 
+(def custom-equipment-path [:character ::entity/values :custom-equipment])
+
+(defn remove-custom-starting-equipment [state equipment-indicator]
+  (update-in
+   state
+   custom-equipment-path
+   (fn [equipment]
+     (vec
+      (remove
+       :background-starting-equipment?
+       equipment)))))
+
+(defn remove-starting-equipment [state equipment-indicator]
+  (update-in
+   state
+   [:character ::entity/options]
+   (fn [options]
+     (into {}
+           (map
+            (fn [[k v]]
+              [k
+               (if (sequential? v)
+                 (vec
+                  (remove
+                   (comp equipment-indicator ::entity/value)
+                   v))
+                 v)])
+            options)))))
+
+(defn add-associated-options [state associated-options]
+  (reduce
+   (fn [new-s associated-option]
+     (update-in
+      new-s
+      [:character ::entity/options]
+      (fn [options]
+        (merge-with
+         (fn [o1 o2]
+           (let [ks (into #{} (map ::entity/key o1))]
+             (vec
+              (concat
+               o1
+               (remove (comp ks ::entity/key) o2)))))
+         options
+         associated-option))))
+   state
+   associated-options))
+
+(defn add-custom-equipment [state custom-equipment]
+  (update-in
+      state
+      custom-equipment-path
+      (fn [equipment]
+        (let [current-names (into #{} (map :name equipment))]
+          (vec
+           (concat
+            equipment
+            (remove
+             (comp current-names :name)
+             (map
+              (fn [[nm num]]
+                {:name nm
+                 :quantity num
+                 :equipped? true
+                 :background-starting-equipment? true})
+              custom-equipment))))))))
+
 (defn background-option [{:keys [name
                                  help
                                  page
@@ -4491,21 +4616,37 @@ long rest."})]
                                  weapon-choices
                                  weapons
                                  equipment
+                                 custom-equipment
                                  equipment-choices
                                  armor
                                  armor-choices
+                                 treasure
                                  traits]
-                          :as cls}]
+                          :as background}]
   (let [kw (common/name-to-kw name)
         {:keys [skill skill-options tool-options tool language-options]
          armor-profs :armor weapon-profs :weapon} profs
         {skill-num :choose options :options} skill-options
-        skill-kws (if (:any options) (map :key skill5e/skills) (keys options))]
+        skill-kws (if (:any options) (map :key skill5e/skills) (keys options))
+        equipment-options (remove
+                            nil?
+                            [(background-starting-equipment-entity-options :weapons weapons)
+                             (background-starting-equipment-entity-options :armor armor)
+                             (background-starting-equipment-entity-options :equipment equipment)
+                             (background-starting-equipment-entity-options :treasure treasure)])]
     (t/option-cfg
      {:name name
       :key kw
       :help help
       :page page
+      :select-fn (fn [_ app-state]
+                    (swap! app-state
+                           (fn [state]
+                             (-> state
+                                 (remove-starting-equipment :background-starting-equipment?)
+                                 (add-associated-options equipment-options)
+                                 (remove-custom-starting-equipment :background-starting-equipment?)
+                                 (add-custom-equipment custom-equipment)))))
       :selections (concat
                    selections
                    (if (seq tool-options) [(tool-prof-selection tool-options)])
@@ -4524,19 +4665,7 @@ long rest."})]
                   (map
                    (fn [skill-kw]
                      (mod5e/skill-proficiency skill-kw))
-                   (keys skill))
-                  (map
-                   (fn [[k num]]
-                     (mod5e/weapon k num))
-                   weapons)
-                  (map
-                   (fn [[k num]]
-                     (mod5e/armor k num))
-                   armor)
-                  (map
-                   (fn [[k num]]
-                     (mod5e/equipment k num))
-                   equipment))})))
+                   (keys skill)))})))
 
 (defn volos-guide-to-monsters-selections [app-state]
   [(t/selection-cfg

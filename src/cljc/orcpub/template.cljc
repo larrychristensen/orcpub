@@ -90,7 +90,7 @@
    ::prereq-fn func
    ::hide-if-fail? hide-if-fail?})
 
-(defn option-cfg [{:keys [name key help selections modifiers associated-options prereqs order ui-fn icon] :as cfg}]
+(defn option-cfg [{:keys [name key help selections modifiers associated-options prereqs order ui-fn icon select-fn] :as cfg}]
   {::name name
    ::key (or key (common/name-to-kw name))
    ::help help
@@ -100,6 +100,7 @@
    ::associated-options associated-options
    ::prereqs prereqs
    ::ui-fn ui-fn
+   ::select-fn select-fn
    ::icon icon})
 
 (defn option [name key selections modifiers & [prereqs]]
