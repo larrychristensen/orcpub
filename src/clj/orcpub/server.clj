@@ -233,7 +233,7 @@
                    8890
                    (Integer/parseInt port)))
    ::http/resource-path "/public"
-   #_::http/container-options #_{:context-configurator (fn [c]
+   ::http/container-options {:context-configurator (fn [c]
                                                      (let [gzip-handler (GzipHandler.)]
                                                        (.setGzipHandler c gzip-handler)
                                                        c))}})
