@@ -32,7 +32,7 @@
 
             [reagent.core :as r]))
 
-(def print-enabled? false)
+(def print-enabled? true)
 
 (declare app-state)
 
@@ -1240,10 +1240,10 @@
    (fn [{:keys [::t/name] :as selection}]
      (let [remaining (count-remaining built-template character selection)]
        (cond
-         (pos? remaining) [(str "You have " remaining " more '" name "' selections to make.")]
-         (neg? remaining) [(str "You must remove " (Math/abs remaining) " '" name "' selections.")]
+         (pos? remaining) [(str "You have " remaining " more '" name "' selection" (if (> remaining 1) "s") " to make.")]
+         (neg? remaining) [(str "You must remove " (Math/abs remaining) " '" name "' selection" (if (< remaining -1) "s") ".")]
          :else nil)))
-   selections))
+   (entity/combine-selections selections)))
 
 
 (defn new-option-selector [character built-char built-template option-paths option-path
@@ -2367,7 +2367,7 @@
         al-illegal-reasons (concat (es/entity-val built-char :al-illegal-reasons)
                                    selection-validation-messages)
         used-resources (es/entity-val built-char :used-resources)
-        num-resources (count used-resources)
+        num-resources (count (into #{} (map :resource-key used-resources)))
         multiple-resources? (> num-resources 1)
         al-legal? (and (empty? al-illegal-reasons)
                        (not multiple-resources?))

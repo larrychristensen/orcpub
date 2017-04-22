@@ -4717,7 +4717,7 @@ long rest."})]
      :tags #{:race}
      :options (map
                (fn [race]
-                 (race-option (assoc race :source :scag)))
+                 (race-option (assoc race :source :vgm)))
                [aasimar-option-cfg
                 firbolg-option-cfg
                 goliath-option-cfg
