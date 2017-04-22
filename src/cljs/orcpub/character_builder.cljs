@@ -1235,6 +1235,16 @@
           :else
           0)))
 
+(defn validate-selections [built-template character selections]
+  (mapcat
+   (fn [{:keys [::t/name] :as selection}]
+     (let [remaining (count-remaining built-template character selection)]
+       (cond
+         (pos? remaining) [(str "You have " remaining " more '" name "' selections to make.")]
+         (neg? remaining) [(str "You must remove " (Math/abs remaining) " '" name "' selections.")]
+         :else nil)))
+   selections))
+
 
 (defn new-option-selector [character built-char built-template option-paths option-path
                            {:keys [::t/min ::t/max ::t/options ::t/multiselect?] :as selection}
@@ -2340,8 +2350,9 @@
                                      s
                                      selected-plugins)))
                           template)
-        option-paths (entity/make-path-map (:character @app-state))
-        built-template merged-template ;;(entity/build-template (:character @app-state) merged-template)
+        character (:character @app-state)
+        option-paths (entity/make-path-map character)
+        built-template merged-template
         built-char (entity/build (:character @app-state) built-template)
         active-tab (get-in @app-state tab-path)
         view-width (.-width (gdom/getViewportSize js/window))
@@ -2351,8 +2362,10 @@
         mouseover-option (:mouseover-option @app-state)
         plugins (:plugins @app-state)
         stepper-dismissed? (:stepper-dismissed @app-state)
-        all-selections (entity/available-selections (:character @app-state) built-char built-template)
-        al-illegal-reasons (es/entity-val built-char :al-illegal-reasons)
+        all-selections (entity/available-selections character built-char built-template)
+        selection-validation-messages (validate-selections built-template character all-selections)
+        al-illegal-reasons (concat (es/entity-val built-char :al-illegal-reasons)
+                                   selection-validation-messages)
         used-resources (es/entity-val built-char :used-resources)
         num-resources (count used-resources)
         multiple-resources? (> num-resources 1)
