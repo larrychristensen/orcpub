@@ -653,6 +653,9 @@
 
 (def app
   (concat
+   [[:#app
+     {:background-image "linear-gradient(182deg, #2c3445, #000000)"}]]
+   
    [[:.app
      {:background-image "linear-gradient(182deg, #2c3445, #000000)"
       :font-family font-family
