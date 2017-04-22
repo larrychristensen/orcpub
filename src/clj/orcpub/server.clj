@@ -2,13 +2,15 @@
   (:require [io.pedestal.http :as http]          
             [io.pedestal.http.route :as route]
             [io.pedestal.test :as test]
+            [io.pedestal.http.ring-middlewares :as ring]
             [io.pedestal.interceptor.error :as error-int]
             [clojure.java.io :as io]
             [orcpub.dnd.e5.skills :as skill5e]
             [orcpub.dnd.e5.character :as char5e])
-  (:import [org.apache.pdfbox.pdmodel.interactive.form PDCheckBox PDComboBox PDListBox PDRadioButton PDTextField]
-           [org.apache.pdfbox.pdmodel PDDocument]
-           [java.io ByteArrayOutputStream ByteArrayInputStream])
+  (:import (org.apache.pdfbox.pdmodel.interactive.form PDCheckBox PDComboBox PDListBox PDRadioButton PDTextField)
+           (org.apache.pdfbox.pdmodel PDDocument)
+           (java.io ByteArrayOutputStream ByteArrayInputStream)
+           (org.eclipse.jetty.server.handler.gzip GzipHandler))
   (:gen-class))
 
 (defn response [status body & {:as headers}]
@@ -175,6 +177,36 @@
            (assoc context :response {:status 200 :body (ByteArrayInputStream. a)})))
        (catch Throwable e (prn "EXCEPTION!!!!!!!!!!" e))))})
 
+(defn character-pdf-2
+  [req]
+  (let [body-map (io.pedestal.http.route/parse-query-string (slurp (:body req)))
+        fields (clojure.edn/read-string (:body body-map))
+        input (.openStream (io/resource (cond
+                                          (find fields :spellcasting-class-6) "fillable-char-sheet-6-spells.pdf"
+                                          (find fields :spellcasting-class-5) "fillable-char-sheet-5-spells.pdf"
+                                          (find fields :spellcasting-class-4) "fillable-char-sheet-4-spells.pdf"
+                                          (find fields :spellcasting-class-3) "fillable-char-sheet-3-spells.pdf"
+                                          (find fields :spellcasting-class-2) "fillable-char-sheet-2-spells.pdf"
+                                          (find fields :spellcasting-class-1) "fillable-char-sheet-1-spells.pdf"
+                                          :else "fillable-char-sheet-0-spells.pdf")))
+        output (ByteArrayOutputStream.)
+        user-agent (get-in req [:headers "user-agent"])
+        chrome? (re-matches #".*Chrome.*" user-agent)]
+    (with-open [doc (PDDocument/load input)]
+      (write-fields! doc fields (not chrome?))
+      (.save doc output))
+    (let [a (.toByteArray output)]
+      {:status 200 :body (ByteArrayInputStream. a)})))
+
+(defn html-response
+  [html]
+  {:status 200 :body html :headers {"Content-Type" "text/html"}})
+
+(defn index
+  [req]
+  (html-response
+   (slurp (io/resource "public/index.html"))))
+
 (def service-error-handler
   (error-int/error-dispatch [ctx ex]
     
@@ -190,14 +222,8 @@
 
 (def routes
   (route/expand-routes
-   #{["/character.pdf"        :post   [service-error-handler character-pdf]]
-     ["/todo"                 :post   [db-interceptor list-create]]
-     ["/todo"                 :get    echo :route-name :list-query-form]
-     ["/todo/:list-id"        :get    [entity-render db-interceptor list-view]]
-     ["/todo/:list-id"        :post   [entity-render list-item-view db-interceptor list-item-create]]
-     ["/todo/:list-id/:item"  :get    [entity-render list-item-view]]
-     ["/todo/:list-id/:item"  :put    echo :route-name :list-item-update]
-     ["/todo/:list-id/:item"  :delete echo :route-name :list-item-delete]}))
+   [[["/" {:get `index}]
+     ["/character.pdf" {:post `character-pdf-2}]]]))
 
 (def service
   {::http/routes #(deref #'routes)
@@ -206,7 +232,11 @@
                  (if (clojure.string/blank? port)
                    8890
                    (Integer/parseInt port)))
-   ::http/resource-path "/public"})
+   ::http/resource-path "/public"
+   #_::http/container-options #_{:context-configurator (fn [c]
+                                                     (let [gzip-handler (GzipHandler.)]
+                                                       (.setGzipHandler c gzip-handler)
+                                                       c))}})
 
 (defn start []
   (http/start (http/create-server service)))
