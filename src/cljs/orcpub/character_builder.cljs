@@ -1,5 +1,6 @@
 (ns orcpub.character-builder
   (:require [goog.dom :as gdom]
+            [goog.string :as gs]
             [goog.labs.userAgent.device :as device]
             [cljs.pprint :as pprint]
             [cljs.reader :as reader]
@@ -2285,7 +2286,7 @@
 (defn download-form [built-char]
   [:form.download-form
    {:id "download-form"
-    :action (if (.startsWith js/window.location.href "http://localhost")
+    :action (if (s/starts-with? js/window.location.href "http://localhost")
               "http://localhost:8890/character.pdf"
               "/character.pdf")
     :method "POST"

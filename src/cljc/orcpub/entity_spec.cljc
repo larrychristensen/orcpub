@@ -1,6 +1,8 @@
 (ns orcpub.entity-spec
   (:require [clojure.string :as s]
-            [clojure.set :as sets]))
+            [clojure.set :as sets]
+            ;;[goog.string :as gs]
+            ))
 
 (defn entity-val [entity k]
   (let [v (entity k)
@@ -19,7 +21,7 @@
 
 (defn ref-to-kw [s entity]
   (if (and (symbol? s)
-           (.startsWith (str s) "?"))
+           (s/starts-with? (str s) "?"))
     `(entity-val ~entity ~(ref-sym-to-kw s))
     s))
 
@@ -47,7 +49,7 @@
       (filter
        #(and (symbol? %)
              (not= k %)
-             (.startsWith (name %) "?")))
+             (s/starts-with? (name %) "?")))
       (map ref-sym-to-kw))
      nodes)))
 
