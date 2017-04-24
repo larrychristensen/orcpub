@@ -21,13 +21,14 @@
    {}
    kws))
 
-(defn class-string [levels]
+(defn class-string [classes levels]
   (s/join
    " / "
    (map
-    (fn [[cls-k {:keys [class-name class-level subclass]}]]
-      (str class-name " (" class-level ")"))
-    levels)))
+    (fn [cls-key]
+      (let [{:keys [class-name class-level subclass]} (levels cls-key)]
+        (str class-name " (" class-level ")")))
+    classes)))
 
 (defn ability-related-bonuses [suffix vals]
   (into {}
@@ -323,6 +324,7 @@
                             (ac-with-armor-fn armor shield))
         max-armor-class (apply max all-armor-classes)
         levels (char5e/levels built-char)
+        classes (char5e/classes built-char)
         total-hit-dice (s/join
                         " / "
                         (map
@@ -331,7 +333,7 @@
     (merge
      {:race (str race (if subrace (str "/" subrace)))
       :alignment (char5e/alignment built-char)
-      :class-level (class-string levels)
+      :class-level (class-string classes levels)
       :background (char5e/background built-char)
       :prof-bonus (common/bonus-str (es/entity-val built-char :prof-bonus))
       :ac max-armor-class

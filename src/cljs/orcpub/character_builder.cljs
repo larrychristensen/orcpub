@@ -535,6 +535,7 @@
 (defn prof-name [prof-map prof-kw]
   (or (-> prof-kw prof-map :name) (common/kw-to-name prof-kw)))
 
+
 (defn character-display [built-char]
   (let [race (char5e/race built-char)
         subrace (char5e/subrace built-char)
@@ -984,7 +985,7 @@
                     levels-selection (some #(if (= :levels (::t/key %)) %) (::t/selections class-template-option))
                     available-levels (::t/options levels-selection)
                     last-level-key (::entity/key (last selected-levels))]
-                [:select.builder-option.builder-option-dropdown.m-t-0.m-l-5.w-80
+                [:select.builder-option.builder-option-dropdown.m-t-0.m-l-5.w-100
                  {:value last-level-key
                   :on-change
                   (fn [e]
