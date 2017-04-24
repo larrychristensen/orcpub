@@ -1078,18 +1078,7 @@
      :icon "dodging"
      :page 168
      :summary "increase ability by 1 and gain proficiency in saves with that ability"
-     :selections [(t/selection-cfg
-                   {:name "Ability"
-                    :tags #{:ability-scores}
-                    :options (map
-                              (fn [ability-key]
-                                (t/option
-                                 (s/upper-case (name ability-key))
-                                 ability-key
-                                 []
-                                 [(modifiers/ability ability-key 1)
-                                  (modifiers/saving-throws nil ability-key)]))
-                              character/ability-keys)})]})
+     :selections [(ability-increase-selection character/ability-keys 1 false)]})
    (feat-option
     {:name "Ritual Caster"
      :icon "gift-of-knowledge"
