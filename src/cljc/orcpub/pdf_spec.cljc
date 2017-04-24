@@ -325,6 +325,7 @@
         max-armor-class (apply max all-armor-classes)
         levels (char5e/levels built-char)
         classes (char5e/classes built-char)
+        character-name (es/entity-val built-char :character-name)
         total-hit-dice (s/join
                         " / "
                         (map
@@ -348,7 +349,8 @@
       :bonds (es/entity-val built-char :bonds)
       :flaws (es/entity-val built-char :flaws)
       :backstory (es/entity-val built-char :description)
-      :character-name (es/entity-val built-char :character-name)
+      :character-name character-name
+      :character-name-2 character-name
       :player-name (es/entity-val built-char :player-name)}
      (attacks-and-spellcasting-fields built-char)
      (skill-fields built-char)
