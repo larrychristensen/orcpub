@@ -32,7 +32,7 @@
 
             [reagent.core :as r]))
 
-(def print-enabled? false)
+(def print-enabled? true)
 
 (declare app-state)
 
@@ -44,41 +44,9 @@
     (func e)
     (stop-propagation e)))
 
-(defn index-of-option [selection option-key]
-  (first
-   (keep-indexed
-    (fn [i v]
-      (if (= option-key (::entity/key v))
-        i))
-    selection)))
-
-(defn get-option-value [template entity path]
-  (get-in entity (entity/get-option-value-path template entity path)))
-
-(defn update-in-entity [m [k & ks] f & args]
-  (let [current (get m k)
-         val (if (and (int? k)
-                      (>= k (count current)))
-               (vec (concat current (repeat (inc (- k (count current))))))
-               current)]
-     (if ks
-       (assoc m k (apply update-in val ks f args))
-       (assoc m k (apply f val args)))))
-
 (defn update-option [template entity path update-fn]
   (let [entity-path (entity/get-entity-path template entity path)]
     (update-in entity entity-path update-fn)))
-
-
-(defn remove-list-option [template entity path index]
-  (update-option template
-                 entity
-                 path
-                 (fn [list]
-                   (vec
-                    (keep-indexed
-                     (fn [i v] (if (not= i index) v))
-                     list)))))
 
 (def stored-char-str (.getItem js/window.localStorage "char-meta"))
 (defn remove-stored-char [stored-char-str & [more-info]]
@@ -91,12 +59,6 @@
                                           (catch js/Object
                                               e
                                             (remove-stored-char stored-char-str)))))
-
-(def text-color
-  {:color :white})
-
-(def field-font-size
-  {:font-size "14px"})
 
 (defonce app-state
   (r/atom
@@ -122,9 +84,10 @@
     (swap! history pop)
     (swap! app-state #(peek @history))))
 
-#_(add-watch app-state :log (fn [k r os ns]
-                            (js/console.log "OLD" (clj->js os))
-                              (js/console.log "NEW" (clj->js ns))))
+(if print-enabled?
+  (add-watch app-state :log (fn [k r os ns]
+                              (js/console.log "OLD" (clj->js os))
+                              (js/console.log "NEW" (clj->js ns)))))
 
 (add-watch app-state
            :local-storage
@@ -137,188 +100,8 @@
              (if (not= ns (peek @history))
                (swap! history conj ns))))
 
-(declare builder-selector)
-
-(defn dropdown-option [option]
-  [:option.builder-dropdown-item
-   {:value (str (::t/key option))}
-   (::t/name option)])
-
-(defn hide-mouseover-option! []
-  (let [mouseover-option (js/document.getElementById "mouseover-option")]
-    (if mouseover-option (set! (.-display (.-style mouseover-option)) "none"))))
-
-(defn show-mouseover-option! []
-  (let [mouseover-option (js/document.getElementById "mouseover-option")]
-    (if mouseover-option (set! (.-display (.-style mouseover-option)) "block"))))
-
-(defn set-mouseover-option! [opt]
-  (show-mouseover-option!)
-  (let [title-el (js/document.getElementById "mouseover-option-title")]
-    (if title-el
-      (do (set! (.-innerHTML title-el) (::t/name opt))
-          (set! (.-innerHTML (js/document.getElementById "mouseover-option-help")) (or (::t/help opt) ""))))))
-
-(defn dropdown [options selected-value change-fn built-char]
-  [:select.builder-option.builder-option-dropdown
-   {:on-change change-fn
-    :value (or (str selected-value) "")
-    :on-mouse-over (fn [_]
-                     (if selected-value
-                       (set-mouseover-option!
-                        (first
-                         (filter
-                          #(= selected-value (::t/key %))
-                          options)))))}
-   [:option.builder-dropdown-item]
-   (doall
-    (map-indexed
-     (fn [i option]
-       ^{:key i} [dropdown-option option])
-     (filter (fn [{:keys [::t/prereqs]}]
-               (or (nil? prereqs)
-                   (every? #(% built-char) prereqs)))
-             options)))])
-
-(defn set-option-value [char path value]
-  (let [number-indices (keep-indexed (fn [i v] (if (number? v) i))
-                                     path)
-        subpaths (map #(subvec path 0 (inc %)) number-indices)]
-    (assoc-in
-     (reduce
-      (fn [c p]
-        (let [vec-path (butlast p)
-              v (get-in c vec-path)
-              remaining (inc (- (last p) (count v)))]
-          (if (nil? v)
-            (assoc-in c vec-path (vec (repeat remaining {})))
-            c)))
-      char
-      subpaths)
-     path
-     value)))
-
-(defn make-dropdown-change-fn [path key template raw-char app-state i]
-  (fn [e]
-    (let [new-path (concat path [key i])
-          option-path (entity/get-entity-path template raw-char new-path)
-          new-value (reader/read-string (.. e -target -value))]
-      (swap! app-state #(update % :character (fn [c] (set-option-value c (conj option-path ::entity/key) new-value)))))))
-
-(defn make-quantity-change-fn [path key template raw-char app-state i]
-  (fn [e]
-    (let [new-path (concat path [key i])
-          option-path (entity/get-entity-path template raw-char new-path)
-          raw-value (.. e -target -value)
-          new-value (if (not (s/blank? raw-value)) (js/parseInt raw-value) 1)]
-      (swap! app-state #(update % :character (fn [c] (set-option-value c (conj option-path ::entity/value) new-value)))))))
-
-(defn to-option-path
-  ([template-path template]
-   (to-option-path template-path template []))
-  ([template-path template current-option-path]
-   (let [path-len (count template-path)
-         key (::t/key (get-in template template-path))
-         next-option-path (if key (conj current-option-path key) current-option-path)]
-     (if (and key (> path-len 2))
-       (recur (subvec template-path 0 (- path-len 2))
-              template
-              next-option-path)
-       (vec (reverse next-option-path))))))
-
-(def builder-selector-style)
-
-(defn add-option-button [{:keys [::t/key ::t/name ::t/options ::t/new-item-fn ::t/new-item-text] :as selection} entity path built-template]
-  [:div.orange.p-5.underline.pointer
-   [:i.fa.fa-plus-circle.orange]
-   [:span.m-l-5
-    {:on-click
-     (fn []
-       (let [value-path (entity/get-entity-path built-template entity path)
-             new-item (new-item-fn
-                       selection
-                       options
-                       (get-in @app-state (concat [:character] value-path)))]
-         (swap! app-state #(update % :character (fn [c] (update-option built-template c path
-                                                                      (fn [options] (conj (vec options) new-item))))))))}
-    (or new-item-text (str "Add " name))]])
-
-(defn remove-option-button [path built-template index]
-  [:i.fa.fa-minus-circle.remove-item-button.orange
-   {:on-click
-    (fn [e]
-      (swap! app-state #(update % :character (fn [c] (remove-list-option built-template c path index)))))}])
-
-(defn dropdown-selector [path option-paths {:keys [::t/options ::t/min ::t/max ::t/key ::t/name ::t/sequential? ::t/new-item-fn ::t/quantity?] :as selection} built-char raw-char built-template collapsed?]
-  (if (not collapsed?)
-    (let [change-fn (partial make-dropdown-change-fn path key built-template raw-char app-state)
-          qty-change-fn (partial make-quantity-change-fn path key built-template raw-char app-state)
-          options (filter (fn [{:keys [::t/prereq-fn]}]
-                            (or (not prereq-fn) (prereq-fn built-char)))
-                          options)]
-      [:div
-       (if max
-         (if (= min max)
-           (doall
-            (for [i (range max)]
-              (let [option-path (conj path key i)
-                    entity-path (entity/get-entity-path built-template raw-char option-path)
-                    key-path (conj entity-path ::entity/key)
-                    value (get-in @app-state (concat [:character] key-path))]
-                ^{:key i} [:div [dropdown options value (change-fn i) built-char]]))))
-         [:div
-          (let [full-path (conj path key)
-                entity-path (entity/get-entity-path built-template raw-char full-path)
-                selected (get-in @app-state (concat [:character] entity-path))
-                remaining (- min (count selected))
-                final-options (if (pos? remaining)
-                                (vec (concat selected (repeat remaining {::entity/key nil})))
-                                selected)]
-            (doall
-             (map-indexed
-              (fn [i {value ::entity/key
-                      qty-value ::entity/value
-                      :as option}]
-                ^{:key i}
-                [:div.flex.align-items-c
-                 [dropdown options value (change-fn i) built-char]
-                 (if quantity?
-                   [:input.input.m-l-5.w-70
-                    {:type :number
-                     :placeholder "QTY"
-                     :value qty-value
-                     :on-change (qty-change-fn i)}])
-                 [remove-option-button full-path built-template i]])
-              final-options)))
-          (add-option-button selection raw-char (conj path key) built-template)])])
-    [:div
-     [:div.builder-option.collapsed-list-builder-option]
-     [:div.builder-option.collapsed-list-builder-option]]))
-
-(defn filter-selected [path key option-paths options raw-char built-template]
-  (let [options-path (conj path key)
-        entity-opt-path (entity/get-entity-path built-template raw-char options-path)
-        selected (get-in raw-char entity-opt-path)]
-    (if (sequential? selected)
-      (let [options-map (into {} (map (juxt ::t/key identity) options))]
-        (map
-         (fn [{k ::entity/key}]
-           (options-map k))
-         selected))
-      (filter
-       (fn [opt]
-         (let [option-path (concat path [key (::t/key opt)])]
-           (get-in option-paths option-path)))
-       options))))
-
 (defn selector-id [path]
   (s/join "--" (map name path)))
-
-;;(stest/instrument `entity/build)
-;;(stest/instrument `t/make-modifier-map)
-
-;;(prn "MODIFIER MAP" (cljs.pprint/pprint (t/make-modifier-map template)))
-;;(spec/explain ::t/modifier-map (t/make-modifier-map template))
 
 (defn realize-char [built-char]
   (reduce-kv
@@ -601,8 +384,7 @@
               [:div.f-s-24.f-w-b (abilities k)]
               [:div.f-s-12.opacity-5.m-b--2.m-t-2 "mod"]
               [:div.f-s-18 (common/bonus-str (ability-bonuses k))]])
-           char5e/ability-keys))]
-        #_[abilities-radar 187 (char5e/ability-values built-char) ability-bonuses]]
+           char5e/ability-keys))]]
        [:div.flex
         [:div.w-50-p
          [:img.character-image.w-100-p.m-b-20 {:src (or (get-in @app-state [:character ::entity/values :image-url]) "image/barbarian-girl.png")}]]
@@ -612,18 +394,6 @@
          [armor-class-section armor-class armor-class-with-armor (merge magic-armor armor)]
          [svg-icon-section "Hit Points" "health-normal" (char5e/max-hit-points built-char)]
          [speed-section built-char]
-         #_[display-section "Speed" nil
-          (let [unarmored-speed-bonus (char5e/unarmored-speed-bonus built-char)
-                speed (char5e/base-land-speed built-char)
-                swim-speed (char5e/base-swimming-speed built-char)
-                speed-with-armor (char5e/speed-with-armor built-char)]
-            [:div
-             [:div
-              (if speed-with-armor
-                (speed-section speed-with-armor armor)
-                speed)]
-             (if swim-speed
-               [:div [:span swim-speed] [:span.display-section-qualifier-text "(swim)"]])])]
          [svg-icon-section "Darkvision" "night-vision" (if darkvision (str darkvision " ft.") "--")]
          [svg-icon-section "Initiative" "sprint" (mod/bonus-str (char5e/initiative built-char))]
          [display-section "Proficiency Bonus" nil (mod/bonus-str (char5e/proficiency-bonus built-char))]
@@ -702,163 +472,8 @@
     :key :ee
     :selections (t5e/elemental-evil-selections (:character @app-state))}])
 
-(def plugins-map
-  (zipmap (map :key plugins) plugins))
-
-(def option-sources-selection
-  {::t/name "Option Sources"
-   ::t/optional? true
-   ::t/help "Select the sources you want to use for races, classes, etc. Click the 'Show All Options' button to make additional selections. If you are new to the game we recommend just moving on to the next step."})
-
-(defn selection-made? [built-template selected-option-paths character selection]
-  (let [option (get-in selected-option-paths (::path selection))
-        entity-path (entity/get-entity-path built-template character (::path selection))
-        selections (get-in character entity-path)
-        min-count (::t/min selection)]
-    (and option (or (= min-count 1) (and (vector? selections) (>= (count (filter ::entity/key selections)) min-count))))))
-
-(defn drop-selected [built-template selected-option-paths character selections]
-  (remove
-   (partial selection-made? built-template selected-option-paths character)
-   selections))
-
-(defn selection-after [current-path all-selections]
-  (let [up-to-current (drop-while
-                       (fn [s]
-                         (not= (::path s) current-path))
-                       all-selections)
-        up-to-next (drop 1 up-to-current)
-        next (first up-to-next)]
-    (if next
-      [(::path next) next]
-      (let [first-selection (first all-selections)]
-        [(::path first-selection) first-selection]))))
-
-(defn next-selection [current-template-path built-template selected-option-paths character built-char]
-  (let [current-path (to-option-path current-template-path built-template)
-        all-selections (entity/get-all-selections [] built-template selected-option-paths built-char)]
-    (selection-after current-path all-selections)))
-
-(defn prev-selection [current-template-path built-template selected-option-paths character built-char]
-  (let [current-path (to-option-path current-template-path built-template)
-        all-selections (entity/get-all-selections [] built-template selected-option-paths built-char)
-        up-to-current (take-while
-                       (fn [s]
-                         (not= (::path s) current-path))
-                       all-selections)
-        prev (last up-to-current)]
-    (if prev
-      [(::path prev) prev]
-      (let [last-selection (last all-selections)]
-        [(::path last-selection) last-selection]))))
-
-(defn collapse-paths [state paths]
-  (let [all-paths (mapcat #(reductions conj [] %) paths)]
-    (reduce
-     (fn [s path]
-       (update s :collapsed-paths conj path))
-     state
-     all-paths)))
-
-(defn open-path-and-subpaths [state path]
-  (reduce
-   (fn [s subpath]
-     (update s :collapsed-paths disj subpath))
-   state
-   (reductions conj [] path)))
-
-(defn set-stepper-top! [top]
-  (let [stepper-element (js/document.getElementById "selection-stepper")]
-    (set! (.-top (.-style stepper-element)) (str top "px"))))
-
-(defn to-selection-path [entity-path entity]
-  (vec
-   (remove
-    nil?
-    (map (fn [path]
-           (let [last-key (last path)]
-             (cond
-               (= last-key ::entity/options) nil
-               (number? last-key) (::entity/key (get-in entity path))
-               :else last-key)))
-         (reductions conj [] entity-path)))))
-
-(defn set-next-template-path! [built-template next-path next-template-path next-selection character]
-  (swap!
-   app-state
-   (fn [as]
-     (-> as
-         (assoc :stepper-selection-path next-template-path)
-         (assoc :stepper-selection next-selection)))))
-
-(defn set-next-selection! [built-template option-paths character stepper-selection-path all-selections built-char]
-  (let [[next-path {:keys [::t/name] :as next-selection}]
-        (if (nil? stepper-selection-path)
-          (let [s (second all-selections)]
-            [(::path s) s])
-          (next-selection
-           stepper-selection-path
-           built-template
-           option-paths
-           character
-           built-char))
-        next-template-path (if next-path (entity/get-template-selection-path built-template next-path []))]
-    (set-next-template-path! built-template next-path next-template-path next-selection character)))
-
-(defn set-prev-selection! [built-template option-paths character stepper-selection-path all-selections built-char]
-  (let [[prev-path {:keys [::t/name] :as next-selection}]
-        (if (nil? stepper-selection-path)
-          (let [s (last all-selections)]
-            [(::path s) s])
-          (prev-selection
-           stepper-selection-path
-           built-template
-           option-paths
-           character
-           built-char))
-        prev-template-path (if prev-path (entity/get-template-selection-path built-template prev-path []))]
-    (set-next-template-path! built-template prev-path prev-template-path next-selection character)))
-
-(defn level-up! [built-template character]
-  (let [entity-path [::entity/options :class 0 ::entity/options :levels]
-        lvls (get-in @app-state (concat [:character] entity-path))
-        next-lvl (-> lvls count inc str keyword)
-        selection-path (to-selection-path entity-path (:character @app-state))
-        next-lvl-path (conj selection-path next-lvl)
-        template-path (entity/get-template-selection-path built-template next-lvl-path [])
-        option (get-in built-template template-path)
-        first-selection (first (::t/selections option))
-        selection-key (::t/key first-selection)
-        next-path (conj next-lvl-path selection-key)
-        next-template-path (conj template-path ::t/selections 0)]
-    (swap!
-     app-state
-     update-in
-     (concat [:character] entity-path)
-     conj
-     {::entity/key next-lvl})
-    (set-next-template-path! built-template next-path next-template-path nil character)))
-
 (defn get-template-from-props [x]
   (get (.-argv (.-props x)) 6))
-
-
-(defn on-builder-selector-update [x & args]
-  (let [built-template ((vec (first args)) 6)
-        stepper-selection-path (get @app-state :stepper-selection-path)
-        selection (get-in built-template stepper-selection-path)
-        selection-path (to-option-path stepper-selection-path built-template)
-        selection-id (selector-id selection-path)
-        element (js/document.getElementById selection-id)
-        top (if element (.-offsetTop element) 0)
-        stepper-element (js/document.getElementById "selection-stepper")
-        options-top (.-offsetTop (js/document.getElementById "options-column"))]
-    (if (pos? top) (set-stepper-top! (- top options-top)))))
-
-(def builder-selector-component
-  (with-meta
-    builder-selector
-    {:component-did-update on-builder-selector-update}))
 
 (defn help-section [help]
   [:div.m-t-10.f-w-n
@@ -871,28 +486,18 @@
        (s/split help #"\n")))
      help)])
 
-(defn expand-button [option-path expand-text collapse-text & [handler]]
-  (let [full-path [:expanded-paths option-path]
-        expanded? (get-in @app-state full-path)]
-    [:span.flex.pointer.align-items-c.justify-cont-end
-     {:on-click (fn [e]
-                  (swap! app-state update-in full-path not)
-                  (if handler (handler e))
-                  (.stopPropagation e))}
-     [:span.underline.orange.p-0.m-r-2 (if expanded? expand-text collapse-text)]
-     [:i.fa.orange
-      {:class-name (if expanded? "fa-angle-up" "fa-angle-down")}]]))
+(defn expand-button [expanded-path expand-text collapse-text expanded? & [handler]]
+  [:span.flex.pointer.align-items-c.justify-cont-end
+   {:on-click (fn [e]
+                (swap! app-state update-in expanded-path not)
+                (if handler (handler e))
+                (.stopPropagation e))}
+   [:span.underline.orange.p-0.m-r-2 (if expanded? expand-text collapse-text)]
+   [:i.fa.orange
+    {:class-name (if expanded? "fa-angle-up" "fa-angle-down")}]])
 
-(defn show-info-button [expanded? option-path]
-  [:div.f-w-n.m-l-5 (expand-button option-path "hide info" "show info")])
-
-(defn set-next! [char next-selection next-selection-path]
-  (swap! app-state
-         (fn [as]
-           (cond-> as
-             char (assoc :character char)
-             next-selection-path (assoc :stepper-selection-path next-selection-path)
-             next-selection (assoc :stepper-selection next-selection)))))
+(defn show-info-button [expanded? expanded-path]
+  [:div.f-w-n.m-l-5 (expand-button expanded-path "hide info" "show info" expanded?)])
 
 (defn multiselection? [{:keys [::t/multiselect? ::t/min ::t/max]}]
   (or multiselect?
@@ -920,6 +525,9 @@
 (defn character-textarea [app-state prop-name & [cls-str]]
   (character-field app-state prop-name :textarea cls-str))
 
+(defn make-expanded-path [option-path]
+  [:expanded-paths option-path])
+
 (defn class-levels-selector [character {:keys [::t/options] :as selection} built-char]
   (let [selected-classes (get-in character [::entity/options :class])
         unselected-classes (remove
@@ -942,8 +550,8 @@
         (fn [i {:keys [::entity/key] :as selected-class}]
           (let [options-map (zipmap (map ::t/key options) options)
                 class-template-option (options-map key)
-                expanded-path [:class-levels key]
-                expanded? (get-in @app-state [:expanded-paths expanded-path])]
+                expanded-path (make-expanded-path [:class-levels key])
+                expanded? (get-in @app-state expanded-path)]
             ^{:key key}
             [:div.m-b-5
              {:class-name (if expanded? "b-1 b-rad-5 p-5")}
@@ -1058,7 +666,7 @@
      {:on-click check-fn}
      (checkbox equipped? false)]
     [:div.flex-grow-1 item-name]
-    (if item-description [:div.w-60 [show-info-button expanded? [selection-key item-key]]])
+    (if item-description [:div.w-60 [show-info-button expanded? (make-expanded-path [selection-key item-key])]])
     [:input.input.m-l-5.m-t-0.
      {:class-name (str "w-" (or qty-input-width 60))
       :type :number
@@ -1165,7 +773,8 @@
           (get-in @app-state [:character ::entity/values custom-equipment-key])))])]))
 
 (defn option-selector-base [{:keys [name key help selected? selectable? option-path select-fn content explanation-text icon classes multiselect? disable-checkbox?]}]
-  (let [expanded? (get-in @app-state [:expanded-paths option-path])]
+  (let [expanded-path (make-expanded-path [:expanded-paths option-path])
+        expanded? (get-in @app-state expanded-path)]
     ^{:key key}
     [:div.p-10.b-1.b-rad-5.m-5.b-orange.hover-shadow
      {:class-name (s/join " " (conj
@@ -1182,7 +791,7 @@
         (if icon [:div.m-r-5 (svg-icon icon 24)])
         [:span.f-w-b.f-s-1.flex-grow-1 name]
         (if help
-          [show-info-button expanded? option-path])]
+          [show-info-button expanded? expanded-path])]
        (if (and help expanded?)
          [help-section help])
        (if (and content selected?)
@@ -1362,7 +971,8 @@
       [:span.bg-red.t-a-c.w-18.h-18.p-t-4.b-rad-50-p.inline-block.f-w-b (Math/abs remaining)]])])
 
 (defn selection-section-base [{:keys [path parent-title name icon help max min remaining body]}]
-  (let [expanded? (and path (get-in @app-state [:expanded-paths path]))]
+  (let [expanded-path (make-expanded-path path)
+        expanded? (and path (get-in @app-state expanded-path))]
     ^{:key (keyword (s/join "-" (map clojure.core/name path)))}
     [:div.p-5.m-b-20.m-b-0-last
      (if parent-title
@@ -1371,7 +981,7 @@
       (if icon (svg-icon icon 24))
       (selection-section-title name)
       (if (and path help)
-        [show-info-button expanded? path])]
+        [show-info-button expanded? expanded-path])]
      (if (and help expanded?)
        [help-section help])
      (if (or (and (pos? min)
@@ -2125,7 +1735,6 @@
               (remove nil?))
         (get-in @app-state [:character ::entity/options :optional-content])))
 
-
 (defn new-options-column [character built-char built-template available-selections page-index option-paths stepper-selection-path]
   (if print-enabled? (js/console.log "AVAILABLE SELECTIONS" available-selections))
   (let [{:keys [tags ui-fns] :as page} (pages page-index)
@@ -2134,15 +1743,17 @@
         final-selections (remove #(and (zero? (::t/min %))
                                        (zero? (::t/max %))
                                        (zero? (count-remaining built-template character %)))
-                                 combined-selections)]
+                                 combined-selections)
+        expanded-path (make-expanded-path [:option-sources])
+        expanded? (get-in @app-state expanded-path)]
     (if print-enabled? (js/console.log "FINAL SELECTIONS" (vec final-selections) (map ::t/key final-selections)))
     [:div.w-100-p
      [:div.m-b-20
       [:div.flex.align-items-c
        (svg-icon "bookshelf")
        (selection-section-title "Option Sources")
-       (expand-button [:option-sources] "collapse" "select sources")]
-      (if (get-in @app-state [:expanded-paths [:option-sources]])
+       (expand-button expanded-path "collapse" "select sources" expanded?)]
+      (if expanded?
         [:div
          (option-selector-base {:name "Player's Handbook"
                                 :help (t5e/amazon-frame-help t5e/phb-amazon-frame
@@ -2372,7 +1983,9 @@
         multiple-resources? (> num-resources 1)
         al-legal? (and (empty? al-illegal-reasons)
                        (not multiple-resources?))
-        al-illegal-reasons-path [:al-illegal-reasons]]
+        al-illegal-reasons-path [:al-illegal-reasons]
+        al-illegal-reasons-expanded-path (make-expanded-path al-illegal-reasons-path)
+        al-illegal-reasons-expanded? (get-in @app-state al-illegal-reasons-expanded-path)]
     (if print-enabled? (print-char built-char))
     [:div.app
      {:on-scroll (fn [e]
@@ -2421,8 +2034,8 @@
                   "Illegal"))]]
          (if (not al-legal?)
            [:span.m-l-10.f-s-14
-            (expand-button al-illegal-reasons-path "hide reasons" "show reasons")])]
-        (if (and (get-in @app-state [:expanded-paths al-illegal-reasons-path])
+            (expand-button al-illegal-reasons-expanded-path "hide reasons" "show reasons" al-illegal-reasons-expanded?)])]
+        (if (and al-illegal-reasons-expanded?
                  (not al-legal?))
           [:div.i.red.m-t-5
            (map-indexed
