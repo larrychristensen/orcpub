@@ -1215,7 +1215,7 @@
                          :tags #{:subclass}
                          :options (map
                                    #(subclass-option (assoc cls :key kw) %)
-                                   subclasses)})])
+                                   (if source (map (fn [sc] (assoc sc :source source)) subclasses) subclasses))})])
                     (if (and (not plugin?) (ability-inc-set i))
                       [(opt5e/ability-score-improvement-selection name i)])
                     (if (not plugin?)
@@ -1777,10 +1777,11 @@
 (defn cleric-spell [spell-level spell-key min-level]
   (mod5e/spells-known spell-level spell-key :wis "Cleric" min-level nil :cleric))
 
-(defn potent-spellcasting [page]
+(defn potent-spellcasting [page & [source]]
   (mod5e/dependent-trait
    {:level 8
     :page page
+    :source source
     :summary (str "Add "
                   (common/bonus-str (?ability-bonuses :wis))
                   " to damage from cantrips you cast")
@@ -4896,6 +4897,7 @@ long rest."})]
     :plugin? true
     :subclass-level 3
     :subclass-title "Primal Path"
+    :source :scag
     :subclasses [{:name "Path of the Battlerager"
                   :source :scag
                   :modifiers [(mod5e/bonus-action
@@ -4978,9 +4980,10 @@ long rest."})]
                                                                         :source :scag
                                                                         :summary "make an additional melee weapon attack when you move 20+ ft. in a line and make a melee weapon attack"})]})]})]}}}]}
    {:name "Cleric"
-    :plugin true
+    :plugin? true
     :subclass-level 1
     :subclass-title "Divine Domain"
+    :source :scag
     :subclasses [{:name "Arcana Domain"
                   :profs {:armor {:heavy true}}
                   :modifiers [(mod5e/skill-proficiency :arcana)
@@ -5005,11 +5008,7 @@ long rest."})]
                                             :page 126
                                             :source :scag
                                             :summary (str "turn celestial, elemental, fey, or fiend on failed DC " (?spell-save-dc :wis) " WIS save.")})]}
-                           8 {:modifiers [(mod5e/dependent-trait
-                                           {:name "Potent Spellcasting"
-                                            :page 126
-                                            :source :scag
-                                            :summary (str (common/bonus-str :wis) " extra damage from your cleric cantrips")})]}
+                           8 {:modifiers [(potent-spellcasting 126 :scag)]}
                            17 {:selections (map
                                             (fn [level]
                                               (opt5e/spell-selection {:title (str "Wizard Spell: Level " level)
@@ -5031,6 +5030,7 @@ long rest."})]
     :plugin? true
     :subclass-level 3
     :subclass-title "Martial Archetype"
+    :source :scag
     :subclasses [{:name "Purple Dragon Knight"
                   :levels {3 {:modifiers [(mod5e/dependent-trait
                                            {:name "Rallying Cry"
@@ -5061,6 +5061,7 @@ long rest."})]
    {:name "Monk"
     :subclass-level 3
     :subclass-title "Monastic Tradition"
+    :source :scag
     :subclasses [{:name "Way of the Long Death"
                   :modifiers [(mod5e/dependent-trait
                                {:name "Touch of Death"
@@ -5114,6 +5115,7 @@ long rest."})]
    {:name "Paladin"
     :subclass-level 3
     :subclass-title "Sacred Oath"
+    :source :scag
     :subclasses [{:name "Oath of the Crown"
                   :modifiers [(paladin-spell 1 :command 3)
                               (paladin-spell 1 :compelling-duel 3)
