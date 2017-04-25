@@ -605,7 +605,7 @@
         #_[abilities-radar 187 (char5e/ability-values built-char) ability-bonuses]]
        [:div.flex
         [:div.w-50-p
-         [:img.character-image.w-100-p.m-b-20 {:src (or (get-in @app-state [:character ::entity/values :image-url]) "image/barbarian-girl.png")}]]
+         [:img.character-image.w-100-p.m-b-20 {:src (or (get-in @app-state [:character ::entity/values :image-url]) "image/barbarian.png")}]]
         [:div.w-50-p
          (if background [svg-icon-section "Background" "ages" [:span.f-s-18.f-w-n background]])
          (if alignment [svg-icon-section "Alignment" "yin-yang" [:span.f-s-18.f-w-n alignment]])

@@ -4,7 +4,11 @@
 
 (enable-console-print!)
 
-(r/render (if js/window.localStorage
+(r/render (if (let [doc-style js/document.documentElement.style]
+                (and js/window.localStorage
+                     (or (aget doc-style "flexWrap")
+                         (aget doc-style "WebkitFlexWrap")
+                         (aget doc-style "msFlexWrap"))))
             [ch/character-builder]
             [:div
              [ch/app-header]
