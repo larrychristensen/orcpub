@@ -208,3 +208,6 @@
   ((es/entity-val built-char :weapon-damage-modifier)
    weapon
    finesse?))
+
+(defn image-url [built-char]
+  (es/entity-val built-char :image-url))
