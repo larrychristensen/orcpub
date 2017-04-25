@@ -4538,6 +4538,14 @@ If you cast this spell multiple times, you can have up to three of its 1-minute 
     :components {:somatic true}
     :page 22
     :source :ee}
+   {:name "Thunderous Smite"
+    :school "evocation"
+    :level 1
+    :casting-time "1 bonus action"
+    :range "Self"
+    :components {:verbal true}
+    :page 282
+    :source :phb}
    {
     :name "Thunderwave"
     :school "evocation"
