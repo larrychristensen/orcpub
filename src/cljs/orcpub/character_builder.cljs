@@ -32,7 +32,7 @@
 
             [reagent.core :as r]))
 
-(def print-enabled? false)
+(def print-enabled? true)
 
 (declare app-state)
 
@@ -2248,6 +2248,32 @@
     [:div.m-t-5
      [:span.personality-label.f-s-18 "Character Name"]
      [character-input app-state :character-name]]
+    [:div.field
+     [:span.personality-label.f-s-18 "Player Name"]
+     [character-input app-state :player-name]]
+    [:div.flex.justify-cont-s-b
+     [:div.field.flex-grow-1.m-r-2
+      [:span.personality-label.f-s-18 "Age"]
+      [character-input app-state :age]]
+     [:div.field.flex-grow-1.m-l-2.m-r-2
+      [:span.personality-label.f-s-18 "Sex"]
+      [character-input app-state :sex]]
+     [:div.field.flex-grow-1.m-l-2.m-r-2
+      [:span.personality-label.f-s-18 "Height"]
+      [character-input app-state :height]]
+     [:div.field.flex-grow-1.m-1-2
+      [:span.personality-label.f-s-18 "Weight"]
+      [character-input app-state :weight]]]
+    [:div.flex.justify-cont-s-b
+     [:div.field.flex-grow-1.m-r-2
+      [:span.personality-label.f-s-18 "Hair Color"]
+      [character-input app-state :hair]]
+     [:div.field.flex-grow-1.m-1-2.m-r-2
+      [:span.personality-label.f-s-18 "Eye Color"]
+      [character-input app-state :eyes]]
+     [:div.field.flex-grow-1.m-1-2
+      [:span.personality-label.f-s-18 "Skin Color"]
+      [character-input app-state :skin]]]
     [:div.field
      [:span.personality-label.f-s-18 "Personality Trait 1"]
      [character-textarea app-state :personality-trait-1]]

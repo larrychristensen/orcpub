@@ -351,7 +351,6 @@
   (mods/deferred-modifier
     ?magic-items
     (fn [cfg] (let [mod (es/map-mod ?magic-items item-kw (equipment-cfg cfg))]
-                  (prn "MAGICAL AC BONUS" magical-ac-bonus)
                 (if (and (:equipped? cfg)
                          magical-ac-bonus)
                   [mod (es/cum-sum-mod ?magical-ac-bonus magical-ac-bonus)]

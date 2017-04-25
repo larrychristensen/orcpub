@@ -370,7 +370,13 @@
       :backstory (es/entity-val built-char :description)
       :character-name character-name
       :character-name-2 character-name
-      :player-name (es/entity-val built-char :player-name)}
+      :player-name (es/entity-val built-char :player-name)
+      :age (char5e/age built-char)
+      :height (char5e/height built-char)
+      :weight (char5e/weight built-char)
+      :eyes (char5e/eyes built-char)
+      :skin (char5e/skin built-char)
+      :hair (char5e/hair built-char)}
      (attacks-and-spellcasting-fields built-char)
      (skill-fields built-char)
      abilities
