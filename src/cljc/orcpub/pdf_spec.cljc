@@ -83,6 +83,22 @@
          (trait-string (:name action) (common/sentensize (disp5e/action-description action))))
        actions)))))
 
+(defn keyword-vec-trait [nm keywords]
+  (if (seq keywords) (str nm ": " (s/join ", " (map name keywords)))))
+
+(defn features-and-traits-header [built-char]
+  (let [darkvision (char5e/darkvision built-char)
+        damage-resistances (char5e/damage-resistances built-char)
+        damage-immunities (char5e/damage-immunities built-char)
+        condition-immunities (char5e/condition-immunities built-char)]
+    (s/join
+     "\n"
+     (remove nil?
+             [(if darkvision (str "Darkvision: " darkvision " ft."))
+              (keyword-vec-trait "Damage Resistances" damage-resistances)
+              (keyword-vec-trait "Damage Immunities" damage-immunities)
+              (keyword-vec-trait "Condition Immunities" condition-immunities)]))))
+
 (defn traits-fields [built-char]
   (let [bonus-actions (sort-by :name (es/entity-val built-char :bonus-actions))
         actions (sort-by :name (es/entity-val built-char :actions))
@@ -91,16 +107,19 @@
         traits-str (traits-string traits)
         actions? (or (seq bonus-actions)
                      (seq actions)
-                     (seq reactions))]
-    {:features-and-traits (if actions?
-                            (s/join
-                             "\n\n"
-                             (remove nil?
-                                     [(actions-string "----------Bonus Actions----------" bonus-actions)
-                                      (actions-string "---------------Actions--------------" actions)
-                                      (actions-string "-------------Reactions-------------" reactions)
-                                      (if traits "(additional features & traits on page 2)")]))
-                            traits-str)
+                     (seq reactions))
+        header (features-and-traits-header built-char)]
+    {:features-and-traits (str
+                           (if (not (s/blank? header)) (str header "\n\n"))
+                           (if actions?
+                             (s/join
+                              "\n\n"
+                              (remove nil?
+                                      [(actions-string "----------Bonus Actions----------" bonus-actions)
+                                       (actions-string "---------------Actions--------------" actions)
+                                       (actions-string "-------------Reactions-------------" reactions)
+                                       (if traits "(additional features & traits on page 2)")]))
+                             traits-str))
      :features-and-traits-2 (if actions? traits-str)}))
 
 (defn attack-string [attack]

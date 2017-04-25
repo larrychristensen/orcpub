@@ -261,7 +261,7 @@
                    [(t/selection-cfg
                      {:name "Subrace"
                       :tags #{:subrace}
-                      :options (map (partial subrace-option source) subraces)})])
+                      :options (map (partial subrace-option source) (if source (map (fn [sr] (assoc sr :source source)) subraces) subraces))})])
                  (if language-options
                    (language-selection language-options))
                  selections)

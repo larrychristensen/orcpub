@@ -176,7 +176,8 @@
 (defn spell-slot-factor [class-key factor]
   (mods/map-mod ?spell-slot-factors class-key factor))
 
-(defn trait-cfg [{:keys [name description class-key level summary page conditions] :as cfg}]
+(defn trait-cfg [{:keys [name description class-key level summary page conditions source] :as cfg}]
+  (prn "CFG" cfg)
   (let [class-key? (not (nil? class-key))]
     (mods/modifier ?traits
                    (if (or (nil? level)
