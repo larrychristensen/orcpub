@@ -5540,12 +5540,12 @@ long rest."})]
                     ::entity/value 1})
     :tags #{:equipment}
     :options (map
-              (fn [{:keys [name key description]}]
+              (fn [{:keys [name key description] :as item}]
                 (t/option-cfg
                  {:name name
                   :key key
                   :help description
-                  :modifiers [(modifier-fn key)]}))
+                  :modifiers [(modifier-fn key item)]}))
               items)}))
 
 (defn amazon-frame [link]
@@ -5754,12 +5754,15 @@ long rest."})]
 (def template-base
   (es/make-entity
    {?armor-class (+ 10 (?ability-bonuses :dex))
-    ?base-armor-class (+ 10 (?ability-bonuses :dex) ?natural-ac-bonus)
+    ?base-armor-class (+ 10 (?ability-bonuses :dex)
+                         ?natural-ac-bonus
+                         ?magical-ac-bonus)
     ?natural-ac-bonus 0
     ?unarmored-ac-bonus 0
     ?unarmored-with-shield-ac-bonus 0
     ?armored-ac-bonus 0
     ?max-medium-armor-bonus 2
+    ?magical-ac-bonus 0
     ?armor-stealth-disadvantage? (fn [armor]
                                    (:stealth-disadvantage? armor))
     ?armor-dex-bonus (fn [armor]
@@ -5783,7 +5786,8 @@ long rest."})]
                                              (+ (?armor-dex-bonus armor)
                                                 (or ?armored-ac-bonus 0)
                                                 (:base-ac armor)
-                                                (:magical-ac-bonus armor)))))
+                                                (:magical-ac-bonus armor))
+                                             ?magical-ac-bonus)))
     ?abilities (reduce
                 (fn [m k]
                   (assoc m k (+ (or (k ?base-abilities) 0)
