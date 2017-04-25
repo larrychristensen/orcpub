@@ -32,7 +32,7 @@
 
             [reagent.core :as r]))
 
-(def print-enabled? false)
+(def print-enabled? true)
 
 (declare app-state)
 
@@ -1947,26 +1947,28 @@
                                                         (+ average-value remainder)
                                                         average-value)})))))}]
           total-hps)]]
-      [:button.form-button.p-10
-       {:on-click (fn [_]
-                    (doseq [selection selections]
-                      (let [[_ class-kw :as path] (::entity/path selection)]
-                        (swap! app-state
-                               assoc-in
-                               (concat [:character] (entity/get-entity-path built-template character path))
-                               {::entity/key :roll
-                                ::entity/value (dice/die-roll (-> levels class-kw :hit-die))}))))}
-       "Random"]
-      [:button.form-button.p-10
-       {:on-click (fn [_]
-                    (doseq [selection selections]
-                      (let [[_ class-kw :as path] (::entity/path selection)]
-                        (swap! app-state
-                               assoc-in
-                               (concat [:character] (entity/get-entity-path built-template character path))
-                               {::entity/key :average
-                                ::entity/value (dice/die-mean (-> levels class-kw :hit-die))}))))}
-       "Average"]]
+      (if (seq selections)
+        [:button.form-button.p-10
+         {:on-click (fn [_]
+                      (doseq [selection selections]
+                        (let [[_ class-kw :as path] (::entity/path selection)]
+                          (swap! app-state
+                                 assoc-in
+                                 (concat [:character] (entity/get-entity-path built-template character path))
+                                 {::entity/key :roll
+                                  ::entity/value (dice/die-roll (-> levels class-kw :hit-die))}))))}
+         "Random"])
+      (if (seq selections)
+        [:button.form-button.p-10
+         {:on-click (fn [_]
+                      (doseq [selection selections]
+                        (let [[_ class-kw :as path] (::entity/path selection)]
+                          (swap! app-state
+                                 assoc-in
+                                 (concat [:character] (entity/get-entity-path built-template character path))
+                                 {::entity/key :average
+                                  ::entity/value (dice/die-mean (-> levels class-kw :hit-die))}))))}
+         "Average"])]
      (doall
       (map-indexed
        (fn [i cls]

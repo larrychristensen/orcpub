@@ -1057,7 +1057,8 @@
                           :icon (:icon tool)
                           :modifiers [(mod5e/tool-proficiency (:key tool))]}))))
                   tool-options)
-        :prereq-fn prereq-fn}))))
+        :prereq-fn prereq-fn
+        :tags #{:profs :tool-profs}}))))
 
 (defn level-key [index]
   (keyword (str "level-" index)))
@@ -4665,7 +4666,8 @@ long rest."})]
                                  armor-choices
                                  treasure
                                  custom-treasure
-                                 traits]
+                                 traits
+                                 source]
                           :as background}]
   (let [kw (common/name-to-kw name)
         {:keys [skill skill-options tool-options tool language-options]
@@ -4703,6 +4705,7 @@ long rest."})]
                    (if (seq language-options) [(language-selection language-options)]))
       :modifiers (concat
                   [(mod5e/background name)]
+                  (if source [(mod5e/used-resource source name)])
                   (traits-modifiers traits)
                   modifiers
                   (armor-prof-modifiers (keys armor-profs))
