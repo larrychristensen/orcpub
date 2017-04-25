@@ -2261,7 +2261,7 @@
      [:div.field.flex-grow-1.m-l-2.m-r-2
       [:span.personality-label.f-s-18 "Height"]
       [character-input app-state :height]]
-     [:div.field.flex-grow-1.m-1-2
+     [:div.field.flex-grow-1.m-l-2
       [:span.personality-label.f-s-18 "Weight"]
       [character-input app-state :weight]]]
     [:div.flex.justify-cont-s-b
@@ -2357,6 +2357,12 @@
       [:i.fa.fa-cloud-upload.f-s-18]
       [:span.m-l-5.hidden-sm.hidden-xs.hidden-md "Save" [:span.i.m-l-5 "(Coming Soon)"]]]]]])
 
+(defn app-header []
+  [:div#app-header.app-header
+   [:div.app-header-bar.container
+    [:div.content
+     [:img.orcpub-logo {:src "image/orcpub-logo.svg"}]]]])
+
 
 (defn character-builder []
   (if print-enabled? (cljs.pprint/pprint (:character @app-state)))
@@ -2415,10 +2421,7 @@
                        (set! (.-display (.-style sticky-header)) "none"))))}
      
      [download-form built-char]
-     [:div#app-header.app-header
-      [:div.app-header-bar.container
-       [:div.content
-        [:img.orcpub-logo {:src "image/orcpub-logo.svg"}]]]]
+     [app-header]
      [:div#sticky-header.sticky-header.w-100-p.posn-fixed
       [:div.flex.justify-cont-c.bg-light
        [:div#header-container.f-s-14.white.content

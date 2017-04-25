@@ -45,6 +45,8 @@
    (keyword (str "-moz-" (name property))) value
    property value})
 
+(def font-family "Open Sans, sans-serif !important")
+
 (def font-sizes
   [[:.f-s-10
     {:font-size "10px"}]
@@ -70,7 +72,9 @@
     {:font-size "36px"}]])
 
 (def props
-  [[:.flex
+  [[:.sans
+    {:font-family font-family}]
+   [:.flex
     {:display :flex}]
    [:.inline-block
     {:display :inline-block}]
@@ -648,8 +652,6 @@
     {:print true}
     [:.hidden-print
      {:display "none !important"}])])
-
-(def font-family "Open Sans, sans-serif !important")
 
 (def app
   (concat
