@@ -951,7 +951,8 @@
                          :summary "cast pass without trace without material components"}]}
               {:name "Fire Genasi"
                :abilities {:int 1}
-               :modifiers [(mod5e/damage-resistance :fire)
+               :modifiers [(mod5e/darkvision 60)
+                           (mod5e/damage-resistance :fire)
                            (mod5e/spells-known 0 :produce-flame :con "Fire Genasi")
                            (mod5e/spells-known 1 :burning-hands :con "Fire Genasi" 3 "once/long rest")]
                :traits [{:name "Fire Resistance"
