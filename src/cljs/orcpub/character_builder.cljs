@@ -518,21 +518,22 @@
 (defn character-value-path [prop-name]
   (conj character-values-path prop-name))
 
-(defn character-field [app-state prop-name type value & [cls-str]]
-  [type {:class-name (str "input " cls-str)
-         :type :text
-         :value value
-         :on-change (fn [e]
-                      (swap! app-state
-                             assoc-in
-                             (character-value-path prop-name)
-                             (get-event-value e)))}])
+(defn character-field [app-state prop-name type & [cls-str]]
+  (let [value-path (character-value-path prop-name)]
+    [type {:class-name (str "input " cls-str)
+           :type :text
+           :value (get-in @app-state value-path)
+           :on-change (fn [e]
+                        (swap! app-state
+                               assoc-in
+                               value-path
+                               (get-event-value e)))}]))
 
-(defn character-input [app-state prop-name value & [cls-str]]
-  (character-field app-state prop-name :input value cls-str))
+(defn character-input [app-state prop-name & [cls-str]]
+  (character-field app-state prop-name :input cls-str))
 
-(defn character-textarea [app-state prop-name value & [cls-str]]
-  (character-field app-state prop-name :textarea value cls-str))
+(defn character-textarea [app-state prop-name & [cls-str]]
+  (character-field app-state prop-name :textarea cls-str))
 
 (defn class-level-selector []
   (let [expanded? (r/atom false)]
