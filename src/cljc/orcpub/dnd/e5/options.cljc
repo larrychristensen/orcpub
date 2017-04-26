@@ -59,11 +59,9 @@
     :modifiers [(modifiers/skill-proficiency (:key skill))]}))
 
 (defn weapon-proficiency-option [{:keys [name key]}]
-  (t/option
-   name
-   key
-   nil
-   [(modifiers/weapon-proficiency key)]))
+  (t/option-cfg
+   {:name name
+    :modifiers [(modifiers/weapon-proficiency key)]}))
 
 (defn tool-option [tool]
   (t/option-cfg
@@ -612,7 +610,6 @@
 (defn magic-initiate-option [class-key spellcasting-ability spell-lists]
   (t/option-cfg
    {:name (name class-key)
-    :kye class-key
     :selections [(t/selection-cfg
                   {:name "Cantrip"
                    :order 1
@@ -665,19 +662,15 @@
     :max num}))
 
 (defn maneuver-option [name & [desc]]
-  (t/option
-   name
-   (common/name-to-kw name)
-   nil
-   [(modifiers/trait (str name " Maneuver")
-                     desc)]))
+  (t/option-cfg
+   {:name name
+    :modifiers [(modifiers/trait (str name " Maneuver")
+                      desc)]}))
 
 (defn mod-maneuver-option [name mods]
-  (t/option
-   name
-   (common/name-to-kw name)
-   nil
-   mods))
+  (t/option-cfg
+   {:name name
+    :modifiers mods}))
 
 (defn proficiency-help [num singular plural]
   (str "Select additional " (if (> num 1) plural singular) " for which you are proficient."))
@@ -749,12 +742,12 @@
   (t/selection-cfg
    {:name title
     :tags #{:profs}
-    :options [(t/select-option
-              "Skill"
-              [(skill-selection 1)])
-             (t/select-option
-              "Tool"
-              [(tool-selection 1)])]}))
+    :options [(t/option-cfg
+              {:name "Skill"
+               :selections [(skill-selection 1)]})
+             (t/option-cfg
+              {:name "Tool"
+               :selections [(tool-selection 1)]})]}))
 
 (def maneuver-options
   [(maneuver-option "Commander's Strike"
@@ -1183,55 +1176,43 @@
                   (weapon-proficiency-selection 4)]})])
 
 (def fighting-style-options
-  [(t/option
-    "Archery"
-    :archery
-    []
-    [(modifiers/ranged-attack-bonus 2)
-     (modifiers/trait-cfg
-      {:name "Archery Fighting Style"
-       :page 72
-       :description "You gain a +2 bonus to attack rolls you make with ranged weapons."})])
-   (t/option
-    "Defense"
-    :defense
-    []
-    [(modifiers/armored-ac-bonus 1)
-     (modifiers/trait-cfg
-      {:name "Defense Fighting Style"
-       :page 72
-       :description "While you are wearing armor, you gain a +1 bonus to AC."})])
-   (t/option
-    "Dueling"
-    :dueling
-    []
-    [(modifiers/trait-cfg
-      {:name "Dueling Fighting Style"
-       :page 72
-       :description "When you are wielding a melee weapon in one hand and no other weapons, you gain a +2 bonus to damage rolls with that weapon."})])
-   (t/option
-    "Great Weapon Fighting"
-    :great-weapon-fighting
-    []
-    [(modifiers/trait-cfg
-      {:name "Great Weapon Fighting Style"
-       :page 72
-       :description "When you roll a 1 or 2 on a damage die for an attack you make with a melee weapon that you are wielding with two hands, you can reroll the die and must use the new roll, even if the new roll is a 1 or a 2. The weapon must have the two-handed or versatile property for you to gain this benefit."})])
-   (t/option
-    "Protection"
-    :protection
-    []
-    [(modifiers/reaction
-      {:name "Protection Fighting Style"
-       :page 72
-       :description "When a creature you can see attacks a target other than you that is within 5 feet of you, you can use your reaction to impose disadvantage on the attack roll. You must be wielding a shield."})])
-   (t/option
-    "Two Weapon Fighting"
-    :two-weapon-fighting
-    []
-    [(modifiers/trait-cfg
-      {:name "Two Weapon Fighting"
-       :description "When you engage in two-weapon fighting, you can add your ability modifier to the damage of the second attack."})])])
+  [(t/option-cfg
+    {:name "Archery"
+     :modifiers [(modifiers/ranged-attack-bonus 2)
+      (modifiers/trait-cfg
+       {:name "Archery Fighting Style"
+        :page 72
+        :description "You gain a +2 bonus to attack rolls you make with ranged weapons."})]})
+   (t/option-cfg
+    {:name "Defense"
+     :modifiers [(modifiers/armored-ac-bonus 1)
+      (modifiers/trait-cfg
+       {:name "Defense Fighting Style"
+        :page 72
+        :description "While you are wearing armor, you gain a +1 bonus to AC."})]})
+   (t/option-cfg
+    {:name "Dueling"
+     :modifiers [(modifiers/trait-cfg
+       {:name "Dueling Fighting Style"
+        :page 72
+        :description "When you are wielding a melee weapon in one hand and no other weapons, you gain a +2 bonus to damage rolls with that weapon."})]})
+   (t/option-cfg
+    {:name "Great Weapon Fighting"
+     :modifiers [(modifiers/trait-cfg
+       {:name "Great Weapon Fighting Style"
+        :page 72
+        :description "When you roll a 1 or 2 on a damage die for an attack you make with a melee weapon that you are wielding with two hands, you can reroll the die and must use the new roll, even if the new roll is a 1 or a 2. The weapon must have the two-handed or versatile property for you to gain this benefit."})]})
+   (t/option-cfg
+    {:name "Protection"
+     :modifiers [(modifiers/reaction
+       {:name "Protection Fighting Style"
+        :page 72
+        :description "When a creature you can see attacks a target other than you that is within 5 feet of you, you can use your reaction to impose disadvantage on the attack roll. You must be wielding a shield."})]})
+   (t/option-cfg
+    {:name"Two Weapon Fighting"
+     :modifiers [(modifiers/trait-cfg
+       {:name "Two Weapon Fighting"
+        :description "When you engage in two-weapon fighting, you can add your ability modifier to the damage of the second attack."})]})])
 
 (defn fighting-style-selection [& [restrictions]]
   (t/selection-cfg
@@ -1292,13 +1273,10 @@
    {:name "Expertise"
     :tags #{:profs :skill-profs :expertise}
     :order 1
-    :options [(t/option
-               "Two Skills"
-               :two-skills
-               [(expertise-selection 2 :two-skills)]
-               [])
-              (t/option
-               "One Skill/Theives Tools"
-               :one-skill-thieves-tools
-               [(expertise-selection 1 :one-skill-thieves-tools)]
-               [(modifiers/tool-proficiency :thieves-tools)])]}))
+    :options [(t/option-cfg
+               {:name "Two Skills"
+                :selections [(expertise-selection 2 :two-skills)]})
+              (t/option-cfg
+               {:name "One Skill/Theives Tools"
+                :selections [(expertise-selection 1 :one-skill-thieves-tools)]
+                :modifiers [(modifiers/tool-proficiency :thieves-tools)]})]}))

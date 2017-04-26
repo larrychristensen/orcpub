@@ -230,3 +230,5 @@
 (defn hair [built-char]
   (es/entity-val built-char :hair))
 
+(defn image-url [built-char]
+  (es/entity-val built-char :image-url))

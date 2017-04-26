@@ -203,22 +203,20 @@
                               traits
                               source]}
                       app-state]
-  (let [option (t/option
-   name
-   (common/name-to-kw name)
-   selections
-   (concat
-    [(mod5e/subrace name)]
-    modifiers
-    (armor-prof-modifiers armor-proficiencies)
-    (weapon-prof-modifiers weapon-proficiencies)
-    (map
-     (fn [[k v]]
-       (mod5e/subrace-ability k v))
-     abilities)
-    (traits-modifiers traits nil source)
-    (if source [(mod5e/used-resource source name)])))]
-    option))
+  (t/option-cfg
+   {:name name
+    :selections selections
+    :modifiers (concat
+                [(mod5e/subrace name)]
+                modifiers
+                (armor-prof-modifiers armor-proficiencies)
+                (weapon-prof-modifiers weapon-proficiencies)
+                (map
+                 (fn [[k v]]
+                   (mod5e/subrace-ability k v))
+                 abilities)
+                (traits-modifiers traits nil source)
+                (if source [(mod5e/used-resource source name)]))}))
 
 (defn ability-modifiers [abilities]
   (map
@@ -415,31 +413,25 @@
                 (t/selection-cfg
                  {:name "Variant"
                   :tags #{:subrace}
-                  :options [(t/option
-                             "Standard Human"
-                             :standard
-                             []
-                             [(mod5e/race-ability :str 1)
-                              (mod5e/race-ability :con 1)
-                              (mod5e/race-ability :dex 1)
-                              (mod5e/race-ability :int 1)
-                              (mod5e/race-ability :wis 1)
-                              (mod5e/race-ability :cha 1)])
-                            (t/option
-                             "Variant Human"
-                             :variant
-                             [(opt5e/feat-selection 1)
-                              (opt5e/skill-selection 1)
-                              (opt5e/ability-increase-selection char5e/ability-keys 2 true)]
-                             [])]})]})
+                  :options [(t/option-cfg
+                             {:name "Standard Human"
+                              :modifiers [(mod5e/race-ability :str 1)
+                                          (mod5e/race-ability :con 1)
+                                          (mod5e/race-ability :dex 1)
+                                          (mod5e/race-ability :int 1)
+                                          (mod5e/race-ability :wis 1)
+                                          (mod5e/race-ability :cha 1)]})
+                            (t/option-cfg
+                             {:name "Variant Human"
+                              :selections [(opt5e/feat-selection 1)
+                                           (opt5e/skill-selection 1)
+                                           (opt5e/ability-increase-selection char5e/ability-keys 2 true)]})]})]})
 
 (defn draconic-ancestry-option [{:keys [name breath-weapon]}]
-  (t/option
-   name
-   (common/name-to-kw name)
-   []
-   [(mod5e/damage-resistance (:damage-type breath-weapon))
-    (mod/modifier ?draconic-ancestry-breath-weapon breath-weapon)]))
+  (t/option-cfg
+   {:name name
+    :modifiers [(mod5e/damage-resistance (:damage-type breath-weapon))
+                (mod/modifier ?draconic-ancestry-breath-weapon breath-weapon)]}))
 
 (def draconic-ancestries
   [{:name "Black"
@@ -817,11 +809,12 @@
    :speed 30
    :darkvision 60
    :source :vgm
-   :selections [(t/selection
-                 "Martial Weapon Proficiencies"
-                 (opt5e/weapon-proficiency-options (weapon5e/martial-weapons weapon5e/weapons))
-                 2
-                 2)]
+   :selections [(t/selection-cfg
+                 {:name "Martial Weapon Proficiencies"
+                  :tags #{:weapon-profs :profs}
+                  :options (opt5e/weapon-proficiency-options (weapon5e/martial-weapons weapon5e/weapons))
+                  :min 2
+                  :max 2})]
    :modifiers [(mod5e/light-armor-proficiency)]
    :traits [{:name "Saving Face"
              :page 119
@@ -1046,11 +1039,9 @@
                   (fn [[k num]]
                     (let [tool (equip5e/tools-map k)]
                       (if (:values tool)
-                        (t/option
-                         (:name tool)
-                         k
-                         [(tool-prof-selection-aux tool num key prereq-fn)]
-                         [])
+                        (t/option-cfg
+                         {:name (:name tool)
+                          :selections [(tool-prof-selection-aux tool num key prereq-fn)]})
                         (t/option-cfg
                          {:name (:name tool)
                           :key (:key tool)
@@ -1153,29 +1144,28 @@
                             (partial add-mod-total-levels-prereq lvl cls)
                             modifiers))
                          levels)]
-    (t/option
-     name
-     kw
-     (map
-      (fn [selection]
-        (update selection ::t/tags sets/union #{(:key cls) kw}))
-      (concat
-       selections
-       level-selections
-       spell-selections
-       (if (seq tool-options) [(tool-prof-selection tool-options)])
-       (if (seq skill-kws) [(opt5e/skill-selection skill-kws skill-num)])
-       (if (seq language-options) [(language-selection language-options)])))
-     (concat
-      modifiers
-      level-modifiers
-      [(mod5e/subclass (:key cls) kw)]
-      (armor-prof-modifiers armor-profs)
-      (weapon-prof-modifiers weapon-profs)
-      (tool-prof-modifiers tool-profs)
-      (traits-modifiers traits (:key cls))
-      (if level-factor [(mod5e/spell-slot-factor (:key cls) level-factor)])
-      (if source [(mod5e/used-resource source name)])))))
+    (t/option-cfg
+     {:name name
+      :selections (map
+                   (fn [selection]
+                     (update selection ::t/tags sets/union #{(:key cls) kw}))
+                   (concat
+                    selections
+                    level-selections
+                    spell-selections
+                    (if (seq tool-options) [(tool-prof-selection tool-options)])
+                    (if (seq skill-kws) [(opt5e/skill-selection skill-kws skill-num)])
+                    (if (seq language-options) [(language-selection language-options)])))
+      :modifiers (concat
+                  modifiers
+                  level-modifiers
+                  [(mod5e/subclass (:key cls) kw)]
+                  (armor-prof-modifiers armor-profs)
+                  (weapon-prof-modifiers weapon-profs)
+                  (tool-prof-modifiers tool-profs)
+                  (traits-modifiers traits (:key cls))
+                  (if level-factor [(mod5e/spell-slot-factor (:key cls) level-factor)])
+                  (if source [(mod5e/used-resource source name)]))})))
 
 (defn first-class? [class-kw]
   (fn [c] (= class-kw (first (es/entity-val c :classes)))))
@@ -1271,6 +1261,7 @@
        {:name (:name equipment)
         :selections [(t/selection-cfg
                       {:name (:name equipment)
+                       :tags {:equipment :starting-equipment}
                        :options (map
                                  equipment-option
                                  (zipmap (map :key (:values equipment)) (repeat num)))
@@ -1312,11 +1303,9 @@
       :modifiers [(mod5e/weapon k num)]})))
 
 (defn armor-option [[k num]]
-  (t/option
-     (-> k armor5e/armor-map :name)
-     k
-     []
-     [(mod5e/armor k num)]))
+  (t/option-cfg
+     {:name (-> k armor5e/armor-map :name)
+      :modifiers [(mod5e/armor k num)]}))
 
 (defn class-options [class-kw option-fn choices help]
   (map
@@ -1768,12 +1757,11 @@
 
 (defn blessings-of-knowledge-skill [skill-name]
   (let [skill-kw (common/name-to-kw skill-name)]
-    (t/option
-     skill-name
-     skill-kw
-     []
-     [(mod5e/skill-proficiency skill-kw)
-      (mod5e/skill-expertise skill-kw)])))
+    (t/option-cfg
+     {:name skill-name
+      :key skill-kw
+      :modifiers [(mod5e/skill-proficiency skill-kw)
+                  (mod5e/skill-expertise skill-kw)]})))
 
 (defn cleric-spell [spell-level spell-key min-level]
   (mod5e/spells-known spell-level spell-key :wis "Cleric" min-level nil :cleric))
@@ -2183,28 +2171,25 @@
                               :summary (str "You can transform into a beast you have seen with CR "
                                             ?wild-shape-cr
                                             (if ?wild-shape-limitation (str " and " ?wild-shape-limitation)))})]}}
-    :selections [(t/selection
-                  "Wooden Shield or Simple Weapon"
-                  [(t/option
-                    "Wooden Shield"
-                    :shield
-                    []
-                    [(mod5e/armor :shield 1)])
-                   (weapon-option :druid [:simple 1])])
-                 (t/selection
-                  "Melee Weapon"
-                  [(t/option
-                    "Scimitar"
-                    :scimitar
-                    []
-                    [(mod5e/weapon :scimitar 1)])
-                   (t/option
-                    "Simple Melee Weapon"
-                    :simple-melee
-                    [(t/selection
-                      "Simple Melee Weapon"
-                      (opt5e/simple-melee-weapon-options 1))]
-                    [])])]
+    :selections [(new-starting-equipment-selection
+                  :druid
+                  {:name "Wooden Shield or Simple Weapon"
+                   :options [(t/option-cfg
+                              {:name "Wooden Shield"
+                               :modifiers [(mod5e/armor :shield 1)]})
+                             (weapon-option :druid [:simple 1])]})
+                 (new-starting-equipment-selection
+                  :druid
+                  {:name "Melee Weapon"
+                   :options [(t/option-cfg
+                              {:name "Scimitar"
+                               :modifiers [(mod5e/weapon :scimitar 1)]})
+                             (t/option-cfg
+                              {:name "Simple Melee Weapon"
+                               :selections [(new-starting-equipment-selection
+                                             :druid
+                                             {:name "Simple Melee Weapon"
+                                              :options (opt5e/simple-melee-weapon-options 1)})]})]})]
     :traits [{:name "Druidic"
               :page 66
               :summary "You can speak Druidic and use it to leave hidden message and automatically spot messages left by others"}
@@ -2223,67 +2208,53 @@
     :subclass-level 2
     :subclass-title "Druid Circle"
     :subclasses [{:name "Circle of the Land"
-                  :selections [(t/selection
-                                "Bonus Cantrip"
-                                (opt5e/spell-options (get-in sl/spell-lists [:druid 0]) :wis "Druid"))
-                               (t/selection
-                                "Land Type"
-                                [(t/option
-                                  "Arctic"
-                                  :arctic
-                                  []
-                                  [(druid-spell 3 :slow 5)
-                                   (druid-spell 5 :cone-of-cold 9)])
-                                 (t/option
-                                  "Coast"
-                                  :coast
-                                  []
-                                  [(druid-spell 2 :mirror-image 3)
-                                   (druid-spell 2 :misty-step 3)])
-                                 (t/option
-                                  "Desert"
-                                  :desert
-                                  []
-                                  [(druid-spell 2 :blur 3)
-                                   (druid-spell 2 :silence 3)
-                                   (druid-spell 3 :create-food-and-water 5)])
-                                 (t/option
-                                  "Forest"
-                                  :forest
-                                  []
-                                  [(druid-spell 2 :spider-climb 3)
-                                   (druid-spell 4 :divination 7)])
-                                 (t/option
-                                  "Grassland"
-                                  :grassland
-                                  []
-                                  [(druid-spell 2 :invisibility 3)
-                                   (druid-spell 3 :haste 5)
-                                   (druid-spell 4 :divination 7)
-                                   (druid-spell 5 :dream 9)])
-                                 (t/option
-                                  "Mountain"
-                                  :mountain
-                                  []
-                                  [(druid-spell 2 :spider-climb 3)
-                                   (druid-spell 3 :lightning-bolt 5)])
-                                 (t/option
-                                  "Swamp"
-                                  :swamp
-                                  []
-                                  [(druid-spell 2 :darkness 3)
-                                   (druid-spell 2 :melfs-acid-arrow 3)
-                                   (druid-spell 3 :stinking-cloud 5)])
-                                 (t/option
-                                  "Underdark"
-                                  :underdark
-                                  []
-                                  [(druid-spell 2 :spider-climb 3)
-                                   (druid-spell 2 :web 3)
-                                   (druid-spell 3 :stinking-cloud 5)
-                                   (druid-spell 3 :gaseous-form 5)
-                                   (druid-spell 4 :greater-invisibility 7)
-                                   (druid-spell 5 :cloudkill 9)])])]
+                  :selections [(opt5e/spell-selection
+                                {:title "Bonus Cantrip"
+                                 :num 1
+                                 :options (opt5e/spell-options (get-in sl/spell-lists [:druid 0]) :wis "Druid")})
+                               (t/selection-cfg
+                                {:name "Land Type"
+                                 :tags #{:class}
+                                 :options [(t/option-cfg
+                                   {:name "Arctic"
+                                    :modifiers [(druid-spell 3 :slow 5)
+                                                (druid-spell 5 :cone-of-cold 9)]})
+                                  (t/option-cfg
+                                   {:name "Coast"
+                                    :modifiers [(druid-spell 2 :mirror-image 3)
+                                              (druid-spell 2 :misty-step 3)]})
+                                  (t/option-cfg
+                                   {:name "Desert"
+                                    :modifiers [(druid-spell 2 :blur 3)
+                                              (druid-spell 2 :silence 3)
+                                              (druid-spell 3 :create-food-and-water 5)]})
+                                  (t/option-cfg
+                                   {:name "Forest"
+                                    :modifiers [(druid-spell 2 :spider-climb 3)
+                                              (druid-spell 4 :divination 7)]})
+                                  (t/option-cfg
+                                   {:name "Grassland"
+                                    :modifiers [(druid-spell 2 :invisibility 3)
+                                              (druid-spell 3 :haste 5)
+                                              (druid-spell 4 :divination 7)
+                                              (druid-spell 5 :dream 9)]})
+                                  (t/option-cfg
+                                   {:name "Mountain"
+                                    :modifiers [(druid-spell 2 :spider-climb 3)
+                                                (druid-spell 3 :lightning-bolt 5)]})
+                                  (t/option-cfg
+                                   {:name "Swamp"
+                                    :modifiers [(druid-spell 2 :darkness 3)
+                                                (druid-spell 2 :melfs-acid-arrow 3)
+                                                (druid-spell 3 :stinking-cloud 5)]})
+                                  (t/option-cfg
+                                   {:name "Underdark"
+                                    :modifiers [(druid-spell 2 :spider-climb 3)
+                                                (druid-spell 2 :web 3)
+                                                (druid-spell 3 :stinking-cloud 5)
+                                                (druid-spell 3 :gaseous-form 5)
+                                                (druid-spell 4 :greater-invisibility 7)
+                                                (druid-spell 5 :cloudkill 9)]})]})]
                   :modifiers []
                   :levels {2 {:modifiers [(mod5e/dependent-trait
                                            {:name "Natural Recovery"
@@ -2513,16 +2484,16 @@
                   {:name "Weapons"
                    :options [(t/option-cfg
                               {:name "Martial Weapon and Shield"
-                               :selections [(t/selection-cfg
+                               :selections [(new-starting-equipment-selection
+                                             :fighter
                                              {:name "Martial Weapon"
-                                              :tags #{:equipment :starting-equipment}
                                               :options (opt5e/martial-weapon-options 1)})]
                                :modifiers [(mod5e/armor :shield 1)]})
                              (t/option-cfg
                               {:name "Two Martial Weapons"
-                               :selections [(t/selection-cfg
+                               :selections [(new-starting-equipment-selection
+                                             :fighter
                                              {:name "Martial Weapons"
-                                              :tags #{:equipment :starting-equipment}
                                               :options (opt5e/martial-weapon-options 1)
                                               :min 2
                                               :max 2})]})]})
@@ -2880,17 +2851,19 @@
                   {:name "Weapons"
                    :options [(t/option-cfg
                               {:name "Martial Weapon and Shield"
-                               :selections [(t/selection
-                                             "Martial Weapon"
-                                             (opt5e/martial-weapon-options 1))]
+                               :selections [(new-starting-equipment-selection
+                                             :paladin
+                                             {:name "Martial Weapon"
+                                              :options (opt5e/martial-weapon-options 1)})]
                                :modifiers [(mod5e/armor :shield 1)]})
                              (t/option-cfg
                               {:name "Two Martial Weapons"
-                               :selections [(t/selection
-                                             "Martial Weapons"
-                                             (opt5e/martial-weapon-options 1)
-                                             2
-                                             2)]})]})
+                               :selections [(new-starting-equipment-selection
+                                             :paladin
+                                             {:name "Martial Weapons"
+                                              :options (opt5e/martial-weapon-options 1)
+                                              :min 2
+                                              :max 2})]})]})
                  (new-starting-equipment-selection
                   :paladin
                   {:name "Melee Weapon"
@@ -2899,9 +2872,10 @@
                                :modifiers [(mod5e/weapon :javelin 5)]})
                              (t/option-cfg
                               {:name "Simple Melee Weapon"
-                               :selections [(t/selection
-                                             "Simple Melee Weapon"
-                                             (opt5e/simple-melee-weapon-options 1))]})]})]
+                               :selections [(new-starting-equipment-selection
+                                             :paladin
+                                             {:name "Simple Melee Weapon"
+                                              :options (opt5e/simple-melee-weapon-options 1)})]})]})]
     :traits [{:name "Divine Smite"
               :level 2
               :page 85
@@ -3078,37 +3052,42 @@
       :modifiers [(mod/set-mod ?ranger-favored-enemies enemy-type)]})))
 
 (def favored-enemy-selection
-  (t/selection
-   "Favored Enemy"
-   [(t/option-cfg
-     {:name "Type"
-      :selections [(t/selection
-                    "Type"
-                    (map
-                     favored-enemy-option
-                     favored-enemy-types))]})
-    (t/option-cfg
-     {:name "Two Humanoid Races"
-      :selections [(t/selection
-                    "Humanoid Race 1"
-                    (map
-                     favored-enemy-option
-                     humanoid-enemies))
-                   (t/selection
-                    "Humanoid Race 2"
-                    (map
-                     favored-enemy-option
-                     humanoid-enemies))]})]))
+  (t/selection-cfg
+   {:name "Favored Enemy"
+    :tags #{:class}
+    :options [(t/option-cfg
+               {:name "Type"
+                :selections [(t/selection-cfg
+                              {:name "Type"
+                               :tags #{:class}
+                               :options (map
+                                         favored-enemy-option
+                                         favored-enemy-types)})]})
+              (t/option-cfg
+               {:name "Two Humanoid Races"
+                :selections [(t/selection-cfg
+                              {:name "Humanoid Race 1"
+                               :tags #{:class}
+                               :options (map
+                                         favored-enemy-option
+                                         humanoid-enemies)})
+                             (t/selection-cfg
+                              {:name "Humanoid Race 2"
+                               :tags #{:class}
+                               :options (map
+                                         favored-enemy-option
+                                         humanoid-enemies)})]})]}))
 
 (def favored-terrain-selection
-  (t/selection
-   "Favored Terrain"
-   (map
-    (fn [terrain]
-      (t/option-cfg
-       {:name (common/kw-to-name terrain)
-        :modifiers [(mod/set-mod ?ranger-favored-terrain terrain)]}))
-    [:arctic :coast :desert :forest :grassland :mountain :swamp :underdark])))
+  (t/selection-cfg
+   {:name "Favored Terrain"
+    :tags #{:class}
+    :options (map
+     (fn [terrain]
+       (t/option-cfg
+        {:name (common/kw-to-name terrain)
+         :modifiers [(mod/set-mod ?ranger-favored-terrain terrain)]}))
+     [:arctic :coast :desert :forest :grassland :mountain :swamp :underdark])}))
 
 (defn uncanny-dodge-modifier [page]
   (mod5e/reaction
@@ -3164,18 +3143,20 @@
                     :summary (let [favored-terrain ?ranger-favored-terrain
                                    one-terrain? (= 1 (count favored-terrain))]
                                (str "your favored terrain " (if one-terrain? "type is" "types are") " " (if (seq favored-terrain) (common/list-print (map #(common/kw-to-name % false) ?ranger-favored-terrain)) "not selected") ". Related to the terrain type" (if (not one-terrain?) "s") ": 2X proficiency bonus for INT and WIS checks for which you are proficient, difficult terrain doesn't slow your group, always alert for danger, can move stealthily alone at normal pace, 2x food when foraging, while tracking learn exact number, size, and when they passed through"))})]
-    :selections [(t/selection
-                  "Melee Weapon"
-                  [(t/option-cfg
-                    {:name "Two Shortswords"
-                     :modifiers [(mod5e/weapon :shortsword 2)]})
-                   (t/option-cfg
-                    {:name "Simple Melee Weapon"
-                     :selections [(t/selection
-                                   "Simple Melee Weapon"
-                                   (opt5e/simple-melee-weapon-options 1)
-                                   2
-                                   2)]})])
+    :selections [(new-starting-equipment-selection
+                  :ranger
+                  {:name "Melee Weapon"
+                   :options [(t/option-cfg
+                              {:name "Two Shortswords"
+                               :modifiers [(mod5e/weapon :shortsword 2)]})
+                             (t/option-cfg
+                              {:name "Simple Melee Weapon"
+                               :selections [(new-starting-equipment-selection
+                                             :ranger
+                                             {:name "Simple Melee Weapon"
+                                              :options (opt5e/simple-melee-weapon-options 1)
+                                              :min 2
+                                              :max 2})]})]})
                  favored-enemy-selection
                  favored-terrain-selection]
     :levels {2 {:selections [(opt5e/fighting-style-selection #{:archery :defense :dueling :two-weapon-fighting})]}
@@ -3211,89 +3192,94 @@
     :subclass-level 3
     :subclass-title "Ranger Archetype"
     :subclasses [{:name "Hunter"
-                  :levels {3 {:selections [(t/selection
-                                            "Hunter's Prey"
-                                            [(t/option-cfg
-                                              {:name "Colossus Slayer"
-                                               :modifiers [(mod5e/trait-cfg
-                                                            {:name "Colossus Slayer"
-                                                             :page 93
-                                                             :frequency {:units :turn}
-                                                             :summary "deal an extra d8 damage when you hit a creature that is below its HP max with a weapon attack"})]})
-                                             (t/option-cfg
-                                              {:name "Giant Killer"
-                                               :modifiers [(mod5e/reaction
-                                                            {:name "Giant Killer"
-                                                             :page 93
-                                                             :frequency {:units :turn}
-                                                             :summary "attack a Large or larger creature within 5 ft that misses an attack against you"})]})
-                                             (t/option-cfg
-                                              {:name "Horde Breaker"
-                                               :modifiers [(mod5e/trait-cfg
-                                                            {:name "Horde Breaker"
-                                                             :page 93
-                                                             :frequency {:units :turn}
-                                                             :summary "when you attack one creature, attack another creature within 5 feet of it with the same action"})]})])]}
-                           7 {:selections [(t/selection
-                                            "Defensive Tactics"
-                                            [(t/option-cfg
-                                              {:name "Escape the Horde"
-                                               :modifiers [(mod5e/trait-cfg
-                                                            {:name "Escape the Horde"
-                                                             :frequency {:units :turn}
-                                                             :page 93})]})
-                                             (t/option-cfg
-                                              {:name "Multiattack Defense"
-                                               :modifiers [(mod5e/trait-cfg
-                                                            {:name "Multiattack Defense"
-                                                             :frequency {:units :turn}
-                                                             :page 93})]})
-                                             (t/option-cfg
-                                              {:name "Steel Will"
-                                               :modifiers [(mod5e/saving-throw-advantage [:frightened])]})])]}
-                           11 {:selections [(t/selection
-                                            "Multiattack"
-                                            [(t/option-cfg
-                                              {:name "Volley"
-                                               :modifiers [(mod5e/action
-                                                            {:name "Volley"
-                                                             :page 93
-                                                             :summary "make a ranged attack against any creatures within a 10 ft of a point" 
-})]})
-                                             (t/option-cfg
-                                              {:name "Whirlwind Attack"
-                                               :modifiers [(mod5e/action
-                                                            {:name "Whirlwind Attack"
-                                                             :page 93
-                                                             :summary "melee attack against any creatures within 5 ft. of you"})]})])]}
-                           15 {:selections [(t/selection
-                                            "Superior Hunter's Defense"
-                                            [(t/option-cfg
-                                              {:name "Evasion"
-                                               :modifiers [(mod5e/trait-cfg
-                                                            (evasion 15 93))]})
-                                             (t/option-cfg
-                                              {:name "Stand Against the Tide"
-                                               :modifiers  [(mod5e/reaction
-                                                             {:name "Stand Against the Tide"
-                                                              :page 93
-                                                              :summary "force a creature to repeat its attack on another creature when it misses you"
-})]})
-                                             (t/option-cfg
-                                              {:name "Uncanny Dodge"
-                                               :modifiers [(uncanny-dodge-modifier 93)]})])]}}}
+                  :levels {3 {:selections [(t/selection-cfg
+                                            {:name "Hunter's Prey"
+                                             :tags #{:class}
+                                             :options [(t/option-cfg
+                                                        {:name "Colossus Slayer"
+                                                         :modifiers [(mod5e/trait-cfg
+                                                                      {:name "Colossus Slayer"
+                                                                       :page 93
+                                                                       :frequency {:units :turn}
+                                                                       :summary "deal an extra d8 damage when you hit a creature that is below its HP max with a weapon attack"})]})
+                                                       (t/option-cfg
+                                                        {:name "Giant Killer"
+                                                         :modifiers [(mod5e/reaction
+                                                                      {:name "Giant Killer"
+                                                                       :page 93
+                                                                       :frequency {:units :turn}
+                                                                       :summary "attack a Large or larger creature within 5 ft that misses an attack against you"})]})
+                                                       (t/option-cfg
+                                                        {:name "Horde Breaker"
+                                                         :modifiers [(mod5e/trait-cfg
+                                                                      {:name "Horde Breaker"
+                                                                       :page 93
+                                                                       :frequency {:units :turn}
+                                                                       :summary "when you attack one creature, attack another creature within 5 feet of it with the same action"})]})]})]}
+                           7 {:selections [(t/selection-cfg
+                                            {:name "Defensive Tactics"
+                                             :tags #{:class}
+                                             :options [(t/option-cfg
+                                                        {:name "Escape the Horde"
+                                                         :modifiers [(mod5e/trait-cfg
+                                                                      {:name "Escape the Horde"
+                                                                       :frequency {:units :turn}
+                                                                       :page 93})]})
+                                                       (t/option-cfg
+                                                        {:name "Multiattack Defense"
+                                                         :modifiers [(mod5e/trait-cfg
+                                                                      {:name "Multiattack Defense"
+                                                                       :frequency {:units :turn}
+                                                                       :page 93})]})
+                                                       (t/option-cfg
+                                                        {:name "Steel Will"
+                                                         :modifiers [(mod5e/saving-throw-advantage [:frightened])]})]})]}
+                           11 {:selections [(t/selection-cfg
+                                             {:name "Multiattack"
+                                              :tags #{:class}
+                                              :options [(t/option-cfg
+                                                         {:name "Volley"
+                                                          :modifiers [(mod5e/action
+                                                                       {:name "Volley"
+                                                                        :page 93
+                                                                        :summary "make a ranged attack against any creatures within a 10 ft of a point" 
+                                                                        })]})
+                                                        (t/option-cfg
+                                                         {:name "Whirlwind Attack"
+                                                          :modifiers [(mod5e/action
+                                                                       {:name "Whirlwind Attack"
+                                                                        :page 93
+                                                                        :summary "melee attack against any creatures within 5 ft. of you"})]})]})]}
+                           15 {:selections [(t/selection-cfg
+                                             {:name "Superior Hunter's Defense"
+                                              :tags #{:class}
+                                              :options [(t/option-cfg
+                                                         {:name "Evasion"
+                                                          :modifiers [(mod5e/trait-cfg
+                                                                       (evasion 15 93))]})
+                                                        (t/option-cfg
+                                                         {:name "Stand Against the Tide"
+                                                          :modifiers  [(mod5e/reaction
+                                                                        {:name "Stand Against the Tide"
+                                                                         :page 93
+                                                                         :summary "force a creature to repeat its attack on another creature when it misses you"
+                                                                         })]})
+                                                        (t/option-cfg
+                                                         {:name "Uncanny Dodge"
+                                                          :modifiers [(uncanny-dodge-modifier 93)]})]})]}}}
                  {:name "Beast Master"
-                  :selections [(t/selection
-                                "Ranger's Companion"
-                                (map
-                                 (fn [monster-name]
-                                   (t/option-cfg
-                                    {:name monster-name
-                                     :modifiers [(mod5e/action
-                                                  {:name "Ranger's Companion"
-                                                   :page 93
-                                                   :summary (str "You have a " monster-name " as your companion, you can command it to Attack, Dash, Disengage, Dodge, or Help")})]}))
-                                 ["Stirge" "Baboon" "Bat" "Badger" "Blood Hawk" "Boar" "Cat" "Crab" "Deer" "Eagle" "Flying Snake" "Frog" "Giant Badger" "Giant Centipede" "Giant Crab" "Giant Fire Beetle" "Giant Frog" "Giant Poisonous Snake" "Giant Rat" "Giant Wolf Spider" "Goat" "Hawk" "Hyena" "Jackal" "Lizard" "Mastiff" "Mule" "Octopus" "Panther" "Owl" "Poisonous Snake" "Pony" "Quipper" "Rat" "Raven" "Scorpion" "Sea Horse" "Spider" "Vulture" "Weasel" "Wolf"]))]
+                  :selections [(t/selection-cfg
+                                {:name "Ranger's Companion"
+                                 :tags #{:class}
+                                 :options (map
+                                           (fn [monster-name]
+                                             (t/option-cfg
+                                              {:name monster-name
+                                               :modifiers [(mod5e/action
+                                                            {:name "Ranger's Companion"
+                                                             :page 93
+                                                             :summary (str "You have a " monster-name " as your companion, you can command it to Attack, Dash, Disengage, Dodge, or Help")})]}))
+                                           ["Stirge" "Baboon" "Bat" "Badger" "Blood Hawk" "Boar" "Cat" "Crab" "Deer" "Eagle" "Flying Snake" "Frog" "Giant Badger" "Giant Centipede" "Giant Crab" "Giant Fire Beetle" "Giant Frog" "Giant Poisonous Snake" "Giant Rat" "Giant Wolf Spider" "Goat" "Hawk" "Hyena" "Jackal" "Lizard" "Mastiff" "Mule" "Octopus" "Panther" "Owl" "Poisonous Snake" "Pony" "Quipper" "Rat" "Raven" "Scorpion" "Sea Horse" "Spider" "Vulture" "Weasel" "Wolf"])})]
                   :levels {7 {:modifiers [(mod5e/bonus-action
                                            {:name "Exceptional Training"
                                             :page 93
@@ -3352,20 +3338,17 @@
                               ::t/order
                               1)]}
              15 {:modifiers [(mod5e/saving-throws nil :wis)]}}
-    :selections [(t/selection
-                  "Additional Weapon"
-                  [(t/option
-                    "Shortbow, Quiver, 20 Arrows"
-                    :shortbow
-                    []
-                    [(mod5e/weapon :shortbow 5)
-                     (mod5e/equipment :quiver 1)
-                     (mod5e/equipment :arrow 20)])
-                   (t/option
-                    "Shortsword"
-                    :shortsword
-                    []
-                    [(mod5e/weapon :shortsword 1)])])
+    :selections [(new-starting-equipment-selection
+                  :rogue
+                  {:name "Additional Weapon"
+                   :options [(t/option-cfg
+                              {:name "Shortbow, Quiver, 20 Arrows"
+                               :modifiers [(mod5e/weapon :shortbow 5)
+                                           (mod5e/equipment :quiver 1)
+                                           (mod5e/equipment :arrow 20)]})
+                             (t/option-cfg
+                              {:name "Shortsword"
+                               :modifiers [(mod5e/weapon :shortsword 1)]})]})
                  (assoc
                   opt5e/rogue-expertise-selection
                   ::t/order
@@ -3483,59 +3466,60 @@
                             :summary "creatures have disadvantage on saves against your spells (only on the turn you cast them) if you are hidden from them"}]}]}))
 
 (defn metamagic-selection [num]
-  (t/selection
-   "Metamagic"
-   [(t/option-cfg
-     {:name "Careful Spell"
-      :modifiers [(mod5e/dependent-trait
-                   {:name "Careful Spell"
-                    :page 102
-                    :class-key :sorcerer
-                    :summary (str "When you cast a spell that requires a save, spend 1 sorcery pt. to allow up to " (?ability-bonuses :cha) " creatures to automatically succeed")})]})
-    (t/option-cfg
-     {:name "Distant Spell"
-      :modifiers [(mod5e/trait-cfg
-                   {:name "Distant Spell"
-                    :page 102
-                    :summary "spend 1 sorcery pt. double the range of a spell with range 5 ft. or greater or make the range of a touch spell 30 ft."})]})
-    (t/option-cfg
-     {:name "Empowered Spell"
-      :modifiers [(mod5e/dependent-trait
-                   {:name "Empowered Spell"
-                    :page 102
-                    :summary (str "spend 1 sorcery pt. to reroll up to " (?ability-bonuses :cha) " spell damage dice")})]})
-    (t/option-cfg
-     {:name "Extended Spell"
-      :modifiers [(mod5e/trait-cfg
-                   {:name "Extended Spell"
-                    :page 102
-                    :summary "spend 1 sorcery pt. to double the duration of a spell to a max 24 hrs."})]})
-    (t/option-cfg
-     {:name "Heightened Spell"
-      :modifiers [(mod5e/trait-cfg
-                   {:name "Heightened Spell"
-                    :page 102
-                    :summary "when you cast a spell with a save to resist it's effects, spend 3 sorcery pts. to give one target disadvantage on its first save against it"})]})
-    (t/option-cfg
-     {:name "Quickened Spell"
-      :modifiers [(mod5e/trait-cfg
-                   {:name "Quickened Spell"
-                    :page 102
-                    :summary "spend 2 sorcery pts. to convert a casting of a spell with 1 action casting time to 1 bonus-action"})]})
-    (t/option-cfg
-     {:name "Subtle Spell"
-      :modifiers [(mod5e/trait-cfg
-                   {:name "Subtle Spell"
-                    :page 102
-                    :summary "spend 1 sorcery pt. to cast a spell without somatic or verbal components"})]})
-    (t/option-cfg
-     {:name "Twinned Spell"
-      :modifiers [(mod5e/trait-cfg
-                  {:name "Twinned Spell"
-                   :page 102
-                   :summary "spend X sorcery pts. (min 1) to target two creatures with a single target spell, where X is the spell level"})]})]
-   num
-   num))
+  (t/selection-cfg
+   {:name "Metamagic"
+    :tags #{:class}
+    :min num
+    :max num
+    :options [(t/option-cfg
+               {:name "Careful Spell"
+                :modifiers [(mod5e/dependent-trait
+                             {:name "Careful Spell"
+                              :page 102
+                              :class-key :sorcerer
+                              :summary (str "When you cast a spell that requires a save, spend 1 sorcery pt. to allow up to " (?ability-bonuses :cha) " creatures to automatically succeed")})]})
+              (t/option-cfg
+               {:name "Distant Spell"
+                :modifiers [(mod5e/trait-cfg
+                             {:name "Distant Spell"
+                              :page 102
+                              :summary "spend 1 sorcery pt. double the range of a spell with range 5 ft. or greater or make the range of a touch spell 30 ft."})]})
+              (t/option-cfg
+               {:name "Empowered Spell"
+                :modifiers [(mod5e/dependent-trait
+                             {:name "Empowered Spell"
+                              :page 102
+                              :summary (str "spend 1 sorcery pt. to reroll up to " (?ability-bonuses :cha) " spell damage dice")})]})
+              (t/option-cfg
+               {:name "Extended Spell"
+                :modifiers [(mod5e/trait-cfg
+                             {:name "Extended Spell"
+                              :page 102
+                              :summary "spend 1 sorcery pt. to double the duration of a spell to a max 24 hrs."})]})
+              (t/option-cfg
+               {:name "Heightened Spell"
+                :modifiers [(mod5e/trait-cfg
+                             {:name "Heightened Spell"
+                              :page 102
+                              :summary "when you cast a spell with a save to resist it's effects, spend 3 sorcery pts. to give one target disadvantage on its first save against it"})]})
+              (t/option-cfg
+               {:name "Quickened Spell"
+                :modifiers [(mod5e/trait-cfg
+                             {:name "Quickened Spell"
+                              :page 102
+                              :summary "spend 2 sorcery pts. to convert a casting of a spell with 1 action casting time to 1 bonus-action"})]})
+              (t/option-cfg
+               {:name "Subtle Spell"
+                :modifiers [(mod5e/trait-cfg
+                             {:name "Subtle Spell"
+                              :page 102
+                              :summary "spend 1 sorcery pt. to cast a spell without somatic or verbal components"})]})
+              (t/option-cfg
+               {:name "Twinned Spell"
+                :modifiers [(mod5e/trait-cfg
+                             {:name "Twinned Spell"
+                              :page 102
+                              :summary "spend X sorcery pts. (min 1) to target two creatures with a single target spell, where X is the spell level"})]})]}))
 
 (def sorcerer-option
   (class-option
@@ -3568,12 +3552,10 @@
     :selections [(new-starting-equipment-selection
                   :sorcerer
                   {:name "Weapon"
-                   :options [(t/option
-                              "Light Crossbow"
-                              :crossbow
-                              []
-                              [(mod5e/weapon :crossbow-light 1)
-                               (mod5e/equipment :crossbow-bolt 20)])
+                   :options [(t/option-cfg
+                              {:name "Light Crossbow"
+                               :modifiers [(mod5e/weapon :crossbow-light 1)
+                                           (mod5e/equipment :crossbow-bolt 20)]})
                              (weapon-option :sorcerer [:simple 1])]})]
     :modifiers [(mod/modifier ?natural-ac-bonus 3)]
     :levels {2 {:modifiers [(mod5e/dependent-trait
@@ -3890,44 +3872,39 @@
                    (get (es/entity-val c :spells-known) 0))))
 
 (def pact-boon-options
-  [(t/option
-    "Pact of the Chain"
-    :pact-of-the-chain
-    []
-    [(mod5e/trait-cfg
-      {:name pact-of-the-chain-name
-       :page 107
-       :summary "Can cast find familiar as a ritual, use your attack action to give your familiar an attack as a reaction"})])
-   (t/option
-    "Pact of the Blade"
-    :pact-of-the-blade
-    []
-    [(mod5e/trait-cfg
-      {:name pact-of-the-blade-name
-       :page 107
-       :summary "summon a magical weapon"})])
-   (t/option
-    "Pact of the Tome"
-    :pact-of-the-tome
-    [(t/selection-cfg
-      {:name "Book of Shadows Cantrips"
-       :tags #{:spells}
-       :min 3
-       :max 3
-       :options (opt5e/spell-options (into
-                                      #{}
-                                      (mapcat
-                                       (fn [[cls-kw spells-by-level]]
-                                         (spells-by-level 0))
-                                       sl/spell-lists))
-                                     :cha
-                                     "Warlock"
-                                     false
-                                     "uses Book of Shadows")})]
-    [(mod5e/trait-cfg
-      {:name pact-of-the-tome-name
-       :page 108
-       :summary "you have a spellbook with 3 extra cantrips"})])])
+  [(t/option-cfg
+    {:name "Pact of the Chain"
+     :modifiers [(mod5e/trait-cfg
+                  {:name pact-of-the-chain-name
+                   :page 107
+                   :summary "Can cast find familiar as a ritual, use your attack action to give your familiar an attack as a reaction"})]})
+   (t/option-cfg
+    {:name "Pact of the Blade"
+     :modifiers [(mod5e/trait-cfg
+                  {:name pact-of-the-blade-name
+                   :page 107
+                   :summary "summon a magical weapon"})]})
+   (t/option-cfg
+    {:name "Pact of the Tome"
+     :selections [(t/selection-cfg
+                   {:name "Book of Shadows Cantrips"
+                    :tags #{:spells}
+                    :min 3
+                    :max 3
+                    :options (opt5e/spell-options (into
+                                                   #{}
+                                                   (mapcat
+                                                    (fn [[cls-kw spells-by-level]]
+                                                      (spells-by-level 0))
+                                                    sl/spell-lists))
+                                                  :cha
+                                                  "Warlock"
+                                                  false
+                                                  "uses Book of Shadows")})]
+     :modifiers [(mod5e/trait-cfg
+                  {:name pact-of-the-tome-name
+                   :page 108
+                   :summary "you have a spellbook with 3 extra cantrips"})]})])
 
 
 (def eldritch-invocation-options
@@ -4258,12 +4235,10 @@ long rest."})]
     :selections [(new-starting-equipment-selection
                   :warlock
                   {:name "Weapon"
-                   :options [(t/option
-                              "Light Crossbow"
-                              :crossbow
-                              []
-                              [(mod5e/weapon :crossbow-light 1)
-                               (mod5e/equipment :crossbow-bolt 20)])
+                   :options [(t/option-cfg
+                              {:name "Light Crossbow"
+                               :modifiers [(mod5e/weapon :crossbow-light 1)
+                                           (mod5e/equipment :crossbow-bolt 20)]})
                              (weapon-option :warlock [:simple 1])]})
                  (simple-weapon-selection 1 :warlock)]
     :equipment-choices [{:name "Equipment Pack"
@@ -4390,13 +4365,11 @@ long rest."})]
                             :summary "charm incapacitated creature, it becomes charmed by you, you can communicate with it telepathically"}]}]}))
 
 (def arcane-tradition-options
-  [(t/option
-    "School of Evocation"
-    :school-of-evocation
-    nil
-    [(mod5e/subclass :wizard "School of Evocation")
-     (mod5e/trait "Evocation Savant")
-     (mod5e/trait "Sculpt Spells")])])
+  [(t/option-cfg
+    {:name "School of Evocation"
+     :modifiers [(mod5e/subclass :wizard "School of Evocation")
+                 (mod5e/trait "Evocation Savant")
+                 (mod5e/trait "Sculpt Spells")]})])
 
 (def artisans-tools-choice-cfg)
 
