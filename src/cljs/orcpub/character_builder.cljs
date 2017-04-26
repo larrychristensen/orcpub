@@ -32,7 +32,7 @@
 
             [reagent.core :as r]))
 
-(def print-enabled? true)
+(def print-enabled? (s/starts-with? js/window.location.href "http://localhost"))
 
 (declare app-state)
 
