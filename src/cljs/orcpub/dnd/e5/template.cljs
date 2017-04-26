@@ -2451,7 +2451,7 @@
   (class-option
    {:name "Fighter",
     :hit-die 10,
-    :ability-increase-levels [4 6 8 12 16 19]
+    :ability-increase-levels [4 6 8 12 14 16 19]
     :profs {:armor {:light false :medium false :heavy true :shields false}
             :weapon {:simple false :martial false} 
             :save {:str true :con true}
