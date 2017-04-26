@@ -32,7 +32,7 @@
 
             [reagent.core :as r]))
 
-(def print-enabled? true)
+(def print-enabled? false)
 
 (declare app-state)
 
