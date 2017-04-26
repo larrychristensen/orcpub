@@ -297,7 +297,7 @@
   (mods/modifier ?size size))
 
 (defn equipment-cfg [cfg]
-  (if (int? cfg) {:quantity cfg :equipped? false} cfg))
+  (if (int? cfg) {:quantity cfg :equipped? true} cfg))
 
 (defn weapon [weapon-kw cfg]
   (mods/map-mod ?weapons weapon-kw (equipment-cfg cfg)))

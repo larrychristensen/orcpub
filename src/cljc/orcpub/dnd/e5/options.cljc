@@ -75,7 +75,8 @@
    {:name (:name weapon)
     :key (:key weapon)
     :help (:description weapon)
-    :modifiers [(modifiers/weapon (:key weapon) (or num 1))]}))
+    :modifiers [(modifiers/weapon (:key weapon) {:equipped? true
+                                                 :quantity (or num 1)})]}))
 
 (defn weapon-options [weapons & [num]]
   (map
