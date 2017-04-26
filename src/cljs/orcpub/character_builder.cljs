@@ -1027,14 +1027,18 @@
 (def ignore-paths-ending-with #{:class :levels :asi-or-feat :ability-score-improvement})
 
 (defn ancestor-names-string [built-template path]
-  (let [ancestor-paths (remove
+  (let [ancestor-paths (map
                         (fn [p]
-                          (ignore-paths-ending-with (last p)))
+                          (if (ignore-paths-ending-with (last p))
+                            []
+                            p))
                         (reductions conj [] path))
+        _ (prn "ANCESTOR PATHS" ancestor-paths)
         ancestors (map (fn [a-p]
                          (entity/get-in-lazy built-template
                                  (entity/get-template-selection-path built-template a-p [])))
-                       ancestor-paths)
+                       (butlast ancestor-paths))
+        _ (js/console.log "ANCESTORs" ancestors)
         ancestor-names (map ::t/name (remove nil? ancestors))]
     (s/join " - " ancestor-names)))
 
@@ -1433,6 +1437,7 @@
    (doall
     (map-indexed
      (fn [i {:keys [::t/key ::t/min ::t/max ::t/options ::entity/path] :as selection}]
+       (prn "PATH" path)
        (let [remaining (count-remaining built-template character selection)]
          ^{:key i}
          [selection-section-base
