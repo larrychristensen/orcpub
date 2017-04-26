@@ -196,7 +196,6 @@
            (fn [[armor-kw _]]
              (let [armor (mi5e/all-armor-map armor-kw)
                    speed (speed-with-armor armor)]
-               (prn "ARMOR" armor speed)
                ^{:key armor-kw}
                [:div
                 [:div
@@ -1033,12 +1032,10 @@
                             []
                             p))
                         (reductions conj [] path))
-        _ (prn "ANCESTOR PATHS" ancestor-paths)
         ancestors (map (fn [a-p]
                          (entity/get-in-lazy built-template
                                  (entity/get-template-selection-path built-template a-p [])))
                        (butlast ancestor-paths))
-        _ (js/console.log "ANCESTORs" ancestors)
         ancestor-names (map ::t/name (remove nil? ancestors))]
     (s/join " - " ancestor-names)))
 
@@ -1437,7 +1434,6 @@
    (doall
     (map-indexed
      (fn [i {:keys [::t/key ::t/min ::t/max ::t/options ::entity/path] :as selection}]
-       (prn "PATH" path)
        (let [remaining (count-remaining built-template character selection)]
          ^{:key i}
          [selection-section-base
@@ -1843,7 +1839,7 @@
                                  combined-selections)]
     (if print-enabled? (js/console.log "FINAL SELECTIONS" (vec final-selections) (map ::t/key final-selections)))
     [:div.w-100-p
-     [option-sources]
+     [option-sources character built-char built-template option-paths]
      [:div#options-column.b-1.b-rad-5
       [section-tabs available-selections built-template character page-index]
       [:div.flex.justify-cont-s-b.p-t-5.p-10.align-items-t
