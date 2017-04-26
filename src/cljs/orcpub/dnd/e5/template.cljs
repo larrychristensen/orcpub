@@ -1451,6 +1451,12 @@
 (defn class-level [levels class-kw]
   (get-in levels [class-kw :class-level]))
 
+(defn extra-attack-trait [page]
+  (mod5e/trait-cfg
+   {:name "Extra Attack"
+    :page page
+    :summary "Attack twice when taking Attack action"}))
+
 (def barbarian-option
   (class-option
    {:name "Barbarian"
@@ -1495,10 +1501,7 @@
                                                     9 3
                                                     2))
                                 "; resistance to bludgeoning, piercing, and slashing damage")})]
-    :levels {5 {:modifiers [(mod5e/trait-cfg
-                             {:name "Extra Attack"
-                              :page 49
-                              :summary "Attack twice when taking Attack action"})
+    :levels {5 {:modifiers [(extra-attack-trait 49)
                             (mod5e/extra-attack)
                             (mod/modifier ?speed-with-armor (fn [armor] (if (not= :heavy (:type armor))
                                                                             (+ 10 ?speed)
@@ -1758,7 +1761,12 @@
                   :profs {:armor {:medium true
                                   :shields true}
                           :weapon {:martial true}}
-                  :levels {6 {:modifiers [(mod5e/extra-attack)]}
+                  :levels {3 {:modifiers [(mod5e/trait-cfg
+                                           {:name "Combat Inspiration"
+                                            :page 55
+                                            :summary "a creature can add your bardic inspiration to a damage roll or to it's AC against an attack"})]}
+                           6 {:modifiers [(extra-attack-trait 55)
+                                          (mod5e/extra-attack)]}
                            14 {:modifiers [(mod5e/bonus-action
                                            {:name "Battle Magic"
                                             :page 55
