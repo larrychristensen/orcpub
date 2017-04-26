@@ -2091,7 +2091,7 @@
                                            {:name "Channel Divinity: Invoke Duplicity"
                                             :level 2
                                             :page 63
-                                            :summary "create illusion of yourself for 1 min. or concentration. Move it 30 ft. as a bonus action, cast spells as if in illusion's space, gain advantage on a creature both you and the illusion are within 5 ft. of"})]}
+                                            :summary "create illusion of yourself for 1 min. or concentration. Move it 30 ft. as a bonus action, cast spells as if in illusion's space, gain advantage on attacks on a creature both you and the illusion are within 5 ft. of"})]}
                            6 {:modifiers [(mod5e/action
                                            {:name "Channel Divinity: Cloak of Shadows"
                                             :level 6
@@ -2121,7 +2121,7 @@
                                 :level 1
                                 :page 63
                                 :frequency {:units :long-rest
-                                            :amount (?ability-bonuses :wis)}
+                                            :amount (max 1 (?ability-bonuses :wis))}
                                 :summary "make one extra weapon attack when you use the Attack action"})]
                   :levels {6 {:modifiers [(mod5e/reaction
                                            {:name "Channel Divinity: War God's Blessing"
