@@ -1258,7 +1258,7 @@
                   :key key
                   :icon icon
                   :modifiers [(modifiers/skill-expertise key)]
-                  :prereqs [(t/option-prereq (str "proficiency in " name)
+                  :prereqs [(t/option-prereq (str "Requires proficiency in " name)
                                              (fn [built-char]
                                                (let [skill-profs (es/entity-val built-char :skill-profs)]
                                                  (and skill-profs (skill-profs key)))))]}))

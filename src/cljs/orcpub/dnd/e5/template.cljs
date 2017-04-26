@@ -1698,6 +1698,10 @@
     :levels {2 {:modifiers [(mod/modifier ?default-skill-bonus (let [b (int (/ ?prof-bonus 2))]
                                                                  (zipmap char5e/ability-keys (repeat b))))
                             (mod5e/dependent-trait
+                             {:name "Jack of All Trades"
+                              :page 54
+                              :summary (str (common/bonus-str (int (/ ?prof-bonus 2))) " to ability checks that don't already include your proficiency bonus")})
+                            (mod5e/dependent-trait
                              {:name "Song of Rest"
                               :page 54
                               :level 2

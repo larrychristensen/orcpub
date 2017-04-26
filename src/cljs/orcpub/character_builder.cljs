@@ -177,7 +177,6 @@
         speed-with-armor (char5e/land-speed-with-armor built-char)
         unarmored-speed-bonus (char5e/unarmored-speed-bonus built-char)
         equipped-armor (char5e/normal-armor-inventory built-char)]
-    (prn "SPEED WITH ARMOR" speed-with-armor)
     [svg-icon-section
      "Speed"
      "walking-boot"
