@@ -513,6 +513,7 @@
       :tags #{:spells}
       :min 2
       :max 2
+      :ref [:class :bard :magical-secrets]
       :options (mapcat
                 (fn [[lvl spells]]
                   (map
