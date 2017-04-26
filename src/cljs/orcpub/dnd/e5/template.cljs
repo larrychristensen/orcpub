@@ -2538,9 +2538,6 @@
                               {:name "Two Handaxes"
                                :modifiers [(mod5e/weapon :handaxe 2)]})]})]
     :subclasses [{:name "Champion"
-                  :selections [(add-level-prereq
-                                (opt5e/fighting-style-selection)
-                                10)]
                   :levels {3 {:modifiers [(mod5e/critical 19)]}
                            7 {:modifiers [(mod/modifier ?default-skill-bonus (let [b (int (/ ?prof-bonus 2))] {:str b :dex b :con b}))
                                           (mod5e/dependent-trait
@@ -2552,6 +2549,7 @@
                                                           " to STR, DEX, or CON checks that don't already include prof bonus; running long jump increases by "
                                                           (?ability-bonuses :str)
                                                           " ft.")})]}
+                           10 {:selections [(opt5e/fighting-style-selection)]}
                            15 {:modifiers [(mod5e/critical 18)]}
                            18 {:modifiers [(mod5e/dependent-trait
                                             {:level 18
