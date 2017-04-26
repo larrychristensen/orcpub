@@ -1991,12 +1991,15 @@
     :target "_blank"}
    [:input {:type "hidden" :name "body" :id "fields-input"}]])
 
+(def patreon-link-props
+  {:href "https://www.patreon.com/user?u=5892323" :target "_blank"})
+
 (defn header [built-char]
   [:div.w-100-p
    [:div.flex.align-items-c.f-w-b.f-s-18.m-t-10.m-l-10
     [:span "Please support continuing development on "]
-    [:a.m-l-5 {:href "https://www.patreon.com/user?u=5892323"} [:span "Patreon"]]
-    [:a.m-l-5 {:href "https://www.patreon.com/user?u=5892323"}
+    [:a.m-l-5 patreon-link-props [:span "Patreon"]]
+    [:a.m-l-5 patreon-link-props
      [:img.h-32.w-32 {:src "https://www.patreon.com/images/patreon_navigation_logo_mini_orange.png"}]]]
    [:div.flex.align-items-c.justify-cont-s-b
     [:h1.f-s-36.f-w-b.m-t-21.m-b-19.m-l-10 "Character Builder"]
