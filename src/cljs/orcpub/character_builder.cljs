@@ -1883,11 +1883,11 @@
                 [:div (selection-section character built-char built-template option-paths nil selection)])
               non-ui-fn-selections))])])]]))
 
-(defn builder-columns [built-template built-char option-paths collapsed-paths stepper-selection-path stepper-selection plugins active-tabs stepper-dismissed? available-selections]
+(defn builder-columns [built-template built-char option-paths plugins active-tabs available-selections]
   [:div.flex-grow-1.flex
    {:class-name (s/join " " (map #(str (name %) "-tab-active") active-tabs))}
    [:div.builder-column.options-column
-    [new-options-column (:character @app-state) built-char built-template available-selections (or (:page @app-state) 0) option-paths stepper-selection-path]]
+    [new-options-column (:character @app-state) built-char built-template available-selections (or (:page @app-state) 0) option-paths]]
    [:div.flex-grow-1.builder-column.personality-column
     [:div.m-t-5
      [:span.personality-label.f-s-18 "Character Name"]
@@ -2124,13 +2124,10 @@
         [builder-columns
          built-template
          built-char
-         character
          option-paths
-         collapsed-paths
          plugins
          active-tab
-         all-selections
-         (:page @app-state)]]]]
+         all-selections]]]]
      [:div.white.flex.justify-cont-c
       [:div.content.f-w-n.f-s-12
        [:div.p-10
