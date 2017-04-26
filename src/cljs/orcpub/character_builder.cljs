@@ -228,12 +228,12 @@
 
 (defn spells-known-section [spells-known]
   [display-section "Spells Known" "spell-book"
-   [:div.f-s-14
+   [:div.f-s-14.flex.flex-wrap
     (doall
      (map
       (fn [[level spells]]
         ^{:key level}
-        [:div.m-t-10
+        [:div.m-t-10.w-200
          [:span.f-w-600 (if (zero? level) "Cantrip" (str "Level " level))]
          [:div.i.f-w-n
           (doall

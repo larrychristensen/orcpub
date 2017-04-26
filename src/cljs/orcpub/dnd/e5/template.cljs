@@ -1926,7 +1926,7 @@
                   :selections [(opt5e/language-selection opt5e/languages 2)
                                (t/selection-cfg
                                 {:name "Blessings of Knowledge Skills"
-                                 :tags #{:class}
+                                 :tags #{:profs :skill-profs}
                                  :options (map
                                            blessings-of-knowledge-skill
                                            ["Arcana" "History" "Nature" "Religion"])
@@ -1938,7 +1938,7 @@
                                             :name "Channel Divinity: Read Thoughts"
                                             :summary (str "a creature within 60 ft. must make a DC "
                                                           (?spell-save-dc :wis)
-                                                          " Wisdom save or you can read it's thoughts for 1 min, use an action to end the effect and cast suggestion without using a slot and with no save")})]}
+                                                          " Wisdom save or you can read it's thoughts for 1 min, use an action to end the effect and cast 'suggestion' without using a slot and with no save")})]}
                            8 {:modifiers [(potent-spellcasting 60)]}}
                   :traits [{:level 2
                             :page 59
