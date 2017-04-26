@@ -3046,14 +3046,14 @@
       :selections [(opt5e/language-selection
                     (map
                      (fn [lang]
-                       (or (opt5e/language-map lang) {:key lang :name (common/kw-to-name lang)}))
+                       (or (opt5e/language-map lang) {:key lang :name (s/capitalize (common/kw-to-name lang))}))
                      languages)
                     1)]
       :modifiers [(mod/set-mod ?ranger-favored-enemies enemy-type)]})))
 
-(def favored-enemy-selection
+(defn favored-enemy-selection [order]
   (t/selection-cfg
-   {:name "Favored Enemy"
+   {:name (str "Favored Enemy " order)
     :tags #{:class}
     :options [(t/option-cfg
                {:name "Type"
@@ -3078,9 +3078,9 @@
                                          favored-enemy-option
                                          humanoid-enemies)})]})]}))
 
-(def favored-terrain-selection
+(defn favored-terrain-selection [order]
   (t/selection-cfg
-   {:name "Favored Terrain"
+   {:name (str "Favored Terrain " order)
     :tags #{:class}
     :options (map
      (fn [terrain]
@@ -3157,8 +3157,8 @@
                                               :options (opt5e/simple-melee-weapon-options 1)
                                               :min 2
                                               :max 2})]})]})
-                 favored-enemy-selection
-                 favored-terrain-selection]
+                 (favored-enemy-selection 1)
+                 (favored-terrain-selection 1)]
     :levels {2 {:selections [(opt5e/fighting-style-selection #{:archery :defense :dueling :two-weapon-fighting})]}
              3 {:modifiers [(mod5e/action
                              {:name "Primeval Awareness"
@@ -3166,10 +3166,10 @@
                               :page 92
                               :summary (str "spend an X-level spell slot, for X minutes, you sense the types of creatures within 1 mile" (if (seq ?ranger-favored-terrain) (str "(6 if " (common/list-print (map #(common/kw-to-name % false) ?ranger-favored-terrain))) ")") )})]}
              5 {:modifiers [(mod5e/extra-attack)]}
-             6 {:selections [favored-enemy-selection
-                             favored-terrain-selection]}
-             10 {:selections [favored-terrain-selection]}
-             14 {:selections [favored-enemy-selection]}
+             6 {:selections [(favored-enemy-selection 2)
+                             (favored-terrain-selection 2)]}
+             10 {:selections [(favored-terrain-selection 3)]}
+             14 {:selections [(favored-enemy-selection 3)]}
              20 {:modifiers [(mod5e/dependent-trait
                               {:name "Foe Slayer"
                                :frequency {:units :turn}
