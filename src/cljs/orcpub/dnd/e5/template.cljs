@@ -1798,7 +1798,8 @@
    {:level 8
     :name "Divine Strike"
     :page 60
-    :summary (str "Once each of your turns, add "
+    :frequency {:units :turn}
+    :summary (str "Add "
                   (if (>= (?class-level :cleric) 14) 2 1)
                   "d8 "
                   damage-desc
@@ -2051,7 +2052,7 @@
                                {:name "Wrath of the Storm"
                                 :page 62
                                 :frequency {:units :long-rest
-                                            :amount (?ability-bonuses :wis)}
+                                            :amount (max 1 (?ability-bonuses :wis))}
                                 :summary (str "When a creature within 5 ft. hits you, you deal 2d8 lightning or thunder damage to them (half that on successful DC "
                                               (?spell-save-dc :wis)
                                               " Dexterity save).")})]
@@ -2060,13 +2061,15 @@
                                             :page 62
                                             :level 2
                                             :summary "Rather than roll lighting or thunder damage, deal max damage"})]}
-                           8 {:modifiers [(divine-strike "thunder" 62)]}}
+                           8 {:modifiers [(divine-strike "thunder" 62)]}
+                           17 {:modifiers [(mod5e/flying-speed-equal-to-walking)]}}
                   :traits [{:name "Thunderbolt Strike"
                             :page 62
                             :level 6
                             :summary "Push a Large or smaller creature up to 10 ft. when you deal lightning damage to it"}
                            {:name "Stormborn"
                             :page 62
+                            :level 17
                             :summary "Flying speed equal to your walking speed"}]}
                  {:name "Trickery Domain"
                   :modifiers [(cleric-spell 1 :charm-person 1)
