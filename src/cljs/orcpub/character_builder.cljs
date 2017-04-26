@@ -32,7 +32,7 @@
 
             [reagent.core :as r]))
 
-(def print-enabled? false)
+(def print-enabled? true)
 
 (declare app-state)
 
@@ -312,7 +312,7 @@
           [:p.m-t-10
            [:span.f-w-600.i (:name action) "."]
            [:span.f-w-n.m-l-10 (add-links (common/sentensize (disp5e/action-description action)))]])
-        actions))])))
+        (sort-by :name actions)))])))
 
 (defn prof-name [prof-map prof-kw]
   (or (-> prof-kw prof-map :name) (common/kw-to-name prof-kw)))
@@ -1021,13 +1021,17 @@
              (remaining-component max remaining)]]))
        body])))
 
+(def ignore-paths-ending-with #{:class :levels :asi-or-feat :ability-score-improvement})
+
 (defn ancestor-names-string [built-template path]
-  (let [ancestor-paths (reductions conj [] path)
+  (let [ancestor-paths (remove
+                        (fn [p]
+                          (ignore-paths-ending-with (last p)))
+                        (reductions conj [] path))
         ancestors (map (fn [a-p]
                          (entity/get-in-lazy built-template
                                  (entity/get-template-selection-path built-template a-p [])))
-                       ancestor-paths
-                       (butlast ancestor-paths))
+                       ancestor-paths)
         ancestor-names (map ::t/name (remove nil? ancestors))]
     (s/join " - " ancestor-names)))
 

@@ -1523,11 +1523,11 @@
     :traits [{:name "Reckless Attack"
               :level 2
               :page 48
-              :summary "Advantage on attacks using Strength, attack against you have advantage as well."}
+              :summary "Advantage on attacks using Strength, attacks against you have advantage as well."}
              {:name "Danger Sense"
               :level 2
               :page 48
-              :summary "Advantage on Dexterity saves against effects you can see."}
+              :summary "Advantage on DEX saves against effects you can see."}
              {:name "Feral Instinct"
               :level 7
               :page 49
