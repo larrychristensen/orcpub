@@ -2235,9 +2235,11 @@
     :subclass-title "Druid Circle"
     :subclasses [{:name "Circle of the Land"
                   :selections [(opt5e/spell-selection
-                                {:title "Bonus Cantrip"
-                                 :num 1
-                                 :options (opt5e/spell-options (get-in sl/spell-lists [:druid 0]) :wis "Druid")})
+                                {:class-key :druid
+                                 :level 0
+                                 :spellcasting-ability :wis
+                                 :class-name "Druid"
+                                 :num 1})
                                (t/selection-cfg
                                 {:name "Land Type"
                                  :tags #{:class}
