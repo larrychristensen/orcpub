@@ -1495,7 +1495,11 @@
                                                     9 3
                                                     2))
                                 "; resistance to bludgeoning, piercing, and slashing damage")})]
-    :levels {5 {:modifiers [(mod5e/extra-attack)
+    :levels {5 {:modifiers [(mod5e/trait-cfg
+                             {:name "Extra Attack"
+                              :page 49
+                              :summary "Attack twice when taking Attack action"})
+                            (mod5e/extra-attack)
                             (mod/modifier ?speed-with-armor (fn [armor] (if (not= :heavy (:type armor))
                                                                             (+ 10 ?speed)
                                                                             ?speed)))]}

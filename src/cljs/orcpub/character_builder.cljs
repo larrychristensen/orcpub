@@ -172,11 +172,12 @@
        [:div
         (doall (rest display-rows))]])))
 
-(defn speed-section [built-char]
+(defn speed-section [built-char all-armor]
   (let [speed (char5e/base-land-speed built-char)
         speed-with-armor (char5e/land-speed-with-armor built-char)
         unarmored-speed-bonus (char5e/unarmored-speed-bonus built-char)
         equipped-armor (char5e/normal-armor-inventory built-char)]
+    (prn "SPEED WITH ARMOR" speed-with-armor)
     [svg-icon-section
      "Speed"
      "walking-boot"
@@ -196,12 +197,13 @@
            (fn [[armor-kw _]]
              (let [armor (mi5e/all-armor-map armor-kw)
                    speed (speed-with-armor armor)]
+               (prn "ARMOR" armor speed)
                ^{:key armor-kw}
                [:div
                 [:div
                  [:span speed]
                  [:span.display-section-qualifier-text (str "(" (:name armor) " armor)")]]]))
-           (dissoc equipped-armor :shield)))]
+           (dissoc all-armor :shield)))]
         (if unarmored-speed-bonus
           [:div
            [:span
@@ -340,6 +342,7 @@
         armor-class-with-armor (char5e/armor-class-with-armor built-char)
         armor (char5e/normal-armor-inventory built-char)
         magic-armor (char5e/magic-armor-inventory built-char)
+        all-armor (merge magic-armor armor)
         spells-known (char5e/spells-known built-char)
         weapons (char5e/normal-weapons-inventory built-char)
         magic-weapons (char5e/magic-weapons-inventory built-char)
@@ -391,9 +394,9 @@
         [:div.w-50-p
          (if background [svg-icon-section "Background" "ages" [:span.f-s-18.f-w-n background]])
          (if alignment [svg-icon-section "Alignment" "yin-yang" [:span.f-s-18.f-w-n alignment]])
-         [armor-class-section armor-class armor-class-with-armor (merge magic-armor armor)]
+         [armor-class-section armor-class armor-class-with-armor all-armor]
          [svg-icon-section "Hit Points" "health-normal" (char5e/max-hit-points built-char)]
-         [speed-section built-char]
+         [speed-section built-char all-armor]
          [svg-icon-section "Darkvision" "night-vision" (if darkvision (str darkvision " ft.") "--")]
          [svg-icon-section "Initiative" "sprint" (mod/bonus-str (char5e/initiative built-char))]
          [display-section "Proficiency Bonus" nil (mod/bonus-str (char5e/proficiency-bonus built-char))]
