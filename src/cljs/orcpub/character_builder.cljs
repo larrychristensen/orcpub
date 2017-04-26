@@ -872,12 +872,13 @@
 
 (defn validate-selections [built-template character selections]
   (mapcat
-   (fn [{:keys [::t/name] :as selection}]
-     (let [remaining (count-remaining built-template character selection)]
-       (cond
-         (pos? remaining) [(str "You have " remaining " more '" name "' selection" (if (> remaining 1) "s") " to make.")]
-         (neg? remaining) [(str "You must remove " (Math/abs remaining) " '" name "' selection" (if (< remaining -1) "s") ".")]
-         :else nil)))
+   (fn [{:keys [::t/name ::t/tags] :as selection}]
+     (if (not (tags :starting-equipment))
+       (let [remaining (count-remaining built-template character selection)]
+         (cond
+           (pos? remaining) [(str "You have " remaining " more '" name "' selection" (if (> remaining 1) "s") " to make.")]
+           (neg? remaining) [(str "You must remove " (Math/abs remaining) " '" name "' selection" (if (< remaining -1) "s") ".")]
+           :else nil))))
    (entity/combine-selections selections)))
 
 
