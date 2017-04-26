@@ -2295,14 +2295,18 @@
                            6 {:modifiers [(mod5e/saving-throw-advantage ["plants magically created or manipulated to impede movement"])]}
                            10 {:modifiers [(mod5e/damage-immunity :poison)
                                            (mod5e/condition-immunity :poisoned)
-                                           (mod5e/condition-immunity :charmed "only by elementals or fey")
-                                           (mod5e/condition-immunity :frightened "only by elementals or fey")
-                                           (mod5e/immunity :disease)]}
+                                           (mod5e/condition-immunity :charmed "by elementals or fey")
+                                           (mod5e/condition-immunity :frightened "by elementals or fey")
+                                           (mod5e/immunity :disease)
+                                           (mod5e/trait-cfg
+                                            {:name "Nature's Ward"
+                                             :page 69
+                                             :summary "immune to being charmed by fey or elementals; immune to poison and disease"})]}
                            14 {:modifiers [(mod5e/dependent-trait
                                             {:name "Nature's Santuary"
                                              :level 14
                                              :page 69
-                                             :summary (str "beast or plant creatures must make a DC "
+                                             :summary (str "beasts or plant creatures must make a DC "
                                                            (?spell-save-dc :wis)
                                                            " Wisdom save or they cannot attack you.")})]}}
                   :traits [(lands-stride 6)]}
@@ -2319,13 +2323,10 @@
                                              :level 10
                                              :page 69
                                              :summary "expend two Wild Shape uses to transform into an air, earth, fire, or water elemental"})]}}
-                  :traits [
-                           
-                           {:name "Primal Strike"
+                  :traits [{:name "Primal Strike"
                             :level 6
                             :page 69
                             :summary "Your beast form attacks count as magical"}
-                          
                            {:name "Thousand Forms"
                             :page 69
                             :summary "cast alter self at will"
