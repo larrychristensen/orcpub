@@ -1781,7 +1781,7 @@
                   (mod5e/skill-expertise skill-kw)]})))
 
 (defn cleric-spell [spell-level spell-key min-level]
-  (mod5e/spells-known spell-level spell-key :wis "Cleric" min-level "domain spell" :cleric))
+  (mod5e/spells-known spell-level spell-key :wis "Cleric" min-level nil :cleric))
 
 (defn potent-spellcasting [page & [source]]
   (mod5e/dependent-trait
@@ -1816,21 +1816,6 @@
    3 5
    4 7
    5 9})
-
-(defn cleric-domain-spell-modifiers [spells-by-level page]
-  (let [spell-mods (mapcat
-                    (fn [[spell-lvl spells]]
-                      (map
-                       (fn [spell-key]
-                         (cleric-spell spell-lvl spell-key (spell-level-to-cleric-level spell-lvl)))
-                       spells))
-                    spells-by-level)]
-    (conj
-     spell-mods
-     (mod5e/trait-cfg
-      {:name "Domain Spells"
-       :page page
-       :summary (str "Your domain spells are " (common/list-print (reduce concat (vals spells-by-level) spells-by-level)) " you always have them prepared and they don't count against your daily prepared spell count")}))))
 
 (def cleric-option
   (class-option
@@ -1904,7 +1889,36 @@
                                            "if you make a percentile roll less than or equal to your cleric level"))})]}}
     :subclass-level 1
     :subclass-title "Divine Domain"
-    :subclasses [{:name "Knowledge Domain"
+    :subclasses [{:name "Life Domain"
+                  :profs {:armor {:heavy true}}
+                  :modifiers [(cleric-spell 1 :bless 1)
+                              (cleric-spell 1 :cure-wounds 1)
+                              (cleric-spell 2 :lesser-restoration 3)
+                              (cleric-spell 2 :spiritual-weapon 3)
+                              (cleric-spell 3 :beacon-of-hope 5)
+                              (cleric-spell 3 :revivify 5)
+                              (cleric-spell 4 :death-ward 7)
+                              (cleric-spell 4 :guardian-of-faith 7)
+                              (cleric-spell 5 :mass-cure-wounds 9)
+                              (cleric-spell 5 :raise-dead 9)]
+                  :levels {2 {:modifiers [(mod5e/action
+                                           {:name "Channel Divinity: Preserve Life"
+                                            :summary (str "Distribute "
+                                                          (* 5 (?class-level :cleric))
+                                                          " HPs healing among any creatures within 30 ft., each can be restored to at most 1/2 their HP max")})]}
+                           8 {:modifiers [(divine-strike "radiant" 60)]}}
+                  :traits [{:level 1
+                            :name "Disciple of Life"
+                            :page 60
+                            :summary "1st level or greater healing spells increase healing by 2 + spell's level HPs"}
+                           {:level 6
+                            :name "Blessed Healer"
+                            :page 60
+                            :summary "When you cast spells that heal a creature other than you, you regain 2 + spell's level HPs"}
+                           {:level 17
+                            :name "Supreme Healing"
+                            :summary "Instead of rolling healing, use max possible roll value." }]}
+                 {:name "Knowledge Domain"
                   :modifiers [(cleric-spell 1 :command 1)
                               (cleric-spell 1 :identify 1)
                               (cleric-spell 2 :augury 3)
@@ -1940,32 +1954,6 @@
                             :page 60
                             :name "Visions of the Past"
                             :summary "Learn the history of an object you hold or area you are in"}]}
-                 {:name "Life Domain"
-                  :profs {:armor {:heavy true}}
-                  :modifiers (cleric-domain-spell-modifiers
-                              {1 [:bless :cure-wounds]
-                               3 [:lesser-restoration :spiritual-weapon]
-                               5 [:beacon-of-hope :revivify]
-                               7 [:death-ward :guardian-of-faith]
-                               9 [:mass-cure-wounds :raise-dead]}
-                              60)
-                  :levels {2 {:modifiers [(mod5e/action
-                                           {:name "Channel Divinity: Preserve Life"
-                                            :summary (str "Distribute "
-                                                          (* 5 (?class-level :cleric))
-                                                          " HPs healing among any creatures within 30 ft., each can be restored to at most 1/2 their HP max")})]}
-                           8 {:modifiers [(divine-strike "radiant" 60)]}}
-                  :traits [{:level 1
-                            :name "Disciple of Life"
-                            :page 60
-                            :summary "1st level or greater healing spells increase healing by 2 + spell's level HPs"}
-                           {:level 6
-                            :name "Blessed Healer"
-                            :page 60
-                            :summary "When you cast spells that heal a creature other than you, you regain 2 + spell's level HPs"}
-                           {:level 17
-                            :name "Supreme Healing"
-                            :summary "Instead of rolling healing, use max possible roll value." }]}
                  {:name "Light Domain"
                   :modifiers [(cleric-spell 0 :light 1)
                               (cleric-spell 1 :burning-hands 1)
