@@ -79,6 +79,9 @@
    [:.inline-block
     {:display :inline-block}]
 
+   [:.flex-column
+    {:flex-direction :column}]
+
    [:.list-style-disc
     {:list-style-type :disc
      :list-style-position :inside}]
