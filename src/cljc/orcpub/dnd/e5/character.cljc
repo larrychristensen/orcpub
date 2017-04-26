@@ -108,7 +108,10 @@
   (es/entity-val built-char :tool-profs))
 
 (defn weapon-proficiencies [built-char]
-  (es/entity-val built-char :weapon-profs))
+  (let [proficiencies (es/entity-val built-char :weapon-profs)]
+    (if (proficiencies :martial)
+      [:simple :martial]
+      proficiencies)))
 
 (defn armor-proficiencies [built-char]
   (es/entity-val built-char :armor-profs))

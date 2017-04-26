@@ -2159,7 +2159,7 @@
                    :known-mode :all
                    :ability :wis}
     :multiclass-prereqs [(opt5e/ability-prereq :wis 13)]
-    :ability-increase-levels [4 6 8 12 14 16 19]
+    :ability-increase-levels [4 8 12 16 19]
     :profs {:armor {:light false :medium false :shields false}
             :weapon {:club true :dagger true :dart true :javelin true :mace true :quarterstaff true :scimitar true :sickle true :sling true :spear true}
             :tool {:herbalism-kit true}

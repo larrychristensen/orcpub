@@ -1701,9 +1701,9 @@
     (if (es/entity-val built-char :levels)
       [selection-section-base
        {:name "Hit Points"
-        :min num-selections
-        :max num-selections
-        :remaining (sum-remaining built-template character selections) 
+        :min (if (pos? num-selections) num-selections)
+        :max (if (pos? num-selections) num-selections)
+        :remaining (if (pos? num-selections) (sum-remaining built-template character selections)) 
         :body (hit-points-entry character selections built-char built-template)}])))
 
 (def pages
