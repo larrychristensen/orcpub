@@ -211,3 +211,24 @@
 
 (defn image-url [built-char]
   (es/entity-val built-char :image-url))
+
+(defn age [built-char]
+  (es/entity-val built-char :age))
+
+(defn sex [built-char]
+  (es/entity-val built-char :sex))
+
+(defn height [built-char]
+  (es/entity-val built-char :height))
+
+(defn weight [built-char]
+  (es/entity-val built-char :weight))
+
+(defn skin [built-char]
+  (es/entity-val built-char :skin))
+
+(defn eyes [built-char]
+  (es/entity-val built-char :eyes))
+
+(defn hair [built-char]
+  (es/entity-val built-char :hair))

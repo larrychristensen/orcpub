@@ -387,7 +387,7 @@
            char5e/ability-keys))]]
        [:div.flex
         [:div.w-50-p
-         [:img.character-image.w-100-p.m-b-20 {:src (or image-url "image/barbarian-girl.png")}]]
+         [:img.character-image.w-100-p.m-b-20 {:src (or (get-in @app-state [:character ::entity/values :image-url]) "image/barbarian.png")}]]
         [:div.w-50-p
          (if background [svg-icon-section "Background" "ages" [:span.f-s-18.f-w-n background]])
          (if alignment [svg-icon-section "Alignment" "yin-yang" [:span.f-s-18.f-w-n alignment]])
@@ -1589,26 +1589,28 @@
                                                         (+ average-value remainder)
                                                         average-value)})))))}]
           total-hps)]]
-      [:button.form-button.p-10
-       {:on-click (fn [_]
-                    (doseq [selection selections]
-                      (let [[_ class-kw :as path] (::entity/path selection)]
-                        (swap! app-state
-                               assoc-in
-                               (concat [:character] (entity/get-entity-path built-template character path))
-                               {::entity/key :roll
-                                ::entity/value (dice/die-roll (-> levels class-kw :hit-die))}))))}
-       "Random"]
-      [:button.form-button.p-10
-       {:on-click (fn [_]
-                    (doseq [selection selections]
-                      (let [[_ class-kw :as path] (::entity/path selection)]
-                        (swap! app-state
-                               assoc-in
-                               (concat [:character] (entity/get-entity-path built-template character path))
-                               {::entity/key :average
-                                ::entity/value (dice/die-mean (-> levels class-kw :hit-die))}))))}
-       "Average"]]
+      (if (seq selections)
+        [:button.form-button.p-10
+         {:on-click (fn [_]
+                      (doseq [selection selections]
+                        (let [[_ class-kw :as path] (::entity/path selection)]
+                          (swap! app-state
+                                 assoc-in
+                                 (concat [:character] (entity/get-entity-path built-template character path))
+                                 {::entity/key :roll
+                                  ::entity/value (dice/die-roll (-> levels class-kw :hit-die))}))))}
+         "Random"])
+      (if (seq selections)
+        [:button.form-button.p-10
+         {:on-click (fn [_]
+                      (doseq [selection selections]
+                        (let [[_ class-kw :as path] (::entity/path selection)]
+                          (swap! app-state
+                                 assoc-in
+                                 (concat [:character] (entity/get-entity-path built-template character path))
+                                 {::entity/key :average
+                                  ::entity/value (dice/die-mean (-> levels class-kw :hit-die))}))))}
+         "Average"])]
      (doall
       (map-indexed
        (fn [i cls]
@@ -1881,47 +1883,64 @@
                 [:div (selection-section character built-char built-template option-paths nil selection)])
               non-ui-fn-selections))])])]]))
 
-(defn builder-columns [built-template
-                       built-char
-                       character
-                       option-paths
-                       collapsed-paths
-                       plugins
-                       active-tabs
-                       available-selections                     
-                       page]
-  (let [character-values (get-in @app-state character-values-path)]
-    [:div.flex-grow-1.flex
-     {:class-name (s/join " " (map #(str (name %) "-tab-active") active-tabs))}
-     [:div.builder-column.options-column
-      [new-options-column character built-char built-template available-selections (or page 0) option-paths]]
-     [:div.flex-grow-1.builder-column.personality-column
-      [:div.m-t-5
-       [:span.personality-label.f-s-18 "Character Name"]
-       [character-input app-state :character-name (:character-name character-values)]]
-      [:div.field
-       [:span.personality-label.f-s-18 "Personality Trait 1"]
-       [character-textarea app-state :personality-trait-1 (:personality-trait-1 character-values)]]
-      [:div.field
-       [:span.personality-label.f-s-18 "Personality Trait 2"]
-       [character-textarea app-state :personality-trait-2 (:personality-trait-2 character-values)]]
-      [:div.field
-       [:span.personality-label.f-s-18 "Ideals"]
-       [character-textarea app-state :ideals (:ideals character-values)]]
-      [:div.field
-       [:span.personality-label.f-s-18 "Bonds"]
-       [character-textarea app-state :bonds (:bonds character-values)]]
-      [:div.field
-       [:span.personality-label.f-s-18 "Flaws"]
-       [character-textarea app-state :flaws (:flaws character-values)]]
-      [:div.field
-       [:span.personality-label.f-s-18 "Image URL"]
-       [character-input app-state :image-url (:image-url character-values)]]
-      [:div.field
-       [:span.personality-label.f-s-18 "Description/Backstory"]
-       [character-textarea app-state :description (:description character-values) "h-800"]]]
-     [:div.builder-column.details-column
-      [character-display built-char]]]))
+(defn builder-columns [built-template built-char option-paths collapsed-paths stepper-selection-path stepper-selection plugins active-tabs stepper-dismissed? available-selections]
+  [:div.flex-grow-1.flex
+   {:class-name (s/join " " (map #(str (name %) "-tab-active") active-tabs))}
+   [:div.builder-column.options-column
+    [new-options-column (:character @app-state) built-char built-template available-selections (or (:page @app-state) 0) option-paths stepper-selection-path]]
+   [:div.flex-grow-1.builder-column.personality-column
+    [:div.m-t-5
+     [:span.personality-label.f-s-18 "Character Name"]
+     [character-input app-state :character-name]]
+    [:div.field
+     [:span.personality-label.f-s-18 "Player Name"]
+     [character-input app-state :player-name]]
+    [:div.flex.justify-cont-s-b
+     [:div.field.flex-grow-1.m-r-2
+      [:span.personality-label.f-s-18 "Age"]
+      [character-input app-state :age]]
+     [:div.field.flex-grow-1.m-l-2.m-r-2
+      [:span.personality-label.f-s-18 "Sex"]
+      [character-input app-state :sex]]
+     [:div.field.flex-grow-1.m-l-2.m-r-2
+      [:span.personality-label.f-s-18 "Height"]
+      [character-input app-state :height]]
+     [:div.field.flex-grow-1.m-l-2
+      [:span.personality-label.f-s-18 "Weight"]
+      [character-input app-state :weight]]]
+    [:div.flex.justify-cont-s-b
+     [:div.field.flex-grow-1.m-r-2
+      [:span.personality-label.f-s-18 "Hair Color"]
+      [character-input app-state :hair]]
+     [:div.field.flex-grow-1.m-1-2.m-r-2
+      [:span.personality-label.f-s-18 "Eye Color"]
+      [character-input app-state :eyes]]
+     [:div.field.flex-grow-1.m-1-2
+      [:span.personality-label.f-s-18 "Skin Color"]
+      [character-input app-state :skin]]]
+    [:div.field
+     [:span.personality-label.f-s-18 "Personality Trait 1"]
+     [character-textarea app-state :personality-trait-1]]
+    [:div.field
+     [:span.personality-label.f-s-18 "Personality Trait 2"]
+     [character-textarea app-state :personality-trait-2]]
+    [:div.field
+     [:span.personality-label.f-s-18 "Ideals"]
+     [character-textarea app-state :ideals]]
+    [:div.field
+     [:span.personality-label.f-s-18 "Bonds"]
+     [character-textarea app-state :bonds]]
+    [:div.field
+     [:span.personality-label.f-s-18 "Flaws"]
+     [character-textarea app-state :flaws]]
+    [:div.field
+     [:span.personality-label.f-s-18 "Image URL"]
+     [character-input app-state :image-url]]
+    [:div.field
+     [:span.personality-label.f-s-18 "Description/Backstory"]
+     [character-textarea app-state :description "h-800"]]]
+   [:div.builder-column.details-column
+    [character-display built-char]]])
 
 (defn builder-tabs [active-tabs]
   [:div.hidden-lg.w-100-p
@@ -2029,6 +2048,11 @@
                             used-resources))))
                al-illegal-reasons))])]))))
 
+(defn app-header []
+  [:div#app-header.app-header
+   [:div.app-header-bar.container
+    [:div.content
+     [:img.orcpub-logo {:src "image/orcpub-logo.svg"}]]]])
 
 (defn character-builder []
   (if print-enabled? (cljs.pprint/pprint (:character @app-state)))
@@ -2082,10 +2106,7 @@
                        (set! (.-display (.-style sticky-header)) "none"))))}
      
      [download-form built-char]
-     [:div#app-header.app-header
-      [:div.app-header-bar.container
-       [:div.content
-        [:img.orcpub-logo {:src "image/orcpub-logo.svg"}]]]]
+     [app-header]
      [:div#sticky-header.sticky-header.w-100-p.posn-fixed
       [:div.flex.justify-cont-c.bg-light
        [:div#header-container.f-s-14.white.content

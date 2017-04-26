@@ -2,7 +2,8 @@
   (:require [orcpub.common :as common]
             [orcpub.dnd.e5.weapons :as weapons]
             [orcpub.dnd.e5.armor :as armor5e]
-            [orcpub.dnd.e5.equipment :as equip5e]))
+            [orcpub.dnd.e5.equipment :as equip5e]
+            [orcpub.dnd.e5.modifiers :as mod5e]))
 
 (defn sword? [w]
   (= :sword (:subtype w)))

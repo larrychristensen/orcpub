@@ -261,7 +261,7 @@
                    [(t/selection-cfg
                      {:name "Subrace"
                       :tags #{:subrace}
-                      :options (map (partial subrace-option source) subraces)})])
+                      :options (map (partial subrace-option source) (if source (map (fn [sr] (assoc sr :source source)) subraces) subraces))})])
                  (if language-options
                    (language-selection language-options))
                  selections)
@@ -951,7 +951,8 @@
                          :summary "cast pass without trace without material components"}]}
               {:name "Fire Genasi"
                :abilities {:int 1}
-               :modifiers [(mod5e/damage-resistance :fire)
+               :modifiers [(mod5e/darkvision 60)
+                           (mod5e/damage-resistance :fire)
                            (mod5e/spells-known 0 :produce-flame :con "Fire Genasi")
                            (mod5e/spells-known 1 :burning-hands :con "Fire Genasi" 3 "once/long rest")]
                :traits [{:name "Fire Resistance"
@@ -1056,7 +1057,8 @@
                           :icon (:icon tool)
                           :modifiers [(mod5e/tool-proficiency (:key tool))]}))))
                   tool-options)
-        :prereq-fn prereq-fn}))))
+        :prereq-fn prereq-fn
+        :tags #{:profs :tool-profs}}))))
 
 (defn level-key [index]
   (keyword (str "level-" index)))
@@ -1214,7 +1216,7 @@
                          :tags #{:subclass}
                          :options (map
                                    #(subclass-option (assoc cls :key kw) %)
-                                   subclasses)})])
+                                   (if source (map (fn [sc] (assoc sc :source source)) subclasses) subclasses))})])
                     (if (and (not plugin?) (ability-inc-set i))
                       [(opt5e/ability-score-improvement-selection name i)])
                     (if (not plugin?)
@@ -1776,10 +1778,11 @@
 (defn cleric-spell [spell-level spell-key min-level]
   (mod5e/spells-known spell-level spell-key :wis "Cleric" min-level nil :cleric))
 
-(defn potent-spellcasting [page]
+(defn potent-spellcasting [page & [source]]
   (mod5e/dependent-trait
    {:level 8
     :page page
+    :source source
     :summary (str "Add "
                   (common/bonus-str (?ability-bonuses :wis))
                   " to damage from cantrips you cast")
@@ -4663,7 +4666,8 @@ long rest."})]
                                  armor-choices
                                  treasure
                                  custom-treasure
-                                 traits]
+                                 traits
+                                 source]
                           :as background}]
   (let [kw (common/name-to-kw name)
         {:keys [skill skill-options tool-options tool language-options]
@@ -4701,6 +4705,7 @@ long rest."})]
                    (if (seq language-options) [(language-selection language-options)]))
       :modifiers (concat
                   [(mod5e/background name)]
+                  (if source [(mod5e/used-resource source name)])
                   (traits-modifiers traits)
                   modifiers
                   (armor-prof-modifiers (keys armor-profs))
@@ -4895,6 +4900,7 @@ long rest."})]
     :plugin? true
     :subclass-level 3
     :subclass-title "Primal Path"
+    :source :scag
     :subclasses [{:name "Path of the Battlerager"
                   :source :scag
                   :modifiers [(mod5e/bonus-action
@@ -4977,9 +4983,10 @@ long rest."})]
                                                                         :source :scag
                                                                         :summary "make an additional melee weapon attack when you move 20+ ft. in a line and make a melee weapon attack"})]})]})]}}}]}
    {:name "Cleric"
-    :plugin true
+    :plugin? true
     :subclass-level 1
     :subclass-title "Divine Domain"
+    :source :scag
     :subclasses [{:name "Arcana Domain"
                   :profs {:armor {:heavy true}}
                   :modifiers [(mod5e/skill-proficiency :arcana)
@@ -5004,11 +5011,7 @@ long rest."})]
                                             :page 126
                                             :source :scag
                                             :summary (str "turn celestial, elemental, fey, or fiend on failed DC " (?spell-save-dc :wis) " WIS save.")})]}
-                           8 {:modifiers [(mod5e/dependent-trait
-                                           {:name "Potent Spellcasting"
-                                            :page 126
-                                            :source :scag
-                                            :summary (str (common/bonus-str :wis) " extra damage from your cleric cantrips")})]}
+                           8 {:modifiers [(potent-spellcasting 126 :scag)]}
                            17 {:selections (map
                                             (fn [level]
                                               (opt5e/spell-selection {:title (str "Wizard Spell: Level " level)
@@ -5030,6 +5033,7 @@ long rest."})]
     :plugin? true
     :subclass-level 3
     :subclass-title "Martial Archetype"
+    :source :scag
     :subclasses [{:name "Purple Dragon Knight"
                   :levels {3 {:modifiers [(mod5e/dependent-trait
                                            {:name "Rallying Cry"
@@ -5060,6 +5064,7 @@ long rest."})]
    {:name "Monk"
     :subclass-level 3
     :subclass-title "Monastic Tradition"
+    :source :scag
     :subclasses [{:name "Way of the Long Death"
                   :modifiers [(mod5e/dependent-trait
                                {:name "Touch of Death"
@@ -5113,6 +5118,7 @@ long rest."})]
    {:name "Paladin"
     :subclass-level 3
     :subclass-title "Sacred Oath"
+    :source :scag
     :subclasses [{:name "Oath of the Crown"
                   :modifiers [(paladin-spell 1 :command 3)
                               (paladin-spell 1 :compelling-duel 3)
@@ -5537,12 +5543,12 @@ long rest."})]
                     ::entity/value 1})
     :tags #{:equipment}
     :options (map
-              (fn [{:keys [name key description]}]
+              (fn [{:keys [name key description] :as item}]
                 (t/option-cfg
                  {:name name
                   :key key
                   :help description
-                  :modifiers [(modifier-fn key)]}))
+                  :modifiers [(modifier-fn key item)]}))
               items)}))
 
 (defn amazon-frame [link]
@@ -5751,12 +5757,15 @@ long rest."})]
 (def template-base
   (es/make-entity
    {?armor-class (+ 10 (?ability-bonuses :dex))
-    ?base-armor-class (+ 10 (?ability-bonuses :dex) ?natural-ac-bonus)
+    ?base-armor-class (+ 10 (?ability-bonuses :dex)
+                         ?natural-ac-bonus
+                         ?magical-ac-bonus)
     ?natural-ac-bonus 0
     ?unarmored-ac-bonus 0
     ?unarmored-with-shield-ac-bonus 0
     ?armored-ac-bonus 0
     ?max-medium-armor-bonus 2
+    ?magical-ac-bonus 0
     ?armor-stealth-disadvantage? (fn [armor]
                                    (:stealth-disadvantage? armor))
     ?armor-dex-bonus (fn [armor]
@@ -5780,7 +5789,8 @@ long rest."})]
                                              (+ (?armor-dex-bonus armor)
                                                 (or ?armored-ac-bonus 0)
                                                 (:base-ac armor)
-                                                (:magical-ac-bonus armor)))))
+                                                (:magical-ac-bonus armor))
+                                             ?magical-ac-bonus)))
     ?abilities (reduce
                 (fn [m k]
                   (assoc m k (+ (or (k ?base-abilities) 0)

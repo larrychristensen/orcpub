@@ -176,7 +176,7 @@
 (defn spell-slot-factor [class-key factor]
   (mods/map-mod ?spell-slot-factors class-key factor))
 
-(defn trait-cfg [{:keys [name description class-key level summary page conditions] :as cfg}]
+(defn trait-cfg [{:keys [name description class-key level summary page conditions source] :as cfg}]
   (let [class-key? (not (nil? class-key))]
     (mods/modifier ?traits
                    (if (or (nil? level)
@@ -305,13 +305,13 @@
 (defn magic-weapon [weapon-kw cfg]
   (mods/map-mod ?magic-weapons weapon-kw (equipment-cfg cfg)))
 
-(defn deferred-weapon [weapon-kw]
+(defn deferred-weapon [weapon-kw weapon]
   (mods/deferred-modifier
     ?weapons
     (fn [cfg] (es/map-mod ?weapons weapon-kw (equipment-cfg cfg)))
     1))
 
-(defn deferred-magic-weapon [weapon-kw]
+(defn deferred-magic-weapon [weapon-kw weapon]
   (mods/deferred-modifier
     ?magic-weapons
     (fn [cfg] (es/map-mod ?magic-weapons weapon-kw (equipment-cfg cfg)))
@@ -320,13 +320,13 @@
 (defn armor [armor-kw cfg]
   (mods/map-mod ?armor armor-kw (equipment-cfg cfg)))
 
-(defn deferred-armor [armor-kw]
+(defn deferred-armor [armor-kw armor]
   (mods/deferred-modifier
     ?armor
     (fn [cfg] (es/map-mod ?armor armor-kw (equipment-cfg cfg)))
     1))
 
-(defn deferred-magic-armor [armor-kw]
+(defn deferred-magic-armor [armor-kw armor]
   (mods/deferred-modifier
     ?armor
     (fn [cfg] (es/map-mod ?magic-armor armor-kw (equipment-cfg cfg)))
@@ -335,22 +335,26 @@
 (defn equipment [equipment-kw cfg]
   (mods/map-mod ?equipment equipment-kw (equipment-cfg cfg)))
 
-(defn deferred-equipment [equipment-kw]
+(defn deferred-equipment [equipment-kw equipment]
   (mods/deferred-modifier
     ?equipment
     (fn [cfg] (es/map-mod ?equipment equipment-kw (equipment-cfg cfg)))
     1))
 
-(defn deferred-treasure [treasure-kw]
+(defn deferred-treasure [treasure-kw treasure]
   (mods/deferred-modifier
     ?treasure
     (fn [cfg] (es/map-mod ?treasure treasure-kw (equipment-cfg cfg)))
     1))
 
-(defn deferred-magic-item [item-kw]
+(defn deferred-magic-item [item-kw {:keys [magical-ac-bonus]}]
   (mods/deferred-modifier
     ?magic-items
-    (fn [cfg] (es/map-mod ?magic-items item-kw (equipment-cfg cfg)))
+    (fn [cfg] (let [mod (es/map-mod ?magic-items item-kw (equipment-cfg cfg))]
+                (if (and (:equipped? cfg)
+                         magical-ac-bonus)
+                  [mod (es/cum-sum-mod ?magical-ac-bonus magical-ac-bonus)]
+                  mod)))
     1))
 
 (defn extra-attack []

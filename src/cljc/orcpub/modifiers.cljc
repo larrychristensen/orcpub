@@ -93,7 +93,14 @@
        #?(:clj (prn "MODIFIER IS NULL!!!!!!!!!!!!!!"))
        #?(:cljs (js/console.warn "MODIFIER IS NULL!!!!!!!!!!")))
      (if (and mod (every? #(% e) conds))
-       ((modifier-fn mod) e)
+       (let [mod-fn-result (modifier-fn mod)]
+         (if (fn? mod-fn-result)
+           (mod-fn-result e)
+           (reduce
+            (fn [e2 f]
+              (f e2))
+            e
+            mod-fn-result)))
        e))
    entity
    modifiers))
