@@ -2269,7 +2269,8 @@
                                   (t/option-cfg
                                    {:name "Mountain"
                                     :modifiers [(druid-spell 2 :spider-climb 3)
-                                                (druid-spell 3 :lightning-bolt 5)]})
+                                                (druid-spell 3 :lightning-bolt 5)
+                                                (druid-spell 5 :passwall 9)]})
                                   (t/option-cfg
                                    {:name "Swamp"
                                     :modifiers [(druid-spell 2 :darkness 3)
