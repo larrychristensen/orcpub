@@ -2073,11 +2073,13 @@
    [:div.app-header-bar.container
     [:div.content
      [:img.orcpub-logo {:src "image/orcpub-logo.svg"}]]]
-   [:div.flex.align-items-c.f-w-b.f-s-18.m-t-10.m-l-10.white
-    [:span "Please support continuing development on "]
-    [:a.m-l-5 patreon-link-props [:span "Patreon"]]
-    [:a.m-l-5 patreon-link-props
-     [:img.h-32.w-32 {:src "https://www.patreon.com/images/patreon_navigation_logo_mini_orange.png"}]]]])
+   [:div.container
+    [:div.content
+     [:div.flex.align-items-c.f-w-b.f-s-18.m-t-10.m-l-10.white
+      [:span.hidden-xs "Please support continuing development on "]
+      [:a.m-l-5 patreon-link-props [:span "Patreon"]]
+      [:a.m-l-5 patreon-link-props
+       [:img.h-32.w-32 {:src "https://www.patreon.com/images/patreon_navigation_logo_mini_orange.png"}]]]]]])
 
 (defn character-builder []
   (if print-enabled? (cljs.pprint/pprint (:character @app-state)))
