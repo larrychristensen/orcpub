@@ -1812,6 +1812,13 @@
                      :url disp5e/phb-url}
                     (map t5e/plugin-map (get-selected-plugin-options app-state)))))))])])))
 
+(def selection-order-title
+  (juxt ::t/order ::t/name ::entity/path))
+
+(defn compare-selections [s1 s2]
+  (< (selection-order-title s1)
+     (selection-order-title s2)))
+
 (defn new-options-column [character built-char built-template available-selections page-index option-paths]
   (if print-enabled? (js/console.log "AVAILABLE SELECTIONS" available-selections))
   (let [{:keys [tags ui-fns] :as page} (pages page-index)
@@ -1875,14 +1882,14 @@
                                   final-selections)]
                    (selection-section character built-char built-template option-paths {key ui-fn} selection)))])
             ui-fns))]
-         (if (seq non-ui-fn-selections)
+         (when (seq non-ui-fn-selections)
            [:div.m-t-20
             (doall
              (map
               (fn [selection]
-                ^{:key (::t/key selection)}
+                ^{:key (::entity/path selection)}
                 [:div (selection-section character built-char built-template option-paths nil selection)])
-              non-ui-fn-selections))])])]]))
+              (into (sorted-set-by compare-selections) non-ui-fn-selections)))])])]]))
 
 (defn builder-columns [built-template built-char option-paths plugins active-tabs available-selections]
   [:div.flex-grow-1.flex

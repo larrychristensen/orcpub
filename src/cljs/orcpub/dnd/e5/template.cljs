@@ -1204,6 +1204,7 @@
                          :key (common/name-to-kw subclass-title)
                          :help subclass-help
                          :tags #{:subclass}
+                         :order 2
                          :options (map
                                    #(subclass-option (assoc cls :key kw) %)
                                    (if source (map (fn [sc] (assoc sc :source source)) subclasses) subclasses))})])
@@ -3055,11 +3056,13 @@
   (t/selection-cfg
    {:name (str "Favored Enemy " order)
     :tags #{:class}
+    :order 3
     :options [(t/option-cfg
                {:name "Type"
                 :selections [(t/selection-cfg
                               {:name "Type"
                                :tags #{:class}
+                               :order 4
                                :options (map
                                          favored-enemy-option
                                          favored-enemy-types)})]})
@@ -3068,12 +3071,14 @@
                 :selections [(t/selection-cfg
                               {:name "Humanoid Race 1"
                                :tags #{:class}
+                               :order 4
                                :options (map
                                          favored-enemy-option
                                          humanoid-enemies)})
                              (t/selection-cfg
                               {:name "Humanoid Race 2"
                                :tags #{:class}
+                               :order 4
                                :options (map
                                          favored-enemy-option
                                          humanoid-enemies)})]})]}))
@@ -3082,6 +3087,7 @@
   (t/selection-cfg
    {:name (str "Favored Terrain " order)
     :tags #{:class}
+    :order 5
     :options (map
      (fn [terrain]
        (t/option-cfg
