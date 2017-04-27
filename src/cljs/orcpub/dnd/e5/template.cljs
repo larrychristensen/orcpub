@@ -2640,7 +2640,7 @@
   (class-option
    {:name "Monk"
     :hit-die 8
-    :ability-increase-levels [4 8 10 16 19]
+    :ability-increase-levels [4 8 12 16 19]
     :unarmored-abilities [:wis]
     :profs {:armor {:light true}
             :weapon {:simple false :shortsword false}
