@@ -431,10 +431,10 @@
 (defn spell-level-title [class-name level]
   (str class-name (if (zero? level) " Cantrips Known" (str " Spells Known" (if level (str " " level))))))
 
-(defn spell-selection [{:keys [title class-key level spellcasting-ability class-name num prepend-level? spell-keys options min max exclude-ref?]}]
+(defn spell-selection [{:keys [title class-key level spellcasting-ability class-name num prepend-level? spell-keys options min max exclude-ref? ref]}]
   (let [title (or title (spell-level-title class-name level))
         kw (common/name-to-kw title)
-        ref (if (not exclude-ref?) [:class class-key kw])]
+        ref (or ref (if (not exclude-ref?) [:class class-key kw]))]
      (t/selection-cfg
       {:name title
        :key kw
@@ -760,16 +760,28 @@
                     "When you hit with a weapon attack, expend a superiority die, add die to damage, give advantage to next attack roll by someone else against the creature")
    (maneuver-option "Evasive Footwork"
                     "Add superiority die to AC when moving")
-   (maneuver-option "Feinting Attack"
-                    "feint attack on a creature and gain advantage on next attack against it, adding superiority die to damage")
-   (maneuver-option "Goading Attack"
-                    "add superiority die to a successful attack's damage, if target fails WIS save, the next attack it makes must be against you or have disadvantage")
+   (mod-maneuver-option
+    "Feinting Attack"
+    [(modifiers/bonus-action
+      {:name "Feinting Attack Maneuver"
+       :page 74
+       :summary "feint attack on a creature and gain advantage on next attack against it, adding superiority die to damage"})])
+   (mod-maneuver-option
+    "Goading Attack"
+    [(modifiers/dependent-trait
+      {:name "Goading Attack Maneuver"
+       :page 74
+       :summary (str "add superiority die to a successful attack's damage, if target fails DC " ?maneuver-save-dc " WIS save, the next attack it makes must be against you or have disadvantage")})])
    (maneuver-option "Lunging Attack"
                     "increase melee attack reach by 5 ft., add superiority die to damage")
    (maneuver-option "Manuevering Attack"
                     "add superiority die to a successful attack's damage, choose a friendly creature that can move half it's speed as a reaction without opportunity attack from attack target")
-   (maneuver-option "Menacing Attack"
-                    "add superiority die to a successful attack's damage, if target fails WIS save, it becomes frightened of you until your next turn")
+   (mod-maneuver-option
+    "Menacing Attack"
+    [(modifiers/dependent-trait
+      {:name "Menacing Attack Maneuver"
+       :page 74
+       :summary (str "add superiority die to a successful attack's damage, if target fails DC " ?maneuver-save-dc " WIS save, it becomes frightened of you until your next turn")})])
    (mod-maneuver-option
     "Parry"
     [(modifiers/reaction
@@ -778,8 +790,12 @@
        :summary (str "reduce melee attack damage dealt to you by superiority die roll " (common/mod-str (?ability-bonuses :dex)))})])
    (maneuver-option "Precision Attack"
                     "add superiority die to weapon attack roll")
-   (maneuver-option "Pushing Attack"
-                    "add superiority die to a successful attack's damage, if target is Large or smaller and fails an STR save, it is pushed 15 ft. away")
+   (mod-maneuver-option
+    "Pushing Attack"
+    [(modifiers/dependent-trait
+      {:name "Pushing Attack Maneuver"
+       :page 74
+       :summary (str "add superiority die to a successful attack's damage, if target is Large or smaller and fails a DC " ?maneuver-save-dc " STR save, it is pushed 15 ft. away")})])
    (mod-maneuver-option
     "Rally"
     [(modifiers/bonus-action
@@ -796,8 +812,12 @@
        :summary "if a creature misses you with a melee attack, attack as a reaction and add superiority die to damage"})])
    (maneuver-option "Sweeping Attack"
                     "if you hit a creature with an attack roll, choose another creature within 5 ft., if the roll would hit the creature, it takes superiority die worth of damage")
-   (maneuver-option "Trip Attack"
-                    "add superiority die to successful attack's damage, if target fails STR save, it is knocked prone")])
+   (mod-maneuver-option
+    "Trip Attack"
+    [(modifiers/dependent-trait
+      {:name "Trip Attack Maneuver"
+       :page 74
+       :summary (str "add superiority die to successful attack's damage, if target fails a DC " ?maneuver-save-dc " STR save, it is knocked prone")})])])
 
 (def can-cast-spell-prereq
   (t/option-prereq "Requires spellcasting ability."

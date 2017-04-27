@@ -2351,9 +2351,10 @@
     :num num
     :prepend-level? true}))
 
-(defn subclass-wizard-spell-selection [title class-key class-name num spell-levels & [filter-fn]]
+(defn subclass-wizard-spell-selection [title ref class-key class-name num spell-levels & [filter-fn]]
   (opt5e/spell-selection {:title title
                           :class-key class-key
+                          :ref ref
                           :spellcasting-ability :int
                           :class-name class-name
                           :num num
@@ -2369,8 +2370,19 @@
                                            spell-keys)
                                           spell-keys))}))
 
+(defn eldritch-knight-ref [subpath]
+  (concat
+   [:class :fighter :levels :level-3 :martial-archetype :eldritch-knight]
+   subpath))
+
+(defn arcane-trickster-ref [subpath]
+  (concat
+   [:class :rogue :levels :level-3 :roguish-archetype :arcane-trickster]
+   subpath))
+
 (defn eldritch-knight-spell-selection [num spell-levels]
   (subclass-wizard-spell-selection "Eldritch Knight Abjuration or Evocation Spells"
+                                   (eldritch-knight-ref [:abjuration-or-evocation-spells-known])
                                    :fighter
                                    "Eldritch Knight"
                                    num
@@ -2379,6 +2391,7 @@
 
 (defn arcane-trickster-spell-selection [num spell-levels]
   (subclass-wizard-spell-selection "Arcane Trickster Enchantment or Illusion Spells"
+                                   (arcane-trickster-ref [:enchantment-or-illusion-spells-known])
                                    :rogue
                                    "Arcane Trickster"
                                    num
@@ -2387,6 +2400,7 @@
 
 (defn eldritch-knight-any-spell-selection [num spell-levels]
   (subclass-wizard-spell-selection "Eldritch Knight Spells: Any School"
+                                   (eldritch-knight-ref [:spells-known-any-school])
                                    :fighter
                                    "Eldritch Knight"
                                    num
@@ -2394,10 +2408,29 @@
 
 (defn arcane-trickster-any-spell-selection [num spell-levels]
   (subclass-wizard-spell-selection "Arcane Trickster Spells: Any School"
+                                   (arcane-trickster-ref [:spells-known-any-school])
                                    :rogue
                                    "Arcane Trickster"
                                    num
                                    spell-levels))
+
+(defn eldritch-knight-cantrip [num]
+  (opt5e/spell-selection {:class-key :fighter
+                          :level 0
+                          :ref (eldritch-knight-ref [:cantrips-known])
+                          :spellcasting-ability :int
+                          :class-name "Eldritch Knight"
+                          :num num
+                          :spell-keys (get-in sl/spell-lists [:wizard 0])}))
+
+(defn arcane-trickster-cantrip [num]
+  (opt5e/spell-selection {:class-key :rogue
+                          :level 0
+                          :ref (arcane-trickster-ref [:cantrips-known])
+                          :spellcasting-ability :int
+                          :class-name "Arcane Trickster"
+                          :num num
+                          :spell-keys (get-in sl/spell-lists [:wizard 0])}))
 
 (def eldritch-knight-cfg
   {:name "Eldritch Knight"
@@ -2406,13 +2439,7 @@
                 {:name "Summon Bonded Weapon"
                  :page 75
                  :summary "If on the same plane of existence, instantly teleport a bonded weapon into your hand"})]
-   :levels {3 {:selections [(opt5e/spell-selection {:class-key :fighter
-                                                    :level 0
-                                                    :exclude-ref? true
-                                                    :spellcasting-ability :int
-                                                    :class-name "Eldritch Knight"
-                                                    :num 2
-                                                    :spell-keys (get-in sl/spell-lists [:wizard 0])})
+   :levels {3 {:selections [(eldritch-knight-cantrip 2)
                             (eldritch-knight-spell-selection 2 [1])
                             (eldritch-knight-any-spell-selection 1 [1])]}
             4 {:selections [(eldritch-knight-spell-selection 1 [1])]}
@@ -2422,7 +2449,8 @@
                              :page 75
                              :summary "make a weapon attack if you used your action to cast a cantrip"})]}
             8 {:selections [(eldritch-knight-any-spell-selection 1 [1 2])]}
-            10 {:selections [(eldritch-knight-spell-selection 1 [1 2])]}
+            10 {:selections [(eldritch-knight-cantrip 1)
+                             (eldritch-knight-spell-selection 1 [1 2])]}
             11 {:selections [(eldritch-knight-spell-selection 1 [1 2])]}
             13 {:selections [(eldritch-knight-spell-selection 1 [1 2 3])]}
             14 {:selections [(eldritch-knight-any-spell-selection 1 [1 2 3])]}
@@ -3461,18 +3489,14 @@
                  {:name "Arcane Trickster"
                   :spellcasting {:level-factor 3}
                   :modifiers [(mod5e/spells-known 0 :mage-hand :int "Arcane Trickster")]
-                  :levels {3 {:selections [(opt5e/spell-selection {:class-key :rogue
-                                                                   :level 0
-                                                                   :spellcasting-ability :int
-                                                                   :class-name "Arcane Trickster"
-                                                                   :num 2
-                                                                   :spell-keys (get-in sl/spell-lists [:wizard 0])})
+                  :levels {3 {:selections [(arcane-trickster-cantrip 3)
                                            (arcane-trickster-spell-selection 2 [1])
                                            (arcane-trickster-any-spell-selection 1 [1])]}
                            4 {:selections [(arcane-trickster-spell-selection 1 [1])]}
                            7 {:selections [(arcane-trickster-spell-selection 1 [1 2])]}
                            8 {:selections [(arcane-trickster-any-spell-selection 1 [1 2])]}
-                           10 {:selections [(arcane-trickster-spell-selection 1 [1 2])]}
+                           10 {:selections [(arcane-trickster-cantrip 1)
+                                            (arcane-trickster-spell-selection 1 [1 2])]}
                            11 {:selections [(arcane-trickster-spell-selection 1 [1 2])]}
                            13 {:selections [(arcane-trickster-spell-selection 1 [1 2 3])]
                                :modifiers [(mod5e/bonus-action

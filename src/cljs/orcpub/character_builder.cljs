@@ -889,7 +889,7 @@
                            disable-select-new?
                            {:keys [::t/key ::t/name ::t/path ::t/help ::t/selections ::t/prereqs
                                    ::t/modifiers ::t/select-fn ::t/ui-fn ::t/icon] :as option}]
-  (let [new-option-path (conj option-path key)
+  (let [new-option-path (conj (vec option-path) key)
         selected? (get-in option-paths new-option-path)
         failed-prereqs (reduce
                         (fn [failures {:keys [::t/prereq-fn ::t/label ::t/hide-if-fail?] :as prereq}]
