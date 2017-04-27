@@ -545,6 +545,29 @@
       (t5e/add-associated-options without-starting-equipment associated-options)
       with-new-class)))
 
+(defn set-class-level [db [class-index new-highest-level]]
+  (update-in
+   db
+   [:character ::entity/options :class class-index ::entity/options :levels]
+   (fn [levels]
+     (let [current-highest-level (count levels)]
+       (cond
+         (> new-highest-level current-highest-level)
+         (vec (concat levels (map
+                              (fn [lvl] {::entity/key (keyword (str "level-" (inc lvl)))})
+                              (range current-highest-level new-highest-level))))
+         
+         (< new-highest-level current-highest-level)
+         (vec (take new-highest-level levels))
+         
+         :else levels)))))
+
+(defn delete-class [db [class-key]]
+  (update-in
+   db
+   [:character ::entity/options :class]
+   (fn [classes] (vec (remove #(= class-key (::entity/key %)) classes)))))
+
 (defn class-level-selector []
   (let [expanded? (r/atom false)]
     (fn [i key selected-class options unselected-classes-set multiclass-options]
@@ -583,21 +606,7 @@
               (fn [e]
                 (let [new-highest-level-str (.. e -target -value)
                       new-highest-level (js/parseInt (last (s/split new-highest-level-str #"-")))]
-                  (swap! app-state
-                         update-in
-                         [:character ::entity/options :class i ::entity/options :levels]
-                         (fn [levels]
-                           (let [current-highest-level (count levels)]
-                             (cond
-                               (> new-highest-level current-highest-level)
-                               (vec (concat levels (map
-                                                    (fn [lvl] {::entity/key (keyword (str "level-" (inc lvl)))})
-                                                    (range current-highest-level new-highest-level))))
-                           
-                               (< new-highest-level current-highest-level)
-                               (vec (take new-highest-level levels))
-                           
-                               :else levels))))))}
+                  (swap! app-state set-class-level [i new-highest-level])))}
              (doall
               (map-indexed
                (fn [i {level-key ::t/key}]
@@ -607,10 +616,7 @@
                   (inc i)])
                available-levels))])
           [:i.fa.fa-minus-circle.orange.f-s-16.m-l-5.pointer
-           {:on-click (fn [_] (swap! app-state
-                                     update-in
-                                     [:character ::entity/options :class]
-                                     (fn [classes] (vec (remove #(= key (::entity/key %)) classes)))))}]]
+           {:on-click (fn [_] (swap! app-state delete-class [key]))}]]
          (if @expanded?
            [:div.m-t-5.m-b-10 (::t/help class-template-option)])]))))
 
