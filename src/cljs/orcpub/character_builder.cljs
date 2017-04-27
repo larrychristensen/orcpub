@@ -281,7 +281,7 @@
     (if abbr
       [:span
        [:span before]
-       [:a {:href url} abbr]
+       [:a {:href url :target :_blank} abbr]
        [:span after]]
       desc)))
 

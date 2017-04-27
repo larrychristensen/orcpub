@@ -2791,7 +2791,7 @@
                               (mod5e/action
                                {:name "Shadow Arts"
                                 :page 80
-                                :summary "spend 2 ki to cast darkness, darkvision, pass without trace, or silence spells"})]
+                                :summary "spend 2 ki to cast 'darkness', 'darkvision', 'pass without trace', or 'silence' spell"})]
                   :levels {6 {:modfifiers [(mod5e/bonus-action
                                             {:name "Shadow Step"
                                              :page 80
@@ -5635,7 +5635,7 @@ long rest."})]
    {:name "Elemental Evil Player's Companion"
     :key :ee
     :url "https://media.wizards.com/2015/downloads/dnd/EE_PlayersCompanion.pdf"
-    :help [:div "Race and spell options from the " [:a {:href "https://media.wizards.com/2015/downloads/dnd/EE_PlayersCompanion.pdf"} "player's companion to Prince's of the Apocalypse"]]}])
+    :help [:div "Race and spell options from the " [:a {:href "https://media.wizards.com/2015/downloads/dnd/EE_PlayersCompanion.pdf" :target :_blank} "player's companion to Prince's of the Apocalypse"]]}])
 
 (def optional-content-selection
   (t/selection-cfg

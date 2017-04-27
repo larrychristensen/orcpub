@@ -398,7 +398,7 @@
                    (let [{:keys [abbr url]} (disp/sources source)]
                      [:div
                       [:span "See"]
-                      [:a.m-l-5 {:href url} abbr]
+                      [:a.m-l-5 {:href url :target :_blank} abbr]
                       [:span.m-l-5 (str "page " page)]])))]])
 
 (defn spell-option [spellcasting-ability class-name key & [prepend-level? qualifier]]
