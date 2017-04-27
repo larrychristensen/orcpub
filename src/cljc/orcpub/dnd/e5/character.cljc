@@ -163,6 +163,9 @@
 (defn spells-known [built-char]
   (es/entity-val built-char :spells-known))
 
+(defn spell-slots [built-char]
+  (es/entity-val built-char :spell-slots))
+
 (defn traits [built-char]
   (es/entity-val built-char :traits))
 

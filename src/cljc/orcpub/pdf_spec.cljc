@@ -255,7 +255,7 @@
   (let [spells-known (es/entity-val built-char :spells-known)
         spell-attack-modifier-fn (es/entity-val built-char :spell-attack-modifier)
         spell-save-dc-fn (es/entity-val built-char :spell-save-dc)
-        spell-slots (es/entity-val built-char :spell-slots)]
+        spell-slots (char5e/spell-slots built-char)]
     (spell-page-fields spells-known spell-slots spell-save-dc-fn spell-attack-modifier-fn)))
 
 (defn profs-paragraph [profs prof-map title]

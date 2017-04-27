@@ -225,7 +225,7 @@
   (let [key-fn (juxt :key :ability)]
     (compare (key-fn spell-1) (key-fn spell-2))))
 
-(defn spells-known-section [spells-known]
+(defn spells-known-section [spells-known spell-slots]
   [display-section "Spells Known" "spell-book"
    [:div.f-s-14.flex.flex-wrap
     (doall
@@ -233,7 +233,8 @@
       (fn [[level spells]]
         ^{:key level}
         [:div.m-t-10.w-200
-         [:span.f-w-600 (if (zero? level) "Cantrip" (str "Level " level))]
+         [:span.f-w-b (str (if (zero? level) "Cantrip" (str "Level " level)) (if (pos? level)
+                                                                                 (str " (" (spell-slots level) " slots)")))]
          [:div.i.f-w-n
           (doall
            (map-indexed
@@ -342,6 +343,7 @@
         magic-armor (char5e/magic-armor-inventory built-char)
         all-armor (merge magic-armor armor)
         spells-known (char5e/spells-known built-char)
+        spell-slots (char5e/spell-slots built-char)
         weapons (char5e/normal-weapons-inventory built-char)
         magic-weapons (char5e/magic-weapons-inventory built-char)
         equipment (char5e/normal-equipment-inventory built-char)
@@ -446,7 +448,7 @@
        [list-item-section "Condition Immunities" nil condition-immunities (fn [{:keys [condition qualifier]}]
                                                                         (str (name condition)
                                                                              (if qualifier (str " (" qualifier ")"))))]
-       (if (seq spells-known) [spells-known-section spells-known])
+       (if (seq spells-known) [spells-known-section spells-known spell-slots])
        [equipment-section "Weapons" "plain-dagger" (concat magic-weapons weapons) mi5e/all-weapons-map]
        [equipment-section "Armor" "breastplate" (merge magic-armor armor) mi5e/all-armor-map]
        [equipment-section "Equipment" "backpack" (concat magic-items
