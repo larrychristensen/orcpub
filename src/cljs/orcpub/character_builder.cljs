@@ -32,7 +32,7 @@
 
             [reagent.core :as r]))
 
-(def print-enabled? true)
+(def print-enabled? (s/starts-with? js/window.location.href "http://localhost"))
 
 (declare app-state)
 
@@ -62,26 +62,21 @@
 
 (defonce app-state
   (r/atom
-   {:collapsed-paths #{[:ability-scores]
-                       [:background]
-                       [:race]
-                       [:sources]
-                       [:class :barbarian]}
-    :stepper-selection-path nil
-    :stepper-selection nil
-    :mouseover-option nil
-    :builder {:character {:tab #{:build :options}}}
+   {:builder {:character {:tab #{:build :options}}}
     :character (if stored-char stored-char t5e/character)}))
 
 (defonce history
-  (r/atom (list @app-state)))
+  (r/atom (list (:character @app-state))))
 
 (def template t5e/template)
+
+(defn set-character [db [character]]
+  (assoc db :character character))
 
 (defn undo! []
   (when (> (count @history) 1)
     (swap! history pop)
-    (swap! app-state #(peek @history))))
+    (swap! app-state set-character [(peek @history)])))
 
 (if print-enabled?
   (add-watch app-state :log (fn [k r os ns]
@@ -96,8 +91,8 @@
 (add-watch app-state
            :history
            (fn [k r os ns]
-             (if (not= ns (peek @history))
-               (swap! history conj ns))))
+             (if (not= (:character ns) (peek @history))
+               (swap! history conj (:character ns)))))
 
 (defn selector-id [path]
   (s/join "--" (map name path)))
@@ -172,7 +167,7 @@
        [:div
         (doall (rest display-rows))]])))
 
-(defn speed-section [built-char]
+(defn speed-section [built-char all-armor]
   (let [speed (char5e/base-land-speed built-char)
         speed-with-armor (char5e/land-speed-with-armor built-char)
         unarmored-speed-bonus (char5e/unarmored-speed-bonus built-char)
@@ -201,7 +196,7 @@
                 [:div
                  [:span speed]
                  [:span.display-section-qualifier-text (str "(" (:name armor) " armor)")]]]))
-           (dissoc equipped-armor :shield)))]
+           (dissoc all-armor :shield)))]
         (if unarmored-speed-bonus
           [:div
            [:span
@@ -225,15 +220,16 @@
   (let [key-fn (juxt :key :ability)]
     (compare (key-fn spell-1) (key-fn spell-2))))
 
-(defn spells-known-section [spells-known]
+(defn spells-known-section [spells-known spell-slots]
   [display-section "Spells Known" "spell-book"
-   [:div.f-s-14
+   [:div.f-s-14.flex.flex-wrap
     (doall
      (map
       (fn [[level spells]]
         ^{:key level}
-        [:div.m-t-10
-         [:span.f-w-600 (if (zero? level) "Cantrip" (str "Level " level))]
+        [:div.m-t-10.w-200
+         [:span.f-w-b (str (if (zero? level) "Cantrip" (str "Level " level)) (if (pos? level)
+                                                                                 (str " (" (spell-slots level) " slots)")))]
          [:div.i.f-w-n
           (doall
            (map-indexed
@@ -281,7 +277,7 @@
     (if abbr
       [:span
        [:span before]
-       [:a {:href url} abbr]
+       [:a {:href url :target :_blank} abbr]
        [:span after]]
       desc)))
 
@@ -312,7 +308,7 @@
           [:p.m-t-10
            [:span.f-w-600.i (:name action) "."]
            [:span.f-w-n.m-l-10 (add-links (common/sentensize (disp5e/action-description action)))]])
-        actions))])))
+        (sort-by :name actions)))])))
 
 (defn prof-name [prof-map prof-kw]
   (or (-> prof-kw prof-map :name) (common/kw-to-name prof-kw)))
@@ -340,7 +336,9 @@
         armor-class-with-armor (char5e/armor-class-with-armor built-char)
         armor (char5e/normal-armor-inventory built-char)
         magic-armor (char5e/magic-armor-inventory built-char)
+        all-armor (merge magic-armor armor)
         spells-known (char5e/spells-known built-char)
+        spell-slots (char5e/spell-slots built-char)
         weapons (char5e/normal-weapons-inventory built-char)
         magic-weapons (char5e/magic-weapons-inventory built-char)
         equipment (char5e/normal-equipment-inventory built-char)
@@ -391,9 +389,9 @@
         [:div.w-50-p
          (if background [svg-icon-section "Background" "ages" [:span.f-s-18.f-w-n background]])
          (if alignment [svg-icon-section "Alignment" "yin-yang" [:span.f-s-18.f-w-n alignment]])
-         [armor-class-section armor-class armor-class-with-armor (merge magic-armor armor)]
+         [armor-class-section armor-class armor-class-with-armor all-armor]
          [svg-icon-section "Hit Points" "health-normal" (char5e/max-hit-points built-char)]
-         [speed-section built-char]
+         [speed-section built-char all-armor]
          [svg-icon-section "Darkvision" "night-vision" (if darkvision (str darkvision " ft.") "--")]
          [svg-icon-section "Initiative" "sprint" (mod/bonus-str (char5e/initiative built-char))]
          [display-section "Proficiency Bonus" nil (mod/bonus-str (char5e/proficiency-bonus built-char))]
@@ -445,7 +443,7 @@
        [list-item-section "Condition Immunities" nil condition-immunities (fn [{:keys [condition qualifier]}]
                                                                         (str (name condition)
                                                                              (if qualifier (str " (" qualifier ")"))))]
-       (if (seq spells-known) [spells-known-section spells-known])
+       (if (seq spells-known) [spells-known-section spells-known spell-slots])
        [equipment-section "Weapons" "plain-dagger" (concat magic-weapons weapons) mi5e/all-weapons-map]
        [equipment-section "Armor" "breastplate" (merge magic-armor armor) mi5e/all-armor-map]
        [equipment-section "Equipment" "backpack" (concat magic-items
@@ -516,21 +514,22 @@
 (defn character-value-path [prop-name]
   (conj character-values-path prop-name))
 
-(defn character-field [app-state prop-name type value & [cls-str]]
-  [type {:class-name (str "input " cls-str)
-         :type :text
-         :value value
-         :on-change (fn [e]
-                      (swap! app-state
-                             assoc-in
-                             (character-value-path prop-name)
-                             (get-event-value e)))}])
+(defn character-field [app-state prop-name type & [cls-str]]
+  (let [value-path (character-value-path prop-name)]
+    [type {:class-name (str "input " cls-str)
+           :type :text
+           :value (get-in @app-state value-path)
+           :on-change (fn [e]
+                        (swap! app-state
+                               assoc-in
+                               value-path
+                               (get-event-value e)))}]))
 
-(defn character-input [app-state prop-name value & [cls-str]]
-  (character-field app-state prop-name :input value cls-str))
+(defn character-input [app-state prop-name & [cls-str]]
+  (character-field app-state prop-name :input cls-str))
 
-(defn character-textarea [app-state prop-name value & [cls-str]]
-  (character-field app-state prop-name :textarea value cls-str))
+(defn character-textarea [app-state prop-name & [cls-str]]
+  (character-field app-state prop-name :textarea cls-str))
 
 (defn class-level-selector []
   (let [expanded? (r/atom false)]
@@ -872,12 +871,13 @@
 
 (defn validate-selections [built-template character selections]
   (mapcat
-   (fn [{:keys [::t/name] :as selection}]
-     (let [remaining (count-remaining built-template character selection)]
-       (cond
-         (pos? remaining) [(str "You have " remaining " more '" name "' selection" (if (> remaining 1) "s") " to make.")]
-         (neg? remaining) [(str "You must remove " (Math/abs remaining) " '" name "' selection" (if (< remaining -1) "s") ".")]
-         :else nil)))
+   (fn [{:keys [::t/name ::t/tags] :as selection}]
+     (if (not (tags :starting-equipment))
+       (let [remaining (count-remaining built-template character selection)]
+         (cond
+           (pos? remaining) [(str "You have " remaining " more '" name "' selection" (if (> remaining 1) "s") " to make.")]
+           (neg? remaining) [(str "You must remove " (Math/abs remaining) " '" name "' selection" (if (< remaining -1) "s") ".")]
+           :else nil))))
    (entity/combine-selections selections)))
 
 
@@ -886,7 +886,7 @@
                            disable-select-new?
                            {:keys [::t/key ::t/name ::t/path ::t/help ::t/selections ::t/prereqs
                                    ::t/modifiers ::t/select-fn ::t/ui-fn ::t/icon] :as option}]
-  (let [new-option-path (conj option-path key)
+  (let [new-option-path (conj (vec option-path) key)
         selected? (get-in option-paths new-option-path)
         failed-prereqs (reduce
                         (fn [failures {:keys [::t/prereq-fn ::t/label ::t/hide-if-fail?] :as prereq}]
@@ -1020,12 +1020,19 @@
              (remaining-component max remaining)]]))
        body])))
 
+(def ignore-paths-ending-with #{:class :levels :asi-or-feat :ability-score-improvement})
+
 (defn ancestor-names-string [built-template path]
-  (let [ancestor-paths (reductions conj [] path)
+  (let [ancestor-paths (map
+                        (fn [p]
+                          (if (ignore-paths-ending-with (last p))
+                            []
+                            p))
+                        (reductions conj [] path))
         ancestors (map (fn [a-p]
-                         (get-in built-template
+                         (entity/get-in-lazy built-template
                                  (entity/get-template-selection-path built-template a-p [])))
-                       (take-nth 2 (butlast ancestor-paths)))
+                       (butlast ancestor-paths))
         ancestor-names (map ::t/name (remove nil? ancestors))]
     (s/join " - " ancestor-names)))
 
@@ -1691,9 +1698,9 @@
     (if (es/entity-val built-char :levels)
       [selection-section-base
        {:name "Hit Points"
-        :min num-selections
-        :max num-selections
-        :remaining (sum-remaining built-template character selections) 
+        :min (if (pos? num-selections) num-selections)
+        :max (if (pos? num-selections) num-selections)
+        :remaining (if (pos? num-selections) (sum-remaining built-template character selections)) 
         :body (hit-points-entry character selections built-char built-template)}])))
 
 (def pages
@@ -1811,6 +1818,13 @@
                      :url disp5e/phb-url}
                     (map t5e/plugin-map (get-selected-plugin-options app-state)))))))])])))
 
+(def selection-order-title
+  (juxt ::t/order ::t/name ::entity/path))
+
+(defn compare-selections [s1 s2]
+  (< (selection-order-title s1)
+     (selection-order-title s2)))
+
 (defn new-options-column [character built-char built-template available-selections page-index option-paths]
   (if print-enabled? (js/console.log "AVAILABLE SELECTIONS" available-selections))
   (let [{:keys [tags ui-fns] :as page} (pages page-index)
@@ -1822,7 +1836,7 @@
                                  combined-selections)]
     (if print-enabled? (js/console.log "FINAL SELECTIONS" (vec final-selections) (map ::t/key final-selections)))
     [:div.w-100-p
-     [option-sources]
+     [option-sources character built-char built-template option-paths]
      [:div#options-column.b-1.b-rad-5
       [section-tabs available-selections built-template character page-index]
       [:div.flex.justify-cont-s-b.p-t-5.p-10.align-items-t
@@ -1874,14 +1888,14 @@
                                   final-selections)]
                    (selection-section character built-char built-template option-paths {key ui-fn} selection)))])
             ui-fns))]
-         (if (seq non-ui-fn-selections)
+         (when (seq non-ui-fn-selections)
            [:div.m-t-20
             (doall
              (map
               (fn [selection]
-                ^{:key (::t/key selection)}
+                ^{:key (::entity/path selection)}
                 [:div (selection-section character built-char built-template option-paths nil selection)])
-              non-ui-fn-selections))])])]]))
+              (into (sorted-set-by compare-selections) non-ui-fn-selections)))])])]]))
 
 (defn builder-columns [built-template built-char option-paths plugins active-tabs available-selections]
   [:div.flex-grow-1.flex
@@ -1974,6 +1988,9 @@
     :target "_blank"}
    [:input {:type "hidden" :name "body" :id "fields-input"}]])
 
+(def patreon-link-props
+  {:href "https://www.patreon.com/user?u=5892323" :target "_blank"})
+
 (defn header [built-char]
   [:div.w-100-p
    [:div.flex.align-items-c.justify-cont-s-b
@@ -2049,10 +2066,17 @@
                al-illegal-reasons))])]))))
 
 (defn app-header []
-  [:div#app-header.app-header
+  [:div#app-header.app-header.flex.flex-column.justify-cont-s-b
    [:div.app-header-bar.container
     [:div.content
-     [:img.orcpub-logo {:src "image/orcpub-logo.svg"}]]]])
+     [:img.orcpub-logo {:src "image/orcpub-logo.svg"}]]]
+   [:div.container
+    [:div.content
+     [:div.flex.align-items-c.f-w-b.f-s-18.m-t-10.m-l-10.white
+      [:span.hidden-xs "Please support continuing development on "]
+      [:a.m-l-5 patreon-link-props [:span "Patreon"]]
+      [:a.m-l-5 patreon-link-props
+       [:img.h-32.w-32 {:src "https://www.patreon.com/images/patreon_navigation_logo_mini_orange.png"}]]]]]])
 
 (defn character-builder []
   (if print-enabled? (cljs.pprint/pprint (:character @app-state)))

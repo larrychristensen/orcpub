@@ -108,7 +108,10 @@
   (es/entity-val built-char :tool-profs))
 
 (defn weapon-proficiencies [built-char]
-  (es/entity-val built-char :weapon-profs))
+  (let [proficiencies (es/entity-val built-char :weapon-profs)]
+    (if (proficiencies :martial)
+      [:simple :martial]
+      proficiencies)))
 
 (defn armor-proficiencies [built-char]
   (es/entity-val built-char :armor-profs))
@@ -160,6 +163,9 @@
 (defn spells-known [built-char]
   (es/entity-val built-char :spells-known))
 
+(defn spell-slots [built-char]
+  (es/entity-val built-char :spell-slots))
+
 (defn traits [built-char]
   (es/entity-val built-char :traits))
 
@@ -209,9 +215,6 @@
    weapon
    finesse?))
 
-(defn image-url [built-char]
-  (es/entity-val built-char :image-url))
-
 (defn age [built-char]
   (es/entity-val built-char :age))
 
@@ -232,3 +235,6 @@
 
 (defn hair [built-char]
   (es/entity-val built-char :hair))
+
+(defn image-url [built-char]
+  (es/entity-val built-char :image-url))

@@ -255,7 +255,7 @@
   (let [spells-known (es/entity-val built-char :spells-known)
         spell-attack-modifier-fn (es/entity-val built-char :spell-attack-modifier)
         spell-save-dc-fn (es/entity-val built-char :spell-save-dc)
-        spell-slots (es/entity-val built-char :spell-slots)]
+        spell-slots (char5e/spell-slots built-char)]
     (spell-page-fields spells-known spell-slots spell-save-dc-fn spell-attack-modifier-fn)))
 
 (defn profs-paragraph [profs prof-map title]
@@ -271,10 +271,10 @@
                        (sort profs))))))
 
 (defn other-profs-field [built-char]
-  (let [tool-profs (es/entity-val built-char :tool-profs)
-        weapon-profs (es/entity-val built-char :weapon-profs)
-        armor-profs (es/entity-val built-char :armor-profs)
-        languages (es/entity-val built-char :languages)]
+  (let [tool-profs (char5e/tool-proficiencies built-char)
+        weapon-profs (char5e/weapon-proficiencies built-char)
+        armor-profs (char5e/armor-proficiencies built-char)
+        languages (char5e/languages built-char)]
     (s/join
      "\n\n"
      (remove

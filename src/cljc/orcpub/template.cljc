@@ -1,5 +1,6 @@
 (ns orcpub.template
   (:require [clojure.spec :as spec]
+            [clojure.spec.test :as stest]
             [orcpub.modifiers :as modifiers]
             [orcpub.common :as common]))
 
@@ -29,6 +30,10 @@
                                                         :min ::min
                                                         :max ::max)))
 
+(spec/def ::tags set?)
+
+(spec/def ::selection-cfg (spec/keys :req-un [::tags ::options]))
+
 (defn selection-cfg [{:keys [name key source page order options help min sequential? multiselect? quantity? collapsible? ui-fn new-item-text new-item-fn prereq-fn simple? tags ref icon different? require-value?] :as cfg}]
   (let [max (if (find cfg :max) (:max cfg) 1)]
     {::name name
@@ -55,35 +60,12 @@
      ::different? different?
      ::require-value? require-value?}))
 
-(defn selection-with-key
-  ([name key options]
-   (selection-with-key name key options 1 1))
-  ([name key options min max &[sequential? new-item-fn]]
-   {::name name
-    ::key key
-    ::options options
-    ::min min
-    ::max max
-    ::sequential? (boolean sequential?)
-    ::new-item-fn new-item-fn}))
+(spec/fdef
+ selection-cfg
+ :args (spec/cat :cfg ::selection-cfg)
+ :ret ::selection)
 
-(defn selection
-  ([name options]
-   (selection name options 1 1))
-  ([name options min max &[sequential? new-item-fn]]
-   (selection-with-key name (common/name-to-kw name) options min max sequential? new-item-fn)))
-
-(defn selection? [name options]
-  (selection name options 0 1))
-
-(defn selection+ [name new-item-fn options]
-  (selection name options 1 nil false new-item-fn))
-
-(defn selection* [name new-item-fn options]
-  (selection name options 0 nil false new-item-fn))
-
-(defn sequential-selection [name new-item-fn options]
-  (selection name options 1 nil true new-item-fn))
+#_(stest/instrument `selection-cfg)
 
 (defn option-prereq [explanation func & [hide-if-fail?]]
   {::label explanation
@@ -102,19 +84,6 @@
    ::ui-fn ui-fn
    ::select-fn select-fn
    ::icon icon})
-
-(defn option [name key selections modifiers & [prereqs]]
-  (cond-> {::name name
-           ::key key}
-    selections (assoc ::selections selections)
-    modifiers (assoc ::modifiers modifiers)
-    prereqs (assoc ::prereqs prereqs)))
-
-(defn select-option [name selections & [prereqs]]
-  (option name (common/name-to-kw name) selections nil prereqs))
-
-(defn mod-option [name modifiers & [prereqs]]
-  (option name (common/name-to-kw name) nil modifiers prereqs))
 
 (declare make-modifier-map-from-selections)
 (declare make-plugin-map-from-selections)

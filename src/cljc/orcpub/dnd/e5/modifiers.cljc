@@ -62,7 +62,13 @@
   (mods/cum-sum-mod ?speed value "speed" (mods/bonus-str value)))
 
 (defn flying-speed [value]
-  [(mods/cum-sum-mod ?flying-speed value "flying" (mods/bonus-str value))])
+  (mods/modifier ?flying-speed value "flying" (mods/bonus-str value)))
+
+(defn flying-speed-equal-to-walking []
+  (mods/modifier ?flying-speed (if (and (int? ?flying-speed)
+                                        (> ?flying-speed ?speed))
+                                 ?flying-speed
+                                 ?speed)))
 
 (defn swimming-speed [value]
   (mods/cum-sum-mod ?swimming-speed value "swimming" (mods/bonus-str value)))
@@ -297,7 +303,7 @@
   (mods/modifier ?size size))
 
 (defn equipment-cfg [cfg]
-  (if (int? cfg) {:quantity cfg :equipped? false} cfg))
+  (if (int? cfg) {:quantity cfg :equipped? true} cfg))
 
 (defn weapon [weapon-kw cfg]
   (mods/map-mod ?weapons weapon-kw (equipment-cfg cfg)))

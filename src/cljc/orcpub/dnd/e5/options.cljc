@@ -59,11 +59,9 @@
     :modifiers [(modifiers/skill-proficiency (:key skill))]}))
 
 (defn weapon-proficiency-option [{:keys [name key]}]
-  (t/option
-   name
-   key
-   nil
-   [(modifiers/weapon-proficiency key)]))
+  (t/option-cfg
+   {:name name
+    :modifiers [(modifiers/weapon-proficiency key)]}))
 
 (defn tool-option [tool]
   (t/option-cfg
@@ -77,7 +75,8 @@
    {:name (:name weapon)
     :key (:key weapon)
     :help (:description weapon)
-    :modifiers [(modifiers/weapon (:key weapon) (or num 1))]}))
+    :modifiers [(modifiers/weapon (:key weapon) {:equipped? true
+                                                 :quantity (or num 1)})]}))
 
 (defn weapon-options [weapons & [num]]
   (map
@@ -399,7 +398,7 @@
                    (let [{:keys [abbr url]} (disp/sources source)]
                      [:div
                       [:span "See"]
-                      [:a.m-l-5 {:href url} abbr]
+                      [:a.m-l-5 {:href url :target :_blank} abbr]
                       [:span.m-l-5 (str "page " page)]])))]])
 
 (defn spell-option [spellcasting-ability class-name key & [prepend-level? qualifier]]
@@ -432,10 +431,10 @@
 (defn spell-level-title [class-name level]
   (str class-name (if (zero? level) " Cantrips Known" (str " Spells Known" (if level (str " " level))))))
 
-(defn spell-selection [{:keys [title class-key level spellcasting-ability class-name num prepend-level? spell-keys options min max exclude-ref?]}]
+(defn spell-selection [{:keys [title class-key level spellcasting-ability class-name num prepend-level? spell-keys options min max exclude-ref? ref]}]
   (let [title (or title (spell-level-title class-name level))
         kw (common/name-to-kw title)
-        ref (if (not exclude-ref?) [:class class-key kw])]
+        ref (or ref (if (not exclude-ref?) [:class class-key kw]))]
      (t/selection-cfg
       {:name title
        :key kw
@@ -514,6 +513,7 @@
       :tags #{:spells}
       :min 2
       :max 2
+      :ref [:class :bard :magical-secrets]
       :options (mapcat
                 (fn [[lvl spells]]
                   (map
@@ -612,7 +612,6 @@
 (defn magic-initiate-option [class-key spellcasting-ability spell-lists]
   (t/option-cfg
    {:name (name class-key)
-    :kye class-key
     :selections [(t/selection-cfg
                   {:name "Cantrip"
                    :order 1
@@ -665,19 +664,15 @@
     :max num}))
 
 (defn maneuver-option [name & [desc]]
-  (t/option
-   name
-   (common/name-to-kw name)
-   nil
-   [(modifiers/trait (str name " Maneuver")
-                     desc)]))
+  (t/option-cfg
+   {:name name
+    :modifiers [(modifiers/trait (str name " Maneuver")
+                      desc)]}))
 
 (defn mod-maneuver-option [name mods]
-  (t/option
-   name
-   (common/name-to-kw name)
-   nil
-   mods))
+  (t/option-cfg
+   {:name name
+    :modifiers mods}))
 
 (defn proficiency-help [num singular plural]
   (str "Select additional " (if (> num 1) plural singular) " for which you are proficient."))
@@ -749,12 +744,12 @@
   (t/selection-cfg
    {:name title
     :tags #{:profs}
-    :options [(t/select-option
-              "Skill"
-              [(skill-selection 1)])
-             (t/select-option
-              "Tool"
-              [(tool-selection 1)])]}))
+    :options [(t/option-cfg
+              {:name "Skill"
+               :selections [(skill-selection 1)]})
+             (t/option-cfg
+              {:name "Tool"
+               :selections [(tool-selection 1)]})]}))
 
 (def maneuver-options
   [(maneuver-option "Commander's Strike"
@@ -765,16 +760,28 @@
                     "When you hit with a weapon attack, expend a superiority die, add die to damage, give advantage to next attack roll by someone else against the creature")
    (maneuver-option "Evasive Footwork"
                     "Add superiority die to AC when moving")
-   (maneuver-option "Feinting Attack"
-                    "feint attack on a creature and gain advantage on next attack against it, adding superiority die to damage")
-   (maneuver-option "Goading Attack"
-                    "add superiority die to a successful attack's damage, if target fails WIS save, the next attack it makes must be against you or have disadvantage")
+   (mod-maneuver-option
+    "Feinting Attack"
+    [(modifiers/bonus-action
+      {:name "Feinting Attack Maneuver"
+       :page 74
+       :summary "feint attack on a creature and gain advantage on next attack against it, adding superiority die to damage"})])
+   (mod-maneuver-option
+    "Goading Attack"
+    [(modifiers/dependent-trait
+      {:name "Goading Attack Maneuver"
+       :page 74
+       :summary (str "add superiority die to a successful attack's damage, if target fails DC " ?maneuver-save-dc " WIS save, the next attack it makes must be against you or have disadvantage")})])
    (maneuver-option "Lunging Attack"
                     "increase melee attack reach by 5 ft., add superiority die to damage")
    (maneuver-option "Manuevering Attack"
                     "add superiority die to a successful attack's damage, choose a friendly creature that can move half it's speed as a reaction without opportunity attack from attack target")
-   (maneuver-option "Menacing Attack"
-                    "add superiority die to a successful attack's damage, if target fails WIS save, it becomes frightened of you until your next turn")
+   (mod-maneuver-option
+    "Menacing Attack"
+    [(modifiers/dependent-trait
+      {:name "Menacing Attack Maneuver"
+       :page 74
+       :summary (str "add superiority die to a successful attack's damage, if target fails DC " ?maneuver-save-dc " WIS save, it becomes frightened of you until your next turn")})])
    (mod-maneuver-option
     "Parry"
     [(modifiers/reaction
@@ -783,8 +790,12 @@
        :summary (str "reduce melee attack damage dealt to you by superiority die roll " (common/mod-str (?ability-bonuses :dex)))})])
    (maneuver-option "Precision Attack"
                     "add superiority die to weapon attack roll")
-   (maneuver-option "Pushing Attack"
-                    "add superiority die to a successful attack's damage, if target is Large or smaller and fails an STR save, it is pushed 15 ft. away")
+   (mod-maneuver-option
+    "Pushing Attack"
+    [(modifiers/dependent-trait
+      {:name "Pushing Attack Maneuver"
+       :page 74
+       :summary (str "add superiority die to a successful attack's damage, if target is Large or smaller and fails a DC " ?maneuver-save-dc " STR save, it is pushed 15 ft. away")})])
    (mod-maneuver-option
     "Rally"
     [(modifiers/bonus-action
@@ -801,8 +812,12 @@
        :summary "if a creature misses you with a melee attack, attack as a reaction and add superiority die to damage"})])
    (maneuver-option "Sweeping Attack"
                     "if you hit a creature with an attack roll, choose another creature within 5 ft., if the roll would hit the creature, it takes superiority die worth of damage")
-   (maneuver-option "Trip Attack"
-                    "add superiority die to successful attack's damage, if target fails STR save, it is knocked prone")])
+   (mod-maneuver-option
+    "Trip Attack"
+    [(modifiers/dependent-trait
+      {:name "Trip Attack Maneuver"
+       :page 74
+       :summary (str "add superiority die to successful attack's damage, if target fails a DC " ?maneuver-save-dc " STR save, it is knocked prone")})])])
 
 (def can-cast-spell-prereq
   (t/option-prereq "Requires spellcasting ability."
@@ -1183,55 +1198,43 @@
                   (weapon-proficiency-selection 4)]})])
 
 (def fighting-style-options
-  [(t/option
-    "Archery"
-    :archery
-    []
-    [(modifiers/ranged-attack-bonus 2)
-     (modifiers/trait-cfg
-      {:name "Archery Fighting Style"
-       :page 72
-       :description "You gain a +2 bonus to attack rolls you make with ranged weapons."})])
-   (t/option
-    "Defense"
-    :defense
-    []
-    [(modifiers/armored-ac-bonus 1)
-     (modifiers/trait-cfg
-      {:name "Defense Fighting Style"
-       :page 72
-       :description "While you are wearing armor, you gain a +1 bonus to AC."})])
-   (t/option
-    "Dueling"
-    :dueling
-    []
-    [(modifiers/trait-cfg
-      {:name "Dueling Fighting Style"
-       :page 72
-       :description "When you are wielding a melee weapon in one hand and no other weapons, you gain a +2 bonus to damage rolls with that weapon."})])
-   (t/option
-    "Great Weapon Fighting"
-    :great-weapon-fighting
-    []
-    [(modifiers/trait-cfg
-      {:name "Great Weapon Fighting Style"
-       :page 72
-       :description "When you roll a 1 or 2 on a damage die for an attack you make with a melee weapon that you are wielding with two hands, you can reroll the die and must use the new roll, even if the new roll is a 1 or a 2. The weapon must have the two-handed or versatile property for you to gain this benefit."})])
-   (t/option
-    "Protection"
-    :protection
-    []
-    [(modifiers/reaction
-      {:name "Protection Fighting Style"
-       :page 72
-       :description "When a creature you can see attacks a target other than you that is within 5 feet of you, you can use your reaction to impose disadvantage on the attack roll. You must be wielding a shield."})])
-   (t/option
-    "Two Weapon Fighting"
-    :two-weapon-fighting
-    []
-    [(modifiers/trait-cfg
-      {:name "Two Weapon Fighting"
-       :description "When you engage in two-weapon fighting, you can add your ability modifier to the damage of the second attack."})])])
+  [(t/option-cfg
+    {:name "Archery"
+     :modifiers [(modifiers/ranged-attack-bonus 2)
+      (modifiers/trait-cfg
+       {:name "Archery Fighting Style"
+        :page 72
+        :description "You gain a +2 bonus to attack rolls you make with ranged weapons."})]})
+   (t/option-cfg
+    {:name "Defense"
+     :modifiers [(modifiers/armored-ac-bonus 1)
+      (modifiers/trait-cfg
+       {:name "Defense Fighting Style"
+        :page 72
+        :description "While you are wearing armor, you gain a +1 bonus to AC."})]})
+   (t/option-cfg
+    {:name "Dueling"
+     :modifiers [(modifiers/trait-cfg
+       {:name "Dueling Fighting Style"
+        :page 72
+        :description "When you are wielding a melee weapon in one hand and no other weapons, you gain a +2 bonus to damage rolls with that weapon."})]})
+   (t/option-cfg
+    {:name "Great Weapon Fighting"
+     :modifiers [(modifiers/trait-cfg
+       {:name "Great Weapon Fighting Style"
+        :page 72
+        :description "When you roll a 1 or 2 on a damage die for an attack you make with a melee weapon that you are wielding with two hands, you can reroll the die and must use the new roll, even if the new roll is a 1 or a 2. The weapon must have the two-handed or versatile property for you to gain this benefit."})]})
+   (t/option-cfg
+    {:name "Protection"
+     :modifiers [(modifiers/reaction
+       {:name "Protection Fighting Style"
+        :page 72
+        :description "When a creature you can see attacks a target other than you that is within 5 feet of you, you can use your reaction to impose disadvantage on the attack roll. You must be wielding a shield."})]})
+   (t/option-cfg
+    {:name"Two Weapon Fighting"
+     :modifiers [(modifiers/trait-cfg
+       {:name "Two Weapon Fighting"
+        :description "When you engage in two-weapon fighting, you can add your ability modifier to the damage of the second attack."})]})])
 
 (defn fighting-style-selection [& [restrictions]]
   (t/selection-cfg
@@ -1276,7 +1279,7 @@
                   :key key
                   :icon icon
                   :modifiers [(modifiers/skill-expertise key)]
-                  :prereqs [(t/option-prereq (str "proficiency in " name)
+                  :prereqs [(t/option-prereq (str "Requires proficiency in " name)
                                              (fn [built-char]
                                                (let [skill-profs (es/entity-val built-char :skill-profs)]
                                                  (and skill-profs (skill-profs key)))))]}))
@@ -1292,13 +1295,10 @@
    {:name "Expertise"
     :tags #{:profs :skill-profs :expertise}
     :order 1
-    :options [(t/option
-               "Two Skills"
-               :two-skills
-               [(expertise-selection 2 :two-skills)]
-               [])
-              (t/option
-               "One Skill/Theives Tools"
-               :one-skill-thieves-tools
-               [(expertise-selection 1 :one-skill-thieves-tools)]
-               [(modifiers/tool-proficiency :thieves-tools)])]}))
+    :options [(t/option-cfg
+               {:name "Two Skills"
+                :selections [(expertise-selection 2 :two-skills)]})
+              (t/option-cfg
+               {:name "One Skill/Theives Tools"
+                :selections [(expertise-selection 1 :one-skill-thieves-tools)]
+                :modifiers [(modifiers/tool-proficiency :thieves-tools)]})]}))

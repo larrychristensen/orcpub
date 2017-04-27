@@ -315,6 +315,7 @@
 
 (def memoized-make-modifier-map (memoize t/make-modifier-map))
 
+
 (defn apply-options [raw-entity template]
   (let [options (flatten-options (::options raw-entity))
         modifiers (sort-by ::mods/order (collect-modifiers raw-entity options template))

@@ -79,6 +79,9 @@
    [:.inline-block
     {:display :inline-block}]
 
+   [:.flex-column
+    {:flex-direction :column}]
+
    [:.list-style-disc
     {:list-style-type :disc
      :list-style-position :inside}]
@@ -242,6 +245,8 @@
     {:width "100px"}]
    [:.w-200
     {:width "200px"}]
+   [:.w-220
+    {:width "220px"}]
    [:.w-250
     {:width "250px"}]
    [:.w-300
