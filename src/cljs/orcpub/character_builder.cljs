@@ -632,6 +632,13 @@
      [{::t/key (::t/key levels)
        ::t/options (map #(select-keys % [::t/key]) (::t/options levels))}])))
 
+(defn add-class [db [first-unselected]]
+  (update-in
+   db
+   [:character ::entity/options :class]
+   conj
+   {::entity/key first-unselected ::entity/options {:levels [{::entity/key :level-1}]}}))
+
 (defn class-levels-selector [{:keys [character selection built-char]}]
   (let [options (::t/options selection)
         selected-classes (get-in character [::entity/options :class])
@@ -668,7 +675,7 @@
          {:on-click
           (fn [_]
             (let [first-unselected (::t/key (first remaining-classes))]
-              (swap! app-state update-in [:character ::entity/options :class] conj {::entity/key first-unselected ::entity/options {:levels [{::entity/key :level-1}]}})))}
+              (swap! app-state add-class [first-unselected])))}
          "Add Class"]])]))
 
 (defn checkbox [selected? disable?]
@@ -707,6 +714,61 @@
          {:on-click remove-fn}]]
        (if @expanded? [:div.m-t-5 item-description])])))
 
+(defn add-inventory-item [db [selection-key item-key]]
+  (update-in
+   db
+   [:character ::entity/options selection-key]
+   (fn [items]
+     (vec
+      (conj
+       items
+       {::entity/key item-key
+        ::entity/value {:quantity 1 :equipped? true}})))))
+
+(defn toggle-inventory-item-equipped [db [selection-key item-index]]
+  (update-in
+   db
+   [:character ::entity/options selection-key item-index ::entity/value :equipped?]
+   not))
+
+(defn toggle-custom-inventory-item-equipped [db [custom-equipment-key item-index]]
+  (update-in
+   db
+   [:character ::entity/values custom-equipment-key item-index :equipped?]
+   not))
+
+(defn change-inventory-item-quantity [db [selection-key item-index quantity]]
+  (update-in
+   db
+   [:character ::entity/options selection-key item-index ::entity/value]
+   (fn [item-cfg]
+     ;; the select keys here is to keep :equipped while wiping out the starting-equipment indicators
+     (assoc (select-keys item-cfg [:equipped?]) :quantity quantity))))
+
+(defn change-custom-inventory-item-quantity [db [custom-equipment-key item-index quantity]]
+  (update-in
+   db
+   [:character ::entity/values custom-equipment-key item-index]
+   (fn [item-cfg]
+     ;; the select keys here is to keep :equipped while wiping out the starting-equipment indicators
+     (assoc
+      (select-keys item-cfg [:name :equipped?])
+      :quantity
+      quantity))))
+
+(defn remove-inventory-item [db [selection-key item-key]]
+  (update-in
+   db
+   [:character ::entity/options selection-key]
+   (fn [items] (vec (remove #(= item-key (::entity/key %)) items)))))
+
+(defn remove-custom-inventory-item [db [custom-equipment-key name]]
+  (update-in
+   db
+   [:character ::entity/values custom-equipment-key]
+   (fn [items]
+     (vec (remove #(= name (:name %)) items)))))
+
 (defn inventory-selector [item-map qty-input-width {:keys [character selection]} & [custom-equipment-key]]
   (let [{:keys [::t/key ::t/options]} selection
         selected-items (get-in @app-state [:character ::entity/options key])
@@ -717,15 +779,7 @@
        :on-change
        (fn [e]
          (let [kw (keyword (.. e -target -value))]
-           (swap! app-state
-                  update-in
-                  [:character ::entity/options key]
-                  (fn [items]
-                    (vec
-                     (conj
-                      items
-                      {::entity/key kw
-                       ::entity/value {:quantity 1 :equipped? false}}))))))}
+           (swap! app-state add-inventory-item [key kw])))}
       [:option.builder-dropdown-item
        {:value ""
         :disabled true}
@@ -759,18 +813,11 @@
                              :i i
                              :qty-input-width qty-input-width
                              :check-fn (fn [_]
-                                         (swap! app-state
-                                                update-in
-                                                [:character ::entity/options key i ::entity/value :equipped?]
-                                                not))
-                             :qty-change-fn (fn [e] (swap! app-state
-                                                           assoc-in
-                                                           [:character ::entity/options key i ::entity/value]
-                                                           {:equipped? equipped? :quantity (.. e -target -value)}))
-                             :remove-fn (fn [_] (swap! app-state
-                                                       update-in
-                                                       [:character ::entity/options key]
-                                                       (fn [items] (vec (remove #(= item-key (::entity/key %)) items)))))}]))
+                                         (swap! app-state toggle-inventory-item-equipped [key i]))
+                             :qty-change-fn (fn [e]
+                                              (let [qty (.. e -target -value)]
+                                                (swap! app-state change-inventory-item-quantity [key i qty])))
+                             :remove-fn (fn [_] (swap! app-state remove-inventory-item [key item-key]))}]))
         selected-items))]
      (if custom-equipment-key
        [:div
@@ -787,21 +834,16 @@
                                :i i
                                :qty-input-width qty-input-width
                                :check-fn (fn [_]
-                                           (swap! app-state
-                                                  update-in
-                                                  [:character ::entity/values custom-equipment-key i :equipped?]
-                                                  not))
+                                           (swap! app-state toggle-custom-inventory-item-equipped [custom-equipment-key i]))
                                :qty-change-fn (fn [e]
-                                                (swap! app-state
-                                                       assoc-in
-                                                       [:character ::entity/values custom-equipment-key i]
-                                                       {:name name :quantity (.. e -target -value) :equipped? equipped?}))
+                                                (let [qty (.. e -target -value)]
+                                                  (swap! app-state
+                                                         change-custom-inventory-item-quantity
+                                                         [custom-equipment-key i qty])))
                                :remove-fn (fn [_]
                                             (swap! app-state
-                                                   update-in
-                                                   [:character ::entity/values custom-equipment-key]
-                                                   (fn [items]
-                                                     (vec (remove #(= name (:name %)) items)))))}]))
+                                                   remove-custom-inventory-item
+                                                   [custom-equipment-key name]))}]))
           (get-in @app-state [:character ::entity/values custom-equipment-key])))])]))
 
 (defn option-selector-base []
