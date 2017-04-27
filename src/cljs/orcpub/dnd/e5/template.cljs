@@ -4156,7 +4156,7 @@ long rest."})]
      :modifiers [(mod5e/trait-cfg
                   {:name "Eldritch Invocation: Repelling Blast"
                    :page 111
-                   :summary "push the creature 10 ft when you eldritch blast"})]
+                   :summary "push the creature 10 ft when you cast eldritch blast"})]
      :prereqs [has-eldritch-blast-prereq]})
    (t/option-cfg
     {:name "Sculptor of Flesh"
