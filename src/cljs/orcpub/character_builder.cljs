@@ -62,15 +62,7 @@
 
 (defonce app-state
   (r/atom
-   {:collapsed-paths #{[:ability-scores]
-                       [:background]
-                       [:race]
-                       [:sources]
-                       [:class :barbarian]}
-    :stepper-selection-path nil
-    :stepper-selection nil
-    :mouseover-option nil
-    :builder {:character {:tab #{:build :options}}}
+   {:builder {:character {:tab #{:build :options}}}
     :character (if stored-char stored-char t5e/character)}))
 
 (defonce history
