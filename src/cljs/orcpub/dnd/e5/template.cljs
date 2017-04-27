@@ -2645,6 +2645,7 @@
     :profs {:armor {:light true}
             :weapon {:simple false :shortsword false}
             :save {:dex true :str true}
+            :tool-options {:musical-instrument 1 :artisans-tool 1}
             :skill-options {:choose 2 :options {:acrobatics true :athletics true :history true :insight true :religion true :stealth true}}}
     :multiclass-prereqs [(t/option-prereq "Requires Wisdom 13 and Dexterity 13"
                                           (fn [c]
@@ -4428,7 +4429,9 @@ long rest."})]
                  (mod5e/trait "Evocation Savant")
                  (mod5e/trait "Sculpt Spells")]})])
 
-(def artisans-tools-choice-cfg)
+(def artisans-tools-choice-cfg
+  {:name "Artisan's Tool"
+   :options (zipmap (map :key equip5e/artisans-tools) (repeat 1))})
 
 (def backgrounds [{:name "Acolyte"
                    :help "Your life has been devoted to serving a god or gods."
