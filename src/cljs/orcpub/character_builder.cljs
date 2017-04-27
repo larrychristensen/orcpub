@@ -514,22 +514,36 @@
 (defn character-value-path [prop-name]
   (conj character-values-path prop-name))
 
+(defn update-value-field [db [prop-name value]]
+  (assoc-in db (character-value-path prop-name) value))
+
 (defn character-field [app-state prop-name type & [cls-str]]
   (let [value-path (character-value-path prop-name)]
     [type {:class-name (str "input " cls-str)
            :type :text
            :value (get-in @app-state value-path)
            :on-change (fn [e]
-                        (swap! app-state
-                               assoc-in
-                               value-path
-                               (get-event-value e)))}]))
+                        (swap! app-state update-value-field [prop-name (get-event-value e)]))}]))
 
 (defn character-input [app-state prop-name & [cls-str]]
   (character-field app-state prop-name :input cls-str))
 
 (defn character-textarea [app-state prop-name & [cls-str]]
   (character-field app-state prop-name :textarea cls-str))
+
+(defn set-class [db [class-key class-index options-map]]
+  (let [new-class-option (options-map class-key)
+        associated-options (::t/associated-options new-class-option)
+        with-new-class (assoc-in
+                        db
+                        [:character ::entity/options :class class-index]
+                        {::entity/key class-key
+                         ::entity/options
+                         {:levels [{::entity/key :level-1}]}})
+        without-starting-equipment (t5e/remove-starting-equipment with-new-class :class-starting-equipment)]
+    (if (zero? class-index)
+      (t5e/add-associated-options without-starting-equipment associated-options)
+      with-new-class)))
 
 (defn class-level-selector []
   (let [expanded? (r/atom false)]
@@ -543,20 +557,7 @@
           [:select.builder-option.builder-option-dropdown.flex-grow-1.m-t-0
            {:value key
             :on-change (fn [e] (let [new-key (keyword (.. e -target -value))]
-                                 (swap! app-state
-                                        (fn [s]
-                                          (let [new-class-option (options-map new-key)
-                                                associated-options (::t/associated-options new-class-option)
-                                                with-new-class (assoc-in
-                                                                s
-                                                                [:character ::entity/options :class i]
-                                                                {::entity/key new-key
-                                                                 ::entity/options
-                                                                 {:levels [{::entity/key :level-1}]}})
-                                                without-starting-equipment (t5e/remove-starting-equipment with-new-class :class-starting-equipment)]
-                                            (if (zero? i)
-                                              (t5e/add-associated-options without-starting-equipment associated-options)
-                                              with-new-class))))))}
+                                 (swap! app-state set-class [new-key i options-map])))}
            (doall
             (map
              (fn [{:keys [::t/key ::t/name] :as option}]
