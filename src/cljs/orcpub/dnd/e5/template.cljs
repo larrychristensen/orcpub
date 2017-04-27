@@ -2807,6 +2807,13 @@
                                              :level 17
                                              :summary "when a creature within 5 ft. is hit by attack from someone else, make a melee attack"})]}}}
                  {:name "Way of the Four Elements"
+                  :modifiers [(mod5e/dependent-trait
+                               {:name "Disciple of the Elements"
+                                :page 80
+                                :summary (str "You learn elemental disciplines with spell save DC " (?spell-save-dc :wis) "."
+                                              (if (>= (?class-level :monk) 5)
+                                                (str " You can increase the level of elemental discipline spells you cast by 1 for each additional ki point you spend, up to " (mod5e/level-val (?class-level :monk)
+                            {9 4 13 5 17 6 :default 3}))))})]
                   :levels {3 {:selections [(opt5e/monk-elemental-disciplines)]}
                            6 {:selections [(opt5e/monk-elemental-disciplines)]}
                            11 {:selections [(opt5e/monk-elemental-disciplines)]}
