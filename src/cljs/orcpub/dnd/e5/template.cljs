@@ -4302,7 +4302,7 @@ long rest."})]
                   :warlock
                   {:name "Weapon"
                    :options [(t/option-cfg
-                              {:name "Light Crossbow"
+                              {:name "Light Crossbow & 20 Bolts"
                                :modifiers [(mod5e/weapon :crossbow-light 1)
                                            (mod5e/equipment :crossbow-bolt 20)]})
                              (weapon-option :warlock [:simple 1])]})
