@@ -81,16 +81,6 @@
    gaming-sets
    vehicles))
 
-(def tools-map
-  (merge
-   {:artisans-tool {:name "Artisans Tools"
-                    :values artisans-tools}
-    :musical-instrument {:name "Musical Instruments"
-                         :values musical-instruments}
-    :gaming-set {:name "Gaming Set"
-                 :values gaming-sets}}
-   (zipmap (map :key tools) tools)))
-
 (def arcane-focuses
   (common/add-keys
    [{:name "Crystal" :cost {:num 10 :type :gp} :weight "1 lb."}
@@ -111,6 +101,22 @@
    [{:name "Amulet" :cost {:num 5 :type :gp} :weight "1 lb."}
     {:name "Emblem" :cost {:num 5 :type :gp} :weight "—"}
     {:name "Reliquary" :cost {:num 5 :type :gp} :weight "2 lb."}]))
+
+(def tools-map
+  (merge
+   {:artisans-tool {:name "Artisans Tools"
+                    :values artisans-tools}
+    :musical-instrument {:name "Musical Instruments"
+                         :values musical-instruments}
+    :gaming-set {:name "Gaming Set"
+                 :values gaming-sets}
+    :arcane-focus {:name "Arcane Focus"
+                   :values arcane-focuses}
+    :druidic-focus {:name "Druidic Focus"
+                    :values druidic-focuses}
+    :holy-symbol {:name "Holy Symbol"
+                  :values holy-symbols}}
+   (zipmap (map :key tools) tools)))
 
 (def clothes
   (common/add-keys

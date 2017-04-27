@@ -1262,9 +1262,9 @@
        {:name (:name equipment)
         :selections [(t/selection-cfg
                       {:name (:name equipment)
-                       :tags {:equipment :starting-equipment}
+                       :tags #{:equipment :starting-equipment}
                        :options (map
-                                 equipment-option
+                                 #(equipment-option class-kw %)
                                  (zipmap (map :key (:values equipment)) (repeat num)))
                        :prereq-fn (first-class? class-kw)})]})
       (t/option-cfg
@@ -1336,7 +1336,8 @@
 (defn class-help-field [name value]
   [:div.m-t-5
     [:span.f-w-b (str name ":")]
-    [:span.m-l-10 value]])
+   [:span.m-l-10 value]])
+
 
 (defn class-help [hd saves weapon-profs armor-profs]
   [:div
