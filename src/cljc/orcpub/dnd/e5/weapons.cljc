@@ -10,7 +10,8 @@
     :ranged? true,
     :range {:min 80, :max 320},
     :key :crossbow-light
-    :two-handed? true}
+    :two-handed? true
+    :link "https://en.wikipedia.org/wiki/Crossbow"}
    {:ranged? true,
     :key :dart,
     :name "Dart",
@@ -20,7 +21,8 @@
     :thrown true,
     :finesse? true,
     :damage-die 4,
-    :range {:min 20, :max 60}}
+    :range {:min 20, :max 60}
+    :link "https://en.wikipedia.org/wiki/Dart_(missile)"}
    {:name "Shortbow",
     :damage-type :piercing,
     :damage-die 6,
@@ -29,7 +31,8 @@
     :ranged? true,
     :range {:min 80, :max 320},
     :key :shortbow
-    :two-handed? true}
+    :two-handed? true
+    :link "https://en.wikipedia.org/wiki/Bow_and_arrow"}
    {:name "Sling",
     :damage-type :bludgeoning,
     :damage-die 4,
@@ -37,14 +40,16 @@
     :damage-die-count 1,
     :ranged? true,
     :range {:min 30, :max 120},
-    :key :sling}
+    :key :sling
+    :link "https://en.wikipedia.org/wiki/Sling_(weapon)"}
    {:name "Club",
     :damage-type :bludgeoning,
     :damage-die 4,
     :damage-die-count 1,
     :type :simple,
     :melee? true,
-    :key :club}
+    :key :club
+    :link "https://en.wikipedia.org/wiki/Club_(weapon)"}
    {:melee? true,
     :key :dagger,
     :name "Dagger",
@@ -54,7 +59,8 @@
     :thrown true,
     :finesse? true,
     :damage-die 4,
-    :range {:min 20, :max 60}}
+    :range {:min 20, :max 60}
+    :link "https://en.wikipedia.org/wiki/Dagger"}
    {:name "Greatclub",
     :damage-type :bludgeoning,
     :damage-die 8,
@@ -62,7 +68,8 @@
     :type :simple,
     :melee? true,
     :key :greatclub
-    :two-handed? true}
+    :two-handed? true
+    :link "https://en.wikipedia.org/wiki/Club_(weapon)"}
    {:name "Handaxe",
     :damage-type :slashing,
     :damage-die 6,
@@ -71,7 +78,8 @@
     :melee? true,
     :thrown true,
     :range {:min 20, :max 60},
-    :key :handaxe}
+    :key :handaxe
+    :link "https://en.wikipedia.org/wiki/Battle_axe"}
    {:name "Javelin",
     :damage-type :piercing,
     :damage-die 6,
@@ -80,7 +88,8 @@
     :melee? true,
     :thrown true,
     :range {:min 30, :max 120},
-    :key :javelin}
+    :key :javelin
+    :link "https://en.wikipedia.org/wiki/Javelin"}
    {:name "Light hammer",
     :damage-type :bludgeoning,
     :damage-die 4,
@@ -89,14 +98,16 @@
     :melee? true,
     :thrown true,
     :range {:min 20, :max 60},
-    :key :light-hammer}
+    :key :light-hammer
+    :link "https://en.wikipedia.org/wiki/War_hammer"}
    {:name "Mace",
     :damage-type :bludgeoning,
     :type :simple,
     :damage-die 6,
     :damage-die-count 1,
     :melee? true,
-    :key :mace}
+    :key :mace
+    :link "https://en.wikipedia.org/wiki/Mace_(weapon)"}
    {:name "Quarterstaff",
     :damage-type :bludgeoning,
     :type :simple,
@@ -104,14 +115,16 @@
     :damage-die-count 1,
     :versatile {:damage-die 8, :damage-die-count 1},
     :melee? true,
-    :key :quarterstaff}
+    :key :quarterstaff
+    :link "https://en.wikipedia.org/wiki/Quarterstaff"}
    {:name "Sickle",
     :damage-type :slashing,
     :damage-die 4,
     :type :simple,
     :damage-die-count 1,
     :melee? true,
-    :key :sickle}
+    :key :sickle
+    :link "https://en.wikipedia.org/wiki/Sickle"}
    {:melee? true,
     :versatile {:damage-die 8, :damage-die-count 1},
     :key :spear,
@@ -121,7 +134,8 @@
     :damage-type :piercing,
     :thrown true,
     :damage-die 6,
-    :range {:min 20, :max 60}}
+    :range {:min 20, :max 60}
+    :link "https://en.wikipedia.org/wiki/Spear"}
    {:name "Battleaxe",
     :damage-type :slashing,
     :damage-die 8,
@@ -129,14 +143,16 @@
     :damage-die-count 1,
     :versatile {:damage-die 10, :damage-die-count 1},
     :melee? true,
-    :key :battleaxe}
+    :key :battleaxe
+    :link "https://en.wikipedia.org/wiki/Battle_axe"}
    {:name "Flail",
     :damage-type :bludgeoning,
     :damage-die 8,
     :type :martial,
     :damage-die-count 1,
     :melee? true,
-    :key :flail}
+    :key :flail
+    :link "https://en.wikipedia.org/wiki/Flail_(weapon)"}
    {:name "Glaive",
     :damage-type :slashing,
     :damage-die 10,
