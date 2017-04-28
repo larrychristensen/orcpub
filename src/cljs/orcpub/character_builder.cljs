@@ -25,6 +25,7 @@
             [orcpub.dnd.e5.display :as disp5e]
             [orcpub.dnd.e5.equipment :as equip5e]
             [orcpub.dnd.e5.skills :as skill5e]
+            [orcpub.dnd.e5.events :as events5e]
             [orcpub.pdf-spec :as pdf-spec]
 
             [clojure.spec :as spec]
@@ -70,13 +71,10 @@
 
 (def template t5e/template)
 
-(defn set-character [db [character]]
-  (assoc db :character character))
-
 (defn undo! []
   (when (> (count @history) 1)
     (swap! history pop)
-    (swap! app-state set-character [(peek @history)])))
+    (swap! app-state events5e/set-character [(peek @history)])))
 
 (if print-enabled?
   (add-watch app-state :log (fn [k r os ns]
@@ -457,8 +455,6 @@
        [actions-section "Reactions" "van-damme-split" reactions]
        [actions-section "Features, Traits, and Feats" "vitruvian-man" traits]]]]))
 
-(def tab-path [:builder :character :tab])
-
 (def plugins
   [{:name "Sword Coast Adventurer's Guide"
     :key :scag
@@ -508,65 +504,19 @@
 (defn character-state-path [path]
   (concat [:character] path))
 
-(def character-values-path
-  [:character ::entity/values])
-
-(defn character-value-path [prop-name]
-  (conj character-values-path prop-name))
-
-(defn update-value-field [db [prop-name value]]
-  (assoc-in db (character-value-path prop-name) value))
-
 (defn character-field [app-state prop-name type & [cls-str]]
-  (let [value-path (character-value-path prop-name)]
+  (let [value-path (events5e/character-value-path prop-name)]
     [type {:class-name (str "input " cls-str)
            :type :text
            :value (get-in @app-state value-path)
            :on-change (fn [e]
-                        (swap! app-state update-value-field [prop-name (get-event-value e)]))}]))
+                        (swap! app-state events5e/update-value-field [prop-name (get-event-value e)]))}]))
 
 (defn character-input [app-state prop-name & [cls-str]]
   (character-field app-state prop-name :input cls-str))
 
 (defn character-textarea [app-state prop-name & [cls-str]]
   (character-field app-state prop-name :textarea cls-str))
-
-(defn set-class [db [class-key class-index options-map]]
-  (let [new-class-option (options-map class-key)
-        associated-options (::t/associated-options new-class-option)
-        with-new-class (assoc-in
-                        db
-                        [:character ::entity/options :class class-index]
-                        {::entity/key class-key
-                         ::entity/options
-                         {:levels [{::entity/key :level-1}]}})
-        without-starting-equipment (t5e/remove-starting-equipment with-new-class :class-starting-equipment)]
-    (if (zero? class-index)
-      (t5e/add-associated-options without-starting-equipment associated-options)
-      with-new-class)))
-
-(defn set-class-level [db [class-index new-highest-level]]
-  (update-in
-   db
-   [:character ::entity/options :class class-index ::entity/options :levels]
-   (fn [levels]
-     (let [current-highest-level (count levels)]
-       (cond
-         (> new-highest-level current-highest-level)
-         (vec (concat levels (map
-                              (fn [lvl] {::entity/key (keyword (str "level-" (inc lvl)))})
-                              (range current-highest-level new-highest-level))))
-         
-         (< new-highest-level current-highest-level)
-         (vec (take new-highest-level levels))
-         
-         :else levels)))))
-
-(defn delete-class [db [class-key]]
-  (update-in
-   db
-   [:character ::entity/options :class]
-   (fn [classes] (vec (remove #(= class-key (::entity/key %)) classes)))))
 
 (defn class-level-selector []
   (let [expanded? (r/atom false)]
@@ -580,7 +530,7 @@
           [:select.builder-option.builder-option-dropdown.flex-grow-1.m-t-0
            {:value key
             :on-change (fn [e] (let [new-key (keyword (.. e -target -value))]
-                                 (swap! app-state set-class [new-key i options-map])))}
+                                 (swap! app-state events5e/set-class [new-key i options-map])))}
            (doall
             (map
              (fn [{:keys [::t/key ::t/name] :as option}]
@@ -606,7 +556,7 @@
               (fn [e]
                 (let [new-highest-level-str (.. e -target -value)
                       new-highest-level (js/parseInt (last (s/split new-highest-level-str #"-")))]
-                  (swap! app-state set-class-level [i new-highest-level])))}
+                  (swap! app-state events5e/set-class-level [i new-highest-level])))}
              (doall
               (map-indexed
                (fn [i {level-key ::t/key}]
@@ -616,7 +566,7 @@
                   (inc i)])
                available-levels))])
           [:i.fa.fa-minus-circle.orange.f-s-16.m-l-5.pointer
-           {:on-click (fn [_] (swap! app-state delete-class [key]))}]]
+           {:on-click (fn [_] (swap! app-state events5e/delete-class [key]))}]]
          (if @expanded?
            [:div.m-t-5.m-b-10 (::t/help class-template-option)])]))))
 
@@ -631,13 +581,6 @@
      ::t/selections
      [{::t/key (::t/key levels)
        ::t/options (map #(select-keys % [::t/key]) (::t/options levels))}])))
-
-(defn add-class [db [first-unselected]]
-  (update-in
-   db
-   [:character ::entity/options :class]
-   conj
-   {::entity/key first-unselected ::entity/options {:levels [{::entity/key :level-1}]}}))
 
 (defn class-levels-selector [{:keys [character selection built-char]}]
   (let [options (::t/options selection)
@@ -675,7 +618,7 @@
          {:on-click
           (fn [_]
             (let [first-unselected (::t/key (first remaining-classes))]
-              (swap! app-state add-class [first-unselected])))}
+              (swap! app-state events5e/add-class [first-unselected])))}
          "Add Class"]])]))
 
 (defn checkbox [selected? disable?]
@@ -714,61 +657,6 @@
          {:on-click remove-fn}]]
        (if @expanded? [:div.m-t-5 item-description])])))
 
-(defn add-inventory-item [db [selection-key item-key]]
-  (update-in
-   db
-   [:character ::entity/options selection-key]
-   (fn [items]
-     (vec
-      (conj
-       items
-       {::entity/key item-key
-        ::entity/value {:quantity 1 :equipped? true}})))))
-
-(defn toggle-inventory-item-equipped [db [selection-key item-index]]
-  (update-in
-   db
-   [:character ::entity/options selection-key item-index ::entity/value :equipped?]
-   not))
-
-(defn toggle-custom-inventory-item-equipped [db [custom-equipment-key item-index]]
-  (update-in
-   db
-   [:character ::entity/values custom-equipment-key item-index :equipped?]
-   not))
-
-(defn change-inventory-item-quantity [db [selection-key item-index quantity]]
-  (update-in
-   db
-   [:character ::entity/options selection-key item-index ::entity/value]
-   (fn [item-cfg]
-     ;; the select keys here is to keep :equipped while wiping out the starting-equipment indicators
-     (assoc (select-keys item-cfg [:equipped?]) :quantity quantity))))
-
-(defn change-custom-inventory-item-quantity [db [custom-equipment-key item-index quantity]]
-  (update-in
-   db
-   [:character ::entity/values custom-equipment-key item-index]
-   (fn [item-cfg]
-     ;; the select keys here is to keep :equipped and :name while wiping out the starting-equipment indicators
-     (assoc
-      (select-keys item-cfg [:name :equipped?])
-      :quantity
-      quantity))))
-
-(defn remove-inventory-item [db [selection-key item-key]]
-  (update-in
-   db
-   [:character ::entity/options selection-key]
-   (fn [items] (vec (remove #(= item-key (::entity/key %)) items)))))
-
-(defn remove-custom-inventory-item [db [custom-equipment-key name]]
-  (update-in
-   db
-   [:character ::entity/values custom-equipment-key]
-   (fn [items]
-     (vec (remove #(= name (:name %)) items)))))
-
 (defn inventory-selector [item-map qty-input-width {:keys [character selection]} & [custom-equipment-key]]
   (let [{:keys [::t/key ::t/options]} selection
         selected-items (get-in @app-state [:character ::entity/options key])
@@ -779,7 +667,7 @@
        :on-change
        (fn [e]
          (let [kw (keyword (.. e -target -value))]
-           (swap! app-state add-inventory-item [key kw])))}
+           (swap! app-state events5e/add-inventory-item [key kw])))}
       [:option.builder-dropdown-item
        {:value ""
         :disabled true}
@@ -813,11 +701,11 @@
                              :i i
                              :qty-input-width qty-input-width
                              :check-fn (fn [_]
-                                         (swap! app-state toggle-inventory-item-equipped [key i]))
+                                         (swap! app-state events5e/toggle-inventory-item-equipped [key i]))
                              :qty-change-fn (fn [e]
                                               (let [qty (.. e -target -value)]
-                                                (swap! app-state change-inventory-item-quantity [key i qty])))
-                             :remove-fn (fn [_] (swap! app-state remove-inventory-item [key item-key]))}]))
+                                                (swap! app-state events5e/change-inventory-item-quantity [key i qty])))
+                             :remove-fn (fn [_] (swap! app-state events5e/remove-inventory-item [key item-key]))}]))
         selected-items))]
      (if custom-equipment-key
        [:div
@@ -834,15 +722,15 @@
                                :i i
                                :qty-input-width qty-input-width
                                :check-fn (fn [_]
-                                           (swap! app-state toggle-custom-inventory-item-equipped [custom-equipment-key i]))
+                                           (swap! app-state events5e/toggle-custom-inventory-item-equipped [custom-equipment-key i]))
                                :qty-change-fn (fn [e]
                                                 (let [qty (.. e -target -value)]
                                                   (swap! app-state
-                                                         change-custom-inventory-item-quantity
+                                                         events5e/change-custom-inventory-item-quantity
                                                          [custom-equipment-key i qty])))
                                :remove-fn (fn [_]
                                             (swap! app-state
-                                                   remove-custom-inventory-item
+                                                   events5e/remove-custom-inventory-item
                                                    [custom-equipment-key name]))}]))
           (get-in @app-state [:character ::entity/values custom-equipment-key])))])]))
 
@@ -1000,7 +888,7 @@
                                                                     character
                                                                     new-option-path
                                                                     (fn [o] (if multiselect? [new-option] new-option)))))]
-                                              (swap! app-state set-character [updated-char]))
+                                              (swap! app-state events5e/set-character [updated-char]))
                                             (if select-fn
                                               (select-fn (entity/get-option-value-path
                                                           built-template
@@ -1116,37 +1004,24 @@
                                                                     (not (pos? remaining))) option)])
                                        (sort-by ::t/name options))))}]))
 
-(defn set-abilities [db [abilities]]
-  (assoc-in db [:character ::entity/options :ability-scores ::entity/value] abilities))
-
 (defn set-abilities! [app-state abilities]
-  (swap! app-state set-abilities [abilities]))
+  (swap! app-state events5e/set-abilities [abilities]))
 
 (defn reroll-abilities [app-state]
-  (swap! app-state set-abilities [(char5e/standard-ability-rolls)]))
+  (swap! app-state events5e/set-abilities [(char5e/standard-ability-rolls)]))
 
 (defn set-standard-abilities [app-state]
   (fn []
-    (swap! app-state set-abilities [(char5e/abilities 15 14 13 12 10 8)])))
+    (swap! app-state events5e/set-abilities [(char5e/abilities 15 14 13 12 10 8)])))
 
 (defn reset-point-buy-abilities [app-state]
   (fn []
-    (swap! app-state set-abilities [(char5e/abilities 8 8 8 8 8 8)])))
-
-(defn swap-ability-values [db [i other-i k v]]
-  (update-in
-   db
-   [:character ::entity/options :ability-scores ::entity/value]
-   (fn [a]
-     (let [a-vec (vec a)
-           other-index (mod other-i (count a-vec))
-           [other-k other-v] (a-vec other-index)]
-       (assoc a k other-v other-k v)))))
+    (swap! app-state events5e/set-abilities [(char5e/abilities 8 8 8 8 8 8)])))
 
 (defn swap-abilities [app-state i other-i k v]
   (stop-prop-fn
    (fn []
-     (swap! app-state swap-ability-values [i other-i k v]))))
+     (swap! app-state events5e/swap-ability-values [i other-i k v]))))
 
 (def ability-icons
   {:str "strong"
@@ -1188,23 +1063,6 @@
 
 (defn ability-value [v]
   [:div.f-s-18.f-w-b v])
-
-(defn decrease-ability-value [db [full-path k]]
-  (update-in
-   db
-   full-path
-   (fn [incs]
-     (common/remove-first
-      (fn [{inc-key ::entity/key}]
-        (= inc-key k))
-      incs))))
-
-(defn increase-ability-value [db [full-path k]]
-  (update-in
-   db
-   full-path
-   conj
-   {::entity/key k}))
 
 (defn ability-increases-component [app-state built-char built-template asi-selections ability-keys]
   (let [total-abilities (es/entity-val built-char :abilities)]
@@ -1253,13 +1111,13 @@
                        :on-click (stop-prop-fn
                                   (fn []
                                     (if (not decrease-disabled?)
-                                      (swap! app-state decrease-ability-value [full-path k]))))}]
+                                      (swap! app-state events5e/decrease-ability-value [full-path k]))))}]
                      [:i.fa.fa-plus-circle.orange.m-l-5
                       {:class-name (if increase-disabled? "opacity-5 cursor-disabled")
                        :on-click (stop-prop-fn
                                   (fn []
                                     (if (not increase-disabled?)
-                                      (swap! app-state increase-ability-value [full-path k]))))}]]]))
+                                      (swap! app-state events5e/increase-ability-value [full-path k]))))}]]]))
                ability-keys))]]))
        asi-selections))]))
 
@@ -1425,9 +1283,6 @@
    asi-selections
    (abilities-standard app-state)))
 
-(defn set-ability-score [db [ability-kw v]]
-  (assoc-in db [:character ::entity/options :ability-scores ::entity/value ability-kw] v))
-
 (defn abilities-entry [app-state built-char built-template asi-selections]
   (let [abilities (or (opt5e/get-raw-abilities app-state)
                       (char5e/abilities 15 14 13 12 10 8))
@@ -1445,7 +1300,7 @@
              :on-change (fn [e] (let [value (.-value (.-target e))
                                       new-v (if (not (s/blank? value))
                                               (js/parseInt value))]
-                                  (swap! app-state set-ability-score [k new-v])))}]])
+                                  (swap! app-state events5e/set-ability-score [k new-v])))}]])
         char5e/ability-keys))]
      (ability-increases-component app-state built-char built-template asi-selections char5e/ability-keys)
      (race-abilities-component built-char char5e/ability-keys)
@@ -1466,11 +1321,8 @@
                                               (abilities k))
                                       new-v (if (not (s/blank? value))
                                               (- (js/parseInt value) (or diff 0)))]
-                                  (swap! app-state set-ability-score [k new-v])))}]])
+                                  (swap! app-state events5e/set-ability-score [k new-v])))}]])
         total-abilities))]]))
-
-(defn set-ability-score-variant [db [variant-key]]
-  (assoc-in db [:character ::entity/options :ability-scores ::entity/key] variant-key))
 
 (defn ability-variant-option-selector [name key selected-key content & [select-fn]]
   [option-selector-base
@@ -1483,7 +1335,7 @@
     :select-fn (fn [_]
                  (when (not= selected-key key)
                    (if select-fn (select-fn))
-                   (swap! app-state set-ability-score-variant [key])))}])
+                   (swap! app-state events5e/set-ability-score-variant [key])))}])
 
 (defn abilities-editor [{:keys [character built-char built-template option-paths selections]}]
   [:div
@@ -1541,15 +1393,6 @@
                selected-variant
                (abilities-entry app-state built-char built-template asi-selections))]}])])
 
-(defn select-skill [db [path selected? skill-key]]
-  (update-in
-   db
-   path
-   (fn [skills]
-     (if selected?                                             
-       (vec (remove (fn [s] (= skill-key (::entity/key s))) skills))
-       (vec (conj skills {::entity/key skill-key}))))))
-
 (defn skills-selector [{:keys [character selection built-char]}]
   (let [{:keys [::t/ref ::t/max ::t/options]} selection
         path [:character ::entity/options ref]
@@ -1581,7 +1424,7 @@
                                  :option-path [:skill-profs key]
                                  :select-fn (fn [_]
                                               (if allow-select?
-                                                (swap! app-state select-skill [path selected? key])))
+                                                (swap! app-state events5e/select-skill [path selected? key])))
                                  :explanation-text (if (and has-prof?
                                                             (not selected?))
                                                      "You already have this skill proficiency")
@@ -1604,36 +1447,6 @@
     {:name class-name
      :level (js/parseInt (last (s/split (name level-kw) #"-")))
      :key class-kw}))
-
-(defn set-total-hps [db [full-path first-selection selection average-value remainder]]
-  (assoc-in
-   db
-   full-path
-   {::entity/key :manual-entry
-    ::entity/value (if (= first-selection selection)
-                     (+ average-value remainder)
-                     average-value)}))
-
-(defn randomize-hit-points [db [built-template character path levels class-kw]]
-  (assoc-in
-   db
-   (concat [:character] (entity/get-entity-path built-template character path))
-   {::entity/key :roll
-    ::entity/value (dice/die-roll (-> levels class-kw :hit-die))}))
-
-(defn set-hit-points-to-average [db [built-template character path levels class-kw]]
-  (assoc-in
-   db
-   (concat [:character] (entity/get-entity-path built-template character path))
-   {::entity/key :average
-    ::entity/value (dice/die-mean (-> levels class-kw :hit-die))}))
-
-(defn set-level-hit-points [db [built-template character level-value value]]
-  (assoc-in
-   db
-   (concat [:character] (entity/get-entity-path built-template character (:path level-value)))
-   {::entity/key :manual-entry
-    ::entity/value (if (not (js/isNaN value)) value)}))
 
 (defn hit-points-entry [character selections built-char built-template]
   (let [classes (es/entity-val built-char :classes)
@@ -1681,21 +1494,21 @@
                            (doseq [selection selections]
                              (let [entity-path (entity/get-entity-path built-template character (::entity/path selection))
                                    full-path (concat [:character] entity-path)]                                         
-                               (swap! app-state set-total-hps [full-path first-selection selection average-value remainder])))))}]
+                               (swap! app-state events5e/set-total-hps [full-path first-selection selection average-value remainder])))))}]
           total-hps)]]
       (if (seq selections)
         [:button.form-button.p-10
          {:on-click (fn [_]
                       (doseq [selection selections]
                         (let [[_ class-kw :as path] (::entity/path selection)]
-                          (swap! app-state randomize-hit-points [built-template character path levels class-kw]))))}
+                          (swap! app-state events5e/randomize-hit-points [built-template character path levels class-kw]))))}
          "Random"])
       (if (seq selections)
         [:button.form-button.p-10
          {:on-click (fn [_]
                       (doseq [selection selections]
                         (let [[_ class-kw :as path] (::entity/path selection)]
-                          (swap! app-state set-hit-points-to-average [built-template character path levels class-kw]))))}
+                          (swap! app-state events5e/set-hit-points-to-average [built-template character path levels class-kw]))))}
          "Average"])]
      (doall
       (map-indexed
@@ -1739,7 +1552,7 @@
                                             "b-red b-3")
                               :on-change (fn [e]
                                            (let [value (js/parseInt (.. e -target -value))]
-                                             (swap! app-state set-level-hit-points [built-template character level-value value])))
+                                             (swap! app-state events5e/set-level-hit-points [built-template character level-value value])))
                               :value (:value level-value)}]]
                    [:td.p-5 con-bonus-str]
                    [:td.p-5 misc-bonus-str]
@@ -1813,9 +1626,6 @@
              {:key :other-magic-items :ui-fn (partial inventory-selector mi5e/other-magic-item-map 60)}
              {:key :treasure :ui-fn #(inventory-selector equip5e/treasure-map 100 % :custom-treasure)}]}])
 
-(defn set-page [db [page-index]]
-  (assoc db :page page-index))
-
 (defn section-tabs [available-selections built-template character page-index]
   [:div.flex.justify-cont-s-a
    (doall
@@ -1827,7 +1637,7 @@
          ^{:key name}
          [:div.p-5.hover-opacity-full.pointer
           {:class-name (if (= i page-index) "b-b-2 b-orange" "")
-           :on-click (fn [_] (swap! app-state set-page [i]))}
+           :on-click (fn [_] (swap! app-state events5e/set-page [i]))}
           [:div
            {:class-name (if (= i page-index) "selected-tab" "opacity-5 hover-opacity-full")}
            (svg-icon icon 32)]
@@ -1920,7 +1730,7 @@
       [:div.flex.justify-cont-s-b.p-t-5.p-10.align-items-t
        [:button.form-button.p-5-10.m-r-5
         {:on-click
-         (fn [_] (swap! app-state set-page [(let [prev (dec page-index)]
+         (fn [_] (swap! app-state events5e/set-page [(let [prev (dec page-index)]
                                               (if (neg? prev)
                                                 (dec (count pages))
                                                 prev))]))}
@@ -1929,7 +1739,7 @@
         [:h3.f-w-b.f-s-20.t-a-c (:name page)]]
        [:button.form-button.p-5-10.m-l-5
         {:on-click
-         (fn [_] (swap! app-state set-page [(let [next (inc page-index)]
+         (fn [_] (swap! app-state events5e/set-page [(let [next (inc page-index)]
                                               (if (>= next (count pages))
                                                 0
                                                 next))]))}
@@ -2034,24 +1844,21 @@
    [:div.builder-column.details-column
     [character-display built-char]]])
 
-(defn set-active-tabs [db [active-tabs]]
-  (assoc-in db tab-path active-tabs))
-
 (defn builder-tabs [active-tabs]
   [:div.hidden-lg.w-100-p
    [:div.builder-tabs
     [:span.builder-tab.options-tab
      {:class-name (if (active-tabs :options) "selected-builder-tab")
-      :on-click (fn [_] (swap! app-state set-active-tabs [#{:build :options}]))} "Options"]
+      :on-click (fn [_] (swap! app-state events5e/set-active-tabs [#{:build :options}]))} "Options"]
     [:span.builder-tab.personality-tab
      {:class-name (if (active-tabs :personality) "selected-builder-tab")
-      :on-click (fn [_] (swap! app-state set-active-tabs [#{:build :personality}]))} "Description"]
+      :on-click (fn [_] (swap! app-state events5e/set-active-tabs [#{:build :personality}]))} "Description"]
     [:span.builder-tab.build-tab
      {:class-name (if (active-tabs :build) "selected-builder-tab")
-      :on-click (fn [_] (swap! app-state set-active-tabs [#{:build :options}]))} "Build"]
+      :on-click (fn [_] (swap! app-state events5e/set-active-tabs [#{:build :options}]))} "Build"]
     [:span.builder-tab.details-tab
      {:class-name (if (active-tabs :details) "selected-builder-tab")
-      :on-click (fn [_] (swap! app-state set-active-tabs [#{:details}]))} "Details"]]])
+      :on-click (fn [_] (swap! app-state events5e/set-active-tabs [#{:details}]))} "Details"]]])
 
 (defn export-pdf [built-char]
   (fn [_]
@@ -2072,9 +1879,6 @@
 (def patreon-link-props
   {:href "https://www.patreon.com/user?u=5892323" :target "_blank"})
 
-(defn reset-character [db []]
-  (assoc db :character t5e/character :page 0))
-
 (defn header [built-char]
   [:div.w-100-p
    [:div.flex.align-items-c.justify-cont-s-b
@@ -2086,7 +1890,7 @@
       [:i.fa.fa-undo.f-s-18]
       [:span.m-l-5.hidden-sm.hidden-xs.hidden-md "Undo"]]
      [:button.form-button.h-40.m-l-5.m-t-5.m-b-5
-      {:on-click (fn [_] (swap! app-state reset-character []))}
+      {:on-click (fn [_] (swap! app-state events5e/reset-character []))}
       [:span
        [:i.fa.fa-undo.f-s-18]
        [:i.fa.fa-undo.f-s-18]]
@@ -2185,7 +1989,7 @@
         option-paths (entity/make-path-map character)
         built-template merged-template
         built-char (entity/build (:character @app-state) built-template)
-        active-tab (get-in @app-state tab-path)
+        active-tab (get-in @app-state events5e/tab-path)
         view-width (.-width (gdom/getViewportSize js/window))
         stepper-selection-path (:stepper-selection-path @app-state)
         stepper-selection (:stepper-selection @app-state)
