@@ -25,16 +25,17 @@
             [orcpub.dnd.e5.display :as disp5e]
             [orcpub.dnd.e5.equipment :as equip5e]
             [orcpub.dnd.e5.skills :as skill5e]
+            [orcpub.dnd.e5.events :as events5e]
+            [orcpub.dnd.e5.db :as db5e]
             [orcpub.pdf-spec :as pdf-spec]
 
             [clojure.spec :as spec]
             [clojure.spec.test :as stest]
 
-            [reagent.core :as r]))
+            [reagent.core :as r]
+            [re-frame.core :refer [subscribe dispatch]]))
 
 (def print-enabled? (s/starts-with? js/window.location.href "http://localhost"))
-
-(declare app-state)
 
 (defn stop-propagation [e]
   (.stopPropagation e))
@@ -48,11 +49,11 @@
   (let [entity-path (entity/get-entity-path template entity path)]
     (update-in entity entity-path update-fn)))
 
-(def stored-char-str (.getItem js/window.localStorage "char-meta"))
-(defn remove-stored-char [stored-char-str & [more-info]]
+#_(def stored-char-str (.getItem js/window.localStorage "char-meta"))
+#_(defn remove-stored-char [stored-char-str & [more-info]]
   (js/console.warn (str "Invalid char-meta: " stored-char-str more-info))
   (.removeItem js/window.localStorage "char-meta"))
-(def stored-char (if stored-char-str (try (let [v (reader/read-string stored-char-str)]
+#_(def stored-char (if stored-char-str (try (let [v (reader/read-string stored-char-str)]
                                             (if (spec/valid? ::entity/raw-entity v)
                                               v
                                               (remove-stored-char stored-char-str (str (spec/explain-data ::entity/raw-entity v)))))
@@ -60,36 +61,29 @@
                                               e
                                             (remove-stored-char stored-char-str)))))
 
-(defonce app-state
-  (r/atom
-   {:builder {:character {:tab #{:build :options}}}
-    :character (if stored-char stored-char t5e/character)}))
+#_(defonce history
+  (r/atom (list (:character @app-state))))
 
-(defonce history
-  (r/atom (list @app-state)))
-
-(def template t5e/template)
-
-(defn undo! []
+#_(defn undo! []
   (when (> (count @history) 1)
     (swap! history pop)
-    (swap! app-state #(peek @history))))
+    (swap! app-state events5e/set-character [(peek @history)])))
 
-(if print-enabled?
+#_(if print-enabled?
   (add-watch app-state :log (fn [k r os ns]
                               (js/console.log "OLD" (clj->js os))
                               (js/console.log "NEW" (clj->js ns)))))
 
-(add-watch app-state
+#_(add-watch app-state
            :local-storage
            (fn [k r os ns]
              (.setItem js/window.localStorage "char-meta" (str (:character ns)))))
 
-(add-watch app-state
+#_(add-watch app-state
            :history
            (fn [k r os ns]
-             (if (not= ns (peek @history))
-               (swap! history conj ns))))
+             (if (not= (:character ns) (peek @history))
+               (swap! history conj (:character ns)))))
 
 (defn selector-id [path]
   (s/join "--" (map name path)))
@@ -311,8 +305,9 @@
   (or (-> prof-kw prof-map :name) (common/kw-to-name prof-kw)))
 
 
-(defn character-display [built-char]
-  (let [race (char5e/race built-char)
+(defn character-display []
+  (let [built-char @(subscribe [:built-character])
+        race (char5e/race built-char)
         subrace (char5e/subrace built-char)
         alignment (char5e/alignment built-char)
         background (char5e/background built-char)
@@ -382,7 +377,7 @@
            char5e/ability-keys))]]
        [:div.flex
         [:div.w-50-p
-         [:img.character-image.w-100-p.m-b-20 {:src (or (get-in @app-state [:character ::entity/values :image-url]) "image/barbarian.png")}]]
+         [:img.character-image.w-100-p.m-b-20 {:src (or image-url "image/barbarian.png")}]]
         [:div.w-50-p
          (if background [svg-icon-section "Background" "ages" [:span.f-s-18.f-w-n background]])
          (if alignment [svg-icon-section "Alignment" "yin-yang" [:span.f-s-18.f-w-n alignment]])
@@ -454,19 +449,6 @@
        [actions-section "Reactions" "van-damme-split" reactions]
        [actions-section "Features, Traits, and Feats" "vitruvian-man" traits]]]]))
 
-(def tab-path [:builder :character :tab])
-
-(def plugins
-  [{:name "Sword Coast Adventurer's Guide"
-    :key :scag
-    :selections (t5e/sword-coast-adventurers-guide-selections (:character @app-state))}
-   {:name "Volo's Guide to Monsters"
-    :key :vgm
-    :selections (t5e/volos-guide-to-monsters-selections (:character @app-state))}
-   {:name "Elemental Evil Player's Companion"
-    :key :ee
-    :selections (t5e/elemental-evil-selections (:character @app-state))}])
-
 (defn get-template-from-props [x]
   (get (.-argv (.-props x)) 6))
 
@@ -505,28 +487,17 @@
 (defn character-state-path [path]
   (concat [:character] path))
 
-(def character-values-path
-  [:character ::entity/values])
+(defn character-field [entity-values prop-name type & [cls-str]]
+  [type {:class-name (str "input " cls-str)
+         :type :text
+         :value (get entity-values prop-name)
+         :on-change #(dispatch [:update-value-field prop-name (get-event-value %)])}])
 
-(defn character-value-path [prop-name]
-  (conj character-values-path prop-name))
+(defn character-input [entity-values prop-name & [cls-str]]
+  (character-field entity-values prop-name :input cls-str))
 
-(defn character-field [app-state prop-name type & [cls-str]]
-  (let [value-path (character-value-path prop-name)]
-    [type {:class-name (str "input " cls-str)
-           :type :text
-           :value (get-in @app-state value-path)
-           :on-change (fn [e]
-                        (swap! app-state
-                               assoc-in
-                               value-path
-                               (get-event-value e)))}]))
-
-(defn character-input [app-state prop-name & [cls-str]]
-  (character-field app-state prop-name :input cls-str))
-
-(defn character-textarea [app-state prop-name & [cls-str]]
-  (character-field app-state prop-name :textarea cls-str))
+(defn character-textarea [entity-values prop-name & [cls-str]]
+  (character-field entity-values prop-name :textarea cls-str))
 
 (defn class-level-selector []
   (let [expanded? (r/atom false)]
@@ -540,20 +511,7 @@
           [:select.builder-option.builder-option-dropdown.flex-grow-1.m-t-0
            {:value key
             :on-change (fn [e] (let [new-key (keyword (.. e -target -value))]
-                                 (swap! app-state
-                                        (fn [s]
-                                          (let [new-class-option (options-map new-key)
-                                                associated-options (::t/associated-options new-class-option)
-                                                with-new-class (assoc-in
-                                                                s
-                                                                [:character ::entity/options :class i]
-                                                                {::entity/key new-key
-                                                                 ::entity/options
-                                                                 {:levels [{::entity/key :level-1}]}})
-                                                without-starting-equipment (t5e/remove-starting-equipment with-new-class :class-starting-equipment)]
-                                            (if (zero? i)
-                                              (t5e/add-associated-options without-starting-equipment associated-options)
-                                              with-new-class))))))}
+                                 (dispatch [:set-class new-key i options-map])))}
            (doall
             (map
              (fn [{:keys [::t/key ::t/name] :as option}]
@@ -579,21 +537,7 @@
               (fn [e]
                 (let [new-highest-level-str (.. e -target -value)
                       new-highest-level (js/parseInt (last (s/split new-highest-level-str #"-")))]
-                  (swap! app-state
-                         update-in
-                         [:character ::entity/options :class i ::entity/options :levels]
-                         (fn [levels]
-                           (let [current-highest-level (count levels)]
-                             (cond
-                               (> new-highest-level current-highest-level)
-                               (vec (concat levels (map
-                                                    (fn [lvl] {::entity/key (keyword (str "level-" (inc lvl)))})
-                                                    (range current-highest-level new-highest-level))))
-                           
-                               (< new-highest-level current-highest-level)
-                               (vec (take new-highest-level levels))
-                           
-                               :else levels))))))}
+                  (dispatch [:set-class-level i new-highest-level])))}
              (doall
               (map-indexed
                (fn [i {level-key ::t/key}]
@@ -603,10 +547,7 @@
                   (inc i)])
                available-levels))])
           [:i.fa.fa-minus-circle.orange.f-s-16.m-l-5.pointer
-           {:on-click (fn [_] (swap! app-state
-                                     update-in
-                                     [:character ::entity/options :class]
-                                     (fn [classes] (vec (remove #(= key (::entity/key %)) classes)))))}]]
+           {:on-click (fn [_] (dispatch [:delete-class key]))}]]
          (if @expanded?
            [:div.m-t-5.m-b-10 (::t/help class-template-option)])]))))
 
@@ -658,7 +599,7 @@
          {:on-click
           (fn [_]
             (let [first-unselected (::t/key (first remaining-classes))]
-              (swap! app-state update-in [:character ::entity/options :class] conj {::entity/key first-unselected ::entity/options {:levels [{::entity/key :level-1}]}})))}
+              (dispatch [:add-class first-unselected])))}
          "Add Class"]])]))
 
 (defn checkbox [selected? disable?]
@@ -699,7 +640,7 @@
 
 (defn inventory-selector [item-map qty-input-width {:keys [character selection]} & [custom-equipment-key]]
   (let [{:keys [::t/key ::t/options]} selection
-        selected-items (get-in @app-state [:character ::entity/options key])
+        selected-items (get-in character [::entity/options key])
         selected-keys (into #{} (map ::entity/key selected-items))]
     [:div
      [:select.builder-option.builder-option-dropdown
@@ -707,15 +648,7 @@
        :on-change
        (fn [e]
          (let [kw (keyword (.. e -target -value))]
-           (swap! app-state
-                  update-in
-                  [:character ::entity/options key]
-                  (fn [items]
-                    (vec
-                     (conj
-                      items
-                      {::entity/key kw
-                       ::entity/value {:quantity 1 :equipped? false}}))))))}
+           (dispatch [:add-inventory-item key kw])))}
       [:option.builder-dropdown-item
        {:value ""
         :disabled true}
@@ -749,18 +682,12 @@
                              :i i
                              :qty-input-width qty-input-width
                              :check-fn (fn [_]
-                                         (swap! app-state
-                                                update-in
-                                                [:character ::entity/options key i ::entity/value :equipped?]
-                                                not))
-                             :qty-change-fn (fn [e] (swap! app-state
-                                                           assoc-in
-                                                           [:character ::entity/options key i ::entity/value]
-                                                           {:equipped? equipped? :quantity (.. e -target -value)}))
-                             :remove-fn (fn [_] (swap! app-state
-                                                       update-in
-                                                       [:character ::entity/options key]
-                                                       (fn [items] (vec (remove #(= item-key (::entity/key %)) items)))))}]))
+                                         (dispatch [:toggle-inventory-item-equipped key i]))
+                             :qty-change-fn (fn [e]
+                                              (let [qty (.. e -target -value)]
+                                                (dispatch [:change-inventory-item-quantity key i qty])))
+                             :remove-fn (fn [_]
+                                          (dispatch [:remove-inventory-item key item-key]))}]))
         selected-items))]
      (if custom-equipment-key
        [:div
@@ -777,22 +704,13 @@
                                :i i
                                :qty-input-width qty-input-width
                                :check-fn (fn [_]
-                                           (swap! app-state
-                                                  update-in
-                                                  [:character ::entity/values custom-equipment-key i :equipped?]
-                                                  not))
+                                           (dispatch [:toggle-custom-inventory-item-equipped custom-equipment-key i]))
                                :qty-change-fn (fn [e]
-                                                (swap! app-state
-                                                       assoc-in
-                                                       [:character ::entity/values custom-equipment-key i]
-                                                       {:name name :quantity (.. e -target -value) :equipped? equipped?}))
+                                                (let [qty (.. e -target -value)]
+                                                  (dispatch [:change-custom-inventory-item-quantity custom-equipment-key i qty])))
                                :remove-fn (fn [_]
-                                            (swap! app-state
-                                                   update-in
-                                                   [:character ::entity/values custom-equipment-key]
-                                                   (fn [items]
-                                                     (vec (remove #(= name (:name %)) items)))))}]))
-          (get-in @app-state [:character ::entity/values custom-equipment-key])))])]))
+                                            (dispatch [:remove-custom-inventory-item custom-equipment-key name]))}]))
+          (get-in character [::entity/values custom-equipment-key])))])]))
 
 (defn option-selector-base []
   (let [expanded? (r/atom false)]
@@ -877,13 +795,16 @@
            :else nil))))
    (entity/combine-selections selections)))
 
-
-(defn new-option-selector [character built-char built-template option-paths option-path
+(defn new-option-selector [option-path
                            {:keys [::t/min ::t/max ::t/options ::t/multiselect?] :as selection}
                            disable-select-new?
                            {:keys [::t/key ::t/name ::t/path ::t/help ::t/selections ::t/prereqs
                                    ::t/modifiers ::t/select-fn ::t/ui-fn ::t/icon] :as option}]
-  (let [new-option-path (conj (vec option-path) key)
+  (let [built-char @(subscribe [:built-character])
+        built-template @(subscribe [:built-template])
+        character @(subscribe [:character])
+        option-paths @(subscribe [:option-paths])
+        new-option-path (conj (vec option-path) key)
         selected? (get-in option-paths new-option-path)
         failed-prereqs (reduce
                         (fn [failures {:keys [::t/prereq-fn ::t/label ::t/hide-if-fail?] :as prereq}]
@@ -949,16 +870,16 @@
                                                                     character
                                                                     new-option-path
                                                                     (fn [o] (if multiselect? [new-option] new-option)))))]
-                                              (swap! app-state assoc :character updated-char))
+                                              (dispatch [:set-character updated-char]))
                                             (if select-fn
                                               (select-fn (entity/get-option-value-path
                                                           built-template
-                                                          (:character @app-state)
+                                                          character
                                                           new-option-path)
-                                                         app-state)))
+                                                         nil)))
                                           (.stopPropagation e))
                              :content (if (and (or selected? (= 1 (count options))) ui-fn)
-                                        (ui-fn new-option-path built-template app-state built-char))
+                                        (ui-fn new-option-path built-template built-char))
                              :explanation-text (let [explanation-text (if (and (not meets-prereqs?)
                                                                                (not selected?))
                                                                         (s/join ", " (map ::t/label failed-prereqs)))]                      
@@ -1054,48 +975,31 @@
                                       (map-indexed
                                        (fn [i option]
                                          ^{:key i}
-                                         [:div (new-option-selector character
-                                                               built-char
-                                                               built-template
-                                                               option-paths
-                                                               actual-path
-                                                               selection
-                                                               (and (or (and max (> min 1))
-                                                                        multiselect?)
-                                                                    (not (pos? remaining))) option)])
+                                         [:div (new-option-selector actual-path
+                                                                    selection
+                                                                    (and (or (and max (> min 1))
+                                                                             multiselect?)
+                                                                         (not (pos? remaining))) option)])
                                        (sort-by ::t/name options))))}]))
 
-(defn set-ability! [app-state ability-key ability-value]
-  (swap! app-state
-         assoc-in
-         [:character ::entity/options :ability-scores ::entity/value ability-key]
-         ability-value))
+(defn set-abilities! [abilities]
+  (dispatch [:set-abilities abilities]))
 
-(defn set-abilities! [app-state abilities]
-  (swap! app-state assoc-in [:character ::entity/options :ability-scores ::entity/value] abilities))
+(defn reroll-abilities []
+  (dispatch [:set-abilities (char5e/standard-ability-rolls)]))
 
-(defn reroll-abilities [app-state]
-  (set-abilities! app-state (char5e/standard-ability-rolls)))
-
-(defn set-standard-abilities [app-state]
+(defn set-standard-abilities []
   (fn []
-    (set-abilities! app-state (char5e/abilities 15 14 13 12 10 8))))
+    (dispatch [:set-abilities (char5e/abilities 15 14 13 12 10 8)])))
 
-(defn reset-point-buy-abilities [app-state]
+(defn reset-point-buy-abilities []
   (fn []
-    (set-abilities! app-state (char5e/abilities 8 8 8 8 8 8))))
+    (dispatch [:set-abilities (char5e/abilities 8 8 8 8 8 8)])))
 
-(defn swap-abilities [app-state i other-i k v]
+(defn swap-abilities [i other-i k v]
   (stop-prop-fn
    (fn []
-     (swap! app-state
-            update-in
-            [:character ::entity/options :ability-scores ::entity/value]
-            (fn [a]
-              (let [a-vec (vec a)
-                    other-index (mod other-i (count a-vec))
-                    [other-k other-v] (a-vec other-index)]
-                (assoc a k other-v other-k v)))))))
+     (dispatch [:swap-ability-values i other-i k v]))))
 
 (def ability-icons
   {:str "strong"
@@ -1118,7 +1022,7 @@
    [:div.m-t--1
     (opt5e/ability-bonus-str v)]])
 
-(defn ability-component [k v i app-state controls]
+(defn ability-component [k v i controls]
   [:div.t-a-c
    [:div.f-s-18.f-w-b v]
    controls])
@@ -1138,15 +1042,14 @@
 (defn ability-value [v]
   [:div.f-s-18.f-w-b v])
 
-(defn ability-increases-component [app-state built-char built-template asi-selections ability-keys]
+(defn ability-increases-component [character built-char built-template asi-selections ability-keys]
   (let [total-abilities (es/entity-val built-char :abilities)]
     [:div
      (doall
       (map-indexed
        (fn [i {:keys [::t/name ::t/key ::t/min ::t/options ::t/different? ::entity/path] :as selection}]
-         (let [increases-path (entity/get-entity-path built-template (:character @app-state) path)
-               full-path (concat [:character] increases-path)
-               selected-options (get-in @app-state full-path)
+         (let [increases-path (entity/get-entity-path built-template character path)
+               selected-options (get-in character increases-path)
                ability-increases (frequencies (map ::entity/key selected-options))
                num-increased (apply + (vals ability-increases))
                num-remaining (- min num-increased)
@@ -1185,24 +1088,13 @@
                        :on-click (stop-prop-fn
                                   (fn []
                                     (if (not decrease-disabled?)
-                                      (swap! app-state
-                                             update-in
-                                             full-path
-                                             (fn [incs]
-                                               (common/remove-first
-                                                (fn [{inc-key ::entity/key}]
-                                                  (= inc-key k))
-                                                incs))))))}]
+                                      (dispatch [:decrease-ability-value increases-path k]))))}]
                      [:i.fa.fa-plus-circle.orange.m-l-5
                       {:class-name (if increase-disabled? "opacity-5 cursor-disabled")
                        :on-click (stop-prop-fn
                                   (fn []
                                     (if (not increase-disabled?)
-                                      (swap! app-state
-                                             update-in
-                                             full-path
-                                             conj
-                                             {::entity/key k}))))}]]]))
+                                      (dispatch [:increase-ability-value increases-path k]))))}]]]))
                ability-keys))]]))
        asi-selections))]))
 
@@ -1264,7 +1156,7 @@
         (ability-subtitle "base")])
      ability-keys))])
 
-(defn abilities-component [app-state
+(defn abilities-component [character
                            built-char
                            built-template
                            asi-selections
@@ -1273,19 +1165,19 @@
     [:div
      (abilities-header char5e/ability-keys)
      content
-     (ability-increases-component app-state built-char built-template asi-selections char5e/ability-keys)
+     (ability-increases-component character built-char built-template asi-selections char5e/ability-keys)
      (abilities-matrix-footer built-char char5e/ability-keys)]))
 
 
-(defn point-buy-abilities [app-state built-char built-template asi-selections]
+(defn point-buy-abilities [character built-char built-template asi-selections]
   (let [default-base-abilities (char5e/abilities 8 8 8 8 8 8)
-        abilities (or (opt5e/get-raw-abilities app-state)
+        abilities (or (get-in character [::entity/options :ability-scores ::entity/value])
                       default-base-abilities)
         points-used (apply + (map (comp score-costs second) abilities))
         points-remaining (- point-buy-points points-used)
         total-abilities (es/entity-val built-char :abilities)]
     (abilities-component
-     app-state
+     character
      built-char
      built-template
      asi-selections
@@ -1321,55 +1213,55 @@
                  :on-click (stop-prop-fn
                             (fn [e]
                               (if (not decrease-disabled?)
-                                (set-abilities! app-state (update abilities k dec)))))}]
+                                (set-abilities! (update abilities k dec)))))}]
                [:i.fa.fa-plus-circle.orange.m-l-5
                 {:class-name (if increase-disabled? "opacity-5 cursor-disabled")
                  :on-click (stop-prop-fn
                             (fn [_]
-                              (if (not increase-disabled?) (set-abilities! app-state (update abilities k inc)))))}]]]))
+                              (if (not increase-disabled?) (set-abilities! (update abilities k inc)))))}]]]))
          abilities))]])))
 
-(defn abilities-standard [app-state]
+(defn abilities-standard [character]
   [:div.flex.justify-cont-s-a
-   (let [abilities (or (opt5e/get-raw-abilities app-state)
+   (let [abilities (or (get-in character [::entity/options :ability-scores ::entity/value])
                        (char5e/abilities 15 14 13 12 10 8))
           abilities-vec (vec abilities)]
       (doall
        (map-indexed
         (fn [i [k v]]
           ^{:key k}
-          [ability-component k v i app-state
+          [ability-component k v i
            [:div.f-s-16
             [:i.fa.fa-chevron-circle-left.orange
-             {:on-click (swap-abilities app-state i (dec i) k v)}]
+             {:on-click (swap-abilities i (dec i) k v)}]
             [:i.fa.fa-chevron-circle-right.orange.m-l-5
-             {:on-click (swap-abilities app-state i (inc i) k v)}]]])
+             {:on-click (swap-abilities i (inc i) k v)}]]])
         abilities-vec)))])
 
-(defn abilities-roller [app-state built-char built-template asi-selections]
+(defn abilities-roller [character built-char built-template asi-selections]
   (abilities-component
-   app-state
+   character
    built-char
    built-template
    asi-selections
    [:div
-    (abilities-standard app-state)
+    (abilities-standard character)
     [:button.form-button.m-t-5
      {:on-click (stop-prop-fn
                  (fn [e]
-                   (reroll-abilities app-state)))}
+                   (reroll-abilities)))}
      "Re-Roll"]]))
 
-(defn abilities-standard-editor [app-state built-char built-template asi-selections]
+(defn abilities-standard-editor [character built-char built-template asi-selections]
   (abilities-component
-   app-state
+   character
    built-char
    built-template
    asi-selections
-   (abilities-standard app-state)))
+   (abilities-standard character)))
 
-(defn abilities-entry [app-state built-char built-template asi-selections]
-  (let [abilities (or (opt5e/get-raw-abilities app-state)
+(defn abilities-entry [character built-char built-template asi-selections]
+  (let [abilities (or (opt5e/get-raw-abilities character)
                       (char5e/abilities 15 14 13 12 10 8))
         total-abilities (es/entity-val built-char :abilities)]
     [:div
@@ -1385,9 +1277,9 @@
              :on-change (fn [e] (let [value (.-value (.-target e))
                                       new-v (if (not (s/blank? value))
                                               (js/parseInt value))]
-                                  (swap! app-state assoc-in [:character ::entity/options :ability-scores ::entity/value k] new-v)))}]])
+                                  (dispatch [:set-ability-score k new-v])))}]])
         char5e/ability-keys))]
-     (ability-increases-component app-state built-char built-template asi-selections char5e/ability-keys)
+     (ability-increases-component character built-char built-template asi-selections char5e/ability-keys)
      (race-abilities-component built-char char5e/ability-keys)
      [:div.flex.justify-cont-s-a
       (doall
@@ -1406,7 +1298,7 @@
                                               (abilities k))
                                       new-v (if (not (s/blank? value))
                                               (- (js/parseInt value) (or diff 0)))]
-                                  (swap! app-state assoc-in [:character ::entity/options :ability-scores ::entity/value k] new-v)))}]])
+                                  (dispatch [:set-ability-score k new-v])))}]])
         total-abilities))]]))
 
 (defn ability-variant-option-selector [name key selected-key content & [select-fn]]
@@ -1420,7 +1312,7 @@
     :select-fn (fn [_]
                  (when (not= selected-key key)
                    (if select-fn (select-fn))
-                   (swap! app-state assoc-in [:character ::entity/options :ability-scores ::entity/key] key)))}])
+                   (dispatch [:set-ability-score-variant key])))}])
 
 (defn abilities-editor [{:keys [character built-char built-template option-paths selections]}]
   [:div
@@ -1440,14 +1332,14 @@
                   (map
                    (fn [option]
                      ^{:key (::t/key option)}
-                     (new-option-selector character built-char built-template option-paths path selection (and max (> min 1) (zero? remaining)) option))
+                     (new-option-selector path selection (and max (> min 1) (zero? remaining)) option))
                    (sort-by ::t/name options)))}]))
      (filter
       (fn [s]
         (= :asi-or-feat (::t/key s)))
       selections)))
    (let [asi-selections (filter (fn [s] (= :asi (::t/key s))) selections)
-         selected-variant (get-in @app-state [:character ::entity/options :ability-scores ::entity/key])]
+         selected-variant (get-in character [::entity/options :ability-scores ::entity/key])]
      [selection-section-base
       {:path [:ability-scores]
        :name "Abilities Variant"
@@ -1458,30 +1350,30 @@
                "Point Buy"
                :point-buy
                selected-variant
-               (point-buy-abilities app-state built-char built-template asi-selections)
-               #(set-abilities! app-state (char5e/abilities 8 8 8 8 8 8)))
+               (point-buy-abilities character built-char built-template asi-selections)
+               #(set-abilities! (char5e/abilities 8 8 8 8 8 8)))
               (ability-variant-option-selector
                "Dice Roll"
                :standard-roll
                selected-variant
-               (abilities-roller app-state built-char built-template asi-selections)
-               #(reroll-abilities app-state))
+               (abilities-roller character built-char built-template asi-selections)
+               #(reroll-abilities))
               (ability-variant-option-selector
                "Standard Scores"
                :standard-scores
                selected-variant
-               (abilities-standard-editor app-state built-char built-template asi-selections)
-               #(set-abilities! app-state (char5e/abilities 15 14 13 12 10 8)))
+               (abilities-standard-editor character built-char built-template asi-selections)
+               #(set-abilities! (char5e/abilities 15 14 13 12 10 8)))
               (ability-variant-option-selector
                "Manual Entry"
                :manual-entry
                selected-variant
-               (abilities-entry app-state built-char built-template asi-selections))]}])])
+               (abilities-entry character built-char built-template asi-selections))]}])])
 
 (defn skills-selector [{:keys [character selection built-char]}]
   (let [{:keys [::t/ref ::t/max ::t/options]} selection
-        path [:character ::entity/options ref]
-        selected-skills (get-in @app-state path)
+        path [::entity/options ref]
+        selected-skills (get-in character path)
         selected-count (count selected-skills)
         remaining (- max selected-count)
         available-skills (into #{} (map ::t/key options))
@@ -1509,13 +1401,7 @@
                                  :option-path [:skill-profs key]
                                  :select-fn (fn [_]
                                               (if allow-select?
-                                                (swap! app-state
-                                                       update-in
-                                                       path
-                                                       (fn [skills]
-                                                         (if selected?                                             
-                                                           (vec (remove (fn [s] (= key (::entity/key s))) skills))
-                                                           (vec (conj skills {::entity/key key})))))))
+                                                (dispatch [:select-skill path selected? key])))
                                  :explanation-text (if (and has-prof?
                                                             (not selected?))
                                                      "You already have this skill proficiency")
@@ -1583,37 +1469,22 @@
                                remainder (rem total-value (count selections))
                                first-selection (first selections)]
                            (doseq [selection selections]
-                             (let [entity-path (entity/get-entity-path built-template character (::entity/path selection))
-                                   full-path (concat [:character] entity-path)]                                         
-                               (swap! app-state
-                                      assoc-in
-                                      full-path
-                                      {::entity/key :manual-entry
-                                       ::entity/value (if (= first-selection selection)
-                                                        (+ average-value remainder)
-                                                        average-value)})))))}]
+                             (let [entity-path (entity/get-entity-path built-template character (::entity/path selection))]
+                               (dispatch [:set-total-hps entity-path first-selection selection average-value remainder])))))}]
           total-hps)]]
       (if (seq selections)
         [:button.form-button.p-10
          {:on-click (fn [_]
                       (doseq [selection selections]
                         (let [[_ class-kw :as path] (::entity/path selection)]
-                          (swap! app-state
-                                 assoc-in
-                                 (concat [:character] (entity/get-entity-path built-template character path))
-                                 {::entity/key :roll
-                                  ::entity/value (dice/die-roll (-> levels class-kw :hit-die))}))))}
+                          (dispatch [:randomize-hit-points built-template path levels class-kw]))))}
          "Random"])
       (if (seq selections)
         [:button.form-button.p-10
          {:on-click (fn [_]
                       (doseq [selection selections]
                         (let [[_ class-kw :as path] (::entity/path selection)]
-                          (swap! app-state
-                                 assoc-in
-                                 (concat [:character] (entity/get-entity-path built-template character path))
-                                 {::entity/key :average
-                                  ::entity/value (dice/die-mean (-> levels class-kw :hit-die))}))))}
+                          (dispatch [:set-hit-points-to-average built-template path levels class-kw]))))}
          "Average"])]
      (doall
       (map-indexed
@@ -1657,11 +1528,7 @@
                                             "b-red b-3")
                               :on-change (fn [e]
                                            (let [value (js/parseInt (.. e -target -value))]
-                                             (swap! app-state
-                                                    assoc-in
-                                                    (concat [:character] (entity/get-entity-path built-template character (:path level-value)))
-                                                    {::entity/key :manual-entry
-                                                     ::entity/value (if (not (js/isNaN value)) value)})))
+                                             (dispatch [:set-level-hit-points built-template character level-value value])))
                               :value (:value level-value)}]]
                    [:td.p-5 con-bonus-str]
                    [:td.p-5 misc-bonus-str]
@@ -1746,7 +1613,7 @@
          ^{:key name}
          [:div.p-5.hover-opacity-full.pointer
           {:class-name (if (= i page-index) "b-b-2 b-orange" "")
-           :on-click (fn [_] (swap! app-state assoc :page i))}
+           :on-click (fn [_] (dispatch [:set-page i]))}
           [:div
            {:class-name (if (= i page-index) "selected-tab" "opacity-5 hover-opacity-full")}
            (svg-icon icon 32)]
@@ -1763,15 +1630,9 @@
   #(if (or (= (::t/key %) key)
            (= (::t/ref %) key)) %))
 
-(defn get-selected-plugin-options [app-state]
-  (into #{}
-        (comp (map ::entity/key)
-              (remove nil?))
-        (get-in @app-state [:character ::entity/options :optional-content])))
-
 (defn option-sources []
   (let [expanded? (r/atom false)]
-    (fn [character built-char built-template option-paths]
+    (fn []
       [:div.m-b-20
        [:div.flex.align-items-c
         (svg-icon "bookshelf")
@@ -1792,11 +1653,7 @@
           (doall
            (map
             (fn [option]
-              (new-option-selector character
-                                   built-char
-                                   built-template
-                                   option-paths
-                                   [(::t/key t5e/optional-content-selection)]
+              (new-option-selector [(::t/key t5e/optional-content-selection)]
                                    t5e/optional-content-selection
                                    false
                                    option))
@@ -1813,7 +1670,7 @@
                 [:a.orange {:href url} name])
               (cons {:name "Player's Handbook"
                      :url disp5e/phb-url}
-                    (map t5e/plugin-map (get-selected-plugin-options app-state)))))))])])))
+                    (map t5e/plugin-map @(subscribe [:selected-plugin-options])))))))])])))
 
 (def selection-order-title
   (juxt ::t/order ::t/name ::entity/path))
@@ -1822,36 +1679,46 @@
   (< (selection-order-title s1)
      (selection-order-title s2)))
 
-(defn new-options-column [character built-char built-template available-selections page-index option-paths]
-  (if print-enabled? (js/console.log "AVAILABLE SELECTIONS" available-selections))
-  (let [{:keys [tags ui-fns] :as page} (pages page-index)
+(defn new-options-column []
+  (let [character @(subscribe [:character])
+        built-char @(subscribe [:built-character])
+        built-template @(subscribe [:built-template])
+        available-selections @(subscribe [:available-selections])
+        _ (if print-enabled? (js/console.log "AVAILABLE SELECTIONS" available-selections))
+        page @(subscribe [:page])
+        page-index (or page 0)
+        option-paths @(subscribe [:option-paths])
+        {:keys [tags ui-fns] :as page} (pages page-index)
         selections (entity/tagged-selections available-selections tags)
         combined-selections (entity/combine-selections selections)
         final-selections (remove #(and (zero? (::t/min %))
                                        (zero? (::t/max %))
                                        (zero? (count-remaining built-template character %)))
                                  combined-selections)]
+    (prn "NEW OPTIONS COLUMN")
     (if print-enabled? (js/console.log "FINAL SELECTIONS" (vec final-selections) (map ::t/key final-selections)))
     [:div.w-100-p
-     [option-sources character built-char built-template option-paths]
+     [option-sources]
      [:div#options-column.b-1.b-rad-5
       [section-tabs available-selections built-template character page-index]
       [:div.flex.justify-cont-s-b.p-t-5.p-10.align-items-t
        [:button.form-button.p-5-10.m-r-5
         {:on-click
-         (fn [_] (swap! app-state assoc :page (let [prev (dec page-index)]
-                                                (if (neg? prev)
-                                                  (dec (count pages))
-                                                  prev))))}
+         (fn [_]
+           (dispatch [:set-page (let [prev (dec page-index)]
+                                  (if (neg? prev)
+                                    (dec (count pages))
+                                    prev))]))}
         "Back"]
        [:div.flex-grow-1
         [:h3.f-w-b.f-s-20.t-a-c (:name page)]]
        [:button.form-button.p-5-10.m-l-5
         {:on-click
-         (fn [_] (swap! app-state assoc :page (let [next (inc page-index)]
-                                                (if (>= next (count pages))
-                                                  0
-                                                  next))))}
+         (fn [_]
+           (dispatch [:set-page (let [next (inc page-index)]
+                                  (if (>= next (count pages))
+                                    0
+                                    next))]))}
         "Next"]]
       (let [ui-fn-selections (mapcat
                               (fn [{:keys [key group? ui-fn]}]
@@ -1894,80 +1761,88 @@
                 [:div (selection-section character built-char built-template option-paths nil selection)])
               (into (sorted-set-by compare-selections) non-ui-fn-selections)))])])]]))
 
-(defn builder-columns [built-template built-char option-paths plugins active-tabs available-selections]
+(defn description-fields []
+  (let [entity-values @(subscribe [:entity-values])]
+    [:div.flex-grow-1.builder-column.personality-column
+     [:div.m-t-5
+      [:span.personality-label.f-s-18 "Character Name"]
+      [character-input entity-values :character-name]]
+     [:div.field
+      [:span.personality-label.f-s-18 "Player Name"]
+      [character-input entity-values :player-name]]
+     [:div.flex.justify-cont-s-b
+      [:div.field.flex-grow-1.m-r-2
+       [:span.personality-label.f-s-18 "Age"]
+       [character-input entity-values :age]]
+      [:div.field.flex-grow-1.m-l-2.m-r-2
+       [:span.personality-label.f-s-18 "Sex"]
+       [character-input entity-values :sex]]
+      [:div.field.flex-grow-1.m-l-2.m-r-2
+       [:span.personality-label.f-s-18 "Height"]
+       [character-input entity-values :height]]
+      [:div.field.flex-grow-1.m-l-2
+       [:span.personality-label.f-s-18 "Weight"]
+       [character-input entity-values :weight]]]
+     [:div.flex.justify-cont-s-b
+      [:div.field.flex-grow-1.m-r-2
+       [:span.personality-label.f-s-18 "Hair Color"]
+       [character-input entity-values :hair]]
+      [:div.field.flex-grow-1.m-1-2.m-r-2
+       [:span.personality-label.f-s-18 "Eye Color"]
+       [character-input entity-values :eyes]]
+      [:div.field.flex-grow-1.m-1-2
+       [:span.personality-label.f-s-18 "Skin Color"]
+       [character-input entity-values :skin]]]
+     [:div.field
+      [:span.personality-label.f-s-18 "Personality Trait 1"]
+      [character-textarea entity-values :personality-trait-1]]
+     [:div.field
+      [:span.personality-label.f-s-18 "Personality Trait 2"]
+      [character-textarea entity-values :personality-trait-2]]
+     [:div.field
+      [:span.personality-label.f-s-18 "Ideals"]
+      [character-textarea entity-values :ideals]]
+     [:div.field
+      [:span.personality-label.f-s-18 "Bonds"]
+      [character-textarea entity-values :bonds]]
+     [:div.field
+      [:span.personality-label.f-s-18 "Flaws"]
+      [character-textarea entity-values :flaws]]
+     [:div.field
+      [:span.personality-label.f-s-18 "Image URL"]
+      [character-input entity-values :image-url]]
+     [:div.field
+      [:span.personality-label.f-s-18 "Description/Backstory"]
+      [character-textarea entity-values :description "h-800"]]]))
+
+(defn builder-columns []
   [:div.flex-grow-1.flex
-   {:class-name (s/join " " (map #(str (name %) "-tab-active") active-tabs))}
+   {:class-name (s/join " " (map #(str (name %) "-tab-active") @(subscribe [:active-tabs])))}
    [:div.builder-column.options-column
-    [new-options-column (:character @app-state) built-char built-template available-selections (or (:page @app-state) 0) option-paths]]
-   [:div.flex-grow-1.builder-column.personality-column
-    [:div.m-t-5
-     [:span.personality-label.f-s-18 "Character Name"]
-     [character-input app-state :character-name]]
-    [:div.field
-     [:span.personality-label.f-s-18 "Player Name"]
-     [character-input app-state :player-name]]
-    [:div.flex.justify-cont-s-b
-     [:div.field.flex-grow-1.m-r-2
-      [:span.personality-label.f-s-18 "Age"]
-      [character-input app-state :age]]
-     [:div.field.flex-grow-1.m-l-2.m-r-2
-      [:span.personality-label.f-s-18 "Sex"]
-      [character-input app-state :sex]]
-     [:div.field.flex-grow-1.m-l-2.m-r-2
-      [:span.personality-label.f-s-18 "Height"]
-      [character-input app-state :height]]
-     [:div.field.flex-grow-1.m-l-2
-      [:span.personality-label.f-s-18 "Weight"]
-      [character-input app-state :weight]]]
-    [:div.flex.justify-cont-s-b
-     [:div.field.flex-grow-1.m-r-2
-      [:span.personality-label.f-s-18 "Hair Color"]
-      [character-input app-state :hair]]
-     [:div.field.flex-grow-1.m-1-2.m-r-2
-      [:span.personality-label.f-s-18 "Eye Color"]
-      [character-input app-state :eyes]]
-     [:div.field.flex-grow-1.m-1-2
-      [:span.personality-label.f-s-18 "Skin Color"]
-      [character-input app-state :skin]]]
-    [:div.field
-     [:span.personality-label.f-s-18 "Personality Trait 1"]
-     [character-textarea app-state :personality-trait-1]]
-    [:div.field
-     [:span.personality-label.f-s-18 "Personality Trait 2"]
-     [character-textarea app-state :personality-trait-2]]
-    [:div.field
-     [:span.personality-label.f-s-18 "Ideals"]
-     [character-textarea app-state :ideals]]
-    [:div.field
-     [:span.personality-label.f-s-18 "Bonds"]
-     [character-textarea app-state :bonds]]
-    [:div.field
-     [:span.personality-label.f-s-18 "Flaws"]
-     [character-textarea app-state :flaws]]
-    [:div.field
-     [:span.personality-label.f-s-18 "Image URL"]
-     [character-input app-state :image-url]]
-    [:div.field
-     [:span.personality-label.f-s-18 "Description/Backstory"]
-     [character-textarea app-state :description "h-800"]]]
+    [new-options-column]]
+   [description-fields]
    [:div.builder-column.details-column
-    [character-display built-char]]])
+    [character-display]]])
 
 (defn builder-tabs [active-tabs]
   [:div.hidden-lg.w-100-p
    [:div.builder-tabs
     [:span.builder-tab.options-tab
      {:class-name (if (active-tabs :options) "selected-builder-tab")
-      :on-click (fn [_] (swap! app-state assoc-in tab-path #{:build :options}))} "Options"]
+      :on-click (fn [_]
+                  (dispatch [:set-active-tabs #{:build :options}]))} "Options"]
     [:span.builder-tab.personality-tab
      {:class-name (if (active-tabs :personality) "selected-builder-tab")
-      :on-click (fn [_] (swap! app-state assoc-in tab-path #{:build :personality}))} "Description"]
+      :on-click (fn [_]
+                  (dispatch [:set-active-tabs #{:build :personality}]))} "Description"]
     [:span.builder-tab.build-tab
      {:class-name (if (active-tabs :build) "selected-builder-tab")
-      :on-click (fn [_] (swap! app-state assoc-in tab-path #{:build :options}))} "Build"]
+      :on-click (fn [_]
+                  (dispatch [:set-active-tabs #{:build :options}]))} "Build"]
     [:span.builder-tab.details-tab
      {:class-name (if (active-tabs :details) "selected-builder-tab")
-      :on-click (fn [_] (swap! app-state assoc-in tab-path #{:details}))} "Details"]]])
+      :on-click (fn [_]
+                  (dispatch [:set-active-tabs #{:details}]))} "Details"]]])
 
 (defn export-pdf [built-char]
   (fn [_]
@@ -1993,13 +1868,14 @@
    [:div.flex.align-items-c.justify-cont-s-b
     [:h1.f-s-36.f-w-b.m-t-21.m-b-19.m-l-10 "Character Builder"]
     [:div.flex.align-items-c.justify-cont-end.flex-wrap.m-r-10
-     [:button.form-button.h-40.m-l-5.m-t-5.m-b-5
+     #_[:button.form-button.h-40.m-l-5.m-t-5.m-b-5
       {:class-name (if (<= (count @history) 1) "opacity-5")
        :on-click undo!}
       [:i.fa.fa-undo.f-s-18]
       [:span.m-l-5.hidden-sm.hidden-xs.hidden-md "Undo"]]
      [:button.form-button.h-40.m-l-5.m-t-5.m-b-5
-      {:on-click (fn [_] (swap! app-state assoc :character t5e/character :page 0))}
+      {:on-click (fn [_]
+                   (dispatch [:reset-character]))}
       [:span
        [:i.fa.fa-undo.f-s-18]
        [:i.fa.fa-undo.f-s-18]]
@@ -2076,36 +1952,14 @@
        [:img.h-32.w-32 {:src "https://www.patreon.com/images/patreon_navigation_logo_mini_orange.png"}]]]]]])
 
 (defn character-builder []
-  (if print-enabled? (cljs.pprint/pprint (:character @app-state)))
-  ;;(js/console.log "APP STATE" @app-state)
-  (let [selected-plugin-options (get-selected-plugin-options app-state)
-        selected-plugins (map
-                          :selections
-                          (filter
-                           (fn [{:keys [key]}]
-                             (selected-plugin-options key))
-                           plugins))
-        merged-template (if (seq selected-plugins)
-                          (update template
-                                  ::t/selections
-                                  (fn [s]
-                                    (apply
-                                     entity/merge-multiple-selections
-                                     s
-                                     selected-plugins)))
-                          template)
-        character (:character @app-state)
-        option-paths (entity/make-path-map character)
-        built-template merged-template
-        built-char (entity/build (:character @app-state) built-template)
-        active-tab (get-in @app-state tab-path)
+  (let [character @(subscribe [:character])
+        _  (if print-enabled? (cljs.pprint/pprint character))
+        option-paths @(subscribe [:option-paths])
+        built-template @(subscribe [:built-template])
+        built-char @(subscribe [:built-character])
+        active-tab @(subscribe [:active-tabs])
         view-width (.-width (gdom/getViewportSize js/window))
-        stepper-selection-path (:stepper-selection-path @app-state)
-        stepper-selection (:stepper-selection @app-state)
-        collapsed-paths (:collapsed-paths @app-state)
-        mouseover-option (:mouseover-option @app-state)
-        plugins (:plugins @app-state)
-        stepper-dismissed? (:stepper-dismissed @app-state)
+        plugins @(subscribe [:plugins])
         all-selections (entity/available-selections character built-char built-template)
         selection-validation-messages (validate-selections built-template character all-selections)
         al-illegal-reasons (concat (es/entity-val built-char :al-illegal-reasons)

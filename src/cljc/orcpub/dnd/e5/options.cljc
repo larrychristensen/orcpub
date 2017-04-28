@@ -118,8 +118,8 @@
 (defn ability-bonus-str [ability-value]
   (common/bonus-str (ability-bonus ability-value)))
 
-(defn get-raw-abilities [app-state]
-  (get-in (:character @app-state) [::entity/options :ability-scores ::entity/value]))
+(defn get-raw-abilities [character]
+  (get-in character [::entity/options :ability-scores ::entity/value]))
 
 (defn abilities-improvement-component [num-increases different? ability-keys path built-template app-state built-char]
   (let [abilities (es/entity-val built-char :abilities)

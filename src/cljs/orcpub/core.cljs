@@ -1,8 +1,13 @@
 (ns orcpub.core
   (:require [orcpub.character-builder :as ch]
+            [orcpub.dnd.e5.subs]
+            [orcpub.dnd.e5.events]
+            [re-frame.core :refer [dispatch dispatch-sync]]
             [reagent.core :as r]))
 
 (enable-console-print!)
+
+(dispatch-sync [:initialize-db])
 
 (r/render (if (let [doc-style js/document.documentElement.style]
                 (and js/window.localStorage
