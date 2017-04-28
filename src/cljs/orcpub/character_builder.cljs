@@ -795,12 +795,16 @@
            :else nil))))
    (entity/combine-selections selections)))
 
-(defn new-option-selector [character built-char built-template option-paths option-path
+(defn new-option-selector [option-path
                            {:keys [::t/min ::t/max ::t/options ::t/multiselect?] :as selection}
                            disable-select-new?
                            {:keys [::t/key ::t/name ::t/path ::t/help ::t/selections ::t/prereqs
                                    ::t/modifiers ::t/select-fn ::t/ui-fn ::t/icon] :as option}]
-  (let [new-option-path (conj (vec option-path) key)
+  (let [built-char @(subscribe [:built-character])
+        built-template @(subscribe [:built-template])
+        character @(subscribe [:character])
+        option-paths @(subscribe [:option-paths])
+        new-option-path (conj (vec option-path) key)
         selected? (get-in option-paths new-option-path)
         failed-prereqs (reduce
                         (fn [failures {:keys [::t/prereq-fn ::t/label ::t/hide-if-fail?] :as prereq}]
@@ -971,15 +975,11 @@
                                       (map-indexed
                                        (fn [i option]
                                          ^{:key i}
-                                         [:div (new-option-selector character
-                                                               built-char
-                                                               built-template
-                                                               option-paths
-                                                               actual-path
-                                                               selection
-                                                               (and (or (and max (> min 1))
-                                                                        multiselect?)
-                                                                    (not (pos? remaining))) option)])
+                                         [:div (new-option-selector actual-path
+                                                                    selection
+                                                                    (and (or (and max (> min 1))
+                                                                             multiselect?)
+                                                                         (not (pos? remaining))) option)])
                                        (sort-by ::t/name options))))}]))
 
 (defn set-abilities! [abilities]
@@ -1332,7 +1332,7 @@
                   (map
                    (fn [option]
                      ^{:key (::t/key option)}
-                     (new-option-selector character built-char built-template option-paths path selection (and max (> min 1) (zero? remaining)) option))
+                     (new-option-selector path selection (and max (> min 1) (zero? remaining)) option))
                    (sort-by ::t/name options)))}]))
      (filter
       (fn [s]
@@ -1632,7 +1632,7 @@
 
 (defn option-sources []
   (let [expanded? (r/atom false)]
-    (fn [character built-char built-template option-paths]
+    (fn []
       [:div.m-b-20
        [:div.flex.align-items-c
         (svg-icon "bookshelf")
@@ -1653,11 +1653,7 @@
           (doall
            (map
             (fn [option]
-              (new-option-selector character
-                                   built-char
-                                   built-template
-                                   option-paths
-                                   [(::t/key t5e/optional-content-selection)]
+              (new-option-selector [(::t/key t5e/optional-content-selection)]
                                    t5e/optional-content-selection
                                    false
                                    option))
@@ -1699,9 +1695,10 @@
                                        (zero? (::t/max %))
                                        (zero? (count-remaining built-template character %)))
                                  combined-selections)]
+    (prn "NEW OPTIONS COLUMN")
     (if print-enabled? (js/console.log "FINAL SELECTIONS" (vec final-selections) (map ::t/key final-selections)))
     [:div.w-100-p
-     [option-sources character built-char built-template option-paths]
+     [option-sources]
      [:div#options-column.b-1.b-rad-5
       [section-tabs available-selections built-template character page-index]
       [:div.flex.justify-cont-s-b.p-t-5.p-10.align-items-t
