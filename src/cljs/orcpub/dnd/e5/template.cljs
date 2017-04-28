@@ -3886,8 +3886,8 @@
                             :page 118
                             :summary "can create a sound and an image with the same casting of minor illusion"}]}
                  {:name "School of Necromancy"
-                  :modifiers [(mod5e/damage-resistance :necrotic)]
-                  :levels {14 {:modifiers [(mod5e/action
+                  :levels {10 {:modifiers [(mod5e/damage-resistance :necrotic)]}
+                           14 {:modifiers [(mod5e/action
                                             {:name "Command Undead"
                                              :page 119
                                              :summary (str "bring undead under your control unless it succeeds on a DC " (?spell-save-dc :int) " CHA save")})]}}
