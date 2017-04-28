@@ -31,54 +31,59 @@
  [(inject-cofx :local-store-character)
   check-spec-interceptor]
  (fn [{:keys [db local-store-character]} _]
-   {:db (assoc default-value :character local-store-character)}))
+   {:db (if local-store-character
+          (assoc default-value :character local-store-character)
+          default-value)}))
 
-(defn reset-character [db [_]]
-  (assoc db :character t5e/character :page 0))
+(defn reset-character [character [_]]
+  t5e/character)
 
 (reg-event-db
  :reset-character
+ character-interceptors
  reset-character)
 
-(defn set-character [db [_ character]]
-  (js/console.log "SET CHARACTER" db character)
-  (assoc db :character character))
+(defn set-character [_ [_ character]]
+  character)
 
 (reg-event-db
  :set-character
+ character-interceptors
  set-character)
 
 (def character-values-path
-  [:character ::entity/values])
+  [::entity/values])
 
 (defn character-value-path [prop-name]
   (conj character-values-path prop-name))
 
-(defn update-value-field [db [_ prop-name value]]
-  (assoc-in db (character-value-path prop-name) value))
+(defn update-value-field [character [_ prop-name value]]
+  (assoc-in character (character-value-path prop-name) value))
 
 (reg-event-db
  :update-value-field
+ character-interceptors
  update-value-field)
 
-(defn add-class [db [_ first-unselected]]
+(defn add-class [character [_ first-unselected]]
   (update-in
-   db
-   [:character ::entity/options :class]
+   character
+   [::entity/options :class]
    conj
    {::entity/key first-unselected ::entity/options {:levels [{::entity/key :level-1}]}}))
 
 (reg-event-db
  :add-class
+ character-interceptors
  add-class)
 
-(def custom-equipment-path [:character ::entity/values :custom-equipment])
+(def custom-equipment-path [::entity/values :custom-equipment])
 
-(def custom-treasure-path [:character ::entity/values :custom-treasure])
+(def custom-treasure-path [::entity/values :custom-treasure])
 
-(defn remove-custom-starting-equipment [state equipment-indicator path]
+(defn remove-custom-starting-equipment [character equipment-indicator path]
   (update-in
-   state
+   character
    path
    (fn [equipment]
      (vec
@@ -86,10 +91,10 @@
        :background-starting-equipment?
        equipment)))))
 
-(defn remove-starting-equipment [state equipment-indicator]
+(defn remove-starting-equipment [character equipment-indicator]
   (update-in
-   state
-   [:character ::entity/options]
+   character
+   [::entity/options]
    (fn [options]
      (into {}
            (map
@@ -103,12 +108,12 @@
                  v)])
             options)))))
 
-(defn add-associated-options [state associated-options]
+(defn add-associated-options [character associated-options]
   (reduce
-   (fn [new-s associated-option]
+   (fn [new-char associated-option]
      (update-in
-      new-s
-      [:character ::entity/options]
+      new-char
+      [::entity/options]
       (fn [options]
         (merge-with
          (fn [o1 o2]
@@ -119,30 +124,30 @@
                (remove (comp ks ::entity/key) o2)))))
          options
          associated-option))))
-   state
+   character
    associated-options))
 
-(defn add-custom-equipment [state custom-equipment path]
+(defn add-custom-equipment [character custom-equipment path]
   (update-in
-      state
-      path
-      (fn [equipment]
-        (let [current-names (into #{} (map :name equipment))]
-          (vec
-           (concat
-            equipment
-            (remove
-             (comp current-names :name)
-             (map
-              (fn [[nm num]]
-                {:name nm
-                 :quantity num
-                 :equipped? true
-                 :background-starting-equipment? true})
-              custom-equipment))))))))
+   character
+   path
+   (fn [equipment]
+     (let [current-names (into #{} (map :name equipment))]
+       (vec
+        (concat
+         equipment
+         (remove
+          (comp current-names :name)
+          (map
+           (fn [[nm num]]
+             {:name nm
+              :quantity num
+              :equipped? true
+              :background-starting-equipment? true})
+           custom-equipment))))))))
 
-(defn add-starting-equipment [db [_ equipment-options custom-treasure custom-equipment]]
-  (-> db
+(defn add-starting-equipment [character [_ equipment-options custom-treasure custom-equipment]]
+  (-> character
       (remove-starting-equipment :background-starting-equipment?)
       (add-associated-options equipment-options)
       (remove-custom-starting-equipment :background-starting-equipment? custom-treasure-path)
@@ -152,14 +157,15 @@
 
 (reg-event-db
  :add-starting-equipment
+ character-interceptors
  add-starting-equipment)
 
-(defn set-class [db [_ class-key class-index options-map]]
+(defn set-class [character [_ class-key class-index options-map]]
   (let [new-class-option (options-map class-key)
         associated-options (::t/associated-options new-class-option)
         with-new-class (assoc-in
-                        db
-                        [:character ::entity/options :class class-index]
+                        character
+                        [::entity/options :class class-index]
                         {::entity/key class-key
                          ::entity/options
                          {:levels [{::entity/key :level-1}]}})
@@ -170,12 +176,13 @@
 
 (reg-event-db
  :set-class
+ character-interceptors
  set-class)
 
-(defn set-class-level [db [_ class-index new-highest-level]]
+(defn set-class-level [character [_ class-index new-highest-level]]
   (update-in
-   db
-   [:character ::entity/options :class class-index ::entity/options :levels]
+   character
+   [::entity/options :class class-index ::entity/options :levels]
    (fn [levels]
      (let [current-highest-level (count levels)]
        (cond
@@ -191,22 +198,24 @@
 
 (reg-event-db
  :set-class-level
+ character-interceptors
  set-class-level)
 
-(defn delete-class [db [_ class-key]]
+(defn delete-class [character [_ class-key]]
   (update-in
-   db
-   [:character ::entity/options :class]
+   character
+   [::entity/options :class]
    (fn [classes] (vec (remove #(= class-key (::entity/key %)) classes)))))
 
 (reg-event-db
  :delete-class
+ character-interceptors
  delete-class)
 
-(defn add-inventory-item [db [_ selection-key item-key]]
+(defn add-inventory-item [character [_ selection-key item-key]]
   (update-in
-   db
-   [:character ::entity/options selection-key]
+   character
+   [::entity/options selection-key]
    (fn [items]
      (vec
       (conj
@@ -216,44 +225,48 @@
 
 (reg-event-db
  :add-inventory-item
+ character-interceptors
  add-inventory-item)
 
-(defn toggle-inventory-item-equipped [db [_ selection-key item-index]]
+(defn toggle-inventory-item-equipped [character [_ selection-key item-index]]
   (update-in
-   db
-   [:character ::entity/options selection-key item-index ::entity/value :equipped?]
+   character
+   [::entity/options selection-key item-index ::entity/value :equipped?]
    not))
 
 (reg-event-db
  :toggle-inventory-item-equipped
+ character-interceptors
  toggle-inventory-item-equipped)
 
-(defn toggle-custom-inventory-item-equipped [db [_ custom-equipment-key item-index]]
+(defn toggle-custom-inventory-item-equipped [character [_ custom-equipment-key item-index]]
   (update-in
-   db
-   [:character ::entity/values custom-equipment-key item-index :equipped?]
+   character
+   [::entity/values custom-equipment-key item-index :equipped?]
    not))
 
 (reg-event-db
  :toggle-custom-inventory-item-equipped
+ character-interceptors
  toggle-custom-inventory-item-equipped)
 
-(defn change-inventory-item-quantity [db [_ selection-key item-index quantity]]
+(defn change-inventory-item-quantity [character [_ selection-key item-index quantity]]
   (update-in
-   db
-   [:character ::entity/options selection-key item-index ::entity/value]
+   character
+   [::entity/options selection-key item-index ::entity/value]
    (fn [item-cfg]
      ;; the select keys here is to keep :equipped while wiping out the starting-equipment indicators
      (assoc (select-keys item-cfg [:equipped?]) :quantity quantity))))
 
 (reg-event-db
  :change-inventory-item-quantity
+ character-interceptors
  change-inventory-item-quantity)
 
-(defn change-custom-inventory-item-quantity [db [_ custom-equipment-key item-index quantity]]
+(defn change-custom-inventory-item-quantity [character [_ custom-equipment-key item-index quantity]]
   (update-in
-   db
-   [:character ::entity/values custom-equipment-key item-index]
+   character
+   [::entity/values custom-equipment-key item-index]
    (fn [item-cfg]
      ;; the select keys here is to keep :equipped and :name while wiping out the starting-equipment indicators
      (assoc
@@ -263,40 +276,44 @@
 
 (reg-event-db
  :change-custom-inventory-item-quantity
+ character-interceptors
  change-custom-inventory-item-quantity)
 
-(defn remove-inventory-item [db [_ selection-key item-key]]
+(defn remove-inventory-item [character [_ selection-key item-key]]
   (update-in
-   db
-   [:character ::entity/options selection-key]
+   character
+   [::entity/options selection-key]
    (fn [items] (vec (remove #(= item-key (::entity/key %)) items)))))
 
 (reg-event-db
  :remove-inventory-item
+ character-interceptors
  remove-inventory-item)
 
-(defn remove-custom-inventory-item [db [_ custom-equipment-key name]]
+(defn remove-custom-inventory-item [character [_ custom-equipment-key name]]
   (update-in
-   db
-   [:character ::entity/values custom-equipment-key]
+   character
+   [::entity/values custom-equipment-key]
    (fn [items]
      (vec (remove #(= name (:name %)) items)))))
 
 (reg-event-db
  :remove-custom-inventory-item
+ character-interceptors
  remove-custom-inventory-item)
 
-(defn set-abilities [db [_ abilities]]
-  (assoc-in db [:character ::entity/options :ability-scores ::entity/value] abilities))
+(defn set-abilities [character [_ abilities]]
+  (assoc-in character [::entity/options :ability-scores ::entity/value] abilities))
 
 (reg-event-db
  :set-abilities
+ character-interceptors
  set-abilities)
 
-(defn swap-ability-values [db [_ i other-i k v]]
+(defn swap-ability-values [character [_ i other-i k v]]
   (update-in
-   db
-   [:character ::entity/options :ability-scores ::entity/value]
+   character
+   [::entity/options :ability-scores ::entity/value]
    (fn [a]
      (let [a-vec (vec a)
            other-index (mod other-i (count a-vec))
@@ -305,11 +322,12 @@
 
 (reg-event-db
  :swap-ability-values
+ character-interceptors
  swap-ability-values)
 
-(defn decrease-ability-value [db [_ full-path k]]
+(defn decrease-ability-value [character [_ full-path k]]
   (update-in
-   db
+   character
    full-path
    (fn [incs]
      (common/remove-first
@@ -319,38 +337,41 @@
 
 (reg-event-db
  :decrease-ability-value
+ character-interceptors
  decrease-ability-value)
 
-(defn increase-ability-value [db [_ full-path k]]
+(defn increase-ability-value [character [_ full-path k]]
   (update-in
-   db
+   character
    full-path
    conj
    {::entity/key k}))
 
 (reg-event-db
  :increase-ability-value
+ character-interceptors
  increase-ability-value)
 
-(defn set-ability-score [db [_ ability-kw v]]
-  (assoc-in db [:character ::entity/options :ability-scores ::entity/value ability-kw] v))
+(defn set-ability-score [character [_ ability-kw v]]
+  (assoc-in character [::entity/options :ability-scores ::entity/value ability-kw] v))
 
 (reg-event-db
  :set-ability-score
+ character-interceptors
  set-ability-score)
 
-(defn set-ability-score-variant [db [_ variant-key]]
-  (assoc-in db [:character ::entity/options :ability-scores ::entity/key] variant-key))
+(defn set-ability-score-variant [character [_ variant-key]]
+  (assoc-in character [::entity/options :ability-scores ::entity/key] variant-key))
 
 (reg-event-db
  :set-ability-score-variant
+ character-interceptors
  set-ability-score-variant)
 
-(defn select-skill [db [_ path selected? skill-key]]
-  (js/console.log "SELECT SKILL" path selected? skill-key)
+(defn select-skill [character [_ path selected? skill-key]]
   (update-in
-   db
-   (concat [:character] path)
+   character
+   path
    (fn [skills]
      (if selected?                                             
        (vec (remove (fn [s] (= skill-key (::entity/key s))) skills))
@@ -358,11 +379,12 @@
 
 (reg-event-db
  :select-skill
+ character-interceptors
  select-skill)
 
-(defn set-total-hps [db [_ full-path first-selection selection average-value remainder]]
+(defn set-total-hps [character [_ full-path first-selection selection average-value remainder]]
   (assoc-in
-   db
+   character
    full-path
    {::entity/key :manual-entry
     ::entity/value (if (= first-selection selection)
@@ -371,39 +393,43 @@
 
 (reg-event-db
  :set-total-hps
+ character-interceptors
  set-total-hps)
 
-(defn randomize-hit-points [db [_ built-template character path levels class-kw]]
+(defn randomize-hit-points [character [_ built-template path levels class-kw]]
   (assoc-in
-   db
-   (concat [:character] (entity/get-entity-path built-template character path))
+   character
+   (entity/get-entity-path built-template character path)
    {::entity/key :roll
     ::entity/value (dice/die-roll (-> levels class-kw :hit-die))}))
 
 (reg-event-db
  :randomize-hit-points
+ character-interceptors
  randomize-hit-points)
 
-(defn set-hit-points-to-average [db [_ built-template character path levels class-kw]]
+(defn set-hit-points-to-average [character [_ built-template path levels class-kw]]
   (assoc-in
-   db
-   (concat [:character] (entity/get-entity-path built-template character path))
+   character
+   (entity/get-entity-path built-template character path)
    {::entity/key :average
     ::entity/value (dice/die-mean (-> levels class-kw :hit-die))}))
 
 (reg-event-db
  :set-hit-points-to-average
+ character-interceptors
  set-hit-points-to-average)
 
-(defn set-level-hit-points [db [_ built-template character level-value value]]
+(defn set-level-hit-points [character [_ built-template character level-value value]]
   (assoc-in
-   db
-   (concat [:character] (entity/get-entity-path built-template character (:path level-value)))
+   character
+   (entity/get-entity-path built-template character (:path level-value))
    {::entity/key :manual-entry
     ::entity/value (if (not (js/isNaN value)) value)}))
 
 (reg-event-db
  :set-level-hit-points
+ character-interceptors
  set-level-hit-points)
 
 (defn set-page [db [_ page-index]]

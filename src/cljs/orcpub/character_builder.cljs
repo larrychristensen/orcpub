@@ -49,11 +49,11 @@
   (let [entity-path (entity/get-entity-path template entity path)]
     (update-in entity entity-path update-fn)))
 
-(def stored-char-str (.getItem js/window.localStorage "char-meta"))
-(defn remove-stored-char [stored-char-str & [more-info]]
+#_(def stored-char-str (.getItem js/window.localStorage "char-meta"))
+#_(defn remove-stored-char [stored-char-str & [more-info]]
   (js/console.warn (str "Invalid char-meta: " stored-char-str more-info))
   (.removeItem js/window.localStorage "char-meta"))
-(def stored-char (if stored-char-str (try (let [v (reader/read-string stored-char-str)]
+#_(def stored-char (if stored-char-str (try (let [v (reader/read-string stored-char-str)]
                                             (if (spec/valid? ::entity/raw-entity v)
                                               v
                                               (remove-stored-char stored-char-str (str (spec/explain-data ::entity/raw-entity v)))))
@@ -305,8 +305,9 @@
   (or (-> prof-kw prof-map :name) (common/kw-to-name prof-kw)))
 
 
-(defn character-display [built-char]
-  (let [race (char5e/race built-char)
+(defn character-display []
+  (let [built-char @(subscribe [:built-character])
+        race (char5e/race built-char)
         subrace (char5e/subrace built-char)
         alignment (char5e/alignment built-char)
         background (char5e/background built-char)
@@ -486,18 +487,17 @@
 (defn character-state-path [path]
   (concat [:character] path))
 
-(defn character-field [character prop-name type & [cls-str]]
-  (let [value-path [::entity/values prop-name]]
-    [type {:class-name (str "input " cls-str)
-           :type :text
-           :value (get-in character value-path)
-           :on-change #(dispatch [:update-value-field prop-name (get-event-value %)])}]))
+(defn character-field [entity-values prop-name type & [cls-str]]
+  [type {:class-name (str "input " cls-str)
+         :type :text
+         :value (get entity-values prop-name)
+         :on-change #(dispatch [:update-value-field prop-name (get-event-value %)])}])
 
-(defn character-input [character prop-name & [cls-str]]
-  (character-field character prop-name :input cls-str))
+(defn character-input [entity-values prop-name & [cls-str]]
+  (character-field entity-values prop-name :input cls-str))
 
-(defn character-textarea [character prop-name & [cls-str]]
-  (character-field character prop-name :textarea cls-str))
+(defn character-textarea [entity-values prop-name & [cls-str]]
+  (character-field entity-values prop-name :textarea cls-str))
 
 (defn class-level-selector []
   (let [expanded? (r/atom false)]
@@ -1049,7 +1049,6 @@
       (map-indexed
        (fn [i {:keys [::t/name ::t/key ::t/min ::t/options ::t/different? ::entity/path] :as selection}]
          (let [increases-path (entity/get-entity-path built-template character path)
-               full-path (concat [:character] increases-path)
                selected-options (get-in character increases-path)
                ability-increases (frequencies (map ::entity/key selected-options))
                num-increased (apply + (vals ability-increases))
@@ -1089,13 +1088,13 @@
                        :on-click (stop-prop-fn
                                   (fn []
                                     (if (not decrease-disabled?)
-                                      (dispatch [:decrease-ability-value full-path k]))))}]
+                                      (dispatch [:decrease-ability-value increases-path k]))))}]
                      [:i.fa.fa-plus-circle.orange.m-l-5
                       {:class-name (if increase-disabled? "opacity-5 cursor-disabled")
                        :on-click (stop-prop-fn
                                   (fn []
                                     (if (not increase-disabled?)
-                                      (dispatch [:increase-ability-value full-path k]))))}]]]))
+                                      (dispatch [:increase-ability-value increases-path k]))))}]]]))
                ability-keys))]]))
        asi-selections))]))
 
@@ -1470,23 +1469,22 @@
                                remainder (rem total-value (count selections))
                                first-selection (first selections)]
                            (doseq [selection selections]
-                             (let [entity-path (entity/get-entity-path built-template character (::entity/path selection))
-                                   full-path (concat [:character] entity-path)]
-                               (dispatch [:set-total-hps full-path first-selection selection average-value remainder])))))}]
+                             (let [entity-path (entity/get-entity-path built-template character (::entity/path selection))]
+                               (dispatch [:set-total-hps entity-path first-selection selection average-value remainder])))))}]
           total-hps)]]
       (if (seq selections)
         [:button.form-button.p-10
          {:on-click (fn [_]
                       (doseq [selection selections]
                         (let [[_ class-kw :as path] (::entity/path selection)]
-                          (dispatch [:randomize-hit-points built-template character path levels class-kw]))))}
+                          (dispatch [:randomize-hit-points built-template path levels class-kw]))))}
          "Random"])
       (if (seq selections)
         [:button.form-button.p-10
          {:on-click (fn [_]
                       (doseq [selection selections]
                         (let [[_ class-kw :as path] (::entity/path selection)]
-                          (dispatch [:set-hit-points-to-average built-template character path levels class-kw]))))}
+                          (dispatch [:set-hit-points-to-average built-template path levels class-kw]))))}
          "Average"])]
      (doall
       (map-indexed
@@ -1685,9 +1683,16 @@
   (< (selection-order-title s1)
      (selection-order-title s2)))
 
-(defn new-options-column [character built-char built-template available-selections page-index option-paths]
-  (if print-enabled? (js/console.log "AVAILABLE SELECTIONS" available-selections))
-  (let [{:keys [tags ui-fns] :as page} (pages page-index)
+(defn new-options-column []
+  (let [character @(subscribe [:character])
+        built-char @(subscribe [:built-character])
+        built-template @(subscribe [:built-template])
+        available-selections @(subscribe [:available-selections])
+        _ (if print-enabled? (js/console.log "AVAILABLE SELECTIONS" available-selections))
+        page @(subscribe [:page])
+        page-index (or page 0)
+        option-paths @(subscribe [:option-paths])
+        {:keys [tags ui-fns] :as page} (pages page-index)
         selections (entity/tagged-selections available-selections tags)
         combined-selections (entity/combine-selections selections)
         final-selections (remove #(and (zero? (::t/min %))
@@ -1759,66 +1764,68 @@
                 [:div (selection-section character built-char built-template option-paths nil selection)])
               (into (sorted-set-by compare-selections) non-ui-fn-selections)))])])]]))
 
-(defn builder-columns [built-template built-char option-paths plugins active-tabs available-selections]
-  (let [character @(subscribe [:character])
-        page @(subscribe [:page])]
-    [:div.flex-grow-1.flex
-     {:class-name (s/join " " (map #(str (name %) "-tab-active") active-tabs))}
-     [:div.builder-column.options-column
-      [new-options-column character built-char built-template available-selections (or page 0) option-paths]]
-     [:div.flex-grow-1.builder-column.personality-column
-      [:div.m-t-5
-       [:span.personality-label.f-s-18 "Character Name"]
-       [character-input character :character-name]]
-      [:div.field
-       [:span.personality-label.f-s-18 "Player Name"]
-       [character-input character :player-name]]
-      [:div.flex.justify-cont-s-b
-       [:div.field.flex-grow-1.m-r-2
-        [:span.personality-label.f-s-18 "Age"]
-        [character-input character :age]]
-       [:div.field.flex-grow-1.m-l-2.m-r-2
-        [:span.personality-label.f-s-18 "Sex"]
-        [character-input character :sex]]
-       [:div.field.flex-grow-1.m-l-2.m-r-2
-        [:span.personality-label.f-s-18 "Height"]
-        [character-input character :height]]
-       [:div.field.flex-grow-1.m-l-2
-        [:span.personality-label.f-s-18 "Weight"]
-        [character-input character :weight]]]
-      [:div.flex.justify-cont-s-b
-       [:div.field.flex-grow-1.m-r-2
-        [:span.personality-label.f-s-18 "Hair Color"]
-        [character-input character :hair]]
-       [:div.field.flex-grow-1.m-1-2.m-r-2
-        [:span.personality-label.f-s-18 "Eye Color"]
-        [character-input character :eyes]]
-       [:div.field.flex-grow-1.m-1-2
-        [:span.personality-label.f-s-18 "Skin Color"]
-        [character-input character :skin]]]
-      [:div.field
-       [:span.personality-label.f-s-18 "Personality Trait 1"]
-       [character-textarea character :personality-trait-1]]
-      [:div.field
-       [:span.personality-label.f-s-18 "Personality Trait 2"]
-       [character-textarea character :personality-trait-2]]
-      [:div.field
-       [:span.personality-label.f-s-18 "Ideals"]
-       [character-textarea character :ideals]]
-      [:div.field
-       [:span.personality-label.f-s-18 "Bonds"]
-       [character-textarea character :bonds]]
-      [:div.field
-       [:span.personality-label.f-s-18 "Flaws"]
-       [character-textarea character :flaws]]
-      [:div.field
-       [:span.personality-label.f-s-18 "Image URL"]
-       [character-input character :image-url]]
-      [:div.field
-       [:span.personality-label.f-s-18 "Description/Backstory"]
-       [character-textarea character :description "h-800"]]]
-     [:div.builder-column.details-column
-      [character-display built-char]]]))
+(defn description-fields []
+  (let [entity-values @(subscribe [:entity-values])]
+    [:div.flex-grow-1.builder-column.personality-column
+     [:div.m-t-5
+      [:span.personality-label.f-s-18 "Character Name"]
+      [character-input entity-values :character-name]]
+     [:div.field
+      [:span.personality-label.f-s-18 "Player Name"]
+      [character-input entity-values :player-name]]
+     [:div.flex.justify-cont-s-b
+      [:div.field.flex-grow-1.m-r-2
+       [:span.personality-label.f-s-18 "Age"]
+       [character-input entity-values :age]]
+      [:div.field.flex-grow-1.m-l-2.m-r-2
+       [:span.personality-label.f-s-18 "Sex"]
+       [character-input entity-values :sex]]
+      [:div.field.flex-grow-1.m-l-2.m-r-2
+       [:span.personality-label.f-s-18 "Height"]
+       [character-input entity-values :height]]
+      [:div.field.flex-grow-1.m-l-2
+       [:span.personality-label.f-s-18 "Weight"]
+       [character-input entity-values :weight]]]
+     [:div.flex.justify-cont-s-b
+      [:div.field.flex-grow-1.m-r-2
+       [:span.personality-label.f-s-18 "Hair Color"]
+       [character-input entity-values :hair]]
+      [:div.field.flex-grow-1.m-1-2.m-r-2
+       [:span.personality-label.f-s-18 "Eye Color"]
+       [character-input entity-values :eyes]]
+      [:div.field.flex-grow-1.m-1-2
+       [:span.personality-label.f-s-18 "Skin Color"]
+       [character-input entity-values :skin]]]
+     [:div.field
+      [:span.personality-label.f-s-18 "Personality Trait 1"]
+      [character-textarea entity-values :personality-trait-1]]
+     [:div.field
+      [:span.personality-label.f-s-18 "Personality Trait 2"]
+      [character-textarea entity-values :personality-trait-2]]
+     [:div.field
+      [:span.personality-label.f-s-18 "Ideals"]
+      [character-textarea entity-values :ideals]]
+     [:div.field
+      [:span.personality-label.f-s-18 "Bonds"]
+      [character-textarea entity-values :bonds]]
+     [:div.field
+      [:span.personality-label.f-s-18 "Flaws"]
+      [character-textarea entity-values :flaws]]
+     [:div.field
+      [:span.personality-label.f-s-18 "Image URL"]
+      [character-input entity-values :image-url]]
+     [:div.field
+      [:span.personality-label.f-s-18 "Description/Backstory"]
+      [character-textarea entity-values :description "h-800"]]]))
+
+(defn builder-columns []
+  [:div.flex-grow-1.flex
+   {:class-name (s/join " " (map #(str (name %) "-tab-active") @(subscribe [:active-tabs])))}
+   [:div.builder-column.options-column
+    [new-options-column]]
+   [description-fields]
+   [:div.builder-column.details-column
+    [character-display]]])
 
 (defn builder-tabs [active-tabs]
   [:div.hidden-lg.w-100-p

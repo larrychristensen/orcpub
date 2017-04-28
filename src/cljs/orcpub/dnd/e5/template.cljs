@@ -3538,6 +3538,7 @@
     :tags #{:class}
     :min num
     :max num
+    :ref [:class :sorcerer :metamagic]
     :options [(t/option-cfg
                {:name "Careful Spell"
                 :modifiers [(mod5e/dependent-trait

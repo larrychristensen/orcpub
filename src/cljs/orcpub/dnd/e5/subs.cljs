@@ -17,6 +17,12 @@
    (:character db)))
 
 (reg-sub
+ :entity-values
+ :<- [:character]
+ (fn [character _]
+   (get-in character [::entity/values])))
+
+(reg-sub
  :option-paths
  :<- [:character]
  (fn [character _]
@@ -30,6 +36,14 @@
          (comp (map ::entity/key)
                (remove nil?))
          (get-in character [::entity/options :optional-content]))))
+
+(reg-sub
+ :available-selections
+ :<- [:character]
+ :<- [:built-character]
+ :<- [:built-template]
+ (fn [[character built-character built-template]]
+   (entity/available-selections character built-character built-template)))
 
 (reg-sub
  :template
