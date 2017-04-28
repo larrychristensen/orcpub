@@ -16,7 +16,8 @@
             [orcpub.dnd.e5.spell-lists :as sl]
             [orcpub.dnd.e5.spells :as spells]
             [orcpub.dnd.e5.magic-items :as mi]
-            [orcpub.dnd.e5.skills :as skill5e])
+            [orcpub.dnd.e5.skills :as skill5e]
+            [re-frame.core :refer [subscribe dispatch]])
   #_(:require-macros [orcpub.dnd.e5.options :as opt5e]
                      [orcpub.dnd.e5.modifiers :as mod5e]))
 
@@ -4624,74 +4625,6 @@ long rest."})]
                                       "Token to remember your parents" 1}
                    :treasure {:gp 10}}])
 
-(def custom-equipment-path [:character ::entity/values :custom-equipment])
-(def custom-treasure-path [:character ::entity/values :custom-treasure])
-
-(defn remove-custom-starting-equipment [state equipment-indicator path]
-  (update-in
-   state
-   path
-   (fn [equipment]
-     (vec
-      (remove
-       :background-starting-equipment?
-       equipment)))))
-
-(defn remove-starting-equipment [state equipment-indicator]
-  (update-in
-   state
-   [:character ::entity/options]
-   (fn [options]
-     (into {}
-           (map
-            (fn [[k v]]
-              [k
-               (if (sequential? v)
-                 (vec
-                  (remove
-                   (comp equipment-indicator ::entity/value)
-                   v))
-                 v)])
-            options)))))
-
-(defn add-associated-options [state associated-options]
-  (reduce
-   (fn [new-s associated-option]
-     (update-in
-      new-s
-      [:character ::entity/options]
-      (fn [options]
-        (merge-with
-         (fn [o1 o2]
-           (let [ks (into #{} (map ::entity/key o1))]
-             (vec
-              (concat
-               o1
-               (remove (comp ks ::entity/key) o2)))))
-         options
-         associated-option))))
-   state
-   associated-options))
-
-(defn add-custom-equipment [state custom-equipment path]
-  (update-in
-      state
-      path
-      (fn [equipment]
-        (let [current-names (into #{} (map :name equipment))]
-          (vec
-           (concat
-            equipment
-            (remove
-             (comp current-names :name)
-             (map
-              (fn [[nm num]]
-                {:name nm
-                 :quantity num
-                 :equipped? true
-                 :background-starting-equipment? true})
-              custom-equipment))))))))
-
 (defn background-option [{:keys [name
                                  help
                                  page
@@ -4726,16 +4659,8 @@ long rest."})]
       :key kw
       :help help
       :page page
-      :select-fn (fn [_ app-state]
-                    (swap! app-state
-                           (fn [state]
-                             (-> state
-                                 (remove-starting-equipment :background-starting-equipment?)
-                                 (add-associated-options equipment-options)
-                                 (remove-custom-starting-equipment :background-starting-equipment? custom-treasure-path)
-                                 (add-custom-equipment custom-treasure custom-treasure-path)
-                                 (remove-custom-starting-equipment :background-starting-equipment? custom-equipment-path)
-                                 (add-custom-equipment custom-equipment custom-equipment-path)))))
+      :select-fn (fn [_ _]
+                   (dispatch [:add-starting-equipment equipment-options custom-treasure custom-equipment]))
       :selections (concat
                    selections
                    (if (seq tool-options) [(tool-prof-selection tool-options)])
@@ -4757,7 +4682,7 @@ long rest."})]
                      (mod5e/skill-proficiency skill-kw))
                    (keys skill)))})))
 
-(defn volos-guide-to-monsters-selections [app-state]
+(def volos-guide-to-monsters-selections
   [(t/selection-cfg
     {:name "Race"
      :tags #{:race}
@@ -5413,7 +5338,7 @@ long rest."})]
      :tags #{:race}}
     cfg)))
 
-(defn elemental-evil-selections [app-state]
+(def elemental-evil-selections
   [(race-selection
     {:options (map
                race-option
@@ -5552,7 +5477,7 @@ long rest."})]
                (mod5e/spells-known 1 :hellish-rebuke :cha "Tiefling" 3)
                (mod5e/spells-known 2 :darkness :cha "Tiefling" 5)]})
 
-(defn sword-coast-adventurers-guide-selections [app-state]
+(def sword-coast-adventurers-guide-selections
   [(background-selection
     {:options (map
                background-option
@@ -5631,11 +5556,13 @@ long rest."})]
   [{:name "Sword Coast Adventurer's Guide"
     :key :scag
     :url "https://www.amazon.com/gp/product/0786965800/ref=as_li_tl?ie=UTF8&tag=orcpub-20&camp=1789&creative=9325&linkCode=as2&creativeASIN=0786965800&linkId=9b93efa0fc7239ebbf005d0b17367233"
+    :selections sword-coast-adventurers-guide-selections
     :help (amazon-frame-help scag-amazon-frame
                              [:span "Incudes too many new, exciting subraces, race variants, subclasses, and backgrounds to list, as well as a ton of other info to help you create in-depth characters in the Sword Coast or elsewhere."])}
    {:name "Volo's Guide to Monsters"
     :key :vgm
     :url "https://www.amazon.com/gp/product/0786966017/ref=as_li_tl?ie=UTF8&tag=orcpub-20&camp=1789&creative=9325&linkCode=as2&creativeASIN=0786966017&linkId=506a1b33174f884dcec5db8c6c07ad31"
+    :selections volos-guide-to-monsters-selections
     :help (amazon-frame-help volos-amazon-frame
                              [:div
                               "Full of great monster race options, including"
@@ -5643,6 +5570,7 @@ long rest."})]
    {:name "Elemental Evil Player's Companion"
     :key :ee
     :url "https://media.wizards.com/2015/downloads/dnd/EE_PlayersCompanion.pdf"
+    :selections elemental-evil-selections
     :help [:div "Race and spell options from the " [:a {:href "https://media.wizards.com/2015/downloads/dnd/EE_PlayersCompanion.pdf" :target :_blank} "player's companion to Prince's of the Apocalypse"]]}])
 
 (def optional-content-selection
@@ -5928,7 +5856,6 @@ long rest."})]
     ?saving-throw-advantage []
     ?saving-throws #{}
     ?spells-known {}}))
-
 
 (def template
   {::t/base template-base

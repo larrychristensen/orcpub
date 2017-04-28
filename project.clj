@@ -12,19 +12,15 @@
   :dependencies [[org.clojure/clojure "1.9.0-alpha14"]
                  [org.clojure/test.check "0.9.0"]
                  [org.clojure/clojurescript "1.9.229"]
-                 [org.clojure/core.async "0.2.391"
+                 #_[org.clojure/core.async "0.2.391"
                   :exclusions [org.clojure/tools.reader]]
                  [cljsjs/react "15.3.1-0"]
                  [cljsjs/react-dom "15.3.1-0"]
-                 ;;[sablono "0.7.3"]
-                 [org.omcljs/om "1.0.0-alpha46"]
-                 [org.clojure/core.match "0.3.0-alpha4"]
+                 ;;[org.clojure/core.match "0.3.0-alpha4"]
+                 [re-frame "0.9.0"]
                  [reagent "0.6.0"]
                  [garden "1.3.2"]
-                 ;;[compojure "1.4.0"]
-                 ;;[ring/ring-jetty-adapter "1.4.0"]
                  [org.apache.pdfbox/pdfbox "2.1.0-20170316.190223-802"]
-                 ;;[org.apache.pdfbox/pdfbox "2.1.0-20170309.210827-797"]
 
                  [io.pedestal/pedestal.service "0.5.1"]
                  [io.pedestal/pedestal.route "0.5.1"]
@@ -33,7 +29,6 @@
                  [org.slf4j/slf4j-simple "1.7.21"]
                  
                  [clj-http "2.3.0"]
-                 ;;[pdfboxing "0.1.11"]
                  [environ "1.0.0"]]
 
   :plugins [[lein-figwheel "0.5.8"]
