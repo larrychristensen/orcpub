@@ -750,7 +750,7 @@
    db
    [:character ::entity/values custom-equipment-key item-index]
    (fn [item-cfg]
-     ;; the select keys here is to keep :equipped while wiping out the starting-equipment indicators
+     ;; the select keys here is to keep :equipped and :name while wiping out the starting-equipment indicators
      (assoc
       (select-keys item-cfg [:name :equipped?])
       :quantity
@@ -929,7 +929,6 @@
            :else nil))))
    (entity/combine-selections selections)))
 
-
 (defn new-option-selector [character built-char built-template option-paths option-path
                            {:keys [::t/min ::t/max ::t/options ::t/multiselect?] :as selection}
                            disable-select-new?
@@ -1001,7 +1000,7 @@
                                                                     character
                                                                     new-option-path
                                                                     (fn [o] (if multiselect? [new-option] new-option)))))]
-                                              (swap! app-state assoc :character updated-char))
+                                              (swap! app-state set-character [updated-char]))
                                             (if select-fn
                                               (select-fn (entity/get-option-value-path
                                                           built-template
@@ -1420,6 +1419,9 @@
    asi-selections
    (abilities-standard app-state)))
 
+(defn set-ability-score [db [ability-kw v]]
+  (assoc-in db [:character ::entity/options :ability-scores ::entity/value ability-kw] v))
+
 (defn abilities-entry [app-state built-char built-template asi-selections]
   (let [abilities (or (opt5e/get-raw-abilities app-state)
                       (char5e/abilities 15 14 13 12 10 8))
@@ -1437,7 +1439,7 @@
              :on-change (fn [e] (let [value (.-value (.-target e))
                                       new-v (if (not (s/blank? value))
                                               (js/parseInt value))]
-                                  (swap! app-state assoc-in [:character ::entity/options :ability-scores ::entity/value k] new-v)))}]])
+                                  (swap! app-state set-ability-score [k new-v])))}]])
         char5e/ability-keys))]
      (ability-increases-component app-state built-char built-template asi-selections char5e/ability-keys)
      (race-abilities-component built-char char5e/ability-keys)
@@ -1458,8 +1460,11 @@
                                               (abilities k))
                                       new-v (if (not (s/blank? value))
                                               (- (js/parseInt value) (or diff 0)))]
-                                  (swap! app-state assoc-in [:character ::entity/options :ability-scores ::entity/value k] new-v)))}]])
+                                  (swap! app-state set-ability-score [k new-v])))}]])
         total-abilities))]]))
+
+(defn set-ability-score-variant [db [variant-key]]
+  (assoc-in db [:character ::entity/options :ability-scores ::entity/key] variant-key))
 
 (defn ability-variant-option-selector [name key selected-key content & [select-fn]]
   [option-selector-base
@@ -1472,7 +1477,7 @@
     :select-fn (fn [_]
                  (when (not= selected-key key)
                    (if select-fn (select-fn))
-                   (swap! app-state assoc-in [:character ::entity/options :ability-scores ::entity/key] key)))}])
+                   (swap! app-state set-ability-score-variant [key])))}])
 
 (defn abilities-editor [{:keys [character built-char built-template option-paths selections]}]
   [:div
@@ -1530,6 +1535,15 @@
                selected-variant
                (abilities-entry app-state built-char built-template asi-selections))]}])])
 
+(defn select-skill [db [path selected? skill-key]]
+  (update-in
+   db
+   path
+   (fn [skills]
+     (if selected?                                             
+       (vec (remove (fn [s] (= skill-key (::entity/key s))) skills))
+       (vec (conj skills {::entity/key skill-key}))))))
+
 (defn skills-selector [{:keys [character selection built-char]}]
   (let [{:keys [::t/ref ::t/max ::t/options]} selection
         path [:character ::entity/options ref]
@@ -1561,13 +1575,7 @@
                                  :option-path [:skill-profs key]
                                  :select-fn (fn [_]
                                               (if allow-select?
-                                                (swap! app-state
-                                                       update-in
-                                                       path
-                                                       (fn [skills]
-                                                         (if selected?                                             
-                                                           (vec (remove (fn [s] (= key (::entity/key s))) skills))
-                                                           (vec (conj skills {::entity/key key})))))))
+                                                (swap! app-state select-skill [path selected? key])))
                                  :explanation-text (if (and has-prof?
                                                             (not selected?))
                                                      "You already have this skill proficiency")
