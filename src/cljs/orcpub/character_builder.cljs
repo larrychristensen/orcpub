@@ -1622,6 +1622,13 @@
    {::entity/key :average
     ::entity/value (dice/die-mean (-> levels class-kw :hit-die))}))
 
+(defn set-level-hit-points [db [built-template character level-value value]]
+  (assoc-in
+   db
+   (concat [:character] (entity/get-entity-path built-template character (:path level-value)))
+   {::entity/key :manual-entry
+    ::entity/value (if (not (js/isNaN value)) value)}))
+
 (defn hit-points-entry [character selections built-char built-template]
   (let [classes (es/entity-val built-char :classes)
         levels (es/entity-val built-char :levels)
@@ -1726,11 +1733,7 @@
                                             "b-red b-3")
                               :on-change (fn [e]
                                            (let [value (js/parseInt (.. e -target -value))]
-                                             (swap! app-state
-                                                    assoc-in
-                                                    (concat [:character] (entity/get-entity-path built-template character (:path level-value)))
-                                                    {::entity/key :manual-entry
-                                                     ::entity/value (if (not (js/isNaN value)) value)})))
+                                             (swap! app-state set-level-hit-points [built-template character level-value value])))
                               :value (:value level-value)}]]
                    [:td.p-5 con-bonus-str]
                    [:td.p-5 misc-bonus-str]
