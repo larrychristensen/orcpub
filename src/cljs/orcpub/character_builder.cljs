@@ -1599,6 +1599,29 @@
      :level (js/parseInt (last (s/split (name level-kw) #"-")))
      :key class-kw}))
 
+(defn set-total-hps [db [full-path first-selection selection average-value remainder]]
+  (assoc-in
+   db
+   full-path
+   {::entity/key :manual-entry
+    ::entity/value (if (= first-selection selection)
+                     (+ average-value remainder)
+                     average-value)}))
+
+(defn randomize-hit-points [db [built-template character path levels class-kw]]
+  (assoc-in
+   db
+   (concat [:character] (entity/get-entity-path built-template character path))
+   {::entity/key :roll
+    ::entity/value (dice/die-roll (-> levels class-kw :hit-die))}))
+
+(defn set-hit-points-to-average [db [built-template character path levels class-kw]]
+  (assoc-in
+   db
+   (concat [:character] (entity/get-entity-path built-template character path))
+   {::entity/key :average
+    ::entity/value (dice/die-mean (-> levels class-kw :hit-die))}))
+
 (defn hit-points-entry [character selections built-char built-template]
   (let [classes (es/entity-val built-char :classes)
         levels (es/entity-val built-char :levels)
@@ -1645,35 +1668,21 @@
                            (doseq [selection selections]
                              (let [entity-path (entity/get-entity-path built-template character (::entity/path selection))
                                    full-path (concat [:character] entity-path)]                                         
-                               (swap! app-state
-                                      assoc-in
-                                      full-path
-                                      {::entity/key :manual-entry
-                                       ::entity/value (if (= first-selection selection)
-                                                        (+ average-value remainder)
-                                                        average-value)})))))}]
+                               (swap! app-state set-total-hps [full-path first-selection selection average-value remainder])))))}]
           total-hps)]]
       (if (seq selections)
         [:button.form-button.p-10
          {:on-click (fn [_]
                       (doseq [selection selections]
                         (let [[_ class-kw :as path] (::entity/path selection)]
-                          (swap! app-state
-                                 assoc-in
-                                 (concat [:character] (entity/get-entity-path built-template character path))
-                                 {::entity/key :roll
-                                  ::entity/value (dice/die-roll (-> levels class-kw :hit-die))}))))}
+                          (swap! app-state randomize-hit-points [built-template character path levels class-kw]))))}
          "Random"])
       (if (seq selections)
         [:button.form-button.p-10
          {:on-click (fn [_]
                       (doseq [selection selections]
                         (let [[_ class-kw :as path] (::entity/path selection)]
-                          (swap! app-state
-                                 assoc-in
-                                 (concat [:character] (entity/get-entity-path built-template character path))
-                                 {::entity/key :average
-                                  ::entity/value (dice/die-mean (-> levels class-kw :hit-die))}))))}
+                          (swap! app-state set-hit-points-to-average [built-template character path levels class-kw]))))}
          "Average"])]
      (doall
       (map-indexed
