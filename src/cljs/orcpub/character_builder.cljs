@@ -1116,37 +1116,37 @@
                                                                     (not (pos? remaining))) option)])
                                        (sort-by ::t/name options))))}]))
 
-(defn set-ability! [app-state ability-key ability-value]
-  (swap! app-state
-         assoc-in
-         [:character ::entity/options :ability-scores ::entity/value ability-key]
-         ability-value))
+(defn set-abilities [db [abilities]]
+  (assoc-in db [:character ::entity/options :ability-scores ::entity/value] abilities))
 
 (defn set-abilities! [app-state abilities]
-  (swap! app-state assoc-in [:character ::entity/options :ability-scores ::entity/value] abilities))
+  (swap! app-state set-abilities [abilities]))
 
 (defn reroll-abilities [app-state]
-  (set-abilities! app-state (char5e/standard-ability-rolls)))
+  (swap! app-state set-abilities [(char5e/standard-ability-rolls)]))
 
 (defn set-standard-abilities [app-state]
   (fn []
-    (set-abilities! app-state (char5e/abilities 15 14 13 12 10 8))))
+    (swap! app-state set-abilities [(char5e/abilities 15 14 13 12 10 8)])))
 
 (defn reset-point-buy-abilities [app-state]
   (fn []
-    (set-abilities! app-state (char5e/abilities 8 8 8 8 8 8))))
+    (swap! app-state set-abilities [(char5e/abilities 8 8 8 8 8 8)])))
+
+(defn swap-ability-values [db [i other-i k v]]
+  (update-in
+   db
+   [:character ::entity/options :ability-scores ::entity/value]
+   (fn [a]
+     (let [a-vec (vec a)
+           other-index (mod other-i (count a-vec))
+           [other-k other-v] (a-vec other-index)]
+       (assoc a k other-v other-k v)))))
 
 (defn swap-abilities [app-state i other-i k v]
   (stop-prop-fn
    (fn []
-     (swap! app-state
-            update-in
-            [:character ::entity/options :ability-scores ::entity/value]
-            (fn [a]
-              (let [a-vec (vec a)
-                    other-index (mod other-i (count a-vec))
-                    [other-k other-v] (a-vec other-index)]
-                (assoc a k other-v other-k v)))))))
+     (swap! app-state swap-ability-values [i other-i k v]))))
 
 (def ability-icons
   {:str "strong"
@@ -1188,6 +1188,23 @@
 
 (defn ability-value [v]
   [:div.f-s-18.f-w-b v])
+
+(defn decrease-ability-value [db [full-path k]]
+  (update-in
+   db
+   full-path
+   (fn [incs]
+     (common/remove-first
+      (fn [{inc-key ::entity/key}]
+        (= inc-key k))
+      incs))))
+
+(defn increase-ability-value [db [full-path k]]
+  (update-in
+   db
+   full-path
+   conj
+   {::entity/key k}))
 
 (defn ability-increases-component [app-state built-char built-template asi-selections ability-keys]
   (let [total-abilities (es/entity-val built-char :abilities)]
@@ -1236,24 +1253,13 @@
                        :on-click (stop-prop-fn
                                   (fn []
                                     (if (not decrease-disabled?)
-                                      (swap! app-state
-                                             update-in
-                                             full-path
-                                             (fn [incs]
-                                               (common/remove-first
-                                                (fn [{inc-key ::entity/key}]
-                                                  (= inc-key k))
-                                                incs))))))}]
+                                      (swap! app-state decrease-ability-value [full-path k]))))}]
                      [:i.fa.fa-plus-circle.orange.m-l-5
                       {:class-name (if increase-disabled? "opacity-5 cursor-disabled")
                        :on-click (stop-prop-fn
                                   (fn []
                                     (if (not increase-disabled?)
-                                      (swap! app-state
-                                             update-in
-                                             full-path
-                                             conj
-                                             {::entity/key k}))))}]]]))
+                                      (swap! app-state increase-ability-value [full-path k]))))}]]]))
                ability-keys))]]))
        asi-selections))]))
 
@@ -1807,6 +1813,9 @@
              {:key :other-magic-items :ui-fn (partial inventory-selector mi5e/other-magic-item-map 60)}
              {:key :treasure :ui-fn #(inventory-selector equip5e/treasure-map 100 % :custom-treasure)}]}])
 
+(defn set-page [db [page-index]]
+  (assoc db :page page-index))
+
 (defn section-tabs [available-selections built-template character page-index]
   [:div.flex.justify-cont-s-a
    (doall
@@ -1818,7 +1827,7 @@
          ^{:key name}
          [:div.p-5.hover-opacity-full.pointer
           {:class-name (if (= i page-index) "b-b-2 b-orange" "")
-           :on-click (fn [_] (swap! app-state assoc :page i))}
+           :on-click (fn [_] (swap! app-state set-page [i]))}
           [:div
            {:class-name (if (= i page-index) "selected-tab" "opacity-5 hover-opacity-full")}
            (svg-icon icon 32)]
@@ -1911,19 +1920,19 @@
       [:div.flex.justify-cont-s-b.p-t-5.p-10.align-items-t
        [:button.form-button.p-5-10.m-r-5
         {:on-click
-         (fn [_] (swap! app-state assoc :page (let [prev (dec page-index)]
-                                                (if (neg? prev)
-                                                  (dec (count pages))
-                                                  prev))))}
+         (fn [_] (swap! app-state set-page [(let [prev (dec page-index)]
+                                              (if (neg? prev)
+                                                (dec (count pages))
+                                                prev))]))}
         "Back"]
        [:div.flex-grow-1
         [:h3.f-w-b.f-s-20.t-a-c (:name page)]]
        [:button.form-button.p-5-10.m-l-5
         {:on-click
-         (fn [_] (swap! app-state assoc :page (let [next (inc page-index)]
-                                                (if (>= next (count pages))
-                                                  0
-                                                  next))))}
+         (fn [_] (swap! app-state set-page [(let [next (inc page-index)]
+                                              (if (>= next (count pages))
+                                                0
+                                                next))]))}
         "Next"]]
       (let [ui-fn-selections (mapcat
                               (fn [{:keys [key group? ui-fn]}]
@@ -2025,21 +2034,24 @@
    [:div.builder-column.details-column
     [character-display built-char]]])
 
+(defn set-active-tabs [db [active-tabs]]
+  (assoc-in db tab-path active-tabs))
+
 (defn builder-tabs [active-tabs]
   [:div.hidden-lg.w-100-p
    [:div.builder-tabs
     [:span.builder-tab.options-tab
      {:class-name (if (active-tabs :options) "selected-builder-tab")
-      :on-click (fn [_] (swap! app-state assoc-in tab-path #{:build :options}))} "Options"]
+      :on-click (fn [_] (swap! app-state set-active-tabs [#{:build :options}]))} "Options"]
     [:span.builder-tab.personality-tab
      {:class-name (if (active-tabs :personality) "selected-builder-tab")
-      :on-click (fn [_] (swap! app-state assoc-in tab-path #{:build :personality}))} "Description"]
+      :on-click (fn [_] (swap! app-state set-active-tabs [#{:build :personality}]))} "Description"]
     [:span.builder-tab.build-tab
      {:class-name (if (active-tabs :build) "selected-builder-tab")
-      :on-click (fn [_] (swap! app-state assoc-in tab-path #{:build :options}))} "Build"]
+      :on-click (fn [_] (swap! app-state set-active-tabs [#{:build :options}]))} "Build"]
     [:span.builder-tab.details-tab
      {:class-name (if (active-tabs :details) "selected-builder-tab")
-      :on-click (fn [_] (swap! app-state assoc-in tab-path #{:details}))} "Details"]]])
+      :on-click (fn [_] (swap! app-state set-active-tabs [#{:details}]))} "Details"]]])
 
 (defn export-pdf [built-char]
   (fn [_]
@@ -2060,6 +2072,9 @@
 (def patreon-link-props
   {:href "https://www.patreon.com/user?u=5892323" :target "_blank"})
 
+(defn reset-character [db []]
+  (assoc db :character t5e/character :page 0))
+
 (defn header [built-char]
   [:div.w-100-p
    [:div.flex.align-items-c.justify-cont-s-b
@@ -2071,7 +2086,7 @@
       [:i.fa.fa-undo.f-s-18]
       [:span.m-l-5.hidden-sm.hidden-xs.hidden-md "Undo"]]
      [:button.form-button.h-40.m-l-5.m-t-5.m-b-5
-      {:on-click (fn [_] (swap! app-state assoc :character t5e/character :page 0))}
+      {:on-click (fn [_] (swap! app-state reset-character []))}
       [:span
        [:i.fa.fa-undo.f-s-18]
        [:i.fa.fa-undo.f-s-18]]
