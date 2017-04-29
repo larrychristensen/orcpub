@@ -5026,10 +5026,10 @@ long rest."})]
                                              :page 128
                                              :class-key :fighter
                                              :source :scag
-                                             :range {:unit :feet
+                                             :range {:units :feet
                                                      :amount 60}
                                              :summary (str "When you Action Surge, choose "
-                                                           (if (>= (?class-levels) 17)
+                                                           (if (>= (?class-level :fighter) 17)
                                                              2
                                                              1)
                                                            " allies to gain an attack as reaction")})]}

@@ -1810,7 +1810,7 @@
 
 (def max-iterations 100)
 
-(defn random-character [built-template]
+(defn random-character [current-character built-template]
   (reduce
    (fn [character i]
      (if (< i 10)
@@ -1840,7 +1840,7 @@
             character
             pending-selections)))
        (reduced character)))
-   {::entity/options {}}
+   {::entity/options (select-keys (::entity/options current-character) [:optional-content])}
    (range)))
 
 (defn description-fields []
@@ -1945,7 +1945,7 @@
 (def patreon-link-props
   {:href "https://www.patreon.com/user?u=5892323" :target "_blank"})
 
-(defn header [built-char]
+(defn header [character built-char]
   [:div.w-100-p
    [:div.flex.align-items-c.justify-cont-s-b
     [:h1.f-s-36.f-w-b.m-t-21.m-b-19.m-l-10 "Character Builder"]
@@ -1959,7 +1959,7 @@
       {:on-click (fn [_]
                    (do
                      (dispatch-sync [:set-loading true])
-                     (let [new-char (random-character @(subscribe [:built-template]))]
+                     (let [new-char (random-character character @(subscribe [:built-template]))]
                        (dispatch [:set-character new-char]))))}
       [:span
        [:i.fa.fa-random.f-s-18]]
@@ -2091,9 +2091,9 @@
       [:div#sticky-header.sticky-header.w-100-p.posn-fixed
        [:div.flex.justify-cont-c.bg-light
         [:div#header-container.f-s-14.white.content
-         (header built-char)]]]
+         [header character built-char]]]]
       [:div.flex.justify-cont-c.white
-       [:div.content (header built-char)]]
+       [:div.content [header character built-char]]]
       [:div.container
        [:div.content
         [al-legality al-illegal-reasons used-resources]]]
