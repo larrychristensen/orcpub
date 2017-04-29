@@ -2521,12 +2521,11 @@
                                                     17 3
                                                     :default 1})}
                               :summary "reroll a save if you fail"})]}
-             10 {:modifers [(opt5e/fighting-style-selection)]}
              11 {:modifiers [(mod5e/extra-attack)]}
              20 {:modifiers [(mod5e/extra-attack)]}}
     :subclass-level 3
     :subclass-title "Martial Archetype"
-    :selections [(opt5e/fighting-style-selection)
+    :selections [(opt5e/fighting-style-selection :fighter)
                  (new-starting-equipment-selection
                   :fighter
                   {:name "Armor"
@@ -2578,7 +2577,7 @@
                                                           " to STR, DEX, or CON checks that don't already include prof bonus; running long jump increases by "
                                                           (?ability-bonuses :str)
                                                           " ft.")})]}
-                           10 {:selections [(opt5e/fighting-style-selection)]}
+                           10 {:selections [(opt5e/fighting-style-selection :fighter)]}
                            15 {:modifiers [(mod5e/critical 18)]}
                            18 {:modifiers [(mod5e/dependent-trait
                                             {:level 18
@@ -2869,7 +2868,7 @@
                          :options {:priests-pack 1
                                    :explorers-pack 1}}]
     :armor {:chain-mail 1}
-    :levels {2 {:selections [(opt5e/fighting-style-selection #{:defense :dueling :great-weapon-fighting :protection})]}
+    :levels {2 {:selections [(opt5e/fighting-style-selection :paladin #{:defense :dueling :great-weapon-fighting :protection})]}
              3 {:modifiers [(mod5e/damage-immunity :disease)
                             (mod5e/trait-cfg
                              {:name "Divine Health"
@@ -3230,7 +3229,7 @@
                                               :max 2})]})]})
                  (favored-enemy-selection 1)
                  (favored-terrain-selection 1)]
-    :levels {2 {:selections [(opt5e/fighting-style-selection #{:archery :defense :dueling :two-weapon-fighting})]}
+    :levels {2 {:selections [(opt5e/fighting-style-selection :ranger #{:archery :defense :dueling :two-weapon-fighting})]}
              3 {:modifiers [(mod5e/action
                              {:name "Primeval Awareness"
                               :level 3
@@ -3665,7 +3664,15 @@
                   :levels {6 {:modifiers [(mod5e/dependent-trait
                                            {:name "Elemental Affinity"
                                             :page 102
-                                            :summary (str "Add CHA mod to one damage roll of a spell that deals " (common/safe-name (get-in ?sorcerer-draconic-ancestry [:breath-weapon :damage-type]))  " damage, you may also spend 1 sorcery pt. to gain resistance to that damage type for an hr.")})]}
+                                            :summary (str "Add CHA mod to one damage roll of a spell that deals "
+                                                          (if ?sorcerer-draconic-ancestry
+                                                            (str (common/safe-name
+                                                                  (get-in
+                                                                   ?sorcerer-draconic-ancestry
+                                                                   [:breath-weapon :damage-type]))
+                                                                 " damage")
+                                                            "damage of type associated with your draconic ancestry")
+                                                          ", you may also spend 1 sorcery pt. to gain resistance to that damage type for an hr.")})]}
                            14 {:modifiers [(mod5e/bonus-action
                                             {:name "Dragon Wings"
                                              :page 103

@@ -109,7 +109,7 @@
 
 (defn weapon-proficiencies [built-char]
   (let [proficiencies (es/entity-val built-char :weapon-profs)]
-    (if (proficiencies :martial)
+    (if (and proficiencies (proficiencies :martial))
       [:simple :martial]
       proficiencies)))
 

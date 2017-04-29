@@ -35,7 +35,9 @@
             [reagent.core :as r]
             [re-frame.core :refer [subscribe dispatch dispatch-sync]]))
 
-(def print-enabled? (s/starts-with? js/window.location.href "http://localhost"))
+(def print-disabled? false)
+(def print-enabled? (and (not print-disabled?)
+                         (s/starts-with? js/window.location.href "http://localhost")))
 
 (defn stop-propagation [e]
   (.stopPropagation e))
