@@ -262,7 +262,7 @@
                    :summary "spend 5 ki to cast stoneskin on yourself"})]})
    (t/option-cfg
     {:name "Fangs of the Fire Snake"
-     :modifiers [(modifiers/trait
+     :modifiers [(modifiers/trait-cfg
                   {:name "Fangs of the Fire Snake"
                    :page 81
                    :summary "spend 1 ki point when you use Attack action to increase your unarmed strike reach by 10 ft. You unarmed strike deals fire damage and if you spend 1 more ki it deals an extra 2d10 damage"})]})
@@ -620,7 +620,7 @@
                    :min 2
                    :max 2})
                  (t/selection-cfg
-                  {:name "1st Level Spell"
+                  {:name "Level 1 Spell"
                    :order 2
                    :tags #{:spells}
                    :options (spell-options (get-in spell-lists [class-key 1]) spellcasting-ability (class-names class-key))
@@ -635,20 +635,23 @@
    {:name (name class-key)
     :key class-key
     :selections [(t/selection-cfg
-                  {:name "1st Level Ritual"
+                  {:name "Level 1 Ritual"
                    :tags #{:spells}
                    :options (spell-options (filter (fn [spell-kw] (ritual-spell? (spells/spell-map spell-kw))) (get-in spell-lists [class-key 1])) spellcasting-ability (class-names class-key))
                    :min 2
                    :max 2})]}))
 
 (defn spell-sniper-option [class-key spellcasting-ability spell-lists]
-  (t/option-cfg
-   {:name (name class-key)
-    :key class-key
-    :selections [(t/selection-cfg
-                  {:name "Attack Cantrip"
-                   :tags #{:spells}
-                   :options (spell-options (filter (fn [spell-kw] (:attack-roll? (spells/spell-map spell-kw))) (get-in spell-lists [class-key 0])) spellcasting-ability (class-names class-key))})]}))
+  (let [options (spell-options (filter (fn [spell-kw] (:attack-roll? (spells/spell-map spell-kw))) (get-in spell-lists [class-key 0])) spellcasting-ability (class-names class-key))]
+    (t/option-cfg
+     {:name (name class-key)
+      :key class-key
+      :prereqs [(t/option-prereq "There are no attack cantrips for this class with the 'Option Sources' you have selected"
+                                 (fn [_] (seq options)))]
+      :selections [(t/selection-cfg
+                    {:name "Attack Cantrip"
+                     :tags #{:spells}
+                     :options options})]})))
 
 (defn language-selection [langs num]
   (t/selection-cfg
@@ -820,7 +823,7 @@
        :summary (str "add superiority die to successful attack's damage, if target fails a DC " ?maneuver-save-dc " STR save, it is knocked prone")})])])
 
 (def can-cast-spell-prereq
-  (t/option-prereq "Requires spellcasting ability."
+  (t/option-prereq "Requires the ability to cast at least one spell."
                    (fn [c] (some (fn [[k v]] (seq v)) (es/entity-val c :spells-known)))))
 
 (defn does-not-have-feat-prereq [kw]

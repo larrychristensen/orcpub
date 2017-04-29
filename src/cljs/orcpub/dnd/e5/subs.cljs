@@ -1,10 +1,14 @@
 (ns orcpub.dnd.e5.subs
   (:require [re-frame.core :refer [reg-sub subscribe]]
-
             [orcpub.entity :as entity]
             [orcpub.template :as t]
             [orcpub.dnd.e5.template :as t5e]
             [orcpub.dnd.e5.db :refer [tab-path]]))
+
+(reg-sub
+ :loading
+ (fn [db _]
+   (get db :loading)))
 
 (reg-sub
  :active-tabs
@@ -65,7 +69,6 @@
  :<- [:template]
  :<- [:selected-plugin-options]
  (fn [[template selected-plugin-options] _]
-   (js/console.log "BUILT_TEMPALTE SUB" template selected-plugin-options)
    (let [selected-plugins (map
                            :selections
                            (filter

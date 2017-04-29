@@ -3125,34 +3125,35 @@
     :options [(t/option-cfg
                {:name "Type"
                 :selections [(t/selection-cfg
-                              {:name "Type"
+                              {:name "Favored Enemy Type"
                                :tags #{:class}
                                :order 4
+                               :multiselect? true
+                               :ref [:class :ranger :favored-enemy-type]
                                :options (map
                                          favored-enemy-option
                                          favored-enemy-types)})]})
               (t/option-cfg
                {:name "Two Humanoid Races"
                 :selections [(t/selection-cfg
-                              {:name "Humanoid Race 1"
+                              {:name "Favored Enemy Humanoid Race"
                                :tags #{:class}
                                :order 4
-                               :options (map
-                                         favored-enemy-option
-                                         humanoid-enemies)})
-                             (t/selection-cfg
-                              {:name "Humanoid Race 2"
-                               :tags #{:class}
-                               :order 4
+                               :min 2
+                               :max 2
+                               :multiselect? true
+                               :ref [:class :ranger :favored-enemy-race]
                                :options (map
                                          favored-enemy-option
                                          humanoid-enemies)})]})]}))
 
 (defn favored-terrain-selection [order]
   (t/selection-cfg
-   {:name (str "Favored Terrain " order)
+   {:name "Favored Terrain"
     :tags #{:class}
     :order 5
+    :ref [:class :ranger :favored-terrain]
+    :multiselect? true
     :options (map
      (fn [terrain]
        (t/option-cfg

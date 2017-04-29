@@ -33,7 +33,7 @@
             [clojure.spec.test :as stest]
 
             [reagent.core :as r]
-            [re-frame.core :refer [subscribe dispatch]]))
+            [re-frame.core :refer [subscribe dispatch dispatch-sync]]))
 
 (def print-enabled? (s/starts-with? js/window.location.href "http://localhost"))
 
@@ -47,7 +47,9 @@
 
 (defn update-option [template entity path update-fn]
   (let [entity-path (entity/get-entity-path template entity path)]
-    (update-in entity entity-path update-fn)))
+    (try (update-in entity entity-path update-fn)
+         (catch js/Object e (do (js/console.log "ERRO" entity path entity-path)
+                                (throw "EROR"))))))
 
 #_(def stored-char-str (.getItem js/window.localStorage "char-meta"))
 #_(defn remove-stored-char [stored-char-str & [more-info]]
@@ -756,7 +758,7 @@
    remaining])
 
 (defn actual-path [{:keys [::t/ref ::entity/path] :as selection}]
-  (if ref (if (sequential? ref) ref [ref]) path))
+  (vec (if ref (if (sequential? ref) ref [ref]) path)))
 
 (defn count-remaining [built-template character {:keys [::t/min ::t/max ::t/require-value?] :as selection}]
   (let [actual-path (actual-path selection)
@@ -1695,7 +1697,6 @@
                                        (zero? (::t/max %))
                                        (zero? (count-remaining built-template character %)))
                                  combined-selections)]
-    (prn "NEW OPTIONS COLUMN")
     (if print-enabled? (js/console.log "FINAL SELECTIONS" (vec final-selections) (map ::t/key final-selections)))
     [:div.w-100-p
      [option-sources]
@@ -1760,6 +1761,78 @@
                 ^{:key (::entity/path selection)}
                 [:div (selection-section character built-char built-template option-paths nil selection)])
               (into (sorted-set-by compare-selections) non-ui-fn-selections)))])])]]))
+
+(defn random-sequential-selection [built-template character {:keys [::t/min ::t/max ::t/options ::entity/path] :as selection}]
+  (let [num (inc (rand-int (count options)))
+        actual-path (actual-path selection)]
+    (update-option
+     built-template
+     character
+     actual-path
+     (fn [_]
+       (mapv
+        (fn [{:keys [::t/key]}]
+          {::entity/key key})
+        (take num options))))))
+
+(defn random-selection [built-template character {:keys [::t/min ::t/max ::t/options ::t/multiselect? ::entity/path] :as selection}]
+  (let [new-options (take (count-remaining built-template character selection) (shuffle options))]
+    (reduce
+     (fn [new-character {:keys [::t/key]}]
+       (let [new-option {::entity/key key}
+             multiselect? (or multiselect?
+                              (> min 1)
+                              (nil? max))]
+         (update-option
+          built-template
+          new-character
+          (conj (actual-path selection) key)
+          (fn [options] (if multiselect? (conj (or options []) new-option) new-option)))))
+     character
+     new-options)))
+
+(def selection-randomizers
+  {:ability-scores (fn [s _]
+                     (fn [_] {::entity/key :standard-roll
+                             ::entity/value (char5e/standard-ability-rolls)}))
+   :hit-points (fn [{[_ class-kw] ::entity/path} built-char]
+                 (fn [_]
+                   (events5e/random-hit-points-option (char5e/levels built-char) class-kw)))})
+
+(def max-iterations 100)
+
+(defn random-character [built-template]
+  (reduce
+   (fn [character i]
+     (if (< i 10)
+       (let [built-char (entity/build character built-template)
+             available-selections (entity/available-selections character built-char built-template)
+             combined-selections (entity/combine-selections available-selections)
+             pending-selections (filter
+                                 (fn [selection]
+                                   (let [remaining (count-remaining built-template character selection)]
+                                     (pos? remaining)))
+                                 combined-selections)]
+         (if (empty? pending-selections)
+           (reduced character)
+           (reduce
+            (fn [new-character {:keys [::t/key ::t/sequential?] :as selection}]
+              (let [selection-randomizer (selection-randomizers key)]
+                (if selection-randomizer
+                  (let [random-value (selection-randomizer selection)]
+                    (update-option
+                     built-template
+                     new-character
+                     (actual-path selection)
+                     (selection-randomizer selection built-char)))
+                    (if sequential?
+                      (random-sequential-selection built-template new-character selection)
+                      (random-selection built-template new-character selection)))))
+            character
+            pending-selections)))
+       (reduced character)))
+   {::entity/options {}}
+   (range)))
 
 (defn description-fields []
   (let [entity-values @(subscribe [:entity-values])]
@@ -1872,24 +1945,32 @@
       {:class-name (if (<= (count @history) 1) "opacity-5")
        :on-click undo!}
       [:i.fa.fa-undo.f-s-18]
-      [:span.m-l-5.hidden-sm.hidden-xs.hidden-md "Undo"]]
+        [:span.m-l-5.hidden-sm.hidden-xs.hidden-md "Undo"]]
      [:button.form-button.h-40.m-l-5.m-t-5.m-b-5
       {:on-click (fn [_]
-                   (dispatch [:reset-character]))}
+                   (do
+                     (dispatch-sync [:set-loading true])
+                     (let [new-char (random-character @(subscribe [:built-template]))]
+                       (dispatch [:set-character new-char]))))}
+      [:span
+       [:i.fa.fa-random.f-s-18]]
+      [:span.m-l-5.hidden-sm.hidden-xs "Random"]]
+     [:button.form-button.h-40.m-l-5.m-t-5.m-b-5
+      {:on-click (fn [_] (dispatch [:reset-character]))}
       [:span
        [:i.fa.fa-undo.f-s-18]
        [:i.fa.fa-undo.f-s-18]]
-      [:span.m-l-5.hidden-sm.hidden-xs.hidden-md "Reset"]]
+      [:span.m-l-5.hidden-sm.hidden-xs "Reset"]]
      [:button.form-button.h-40.m-l-5.m-t-5.m-b-5
       {:on-click (export-pdf built-char)}
       [:i.fa.fa-print.f-s-18]
-      [:span.m-l-5.hidden-sm.hidden-xs.hidden-md "Print"]]
+      [:span.m-l-5.hidden-sm.hidden-xs "Print"]]
      [:button.form-button.h-40.m-l-5.m-t-5.m-b-5
       [:i.fa.fa-floppy-o.f-s-18]
-      [:span.m-l-5.hidden-sm.hidden-xs.hidden-md "Browser Save"]]
+      [:span.m-l-5.hidden-sm.hidden-xs "Browser Save"]]
      [:button.form-button.h-40.m-l-5.opacity-5.m-t-5.m-b-5
       [:i.fa.fa-cloud-upload.f-s-18]
-      [:span.m-l-5.hidden-sm.hidden-xs.hidden-md "Save" [:span.i.m-l-5 "(Coming Soon)"]]]]]])
+      [:span.m-l-5.hidden-sm.hidden-xs "Save" [:span.i.m-l-5 "(Coming Soon)"]]]]]])
 
 (defn al-legality []
   (let [expanded? (r/atom false)]
@@ -1951,6 +2032,17 @@
       [:a.m-l-5 patreon-link-props
        [:img.h-32.w-32 {:src "https://www.patreon.com/images/patreon_navigation_logo_mini_orange.png"}]]]]]])
 
+(def loading-style
+  {:position :absolute
+   :height "100%"
+   :width "100%"
+   :top 0
+   :bottom 0
+   :right 0
+   :left 0
+   :z-index 100
+   :background-color "rgba(0,0,0,0.6)"})
+
 (defn character-builder []
   (let [character @(subscribe [:character])
         _  (if print-enabled? (cljs.pprint/pprint character))
@@ -1964,7 +2056,8 @@
         selection-validation-messages (validate-selections built-template character all-selections)
         al-illegal-reasons (concat (es/entity-val built-char :al-illegal-reasons)
                                    selection-validation-messages)
-        used-resources (es/entity-val built-char :used-resources)]
+        used-resources (es/entity-val built-char :used-resources)
+        loading @(subscribe [:loading])]
     (if print-enabled? (print-char built-char))
     [:div.app
      {:on-scroll (fn [e]
@@ -1979,31 +2072,35 @@
                      (if (>= scroll-top header-height)
                        (set! (.-display (.-style sticky-header)) "block")
                        (set! (.-display (.-style sticky-header)) "none"))))}
-     
+     (if loading
+       [:div {:style loading-style}
+        [:div.flex.justify-cont-s-a.align-items-c.h-100-p
+         [:img.h-200.w-200.m-t-200 {:src "/image/spiral.gif"}]]])
      [download-form built-char]
      [app-header]
-     [:div#sticky-header.sticky-header.w-100-p.posn-fixed
-      [:div.flex.justify-cont-c.bg-light
-       [:div#header-container.f-s-14.white.content
-        (header built-char)]]]
-     [:div.flex.justify-cont-c.white
-      [:div.content (header built-char)]]
-     [:div.container
-      [:div.content
-       [al-legality al-illegal-reasons used-resources]]]
-     [:div.flex.justify-cont-c.white
-      [:div.content [builder-tabs active-tab]]]
-     [:div#app-main.flex.justify-cont-c.p-b-40
-      [:div.f-s-14.white.content
-       [:div.flex.w-100-p
-        [builder-columns
-         built-template
-         built-char
-         option-paths
-         plugins
-         active-tab
-         all-selections]]]]
-     [:div.white.flex.justify-cont-c
-      [:div.content.f-w-n.f-s-12
-       [:div.p-10
-        [:div.m-b-5 "Icons made by Lorc, Caduceus, and Delapouite. Available on " [:a.orange {:href "http://game-icons.net"} "http://game-icons.net"]]]]]]))
+     [:div
+      [:div#sticky-header.sticky-header.w-100-p.posn-fixed
+       [:div.flex.justify-cont-c.bg-light
+        [:div#header-container.f-s-14.white.content
+         (header built-char)]]]
+      [:div.flex.justify-cont-c.white
+       [:div.content (header built-char)]]
+      [:div.container
+       [:div.content
+        [al-legality al-illegal-reasons used-resources]]]
+      [:div.flex.justify-cont-c.white
+       [:div.content [builder-tabs active-tab]]]
+      [:div#app-main.flex.justify-cont-c.p-b-40
+       [:div.f-s-14.white.content
+        [:div.flex.w-100-p
+         [builder-columns
+          built-template
+          built-char
+          option-paths
+          plugins
+          active-tab
+          all-selections]]]]
+      [:div.white.flex.justify-cont-c
+       [:div.content.f-w-n.f-s-12
+        [:div.p-10
+         [:div.m-b-5 "Icons made by Lorc, Caduceus, and Delapouite. Available on " [:a.orange {:href "http://game-icons.net"} "http://game-icons.net"]]]]]]]))

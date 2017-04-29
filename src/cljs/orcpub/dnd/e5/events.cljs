@@ -20,7 +20,8 @@
 
 (def ->local-store (after character->local-store))
 
-(def character-interceptors [(path :character)
+(def character-interceptors [check-spec-interceptor
+                             (path :character)
                              ->local-store])
 
 
@@ -31,9 +32,11 @@
  [(inject-cofx :local-store-character)
   check-spec-interceptor]
  (fn [{:keys [db local-store-character]} _]
-   {:db (if local-store-character
-          (assoc default-value :character local-store-character)
-          default-value)}))
+   {:db (if (seq db)
+          db
+          (if local-store-character
+            (assoc default-value :character local-store-character)
+            default-value))}))
 
 (defn reset-character [character [_]]
   t5e/character)
@@ -43,12 +46,12 @@
  character-interceptors
  reset-character)
 
-(defn set-character [_ [_ character]]
-  character)
+(defn set-character [db [_ character]]
+  (character->local-store character)
+  (assoc db :character character :loading false))
 
 (reg-event-db
  :set-character
- character-interceptors
  set-character)
 
 (def character-values-path
@@ -396,12 +399,15 @@
  character-interceptors
  set-total-hps)
 
+(defn random-hit-points-option [levels class-kw]
+  {::entity/key :roll
+   ::entity/value (dice/die-roll (-> levels class-kw :hit-die))})
+
 (defn randomize-hit-points [character [_ built-template path levels class-kw]]
   (assoc-in
    character
    (entity/get-entity-path built-template character path)
-   {::entity/key :roll
-    ::entity/value (dice/die-roll (-> levels class-kw :hit-die))}))
+   (random-hit-points-option levels class-kw)))
 
 (reg-event-db
  :randomize-hit-points
@@ -445,3 +451,10 @@
 (reg-event-db
  :set-active-tabs
  set-active-tabs)
+
+(defn set-loading [db [v]]
+  (assoc db :loading v))
+
+(reg-event-db
+ :set-loading
+ set-loading)

@@ -7,7 +7,8 @@
             [clojure.set :refer [difference union intersection]]
             #?(:cljs [cljs.pprint :as pp])))
 
-(spec/def ::key keyword?)
+(spec/def ::key (fn [k] (and (keyword? k)
+                             (not (re-matches #"^[0-9].*" (name k))))))
 (spec/def ::option (spec/keys :req [::key]
                               :opt [::options]))
 (spec/def ::option-vec (spec/* ::option))
