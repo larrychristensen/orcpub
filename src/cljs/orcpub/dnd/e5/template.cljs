@@ -1079,11 +1079,10 @@
                 (es/entity-val c :total-levels))
               level)))
 
-(defn add-level-prereq [template-obj level]
-  (assoc
-   template-obj
-   ::t/prereq-fn
-   (total-levels-prereq level)))
+(defn total-levels-option-prereq [level & [class-key]]
+  (t/option-prereq
+   (str "You have at least " level " " (name class-key) " levels")
+   (total-levels-prereq level class-key)))
 
 (defn add-mod-total-levels-prereq [lvl cls modifier]
   (if (sequential? modifier)
@@ -3930,15 +3929,19 @@
                             :summary "cast polymorph without a spell slot to turn into a CR 1 or less beast"}]}]}))
 
 (defn has-trait-with-name-prereq [name]
-  (fn [c] (some #(= name (:name %)) (es/entity-val c :traits))))
+  (t/option-prereq
+   (str "You must have " name)
+   (fn [c] (some #(= name (:name %)) (es/entity-val c :traits)))))
 
 (def pact-of-the-tome-name "Pact Boon: Pact of the Tome")
 (def pact-of-the-chain-name "Pact Boon: Pact of the Chain")
 (def pact-of-the-blade-name "Pact Boon: Pact of the Blade")
 
 (def has-eldritch-blast-prereq
-  (fn [c] (some #(= :eldritch-blast (:key %))
-                   (get (es/entity-val c :spells-known) 0))))
+  (t/option-prereq
+   "You must know the edritch blast spell"
+   (fn [c] (some #(= :eldritch-blast (:key %))
+                 (get (es/entity-val c :spells-known) 0)))))
 
 (def pact-boon-options
   [(t/option-cfg
@@ -3996,7 +3999,7 @@
                   {:name "Eldritch Invocation: Ascendant Step"
                    :page 110
                    :summary "cast levitate on yourself at will"})]
-     :prereqs [(total-levels-prereq 9)]})
+     :prereqs [(total-levels-option-prereq 9 :warlock)]})
    (t/option-cfg
     {:name "Beast Speech"
      :modifiers [(mod5e/trait-cfg
@@ -4049,7 +4052,7 @@
                    :frequency {:units :long-rest}
                    :summary "cast hold monster at will on celestials, fiends, or elementals"})]
      :prereqs [(has-trait-with-name-prereq pact-of-the-chain-name)
-               (total-levels-prereq 15)]})
+               (total-levels-option-prereq 15 :warlock)]})
    (t/option-cfg
     {:name "Devil's Sight"
      :modifiers [(mod5e/darkvision 120 1)
@@ -4066,7 +4069,7 @@
                    :page 110
                    :summary "use warlock spell slot to cast confusion"
                    :frequency {:units :long-rest}})]
-     :prereqs [(total-levels-prereq 7)]})
+     :prereqs [(total-levels-option-prereq 7 :warlock)]})
    (t/option-cfg
     {:name "Eldritch Sight"
      :modifiers [(mod5e/trait-cfg
@@ -4102,7 +4105,7 @@
                   {:name "Eldritch Invocation: Lifedrinker"
                    :page 111
                    :summary (str "extra " (max 1 (?ability-bonuses :cha)) " necrotic damage with your pact weapon")})]
-     :prereqs [(total-levels-prereq 12)
+     :prereqs [(total-levels-option-prereq 12 :warlock)
                (has-trait-with-name-prereq pact-of-the-blade-name)]})
    (t/option-cfg
     {:name "Mask of Many Faces"
@@ -4116,7 +4119,7 @@
                   {:name "Eldritch Invocation: Master of Myriad Forms"
                    :page 111
                    :summary "cast alter self at will"})]
-     :prereqs [(total-levels-prereq 15)]})
+     :prereqs [(total-levels-option-prereq 15 :warlock)]})
    (t/option-cfg
     {:name "Minions of Chaos"
      :modifiers [(mod5e/trait-cfg
@@ -4125,7 +4128,7 @@
                    :frequency {:units :long-rest}
                    :summary "cast conjure elemental using warlock spell slot
 long rest."})]
-     :prereqs [(total-levels-prereq 9)]})
+     :prereqs [(total-levels-option-prereq 9 :warlock)]})
    (t/option-cfg
     {:name "Mire the Mind"
      :modifiers [(mod5e/trait-cfg
@@ -4133,7 +4136,7 @@ long rest."})]
                    :page 111
                    :frequency {:units :long-rest}
                    :summary "cast slow using warlock spell slot"})]
-     :prereqs [(total-levels-prereq 5)]})
+     :prereqs [(total-levels-option-prereq 5 :warlock)]})
    (t/option-cfg
     {:name "Misty Visions"
      :modifiers [(mod5e/trait-cfg
@@ -4146,14 +4149,14 @@ long rest."})]
                   {:name "Eldritch Invocation: One with Shadows"
                    :page 111
                    :summary "in dim light or darkness, become invisible"})]
-     :prereqs [(total-levels-prereq 5)]})
+     :prereqs [(total-levels-option-prereq 5 :warlock)]})
    (t/option-cfg
     {:name "Otherworldly Leap"
      :modifiers [(mod5e/trait-cfg
                   {:name "Eldritch Invocation: Otherworldly Leap"
                    :page 111
                    :summary "cast jump on yourself at will"})]
-     :prereqs [(total-levels-prereq 9)]})
+     :prereqs [(total-levels-option-prereq 9 :warlock)]})
    (t/option-cfg
     {:name "Repelling Blast"
      :modifiers [(mod5e/trait-cfg
@@ -4168,7 +4171,7 @@ long rest."})]
                    :page 111
                    :frequency {:units :long-rest}
                    :summary "cast polymorph using a warlock spell slot"})]
-     :prereqs [(total-levels-prereq 7)]})
+     :prereqs [(total-levels-option-prereq 7 :warlock)]})
    (t/option-cfg
     {:name "Sign of Ill Omen"
      :modifiers [(mod5e/trait-cfg
@@ -4176,7 +4179,7 @@ long rest."})]
                    :page 111
                    :frequency {:units :long-rest}
                    :summary "cast bestow curse using warlock spell slot"})]
-     :prereqs [(total-levels-prereq 7)]})
+     :prereqs [(total-levels-option-prereq 7 :warlock)]})
    (t/option-cfg
     {:name "Thief of Five Fates"
      :modifiers [(mod5e/trait-cfg
@@ -4184,14 +4187,14 @@ long rest."})]
                    :page 111
                    :frequency {:units :long-rest}
                    :summary "cast bane warlock spell slot"})]
-     :prereqs [(total-levels-prereq 7)]})
+     :prereqs [(total-levels-option-prereq 7 :warlock)]})
    (t/option-cfg
     {:name "Thirsting Blade"
      :modifiers [(mod5e/trait-cfg
                   {:name "Eldritch Invocation: Thirsting Blade"
                    :page 111
                    :summary "when using Attack action, attack with pact blade twice"})]
-     :prereqs [(total-levels-prereq 5)
+     :prereqs [(total-levels-option-prereq 5 :warlock)
                (has-trait-with-name-prereq pact-of-the-blade-name)]})
    (t/option-cfg
     {:name "Visions of Distant Realms"
@@ -4199,7 +4202,7 @@ long rest."})]
                   {:name "Eldritch Invocation: Visions of Distant Realms"
                    :page 111
                    :summary "cast arcane eye at will"})]
-     :prereqs [(total-levels-prereq 15)]})
+     :prereqs [(total-levels-option-prereq 15 :warlock)]})
    (t/option-cfg
     {:name "Voice of the Chain Master"
      :modifiers [(mod5e/trait-cfg
@@ -4213,7 +4216,7 @@ long rest."})]
                   {:name "Eldritch Invocation: Whispers of the Grave"
                    :page 111
                    :summary "cast speak with dead at will"})]
-     :prereqs [(total-levels-prereq 9)]})
+     :prereqs [(total-levels-option-prereq 9 :warlock)]})
    (t/option-cfg
     {:name "Witch Sight"
      :modifiers [(mod5e/trait-cfg
@@ -4222,7 +4225,7 @@ long rest."})]
                            :amount 30}
                    :page 111
                    :summary "see the true form of a creature"})]
-     :prereqs [(total-levels-prereq 15)]})])
+     :prereqs [(total-levels-option-prereq 15 :warlock)]})])
 
 (def warlock-spells-known
   {1 2

@@ -171,6 +171,7 @@
     :max num-increases
     :tags #{:ability-scores}
     :different? different?
+    :multiselect? true
     :options (map
               (fn [k]
                 (t/option-cfg
@@ -991,14 +992,14 @@
      :page 167
      :summary "increase STR or DEX by 1; proficiency in light armor"
      :selections [(ability-increase-selection [:str :dex] 1 false)]
-     :prereqs [(modifiers/light-armor-proficiency)]})
+     :modifiers [(modifiers/light-armor-proficiency)]})
    (feat-option
     {:name "Linguist"
      :icon "lips"
      :page 167
      :summary "increase INT by 1; learn 3 languages; create written ciphers"
      :selections [(language-selection languages 3)]
-     :prereqs [(modifiers/ability :int 1)]})
+     :modifiers [(modifiers/ability :int 1)]})
    (feat-option
     {:name "Lucky"
      :icon "clover"

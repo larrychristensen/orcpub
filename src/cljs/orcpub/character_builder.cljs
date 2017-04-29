@@ -565,6 +565,14 @@
      [{::t/key (::t/key levels)
        ::t/options (map #(select-keys % [::t/key]) (::t/options levels))}])))
 
+(defn meets-prereqs? [built-char option]
+  (every?
+   (fn [{:keys [::t/prereq-fn] :as prereq}]
+     (if prereq-fn
+       (prereq-fn built-char)
+       (js/console.warn "NO PREREQ_FN" (::t/name option) prereq)))
+   (::t/prereqs option)))
+
 (defn class-levels-selector [{:keys [character selection built-char]}]
   (let [options (::t/options selection)
         selected-classes (get-in character [::entity/options :class])
@@ -576,10 +584,7 @@
                            (fn [option]
                              (and
                               (unselected-classes-set (::t/key option))
-                              (every?
-                               (fn [prereq]
-                                 ((::t/prereq-fn prereq) built-char))
-                               (::t/prereqs option))))
+                              (meets-prereqs? built-char option)))
                            options)]
     [:div
      [:div
@@ -587,9 +592,7 @@
        (map-indexed
         (fn [i {:keys [::entity/key] :as selected-class}]
           (let [multiclass-options (filter
-                                    #(every? (fn [prereq]
-                                               ((::t/prereq-fn prereq) built-char))
-                                             (::t/prereqs %))
+                                    (partial meets-prereqs? built-char)
                                     options)]
             ^{:key key}
             [class-level-selector i key selected-class (map class-level-data options) unselected-classes-set (map class-level-data multiclass-options)]))
@@ -1776,7 +1779,11 @@
         (take num options))))))
 
 (defn random-selection [built-template character {:keys [::t/min ::t/max ::t/options ::t/multiselect? ::entity/path] :as selection}]
-  (let [new-options (take (count-remaining built-template character selection) (shuffle options))]
+  (let [built-char (entity/build character built-template)
+        new-options (take (count-remaining built-template character selection)
+                          (shuffle (filter
+                                    (partial meets-prereqs? built-char)
+                                    options)))]
     (reduce
      (fn [new-character {:keys [::t/key]}]
        (let [new-option {::entity/key key}
