@@ -1506,7 +1506,11 @@
                             (mod5e/extra-attack)
                             (mod/modifier ?speed-with-armor (fn [armor] (if (not= :heavy (:type armor))
                                                                             (+ 10 ?speed)
-                                                                            ?speed)))]}
+                                                                            ?speed)))
+                            (mod5e/dependent-trait
+                             {:name "Fast Movement"
+                              :page 49
+                              :summary (str "Your speed increases to " (+ 10 ?speed) " when not heavily armored")})]}
              9 {:modifiers [(mod5e/dependent-trait
                              {:name "Brutal Critical"
                               :page 49
