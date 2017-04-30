@@ -2035,11 +2035,16 @@
      [:img.orcpub-logo {:src "image/orcpub-logo.svg"}]]]
    [:div.container
     [:div.content
-     [:div.flex.align-items-c.f-w-b.f-s-18.m-t-10.m-l-10.white
-      [:span.hidden-xs "Please support continuing development on "]
-      [:a.m-l-5 patreon-link-props [:span "Patreon"]]
-      [:a.m-l-5 patreon-link-props
-       [:img.h-32.w-32 {:src "https://www.patreon.com/images/patreon_navigation_logo_mini_orange.png"}]]]]]])
+     [:div
+      [:div.m-l-10.white
+       [:span "Questions? Comments? Issues? Feature Requests? We'd love to hear them, "]
+       [:a {:href "https://muut.com/orcpub" :target :_blank} "report them here."]]
+      [:div
+       [:div.flex.align-items-c.f-w-b.f-s-18.m-t-10.m-l-10.white
+        [:span.hidden-xs "Please support continuing development on "]
+        [:a.m-l-5 patreon-link-props [:span "Patreon"]]
+        [:a.m-l-5 patreon-link-props
+         [:img.h-32.w-32 {:src "https://www.patreon.com/images/patreon_navigation_logo_mini_orange.png"}]]]]]]]])
 
 (def loading-style
   {:position :absolute
