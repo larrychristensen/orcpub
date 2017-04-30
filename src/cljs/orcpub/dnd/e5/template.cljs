@@ -1104,6 +1104,7 @@
                                modifiers
                                level-modifiers
                                traits
+                               prereqs
                                levels]
                         :as subcls}]
   (let [kw (common/name-to-kw name)
@@ -1146,6 +1147,7 @@
                          levels)]
     (t/option-cfg
      {:name name
+      :prereqs prereqs
       :selections (map
                    (fn [selection]
                      (update selection ::t/tags sets/union #{(:key cls) kw}))
@@ -4885,6 +4887,9 @@ long rest."})]
     :source :scag
     :subclasses [{:name "Path of the Battlerager"
                   :source :scag
+                  :prereqs [(t/option-prereq
+                             "Dwarves only"
+                             (fn [c] (= "Dwarf" (es/entity-val c :race))))]
                   :modifiers [(mod5e/bonus-action
                                {:name "Spiked Armor Attack"
                                 :page 121
@@ -5293,6 +5298,9 @@ long rest."})]
                   :profs {:armor {:light false}
                           :save {:dex true :int true}
                           :tool {:thieves-tools false}}
+                  :prereqs [(t/option-prereq
+                             "Elves only"
+                             (fn [c] (= "Elf" (es/entity-val c :race))))]
                   :modifiers [(mod5e/skill-proficiency :performance)]
                   :selections [(opt5e/weapon-proficiency-selection
                                 (map

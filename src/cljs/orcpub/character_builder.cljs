@@ -1780,11 +1780,13 @@
           {::entity/key key})
         (take num options))))))
 
-(defn random-selection [built-template character {:keys [::t/min ::t/max ::t/options ::t/multiselect? ::entity/path] :as selection}]
+(defn random-selection [built-template character {:keys [::t/key ::t/min ::t/max ::t/options ::t/multiselect? ::entity/path] :as selection}]
   (let [built-char (entity/build character built-template)
         new-options (take (count-remaining built-template character selection)
                           (shuffle (filter
-                                    (partial meets-prereqs? built-char)
+                                    (fn [o]
+                                      (and (meets-prereqs? built-char o)
+                                           (not= :none (::t/key o))))
                                     options)))]
     (reduce
      (fn [new-character {:keys [::t/key]}]
@@ -1798,7 +1800,10 @@
           (conj (actual-path selection) key)
           (fn [options] (if multiselect? (conj (or options []) new-option) new-option)))))
      character
-     new-options)))
+     (if (and (= :class key) (empty? new-options))
+       [{::t/key :fighter}]
+       new-options))))
+
 
 (def selection-randomizers
   {:ability-scores (fn [s _]
