@@ -748,7 +748,9 @@
      [:.content
       {:width "100%"}]
      [:.options-column
-      {:width "100%"}])
+      {:width "100%"}]
+     [:.header-button-text
+      {:display :none}])
 
     (at-media
      xs-query

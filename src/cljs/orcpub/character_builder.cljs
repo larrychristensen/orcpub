@@ -1963,23 +1963,23 @@
                        (dispatch [:set-character new-char]))))}
       [:span
        [:i.fa.fa-random.f-s-18]]
-      [:span.m-l-5.hidden-sm.hidden-xs "Random"]]
+      [:span.m-l-5.header-button-text "Random"]]
      [:button.form-button.h-40.m-l-5.m-t-5.m-b-5
       {:on-click (fn [_] (dispatch [:reset-character]))}
       [:span
        [:i.fa.fa-undo.f-s-18]
        [:i.fa.fa-undo.f-s-18]]
-      [:span.m-l-5.hidden-sm.hidden-xs "Reset"]]
+      [:span.m-l-5.header-button-text "Reset"]]
      [:button.form-button.h-40.m-l-5.m-t-5.m-b-5
       {:on-click (export-pdf built-char)}
       [:i.fa.fa-print.f-s-18]
-      [:span.m-l-5.hidden-sm.hidden-xs "Print"]]
+      [:span.m-l-5.header-button-text "Print"]]
      [:button.form-button.h-40.m-l-5.m-t-5.m-b-5
       [:i.fa.fa-floppy-o.f-s-18]
-      [:span.m-l-5.hidden-sm.hidden-xs "Browser Save"]]
+      [:span.m-l-5.header-button-text "Browser Save"]]
      [:button.form-button.h-40.m-l-5.opacity-5.m-t-5.m-b-5
       [:i.fa.fa-cloud-upload.f-s-18]
-      [:span.m-l-5.hidden-sm.hidden-xs "Save" [:span.i.m-l-5 "(Coming Soon)"]]]]]])
+      [:span.m-l-5.header-button-text "Save" [:span.i.m-l-5 "(Coming Soon)"]]]]]])
 
 (defn al-legality []
   (let [expanded? (r/atom false)]
@@ -2036,10 +2036,10 @@
    [:div.container
     [:div.content
      [:div
-      [:div.m-l-10.white
+      [:div.m-l-10.white.hidden-xs.hidden-sm
        [:span "Questions? Comments? Issues? Feature Requests? We'd love to hear them, "]
        [:a {:href "https://muut.com/orcpub" :target :_blank} "report them here."]]
-      [:div
+      [:div.hidden-xs.hidden-sm
        [:div.flex.align-items-c.f-w-b.f-s-18.m-t-10.m-l-10.white
         [:span.hidden-xs "Please support continuing development on "]
         [:a.m-l-5 patreon-link-props [:span "Patreon"]]
