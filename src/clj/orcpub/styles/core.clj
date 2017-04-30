@@ -749,7 +749,7 @@
       {:width "100%"}]
      [:.options-column
       {:width "100%"}]
-     [:.header-button-text
+     [:.header-button-text :.header-links
       {:display :none}])
 
     (at-media

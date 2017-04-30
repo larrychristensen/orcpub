@@ -2033,7 +2033,7 @@
    [:div.app-header-bar.container
     [:div.content
      [:img.orcpub-logo {:src "image/orcpub-logo.svg"}]]]
-   [:div.container
+   [:div.container.header-links
     [:div.content
      [:div
       [:div.m-l-10.white.hidden-xs.hidden-sm
