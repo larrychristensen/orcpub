@@ -6,6 +6,16 @@
             [orcpub.dnd.e5.db :refer [tab-path]]))
 
 (reg-sub
+ :locked
+ (fn [db [_ path]]
+   (get-in db [:locked-components path])))
+
+(reg-sub
+ :locked-components
+ (fn [db []]
+   (get db :locked-components)))
+
+(reg-sub
  :loading
  (fn [db _]
    (get db :loading)))

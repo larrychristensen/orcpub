@@ -10,7 +10,8 @@
   {:builder {:character {:tab #{:build :options}}}
    :character t5e/character
    :template t5e/template
-   :plugins t5e/plugins})
+   :plugins t5e/plugins
+   :locked-components #{}})
 
 (defn character->local-store [character]
   (.setItem js/window.localStorage local-storage-character-key (str character)))

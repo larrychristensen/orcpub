@@ -452,9 +452,17 @@
  :set-active-tabs
  set-active-tabs)
 
-(defn set-loading [db [v]]
+(defn set-loading [db [_ v]]
   (assoc db :loading v))
 
 (reg-event-db
  :set-loading
  set-loading)
+
+(reg-event-db
+ :toggle-locked
+ (fn [db [_ path]]
+   (update db :locked-components (fn [comps]
+                                   (if (comps path)
+                                     (disj comps path)
+                                     (conj comps path))))))

@@ -223,8 +223,8 @@
       (fn [[level spells]]
         ^{:key level}
         [:div.m-t-10.w-200
-         [:span.f-w-b (str (if (zero? level) "Cantrip" (str "Level " level)) (if (pos? level)
-                                                                                 (str " (" (spell-slots level) " slots)")))]
+         [:span.f-w-b (str (if (zero? level) "Cantrip" (str "Level " level)))]
+         (if (pos? level) [:span.i.m-l-5 (str " (" (spell-slots level) " slots)")])
          [:div.i.f-w-n
           (doall
            (map-indexed
@@ -765,19 +765,25 @@
 (defn actual-path [{:keys [::t/ref ::entity/path] :as selection}]
   (vec (if ref (if (sequential? ref) ref [ref]) path)))
 
+(defn get-option [built-template entity path]
+  (get-in entity (entity/get-entity-path built-template entity path)))
+
+(defn option-selected? [require-value? option]
+  (and (or (::entity/value option)
+           (not require-value?))
+       (::entity/key option)))
+
 (defn count-remaining [built-template character {:keys [::t/min ::t/max ::t/require-value?] :as selection}]
   (let [actual-path (actual-path selection)
-        entity-path (entity/get-entity-path built-template character actual-path)
-        selected-options (get-in character entity-path)
+        selected-options (get-option built-template character actual-path)
         selected-count (cond
                          (sequential? selected-options)
                          (count (if require-value?
-                                  (filter ::entity/value selected-options)
+                                  (filter (partial option-selected? require-value?) selected-options)
                                   selected-options))
                          
                          (map? selected-options)
-                         (if (or (::entity/value selected-options)
-                                 (not require-value?))
+                         (if (option-selected? require-value? selected-options)
                            1
                            0)
                          
@@ -922,28 +928,33 @@
 
 (defn selection-section-base []
   (let [expanded? (r/atom false)]
-    (fn [{:keys [path parent-title name icon help max min remaining body]}]
-      [:div.p-5.m-b-20.m-b-0-last
-       (if parent-title
-         (selection-section-parent-title parent-title))
-       [:div.flex.align-items-c
-        (if icon (svg-icon icon 24))
-        (selection-section-title name)
-        (if (and path help)
-          [show-info-button expanded?])]
-       (if (and help path @expanded?)
-         [help-section help])
-       (if (or (and (pos? min)
-                    (nil? max))
-               (= min max))
-         (if (int? min)
-           [:div.p-5.f-s-16
-            [:div.flex.align-items-c.justify-cont-s-b
-             [:span.i.m-r-10 (str "select " (if (= min max)
-                                              min
-                                              (str "at least " min)))]
-             (remaining-component max remaining)]]))
-       body])))
+    (fn [{:keys [path parent-title name icon help max min remaining body hide-lock?]}]
+      (let [locked? @(subscribe [:locked path])]
+        [:div.p-5.m-b-20.m-b-0-last
+         (if parent-title
+           (selection-section-parent-title parent-title))
+         [:div.flex.align-items-c
+          (if icon (svg-icon icon 24))
+          (selection-section-title name)
+          (if (and path help)
+            [show-info-button expanded?])
+          (if (not hide-lock?)
+            [:i.fa.f-s-16.m-l-10.m-r-5.pointer.opacity-5.hover-opacity-full
+             {:class-name (if locked? "fa-lock" "fa-unlock-alt")
+              :on-click #(do (prn "PATH" path) (dispatch [:toggle-locked path]))}])]
+         (if (and help path @expanded?)
+           [help-section help])
+         (if (or (and (pos? min)
+                      (nil? max))
+                 (= min max))
+           (if (int? min)
+             [:div.p-5.f-s-16
+              [:div.flex.align-items-c.justify-cont-s-b
+               [:span.i.m-r-10 (str "select " (if (= min max)
+                                                min
+                                                (str "at least " min)))]
+               (remaining-component max remaining)]]))
+         body]))))
 
 (def ignore-paths-ending-with #{:class :levels :asi-or-feat :ability-score-improvement})
 
@@ -1335,6 +1346,7 @@
            :max 1
            :min 1
            :remaining remaining
+           :hide-lock? true
            :body (doall
                   (map
                    (fn [option]
@@ -1569,6 +1581,7 @@
     (if (es/entity-val built-char :levels)
       [selection-section-base
        {:name "Hit Points"
+        :hide-lock? true
         :min (if (pos? num-selections) num-selections)
         :max (if (pos? num-selections) num-selections)
         :remaining (if (pos? num-selections) (sum-remaining built-template character selections)) 
@@ -1815,7 +1828,18 @@
 
 (def max-iterations 100)
 
-(defn random-character [current-character built-template]
+(defn keep-options [built-template entity option-paths]
+  (reduce
+   (fn [new-entity option-path]
+     (update-option
+      built-template
+      new-entity
+      option-path
+      (fn [_] (get-option built-template entity option-path))))
+   {}
+   option-paths))
+
+(defn random-character [current-character built-template locked-components]
   (reduce
    (fn [character i]
      (if (< i 10)
@@ -1823,9 +1847,10 @@
              available-selections (entity/available-selections character built-char built-template)
              combined-selections (entity/combine-selections available-selections)
              pending-selections (filter
-                                 (fn [selection]
+                                 (fn [{:keys [::entity/path] :as selection}]
                                    (let [remaining (count-remaining built-template character selection)]
-                                     (pos? remaining)))
+                                     (and (pos? remaining)
+                                          (not (locked-components path)))))
                                  combined-selections)]
          (if (empty? pending-selections)
            (reduced character)
@@ -1845,7 +1870,8 @@
             character
             pending-selections)))
        (reduced character)))
-   {::entity/options (select-keys (::entity/options current-character) [:optional-content])}
+   (let [starting-character (keep-options built-template current-character (conj (vec locked-components) [:optional-content]))]
+     starting-character)
    (range)))
 
 (defn description-fields []
@@ -1964,7 +1990,9 @@
       {:on-click (fn [_]
                    (do
                      (dispatch-sync [:set-loading true])
-                     (let [new-char (random-character character @(subscribe [:built-template]))]
+                     (let [new-char (random-character character
+                                                      @(subscribe [:built-template])
+                                                      @(subscribe [:locked-components]))]
                        (dispatch [:set-character new-char]))))}
       [:span
        [:i.fa.fa-random.f-s-18]]

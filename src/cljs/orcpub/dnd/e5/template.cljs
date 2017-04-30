@@ -5879,7 +5879,7 @@ long rest."})]
     ?damage-resistances #{}
     ?saving-throw-advantage []
     ?saving-throws #{}
-    ?spells-known {}}))
+    ?spells-known (sorted-map)}))
 
 (def template
   {::t/base template-base
