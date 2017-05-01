@@ -1,6 +1,7 @@
 (ns orcpub.dnd.e5.modifiers
   (:require [clojure.spec :as spec]
             [clojure.string :as s]
+            [orcpub.common :as common]
             [orcpub.modifiers :as mods]
             [orcpub.entity-spec :as es]
             [orcpub.dnd.e5.character :as char5e]
@@ -58,8 +59,18 @@
    nil
    order-number))
 
+(defn darkvision-bonus [value]
+  (mods/cum-sum-mod
+   ?darkvision-bonus
+   value
+   "Darkvision"
+   (common/bonus-str value)))
+
 (defn speed [value]
   (mods/cum-sum-mod ?speed value "speed" (mods/bonus-str value)))
+
+(defn speed-override [value]
+  (mods/vec-mod ?speed-overrides value))
 
 (defn flying-speed [value]
   (mods/modifier ?flying-speed value "flying" (mods/bonus-str value)))
@@ -84,6 +95,13 @@
                  (update ?ability-increases ability + bonus)
                  (clojure.string/upper-case (name ability))
                  (mods/bonus-str bonus)))
+
+(defn conditional-ability [ability bonus conditions]
+  (mods/modifier ?ability-increases
+                   (update ?ability-increases ability + bonus)
+                   (clojure.string/upper-case (name ability))
+                   (mods/bonus-str bonus)
+                   (vec conditions)))
 
 (defn ability-override [ability value]
   (mods/vec-mod ?ability-overrides {:ability ability :value value}))
@@ -247,6 +265,10 @@
 (defn skill-proficiency [skill-kw]
   (mods/set-mod ?skill-profs skill-kw (s/capitalize (-> skill-kw skill5e/skills-map :name)) "proficiency"))
 
+(defn skill-bonus [skill-kw bonus]
+  (mods/modifier ?additional-skill-bonuses
+                 (update ?additional-skill-bonuses skill-kw + bonus)))
+
 (defn max-hit-points [bonus]
   (mods/cum-sum-mod ?hit-point-level-increases bonus "HP" (mods/bonus-str bonus)))
 
@@ -389,6 +411,9 @@
 
 (defn armored-ac-bonus [bonus]
   (mods/cum-sum-mod ?armored-ac-bonus bonus))
+
+(defn unarmored-ac-bonus [bonus]
+  (mods/cum-sum-mod ?unarmored-ac-bonus bonus))
 
 (defn unarmored-defense [cls]
   (mods/vec-mod ?unarmored-defense cls))

@@ -388,7 +388,7 @@
          [armor-class-section armor-class armor-class-with-armor all-armor]
          [svg-icon-section "Hit Points" "health-normal" (char5e/max-hit-points built-char)]
          [speed-section built-char all-armor]
-         [svg-icon-section "Darkvision" "night-vision" (if darkvision (str darkvision " ft.") "--")]
+         [svg-icon-section "Darkvision" "night-vision" (if (and darkvision (pos? darkvision)) (str darkvision " ft.") "--")]
          [svg-icon-section "Initiative" "sprint" (mod/bonus-str (char5e/initiative built-char))]
          [display-section "Proficiency Bonus" nil (mod/bonus-str (char5e/proficiency-bonus built-char))]
          [svg-icon-section "Passive Perception" "awareness" (char5e/passive-perception built-char)]
@@ -2034,7 +2034,7 @@
                "fa-check"
                "fa-times")}]
            [:a.m-l-5.f-w-b
-            {:href "https://media.wizards.com/2016/dnd/downloads/AL_PH_SKT.pdf"}
+            {:href "https://media.wizards.com/2016/dnd/downloads/AL_PH_SKT.pdf" :target :_blank}
             (str "Adventurer's League "
                  (if al-legal?
                    "Legal"

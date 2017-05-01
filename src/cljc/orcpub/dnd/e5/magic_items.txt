@@ -308,13 +308,23 @@ Whenever a hostile creature damages you while the axe is in your possession, you
     :rarity :rare
 
     :attunement [:any]
-    :description "While you wear these boots, you can use an action to cast the levitate spell on yourself at will."
+      :description "While you wear these boots, you can use an action to cast the levitate spell on yourself at will."
+      :modifiers [(mod5e/action
+                    {:name "Levitate"
+		     :source :dmg
+		     :page 155
+		     :summary "cast levitate at will")]
     }{
     :name "Boots of Speed"
     :item-type :wondrous-item
     :rarity :rare
 
     :attunement [:any]
+    :modifiers [(mod5e/bonus-action
+    	         {:name "Boots of Speed"
+		  :source :dmg
+		  :page 155
+		  :summary "Activate Boots of Speed and double your walking speed and opportunity attacks against you have disadvantage")]
     :description "While you wear these boots, you can use a bonus action and click the boots’ heels together. If you do, the boots double your walking speed, and any creature that makes an opportunity attack against you has disadvantage on the attack roll. If you click your heels together again, you end the effect.
 When the boots’ property has been used for a total of 10 minutes, the magic ceases to function until you finish a long rest."
     }{
@@ -323,6 +333,7 @@ When the boots’ property has been used for a total of 10 minutes, the magic ce
     :rarity :uncommon
 
     :attunement [:any]
+    :modifiers [(mod5e/speed-override 30)]
     :description "While you wear these boots, your walking speed becomes 30 feet, unless your walking speed is higher, and your speed isn’t reduced if you are encumbered or wearing heavy armor. In addition, you can jump three times the normal distance, though you can’t jump farther than your remaining movement would allow."
     }{
     :name "Boots of the Winterlands"

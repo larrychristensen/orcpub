@@ -1,5 +1,6 @@
 (ns orcpub.dnd.e5.magic-items
   (:require [orcpub.common :as common]
+            [orcpub.modifiers :as mod]
             [orcpub.dnd.e5.weapons :as weapons]
             [orcpub.dnd.e5.armor :as armor5e]
             [orcpub.dnd.e5.equipment :as equip5e]
@@ -37,6 +38,31 @@
 (def plus-1-name (bonus-name-fn 1))
 (def plus-2-name (bonus-name-fn 2))
 (def plus-3-name (bonus-name-fn 3))
+
+
+(defn dragon-scale-mail [color-nm resistance-kw]
+  {
+   :name (str "Dragon Scale Mail, " color-nm)
+   :magical-ac-bonus 1
+   :item-type :armor
+   :item-subtype :scale-mail
+
+   :rarity :very-rare
+
+   :attunement [:any]
+   :modifiers [(mod5e/damage-resistance resistance-kw)
+               (mod5e/saving-throw-advantage ["'Frightful Presence' spell" "breath weapons of dragons"])
+               (mod5e/action
+                {:name "Dragon Scale Mail"
+                 :page 165
+                 :source :dmg
+                 :frequency {:units :day}
+                 :summary "know location of closest dragon within 30 miles"})]
+   :description (str "Dragon scale mail is made of the scales of one kind of dragon. Sometimes dragons collect their cast-off scales and gift them to humanoids. Other times, hunters carefully skin and preserve the hide of a dead dragon. In either case, dragon scale mail is highly valued.
+While wearing this armor, you gain a +1 bonus to AC, you have advantage on saving throws against the Frightful Presence and breath weapons of dragons, and you have resistance to " (name resistance-kw) " damage.
+Additionally, you can focus your senses as an action to magically discern the distance and
+direction to the closest dragon within 30 miles of you that is of the same type as the armor. This special action can’t be used again until the next dawn."
+   )})
                             
 (def raw-magic-items
   [{
@@ -308,21 +334,36 @@ Whenever a hostile creature damages you while the axe is in your possession, you
     :rarity :rare
 
     :attunement [:any]
-    :description "While you wear these boots, you can use an action to cast the levitate spell on yourself at will."
-    }{
+      :description "While you wear these boots, you can use an action to cast the levitate spell on yourself at will."
+      :modifiers [(mod5e/action
+                    {:name "Levitate"
+		     :source :dmg
+		     :page 155
+		     :summary "cast levitate at will"})]}
+{
     :name "Boots of Speed"
     :item-type :wondrous-item
     :rarity :rare
 
     :attunement [:any]
+    :modifiers [(mod5e/bonus-action
+    	         {:name "Boots of Speed"
+		  :source :dmg
+		  :page 155
+                  :frequency {:units :long-rest}
+                  :duration {:units :minute
+                             :amount 10}
+		  :summary "Activate Boots of Speed and double your walking speed and opportunity attacks against you have disadvantage"})]
+
     :description "While you wear these boots, you can use a bonus action and click the boots’ heels together. If you do, the boots double your walking speed, and any creature that makes an opportunity attack against you has disadvantage on the attack roll. If you click your heels together again, you end the effect.
-When the boots’ property has been used for a total of 10 minutes, the magic ceases to function until you finish a long rest."
-    }{
+When the boots’ property has been used for a total of 10 minutes, the magic ceases to function until you finish a long rest."}
+{
     :name "Boots of Striding and Springing"
     :item-type :wondrous-item
     :rarity :uncommon
 
     :attunement [:any]
+    :modifiers [(mod5e/speed-override 30)]
     :description "While you wear these boots, your walking speed becomes 30 feet, unless your walking speed is higher, and your speed isn’t reduced if you are encumbered or wearing heavy armor. In addition, you can jump three times the normal distance, though you can’t jump farther than your remaining movement would allow."
     }{
     :name "Boots of the Winterlands"
@@ -330,6 +371,7 @@ When the boots’ property has been used for a total of 10 minutes, the magic ce
     :rarity :uncommon
 
     :attunement [:any]
+      :modifiers [(mod5e/damage-resistance :cold)]
     :description "These furred boots are snug and feel quite warm. While you wear them, you gain the following benefits:
 • You have resistance to cold damage.
 • You ignore difficult terrain created by ice or snow.
@@ -353,6 +395,7 @@ The bowl is about 1 foot in diameter and half as deep. It weighs 3 pounds and ho
     :rarity :rare
 
     :attunement [:any]
+    :modifiers [(mod5e/unarmored-ac-bonus 2)]
     :description "While wearing these bracers, you gain a +2 bonus to AC if you are wearing no armor and using no shield."
     }{
     :name "Brazier of Commanding Fire Elementals"
@@ -366,6 +409,7 @@ The brazier weighs 5 pounds."
     :rarity :uncommon
 
     :attunement [:any]
+    :modifiers [(mod5e/damage-resistance :force) (mod5e/damage-immunity :magic-missile)]
     :description "While wearing this brooch, you have resistance to force damage, and you have immunity to damage from the magic missile spell."
     }{
     :name "Broom of Flying"
@@ -388,6 +432,12 @@ Alternatively, when you light the candle for the first time, you can cast the ga
     :name "Cape of the Mountebank"
     :item-type :wondrous-item
     :rarity :rare
+    :modifiers [(mod5e/action 
+                 {:name "Cape of the Mountebank"
+                  :page 157
+                  :source :dmg
+                  :frequency {:units :day}
+                  :summary "Cast 'dimension door'"})]
     :description "This cape smells faintly of brimstone. While wearing it, you can use it to cast the dimension door spell as an action. This property of the cape can’t be used again until the next dawn.
 When you disappear, you leave behind a cloud of smoke, and you appear in a similar cloud of smoke at your destination. The smoke lightly obscures the space you left and the space you appear in, and it dissipates at the end of your next turn. A light or stronger wind disperses the smoke."
     }{
@@ -414,6 +464,12 @@ The chime can be used ten times. After the tenth time, it cracks and becomes use
     :name "Circlet of Blasting"
     :item-type :wondrous-item
     :rarity :uncommon
+    :modifiers [(mod5e/action 
+                 {:name "Cape of the Mountebank"
+                  :page 158
+                  :source :dmg
+                  :frequency {:units :day}
+                  :summary "cast 'scorching ray' with +5 attack bonus"})]
     :description "While wearing this circlet, you can use an action to cast the scorching ray spell with it. When you make the spell’s attacks, you do so with an attack bonus of +5. The circlet can’t be used this way again until the next dawn."
     }{
     :name "Cloak of Arachnida"
@@ -422,6 +478,13 @@ The chime can be used ten times. After the tenth time, it cracks and becomes use
     :rarity :very-rare
 
     :attunement [:any]
+      :modifiers [(mod5e/damage-resistance :poison)
+                  (mod5e/action 
+                   {:name "Cloak of Arachnidia"
+                    :page 158
+                    :source :dmg
+                    :frequency {:units :day}
+                    :summary "cast 'web' with save DC 13 and 2X area"})]
     :description "This fine garment is made of black silk interwoven with faint silvery threads. While wearing it, you gain the following benefits:
 • You have resistance to poison damage.
 • You have a climbing speed equal to your walking speed.
@@ -443,9 +506,32 @@ The chime can be used ten times. After the tenth time, it cracks and becomes use
     :rarity :uncommon
 
     :attunement [:any]
+    :modifiers [(mod5e/action
+                 {:name "Cloak of Elvenkind"
+                  :page 158
+                  :source :dmg
+                  :summary "Pull hood up and gain advantage on Stealth and others have disadvantage on Perception checks to see you"})]
     :description "While you wear this cloak with its hood up, Wisdom (Perception) checks made to see you have disadvantage, and you have advantage on Dexterity (Stealth) checks made to hide, as the cloak’s color
 shifts to camouflage you. Pulling the hood up or down requires an action."
-    }{
+    }
+{
+    :name "Cloak of Invisibility"
+    :item-type :wondrous-item
+
+    :rarity :legendary
+
+    :attunement [:any]
+    :modifiers [(mod5e/action
+                 {:name "Cloak of Invisibility"
+                  :page 158
+                  :source :dmg
+                  :duration {:units :hour
+                             :amount 2}
+                  :frequency {:units :day}
+                  :summary "Pull hood up and become invisible"})]
+    :description "While you wear this cloak with its hood up, Wisdom (Perception) checks made to see you have disadvantage, and you have advantage on Dexterity (Stealth) checks made to hide, as the cloak’s color
+shifts to camouflage you. Pulling the hood up or down requires an action."}
+{
     :name "Cloak of Protection"
     :item-type :wondrous-item
 
@@ -461,6 +547,12 @@ shifts to camouflage you. Pulling the hood up or down requires an action."
     :rarity :rare
 
     :attunement [:any]
+      :modifiers [(mod5e/action 
+                   {:name "Cloak of the Bat"
+                    :page 159
+                    :source :dmg
+                    :frequency {:units :day}
+                    :summary "'polymorph' into a bat"})]
     :description "While wearing this cloak, you have advantage on Dexterity (Stealth) checks. In an area of dim light or darkness, you can grip the edges of the cloak with both hands and use it to fly at a speed of 40 feet. If you ever fail to grip the cloak’s edges while flying in this way, or if you are no longer in dim light or darkness, you lose this flying speed.
 While wearing the cloak in an area of dim light or darkness, you can use your action to cast polymorph
 on yourself, transforming into a bat. While you are in the form of the bat, you retain your Intelligence, Wisdom, and Charisma scores. The cloak can’t be used this way again until the next dawn."
@@ -468,6 +560,7 @@ on yourself, transforming into a bat. While you are in the form of the bat, you 
     :name "Cloak of the Manta Ray"
     :item-type :wondrous-item
     :rarity :uncommon
+      :modifiers [(mod5e/swimming-speed 60)]
     :description "While wearing this cloak with its hood up, you can breathe underwater, and you have a swimming speed of 60 feet. Pulling the hood up or down requires an action."
     }{
     :name "Crystal Ball"
@@ -518,6 +611,11 @@ You can use an action to cause thick, black poison to coat the blade. The poison
     :rarity :very-rare
 
     :attunement [:any]
+      :modifiers [(mod5e/bonus-action
+                  {:name "Dancing Sword"
+                   :page 161
+                   :source :dmg
+                   :summary "Cause the sword to fly up to 30 ft. and attack"})]
     :description "You can use a bonus action to toss this magic sword into the air and speak the command word. When you do so, the sword begins to hover, flies up to 30 feet, and attacks one creature of your choice within 5 feet of it. The sword uses your attack roll and ability score modifier to damage rolls.
 While the sword hovers, you can use a bonus action to cause it to fly up to 30 feet to another spot within 30 feet of you. As part of the same bonus action, you can cause the sword to attack one creature within 5 feet of it.
 After the hovering sword attacks for the fourth time, it flies up to 30 feet and tries to return to your hand. If you have no hand free, it falls to the ground
@@ -594,6 +692,14 @@ The first time you attack with the sword on each of your turns, you can transfer
 
     :rarity :very-rare
     :attunement [:any]
+    :modifiers [(mod5e/language :abyssal)
+                (mod5e/attack
+                 {:name "Demon Armor Gauntlets"
+                  :damage-die 8
+                  :damage-die-count 1
+                  :damage-modifier 1
+                  :attack-bonus 1
+                  :damage-type :slashing})]
     :description "While wearing this armor, you gain a +1 bonus to AC, and you can understand and speak Abyssal. In addition, the armor’s clawed gauntlets turn unarmed strikes with your hands into magic weapons that deal slashing damage, with a +1 bonus to attack rolls and damage rolls and a damage die of 1d8.
 Curse. Once you don this cursed armor, you can’t doff it unless you are targeted by the remove curse
 spell or similar magic. While wearing the armor, you have disadvantage on attack rolls against demons and on saving throws against their spells and special abilities."
@@ -603,20 +709,18 @@ spell or similar magic. While wearing the armor, you have disadvantage on attack
     :rarity :rare
     :description "You can use an action to place these shackles on an incapacitated creature. The shackles adjust to fit a creature of Small to Large size. In addition to serving as mundane manacles, the shackles prevent a creature bound by them from using any method of extradimensional movement, including teleportation or travel to a different plane of existence. They don’t prevent the creature from passing through an interdimensional portal.
 You and any creature you designate when you use the shackles can use an action to remove them. Once every 30 days, the bound creature can make a DC 30 Strength (Athletics) check. On a success, the creature breaks free and destroys the shackles."
-    }{
-    :name "Dragon Scale Mail"
-    :magical-ac-bonus 1
-    :item-type :armor
-    :item-subtype :scale-mail
-
-    :rarity :very-rare
-
-    :attunement [:any]
-    :description "Dragon scale mail is made of the scales of one kind of dragon. Sometimes dragons collect their cast-off scales and gift them to humanoids. Other times, hunters carefully skin and preserve the hide of a dead dragon. In either case, dragon scale mail is highly valued.
-While wearing this armor, you gain a +1 bonus to AC, you have advantage on saving throws against the Frightful Presence and breath weapons of dragons, and you have resistance to one damage type that is determined by the kind of dragon that provided the scales (see the table).
-Additionally, you can focus your senses as an action to magically discern the distance and
-direction to the closest dragon within 30 miles of you that is of the same type as the armor. This special action can’t be used again until the next dawn."
-    }{
+    }
+   (dragon-scale-mail "Black" :acid)
+   (dragon-scale-mail "Blue" :lightning)
+   (dragon-scale-mail "Brass" :fire)
+   (dragon-scale-mail "Bronze" :lightning)
+   (dragon-scale-mail "Copper" :acid)
+   (dragon-scale-mail "Gold" :fire)
+   (dragon-scale-mail "Green" :poison)
+   (dragon-scale-mail "Red" :fire)
+   (dragon-scale-mail "Silver" :cold)
+   (dragon-scale-mail "White" :cold)
+{
     :name "Dragon Slayer"
     :item-type :weapon
     :item-subtype sword?
@@ -651,7 +755,12 @@ spell can also end the effect on a creature.}{"
     :item-type :armor
     :item-subtype :plate
     :rarity :very-rare
-    :magical-ac-bonus 2
+      :magical-ac-bonus 2
+      :modifiers [(mod5e/reaction
+                   {:name "Dwarven Plate"
+                    :page 167
+                    :source :dmg
+                    :summary "if an effect moves you against your will along the ground, you can use your reaction to reduce the distance you are moved by up to 10 feet"})]
     :description "While wearing this armor, you gain a +2 bonus to AC. In addition, if an effect moves you against your will along the ground, you can use your reaction to reduce the distance you are moved by up to 10 feet."
     }{
     :name "Dwarven Thrower"
@@ -687,7 +796,8 @@ spell, and the gem’s magic is lost. The type of gem determines the elemental s
     :item-type :armor
     :item-subtype :chain-shirt
     :rarity :rare
-    :magical-ac-bonus 1
+      :magical-ac-bonus 1
+      :modifiers [(mod5e/armor-proficiency :elven-chain)]
     :description "You gain a +1 bonus to AC while you wear this armor. You are considered proficient with this armor even if you lack proficiency with medium armor."
     }{
     :name "Eversmoking Bottle"
@@ -701,7 +811,15 @@ The cloud persists as long as the bottle is open. Closing the bottle requires yo
 
     :rarity :uncommon
 
-    :attunement [:any]
+      :attunement [:any]
+      :modifiers [(mod5e/action
+                   {:name "Eyes of Charming"
+                    :page 168
+                    :source :dmg
+                    :frequency {:units :day}
+                    :range {:units :feet
+                            :amount 30}
+                    :summary "cast 'charm person'"})]
     :description "These crystal lenses fit over the eyes. They have 3 charges. While wearing them, you can expend 1 charge as an action to cast the charm person spell
 (save DC 13) on a humanoid within 30 feet of you, provided that you and the target can see each other. The lenses regain all expended charges daily at dawn."
     }{
@@ -827,7 +945,12 @@ When you hit a giant with it, the giant takes an extra 2d6 damage of the weapon�
     :item-type :armor
     :item-subtype :studded-leather
     :rarity :rare
-    :magical-ac-bonus 1
+      :magical-ac-bonus 1
+      :modifiers [(mod5e/bonus-action
+                   {:name "Glamoured Studded Leather"
+                    :page 172
+                    :source :dmg
+                    :summary "change the armor to assume the appearance of normal clothing or some other armor"})]
     :description "While wearing this armor, you gain a +1 bonus to AC. You can also use a bonus action to speak the armor’s command word and cause the armor to assume the appearance of a normal set of clothing or some other kind of armor. You decide what it looks like, including color, style, and accessories, but the armor retains its normal bulk and weight. The illusory appearance lasts until you use this property again or remove the armor."
     }{
     :name "Gloves of Missile Snaring"
@@ -835,7 +958,12 @@ When you hit a giant with it, the giant takes an extra 2d6 damage of the weapon�
 
     :rarity :uncommon
 
-    :attunement [:any]
+      :attunement [:any]
+      :modifiers [(mod5e/reaction
+                   {:name "Gloves of Missile Snaring"
+                    :page 172
+                    :source :dmg
+                    :summary (str "when hit by a ranged weapon attack, reduce the damage by 1d10 + DEX mod")})]
     :description "These gloves seem to almost meld into your hands when you don them. When a ranged weapon attack hits you while you’re wearing them, you can use your reaction to reduce the damage by 1d10 + your Dexterity modifier, provided that you have a free hand. If you reduce the damage to 0, you can catch the missile if it is small enough for you to hold in that hand."
     }{
     :name "Gloves of Swimming and Climbing"
@@ -845,10 +973,12 @@ When you hit a giant with it, the giant takes an extra 2d6 damage of the weapon�
 
     :attunement [:any]
     :description "While wearing these gloves, climbing and swimming don’t cost you extra movement, and you gain a +5 bonus to Strength (Athletics) checks made to climb or swim."
-    }{
+      }
+   {
     :name "Goggles of Night"
     :item-type :wondrous-item
     :rarity :uncommon
+    :modifiers [(mod5e/darkvision-bonus 60)]
     :description "While wearing these dark lenses, you have darkvision out to a range of 60 feet. If you already have darkvision, wearing the goggles increases its range by 60 feet."
     }{
     :name "Hammer of Thunderbolts"
@@ -856,11 +986,23 @@ When you hit a giant with it, the giant takes an extra 2d6 damage of the weapon�
     :item-subtype :maul
     :rarity :legendary
     :magical-attack-bonus 1
-    :magical-damage-bonus 1
+      :magical-damage-bonus 1
+      :attunement [:any]
+      :modifiers [(mod/modifier ?ability-increases
+                                 (update ?ability-increases :str + 4)
+                                 nil
+                                 nil
+                                 [(do
+                                    (prn "MAGIC ITEMS" ?magic-items)
+                                    (and (get-in ?magic-items [:gauntlets-of-ogre-power :equipped?])
+                                         (or (get-in ?magic-items [:belt-of-hill-giant-strength :equipped?])
+                                             (get-in ?magic-items [:belt-of-stone-giant-strength :equipped?])
+                                             (get-in ?magic-items [:belt-of-frost-giant-strength :equipped?])
+                                             (get-in ?magic-items [:belt-of-fire-giant-strength :equipped?])
+                                             (get-in ?magic-items [:belt-of-cloud-giant-strength :equipped?])
+                                             (get-in ?magic-items [:belt-of-storm-giant-strength :equipped?]))))])]
     :description "You gain a +1 bonus to attack and damage rolls made with this magic weapon.
-Giant’s Bane
-
-:attunement [:any]. You must be wearing a belt of giant strength (any variety) and gauntlets of ogre power to attune to this weapon. The attunement ends if you take off either of those items. While you are attuned to this weapon and holding it, your Strength score increases by 4 and can exceed 20, but not 30. When you roll a 20 on an attack roll made with this weapon against a giant, the giant must succeed on a DC 17 Constitution saving throw or die.
+Giant’s Bane. You must be wearing a belt of giant strength (any variety) and gauntlets of ogre power to attune to this weapon. The attunement ends if you take off either of those items. While you are attuned to this weapon and holding it, your Strength score increases by 4 and can exceed 20, but not 30. When you roll a 20 on an attack roll made with this weapon against a giant, the giant must succeed on a DC 17 Constitution saving throw or die.
 The hammer also has 5 charges. While attuned to it, you can expend 1 charge and make a ranged weapon attack with the hammer, hurling it as if it had the thrown property with a normal range of 20 feet and a long range of 60 feet. If the attack hits, the hammer unleashes a thunderclap audible out to 300 feet. The target and every creature within 30 feet of it must succeed on a DC 17 Constitution saving throw or be stunned until the end of your next turn. The hammer regains 1d4 + 1 expended charges daily at dawn."
     }{
     :name "Handy Haversack"

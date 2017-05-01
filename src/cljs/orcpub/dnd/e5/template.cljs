@@ -17,6 +17,7 @@
             [orcpub.dnd.e5.spells :as spells]
             [orcpub.dnd.e5.magic-items :as mi]
             [orcpub.dnd.e5.skills :as skill5e]
+            [orcpub.dnd.e5.display :as disp5e]
             [re-frame.core :refer [subscribe dispatch]])
   #_(:require-macros [orcpub.dnd.e5.options :as opt5e]
                      [orcpub.dnd.e5.modifiers :as mod5e]))
@@ -5520,6 +5521,16 @@ long rest."})]
 (defn ability-item [name abbr desc]
   [:li.m-t-5 [:span.f-w-b.m-r-5 (str name " (" abbr ")")] desc])
 
+(defn inventory-help [description page source]
+  [:div
+   [:div description]
+   (if page (let [{:keys [abbr url]} (disp5e/get-source source)]
+              [:span
+               [:span "see"]
+               [:a {:href url :target :_blank}
+                abbr]
+               [:span page]]))])
+
 (defn inventory-selection [item-type-name icon items modifier-fn]
   (t/selection-cfg
    {:name item-type-name
@@ -5534,11 +5545,13 @@ long rest."})]
                     ::entity/value 1})
     :tags #{:equipment}
     :options (map
-              (fn [{:keys [name key description] :as item}]
+              (fn [{:keys [name key description page source] :as item}]
                 (t/option-cfg
                  {:name name
                   :key key
-                  :help description
+                  :help (if (or description
+                                page)
+                          (inventory-help description page source))
                   :modifiers [(modifier-fn key item)]}))
               items)}))
 
@@ -5828,9 +5841,12 @@ long rest."})]
                          skill5e/skills)
     ?skill-bonuses (reduce-kv
                     (fn [m k v]
-                      (assoc m k (+ v (?ability-bonuses (skill5e/skill-abilities k)))))
+                      (assoc m k (+ v
+                                    (?ability-bonuses (skill5e/skill-abilities k))
+                                    (get ?additional-skill-bonuses 0))))
                     {}
                     ?skill-prof-bonuses)
+    ?additional-skill-bonuses {}
     ?passive-perception (+ 10 (?skill-bonuses :perception))
     ?passive-investigation (+ 10 (?skill-bonuses :investigation))
     ?hit-point-level-bonus (?ability-bonuses :con)
@@ -5891,7 +5907,14 @@ long rest."})]
     ?damage-resistances #{}
     ?saving-throw-advantage []
     ?saving-throws #{}
-    ?spells-known (sorted-map)}))
+    ?spells-known (sorted-map)
+    ?speed-overrides []
+    ?speed 0
+    ?total-speed (apply max ?speed ?speed-overrides)
+    ?darkvision-bonus 0
+    ?darkvision 0
+    ?total-darkvision (+ ?darkvision ?darkvision-bonus)}))
+
 
 (def template
   {::t/base template-base

@@ -72,7 +72,7 @@
   (es/entity-val built-char :ability-bonuses))
 
 (defn base-land-speed [built-char]
-  (es/entity-val built-char :speed))
+  (es/entity-val built-char :total-speed))
 
 (defn base-swimming-speed [built-char]
   (es/entity-val built-char :swimming-speed))
@@ -96,7 +96,7 @@
   (es/entity-val built-char :classes))
 
 (defn darkvision [built-char]
-  (es/entity-val built-char :darkvision))
+  (es/entity-val built-char :total-darkvision))
 
 (defn skill-proficiencies [built-char]
   (es/entity-val built-char :skill-profs))

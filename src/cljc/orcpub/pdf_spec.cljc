@@ -368,7 +368,7 @@
       :ac max-armor-class
       :hd-total total-hit-dice
       :initiative (common/bonus-str (es/entity-val built-char :initiative))
-      :speed (es/entity-val built-char :speed)
+      :speed (char5e/base-land-speed built-char)
       :hp-max (es/entity-val built-char :max-hit-points)
       :passive (es/entity-val built-char :passive-perception)
       :other-profs (other-profs-field built-char)

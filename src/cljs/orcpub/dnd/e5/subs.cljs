@@ -76,9 +76,8 @@
 
 (reg-sub
  :built-template
- :<- [:template]
  :<- [:selected-plugin-options]
- (fn [[template selected-plugin-options] _]
+ (fn [selected-plugin-options _]
    (let [selected-plugins (map
                            :selections
                            (filter
@@ -86,14 +85,14 @@
                               (selected-plugin-options key))
                             t5e/plugins))]
      (if (seq selected-plugins)
-       (update template
+       (update t5e/template
                ::t/selections
                (fn [s]
                  (apply
                   entity/merge-multiple-selections
                   s
                   selected-plugins)))
-       template))))
+       t5e/template))))
 
 (reg-sub
  :built-character
