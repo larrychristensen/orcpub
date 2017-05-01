@@ -83,8 +83,11 @@
          (trait-string (:name action) (common/sentensize (disp5e/action-description action))))
        actions)))))
 
+(defn vec-trait [nm items]
+  (if (seq items) (str nm ": " (s/join ", " items))))
+ 
 (defn keyword-vec-trait [nm keywords]
-  (if (seq keywords) (str nm ": " (s/join ", " (map name keywords)))))
+  (vec-trait nm (map name keywords)))
 
 (defn features-and-traits-header [built-char]
   (let [darkvision (char5e/darkvision built-char)
@@ -97,7 +100,13 @@
              [(if darkvision (str "Darkvision: " darkvision " ft."))
               (keyword-vec-trait "Damage Resistances" damage-resistances)
               (keyword-vec-trait "Damage Immunities" damage-immunities)
-              (keyword-vec-trait "Condition Immunities" condition-immunities)]))))
+              (vec-trait "Condition Immunities"
+                         (map
+                          (fn [{:keys [condition qualifier]}]
+                            (str (name condition)
+                                 (if qualifier
+                                   (str "(" qualifier ")"))))
+                          condition-immunities))]))))
 
 (defn traits-fields [built-char]
   (let [bonus-actions (sort-by :name (es/entity-val built-char :bonus-actions))
