@@ -39,6 +39,8 @@
 (def plus-2-name (bonus-name-fn 2))
 (def plus-3-name (bonus-name-fn 3))
 
+(defn belt-of-giant-strength-mod [value]
+  (mod/vec-mod ?ability-overrides {:ability :str :value (min 30 (+ value (if (and ?giants-bane-gauntlet ?giants-bane-hammer) 4 0)))}))
 
 (defn dragon-scale-mail [color-nm resistance-kw]
   {
@@ -252,7 +254,7 @@ An enclosed creature can use its action to push against the sphere’s wall, mov
     :rarity :rare
 
     :attunement [:any]
-    :modifiers [(mod5e/ability-override :str 21)]
+    :modifiers [(belt-of-giant-strength-mod 21)]
     :description "While wearing this belt, your Strength score changes to 21. If your Strength is already equal to or greater than 21, the item has no effect on you."
       }
       {
@@ -263,7 +265,7 @@ An enclosed creature can use its action to push against the sphere’s wall, mov
     :rarity :very-rare
 
     :attunement [:any]
-    :modifiers [(mod5e/ability-override :str 23)]
+    :modifiers [(belt-of-giant-strength-mod 23)]
     :description "While wearing this belt, your Strength score changes to 23. If your Strength is already equal to or greater than 23, the item has no effect on you."
       }
       {
@@ -274,7 +276,7 @@ An enclosed creature can use its action to push against the sphere’s wall, mov
     :rarity :very-rare
 
     :attunement [:any]
-    :modifiers [(mod5e/ability-override :str 23)]
+    :modifiers [(belt-of-giant-strength-mod 23)]
     
     :description "While wearing this belt, your Strength score changes to 23. If your Strength is already equal to or greater than 23, the item has no effect on you."
       }
@@ -286,7 +288,7 @@ An enclosed creature can use its action to push against the sphere’s wall, mov
     :rarity :very-rare
 
     :attunement [:any]
-    :modifiers [(mod5e/ability-override :str 25)]
+    :modifiers [(belt-of-giant-strength-mod 25)]
     :description "While wearing this belt, your Strength score changes to 25. If your Strength is already equal to or greater than 25, the item has no effect on you."
       }
       {
@@ -297,7 +299,7 @@ An enclosed creature can use its action to push against the sphere’s wall, mov
     :rarity :legendary
 
     :attunement [:any]
-    :modifiers [(mod5e/ability-override :str 27)]
+    :modifiers [(belt-of-giant-strength-mod 27)]
     :description "While wearing this belt, your Strength score changes to 27. If your Strength is already equal to or greater than 27, the item has no effect on you."
       }
       {
@@ -308,7 +310,7 @@ An enclosed creature can use its action to push against the sphere’s wall, mov
     :rarity :legendary
 
     :attunement [:any]
-    :modifiers [(mod5e/ability-override :str 29)]
+    :modifiers [(belt-of-giant-strength-mod 29)]
     :description "While wearing this belt, your Strength score changes to 29. If your Strength is already equal to or greater than 29, the item has no effect on you."
       }
    {
@@ -910,7 +912,8 @@ When you draw this weapon, you can extinguish all nonmagical flames within 30 fe
     :rarity :uncommon
 
     :attunement [:any]
-    :modifiers [(mod5e/ability-override :str 19)]
+      :modifiers [(mod5e/ability-override :str 19)
+                  (mod/modifier ?giants-bane-gauntlet true)]
     :description "Your Strength score is 19 while you wear these gauntlets. They have no effect on you if your Strength is already 19 or higher."
     }{
     :name "Gem of Brightness"
@@ -988,17 +991,7 @@ When you hit a giant with it, the giant takes an extra 2d6 damage of the weapon�
     :magical-attack-bonus 1
       :magical-damage-bonus 1
       :attunement [:any]
-      :modifiers [(mod/modifier ?ability-increases
-                                 (update ?ability-increases :str + 4)
-                                 nil
-                                 nil
-                                 [(and (get-in ?magic-items [:gauntlets-of-ogre-power :equipped?])
-                                       (or (get-in ?magic-items [:belt-of-hill-giant-strength :equipped?])
-                                           (get-in ?magic-items [:belt-of-stone-giant-strength :equipped?])
-                                           (get-in ?magic-items [:belt-of-frost-giant-strength :equipped?])
-                                           (get-in ?magic-items [:belt-of-fire-giant-strength :equipped?])
-                                           (get-in ?magic-items [:belt-of-cloud-giant-strength :equipped?])
-                                           (get-in ?magic-items [:belt-of-storm-giant-strength :equipped?])))])]
+      :modifiers [(mod/modifier ?giants-bane-hammer true)]
     :description "You gain a +1 bonus to attack and damage rolls made with this magic weapon.
 Giant’s Bane. You must be wearing a belt of giant strength (any variety) and gauntlets of ogre power to attune to this weapon. The attunement ends if you take off either of those items. While you are attuned to this weapon and holding it, your Strength score increases by 4 and can exceed 20, but not 30. When you roll a 20 on an attack roll made with this weapon against a giant, the giant must succeed on a DC 17 Constitution saving throw or die.
 The hammer also has 5 charges. While attuned to it, you can expend 1 charge and make a ranged weapon attack with the hammer, hurling it as if it had the thrown property with a normal range of 20 feet and a long range of 60 feet. If the attack hits, the hammer unleashes a thunderclap audible out to 300 feet. The target and every creature within 30 feet of it must succeed on a DC 17 Constitution saving throw or be stunned until the end of your next turn. The hammer regains 1d4 + 1 expended charges daily at dawn."

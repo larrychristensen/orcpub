@@ -306,12 +306,13 @@
            option-value ::value
            :as option}]
        (let [modifiers (get-modifiers template ref-selection-map path)]
-         (map
-          (fn [{:keys [::mods/name ::mods/value ::mods/fn ::mods/deferred-fn ::mods/default-value] :as mod}]
-            (if deferred-fn
-              (assoc mod ::mods/value (or option-value default-value))
-              mod))
-          (flatten modifiers))))
+         (flatten
+          (map
+           (fn [{:keys [::mods/name ::mods/value ::mods/fn ::mods/deferred-fn ::mods/default-value] :as mod}]
+             (if deferred-fn
+               (deferred-fn (or option-value default-value))
+               mod))
+           (flatten modifiers)))))
      flat-options)))
 
 (def memoized-make-modifier-map (memoize t/make-modifier-map))
