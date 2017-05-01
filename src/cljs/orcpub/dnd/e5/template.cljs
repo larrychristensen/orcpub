@@ -321,7 +321,8 @@
    :languages ["Elvish" "Common"]
    :darkvision 60
    :modifiers [(mod5e/saving-throw-advantage [:charmed])
-               (mod5e/immunity :magical-sleep)]
+               (mod5e/immunity :magical-sleep)
+               (mod5e/skill-proficiency :perception)]
    :subraces
    [{:name "High Elf"
      :abilities {:int 1}
