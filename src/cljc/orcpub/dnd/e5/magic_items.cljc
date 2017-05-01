@@ -144,7 +144,8 @@ A creature in the compartment can use an action to move as many as two of the ap
     :item-subtype :plate
     :rarity :legendary
 
-    :attunement [:any]
+      :attunement [:any]
+      :modifiers [(mod5e/damage-resistance :nonmagical)]
     :description "You have resistance to nonmagical damage while you wear this armor. Additionally, you can use an action to make yourself immune to nonmagical damage for 10 minutes or until you are no longer wearing the armor. Once this special action is used, it can’t be used again until the next dawn."
     }{
     :name "Armor of Resistance"
@@ -218,16 +219,73 @@ Once three fuzzy objects have been pulled from the bag, the bag can’t be used 
 You can use an action to throw the bead up to 60 feet. The bead explodes on impact and is destroyed. Each creature within a 10-foot radius of where the bead landed must succeed on a DC 15 Dexterity saving throw or take 5d4 force damage. A sphere of transparent force then encloses the area for 1 minute. Any creature that failed the save and is completely within the area is trapped inside this sphere. Creatures that succeeded on the save, or are partially within the area, are pushed away from the center of the sphere until they are no longer inside it. Only breathable air can pass through the sphere’s wall. No attack or other effect can.
 An enclosed creature can use its action to push against the sphere’s wall, moving the sphere up to half the creature’s walking speed. The sphere can be picked up, and its magic causes it to weigh only 1 pound, regardless of the weight of creatures inside."
     }{
-    :name "Belt of Giant Strength"
+    :name "Belt of Hill Giant Strength"
 
     :item-type :wondrous-item
 
-    :rarity "varies"
+    :rarity :rare
 
     :attunement [:any]
-    :description "While wearing this belt, your Strength score changes to a score granted by the belt. If your Strength is already equal to or greater than the belt’s score, the item has no effect on you.
-Six varieties of this belt exist, corresponding with and having rarity according to the six kinds of true giants. The belt of stone giant strength and the belt of frost giant strength look different, but they have the same effect."
-    }{
+    :modifiers [(mod5e/ability-override :str 21)]
+    :description "While wearing this belt, your Strength score changes to 21. If your Strength is already equal to or greater than 21, the item has no effect on you."
+      }
+      {
+    :name "Belt of Stone Giant Strength"
+
+    :item-type :wondrous-item
+
+    :rarity :very-rare
+
+    :attunement [:any]
+    :modifiers [(mod5e/ability-override :str 23)]
+    :description "While wearing this belt, your Strength score changes to 23. If your Strength is already equal to or greater than 23, the item has no effect on you."
+      }
+      {
+    :name "Belt of Frost Giant Strength"
+
+    :item-type :wondrous-item
+
+    :rarity :very-rare
+
+    :attunement [:any]
+    :modifiers [(mod5e/ability-override :str 23)]
+    
+    :description "While wearing this belt, your Strength score changes to 23. If your Strength is already equal to or greater than 23, the item has no effect on you."
+      }
+      {
+    :name "Belt of Fire Giant Strength"
+
+    :item-type :wondrous-item
+
+    :rarity :very-rare
+
+    :attunement [:any]
+    :modifiers [(mod5e/ability-override :str 25)]
+    :description "While wearing this belt, your Strength score changes to 25. If your Strength is already equal to or greater than 25, the item has no effect on you."
+      }
+      {
+    :name "Belt of Cloud Giant Strength"
+
+    :item-type :wondrous-item
+
+    :rarity :legendary
+
+    :attunement [:any]
+    :modifiers [(mod5e/ability-override :str 27)]
+    :description "While wearing this belt, your Strength score changes to 27. If your Strength is already equal to or greater than 27, the item has no effect on you."
+      }
+      {
+    :name "Belt of Storm Giant Strength"
+
+    :item-type :wondrous-item
+
+    :rarity :legendary
+
+    :attunement [:any]
+    :modifiers [(mod5e/ability-override :str 29)]
+    :description "While wearing this belt, your Strength score changes to 29. If your Strength is already equal to or greater than 29, the item has no effect on you."
+      }
+   {
     :name "Berserker Axe"
     :item-type :weapon
     :item-subtype axe?
@@ -392,8 +450,9 @@ shifts to camouflage you. Pulling the hood up or down requires an action."
     :item-type :wondrous-item
 
     :rarity :uncommon
-      :magical-ac-bonus 1
-      :attunement [:any]
+    :magical-ac-bonus 1
+    :modifiers (map #(mod5e/saving-throw-bonus % 1) [:str :con :dex :int :wis :cha])
+    :attunement [:any]
     :description "You gain a +1 bonus to AC and saving throws while you wear this cloak."
     }{
     :name "Cloak of the Bat"
@@ -528,8 +587,8 @@ The Void. This black card spells disaster. Your soul is drawn from your body and
     :description "You gain a +3 bonus to attack and damage rolls made with this magic weapon.
 The first time you attack with the sword on each of your turns, you can transfer some or all of the sword’s bonus to your Armor Class, instead of using the bonus on any attacks that turn. For example, you could reduce the bonus to your attack and damage rolls to +1 and gain a +2 bonus to AC. The adjusted bonuses remain in effect until the start of your next turn, although you must hold the sword to gain a bonus to AC from it."
     }{
-      :name "Demon Armor"
-      :magical-ac-bonus 1
+    :name "Demon Armor"
+    :magical-ac-bonus 1
     :item-type :armor
     :item-subtype :plate
 
@@ -545,8 +604,8 @@ spell or similar magic. While wearing the armor, you have disadvantage on attack
     :description "You can use an action to place these shackles on an incapacitated creature. The shackles adjust to fit a creature of Small to Large size. In addition to serving as mundane manacles, the shackles prevent a creature bound by them from using any method of extradimensional movement, including teleportation or travel to a different plane of existence. They don’t prevent the creature from passing through an interdimensional portal.
 You and any creature you designate when you use the shackles can use an action to remove them. Once every 30 days, the bound creature can make a DC 30 Strength (Athletics) check. On a success, the creature breaks free and destroys the shackles."
     }{
-      :name "Dragon Scale Mail"
-      :magical-ac-bonus 1
+    :name "Dragon Scale Mail"
+    :magical-ac-bonus 1
     :item-type :armor
     :item-subtype :scale-mail
 
@@ -591,8 +650,8 @@ spell can also end the effect on a creature.}{"
     :name "Dwarven Plate"
     :item-type :armor
     :item-subtype :plate
-      :rarity :very-rare
-      :magical-ac-bonus 2
+    :rarity :very-rare
+    :magical-ac-bonus 2
     :description "While wearing this armor, you gain a +2 bonus to AC. In addition, if an effect moves you against your will along the ground, you can use your reaction to reduce the distance you are moved by up to 10 feet."
     }{
     :name "Dwarven Thrower"
@@ -627,8 +686,8 @@ spell, and the gem’s magic is lost. The type of gem determines the elemental s
     :name "Elven Chain"
     :item-type :armor
     :item-subtype :chain-shirt
-      :rarity :rare
-      :magical-ac-bonus 1
+    :rarity :rare
+    :magical-ac-bonus 1
     :description "You gain a +1 bonus to AC while you wear this armor. You are considered proficient with this armor even if you lack proficiency with medium armor."
     }{
     :name "Eversmoking Bottle"
@@ -732,8 +791,8 @@ When you draw this weapon, you can extinguish all nonmagical flames within 30 fe
 
     :rarity :uncommon
 
-      :attunement [:any]
-      :modifiers [(mod5e/ability-override :str 19)]
+    :attunement [:any]
+    :modifiers [(mod5e/ability-override :str 19)]
     :description "Your Strength score is 19 while you wear these gauntlets. They have no effect on you if your Strength is already 19 or higher."
     }{
     :name "Gem of Brightness"
@@ -767,8 +826,8 @@ When you hit a giant with it, the giant takes an extra 2d6 damage of the weapon�
     :name "Glamoured Studded Leather"
     :item-type :armor
     :item-subtype :studded-leather
-      :rarity :rare
-      :magical-ac-bonus 1
+    :rarity :rare
+    :magical-ac-bonus 1
     :description "While wearing this armor, you gain a +1 bonus to AC. You can also use a bonus action to speak the armor’s command word and cause the armor to assume the appearance of a normal set of clothing or some other kind of armor. You decide what it looks like, including color, style, and accessories, but the armor retains its normal bulk and weight. The illusory appearance lasts until you use this property again or remove the armor."
     }{
     :name "Gloves of Missile Snaring"
@@ -825,8 +884,8 @@ Placing the haversack inside an extradimensional space created by a bag of holdi
 
     :rarity :uncommon
 
-      :attunement [:any]
-      :modifiers [(mod5e/ability-override :int 19)]
+    :attunement [:any]
+    :modifiers [(mod5e/ability-override :int 19)]
     :description "Your Intelligence score is 19 while you wear this headband. It has no effect on you if your Intelligence is already 19 or higher."
     }{
     :name "Helm of Brilliance"
@@ -963,7 +1022,7 @@ An identify spell reveals that a creature is inside the flask, but the only way 
     }{
     :name "Javelin of Lightning"
     :item-type :weapon
-      :item-subtype javelin?
+    :item-subtype javelin?
     :rarity :uncommon
     :description "This javelin is a magic weapon. When you hurl it and speak its command word, it transforms into a bolt of lightning, forming a line 5 feet wide that extends out from you to a target within 120 feet. Each creature in the line excluding you and the target must make a DC 13 Dexterity saving throw, taking 4d6 lightning damage on a failed save, and half as much damage on a successful one. The lightning bolt turns back into a javelin when it reaches the target. Make a ranged weapon attack against the target. On a hit, the target takes damage from the javelin plus 4d6 lightning damage.
 The javelin’s property can’t be used again until the next dawn. In the meantime, the javelin can still be used as a magic weapon."
@@ -983,6 +1042,7 @@ foot radius."
     :attunement [:any]
     :magical-attack-bonus 1
     :magical-damage-bonus 1
+    :modifiers [(mod5e/saving-throw-bonuses 1)]
     :description "You gain a +1 bonus to attack and damage rolls made with this magic weapon. While the sword is on your person, you also gain a +1 bonus to saving throws.
 Luck. If the sword is on your person, you can call on its luck (no action required) to reroll one attack roll, ability check, or saving throw you dislike. You must use the second roll. This property can’t be used again until the next dawn.
 Wish. The sword has 1d4 – 1 charges. While holding it, you can use an action to expend 1 charge and cast the wish spell from it. This property can’t be used again until the next dawn. The sword loses this property if it has no charges."
@@ -1023,6 +1083,7 @@ The mace regains 1d3 expended charges daily at dawn."
     :rarity :rare
 
     :attunement [:any]
+    :modifiers [(mod5e/saving-throw-advantage ["spells"])]
     :description "You have advantage on saving throws against spells while you wear this cloak."
     }{
     :name "Manual of Bodily Health"
@@ -1406,8 +1467,9 @@ If you die while wearing the ring, your soul enters it, unless it already houses
 
     :rarity :rare
 
-      :attunement [:any]
-      :magical-ac-bonus 1
+    :attunement [:any]
+    :magical-ac-bonus 1
+    :modifiers (map #(mod5e/saving-throw-bonus % 1) [:str :con :dex :int :wis :cha])
     :description "You gain a +1 bonus to AC and saving throws while wearing this ring."
     }{
     :name "Ring of Regeneration"
@@ -1661,7 +1723,7 @@ The rope has AC 20 and 20 hit points. It regains 1 hit point every 5 minutes as 
     :item-type :armor
     :item-subtype :shield
     :rarity :uncommon
-      :magical-ac-bonus 1
+    :magical-ac-bonus 1
     :description "While holding this shield, you have a +1 bonus to AC. This bonus is in addition to the shield’s normal bonus to AC."
     }{
     :name "Shield +2"

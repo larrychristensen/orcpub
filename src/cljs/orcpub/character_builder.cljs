@@ -402,8 +402,8 @@
              (display-section "Critical Hit" nil (str min-crit "-" max-crit))))
          [:div
           [list-display-section
-           "Save Proficiencies" "dodging"
-           (map (comp s/upper-case name) (char5e/saving-throws built-char))]
+           "Saving Throws" "dodging"
+           (map (fn [[k v]] (str (s/upper-case (name k)) (common/bonus-str v))) (char5e/save-bonuses built-char))]
           (let [save-advantage (char5e/saving-throw-advantages built-char)]
             [:ul.list-style-disc.m-t-5
              (doall

@@ -5805,9 +5805,12 @@ long rest."})]
                       {}
                       ?abilities)
     ?ability-overrides []
+    ?saving-throw-bonuses {}
     ?save-bonuses (reduce-kv
                    (fn [m k v]
-                     (assoc m k (+ v (if (and ?saving-throws (?saving-throws k)) ?prof-bonus 0))))
+                     (assoc m k (+ v
+                                   (or (get ?saving-throw-bonuses k) 0)
+                                   (if (and ?saving-throws (?saving-throws k)) ?prof-bonus 0))))
                    {}
                    ?ability-bonuses)
     ?total-levels (apply + (map (fn [[k {l :class-level}]] l) ?levels))

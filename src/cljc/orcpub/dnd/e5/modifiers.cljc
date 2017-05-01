@@ -128,6 +128,16 @@
                  nil;;(s/join ", " (map (comp s/upper-case name) abilities))
                  [(or (nil? cls-kw) (= cls-kw (first ?classes)))]))
 
+(defn saving-throw-bonus [ability-kw bonus]
+  (mods/modifier ?saving-throw-bonuses
+                 (update ?saving-throw-bonuses ability-kw + bonus)))
+
+(defn saving-throw-bonuses [bonus]
+  (mods/modifier ?saving-throw-bonuses
+                 (merge-with +
+                             ?saving-throw-bonuses
+                             (zipmap [:str :con :dex :int :wis :cha] (repeat bonus)))))
+
 (defn saving-throw-advantage [types & [abilities]]
   (mods/vec-mod ?saving-throw-advantage {:abilities abilities
                                          :types types}))
@@ -320,10 +330,19 @@
     (fn [cfg] (es/map-mod ?weapons weapon-kw (equipment-cfg cfg)))
     1))
 
-(defn deferred-magic-weapon [weapon-kw weapon]
+(defn deferred-magic-item-fn [equipment-mod-fn {:keys [magical-ac-bonus modifiers]}]
+  (fn [cfg] (let [equipment-mod (equipment-mod-fn cfg)]
+              (if (:equipped? cfg)
+                (let [mods (concat [equipment-mod]
+                                   (if magical-ac-bonus [(es/cum-sum-mod ?magical-ac-bonus magical-ac-bonus)])
+                                   (map ::mods/fn modifiers))]
+                  mods)
+                equipment-mod))))
+
+(defn deferred-magic-weapon [weapon-kw {:keys [magical-ac-bonus modifiers] :as weapon}]
   (mods/deferred-modifier
     ?magic-weapons
-    (fn [cfg] (es/map-mod ?magic-weapons weapon-kw (equipment-cfg cfg)))
+    (deferred-magic-item-fn #(es/map-mod ?magic-weapons weapon-kw (equipment-cfg %)) weapon)
     1))
 
 (defn armor [armor-kw cfg]
@@ -338,7 +357,7 @@
 (defn deferred-magic-armor [armor-kw armor]
   (mods/deferred-modifier
     ?armor
-    (fn [cfg] (es/map-mod ?magic-armor armor-kw (equipment-cfg cfg)))
+    (deferred-magic-item-fn (fn [cfg] (es/map-mod ?magic-armor armor-kw (equipment-cfg cfg))) armor)
     1))
 
 (defn equipment [equipment-kw cfg]
@@ -356,16 +375,10 @@
     (fn [cfg] (es/map-mod ?treasure treasure-kw (equipment-cfg cfg)))
     1))
 
-(defn deferred-magic-item [item-kw {:keys [magical-ac-bonus modifiers]}]
+(defn deferred-magic-item [item-kw item]
   (mods/deferred-modifier
     ?magic-items
-    (fn [cfg] (let [mod (es/map-mod ?magic-items item-kw (equipment-cfg cfg))]
-                (if (:equipped? cfg)
-                  (let [mods (concat [mod]
-                                     (if magical-ac-bonus [(es/cum-sum-mod ?magical-ac-bonus magical-ac-bonus)])
-                                     (map ::mods/fn modifiers))]
-                    mods)
-                  mod)))
+    (deferred-magic-item-fn (fn [cfg] (es/map-mod ?magic-items item-kw (equipment-cfg cfg))) item)
     1))
 
 (defn extra-attack []

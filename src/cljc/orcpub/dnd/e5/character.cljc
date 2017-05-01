@@ -202,6 +202,9 @@
 (defn saving-throws [built-char]
   (es/entity-val built-char :saving-throws))
 
+(defn save-bonuses [built-char]
+  (es/entity-val built-char :save-bonuses))
+
 (defn saving-throw-advantages [built-char]
   (es/entity-val built-char :saving-throw-advantage))
 
