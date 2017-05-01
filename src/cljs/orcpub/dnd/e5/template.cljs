@@ -4262,8 +4262,9 @@ long rest."})]
   (t/selection-cfg
    {:name "Eldritch Invocations"
     :options eldritch-invocation-options
-    :min (or num 0)
-    :max (or num 0)
+    :min (or num 1)
+    :max (or num 1)
+    :ref [:class :warlock :eldritch-invocations]
     :tags #{:spells}
     :simple? true}))
 
@@ -4345,8 +4346,10 @@ long rest."})]
                                :tags #{:class}
                                :options pact-boon-options})]}
              5 {:selections [(eldritch-invocation-selection)]}
-             8 {:selections [(eldritch-invocation-selection)]}
-             11 {:selections [(mystic-arcanum-selection 6)]
+             7 {:selections [(eldritch-invocation-selection)]}
+             9 {:selections [(eldritch-invocation-selection)]}
+             12 {:selections [(eldritch-invocation-selection)
+                              (mystic-arcanum-selection 6)]
                  :modifiers [(mod5e/dependent-trait
                               {:name "Mystic Arcanum"
                                :level 11
@@ -4359,7 +4362,6 @@ long rest."})]
                                                      15 3
                                                      17 4
                                                      :default 1})}})]}
-             12 {:selections [(eldritch-invocation-selection)]}
              13 {:selections [(mystic-arcanum-selection 7)]}
              15 {:selections [(eldritch-invocation-selection)
                               (mystic-arcanum-selection 8)]}
