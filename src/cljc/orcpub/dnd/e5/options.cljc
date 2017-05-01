@@ -492,7 +492,8 @@
        10 {2 1}
        13 {3 2}
        16 {3 1}
-       19 {4 1}}))
+       19 {4 1}}
+    {}))
 
 (defn total-slots [level level-factor]
   (let [schedule (spell-slot-schedule level-factor)]
@@ -551,6 +552,7 @@
 (defn spell-selection-key [cls-key-nm]
   (keyword (str cls-key-nm "-spells-known")))
 
+
 (defn spells-known-selections [{:keys [class-key
                                        level-factor
                                        spells-known
@@ -563,7 +565,7 @@
   (reduce
    (fn [m [cls-lvl v]]
      (let [[num restriction] (if (number? v) [v] ((juxt :num :restriction) v))
-           slots (or slot-schedule (total-slots cls-lvl level-factor))
+           slots (or (if slot-schedule (slot-schedule cls-lvl)) (total-slots cls-lvl level-factor))
            all-spells (select-keys
                        (or spells (sl/spell-lists (or spell-list class-key)))
                        (keys slots))

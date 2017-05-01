@@ -216,42 +216,45 @@
     (compare (key-fn spell-1) (key-fn spell-2))))
 
 (defn spells-known-section [spells-known spell-slots]
-  [display-section "Spells Known" "spell-book"
-   [:div.f-s-14.flex.flex-wrap
-    (doall
-     (map
-      (fn [[level spells]]
-        ^{:key level}
-        [:div.m-t-10.w-200
-         [:span.f-w-b (str (if (zero? level) "Cantrip" (str "Level " level)))]
-         (if (pos? level) [:span.i.m-l-5 (str " (" (spell-slots level) " slots)")])
-         [:div.i.f-w-n
-          (doall
-           (map-indexed
-            (fn [i spell]
-              (let [spell-data (spells/spell-map (:key spell))]
-                ^{:key i}
-                [:div
-                 (str
-                  (:name (spells/spell-map (:key spell)))
-                  " ("
-                  (s/join
-                   ", "
-                   (remove
-                    nil?
-                    [(if (:ability spell) (s/upper-case (name (:ability spell))))
-                     (if (:qualifier spell) (:qualifier spell))]))
+  [display-section "Spells" "spell-book"
+   [:div
+    [:div.f-s-14
+     [:span.f-w-b "Slots: "]
+     [:span.f-w-n (s/join ", " (map (fn [[level slots]] (str level " - " slots)) spell-slots))]]
+    [:div.f-s-14.flex.flex-wrap
+     (doall
+      (map
+       (fn [[level spells]]
+         ^{:key level}
+         [:div.m-t-10.w-200
+          [:span.f-w-b (str (if (zero? level) "Cantrip" (str "Level " level)))]
+          [:div.i.f-w-n
+           (doall
+            (map-indexed
+             (fn [i spell]
+               (let [spell-data (spells/spell-map (:key spell))]
+                 ^{:key i}
+                 [:div
+                  (str
+                   (:name (spells/spell-map (:key spell)))
+                   " ("
+                   (s/join
+                    ", "
+                    (remove
+                     nil?
+                     [(if (:ability spell) (s/upper-case (name (:ability spell))))
+                      (if (:qualifier spell) (:qualifier spell))]))
                 
-                  ")")]))
-            (into
-             (sorted-set-by compare-spell)
-             (filter
-              (fn [{k :key}]
-                (spells/spell-map k))
-              spells))))]])
-      (filter
-       (comp seq second)
-       spells-known)))]])
+                   ")")]))
+             (into
+              (sorted-set-by compare-spell)
+              (filter
+               (fn [{k :key}]
+                 (spells/spell-map k))
+               spells))))]])
+       (filter
+        (comp seq second)
+        spells-known)))]]])
 
 (defn equipment-section [title icon-name equipment equipment-map]
   [list-display-section title icon-name

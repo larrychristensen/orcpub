@@ -4279,26 +4279,26 @@ long rest."})]
               "uses Mystic Arcanum")}))
 
 (def warlock-spell-slot-schedule
-  {1 1
-   2 2
-   3 2
-   4 2
-   5 2
-   6 2
-   7 2
-   8 2
-   9 2
-   10 2
-   11 3
-   12 3
-   13 3
-   14 3
-   15 3
-   16 3
-   17 4
-   18 4
-   19 4
-   20 4})
+  {1 {1 1}
+   2 {1 2}
+   3 {2 2}
+   4 {2 2}
+   5 {3 2}
+   6 {3 2}
+   7 {4 2}
+   8 {4 2}
+   9 {5 2}
+   10 {5 2}
+   11 {5 3}
+   12 {5 3}
+   13 {5 3}
+   14 {5 3}
+   15 {5 3}
+   16 {5 3}
+   17 {5 4}
+   18 {5 4}
+   19 {5 4}
+   20 {5 4}})
 
 (defn warlock-subclass-spell-selection [spells]
   (subclass-spell-selection :warlock "Warlock" :cha spells 0))
@@ -4306,10 +4306,11 @@ long rest."})]
 (def warlock-option
   (class-option
    {:name "Warlock"
-    :spellcasting {:level-factor 1
-                   :cantrips-known {1 2 4 1 10 1}
+    :spellcasting {:cantrips-known {1 2 4 1 10 1}
                    :spells-known warlock-spells-known
+                   :slot-schedule warlock-spell-slot-schedule
                    :known-mode :schedule
+                   :pact-magic? true
                    :ability :cha}
     :multiclass-prereqs [(opt5e/ability-prereq :cha 13)]
     :spellcaster true
@@ -4319,6 +4320,7 @@ long rest."})]
             :weapon {:simple false}
             :save {:wis true :cha true}
             :skill-options {:choose 2 :options {:arcana true :deception true :history true :intimidation true :investigation true :nature true :religion true}}}
+    :modifiers [(mod/modifier ?pact-magic? true)]
     :selections [(new-starting-equipment-selection
                   :warlock
                   {:name "Weapon"
@@ -5890,13 +5892,17 @@ long rest."})]
                              (+ ?prof-bonus (?ability-bonuses ability-kw)))
     ?spell-save-dc (fn [ability-kw]
                      (+ 8 ?prof-bonus (?ability-bonuses ability-kw)))
-    ?spell-slots (opt5e/total-slots (apply + (map (fn [[cls-kw factor]]
-                                                    (-> ?levels
-                                                        cls-kw
-                                                        :class-level
-                                                        (/ factor)
-                                                        int))
-                                                  ?spell-slot-factors)) 1)
+    ?spell-slots (merge-with
+                  +
+                  (opt5e/total-slots (apply + (map (fn [[cls-kw factor]]
+                                                     (-> ?levels
+                                                         cls-kw
+                                                         :class-level
+                                                         (/ factor)
+                                                         int))
+                                                   ?spell-slot-factors)) 1)
+                  (if ?pact-magic?
+                    (warlock-spell-slot-schedule (?class-level :warlock))))
     ?reactions []
     ?actions []
     ?bonus-actions []
