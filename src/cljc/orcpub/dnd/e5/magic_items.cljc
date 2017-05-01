@@ -76,7 +76,8 @@
     :name "Amulet of Health"
     :item-type :wondrous-item
     :rarity :rare
-    :attunement [:any]
+      :attunement [:any]
+      :modifiers [(mod5e/ability-override :con 19)]
     :description "Your Constitution score is 19 while you wear this amulet. It has no effect on you if your Constitution is already 19 or higher."
     }{
     :name "Amulet of Proof against Detection and Location"
@@ -731,7 +732,8 @@ When you draw this weapon, you can extinguish all nonmagical flames within 30 fe
 
     :rarity :uncommon
 
-    :attunement [:any]
+      :attunement [:any]
+      :modifiers [(mod5e/ability-override :str 19)]
     :description "Your Strength score is 19 while you wear these gauntlets. They have no effect on you if your Strength is already 19 or higher."
     }{
     :name "Gem of Brightness"
@@ -823,7 +825,8 @@ Placing the haversack inside an extradimensional space created by a bag of holdi
 
     :rarity :uncommon
 
-    :attunement [:any]
+      :attunement [:any]
+      :modifiers [(mod5e/ability-override :int 19)]
     :description "Your Intelligence score is 19 while you wear this headband. It has no effect on you if your Intelligence is already 19 or higher."
     }{
     :name "Helm of Brilliance"

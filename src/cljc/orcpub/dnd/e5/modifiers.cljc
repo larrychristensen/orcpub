@@ -85,6 +85,9 @@
                  (clojure.string/upper-case (name ability))
                  (mods/bonus-str bonus)))
 
+(defn ability-override [ability value]
+  (mods/vec-mod ?ability-overrides {:ability ability :value value}))
+
 (defn level-ability-increase [ability bonus]
   (mods/modifier ?level-ability-increases
                  (update ?level-ability-increases ability + bonus)
@@ -353,13 +356,15 @@
     (fn [cfg] (es/map-mod ?treasure treasure-kw (equipment-cfg cfg)))
     1))
 
-(defn deferred-magic-item [item-kw {:keys [magical-ac-bonus]}]
+(defn deferred-magic-item [item-kw {:keys [magical-ac-bonus modifiers]}]
   (mods/deferred-modifier
     ?magic-items
     (fn [cfg] (let [mod (es/map-mod ?magic-items item-kw (equipment-cfg cfg))]
-                (if (and (:equipped? cfg)
-                         magical-ac-bonus)
-                  [mod (es/cum-sum-mod ?magical-ac-bonus magical-ac-bonus)]
+                (if (:equipped? cfg)
+                  (let [mods (concat [mod]
+                                     (if magical-ac-bonus [(es/cum-sum-mod ?magical-ac-bonus magical-ac-bonus)])
+                                     (map ::mods/fn modifiers))]
+                    mods)
                   mod)))
     1))
 

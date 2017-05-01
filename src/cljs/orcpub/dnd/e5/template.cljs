@@ -5787,9 +5787,16 @@ long rest."})]
                                              ?magical-ac-bonus)))
     ?abilities (reduce
                 (fn [m k]
-                  (assoc m k (+ (or (k ?base-abilities) 0)
-                                (or (k ?ability-increases) 0)
-                                (or (k ?level-ability-increases) 0))))
+                  (assoc m k (max (let [overrides (filter
+                                                   (fn [{:keys [ability value]}]
+                                                     (= ability k))
+                                                   ?ability-overrides)]
+                                    (if (seq overrides)
+                                      (apply max (map :value overrides))
+                                      0))
+                                  (+ (or (k ?base-abilities) 0)
+                                     (or (k ?ability-increases) 0)
+                                     (or (k ?level-ability-increases) 0)))))
                 {}
                 char5e/ability-keys)
     ?ability-bonuses (reduce-kv
@@ -5797,6 +5804,7 @@ long rest."})]
                         (assoc m k (opt5e/ability-bonus v)))
                       {}
                       ?abilities)
+    ?ability-overrides []
     ?save-bonuses (reduce-kv
                    (fn [m k v]
                      (assoc m k (+ v (if (and ?saving-throws (?saving-throws k)) ?prof-bonus 0))))
