@@ -394,7 +394,7 @@
            [:img.character-image.w-100-p.m-b-20 {:src (or image-url "image/barbarian.png")
                                                  :on-error (fn [_] (dispatch [:failed-loading-image image-url]))
                                                  :on-load (fn [_] (if image-url-failed (dispatch [:loaded-image])))}])]
-        [:div.w-50-p
+        [:div.w-50-p.m-l-10
          (if background [svg-icon-section "Background" "ages" [:span.f-s-18.f-w-n background]])
          (if alignment [svg-icon-section "Alignment" "yin-yang" [:span.f-s-18.f-w-n alignment]])
          [armor-class-section armor-class armor-class-with-armor all-armor]
