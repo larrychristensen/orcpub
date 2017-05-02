@@ -20,7 +20,9 @@
    :dmg {:abbr "DMG"
          :url dmg-url}
    :ee {:abbr "EE"
-        :url "https://media.wizards.com/2015/downloads/dnd/EE_PlayersCompanion.pdf"}})
+        :url "https://media.wizards.com/2015/downloads/dnd/EE_PlayersCompanion.pdf"}
+   :cos {:abbr "COS"
+         :url "https://www.amazon.com/gp/product/0786965983/ref=as_li_qf_sp_asin_il_tl?ie=UTF8&tag=orcpub-20&camp=1789&creative=9325&linkCode=as2&creativeASIN=0786965983&linkId=80c8baab14ecdb5c31f29d9c5b594c83"}})
 
 
 (def plural-map

@@ -179,6 +179,7 @@
      {:name "Hammer, sledge" :cost {:num 2 :type :gp} :weight "10 lb."}
      {:name "Healer’s kit" :cost {:num 5 :type :gp} :weight "3 lb."}
      {:name "Holy water" :sell-container :flask :cost {:num 25 :type :gp} :weight "1 lb."}
+     {:name "Holy symbol"}
      {:name "Hourglass" :cost {:num 25 :type :gp} :weight "1 lb."}
      {:name "Hunting trap" :cost {:num 5 :type :gp} :weight "25 lb."}
      {:name "Ink" :sell-container "ounce bottle" :cost {:num 10 :type :gp} :weight "—"}
@@ -232,7 +233,8 @@
      {:name "Vial" :cost {:num 1 :type :gp} :weight "—"}
      {:name "Vestements"}
      {:name "Waterskin" :cost {:num 2 :type :sp} :weight "5 lb. (full)"}
-     {:name "Whetstone" :cost {:num 1 :type :cp} :weight "1 lb."}])))
+     {:name "Whetstone" :cost {:num 1 :type :cp} :weight "1 lb."}
+     {:name "Wooden Stake"}])))
 
 (def packs
   (into
@@ -310,7 +312,19 @@
              :ink-pen 1
              :parchment 10
              :bag-of-sand 1
-             :knife-small 1}}]))
+             :knife-small 1}}
+    {:name "Monster Hunter's Pack"
+     :items {:chest 1
+             :crowbar 1
+             :hammer 1
+             :wooden-stake 3
+             :holy-symbol 1
+             :holy-water 1
+             :manacles 1
+             :mirror-steel 1
+             :oil 1
+             :tinderbox 1
+             :torch 3}}]))
 
 (def equipment
   (concat

@@ -230,7 +230,7 @@
    {:name "Primordial"
     :key :primordial}
    {:name "Sylvan"
-    :key :sylval}
+    :key :sylvan}
    {:name "Undercommon"
     :key :undercommon}])
 

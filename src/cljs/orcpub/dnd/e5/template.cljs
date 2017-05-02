@@ -4822,13 +4822,27 @@ long rest."})]
                 orc-option-cfg
                 yuan-ti-option-cfg])})])
 
+(defn add-sources [source background]
+  (-> background
+      (assoc :source source)
+      (update :traits (fn [traits] (map (fn [t] (assoc t :source source)) traits)))))
+
+(def cos-backgrounds
+  (map
+   (partial add-sources :cos)
+   [{:name "Haunted One"
+     :help "You have been subjected to an unimaginable horror"
+     :profs {:skill-options {:choose 1 :options {:arcana true :investigation true :religion true :survival true}}
+             :language-options {:choose 2 :options {:abyssal true :celestial true :deep-speech true :draconic true :infernal true :primordial true :sylvan true :undercommon true}}}
+     :equipment {:monster-hunters-pack 1}
+     :traits [{:name "Heart of Darkness"
+               :page 209
+               :source :cos
+               :summary "Commoners do their utmost to help you, even fighting along side you"}]}]))
 
 (def sword-coast-adventurers-guide-backgrounds
   (map
-   (fn [background]
-     (-> background
-         (assoc :source :scag)
-         (update :traits (fn [traits] (map (fn [t] (assoc t :source :scag)) traits)))))
+   (partial add-sources :scag)
    [{:name "City Watch"
      :profs {:skill {:athletics true :insight true}
              :language-options {:choose 2 :options {:any true}}}
@@ -5717,6 +5731,12 @@ long rest."})]
                (fn [cfg] (class-option (assoc cfg :plugin? true :source :scag)))
                scag-classes)})])
 
+(def cos-selections
+  [(background-selection
+    {:options (map
+               background-option
+               cos-backgrounds)})])
+
 (def dmg-selections
   [(class-selection
     {:options (map
@@ -5789,6 +5809,9 @@ long rest."})]
 (def dmg-amazon-frame
   (amazon-frame "//ws-na.amazon-adsystem.com/widgets/q?ServiceVersion=20070822&OneJS=1&Operation=GetAdHtml&MarketPlace=US&source=ac&ref=tf_til&ad_type=product_link&tracking_id=orcpub-20&marketplace=amazon&region=US&placement=0786965622&asins=0786965622&linkId=01922a9aafc4ea52eb90aed12bbeac04&show_border=false&link_opens_in_new_window=true&price_color=ffffff&title_color=f0a100&bg_color=2c3445"))
 
+(def cos-amazon-frame
+  (amazon-frame "//ws-na.amazon-adsystem.com/widgets/q?ServiceVersion=20070822&OneJS=1&Operation=GetAdHtml&MarketPlace=US&source=ac&ref=qf_sp_asin_til&ad_type=product_link&tracking_id=orcpub-20&marketplace=amazon&region=US&placement=0786965983&asins=0786965983&linkId=91dfcae14b0c8ecd3795eaf375104ca5&show_border=false&link_opens_in_new_window=true&price_color=ffffff&title_color=f0a100&bg_color=2c3445"))
+
 (defn amazon-frame-help [frame content]
   [:div.flex.m-t-10
    [:div.flex-grow-1.p-r-5
@@ -5823,7 +5846,13 @@ long rest."})]
     :url (-> disp5e/sources :dmg :url)
     :selections dmg-selections
     :help (amazon-frame-help dmg-amazon-frame
-                             [:span "Includes villainous class options, including Cleric: Death Domain and Paladin: Oathbreaker, neither of which are Adventurer's League legal."])}])
+                             [:span "Includes villainous class options, including Cleric: Death Domain and Paladin: Oathbreaker, neither of which are Adventurer's League legal."])}
+   {:name "Curse of Strahd"
+    :key :cos
+    :url (-> disp5e/sources :cos :url)
+    :selections cos-selections
+    :help (amazon-frame-help cos-amazon-frame
+                             [:span "Includes the Haunted One background"])}])
 
 (def optional-content-selection
   (t/selection-cfg
