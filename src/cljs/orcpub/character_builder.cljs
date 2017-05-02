@@ -311,6 +311,9 @@
 (defn prof-name [prof-map prof-kw]
   (or (-> prof-kw prof-map :name) (common/kw-to-name prof-kw)))
 
+(defn resistance-str [{:keys [value qualifier]}]
+  (str (name value)
+       (if qualifier (str " (" qualifier ")"))))
 
 (defn character-display []
   (let [built-char @(subscribe [:built-character])
@@ -326,7 +329,8 @@
         weapon-profs (char5e/weapon-proficiencies built-char)
         armor-profs (char5e/armor-proficiencies built-char)
         resistances (char5e/damage-resistances built-char)
-        immunities (char5e/damage-immunities built-char)
+        damage-immunities (char5e/damage-immunities built-char)
+        immunities (char5e/immunities built-char)
         condition-immunities (char5e/condition-immunities built-char)
         languages (char5e/languages built-char)
         abilities (char5e/ability-values built-char)
@@ -437,11 +441,10 @@
        [list-item-section "Tool Proficiencies" "stone-crafting" tool-profs (partial prof-name equip5e/tools-map)]
        [list-item-section "Weapon Proficiencies" "bowman" weapon-profs (partial prof-name weapon5e/weapons-map)]
        [list-item-section "Armor Proficiencies" "mailed-fist" armor-profs (partial prof-name armor5e/armor-map)]
-       [list-item-section "Damage Resistances" "surrounded-shield" resistances name]
-       [list-item-section "Damage Immunities" nil immunities name]
-       [list-item-section "Condition Immunities" nil condition-immunities (fn [{:keys [condition qualifier]}]
-                                                                        (str (name condition)
-                                                                             (if qualifier (str " (" qualifier ")"))))]
+       [list-item-section "Damage Resistances" "surrounded-shield" resistances resistance-str]
+       [list-item-section "Damage Immunities" nil damage-immunities resistance-str]
+       [list-item-section "Condition Immunities" nil condition-immunities resistance-str]
+       [list-item-section "Immunities" nil immunities resistance-str]
        (if (seq spells-known) [spells-known-section spells-known spell-slots])
        [equipment-section "Weapons" "plain-dagger" (concat magic-weapons weapons) mi5e/all-weapons-map]
        [equipment-section "Armor" "breastplate" (merge magic-armor armor) mi5e/all-armor-map]

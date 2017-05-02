@@ -4985,37 +4985,39 @@ An affected creature is aware of the spell and can thus avoid answering question
                 }])
 
 (def spells
-  (concat
-   a-spells
-   b-spells
-   c-spells
-   d-spells
-   e-spells
-   f-spells
-   g-spells
-   h-spells
-   i-spells
-   j-spells
-   k-spells
-   l-spells
-   m-spells
-   n-spells
-   p-spells
-   o-spells
-   r-spells
-   s-spells
-   t-spells
-   u-spells
-   v-spells
-   w-spells
-   z-spells))
+  (map
+   (fn [s]
+     (assoc s :key (or (:key s) (common/name-to-kw (:name s)))))
+   (concat
+    a-spells
+    b-spells
+    c-spells
+    d-spells
+    e-spells
+    f-spells
+    g-spells
+    h-spells
+    i-spells
+    j-spells
+    k-spells
+    l-spells
+    m-spells
+    n-spells
+    p-spells
+    o-spells
+    r-spells
+    s-spells
+    t-spells
+    u-spells
+    v-spells
+    w-spells
+    z-spells)))
 
 (def spell-map
   (into
    {}
    (map
     (fn [spell]
-      [(or (:key spell)
-           (common/name-to-kw (:name spell)))
+      [(:key spell)
        spell]))
    spells))

@@ -1802,11 +1802,12 @@
                   " to damage from cantrips you cast")
     :name "Potent Spellcasting"}))
 
-(defn divine-strike [damage-desc page]
+(defn divine-strike [damage-desc page & [source]]
   (mod5e/dependent-trait
    {:level 8
     :name "Divine Strike"
-    :page 60
+    :page page
+    :source source
     :frequency {:units :turn}
     :summary (str "Add "
                   (if (>= (?class-level :cleric) 14) 2 1)
@@ -4990,6 +4991,93 @@ long rest."})]
                         "Skin of fine zzar or wine" 1}
      :treasure {:gp 20}}]))
 
+(def dmg-classes
+  [{:name "Cleric"
+    :plugin? true
+    :subclass-level 1
+    :subclass-title "Divine Domain"
+    :source :dmg
+    :subclasses [{:name "Death Domain"
+                  :modifiers [(mod5e/weapon-proficiency :martial)
+                              (cleric-spell 1 :false-life 1)
+                              (cleric-spell 1 :ray-of-sickness 1)
+                              (cleric-spell 2 :blindness-deafness 3)
+                              (cleric-spell 2 :ray-of-enfeeblement 3)
+                              (cleric-spell 3 :animate-dead 5)
+                              (cleric-spell 3 :vampiric-touch 5)
+                              (cleric-spell 4 :blight 7)
+                              (cleric-spell 4 :death-ward 7)
+                              (cleric-spell 5 :antilife-shell 9)
+                              (cleric-spell 5 :cloudkill 9)
+                              (mod5e/trait-cfg
+                               {:name "Reaper"
+                                :page 96
+                                :source :dmg
+                                :summary "Your necromancy cantrips that only target 1 creature can instead target two within 5 ft of each other"})]
+                  :selections [(opt5e/spell-selection {:title "Necromancy Cantrip"
+                                                       :spellcasting-ability :wis
+                                                       :class-name "Cleric"
+                                                       :num 1
+                                                       :spell-keys (map :key (filter #(and (= "necromancy" (:school %))
+                                                                                           (= 0 (:level %))) spells/spells))
+                                                       :exclude-ref? true})]
+                  :levels {2 {:modifiers [(mod5e/action
+                                           {:name "Channel Divinity: Touch of Death"
+                                            :page 97
+                                            :source :dmg
+                                            :summary (str "when you hit with melee weapon attack, deal an extra " (+ 5 (* 2 (?class-level :cleric))) " necrotic damage")})]}
+                           6 {:modifiers [(mod5e/trait-cfg
+                                           {:name "Inescapable Destruction"
+                                            :page 97
+                                            :source :dmg
+                                            :summary "Your cleric spells and Channel Divinity ignore necrotic damage resistance"})]}
+                           8 {:modifiers [(divine-strike "necrotic" 97 :dmg)]}}
+                  :traits [{:level 17
+                            :name "Improved Reaper"
+                            :summary "If you cast a necromancy spell that targets only 1 creature, you can instead target two within 5 ft. of each other"}]}]}
+   {:name "Paladin"
+    :subclass-level 3
+    :subclass-title "Sacred Oath"
+    :source :dmg
+    :subclasses [{:name "Oathbreaker"
+                  :modifiers [(paladin-spell 1 :hellish-rebuke 3)
+                              (paladin-spell 1 :inflict-wounds 3)
+                              (paladin-spell 2 :crown-of-madness 5)
+                              (paladin-spell 2 :darkness 5)
+                              (paladin-spell 3 :animate-dead 9)
+                              (paladin-spell 3 :bestow-curse 9)
+                              (paladin-spell 4 :blight 13)
+                              (paladin-spell 4 :confusion 13)
+                              (paladin-spell 5 :contagion 17)
+                              (paladin-spell 5 :dominate-person 17)
+                              (mod5e/action
+                               {:name "Channel Divinity: Control Undead"
+                                :source :dmg
+                                :page 97
+                                :summary (str "Control an undead creature of CR " (?class-level :paladin) " or less if it fails a DC " (?spell-save-dc :cha) " WIS save")})
+                              (mod5e/action
+                               {:name "Channel Divinity: Dreadful Aspect"
+                                :page 97
+                                :source :dmg
+                                :summary (str "creatures of your choice within 30 ft. must succeed on a DC " (?spell-save-dc :cha) " WIS save or be frightened of you")})]
+                  :levels {7 {:modifiers [(mod5e/dependent-trait
+                                           {:name "Aura of Hate"
+                                            :page 97
+                                            :source :dmg
+                                            :summary (str "you and friends within " (if (>= (?class-level :paladin) 18) 30 10) " ft. gain a " (common/bonus-str (max 1 (?ability-bonuses :cha))) " bonus to melee weapon attack damage")})]}
+                           15 {:modifiers [(mod5e/damage-resistance :bludgeoning "nonmagical weapons")
+                                          (mod5e/damage-resistance :piercing "nonmagical weapons")
+                                          (mod5e/damage-resistance :slashing "nonmagical weapons")]}
+                           20 {:modifiers [(mod5e/action
+                                            {:name "Dread Lord"
+                                             :page 97
+                                             :source :dmg
+                                             :frequency {:units :long-rest}
+                                             :duration {:units :minute}
+                                             :range {:units :feet
+                                                     :amount 30}
+                                             :summary (str "create an aura that: reduces bright light to dim; frightened enemies within aura take 4d10 psychic damage; creatures that rely on sight have disadvantage on attack rolls agains you and allies within aura; as a bonus action make a melee spell attack on a creature within aura that deals 3d10 " (common/mod-str (?ability-bonuses :cha)) "necrotic damage")})]}}}]}])
+
 (def scag-classes
   [{:name "Barbarian"
     :plugin? true
@@ -5627,6 +5715,12 @@ long rest."})]
                (fn [cfg] (class-option (assoc cfg :plugin? true :source :scag)))
                scag-classes)})])
 
+(def dmg-selections
+  [(class-selection
+    {:options (map
+               (fn [cfg] (class-option (assoc cfg :plugin? true :source :dmg)))
+               dmg-classes)})])
+
 (defn ability-item [name abbr desc]
   [:li.m-t-5 [:span.f-w-b.m-r-5 (str name " (" abbr ")")] desc])
 
@@ -5690,6 +5784,9 @@ long rest."})]
 (def phb-amazon-frame
   (amazon-frame "//ws-na.amazon-adsystem.com/widgets/q?ServiceVersion=20070822&OneJS=1&Operation=GetAdHtml&MarketPlace=US&source=ac&ref=qf_sp_asin_til&ad_type=product_link&tracking_id=orcpub-20&marketplace=amazon&region=US&placement=0786965606&asins=0786965606&linkId=3b5b686390559c31dbc3c20d20f37ec4&show_border=false&link_opens_in_new_window=true&price_color=ffffff&title_color=f0a100&bg_color=2c3445"))
 
+(def dmg-amazon-frame
+  (amazon-frame "//ws-na.amazon-adsystem.com/widgets/q?ServiceVersion=20070822&OneJS=1&Operation=GetAdHtml&MarketPlace=US&source=ac&ref=tf_til&ad_type=product_link&tracking_id=orcpub-20&marketplace=amazon&region=US&placement=0786965622&asins=0786965622&linkId=01922a9aafc4ea52eb90aed12bbeac04&show_border=false&link_opens_in_new_window=true&price_color=ffffff&title_color=f0a100&bg_color=2c3445"))
+
 (defn amazon-frame-help [frame content]
   [:div.flex.m-t-10
    [:div.flex-grow-1.p-r-5
@@ -5718,7 +5815,13 @@ long rest."})]
     :key :ee
     :url "https://media.wizards.com/2015/downloads/dnd/EE_PlayersCompanion.pdf"
     :selections elemental-evil-selections
-    :help [:div "Race and spell options from the " [:a {:href "https://media.wizards.com/2015/downloads/dnd/EE_PlayersCompanion.pdf" :target :_blank} "player's companion to Prince's of the Apocalypse"]]}])
+    :help [:div "Race and spell options from the " [:a {:href "https://media.wizards.com/2015/downloads/dnd/EE_PlayersCompanion.pdf" :target :_blank} "player's companion to Prince's of the Apocalypse"]]}
+   {:name "Dungeon Master's Guide"
+    :key :dmg
+    :url (-> disp5e/sources :dmg :url)
+    :selections dmg-selections
+    :help (amazon-frame-help dmg-amazon-frame
+                             [:span "Includes villainous class options, including Cleric: Death Domain and Paladin: Oathbreaker, neither of which are Adventurer's League legal."])}])
 
 (def optional-content-selection
   (t/selection-cfg

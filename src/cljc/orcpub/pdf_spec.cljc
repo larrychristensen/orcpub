@@ -89,24 +89,28 @@
 (defn keyword-vec-trait [nm keywords]
   (vec-trait nm (map name keywords)))
 
+(defn resistance-strings [resistances]
+  (map
+   (fn [{:keys [value qualifier]}]
+     (str (name value)
+          (if qualifier
+            (str "(" qualifier ")"))))
+   resistances))
+
 (defn features-and-traits-header [built-char]
   (let [darkvision (char5e/darkvision built-char)
         damage-resistances (char5e/damage-resistances built-char)
         damage-immunities (char5e/damage-immunities built-char)
-        condition-immunities (char5e/condition-immunities built-char)]
+        condition-immunities (char5e/condition-immunities built-char)
+        immunities (char5e/condition-immunities built-char)]
     (s/join
      "\n"
      (remove nil?
              [(if darkvision (str "Darkvision: " darkvision " ft."))
-              (keyword-vec-trait "Damage Resistances" damage-resistances)
-              (keyword-vec-trait "Damage Immunities" damage-immunities)
-              (vec-trait "Condition Immunities"
-                         (map
-                          (fn [{:keys [condition qualifier]}]
-                            (str (name condition)
-                                 (if qualifier
-                                   (str "(" qualifier ")"))))
-                          condition-immunities))]))))
+              (vec-trait "Damage Resistances" (resistance-strings damage-resistances))
+              (vec-trait "Damage Immunities" (resistance-strings damage-immunities))
+              (vec-trait "Condition Immunities" (resistance-strings condition-immunities))
+              (vec-trait "Immunities" (resistance-strings immunities))]))))
 
 (defn traits-fields [built-char]
   (let [bonus-actions (sort-by :name (es/entity-val built-char :bonus-actions))

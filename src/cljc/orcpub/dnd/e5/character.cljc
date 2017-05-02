@@ -122,6 +122,9 @@
 (defn damage-immunities [built-char]
   (es/entity-val built-char :damage-immunities))
 
+(defn immunities [built-char]
+  (es/entity-val built-char :immunities))
+
 (defn condition-immunities [built-char]
   (es/entity-val built-char :condition-immunities))
 

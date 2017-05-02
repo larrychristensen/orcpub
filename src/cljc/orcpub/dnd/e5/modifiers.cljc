@@ -37,18 +37,21 @@
 (defn subrace [nm]
   (mods/modifier ?subrace nm))
 
-(defn damage-resistance [value]
-  (mods/set-mod ?damage-resistances value (name value) "damage resistance"))
+(defn resistance-cfg [value qualifier]
+  {:value value
+   :qualifier qualifier})
 
-(defn damage-immunity [value]
-  (mods/set-mod ?damage-immunities value (name value) "damage immunity"))
+(defn damage-resistance [value & [qualifier-text]]
+  (mods/set-mod ?damage-resistances (resistance-cfg value qualifier-text) (name value) "damage resistance"))
 
-(defn immunity [value]
-  (mods/set-mod ?immunities value (name value) "immunity"))
+(defn damage-immunity [value & [qualifier-text]]
+  (mods/set-mod ?damage-immunities (resistance-cfg value qualifier-text) (name value) "damage immunity"))
+
+(defn immunity [value & [qualifier-text]]
+  (mods/set-mod ?immunities (resistance-cfg value qualifier-text) (name value) "immunity"))
 
 (defn condition-immunity [value & [qualifier-text]]
-  (mods/set-mod ?condition-immunities {:condition value
-                                       :qualifier qualifier-text}))
+  (mods/set-mod ?condition-immunities (resistance-cfg value qualifier-text) (name value) " condition immunity"))
 
 (defn darkvision [value & [order-number]]
   (mods/modifier
@@ -358,7 +361,6 @@
                 (let [mods (concat [equipment-mod]
                                    (if magical-ac-bonus [(mods/cum-sum-mod ?magical-ac-bonus magical-ac-bonus)])
                                    modifiers)]
-                  (prn "MODS" mods)
                   mods)
                 equipment-mod))))
 
