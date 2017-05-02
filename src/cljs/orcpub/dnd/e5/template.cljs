@@ -4839,6 +4839,17 @@ long rest."})]
      :custom-equipment {"Uniform with your rank" 1
                         "Horn to summon help" 1}
      :treasure {:gp 10}}
+    {:name "Investigator"
+     :profs {:skill {:investigation true :insight true}
+             :language-options {:choose 2 :options {:any true}}}
+     :traits [{:name "Watcher's Eye"
+               :page 145
+               :summary "can easily find local watch and criminal outposts"}]
+     :equipment {:manacles 1
+                 :pouch 1}
+     :custom-equipment {"Uniform with your rank" 1
+                        "Horn to summon help" 1}
+     :treasure {:gp 10}}
     {:name "Clan Crafter"
      :profs {:skill {:history true :insight true}
              :tool-options {:artisans-tool 1}
