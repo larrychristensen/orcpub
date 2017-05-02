@@ -80,6 +80,18 @@
  character-interceptors
  add-class)
 
+(reg-event-db
+ :set-image-url
+ character-interceptors
+ (fn [character [_ image-url]]
+   (update character
+           ::entity/values
+           assoc
+           :image-url
+           image-url
+           :image-url-failed
+           nil)))
+
 (def custom-equipment-path [::entity/values :custom-equipment])
 
 (def custom-treasure-path [::entity/values :custom-treasure])
@@ -466,3 +478,22 @@
                                    (if (comps path)
                                      (disj comps path)
                                      (conj comps path))))))
+
+(reg-event-db
+ :failed-loading-image
+ character-interceptors
+ (fn [character [_ image-url]]
+   (update character
+           ::entity/values
+           assoc
+           :image-url-failed
+           image-url)))
+
+(reg-event-db
+ :loaded-image
+ character-interceptors
+ (fn [character []]
+   (update character
+           ::entity/values
+           dissoc
+           :image-url-failed)))
