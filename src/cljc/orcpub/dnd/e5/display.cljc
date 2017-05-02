@@ -60,22 +60,23 @@
    "/"
    (s/replace (common/safe-name units) #"-" " ")))
 
-(defn attack-description [{:keys [description attack-type area-type damage-type damage-die damage-die-count damage-modifier save save-dc page source] :as attack}]
-  (str
-   (if description (str description ", "))
-   (case attack-type
-     :area (case area-type
-             :line (str (:line-width attack) " x " (:line-length attack) " ft. line, ")
-             :cone (str (:length attack) " ft. cone, ")
-             nil)
-     :ranged "ranged, "
-     "melee, ")
-   damage-die-count "d" damage-die (if damage-modifier (common/mod-str damage-modifier))
-   " "
-   (if damage-type (common/safe-name damage-type))
-   " damage"
-   (if save (str ", DC" save-dc " " (common/safe-name save) " save"))
-   (if page (str " (" (source-description source page) ")"))))
+(defn attack-description [{:keys [description summary attack-type area-type damage-type damage-die damage-die-count damage-modifier save save-dc page source] :as attack}]
+  (let [summary (or summary description)]
+    (str
+     (if summary (str summary ", "))
+     (case attack-type
+       :area (case area-type
+               :line (str (:line-width attack) " x " (:line-length attack) " ft. line, ")
+               :cone (str (:length attack) " ft. cone, ")
+               nil)
+       :ranged "ranged, "
+       "melee, ")
+     damage-die-count "d" damage-die (if damage-modifier (common/mod-str damage-modifier))
+     " "
+     (if damage-type (common/safe-name damage-type))
+     " damage"
+     (if save (str ", DC" save-dc " " (common/safe-name save) " save"))
+     (if page (str " (" (source-description source page) ")")))))
 
 (defn action-description [{:keys [description summary source page duration range frequency]}]
   (str

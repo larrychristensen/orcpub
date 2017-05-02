@@ -252,6 +252,7 @@
                            language-options
                            armor-proficiencies
                            weapon-proficiencies
+                           tool-proficiencies
                            source]}]
   (t/option-cfg
    {:name name
@@ -280,6 +281,7 @@
                    (mod5e/race-ability k v))
                  abilities)
                 modifiers
+                (tool-prof-modifiers tool-proficiencies)
                 (traits-modifiers traits nil source)
                 (armor-prof-modifiers armor-proficiencies)
                 (weapon-prof-modifiers weapon-proficiencies)
@@ -5897,6 +5899,45 @@ long rest."})]
 
 (def ua-al-illegal (mod5e/al-illegal "Unearthed Arcana options are not allowed"))
 
+(def ua-waterborne-kw :ua-waterborne)
+
+(def ua-waterborne-plugin
+  {:name "Unearthed Arcana: Waterborne Adventures"
+   :key ua-waterborne-kw
+   :selections [(race-selection
+                 {:options [(race-option
+                             {:name "Minotaur (Krynn)"
+                              :abilities {:str 1}
+                              :selections [(opt5e/ability-increase-selection [:str :int :wis] 1 true)]
+                              :size :medium
+                              :speed 30
+                              :weapon-proficiencies [:horns]
+                              :tool-proficiencies [:navigators-tools :water-vehicles]
+                              :languages ["Common"]
+                              :modifiers [ua-al-illegal
+                                          (mod5e/attack
+                                           {:name "Horns"
+                                            :damage-die 12
+                                            :damage-die-count 1
+                                            :damage-type :piercing
+                                            :page 2
+                                            :source ua-waterborne-kw
+                                            :summary "Advantage to shove a creature with your horns"})
+                                          (mod5e/bonus-action
+                                           {:name "Goring Rush"
+                                            :page 2
+                                            :source ua-waterborne-kw
+                                            :summary "When you take Dash action, make a melee attack with horns"})
+                                          (mod5e/bonus-action
+                                           {:name "Hammering Horns"
+                                            :page 2
+                                            :source ua-waterborne-kw
+                                            :summary "When you use melee Attack action, shove a creature"})]
+                              :traits [{:name "Labyrinthine Recall"
+                                        :page 2
+                                        :source ua-waterborne-kw
+                                        :summary "perfect recall of paths you've traveled"}]})]})]})
+
 (defn dragonmark-feat [nm ability-kw least lesser greater]
   (opt5e/feat-option
    {:name (str "Dragonmark: " nm)
@@ -6033,7 +6074,8 @@ long rest."})]
   (map
    (fn [{:keys [name key] :as plugin}]
      (assoc plugin :help (ua-help name (source-url key))))
-   [ua-eberron-plugin]))
+   [ua-waterborne-plugin
+    ua-eberron-plugin]))
 
 (def plugins
   (map
