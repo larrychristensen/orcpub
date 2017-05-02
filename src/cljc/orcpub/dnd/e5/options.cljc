@@ -1242,7 +1242,7 @@
        {:name "Two Weapon Fighting"
         :description "When you engage in two-weapon fighting, you can add your ability modifier to the damage of the second attack."})]})])
 
-(defn fighting-style-selection [class-kw & [restrictions]]
+(defn fighting-style-selection-2 [class-kw options]
   (t/selection-cfg
    {:name "Fighting Style"
     :tags #{:class}
@@ -1250,12 +1250,17 @@
     :multiselect? true
     :min 1
     :max 1
-    :options (if restrictions
-               (filter
-                (fn [o]
-                  (restrictions (::t/key o)))
-                fighting-style-options)
-               fighting-style-options)}))
+    :options options}))
+
+(defn fighting-style-selection [class-kw & [restrictions additional-options]]
+  (fighting-style-selection-2
+   class-kw
+   (if restrictions
+     (filter
+      (fn [o]
+        (restrictions (::t/key o)))
+      fighting-style-options)
+     fighting-style-options)))
 
 (defn feat-selection [num]
   (t/selection-cfg

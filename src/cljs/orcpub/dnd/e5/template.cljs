@@ -5901,10 +5901,41 @@ long rest."})]
 
 (def ua-waterborne-kw :ua-waterborne)
 
+(defn mariner-class-option [nm kw level]
+  (class-option
+   {:name nm
+    :plugin? true
+    :source ua-waterborne-kw
+    :levels {level {:selections [(opt5e/fighting-style-selection-2
+                                  kw
+                                  [(t/option-cfg
+                                    {:name "Mariner"
+                                     :modifiers [(mod/cum-sum-mod ?ac-bonus
+                                                                  1
+                                                                  "AC"
+                                                                  "+1"
+                                                                  [(let [enable? (not-any?
+                                                                                  (fn [[armor-kw]]
+                                                                                    (let [disabled-type? (-> mi/all-armor-map armor-kw :type #{:shield :heavy})]
+                                                                                      (prn "DIAVCLED TYPE" disabled-type?)
+                                                                                      disabled-type?))
+                                                                                  ?equipped-armor)]
+                                                                     (prn "ENABLE?" enable?)
+                                                                     enable?)])
+                                                 (mod5e/trait-cfg
+                                                  {:name "Mariner Fighting Style"
+                                                   :page 2
+                                                   :source ua-waterborne-kw
+                                                   :summary "while not wearing heavy armor, gain +1 AC bonus and you have swimming speed and climbing speed equal to your land speed"})]})])]}}}))
+
 (def ua-waterborne-plugin
   {:name "Unearthed Arcana: Waterborne Adventures"
    :key ua-waterborne-kw
-   :selections [(race-selection
+   :selections [(class-selection
+                 {:options [(mariner-class-option "Fighter" :fighter 1)
+                            (mariner-class-option "Paladin" :paladin 2)
+                            (mariner-class-option "Ranger" :ranger 2)]})
+                (race-selection
                  {:options [(race-option
                              {:name "Minotaur (Krynn)"
                               :abilities {:str 1}
@@ -5921,8 +5952,7 @@ long rest."})]
                                             :damage-die-count 1
                                             :damage-type :piercing
                                             :page 2
-                                            :source ua-waterborne-kw
-                                            :summary "Advantage to shove a creature with your horns"})
+                                            :source ua-waterborne-kw})
                                           (mod5e/bonus-action
                                            {:name "Goring Rush"
                                             :page 2
@@ -6260,6 +6290,7 @@ long rest."})]
     ?base-armor-class (+ 10 (?ability-bonuses :dex)
                          ?natural-ac-bonus
                          ?magical-ac-bonus)
+    ?ac-bonus 0
     ?natural-ac-bonus 0
     ?unarmored-ac-bonus 0
     ?unarmored-with-shield-ac-bonus 0
@@ -6276,10 +6307,11 @@ long rest."})]
                            0)))
     ?shield-ac-bonus (fn [shield]
                     (+ 2 (or (:magical-ac-bonus shield) 0)))
-    ?unarmored-armor-class (+ ?base-armor-class ?unarmored-ac-bonus)
+    ?unarmored-armor-class (+ ?base-armor-class ?unarmored-ac-bonus ?ac-bonus)
     ?unarmored-with-shield-armor-class (fn [shield]
                                          (+ ?base-armor-class
                                             ?unarmored-with-shield-ac-bonus
+                                            ?ac-bonus
                                             (?shield-ac-bonus shield)))
     ?armor-class-with-armor (fn [armor & [shield]]
                               (cond (and (nil? armor)
@@ -6289,7 +6321,8 @@ long rest."})]
                                              (+ (?armor-dex-bonus armor)
                                                 (or ?armored-ac-bonus 0)
                                                 (:base-ac armor)
-                                                (:magical-ac-bonus armor))
+                                                (:magical-ac-bonus armor)
+                                                ?ac-bonus)
                                              ?magical-ac-bonus)))
     ?abilities (reduce
                 (fn [m k]
@@ -6410,7 +6443,9 @@ long rest."})]
     ?total-speed (apply max ?speed ?speed-overrides)
     ?darkvision-bonus 0
     ?darkvision 0
-    ?total-darkvision (+ ?darkvision ?darkvision-bonus)}))
+    ?total-darkvision (+ ?darkvision ?darkvision-bonus)
+    ?all-armor (merge ?armor ?magic-armor)
+    ?equipped-armor (into {} (filter (fn [[_ v]] (:equipped? v)) ?all-armor))}))
 
 
 (def template
