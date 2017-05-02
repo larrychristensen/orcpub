@@ -4998,7 +4998,8 @@ long rest."})]
     :subclass-title "Divine Domain"
     :source :dmg
     :subclasses [{:name "Death Domain"
-                  :modifiers [(mod5e/weapon-proficiency :martial)
+                  :modifiers [(mod5e/al-illegal "Death Domain is not allowed")
+                              (mod5e/weapon-proficiency :martial)
                               (cleric-spell 1 :false-life 1)
                               (cleric-spell 1 :ray-of-sickness 1)
                               (cleric-spell 2 :blindness-deafness 3)
@@ -5040,7 +5041,8 @@ long rest."})]
     :subclass-title "Sacred Oath"
     :source :dmg
     :subclasses [{:name "Oathbreaker"
-                  :modifiers [(paladin-spell 1 :hellish-rebuke 3)
+                  :modifiers [(mod5e/al-illegal "Oathbreaker is not allowed")
+                              (paladin-spell 1 :hellish-rebuke 3)
                               (paladin-spell 1 :inflict-wounds 3)
                               (paladin-spell 2 :crown-of-madness 5)
                               (paladin-spell 2 :darkness 5)
