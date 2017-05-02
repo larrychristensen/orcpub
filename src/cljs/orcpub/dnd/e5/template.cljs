@@ -2729,7 +2729,7 @@
                               :page 79
                               :summary "end one effect causing you to be charmed or frightened"})]}
              10 {:modifiers [(mod5e/damage-immunity :poison)
-                             (mod5e/damage-immunity :disease)
+                             (mod5e/immunity :disease)
                              (mod5e/unarmored-speed-bonus 5)]}
              13 {:modifiers (map
                              (fn [{:keys [name key]}]
@@ -2878,7 +2878,7 @@
                                    :explorers-pack 1}}]
     :armor {:chain-mail 1}
     :levels {2 {:selections [(opt5e/fighting-style-selection :paladin #{:defense :dueling :great-weapon-fighting :protection})]}
-             3 {:modifiers [(mod5e/damage-immunity :disease)
+             3 {:modifiers [(mod5e/immunity :disease)
                             (mod5e/trait-cfg
                              {:name "Divine Health"
                               :page 85
@@ -5818,41 +5818,121 @@ long rest."})]
     content]
    frame])
 
+(defn ua-help [name url]
+  [:a {:href url :target :_blank} name])
+
 (def srd-link
   [:a.orange {:href "SRD-OGL_V5.1.pdf" :target "_blank"} "the 5e SRD"])
 
+(defn source-url [source]
+  (-> disp5e/sources source :url))
+
+(def ua-eberron-kw :ua-eberron)
+
+(def ua-eberron-plugin
+  {:name "Unearthed Arcana: Eberron"
+   :key ua-eberron-kw
+   :selections [(race-selection
+                 {:options (map
+                            (fn [race] (race-option (assoc race :source ua-eberron-kw)))
+                            [{:name "Changeling"
+                              :abilities {:dex 1 :cha 1}
+                              :size :medium
+                              :speed 30
+                              :languages ["Common"]
+                              :modifiers [(mod5e/skill-proficiency :deception)
+                                          (mod5e/action
+                                           {:name "Shapechanger"
+                                            :page 1
+                                            :source ua-eberron-kw
+                                            :summary "polymorph into a Medium humanoid you have seen"})]
+                              :selections [(opt5e/language-selection opt5e/languages 2)]}
+                             {:name "Shifter"
+                              :abilities {:dex 1}
+                              :size :medium
+                              :speed 30
+                              :darkvision 60
+                              :languages ["Common" "Sylvan"]
+                              :modifiers [(mod5e/bonus-action
+                                           {:name "Shifting"
+                                            :page 2
+                                            :source ua-eberron-kw
+                                            :duration {:units :minute}
+                                            :summary (str "gain "
+                                                          (max 1 (+ ?total-levels (?ability-bonuses :con)))
+                                                          " temp HPs"
+                                                          (if ?shifting-feature
+                                                            (str " and " ?shifting-feature)))})]
+                              :subraces [{:name "Beasthide"
+                                          :abilities {:con 1}
+                                          :modifiers [(mod/modifier ?shifting-feature "a +1 AC bonus")]}
+                                         {:name "Cliffwalk"
+                                          :abilities {:dex 1}
+                                          :modifiers [(mod/modifier ?shifting-feature "climbing speed of 30")]}
+                                         {:name "Longstride"
+                                          :abilities {:dex 1}
+                                          :modifiers [(mod/modifier ?shifting-feature "Dash as bonus action")]}
+                                         {:name "Longtooth"
+                                          :abilities {:str 1}
+                                          :modifiers [(mod/modifier ?shifting-feature "1d6 bite attack")]}
+                                         {:name "Razorclaw"
+                                          :abilities {:dex 1}
+                                          :modifiers [(mod/modifier ?shifting-feature "unarmed strike as bonus action")]}
+                                         {:name "Wildhunt"
+                                          :abilities {:wis 1}
+                                          :modifiers [(mod/modifier ?shifting-feature "advantage on WIS checks and saves")]}]}
+                             {:name "Warforged"
+                              :abilities {:str 1 :con 1}
+                              :size :medium
+                              :speed 20
+                              :modifiers [(mod5e/natural-ac-bonus 1)
+                                          (mod5e/immunity :disease)
+                                          (mod5e/trait-cfg
+                                           {:name "Living Construct"
+                                            :page 3
+                                            :source ua-eberron-kw
+                                            :summmary "immune to disease; no need to eat or breathe; instead of sleeping, go inactive but alert for 4 hours"})]
+                              :languages ["Common"]
+                              :selections [(opt5e/language-selection opt5e/languages 1)]}])})]})
+
+(def ua-plugins
+  (map
+   (fn [{:keys [name key] :as plugin}]
+     (assoc plugin :help (ua-help name (source-url key))))
+   [ua-eberron-plugin]))
+
 (def plugins
-  [{:name "Sword Coast Adventurer's Guide"
-    :key :scag
-    :url "https://www.amazon.com/gp/product/0786965800/ref=as_li_tl?ie=UTF8&tag=orcpub-20&camp=1789&creative=9325&linkCode=as2&creativeASIN=0786965800&linkId=9b93efa0fc7239ebbf005d0b17367233"
-    :selections sword-coast-adventurers-guide-selections
-    :help (amazon-frame-help scag-amazon-frame
-                             [:span "Incudes too many new, exciting subraces, race variants, subclasses, and backgrounds to list, as well as a ton of other info to help you create in-depth characters in the Sword Coast or elsewhere."])}
-   {:name "Volo's Guide to Monsters"
-    :key :vgm
-    :url "https://www.amazon.com/gp/product/0786966017/ref=as_li_tl?ie=UTF8&tag=orcpub-20&camp=1789&creative=9325&linkCode=as2&creativeASIN=0786966017&linkId=506a1b33174f884dcec5db8c6c07ad31"
-    :selections volos-guide-to-monsters-selections
-    :help (amazon-frame-help volos-amazon-frame
-                             [:div
-                              "Full of great monster race options, including"
-                              (content-list ["Aasimar" "Firbolg" "Goliath" "Kenku" "Lizardfolk" "Tabaxi" "Triton" "Bugbear" "Goblin" "Hobgoblin" "Kobold" "Orc" "Yuan-Ti Pureblood"])])}
-   {:name "Elemental Evil Player's Companion"
-    :key :ee
-    :url "https://media.wizards.com/2015/downloads/dnd/EE_PlayersCompanion.pdf"
-    :selections elemental-evil-selections
-    :help [:div "Race and spell options from the " [:a {:href "https://media.wizards.com/2015/downloads/dnd/EE_PlayersCompanion.pdf" :target :_blank} "player's companion to Prince's of the Apocalypse"]]}
-   {:name "Dungeon Master's Guide"
-    :key :dmg
-    :url (-> disp5e/sources :dmg :url)
-    :selections dmg-selections
-    :help (amazon-frame-help dmg-amazon-frame
-                             [:span "Includes villainous class options, including Cleric: Death Domain and Paladin: Oathbreaker, neither of which are Adventurer's League legal."])}
-   {:name "Curse of Strahd"
-    :key :cos
-    :url (-> disp5e/sources :cos :url)
-    :selections cos-selections
-    :help (amazon-frame-help cos-amazon-frame
-                             [:span "Includes the Haunted One background"])}])
+  (map
+   (fn [{:keys [key] :as plugin}]
+     (assoc plugin :url (source-url key)))
+   (concat
+    [{:name "Sword Coast Adventurer's Guide"
+      :key :scag
+      :selections sword-coast-adventurers-guide-selections
+      :help (amazon-frame-help scag-amazon-frame
+                               [:span "Incudes too many new, exciting subraces, race variants, subclasses, and backgrounds to list, as well as a ton of other info to help you create in-depth characters in the Sword Coast or elsewhere."])}
+     {:name "Volo's Guide to Monsters"
+      :key :vgm
+      :selections volos-guide-to-monsters-selections
+      :help (amazon-frame-help volos-amazon-frame
+                               [:div
+                                "Full of great monster race options, including"
+                                (content-list ["Aasimar" "Firbolg" "Goliath" "Kenku" "Lizardfolk" "Tabaxi" "Triton" "Bugbear" "Goblin" "Hobgoblin" "Kobold" "Orc" "Yuan-Ti Pureblood"])])}
+     {:name "Elemental Evil Player's Companion"
+      :key :ee
+      :selections elemental-evil-selections
+      :help [:div "Race and spell options from the " [:a {:href "https://media.wizards.com/2015/downloads/dnd/EE_PlayersCompanion.pdf" :target :_blank} "player's companion to Prince's of the Apocalypse"]]}
+     {:name "Dungeon Master's Guide"
+      :key :dmg
+      :selections dmg-selections
+      :help (amazon-frame-help dmg-amazon-frame
+                               [:span "Includes villainous class options, including Cleric: Death Domain and Paladin: Oathbreaker, neither of which are Adventurer's League legal."])}
+     {:name "Curse of Strahd"
+      :key :cos
+      :selections cos-selections
+      :help (amazon-frame-help cos-amazon-frame
+                               [:span "Includes the Haunted One background"])}]
+    ua-plugins)))
 
 (def optional-content-selection
   (t/selection-cfg
