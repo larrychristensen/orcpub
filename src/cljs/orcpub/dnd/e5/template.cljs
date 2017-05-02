@@ -5628,6 +5628,15 @@ long rest."})]
      :tags #{:race}}
     cfg)))
 
+(defn feat-selection [cfg]
+  (t/selection-cfg
+   (merge
+    {:name "Feats"
+     :ref :feats
+     :tags #{:feats}
+     :multiselect? true}
+    cfg)))
+
 (def elemental-evil-selections
   [(race-selection
     {:options (map
@@ -5880,6 +5889,28 @@ long rest."})]
 
 (def ua-eberron-kw :ua-eberron)
 
+(defn spell-level [spell-kw]
+  (-> spells/spell-map spell-kw :level))
+
+(defn dragonmark-spell-mod [kw ability-kw lvl]
+  (mod5e/spells-known (spell-level kw) kw ability-kw "Dragonmark" lvl))
+
+(def ua-al-illegal (mod5e/al-illegal "Unearthed Arcana options are not allowed"))
+
+(defn dragonmark-feat [nm ability-kw least lesser greater]
+  (opt5e/feat-option
+   {:name (str "Dragonmark: " nm)
+    :page 5
+    :source ua-eberron-kw
+    :summary (str "You have the " nm " dragonmark")
+    :modifiers (conj
+                (map
+                 #(dragonmark-spell-mod % ability-kw 1)
+                 least)
+                (dragonmark-spell-mod lesser ability-kw 5)
+                (dragonmark-spell-mod greater ability-kw 9)
+                ua-al-illegal)}))
+
 (def ua-eberron-plugin
   {:name "Unearthed Arcana: Eberron"
    :key ua-eberron-kw
@@ -5891,7 +5922,8 @@ long rest."})]
                               :size :medium
                               :speed 30
                               :languages ["Common"]
-                              :modifiers [(mod5e/skill-proficiency :deception)
+                              :modifiers [ua-al-illegal
+                                          (mod5e/skill-proficiency :deception)
                                           (mod5e/action
                                            {:name "Shapechanger"
                                             :page 1
@@ -5904,7 +5936,8 @@ long rest."})]
                               :speed 30
                               :darkvision 60
                               :languages ["Common" "Sylvan"]
-                              :modifiers [(mod5e/bonus-action
+                              :modifiers [ua-al-illegal
+                                          (mod5e/bonus-action
                                            {:name "Shifting"
                                             :page 2
                                             :source ua-eberron-kw
@@ -5936,7 +5969,8 @@ long rest."})]
                               :abilities {:str 1 :con 1}
                               :size :medium
                               :speed 20
-                              :modifiers [(mod5e/natural-ac-bonus 1)
+                              :modifiers [ua-al-illegal
+                                          (mod5e/natural-ac-bonus 1)
                                           (mod5e/immunity :disease)
                                           (mod5e/trait-cfg
                                            {:name "Living Construct"
@@ -5953,6 +5987,7 @@ long rest."})]
                               :subclass-level 2
                               :subclass-title "Arcane Tradition"
                               :subclasses [{:name "Artificer"
+                                            :modifiers [ua-al-illegal]
                                             :levels {2 {:modifiers [(mod5e/trait-cfg
                                                                      {:name "Infuse Potions"
                                                                       :page 3
@@ -5979,7 +6014,20 @@ long rest."})]
                                                                       {:name "Master Artificer"
                                                                        :page 4
                                                                        :source ua-eberron-kw
-                                                                       :summary "create magic items from tables A or B of DMG"})]}}}]})]})]})
+                                                                       :summary "create magic items from tables A or B of DMG"})]}}}]})]})
+                (feat-selection
+                 {:options [(dragonmark-feat "Detection" :wis [:detect-magic :mage-hand] :detect-thoughts :clairvoyance)
+                            (dragonmark-feat "Finding" :wis [:identify :mage-hand] :locate-object :clairvoyance)
+                            (dragonmark-feat "Handling" :wis [:druidcraft :speak-with-animals] :beast-sense :conjure-animals)
+                            (dragonmark-feat "Healing" :wis [:cure-wounds :spare-the-dying] :lesser-restoration :revivify)
+                            (dragonmark-feat "Hospitality" :wis [:friends :unseen-servant] :rope-trick :leomunds-tiny-hut)
+                            (dragonmark-feat "Making" :int [:identify :mending] :magic-weapon :fabricate)
+                            (dragonmark-feat "Passage" :int [:expeditious-retreat :light] :misty-step :teleportation-circle)
+                            (dragonmark-feat "Scribing" :int [:comprehend-languages :message] :sending :tongues)
+                            (dragonmark-feat "Sentinel" :wis [:blade-ward :compelling-duel] :blur :protection-from-energy)
+                            (dragonmark-feat "Shadow" :cha [:dancing-lights :disguise-self] :darkness :nondetection)
+                            (dragonmark-feat "Storm" :int [:fog-cloud :shocking-grasp] :gust-of-wind :sleet-storm)
+                            (dragonmark-feat "Warding" :int [:alarm :resistance] :arcane-lock :magic-circle)]})]})
 
 (def ua-plugins
   (map
@@ -6135,14 +6183,8 @@ long rest."})]
      :options (map
                background-option
                backgrounds)})
-   (t/selection-cfg
-    {:name "Feats"
-     :ref :feats
-     :tags #{:feats}
-     :options opt5e/feat-options
-     :multiselect? true
-     :min 0
-     :max 0})
+   (feat-selection
+    {:options opt5e/feat-options})
    (class-selection
     {:help [:div
             [:p "Class is your adventuring vocation. It determines many of your special talents, including weapon, armor, skill, saving throw, and tool proficiencies. It also provides starting equipment options. When you gain levels, you gain them in a particular class."]
