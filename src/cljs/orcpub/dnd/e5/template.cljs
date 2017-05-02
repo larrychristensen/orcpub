@@ -4466,6 +4466,25 @@ long rest."})]
   {:name "Artisan's Tool"
    :options (zipmap (map :key equip5e/artisans-tools) (repeat 1))})
 
+(defn criminal-background [nm]
+  {:name nm
+   :help "You have a history of criminal activity."
+   :traits [{:name "Criminal Contact"
+             :page 129
+             :summary "You have a contact into a network of criminals"}]
+   :profs {:skill {:deception true, :stealth true}
+           :tool {:thieves-tools true}
+           :tool-options {:gaming-set 1}}
+   :equipment {:crowbar 1
+               :clothes-common 1
+               :pouch 1}
+   :treasure {:gp 15}})
+
+(def ships-passage-trait-cfg
+  {:name "Ship's Passage"
+   :page 139
+   :summary "You are able to secure free passage on a sailing ship"})
+
 (def backgrounds [{:name "Acolyte"
                    :help "Your life has been devoted to serving a god or gods."
                    :profs {:skill {:insight true, :religion true}
@@ -4499,18 +4518,8 @@ long rest."})]
                                :disguise-kit 1
                                :pouch 1}
                    :treasure {:gp 15}}
-                  {:name "Criminal"
-                   :help "You have a history of criminal activity."
-                   :traits [{:name "Criminal Contact"
-                             :page 129
-                             :summary "You have a contact into a network of criminals"}]
-                   :profs {:skill {:deception true, :stealth true}
-                           :tool {:thieves-tools true}
-                           :tool-options {:gaming-set 1}}
-                   :equipment {:crowbar 1
-                               :clothes-common 1
-                               :pouch 1}
-                   :treasure {:gp 15}}
+                  (criminal-background "Criminal")
+                  (criminal-background "Spy")
                   {:name "Entertainer"
                    :help "You have a history of entertaining people."
                    :traits [{:name "By Popular Demand"
@@ -4520,6 +4529,21 @@ long rest."})]
                            :tool {:disguise-kit true}
                            :tool-options {:musical-instrument 1}}
                    :equipment-choices [musical-instrument-choice-cfg]
+                   :equipment {:costume 1
+                               :pouch 1}
+                   :treasure {:gp 15}}
+                  {:name "Gladiator"
+                   :help "You have a history of gladiatorial entertainment."
+                   :traits [{:name "By Popular Demand"
+                             :page 130
+                             :summary "you are able to find a place to perform, in which you will recieve free food and lodging"}]
+                   :profs {:skill {:acrobatics true :performance true}
+                           :tool {:disguise-kit true}
+                           :tool-options {:musical-instrument 1}}
+                   :selections [(new-starting-equipment-selection
+                                 nil
+                                 {:name "Gladiator Weapon"
+                                  :options (opt5e/weapon-options weapon5e/weapons)})]
                    :equipment {:costume 1
                                :pouch 1}
                    :treasure {:gp 15}}
@@ -4549,6 +4573,27 @@ long rest."})]
                    :equipment {:clothes-traveler-s 1
                                :pouch 1}
                    :treasure {:gp 15}}
+                  {:name "Guild Merchant"
+                   :help "You are member of a guild of merchants"
+                   :traits [{:name "Guild Membership"
+                             :page 133
+                             :summary "fellow guild members will provide you with food and lodging; you have powerful political connections through your guild"}]
+                   :profs {:skill {:insight true :persuasion true}
+                           :language-options {:choose 1 :options {:any true}}}
+                   :selections [(t/selection-cfg
+                                 {:name "Proficiency: Navigator's Tools or Language"
+                                  :tags #{:profs}
+                                  :options [(t/option-cfg
+                                             {:name "Navigator's Tools"
+                                              :modifiers [(mod5e/tool-proficiency :navigators-tools)]})
+                                            (t/option-cfg
+                                             {:name "Language"
+                                              :selections [(opt5e/language-selection opt5e/languages 1)]})]})]
+                   :equipment {:clothes-traveler-s 1
+                               :pouch 1
+                               :mule 1
+                               :cart 1}
+                   :treasure {:gp 15}}
                   {:name "Hermit"
                    :help "You have lived a secluded life."
                    :traits [{:name "Discovery"
@@ -4565,16 +4610,43 @@ long rest."})]
                    :treasure {:gp 5}}
                   {:name "Noble"
                    :help "You are of noble birth."
-                   :traits [{:name "Position of Priviledge"
-                             :page 135
-                             :summary "you are welcome in high society and common folk try to accomodate you"}]
+                   :traits []
+                   :profs {:skill {:history true :persuasion true}
+                           :tool-options {:gaming-set 1}
+                           :language-options {:choose 1 :options {:any true}}}
+                   :selections [(t/selection-cfg
+                                 {:name "Feature"
+                                  :tags #{:background}
+                                  :options [(t/option-cfg
+                                             {:name "Position of Priviledge"
+                                              :modifiers [(mod5e/trait-cfg
+                                                           {:name "Position of Priviledge"
+                                                            :page 135
+                                                            :summary "you are welcome in high society and common folk try to accomodate you"})]})
+                                            (t/option-cfg
+                                             {:name "Retainers"
+                                              :modifiers [(mod5e/trait-cfg
+                                                           {:name "Retainers"
+                                                            :page 136
+                                                            :summary "You have 3 commoner retainers"})]})]})]
+                   :equipment {:clothes-fine 1
+                               :signet-ring 1
+                               :purse 1}
+                   :custom-equipment {"Scoll of Pedigree" 1}
+                   :treasure {:gp 25}}
+                  {:name "Knight"
+                   :help "You are a knight."
+                   :traits [{:name "Retainers"
+                             :page 136
+                             :summary "You have 2 commoner retainers and 1 noble squire"}]
                    :profs {:skill {:history true :persuasion true}
                            :tool-options {:gaming-set 1}
                            :language-options {:choose 1 :options {:any true}}}
                    :equipment {:clothes-fine 1
                                :signet-ring 1
                                :purse 1}
-                   :custom-equipment {"Scoll of Pedigree" 1}
+                   :custom-equipment {"Scoll of Pedigree" 1
+                                      "Emblem of Chivalry" 1}
                    :treasure {:gp 25}}
                   {:name "Outlander"
                    :help "You were raised in the wilds."
@@ -4606,15 +4678,37 @@ long rest."})]
                    :treasure {:gp 10}}
                   {:name "Sailor"
                    :help "You were a member of a crew for a seagoing vessel."
-                   :traits [{:name "Ship's Passage"
-                             :page 139
-                             :summary "You are able to secure free passage on a sailing ship"}]
+                   :traits [ships-passage-trait-cfg]
                    :profs {:skill {:athletics true :perception true}
                            :tool {:navigators-tools true :water-vehices true}}
                    :weapons {:club 1}
                    :equipment {:rope-silk 1
                                :clothes-common 1
                                :pouch 1}
+                   :custom-equipment {"Belaying Pin" 1
+                                      "Lucky Charm" 1}
+                   :treasure {:gp 10}}
+                  {:name "Pirate"
+                   :help "You were a member of a crew for a seagoing vessel."
+                   :profs {:skill {:athletics true :perception true}
+                           :tool {:navigators-tools true :water-vehices true}}
+                   :weapons {:club 1}
+                   :equipment {:rope-silk 1
+                               :clothes-common 1
+                               :pouch 1}
+                   :selections [(t/selection-cfg
+                                 {:name "Feature"
+                                  :tags #{:background}
+                                  :options [(t/option-cfg
+                                             {:name "Ship's Passage"
+                                              :modifiers [(mod5e/trait-cfg
+                                                           ships-passage-trait-cfg)]})
+                                            (t/option-cfg
+                                             {:name "Bad Reputation"
+                                              :modifiers [(mod5e/trait-cfg
+                                                           {:name "Bad Reputation"
+                                                            :page 139
+                                                            :summary "People in a civilized settlement are afraid of you and will let you get away with minor crimes"})]})]})]
                    :custom-equipment {"Belaying Pin" 1
                                       "Lucky Charm" 1}
                    :treasure {:gp 10}}

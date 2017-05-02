@@ -67,7 +67,7 @@
    {:name "Three-Dragon Ante Set"
     :key :three-dragon-ante-set}])
 
-(def vehicles
+(def vehicle-types
   [{:name "Water Vehicles"
     :key :water-vehicles}
    {:name "Land Vehicles"
@@ -79,7 +79,7 @@
    artisans-tools
    misc-tools
    gaming-sets
-   vehicles))
+   vehicle-types))
 
 (def arcane-focuses
   (common/add-keys
@@ -125,6 +125,13 @@
     {:name "Clothes, fine" :cost {:num 15 :type :gp} :weight "6 lb."}
     {:name "Clothes, traveler’s" :cost {:num 2 :type :gp} :weight "4 lb."}]))
 
+(def mounts
+  (common/add-keys
+   [{:name "Mule" :cost {:num 8 :type :gp} :speed 40 :carrying-capacity 420}]))
+
+(def vehicles
+  (common/add-keys
+   [{:name "Cart" :cost {:num 15 :type :gp} :weight "200 lb."}]))
 
 (def adventuring-gear
   (concat
@@ -133,6 +140,8 @@
    druidic-focuses
    holy-symbols
    clothes
+   mounts
+   vehicles
    (common/add-keys
     [{:name "Abacus" :cost {:num 2 :type :gp} :weight "2 lb."}
      {:name "Acid" :sell-container :vial :cost {:num 25 :type :gp} :weight "1 lb."}
