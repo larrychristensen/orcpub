@@ -3733,6 +3733,42 @@
 (defn has-minor-illusion? [c]
   (has-spell? c 0 :minor-illusion))
 
+(defn spell-mastery-selection [level]
+  (t/selection-cfg
+   {:name (str "Spell Mastery Level " level " Spell")
+    :tags #{:spells}
+    :options (map
+              (fn [spell-kw]
+                (let [{:keys [name] :as spell} (spells/spell-map spell-kw)]
+                  (t/option-cfg
+                   {:name name
+                    :help (opt5e/spell-help spell)
+                    :modifiers [(mod/set-mod ?spell-mastery name)]
+                    :prereqs [(t/option-prereq
+                               nil
+                               (fn [c] (some #(= spell-kw (:key %)) (get (char5e/spells-known c) level)))
+                               true)]})))
+              (get-in sl/spell-lists [:wizard level]))}))
+
+(defn signature-spells-selection []
+  (t/selection-cfg
+   {:name "Signature Spells"
+    :tags #{:spells}
+    :min 2
+    :max 2
+    :options (map
+              (fn [spell-kw]
+                (let [{:keys [name] :as spell} (spells/spell-map spell-kw)]
+                  (t/option-cfg
+                   {:name name
+                    :help (opt5e/spell-help spell)
+                    :modifiers [(mod/set-mod ?signature-spells name)]
+                    :prereqs [(t/option-prereq
+                               nil
+                               (fn [c] (some #(= spell-kw (:key %)) (get (char5e/spells-known c) 3)))
+                               true)]})))
+              (get-in sl/spell-lists [:wizard 3]))}))
+
 (def wizard-option
   (class-option
    {:name "Wizard",
@@ -3755,8 +3791,23 @@
     :profs {:weapon {:dagger true :dart true :sling true :quarterstaff true :crossbow-light true}
             :save {:int true :wis true}
             :skill-options {:choose 2 :options {:arcana true :history true :insight true :investigation true :medicine true :religion true}}}
-    :traits [{:level 18 :name "Spell Mastery"}
-             {:level 20 :name "Signature Spells"}]
+    :levels {18 {:selections [(spell-mastery-selection 1)
+                              (spell-mastery-selection 2)]
+                 :modifiers [(mod5e/dependent-trait
+                              {:name "Spell Mastery"
+                               :page 115
+                               :summary (str (if (seq ?spell-mastery)
+                                               (str "Cast " (common/list-print ?spell-mastery))
+                                               "Choose a 1st and 2nd level spell, cast those")
+                                             " at lowest level without expending a slot if you have them prepared")})]}
+             20 {:selections [(signature-spells-selection)]
+                 :modifiers [(mod5e/dependent-trait
+                              {:name "Signature Spells"
+                               :page 115
+                               :summary (str (if (seq ?signature-spells)
+                                               (str "Your signature spells are " (common/list-print ?signature-spells))
+                                               "Choose two 3rd level spells")
+                                             ", you always have them prepared and can cast them once without expending a slot")})]}}
     :subclass-level 2
     :subclass-title "Arcane Tradition"
     :subclasses [{:name "School of Evocation"
@@ -5893,7 +5944,42 @@ long rest."})]
                                             :source ua-eberron-kw
                                             :summmary "immune to disease; no need to eat or breathe; instead of sleeping, go inactive but alert for 4 hours"})]
                               :languages ["Common"]
-                              :selections [(opt5e/language-selection opt5e/languages 1)]}])})]})
+                              :selections [(opt5e/language-selection opt5e/languages 1)]}])})
+                (class-selection
+                 {:options [(class-option
+                             {:name "Wizard",
+                              :plugin? true
+                              :source ua-eberron-kw
+                              :subclass-level 2
+                              :subclass-title "Arcane Tradition"
+                              :subclasses [{:name "Artificer"
+                                            :levels {2 {:modifiers [(mod5e/trait-cfg
+                                                                     {:name "Infuse Potions"
+                                                                      :page 3
+                                                                      :source ua-eberron-kw
+                                                                      :summary "create a potion"})
+                                                                    (mod5e/trait-cfg
+                                                                     {:name "Infuse Scrolls"
+                                                                      :page 4
+                                                                      :source ua-eberron-kw
+                                                                      :summary "create a scroll"})]}
+                                                     6 {:modifiers [(mod5e/trait-cfg
+                                                                     {:name "Infuse Weapons and Armor"
+                                                                      :page 4
+                                                                      :source ua-eberron-kw
+                                                                      :duration {:units :hour
+                                                                                 :amount 8}
+                                                                      :summary "create magic weapon or armor"})]}
+                                                     10 {:modifiers [(mod5e/trait-cfg
+                                                                      {:name "Superior Artificer"
+                                                                       :page 4
+                                                                       :source ua-eberron-kw
+                                                                       :summary "infuse 1 additional weapon or armor and 1 addition potion or scroll"})]}
+                                                     14 {:modifiers [(mod5e/trait-cfg
+                                                                      {:name "Master Artificer"
+                                                                       :page 4
+                                                                       :source ua-eberron-kw
+                                                                       :summary "create magic items from tables A or B of DMG"})]}}}]})]})]})
 
 (def ua-plugins
   (map
