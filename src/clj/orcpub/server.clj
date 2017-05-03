@@ -218,7 +218,7 @@
       (if (and image-url
                (re-matches #"^(https?|ftp|file)://[-a-zA-Z0-9+&@#/%?=~_|!:,.;]*[-a-zA-Z0-9+&@#/%=~_|]" image-url)
                (not image-url-failed))
-        (draw-image! doc (get-page doc 1) image-url 0.53 1.85 2.25 3.0))
+        (draw-image! doc (get-page doc 1) image-url 0.45 1.75 2.35 3.15))
       (.save doc output))
     (let [a (.toByteArray output)]
       {:status 200 :body (ByteArrayInputStream. a)})))
