@@ -244,3 +244,9 @@
 
 (defn image-url [built-char]
   (es/entity-val built-char :image-url))
+
+(defn faction-image-url [built-char]
+  (es/entity-val built-char :faction-image-url))
+
+(defn faction-name [built-char]
+  (es/entity-val built-char :faction-name))

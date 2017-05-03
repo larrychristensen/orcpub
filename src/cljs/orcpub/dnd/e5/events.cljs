@@ -92,6 +92,18 @@
            :image-url-failed
            nil)))
 
+(reg-event-db
+ :set-faction-image-url
+ character-interceptors
+ (fn [character [_ faction-image-url]]
+   (update character
+           ::entity/values
+           assoc
+           :faction-image-url
+           faction-image-url
+           :faction-image-url-failed
+           nil)))
+
 (def custom-equipment-path [::entity/values :custom-equipment])
 
 (def custom-treasure-path [::entity/values :custom-treasure])
@@ -490,6 +502,16 @@
            image-url)))
 
 (reg-event-db
+ :failed-loading-faction-image
+ character-interceptors
+ (fn [character [_ faction-image-url]]
+   (update character
+           ::entity/values
+           assoc
+           :faction-image-url-failed
+           faction-image-url)))
+
+(reg-event-db
  :loaded-image
  character-interceptors
  (fn [character []]
@@ -497,3 +519,12 @@
            ::entity/values
            dissoc
            :image-url-failed)))
+
+(reg-event-db
+ :loaded-faction-image
+ character-interceptors
+ (fn [character []]
+   (update character
+           ::entity/values
+           dissoc
+           :faction-image-url-failed)))

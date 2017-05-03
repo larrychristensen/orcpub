@@ -353,6 +353,10 @@
     {:padding "5px"}]
    [:.p-10
     {:padding "10px"}]
+   [:.p-20
+    {:padding "20px"}]
+   [:.p-30
+    {:padding "30px"}]
    [:.p-5-10
     {:padding "5px 10px"}]
 

@@ -200,8 +200,7 @@
   [req]
   (let [body-map (io.pedestal.http.route/parse-query-string (slurp (:body req)))
         fields (clojure.edn/read-string (:body body-map))
-        image-url (:image-url fields)
-        image-url-failed (:image-url-failed fields)
+        {:keys [image-url image-url-failed faction-image-url faction-image-url-failed]} fields
         input (.openStream (io/resource (cond
                                           (find fields :spellcasting-class-6) "fillable-char-sheet-6-spells.pdf"
                                           (find fields :spellcasting-class-5) "fillable-char-sheet-5-spells.pdf"
@@ -219,6 +218,10 @@
                (re-matches #"^(https?|ftp|file)://[-a-zA-Z0-9+&@#/%?=~_|!:,.;]*[-a-zA-Z0-9+&@#/%=~_|]" image-url)
                (not image-url-failed))
         (draw-image! doc (get-page doc 1) image-url 0.45 1.75 2.35 3.15))
+      (if (and faction-image-url
+               (re-matches #"^(https?|ftp|file)://[-a-zA-Z0-9+&@#/%?=~_|!:,.;]*[-a-zA-Z0-9+&@#/%=~_|]" faction-image-url)
+               (not faction-image-url-failed))
+        (draw-image! doc (get-page doc 1) faction-image-url 5.88 2.4 1.905 1.52))
       (.save doc output))
     (let [a (.toByteArray output)]
       {:status 200 :body (ByteArrayInputStream. a)})))

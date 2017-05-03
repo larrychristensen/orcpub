@@ -352,7 +352,9 @@
         reactions (char5e/reactions built-char)
         actions (char5e/actions built-char)
         image-url (char5e/image-url built-char)
-        image-url-failed (es/entity-val built-char :image-url-failed)]
+        image-url-failed (es/entity-val built-char :image-url-failed)
+        faction-image-url (char5e/faction-image-url built-char)
+        faction-image-url-failed (es/entity-val built-char :faction-image-url-failed)]
     [:div
      [:div.f-s-24.f-w-600.m-b-16.text-shadow.flex
       [:span
@@ -393,7 +395,13 @@
            [:div.p-10.red.f-s-18 (str "Image could not be loaded, please check the URL and try again")]
            [:img.character-image.w-100-p.m-b-20 {:src (or image-url "image/barbarian.png")
                                                  :on-error (fn [_] (dispatch [:failed-loading-image image-url]))
-                                                 :on-load (fn [_] (if image-url-failed (dispatch [:loaded-image])))}])]
+                                                 :on-load (fn [_] (if image-url-failed (dispatch [:loaded-image])))}])
+         (if faction-image-url-failed
+           [:div.p-10.red.f-s-18 (str "Faction image could not be loaded, please check the URL and try again")]
+           (if faction-image-url
+             [:div.p-30 [:img.character-image.w-100-p.m-b-20 {:src faction-image-url
+                                                    :on-error (fn [_] (dispatch [:failed-loading-faction-image faction-image-url]))
+                                                    :on-load (fn [_] (if faction-image-url-failed (dispatch [:loaded-faction-image])))}]]))]
         [:div.w-50-p.m-l-10
          (if background [svg-icon-section "Background" "ages" [:span.f-s-18.f-w-n background]])
          (if alignment [svg-icon-section "Alignment" "yin-yang" [:span.f-s-18.f-w-n alignment]])
@@ -1938,6 +1946,12 @@
      [:div.field
       [:span.personality-label.f-s-18 "Image URL"]
       [character-input entity-values :image-url nil #(dispatch [:set-image-url %])]]
+     [:div.field
+      [:span.personality-label.f-s-18 "Faction Name"]
+      [character-input entity-values :faction-name]]
+     [:div.field
+      [:span.personality-label.f-s-18 "Faction Image URL"]
+      [character-input entity-values :faction-image-url nil #(dispatch [:set-faction-image-url %])]]
      [:div.field
       [:span.personality-label.f-s-18 "Description/Backstory"]
       [character-textarea entity-values :description "h-800"]]]))
