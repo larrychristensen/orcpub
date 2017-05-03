@@ -6324,6 +6324,7 @@ long rest."})]
                                                 (:magical-ac-bonus armor)
                                                 ?ac-bonus)
                                              ?magical-ac-bonus)))
+    ?ac-bonus-fns []
     ?abilities (reduce
                 (fn [m k]
                   (assoc m k (max (let [overrides (filter
