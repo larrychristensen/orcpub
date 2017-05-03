@@ -1,5 +1,6 @@
 (ns orcpub.dnd.e5.db
   (:require [orcpub.dnd.e5.template :as t5e]
+            [orcpub.dnd.e5.character :as char5e]
             [re-frame.core :as re-frame]
             [orcpub.entity :as entity]
             [cljs.spec :as spec]))
@@ -8,7 +9,7 @@
 
 (def default-value
   {:builder {:character {:tab #{:build :options}}}
-   :character t5e/character
+   :character (char5e/set-class t5e/character :barbarian 0 t5e/barbarian-option)
    :template t5e/template
    :plugins t5e/plugins
    :locked-components #{}})

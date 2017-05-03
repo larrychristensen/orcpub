@@ -2,7 +2,8 @@
   (:require [clojure.spec :as spec]
             [orcpub.entity-spec :as es]
             [orcpub.dice :as dice]
-            [orcpub.template :as t]))
+            [orcpub.template :as t]
+            [orcpub.entity :as entity]))
 
 (spec/def ::armor-class nat-int?)
 (spec/def ::subrace string?)
@@ -250,3 +251,85 @@
 
 (defn faction-name [built-char]
   (es/entity-val built-char :faction-name))
+
+(defn remove-custom-starting-equipment [character equipment-indicator path]
+  (update-in
+   character
+   path
+   (fn [equipment]
+     (vec
+      (remove
+       :background-starting-equipment?
+       equipment)))))
+
+(defn remove-starting-equipment [character equipment-indicator]
+  (update-in
+   character
+   [::entity/options]
+   (fn [options]
+     (into {}
+           (map
+            (fn [[k v]]
+              [k
+               (if (sequential? v)
+                 (vec
+                  (remove
+                   (comp equipment-indicator ::entity/value)
+                   v))
+                 v)])
+            options)))))
+
+(defn add-associated-options [character associated-options]
+  (reduce
+   (fn [new-char associated-option]
+     (update-in
+      new-char
+      [::entity/options]
+      (fn [options]
+        (merge-with
+         (fn [o1 o2]
+           (let [ks (into #{} (map ::entity/key o1))]
+             (vec
+              (concat
+               o1
+               (remove (comp ks ::entity/key) o2)))))
+         options
+         associated-option))))
+   character
+   associated-options))
+
+(defn add-custom-equipment [character custom-equipment path]
+  (update-in
+   character
+   path
+   (fn [equipment]
+     (let [current-names (into #{} (map :name equipment))]
+       (vec
+        (concat
+         equipment
+         (remove
+          (comp current-names :name)
+          (map
+           (fn [[nm num]]
+             {:name nm
+              :quantity num
+              :equipped? true
+              :background-starting-equipment? true})
+           custom-equipment))))))))
+
+
+
+(defn set-class [character class-key class-index new-class-option]
+  (let [associated-options (::t/associated-options new-class-option)
+        with-new-class (assoc-in
+                        character
+                        [::entity/options :class class-index]
+                        {::entity/key class-key
+                         ::entity/options
+                         {:levels [{::entity/key :level-1}]}})
+        without-starting-equipment (remove-starting-equipment with-new-class :class-starting-equipment?)]
+    (prn "WITHOUT STARTING EQUIPMENT" without-starting-equipment)
+    #?(:cljs (cljs.pprint/pprint without-starting-equipment))
+    (if (zero? class-index)
+      (add-associated-options without-starting-equipment associated-options)
+      with-new-class)))

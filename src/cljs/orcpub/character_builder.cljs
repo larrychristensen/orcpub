@@ -573,7 +573,7 @@
                   (inc i)])
                available-levels))])
           [:i.fa.fa-minus-circle.orange.f-s-16.m-l-5.pointer
-           {:on-click (fn [_] (dispatch [:delete-class key]))}]]
+           {:on-click (fn [_] (dispatch [:delete-class key i options-map]))}]]
          (if @expanded?
            [:div.m-t-5.m-b-10 (::t/help class-template-option)])]))))
 
