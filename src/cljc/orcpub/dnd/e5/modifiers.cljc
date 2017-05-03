@@ -355,11 +355,12 @@
     (fn [cfg] (mods/map-mod ?weapons weapon-kw (equipment-cfg cfg)))
     1))
 
-(defn deferred-magic-item-fn [equipment-mod-fn {:keys [magical-ac-bonus modifiers]}]
+(defn deferred-magic-item-fn [equipment-mod-fn {:keys [magical-ac-bonus modifiers]} & [include-magic-bonus?]]
   (fn [cfg] (let [equipment-mod (equipment-mod-fn cfg)]
               (if (:equipped? cfg)
                 (let [mods (concat [equipment-mod]
-                                   (if magical-ac-bonus [(mods/cum-sum-mod ?magical-ac-bonus magical-ac-bonus)])
+                                   (if (and include-magic-bonus? magical-ac-bonus)
+                                     [(mods/cum-sum-mod ?magical-ac-bonus magical-ac-bonus)])
                                    modifiers)]
                   mods)
                 equipment-mod))))
@@ -403,7 +404,7 @@
 (defn deferred-magic-item [item-kw item]
   (mods/deferred-modifier
     ?magic-items
-    (deferred-magic-item-fn (fn [cfg] (mods/map-mod ?magic-items item-kw (equipment-cfg cfg))) item)
+    (deferred-magic-item-fn (fn [cfg] (mods/map-mod ?magic-items item-kw (equipment-cfg cfg))) item true)
     1
     "MAGIC ITEM"))
 
