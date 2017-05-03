@@ -8,9 +8,13 @@
             [orcpub.dnd.e5.skills :as skill5e]
             [orcpub.dnd.e5.character :as char5e])
   (:import (org.apache.pdfbox.pdmodel.interactive.form PDCheckBox PDComboBox PDListBox PDRadioButton PDTextField)
-           (org.apache.pdfbox.pdmodel PDDocument)
+           (org.apache.pdfbox.pdmodel PDDocument PDPageContentStream)
+           (org.apache.pdfbox.pdmodel.graphics.image PDImageXObject)
            (java.io ByteArrayOutputStream ByteArrayInputStream)
-           (org.eclipse.jetty.server.handler.gzip GzipHandler))
+           (org.apache.pdfbox.pdmodel.graphics.image JPEGFactory)
+           (org.eclipse.jetty.server.handler.gzip GzipHandler)
+           (javax.imageio ImageIO)
+           (java.net URL))
   (:gen-class))
 
 (defn response [status body & {:as headers}]
@@ -152,35 +156,52 @@
       (.setNeedAppearances form false)
       (.flatten form))))
 
-(def character-pdf
-  {:name :character-pdf
-   :enter
-   (fn [context]
-     (try
-       (let [body-map (io.pedestal.http.route/parse-query-string (slurp (get-in context [:request :body])))
-             fields (clojure.edn/read-string (:body body-map))
-             input (.openStream (io/resource (cond
-                                               (find fields :spellcasting-class-6) "fillable-char-sheet-6-spells.pdf"
-                                               (find fields :spellcasting-class-5) "fillable-char-sheet-5-spells.pdf"
-                                               (find fields :spellcasting-class-4) "fillable-char-sheet-4-spells.pdf"
-                                               (find fields :spellcasting-class-3) "fillable-char-sheet-3-spells.pdf"
-                                               (find fields :spellcasting-class-2) "fillable-char-sheet-2-spells.pdf"
-                                               (find fields :spellcasting-class-1) "fillable-char-sheet-1-spells.pdf"
-                                               :else "fillable-char-sheet-0-spells.pdf")))
-             output (ByteArrayOutputStream.)
-             user-agent (get-in context [:request :headers "user-agent"])
-             chrome? (re-matches #".*Chrome.*" user-agent)]
-         (with-open [doc (PDDocument/load input)]
-           (write-fields! doc fields (not chrome?))
-           (.save doc output))
-         (let [a (.toByteArray output)]
-           (assoc context :response {:status 200 :body (ByteArrayInputStream. a)})))
-       (catch Throwable e (prn "EXCEPTION!!!!!!!!!!" e))))})
+(defn content-stream [doc page]
+  (PDPageContentStream. doc page true false true))
+
+(defn in-to-sz [inches]
+  (float (* 72 inches)))
+
+(defn in-to-coord-x [inches]
+  (in-to-sz inches))
+
+(defn in-to-coord-y [inches]
+  (in-to-sz (- 11 inches)))
+
+(defn scale [[r-h r-w] [i-h i-w]]
+  (let [height-to-width (/ i-h i-w)
+        rect-height-to-width (/ r-h r-w)
+        height-ratio (/ r-h i-h)]
+    (if (> height-to-width rect-height-to-width)
+      [r-h (* r-h (/ i-w i-h))]
+      [(* r-w (/ i-h i-w)) r-w])))
+
+(defn draw-image! [doc page url x y width height]
+  (let [stream (.openStream (URL. url))
+        img (JPEGFactory/createFromStream doc stream)
+        [scaled-height scaled-width] (scale [height width] [(.getHeight img) (.getWidth img)])]
+    (doto (content-stream doc page)
+      (.drawImage
+       img
+       (in-to-coord-x (+ x (if (< scaled-width width)
+                             (/ (- width scaled-width) 2)
+                             0)))
+       (in-to-coord-y (+ height y (if (< scaled-height height)
+                                    (/ (- scaled-height height) 2)
+                                    0)))
+       (in-to-sz scaled-width)
+       (in-to-sz scaled-height))
+      (.close))))
+
+(defn get-page [doc index]
+  (.getPage doc index))
 
 (defn character-pdf-2
   [req]
   (let [body-map (io.pedestal.http.route/parse-query-string (slurp (:body req)))
         fields (clojure.edn/read-string (:body body-map))
+        image-url (:image-url fields)
+        image-url-failed (:image-url-failed fields)
         input (.openStream (io/resource (cond
                                           (find fields :spellcasting-class-6) "fillable-char-sheet-6-spells.pdf"
                                           (find fields :spellcasting-class-5) "fillable-char-sheet-5-spells.pdf"
@@ -194,6 +215,10 @@
         chrome? (re-matches #".*Chrome.*" user-agent)]
     (with-open [doc (PDDocument/load input)]
       (write-fields! doc fields (not chrome?))
+      (if (and image-url
+               (re-matches #"^(https?|ftp|file)://[-a-zA-Z0-9+&@#/%?=~_|!:,.;]*[-a-zA-Z0-9+&@#/%=~_|]" image-url)
+               (not image-url-failed))
+        (draw-image! doc (get-page doc 1) image-url 0.53 1.85 2.25 3.0))
       (.save doc output))
     (let [a (.toByteArray output)]
       {:status 200 :body (ByteArrayInputStream. a)})))
