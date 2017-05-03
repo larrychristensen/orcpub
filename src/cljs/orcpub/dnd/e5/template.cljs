@@ -6226,7 +6226,9 @@ long rest."})]
                background-option
                backgrounds)})
    (feat-selection
-    {:options opt5e/feat-options})
+    {:options opt5e/feat-options
+     :min 0
+     :max 0})
    (class-selection
     {:help [:div
             [:p "Class is your adventuring vocation. It determines many of your special talents, including weapon, armor, skill, saving throw, and tool proficiencies. It also provides starting equipment options. When you gain levels, you gain them in a particular class."]
