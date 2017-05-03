@@ -389,7 +389,12 @@
       :weight (char5e/weight built-char)
       :eyes (char5e/eyes built-char)
       :skin (char5e/skin built-char)
-      :hair (char5e/hair built-char)}
+      :hair (char5e/hair built-char)
+      :image-url (char5e/image-url built-char)
+      :image-url-failed (es/entity-val built-char :image-url-failed)
+      :faction-image-url (char5e/faction-image-url built-char)
+      :faction-image-url-failed (es/entity-val built-char :faction-image-url-failed)
+      :faction-name (char5e/faction-name built-char)}
      (attacks-and-spellcasting-fields built-char)
      (skill-fields built-char)
      abilities

@@ -25,7 +25,7 @@
          :url "https://www.amazon.com/gp/product/0786965983/ref=as_li_qf_sp_asin_il_tl?ie=UTF8&tag=orcpub-20&camp=1789&creative=9325&linkCode=as2&creativeASIN=0786965983&linkId=80c8baab14ecdb5c31f29d9c5b594c83"}
    :ua-eberron {:abbr "UA-Eberron"
                 :url "http://media.wizards.com/2015/downloads/dnd/UA_Eberron_v1.1.pdf"}
-   :ua-waterborne {:abber "UA-Waterborne"
+   :ua-waterborne {:abbr "UA-Waterborne"
                    :url "http://media.wizards.com/2015/downloads/dnd/UA_Waterborne_v3.pdf"}})
 
 

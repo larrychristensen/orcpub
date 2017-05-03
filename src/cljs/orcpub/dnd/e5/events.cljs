@@ -4,6 +4,7 @@
             [orcpub.common :as common]
             [orcpub.dice :as dice]
             [orcpub.dnd.e5.template :as t5e]
+            [orcpub.dnd.e5.character :as char5e]
             [orcpub.dnd.e5.db :refer [default-value character->local-store tab-path]]
 
             [re-frame.core :refer [reg-event-db reg-event-fx inject-cofx path trim-v
@@ -38,8 +39,8 @@
             (assoc default-value :character local-store-character)
             default-value))}))
 
-(defn reset-character [character [_]]
-  t5e/character)
+(defn reset-character [_ [_]]
+  (char5e/set-class t5e/character :barbarian 0 t5e/barbarian-option))
 
 (reg-event-db
  :reset-character
@@ -80,83 +81,42 @@
  character-interceptors
  add-class)
 
+(reg-event-db
+ :set-image-url
+ character-interceptors
+ (fn [character [_ image-url]]
+   (update character
+           ::entity/values
+           assoc
+           :image-url
+           image-url
+           :image-url-failed
+           nil)))
+
+(reg-event-db
+ :set-faction-image-url
+ character-interceptors
+ (fn [character [_ faction-image-url]]
+   (update character
+           ::entity/values
+           assoc
+           :faction-image-url
+           faction-image-url
+           :faction-image-url-failed
+           nil)))
+
 (def custom-equipment-path [::entity/values :custom-equipment])
 
 (def custom-treasure-path [::entity/values :custom-treasure])
 
-(defn remove-custom-starting-equipment [character equipment-indicator path]
-  (update-in
-   character
-   path
-   (fn [equipment]
-     (vec
-      (remove
-       :background-starting-equipment?
-       equipment)))))
-
-(defn remove-starting-equipment [character equipment-indicator]
-  (update-in
-   character
-   [::entity/options]
-   (fn [options]
-     (into {}
-           (map
-            (fn [[k v]]
-              [k
-               (if (sequential? v)
-                 (vec
-                  (remove
-                   (comp equipment-indicator ::entity/value)
-                   v))
-                 v)])
-            options)))))
-
-(defn add-associated-options [character associated-options]
-  (reduce
-   (fn [new-char associated-option]
-     (update-in
-      new-char
-      [::entity/options]
-      (fn [options]
-        (merge-with
-         (fn [o1 o2]
-           (let [ks (into #{} (map ::entity/key o1))]
-             (vec
-              (concat
-               o1
-               (remove (comp ks ::entity/key) o2)))))
-         options
-         associated-option))))
-   character
-   associated-options))
-
-(defn add-custom-equipment [character custom-equipment path]
-  (update-in
-   character
-   path
-   (fn [equipment]
-     (let [current-names (into #{} (map :name equipment))]
-       (vec
-        (concat
-         equipment
-         (remove
-          (comp current-names :name)
-          (map
-           (fn [[nm num]]
-             {:name nm
-              :quantity num
-              :equipped? true
-              :background-starting-equipment? true})
-           custom-equipment))))))))
-
 (defn add-starting-equipment [character [_ equipment-options custom-treasure custom-equipment]]
   (-> character
-      (remove-starting-equipment :background-starting-equipment?)
-      (add-associated-options equipment-options)
-      (remove-custom-starting-equipment :background-starting-equipment? custom-treasure-path)
-      (add-custom-equipment custom-treasure custom-treasure-path)
-      (remove-custom-starting-equipment :background-starting-equipment? custom-equipment-path)
-      (add-custom-equipment custom-equipment custom-equipment-path)))
+      (char5e/remove-starting-equipment :background-starting-equipment?)
+      (char5e/add-associated-options equipment-options)
+      (char5e/remove-custom-starting-equipment :background-starting-equipment? custom-treasure-path)
+      (char5e/add-custom-equipment custom-treasure custom-treasure-path)
+      (char5e/remove-custom-starting-equipment :background-starting-equipment? custom-equipment-path)
+      (char5e/add-custom-equipment custom-equipment custom-equipment-path)))
 
 (reg-event-db
  :add-starting-equipment
@@ -164,18 +124,7 @@
  add-starting-equipment)
 
 (defn set-class [character [_ class-key class-index options-map]]
-  (let [new-class-option (options-map class-key)
-        associated-options (::t/associated-options new-class-option)
-        with-new-class (assoc-in
-                        character
-                        [::entity/options :class class-index]
-                        {::entity/key class-key
-                         ::entity/options
-                         {:levels [{::entity/key :level-1}]}})
-        without-starting-equipment (remove-starting-equipment with-new-class :class-starting-equipment)]
-    (if (zero? class-index)
-      (add-associated-options without-starting-equipment associated-options)
-      with-new-class)))
+  (char5e/set-class character class-key class-index (options-map class-key)))
 
 (reg-event-db
  :set-class
@@ -204,11 +153,17 @@
  character-interceptors
  set-class-level)
 
-(defn delete-class [character [_ class-key]]
-  (update-in
-   character
-   [::entity/options :class]
-   (fn [classes] (vec (remove #(= class-key (::entity/key %)) classes)))))
+(defn delete-class [character [_ class-key i options-map]]
+  (let [updated (update-in
+                 character
+                 [::entity/options :class]
+                 (fn [classes] (vec (remove #(= class-key (::entity/key %)) classes))))
+        new-first-class-key (get-in updated [::entity/options :class 0 ::entity/key])
+        new-first-class-option (if new-first-class-key (options-map new-first-class-key))]
+    (if (and (zero? i)
+             new-first-class-option)
+      (char5e/set-class updated new-first-class-key 0 new-first-class-option)
+      updated)))
 
 (reg-event-db
  :delete-class
@@ -466,3 +421,41 @@
                                    (if (comps path)
                                      (disj comps path)
                                      (conj comps path))))))
+
+(reg-event-db
+ :failed-loading-image
+ character-interceptors
+ (fn [character [_ image-url]]
+   (update character
+           ::entity/values
+           assoc
+           :image-url-failed
+           image-url)))
+
+(reg-event-db
+ :failed-loading-faction-image
+ character-interceptors
+ (fn [character [_ faction-image-url]]
+   (update character
+           ::entity/values
+           assoc
+           :faction-image-url-failed
+           faction-image-url)))
+
+(reg-event-db
+ :loaded-image
+ character-interceptors
+ (fn [character []]
+   (update character
+           ::entity/values
+           dissoc
+           :image-url-failed)))
+
+(reg-event-db
+ :loaded-faction-image
+ character-interceptors
+ (fn [character []]
+   (update character
+           ::entity/values
+           dissoc
+           :faction-image-url-failed)))

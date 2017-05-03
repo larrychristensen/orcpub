@@ -5899,6 +5899,14 @@ long rest."})]
 
 (def ua-al-illegal (mod5e/al-illegal "Unearthed Arcana options are not allowed"))
 
+(def ua-awakened-mystic :ua-awakened-mystic)
+
+(def ua-awakened-mystic-plugin
+  {:name "Unearthed Arcana: Awakened Mystic"
+   :key ua-awakened-mystic
+   :selections [(class-selection
+                 {:options []})]})
+
 (def ua-waterborne-kw :ua-waterborne)
 
 (defn mariner-class-option [nm kw level]
@@ -5910,18 +5918,13 @@ long rest."})]
                                   kw
                                   [(t/option-cfg
                                     {:name "Mariner"
-                                     :modifiers [(mod/cum-sum-mod ?ac-bonus
-                                                                  1
-                                                                  "AC"
-                                                                  "+1"
-                                                                  [(let [enable? (not-any?
-                                                                                  (fn [[armor-kw]]
-                                                                                    (let [disabled-type? (-> mi/all-armor-map armor-kw :type #{:shield :heavy})]
-                                                                                      (prn "DIAVCLED TYPE" disabled-type?)
-                                                                                      disabled-type?))
-                                                                                  ?equipped-armor)]
-                                                                     (prn "ENABLE?" enable?)
-                                                                     enable?)])
+                                     :modifiers [ua-al-illegal
+                                                 (mod5e/ac-bonus-fn
+                                                  (fn [armor shield]
+                                                    (if (and (nil? shield)
+                                                             (not (= :heavy (:type armor))))
+                                                      1
+                                                      0)))
                                                  (mod5e/trait-cfg
                                                   {:name "Mariner Fighting Style"
                                                    :page 2
@@ -6256,7 +6259,9 @@ long rest."})]
                background-option
                backgrounds)})
    (feat-selection
-    {:options opt5e/feat-options})
+    {:options opt5e/feat-options
+     :min 0
+     :max 0})
    (class-selection
     {:help [:div
             [:p "Class is your adventuring vocation. It determines many of your special talents, including weapon, armor, skill, saving throw, and tool proficiencies. It also provides starting equipment options. When you gain levels, you gain them in a particular class."]
@@ -6312,7 +6317,7 @@ long rest."})]
                                             ?unarmored-with-shield-ac-bonus
                                             ?ac-bonus
                                             (?shield-ac-bonus shield)))
-    ?armor-class-with-armor (fn [armor & [shield]]
+    ?armor-class-with-armor-base (fn [armor & [shield]]
                               (cond (and (nil? armor)
                                          (nil? shield)) ?unarmored-armor-class
                                     (nil? armor) (?unarmored-with-shield-armor-class shield)
@@ -6323,6 +6328,10 @@ long rest."})]
                                                 (:magical-ac-bonus armor)
                                                 ?ac-bonus)
                                              ?magical-ac-bonus)))
+    ?armor-class-with-armor (fn [armor & [shield]]
+                              (apply +
+                                     (?armor-class-with-armor-base armor shield)
+                                     (map #(% armor shield) ?ac-bonus-fns)))
     ?ac-bonus-fns []
     ?abilities (reduce
                 (fn [m k]
