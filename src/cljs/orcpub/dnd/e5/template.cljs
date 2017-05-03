@@ -6283,7 +6283,6 @@ long rest."})]
    (inventory-selection "Equipment" "backpack" equip5e/equipment mod5e/deferred-equipment)
    (inventory-selection "Other Magic Items" "orb-wand" mi/other-magic-items mod5e/deferred-magic-item)])
 
-
 (def template-base
   (es/make-entity
    {?armor-class (+ 10 (?ability-bonuses :dex))
