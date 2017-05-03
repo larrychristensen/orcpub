@@ -1709,7 +1709,7 @@
              [:span.orange ", "]
              (map
               (fn [{:keys [name url]}]
-                [:a.orange {:href url} name])
+                [:a.orange {:href url :target :_blank} name])
               (cons {:name "Player's Handbook"
                      :url disp5e/phb-url}
                     (map t5e/plugin-map @(subscribe [:selected-plugin-options])))))))])])))
