@@ -211,7 +211,7 @@
    :warlock
    {0
     [:blade-ward :chill-touch :eldritch-blast :friends :mage-hand :minor-illusion :prestidigitation
-     :true-strike
+     :true-strike :poison-spray
      :booming-blade :green-flame-blade :lightning-lure :sword-burst
      :create-bonfire :frostbite :magic-stone :thunderclap],
     1

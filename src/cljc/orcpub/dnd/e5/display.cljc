@@ -26,7 +26,9 @@
    :ua-eberron {:abbr "UA-Eberron"
                 :url "http://media.wizards.com/2015/downloads/dnd/UA_Eberron_v1.1.pdf"}
    :ua-waterborne {:abbr "UA-Waterborne"
-                   :url "http://media.wizards.com/2015/downloads/dnd/UA_Waterborne_v3.pdf"}})
+                   :url "http://media.wizards.com/2015/downloads/dnd/UA_Waterborne_v3.pdf"}
+   :ua-mystic {:abbr "UA-Mystic"
+               :url "http://media.wizards.com/2017/dnd/downloads/UAMystic3.pdf"}})
 
 
 (def plural-map
@@ -80,7 +82,7 @@
      (if save (str ", DC" save-dc " " (common/safe-name save) " save"))
      (if page (str " (" (source-description source page) ")")))))
 
-(defn action-description [{:keys [description summary source page duration range frequency]}]
+(defn action-description [{:keys [description summary source page duration range frequency qualifier]}]
   (str
    (or summary description)
    (if (or range duration frequency page)
@@ -89,7 +91,8 @@
       (s/join ", "
               (remove
                nil?
-               [(if range (str "range " (unit-amount-description range)))
+               [qualifier
+                (if range (str "range " (unit-amount-description range)))
                 (if duration (str "lasts " (unit-amount-description duration)))
                 (if frequency (str "use " (frequency-description frequency)))
                 (if page (source-description source page))]))
