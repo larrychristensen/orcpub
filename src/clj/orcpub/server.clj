@@ -5,13 +5,14 @@
             [io.pedestal.http.ring-middlewares :as ring]
             [io.pedestal.interceptor.error :as error-int]
             [clojure.java.io :as io]
+            [clojure.string :as s]
             [orcpub.dnd.e5.skills :as skill5e]
             [orcpub.dnd.e5.character :as char5e])
   (:import (org.apache.pdfbox.pdmodel.interactive.form PDCheckBox PDComboBox PDListBox PDRadioButton PDTextField)
            (org.apache.pdfbox.pdmodel PDDocument PDPageContentStream)
            (org.apache.pdfbox.pdmodel.graphics.image PDImageXObject)
            (java.io ByteArrayOutputStream ByteArrayInputStream)
-           (org.apache.pdfbox.pdmodel.graphics.image JPEGFactory)
+           (org.apache.pdfbox.pdmodel.graphics.image JPEGFactory LosslessFactory)
            (org.eclipse.jetty.server.handler.gzip GzipHandler)
            (javax.imageio ImageIO)
            (java.net URL))
@@ -177,10 +178,14 @@
       [(* r-w (/ i-h i-w)) r-w])))
 
 (defn draw-image! [doc page url x y width height]
-  (let [stream (.openStream (URL. url))
-        img (JPEGFactory/createFromStream doc stream)
-        [scaled-height scaled-width] (scale [height width] [(.getHeight img) (.getWidth img)])]
-    (doto (content-stream doc page)
+  (let [lower-case-url (s/lower-case url)
+        img (if (or (s/ends-with? lower-case-url "jpg")
+                    (s/ends-with? lower-case-url "jpeg"))
+              (JPEGFactory/createFromStream doc (.openStream (URL. url)))
+              (LosslessFactory/createFromImage doc (ImageIO/read (URL. url))))
+        [scaled-height scaled-width] (scale [height width] [(.getHeight img) (.getWidth img)])
+        c-stream (content-stream doc page)]
+    (doto c-stream
       (.drawImage
        img
        (in-to-coord-x (+ x (if (< scaled-width width)
