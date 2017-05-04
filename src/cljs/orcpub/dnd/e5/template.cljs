@@ -50,6 +50,16 @@
 
 (def hours-1 {:units :hour})
 
+(def conc-minutes-1 {:units :minute
+                     :concentration true})
+
+(def conc-minutes-10 {:units :minute
+                      :amount 10
+                      :concentration true})
+
+(def conc-hours-1 {:units :hour
+              :concentration true})
+
 (def rests-1 {:units :rest})
 
 (def long-rests-1 {:units :long-rest})
@@ -6057,6 +6067,7 @@ long rest."})]
 
 (def psionic-disciplines
   [{:name "Adaptive Body"
+    :mystic-order :immortal
     :modifiers [(mod5e/trait-cfg
                  {:name "Adaptive Body: Psychic Focus"
                   :page 10
@@ -6067,7 +6078,7 @@ long rest."})]
                   :page 10
                   :source ua-mystic-kw
                   :qualifier "2 psi"
-                  :duration hours-1
+                  :duration conc-hours-1
                   :summary "you or a creature you touch can ignore effects of extreme cold or heat"})
                 (mod5e/reaction
                  {:name "Adaptive Shield"
@@ -6081,16 +6092,17 @@ long rest."})]
                   :page 10
                   :source ua-mystic-kw
                   :qualifier "5 psi"
-                  :duration hours-1
+                  :duration conc-hours-1
                   :summary "impart resistance to cold, acid, fire, lighting, or thunder damage"})
                 (mod5e/action
                  {:name "Energy Immunity"
                   :page 10
                   :source ua-mystic-kw
                   :qualifier "7 psi"
-                  :duration hours-1
+                  :duration conc-hours-1
                   :summary "impart immunity to cold, acid, fire, lighting, or thunder damage"})]}
    {:name "Aura Sight"
+    :mystic-order :awakened
     :modifiers [(mod5e/trait-cfg
                  {:name "Aura Sight: Psychic Focus"
                   :page 11
@@ -6113,16 +6125,17 @@ long rest."})]
                   :page 11
                   :source ua-mystic-kw
                   :qualifier "3 psi"
-                  :duration hours-1
+                  :duration conc-hours-1
                   :summary "learn effects on a creature, it's current HPs, and its mood"})
                 (mod5e/bonus-action
                  {:name "Perceive the Unseen"
                   :page 11
                   :source ua-mystic-kw
                   :qualifier "5 psi"
-                  :duration minutes-1
+                  :duration conc-hours-1
                   :summary "see invisible and hidden creatures"})]}
    {:name "Bestial Form"
+    :mystic-order :immortal
     :modifiers [(mod5e/trait-cfg
                  {:name "Bestial Form: Psychic Focus"
                   :page 11
@@ -6139,51 +6152,52 @@ long rest."})]
                   :page 11
                   :source ua-mystic-kw
                   :qualifier "2 psi"
-                  :duration hours-1
+                  :duration conc-hours-1
                   :summary "can breathe air or water"})
                 (mod5e/bonus-action
                  {:name "Bestial Transformation: Climbing"
                   :page 11
                   :source ua-mystic-kw
                   :qualifier "2 psi"
-                  :duration hours-1
+                  :duration conc-hours-1
                   :summary "gain climbing speed equal to your walking speed"})
                 (mod5e/bonus-action
                  {:name "Bestial Transformation: Flight"
                   :page 11
                   :source ua-mystic-kw
                   :qualifier "5 psi"
-                  :duration hours-1
+                  :duration conc-hours-1
                   :summary "gain flying speed equal to your walking speed"})
                 (mod5e/bonus-action
                  {:name "Bestial Transformation: Keen Senses"
                   :page 11
                   :source ua-mystic-kw
                   :qualifier "2 psi"
-                  :duration hours-1
+                  :duration conc-hours-1
                   :summary "advantage on Perception checks"})
                 (mod5e/bonus-action
                  {:name "Bestial Transformation: Perfect Senses"
                   :page 11
                   :source ua-mystic-kw
                   :qualifier "3 psi"
-                  :duration hours-1
+                  :duration conc-hours-1
                   :summary "see invisible creatures and objects, even if blinded"})
                 (mod5e/bonus-action
                  {:name "Bestial Transformation: Swimming"
                   :page 11
                   :source ua-mystic-kw
                   :qualifier "2 psi"
-                  :duration hours-1
+                  :duration conc-hours-1
                   :summary "gain swimming speed equal to your walking speed"})
                 (mod5e/bonus-action
                  {:name "Bestial Transformation: Tough Hide"
                   :page 11
                   :source ua-mystic-kw
                   :qualifier "2 psi"
-                  :duration hours-1
+                  :duration conc-hours-1
                   :summary "gain +2 AC bonus"})]}
    {:name "Brute Force"
+    :mystic-order :immortal
     :modifiers [(mod5e/trait-cfg
                  {:name "Brute Force: Psychic Focus"
                   :page 11
@@ -6214,6 +6228,7 @@ long rest."})]
                   :qualifier "2 psi"
                   :summary "gain +5 bonus to STR checks until end of your next turn"})]}
    {:name "Celerity"
+    :mystic-order :immortal
     :modifiers [(mod5e/trait-cfg
                  {:name "Celerity: Psychic Focus"
                   :page 12
@@ -6254,6 +6269,7 @@ long rest."})]
                   :duration turns-1
                   :summary "take Dash action or make a weapon attack"})]}
    {:name "Corrosive Metabolism"
+    :mystic-order :immortal
     :modifiers [(mod5e/trait-cfg
                  {:name "Corrosive Metabolism: Psychic Focus"
                   :page 12
@@ -6291,6 +6307,7 @@ long rest."})]
                   :qualifier "7 psi"
                   :summary (str "exhale 90 ft. cone of poison dealing 10d6 poison damage, half on successful DC " (?spell-save-dc :int) " CON save")})]}
    {:name "Crown of Despair"
+    :mystic-order :avatar
     :modifiers [(mod5e/trait-cfg
                  {:name "Crown of Despair: Psychic Focus"
                   :page 12
@@ -6309,7 +6326,7 @@ long rest."})]
                   :source ua-mystic-kw
                   :qualifier "2 psi"
                   :range ft-30
-                  :duration minutes-10
+                  :duration conc-minutes-10
                   :summary (str "if you spent 1 min conversing with a creature, charm to incapacitate it unless if succeeds on a DC " (?spell-save-dc :int) " WIS save")})
                 (mod5e/action
                  {:name "Visions of Despair"
@@ -6323,10 +6340,11 @@ long rest."})]
                   :page 12
                   :source ua-mystic-kw
                   :qualifier "5 psi"
-                  :duration minutes-1
+                  :duration conc-hours-1
                   :range ft-60
                   :summary (str "incapaciate a creature on failed DC " (?spell-save-dc :int) " CHA save")})]}
    {:name "Crown of Disgust"
+    :mystic-order :avatar
     :modifiers [(mod5e/trait-cfg
                  {:name "Crown of Disgust: Psychic Focus"
                   :page 13
@@ -6346,7 +6364,7 @@ long rest."})]
                   :source ua-mystic-kw
                   :qualifier "3 psi"
                   :range ft-60
-                  :duration minutes-10
+                  :duration conc-minutes-10
                   :summary (str "create a 30 x 10 x 1 ft. wall, a creature must make a DC " (?spell-save-dc :int) " WIS save to pass through")})
                 (mod5e/action
                  {:name "Visions of Disgust"
@@ -6354,17 +6372,18 @@ long rest."})]
                   :source ua-mystic-kw
                   :qualifier "5 psi"
                   :range ft-60
-                  :duration minutes-1
+                  :duration conc-minutes-1
                   :summary (str "deal 5d6 psychic damage at end of each of target's turns it takes 1d6 psychic damage for every creature within 5 ft of it, only half initial damage on successful DC " (?spell-save-dc :int) " WIS save")})
                 (mod5e/action
                  {:name "World of Horror"
                   :page 13
                   :source ua-mystic-kw
                   :qualifier "7 psi"
-                  :duration minutes-1
+                  :duration conc-hours-1
                   :range ft-60
                   :summary (str "choose up to 6 creatures, they take 8d6 psychic damage and are frightened, half as much damage on failed DC " (?spell-save-dc :int) " CHA save")})]}
    {:name "Crown of Rage"
+    :mystic-order :avatar
     :modifiers [(mod5e/trait-cfg
                  {:name "Crown of Rage: Psychic Focus"
                   :page 13
@@ -6383,7 +6402,7 @@ long rest."})]
                   :page 13
                   :source ua-mystic-kw
                   :qualifier "2 psi"
-                  :duration minutes-10
+                  :duration conc-minutes-10
                   :summary (str "if you spent 1 minute conversing with a creature, charm it to cause it to attack another creature you describe or name unless it succeeds on a DC " (?spell-save-dc :int) " WIS save")})
                 (mod5e/bonus-action
                  {:name "Mindless Courage"
@@ -6397,10 +6416,11 @@ long rest."})]
                   :page 14
                   :source ua-mystic-kw
                   :qualifier "5 psi"
-                  :duration minutes-1
+                  :duration conc-hours-1
                   :range ft-60
                   :summary (str "target must succeed on DC " (?spell-save-dc :int) " WIS save or, when it makes a melee attack, creatures within 5 ft. of it can use reaction to melee attack it")})]}
    {:name "Diminution"
+    :mystic-order :immortal
     :modifiers [(mod5e/trait-cfg
                  {:name "Diminution: Psychic Focus"
                   :page 14
@@ -6430,10 +6450,11 @@ long rest."})]
                   :page 14
                   :source ua-mystic-kw
                   :qualifier "7 psi"
-                  :duration minutes-1
+                  :duration conc-hours-1
                   :range ft-60
                   :summary "Become smaller than Tiny, gain +10 to Stealth checks and +5 to AC."})]}
    {:name "Giant Growth"
+    :mystic-order :immortal
     :modifiers [(mod5e/trait-cfg
                  {:name "Giant Growth: Psychic Focus"
                   :page 14
@@ -6444,16 +6465,17 @@ long rest."})]
                   :page 14
                   :source ua-mystic-kw
                   :qualifier "2 psi"
-                  :duration minutes-1
+                  :duration conc-hours-1
                   :summary "+10 temp HPs, +1d4 bludgeoning damage on melee attacks, +5 ft. reach, become Large"})
                 (mod5e/bonus-action
                  {:name "Giant Form"
                   :page 14
                   :source ua-mystic-kw
                   :qualifier "7 psi"
-                  :duration minutes-1
+                  :duration conc-hours-1
                   :summary "+30 temp HPs, +2d6 bludgeoning damage on melee attacks, +10 ft. reach, become Huge"})]}
    {:name "Intellect Fortress"
+    :mystic-order :awakened
     :modifiers [(mod5e/trait-cfg
                  {:name "Intellect Fortress: Psychic Focus"
                   :page 14
@@ -6475,6 +6497,7 @@ long rest."})]
                   :source ua-mystic-kw
                   :qualifier "5 psi"})]}
    {:name "Iron Durability"
+    :mystic-order :immortal
     :modifiers [(mod5e/trait-cfg
                  {:name "Iron Durability: Psychic Focus"
                   :page 15
@@ -6499,9 +6522,10 @@ long rest."})]
                   :page 15
                   :source ua-mystic-kw
                   :qualifier "7 psi"
-                  :duration hours-1
+                  :duration conc-hours-1
                   :summary "gain resistance to bludgeoning, piercing, and slashing damage"})]}
    {:name "Mantle of Awe"
+    :mystic-order :awakened
     :modifiers [(mod5e/dependent-trait
                  {:name "Mantle of Awe: Psychic Focus"
                   :page 15
@@ -6517,14 +6541,15 @@ long rest."})]
                   :page 15
                   :source ua-mystic-kw
                   :qualifier "2 psi"
-                  :duration minutes-1})
+                  :duration conc-hours-1})
                 (mod5e/action
                  {:name "Invoke Awe"
                   :page 15
                   :source ua-mystic-kw
                   :qualifier "7 psi"
-                  :duration minutes-10})]}
+                  :duration conc-minutes-10})]}
    {:name "Mantle of Command"
+    :mystic-order :avatar
     :modifiers [(mod5e/dependent-trait
                  {:name "Mantle of Command: Psychic Focus"
                   :page 15
@@ -6550,13 +6575,14 @@ long rest."})]
                   :page 15
                   :source ua-mystic-kw
                   :qualifier "5 psi"
-                  :duration minutes-1})
+                  :duration conc-hours-1})
                 (mod5e/action
                  {:name "Overwhelming Attack"
                   :page 16
                   :source ua-mystic-kw
                   :qualifier "7 psi"})]}
    {:name "Mantle of Courage"
+    :mystic-order :avatar
     :modifiers [(mod5e/dependent-trait
                  {:name "Mantle of Courage: Psychic Focus"
                   :page 16
@@ -6571,7 +6597,7 @@ long rest."})]
                   :page 16
                   :source ua-mystic-kw
                   :qualifier "1-7 psi"
-                  :duration minutes-10})
+                  :duration conc-minutes-10})
                 (mod5e/bonus-action
                  {:name "Pillar of Confidence"
                   :page 16
@@ -6579,6 +6605,7 @@ long rest."})]
                   :qualifier "6 psi"
                   :duration rounds-1})]}
    {:name "Mantle of Fear"
+    :mystic-order :avatar
     :modifiers [(mod5e/dependent-trait
                  {:name "Mantle of Fear: Psychic Focus"
                   :page 16
@@ -6589,20 +6616,21 @@ long rest."})]
                   :page 16
                   :source ua-mystic-kw
                   :qualifier "2 psi"
-                  :duration minutes-1})
+                  :duration conc-hours-1})
                 (mod5e/bonus-action
                  {:name "Unsettling Aura"
                   :page 16
                   :source ua-mystic-kw
                   :qualifier "3 psi"
-                  :duration hours-1})
+                  :duration conc-hours-1})
                 (mod5e/action
                  {:name "Incite Panic"
                   :page 16
                   :source ua-mystic-kw
                   :qualifier "5 psi"
-                  :duration minutes-1})]}
+                  :duration conc-hours-1})]}
    {:name "Mantle of Fury"
+    :mystic-order :avatar
     :modifiers [(mod5e/dependent-trait
                  {:name "Mantle of Fury: Psychic Focus"
                   :page 16
@@ -6612,7 +6640,7 @@ long rest."})]
                   :page 16
                   :source ua-mystic-kw
                   :qualifier "2 psi"
-                  :duration minutes-1})
+                  :duration conc-hours-1})
                 (mod5e/bonus-action
                  {:name "Mindless Charge"
                   :page 16
@@ -6623,14 +6651,15 @@ long rest."})]
                   :page 16
                   :source ua-mystic-kw
                   :qualifier "3 psi"
-                  :duration minutes-1})
+                  :duration conc-hours-1})
                 (mod5e/bonus-action
                  {:name "Overwhelming Fury"
                   :page 16
                   :source ua-mystic-kw
                   :qualifier "5 psi"
-                  :duration minutes-1})]}
+                  :duration conc-hours-1})]}
    {:name "Mantle of Joy"
+    :mystic-order :avatar
     :modifiers [(mod5e/dependent-trait
                  {:name "Mantle of Fury: Psychic Focus"
                   :page 17
@@ -6646,19 +6675,20 @@ long rest."})]
                   :page 17
                   :source ua-mystic-kw
                   :qualifier "2 psi"
-                  :duration minutes-1})
+                  :duration conc-hours-1})
                 (mod5e/bonus-action
                  {:name "Aura of Jubilation"
                   :page 17
                   :source ua-mystic-kw
                   :qualifier "3 psi"
-                  :duration minutes-1})
+                  :duration conc-hours-1})
                 (mod5e/bonus-action
                  {:name "Beacon of Recovery"
                   :page 17
                   :source ua-mystic-kw
                   :qualifier "5 psi"})]}
    {:name "Mastery of Air"
+    :mystic-order :wu-jen
     :modifiers [(mod5e/dependent-trait
                  {:name "Mastery of Air: Psychic Focus"
                   :page 17
@@ -6679,26 +6709,27 @@ long rest."})]
                   :page 17
                   :source ua-mystic-kw
                   :qualifier "3 psi"
-                  :duration minutes-10})
+                  :duration conc-minutes-10})
                 (mod5e/bonus-action
                  {:name "Wind Form"
                   :page 17
                   :source ua-mystic-kw
                   :qualifier "5 psi"
-                  :duration minutes-10})
+                  :duration conc-minutes-10})
                 (mod5e/action
                  {:name "Misty Form"
                   :page 17
                   :source ua-mystic-kw
                   :qualifier "6 psi"
-                  :duration minutes-1})
+                  :duration conc-hours-1})
                 (mod5e/action
                  {:name "Animate Air"
                   :page 17
                   :source ua-mystic-kw
                   :qualifier "7 psi"
-                  :duration hours-1})]}
+                  :duration conc-hours-1})]}
    {:name "Mastery of Fire"
+    :mystic-order :wu-jen
     :modifiers [(mod5e/trait-cfg
                  {:name "Mastery of Fire: Psychic Focus"
                   :page 17
@@ -6708,13 +6739,13 @@ long rest."})]
                   :page 17
                   :source ua-mystic-kw
                   :qualifier "1-7 psi"
-                  :duration minutes-1})
+                  :duration conc-hours-1})
                 (mod5e/action
                  {:name "Rolling Flame"
                   :page 17
                   :source ua-mystic-kw
                   :qualifier "3 psi"
-                  :duration minutes-1})
+                  :duration conc-hours-1})
                 (mod5e/action
                  {:name "Detonation"
                   :page 18
@@ -6725,14 +6756,15 @@ long rest."})]
                   :page 18
                   :source ua-mystic-kw
                   :qualifier "5 psi"
-                  :duration minutes-1})
+                  :duration conc-hours-1})
                 (mod5e/action
                  {:name "Animate Fire"
                   :page 18
                   :source ua-mystic-kw
                   :qualifier "6 psi"
-                  :duration hours-1})]}
+                  :duration conc-hours-1})]}
    {:name "Mastery of Force"
+    :mystic-order :wu-jen
     :modifiers [(mod5e/trait-cfg
                  {:name "Mastery of Force: Psychic Focus"
                   :page 18
@@ -6758,14 +6790,15 @@ long rest."})]
                   :page 18
                   :source ua-mystic-kw
                   :qualifier "3 psi"
-                  :duration minutes-10})
+                  :duration conc-minutes-10})
                 (mod5e/action
                  {:name "Grasp"
                   :page 18
                   :source ua-mystic-kw
                   :qualifier "3 psi"
-                  :duration minutes-1})]}
+                  :duration conc-hours-1})]}
    {:name "Mastery of Ice"
+    :mystic-order :wu-jen
     :modifiers [(mod5e/trait-cfg
                  {:name "Mastery of Ice: Psychic Focus"
                   :page 19
@@ -6791,18 +6824,574 @@ long rest."})]
                   :page 19
                   :source ua-mystic-kw
                   :qualifier "5 psi"
-                  :duration minutes-1})
+                  :duration conc-hours-1})
                 (mod5e/action
                  {:name "Ice Barrier"
                   :page 19
                   :source ua-mystic-kw
                   :qualifier "6 psi"
-                  :duration minutes-10})]}])
+                  :duration conc-minutes-10})]}
+   {:name "Mastery of Light and Darkness"
+    :mystic-order :wu-jen
+    :modifiers [(mod5e/trait-cfg
+                 {:name "Mastery of Light and Darkness: Psychic Focus"
+                  :page 19
+                  :source ua-mystic-kw
+                  :summary "Darkness within 30 ft. doesn't affect your vision"})
+                (mod5e/action
+                 {:name "Darkness"
+                  :page 19
+                  :source ua-mystic-kw
+                  :qualifier "1-7 psi"})
+                (mod5e/action
+                 {:name "Light"
+                  :page 19
+                  :source ua-mystic-kw
+                  :qualifier "2 psi"
+                  :duration conc-hours-1})
+                (mod5e/action
+                 {:name "Shadow Beasts"
+                  :page 19
+                  :source ua-mystic-kw
+                  :qualifier "3 psi"
+                  :duration conc-hours-1})
+                (mod5e/action
+                 {:name "Radiant Beam"
+                  :page 19
+                  :source ua-mystic-kw
+                  :qualifier "5 psi"
+                  :duration conc-hours-1})]}
+   {:name "Mastery of Water"
+    :mystic-order :wu-jen
+    :modifiers [(mod5e/trait-cfg
+                 {:name "Mastery of Water: Psychic Focus"
+                  :page 19
+                  :source ua-mystic-kw
+                  :summary "Breathe underwater; swimming speed equal to walking speed"})
+                (mod5e/action
+                 {:name "Dessicate"
+                  :page 20
+                  :source ua-mystic-kw
+                  :qualifier "1-7 psi"})
+                (mod5e/action
+                 {:name "Watery Grasp"
+                  :page 20
+                  :source ua-mystic-kw
+                  :qualifier "2 psi"})
+                (mod5e/action
+                 {:name "Water Whip"
+                  :page 20
+                  :source ua-mystic-kw
+                  :qualifier "3 psi"})
+                (mod5e/action
+                 {:name "Water Breathing"
+                  :page 20
+                  :source ua-mystic-kw
+                  :qualifier "5 psi"})
+                (mod5e/action
+                 {:name "Water Sphere"
+                  :page 20
+                  :source ua-mystic-kw
+                  :qualifier "6 psi"
+                  :duration conc-hours-1})
+                (mod5e/action
+                 {:name "Animate Water"
+                  :page 20
+                  :source ua-mystic-kw
+                  :qualifier "7 psi"
+                  :duration conc-hours-1})]}
+   {:name "Mastery of Weather"
+    :mystic-order :wu-jen
+    :modifiers [(mod5e/trait-cfg
+                 {:name "Mastery of Weather: Psychic Focus"
+                  :page 20
+                  :source ua-mystic-kw
+                  :summary "gain resistance to thunder and lightning damage"})
+                (mod5e/action
+                 {:name "Cloud Steps"
+                  :page 20
+                  :source ua-mystic-kw
+                  :qualifier "1-7 psi"
+                  :duration conc-minutes-10})
+                (mod5e/action
+                 {:name "Hungry Lighting"
+                  :page 20
+                  :source ua-mystic-kw
+                  :qualifier "1-7 psi"})
+                (mod5e/action
+                 {:name "Wall of Clouds"
+                  :page 20
+                  :source ua-mystic-kw
+                  :qualifier "2 psi"
+                  :duration conc-minutes-10})
+                (mod5e/action
+                 {:name "Water Breathing"
+                  :page 20
+                  :source ua-mystic-kw
+                  :qualifier "5 psi"})
+                (mod5e/action
+                 {:name "Whirlwind"
+                  :page 20
+                  :source ua-mystic-kw
+                  :qualifier "2 psi"})
+                (mod5e/action
+                 {:name "Lightning Leap"
+                  :page 20
+                  :source ua-mystic-kw
+                  :qualifier "5 psi"})
+                (mod5e/action
+                 {:name "Wall of Thunder"
+                  :page 21
+                  :source ua-mystic-kw
+                  :qualifier "6 psi"
+                  :duration conc-minutes-10})
+                (mod5e/action
+                 {:name "Thunder Clap"
+                  :page 21
+                  :source ua-mystic-kw
+                  :qualifier "7 psi"})]}
+   {:name "Mastery of Wood and Earth"
+    :mystic-order :wu-jen
+    :modifiers [(mod5e/trait-cfg
+                 {:name "Mastery of Wood and Earth: Psychic Focus"
+                  :page 21
+                  :source ua-mystic-kw
+                  :summary "+1 AC bonus"})
+                (mod5e/action
+                 {:name "Animate Weapon"
+                  :page 21
+                  :source ua-mystic-kw
+                  :qualifier "1-7 psi"})
+                (mod5e/action
+                 {:name "Warp Weapon"
+                  :page 21
+                  :source ua-mystic-kw
+                  :qualifier "2 psi"})
+                (mod5e/action
+                 {:name "Warp Armor"
+                  :page 21
+                  :source ua-mystic-kw
+                  :qualifier "3 psi"})
+                (mod5e/action
+                 {:name "Water Breathing"
+                  :page 21
+                  :source ua-mystic-kw
+                  :qualifier "5 psi"})
+                (mod5e/action
+                 {:name "Wall of Wood"
+                  :page 21
+                  :source ua-mystic-kw
+                  :qualifier "3 psi"
+                  :duration conc-hours-1})
+                (mod5e/bonus-action
+                 {:name "Armored Form"
+                  :page 21
+                  :source ua-mystic-kw
+                  :qualifier "6 psi"
+                  :duration conc-hours-1})
+                (mod5e/action
+                 {:name "Animate Earth"
+                  :page 21
+                  :source ua-mystic-kw
+                  :qualifier "7 psi"
+                  :duration conc-hours-1})]}
+   {:name "Nomadic Arrow"
+    :mystic-order :nomad
+    :modifiers [(mod5e/trait-cfg
+                 {:name "Nomadic Arrow: Psychic Focus"
+                  :page 21
+                  :source ua-mystic-kw})
+                (mod5e/bonus-action
+                 {:name "Speed Dart"
+                  :page 21
+                  :source ua-mystic-kw
+                  :qualifier "1-7 psi"})
+                (mod5e/reaction
+                 {:name "Seeking Missile"
+                  :page 21
+                  :source ua-mystic-kw
+                  :qualifier "2 psi"})
+                (mod5e/action
+                 {:name "Faithful Archer"
+                  :page 21
+                  :source ua-mystic-kw
+                  :qualifier "5 psi"
+                  :duration conc-hours-1})]}
+   {:name "Nomadic Chameleon"
+    :mystic-order :nomad
+    :modifiers [(mod5e/trait-cfg
+                 {:name "Nomadic Chameleon: Psychic Focus"
+                  :page 22
+                  :source ua-mystic-kw
+                  :summary "gain advantage on stealth checks"})
+                (mod5e/action
+                 {:name "Chameleon"
+                  :page 22
+                  :source ua-mystic-kw
+                  :qualifier "2 psi"})
+                (mod5e/bonus-action
+                 {:name "Step from Sight"
+                  :page 22
+                  :source ua-mystic-kw
+                  :qualifier "3 psi"
+                  :duration conc-hours-1})
+                (mod5e/bonus-action
+                 {:name "Enduring Invisibility"
+                  :page 22
+                  :source ua-mystic-kw
+                  :qualifier "7 psi"
+                  :duration conc-hours-1})]}
+   {:name "Nomadic Mind"
+    :mystic-order :nomad
+    :modifiers [(mod5e/trait-cfg
+                 {:name "Nomadic Mind: Psychic Focus"
+                  :page 22
+                  :source ua-mystic-kw})
+                (mod5e/trait-cfg
+                 {:name "Wandering Mind"
+                  :page 22
+                  :source ua-mystic-kw
+                  :qualifier "2-6 psi"
+                  :duration conc-minutes-10})
+                (mod5e/trait-cfg
+                 {:name "Find Creature"
+                  :page 22
+                  :source ua-mystic-kw
+                  :qualifier "2 psi"
+                  :duration conc-hours-1})
+                (mod5e/trait-cfg
+                 {:name "Item Lore"
+                  :page 22
+                  :source ua-mystic-kw
+                  :qualifier "3 psi"
+                  :duration conc-hours-1})
+                (mod5e/action
+                 {:name "Psychic Speech"
+                  :page 22
+                  :source ua-mystic-kw
+                  :qualifier "5 psi"})
+                (mod5e/action
+                 {:name "Wandering Eye"
+                  :page 22
+                  :source ua-mystic-kw
+                  :qualifier "6 psi"
+                  :duration conc-hours-1})
+                (mod5e/action
+                 {:name "Phasing Eye"
+                  :page 22
+                  :source ua-mystic-kw
+                  :qualifier "7 psi"
+                  :duration conc-hours-1})]}
+   {:name "Nomadic Step"
+    :mystic-order :nomad
+    :modifiers [(mod5e/trait-cfg
+                 {:name "Nomadic Step: Psychic Focus"
+                  :page 22
+                  :source ua-mystic-kw})
+                (mod5e/bonus-action
+                 {:name "Step of a Dozen Paces"
+                  :page 22
+                  :source ua-mystic-kw
+                  :qualifier "1-7 psi"})
+                (mod5e/action
+                 {:name "Nomadic Anchor"
+                  :page 23
+                  :source ua-mystic-kw
+                  :qualifier "1 psi"})
+                (mod5e/reaction
+                 {:name "Defensive Step"
+                  :page 23
+                  :source ua-mystic-kw
+                  :qualifier "2 psi"})
+                (mod5e/bonus-action
+                 {:name "There and Back Again"
+                  :page 23
+                  :source ua-mystic-kw
+                  :qualifier "2 psi"})
+                (mod5e/bonus-action
+                 {:name "Transposition"
+                  :page 23
+                  :source ua-mystic-kw
+                  :qualifier "3 psi"
+                  :duration conc-hours-1})
+                (mod5e/action
+                 {:name "Baleful Transposition"
+                  :page 23
+                  :source ua-mystic-kw
+                  :qualifier "5 psi"})
+                (mod5e/action
+                 {:name "Phantom Caravan"
+                  :page 23
+                  :source ua-mystic-kw
+                  :qualifier "6 psi"})
+                (mod5e/action
+                 {:name "Nomadic Gate"
+                  :page 23
+                  :source ua-mystic-kw
+                  :qualifier "7 psi"
+                  :duration conc-hours-1})]}
+   {:name "Precognition"
+    :mystic-order :awakened
+    :modifiers [(mod5e/trait-cfg
+                 {:name "Precognition: Psychic Focus"
+                  :page 23
+                  :source ua-mystic-kw
+                  :summary "advantage on initiative rolls"})
+                (mod5e/bonus-action
+                 {:name "Precognitive Hunch"
+                  :page 23
+                  :source ua-mystic-kw
+                  :qualifier "2 psi"})
+                (mod5e/reaction
+                 {:name "All-Around Sight"
+                  :page 23
+                  :source ua-mystic-kw
+                  :qualifier "3 psi"})
+                (mod5e/action
+                 {:name "Danger Sense"
+                  :page 23
+                  :source ua-mystic-kw
+                  :qualifier "5 psi"
+                  :duration {:units :hour
+                             :amount 8
+                             :concentration true}})
+                (mod5e/trait-cfg
+                 {:name "Victory Before Battle"
+                  :page 23
+                  :source ua-mystic-kw
+                  :qualifier "7 psi"})]}
+   {:name "Psionic Restoration"
+    :mystic-order :immortal
+    :modifiers [(mod5e/trait-cfg
+                 {:name "Psionic Restoration: Psychic Focus"
+                  :page 23
+                  :source ua-mystic-kw})
+                (mod5e/action
+                 {:name "Mend Wounds"
+                  :page 23
+                  :source ua-mystic-kw
+                  :qualifier "1-7 psi"})
+                (mod5e/action
+                 {:name "Restore Health"
+                  :page 23
+                  :source ua-mystic-kw
+                  :qualifier "3 psi"})
+                (mod5e/action
+                 {:name "Restore Life"
+                  :page 23
+                  :source ua-mystic-kw
+                  :qualifier "5 psi"})
+                (mod5e/action
+                 {:name "Restore Vigor"
+                  :page 24
+                  :source ua-mystic-kw
+                  :qualifier "7 psi"})]}
+   {:name "Psionic Weapon"
+    :mystic-order :immortal
+    :modifiers [(mod5e/trait-cfg
+                 {:name "Psionic Weapon: Psychic Focus"
+                  :page 24
+                  :source ua-mystic-kw})
+                (mod5e/bonus-action
+                 {:name "Etereal Weapon"
+                  :page 24
+                  :source ua-mystic-kw
+                  :qualifier "1 psi"})
+                (mod5e/bonus-action
+                 {:name "Lethal Strike"
+                  :page 23
+                  :source ua-mystic-kw
+                  :qualifier "1-7 psi"})
+                (mod5e/bonus-action
+                 {:name "Augmented Weapon"
+                  :page 23
+                  :source ua-mystic-kw
+                  :qualifier "5 psi"
+                  :duration conc-minutes-10})]}
+   {:name "Psychic Assault"
+    :mystic-order :awakened
+    :modifiers [(mod5e/trait-cfg
+                 {:name "Psychic Assault: Psychic Focus"
+                  :page 24
+                  :source ua-mystic-kw
+                  :summary "+2 bonus to damage from psionic talents that deal psychic damage"})
+                (mod5e/action
+                 {:name "Psionic Blast"
+                  :page 24
+                  :source ua-mystic-kw
+                  :qualifier "1-7 psi"})
+                (mod5e/action
+                 {:name "Ego Whip"
+                  :page 24
+                  :source ua-mystic-kw
+                  :qualifier "3 psi"})
+                (mod5e/action
+                 {:name "Id Insinuation"
+                  :page 24
+                  :source ua-mystic-kw
+                  :qualifier "5 psi"})
+                (mod5e/action
+                 {:name "Psychic Blast"
+                  :page 24
+                  :source ua-mystic-kw
+                  :qualifier "6 psi"})
+                (mod5e/action
+                 {:name "Psychic Crush"
+                  :page 24
+                  :source ua-mystic-kw
+                  :qualifier "7 psi"})]}
+   {:name "Psychic Disruption"
+    :mystic-order :awakened
+    :modifiers [(mod5e/trait-cfg
+                 {:name "Psychic Disruption: Psychic Focus"
+                  :page 24
+                  :source ua-mystic-kw
+                  :summary "advantage on Deception checks"})
+                (mod5e/action
+                 {:name "Distracting Haze"
+                  :page 24
+                  :source ua-mystic-kw
+                  :qualifier "1-7 psi"
+                  :duration conc-minutes-1})
+                (mod5e/action
+                 {:name "Daze"
+                  :page 25
+                  :source ua-mystic-kw
+                  :qualifier "3 psi"})
+                (mod5e/action
+                 {:name "Mind Storm"
+                  :page 25
+                  :source ua-mystic-kw
+                  :qualifier "5 psi"})]}
+   {:name "Psychic Inquisition"
+    :mystic-order :awakened
+    :modifiers [(mod5e/trait-cfg
+                 {:name "Psychic Inquisition: Psychic Focus"
+                  :page 24
+                  :source ua-mystic-kw})
+                (mod5e/action
+                 {:name "Hammer of Inquisition"
+                  :page 24
+                  :source ua-mystic-kw
+                  :qualifier "1-7 psi"})
+                (mod5e/action
+                 {:name "Forceful Query"
+                  :page 25
+                  :source ua-mystic-kw
+                  :qualifier "2 psi"})
+                (mod5e/trait-cfg
+                 {:name "Ransack Mind"
+                  :page 25
+                  :source ua-mystic-kw
+                  :qualifier "5 psi"
+                  :duration conc-hours-1})
+                (mod5e/trait-cfg
+                 {:name "Phantom Idea"
+                  :page 25
+                  :source ua-mystic-kw
+                  :qualifier "6 psi"
+                  :duration conc-hours-1})]}
+   {:name "Psychic Phantoms"
+    :mystic-order :awakened
+    :modifiers [(mod5e/trait-cfg
+                 {:name "Psychic Phantoms: Psychic Focus"
+                  :page 24
+                  :source ua-mystic-kw
+                  :summary "gain advantage on Deception checks"})
+                (mod5e/action
+                 {:name "Distracting Figment"
+                  :page 24
+                  :source ua-mystic-kw
+                  :qualifier "1-7 psi"})
+                (mod5e/action
+                 {:name "Phantom Foe"
+                  :page 25
+                  :source ua-mystic-kw
+                  :qualifier "3 psi"
+                  :duration conc-minutes-1})
+                (mod5e/action
+                 {:name "Phantom Betrayal"
+                  :page 26
+                  :source ua-mystic-kw
+                  :qualifier "5 psi"
+                  :duration conc-minutes-1})
+                (mod5e/action
+                 {:name "Phantom Riches"
+                  :page 26
+                  :source ua-mystic-kw
+                  :qualifier "7 psi"
+                  :duration conc-minutes-1})]}
+   {:name "Telepathic Contact"
+    :mystic-order :awakened
+    :modifiers [(mod5e/trait-cfg
+                 {:name "Telepathic Contact: Psychic Focus"
+                  :page 26
+                  :source ua-mystic-kw})
+                (mod5e/action
+                 {:name "Extracting Query"
+                  :page 26
+                  :source ua-mystic-kw
+                  :qualifier "2 psi"})
+                (mod5e/action
+                 {:name "Occluded Mind"
+                  :page 26
+                  :source ua-mystic-kw
+                  :qualifier "2 psi"})
+                (mod5e/action
+                 {:name "Broken Will"
+                  :page 26
+                  :source ua-mystic-kw
+                  :qualifier "5 psi"})
+                (mod5e/action
+                 {:name "Psychic Grip"
+                  :page 26
+                  :source ua-mystic-kw
+                  :qualifier "6 psi"
+                  :duration conc-minutes-1})
+                (mod5e/action
+                 {:name "Psychic Domination"
+                  :page 26
+                  :source ua-mystic-kw
+                  :qualifier "7 psi"
+                  :duration conc-minutes-1})]}
+   {:name "Third Eye"
+    :mystic-order :nomad
+    :modifiers [(mod5e/trait-cfg
+                 {:name "Third Eye: Psychic Focus"
+                  :page 26
+                  :source ua-mystic-kw
+                  :summary "gain darkvision 60 ft. or +10 ft. if you already have darkvision"})
+                (mod5e/bonus-action
+                 {:name "Tremor Sense"
+                  :page 26
+                  :source ua-mystic-kw
+                  :qualifier "2 psi"
+                  :duration conc-minutes-1})
+                (mod5e/bonus-action
+                 {:name "Unwavering Eye"
+                  :page 26
+                  :source ua-mystic-kw
+                  :qualifier "2 psi"})
+                (mod5e/bonus-action
+                 {:name "Piercing Sight"
+                  :page 26
+                  :source ua-mystic-kw
+                  :qualifier "3 psi"
+                  :duration conc-minutes-1})
+                (mod5e/bonus-action
+                 {:name "Truesight"
+                  :page 26
+                  :source ua-mystic-kw
+                  :qualifier "5 psi"
+                  :duration conc-minutes-1})]}])
 
 (defn psionic-disciplines-selection [num & [name filter-fn]]
   (t/selection-cfg
    {:name (str name (if name " ") "Psionic Disciplines")
     :tags #{:class}
+    :min (or num 1)
+    :max (or num 1)
+    :multiselect? true
     :ref (if name
            [:class :mystic :levels :level-1 :mystic-order (common/name-to-kw name) :psionic-disciplines]
            [:class :mystic :psionic-disciplines])
@@ -6831,7 +7420,8 @@ long rest."})]
                               :equipment-choices [{:name "Equipment Pack"
                                                    :options {:scholars-pack 1
                                                              :explorers-pack 1}}]
-                              :modifiers [(mod/modifier ?psi-points (mod5e/level-val
+                              :modifiers [ua-al-illegal
+                                          (mod/modifier ?psi-points (mod5e/level-val
                                                                      (?class-level :mystic)
                                                                      {2 6
                                                                       3 14
@@ -6958,69 +7548,139 @@ long rest."})]
                               :subclass-level 1
                               :subclass-title "Mystic Order"
                               :subclasses [{:name "Order of the Avatar"
-                                            :levels {3 {:modifiers [(mod5e/critical 19)]}
-                                                     7 {:modifiers [(mod/modifier ?default-skill-bonus (let [b (int (/ ?prof-bonus 2))] {:str b :dex b :con b}))
-                                                                    (mod5e/dependent-trait
-                                                                     {:level 7
-                                                                      :name "Remarkable Athlete"
-                                                                      :page 72
-                                                                      :summary (str "+"
-                                                                                    (common/round-up (/ ?prof-bonus 2))
-                                                                                    " to STR, DEX, or CON checks that don't already include prof bonus; running long jump increases by "
-                                                                                    (?ability-bonuses :str)
-                                                                                    " ft.")})]}
-                                                     10 {:selections [(opt5e/fighting-style-selection :fighter)]}
-                                                     15 {:modifiers [(mod5e/critical 18)]}
-                                                     18 {:modifiers [(mod5e/dependent-trait
-                                                                      {:level 18
-                                                                       :page 73
-                                                                       :name "Survivor"
-                                                                       :summary (str "At start of your turns, if you have at most "
-                                                                                     (int (/ ?max-hit-points 2))
-                                                                                     " HPs left, regain "
-                                                                                     (+ 5 (?ability-bonuses :con)) " HPs")})]}}
-                                            :traits []}
-                                           {:name "Battle Master"
-                                            :selections [(t/selection-cfg
-                                                          {:name "Martial Maneuvers"
-                                                           :options opt5e/maneuver-options
-                                                           :tags #{:class}
-                                                           :min 3
-                                                           :max 3})
-                                                         (opt5e/tool-selection (map :key equip5e/artisans-tools) 1)]
-                                            :modifiers [(mod/modifier ?maneuver-save-dc (max (?spell-save-dc :dex)
-                                                                                             (?spell-save-dc :str)))
-                                                        (mod5e/dependent-trait
-                                                         {:name "Combat Superiority"
-                                                          :page 73
-                                                          :level 3
-                                                          :summary (let [[num-maneuvers num-dice die]
-                                                                         (mod5e/level-val
-                                                                          (?class-level :fighter)
-                                                                          {7 [5 5 8]
-                                                                           10 [7 5 10]
-                                                                           15 [9 6 10]
-                                                                           18 [9 6 12]
-                                                                           :default [3 4 8]})]
-                                                                     (str "You know "
-                                                                          num-maneuvers
-                                                                          " martial maneuvers, have "
-                                                                          num-dice
-                                                                          " superiority dice (d"
-                                                                          die
-                                                                          "s), and maneuver save DC of "
-                                                                          ?maneuver-save-dc))})]
-                                            :traits [{:name "Know Your Enemy"
-                                                      :level 7
-                                                      :page 73
-                                                      :class-key :fighter
-                                                      :summary "Study a creature outside combat for 1 min. to learn if it is superior, inferior, or equal in STR, DEX, CON, AC, current HP, total levels, fighter levels"}
-                                                     {:name "Relentless"
-                                                      :level 15
-                                                      :page 74
-                                                      :class-key :fighter
-                                                      :summary "you regain 1 superiority die when you roll iniative and have no remaining superiority dice"}]}
-                                           eldritch-knight-cfg]})]})]})
+                                            :selections [(psionic-disciplines-selection 2 "Order of the Avatar" (fn [d] (= :avatar (:mystic-order d))))]
+                                            :modifiers [(mod5e/armor-proficiency :medium)
+                                                        (mod5e/armor-proficiency :shields)]
+                                            :levels {6 {:modifiers [(mod5e/dependent-trait
+                                                                     {:name "Avatar of Healing"
+                                                                      :page 6
+                                                                      :source ua-mystic-kw
+                                                                      :range ft-30
+                                                                      :summary (str "allies regain additional " (max 0 (?ability-bonuses :int)) " HPs from psionic disciplines")})]}
+                                                     14 {:modifiers [(mod5e/dependent-trait
+                                                                      {:page 6
+                                                                       :name "Avatar of Speed"
+                                                                       :range ft-30
+                                                                       :summary "an ally can Dash as bonus action"})]}}
+                                            :traits [{:name "Avatar of Battle"
+                                                      :level 3
+                                                      :page 5
+                                                      :source ua-mystic-kw
+                                                      :range ft-30
+                                                      :summary "give an ally +2 initiative bonus"}]}
+                                           {:name "Order of the Awakened"
+                                            :selections [(psionic-disciplines-selection 2 "Order of the Awakened" (fn [d] (= :awakened (:mystic-order d))))
+                                                         (opt5e/skill-selection [:animal-handling :deception :insight :intimidation :investigation :perception :persuasion] 2)]
+                                            :levels {6 {:modifiers [(mod5e/dependent-trait
+                                                                     {:name "Psionic Surge"
+                                                                      :page 6
+                                                                      :source ua-mystic-kw
+                                                                      :range ft-30
+                                                                      :summary "use psionic focus to impose disadvantage on saves against your psionic disciplines or talents"})]}
+                                                     14 {:modifiers [(mod5e/action
+                                                                      {:page 6
+                                                                       :name "Spectral Form"
+                                                                       :range ft-30
+                                                                       :duration minutes-10
+                                                                       :summary "gain resistance to all damage; move at half speed; can pass through creatures and objects"})]}}
+                                            :traits [{:name "Psionic Investigation"
+                                                      :level 3
+                                                      :page 6
+                                                      :source ua-mystic-kw
+                                                      :summary "learn basic facts about an object; embed a psionic sensor in an object"}]}
+                                           {:name "Order of the Immortal"
+                                            :selections [(psionic-disciplines-selection 2 "Order of the Immortal" (fn [d] (= :immortal (:mystic-order d))))]
+                                            :modifiers [(mod/cum-sum-mod ?hit-point-level-increases (?class-level :mystic))
+                                                        (mod5e/ac-bonus-fn
+                                                         (fn [armor shield]
+                                                           (if (and (nil? shield)
+                                                                    (nil? armor))
+                                                             (?ability-bonuses :con)
+                                                             0)))]
+                                            :levels {3 {:modifiers [(mod5e/dependent-trait
+                                                                     {:name "Psionic Resilience"
+                                                                      :page 7
+                                                                      :source ua-mystic-kw
+                                                                      :summary (str "at start of your turns, gain " (max 0 (?ability-bonuses :int)) " temp HPs if you have at least 1 HP.")})]}
+                                                     6 {:modifiers [(mod5e/reaction
+                                                                     {:name "Surge of Health"
+                                                                      :page 7
+                                                                      :source ua-mystic-kw
+                                                                      :summary "when you take damage, take half instead, but lose psychic focus until you finish as rest"})]}
+                                                     14 {:modifiers [(mod5e/dependent-trait
+                                                                      {:page 7
+                                                                       :name "Immortal Will"
+                                                                       :summary (str "at end of your turn, if you have 0 HPs spend 5 psi to regain " (+ (?class-level :mystic) (?ability-bonuses :con)) " HPs")})]}}}
+                                           {:name "Order of the Nomad"
+                                            :selections [(psionic-disciplines-selection 2 "Order of the Nomad" (fn [d] (= :nomad (:mystic-order d))))]
+                                            :modifiers [(mod5e/trait-cfg
+                                                         {:name "Breadth of Knowledge"
+                                                          :page 7
+                                                          :source ua-mystic-kw
+                                                          :duration long-rests-1
+                                                          :frequency long-rests-1
+                                                          :summary "gain two skill or tool proficiencies"})]
+                                            :levels {3 {:modifiers [(mod5e/reaction
+                                                                     {:name "Memory of One Thousand Steps"
+                                                                      :page 7
+                                                                      :source ua-mystic-kw
+                                                                      :summary "when hit by attack, teleport to an unoccupied space you occupied since start of your last turn"})]}
+                                                     6 {:modifiers [(mod5e/trait-cfg
+                                                                     {:name "Superior Teleportation"
+                                                                      :page 7
+                                                                      :source ua-mystic-kw
+                                                                      :summary "+10 psionic teleportation distance"})]}
+                                                     14 {:modifiers [(mod5e/trait-cfg
+                                                                      {:page 7
+                                                                       :name "Effortless Journey"
+                                                                       :summary "forfeit up to 30 ft of you movement to teleport that distance instead"})]}}}
+                                           {:name "Order of the Soul Knife"
+                                            :modifiers [(mod5e/armor-proficiency :medium)
+                                                        (mod5e/weapon-proficiency :martial)
+                                                        (mod5e/bonus-action
+                                                         {:name "Soul Knife"
+                                                          :page 8
+                                                          :summary "create sould knives in each of your fists that deal 1d8 psychic damage; as a bonus action gain +2 bonus to AC until start of your next turn"})]
+                                            :levels {3 {:modifiers [(mod5e/trait-cfg
+                                                                     {:name "Psionic Resilience"
+                                                                      :page 8
+                                                                      :source ua-mystic-kw
+                                                                      :duration minutes-10
+                                                                      :summary "spend psi to gain bonus to attack and damage: 2 psi for +1, 5 psi for +2, 7 psi for +4"})]}
+                                                     6 {:modifiers [(mod5e/trait-cfg
+                                                                     {:name "Consumptive Knife"
+                                                                      :page 8
+                                                                      :source ua-mystic-kw
+                                                                      :summary "when you slay with your soul knife, retain 2 HPs"})]}
+                                                     14 {:modifiers [(mod5e/action
+                                                                      {:page 8
+                                                                       :name "Phantom Knife"
+                                                                       :summary "make a soul knife attack against AC 10 instead of target's actual AC"})]}}}
+                                           {:name "Order of the Wu Jen"
+                                            :selections [(psionic-disciplines-selection 2 "Order of the Wu Jen" (fn [d] (= :wu-jen (:mystic-order d))))]
+                                            :levels {3 {:modifiers [(mod5e/trait-cfg
+                                                                     {:name "Elemental Attunement"
+                                                                      :page 8
+                                                                      :source ua-mystic-kw
+                                                                      :summary "Spend 1 extra psi point on a discipline to resistance"})]}
+                                                     6 {:selections [(opt5e/spell-selection {:title "Wu Jen Spells"
+                                                                                             :ref [:class :mystic :levels :level-1 :mystic-order :order-of-the-wu-jen :spells-known]
+                                                                                             :spellcasting-ability :int
+                                                                                             :class-name "Order of the Wu Jen"
+                                                                                             :num 3
+                                                                                             :prepend-level? true
+                                                                                             :spell-keys (concat (get-in sl/spell-lists [:wizard 1])
+                                                                                                                 (get-in sl/spell-lists [:wizard 2])
+                                                                                                                 (get-in sl/spell-lists [:wizard 3]))})]
+                                                        :modifiers [(mod5e/trait-cfg
+                                                                     {:name "Arcane Dabbler"
+                                                                      :page 8
+                                                                      :source ua-mystic-kw
+                                                                      :summary "learn 3 wizard spells you always have prepared; spend psi to gain spell slots: 2 psi for 1st level, 3 psi for 2nd, 5 psi for 3rd, 6 psi for 4th, 7 psi for 5th"})]}
+                                                     14 {:modifiers [(mod5e/reaction
+                                                                      {:page 8
+                                                                       :name "Elemental Mastery"
+                                                                       :summary "spend 2 psi to gain immunity to damage that you take that you are resistant to"})]}}}]})]})]})
 
 (def ua-waterborne-kw :ua-waterborne)
 
@@ -7222,7 +7882,7 @@ long rest."})]
   (map
    (fn [{:keys [name key] :as plugin}]
      (assoc plugin :help (ua-help name (source-url key))))
-   [#_ua-mystic-plugin
+   [ua-mystic-plugin
     ua-waterborne-plugin
     ua-eberron-plugin]))
 

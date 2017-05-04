@@ -49,6 +49,9 @@
                       (common/safe-name singular)
                       (str (common/safe-name units))))))
 
+(defn duration-description [{:keys [concentration] :as duration}]
+  (str (if concentration "conc. ") (unit-amount-description duration)))
+
 (defn get-source [source]
   (sources (or source :phb)))
 
@@ -93,7 +96,7 @@
                nil?
                [qualifier
                 (if range (str "range " (unit-amount-description range)))
-                (if duration (str "lasts " (unit-amount-description duration)))
+                (if duration (str "lasts " (duration-description duration)))
                 (if frequency (str "use " (frequency-description frequency)))
                 (if page (source-description source page))]))
       ")"))))

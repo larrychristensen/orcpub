@@ -423,8 +423,8 @@
 (defn natural-ac-bonus [bonus]
   (mods/cum-sum-mod ?natural-ac-bonus bonus))
 
-(defn ac-bonus-fn [bonus-fn]
-  (mods/vec-mod ?ac-bonus-fns bonus-fn))
+(defmacro ac-bonus-fn [bonus-fn]
+  `(mods/vec-mod ~'?ac-bonus-fns ~bonus-fn))
 
 (defn unarmored-defense [cls]
   (mods/vec-mod ?unarmored-defense cls))
