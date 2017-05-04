@@ -102,7 +102,7 @@
         damage-resistances (char5e/damage-resistances built-char)
         damage-immunities (char5e/damage-immunities built-char)
         condition-immunities (char5e/condition-immunities built-char)
-        immunities (char5e/condition-immunities built-char)]
+        immunities (char5e/immunities built-char)]
     (s/join
      "\n"
      (remove nil?
