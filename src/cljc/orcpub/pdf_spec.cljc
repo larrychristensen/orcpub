@@ -341,6 +341,19 @@
          (keyword (str "weapon-damage-" (inc i))) damage})
       first-3-weapons))))
 
+(defn speed [built-char]
+  (let [speed (char5e/base-land-speed built-char)
+        speed-with-armor (char5e/land-speed-with-armor built-char)
+        unarmored-speed-bonus (char5e/unarmored-speed-bonus built-char)
+        equipped-armor (char5e/normal-armor-inventory built-char)
+        unarmored-speed (+ (or unarmored-speed-bonus 0)
+                           (if speed-with-armor
+                             (speed-with-armor nil)
+                             speed))]
+    (if (not= unarmored-speed speed)
+      (str unarmored-speed "/" speed)
+      speed)))
+
 (defn make-spec [built-char]
   (let [race (char5e/race built-char)
         subrace (char5e/subrace built-char)
@@ -361,7 +374,7 @@
         total-hit-dice (s/join
                         " / "
                         (map
-                         (fn [{:keys [class-level hit-die]}] (str class-level "D" hit-die))
+                         (fn [{:keys [class-level hit-die]}] (str class-level "d" hit-die))
                          (vals levels)))]
     (merge
      {:race (str race (if subrace (str "/" subrace)))
@@ -372,7 +385,7 @@
       :ac max-armor-class
       :hd-total total-hit-dice
       :initiative (common/bonus-str (es/entity-val built-char :initiative))
-      :speed (char5e/base-land-speed built-char)
+      :speed (speed built-char)
       :hp-max (es/entity-val built-char :max-hit-points)
       :passive (es/entity-val built-char :passive-perception)
       :other-profs (other-profs-field built-char)
