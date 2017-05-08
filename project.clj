@@ -24,7 +24,7 @@
                  [re-frame "0.9.0"]
                  [reagent "0.6.0"]
                  [garden "1.3.2"]
-                 [org.apache.pdfbox/pdfbox "2.1.0-20170316.190223-802"]
+                 [org.apache.pdfbox/pdfbox "2.1.0-20170324.170253-831"]
 
                  #_[org.eclipse.jetty/jetty-util "9.4.0.v20161208"]
                  #_[org.eclipse.jetty/jetty-http "9.4.0.v20161208"]
