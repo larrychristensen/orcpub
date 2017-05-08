@@ -5,7 +5,6 @@
             [io.pedestal.http.ring-middlewares :as ring]
             [io.pedestal.http.body-params :as body-params]
             [io.pedestal.interceptor.error :as error-int]
-            [io.pedestal.interceptor.helpers :refer [defhandler]]
             [io.pedestal.interceptor.chain :refer [terminate]]
             [buddy.auth.protocols :as proto]
             [buddy.auth.backends :as backends]
@@ -91,7 +90,7 @@
         {:status 200 :body {:username user
                             :token token}}))))
 
-(defhandler login
+(defn login
   [{:keys [json-params db] :as request}]
   (prn "LOGIN" json-params @db request)
   (login-response request))
@@ -239,7 +238,7 @@
      ["/register" ^:interceptors [(body-params/body-params) db-interceptor]
       {:post register}]
      ["/login" ^:interceptors [(body-params/body-params) db-interceptor]
-      {:post login}]
+      {:post `login}]
      ["/character.pdf" {:post `character-pdf-2}]]]))
 
 (def service
