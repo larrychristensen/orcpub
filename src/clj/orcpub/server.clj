@@ -39,7 +39,7 @@
 
 (def db-interceptor
   {:name :db-interceptor
-   :leave (fn [context] (update context :request assoc :db database))})
+   :enter (fn [context] (update context :request assoc :db database))})
 
 (defn make-list [nm]
   {:name  nm
@@ -65,16 +65,17 @@
                  [(buddy.hashers/check ?password ?enc)]]}
          db username password))
 
-(defbefore check-auth
- [{:keys [request] :as context}]
-  (let [req (try (some->> (proto/-parse backend request)
-                          (proto/-authenticate backend request))
-                 (catch Exception _))]
-    (if (:identity req)
-      (assoc context :request req)
-      (-> context
-          terminate
-          (assoc :response {:status 401 :body {:message "Unauthorized"}})))))
+(def check-auth
+  {:name :check-auth
+   :enter (fn [{:keys [request] :as context}]
+     (let [req (try (some->> (proto/-parse backend request)
+                             (proto/-authenticate backend request))
+                    (catch Exception _))]
+       (if (:identity req)
+         (assoc context :request req)
+         (-> context
+             terminate
+             (assoc :response {:status 401 :body {:message "Unauthorized"}})))))})
 
 (defn login-response
   [{:keys [json-params db] :as request}]
