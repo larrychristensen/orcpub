@@ -7695,7 +7695,8 @@ long rest."})]
     :subclass-title "Martial Archetype"
     :source ua-revised-subclasses-kw
     :subclasses [{:name "Arcane Archer"
-                  :levels {3 {:modifiers [(mod5e/trait-cfg
+                  :levels {3 {:modifiers [ua-al-illegal
+                                          (mod5e/trait-cfg
                                            {:name "Magic Arrow"
                                             :page 3
                                             :source ua-revised-subclasses-kw
@@ -7773,7 +7774,8 @@ long rest."})]
     :plugin? true
     :subclasses [{:name "Way of the Kensei"
                   :selections [(kensei-weapon-selection 2)]
-                  :modifiers [(mod5e/dependent-trait
+                  :modifiers [ua-al-illegal
+                              (mod5e/dependent-trait
                                {:name "Path of the Kensei"
                                 :page 4
                                 :source ua-revised-subclasses-kw
@@ -7804,7 +7806,8 @@ long rest."})]
     :subclass-level 1
     :plugin? true
     :subclasses [{:name "Favored Soul"
-                  :modifiers [(mod5e/spells-known 1 :cure-wounds :cha "Sorcerer")
+                  :modifiers [ua-al-illegal
+                              (mod5e/spells-known 1 :cure-wounds :cha "Sorcerer")
                               (mod5e/trait-cfg
                                {:name "Favored by the Gods"
                                 :page 5
