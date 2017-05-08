@@ -95,7 +95,7 @@
   (prn "LOGIN" json-params @db request)
   (login-response request))
 
-(defhandler register
+(defn register
   [{:keys [form-params db] :as request}]
   (prn "REGISTER" form-params @db)
   (swap! db assoc (:username form-params) form-params)
@@ -236,7 +236,7 @@
   (route/expand-routes
    [[["/" {:get `index}]
      ["/register" ^:interceptors [(body-params/body-params) db-interceptor]
-      {:post register}]
+      {:post `register}]
      ["/login" ^:interceptors [(body-params/body-params) db-interceptor]
       {:post `login}]
      ["/character.pdf" {:post `character-pdf-2}]]]))
