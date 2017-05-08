@@ -159,7 +159,7 @@
     :type :martial,
     :damage-die-count 1,
     :melee? true,
-    :heavy true,
+    :heavy? true,
     :reach true,
     :key :glaive
     :two-handed? true
@@ -170,7 +170,7 @@
     :type :martial,
     :subtype :axe
     :damage-die-count 1,
-    :heavy true,
+    :heavy? true,
     :melee? true,
     :key :greataxe
     :two-handed? true
@@ -181,7 +181,7 @@
     :damage-die 6,
     :type :martial,
     :damage-die-count 2,
-    :heavy true,
+    :heavy? true,
     :melee? true,
     :key :greatsword
     :two-handed? true
@@ -192,7 +192,7 @@
     :type :martial,
     :damage-die-count 1,
     :melee? true,
-    :heavy true,
+    :heavy? true,
     :reach true,
     :key :halberd
     :two-handed? true
@@ -205,6 +205,7 @@
     :melee? true,
     :reach true,
     :key :lance
+    :special? true
     :link "https://en.wikipedia.org/wiki/Lance"}
    {:name "Longsword",
     :damage-type :slashing,
@@ -221,7 +222,7 @@
     :damage-die 6,
     :type :martial,
     :damage-die-count 2,
-    :heavy true,
+    :heavy? true,
     :melee? true,
     :key :maul
     :two-handed? true
@@ -240,7 +241,7 @@
     :type :martial,
     :damage-die-count 1,
     :melee? true,
-    :heavy true,
+    :heavy? true,
     :reach true,
     :key :pike
     :two-handed? true
@@ -333,7 +334,7 @@
     :type :martial,
     :damage-die-count 1,
     :ranged? true,
-    :heavy true,
+    :heavy? true,
     :range {:min 100, :max 400},
     :key :crossbow-heavy
     :two-handed? true}
@@ -343,7 +344,7 @@
     :type :martial,
     :damage-die-count 1,
     :ranged? true,
-    :heavy true,
+    :heavy? true,
     :range {:min 150, :max 600},
     :key :longbow
     :two-handed? true}
@@ -352,7 +353,8 @@
     :ranged? true,
     :thrown true,
     :range {:min 5, :max 15},
-    :key :net}])
+    :key :net
+    :special? true}])
 
 (def ammunition
   (common/add-keys

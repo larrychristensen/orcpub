@@ -25,7 +25,7 @@
 
 (def ->local-store (after character->local-store))
 
-(def db-char->local-store (after (fn [db] (character->local-store (:char db)))))
+(def db-char->local-store (after (fn [db] (character->local-store (:character db)))))
 
 (def character-interceptors [check-spec-interceptor
                              (path :character)
@@ -54,6 +54,7 @@
  reset-character)
 
 (defn set-character [db [_ character]]
+  ;;(prn "SET_CHARACTER" character)
   (assoc db :character character :loading false))
 
 (reg-event-db
