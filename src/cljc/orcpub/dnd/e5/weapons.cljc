@@ -162,7 +162,8 @@
     :heavy true,
     :reach true,
     :key :glaive
-    :two-handed? true}
+    :two-handed? true
+    :link "https://en.wikipedia.org/wiki/Glaive"}
    {:name "Greataxe",
     :damage-type :slashing,
     :damage-die 12,
@@ -172,7 +173,8 @@
     :heavy true,
     :melee? true,
     :key :greataxe
-    :two-handed? true}
+    :two-handed? true
+    :link "https://en.wikipedia.org/wiki/Battle_axe"}
    {:name "Greatsword",
     :subtype :sword
     :damage-type :slashing,
@@ -182,7 +184,8 @@
     :heavy true,
     :melee? true,
     :key :greatsword
-    :two-handed? true}
+    :two-handed? true
+    :link "https://en.wikipedia.org/wiki/Sword"}
    {:name "Halberd",
     :damage-type :slashing,
     :damage-die 10,
@@ -192,7 +195,8 @@
     :heavy true,
     :reach true,
     :key :halberd
-    :two-handed? true}
+    :two-handed? true
+    :link "https://en.wikipedia.org/wiki/Halberd"}
    {:name "Lance",
     :damage-type :piercing,
     :damage-die 12,
@@ -200,7 +204,8 @@
     :damage-die-count 1,
     :melee? true,
     :reach true,
-    :key :lance}
+    :key :lance
+    :link "https://en.wikipedia.org/wiki/Lance"}
    {:name "Longsword",
     :damage-type :slashing,
     :damage-die 8,
@@ -209,7 +214,8 @@
     :damage-die-count 1,
     :versatile {:damage-die 10, :damage-die-count 1},
     :melee? true,
-    :key :longsword}
+    :key :longsword
+    :link "https://en.wikipedia.org/wiki/Sword"}
    {:name "Maul",
     :damage-type :bludgeoning,
     :damage-die 6,
@@ -218,14 +224,16 @@
     :heavy true,
     :melee? true,
     :key :maul
-    :two-handed? true}
+    :two-handed? true
+    :link "https://en.wikipedia.org/wiki/War_hammer"}
    {:name "Morningstar",
     :damage-type :piercing,
     :damage-die 8,
     :type :martial,
     :damage-die-count 1,
     :melee? true,
-    :key :morningstar}
+    :key :morningstar
+    :link "https://en.wikipedia.org/wiki/Morning_star_(weapon)"}
    {:name "Pike",
     :damage-type :piercing,
     :damage-die 10,
@@ -235,7 +243,8 @@
     :heavy true,
     :reach true,
     :key :pike
-    :two-handed? true}
+    :two-handed? true
+    :link "https://en.wikipedia.org/wiki/Pike_(weapon)"}
    {:name "Rapier",
     :damage-type :piercing,
     :damage-die 8,
@@ -244,7 +253,8 @@
     :damage-die-count 1,
     :finesse? true,
     :melee? true,
-    :key :rapier}
+    :key :rapier
+    :link "https://en.wikipedia.org/wiki/Rapier"}
    {:name "Scimitar",
     :damage-type :slashing,
     :damage-die 6,
@@ -253,7 +263,8 @@
     :damage-die-count 1,
     :finesse? true,
     :melee? true,
-    :key :scimitar}
+    :key :scimitar
+    :link "https://en.wikipedia.org/wiki/Scimitar"}
    {:name "Shortsword",
     :damage-type :piercing,
     :damage-die 6,
@@ -262,7 +273,8 @@
     :finesse? true,
     :damage-die-count 1,
     :melee? true,
-    :key :shortsword}
+    :key :shortsword
+    :link "https://en.wikipedia.org/wiki/Sword"}
    {:melee? true,
     :versatile {:damage-die 8, :damage-die-count 1},
     :key :trident,
@@ -272,7 +284,8 @@
     :damage-type :piercing,
     :thrown true,
     :damage-die 6,
-    :range {:min 20, :max 60}}
+    :range {:min 20, :max 60}
+    :link "https://en.wikipedia.org/wiki/Trident"}
    {:name "War pick",
     :damage-type :piercing,
     :damage-die 8,
@@ -287,7 +300,8 @@
     :damage-die-count 1,
     :versatile {:damage-die 10, :damage-die-count 1},
     :melee? true,
-    :key :warhammer}
+    :key :warhammer
+    :link "https://en.wikipedia.org/wiki/War_hammer"}
    {:name "Whip",
     :damage-type :slashing,
     :damage-die 4,

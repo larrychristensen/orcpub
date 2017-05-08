@@ -3,7 +3,8 @@
             [orcpub.dnd.e5.character :as char5e]
             [re-frame.core :as re-frame]
             [orcpub.entity :as entity]
-            [cljs.spec :as spec]))
+            [cljs.spec :as spec]
+            [cljs.reader :as reader]))
 
 (def local-storage-character-key "char-meta")
 
@@ -22,14 +23,15 @@
 (defn get-stored-character []
   (let [stored-str (.getItem js/window.localStorage local-storage-character-key)]
     (if stored-str
-      (try (cljs.reader/read-string stored-str)
+      (try (reader/read-string stored-str)
            (catch js/Object e (js/console.warn "UNREADABLE CHARACTER FOUND" stored-str))))))
 
 (re-frame/reg-cofx
   :local-store-character
   (fn [cofx _]
       "Read in character from localstore, and process into a map we can merge into app-db."
-      (assoc cofx :local-store-character
+    (assoc cofx
+           :local-store-character
              (let [stored-character (get-stored-character)]
                (if stored-character
                  (if (spec/valid? ::entity/raw-entity stored-character)

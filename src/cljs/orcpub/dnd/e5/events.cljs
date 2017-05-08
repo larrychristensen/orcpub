@@ -7,9 +7,13 @@
             [orcpub.dnd.e5.character :as char5e]
             [orcpub.dnd.e5.db :refer [default-value character->local-store tab-path]]
 
-            [re-frame.core :refer [reg-event-db reg-event-fx inject-cofx path trim-v
-                                   after debug]]
-            [cljs.spec :as spec]))
+            [re-frame.core :refer [reg-event-db reg-event-fx reg-fx inject-cofx path trim-v
+                                   after debug dispatch]]
+            [cljs.spec :as spec]
+            [cljs-http.client :as http]
+            [cljs.core.async :refer [<!]]
+            [clojure.string :as s])
+  (:require-macros [cljs.core.async.macros :refer [go]]))
 
 (defn check-and-throw
   "throw an exception if db doesn't match the spec"
@@ -20,6 +24,8 @@
 (def check-spec-interceptor (after (partial check-and-throw ::entity/raw-entity)))
 
 (def ->local-store (after character->local-store))
+
+(def db-char->local-store (after (fn [db] (character->local-store (:char db)))))
 
 (def character-interceptors [check-spec-interceptor
                              (path :character)
@@ -48,11 +54,11 @@
  reset-character)
 
 (defn set-character [db [_ character]]
-  (character->local-store character)
   (assoc db :character character :loading false))
 
 (reg-event-db
  :set-character
+ [db-char->local-store]
  set-character)
 
 (def character-values-path
@@ -459,3 +465,40 @@
            ::entity/values
            dissoc
            :faction-image-url-failed)))
+
+(reg-fx
+ :http
+ (fn [{:keys [on-success on-failure] :as cfg}]
+   (go (let [response (<! (http/request cfg))]
+         (prn "RESPONSE" response)
+         (if (<= 200 (:status response) 299)
+           (dispatch (conj on-success response))
+           (dispatch (conj on-failure response)))))))
+
+(defn backend-url [path]
+  (if (s/starts-with? js/window.location.href "http://localhost")
+    (str "http://localhost:8890" (if (not (s/starts-with? path "/")) "/") path)
+    path))
+
+(def login-url (backend-url "/login"))
+
+(reg-event-db
+ :login-success
+ (fn [db [_ response]]
+   (prn "SUCCESS" response)
+   db))
+
+(reg-event-db
+ :login-failure
+ (fn [db [_ response]]
+   (prn "FAILURE" response)
+   db))
+
+(reg-event-fx
+ :login
+ (fn [cofx [_ params]]
+   {:http {:method :post
+           :url login-url
+           :json-params params
+           :on-success [:login-success]
+           :on-failure [:login-failure]}}))

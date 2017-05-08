@@ -180,6 +180,9 @@
    [:.hover-shadow:hover
     {:box-shadow "0 2px 6px 0 rgba(0, 0, 0, 0.5)"}]
 
+   [:.hover-underline:hover
+    {:text-decoration :underline}]
+
    [:.orange-shadow
     {:box-shadow "0 1px 0 0 #f0a100"}]
    

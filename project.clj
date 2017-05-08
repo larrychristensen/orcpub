@@ -7,7 +7,9 @@
 
   :min-lein-version "2.7.1"
 
-  :repositories [["apache" "http://repository.apache.org/snapshots/"]]
+  :repositories [["apache" "http://repository.apache.org/snapshots/"]
+                 ["my.datomic.com" {:url "https://my.datomic.com/repo"
+                                    :creds :gpg}]]
 
   :dependencies [[org.clojure/clojure "1.9.0-alpha14"]
                  [org.clojure/test.check "0.9.0"]
@@ -16,19 +18,30 @@
                   :exclusions [org.clojure/tools.reader]]
                  [cljsjs/react "15.3.1-0"]
                  [cljsjs/react-dom "15.3.1-0"]
+                 [cljs-http "0.1.43"]
+                 
                  ;;[org.clojure/core.match "0.3.0-alpha4"]
                  [re-frame "0.9.0"]
                  [reagent "0.6.0"]
                  [garden "1.3.2"]
                  [org.apache.pdfbox/pdfbox "2.1.0-20170316.190223-802"]
 
-                 [io.pedestal/pedestal.service "0.5.1"]
-                 [io.pedestal/pedestal.route "0.5.1"]
-                 [io.pedestal/pedestal.jetty "0.5.1"]
+                 [org.eclipse.jetty/jetty-util "9.4.0.v20161208"]
+                 [org.eclipse.jetty/jetty-http "9.4.0.v20161208"]
+                 [org.eclipse.jetty/jetty-client "9.4.0.v20161208"]
+
+                 [io.pedestal/pedestal.service "0.5.2"]
+                 [io.pedestal/pedestal.route "0.5.2"]
+                 [io.pedestal/pedestal.jetty "0.5.2"]
                  [org.clojure/data.json "0.2.6"]
                  [org.slf4j/slf4j-simple "1.7.21"]
+                 [buddy/buddy-auth "1.4.1"]
+                 [bidi "2.0.17"]
+
+                 [com.datomic/datomic-pro "0.9.5561"]
+                 [com.datomic/clj-client "0.8.606"]
                  
-                 [clj-http "2.3.0"]
+                 #_[clj-http "2.3.0"]
                  [environ "1.0.0"]]
 
   :plugins [[lein-figwheel "0.5.8"]

@@ -5929,6 +5929,205 @@ long rest."})]
 
 (def ua-al-illegal (mod5e/al-illegal "Unearthed Arcana options are not allowed"))
 
+#_(def revised-ranger-option
+  (class-option
+   {:name "Ranger (Revised)"
+    :hit-die 10
+    :profs {:armor {:light false :medium false :shields false}
+            :weapon {:simple false :martial false}
+            :save {:str true :dex true}
+            :skill-options {:choose 3 :options ranger-skills}
+            :multiclass-skill-options {:choose 1 :options ranger-skills}}
+    :multiclass-prereqs [(t/option-prereq "Requires Wisdom 13 and Dexterity 13"
+                                          (fn [c]
+                                            (let [abilities (es/entity-val c :abilities)]
+                                              (and (>= (:wis abilities) 13)
+                                                  (>= (:dex abilities) 13)))))]
+    :ability-increase-levels [4 8 10 16 19]
+    :spellcaster true
+    :spellcasting {:level-factor 2
+                   :known-mode :schedule
+                   :spells-known {2 2
+                                  3 1
+                                  5 1
+                                  7 1
+                                  9 1
+                                  11 1
+                                  13 1
+                                  15 1
+                                  17 1
+                                  19 1}
+                   :ability :wis}
+    :armor-choices [{:name "Armor"
+                     :options {:scale-mail 1
+                               :leather 1}}]
+    :equipment-choices [{:name "Equipment Pack"
+                         :options {:dungeoneers-pack 1
+                                   :explorers-pack 1}}]
+    :weapons {:longbow 1}
+    :equipment {:quiver 1
+                :arrow 20}
+    :modifiers [(mod5e/dependent-trait
+                   {:name "Favored Enemy"
+                    :page 91
+                    :summary (str "You have advantage on survival checks to track " (common/list-print (map #(common/kw-to-name % false) ?ranger-favored-enemies)) " creatures and on INT checks to recall info about them")})
+                (mod5e/dependent-trait
+                   {:name "Natural Explorer"
+                    :page 91
+                    :summary (let [favored-terrain ?ranger-favored-terrain
+                                   one-terrain? (= 1 (count favored-terrain))]
+                               (str "your favored terrain " (if one-terrain? "type is" "types are") " " (if (seq favored-terrain) (common/list-print (map #(common/kw-to-name % false) ?ranger-favored-terrain)) "not selected") ". Related to the terrain type" (if (not one-terrain?) "s") ": 2X proficiency bonus for INT and WIS checks for which you are proficient, difficult terrain doesn't slow your group, always alert for danger, can move stealthily alone at normal pace, 2x food when foraging, while tracking learn exact number, size, and when they passed through"))})]
+    :selections [(new-starting-equipment-selection
+                  :ranger
+                  {:name "Melee Weapon"
+                   :options [(t/option-cfg
+                              {:name "Two Shortswords"
+                               :modifiers [(mod5e/weapon :shortsword 2)]})
+                             (t/option-cfg
+                              {:name "Simple Melee Weapon"
+                               :selections [(new-starting-equipment-selection
+                                             :ranger
+                                             {:name "Simple Melee Weapon"
+                                              :options (opt5e/simple-melee-weapon-options 1)
+                                              :min 2
+                                              :max 2})]})]})
+                 (favored-enemy-selection 1)
+                 (favored-terrain-selection 1)]
+    :levels {2 {:selections [(opt5e/fighting-style-selection :ranger #{:archery :defense :dueling :two-weapon-fighting})]}
+             3 {:modifiers [(mod5e/action
+                             {:name "Primeval Awareness"
+                              :level 3
+                              :page 92
+                              :summary (str "spend an X-level spell slot, for X minutes, you sense the types of creatures within 1 mile" (if (seq ?ranger-favored-terrain) (str "(6 if " (common/list-print (map #(common/kw-to-name % false) ?ranger-favored-terrain))) ")") )})]}
+             5 {:modifiers [(mod5e/extra-attack)]}
+             6 {:selections [(favored-enemy-selection 2)
+                             (favored-terrain-selection 2)]}
+             10 {:selections [(favored-terrain-selection 3)]}
+             14 {:selections [(favored-enemy-selection 3)]}
+             20 {:modifiers [(mod5e/dependent-trait
+                              {:name "Foe Slayer"
+                               :frequency turns-1
+                               :level 20
+                               :page 92
+                               :summary (str "add " (common/bonus-str (?ability-bonuses :wis)) " to an attack or damage roll") })]}}
+    :traits [(lands-stride 8)
+             {:name "Hide in Plain Sight"
+              :level 10
+              :page 92
+              :summary "spend 1 minute camouflaging yourself to gain +10 to Stealth checks when you don't move"}
+             {:name "Vanish"
+              :level 14
+              :page 92
+              :summary "Hide action as a bonus action. You also can't be non-magically tracked"}
+             {:name "Feral Senses"
+              :level 18
+              :page 92
+              :summary "no disadvantage on attacks against creature you can't see, you know location of invisible creatures within 30 ft."}]
+    :subclass-level 3
+    :subclass-title "Ranger Archetype"
+    :subclasses [{:name "Hunter"
+                  :levels {3 {:selections [(t/selection-cfg
+                                            {:name "Hunter's Prey"
+                                             :tags #{:class}
+                                             :options [(t/option-cfg
+                                                        {:name "Colossus Slayer"
+                                                         :modifiers [(mod5e/trait-cfg
+                                                                      {:name "Colossus Slayer"
+                                                                       :page 93
+                                                                       :frequency turns-1
+                                                                       :summary "deal an extra d8 damage when you hit a creature that is below its HP max with a weapon attack"})]})
+                                                       (t/option-cfg
+                                                        {:name "Giant Killer"
+                                                         :modifiers [(mod5e/reaction
+                                                                      {:name "Giant Killer"
+                                                                       :page 93
+                                                                       :frequency turns-1
+                                                                       :summary "attack a Large or larger creature within 5 ft that misses an attack against you"})]})
+                                                       (t/option-cfg
+                                                        {:name "Horde Breaker"
+                                                         :modifiers [(mod5e/trait-cfg
+                                                                      {:name "Horde Breaker"
+                                                                       :page 93
+                                                                       :frequency turns-1
+                                                                       :summary "when you attack one creature, attack another creature within 5 feet of it with the same action"})]})]})]}
+                           7 {:selections [(t/selection-cfg
+                                            {:name "Defensive Tactics"
+                                             :tags #{:class}
+                                             :options [(t/option-cfg
+                                                        {:name "Escape the Horde"
+                                                         :modifiers [(mod5e/trait-cfg
+                                                                      {:name "Escape the Horde"
+                                                                       :frequency turns-1
+                                                                       :page 93})]})
+                                                       (t/option-cfg
+                                                        {:name "Multiattack Defense"
+                                                         :modifiers [(mod5e/trait-cfg
+                                                                      {:name "Multiattack Defense"
+                                                                       :frequency turns-1
+                                                                       :page 93})]})
+                                                       (t/option-cfg
+                                                        {:name "Steel Will"
+                                                         :modifiers [(mod5e/saving-throw-advantage [:frightened])]})]})]}
+                           11 {:selections [(t/selection-cfg
+                                             {:name "Multiattack"
+                                              :tags #{:class}
+                                              :options [(t/option-cfg
+                                                         {:name "Volley"
+                                                          :modifiers [(mod5e/action
+                                                                       {:name "Volley"
+                                                                        :page 93
+                                                                        :summary "make a ranged attack against any creatures within a 10 ft of a point" 
+                                                                        })]})
+                                                        (t/option-cfg
+                                                         {:name "Whirlwind Attack"
+                                                          :modifiers [(mod5e/action
+                                                                       {:name "Whirlwind Attack"
+                                                                        :page 93
+                                                                        :summary "melee attack against any creatures within 5 ft. of you"})]})]})]}
+                           15 {:selections [(t/selection-cfg
+                                             {:name "Superior Hunter's Defense"
+                                              :tags #{:class}
+                                              :options [(t/option-cfg
+                                                         {:name "Evasion"
+                                                          :modifiers [(mod5e/trait-cfg
+                                                                       (evasion 15 93))]})
+                                                        (t/option-cfg
+                                                         {:name "Stand Against the Tide"
+                                                          :modifiers  [(mod5e/reaction
+                                                                        {:name "Stand Against the Tide"
+                                                                         :page 93
+                                                                         :summary "force a creature to repeat its attack on another creature when it misses you"
+                                                                         })]})
+                                                        (t/option-cfg
+                                                         {:name "Uncanny Dodge"
+                                                          :modifiers [(uncanny-dodge-modifier 93)]})]})]}}}
+                 {:name "Beast Master"
+                  :selections [(t/selection-cfg
+                                {:name "Ranger's Companion"
+                                 :tags #{:class}
+                                 :options (map
+                                           (fn [monster-name]
+                                             (t/option-cfg
+                                              {:name monster-name
+                                               :modifiers [(mod5e/action
+                                                            {:name "Ranger's Companion"
+                                                             :page 93
+                                                             :summary (str "You have a " monster-name " as your companion, you can command it to Attack, Dash, Disengage, Dodge, or Help")})]}))
+                                           ["Stirge" "Baboon" "Bat" "Badger" "Blood Hawk" "Boar" "Cat" "Crab" "Deer" "Eagle" "Flying Snake" "Frog" "Giant Badger" "Giant Centipede" "Giant Crab" "Giant Fire Beetle" "Giant Frog" "Giant Poisonous Snake" "Giant Rat" "Giant Wolf Spider" "Goat" "Hawk" "Hyena" "Jackal" "Lizard" "Mastiff" "Mule" "Octopus" "Panther" "Owl" "Poisonous Snake" "Pony" "Quipper" "Rat" "Raven" "Scorpion" "Sea Horse" "Spider" "Vulture" "Weasel" "Wolf"])})]
+                  :levels {7 {:modifiers [(mod5e/bonus-action
+                                           {:name "Exceptional Training"
+                                            :page 93
+                                            :level 7
+                                            :summary "when your companion doesn't attack, you can command it to take the Dash, Disengage, Dodge, or Help action"})]}}
+                  :traits [{:name "Bestial Fury"
+                            :level 11
+                            :page 93
+                            :summary "your companion attacks twice when it takes the Attack action"}
+                           {:name "Share Spells"
+                            :level 15
+                            :page 93
+                            :summary "when you target yourself with a spell you can also affect your companion if within 30 ft."}]}]}))
+
 (def ua-mystic-kw :ua-mystic)
 
 (def psionic-talents
@@ -6055,6 +6254,7 @@ long rest."})]
    {:name "Psionic Talents"
     :tags #{:class}
     :ref [:class :mystic :psionic-talents]
+    :multiselect? true
     :options (map
               (fn [{:keys [name modifiers] :as cfg}]
                 (t/option-cfg
