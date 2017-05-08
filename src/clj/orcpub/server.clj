@@ -36,8 +36,9 @@
                               :password "noentry4u"
                               :first-and-last-name "Larry Christensen"}}))
 
-(defbefore db-interceptor [context]
-  (update context :request assoc :db database))
+(def db-interceptor
+  {:name :db-interceptor
+   :leave (fn [context] (update context :request assoc :db database))})
 
 (defn make-list [nm]
   {:name  nm
@@ -290,3 +291,4 @@
 
 (defn -main []
   (start))
+
