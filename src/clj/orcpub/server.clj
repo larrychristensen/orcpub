@@ -5,7 +5,7 @@
             [io.pedestal.http.ring-middlewares :as ring]
             [io.pedestal.http.body-params :as body-params]
             [io.pedestal.interceptor.error :as error-int]
-            [io.pedestal.interceptor.helpers :refer [defbefore defhandler]]
+            [io.pedestal.interceptor.helpers :refer [defhandler]]
             [io.pedestal.interceptor.chain :refer [terminate]]
             [buddy.auth.protocols :as proto]
             [buddy.auth.backends :as backends]
@@ -24,6 +24,7 @@
            (javax.imageio ImageIO)
            (java.net URL))
   (:gen-class))
+
 
 (defn response [status body & {:as headers}]
   {:status status :body body :headers headers})
