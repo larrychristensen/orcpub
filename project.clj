@@ -35,11 +35,12 @@
                  [buddy/buddy-hashers "1.2.0"]
                  [bidi "2.0.17"]
 
-                 #_[com.stuartsierra/component "0.3.2"]
+                 [com.stuartsierra/component "0.3.2"]
+                 [com.google.guava/guava "19.0"]
 
                  [com.datomic/datomic-pro "0.9.5561"]
                  #_[com.datomic/clj-client "0.8.606"]
-                 
+
                  #_[clj-http "2.3.0"]
                  [environ "1.0.0"]]
 

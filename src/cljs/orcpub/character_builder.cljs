@@ -36,7 +36,7 @@
             [reagent.core :as r]
             [re-frame.core :refer [subscribe dispatch dispatch-sync]]))
 
-(def print-disabled? false)
+(def print-disabled? true)
 (def print-enabled? (and (not print-disabled?)
                          (s/starts-with? js/window.location.href "http://localhost")))
 
@@ -964,7 +964,7 @@
           (if (not hide-lock?)
             [:i.fa.f-s-16.m-l-10.m-r-5.pointer.opacity-5.hover-opacity-full
              {:class-name (if locked? "fa-lock" "fa-unlock-alt")
-              :on-click #(do (prn "PATH" path) (dispatch [:toggle-locked path]))}])]
+              :on-click #(do (dispatch [:toggle-locked path]))}])]
          (if (and help path @expanded?)
            [help-section help])
          (if (or (and (pos? min)
