@@ -278,6 +278,7 @@
 
 
 (defn race-option [{:keys [name
+                           key
                            help
                            abilities
                            size
@@ -296,6 +297,7 @@
                            source]}]
   (t/option-cfg
    {:name name
+    :key (or key (common/name-to-kw name))
     :help help
     :selections (concat
                  (if subraces
@@ -1412,6 +1414,7 @@
   (starting-equipment-entity-options :background-starting-equipment? key items))
 
 (defn class-option [{:keys [name
+                            key
                             help
                             hit-die
                             plugin?
@@ -1433,7 +1436,8 @@
                             spellcasting
                             multiclass-prereqs]
                      :as cls}]
-  (let [kw (common/name-to-kw name)
+  (prn "KEY" key)
+  (let [kw (or key (common/name-to-kw name))
         {:keys [save skill-options multiclass-skill-options tool-options multiclass-tool-options tool]
          armor-profs :armor weapon-profs :weapon} profs
         {level-factor :level-factor} spellcasting
@@ -5664,7 +5668,7 @@ long rest."})]
                [aarakocra-option-cfg
                 ee-gnome-option-cfg
                 genasi-option-cfg
-                goliath-option-cfg])})])
+                (assoc goliath-option-cfg :key :goliath-ee)])})])
 
 (def keen-senses-option
   (t/option-cfg
