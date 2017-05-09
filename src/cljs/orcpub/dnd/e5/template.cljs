@@ -1436,7 +1436,6 @@
                             spellcasting
                             multiclass-prereqs]
                      :as cls}]
-  (prn "KEY" key)
   (let [kw (or key (common/name-to-kw name))
         {:keys [save skill-options multiclass-skill-options tool-options multiclass-tool-options tool]
          armor-profs :armor weapon-profs :weapon} profs

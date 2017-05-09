@@ -106,7 +106,7 @@
     (s/join
      "\n"
      (remove nil?
-             [(if darkvision (str "Darkvision: " darkvision " ft."))
+             [(if (and darkvision (pos? darkvision)) (str "Darkvision: " darkvision " ft."))
               (vec-trait "Damage Resistances" (resistance-strings damage-resistances))
               (vec-trait "Damage Immunities" (resistance-strings damage-immunities))
               (vec-trait "Condition Immunities" (resistance-strings condition-immunities))
