@@ -6,9 +6,11 @@
             [io.pedestal.http.body-params :as body-params]
             [io.pedestal.interceptor.error :as error-int]
             [io.pedestal.interceptor.chain :refer [terminate]]
+            #_[com.stuartsierra.component :as component]
             [buddy.auth.protocols :as proto]
             [buddy.auth.backends :as backends]
             [buddy.sign.jwt :as jwt]
+            [buddy.hashers :as hashers]
             [clojure.java.io :as io]
             [clj-time.core :refer [hours from-now]]
             [clojure.string :as s]
@@ -26,6 +28,7 @@
   (:gen-class))
 
 
+
 (defn response [status body & {:as headers}]
   {:status status :body body :headers headers})
 
@@ -37,9 +40,31 @@
                               :password "noentry4u"
                               :first-and-last-name "Larry Christensen"}}))
 
+#_(defrecord Database [host port connection]
+  ;; Implement the Lifecycle protocol
+  component/Lifecycle
+
+  (start [component]
+    (println ";; Starting database")
+    (let [conn (connect-to-database host port)]
+      ;; Return an updated version of the component with
+      ;; the run-time state assoc'd in.
+      (assoc component :connection conn)))
+
+  (stop [component]
+    (println ";; Stopping database")
+    ;; In the 'stop' method, shut down the running
+    ;; component and release any external resources it has
+    ;; acquired.
+    (.close connection)
+    ;; Return the component, optionally modified. Remember that if you
+    ;; dissoc one of a record's base fields, you get a plain map.
+    (assoc component :connection nil)))
+
 (def db-uri "datomic:dev://localhost:4334/orcpub")
 
-(def conn (d/connect db-uri))
+#_(def conn (d/connect db-uri))
+(def conn)
 
 (def db-interceptor
   {:name :db-interceptor
@@ -97,14 +122,26 @@
         {:status 200 :body {:user (d/pull db '[*] user)
                             :token token}}))))
 
-(defn login
-  [{:keys [json-params db] :as request}]
-  (prn "LOGIN" json-params db request)
+(defn login [{:keys [json-params db] :as request}]
   (login-response request))
 
-(defn register
-  [{:keys [form-params db] :as request}]
-  (login-response (assoc request :db db)))
+(defn register [{:keys [json-params db] :as request}]
+  (let [{:keys [username email password first-and-last-name]} json-params]
+    (cond
+      (d/q '[:find ?e :where [?e :orcpub.user/email email]] db)
+      {:status 400 :body {:message "Email address is already taken"}}
+
+      (d/q '[:find ?e :where [?e :orcpub.user/username username]] db)
+      {:status 400 :body {:message "username is already taken"}}
+
+      :else
+      (do @(d/transact
+            conn
+            [{:orcpub.user/email email
+              :orcpub.user/username username
+              :orcpub.user/password (hashers/encrypt password)
+              :orcpub.user/first-and-last-name first-and-last-name}])
+          (login-response (assoc request :db (d/db conn)))))))
 
 (def font-sizes
   (merge

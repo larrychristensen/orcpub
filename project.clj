@@ -26,10 +26,6 @@
                  [garden "1.3.2"]
                  [org.apache.pdfbox/pdfbox "2.1.0-20170324.170253-831"]
 
-                 #_[org.eclipse.jetty/jetty-util "9.4.0.v20161208"]
-                 #_[org.eclipse.jetty/jetty-http "9.4.0.v20161208"]
-                 #_[org.eclipse.jetty/jetty-client "9.4.0.v20161208"]
-
                  [io.pedestal/pedestal.service "0.5.1"]
                  [io.pedestal/pedestal.route "0.5.1"]
                  [io.pedestal/pedestal.jetty "0.5.1"]
@@ -38,6 +34,8 @@
                  [buddy/buddy-auth "1.4.1"]
                  [buddy/buddy-hashers "1.2.0"]
                  [bidi "2.0.17"]
+
+                 #_[com.stuartsierra/component "0.3.2"]
 
                  [com.datomic/datomic-pro "0.9.5561"]
                  #_[com.datomic/clj-client "0.8.606"]

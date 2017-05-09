@@ -1,4 +1,6 @@
-(ns orcpub.db.schema)
+(ns orcpub.db.schema
+  (:require [orcpub.entity :as e]
+            [orcpub.dnd.e5.character :as char5e]))
 
 (def user-schema
   [{:db/ident :orcpub.user/username
