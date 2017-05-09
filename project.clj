@@ -8,7 +8,7 @@
   :min-lein-version "2.7.1"
 
   :repositories [["apache" "http://repository.apache.org/snapshots/"]
-                 #_["my.datomic.com" {:url "https://my.datomic.com/repo"
+                 ["my.datomic.com" {:url "https://my.datomic.com/repo"
                                     :creds :gpg}]]
 
   :dependencies [[org.clojure/clojure "1.9.0-alpha14"]
@@ -38,9 +38,9 @@
                  [buddy/buddy-auth "1.4.1"]
                  [bidi "2.0.17"]
 
-                 #_[com.datomic/datomic-pro "0.9.5561"]
+                 [com.datomic/datomic-pro "0.9.5561"]
                  #_[com.datomic/clj-client "0.8.606"]
-                 
+
                  #_[clj-http "2.3.0"]
                  [environ "1.0.0"]]
 
