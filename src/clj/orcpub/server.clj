@@ -13,7 +13,8 @@
             [clj-time.core :refer [hours from-now]]
             [clojure.string :as s]
             [orcpub.dnd.e5.skills :as skill5e]
-            [orcpub.dnd.e5.character :as char5e])
+            [orcpub.dnd.e5.character :as char5e]
+            [datomic.api :as d])
   (:import (org.apache.pdfbox.pdmodel.interactive.form PDCheckBox PDComboBox PDListBox PDRadioButton PDTextField)
            (org.apache.pdfbox.pdmodel PDDocument PDPageContentStream)
            (org.apache.pdfbox.pdmodel.graphics.image PDImageXObject)
@@ -36,9 +37,16 @@
                               :password "noentry4u"
                               :first-and-last-name "Larry Christensen"}}))
 
+(def db-uri "datomic:dev://localhost:4334/orcpub")
+
+(def conn (d/connect db-uri))
+
 (def db-interceptor
   {:name :db-interceptor
-   :enter (fn [context] (update context :request assoc :db database))})
+   :enter (fn [context]
+            (let [db (d/db conn)]
+              (prn "CONN" conn db)
+              (update context :request assoc :db db)))})
 
 (defn make-list [nm]
   {:name  nm
@@ -53,16 +61,15 @@
                            :enc :a128-hs256}})
 
 (defn lookup-user [db username password]
-  (let [user (get @db username)]
-    (prn "USER" user username password)
-    (if (= password (:password user))
-      user)) 
-  #_(d/q '{:find [[?e]]
-         :in [$ ?username ?password]
-         :where [[?e :user/email ?username]
-                 [?e :user/password ?enc]
-                 [(buddy.hashers/check ?password ?enc)]]}
-         db username password))
+  (prn "DB" db)
+  (first
+   (d/q '{:find [[?e]]
+          :in [$ ?username ?password]
+          :where [(or [?e :orcpub.user/username ?username]
+                      [?e :orcpub.user/email ?username])
+                  [?e :orcpub.user/password ?enc]
+                  [(buddy.hashers/check ?password ?enc)]]}
+        db username password)))
 
 (def check-auth
   {:name :check-auth
@@ -87,19 +94,16 @@
       (let [claims {:user user
                     :exp (-> 3 hours from-now)}
             token (jwt/sign claims secret)]
-        {:status 200 :body {:username user
+        {:status 200 :body {:user (d/pull db '[*] user)
                             :token token}}))))
 
 (defn login
   [{:keys [json-params db] :as request}]
-  (prn "LOGIN" json-params @db request)
+  (prn "LOGIN" json-params db request)
   (login-response request))
 
 (defn register
   [{:keys [form-params db] :as request}]
-  (prn "REGISTER" form-params @db)
-  (swap! db assoc (:username form-params) form-params)
-  (prn "DB" @db)
   (login-response (assoc request :db db)))
 
 (def font-sizes

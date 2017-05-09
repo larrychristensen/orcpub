@@ -1,5 +1,6 @@
 (ns orcpub.dnd.e5.db
-  (:require [orcpub.dnd.e5.template :as t5e]
+  (:require [orcpub.routes :as routes]
+            [orcpub.dnd.e5.template :as t5e]
             [orcpub.dnd.e5.character :as char5e]
             [re-frame.core :as re-frame]
             [orcpub.entity :as entity]
@@ -8,12 +9,16 @@
 
 (def local-storage-character-key "char-meta")
 
+(def default-route routes/dnd-e5-char-builder-route)
+
 (def default-value
   {:builder {:character {:tab #{:build :options}}}
    :character (char5e/set-class t5e/character :barbarian 0 t5e/barbarian-option)
    :template t5e/template
    :plugins t5e/plugins
-   :locked-components #{}})
+   :locked-components #{}
+   :route default-route
+   :route-history (list default-route)})
 
 (defn character->local-store [character]
   (.setItem js/window.localStorage local-storage-character-key (str character)))

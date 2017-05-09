@@ -378,6 +378,8 @@
     {:padding-right "5px"}]
    [:.p-r-10
     {:padding-right "10px"}]
+   [:.p-r-20
+    {:padding-right "20px"}]
 
    [:.b-rad-50-p
     {:border-radius "50%"}]

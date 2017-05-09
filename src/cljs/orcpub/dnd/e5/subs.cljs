@@ -75,6 +75,21 @@
    (:page db)))
 
 (reg-sub
+ :route
+ (fn [db _]
+   (:route db)))
+
+(reg-sub
+ :previous-route
+ (fn [db _]
+   (-> db :route-history peek)))
+
+(reg-sub
+ :user-data
+ (fn [db _]
+   (:user-data db)))
+
+(reg-sub
  :built-template
  :<- [:selected-plugin-options]
  (fn [selected-plugin-options _]

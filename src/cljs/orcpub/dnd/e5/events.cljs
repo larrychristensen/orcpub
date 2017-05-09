@@ -407,6 +407,18 @@
  :set-page
  set-page)
 
+(reg-event-db
+ :route
+ (fn [{:keys [route route-history] :as db} [_ new-route]]
+   (assoc db
+          :route new-route
+          :route-history (conj route-history route))))
+
+(reg-event-db
+ :set-user-data
+ (fn [db [_ user-data]]
+   (assoc db :user-data user-data)))
+
 (defn set-active-tabs [db [_ active-tabs]]
   (assoc-in db tab-path active-tabs))
 
@@ -485,21 +497,28 @@
 
 (reg-event-db
  :login-success
- (fn [db [_ response]]
+ (fn [db [_ backtrack? response]]
    (prn "SUCCESS" response)
-   db))
+   (cond-> db
+       true (assoc :user-data (:body response))
+       backtrack? (assoc :route (peek (:route-history db))))))
 
-(reg-event-db
+(reg-event-fx
  :login-failure
- (fn [db [_ response]]
+ (fn [cofx [_ response]]
    (prn "FAILURE" response)
-   db))
+   {:dispatch [:set-user-data nil]}))
+
+(reg-event-fx
+ :logout
+ (fn [cofx [_ response]]
+   {:dispatch [:set-user-data nil]}))
 
 (reg-event-fx
  :login
- (fn [cofx [_ params]]
+ (fn [cofx [_ params backtrack?]]
    {:http {:method :post
            :url login-url
            :json-params params
-           :on-success [:login-success]
+           :on-success [:login-success backtrack?]
            :on-failure [:login-failure]}}))

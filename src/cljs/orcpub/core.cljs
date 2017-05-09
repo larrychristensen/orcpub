@@ -3,53 +3,21 @@
   (:require [orcpub.character-builder :as ch]
             [orcpub.dnd.e5.subs]
             [orcpub.dnd.e5.events]
+            [orcpub.dnd.e5.views :as views]
+            [orcpub.routes :as routes]
             [cljs-http.client :as http]
             [cljs.core.async :refer [<!]]
             [clojure.string :as s]
-            [re-frame.core :refer [dispatch dispatch-sync]]
+            [re-frame.core :refer [dispatch dispatch-sync subscribe]]
             [reagent.core :as r]))
 
 (enable-console-print!)
 
 (dispatch-sync [:initialize-db])
 
-(def text-color "#484848")
-
-(def orange "#f0a100")
-
-(def input-style
-  {:height "38px" :width "438px"
-   :border "solid 1px rgba(72,72,72,0.37)"
-   :border-radius "3px"
-   :font-size "14px"
-   :padding-left "10px"
-   :color text-color})
-
 (def register-url (if (s/starts-with? js/window.location.href "http://localhost")
                     "http://localhost:8890/register"
                     "/register"))
-
-(defn login-form []
-  (let [params (r/atom {})]
-    (fn []
-      [:div
-       [:input.m-t-20 {:name :email
-                       :placeholder "Username or Email"
-                       :style (assoc input-style :width "200px")
-                       :value (:username @params)
-                       :on-change (fn [e] (swap! params assoc :username (.. e -target -value)))}]
-       [:input.m-t-20.m-l-5 {:name :password
-                             :type :password
-                             :placeholder "Password"
-                             :value (:password @params)
-                             :style (assoc input-style :width "200px")
-                             :on-change (fn [e] (swap! params assoc :password (.. e -target -value)))}]
-       [:button.form-button.m-l-5
-        {:style {:height "42px"
-                 :width "100px"
-                 :font-size "16px"}
-         :on-click (fn [_] (dispatch [:login @params]))}
-        "LOGIN"]])))
 
 (defn login-page []
   [:div.sans.h-100-p.flex
@@ -58,16 +26,16 @@
                             :background-color "#1a2532"
                             :box-shadow "0 2px 6px 0 rgba(0,0,0,0.5)"}}
     [:div.content
-     [:div.flex.justify-cont-s-b.w-100-p
+     [:div.flex.justify-cont-s-b.w-100-p.align-items-c.p-l-20.p-r-20
       [:img {:src "image/orcpub-logo.svg"}]
-      [login-form]]]]
+      [views/login-form]]]]
    [:div.flex.justify-cont-s-a.align-items-c.flex-grow-1
     [:div
      {:style {:width "785px"
               :height "600px"
               :background-color :white
               :border "1px solid white"
-              :color text-color}}
+              :color views/text-color}}
      [:div.flex
       [:div {:style {:width "487px"}}
        [:div.flex.justify-cont-s-a.align-items-c
@@ -77,7 +45,7 @@
         [:img {:src "image/orcpub-logo.svg"
                :style {:height "25.3px"}}]]
        [:div {:style {:text-align :center}}
-        [:div {:style {:color orange
+        [:div {:style {:color views/orange
                        :font-weight :bold
                        :font-size "36px"
                        :text-transform :uppercase
@@ -91,16 +59,16 @@
                 :method :post}
          [:input.m-t-20 {:name :first-and-last-name
                          :placeholder "First and Last Name"
-                         :style input-style}]
+                         :style views/input-style}]
          [:input.m-t-20 {:name :email
                          :placeholder "Email"
-                         :style input-style}]
+                         :style views/input-style}]
          [:input.m-t-20 {:name :username
                          :placeholder "Username"
-                         :style input-style}]
+                         :style views/input-style}]
          [:input.m-t-20 {:name :password
                          :placeholder "Password"
-                         :style input-style}]
+                         :style views/input-style}]
          [:div.m-t-20
           {:style {:text-align :left
                    :margin-left "15px"}}
@@ -124,10 +92,10 @@
          [:span.f-s-14
           "By clicking JOIN you agree to our"
           [:a.m-l-5 {:href "" :target :_blank
-                     :style {:color text-color}} "Terms of Use"]
+                     :style {:color views/text-color}} "Terms of Use"]
           [:span.m-l-5 "and that you've read our"]
           [:a.m-l-5 {:href "" :target :_blank
-                     :style {:color text-color}} "Privacy Policy"]]]
+                     :style {:color views/text-color}} "Privacy Policy"]]]
         [:div.m-l-15 {:style {:text-align :left
                               :margin-top "15px"}}
          "© 2017 OrcPub"]]]
@@ -138,13 +106,21 @@
                      :width "308px"
                      :height "600px"}}]]]]])
 
+(def pages
+  {routes/dnd-e5-char-builder-route ch/character-builder
+   routes/register-route login-page})
+
+(defn main-view []
+  (let [route @(subscribe [:route])
+        view (pages route)]
+    [view]))
+
 (r/render (if (let [doc-style js/document.documentElement.style]
                 (and js/window.localStorage
                      (or (aget doc-style "flexWrap")
                          (aget doc-style "WebkitFlexWrap")
                          (aget doc-style "msFlexWrap"))))
-            [ch/character-builder]
-            #_[login-page]
+            [main-view]
             [:div
              [ch/app-header]
              [:div.f-s-24.white.sans

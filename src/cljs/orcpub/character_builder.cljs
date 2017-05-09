@@ -27,6 +27,7 @@
             [orcpub.dnd.e5.skills :as skill5e]
             [orcpub.dnd.e5.events :as events5e]
             [orcpub.dnd.e5.db :as db5e]
+            [orcpub.dnd.e5.views :as views5e]
             [orcpub.pdf-spec :as pdf-spec]
 
             [clojure.spec :as spec]
@@ -2093,7 +2094,21 @@
   [:div#app-header.app-header.flex.flex-column.justify-cont-s-b
    [:div.app-header-bar.container
     [:div.content
-     [:img.orcpub-logo {:src "image/orcpub-logo.svg"}]]]
+     [:div.flex.justify-cont-s-b.align-items-c.w-100-p.p-l-20.p-r-20
+      [:img.orcpub-logo {:src "image/orcpub-logo.svg"}]
+      (let [user-data @(subscribe [:user-data])]
+        (if user-data
+          [:div.white.f-w-b.pointer
+           [:span.m-r-5 (-> user-data :user :orcpub.user/username)]
+           #_[:i.fa.fa-caret-down]
+           [:span.orange.underline
+            {:on-click (fn [] (dispatch [:logout]))}
+            "log out"]]
+          [:div.flex.align-items-c.pointer
+           [views5e/login-form]
+           [:span.orange.underline.f-w-b.m-l-5
+            {:on-click (fn [_] (dispatch [:route [:register]]))}
+           "REGISTER"]]))]]]
    [:div.container.header-links
     [:div.content
      [:div

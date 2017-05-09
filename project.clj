@@ -36,6 +36,7 @@
                  [org.clojure/data.json "0.2.6"]
                  [org.slf4j/slf4j-simple "1.7.21"]
                  [buddy/buddy-auth "1.4.1"]
+                 [buddy/buddy-hashers "1.2.0"]
                  [bidi "2.0.17"]
 
                  [com.datomic/datomic-pro "0.9.5561"]
