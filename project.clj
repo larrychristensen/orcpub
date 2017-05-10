@@ -39,6 +39,8 @@
                  [com.google.guava/guava "19.0"]
 
                  [com.datomic/datomic-pro "0.9.5561"]
+                 [com.amazonaws/aws-java-sdk-dynamodb "1.11.6"]
+                 [com.fasterxml.jackson.core/jackson-databind "2.7.0"]
                  #_[com.datomic/clj-client "0.8.606"]
 
                  #_[clj-http "2.3.0"]
