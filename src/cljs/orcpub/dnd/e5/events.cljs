@@ -98,7 +98,8 @@
            :image-url
            image-url
            :image-url-failed
-           nil)))
+           (if (s/starts-with? image-url "https")
+             :https))))
 
 (reg-event-db
  :set-faction-image-url
@@ -110,7 +111,8 @@
            :faction-image-url
            faction-image-url
            :faction-image-url-failed
-           nil)))
+           (if (s/starts-with? faction-image-url "https")
+             :https))))
 
 (def custom-equipment-path [::entity/values :custom-equipment])
 

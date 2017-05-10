@@ -315,6 +315,8 @@
   (str (name value)
        (if qualifier (str " (" qualifier ")"))))
 
+(def no-https-images "Sorry, we don't currently support images that start with https")
+
 (defn character-display []
   (let [built-char @(subscribe [:built-character])
         race (char5e/race built-char)
@@ -392,13 +394,17 @@
        [:div.flex
         [:div.w-50-p
          (if image-url-failed
-           [:div.p-10.red.f-s-18 (str "Image could not be loaded, please check the URL and try again")]
-           [:img.character-image.w-100-p.m-b-20 {:src (or image-url "image/barbarian.png")
+           [:div.p-10.red.f-s-18 (str (if (= :https image-url-failed)
+                                        no-https-images
+                                        "Image could not be loaded, please check the URL and try again"))]
+           [:img.character-image.w-100-p.m-b-20 {:src (if (not (s/blank? image-url)) image-url "image/barbarian.png")
                                                  :on-error (fn [_] (dispatch [:failed-loading-image image-url]))
                                                  :on-load (fn [_] (if image-url-failed (dispatch [:loaded-image])))}])
          (if faction-image-url-failed
-           [:div.p-10.red.f-s-18 (str "Faction image could not be loaded, please check the URL and try again")]
-           (if faction-image-url
+           [:div.p-10.red.f-s-18 (str (if (= :https faction-image-url-failed)
+                                        no-https-images
+                                        "Faction image could not be loaded, please check the URL and try again"))]
+           (if (not (s/blank? faction-image-url))
              [:div.p-30 [:img.character-image.w-100-p.m-b-20 {:src faction-image-url
                                                     :on-error (fn [_] (dispatch [:failed-loading-faction-image faction-image-url]))
                                                     :on-load (fn [_] (if faction-image-url-failed (dispatch [:loaded-faction-image])))}]]))]
