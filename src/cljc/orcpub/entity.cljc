@@ -221,7 +221,7 @@
 (defn get-all-selections-aux [path {:keys [::t/ref ::t/key ::t/selections ::t/options] :as obj} parent selected-option-paths]
   (let [children (map
                   (fn [{:keys [::t/key] :as s}]
-                    (let [child-path (conj path key)]
+                    (let [child-path (conj (or ref path) key)]
                       (get-all-selections-aux child-path
                                               s
                                               obj

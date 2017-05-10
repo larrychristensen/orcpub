@@ -1128,7 +1128,7 @@
 
 (defn total-levels-option-prereq [level & [class-key]]
   (t/option-prereq
-   (str "You have at least " level " " (name class-key) " levels")
+   (str "You must have at least " level " " (name class-key) " levels")
    (total-levels-prereq level class-key)))
 
 (defn add-mod-total-levels-prereq [lvl cls modifier]
@@ -5663,7 +5663,7 @@ long rest."})]
   (t/selection-cfg
    (merge
     {:name "Feats"
-     :ref :feats
+     :ref [:feats]
      :tags #{:feats}
      :multiselect? true}
     cfg)))

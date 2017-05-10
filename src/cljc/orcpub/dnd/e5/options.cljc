@@ -663,7 +663,7 @@
      (fn [lang]
        (language-option lang))
      langs)
-    :ref :languages
+    :ref [:languages]
     :multiselect? true
     :tags #{:profs :language-profs}
     :min num
@@ -699,7 +699,7 @@
      :min num
      :max num
      :multiselect? true
-     :ref :skill-profs
+     :ref [:skill-profs]
      :tags #{:skill-profs :profs}
      :prereq-fn prereq-fn})))
 
@@ -1268,7 +1268,7 @@
     :options feat-options
     :multiselect? true
     :tags #{:feats}
-    :ref :feats
+    :ref [:feats]
     :min num
     :max num}))
 
@@ -1302,7 +1302,7 @@
     :min num
     :max num
     :multiselect? true
-    :ref :skill-expertise
+    :ref [:skill-expertise]
     :tags #{:profs :expertise}}))
 
 (def rogue-expertise-selection
