@@ -601,6 +601,7 @@
    :abilities {:cha 2}
    :size :medium
    :speed 30
+   :darkvision 60
    :languages ["Common" "Elvish"]
    :selections [(opt5e/ability-increase-selection (disj (set char5e/ability-keys) :cha) 2 true)
                 (opt5e/skill-selection 2)
