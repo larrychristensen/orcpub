@@ -1012,11 +1012,14 @@
                              :max max
                              :min min
                              :remaining remaining
-                             :body (if (and ui-fns (ui-fns (or ref key)))
-                                     ((ui-fns (or ref key))
-                                      {:character character
-                                       :selection selection
-                                       :built-char built-char})
+                             :body (if (and ui-fns (or (ui-fns ref)
+                                                       (ui-fns key)))
+                                     (let [ui-fn (or (ui-fns ref)
+                                                       (ui-fns key))]                                     
+                                       (ui-fn
+                                        {:character character
+                                         :selection selection
+                                         :built-char built-char}))
                                      (doall
                                       (map-indexed
                                        (fn [i option]
@@ -1419,7 +1422,7 @@
 
 (defn skills-selector [{:keys [character selection built-char]}]
   (let [{:keys [::t/ref ::t/max ::t/options]} selection
-        path [::entity/options ref]
+        path (concat [::entity/options] ref)
         selected-skills (get-in character path)
         selected-count (count selected-skills)
         remaining (- max selected-count)
@@ -1638,7 +1641,7 @@
    {:name "Proficiencies"
     :icon "juggler"
     :tags #{:profs}
-    :ui-fns [{:key :skill-profs :ui-fn skills-selector}]}
+    :ui-fns [{:key :skill-proficiency :ui-fn skills-selector}]}
    {:name "Equipment"
     :icon "backpack"
     :tags #{:equipment :starting-equipment}
@@ -1671,12 +1674,18 @@
 
 (defn matches-group-fn [key]
   (fn [{s-key ::t/key tags ::t/tags}]
-    (or (= key s-key)
-        (get tags key))))
+    (let [v (or (= key s-key)
+                (get tags key))]
+      (prn "MATCHES GROUP FN" key)
+      v)))
 
 (defn matches-non-group-fn [key]
-  #(if (or (= (::t/key %) key)
-           (= (::t/ref %) key)) %))
+  (fn [{s-key ::t/key ref ::t/ref :as s}]
+    (let [v (if (or (= s-key key)
+                    (= ref [key]))
+              s)]
+      (prn "MATCHES NON GROUP FN " (if v s-key))
+      v)))
 
 (defn option-sources []
   (let [expanded? (r/atom false)]
@@ -1778,6 +1787,8 @@
                                     final-selections)]))
                               ui-fns)
             non-ui-fn-selections (sets/difference (set final-selections) (set ui-fn-selections))]
+        (prn "UI-SELECTIONS" (map ::t/key ui-fn-selections))
+        (prn "NON-UI-SELECTIONS" (map ::t/key non-ui-fn-selections))
         [:div.p-5
          [:div
           (doall
@@ -1807,6 +1818,7 @@
                 ^{:key (::entity/path selection)}
                 [:div (selection-section character built-char built-template option-paths nil selection)])
               (into (sorted-set-by compare-selections) non-ui-fn-selections)))])])]]))
+
 
 (defn random-sequential-selection [built-template character {:keys [::t/min ::t/max ::t/options ::entity/path] :as selection}]
   (let [num (inc (rand-int (count options)))

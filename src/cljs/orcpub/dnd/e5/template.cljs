@@ -3121,34 +3121,34 @@
    :beast [:giant-elk :giant-eagle :giant-owl]
    :celestial opt5e/language-keys
    :construct [:modron]
-   :dragon [:aquan :common :draconic :sylvan]
+   :dragon [:aquan :draconic :sylvan]
    :elemental [:auran :terran :ignan :aquan]
-   :fey [:common :draconic :elvish :sylvan :abyssal :infernal :primoridial :aquan :giant]
+   :fey [:draconic :elvish :sylvan :abyssal :infernal :primoridial :aquan :giant]
    :fiend opt5e/language-keys
-   :giant [:giant :orc :undercommon :common]
-   :monstrosity [:common :draconic :sylvan :elvish :hook-horror :abyssal :celestial :infernal :primordial :aquan :sphynx :umber-hulk :yeti :winter-wolf :goblin :worg]
+   :giant [:giant :orc :undercommon]
+   :monstrosity [:draconic :sylvan :elvish :hook-horror :abyssal :celestial :infernal :primordial :aquan :sphynx :umber-hulk :yeti :winter-wolf :goblin :worg]
    :ooze []
-   :plant [:common :druidic :elvish :sylvan]
+   :plant [:druidic :elvish :sylvan]
    :undead opt5e/language-keys})
 
 (def humanoid-enemies
-  {:bugbear [:common :goblin]
+  {:bugbear [:goblin]
    :bullywug [:bullywug]
    :githyanki [:gith]
    :gitzerai [:gith]
    :gnoll [:gnoll :abyssal]
-   :goblin [:common :goblin]
+   :goblin [:goblin]
    :grimlock [:undercommon]
-   :hobgoblin [:common :goblin]
-   :kobold [:common :draconic]
+   :hobgoblin [:goblin]
+   :kobold [:draconic]
    :koa-toa [:undercommon]
    :lizardfolk [:draconic :abyssal]
-   :merfolk [:aquan :common]
-   :orc [:common :orc]
+   :merfolk [:aquan]
+   :orc [:orc]
    :thri-kreen [:thri-kreen]
    :troglodyte [:troglodyte]
    :yuan-ti-pureblood {:name "Yuan-Ti Pureblood"
-                       :languages [:abyssal :common :draconic]}})
+                       :languages [:abyssal :draconic]}})
 
 (defn favored-enemy-option [[enemy-type info]]
   (let [vec-info? (sequential? info)
@@ -3156,13 +3156,18 @@
         name (if vec-info? (common/kw-to-name enemy-type) (:name info))]
     (t/option-cfg
      {:name name
-      :selections [(opt5e/language-selection
-                    (map
-                     (fn [lang]
-                       (or (opt5e/language-map lang) {:key lang :name (s/capitalize (common/kw-to-name lang))}))
-                     languages)
-                    1)]
-      :modifiers [(mod/set-mod ?ranger-favored-enemies enemy-type)]})))
+      :selections (if (> 1 (count languages))
+                    [(opt5e/language-selection
+                      (map
+                       (fn [lang]
+                         (or (opt5e/language-map lang) {:key lang :name (s/capitalize (common/kw-to-name lang))}))
+                       languages)
+                      1)])
+      :modifiers (remove
+                  nil?
+                  [(if (= 1 (count languages))
+                     (mod5e/language (first languages)))
+                   (mod/set-mod ?ranger-favored-enemies enemy-type)])})))
 
 (defn favored-enemy-selection [order]
   (t/selection-cfg
