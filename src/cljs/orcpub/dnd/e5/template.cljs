@@ -3691,7 +3691,8 @@
     :subclass-title "Sorcerous Origin"
     :subclass-level 1
     :subclasses [{:name "Draconic Bloodline"
-                  :modifiers [(mod/modifier ?hit-point-level-bonus (+ 1 ?hit-point-level-bonus))]
+                  :modifiers [(mod/modifier ?hit-point-level-bonus (+ 1 ?hit-point-level-bonus))
+                              (mod5e/language :draconic)]
                   :selections [(t/selection-cfg
                                 {:name "Draconic Ancestry Type"
                                  :tags #{:class}
@@ -6270,6 +6271,18 @@ long rest."})]
                                  cfg)]})))
               psionic-talents)}))
 
+(defn psionic-discipline [name page summary type]
+  (let [trait-fn (case type
+                   :trait mod5e/trait-cfg
+                   :action mod5e/action
+                   :reaction mod5e/reaction
+                   :bonus-action mod5e/bonus-action)]
+    (trait-fn
+     {:name name
+      :page page
+      :source ua-mystic-kw
+      :summary summary})))
+
 (def psionic-disciplines
   [{:name "Adaptive Body"
     :mystic-order :immortal
@@ -7605,6 +7618,39 @@ long rest."})]
               (if filter-fn
                 (filter filter-fn psionic-disciplines)
                 psionic-disciplines))}))
+
+(def ua-trio-of-subclasses-kw :ua-trio-of-subclasses)
+
+(def ua-trio-of-subclasses-classes
+  [{:name "Monk"
+    :subclass-level 3
+    :subclass-title "Monastic Tradition"
+    :source ua-trio-of-subclasses-kw
+    :plugin? true
+    :subclasses [{:name "Way of the Drunken Master"
+                  :modifiers [ua-al-illegal
+                              (mod5e/skill-proficiency :performance)
+                              (mod5e/trait-cfg
+                               {:name "Drunken Technique"
+                                :page 1
+                                :source ua-trio-of-subclasses-kw
+                                :summary "When you use Flurry of Blows, you can Disengage and walking speed increases by 10 ft."})]
+                  :levels {6 {:modifiers [(mod5e/reaction
+                                           {:name "Tipsy Sway"
+                                            :page 1
+                                            :source ua-trio-of-subclasses-kw
+                                            :frequency {:units :rest}
+                                            :summary "When an enemy misses you with melee attack you can have the attack hit another creature within 5 ft. of you"})]}
+                           11 {:modifiers [(mod5e/trait-cfg
+                                           {:name "Drunkard's Luck"
+                                            :page 1
+                                            :source ua-trio-of-subclasses-kw
+                                            :summary "when you make a save, you may spend a ki to gain advantage on the roll"})]}
+                           17 {:modifiers [(mod5e/trait-cfg
+                                            {:name "Intoxicated Frenzy"
+                                             :page 1
+                                             :source ua-trio-of-subclasses-kw
+                                             :summary "When you use Flurry of Blows, you can make 3 additional attacks if each attack targets a different creature"})]}}}]}])
 
 (def ua-revised-subclasses-kw :ua-revised-subclasses)
 
