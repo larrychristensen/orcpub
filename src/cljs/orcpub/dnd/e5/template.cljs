@@ -5799,6 +5799,18 @@ long rest."})]
                (mod5e/spells-known 1 :hellish-rebuke :cha "Tiefling" 3)
                (mod5e/spells-known 2 :darkness :cha "Tiefling" 5)]})
 
+(def scag-halfling-option-cfg
+  {:name "Halfling"
+   :subraces
+   [{:name "Ghostwise"
+     :abilities {:wis 1}
+     :source :scag
+     :traits [{:name "Silent Speech"
+               :source :scag
+               :page 110
+               :range ft-30
+               :summary "Speak telepathically to 1 creature who understands your language"}]}]})
+
 (def sword-coast-adventurers-guide-selections
   [(background-selection
     {:options (map
@@ -5808,7 +5820,8 @@ long rest."})]
     {:options (map
                (fn [race] (race-option (assoc race :source :scag)))
                [scag-half-elf-option-cfg
-                scag-tiefling-option-cfg])})
+                scag-tiefling-option-cfg
+                scag-halfling-option-cfg])})
    (class-selection
     {:options (map
                (fn [cfg] (class-option (assoc cfg :plugin? true :source :scag)))

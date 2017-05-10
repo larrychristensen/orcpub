@@ -82,7 +82,14 @@
     :min-str 15,
     :stealth-disadvantage? true,
     :weight 65,
-    :key :plate}])
+    :key :plate}
+   {:name "Spiked Armor"
+    :type :medium
+    :base-ac 14
+    :max-dex-mod 2
+    :weight 45
+    :stealth-disadvantage? true
+    :key :spiked-armor}])
 
 (def armor-map
   (zipmap (map :key armor) armor))
