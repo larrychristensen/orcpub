@@ -2700,191 +2700,197 @@
    :level level
    :summary "when you succeed on a DEX save to take half damage, you take none, if you fail, you take half"})
 
+(def monk-base-cfg
+  {:name "Monk"
+   :subclass-level 3
+   :subclass-title "Monastic Tradition"})
+
 (def monk-option
   (class-option
-   {:name "Monk"
-    :hit-die 8
-    :ability-increase-levels [4 8 12 16 19]
-    :unarmored-abilities [:wis]
-    :profs {:armor {:light true}
-            :weapon {:simple false :shortsword false}
-            :save {:dex true :str true}
-            :tool-options {:musical-instrument 1 :artisans-tool 1}
-            :skill-options {:choose 2 :options {:acrobatics true :athletics true :history true :insight true :religion true :stealth true}}}
-    :multiclass-prereqs [(t/option-prereq "Requires Wisdom 13 and Dexterity 13"
-                                          (fn [c]
-                                            (let [abilities (es/entity-val c :abilities)]
-                                              (and (>= (:wis abilities) 13)
-                                                  (>= (:dex abilities) 13)))))]
-    :equipment-choices [{:name "Equipment Pack"
-                         :options {:dungeoneers-pack 1
-                                   :explorers-pack 1}}]
-    :weapon-choices [{:name "Weapon"
-                      :options {:shortsword 1
-                                :simple 1}}]
-    :modifiers [(mod/vec-mod ?unarmored-defense :monk)
-                (mod/cum-sum-mod ?unarmored-ac-bonus
-                                 (?ability-bonuses :wis)
-                                 nil
-                                 nil
-                                 [(= :monk (first ?unarmored-defense))])
-                (mod/modifier ?martial-arts-die (mod5e/level-val
-                                                 (?class-level :monk)
-                                                 {5 6
-                                                  11 8
-                                                  17 10
-                                                  :default 4}))
-                (mod5e/attack
-                 {:name "Martial Arts"
-                  :damage-die ?martial-arts-die
-                  :damage-die-count 1
-                  :damage-modifier (max (?ability-bonuses :str) (?ability-bonuses :dex))
-                  :summary "Unarmed strike or monk weapon"})
-                (mod5e/bonus-action
-                 {:name "Martial Arts"
-                  :page 78
-                  :summary "Make an extra unarmed strike when you take Attack action"})]
-    :levels {2 {:modifiers [(mod5e/unarmored-speed-bonus 10)
-                            (mod5e/dependent-trait
-                             {:name "Ki"
-                              :page 78
-                              :level 2
-                              :summary (str "You have " (?class-level :monk) " ki points")})
-                            (mod5e/bonus-action
-                             {:name "Flurry of Blows"
-                              :page 78
-                              :level 2
-                              :summary "After you take Attack action, spend 1 ki to make 2 unarmed strikes"})
-                            (mod5e/bonus-action
-                             {:name "Patient Defense"
-                              :page 78
-                              :summary "Spend 1 ki point to take the Dodge action"})
-                            (mod5e/bonus-action
-                             {:name "Step of the Wind"
-                              :page 78
-                              :summary "Spend 1 ki point to take the Disengage or Dash action and jump distance is doubled for the turn"})]}
-             3 {:modifiers [(mod5e/reaction
-                             {:name "Deflect Missiles"
-                              :page 78
-                              :summary (str "When hit by a ranged attack, reduce the damage by 1d10 " (common/mod-str (+ (?ability-bonuses :dex) (?class-level :monk))) ". If you reduce it to 0, you can catch the missile and use it in a ranged attack as a monk weapon with range 20/60")})]}
-             4 {:modifiers [(mod5e/reaction
-                             {:name "Slow Fall"
-                              :page 78
-                             :level 4
-                             :summary (str "reduce falling damage by " (* 5  (?class-level :monk)))})]}
-             5 {:modifiers [(mod5e/extra-attack)
-                            (mod5e/dependent-trait
-                             {:name "Stunning Strike"
-                              :page 79
-                              :level 5
-                              :summary (str "when you hit a creature with melee attack, spend 1 ki point to stun the creature if it fails a DC " (?spell-save-dc :wis) " CON save")})]}
-             6 {:modifiers [(mod5e/unarmored-speed-bonus 5)]}
-             7 {:modifiers [(mod5e/action
-                             {:name "Stillness of Mind"
-                              :page 79
-                              :summary "end one effect causing you to be charmed or frightened"})]}
-             10 {:modifiers [(mod5e/damage-immunity :poison)
-                             (mod5e/immunity :disease)
-                             (mod5e/unarmored-speed-bonus 5)]}
-             13 {:modifiers (map
-                             (fn [{:keys [name key]}]
-                               (mod5e/language key))
-                             opt5e/languages)}
-             14 {:modifiers [(mod5e/saving-throws char5e/ability-keys)
-                             (mod5e/unarmored-speed-bonus 5)]}
-             18 {:modifiers [(mod5e/unarmored-speed-bonus 5)
-                             (mod5e/action
-                              {:name "Empty Body: Invisibility"
-                               :level 18
+   (merge
+    
+    {:name "Monk"
+     :hit-die 8
+     :ability-increase-levels [4 8 12 16 19]
+     :unarmored-abilities [:wis]
+     :profs {:weapon {:simple false :shortsword false}
+             :save {:dex true :str true}
+             :tool-options {:musical-instrument 1 :artisans-tool 1}
+             :skill-options {:choose 2 :options {:acrobatics true :athletics true :history true :insight true :religion true :stealth true}}}
+     :multiclass-prereqs [(t/option-prereq "Requires Wisdom 13 and Dexterity 13"
+                                           (fn [c]
+                                             (let [abilities (es/entity-val c :abilities)]
+                                               (and (>= (:wis abilities) 13)
+                                                    (>= (:dex abilities) 13)))))]
+     :equipment-choices [{:name "Equipment Pack"
+                          :options {:dungeoneers-pack 1
+                                    :explorers-pack 1}}]
+     :weapon-choices [{:name "Weapon"
+                       :options {:shortsword 1
+                                 :simple 1}}]
+     :modifiers [(mod/vec-mod ?unarmored-defense :monk)
+                 (mod/cum-sum-mod ?unarmored-ac-bonus
+                                  (?ability-bonuses :wis)
+                                  nil
+                                  nil
+                                  [(= :monk (first ?unarmored-defense))])
+                 (mod/modifier ?martial-arts-die (mod5e/level-val
+                                                  (?class-level :monk)
+                                                  {5 6
+                                                   11 8
+                                                   17 10
+                                                   :default 4}))
+                 (mod5e/attack
+                  {:name "Martial Arts"
+                   :damage-die ?martial-arts-die
+                   :damage-die-count 1
+                   :damage-modifier (max (?ability-bonuses :str) (?ability-bonuses :dex))
+                   :summary "Unarmed strike or monk weapon"})
+                 (mod5e/bonus-action
+                  {:name "Martial Arts"
+                   :page 78
+                   :summary "Make an extra unarmed strike when you take Attack action"})]
+     :levels {2 {:modifiers [(mod5e/unarmored-speed-bonus 10)
+                             (mod5e/dependent-trait
+                              {:name "Ki"
+                               :page 78
+                               :level 2
+                               :summary (str "You have " (?class-level :monk) " ki points")})
+                             (mod5e/bonus-action
+                              {:name "Flurry of Blows"
+                               :page 78
+                               :level 2
+                               :summary "After you take Attack action, spend 1 ki to make 2 unarmed strikes"})
+                             (mod5e/bonus-action
+                              {:name "Patient Defense"
+                               :page 78
+                               :summary "Spend 1 ki point to take the Dodge action"})
+                             (mod5e/bonus-action
+                              {:name "Step of the Wind"
+                               :page 78
+                               :summary "Spend 1 ki point to take the Disengage or Dash action and jump distance is doubled for the turn"})]}
+              3 {:modifiers [(mod5e/reaction
+                              {:name "Deflect Missiles"
+                               :page 78
+                               :summary (str "When hit by a ranged attack, reduce the damage by 1d10 " (common/mod-str (+ (?ability-bonuses :dex) (?class-level :monk))) ". If you reduce it to 0, you can catch the missile and use it in a ranged attack as a monk weapon with range 20/60")})]}
+              4 {:modifiers [(mod5e/reaction
+                              {:name "Slow Fall"
+                               :page 78
+                               :level 4
+                               :summary (str "reduce falling damage by " (* 5  (?class-level :monk)))})]}
+              5 {:modifiers [(mod5e/extra-attack)
+                             (mod5e/dependent-trait
+                              {:name "Stunning Strike"
                                :page 79
-                               :duration minutes-1
-                               :summary "spend 4 ki points to become invisible and have resistance to all damage but force damage"})
-                             (mod5e/action
-                              {:name "Empty Body: Astral Projection"
+                               :level 5
+                               :summary (str "when you hit a creature with melee attack, spend 1 ki point to stun the creature if it fails a DC " (?spell-save-dc :wis) " CON save")})]}
+              6 {:modifiers [(mod5e/unarmored-speed-bonus 5)]}
+              7 {:modifiers [(mod5e/action
+                              {:name "Stillness of Mind"
                                :page 79
-                               :level 18
-                               :summary "use 8 ki points to cast the astral projection spell"})]}}
-    :weapons {:dart 10}
-    :traits [{:name "Ki-Empowered Strikes"
-              :page 79
-              :level 6
-              :summary "your unarmed strikes count as magical"}
-             (evasion 7 79)
-             {:name "Tongue of the Sun and Moon"
-              :page 79
-              :level 13
-              :summary "you understand all languages and can communicate with any creature that can understand a language"}
-             {:name "Diamond Soul"
-              :level 14
-              :page 79
-              :summary "you are proficient in all saves. You can spend 1 ki point to reroll failed saves."}
-             {:name "Timeless Body"
-              :page 79
-              :level 15
-              :summary "you can't be aged magically and you need no food or water"}
-             
-             {:name "Perfect Self"
-              :page 79
-              :level 20
-              :summary "regain 4 ki when you have none and roll initiative"}]
-    :subclass-level 3
-    :subclass-title "Monastic Tradition"
-    :subclasses [{:name "Way of the Open Hand"
-                  :modifiers [(mod5e/dependent-trait
-                               {:name "Open Hand Technique"
-                                :page 79
-                                :summary (str "when you hit with Flurry of Blows, you impose one of the effects on the target: 1) must make a DC "(?spell-save-dc :wis) " DEX save or be knocked prone. 2) make a DC " (?spell-save-dc :wis) " STR save or be pushed 15 ft. 3) can't take reactions until end of your next turn")})]
-                  :levels {6 {:modifiers [(mod5e/action
-                                           {:name "Wholeness of Body"
-                                            :page 79
-                                            :level 6
-                                            :frequency long-rests-1
-                                            :summary (str "heal yourself " (* 3 (?class-level :monk)) " HPs")})]}
-                           11 {:modifiers [(mod5e/dependent-trait
-                                            {:name "Tranquility"
-                                             :page 80
-                                             :level 11
-                                             :summary (str "gain effects of sanctuary spell (save DC " (?spell-save-dc :wis) ") between rests")})]}
-                           17 {:modifiers [(mod5e/dependent-trait
-                                            {:name "Quivering Palm"
-                                             :level 17
-                                             :page 80
-                                             :summary (str "when you hit a creature with unarmed strike, set up vibrations that last " (?class-level :monk) " days. Use an action to end the vibrations, reducing the target to 0 HPs on failed DC " (?spell-save-dc :wis) " CON save. It takes 10d10 necrotic damage on successful save.")})]}}}
-                 {:name "Way of Shadow"
-                  :modifiers [(mod5e/spells-known 0 :minor-illusion :wis "Monk (Way of Shadow)")
+                               :summary "end one effect causing you to be charmed or frightened"})]}
+              10 {:modifiers [(mod5e/damage-immunity :poison)
+                              (mod5e/immunity :disease)
+                              (mod5e/unarmored-speed-bonus 5)]}
+              13 {:modifiers (map
+                              (fn [{:keys [name key]}]
+                                (mod5e/language key))
+                              opt5e/languages)}
+              14 {:modifiers [(mod5e/saving-throws char5e/ability-keys)
+                              (mod5e/unarmored-speed-bonus 5)]}
+              18 {:modifiers [(mod5e/unarmored-speed-bonus 5)
                               (mod5e/action
-                               {:name "Shadow Arts"
-                                :page 80
-                                :summary "spend 2 ki to cast 'darkness', 'darkvision', 'pass without trace', or 'silence' spell"})]
-                  :levels {6 {:modfifiers [(mod5e/bonus-action
-                                            {:name "Shadow Step"
-                                             :page 80
-                                             :summary "teleport 60 ft. and gain advantage on first melee attack before end of turn"})]}
-                           11 {:modifiers [(mod5e/action
-                                            {:name "Cloak of Shadows"
-                                             :level 11
-                                             :page 80
-                                             :summary "become invisible"})]}
-                           17 {:modifiers [(mod5e/reaction
-                                            {:name "Opportunist"
-                                             :page 80
-                                             :level 17
-                                             :summary "when a creature within 5 ft. is hit by attack from someone else, make a melee attack"})]}}}
-                 {:name "Way of the Four Elements"
-                  :modifiers [(mod5e/dependent-trait
-                               {:name "Disciple of the Elements"
-                                :page 80
-                                :summary (str "You learn elemental disciplines with spell save DC " (?spell-save-dc :wis) "."
-                                              (if (>= (?class-level :monk) 5)
-                                                (str " You can increase the level of elemental discipline spells you cast by 1 for each additional ki point you spend, up to " (mod5e/level-val (?class-level :monk)
-                            {9 4 13 5 17 6 :default 3}))))})]
-                  :levels {3 {:selections [(opt5e/monk-elemental-disciplines)]}
-                           6 {:selections [(opt5e/monk-elemental-disciplines)]}
-                           11 {:selections [(opt5e/monk-elemental-disciplines)]}
-                           17 {:selections [(opt5e/monk-elemental-disciplines)]}}
-                  :traits [{:name "Elemental Attunement"
-                            :page 81
-                            :summary "create minor elemental effect"}]}]}))
+                               {:name "Empty Body: Invisibility"
+                                :level 18
+                                :page 79
+                                :duration minutes-1
+                                :summary "spend 4 ki points to become invisible and have resistance to all damage but force damage"})
+                              (mod5e/action
+                               {:name "Empty Body: Astral Projection"
+                                :page 79
+                                :level 18
+                                :summary "use 8 ki points to cast the astral projection spell"})]}}
+     :weapons {:dart 10}
+     :traits [{:name "Ki-Empowered Strikes"
+               :page 79
+               :level 6
+               :summary "your unarmed strikes count as magical"}
+              (evasion 7 79)
+              {:name "Tongue of the Sun and Moon"
+               :page 79
+               :level 13
+               :summary "you understand all languages and can communicate with any creature that can understand a language"}
+              {:name "Diamond Soul"
+               :level 14
+               :page 79
+               :summary "you are proficient in all saves. You can spend 1 ki point to reroll failed saves."}
+              {:name "Timeless Body"
+               :page 79
+               :level 15
+               :summary "you can't be aged magically and you need no food or water"}
+             
+              {:name "Perfect Self"
+               :page 79
+               :level 20
+               :summary "regain 4 ki when you have none and roll initiative"}]
+     :subclass-level 3
+     :subclass-title "Monastic Tradition"
+     :subclasses [{:name "Way of the Open Hand"
+                   :modifiers [(mod5e/dependent-trait
+                                {:name "Open Hand Technique"
+                                 :page 79
+                                 :summary (str "when you hit with Flurry of Blows, you impose one of the effects on the target: 1) must make a DC "(?spell-save-dc :wis) " DEX save or be knocked prone. 2) make a DC " (?spell-save-dc :wis) " STR save or be pushed 15 ft. 3) can't take reactions until end of your next turn")})]
+                   :levels {6 {:modifiers [(mod5e/action
+                                            {:name "Wholeness of Body"
+                                             :page 79
+                                             :level 6
+                                             :frequency long-rests-1
+                                             :summary (str "heal yourself " (* 3 (?class-level :monk)) " HPs")})]}
+                            11 {:modifiers [(mod5e/dependent-trait
+                                             {:name "Tranquility"
+                                              :page 80
+                                              :level 11
+                                              :summary (str "gain effects of sanctuary spell (save DC " (?spell-save-dc :wis) ") between rests")})]}
+                            17 {:modifiers [(mod5e/dependent-trait
+                                             {:name "Quivering Palm"
+                                              :level 17
+                                              :page 80
+                                              :summary (str "when you hit a creature with unarmed strike, set up vibrations that last " (?class-level :monk) " days. Use an action to end the vibrations, reducing the target to 0 HPs on failed DC " (?spell-save-dc :wis) " CON save. It takes 10d10 necrotic damage on successful save.")})]}}}
+                  {:name "Way of Shadow"
+                   :modifiers [(mod5e/spells-known 0 :minor-illusion :wis "Monk (Way of Shadow)")
+                               (mod5e/action
+                                {:name "Shadow Arts"
+                                 :page 80
+                                 :summary "spend 2 ki to cast 'darkness', 'darkvision', 'pass without trace', or 'silence' spell"})]
+                   :levels {6 {:modfifiers [(mod5e/bonus-action
+                                             {:name "Shadow Step"
+                                              :page 80
+                                              :summary "teleport 60 ft. and gain advantage on first melee attack before end of turn"})]}
+                            11 {:modifiers [(mod5e/action
+                                             {:name "Cloak of Shadows"
+                                              :level 11
+                                              :page 80
+                                              :summary "become invisible"})]}
+                            17 {:modifiers [(mod5e/reaction
+                                             {:name "Opportunist"
+                                              :page 80
+                                              :level 17
+                                              :summary "when a creature within 5 ft. is hit by attack from someone else, make a melee attack"})]}}}
+                  {:name "Way of the Four Elements"
+                   :modifiers [(mod5e/dependent-trait
+                                {:name "Disciple of the Elements"
+                                 :page 80
+                                 :summary (str "You learn elemental disciplines with spell save DC " (?spell-save-dc :wis) "."
+                                               (if (>= (?class-level :monk) 5)
+                                                 (str " You can increase the level of elemental discipline spells you cast by 1 for each additional ki point you spend, up to " (mod5e/level-val (?class-level :monk)
+                                                                                                                                                                                                 {9 4 13 5 17 6 :default 3}))))})]
+                   :levels {3 {:selections [(opt5e/monk-elemental-disciplines)]}
+                            6 {:selections [(opt5e/monk-elemental-disciplines)]}
+                            11 {:selections [(opt5e/monk-elemental-disciplines)]}
+                            17 {:selections [(opt5e/monk-elemental-disciplines)]}}
+                   :traits [{:name "Elemental Attunement"
+                             :page 81
+                             :summary "create minor elemental effect"}]}]})))
 
 (defn paladin-spell [spell-level key min-level]
   (mod5e/spells-known spell-level key :wis "Paladin" min-level nil :paladin))
