@@ -33,6 +33,7 @@
                  [org.slf4j/slf4j-simple "1.7.21"]
                  [buddy/buddy-auth "1.4.1"]
                  [buddy/buddy-hashers "1.2.0"]
+                 [reloaded.repl "0.2.3"]
                  [bidi "2.0.17"]
 
                  [com.stuartsierra/component "0.3.2"]
