@@ -8320,6 +8320,7 @@ long rest."})]
     :source ua-waterborne-kw
     :levels {level {:selections [(opt5e/fighting-style-selection-2
                                   kw
+                                  0
                                   [(t/option-cfg
                                     {:name "Mariner"
                                      :modifiers [ua-al-illegal
