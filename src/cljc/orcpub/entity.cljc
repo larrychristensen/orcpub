@@ -218,28 +218,6 @@
     (sort-by (fn [s] [(or (::t/order s) 1000) (::t/name s)])
              (concat non-ref-selections combined-ref-selections))))
 
-(defn get-all-selections-aux [path {:keys [::t/ref ::t/key ::t/selections ::t/options] :as obj} parent selected-option-paths]
-  (let [children (map
-                  (fn [{:keys [::t/key] :as s}]
-                    (let [child-path (conj (or ref path) key)]
-                      (get-all-selections-aux child-path
-                                              s
-                                              obj
-                                              selected-option-paths)))
-                  (or selections options))]
-    ;; need to filter out duplicated ref options
-    (cond
-      selections
-      (if (get-in selected-option-paths path)
-        children)
-      
-      options
-      (if key
-        (concat
-         [(assoc obj ::path path ::parent parent)]
-         children)
-        children))))
-
 (defn add-child-paths [path ref children]
   (map
    (fn [child]
@@ -284,11 +262,6 @@
 (defn get-all-selections-2 [obj selected-option-paths built-char]
   (remove-disqualified-selections
    (get-all-selections-aux-2 obj selected-option-paths)
-   built-char))
-
-(defn get-all-selections [path obj selected-option-paths built-char]
-  (remove-disqualified-selections
-   (flatten (get-all-selections-aux path obj nil selected-option-paths))
    built-char))
 
 (defn make-path-map-aux [character]
