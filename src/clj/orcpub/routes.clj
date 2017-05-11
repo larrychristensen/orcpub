@@ -76,7 +76,9 @@
 
 (defn login [{:keys [json-params db] :as request}]
   (prn "LOGIN" login)
-  (login-response request))
+  (try
+    (login-response request)
+    (catch Exception e (prn "E" e))))
 
 (defn register [{:keys [json-params db] :as request}]
   (let [{:keys [username email password first-and-last-name]} json-params]
@@ -115,16 +117,18 @@
         form (.getAcroForm catalog)]
     (.setNeedAppearances form true)
     (doseq [[k v] fields]
-      (let [field (.getField form (name k))]
-        (when field
-          (if (and (font-sizes k) flatten)
-            (.setDefaultAppearance field (str "/Helv " (font-sizes k) " Tf 0 0 0 rg")))
-          (.setValue
-           field
-           (cond 
-             (instance? PDCheckBox field) (if v "Yes" "Off")
-             (instance? PDTextField field) (str v)
-             :else nil)))))
+      (try
+        (let [field (.getField form (name k))]
+          (when field
+            (if (and (font-sizes k) flatten)
+              (.setDefaultAppearance field (str "/Helv " (font-sizes k) " Tf 0 0 0 rg")))
+            (.setValue
+             field
+             (cond 
+               (instance? PDCheckBox field) (if v "Yes" "Off")
+               (instance? PDTextField field) (str v)
+               :else nil))))
+        (catch Exception e (prn "failed writing field: " k v (clojure.stacktrace/print-stack-trace e)))))
     (when flatten
       (.setNeedAppearances form false)
       (.flatten form))))
@@ -150,31 +154,32 @@
       [(* r-w (/ i-h i-w)) r-w])))
 
 (defn draw-image! [doc page url x y width height]
-  (let [lower-case-url (s/lower-case url)
-        img (if (or (s/ends-with? lower-case-url "jpg")
-                    (s/ends-with? lower-case-url "jpeg"))
-              (JPEGFactory/createFromStream doc (.openStream (URL. url)))
-              (LosslessFactory/createFromImage doc (ImageIO/read (URL. url))))
-        [scaled-height scaled-width] (scale [height width] [(.getHeight img) (.getWidth img)])
-        c-stream (content-stream doc page)]
-    (doto c-stream
-      (.drawImage
-       img
-       (in-to-coord-x (+ x (if (< scaled-width width)
-                             (/ (- width scaled-width) 2)
-                             0)))
-       (in-to-coord-y (+ height y (if (< scaled-height height)
-                                    (/ (- scaled-height height) 2)
-                                    0)))
-       (in-to-sz scaled-width)
-       (in-to-sz scaled-height))
-      (.close))))
+  (let [lower-case-url (s/lower-case url)]
+    (try
+      (with-open [img (if (or (s/ends-with? lower-case-url "jpg")
+                              (s/ends-with? lower-case-url "jpeg"))
+                        (JPEGFactory/createFromStream doc (.openStream (URL. url)))
+                        (LosslessFactory/createFromImage doc (ImageIO/read (URL. url))))
+                  c-stream (content-stream doc page)]
+        (let [[scaled-height scaled-width] (scale [height width] [(.getHeight img) (.getWidth img)])]
+          (.drawImage
+           c-stream
+           img
+           (in-to-coord-x (+ x (if (< scaled-width width)
+                                 (/ (- width scaled-width) 2)
+                                 0)))
+           (in-to-coord-y (+ height y (if (< scaled-height height)
+                                        (/ (- scaled-height height) 2)
+                                        0)))
+           (in-to-sz scaled-width)
+           (in-to-sz scaled-height))))
+      (catch Exception e (prn "failed loading image" (clojure.stacktrace/print-stack-trace e))))))
 
 (defn get-page [doc index]
   (.getPage doc index))
 
 (defn character-pdf-2 [req]
-  (prn "CHARACTER PDFx" req)
+  (prn "CHARACTER PDFxU" req)
   (let [body-map (io.pedestal.http.route/parse-query-string (slurp (:body req)))
         fields (clojure.edn/read-string (:body body-map))
         {:keys [image-url image-url-failed faction-image-url faction-image-url-failed]} fields
@@ -223,7 +228,9 @@
     (assoc ctx :response {:status 400 :body "A bad one"})
 
     :else
-    (assoc ctx :io.pedestal.interceptor.chain/error ex)))
+    (do
+      (prn "EXCEPTION" ex)
+      (assoc ctx :io.pedestal.interceptor.chain/error ex))))
 
 (def db-interceptor
   {:name :db-interceptor
@@ -235,8 +242,8 @@
 (def routes
   (route/expand-routes
    [[["/" {:get `index}]
-     ["/register" ^:interceptors [(body-params/body-params) db-interceptor]
+     ["/register" ^:interceptors [(body-params/body-params) #_db-interceptor]
       {:post `register}]
-     ["/login" ^:interceptors [(body-params/body-params) db-interceptor]
+     ["/login" ^:interceptors [(body-params/body-params) #_db-interceptor]
       {:post `login}]
      ["/character.pdf" {:post `character-pdf-2}]]]))

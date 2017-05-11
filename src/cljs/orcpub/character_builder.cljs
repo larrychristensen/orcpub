@@ -2117,7 +2117,7 @@
            #_[:i.fa.fa-caret-down]
            [:span.orange.underline
             {:on-click (fn [] (dispatch [:logout]))}
-            "log out"]]
+            "LOG OUT"]]
           [:div.flex.align-items-c.pointer
            [views5e/login-form]
            [:span.orange.underline.f-w-b.m-l-5

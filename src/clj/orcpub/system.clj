@@ -31,18 +31,20 @@
 
 (defn system [env]
   (component/system-map
+   :conn
+   (datomic/new-datomic "datomic:ddb://us-east-1/your-system-name/orcpub?aws_access_key_id=AKIAJH7SDJJ6DM3I3NWA&aws_secret_key=y/coBQvXdF/9jHrWlhDXFtsSginE7OTiENtsBVET")
+   
    :service-map
-   (merge
-    {:env env}
-    prod-service-map
-    (if (= :dev env) dev-service-map-overrides))
+   (cond-> (merge
+            {:env env}
+            prod-service-map
+            (if (= :dev env) dev-service-map-overrides))
+     true http/default-interceptors
+     (= :dev env) http/dev-interceptors)
 
    :pedestal
    (component/using
     (pedestal/new-pedestal)
-    [:service-map])
-
-   :datomic
-   (datomic/new-datomic "datomic:ddb://us-east-1/your-system-name/orcpub?aws_access_key_id=AKIAJH7SDJJ6DM3I3NWA&aws_secret_key=y/coBQvXdF/9jHrWlhDXFtsSginE7OTiENtsBVET")))
+    [:service-map :conn])))
 
 (reloaded.repl/set-init! #(system :prod))
