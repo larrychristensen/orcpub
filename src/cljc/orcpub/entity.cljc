@@ -218,26 +218,40 @@
     (sort-by (fn [s] [(or (::t/order s) 1000) (::t/name s)])
              (concat non-ref-selections combined-ref-selections))))
 
-(defn get-all-selections-aux [path {:keys [::t/ref ::t/key ::t/selections ::t/options] :as obj} parent selected-option-paths]
-  (let [children (map
-                  (fn [{:keys [::t/key] :as s}]
-                    (let [child-path (conj path key)]
-                      (get-all-selections-aux child-path
-                                              s
-                                              obj
-                                              selected-option-paths)))
-                  (or selections options))]
-    (cond
-      selections
-      (if (get-in selected-option-paths path)
-        children)
-      
-      options
-      (if key
-        (concat
-         [(assoc obj ::path path ::parent parent)]
-         children)
-        children))))
+(defn add-child-paths [path ref children]
+  (map
+   (fn [child]
+     (assoc child
+            ::path
+            (vec
+             (conj (or ref path)
+                   (::t/key child)))))
+   children))
+
+(defn get-all-selections-aux-2 [template selected-option-paths]
+  (loop [[current & r] [template]
+         used-ref-option-paths #{}
+         accum-selections []]
+    (if current
+      (let [{:keys [::t/options ::t/selections ::path ::t/ref]} current
+            selection? options
+            children (or options selections)
+            children-with-paths (add-child-paths path ref children)
+            active-children (filter
+                             (fn [{:keys [::path]}]
+                               (or (= current template)
+                                   (not selection?)
+                                   (and (get-in selected-option-paths path)
+                                        (not (used-ref-option-paths path)))))
+                             children-with-paths)]
+        (recur (concat active-children r)
+               (if ref
+                 (union used-ref-option-paths (set (map ::path active-children)))
+                 used-ref-option-paths)
+               (if selection?
+                 (conj accum-selections current)
+                 accum-selections)))
+      accum-selections)))
 
 (defn remove-disqualified-selections [selections built-char]
   (remove #(or (nil? %)
@@ -245,9 +259,9 @@
                  (and prereq-fn (not (prereq-fn built-char)))))
           selections))
 
-(defn get-all-selections [path obj selected-option-paths built-char]
+(defn get-all-selections-2 [obj selected-option-paths built-char]
   (remove-disqualified-selections
-   (flatten (get-all-selections-aux path obj nil selected-option-paths))
+   (get-all-selections-aux-2 obj selected-option-paths)
    built-char))
 
 (defn make-path-map-aux [character]
@@ -265,7 +279,7 @@
 
 (defn available-selections [raw-entity built-entity template]
   (let [path-map (make-path-map raw-entity)
-        all-selections (get-all-selections [] template path-map built-entity)]
+        all-selections (get-all-selections-2 template path-map built-entity)]
     all-selections))
 
 (defn tagged-selections [available-selections tags]
@@ -275,7 +289,7 @@
 
 (defn make-ref-selection-map [raw-entity template]
   (let [path-map (make-path-map raw-entity)
-        all-selections (remove nil? (flatten (get-all-selections-aux [] template nil path-map)))
+        all-selections (remove nil? (flatten (get-all-selections-aux-2 template path-map)))
         by-ref (group-by ::t/ref all-selections)]
     (reduce-kv
      (fn [m ref selections]

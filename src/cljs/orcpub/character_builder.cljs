@@ -36,7 +36,7 @@
             [reagent.core :as r]
             [re-frame.core :refer [subscribe dispatch dispatch-sync]]))
 
-(def print-disabled? true)
+(def print-disabled? false)
 (def print-enabled? (and (not print-disabled?)
                          (s/starts-with? js/window.location.href "http://localhost")))
 
@@ -316,6 +316,8 @@
   (str (name value)
        (if qualifier (str " (" qualifier ")"))))
 
+(def no-https-images "Sorry, we don't currently support images that start with https")
+
 (defn character-display []
   (let [built-char @(subscribe [:built-character])
         race (char5e/race built-char)
@@ -393,13 +395,17 @@
        [:div.flex
         [:div.w-50-p
          (if image-url-failed
-           [:div.p-10.red.f-s-18 (str "Image could not be loaded, please check the URL and try again")]
-           [:img.character-image.w-100-p.m-b-20 {:src (or image-url "image/barbarian.png")
+           [:div.p-10.red.f-s-18 (str (if (= :https image-url-failed)
+                                        no-https-images
+                                        "Image could not be loaded, please check the URL and try again"))]
+           [:img.character-image.w-100-p.m-b-20 {:src (if (not (s/blank? image-url)) image-url "image/barbarian.png")
                                                  :on-error (fn [_] (dispatch [:failed-loading-image image-url]))
                                                  :on-load (fn [_] (if image-url-failed (dispatch [:loaded-image])))}])
          (if faction-image-url-failed
-           [:div.p-10.red.f-s-18 (str "Faction image could not be loaded, please check the URL and try again")]
-           (if faction-image-url
+           [:div.p-10.red.f-s-18 (str (if (= :https faction-image-url-failed)
+                                        no-https-images
+                                        "Faction image could not be loaded, please check the URL and try again"))]
+           (if (not (s/blank? faction-image-url))
              [:div.p-30 [:img.character-image.w-100-p.m-b-20 {:src faction-image-url
                                                     :on-error (fn [_] (dispatch [:failed-loading-faction-image faction-image-url]))
                                                     :on-load (fn [_] (if faction-image-url-failed (dispatch [:loaded-faction-image])))}]]))]
@@ -1007,11 +1013,14 @@
                              :max max
                              :min min
                              :remaining remaining
-                             :body (if (and ui-fns (ui-fns (or ref key)))
-                                     ((ui-fns (or ref key))
-                                      {:character character
-                                       :selection selection
-                                       :built-char built-char})
+                             :body (if (and ui-fns (or (ui-fns ref)
+                                                       (ui-fns key)))
+                                     (let [ui-fn (or (ui-fns ref)
+                                                       (ui-fns key))]                                     
+                                       (ui-fn
+                                        {:character character
+                                         :selection selection
+                                         :built-char built-char}))
                                      (doall
                                       (map-indexed
                                        (fn [i option]
@@ -1414,7 +1423,7 @@
 
 (defn skills-selector [{:keys [character selection built-char]}]
   (let [{:keys [::t/ref ::t/max ::t/options]} selection
-        path [::entity/options ref]
+        path (concat [::entity/options] ref)
         selected-skills (get-in character path)
         selected-count (count selected-skills)
         remaining (- max selected-count)
@@ -1633,7 +1642,7 @@
    {:name "Proficiencies"
     :icon "juggler"
     :tags #{:profs}
-    :ui-fns [{:key :skill-profs :ui-fn skills-selector}]}
+    :ui-fns [{:key :skill-proficiency :ui-fn skills-selector}]}
    {:name "Equipment"
     :icon "backpack"
     :tags #{:equipment :starting-equipment}
@@ -1666,12 +1675,16 @@
 
 (defn matches-group-fn [key]
   (fn [{s-key ::t/key tags ::t/tags}]
-    (or (= key s-key)
-        (get tags key))))
+    (let [v (or (= key s-key)
+                (get tags key))]
+      v)))
 
 (defn matches-non-group-fn [key]
-  #(if (or (= (::t/key %) key)
-           (= (::t/ref %) key)) %))
+  (fn [{s-key ::t/key ref ::t/ref :as s}]
+    (let [v (if (or (= s-key key)
+                    (= ref [key]))
+              s)]
+      v)))
 
 (defn option-sources []
   (let [expanded? (r/atom false)]
@@ -1802,6 +1815,7 @@
                 ^{:key (::entity/path selection)}
                 [:div (selection-section character built-char built-template option-paths nil selection)])
               (into (sorted-set-by compare-selections) non-ui-fn-selections)))])])]]))
+
 
 (defn random-sequential-selection [built-template character {:keys [::t/min ::t/max ::t/options ::entity/path] :as selection}]
   (let [num (inc (rand-int (count options)))

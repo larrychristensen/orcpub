@@ -328,7 +328,6 @@
                          ::entity/options
                          {:levels [{::entity/key :level-1}]}})
         without-starting-equipment (remove-starting-equipment with-new-class :class-starting-equipment?)]
-    #?(:cljs (cljs.pprint/pprint without-starting-equipment))
     (if (zero? class-index)
       (add-associated-options without-starting-equipment associated-options)
       with-new-class)))

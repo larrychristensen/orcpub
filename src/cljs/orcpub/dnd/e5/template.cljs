@@ -25,7 +25,10 @@
 (enable-console-print!)
 
 (def ft-5 {:units :feet
-            :amount 5})
+           :amount 5})
+
+(def ft-10 {:units :feet
+           :amount 10})
 
 (def ft-30 {:units :feet
             :amount 30})
@@ -601,6 +604,7 @@
    :abilities {:cha 2}
    :size :medium
    :speed 30
+   :darkvision 60
    :languages ["Common" "Elvish"]
    :selections [(opt5e/ability-increase-selection (disj (set char5e/ability-keys) :cha) 2 true)
                 (opt5e/skill-selection 2)
@@ -1127,7 +1131,7 @@
 
 (defn total-levels-option-prereq [level & [class-key]]
   (t/option-prereq
-   (str "You have at least " level " " (name class-key) " levels")
+   (str "You must have at least " level " " (name class-key) " levels")
    (total-levels-prereq level class-key)))
 
 (defn add-mod-total-levels-prereq [lvl cls modifier]
@@ -2699,413 +2703,423 @@
    :level level
    :summary "when you succeed on a DEX save to take half damage, you take none, if you fail, you take half"})
 
+(def monk-base-cfg
+  {:name "Monk"
+   :subclass-level 3
+   :subclass-title "Monastic Tradition"})
+
 (def monk-option
   (class-option
-   {:name "Monk"
-    :hit-die 8
-    :ability-increase-levels [4 8 12 16 19]
-    :unarmored-abilities [:wis]
-    :profs {:armor {:light true}
-            :weapon {:simple false :shortsword false}
-            :save {:dex true :str true}
-            :tool-options {:musical-instrument 1 :artisans-tool 1}
-            :skill-options {:choose 2 :options {:acrobatics true :athletics true :history true :insight true :religion true :stealth true}}}
-    :multiclass-prereqs [(t/option-prereq "Requires Wisdom 13 and Dexterity 13"
-                                          (fn [c]
-                                            (let [abilities (es/entity-val c :abilities)]
-                                              (and (>= (:wis abilities) 13)
-                                                  (>= (:dex abilities) 13)))))]
-    :equipment-choices [{:name "Equipment Pack"
-                         :options {:dungeoneers-pack 1
-                                   :explorers-pack 1}}]
-    :weapon-choices [{:name "Weapon"
-                      :options {:shortsword 1
-                                :simple 1}}]
-    :modifiers [(mod/vec-mod ?unarmored-defense :monk)
-                (mod/cum-sum-mod ?unarmored-ac-bonus
-                                 (?ability-bonuses :wis)
-                                 nil
-                                 nil
-                                 [(= :monk (first ?unarmored-defense))])
-                (mod/modifier ?martial-arts-die (mod5e/level-val
-                                                 (?class-level :monk)
-                                                 {5 6
-                                                  11 8
-                                                  17 10
-                                                  :default 4}))
-                (mod5e/attack
-                 {:name "Martial Arts"
-                  :damage-die ?martial-arts-die
-                  :damage-die-count 1
-                  :damage-modifier (max (?ability-bonuses :str) (?ability-bonuses :dex))
-                  :summary "Unarmed strike or monk weapon"})
-                (mod5e/bonus-action
-                 {:name "Martial Arts"
-                  :page 78
-                  :summary "Make an extra unarmed strike when you take Attack action"})]
-    :levels {2 {:modifiers [(mod5e/unarmored-speed-bonus 10)
-                            (mod5e/dependent-trait
-                             {:name "Ki"
-                              :page 78
-                              :level 2
-                              :summary (str "You have " (?class-level :monk) " ki points")})
-                            (mod5e/bonus-action
-                             {:name "Flurry of Blows"
-                              :page 78
-                              :level 2
-                              :summary "After you take Attack action, spend 1 ki to make 2 unarmed strikes"})
-                            (mod5e/bonus-action
-                             {:name "Patient Defense"
-                              :page 78
-                              :summary "Spend 1 ki point to take the Dodge action"})
-                            (mod5e/bonus-action
-                             {:name "Step of the Wind"
-                              :page 78
-                              :summary "Spend 1 ki point to take the Disengage or Dash action and jump distance is doubled for the turn"})]}
-             3 {:modifiers [(mod5e/reaction
-                             {:name "Deflect Missiles"
-                              :page 78
-                              :summary (str "When hit by a ranged attack, reduce the damage by 1d10 " (common/mod-str (+ (?ability-bonuses :dex) (?class-level :monk))) ". If you reduce it to 0, you can catch the missile and use it in a ranged attack as a monk weapon with range 20/60")})]}
-             4 {:modifiers [(mod5e/reaction
-                             {:name "Slow Fall"
-                              :page 78
-                             :level 4
-                             :summary (str "reduce falling damage by " (* 5  (?class-level :monk)))})]}
-             5 {:modifiers [(mod5e/extra-attack)
-                            (mod5e/dependent-trait
-                             {:name "Stunning Strike"
-                              :page 79
-                              :level 5
-                              :summary (str "when you hit a creature with melee attack, spend 1 ki point to stun the creature if it fails a DC " (?spell-save-dc :wis) " CON save")})]}
-             6 {:modifiers [(mod5e/unarmored-speed-bonus 5)]}
-             7 {:modifiers [(mod5e/action
-                             {:name "Stillness of Mind"
-                              :page 79
-                              :summary "end one effect causing you to be charmed or frightened"})]}
-             10 {:modifiers [(mod5e/damage-immunity :poison)
-                             (mod5e/immunity :disease)
-                             (mod5e/unarmored-speed-bonus 5)]}
-             13 {:modifiers (map
-                             (fn [{:keys [name key]}]
-                               (mod5e/language key))
-                             opt5e/languages)}
-             14 {:modifiers [(mod5e/saving-throws char5e/ability-keys)
-                             (mod5e/unarmored-speed-bonus 5)]}
-             18 {:modifiers [(mod5e/unarmored-speed-bonus 5)
-                             (mod5e/action
-                              {:name "Empty Body: Invisibility"
-                               :level 18
+   (merge
+    monk-base-cfg
+    {:hit-die 8
+     :ability-increase-levels [4 8 12 16 19]
+     :unarmored-abilities [:wis]
+     :profs {:weapon {:simple false :shortsword false}
+             :save {:dex true :str true}
+             :tool-options {:musical-instrument 1 :artisans-tool 1}
+             :skill-options {:choose 2 :options {:acrobatics true :athletics true :history true :insight true :religion true :stealth true}}}
+     :multiclass-prereqs [(t/option-prereq "Requires Wisdom 13 and Dexterity 13"
+                                           (fn [c]
+                                             (let [abilities (es/entity-val c :abilities)]
+                                               (and (>= (:wis abilities) 13)
+                                                    (>= (:dex abilities) 13)))))]
+     :equipment-choices [{:name "Equipment Pack"
+                          :options {:dungeoneers-pack 1
+                                    :explorers-pack 1}}]
+     :weapon-choices [{:name "Weapon"
+                       :options {:shortsword 1
+                                 :simple 1}}]
+     :modifiers [(mod/vec-mod ?unarmored-defense :monk)
+                 (mod/cum-sum-mod ?unarmored-ac-bonus
+                                  (?ability-bonuses :wis)
+                                  nil
+                                  nil
+                                  [(= :monk (first ?unarmored-defense))])
+                 (mod/modifier ?martial-arts-die (mod5e/level-val
+                                                  (?class-level :monk)
+                                                  {5 6
+                                                   11 8
+                                                   17 10
+                                                   :default 4}))
+                 (mod5e/attack
+                  {:name "Martial Arts"
+                   :damage-die ?martial-arts-die
+                   :damage-die-count 1
+                   :damage-modifier (max (?ability-bonuses :str) (?ability-bonuses :dex))
+                   :summary "Unarmed strike or monk weapon"})
+                 (mod5e/bonus-action
+                  {:name "Martial Arts"
+                   :page 78
+                   :summary "Make an extra unarmed strike when you take Attack action"})]
+     :levels {2 {:modifiers [(mod5e/unarmored-speed-bonus 10)
+                             (mod5e/dependent-trait
+                              {:name "Ki"
+                               :page 78
+                               :level 2
+                               :summary (str "You have " (?class-level :monk) " ki points")})
+                             (mod5e/bonus-action
+                              {:name "Flurry of Blows"
+                               :page 78
+                               :level 2
+                               :summary "After you take Attack action, spend 1 ki to make 2 unarmed strikes"})
+                             (mod5e/bonus-action
+                              {:name "Patient Defense"
+                               :page 78
+                               :summary "Spend 1 ki point to take the Dodge action"})
+                             (mod5e/bonus-action
+                              {:name "Step of the Wind"
+                               :page 78
+                               :summary "Spend 1 ki point to take the Disengage or Dash action and jump distance is doubled for the turn"})]}
+              3 {:modifiers [(mod5e/reaction
+                              {:name "Deflect Missiles"
+                               :page 78
+                               :summary (str "When hit by a ranged attack, reduce the damage by 1d10 " (common/mod-str (+ (?ability-bonuses :dex) (?class-level :monk))) ". If you reduce it to 0, you can catch the missile and use it in a ranged attack as a monk weapon with range 20/60")})]}
+              4 {:modifiers [(mod5e/reaction
+                              {:name "Slow Fall"
+                               :page 78
+                               :level 4
+                               :summary (str "reduce falling damage by " (* 5  (?class-level :monk)))})]}
+              5 {:modifiers [(mod5e/extra-attack)
+                             (mod5e/dependent-trait
+                              {:name "Stunning Strike"
                                :page 79
-                               :duration minutes-1
-                               :summary "spend 4 ki points to become invisible and have resistance to all damage but force damage"})
-                             (mod5e/action
-                              {:name "Empty Body: Astral Projection"
+                               :level 5
+                               :summary (str "when you hit a creature with melee attack, spend 1 ki point to stun the creature if it fails a DC " (?spell-save-dc :wis) " CON save")})]}
+              6 {:modifiers [(mod5e/unarmored-speed-bonus 5)]}
+              7 {:modifiers [(mod5e/action
+                              {:name "Stillness of Mind"
                                :page 79
-                               :level 18
-                               :summary "use 8 ki points to cast the astral projection spell"})]}}
-    :weapons {:dart 10}
-    :traits [{:name "Ki-Empowered Strikes"
-              :page 79
-              :level 6
-              :summary "your unarmed strikes count as magical"}
-             (evasion 7 79)
-             {:name "Tongue of the Sun and Moon"
-              :page 79
-              :level 13
-              :summary "you understand all languages and can communicate with any creature that can understand a language"}
-             {:name "Diamond Soul"
-              :level 14
-              :page 79
-              :summary "you are proficient in all saves. You can spend 1 ki point to reroll failed saves."}
-             {:name "Timeless Body"
-              :page 79
-              :level 15
-              :summary "you can't be aged magically and you need no food or water"}
-             
-             {:name "Perfect Self"
-              :page 79
-              :level 20
-              :summary "regain 4 ki when you have none and roll initiative"}]
-    :subclass-level 3
-    :subclass-title "Monastic Tradition"
-    :subclasses [{:name "Way of the Open Hand"
-                  :modifiers [(mod5e/dependent-trait
-                               {:name "Open Hand Technique"
-                                :page 79
-                                :summary (str "when you hit with Flurry of Blows, you impose one of the effects on the target: 1) must make a DC "(?spell-save-dc :wis) " DEX save or be knocked prone. 2) make a DC " (?spell-save-dc :wis) " STR save or be pushed 15 ft. 3) can't take reactions until end of your next turn")})]
-                  :levels {6 {:modifiers [(mod5e/action
-                                           {:name "Wholeness of Body"
-                                            :page 79
-                                            :level 6
-                                            :frequency long-rests-1
-                                            :summary (str "heal yourself " (* 3 (?class-level :monk)) " HPs")})]}
-                           11 {:modifiers [(mod5e/dependent-trait
-                                            {:name "Tranquility"
-                                             :page 80
-                                             :level 11
-                                             :summary (str "gain effects of sanctuary spell (save DC " (?spell-save-dc :wis) ") between rests")})]}
-                           17 {:modifiers [(mod5e/dependent-trait
-                                            {:name "Quivering Palm"
-                                             :level 17
-                                             :page 80
-                                             :summary (str "when you hit a creature with unarmed strike, set up vibrations that last " (?class-level :monk) " days. Use an action to end the vibrations, reducing the target to 0 HPs on failed DC " (?spell-save-dc :wis) " CON save. It takes 10d10 necrotic damage on successful save.")})]}}}
-                 {:name "Way of Shadow"
-                  :modifiers [(mod5e/spells-known 0 :minor-illusion :wis "Monk (Way of Shadow)")
+                               :summary "end one effect causing you to be charmed or frightened"})]}
+              10 {:modifiers [(mod5e/damage-immunity :poison)
+                              (mod5e/immunity :disease)
+                              (mod5e/unarmored-speed-bonus 5)]}
+              13 {:modifiers (map
+                              (fn [{:keys [name key]}]
+                                (mod5e/language key))
+                              opt5e/languages)}
+              14 {:modifiers [(mod5e/saving-throws char5e/ability-keys)
+                              (mod5e/unarmored-speed-bonus 5)]}
+              18 {:modifiers [(mod5e/unarmored-speed-bonus 5)
                               (mod5e/action
-                               {:name "Shadow Arts"
-                                :page 80
-                                :summary "spend 2 ki to cast 'darkness', 'darkvision', 'pass without trace', or 'silence' spell"})]
-                  :levels {6 {:modfifiers [(mod5e/bonus-action
-                                            {:name "Shadow Step"
-                                             :page 80
-                                             :summary "teleport 60 ft. and gain advantage on first melee attack before end of turn"})]}
-                           11 {:modifiers [(mod5e/action
-                                            {:name "Cloak of Shadows"
-                                             :level 11
-                                             :page 80
-                                             :summary "become invisible"})]}
-                           17 {:modifiers [(mod5e/reaction
-                                            {:name "Opportunist"
-                                             :page 80
-                                             :level 17
-                                             :summary "when a creature within 5 ft. is hit by attack from someone else, make a melee attack"})]}}}
-                 {:name "Way of the Four Elements"
-                  :modifiers [(mod5e/dependent-trait
-                               {:name "Disciple of the Elements"
-                                :page 80
-                                :summary (str "You learn elemental disciplines with spell save DC " (?spell-save-dc :wis) "."
-                                              (if (>= (?class-level :monk) 5)
-                                                (str " You can increase the level of elemental discipline spells you cast by 1 for each additional ki point you spend, up to " (mod5e/level-val (?class-level :monk)
-                            {9 4 13 5 17 6 :default 3}))))})]
-                  :levels {3 {:selections [(opt5e/monk-elemental-disciplines)]}
-                           6 {:selections [(opt5e/monk-elemental-disciplines)]}
-                           11 {:selections [(opt5e/monk-elemental-disciplines)]}
-                           17 {:selections [(opt5e/monk-elemental-disciplines)]}}
-                  :traits [{:name "Elemental Attunement"
-                            :page 81
-                            :summary "create minor elemental effect"}]}]}))
+                               {:name "Empty Body: Invisibility"
+                                :level 18
+                                :page 79
+                                :duration minutes-1
+                                :summary "spend 4 ki points to become invisible and have resistance to all damage but force damage"})
+                              (mod5e/action
+                               {:name "Empty Body: Astral Projection"
+                                :page 79
+                                :level 18
+                                :summary "use 8 ki points to cast the astral projection spell"})]}}
+     :weapons {:dart 10}
+     :traits [{:name "Ki-Empowered Strikes"
+               :page 79
+               :level 6
+               :summary "your unarmed strikes count as magical"}
+              (evasion 7 79)
+              {:name "Tongue of the Sun and Moon"
+               :page 79
+               :level 13
+               :summary "you understand all languages and can communicate with any creature that can understand a language"}
+              {:name "Diamond Soul"
+               :level 14
+               :page 79
+               :summary "you are proficient in all saves. You can spend 1 ki point to reroll failed saves."}
+              {:name "Timeless Body"
+               :page 79
+               :level 15
+               :summary "you can't be aged magically and you need no food or water"}
+             
+              {:name "Perfect Self"
+               :page 79
+               :level 20
+               :summary "regain 4 ki when you have none and roll initiative"}]
+     :subclasses [{:name "Way of the Open Hand"
+                   :modifiers [(mod5e/dependent-trait
+                                {:name "Open Hand Technique"
+                                 :page 79
+                                 :summary (str "when you hit with Flurry of Blows, you impose one of the effects on the target: 1) must make a DC "(?spell-save-dc :wis) " DEX save or be knocked prone. 2) make a DC " (?spell-save-dc :wis) " STR save or be pushed 15 ft. 3) can't take reactions until end of your next turn")})]
+                   :levels {6 {:modifiers [(mod5e/action
+                                            {:name "Wholeness of Body"
+                                             :page 79
+                                             :level 6
+                                             :frequency long-rests-1
+                                             :summary (str "heal yourself " (* 3 (?class-level :monk)) " HPs")})]}
+                            11 {:modifiers [(mod5e/dependent-trait
+                                             {:name "Tranquility"
+                                              :page 80
+                                              :level 11
+                                              :summary (str "gain effects of sanctuary spell (save DC " (?spell-save-dc :wis) ") between rests")})]}
+                            17 {:modifiers [(mod5e/dependent-trait
+                                             {:name "Quivering Palm"
+                                              :level 17
+                                              :page 80
+                                              :summary (str "when you hit a creature with unarmed strike, set up vibrations that last " (?class-level :monk) " days. Use an action to end the vibrations, reducing the target to 0 HPs on failed DC " (?spell-save-dc :wis) " CON save. It takes 10d10 necrotic damage on successful save.")})]}}}
+                  {:name "Way of Shadow"
+                   :modifiers [(mod5e/spells-known 0 :minor-illusion :wis "Monk (Way of Shadow)")
+                               (mod5e/action
+                                {:name "Shadow Arts"
+                                 :page 80
+                                 :summary "spend 2 ki to cast 'darkness', 'darkvision', 'pass without trace', or 'silence' spell"})]
+                   :levels {6 {:modfifiers [(mod5e/bonus-action
+                                             {:name "Shadow Step"
+                                              :page 80
+                                              :summary "teleport 60 ft. and gain advantage on first melee attack before end of turn"})]}
+                            11 {:modifiers [(mod5e/action
+                                             {:name "Cloak of Shadows"
+                                              :level 11
+                                              :page 80
+                                              :summary "become invisible"})]}
+                            17 {:modifiers [(mod5e/reaction
+                                             {:name "Opportunist"
+                                              :page 80
+                                              :level 17
+                                              :summary "when a creature within 5 ft. is hit by attack from someone else, make a melee attack"})]}}}
+                  {:name "Way of the Four Elements"
+                   :modifiers [(mod5e/dependent-trait
+                                {:name "Disciple of the Elements"
+                                 :page 80
+                                 :summary (str "You learn elemental disciplines with spell save DC " (?spell-save-dc :wis) "."
+                                               (if (>= (?class-level :monk) 5)
+                                                 (str " You can increase the level of elemental discipline spells you cast by 1 for each additional ki point you spend, up to " (mod5e/level-val (?class-level :monk)
+                                                                                                                                                                                                 {9 4 13 5 17 6 :default 3}))))})]
+                   :levels {3 {:selections [(opt5e/monk-elemental-disciplines)]}
+                            6 {:selections [(opt5e/monk-elemental-disciplines)]}
+                            11 {:selections [(opt5e/monk-elemental-disciplines)]}
+                            17 {:selections [(opt5e/monk-elemental-disciplines)]}}
+                   :traits [{:name "Elemental Attunement"
+                             :page 81
+                             :summary "create minor elemental effect"}]}]})))
 
 (defn paladin-spell [spell-level key min-level]
   (mod5e/spells-known spell-level key :wis "Paladin" min-level nil :paladin))
 
+(def paladin-base-cfg
+  {:name "Paladin"
+   :subclass-level 3
+   :subclass-title "Sacred Oath"})
+
 (def paladin-option
   (class-option
-   {:name "Paladin"
-    :spellcaster true
-    :spellcasting {:level-factor 2
-                   :known-mode :all
-                   :ability :cha}
-    :hit-die 10
-    :ability-increase-levels [4 8 12 16 19]
-    :profs {:armor {:light false :medium false :heavy true :shields false}
-            :weapon {:simple false :martial false}
-            :save {:wis true :cha true}
-            :skill-options {:choose 2 :options {:athletics true :insight true :intimidation true :medicine true :persuasion true :religion true}}}
-    :multiclass-prereqs [(t/option-prereq "Requires Strength 13 or Charisma 13"
-                                          (fn [c]
-                                            (let [abilities (es/entity-val c :abilities)]
-                                              (and (>= (:str abilities) 13)
-                                                  (>= (:cha abilities) 13)))))]
-    :equipment-choices [{:name "Equipment Pack"
-                         :options {:priests-pack 1
-                                   :explorers-pack 1}}]
-    :armor {:chain-mail 1}
-    :levels {2 {:selections [(opt5e/fighting-style-selection :paladin #{:defense :dueling :great-weapon-fighting :protection})]}
-             3 {:modifiers [(mod5e/immunity :disease)
-                            (mod5e/trait-cfg
-                             {:name "Divine Health"
-                              :page 85
-                              :summary "immune to disease"})]}
-             5 {:modifiers [(mod5e/extra-attack)]}
-             14 {:modifiers [(mod5e/action
-                              {:name "Cleansing Touch"
-                               :level 14
+   (merge
+    paladin-base-cfg
+    {:name "Paladin"
+     :spellcaster true
+     :spellcasting {:level-factor 2
+                    :known-mode :all
+                    :ability :cha}
+     :hit-die 10
+     :ability-increase-levels [4 8 12 16 19]
+     :profs {:armor {:light false :medium false :heavy true :shields false}
+             :weapon {:simple false :martial false}
+             :save {:wis true :cha true}
+             :skill-options {:choose 2 :options {:athletics true :insight true :intimidation true :medicine true :persuasion true :religion true}}}
+     :multiclass-prereqs [(t/option-prereq "Requires Strength 13 or Charisma 13"
+                                           (fn [c]
+                                             (let [abilities (es/entity-val c :abilities)]
+                                               (and (>= (:str abilities) 13)
+                                                    (>= (:cha abilities) 13)))))]
+     :equipment-choices [{:name "Equipment Pack"
+                          :options {:priests-pack 1
+                                    :explorers-pack 1}}]
+     :armor {:chain-mail 1}
+     :levels {2 {:selections [(opt5e/fighting-style-selection :paladin #{:defense :dueling :great-weapon-fighting :protection})]}
+              3 {:modifiers [(mod5e/immunity :disease)
+                             (mod5e/trait-cfg
+                              {:name "Divine Health"
                                :page 85
-                               :frequency {:units :long-rest
-                                           :amount (?ability-bonuses :cha)}
-                               :summary "end a spell on yourself or willing creature"})]}}
-    :modifiers [(mod/modifier ?paladin-aura (if (< (?class-level :paladin) 18) 10 30))
-                (mod5e/action
-                 {:name "Divine Sense"
-                  :page 84
-                  :frequency {:units :long-rest
-                              :amount (inc (?ability-bonuses :cha))}
-                  :summary "within 60 ft., detect presense of undead, celestial, or fiend. Also detect consecrated or desecrated object or place"})
-                (mod5e/action
-                 {:name "Lay on Hands"
-                  :page 84
-                  :frequency long-rests-1
-                  :summary (str "you have a healing pool of " (* 5 (?class-level :paladin)) " HPs, with it you can heal a creature or expend 5 points to cure disease or neutralize poison")})
-                (mod5e/dependent-trait
-                 {:name "Aura of Protection"
-                  :level 6
-                  :page 85
-                  :summary (str "you and friendly creatures within " ?paladin-aura " ft. have a " (common/bonus-str (max 1 (?ability-bonuses :cha))) " bonus to saves")})
-                (mod5e/dependent-trait
-                 {:name "Aura of Courage"
-                  :level 10
-                  :page 85
-                  :summary (str (str "you and friendly creatures within " ?paladin-aura " ft. can't be frightened"))})
-                (mod5e/dependent-trait
-                 {:name "Channel Divinity"
-                  :page 85
-                  :level 3
-                  :frequency rests-1
-                  :summary "your oath provides specific options"})]
-    :selections [(new-starting-equipment-selection
-                  :paladin
-                  {:name "Weapons"
-                   :options [(t/option-cfg
-                              {:name "Martial Weapon and Shield"
-                               :selections [(new-starting-equipment-selection
-                                             :paladin
-                                             {:name "Martial Weapon"
-                                              :options (opt5e/martial-weapon-options 1)})]
-                               :modifiers [(mod5e/armor :shield 1)]})
-                             (t/option-cfg
-                              {:name "Two Martial Weapons"
-                               :selections [(new-starting-equipment-selection
-                                             :paladin
-                                             {:name "Martial Weapons"
-                                              :options (opt5e/martial-weapon-options 1)
-                                              :min 2
-                                              :max 2})]})]})
-                 (new-starting-equipment-selection
-                  :paladin
-                  {:name "Melee Weapon"
-                   :options [(t/option-cfg
-                              {:name "Five Javelins"
-                               :modifiers [(mod5e/weapon :javelin 5)]})
-                             (t/option-cfg
-                              {:name "Simple Melee Weapon"
-                               :selections [(new-starting-equipment-selection
-                                             :paladin
-                                             {:name "Simple Melee Weapon"
-                                              :options (opt5e/simple-melee-weapon-options 1)})]})]})]
-    :traits [{:name "Divine Smite"
-              :level 2
-              :page 85
-              :summary "when you hit with melee weapon attack, you can expend 1 X-th level spell slot to deal extra (X+1)d8 radiant damage, up to 5d8. Additional d8 on fiend or undead."}
-             {:name "Improved Divine Smite"
-              :level 11
-              :page 85
-              :summary "whenever you hit with melee weapon, you deal an extra d8 radiant damage"}]
-    :subclass-level 3
-    :subclass-title "Sacred Oath"
-    :subclasses [{:name "Oath of Devotion"
-                  :modifiers [(paladin-spell 1 :protection-from-evil-and-good 3)
-                              (paladin-spell 1 :sanctuary 3)
-                              (paladin-spell 2 :lesser-restoration 5)
-                              (paladin-spell 2 :zone-of-truth 5)
-                              (paladin-spell 3 :beacon-of-hope 9)
-                              (paladin-spell 3 :dispel-magic 9)
-                              (paladin-spell 4 :freedom-of-movement 13)
-                              (paladin-spell 4 :guardian-of-faith 13)
-                              (paladin-spell 5 :commune 17)
-                              (paladin-spell 5 :flame-strike 17)
-                              (mod5e/action
-                               {:name "Channel Divinity: Sacred Weapon"
-                                :page 86
-                                :duration minutes-1
-                                :summary (str "make a weapon magical, with a " (common/bonus-str (max 1 (?ability-bonuses :cha))) " attack bonus and magical light (20 ft./20 ft.)")})
-                              (mod5e/action
-                               {:name "Channel Divinity: Turn the Unholy"
-                                :page 86
-                                :duration minutes-1
-                                :summary (str "each undead or fiend within 30 ft. must make a DC " (?spell-save-dc :cha) " WIS save or be turned for 1 min.")})]
-                  :levels {7 {:modifiers [(mod5e/dependent-trait
-                                           {:name "Aura of Devotion"
-                                            :level 7
-                                            :page 86
-                                            :summary (str "you and friendly creatures within " ?paladin-aura " ft. can't be charmed")})]}
-                           20 {:modifiers [(mod5e/action
-                                            {:name "Holy Nimbus"
-                                             :level 20
+                               :summary "immune to disease"})]}
+              5 {:modifiers [(mod5e/extra-attack)]}
+              14 {:modifiers [(mod5e/action
+                               {:name "Cleansing Touch"
+                                :level 14
+                                :page 85
+                                :frequency {:units :long-rest
+                                            :amount (?ability-bonuses :cha)}
+                                :summary "end a spell on yourself or willing creature"})]}}
+     :modifiers [(mod/modifier ?paladin-aura (if (< (?class-level :paladin) 18) 10 30))
+                 (mod5e/action
+                  {:name "Divine Sense"
+                   :page 84
+                   :frequency {:units :long-rest
+                               :amount (inc (?ability-bonuses :cha))}
+                   :summary "within 60 ft., detect presense of undead, celestial, or fiend. Also detect consecrated or desecrated object or place"})
+                 (mod5e/action
+                  {:name "Lay on Hands"
+                   :page 84
+                   :frequency long-rests-1
+                   :summary (str "you have a healing pool of " (* 5 (?class-level :paladin)) " HPs, with it you can heal a creature or expend 5 points to cure disease or neutralize poison")})
+                 (mod5e/dependent-trait
+                  {:name "Aura of Protection"
+                   :level 6
+                   :page 85
+                   :summary (str "you and friendly creatures within " ?paladin-aura " ft. have a " (common/bonus-str (max 1 (?ability-bonuses :cha))) " bonus to saves")})
+                 (mod5e/dependent-trait
+                  {:name "Aura of Courage"
+                   :level 10
+                   :page 85
+                   :summary (str (str "you and friendly creatures within " ?paladin-aura " ft. can't be frightened"))})
+                 (mod5e/dependent-trait
+                  {:name "Channel Divinity"
+                   :page 85
+                   :level 3
+                   :frequency rests-1
+                   :summary "your oath provides specific options"})]
+     :selections [(new-starting-equipment-selection
+                   :paladin
+                   {:name "Weapons"
+                    :options [(t/option-cfg
+                               {:name "Martial Weapon and Shield"
+                                :selections [(new-starting-equipment-selection
+                                              :paladin
+                                              {:name "Martial Weapon"
+                                               :options (opt5e/martial-weapon-options 1)})]
+                                :modifiers [(mod5e/armor :shield 1)]})
+                              (t/option-cfg
+                               {:name "Two Martial Weapons"
+                                :selections [(new-starting-equipment-selection
+                                              :paladin
+                                              {:name "Martial Weapons"
+                                               :options (opt5e/martial-weapon-options 1)
+                                               :min 2
+                                               :max 2})]})]})
+                  (new-starting-equipment-selection
+                   :paladin
+                   {:name "Melee Weapon"
+                    :options [(t/option-cfg
+                               {:name "Five Javelins"
+                                :modifiers [(mod5e/weapon :javelin 5)]})
+                              (t/option-cfg
+                               {:name "Simple Melee Weapon"
+                                :selections [(new-starting-equipment-selection
+                                              :paladin
+                                              {:name "Simple Melee Weapon"
+                                               :options (opt5e/simple-melee-weapon-options 1)})]})]})]
+     :traits [{:name "Divine Smite"
+               :level 2
+               :page 85
+               :summary "when you hit with melee weapon attack, you can expend 1 X-th level spell slot to deal extra (X+1)d8 radiant damage, up to 5d8. Additional d8 on fiend or undead."}
+              {:name "Improved Divine Smite"
+               :level 11
+               :page 85
+               :summary "whenever you hit with melee weapon, you deal an extra d8 radiant damage"}]
+     :subclass-level 3
+     :subclass-title "Sacred Oath"
+     :subclasses [{:name "Oath of Devotion"
+                   :modifiers [(paladin-spell 1 :protection-from-evil-and-good 3)
+                               (paladin-spell 1 :sanctuary 3)
+                               (paladin-spell 2 :lesser-restoration 5)
+                               (paladin-spell 2 :zone-of-truth 5)
+                               (paladin-spell 3 :beacon-of-hope 9)
+                               (paladin-spell 3 :dispel-magic 9)
+                               (paladin-spell 4 :freedom-of-movement 13)
+                               (paladin-spell 4 :guardian-of-faith 13)
+                               (paladin-spell 5 :commune 17)
+                               (paladin-spell 5 :flame-strike 17)
+                               (mod5e/action
+                                {:name "Channel Divinity: Sacred Weapon"
+                                 :page 86
+                                 :duration minutes-1
+                                 :summary (str "make a weapon magical, with a " (common/bonus-str (max 1 (?ability-bonuses :cha))) " attack bonus and magical light (20 ft./20 ft.)")})
+                               (mod5e/action
+                                {:name "Channel Divinity: Turn the Unholy"
+                                 :page 86
+                                 :duration minutes-1
+                                 :summary (str "each undead or fiend within 30 ft. must make a DC " (?spell-save-dc :cha) " WIS save or be turned for 1 min.")})]
+                   :levels {7 {:modifiers [(mod5e/dependent-trait
+                                            {:name "Aura of Devotion"
+                                             :level 7
                                              :page 86
-                                             :frequency long-rests-1
-                                             :duration minutes-1
-                                             :summary "you emanate a bright light with 30 ft radius, an enemy that starts its turn there takes 10 radiant damage. You also have advantage on saves against spells cast by fiends and undead"})]}}
-                  :traits [{:name "Purity of Spirit"
-                            :level 15
-                            :page 86
-                            :summary "always under effects of protection from evil and good spell"}]}
-                 {:name "Oath of the Ancients"
-                  :modifiers [(paladin-spell 1 :ensnaring-strike 3)
-                              (paladin-spell 1 :speak-with-animals 3)
-                              (paladin-spell 2 :misty-step 5)
-                              (paladin-spell 2 :moonbeam 5)
-                              (paladin-spell 3 :plant-growth 9)
-                              (paladin-spell 3 :protection-from-energy 9)
-                              (paladin-spell 4 :ice-storm 13)
-                              (paladin-spell 4 :stoneskin 13)
-                              (paladin-spell 5 :commune-with-nature 17)
-                              (paladin-spell 5 :tree-stride 17)
-                              (mod5e/action
-                               {:name "Channel Divinity: Nature's Wrath"
-                                :level 3
-                                :page 87
-                                :summary (str "restrain a creature with vines on a failed DC " (?spell-save-dc :cha) " STR or DEX save. It makes the save every turn until freed.")})
-                              (mod5e/action
-                               {:name "Channel Divinity: Turn the Faithless"
-                                :level 3
-                                :page 87
-                                :duration minutes-1
-                                :summary "turn and reveal the true form of fey and fiends within 30 ft."})]
-                  :levels {7 {:modifiers [(mod5e/dependent-trait
-                                           {:name "Aura of Warding"
-                                            :level 7
-                                            :page 87
-                                            :summary (str "you and friendly creatures within " ?paladin-aura " have resistance to spell damage")})]}}
-                  :traits [{:name "Undying Sentinal"
-                            :level 15
-                            :page 87
-                            :frequency long-rests-1
-                            :summary "when you are reduced to 0 HP without being killed, you drop to 1 instead"}
-                           {:name "Elder Champion"
-                            :level 20
-                            :page 87
-                            :frequency long-rests-1
-                            :duration minutes-1
-                            :summary "undergo a tranformation where you 1) regain 10 HPs at start of your turns 2) can cast spells with casting time action as bonus action 3) enemies within 10 ft. have disadvantage on saves against your Channel Divinity and spells"}]}
-                 {:name "Oath of Vengeance"
-                  :modifiers [(paladin-spell 1 :bane 3)
-                              (paladin-spell 1 :hunters-mark 3)
-                              (paladin-spell 2 :hold-person 5)
-                              (paladin-spell 2 :misty-step 5)
-                              (paladin-spell 3 :haste 9)
-                              (paladin-spell 3 :protection-from-energy 9)
-                              (paladin-spell 4 :banishment 13)
-                              (paladin-spell 4 :dimension-door 13)
-                              (paladin-spell 5 :hold-monster 17)
-                              (paladin-spell 5 :scrying 17)
-                              (mod5e/action
-                               {:name "Channel Divinity: Abjure Enemy"
-                                :level 3
-                                :page 88
-                                :duration minutes-1
-                                :summary (str "a creature of your choosing within 60 ft. must succeed on a DC " (?spell-save-dc :cha) " WIS save or be frightened and have a speed of 0, speed is halved on successful save")})
-                              (mod5e/bonus-action
-                               {:name "Channel Divinity: Vow of Eternity"
-                                :level 3
-                                :page 88
-                                :duration minutes-1
-                                :summary "gain advantage on attacks against a creature"})]
-                  :levels {15 {:modifiers [(mod5e/reaction
-                                            {:name "Soul of Vengeance"
-                                             :level 15
-                                             :page 88
-                                             :summary "when a creature under you Vow of Enmity attacks, make a melee weapon attack against it"})]}
-                           20 {:modifiers [(mod5e/action
-                                            {:name "Avenging Angel"
-                                             :level 20
-                                             :page 88
-                                             :duration hours-1
-                                             :frequency long-rests-1
-                                             :summary (str "transform, gain flying speed of 60 ft., emanate a 30 ft. aura and creatures within it must succeed on a DC " (?spell-save-dc :cha) " WIS or be frightened for 1 min and attacks against them have advantage")})]}}
-                  :traits [{:name "Relentless Avenger"
-                            :level 7
-                            :page 88
-                            :summary "when you hit with opportunity attack, you can also move up to half your speed after the attack without provoking opportunity attacks"}]}]}))
+                                             :summary (str "you and friendly creatures within " ?paladin-aura " ft. can't be charmed")})]}
+                            20 {:modifiers [(mod5e/action
+                                             {:name "Holy Nimbus"
+                                              :level 20
+                                              :page 86
+                                              :frequency long-rests-1
+                                              :duration minutes-1
+                                              :summary "you emanate a bright light with 30 ft radius, an enemy that starts its turn there takes 10 radiant damage. You also have advantage on saves against spells cast by fiends and undead"})]}}
+                   :traits [{:name "Purity of Spirit"
+                             :level 15
+                             :page 86
+                             :summary "always under effects of protection from evil and good spell"}]}
+                  {:name "Oath of the Ancients"
+                   :modifiers [(paladin-spell 1 :ensnaring-strike 3)
+                               (paladin-spell 1 :speak-with-animals 3)
+                               (paladin-spell 2 :misty-step 5)
+                               (paladin-spell 2 :moonbeam 5)
+                               (paladin-spell 3 :plant-growth 9)
+                               (paladin-spell 3 :protection-from-energy 9)
+                               (paladin-spell 4 :ice-storm 13)
+                               (paladin-spell 4 :stoneskin 13)
+                               (paladin-spell 5 :commune-with-nature 17)
+                               (paladin-spell 5 :tree-stride 17)
+                               (mod5e/action
+                                {:name "Channel Divinity: Nature's Wrath"
+                                 :level 3
+                                 :page 87
+                                 :summary (str "restrain a creature with vines on a failed DC " (?spell-save-dc :cha) " STR or DEX save. It makes the save every turn until freed.")})
+                               (mod5e/action
+                                {:name "Channel Divinity: Turn the Faithless"
+                                 :level 3
+                                 :page 87
+                                 :duration minutes-1
+                                 :summary "turn and reveal the true form of fey and fiends within 30 ft."})]
+                   :levels {7 {:modifiers [(mod5e/dependent-trait
+                                            {:name "Aura of Warding"
+                                             :level 7
+                                             :page 87
+                                             :summary (str "you and friendly creatures within " ?paladin-aura " have resistance to spell damage")})]}}
+                   :traits [{:name "Undying Sentinal"
+                             :level 15
+                             :page 87
+                             :frequency long-rests-1
+                             :summary "when you are reduced to 0 HP without being killed, you drop to 1 instead"}
+                            {:name "Elder Champion"
+                             :level 20
+                             :page 87
+                             :frequency long-rests-1
+                             :duration minutes-1
+                             :summary "undergo a tranformation where you 1) regain 10 HPs at start of your turns 2) can cast spells with casting time action as bonus action 3) enemies within 10 ft. have disadvantage on saves against your Channel Divinity and spells"}]}
+                  {:name "Oath of Vengeance"
+                   :modifiers [(paladin-spell 1 :bane 3)
+                               (paladin-spell 1 :hunters-mark 3)
+                               (paladin-spell 2 :hold-person 5)
+                               (paladin-spell 2 :misty-step 5)
+                               (paladin-spell 3 :haste 9)
+                               (paladin-spell 3 :protection-from-energy 9)
+                               (paladin-spell 4 :banishment 13)
+                               (paladin-spell 4 :dimension-door 13)
+                               (paladin-spell 5 :hold-monster 17)
+                               (paladin-spell 5 :scrying 17)
+                               (mod5e/action
+                                {:name "Channel Divinity: Abjure Enemy"
+                                 :level 3
+                                 :page 88
+                                 :duration minutes-1
+                                 :summary (str "a creature of your choosing within 60 ft. must succeed on a DC " (?spell-save-dc :cha) " WIS save or be frightened and have a speed of 0, speed is halved on successful save")})
+                               (mod5e/bonus-action
+                                {:name "Channel Divinity: Vow of Eternity"
+                                 :level 3
+                                 :page 88
+                                 :duration minutes-1
+                                 :summary "gain advantage on attacks against a creature"})]
+                   :levels {15 {:modifiers [(mod5e/reaction
+                                             {:name "Soul of Vengeance"
+                                              :level 15
+                                              :page 88
+                                              :summary "when a creature under you Vow of Enmity attacks, make a melee weapon attack against it"})]}
+                            20 {:modifiers [(mod5e/action
+                                             {:name "Avenging Angel"
+                                              :level 20
+                                              :page 88
+                                              :duration hours-1
+                                              :frequency long-rests-1
+                                              :summary (str "transform, gain flying speed of 60 ft., emanate a 30 ft. aura and creatures within it must succeed on a DC " (?spell-save-dc :cha) " WIS or be frightened for 1 min and attacks against them have advantage")})]}}
+                   :traits [{:name "Relentless Avenger"
+                             :level 7
+                             :page 88
+                             :summary "when you hit with opportunity attack, you can also move up to half your speed after the attack without provoking opportunity attacks"}]}]})))
 
 (def ranger-skills {:animal-handling true :athletics true :insight true :investigation true :nature true :perception true :stealth true :survival true})
 
@@ -3114,34 +3128,34 @@
    :beast [:giant-elk :giant-eagle :giant-owl]
    :celestial opt5e/language-keys
    :construct [:modron]
-   :dragon [:aquan :common :draconic :sylvan]
+   :dragon [:aquan :draconic :sylvan]
    :elemental [:auran :terran :ignan :aquan]
-   :fey [:common :draconic :elvish :sylvan :abyssal :infernal :primoridial :aquan :giant]
+   :fey [:draconic :elvish :sylvan :abyssal :infernal :primoridial :aquan :giant]
    :fiend opt5e/language-keys
-   :giant [:giant :orc :undercommon :common]
-   :monstrosity [:common :draconic :sylvan :elvish :hook-horror :abyssal :celestial :infernal :primordial :aquan :sphynx :umber-hulk :yeti :winter-wolf :goblin :worg]
+   :giant [:giant :orc :undercommon]
+   :monstrosity [:draconic :sylvan :elvish :hook-horror :abyssal :celestial :infernal :primordial :aquan :sphynx :umber-hulk :yeti :winter-wolf :goblin :worg]
    :ooze []
-   :plant [:common :druidic :elvish :sylvan]
+   :plant [:druidic :elvish :sylvan]
    :undead opt5e/language-keys})
 
 (def humanoid-enemies
-  {:bugbear [:common :goblin]
+  {:bugbear [:goblin]
    :bullywug [:bullywug]
    :githyanki [:gith]
    :gitzerai [:gith]
    :gnoll [:gnoll :abyssal]
-   :goblin [:common :goblin]
+   :goblin [:goblin]
    :grimlock [:undercommon]
-   :hobgoblin [:common :goblin]
-   :kobold [:common :draconic]
+   :hobgoblin [:goblin]
+   :kobold [:draconic]
    :koa-toa [:undercommon]
    :lizardfolk [:draconic :abyssal]
-   :merfolk [:aquan :common]
-   :orc [:common :orc]
+   :merfolk [:aquan]
+   :orc [:orc]
    :thri-kreen [:thri-kreen]
    :troglodyte [:troglodyte]
    :yuan-ti-pureblood {:name "Yuan-Ti Pureblood"
-                       :languages [:abyssal :common :draconic]}})
+                       :languages [:abyssal :draconic]}})
 
 (defn favored-enemy-option [[enemy-type info]]
   (let [vec-info? (sequential? info)
@@ -3149,13 +3163,18 @@
         name (if vec-info? (common/kw-to-name enemy-type) (:name info))]
     (t/option-cfg
      {:name name
-      :selections [(opt5e/language-selection
-                    (map
-                     (fn [lang]
-                       (or (opt5e/language-map lang) {:key lang :name (s/capitalize (common/kw-to-name lang))}))
-                     languages)
-                    1)]
-      :modifiers [(mod/set-mod ?ranger-favored-enemies enemy-type)]})))
+      :selections (if (> (count languages) 1)
+                    [(opt5e/language-selection
+                      (map
+                       (fn [lang]
+                         (or (opt5e/language-map lang) {:key lang :name (s/capitalize (common/kw-to-name lang))}))
+                       languages)
+                      1)])
+      :modifiers (remove
+                  nil?
+                  [(if (= 1 (count languages))
+                     (mod5e/language (first languages)))
+                   (mod/set-mod ?ranger-favored-enemies enemy-type)])})))
 
 (defn favored-enemy-selection [order]
   (t/selection-cfg
@@ -3207,204 +3226,208 @@
     :page page
     :summary "halve the damage from an attacker you can see that hits you"}))
 
+(def ranger-base-cfg
+  {:name "Ranger"
+   :subclass-level 3
+   :subclass-title "Ranger Archetype"})
+
 (def ranger-option
   (class-option
-   {:name "Ranger"
-    :hit-die 10
-    :profs {:armor {:light false :medium false :shields false}
-            :weapon {:simple false :martial false}
-            :save {:str true :dex true}
-            :skill-options {:choose 3 :options ranger-skills}
-            :multiclass-skill-options {:choose 1 :options ranger-skills}}
-    :multiclass-prereqs [(t/option-prereq "Requires Wisdom 13 and Dexterity 13"
-                                          (fn [c]
-                                            (let [abilities (es/entity-val c :abilities)]
-                                              (and (>= (:wis abilities) 13)
-                                                  (>= (:dex abilities) 13)))))]
-    :ability-increase-levels [4 8 10 16 19]
-    :spellcaster true
-    :spellcasting {:level-factor 2
-                   :known-mode :schedule
-                   :spells-known {2 2
-                                  3 1
-                                  5 1
-                                  7 1
-                                  9 1
-                                  11 1
-                                  13 1
-                                  15 1
-                                  17 1
-                                  19 1}
-                   :ability :wis}
-    :armor-choices [{:name "Armor"
-                     :options {:scale-mail 1
-                               :leather 1}}]
-    :equipment-choices [{:name "Equipment Pack"
-                         :options {:dungeoneers-pack 1
-                                   :explorers-pack 1}}]
-    :weapons {:longbow 1}
-    :equipment {:quiver 1
-                :arrow 20}
-    :modifiers [(mod5e/dependent-trait
-                   {:name "Favored Enemy"
-                    :page 91
-                    :summary (str "You have advantage on survival checks to track " (common/list-print (map #(common/kw-to-name % false) ?ranger-favored-enemies)) " creatures and on INT checks to recall info about them")})
-                (mod5e/dependent-trait
-                   {:name "Natural Explorer"
-                    :page 91
-                    :summary (let [favored-terrain ?ranger-favored-terrain
-                                   one-terrain? (= 1 (count favored-terrain))]
-                               (str "your favored terrain " (if one-terrain? "type is" "types are") " " (if (seq favored-terrain) (common/list-print (map #(common/kw-to-name % false) ?ranger-favored-terrain)) "not selected") ". Related to the terrain type" (if (not one-terrain?) "s") ": 2X proficiency bonus for INT and WIS checks for which you are proficient, difficult terrain doesn't slow your group, always alert for danger, can move stealthily alone at normal pace, 2x food when foraging, while tracking learn exact number, size, and when they passed through"))})]
-    :selections [(new-starting-equipment-selection
-                  :ranger
-                  {:name "Melee Weapon"
-                   :options [(t/option-cfg
-                              {:name "Two Shortswords"
-                               :modifiers [(mod5e/weapon :shortsword 2)]})
-                             (t/option-cfg
-                              {:name "Simple Melee Weapon"
-                               :selections [(new-starting-equipment-selection
-                                             :ranger
-                                             {:name "Simple Melee Weapon"
-                                              :options (opt5e/simple-melee-weapon-options 1)
-                                              :min 2
-                                              :max 2})]})]})
-                 (favored-enemy-selection 1)
-                 (favored-terrain-selection 1)]
-    :levels {2 {:selections [(opt5e/fighting-style-selection :ranger #{:archery :defense :dueling :two-weapon-fighting})]}
-             3 {:modifiers [(mod5e/action
-                             {:name "Primeval Awareness"
-                              :level 3
-                              :page 92
-                              :summary (str "spend an X-level spell slot, for X minutes, you sense the types of creatures within 1 mile" (if (seq ?ranger-favored-terrain) (str "(6 if " (common/list-print (map #(common/kw-to-name % false) ?ranger-favored-terrain))) ")") )})]}
-             5 {:modifiers [(mod5e/extra-attack)]}
-             6 {:selections [(favored-enemy-selection 2)
-                             (favored-terrain-selection 2)]}
-             10 {:selections [(favored-terrain-selection 3)]}
-             14 {:selections [(favored-enemy-selection 3)]}
-             20 {:modifiers [(mod5e/dependent-trait
-                              {:name "Foe Slayer"
-                               :frequency turns-1
-                               :level 20
+   (merge
+    ranger-base-cfg
+    {:hit-die 10
+     :profs {:armor {:light false :medium false :shields false}
+             :weapon {:simple false :martial false}
+             :save {:str true :dex true}
+             :skill-options {:choose 3 :options ranger-skills}
+             :multiclass-skill-options {:choose 1 :options ranger-skills}}
+     :multiclass-prereqs [(t/option-prereq "Requires Wisdom 13 and Dexterity 13"
+                                           (fn [c]
+                                             (let [abilities (es/entity-val c :abilities)]
+                                               (and (>= (:wis abilities) 13)
+                                                    (>= (:dex abilities) 13)))))]
+     :ability-increase-levels [4 8 10 16 19]
+     :spellcaster true
+     :spellcasting {:level-factor 2
+                    :known-mode :schedule
+                    :spells-known {2 2
+                                   3 1
+                                   5 1
+                                   7 1
+                                   9 1
+                                   11 1
+                                   13 1
+                                   15 1
+                                   17 1
+                                   19 1}
+                    :ability :wis}
+     :armor-choices [{:name "Armor"
+                      :options {:scale-mail 1
+                                :leather 1}}]
+     :equipment-choices [{:name "Equipment Pack"
+                          :options {:dungeoneers-pack 1
+                                    :explorers-pack 1}}]
+     :weapons {:longbow 1}
+     :equipment {:quiver 1
+                 :arrow 20}
+     :modifiers [(mod5e/dependent-trait
+                  {:name "Favored Enemy"
+                   :page 91
+                   :summary (str "You have advantage on survival checks to track " (common/list-print (map #(common/kw-to-name % false) ?ranger-favored-enemies)) " creatures and on INT checks to recall info about them")})
+                 (mod5e/dependent-trait
+                  {:name "Natural Explorer"
+                   :page 91
+                   :summary (let [favored-terrain ?ranger-favored-terrain
+                                  one-terrain? (= 1 (count favored-terrain))]
+                              (str "your favored terrain " (if one-terrain? "type is" "types are") " " (if (seq favored-terrain) (common/list-print (map #(common/kw-to-name % false) ?ranger-favored-terrain)) "not selected") ". Related to the terrain type" (if (not one-terrain?) "s") ": 2X proficiency bonus for INT and WIS checks for which you are proficient, difficult terrain doesn't slow your group, always alert for danger, can move stealthily alone at normal pace, 2x food when foraging, while tracking learn exact number, size, and when they passed through"))})]
+     :selections [(new-starting-equipment-selection
+                   :ranger
+                   {:name "Melee Weapon"
+                    :options [(t/option-cfg
+                               {:name "Two Shortswords"
+                                :modifiers [(mod5e/weapon :shortsword 2)]})
+                              (t/option-cfg
+                               {:name "Simple Melee Weapon"
+                                :selections [(new-starting-equipment-selection
+                                              :ranger
+                                              {:name "Simple Melee Weapon"
+                                               :options (opt5e/simple-melee-weapon-options 1)
+                                               :min 2
+                                               :max 2})]})]})
+                  (favored-enemy-selection 1)
+                  (favored-terrain-selection 1)]
+     :levels {2 {:selections [(opt5e/fighting-style-selection :ranger #{:archery :defense :dueling :two-weapon-fighting})]}
+              3 {:modifiers [(mod5e/action
+                              {:name "Primeval Awareness"
+                               :level 3
                                :page 92
-                               :summary (str "add " (common/bonus-str (?ability-bonuses :wis)) " to an attack or damage roll") })]}}
-    :traits [(lands-stride 8)
-             {:name "Hide in Plain Sight"
-              :level 10
-              :page 92
-              :summary "spend 1 minute camouflaging yourself to gain +10 to Stealth checks when you don't move"}
-             {:name "Vanish"
-              :level 14
-              :page 92
-              :summary "Hide action as a bonus action. You also can't be non-magically tracked"}
-             {:name "Feral Senses"
-              :level 18
-              :page 92
-              :summary "no disadvantage on attacks against creature you can't see, you know location of invisible creatures within 30 ft."}]
-    :subclass-level 3
-    :subclass-title "Ranger Archetype"
-    :subclasses [{:name "Hunter"
-                  :levels {3 {:selections [(t/selection-cfg
-                                            {:name "Hunter's Prey"
-                                             :tags #{:class}
-                                             :options [(t/option-cfg
-                                                        {:name "Colossus Slayer"
-                                                         :modifiers [(mod5e/trait-cfg
-                                                                      {:name "Colossus Slayer"
-                                                                       :page 93
-                                                                       :frequency turns-1
-                                                                       :summary "deal an extra d8 damage when you hit a creature that is below its HP max with a weapon attack"})]})
-                                                       (t/option-cfg
-                                                        {:name "Giant Killer"
-                                                         :modifiers [(mod5e/reaction
-                                                                      {:name "Giant Killer"
-                                                                       :page 93
-                                                                       :frequency turns-1
-                                                                       :summary "attack a Large or larger creature within 5 ft that misses an attack against you"})]})
-                                                       (t/option-cfg
-                                                        {:name "Horde Breaker"
-                                                         :modifiers [(mod5e/trait-cfg
-                                                                      {:name "Horde Breaker"
-                                                                       :page 93
-                                                                       :frequency turns-1
-                                                                       :summary "when you attack one creature, attack another creature within 5 feet of it with the same action"})]})]})]}
-                           7 {:selections [(t/selection-cfg
-                                            {:name "Defensive Tactics"
-                                             :tags #{:class}
-                                             :options [(t/option-cfg
-                                                        {:name "Escape the Horde"
-                                                         :modifiers [(mod5e/trait-cfg
-                                                                      {:name "Escape the Horde"
-                                                                       :frequency turns-1
-                                                                       :page 93})]})
-                                                       (t/option-cfg
-                                                        {:name "Multiattack Defense"
-                                                         :modifiers [(mod5e/trait-cfg
-                                                                      {:name "Multiattack Defense"
-                                                                       :frequency turns-1
-                                                                       :page 93})]})
-                                                       (t/option-cfg
-                                                        {:name "Steel Will"
-                                                         :modifiers [(mod5e/saving-throw-advantage [:frightened])]})]})]}
-                           11 {:selections [(t/selection-cfg
-                                             {:name "Multiattack"
+                               :summary (str "spend an X-level spell slot, for X minutes, you sense the types of creatures within 1 mile" (if (seq ?ranger-favored-terrain) (str "(6 if " (common/list-print (map #(common/kw-to-name % false) ?ranger-favored-terrain))) ")") )})]}
+              5 {:modifiers [(mod5e/extra-attack)]}
+              6 {:selections [(favored-enemy-selection 2)
+                              (favored-terrain-selection 2)]}
+              10 {:selections [(favored-terrain-selection 3)]}
+              14 {:selections [(favored-enemy-selection 3)]}
+              20 {:modifiers [(mod5e/dependent-trait
+                               {:name "Foe Slayer"
+                                :frequency turns-1
+                                :level 20
+                                :page 92
+                                :summary (str "add " (common/bonus-str (?ability-bonuses :wis)) " to an attack or damage roll") })]}}
+     :traits [(lands-stride 8)
+              {:name "Hide in Plain Sight"
+               :level 10
+               :page 92
+               :summary "spend 1 minute camouflaging yourself to gain +10 to Stealth checks when you don't move"}
+              {:name "Vanish"
+               :level 14
+               :page 92
+               :summary "Hide action as a bonus action. You also can't be non-magically tracked"}
+              {:name "Feral Senses"
+               :level 18
+               :page 92
+               :summary "no disadvantage on attacks against creature you can't see, you know location of invisible creatures within 30 ft."}]
+     :subclasses [{:name "Hunter"
+                   :levels {3 {:selections [(t/selection-cfg
+                                             {:name "Hunter's Prey"
                                               :tags #{:class}
                                               :options [(t/option-cfg
-                                                         {:name "Volley"
-                                                          :modifiers [(mod5e/action
-                                                                       {:name "Volley"
-                                                                        :page 93
-                                                                        :summary "make a ranged attack against any creatures within a 10 ft of a point" 
-                                                                        })]})
-                                                        (t/option-cfg
-                                                         {:name "Whirlwind Attack"
-                                                          :modifiers [(mod5e/action
-                                                                       {:name "Whirlwind Attack"
-                                                                        :page 93
-                                                                        :summary "melee attack against any creatures within 5 ft. of you"})]})]})]}
-                           15 {:selections [(t/selection-cfg
-                                             {:name "Superior Hunter's Defense"
-                                              :tags #{:class}
-                                              :options [(t/option-cfg
-                                                         {:name "Evasion"
+                                                         {:name "Colossus Slayer"
                                                           :modifiers [(mod5e/trait-cfg
-                                                                       (evasion 15 93))]})
+                                                                       {:name "Colossus Slayer"
+                                                                        :page 93
+                                                                        :frequency turns-1
+                                                                        :summary "deal an extra d8 damage when you hit a creature that is below its HP max with a weapon attack"})]})
                                                         (t/option-cfg
-                                                         {:name "Stand Against the Tide"
-                                                          :modifiers  [(mod5e/reaction
-                                                                        {:name "Stand Against the Tide"
+                                                         {:name "Giant Killer"
+                                                          :modifiers [(mod5e/reaction
+                                                                       {:name "Giant Killer"
+                                                                        :page 93
+                                                                        :frequency turns-1
+                                                                        :summary "attack a Large or larger creature within 5 ft that misses an attack against you"})]})
+                                                        (t/option-cfg
+                                                         {:name "Horde Breaker"
+                                                          :modifiers [(mod5e/trait-cfg
+                                                                       {:name "Horde Breaker"
+                                                                        :page 93
+                                                                        :frequency turns-1
+                                                                        :summary "when you attack one creature, attack another creature within 5 feet of it with the same action"})]})]})]}
+                            7 {:selections [(t/selection-cfg
+                                             {:name "Defensive Tactics"
+                                              :tags #{:class}
+                                              :options [(t/option-cfg
+                                                         {:name "Escape the Horde"
+                                                          :modifiers [(mod5e/trait-cfg
+                                                                       {:name "Escape the Horde"
+                                                                        :frequency turns-1
+                                                                        :page 93})]})
+                                                        (t/option-cfg
+                                                         {:name "Multiattack Defense"
+                                                          :modifiers [(mod5e/trait-cfg
+                                                                       {:name "Multiattack Defense"
+                                                                        :frequency turns-1
+                                                                        :page 93})]})
+                                                        (t/option-cfg
+                                                         {:name "Steel Will"
+                                                          :modifiers [(mod5e/saving-throw-advantage [:frightened])]})]})]}
+                            11 {:selections [(t/selection-cfg
+                                              {:name "Multiattack"
+                                               :tags #{:class}
+                                               :options [(t/option-cfg
+                                                          {:name "Volley"
+                                                           :modifiers [(mod5e/action
+                                                                        {:name "Volley"
                                                                          :page 93
-                                                                         :summary "force a creature to repeat its attack on another creature when it misses you"
+                                                                         :summary "make a ranged attack against any creatures within a 10 ft of a point" 
                                                                          })]})
-                                                        (t/option-cfg
-                                                         {:name "Uncanny Dodge"
-                                                          :modifiers [(uncanny-dodge-modifier 93)]})]})]}}}
-                 {:name "Beast Master"
-                  :selections [(t/selection-cfg
-                                {:name "Ranger's Companion"
-                                 :tags #{:class}
-                                 :options (map
-                                           (fn [monster-name]
-                                             (t/option-cfg
-                                              {:name monster-name
-                                               :modifiers [(mod5e/action
-                                                            {:name "Ranger's Companion"
-                                                             :page 93
-                                                             :summary (str "You have a " monster-name " as your companion, you can command it to Attack, Dash, Disengage, Dodge, or Help")})]}))
-                                           ["Stirge" "Baboon" "Bat" "Badger" "Blood Hawk" "Boar" "Cat" "Crab" "Deer" "Eagle" "Flying Snake" "Frog" "Giant Badger" "Giant Centipede" "Giant Crab" "Giant Fire Beetle" "Giant Frog" "Giant Poisonous Snake" "Giant Rat" "Giant Wolf Spider" "Goat" "Hawk" "Hyena" "Jackal" "Lizard" "Mastiff" "Mule" "Octopus" "Panther" "Owl" "Poisonous Snake" "Pony" "Quipper" "Rat" "Raven" "Scorpion" "Sea Horse" "Spider" "Vulture" "Weasel" "Wolf"])})]
-                  :levels {7 {:modifiers [(mod5e/bonus-action
-                                           {:name "Exceptional Training"
-                                            :page 93
-                                            :level 7
-                                            :summary "when your companion doesn't attack, you can command it to take the Dash, Disengage, Dodge, or Help action"})]}}
-                  :traits [{:name "Bestial Fury"
-                            :level 11
-                            :page 93
-                            :summary "your companion attacks twice when it takes the Attack action"}
-                           {:name "Share Spells"
-                            :level 15
-                            :page 93
-                            :summary "when you target yourself with a spell you can also affect your companion if within 30 ft."}]}]}))
+                                                         (t/option-cfg
+                                                          {:name "Whirlwind Attack"
+                                                           :modifiers [(mod5e/action
+                                                                        {:name "Whirlwind Attack"
+                                                                         :page 93
+                                                                         :summary "melee attack against any creatures within 5 ft. of you"})]})]})]}
+                            15 {:selections [(t/selection-cfg
+                                              {:name "Superior Hunter's Defense"
+                                               :tags #{:class}
+                                               :options [(t/option-cfg
+                                                          {:name "Evasion"
+                                                           :modifiers [(mod5e/trait-cfg
+                                                                        (evasion 15 93))]})
+                                                         (t/option-cfg
+                                                          {:name "Stand Against the Tide"
+                                                           :modifiers  [(mod5e/reaction
+                                                                         {:name "Stand Against the Tide"
+                                                                          :page 93
+                                                                          :summary "force a creature to repeat its attack on another creature when it misses you"
+                                                                          })]})
+                                                         (t/option-cfg
+                                                          {:name "Uncanny Dodge"
+                                                           :modifiers [(uncanny-dodge-modifier 93)]})]})]}}}
+                  {:name "Beast Master"
+                   :selections [(t/selection-cfg
+                                 {:name "Ranger's Companion"
+                                  :tags #{:class}
+                                  :options (map
+                                            (fn [monster-name]
+                                              (t/option-cfg
+                                               {:name monster-name
+                                                :modifiers [(mod5e/action
+                                                             {:name "Ranger's Companion"
+                                                              :page 93
+                                                              :summary (str "You have a " monster-name " as your companion, you can command it to Attack, Dash, Disengage, Dodge, or Help")})]}))
+                                            ["Stirge" "Baboon" "Bat" "Badger" "Blood Hawk" "Boar" "Cat" "Crab" "Deer" "Eagle" "Flying Snake" "Frog" "Giant Badger" "Giant Centipede" "Giant Crab" "Giant Fire Beetle" "Giant Frog" "Giant Poisonous Snake" "Giant Rat" "Giant Wolf Spider" "Goat" "Hawk" "Hyena" "Jackal" "Lizard" "Mastiff" "Mule" "Octopus" "Panther" "Owl" "Poisonous Snake" "Pony" "Quipper" "Rat" "Raven" "Scorpion" "Sea Horse" "Spider" "Vulture" "Weasel" "Wolf"])})]
+                   :levels {7 {:modifiers [(mod5e/bonus-action
+                                            {:name "Exceptional Training"
+                                             :page 93
+                                             :level 7
+                                             :summary "when your companion doesn't attack, you can command it to take the Dash, Disengage, Dodge, or Help action"})]}}
+                   :traits [{:name "Bestial Fury"
+                             :level 11
+                             :page 93
+                             :summary "your companion attacks twice when it takes the Attack action"}
+                            {:name "Share Spells"
+                             :level 15
+                             :page 93
+                             :summary "when you target yourself with a spell you can also affect your companion if within 30 ft."}]}]})))
 
 (def rogue-skills {:acrobatics true :athletics true :deception true :insight true :intimidation true :investigation true :perception true :performance true :persuasion true :sleight-of-hand true :stealth true})
 
@@ -3666,7 +3689,6 @@
                                :modifiers [(mod5e/weapon :crossbow-light 1)
                                            (mod5e/equipment :crossbow-bolt 20)]})
                              (weapon-option :sorcerer [:simple 1])]})]
-    :modifiers [(mod/modifier ?natural-ac-bonus 3)]
     :levels {2 {:modifiers [(mod5e/dependent-trait
                              {:name "Sorcery Points"
                               :level 2
@@ -3690,7 +3712,9 @@
     :subclass-title "Sorcerous Origin"
     :subclass-level 1
     :subclasses [{:name "Draconic Bloodline"
-                  :modifiers [(mod/modifier ?hit-point-level-bonus (+ 1 ?hit-point-level-bonus))]
+                  :modifiers [(mod/modifier ?hit-point-level-bonus (+ 1 ?hit-point-level-bonus))
+                              (mod/modifier ?natural-ac-bonus 3)
+                              (mod5e/language :draconic)]
                   :selections [(t/selection-cfg
                                 {:name "Draconic Ancestry Type"
                                  :tags #{:class}
@@ -5082,6 +5106,18 @@ long rest."})]
                         "Skin of fine zzar or wine" 1}
      :treasure {:gp 20}}]))
 
+(def ua-al-illegal (mod5e/al-illegal "Unearthed Arcana options are not allowed"))
+
+(defn subclass-plugin [class-base-cfg source subclasses]
+  (merge
+   class-base-cfg
+   {:source source
+    :plugin? true
+    :subclasses (map
+                 (fn [subclass]
+                   (update subclass :modifiers conj ua-al-illegal))
+                 subclasses)}))
+
 (def dmg-classes
   [{:name "Cleric"
     :plugin? true
@@ -5127,48 +5163,47 @@ long rest."})]
                   :traits [{:level 17
                             :name "Improved Reaper"
                             :summary "If you cast a necromancy spell that targets only 1 creature, you can instead target two within 5 ft. of each other"}]}]}
-   {:name "Paladin"
-    :subclass-level 3
-    :subclass-title "Sacred Oath"
-    :source :dmg
-    :subclasses [{:name "Oathbreaker"
-                  :modifiers [(mod5e/al-illegal "Oathbreaker is not allowed")
-                              (paladin-spell 1 :hellish-rebuke 3)
-                              (paladin-spell 1 :inflict-wounds 3)
-                              (paladin-spell 2 :crown-of-madness 5)
-                              (paladin-spell 2 :darkness 5)
-                              (paladin-spell 3 :animate-dead 9)
-                              (paladin-spell 3 :bestow-curse 9)
-                              (paladin-spell 4 :blight 13)
-                              (paladin-spell 4 :confusion 13)
-                              (paladin-spell 5 :contagion 17)
-                              (paladin-spell 5 :dominate-person 17)
-                              (mod5e/action
-                               {:name "Channel Divinity: Control Undead"
-                                :source :dmg
+   (subclass-plugin
+    paladin-base-cfg
+    :dmg
+    [{:name "Oathbreaker"
+      :modifiers [(mod5e/al-illegal "Oathbreaker is not allowed")
+                  (paladin-spell 1 :hellish-rebuke 3)
+                  (paladin-spell 1 :inflict-wounds 3)
+                  (paladin-spell 2 :crown-of-madness 5)
+                  (paladin-spell 2 :darkness 5)
+                  (paladin-spell 3 :animate-dead 9)
+                  (paladin-spell 3 :bestow-curse 9)
+                  (paladin-spell 4 :blight 13)
+                  (paladin-spell 4 :confusion 13)
+                  (paladin-spell 5 :contagion 17)
+                  (paladin-spell 5 :dominate-person 17)
+                  (mod5e/action
+                   {:name "Channel Divinity: Control Undead"
+                    :source :dmg
+                    :page 97
+                    :summary (str "Control an undead creature of CR " (?class-level :paladin) " or less if it fails a DC " (?spell-save-dc :cha) " WIS save")})
+                  (mod5e/action
+                   {:name "Channel Divinity: Dreadful Aspect"
+                    :page 97
+                    :source :dmg
+                    :summary (str "creatures of your choice within 30 ft. must succeed on a DC " (?spell-save-dc :cha) " WIS save or be frightened of you")})]
+      :levels {7 {:modifiers [(mod5e/dependent-trait
+                               {:name "Aura of Hate"
                                 :page 97
-                                :summary (str "Control an undead creature of CR " (?class-level :paladin) " or less if it fails a DC " (?spell-save-dc :cha) " WIS save")})
-                              (mod5e/action
-                               {:name "Channel Divinity: Dreadful Aspect"
-                                :page 97
                                 :source :dmg
-                                :summary (str "creatures of your choice within 30 ft. must succeed on a DC " (?spell-save-dc :cha) " WIS save or be frightened of you")})]
-                  :levels {7 {:modifiers [(mod5e/dependent-trait
-                                           {:name "Aura of Hate"
-                                            :page 97
-                                            :source :dmg
-                                            :summary (str "you and friends within " (if (>= (?class-level :paladin) 18) 30 10) " ft. gain a " (common/bonus-str (max 1 (?ability-bonuses :cha))) " bonus to melee weapon attack damage")})]}
-                           15 {:modifiers [(mod5e/damage-resistance :bludgeoning "nonmagical weapons")
-                                          (mod5e/damage-resistance :piercing "nonmagical weapons")
-                                          (mod5e/damage-resistance :slashing "nonmagical weapons")]}
-                           20 {:modifiers [(mod5e/action
-                                            {:name "Dread Lord"
-                                             :page 97
-                                             :source :dmg
-                                             :frequency long-rests-1
-                                             :duration minutes-1
-                                             :range ft-30
-                                             :summary (str "create an aura that: reduces bright light to dim; frightened enemies within aura take 4d10 psychic damage; creatures that rely on sight have disadvantage on attack rolls agains you and allies within aura; as a bonus action make a melee spell attack on a creature within aura that deals 3d10 " (common/mod-str (?ability-bonuses :cha)) "necrotic damage")})]}}}]}])
+                                :summary (str "you and friends within " (if (>= (?class-level :paladin) 18) 30 10) " ft. gain a " (common/bonus-str (max 1 (?ability-bonuses :cha))) " bonus to melee weapon attack damage")})]}
+               15 {:modifiers [(mod5e/damage-resistance :bludgeoning "nonmagical weapons")
+                               (mod5e/damage-resistance :piercing "nonmagical weapons")
+                               (mod5e/damage-resistance :slashing "nonmagical weapons")]}
+               20 {:modifiers [(mod5e/action
+                                {:name "Dread Lord"
+                                 :page 97
+                                 :source :dmg
+                                 :frequency long-rests-1
+                                 :duration minutes-1
+                                 :range ft-30
+                                 :summary (str "create an aura that: reduces bright light to dim; frightened enemies within aura take 4d10 psychic damage; creatures that rely on sight have disadvantage on attack rolls agains you and allies within aura; as a bonus action make a melee spell attack on a creature within aura that deals 3d10 " (common/mod-str (?ability-bonuses :cha)) "necrotic damage")})]}}}])])
 
 (def scag-classes
   [{:name "Barbarian"
@@ -5338,103 +5373,101 @@ long rest."})]
                                              :class-key :fighter
                                              :name "Bulwark"
                                              :summary "When you use Indomitable, extend the benefit to 1 ally"})]}}}]}
-   {:name "Monk"
-    :subclass-level 3
-    :subclass-title "Monastic Tradition"
-    :source :scag
-    :subclasses [{:name "Way of the Long Death"
-                  :modifiers [(mod5e/dependent-trait
-                               {:name "Touch of Death"
-                                :page 130
-                                :source :scag
-                                :summary (str "when you reduce a creature within 5 ft. to 0 HPs, you gain " (max 1 (+ (?ability-bonuses :wis) (?class-level :monk))) " temp HPs")})]
-                  :levels {6 {:modifiers [(mod5e/action
-                                           {:name "Hour of Reaping"
-                                            :page 130
-                                            :source :scag
-                                            :duration turns-1
-                                            :summary (str "creatures within 30 ft. are frightened of you on failed DC " (?spell-save-dc :wis) " WIS save")})]}
-                           11 {:modifiers [(mod5e/trait-cfg
-                                            {:name "Mastery of Death"
+   (merge
+    monk-base-cfg
+    {:source :scag
+     :subclasses [{:name "Way of the Long Death"
+                   :modifiers [(mod5e/dependent-trait
+                                {:name "Touch of Death"
+                                 :page 130
+                                 :source :scag
+                                 :summary (str "when you reduce a creature within 5 ft. to 0 HPs, you gain " (max 1 (+ (?ability-bonuses :wis) (?class-level :monk))) " temp HPs")})]
+                   :levels {6 {:modifiers [(mod5e/action
+                                            {:name "Hour of Reaping"
+                                             :page 130
+                                             :source :scag
+                                             :duration turns-1
+                                             :summary (str "creatures within 30 ft. are frightened of you on failed DC " (?spell-save-dc :wis) " WIS save")})]}
+                            11 {:modifiers [(mod5e/trait-cfg
+                                             {:name "Mastery of Death"
+                                              :page 131
+                                              :source :scag
+                                              :summary "when reduced to 0 HP, spend 1 ki point to reduce to 1 instead"})]}
+                            17 {:modifiers [(mod5e/action
+                                             {:name "Touch of the Long Death"
+                                              :source :scag
+                                              :page 131
+                                              :summary (str "spend X (up to 10) ki points to deal 2Xd10 necrotic damage on failed DC " (?spell-save-dc :wis) " CON save, half as much on successful save")})]}}}
+                  {:name "Way of the Sun Soul"
+                   :modifiers [(mod5e/attack
+                                {:name "Radiant Sun Bolt"
+                                 :page 131
+                                 :source :scag
+                                 :attack-type :ranged
+                                 :range ft-30
+                                 :damage-die ?martial-arts-die
+                                 :damage-die-count 1
+                                 :damage-type :radiant
+                                 :damage-modifier (?ability-bonuses :dex)})]
+                   :levels {6 {:modifiers [(mod5e/bonus-action
+                                            {:name "Searing Arc Strike"
                                              :page 131
                                              :source :scag
-                                             :summary "when reduced to 0 HP, spend 1 ki point to reduce to 1 instead"})]}
-                           17 {:modifiers [(mod5e/action
-                                            {:name "Touch of the Long Death"
-                                             :source :scag
-                                             :page 131
-                                             :summary (str "spend X (up to 10) ki points to deal 2Xd10 necrotic damage on failed DC " (?spell-save-dc :wis) " CON save, half as much on successful save")})]}}}
-                 {:name "Way of the Sun Soul"
-                  :modifiers [(mod5e/attack
-                               {:name "Radiant Sun Bolt"
-                                :page 131
-                                :source :scag
-                                :attack-type :ranged
-                                :range ft-30
-                                :damage-die ?martial-arts-die
-                                :damage-die-count 1
-                                :damage-type :radiant
-                                :damage-modifier (?ability-bonuses :dex)})]
-                  :levels {6 {:modifiers [(mod5e/bonus-action
-                                           {:name "Searing Arc Strike"
-                                            :page 131
-                                            :source :scag
-                                            :summary (str "after taking Attack action, spend 2 + X ki points to cast level X burning hands (max X of " (int (/ (?class-level :monk) 2)) ")")})]}
-                           11 {:modifiers [(mod5e/action
-                                            {:name "Searing Sunburst"
-                                             :level 11
-                                             :page 131
-                                             :source :scag
-                                             :summary (str "create an exploding orb, dealing 2d6 damage to creatures in a 20 ft sphere that fail a DC " (?spell-save-dc :wis) " CON save, you can spend X ki to increase by 2Xd6 damage (up to 3 ki)")})]}
-                           17 {:modifiers [(mod5e/reaction
-                                            {:name "Sun Shield"
-                                             :page 131
-                                             :source :scag
-                                             :summary (str "when hit with melee attack, deal " (+ 5 (?ability-bonuses :wis)) " radiant damage to attacker; you also shed 30 ft. light")})]}}}]}
-   {:name "Paladin"
-    :subclass-level 3
-    :subclass-title "Sacred Oath"
-    :source :scag
-    :subclasses [{:name "Oath of the Crown"
-                  :modifiers [(paladin-spell 1 :command 3)
-                              (paladin-spell 1 :compelling-duel 3)
-                              (paladin-spell 2 :warding-bond 5)
-                              (paladin-spell 2 :zone-of-truth 5)
-                              (paladin-spell 3 :aura-of-vitality 9)
-                              (paladin-spell 3 :spirit-guardians 9)
-                              (paladin-spell 4 :banishment 13)
-                              (paladin-spell 4 :guardian-of-faith 13)
-                              (paladin-spell 5 :circle-of-power 17)
-                              (paladin-spell 5 :geas 17)
-                              (mod5e/dependent-trait
-                               {:name "Channel Divinity: Champion Challenge"
-                                :source :scag
+                                             :summary (str "after taking Attack action, spend 2 + X ki points to cast level X burning hands (max X of " (int (/ (?class-level :monk) 2)) ")")})]}
+                            11 {:modifiers [(mod5e/action
+                                             {:name "Searing Sunburst"
+                                              :level 11
+                                              :page 131
+                                              :source :scag
+                                              :summary (str "create an exploding orb, dealing 2d6 damage to creatures in a 20 ft sphere that fail a DC " (?spell-save-dc :wis) " CON save, you can spend X ki to increase by 2Xd6 damage (up to 3 ki)")})]}
+                            17 {:modifiers [(mod5e/reaction
+                                             {:name "Sun Shield"
+                                              :page 131
+                                              :source :scag
+                                              :summary (str "when hit with melee attack, deal " (+ 5 (?ability-bonuses :wis)) " radiant damage to attacker; you also shed 30 ft. light")})]}}}]})
+   (subclass-plugin
+    paladin-base-cfg
+    :scag
+    [{:name "Oath of the Crown"
+      :modifiers [(paladin-spell 1 :command 3)
+                  (paladin-spell 1 :compelling-duel 3)
+                  (paladin-spell 2 :warding-bond 5)
+                  (paladin-spell 2 :zone-of-truth 5)
+                  (paladin-spell 3 :aura-of-vitality 9)
+                  (paladin-spell 3 :spirit-guardians 9)
+                  (paladin-spell 4 :banishment 13)
+                  (paladin-spell 4 :guardian-of-faith 13)
+                  (paladin-spell 5 :circle-of-power 17)
+                  (paladin-spell 5 :geas 17)
+                  (mod5e/dependent-trait
+                   {:name "Channel Divinity: Champion Challenge"
+                    :source :scag
+                    :page 133
+                    :summary (str "creatures of your choice within 30 ft. cannot move more than 30 ft. from you on failed DC " (?spell-save-dc :cha) " WIS save")})
+                  (mod5e/bonus-action
+                   {:name "Channel Divinity: Turn the Tide"
+                    :page 133
+                    :source :scag
+                    :summary (str "creatures of your choice within 30 ft. and with half or less HPs regain 1d6 " (common/mod-str (?ability-bonuses :cha)))})]
+      :levels {7 {:modifiers [(mod5e/reaction
+                               {:name "Divine Allegience"
+                                :level 7
                                 :page 133
-                                :summary (str "creatures of your choice within 30 ft. cannot move more than 30 ft. from you on failed DC " (?spell-save-dc :cha) " WIS save")})
-                              (mod5e/bonus-action
-                               {:name "Channel Divinity: Turn the Tide"
+                                :source :scag
+                                :summary "take damage another creature would take"})]}
+               15 {:modifier [(mod5e/saving-throw-advantage [:paralyzed :stunned])
+                              (mod5e/trait-cfg
+                               {:name "Unyielding Spirit"
                                 :page 133
                                 :source :scag
-                                :summary (str "creatures of your choice within 30 ft. and with half or less HPs regain 1d6 " (common/mod-str (?ability-bonuses :cha)))})]
-                  :levels {7 {:modifiers [(mod5e/reaction
-                                           {:name "Divine Allegience"
-                                            :level 7
-                                            :page 133
-                                            :source :scag
-                                            :summary "take damage another creature would take"})]}
-                           15 {:modifier [(mod5e/saving-throw-advantage [:paralyzed :stunned])
-                                          (mod5e/trait-cfg
-                                           {:name "Unyielding Spirit"
-                                            :page 133
-                                            :source :scag
-                                            :summary "advantage on saves against being stunned or paralyzed"})]}
-                           20 {:modifiers [(mod5e/action
-                                            {:name "Exalted Champion"
-                                             :page 86
-                                             :source :scag
-                                             :frequency long-rests-1
-                                             :duration hours-1
-                                             :summary "resistance to non-magical weapon slashing, bludgeoning, and piercing damage; allies within 30 ft. have advantage on death saves; you and allies have advantage on WIS saves"})]}}}]}
+                                :summary "advantage on saves against being stunned or paralyzed"})]}
+               20 {:modifiers [(mod5e/action
+                                {:name "Exalted Champion"
+                                 :page 86
+                                 :source :scag
+                                 :frequency long-rests-1
+                                 :duration hours-1
+                                 :summary "resistance to non-magical weapon slashing, bludgeoning, and piercing damage; allies within 30 ft. have advantage on death saves; you and allies have advantage on WIS saves"})]}}}])
    {:name "Rogue"
     :subclass-level 3
     :subclass-title "Roguish Archetype"
@@ -5655,7 +5688,7 @@ long rest."})]
   (t/selection-cfg
    (merge
     {:name "Feats"
-     :ref :feats
+     :ref [:feats]
      :tags #{:feats}
      :multiselect? true}
     cfg)))
@@ -5799,6 +5832,18 @@ long rest."})]
                (mod5e/spells-known 1 :hellish-rebuke :cha "Tiefling" 3)
                (mod5e/spells-known 2 :darkness :cha "Tiefling" 5)]})
 
+(def scag-halfling-option-cfg
+  {:name "Halfling"
+   :subraces
+   [{:name "Ghostwise"
+     :abilities {:wis 1}
+     :source :scag
+     :traits [{:name "Silent Speech"
+               :source :scag
+               :page 110
+               :range ft-30
+               :summary "Speak telepathically to 1 creature who understands your language"}]}]})
+
 (def sword-coast-adventurers-guide-selections
   [(background-selection
     {:options (map
@@ -5808,7 +5853,8 @@ long rest."})]
     {:options (map
                (fn [race] (race-option (assoc race :source :scag)))
                [scag-half-elf-option-cfg
-                scag-tiefling-option-cfg])})
+                scag-tiefling-option-cfg
+                scag-halfling-option-cfg])})
    (class-selection
     {:options (map
                (fn [cfg] (class-option (assoc cfg :plugin? true :source :scag)))
@@ -5917,8 +5963,6 @@ long rest."})]
 
 (defn dragonmark-spell-mod [kw ability-kw lvl]
   (mod5e/spells-known (spell-level kw) kw ability-kw "Dragonmark" lvl))
-
-(def ua-al-illegal (mod5e/al-illegal "Unearthed Arcana options are not allowed"))
 
 #_(def revised-ranger-option
   (class-option
@@ -6255,6 +6299,18 @@ long rest."})]
                     :modifiers [(mod5e/trait-cfg
                                  cfg)]})))
               psionic-talents)}))
+
+(defn psionic-discipline [name page summary type]
+  (let [trait-fn (case type
+                   :trait mod5e/trait-cfg
+                   :action mod5e/action
+                   :reaction mod5e/reaction
+                   :bonus-action mod5e/bonus-action)]
+    (trait-fn
+     {:name name
+      :page page
+      :source ua-mystic-kw
+      :summary summary})))
 
 (def psionic-disciplines
   [{:name "Adaptive Body"
@@ -7592,6 +7648,129 @@ long rest."})]
                 (filter filter-fn psionic-disciplines)
                 psionic-disciplines))}))
 
+(def ua-trio-of-subclasses-kw :ua-trio-of-subclasses)
+
+(def ua-trio-of-subclasses-classes
+  [(subclass-plugin
+    monk-base-cfg
+    ua-trio-of-subclasses-kw
+    [{:name "Way of the Drunken Master"
+      :modifiers [(mod5e/skill-proficiency :performance)
+                  (mod5e/trait-cfg
+                   {:name "Drunken Technique"
+                    :page 1
+                    :source ua-trio-of-subclasses-kw
+                    :summary "When you use Flurry of Blows, you can Disengage and walking speed increases by 10 ft."})]
+      :levels {6 {:modifiers [(mod5e/reaction
+                               {:name "Tipsy Sway"
+                                :page 1
+                                :source ua-trio-of-subclasses-kw
+                                :frequency {:units :rest}
+                                :summary "When an enemy misses you with melee attack you can have the attack hit another creature within 5 ft. of you"})]}
+               11 {:modifiers [(mod5e/trait-cfg
+                                {:name "Drunkard's Luck"
+                                 :page 1
+                                 :source ua-trio-of-subclasses-kw
+                                 :summary "when you make a save, you may spend a ki to gain advantage on the roll"})]}
+               17 {:modifiers [(mod5e/trait-cfg
+                                {:name "Intoxicated Frenzy"
+                                 :page 1
+                                 :source ua-trio-of-subclasses-kw
+                                 :summary "When you use Flurry of Blows, you can make 3 additional attacks if each attack targets a different creature"})]}}}])
+   (subclass-plugin
+    paladin-base-cfg
+    ua-trio-of-subclasses-kw
+    [{:name "Oath of Redemption"
+      :modifiers [(paladin-spell 1 :shield 3)
+                  (paladin-spell 1 :sleep 3)
+                  (paladin-spell 2 :hold-person 5)
+                  (paladin-spell 2 :ray-of-enfeeblement 5)
+                  (paladin-spell 3 :counterspell 9)
+                  (paladin-spell 3 :hypnotic-pattern 9)
+                  (paladin-spell 4 :otilukes-resilient-sphere 13)
+                  (paladin-spell 4 :stoneskin 13)
+                  (paladin-spell 5 :hold-monster 17)
+                  (paladin-spell 5 :wall-of-force 17)
+                  (mod5e/ac-bonus-fn
+                   (fn [armor shield]
+                     (if (and (nil? shield)
+                              (nil? armor))
+                       6
+                       0)))
+                  (mod5e/trait-cfg
+                   {:name "Warrior of Reconciliation"
+                    :source ua-trio-of-subclasses-kw
+                    :page 2
+                    :duration minutes-1
+                    :summary "when using a simple bludgeoning weapon and you reduce a creature to 0 HPs, the creature is charmed instead"})
+                  (mod5e/bonus-action
+                   {:name "Channel Divinity: Emissary of Peace"
+                    :source ua-trio-of-subclasses-kw
+                    :page 2
+                    :summary "gain +5 to the next charisma check you make in the next minute."})
+                  (mod5e/reaction
+                   {:name "Channel Divinity: Rebuke the Violent"
+                    :page 2
+                    :source ua-trio-of-subclasses-kw
+                    :range ft-10
+                    :summary (str "when an enemy deals melee damage to someone other than you, it takes radiant damage equal to the amount it dealt, half on a successful DC " (?spell-save-dc :cha) " WIS save.")})]
+      :levels {7 {:modifiers [(mod5e/reaction
+                               {:name "Aura of the Guardian"
+                                :page 2
+                                :source ua-trio-of-subclasses-kw
+                                :range ft-10
+                                :summary "magically absorb the damage an ally would take"})]}
+               15 {:modifiers [(mod5e/dependent-trait
+                                {:name "Protective Spirit"
+                                 :page 2
+                                 :source ua-trio-of-subclasses-kw
+                                 :summary (str "at the end of your turn in combat, regain 1d6 + " (int (/ (?class-level :paladin) 2)) " HPs if you have less than " (int (/ ?max-hit-points 2)))})]}
+               20 {:modifiers [(mod5e/trait-cfg
+                                {:name "Emissary of Redemption"
+                                 :page 3
+                                 :source ua-trio-of-subclasses-kw
+                                 :sumary "unless you attack, damage, or force it to make a save, you have resistance to all damage dealt by a creature and it takes damage equal to half that it dealt to you"})]}}}])
+   ;; when revised ranger is added, there needs to be a corresponding subclass that gets an extra attack
+   (subclass-plugin
+    ranger-base-cfg
+    ua-trio-of-subclasses-kw
+    [{:name "Monster Slayer"
+      :modifiers [(mod5e/spells-known 1 :protection-from-evil-and-good :wis "Ranger")
+                  (mod5e/bonus-action
+                   {:name "Slayer's Eye"
+                    :page 3
+                    :source ua-trio-of-subclasses-kw
+                    :range ft-120
+                    :summary "learn creature's vulnerabilities, immunities, and resistances, as well as special effects triggered by damage; target also takes 1d6 the first time you hit with a weapon attack"})]
+      :levels {5 {:modifiers [(mod5e/spells-known 2 :zone-of-truth :wis "Ranger")]}
+               7 {:modifiers [(mod5e/trait-cfg
+                               {:name "Supernatural Defense"
+                                :page 3
+                                :source ua-trio-of-subclasses-kw
+                                :summary "when the target of your Slayer's Eye causes you to make a save, add a 1d6 to your roll"})]}
+               9 {:modifiers [(mod5e/spells-known 3 :magic-circle :wis "Ranger")]}
+               11 {:modifiers [(mod5e/reaction
+                                {:name "Relentless Slayer"
+                                 :page 3
+                                 :source ua-trio-of-subclasses-kw
+                                 :range ft-30
+                                 :summary "when the target of your Slayer's Eye tries to change shape, teleport, travel to another plane, or turn gaseous, make a contested WIS check with the target, if you succeed, it fails the attempt"})]}
+               13 {:modifiers [(mod5e/spells-known 4 :banishment :wis "Ranger")]}
+               15 {:modifiers [(mod5e/reaction
+                                {:name "Slayer's Counter"
+                                 :page 3
+                                 :source ua-trio-of-subclasses-kw
+                                 :summary "when the target of your Slayer's Eye forces you to make a save, make a weapon attack and, if it hits, you automatically succeed on the save"})]}
+               17 {:modifiers [(mod5e/spells-known 5 :planar-binding :wis "Ranger")]}}}])])
+
+(def ua-trio-of-subclasses-plugin
+  {:name "Unearthed Arcana: A Trio of Subclasses"
+   :key ua-trio-of-subclasses-kw
+   :selections [(class-selection
+                 {:options (map
+                            class-option
+                            ua-trio-of-subclasses-classes)})]})
+
 (def ua-revised-subclasses-kw :ua-revised-subclasses)
 
 (defn kensei-weapon-selection [num]
@@ -7770,40 +7949,39 @@ long rest."})]
                                              :source ua-revised-subclasses-kw
                                              :name "Ever-Ready Shot"
                                              :summary "Regain a use of Arcane Shot if you roll initiative and have none"})]}}}]}
-   {:name "Monk"
-    :subclass-level 3
-    :subclass-title "Monastic Tradition"
-    :source ua-revised-subclasses-kw
-    :plugin? true
-    :subclasses [{:name "Way of the Kensei"
-                  :selections [(kensei-weapon-selection 2)]
-                  :modifiers [ua-al-illegal
-                              (mod5e/dependent-trait
-                               {:name "Path of the Kensei"
-                                :page 4
-                                :source ua-revised-subclasses-kw
-                                :summary (str "Your kensei weapons are " (common/list-print ?kensei-weapons) ". If you make an unarmed strike Attack and you have a melee kensei weapon in hand, gain +2 AC until start of your next turn. You can use a bonus action to add 1d4 damage to your ranged kensei weapon attacks for your turn.")})]
-                  :levels {6 {:selections [(kensei-weapon-selection 1)]
-                              :modifiers [(mod5e/trait-cfg
-                                           {:name "One with the Blade"
-                                            :page 5
-                                            :source ua-revised-subclasses-kw
-                                            :frequency {:units :round}
-                                            :summary "kensei weapons count as magical; when you hit with a kensei weapon you may spend 1 ki to add damage equal to you Martial Arts die"})]}
-                           11 {:selections [(kensei-weapon-selection 1)]
-                               :modifiers [(mod5e/bonus-action
-                                           {:name "Sharpen the Blade"
-                                            :page 5
-                                            :source ua-revised-subclasses-kw
-                                            :duration {:units :minute}
-                                            :summary "spend X ki (max 3) to grant a kensei weapon an X bonus to attack and damage rolls"})]}
-                           17 {:selections [(kensei-weapon-selection 1)]
+   (merge
+    monk-base-cfg
+    {:source ua-revised-subclasses-kw
+     :plugin? true
+     :subclasses [{:name "Way of the Kensei"
+                   :selections [(kensei-weapon-selection 2)]
+                   :modifiers [ua-al-illegal
+                               (mod5e/dependent-trait
+                                {:name "Path of the Kensei"
+                                 :page 4
+                                 :source ua-revised-subclasses-kw
+                                 :summary (str "Your kensei weapons are " (common/list-print ?kensei-weapons) ". If you make an unarmed strike Attack and you have a melee kensei weapon in hand, gain +2 AC until start of your next turn. You can use a bonus action to add 1d4 damage to your ranged kensei weapon attacks for your turn.")})]
+                   :levels {6 {:selections [(kensei-weapon-selection 1)]
                                :modifiers [(mod5e/trait-cfg
-                                            {:name "Unerring Accuracy"
+                                            {:name "One with the Blade"
                                              :page 5
                                              :source ua-revised-subclasses-kw
                                              :frequency {:units :round}
-                                             :summary "if you miss with a monk weapon, reroll the attack"})]}}}]}
+                                             :summary "kensei weapons count as magical; when you hit with a kensei weapon you may spend 1 ki to add damage equal to you Martial Arts die"})]}
+                            11 {:selections [(kensei-weapon-selection 1)]
+                                :modifiers [(mod5e/bonus-action
+                                             {:name "Sharpen the Blade"
+                                              :page 5
+                                              :source ua-revised-subclasses-kw
+                                              :duration {:units :minute}
+                                              :summary "spend X ki (max 3) to grant a kensei weapon an X bonus to attack and damage rolls"})]}
+                            17 {:selections [(kensei-weapon-selection 1)]
+                                :modifiers [(mod5e/trait-cfg
+                                             {:name "Unerring Accuracy"
+                                              :page 5
+                                              :source ua-revised-subclasses-kw
+                                              :frequency {:units :round}
+                                              :summary "if you miss with a monk weapon, reroll the attack"})]}}}]})
    {:name "Sorcerer"
     :subclass-title "Sorcerous Origin"
     :subclass-level 1
@@ -8268,7 +8446,7 @@ long rest."})]
                              {:name "Warforged"
                               :abilities {:str 1 :con 1}
                               :size :medium
-                              :speed 20
+                              :speed 30
                               :modifiers [ua-al-illegal
                                           (mod5e/natural-ac-bonus 1)
                                           (mod5e/immunity :disease)
@@ -8333,7 +8511,8 @@ long rest."})]
   (map
    (fn [{:keys [name key] :as plugin}]
      (assoc plugin :help (ua-help name (source-url key))))
-   [ua-revised-subclasses-plugin
+   [ua-trio-of-subclasses-plugin
+    ua-revised-subclasses-plugin
     ua-mystic-plugin
     ua-waterborne-plugin
     ua-eberron-plugin]))
