@@ -3689,7 +3689,6 @@
                                :modifiers [(mod5e/weapon :crossbow-light 1)
                                            (mod5e/equipment :crossbow-bolt 20)]})
                              (weapon-option :sorcerer [:simple 1])]})]
-    :modifiers [(mod/modifier ?natural-ac-bonus 3)]
     :levels {2 {:modifiers [(mod5e/dependent-trait
                              {:name "Sorcery Points"
                               :level 2
@@ -3714,6 +3713,7 @@
     :subclass-level 1
     :subclasses [{:name "Draconic Bloodline"
                   :modifiers [(mod/modifier ?hit-point-level-bonus (+ 1 ?hit-point-level-bonus))
+                              (mod/modifier ?natural-ac-bonus 3)
                               (mod5e/language :draconic)]
                   :selections [(t/selection-cfg
                                 {:name "Draconic Ancestry Type"
