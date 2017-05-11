@@ -1676,7 +1676,6 @@
   (fn [{s-key ::t/key tags ::t/tags}]
     (let [v (or (= key s-key)
                 (get tags key))]
-      (prn "MATCHES GROUP FN" key)
       v)))
 
 (defn matches-non-group-fn [key]
@@ -1684,7 +1683,6 @@
     (let [v (if (or (= s-key key)
                     (= ref [key]))
               s)]
-      (prn "MATCHES NON GROUP FN " (if v s-key))
       v)))
 
 (defn option-sources []
@@ -1787,8 +1785,6 @@
                                     final-selections)]))
                               ui-fns)
             non-ui-fn-selections (sets/difference (set final-selections) (set ui-fn-selections))]
-        (prn "UI-SELECTIONS" (map ::t/key ui-fn-selections))
-        (prn "NON-UI-SELECTIONS" (map ::t/key non-ui-fn-selections))
         [:div.p-5
          [:div
           (doall

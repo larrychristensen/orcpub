@@ -1264,7 +1264,7 @@
 
 (defn feat-selection [num]
   (t/selection-cfg
-   {:name (if (= 1 num) "Feat" "Feats")
+   {:name "Feats"
     :options feat-options
     :multiselect? true
     :tags #{:feats}

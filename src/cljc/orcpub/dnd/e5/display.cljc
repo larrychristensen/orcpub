@@ -30,8 +30,9 @@
    :ua-mystic {:abbr "UA-Mystic"
                :url "http://media.wizards.com/2017/dnd/downloads/UAMystic3.pdf"}
    :ua-revised-subclasses {:abbr "UA-Revised-Subclasses"
-                           :url "http://media.wizards.com/2017/dnd/downloads/UA-RevisedSubclasses.pdf"}})
-
+                           :url "http://media.wizards.com/2017/dnd/downloads/UA-RevisedSubclasses.pdf"}
+   :ua-trio-of-subclasses {:abbr "UA-Trio-of-Subclasses"
+                           :url "http://media.wizards.com/2017/dnd/downloads/UAThreeSubclasses.pdf"}})
 
 (def plural-map
   {:feet :feet})
