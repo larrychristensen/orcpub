@@ -4068,7 +4068,8 @@
 (def pact-boon-options
   [(t/option-cfg
     {:name "Pact of the Chain"
-     :modifiers [(mod5e/trait-cfg
+     :modifiers [(mod5e/spells-known 1 :find-familiar :cha "Warlock")
+                 (mod5e/trait-cfg
                   {:name pact-of-the-chain-name
                    :page 107
                    :summary "Can cast find familiar as a ritual, use your attack action to give your familiar an attack as a reaction"})]})
@@ -4445,8 +4446,7 @@ long rest."})]
     :weapons {:dagger 2}
     :armor {:leather 1}
     :levels {2 {:selections [(eldritch-invocation-selection 2)]}
-             3 {:modifiers [(mod5e/spells-known 1 :find-familiar :cha "Warlock")]
-                :selections [(t/selection-cfg
+             3 {:selections [(t/selection-cfg
                               {:name "Pact Boon"
                                :tags #{:class}
                                :options pact-boon-options})]}
