@@ -87,21 +87,38 @@
     (deferred-fn value)
     fn))
 
+(defn realize-char [built-char]
+  (reduce-kv
+   (fn [m k v]
+     (let [realized-value (es/entity-val built-char k)]
+       (if (fn? realized-value)
+         m
+         (assoc m k realized-value))))
+   (sorted-map)
+   built-char))
+
+(defn print-char [built-char]
+  #?(:cljs (cljs.pprint/pprint
+     (dissoc (realize-char built-char) ::es/deps))))
+
+
 (defn apply-modifiers [entity modifiers]
   (reduce
-   (fn [e {conds ::conditions :as mod}]
+   (fn [e {:keys [::key ::conditions] :as mod}]
      (if (nil? mod)
        #?(:clj (prn "MODIFIER IS NULL!!!!!!!!!!!!!!"))
        #?(:cljs (js/console.warn "MODIFIER IS NULL!!!!!!!!!!")))
-     (if (and mod (every? #(% e) conds))
-       (let [mod-fn-result (modifier-fn mod)]
-         (if (fn? mod-fn-result)
-           (mod-fn-result e)
-           (reduce
-            (fn [e2 f]
-              (f e2))
-            e
-            mod-fn-result)))
-       e))
+     (let [passes-conds? (every? #(% e) conditions)
+           level-increase? (= key :hit-point-level-increases)]
+       (if (and mod passes-conds?)
+         (let [mod-fn-result (modifier-fn mod)]
+           (if (fn? mod-fn-result)
+             (mod-fn-result e)
+             (reduce
+              (fn [e2 f]
+                (f e2))
+              e
+              mod-fn-result)))
+         e)))
    entity
    modifiers))
