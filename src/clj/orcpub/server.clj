@@ -157,26 +157,38 @@
       [r-h (* r-h (/ i-w i-h))]
       [(* r-w (/ i-h i-w)) r-w])))
 
+(defn draw-imagex [c-stream img x y width height]
+  (let [[scaled-height scaled-width] (scale [height width] [(.getHeight img) (.getWidth img)])]
+    (.drawImage
+     c-stream
+     img
+     (in-to-coord-x (+ x (if (< scaled-width width)
+                           (/ (- width scaled-width) 2)
+                           0)))
+     (in-to-coord-y (+ height y (if (< scaled-height height)
+                                  (/ (- scaled-height height) 2)
+                                  0)))
+     (in-to-sz scaled-width)
+     (in-to-sz scaled-height))))
+
+(defn draw-non-jpg [doc page url x y width height]
+  (with-open [c-stream (content-stream doc page)]
+    (let [img (LosslessFactory/createFromImage doc (ImageIO/read (URL. url)))]
+      (draw-imagex c-stream img x y width height))))
+
+(defn draw-jpg [doc page url x y width height]
+  (with-open [c-stream (content-stream doc page)
+              image-stream (.openStream (URL. url))]
+    (let [img (JPEGFactory/createFromStream doc image-stream)]
+      (draw-imagex c-stream img x y width height))))
+
 (defn draw-image! [doc page url x y width height]
-  (let [lower-case-url (s/lower-case url)]
+  (let [lower-case-url (s/lower-case url)
+        jpg? (or (s/ends-with? lower-case-url "jpg")
+                 (s/ends-with? lower-case-url "jpeg"))
+        draw-fn (if jpg? draw-jpg draw-non-jpg)]
     (try
-      (with-open [img (if (or (s/ends-with? lower-case-url "jpg")
-                              (s/ends-with? lower-case-url "jpeg"))
-                        (JPEGFactory/createFromStream doc (.openStream (URL. url)))
-                        (LosslessFactory/createFromImage doc (ImageIO/read (URL. url))))
-                  c-stream (content-stream doc page)]
-        (let [[scaled-height scaled-width] (scale [height width] [(.getHeight img) (.getWidth img)])]
-          (.drawImage
-           c-stream
-           img
-           (in-to-coord-x (+ x (if (< scaled-width width)
-                                 (/ (- width scaled-width) 2)
-                                 0)))
-           (in-to-coord-y (+ height y (if (< scaled-height height)
-                                        (/ (- scaled-height height) 2)
-                                        0)))
-           (in-to-sz scaled-width)
-           (in-to-sz scaled-height))))
+      (draw-fn doc page url x y width height)
       (catch Exception e (prn "failed loading image" (clojure.stacktrace/print-stack-trace e))))))
 
 (defn get-page [doc index]
@@ -205,7 +217,7 @@
       (if (and image-url
                (re-matches #"^(https?|ftp|file)://[-a-zA-Z0-9+&@#/%?=~_|!:,.;]*[-a-zA-Z0-9+&@#/%=~_|]" image-url)
                (not image-url-failed))
-        (draw-image! doc (get-page doc 1) image-url 0.45 1.75 2.35 3.15))
+        (draw-image! doc (get-page doc 1) image-url 0.45 1.76 2.35 3.14))
       (if (and faction-image-url
                (re-matches #"^(https?|ftp|file)://[-a-zA-Z0-9+&@#/%?=~_|!:,.;]*[-a-zA-Z0-9+&@#/%=~_|]" faction-image-url)
                (not faction-image-url-failed))

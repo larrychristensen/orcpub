@@ -87,21 +87,6 @@
     (deferred-fn value)
     fn))
 
-(defn realize-char [built-char]
-  (reduce-kv
-   (fn [m k v]
-     (let [realized-value (es/entity-val built-char k)]
-       (if (fn? realized-value)
-         m
-         (assoc m k realized-value))))
-   (sorted-map)
-   built-char))
-
-(defn print-char [built-char]
-  #?(:cljs (cljs.pprint/pprint
-     (dissoc (realize-char built-char) ::es/deps))))
-
-
 (defn apply-modifiers [entity modifiers]
   (reduce
    (fn [e {:keys [::key ::conditions] :as mod}]
