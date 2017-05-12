@@ -14,6 +14,9 @@
     :db/cardinality :db.cardinality/one}
    {:db/ident :orcpub.user/password
     :db/valueType :db.type/string
+    :db/cardinality :db.cardinality/one}
+   {:db/ident :orcpub.user/send-updates?
+    :db/valueType :db.type/boolean
     :db/cardinality :db.cardinality/one}])
 
 (def entity-schema

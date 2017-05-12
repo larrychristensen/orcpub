@@ -500,7 +500,6 @@
 (reg-event-db
  :login-success
  (fn [db [_ backtrack? response]]
-   (prn "SUCCESS" response)
    (cond-> db
        true (assoc :user-data (:body response))
        backtrack? (assoc :route (peek (:route-history db))))))
@@ -508,7 +507,6 @@
 (reg-event-fx
  :login-failure
  (fn [cofx [_ response]]
-   (prn "FAILURE" response)
    {:dispatch [:set-user-data nil]}))
 
 (reg-event-fx
@@ -524,3 +522,29 @@
            :json-params params
            :on-success [:login-success backtrack?]
            :on-failure [:login-failure]}}))
+
+(reg-event-db
+ :register-success
+ (fn [db [_ backtrack? response]]
+   (prn "SUCCES RESPONSE" response)
+   (cond-> db
+       true (assoc :user-data (:body response))
+       backtrack? (assoc :route (peek (:route-history db))))))
+
+(reg-event-fx
+ :register-failure
+ (fn [cofx [_ response]]
+   (prn "FAILURE RESPONSE" response)
+   {:dispatch [:set-user-data nil]}))
+
+(def register-url (backend-url "/register"))
+
+(reg-event-fx
+ :register
+ (fn [cofx [_ params backtrack?]]
+   {:http {:method :post
+           :url register-url
+           :json-params params
+           :on-success [:register-success backtrack?]
+           :on-failure [:register-failure]}}))
+

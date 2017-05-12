@@ -32,7 +32,9 @@
 (defn system [env]
   (component/system-map
    :conn
-   (datomic/new-datomic "datomic:ddb://us-east-1/your-system-name/orcpub?aws_access_key_id=AKIAJH7SDJJ6DM3I3NWA&aws_secret_key=y/coBQvXdF/9jHrWlhDXFtsSginE7OTiENtsBVET")
+   (datomic/new-datomic (if (= :dev env) 
+                          "datomic:dev://localhost:4334/orcpub"
+                          "datomic:ddb://us-east-1/your-system-name/orcpub?aws_access_key_id=AKIAJH7SDJJ6DM3I3NWA&aws_secret_key=y/coBQvXdF/9jHrWlhDXFtsSginE7OTiENtsBVET"))
    
    :service-map
    (cond-> (merge

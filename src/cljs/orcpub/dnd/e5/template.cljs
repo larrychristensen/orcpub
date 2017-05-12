@@ -2647,14 +2647,12 @@
                            10 {:selections [(opt5e/fighting-style-selection :fighter)]}
                            15 {:modifiers [(mod5e/critical 18)]}
                            18 {:modifiers [(mod5e/dependent-trait
-                                            {:level 18
-                                             :page 73
+                                            {:page 73
                                              :name "Survivor"
-                                             :summary (str "At start of your turns, if you have at most "
-                                                           (int (/ ?max-hit-points 2))
+                                             :summary (str "At start of your turns, if you have at most half of your "
+                                                           #_(int (/ ?max-hit-points 2))
                                                            " HPs left, regain "
-                                                           (+ 5 (?ability-bonuses :con)) " HPs")})]}}
-                  :traits []}
+                                                           (+ 5 (?ability-bonuses :con)) " HPs")})]}}}
                  {:name "Battle Master"
                   :selections [(t/selection-cfg
                                 {:name "Martial Maneuvers"

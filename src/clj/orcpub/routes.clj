@@ -80,13 +80,13 @@
     (login-response request)
     (catch Exception e (prn "E" e))))
 
-(defn register [{:keys [json-params db] :as request}]
-  (let [{:keys [username email password first-and-last-name]} json-params]
+(defn register [{:keys [json-params db conn] :as request}]
+  (let [{:keys [username email password first-and-last-name send-updates?]} json-params]
     (cond
-      (d/q '[:find ?e :where [?e :orcpub.user/email email]] db)
+      (seq (d/q '[:find ?e :where [?e :orcpub.user/email email]] db))
       {:status 400 :body {:message "Email address is already taken"}}
 
-      (d/q '[:find ?e :where [?e :orcpub.user/username username]] db)
+      (seq (d/q '[:find ?e :where [?e :orcpub.user/username username]] db))
       {:status 400 :body {:message "username is already taken"}}
 
       :else
@@ -95,7 +95,8 @@
             [{:orcpub.user/email email
               :orcpub.user/username username
               :orcpub.user/password (hashers/encrypt password)
-              :orcpub.user/first-and-last-name first-and-last-name}])
+              :orcpub.user/first-and-last-name first-and-last-name
+              :orcpub.user/send-updates? send-updates?}])
           (login-response (assoc request :db (d/db conn)))))))
 
 (def font-sizes
@@ -217,33 +218,11 @@
   (html-response
    (slurp (io/resource "public/index.html"))))
 
-(def service-error-handler
-  (error-int/error-dispatch [ctx ex]
-    
-    [{:exception-type :java.lang.ArithmeticException :interceptor ::another-bad-one}]
-    (assoc ctx :response {:status 400 :body "Another bad one"})
-
-    
-    [{:exception-type :java.lang.ArithmeticException}]
-    (assoc ctx :response {:status 400 :body "A bad one"})
-
-    :else
-    (do
-      (prn "EXCEPTION" ex)
-      (assoc ctx :io.pedestal.interceptor.chain/error ex))))
-
-(def db-interceptor
-  {:name :db-interceptor
-   :enter (fn [context]
-            (let [db (d/db conn)]
-              (prn "CONN" conn db)
-              (update context :request assoc :db db)))})
-
 (def routes
   (route/expand-routes
    [[["/" {:get `index}]
-     ["/register" ^:interceptors [(body-params/body-params) #_db-interceptor]
+     ["/register" ^:interceptors [(body-params/body-params)]
       {:post `register}]
-     ["/login" ^:interceptors [(body-params/body-params) #_db-interceptor]
+     ["/login" ^:interceptors [(body-params/body-params)]
       {:post `login}]
      ["/character.pdf" {:post `character-pdf-2}]]]))
