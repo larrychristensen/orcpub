@@ -2650,8 +2650,8 @@
                                             {:level 18
                                              :page 73
                                              :name "Survivor"
-                                             :summary (str "At start of your turns, if you have at most "
-                                                           (int (/ ?max-hit-points 2))
+                                             :summary (str "At start of your turns, if you have at most half of your "
+                                                           #_(int (/ ?max-hit-points 2))
                                                            " HPs left, regain "
                                                            (+ 5 (?ability-bonuses :con)) " HPs")})]}}
                   :traits []}
