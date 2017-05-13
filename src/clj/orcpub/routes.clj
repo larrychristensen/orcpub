@@ -93,9 +93,6 @@
     :where [?e :orcpub.user/email ?email]])
 
 (defn register [{:keys [json-params db conn scheme headers] :as request}]
-  (prn "REQUEST" request)
-  (prn "HEADERS" headers)
-  (prn "HOST" (headers "host"))
   (let [{:keys [username email password first-and-last-name send-updates?]} json-params
         validation (registration/validate-registration
                     json-params
@@ -104,7 +101,8 @@
     (if (seq validation)
       {:status 400
        :body validation}
-      (let [verification-key (str (java.util.UUID/randomUUID))]
+      (let [verification-key (str (java.util.UUID/randomUUID))
+            now (java.util.Date.)]
         (do @(d/transact
               conn
               [{:orcpub.user/email email
@@ -114,7 +112,8 @@
                 :orcpub.user/send-updates? send-updates?
                 :orcpub.user/verified? false
                 :orcpub.user/verification-key verification-key
-                :orcpub.user/created (java.util.Date.)}])
+                :orcpub.user/created now
+                :orcpub.user/verification-sent now}])
             (email/send-verification-email
              (str (name scheme) "://" (headers "host"))
              json-params
@@ -133,12 +132,10 @@
     (d/pull db '[*] user-id)))
 
 (defn verify [{:keys [query-params db conn] :as request}]
-  (prn "CONNY" conn)
   (let [key (:key query-params)
-        {:keys [:orcpub.user/created] :as user} (user-for-verification-key (d/db conn) key)]
-    (prn "VERIFY" key user created)
-    (if (or (nil? created)
-            (t/before? (from-date created) (-> 24 hours ago)))
+        {:keys [:orcpub.user/verification-sent] :as user} (user-for-verification-key (d/db conn) key)]
+    (if (or (nil? verification-sent)
+            (t/before? (from-date verification-sent) (-> 24 hours ago)))
       (ring-resp/redirect "/verification-expired")
       (ring-resp/redirect "/verification-successful"))))
 

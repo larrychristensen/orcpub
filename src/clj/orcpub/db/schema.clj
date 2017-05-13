@@ -26,6 +26,9 @@
     :db/cardinality :db.cardinality/one}
    {:db/ident :orcpub.user/created
     :db/valueType :db.type/instant
+    :db/cardinality :db.cardinality/one}
+   {:db/ident :orcpub.user/verification-sent
+    :db/valueType :db.type/instant
     :db/cardinality :db.cardinality/one}])
 
 (def entity-schema
