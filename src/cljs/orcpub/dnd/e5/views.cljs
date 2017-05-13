@@ -197,7 +197,9 @@
                   :width "174px"
                   :font-size "16px"
                   :font-weight "600"}
-          :on-click #(dispatch [:register])}
+          :class-name (if (seq registration-validation) "opacity-5 hover-no-shadow cursor-disabled")
+          :on-click #(if (empty? registration-validation)
+                       (dispatch [:register]))}
          "JOIN"]]]
       [:div.m-t-5
        [:span.f-s-14

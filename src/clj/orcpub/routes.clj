@@ -21,7 +21,8 @@
             [datomic.api :as d]
             [bidi.bidi :as bidi]
             [orcpub.route-map :as route-map]
-            [orcpub.email :as email])
+            [orcpub.email :as email]
+            [orcpub.registration :as registration])
   (:import (org.apache.pdfbox.pdmodel.interactive.form PDCheckBox PDComboBox PDListBox PDRadioButton PDTextField)
            (org.apache.pdfbox.pdmodel PDDocument PDPageContentStream)
            (org.apache.pdfbox.pdmodel.graphics.image PDImageXObject)
@@ -35,10 +36,6 @@
 (defonce secret "lakdsjflkdjflakdsjflaskdjflaksjdflsadjlfjdl")
 
 (def backend (backends/jws {:secret secret}))
-
-#_(def encryption {:secret privkey
-                 :options {:alg :rsa-oaep
-                           :enc :a128-hs256}})
 
 (def conn)
 
@@ -99,15 +96,14 @@
   (prn "REQUEST" request)
   (prn "HEADERS" headers)
   (prn "HOST" (headers "host"))
-  (let [{:keys [username email password first-and-last-name send-updates?]} json-params]
-    (cond
-      (seq (d/q email-query db email))
-      {:status 400 :body {:code :email-taken}}
-
-      (seq (d/q username-query db username))
-      {:status 400 :body {:code :username-taken}}
-
-      :else
+  (let [{:keys [username email password first-and-last-name send-updates?]} json-params
+        validation (registration/validate-registration
+                    json-params
+                    (seq (d/q email-query db email))
+                    (seq (d/q username-query db username)))]
+    (if (seq validation)
+      {:status 400
+       :body validation}
       (let [verification-key (str (java.util.UUID/randomUUID))]
         (do @(d/transact
               conn
