@@ -1366,29 +1366,32 @@
 
 (defn abilities-editor [{:keys [character built-char built-template option-paths selections]}]
   [:div
-   [:div.m-l-5 (selection-section-title "Ability Score Improvements")]
-   (doall
-    (map-indexed
-     (fn [i {:keys [::t/key ::t/min ::t/max ::t/options ::entity/path] :as selection}]
-       (let [remaining (count-remaining built-template character selection)]
-         ^{:key i}
-         [selection-section-base
-          {:path path
-           :parent-title (ancestor-names-string built-template path)
-           :max 1
-           :min 1
-           :remaining remaining
-           :hide-lock? true
-           :body (doall
-                  (map
-                   (fn [option]
-                     ^{:key (::t/key option)}
-                     (new-option-selector path selection (and max (> min 1) (zero? remaining)) option))
-                   (sort-by ::t/name options)))}]))
-     (filter
-      (fn [s]
-        (= :asi-or-feat (::t/key s)))
-      selections)))
+   (let [asi-or-feat-selections (filter
+                         (fn [s]
+                           (= :asi-or-feat (::t/key s)))
+                         selections)]
+     (if (seq asi-or-feat-selections)
+       [:div
+        [:div.m-l-5 (selection-section-title "Ability Score Improvements")]
+        (doall
+         (map-indexed
+          (fn [i {:keys [::t/key ::t/min ::t/max ::t/options ::entity/path] :as selection}]
+            (let [remaining (count-remaining built-template character selection)]
+              ^{:key i}
+              [selection-section-base
+               {:path path
+                :parent-title (ancestor-names-string built-template path)
+                :max 1
+                :min 1
+                :remaining remaining
+                :hide-lock? true
+                :body (doall
+                       (map
+                        (fn [option]
+                          ^{:key (::t/key option)}
+                          (new-option-selector path selection (and max (> min 1) (zero? remaining)) option))
+                        (sort-by ::t/name options)))}]))
+          asi-or-feat-selections))]))
    (let [asi-selections (filter (fn [s] (= :asi (::t/key s))) selections)
          selected-variant (get-in character [::entity/options :ability-scores ::entity/key])]
      [selection-section-base
