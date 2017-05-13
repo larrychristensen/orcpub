@@ -17,6 +17,15 @@
     :db/cardinality :db.cardinality/one}
    {:db/ident :orcpub.user/send-updates?
     :db/valueType :db.type/boolean
+    :db/cardinality :db.cardinality/one}
+   {:db/ident :orcpub.user/verified?
+    :db/valueType :db.type/boolean
+    :db/cardinality :db.cardinality/one}
+   {:db/ident :orcpub.user/verification-key
+    :db/valueType :db.type/string
+    :db/cardinality :db.cardinality/one}
+   {:db/ident :orcpub.user/created
+    :db/valueType :db.type/instant
     :db/cardinality :db.cardinality/one}])
 
 (def entity-schema

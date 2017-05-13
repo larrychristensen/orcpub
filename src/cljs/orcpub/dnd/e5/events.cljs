@@ -12,7 +12,9 @@
             [cljs.spec :as spec]
             [cljs-http.client :as http]
             [cljs.core.async :refer [<!]]
-            [clojure.string :as s])
+            [clojure.string :as s]
+            [bidi.bidi :as bidi]
+            [orcpub.route-map :as routes])
   (:require-macros [cljs.core.async.macros :refer [go]]))
 
 (defn check-and-throw
@@ -409,12 +411,14 @@
  :set-page
  set-page)
 
-(reg-event-db
+(reg-event-fx
  :route
- (fn [{:keys [route route-history] :as db} [_ new-route]]
-   (assoc db
-          :route new-route
-          :route-history (conj route-history route))))
+ (fn [{:keys [db]} [_ new-route]]
+   (let [{:keys [route route-history]} db]
+     {:db (assoc db
+                 :route new-route
+                 :route-history (conj route-history route))
+      :path (routes/path-for new-route)})))
 
 (reg-event-db
  :set-user-data
@@ -490,6 +494,11 @@
            (dispatch (conj on-success response))
            (dispatch (conj on-failure response)))))))
 
+(reg-fx
+ :path
+ (fn [path]
+   (.pushState js/window.history {} nil path)))
+
 (defn backend-url [path]
   (if (s/starts-with? js/window.location.href "http://localhost")
     (str "http://localhost:8890" (if (not (s/starts-with? path "/")) "/") path)
@@ -526,10 +535,10 @@
 (reg-event-db
  :register-success
  (fn [db [_ backtrack? response]]
-   (prn "SUCCES RESPONSE" response)
-   (cond-> db
-       true (assoc :user-data (:body response))
-       backtrack? (assoc :route (peek (:route-history db))))))
+   (prn "SUCCESS RESPONSE" response)
+   (assoc db
+          :user-data (:body response)
+          :route :verify-sent)))
 
 (reg-event-fx
  :register-failure
@@ -537,14 +546,93 @@
    (prn "FAILURE RESPONSE" response)
    {:dispatch [:set-user-data nil]}))
 
-(def register-url (backend-url "/register"))
+(reg-event-db
+ :re-verify-success
+ (fn [db []]
+   (assoc db :route (-> (bidi/match-route routes/routes routes/verify-sent-route) :handler first))))
+
+(defn validate-registration [])
+
+(reg-event-db
+ :email-taken
+ (fn [db [_ response]]
+   (prn "CHECK EMAIL RESPONSE" response)
+   (assoc db :email-taken? (-> response :body (= "true")))))
+
+(reg-event-db
+ :username-taken
+ (fn [db [_ response]]
+   (prn "CHECK EMAIL RESPONSE" response)
+   (assoc db :username-taken? (-> response :body (= "true")))))
+
+(reg-event-db
+ :registration-first-and-last-name
+ (fn [db [_ first-and-last-name]]
+   (assoc-in db [:registration-form :first-and-last-name] first-and-last-name)))
+
+(reg-event-fx
+ :registration-email
+ (fn [{:keys [db]} [_ email]]
+   {:db (assoc-in db [:registration-form :email] email)
+    :dispatch [:check-email email]}))
+
+(reg-event-fx
+ :registration-username
+ (fn [{:keys [db]} [_ username]]
+   {:db (assoc-in db [:registration-form :username] username)
+    :dispatch [:check-username username]}))
+
+(reg-event-db
+ :registration-password
+ (fn [db [_ password]]
+   (assoc-in db [:registration-form :password] password)))
+
+(reg-event-db
+ :registration-send-updates?
+ (fn [db [_ send-updates?]]
+   (assoc-in db [:registration-form :send-updates?] send-updates?)))
+
+(reg-event-db
+ :register-first-and-last-name
+ (fn [db [_ first-and-last-name]]
+   (assoc-in db [:registration-form :first-and-last-name] first-and-last-name)))
+
+(reg-event-fx
+ :check-email
+ (fn [{:keys [db]} [_ email]]
+   {:http {:method :get
+           :url (backend-url (bidi/path-for routes/routes routes/check-email-route))
+           :query-params {:email email}
+           :on-success [:email-taken]}}))
+
+(reg-event-fx
+ :check-username
+ (fn [{:keys [db]} [_ username]]
+   (prn "USERNAME" username)
+   {:http {:method :get
+           :url (backend-url (bidi/path-for routes/routes routes/check-username-route))
+           :query-params {:username username}
+           :on-success [:username-taken]}}))
 
 (reg-event-fx
  :register
- (fn [cofx [_ params backtrack?]]
-   {:http {:method :post
-           :url register-url
-           :json-params params
-           :on-success [:register-success backtrack?]
-           :on-failure [:register-failure]}}))
+ (fn [{:keys [db]} [_ params backtrack?]]
+   (let [registration-form (:registration-form db)]
+     {:db (assoc db :temp-email (:email registration-form))
+      :http {:method :post
+             :url (backend-url (bidi/path-for routes/routes routes/register-route))
+             :json-params registration-form
+             :on-success [:register-success backtrack?]
+             :on-failure [:register-failure]}})))
+
+(reg-event-fx
+ :re-verify
+ (fn [{:keys [db]} [_]]
+   (let [registration-form (:registration-form db)]
+     {:db (assoc db :temp-email (:email registration-form))
+      :http {:method :post
+             :url (backend-url (bidi/path-for routes/routes routes/re-verify-route))
+             :json-params registration-form
+             :on-success [:re-verify-success]
+             :on-failure [:re-verify-failure]}})))
 

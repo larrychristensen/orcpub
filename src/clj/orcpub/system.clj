@@ -4,7 +4,8 @@
             [io.pedestal.http :as http]                      
             [orcpub.pedestal :as pedestal]                                       
             [orcpub.routes :as routes]
-            [orcpub.datomic :as datomic])
+            [orcpub.datomic :as datomic]
+            [environ.core :as environ])
   (:import (org.eclipse.jetty.server.handler.gzip GzipHandler)))
 
 (def dev-service-map-overrides
@@ -32,9 +33,7 @@
 (defn system [env]
   (component/system-map
    :conn
-   (datomic/new-datomic (if (= :dev env) 
-                          "datomic:dev://localhost:4334/orcpub"
-                          "datomic:ddb://us-east-1/your-system-name/orcpub?aws_access_key_id=AKIAJH7SDJJ6DM3I3NWA&aws_secret_key=y/coBQvXdF/9jHrWlhDXFtsSginE7OTiENtsBVET"))
+   (datomic/new-datomic (str (environ/env :datomic-url) "?aws_access_key_id=" (environ/env :datomic-access-key) "&aws_secret_key=" (environ/env :datomic-secret-key)))
    
    :service-map
    (cond-> (merge

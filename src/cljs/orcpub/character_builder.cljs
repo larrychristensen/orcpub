@@ -2121,7 +2121,7 @@
           [:div.flex.align-items-c.pointer
            [views5e/login-form]
            [:span.orange.underline.f-w-b.m-l-5
-            {:on-click (fn [_] (dispatch [:route [:register]]))}
+            {:on-click (fn [_] (dispatch [:route :register-page]))}
            "REGISTER"]]))]]]
    [:div.container.header-links
     [:div.content

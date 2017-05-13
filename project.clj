@@ -42,14 +42,15 @@
                  [com.datomic/datomic-pro "0.9.5561"]
                  [com.amazonaws/aws-java-sdk-dynamodb "1.11.6"]
                  [com.fasterxml.jackson.core/jackson-databind "2.7.0"]
-                 #_[com.datomic/clj-client "0.8.606"]
 
-                 #_[clj-http "2.3.0"]
-                 [environ "1.0.0"]]
+                 [hiccup "1.0.5"]
+                 [com.draines/postal "2.0.2"]
+                 [environ "1.1.0"]]
 
   :plugins [[lein-figwheel "0.5.8"]
             [lein-cljsbuild "1.1.4" :exclusions [[org.clojure/clojure]]]
-            [lein-garden "0.3.0"]]
+            [lein-garden "0.3.0"]
+            [lein-environ "1.1.0"]]
 
   :source-paths ["src/clj" "src/cljc" "src/cljs"]
 

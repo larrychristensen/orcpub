@@ -1,15 +1,23 @@
 (ns orcpub.dnd.e5.db
-  (:require [orcpub.routes :as routes]
+  (:require [orcpub.route-map :as route-map]
             [orcpub.dnd.e5.template :as t5e]
             [orcpub.dnd.e5.character :as char5e]
             [re-frame.core :as re-frame]
             [orcpub.entity :as entity]
             [cljs.spec :as spec]
-            [cljs.reader :as reader]))
+            [cljs.reader :as reader]
+            [bidi.bidi :as bidi]))
 
 (def local-storage-character-key "char-meta")
 
-(def default-route routes/dnd-e5-char-builder-route)
+(def default-route route-map/dnd-e5-char-builder-route)
+
+(defn parse-route []
+  (let [{:keys [handler] :as parsed} (bidi/match-route route-map/routes js/window.location.pathname)]
+    (prn "PATH" js/window.location.pathname parsed handler)
+    (if handler
+      handler
+      default-route)))
 
 (def default-value
   {:builder {:character {:tab #{:build :options}}}
@@ -17,8 +25,9 @@
    :template t5e/template
    :plugins t5e/plugins
    :locked-components #{}
-   :route default-route
-   :route-history (list default-route)})
+   :route (parse-route)
+   :route-history (list default-route)
+   :registration-form {:send-updates? true}})
 
 (defn character->local-store [character]
   (.setItem js/window.localStorage local-storage-character-key (str character)))

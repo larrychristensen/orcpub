@@ -3,6 +3,7 @@
             [io.pedestal.http.route :as route]
             [io.pedestal.test :as test]
             [io.pedestal.http.ring-middlewares :as ring]
+            [ring.util.response :as ring-resp]
             [io.pedestal.http.body-params :as body-params]
             [io.pedestal.interceptor.error :as error-int]
             [io.pedestal.interceptor.chain :refer [terminate]]
@@ -12,11 +13,15 @@
             [buddy.sign.jwt :as jwt]
             [buddy.hashers :as hashers]
             [clojure.java.io :as io]
-            [clj-time.core :refer [hours from-now]]
+            [clj-time.core :as t :refer [hours from-now ago]]
+            [clj-time.coerce :as tc :refer [from-date]]
             [clojure.string :as s]
             [orcpub.dnd.e5.skills :as skill5e]
             [orcpub.dnd.e5.character :as char5e]
-            [datomic.api :as d])
+            [datomic.api :as d]
+            [bidi.bidi :as bidi]
+            [orcpub.route-map :as route-map]
+            [orcpub.email :as email])
   (:import (org.apache.pdfbox.pdmodel.interactive.form PDCheckBox PDComboBox PDListBox PDRadioButton PDTextField)
            (org.apache.pdfbox.pdmodel PDDocument PDPageContentStream)
            (org.apache.pdfbox.pdmodel.graphics.image PDImageXObject)
@@ -80,24 +85,66 @@
     (login-response request)
     (catch Exception e (prn "E" e))))
 
-(defn register [{:keys [json-params db conn] :as request}]
+(def username-query
+  '[:find ?e
+    :in $ ?username
+    :where [?e :orcpub.user/username ?username]])
+
+(def email-query
+  '[:find ?e
+    :in $ ?email
+    :where [?e :orcpub.user/email ?email]])
+
+(defn register [{:keys [json-params db conn scheme headers] :as request}]
+  (prn "REQUEST" request)
+  (prn "HEADERS" headers)
+  (prn "HOST" (headers "host"))
   (let [{:keys [username email password first-and-last-name send-updates?]} json-params]
     (cond
-      (seq (d/q '[:find ?e :where [?e :orcpub.user/email email]] db))
-      {:status 400 :body {:message "Email address is already taken"}}
+      (seq (d/q email-query db email))
+      {:status 400 :body {:code :email-taken}}
 
-      (seq (d/q '[:find ?e :where [?e :orcpub.user/username username]] db))
-      {:status 400 :body {:message "username is already taken"}}
+      (seq (d/q username-query db username))
+      {:status 400 :body {:code :username-taken}}
 
       :else
-      (do @(d/transact
-            conn
-            [{:orcpub.user/email email
-              :orcpub.user/username username
-              :orcpub.user/password (hashers/encrypt password)
-              :orcpub.user/first-and-last-name first-and-last-name
-              :orcpub.user/send-updates? send-updates?}])
-          (login-response (assoc request :db (d/db conn)))))))
+      (let [verification-key (str (java.util.UUID/randomUUID))]
+        (do @(d/transact
+              conn
+              [{:orcpub.user/email email
+                :orcpub.user/username username
+                :orcpub.user/password (hashers/encrypt password)
+                :orcpub.user/first-and-last-name first-and-last-name
+                :orcpub.user/send-updates? send-updates?
+                :orcpub.user/verified? false
+                :orcpub.user/verification-key verification-key
+                :orcpub.user/created (java.util.Date.)}])
+            (email/send-verification-email
+             (str (name scheme) "://" (headers "host"))
+             json-params
+             verification-key)
+            {:status 200})))))
+
+(defn user-for-verification-key [db key]
+  (prn "DB" db)
+  (let [result (d/q '[:find ?e
+                      :in $ ?key
+                      :where [?e :orcpub.user/verification-key ?key]]
+                    db
+                    key)
+        _ (prn "RESULT" result key (type key))
+        user-id (ffirst result)]
+    (d/pull db '[*] user-id)))
+
+(defn verify [{:keys [query-params db conn] :as request}]
+  (prn "CONNY" conn)
+  (let [key (:key query-params)
+        {:keys [:orcpub.user/created] :as user} (user-for-verification-key (d/db conn) key)]
+    (prn "VERIFY" key user created)
+    (if (or (nil? created)
+            (t/before? (from-date created) (-> 24 hours ago)))
+      (ring-resp/redirect "/verification-expired")
+      (ring-resp/redirect "/verification-successful"))))
 
 (def font-sizes
   (merge
@@ -154,26 +201,38 @@
       [r-h (* r-h (/ i-w i-h))]
       [(* r-w (/ i-h i-w)) r-w])))
 
+(defn draw-imagex [c-stream img x y width height]
+  (let [[scaled-height scaled-width] (scale [height width] [(.getHeight img) (.getWidth img)])]
+    (.drawImage
+     c-stream
+     img
+     (in-to-coord-x (+ x (if (< scaled-width width)
+                           (/ (- width scaled-width) 2)
+                           0)))
+     (in-to-coord-y (+ height y (if (< scaled-height height)
+                                  (/ (- scaled-height height) 2)
+                                  0)))
+     (in-to-sz scaled-width)
+     (in-to-sz scaled-height))))
+
+(defn draw-non-jpg [doc page url x y width height]
+  (with-open [c-stream (content-stream doc page)]
+    (let [img (LosslessFactory/createFromImage doc (ImageIO/read (URL. url)))]
+      (draw-imagex c-stream img x y width height))))
+
+(defn draw-jpg [doc page url x y width height]
+  (with-open [c-stream (content-stream doc page)
+              image-stream (.openStream (URL. url))]
+    (let [img (JPEGFactory/createFromStream doc image-stream)]
+      (draw-imagex c-stream img x y width height))))
+
 (defn draw-image! [doc page url x y width height]
-  (let [lower-case-url (s/lower-case url)]
+  (let [lower-case-url (s/lower-case url)
+        jpg? (or (s/ends-with? lower-case-url "jpg")
+                 (s/ends-with? lower-case-url "jpeg"))
+        draw-fn (if jpg? draw-jpg draw-non-jpg)]
     (try
-      (with-open [img (if (or (s/ends-with? lower-case-url "jpg")
-                              (s/ends-with? lower-case-url "jpeg"))
-                        (JPEGFactory/createFromStream doc (.openStream (URL. url)))
-                        (LosslessFactory/createFromImage doc (ImageIO/read (URL. url))))
-                  c-stream (content-stream doc page)]
-        (let [[scaled-height scaled-width] (scale [height width] [(.getHeight img) (.getWidth img)])]
-          (.drawImage
-           c-stream
-           img
-           (in-to-coord-x (+ x (if (< scaled-width width)
-                                 (/ (- width scaled-width) 2)
-                                 0)))
-           (in-to-coord-y (+ height y (if (< scaled-height height)
-                                        (/ (- scaled-height height) 2)
-                                        0)))
-           (in-to-sz scaled-width)
-           (in-to-sz scaled-height))))
+      (draw-fn doc page url x y width height)
       (catch Exception e (prn "failed loading image" (clojure.stacktrace/print-stack-trace e))))))
 
 (defn get-page [doc index]
@@ -213,16 +272,50 @@
   [html]
   {:status 200 :body html :headers {"Content-Type" "text/html"}})
 
-(defn index
-  [req]
+(defn index [req]
+  (prn "REQUESt" req)
   (html-response
    (slurp (io/resource "public/index.html"))))
+
+(defn verification-expired [req]
+  (index req))
+
+(defn verification-successful [req]
+  (index req))
+
+(defn registration-page [req]
+  (index req))
+
+(defn check-field [query value db]
+  {:status 200
+   :body (-> (d/q query db value)
+             seq
+             boolean
+             str)})
+
+(defn check-username [{:keys [db query-params]}]
+  (check-field username-query (:username query-params) db))
+
+(defn check-email [{:keys [db query-params]}]
+  (check-field email-query (:email query-params) db))
 
 (def routes
   (route/expand-routes
    [[["/" {:get `index}]
-     ["/register" ^:interceptors [(body-params/body-params)]
+     [(route-map/path-for route-map/register-route) ^:interceptors [(body-params/body-params)]
       {:post `register}]
-     ["/login" ^:interceptors [(body-params/body-params)]
+     [(route-map/path-for route-map/login-route) ^:interceptors [(body-params/body-params)]
       {:post `login}]
-     ["/character.pdf" {:post `character-pdf-2}]]]))
+     [(route-map/path-for route-map/character-pdf-route) {:post `character-pdf-2}]
+     [(route-map/path-for route-map/verify-route) ^:interceptors [(body-params/body-params)]
+      {:get `verify}]
+     [(route-map/path-for route-map/verify-failed-route)
+      {:get `verification-expired}]
+     [(route-map/path-for route-map/verify-success-route)
+      {:get `verification-successful}]
+     [(route-map/path-for route-map/register-page-route)
+      {:get `registration-page}]
+     [(route-map/path-for route-map/check-email-route)
+      {:get `check-email}]
+     [(route-map/path-for route-map/check-username-route)
+      {:get `check-username}]]]))

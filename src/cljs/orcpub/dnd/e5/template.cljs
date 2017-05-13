@@ -1219,8 +1219,8 @@
                   (if level-factor [(mod5e/spell-slot-factor (:key cls) level-factor)])
                   (if source [(mod5e/used-resource source name)]))})))
 
-(defn first-class? [class-kw]
-  (fn [c] (= class-kw (first (es/entity-val c :classes)))))
+(defn first-class? [class-kw & [classes]]
+  (fn [c] (= class-kw (first (or classes (es/entity-val c :classes))))))
 
 (defn level-option [{:keys [name
                             plugin?
@@ -1287,10 +1287,12 @@
                     traits)
                    kw)
                   (if (and (not plugin?)
-                           (= i 1)) [(assoc
-                                      (mod5e/max-hit-points hit-die)
-                                      ::mod/conditions
-                                      [(first-class? kw)])])
+                           (= i 1)) [(mod/cum-sum-mod
+                                      ?hit-point-level-increases
+                                      hit-die
+                                      nil
+                                      nil
+                                      [(first-class? kw ?classes)])])
                   (if (not plugin?)
                     [(mod5e/level kw name i hit-die)]))})))
 
@@ -4064,7 +4066,8 @@
 (def pact-boon-options
   [(t/option-cfg
     {:name "Pact of the Chain"
-     :modifiers [(mod5e/trait-cfg
+     :modifiers [(mod5e/spells-known 1 :find-familiar :cha "Warlock")
+                 (mod5e/trait-cfg
                   {:name pact-of-the-chain-name
                    :page 107
                    :summary "Can cast find familiar as a ritual, use your attack action to give your familiar an attack as a reaction"})]})
@@ -4441,8 +4444,7 @@ long rest."})]
     :weapons {:dagger 2}
     :armor {:leather 1}
     :levels {2 {:selections [(eldritch-invocation-selection 2)]}
-             3 {:modifiers [(mod5e/spells-known 1 :find-familiar :cha "Warlock")]
-                :selections [(t/selection-cfg
+             3 {:selections [(t/selection-cfg
                               {:name "Pact Boon"
                                :tags #{:class}
                                :options pact-boon-options})]}
@@ -7728,6 +7730,7 @@ long rest."})]
                                  :page 3
                                  :source ua-trio-of-subclasses-kw
                                  :sumary "unless you attack, damage, or force it to make a save, you have resistance to all damage dealt by a creature and it takes damage equal to half that it dealt to you"})]}}}])
+   
    ;; when revised ranger is added, there needs to be a corresponding subclass that gets an extra attack
    (subclass-plugin
     ranger-base-cfg
@@ -8694,12 +8697,14 @@ long rest."})]
    (inventory-selection "Equipment" "backpack" equip5e/equipment mod5e/deferred-equipment)
    (inventory-selection "Other Magic Items" "orb-wand" mi/other-magic-items mod5e/deferred-magic-item)])
 
+
 (def template-base
   (es/make-entity
    {?armor-class (+ 10 (?ability-bonuses :dex))
     ?base-armor-class (+ 10 (?ability-bonuses :dex)
                          ?natural-ac-bonus
                          ?magical-ac-bonus)
+    ?levels {}
     ?ac-bonus 0
     ?natural-ac-bonus 0
     ?unarmored-ac-bonus 0

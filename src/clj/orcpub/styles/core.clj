@@ -430,6 +430,8 @@
     {:border-color button-color}]
    [:.b-red
     {:border-color red}]
+   [:.b-gray
+    {:border-color "rgba(72,72,72,0.37)"}]
 
    [:.hover-slight-white:hover
     {:background-color "#2c3445"

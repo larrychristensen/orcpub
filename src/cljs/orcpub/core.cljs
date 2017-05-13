@@ -4,7 +4,7 @@
             [orcpub.dnd.e5.subs]
             [orcpub.dnd.e5.events]
             [orcpub.dnd.e5.views :as views]
-            [orcpub.routes :as routes]
+            [orcpub.route-map :as routes]
             [cljs-http.client :as http]
             [cljs.core.async :refer [<!]]
             [clojure.string :as s]
@@ -19,26 +19,17 @@
                     "http://localhost:8890/register"
                     "/register"))
 
-(defn login-page []
-  [:div.sans.h-100-p.flex
-   {:style {:flex-direction :column}}
-   [:div.container {:style {:height "80px"
-                            :background-color "#1a2532"
-                            :box-shadow "0 2px 6px 0 rgba(0,0,0,0.5)"}}
-    [:div.content
-     [:div.flex.justify-cont-s-b.w-100-p.align-items-c.p-l-20.p-r-20
-      [:img {:src "image/orcpub-logo.svg"}]
-      [views/login-form]]]]
-   [:div.flex.justify-cont-s-a.align-items-c.flex-grow-1
-    [views/register-form]]])
-
 (def pages
   {routes/dnd-e5-char-builder-route ch/character-builder
-   routes/register-route login-page})
+   routes/register-page-route views/register-form
+   routes/verify-failed-route views/verify-failed
+   routes/verify-success-route views/verify-success
+   routes/verify-sent-route views/verify-sent})
 
 (defn main-view []
   (let [route @(subscribe [:route])
         view (pages route)]
+    (prn "VIEW" view route)
     [view]))
 
 (r/render (if (let [doc-style js/document.documentElement.style]

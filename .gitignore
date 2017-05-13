@@ -9,6 +9,8 @@ pom.xml
 .lein-deps-sum
 .lein-repl-history
 .lein-plugins/
+.lein-env
+profiles.clj
 .repl
 .nrepl-port
 /resources/*_backup.pdf
