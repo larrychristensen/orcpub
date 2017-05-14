@@ -28,6 +28,7 @@
             [orcpub.dnd.e5.events :as events5e]
             [orcpub.dnd.e5.db :as db5e]
             [orcpub.dnd.e5.views :as views5e]
+            [orcpub.route-map :as routes]
             [orcpub.pdf-spec :as pdf-spec]
 
             [clojure.spec :as spec]
@@ -2024,9 +2025,9 @@
 
 (defn header [character built-char]
   [:div.w-100-p
-   [:div.flex.align-items-c.justify-cont-s-b
-    [:h1.f-s-36.f-w-b.m-t-21.m-b-19.m-l-10 "Character Builder"]
-    [:div.flex.align-items-c.justify-cont-end.flex-wrap.m-r-10
+   [:div.flex.align-items-c.justify-cont-s-b.flex-wrap
+    [:h1.f-s-36.f-w-b.m-t-21.m-l-10.character-builder-header "Character Builder"]
+    [:div.flex.align-items-c.justify-cont-end.flex-wrap.m-r-10.m-l-10
      #_[:button.form-button.h-40.m-l-5.m-t-5.m-b-5
       {:class-name (if (<= (count @history) 1) "opacity-5")
        :on-click undo!}
@@ -2107,25 +2108,27 @@
                             used-resources))))
                al-illegal-reasons))])]))))
 
+(defn user-header-view []
+  (let [username @(subscribe [:username])]
+    (if username
+      [:div.white.f-w-b.t-a-r
+       [:span.m-r-5 username]
+       #_[:i.fa.fa-caret-down]
+       [:span.orange.underline.pointer
+        {:on-click (fn [] (dispatch [:logout]))}
+        "LOG OUT"]]
+      [:div.pointer.flex.flex-column.align-items-end
+       [:span.orange.underline.f-w-b.m-l-5
+        {:on-click #(dispatch [:route routes/login-page-route])}
+        [:span "LOGIN"]]])))
+
 (defn app-header []
   [:div#app-header.app-header.flex.flex-column.justify-cont-s-b
    [:div.app-header-bar.container
     [:div.content
      [:div.flex.justify-cont-s-b.align-items-c.w-100-p.p-l-20.p-r-20
-      [:img.orcpub-logo {:src "image/orcpub-logo.svg"}]
-      (let [user-data @(subscribe [:user-data])]
-        (if user-data
-          [:div.white.f-w-b.pointer
-           [:span.m-r-5 (-> user-data :user :orcpub.user/username)]
-           #_[:i.fa.fa-caret-down]
-           [:span.orange.underline
-            {:on-click (fn [] (dispatch [:logout]))}
-            "LOG OUT"]]
-          [:div.flex.align-items-c.pointer
-           [views5e/login-form]
-           [:span.orange.underline.f-w-b.m-l-5
-            {:on-click (fn [_] (dispatch [:route :register-page]))}
-           "REGISTER"]]))]]]
+      [:img.orcpub-logo.h-32.w-120 {:src "image/orcpub-logo.svg"}]
+      [user-header-view]]]]
    [:div.container.header-links
     [:div.content
      [:div

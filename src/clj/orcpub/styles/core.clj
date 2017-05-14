@@ -131,6 +131,8 @@
     {:margin-top "-5px"}]
    [:.m-t-2
     {:margin-top "2px"}]
+   [:.m-t-30
+    {:margin-top "30px"}]
    [:.m-t-21
     {:margin-top "21px"}]
 
@@ -207,6 +209,8 @@
     {:align-items :center}]
    [:.align-items-t
     {:align-items :flex-start}]
+   [:.align-items-end
+    {:align-items :flex-end}]
    [:.flex-wrap
     {:flex-wrap :wrap}]
 
@@ -249,6 +253,8 @@
     {:width "80px"}]
    [:.w-100
     {:width "100px"}]
+   [:.w-120
+    {:width "120px"}]
    [:.w-200
     {:width "200px"}]
    [:.w-220
@@ -686,6 +692,9 @@
       :height "100%"
       :overflow :auto}]
 
+    [:.character-builder-header
+     {:margin-bottom "19px"}]
+
     #_["input::-webkit-outer-spin-button"
      "input::-webkit-inner-spin-button"
      {:-webkit-appearance :none
@@ -722,12 +731,12 @@
     [:.app-header
      {:background-color :black
       :background-image "url(../../image/header-background.jpg)"
-      :background-position "center"
+      :background-position "-400px"
       :background-size "cover"
       :height (px const/header-height)}]
 
     [:.app-header-bar
-     {:height (px 81)
+     {:min-height (px 81)
       :-webkit-backdrop-filter "blur(5px)"
       :backdrop-filter "blur(5px)"
       :background-color "rgba(0, 0, 0, 0.15)"}]
@@ -749,16 +758,16 @@
 
     (at-media
      xs-query
+     [:.character-builder-header
+      {:margin-bottom 0}]
      [:.app-header
       {:height (px 81)
        :background-image :none
-       :background-color "rgba(0, 0, 0, 0.3)"}]
+       :background-color "rgba(0, 0, 0, 0.3)"
+       :min-height 0}]
      [:.app-header-bar
       {:backdrop-filter :none
        :-webkit-backdrop-filter :none}]
-     [:.orcpub-logo
-      {:width "220px"
-       :margin-left "20px"}]
      [:.content
       {:width "100%"}]
      [:.options-column

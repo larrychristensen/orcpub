@@ -24,12 +24,13 @@
    routes/register-page-route views/register-form
    routes/verify-failed-route views/verify-failed
    routes/verify-success-route views/verify-success
-   routes/verify-sent-route views/verify-sent})
+   routes/verify-sent-route views/verify-sent
+   routes/login-page-route views/login-page
+   routes/send-password-reset-page-route views/send-password-reset-page})
 
 (defn main-view []
   (let [route @(subscribe [:route])
         view (pages route)]
-    (prn "VIEW" view route)
     [view]))
 
 (r/render (if (let [doc-style js/document.documentElement.style]
