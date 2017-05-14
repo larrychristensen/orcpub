@@ -348,8 +348,6 @@
         all-deps (merge-with union deps base-deps)
         mod-order (rseq (kahn-sort all-deps))
         ordered-mods (order-modifiers modifiers mod-order)]
-    #?(:cljs (js/console.log "ORDERED MODS" ordered-mods))
-    #?(:cljs (js/console.log "MOD ORDER" mod-order))
     (mods/apply-modifiers base ordered-mods)))
 
 (defn build-aux [raw-entity template]
