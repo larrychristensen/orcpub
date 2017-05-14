@@ -120,6 +120,11 @@
    (:user-data db)))
 
 (reg-sub
+ :username
+ (fn [db _]
+   (-> db :user-data :user-data :username)))
+
+(reg-sub
  :built-template
  :<- [:selected-plugin-options]
  (fn [selected-plugin-options _]

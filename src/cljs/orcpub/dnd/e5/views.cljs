@@ -18,44 +18,20 @@
    :padding-left "10px"
    :color text-color})
 
+(def default-input-style
+  (merge
+   input-style
+   {:border-color "rgba(72,72,72,0.37)"}))
+
 (defn event-value [e]
   (.. e -target -value))
 
 (defn set-value [atom key e]
   (swap! atom assoc key (event-value e)))
 
-(defn login-form []
-  (let [params (r/atom {})]
-    (fn []
-      [:div
-       [:input {:name :email
-                       :placeholder "Username or Email"
-                       :style (assoc input-style :width "150px")
-                       :value (:username @params)
-                       :on-change (partial set-value params :username)}]
-       [:input.m-l-5 {:name :password
-                             :type :password
-                             :placeholder "Password"
-                             :value (:password @params)
-                             :style (assoc input-style :width "150px")
-                             :on-change (partial set-value params :password)}]
-       [:button.form-button.m-l-5
-        {:style {:height "42px"
-                 :width "100px"
-                 :font-size "16px"}
-         :on-click #(dispatch [:login @params true])}
-        "LOGIN"]])))
-
 (defn registration-page [content]
   [:div.sans.h-100-p.flex
    {:style {:flex-direction :column}}
-   [:div.container {:style {:height "80px"
-                            :background-color "#1a2532"
-                            :box-shadow "0 2px 6px 0 rgba(0,0,0,0.5)"}}
-    [:div.content
-     [:div.flex.justify-cont-s-b.w-100-p.align-items-c.p-l-20.p-r-20
-      [:img {:src "image/orcpub-logo.svg"}]
-      [login-form]]]]
    [:div.flex.justify-cont-s-a.align-items-c.flex-grow-1
     [:div
      {:style {:width "785px"
@@ -90,13 +66,13 @@
                            :flex-direction :column}}
         [:div.p-20
          [:div.f-w-b.f-s-24.p-b-10
-          "That key has expired."]
+          "Your key has expired."]
          [:div "You must verify your email within 24 hours of registering. Send another verification email by submitting you address here:"]
          [:input.m-t-20 {:name :email
                          :value (:email @params)
                          :type :email
                          :placeholder "Email"
-                         :style input-style
+                         :style default-input-style
                          :on-change (partial set-value params :email)}]
          [:button.form-button.m-l-20.m-t-10
           {:style {:height "40px"
@@ -105,6 +81,30 @@
                    :font-weight "600"}
            :on-click #(dispatch [:re-verify @params])}
           "RESEND"]]]))))
+
+(defn send-password-reset-page []
+  (let [params (r/atom {})]
+    (fn []
+      (registration-page
+       [:div.flex.justify-cont-s-b {:style {:text-align :center
+                           :flex-direction :column}}
+        [:div.p-20
+         [:div.f-w-b.f-s-24.p-b-10
+          "Reset Password"]
+         [:div "Submit your email address here and we will send you an email to reset your password."]
+         [:input.m-t-20 {:name :email
+                         :value (:email @params)
+                         :type :email
+                         :placeholder "Email"
+                         :style default-input-style
+                         :on-change (partial set-value params :email)}]
+         [:button.form-button.m-l-20.m-t-10
+          {:style {:height "40px"
+                   :width "174px"
+                   :font-size "16px"
+                   :font-weight "600"}
+           :on-click #(dispatch [:re-verify @params])}
+          "SUBMIT"]]]))))
 
 (defn verify-success []
   (registration-page
@@ -142,20 +142,23 @@
         [:li.red (str common/dot-char " " msg)])
       messages)]))
 
-(defn form-input [title key form-data form-validation type]
-  (let [value (key form-data)]
-    [:div
-     [:input.m-t-20
-      {:name key
-       :type type
-       :value value
-       :placeholder title
-       :style input-style
-       :class-name (if (and value (seq (form-validation key)))
-                     "b-red"
-                     "b-gray")
-       :on-change (fn [e] (dispatch [(keyword (str "registration-" (name key))) (event-value e)]))}]
-     (if value (validation-messages (form-validation key)))]))
+(defn form-input []
+  (let [blurred? (r/atom false)]
+    (fn [title key form-data form-validation type on-change]
+      (let [value (key form-data)]
+        [:div
+         [:input.m-t-20
+          {:name key
+           :type type
+           :value value
+           :placeholder title
+           :style input-style
+           :class-name (if (and @blurred? (seq (key form-validation)))
+                         "b-red"
+                         "b-gray")
+           :on-change on-change
+           :on-blur #(do (prn "BLUR") (swap! blurred? (fn [_] true)))}]
+         (if @blurred? (validation-messages (form-validation key)))]))))
 
 (defn register-form []
   (let [registration-validation @(subscribe [:registration-validation])
@@ -173,10 +176,10 @@
        "join for free"]
       [:div.f-s-16.m-t-20 "Join now to save your character"]
       [:div
-       (form-input "First and Last Name" :first-and-last-name registration-form registration-validation :text)
-       (form-input "Email" :email registration-form registration-validation :email)
-       (form-input "Username" :username registration-form registration-validation :username)
-       (form-input "Password" :password registration-form registration-validation :password)
+       [form-input "First and Last Name" :first-and-last-name registration-form registration-validation :text (fn [e] (dispatch [:registration-first-and-last-name (event-value e)]))]
+       [form-input "Email" :email registration-form registration-validation :email (fn [e] (dispatch [:registration-email (event-value e)]))]
+       [form-input "Username" :username registration-form registration-validation :username (fn [e] (dispatch [:registration-username (event-value e)]))]
+       [form-input "Password" :password registration-form registration-validation :password (fn [e] (dispatch [:registration-password (event-value e)]))]
        [:div.m-t-20
         {:style {:text-align :left
                  :margin-left "15px"}}
@@ -189,9 +192,11 @@
                   :border-bottom-width "3px"}
           :on-click #(dispatch [:registration-send-updates? (not send-updates?)])}]
         [:span.m-l-5 "Yes! Send me updates about OrcPub."]]
-       [:div {:style {:margin-top "40px"}}
-        #_[:span "Already have an account?"]
-        #_[:span.hover-underline.f-w-b.m-l-10.pointer "LOGIN"]
+       [:div.m-t-30
+        [:span "Already have an account?"]
+        [:span.underline.f-w-b.m-l-10.pointer.orange
+         {:on-click #(dispatch [:route routes/login-page-route])}
+         "LOGIN"]
         [:button.form-button.m-l-20
          {:style {:height "40px"
                   :width "174px"
@@ -209,4 +214,41 @@
         [:span.m-l-5 "and that you've read our"]
         [:a.m-l-5 {:href "" :target :_blank
                    :style {:color text-color}} "Privacy Policy"]]]])))
+
+(defn login-page []
+  (let [params (r/atom {})]
+    (fn []
+      (registration-page
+       [:div {:style {:text-align :center}}
+        [:div {:style {:color orange
+                       :font-weight :bold
+                       :font-size "36px"
+                       :text-transform :uppercase
+                       :text-shadow "1px 2px 1px rgba(0,0,0,0.37)"
+                       :margin-top "20px"}}
+         "LOGIN"]
+        [:div
+         {:style {:margin-top "50px"}}
+         [form-input "Username or Email" :username @params nil :username #(swap! params assoc :username (event-value %))]
+         [form-input "Password" :password @params nil :password #(swap! params assoc :password (event-value %))]
+         [:div {:style {:margin-top "40px"}}
+          #_[:span "Already have an account?"]
+          #_[:span.hover-underline.f-w-b.m-l-10.pointer "LOGIN"]
+          [:button.form-button.m-l-20
+           {:style {:height "40px"
+                    :width "174px"
+                    :font-size "16px"
+                    :font-weight "600"}
+            :on-click #(dispatch [:login @params true])}
+           "LOGIN"]
+          [:div.m-t-20
+           [:span "Don't have a login? "]
+           [:span.orange.underline.pointer
+            {:on-click #(dispatch [:route routes/register-page-route])}
+            "REGISTER NOW"]]
+          [:div.m-t-20
+           [:span "Forgot your password? "]
+           [:span.orange.underline.pointer
+            {:on-click #(dispatch [:route routes/reset-password-page-route])}
+            "RESET PASSWORD"]]]]]))))
 

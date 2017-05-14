@@ -14,7 +14,8 @@
             [cljs.core.async :refer [<!]]
             [clojure.string :as s]
             [bidi.bidi :as bidi]
-            [orcpub.route-map :as routes])
+            [orcpub.route-map :as routes]
+            [orcpub.errors :as errors])
   (:require-macros [cljs.core.async.macros :refer [go]]))
 
 (defn check-and-throw
@@ -414,6 +415,7 @@
 (reg-event-fx
  :route
  (fn [{:keys [db]} [_ new-route]]
+   (prn "ROUTE" (:route db) new-route)
    (let [{:keys [route route-history]} db]
      {:db (assoc db
                  :route new-route
@@ -510,13 +512,20 @@
  :login-success
  (fn [db [_ backtrack? response]]
    (cond-> db
-       true (assoc :user-data (:body response))
+       true (assoc :user-data (-> response :body))
        backtrack? (assoc :route (peek (:route-history db))))))
 
 (reg-event-fx
  :login-failure
- (fn [cofx [_ response]]
-   {:dispatch [:set-user-data nil]}))
+ (fn [{:keys [db]} [_ response]]
+   (let [error-code (-> response :body :error)]
+     (prn "ERROR CODE" error-code)
+     (cond
+       (= error-code errors/bad-credentials) {:dispatch [:set-user-data nil]}
+       (= error-code errors/unverified) {:db (assoc db :temp-email (-> response :body :email))
+                                         :dispatch [:route routes/verify-sent-route]}
+       (= error-code errors/unverified-expired) {:dispatch [:route routes/verify-failed-route]}
+       :else (prn "JUANCHO")))))
 
 (reg-event-fx
  :logout
@@ -627,12 +636,11 @@
 
 (reg-event-fx
  :re-verify
- (fn [{:keys [db]} [_]]
-   (let [registration-form (:registration-form db)]
-     {:db (assoc db :temp-email (:email registration-form))
-      :http {:method :post
-             :url (backend-url (bidi/path-for routes/routes routes/re-verify-route))
-             :json-params registration-form
-             :on-success [:re-verify-success]
-             :on-failure [:re-verify-failure]}})))
+ (fn [{:keys [db]} [_ params]]
+   {:db (assoc db :temp-email (:email params))
+    :http {:method :get
+           :url (backend-url (bidi/path-for routes/routes routes/re-verify-route))
+           :query-params params
+           :on-success [:re-verify-success]
+           :on-failure [:re-verify-failure]}}))
 

@@ -21,6 +21,7 @@
             [datomic.api :as d]
             [bidi.bidi :as bidi]
             [orcpub.route-map :as route-map]
+            [orcpub.errors :as errors]
             [orcpub.email :as email]
             [orcpub.registration :as registration])
   (:import (org.apache.pdfbox.pdmodel.interactive.form PDCheckBox PDComboBox PDListBox PDRadioButton PDTextField)
@@ -37,18 +38,23 @@
 
 (def backend (backends/jws {:secret secret}))
 
-(def conn)
+(defn first-user-by [db query value]
+  (let [result (d/q query
+                    db
+                    value)
+        user-id (ffirst result)]
+    (d/pull db '[*] user-id)))
 
 (defn lookup-user [db username password]
   (prn "DB" db)
-  (first
-   (d/q '{:find [[?e]]
-          :in [$ ?username ?password]
-          :where [(or [?e :orcpub.user/username ?username]
-                      [?e :orcpub.user/email ?username])
-                  [?e :orcpub.user/password ?enc]
-                  [(buddy.hashers/check ?password ?enc)]]}
-        db username password)))
+  (first-user-by db
+                 '{:find [?e]
+                   :in [$ [?username ?password]]
+                   :where [(or [?e :orcpub.user/username ?username]
+                               [?e :orcpub.user/email ?username])
+                           [?e :orcpub.user/password ?enc]
+                           [(buddy.hashers/check ?password ?enc)]]}
+                 [username password]))
 
 (def check-auth
   {:name :check-auth
@@ -62,19 +68,38 @@
              terminate
              (assoc :response {:status 401 :body {:message "Unauthorized"}})))))})
 
+(defn redirect [route-key]
+  (ring-resp/redirect (route-map/path-for route-key)))
+
+(defn verification-expired? [verification-sent]
+  (t/before? (from-date verification-sent) (-> 24 hours ago)))
+
+(defn login-error [error-key & [data]]
+  {:status 401 :body (merge
+                      data
+                      {:error error-key})})
+
 (defn login-response
   [{:keys [json-params db] :as request}]
+  (prn "REQUEST" request)
   (let [{:keys [username password]} json-params
-        user (lookup-user db username password)
-        valid? (some? user)]
-    (prn "VALID?" valid?)
-    (if-not valid?
-      {:status 401 :body {:message "Wrong credentials"}}
-      (let [claims {:user user
-                    :exp (-> 3 hours from-now)}
-            token (jwt/sign claims secret)]
-        {:status 200 :body {:user (d/pull db '[*] user)
-                            :token token}}))))
+        {:keys [:orcpub.user/verified?
+                :orcpub.user/verification-sent
+                :orcpub.user/email
+                :db/id] :as user} (lookup-user db username password)
+        _ (prn "USER" user username password)
+        unverified? (not verified?)
+        expired? (and verification-sent (verification-expired? verification-sent))]
+    (cond
+      (nil? id) (login-error errors/bad-credentials)
+      (and unverified? expired?) (login-error errors/unverified-expired)
+      unverified? (login-error errors/unverified {:email email})
+      :else (let [claims {:user (select-keys user [:orcpub.user/username])
+                          :exp (-> 3 hours from-now)}
+                  token (jwt/sign claims secret)]
+              {:status 200 :body {:user-data {:username (:orcpub.user/username user)
+                                              :email (:orcpub.user/email user)}
+                                  :token token}}))))
 
 (defn login [{:keys [json-params db] :as request}]
   (prn "LOGIN" login)
@@ -92,6 +117,26 @@
     :in $ ?email
     :where [?e :orcpub.user/email ?email]])
 
+(defn send-verification-email [scheme headers params verification-key]
+  (email/send-verification-email
+   (str (name scheme) "://" (headers "host"))
+   params
+   verification-key))
+
+(defn do-verification [scheme headers params conn & [tx-data]]
+  (let [verification-key (str (java.util.UUID/randomUUID))
+        now (java.util.Date.)]
+    (prn "DO VERIFY" tx-data)
+    (do @(d/transact
+          conn
+          [(merge
+            tx-data
+            {:orcpub.user/verified? false
+             :orcpub.user/verification-key verification-key
+             :orcpub.user/verification-sent now})])
+        (send-verification-email scheme headers params verification-key)
+        {:status 200})))
+
 (defn register [{:keys [json-params db conn scheme headers] :as request}]
   (let [{:keys [username email password first-and-last-name send-updates?]} json-params
         validation (registration/validate-registration
@@ -101,43 +146,63 @@
     (if (seq validation)
       {:status 400
        :body validation}
-      (let [verification-key (str (java.util.UUID/randomUUID))
-            now (java.util.Date.)]
-        (do @(d/transact
-              conn
-              [{:orcpub.user/email email
-                :orcpub.user/username username
-                :orcpub.user/password (hashers/encrypt password)
-                :orcpub.user/first-and-last-name first-and-last-name
-                :orcpub.user/send-updates? send-updates?
-                :orcpub.user/verified? false
-                :orcpub.user/verification-key verification-key
-                :orcpub.user/created now
-                :orcpub.user/verification-sent now}])
-            (email/send-verification-email
-             (str (name scheme) "://" (headers "host"))
-             json-params
-             verification-key)
-            {:status 200})))))
+      (do-verification
+       scheme
+       headers
+       json-params
+       conn
+       {:orcpub.user/email email
+        :orcpub.user/username username
+        :orcpub.user/password (hashers/encrypt password)
+        :orcpub.user/first-and-last-name first-and-last-name
+        :orcpub.user/send-updates? send-updates?
+        :orcpub.user/created (java.util.Date.)}))))
+
+(def user-for-verification-key-query
+  '[:find ?e
+    :in $ ?key
+    :where [?e :orcpub.user/verification-key ?key]])
+
+(def user-for-email-query
+  '[:find ?e
+    :in $ ?email
+    :where [?e :orcpub.user/email ?email]])
 
 (defn user-for-verification-key [db key]
-  (prn "DB" db)
-  (let [result (d/q '[:find ?e
-                      :in $ ?key
-                      :where [?e :orcpub.user/verification-key ?key]]
-                    db
-                    key)
-        _ (prn "RESULT" result key (type key))
-        user-id (ffirst result)]
-    (d/pull db '[*] user-id)))
+  (first-user-by db user-for-verification-key-query key))
+
+(defn user-for-email [db email]
+  (first-user-by db user-for-email-query email))
 
 (defn verify [{:keys [query-params db conn] :as request}]
   (let [key (:key query-params)
-        {:keys [:orcpub.user/verification-sent] :as user} (user-for-verification-key (d/db conn) key)]
-    (if (or (nil? verification-sent)
-            (t/before? (from-date verification-sent) (-> 24 hours ago)))
-      (ring-resp/redirect "/verification-expired")
-      (ring-resp/redirect "/verification-successful"))))
+        {:keys [:orcpub.user/verification-sent
+                :orcpub.user/verified?
+                :db/id] :as user} (user-for-verification-key (d/db conn) key)]
+    (prn "USER" user)
+    (if verified?
+      (redirect route-map/verify-success-route)
+      (if (or (nil? verification-sent)
+              (verification-expired? verification-sent))
+        (redirect route-map/verify-failed-route)
+        (do (d/transact conn [{:db/id id
+                               :orcpub.user/verified? true}])
+            (redirect route-map/verify-success-route))))))
+
+(defn re-verify [{:keys [query-params db conn scheme headers] :as request}]
+  (let [email (:email query-params)
+        {:keys [:orcpub.user/verification-sent
+                :orcpub.user/verified?
+                :orcpub.user/first-and-last-name
+                :db/id] :as user} (user-for-email db email)]
+    (if verified?
+      (ring-resp/redirect (route-map/verify-success-route))
+      (do-verification scheme
+                       headers
+                       (merge query-params
+                              {:first-and-last-name first-and-last-name})
+                       conn
+                       {:db/id id}))))
 
 (def font-sizes
   (merge
@@ -276,7 +341,19 @@
 (defn verification-successful [req]
   (index req))
 
+(defn verify-sent [req]
+  (index req))
+
 (defn registration-page [req]
+  (index req))
+
+(defn login-page [req]
+  (index req))
+
+(defn reset-password-page [req]
+  (index req))
+
+(defn send-password-reset-page [req]
   (index req))
 
 (defn check-field [query value db]
@@ -300,14 +377,28 @@
      [(route-map/path-for route-map/login-route) ^:interceptors [(body-params/body-params)]
       {:post `login}]
      [(route-map/path-for route-map/character-pdf-route) {:post `character-pdf-2}]
-     [(route-map/path-for route-map/verify-route) ^:interceptors [(body-params/body-params)]
+     [(route-map/path-for route-map/verify-route)
       {:get `verify}]
+     [(route-map/path-for route-map/verify-sent-route)
+      {:get `verify-sent}]
+     [(route-map/path-for route-map/reset-password-page-route)
+      {:get `reset-password-page}]
+     [(route-map/path-for route-map/send-password-reset-page-route)
+      {:get `send-password-reset-page}]
+     [(route-map/path-for route-map/re-verify-route) ^:interceptors [(body-params/body-params)]
+      {:get `re-verify}]
+     [(route-map/path-for route-map/reset-password-route) ^:interceptors [(body-params/body-params)]
+      {:get `reset-password}]
+     [(route-map/path-for route-map/send-password-reset-route) ^:interceptors [(body-params/body-params)]
+      {:get `send-password-reset}]
      [(route-map/path-for route-map/verify-failed-route)
       {:get `verification-expired}]
      [(route-map/path-for route-map/verify-success-route)
       {:get `verification-successful}]
      [(route-map/path-for route-map/register-page-route)
       {:get `registration-page}]
+     [(route-map/path-for route-map/login-page-route)
+      {:get `login-page}]
      [(route-map/path-for route-map/check-email-route)
       {:get `check-email}]
      [(route-map/path-for route-map/check-username-route)
