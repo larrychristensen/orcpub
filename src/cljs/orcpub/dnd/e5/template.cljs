@@ -308,8 +308,7 @@
                      {:name "Subrace"
                       :tags #{:subrace}
                       :options (map (partial subrace-option source) (if source (map (fn [sr] (assoc sr :source source)) subraces) subraces))})])
-                 (if language-options
-                   (language-selection language-options))
+                 (if (seq language-options) [(language-selection language-options)])
                  selections)
     :modifiers (concat
                 [(mod5e/race name)
