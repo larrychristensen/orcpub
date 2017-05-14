@@ -320,16 +320,16 @@
                   key)))
 
 (defn light-armor-proficiency [& [first-class? cls-kw]]
-  (armor-proficiency "light" :light first-class? cls-kw))
+  (armor-proficiency :light first-class? cls-kw))
 
 (defn medium-armor-proficiency [& [first-class? cls-kw]]
-  (armor-proficiency "medium" :medium first-class? cls-kw))
+  (armor-proficiency :medium first-class? cls-kw))
 
 (defn heavy-armor-proficiency [& [first-class? cls-kw]]
-  (armor-proficiency "heavy" :heavy first-class? cls-kw))
+  (armor-proficiency :heavy first-class? cls-kw))
 
 (defn shield-armor-proficiency [& [first-class? cls-kw]]
-  (armor-proficiency "shields" :shields first-class? cls-kw))
+  (armor-proficiency :shields first-class? cls-kw))
 
 (defn passive-perception [bonus]
   (mods/cum-sum-mod ?passive-perception bonus))
