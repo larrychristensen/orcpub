@@ -9,7 +9,10 @@
             [cljs.core.async :refer [<!]]
             [clojure.string :as s]
             [re-frame.core :refer [dispatch dispatch-sync subscribe]]
-            [reagent.core :as r]))
+            [reagent.core :as r]
+            [goog.events])
+  (:import
+   [goog.history Html5History EventType]))
 
 (enable-console-print!)
 
@@ -20,7 +23,8 @@
                     "/register"))
 
 (def pages
-  {routes/dnd-e5-char-builder-route ch/character-builder
+  {routes/default-route ch/character-builder
+   routes/dnd-e5-char-builder-route ch/character-builder
    routes/register-page-route views/register-form
    routes/verify-failed-route views/verify-failed
    routes/verify-success-route views/verify-success
@@ -33,10 +37,26 @@
    routes/password-reset-expired-route views/password-reset-expired-page
    routes/password-reset-used-route views/password-reset-used-page})
 
+(defn handle-url-change [_]
+  (let [route (routes/match-route js/window.location.pathname)]
+    (prn "ROUTE CHNAGE" route js/window.location.pathname)
+    (dispatch [:route route nil true])))
+
+(defn make-history []
+  (doto (Html5History.)
+    (.setPathPrefix (str js/window.location.protocol
+                         "//"
+                         js/window.location.host))
+    (.setUseFragment false)))
+
+(defonce history (doto (make-history)
+                   (goog.events/listen EventType.NAVIGATE
+                                       #(handle-url-change %))
+                   (.setEnabled true)))
+
 (defn main-view []
   (let [route @(subscribe [:route])
         view (pages route)]
-    (prn "VIEW " view)
     [view]))
 
 (r/render (if (let [doc-style js/document.documentElement.style]

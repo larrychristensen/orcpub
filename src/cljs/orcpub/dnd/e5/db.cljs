@@ -9,6 +9,7 @@
             [bidi.bidi :as bidi]))
 
 (def local-storage-character-key "char-meta")
+(def local-storage-user-key "user")
 
 (def default-route route-map/dnd-e5-char-builder-route)
 
@@ -33,22 +34,39 @@
 (defn character->local-store [character]
   (.setItem js/window.localStorage local-storage-character-key (str character)))
 
+(defn user->local-store [user-data]
+  (.setItem js/window.localStorage local-storage-user-key (str user-data)))
+
 (def tab-path [:builder :character :tab])
 
-(defn get-stored-character []
-  (let [stored-str (.getItem js/window.localStorage local-storage-character-key)]
-    (if stored-str
-      (try (reader/read-string stored-str)
-           (catch js/Object e (js/console.warn "UNREADABLE CHARACTER FOUND" stored-str))))))
+(defn get-local-storage-item [local-storage-key]
+  (if-let [stored-str (.getItem js/window.localStorage local-storage-key)]
+    (try (reader/read-string stored-str)
+         (catch js/Object e (js/console.warn "UNREADABLE ITEM FOUND" local-storage-key stored-str)))))
 
-(re-frame/reg-cofx
-  :local-store-character
-  (fn [cofx _]
-      "Read in character from localstore, and process into a map we can merge into app-db."
-    (assoc cofx
-           :local-store-character
-             (let [stored-character (get-stored-character)]
-               (if stored-character
-                 (if (spec/valid? ::entity/raw-entity stored-character)
-                   stored-character
-                   (js/console.warn "INVALID CHARACTER FOUND, IGNORING" (spec/explain-data ::entity/raw-entity stored-character))))))))
+(defn reg-local-store-cofx [key local-storage-key item-spec]
+  (re-frame/reg-cofx
+   key
+   (fn [cofx _]
+     (assoc cofx
+            key
+            (if-let [stored-item (get-local-storage-item local-storage-key)]
+              (if (spec/valid? item-spec stored-item)
+                stored-item
+                (js/console.warn "INVALID ITEM FOUND, IGNORING" key (spec/explain-data item-spec stored-item))))))))
+
+(reg-local-store-cofx
+ :local-store-character
+ local-storage-character-key
+ ::entity/raw-entity)
+
+(spec/def ::username string?)
+(spec/def ::email string?)
+(spec/def ::token string?)
+(spec/def ::user-data (spec/keys :req-un [::username ::email]))
+(spec/def ::user (spec/keys :req-un [::user-data ::token]))
+
+(reg-local-store-cofx
+ :local-store-user
+ local-storage-user-key
+ ::user)

@@ -48,7 +48,6 @@
 (defn form-input []
   (let [blurred? (r/atom false)]
     (fn [{:keys [title key value messages type on-change]}]
-      (prn "MESSAGES" messages @blurred?)
       [:div
        [base-input
         {:name key
@@ -60,7 +59,7 @@
                        "b-red"
                        "b-gray")
          :on-change on-change
-         :on-blur #(do (prn "BLUR") (swap! blurred? (fn [_] true)))}]
+         :on-blur #(swap! blurred? (fn [_] true))}]
        (if @blurred? (validation-messages messages))])))
 
 (defn registration-page [content]
@@ -72,7 +71,8 @@
               :border "1px solid white"
               :color text-color}}
      [:div.flex.h-100-p
-      [:div.flex.flex-grow-1 {:style {:flex-direction :column}}
+      [:div.flex {:style {:flex-direction :column
+                          :width "435px"}}
        [:div.flex.justify-cont-s-a.align-items-c
         {:style {:height "65px"
                  :background-color "#1a2532"
@@ -80,7 +80,7 @@
         [:img.pointer
          {:src "image/orcpub-logo.svg"
           :style {:height "25.3px"}
-          :on-click #(dispatch [:route routes/dnd-e5-char-builder-route])}]]
+          :on-click #(dispatch [:route :default])}]]
        [:div.flex-grow-1 content]
        [:div.m-l-15.m-b-10 {:style {:text-align :left}}
         "© 2017 OrcPub"]]
@@ -89,7 +89,7 @@
                 :background-size "1200px 800px"
                 :background-position "-350px 0px"
                 :background-clip :content-box
-                :width "450px"
+                :width "350px"
                 :min-height "600px"}}]]]]])
 
 (defn verify-failed []
@@ -252,7 +252,6 @@
   (let [registration-validation @(subscribe [:registration-validation])
         registration-form @(subscribe [:registration-form])
         send-updates? (not= false (:send-updates? registration-form))]
-    (prn "VALIDATION" registration-validation)
     (registration-page
      [:div {:style {:text-align :center}}
       [:div {:style {:color orange
@@ -262,7 +261,7 @@
                      :text-shadow "1px 2px 1px rgba(0,0,0,0.37)"
                      :margin-top "20px"}}
        "join for free"]
-      [:div.f-s-16.m-t-20 "Join now to save your character"]
+      [:div.f-s-16.m-t-20 "Join now to save your characters and more!"]
       [:div.m-t-10
        [form-input {:title "First and Last Name"
                     :key :first-and-last-name
@@ -313,7 +312,7 @@
           :on-click #(if (empty? registration-validation)
                        (dispatch [:register]))}
          "JOIN"]]]
-      [:div.m-t-5
+      [:div.m-t-5.p-r-10.p-l-10
        [:span.f-s-14
         "By clicking JOIN you agree to our"
         [:a.m-l-5 {:href "" :target :_blank

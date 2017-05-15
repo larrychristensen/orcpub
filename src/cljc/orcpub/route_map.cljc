@@ -2,6 +2,7 @@
   (:require [bidi.bidi :as bidi]))
 
 (def dnd-e5-char-builder-route :char-builder-5e)
+(def default-route :default)
 (def register-route :register)
 (def register-page-route :register-page)
 (def verify-route :verify)
@@ -23,26 +24,31 @@
 (def password-reset-expired-route :password-reset-expired)
 (def password-reset-used-route :password-reset-used)
 
-(def routes ["/" {"verify" verify-route
-                  "verification-expired" verify-failed-route
-                  "verification-successful" verify-success-route
-                  "verification-sent" verify-sent-route
-                  "re-verify" re-verify-route
-                  "register" register-route
-                  "register-page" register-page-route
-                  "login" login-route
-                  "login-page" login-page-route
-                  "character.pdf" character-pdf-route
-                  "check-email" check-email-route
-                  "check-username" check-username-route
-                  "reset-password-page" reset-password-page-route
-                  "reset-password" reset-password-route
-                  "send-password-reset" send-password-reset-route
-                  "send-password-reset-page" send-password-reset-page-route
-                  "password-reset-sent" password-reset-sent-route
-                  "password-reset-success" password-reset-success-route
-                  "password-reset-expired" password-reset-expired-route
-                  "password-reset-used" password-reset-used-route}])
+(def routes ["/"
+             {"" default-route
+              "verify" verify-route
+              "verification-expired" verify-failed-route
+              "verification-successful" verify-success-route
+              "verification-sent" verify-sent-route
+              "re-verify" re-verify-route
+              "register" register-route
+              "register-page" register-page-route
+              "login" login-route
+              "login-page" login-page-route
+              "character.pdf" character-pdf-route
+              "check-email" check-email-route
+              "check-username" check-username-route
+              "reset-password-page" reset-password-page-route
+              "reset-password" reset-password-route
+              "send-password-reset" send-password-reset-route
+              "send-password-reset-page" send-password-reset-page-route
+              "password-reset-sent" password-reset-sent-route
+              "password-reset-success" password-reset-success-route
+              "password-reset-expired" password-reset-expired-route
+              "password-reset-used" password-reset-used-route}])
 
 (defn path-for [route]
   (bidi/path-for routes route))
+
+(defn match-route [path]
+  (->> path (bidi/match-route routes) :handler))

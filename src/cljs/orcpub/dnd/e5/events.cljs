@@ -5,8 +5,10 @@
             [orcpub.dice :as dice]
             [orcpub.dnd.e5.template :as t5e]
             [orcpub.dnd.e5.character :as char5e]
-            [orcpub.dnd.e5.db :refer [default-value character->local-store tab-path]]
-
+            [orcpub.dnd.e5.db :refer [default-value
+                                      character->local-store
+                                      user->local-store
+                                      tab-path]]
             [re-frame.core :refer [reg-event-db reg-event-fx reg-fx inject-cofx path trim-v
                                    after debug dispatch]]
             [cljs.spec :as spec]
@@ -30,6 +32,8 @@
 
 (def db-char->local-store (after (fn [db] (character->local-store (:character db)))))
 
+(def user->local-store-interceptor (after (fn [db] (user->local-store (:user-data db)))))
+
 (def character-interceptors [check-spec-interceptor
                              (path :character)
                              ->local-store])
@@ -40,13 +44,14 @@
 (reg-event-fx
  :initialize-db
  [(inject-cofx :local-store-character)
+  (inject-cofx :local-store-user)
   check-spec-interceptor]
- (fn [{:keys [db local-store-character]} _]
+ (fn [{:keys [db local-store-character local-store-user]} _]
    {:db (if (seq db)
           db
-          (if local-store-character
-            (assoc default-value :character local-store-character)
-            default-value))}))
+          (cond-> default-value
+            local-store-character (assoc :character local-store-character)
+            local-store-user (assoc :user-data local-store-user)))}))
 
 (defn reset-character [_ [_]]
   (char5e/set-class t5e/character :barbarian 0 t5e/barbarian-option))
@@ -57,7 +62,6 @@
  reset-character)
 
 (defn set-character [db [_ character]]
-  ;;(prn "SET_CHARACTER" character)
   (assoc db :character character :loading false))
 
 (reg-event-db
@@ -414,14 +418,13 @@
 
 (reg-event-fx
  :route
- (fn [{:keys [db]} [_ new-route return-route]]
-   (prn "ROUTE" (:route db) new-route)
+ (fn [{:keys [db]} [_ new-route return-route skip-path?]]
    (let [{:keys [route route-history]} db]
-     {:db (assoc db
-                 :route new-route
-                 :return-route (or return-route (:return-route db))
-                 :route-history (conj route-history route))
-      :path (routes/path-for new-route)})))
+     (cond-> {:db (assoc db
+                  :route new-route
+                  :return-route (or return-route (:return-route db))
+                  :route-history (conj route-history route))}
+       (not skip-path?) (assoc :path (routes/path-for new-route))))))
 
 (reg-event-db
  :set-user-data
@@ -492,7 +495,6 @@
  :http
  (fn [{:keys [on-success on-failure] :as cfg}]
    (go (let [response (<! (http/request cfg))]
-         (prn "RESPONSE" response)
          (if (<= 200 (:status response) 299)
            (dispatch (conj on-success response))
            (dispatch (conj on-failure response)))))))
@@ -511,6 +513,7 @@
 
 (reg-event-db
  :login-success
+ [user->local-store-interceptor]
  (fn [db [_ backtrack? response]]
    (cond-> db
        true (assoc :user-data (-> response :body))
@@ -520,13 +523,12 @@
  :login-failure
  (fn [{:keys [db]} [_ response]]
    (let [error-code (-> response :body :error)]
-     (prn "ERROR CODE" error-code)
      (cond
        (= error-code errors/bad-credentials) {:dispatch [:set-user-data nil]}
        (= error-code errors/unverified) {:db (assoc db :temp-email (-> response :body :email))
                                          :dispatch [:route routes/verify-sent-route]}
        (= error-code errors/unverified-expired) {:dispatch [:route routes/verify-failed-route]}
-       :else (prn "JUANCHO")))))
+       :else {}))))
 
 (reg-event-fx
  :logout
@@ -545,7 +547,6 @@
 (reg-event-db
  :register-success
  (fn [db [_ backtrack? response]]
-   (prn "SUCCESS RESPONSE" response)
    (assoc db
           :user-data (:body response)
           :route :verify-sent)))
@@ -553,7 +554,6 @@
 (reg-event-fx
  :register-failure
  (fn [cofx [_ response]]
-   (prn "FAILURE RESPONSE" response)
    {:dispatch [:set-user-data nil]}))
 
 (defn validate-registration [])
@@ -561,13 +561,11 @@
 (reg-event-db
  :email-taken
  (fn [db [_ response]]
-   (prn "CHECK EMAIL RESPONSE" response)
    (assoc db :email-taken? (-> response :body (= "true")))))
 
 (reg-event-db
  :username-taken
  (fn [db [_ response]]
-   (prn "CHECK EMAIL RESPONSE" response)
    (assoc db :username-taken? (-> response :body (= "true")))))
 
 (reg-event-db
@@ -613,7 +611,6 @@
 (reg-event-fx
  :check-username
  (fn [{:keys [db]} [_ username]]
-   (prn "USERNAME" username)
    {:http {:method :get
            :url (backend-url (bidi/path-for routes/routes routes/check-username-route))
            :query-params {:username username}
