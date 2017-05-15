@@ -486,6 +486,9 @@
 (def lg-query
   {:min-width lg-width})
 
+(def not-lg-query
+  {:max-width lg-width})
+
 (def media-queries
   [[:.visible-xs,
     :.visible-sm,
@@ -508,16 +511,11 @@
     {:display "none !important"}]
 
    (at-media xs-query
-    [:.visible-xs {:display "block !important"
-                   }]
+    [:.visible-xs {:display "block !important"}]
     [:table.visible-xs {:display "table !important"}]
-    [:tr.visible-xs {
-                     :display "table-row !important"
-                     }]
+    [:tr.visible-xs {:display "table-row !important"}]
     [:th.visible-xs,
-     :td.visible-xs {
-                     :display "table-cell !important"
-                     }])
+     :td.visible-xs {:display "table-cell !important"}])
 
    (at-media xs-query
     [:.visible-xs-block
@@ -695,6 +693,13 @@
     [:.character-builder-header
      {:margin-bottom "19px"}]
 
+    [:.registration-content
+     {:width "785px"
+      :min-height "600px"}]
+
+    [:.registration-input
+     {:min-width "438px"}]
+
     #_["input::-webkit-outer-spin-button"
      "input::-webkit-inner-spin-button"
      {:-webkit-appearance :none
@@ -830,6 +835,16 @@
      
      [:.details-columns
       {:display :flex}])
+
+    (at-media
+     not-lg-query
+     [:.registration-image
+      {:display :none}]
+     [:.registration-content
+      {:width "100%"
+       :height "100%"}]
+     [:.registration-input
+      {:width "100%"}])
 
     (at-media
      lg-query
