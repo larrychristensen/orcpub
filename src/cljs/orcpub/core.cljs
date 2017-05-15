@@ -26,11 +26,17 @@
    routes/verify-success-route views/verify-success
    routes/verify-sent-route views/verify-sent
    routes/login-page-route views/login-page
-   routes/send-password-reset-page-route views/send-password-reset-page})
+   routes/send-password-reset-page-route views/send-password-reset-page
+   routes/password-reset-sent-route views/password-reset-sent
+   routes/reset-password-page-route views/password-reset-page
+   routes/password-reset-success-route views/password-reset-success
+   routes/password-reset-expired-route views/password-reset-expired-page
+   routes/password-reset-used-route views/password-reset-used-page})
 
 (defn main-view []
   (let [route @(subscribe [:route])
         view (pages route)]
+    (prn "VIEW " view)
     [view]))
 
 (r/render (if (let [doc-style js/document.documentElement.style]

@@ -18,6 +18,10 @@
 (def reset-password-route :reset-password)
 (def send-password-reset-route :send-password-reset)
 (def send-password-reset-page-route :send-password-reset-page)
+(def password-reset-sent-route :password-reset-sent)
+(def password-reset-success-route :password-reset-success)
+(def password-reset-expired-route :password-reset-expired)
+(def password-reset-used-route :password-reset-used)
 
 (def routes ["/" {"verify" verify-route
                   "verification-expired" verify-failed-route
@@ -34,7 +38,11 @@
                   "reset-password-page" reset-password-page-route
                   "reset-password" reset-password-route
                   "send-password-reset" send-password-reset-route
-                  "send-password-reset-page" send-password-reset-page-route}])
+                  "send-password-reset-page" send-password-reset-page-route
+                  "password-reset-sent" password-reset-sent-route
+                  "password-reset-success" password-reset-success-route
+                  "password-reset-expired" password-reset-expired-route
+                  "password-reset-used" password-reset-used-route}])
 
 (defn path-for [route]
   (bidi/path-for routes route))
