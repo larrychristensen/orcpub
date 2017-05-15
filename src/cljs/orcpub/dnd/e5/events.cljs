@@ -414,11 +414,12 @@
 
 (reg-event-fx
  :route
- (fn [{:keys [db]} [_ new-route]]
+ (fn [{:keys [db]} [_ new-route return-route]]
    (prn "ROUTE" (:route db) new-route)
    (let [{:keys [route route-history]} db]
      {:db (assoc db
                  :route new-route
+                 :return-route (or return-route (:return-route db))
                  :route-history (conj route-history route))
       :path (routes/path-for new-route)})))
 
@@ -513,7 +514,7 @@
  (fn [db [_ backtrack? response]]
    (cond-> db
        true (assoc :user-data (-> response :body))
-       backtrack? (assoc :route (peek (:route-history db))))))
+       true (assoc :route (:return-route db)))))
 
 (reg-event-fx
  :login-failure
@@ -554,11 +555,6 @@
  (fn [cofx [_ response]]
    (prn "FAILURE RESPONSE" response)
    {:dispatch [:set-user-data nil]}))
-
-(reg-event-db
- :re-verify-success
- (fn [db []]
-   (assoc db :route (-> (bidi/match-route routes/routes routes/verify-sent-route) :handler first))))
 
 (defn validate-registration [])
 
@@ -634,6 +630,11 @@
              :on-success [:register-success backtrack?]
              :on-failure [:register-failure]}})))
 
+(reg-event-db
+ :re-verify-success
+ (fn [db []]
+   (assoc db :route routes/verify-sent-route)))
+
 (reg-event-fx
  :re-verify
  (fn [{:keys [db]} [_ params]]
@@ -641,6 +642,39 @@
     :http {:method :get
            :url (backend-url (bidi/path-for routes/routes routes/re-verify-route))
            :query-params params
-           :on-success [:re-verify-success]
-           :on-failure [:re-verify-failure]}}))
+           :on-success [:re-verify-success]}}))
 
+(reg-event-db
+ :send-password-reset-success
+ (fn [db []]
+   (assoc db :route routes/password-reset-sent-route)))
+
+(reg-event-fx
+ :send-password-reset
+ (fn [{:keys [db]} [_ params]]
+   {:db (assoc db :temp-email (:email params))
+    :http {:method :get
+           :url (backend-url (bidi/path-for routes/routes routes/send-password-reset-route))
+           :query-params params
+           :on-success [:send-password-reset-success]}}))
+
+(reg-event-db
+ :password-reset-success
+ (fn [db []]
+   (assoc db :route routes/password-reset-success-route)))
+
+(defn cookies []
+  (let [cookie js/document.cookie]
+    (into {}
+          (map #(s/split % "="))
+          (s/split cookie "; "))))
+
+(reg-event-fx
+ :password-reset
+ (fn [{:keys [db]} [_ params]]
+   {:db (assoc db :temp-email (:email params))
+    :http {:method :post
+           :headers {"Authorization" (str "Token " ((cookies) "token"))}
+           :url (backend-url (bidi/path-for routes/routes routes/reset-password-route))
+           :json-params params
+           :on-success [:password-reset-success]}}))

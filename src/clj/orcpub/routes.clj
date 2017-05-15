@@ -3,7 +3,7 @@
             [io.pedestal.http.route :as route]
             [io.pedestal.test :as test]
             [io.pedestal.http.ring-middlewares :as ring]
-            [ring.util.response :as ring-resp]
+            [ring.middleware.cookies :only [wrap-cookies]]
             [io.pedestal.http.body-params :as body-params]
             [io.pedestal.interceptor.error :as error-int]
             [io.pedestal.interceptor.chain :refer [terminate]]
@@ -12,6 +12,7 @@
             [buddy.auth.backends :as backends]
             [buddy.sign.jwt :as jwt]
             [buddy.hashers :as hashers]
+            [buddy.auth.middleware :refer [authentication-request]]
             [clojure.java.io :as io]
             [clj-time.core :as t :refer [hours from-now ago]]
             [clj-time.coerce :as tc :refer [from-date]]
@@ -58,15 +59,9 @@
 
 (def check-auth
   {:name :check-auth
-   :enter (fn [{:keys [request] :as context}]
-     (let [req (try (some->> (proto/-parse backend request)
-                             (proto/-authenticate backend request))
-                    (catch Exception _))]
-       (if (:identity req)
-         (assoc context :request req)
-         (-> context
-             terminate
-             (assoc :response {:status 401 :body {:message "Unauthorized"}})))))})
+   :enter (fn [context]
+            (let [request (:request context)]
+              (update context :request #(authentication-request % backend))))})
 
 (defn redirect [route-key]
   (ring-resp/redirect (route-map/path-for route-key)))
@@ -78,6 +73,11 @@
   {:status 401 :body (merge
                       data
                       {:error error-key})})
+
+(defn create-token [username exp]
+  (jwt/sign {:user username
+             :exp exp}
+            secret))
 
 (defn login-response
   [{:keys [json-params db] :as request}]
@@ -94,9 +94,7 @@
       (nil? id) (login-error errors/bad-credentials)
       (and unverified? expired?) (login-error errors/unverified-expired)
       unverified? (login-error errors/unverified {:email email})
-      :else (let [claims {:user (select-keys user [:orcpub.user/username])
-                          :exp (-> 3 hours from-now)}
-                  token (jwt/sign claims secret)]
+      :else (let [token (create-token username (-> 3 hours from-now))]
               {:status 200 :body {:user-data {:username (:orcpub.user/username user)
                                               :email (:orcpub.user/email user)}
                                   :token token}}))))
@@ -117,13 +115,16 @@
     :in $ ?email
     :where [?e :orcpub.user/email ?email]])
 
-(defn send-verification-email [scheme headers params verification-key]
+(defn base-url [{:keys [scheme headers]}]
+  (str (name scheme) "://" (headers "host")))
+
+(defn send-verification-email [request params verification-key]
   (email/send-verification-email
-   (str (name scheme) "://" (headers "host"))
+   (base-url request)
    params
    verification-key))
 
-(defn do-verification [scheme headers params conn & [tx-data]]
+(defn do-verification [request params conn & [tx-data]]
   (let [verification-key (str (java.util.UUID/randomUUID))
         now (java.util.Date.)]
     (prn "DO VERIFY" tx-data)
@@ -134,10 +135,10 @@
             {:orcpub.user/verified? false
              :orcpub.user/verification-key verification-key
              :orcpub.user/verification-sent now})])
-        (send-verification-email scheme headers params verification-key)
+        (send-verification-email request params verification-key)
         {:status 200})))
 
-(defn register [{:keys [json-params db conn scheme headers] :as request}]
+(defn register [{:keys [json-params db conn] :as request}]
   (let [{:keys [username email password first-and-last-name send-updates?]} json-params
         validation (registration/validate-registration
                     json-params
@@ -147,8 +148,7 @@
       {:status 400
        :body validation}
       (do-verification
-       scheme
-       headers
+       request
        json-params
        conn
        {:orcpub.user/email email
@@ -189,20 +189,71 @@
                                :orcpub.user/verified? true}])
             (redirect route-map/verify-success-route))))))
 
-(defn re-verify [{:keys [query-params db conn scheme headers] :as request}]
+(defn re-verify [{:keys [query-params db conn] :as request}]
   (let [email (:email query-params)
         {:keys [:orcpub.user/verification-sent
                 :orcpub.user/verified?
                 :orcpub.user/first-and-last-name
                 :db/id] :as user} (user-for-email db email)]
     (if verified?
-      (ring-resp/redirect (route-map/verify-success-route))
-      (do-verification scheme
-                       headers
+      (redirect route-map/verify-success-route)
+      (do-verification request
                        (merge query-params
                               {:first-and-last-name first-and-last-name})
                        conn
                        {:db/id id}))))
+
+(defn do-send-password-reset [user-id first-and-last-name email conn request]
+  (let [key (str (java.util.UUID/randomUUID))]
+    @(d/transact
+      conn
+      [{:db/id user-id
+        :orcpub.user/password-reset-key key
+        :orcpub.user/password-reset-sent (java.util.Date.)}])
+    (email/send-reset-email
+     (base-url request)
+     {:first-and-last-name first-and-last-name
+      :email email}
+     key)
+    {:status 200}))
+
+(defn password-reset-expired? [password-reset-sent]
+  (and password-reset-sent (t/before? (tc/from-date password-reset-sent) (-> 24 hours ago))))
+
+(defn password-already-reset? [password-reset password-reset-sent]
+  (and password-reset (t/before? (tc/from-date password-reset-sent) (tc/from-date password-reset))))
+
+(defn send-password-reset [{:keys [query-params db conn scheme headers] :as request}]
+  (let [email (:email query-params)
+        {:keys [:orcpub.user/first-and-last-name
+                :orcpub.user/password-reset-sent
+                :orcpub.user/password-reset
+                :db/id] :as user} (user-for-email db email)
+        expired? (password-reset-expired? password-reset-sent)
+        already-reset? (password-already-reset? password-reset password-reset-sent)]
+    (if (or (not password-reset-sent)
+            expired?
+            already-reset?)
+          (do-send-password-reset id first-and-last-name email conn request)
+          (redirect route-map/password-reset-sent-route))))
+
+(defn do-password-reset [conn user-id password]
+  @(d/transact
+    conn
+    [{:db/id user-id
+      :orcpub.user/password (hashers/encrypt password)
+      :orcpub.user/password-reset (java.util.Date.)}])
+  {:status 200})
+
+(defn reset-password [{:keys [json-params db conn cookies identity] :as request}]
+  (prn "RESET PASSWORD REQUEST" request)
+  (let [{:keys [password verify-password]} json-params
+        username (:user identity)
+        {:keys [:db/id] :as user} (first-user-by db username-query username)]
+    (prn "USER" username user)
+    (if (= password verify-password)
+      (do-password-reset conn id password)
+      {:status 400 :message "Passwords do not match"})))
 
 (def font-sizes
   (merge
@@ -327,13 +378,18 @@
       {:status 200 :body (ByteArrayInputStream. a)})))
 
 (defn html-response
-  [html]
-  {:status 200 :body html :headers {"Content-Type" "text/html"}})
+  [html & [response]]
+  (let [merged (merge
+                response
+                {:status 200 :body html :headers {"Content-Type" "text/html"}})]
+    (prn "MERSGED" merged)
+    merged))
 
-(defn index [req]
+(defn index [req & [response]]
   (prn "REQUESt" req)
   (html-response
-   (slurp (io/resource "public/index.html"))))
+   (slurp (io/resource "public/index.html"))
+   response))
 
 (defn verification-expired [req]
   (index req))
@@ -350,7 +406,35 @@
 (defn login-page [req]
   (index req))
 
-(defn reset-password-page [req]
+(def user-by-password-reset-key-query
+  '[:find ?e
+    :in $ ?key
+    :where [?e :orcpub.user/password-reset-key ?key]])
+
+(defn reset-password-page [{:keys [query-params db conn] :as req}]
+  (let [key (:key query-params)
+        {:keys [:db/id
+                :orcpub.user/username
+                :orcpub.user/password-reset-key
+                :orcpub.user/password-reset-sent
+                :orcpub.user/password-reset] :as user} (first-user-by db user-by-password-reset-key-query key)
+        _ (prn "USER" user key)
+        expired? (password-reset-expired? password-reset-sent) 
+        already-reset? (password-already-reset? password-reset password-reset-sent)]
+    (prn "EXIRED" expired? already-reset? password-reset-sent password-reset)
+    (cond
+      expired? (redirect route-map/password-reset-expired-route)
+      already-reset? (redirect route-map/password-reset-used-route)
+      :else (let [token (create-token username (-> 1 hours from-now))]
+              (index req {:cookies {"token" token}})))))
+
+(defn password-reset-sent-page [req]
+  (index req))
+
+(defn password-reset-expired-page [req]
+  (index req))
+
+(defn password-reset-used-page [req]
   (index req))
 
 (defn send-password-reset-page [req]
@@ -381,14 +465,20 @@
       {:get `verify}]
      [(route-map/path-for route-map/verify-sent-route)
       {:get `verify-sent}]
-     [(route-map/path-for route-map/reset-password-page-route)
+     [(route-map/path-for route-map/reset-password-page-route) ^:interceptors [ring/cookies]
       {:get `reset-password-page}]
      [(route-map/path-for route-map/send-password-reset-page-route)
       {:get `send-password-reset-page}]
+     [(route-map/path-for route-map/password-reset-sent-route)
+      {:get `password-reset-sent-page}]
+     [(route-map/path-for route-map/password-reset-expired-route)
+      {:get `password-reset-expired-page}]
+     [(route-map/path-for route-map/password-reset-used-route)
+      {:get `password-reset-used-page}]
      [(route-map/path-for route-map/re-verify-route) ^:interceptors [(body-params/body-params)]
       {:get `re-verify}]
-     [(route-map/path-for route-map/reset-password-route) ^:interceptors [(body-params/body-params)]
-      {:get `reset-password}]
+     [(route-map/path-for route-map/reset-password-route) ^:interceptors [(body-params/body-params) ring/cookies check-auth]
+      {:post `reset-password}]
      [(route-map/path-for route-map/send-password-reset-route) ^:interceptors [(body-params/body-params)]
       {:get `send-password-reset}]
      [(route-map/path-for route-map/verify-failed-route)

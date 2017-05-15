@@ -29,6 +29,15 @@
     :db/cardinality :db.cardinality/one}
    {:db/ident :orcpub.user/verification-sent
     :db/valueType :db.type/instant
+    :db/cardinality :db.cardinality/one}
+   {:db/ident :orcpub.user/password-reset-sent
+    :db/valueType :db.type/instant
+    :db/cardinality :db.cardinality/one}
+   {:db/ident :orcpub.user/password-reset
+    :db/valueType :db.type/instant
+    :db/cardinality :db.cardinality/one}
+   {:db/ident :orcpub.user/password-reset-key
+    :db/valueType :db.type/string
     :db/cardinality :db.cardinality/one}])
 
 (def entity-schema

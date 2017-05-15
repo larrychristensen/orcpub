@@ -27,6 +27,7 @@
    :locked-components #{}
    :route (parse-route)
    :route-history (list default-route)
+   :return-route default-route
    :registration-form {:send-updates? true}})
 
 (defn character->local-store [character]
