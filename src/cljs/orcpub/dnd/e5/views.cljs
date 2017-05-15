@@ -11,7 +11,7 @@
 (def orange "#f0a100")
 
 (def input-style
-  {:height "38px" :width "438px"
+  {:height "38px"
    :border-style "solid"
    :border-width "1px"
    :border-radius "3px"
@@ -33,17 +33,24 @@
 (defn validation-messages [messages]
   (if messages
     [:ul.t-a-l.p-l-20.p-r-20
-     (map-indexed
-      (fn [i msg]
-        ^{:key i}
-        [:li.red (str common/dot-char " " msg)])
-      messages)]))
+     (doall
+      (map-indexed
+       (fn [i msg]
+         ^{:key i}
+         [:li.red (str common/dot-char " " msg)])
+       messages))]))
+
+(defn base-input [attrs]
+  [:div.flex.p-l-10.p-l-10.p-r-10.p-t-10
+   [:input.flex-grow-1
+    attrs]])
 
 (defn form-input []
   (let [blurred? (r/atom false)]
     (fn [{:keys [title key value messages type on-change]}]
+      (prn "MESSAGES" messages @blurred?)
       [:div
-       [:input.m-t-20
+       [base-input
         {:name key
          :type type
          :value value
@@ -59,31 +66,31 @@
 (defn registration-page [content]
   [:div.sans.h-100-p.flex
    {:style {:flex-direction :column}}
-   [:div.flex.justify-cont-s-a.align-items-c.flex-grow-1
-    [:div
-     {:style {:width "785px"
-              :min-height "600px"
-              :background-color :white
+   [:div.flex.justify-cont-s-a.align-items-c.flex-grow-1.h-100-p
+    [:div.registration-content
+     {:style {:background-color :white
               :border "1px solid white"
               :color text-color}}
-     [:div.flex
-      [:div.flex {:style {:width "487px"
-                          :flex-direction :column}}
+     [:div.flex.h-100-p
+      [:div.flex.flex-grow-1 {:style {:flex-direction :column}}
        [:div.flex.justify-cont-s-a.align-items-c
         {:style {:height "65px"
                  :background-color "#1a2532"
                  :border-right "1px solid white"}}
-        [:img {:src "image/orcpub-logo.svg"
-               :style {:height "25.3px"}}]]
+        [:img.pointer
+         {:src "image/orcpub-logo.svg"
+          :style {:height "25.3px"}
+          :on-click #(dispatch [:route routes/dnd-e5-char-builder-route])}]]
        [:div.flex-grow-1 content]
        [:div.m-l-15.m-b-10 {:style {:text-align :left}}
         "© 2017 OrcPub"]]
-      [:div {:style {:background-image "url(image/shutterstock_432001912.jpg)"
-                     :background-size "1200px 800px"
-                     :background-position "-350px 0px"
-                     :background-clip :content-box
-                     :width "308px"
-                     :min-height "600px"}}]]]]])
+      [:div.registration-image
+       {:style {:background-image "url(image/shutterstock_432001912.jpg)"
+                :background-size "1200px 800px"
+                :background-position "-350px 0px"
+                :background-clip :content-box
+                :width "450px"
+                :min-height "600px"}}]]]]])
 
 (defn verify-failed []
   (let [params (r/atom {})]
@@ -95,12 +102,13 @@
          [:div.f-w-b.f-s-24.p-b-10
           "Your key has expired."]
          [:div "You must verify your email within 24 hours of registering. Send another verification email by submitting you address here:"]
-         [:input.m-t-20 {:name :email
-                         :value (:email @params)
-                         :type :email
-                         :placeholder "Email"
-                         :style default-input-style
-                         :on-change (partial set-value params :email)}]
+         [base-input
+          {:name :email
+           :value (:email @params)
+           :type :email
+           :placeholder "Email"
+           :style default-input-style
+           :on-change (partial set-value params :email)}]
          [:button.form-button.m-l-20.m-t-10
           {:style {:height "40px"
                    :width "174px"
@@ -113,20 +121,22 @@
   (let [params (r/atom {})]
     (fn [error-message]
       (registration-page
-       [:div.flex.justify-cont-s-b {:style {:text-align :center
-                           :flex-direction :column}}
-        [:div.p-20
+       [:div.flex.justify-cont-s-b.w-100-p
+        {:style {:text-align :center
+                 :flex-direction :column}}
+        [:div.p-t-10
          (if error-message [:div.red.m-b-20 error-message])
          [:div.f-w-b.f-s-24.p-b-10
           "Send Password Reset Email"]
-         [:div "Submit your email address here and we will send you a link to reset your password."]
-         [:input.m-t-20 {:name :email
-                         :value (:email @params)
-                         :type :email
-                         :placeholder "Email"
-                         :style default-input-style
-                         :on-change (partial set-value params :email)}]
-         [:button.form-button.m-l-20.m-t-10
+         [:div.m-b-10 "Submit your email address here and we will send you a link to reset your password."]
+         [base-input
+          {:name :email
+           :value (:email @params)
+           :type :email
+           :placeholder "Email"
+           :style default-input-style
+           :on-change (partial set-value params :email)}]
+         [:button.form-button.m-t-10
           {:style {:height "40px"
                    :width "174px"
                    :font-size "16px"
@@ -253,7 +263,7 @@
                      :margin-top "20px"}}
        "join for free"]
       [:div.f-s-16.m-t-20 "Join now to save your character"]
-      [:div
+      [:div.m-t-10
        [form-input {:title "First and Last Name"
                     :key :first-and-last-name
                     :value (:first-and-last-name registration-form)
@@ -291,9 +301,10 @@
           :on-click #(dispatch [:registration-send-updates? (not send-updates?)])}]
         [:span.m-l-5 "Yes! Send me updates about OrcPub."]]
        [:div.m-t-30
-        [:span "Already have an account?"]
-        (login-link)
-        [:button.form-button.m-l-20
+        [:div.p-10
+         [:span "Already have an account?"]
+         (login-link)]
+        [:button.form-button
          {:style {:height "40px"
                   :width "174px"
                   :font-size "16px"
