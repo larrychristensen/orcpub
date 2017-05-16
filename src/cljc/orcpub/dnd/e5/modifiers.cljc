@@ -216,6 +216,12 @@
 (defn spell-slot-factor [class-key factor]
   (mods/map-mod ?spell-slot-factors class-key factor))
 
+(defn spell-save-dc-bonus [bonus]
+  (mods/cum-sum-mod ?spell-save-dc-bonus bonus))
+
+(defn spell-attack-modifier-bonus [bonus]
+  (mods/cum-sum-mod ?spell-attack-modifier-bonus bonus))
+
 (defn trait-cfg [{:keys [name description class-key level summary page conditions source] :as cfg}]
   (let [class-key? (not (nil? class-key))]
     (mods/modifier ?traits

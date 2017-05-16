@@ -8833,10 +8833,25 @@ long rest."})]
                                             (and (not melee?) definitely-finesse?))
                                       :str
                                       :dex)))))
+    ?spell-attack-modifier-bonus 0
     ?spell-attack-modifier (fn [ability-kw]
-                             (+ ?prof-bonus (?ability-bonuses ability-kw)))
+                             (+ ?prof-bonus
+                                (?ability-bonuses ability-kw)
+                                ?spell-attack-modifier-bonus))
+    ?spell-save-dc-bonus 0
     ?spell-save-dc (fn [ability-kw]
-                     (+ 8 ?prof-bonus (?ability-bonuses ability-kw)))
+                     (+ 8
+                        ?prof-bonus
+                        (?ability-bonuses ability-kw)
+                        ?spell-save-dc-bonus))
+    ?spell-modifiers (reduce
+                      (fn [m {:keys [ability class]}]
+                        (assoc m class {:class class
+                                        :ability ability
+                                        :spell-save-dc (?spell-save-dc ability)
+                                        :spell-attack-modifier (?spell-attack-modifier ability)}))
+                      {}
+                      (->> ?spells-known vals flatten))
     ?spell-slots (merge-with
                   +
                   (opt5e/total-slots (apply + (map (fn [[cls-kw factor]]

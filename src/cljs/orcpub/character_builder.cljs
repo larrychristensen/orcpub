@@ -215,12 +215,26 @@
   (let [key-fn (juxt :key :ability)]
     (compare (key-fn spell-1) (key-fn spell-2))))
 
-(defn spells-known-section [spells-known spell-slots]
+(defn spells-known-section [spells-known spell-slots spell-modifiers]
   [display-section "Spells" "spell-book"
    [:div
     [:div.f-s-14
      [:span.f-w-b "Slots: "]
      [:span.f-w-n (s/join ", " (map (fn [[level slots]] (str level " - " slots)) spell-slots))]]
+    [:div.f-s-14
+     [:span.f-w-b "Spell Save DC: "]
+     [:span.f-w-n (s/join ", " (map (fn [[class {:keys [spell-save-dc ability]}]]
+                                      (str spell-save-dc
+                                           (if (-> spell-modifiers count (> 1))
+                                             (str " (" class ", " (s/upper-case (name ability)) ")"))))
+                                    spell-modifiers))]]
+    [:div.f-s-14
+     [:span.f-w-b "Spell Attack Bonus: "]
+     [:span.f-w-n (s/join ", " (map (fn [[class {:keys [spell-attack-modifier ability]}]]
+                                      (str (common/bonus-str spell-attack-modifier)
+                                           (if (-> spell-modifiers count (> 1))
+                                             (str " (" class ", " (s/upper-case (name ability)) ")"))))
+                                    spell-modifiers))]]
     [:div.f-s-14.flex.flex-wrap
      (doall
       (map
@@ -464,7 +478,7 @@
        [list-item-section "Damage Immunities" nil damage-immunities resistance-str]
        [list-item-section "Condition Immunities" nil condition-immunities resistance-str]
        [list-item-section "Immunities" nil immunities resistance-str]
-       (if (seq spells-known) [spells-known-section spells-known spell-slots])
+       (if (seq spells-known) [spells-known-section spells-known spell-slots (es/entity-val built-char :spell-modifiers)])
        [equipment-section "Weapons" "plain-dagger" (concat magic-weapons weapons) mi5e/all-weapons-map]
        [equipment-section "Armor" "breastplate" (merge magic-armor armor) mi5e/all-armor-map]
        [equipment-section "Equipment" "backpack" (concat magic-items
