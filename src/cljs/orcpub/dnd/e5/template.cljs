@@ -616,6 +616,7 @@
    :abilities {:str 2 :con 1}
    :size :medium
    :speed 30
+   :darkvision 60
    :languages ["Common" "Orc"]
    :modifiers [(mod5e/skill-proficiency :intimidation)]
    :traits [{:name "Relentless Endurance"
