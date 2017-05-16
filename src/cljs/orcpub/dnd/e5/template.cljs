@@ -1761,6 +1761,7 @@
                                 " that it can, within the next 10 min., add to a d20 roll")})]
     :levels {2 {:modifiers [(mod/modifier ?default-skill-bonus (let [b (int (/ ?prof-bonus 2))]
                                                                  (zipmap char5e/ability-keys (repeat b))))
+                            (mod/cum-sum-mod ?initiative (int (/ ?prof-bonus 2)))
                             (mod5e/dependent-trait
                              {:name "Jack of All Trades"
                               :page 54
