@@ -859,6 +859,7 @@
    :speed 30
    :darkvision 60
    :source :vgm
+   :languages ["Common" "Goblin"]
    :selections [(t/selection-cfg
                  {:name "Martial Weapon Proficiencies"
                   :tags #{:weapon-profs :profs}
