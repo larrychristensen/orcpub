@@ -33,7 +33,10 @@
             [clojure.spec.test :as stest]
 
             [reagent.core :as r]
-            [re-frame.core :refer [subscribe dispatch dispatch-sync]]))
+            [re-frame.core :refer [subscribe dispatch dispatch-sync]]
+            [goog.labs.userAgent.browser :as g-browser]
+            [goog.labs.userAgent.device :as g-device]
+            [goog.labs.userAgent.platform :as g-platform]))
 
 (def print-disabled? false)
 (def print-enabled? (and (not print-disabled?)
@@ -2149,6 +2152,60 @@
    :z-index 100
    :background-color "rgba(0,0,0,0.6)"})
 
+(def debug-data-style {:width "400px" :height "400px"})
+
+(defn browser []
+  (cond
+    (g-browser/isChrome) :chrome
+    (g-browser/isEdge) :edge
+    (g-browser/isFirefox) :firefox
+    (g-browser/isIE) :ie
+    (g-browser/isSafari) :safari
+    :else :not-found))
+
+(defn browser-version []
+  (g-browser/getVersion))
+
+(defn device-type []
+  (cond
+    (g-device/isDesktop) :desktop
+    (g-device/isMobile) :mobile
+    (g-device/isTablet) :tablet
+    :else :not-found))
+
+(defn platform []
+  (cond
+    (g-platform/isAndroid) :android
+    (g-platform/isChromeOS) :chrome-os
+    (g-platform/isIos) :ios
+    (g-platform/isIpad) :ipad
+    (g-platform/isIphone) :iphone
+    (g-platform/isIpod) :ipod
+    (g-platform/isLinux) :linux
+    (g-platform/isMacintosh) :macintosh
+    (g-platform/isWindows) :windows
+    :else :not-found))
+
+(defn platform-version []
+  (g-platform/getVersion))
+
+(defn debug-data []
+  (let [expanded? (r/atom false)]
+    (fn []
+      [:div.t-a-r
+       [:div.orange.pointer.underline
+        {:on-click #(swap! expanded? not)}
+        [:i.fa.fa-bug {:class-name (if @expanded? "white")}]]
+       (if @expanded?
+         [:textarea.m-t-5
+          {:style debug-data-style
+           :value (str {:browser (browser)
+                        :browser-version (browser-version)
+                        :device-type (device-type)
+                        :platform (platform)
+                        :platform-version (platform-version)
+                        :char-data @(subscribe [:character])})}])])))
+
 (defn character-builder []
   (let [character @(subscribe [:character])
         _  (if print-enabled? (cljs.pprint/pprint character))
@@ -2206,7 +2263,8 @@
           plugins
           active-tab
           all-selections]]]]
-      [:div.white.flex.justify-cont-c
+      [:div.white
        [:div.content.f-w-n.f-s-12
-        [:div.p-10
-         [:div.m-b-5 "Icons made by Lorc, Caduceus, and Delapouite. Available on " [:a.orange {:href "http://game-icons.net"} "http://game-icons.net"]]]]]]]))
+        [:div.p-10.flex.justify-cont-s-b.w-100-p
+         [:div.m-b-5 "Icons made by Lorc, Caduceus, and Delapouite. Available on " [:a.orange {:href "http://game-icons.net"} "http://game-icons.net"]]
+         [debug-data]]]]]]))
