@@ -87,7 +87,7 @@
                            :open-urls ["http://localhost:3449/index.html"]}
 
                 :compiler {:main orcpub.core
-                           :asset-path "js/compiled/out"
+                           :asset-path "/js/compiled/out"
                            :output-to "resources/public/js/compiled/orcpub.js"
                            :output-dir "resources/public/js/compiled/out"
                            :source-map-timestamp true
@@ -148,7 +148,8 @@
 
   :profiles {:dev {:dependencies [[binaryage/devtools "0.8.2"]
                                   [figwheel-sidecar "0.5.8"]
-                                  [com.cemerick/piggieback "0.2.1"]]
+                                  [com.cemerick/piggieback "0.2.1"]
+                                  [org.clojure/test.check "0.9.0"]]
                    ;; need to add dev source path here to get user.clj loaded
                    :source-paths ["src/clj" "src/cljc" "src/cljs" "dev"]
                    ;; for CIDER

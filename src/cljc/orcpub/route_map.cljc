@@ -2,6 +2,8 @@
   (:require [bidi.bidi :as bidi]))
 
 (def dnd-e5-char-builder-route :char-builder-5e)
+(def dnd-e5-char-list-route :char-list-5e)
+(def dnd-e5-char-list-page-route :char-list-5e-page)
 (def default-route :default)
 (def register-route :register)
 (def register-page-route :register-page)
@@ -45,7 +47,11 @@
               "password-reset-sent" password-reset-sent-route
               "password-reset-success" password-reset-success-route
               "password-reset-expired" password-reset-expired-route
-              "password-reset-used" password-reset-used-route}])
+              "password-reset-used" password-reset-used-route
+              "dnd/"
+              {"5e/"
+               {"characters" dnd-e5-char-list-route
+                "characters-page" dnd-e5-char-list-page-route}}}])
 
 (defn path-for [route]
   (bidi/path-for routes route))

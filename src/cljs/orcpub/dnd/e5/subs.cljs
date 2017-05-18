@@ -1,11 +1,16 @@
 (ns orcpub.dnd.e5.subs
-  (:require [re-frame.core :refer [reg-sub subscribe]]
+  (:require [re-frame.core :refer [reg-sub reg-sub-raw subscribe dispatch]]
             [orcpub.entity :as entity]
             [orcpub.template :as t]
             [orcpub.registration :as registration]
             [orcpub.dnd.e5.template :as t5e]
             [orcpub.dnd.e5.db :refer [tab-path]]
-            [clojure.string :as s]))
+            [orcpub.route-map :as routes]
+            [clojure.string :as s]
+            [reagent.ratom :as ra]
+            [cljs.core.async :refer [<!]]
+            [cljs-http.client :as http])
+  (:require-macros [cljs.core.async.macros :refer [go]]))
 
 (reg-sub
  :registration-form
@@ -150,3 +155,18 @@
  :<- [:built-template]
  (fn [[character built-template] _]
    (entity/build character built-template)))
+
+(reg-sub
+ :dnd-5e-characters
+ (fn [db _]
+   (get-in db [:dnd :e5 :characters])))
+
+(reg-sub-raw
+  :dnd-5e-characters
+  (fn [app-db [_]]
+    (go (let [response (<! (http/get (routes/path-for routes/dnd-e5-char-list-route)
+                                     {:accept :transit
+                                      :headers {"Authorization" (str "Token " (-> @app-db :user-data :token))}}))]
+          (dispatch [:set-dnd-5e-characters (-> response :body)])))
+    (ra/make-reaction
+     (fn [] (get-in @app-db [:dnd :e5 :characters] [])))))

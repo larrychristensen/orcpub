@@ -1,9 +1,15 @@
 (ns orcpub.dnd.e5.character
-  (:require [clojure.spec :as spec]
+  (:require #?(:clj [clojure.spec :as spec])
+            #?(:cljs [cljs.spec :as spec])
+            #?(:clj [clojure.spec.test :as stest])
+            #?(:cljs [cljs.spec.test :as stest])
             [orcpub.entity-spec :as es]
             [orcpub.dice :as dice]
+            [orcpub.common :as common]
             [orcpub.template :as t]
-            [orcpub.entity :as entity]))
+            [orcpub.entity :as entity]
+            [orcpub.entity.strict :as se]
+            [orcpub.dnd.e5.character.equipment :as equip]))
 
 (spec/def ::armor-class nat-int?)
 (spec/def ::subrace string?)
@@ -25,11 +31,94 @@
 
 (spec/def ::abilities (spec/keys :req-un [::str ::dex ::con ::int ::wis ::cha]))
 
-(spec/def ::character (spec/keys :req-un [::abilities
-                                          ::savings-throws
-                                          ::speed
-                                          ::darkvision
-                                          ::initiative]))
+(spec/def ::custom-equipment ::equip/equipment-items)
+(spec/def ::custom-treasure ::equip/equipment-items)
+
+(spec/def ::values (spec/and (spec/map-of qualified-keyword? any?)
+                              (spec/keys :opt [::custom-equipment
+                                               ::custom-treasure])))
+
+(spec/def ::raw-character ::entity/raw-entity)
+
+(spec/def ::strict-character ::se/entity)
+
+(defn add-equipment-namespace-to-option [{:keys [::entity/value] :as option}]
+  (if value
+    (assoc
+     option
+     ::entity/value
+     (common/add-namespaces-to-keys
+      "orcpub.dnd.e5.character.equipment"
+      value))
+    option))
+
+(defn add-equipment-namespace [raw-character equipment-key]
+  (let [path [::entity/options equipment-key]]
+    (if (get-in raw-character path)
+      (update-in raw-character
+                 path
+                 #(map
+                   add-equipment-namespace-to-option
+                   %))
+      raw-character)))
+
+(defn add-custom-equipment-namespaces [raw-character]
+  (if (get-in raw-character [::entity/values :custom-equipment])
+    (update-in raw-character [::entity/values :custom-equipment]
+               #(map (partial common/add-namespaces-to-keys
+                              "orcpub.dnd.e5.character.equipment")
+                     %))
+    raw-character))
+
+(defn add-equipment-namespaces [raw-character]
+  (-> (reduce
+       add-equipment-namespace
+       raw-character
+       [:equipment :weapons :armor :treasure :magic-items :magic-weapons :magic-armor])
+      add-custom-equipment-namespaces))
+
+(defn prn-n-return [v message]
+  (prn message v)
+  v)
+
+(defn add-ability-namespaces [raw-character]
+  (update-in raw-character
+             [::entity/options :ability-scores ::entity/value]
+             (fn [{:keys [str dex con int wis cha]}]
+               {::str str
+                ::dex dex
+                ::con con
+                ::int int
+                ::wis wis
+                ::cha cha})))
+
+(defn add-namespaces-to-values [raw-character]
+  (if (seq (::entity/values raw-character))
+    (update raw-character
+            ::entity/values
+            (fn [values]
+              (common/add-namespaces-to-keys
+               "orcpub.dnd.e5.character"
+               values)))
+    raw-character))
+
+(defn add-namespaces [raw-character]
+  (-> raw-character
+      add-equipment-namespaces
+      add-ability-namespaces
+      add-namespaces-to-values))
+
+(defn to-strict [raw-character]
+  (-> raw-character
+      add-namespaces
+      entity/to-strict))
+
+
+(spec/fdef to-strict
+           :args ::raw-character
+           :ret ::strict-character)
+
+(stest/unstrument `to-strict)
 
 (defn standard-ability-roll []
   (dice/dice-roll {:num 4 :sides 6 :drop-num 1}))

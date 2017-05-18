@@ -108,16 +108,10 @@
   (cljs.pprint/pprint
    (dissoc (realize-char built-char) ::es/deps)))
 
-(defn svg-icon [icon-name & [size]]
-  (let [size (or size 32)]
-    [:img
-     {:class-name (str "h-" size " w-" size)
-      :src (str "image/" icon-name ".svg")}]))
-
 (defn display-section [title icon-name value & [list?]]
   [:div.m-t-20
    [:div.flex.align-items-c
-    (if icon-name (svg-icon icon-name))
+    (if icon-name (views5e/svg-icon icon-name))
     [:span.m-l-5.f-s-16.f-w-600 title]]
    [:div {:class-name (if list? "m-t-0" "m-t-4")}
     [:span.f-s-24.f-w-600
@@ -138,7 +132,7 @@
   [:div.m-t-20
    [:span.f-s-16.f-w-600 title]
    [:div.flex.align-items-c
-    (svg-icon icon-name)
+    (views5e/svg-icon icon-name)
     [:div.f-s-24.m-l-10.f-w-b content]]])
 
 (defn armor-class-section [armor-class armor-class-with-armor equipped-armor]
@@ -764,7 +758,7 @@
          [:div.flex.align-items-c
           (if multiselect?
             (checkbox selected? disable-checkbox?))
-          (if icon [:div.m-r-5 (svg-icon icon 24)])
+          (if icon [:div.m-r-5 (views5e/svg-icon icon 24)])
           [:span.f-w-b.f-s-1.flex-grow-1 name]
           (if help
             [show-info-button expanded?])]
@@ -779,7 +773,7 @@
 (defn skill-help [name key ability icon description]
   [:div
    [:div.flex.align-items-c
-    (svg-icon icon 48)
+    (views5e/svg-icon icon 48)
     [:div.f-s-18.f-w-b.m-l-5
      [:div name]
      [:div.i (str "(" (:name (opt5e/abilities-map ability)) ")")]]]
@@ -964,7 +958,7 @@
          (if parent-title
            (selection-section-parent-title parent-title))
          [:div.flex.align-items-c
-          (if icon (svg-icon icon 24))
+          (if icon (views5e/svg-icon icon 24))
           (selection-section-title name)
           (if (and path help)
             [show-info-button expanded?])
@@ -1672,7 +1666,7 @@
            :on-click (fn [_] (dispatch [:set-page i]))}
           [:div
            {:class-name (if (= i page-index) "selected-tab" "opacity-5 hover-opacity-full")}
-           (svg-icon icon 32)]
+           (views5e/svg-icon icon 32)]
           (if (not (= total-remaining 0))
             [:div.flex.justify-cont-end.m-t--10 (remaining-indicator total-remaining 12 11)])]))
      pages))])
@@ -1695,7 +1689,7 @@
     (fn []
       [:div.m-b-20
        [:div.flex.align-items-c
-        (svg-icon "bookshelf")
+        (views5e/svg-icon "bookshelf")
         (selection-section-title "Option Sources")
         [expand-button "collapse" "select sources" expanded?]]
        (if @expanded?
@@ -2028,11 +2022,6 @@
    [:div.flex.align-items-c.justify-cont-s-b.flex-wrap
     [:h1.f-s-36.f-w-b.m-t-21.m-l-10.character-builder-header "Character Builder"]
     [:div.flex.align-items-c.justify-cont-end.flex-wrap.m-r-10.m-l-10
-     #_[:button.form-button.h-40.m-l-5.m-t-5.m-b-5
-      {:class-name (if (<= (count @history) 1) "opacity-5")
-       :on-click undo!}
-      [:i.fa.fa-undo.f-s-18]
-        [:span.m-l-5.hidden-sm.hidden-xs.hidden-md "Undo"]]
      [:button.form-button.h-40.m-l-5.m-t-5.m-b-5
       {:on-click (fn [_]
                    (do
@@ -2057,9 +2046,11 @@
      [:button.form-button.h-40.m-l-5.m-t-5.m-b-5
       [:i.fa.fa-floppy-o.f-s-18]
       [:span.m-l-5.header-button-text "Browser Save"]]
-     [:button.form-button.h-40.m-l-5.opacity-5.m-t-5.m-b-5
+     [:button.form-button.h-40.m-l-5.m-t-5.m-b-5
       [:i.fa.fa-cloud-upload.f-s-18]
-      [:span.m-l-5.header-button-text "Save" [:span.i.m-l-5 "(Coming Soon)"]]]]]])
+      [:span.m-l-5.header-button-text
+       {:on-click #(dispatch [:save-character])}
+       "Save"]]]]])
 
 (defn al-legality []
   (let [expanded? (r/atom false)]
@@ -2108,51 +2099,6 @@
                             used-resources))))
                al-illegal-reasons))])]))))
 
-(defn user-header-view []
-  (let [username @(subscribe [:username])]
-    (if username
-      [:div.white.f-w-b.t-a-r
-       [:span.m-r-5 username]
-       #_[:i.fa.fa-caret-down]
-       [:span.orange.underline.pointer
-        {:on-click (fn [] (dispatch [:logout]))}
-        "LOG OUT"]]
-      [:div.pointer.flex.flex-column.align-items-end
-       [:span.orange.underline.f-w-b.m-l-5
-        {:on-click #(dispatch [:route routes/login-page-route])}
-        [:span "LOGIN"]]])))
-
-(defn app-header []
-  [:div#app-header.app-header.flex.flex-column.justify-cont-s-b
-   [:div.app-header-bar.container
-    [:div.content
-     [:div.flex.justify-cont-s-b.align-items-c.w-100-p.p-l-20.p-r-20
-      [:img.orcpub-logo.h-32.w-120 {:src "image/orcpub-logo.svg"}]
-      [user-header-view]]]]
-   [:div.container.header-links
-    [:div.content
-     [:div
-      [:div.m-l-10.white.hidden-xs.hidden-sm
-       [:span "Questions? Comments? Issues? Feature Requests? We'd love to hear them, "]
-       [:a {:href "https://muut.com/orcpub" :target :_blank} "report them here."]]
-      [:div.hidden-xs.hidden-sm
-       [:div.flex.align-items-c.f-w-b.f-s-18.m-t-10.m-l-10.white
-        [:span.hidden-xs "Please support continuing development on "]
-        [:a.m-l-5 patreon-link-props [:span "Patreon"]]
-        [:a.m-l-5 patreon-link-props
-         [:img.h-32.w-32 {:src "https://www.patreon.com/images/patreon_navigation_logo_mini_orange.png"}]]]]]]]])
-
-(def loading-style
-  {:position :absolute
-   :height "100%"
-   :width "100%"
-   :top 0
-   :bottom 0
-   :right 0
-   :left 0
-   :z-index 100
-   :background-color "rgba(0,0,0,0.6)"})
-
 (defn character-builder []
   (let [character @(subscribe [:character])
         _  (if print-enabled? (cljs.pprint/pprint character))
@@ -2169,32 +2115,23 @@
         used-resources (es/entity-val built-char :used-resources)
         loading @(subscribe [:loading])]
     (if print-enabled? (print-char built-char))
-    [:div.app
-     {:on-scroll (fn [e]
-                   (let [app-header (js/document.getElementById "app-header")
-                         header-height (.-offsetHeight app-header)
-                         scroll-top (.-scrollTop (.-target e))
-                         sticky-header (js/document.getElementById "sticky-header")
-                         app-main (js/document.getElementById "app-main")
-                         scrollbar-width (- js/window.innerWidth (.-offsetWidth app-main))
-                         header-container (js/document.getElementById "header-container")]
-                     (set! (.-paddingRight (.-style header-container)) (str scrollbar-width "px"))
-                     (if (>= scroll-top header-height)
-                       (set! (.-display (.-style sticky-header)) "block")
-                       (set! (.-display (.-style sticky-header)) "none"))))}
-     (if loading
-       [:div {:style loading-style}
-        [:div.flex.justify-cont-s-a.align-items-c.h-100-p
-         [:img.h-200.w-200.m-t-200 {:src "/image/spiral.gif"}]]])
-     [download-form built-char]
-     [app-header]
+    [views5e/content-page
+     "Character Builder"
+     [{:title "Random"
+       :on-click (fn [_]
+                   (do
+                     (dispatch-sync [:set-loading true])
+                     (let [new-char (random-character character
+                                                      @(subscribe [:built-template])
+                                                      @(subscribe [:locked-components]))]
+                       (dispatch [:set-character new-char]))))}
+      {:title "Reset"
+       :on-click (fn [_] (dispatch [:reset-character]))}
+      {:title "Print"
+       :on-click (export-pdf built-char)}
+      {:title "Save"
+       :on-click #(dispatch [:save-character])}]
      [:div
-      [:div#sticky-header.sticky-header.w-100-p.posn-fixed
-       [:div.flex.justify-cont-c.bg-light
-        [:div#header-container.f-s-14.white.content
-         [header character built-char]]]]
-      [:div.flex.justify-cont-c.white
-       [:div.content [header character built-char]]]
       [:div.container
        [:div.content
         [al-legality al-illegal-reasons used-resources]]]
@@ -2209,8 +2146,4 @@
           option-paths
           plugins
           active-tab
-          all-selections]]]]
-      [:div.white.flex.justify-cont-c
-       [:div.content.f-w-n.f-s-12
-        [:div.p-10
-         [:div.m-b-5 "Icons made by Lorc, Caduceus, and Delapouite. Available on " [:a.orange {:href "http://game-icons.net"} "http://game-icons.net"]]]]]]]))
+          all-selections]]]]]]))

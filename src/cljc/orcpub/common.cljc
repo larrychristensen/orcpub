@@ -1,5 +1,7 @@
 (ns orcpub.common
-  (:require [clojure.string :as s]))
+  (:require [clojure.string :as s]
+            #?(:clj [clojure.spec :as spec])
+            #?(:cljs [cljs.spec :as spec])))
 
 (def dot-char "•")
 
@@ -86,3 +88,19 @@
   (concat
    (take-while (complement f) v)
    (rest (drop-while (complement f) v))))
+
+(defn add-namespaces-to-keys [ns-str item]
+  (into {}
+        (map
+         (fn [[k v]]
+           [(keyword ns-str (name k))
+            v])
+         item)))
+
+(spec/fdef add-namespaces-to-keys
+           :args (spec/cat :ns-str string? :item (spec/map-of simple-keyword? any?))
+           :ret (spec/map-of qualified-keyword? any?)
+           :fn #(and (= (count (-> % :args :item))
+                        (count (-> % :ret)))
+                     (= (set (-> % :args :item keys))
+                        (set (->> % :ret keys (map (fn [k] (keyword (name k)))))))))

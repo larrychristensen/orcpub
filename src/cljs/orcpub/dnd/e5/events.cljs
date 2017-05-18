@@ -14,6 +14,7 @@
             [cljs.spec :as spec]
             [cljs-http.client :as http]
             [cljs.core.async :refer [<!]]
+            [cljs.pprint :refer [pprint]]
             [clojure.string :as s]
             [bidi.bidi :as bidi]
             [orcpub.route-map :as routes]
@@ -41,6 +42,11 @@
 
 ;; -- Event Handlers --------------------------------------------------
 
+(defn backend-url [path]
+  (if (s/starts-with? js/window.location.href "http://localhost")
+    (str "http://localhost:8890" (if (not (s/starts-with? path "/")) "/") path)
+    path))
+
 (reg-event-fx
  :initialize-db
  [(inject-cofx :local-store-character)
@@ -60,6 +66,16 @@
  :reset-character
  character-interceptors
  reset-character)
+
+(reg-event-fx
+ :save-character
+ (fn [{:keys [db]} [_]]
+   (let [strict (char5e/to-strict (:character db))]
+     {:http {:method :post
+             :headers {"Authorization" (str "Token " (-> db :user-data :token))}
+             :url (backend-url (bidi/path-for routes/routes routes/dnd-e5-char-list-route))
+             :transit-params strict
+             :on-success [:character-save-success]}})))
 
 (defn set-character [db [_ character]]
   (assoc db :character character :loading false))
@@ -418,13 +434,14 @@
 
 (reg-event-fx
  :route
- (fn [{:keys [db]} [_ new-route return-route skip-path?]]
+ (fn [{:keys [db]} [_ new-route {:keys [return-route skip-path? event]}]]
    (let [{:keys [route route-history]} db]
      (cond-> {:db (assoc db
                   :route new-route
                   :return-route (or return-route (:return-route db))
                   :route-history (conj route-history route))}
-       (not skip-path?) (assoc :path (routes/path-for new-route))))))
+       (not skip-path?) (assoc :path (routes/path-for new-route))
+       event (assoc :dispatch event)))))
 
 (reg-event-db
  :set-user-data
@@ -491,23 +508,27 @@
            dissoc
            :faction-image-url-failed)))
 
+(defn cookies []
+  (let [cookie js/document.cookie]
+    (into {}
+          (map #(s/split % "="))
+          (s/split cookie "; "))))
+
 (reg-fx
  :http
- (fn [{:keys [on-success on-failure] :as cfg}]
-   (go (let [response (<! (http/request cfg))]
-         (if (<= 200 (:status response) 299)
-           (dispatch (conj on-success response))
-           (dispatch (conj on-failure response)))))))
+ (fn [{:keys [on-success on-failure auth-token] :as cfg}]
+   (let [final-cfg (if auth-token
+                     (assoc-in cfg [:headers "Authorization"] (str "Token " auth-token))
+                     cfg)]
+     (go (let [response (<! (http/request final-cfg))]
+           (if (<= 200 (:status response) 299)
+             (dispatch (conj on-success response))
+             (if on-failure (dispatch (conj on-failure response)))))))))
 
 (reg-fx
  :path
  (fn [path]
    (.pushState js/window.history {} nil path)))
-
-(defn backend-url [path]
-  (if (s/starts-with? js/window.location.href "http://localhost")
-    (str "http://localhost:8890" (if (not (s/starts-with? path "/")) "/") path)
-    path))
 
 (def login-url (backend-url "/login"))
 
@@ -515,9 +536,10 @@
  :login-success
  [user->local-store-interceptor]
  (fn [db [_ backtrack? response]]
-   (cond-> db
-       true (assoc :user-data (-> response :body))
-       true (assoc :route (:return-route db)))))
+   (prn "LOGIN BODY" (:body response))
+   (-> db
+       (assoc :user-data (-> response :body))
+       (assoc :route (:return-route db)))))
 
 (reg-event-fx
  :login-failure
@@ -656,22 +678,38 @@
            :on-success [:send-password-reset-success]}}))
 
 (reg-event-db
+ :load-characters-success
+ (fn [db [_ response]]
+   (prn "RESPONSE" response)
+   (assoc-in db [:dnd :e5 :characters] (:body response))))
+
+(defn get-auth-token [db]
+  (-> db :user-data :token))
+
+(reg-event-fx
+ :load-characters
+ (fn [{:keys [db]} [_ params]]
+   {:http {:method :get
+           :auth-token (get-auth-token db)
+           :url (backend-url (routes/path-for routes/dnd-e5-char-list-route))
+           :on-success [:load-characters-success]}}))
+
+(reg-event-db
  :password-reset-success
  (fn [db []]
    (assoc db :route routes/password-reset-success-route)))
-
-(defn cookies []
-  (let [cookie js/document.cookie]
-    (into {}
-          (map #(s/split % "="))
-          (s/split cookie "; "))))
 
 (reg-event-fx
  :password-reset
  (fn [{:keys [db]} [_ params]]
    {:db (assoc db :temp-email (:email params))
     :http {:method :post
-           :headers {"Authorization" (str "Token " ((cookies) "token"))}
+           :auth-token (get-auth-token db)
            :url (backend-url (bidi/path-for routes/routes routes/reset-password-route))
            :json-params params
            :on-success [:password-reset-success]}}))
+
+(reg-event-db
+ :set-dnd-5e-characters
+ (fn [db [_ characters]]
+   (assoc-in db [:dnd :e5 :characters] characters)))

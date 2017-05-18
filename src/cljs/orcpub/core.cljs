@@ -23,8 +23,10 @@
                     "/register"))
 
 (def pages
-  {routes/default-route ch/character-builder
+  {nil ch/character-builder
+   routes/default-route ch/character-builder
    routes/dnd-e5-char-builder-route ch/character-builder
+   routes/dnd-e5-char-list-page-route views/character-list
    routes/register-page-route views/register-form
    routes/verify-failed-route views/verify-failed
    routes/verify-success-route views/verify-success
@@ -40,7 +42,7 @@
 (defn handle-url-change [_]
   (let [route (routes/match-route js/window.location.pathname)]
     (prn "ROUTE CHNAGE" route js/window.location.pathname)
-    (dispatch [:route route nil true])))
+    (dispatch [:route route {:skip-path? true}])))
 
 (defn make-history []
   (doto (Html5History.)
@@ -66,7 +68,7 @@
                          (aget doc-style "msFlexWrap"))))
             [main-view]
             [:div
-             [ch/app-header]
+             [views/app-header]
              [:div.f-s-24.white.sans
               {:style {:padding "200px"}}
               "Sorry, we are unable to support your browser since it does not support important HTML5 features. Please try a modern browser such as " [:a {:href "https://www.google.com/chrome/browser/desktop/index.html"} "Google Chrome"] " or " [:a {:href "https://www.mozilla.org/en-US/firefox/products/?v=a"} "Mozilla Firefox"]]])

@@ -1,9 +1,11 @@
 (ns orcpub.entity
-  (:require [clojure.spec :as spec]
+  (:require #?(:clj [clojure.spec :as spec])
+            #?(:cljs [cljs.spec :as spec])
             [orcpub.common :as common]
             [orcpub.modifiers :as mods]
             [orcpub.entity-spec :as es]
             [orcpub.template :as t]
+            [orcpub.entity.strict :as strict]
             [clojure.set :refer [difference union intersection]]
             #?(:cljs [cljs.pprint :as pp])))
 
@@ -14,12 +16,79 @@
 (spec/def ::option-vec (spec/* ::option))
 (spec/def ::options (spec/map-of keyword? (spec/or :single ::option
                                                    :multiple ::option-vec)))
-(spec/def ::raw-entity (spec/keys :opt [::options]))
+(spec/def ::values (spec/map-of keyword? any?))
+(spec/def ::raw-entity (spec/keys :opt [::options
+                                        ::values]))
 
 (spec/def ::flat-option (spec/keys :req [::t/path]
                                    :opt [::value]))
 (spec/def ::flat-options (spec/+ ::flat-option))
 
+(declare to-strict-option)
+
+(defn to-strict-selections [options]
+  (map
+   (fn [[k v]]
+     (cond-> {::strict/key k}
+       (sequential? v) (assoc ::strict/options (map to-strict-option v))
+       (map? v) (assoc ::strict/option (to-strict-option v))))
+   options))
+
+(defn to-strict-option [{:keys [::key ::value ::options]}]
+  (cond-> {::strict/key key}
+    options (assoc ::strict/selections (to-strict-selections options))
+    (int? value) (assoc ::strict/int-value value)
+    (map? value) (assoc ::strict/map-value value)))
+
+(defn remove-empty-fields [raw-character]
+  (into {}
+        (comp
+         (remove (fn [[k v]] (and (coll? v) (empty? v))))
+         (map (fn [[k v]] [k (cond
+                                (sequential? v) (map remove-empty-fields v)
+                                (map? v) (remove-empty-fields v)
+                                :else v)])))
+        raw-character))
+
+(defn to-strict [{:keys [::options ::values]}]
+  (-> {::strict/selections (to-strict-selections options)
+       ::strict/values (into {} (remove (comp nil? val)) values)}
+      remove-empty-fields))
+
+(spec/fdef to-strict
+           :args (spec/cat :entity ::raw-entity)
+           :ret ::strict/entity)
+
+(declare from-strict-selections)
+
+(defn from-strict-option [{:keys [::strict/key
+                                  ::strict/selections
+                                  ::strict/int-value
+                                  ::strict/map-value]}]
+  (let [value (or int-value map-value)]
+    (cond-> {::key key}
+      selections (assoc ::options (from-strict-selections selections))
+      value (assoc ::value value))))
+
+(defn from-strict-options [options]
+  (map from-strict-option options))
+
+(defn from-strict-selections [selections]
+  (reduce
+   (fn [s {:keys [::strict/key ::strict/option ::strict/options]}]
+     (assoc s key (if option
+                    (from-strict-option option)
+                    (from-strict-options options))))
+   {}
+   selections))
+
+(defn from-strict [{:keys [::strict/selections ::strict/values]}]
+  (-> {::options (from-strict-selections selections)
+       ::values values}))
+
+(spec/fdef from-strict
+           :args (spec/cat :entity ::strict/entity)
+           :ret ::raw-entity)
 
 ;;============== topo sort ===============
 

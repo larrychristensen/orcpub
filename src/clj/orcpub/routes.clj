@@ -4,6 +4,7 @@
             [io.pedestal.test :as test]
             [io.pedestal.http.ring-middlewares :as ring]
             [ring.middleware.cookies :only [wrap-cookies]]
+            [ring.util.response :as ring-resp]
             [io.pedestal.http.body-params :as body-params]
             [io.pedestal.interceptor.error :as error-int]
             [io.pedestal.interceptor.chain :refer [terminate]]
@@ -17,6 +18,8 @@
             [clj-time.core :as t :refer [hours from-now ago]]
             [clj-time.coerce :as tc :refer [from-date]]
             [clojure.string :as s]
+            [clojure.pprint :refer [pprint]]
+            [clojure.spec :as spec]
             [orcpub.dnd.e5.skills :as skill5e]
             [orcpub.dnd.e5.character :as char5e]
             [datomic.api :as d]
@@ -24,7 +27,8 @@
             [orcpub.route-map :as route-map]
             [orcpub.errors :as errors]
             [orcpub.email :as email]
-            [orcpub.registration :as registration])
+            [orcpub.registration :as registration]
+            [orcpub.entity.strict :as se])
   (:import (org.apache.pdfbox.pdmodel.interactive.form PDCheckBox PDComboBox PDListBox PDRadioButton PDTextField)
            (org.apache.pdfbox.pdmodel PDDocument PDPageContentStream)
            (org.apache.pdfbox.pdmodel.graphics.image PDImageXObject)
@@ -47,7 +51,6 @@
     (d/pull db '[*] user-id)))
 
 (defn lookup-user [db username password]
-  (prn "DB" db)
   (first-user-by db
                  '{:find [?e]
                    :in [$ [?username ?password]]
@@ -60,8 +63,13 @@
 (def check-auth
   {:name :check-auth
    :enter (fn [context]
-            (let [request (:request context)]
-              (update context :request #(authentication-request % backend))))})
+            (let [request (:request context)
+                  updated-request (authentication-request request backend)]
+              (if (:identity updated-request)
+                (assoc context :request updated-request)
+                (-> context
+                    terminate
+                    (assoc :response {:status 401 :body {:message "Unauthorized"}})))))})
 
 (defn redirect [route-key]
   (ring-resp/redirect (route-map/path-for route-key)))
@@ -382,11 +390,9 @@
   (let [merged (merge
                 response
                 {:status 200 :body html :headers {"Content-Type" "text/html"}})]
-    (prn "MERSGED" merged)
     merged))
 
 (defn index [req & [response]]
-  (prn "REQUESt" req)
   (html-response
    (slurp (io/resource "public/index.html"))
    response))
@@ -404,6 +410,9 @@
   (index req))
 
 (defn login-page [req]
+  (index req))
+
+(defn character-list-page [req]
   (index req))
 
 (def user-by-password-reset-key-query
@@ -453,11 +462,38 @@
 (defn check-email [{:keys [db query-params]}]
   (check-field email-query (:email query-params) db))
 
+(defn save-character [{:keys [db transit-params body conn identity] :as request}]
+  (pprint transit-params)
+  (if-let [data (spec/explain-data ::se/entity transit-params)]
+    {:status 400 :message data}
+    (let [result @(d/transact conn [(assoc transit-params
+                                           :db/id "tempid"
+                                           :orcpub.user/username (:user identity))])]
+      {:status 200 :body (assoc transit-params :db/id (-> result :tempids (get "tempid")))})))
+
+(defn character-list [{:keys [db transit-params body conn identity] :as request}]
+  (let [username (:user identity)
+        ids (d/q '[:find ?e
+                   :in $ ?user
+                   :where
+                   [?e :orcpub.user/username ?user]
+                   [?e :orcpub.entity.strict/selections]]
+                 db
+                 username)
+        _ (prn "IDS" ids)
+        characters (d/pull-many db '[*] (map first ids))]
+    {:status 200 :body characters}))
+
 (def routes
   (route/expand-routes
    [[["/" {:get `index}]
      [(route-map/path-for route-map/register-route) ^:interceptors [(body-params/body-params)]
       {:post `register}]
+     [(route-map/path-for route-map/dnd-e5-char-list-route) ^:interceptors [(body-params/body-params) check-auth]
+      {:post `save-character
+       :get `character-list}]
+     [(route-map/path-for route-map/dnd-e5-char-list-page-route) ^:interceptors [(body-params/body-params)]
+      {:get `character-list-page}]
      [(route-map/path-for route-map/login-route) ^:interceptors [(body-params/body-params)]
       {:post `login}]
      [(route-map/path-for route-map/character-pdf-route) {:post `character-pdf-2}]

@@ -1,6 +1,5 @@
 (ns orcpub.template
   (:require [clojure.spec :as spec]
-            [clojure.spec.test :as stest]
             [orcpub.modifiers :as modifiers]
             [orcpub.common :as common]))
 
@@ -64,8 +63,6 @@
  selection-cfg
  :args (spec/cat :cfg ::selection-cfg)
  :ret ::selection)
-
-#_(stest/instrument `selection-cfg)
 
 (defn option-prereq [explanation func & [hide-if-fail?]]
   {::label explanation
