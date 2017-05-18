@@ -1,6 +1,34 @@
 (ns orcpub.db.schema
-  (:require [orcpub.entity :as e]
-            [orcpub.dnd.e5.character :as char5e]))
+  (:require [orcpub.entity.strict :as se]
+            [orcpub.dnd.e5.character :as char5e]
+            [orcpub.dnd.e5.character.equipment :as char-equip-5e]))
+
+(defn string-prop [key]
+  {:db/ident key
+   :db/valueType :db.type/string
+   :db/cardinality :db.cardinality/one})
+
+(defn fulltext-prop [key]
+  {:db/ident key
+   :db/valueType :db.type/string
+   :db/cardinality :db.cardinality/one
+   :db/fulltext true})
+
+(defn long-prop [key]
+  {:db/ident key
+   :db/valueType :db.type/long
+   :db/cardinality :db.cardinality/one})
+
+(defn bool-prop [key]
+  {:db/ident key
+   :db/valueType :db.type/boolean
+   :db/cardinality :db.cardinality/one})
+
+(defn many-ref [key]
+  {:db/ident key
+   :db/valueType :db.type/ref
+   :db/cardinality :db.cardinality/many
+   :db/isComponent true})
 
 (def user-schema
   [{:db/ident :orcpub.user/username
@@ -41,43 +69,86 @@
     :db/cardinality :db.cardinality/one}])
 
 (def entity-schema
-  [{:db/ident ::e/key
+  [{:db/ident ::se/key
     :db/valueType :db.type/keyword
     :db/cardinality :db.cardinality/one}
-   {:db/ident ::e/options
-    :db/valueType :db.type/ref
-    :db/cardinality :db.cardinality/many
-    :db/isComponent true}
-   {:db/ident ::e/selection-key
-    :db/valueType :db.type/keyword
-    :db/cardinality :db.cardinality/one}
-   {:db/ident ::e/vec-selection
-    :db/valueType :db.type/ref
-    :db/cardinality :db.cardinality/many
-    :db/isComponent true}
-   {:db/ident ::e/map-selection
+   {:db/ident ::se/option
     :db/valueType :db.type/ref
     :db/cardinality :db.cardinality/one
     :db/isComponent true}
-   {:db/ident ::e/map-value
+   {:db/ident ::se/options
+    :db/valueType :db.type/ref
+    :db/cardinality :db.cardinality/many
+    :db/isComponent true}
+   {:db/ident ::se/values
     :db/valueType :db.type/ref
     :db/cardinality :db.cardinality/one
     :db/isComponent true}
-   {:db/ident ::char5e/str
+   {:db/ident ::se/selections
+    :db/valueType :db.type/ref
+    :db/cardinality :db.cardinality/many
+    :db/isComponent true}
+   {:db/ident ::se/int-value
     :db/valueType :db.type/long
     :db/cardinality :db.cardinality/one}
-   {:db/ident ::char5e/dex
-    :db/valueType :db.type/long
-    :db/cardinality :db.cardinality/one}
-   {:db/ident ::char5e/con
-    :db/valueType :db.type/long
-    :db/cardinality :db.cardinality/one}
-   {:db/ident ::char5e/int
-    :db/valueType :db.type/long
-    :db/cardinality :db.cardinality/one}
-   {:db/ident ::char5e/wis
-    :db/valueType :db.type/long
-    :db/cardinality :db.cardinality/one}
-   {:db/ident ::char5e/cha
-    :db/valueType :db.type/long
-    :db/cardinality :db.cardinality/one}])
+   {:db/ident ::se/map-value
+    :db/valueType :db.type/ref
+    :db/cardinality :db.cardinality/one
+    :db/isComponent true}])
+
+(def character-schema
+  (concat
+   (map
+    many-ref
+    [::char5e/custom-equipment
+     ::char5e/custom-treasure])
+   (map
+    long-prop
+    [::char5e/str
+     ::char5e/dex
+     ::char5e/con
+     ::char5e/int
+     ::char5e/wis
+     ::char5e/cha])
+   (map
+    fulltext-prop
+    [::char5e/character-name
+     ::char5e/description])
+   (map
+    string-prop
+    [::char5e/weight
+     ::char5e/faction-image-url
+     ::char5e/hair
+     ::char5e/player-name
+     ::char5e/skin
+     ::char5e/height
+     ::char5e/flaws
+     ::char5e/faction-image-url-failed
+     ::char5e/image-url
+     ::char5e/description
+     ::char5e/personality-trait-1
+     ::char5e/eyes
+     ::char5e/age
+     ::char5e/sex
+     ::char5e/ideals
+     ::char5e/personality-trait-2
+     ::char5e/image-url-failed
+     ::char5e/bonds
+     ::char5e/faction-name])))
+
+(def character-equipment-schema
+  (concat
+   [(string-prop ::char-equip-5e/name)
+    (long-prop ::char-equip-5e/quantity)]
+   (map
+    bool-prop
+    [::char-equip-5e/equipped?
+     ::char-equip-5e/background-starting-equipment?
+     ::char-equip-5e/class-starting-equipment?])))
+
+(def all-schemas
+  (concat
+   user-schema
+   entity-schema
+   character-schema
+   character-equipment-schema))

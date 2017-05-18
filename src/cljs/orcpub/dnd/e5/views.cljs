@@ -3,6 +3,7 @@
             [reagent.core :as r]
             [orcpub.route-map :as routes]
             [orcpub.common :as common]
+            [cljs.pprint :refer [pprint]]
             [orcpub.registration :as registration]
             [bidi.bidi :as bidi]))
 
@@ -61,6 +62,68 @@
          :on-change on-change
          :on-blur #(swap! blurred? (fn [_] true))}]
        (if @blurred? (validation-messages messages))])))
+
+(defn svg-icon [icon-name & [size]]
+  (let [size (or size 32)]
+    [:img
+     {:class-name (str "h-" size " w-" size)
+      :src (str "/image/" icon-name ".svg")}]))
+
+(defn user-header-view []
+  (let [username @(subscribe [:username])]
+    (if username
+      [:div.white.f-w-b.t-a-r
+       [:span.m-r-5 username]
+       #_[:i.fa.fa-caret-down]
+       [:span.orange.underline.pointer
+        {:on-click (fn [] (dispatch [:logout]))}
+        "LOG OUT"]]
+      [:div.pointer.flex.flex-column.align-items-end
+       [:span.orange.underline.f-w-b.m-l-5
+        {:on-click #(dispatch [:route routes/login-page-route])}
+        [:span "LOGIN"]]])))
+
+(def header-tab-style
+  {:width "85px"})
+
+(defn app-header []
+  [:div#app-header.app-header.flex.flex-column.justify-cont-s-b
+   [:div.app-header-bar.container
+    [:div.content
+     [:div.flex.justify-cont-s-b.align-items-c.w-100-p.p-l-20.p-r-20
+      [:img.orcpub-logo.h-32.w-120 {:src "/image/orcpub-logo.svg"}]
+      [user-header-view]]]]
+   [:div.container
+    [:div.content
+     [:div.flex.justify-cont-end.w-100-p
+      [:div.flex.m-b-5.m-r-5
+       [:div.pointer.white.f-w-b.f-s-14.t-a-c.p-10.header-tab.m-5
+        {:style header-tab-style
+         :on-click #(dispatch [:route routes/dnd-e5-char-list-page-route])}
+        [:div (svg-icon "battle-gear" 48 48)
+         [:div "CHARACTERS"]]]
+       [:div.white.f-w-b.f-s-14.t-a-c.p-10.header-tab.m-5.disabled
+        {:style header-tab-style}
+        [:div.opacity-2
+         (svg-icon "spell-book" 48 48)
+         [:div "SPELLS"]]]
+       [:div.white.f-w-b.f-s-14.t-a-c.p-10.header-tab.m-5.disabled
+        {:style header-tab-style}
+        [:div.opacity-2
+         (svg-icon "orc-head" 48 48)
+         [:div "MONSTERS"]]]]]]]
+   #_[:div.container.header-links
+    [:div.content
+     [:div.hidden-xs.hidden-sm
+      [:div.m-l-10.white
+       [:span "Questions? Comments? Issues? Feature Requests? We'd love to hear them, "]
+       [:a {:href "https://muut.com/orcpub" :target :_blank} "report them here."]]
+      [:div
+       [:div.flex.align-items-c.f-w-b.f-s-18.m-t-10.m-l-10.white
+        [:span.hidden-xs "Please support continuing development on "]
+        [:a.m-l-5 patreon-link-props [:span "Patreon"]]
+        [:a.m-l-5 patreon-link-props
+         [:img.h-32.w-32 {:src "https://www.patreon.com/images/patreon_navigation_logo_mini_orange.png"}]]]]]]]])
 
 (defn registration-page [content]
   [:div.sans.h-100-p.flex
@@ -365,4 +428,77 @@
            [:span.orange.underline.pointer
             {:on-click #(dispatch [:route routes/send-password-reset-page-route])}
             "RESET PASSWORD"]]]]]))))
+
+(def loading-style
+  {:position :absolute
+   :height "100%"
+   :width "100%"
+   :top 0
+   :bottom 0
+   :right 0
+   :left 0
+   :z-index 100
+   :background-color "rgba(0,0,0,0.6)"})
+
+(defn header [title button-cfgs]
+  [:div.w-100-p
+   [:div.flex.align-items-c.justify-cont-s-b.flex-wrap
+    [:h1.f-s-36.f-w-b.m-t-21.m-l-10.character-builder-header title]
+    [:div.flex.align-items-c.justify-cont-end.flex-wrap.m-r-10.m-l-10
+     (map-indexed
+      (fn [i {:keys [title icon on-click]}]
+        ^{:key i}
+        [:button.form-button.h-40.m-l-5.m-t-5.m-b-5
+         {:on-click on-click}
+         [:span
+          [:i.fa.fa-undo.f-s-18]
+          [:i.fa.fa-undo.f-s-18]]
+         [:span.m-l-5.header-button-text title]])
+      button-cfgs)]]])
+
+(defn content-page [title button-cfgs content]
+  [:div.app
+   {:on-scroll (fn [e]
+                 (let [app-header (js/document.getElementById "app-header")
+                       header-height (.-offsetHeight app-header)
+                       scroll-top (.-scrollTop (.-target e))
+                       sticky-header (js/document.getElementById "sticky-header")
+                       app-main (js/document.getElementById "app-main")
+                       scrollbar-width (- js/window.innerWidth (.-offsetWidth app-main))
+                       header-container (js/document.getElementById "header-container")]
+                   (set! (.-paddingRight (.-style header-container)) (str scrollbar-width "px"))
+                   (if (>= scroll-top header-height)
+                     (set! (.-display (.-style sticky-header)) "block")
+                     (set! (.-display (.-style sticky-header)) "none"))))}
+   (if @(subscribe [:loading])
+     [:div {:style loading-style}
+      [:div.flex.justify-cont-s-a.align-items-c.h-100-p
+       [:img.h-200.w-200.m-t-200 {:src "/image/spiral.gif"}]]])
+   [app-header]
+   (let [hdr [header title button-cfgs]]
+     [:div
+      [:div#sticky-header.sticky-header.w-100-p.posn-fixed
+       [:div.flex.justify-cont-c.bg-light
+        [:div#header-container.f-s-14.white.content
+         hdr]]]
+      [:div.flex.justify-cont-c.white
+       [:div.content hdr]]
+      content
+      [:div.white.flex.justify-cont-c
+       [:div.content.f-w-n.f-s-12
+        [:div.p-10
+         [:div.m-b-5 "Icons made by Lorc, Caduceus, and Delapouite. Available on " [:a.orange {:href "http://game-icons.net"} "http://game-icons.net"]]]]]])])
+
+(defn character-list []
+  (let [characters @(subscribe [:dnd-5e-characters])]
+    (pprint characters)
+    [content-page
+     "Characters"
+     nil
+     [:div
+      (doall
+       (map
+        (fn [character]
+          [:div (get-in character [:orcpub.entity.strict/values :orcpub.dnd.e5.character/character-name])])
+        characters))]]))
 

@@ -138,6 +138,8 @@
 
    [:.opacity-1
     {:opacity "0.1"}]
+   [:.opacity-2
+    {:opacity "0.2"}]
    [:.opacity-5
     {:opacity "0.5"}]
    [:.opacity-6
@@ -735,16 +737,25 @@
 
     [:.app-header
      {:background-color :black
-      :background-image "url(../../image/header-background.jpg)"
-      :background-position "-400px"
+      :background-image "url(/../../image/header-background.jpg)"
+      :background-position "right center"
       :background-size "cover"
       :height (px const/header-height)}]
+
+    [:.header-tab
+     {:background-color "rgba(0, 0, 0, 0.25)"
+      :-webkit-backdrop-filter "blur(5px)"
+      :backdrop-filter "blur(5px)"}]
+
+    [:.header-tab:hover
+     [(garden.selectors/& (garden.selectors/not :.disabled))
+      {:background-color orange}]]
 
     [:.app-header-bar
      {:min-height (px 81)
       :-webkit-backdrop-filter "blur(5px)"
       :backdrop-filter "blur(5px)"
-      :background-color "rgba(0, 0, 0, 0.15)"}]
+      :background-color "rgba(0, 0, 0, 0.25)"}]
 
     [:.options-column
      {:width "300px"}]
