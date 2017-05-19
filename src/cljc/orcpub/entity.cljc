@@ -6,8 +6,7 @@
             [orcpub.entity-spec :as es]
             [orcpub.template :as t]
             [orcpub.entity.strict :as strict]
-            [clojure.set :refer [difference union intersection]]
-            #?(:cljs [cljs.pprint :as pp])))
+            [clojure.set :refer [difference union intersection]]))
 
 (spec/def ::key (fn [k] (and (keyword? k)
                              (not (re-matches #"^[0-9].*" (name k))))))

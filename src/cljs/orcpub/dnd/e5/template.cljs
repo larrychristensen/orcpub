@@ -101,7 +101,7 @@
 
 (defn ability-icon [k size]
   [:img {:class-name (str "h-" size " w-" size)
-         :src (str "image/" (ability-icons k) ".svg")}])
+         :src (str "/image/" (ability-icons k) ".svg")}])
 
 (defn ability-modifier [v]
   [:div.f-6-12.f-w-n.h-24

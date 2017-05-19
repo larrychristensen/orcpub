@@ -93,7 +93,6 @@
   (into {}
         (map
          (fn [x]
-           (prn "X" x)
            (let [[k v] x]
              [(keyword ns-str (name k))
               v]))

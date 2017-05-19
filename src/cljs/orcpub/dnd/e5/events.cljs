@@ -15,7 +15,6 @@
             [cljs.spec :as spec]
             [cljs-http.client :as http]
             [cljs.core.async :refer [<!]]
-            [cljs.pprint :refer [pprint]]
             [clojure.string :as s]
             [bidi.bidi :as bidi]
             [orcpub.route-map :as routes]
@@ -82,6 +81,11 @@
   (assoc db :character character :loading false))
 
 (reg-event-db
+ :toggle-character-expanded
+ (fn [db [_ character-id]]
+   (update-in db [:expanded-characters character-id] not)))
+
+(reg-event-db
  :set-character
  [db-char->local-store]
  set-character)
@@ -119,7 +123,7 @@
    (update character
            ::entity/values
            assoc
-           :image-url
+           ::char5e/image-url
            image-url
            :image-url-failed
            (if (s/starts-with? image-url "https")
@@ -132,7 +136,7 @@
    (update character
            ::entity/values
            assoc
-           :faction-image-url
+           ::char5e/faction-image-url
            faction-image-url
            :faction-image-url-failed
            (if (s/starts-with? faction-image-url "https")
@@ -537,7 +541,6 @@
  :login-success
  [user->local-store-interceptor]
  (fn [db [_ backtrack? response]]
-   (prn "LOGIN BODY" (:body response))
    (-> db
        (assoc :user-data (-> response :body))
        (assoc :route (:return-route db)))))
@@ -681,7 +684,6 @@
 (reg-event-db
  :load-characters-success
  (fn [db [_ response]]
-   (prn "RESPONSE" response)
    (assoc-in db [:dnd :e5 :characters] (:body response))))
 
 (defn get-auth-token [db]

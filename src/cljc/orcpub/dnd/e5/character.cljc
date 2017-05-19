@@ -41,7 +41,6 @@
 (spec/def ::raw-character ::entity/raw-entity)
 
 (defn has-simple-keywords? [values]
-  (prn "VALUES" values)
   (let [has? (some
               (fn [[k v]] (simple-keyword? k))
               values)]
@@ -73,10 +72,9 @@
      equipment-keys)))
 
 (spec/def ::unnamespaced-abilities
-  (fn [c] (prn "UN" c)
+  (fn [c]
     (let [abilities-selection (-> c ::entity/options :ability-scores)
           abilities (if (vector? abilities-selection) (second abilities-selection) abilities-selection)]
-      (prn "ABILITIES" abilities)
       (has-simple-keywords? (::entity/value abilities)))))
 
 (spec/def ::unnamespaced-keywords
@@ -157,9 +155,7 @@
       add-namespaces-to-values))
 
 (defn to-strict [raw-character]
-  (-> raw-character
-      add-namespaces
-      entity/to-strict))
+  (entity/to-strict raw-character))
 
 (spec/fdef to-strict
            :args ::raw-character
@@ -360,34 +356,37 @@
    finesse?))
 
 (defn age [built-char]
-  (es/entity-val built-char :age))
+  (es/entity-val built-char ::age))
 
 (defn sex [built-char]
-  (es/entity-val built-char :sex))
+  (es/entity-val built-char ::sex))
 
 (defn height [built-char]
-  (es/entity-val built-char :height))
+  (es/entity-val built-char ::height))
 
 (defn weight [built-char]
-  (es/entity-val built-char :weight))
+  (es/entity-val built-char ::weight))
 
 (defn skin [built-char]
-  (es/entity-val built-char :skin))
+  (es/entity-val built-char ::skin))
 
 (defn eyes [built-char]
-  (es/entity-val built-char :eyes))
+  (es/entity-val built-char ::eyes))
 
 (defn hair [built-char]
-  (es/entity-val built-char :hair))
+  (es/entity-val built-char ::hair))
 
 (defn image-url [built-char]
-  (es/entity-val built-char :image-url))
+  (es/entity-val built-char ::image-url))
 
 (defn faction-image-url [built-char]
-  (es/entity-val built-char :faction-image-url))
+  (es/entity-val built-char ::faction-image-url))
 
 (defn faction-name [built-char]
-  (es/entity-val built-char :faction-name))
+  (es/entity-val built-char ::faction-name))
+
+(defn character-name [built-char]
+  (es/entity-val built-char ::character-name))
 
 (defn remove-custom-starting-equipment [character equipment-indicator path]
   (update-in

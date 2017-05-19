@@ -41,7 +41,6 @@
 
 (defn handle-url-change [_]
   (let [route (routes/match-route js/window.location.pathname)]
-    (prn "ROUTE CHNAGE" route js/window.location.pathname)
     (dispatch [:route route {:skip-path? true}])))
 
 (defn make-history []

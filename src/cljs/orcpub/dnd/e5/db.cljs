@@ -61,8 +61,8 @@
  ::entity/raw-entity
  (fn [char]
    (if (spec/valid? ::char5e/unnamespaced-character char)
-     (do (prn "UNNAMESPACED!") (char5e/add-namespaces char))
-     (do (prn "NAMESPSEED") char))))
+     (char5e/add-namespaces char)
+     char)))
 
 (spec/def ::username string?)
 (spec/def ::email string?)

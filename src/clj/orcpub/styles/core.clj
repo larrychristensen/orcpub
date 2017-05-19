@@ -491,6 +491,9 @@
 (def not-lg-query
   {:max-width lg-width})
 
+(def not-xs-query
+  {:min-width sm-min})
+
 (def media-queries
   [[:.visible-xs,
     :.visible-sm,
@@ -842,10 +845,14 @@
       [:.personality-column
        {:display :none}]
       [:.details-column
-       {:display :block}]]
-     
+       {:display :block}]])
+
+    (at-media
+     not-xs-query
      [:.details-columns
-      {:display :flex}])
+      {:display :flex}]
+     [:.details-column-2
+      {:margin-left "40px"}])
 
     (at-media
      not-lg-query
