@@ -616,6 +616,7 @@
    :abilities {::char5e/str 2 ::char5e/con 1}
    :size :medium
    :speed 30
+   :darkvision 60
    :languages ["Common" "Orc"]
    :modifiers [(mod5e/skill-proficiency :intimidation)]
    :traits [{:name "Relentless Endurance"
@@ -859,6 +860,7 @@
    :speed 30
    :darkvision 60
    :source :vgm
+   :languages ["Common" "Goblin"]
    :selections [(t/selection-cfg
                  {:name "Martial Weapon Proficiencies"
                   :tags #{:weapon-profs :profs}
@@ -1286,12 +1288,14 @@
                     traits)
                    kw)
                   (if (and (not plugin?)
-                           (= i 1)) [(mod/cum-sum-mod
-                                      ?hit-point-level-increases
-                                      hit-die
-                                      nil
-                                      nil
-                                      [(first-class? kw ?classes)])])
+                           (= i 1)
+                           ())
+                    [(mod/cum-sum-mod
+                      ?hit-point-level-increases
+                      hit-die
+                      nil
+                      nil
+                      [(= kw (first ?classes))])])
                   (if (not plugin?)
                     [(mod5e/level kw name i hit-die)]))})))
 
@@ -1759,6 +1763,7 @@
                                 " that it can, within the next 10 min., add to a d20 roll")})]
     :levels {2 {:modifiers [(mod/modifier ?default-skill-bonus (let [b (int (/ ?prof-bonus 2))]
                                                                  (zipmap char5e/ability-keys (repeat b))))
+                            (mod/cum-sum-mod ?initiative (int (/ ?prof-bonus 2)))
                             (mod5e/dependent-trait
                              {:name "Jack of All Trades"
                               :page 54
@@ -5503,7 +5508,8 @@ long rest."})]
                             :summary "your thoughts can't be read telepathically; when an attempt is made you can provide false thoughts; magical attempts to determine your truthfulness always result in true"}]}
                  {:name "Swashbuckler"
                   :source "Sword Coast Adventurer's Guide"
-                  :levels {3 {:modifiers [(mod5e/dependent-trait
+                  :levels {3 {:modifiers [(mod/cum-sum-mod ?initiative (max 0 (?ability-bonuses :cha)))
+                                          (mod5e/dependent-trait
                                            {:name "Rakish Audacity"
                                             :level 3
                                             :page 136
@@ -8831,10 +8837,25 @@ long rest."})]
                                             (and (not melee?) definitely-finesse?))
                                       ::char5e/str
                                       ::char5e/dex)))))
+    ?spell-attack-modifier-bonus 0
     ?spell-attack-modifier (fn [ability-kw]
-                             (+ ?prof-bonus (?ability-bonuses ability-kw)))
+                             (+ ?prof-bonus
+                                (?ability-bonuses ability-kw)
+                                ?spell-attack-modifier-bonus))
+    ?spell-save-dc-bonus 0
     ?spell-save-dc (fn [ability-kw]
-                     (+ 8 ?prof-bonus (?ability-bonuses ability-kw)))
+                     (+ 8
+                        ?prof-bonus
+                        (?ability-bonuses ability-kw)
+                        ?spell-save-dc-bonus))
+    ?spell-modifiers (reduce
+                      (fn [m {:keys [ability class]}]
+                        (assoc m class {:class class
+                                        :ability ability
+                                        :spell-save-dc (?spell-save-dc ability)
+                                        :spell-attack-modifier (?spell-attack-modifier ability)}))
+                      {}
+                      (->> ?spells-known vals flatten))
     ?spell-slots (merge-with
                   +
                   (opt5e/total-slots (apply + (map (fn [[cls-kw factor]]
@@ -8846,6 +8867,7 @@ long rest."})]
                                                    ?spell-slot-factors)) 1)
                   (if ?pact-magic?
                     (warlock-spell-slot-schedule (?class-level :warlock))))
+    ?classes []
     ?reactions []
     ?actions []
     ?bonus-actions []

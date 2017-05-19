@@ -163,7 +163,7 @@
                :on-click (fn [] (if (not increase-disabled?) (swap! app-state assoc-in full-path (update ability-increases k inc))))}]]]))
         abilities-vec))]]))
 
-(defn ability-increase-selection [ability-keys num-increases & [different?]]
+(defn ability-increase-selection [ability-keys num-increases & [different? modifier-fns]]
   (t/selection-cfg
    {:name "Ability Score Improvement"
     :key :asi
@@ -177,7 +177,8 @@
                 (t/option-cfg
                  {:name (:name (abilities-map k))
                   :key k
-                  :modifiers [(modifiers/level-ability-increase k 1)]}))
+                  :modifiers (conj (map #(% k) modifier-fns)
+                                   (modifiers/level-ability-increase k 1))}))
               ability-keys)}))
 
 (defn ability-increase-option [num-increases different? ability-keys]
@@ -1099,7 +1100,7 @@
      :icon "dodging"
      :page 168
      :summary "increase ability by 1 and gain proficiency in saves with that ability"
-     :selections [(ability-increase-selection character/ability-keys 1 false)]})
+     :selections [(ability-increase-selection character/ability-keys 1 false [(fn [k] (modifiers/saving-throws nil k))])]})
    (feat-option
     {:name "Ritual Caster"
      :icon "gift-of-knowledge"
