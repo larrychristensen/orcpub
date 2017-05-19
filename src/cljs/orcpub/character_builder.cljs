@@ -15,6 +15,7 @@
             [orcpub.dice :as dice]
             [orcpub.modifiers :as mod]
             [orcpub.dnd.e5.character :as char5e]
+            [orcpub.dnd.e5.character.equipment :as char-equip5e]
             [orcpub.dnd.e5.modifiers :as mod5e]
             [orcpub.dnd.e5.options :as opt5e]
             [orcpub.dnd.e5.template :as t5e]
@@ -255,7 +256,9 @@
 (defn equipment-section [title icon-name equipment equipment-map]
   [list-display-section title icon-name
    (map
-    (fn [[equipment-kw {item-qty :quantity equipped? :equipped? :as num}]]
+    (fn [[equipment-kw {item-qty ::char-equip5e/quantity
+                        equipped? ::char-equip5e/equipped?
+                        :as num}]]
       (str (disp5e/equipment-name equipment-map equipment-kw)
            " (" (or item-qty num) ")"))
     equipment)])
@@ -699,7 +702,9 @@
      [:div
       (doall
        (map-indexed
-        (fn [i {item-key ::entity/key {item-qty :quantity equipped? :equipped? item-name :name} ::entity/value}]
+        (fn [i {item-key ::entity/key {item-qty ::char-equip5e/quantity
+                                       equipped? ::char-equip5e/equipped?
+                                       item-name ::char-equip5e/name} ::entity/value}]
           (let [item (item-map item-key)
                 item-name (or item-name (:name item))
                 item-description (:description item)]
@@ -724,7 +729,7 @@
        [:div
         (doall
          (map-indexed
-          (fn [i {:keys [name quantity equipped?]}]
+          (fn [i {:keys [::char-equip5e/name ::char-equip5e/quantity ::char-equip5e/equipped?]}]
             (let [item-key (common/name-to-kw name)]
               ^{:key item-key}
               [inventory-item {:selection-key custom-equipment-key
@@ -1914,60 +1919,60 @@
     [:div.flex-grow-1.builder-column.personality-column
      [:div.m-t-5
       [:span.personality-label.f-s-18 "Character Name"]
-      [character-input entity-values :character-name]]
+      [character-input entity-values ::char5e/character-name]]
      [:div.field
       [:span.personality-label.f-s-18 "Player Name"]
-      [character-input entity-values :player-name]]
+      [character-input entity-values ::char5e/player-name]]
      [:div.flex.justify-cont-s-b
       [:div.field.flex-grow-1.m-r-2
        [:span.personality-label.f-s-18 "Age"]
-       [character-input entity-values :age]]
+       [character-input entity-values ::char5e/age]]
       [:div.field.flex-grow-1.m-l-2.m-r-2
        [:span.personality-label.f-s-18 "Sex"]
-       [character-input entity-values :sex]]
+       [character-input entity-values ::char5e/sex]]
       [:div.field.flex-grow-1.m-l-2.m-r-2
        [:span.personality-label.f-s-18 "Height"]
-       [character-input entity-values :height]]
+       [character-input entity-values ::char5e/height]]
       [:div.field.flex-grow-1.m-l-2
        [:span.personality-label.f-s-18 "Weight"]
-       [character-input entity-values :weight]]]
+       [character-input entity-values ::char5e/weight]]]
      [:div.flex.justify-cont-s-b
       [:div.field.flex-grow-1.m-r-2
        [:span.personality-label.f-s-18 "Hair Color"]
-       [character-input entity-values :hair]]
+       [character-input entity-values ::char5e/hair]]
       [:div.field.flex-grow-1.m-1-2.m-r-2
        [:span.personality-label.f-s-18 "Eye Color"]
-       [character-input entity-values :eyes]]
+       [character-input entity-values ::char5e/eyes]]
       [:div.field.flex-grow-1.m-1-2
        [:span.personality-label.f-s-18 "Skin Color"]
-       [character-input entity-values :skin]]]
+       [character-input entity-values ::char5e/skin]]]
      [:div.field
       [:span.personality-label.f-s-18 "Personality Trait 1"]
-      [character-textarea entity-values :personality-trait-1]]
+      [character-textarea entity-values ::char5e/personality-trait-1]]
      [:div.field
       [:span.personality-label.f-s-18 "Personality Trait 2"]
-      [character-textarea entity-values :personality-trait-2]]
+      [character-textarea entity-values ::char5e/personality-trait-2]]
      [:div.field
       [:span.personality-label.f-s-18 "Ideals"]
-      [character-textarea entity-values :ideals]]
+      [character-textarea entity-values ::char5e/ideals]]
      [:div.field
       [:span.personality-label.f-s-18 "Bonds"]
-      [character-textarea entity-values :bonds]]
+      [character-textarea entity-values ::char5e/bonds]]
      [:div.field
       [:span.personality-label.f-s-18 "Flaws"]
-      [character-textarea entity-values :flaws]]
+      [character-textarea entity-values ::char5e/flaws]]
      [:div.field
       [:span.personality-label.f-s-18 "Image URL"]
-      [character-input entity-values :image-url nil #(dispatch [:set-image-url %])]]
+      [character-input entity-values ::char5e/image-url nil #(dispatch [:set-image-url %])]]
      [:div.field
       [:span.personality-label.f-s-18 "Faction Name"]
-      [character-input entity-values :faction-name]]
+      [character-input entity-values ::char5e/faction-name]]
      [:div.field
       [:span.personality-label.f-s-18 "Faction Image URL"]
-      [character-input entity-values :faction-image-url nil #(dispatch [:set-faction-image-url %])]]
+      [character-input entity-values ::char5e/faction-image-url nil #(dispatch [:set-faction-image-url %])]]
      [:div.field
       [:span.personality-label.f-s-18 "Description/Backstory"]
-      [character-textarea entity-values :description "h-800"]]]))
+      [character-textarea entity-values ::char5e/description "h-800"]]]))
 
 (defn builder-columns []
   [:div.flex-grow-1.flex
@@ -2113,23 +2118,27 @@
         al-illegal-reasons (concat (es/entity-val built-char :al-illegal-reasons)
                                    selection-validation-messages)
         used-resources (es/entity-val built-char :used-resources)
-        loading @(subscribe [:loading])]
+        loading @(subscribe [:loading])
+        locked-components @(subscribe [:locked-components])]
     (if print-enabled? (print-char built-char))
     [views5e/content-page
      "Character Builder"
      [{:title "Random"
+       :icon "random"
        :on-click (fn [_]
-                   (do
-                     (dispatch-sync [:set-loading true])
-                     (let [new-char (random-character character
-                                                      @(subscribe [:built-template])
-                                                      @(subscribe [:locked-components]))]
-                       (dispatch [:set-character new-char]))))}
+                   (dispatch [:set-loading true])
+                   (let [new-char (random-character character
+                                                    built-template
+                                                    locked-components)]
+                     (dispatch [:set-character new-char])))}
       {:title "Reset"
+       :icon "undo"
        :on-click (fn [_] (dispatch [:reset-character]))}
       {:title "Print"
+       :icon "print"
        :on-click (export-pdf built-char)}
       {:title "Save"
+       :icon "save"
        :on-click #(dispatch [:save-character])}]
      [:div
       [:div.container

@@ -49,4 +49,3 @@
   (stest/instrument `entity/from-strict)
   (is (= (entity/from-strict strict-character) character))
   (stest/unstrument `entity/from-strict))
-
