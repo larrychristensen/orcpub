@@ -92,12 +92,12 @@
                (assoc a k other-v other-k v))))))
 
 (def ability-icons
-  {:str "strong"
-   :con "caduceus"
-   :dex "body-balance"
-   :int "read"
-   :wis "meditation"
-   :cha "aura"})
+  {::char5e/str "strong"
+   ::char5e/con "caduceus"
+   ::char5e/dex "body-balance"
+   ::char5e/int "read"
+   ::char5e/wis "meditation"
+   ::char5e/cha "aura"})
 
 (defn ability-icon [k size]
   [:img {:class-name (str "h-" size " w-" size)
@@ -350,19 +350,19 @@
    {:class-key :wizard
     :level 0
     :exclude-ref? true
-    :spellcasting-ability :int
+    :spellcasting-ability ::char5e/int
     :class-name "High Elf"
     :num 1}))
 
 (def drow-magic-mods
-  [(mod5e/spells-known 0 :dancing-lights :cha "Dark Elf")
-   (mod5e/spells-known 1 :faerie-fire :cha "Dark Elf" 3)
-   (mod5e/spells-known 2 :darkness :cha "Dark Elf" 5)])
+  [(mod5e/spells-known 0 :dancing-lights ::char5e/cha "Dark Elf")
+   (mod5e/spells-known 1 :faerie-fire ::char5e/cha "Dark Elf" 3)
+   (mod5e/spells-known 2 :darkness ::char5e/cha "Dark Elf" 5)])
 
 (def elf-option-cfg
   {:name "Elf"
    :help "Elves are graceful, magical creatures, with a slight build."
-   :abilities {:dex 2}
+   :abilities {::char5e/dex 2}
    :size :medium
    :speed 30
    :languages ["Elvish" "Common"]
@@ -372,17 +372,17 @@
                (mod5e/skill-proficiency :perception)]
    :subraces
    [{:name "High Elf"
-     :abilities {:int 1}
+     :abilities {::char5e/int 1}
      :selections [high-elf-cantrip-selection
                   (opt5e/language-selection opt5e/languages 1)]
      :modifiers [elf-weapon-training-mods]}
     {:name "Wood Elf"
-     :abilities {:wis 1}
+     :abilities {::char5e/wis 1}
      :modifiers [(mod5e/speed 5)
                  mask-of-the-wild-mod
                  elf-weapon-training-mods]}
     {:name "Dark Elf (Drow)"
-     :abilities {:cha 1}
+     :abilities {::char5e/cha 1}
      :traits [(sunlight-sensitivity 24)]
      :modifiers (conj drow-magic-mods (mod5e/darkvision 120))}]
    :traits [{:name "Fey Ancestry"
@@ -395,7 +395,7 @@
 (def dwarf-option-cfg
   {:name "Dwarf",
    :help "Dwarves are short and stout and tend to be skilled warriors and craftmen in stone and metal."
-   :abilities {:con 2},
+   :abilities {::char5e/con 2},
    :size :medium
    :speed 25,
    :darkvision 60
@@ -408,11 +408,11 @@
              :summary "2X prof bonus on stonework-related history checks"
              :page 20}]
    :subraces [{:name "Hill Dwarf",
-               :abilities {:wis 1}
+               :abilities {::char5e/wis 1}
                :selections [(opt5e/tool-selection [:smiths-tools :brewers-supplies :masons-tools] 1)]
                :modifiers [(mod/modifier ?hit-point-level-bonus (+ 1 ?hit-point-level-bonus))]}
               {:name "Mountain Dwarf"
-               :abilities {:str 2}
+               :abilities {::char5e/str 2}
                :armor-proficiencies [:light :medium]}]
    :modifiers [(mod5e/damage-resistance :poison)
                (mod5e/saving-throw-advantage [:poisoned])]})
@@ -420,19 +420,19 @@
 (def halfling-option-cfg
   {:name "Halfling"
    :help "Halflings are small and nimble, half the height of a human, but fairly stout. They are cheerful and practical."
-   :abilities {:dex 2}
+   :abilities {::char5e/dex 2}
    :size :small
    :speed 25
    :languages ["Halfling" "Common"]
    :modifiers [(mod5e/saving-throw-advantage [:frightened])]
    :subraces
    [{:name "Lightfoot"
-     :abilities {:cha 1}
+     :abilities {::char5e/cha 1}
      :traits [{:name "Naturally Stealthy"
                :page 28
                :summary "Hide behind creatures larger than you"}]}
     {:name "Stout"
-     :abilities {:con 1}
+     :abilities {::char5e/con 1}
      :modifiers [(mod5e/damage-resistance :poison)
                  (mod5e/saving-throw-advantage [:poisoned])]}]
    :traits [{:name "Lucky"
@@ -464,12 +464,12 @@
                   :tags #{:subrace}
                   :options [(t/option-cfg
                              {:name "Standard Human"
-                              :modifiers [(mod5e/race-ability :str 1)
-                                          (mod5e/race-ability :con 1)
-                                          (mod5e/race-ability :dex 1)
-                                          (mod5e/race-ability :int 1)
-                                          (mod5e/race-ability :wis 1)
-                                          (mod5e/race-ability :cha 1)]})
+                              :modifiers [(mod5e/race-ability ::char5e/str 1)
+                                          (mod5e/race-ability ::char5e/con 1)
+                                          (mod5e/race-ability ::char5e/dex 1)
+                                          (mod5e/race-ability ::char5e/int 1)
+                                          (mod5e/race-ability ::char5e/wis 1)
+                                          (mod5e/race-ability ::char5e/cha 1)]})
                             (t/option-cfg
                              {:name "Variant Human"
                               :selections [(opt5e/feat-selection 1)
@@ -488,61 +488,61 @@
                     :area-type :line
                     :line-width 5
                     :line-length 30
-                    :save :dex}}
+                    :save ::char5e/dex}}
    {:name "Blue"
     :breath-weapon {:damage-type :lightning
                     :area-type :line
                     :line-width 5
                     :line-length 30
-                    :save :dex}}
+                    :save ::char5e/dex}}
    {:name "Brass"
     :breath-weapon {:damage-type :fire
                     :area-type :line
                     :line-width 5
                     :line-length 30
-                    :save :dex}}
+                    :save ::char5e/dex}}
    {:name "Bronze"
     :breath-weapon {:damage-type :lightning
                     :area-type :line
                     :line-width 5
                     :line-length 30
-                    :save :dex}}
+                    :save ::char5e/dex}}
    {:name "Copper"
     :breath-weapon {:damage-type :acid
                     :area-type :line
                     :line-width 5
                     :line-length 30
-                    :save :dex}}
+                    :save ::char5e/dex}}
    {:name "Gold"
     :breath-weapon {:damage-type :fire
                     :area-type :cone
                     :length 15
-                    :save :dex}}
+                    :save ::char5e/dex}}
    {:name "Green"
     :breath-weapon {:damage-type :poison
                     :area-type :cone
                     :length 15
-                    :save :con}}
+                    :save ::char5e/con}}
    {:name "Red"
     :breath-weapon {:damage-type :fire
                     :area-type :cone
                     :length 15
-                    :save :dex}}
+                    :save ::char5e/dex}}
    {:name "Silver"
     :breath-weapon {:damage-type :cold
                     :area-type :cone
                     :length 15
-                    :save :con}}
+                    :save ::char5e/con}}
    {:name "White"
     :breath-weapon {:damage-type :cold
                     :area-type :cone
                     :length 15
-                    :save :con}}])
+                    :save ::char5e/con}}])
 
 (def dragonborn-option-cfg
   {:name "Dragonborn"
    :help "Kin to dragons, dragonborn resemble humanoid dragons, without wings or tail and standing erect. They tend to make excellent warriors."
-   :abilities {:str 2 :cha 1}
+   :abilities {::char5e/str 2 ::char5e/cha 1}
    :size :medium
    :speed 30
    :languages ["Draconic" "Common"]
@@ -562,7 +562,7 @@
                                         11 4
                                         6 3
                                         2)
-                    :save-dc (?spell-save-dc :con)})))]
+                    :save-dc (?spell-save-dc ::char5e/con)})))]
    :selections [(t/selection-cfg
                  {:name "Draconic Ancestry"
                   :tags #{:subrace}
@@ -574,15 +574,15 @@
 (def gnome-option-cfg
   {:name "Gnome"
    :help "Gnomes are small, intelligent humanoids who live life with the utmost of enthusiasm."
-   :abilities {:int 2}
+   :abilities {::char5e/int 2}
    :size :small
    :speed 25
    :darkvision 60
    :languages ["Gnomish" "Common"]
-   :modifiers [(mod5e/saving-throw-advantage [:magic] [:int :wis :cha])]
+   :modifiers [(mod5e/saving-throw-advantage [:magic] [::char5e/int ::char5e/wis ::char5e/cha])]
    :subraces
    [{:name "Rock Gnome"
-     :abilities {:con 1}
+     :abilities {::char5e/con 1}
      :modifiers [(mod5e/tool-proficiency :tinkers-tools)]
      :traits [{:name "Artificer's Lore"
                :page 37
@@ -591,8 +591,8 @@
                :page 37
                :summary "Construct tiny clockwork devices."}]}
     {:name "Forest Gnome"
-     :abilities {:dex 1}
-     :modifiers [(mod5e/spells-known 0 :minor-illusion :int "Forest Gnome")]
+     :abilities {::char5e/dex 1}
+     :modifiers [(mod5e/spells-known 0 :minor-illusion ::char5e/int "Forest Gnome")]
      :traits [{:name "Speak with Small Beasts"
                :page 37
                :summary "Communicate with Small or smaller beasts."}]}]})
@@ -600,12 +600,12 @@
 (def half-elf-option-cfg
   {:name "Half-Elf"
    :help "Half-elves are charismatic, and bear a resemblance to both their elvish and human parents and share many of the traits of each."
-   :abilities {:cha 2}
+   :abilities {::char5e/cha 2}
    :size :medium
    :speed 30
    :darkvision 60
    :languages ["Common" "Elvish"]
-   :selections [(opt5e/ability-increase-selection (disj (set char5e/ability-keys) :cha) 2 true)
+   :selections [(opt5e/ability-increase-selection (disj (set char5e/ability-keys) ::char5e/cha) 2 true)
                 (opt5e/skill-selection 2)
                 (opt5e/language-selection opt5e/languages 1)]
    :modifiers [(mod5e/saving-throw-advantage [:charmed])]})
@@ -613,7 +613,7 @@
 (def half-orc-option-cfg
   {:name "Half-Orc"
    :help "Half-orcs are strong and bear an unmistakable resemblance to their orcish parent. They tend to make excellent warriors, especially Barbarians."
-   :abilities {:str 2 :con 1}
+   :abilities {::char5e/str 2 ::char5e/con 1}
    :size :medium
    :speed 30
    :languages ["Common" "Orc"]
@@ -627,7 +627,7 @@
 
 (def aasimar-option-cfg
   {:name "Aasimar"
-   :abilities {:cha 2}
+   :abilities {::char5e/cha 2}
    :size :medium
    :speed 30
    :darkvision 60
@@ -635,12 +635,12 @@
    :languages ["Common" "Celestial"]
    :modifiers [(mod5e/damage-resistance :necrotic)
                (mod5e/damage-resistance :radiant)
-               (mod5e/spells-known 0 :light :cha "Aasimar")]
+               (mod5e/spells-known 0 :light ::char5e/cha "Aasimar")]
    :traits [{:name "Healing Hands"
              :page 105
              :summary "Heal a creature a number of hit points equal to your level"}]
    :subraces [{:name "Protector Aasimar"
-               :abilities {:wis 1}
+               :abilities {::char5e/wis 1}
                :modifiers [(mod5e/dependent-trait
                             {:name "Radiant Soul"
                              :level 3
@@ -650,7 +650,7 @@
                                            ?total-levels
                                            " extra radiant damage.") })]}
               {:name "Scourge Aasimar"
-               :abilities {:con 1}
+               :abilities {::char5e/con 1}
                :modifiers [(mod5e/dependent-trait
                             {:name "Radiant Consumption"
                              :level 3
@@ -661,13 +661,13 @@
                                              (common/round-up (/ level 2))
                                              " radiant damage to each creature within 10 ft. and deal an additional " level " radiant damage to one target you deal damage to with a spell or attack"))})]}
               {:name "Fallen Aasimar"
-               :abilities {:str 1}
+               :abilities {::char5e/str 1}
                :modifiers [(mod5e/dependent-trait
                             {:name "Necrotic Shroud"
                              :level 3
                              :page 105
                              :source :vgm
-                             :summary (str "For 1 minute, creatures within 10 ft. must succeed on a DC " (?spell-save-dc :cha) " cha save or be frightened of you. During that time also deal an additional " ?total-levels " necrotic damage to one target you deal damage to with a spell or attack.")})]}]})
+                             :summary (str "For 1 minute, creatures within 10 ft. must succeed on a DC " (?spell-save-dc ::char5e/cha) " cha save or be frightened of you. During that time also deal an additional " ?total-levels " necrotic damage to one target you deal damage to with a spell or attack.")})]}]})
 
 (defn powerful-build [page]
   {:name "Powerful Build"
@@ -677,13 +677,13 @@
 
 (def firbolg-option-cfg
   {:name "Firbolg"
-   :abilities {:wis 2 :str 1}
+   :abilities {::char5e/wis 2 ::char5e/str 1}
    :size :medium
    :speed 30
    :source :vgm
    :languages ["Common" "Elvish" "Giant"]
-   :modifiers [(mod5e/spells-known 1 :detect-magic :wis "Firbolg")
-               (mod5e/spells-known 1 :disguise-self :wis "Firbolg" 1 "only to seem 3 ft. shorter")
+   :modifiers [(mod5e/spells-known 1 :detect-magic ::char5e/wis "Firbolg")
+               (mod5e/spells-known 1 :disguise-self ::char5e/wis "Firbolg" 1 "only to seem 3 ft. shorter")
                (mod5e/bonus-action
                 {:name "Hidden Step"
                  :duration rounds-1
@@ -699,7 +699,7 @@
 
 (def goliath-option-cfg
   {:name "Goliath"
-   :abilities {:str 2 :con 1}
+   :abilities {::char5e/str 2 ::char5e/con 1}
    :size :medium
    :speed 30
    :languages ["Common" "Giant"]
@@ -710,7 +710,7 @@
                  :frequency rests-1
                  :page 109
                  :source :vgm
-                 :summary (str "Reduce damage taken by 1d12 + " (:con ?ability-bonuses))})]
+                 :summary (str "Reduce damage taken by 1d12 + " (::char5e/con ?ability-bonuses))})]
    
    :traits [{:name "Mountain Born"
              :page 109
@@ -719,7 +719,7 @@
 
 (def kenku-option-cfg
   {:name "Kenku"
-   :abilities {:dex 2 :wis 1}
+   :abilities {::char5e/dex 2 ::char5e/wis 1}
    :size :medium
    :speed 30
    :source :vgm
@@ -736,7 +736,7 @@
 
 (def lizardfolk-option-cfg
   {:name "Lizardfolk"
-   :abilities {:con 2 :wis 1}
+   :abilities {::char5e/con 2 ::char5e/wis 1}
    :size :medium
    :speed 30
    :source :vgm
@@ -754,7 +754,7 @@
                  :source :vgm
                  :frequency rests-1
                  :summary (str "Special attack with your bite. If you hit, you gain "
-                               (max 1 (:con ?ability-bonuses))
+                               (max 1 (::char5e/con ?ability-bonuses))
                                " temp. hit points")})
                (mod5e/attack
                 {:name "Bite"
@@ -764,7 +764,7 @@
                  :damage-type :piercing
                  :damage-die 6
                  :damage-die-count 1
-                 :damage-modifier (:str ?ability-bonuses)})]
+                 :damage-modifier (::char5e/str ?ability-bonuses)})]
    :profs {:skill-options {:choose 2 :options {:animal-handling true :nature true :stealth true :perception true :survival true}}}
    :traits [{:name "Cunning Artisan"
              :page 113
@@ -775,7 +775,7 @@
 
 (def tabaxi-option-cfg
   {:name "Tabaxi"
-   :abilities {:dex 2 :cha 1}
+   :abilities {::char5e/dex 2 ::char5e/cha 1}
    :size :medium
    :speed 30
    :darkvision 60
@@ -789,7 +789,7 @@
                  :damage-type :slashing
                  :damage-die 4
                  :damage-die-count 1
-                 :damage-modifier (:str ?ability-bonuses)})]
+                 :damage-modifier (::char5e/str ?ability-bonuses)})]
    :language-options {:choose 1 :options {:any true}}
    :profs {:skill {:perception true :stealth true}}
    :traits [{:name "Feline Agility"
@@ -798,15 +798,15 @@
 
 (def triton-option-cfg
   {:name "Triton"
-   :abilities {:str 1 :con 1 :cha 1}
+   :abilities {::char5e/str 1 ::char5e/con 1 ::char5e/cha 1}
    :size :medium
    :speed 30
    :source :vgm
    :languages ["Common" "Primordial"]
    :modifiers [(mod5e/swimming-speed 30)
-               (mod5e/spells-known 1 :fog-cloud :cha "Triton")
-               (mod5e/spells-known 2 :gust-of-wind :cha "Triton" 3)
-               (mod5e/spells-known 3 :wall-of-water :cha "Triton" 5)
+               (mod5e/spells-known 1 :fog-cloud ::char5e/cha "Triton")
+               (mod5e/spells-known 2 :gust-of-wind ::char5e/cha "Triton" 3)
+               (mod5e/spells-known 3 :wall-of-water ::char5e/cha "Triton" 5)
                (mod5e/damage-resistance :cold)]
    :traits [{:name "Amphibious"
              :page 118
@@ -820,7 +820,7 @@
 
 (def bugbear-option-cfg
   {:name "Bugbear"
-   :abilities {:str 2 :dex 1}
+   :abilities {::char5e/str 2 ::char5e/dex 1}
    :size "Medium"
    :speed 30
    :darkvision 60
@@ -837,7 +837,7 @@
 
 (def goblin-option-cfg
   {:name "Goblin"
-   :abilities {:dex 2 :con 1}
+   :abilities {::char5e/dex 2 ::char5e/con 1}
    :size "Medium"
    :speed 30
    :darkvision 60
@@ -854,7 +854,7 @@
 
 (def hobgoblin-option-cfg
   {:name "Hobgoblin"
-   :abilities {:con 2 :int 1}
+   :abilities {::char5e/con 2 ::char5e/int 1}
    :size "Medium"
    :speed 30
    :darkvision 60
@@ -872,7 +872,7 @@
 
 (def kobold-option-cfg
   {:name "Kobold"
-   :abilities {:dex 2 :str -2}
+   :abilities {::char5e/dex 2 ::char5e/str -2}
    :size "Medium"
    :speed 30
    :darkvision 60
@@ -888,7 +888,7 @@
 
 (def orc-option-cfg
   {:name "Orc"
-   :abilities {:str 2 :con 1 :int -2}
+   :abilities {::char5e/str 2 ::char5e/con 1 ::char5e/int -2}
    :size "Medium"
    :speed 30
    :darkvision 60
@@ -903,14 +903,14 @@
 
 (def yuan-ti-option-cfg
   {:name "Yuan-Ti Pureblood"
-   :abilities {:cha 2 :int 1}
+   :abilities {::char5e/cha 2 ::char5e/int 1}
    :size "Medium"
    :speed 30
    :darkvision 60
    :source :vgm
-   :modifiers [(mod5e/spells-known 0 :poison-spray :cha "Yuan-Ti")
-               (mod5e/spells-known 1 :animal-friendship :cha "Yuan-Ti" 1 "unlimited uses, can only target snakes")
-               (mod5e/spells-known 2 :suggestion :cha "Yuan-Ti" 3 "one use per long rest")
+   :modifiers [(mod5e/spells-known 0 :poison-spray ::char5e/cha "Yuan-Ti")
+               (mod5e/spells-known 1 :animal-friendship ::char5e/cha "Yuan-Ti" 1 "unlimited uses, can only target snakes")
+               (mod5e/spells-known 2 :suggestion ::char5e/cha "Yuan-Ti" 3 "one use per long rest")
                (mod5e/damage-immunity :poison)
                (mod5e/condition-immunity :poisoned)
                (mod5e/saving-throw-advantage [:magic])]
@@ -919,21 +919,21 @@
 (def tiefling-option-cfg
   {:name "Tiefling"
    :help "Tieflings bear the distinct marks of their infernal ancestry: horns, a tail, pointed teeth, and solid-colored eyes. They are smart and charismatic."
-   :abilities {:int 1 :cha 2}
+   :abilities {::char5e/int 1 ::char5e/cha 2}
    :size :medium
    :speed 30
    :darkvision 60
    :languages ["Common" "Infernal"]
-   :modifiers [(mod5e/spells-known 0 :thaumaturgy :cha "Tiefling")
-               (mod5e/spells-known 1 :hellish-rebuke :cha "Tiefling" 3)
-               (mod5e/spells-known 2 :darkness :cha "Tiefling" 5)]})
+   :modifiers [(mod5e/spells-known 0 :thaumaturgy ::char5e/cha "Tiefling")
+               (mod5e/spells-known 1 :hellish-rebuke ::char5e/cha "Tiefling" 3)
+               (mod5e/spells-known 2 :darkness ::char5e/cha "Tiefling" 5)]})
 
 (defn al-illegal-flying-mod [name]
   (mod5e/al-illegal (str name " gains flying speed a 1st level, which is not legal")))
 
 (def aarakocra-option-cfg
   {:name "Aarakocra"
-   :abilities {:dex 2 :wis 1}
+   :abilities {::char5e/dex 2 ::char5e/wis 1}
    :size :medium
    :speed 25
    :languages ["Common" "Aarakocra" "Auran"]
@@ -947,13 +947,13 @@
                  :damage-die 4
                  :damage-die-count 1
                  :damage-type :slashing
-                 :damage-modifier (?ability-bonuses :str)})]})
+                 :damage-modifier (?ability-bonuses ::char5e/str)})]})
 
 (def ee-gnome-option-cfg
   {:name "Gnome"
    :subraces
    [{:name "Deep Gnome"
-     :abilities {:dex 1}
+     :abilities {::char5e/dex 1}
      :modifiers [(mod5e/darkvision 120)]
      :source :ee
      :traits [{:name "Stone Camouflage"
@@ -964,13 +964,13 @@
 (def genasi-option-cfg
   {:name "Genasi"
    :source :ee
-   :abilities {:con 2}
+   :abilities {::char5e/con 2}
    :size "Medium"
    :speed 30
    :languages ["Common" "Primordial"]
    :subraces [{:name "Air Genasi"
-               :abilities {:dex 1}
-               :modifiers [(mod5e/spells-known 2 :levitate :con "Air Genasi" nil "once/long rest")]
+               :abilities {::char5e/dex 1}
+               :modifiers [(mod5e/spells-known 2 :levitate ::char5e/con "Air Genasi" nil "once/long rest")]
                :traits [{:name "Unending Breath"
                          :page 9
                          :source :ee
@@ -981,8 +981,8 @@
                          :frequency long-rests-1
                          :summary "cast levitate without material components"}]}
               {:name "Earth Genasi"
-               :abilities {:str 1}
-               :modifiers [(mod5e/spells-known 2 :pass-without-trace :con "Earth Genasi" nil "once/long rest")]
+               :abilities {::char5e/str 1}
+               :modifiers [(mod5e/spells-known 2 :pass-without-trace ::char5e/con "Earth Genasi" nil "once/long rest")]
                :traits [{:name "Earth Walk"
                          :page 9
                          :source :ee
@@ -993,11 +993,11 @@
                          :frequency long-rests-1
                          :summary "cast pass without trace without material components"}]}
               {:name "Fire Genasi"
-               :abilities {:int 1}
+               :abilities {::char5e/int 1}
                :modifiers [(mod5e/darkvision 60)
                            (mod5e/damage-resistance :fire)
-                           (mod5e/spells-known 0 :produce-flame :con "Fire Genasi")
-                           (mod5e/spells-known 1 :burning-hands :con "Fire Genasi" 3 "once/long rest")]
+                           (mod5e/spells-known 0 :produce-flame ::char5e/con "Fire Genasi")
+                           (mod5e/spells-known 1 :burning-hands ::char5e/con "Fire Genasi" 3 "once/long rest")]
                :traits [{:name "Fire Resistance"
                          :page 10
                          :source :ee
@@ -1008,11 +1008,11 @@
                          :frequency long-rests-1
                          :summary "have 'produce flame' cantrip; at level 3 can cast burning hands"}]}
               {:name "Water Genasi"
-               :abilities {:wis 1}
+               :abilities {::char5e/wis 1}
                :modifiers [(mod5e/damage-resistance :acid)
                            (mod5e/swimming-speed 30)
-                           (mod5e/spells-known 0 :shape-water :con "Water Genasi")
-                           (mod5e/spells-known 1 :create-or-destroy-water :con "Water Genasi" 3 "once/long rest")]
+                           (mod5e/spells-known 0 :shape-water ::char5e/con "Water Genasi")
+                           (mod5e/spells-known 1 :create-or-destroy-water ::char5e/con "Water Genasi" 3 "once/long rest")]
                :traits [{:name "Acid Resistance"
                          :page 10
                          :source :ee
@@ -1519,9 +1519,9 @@
     :ability-increase-levels [4 8 12 16 19]
     :profs {:armor {:light true :medium true :shields false}
             :weapon {:simple false :martial false}
-            :save {:str true :con true}
+            :save {::char5e/str true ::char5e/con true}
             :skill-options {:choose 2 :options {:animal-handling true :athletics true :intimidation true :nature true :perception true :survival true}}}
-    :multiclass-prereqs [(opt5e/ability-prereq :str 13)]
+    :multiclass-prereqs [(opt5e/ability-prereq ::char5e/str 13)]
     :weapon-choices [{:name "Martial Weapon"
                       :options {:greataxe 1
                                 :martial 1}}
@@ -1531,11 +1531,11 @@
     :weapons {:javelin 4}
     :equipment {:explorers-pack 1}
     :modifiers [(mod/vec-mod ?unarmored-defense :barbarian)
-                (mod/cum-sum-mod ?unarmored-ac-bonus (?ability-bonuses :con)
+                (mod/cum-sum-mod ?unarmored-ac-bonus (?ability-bonuses ::char5e/con)
                                  nil
                                  nil
                                  [(= :barbarian (first ?unarmored-defense))])
-                (mod/cum-sum-mod ?unarmored-with-shield-ac-bonus (?ability-bonuses :con)
+                (mod/cum-sum-mod ?unarmored-with-shield-ac-bonus (?ability-bonuses ::char5e/con)
                                  nil
                                  nil
                                  [(= :barbarian (first ?unarmored-defense))])
@@ -1582,10 +1582,10 @@
                               {:name "Indomitable Might"
                                :level 18
                                :page 49
-                               :summary (let [str-score (:str ?abilities)]
+                               :summary (let [str-score (::char5e/str ?abilities)]
                                           (str "Min strength check value is " str-score))})]}
-             20 {:modifiers [(mod5e/ability :str 4)
-                            (mod5e/ability :con 4)]}}
+             20 {:modifiers [(mod5e/ability ::char5e/str 4)
+                            (mod5e/ability ::char5e/con 4)]}}
     :traits [{:name "Reckless Attack"
               :level 2
               :page 48
@@ -1614,7 +1614,7 @@
                                             {:name "Intimidating Presence"
                                              :level 10
                                              :page 49
-                                             :summary (str "Frighten (Wisdom save DC " (?spell-save-dc :cha) ") a creature with 30 ft.")})]}
+                                             :summary (str "Frighten (Wisdom save DC " (?spell-save-dc ::char5e/cha) ") a creature with 30 ft.")})]}
                            14 {:modifiers [(mod5e/reaction
                                            {:name "Retaliation"
                                             :page 49
@@ -1712,10 +1712,10 @@
    {:name "Bard"
     :hit-die 8
     :ability-increase-levels [4 8 12 16 19]
-    :multiclass-prereqs [(opt5e/ability-prereq :cha 13)]
+    :multiclass-prereqs [(opt5e/ability-prereq ::char5e/cha 13)]
     :profs {:armor {:light false}
             :weapon {:simple true :crossbow-hand true :longsword true :rapier true :shortsword true}
-            :save {:dex true :cha true}
+            :save {::char5e/dex true ::char5e/cha true}
             :skill-options {:choose 3 :options {:any true}}
             :multiclass-skill-options {:choose 1 :options {:any true}}
             :tool-options {:musical-instrument 3}
@@ -1750,7 +1750,7 @@
                                   17 1
                                   18 2}
                    :known-mode :schedule
-                   :ability :cha}
+                   :ability ::char5e/cha}
     :modifiers [(mod5e/bonus-action
                  {:name "Bardic Inspiration"
                   :page 53
@@ -1840,7 +1840,7 @@
                   (mod5e/skill-expertise skill-kw)]})))
 
 (defn cleric-spell [spell-level spell-key min-level]
-  (mod5e/spells-known spell-level spell-key :wis "Cleric" min-level nil :cleric))
+  (mod5e/spells-known spell-level spell-key ::char5e/wis "Cleric" min-level nil :cleric))
 
 (defn potent-spellcasting [page & [source]]
   (mod5e/dependent-trait
@@ -1848,7 +1848,7 @@
     :page page
     :source source
     :summary (str "Add "
-                  (common/bonus-str (?ability-bonuses :wis))
+                  (common/bonus-str (?ability-bonuses ::char5e/wis))
                   " to damage from cantrips you cast")
     :name "Potent Spellcasting"}))
 
@@ -1884,14 +1884,14 @@
     :spellcasting {:level-factor 1
                    :cantrips-known {1 3 4 1 10 1}
                    :known-mode :all
-                   :ability :wis}
-    :multiclass-prereqs [(opt5e/ability-prereq :wis 13)]
+                   :ability ::char5e/wis}
+    :multiclass-prereqs [(opt5e/ability-prereq ::char5e/wis 13)]
     :spellcaster true
     :hit-die 8,
     :ability-increase-levels [4 8 12 16 19]
     :profs {:armor {:light false :medium false :shields false}
             :weapon {:simple true}
-            :save {:wis true :cha true}
+            :save {::char5e/wis true ::char5e/cha true}
             :skill-options {:choose 2 :options {:history true :insight true :medicine true :persuasion true :religion true}}}
     :equipment-choices [{:name "Equipment Pack"
                          :options {:priests-pack 1
@@ -1923,7 +1923,7 @@
                               :page 59
                               :name "Channel Divinity: Turn Undead"
                               :summary (str "undead within 30 feet must make a DC "
-                                            (?spell-save-dc :wis)
+                                            (?spell-save-dc ::char5e/wis)
                                             " Wisdom save or be turned for 1 min. or until damaged")})]}
              5 {:modifiers [(mod5e/dependent-trait
                              {:level 5
@@ -2004,7 +2004,7 @@
                                             :page 59
                                             :name "Channel Divinity: Read Thoughts"
                                             :summary (str "a creature within 60 ft. must make a DC "
-                                                          (?spell-save-dc :wis)
+                                                          (?spell-save-dc ::char5e/wis)
                                                           " Wisdom save or you can read it's thoughts for 1 min, use an action to end the effect and cast 'suggestion' without using a slot and with no save")})]}
                            8 {:modifiers [(potent-spellcasting 60)]}}
                   :traits [{:level 2
@@ -2032,7 +2032,7 @@
                                 :page 61
                                 :summary "impose disadvantage on an attack roll against you"
                                 :frequency {:units :long-rest
-                                            :amount (max 1 (?ability-bonuses :wis))}})]
+                                            :amount (max 1 (?ability-bonuses ::char5e/wis))}})]
                   :levels {2 {:modifiers [(mod5e/action
                                            {:level 2
                                             :class-key :cleric
@@ -2043,7 +2043,7 @@
                                             :summary (str "Dispel magical darkness and deal 2d10 + "
                                                           (?class-level :cleric)
                                                           " radiant damage (half on successful DC "
-                                                          (?spell-save-dc :wis)
+                                                          (?spell-save-dc ::char5e/wis)
                                                           " Constitution save) to hostile creatures")})]}
                            6 {:modifiers [(mod5e/reaction
                                            {:level 6
@@ -2076,7 +2076,7 @@
                                             :range {:plural :feet
                                                     :amount 30}
                                             :summary (str "charm beasts and plant creatures unless they succeed on a DC "
-                                                          (?spell-save-dc :wis)
+                                                          (?spell-save-dc ::char5e/wis)
                                                           " Wisdom save")})]}
                            6 {:modifiers [(mod5e/reaction
                                            {:name "Dampen Elements"
@@ -2094,7 +2094,7 @@
                   :selections [(t/selection-cfg
                                 {:name "Druid Cantrip"
                                  :tags #{:spells}
-                                 :options (opt5e/spell-options (get-in sl/spell-lists [:druid 0]) :wis "Druid")})]}
+                                 :options (opt5e/spell-options (get-in sl/spell-lists [:druid 0]) ::char5e/wis "Druid")})]}
                  {:name "Tempest Domain"
                   :profs {:armor {:heavy true}
                           :weapon {:martial true}}
@@ -2112,9 +2112,9 @@
                                {:name "Wrath of the Storm"
                                 :page 62
                                 :frequency {:units :long-rest
-                                            :amount (max 1 (?ability-bonuses :wis))}
+                                            :amount (max 1 (?ability-bonuses ::char5e/wis))}
                                 :summary (str "When a creature within 5 ft. hits you, you deal 2d8 lightning or thunder damage to them (half that on successful DC "
-                                              (?spell-save-dc :wis)
+                                              (?spell-save-dc ::char5e/wis)
                                               " Dexterity save).")})]
                   :levels {2 {:modifiers [(mod5e/trait-cfg
                                            {:name "Channel Divinity: Destructive Wrath"
@@ -2181,7 +2181,7 @@
                                 :level 1
                                 :page 63
                                 :frequency {:units :long-rest
-                                            :amount (max 1 (?ability-bonuses :wis))}
+                                            :amount (max 1 (?ability-bonuses ::char5e/wis))}
                                 :summary "make one extra weapon attack when you use the Attack action"})]
                   :levels {6 {:modifiers [(mod5e/reaction
                                            {:name "Channel Divinity: War God's Blessing"
@@ -2201,7 +2201,7 @@
                             :summary "from non-magical weapons, resistance to slashing, bludgeoning, and piercing damage"}]}]}))
 
 (defn druid-spell [spell-level spell-key min-level]
-  (mod5e/spells-known spell-level spell-key :wis "Druid" min-level nil :druid))
+  (mod5e/spells-known spell-level spell-key ::char5e/wis "Druid" min-level nil :druid))
 
 (defn lands-stride [level]
   {:name "Land's Stride"
@@ -2217,13 +2217,13 @@
     :spellcasting {:level-factor 1
                    :cantrips-known {1 2 4 1 10 1}
                    :known-mode :all
-                   :ability :wis}
-    :multiclass-prereqs [(opt5e/ability-prereq :wis 13)]
+                   :ability ::char5e/wis}
+    :multiclass-prereqs [(opt5e/ability-prereq ::char5e/wis 13)]
     :ability-increase-levels [4 8 12 16 19]
     :profs {:armor {:light false :medium false :shields false}
             :weapon {:club true :dagger true :dart true :javelin true :mace true :quarterstaff true :scimitar true :sickle true :sling true :spear true}
             :tool {:herbalism-kit true}
-            :save {:int true :wis true}
+            :save {::char5e/int true ::char5e/wis true}
             :skill-options {:choose 2 :options {:arcana true :animal-handling true :insight true :medicine true :nature true :perception true :religion true :survival true}}}
     :armor {:leather 1}
     :equipment-choices [{:name "Equipment Pack"
@@ -2297,7 +2297,7 @@
                   :selections [(opt5e/spell-selection
                                 {:class-key :druid
                                  :level 0
-                                 :spellcasting-ability :wis
+                                 :spellcasting-ability ::char5e/wis
                                  :class-name "Druid"
                                  :num 1})
                                (t/selection-cfg
@@ -2367,7 +2367,7 @@
                                              :level 14
                                              :page 69
                                              :summary (str "beasts or plant creatures must make a DC "
-                                                           (?spell-save-dc :wis)
+                                                           (?spell-save-dc ::char5e/wis)
                                                            " Wisdom save or they cannot attack you.")})]}}
                   :traits [(lands-stride 6)]}
                  {:name "Circle of the Moon"
@@ -2424,7 +2424,7 @@
   (opt5e/spell-selection {:title title
                           :class-key class-key
                           :ref ref
-                          :spellcasting-ability :int
+                          :spellcasting-ability ::char5e/int
                           :class-name class-name
                           :num num
                           :prepend-level? true
@@ -2487,7 +2487,7 @@
   (opt5e/spell-selection {:class-key :fighter
                           :level 0
                           :ref (eldritch-knight-ref [:cantrips-known])
-                          :spellcasting-ability :int
+                          :spellcasting-ability ::char5e/int
                           :class-name "Eldritch Knight"
                           :num num
                           :spell-keys (get-in sl/spell-lists [:wizard 0])}))
@@ -2496,7 +2496,7 @@
   (opt5e/spell-selection {:class-key :rogue
                           :level 0
                           :ref (arcane-trickster-ref [:cantrips-known])
-                          :spellcasting-ability :int
+                          :spellcasting-ability ::char5e/int
                           :class-name "Arcane Trickster"
                           :num num
                           :spell-keys (get-in sl/spell-lists [:wizard 0])}))
@@ -2551,13 +2551,13 @@
     :ability-increase-levels [4 6 8 12 14 16 19]
     :profs {:armor {:light false :medium false :heavy true :shields false}
             :weapon {:simple false :martial false} 
-            :save {:str true :con true}
+            :save {::char5e/str true ::char5e/con true}
             :skill-options {:choose 2 :options {:acrobatics true :animal-handling true :athletics true :history true :insight true :intimidation true :perception true :survival true}}}
     :multiclass-prereqs [(t/option-prereq "Requires Strength 13 or Dexterity 13"
                                           (fn [c]
                                             (let [abilities (es/entity-val c :abilities)]
-                                              (or (>= (:str abilities) 13)
-                                                  (>= (:dex abilities) 13)))))]
+                                              (or (>= (::char5e/str abilities) 13)
+                                                  (>= (::char5e/dex abilities) 13)))))]
     :equipment-choices [{:name "Equipment Pack"
                          :options {:dungeoneers-pack 1
                                    :explorers-pack 1}}]
@@ -2635,7 +2635,7 @@
                                :modifiers [(mod5e/weapon :handaxe 2)]})]})]
     :subclasses [{:name "Champion"
                   :levels {3 {:modifiers [(mod5e/critical 19)]}
-                           7 {:modifiers [(mod/modifier ?default-skill-bonus (let [b (int (/ ?prof-bonus 2))] {:str b :dex b :con b}))
+                           7 {:modifiers [(mod/modifier ?default-skill-bonus (let [b (int (/ ?prof-bonus 2))] {::char5e/str b ::char5e/dex b ::char5e/con b}))
                                           (mod5e/dependent-trait
                                            {:level 7
                                             :name "Remarkable Athlete"
@@ -2643,7 +2643,7 @@
                                             :summary (str "+"
                                                           (common/round-up (/ ?prof-bonus 2))
                                                           " to STR, DEX, or CON checks that don't already include prof bonus; running long jump increases by "
-                                                          (?ability-bonuses :str)
+                                                          (?ability-bonuses ::char5e/str)
                                                           " ft.")})]}
                            10 {:selections [(opt5e/fighting-style-selection :fighter)]}
                            15 {:modifiers [(mod5e/critical 18)]}
@@ -2653,7 +2653,7 @@
                                              :summary (str "At start of your turns, if you have at most half of your "
                                                            #_(int (/ ?max-hit-points 2))
                                                            " HPs left, regain "
-                                                           (+ 5 (?ability-bonuses :con)) " HPs")})]}}}
+                                                           (+ 5 (?ability-bonuses ::char5e/con)) " HPs")})]}}}
                  {:name "Battle Master"
                   :selections [(t/selection-cfg
                                 {:name "Martial Maneuvers"
@@ -2662,8 +2662,8 @@
                                  :min 3
                                  :max 3})
                                (opt5e/tool-selection (map :key equip5e/artisans-tools) 1)]
-                  :modifiers [(mod/modifier ?maneuver-save-dc (max (?spell-save-dc :dex)
-                                                                   (?spell-save-dc :str)))
+                  :modifiers [(mod/modifier ?maneuver-save-dc (max (?spell-save-dc ::char5e/dex)
+                                                                   (?spell-save-dc ::char5e/str)))
                               (mod5e/dependent-trait
                                {:name "Combat Superiority"
                                 :page 73
@@ -2713,16 +2713,16 @@
     monk-base-cfg
     {:hit-die 8
      :ability-increase-levels [4 8 12 16 19]
-     :unarmored-abilities [:wis]
+     :unarmored-abilities [::char5e/wis]
      :profs {:weapon {:simple false :shortsword false}
-             :save {:dex true :str true}
+             :save {::char5e/dex true ::char5e/str true}
              :tool-options {:musical-instrument 1 :artisans-tool 1}
              :skill-options {:choose 2 :options {:acrobatics true :athletics true :history true :insight true :religion true :stealth true}}}
      :multiclass-prereqs [(t/option-prereq "Requires Wisdom 13 and Dexterity 13"
                                            (fn [c]
                                              (let [abilities (es/entity-val c :abilities)]
-                                               (and (>= (:wis abilities) 13)
-                                                    (>= (:dex abilities) 13)))))]
+                                               (and (>= (::char5e/wis abilities) 13)
+                                                    (>= (::char5e/dex abilities) 13)))))]
      :equipment-choices [{:name "Equipment Pack"
                           :options {:dungeoneers-pack 1
                                     :explorers-pack 1}}]
@@ -2731,7 +2731,7 @@
                                  :simple 1}}]
      :modifiers [(mod/vec-mod ?unarmored-defense :monk)
                  (mod/cum-sum-mod ?unarmored-ac-bonus
-                                  (?ability-bonuses :wis)
+                                  (?ability-bonuses ::char5e/wis)
                                   nil
                                   nil
                                   [(= :monk (first ?unarmored-defense))])
@@ -2745,7 +2745,7 @@
                   {:name "Martial Arts"
                    :damage-die ?martial-arts-die
                    :damage-die-count 1
-                   :damage-modifier (max (?ability-bonuses :str) (?ability-bonuses :dex))
+                   :damage-modifier (max (?ability-bonuses ::char5e/str) (?ability-bonuses ::char5e/dex))
                    :summary "Unarmed strike or monk weapon"})
                  (mod5e/bonus-action
                   {:name "Martial Arts"
@@ -2773,7 +2773,7 @@
               3 {:modifiers [(mod5e/reaction
                               {:name "Deflect Missiles"
                                :page 78
-                               :summary (str "When hit by a ranged attack, reduce the damage by 1d10 " (common/mod-str (+ (?ability-bonuses :dex) (?class-level :monk))) ". If you reduce it to 0, you can catch the missile and use it in a ranged attack as a monk weapon with range 20/60")})]}
+                               :summary (str "When hit by a ranged attack, reduce the damage by 1d10 " (common/mod-str (+ (?ability-bonuses ::char5e/dex) (?class-level :monk))) ". If you reduce it to 0, you can catch the missile and use it in a ranged attack as a monk weapon with range 20/60")})]}
               4 {:modifiers [(mod5e/reaction
                               {:name "Slow Fall"
                                :page 78
@@ -2784,7 +2784,7 @@
                               {:name "Stunning Strike"
                                :page 79
                                :level 5
-                               :summary (str "when you hit a creature with melee attack, spend 1 ki point to stun the creature if it fails a DC " (?spell-save-dc :wis) " CON save")})]}
+                               :summary (str "when you hit a creature with melee attack, spend 1 ki point to stun the creature if it fails a DC " (?spell-save-dc ::char5e/wis) " CON save")})]}
               6 {:modifiers [(mod5e/unarmored-speed-bonus 5)]}
               7 {:modifiers [(mod5e/action
                               {:name "Stillness of Mind"
@@ -2838,7 +2838,7 @@
                    :modifiers [(mod5e/dependent-trait
                                 {:name "Open Hand Technique"
                                  :page 79
-                                 :summary (str "when you hit with Flurry of Blows, you impose one of the effects on the target: 1) must make a DC "(?spell-save-dc :wis) " DEX save or be knocked prone. 2) make a DC " (?spell-save-dc :wis) " STR save or be pushed 15 ft. 3) can't take reactions until end of your next turn")})]
+                                 :summary (str "when you hit with Flurry of Blows, you impose one of the effects on the target: 1) must make a DC "(?spell-save-dc ::char5e/wis) " DEX save or be knocked prone. 2) make a DC " (?spell-save-dc ::char5e/wis) " STR save or be pushed 15 ft. 3) can't take reactions until end of your next turn")})]
                    :levels {6 {:modifiers [(mod5e/action
                                             {:name "Wholeness of Body"
                                              :page 79
@@ -2849,14 +2849,14 @@
                                              {:name "Tranquility"
                                               :page 80
                                               :level 11
-                                              :summary (str "gain effects of sanctuary spell (save DC " (?spell-save-dc :wis) ") between rests")})]}
+                                              :summary (str "gain effects of sanctuary spell (save DC " (?spell-save-dc ::char5e/wis) ") between rests")})]}
                             17 {:modifiers [(mod5e/dependent-trait
                                              {:name "Quivering Palm"
                                               :level 17
                                               :page 80
-                                              :summary (str "when you hit a creature with unarmed strike, set up vibrations that last " (?class-level :monk) " days. Use an action to end the vibrations, reducing the target to 0 HPs on failed DC " (?spell-save-dc :wis) " CON save. It takes 10d10 necrotic damage on successful save.")})]}}}
+                                              :summary (str "when you hit a creature with unarmed strike, set up vibrations that last " (?class-level :monk) " days. Use an action to end the vibrations, reducing the target to 0 HPs on failed DC " (?spell-save-dc ::char5e/wis) " CON save. It takes 10d10 necrotic damage on successful save.")})]}}}
                   {:name "Way of Shadow"
-                   :modifiers [(mod5e/spells-known 0 :minor-illusion :wis "Monk (Way of Shadow)")
+                   :modifiers [(mod5e/spells-known 0 :minor-illusion ::char5e/wis "Monk (Way of Shadow)")
                                (mod5e/action
                                 {:name "Shadow Arts"
                                  :page 80
@@ -2879,7 +2879,7 @@
                    :modifiers [(mod5e/dependent-trait
                                 {:name "Disciple of the Elements"
                                  :page 80
-                                 :summary (str "You learn elemental disciplines with spell save DC " (?spell-save-dc :wis) "."
+                                 :summary (str "You learn elemental disciplines with spell save DC " (?spell-save-dc ::char5e/wis) "."
                                                (if (>= (?class-level :monk) 5)
                                                  (str " You can increase the level of elemental discipline spells you cast by 1 for each additional ki point you spend, up to " (mod5e/level-val (?class-level :monk)
                                                                                                                                                                                                  {9 4 13 5 17 6 :default 3}))))})]
@@ -2892,7 +2892,7 @@
                              :summary "create minor elemental effect"}]}]})))
 
 (defn paladin-spell [spell-level key min-level]
-  (mod5e/spells-known spell-level key :wis "Paladin" min-level nil :paladin))
+  (mod5e/spells-known spell-level key ::char5e/wis "Paladin" min-level nil :paladin))
 
 (def paladin-base-cfg
   {:name "Paladin"
@@ -2907,18 +2907,18 @@
      :spellcaster true
      :spellcasting {:level-factor 2
                     :known-mode :all
-                    :ability :cha}
+                    :ability ::char5e/cha}
      :hit-die 10
      :ability-increase-levels [4 8 12 16 19]
      :profs {:armor {:light false :medium false :heavy true :shields false}
              :weapon {:simple false :martial false}
-             :save {:wis true :cha true}
+             :save {::char5e/wis true ::char5e/cha true}
              :skill-options {:choose 2 :options {:athletics true :insight true :intimidation true :medicine true :persuasion true :religion true}}}
      :multiclass-prereqs [(t/option-prereq "Requires Strength 13 or Charisma 13"
                                            (fn [c]
                                              (let [abilities (es/entity-val c :abilities)]
-                                               (and (>= (:str abilities) 13)
-                                                    (>= (:cha abilities) 13)))))]
+                                               (and (>= (::char5e/str abilities) 13)
+                                                    (>= (::char5e/cha abilities) 13)))))]
      :equipment-choices [{:name "Equipment Pack"
                           :options {:priests-pack 1
                                     :explorers-pack 1}}]
@@ -2935,14 +2935,14 @@
                                 :level 14
                                 :page 85
                                 :frequency {:units :long-rest
-                                            :amount (?ability-bonuses :cha)}
+                                            :amount (?ability-bonuses ::char5e/cha)}
                                 :summary "end a spell on yourself or willing creature"})]}}
      :modifiers [(mod/modifier ?paladin-aura (if (< (?class-level :paladin) 18) 10 30))
                  (mod5e/action
                   {:name "Divine Sense"
                    :page 84
                    :frequency {:units :long-rest
-                               :amount (inc (?ability-bonuses :cha))}
+                               :amount (inc (?ability-bonuses ::char5e/cha))}
                    :summary "within 60 ft., detect presense of undead, celestial, or fiend. Also detect consecrated or desecrated object or place"})
                  (mod5e/action
                   {:name "Lay on Hands"
@@ -2953,7 +2953,7 @@
                   {:name "Aura of Protection"
                    :level 6
                    :page 85
-                   :summary (str "you and friendly creatures within " ?paladin-aura " ft. have a " (common/bonus-str (max 1 (?ability-bonuses :cha))) " bonus to saves")})
+                   :summary (str "you and friendly creatures within " ?paladin-aura " ft. have a " (common/bonus-str (max 1 (?ability-bonuses ::char5e/cha))) " bonus to saves")})
                  (mod5e/dependent-trait
                   {:name "Aura of Courage"
                    :level 10
@@ -3020,12 +3020,12 @@
                                 {:name "Channel Divinity: Sacred Weapon"
                                  :page 86
                                  :duration minutes-1
-                                 :summary (str "make a weapon magical, with a " (common/bonus-str (max 1 (?ability-bonuses :cha))) " attack bonus and magical light (20 ft./20 ft.)")})
+                                 :summary (str "make a weapon magical, with a " (common/bonus-str (max 1 (?ability-bonuses ::char5e/cha))) " attack bonus and magical light (20 ft./20 ft.)")})
                                (mod5e/action
                                 {:name "Channel Divinity: Turn the Unholy"
                                  :page 86
                                  :duration minutes-1
-                                 :summary (str "each undead or fiend within 30 ft. must make a DC " (?spell-save-dc :cha) " WIS save or be turned for 1 min.")})]
+                                 :summary (str "each undead or fiend within 30 ft. must make a DC " (?spell-save-dc ::char5e/cha) " WIS save or be turned for 1 min.")})]
                    :levels {7 {:modifiers [(mod5e/dependent-trait
                                             {:name "Aura of Devotion"
                                              :level 7
@@ -3057,7 +3057,7 @@
                                 {:name "Channel Divinity: Nature's Wrath"
                                  :level 3
                                  :page 87
-                                 :summary (str "restrain a creature with vines on a failed DC " (?spell-save-dc :cha) " STR or DEX save. It makes the save every turn until freed.")})
+                                 :summary (str "restrain a creature with vines on a failed DC " (?spell-save-dc ::char5e/cha) " STR or DEX save. It makes the save every turn until freed.")})
                                (mod5e/action
                                 {:name "Channel Divinity: Turn the Faithless"
                                  :level 3
@@ -3096,7 +3096,7 @@
                                  :level 3
                                  :page 88
                                  :duration minutes-1
-                                 :summary (str "a creature of your choosing within 60 ft. must succeed on a DC " (?spell-save-dc :cha) " WIS save or be frightened and have a speed of 0, speed is halved on successful save")})
+                                 :summary (str "a creature of your choosing within 60 ft. must succeed on a DC " (?spell-save-dc ::char5e/cha) " WIS save or be frightened and have a speed of 0, speed is halved on successful save")})
                                (mod5e/bonus-action
                                 {:name "Channel Divinity: Vow of Eternity"
                                  :level 3
@@ -3114,7 +3114,7 @@
                                               :page 88
                                               :duration hours-1
                                               :frequency long-rests-1
-                                              :summary (str "transform, gain flying speed of 60 ft., emanate a 30 ft. aura and creatures within it must succeed on a DC " (?spell-save-dc :cha) " WIS or be frightened for 1 min and attacks against them have advantage")})]}}
+                                              :summary (str "transform, gain flying speed of 60 ft., emanate a 30 ft. aura and creatures within it must succeed on a DC " (?spell-save-dc ::char5e/cha) " WIS or be frightened for 1 min and attacks against them have advantage")})]}}
                    :traits [{:name "Relentless Avenger"
                              :level 7
                              :page 88
@@ -3237,14 +3237,14 @@
     {:hit-die 10
      :profs {:armor {:light false :medium false :shields false}
              :weapon {:simple false :martial false}
-             :save {:str true :dex true}
+             :save {::char5e/str true ::char5e/dex true}
              :skill-options {:choose 3 :options ranger-skills}
              :multiclass-skill-options {:choose 1 :options ranger-skills}}
      :multiclass-prereqs [(t/option-prereq "Requires Wisdom 13 and Dexterity 13"
                                            (fn [c]
                                              (let [abilities (es/entity-val c :abilities)]
-                                               (and (>= (:wis abilities) 13)
-                                                    (>= (:dex abilities) 13)))))]
+                                               (and (>= (::char5e/wis abilities) 13)
+                                                    (>= (::char5e/dex abilities) 13)))))]
      :ability-increase-levels [4 8 10 16 19]
      :spellcaster true
      :spellcasting {:level-factor 2
@@ -3259,7 +3259,7 @@
                                    15 1
                                    17 1
                                    19 1}
-                    :ability :wis}
+                    :ability ::char5e/wis}
      :armor-choices [{:name "Armor"
                       :options {:scale-mail 1
                                 :leather 1}}]
@@ -3311,7 +3311,7 @@
                                 :frequency turns-1
                                 :level 20
                                 :page 92
-                                :summary (str "add " (common/bonus-str (?ability-bonuses :wis)) " to an attack or damage roll") })]}}
+                                :summary (str "add " (common/bonus-str (?ability-bonuses ::char5e/wis)) " to an attack or damage roll") })]}}
      :traits [(lands-stride 8)
               {:name "Hide in Plain Sight"
                :level 10
@@ -3438,11 +3438,11 @@
     :expertise true
     :profs {:armor {:light false}
             :weapon {:simple true :crossbow-hand true :longsword true :rapier true :shortsword true}
-            :save {:dex true :int true}
+            :save {::char5e/dex true ::char5e/int true}
             :tool {:thieves-tools false}
             :skill-options {:order 0 :choose 4 :options rogue-skills}
             :multiclass-skill-options {:order 0 :choose 1 :options rogue-skills}}
-    :multiclass-prereqs [(opt5e/ability-prereq :dex 13)]
+    :multiclass-prereqs [(opt5e/ability-prereq ::char5e/dex 13)]
     :weapon-choices [{:name "Melee Weapon"
                       :options {:rapier 1
                                 :shortsword 1}}]
@@ -3471,7 +3471,7 @@
                               opt5e/rogue-expertise-selection
                               ::t/order
                               1)]}
-             15 {:modifiers [(mod5e/saving-throws nil :wis)]}}
+             15 {:modifiers [(mod5e/saving-throws nil ::char5e/wis)]}}
     :selections [(new-starting-equipment-selection
                   :rogue
                   {:name "Additional Weapon"
@@ -3526,7 +3526,7 @@
                                {:level 3
                                 :name "Second-Story Work"
                                 :page 97
-                                :summary (str "climbing costs no extra movement, your running jump distance increases by " (?ability-bonuses :dex) " ft.")
+                                :summary (str "climbing costs no extra movement, your running jump distance increases by " (?ability-bonuses ::char5e/dex) " ft.")
 })]
                   :traits [{:level 9
                             :name "Supreme Sneak"
@@ -3546,7 +3546,7 @@
                                             {:name "Death Strike"
                                              :level 17
                                              :page 97
-                                             :summary (str "double damage against a surpised creature if it fails a DC " (?spell-save-dc :dex) " CON save")})]}}
+                                             :summary (str "double damage against a surpised creature if it fails a DC " (?spell-save-dc ::char5e/dex) " CON save")})]}}
                   :traits [{:name "Assassinate"
                             :level 3
                             :page 97
@@ -3561,7 +3561,7 @@
                             :summary "accurately mimic the behavior, speech, and writing of another person"}]}
                  {:name "Arcane Trickster"
                   :spellcasting {:level-factor 3}
-                  :modifiers [(mod5e/spells-known 0 :mage-hand :int "Arcane Trickster")]
+                  :modifiers [(mod5e/spells-known 0 :mage-hand ::char5e/int "Arcane Trickster")]
                   :levels {3 {:selections [(arcane-trickster-cantrip 3)
                                            (arcane-trickster-spell-selection 2 [1])
                                            (arcane-trickster-any-spell-selection 1 [1])]}
@@ -3583,7 +3583,7 @@
                                             {:name "Spell Thief"
                                              :level 17
                                              :page 98
-                                             :summary (str "steal a spell for 8 hours if it is cast on you and the spellcaster fails a DC " (?spell-save-dc :int) " save with its spellcasting ability")})]}
+                                             :summary (str "steal a spell for 8 hours if it is cast on you and the spellcaster fails a DC " (?spell-save-dc ::char5e/int) " save with its spellcasting ability")})]}
                            19 {:selections [(arcane-trickster-spell-selection 1 [1 2 3 4])]}
                            20 {:selections [(arcane-trickster-any-spell-selection 1 [1 2 3 4])]}}
                   :traits [{:name "Mage Hand Legerdemain"
@@ -3608,7 +3608,7 @@
                              {:name "Careful Spell"
                               :page 102
                               :class-key :sorcerer
-                              :summary (str "When you cast a spell that requires a save, spend 1 sorcery pt. to allow up to " (?ability-bonuses :cha) " creatures to automatically succeed")})]})
+                              :summary (str "When you cast a spell that requires a save, spend 1 sorcery pt. to allow up to " (?ability-bonuses ::char5e/cha) " creatures to automatically succeed")})]})
               (t/option-cfg
                {:name "Distant Spell"
                 :modifiers [(mod5e/trait-cfg
@@ -3620,7 +3620,7 @@
                 :modifiers [(mod5e/dependent-trait
                              {:name "Empowered Spell"
                               :page 102
-                              :summary (str "spend 1 sorcery pt. to reroll up to " (?ability-bonuses :cha) " spell damage dice")})]})
+                              :summary (str "spend 1 sorcery pt. to reroll up to " (?ability-bonuses ::char5e/cha) " spell damage dice")})]})
               (t/option-cfg
                {:name "Extended Spell"
                 :modifiers [(mod5e/trait-cfg
@@ -3672,13 +3672,13 @@
                                   13 1
                                   15 1
                                   17 1}
-                   :ability :cha}
-    :multiclass-prereqs [(opt5e/ability-prereq :cha 13)]
+                   :ability ::char5e/cha}
+    :multiclass-prereqs [(opt5e/ability-prereq ::char5e/cha 13)]
     :spellcaster true
     :hit-die 6
     :ability-increase-levels [4 8 12 16 19]
     :profs {:weapon {:dagger true :dart true :sling true :quarterstaff true :crossbow-light true}
-            :save {:con true :cha true}
+            :save {::char5e/con true ::char5e/cha true}
             :skill-options {:choose 2 :options {:arcana true :deception true :insight true :intimidation true :persuasion true :religion true}}}
     :selections [(new-starting-equipment-selection
                   :sorcerer
@@ -3745,7 +3745,7 @@
                            18 {:modifiers [(mod5e/action
                                             {:name "Draconic Presence"
                                              :page 103
-                                             :summary (str "Spend 5 sorcery pts. and create an aura that causes hostile creatures that start their turn within it to be charmed or afraid if they fail a DC " (?spell-save-dc :cha) " Wisdom save.")})]}}}
+                                             :summary (str "Spend 5 sorcery pts. and create an aura that causes hostile creatures that start their turn within it to be charmed or afraid if they fail a DC " (?spell-save-dc ::char5e/cha) " Wisdom save.")})]}}}
                  {:name "Wild Magic"
                   :levels {6 {:modifiers [(mod5e/reaction
                                            {:name "Bend Luck"
@@ -3832,9 +3832,9 @@
                    :cantrips-known {1 3 4 1 10 1}
                    :known-mode :acquire
                    :spells-known (zipmap (range 1 21) (cons 6 (repeat 2)))
-                   :ability :int}
+                   :ability ::char5e/int}
     :spellcaster true
-    :multiclass-prereqs [(opt5e/ability-prereq :int 13)]
+    :multiclass-prereqs [(opt5e/ability-prereq ::char5e/int 13)]
     :hit-die 6
     :ability-increase-levels [4 8 12 16 19]
     :equipment-choices [{:name "Equipment Pack"
@@ -3845,7 +3845,7 @@
                                    :arcane-focus 1}}]
     :equipment {:spellbook 1}
     :profs {:weapon {:dagger true :dart true :sling true :quarterstaff true :crossbow-light true}
-            :save {:int true :wis true}
+            :save {::char5e/int true ::char5e/wis true}
             :skill-options {:choose 2 :options {:arcana true :history true :insight true :investigation true :medicine true :religion true}}}
     :levels {18 {:selections [(spell-mastery-selection 1)
                               (spell-mastery-selection 2)]
@@ -3871,7 +3871,7 @@
                                             {:level 10
                                              :name "Empowered Evocation"
                                              :page 117
-                                             :summary (str "add your INT mod (" (?ability-bonuses :int) ") to one damage roll of evocation spell you cast")})]}}
+                                             :summary (str "add your INT mod (" (?ability-bonuses ::char5e/int) ") to one damage roll of evocation spell you cast")})]}}
                   :traits [(spell-school-savant "evocation" 117)
                            {:level 2
                             :name "Sculpt Spells"
@@ -3889,7 +3889,7 @@
                   :modifiers [(mod5e/dependent-trait
                                {:name "Arcane Ward"
                                 :page 115
-                                :summary (str "magical ward with HP max " (+ (?class-level :wizard) (?ability-bonuses :int)) ", casting X-th level abjuration spells restores 2X HPs to it")})]
+                                :summary (str "magical ward with HP max " (+ (?class-level :wizard) (?ability-bonuses ::char5e/int)) ", casting X-th level abjuration spells restores 2X HPs to it")})]
                   :levels {6 {:modifiers [(mod5e/reaction
                                            {:name "Projected Ward"
                                             :page 115
@@ -3950,18 +3950,18 @@
                                             :level 2
                                             :page 117
                                             :range ft-5
-                                            :summary (str "charm a creature until end of your next turn unless it succeeds on a DC " (?spell-save-dc :int) " WIS save, it is incapacitated and dazed")})]}
+                                            :summary (str "charm a creature until end of your next turn unless it succeeds on a DC " (?spell-save-dc ::char5e/int) " WIS save, it is incapacitated and dazed")})]}
                            6 {:modifiers [(mod5e/reaction
                                            {:name "Instinctive Charm"
                                             :page 117
                                             :range ft-30
                                             :frequency long-rests-1
-                                            :summary (str "redirect a creature's attack against you to the creature closest to it, not including you, if it fails a DC " (?spell-save-dc :int) " WIS save")})]}
+                                            :summary (str "redirect a creature's attack against you to the creature closest to it, not including you, if it fails a DC " (?spell-save-dc ::char5e/int) " WIS save")})]}
                            14 {:modifiers [(mod5e/dependent-trait
                                             {:name "Alter Memories"
                                              :level 14
                                              :page 117
-                                             :summary (str "make a creature unaware of your charm on it, can also use your action to erase up to " (inc (?ability-bonuses :cha)) " hours from it's memory if it fails a DC " (?spell-save-dc :int) " INT check")})]}}
+                                             :summary (str "make a creature unaware of your charm on it, can also use your action to erase up to " (inc (?ability-bonuses ::char5e/cha)) " hours from it's memory if it fails a DC " (?spell-save-dc ::char5e/int) " INT check")})]}}
                   :traits [(spell-school-savant "enchantment" 117)
                            {:name "Split Enchantment"
                             :level 10
@@ -3970,7 +3970,7 @@
                  {:name "School of Illusion"
                   :modifiers [(mod5e/spells-known-cfg 0
                                                       {:key :minor-illusion
-                                                       :ability :int
+                                                       :ability ::char5e/int
                                                        :class "Wizard"
                                                        :illusionist-cantrip? true}
                                                       0
@@ -3979,7 +3979,7 @@
                                 {:name "Illusionist Cantrip"
                                  :order 0
                                  :tags (opt5e/spell-tags :wizard 0)
-                                 :options (opt5e/spell-options (get-in sl/spell-lists [:wizard 0]) :int "Wizard")
+                                 :options (opt5e/spell-options (get-in sl/spell-lists [:wizard 0]) ::char5e/int "Wizard")
                                  :prereq-fn (fn [c]
                                               (let [spells-known (es/entity-val c :spells-known)
                                                     passes? (or (nil? spells-known)
@@ -4011,7 +4011,7 @@
                            14 {:modifiers [(mod5e/action
                                             {:name "Command Undead"
                                              :page 119
-                                             :summary (str "bring undead under your control unless it succeeds on a DC " (?spell-save-dc :int) " CHA save")})]}}
+                                             :summary (str "bring undead under your control unless it succeeds on a DC " (?spell-save-dc ::char5e/int) " CHA save")})]}}
                   :traits [(spell-school-savant "necromancy" 118)
                            {:name "Grim Harvest"
                             :level 2
@@ -4026,7 +4026,7 @@
                             :level 10
                             :summary "resistant to necrotic damage; your HP max cannot be reduced"}]}
                  {:name "School of Transmutation"
-                  :modifiers [(mod5e/spells-known 4 :polymorph :int "Wizard")]
+                  :modifiers [(mod5e/spells-known 4 :polymorph ::char5e/int "Wizard")]
                   :levels {14 {:modifiers [(mod5e/action
                                             {:name "Master Transmuter"
                                              :page 119
@@ -4065,7 +4065,7 @@
 (def pact-boon-options
   [(t/option-cfg
     {:name "Pact of the Chain"
-     :modifiers [(mod5e/spells-known 1 :find-familiar :cha "Warlock")
+     :modifiers [(mod5e/spells-known 1 :find-familiar ::char5e/cha "Warlock")
                  (mod5e/trait-cfg
                   {:name pact-of-the-chain-name
                    :page 107
@@ -4089,7 +4089,7 @@
                                                     (fn [[cls-kw spells-by-level]]
                                                       (spells-by-level 0))
                                                     sl/spell-lists))
-                                                  :cha
+                                                  ::char5e/cha
                                                   "Warlock"
                                                   false
                                                   "uses Book of Shadows")})]
@@ -4105,7 +4105,7 @@
      :modifiers [(mod5e/dependent-trait
                   {:name "Eldritch Invocation: Agonizing Blast"
                    :page 110
-                   :summary (str "add " (?ability-bonuses :cha) " to eldritch blast spell damage")})]
+                   :summary (str "add " (?ability-bonuses ::char5e/cha) " to eldritch blast spell damage")})]
      :prereqs [has-eldritch-blast-prereq]})
    (t/option-cfg
     {:name "Armor of Shadows"
@@ -4157,7 +4157,7 @@
                                (filter
                                 (fn [s] (and (= 1 (:level s)) (opt5e/ritual-spell? s)))
                                 spells/spells))
-                              :cha
+                              ::char5e/cha
                               "Warlock"
                               false
                               "Book of Ancient Secrets Ritual")
@@ -4223,7 +4223,7 @@
      :modifiers [(mod5e/dependent-trait
                   {:name "Eldritch Invocation: Lifedrinker"
                    :page 111
-                   :summary (str "extra " (max 1 (?ability-bonuses :cha)) " necrotic damage with your pact weapon")})]
+                   :summary (str "extra " (max 1 (?ability-bonuses ::char5e/cha)) " necrotic damage with your pact weapon")})]
      :prereqs [(total-levels-option-prereq 12 :warlock)
                (has-trait-with-name-prereq pact-of-the-blade-name)]})
    (t/option-cfg
@@ -4377,7 +4377,7 @@ long rest."})]
     :tags #{:spells}
     :options (opt5e/spell-options
               (get-in sl/spell-lists [:warlock spell-level])
-              :cha
+              ::char5e/cha
               "Warlock"
               false
               "uses Mystic Arcanum")}))
@@ -4405,7 +4405,7 @@ long rest."})]
    20 {5 4}})
 
 (defn warlock-subclass-spell-selection [spells]
-  (subclass-spell-selection :warlock "Warlock" :cha spells 0))
+  (subclass-spell-selection :warlock "Warlock" ::char5e/cha spells 0))
 
 (def warlock-option
   (class-option
@@ -4415,14 +4415,14 @@ long rest."})]
                    :slot-schedule warlock-spell-slot-schedule
                    :known-mode :schedule
                    :pact-magic? true
-                   :ability :cha}
-    :multiclass-prereqs [(opt5e/ability-prereq :cha 13)]
+                   :ability ::char5e/cha}
+    :multiclass-prereqs [(opt5e/ability-prereq ::char5e/cha 13)]
     :spellcaster true
     :hit-die 8
     :ability-increase-levels [4 8 12 16 19]
     :profs {:armor {:light false}
             :weapon {:simple false}
-            :save {:wis true :cha true}
+            :save {::char5e/wis true ::char5e/cha true}
             :skill-options {:choose 2 :options {:arcana true :deception true :history true :intimidation true :investigation true :nature true :religion true}}}
     :modifiers [(mod/modifier ?pact-magic? true)]
     :selections [(new-starting-equipment-selection
@@ -4495,7 +4495,7 @@ long rest."})]
                                            {:name "Dark One's Blessing"
                                             :page 109
                                             :summary (str "gain " (+ (?class-level :warlock)
-                                                                     (?ability-bonuses :cha)) " temp HPs when you reduce a hostile creature to 0 HPs")})]
+                                                                     (?ability-bonuses ::char5e/cha)) " temp HPs when you reduce a hostile creature to 0 HPs")})]
                               :selections [(warlock-subclass-spell-selection [:burning-hands :command])]}
                            3 {:selections [(warlock-subclass-spell-selection [:blindness-deafness :scorching-ray])]}
                            5 {:selections [(warlock-subclass-spell-selection [:fireball :stinking-cloud])]}
@@ -4505,7 +4505,7 @@ long rest."})]
                   :modifiers [(mod5e/action
                                {:name "Fey Presence"
                                 :page 109
-                                :summary (str "charm or frighten creatures in a 10 ft cube from you unless the succeed on a DC " (?spell-save-dc :cha) " WIS save.")
+                                :summary (str "charm or frighten creatures in a 10 ft cube from you unless the succeed on a DC " (?spell-save-dc ::char5e/cha) " WIS save.")
                                 :duration turns-1
                                 :frequency rests-1})]
                   :levels {1 {:selections [(warlock-subclass-spell-selection [:faerie-fire :sleep])]}
@@ -4524,11 +4524,11 @@ long rest."})]
                                             {:name "Beguiling Defenses"
                                              :page 109
                                              :duration minutes-1
-                                             :summary (str "when a creature attempts to charm you, you can turn it back on them with a spell save DC " (?spell-save-dc :cha) " WIS save")})]}
+                                             :summary (str "when a creature attempts to charm you, you can turn it back on them with a spell save DC " (?spell-save-dc ::char5e/cha) " WIS save")})]}
                            14 {:modifiers [(mod5e/action
                                             {:name "Dark Delerium"
                                              :page 109
-                                             :summary (str "charm or frighten a creature within 60 ft., spell save DC " (?spell-save-dc :cha) "WIS save")
+                                             :summary (str "charm or frighten a creature within 60 ft., spell save DC " (?spell-save-dc ::char5e/cha) "WIS save")
                                              :frequency rests-1})]}}}
                  {:name "The Great Old One"
                   :levels {1 {:selections [(warlock-subclass-spell-selection [:dissonant-whispers :tashas-hideous-laughter])]}
@@ -5142,7 +5142,7 @@ long rest."})]
                                 :source :dmg
                                 :summary "Your necromancy cantrips that only target 1 creature can instead target two within 5 ft of each other"})]
                   :selections [(opt5e/spell-selection {:title "Necromancy Cantrip"
-                                                       :spellcasting-ability :wis
+                                                       :spellcasting-ability ::char5e/wis
                                                        :class-name "Cleric"
                                                        :num 1
                                                        :spell-keys (map :key (filter #(and (= "necromancy" (:school %))
@@ -5181,17 +5181,17 @@ long rest."})]
                    {:name "Channel Divinity: Control Undead"
                     :source :dmg
                     :page 97
-                    :summary (str "Control an undead creature of CR " (?class-level :paladin) " or less if it fails a DC " (?spell-save-dc :cha) " WIS save")})
+                    :summary (str "Control an undead creature of CR " (?class-level :paladin) " or less if it fails a DC " (?spell-save-dc ::char5e/cha) " WIS save")})
                   (mod5e/action
                    {:name "Channel Divinity: Dreadful Aspect"
                     :page 97
                     :source :dmg
-                    :summary (str "creatures of your choice within 30 ft. must succeed on a DC " (?spell-save-dc :cha) " WIS save or be frightened of you")})]
+                    :summary (str "creatures of your choice within 30 ft. must succeed on a DC " (?spell-save-dc ::char5e/cha) " WIS save or be frightened of you")})]
       :levels {7 {:modifiers [(mod5e/dependent-trait
                                {:name "Aura of Hate"
                                 :page 97
                                 :source :dmg
-                                :summary (str "you and friends within " (if (>= (?class-level :paladin) 18) 30 10) " ft. gain a " (common/bonus-str (max 1 (?ability-bonuses :cha))) " bonus to melee weapon attack damage")})]}
+                                :summary (str "you and friends within " (if (>= (?class-level :paladin) 18) 30 10) " ft. gain a " (common/bonus-str (max 1 (?ability-bonuses ::char5e/cha))) " bonus to melee weapon attack damage")})]}
                15 {:modifiers [(mod5e/damage-resistance :bludgeoning "nonmagical weapons")
                                (mod5e/damage-resistance :piercing "nonmagical weapons")
                                (mod5e/damage-resistance :slashing "nonmagical weapons")]}
@@ -5202,7 +5202,7 @@ long rest."})]
                                  :frequency long-rests-1
                                  :duration minutes-1
                                  :range ft-30
-                                 :summary (str "create an aura that: reduces bright light to dim; frightened enemies within aura take 4d10 psychic damage; creatures that rely on sight have disadvantage on attack rolls agains you and allies within aura; as a bonus action make a melee spell attack on a creature within aura that deals 3d10 " (common/mod-str (?ability-bonuses :cha)) "necrotic damage")})]}}}])])
+                                 :summary (str "create an aura that: reduces bright light to dim; frightened enemies within aura take 4d10 psychic damage; creatures that rely on sight have disadvantage on attack rolls agains you and allies within aura; as a bonus action make a melee spell attack on a creature within aura that deals 3d10 " (common/mod-str (?ability-bonuses ::char5e/cha)) "necrotic damage")})]}}}])])
 
 (def scag-classes
   [{:name "Barbarian"
@@ -5224,7 +5224,7 @@ long rest."})]
                                            {:name "Reckless Abandon"
                                             :page 121
                                             :source :scag
-                                            :summary (str "gain " (?ability-bonuses :con) " temp HPs when you Reckless Attack")})]}
+                                            :summary (str "gain " (?ability-bonuses ::char5e/con) " temp HPs when you Reckless Attack")})]}
                            10 {:modifiers [(mod5e/bonus-action
                                             {:name "Battlerager Charge"
                                              :page 121
@@ -5285,7 +5285,7 @@ long rest."})]
                                                                        {:name "Totemic Attunement: Elk"
                                                                         :page 122
                                                                         :source :scag
-                                                                        :summary (str "pass through space of Large or smaller creature, if it fails a DC " (?spell-save-dc :str) " STR save it is knocked prone and takes 1d12 " (common/mod-str (?ability-bonuses :str)) " damage")})]})
+                                                                        :summary (str "pass through space of Large or smaller creature, if it fails a DC " (?spell-save-dc ::char5e/str) " STR save it is knocked prone and takes 1d12 " (common/mod-str (?ability-bonuses ::char5e/str)) " damage")})]})
                                                         (t/option-cfg
                                                          {:name "Tiger"
                                                           :modifiers [(mod5e/used-resource :scag "Totemic Attunement: Tiger")
@@ -5313,7 +5313,7 @@ long rest."})]
                               (cleric-spell 5 :planar-binding 9)
                               (cleric-spell 5 :teleportation-circle 9)]
                   :selections [(opt5e/spell-selection {:title "Wizard Cantrips"
-                                                       :spellcasting-ability :wis
+                                                       :spellcasting-ability ::char5e/wis
                                                        :class-name "Cleric"
                                                        :num 2
                                                        :spell-keys (get-in sl/spell-lists [:wizard 0])
@@ -5322,12 +5322,12 @@ long rest."})]
                                            {:name "Channel Divinity: Arcane Abjuration"
                                             :page 126
                                             :source :scag
-                                            :summary (str "turn celestial, elemental, fey, or fiend on failed DC " (?spell-save-dc :wis) " WIS save.")})]}
+                                            :summary (str "turn celestial, elemental, fey, or fiend on failed DC " (?spell-save-dc ::char5e/wis) " WIS save.")})]}
                            8 {:modifiers [(potent-spellcasting 126 :scag)]}
                            17 {:selections (map
                                             (fn [level]
                                               (opt5e/spell-selection {:title (str "Wizard Spell: Level " level)
-                                                                      :spellcasting-ability :wis
+                                                                      :spellcasting-ability ::char5e/wis
                                                                       :class-name "Cleric"
                                                                       :num 1
                                                                       :spell-keys (get-in sl/spell-lists [:wizard level])
@@ -5380,13 +5380,13 @@ long rest."})]
                                 {:name "Touch of Death"
                                  :page 130
                                  :source :scag
-                                 :summary (str "when you reduce a creature within 5 ft. to 0 HPs, you gain " (max 1 (+ (?ability-bonuses :wis) (?class-level :monk))) " temp HPs")})]
+                                 :summary (str "when you reduce a creature within 5 ft. to 0 HPs, you gain " (max 1 (+ (?ability-bonuses ::char5e/wis) (?class-level :monk))) " temp HPs")})]
                    :levels {6 {:modifiers [(mod5e/action
                                             {:name "Hour of Reaping"
                                              :page 130
                                              :source :scag
                                              :duration turns-1
-                                             :summary (str "creatures within 30 ft. are frightened of you on failed DC " (?spell-save-dc :wis) " WIS save")})]}
+                                             :summary (str "creatures within 30 ft. are frightened of you on failed DC " (?spell-save-dc ::char5e/wis) " WIS save")})]}
                             11 {:modifiers [(mod5e/trait-cfg
                                              {:name "Mastery of Death"
                                               :page 131
@@ -5396,7 +5396,7 @@ long rest."})]
                                              {:name "Touch of the Long Death"
                                               :source :scag
                                               :page 131
-                                              :summary (str "spend X (up to 10) ki points to deal 2Xd10 necrotic damage on failed DC " (?spell-save-dc :wis) " CON save, half as much on successful save")})]}}}
+                                              :summary (str "spend X (up to 10) ki points to deal 2Xd10 necrotic damage on failed DC " (?spell-save-dc ::char5e/wis) " CON save, half as much on successful save")})]}}}
                   {:name "Way of the Sun Soul"
                    :modifiers [(mod5e/attack
                                 {:name "Radiant Sun Bolt"
@@ -5407,7 +5407,7 @@ long rest."})]
                                  :damage-die ?martial-arts-die
                                  :damage-die-count 1
                                  :damage-type :radiant
-                                 :damage-modifier (?ability-bonuses :dex)})]
+                                 :damage-modifier (?ability-bonuses ::char5e/dex)})]
                    :levels {6 {:modifiers [(mod5e/bonus-action
                                             {:name "Searing Arc Strike"
                                              :page 131
@@ -5418,12 +5418,12 @@ long rest."})]
                                               :level 11
                                               :page 131
                                               :source :scag
-                                              :summary (str "create an exploding orb, dealing 2d6 damage to creatures in a 20 ft sphere that fail a DC " (?spell-save-dc :wis) " CON save, you can spend X ki to increase by 2Xd6 damage (up to 3 ki)")})]}
+                                              :summary (str "create an exploding orb, dealing 2d6 damage to creatures in a 20 ft sphere that fail a DC " (?spell-save-dc ::char5e/wis) " CON save, you can spend X ki to increase by 2Xd6 damage (up to 3 ki)")})]}
                             17 {:modifiers [(mod5e/reaction
                                              {:name "Sun Shield"
                                               :page 131
                                               :source :scag
-                                              :summary (str "when hit with melee attack, deal " (+ 5 (?ability-bonuses :wis)) " radiant damage to attacker; you also shed 30 ft. light")})]}}}]})
+                                              :summary (str "when hit with melee attack, deal " (+ 5 (?ability-bonuses ::char5e/wis)) " radiant damage to attacker; you also shed 30 ft. light")})]}}}]})
    (subclass-plugin
     paladin-base-cfg
     :scag
@@ -5442,12 +5442,12 @@ long rest."})]
                    {:name "Channel Divinity: Champion Challenge"
                     :source :scag
                     :page 133
-                    :summary (str "creatures of your choice within 30 ft. cannot move more than 30 ft. from you on failed DC " (?spell-save-dc :cha) " WIS save")})
+                    :summary (str "creatures of your choice within 30 ft. cannot move more than 30 ft. from you on failed DC " (?spell-save-dc ::char5e/cha) " WIS save")})
                   (mod5e/bonus-action
                    {:name "Channel Divinity: Turn the Tide"
                     :page 133
                     :source :scag
-                    :summary (str "creatures of your choice within 30 ft. and with half or less HPs regain 1d6 " (common/mod-str (?ability-bonuses :cha)))})]
+                    :summary (str "creatures of your choice within 30 ft. and with half or less HPs regain 1d6 " (common/mod-str (?ability-bonuses ::char5e/cha)))})]
       :levels {7 {:modifiers [(mod5e/reaction
                                {:name "Divine Allegience"
                                 :level 7
@@ -5508,7 +5508,7 @@ long rest."})]
                                             :level 3
                                             :page 136
                                             :source :scag
-                                            :summary (str "can add CON mod (" (common/bonus-str (?ability-bonuses :cha)) ") to initiative; don't need advantage for Sneak Attack")})]}
+                                            :summary (str "can add CON mod (" (common/bonus-str (?ability-bonuses ::char5e/cha)) ") to initiative; don't need advantage for Sneak Attack")})]}
                            9 {:modifiers [(mod5e/action
                                            {:name "Panache"
                                             :level 3
@@ -5565,7 +5565,7 @@ long rest."})]
                                             {:name "Storm's Fury"
                                              :page 137
                                              :source :scag
-                                             :summary (str "when hit with melee attack, deal " (?class-level :sorcerer) " lightning damage to attacker, if it fails a DC " (?spell-save-dc :cha) " STR save it is pushed 20 ft. from you")})]}
+                                             :summary (str "when hit with melee attack, deal " (?class-level :sorcerer) " lightning damage to attacker, if it fails a DC " (?spell-save-dc ::char5e/cha) " STR save it is pushed 20 ft. from you")})]}
                            18 {:modifiers [(mod5e/damage-immunity :lightning)
                                            (mod5e/damage-immunity :thunder)
                                            (mod5e/flying-speed 60)
@@ -5575,7 +5575,7 @@ long rest."})]
                                              :source :scag
                                              :duration hours-1
                                              :frequency rests-1
-                                             :summary (str "temporarily sacrifice 30 ft. of your flying speed to give 30 ft. to up to " (+ 3 (?ability-bonuses :cha)) " other creatures")})]}}}]}
+                                             :summary (str "temporarily sacrifice 30 ft. of your flying speed to give 30 ft. to up to " (+ 3 (?ability-bonuses ::char5e/cha)) " other creatures")})]}}}]}
    {:name "Warlock"
     :subclass-level 1
     :subclass-title "Otherworldly Patron"
@@ -5586,13 +5586,13 @@ long rest."})]
                             :page 140
                             :source :scag
                             :summary "don't need to breath, eat, drink, or sleep"}]
-                  :levels {1 {:modifiers [(mod5e/spells-known 0 :spare-the-dying :cha "Warlock")
+                  :levels {1 {:modifiers [(mod5e/spells-known 0 :spare-the-dying ::char5e/cha "Warlock")
                                           (mod5e/saving-throw-advantage [:disease])
                                           (mod5e/dependent-trait
                                            {:name "Among the Dead"
                                             :page 139
                                             :source :scag
-                                            :summary (str "if an undead targets you, it must make a DC " (?spell-save-dc :cha) " WIS save or choose another target")})]
+                                            :summary (str "if an undead targets you, it must make a DC " (?spell-save-dc ::char5e/cha) " WIS save or choose another target")})]
                               :selections [(warlock-subclass-spell-selection [:false-life :ray-of-sickness])]}
                            3 {:selections [(warlock-subclass-spell-selection [:blindness-deafness :silence])]}
                            5 {:selections [(warlock-subclass-spell-selection [:feign-death :speak-with-dead])]}
@@ -5602,7 +5602,7 @@ long rest."})]
                                              :page 140
                                              :source :scag
                                              :frequency long-rests-1
-                                             :summary (str "regain 1d8 " (common/bonus-str (?ability-bonuses :con)) " HPs when you succeed on a death save or stabilize with spare the dying")})]}
+                                             :summary (str "regain 1d8 " (common/bonus-str (?ability-bonuses ::char5e/con)) " HPs when you succeed on a death save or stabilize with spare the dying")})]}
                            7 {:selections [(warlock-subclass-spell-selection [:aura-of-life :death-ward])]}
                            9 {:selections [(warlock-subclass-spell-selection [:contagion :legend-lore])]}
                            14 {:modifiers [(mod5e/bonus-action
@@ -5617,7 +5617,7 @@ long rest."})]
     :subclass-title "Arcane Tradition"
     :subclasses [{:name "Bladesinger"
                   :profs {:armor {:light false}
-                          :save {:dex true :int true}
+                          :save {::char5e/dex true ::char5e/int true}
                           :tool {:thieves-tools false}}
                   :prereqs [(t/option-prereq
                              "Elves only"
@@ -5640,7 +5640,7 @@ long rest."})]
                                             :duration minutes-1
                                             :frequency {:units :rest
                                                         :amount 2}
-                                            :summary (let [bonus (common/bonus-str (max 1 (?ability-bonuses :int)))] (str bonus " AC; +10 speed; advantage on Acrobatics; " bonus " on concentration saves"))})]}
+                                            :summary (let [bonus (common/bonus-str (max 1 (?ability-bonuses ::char5e/int)))] (str bonus " AC; +10 speed; advantage on Acrobatics; " bonus " on concentration saves"))})]}
                            6 {:modifiers [(mod5e/extra-attack)
                                           (mod5e/trait-cfg
                                            {:name "Extra Attack"
@@ -5656,7 +5656,7 @@ long rest."})]
                                             {:name "Song of Victory"
                                              :page 142
                                              :source :scag
-                                             :summary (str "while bladesinging, add " (common/bonus-str (max 1 (?ability-bonuses :int))) " to melee weapon attack damage")})]}}}]}])
+                                             :summary (str "while bladesinging, add " (common/bonus-str (max 1 (?ability-bonuses ::char5e/int))) " to melee weapon attack damage")})]}}}]}])
 
 
 (defn background-selection [cfg]
@@ -5799,8 +5799,8 @@ long rest."})]
                                                        (t/option-cfg
                                                         {:name "Feral"
                                                          :help "The ability increases from the Sword Coast Adventurer's Guide"
-                                                         :modifiers [(mod5e/race-ability :dex 2)
-                                                                     (mod5e/race-ability :cha -2)]})]})
+                                                         :modifiers [(mod5e/race-ability ::char5e/dex 2)
+                                                                     (mod5e/race-ability ::char5e/cha -2)]})]})
                                            (t/selection-cfg
                                             {:name "Variant Features"
                                              :tags #{:race}
@@ -5810,15 +5810,15 @@ long rest."})]
                                                          :help "Keep the other standard tiefling traits"})
                                                        (t/option-cfg
                                                         {:name "Devil's Tongue"
-                                                         :modifiers [(mod5e/spells-known 0 :vicious-mockery :cha "Tiefling")
-                                                                     (mod5e/spells-known 1 :charm-person :cha "Tiefling" 3)
-                                                                     (mod5e/spells-known 2 :enthrall :cha "Tiefling" 5)
+                                                         :modifiers [(mod5e/spells-known 0 :vicious-mockery ::char5e/cha "Tiefling")
+                                                                     (mod5e/spells-known 1 :charm-person ::char5e/cha "Tiefling" 3)
+                                                                     (mod5e/spells-known 2 :enthrall ::char5e/cha "Tiefling" 5)
                                                                      (tiefling-spell-removal-modifier 0 :thaumaturgy)
                                                                      (tiefling-spell-removal-modifier 1 :hellish-rebuke)
                                                                      (tiefling-spell-removal-modifier 2 :darkness)]})
                                                        (t/option-cfg
                                                         {:name "Hellfire"
-                                                         :modifiers [(mod5e/spells-known 1 :burning-hands :cha "Tiefling" 3)
+                                                         :modifiers [(mod5e/spells-known 1 :burning-hands ::char5e/cha "Tiefling" 3)
                                                                      (tiefling-spell-removal-modifier 1 :hellish-rebuke)]})
                                                        (t/option-cfg
                                                         {:name "Winged"
@@ -5827,15 +5827,15 @@ long rest."})]
                                                                      (tiefling-spell-removal-modifier 0 :thaumaturgy)
                                                                      (tiefling-spell-removal-modifier 1 :hellish-rebuke)
                                                                      (tiefling-spell-removal-modifier 2 :darkness)]})]})]})]})]
-   :modifiers [(mod5e/spells-known 0 :thaumaturgy :cha "Tiefling")
-               (mod5e/spells-known 1 :hellish-rebuke :cha "Tiefling" 3)
-               (mod5e/spells-known 2 :darkness :cha "Tiefling" 5)]})
+   :modifiers [(mod5e/spells-known 0 :thaumaturgy ::char5e/cha "Tiefling")
+               (mod5e/spells-known 1 :hellish-rebuke ::char5e/cha "Tiefling" 3)
+               (mod5e/spells-known 2 :darkness ::char5e/cha "Tiefling" 5)]})
 
 (def scag-halfling-option-cfg
   {:name "Halfling"
    :subraces
    [{:name "Ghostwise"
-     :abilities {:wis 1}
+     :abilities {::char5e/wis 1}
      :source :scag
      :traits [{:name "Silent Speech"
                :source :scag
@@ -5969,14 +5969,14 @@ long rest."})]
     :hit-die 10
     :profs {:armor {:light false :medium false :shields false}
             :weapon {:simple false :martial false}
-            :save {:str true :dex true}
+            :save {::char5e/str true ::char5e/dex true}
             :skill-options {:choose 3 :options ranger-skills}
             :multiclass-skill-options {:choose 1 :options ranger-skills}}
     :multiclass-prereqs [(t/option-prereq "Requires Wisdom 13 and Dexterity 13"
                                           (fn [c]
                                             (let [abilities (es/entity-val c :abilities)]
-                                              (and (>= (:wis abilities) 13)
-                                                  (>= (:dex abilities) 13)))))]
+                                              (and (>= (::char5e/wis abilities) 13)
+                                                  (>= (::char5e/dex abilities) 13)))))]
     :ability-increase-levels [4 8 10 16 19]
     :spellcaster true
     :spellcasting {:level-factor 2
@@ -5991,7 +5991,7 @@ long rest."})]
                                   15 1
                                   17 1
                                   19 1}
-                   :ability :wis}
+                   :ability ::char5e/wis}
     :armor-choices [{:name "Armor"
                      :options {:scale-mail 1
                                :leather 1}}]
@@ -6043,7 +6043,7 @@ long rest."})]
                                :frequency turns-1
                                :level 20
                                :page 92
-                               :summary (str "add " (common/bonus-str (?ability-bonuses :wis)) " to an attack or damage roll") })]}}
+                               :summary (str "add " (common/bonus-str (?ability-bonuses ::char5e/wis)) " to an attack or damage roll") })]}}
     :traits [(lands-stride 8)
              {:name "Hide in Plain Sight"
               :level 10
@@ -6180,7 +6180,7 @@ long rest."})]
                   :page 27
                   :souce ua-mystic-kw
                   :duration rounds-1
-                  :summary (str "Become invisible to 1 creature unless it succeeds on a DC " (?spell-save-dc :int) " WIS save.")})]
+                  :summary (str "Become invisible to 1 creature unless it succeeds on a DC " (?spell-save-dc ::char5e/int) " WIS save.")})]
     :summary "Become invisible to 1 creature"}
    {:name "Delusion"
     :page 27
@@ -6193,7 +6193,7 @@ long rest."})]
                   :source ua-mystic-kw
                   :range ft-90
                   :summary (str "A creature must succeed on a DC "
-                                (?spell-save-dc :int)
+                                (?spell-save-dc ::char5e/int)
                                 " WIS save or take "
                                 (mod5e/level-val
                                  (?class-level :mystic)
@@ -6221,7 +6221,7 @@ long rest."})]
                   :source ua-mystic-kw
                   :range ft-60
                   :summary (str "A creature must succeed on a DC "
-                                (?spell-save-dc :int)
+                                (?spell-save-dc ::char5e/int)
                                 " CON save or take "
                                 (mod5e/level-val
                                  (?class-level :mystic)
@@ -6238,7 +6238,7 @@ long rest."})]
                   :source ua-mystic-kw
                   :range ft-120
                   :summary (str "A creature must succeed on a DC "
-                                (?spell-save-dc :int)
+                                (?spell-save-dc ::char5e/int)
                                 " INT save or take "
                                 (mod5e/level-val
                                  (?class-level :mystic)
@@ -6256,7 +6256,7 @@ long rest."})]
                   :range ft-120
                   :duration turns-1
                   :summary (str "A creature must succeed on a DC "
-                                (?spell-save-dc :int)
+                                (?spell-save-dc ::char5e/int)
                                 " CHA save or be charmed by you")})]
     :summary "charm a creature"}
    {:name "Mystic Hand"
@@ -6272,7 +6272,7 @@ long rest."})]
                   :source ua-mystic-kw
                   :range ft-120
                   :summary (str "A creature must succeed on a DC "
-                                (?spell-save-dc :int)
+                                (?spell-save-dc ::char5e/int)
                                 " STR save or take "
                                 (mod5e/level-val
                                  (?class-level :mystic)
@@ -6460,7 +6460,7 @@ long rest."})]
                   :page 11
                   :source ua-mystic-kw
                   :qualifier "1-7 psi"
-                  :summary (str "unless it succeeds on a DC " (?spell-save-dc :int) " STR save, push a target 10 ft per psi and do 1d6 bludgeoning damage per psi if it hits an object")})
+                  :summary (str "unless it succeeds on a DC " (?spell-save-dc ::char5e/int) " STR save, push a target 10 ft per psi and do 1d6 bludgeoning damage per psi if it hits an object")})
                 (mod5e/trait-cfg
                  {:name "Mighty Leap"
                   :page 11
@@ -6526,14 +6526,14 @@ long rest."})]
                   :page 12
                   :source ua-mystic-kw
                   :qualifier "1-7 psi"
-                  :summary (str "deal 1d10 acid damage per psi, half on successful DC " (?spell-save-dc :int) " DEX save")})
+                  :summary (str "deal 1d10 acid damage per psi, half on successful DC " (?spell-save-dc ::char5e/int) " DEX save")})
                 (mod5e/action
                  {:name "Venom Strike"
                   :page 12
                   :source ua-mystic-kw
                   :qualifier "1-7 psi"
                   :range ft-30
-                  :summary (str "deal 1d6 per psi poison damage and target it poisoned until end of your next turn, it takes half damage and is not poisoned on successful DC " (?spell-save-dc :int) " CON save")})
+                  :summary (str "deal 1d6 per psi poison damage and target it poisoned until end of your next turn, it takes half damage and is not poisoned on successful DC " (?spell-save-dc ::char5e/int) " CON save")})
                 (mod5e/reaction
                  {:name "Acid Spray"
                   :page 12
@@ -6545,13 +6545,13 @@ long rest."})]
                   :page 11
                   :source ua-mystic-kw
                   :qualifier "5 psi"
-                  :summary (str "exhale 60 x 5 ft. line of acid dealing 6d6 acid damage, half on successful DC " (?spell-save-dc :int) " CON save")})
+                  :summary (str "exhale 60 x 5 ft. line of acid dealing 6d6 acid damage, half on successful DC " (?spell-save-dc ::char5e/int) " CON save")})
                 (mod5e/dependent-trait
                  {:name "Breath of the Green Dragon"
                   :page 11
                   :source ua-mystic-kw
                   :qualifier "7 psi"
-                  :summary (str "exhale 90 ft. cone of poison dealing 10d6 poison damage, half on successful DC " (?spell-save-dc :int) " CON save")})]}
+                  :summary (str "exhale 90 ft. cone of poison dealing 10d6 poison damage, half on successful DC " (?spell-save-dc ::char5e/int) " CON save")})]}
    {:name "Crown of Despair"
     :mystic-order :avatar
     :modifiers [(mod5e/trait-cfg
@@ -6565,7 +6565,7 @@ long rest."})]
                   :source ua-mystic-kw
                   :qualifier "1-7 psi"
                   :range ft-60
-                  :summary (str "deal 1d8 psychic damage per psi and target can't take reactions, half as much on successful DC " (?spell-save-dc :int) " CHA save")})
+                  :summary (str "deal 1d8 psychic damage per psi and target can't take reactions, half as much on successful DC " (?spell-save-dc ::char5e/int) " CHA save")})
                 (mod5e/action
                  {:name "Call to Inaction"
                   :page 12
@@ -6573,14 +6573,14 @@ long rest."})]
                   :qualifier "2 psi"
                   :range ft-30
                   :duration conc-minutes-10
-                  :summary (str "if you spent 1 min conversing with a creature, charm to incapacitate it unless if succeeds on a DC " (?spell-save-dc :int) " WIS save")})
+                  :summary (str "if you spent 1 min conversing with a creature, charm to incapacitate it unless if succeeds on a DC " (?spell-save-dc ::char5e/int) " WIS save")})
                 (mod5e/action
                  {:name "Visions of Despair"
                   :page 12
                   :source ua-mystic-kw
                   :qualifier "3 psi"
                   :range ft-60
-                  :summary (str "Deal 3d6 + 1d6 per additional psi psychic damage to a creature and it's speed becomes 0 unless  it succeeds on DC " (?spell-save-dc :int) " CHA save")})
+                  :summary (str "Deal 3d6 + 1d6 per additional psi psychic damage to a creature and it's speed becomes 0 unless  it succeeds on DC " (?spell-save-dc ::char5e/int) " CHA save")})
                 (mod5e/action
                  {:name "Dolorous Mind"
                   :page 12
@@ -6588,7 +6588,7 @@ long rest."})]
                   :qualifier "5 psi"
                   :duration conc-hours-1
                   :range ft-60
-                  :summary (str "incapaciate a creature on failed DC " (?spell-save-dc :int) " CHA save")})]}
+                  :summary (str "incapaciate a creature on failed DC " (?spell-save-dc ::char5e/int) " CHA save")})]}
    {:name "Crown of Disgust"
     :mystic-order :avatar
     :modifiers [(mod5e/trait-cfg
@@ -6603,7 +6603,7 @@ long rest."})]
                   :source ua-mystic-kw
                   :qualifier "1-7 psi"
                   :range ft-60
-                  :summary (str "deal 1d6 psychic damage per psi and target can't move closer to you until end of its next turn, half as much damage on successful DC " (?spell-save-dc :int) " WIS save")})
+                  :summary (str "deal 1d6 psychic damage per psi and target can't move closer to you until end of its next turn, half as much damage on successful DC " (?spell-save-dc ::char5e/int) " WIS save")})
                 (mod5e/action
                  {:name "Wall of Repulsion"
                   :page 13
@@ -6611,7 +6611,7 @@ long rest."})]
                   :qualifier "3 psi"
                   :range ft-60
                   :duration conc-minutes-10
-                  :summary (str "create a 30 x 10 x 1 ft. wall, a creature must make a DC " (?spell-save-dc :int) " WIS save to pass through")})
+                  :summary (str "create a 30 x 10 x 1 ft. wall, a creature must make a DC " (?spell-save-dc ::char5e/int) " WIS save to pass through")})
                 (mod5e/action
                  {:name "Visions of Disgust"
                   :page 13
@@ -6619,7 +6619,7 @@ long rest."})]
                   :qualifier "5 psi"
                   :range ft-60
                   :duration conc-minutes-1
-                  :summary (str "deal 5d6 psychic damage at end of each of target's turns it takes 1d6 psychic damage for every creature within 5 ft of it, only half initial damage on successful DC " (?spell-save-dc :int) " WIS save")})
+                  :summary (str "deal 5d6 psychic damage at end of each of target's turns it takes 1d6 psychic damage for every creature within 5 ft of it, only half initial damage on successful DC " (?spell-save-dc ::char5e/int) " WIS save")})
                 (mod5e/action
                  {:name "World of Horror"
                   :page 13
@@ -6627,7 +6627,7 @@ long rest."})]
                   :qualifier "7 psi"
                   :duration conc-hours-1
                   :range ft-60
-                  :summary (str "choose up to 6 creatures, they take 8d6 psychic damage and are frightened, half as much damage on failed DC " (?spell-save-dc :int) " CHA save")})]}
+                  :summary (str "choose up to 6 creatures, they take 8d6 psychic damage and are frightened, half as much damage on failed DC " (?spell-save-dc ::char5e/int) " CHA save")})]}
    {:name "Crown of Rage"
     :mystic-order :avatar
     :modifiers [(mod5e/trait-cfg
@@ -6642,21 +6642,21 @@ long rest."})]
                   :source ua-mystic-kw
                   :qualifier "1-7 psi"
                   :range ft-60
-                  :summary (str "deal 1d6 psychic damage per psi and target must use reaction to move in a straight line toward it's nearest enemy unless it succeeds on a DC " (?spell-save-dc :int) " CHA save")})
+                  :summary (str "deal 1d6 psychic damage per psi and target must use reaction to move in a straight line toward it's nearest enemy unless it succeeds on a DC " (?spell-save-dc ::char5e/int) " CHA save")})
                 (mod5e/action
                  {:name "Fighting Words"
                   :page 13
                   :source ua-mystic-kw
                   :qualifier "2 psi"
                   :duration conc-minutes-10
-                  :summary (str "if you spent 1 minute conversing with a creature, charm it to cause it to attack another creature you describe or name unless it succeeds on a DC " (?spell-save-dc :int) " WIS save")})
+                  :summary (str "if you spent 1 minute conversing with a creature, charm it to cause it to attack another creature you describe or name unless it succeeds on a DC " (?spell-save-dc ::char5e/int) " WIS save")})
                 (mod5e/bonus-action
                  {:name "Mindless Courage"
                   :page 13
                   :source ua-mystic-kw
                   :qualifier "2 psi"
                   :range ft-60
-                  :summary (str "target must succeed on DC " (?spell-save-dc :int) " WIS save or it can't move except toward it's nearest enemy")})
+                  :summary (str "target must succeed on DC " (?spell-save-dc ::char5e/int) " WIS save or it can't move except toward it's nearest enemy")})
                 (mod5e/bonus-action
                  {:name "Punishing Fury"
                   :page 14
@@ -6664,7 +6664,7 @@ long rest."})]
                   :qualifier "5 psi"
                   :duration conc-hours-1
                   :range ft-60
-                  :summary (str "target must succeed on DC " (?spell-save-dc :int) " WIS save or, when it makes a melee attack, creatures within 5 ft. of it can use reaction to melee attack it")})]}
+                  :summary (str "target must succeed on DC " (?spell-save-dc ::char5e/int) " WIS save or, when it makes a melee attack, creatures within 5 ft. of it can use reaction to melee attack it")})]}
    {:name "Diminution"
     :mystic-order :immortal
     :modifiers [(mod5e/trait-cfg
@@ -6684,7 +6684,7 @@ long rest."})]
                   :source ua-mystic-kw
                   :qualifier "2 psi"
                   :range ft-5
-                  :summary (str "a creature must succed on DC " (?spell-save-dc :int) " STR save or be knocked prone")})
+                  :summary (str "a creature must succed on DC " (?spell-save-dc ::char5e/int) " STR save or be knocked prone")})
                 (mod5e/reaction
                  {:name "Sudden Shift"
                   :page 14
@@ -6776,7 +6776,7 @@ long rest."})]
                  {:name "Mantle of Awe: Psychic Focus"
                   :page 15
                   :source ua-mystic-kw
-                  :summary (str "gain a " (max 1 (/ (?ability-bonuses :int) 2)) " bonus to CHA checks")})
+                  :summary (str "gain a " (max 1 (/ (?ability-bonuses ::char5e/int) 2)) " bonus to CHA checks")})
                 (mod5e/action
                  {:name "Charming Presence"
                   :page 15
@@ -7712,7 +7712,7 @@ long rest."})]
                     :page 2
                     :source ua-trio-of-subclasses-kw
                     :range ft-10
-                    :summary (str "when an enemy deals melee damage to someone other than you, it takes radiant damage equal to the amount it dealt, half on a successful DC " (?spell-save-dc :cha) " WIS save.")})]
+                    :summary (str "when an enemy deals melee damage to someone other than you, it takes radiant damage equal to the amount it dealt, half on a successful DC " (?spell-save-dc ::char5e/cha) " WIS save.")})]
       :levels {7 {:modifiers [(mod5e/reaction
                                {:name "Aura of the Guardian"
                                 :page 2
@@ -7735,33 +7735,33 @@ long rest."})]
     ranger-base-cfg
     ua-trio-of-subclasses-kw
     [{:name "Monster Slayer"
-      :modifiers [(mod5e/spells-known 1 :protection-from-evil-and-good :wis "Ranger")
+      :modifiers [(mod5e/spells-known 1 :protection-from-evil-and-good ::char5e/wis "Ranger")
                   (mod5e/bonus-action
                    {:name "Slayer's Eye"
                     :page 3
                     :source ua-trio-of-subclasses-kw
                     :range ft-120
                     :summary "learn creature's vulnerabilities, immunities, and resistances, as well as special effects triggered by damage; target also takes 1d6 the first time you hit with a weapon attack"})]
-      :levels {5 {:modifiers [(mod5e/spells-known 2 :zone-of-truth :wis "Ranger")]}
+      :levels {5 {:modifiers [(mod5e/spells-known 2 :zone-of-truth ::char5e/wis "Ranger")]}
                7 {:modifiers [(mod5e/trait-cfg
                                {:name "Supernatural Defense"
                                 :page 3
                                 :source ua-trio-of-subclasses-kw
                                 :summary "when the target of your Slayer's Eye causes you to make a save, add a 1d6 to your roll"})]}
-               9 {:modifiers [(mod5e/spells-known 3 :magic-circle :wis "Ranger")]}
+               9 {:modifiers [(mod5e/spells-known 3 :magic-circle ::char5e/wis "Ranger")]}
                11 {:modifiers [(mod5e/reaction
                                 {:name "Relentless Slayer"
                                  :page 3
                                  :source ua-trio-of-subclasses-kw
                                  :range ft-30
                                  :summary "when the target of your Slayer's Eye tries to change shape, teleport, travel to another plane, or turn gaseous, make a contested WIS check with the target, if you succeed, it fails the attempt"})]}
-               13 {:modifiers [(mod5e/spells-known 4 :banishment :wis "Ranger")]}
+               13 {:modifiers [(mod5e/spells-known 4 :banishment ::char5e/wis "Ranger")]}
                15 {:modifiers [(mod5e/reaction
                                 {:name "Slayer's Counter"
                                  :page 3
                                  :source ua-trio-of-subclasses-kw
                                  :summary "when the target of your Slayer's Eye forces you to make a save, make a weapon attack and, if it hits, you automatically succeed on the save"})]}
-               17 {:modifiers [(mod5e/spells-known 5 :planar-binding :wis "Ranger")]}}}])])
+               17 {:modifiers [(mod5e/spells-known 5 :planar-binding ::char5e/wis "Ranger")]}}}])])
 
 (def ua-trio-of-subclasses-plugin
   {:name "Unearthed Arcana: A Trio of Subclasses"
@@ -7900,12 +7900,12 @@ long rest."})]
                                            {:name "Arcane Shot: Banishing Arrow"
                                             :page 3
                                             :source ua-revised-subclasses-kw
-                                            :summary (str "If the arrow hits, banish the creature until the end of it's next turn, it's speed becomes 0 and it is incapacitated unless it succeeds on a DC " (?spell-save-dc :int) " CHA save. " (if (>= (?class-level :fighter) 18) " The target also takes 2d6 force damage."))})
+                                            :summary (str "If the arrow hits, banish the creature until the end of it's next turn, it's speed becomes 0 and it is incapacitated unless it succeeds on a DC " (?spell-save-dc ::char5e/int) " CHA save. " (if (>= (?class-level :fighter) 18) " The target also takes 2d6 force damage."))})
                                           (mod5e/dependent-trait
                                            {:name "Arcane Shot: Brute Bane Arrow"
                                             :page 3
                                             :source ua-revised-subclasses-kw
-                                            :summary (str "If the arrow hits, deal " (if (>= (?class-level :fighter) 18) 4 2) "d6 extra necrotic damage to the target, if it fails a DC " (?spell-save-dc :int) " CON save, it's attacks deal half damage until start of your next turn")})
+                                            :summary (str "If the arrow hits, deal " (if (>= (?class-level :fighter) 18) 4 2) "d6 extra necrotic damage to the target, if it fails a DC " (?spell-save-dc ::char5e/int) " CON save, it's attacks deal half damage until start of your next turn")})
                                           (mod5e/dependent-trait
                                            {:name "Arcane Shot: Bursting Arrow"
                                             :page 3
@@ -7916,28 +7916,28 @@ long rest."})]
                                             :page 3
                                             :source ua-revised-subclasses-kw
                                             :summary (let [die-count (if (>= (?class-level :fighter) 18) 4 2)]
-                                                       (str "if the arrow hits, grasping brambles deal an extra " die-count "d6 poison damage, target's speed is reduced by 10 ft. and takes " die-count "d6 slashing damage the first time it moves on each of it's turns. The brambles can be removed with a DC " (?spell-save-dc :int) " STR save."))})
+                                                       (str "if the arrow hits, grasping brambles deal an extra " die-count "d6 poison damage, target's speed is reduced by 10 ft. and takes " die-count "d6 slashing damage the first time it moves on each of it's turns. The brambles can be removed with a DC " (?spell-save-dc ::char5e/int) " STR save."))})
                                           (mod5e/dependent-trait
                                            {:name "Arcane Shot: Mind Scrambling Arrow"
                                             :page 4
                                             :source ua-revised-subclasses-kw
-                                            :summary (str "if the arrow hits, deal an extra " (if (>= (?class-level :fighter) 18) 4 2) "d6 psychic damage, and the target must succeed on a DC " (?spell-save-dc :int) " WIS save or cannot harm an ally of your choosing")})
+                                            :summary (str "if the arrow hits, deal an extra " (if (>= (?class-level :fighter) 18) 4 2) "d6 psychic damage, and the target must succeed on a DC " (?spell-save-dc ::char5e/int) " WIS save or cannot harm an ally of your choosing")})
                                           (mod5e/dependent-trait
                                            {:name "Arcane Shot: Piercing Arrow"
                                             :page 4
                                             :source ua-revised-subclasses-kw
-                                            :summary (str "instead of an attack roll, you deal the arrows damage to all creatures within a 1 ft. X 30 ft. line plus an extra " (if (>= (?class-level :fighter) 18) 2 1) "d6 piercing damage, half damage on successful DC " (?spell-save-dc :int) " DEX save")})
+                                            :summary (str "instead of an attack roll, you deal the arrows damage to all creatures within a 1 ft. X 30 ft. line plus an extra " (if (>= (?class-level :fighter) 18) 2 1) "d6 piercing damage, half damage on successful DC " (?spell-save-dc ::char5e/int) " DEX save")})
                                           (mod5e/dependent-trait
                                            {:name "Arcane Shot: Seeking Arrow"
                                             :page 4
                                             :source ua-revised-subclasses-kw
-                                            :summary (str "instead of an attack roll, choose 1 creature you have seen in the past minute, it must succeed on a DC " (?spell-save-dc :int) " DEX save or be hit by the arrow, which can move around corners, taking the arrow's damage plus an extra " (if (>= (?class-level :fighter) 18) 2 1) "d6 force damage, half on a successful save")})
+                                            :summary (str "instead of an attack roll, choose 1 creature you have seen in the past minute, it must succeed on a DC " (?spell-save-dc ::char5e/int) " DEX save or be hit by the arrow, which can move around corners, taking the arrow's damage plus an extra " (if (>= (?class-level :fighter) 18) 2 1) "d6 force damage, half on a successful save")})
                                           (mod5e/dependent-trait
                                            {:name "Arcane Shot: Shadow Arrow"
                                             :page 4
                                             :source ua-revised-subclasses-kw
                                             :duration {:units :round}
-                                            :summary (str "if the arrow hits, deal an extra " (if (>= (?class-level :fighter) 18) 4 2) "d6 psychic damage and target must succeed on a DC " (?spell-save-dc :int) " WIS save or cannot see beyond 5 ft")})]
+                                            :summary (str "if the arrow hits, deal an extra " (if (>= (?class-level :fighter) 18) 4 2) "d6 psychic damage and target must succeed on a DC " (?spell-save-dc ::char5e/int) " WIS save or cannot see beyond 5 ft")})]
                               :selections [(opt5e/skill-selection [:arcana :nature] 1)]}
                            7 {:modifiers [(mod5e/bonus-action
                                            {:name "Curving Shot"
@@ -7988,28 +7988,28 @@ long rest."})]
     :plugin? true
     :subclasses [{:name "Favored Soul"
                   :modifiers [ua-al-illegal
-                              (mod5e/spells-known 1 :cure-wounds :cha "Sorcerer")
+                              (mod5e/spells-known 1 :cure-wounds ::char5e/cha "Sorcerer")
                               (mod5e/trait-cfg
                                {:name "Favored by the Gods"
                                 :page 5
                                 :source ua-revised-subclasses-kw
                                 :frequency {:units :rest}
                                 :summary "if you fail a save or miss an attack, you may roll 2d4 and add it to the missed roll"})]
-                  :selections [(subclass-cantrip-selection :sorcerer "Sorcerer" :cha (get-in sl/spell-lists [:cleric 0]) 0)
-                               (subclass-spell-selection :sorcerer "Sorcerer" :cha (get-in sl/spell-lists [:cleric 1]) 0)]
-                  :levels {3 {:selections [(subclass-spell-selection :sorcerer "Sorcerer" :cha (get-in sl/spell-lists [:cleric 2]) 0)]}
-                           5 {:selections [(subclass-spell-selection :sorcerer "Sorcerer" :cha (get-in sl/spell-lists [:cleric 3]) 0)]}
+                  :selections [(subclass-cantrip-selection :sorcerer "Sorcerer" ::char5e/cha (get-in sl/spell-lists [:cleric 0]) 0)
+                               (subclass-spell-selection :sorcerer "Sorcerer" ::char5e/cha (get-in sl/spell-lists [:cleric 1]) 0)]
+                  :levels {3 {:selections [(subclass-spell-selection :sorcerer "Sorcerer" ::char5e/cha (get-in sl/spell-lists [:cleric 2]) 0)]}
+                           5 {:selections [(subclass-spell-selection :sorcerer "Sorcerer" ::char5e/cha (get-in sl/spell-lists [:cleric 3]) 0)]}
                            6 {:modifiers [(mod5e/dependent-trait
                                            {:name "Empowered Healing"
                                             :page 5
                                             :source ua-revised-subclasses-kw
                                             :summary "you may reroll healing dice once"})]}
-                           7 {:selections [(subclass-spell-selection :sorcerer "Sorcerer" :cha (get-in sl/spell-lists [:cleric 4]) 0)]}
-                           9 {:selections [(subclass-spell-selection :sorcerer "Sorcerer" :cha (get-in sl/spell-lists [:cleric 5]) 0)]}
-                           11 {:selections [(subclass-spell-selection :sorcerer "Sorcerer" :cha (get-in sl/spell-lists [:cleric 6]) 0)]}
-                           13 {:selections [(subclass-spell-selection :sorcerer "Sorcerer" :cha (get-in sl/spell-lists [:cleric 7]) 0)]}
-                           15 {:selections [(subclass-spell-selection :sorcerer "Sorcerer" :cha (get-in sl/spell-lists [:cleric 8]) 0)]}
-                           17 {:selections [(subclass-spell-selection :sorcerer "Sorcerer" :cha (get-in sl/spell-lists [:cleric 9]) 0)]}
+                           7 {:selections [(subclass-spell-selection :sorcerer "Sorcerer" ::char5e/cha (get-in sl/spell-lists [:cleric 4]) 0)]}
+                           9 {:selections [(subclass-spell-selection :sorcerer "Sorcerer" ::char5e/cha (get-in sl/spell-lists [:cleric 5]) 0)]}
+                           11 {:selections [(subclass-spell-selection :sorcerer "Sorcerer" ::char5e/cha (get-in sl/spell-lists [:cleric 6]) 0)]}
+                           13 {:selections [(subclass-spell-selection :sorcerer "Sorcerer" ::char5e/cha (get-in sl/spell-lists [:cleric 7]) 0)]}
+                           15 {:selections [(subclass-spell-selection :sorcerer "Sorcerer" ::char5e/cha (get-in sl/spell-lists [:cleric 8]) 0)]}
+                           17 {:selections [(subclass-spell-selection :sorcerer "Sorcerer" ::char5e/cha (get-in sl/spell-lists [:cleric 9]) 0)]}
                            14 {:modifiers [(mod5e/bonus-action
                                            {:name "Angelic Form"
                                             :page 5
@@ -8040,12 +8040,12 @@ long rest."})]
                               :ability-increase-levels [4 8 12 16 19]
                               :profs {:armor {:light false :medium false}
                                       :weapon {:simple false} 
-                                      :save {:int true :wis true}
+                                      :save {::char5e/int true ::char5e/wis true}
                                       :skill-options {:choose 2 :options {:arcana true :history true :insight true :medicine true :nature true :perception true :religion true}}}
                               :multiclass-prereqs [(t/option-prereq "Requires Intelligence 13"
                                                                     (fn [c]
                                                                       (let [abilities (es/entity-val c :abilities)]
-                                                                        (>= (:int abilities) 13))))]
+                                                                        (>= (::char5e/int abilities) 13))))]
                               :equipment-choices [{:name "Equipment Pack"
                                                    :options {:scholars-pack 1
                                                              :explorers-pack 1}}]
@@ -8120,7 +8120,7 @@ long rest."})]
                                                        {:name "Mystical Recovery"
                                                         :page 4
                                                         :source ua-mystic-kw
-                                                        :summary (str "regain " (?ability-bonuses :int) " HPs when you spend psi points on psychic discipline of your order and you have less than " (inc (int (/ ?max-hit-points 2))) "HPs remaining")})
+                                                        :summary (str "regain " (?ability-bonuses ::char5e/int) " HPs when you spend psi points on psychic discipline of your order and you have less than " (inc (int (/ ?max-hit-points 2))) "HPs remaining")})
                                                       (mod5e/trait-cfg
                                                        {:name "Telepathy"
                                                         :page 4
@@ -8185,7 +8185,7 @@ long rest."})]
                                                                       :page 6
                                                                       :source ua-mystic-kw
                                                                       :range ft-30
-                                                                      :summary (str "allies regain additional " (max 0 (?ability-bonuses :int)) " HPs from psionic disciplines")})]}
+                                                                      :summary (str "allies regain additional " (max 0 (?ability-bonuses ::char5e/int)) " HPs from psionic disciplines")})]}
                                                      14 {:modifiers [(mod5e/dependent-trait
                                                                       {:page 6
                                                                        :name "Avatar of Speed"
@@ -8224,13 +8224,13 @@ long rest."})]
                                                          (fn [armor shield]
                                                            (if (and (nil? shield)
                                                                     (nil? armor))
-                                                             (?ability-bonuses :con)
+                                                             (?ability-bonuses ::char5e/con)
                                                              0)))]
                                             :levels {3 {:modifiers [(mod5e/dependent-trait
                                                                      {:name "Psionic Resilience"
                                                                       :page 7
                                                                       :source ua-mystic-kw
-                                                                      :summary (str "at start of your turns, gain " (max 0 (?ability-bonuses :int)) " temp HPs if you have at least 1 HP.")})]}
+                                                                      :summary (str "at start of your turns, gain " (max 0 (?ability-bonuses ::char5e/int)) " temp HPs if you have at least 1 HP.")})]}
                                                      6 {:modifiers [(mod5e/reaction
                                                                      {:name "Surge of Health"
                                                                       :page 7
@@ -8239,7 +8239,7 @@ long rest."})]
                                                      14 {:modifiers [(mod5e/dependent-trait
                                                                       {:page 7
                                                                        :name "Immortal Will"
-                                                                       :summary (str "at end of your turn, if you have 0 HPs spend 5 psi to regain " (+ (?class-level :mystic) (?ability-bonuses :con)) " HPs")})]}}}
+                                                                       :summary (str "at end of your turn, if you have 0 HPs spend 5 psi to regain " (+ (?class-level :mystic) (?ability-bonuses ::char5e/con)) " HPs")})]}}}
                                            {:name "Order of the Nomad"
                                             :selections [(psionic-disciplines-selection 2 "Order of the Nomad" (fn [d] (= :nomad (:mystic-order d))))]
                                             :modifiers [(mod5e/trait-cfg
@@ -8294,7 +8294,7 @@ long rest."})]
                                                                       :summary "Spend 1 extra psi point on a discipline to resistance"})]}
                                                      6 {:selections [(opt5e/spell-selection {:title "Wu Jen Spells"
                                                                                              :ref [:class :mystic :levels :level-1 :mystic-order :order-of-the-wu-jen :spells-known]
-                                                                                             :spellcasting-ability :int
+                                                                                             :spellcasting-ability ::char5e/int
                                                                                              :class-name "Order of the Wu Jen"
                                                                                              :num 3
                                                                                              :prepend-level? true
@@ -8346,8 +8346,8 @@ long rest."})]
                 (race-selection
                  {:options [(race-option
                              {:name "Minotaur (Krynn)"
-                              :abilities {:str 1}
-                              :selections [(opt5e/ability-increase-selection [:str :int :wis] 1 true)]
+                              :abilities {::char5e/str 1}
+                              :selections [(opt5e/ability-increase-selection [::char5e/str ::char5e/int ::char5e/wis] 1 true)]
                               :size :medium
                               :speed 30
                               :weapon-proficiencies [:horns]
@@ -8397,7 +8397,7 @@ long rest."})]
                  {:options (map
                             (fn [race] (race-option (assoc race :source ua-eberron-kw)))
                             [{:name "Changeling"
-                              :abilities {:dex 1 :cha 1}
+                              :abilities {::char5e/dex 1 ::char5e/cha 1}
                               :size :medium
                               :speed 30
                               :languages ["Common"]
@@ -8410,7 +8410,7 @@ long rest."})]
                                             :summary "polymorph into a Medium humanoid you have seen"})]
                               :selections [(opt5e/language-selection opt5e/languages 2)]}
                              {:name "Shifter"
-                              :abilities {:dex 1}
+                              :abilities {::char5e/dex 1}
                               :size :medium
                               :speed 30
                               :darkvision 60
@@ -8422,30 +8422,30 @@ long rest."})]
                                             :source ua-eberron-kw
                                             :duration minutes-1
                                             :summary (str "gain "
-                                                          (max 1 (+ ?total-levels (?ability-bonuses :con)))
+                                                          (max 1 (+ ?total-levels (?ability-bonuses ::char5e/con)))
                                                           " temp HPs"
                                                           (if ?shifting-feature
                                                             (str " and " ?shifting-feature)))})]
                               :subraces [{:name "Beasthide"
-                                          :abilities {:con 1}
+                                          :abilities {::char5e/con 1}
                                           :modifiers [(mod/modifier ?shifting-feature "a +1 AC bonus")]}
                                          {:name "Cliffwalk"
-                                          :abilities {:dex 1}
+                                          :abilities {::char5e/dex 1}
                                           :modifiers [(mod/modifier ?shifting-feature "climbing speed of 30")]}
                                          {:name "Longstride"
-                                          :abilities {:dex 1}
+                                          :abilities {::char5e/dex 1}
                                           :modifiers [(mod/modifier ?shifting-feature "Dash as bonus action")]}
                                          {:name "Longtooth"
-                                          :abilities {:str 1}
+                                          :abilities {::char5e/str 1}
                                           :modifiers [(mod/modifier ?shifting-feature "1d6 bite attack")]}
                                          {:name "Razorclaw"
-                                          :abilities {:dex 1}
+                                          :abilities {::char5e/dex 1}
                                           :modifiers [(mod/modifier ?shifting-feature "unarmed strike as bonus action")]}
                                          {:name "Wildhunt"
-                                          :abilities {:wis 1}
+                                          :abilities {::char5e/wis 1}
                                           :modifiers [(mod/modifier ?shifting-feature "advantage on WIS checks and saves")]}]}
                              {:name "Warforged"
-                              :abilities {:str 1 :con 1}
+                              :abilities {::char5e/str 1 ::char5e/con 1}
                               :size :medium
                               :speed 30
                               :modifiers [ua-al-illegal
@@ -8495,18 +8495,18 @@ long rest."})]
                                                                        :source ua-eberron-kw
                                                                        :summary "create magic items from tables A or B of DMG"})]}}}]})]})
                 (feat-selection
-                 {:options [(dragonmark-feat "Detection" :wis [:detect-magic :mage-hand] :detect-thoughts :clairvoyance)
-                            (dragonmark-feat "Finding" :wis [:identify :mage-hand] :locate-object :clairvoyance)
-                            (dragonmark-feat "Handling" :wis [:druidcraft :speak-with-animals] :beast-sense :conjure-animals)
-                            (dragonmark-feat "Healing" :wis [:cure-wounds :spare-the-dying] :lesser-restoration :revivify)
-                            (dragonmark-feat "Hospitality" :wis [:friends :unseen-servant] :rope-trick :leomunds-tiny-hut)
-                            (dragonmark-feat "Making" :int [:identify :mending] :magic-weapon :fabricate)
-                            (dragonmark-feat "Passage" :int [:expeditious-retreat :light] :misty-step :teleportation-circle)
-                            (dragonmark-feat "Scribing" :int [:comprehend-languages :message] :sending :tongues)
-                            (dragonmark-feat "Sentinel" :wis [:blade-ward :compelling-duel] :blur :protection-from-energy)
-                            (dragonmark-feat "Shadow" :cha [:dancing-lights :disguise-self] :darkness :nondetection)
-                            (dragonmark-feat "Storm" :int [:fog-cloud :shocking-grasp] :gust-of-wind :sleet-storm)
-                            (dragonmark-feat "Warding" :int [:alarm :resistance] :arcane-lock :magic-circle)]})]})
+                 {:options [(dragonmark-feat "Detection" ::char5e/wis [:detect-magic :mage-hand] :detect-thoughts :clairvoyance)
+                            (dragonmark-feat "Finding" ::char5e/wis [:identify :mage-hand] :locate-object :clairvoyance)
+                            (dragonmark-feat "Handling" ::char5e/wis [:druidcraft :speak-with-animals] :beast-sense :conjure-animals)
+                            (dragonmark-feat "Healing" ::char5e/wis [:cure-wounds :spare-the-dying] :lesser-restoration :revivify)
+                            (dragonmark-feat "Hospitality" ::char5e/wis [:friends :unseen-servant] :rope-trick :leomunds-tiny-hut)
+                            (dragonmark-feat "Making" ::char5e/int [:identify :mending] :magic-weapon :fabricate)
+                            (dragonmark-feat "Passage" ::char5e/int [:expeditious-retreat :light] :misty-step :teleportation-circle)
+                            (dragonmark-feat "Scribing" ::char5e/int [:comprehend-languages :message] :sending :tongues)
+                            (dragonmark-feat "Sentinel" ::char5e/wis [:blade-ward :compelling-duel] :blur :protection-from-energy)
+                            (dragonmark-feat "Shadow" ::char5e/cha [:dancing-lights :disguise-self] :darkness :nondetection)
+                            (dragonmark-feat "Storm" ::char5e/int [:fog-cloud :shocking-grasp] :gust-of-wind :sleet-storm)
+                            (dragonmark-feat "Warding" ::char5e/int [:alarm :resistance] :arcane-lock :magic-circle)]})]})
 
 (def ua-plugins
   (map
@@ -8699,8 +8699,8 @@ long rest."})]
 
 (def template-base
   (es/make-entity
-   {?armor-class (+ 10 (?ability-bonuses :dex))
-    ?base-armor-class (+ 10 (?ability-bonuses :dex)
+   {?armor-class (+ 10 (?ability-bonuses ::char5e/dex))
+    ?base-armor-class (+ 10 (?ability-bonuses ::char5e/dex)
                          ?natural-ac-bonus
                          ?magical-ac-bonus)
     ?levels {}
@@ -8714,7 +8714,7 @@ long rest."})]
     ?armor-stealth-disadvantage? (fn [armor]
                                    (:stealth-disadvantage? armor))
     ?armor-dex-bonus (fn [armor]
-                       (let [dex-bonus (?ability-bonuses :dex)]
+                       (let [dex-bonus (?ability-bonuses ::char5e/dex)]
                          (case (:type armor)
                            :light dex-bonus
                            :medium (min ?max-medium-armor-bonus dex-bonus)
@@ -8794,10 +8794,10 @@ long rest."})]
     ?additional-skill-bonuses {}
     ?passive-perception (+ 10 (?skill-bonuses :perception))
     ?passive-investigation (+ 10 (?skill-bonuses :investigation))
-    ?hit-point-level-bonus (?ability-bonuses :con)
+    ?hit-point-level-bonus (?ability-bonuses ::char5e/con)
     ?hit-point-level-increases 0
     ?max-hit-points (max 1 (+ ?hit-point-level-increases (* ?total-levels ?hit-point-level-bonus)))
-    ?initiative (?ability-bonuses :dex)
+    ?initiative (?ability-bonuses ::char5e/dex)
     ?num-attacks 1
     ?critical #{20}
     ?has-weapon-prof? (fn [weapon]
@@ -8815,10 +8815,10 @@ long rest."})]
                                    (or (:attack-bonus weapon) 0)
                                    (if (:melee? weapon)
                                      (+ (?ability-bonuses
-                                         (if definitely-finesse? :dex :str))
+                                         (if definitely-finesse? ::char5e/dex ::char5e/str))
                                         (or ?melee-attack-bonus 0))
                                      (+ (?ability-bonuses
-                                         (if definitely-finesse? :str :dex))
+                                         (if definitely-finesse? ::char5e/str ::char5e/dex))
                                         (or ?ranged-attack-bonus 0))))))
     ?weapon-damage-modifier (fn [weapon finesse?]
                               (let [definitely-finesse? (and finesse?
@@ -8829,8 +8829,8 @@ long rest."})]
                                    (?ability-bonuses
                                     (if (or (and melee? (not definitely-finesse?))
                                             (and (not melee?) definitely-finesse?))
-                                      :str
-                                      :dex)))))
+                                      ::char5e/str
+                                      ::char5e/dex)))))
     ?spell-attack-modifier (fn [ability-kw]
                              (+ ?prof-bonus (?ability-bonuses ability-kw)))
     ?spell-save-dc (fn [ability-kw]
