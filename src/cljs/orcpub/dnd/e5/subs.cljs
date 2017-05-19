@@ -77,14 +77,17 @@
  (fn [character _]
    (entity/make-path-map character)))
 
+(defn selected-plugin-options [character]
+  (into #{}
+        (comp (map ::entity/key)
+              (remove nil?))
+        (get-in character [::entity/options :optional-content])))
+
 (reg-sub
  :selected-plugin-options
  :<- [:character]
  (fn [character _]
-   (into #{}
-         (comp (map ::entity/key)
-               (remove nil?))
-         (get-in character [::entity/options :optional-content]))))
+   (selected-plugin-options character)))
 
 (reg-sub
  :available-selections
@@ -129,32 +132,43 @@
  (fn [db _]
    (-> db :user-data :user-data :username)))
 
+(defn built-template [selected-plugin-options]
+  (let [selected-plugins (map
+                          :selections
+                          (filter
+                           (fn [{:keys [key]}]
+                             (selected-plugin-options key))
+                           t5e/plugins))]
+    (if (seq selected-plugins)
+      (update t5e/template
+              ::t/selections
+              (fn [s]
+                (apply
+                 entity/merge-multiple-selections
+                 s
+                 selected-plugins)))
+      t5e/template)))
+
 (reg-sub
  :built-template
  :<- [:selected-plugin-options]
  (fn [selected-plugin-options _]
-   (let [selected-plugins (map
-                           :selections
-                           (filter
-                            (fn [{:keys [key]}]
-                              (selected-plugin-options key))
-                            t5e/plugins))]
-     (if (seq selected-plugins)
-       (update t5e/template
-               ::t/selections
-               (fn [s]
-                 (apply
-                  entity/merge-multiple-selections
-                  s
-                  selected-plugins)))
-       t5e/template))))
+   (built-template selected-plugin-options)))
+
+(defn built-character [character built-template]
+  (entity/build character built-template))
 
 (reg-sub
  :built-character
  :<- [:character]
  :<- [:built-template]
  (fn [[character built-template] _]
-   (entity/build character built-template)))
+   (built-character character built-template)))
+
+(reg-sub
+ :expanded-characters
+ (fn [db _]
+   (:expanded-characters db)))
 
 (reg-sub
  :dnd-5e-characters

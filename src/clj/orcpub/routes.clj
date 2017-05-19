@@ -463,9 +463,8 @@
   (check-field email-query (:email query-params) db))
 
 (defn save-character [{:keys [db transit-params body conn identity] :as request}]
-  (pprint transit-params)
   (if-let [data (spec/explain-data ::se/entity transit-params)]
-    {:status 400 :message data}
+    (do (prn "DATA" data) {:status 400 :message data})
     (let [result @(d/transact conn [(assoc transit-params
                                            :db/id "tempid"
                                            :orcpub.user/username (:user identity))])]
