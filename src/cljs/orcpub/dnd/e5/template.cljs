@@ -3569,7 +3569,7 @@
                  {:name "Arcane Trickster"
                   :spellcasting {:level-factor 3}
                   :modifiers [(mod5e/spells-known 0 :mage-hand :int "Arcane Trickster")]
-                  :levels {3 {:selections [(arcane-trickster-cantrip 3)
+                  :levels {3 {:selections [(arcane-trickster-cantrip 2)
                                            (arcane-trickster-spell-selection 2 [1])
                                            (arcane-trickster-any-spell-selection 1 [1])]}
                            4 {:selections [(arcane-trickster-spell-selection 1 [1])]}
@@ -7694,7 +7694,6 @@ long rest."})]
                   (paladin-spell 3 :counterspell 9)
                   (paladin-spell 3 :hypnotic-pattern 9)
                   (paladin-spell 4 :otilukes-resilient-sphere 13)
-                  
                   (paladin-spell 4 :stoneskin 13)
                   (paladin-spell 5 :hold-monster 17)
                   (paladin-spell 5 :wall-of-force 17)
