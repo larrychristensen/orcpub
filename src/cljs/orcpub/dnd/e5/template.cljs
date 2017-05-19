@@ -5510,7 +5510,8 @@ long rest."})]
                             :summary "your thoughts can't be read telepathically; when an attempt is made you can provide false thoughts; magical attempts to determine your truthfulness always result in true"}]}
                  {:name "Swashbuckler"
                   :source "Sword Coast Adventurer's Guide"
-                  :levels {3 {:modifiers [(mod5e/dependent-trait
+                  :levels {3 {:modifiers [(mod/cum-sum-mod ?initiative (max 0 (?ability-bonuses :cha)))
+                                          (mod5e/dependent-trait
                                            {:name "Rakish Audacity"
                                             :level 3
                                             :page 136
