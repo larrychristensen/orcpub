@@ -1288,12 +1288,14 @@
                     traits)
                    kw)
                   (if (and (not plugin?)
-                           (= i 1)) [(mod/cum-sum-mod
-                                      ?hit-point-level-increases
-                                      hit-die
-                                      nil
-                                      nil
-                                      [(first-class? kw ?classes)])])
+                           (= i 1)
+                           ())
+                    [(mod/cum-sum-mod
+                      ?hit-point-level-increases
+                      hit-die
+                      nil
+                      nil
+                      [(= kw (first ?classes))])])
                   (if (not plugin?)
                     [(mod5e/level kw name i hit-die)]))})))
 
@@ -8866,6 +8868,7 @@ long rest."})]
                                                    ?spell-slot-factors)) 1)
                   (if ?pact-magic?
                     (warlock-spell-slot-schedule (?class-level :warlock))))
+    ?classes []
     ?reactions []
     ?actions []
     ?bonus-actions []
