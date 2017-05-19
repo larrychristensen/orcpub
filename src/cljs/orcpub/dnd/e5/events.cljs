@@ -5,6 +5,7 @@
             [orcpub.dice :as dice]
             [orcpub.dnd.e5.template :as t5e]
             [orcpub.dnd.e5.character :as char5e]
+            [orcpub.dnd.e5.character.equipment :as char-equip5e]
             [orcpub.dnd.e5.db :refer [default-value
                                       character->local-store
                                       user->local-store
@@ -211,7 +212,7 @@
       (conj
        items
        {::entity/key item-key
-        ::entity/value {:quantity 1 :equipped? true}})))))
+        ::entity/value {::char-equip5e/quantity 1 ::char-equip5e/equipped? true}})))))
 
 (reg-event-db
  :add-inventory-item
@@ -221,7 +222,7 @@
 (defn toggle-inventory-item-equipped [character [_ selection-key item-index]]
   (update-in
    character
-   [::entity/options selection-key item-index ::entity/value :equipped?]
+   [::entity/options selection-key item-index ::entity/value ::char-equip5e/equipped?]
    not))
 
 (reg-event-db
@@ -232,7 +233,7 @@
 (defn toggle-custom-inventory-item-equipped [character [_ custom-equipment-key item-index]]
   (update-in
    character
-   [::entity/values custom-equipment-key item-index :equipped?]
+   [::entity/values custom-equipment-key item-index ::char-equip5e/equipped?]
    not))
 
 (reg-event-db
@@ -246,7 +247,7 @@
    [::entity/options selection-key item-index ::entity/value]
    (fn [item-cfg]
      ;; the select keys here is to keep :equipped while wiping out the starting-equipment indicators
-     (assoc (select-keys item-cfg [:equipped?]) :quantity quantity))))
+     (assoc (select-keys item-cfg [::char-equip5e/equipped?]) ::char-equip5e/quantity quantity))))
 
 (reg-event-db
  :change-inventory-item-quantity
@@ -260,8 +261,8 @@
    (fn [item-cfg]
      ;; the select keys here is to keep :equipped and :name while wiping out the starting-equipment indicators
      (assoc
-      (select-keys item-cfg [:name :equipped?])
-      :quantity
+      (select-keys item-cfg [::char-equip5e/name ::char-equip5e/equipped?])
+      ::char-equip5e/quantity
       quantity))))
 
 (reg-event-db

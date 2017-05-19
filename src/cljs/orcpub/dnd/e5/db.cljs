@@ -6,7 +6,8 @@
             [orcpub.entity :as entity]
             [cljs.spec :as spec]
             [cljs.reader :as reader]
-            [bidi.bidi :as bidi]))
+            [bidi.bidi :as bidi]
+            [cljs-http.client :as http]))
 
 (def local-storage-character-key "char-meta")
 (def local-storage-user-key "user")
@@ -15,7 +16,6 @@
 
 (defn parse-route []
   (let [{:keys [handler] :as parsed} (bidi/match-route route-map/routes js/window.location.pathname)]
-    (prn "PATH" js/window.location.pathname parsed handler)
     (if handler
       handler
       default-route)))
@@ -44,7 +44,7 @@
     (try (reader/read-string stored-str)
          (catch js/Object e (js/console.warn "UNREADABLE ITEM FOUND" local-storage-key stored-str)))))
 
-(defn reg-local-store-cofx [key local-storage-key item-spec]
+(defn reg-local-store-cofx [key local-storage-key item-spec & [item-fn]]
   (re-frame/reg-cofx
    key
    (fn [cofx _]
@@ -52,13 +52,17 @@
             key
             (if-let [stored-item (get-local-storage-item local-storage-key)]
               (if (spec/valid? item-spec stored-item)
-                stored-item
+                (if item-fn (item-fn stored-item) stored-item)
                 (js/console.warn "INVALID ITEM FOUND, IGNORING" key (spec/explain-data item-spec stored-item))))))))
 
 (reg-local-store-cofx
  :local-store-character
  local-storage-character-key
- ::entity/raw-entity)
+ ::entity/raw-entity
+ (fn [char]
+   (if (spec/valid? ::char5e/unnamespaced-character char)
+     (do (prn "UNNAMESPACED!") (char5e/add-namespaces char))
+     (do (prn "NAMESPSEED") char))))
 
 (spec/def ::username string?)
 (spec/def ::email string?)

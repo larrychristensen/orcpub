@@ -92,9 +92,11 @@
 (defn add-namespaces-to-keys [ns-str item]
   (into {}
         (map
-         (fn [[k v]]
-           [(keyword ns-str (name k))
-            v])
+         (fn [x]
+           (prn "X" x)
+           (let [[k v] x]
+             [(keyword ns-str (name k))
+              v]))
          item)))
 
 (spec/fdef add-namespaces-to-keys

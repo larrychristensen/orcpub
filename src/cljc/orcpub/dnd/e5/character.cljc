@@ -35,10 +35,49 @@
 (spec/def ::custom-treasure ::equip/equipment-items)
 
 (spec/def ::values (spec/and (spec/map-of qualified-keyword? any?)
-                              (spec/keys :opt [::custom-equipment
-                                               ::custom-treasure])))
+                             (spec/keys :opt [::custom-equipment
+                                              ::custom-treasure])))
 
 (spec/def ::raw-character ::entity/raw-entity)
+
+(defn has-simple-keywords? [values]
+  (let [has? (some
+              (fn [[k v]] (simple-keyword? k))
+              values)]
+    has?))
+
+(defn equipment-has-simple-keywords [equipment]
+  (some
+   (fn [e] (-> e ::entity/value has-simple-keywords?))
+   (let [[m e] equipment]
+     (if (= :multiple m)
+       e
+       equipment))))
+
+(spec/def ::unnamespaced-values
+  #(has-simple-keywords? (::entity/values %)))
+
+(def equipment-keys [:equipment
+                     :weapons
+                     :armor
+                     :treasure
+                     :other-magic-items
+                     :magic-weapons
+                     :magic-armor])
+
+(spec/def ::unnamespaced-equipment
+  (fn [c]
+    (some
+     #(equipment-has-simple-keywords (-> c ::entity/options %))
+     equipment-keys)))
+
+(spec/def ::unnamespaced-keywords
+  (spec/or :values ::unnamespaced-values
+           :equipment ::unnamespaced-equipment))
+
+(spec/def ::unnamespaced-character
+  (spec/and ::raw-character
+            ::unnamespaced-keywords))
 
 (spec/def ::strict-character ::se/entity)
 
@@ -57,7 +96,7 @@
     (if (get-in raw-character path)
       (update-in raw-character
                  path
-                 #(map
+                 #(mapv
                    add-equipment-namespace-to-option
                    %))
       raw-character)))
@@ -65,7 +104,7 @@
 (defn add-custom-equipment-namespaces [raw-character]
   (if (get-in raw-character [::entity/values :custom-equipment])
     (update-in raw-character [::entity/values :custom-equipment]
-               #(map (partial common/add-namespaces-to-keys
+               #(mapv (partial common/add-namespaces-to-keys
                               "orcpub.dnd.e5.character.equipment")
                      %))
     raw-character))
@@ -74,7 +113,7 @@
   (-> (reduce
        add-equipment-namespace
        raw-character
-       [:equipment :weapons :armor :treasure :magic-items :magic-weapons :magic-armor])
+       equipment-keys)
       add-custom-equipment-namespaces))
 
 (defn prn-n-return [v message]
@@ -113,12 +152,12 @@
       add-namespaces
       entity/to-strict))
 
-
 (spec/fdef to-strict
            :args ::raw-character
            :ret ::strict-character)
 
-(stest/unstrument `to-strict)
+(defn from-strict [raw-character]
+  (entity/from-strict raw-character))
 
 (defn standard-ability-roll []
   (dice/dice-roll {:num 4 :sides 6 :drop-num 1}))

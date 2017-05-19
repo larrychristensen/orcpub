@@ -71,17 +71,18 @@
 
 (defn user-header-view []
   (let [username @(subscribe [:username])]
-    (if username
-      [:div.white.f-w-b.t-a-r
-       [:span.m-r-5 username]
-       #_[:i.fa.fa-caret-down]
-       [:span.orange.underline.pointer
-        {:on-click (fn [] (dispatch [:logout]))}
-        "LOG OUT"]]
-      [:div.pointer.flex.flex-column.align-items-end
-       [:span.orange.underline.f-w-b.m-l-5
-        {:on-click #(dispatch [:route routes/login-page-route])}
-        [:span "LOGIN"]]])))
+    [:div.flex.align-items-c
+     [svg-icon "orc-head" 40 40]
+     (if username
+       [:span.white.f-w-b.t-a-r
+        [:span.m-r-5 username]
+        [:span.orange.underline.pointer
+         {:on-click (fn [] (dispatch [:logout]))}
+         "LOG OUT"]]
+       [:span.pointer.flex.flex-column.align-items-end
+        [:span.orange.underline.f-w-b.m-l-5
+         {:on-click #(dispatch [:route routes/login-page-route])}
+         [:span "LOGIN"]]])]))
 
 (def header-tab-style
   {:width "85px"})
@@ -110,7 +111,7 @@
        [:div.white.f-w-b.f-s-14.t-a-c.p-10.header-tab.m-5.disabled
         {:style header-tab-style}
         [:div.opacity-2
-         (svg-icon "orc-head" 48 48)
+         (svg-icon "hydra" 48 48)
          [:div "MONSTERS"]]]]]]]
    #_[:div.container.header-links
     [:div.content
@@ -451,8 +452,8 @@
         [:button.form-button.h-40.m-l-5.m-t-5.m-b-5
          {:on-click on-click}
          [:span
-          [:i.fa.fa-undo.f-s-18]
-          [:i.fa.fa-undo.f-s-18]]
+          [:i.fa.f-s-18
+           (if icon {:class-name (str "fa-" icon)})]]
          [:span.m-l-5.header-button-text title]])
       button-cfgs)]]])
 
