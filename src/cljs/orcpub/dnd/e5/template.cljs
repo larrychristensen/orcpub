@@ -7694,6 +7694,7 @@ long rest."})]
                   (paladin-spell 3 :counterspell 9)
                   (paladin-spell 3 :hypnotic-pattern 9)
                   (paladin-spell 4 :otilukes-resilient-sphere 13)
+                  
                   (paladin-spell 4 :stoneskin 13)
                   (paladin-spell 5 :hold-monster 17)
                   (paladin-spell 5 :wall-of-force 17)
