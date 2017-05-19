@@ -41,12 +41,13 @@
 (spec/def ::raw-character ::entity/raw-entity)
 
 (defn has-simple-keywords? [values]
+  (prn "VALUES" values)
   (let [has? (some
               (fn [[k v]] (simple-keyword? k))
               values)]
     has?))
 
-(defn equipment-has-simple-keywords [equipment]
+(defn equipment-has-simple-keywords? [equipment]
   (some
    (fn [e] (-> e ::entity/value has-simple-keywords?))
    (let [[m e] equipment]
@@ -68,12 +69,20 @@
 (spec/def ::unnamespaced-equipment
   (fn [c]
     (some
-     #(equipment-has-simple-keywords (-> c ::entity/options %))
+     #(equipment-has-simple-keywords? (-> c ::entity/options %))
      equipment-keys)))
+
+(spec/def ::unnamespaced-abilities
+  (fn [c] (prn "UN" c)
+    (let [abilities-selection (-> c ::entity/options :ability-scores)
+          abilities (if (vector? abilities-selection) (second abilities-selection) abilities-selection)]
+      (prn "ABILITIES" abilities)
+      (has-simple-keywords? (::entity/value abilities)))))
 
 (spec/def ::unnamespaced-keywords
   (spec/or :values ::unnamespaced-values
-           :equipment ::unnamespaced-equipment))
+           :equipment ::unnamespaced-equipment
+           :abilities ::unnamespaced-abilities))
 
 (spec/def ::unnamespaced-character
   (spec/and ::raw-character
@@ -168,7 +177,7 @@
  :ret ::character-ability
  :fn (spec/and (partial <= 3) (partial >= 18)))
 
-(def ability-keys [:str :dex :con :int :wis :cha])
+(def ability-keys [::str ::dex ::con ::int ::wis ::cha])
 
 (defn standard-ability-rolls []
   (zipmap

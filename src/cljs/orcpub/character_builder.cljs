@@ -1051,18 +1051,6 @@
    (fn []
      (dispatch [:swap-ability-values i other-i k v]))))
 
-(def ability-icons
-  {:str "strong"
-   :con "caduceus"
-   :dex "body-balance"
-   :int "read"
-   :wis "meditation"
-   :cha "aura"})
-
-(defn ability-icon [k size]
-  [:img {:class-name (str "h-" size " w-" size)
-         :src (str "image/" (ability-icons k) ".svg")}])
-
 (defn ability-subtitle [title]
   [:div.t-a-c.f-s-10.opacity-5 title])
 
@@ -1201,7 +1189,7 @@
      (fn [i k]
        ^{:key k}
        [:div.m-t-10.t-a-c
-        (ability-icon k 24)
+        (t5e/ability-icon k 24)
         [:div.uppercase (name k)]
         (ability-subtitle "base")])
      ability-keys))])
