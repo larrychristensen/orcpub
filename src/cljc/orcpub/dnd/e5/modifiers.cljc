@@ -17,10 +17,7 @@
                                  :option-name option-name}))
 
 (defn cls [cls-key]
-  (mods/modifier ?classes
-                 (if (not ((set ?classes) cls-key))
-                   (conj (or ?classes []) cls-key)
-                   ?classes)))
+  (mods/vec-mod ?classes cls-key))
 
 (defn subclass [cls-key subclass-key]
   (mods/modifier ?levels (assoc-in ?levels [cls-key :subclass] subclass-key)))
