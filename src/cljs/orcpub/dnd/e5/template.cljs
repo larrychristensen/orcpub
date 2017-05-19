@@ -5515,7 +5515,7 @@ long rest."})]
                                             :level 3
                                             :page 136
                                             :source :scag
-                                            :summary (str "can add CON mod (" (common/bonus-str (?ability-bonuses :cha)) ") to initiative; don't need advantage for Sneak Attack")})]}
+                                            :summary (str "can add CHA mod (" (common/bonus-str (?ability-bonuses :cha)) ") to initiative; don't need advantage for Sneak Attack")})]}
                            9 {:modifiers [(mod5e/action
                                            {:name "Panache"
                                             :level 3
