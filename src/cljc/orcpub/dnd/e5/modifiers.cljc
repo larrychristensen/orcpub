@@ -17,10 +17,9 @@
                                  :option-name option-name}))
 
 (defn cls [cls-key]
-  (mods/modifier ?classes
-                 (if (not ((set ?classes) cls-key))
-                   (conj (or ?classes []) cls-key)
-                   ?classes)))
+  (mods/modifier ?classes (if ((set ?classes) cls-key)
+                            ?classes
+                            (conj ?classes cls-key))))
 
 (defn subclass [cls-key subclass-key]
   (mods/modifier ?levels (assoc-in ?levels [cls-key :subclass] subclass-key)))
@@ -215,6 +214,12 @@
 
 (defn spell-slot-factor [class-key factor]
   (mods/map-mod ?spell-slot-factors class-key factor))
+
+(defn spell-save-dc-bonus [bonus]
+  (mods/cum-sum-mod ?spell-save-dc-bonus bonus))
+
+(defn spell-attack-modifier-bonus [bonus]
+  (mods/cum-sum-mod ?spell-attack-modifier-bonus bonus))
 
 (defn trait-cfg [{:keys [name description class-key level summary page conditions source] :as cfg}]
   (let [class-key? (not (nil? class-key))]

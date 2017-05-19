@@ -1737,7 +1737,15 @@ While you wear the robe, you can use an action to enter the Astral Plane along w
 
     :rarity :legendary
 
-    :attunement [:sorcerer, :warlock, :wizard]
+      :attunement [:sorcerer, :warlock, :wizard]
+      :modifiers [(mod5e/spell-save-dc-bonus 2)
+                  (mod5e/spell-attack-modifier-bonus 2)
+                  (mod5e/saving-throw-advantage ["Spells and other magical effects"])
+                  (mod5e/ac-bonus-fn
+                   (fn [armor shield]
+                     (if (nil? armor)
+                       5
+                       0)))]
     :description "This elegant garment is made from exquisite cloth of white, gray, or black and adorned with silvery runes. The robe’s color corresponds to the alignment for which the item was created. A white robe was made for good, gray for neutral, and black for evil. You can’t attune to a robe of the archmagi that doesn’t correspond to your alignment.
 You gain these benefits while wearing the robe:
 • If you aren’t wearing armor, your base Armor Class is 15 + your Dexterity modifier.
