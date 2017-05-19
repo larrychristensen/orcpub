@@ -17,7 +17,7 @@
                                  :option-name option-name}))
 
 (defn cls [cls-key]
-  (mods/vec-mod ?classes (if ((set ?classes) cls-key)
+  (mods/modifier ?classes (if ((set ?classes) cls-key)
                             ?classes
                             (conj ?classes cls-key))))
 
