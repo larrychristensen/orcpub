@@ -170,11 +170,6 @@
  (fn [db _]
    (:expanded-characters db)))
 
-(reg-sub
- :dnd-5e-characters
- (fn [db _]
-   (get-in db [:dnd :e5 :characters])))
-
 (reg-sub-raw
   :dnd-5e-characters
   (fn [app-db [_]]

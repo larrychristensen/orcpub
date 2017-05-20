@@ -9,7 +9,8 @@
             [orcpub.dnd.e5.db :refer [default-value
                                       character->local-store
                                       user->local-store
-                                      tab-path]]
+                                      tab-path
+                                      default-character]]
             [re-frame.core :refer [reg-event-db reg-event-fx reg-fx inject-cofx path trim-v
                                    after debug dispatch]]
             [cljs.spec :as spec]
@@ -716,3 +717,15 @@
  :set-dnd-5e-characters
  (fn [db [_ characters]]
    (assoc-in db [:dnd :e5 :characters] characters)))
+
+(reg-event-fx
+ :edit-character
+ (fn [{:keys [db]} [_ character]]
+   {:db (assoc db :character character)
+    :dispatch [:route routes/dnd-e5-char-builder-route]}))
+
+(reg-event-fx
+ :new-character
+ (fn [{:keys [db]} [_]]
+   {:db (assoc db :character default-character)
+    :dispatch [:route routes/dnd-e5-char-builder-route]}))

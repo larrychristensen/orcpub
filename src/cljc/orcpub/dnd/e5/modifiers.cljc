@@ -5,6 +5,7 @@
             [orcpub.modifiers :as mods]
             [orcpub.entity-spec :as es]
             [orcpub.dnd.e5.character :as char5e]
+            [orcpub.dnd.e5.character.equipment :as char-equip]
             [orcpub.dnd.e5.skills :as skill5e])
   #?(:cljs (:require-macros [orcpub.entity-spec :as es]
                             [orcpub.modifiers :as mods])))
@@ -346,7 +347,7 @@
   (mods/modifier ?size size))
 
 (defn equipment-cfg [cfg]
-  (if (int? cfg) {:quantity cfg :equipped? true} cfg))
+  (if (int? cfg) {::char-equip/quantity cfg ::char-equip/equipped? true} cfg))
 
 (defn weapon [weapon-kw cfg]
   (mods/map-mod ?weapons weapon-kw (equipment-cfg cfg)))
@@ -362,7 +363,7 @@
 
 (defn deferred-magic-item-fn [equipment-mod-fn {:keys [magical-ac-bonus modifiers]} & [include-magic-bonus?]]
   (fn [cfg] (let [equipment-mod (equipment-mod-fn cfg)]
-              (if (:equipped? cfg)
+              (if (::char-equip/equipped? cfg)
                 (let [mods (concat [equipment-mod]
                                    (if (and include-magic-bonus? magical-ac-bonus)
                                      [(mods/cum-sum-mod ?magical-ac-bonus magical-ac-bonus)])

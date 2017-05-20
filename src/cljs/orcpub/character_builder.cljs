@@ -41,7 +41,7 @@
             [goog.labs.userAgent.device :as g-device]
             [goog.labs.userAgent.platform :as g-platform]))
 
-(def print-disabled? true)
+(def print-disabled? false)
 (def print-enabled? (and (not print-disabled?)
                          (s/starts-with? js/window.location.href "http://localhost")))
 
@@ -1606,7 +1606,7 @@
     [new-options-column]]
    [description-fields]
    [:div.builder-column.details-column
-    [views5e/character-display @(subscribe [:built-char]) true]]])
+    [views5e/character-display @(subscribe [:built-character]) true]]])
 
 (defn builder-tabs [active-tabs]
   [:div.hidden-lg.w-100-p
