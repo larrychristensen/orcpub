@@ -173,9 +173,28 @@
 (reg-sub-raw
   :dnd-5e-characters
   (fn [app-db [_]]
-    (go (let [response (<! (http/get (routes/path-for routes/dnd-e5-char-list-route)
+    (go (dispatch [:set-loading true])
+        (let [response (<! (http/get (routes/path-for routes/dnd-e5-char-list-route)
                                      {:accept :transit
                                       :headers {"Authorization" (str "Token " (-> @app-db :user-data :token))}}))]
-          (dispatch [:set-dnd-5e-characters (-> response :body)])))
+          (dispatch [:set-loading false])
+          (case (:status response)
+            200 (dispatch [:set-dnd-5e-characters (-> response :body)])
+            401 (dispatch [:route routes/login-page-route]))))
     (ra/make-reaction
      (fn [] (get-in @app-db [:dnd :e5 :characters] [])))))
+
+(reg-sub
+ :message-shown?
+ (fn [db _]
+   (:message-shown? db)))
+
+(reg-sub
+ :message
+ (fn [db _]
+   (:message db)))
+
+(reg-sub
+ :message-type
+ (fn [db [_ type]]
+   (:message-type type)))

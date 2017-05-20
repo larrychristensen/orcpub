@@ -34,12 +34,14 @@
 
             [clojure.spec :as spec]
             [clojure.spec.test :as stest]
+            [cljs.core.async :refer [<!]]
 
             [reagent.core :as r]
             [re-frame.core :refer [subscribe dispatch dispatch-sync]]
             [goog.labs.userAgent.browser :as g-browser]
             [goog.labs.userAgent.device :as g-device]
-            [goog.labs.userAgent.platform :as g-platform]))
+            [goog.labs.userAgent.platform :as g-platform])
+  (:require-macros [cljs.core.async.macros :refer [go]]))
 
 (def print-disabled? false)
 (def print-enabled? (and (not print-disabled?)
@@ -1800,10 +1802,11 @@
        :icon "random"
        :on-click (fn [_]
                    (dispatch [:set-loading true])
-                   (let [new-char (random-character character
-                                                    built-template
-                                                    locked-components)]
-                     (dispatch [:set-character new-char])))}
+                   (go (let [new-char
+                             (random-character character
+                                               built-template
+                                               locked-components)]
+                      (dispatch [:set-character new-char]))))}
       {:title "Reset"
        :icon "undo"
        :on-click (fn [_] (dispatch [:reset-character]))}

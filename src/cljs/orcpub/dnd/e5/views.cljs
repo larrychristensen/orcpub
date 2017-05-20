@@ -455,6 +455,13 @@
    :z-index 100
    :background-color "rgba(0,0,0,0.6)"})
 
+(def message-style
+  {:padding "10px"
+   :border-radius "5px"
+   :background-color "#70a800"
+   :display :flex
+   :justify-content :space-between})
+
 (defn header [title button-cfgs]
   [:div.w-100-p
    [:div.flex.align-items-c.justify-cont-s-b.flex-wrap
@@ -469,7 +476,18 @@
           [:i.fa.f-s-18
            (if icon {:class-name (str "fa-" icon)})]]
          [:span.m-l-5.header-button-text title]])
-      button-cfgs)]]])
+      button-cfgs)]]
+   (if @(subscribe [:message-shown?])
+     [:div.p-b-10.p-r-10.p-l-10
+      [:div.pointer.f-w-b
+       {:on-click #(dispatch [:hide-message])
+        :class-name (case @(subscribe [:message-type])
+                      :error "bg-red"
+                      "bg-green")}
+       [:div
+        {:style message-style}
+        [:span @(subscribe [:message])]
+        [:i.fa.fa-times]]]])])
 
 (defn content-page [title button-cfgs content]
   [:div.app
@@ -511,8 +529,10 @@
 (def list-style
   {:border-top "1px solid rgba(255,255,255,0.5)"})
 
-(defn character-summary [built-char]
+(defn character-summary [built-char & [include-name?]]
   [:div.flex
+   (let [nm (char/character-name built-char)]
+      (if (and nm include-name?) [:span.m-r-20 nm]))
    [:span
     [:span (char/race built-char)]
     [:div.f-s-12.m-t-5.opacity-6 (char/subrace built-char)]]
@@ -949,10 +969,9 @@
                 (if image-url
                   [:img.m-r-20.m-t-10.m-b-10 {:src image-url
                                               :style thumbnail-style}])
-                [:span (char/character-name built-character)]
                 [:div.f-s-24.f-w-600
                  {:style summary-style}
-                 [character-summary built-character]]]
+                 [character-summary built-character true]]]
                (if (get expanded-characters id)
                  [:div
                   {:style character-display-style}

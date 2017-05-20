@@ -69,6 +69,12 @@
  reset-character)
 
 (reg-event-fx
+ :character-save-success
+ (fn [_ [_ response]]
+   (prn "RESPONSE" response)
+   {:dispatch [:show-message "Your character has been saved."]}))
+
+(reg-event-fx
  :save-character
  (fn [{:keys [db]} [_]]
    (let [strict (char5e/to-strict (:character db))]
@@ -451,6 +457,7 @@
 
 (reg-event-db
  :set-user-data
+ [user->local-store-interceptor]
  (fn [db [_ user-data]]
    (assoc db :user-data user-data)))
 
@@ -529,7 +536,9 @@
      (go (let [response (<! (http/request final-cfg))]
            (if (<= 200 (:status response) 299)
              (dispatch (conj on-success response))
-             (if on-failure (dispatch (conj on-failure response)))))))))
+             (if on-failure
+               (dispatch (conj on-failure response))
+               (dispatch [:show-error-message "There was an error, please try again later. If the problem perists please contact redorc@orcpub.com."]))))))))
 
 (reg-fx
  :path
@@ -729,3 +738,24 @@
  (fn [{:keys [db]} [_]]
    {:db (assoc db :character default-character)
     :dispatch [:route routes/dnd-e5-char-builder-route]}))
+
+(reg-event-db
+ :hide-message
+ (fn [db [_]]
+   (assoc db :message-shown? false)))
+
+(reg-event-db
+ :show-message
+ (fn [db [_ message]]
+   (assoc db
+          :message-shown? true
+          :message message
+          :message-type :success)))
+
+(reg-event-db
+ :show-error-message
+ (fn [db [_ message]]
+   (assoc db
+          :message-shown? true
+          :message message
+          :message-type :error)))
