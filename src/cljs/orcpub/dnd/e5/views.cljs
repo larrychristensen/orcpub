@@ -712,6 +712,7 @@
     (fn [[equipment-kw {item-qty ::char-equip/quantity
                         equipped? ::char-equip/equipped?
                         :as num}]]
+      (prn "QTY" item-qty equipped? num)
       (str (disp/equipment-name equipment-map equipment-kw)
            " (" (or item-qty num) ")"))
     equipment)])
@@ -924,17 +925,21 @@
         expanded-characters @(subscribe [:expanded-characters])]
     [content-page
      "Characters"
-     nil
+     [{:title "New"
+       :icon "plus"
+       :on-click #(dispatch [:new-character])}]
      [:div.p-5.w-100-p
       [:div
        {:style list-style}
        (doall
         (map
          (fn [{:keys [:db/id] :as strict-character}]
+           (pprint strict-character)
            ^{:key id}
            [:div.white
             {:style row-style}
             (let [character (char/from-strict strict-character)
+                  _ (pprint character)
                   built-template (subs/built-template (subs/selected-plugin-options character))
                   built-character (subs/built-character character built-template)
                   image-url (char/image-url built-character)]
@@ -951,6 +956,9 @@
                (if (get expanded-characters id)
                  [:div
                   {:style character-display-style}
+                  [:div.flex.justify-cont-end
+                   [:button.form-button
+                    {:on-click #(dispatch [:edit-character character])}
+                    "EDIT"]]
                   [character-display built-character false]])])])
          characters))]]]))
-

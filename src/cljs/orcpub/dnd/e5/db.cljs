@@ -20,9 +20,11 @@
       handler
       default-route)))
 
+(def default-character (char5e/set-class t5e/character :barbarian 0 t5e/barbarian-option))
+
 (def default-value
   {:builder {:character {:tab #{:build :options}}}
-   :character (char5e/set-class t5e/character :barbarian 0 t5e/barbarian-option)
+   :character default-character
    :template t5e/template
    :plugins t5e/plugins
    :locked-components #{}

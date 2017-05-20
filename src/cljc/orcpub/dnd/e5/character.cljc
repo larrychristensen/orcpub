@@ -447,10 +447,10 @@
           (comp current-names :name)
           (map
            (fn [[nm num]]
-             {:name nm
-              :quantity num
-              :equipped? true
-              :background-starting-equipment? true})
+             {::equip/name nm
+              ::equip/quantity num
+              ::equip/equipped? true
+              ::equip/background-starting-equipment? true})
            custom-equipment))))))))
 
 
