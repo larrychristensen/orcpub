@@ -190,11 +190,21 @@
    (:message-shown? db)))
 
 (reg-sub
+ :login-message-shown?
+ (fn [db _]
+   (:login-message-shown? db)))
+
+(reg-sub
  :message
  (fn [db _]
    (:message db)))
 
 (reg-sub
+ :login-message
+ (fn [db _]
+   (:login-message db)))
+
+(reg-sub
  :message-type
- (fn [db [_ type]]
-   (:message-type type)))
+ (fn [db _]
+   (:message-type db)))

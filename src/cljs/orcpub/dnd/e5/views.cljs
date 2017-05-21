@@ -106,7 +106,7 @@
    [:div.app-header-bar.container
     [:div.content
      [:div.flex.justify-cont-s-b.align-items-c.w-100-p.p-l-20.p-r-20
-      [:img.orcpub-logo.h-32.w-120 {:src "/image/orcpub-logo.svg"}]
+      [:img.orcpub-logo.h-32.w-120.pointer {:src "/image/orcpub-logo.svg"}]
       [user-header-view]]]]
    [:div.container
     [:div.content
@@ -399,6 +399,25 @@
         [:a.m-l-5 {:href "" :target :_blank
                    :style {:color text-color}} "Privacy Policy"]]]])))
 
+(def message-style
+  {:padding "10px"
+   :border-radius "5px"
+   :display :flex
+   :justify-content :space-between})
+
+(defn message [message-type message-text close-event]
+  (prn "MESSAGE TYPE" message-type)
+  [:div.pointer.f-w-b
+   {:on-click #(dispatch close-event)}
+   [:div.white
+    {:style message-style
+     :class-name (case message-type
+                   :error "bg-red"
+                   "bg-green")}
+    [:span message-text]
+    [:i.fa.fa-times]]])
+
+
 (defn login-page []
   (let [params (r/atom {})]
     (fn []
@@ -423,6 +442,11 @@
                       :value (:password @params)
                       :type :password
                       :on-change #(swap! params assoc :password (event-value %))}]
+         (if @(subscribe [:login-message-shown?])
+           [:div.m-t-5.p-r-5.p-l-5 [message
+             :error
+             @(subscribe [:login-message])
+             [:hide-login-message]]])
          [:div {:style {:margin-top "40px"}}
           #_[:span "Already have an account?"]
           #_[:span.hover-underline.f-w-b.m-l-10.pointer "LOGIN"]
@@ -455,13 +479,6 @@
    :z-index 100
    :background-color "rgba(0,0,0,0.6)"})
 
-(def message-style
-  {:padding "10px"
-   :border-radius "5px"
-   :background-color "#70a800"
-   :display :flex
-   :justify-content :space-between})
-
 (defn header [title button-cfgs]
   [:div.w-100-p
    [:div.flex.align-items-c.justify-cont-s-b.flex-wrap
@@ -479,15 +496,10 @@
       button-cfgs)]]
    (if @(subscribe [:message-shown?])
      [:div.p-b-10.p-r-10.p-l-10
-      [:div.pointer.f-w-b
-       {:on-click #(dispatch [:hide-message])
-        :class-name (case @(subscribe [:message-type])
-                      :error "bg-red"
-                      "bg-green")}
-       [:div
-        {:style message-style}
-        [:span @(subscribe [:message])]
-        [:i.fa.fa-times]]]])])
+      [message
+       @(subscribe [:message-type])
+       @(subscribe [:message])
+       [:hide-message]]])])
 
 (defn content-page [title button-cfgs content]
   [:div.app
@@ -520,8 +532,12 @@
        [:div.content.w-100-p content]]
       [:div.white.flex.justify-cont-c
        [:div.content.f-w-n.f-s-12
-        [:div.p-10
-         [:div.m-b-5 "Icons made by Lorc, Caduceus, and Delapouite. Available on " [:a.orange {:href "http://game-icons.net"} "http://game-icons.net"]]]]]])])
+        [:div.flex.justify-cont-s-b.align-items-c.w-100-p
+         [:div.p-10
+          [:div.m-b-5 "Icons made by Lorc, Caduceus, and Delapouite. Available on " [:a.orange {:href "http://game-icons.net"} "http://game-icons.net"]]]
+         [:div
+          [:a {:href "/privacy-policy" :target :_blank} "Privacy Policy"]
+          [:a.m-l-5 {:href "/terms-of-use" :target :_blank} "Terms of Use"]]]]]])])
 
 (def row-style
   {:border-bottom "1px solid rgba(255,255,255,0.5)"})
@@ -732,7 +748,6 @@
     (fn [[equipment-kw {item-qty ::char-equip/quantity
                         equipped? ::char-equip/equipped?
                         :as num}]]
-      (prn "QTY" item-qty equipped? num)
       (str (disp/equipment-name equipment-map equipment-kw)
            " (" (or item-qty num) ")"))
     equipment)])
@@ -954,30 +969,39 @@
        (doall
         (map
          (fn [{:keys [:db/id] :as strict-character}]
-           (pprint strict-character)
            ^{:key id}
            [:div.white
             {:style row-style}
             (let [character (char/from-strict strict-character)
-                  _ (pprint character)
                   built-template (subs/built-template (subs/selected-plugin-options character))
                   built-character (subs/built-character character built-template)
-                  image-url (char/image-url built-character)]
-              [:div
-               [:div.m-l-10.flex.align-items-c.pointer
-                {:on-click #(dispatch [:toggle-character-expanded id])}
-                (if image-url
-                  [:img.m-r-20.m-t-10.m-b-10 {:src image-url
-                                              :style thumbnail-style}])
-                [:div.f-s-24.f-w-600
-                 {:style summary-style}
-                 [character-summary built-character true]]]
-               (if (get expanded-characters id)
+                  image-url (char/image-url built-character)
+                  expanded? (get expanded-characters id)]
+              [:div.pointer
+               {:on-click #(dispatch [:toggle-character-expanded id])}
+               [:div.flex.justify-cont-s-b.align-items-c
+                [:div.m-l-10.flex.align-items-c
+                 (if image-url
+                   [:img.m-r-20.m-t-10.m-b-10 {:src image-url
+                                               :style thumbnail-style}])
+                 [:div.f-s-24.f-w-600
+                  {:style summary-style}
+                  [character-summary built-character true]]]
+                [:div.orange.pointer.m-r-10
+                 [:span.underline (if expanded?
+                                    "collapse"
+                                    "open")]
+                 [:i.fa.m-l-5
+                  {:class-name (if expanded? "fa-caret-up" "fa-caret-down")}]]]
+               (if expanded?
                  [:div
                   {:style character-display-style}
                   [:div.flex.justify-cont-end
                    [:button.form-button
                     {:on-click #(dispatch [:edit-character character])}
-                    "EDIT"]]
+                    "EDIT"]
+                   [:button.form-button.m-l-5
+                    {:on-click #(dispatch [:delete-character id])}
+                    "DELETE"]]
                   [character-display built-character false]])])])
          characters))]]]))

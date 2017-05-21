@@ -18,7 +18,6 @@
             [clj-time.core :as t :refer [hours from-now ago]]
             [clj-time.coerce :as tc :refer [from-date]]
             [clojure.string :as s]
-            [clojure.pprint :refer [pprint]]
             [clojure.spec :as spec]
             [orcpub.dnd.e5.skills :as skill5e]
             [orcpub.dnd.e5.character :as char5e]
@@ -28,7 +27,8 @@
             [orcpub.errors :as errors]
             [orcpub.email :as email]
             [orcpub.registration :as registration]
-            [orcpub.entity.strict :as se])
+            [orcpub.entity.strict :as se]
+            [hiccup.page :as page])
   (:import (org.apache.pdfbox.pdmodel.interactive.form PDCheckBox PDComboBox PDListBox PDRadioButton PDTextField)
            (org.apache.pdfbox.pdmodel PDDocument PDPageContentStream)
            (org.apache.pdfbox.pdmodel.graphics.image PDImageXObject)
@@ -397,6 +397,11 @@
    (slurp (io/resource "public/index.html"))
    response))
 
+(defn empty-index [req & [response]]
+  (html-response
+   (slurp (io/resource "public/blank.html"))
+   response))
+
 (defn verification-expired [req]
   (index req))
 
@@ -465,9 +470,11 @@
 (defn save-character [{:keys [db transit-params body conn identity] :as request}]
   (if-let [data (spec/explain-data ::se/entity transit-params)]
     (do (prn "DATA" data) {:status 400 :message data})
-    (let [result @(d/transact conn [(assoc transit-params
-                                           :db/id "tempid"
-                                           :orcpub.user/username (:user identity))])]
+    (let [result @(d/transact conn [(if (:db/id transit-params)
+                                      transit-params
+                                      (assoc transit-params
+                                             :db/id "tempid"
+                                             :orcpub.entity.strict/owner (:user identity)))])]
       {:status 200 :body (assoc transit-params :db/id (-> result :tempids (get "tempid")))})))
 
 (defn character-list [{:keys [db transit-params body conn identity] :as request}]
@@ -475,13 +482,35 @@
         ids (d/q '[:find ?e
                    :in $ ?user
                    :where
-                   [?e :orcpub.user/username ?user]
+                   [?e :orcpub.entity.strict/owner ?user]
                    [?e :orcpub.entity.strict/selections]]
                  db
                  username)
         _ (prn "IDS" ids)
         characters (d/pull-many db '[*] (map first ids))]
     {:status 200 :body characters}))
+
+(defn delete-character [{:keys [db conn identity] {:keys [id]} :path-params}]
+  (let [parsed-id (Long/parseLong id)
+        username (:user identity)
+        {:keys [:orcpub.entity.strict/owner]} (d/pull db '[:orcpub.entity.strict/owner] parsed-id)]
+    (prn "OWNER" owner parsed-id (type parsed-id))
+    (if owner
+      (do
+        @(d/transact conn [[:db/retractEntity parsed-id]])
+        {:status 200})
+      {:status 401})))
+
+(def header-style
+  {:style "color:#2c3445"})
+
+(defn privacy-policy-page [req]
+  {:status 200
+   :headers {"Content-Type" "text/html"}
+   :body (orcpub.privacy/privacy-policy)})
+
+(defn terms-of-use-page [req]
+  (empty-index req))
 
 (def routes
   (route/expand-routes
@@ -491,6 +520,8 @@
      [(route-map/path-for route-map/dnd-e5-char-list-route) ^:interceptors [(body-params/body-params) check-auth]
       {:post `save-character
        :get `character-list}]
+     [(route-map/path-for route-map/delete-dnd-e5-char-route :id ":id") ^:interceptors [(body-params/body-params) check-auth]
+      {:delete `delete-character}]
      [(route-map/path-for route-map/dnd-e5-char-list-page-route) ^:interceptors [(body-params/body-params)]
       {:get `character-list-page}]
      [(route-map/path-for route-map/login-route) ^:interceptors [(body-params/body-params)]
@@ -524,6 +555,10 @@
       {:get `registration-page}]
      [(route-map/path-for route-map/login-page-route)
       {:get `login-page}]
+     [(route-map/path-for route-map/privacy-policy-route)
+      {:get `privacy-policy-page}]
+     [(route-map/path-for route-map/terms-of-use-route)
+      {:get `terms-of-use-page}]
      [(route-map/path-for route-map/check-email-route)
       {:get `check-email}]
      [(route-map/path-for route-map/check-username-route)

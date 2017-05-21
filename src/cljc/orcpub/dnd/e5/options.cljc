@@ -16,17 +16,17 @@
   #?(:cljs (:require-macros [orcpub.dnd.e5.modifiers :as modifiers])))
 
 (def abilities
-  [{:key :str
+  [{:key ::character/str
     :name "Strength"}
-   {:key :con
+   {:key ::character/con
     :name "Constitution"}
-   {:key :dex
+   {:key ::character/dex
     :name "Dexterity"}
-   {:key :int
+   {:key ::character/int
     :name "Intelligence"}
-   {:key :wis
+   {:key ::character/wis
     :name "Wisdom"}
-   {:key :cha
+   {:key ::character/cha
     :name "Charisma"}])
 
 (def abilities-map
@@ -121,48 +121,6 @@
 (defn get-raw-abilities [character]
   (get-in character [::entity/options :ability-scores ::entity/value]))
 
-(defn abilities-improvement-component [num-increases different? ability-keys path built-template app-state built-char]
-  (let [abilities (es/entity-val built-char :abilities)
-        abilities-vec (vec abilities)
-        increases-path (entity/get-option-value-path built-template (:character @app-state) path)
-        full-path (concat [:character] increases-path)
-        ability-increases (or (get-in @app-state full-path)
-                              (zipmap character/ability-keys (repeat 0)))
-        num-increased (apply + (vals ability-increases))
-        num-remaining (- num-increases num-increased)
-        allowed-abilities (set ability-keys)]
-    [:div
-     [:div
-      [:div.m-t-5
-       [:span.f-w-n "Increases Remaining: "]
-       [:span.f-w-b num-remaining]
-       (if different? [:div.f-w-n.i.m-t-5 (str num-increases " different abilities")])]]
-     [:div.flex.justify-cont-s-b
-      (doall
-       (map-indexed
-        (fn [i [k v]]
-          (let [ability-disabled? (not (allowed-abilities k))
-                increase-disabled? (or ability-disabled?
-                                       (zero? num-remaining)
-                                       (and different? (pos? (ability-increases k)))
-                                       (>= (abilities k) 20))
-                decrease-disabled? (or ability-disabled?
-                                       (not (pos? (ability-increases k))))]
-            ^{:key k}
-           [:div.m-t-10.t-a-c
-            {:class-name (if ability-disabled? "opacity-5 cursor-disabled")}
-            [:div.uppercase (name k)]
-            [:div.f-s-18.f-w-b v]
-            [:div.f-6-12.f-w-n (ability-bonus-str v)]
-            [:div.f-s-16
-             [:i.fa.fa-minus-circle.orange
-              {:class-name (if decrease-disabled? "opacity-5 cursor-disabled")
-               :on-click (fn [] (if (not decrease-disabled?) (swap! app-state assoc-in full-path (update ability-increases k dec))))}]
-             [:i.fa.fa-plus-circle.orange.m-l-5
-              {:class-name (if increase-disabled? "opacity-5 cursor-disabled")
-               :on-click (fn [] (if (not increase-disabled?) (swap! app-state assoc-in full-path (update ability-increases k inc))))}]]]))
-        abilities-vec))]]))
-
 (defn ability-increase-selection [ability-keys num-increases & [different? modifier-fns]]
   (t/selection-cfg
    {:name "Ability Score Improvement"
@@ -186,7 +144,6 @@
    {:name "Ability Score Improvement"
     :key :ability-score-improvement
     :selections [(ability-increase-selection ability-keys num-increases different?)]
-    ;;:ui-fn (fn [path built-template app-state built-char] (abilities-improvement-component num-increases different? ability-keys path built-template app-state built-char))
     :modifiers [(modifiers/deferred-ability-increases)]}))
 
 (defn min-ability [ability-kw min-value]
@@ -279,7 +236,7 @@
      :modifiers [(modifiers/action
                   {:name "Fist of Unbroken Air"
                    :page 81
-                   :summary (str "spend 2 + X ki, a creature within 30 ft. takes 3d10 + Xd10 damage on failed DC " (?spell-save-dc :wis) " STR save, is pushed up to 20 ft., and is knocked prone. On successful save it just takes half damage.")})]})
+                   :summary (str "spend 2 + X ki, a creature within 30 ft. takes 3d10 + Xd10 damage on failed DC " (?spell-save-dc ::character/wis) " STR save, is pushed up to 20 ft., and is knocked prone. On successful save it just takes half damage.")})]})
    (t/option-cfg
     {:name "Flames of the Phoenix"
      :modifiers [(modifiers/action
@@ -338,7 +295,7 @@
      :modifiers [(modifiers/bonus-action
                   {:name "Water Whip"
                    :page 81
-                   :summary (str "spend 2 + X ki, a creature within 30 ft. takes 3d10 + Xd10 damage on failed DC " (?spell-save-dc :wis) " DEX save, is pulled up to 25 ft. or knocked prone. On successful save it just takes half damage.")})]})
+                   :summary (str "spend 2 + X ki, a creature within 30 ft. takes 3d10 + Xd10 damage on failed DC " (?spell-save-dc ::character/wis) " DEX save, is pulled up to 25 ft. or knocked prone. On successful save it just takes half damage.")})]})
    (t/option-cfg
     {:name "Wave of Rolling Earth"
      :modifiers [(modifiers/action
@@ -522,7 +479,7 @@
                   (map
                    (fn [{:keys [name] :as spell}]
                      (let [key (or (:key spell) (common/name-to-kw name))]
-                       (spell-option :cha "Bard" key true)))
+                       (spell-option ::character/cha "Bard" key true)))
                    spells))
                 filtered-spells-by-level)})))
 
@@ -794,7 +751,7 @@
     [(modifiers/reaction
       {:name "Parry Maneuver"
        :page 74
-       :summary (str "reduce melee attack damage dealt to you by superiority die roll " (common/mod-str (?ability-bonuses :dex)))})])
+       :summary (str "reduce melee attack damage dealt to you by superiority die roll " (common/mod-str (?ability-bonuses ::character/dex)))})])
    (maneuver-option "Precision Attack"
                     "add superiority die to weapon attack roll")
    (mod-maneuver-option
@@ -809,7 +766,7 @@
       {:name "Rally Maneuver"
        :page 74
        :summary (str "give superiority die "
-                     (common/mod-str (?ability-bonuses :cha))
+                     (common/mod-str (?ability-bonuses ::character/cha))
                      " temp HPs to a friendly creature")})])
    (mod-maneuver-option
     "Riposte"
@@ -868,13 +825,13 @@
      :icon "weight-lifting-up"
      :page 165
      :summary "increase STR or DEX by 1; standing up only uses 5 ft movement; climbing doesn't cost extra movement; make running long or high jump after moving only 5 ft."
-     :selections [(ability-increase-selection [:str :dex] 1 false)]})
+     :selections [(ability-increase-selection [::character/str ::character/dex] 1 false)]})
    (feat-option
     {:name "Actor"
      :icon "drama-masks"
      :page 165
      :summary "increase CHA by 1; advantage on Deception and Performance when trying to pass as someone else; mimic the speech of a person you have heard"
-     :modifiers [(modifiers/ability :cha 1)]})
+     :modifiers [(modifiers/ability ::character/cha 1)]})
    (feat-option
     {:name "Charger"
      :icon "charging-bull"
@@ -903,7 +860,7 @@
                   {:name "Defensive Duelist"
                    :page 165
                    :summary defensive-duelist-summary})]
-     :prereqs [(ability-prereq :dex 13)]})
+     :prereqs [(ability-prereq ::character/dex 13)]})
    (feat-option
     {:name "Dual Wielder"
      :icon "rogue"
@@ -922,11 +879,11 @@
      :page 166
      :exclude-trait? true
      :summary "increase CON by 1; when you roll Hit Die to regain HPs, the min points regained is 2X your CON modifier"
-     :modifiers [(modifiers/ability :con 1)
+     :modifiers [(modifiers/ability ::character/con 1)
                  (modifiers/dependent-trait
                   {:name "Durable"
                    :page 166
-                   :summary (str "when you roll Hit Die to regain HPs, the min points regained is " (* 2 (?ability-bonuses :con)))})]})
+                   :summary (str "when you roll Hit Die to regain HPs, the min points regained is " (* 2 (?ability-bonuses ::character/con)))})]})
    (feat-option
     {:name "Elemental Adept"
      :icon "wind-hole"
@@ -943,7 +900,7 @@
                   {:name "Grappler"
                    :page 167
                    :summary "restrain a creature you are grappling"})]
-     :prereqs [(ability-prereq :str 13)]})
+     :prereqs [(ability-prereq ::character/str 13)]})
    (feat-option
     {:name "Great Weapon Master"
      :icon "broadsword"
@@ -968,33 +925,33 @@
      :summary "increase STR by 1; proficiency in heavy armor"
      :page 167
      :modifiers [(modifiers/heavy-armor-proficiency)
-                 (modifiers/ability :str 1)]
+                 (modifiers/ability ::character/str 1)]
      :prereqs [(armor-prereq :medium)]})
    (feat-option
     {:name "Heavy Armor Master"
      :icon "gauntlet"
      :page 167
      :summary "increase STR by 1; when wearing heavy armor, slashing, piercing, and bludgeoning damage from non-magical weapons is 3 less"
-     :modifiers [(modifiers/ability :str 1)]
+     :modifiers [(modifiers/ability ::character/str 1)]
      :prereqs [(armor-prereq :heavy)]})
    (feat-option
     {:name "Inspiring Leader"
      :icon "public-speaker"
      :page 167
      :summary "increase CHA by 1; give 6 friendly creatures within 30 ft. temp HPs equal to you CHA mod + your level"
-     :prereqs [(ability-prereq :cha 13)]})
+     :prereqs [(ability-prereq ::character/cha 13)]})
    (feat-option
     {:name "Keen Mind"
      :icon "brain"
      :page 167
      :summary "increase INT by 1; always know which direction is north; know hours before sunset or sunrise; recall anything heard or seen within a month"
-     :modifiers [(modifiers/ability :int 1)]})
+     :modifiers [(modifiers/ability ::character/int 1)]})
    (feat-option
     {:name "Lightly Armored"
      :icon "scale-mail"
      :page 167
      :summary "increase STR or DEX by 1; proficiency in light armor"
-     :selections [(ability-increase-selection [:str :dex] 1 false)]
+     :selections [(ability-increase-selection [::character/str ::character/dex] 1 false)]
      :modifiers [(modifiers/light-armor-proficiency)]})
    (feat-option
     {:name "Linguist"
@@ -1002,7 +959,7 @@
      :page 167
      :summary "increase INT by 1; learn 3 languages; create written ciphers"
      :selections [(language-selection languages 3)]
-     :modifiers [(modifiers/ability :int 1)]})
+     :modifiers [(modifiers/ability ::character/int 1)]})
    (feat-option
     {:name "Lucky"
      :icon "clover"
@@ -1028,12 +985,12 @@
                    {:name "Spell Class"
                     :order 0
                     :tags #{:spells}
-                    :options [(magic-initiate-option :bard :cha sl/spell-lists)
-                              (magic-initiate-option :cleric :wis sl/spell-lists)
-                              (magic-initiate-option :druid :wis sl/spell-lists)
-                              (magic-initiate-option :sorcerer :cha sl/spell-lists)
-                              (magic-initiate-option :warlock :cha sl/spell-lists)
-                              (magic-initiate-option :wizard :int sl/spell-lists)]})]})
+                    :options [(magic-initiate-option :bard ::character/cha sl/spell-lists)
+                              (magic-initiate-option :cleric ::character/wis sl/spell-lists)
+                              (magic-initiate-option :druid ::character/wis sl/spell-lists)
+                              (magic-initiate-option :sorcerer ::character/cha sl/spell-lists)
+                              (magic-initiate-option :warlock ::character/cha sl/spell-lists)
+                              (magic-initiate-option :wizard ::character/int sl/spell-lists)]})]})
    (feat-option
     {:name "Martial Adept"
      :icon "visored-helm"
@@ -1068,7 +1025,7 @@
      :icon "shoulder-armor"
      :page 168
      :summary "increase STR or DEX by 1; gain proficiency with shields and medium armor"
-     :selections [(ability-increase-selection [:str :dex] 1 false)]
+     :selections [(ability-increase-selection [::character/str ::character/dex] 1 false)]
      :modifiers [(modifiers/medium-armor-proficiency)
                  (modifiers/shield-armor-proficiency)]
      :prereqs [(armor-prereq :light)]})
@@ -1082,7 +1039,7 @@
      :icon "surrounded-eye"
      :page 168
      :summary "increase INT or WIS by 1; read lips; +5 bonus to passive Perception and passive Investigation"
-     :selections [(ability-increase-selection [:int :wis] 1 false)]
+     :selections [(ability-increase-selection [::character/int ::character/wis] 1 false)]
      :modifiers [(modifiers/passive-perception 5)
                  (modifiers/passive-investigation 5)]})
    (feat-option
@@ -1109,15 +1066,15 @@
      :selections [(t/selection-cfg
                    {:name "Ritual Caster: Spell Class"
                     :tags #{:spells}
-                    :options [(ritual-caster-option :bard :cha sl/spell-lists)
-                              (ritual-caster-option :cleric :wis sl/spell-lists)
-                              (ritual-caster-option :druid :wis sl/spell-lists)
-                              (ritual-caster-option :sorcerer :cha sl/spell-lists)
-                              (ritual-caster-option :warlock :cha sl/spell-lists)
-                              (ritual-caster-option :wizard :int sl/spell-lists)]})]
+                    :options [(ritual-caster-option :bard ::character/cha sl/spell-lists)
+                              (ritual-caster-option :cleric ::character/wis sl/spell-lists)
+                              (ritual-caster-option :druid ::character/wis sl/spell-lists)
+                              (ritual-caster-option :sorcerer ::character/cha sl/spell-lists)
+                              (ritual-caster-option :warlock ::character/cha sl/spell-lists)
+                              (ritual-caster-option :wizard ::character/int sl/spell-lists)]})]
      :prereqs [(t/option-prereq "Intelligence or Wisdom 13 or higher"
                                 (fn [c]
-                                  (let [{:keys [:wis :int] :as abilities} (es/entity-val c :abilities)]
+                                  (let [{:keys [::character/wis ::character/int] :as abilities} (es/entity-val c :abilities)]
                                     (or (and wis (>= wis 13))
                                         (and int (>= int 13))))))]})
    (feat-option
@@ -1157,7 +1114,7 @@
      :icon "ghost-ally"
      :page 170
      :summary "hide when lightly obscured; when hiding, missing an attack doesn't reveal you; no disadvantage on Perception checks in dim light"
-     :prereqs [(ability-prereq :dex 13)]})
+     :prereqs [(ability-prereq ::character/dex 13)]})
    (feat-option
     {:name "Spell Sniper"
      :icon "laser-precision"
@@ -1167,18 +1124,18 @@
      :selections [(t/selection-cfg
                    {:name "Spell Sniper: Spell Class"
                     :tags #{:spells}
-                    :options [(spell-sniper-option :bard :cha sl/spell-lists)
-                              (spell-sniper-option :cleric :wis sl/spell-lists)
-                              (spell-sniper-option :druid :wis sl/spell-lists)
-                              (spell-sniper-option :sorcerer :cha sl/spell-lists)
-                              (spell-sniper-option :warlock :cha sl/spell-lists)
-                              (spell-sniper-option :wizard :int sl/spell-lists)]})]})
+                    :options [(spell-sniper-option :bard ::character/cha sl/spell-lists)
+                              (spell-sniper-option :cleric ::character/wis sl/spell-lists)
+                              (spell-sniper-option :druid ::character/wis sl/spell-lists)
+                              (spell-sniper-option :sorcerer ::character/cha sl/spell-lists)
+                              (spell-sniper-option :warlock ::character/cha sl/spell-lists)
+                              (spell-sniper-option :wizard ::character/int sl/spell-lists)]})]})
    (feat-option
     {:name "Tavern Brawler"
      :icon "broken-bottle"
      :page 170
      :summary "increase STR or CON by 1; improvised weapon proficiency; d4 damage on unarmed strike; grapple as bonus action"
-     :selections [(ability-increase-selection [:str :dex] 1 false)]
+     :selections [(ability-increase-selection [::character/str ::character/dex] 1 false)]
      :modifiers [(modifiers/weapon-proficiency :improvised)
                  (modifiers/bonus-action
                   {:name "Tavern Brawler: Grapple"
@@ -1201,7 +1158,7 @@
      :icon "sword-slice"
      :page 170
      :summary "increase STR or DEX by 1; proficiency with 4 weapons"
-     :selections [(ability-increase-selection [:str :dex] 1 false)
+     :selections [(ability-increase-selection [::character/str ::character/dex] 1 false)
                   (weapon-proficiency-selection 4)]})])
 
 (def fighting-style-options
