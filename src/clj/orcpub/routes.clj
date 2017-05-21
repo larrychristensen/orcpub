@@ -504,13 +504,22 @@
 (def header-style
   {:style "color:#2c3445"})
 
-(defn privacy-policy-page [req]
+(defn terms-page [body-fn]
   {:status 200
    :headers {"Content-Type" "text/html"}
-   :body (orcpub.privacy/privacy-policy)})
+   :body (body-fn)})
+
+(defn privacy-policy-page [req]
+  (terms-page orcpub.privacy/privacy-policy))
 
 (defn terms-of-use-page [req]
-  (empty-index req))
+  (terms-page orcpub.privacy/terms-of-use))
+
+(defn community-guidelines-page [_]
+  (terms-page orcpub.privacy/community-guidelines))
+
+(defn cookie-policy-page [_]
+  (terms-page orcpub.privacy/cookie-policy))
 
 (def routes
   (route/expand-routes
@@ -559,6 +568,10 @@
       {:get `privacy-policy-page}]
      [(route-map/path-for route-map/terms-of-use-route)
       {:get `terms-of-use-page}]
+     [(route-map/path-for route-map/community-guidelines-route)
+      {:get `community-guidelines-page}]
+     [(route-map/path-for route-map/cookies-policy-route)
+      {:get `cookie-policy-page}]
      [(route-map/path-for route-map/check-email-route)
       {:get `check-email}]
      [(route-map/path-for route-map/check-username-route)

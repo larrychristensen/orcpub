@@ -28,6 +28,8 @@
 (def password-reset-used-route :password-reset-used)
 (def terms-of-use-route :terms-of-use)
 (def privacy-policy-route :privacy-policy)
+(def community-guidelines-route :community-guidelines)
+(def cookies-policy-route :cookies-policy)
 
 (def routes ["/"
              {"" default-route
@@ -53,6 +55,8 @@
               "password-reset-used" password-reset-used-route
               "terms-of-use" terms-of-use-route
               "privacy-policy" privacy-policy-route
+              "community-guidelines" community-guidelines-route
+              "cookies-policy" cookies-policy-route
               "dnd/"
               {"5e/"
                {"characters" {"" dnd-e5-char-list-route

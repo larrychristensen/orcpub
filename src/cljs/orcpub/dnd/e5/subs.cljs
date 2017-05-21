@@ -208,3 +208,8 @@
  :message-type
  (fn [db _]
    (:message-type db)))
+
+(reg-sub
+ :device-type
+ (fn [db _]
+   (:device-type db)))

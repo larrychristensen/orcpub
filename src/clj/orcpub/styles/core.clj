@@ -253,6 +253,8 @@
     {:width "70px"}]
    [:.w-80
     {:width "80px"}]
+   [:.w-85
+    {:width "85px"}]
    [:.w-100
     {:width "100px"}]
    [:.w-120
@@ -466,14 +468,16 @@
    [:.no-appearance
     (handle-browsers :appearance :none)]])
 
+(def xs-min "0")
 (def sm-min "768px")
+(def sm-max "991px")
 (def md-max "1199px")
 
 (def xs-query
   {:max-width "767px"})
 
 (def sm-query
-  {:min-width sm-min :max-width "991px"})
+  {:min-width sm-min :max-width sm-max})
 
 (def md-width "992px")
 
@@ -482,6 +486,10 @@
 
 (def sm-or-md-query
   {:min-width sm-min :max-width md-max})
+
+(def xs-or-sm-query
+  {:min-width xs-min :max-width sm-max})
+
 
 (def lg-width "1200px")
 
@@ -682,7 +690,117 @@
    (at-media
     {:print true}
     [:.hidden-print
-     {:display "none !important"}])])
+     {:display "none !important"}])
+   (at-media
+    xs-query
+    [:.user-icon
+     {:display :none}]
+     [:.character-builder-header
+      #_{:margin-bottom 0}]
+     [:.list-character-summary
+      {:font-size "18px"}]
+     [:.character-summary
+      {:flex-wrap :wrap}]
+     [:.app-header
+      {:height :auto
+       :background-image :none
+       :background-color "rgba(0, 0, 0, 0.3)"
+       :min-height 0}]
+     [:.app-header-bar
+      {:min-height (px 50)
+       :backdrop-filter :none
+       :-webkit-backdrop-filter :none}]
+     [:.content
+      {:width "100%"}]
+     [:.options-column
+      {:width "100%"}]
+     [:.header-button-text :.header-links
+      {:display :none}])
+
+    (at-media
+     xs-query
+     [:.build-tab
+      {:display :none}]
+     [:.options-tab-active
+      [:.options-column
+       {:display :none}]
+      [:.options-column
+       {:display :block}]
+      [:.personality-column
+       {:display :none}]
+      [:.details-column
+       {:display :none}]]
+     [:.personality-tab-active
+      [:.options-column
+       {:display :none}]
+      [:.personality-column
+       {:display :block}]
+      [:.details-column
+       {:display :none}]]
+     [:.details-tab-active
+      [:.options-column
+       {:display :none}]
+      [:.personality-column
+       {:display :none}]
+      [:.details-column
+       {:display :block}]
+      [:.header-tab
+       [:.title
+        {:display :none}]
+       [:img
+        {:height "24px"
+         :width "24px"}]
+       {:width "30px"}]])
+
+    (at-media
+     sm-or-md-query
+     [:.build-tab
+      {:display :block}]
+     [:.options-tab
+      {:display :none}]
+     [:.personality-tab
+      {:display :none}]
+     [:.build-tab-active
+      [:.options-column
+       {:display :block}]
+      [:.stepper-column
+       {:display :block}]
+      [:.personality-column
+       {:display :block}]
+      [:.details-column
+       {:display :none}]]
+     [:.details-tab-active
+      [:.options-column
+       {:display :none}]
+      [:.personality-column
+       {:display :none}]
+      [:.details-column
+       {:display :block}]])
+    
+
+    (at-media
+     not-xs-query
+     [:.details-columns
+      {:display :flex}]
+     [:.details-column-2
+      {:margin-left "40px"}])
+
+    (at-media
+     not-lg-query
+     [:.registration-image
+      {:display :none}]
+     [:.registration-content
+      {:width "100%"
+       :height "100%"}]
+     [:.registration-input
+      {:width "100%"}])
+
+    (at-media
+     lg-query
+     [:.builder-column
+      {:display :block}]
+     [:.details-column
+      {:max-width "500px"}])])
 
 (def app
   (concat
@@ -738,8 +856,7 @@
 
     [:.content
      (merge
-      content-style
-      {:display :flex})]
+      content-style)]
 
     [:.app-header
      {:background-color :black
@@ -777,102 +894,6 @@
      [:tr
       [(s/& (s/nth-child :even))
        {:background-color "rgba(255, 255, 255, 0.1)"}]]]
-
-    (at-media
-     xs-query
-     [:.character-builder-header
-      {:margin-bottom 0}]
-     [:.app-header
-      {:height (px 81)
-       :background-image :none
-       :background-color "rgba(0, 0, 0, 0.3)"
-       :min-height 0}]
-     [:.app-header-bar
-      {:backdrop-filter :none
-       :-webkit-backdrop-filter :none}]
-     [:.content
-      {:width "100%"}]
-     [:.options-column
-      {:width "100%"}]
-     [:.header-button-text :.header-links
-      {:display :none}])
-
-    (at-media
-     xs-query
-     [:.build-tab
-      {:display :none}]
-     [:.options-tab-active
-      [:.options-column
-       {:display :none}]
-      [:.options-column
-       {:display :block}]
-      [:.personality-column
-       {:display :none}]
-      [:.details-column
-       {:display :none}]]
-     [:.personality-tab-active
-      [:.options-column
-       {:display :none}]
-      [:.personality-column
-       {:display :block}]
-      [:.details-column
-       {:display :none}]]
-     [:.details-tab-active
-      [:.options-column
-       {:display :none}]
-      [:.personality-column
-       {:display :none}]
-      [:.details-column
-       {:display :block}]])
-
-    (at-media
-     sm-or-md-query
-     [:.build-tab
-      {:display :block}]
-     [:.options-tab
-      {:display :none}]
-     [:.personality-tab
-      {:display :none}]
-     [:.build-tab-active
-      [:.options-column
-       {:display :block}]
-      [:.stepper-column
-       {:display :block}]
-      [:.personality-column
-       {:display :block}]
-      [:.details-column
-       {:display :none}]]
-     [:.details-tab-active
-      [:.options-column
-       {:display :none}]
-      [:.personality-column
-       {:display :none}]
-      [:.details-column
-       {:display :block}]])
-
-    (at-media
-     not-xs-query
-     [:.details-columns
-      {:display :flex}]
-     [:.details-column-2
-      {:margin-left "40px"}])
-
-    (at-media
-     not-lg-query
-     [:.registration-image
-      {:display :none}]
-     [:.registration-content
-      {:width "100%"
-       :height "100%"}]
-     [:.registration-input
-      {:width "100%"}])
-
-    (at-media
-     lg-query
-     [:.builder-column
-      {:display :block}]
-     [:.details-column
-      {:max-width "500px"}])
 
     [:.builder-option
      {:border-width (px 1)

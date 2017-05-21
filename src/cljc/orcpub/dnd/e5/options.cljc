@@ -6,6 +6,7 @@
             [orcpub.entity-spec :as es]
             [orcpub.modifiers :as mods]
             [orcpub.dnd.e5.character :as character]
+            [orcpub.dnd.e5.character.equipment :as char-equip]
             [orcpub.dnd.e5.modifiers :as modifiers]
             [orcpub.dnd.e5.weapons :as weapons]
             [orcpub.dnd.e5.spells :as spells]
@@ -75,8 +76,8 @@
    {:name (:name weapon)
     :key (:key weapon)
     :help (:description weapon)
-    :modifiers [(modifiers/weapon (:key weapon) {:equipped? true
-                                                 :quantity (or num 1)})]}))
+    :modifiers [(modifiers/weapon (:key weapon) {::char-equip/equipped? true
+                                                 ::char-equip/quantity (or num 1)})]}))
 
 (defn weapon-options [weapons & [num]]
   (map

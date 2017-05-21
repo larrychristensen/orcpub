@@ -86,7 +86,7 @@
 (defn user-header-view []
   (let [username @(subscribe [:username])]
     [:div.flex.align-items-c
-     [svg-icon "orc-head" 40 40]
+     [:div.user-icon [svg-icon "orc-head" 40 40]]
      (if username
        [:span.white.f-w-b.t-a-r
         [:span.m-r-5 username]
@@ -105,40 +105,44 @@
   [:div#app-header.app-header.flex.flex-column.justify-cont-s-b
    [:div.app-header-bar.container
     [:div.content
-     [:div.flex.justify-cont-s-b.align-items-c.w-100-p.p-l-20.p-r-20
-      [:img.orcpub-logo.h-32.w-120.pointer {:src "/image/orcpub-logo.svg"}]
-      [user-header-view]]]]
+     [:div.flex.align-items-c.h-100-p
+      [:div.flex.justify-cont-s-b.align-items-c.w-100-p.p-l-20.p-r-20
+       [:img.orcpub-logo.h-32.w-120.pointer {:src "/image/orcpub-logo.svg"}]
+       [user-header-view]]]]]
    [:div.container
     [:div.content
      [:div.flex.justify-cont-end.w-100-p
       [:div.flex.m-b-5.m-r-5
-       [:div.pointer.white.f-w-b.f-s-14.t-a-c.p-10.header-tab.m-5
-        {:style header-tab-style
-         :on-click #(dispatch [:route routes/dnd-e5-char-list-page-route])}
-        [:div (svg-icon "battle-gear" 48 48)
-         [:div "CHARACTERS"]]]
-       [:div.white.f-w-b.f-s-14.t-a-c.p-10.header-tab.m-5.disabled
-        {:style header-tab-style}
+       [:div.pointer.white.f-w-b.f-s-14.t-a-c.p-10.header-tab.m-5.w-85
+        {:on-click #(dispatch [:route routes/dnd-e5-char-list-page-route])}
+        (svg-icon "battle-gear" 48 48)
+        [:div.title "CHARACTERS"]]
+       [:div.white.f-w-b.f-s-14.t-a-c.p-10.header-tab.m-5.disabled.w-85
         [:div.opacity-2
          (svg-icon "spell-book" 48 48)
-         [:div "SPELLS"]]]
-       [:div.white.f-w-b.f-s-14.t-a-c.p-10.header-tab.m-5.disabled
-        {:style header-tab-style}
+         [:div.title "SPELLS"]]]
+       [:div.white.f-w-b.f-s-14.t-a-c.p-10.header-tab.m-5.disabled.w-85
         [:div.opacity-2
          (svg-icon "hydra" 48 48)
-         [:div "MONSTERS"]]]]]]]
+         [:div.title "MONSTERS"]]]]]]]
    #_[:div.container.header-links
-    [:div.content
-     [:div.hidden-xs.hidden-sm
-      [:div.m-l-10.white
-       [:span "Questions? Comments? Issues? Feature Requests? We'd love to hear them, "]
-       [:a {:href "https://muut.com/orcpub" :target :_blank} "report them here."]]
-      [:div
-       [:div.flex.align-items-c.f-w-b.f-s-18.m-t-10.m-l-10.white
-        [:span.hidden-xs "Please support continuing development on "]
-        [:a.m-l-5 patreon-link-props [:span "Patreon"]]
-        [:a.m-l-5 patreon-link-props
-         [:img.h-32.w-32 {:src "https://www.patreon.com/images/patreon_navigation_logo_mini_orange.png"}]]]]]]]])
+      [:div.content
+       [:div.hidden-xs.hidden-sm
+        [:div.m-l-10.white
+         [:span "Questions? Comments? Issues? Feature Requests? We'd love to hear them, "]
+         [:a {:href "https://muut.com/orcpub" :target :_blank} "report them here."]]
+        [:div
+         [:div.flex.align-items-c.f-w-b.f-s-18.m-t-10.m-l-10.white
+          [:span.hidden-xs "Please support continuing development on "]
+          [:a.m-l-5 patreon-link-props [:span "Patreon"]]
+          [:a.m-l-5 patreon-link-props
+           [:img.h-32.w-32 {:src "https://www.patreon.com/images/patreon_navigation_logo_mini_orange.png"}]]]]]]]])
+
+(defn legal-footer []
+  [:div.m-l-15.m-b-10 {:style {:text-align :left}}
+   [:span "© 2017 OrcPub"]
+   [:a.m-l-5 {:href "/terms-of-use" :target :_blank} "Terms of Use"]
+   [:a.m-l-5 {:href "/privacy-policy" :target :_blank} "Privacy Policy"]])
 
 (defn registration-page [content]
   [:div.sans.h-100-p.flex
@@ -160,8 +164,7 @@
           :style {:height "25.3px"}
           :on-click #(dispatch [:route :default])}]]
        [:div.flex-grow-1 content]
-       [:div.m-l-15.m-b-10 {:style {:text-align :left}}
-        "© 2017 OrcPub"]]
+       [legal-footer]]
       [:div.registration-image
        {:style {:background-image "url(image/shutterstock_432001912.jpg)"
                 :background-size "1200px 800px"
@@ -253,7 +256,7 @@
                         :key :password
                         :value password
                         :type :password
-                        :messages password-messages
+                        ;;:messages password-messages
                         :on-change (fn [e] (swap! params assoc :password (event-value e)))}]
            [form-input {:title "Verify Password"
                         :key :verify-password
@@ -362,7 +365,7 @@
        [form-input {:title "Password"
                     :key :password
                     :value (:password registration-form)
-                    :messages (:password registration-validation)
+                    ;:messages (:password registration-validation)
                     :type :password
                     :on-change (fn [e] (dispatch [:registration-password (event-value e)]))}]
        [:div.m-t-20
@@ -393,10 +396,10 @@
       [:div.m-t-5.p-r-10.p-l-10
        [:span.f-s-14
         "By clicking JOIN you agree to our"
-        [:a.m-l-5 {:href "" :target :_blank
+        [:a.m-l-5 {:href "/terms-of-use" :target :_blank
                    :style {:color text-color}} "Terms of Use"]
         [:span.m-l-5 "and that you've read our"]
-        [:a.m-l-5 {:href "" :target :_blank
+        [:a.m-l-5 {:href "/privacy-policy" :target :_blank
                    :style {:color text-color}} "Privacy Policy"]]]])))
 
 (def message-style
@@ -532,10 +535,10 @@
        [:div.content.w-100-p content]]
       [:div.white.flex.justify-cont-c
        [:div.content.f-w-n.f-s-12
-        [:div.flex.justify-cont-s-b.align-items-c.w-100-p
+        [:div.flex.justify-cont-s-b.align-items-c.w-100-p.flex-wrap
          [:div.p-10
           [:div.m-b-5 "Icons made by Lorc, Caduceus, and Delapouite. Available on " [:a.orange {:href "http://game-icons.net"} "http://game-icons.net"]]]
-         [:div
+         [:div.m-l-10
           [:a {:href "/privacy-policy" :target :_blank} "Privacy Policy"]
           [:a.m-l-5 {:href "/terms-of-use" :target :_blank} "Terms of Use"]]]]]])])
 
@@ -546,15 +549,15 @@
   {:border-top "1px solid rgba(255,255,255,0.5)"})
 
 (defn character-summary [built-char & [include-name?]]
-  [:div.flex
+  [:div.flex.character-summary
    (let [nm (char/character-name built-char)]
-      (if (and nm include-name?) [:span.m-r-20 nm]))
-   [:span
+      (if (and nm include-name?) [:span.m-r-20.m-b-5 nm]))
+   [:span.m-r-10.m-b-5
     [:span (char/race built-char)]
     [:div.f-s-12.m-t-5.opacity-6 (char/subrace built-char)]]
    (let [levels (char/levels built-char)]
      (if (seq levels)
-       [:span.m-l-10.flex
+       [:span.flex
         (map-indexed
          (fn [i v]
            (with-meta v {:key i}))
@@ -951,7 +954,7 @@
        [actions-section "Features, Traits, and Feats" "vitruvian-man" traits]]]]))
 
 (def character-display-style
-  {:padding "20px 40px"
+  {:padding "20px 5px"
    :background-color "rgba(0,0,0,0.15)"})
 
 (defn character-list []
@@ -986,7 +989,8 @@
                                                :style thumbnail-style}])
                  [:div.f-s-24.f-w-600
                   {:style summary-style}
-                  [character-summary built-character true]]]
+                  [:div.list-character-summary
+                   [character-summary built-character true]]]]
                 [:div.orange.pointer.m-r-10
                  [:span.underline (if expanded?
                                     "collapse"

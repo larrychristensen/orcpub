@@ -70,9 +70,27 @@
 
 (reg-event-fx
  :character-save-success
- (fn [_ [_ response]]
+ (fn [{:keys [db]} [_ response]]
    (prn "RESPONSE" response)
-   {:dispatch [:show-message "Your character has been saved."]}))
+   (let [strict-character (:body response)
+         character (char5e/from-strict strict-character)
+         id (:db/id character)]
+     (prn "CHARAGTEDR" character id)
+     {:db (-> db
+              (assoc :character character)
+              (update :dnd-5e-characters
+                      (fn [chars]
+                        (let [new? (not-any? #(-> % :db/id (= id)) chars)]
+                          (prn "NEW?" new?)
+                          (if new?
+                            (conj chars character)
+                            (map
+                             (fn [char]
+                               (if (:db/id char)
+                                 character
+                                 char))
+                             chars))))))
+      :dispatch [:show-message "Your character has been saved."]})))
 
 (reg-event-fx
  :save-character
@@ -716,12 +734,15 @@
 (reg-event-fx
  :password-reset
  (fn [{:keys [db]} [_ params]]
-   {:db (assoc db :temp-email (:email params))
-    :http {:method :post
-           :auth-token (get-auth-token db)
-           :url (backend-url (bidi/path-for routes/routes routes/reset-password-route))
-           :json-params params
-           :on-success [:password-reset-success]}}))
+   (let [c (cookies)
+         token (c "token")]
+     (prn "TOKEN" token c)
+     {:db (assoc db :temp-email (:email params))
+      :http {:method :post
+             :auth-token token
+             :url (backend-url (bidi/path-for routes/routes routes/reset-password-route))
+             :json-params params
+             :on-success [:password-reset-success]}})))
 
 (reg-event-db
  :set-dnd-5e-characters

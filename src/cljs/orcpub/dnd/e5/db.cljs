@@ -1,5 +1,6 @@
 (ns orcpub.dnd.e5.db
   (:require [orcpub.route-map :as route-map]
+            [orcpub.user-agent :as user-agent]
             [orcpub.dnd.e5.template :as t5e]
             [orcpub.dnd.e5.character :as char5e]
             [re-frame.core :as re-frame]
@@ -31,7 +32,8 @@
    :route (parse-route)
    :route-history (list default-route)
    :return-route default-route
-   :registration-form {:send-updates? true}})
+   :registration-form {:send-updates? true}
+   :device-type (user-agent/device-type)})
 
 (defn character->local-store [character]
   (.setItem js/window.localStorage local-storage-character-key (str character)))
