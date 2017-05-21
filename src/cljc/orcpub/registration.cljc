@@ -11,7 +11,8 @@
         password-missing-uppercase? (fails-match? #".*[A-Z].*" password)
         password-missing-lowercase? (fails-match? #".*[a-z].*" password)
         password-too-short? (or (nil? password) (< (count password) 8))]
-    (cond-> {}
+    {}
+    #_(cond-> {}
       password-missing-lowercase? (update :password conj "Password must have a least one lowercase character")
       password-missing-uppercase? (update :password conj "Password must have a least one uppercase character")
       password-missing-number? (update :password conj "Password must have a least one numeric character")
@@ -31,4 +32,5 @@
       username-too-short? (update :username conj (if (s/blank? username)
                                                    "Username is required"
                                                    "Username must be at least 3 characters"))
-      true (merge (validate-password password)))))
+      ;;true (merge (validate-password password))
+      )))

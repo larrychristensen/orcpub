@@ -31,16 +31,14 @@
             [orcpub.dnd.e5.views :as views5e]
             [orcpub.route-map :as routes]
             [orcpub.pdf-spec :as pdf-spec]
+            [orcpub.user-agent :as user-agent]
 
             [clojure.spec :as spec]
             [clojure.spec.test :as stest]
             [cljs.core.async :refer [<!]]
 
             [reagent.core :as r]
-            [re-frame.core :refer [subscribe dispatch dispatch-sync]]
-            [goog.labs.userAgent.browser :as g-browser]
-            [goog.labs.userAgent.device :as g-device]
-            [goog.labs.userAgent.platform :as g-platform])
+            [re-frame.core :refer [subscribe dispatch dispatch-sync]])
   (:require-macros [cljs.core.async.macros :refer [go]]))
 
 (def print-disabled? true)
@@ -1725,41 +1723,6 @@
 
 (def debug-data-style {:width "400px" :height "400px"})
 
-(defn browser []
-  (cond
-    (g-browser/isChrome) :chrome
-    (g-browser/isEdge) :edge
-    (g-browser/isFirefox) :firefox
-    (g-browser/isIE) :ie
-    (g-browser/isSafari) :safari
-    :else :not-found))
-
-(defn browser-version []
-  (g-browser/getVersion))
-
-(defn device-type []
-  (cond
-    (g-device/isDesktop) :desktop
-    (g-device/isMobile) :mobile
-    (g-device/isTablet) :tablet
-    :else :not-found))
-
-(defn platform []
-  (cond
-    (g-platform/isAndroid) :android
-    (g-platform/isChromeOS) :chrome-os
-    (g-platform/isIos) :ios
-    (g-platform/isIpad) :ipad
-    (g-platform/isIphone) :iphone
-    (g-platform/isIpod) :ipod
-    (g-platform/isLinux) :linux
-    (g-platform/isMacintosh) :macintosh
-    (g-platform/isWindows) :windows
-    :else :not-found))
-
-(defn platform-version []
-  (g-platform/getVersion))
-
 (defn debug-data []
   (let [expanded? (r/atom false)]
     (fn []
@@ -1770,11 +1733,11 @@
        (if @expanded?
          [:textarea.m-t-5
           {:style debug-data-style
-           :value (str {:browser (browser)
-                        :browser-version (browser-version)
-                        :device-type (device-type)
-                        :platform (platform)
-                        :platform-version (platform-version)
+           :value (str {:browser (user-agent/browser)
+                        :browser-version (user-agent/browser-version)
+                        :device-type (user-agent/device-type)
+                        :platform (user-agent/platform)
+                        :platform-version (user-agent/platform-version)
                         :char-data @(subscribe [:character])})}])])))
 
 (defn character-builder []
