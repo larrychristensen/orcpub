@@ -4,6 +4,7 @@
             [orcpub.entity-spec :as es]
             [orcpub.dice :as dice]
             [orcpub.dnd.e5.character :as char5e]
+            [orcpub.dnd.e5.character.equipment :as char-equip5e]
             [orcpub.dnd.e5.options :as opt5e]
             [orcpub.dnd.e5.spells :as spells]
             [orcpub.dnd.e5.display :as disp5e]
@@ -158,9 +159,9 @@
                                 (es/entity-val built-char :custom-equipment)))
         all-equipment (merge equipment custom-equipment magic-items armor magic-armor)
         treasure (es/entity-val built-char :treasure)
-        treasure-map (into {} (map (fn [[kw {qty :quantity}]] [kw qty]) treasure))
+        treasure-map (into {} (map (fn [[kw {qty ::char-equip5e/quantity}]] [kw qty]) treasure))
         unequipped-items (filter
-                          (fn [[kw {:keys [equipped? quantity]}]]
+                          (fn [[kw {:keys [::char-equip5e/equipped? ::char-equip5e/quantity]}]]
                             (and (not equipped?)
                                  (pos? quantity)))
                           (merge all-equipment weapons magic-weapons))]
@@ -169,16 +170,16 @@
      {:equipment (s/join
                   "; "
                   (map
-                   (fn [[kw {count :quantity}]]
+                   (fn [[kw {count ::char-equip5e/quantity}]]
                      (str (disp5e/equipment-name mi5e/all-equipment-map kw) " (" count ")"))
                    (filter
-                    (fn [[kw {:keys [equipped? quantity]}]] (and equipped? (pos? quantity)))
+                    (fn [[kw {:keys [::char-equip5e/equipped? ::char-equip5e/quantity]}]] (and equipped? (pos? quantity)))
                     (concat
                      all-equipment))))
       :treasure (s/join
                   "; "
                   (map
-                   (fn [[kw {count :quantity}]]
+                   (fn [[kw {count ::char-equip5e/quantity}]]
                      (str (disp5e/equipment-name mi5e/all-equipment-map kw) " (" count ")"))
                    unequipped-items))})))
 

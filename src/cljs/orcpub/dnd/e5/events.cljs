@@ -538,7 +538,7 @@
              (dispatch (conj on-success response))
              (if on-failure
                (dispatch (conj on-failure response))
-               (dispatch [:show-error-message "There was an error, please try again later. If the problem perists please contact redorc@orcpub.com."]))))))))
+               (dispatch [:show-error-message [:div "There was an error, please try again later. If the problem persists please contact " [:a {:href "mailto:redorc@orcpub.com"} "redorc@orcpub.com."]]]))))))))
 
 (reg-fx
  :path
@@ -560,7 +560,8 @@
  (fn [{:keys [db]} [_ response]]
    (let [error-code (-> response :body :error)]
      (cond
-       (= error-code errors/bad-credentials) {:dispatch [:set-user-data nil]}
+       (= error-code errors/bad-credentials) {:dispatch-n [[:set-user-data nil]
+                                                           [:show-login-message "Username/password combination is incorrect."]]}
        (= error-code errors/unverified) {:db (assoc db :temp-email (-> response :body :email))
                                          :dispatch [:route routes/verify-sent-route]}
        (= error-code errors/unverified-expired) {:dispatch [:route routes/verify-failed-route]}
@@ -734,6 +735,20 @@
     :dispatch [:route routes/dnd-e5-char-builder-route]}))
 
 (reg-event-fx
+ :delete-character-success
+ (fn [_ _]
+   {:dispatch [:show-message "Character successfully deleted"]}))
+
+(reg-event-fx
+ :delete-character
+ (fn [{:keys [db]} [_ id]]
+   {:db (update db :dnd-5e-characters (fn [chars] (prn "CHARSf" (count chars)) (remove #(do (prn "ID" (:db/id %)) (-> % :db/id (= id))) chars)))
+    :http {:method :delete
+           :auth-token (get-auth-token db)
+           :url (backend-url (routes/path-for routes/delete-dnd-e5-char-route :id id))
+           :on-success [:delete-character-success]}}))
+
+(reg-event-fx
  :new-character
  (fn [{:keys [db]} [_]]
    {:db (assoc db :character default-character)
@@ -743,6 +758,11 @@
  :hide-message
  (fn [db [_]]
    (assoc db :message-shown? false)))
+
+(reg-event-db
+ :hide-login-message
+ (fn [db [_]]
+   (assoc db :login-message-shown? false)))
 
 (reg-event-db
  :show-message
@@ -759,3 +779,10 @@
           :message-shown? true
           :message message
           :message-type :error)))
+
+(reg-event-db
+ :show-login-message
+ (fn [db [_ message]]
+   (assoc db
+          :login-message-shown? true
+          :login-message message)))

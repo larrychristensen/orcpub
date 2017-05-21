@@ -49,10 +49,12 @@
                                 :else v)])))
         raw-character))
 
-(defn to-strict [{:keys [::options ::values]}]
-  (-> {::strict/selections (to-strict-selections options)
-       ::strict/values (into {} (remove (comp nil? val)) values)}
-      remove-empty-fields))
+(defn to-strict [{:keys [:db/id ::options ::values]}]
+  (cond-> {:db/id id
+           ::strict/selections (to-strict-selections options)
+           ::strict/values (into {} (remove (comp nil? val)) values)}
+    id (assoc :db/id id)
+    true remove-empty-fields))
 
 (spec/fdef to-strict
            :args (spec/cat :entity ::raw-entity)
@@ -60,7 +62,8 @@
 
 (declare from-strict-selections)
 
-(defn from-strict-option [{:keys [::strict/key
+(defn from-strict-option [{:keys [:db/id
+                                  ::strict/key
                                   ::strict/selections
                                   ::strict/int-value
                                   ::strict/map-value]}]
@@ -70,19 +73,22 @@
       value (assoc ::value value))))
 
 (defn from-strict-options [options]
-  (map from-strict-option options))
+  (mapv from-strict-option options))
 
 (defn from-strict-selections [selections]
   (reduce
-   (fn [s {:keys [::strict/key ::strict/option ::strict/options]}]
-     (assoc s key (if option
-                    (from-strict-option option)
-                    (from-strict-options options))))
+   (fn [s {:keys [:db/id ::strict/key ::strict/option ::strict/options]}]
+     (assoc s
+            key
+            (if option
+              (from-strict-option option)
+              (from-strict-options options))))
    {}
    selections))
 
-(defn from-strict [{:keys [::strict/selections ::strict/values]}]
-  (-> {::options (from-strict-selections selections)
+(defn from-strict [{:keys [:db/id ::strict/selections ::strict/values]}]
+  (-> {:db/id id
+       ::options (from-strict-selections selections)
        ::values values}))
 
 (spec/fdef from-strict

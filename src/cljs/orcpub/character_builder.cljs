@@ -43,7 +43,7 @@
             [goog.labs.userAgent.platform :as g-platform])
   (:require-macros [cljs.core.async.macros :refer [go]]))
 
-(def print-disabled? false)
+(def print-disabled? true)
 (def print-enabled? (and (not print-disabled?)
                          (s/starts-with? js/window.location.href "http://localhost")))
 
@@ -57,9 +57,7 @@
 
 (defn update-option [template entity path update-fn]
   (let [entity-path (entity/get-entity-path template entity path)]
-    (try (update-in entity entity-path update-fn)
-         (catch js/Object e (do (js/console.log "ERRO" entity path entity-path)
-                                (throw "EROR"))))))
+    (update-in entity entity-path update-fn)))
 
 #_(def stored-char-str (.getItem js/window.localStorage "char-meta"))
 #_(defn remove-stored-char [stored-char-str & [more-info]]
@@ -137,7 +135,7 @@
                 (stop-propagation e))}
    [:span.underline.orange.p-0.m-r-2 (if @expanded? expand-text collapse-text)]
    [:i.fa.orange
-    {:class-name (if @expanded? "fa-angle-up" "fa-angle-down")}]])
+    {:class-name (if @expanded? "fa-caret-up" "fa-caret-down")}]])
 
 (defn show-info-button [expanded?]
   [:div.f-w-n.m-l-5 [expand-button "hide info" "show info" expanded?]])
@@ -902,7 +900,7 @@
   [:div.flex.justify-cont-s-a
    (let [abilities (or (get-in character [::entity/options :ability-scores ::entity/value])
                        (char5e/abilities 15 14 13 12 10 8))
-          abilities-vec (vec abilities)]
+          abilities-vec (map (fn [k] [k (abilities k)]) char5e/ability-keys)]
       (doall
        (map-indexed
         (fn [i [k v]]

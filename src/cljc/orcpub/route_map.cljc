@@ -3,6 +3,7 @@
 
 (def dnd-e5-char-builder-route :char-builder-5e)
 (def dnd-e5-char-list-route :char-list-5e)
+(def delete-dnd-e5-char-route :char-delete-5e)
 (def dnd-e5-char-list-page-route :char-list-5e-page)
 (def default-route :default)
 (def register-route :register)
@@ -25,6 +26,8 @@
 (def password-reset-success-route :password-reset-success)
 (def password-reset-expired-route :password-reset-expired)
 (def password-reset-used-route :password-reset-used)
+(def terms-of-use-route :terms-of-use)
+(def privacy-policy-route :privacy-policy)
 
 (def routes ["/"
              {"" default-route
@@ -48,13 +51,16 @@
               "password-reset-success" password-reset-success-route
               "password-reset-expired" password-reset-expired-route
               "password-reset-used" password-reset-used-route
+              "terms-of-use" terms-of-use-route
+              "privacy-policy" privacy-policy-route
               "dnd/"
               {"5e/"
-               {"characters" dnd-e5-char-list-route
+               {"characters" {"" dnd-e5-char-list-route
+                               ["/" :id] delete-dnd-e5-char-route}
                 "characters-page" dnd-e5-char-list-page-route}}}])
 
-(defn path-for [route]
-  (bidi/path-for routes route))
+(defn path-for [& args]
+  (apply bidi/path-for routes args))
 
 (defn match-route [path]
   (->> path (bidi/match-route routes) :handler))

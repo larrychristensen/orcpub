@@ -705,6 +705,9 @@
     [:.registration-input
      {:min-width "438px"}]
 
+    [:p
+     {:margin "10px 0"}]
+
     #_["input::-webkit-outer-spin-button"
      "input::-webkit-inner-spin-button"
      {:-webkit-appearance :none

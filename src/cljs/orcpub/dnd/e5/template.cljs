@@ -12,15 +12,14 @@
             [orcpub.dnd.e5.options :as opt5e]
             [orcpub.dnd.e5.weapons :as weapon5e]
             [orcpub.dnd.e5.equipment :as equip5e]
+            [orcpub.dnd.e5.character.equipment :as char-equip5e]
             [orcpub.dnd.e5.armor :as armor5e]
             [orcpub.dnd.e5.spell-lists :as sl]
             [orcpub.dnd.e5.spells :as spells]
             [orcpub.dnd.e5.magic-items :as mi]
             [orcpub.dnd.e5.skills :as skill5e]
             [orcpub.dnd.e5.display :as disp5e]
-            [re-frame.core :refer [subscribe dispatch]])
-  #_(:require-macros [orcpub.dnd.e5.options :as opt5e]
-                     [orcpub.dnd.e5.modifiers :as mod5e]))
+            [re-frame.core :refer [subscribe dispatch]]))
 
 (enable-console-print!)
 
@@ -1405,8 +1404,8 @@
 
 (defn starting-equipment-entity-option [indicator-key [k num]]
   {::entity/key k
-   ::entity/value {:quantity num
-                   :equipped? true
+   ::entity/value {::char-equip5e/quantity num
+                   ::char-equip5e/equipped? true
                    indicator-key true}})
 
 (defn starting-equipment-entity-options [indicator-key key items]
@@ -1417,10 +1416,10 @@
       items)}))
 
 (defn class-starting-equipment-entity-options [key items]
-  (starting-equipment-entity-options :class-starting-equipment? key items))
+  (starting-equipment-entity-options ::char-equip5e/class-starting-equipment? key items))
 
 (defn background-starting-equipment-entity-options [key items]
-  (starting-equipment-entity-options :background-starting-equipment? key items))
+  (starting-equipment-entity-options ::char-equip5e/background-starting-equipment? key items))
 
 (defn class-option [{:keys [name
                             key
@@ -2897,7 +2896,7 @@
                              :summary "create minor elemental effect"}]}]})))
 
 (defn paladin-spell [spell-level key min-level]
-  (mod5e/spells-known spell-level key ::char5e/wis "Paladin" min-level nil :paladin))
+  (mod5e/spells-known spell-level key ::char5e/cha "Paladin" min-level nil :paladin))
 
 (def paladin-base-cfg
   {:name "Paladin"
