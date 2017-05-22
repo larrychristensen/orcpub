@@ -107,21 +107,23 @@
     [:div.content
      [:div.flex.align-items-c.h-100-p
       [:div.flex.justify-cont-s-b.align-items-c.w-100-p.p-l-20.p-r-20
-       [:img.orcpub-logo.h-32.w-120.pointer {:src "/image/orcpub-logo.svg"}]
+       [:img.orcpub-logo.h-32.w-120.pointer
+        {:src "/image/orcpub-logo.svg"
+         :on-click #(dispatch [:route routes/default-route])}]
        [user-header-view]]]]]
    [:div.container
     [:div.content
      [:div.flex.justify-cont-end.w-100-p
       [:div.flex.m-b-5.m-r-5
-       [:div.pointer.white.f-w-b.f-s-14.t-a-c.p-10.header-tab.m-5.w-85
+       [:div.pointer.white.f-w-b.f-s-14.t-a-c.p-10.header-tab.m-5.w-90
         {:on-click #(dispatch [:route routes/dnd-e5-char-list-page-route])}
         (svg-icon "battle-gear" 48 48)
         [:div.title "CHARACTERS"]]
-       [:div.white.f-w-b.f-s-14.t-a-c.p-10.header-tab.m-5.disabled.w-85
+       [:div.white.f-w-b.f-s-14.t-a-c.p-10.header-tab.m-5.disabled.w-90
         [:div.opacity-2
          (svg-icon "spell-book" 48 48)
          [:div.title "SPELLS"]]]
-       [:div.white.f-w-b.f-s-14.t-a-c.p-10.header-tab.m-5.disabled.w-85
+       [:div.white.f-w-b.f-s-14.t-a-c.p-10.header-tab.m-5.disabled.w-90
         [:div.opacity-2
          (svg-icon "hydra" 48 48)
          [:div.title "MONSTERS"]]]]]]]
