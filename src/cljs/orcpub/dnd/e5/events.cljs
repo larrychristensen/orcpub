@@ -71,17 +71,14 @@
 (reg-event-fx
  :character-save-success
  (fn [{:keys [db]} [_ response]]
-   (prn "RESPONSE" response)
    (let [strict-character (:body response)
          character (char5e/from-strict strict-character)
          id (:db/id character)]
-     (prn "CHARAGTEDR" character id)
      {:db (-> db
               (assoc :character character)
               (update :dnd-5e-characters
                       (fn [chars]
                         (let [new? (not-any? #(-> % :db/id (= id)) chars)]
-                          (prn "NEW?" new?)
                           (if new?
                             (conj chars character)
                             (map
@@ -565,13 +562,12 @@
 
 (def login-url (backend-url "/login"))
 
-(reg-event-db
+(reg-event-fx
  :login-success
  [user->local-store-interceptor]
- (fn [db [_ backtrack? response]]
-   (-> db
-       (assoc :user-data (-> response :body))
-       (assoc :route (:return-route db)))))
+ (fn [{:keys [db]} [_ backtrack? response]]
+   {:db (assoc db :user-data (-> response :body))
+    :dispatch [:route (:return-route db)]}))
 
 (reg-event-fx
  :login-failure
@@ -590,10 +586,12 @@
  (fn [cofx [_ response]]
    {:dispatch [:set-user-data nil]}))
 
+
 (reg-event-fx
  :login
- (fn [cofx [_ params backtrack?]]
-   {:http {:method :post
+ (fn [{:keys [db]} [_ params backtrack?]]
+   {:db (assoc db :return-route (some #(if (not= :login-page %) %) (:route-history db)))
+    :http {:method :post
            :url login-url
            :json-params params
            :on-success [:login-success backtrack?]
@@ -736,7 +734,6 @@
  (fn [{:keys [db]} [_ params]]
    (let [c (cookies)
          token (c "token")]
-     (prn "TOKEN" token c)
      {:db (assoc db :temp-email (:email params))
       :http {:method :post
              :auth-token token
@@ -763,7 +760,7 @@
 (reg-event-fx
  :delete-character
  (fn [{:keys [db]} [_ id]]
-   {:db (update db :dnd-5e-characters (fn [chars] (prn "CHARSf" (count chars)) (remove #(do (prn "ID" (:db/id %)) (-> % :db/id (= id))) chars)))
+   {:db (update db :dnd-5e-characters (fn [chars] (remove #(-> % :db/id (= id)) chars)))
     :http {:method :delete
            :auth-token (get-auth-token db)
            :url (backend-url (routes/path-for routes/delete-dnd-e5-char-route :id id))

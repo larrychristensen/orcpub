@@ -123,10 +123,6 @@
        equipment-keys)
       add-custom-equipment-namespaces))
 
-(defn prn-n-return [v message]
-  (prn message v)
-  v)
-
 (defn add-ability-namespaces [raw-character]
   (update-in raw-character
              [::entity/options :ability-scores ::entity/value]

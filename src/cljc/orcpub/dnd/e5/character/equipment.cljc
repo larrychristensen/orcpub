@@ -25,7 +25,6 @@
 (spec/def ::equipment-items-un (spec/coll-of ::equipment-item-un))
 
 (defn to-namespaced [item]
-  (prn "ITEM" item)
   (common/add-namespaces-to-keys "orcpub.dnd.e5.character.equipment" item))
 
 (spec/fdef to-namespaced

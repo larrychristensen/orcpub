@@ -28,7 +28,8 @@
             [orcpub.email :as email]
             [orcpub.registration :as registration]
             [orcpub.entity.strict :as se]
-            [hiccup.page :as page])
+            [hiccup.page :as page]
+            [environ.core :as environ])
   (:import (org.apache.pdfbox.pdmodel.interactive.form PDCheckBox PDComboBox PDListBox PDRadioButton PDTextField)
            (org.apache.pdfbox.pdmodel PDDocument PDPageContentStream)
            (org.apache.pdfbox.pdmodel.graphics.image PDImageXObject)
@@ -39,9 +40,7 @@
            (java.net URL))
   (:gen-class))
 
-(defonce secret "lakdsjflkdjflakdsjflaskdjflaksjdflsadjlfjdl")
-
-(def backend (backends/jws {:secret secret}))
+(def backend (backends/jws {:secret (environ/env :signature)}))
 
 (defn first-user-by [db query value]
   (let [result (d/q query
@@ -85,7 +84,7 @@
 (defn create-token [username exp]
   (jwt/sign {:user username
              :exp exp}
-            secret))
+            (environ/env :signature)))
 
 (defn login-response
   [{:keys [json-params db] :as request}]
@@ -469,7 +468,7 @@
 
 (defn save-character [{:keys [db transit-params body conn identity] :as request}]
   (if-let [data (spec/explain-data ::se/entity transit-params)]
-    (do (prn "DATA" data) {:status 400 :message data})
+    {:status 400 :message data}
     (let [result @(d/transact conn [(if (:db/id transit-params)
                                       transit-params
                                       (assoc transit-params
@@ -486,7 +485,6 @@
                    [?e :orcpub.entity.strict/selections]]
                  db
                  username)
-        _ (prn "IDS" ids)
         characters (d/pull-many db '[*] (map first ids))]
     {:status 200 :body characters}))
 
@@ -494,7 +492,6 @@
   (let [parsed-id (Long/parseLong id)
         username (:user identity)
         {:keys [:orcpub.entity.strict/owner]} (d/pull db '[:orcpub.entity.strict/owner] parsed-id)]
-    (prn "OWNER" owner parsed-id (type parsed-id))
     (if owner
       (do
         @(d/transact conn [[:db/retractEntity parsed-id]])

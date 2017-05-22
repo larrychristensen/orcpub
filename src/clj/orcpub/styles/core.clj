@@ -743,14 +743,17 @@
       [:.personality-column
        {:display :none}]
       [:.details-column
-       {:display :block}]
-      [:.header-tab
-       [:.title
-        {:display :none}]
-       [:img
-        {:height "24px"
-         :width "24px"}]
-       {:width "30px"}]])
+       {:display :block}]])
+
+    (at-media
+     xs-or-sm-query
+     [:.header-tab
+      [:.title
+       {:display :none}]
+      [:img
+       {:height "24px"
+        :width "24px"}]
+      {:width "30px"}])
 
     (at-media
      sm-or-md-query

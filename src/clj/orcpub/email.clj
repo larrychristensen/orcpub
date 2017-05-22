@@ -31,7 +31,6 @@
    :port 587})
 
 (defn send-verification-email [base-url {:keys [email username first-and-last-name]} verification-key]
-  (prn "SENDING_EMAIL!" email verification-key first-and-last-name)
   (postal/send-message (email-cfg)
                        {:from "OrcPub Team <no-reply@orcpub.com>"
                         :to email
@@ -65,7 +64,6 @@
     :content (hiccup/html (reset-password-email-html first-and-last-name reset-url))}])
 
 (defn send-reset-email [base-url {:keys [email username first-and-last-name]} reset-key]
-  (prn "SENDING_EMAIL!" email reset-key first-and-last-name)
   (postal/send-message (email-cfg)
                        {:from "OrcPub Team <no-reply@orcpub.com>"
                         :to email
