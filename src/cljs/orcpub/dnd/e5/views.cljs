@@ -409,7 +409,6 @@
    :justify-content :space-between})
 
 (defn message [message-type message-text close-event]
-  (prn "MESSAGE TYPE" message-type)
   [:div.pointer.f-w-b
    {:on-click #(dispatch close-event)}
    [:div.white
@@ -966,7 +965,7 @@
      [{:title "New"
        :icon "plus"
        :on-click #(dispatch [:new-character])}]
-     [:div.p-5.w-100-p
+     [:div.p-5
       [:div
        {:style list-style}
        (doall
