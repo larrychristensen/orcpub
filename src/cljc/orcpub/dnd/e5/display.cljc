@@ -1,6 +1,7 @@
 (ns orcpub.dnd.e5.display
   (:require [clojure.string :as s]
-            [orcpub.common :as common]))
+            [orcpub.common :as common]
+            [orcpub.dnd.e5.character.equipment :as char-equip]))
 
 (def phb-url "https://www.amazon.com/gp/product/0786965606/ref=as_li_tl?ie=UTF8&tag=orcpub-20&camp=1789&creative=9325&linkCode=as2&creativeASIN=0786965606&linkId=9cd9647802c714f226bd591d61058143")
 
@@ -38,7 +39,7 @@
   {:feet :feet})
 
 (defn equipment-name [equipment-map equipment-kw]
-  (or (:name (equipment-map equipment-kw))
+  (or (::char-equip/name (equipment-map equipment-kw))
       (if (string? equipment-kw)
         equipment-kw
         (common/kw-to-name equipment-kw))))
