@@ -25,6 +25,7 @@
             [bidi.bidi :as bidi]
             [orcpub.route-map :as route-map]
             [orcpub.errors :as errors]
+            [orcpub.privacy :as privacy]
             [orcpub.email :as email]
             [orcpub.registration :as registration]
             [orcpub.entity.strict :as se]
@@ -453,6 +454,9 @@
 (defn send-password-reset-page [req]
   (index req))
 
+(defn character-builder-page [req]
+  (index req))
+
 (defn check-field [query value db]
   {:status 200
    :body (-> (d/q query db value)
@@ -507,16 +511,16 @@
    :body (body-fn)})
 
 (defn privacy-policy-page [req]
-  (terms-page orcpub.privacy/privacy-policy))
+  (terms-page privacy/privacy-policy))
 
 (defn terms-of-use-page [req]
-  (terms-page orcpub.privacy/terms-of-use))
+  (terms-page privacy/terms-of-use))
 
 (defn community-guidelines-page [_]
-  (terms-page orcpub.privacy/community-guidelines))
+  (terms-page privacy/community-guidelines))
 
 (defn cookie-policy-page [_]
-  (terms-page orcpub.privacy/cookie-policy))
+  (terms-page privacy/cookie-policy))
 
 (def routes
   (route/expand-routes
@@ -530,6 +534,8 @@
       {:delete `delete-character}]
      [(route-map/path-for route-map/dnd-e5-char-list-page-route) ^:interceptors [(body-params/body-params)]
       {:get `character-list-page}]
+     [(route-map/path-for route-map/dnd-e5-char-builder-route) ^:interceptors [(body-params/body-params)]
+      {:get `character-builder-page}]
      [(route-map/path-for route-map/login-route) ^:interceptors [(body-params/body-params)]
       {:post `login}]
      [(route-map/path-for route-map/character-pdf-route) {:post `character-pdf-2}]

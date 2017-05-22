@@ -455,6 +455,8 @@
    
    [:.bg-light
     {:background-color "#2c3445"}]
+   [:.bg-orange
+    {:background-color orange}]
    [:.bg-red
     {:background-color red}]
    [:.bg-green

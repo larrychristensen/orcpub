@@ -139,7 +139,7 @@
            [:img.h-32.w-32 {:src "https://www.patreon.com/images/patreon_navigation_logo_mini_orange.png"}]]]]]]]])
 
 (defn legal-footer []
-  [:div.m-l-15.m-b-10 {:style {:text-align :left}}
+  [:div.m-l-15.m-b-10.m-t-10 {:style {:text-align :left}}
    [:span "© 2017 OrcPub"]
    [:a.m-l-5 {:href "/terms-of-use" :target :_blank} "Terms of Use"]
    [:a.m-l-5 {:href "/privacy-policy" :target :_blank} "Privacy Policy"]])
@@ -332,7 +332,8 @@
 (defn register-form []
   (let [registration-validation @(subscribe [:registration-validation])
         registration-form @(subscribe [:registration-form])
-        send-updates? (not= false (:send-updates? registration-form))]
+        send-updates? (not= false (:send-updates? registration-form))
+        password-strength (registration/password-strength (:password registration-form))]
     (registration-page
      [:div {:style {:text-align :center}}
       [:div {:style {:color orange
@@ -365,9 +366,38 @@
        [form-input {:title "Password"
                     :key :password
                     :value (:password registration-form)
-                    ;:messages (:password registration-validation)
+                    :messages (:password registration-validation)
                     :type :password
                     :on-change (fn [e] (dispatch [:registration-password (event-value e)]))}]
+       (let [[color text]
+              (cond
+                (= 5 password-strength) ["bg-green" "Strong"]
+                (< 1 password-strength 5) ["bg-orange" "Moderate"]
+                :else ["bg-red" "Weak"])]
+         [:div.p-r-10.p-l-10.p-t-5
+          [:div
+           {:style {:position :relative
+                    :height "30px"}}
+           [:div.b-rad-5
+            {:style {:top 0
+                     :left 0
+                     :height "30px"
+                     :opacity "0.7"
+                     :width "100%"
+                     :position :absolute}
+             :class-name color}]
+           [:div.b-rad-5
+            {:style {:top 0
+                     :left 0
+                     :position :absolute
+                     :height "30px"
+                     :width (str (* 100 (float (/ password-strength 5))) "%")}
+             :class-name color}]
+           [:div.white.p-l-10.b-rad-5
+            {:style {:position :absolute
+                     :padding-top "6px"}}
+             [:span "Password Strength:"]
+             [:span.f-w-b.m-l-5 text]]]])
        [:div.m-t-20
         {:style {:text-align :left
                  :margin-left "15px"}}

@@ -59,8 +59,9 @@
               "cookies-policy" cookies-policy-route
               "dnd/"
               {"5e/"
-               {"characters" {"" dnd-e5-char-list-route
-                               ["/" :id] delete-dnd-e5-char-route}
+               {"character-builder" dnd-e5-char-builder-route
+                "characters" {"" dnd-e5-char-list-route
+                              ["/" :id] delete-dnd-e5-char-route}
                 "characters-page" dnd-e5-char-list-page-route}}}])
 
 (defn path-for [& args]
