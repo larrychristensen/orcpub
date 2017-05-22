@@ -386,11 +386,12 @@
                      :width "100%"
                      :position :absolute}
              :class-name color}]
-           [:div.b-rad-5
+           [:div.b-rad-5.password-strength-meter
             {:style {:top 0
                      :left 0
                      :position :absolute
                      :height "30px"
+                     :transition "width 1s"
                      :width (str (* 100 (float (/ password-strength 5))) "%")}
              :class-name color}]
            [:div.white.p-l-10.b-rad-5
