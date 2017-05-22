@@ -586,11 +586,22 @@
  (fn [cofx [_ response]]
    {:dispatch [:set-user-data nil]}))
 
+(def login-routes
+  #{routes/login-page-route
+    routes/register-page-route
+    routes/verify-sent-route
+    routes/reset-password-page-route
+    routes/verify-failed-route
+    routes/verify-success-route
+    routes/send-password-reset-page-route
+    routes/password-reset-success-route
+    routes/password-reset-expired-route
+    routes/password-reset-used-route})
 
 (reg-event-fx
  :login
  (fn [{:keys [db]} [_ params backtrack?]]
-   {:db (assoc db :return-route (some #(if (not= :login-page %) %) (:route-history db)))
+   {:db (assoc db :return-route (some #(if (not (login-routes %)) %) (:route-history db)))
     :http {:method :post
            :url login-url
            :json-params params
