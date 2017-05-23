@@ -1721,25 +1721,6 @@
    :z-index 100
    :background-color "rgba(0,0,0,0.6)"})
 
-(def debug-data-style {:width "400px" :height "400px"})
-
-(defn debug-data []
-  (let [expanded? (r/atom false)]
-    (fn []
-      [:div.t-a-r
-       [:div.orange.pointer.underline
-        {:on-click #(swap! expanded? not)}
-        [:i.fa.fa-bug {:class-name (if @expanded? "white")}]]
-       (if @expanded?
-         [:textarea.m-t-5
-          {:style debug-data-style
-           :value (str {:browser (user-agent/browser)
-                        :browser-version (user-agent/browser-version)
-                        :device-type (user-agent/device-type)
-                        :platform (user-agent/platform)
-                        :platform-version (user-agent/platform-version)
-                        :char-data @(subscribe [:character])})}])])))
-
 (defn character-builder []
   (let [character @(subscribe [:character])
         _  (if print-enabled? (cljs.pprint/pprint character))

@@ -96,7 +96,8 @@
  :save-character
  (fn [{:keys [db]} [_]]
    (let [strict (char5e/to-strict (:character db))]
-     {:http {:method :post
+     {:dispatch [:set-loading true]
+      :http {:method :post
              :headers {"Authorization" (str "Token " (-> db :user-data :token))}
              :url (backend-url (bidi/path-for routes/routes routes/dnd-e5-char-list-route))
              :transit-params strict
@@ -552,6 +553,7 @@
                      (assoc-in cfg [:headers "Authorization"] (str "Token " auth-token))
                      cfg)]
      (go (let [response (<! (http/request final-cfg))]
+           (dispatch [:set-loading false])
            (if (<= 200 (:status response) 299)
              (dispatch (conj on-success response))
              (if (= 401 (:status response))

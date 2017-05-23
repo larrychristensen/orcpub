@@ -90,3 +90,8 @@
     (is (spec/valid? ::char/unnamespaced-character character-2))
     (is (spec/valid? ::char/unnamespaced-character character-3))
     (is (not (spec/valid? ::char/unnamespaced-character namespaced)))))
+
+(deftest fix-quantities
+  (let [character {:orcpub.entity/options {:weapons [{:orcpub.entity/key :javelin, :orcpub.entity/value {:orcpub.dnd.e5.character.equipment/quantity 4, :orcpub.dnd.e5.character.equipment/equipped? true, :orcpub.dnd.e5.character.equipment/class-starting-equipment? true}} {:orcpub.entity/key :handaxe, :orcpub.entity/value {:orcpub.dnd.e5.character.equipment/equipped? true, :orcpub.dnd.e5.character.equipment/quantity "2"}} {:orcpub.entity/key :greataxe, :orcpub.entity/value {:orcpub.dnd.e5.character.equipment/quantity 1, :orcpub.dnd.e5.character.equipment/equipped? true}}]}}
+        expected {:orcpub.entity/options {:weapons [{:orcpub.entity/key :javelin, :orcpub.entity/value {:orcpub.dnd.e5.character.equipment/quantity 4, :orcpub.dnd.e5.character.equipment/equipped? true, :orcpub.dnd.e5.character.equipment/class-starting-equipment? true}} {:orcpub.entity/key :handaxe, :orcpub.entity/value {:orcpub.dnd.e5.character.equipment/equipped? true, :orcpub.dnd.e5.character.equipment/quantity 2}} {:orcpub.entity/key :greataxe, :orcpub.entity/value {:orcpub.dnd.e5.character.equipment/quantity 1, :orcpub.dnd.e5.character.equipment/equipped? true}}]}}]
+    (is (= (char/fix-quantities character) expected))))
