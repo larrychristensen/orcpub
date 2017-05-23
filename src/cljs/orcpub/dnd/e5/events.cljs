@@ -76,6 +76,7 @@
    (let [strict-character (:body response)
          character (char5e/from-strict strict-character)
          id (:db/id character)]
+     (prn "ID" id)
      {:db (-> db
               (assoc :character character)
               (update-in
@@ -86,7 +87,7 @@
                      (conj chars character)
                      (map
                       (fn [char]
-                        (if (:db/id char)
+                        (if (= id (:db/id char))
                           character
                           char))
                       chars))))))
