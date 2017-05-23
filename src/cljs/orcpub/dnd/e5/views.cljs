@@ -57,9 +57,11 @@
        messages))]))
 
 (defn base-input [attrs]
-  [:div.flex.p-l-10.p-l-10.p-r-10.p-t-10
-   [:input.flex-grow-1
-    attrs]])
+  [:div.m-b-10
+   [:div.f-s-10.t-a-l.m-l-10 (:placeholder attrs)]
+   [:div.flex.p-l-10.p-l-10.p-r-10
+    [:input.flex-grow-1
+     attrs]]])
 
 (defn form-input []
   (let [blurred? (r/atom false)]
