@@ -13,6 +13,11 @@
   (:require-macros [cljs.core.async.macros :refer [go]]))
 
 (reg-sub
+ :db
+ (fn [db _]
+   db))
+
+(reg-sub
  :registration-form
  (fn [db [_]]
    (get db :registration-form)))
