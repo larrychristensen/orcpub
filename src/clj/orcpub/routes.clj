@@ -471,12 +471,15 @@
 (defn save-character [{:keys [db transit-params body conn identity] :as request}]
   (if-let [data (spec/explain-data ::se/entity transit-params)]
     {:status 400 :body data}
-    (let [result @(d/transact conn [(if (:db/id transit-params)
+    (let [current-id (:db/id transit-params)
+          result @(d/transact conn [(if current-id
                                       transit-params
                                       (assoc transit-params
                                              :db/id "tempid"
                                              :orcpub.entity.strict/owner (:user identity)))])]
-      {:status 200 :body (assoc transit-params :db/id (-> result :tempids (get "tempid")))})))
+      {:status 200 :body (if current-id
+                           transit-params
+                           (assoc transit-params :db/id (-> result :tempids (get "tempid"))))})))
 
 (defn character-list [{:keys [db transit-params body conn identity] :as request}]
   (let [username (:user identity)
@@ -519,6 +522,9 @@
 
 (defn cookie-policy-page [_]
   (terms-page privacy/cookie-policy))
+
+(defn health-check [_]
+  {:status 200 :body "OK"})
 
 (def routes
   (route/expand-routes
@@ -577,4 +583,6 @@
      [(route-map/path-for route-map/check-email-route)
       {:get `check-email}]
      [(route-map/path-for route-map/check-username-route)
-      {:get `check-username}]]]))
+      {:get `check-username}]
+     ["/health"
+      {:get `health-check}]]]))
