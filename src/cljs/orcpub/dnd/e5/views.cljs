@@ -443,7 +443,7 @@
    :justify-content :space-between})
 
 (defn message [message-type message-text close-event]
-  [:div.pointer.f-w-b
+  [:div.pointer.f-w-b ;;.h-0.opacity-0.fade-out
    {:on-click #(dispatch close-event)}
    [:div.white
     {:style message-style
