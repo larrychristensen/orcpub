@@ -68,6 +68,8 @@
  character-interceptors
  reset-character)
 
+(def dnd-5e-characters-path [:dnd :e5 :characters])
+
 (reg-event-fx
  :character-save-success
  (fn [{:keys [db]} [_ response]]
@@ -76,17 +78,18 @@
          id (:db/id character)]
      {:db (-> db
               (assoc :character character)
-              (update :dnd-5e-characters
-                      (fn [chars]
-                        (let [new? (not-any? #(-> % :db/id (= id)) chars)]
-                          (if new?
-                            (conj chars character)
-                            (map
-                             (fn [char]
-                               (if (:db/id char)
-                                 character
-                                 char))
-                             chars))))))
+              (update-in
+               dnd-5e-characters-path
+               (fn [chars]
+                 (let [new? (not-any? #(-> % :db/id (= id)) chars)]
+                   (if new?
+                     (conj chars character)
+                     (map
+                      (fn [char]
+                        (if (:db/id char)
+                          character
+                          char))
+                      chars))))))
       :dispatch [:show-message "Your character has been saved."]})))
 
 (reg-event-fx
@@ -164,9 +167,9 @@
            (if (s/starts-with? faction-image-url "https")
              :https))))
 
-(def custom-equipment-path [::entity/values :custom-equipment])
+(def custom-equipment-path [::entity/values ::char5e/custom-equipment])
 
-(def custom-treasure-path [::entity/values :custom-treasure])
+(def custom-treasure-path [::entity/values ::char5e/custom-treasure])
 
 (defn add-starting-equipment [character [_ equipment-options custom-treasure custom-equipment]]
   (-> character
@@ -551,9 +554,11 @@
      (go (let [response (<! (http/request final-cfg))]
            (if (<= 200 (:status response) 299)
              (dispatch (conj on-success response))
-             (if on-failure
-               (dispatch (conj on-failure response))
-               (dispatch [:show-error-message [:div "There was an error, please try again later. If the problem persists please contact " [:a {:href "mailto:redorc@orcpub.com"} "redorc@orcpub.com."]]]))))))))
+             (if (= 401 (:status response))
+               (dispatch [:route routes/login-page-route])
+               (if on-failure
+                 (dispatch (conj on-failure response))
+                 (dispatch [:show-error-message [:div "There was an error, please try again later. If the problem persists please contact " [:a {:href "mailto:redorc@orcpub.com"} "redorc@orcpub.com."]]])))))))))
 
 (reg-fx
  :path
@@ -755,7 +760,7 @@
 (reg-event-db
  :set-dnd-5e-characters
  (fn [db [_ characters]]
-   (assoc-in db [:dnd :e5 :characters] characters)))
+   (assoc-in db dnd-5e-characters-path characters)))
 
 (reg-event-fx
  :edit-character
@@ -768,10 +773,14 @@
  (fn [_ _]
    {:dispatch [:show-message "Character successfully deleted"]}))
 
+
 (reg-event-fx
  :delete-character
  (fn [{:keys [db]} [_ id]]
-   {:db (update db :dnd-5e-characters (fn [chars] (remove #(-> % :db/id (= id)) chars)))
+   {:db (update-in db
+                   dnd-5e-characters-path
+                   (fn [chars]
+                     (remove #(-> % :db/id (= id)) chars)))
     :http {:method :delete
            :auth-token (get-auth-token db)
            :url (backend-url (routes/path-for routes/delete-dnd-e5-char-route :id id))

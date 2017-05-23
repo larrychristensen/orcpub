@@ -8885,7 +8885,7 @@ long rest."})]
     ?darkvision 0
     ?total-darkvision (+ ?darkvision ?darkvision-bonus)
     ?all-armor (merge ?armor ?magic-armor)
-    ?equipped-armor (into {} (filter (fn [[_ v]] (:equipped? v)) ?all-armor))}))
+    ?equipped-armor (into {} (filter (fn [[_ v]] (::char-equip5e/equipped? v)) ?all-armor))}))
 
 
 (def template

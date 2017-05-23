@@ -110,7 +110,7 @@
 
 (defn add-custom-equipment-namespaces [raw-character]
   (if (get-in raw-character [::entity/values :custom-equipment])
-    (update-in raw-character [::entity/values :custom-equipment]
+    (assoc-in raw-character [::entity/values ::custom-equipment]
                #(mapv (partial common/add-namespaces-to-keys
                               "orcpub.dnd.e5.character.equipment")
                      %))
@@ -383,6 +383,30 @@
 
 (defn character-name [built-char]
   (es/entity-val built-char ::character-name))
+
+(defn personality-trait-1 [built-char]
+  (es/entity-val built-char ::personality-trait-1))
+
+(defn personality-trait-2 [built-char]
+  (es/entity-val built-char ::personality-trait-2))
+
+(defn ideals [built-char]
+  (es/entity-val built-char ::ideals))
+
+(defn bonds [built-char]
+  (es/entity-val built-char ::bonds))
+
+(defn flaws [built-char]
+  (es/entity-val built-char ::flaws))
+
+(defn description [built-char]
+  (es/entity-val built-char ::description))
+
+(defn image-url-failed [built-char]
+  (es/entity-val built-char ::image-url-failed))
+
+(defn faction-image-url-failed [built-char]
+  (es/entity-val built-char ::faction-image-url-failed))
 
 (defn remove-custom-starting-equipment [character equipment-indicator path]
   (update-in

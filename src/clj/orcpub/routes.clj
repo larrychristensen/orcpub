@@ -356,9 +356,7 @@
   (.getPage doc index))
 
 (defn character-pdf-2 [req]
-  (prn "CHARACTER PDFxU" req)
-  (let [body-map (io.pedestal.http.route/parse-query-string (slurp (:body req)))
-        fields (clojure.edn/read-string (:body body-map))
+  (let [fields (-> req :form-params :body clojure.edn/read-string)
         {:keys [image-url image-url-failed faction-image-url faction-image-url-failed]} fields
         input (.openStream (io/resource (cond
                                           (find fields :spellcasting-class-6) "fillable-char-sheet-6-spells.pdf"
@@ -471,8 +469,9 @@
   (check-field email-query (:email query-params) db))
 
 (defn save-character [{:keys [db transit-params body conn identity] :as request}]
+  (prn "CHARACTER" transit-params)
   (if-let [data (spec/explain-data ::se/entity transit-params)]
-    {:status 400 :message data}
+    {:status 400 :body data}
     (let [result @(d/transact conn [(if (:db/id transit-params)
                                       transit-params
                                       (assoc transit-params
@@ -538,7 +537,8 @@
       {:get `character-builder-page}]
      [(route-map/path-for route-map/login-route) ^:interceptors [(body-params/body-params)]
       {:post `login}]
-     [(route-map/path-for route-map/character-pdf-route) {:post `character-pdf-2}]
+     [(route-map/path-for route-map/character-pdf-route) ^:interceptors [(body-params/body-params)]
+      {:post `character-pdf-2}]
      [(route-map/path-for route-map/verify-route)
       {:get `verify}]
      [(route-map/path-for route-map/verify-sent-route)

@@ -4,6 +4,7 @@
             [orcpub.dnd.e5.weapons :as weapons]
             [orcpub.dnd.e5.armor :as armor5e]
             [orcpub.dnd.e5.equipment :as equip5e]
+            [orcpub.dnd.e5.character.equipment :as char-equip5e]
             [orcpub.dnd.e5.modifiers :as mod5e])
   #?(:cljs (:require-macros [orcpub.dnd.e5.modifiers :as mod5e])))
 
@@ -2473,7 +2474,7 @@ The boots regain 2 hours of flying capability for every 12 hours they aren’t i
 
 (defn equipped-items-details [items item-map]
   (filter
-   :equipped?
+   ::char-equip5e/equipped?
    (map
     (fn [[item-kw cfg]]
       (merge

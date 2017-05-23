@@ -6,12 +6,13 @@
 (def dot-char "•")
 
 (defn- name-to-kw-aux [name]
-  (-> name
-      clojure.string/lower-case
-      (clojure.string/replace #"'" "")
-      (clojure.string/replace #"\W" "-")
-      (clojure.string/replace #"\-+" "-")
-      keyword))
+  (if (string? name)
+    (-> name
+        clojure.string/lower-case
+        (clojure.string/replace #"'" "")
+        (clojure.string/replace #"\W" "-")
+        (clojure.string/replace #"\-+" "-")
+        keyword)))
 
 (def memoized-name-to-kw (memoize name-to-kw-aux))
 
@@ -19,11 +20,12 @@
   (memoized-name-to-kw name))
 
 (defn kw-to-name [kw & [capitalize?]]
-  (as-> kw $
-    (name $)
-    (s/split $ #"\-")
-    (if capitalize? (map s/capitalize $) $)
-    (s/join " " $)))
+  (if (keyword? kw)
+    (as-> kw $
+      (name $)
+      (s/split $ #"\-")
+      (if capitalize? (map s/capitalize $) $)
+      (s/join " " $))))
 
 (defn map-by-key [values]
   (zipmap (map :key values) values))
