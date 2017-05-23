@@ -371,7 +371,7 @@
         max-armor-class (apply max all-armor-classes)
         levels (char5e/levels built-char)
         classes (char5e/classes built-char)
-        character-name (es/entity-val built-char :character-name)
+        character-name (char5e/character-name built-char)
         total-hit-dice (s/join
                         " / "
                         (map
@@ -390,14 +390,14 @@
       :hp-max (es/entity-val built-char :max-hit-points)
       :passive (es/entity-val built-char :passive-perception)
       :other-profs (other-profs-field built-char)
-      :personality-traits (s/join "\n\n" [(es/entity-val built-char :personality-trait-1) (es/entity-val built-char :personality-trait-2)])
-      :ideals (es/entity-val built-char :ideals)
-      :bonds (es/entity-val built-char :bonds)
-      :flaws (es/entity-val built-char :flaws)
-      :backstory (es/entity-val built-char :description)
+      :personality-traits (s/join "\n\n" [(char5e/personality-trait-1 built-char) (char5e/personality-trait-2 built-char)])
+      :ideals (char5e/ideals built-char)
+      :bonds (char5e/bonds built-char)
+      :flaws (char5e/flaws built-char)
+      :backstory (char5e/description built-char)
       :character-name character-name
       :character-name-2 character-name
-      :player-name (es/entity-val built-char :player-name)
+      :player-name (char5e/character-name built-char)
       :age (char5e/age built-char)
       :height (char5e/height built-char)
       :weight (char5e/weight built-char)
@@ -405,9 +405,9 @@
       :skin (char5e/skin built-char)
       :hair (char5e/hair built-char)
       :image-url (char5e/image-url built-char)
-      :image-url-failed (es/entity-val built-char :image-url-failed)
+      :image-url-failed (char5e/image-url-failed built-char)
       :faction-image-url (char5e/faction-image-url built-char)
-      :faction-image-url-failed (es/entity-val built-char :faction-image-url-failed)
+      :faction-image-url-failed (char5e/faction-image-url-failed built-char)
       :faction-name (char5e/faction-name built-char)}
      (attacks-and-spellcasting-fields built-char)
      (skill-fields built-char)

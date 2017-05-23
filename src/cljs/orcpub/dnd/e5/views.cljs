@@ -570,6 +570,7 @@
         [:div.flex.justify-cont-s-b.align-items-c.w-100-p.flex-wrap
          [:div.p-10
           [:div.m-b-5 "Icons made by Lorc, Caduceus, and Delapouite. Available on " [:a.orange {:href "http://game-icons.net"} "http://game-icons.net"]]]
+         [:a.m-l-10 {:href "https://muut.com/orcpub" :target :_blank} "Feedback/Bug Reports"]
          [:div.m-l-10
           [:a {:href "/privacy-policy" :target :_blank} "Privacy Policy"]
           [:a.m-l-5 {:href "/terms-of-use" :target :_blank} "Terms of Use"]]]]]])])

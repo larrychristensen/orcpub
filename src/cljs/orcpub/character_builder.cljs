@@ -1276,9 +1276,9 @@
              {:key :magic-weapons :ui-fn (partial inventory-selector mi5e/magic-weapon-map 60)}
              {:key :armor :ui-fn (partial inventory-selector armor5e/armor-map 60)}
              {:key :magic-armor :ui-fn (partial inventory-selector mi5e/magic-armor-map 60)}
-             {:key :equipment :ui-fn #(inventory-selector equip5e/equipment-map 60 % :custom-equipment)}
+             {:key :equipment :ui-fn #(inventory-selector equip5e/equipment-map 60 % ::char5e/custom-equipment)}
              {:key :other-magic-items :ui-fn (partial inventory-selector mi5e/other-magic-item-map 60)}
-             {:key :treasure :ui-fn #(inventory-selector equip5e/treasure-map 100 % :custom-treasure)}]}])
+             {:key :treasure :ui-fn #(inventory-selector equip5e/treasure-map 100 % ::char5e/custom-treasure)}]}])
 
 (defn section-tabs [available-selections built-template character page-index]
   [:div.flex.justify-cont-s-a
@@ -1778,6 +1778,7 @@
        :icon "save"
        :on-click #(dispatch [:save-character])}]
      [:div
+      [download-form]
       [:div.container
        [:div.content
         [al-legality al-illegal-reasons used-resources]]]
