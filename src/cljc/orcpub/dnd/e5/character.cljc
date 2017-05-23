@@ -3,6 +3,8 @@
             #?(:cljs [cljs.spec :as spec])
             #?(:clj [clojure.spec.test :as stest])
             #?(:cljs [cljs.spec.test :as stest])
+            #?(:clj [clojure.edn :refer [read-string]])
+            #?(:cljs [cljs.reader :refer [read-string]])
             [orcpub.entity-spec :as es]
             [orcpub.dice :as dice]
             [orcpub.common :as common]
@@ -126,13 +128,14 @@
 (defn add-ability-namespaces [raw-character]
   (update-in raw-character
              [::entity/options :ability-scores ::entity/value]
-             (fn [{:keys [str dex con int wis cha]}]
-               {::str str
-                ::dex dex
-                ::con con
-                ::int int
-                ::wis wis
-                ::cha cha})))
+             (fn [{:keys [::str ::dex ::con ::int ::wis ::cha]
+                   n-str :str n-dex :dex n-con :con n-int :int n-wis :wis n-cha :cha}]
+               {::str (or n-str str)
+                ::dex (or n-dex dex)
+                ::con (or n-con con)
+                ::int (or n-int int)
+                ::wis (or n-wis wis)
+                ::cha (or n-cha cha)})))
 
 (defn add-namespaces-to-values [raw-character]
   (if (seq (::entity/values raw-character))
@@ -156,6 +159,29 @@
 (spec/fdef to-strict
            :args ::raw-character
            :ret ::strict-character)
+
+(defn fix-quantities [raw-character]
+  (reduce
+   (fn [char equipment-key]
+     (let [path [::entity/options equipment-key]]
+       (if (seq (get-in raw-character path))
+         (update-in char
+                    path
+                    (fn [equipment-vec]
+                      (mapv
+                       (fn [equipment]
+                         (update-in
+                          equipment
+                          [::entity/value ::equip/quantity]
+                          (fn [qty]
+                            (if (string? qty)
+                              (read-string qty)
+                              qty))))
+                       equipment-vec)))
+         char)))
+   raw-character
+   equipment-keys))
+
 
 (defn from-strict [raw-character]
   (entity/from-strict raw-character))

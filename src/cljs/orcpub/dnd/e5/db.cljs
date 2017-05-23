@@ -64,9 +64,10 @@
  local-storage-character-key
  ::entity/raw-entity
  (fn [char]
-   (if (spec/valid? ::char5e/unnamespaced-character char)
-     (char5e/add-namespaces char)
-     char)))
+   (char5e/fix-quantities
+    (if (spec/valid? ::char5e/unnamespaced-character char)
+      (char5e/add-namespaces char)
+      char))))
 
 (spec/def ::username string?)
 (spec/def ::email string?)
