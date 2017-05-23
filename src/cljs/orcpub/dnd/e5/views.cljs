@@ -19,6 +19,7 @@
             [orcpub.dnd.e5.template :as t]
             [orcpub.dnd.e5.options :as opt]
             [clojure.string :as s]
+            [orcpub.user-agent :as user-agent]
             [bidi.bidi :as bidi]))
 
 (def text-color "#484848")
@@ -536,6 +537,27 @@
        @(subscribe [:message])
        [:hide-message]]])])
 
+(def debug-data-style {:width "400px" :height "400px"})
+
+(defn debug-data []
+  (let [expanded? (r/atom false)]
+    (fn []
+      [:div.t-a-r
+       [:div.orange.pointer.underline
+        {:on-click #(swap! expanded? not)}
+        [:i.fa.fa-bug {:class-name (if @expanded? "white")}]]
+       (if @expanded?
+         [:textarea.m-t-5
+          {:read-only true
+           :style debug-data-style
+           :value (str {:browser (user-agent/browser)
+                        :browser-version (user-agent/browser-version)
+                        :device-type (user-agent/device-type)
+                        :platform (user-agent/platform)
+                        :platform-version (user-agent/platform-version)
+                        :character @(subscribe [:character])})}])])))
+
+
 (defn content-page [title button-cfgs content]
   [:div.app
    {:on-scroll (fn [e]
@@ -570,10 +592,12 @@
         [:div.flex.justify-cont-s-b.align-items-c.w-100-p.flex-wrap
          [:div.p-10
           [:div.m-b-5 "Icons made by Lorc, Caduceus, and Delapouite. Available on " [:a.orange {:href "http://game-icons.net"} "http://game-icons.net"]]]
-         [:a.m-l-10 {:href "https://muut.com/orcpub" :target :_blank} "Feedback/Bug Reports"]
          [:div.m-l-10
+          [:a {:href "https://muut.com/orcpub" :target :_blank} "Feedback/Bug Reports"]]
+         [:div.m-l-10.m-r-10
           [:a {:href "/privacy-policy" :target :_blank} "Privacy Policy"]
-          [:a.m-l-5 {:href "/terms-of-use" :target :_blank} "Terms of Use"]]]]]])])
+          [:a.m-l-5 {:href "/terms-of-use" :target :_blank} "Terms of Use"]]]
+        [debug-data]]]])])
 
 (def row-style
   {:border-bottom "1px solid rgba(255,255,255,0.5)"})
