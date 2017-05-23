@@ -470,9 +470,10 @@
      (cond-> {:db (assoc db
                   :route new-route
                   :return-route (or return-route (:return-route db))
-                  :route-history (conj route-history route))}
+                  :route-history (conj route-history route))
+              :dispatch-n [[:hide-message]]}
        (not skip-path?) (assoc :path (routes/path-for new-route))
-       event (assoc :dispatch event)))))
+       event (update :dispatch-n conj event)))))
 
 (reg-event-db
  :set-user-data
@@ -797,6 +798,7 @@
 (reg-event-db
  :hide-message
  (fn [db [_]]
+   (prn "HIDE MESSAGE")
    (assoc db :message-shown? false)))
 
 (reg-event-db

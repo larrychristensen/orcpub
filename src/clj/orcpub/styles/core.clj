@@ -136,6 +136,8 @@
    [:.m-t-21
     {:margin-top "21px"}]
 
+   [:.opacity-0
+    {:opacity 0}]
    [:.opacity-1
     {:opacity "0.1"}]
    [:.opacity-2
@@ -274,6 +276,8 @@
    [:.w-1440
     {:width "1440px"}]
 
+   [:.h-0
+    {:height "0px"}]
    [:.h-12
     {:height "12px"}]
    [:.h-14
@@ -423,6 +427,14 @@
    [:.hidden
     {:display :none}]
 
+   (at-keyframes
+    :fade-out
+    [:from {:opacity 1
+            :height "100%"}]
+    [:50% {:opacity 0
+           :height "100%"}]
+    [:to {:height "0%"}])
+
    [:.pointer
     {:cursor :pointer}]
    [:.cursor-disabled
@@ -464,10 +476,9 @@
    [:.bg-green
     {:background-color "#70a800"}]
 
-   (at-keyframes
-    :bling-animation
-    [:from {:text-shadow "0 0 10px black"}]
-    [:to {:text-shadow "0 0 10px red"}])
+   [:.fade-out
+    {:animation-name :fade-out
+     :animation-duration :5s}]
 
    [:.no-appearance
     (handle-browsers :appearance :none)]])
