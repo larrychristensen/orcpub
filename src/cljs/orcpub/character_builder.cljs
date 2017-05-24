@@ -1325,8 +1325,9 @@
              :on-click (fn [_] (dispatch [:set-page i]))}
             [:div
              {:class-name class-name}
-             [:div.f-s-10.m-b-2
-               name]
+             (if (not= :mobile device-type)
+               [:div.f-s-10.m-b-2
+                name])
              [:div.t-a-c
               (views5e/svg-icon icon 32)]]
             (if (not (= total-remaining 0))
