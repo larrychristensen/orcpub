@@ -636,10 +636,19 @@
         ancestor-names (map ::t/name (remove nil? ancestors))]
     (s/join " - " ancestor-names)))
 
-(defn selection-section [character built-char built-template option-paths ui-fns {:keys [::t/key ::t/name ::t/help ::t/options ::t/min ::t/max ::t/ref ::t/icon ::t/multiselect? ::entity/path ::entity/parent] :as selection}]
+(defn selection-section-column [option-selectors]
+  (doall
+   (map-indexed
+    (fn [i selector]
+      ^{:key i}
+      [:div selector])
+    option-selectors)))
+
+(defn selection-section [character built-char built-template option-paths ui-fns {:keys [::t/key ::t/name ::t/help ::t/options ::t/min ::t/max ::t/ref ::t/icon ::t/multiselect? ::entity/path ::entity/parent] :as selection} num-columns]
   (let [actual-path (actual-path selection)
         remaining (count-remaining built-template character selection)
         expanded? (r/atom false)]
+    (prn "NUM_COLUMNS" num-columns)
     [selection-section-base {:path actual-path
                              :parent-title (if parent (ancestor-names-string built-template actual-path))
                              :name name
@@ -647,6 +656,7 @@
                              :help help
                              :max max
                              :min min
+                             :num-columns num-columns
                              :remaining remaining
                              :body (if (and ui-fns (or (ui-fns ref)
                                                        (ui-fns key)))
@@ -656,16 +666,35 @@
                                         {:character character
                                          :selection selection
                                          :built-char built-char}))
-                                     (doall
-                                      (map-indexed
-                                       (fn [i option]
-                                         ^{:key i}
-                                         [:div (new-option-selector actual-path
-                                                                    selection
-                                                                    (and (or (and max (> min 1))
-                                                                             multiselect?)
-                                                                         (not (pos? remaining))) option)])
-                                       (sort-by ::t/name options))))}]))
+                                     (let [option-selectors
+                                           (remove
+                                            nil?
+                                            (map
+                                             (fn [option]
+                                               (new-option-selector
+                                                actual-path
+                                                selection
+                                                (and (or (and max (> min 1))
+                                                         multiselect?)
+                                                     (not (pos? remaining))) option))
+                                             (sort-by ::t/name options)))]
+                                       [:div.flex
+                                        (doall
+                                         (map-indexed
+                                          (fn [i part]
+                                            ^{:key i}
+                                            [:div.flex-grow-1
+                                             {:class-name (str "w-" (int (/ 100 num-columns)) "-p")}
+                                             (doall
+                                              (map-indexed
+                                               (fn [j selector]
+                                                 ^{:key j}
+                                                 [:div selector])
+                                               part))])
+                                          (partition-all
+                                           (common/round-up (/ (count option-selectors)
+                                                               num-columns))
+                                           option-selectors)))]))}]))
 
 (defn set-abilities! [abilities]
   (dispatch [:set-abilities abilities]))
@@ -1281,23 +1310,27 @@
              {:key :treasure :ui-fn #(inventory-selector equip5e/treasure-map 100 % ::char5e/custom-treasure)}]}])
 
 (defn section-tabs [available-selections built-template character page-index]
-  [:div.flex.justify-cont-s-a
-   (doall
-    (map-indexed
-     (fn [i {:keys [name icon tags]}]
-       (let [selections (entity/tagged-selections available-selections tags)
-             combined-selections (entity/combine-selections selections)
-             total-remaining (sum-remaining built-template character combined-selections)]
-         ^{:key name}
-         [:div.p-5.hover-opacity-full.pointer
-          {:class-name (if (= i page-index) "b-b-2 b-orange" "")
-           :on-click (fn [_] (dispatch [:set-page i]))}
-          [:div
-           {:class-name (if (= i page-index) "selected-tab" "opacity-5 hover-opacity-full")}
-           (views5e/svg-icon icon 32)]
-          (if (not (= total-remaining 0))
-            [:div.flex.justify-cont-end.m-t--10 (remaining-indicator total-remaining 12 11)])]))
-     pages))])
+  (let [device-type @(subscribe [:device-type])]
+    [:div.flex.justify-cont-s-a
+     (doall
+      (map-indexed
+       (fn [i {:keys [name icon tags]}]
+         (let [selections (entity/tagged-selections available-selections tags)
+               combined-selections (entity/combine-selections selections)
+               total-remaining (sum-remaining built-template character combined-selections)]
+           ^{:key name}
+           [:div.p-5.hover-opacity-full.pointer.flex.flex-column.align-items-c
+            {:class-name (if (= i page-index) "b-b-2 b-orange" "")
+             :on-click (fn [_] (dispatch [:set-page i]))}
+            (if (= device-type :desktop)
+              [:div.f-s-10.m-b-2 name])
+            [:div.w-32
+             [:div.t-a-c
+              {:class-name (if (= i page-index) "selected-tab" "opacity-5 hover-opacity-full")}
+              (views5e/svg-icon icon 32)]
+             (if (not (= total-remaining 0))
+               [:div.flex.justify-cont-end.m-t--10 (remaining-indicator total-remaining 12 11)])]]))
+       pages))]))
 
 (defn matches-group-fn [key]
   (fn [{s-key ::t/key tags ::t/tags}]
@@ -1361,7 +1394,7 @@
   (< (selection-order-title s1)
      (selection-order-title s2)))
 
-(defn new-options-column []
+(defn new-options-column [num-columns]
   (let [character @(subscribe [:character])
         built-char @(subscribe [:built-character])
         built-template @(subscribe [:built-template])
@@ -1377,7 +1410,8 @@
                                        (zero? (::t/max %))
                                        (zero? (count-remaining built-template character %)))
                                  combined-selections)]
-    (if print-enabled? (js/console.log "FINAL SELECTIONS" (vec final-selections) (map ::t/key final-selections)))
+    (prn "NOC COLUMNS" num-columns)
+    (if print-enabled? (js/console.log "FINAL SELECTIONS" (clj->js final-selections)))
     [:div.w-100-p
      [option-sources]
      [:div#options-column.b-1.b-rad-5
@@ -1431,7 +1465,7 @@
                  (let [selection (some
                                   (matches-non-group-fn key)
                                   final-selections)]
-                   (selection-section character built-char built-template option-paths {key ui-fn} selection)))])
+                   (selection-section character built-char built-template option-paths {key ui-fn} selection num-columns)))])
             ui-fns))]
          (when (seq non-ui-fn-selections)
            [:div.m-t-20
@@ -1439,7 +1473,7 @@
              (map
               (fn [selection]
                 ^{:key (::entity/path selection)}
-                [:div (selection-section character built-char built-template option-paths nil selection)])
+                [:div (selection-section character built-char built-template option-paths nil selection num-columns)])
               (into (sorted-set-by compare-selections) non-ui-fn-selections)))])])]]))
 
 
@@ -1539,7 +1573,7 @@
 
 (defn description-fields []
   (let [entity-values @(subscribe [:entity-values])]
-    [:div.flex-grow-1.builder-column.personality-column
+    [:div.flex-grow-1
      [:div.m-t-5
       [:span.personality-label.f-s-18 "Character Name"]
       [character-input entity-values ::char5e/character-name]]
@@ -1597,8 +1631,48 @@
       [:span.personality-label.f-s-18 "Description/Backstory"]
       [character-textarea entity-values ::char5e/description "h-800"]]]))
 
+(defn builder-tab [title key current-tab]
+  [:span.builder-tab
+   {:class-name (if (= @current-tab key) "selected-builder-tab")
+    :on-click #(reset! current-tab key)} title])
+
+(defn mobile-columns []
+  (let [current-tab (r/atom :options)]
+    (fn []
+      [:div.p-r-10
+       [:div.flex-grow-1.flex.p-l-10.p-t-10
+        [:div.w-100-p
+         [:div.builder-tabs
+          [builder-tab "Options" :options current-tab]
+          [builder-tab "Description" :description current-tab]
+          [builder-tab "Details" :details current-tab]]
+         (case @current-tab
+           :options [new-options-column 1]
+           :description [description-fields]
+           [views5e/character-display @(subscribe [:built-character]) true 1])]]])))
+
+(defn desktop-or-tablet-columns [device-type]
+  (prn "DEVICE_TYPE" device-type)
+  (let [current-tab (r/atom :options)]
+    (fn []
+      [:div
+       [:div.flex-grow-1.flex.p-l-10.p-t-10
+        [:div.w-50-p
+         [:div.builder-tabs
+          [builder-tab "Options" :options current-tab]
+          [builder-tab "Description" :details current-tab]]
+         (if (= @current-tab :options)
+           [new-options-column (if (= device-type :desktop) 2 1)]
+           [description-fields])]
+        [:div.w-50-p.m-l-20
+         [views5e/character-display @(subscribe [:built-character]) true (if (= device-type :desktop) 2 1)]]]])))
+
 (defn builder-columns []
-  [:div.flex-grow-1.flex
+  (let [device-type @(subscribe [:device-type])]
+    (case device-type
+      :mobile [mobile-columns]
+      [desktop-or-tablet-columns device-type]))
+  #_[:div.flex-grow-1.flex
    {:class-name (s/join " " (map #(str (name %) "-tab-active") @(subscribe [:active-tabs])))}
    [:div.builder-column.options-column
     [new-options-column]]
@@ -1763,8 +1837,6 @@
       [:div.container
        [:div.content
         [al-legality al-illegal-reasons used-resources]]]
-      [:div.flex.justify-cont-c.white
-       [:div.content [builder-tabs active-tab]]]
       [:div.flex.justify-cont-c.p-b-40
        [:div.f-s-14.white.content
         [:div.flex.w-100-p
