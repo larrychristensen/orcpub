@@ -843,480 +843,6 @@
                          :frequency opt5e/long-rests-1
                          :summary "have 'shape water' cantrip; at level 3 can cast create or destroy water as 2nd level"}]}]})
 
-(defn al-illegal-hit-points-mod [reason]
-  (mod5e/al-illegal (str reason " The only legal option is 'Average'.")))
-
-(defn hit-points-selection [die class-nm level]
-  (t/selection-cfg
-   {:name (str "Hit Points: " class-nm " " level)
-    :key :hit-points
-    :require-value? true
-    :help "Select the method with which to determine this level's hit points."
-    :tags #{:class}
-    :options [{::t/name "Manual Entry"
-               ::t/key :manual-entry
-               ::t/help "This option allows you to manually type in the value for this level's hit points. Use this if you want to roll dice yourself or if you already have a character with known hit points for this level."
-               ::t/modifiers [(mod5e/deferred-max-hit-points)
-                              (al-illegal-hit-points-mod "Manual entry for hit points is not legal.")]}
-              {::t/name (str "Roll (1D" die ")")
-               ::t/key :roll
-               ::t/help "This option rolls virtual dice for you and sets that value for this level's hit points. It could pay off with a high roll, but you might also roll a 1."
-               ::t/modifiers [(mod5e/deferred-max-hit-points)
-                              (al-illegal-hit-points-mod "Rolling for hit points is not legal.")]}
-              (let [average (dice/die-mean die)]
-                (t/option-cfg
-                 {:name "Average"
-                  :key :average
-                  :help (str "This option just gives you the average value (" average ") for the die roll (1D" die "). Choose this option if you're not feeling lucky.")
-                  :modifiers [(mod5e/max-hit-points average)]}))]}))
-
-(defn tool-prof-selection-aux [tool num & [key prereq-fn]]
-  (t/selection-cfg
-   {:name (str "Tool Proficiency: " (:name tool))
-    :key (if key (keyword (str (name key) "--" (common/name-to-kw (:name tool)))))
-    :help (str "Select " (s/lower-case (:name tool)) " for which you are proficient.")
-    :options (map
-              (fn [{:keys [name key icon]}]
-                (t/option-cfg
-                 {:name name
-                  :key key
-                  :icon icon
-                  :modifiers [(mod5e/tool-proficiency key)]}))
-              (:values tool))
-    :min num
-    :max num
-    :prereq-fn prereq-fn
-    :tags #{:tool-profs :profs}}))
-
-(defn tool-prof-selection [tool-options & [key prereq-fn]]
-  (let [[first-key first-num] (-> tool-options first)
-        first-option (equip5e/tools-map first-key)]
-    (if (and (= 1 (count tool-options))
-             (seq (:values first-option)))
-      (tool-prof-selection-aux first-option first-num key prereq-fn)
-      (t/selection-cfg
-       {:name "Tool Proficiencies"
-        :key key
-        :options (map
-                  (fn [[k num]]
-                    (let [tool (equip5e/tools-map k)]
-                      (if (:values tool)
-                        (t/option-cfg
-                         {:name (:name tool)
-                          :selections [(tool-prof-selection-aux tool num key prereq-fn)]})
-                        (t/option-cfg
-                         {:name (:name tool)
-                          :key (:key tool)
-                          :icon (:icon tool)
-                          :modifiers [(mod5e/tool-proficiency (:key tool))]}))))
-                  tool-options)
-        :prereq-fn prereq-fn
-        :tags #{:profs :tool-profs}}))))
-
-(defn level-key [index]
-  (keyword (str "level-" index)))
-
-(defn level-name [index]
-  (str "Level " index))
-
-(defn subclass-level-option [{:keys [name
-                                     levels] :as subcls}
-                             kw
-                             spellcasting-template
-                             i]
-  (let [selections (some-> levels (get i) :selections)]
-    (t/option-cfg
-     {:name (level-name i)
-      :key (level-key i)
-      :order i
-      :selections (concat
-                   selections      
-                   (some-> spellcasting-template :selections (get i)))
-      :modifiers (some-> levels (get i) :modifiers)})))
-
-(defn total-levels-prereq [level & [class-key]]
-  (fn [c] (>= (if class-key
-                ((es/entity-val c :class-level) class-key)
-                (es/entity-val c :total-levels))
-              level)))
-
-(defn total-levels-option-prereq [level & [class-key]]
-  (t/option-prereq
-   (str "You must have at least " level " " (name class-key) " levels")
-   (total-levels-prereq level class-key)))
-
-(defn add-mod-total-levels-prereq [lvl cls modifier]
-  (if (sequential? modifier)
-    (map
-     add-mod-total-levels-prereq
-     modifier)
-    (update
-     modifier
-     ::mod/conditions
-     conj
-     (total-levels-prereq lvl (:key cls)))))
-
-(defn subclass-option [cls
-                       {:keys [name
-                               source
-                               profs
-                               selections
-                               spellcasting
-                               modifiers
-                               level-modifiers
-                               traits
-                               prereqs
-                               levels]
-                        :as subcls}]
-  (let [kw (common/name-to-kw name)
-        {:keys [armor weapon save skill-options tool-options tool language-options]} profs
-        {skill-num :choose options :options} skill-options
-        {level-factor :level-factor} spellcasting
-        skill-kws (if (:any options) (map :key skill5e/skills) (keys options))
-        armor-profs (keys armor)
-        weapon-profs (keys weapon)
-        tool-profs (keys tool)
-        spellcasting-template (opt5e/spellcasting-template
-                               (assoc
-                                spellcasting
-                                :class-key
-                                (or (:spell-list spellcasting) kw))
-                               subcls)
-        spell-selections (mapcat
-                          (fn [[lvl selections]]
-                            (map
-                             (fn [selection]
-                               (assoc selection ::t/prereq-fn (fn [c] (let [total-levels (es/entity-val c :total-levels)]
-                                                                        (>= lvl total-levels)))))
-                             selections))
-                          (:selections spellcasting-template))
-        level-selections (mapcat
-                          (fn [[lvl {selections :selections}]]
-                            (map
-                             (fn [selection]
-                               (assoc
-                                selection
-                                ::t/prereq-fn
-                                (total-levels-prereq lvl (:key cls))))
-                             selections))
-                          levels)
-        level-modifiers (mapcat
-                         (fn [[lvl {modifiers :modifiers}]]
-                           (map
-                            (partial add-mod-total-levels-prereq lvl cls)
-                            modifiers))
-                         levels)]
-    (t/option-cfg
-     {:name name
-      :prereqs prereqs
-      :selections (map
-                   (fn [selection]
-                     (update selection ::t/tags sets/union #{(:key cls) kw}))
-                   (concat
-                    selections
-                    level-selections
-                    spell-selections
-                    (if (seq tool-options) [(tool-prof-selection tool-options)])
-                    (if (seq skill-kws) [(opt5e/skill-selection skill-kws skill-num)])
-                    (if (seq language-options) [(opt5e/language-selection language-options)])))
-      :modifiers (concat
-                  modifiers
-                  level-modifiers
-                  [(mod5e/subclass (:key cls) kw)]
-                  (opt5e/armor-prof-modifiers armor-profs)
-                  (opt5e/weapon-prof-modifiers weapon-profs)
-                  (opt5e/tool-prof-modifiers tool-profs)
-                  (opt5e/traits-modifiers traits (:key cls))
-                  (if level-factor [(mod5e/spell-slot-factor (:key cls) level-factor)])
-                  (if source [(mod5e/used-resource source name)]))})))
-
-(defn first-class? [class-kw & [classes]]
-  (fn [c] (= class-kw (first (or classes (es/entity-val c :classes))))))
-
-(defn level-option [{:keys [name
-                            plugin?
-                            hit-die
-                            profs
-                            levels
-                            traits
-                            spellcasting
-                            ability-increase-levels
-                            subclass-title
-                            subclass-help
-                            subclass-level
-                            subclasses
-                            source] :as cls}
-                    kw
-                    spellcasting-template
-                    i]
-  (let [ability-inc-set (set ability-increase-levels)
-        level-kw (level-key i)]
-    (t/option-cfg
-     {:name (level-name i)
-      :key level-kw
-      :order i
-      :selections (map
-                   (fn [selection]
-                     (update selection ::t/tags sets/union #{:level level-kw}))
-                   (concat
-                    (some-> levels (get i) :selections)
-                    (some-> spellcasting-template :selections (get i))
-                    (if (= i subclass-level)
-                      [(t/selection-cfg
-                        {:name subclass-title
-                         :key (common/name-to-kw subclass-title)
-                         :help subclass-help
-                         :tags #{:subclass}
-                         :order 2
-                         :options (map
-                                   #(subclass-option (assoc cls :key kw) %)
-                                   (if source (map (fn [sc] (assoc sc :source source)) subclasses) subclasses))})])
-                    (if (and (not plugin?) (ability-inc-set i))
-                      [(opt5e/ability-score-improvement-selection name i)])
-                    (if (not plugin?)
-                      [(assoc
-                        (hit-points-selection hit-die name i)
-                        ::t/prereq-fn
-                        (fn [c] (or (not (= kw (first (es/entity-val c :classes))))
-                                    (> i 1))))])))
-      :modifiers (concat
-                  (if (= :all (:known-mode spellcasting))
-                    (let [slots (opt5e/total-slots i (:level-factor spellcasting))
-                          prev-level-slots (opt5e/total-slots (dec i) (:level-factor spellcasting))
-                          new-slots (apply dissoc slots (keys prev-level-slots))]
-                      (if (seq new-slots)
-                        (let [lvl (key (first new-slots))]
-                          (map
-                           (fn [kw]
-                             (mod5e/spells-known lvl kw (:ability spellcasting) name))
-                           (get-in sl/spell-lists [kw lvl]))))))
-                  (some-> levels (get i) :modifiers)
-                  (opt5e/traits-modifiers
-                   (filter
-                    (fn [{level :level :or {level 1}}]
-                      (= level i))
-                    traits)
-                   kw)
-                  (if (and (not plugin?)
-                           (= i 1)
-                           ())
-                    [(mod/cum-sum-mod
-                      ?hit-point-level-increases
-                      hit-die
-                      nil
-                      nil
-                      [(= kw (first ?classes))])])
-                  (if (not plugin?)
-                    [(mod5e/level kw name i hit-die)]))})))
-
-(defn new-starting-equipment-selection [class-kw {:keys [name options] :as cfg}]
-  (t/selection-cfg
-   (merge
-    cfg
-    {:name (str "Starting Equipment: " name)
-     :tags #{:equipment :starting-equipment}
-     :order 1
-     :options (conj options
-                    (t/option-cfg
-                     {:name "<none>"
-                      :key :none}))
-     :prereq-fn (if class-kw (first-class? class-kw))})))
-
-(defn equipment-option [class-kw [k num]]
-  (let [equipment (equip5e/equipment-map k)]
-    (if (:values equipment)
-      (t/option-cfg
-       {:name (:name equipment)
-        :selections [(t/selection-cfg
-                      {:name (:name equipment)
-                       :tags #{:equipment :starting-equipment}
-                       :options (map
-                                 #(equipment-option class-kw %)
-                                 (zipmap (map :key (:values equipment)) (repeat num)))
-                       :prereq-fn (first-class? class-kw)})]})
-      (t/option-cfg
-       {:name (-> equipment :name (str (if (> num 1) (str " (" num ")") "")))
-        :modifiers (if (:items equipment)
-                     (map
-                      (fn [[kw num]]
-                        (mod5e/equipment kw num))
-                      (:items equipment))
-                     [(mod5e/equipment k num)])}))))
-
-(defn simple-weapon-selection [num class-kw]
-  (new-starting-equipment-selection
-   class-kw
-   {:name "Simple Weapon"
-    :tags #{:starting-equipment}
-    :options (opt5e/weapon-options (weapon5e/simple-weapons weapon5e/weapons))
-    :min num
-    :max num
-    :prereq-fn (first-class? class-kw)}))
-
-(defn weapon-option [class-kw [k num]]
-  (case k
-    :simple (t/option-cfg
-             {:name "Any Simple Weapon"
-              :selections [(simple-weapon-selection num class-kw)]})
-    :martial (t/option-cfg
-              {:name "Any Martial Weapon"
-               :selections [(new-starting-equipment-selection
-                             class-kw
-                             {:name "Martial Weapon"
-                              :options (opt5e/weapon-options (weapon5e/martial-weapons weapon5e/weapons))
-                              :min num
-                              :max num})]})
-    (t/option-cfg
-     {:name (-> k weapon5e/weapons-map :name (str (if (> num 1) (str " (" num ")") "")))
-      :modifiers [(mod5e/weapon k num)]})))
-
-(defn armor-option [[k num]]
-  (t/option-cfg
-     {:name (-> k armor5e/armor-map :name)
-      :modifiers [(mod5e/armor k num)]}))
-
-(defn class-options [class-kw option-fn choices help]
-  (map
-   (fn [{:keys [name options]}]
-     (new-starting-equipment-selection
-      class-kw
-      {:name name
-       :help help
-       :options (map
-                 option-fn
-                 options)}))
-   choices))
-
-(defn class-weapon-options [weapon-choices class-kw]
-  (class-options class-kw (partial weapon-option class-kw) weapon-choices "Select a weapon to begin your adventuring career with."))
-
-(defn class-armor-options [armor-choices class-kw]
-  (class-options class-kw armor-option armor-choices "Select armor to begin your adventuring career with."))
-
-(defn class-equipment-options [equipment-choices class-kw]
-  (class-options class-kw (partial equipment-option class-kw) equipment-choices "Select equipment to start your adventuring career with."))
-
-(defn class-skill-selection [{skill-num :choose options :options skill-select-order :order} key prereq-fn]
-  (let [skill-kws (if (:any options) (map :key skill5e/skills) (keys options))]
-    (opt5e/skill-selection skill-kws skill-num skill-select-order key prereq-fn)))
-
-(defn class-help-field [name value]
-  [:div.m-t-5
-    [:span.f-w-b (str name ":")]
-   [:span.m-l-10 value]])
-
-
-(defn class-help [hd saves weapon-profs armor-profs]
-  [:div
-   (class-help-field "Hit Die" (str "d" hd))
-   (class-help-field "Saving Throw Proficiencies" (s/join ", " (map (comp s/upper-case name) saves)))
-   (class-help-field "Weapon Proficiencies" (s/join ", " (map (comp name key) weapon-profs)))
-   (class-help-field "Armor Proficiencies" (s/join ", " (map (comp name key) armor-profs)))])
-
-(defn starting-equipment-entity-option [indicator-key [k num]]
-  {::entity/key k
-   ::entity/value {::char-equip5e/quantity num
-                   ::char-equip5e/equipped? true
-                   indicator-key true}})
-
-(defn starting-equipment-entity-options [indicator-key key items]
-  (if items
-    {key
-     (mapv
-      (partial starting-equipment-entity-option indicator-key)
-      items)}))
-
-(defn class-starting-equipment-entity-options [key items]
-  (starting-equipment-entity-options ::char-equip5e/class-starting-equipment? key items))
-
-(defn background-starting-equipment-entity-options [key items]
-  (starting-equipment-entity-options ::char-equip5e/background-starting-equipment? key items))
-
-(defn class-option [{:keys [name
-                            key
-                            help
-                            hit-die
-                            plugin?
-                            profs
-                            levels
-                            ability-increase-levels
-                            subclass-title
-                            subclass-level
-                            subclasses
-                            selections
-                            modifiers
-                            source
-                            weapon-choices
-                            weapons
-                            equipment
-                            equipment-choices
-                            armor
-                            armor-choices
-                            spellcasting
-                            multiclass-prereqs]
-                     :as cls}]
-  (let [kw (or key (common/name-to-kw name))
-        {:keys [save skill-options multiclass-skill-options tool-options multiclass-tool-options tool]
-         armor-profs :armor weapon-profs :weapon} profs
-        {level-factor :level-factor} spellcasting
-        save-profs (keys save)
-        spellcasting-template (opt5e/spellcasting-template (assoc spellcasting :class-key kw) cls)]
-    (t/option-cfg
-     {:name name
-      :key kw
-      :help [:div.p-t-5.p-l-10.p-r-10
-             (class-help hit-die save-profs weapon-profs armor-profs)
-             [:div.m-t-10 help]]
-      :prereqs multiclass-prereqs
-      :selections (map
-                   (fn [selection]
-                     (update selection ::t/tags sets/union #{kw}))
-                   (concat
-                    selections
-                    (if (seq tool-options)
-                      [(tool-prof-selection tool-options :tool-selection (fn [c] (= kw (first (:classes c)))))])
-                    (if (seq multiclass-tool-options)
-                      [(tool-prof-selection multiclass-tool-options :multiclass-tool-selection (fn [c] (not= kw (first (:classes c)))))])
-                    (if weapon-choices (class-weapon-options weapon-choices kw))
-                    (if armor-choices (class-armor-options armor-choices kw))
-                    (if equipment-choices (class-equipment-options equipment-choices kw))
-                    (if skill-options
-                      [(class-skill-selection skill-options :skill-proficiency (fn [c] (prn "FIRST CLASS" (es/entity-val c :classes)) (= kw (first (es/entity-val c :classes)))))])
-                    (if multiclass-skill-options
-                      [(class-skill-selection multiclass-skill-options :multiclass-skill-proficiency (fn [c] (not= kw (first (:classes c)))))])
-                    [(t/selection-cfg
-                      {:name (str name " Levels")
-                       :key :levels
-                       :help "These are your levels in the containing class. You can add levels by clicking the 'Add Levels' button below."
-                       :new-item-text "Level Up (Add a Level)"
-                       :new-item-fn (fn [selection options current-values]
-                                      {::entity/key (-> current-values count inc level-key)})
-                       :tags #{kw}
-                       :options (map
-                                 (partial level-option cls kw spellcasting-template)
-                                 (range 1 21))
-                       :min 1
-                       :sequential? true
-                       :max nil})]))
-      :associated-options (remove
-                           nil?
-                           [(class-starting-equipment-entity-options :weapons weapons)
-                            (class-starting-equipment-entity-options :armor armor)
-                            (class-starting-equipment-entity-options :equipment equipment)])
-      :modifiers (concat
-                  modifiers
-                  (if armor-profs (opt5e/armor-prof-modifiers armor-profs kw))
-                  (if weapon-profs (opt5e/weapon-prof-modifiers weapon-profs kw))
-                  (if tool (opt5e/tool-prof-modifiers tool kw))
-                  (if level-factor [(mod5e/spell-slot-factor kw level-factor)])
-                  (if (and source (not plugin?))
-                    [(mod5e/used-resource source name)])
-                  (remove
-                   nil?
-                   [(mod5e/cls kw)
-                    (if save-profs (apply mod5e/saving-throws kw save-profs))]))})))
-
-
 (defn class-level [levels class-kw]
   (get-in levels [class-kw :class-level]))
 
@@ -1327,7 +853,7 @@
     :summary "Attack twice when taking Attack action"}))
 
 (def barbarian-option
-  (class-option
+  (opt5e/class-option
    {:name "Barbarian"
     :hit-die 12
     :ability-increase-levels [4 8 12 16 19]
@@ -1522,7 +1048,7 @@
    :options (zipmap (map :key equip5e/musical-instruments) (repeat 1))})
 
 (def bard-option
-  (class-option
+  (opt5e/class-option
    {:name "Bard"
     :hit-die 8
     :ability-increase-levels [4 8 12 16 19]
@@ -1681,7 +1207,7 @@
    5 9})
 
 (def cleric-option
-  (class-option
+  (opt5e/class-option
    {:name "Cleric",
     :spellcasting {:level-factor 1
                    :cantrips-known {1 3 4 1 10 1}
@@ -1706,15 +1232,15 @@
                                :leather 1
                                :chain-mail 1}}]
     :armor {:shield 1}
-    :selections [(new-starting-equipment-selection
+    :selections [(opt5e/new-starting-equipment-selection
                   :cleric
                   {:name "Additional Weapon"
                    :options [(t/option-cfg
                               {:name "Light Crossbow and 20 Bolts"
                                :modifiers [(mod5e/weapon :crossbow-light 1)
                                            (mod5e/equipment :crossbow-bolt 20)]})
-                             (weapon-option :cleric [:simple 1])]})
-                 (new-starting-equipment-selection
+                             (opt5e/weapon-option :cleric [:simple 1])]})
+                 (opt5e/new-starting-equipment-selection
                   :cleric
                   {:name "Holy Symbol"
                    :options (map
@@ -2012,7 +1538,7 @@
    :summary "moving through nonmagical difficult terrain costs no extra movement, pass through nonmagical plants without being slowed by them and without taking damage from them"})
 
 (def druid-option
-  (class-option
+  (opt5e/class-option
    {:name "Druid"
     :hit-die 8
     :spellcaster true
@@ -2059,14 +1585,14 @@
                               :summary (str "You can transform into a beast you have seen with CR "
                                             ?wild-shape-cr
                                             (if ?wild-shape-limitation (str " and " ?wild-shape-limitation)))})]}}
-    :selections [(new-starting-equipment-selection
+    :selections [(opt5e/new-starting-equipment-selection
                   :druid
                   {:name "Wooden Shield or Simple Weapon"
                    :options [(t/option-cfg
                               {:name "Wooden Shield"
                                :modifiers [(mod5e/armor :shield 1)]})
-                             (weapon-option :druid [:simple 1])]})
-                 (new-starting-equipment-selection
+                             (opt5e/weapon-option :druid [:simple 1])]})
+                 (opt5e/new-starting-equipment-selection
                   :druid
                   {:name "Melee Weapon"
                    :options [(t/option-cfg
@@ -2074,7 +1600,7 @@
                                :modifiers [(mod5e/weapon :scimitar 1)]})
                              (t/option-cfg
                               {:name "Simple Melee Weapon"
-                               :selections [(new-starting-equipment-selection
+                               :selections [(opt5e/new-starting-equipment-selection
                                              :druid
                                              {:name "Simple Melee Weapon"
                                               :options (opt5e/simple-melee-weapon-options 1)})]})]})]
@@ -2330,7 +1856,7 @@
 
 
 (def fighter-option
-  (class-option
+  (opt5e/class-option
    {:name "Fighter",
     :hit-die 10,
     :ability-increase-levels [4 6 8 12 14 16 19]
@@ -2379,7 +1905,7 @@
     :subclass-level 3
     :subclass-title "Martial Archetype"
     :selections [(opt5e/fighting-style-selection :fighter)
-                 (new-starting-equipment-selection
+                 (opt5e/new-starting-equipment-selection
                   :fighter
                   {:name "Armor"
                    :options [(t/option-cfg
@@ -2390,25 +1916,25 @@
                                :options [(mod5e/armor :leather 1)
                                          (mod5e/weapon :longbow 1)
                                          (mod5e/equipment :arrow 20)]})]})
-                 (new-starting-equipment-selection
+                 (opt5e/new-starting-equipment-selection
                   :fighter
                   {:name "Weapons"
                    :options [(t/option-cfg
                               {:name "Martial Weapon and Shield"
-                               :selections [(new-starting-equipment-selection
+                               :selections [(opt5e/new-starting-equipment-selection
                                              :fighter
                                              {:name "Martial Weapon"
                                               :options (opt5e/martial-weapon-options 1)})]
                                :modifiers [(mod5e/armor :shield 1)]})
                              (t/option-cfg
                               {:name "Two Martial Weapons"
-                               :selections [(new-starting-equipment-selection
+                               :selections [(opt5e/new-starting-equipment-selection
                                              :fighter
                                              {:name "Martial Weapons"
                                               :options (opt5e/martial-weapon-options 1)
                                               :min 2
                                               :max 2})]})]})
-                 (new-starting-equipment-selection
+                 (opt5e/new-starting-equipment-selection
                   :fighter
                   {:name "Additional Weapons"
                    :options [(t/option-cfg
@@ -2488,7 +2014,7 @@
    :summary "when you succeed on a DEX save to take half damage, you take none, if you fail, you take half"})
 
 (def monk-option
-  (class-option
+  (opt5e/class-option
    (merge
     opt5e/monk-base-cfg
     {:hit-die 8
@@ -2672,7 +2198,7 @@
                              :summary "create minor elemental effect"}]}]})))
 
 (def paladin-option
-  (class-option
+  (opt5e/class-option
    (merge
     opt5e/paladin-base-cfg
     {:name "Paladin"
@@ -2737,25 +2263,25 @@
                    :level 3
                    :frequency opt5e/rests-1
                    :summary "your oath provides specific options"})]
-     :selections [(new-starting-equipment-selection
+     :selections [(opt5e/new-starting-equipment-selection
                    :paladin
                    {:name "Weapons"
                     :options [(t/option-cfg
                                {:name "Martial Weapon and Shield"
-                                :selections [(new-starting-equipment-selection
+                                :selections [(opt5e/new-starting-equipment-selection
                                               :paladin
                                               {:name "Martial Weapon"
                                                :options (opt5e/martial-weapon-options 1)})]
                                 :modifiers [(mod5e/armor :shield 1)]})
                               (t/option-cfg
                                {:name "Two Martial Weapons"
-                                :selections [(new-starting-equipment-selection
+                                :selections [(opt5e/new-starting-equipment-selection
                                               :paladin
                                               {:name "Martial Weapons"
                                                :options (opt5e/martial-weapon-options 1)
                                                :min 2
                                                :max 2})]})]})
-                  (new-starting-equipment-selection
+                  (opt5e/new-starting-equipment-selection
                    :paladin
                    {:name "Melee Weapon"
                     :options [(t/option-cfg
@@ -2763,7 +2289,7 @@
                                 :modifiers [(mod5e/weapon :javelin 5)]})
                               (t/option-cfg
                                {:name "Simple Melee Weapon"
-                                :selections [(new-starting-equipment-selection
+                                :selections [(opt5e/new-starting-equipment-selection
                                               :paladin
                                               {:name "Simple Melee Weapon"
                                                :options (opt5e/simple-melee-weapon-options 1)})]})]})]
@@ -3003,7 +2529,7 @@
    :subclass-title "Ranger Archetype"})
 
 (def ranger-option
-  (class-option
+  (opt5e/class-option
    (merge
     ranger-base-cfg
     {:hit-die 10
@@ -3051,7 +2577,7 @@
                    :summary (let [favored-terrain ?ranger-favored-terrain
                                   one-terrain? (= 1 (count favored-terrain))]
                               (str "your favored terrain " (if one-terrain? "type is" "types are") " " (if (seq favored-terrain) (common/list-print (map #(common/kw-to-name % false) ?ranger-favored-terrain)) "not selected") ". Related to the terrain type" (if (not one-terrain?) "s") ": 2X proficiency bonus for INT and WIS checks for which you are proficient, difficult terrain doesn't slow your group, always alert for danger, can move stealthily alone at normal pace, 2x food when foraging, while tracking learn exact number, size, and when they passed through"))})]
-     :selections [(new-starting-equipment-selection
+     :selections [(opt5e/new-starting-equipment-selection
                    :ranger
                    {:name "Melee Weapon"
                     :options [(t/option-cfg
@@ -3059,7 +2585,7 @@
                                 :modifiers [(mod5e/weapon :shortsword 2)]})
                               (t/option-cfg
                                {:name "Simple Melee Weapon"
-                                :selections [(new-starting-equipment-selection
+                                :selections [(opt5e/new-starting-equipment-selection
                                               :ranger
                                               {:name "Simple Melee Weapon"
                                                :options (opt5e/simple-melee-weapon-options 1)
@@ -3203,7 +2729,7 @@
 (def rogue-skills {:acrobatics true :athletics true :deception true :insight true :intimidation true :investigation true :perception true :performance true :persuasion true :sleight-of-hand true :stealth true})
 
 (def rogue-option
-  (class-option
+  (opt5e/class-option
    {:name "Rogue",
     :hit-die 8
     :ability-increase-levels [4 8 10 12 16 19]
@@ -3244,7 +2770,7 @@
                               ::t/order
                               1)]}
              15 {:modifiers [(mod5e/saving-throws nil ::char5e/wis)]}}
-    :selections [(new-starting-equipment-selection
+    :selections [(opt5e/new-starting-equipment-selection
                   :rogue
                   {:name "Additional Weapon"
                    :options [(t/option-cfg
@@ -3425,7 +2951,7 @@
                               :summary "spend X sorcery pts. (min 1) to target two creatures with a single target spell, where X is the spell level"})]})]}))
 
 (def sorcerer-option
-  (class-option
+  (opt5e/class-option
    {:name "Sorcerer"
     :spellcasting {:level-factor 1
                    :cantrips-known {1 4 4 1 10 1}
@@ -3452,14 +2978,14 @@
     :profs {:weapon {:dagger true :dart true :sling true :quarterstaff true :crossbow-light true}
             :save {::char5e/con true ::char5e/cha true}
             :skill-options {:choose 2 :options {:arcana true :deception true :insight true :intimidation true :persuasion true :religion true}}}
-    :selections [(new-starting-equipment-selection
+    :selections [(opt5e/new-starting-equipment-selection
                   :sorcerer
                   {:name "Weapon"
                    :options [(t/option-cfg
                               {:name "Light Crossbow"
                                :modifiers [(mod5e/weapon :crossbow-light 1)
                                            (mod5e/equipment :crossbow-bolt 20)]})
-                             (weapon-option :sorcerer [:simple 1])]})]
+                             (opt5e/weapon-option :sorcerer [:simple 1])]})]
     :levels {2 {:modifiers [(mod5e/dependent-trait
                              {:name "Sorcery Points"
                               :level 2
@@ -3598,7 +3124,7 @@
               (get-in sl/spell-lists [:wizard 3]))}))
 
 (def wizard-option
-  (class-option
+  (opt5e/class-option
    {:name "Wizard",
     :spellcasting {:level-factor 1
                    :cantrips-known {1 3 4 1 10 1}
@@ -3891,7 +3417,7 @@
                   {:name "Eldritch Invocation: Ascendant Step"
                    :page 110
                    :summary "cast levitate on yourself at will"})]
-     :prereqs [(total-levels-option-prereq 9 :warlock)]})
+     :prereqs [(opt5e/total-levels-option-prereq 9 :warlock)]})
    (t/option-cfg
     {:name "Beast Speech"
      :modifiers [(mod5e/trait-cfg
@@ -3944,7 +3470,7 @@
                    :frequency opt5e/long-rests-1
                    :summary "cast hold monster at will on celestials, fiends, or elementals"})]
      :prereqs [(has-trait-with-name-prereq pact-of-the-chain-name)
-               (total-levels-option-prereq 15 :warlock)]})
+               (opt5e/total-levels-option-prereq 15 :warlock)]})
    (t/option-cfg
     {:name "Devil's Sight"
      :modifiers [(mod5e/darkvision 120 1)
@@ -3960,7 +3486,7 @@
                    :page 110
                    :summary "use warlock spell slot to cast confusion"
                    :frequency opt5e/long-rests-1})]
-     :prereqs [(total-levels-option-prereq 7 :warlock)]})
+     :prereqs [(opt5e/total-levels-option-prereq 7 :warlock)]})
    (t/option-cfg
     {:name "Eldritch Sight"
      :modifiers [(mod5e/trait-cfg
@@ -3996,7 +3522,7 @@
                   {:name "Eldritch Invocation: Lifedrinker"
                    :page 111
                    :summary (str "extra " (max 1 (?ability-bonuses ::char5e/cha)) " necrotic damage with your pact weapon")})]
-     :prereqs [(total-levels-option-prereq 12 :warlock)
+     :prereqs [(opt5e/total-levels-option-prereq 12 :warlock)
                (has-trait-with-name-prereq pact-of-the-blade-name)]})
    (t/option-cfg
     {:name "Mask of Many Faces"
@@ -4010,7 +3536,7 @@
                   {:name "Eldritch Invocation: Master of Myriad Forms"
                    :page 111
                    :summary "cast alter self at will"})]
-     :prereqs [(total-levels-option-prereq 15 :warlock)]})
+     :prereqs [(opt5e/total-levels-option-prereq 15 :warlock)]})
    (t/option-cfg
     {:name "Minions of Chaos"
      :modifiers [(mod5e/trait-cfg
@@ -4019,7 +3545,7 @@
                    :frequency opt5e/long-rests-1
                    :summary "cast conjure elemental using warlock spell slot
 long rest."})]
-     :prereqs [(total-levels-option-prereq 9 :warlock)]})
+     :prereqs [(opt5e/total-levels-option-prereq 9 :warlock)]})
    (t/option-cfg
     {:name "Mire the Mind"
      :modifiers [(mod5e/trait-cfg
@@ -4027,7 +3553,7 @@ long rest."})]
                    :page 111
                    :frequency opt5e/long-rests-1
                    :summary "cast slow using warlock spell slot"})]
-     :prereqs [(total-levels-option-prereq 5 :warlock)]})
+     :prereqs [(opt5e/total-levels-option-prereq 5 :warlock)]})
    (t/option-cfg
     {:name "Misty Visions"
      :modifiers [(mod5e/trait-cfg
@@ -4040,14 +3566,14 @@ long rest."})]
                   {:name "Eldritch Invocation: One with Shadows"
                    :page 111
                    :summary "in dim light or darkness, become invisible"})]
-     :prereqs [(total-levels-option-prereq 5 :warlock)]})
+     :prereqs [(opt5e/total-levels-option-prereq 5 :warlock)]})
    (t/option-cfg
     {:name "Otherworldly Leap"
      :modifiers [(mod5e/trait-cfg
                   {:name "Eldritch Invocation: Otherworldly Leap"
                    :page 111
                    :summary "cast jump on yourself at will"})]
-     :prereqs [(total-levels-option-prereq 9 :warlock)]})
+     :prereqs [(opt5e/total-levels-option-prereq 9 :warlock)]})
    (t/option-cfg
     {:name "Repelling Blast"
      :modifiers [(mod5e/trait-cfg
@@ -4062,7 +3588,7 @@ long rest."})]
                    :page 111
                    :frequency opt5e/long-rests-1
                    :summary "cast polymorph using a warlock spell slot"})]
-     :prereqs [(total-levels-option-prereq 7 :warlock)]})
+     :prereqs [(opt5e/total-levels-option-prereq 7 :warlock)]})
    (t/option-cfg
     {:name "Sign of Ill Omen"
      :modifiers [(mod5e/trait-cfg
@@ -4070,7 +3596,7 @@ long rest."})]
                    :page 111
                    :frequency opt5e/long-rests-1
                    :summary "cast bestow curse using warlock spell slot"})]
-     :prereqs [(total-levels-option-prereq 7 :warlock)]})
+     :prereqs [(opt5e/total-levels-option-prereq 7 :warlock)]})
    (t/option-cfg
     {:name "Thief of Five Fates"
      :modifiers [(mod5e/trait-cfg
@@ -4078,14 +3604,14 @@ long rest."})]
                    :page 111
                    :frequency opt5e/long-rests-1
                    :summary "cast bane warlock spell slot"})]
-     :prereqs [(total-levels-option-prereq 7 :warlock)]})
+     :prereqs [(opt5e/total-levels-option-prereq 7 :warlock)]})
    (t/option-cfg
     {:name "Thirsting Blade"
      :modifiers [(mod5e/trait-cfg
                   {:name "Eldritch Invocation: Thirsting Blade"
                    :page 111
                    :summary "when using Attack action, attack with pact blade twice"})]
-     :prereqs [(total-levels-option-prereq 5 :warlock)
+     :prereqs [(opt5e/total-levels-option-prereq 5 :warlock)
                (has-trait-with-name-prereq pact-of-the-blade-name)]})
    (t/option-cfg
     {:name "Visions of Distant Realms"
@@ -4093,7 +3619,7 @@ long rest."})]
                   {:name "Eldritch Invocation: Visions of Distant Realms"
                    :page 111
                    :summary "cast arcane eye at will"})]
-     :prereqs [(total-levels-option-prereq 15 :warlock)]})
+     :prereqs [(opt5e/total-levels-option-prereq 15 :warlock)]})
    (t/option-cfg
     {:name "Voice of the Chain Master"
      :modifiers [(mod5e/trait-cfg
@@ -4107,7 +3633,7 @@ long rest."})]
                   {:name "Eldritch Invocation: Whispers of the Grave"
                    :page 111
                    :summary "cast speak with dead at will"})]
-     :prereqs [(total-levels-option-prereq 9 :warlock)]})
+     :prereqs [(opt5e/total-levels-option-prereq 9 :warlock)]})
    (t/option-cfg
     {:name "Witch Sight"
      :modifiers [(mod5e/trait-cfg
@@ -4115,7 +3641,7 @@ long rest."})]
                    :range opt5e/ft-30
                    :page 111
                    :summary "see the true form of a creature"})]
-     :prereqs [(total-levels-option-prereq 15 :warlock)]})])
+     :prereqs [(opt5e/total-levels-option-prereq 15 :warlock)]})])
 
 (def warlock-spells-known
   {1 2
@@ -4155,7 +3681,7 @@ long rest."})]
               "uses Mystic Arcanum")}))
 
 (def warlock-option
-  (class-option
+  (opt5e/class-option
    {:name "Warlock"
     :spellcasting {:cantrips-known {1 2 4 1 10 1}
                    :spells-known warlock-spells-known
@@ -4172,15 +3698,15 @@ long rest."})]
             :save {::char5e/wis true ::char5e/cha true}
             :skill-options {:choose 2 :options {:arcana true :deception true :history true :intimidation true :investigation true :nature true :religion true}}}
     :modifiers [(mod/modifier ?pact-magic? true)]
-    :selections [(new-starting-equipment-selection
+    :selections [(opt5e/new-starting-equipment-selection
                   :warlock
                   {:name "Weapon"
                    :options [(t/option-cfg
                               {:name "Light Crossbow & 20 Bolts"
                                :modifiers [(mod5e/weapon :crossbow-light 1)
                                            (mod5e/equipment :crossbow-bolt 20)]})
-                             (weapon-option :warlock [:simple 1])]})
-                 (simple-weapon-selection 1 :warlock)]
+                             (opt5e/weapon-option :warlock [:simple 1])]})
+                 (opt5e/simple-weapon-selection 1 :warlock)]
     :equipment-choices [{:name "Equipment Pack"
                          :options {:scholars-pack 1
                                    :dungeoneers-pack 1}}
@@ -4329,320 +3855,313 @@ long rest."})]
    :page 139
    :summary "You are able to secure free passage on a sailing ship"})
 
-(def backgrounds [{:name "Acolyte"
-                   :help "Your life has been devoted to serving a god or gods."
-                   :profs {:skill {:insight true, :religion true}
-                           :language-options {:choose 2 :options {:any true}}}
-                   :equipment {:clothes-common 1
-                               :pouch 1
-                               :incense 5
-                               :vestements 1}
-                   :selections [(new-starting-equipment-selection
-                                 nil
-                                 {:name "Holy Symbol"
-                                  :options (map
-                                            #(starting-equipment-option % 1)
-                                            equip5e/holy-symbols)})
-                                ]
-                   :equipment-choices [{:name "Prayer Book/Wheel"
-                                        :options {:prayer-book 1
-                                                  :prayer-wheel 1}}]
-                   :treasure {:gp 15}
-                   :traits [{:name "Shelter the Faithful"
-                             :page 127
-                             :summary "You and your companions can expect free healing at an establishment of your faith."}]}
-                  {:name "Charlatan"
-                   :help "You have a history of being able to work people to your advantage."
-                   :traits [{:name "False Identity"
-                             :page 128
-                             :summary "you have a false identity; you can forge documents"}]
-                   :profs {:skill {:deception true :sleight-of-hand true}
-                           :tool {:disguise-kit true :forgery-kit true}}
-                   :equipment {:clothes-fine 1
-                               :disguise-kit 1
-                               :pouch 1}
-                   :treasure {:gp 15}}
+(def acolyte-bg
+  {:name "Acolyte"
+   :help "Your life has been devoted to serving a god or gods."
+   :profs {:skill {:insight true, :religion true}
+           :language-options {:choose 2 :options {:any true}}}
+   :equipment {:clothes-common 1
+               :pouch 1
+               :incense 5
+               :vestements 1}
+   :selections [(opt5e/new-starting-equipment-selection
+                 nil
+                 {:name "Holy Symbol"
+                  :options (map
+                            #(starting-equipment-option % 1)
+                            equip5e/holy-symbols)})
+                ]
+   :equipment-choices [{:name "Prayer Book/Wheel"
+                        :options {:prayer-book 1
+                                  :prayer-wheel 1}}]
+   :treasure {:gp 15}
+   :traits [{:name "Shelter the Faithful"
+             :page 127
+             :summary "You and your companions can expect free healing at an establishment of your faith."}]})
+
+(def charlatan-bg
+  {:name "Charlatan"
+   :help "You have a history of being able to work people to your advantage."
+   :traits [{:name "False Identity"
+             :page 128
+             :summary "you have a false identity; you can forge documents"}]
+   :profs {:skill {:deception true :sleight-of-hand true}
+           :tool {:disguise-kit true :forgery-kit true}}
+   :equipment {:clothes-fine 1
+               :disguise-kit 1
+               :pouch 1}
+   :treasure {:gp 15}})
+
+(def entertainer-bg
+  {:name "Entertainer"
+   :help "You have a history of entertaining people."
+   :traits [{:name "By Popular Demand"
+             :page 130
+             :summary "you are able to find a place to perform, in which you will recieve free food and lodging"}]
+   :profs {:skill {:acrobatics true :performance true}
+           :tool {:disguise-kit true}
+           :tool-options {:musical-instrument 1}}
+   :equipment-choices [musical-instrument-choice-cfg]
+   :equipment {:costume 1
+               :pouch 1}
+   :treasure {:gp 15}})
+
+(def gladiator-bg
+  {:name "Gladiator"
+   :help "You have a history of gladiatorial entertainment."
+   :traits [{:name "By Popular Demand"
+             :page 130
+             :summary "you are able to find a place to perform, in which you will recieve free food and lodging"}]
+   :profs {:skill {:acrobatics true :performance true}
+           :tool {:disguise-kit true}
+           :tool-options {:musical-instrument 1}}
+   :selections [(opt5e/new-starting-equipment-selection
+                 nil
+                 {:name "Gladiator Weapon"
+                  :options (opt5e/weapon-options weapon5e/weapons)})]
+   :equipment {:costume 1
+               :pouch 1}
+   :treasure {:gp 15}})
+
+(def folk-hero-bg
+  {:name "Folk Hero"
+   :help "You are regarded as a hero by the people of your home village."
+   :traits [{:name "Rustic Hospitality"
+             :page 131
+             :summary "find a place to rest, hide, or recuperate among commoners"}]
+   :profs {:skill {:animal-handling true :survival true}
+           :tool {:land-vehicles true}
+           :tool-options {:artisans-tool 1}}
+   :equipment-choices [opt5e/artisans-tools-choice-cfg]
+   :equipment {:shovel 1
+               :pot-iron 1
+               :clothes-common 1
+               :pouch 1}
+   :treasure {:gp 10}})
+
+(def guild-artisan-bg
+  {:name "Guild Artisan"
+   :help "You are an artisan and a member of a guild in a particular field."
+   :traits [{:name "Guild Membership"
+             :page 133
+             :summary "fellow guild members will provide you with food and lodging; you have powerful political connections through your guild"}]
+   :profs {:skill {:insight true :persuasion true}
+           :tool-options {:artisans-tool 1}
+           :language-options {:choose 1 :options {:any true}}}
+   :equipment-choices [opt5e/artisans-tools-choice-cfg]
+   :equipment {:clothes-traveler-s 1
+               :pouch 1}
+   :treasure {:gp 15}})
+
+(def guild-merchant-bg
+  {:name "Guild Merchant"
+   :help "You are member of a guild of merchants"
+   :traits [{:name "Guild Membership"
+             :page 133
+             :summary "fellow guild members will provide you with food and lodging; you have powerful political connections through your guild"}]
+   :profs {:skill {:insight true :persuasion true}
+           :language-options {:choose 1 :options {:any true}}}
+   :selections [(t/selection-cfg
+                 {:name "Proficiency: Navigator's Tools or Language"
+                  :tags #{:profs}
+                  :options [(t/option-cfg
+                             {:name "Navigator's Tools"
+                              :modifiers [(mod5e/tool-proficiency :navigators-tools)]})
+                            (t/option-cfg
+                             {:name "Language"
+                              :selections [(opt5e/language-selection opt5e/languages 1)]})]})]
+   :equipment {:clothes-traveler-s 1
+               :pouch 1
+               :mule 1
+               :cart 1}
+   :treasure {:gp 15}})
+
+(def hermit-bg
+  {:name "Hermit"
+   :help "You have lived a secluded life."
+   :traits [{:name "Discovery"
+             :page 134
+             :summary "You have made a powerful and unique discovery"}]
+   :profs {:skill {:medicine true :religion true}
+           :tool {:herbalism-kit true}
+           :language-options {:choose 1 :options {:any true}}}
+   :equipment {:case-map-or-scroll 1
+               :clothes-common 1
+               :herbalism-kit 1}
+   :custom-equipment {"Winter Blanket" 1
+                      "Notes from studies/prayers" 1}
+   :treasure {:gp 5}})
+
+
+(def noble-bg
+  {:name "Noble"
+   :help "You are of noble birth."
+   :traits []
+   :profs {:skill {:history true :persuasion true}
+           :tool-options {:gaming-set 1}
+           :language-options {:choose 1 :options {:any true}}}
+   :selections [(t/selection-cfg
+                 {:name "Feature"
+                  :tags #{:background}
+                  :options [(t/option-cfg
+                             {:name "Position of Priviledge"
+                              :modifiers [(mod5e/trait-cfg
+                                           {:name "Position of Priviledge"
+                                            :page 135
+                                            :summary "you are welcome in high society and common folk try to accomodate you"})]})
+                            (t/option-cfg
+                             {:name "Retainers"
+                              :modifiers [(mod5e/trait-cfg
+                                           {:name "Retainers"
+                                            :page 136
+                                            :summary "You have 3 commoner retainers"})]})]})]
+   :equipment {:clothes-fine 1
+               :signet-ring 1
+               :purse 1}
+   :custom-equipment {"Scoll of Pedigree" 1}
+   :treasure {:gp 25}})
+
+(def knight-bg
+  {:name "Knight"
+   :help "You are a knight."
+   :traits [{:name "Retainers"
+             :page 136
+             :summary "You have 2 commoner retainers and 1 noble squire"}]
+   :profs {:skill {:history true :persuasion true}
+           :tool-options {:gaming-set 1}
+           :language-options {:choose 1 :options {:any true}}}
+   :equipment {:clothes-fine 1
+               :signet-ring 1
+               :purse 1}
+   :custom-equipment {"Scoll of Pedigree" 1
+                      "Emblem of Chivalry" 1}
+   :treasure {:gp 25}})
+
+(def outlander-bg
+  {:name "Outlander"
+   :help "You were raised in the wilds."
+   :traits [{:name "Wanderer"
+             :page 136
+             :summary "Your memory of maps, geography, settlements, and terrain is excellent. You can find fresh food and water for you and 5 other people."}]
+   :profs {:skill {:athletics true :survival true}
+           :tool-options {:musical-instrument 1}
+           :language-options {:choose 1 :options {:any true}}}
+   :equipment {:staff 1
+               :clothes-traveler-s 1
+               :pouch 1
+               :hunting-trap 1}
+   :custom-equipment {"Trophy from Animal You Killed" 1}
+   :treasure {:gp 10}})
+
+(def sage-bg
+  {:name "Sage"
+   :help "You spent your life studying lore."
+   :traits [{:name "Researcher"
+             :page 139
+             :summary "If you don't know a piece of info you often know where to find it"}]
+   :profs {:skill {:arcana true :history true}
+           :language-options {:choose 2 :options {:any true}}}
+   :equipment {:ink 1
+               :clothes-common 1
+               :pouch 1
+               :knife-small 1}
+   :custom-equipment {"Quill" 1
+                      "Letter with question from dead colleague" 1}
+   :treasure {:gp 10}})
+
+(def sailor-bg
+  {:name "Sailor"
+   :help "You were a member of a crew for a seagoing vessel."
+   :traits [ships-passage-trait-cfg]
+   :profs {:skill {:athletics true :perception true}
+           :tool {:navigators-tools true :water-vehices true}}
+   :weapons {:club 1}
+   :equipment {:rope-silk 1
+               :clothes-common 1
+               :pouch 1}
+   :custom-equipment {"Belaying Pin" 1
+                      "Lucky Charm" 1}
+   :treasure {:gp 10}})
+
+
+(def pirate-bg
+  {:name "Pirate"
+   :help "You were a member of a crew for a seagoing vessel."
+   :profs {:skill {:athletics true :perception true}
+           :tool {:navigators-tools true :water-vehices true}}
+   :weapons {:club 1}
+   :equipment {:rope-silk 1
+               :clothes-common 1
+               :pouch 1}
+   :selections [(t/selection-cfg
+                 {:name "Feature"
+                  :tags #{:background}
+                  :options [(t/option-cfg
+                             {:name "Ship's Passage"
+                              :modifiers [(mod5e/trait-cfg
+                                           ships-passage-trait-cfg)]})
+                            (t/option-cfg
+                             {:name "Bad Reputation"
+                              :modifiers [(mod5e/trait-cfg
+                                           {:name "Bad Reputation"
+                                            :page 139
+                                            :summary "People in a civilized settlement are afraid of you and will let you get away with minor crimes"})]})]})]
+   :custom-equipment {"Belaying Pin" 1
+                      "Lucky Charm" 1}
+   :treasure {:gp 10}})
+
+(def soldier-bg
+  {:name "Soldier"
+   :help "You have spent your living by the sword."
+   :traits [{:name "Military Rank"
+             :page 140
+             :summary "Where recognized, your previous rank provides influence among military"}]
+   :profs {:skill {:athletics true :intimidation true}
+           :tool {:land-vehicles true}
+           :tool-options {:gaming-set 1}}
+   :equipment {:clothes-common 1
+               :pouch 1}
+   :equipment-choices [{:name "Dice or Cards"
+                        :options {:dice-set 1
+                                  :playing-card-set 1}}]
+   :custom-equipment {"Insignia of Rank" 1
+                      "Trophy from Fallen Enemy" 1}
+   :treasure {:gp 10}})
+
+(def urchin-bg
+  {:name "Urchin"
+   :help "You were a poor orphan living on the streets."
+   :traits [{:name "City Streets"
+             :page 141
+             :summary "You can travel twice your normal speed between city locations"}]
+   :profs {:skill {:sleight-of-hand true :stealth true}
+           :tool {:disguise-kit true :thieves-tools true}}
+   :equipment {:knife-small 1
+               :clothes-common 1
+               :pouch 1}
+   :custom-equipment {"Map of city you grew up in" 1
+                      "Pet mouse" 1
+                      "Token to remember your parents" 1}
+   :treasure {:gp 10}})
+
+(def backgrounds [acolyte-bg
+                  charlatan-bg
                   (criminal-background "Criminal")
                   (criminal-background "Spy")
-                  {:name "Entertainer"
-                   :help "You have a history of entertaining people."
-                   :traits [{:name "By Popular Demand"
-                             :page 130
-                             :summary "you are able to find a place to perform, in which you will recieve free food and lodging"}]
-                   :profs {:skill {:acrobatics true :performance true}
-                           :tool {:disguise-kit true}
-                           :tool-options {:musical-instrument 1}}
-                   :equipment-choices [musical-instrument-choice-cfg]
-                   :equipment {:costume 1
-                               :pouch 1}
-                   :treasure {:gp 15}}
-                  {:name "Gladiator"
-                   :help "You have a history of gladiatorial entertainment."
-                   :traits [{:name "By Popular Demand"
-                             :page 130
-                             :summary "you are able to find a place to perform, in which you will recieve free food and lodging"}]
-                   :profs {:skill {:acrobatics true :performance true}
-                           :tool {:disguise-kit true}
-                           :tool-options {:musical-instrument 1}}
-                   :selections [(new-starting-equipment-selection
-                                 nil
-                                 {:name "Gladiator Weapon"
-                                  :options (opt5e/weapon-options weapon5e/weapons)})]
-                   :equipment {:costume 1
-                               :pouch 1}
-                   :treasure {:gp 15}}
-                  {:name "Folk Hero"
-                   :help "You are regarded as a hero by the people of your home village."
-                   :traits [{:name "Rustic Hospitality"
-                             :page 131
-                             :summary "find a place to rest, hide, or recuperate among commoners"}]
-                   :profs {:skill {:animal-handling true :survival true}
-                           :tool {:land-vehicles true}
-                           :tool-options {:artisans-tool 1}}
-                   :equipment-choices [opt5e/artisans-tools-choice-cfg]
-                   :equipment {:shovel 1
-                               :pot-iron 1
-                               :clothes-common 1
-                               :pouch 1}
-                   :treasure {:gp 10}}
-                  {:name "Guild Artisan"
-                   :help "You are an artisan and a member of a guild in a particular field."
-                   :traits [{:name "Guild Membership"
-                             :page 133
-                             :summary "fellow guild members will provide you with food and lodging; you have powerful political connections through your guild"}]
-                   :profs {:skill {:insight true :persuasion true}
-                           :tool-options {:artisans-tool 1}
-                           :language-options {:choose 1 :options {:any true}}}
-                   :equipment-choices [opt5e/artisans-tools-choice-cfg]
-                   :equipment {:clothes-traveler-s 1
-                               :pouch 1}
-                   :treasure {:gp 15}}
-                  {:name "Guild Merchant"
-                   :help "You are member of a guild of merchants"
-                   :traits [{:name "Guild Membership"
-                             :page 133
-                             :summary "fellow guild members will provide you with food and lodging; you have powerful political connections through your guild"}]
-                   :profs {:skill {:insight true :persuasion true}
-                           :language-options {:choose 1 :options {:any true}}}
-                   :selections [(t/selection-cfg
-                                 {:name "Proficiency: Navigator's Tools or Language"
-                                  :tags #{:profs}
-                                  :options [(t/option-cfg
-                                             {:name "Navigator's Tools"
-                                              :modifiers [(mod5e/tool-proficiency :navigators-tools)]})
-                                            (t/option-cfg
-                                             {:name "Language"
-                                              :selections [(opt5e/language-selection opt5e/languages 1)]})]})]
-                   :equipment {:clothes-traveler-s 1
-                               :pouch 1
-                               :mule 1
-                               :cart 1}
-                   :treasure {:gp 15}}
-                  {:name "Hermit"
-                   :help "You have lived a secluded life."
-                   :traits [{:name "Discovery"
-                             :page 134
-                             :summary "You have made a powerful and unique discovery"}]
-                   :profs {:skill {:medicine true :religion true}
-                           :tool {:herbalism-kit true}
-                           :language-options {:choose 1 :options {:any true}}}
-                   :equipment {:case-map-or-scroll 1
-                               :clothes-common 1
-                               :herbalism-kit 1}
-                   :custom-equipment {"Winter Blanket" 1
-                                      "Notes from studies/prayers" 1}
-                   :treasure {:gp 5}}
-                  {:name "Noble"
-                   :help "You are of noble birth."
-                   :traits []
-                   :profs {:skill {:history true :persuasion true}
-                           :tool-options {:gaming-set 1}
-                           :language-options {:choose 1 :options {:any true}}}
-                   :selections [(t/selection-cfg
-                                 {:name "Feature"
-                                  :tags #{:background}
-                                  :options [(t/option-cfg
-                                             {:name "Position of Priviledge"
-                                              :modifiers [(mod5e/trait-cfg
-                                                           {:name "Position of Priviledge"
-                                                            :page 135
-                                                            :summary "you are welcome in high society and common folk try to accomodate you"})]})
-                                            (t/option-cfg
-                                             {:name "Retainers"
-                                              :modifiers [(mod5e/trait-cfg
-                                                           {:name "Retainers"
-                                                            :page 136
-                                                            :summary "You have 3 commoner retainers"})]})]})]
-                   :equipment {:clothes-fine 1
-                               :signet-ring 1
-                               :purse 1}
-                   :custom-equipment {"Scoll of Pedigree" 1}
-                   :treasure {:gp 25}}
-                  {:name "Knight"
-                   :help "You are a knight."
-                   :traits [{:name "Retainers"
-                             :page 136
-                             :summary "You have 2 commoner retainers and 1 noble squire"}]
-                   :profs {:skill {:history true :persuasion true}
-                           :tool-options {:gaming-set 1}
-                           :language-options {:choose 1 :options {:any true}}}
-                   :equipment {:clothes-fine 1
-                               :signet-ring 1
-                               :purse 1}
-                   :custom-equipment {"Scoll of Pedigree" 1
-                                      "Emblem of Chivalry" 1}
-                   :treasure {:gp 25}}
-                  {:name "Outlander"
-                   :help "You were raised in the wilds."
-                   :traits [{:name "Wanderer"
-                             :page 136
-                             :summary "Your memory of maps, geography, settlements, and terrain is excellent. You can find fresh food and water for you and 5 other people."}]
-                   :profs {:skill {:athletics true :survival true}
-                           :tool-options {:musical-instrument 1}
-                           :language-options {:choose 1 :options {:any true}}}
-                   :equipment {:staff 1
-                               :clothes-traveler-s 1
-                               :pouch 1
-                               :hunting-trap 1}
-                   :custom-equipment {"Trophy from Animal You Killed" 1}
-                   :treasure {:gp 10}}
-                  {:name "Sage"
-                   :help "You spent your life studying lore."
-                   :traits [{:name "Researcher"
-                             :page 139
-                             :summary "If you don't know a piece of info you often know where to find it"}]
-                   :profs {:skill {:arcana true :history true}
-                           :language-options {:choose 2 :options {:any true}}}
-                   :equipment {:ink 1
-                               :clothes-common 1
-                               :pouch 1
-                               :knife-small 1}
-                   :custom-equipment {"Quill" 1
-                                      "Letter with question from dead colleague" 1}
-                   :treasure {:gp 10}}
-                  {:name "Sailor"
-                   :help "You were a member of a crew for a seagoing vessel."
-                   :traits [ships-passage-trait-cfg]
-                   :profs {:skill {:athletics true :perception true}
-                           :tool {:navigators-tools true :water-vehices true}}
-                   :weapons {:club 1}
-                   :equipment {:rope-silk 1
-                               :clothes-common 1
-                               :pouch 1}
-                   :custom-equipment {"Belaying Pin" 1
-                                      "Lucky Charm" 1}
-                   :treasure {:gp 10}}
-                  {:name "Pirate"
-                   :help "You were a member of a crew for a seagoing vessel."
-                   :profs {:skill {:athletics true :perception true}
-                           :tool {:navigators-tools true :water-vehices true}}
-                   :weapons {:club 1}
-                   :equipment {:rope-silk 1
-                               :clothes-common 1
-                               :pouch 1}
-                   :selections [(t/selection-cfg
-                                 {:name "Feature"
-                                  :tags #{:background}
-                                  :options [(t/option-cfg
-                                             {:name "Ship's Passage"
-                                              :modifiers [(mod5e/trait-cfg
-                                                           ships-passage-trait-cfg)]})
-                                            (t/option-cfg
-                                             {:name "Bad Reputation"
-                                              :modifiers [(mod5e/trait-cfg
-                                                           {:name "Bad Reputation"
-                                                            :page 139
-                                                            :summary "People in a civilized settlement are afraid of you and will let you get away with minor crimes"})]})]})]
-                   :custom-equipment {"Belaying Pin" 1
-                                      "Lucky Charm" 1}
-                   :treasure {:gp 10}}
-                  {:name "Soldier"
-                   :help "You have spent your living by the sword."
-                   :traits [{:name "Military Rank"
-                             :page 140
-                             :summary "Where recognized, your previous rank provides influence among military"}]
-                   :profs {:skill {:athletics true :intimidation true}
-                           :tool {:land-vehicles true}
-                           :tool-options {:gaming-set 1}}
-                   :equipment {:clothes-common 1
-                               :pouch 1}
-                   :equipment-choices [{:name "Dice or Cards"
-                                        :options {:dice-set 1
-                                                  :playing-card-set 1}}]
-                   :custom-equipment {"Insignia of Rank" 1
-                                      "Trophy from Fallen Enemy" 1}
-                   :treasure {:gp 10}}
-                  {:name "Urchin"
-                   :help "You were a poor orphan living on the streets."
-                   :traits [{:name "City Streets"
-                             :page 141
-                             :summary "You can travel twice your normal speed between city locations"}]
-                   :profs {:skill {:sleight-of-hand true :stealth true}
-                           :tool {:disguise-kit true :thieves-tools true}}
-                   :equipment {:knife-small 1
-                               :clothes-common 1
-                               :pouch 1}
-                   :custom-equipment {"Map of city you grew up in" 1
-                                      "Pet mouse" 1
-                                      "Token to remember your parents" 1}
-                   :treasure {:gp 10}}])
-
-(defn background-option [{:keys [name
-                                 help
-                                 page
-                                 profs
-                                 selections
-                                 modifiers
-                                 weapon-choices
-                                 weapons
-                                 equipment
-                                 custom-equipment
-                                 equipment-choices
-                                 armor
-                                 armor-choices
-                                 treasure
-                                 custom-treasure
-                                 traits
-                                 source]
-                          :as background}]
-  (let [kw (common/name-to-kw name)
-        {:keys [skill skill-options tool-options tool language-options]
-         armor-profs :armor weapon-profs :weapon} profs
-        {skill-num :choose options :options} skill-options
-        skill-kws (if (:any options) (map :key skill5e/skills) (keys options))
-        equipment-options (remove
-                            nil?
-                            [(background-starting-equipment-entity-options :weapons weapons)
-                             (background-starting-equipment-entity-options :armor armor)
-                             (background-starting-equipment-entity-options :equipment equipment)
-                             (background-starting-equipment-entity-options :treasure treasure)])]
-    (t/option-cfg
-     {:name name
-      :key kw
-      :help help
-      :page page
-      :select-fn (fn [_ _]
-                   (dispatch [:add-starting-equipment equipment-options custom-treasure custom-equipment]))
-      :selections (concat
-                   selections
-                   (if (seq tool-options) [(tool-prof-selection tool-options)])
-                   (class-weapon-options weapon-choices nil)
-                   (class-armor-options armor-choices nil)
-                   (class-equipment-options equipment-choices nil)
-                   (if (seq skill-kws) [(opt5e/skill-selection skill-kws skill-num)])
-                   (if (seq language-options) [(opt5e/language-selection language-options)]))
-      :modifiers (concat
-                  [(mod5e/background name)]
-                  (if source [(mod5e/used-resource source name)])
-                  (opt5e/traits-modifiers traits)
-                  modifiers
-                  (opt5e/armor-prof-modifiers (keys armor-profs))
-                  (opt5e/weapon-prof-modifiers (keys weapon-profs))
-                  (opt5e/tool-prof-modifiers (keys tool))
-                  (map
-                   (fn [skill-kw]
-                     (mod5e/skill-proficiency skill-kw))
-                   (keys skill)))})))
+                  entertainer-bg
+                  gladiator-bg
+                  folk-hero-bg
+                  guild-artisan-bg
+                  guild-merchant-bg
+                  hermit-bg
+                  noble-bg
+                  knight-bg
+                  outlander-bg
+                  sage-bg
+                  sailor-bg
+                  pirate-bg
+                  soldier-bg
+                  urchin-bg])
 
 (def volos-guide-to-monsters-selections
   [(t/selection-cfg
@@ -4956,7 +4475,7 @@ long rest."})]
 (def sword-coast-adventurers-guide-selections
   [(background-selection
     {:options (map
-               background-option
+               opt5e/background-option
                scag/sword-coast-adventurers-guide-backgrounds)})
    (race-selection
     {:options (map
@@ -4966,19 +4485,19 @@ long rest."})]
                 scag-halfling-option-cfg])})
    (class-selection
     {:options (map
-               (fn [cfg] (class-option (assoc cfg :plugin? true :source :scag)))
+               (fn [cfg] (opt5e/class-option (assoc cfg :plugin? true :source :scag)))
                scag/scag-classes)})])
 
 (def cos-selections
   [(background-selection
     {:options (map
-               background-option
+               opt5e/background-option
                cos-backgrounds)})])
 
 (def dmg-selections
   [(class-selection
     {:options (map
-               (fn [cfg] (class-option (assoc cfg :plugin? true :source :dmg)))
+               (fn [cfg] (opt5e/class-option (assoc cfg :plugin? true :source :dmg)))
                dmg-classes)})])
 
 (defn ability-item [name abbr desc]
@@ -5226,7 +4745,7 @@ long rest."})]
    :key ua-trio-of-subclasses-kw
    :selections [(class-selection
                  {:options (map
-                            class-option
+                            opt5e/class-option
                             ua-trio-of-subclasses-classes)})]})
 
 (def ua-revised-subclasses-kw :ua-revised-subclasses)
@@ -5499,7 +5018,7 @@ long rest."})]
    :key ua-revised-subclasses-kw
    :selections [(class-selection
                  {:options (map
-                            class-option
+                            opt5e/class-option
                             ua-revised-classes)})]})
 
 (def ua-mystic-order-of-the-awakened
@@ -5660,7 +5179,7 @@ long rest."})]
   {:name "Unearthed Arcana: Mystic"
    :key ua-mystic-kw
    :selections [(class-selection
-                 {:options [(class-option
+                 {:options [(opt5e/class-option
                              {:name "Mystic",
                               :hit-die 8,
                               :ability-increase-levels [4 8 12 16 19]
@@ -5703,7 +5222,7 @@ long rest."})]
                                             :summary (str "You have " ?psi-points " psi points")})]
                               :selections [ua-mystic/psionic-talents-selection
                                            (psionic-disciplines-selection 1) 
-                                           (new-starting-equipment-selection
+                                           (opt5e/new-starting-equipment-selection
                                             :fighter
                                             {:name "Armor"
                                              :options [(t/option-cfg
@@ -5714,25 +5233,25 @@ long rest."})]
                                                          :options [(mod5e/armor :leather 1)
                                                                    (mod5e/weapon :longbow 1)
                                                                    (mod5e/equipment :arrow 20)]})]})
-                                           (new-starting-equipment-selection
+                                           (opt5e/new-starting-equipment-selection
                                             :fighter
                                             {:name "Weapons"
                                              :options [(t/option-cfg
                                                         {:name "Martial Weapon and Shield"
-                                                         :selections [(new-starting-equipment-selection
+                                                         :selections [(opt5e/new-starting-equipment-selection
                                                                        :fighter
                                                                        {:name "Martial Weapon"
                                                                         :options (opt5e/martial-weapon-options 1)})]
                                                          :modifiers [(mod5e/armor :shield 1)]})
                                                        (t/option-cfg
                                                         {:name "Two Martial Weapons"
-                                                         :selections [(new-starting-equipment-selection
+                                                         :selections [(opt5e/new-starting-equipment-selection
                                                                        :fighter
                                                                        {:name "Martial Weapons"
                                                                         :options (opt5e/martial-weapon-options 1)
                                                                         :min 2
                                                                         :max 2})]})]})
-                                           (new-starting-equipment-selection
+                                           (opt5e/new-starting-equipment-selection
                                             :fighter
                                             {:name "Additional Weapons"
                                              :options [(t/option-cfg
@@ -5807,7 +5326,7 @@ long rest."})]
 (def ua-waterborne-kw :ua-waterborne)
 
 (defn mariner-class-option [nm kw level]
-  (class-option
+  (opt5e/class-option
    {:name nm
     :plugin? true
     :source ua-waterborne-kw
@@ -5952,7 +5471,7 @@ long rest."})]
                               :languages ["Common"]
                               :selections [(opt5e/language-selection opt5e/languages 1)]}])})
                 (class-selection
-                 {:options [(class-option
+                 {:options [(opt5e/class-option
                              {:name "Wizard",
                               :plugin? true
                               :source ua-eberron-kw
@@ -6163,7 +5682,7 @@ long rest."})]
    (background-selection
     {:help "Background broadly describes your character origin. It also affords you two skill proficiencies and possibly proficiencies with tools or languages."
      :options (map
-               background-option
+               opt5e/background-option
                backgrounds)})
    (feat-selection
     {:options opt5e/feat-options
