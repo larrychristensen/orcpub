@@ -89,13 +89,11 @@
 
 (defn login-response
   [{:keys [json-params db] :as request}]
-  (prn "REQUEST" request)
   (let [{:keys [username password]} json-params
         {:keys [:orcpub.user/verified?
                 :orcpub.user/verification-sent
                 :orcpub.user/email
                 :db/id] :as user} (lookup-user db username password)
-        _ (prn "USER" user username password)
         unverified? (not verified?)
         expired? (and verification-sent (verification-expired? verification-sent))]
     (cond
@@ -108,7 +106,6 @@
                                   :token token}}))))
 
 (defn login [{:keys [json-params db] :as request}]
-  (prn "LOGIN" login)
   (try
     (login-response request)
     (catch Exception e (prn "E" e))))
@@ -135,7 +132,6 @@
 (defn do-verification [request params conn & [tx-data]]
   (let [verification-key (str (java.util.UUID/randomUUID))
         now (java.util.Date.)]
-    (prn "DO VERIFY" tx-data)
     (do @(d/transact
           conn
           [(merge
@@ -187,7 +183,6 @@
         {:keys [:orcpub.user/verification-sent
                 :orcpub.user/verified?
                 :db/id] :as user} (user-for-verification-key (d/db conn) key)]
-    (prn "USER" user)
     (if verified?
       (redirect route-map/verify-success-route)
       (if (or (nil? verification-sent)
@@ -254,11 +249,9 @@
   {:status 200})
 
 (defn reset-password [{:keys [json-params db conn cookies identity] :as request}]
-  (prn "RESET PASSWORD REQUEST" request)
   (let [{:keys [password verify-password]} json-params
         username (:user identity)
         {:keys [:db/id] :as user} (first-user-by db username-query username)]
-    (prn "USER" username user)
     (if (= password verify-password)
       (do-password-reset conn id password)
       {:status 400 :message "Passwords do not match"})))
@@ -430,10 +423,8 @@
                 :orcpub.user/password-reset-key
                 :orcpub.user/password-reset-sent
                 :orcpub.user/password-reset] :as user} (first-user-by db user-by-password-reset-key-query key)
-        _ (prn "USER" user key)
         expired? (password-reset-expired? password-reset-sent) 
         already-reset? (password-already-reset? password-reset password-reset-sent)]
-    (prn "EXIRED" expired? already-reset? password-reset-sent password-reset)
     (cond
       expired? (redirect route-map/password-reset-expired-route)
       already-reset? (redirect route-map/password-reset-used-route)

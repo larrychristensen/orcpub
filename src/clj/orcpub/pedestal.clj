@@ -12,7 +12,6 @@
    :enter (fn [context]
             (let [conn (:conn conn)]
               (let [db (d/db conn)]
-                (prn "CONN" conn db)
                 (update context :request assoc :db db :conn conn))))})
 
 (defrecord Pedestal [service-map conn service]
