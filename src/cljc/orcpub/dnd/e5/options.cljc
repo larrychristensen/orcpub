@@ -2057,3 +2057,47 @@
                    nil?
                    [(modifiers/cls kw)
                     (if save-profs (apply modifiers/saving-throws kw save-profs))]))})))
+
+(defn source-url [source]
+  (-> disp/sources source :url))
+
+(defn spell-level [spell-kw]
+  (-> spells/spell-map spell-kw :level))
+
+(def ranger-base-cfg
+  {:name "Ranger"
+   :subclass-level 3
+   :subclass-title "Ranger Archetype"})
+
+(defn background-selection [cfg]
+  (t/selection-cfg
+   (merge
+    {:name "Background"
+     :tags #{:background}}
+    cfg)))
+
+(defn class-selection [cfg]
+  (t/selection-cfg
+   (merge
+    {:name "Class"
+     :order 0
+     :tags #{:class}}
+    cfg)))
+
+(defn race-selection [cfg]
+  (t/selection-cfg
+   (merge
+    {:name "Race"
+     :order 0
+     :help "Race determines your appearance and helps shape your culture and background. It also affects you ability scores, size, speed, languages, and many other crucial inherent traits."
+     :tags #{:race}}
+    cfg)))
+
+(defn feat-selection-2 [cfg]
+  (t/selection-cfg
+   (merge
+    {:name "Feats"
+     :ref [:feats]
+     :tags #{:feats}
+     :multiselect? true}
+    cfg)))
