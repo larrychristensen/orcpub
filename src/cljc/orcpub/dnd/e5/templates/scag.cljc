@@ -6,6 +6,7 @@
             [orcpub.dnd.e5.modifiers :as mod5e]
             [orcpub.dnd.e5.character :as char5e]
             [orcpub.dnd.e5.weapons :as weapon5e]
+            [orcpub.dnd.e5.equipment :as equip5e]
             [orcpub.dnd.e5.spell-lists :as sl]
             [orcpub.dnd.e5.options :as opt5e]))
 
@@ -493,3 +494,168 @@
    scag-sorcerer
    scag-warlock
    scag-wizard])
+
+(def sword-coast-adventurers-guide-backgrounds
+  (map
+   (partial opt5e/add-sources :scag)
+   [{:name "City Watch"
+     :profs {:skill {:athletics true :insight true}
+             :language-options {:choose 2 :options {:any true}}}
+     :traits [{:name "Watcher's Eye"
+               :page 145
+               :summary "can easily find local watch and criminal outposts"}]
+     :equipment {:manacles 1
+                 :pouch 1}
+     :custom-equipment {"Uniform with your rank" 1
+                        "Horn to summon help" 1}
+     :treasure {:gp 10}}
+    {:name "Investigator"
+     :profs {:skill {:investigation true :insight true}
+             :language-options {:choose 2 :options {:any true}}}
+     :traits [{:name "Watcher's Eye"
+               :page 145
+               :summary "can easily find local watch and criminal outposts"}]
+     :equipment {:manacles 1
+                 :pouch 1}
+     :custom-equipment {"Uniform with your rank" 1
+                        "Horn to summon help" 1}
+     :treasure {:gp 10}}
+    {:name "Clan Crafter"
+     :profs {:skill {:history true :insight true}
+             :tool-options {:artisans-tool 1}
+             :language-options {:choose 1 :options {:any true}}}
+     :traits [{:name "Respect of the Stout Folk"
+               :page 145
+               :summary "free room and board among shield and gold dwarves"}]
+     :equipment {:pouch 1}
+     :equipment-choices [opt5e/artisans-tools-choice-cfg]
+     :custom-equipment {"Maker's Mark Chisel" 1}
+     :treasure {:gp 5
+                :gem-10-gp 1}}
+    {:name "Cloistered Scholar"
+     :profs {:skill {:history true}
+             :skill-options {:choose 1 :options {:arcana true :nature true :religion true}}
+             :language-options {:choose 2 :options {:any true}}}
+     :traits [{:name "Library Access"
+               :page 146
+               :summary "free access to most of the library where you apprenticed"}]
+     :equipment {:ink 1
+                 :parchment 1
+                 :pouch 1}
+     :custom-equipment {"Cloister Robes" 1
+                        "Quill" 1
+                        "Penknife" 1
+                        "Borrowed book" 1}
+     :treasure {:gp 10}}
+    {:name "Courtier"
+     :profs {:skill {:insight true :persuasion true}
+             :language-options {:choose 2 :options {:any true}}}
+     :traits [{:name "Court Functionary"
+               :page 147
+               :summary "access to the workings of a government or court"}]
+     :equipment {:clothes-fine 1
+                 :pouch 1}
+     :treasure {:gp 5}}
+    {:name "Faction Agent"
+     :profs {:skill {:insight true}
+             :skill-options {:choose 1 :options {:animal-handling true :arcana true :deception true :history true :insight true :intimidation true :investigation true :medicine true :nature true :perception true :performance true :persuasion true :religion true :survival true}}
+             :language-options {:choose 2 :options {:any true}}}
+     :traits [{:name "Safe Haven"
+               :page 148
+               :summary "receive safe haven, room and board, or info from your network"}]
+     :equipment {:clothes-common 1
+                 :pouch 1}
+     :custom-equipment {"Faction Badge/Emblem" 1
+                        "Faction book" 1}
+     :treasure {:gp 15}}
+    {:name "Far Traveler"
+     :source "Sword Coast Adventurer's Guide"
+     :profs {:skill {:perception true :insight true}
+             :tool-options {:musical-instrument 1}
+             :language-options {:choose 1 :options {:any true}}}
+     :traits [{:name "All Eyes on You"
+               :page 149
+               :summary "interest of scholars, nobles, and merchants"}]
+     :equipment {:clothes-traveler-s 1
+                 :pouch 1}
+     :equipment-choices [{:name "Tool or Musical Instrument"
+                          :options (zipmap (map :key (concat equip5e/artisans-tools equip5e/musical-instruments)) (repeat 1))}]
+     :custom-equipment {"Poor maps of your homeland" 1}
+     :custom-treasure {"Piece of jewelry from your homeland (10 GP)" 1}
+     :treasure {:gp 5}}
+    {:name "Inheritor"
+     :source "Sword Coast Adventurer's Guide"
+     :profs {:skill {:survival true}
+             :skill-options {:choose 1 :options {:arcana true :history true :religion true}}
+             :language-options {:choose 1 :options {:any true}}}
+     :traits [{:name "Inheritance"
+               :page 150
+               :summary "an inherited item"}]
+     :equipment {:clothes-traveler-s 1
+                 :pouch 1}
+     :custom-equipment {"Inheritance" 1}
+     :treasure {:gp 15}}
+    {:name "Knight of the Order"
+     :source "Sword Coast Adventurer's Guide"
+     :profs {:skill {:persuasion true}
+             :skill-options {:choose 1 :options {:arcana true :history true :nature true :religion true}}
+             :tool-options {:musical-instrument 1}
+             :language-options {:choose 1 :options {:any true}}}
+     :traits [{:name "Knightly Regard"
+               :page 151
+               :summary "shelter and aid from your order and supporters"}]
+     :equipment {:pouch 1
+                 :clothes-traveler-s 1}
+     :custom-equipment {"Signet" 1
+                        "Banner/seal of your rank" 1}
+     :treasure {:gp 10}}
+    {:name "Mercenary Veteran"
+     :source "Sword Coast Adventurer's Guide"
+     :profs {:skill {:athletics true :persuasion true}
+             :tool {:land-vehicles true}
+             :tool-options {:gaming-set 1}}
+     :traits [{:name "Mercenary Life"
+               :page 152
+               :summary "can recall or find info about mercenary groups and can find mercenary work"}]
+     :equipment {:pouch 1}
+     :equipment-choices [{:name "Gaming Set"
+                          :options (zipmap (map :key equip5e/gaming-sets) (repeat 1))}]
+     :custom-equipment {"Uniform" 1
+                        "Rank Insignia" 1}
+     :treasure {:gp 10}}
+    {:name "Urban Bounty Hunter"
+     :source "Sword Coast Adventurer's Guide"
+     :profs {:skill-options {:choose 2 :options {:deception true :insight true :persuasion true :stealth true}}
+             :tool-options {:gaming-set 1 :musical-instrument 1 :thieves-tools 1}}
+     :traits [{:name "Ear to the Ground"
+               :page 153
+               :summary "you have contacts in any city that can provide info about people and places"}]
+     :equipment-choices [{:name "Clothes Appropriate to Your Duties"
+                          :options (zipmap (map :key equip5e/clothes) (repeat 1))}]
+     :equipment {:pouch 1}
+     :treasure {:gp 20}}
+    {:name "Uthgardt Tribe Member"
+     :source "Sword Coast Adventurer's Guide"
+     :profs {:skill {:athletics true :survival true}
+             :tool-options {:musical-instrument 1 :artisans-tool 1}
+             :language-options {:choose 1 :options {:any true}}}
+     :traits [{:name "Uthgardt Heritage"
+               :page 154
+               :summary "you are familiar with the wilderness of the North; can find 2X food and water when foraging; hospitality of your tribe and allies"}]
+     :equipment {:hunting-trap 1
+                 :pouch 1}
+     :treasure {:gp 10}}
+    {:name "Waterdhavian Noble"
+     :source "Sword Coast Adventurer's Guide"
+     :profs {:skill {:history true :persuasion true}
+             :tool-options {:musical-instrument 1 :gaming-set 1}
+             :language-options {:choose 1 :options {:any true}}}
+     :traits [{:name "Kept in Style"
+               :page 154
+               :summary "2 GP per day of living expenses in the North are covered"}]
+     :equipment {:clothes-fine 1
+                 :purse 1}
+     :custom-equipment {"Signet Ring or Brooch" 1
+                        "Scroll of Pedigree" 1
+                        "Skin of fine zzar or wine" 1}
+     :treasure {:gp 20}}]))

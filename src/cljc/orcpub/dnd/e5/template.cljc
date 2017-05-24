@@ -24,8 +24,6 @@
             [orcpub.dnd.e5.templates.scag :as scag]
             [re-frame.core :refer [subscribe dispatch]]))
 
-#_(enable-console-print!)
-
 (def character
   {::entity/options {:ability-scores {::entity/key :standard-scores
                                       ::entity/value (char5e/abilities 15 14 13 12 10 8)}
@@ -143,133 +141,8 @@
 
 (declare template-selections)
 
-(defn traits-modifiers [traits & [class-key source]]
-  (map
-   (fn [trait]
-     (mod5e/trait-cfg (assoc trait :source source :class-key class-key)))
-   traits))
-
-(defn armor-prof-modifiers [armor-proficiencies & [cls-kw]]
-  (map
-   (fn [armor-prof]
-     (let [[armor-kw first-class?] (if (keyword? armor-prof) [armor-prof false] armor-prof)]
-       (mod5e/armor-proficiency armor-kw first-class? cls-kw)))
-   armor-proficiencies))
-
-(defn tool-prof-modifiers [tool-proficiencies & [cls-kw]]
-  (map
-   (fn [tool-prof]
-     (let [[tool-kw first-class?] (if (keyword? tool-prof) [tool-prof false] tool-prof)]
-       (mod5e/tool-proficiency tool-kw first-class? cls-kw)))
-   tool-proficiencies))
-
-(defn weapon-prof-modifiers [weapon-proficiencies & [cls-kw]]
-  (map
-   (fn [weapon-prof]
-     (let [[weapon-kw first-class?] (if (keyword? weapon-prof) [weapon-prof false] weapon-prof)]
-       (if (#{:simple :martial} weapon-kw)
-         (mod5e/weapon-proficiency weapon-kw first-class? cls-kw)
-         (mod5e/weapon-proficiency weapon-kw first-class? cls-kw))))
-   weapon-proficiencies))
-
-
-(defn subrace-option [source
-                      {:keys [name
-                              abilities
-                              size
-                              speed
-                              subrace-options
-                              armor-proficiencies
-                              weapon-proficiencies
-                              modifiers
-                              selections
-                              traits
-                              source]}]
-  (t/option-cfg
-   {:name name
-    :selections selections
-    :modifiers (concat
-                [(mod5e/subrace name)]
-                modifiers
-                (armor-prof-modifiers armor-proficiencies)
-                (weapon-prof-modifiers weapon-proficiencies)
-                (map
-                 (fn [[k v]]
-                   (mod5e/subrace-ability k v))
-                 abilities)
-                (traits-modifiers traits nil source)
-                (if source [(mod5e/used-resource source name)]))}))
-
-(defn ability-modifiers [abilities]
-  (map
-   (fn [[k v]]
-     (mod5e/ability k v))
-   abilities))
-
-(defn darkvision-modifiers [range]
-  [(mod5e/darkvision range)])
-
-(defn language-selection [language-options]
-  (let [{lang-num :choose lang-options :options} language-options
-        lang-kws (if (:any lang-options)
-                   (map :key opt5e/languages)
-                   (keys lang-options))]
-    (opt5e/language-selection (map opt5e/language-map lang-kws) lang-num)))
-
-
-(defn race-option [{:keys [name
-                           key
-                           help
-                           abilities
-                           size
-                           speed
-                           darkvision
-                           subraces
-                           modifiers
-                           selections
-                           traits
-                           source
-                           languages
-                           language-options
-                           armor-proficiencies
-                           weapon-proficiencies
-                           tool-proficiencies
-                           source]}]
-  (t/option-cfg
-   {:name name
-    :key (or key (common/name-to-kw name))
-    :help help
-    :selections (concat
-                 (if subraces
-                   [(t/selection-cfg
-                     {:name "Subrace"
-                      :tags #{:subrace}
-                      :options (map (partial subrace-option source) (if source (map (fn [sr] (assoc sr :source source)) subraces) subraces))})])
-                 (if (seq language-options) [(language-selection language-options)])
-                 selections)
-    :modifiers (concat
-                [(mod5e/race name)
-                 (mod5e/size size)
-                 (mod5e/speed speed)]
-                (if darkvision
-                  (darkvision-modifiers darkvision))
-                (map
-                 (fn [language]
-                   (mod5e/language (common/name-to-kw language)))
-                 languages)
-                (map
-                 (fn [[k v]]
-                   (mod5e/race-ability k v))
-                 abilities)
-                modifiers
-                (tool-prof-modifiers tool-proficiencies)
-                (traits-modifiers traits nil source)
-                (armor-prof-modifiers armor-proficiencies)
-                (weapon-prof-modifiers weapon-proficiencies)
-                (if source [(mod5e/used-resource source name)]))}))
-
 (def elf-weapon-training-mods
-  (weapon-prof-modifiers [:longsword :shortsword :shortbow :longbow]))
+  (opt5e/weapon-prof-modifiers [:longsword :shortsword :shortbow :longbow]))
 
 (defn sunlight-sensitivity [page]
   {:name "Sunlight Sensitivity"
@@ -1145,15 +1018,15 @@
                     spell-selections
                     (if (seq tool-options) [(tool-prof-selection tool-options)])
                     (if (seq skill-kws) [(opt5e/skill-selection skill-kws skill-num)])
-                    (if (seq language-options) [(language-selection language-options)])))
+                    (if (seq language-options) [(opt5e/language-selection language-options)])))
       :modifiers (concat
                   modifiers
                   level-modifiers
                   [(mod5e/subclass (:key cls) kw)]
-                  (armor-prof-modifiers armor-profs)
-                  (weapon-prof-modifiers weapon-profs)
-                  (tool-prof-modifiers tool-profs)
-                  (traits-modifiers traits (:key cls))
+                  (opt5e/armor-prof-modifiers armor-profs)
+                  (opt5e/weapon-prof-modifiers weapon-profs)
+                  (opt5e/tool-prof-modifiers tool-profs)
+                  (opt5e/traits-modifiers traits (:key cls))
                   (if level-factor [(mod5e/spell-slot-factor (:key cls) level-factor)])
                   (if source [(mod5e/used-resource source name)]))})))
 
@@ -1218,7 +1091,7 @@
                              (mod5e/spells-known lvl kw (:ability spellcasting) name))
                            (get-in sl/spell-lists [kw lvl]))))))
                   (some-> levels (get i) :modifiers)
-                  (traits-modifiers
+                  (opt5e/traits-modifiers
                    (filter
                     (fn [{level :level :or {level 1}}]
                       (= level i))
@@ -1432,9 +1305,9 @@
                             (class-starting-equipment-entity-options :equipment equipment)])
       :modifiers (concat
                   modifiers
-                  (if armor-profs (armor-prof-modifiers armor-profs kw))
-                  (if weapon-profs (weapon-prof-modifiers weapon-profs kw))
-                  (if tool (tool-prof-modifiers tool kw))
+                  (if armor-profs (opt5e/armor-prof-modifiers armor-profs kw))
+                  (if weapon-profs (opt5e/weapon-prof-modifiers weapon-profs kw))
+                  (if tool (opt5e/tool-prof-modifiers tool kw))
                   (if level-factor [(mod5e/spell-slot-factor kw level-factor)])
                   (if (and source (not plugin?))
                     [(mod5e/used-resource source name)])
@@ -4437,10 +4310,6 @@ long rest."})]
                  (mod5e/trait "Evocation Savant")
                  (mod5e/trait "Sculpt Spells")]})])
 
-(def artisans-tools-choice-cfg
-  {:name "Artisan's Tool"
-   :options (zipmap (map :key equip5e/artisans-tools) (repeat 1))})
-
 (defn criminal-background [nm]
   {:name nm
    :help "You have a history of criminal activity."
@@ -4530,7 +4399,7 @@ long rest."})]
                    :profs {:skill {:animal-handling true :survival true}
                            :tool {:land-vehicles true}
                            :tool-options {:artisans-tool 1}}
-                   :equipment-choices [artisans-tools-choice-cfg]
+                   :equipment-choices [opt5e/artisans-tools-choice-cfg]
                    :equipment {:shovel 1
                                :pot-iron 1
                                :clothes-common 1
@@ -4544,7 +4413,7 @@ long rest."})]
                    :profs {:skill {:insight true :persuasion true}
                            :tool-options {:artisans-tool 1}
                            :language-options {:choose 1 :options {:any true}}}
-                   :equipment-choices [artisans-tools-choice-cfg]
+                   :equipment-choices [opt5e/artisans-tools-choice-cfg]
                    :equipment {:clothes-traveler-s 1
                                :pouch 1}
                    :treasure {:gp 15}}
@@ -4761,15 +4630,15 @@ long rest."})]
                    (class-armor-options armor-choices nil)
                    (class-equipment-options equipment-choices nil)
                    (if (seq skill-kws) [(opt5e/skill-selection skill-kws skill-num)])
-                   (if (seq language-options) [(language-selection language-options)]))
+                   (if (seq language-options) [(opt5e/language-selection language-options)]))
       :modifiers (concat
                   [(mod5e/background name)]
                   (if source [(mod5e/used-resource source name)])
-                  (traits-modifiers traits)
+                  (opt5e/traits-modifiers traits)
                   modifiers
-                  (armor-prof-modifiers (keys armor-profs))
-                  (weapon-prof-modifiers (keys weapon-profs))
-                  (tool-prof-modifiers (keys tool))
+                  (opt5e/armor-prof-modifiers (keys armor-profs))
+                  (opt5e/weapon-prof-modifiers (keys weapon-profs))
+                  (opt5e/tool-prof-modifiers (keys tool))
                   (map
                    (fn [skill-kw]
                      (mod5e/skill-proficiency skill-kw))
@@ -4781,7 +4650,7 @@ long rest."})]
      :tags #{:race}
      :options (map
                (fn [race]
-                 (race-option (assoc race :source :vgm)))
+                 (opt5e/race-option (assoc race :source :vgm)))
                [aasimar-option-cfg
                 firbolg-option-cfg
                 goliath-option-cfg
@@ -4796,14 +4665,9 @@ long rest."})]
                 orc-option-cfg
                 yuan-ti-option-cfg])})])
 
-(defn add-sources [source background]
-  (-> background
-      (assoc :source source)
-      (update :traits (fn [traits] (map (fn [t] (assoc t :source source)) traits)))))
-
 (def cos-backgrounds
   (map
-   (partial add-sources :cos)
+   (partial opt5e/add-sources :cos)
    [{:name "Haunted One"
      :help "You have been subjected to an unimaginable horror"
      :profs {:skill-options {:choose 1 :options {:arcana true :investigation true :religion true :survival true}}
@@ -4813,171 +4677,6 @@ long rest."})]
                :page 209
                :source :cos
                :summary "Commoners do their utmost to help you, even fighting along side you"}]}]))
-
-(def sword-coast-adventurers-guide-backgrounds
-  (map
-   (partial add-sources :scag)
-   [{:name "City Watch"
-     :profs {:skill {:athletics true :insight true}
-             :language-options {:choose 2 :options {:any true}}}
-     :traits [{:name "Watcher's Eye"
-               :page 145
-               :summary "can easily find local watch and criminal outposts"}]
-     :equipment {:manacles 1
-                 :pouch 1}
-     :custom-equipment {"Uniform with your rank" 1
-                        "Horn to summon help" 1}
-     :treasure {:gp 10}}
-    {:name "Investigator"
-     :profs {:skill {:investigation true :insight true}
-             :language-options {:choose 2 :options {:any true}}}
-     :traits [{:name "Watcher's Eye"
-               :page 145
-               :summary "can easily find local watch and criminal outposts"}]
-     :equipment {:manacles 1
-                 :pouch 1}
-     :custom-equipment {"Uniform with your rank" 1
-                        "Horn to summon help" 1}
-     :treasure {:gp 10}}
-    {:name "Clan Crafter"
-     :profs {:skill {:history true :insight true}
-             :tool-options {:artisans-tool 1}
-             :language-options {:choose 1 :options {:any true}}}
-     :traits [{:name "Respect of the Stout Folk"
-               :page 145
-               :summary "free room and board among shield and gold dwarves"}]
-     :equipment {:pouch 1}
-     :equipment-choices [artisans-tools-choice-cfg]
-     :custom-equipment {"Maker's Mark Chisel" 1}
-     :treasure {:gp 5
-                :gem-10-gp 1}}
-    {:name "Cloistered Scholar"
-     :profs {:skill {:history true}
-             :skill-options {:choose 1 :options {:arcana true :nature true :religion true}}
-             :language-options {:choose 2 :options {:any true}}}
-     :traits [{:name "Library Access"
-               :page 146
-               :summary "free access to most of the library where you apprenticed"}]
-     :equipment {:ink 1
-                 :parchment 1
-                 :pouch 1}
-     :custom-equipment {"Cloister Robes" 1
-                        "Quill" 1
-                        "Penknife" 1
-                        "Borrowed book" 1}
-     :treasure {:gp 10}}
-    {:name "Courtier"
-     :profs {:skill {:insight true :persuasion true}
-             :language-options {:choose 2 :options {:any true}}}
-     :traits [{:name "Court Functionary"
-               :page 147
-               :summary "access to the workings of a government or court"}]
-     :equipment {:clothes-fine 1
-                 :pouch 1}
-     :treasure {:gp 5}}
-    {:name "Faction Agent"
-     :profs {:skill {:insight true}
-             :skill-options {:choose 1 :options {:animal-handling true :arcana true :deception true :history true :insight true :intimidation true :investigation true :medicine true :nature true :perception true :performance true :persuasion true :religion true :survival true}}
-             :language-options {:choose 2 :options {:any true}}}
-     :traits [{:name "Safe Haven"
-               :page 148
-               :summary "receive safe haven, room and board, or info from your network"}]
-     :equipment {:clothes-common 1
-                 :pouch 1}
-     :custom-equipment {"Faction Badge/Emblem" 1
-                        "Faction book" 1}
-     :treasure {:gp 15}}
-    {:name "Far Traveler"
-     :source "Sword Coast Adventurer's Guide"
-     :profs {:skill {:perception true :insight true}
-             :tool-options {:musical-instrument 1}
-             :language-options {:choose 1 :options {:any true}}}
-     :traits [{:name "All Eyes on You"
-               :page 149
-               :summary "interest of scholars, nobles, and merchants"}]
-     :equipment {:clothes-traveler-s 1
-                 :pouch 1}
-     :equipment-choices [{:name "Tool or Musical Instrument"
-                          :options (zipmap (map :key (concat equip5e/artisans-tools equip5e/musical-instruments)) (repeat 1))}]
-     :custom-equipment {"Poor maps of your homeland" 1}
-     :custom-treasure {"Piece of jewelry from your homeland (10 GP)" 1}
-     :treasure {:gp 5}}
-    {:name "Inheritor"
-     :source "Sword Coast Adventurer's Guide"
-     :profs {:skill {:survival true}
-             :skill-options {:choose 1 :options {:arcana true :history true :religion true}}
-             :language-options {:choose 1 :options {:any true}}}
-     :traits [{:name "Inheritance"
-               :page 150
-               :summary "an inherited item"}]
-     :equipment {:clothes-traveler-s 1
-                 :pouch 1}
-     :custom-equipment {"Inheritance" 1}
-     :treasure {:gp 15}}
-    {:name "Knight of the Order"
-     :source "Sword Coast Adventurer's Guide"
-     :profs {:skill {:persuasion true}
-             :skill-options {:choose 1 :options {:arcana true :history true :nature true :religion true}}
-             :tool-options {:musical-instrument 1}
-             :language-options {:choose 1 :options {:any true}}}
-     :traits [{:name "Knightly Regard"
-               :page 151
-               :summary "shelter and aid from your order and supporters"}]
-     :equipment {:pouch 1
-                 :clothes-traveler-s 1}
-     :custom-equipment {"Signet" 1
-                        "Banner/seal of your rank" 1}
-     :treasure {:gp 10}}
-    {:name "Mercenary Veteran"
-     :source "Sword Coast Adventurer's Guide"
-     :profs {:skill {:athletics true :persuasion true}
-             :tool {:land-vehicles true}
-             :tool-options {:gaming-set 1}}
-     :traits [{:name "Mercenary Life"
-               :page 152
-               :summary "can recall or find info about mercenary groups and can find mercenary work"}]
-     :equipment {:pouch 1}
-     :equipment-choices [{:name "Gaming Set"
-                          :options (zipmap (map :key equip5e/gaming-sets) (repeat 1))}]
-     :custom-equipment {"Uniform" 1
-                        "Rank Insignia" 1}
-     :treasure {:gp 10}}
-    {:name "Urban Bounty Hunter"
-     :source "Sword Coast Adventurer's Guide"
-     :profs {:skill-options {:choose 2 :options {:deception true :insight true :persuasion true :stealth true}}
-             :tool-options {:gaming-set 1 :musical-instrument 1 :thieves-tools 1}}
-     :traits [{:name "Ear to the Ground"
-               :page 153
-               :summary "you have contacts in any city that can provide info about people and places"}]
-     :equipment-choices [{:name "Clothes Appropriate to Your Duties"
-                          :options (zipmap (map :key equip5e/clothes) (repeat 1))}]
-     :equipment {:pouch 1}
-     :treasure {:gp 20}}
-    {:name "Uthgardt Tribe Member"
-     :source "Sword Coast Adventurer's Guide"
-     :profs {:skill {:athletics true :survival true}
-             :tool-options {:musical-instrument 1 :artisans-tool 1}
-             :language-options {:choose 1 :options {:any true}}}
-     :traits [{:name "Uthgardt Heritage"
-               :page 154
-               :summary "you are familiar with the wilderness of the North; can find 2X food and water when foraging; hospitality of your tribe and allies"}]
-     :equipment {:hunting-trap 1
-                 :pouch 1}
-     :treasure {:gp 10}}
-    {:name "Waterdhavian Noble"
-     :source "Sword Coast Adventurer's Guide"
-     :profs {:skill {:history true :persuasion true}
-             :tool-options {:musical-instrument 1 :gaming-set 1}
-             :language-options {:choose 1 :options {:any true}}}
-     :traits [{:name "Kept in Style"
-               :page 154
-               :summary "2 GP per day of living expenses in the North are covered"}]
-     :equipment {:clothes-fine 1
-                 :purse 1}
-     :custom-equipment {"Signet Ring or Brooch" 1
-                        "Scroll of Pedigree" 1
-                        "Skin of fine zzar or wine" 1}
-     :treasure {:gp 20}}]))
 
 (def dmg-classes
   [{:name "Cleric"
@@ -5106,7 +4805,7 @@ long rest."})]
 (def elemental-evil-selections
   [(race-selection
     {:options (map
-               race-option
+               opt5e/race-option
                [aarakocra-option-cfg
                 ee-gnome-option-cfg
                 genasi-option-cfg
@@ -5258,10 +4957,10 @@ long rest."})]
   [(background-selection
     {:options (map
                background-option
-               sword-coast-adventurers-guide-backgrounds)})
+               scag/sword-coast-adventurers-guide-backgrounds)})
    (race-selection
     {:options (map
-               (fn [race] (race-option (assoc race :source :scag)))
+               (fn [race] (opt5e/race-option (assoc race :source :scag)))
                [scag-half-elf-option-cfg
                 scag-tiefling-option-cfg
                 scag-halfling-option-cfg])})
@@ -6138,7 +5837,7 @@ long rest."})]
                             (mariner-class-option "Paladin" :paladin 2)
                             (mariner-class-option "Ranger" :ranger 2)]})
                 (race-selection
-                 {:options [(race-option
+                 {:options [(opt5e/race-option
                              {:name "Minotaur (Krynn)"
                               :abilities {::char5e/str 1}
                               :selections [(opt5e/ability-increase-selection [::char5e/str ::char5e/int ::char5e/wis] 1 true)]
@@ -6189,7 +5888,7 @@ long rest."})]
    :key ua-eberron-kw
    :selections [(race-selection
                  {:options (map
-                            (fn [race] (race-option (assoc race :source ua-eberron-kw)))
+                            (fn [race] (opt5e/race-option (assoc race :source ua-eberron-kw)))
                             [{:name "Changeling"
                               :abilities {::char5e/dex 1 ::char5e/cha 1}
                               :size :medium
@@ -6451,7 +6150,7 @@ long rest."})]
                ["Lawful Good" "Lawful Neutral" "Lawful Evil" "Neutral Good" "Neutral" "Neutral Evil" "Chaotic Good" "Chaotic Neutral" "Chaotic Evil"])})
    (race-selection
     {:options (map
-               race-option
+               opt5e/race-option
                [dwarf-option-cfg
                 elf-option-cfg
                 halfling-option-cfg
