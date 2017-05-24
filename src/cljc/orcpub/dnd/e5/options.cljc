@@ -664,7 +664,8 @@
                      :tags #{:spells}
                      :options options})]})))
 
-(defn language-selection [langs num]
+(defn language-selection
+  ([langs num]
   (t/selection-cfg
    {:name "Languages"
     :options (map
@@ -676,6 +677,12 @@
     :tags #{:profs :language-profs}
     :min num
     :max num}))
+  ([language-options]
+   (let [{lang-num :choose lang-options :options} language-options
+         lang-kws (if (:any lang-options)
+                    (map :key languages)
+                    (keys lang-options))]
+     (language-selection (map language-map lang-kws) lang-num))))
 
 (defn maneuver-option [name & [desc]]
   (t/option-cfg
@@ -1387,3 +1394,130 @@
 
 (defn warlock-subclass-spell-selection [spells]
   (subclass-spell-selection :warlock "Warlock" ::character/cha spells 0))
+
+(defn traits-modifiers [traits & [class-key source]]
+  (map
+   (fn [trait]
+     (modifiers/trait-cfg (assoc trait :source source :class-key class-key)))
+   traits))
+
+(defn armor-prof-modifiers [armor-proficiencies & [cls-kw]]
+  (map
+   (fn [armor-prof]
+     (let [[armor-kw first-class?] (if (keyword? armor-prof) [armor-prof false] armor-prof)]
+       (modifiers/armor-proficiency armor-kw first-class? cls-kw)))
+   armor-proficiencies))
+
+(defn tool-prof-modifiers [tool-proficiencies & [cls-kw]]
+  (map
+   (fn [tool-prof]
+     (let [[tool-kw first-class?] (if (keyword? tool-prof) [tool-prof false] tool-prof)]
+       (modifiers/tool-proficiency tool-kw first-class? cls-kw)))
+   tool-proficiencies))
+
+(defn weapon-prof-modifiers [weapon-proficiencies & [cls-kw]]
+  (map
+   (fn [weapon-prof]
+     (let [[weapon-kw first-class?] (if (keyword? weapon-prof) [weapon-prof false] weapon-prof)]
+       (if (#{:simple :martial} weapon-kw)
+         (modifiers/weapon-proficiency weapon-kw first-class? cls-kw)
+         (modifiers/weapon-proficiency weapon-kw first-class? cls-kw))))
+   weapon-proficiencies))
+
+
+(defn subrace-option [source
+                      {:keys [name
+                              abilities
+                              size
+                              speed
+                              subrace-options
+                              armor-proficiencies
+                              weapon-proficiencies
+                              modifiers
+                              selections
+                              traits
+                              source]}]
+  (t/option-cfg
+   {:name name
+    :selections selections
+    :modifiers (concat
+                [(modifiers/subrace name)]
+                modifiers
+                (armor-prof-modifiers armor-proficiencies)
+                (weapon-prof-modifiers weapon-proficiencies)
+                (map
+                 (fn [[k v]]
+                   (modifiers/subrace-ability k v))
+                 abilities)
+                (traits-modifiers traits nil source)
+                (if source [(modifiers/used-resource source name)]))}))
+
+(defn ability-modifiers [abilities]
+  (map
+   (fn [[k v]]
+     (modifiers/ability k v))
+   abilities))
+
+(defn darkvision-modifiers [range]
+  [(modifiers/darkvision range)])
+
+
+(defn race-option [{:keys [name
+                           key
+                           help
+                           abilities
+                           size
+                           speed
+                           darkvision
+                           subraces
+                           modifiers
+                           selections
+                           traits
+                           source
+                           languages
+                           language-options
+                           armor-proficiencies
+                           weapon-proficiencies
+                           tool-proficiencies
+                           source]}]
+  (t/option-cfg
+   {:name name
+    :key (or key (common/name-to-kw name))
+    :help help
+    :selections (concat
+                 (if subraces
+                   [(t/selection-cfg
+                     {:name "Subrace"
+                      :tags #{:subrace}
+                      :options (map (partial subrace-option source) (if source (map (fn [sr] (assoc sr :source source)) subraces) subraces))})])
+                 (if (seq language-options) [(language-selection language-options)])
+                 selections)
+    :modifiers (concat
+                [(modifiers/race name)
+                 (modifiers/size size)
+                 (modifiers/speed speed)]
+                (if darkvision
+                  (darkvision-modifiers darkvision))
+                (map
+                 (fn [language]
+                   (modifiers/language (common/name-to-kw language)))
+                 languages)
+                (map
+                 (fn [[k v]]
+                   (modifiers/race-ability k v))
+                 abilities)
+                modifiers
+                (tool-prof-modifiers tool-proficiencies)
+                (traits-modifiers traits nil source)
+                (armor-prof-modifiers armor-proficiencies)
+                (weapon-prof-modifiers weapon-proficiencies)
+                (if source [(modifiers/used-resource source name)]))}))
+
+(defn add-sources [source background]
+  (-> background
+      (assoc :source source)
+      (update :traits (fn [traits] (map (fn [t] (assoc t :source source)) traits)))))
+
+(def artisans-tools-choice-cfg
+  {:name "Artisan's Tool"
+   :options (zipmap (map :key equipment/artisans-tools) (repeat 1))})
