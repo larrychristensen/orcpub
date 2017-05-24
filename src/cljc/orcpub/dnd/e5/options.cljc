@@ -16,6 +16,49 @@
             [orcpub.dnd.e5.skills :as skills])
   #?(:cljs (:require-macros [orcpub.dnd.e5.modifiers :as modifiers])))
 
+(def ft-5 {:units :feet
+           :amount 5})
+
+(def ft-10 {:units :feet
+           :amount 10})
+
+(def ft-30 {:units :feet
+            :amount 30})
+
+(def ft-60 {:units :feet
+            :amount 60})
+
+(def ft-90 {:units :feet
+            :amount 90})
+
+(def ft-120 {:units :feet
+             :amount 120})
+
+(def turns-1 {:units :turn})
+
+(def rounds-1 {:units :round})
+
+(def minutes-1 {:units :minute})
+
+(def minutes-10 {:units :minute
+                 :amount 10})
+
+(def hours-1 {:units :hour})
+
+(def conc-minutes-1 {:units :minute
+                     :concentration true})
+
+(def conc-minutes-10 {:units :minute
+                      :amount 10
+                      :concentration true})
+
+(def conc-hours-1 {:units :hour
+              :concentration true})
+
+(def rests-1 {:units :rest})
+
+(def long-rests-1 {:units :long-rest})
+
 (def abilities
   [{:key ::character/str
     :name "Strength"}
