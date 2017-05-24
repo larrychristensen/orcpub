@@ -1326,3 +1326,64 @@
                {:name "One Skill/Theives Tools"
                 :selections [(expertise-selection 1 :one-skill-thieves-tools)]
                 :modifiers [(modifiers/tool-proficiency :thieves-tools)]})]}))
+
+(defn cleric-spell [spell-level spell-key min-level]
+  (modifiers/spells-known spell-level spell-key ::character/wis "Cleric" min-level nil :cleric))
+
+(defn potent-spellcasting [page & [source]]
+  (modifiers/dependent-trait
+   {:level 8
+    :page page
+    :source source
+    :summary (str "Add "
+                  (common/bonus-str (?ability-bonuses ::character/wis))
+                  " to damage from cantrips you cast")
+    :name "Potent Spellcasting"}))
+
+(def monk-base-cfg
+  {:name "Monk"
+   :subclass-level 3
+   :subclass-title "Monastic Tradition"})
+
+(def paladin-base-cfg
+  {:name "Paladin"
+   :subclass-level 3
+   :subclass-title "Sacred Oath"})
+
+(def ua-al-illegal (modifiers/al-illegal "Unearthed Arcana options are not allowed"))
+
+(defn subclass-plugin [class-base-cfg source subclasses ua-al-illegal?]
+  (merge
+   class-base-cfg
+   {:source source
+    :plugin? true
+    :subclasses (if ua-al-illegal?
+                  (map
+                   (fn [subclass]
+                     (update subclass :modifiers conj ua-al-illegal))
+                   subclasses)
+                  subclasses)}))
+
+(defn paladin-spell [spell-level key min-level]
+  (modifiers/spells-known spell-level key ::character/cha "Paladin" min-level nil :paladin))
+
+(defn subclass-spell-selection [class-key class-name ability spells num]
+  (spell-selection
+   {:class-key class-key
+    :spell-keys spells
+    :spellcasting-ability ability
+    :class-name class-name
+    :num num
+    :prepend-level? true}))
+
+(defn subclass-cantrip-selection [class-key class-name ability spells num]
+  (spell-selection
+   {:class-key class-key
+    :level 0
+    :spellcasting-ability ability
+    :class-name class-name
+    :spell-keys spells
+    :num num}))
+
+(defn warlock-subclass-spell-selection [spells]
+  (subclass-spell-selection :warlock "Warlock" ::character/cha spells 0))
