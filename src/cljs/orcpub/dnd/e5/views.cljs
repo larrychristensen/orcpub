@@ -883,7 +883,6 @@
 (def no-https-images "Sorry, we don't currently support images that start with https")
 
 (defn character-display [built-char show-summary? num-columns]
-  (prn "NUMBR COLS" num-columns)
   (let [race (char/race built-char)
         subrace (char/subrace built-char)
         alignment (char/alignment built-char)

@@ -2002,7 +2002,8 @@
          armor-profs :armor weapon-profs :weapon} profs
         {level-factor :level-factor} spellcasting
         save-profs (keys save)
-        spellcasting-template (spellcasting-template (assoc spellcasting :class-key kw) cls)]
+        spellcasting-template (spellcasting-template (assoc spellcasting :class-key kw) cls)
+        first-class? (fn [c] (= kw (first (es/entity-val c :classes))))]
     (t/option-cfg
      {:name name
       :key kw
@@ -2016,16 +2017,16 @@
                    (concat
                     selections
                     (if (seq tool-options)
-                      [(tool-prof-selection tool-options :tool-selection (fn [c] (= kw (first (:classes c)))))])
+                      [(tool-prof-selection tool-options :tool-selection first-class?)])
                     (if (seq multiclass-tool-options)
                       [(tool-prof-selection multiclass-tool-options :multiclass-tool-selection (fn [c] (not= kw (first (:classes c)))))])
                     (if weapon-choices (class-weapon-options weapon-choices kw))
                     (if armor-choices (class-armor-options armor-choices kw))
                     (if equipment-choices (class-equipment-options equipment-choices kw))
                     (if skill-options
-                      [(class-skill-selection skill-options :skill-proficiency (fn [c] (prn "FIRST CLASS" (es/entity-val c :classes)) (= kw (first (es/entity-val c :classes)))))])
+                      [(class-skill-selection skill-options :skill-proficiency first-class?)])
                     (if multiclass-skill-options
-                      [(class-skill-selection multiclass-skill-options :multiclass-skill-proficiency (fn [c] (not= kw (first (:classes c)))))])
+                      [(class-skill-selection multiclass-skill-options :multiclass-skill-proficiency (complement first-class?))])
                     [(t/selection-cfg
                       {:name (str name " Levels")
                        :key :levels
