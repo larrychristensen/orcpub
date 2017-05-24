@@ -1,19 +1,23 @@
 (ns orcpub.dnd.e5.options
   (:require [clojure.string :as s]
+            [clojure.set :as sets]
             [orcpub.common :as common]
             [orcpub.template :as t]
             [orcpub.entity :as entity]
+            [orcpub.dice :as dice]
             [orcpub.entity-spec :as es]
             [orcpub.modifiers :as mods]
             [orcpub.dnd.e5.character :as character]
             [orcpub.dnd.e5.character.equipment :as char-equip]
             [orcpub.dnd.e5.modifiers :as modifiers]
             [orcpub.dnd.e5.weapons :as weapons]
+            [orcpub.dnd.e5.armor :as armor]
             [orcpub.dnd.e5.spells :as spells]
             [orcpub.dnd.e5.equipment :as equipment]
             [orcpub.dnd.e5.spell-lists :as sl]
             [orcpub.dnd.e5.display :as disp]
-            [orcpub.dnd.e5.skills :as skills])
+            [orcpub.dnd.e5.skills :as skills]
+            [re-frame.core :refer [dispatch]])
   #?(:cljs (:require-macros [orcpub.dnd.e5.modifiers :as modifiers])))
 
 (def ft-5 {:units :feet
@@ -1521,3 +1525,535 @@
 (def artisans-tools-choice-cfg
   {:name "Artisan's Tool"
    :options (zipmap (map :key equipment/artisans-tools) (repeat 1))})
+
+(defn starting-equipment-entity-option [indicator-key [k num]]
+  {::entity/key k
+   ::entity/value {::char-equip/quantity num
+                   ::char-equip/equipped? true
+                   indicator-key true}})
+
+(defn starting-equipment-entity-options [indicator-key key items]
+  (if items
+    {key
+     (mapv
+      (partial starting-equipment-entity-option indicator-key)
+      items)}))
+
+(defn class-starting-equipment-entity-options [key items]
+  (starting-equipment-entity-options ::char-equip/class-starting-equipment? key items))
+
+(defn background-starting-equipment-entity-options [key items]
+  (starting-equipment-entity-options ::char-equip/background-starting-equipment? key items))
+
+(defn tool-prof-selection-aux [tool num & [key prereq-fn]]
+  (t/selection-cfg
+   {:name (str "Tool Proficiency: " (:name tool))
+    :key (if key (keyword (str (name key) "--" (common/name-to-kw (:name tool)))))
+    :help (str "Select " (s/lower-case (:name tool)) " for which you are proficient.")
+    :options (map
+              (fn [{:keys [name key icon]}]
+                (t/option-cfg
+                 {:name name
+                  :key key
+                  :icon icon
+                  :modifiers [(modifiers/tool-proficiency key)]}))
+              (:values tool))
+    :min num
+    :max num
+    :prereq-fn prereq-fn
+    :tags #{:tool-profs :profs}}))
+
+(defn tool-prof-selection [tool-options & [key prereq-fn]]
+  (let [[first-key first-num] (-> tool-options first)
+        first-option (equipment/tools-map first-key)]
+    (if (and (= 1 (count tool-options))
+             (seq (:values first-option)))
+      (tool-prof-selection-aux first-option first-num key prereq-fn)
+      (t/selection-cfg
+       {:name "Tool Proficiencies"
+        :key key
+        :options (map
+                  (fn [[k num]]
+                    (let [tool (equipment/tools-map k)]
+                      (if (:values tool)
+                        (t/option-cfg
+                         {:name (:name tool)
+                          :selections [(tool-prof-selection-aux tool num key prereq-fn)]})
+                        (t/option-cfg
+                         {:name (:name tool)
+                          :key (:key tool)
+                          :icon (:icon tool)
+                          :modifiers [(modifiers/tool-proficiency (:key tool))]}))))
+                  tool-options)
+        :prereq-fn prereq-fn
+        :tags #{:profs :tool-profs}}))))
+
+(defn first-class? [class-kw & [classes]]
+  (fn [c] (= class-kw (first (or classes (es/entity-val c :classes))))))
+
+(defn new-starting-equipment-selection [class-kw {:keys [name options] :as cfg}]
+  (t/selection-cfg
+   (merge
+    cfg
+    {:name (str "Starting Equipment: " name)
+     :tags #{:equipment :starting-equipment}
+     :order 1
+     :options (conj options
+                    (t/option-cfg
+                     {:name "<none>"
+                      :key :none}))
+     :prereq-fn (if class-kw (first-class? class-kw))})))
+
+(defn simple-weapon-selection [num class-kw]
+  (new-starting-equipment-selection
+   class-kw
+   {:name "Simple Weapon"
+    :tags #{:starting-equipment}
+    :options (weapon-options (weapons/simple-weapons weapons/weapons))
+    :min num
+    :max num
+    :prereq-fn (first-class? class-kw)}))
+
+(defn weapon-option-2 [class-kw [k num]]
+  (case k
+    :simple (t/option-cfg
+             {:name "Any Simple Weapon"
+              :selections [(simple-weapon-selection num class-kw)]})
+    :martial (t/option-cfg
+              {:name "Any Martial Weapon"
+               :selections [(new-starting-equipment-selection
+                             class-kw
+                             {:name "Martial Weapon"
+                              :options (weapon-options (weapons/martial-weapons weapons/weapons))
+                              :min num
+                              :max num})]})
+    (t/option-cfg
+     {:name (-> k weapons/weapons-map :name (str (if (> num 1) (str " (" num ")") "")))
+      :modifiers [(modifiers/weapon k num)]})))
+
+(defn class-options [class-kw option-fn choices help]
+  (map
+   (fn [{:keys [name options]}]
+     (new-starting-equipment-selection
+      class-kw
+      {:name name
+       :help help
+       :options (map
+                 option-fn
+                 options)}))
+   choices))
+
+(defn class-weapon-options [weapon-choices class-kw]
+  (class-options class-kw (partial weapon-option-2 class-kw) weapon-choices "Select a weapon to begin your adventuring career with."))
+
+(defn armor-option [[k num]]
+  (t/option-cfg
+     {:name (-> k armor/armor-map :name)
+      :modifiers [(modifiers/armor k num)]}))
+
+(defn class-armor-options [armor-choices class-kw]
+  (class-options class-kw armor-option armor-choices "Select armor to begin your adventuring career with."))
+
+(defn equipment-option [class-kw [k num]]
+  (let [equipment (equipment/equipment-map k)]
+    (if (:values equipment)
+      (t/option-cfg
+       {:name (:name equipment)
+        :selections [(t/selection-cfg
+                      {:name (:name equipment)
+                       :tags #{:equipment :starting-equipment}
+                       :options (map
+                                 #(equipment-option class-kw %)
+                                 (zipmap (map :key (:values equipment)) (repeat num)))
+                       :prereq-fn (first-class? class-kw)})]})
+      (t/option-cfg
+       {:name (-> equipment :name (str (if (> num 1) (str " (" num ")") "")))
+        :modifiers (if (:items equipment)
+                     (map
+                      (fn [[kw num]]
+                        (modifiers/equipment kw num))
+                      (:items equipment))
+                     [(modifiers/equipment k num)])}))))
+
+(defn class-equipment-options [equipment-choices class-kw]
+  (class-options class-kw (partial equipment-option class-kw) equipment-choices "Select equipment to start your adventuring career with."))
+
+(defn background-option [{:keys [name
+                                 help
+                                 page
+                                 profs
+                                 selections
+                                 modifiers
+                                 weapon-choices
+                                 weapons
+                                 equipment
+                                 custom-equipment
+                                 equipment-choices
+                                 armor
+                                 armor-choices
+                                 treasure
+                                 custom-treasure
+                                 traits
+                                 source]
+                          :as background}]
+  (let [kw (common/name-to-kw name)
+        {:keys [skill skill-options tool-options tool language-options]
+         armor-profs :armor weapon-profs :weapon} profs
+        {skill-num :choose options :options} skill-options
+        skill-kws (if (:any options) (map :key skills/skills) (keys options))
+        equipment-options (remove
+                            nil?
+                            [(background-starting-equipment-entity-options :weapons weapons)
+                             (background-starting-equipment-entity-options :armor armor)
+                             (background-starting-equipment-entity-options :equipment equipment)
+                             (background-starting-equipment-entity-options :treasure treasure)])]
+    (t/option-cfg
+     {:name name
+      :key kw
+      :help help
+      :page page
+      :select-fn (fn [_ _]
+                   (dispatch [:add-starting-equipment equipment-options custom-treasure custom-equipment]))
+      :selections (concat
+                   selections
+                   (if (seq tool-options) [(tool-prof-selection tool-options)])
+                   (class-weapon-options weapon-choices nil)
+                   (class-armor-options armor-choices nil)
+                   (class-equipment-options equipment-choices nil)
+                   (if (seq skill-kws) [(skill-selection skill-kws skill-num)])
+                   (if (seq language-options) [(language-selection language-options)]))
+      :modifiers (concat
+                  [(modifiers/background name)]
+                  (if source [(modifiers/used-resource source name)])
+                  (traits-modifiers traits)
+                  modifiers
+                  (armor-prof-modifiers (keys armor-profs))
+                  (weapon-prof-modifiers (keys weapon-profs))
+                  (tool-prof-modifiers (keys tool))
+                  (map
+                   (fn [skill-kw]
+                     (modifiers/skill-proficiency skill-kw))
+                   (keys skill)))})))
+
+(defn total-levels-prereq [level & [class-key]]
+  (fn [c] (>= (if class-key
+                ((es/entity-val c :class-level) class-key)
+                (es/entity-val c :total-levels))
+              level)))
+
+(defn total-levels-option-prereq [level & [class-key]]
+  (t/option-prereq
+   (str "You must have at least " level " " (name class-key) " levels")
+   (total-levels-prereq level class-key)))
+
+(defn add-mod-total-levels-prereq [lvl cls modifier]
+  (if (sequential? modifier)
+    (map
+     add-mod-total-levels-prereq
+     modifier)
+    (update
+     modifier
+     ::mods/conditions
+     conj
+     (total-levels-prereq lvl (:key cls)))))
+
+(defn subclass-option [cls
+                       {:keys [name
+                               source
+                               profs
+                               selections
+                               spellcasting
+                               modifiers
+                               level-modifiers
+                               traits
+                               prereqs
+                               levels]
+                        :as subcls}]
+  (let [kw (common/name-to-kw name)
+        {:keys [armor weapon save skill-options tool-options tool language-options]} profs
+        {skill-num :choose options :options} skill-options
+        {level-factor :level-factor} spellcasting
+        skill-kws (if (:any options) (map :key skills/skills) (keys options))
+        armor-profs (keys armor)
+        weapon-profs (keys weapon)
+        tool-profs (keys tool)
+        spellcasting-template (spellcasting-template
+                               (assoc
+                                spellcasting
+                                :class-key
+                                (or (:spell-list spellcasting) kw))
+                               subcls)
+        spell-selections (mapcat
+                          (fn [[lvl selections]]
+                            (map
+                             (fn [selection]
+                               (assoc selection ::t/prereq-fn (fn [c] (let [total-levels (es/entity-val c :total-levels)]
+                                                                        (>= lvl total-levels)))))
+                             selections))
+                          (:selections spellcasting-template))
+        level-selections (mapcat
+                          (fn [[lvl {selections :selections}]]
+                            (map
+                             (fn [selection]
+                               (assoc
+                                selection
+                                ::t/prereq-fn
+                                (total-levels-prereq lvl (:key cls))))
+                             selections))
+                          levels)
+        level-modifiers (mapcat
+                         (fn [[lvl {modifiers :modifiers}]]
+                           (map
+                            (partial add-mod-total-levels-prereq lvl cls)
+                            modifiers))
+                         levels)]
+    (t/option-cfg
+     {:name name
+      :prereqs prereqs
+      :selections (map
+                   (fn [selection]
+                     (update selection ::t/tags sets/union #{(:key cls) kw}))
+                   (concat
+                    selections
+                    level-selections
+                    spell-selections
+                    (if (seq tool-options) [(tool-prof-selection tool-options)])
+                    (if (seq skill-kws) [(skill-selection skill-kws skill-num)])
+                    (if (seq language-options) [(language-selection language-options)])))
+      :modifiers (concat
+                  modifiers
+                  level-modifiers
+                  [(modifiers/subclass (:key cls) kw)]
+                  (armor-prof-modifiers armor-profs)
+                  (weapon-prof-modifiers weapon-profs)
+                  (tool-prof-modifiers tool-profs)
+                  (traits-modifiers traits (:key cls))
+                  (if level-factor [(modifiers/spell-slot-factor (:key cls) level-factor)])
+                  (if source [(modifiers/used-resource source name)]))})))
+
+(defn level-key [index]
+  (keyword (str "level-" index)))
+
+(defn level-name [index]
+  (str "Level " index))
+
+(defn subclass-level-option [{:keys [name
+                                     levels] :as subcls}
+                             kw
+                             spellcasting-template
+                             i]
+  (let [selections (some-> levels (get i) :selections)]
+    (t/option-cfg
+     {:name (level-name i)
+      :key (level-key i)
+      :order i
+      :selections (concat
+                   selections      
+                   (some-> spellcasting-template :selections (get i)))
+      :modifiers (some-> levels (get i) :modifiers)})))
+
+(defn al-illegal-hit-points-mod [reason]
+  (modifiers/al-illegal (str reason " The only legal option is 'Average'.")))
+
+(defn hit-points-selection [die class-nm level]
+  (t/selection-cfg
+   {:name (str "Hit Points: " class-nm " " level)
+    :key :hit-points
+    :require-value? true
+    :help "Select the method with which to determine this level's hit points."
+    :tags #{:class}
+    :options [{::t/name "Manual Entry"
+               ::t/key :manual-entry
+               ::t/help "This option allows you to manually type in the value for this level's hit points. Use this if you want to roll dice yourself or if you already have a character with known hit points for this level."
+               ::t/modifiers [(modifiers/deferred-max-hit-points)
+                              (al-illegal-hit-points-mod "Manual entry for hit points is not legal.")]}
+              {::t/name (str "Roll (1D" die ")")
+               ::t/key :roll
+               ::t/help "This option rolls virtual dice for you and sets that value for this level's hit points. It could pay off with a high roll, but you might also roll a 1."
+               ::t/modifiers [(modifiers/deferred-max-hit-points)
+                              (al-illegal-hit-points-mod "Rolling for hit points is not legal.")]}
+              (let [average (dice/die-mean die)]
+                (t/option-cfg
+                 {:name "Average"
+                  :key :average
+                  :help (str "This option just gives you the average value (" average ") for the die roll (1D" die "). Choose this option if you're not feeling lucky.")
+                  :modifiers [(modifiers/max-hit-points average)]}))]}))
+
+(defn level-option [{:keys [name
+                            plugin?
+                            hit-die
+                            profs
+                            levels
+                            traits
+                            spellcasting
+                            ability-increase-levels
+                            subclass-title
+                            subclass-help
+                            subclass-level
+                            subclasses
+                            source] :as cls}
+                    kw
+                    spellcasting-template
+                    i]
+  (let [ability-inc-set (set ability-increase-levels)
+        level-kw (level-key i)]
+    (t/option-cfg
+     {:name (level-name i)
+      :key level-kw
+      :order i
+      :selections (map
+                   (fn [selection]
+                     (update selection ::t/tags sets/union #{:level level-kw}))
+                   (concat
+                    (some-> levels (get i) :selections)
+                    (some-> spellcasting-template :selections (get i))
+                    (if (= i subclass-level)
+                      [(t/selection-cfg
+                        {:name subclass-title
+                         :key (common/name-to-kw subclass-title)
+                         :help subclass-help
+                         :tags #{:subclass}
+                         :order 2
+                         :options (map
+                                   #(subclass-option (assoc cls :key kw) %)
+                                   (if source (map (fn [sc] (assoc sc :source source)) subclasses) subclasses))})])
+                    (if (and (not plugin?) (ability-inc-set i))
+                      [(ability-score-improvement-selection name i)])
+                    (if (not plugin?)
+                      [(assoc
+                        (hit-points-selection hit-die name i)
+                        ::t/prereq-fn
+                        (fn [c] (or (not (= kw (first (es/entity-val c :classes))))
+                                    (> i 1))))])))
+      :modifiers (concat
+                  (if (= :all (:known-mode spellcasting))
+                    (let [slots (total-slots i (:level-factor spellcasting))
+                          prev-level-slots (total-slots (dec i) (:level-factor spellcasting))
+                          new-slots (apply dissoc slots (keys prev-level-slots))]
+                      (if (seq new-slots)
+                        (let [lvl (key (first new-slots))]
+                          (map
+                           (fn [kw]
+                             (modifiers/spells-known lvl kw (:ability spellcasting) name))
+                           (get-in sl/spell-lists [kw lvl]))))))
+                  (some-> levels (get i) :modifiers)
+                  (traits-modifiers
+                   (filter
+                    (fn [{level :level :or {level 1}}]
+                      (= level i))
+                    traits)
+                   kw)
+                  (if (and (not plugin?)
+                           (= i 1)
+                           ())
+                    [(mods/cum-sum-mod
+                      ?hit-point-level-increases
+                      hit-die
+                      nil
+                      nil
+                      [(= kw (first ?classes))])])
+                  (if (not plugin?)
+                    [(modifiers/level kw name i hit-die)]))})))
+
+
+
+(defn class-skill-selection [{skill-num :choose options :options skill-select-order :order} key prereq-fn]
+  (let [skill-kws (if (:any options) (map :key skills/skills) (keys options))]
+    (skill-selection skill-kws skill-num skill-select-order key prereq-fn)))
+
+(defn class-help-field [name value]
+  [:div.m-t-5
+    [:span.f-w-b (str name ":")]
+   [:span.m-l-10 value]])
+
+
+(defn class-help [hd saves weapon-profs armor-profs]
+  [:div
+   (class-help-field "Hit Die" (str "d" hd))
+   (class-help-field "Saving Throw Proficiencies" (s/join ", " (map (comp s/upper-case name) saves)))
+   (class-help-field "Weapon Proficiencies" (s/join ", " (map (comp name key) weapon-profs)))
+   (class-help-field "Armor Proficiencies" (s/join ", " (map (comp name key) armor-profs)))])
+
+(defn class-option [{:keys [name
+                            key
+                            help
+                            hit-die
+                            plugin?
+                            profs
+                            levels
+                            ability-increase-levels
+                            subclass-title
+                            subclass-level
+                            subclasses
+                            selections
+                            modifiers
+                            source
+                            weapon-choices
+                            weapons
+                            equipment
+                            equipment-choices
+                            armor
+                            armor-choices
+                            spellcasting
+                            multiclass-prereqs]
+                     :as cls}]
+  (let [kw (or key (common/name-to-kw name))
+        {:keys [save skill-options multiclass-skill-options tool-options multiclass-tool-options tool]
+         armor-profs :armor weapon-profs :weapon} profs
+        {level-factor :level-factor} spellcasting
+        save-profs (keys save)
+        spellcasting-template (spellcasting-template (assoc spellcasting :class-key kw) cls)]
+    (t/option-cfg
+     {:name name
+      :key kw
+      :help [:div.p-t-5.p-l-10.p-r-10
+             (class-help hit-die save-profs weapon-profs armor-profs)
+             [:div.m-t-10 help]]
+      :prereqs multiclass-prereqs
+      :selections (map
+                   (fn [selection]
+                     (update selection ::t/tags sets/union #{kw}))
+                   (concat
+                    selections
+                    (if (seq tool-options)
+                      [(tool-prof-selection tool-options :tool-selection (fn [c] (= kw (first (:classes c)))))])
+                    (if (seq multiclass-tool-options)
+                      [(tool-prof-selection multiclass-tool-options :multiclass-tool-selection (fn [c] (not= kw (first (:classes c)))))])
+                    (if weapon-choices (class-weapon-options weapon-choices kw))
+                    (if armor-choices (class-armor-options armor-choices kw))
+                    (if equipment-choices (class-equipment-options equipment-choices kw))
+                    (if skill-options
+                      [(class-skill-selection skill-options :skill-proficiency (fn [c] (prn "FIRST CLASS" (es/entity-val c :classes)) (= kw (first (es/entity-val c :classes)))))])
+                    (if multiclass-skill-options
+                      [(class-skill-selection multiclass-skill-options :multiclass-skill-proficiency (fn [c] (not= kw (first (:classes c)))))])
+                    [(t/selection-cfg
+                      {:name (str name " Levels")
+                       :key :levels
+                       :help "These are your levels in the containing class. You can add levels by clicking the 'Add Levels' button below."
+                       :new-item-text "Level Up (Add a Level)"
+                       :new-item-fn (fn [selection options current-values]
+                                      {::entity/key (-> current-values count inc level-key)})
+                       :tags #{kw}
+                       :options (map
+                                 (partial level-option cls kw spellcasting-template)
+                                 (range 1 21))
+                       :min 1
+                       :sequential? true
+                       :max nil})]))
+      :associated-options (remove
+                           nil?
+                           [(class-starting-equipment-entity-options :weapons weapons)
+                            (class-starting-equipment-entity-options :armor armor)
+                            (class-starting-equipment-entity-options :equipment equipment)])
+      :modifiers (concat
+                  modifiers
+                  (if armor-profs (armor-prof-modifiers armor-profs kw))
+                  (if weapon-profs (weapon-prof-modifiers weapon-profs kw))
+                  (if tool (tool-prof-modifiers tool kw))
+                  (if level-factor [(modifiers/spell-slot-factor kw level-factor)])
+                  (if (and source (not plugin?))
+                    [(modifiers/used-resource source name)])
+                  (remove
+                   nil?
+                   [(modifiers/cls kw)
+                    (if save-profs (apply modifiers/saving-throws kw save-profs))]))})))
