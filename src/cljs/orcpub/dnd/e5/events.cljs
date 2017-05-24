@@ -76,7 +76,6 @@
    (let [strict-character (:body response)
          character (char5e/from-strict strict-character)
          id (:db/id character)]
-     (prn "ID" id)
      {:db (-> db
               (assoc :character character)
               (update-in
@@ -799,7 +798,6 @@
 (reg-event-db
  :hide-message
  (fn [db [_]]
-   (prn "HIDE MESSAGE")
    (assoc db :message-shown? false)))
 
 (reg-event-db

@@ -153,8 +153,11 @@
       add-ability-namespaces
       add-namespaces-to-values))
 
+(defn clean-values [raw-character]
+  (update-in raw-character [::entity/values] (fn [vs] (dissoc vs ::image-url-failed ::faction-image-url-failed))))
+
 (defn to-strict [raw-character]
-  (entity/to-strict raw-character))
+  (entity/to-strict (clean-values raw-character)))
 
 (spec/fdef to-strict
            :args ::raw-character
