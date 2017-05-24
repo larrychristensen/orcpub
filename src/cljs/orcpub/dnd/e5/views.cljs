@@ -104,14 +104,16 @@
 (def header-tab-style
   {:width "85px"})
 
-(defn header-tab [title icon on-click & [disabled]]
-  [:div.white.f-w-b.f-s-14.t-a-c.p-10.header-tab.m-5.w-90
-   {:on-click on-click
-    :class-name (if disabled "disabled")}
-   [:div
-    {:class-name (if disabled "opacity-2" "pointer")}
-    (svg-icon icon 48 48)
-    [:div.title.uppercase title]]])
+(defn header-tab [title icon on-click disabled device-type]
+  (let [mobile? (= :mobile device-type)]
+    [:div.white.f-w-b.f-s-14.t-a-c.p-10.header-tab.m-5
+     {:on-click on-click
+      :class-name (str (if disabled "disabled") " " (if (not mobile?) " w-90"))}
+     [:div
+      {:class-name (if disabled "opacity-2" "pointer")}
+      (let [size (if mobile? 24 48)] (svg-icon icon size size))
+      (if (not mobile?)
+        [:div.title.uppercase title])]]))
 
 (defn app-header []
   (let [device-type @(subscribe [:device-type])]
@@ -131,17 +133,21 @@
          [header-tab
           "characters"
           "battle-gear"
-          #(dispatch [:route routes/dnd-e5-char-list-page-route])]
+          #(dispatch [:route routes/dnd-e5-char-list-page-route])
+          false
+          device-type]
          [header-tab
           "spells"
           "spell-book"
           (fn [])
-          true]
+          true
+          device-type]
          [header-tab
           "monsters"
           "hydra"
           (fn [])
-          true]]]]]
+          true
+          device-type]]]]]
      #_[:div.container.header-links
         [:div.content
          [:div.hidden-xs.hidden-sm
