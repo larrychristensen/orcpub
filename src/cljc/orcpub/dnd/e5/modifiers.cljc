@@ -93,15 +93,18 @@
 (defn unarmored-speed-bonus [value]
   (mods/cum-sum-mod ?unarmored-speed-bonus value "unarmored speed" (mods/bonus-str value)))
 
+(defn add-bonus [x y]
+  (+ (or x 0) (or y 0)))
+
 (defn ability [ability bonus]
   (mods/modifier ?ability-increases
-                 (update ?ability-increases ability + bonus)
+                 (update ?ability-increases ability add-bonus bonus)
                  (clojure.string/upper-case (name ability))
                  (mods/bonus-str bonus)))
 
 (defn conditional-ability [ability bonus conditions]
   (mods/modifier ?ability-increases
-                   (update ?ability-increases ability + bonus)
+                   (update ?ability-increases ability add-bonus bonus)
                    (clojure.string/upper-case (name ability))
                    (mods/bonus-str bonus)
                    (vec conditions)))
@@ -111,19 +114,19 @@
 
 (defn level-ability-increase [ability bonus]
   (mods/modifier ?level-ability-increases
-                 (update ?level-ability-increases ability + bonus)
+                 (update ?level-ability-increases ability add-bonus bonus)
                  (clojure.string/upper-case (name ability))
                  (mods/bonus-str bonus)))
 
 (defn race-ability [ability-kw bonus]
   [(ability ability-kw bonus)
    (mods/modifier ?race-ability-increases
-                  (update ?race-ability-increases ability-kw + bonus))])
+                  (update ?race-ability-increases ability-kw add-bonus bonus))])
 
 (defn subrace-ability [ability-kw bonus]
   [(ability ability-kw bonus)
    (mods/modifier ?subrace-ability-increases
-                  (update ?subrace-ability-increases ability-kw + bonus))])
+                  (update ?subrace-ability-increases ability-kw add-bonus bonus))])
 
 (defn abilities [abilities]
   (mods/modifier ?base-abilities abilities))

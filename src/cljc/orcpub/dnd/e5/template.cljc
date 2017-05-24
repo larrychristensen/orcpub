@@ -21,7 +21,7 @@
             [orcpub.dnd.e5.display :as disp5e]
             [re-frame.core :refer [subscribe dispatch]]))
 
-(enable-console-print!)
+#_(enable-console-print!)
 
 (def ft-5 {:units :feet
            :amount 5})
@@ -182,26 +182,6 @@
                 :on-click (fn [_] (if (not increase-disabled?) (set-ability! app-state k (inc v))))}]]]))
         abilities-vec))]]))
 
-(defn abilities-entry [app-state]
-  [:div.flex.m-l--10.m-r--10
-   (let [abilities (or (opt5e/get-raw-abilities app-state) (char5e/abilities 15 14 13 12 10 8))
-         abilities-vec (vec abilities)]
-     (doall
-      (map-indexed
-       (fn [i k]
-         ^{:key k}
-         [:div.m-t-10.t-a-c.p-1 
-          [:div.uppercase (name k)]
-          (ability-icon k 24)
-          [:input.input.f-s-18.m-b-5.t-a-c.p-l-0
-           {:value (k abilities)
-            :on-change (fn [e] (let [value (.-value (.-target e))
-                                     new-v (if (not (s/blank? value))
-                                             (js/parseInt value))]
-                                 (swap! app-state assoc-in [:character ::entity/options :ability-scores ::entity/value k] new-v)))}]
-          (ability-modifier (k abilities))])
-       char5e/ability-keys)))])
-
 (declare template-selections)
 
 (defn traits-modifiers [traits & [class-key source]]
@@ -245,8 +225,7 @@
                               modifiers
                               selections
                               traits
-                              source]}
-                      app-state]
+                              source]}]
   (t/option-cfg
    {:name name
     :selections selections
@@ -1470,7 +1449,7 @@
                     (if armor-choices (class-armor-options armor-choices kw))
                     (if equipment-choices (class-equipment-options equipment-choices kw))
                     (if skill-options
-                      [(class-skill-selection skill-options :skill-proficiency (fn [c] (= kw (first (:classes c)))))])
+                      [(class-skill-selection skill-options :skill-proficiency (fn [c] (prn "FIRST CLASS" (es/entity-val c :classes)) (= kw (first (es/entity-val c :classes)))))])
                     (if multiclass-skill-options
                       [(class-skill-selection multiclass-skill-options :multiclass-skill-proficiency (fn [c] (not= kw (first (:classes c)))))])
                     [(t/selection-cfg
@@ -6305,16 +6284,15 @@ long rest."})]
               psionic-talents)}))
 
 (defn psionic-discipline [name page summary type]
-  (let [trait-fn (case type
-                   :trait mod5e/trait-cfg
-                   :action mod5e/action
-                   :reaction mod5e/reaction
-                   :bonus-action mod5e/bonus-action)]
-    (trait-fn
-     {:name name
-      :page page
-      :source ua-mystic-kw
-      :summary summary})))
+  (let [trait-cfg {:name name
+                   :page page
+                   :source ua-mystic-kw
+                   :summary summary}]
+    (case type
+      :trait (mod5e/trait-cfg trait-cfg)
+      :action (mod5e/action trait-cfg)
+      :reaction (mod5e/reaction trait-cfg)
+      :bonus-action (mod5e/bonus-action trait-cfg))))
 
 (def psionic-disciplines
   [{:name "Adaptive Body"
@@ -8693,6 +8671,7 @@ long rest."})]
                sorcerer-option
                warlock-option
                wizard-option]})
+   (opt5e/skill-selection 0)
    (inventory-selection "Treasure" "cash" equip5e/treasure mod5e/deferred-treasure)
    (inventory-selection "Weapons" "plain-dagger" weapon5e/weapons mod5e/deferred-weapon)
    (inventory-selection "Magic Weapons" "lightning-bow" mi/magic-weapons mod5e/deferred-magic-weapon)

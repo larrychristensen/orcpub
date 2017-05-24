@@ -49,3 +49,32 @@
   (stest/instrument `entity/from-strict)
   (is (= (entity/from-strict strict-character) character))
   (stest/unstrument `entity/from-strict))
+
+(deftest test-template-option-map
+  (let [selections [(assoc
+                     (t/selection-cfg
+                      {:name "Selection X"
+                       :options [(t/option-cfg
+                                  {:name "Option 1"})
+                                 (t/option-cfg
+                                  {:name "Option 2"})]})
+                     ::entity/path
+                     [:selection-x])
+                    (assoc
+                     (t/selection-cfg
+                      {:name "Selection Y"
+                       :options [(t/option-cfg
+                                  {:name "Option 3"})
+                                 (t/option-cfg
+                                  {:name "Option 4"})]})
+                     ::entity/path
+                     [:selection-y])]
+        expected {[:selection-x :option-1] (t/option-cfg
+                                            {:name "Option 1"})
+                  [:selection-x :option-2] (t/option-cfg
+                                            {:name "Option 2"})
+                  [:selection-y :option-3] (t/option-cfg
+                                            {:name "Option 3"})
+                  [:selection-y :option-4] (t/option-cfg
+                                            {:name "Option 4"})}]
+    (is (= (entity/make-template-option-map selections) expected))))

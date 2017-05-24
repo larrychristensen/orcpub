@@ -19,4 +19,4 @@
                             ::custom-equipment [{::equip/name "Scroll of Pedigree"
                                                  ::equip/equipped? true
                                                  ::equip/background-starting-equipment? true}]}}]
-    (is (spec/valid? ::strict/entity entity))))
+    (is (spec/valid? ::e/entity entity))))

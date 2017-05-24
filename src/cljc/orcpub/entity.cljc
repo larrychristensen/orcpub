@@ -50,8 +50,7 @@
         raw-character))
 
 (defn to-strict [{:keys [:db/id ::options ::values]}]
-  (cond-> {:db/id id
-           ::strict/selections (to-strict-selections options)
+  (cond-> {::strict/selections (to-strict-selections options)
            ::strict/values (into {} (remove (comp nil? val)) values)}
     id (assoc :db/id id)
     true remove-empty-fields))
@@ -87,9 +86,9 @@
    selections))
 
 (defn from-strict [{:keys [:db/id ::strict/selections ::strict/values]}]
-  (-> {:db/id id
-       ::options (from-strict-selections selections)
-       ::values values}))
+  (cond-> {::options (from-strict-selections selections)
+           ::values values}
+    id (assoc :db/id id)))
 
 (spec/fdef from-strict
            :args (spec/cat :entity ::strict/entity)
@@ -146,7 +145,9 @@
   (let [new-path (conj path (::key option))
         child-options (::options option)
         option-value (::value option)
-        result (cond-> {::t/path new-path}
+        result (cond-> {::t/path new-path
+                        ::t/key option
+                        ::t/modifiers option}
                  option-value (assoc ::value option-value))]
     (if (seq child-options)
       (conj (build-options-paths new-path child-options)
@@ -403,12 +404,45 @@
            (flatten modifiers)))))
      flat-options)))
 
-(def memoized-make-modifier-map (memoize t/make-modifier-map))
+(defn make-template-option-map [selections]
+  (reduce
+   (fn [m {:keys [::path ::t/ref ::t/options]}]
+     (merge m
+            (reduce
+             (fn [m2 {:keys [::t/key] :as option}]
+               (let [option-path (conj (or ref path) key)]
+                 (assoc m2 option-path option)))
+             {}
+             options)))
+   {}
+   selections))
 
+;; [:class :warlock :eldritch-invocations :book-of-ancient-secrets :book-of-ancient-secrets-rituals :identify]
+
+(defn prn-js [& args]
+  #?(:cljs (apply js/console.log (map #(clj->js %) args))))
+
+(defn collect-modifiers-2 [raw-entity flat-options template]
+  (let [selections (get-all-selections-aux-2 template (make-path-map raw-entity))
+        template-option-map (make-template-option-map selections)]
+    (mapcat
+     (fn [{path ::t/path
+           option-value ::value
+           :as option}]
+       (let [template-option (template-option-map path)
+             modifiers (::t/modifiers template-option)]
+         (flatten
+          (map
+           (fn [{:keys [::mods/name ::mods/value ::mods/fn ::mods/deferred-fn ::mods/default-value] :as mod}]
+             (if deferred-fn
+               (deferred-fn (or option-value default-value))
+               mod))
+           (flatten modifiers)))))
+     flat-options)))
 
 (defn apply-options [raw-entity template]
   (let [options (flatten-options (::options raw-entity))
-        modifiers (sort-by ::mods/order (collect-modifiers raw-entity options template))
+        modifiers (sort-by ::mods/order (collect-modifiers-2 raw-entity options template))
         deps (reduce
               (fn [m {:keys [::mods/key ::mods/deps]}]
                 (if (seq deps)
@@ -431,6 +465,8 @@
 
 (defn build [raw-entity template]
   (memoized-build-aux raw-entity template))
+
+(def memoized-make-modifier-map (memoize t/make-modifier-map))
 
 (declare merge-selections)
 

@@ -389,7 +389,7 @@
    (sort spells)))
 
 (defn spell-level-title [class-name level]
-  (str class-name (if (zero? level) " Cantrips Known" (str " Spells Known" (if level (str " " level))))))
+  (str class-name (if (and level (zero? level)) " Cantrips Known" (str " Spells Known" (if level (str " " level))))))
 
 (defn spell-selection [{:keys [title class-key level spellcasting-ability class-name num prepend-level? spell-keys options min max exclude-ref? ref]}]
   (let [title (or title (spell-level-title class-name level))
@@ -399,7 +399,7 @@
       {:name title
        :key kw
        :ref ref
-       :order (if (zero? level) 0 1)
+       :order (if (and level (zero? level)) 0 1)
        :multiselect? true
        :options (or options
                     (spell-options
@@ -547,10 +547,11 @@
                        all-spells))]
          (assoc m cls-lvl
                 [(let [cls-key-nm (class-key-name (:key cls-cfg) (:name cls-cfg))
-                       kw (spell-selection-key cls-key-nm)]
+                       kw (spell-selection-key cls-key-nm)
+                       cls-nm (:name cls-cfg)]
                    (spell-selection
                     {:class-key class-key
-                     :class-name (:name cls-cfg)
+                     :class-name cls-nm
                      :min num
                      :max (if (not acquire?) num)
                      :options options}))]))))
@@ -599,7 +600,12 @@
     :selections [(t/selection-cfg
                   {:name "Level 1 Ritual"
                    :tags #{:spells}
-                   :options (spell-options (filter (fn [spell-kw] (ritual-spell? (spells/spell-map spell-kw))) (get-in spell-lists [class-key 1])) spellcasting-ability (class-names class-key))
+                   :options (spell-options
+                             (filter (fn [spell-kw] (ritual-spell? (spells/spell-map spell-kw))) (get-in spell-lists [class-key 1]))
+                             spellcasting-ability
+                             (class-names class-key)
+                             false
+                             "Ritual Only")
                    :min 2
                    :max 2})]}))
 
