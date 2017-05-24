@@ -41,7 +41,7 @@
             [re-frame.core :refer [subscribe dispatch dispatch-sync]])
   (:require-macros [cljs.core.async.macros :refer [go]]))
 
-(def print-disabled? false)
+(def print-disabled? true)
 (def print-enabled? (and (not print-disabled?)
                          (s/starts-with? js/window.location.href "http://localhost")))
 
@@ -644,11 +644,11 @@
       [:div selector])
     option-selectors)))
 
+
 (defn selection-section [character built-char built-template option-paths ui-fns {:keys [::t/key ::t/name ::t/help ::t/options ::t/min ::t/max ::t/ref ::t/icon ::t/multiselect? ::entity/path ::entity/parent] :as selection} num-columns]
   (let [actual-path (actual-path selection)
         remaining (count-remaining built-template character selection)
         expanded? (r/atom false)]
-    (prn "NUM_COLUMNS" num-columns)
     [selection-section-base {:path actual-path
                              :parent-title (if parent (ancestor-names-string built-template actual-path))
                              :name name
@@ -1317,19 +1317,20 @@
        (fn [i {:keys [name icon tags]}]
          (let [selections (entity/tagged-selections available-selections tags)
                combined-selections (entity/combine-selections selections)
-               total-remaining (sum-remaining built-template character combined-selections)]
+               total-remaining (sum-remaining built-template character combined-selections)
+               class-name (if (= i page-index) "selected-tab" "opacity-5 hover-opacity-full")]
            ^{:key name}
            [:div.p-5.hover-opacity-full.pointer.flex.flex-column.align-items-c
             {:class-name (if (= i page-index) "b-b-2 b-orange" "")
              :on-click (fn [_] (dispatch [:set-page i]))}
-            (if (= device-type :desktop)
-              [:div.f-s-10.m-b-2 name])
-            [:div.w-32
+            [:div
+             {:class-name class-name}
+             [:div.f-s-10.m-b-2
+               name]
              [:div.t-a-c
-              {:class-name (if (= i page-index) "selected-tab" "opacity-5 hover-opacity-full")}
-              (views5e/svg-icon icon 32)]
-             (if (not (= total-remaining 0))
-               [:div.flex.justify-cont-end.m-t--10 (remaining-indicator total-remaining 12 11)])]]))
+              (views5e/svg-icon icon 32)]]
+            (if (not (= total-remaining 0))
+              [:div.flex.justify-cont-end.m-t--10.p-l-20 (remaining-indicator total-remaining 12 11)])]))
        pages))]))
 
 (defn matches-group-fn [key]
@@ -1410,7 +1411,6 @@
                                        (zero? (::t/max %))
                                        (zero? (count-remaining built-template character %)))
                                  combined-selections)]
-    (prn "NOC COLUMNS" num-columns)
     (if print-enabled? (js/console.log "FINAL SELECTIONS" (clj->js final-selections)))
     [:div.w-100-p
      [option-sources]
@@ -1652,7 +1652,6 @@
            [views5e/character-display @(subscribe [:built-character]) true 1])]]])))
 
 (defn desktop-or-tablet-columns [device-type]
-  (prn "DEVICE_TYPE" device-type)
   (let [current-tab (r/atom :options)]
     (fn []
       [:div
