@@ -540,6 +540,7 @@
                  :page 111
                  :source :vgm
                  :summary (str "Mimic sounds you've heard, creatures disbelieve it with an insight check opposed to your deception check (1d20" (common/mod-str (:deception ?skill-bonuses)) ").")})]
+   :selections [(opt5e/skill-selection [:acrobatics :deception :stealth :sleight-of-hand] 2)]
    :profs {:skill-options {:choose 2 :options {:acrobatics true :deception true :stealth true :sleight-of-hand true}}}
    :traits [{:name "Expert Forgery"
              :page 111
