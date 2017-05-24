@@ -4694,7 +4694,7 @@ long rest."})]
      :options (map
                opt5e/background-option
                backgrounds)})
-   (opt5e/feat-selection
+   (opt5e/feat-selection-2
     {:options opt5e/feat-options
      :min 0
      :max 0})

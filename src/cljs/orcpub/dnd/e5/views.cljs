@@ -104,44 +104,56 @@
 (def header-tab-style
   {:width "85px"})
 
+(defn header-tab [title icon on-click & [disabled]]
+  [:div.white.f-w-b.f-s-14.t-a-c.p-10.header-tab.m-5.w-90
+   {:on-click on-click
+    :class-name (if disabled "disabled")}
+   [:div
+    {:class-name (if disabled "opacity-2" "pointer")}
+    (svg-icon icon 48 48)
+    [:div.title.uppercase title]]])
+
 (defn app-header []
-  [:div#app-header.app-header.flex.flex-column.justify-cont-s-b
-   [:div.app-header-bar.container
-    [:div.content
-     [:div.flex.align-items-c.h-100-p
-      [:div.flex.justify-cont-s-b.align-items-c.w-100-p.p-l-20.p-r-20
-       [:img.orcpub-logo.h-32.w-120.pointer
-        {:src "/image/orcpub-logo.svg"
-         :on-click #(dispatch [:route routes/default-route])}]
-       [user-header-view]]]]]
-   [:div.container
-    [:div.content
-     [:div.flex.justify-cont-end.w-100-p
-      [:div.flex.m-b-5.m-r-5
-       [:div.pointer.white.f-w-b.f-s-14.t-a-c.p-10.header-tab.m-5.w-90
-        {:on-click #(dispatch [:route routes/dnd-e5-char-list-page-route])}
-        (svg-icon "battle-gear" 48 48)
-        [:div.title "CHARACTERS"]]
-       [:div.white.f-w-b.f-s-14.t-a-c.p-10.header-tab.m-5.disabled.w-90
-        [:div.opacity-2
-         (svg-icon "spell-book" 48 48)
-         [:div.title "SPELLS"]]]
-       [:div.white.f-w-b.f-s-14.t-a-c.p-10.header-tab.m-5.disabled.w-90
-        [:div.opacity-2
-         (svg-icon "hydra" 48 48)
-         [:div.title "MONSTERS"]]]]]]]
-   #_[:div.container.header-links
+  (let [device-type @(subscribe [:device-type])]
+    [:div#app-header.app-header.flex.flex-column.justify-cont-s-b
+     [:div.app-header-bar.container
       [:div.content
-       [:div.hidden-xs.hidden-sm
-        [:div.m-l-10.white
-         [:span "Questions? Comments? Issues? Feature Requests? We'd love to hear them, "]
-         [:a {:href "https://muut.com/orcpub" :target :_blank} "report them here."]]
-        [:div
-         [:div.flex.align-items-c.f-w-b.f-s-18.m-t-10.m-l-10.white
-          [:span.hidden-xs "Please support continuing development on "]
-          [:a.m-l-5 patreon-link-props [:span "Patreon"]]
-          [:a.m-l-5 patreon-link-props
-           [:img.h-32.w-32 {:src "https://www.patreon.com/images/patreon_navigation_logo_mini_orange.png"}]]]]]]]])
+       [:div.flex.align-items-c.h-100-p
+        [:div.flex.justify-cont-s-b.align-items-c.w-100-p.p-l-20.p-r-20
+         [:img.orcpub-logo.h-32.w-120.pointer
+          {:src "/image/orcpub-logo.svg"
+           :on-click #(dispatch [:route routes/default-route])}]
+         [user-header-view]]]]]
+     [:div.container
+      [:div.content
+       [:div.flex.justify-cont-end.w-100-p
+        [:div.flex.m-b-5.m-r-5
+         [header-tab
+          "characters"
+          "battle-gear"
+          #(dispatch [:route routes/dnd-e5-char-list-page-route])]
+         [header-tab
+          "spells"
+          "spell-book"
+          (fn [])
+          true]
+         [header-tab
+          "monsters"
+          "hydra"
+          (fn [])
+          true]]]]]
+     #_[:div.container.header-links
+        [:div.content
+         [:div.hidden-xs.hidden-sm
+          [:div.m-l-10.white
+           [:span "Questions? Comments? Issues? Feature Requests? We'd love to hear them, "]
+           [:a {:href "https://muut.com/orcpub" :target :_blank} "report them here."]]
+          [:div
+           [:div.flex.align-items-c.f-w-b.f-s-18.m-t-10.m-l-10.white
+            [:span.hidden-xs "Please support continuing development on "]
+            [:a.m-l-5 patreon-link-props [:span "Patreon"]]
+            [:a.m-l-5 patreon-link-props
+             [:img.h-32.w-32 {:src "https://www.patreon.com/images/patreon_navigation_logo_mini_orange.png"}]]]]]]]]))
 
 (defn legal-footer []
   [:div.m-l-15.m-b-10.m-t-10 {:style {:text-align :left}}
@@ -518,26 +530,29 @@
    :background-color "rgba(0,0,0,0.6)"})
 
 (defn header [title button-cfgs]
-  [:div.w-100-p
-   [:div.flex.align-items-c.justify-cont-s-b.flex-wrap
-    [:h1.f-s-36.f-w-b.m-t-21.m-l-10.character-builder-header title]
-    [:div.flex.align-items-c.justify-cont-end.flex-wrap.m-r-10.m-l-10
-     (map-indexed
-      (fn [i {:keys [title icon on-click]}]
-        ^{:key i}
-        [:button.form-button.h-40.m-l-5.m-t-5.m-b-5
-         {:on-click on-click}
-         [:span
-          [:i.fa.f-s-18
-           (if icon {:class-name (str "fa-" icon)})]]
-         [:span.m-l-5.header-button-text title]])
-      button-cfgs)]]
-   (if @(subscribe [:message-shown?])
-     [:div.p-b-10.p-r-10.p-l-10
-      [message
-       @(subscribe [:message-type])
-       @(subscribe [:message])
-       [:hide-message]]])])
+  (let [device-type @(subscribe [:device-type])]
+    [:div.w-100-p
+     [:div.flex.align-items-c.justify-cont-s-b.flex-wrap
+      [:h1.f-s-36.f-w-b.m-t-5.m-l-10
+       {:class-name (if (not= :mobile device-type) "m-t-21 m-b-20")}
+       title]
+      [:div.flex.align-items-c.justify-cont-end.flex-wrap.m-r-10.m-l-10
+       (map-indexed
+        (fn [i {:keys [title icon on-click]}]
+          ^{:key i}
+          [:button.form-button.h-40.m-l-5.m-t-5.m-b-5
+           {:on-click on-click}
+           [:span
+            [:i.fa.f-s-18
+             (if icon {:class-name (str "fa-" icon)})]]
+           [:span.m-l-5.header-button-text title]])
+        button-cfgs)]]
+     (if @(subscribe [:message-shown?])
+       [:div.p-b-10.p-r-10.p-l-10
+        [message
+         @(subscribe [:message-type])
+         @(subscribe [:message])
+         [:hide-message]]])]))
 
 (def debug-data-style {:width "400px" :height "400px"})
 
@@ -867,7 +882,8 @@
 
 (def no-https-images "Sorry, we don't currently support images that start with https")
 
-(defn character-display [built-char show-summary?]
+(defn character-display [built-char show-summary? num-columns]
+  (prn "NUMBR COLS" num-columns)
   (let [race (char/race built-char)
         subrace (char/subrace built-char)
         alignment (char/alignment built-char)
@@ -911,7 +927,8 @@
        [:div.f-s-24.f-w-600.m-b-16.text-shadow.flex
         [character-summary built-char]])
      [:div.details-columns
-      [:div.flex-grow-1.flex-basis-50-p
+      {:class-name (if (= 2 num-columns) "flex")}
+      [:div.flex-grow-1
        [:div.w-100-p.t-a-c
         [:div.flex.justify-cont-s-b.p-10
          (doall
@@ -981,7 +998,7 @@
                                       :else %))
                                  types)))])
                save-advantage))])]]]]
-      [:div.flex-grow-1.flex-basis-50-p.details-column-2
+      [:div.flex-grow-1.details-column-2
        [list-display-section "Skill Proficiencies" "juggler"
         (let [skill-bonuses (char/skill-bonuses built-char)]
           (map

@@ -153,6 +153,8 @@
     {:margin-bottom "-1px"}]
    [:.m-b-0-last:last-child
     {:margin-bottom "0px"}]
+   [:.m-b-2
+    {:margin-bottom "2px"}]
    [:.m-b-5
     {:margin-bottom "5px"}]
    [:.m-b-10
@@ -494,10 +496,10 @@
 (def sm-query
   {:min-width sm-min :max-width sm-max})
 
-(def md-width "992px")
+(def md-min "992px")
 
 (def md-query
-  {:min-width md-width :max-width md-max})
+  {:min-width md-min :max-width md-max})
 
 (def sm-or-md-query
   {:min-width sm-min :max-width md-max})
@@ -506,13 +508,13 @@
   {:min-width xs-min :max-width sm-max})
 
 
-(def lg-width "1200px")
+(def lg-min "1200px")
 
 (def lg-query
-  {:min-width lg-width})
+  {:min-width lg-min})
 
 (def not-lg-query
-  {:max-width lg-width})
+  {:max-width md-max})
 
 (def not-xs-query
   {:min-width sm-min})
@@ -706,6 +708,7 @@
     {:print true}
     [:.hidden-print
      {:display "none !important"}])
+   
    (at-media
     xs-query
     [:.user-icon
@@ -727,12 +730,12 @@
        :-webkit-backdrop-filter :none}]
      [:.content
       {:width "100%"}]
-     [:.options-column
+     #_[:.options-column
       {:width "100%"}]
      [:.header-button-text :.header-links
       {:display :none}])
 
-    (at-media
+    #_(at-media
      xs-query
      [:.build-tab
       {:display :none}]
@@ -760,17 +763,7 @@
       [:.details-column
        {:display :block}]])
 
-    (at-media
-     xs-or-sm-query
-     [:.header-tab
-      [:.title
-       {:display :none}]
-      [:img
-       {:height "24px"
-        :width "24px"}]
-      {:width "30px"}])
-
-    (at-media
+    #_(at-media
      sm-or-md-query
      [:.build-tab
       {:display :block}]
@@ -798,9 +791,9 @@
 
     (at-media
      not-xs-query
-     [:.details-columns
+     #_[:.details-columns
       {:display :flex}]
-     [:.details-column-2
+     #_[:.details-column-2
       {:margin-left "40px"}])
 
     (at-media
@@ -813,7 +806,7 @@
      [:.registration-input
       {:width "100%"}])
 
-    (at-media
+    #_(at-media
      lg-query
      [:.builder-column
       {:display :block}]
@@ -888,6 +881,14 @@
       :-webkit-backdrop-filter "blur(5px)"
       :backdrop-filter "blur(5px)"}]
 
+    [:.header-tab.mobile
+     [:.title
+      {:display :none}]
+     [:img
+      {:height "24px"
+       :width "24px"}]
+     {:width "30px"}]
+
     [:.header-tab:hover
      [(garden.selectors/& (garden.selectors/not :.disabled))
       {:background-color orange}]]
@@ -898,7 +899,7 @@
       :backdrop-filter "blur(5px)"
       :background-color "rgba(0, 0, 0, 0.25)"}]
 
-    [:.options-column
+    #_[:.options-column
      {:width "300px"}]
 
     [:.builder-column
