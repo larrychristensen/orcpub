@@ -895,9 +895,10 @@
        (remaining-component 27 points-remaining)]
       [:div.flex.justify-cont-s-a
        (doall
-        (map-indexed
-         (fn [i [k v]]
-           (let [increase-disabled? (or (zero? points-remaining)
+        (map
+         (fn [k]
+           (let [v (abilities k)
+                 increase-disabled? (or (zero? points-remaining)
                                         (= 15 v)
                                         (>= (total-abilities k) 20)
                                         (> (- (score-costs (inc v))
@@ -921,7 +922,7 @@
                  :on-click (stop-prop-fn
                             (fn [_]
                               (if (not increase-disabled?) (set-abilities! (update abilities k inc)))))}]]]))
-         abilities))]])))
+         char5e/ability-keys))]])))
 
 (defn abilities-standard [character]
   [:div.flex.justify-cont-s-a

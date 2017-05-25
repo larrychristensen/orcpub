@@ -4014,7 +4014,7 @@ long rest."})]
    :equipment {:clothes-fine 1
                :signet-ring 1
                :purse 1}
-   :custom-equipment {"Scoll of Pedigree" 1}
+   :custom-equipment {"Scroll of Pedigree" 1}
    :treasure {:gp 25}})
 
 (def knight-bg
@@ -4029,7 +4029,7 @@ long rest."})]
    :equipment {:clothes-fine 1
                :signet-ring 1
                :purse 1}
-   :custom-equipment {"Scoll of Pedigree" 1
+   :custom-equipment {"Scroll of Pedigree" 1
                       "Emblem of Chivalry" 1}
    :treasure {:gp 25}})
 
