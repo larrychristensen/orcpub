@@ -146,6 +146,8 @@
     attack-string
     attacks)))
 
+(def coin-keys [:cp :sp :ep :gp :pp])
+
 (defn equipment-fields [built-char]
   (let [equipment (es/entity-val built-char :equipment)
         armor (es/entity-val built-char :armor)
@@ -166,7 +168,7 @@
                                  (pos? quantity)))
                           (merge all-equipment weapons magic-weapons))]
     (merge
-     (select-keys treasure-map [:cp :sp :ep :gp :pp])
+     (select-keys treasure-map coin-keys)
      {:equipment (s/join
                   "; "
                   (map
@@ -181,7 +183,9 @@
                   (map
                    (fn [[kw {count ::char-equip5e/quantity}]]
                      (str (disp5e/equipment-name mi5e/all-equipment-map kw) " (" count ")"))
-                   unequipped-items))})))
+                   (merge
+                    (apply dissoc treasure coin-keys)
+                    unequipped-items)))})))
 
 (def level-max-spells
   {0 8
