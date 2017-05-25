@@ -100,7 +100,7 @@
       (nil? id) (login-error errors/bad-credentials)
       (and unverified? expired?) (login-error errors/unverified-expired)
       unverified? (login-error errors/unverified {:email email})
-      :else (let [token (create-token username (-> 3 hours from-now))]
+      :else (let [token (create-token (:orcpub.user/username user) (-> 3 hours from-now))]
               {:status 200 :body {:user-data {:username (:orcpub.user/username user)
                                               :email (:orcpub.user/email user)}
                                   :token token}}))))
@@ -472,15 +472,24 @@
                            transit-params
                            (assoc transit-params :db/id (-> result :tempids (get "tempid"))))})))
 
+(defn find-user-by-username-or-email [db username-or-email]
+  (first-user-by db
+                 '[:find ?e
+                   :in $ ?user-or-email
+                   :where (or [?e :orcpub.user/username ?user-or-email]
+                              [?e :orcpub.user/email ?user-or-email])]
+                 username-or-email))
+
 (defn character-list [{:keys [db transit-params body conn identity] :as request}]
   (let [username (:user identity)
+        user (find-user-by-username-or-email db username)
         ids (d/q '[:find ?e
-                   :in $ ?user
+                   :in $ [?idents ...]
                    :where
-                   [?e :orcpub.entity.strict/owner ?user]
-                   [?e :orcpub.entity.strict/selections]]
+                   [?e :orcpub.entity.strict/owner ?idents]]
                  db
-                 username)
+                 [(:orcpub.user/username user)
+                  (:orcpub.user/email user)])
         characters (d/pull-many db '[*] (map first ids))]
     {:status 200 :body characters}))
 
