@@ -932,7 +932,6 @@
        [:div.f-s-24.f-w-600.m-b-16.text-shadow.flex
         [character-summary built-char]])
      [:div.details-columns
-      {:class-name (if (= 2 num-columns) "flex")}
       [:div.flex-grow-1
        [:div.w-100-p.t-a-c
         [:div.flex.justify-cont-s-b.p-10
