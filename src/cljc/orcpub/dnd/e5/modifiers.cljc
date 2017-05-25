@@ -136,14 +136,14 @@
     ?abilities
     (fn [abils]
       (abilities abils))
-    {:str 12 :dex 12 :con 12 :int 12 :wis 12 :cha 12}))
+    (zipmap char5e/ability-keys (repeat 12))))
 
 (defn deferred-ability-increases []
   (mods/deferred-modifier
     ?ability-increases
     (fn [increases]
       (mods/modifier ?ability-increases (merge-with + increases ?ability-increases)))
-    {:str 0 :dex 0 :con 0 :int 0 :wis 0 :cha 0}))
+    (zipmap char5e/ability-keys (repeat 0))))
 
 (defn saving-throws [cls-kw & abilities]
   (mods/modifier ?saving-throws
@@ -160,7 +160,7 @@
   (mods/modifier ?saving-throw-bonuses
                  (merge-with +
                              ?saving-throw-bonuses
-                             (zipmap [:str :con :dex :int :wis :cha] (repeat bonus)))))
+                             (zipmap char5e/ability-keys (repeat bonus)))))
 
 (defn saving-throw-advantage [types & [abilities]]
   (mods/vec-mod ?saving-throw-advantage {:abilities abilities

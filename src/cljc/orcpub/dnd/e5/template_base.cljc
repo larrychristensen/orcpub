@@ -77,16 +77,16 @@
     ?ac-bonus-fns []
     ?abilities (reduce
                 (fn [m k]
-                  (assoc m k (max (let [overrides (filter
-                                                   (fn [{:keys [ability value]}]
-                                                     (= ability k))
-                                                   ?ability-overrides)]
-                                    (if (seq overrides)
+                  (let [overrides (filter
+                                   (fn [{:keys [ability value]}]
+                                     (= ability k))
+                                   ?ability-overrides)]
+                    (assoc m k (max (if (seq overrides)
                                       (apply max (map :value overrides))
-                                      0))
-                                  (+ (or (k ?base-abilities) 0)
-                                     (or (k ?ability-increases) 0)
-                                     (or (k ?level-ability-increases) 0)))))
+                                      0)
+                                    (+ (or (k ?base-abilities) 0)
+                                       (or (k ?ability-increases) 0)
+                                       (or (k ?level-ability-increases) 0))))))
                 {}
                 char5e/ability-keys)
     ?ability-bonuses (reduce-kv

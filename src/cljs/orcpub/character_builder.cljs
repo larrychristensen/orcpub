@@ -1137,7 +1137,7 @@
         first-class (if levels (levels (first classes)))
         first-class-hit-die (:hit-die first-class)
         level-bonus (es/entity-val built-char :hit-point-level-bonus)
-        con-bonus (:con (es/entity-val built-char :ability-bonuses))
+        con-bonus (::char5e/con (es/entity-val built-char :ability-bonuses))
         con-bonus-str (common/bonus-str con-bonus)
         misc-bonus (- level-bonus con-bonus)
         misc-bonus-str (common/bonus-str misc-bonus)

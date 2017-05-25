@@ -4,6 +4,7 @@
             [orcpub.dnd.e5.weapons :as weapons]
             [orcpub.dnd.e5.armor :as armor5e]
             [orcpub.dnd.e5.equipment :as equip5e]
+            [orcpub.dnd.e5.character :as char5e]
             [orcpub.dnd.e5.character.equipment :as char-equip5e]
             [orcpub.dnd.e5.modifiers :as mod5e])
   #?(:cljs (:require-macros [orcpub.dnd.e5.modifiers :as mod5e])))
@@ -42,11 +43,10 @@
 (def plus-3-name (bonus-name-fn 3))
 
 (defn belt-of-giant-strength-mod [value]
-  (mod/vec-mod ?ability-overrides {:ability :str :value (min 30 (+ value (if (and ?giants-bane-gauntlet ?giants-bane-hammer) 4 0)))}))
+  (mod/vec-mod ?ability-overrides {:ability :orcpub.dnd.e5.character/str :value (min 30 (+ value (if (and ?giants-bane-gauntlet ?giants-bane-hammer) 4 0)))}))
 
 (defn dragon-scale-mail [color-nm resistance-kw]
-  {
-   :name (str "Dragon Scale Mail, " color-nm)
+  {:name (str "Dragon Scale Mail, " color-nm)
    :magical-ac-bonus 1
    :item-type :armor
    :item-subtype :scale-mail
@@ -107,7 +107,7 @@ direction to the closest dragon within 30 miles of you that is of the same type 
     :item-type :wondrous-item
     :rarity :rare
       :attunement [:any]
-      :modifiers [(mod5e/ability-override :con 19)]
+      :modifiers [(mod5e/ability-override ::char5e/con 19)]
     :description "Your Constitution score is 19 while you wear this amulet. It has no effect on you if your Constitution is already 19 or higher."
     }{
     :name "Amulet of Proof against Detection and Location"
@@ -541,7 +541,7 @@ shifts to camouflage you. Pulling the hood up or down requires an action."}
 
     :rarity :uncommon
     :magical-ac-bonus 1
-    :modifiers (map #(mod5e/saving-throw-bonus % 1) [:str :con :dex :int :wis :cha])
+    :modifiers (map #(mod5e/saving-throw-bonus % 1) char5e/ability-keys)
     :attunement [:any]
     :description "You gain a +1 bonus to AC and saving throws while you wear this cloak."
     }{
@@ -914,7 +914,7 @@ When you draw this weapon, you can extinguish all nonmagical flames within 30 fe
     :rarity :uncommon
 
     :attunement [:any]
-      :modifiers [(mod5e/ability-override :str 19)
+      :modifiers [(mod5e/ability-override ::char5e/str 19)
                   (mod/modifier ?giants-bane-gauntlet true)]
     :description "Your Strength score is 19 while you wear these gauntlets. They have no effect on you if your Strength is already 19 or higher."
     }{
@@ -1020,7 +1020,7 @@ Placing the haversack inside an extradimensional space created by a bag of holdi
     :rarity :uncommon
 
     :attunement [:any]
-    :modifiers [(mod5e/ability-override :int 19)]
+    :modifiers [(mod5e/ability-override ::char5e/int 19)]
     :description "Your Intelligence score is 19 while you wear this headband. It has no effect on you if your Intelligence is already 19 or higher."
     }{
     :name "Helm of Brilliance"
@@ -1604,7 +1604,7 @@ If you die while wearing the ring, your soul enters it, unless it already houses
 
     :attunement [:any]
     :magical-ac-bonus 1
-    :modifiers (map #(mod5e/saving-throw-bonus % 1) [:str :con :dex :int :wis :cha])
+    :modifiers (map #(mod5e/saving-throw-bonus % 1) char5e/ability-keys)
     :description "You gain a +1 bonus to AC and saving throws while wearing this ring."
     }{
     :name "Ring of Regeneration"
