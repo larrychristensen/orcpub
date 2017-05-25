@@ -39,7 +39,7 @@
   {:feet :feet})
 
 (defn equipment-name [equipment-map equipment-kw]
-  (or (::char-equip/name (equipment-map equipment-kw))
+  (or (:name (equipment-map equipment-kw))
       (if (string? equipment-kw)
         equipment-kw
         (common/kw-to-name equipment-kw))))
