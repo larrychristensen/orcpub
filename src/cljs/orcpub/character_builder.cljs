@@ -1665,7 +1665,7 @@
            [new-options-column (if (= device-type :desktop) 2 1)]
            [description-fields])]
         [:div.w-50-p.m-l-20
-         [views5e/character-display @(subscribe [:built-character]) true (if (= device-type :desktop) 2 1)]]]])))
+         [views5e/character-display @(subscribe [:built-character]) true 1]]]])))
 
 (defn builder-columns []
   (let [device-type @(subscribe [:device-type])]
