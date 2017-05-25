@@ -1402,7 +1402,7 @@
         built-char @(subscribe [:built-character])
         built-template @(subscribe [:built-template])
         available-selections @(subscribe [:available-selections])
-        _ (if print-enabled? (js/console.log "AVAILABLE SELECTIONS" available-selections))
+        ;;_ (if print-enabled? (js/console.log "AVAILABLE SELECTIONS" available-selections))
         page @(subscribe [:page])
         page-index (or page 0)
         option-paths @(subscribe [:option-paths])
@@ -1413,7 +1413,7 @@
                                        (zero? (::t/max %))
                                        (zero? (count-remaining built-template character %)))
                                  combined-selections)]
-    (if print-enabled? (js/console.log "FINAL SELECTIONS" (clj->js final-selections)))
+    ;;(if print-enabled? (js/console.log "FINAL SELECTIONS" (clj->js final-selections)))
     [:div.w-100-p
      [option-sources]
      [:div#options-column.b-1.b-rad-5

@@ -549,7 +549,7 @@
 
 (reg-fx
  :http
- (fn [{:keys [on-success on-failure auth-token] :as cfg}]
+ (fn [{:keys [on-success on-failure on-unauthorized auth-token] :as cfg}]
    (let [final-cfg (if auth-token
                      (assoc-in cfg [:headers "Authorization"] (str "Token " auth-token))
                      cfg)]
@@ -558,7 +558,9 @@
            (if (<= 200 (:status response) 299)
              (dispatch (conj on-success response))
              (if (= 401 (:status response))
-               (dispatch [:route routes/login-page-route])
+               (if on-unauthorized
+                 (dispatch (conj on-unauthorized response))
+                 (dispatch [:route routes/login-page-route]))
                (if on-failure
                  (dispatch (conj on-failure response))
                  (dispatch [:show-error-message [:div "There was an error, please try again later. If the problem persists please contact " [:a {:href "mailto:redorc@orcpub.com"} "redorc@orcpub.com."]]])))))))))
@@ -614,7 +616,7 @@
            :url login-url
            :json-params params
            :on-success [:login-success backtrack?]
-           :on-failure [:login-failure]}}))
+           :on-unauthorized [:login-failure]}}))
 
 (reg-event-db
  :register-success
