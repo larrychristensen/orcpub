@@ -468,6 +468,9 @@
 (defn character-name [built-char]
   (es/entity-val built-char ::character-name))
 
+(defn player-name [built-char]
+  (es/entity-val built-char ::player-name))
+
 (defn personality-trait-1 [built-char]
   (es/entity-val built-char ::personality-trait-1))
 

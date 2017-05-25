@@ -150,6 +150,7 @@
 (defn character-state-path [path]
   (concat [:character] path))
 
+
 (defn character-field []
   (let [state (r/atom
                {:focused false
