@@ -8,6 +8,7 @@
             [orcpub.template :as t]
             [orcpub.dnd.e5.modifiers :as modifiers]
             [orcpub.dnd.e5.character :as char5e]
+            [orcpub.dnd.e5.template :as t5e]
             [orcpub.dnd.e5.character.equipment :as equip]))
 
 (def character {::entity/options
@@ -78,3 +79,59 @@
                   [:selection-y :option-4] (t/option-cfg
                                             {:name "Option 4"})}]
     (is (= (entity/make-template-option-map selections) expected))))
+
+(def arcane-trickster
+  {:orcpub.entity/options
+   {:class
+    [{:orcpub.entity/key :rogue,
+      :orcpub.entity/options
+      {:levels
+       [{:orcpub.entity/key :level-1}
+        {:orcpub.entity/key :level-2}
+        {:orcpub.entity/key :level-3,
+         :orcpub.entity/options
+         {:roguish-archetype
+          {:orcpub.entity/key :arcane-trickster,
+           :orcpub.entity/options
+           {:enchantment-or-illusion-spells-known
+            [{:orcpub.entity/key :charm-person}],
+            :cantrips-known
+            [{:orcpub.entity/key :acid-splash}
+             {:orcpub.entity/key :blade-ward}]}}}}]}}]}})
+
+(deftest test-make-path-map
+  (let [path-map (entity/make-path-map arcane-trickster)]
+    (is (= path-map
+           {:class
+            {:rogue
+             {:levels
+              {:level-1 {},
+               :level-2 {}
+               :level-3
+               {:roguish-archetype
+                {:arcane-trickster
+                 {:enchantment-or-illusion-spells-known {:charm-person {}},
+                  :cantrips-known {:acid-splash {}, :blade-ward {}}}}}}}}}))))
+
+(deftest get-all-selections-aux-2
+  (let [selections (entity/get-all-selections-aux-2 t5e/template (entity/make-path-map arcane-trickster))
+        ref-set (into #{} (map ::t/ref) selections)]
+    (is (ref-set [:class
+                  :rogue
+                  :levels
+                  :level-3
+                  :roguish-archetype
+                  :arcane-trickster
+                  :enchantment-or-illusion-spells-known]))))
+
+(deftest make-template-option-map
+  (let [selections (entity/get-all-selections-aux-2 t5e/template (entity/make-path-map arcane-trickster))
+        template-option-map (entity/make-template-option-map selections)]
+    (is (template-option-map [:class
+                              :rogue
+                              :levels
+                              :level-3
+                              :roguish-archetype
+                              :arcane-trickster
+                              :enchantment-or-illusion-spells-known
+                              :charm-person]))))

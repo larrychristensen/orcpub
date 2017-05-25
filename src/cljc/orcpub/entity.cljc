@@ -281,7 +281,7 @@
        first-selection
        ::t/min (apply + (map ::t/min selections))
        ::t/max (if (every? ::t/max selections) (apply + (map ::t/max selections)))
-       ::t/options (into (sorted-set-by #(< (::t/key %) (::t/key %2))) (apply concat (map ::t/options selections)))))))
+       ::t/options (into (sorted-set-by #(compare (::t/key %) (::t/key %2))) (apply concat (map ::t/options selections)))))))
 
 (defn combine-selections [selections]
   (let [by-ref (group-by ::t/ref selections)
@@ -410,7 +410,7 @@
      (merge m
             (reduce
              (fn [m2 {:keys [::t/key] :as option}]
-               (let [option-path (conj (or ref path) key)]
+               (let [option-path (conj (vec (or ref path)) key)]
                  (assoc m2 option-path option)))
              {}
              options)))
