@@ -178,10 +178,35 @@
    raw-character
    equipment-keys))
 
+(defn fix-custom-quantities [raw-character]
+  (reduce
+   (fn [char equipment-key]
+     (let [path [::entity/values equipment-key]]
+       (if (seq (get-in raw-character path))
+         (update-in char
+                    path
+                    (fn [equipment-vec]
+                      (mapv
+                       (fn [equipment]
+                         (update
+                          equipment
+                          ::equip/quantity
+                          (fn [qty]
+                            (if (string? qty)
+                              (if (s/blank? qty)
+                                0
+                                (read-string qty))
+                              qty))))
+                       equipment-vec)))
+         char)))
+   raw-character
+   [::custom-equipment ::custom-treasure]))
+
 (defn clean-values [raw-character]
   (-> raw-character
       (update-in [::entity/values] (fn [vs] (dissoc vs ::image-url-failed ::faction-image-url-failed)))
-      fix-quantities))
+      fix-quantities
+      fix-custom-quantities))
 
 (defn to-strict [raw-character]
   (entity/to-strict (clean-values raw-character)))
@@ -190,9 +215,28 @@
            :args ::raw-character
            :ret ::strict-character)
 
+(defn vectorize-equipment [raw-character]
+  (reduce
+   (fn [char equipment-key]
+     (prn "EQUIPMENT EKY" equipment-key)
+     (update-in
+      char
+      [::entity/options equipment-key]
+      (fn [e-map]
+        (prn "E_MAP" e-map)
+        (if (vector? e-map)
+          e-map
+          (mapv
+           (fn [[k v]]
+             {::entity/key k
+              ::entity/value v})
+           e-map)))))
+   raw-character
+   equipment-keys))
 
 (defn from-strict [raw-character]
-  (entity/from-strict raw-character))
+  (vectorize-equipment
+   (entity/from-strict raw-character)))
 
 (defn standard-ability-roll []
   (dice/dice-roll {:num 4 :sides 6 :drop-num 1}))

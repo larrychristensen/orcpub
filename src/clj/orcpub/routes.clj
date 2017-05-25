@@ -461,17 +461,19 @@
 
 (defn save-character [{:keys [db transit-params body conn identity] :as request}]
   (prn "SAVING_CHARACTER" transit-params)
-  (if-let [data (spec/explain-data ::se/entity transit-params)]
-    {:status 400 :body data}
-    (let [current-id (:db/id transit-params)
-          result @(d/transact conn [(if current-id
-                                      transit-params
-                                      (assoc transit-params
-                                             :db/id "tempid"
-                                             :orcpub.entity.strict/owner (:user identity)))])]
-      {:status 200 :body (if current-id
-                           transit-params
-                           (assoc transit-params :db/id (-> result :tempids (get "tempid"))))})))
+  (try
+    (if-let [data (spec/explain-data ::se/entity transit-params)]
+      {:status 400 :body data}
+      (let [current-id (:db/id transit-params)
+            result @(d/transact conn [(if current-id
+                                        transit-params
+                                        (assoc transit-params
+                                               :db/id "tempid"
+                                               :orcpub.entity.strict/owner (:user identity)))])]
+        {:status 200 :body (if current-id
+                             transit-params
+                             (assoc transit-params :db/id (-> result :tempids (get "tempid"))))}))
+    (catch Exception e (prn "ERROR" e))))
 
 (defn find-user-by-username-or-email [db username-or-email]
   (first-user-by db
