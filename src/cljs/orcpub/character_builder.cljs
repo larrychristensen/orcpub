@@ -150,20 +150,39 @@
 (defn character-state-path [path]
   (concat [:character] path))
 
-(defn character-field [entity-values prop-name type & [cls-str handler]]
-  [type {:class-name (str "input " cls-str)
-         :type :text
-         :value (get entity-values prop-name)
-         :on-change #(let [v (get-event-value %)]
-                       (if handler
-                         (handler v)
-                         (dispatch [:update-value-field prop-name v])))}])
+(defn character-field []
+  (let [state (r/atom
+               {:focused false
+                :temp-val ""})]
+    (fn [entity-values prop-name type & [cls-str handler]]
+      (let [value (get entity-values prop-name)]
+        [type {:class-name (str "input " cls-str)
+               :type :text
+               :value (if (:focused @state)
+                        (:temp-val @state)
+                        value)
+               :on-focus (fn [_]
+                           (swap! state
+                                  assoc
+                                  :focused true
+                                  :temp-val value))
+               :on-blur (fn [_]
+                          (if handler
+                            (handler (:temp-val @state))
+                            (dispatch-sync [:update-value-field prop-name (:temp-val @state)]))
+                          (swap! state
+                                 assoc
+                                 :focused false))
+               :on-change #(let [v (get-event-value %)]
+                             (swap! state
+                                    assoc
+                                    :temp-val v))}]))))
 
 (defn character-input [entity-values prop-name & [cls-str handler]]
-  (character-field entity-values prop-name :input cls-str handler))
+  [character-field entity-values prop-name :input cls-str handler])
 
 (defn character-textarea [entity-values prop-name & [cls-str]]
-  (character-field entity-values prop-name :textarea cls-str))
+  [character-field entity-values prop-name :textarea cls-str])
 
 (defn class-level-selector []
   (let [expanded? (r/atom false)]

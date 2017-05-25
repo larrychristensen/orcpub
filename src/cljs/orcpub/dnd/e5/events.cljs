@@ -152,7 +152,7 @@
            ::char5e/image-url
            image-url
            :image-url-failed
-           (if (s/starts-with? image-url "https")
+           (if (and image-url (s/starts-with? image-url "https"))
              :https))))
 
 (reg-event-db
@@ -165,7 +165,7 @@
            ::char5e/faction-image-url
            faction-image-url
            :faction-image-url-failed
-           (if (s/starts-with? faction-image-url "https")
+           (if (and faction-image-url (s/starts-with? faction-image-url "https"))
              :https))))
 
 (def custom-equipment-path [::entity/values ::char5e/custom-equipment])
