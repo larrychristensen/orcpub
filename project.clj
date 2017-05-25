@@ -9,7 +9,8 @@
 
   :repositories [["apache" "http://repository.apache.org/snapshots/"]
                  ["my.datomic.com" {:url "https://my.datomic.com/repo"
-                                    :creds :gpg}]]
+                                    :username [:gpg :env]
+                                    :password [:gpg :env]}]]
 
   :dependencies [[org.clojure/clojure "1.9.0-alpha14"]
                  [org.clojure/test.check "0.9.0"]
