@@ -321,6 +321,12 @@
   (merge (normal-weapons-inventory built-char)
          (magic-weapons-inventory built-char)))
 
+(defn custom-equipment [built-char]
+  (::custom-equipment built-char))
+
+(defn custom-treasure [built-char]
+  (::custom-treasure built-char))
+
 (defn normal-equipment-inventory [built-char]
   (es/entity-val built-char :equipment))
 
@@ -449,7 +455,7 @@
    (fn [equipment]
      (vec
       (remove
-       :background-starting-equipment?
+       equipment-indicator
        equipment)))))
 
 (defn remove-starting-equipment [character equipment-indicator]
@@ -517,7 +523,7 @@
                         {::entity/key class-key
                          ::entity/options
                          {:levels [{::entity/key :level-1}]}})
-        without-starting-equipment (remove-starting-equipment with-new-class :class-starting-equipment?)]
+        without-starting-equipment (remove-starting-equipment with-new-class ::equip/class-starting-equipment?)]
     (if (zero? class-index)
       (add-associated-options without-starting-equipment associated-options)
       with-new-class)))

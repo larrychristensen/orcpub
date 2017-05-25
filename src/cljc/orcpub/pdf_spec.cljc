@@ -157,9 +157,13 @@
         magic-weapons (es/entity-val built-char :magic-weapons)
         custom-equipment (into {}
                                (map
-                                (juxt :name identity)
-                                (es/entity-val built-char :custom-equipment)))
-        all-equipment (merge equipment custom-equipment magic-items armor magic-armor)
+                                (juxt ::char-equip5e/name identity)
+                                (char5e/custom-equipment built-char)))
+        custom-treasure (into {}
+                               (map
+                                (juxt ::char-equip5e/name identity)
+                                (char5e/custom-treasure built-char)))
+        all-equipment (merge equipment custom-equipment custom-treasure magic-items armor magic-armor)
         treasure (es/entity-val built-char :treasure)
         treasure-map (into {} (map (fn [[kw {qty ::char-equip5e/quantity}]] [kw qty]) treasure))
         unequipped-items (filter

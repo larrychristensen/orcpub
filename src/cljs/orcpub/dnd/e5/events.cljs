@@ -174,11 +174,11 @@
 
 (defn add-starting-equipment [character [_ equipment-options custom-treasure custom-equipment]]
   (-> character
-      (char5e/remove-starting-equipment :background-starting-equipment?)
+      (char5e/remove-starting-equipment ::char-equip5e/background-starting-equipment?)
       (char5e/add-associated-options equipment-options)
-      (char5e/remove-custom-starting-equipment :background-starting-equipment? custom-treasure-path)
+      (char5e/remove-custom-starting-equipment ::char-equip5e/background-starting-equipment? custom-treasure-path)
       (char5e/add-custom-equipment custom-treasure custom-treasure-path)
-      (char5e/remove-custom-starting-equipment :background-starting-equipment? custom-equipment-path)
+      (char5e/remove-custom-starting-equipment ::char-equip5e/background-starting-equipment? custom-equipment-path)
       (char5e/add-custom-equipment custom-equipment custom-equipment-path)))
 
 (reg-event-db
