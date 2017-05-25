@@ -29,6 +29,7 @@
             [orcpub.email :as email]
             [orcpub.registration :as registration]
             [orcpub.entity.strict :as se]
+            [orcpub.entity :as entity]
             [hiccup.page :as page]
             [environ.core :as environ])
   (:import (org.apache.pdfbox.pdmodel.interactive.form PDCheckBox PDComboBox PDListBox PDRadioButton PDTextField)
@@ -471,21 +472,24 @@
 (defn check-email [{:keys [db query-params]}]
   (check-field email-query (:email query-params) db))
 
+(defn do-save-character [conn transit-params identity]
+  (let [character (entity/remove-empty-fields transit-params)]
+    (try
+      (if-let [data (spec/explain-data ::se/entity character)]
+        {:status 400 :body data}
+        (let [current-id (:db/id character)
+              result @(d/transact conn [(if current-id
+                                          character
+                                          (assoc character
+                                                 :db/id "tempid"
+                                                 :orcpub.entity.strict/owner (:user identity)))])]
+          {:status 200 :body (if current-id
+                               character
+                               (assoc character :db/id (-> result :tempids (get "tempid"))))}))
+      (catch Exception e (do (prn "ERROR" e) (throw e))))))
+
 (defn save-character [{:keys [db transit-params body conn identity] :as request}]
-  (prn "SAVING_CHARACTER" transit-params)
-  (try
-    (if-let [data (spec/explain-data ::se/entity transit-params)]
-      {:status 400 :body data}
-      (let [current-id (:db/id transit-params)
-            result @(d/transact conn [(if current-id
-                                        transit-params
-                                        (assoc transit-params
-                                               :db/id "tempid"
-                                               :orcpub.entity.strict/owner (:user identity)))])]
-        {:status 200 :body (if current-id
-                             transit-params
-                             (assoc transit-params :db/id (-> result :tempids (get "tempid"))))}))
-    (catch Exception e (do (prn "ERROR" e) (throw e)))))
+  (do-save-character conn transit-params identity))
 
 (defn find-user-by-username-or-email [db username-or-email]
   (first-user-by db

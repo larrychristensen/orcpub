@@ -557,8 +557,6 @@
               ::equip/background-starting-equipment? true})
            custom-equipment))))))))
 
-
-
 (defn set-class [character class-key class-index new-class-option]
   (let [associated-options (::t/associated-options new-class-option)
         with-new-class (assoc-in
