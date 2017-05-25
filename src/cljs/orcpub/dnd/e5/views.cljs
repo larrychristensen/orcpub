@@ -932,7 +932,9 @@
        [:div.f-s-24.f-w-600.m-b-16.text-shadow.flex
         [character-summary built-char]])
      [:div.details-columns
+      {:class-name (if (= 2 num-columns) "flex")}
       [:div.flex-grow-1
+       {:class-name (if (= 2 num-columns) "w-50-p")}
        [:div.w-100-p.t-a-c
         [:div.flex.justify-cont-s-b.p-10
          (doall
@@ -1003,6 +1005,7 @@
                                  types)))])
                save-advantage))])]]]]
       [:div.flex-grow-1.details-column-2
+       {:class-name (if (= 2 num-columns) "w-50-p m-l-20")}
        [list-display-section "Skill Proficiencies" "juggler"
         (let [skill-bonuses (char/skill-bonuses built-char)]
           (map
@@ -1087,5 +1090,5 @@
                    [:button.form-button.m-l-5
                     {:on-click #(dispatch [:delete-character id])}
                     "DELETE"]]
-                  [character-display built-character false]])])])
+                  [character-display built-character false 2]])])])
          characters))]]]))
