@@ -90,6 +90,8 @@
 (defn login-response
   [{:keys [json-params db] :as request}]
   (let [{:keys [username password]} json-params
+        username (s/trim username)
+        password (s/trim password)
         {:keys [:orcpub.user/verified?
                 :orcpub.user/verification-sent
                 :orcpub.user/email
@@ -108,7 +110,7 @@
 (defn login [{:keys [json-params db] :as request}]
   (try
     (login-response request)
-    (catch Exception e (prn "E" e))))
+    (catch Throwable e (do (prn "E" e) (throw e)))))
 
 (def username-query
   '[:find ?e
@@ -144,23 +146,28 @@
 
 (defn register [{:keys [json-params db conn] :as request}]
   (let [{:keys [username email password first-and-last-name send-updates?]} json-params
+        username (s/trim username)
+        email (s/trim email)
+        password (s/trim password)
         validation (registration/validate-registration
                     json-params
                     (seq (d/q email-query db email))
                     (seq (d/q username-query db username)))]
-    (if (seq validation)
-      {:status 400
-       :body validation}
-      (do-verification
-       request
-       json-params
-       conn
-       {:orcpub.user/email email
-        :orcpub.user/username username
-        :orcpub.user/password (hashers/encrypt password)
-        :orcpub.user/first-and-last-name first-and-last-name
-        :orcpub.user/send-updates? send-updates?
-        :orcpub.user/created (java.util.Date.)}))))
+    (try
+      (if (seq validation)
+        {:status 400
+         :body validation}
+        (do-verification
+         request
+         json-params
+         conn
+         {:orcpub.user/email email
+          :orcpub.user/username username
+          :orcpub.user/password (hashers/encrypt password)
+          :orcpub.user/first-and-last-name first-and-last-name
+          :orcpub.user/send-updates? send-updates?
+          :orcpub.user/created (java.util.Date.)}))
+      (catch Throwable e (do (prn e) (throw e))))))
 
 (def user-for-verification-key-query
   '[:find ?e
@@ -227,18 +234,21 @@
   (and password-reset (t/before? (tc/from-date password-reset-sent) (tc/from-date password-reset))))
 
 (defn send-password-reset [{:keys [query-params db conn scheme headers] :as request}]
-  (let [email (:email query-params)
-        {:keys [:orcpub.user/first-and-last-name
-                :orcpub.user/password-reset-sent
-                :orcpub.user/password-reset
-                :db/id] :as user} (user-for-email db email)
-        expired? (password-reset-expired? password-reset-sent)
-        already-reset? (password-already-reset? password-reset password-reset-sent)]
-    (if (or (not password-reset-sent)
-            expired?
-            already-reset?)
-          (do-send-password-reset id first-and-last-name email conn request)
-          (redirect route-map/password-reset-sent-route))))
+  (try
+    (let [email (:email query-params)
+          {:keys [:orcpub.user/first-and-last-name
+                  :orcpub.user/password-reset-sent
+                  :orcpub.user/password-reset
+                  :db/id] :as user} (user-for-email db email)
+          expired? (password-reset-expired? password-reset-sent)
+          already-reset? (password-already-reset? password-reset password-reset-sent)]
+      (do-send-password-reset id first-and-last-name email conn request)
+      #_(if (or (not password-reset-sent)
+              expired?
+              already-reset?)
+        (do-send-password-reset id first-and-last-name email conn request)
+        (redirect route-map/password-reset-sent-route)))
+    (catch Throwable e (do (prn e) (throw e)))))
 
 (defn do-password-reset [conn user-id password]
   @(d/transact
@@ -249,12 +259,14 @@
   {:status 200})
 
 (defn reset-password [{:keys [json-params db conn cookies identity] :as request}]
-  (let [{:keys [password verify-password]} json-params
-        username (:user identity)
-        {:keys [:db/id] :as user} (first-user-by db username-query username)]
-    (if (= password verify-password)
-      (do-password-reset conn id password)
-      {:status 400 :message "Passwords do not match"})))
+  (try
+    (let [{:keys [password verify-password]} json-params
+          username (:user identity)
+          {:keys [:db/id] :as user} (first-user-by db username-query username)]
+      (if (= password verify-password)
+        (do-password-reset conn id password)
+        {:status 400 :message "Passwords do not match"}))
+    (catch Throwable t (do (prn t) (throw t)))))
 
 (def font-sizes
   (merge
@@ -473,7 +485,7 @@
         {:status 200 :body (if current-id
                              transit-params
                              (assoc transit-params :db/id (-> result :tempids (get "tempid"))))}))
-    (catch Exception e (prn "ERROR" e))))
+    (catch Exception e (do (prn "ERROR" e) (throw e)))))
 
 (defn find-user-by-username-or-email [db username-or-email]
   (first-user-by db
