@@ -5,6 +5,7 @@
             #?(:cljs [cljs.spec.test :as stest])
             #?(:clj [clojure.edn :refer [read-string]])
             #?(:cljs [cljs.reader :refer [read-string]])
+            [clojure.string :as s]
             [orcpub.entity-spec :as es]
             [orcpub.dice :as dice]
             [orcpub.common :as common]
@@ -153,16 +154,6 @@
       add-ability-namespaces
       add-namespaces-to-values))
 
-(defn clean-values [raw-character]
-  (update-in raw-character [::entity/values] (fn [vs] (dissoc vs ::image-url-failed ::faction-image-url-failed))))
-
-(defn to-strict [raw-character]
-  (entity/to-strict (clean-values raw-character)))
-
-(spec/fdef to-strict
-           :args ::raw-character
-           :ret ::strict-character)
-
 (defn fix-quantities [raw-character]
   (reduce
    (fn [char equipment-key]
@@ -178,12 +169,26 @@
                           [::entity/value ::equip/quantity]
                           (fn [qty]
                             (if (string? qty)
-                              (read-string qty)
+                              (if (s/blank? qty)
+                                0
+                                (read-string qty))
                               qty))))
                        equipment-vec)))
          char)))
    raw-character
    equipment-keys))
+
+(defn clean-values [raw-character]
+  (-> raw-character
+      (update-in [::entity/values] (fn [vs] (dissoc vs ::image-url-failed ::faction-image-url-failed)))
+      fix-quantities))
+
+(defn to-strict [raw-character]
+  (entity/to-strict (clean-values raw-character)))
+
+(spec/fdef to-strict
+           :args ::raw-character
+           :ret ::strict-character)
 
 
 (defn from-strict [raw-character]
