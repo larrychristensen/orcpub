@@ -25,8 +25,9 @@
 
 (declare to-strict-option)
 
+
 (defn to-strict-selections [options]
-  (map
+  (mapv
    (fn [[k v]]
      (let [id (-> v meta :db/id)]
        (cond-> {::strict/key k}
@@ -45,11 +46,14 @@
 (defn remove-empty-fields [raw-character]
   (into {}
         (comp
-         (remove (fn [[k v]] (and (coll? v) (empty? v))))
-         (map (fn [[k v]] [k (cond
-                                (sequential? v) (map remove-empty-fields v)
-                                (map? v) (remove-empty-fields v)
-                                :else v)])))
+         (remove
+          (fn [[k v]] (and (coll? v) (empty? v))))
+         (map
+          (fn [[k v]]
+            [k (cond
+                 (sequential? v) (mapv remove-empty-fields v)
+                 (map? v) (remove-empty-fields v)
+                 :else v)])))
         raw-character))
 
 (defn to-strict [{:keys [:db/id ::options ::values]}]
