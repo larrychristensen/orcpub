@@ -668,9 +668,11 @@
 (defn selection-section [character built-char built-template option-paths ui-fns {:keys [::t/key ::t/name ::t/help ::t/options ::t/min ::t/max ::t/ref ::t/icon ::t/multiselect? ::entity/path ::entity/parent] :as selection} num-columns]
   (let [actual-path (actual-path selection)
         remaining (count-remaining built-template character selection)
-        expanded? (r/atom false)]
+        expanded? (r/atom false)
+        ancestor-names (ancestor-names-string built-template actual-path)]
+    (prn "ANCESTOR NAMES" ancestor-names)
     [selection-section-base {:path actual-path
-                             :parent-title (if parent (ancestor-names-string built-template actual-path))
+                             :parent-title (if (not (s/blank? ancestor-names)) ancestor-names)
                              :name name
                              :icon icon
                              :help help
