@@ -25,16 +25,20 @@
 
 (declare to-strict-option)
 
+
 (defn to-strict-selections [options]
-  (map
+  (mapv
    (fn [[k v]]
-     (cond-> {::strict/key k}
-       (sequential? v) (assoc ::strict/options (map to-strict-option v))
-       (map? v) (assoc ::strict/option (to-strict-option v))))
+     (let [id (-> v meta :db/id)]
+       (cond-> {::strict/key k}
+         id (assoc :db/id id)
+         (sequential? v) (assoc ::strict/options (map to-strict-option v))
+         (map? v) (assoc ::strict/option (to-strict-option v)))))
    options))
 
-(defn to-strict-option [{:keys [::key ::value ::options]}]
+(defn to-strict-option [{:keys [:db/id ::key ::value ::options]}]
   (cond-> {::strict/key key}
+    id (assoc :db/id id)
     options (assoc ::strict/selections (to-strict-selections options))
     (int? value) (assoc ::strict/int-value value)
     (map? value) (assoc ::strict/map-value value)))
@@ -42,11 +46,14 @@
 (defn remove-empty-fields [raw-character]
   (into {}
         (comp
-         (remove (fn [[k v]] (and (coll? v) (empty? v))))
-         (map (fn [[k v]] [k (cond
-                                (sequential? v) (map remove-empty-fields v)
-                                (map? v) (remove-empty-fields v)
-                                :else v)])))
+         (remove
+          (fn [[k v]] (and (coll? v) (empty? v))))
+         (map
+          (fn [[k v]]
+            [k (cond
+                 (sequential? v) (mapv remove-empty-fields v)
+                 (map? v) (remove-empty-fields v)
+                 :else v)])))
         raw-character))
 
 (defn to-strict [{:keys [:db/id ::options ::values]}]
@@ -68,6 +75,7 @@
                                   ::strict/map-value]}]
   (let [value (or int-value map-value)]
     (cond-> {::key key}
+      id (assoc :db/id id)
       selections (assoc ::options (from-strict-selections selections))
       value (assoc ::value value))))
 
@@ -79,9 +87,11 @@
    (fn [s {:keys [:db/id ::strict/key ::strict/option ::strict/options]}]
      (assoc s
             key
-            (if option
-              (from-strict-option option)
-              (from-strict-options options))))
+            (with-meta
+              (if option
+                (from-strict-option option)
+                (from-strict-options options))
+              {:db/id id})))
    {}
    selections))
 
