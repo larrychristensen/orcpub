@@ -135,3 +135,18 @@
                               :arcane-trickster
                               :enchantment-or-illusion-spells-known
                               :charm-person]))))
+
+(defn strict-round-trip [strict]
+  (-> strict entity/from-strict entity/to-strict))
+
+(deftest test-round-trip
+  (let [strict '{:db/id 17592186054525, :orcpub.entity.strict/values {:db/id 17592186054622, :orcpub.dnd.e5.character/character-name "Sanchito", :orcpub.dnd.e5.character/player-name "Larry"}}]
+    (is (= strict (strict-round-trip strict)))))
+
+(deftest test-round-trip-2
+  (let [strict {:db/id 17592186054624, :orcpub.entity.strict/selections [{:db/id 17592186054625, :orcpub.entity.strict/key :ability-scores, :orcpub.entity.strict/option {:db/id 17592186054626, :orcpub.entity.strict/key :standard-scores, :orcpub.entity.strict/map-value {:db/id 17592186054627, :orcpub.dnd.e5.character/str 15, :orcpub.dnd.e5.character/dex 14, :orcpub.dnd.e5.character/con 13, :orcpub.dnd.e5.character/int 12, :orcpub.dnd.e5.character/wis 10, :orcpub.dnd.e5.character/cha 8}}}]}]
+    (is (= strict (strict-round-trip strict)))))
+
+(deftest test-round-trip-3
+  (let [strict '{:db/id 17592186054624, :orcpub.entity.strict/selections [{:db/id 17592186054625, :orcpub.entity.strict/key :ability-scores, :orcpub.entity.strict/option {:db/id 17592186054626, :orcpub.entity.strict/key :standard-scores, :orcpub.entity.strict/map-value {:db/id 17592186054627, :orcpub.dnd.e5.character/str 15, :orcpub.dnd.e5.character/dex 14, :orcpub.dnd.e5.character/con 13, :orcpub.dnd.e5.character/int 12, :orcpub.dnd.e5.character/wis 10, :orcpub.dnd.e5.character/cha 8}}} {:db/id 17592186054628, :orcpub.entity.strict/key :class, :orcpub.entity.strict/options [{:db/id 17592186054629, :orcpub.entity.strict/key :barbarian, :orcpub.entity.strict/selections [{:db/id 17592186054630, :orcpub.entity.strict/key :levels, :orcpub.entity.strict/options [{:db/id 17592186054631, :orcpub.entity.strict/key :level-1}]}]}]} {:db/id 17592186054632, :orcpub.entity.strict/key :weapons, :orcpub.entity.strict/options [{:db/id 17592186054633, :orcpub.entity.strict/key :javelin, :orcpub.entity.strict/map-value {:db/id 17592186054634, :orcpub.dnd.e5.character.equipment/quantity 4, :orcpub.dnd.e5.character.equipment/equipped? true, :orcpub.dnd.e5.character.equipment/class-starting-equipment? true}}]} {:db/id 17592186054635, :orcpub.entity.strict/key :equipment, :orcpub.entity.strict/options [{:db/id 17592186054636, :orcpub.entity.strict/key :explorers-pack, :orcpub.entity.strict/map-value {:db/id 17592186054637, :orcpub.dnd.e5.character.equipment/quantity 1, :orcpub.dnd.e5.character.equipment/equipped? true, :orcpub.dnd.e5.character.equipment/class-starting-equipment? true}}]}]}]
+    (is (= strict (strict-round-trip strict)))))

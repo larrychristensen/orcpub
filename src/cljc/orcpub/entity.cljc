@@ -28,13 +28,16 @@
 (defn to-strict-selections [options]
   (map
    (fn [[k v]]
-     (cond-> {::strict/key k}
-       (sequential? v) (assoc ::strict/options (map to-strict-option v))
-       (map? v) (assoc ::strict/option (to-strict-option v))))
+     (let [id (-> v meta :db/id)]
+       (cond-> {::strict/key k}
+         id (assoc :db/id id)
+         (sequential? v) (assoc ::strict/options (map to-strict-option v))
+         (map? v) (assoc ::strict/option (to-strict-option v)))))
    options))
 
-(defn to-strict-option [{:keys [::key ::value ::options]}]
+(defn to-strict-option [{:keys [:db/id ::key ::value ::options]}]
   (cond-> {::strict/key key}
+    id (assoc :db/id id)
     options (assoc ::strict/selections (to-strict-selections options))
     (int? value) (assoc ::strict/int-value value)
     (map? value) (assoc ::strict/map-value value)))
@@ -68,6 +71,7 @@
                                   ::strict/map-value]}]
   (let [value (or int-value map-value)]
     (cond-> {::key key}
+      id (assoc :db/id id)
       selections (assoc ::options (from-strict-selections selections))
       value (assoc ::value value))))
 
