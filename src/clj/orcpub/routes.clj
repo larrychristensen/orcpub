@@ -482,10 +482,10 @@
                                           character
                                           (assoc character
                                                  :db/id "tempid"
-                                                 :orcpub.entity.strict/owner (:user identity)))])]
-          {:status 200 :body (if current-id
-                               character
-                               (assoc character :db/id (-> result :tempids (get "tempid"))))}))
+                                                 :orcpub.entity.strict/owner (:user identity)))])
+              new-id (or current-id (-> result :tempids (get "tempid")))
+              new-character (d/pull (d/db conn) '[*] new-id)]
+          {:status 200 :body new-character}))
       (catch Exception e (do (prn "ERROR" e) (throw e))))))
 
 (defn save-character [{:keys [db transit-params body conn identity] :as request}]
