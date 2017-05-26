@@ -500,27 +500,34 @@
    character
    path
    (fn [equipment]
-     (vec
-      (remove
-       equipment-indicator
-       equipment)))))
+     (with-meta
+       (vec
+        (remove
+         equipment-indicator
+         equipment))
+       (meta equipment)))))
 
 (defn remove-starting-equipment [character equipment-indicator]
   (update-in
    character
    [::entity/options]
    (fn [options]
-     (into {}
-           (map
-            (fn [[k v]]
-              [k
-               (if (sequential? v)
-                 (vec
-                  (remove
-                   (comp equipment-indicator ::entity/value)
-                   v))
-                 v)])
-            options)))))
+     (reduce
+      (fn [os equipment-key]
+        (if-let [equipment (os equipment-key)]
+          (let [equip-meta (meta equipment)
+                new-equipment (with-meta
+                                (vec
+                                 (remove
+                                  (comp equipment-indicator ::entity/value)
+                                  equipment))
+                                equip-meta)]
+            (if (or (:db/id equip-meta) (seq new-equipment))
+              (assoc os equipment-key new-equipment)
+              (dissoc os equipment-key)))
+          os))
+      options
+      equipment-keys))))
 
 (defn add-associated-options [character associated-options]
   (reduce
@@ -532,10 +539,12 @@
         (merge-with
          (fn [o1 o2]
            (let [ks (into #{} (map ::entity/key o1))]
-             (vec
-              (concat
-               o1
-               (remove (comp ks ::entity/key) o2)))))
+             (with-meta
+               (vec
+                (concat
+                 o1
+                 (remove (comp ks ::entity/key) o2)))
+               (meta o1))))
          options
          associated-option))))
    character
@@ -547,28 +556,29 @@
    path
    (fn [equipment]
      (let [current-names (into #{} (map :name equipment))]
-       (vec
-        (concat
-         equipment
-         (remove
-          (comp current-names :name)
-          (map
-           (fn [[nm num]]
-             {::equip/name nm
-              ::equip/quantity num
-              ::equip/equipped? true
-              ::equip/background-starting-equipment? true})
-           custom-equipment))))))))
+       (with-meta
+         (vec
+          (concat
+           equipment
+           (remove
+            (comp current-names :name)
+            (map
+             (fn [[nm num]]
+               {::equip/name nm
+                ::equip/quantity num
+                ::equip/equipped? true
+                ::equip/background-starting-equipment? true})
+             custom-equipment))))
+         (meta equipment))))))
 
 (defn set-class [character class-key class-index new-class-option]
   (let [associated-options (::t/associated-options new-class-option)
         with-new-class (assoc-in
                         character
-                        [::entity/options :class class-index]
-                        {::entity/key class-key
-                         ::entity/options
-                         {:levels [{::entity/key :level-1}]}})
-        without-starting-equipment (remove-starting-equipment with-new-class ::equip/class-starting-equipment?)]
+                        [::entity/options :class class-index ::entity/key]
+                        class-key)
+        without-starting-equipment (remove-starting-equipment with-new-class ::equip/class-starting-equipment?)
+        with-new-starting-equipment (add-associated-options without-starting-equipment associated-options)]
     (if (zero? class-index)
-      (add-associated-options without-starting-equipment associated-options)
+      with-new-starting-equipment
       with-new-class)))

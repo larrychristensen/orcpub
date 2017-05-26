@@ -1701,19 +1701,14 @@
          armor-profs :armor weapon-profs :weapon} profs
         {skill-num :choose options :options} skill-options
         skill-kws (if (:any options) (map :key skills/skills) (keys options))
-        equipment-options (remove
-                            nil?
-                            [(background-starting-equipment-entity-options :weapons weapons)
-                             (background-starting-equipment-entity-options :armor armor)
-                             (background-starting-equipment-entity-options :equipment equipment)
-                             (background-starting-equipment-entity-options :treasure treasure)])]
+        ]
     (t/option-cfg
      {:name name
       :key kw
       :help help
       :page page
       :select-fn (fn [_ _]
-                   (dispatch [:add-starting-equipment equipment-options custom-treasure custom-equipment]))
+                   (dispatch [:add-background-starting-equipment background]))
       :selections (concat
                    selections
                    (if (seq tool-options) [(tool-prof-selection tool-options)])

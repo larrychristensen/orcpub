@@ -1,7 +1,10 @@
 (ns orcpub.dnd.e5.event-handlers-test
   (:require [clojure.test :refer [deftest is]]
+            [clojure.data :refer [diff]]
             [orcpub.entity :as entity]
+            [orcpub.template :as t]
             [orcpub.entity.strict :as se]
+            [orcpub.dnd.e5.template :as t5e]
             [orcpub.dnd.e5.event-handlers :as eh]))
 
 (def character
@@ -77,6 +80,12 @@
       meta
       :db/id))
 
+(defn get-classes-id [e]
+  (-> e
+      (get-in [::entity/options :class])
+      meta
+      :db/id))
+
 (deftest test-set-level--round-trip
   (let [strict {:db/id 17592186055262, :orcpub.entity.strict/selections [{:db/id 17592186055266, :orcpub.entity.strict/key :class, :orcpub.entity.strict/options [{:db/id 17592186055267, :orcpub.entity.strict/key :barbarian, :orcpub.entity.strict/selections [{:db/id 17592186055268, :orcpub.entity.strict/key :levels, :orcpub.entity.strict/options [{:db/id 17592186055269, :orcpub.entity.strict/key :level-1} {:db/id 17592186055270, :orcpub.entity.strict/key :level-2, :orcpub.entity.strict/selections [{:db/id 17592186055271, :orcpub.entity.strict/key :hit-points, :orcpub.entity.strict/option {:db/id 17592186055272, :orcpub.entity.strict/key :roll, :orcpub.entity.strict/int-value 7}}]} {:db/id 17592186055273, :orcpub.entity.strict/key :level-3, :orcpub.entity.strict/selections [{:db/id 17592186055274, :orcpub.entity.strict/key :hit-points, :orcpub.entity.strict/option {:db/id 17592186055275, :orcpub.entity.strict/key :roll, :orcpub.entity.strict/int-value 5}}]} {:db/id 17592186055288, :orcpub.entity.strict/key :level-4, :orcpub.entity.strict/selections [{:db/id 17592186055289, :orcpub.entity.strict/key :hit-points, :orcpub.entity.strict/option {:db/id 17592186055290, :orcpub.entity.strict/key :manual-entry, :orcpub.entity.strict/int-value 1}}]}]}]}]}]}
         non-strict (entity/from-strict strict)
@@ -100,3 +109,36 @@
            levels-id))
     (is (= (:db/id strict) (:db/id without-new-levels)))
     (is (= strict without-new-levels))))
+
+(deftest test-set-class--round-trip
+  (let [strict {:db/id 17592186055294, :orcpub.entity.strict/selections [{:db/id 17592186055298, :orcpub.entity.strict/key :class, :orcpub.entity.strict/options [{:db/id 17592186055299, :orcpub.entity.strict/key :barbarian, :orcpub.entity.strict/selections [{:db/id 17592186055300, :orcpub.entity.strict/key :levels, :orcpub.entity.strict/options [{:db/id 17592186055301, :orcpub.entity.strict/key :level-1}]}]}]} {:db/id 17592186055302, :orcpub.entity.strict/key :weapons, :orcpub.entity.strict/options [{:db/id 17592186055303, :orcpub.entity.strict/key :javelin, :orcpub.entity.strict/map-value {:db/id 17592186055304, :orcpub.dnd.e5.character.equipment/quantity 4, :orcpub.dnd.e5.character.equipment/equipped? true, :orcpub.dnd.e5.character.equipment/class-starting-equipment? true}}]} {:db/id 17592186055305, :orcpub.entity.strict/key :equipment, :orcpub.entity.strict/options [{:db/id 17592186055306, :orcpub.entity.strict/key :explorers-pack, :orcpub.entity.strict/map-value {:db/id 17592186055307, :orcpub.dnd.e5.character.equipment/quantity 1, :orcpub.dnd.e5.character.equipment/equipped? true, :orcpub.dnd.e5.character.equipment/class-starting-equipment? true}}]}]}
+        levels-id (get-in strict (conj levels-strict-path :db/id))
+        classes-id (get-in strict [::se/selections 0 :db/id])
+        non-strict (entity/from-strict strict)
+        class-selection (some (fn [s] (if (= :class (::t/key s)) s)) (t5e/template ::t/selections))
+        class-options (::t/options class-selection)
+        class-option-map (zipmap (map ::t/key class-options) class-options)
+        updated (-> non-strict
+                    (eh/set-class [:set-class :bard 0 class-option-map])
+                    (eh/set-class [:set-class :barbarian 0 class-option-map]))
+        back-to-strict (entity/to-strict updated)
+        without-equipment-ids (reduce
+                               (fn [e i]
+                                 (update-in e
+                                            [::se/selections i ::se/options]
+                                            (fn [os]
+                                              (map
+                                               (fn [o]
+                                                 (-> o
+                                                     (dissoc :db/id)
+                                                     (update ::se/map-value dissoc :db/id)))
+                                               os))))
+                               strict
+                               [1 2])]
+    (is (some? class-selection))
+    (is (some? classes-id))
+    (is (= (get-classes-id non-strict) classes-id))
+    (is (= (get-classes-id updated) classes-id))
+    (is (= (get-levels-id non-strict) levels-id))
+    (is (= (get-levels-id updated) levels-id))
+    (is (= without-equipment-ids back-to-strict))))

@@ -3997,7 +3997,7 @@ long rest."})]
            :tool-options {:gaming-set 1}
            :language-options {:choose 1 :options {:any true}}}
    :selections [(t/selection-cfg
-                 {:name "Feature"
+                 {:name "Noble Feature"
                   :tags #{:background}
                   :options [(t/option-cfg
                              {:name "Position of Priviledge"

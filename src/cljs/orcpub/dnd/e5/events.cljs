@@ -170,31 +170,15 @@
            (if (and faction-image-url (s/starts-with? faction-image-url "https"))
              :https))))
 
-(def custom-equipment-path [::entity/values ::char5e/custom-equipment])
-
-(def custom-treasure-path [::entity/values ::char5e/custom-treasure])
-
-(defn add-starting-equipment [character [_ equipment-options custom-treasure custom-equipment]]
-  (-> character
-      (char5e/remove-starting-equipment ::char-equip5e/background-starting-equipment?)
-      (char5e/add-associated-options equipment-options)
-      (char5e/remove-custom-starting-equipment ::char-equip5e/background-starting-equipment? custom-treasure-path)
-      (char5e/add-custom-equipment custom-treasure custom-treasure-path)
-      (char5e/remove-custom-starting-equipment ::char-equip5e/background-starting-equipment? custom-equipment-path)
-      (char5e/add-custom-equipment custom-equipment custom-equipment-path)))
-
 (reg-event-db
- :add-starting-equipment
+ :add-background-starting-equipment
  character-interceptors
- add-starting-equipment)
-
-(defn set-class [character [_ class-key class-index options-map]]
-  (char5e/set-class character class-key class-index (options-map class-key)))
+ event-handlers/add-background-starting-equipment)
 
 (reg-event-db
  :set-class
  character-interceptors
- set-class)
+ event-handlers/set-class)
 
 (reg-event-db
  :set-class-level
