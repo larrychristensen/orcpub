@@ -202,21 +202,10 @@
  character-interceptors
  delete-class)
 
-(defn add-inventory-item [character [_ selection-key item-key]]
-  (update-in
-   character
-   [::entity/options selection-key]
-   (fn [items]
-     (vec
-      (conj
-       items
-       {::entity/key item-key
-        ::entity/value {::char-equip5e/quantity 1 ::char-equip5e/equipped? true}})))))
-
 (reg-event-db
  :add-inventory-item
  character-interceptors
- add-inventory-item)
+ event-handlers/add-inventory-item)
 
 (defn toggle-inventory-item-equipped [character [_ selection-key item-index]]
   (update-in
@@ -269,16 +258,10 @@
  character-interceptors
  change-custom-inventory-item-quantity)
 
-(defn remove-inventory-item [character [_ selection-key item-key]]
-  (update-in
-   character
-   [::entity/options selection-key]
-   (fn [items] (vec (remove #(= item-key (::entity/key %)) items)))))
-
 (reg-event-db
  :remove-inventory-item
  character-interceptors
- remove-inventory-item)
+ event-handlers/remove-inventory-item)
 
 (defn remove-custom-inventory-item [character [_ custom-equipment-key name]]
   (update-in

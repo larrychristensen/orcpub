@@ -60,3 +60,25 @@
         (char5e/add-custom-equipment custom-treasure custom-treasure-path)
         (char5e/remove-custom-starting-equipment ::char-equip5e/background-starting-equipment? custom-equipment-path)
         (char5e/add-custom-equipment custom-equipment custom-equipment-path))))
+
+(defn add-inventory-item [character [_ selection-key item-key]]
+  (update-in
+   character
+   [::entity/options selection-key]
+   (fn [items]
+     (with-meta
+       (vec
+        (conj
+         items
+         {::entity/key item-key
+          ::entity/value {::char-equip5e/quantity 1 ::char-equip5e/equipped? true}}))
+       (meta items)))))
+
+(defn remove-inventory-item [character [_ selection-key item-key]]
+  (update-in
+   character
+   [::entity/options selection-key]
+   (fn [items]
+     (with-meta
+       (vec (remove #(= item-key (::entity/key %)) items))
+       (meta items)))))
