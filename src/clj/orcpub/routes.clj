@@ -553,7 +553,7 @@
      [(route-map/path-for route-map/dnd-e5-char-list-route) ^:interceptors [(body-params/body-params) check-auth]
       {:post `save-character
        :get `character-list}]
-     [(route-map/path-for route-map/delete-dnd-e5-char-route :id ":id") ^:interceptors [(body-params/body-params) check-auth]
+     [(route-map/path-for route-map/delete-dnd-e5-char-route :id ":id") ^:interceptors [check-auth]
       {:delete `delete-character}]
      [(route-map/path-for route-map/dnd-e5-char-list-page-route) ^:interceptors [(body-params/body-params)]
       {:get `character-list-page}]
