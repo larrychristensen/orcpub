@@ -79,9 +79,11 @@
    (fn [s {:keys [:db/id ::strict/key ::strict/option ::strict/options]}]
      (assoc s
             key
-            (if option
-              (from-strict-option option)
-              (from-strict-options options))))
+            (with-meta
+              (if option
+                (from-strict-option option)
+                (from-strict-options options))
+              {:db/id id})))
    {}
    selections))
 
