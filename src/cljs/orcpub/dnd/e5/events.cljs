@@ -5,6 +5,7 @@
             [orcpub.dice :as dice]
             [orcpub.dnd.e5.template :as t5e]
             [orcpub.dnd.e5.character :as char5e]
+            [orcpub.dnd.e5.event-handlers :as event-handlers]
             [orcpub.dnd.e5.character.equipment :as char-equip5e]
             [orcpub.dnd.e5.db :refer [default-value
                                       character->local-store
@@ -195,29 +196,10 @@
  character-interceptors
  set-class)
 
-(defn set-class-level [character [_ class-index new-highest-level]]
-  (update-in
-   character
-   [::entity/options :class class-index ::entity/options :levels]
-   (fn [levels]
-     (let [current-highest-level (count levels)]
-       (with-meta ;; ensure that db/id meta gets copied over
-         (cond
-           (> new-highest-level current-highest-level)
-           (vec (concat levels (map
-                                (fn [lvl] {::entity/key (keyword (str "level-" (inc lvl)))})
-                                (range current-highest-level new-highest-level))))
-         
-           (< new-highest-level current-highest-level)
-           (vec (take new-highest-level levels))
-         
-           :else levels)
-         (meta levels))))))
-
 (reg-event-db
  :set-class-level
  character-interceptors
- set-class-level)
+ event-handlers/set-class-level)
 
 (defn delete-class [character [_ class-key i options-map]]
   (let [updated (update-in
