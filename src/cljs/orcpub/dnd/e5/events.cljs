@@ -96,6 +96,7 @@
  :save-character
  (fn [{:keys [db]} [_]]
    (let [strict (char5e/to-strict (:character db))]
+     (prn "STRICT" strict)
      {:dispatch [:set-loading true]
       :http {:method :post
              :headers {"Authorization" (str "Token " (-> db :user-data :token))}
@@ -200,16 +201,18 @@
    [::entity/options :class class-index ::entity/options :levels]
    (fn [levels]
      (let [current-highest-level (count levels)]
-       (cond
-         (> new-highest-level current-highest-level)
-         (vec (concat levels (map
-                              (fn [lvl] {::entity/key (keyword (str "level-" (inc lvl)))})
-                              (range current-highest-level new-highest-level))))
+       (with-meta ;; ensure that db/id meta gets copied over
+         (cond
+           (> new-highest-level current-highest-level)
+           (vec (concat levels (map
+                                (fn [lvl] {::entity/key (keyword (str "level-" (inc lvl)))})
+                                (range current-highest-level new-highest-level))))
          
-         (< new-highest-level current-highest-level)
-         (vec (take new-highest-level levels))
+           (< new-highest-level current-highest-level)
+           (vec (take new-highest-level levels))
          
-         :else levels)))))
+           :else levels)
+         (meta levels))))))
 
 (reg-event-db
  :set-class-level
