@@ -662,9 +662,11 @@
                                                (new-option-selector
                                                 actual-path
                                                 selection
-                                                (and (or (and max (> min 1))
+                                                (and (not (nil? max))
+                                                     (or (and max (> min 1))
                                                          multiselect?)
-                                                     (not (pos? remaining))) option))
+                                                     (not (pos? remaining)))
+                                                option))
                                              (sort-by ::t/name options)))]
                                        [:div.flex
                                         (doall
