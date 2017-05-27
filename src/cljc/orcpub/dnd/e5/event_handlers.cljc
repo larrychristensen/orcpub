@@ -119,7 +119,6 @@
                  meets-prereqs?)
              selectable?)
       (do
-        (prn "SELECTE")
         (if select-fn
           (select-fn (entity/get-option-value-path
                       built-template
@@ -136,5 +135,4 @@
            (if multiselect?
              (update-multi-select new-option key)
              (update-single-select multiselect? new-option)))))
-      (do (prn "NO SELECT")
-          character))))
+      character)))
