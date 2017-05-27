@@ -503,6 +503,9 @@
           (map #(s/split % "="))
           (s/split cookie "; "))))
 
+(defn show-generic-error []
+  [:show-error-message [:div "There was an error, please try again later. If the problem persists please contact " [:a {:href "mailto:redorc@orcpub.com"} "redorc@orcpub.com."]]])
+
 (reg-fx
  :http
  (fn [{:keys [on-success on-failure on-unauthorized auth-token] :as cfg}]
@@ -519,7 +522,7 @@
                  (dispatch [:route routes/login-page-route]))
                (if on-failure
                  (dispatch (conj on-failure response))
-                 (dispatch [:show-error-message [:div "There was an error, please try again later. If the problem persists please contact " [:a {:href "mailto:redorc@orcpub.com"} "redorc@orcpub.com."]]])))))))))
+                 (dispatch (show-generic-error))))))))))
 
 (reg-fx
  :path
@@ -535,13 +538,18 @@
    {:db (assoc db :user-data (-> response :body))
     :dispatch [:route (:return-route db)]}))
 
+(defn show-old-account-message []
+  [:show-login-message [:div  "There is no account for the email or username, please double-check it. You can also try to " [:a {:href (routes/path-for routes/register-page-route)} "register"] "." [:div.f-w-n.i.m-t-10 "Accounts from the old OrcPub have not been ported over yet, but you can create a new account in the mean time and we will link it with your old account as soon as possible if you use the same email address."]]])
+
 (reg-event-fx
  :login-failure
  (fn [{:keys [db]} [_ response]]
    (let [error-code (-> response :body :error)]
      (cond
        (= error-code errors/bad-credentials) {:dispatch-n [[:set-user-data nil]
-                                                           [:show-login-message "Username/password combination is incorrect."]]}
+                                                           [:show-login-message "Password is incorrect."]]}
+       (= error-code errors/no-account) {:dispatch-n [[:set-user-data nil]
+                                                      (show-old-account-message)]}
        (= error-code errors/unverified) {:db (assoc db :temp-email (-> response :body :email))
                                          :dispatch [:route routes/verify-sent-route]}
        (= error-code errors/unverified-expired) {:dispatch [:route routes/verify-failed-route]}
@@ -677,13 +685,23 @@
    (assoc db :route routes/password-reset-sent-route)))
 
 (reg-event-fx
+ :send-password-reset-failure
+ (fn [_ [_ response]]
+   (let [error (-> response :body :error (= :no-account))]
+     (prn "RESPONSE " response error)
+     (if error
+       (dispatch (show-old-account-message))
+       (show-generic-error)))))
+
+(reg-event-fx
  :send-password-reset
  (fn [{:keys [db]} [_ params]]
    {:db (assoc db :temp-email (:email params))
     :http {:method :get
            :url (backend-url (bidi/path-for routes/routes routes/send-password-reset-route))
            :query-params params
-           :on-success [:send-password-reset-success]}}))
+           :on-success [:send-password-reset-success]
+           :on-failure [:send-password-reset-failure]}}))
 
 (reg-event-db
  :load-characters-success
