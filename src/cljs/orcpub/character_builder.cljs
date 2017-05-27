@@ -1629,7 +1629,7 @@
 (defn mobile-columns []
   (let [current-tab (r/atom :options)]
     (fn []
-      [:div.p-r-10
+      [:div.p-r-10.w-100-p
        [:div.flex-grow-1.flex.p-l-10.p-t-10
         [:div.w-100-p
          [:div.builder-tabs
