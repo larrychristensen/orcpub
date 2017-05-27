@@ -1,9 +1,9 @@
 (ns orcpub.styles.core
-  (:require [garden.def :refer [defstylesheet defstyles]]
-            [garden.stylesheet :refer [at-media at-keyframes]]
-            [garden.units :refer [px]]
-            [orcpub.constants :as const]
-            [garden.selectors :as s]))
+     (:require [garden.def :refer [defstylesheet defstyles]]
+               [garden.stylesheet :refer [at-media at-keyframes]]
+               [garden.units :refer [px]]
+               [orcpub.constants :as const]
+               [garden.selectors :as s]))
 
 (def orange "#f0a100")
 (def button-color orange)
@@ -300,6 +300,8 @@
     {:height "40px"}]
    [:.h-48
     {:height "48px"}]
+   [:.h-72
+    {:height "72px"}]
    [:.h-800
     {:height "800px"}]
 

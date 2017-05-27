@@ -899,6 +899,13 @@
 
 (def no-https-images "Sorry, we don't currently support images that start with https")
 
+(defn default-image [built-char]
+  (if (and (let [race (char/race built-char)]
+             (or (= "Human" race)
+                 (nil? race)))
+           (= :barbarian (first (char/classes built-char))))
+    "/image/barbarian.png"))
+
 (defn character-display [built-char show-summary? num-columns]
   (let [race (char/race built-char)
         subrace (char/subrace built-char)
@@ -965,9 +972,19 @@
            [:div.p-10.red.f-s-18 (str (if (= :https image-url-failed)
                                         no-https-images
                                         "Image could not be loaded, please check the URL and try again"))]
-           [:img.character-image.w-100-p.m-b-20 {:src (if (not (s/blank? image-url)) image-url "/image/barbarian.png")
-                                                 :on-error (fn [_] (dispatch [:failed-loading-image image-url]))
-                                                 :on-load (fn [_] (if image-url-failed (dispatch [:loaded-image])))}])
+           (let [default-image-url (default-image built-char)
+                 image-url? (not (s/blank? image-url))]
+             (if (or default-image-url image-url?)
+               [:img.character-image.w-100-p.m-b-20 {:src (if image-url?
+                                                              image-url
+                                                              default-image-url)
+                                                     :on-error (fn [_] (dispatch [:failed-loading-image image-url]))
+                                                     :on-load (fn [_] (if image-url-failed (dispatch [:loaded-image])))}]
+               [:div.p-20.bg-gray.b-rad-5.t-a-c
+                {:style {:border "2px solid white"
+                         :background-color "rgba(255,255,255,0.1)"}}
+                [:div (svg-icon "orc-head" 72 72)]
+                [:div "No image set, you can set one using the 'Image URL' field in the 'Description' tab."]])))
          (if faction-image-url-failed
            [:div.p-10.red.f-s-18 (str (if (= :https faction-image-url-failed)
                                         no-https-images
