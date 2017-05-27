@@ -1272,8 +1272,7 @@
    {:name "Ability Scores / Feats"
     :icon "strong"
     :tags #{:ability-scores :feats}
-    :ui-fns [{:key :ability-scores :group? true :ui-fn abilities-editor}]
-    }
+    :ui-fns [{:key :ability-scores :group? true :ui-fn abilities-editor}]}
    {:name "Background"
     :icon "ages"
     :tags #{:background}}
@@ -1288,7 +1287,8 @@
    {:name "Proficiencies"
     :icon "juggler"
     :tags #{:profs}
-    :ui-fns [{:key :skill-proficiency :ui-fn skills-selector}]}
+    ;;:ui-fns [{:key :skill-proficiency :ui-fn skills-selector}]
+    }
    {:name "Equipment"
     :icon "backpack"
     :tags #{:equipment :starting-equipment}

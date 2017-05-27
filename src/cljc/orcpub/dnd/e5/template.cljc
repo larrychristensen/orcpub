@@ -4717,7 +4717,7 @@ long rest."})]
                sorcerer-option
                warlock-option
                wizard-option]})
-   (opt5e/skill-selection 0)
+   ;;(opt5e/skill-selection 0)
    (inventory-selection "Treasure" "cash" equip5e/treasure mod5e/deferred-treasure)
    (inventory-selection "Weapons" "plain-dagger" weapon5e/weapons mod5e/deferred-weapon)
    (inventory-selection "Magic Weapons" "lightning-bow" mi/magic-weapons mod5e/deferred-magic-weapon)
