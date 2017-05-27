@@ -53,10 +53,6 @@
     (func e)
     (stop-propagation e)))
 
-(defn update-option [template entity path update-fn]
-  (let [entity-path (entity/get-entity-path template entity path)]
-    (update-in entity entity-path update-fn)))
-
 #_(def stored-char-str (.getItem js/window.localStorage "char-meta"))
 #_(defn remove-stored-char [stored-char-str & [more-info]]
   (js/console.warn (str "Invalid char-meta: " stored-char-str more-info))
@@ -536,44 +532,15 @@
                                                (> min 1)
                                                (nil? max))
                              :select-fn (fn [e]
-                                          (when (and (or (> max 1)
-                                                         (nil? max)
-                                                         multiselect?
-                                                         (not selected?)
-                                                         has-selections?)
-                                                     (or selected?
-                                                         meets-prereqs?)
-                                                     selectable?)
-                                            (let [updated-char (let [new-option {::entity/key key}]
-                                                                 (if (or
-                                                                      multiselect?
-                                                                      (nil? max)
-                                                                      (and
-                                                                       (> min 1)
-                                                                       (= min max)))
-                                                                   (update-option
-                                                                    built-template
-                                                                    character
-                                                                    option-path
-                                                                    (fn [parent-vec]
-                                                                      (if (or (nil? parent-vec) (map? parent-vec))
-                                                                        [new-option]
-                                                                        (let [parent-keys (into #{} (map ::entity/key) parent-vec)]
-                                                                          (if (parent-keys key)
-                                                                            (vec (remove #(= key (::entity/key %)) parent-vec))
-                                                                            (conj parent-vec new-option))))))
-                                                                   (update-option
-                                                                    built-template
-                                                                    character
-                                                                    new-option-path
-                                                                    (fn [o] (if multiselect? [new-option] new-option)))))]
-                                              (dispatch [:set-character updated-char]))
-                                            (if select-fn
-                                              (select-fn (entity/get-option-value-path
-                                                          built-template
-                                                          character
-                                                          new-option-path)
-                                                         nil)))
+                                          (dispatch [:select-option {:option-path option-path
+                                                                     :selected? selected?
+                                                                     :selectable? selectable?
+                                                                     :meets-prereqs? meets-prereqs?
+                                                                     :selection selection
+                                                                     :option option
+                                                                     :has-selections? has-selections?
+                                                                     :built-template built-template
+                                                                     :new-option-path new-option-path}])
                                           (.stopPropagation e))
                              :content (if (and (or selected? (= 1 (count options))) ui-fn)
                                         (ui-fn new-option-path built-template built-char))
@@ -1504,7 +1471,7 @@
 (defn random-sequential-selection [built-template character {:keys [::t/min ::t/max ::t/options ::entity/path] :as selection}]
   (let [num (inc (rand-int (count options)))
         actual-path (actual-path selection)]
-    (update-option
+    (entity/update-option
      built-template
      character
      actual-path
@@ -1528,7 +1495,7 @@
              multiselect? (or multiselect?
                               (> min 1)
                               (nil? max))]
-         (update-option
+         (entity/update-option
           built-template
           new-character
           (conj (actual-path selection) key)
@@ -1552,7 +1519,7 @@
 (defn keep-options [built-template entity option-paths]
   (reduce
    (fn [new-entity option-path]
-     (update-option
+     (entity/update-option
       built-template
       new-entity
       option-path
@@ -1580,7 +1547,7 @@
               (let [selection-randomizer (selection-randomizers key)]
                 (if selection-randomizer
                   (let [random-value (selection-randomizer selection)]
-                    (update-option
+                    (entity/update-option
                      built-template
                      new-character
                      (actual-path selection)
