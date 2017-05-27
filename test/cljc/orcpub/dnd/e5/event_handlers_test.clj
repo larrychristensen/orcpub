@@ -86,6 +86,12 @@
       meta
       :db/id))
 
+(defn get-race-id [e]
+  (-> e
+      (get-in [::entity/options :race])
+      meta
+      :db/id))
+
 (deftest test-set-level--round-trip
   (let [strict {:db/id 17592186055262, :orcpub.entity.strict/selections [{:db/id 17592186055266, :orcpub.entity.strict/key :class, :orcpub.entity.strict/options [{:db/id 17592186055267, :orcpub.entity.strict/key :barbarian, :orcpub.entity.strict/selections [{:db/id 17592186055268, :orcpub.entity.strict/key :levels, :orcpub.entity.strict/options [{:db/id 17592186055269, :orcpub.entity.strict/key :level-1} {:db/id 17592186055270, :orcpub.entity.strict/key :level-2, :orcpub.entity.strict/selections [{:db/id 17592186055271, :orcpub.entity.strict/key :hit-points, :orcpub.entity.strict/option {:db/id 17592186055272, :orcpub.entity.strict/key :roll, :orcpub.entity.strict/int-value 7}}]} {:db/id 17592186055273, :orcpub.entity.strict/key :level-3, :orcpub.entity.strict/selections [{:db/id 17592186055274, :orcpub.entity.strict/key :hit-points, :orcpub.entity.strict/option {:db/id 17592186055275, :orcpub.entity.strict/key :roll, :orcpub.entity.strict/int-value 5}}]} {:db/id 17592186055288, :orcpub.entity.strict/key :level-4, :orcpub.entity.strict/selections [{:db/id 17592186055289, :orcpub.entity.strict/key :hit-points, :orcpub.entity.strict/option {:db/id 17592186055290, :orcpub.entity.strict/key :manual-entry, :orcpub.entity.strict/int-value 1}}]}]}]}]}]}
         non-strict (entity/from-strict strict)
@@ -150,7 +156,6 @@
                     (eh/add-background-starting-equipment [:_ t5e/noble-bg])
                     (eh/add-background-starting-equipment [:_ t5e/urchin-bg]))
         back-to-strict (entity/to-strict updated)]
-    (prn "DIFF" (diff strict back-to-strict))
     (is (= strict back-to-strict))))
 
 (deftest add-inventory-item--round-trip
@@ -160,4 +165,34 @@
                     (eh/add-inventory-item [:_ :weapons :dagger])
                     (eh/remove-inventory-item [:_ :weapons :dagger]))
         back-to-strict (entity/to-strict updated)]
+    (is (= strict back-to-strict))))
+
+(deftest update-single-select--round-trip
+  (let [strict {:db/id 17592186055354, :orcpub.entity.strict/selections [{:db/id 17592186055371, :orcpub.entity.strict/key :race, :orcpub.entity.strict/option {:orcpub.entity.strict/key :elf}}]}
+        option-id (get-in strict [::se/selections 0 :db/id])
+        non-strict (entity/from-strict strict)
+        updated (-> non-strict
+                    (eh/select-option [:_
+                                       {:option-path [:race]
+                                        :selected? false
+                                        :selectable? true
+                                        :meets-prereqs? true
+                                        :has-selections? true
+                                        :built-template t5e/template
+                                        :new-option-path [:race :dwarf]
+                                        :selection {::t/multiselect? false ::t/min 1 ::t/max 1}
+                                        :option {::t/key :dwarf}}])
+                    (eh/select-option [:_
+                                       {:option-path [:race]
+                                        :selected? false
+                                        :selectable? true
+                                        :meets-prereqs? true
+                                        :has-selections? true
+                                        :built-template t5e/template
+                                        :new-option-path [:race :elf]
+                                        :selection {::t/multiselect? false ::t/min 1 ::t/max 1}
+                                        :option {::t/key :elf}}]))
+        back-to-strict (entity/to-strict updated)]
+    (is (= option-id (get-race-id non-strict)))
+    (prn "DIFFY" (diff strict back-to-strict))
     (is (= strict back-to-strict))))

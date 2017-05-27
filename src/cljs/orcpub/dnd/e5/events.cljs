@@ -132,6 +132,11 @@
  character-interceptors
  update-value-field)
 
+(reg-event-db
+ :select-option
+ character-interceptors
+ event-handlers/select-option)
+
 (defn add-class [character [_ first-unselected]]
   (update-in
    character

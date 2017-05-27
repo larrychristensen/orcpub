@@ -1,5 +1,6 @@
 (ns orcpub.dnd.e5.event-handlers
   (:require [orcpub.entity :as entity]
+            [orcpub.template :as t]
             [orcpub.dnd.e5.character :as char5e]
             [orcpub.dnd.e5.character.equipment :as char-equip5e]))
 
@@ -82,3 +83,58 @@
      (with-meta
        (vec (remove #(= item-key (::entity/key %)) items))
        (meta items)))))
+
+(defn update-single-select [multiselect? new-option]
+  (fn [option]
+    (let [option-with-meta (with-meta new-option (meta option))]
+      (if multiselect? [option-with-meta] option-with-meta))))
+
+(defn update-multi-select [new-option key]
+  (fn [parent-vec]
+    (prn "UPDATE MULTI SELECT")
+    (if (or (nil? parent-vec) (map? parent-vec))
+      (with-meta
+        [new-option]
+        (meta parent-vec))
+      (let [parent-keys (into #{} (map ::entity/key) parent-vec)]
+        (if (parent-keys key)
+          (with-meta
+            (vec (remove #(= key (::entity/key %)) parent-vec))
+            (meta parent-vec))
+          (conj parent-vec new-option))))))
+
+(defn select-option [character [_
+                                {:keys [option-path selected? selectable? meets-prereqs? has-selections? built-template new-option-path]
+                                 {:keys [::t/min ::t/max ::t/multiselect?] :as selection} :selection
+                                 {:keys [::t/key ::t/select-fn] :as option} :option}]]
+  (prn "SELECTION" selection)
+  (let [multiselect? (or multiselect?
+                         (nil? max)
+                         (> max 1))]
+    (prn "VALS" multiselect? selected? meets-prereqs? selectable? has-selections?)
+    (if (and (or multiselect?
+                 (not selected?)
+                 has-selections?)
+             (or selected?
+                 meets-prereqs?)
+             selectable?)
+      (do
+        (prn "SELECTE")
+        (if select-fn
+          (select-fn (entity/get-option-value-path
+                      built-template
+                      character
+                      new-option-path)
+                     nil))
+        (let [new-option {::entity/key key}]
+          (entity/update-option
+           built-template
+           character
+           (if multiselect?
+             option-path
+             new-option-path)
+           (if multiselect?
+             (update-multi-select new-option key)
+             (update-single-select multiselect? new-option)))))
+      (do (prn "NO SELECT")
+          character))))
