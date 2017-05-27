@@ -1287,8 +1287,7 @@
    {:name "Proficiencies"
     :icon "juggler"
     :tags #{:profs}
-    ;;:ui-fns [{:key :skill-proficiency :ui-fn skills-selector}]
-    }
+    :ui-fns [{:key :skill-proficiency :ui-fn skills-selector}]}
    {:name "Equipment"
     :icon "backpack"
     :tags #{:equipment :starting-equipment}

@@ -16,7 +16,7 @@
    :orcpub.dnd.e5.character/cha 15})
 
 (def selected-skill-profs
-  #{:intimidation :persuasion})
+  #{:intimidation :history})
 
 (def warlock-with-book-of-ancient-secrets
   {:orcpub.entity/options
