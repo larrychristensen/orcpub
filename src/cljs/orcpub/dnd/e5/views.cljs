@@ -221,32 +221,60 @@
            :on-click #(dispatch [:re-verify @params])}
           "RESEND"]]]))))
 
+(def message-style
+  {:padding "10px"
+   :border-radius "5px"
+   :display :flex
+   :justify-content :space-between})
+
+(defn message [message-type message-text close-event]
+  [:div.pointer.f-w-b ;;.h-0.opacity-0.fade-out
+   {:on-click #(dispatch close-event)}
+   [:div.white
+    {:style message-style
+     :class-name (case message-type
+                   :error "bg-red"
+                   "bg-green")}
+    [:span message-text]
+    [:i.fa.fa-times]]])
+
 (defn send-password-reset-page []
   (let [params (r/atom {})]
     (fn [error-message]
-      (registration-page
-       [:div.flex.justify-cont-s-b.w-100-p
-        {:style {:text-align :center
-                 :flex-direction :column}}
-        [:div.p-t-10
-         (if error-message [:div.red.m-b-20 error-message])
-         [:div.f-w-b.f-s-24.p-b-10
-          "Send Password Reset Email"]
-         [:div.m-b-10 "Submit your email address here and we will send you a link to reset your password."]
-         [base-input
-          {:name :email
-           :value (:email @params)
-           :type :email
-           :placeholder "Email"
-           :style default-input-style
-           :on-change (partial set-value params :email)}]
-         [:button.form-button.m-t-10
-          {:style {:height "40px"
-                   :width "174px"
-                   :font-size "16px"
-                   :font-weight "600"}
-           :on-click #(dispatch [:send-password-reset @params])}
-          "SUBMIT"]]]))))
+      (let [email (:email @params)
+            bad-email? (registration/bad-email? email)]
+        (registration-page
+         [:div.flex.justify-cont-s-b.w-100-p
+          {:style {:text-align :center
+                   :flex-direction :column}}
+          [:div.p-t-10
+           (if error-message [:div.red.m-b-20 error-message])
+           [:div.f-w-b.f-s-24.p-b-10
+            "Send Password Reset Email"]
+           [:div.m-b-10 "Submit your email address here and we will send you a link to reset your password."]
+           [form-input
+            {:title "Email"
+             :key :email
+             :messages (if bad-email?
+                           ["Not a valid email address"]
+                           [])
+             :type :email
+             :value email
+             :on-change (partial set-value params :email)}]
+           (if @(subscribe [:login-message-shown?])
+             [:div.m-t-5.p-r-5.p-l-5
+              [message
+               :error
+               @(subscribe [:login-message])
+               [:hide-login-message]]])
+           [:button.form-button.m-t-10
+            {:style {:height "40px"
+                     :width "174px"
+                     :font-size "16px"
+                     :font-weight "600"}
+             :class-name (if bad-email? "disabled opacity-5 hover-no-shadow")
+             :on-click #(if (not bad-email?) (dispatch [:send-password-reset @params]))}
+            "SUBMIT"]]])))))
 
 (defn password-reset-expired-page []
   [send-password-reset-page "Your reset link has expired, you must complete the reset within 24 hours. Please use the form below to send another reset email."])
@@ -455,23 +483,6 @@
         [:span.m-l-5 "and that you've read our"]
         [:a.m-l-5 {:href "/privacy-policy" :target :_blank
                    :style {:color text-color}} "Privacy Policy"]]]])))
-
-(def message-style
-  {:padding "10px"
-   :border-radius "5px"
-   :display :flex
-   :justify-content :space-between})
-
-(defn message [message-type message-text close-event]
-  [:div.pointer.f-w-b ;;.h-0.opacity-0.fade-out
-   {:on-click #(dispatch close-event)}
-   [:div.white
-    {:style message-style
-     :class-name (case message-type
-                   :error "bg-red"
-                   "bg-green")}
-    [:span message-text]
-    [:i.fa.fa-times]]])
 
 
 (defn login-page []

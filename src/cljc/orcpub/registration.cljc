@@ -32,8 +32,11 @@
       ;;password-missing-special-character? (update :password conj "Password must have a least one of the following characters: !, @, #, $, %, ^, &, or *")
       password-too-short? (update :password conj "Password must be at least 6 characters"))))
 
+(defn bad-email? [email]
+  (fails-match? #"[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,4}" email))
+
 (defn validate-registration [{:keys [email username password first-and-last-name]} email-taken? username-taken?]
-  (let [bad-email-format? (fails-match? #"[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,4}" email)
+  (let [bad-email-format? (bad-email? email)
         username-too-short? (or (nil? username) (< (count username) 3))]
     (cond-> {}
       (s/blank? first-and-last-name) (update :first-and-last-name conj "Name is required")

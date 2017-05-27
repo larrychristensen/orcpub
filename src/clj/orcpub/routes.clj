@@ -51,15 +51,34 @@
         user-id (ffirst result)]
     (d/pull db '[*] user-id)))
 
-(defn lookup-user [db username password]
+(def username-query
+  '[:find ?e
+    :in $ ?username
+    :where [?e :orcpub.user/username ?username]])
+
+(def email-query
+  '[:find ?e
+    :in $ ?email
+    :where [?e :orcpub.user/email ?email]])
+
+(defn find-user-by-username-or-email [db username-or-email]
   (first-user-by db
-                 '{:find [?e]
-                   :in [$ [?username ?password]]
-                   :where [(or [?e :orcpub.user/username ?username]
-                               [?e :orcpub.user/email ?username])
-                           [?e :orcpub.user/password ?enc]
-                           [(buddy.hashers/check ?password ?enc)]]}
-                 [username password]))
+                 '[:find ?e
+                   :in $ ?user-or-email
+                   :where (or [?e :orcpub.user/username ?user-or-email]
+                              [?e :orcpub.user/email ?user-or-email])]
+                 username-or-email))
+
+(defn lookup-user [db username password]
+  (let [user (first-user-by db
+                         '{:find [?e]
+                           :in [$ [?username ?password]]
+                           :where [(or [?e :orcpub.user/username ?username]
+                                       [?e :orcpub.user/email ?username])
+                                   [?e :orcpub.user/password ?enc]
+                                   [(buddy.hashers/check ?password ?enc)]]}
+                         [username password])]
+    user))
 
 (def check-auth
   {:name :check-auth
@@ -100,7 +119,10 @@
         unverified? (not verified?)
         expired? (and verification-sent (verification-expired? verification-sent))]
     (cond
-      (nil? id) (login-error errors/bad-credentials)
+      (nil? id) (let [user-for-username (find-user-by-username-or-email db username)]
+                  (login-error (if (:db/id user-for-username)
+                                 errors/bad-credentials
+                                 errors/no-account)))
       (and unverified? expired?) (login-error errors/unverified-expired)
       unverified? (login-error errors/unverified {:email email})
       :else (let [token (create-token (:orcpub.user/username user) (-> 3 hours from-now))]
@@ -112,16 +134,6 @@
   (try
     (login-response request)
     (catch Throwable e (do (prn "E" e) (throw e)))))
-
-(def username-query
-  '[:find ?e
-    :in $ ?username
-    :where [?e :orcpub.user/username ?username]])
-
-(def email-query
-  '[:find ?e
-    :in $ ?email
-    :where [?e :orcpub.user/email ?email]])
 
 (defn base-url [{:keys [scheme headers]}]
   (str (name scheme) "://" (headers "host")))
@@ -243,12 +255,9 @@
                   :db/id] :as user} (user-for-email db email)
           expired? (password-reset-expired? password-reset-sent)
           already-reset? (password-already-reset? password-reset password-reset-sent)]
-      (do-send-password-reset id first-and-last-name email conn request)
-      #_(if (or (not password-reset-sent)
-              expired?
-              already-reset?)
+      (if id
         (do-send-password-reset id first-and-last-name email conn request)
-        (redirect route-map/password-reset-sent-route)))
+        {:status 400 :body {:error :no-account}}))
     (catch Throwable e (do (prn e) (throw e)))))
 
 (defn do-password-reset [conn user-id password]
@@ -490,14 +499,6 @@
 
 (defn save-character [{:keys [db transit-params body conn identity] :as request}]
   (do-save-character conn transit-params identity))
-
-(defn find-user-by-username-or-email [db username-or-email]
-  (first-user-by db
-                 '[:find ?e
-                   :in $ ?user-or-email
-                   :where (or [?e :orcpub.user/username ?user-or-email]
-                              [?e :orcpub.user/email ?user-or-email])]
-                 username-or-email))
 
 (defn character-list [{:keys [db transit-params body conn identity] :as request}]
   (let [username (:user identity)
