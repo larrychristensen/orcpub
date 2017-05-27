@@ -96,7 +96,9 @@
         (map
          (fn [x]
            (let [[k v] x]
-             [(keyword ns-str (name k))
+             [(if (simple-keyword? k)
+                (keyword ns-str (name k))
+                v)
               v]))
          item)))
 
