@@ -97,7 +97,6 @@
  :save-character
  (fn [{:keys [db]} [_]]
    (let [strict (char5e/to-strict (:character db))]
-     (prn "STRICT" strict)
      {:dispatch [:set-loading true]
       :http {:method :post
              :headers {"Authorization" (str "Token " (-> db :user-data :token))}

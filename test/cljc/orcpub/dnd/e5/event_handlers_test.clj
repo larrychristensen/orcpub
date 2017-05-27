@@ -74,23 +74,23 @@
 
 (def levels-strict-path [::se/selections 0 ::se/options 0 ::se/selections 0])
 
-(defn get-levels-id [e]
+(defn get-id [e path]
   (-> e
-      (get-in [::entity/options :class 0 ::entity/options :levels])
+      (get-in path)
       meta
       :db/id))
+
+(defn get-levels-id [e]
+  (get-id e [::entity/options :class 0 ::entity/options :levels]))
 
 (defn get-classes-id [e]
-  (-> e
-      (get-in [::entity/options :class])
-      meta
-      :db/id))
+  (get-id e [::entity/options :class]))
+
+(defn get-skills-id [e]
+  (get-id e [::entity/options :skill-profs]))
 
 (defn get-race-id [e]
-  (-> e
-      (get-in [::entity/options :race])
-      meta
-      :db/id))
+  (get-id e [::entity/options :race]))
 
 (deftest test-set-level--round-trip
   (let [strict {:db/id 17592186055262, :orcpub.entity.strict/selections [{:db/id 17592186055266, :orcpub.entity.strict/key :class, :orcpub.entity.strict/options [{:db/id 17592186055267, :orcpub.entity.strict/key :barbarian, :orcpub.entity.strict/selections [{:db/id 17592186055268, :orcpub.entity.strict/key :levels, :orcpub.entity.strict/options [{:db/id 17592186055269, :orcpub.entity.strict/key :level-1} {:db/id 17592186055270, :orcpub.entity.strict/key :level-2, :orcpub.entity.strict/selections [{:db/id 17592186055271, :orcpub.entity.strict/key :hit-points, :orcpub.entity.strict/option {:db/id 17592186055272, :orcpub.entity.strict/key :roll, :orcpub.entity.strict/int-value 7}}]} {:db/id 17592186055273, :orcpub.entity.strict/key :level-3, :orcpub.entity.strict/selections [{:db/id 17592186055274, :orcpub.entity.strict/key :hit-points, :orcpub.entity.strict/option {:db/id 17592186055275, :orcpub.entity.strict/key :roll, :orcpub.entity.strict/int-value 5}}]} {:db/id 17592186055288, :orcpub.entity.strict/key :level-4, :orcpub.entity.strict/selections [{:db/id 17592186055289, :orcpub.entity.strict/key :hit-points, :orcpub.entity.strict/option {:db/id 17592186055290, :orcpub.entity.strict/key :manual-entry, :orcpub.entity.strict/int-value 1}}]}]}]}]}]}
@@ -167,6 +167,13 @@
         back-to-strict (entity/to-strict updated)]
     (is (= strict back-to-strict))))
 
+(defn meta-path [entity-path entity]
+  (let [paths (reductions
+               conj
+               []
+               entity-path)]
+    (map #(meta (get-in entity %)) paths)))
+
 (deftest update-single-select--round-trip
   (let [strict {:db/id 17592186055354, :orcpub.entity.strict/selections [{:db/id 17592186055371, :orcpub.entity.strict/key :race, :orcpub.entity.strict/option {:orcpub.entity.strict/key :elf}}]}
         option-id (get-in strict [::se/selections 0 :db/id])
@@ -194,5 +201,56 @@
                                         :option {::t/key :elf}}]))
         back-to-strict (entity/to-strict updated)]
     (is (= option-id (get-race-id non-strict)))
-    (prn "DIFFY" (diff strict back-to-strict))
+    (is (= strict back-to-strict))))
+
+(deftest update-multi-select--round-trip
+  (let [strict {:db/id 17592186055379, :orcpub.entity.strict/selections [{:db/id 17592186055393, :orcpub.entity.strict/key :skill-profs, :orcpub.entity.strict/options [{:orcpub.entity.strict/key :arcana}]}]}
+        skills-id (get-in strict [::se/selections 0 :db/id])
+        non-strict (entity/from-strict strict)
+        without-arcana-with-deception
+        (-> non-strict
+            (eh/select-option [:_
+                               {:option-path [:skill-profs]
+                                :selected? false
+                                :selectable? true
+                                :meets-prereqs? true
+                                :has-selections? true
+                                :built-template t5e/template
+                                :new-option-path [:skill-profs :arcana]
+                                :selection {::t/multiselect? true ::t/min 1 ::t/max 1}
+                                :option {::t/key :arcana}}])
+            (eh/select-option [:_
+                               {:option-path [:skill-profs]
+                                :selected? true
+                                :selectable? true
+                                :meets-prereqs? true
+                                :has-selections? true
+                                :built-template t5e/template
+                                :new-option-path [:skill-profs :deception]
+                                :selection {::t/multiselect? true ::t/min 1 ::t/max 1}
+                                :option {::t/key :deception}}]))
+        change-back
+        (-> without-arcana-with-deception
+            (eh/select-option [:_
+                               {:option-path [:skill-profs]
+                                :selected? true
+                                :selectable? true
+                                :meets-prereqs? true
+                                :has-selections? true
+                                :built-template t5e/template
+                                :new-option-path [:skill-profs :deception]
+                                :selection {::t/multiselect? true ::t/min 1 ::t/max 1}
+                                :option {::t/key :deception}}])
+            (eh/select-option [:_
+                               {:option-path [:skill-profs]
+                                :selected? false
+                                :selectable? true
+                                :meets-prereqs? true
+                                :has-selections? true
+                                :built-template t5e/template
+                                :new-option-path [:skill-profs :arcana]
+                                :selection {::t/multiselect? true ::t/min 1 ::t/max 1}
+                                :option {::t/key :arcana}}]))
+        back-to-strict (entity/to-strict change-back)]
+    (is (= skills-id (get-skills-id non-strict)))
     (is (= strict back-to-strict))))

@@ -637,7 +637,6 @@
         remaining (count-remaining built-template character selection)
         expanded? (r/atom false)
         ancestor-names (ancestor-names-string built-template actual-path)]
-    (prn "ANCESTOR NAMES" ancestor-names)
     [selection-section-base {:path actual-path
                              :parent-title (if (not (s/blank? ancestor-names)) ancestor-names)
                              :name name

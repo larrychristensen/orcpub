@@ -218,12 +218,10 @@
 (defn vectorize-equipment [raw-character]
   (reduce
    (fn [char equipment-key]
-     (prn "EQUIPMENT EKY" equipment-key)
      (update-in
       char
       [::entity/options equipment-key]
       (fn [e-map]
-        (prn "E_MAP" e-map)
         (if (vector? e-map)
           e-map
           (mapv
