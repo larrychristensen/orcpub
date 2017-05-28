@@ -743,8 +743,8 @@
 (reg-event-fx
  :edit-character
  (fn [{:keys [db]} [_ character]]
-   {:db (assoc db :character character)
-    :dispatch [:route routes/dnd-e5-char-builder-route]}))
+   {:dispatch-n [[:set-character character]
+                 [:route routes/dnd-e5-char-builder-route]]}))
 
 (reg-event-fx
  :delete-character-success
