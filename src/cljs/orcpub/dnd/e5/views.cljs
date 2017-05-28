@@ -1071,7 +1071,8 @@
 (defn character-list []
   (let [characters @(subscribe [:dnd-5e-characters])
         built-template @(subscribe [:built-template])
-        expanded-characters @(subscribe [:expanded-characters])]
+        expanded-characters @(subscribe [:expanded-characters])
+        device-type @(subscribe [:device-type])]
     [content-page
      "Characters"
      [{:title "New"
@@ -1103,9 +1104,9 @@
                   [:div.list-character-summary
                    [character-summary built-character true]]]]
                 [:div.orange.pointer.m-r-10
-                 [:span.underline (if expanded?
-                                    "collapse"
-                                    "open")]
+                 (if (not= device-type :mobile) [:span.underline (if expanded?
+                                           "collapse"
+                                           "open")])
                  [:i.fa.m-l-5
                   {:class-name (if expanded? "fa-caret-up" "fa-caret-down")}]]]
                (if expanded?
@@ -1118,5 +1119,5 @@
                    [:button.form-button.m-l-5
                     {:on-click #(dispatch [:delete-character id])}
                     "DELETE"]]
-                  [character-display built-character false 2]])])])
+                  [character-display built-character false (if (= :mobile device-type) 1 2)]])])])
          characters))]]]))
