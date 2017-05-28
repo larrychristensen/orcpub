@@ -17,6 +17,7 @@
             [orcpub.dnd.e5.spell-lists :as sl]
             [orcpub.dnd.e5.display :as disp]
             [orcpub.dnd.e5.skills :as skills]
+            [orcpub.dnd.e5.event-handlers :as eh]
             [re-frame.core :refer [dispatch]])
   #?(:cljs (:require-macros [orcpub.dnd.e5.modifiers :as modifiers])))
 
@@ -202,7 +203,7 @@
                    (min-ability ability-kw min-value)))
 
 (defn armor-prereq [armor-kw]
-  (t/option-prereq (str "proficiency with " (name armor-kw) " armor")
+  (t/option-prereq (str "Requires proficiency with " (name armor-kw) " armor")
                    (fn [c] (let [prof-keys (:armor-profs c)]
                              (boolean (and prof-keys (prof-keys armor-kw)))))))
 
@@ -1133,7 +1134,7 @@
                               (ritual-caster-option :sorcerer ::character/cha sl/spell-lists)
                               (ritual-caster-option :warlock ::character/cha sl/spell-lists)
                               (ritual-caster-option :wizard ::character/int sl/spell-lists)]})]
-     :prereqs [(t/option-prereq "Intelligence or Wisdom 13 or higher"
+     :prereqs [(t/option-prereq "Requires Intelligence or Wisdom 13 or higher"
                                 (fn [c]
                                   (let [{:keys [::character/wis ::character/int] :as abilities} (es/entity-val c :abilities)]
                                     (or (and wis (>= wis 13))
@@ -1316,7 +1317,7 @@
                   :modifiers [(modifiers/skill-expertise key)]
                   :prereqs [(t/option-prereq (str "Requires proficiency in " name)
                                              (fn [built-char]
-                                               (let [skill-profs (es/entity-val built-char :skill-profs)]
+                                               (let [skill-profs (character/skill-proficiencies built-char)]
                                                  (and skill-profs (skill-profs key)))))]}))
               skills/skills)
     :min num
@@ -1526,24 +1527,8 @@
   {:name "Artisan's Tool"
    :options (zipmap (map :key equipment/artisans-tools) (repeat 1))})
 
-(defn starting-equipment-entity-option [indicator-key [k num]]
-  {::entity/key k
-   ::entity/value {::char-equip/quantity num
-                   ::char-equip/equipped? true
-                   indicator-key true}})
-
-(defn starting-equipment-entity-options [indicator-key key items]
-  (if items
-    {key
-     (mapv
-      (partial starting-equipment-entity-option indicator-key)
-      items)}))
-
 (defn class-starting-equipment-entity-options [key items]
-  (starting-equipment-entity-options ::char-equip/class-starting-equipment? key items))
-
-(defn background-starting-equipment-entity-options [key items]
-  (starting-equipment-entity-options ::char-equip/background-starting-equipment? key items))
+  (eh/starting-equipment-entity-options ::char-equip/class-starting-equipment? key items))
 
 (defn tool-prof-selection-aux [tool num & [key prereq-fn]]
   (t/selection-cfg
@@ -1678,6 +1663,27 @@
 (defn class-equipment-options [equipment-choices class-kw]
   (class-options class-kw (partial equipment-option class-kw) equipment-choices "Select equipment to start your adventuring career with."))
 
+(defn background-skills-cfg [background-nm skill-kws]
+  {:modifiers (map
+               (fn [skill-kw]
+                 (modifiers/skill-proficiency skill-kw
+                                              background-nm
+                                              [(not (get ?skill-profs skill-kw))]))
+               skill-kws)
+   :selections (map
+                (fn [skill-kw]
+                  (skill-selection (map :key skills/skills)
+                                   1
+                                   0
+                                   nil
+                                   (fn [c]
+                                     (let [skill-profs (es/entity-val c :skill-profs)
+                                           skill-sources (get skill-profs skill-kw)
+                                           passes? (and skill-sources
+                                                        (not (skill-sources background-nm)))]
+                                       passes?))))
+                skill-kws)})
+
 (defn background-option [{:keys [name
                                  help
                                  page
@@ -1700,35 +1706,33 @@
         {:keys [skill skill-options tool-options tool language-options]
          armor-profs :armor weapon-profs :weapon} profs
         {skill-num :choose options :options} skill-options
-        skill-kws (if (:any options) (map :key skills/skills) (keys options))
-        ]
+        skill-kws (if (:any options) (map :key skills/skills) (keys options))]
     (t/option-cfg
-     {:name name
-      :key kw
-      :help help
-      :page page
-      :select-fn (fn [_ _]
-                   (dispatch [:add-background-starting-equipment background]))
-      :selections (concat
-                   selections
-                   (if (seq tool-options) [(tool-prof-selection tool-options)])
-                   (class-weapon-options weapon-choices nil)
-                   (class-armor-options armor-choices nil)
-                   (class-equipment-options equipment-choices nil)
-                   (if (seq skill-kws) [(skill-selection skill-kws skill-num)])
-                   (if (seq language-options) [(language-selection language-options)]))
-      :modifiers (concat
-                  [(modifiers/background name)]
-                  (if source [(modifiers/used-resource source name)])
-                  (traits-modifiers traits)
-                  modifiers
-                  (armor-prof-modifiers (keys armor-profs))
-                  (weapon-prof-modifiers (keys weapon-profs))
-                  (tool-prof-modifiers (keys tool))
-                  (map
-                   (fn [skill-kw]
-                     (modifiers/skill-proficiency skill-kw))
-                   (keys skill)))})))
+     (merge-with
+      concat
+      (background-skills-cfg name (keys skill))
+      {:name name
+       :key kw
+       :help help
+       :page page
+       :select-fn (fn [_ _]
+                    (dispatch [:add-background-starting-equipment background]))
+       :selections (concat
+                    selections
+                    (if (seq tool-options) [(tool-prof-selection tool-options)])
+                    (class-weapon-options weapon-choices nil)
+                    (class-armor-options armor-choices nil)
+                    (class-equipment-options equipment-choices nil)
+                    (if (seq skill-kws) [(skill-selection skill-kws skill-num)])
+                    (if (seq language-options) [(language-selection language-options)]))
+       :modifiers (concat
+                   [(modifiers/background name)]
+                   (if source [(modifiers/used-resource source name)])
+                   (traits-modifiers traits)
+                   modifiers
+                   (armor-prof-modifiers (keys armor-profs))
+                   (weapon-prof-modifiers (keys weapon-profs))
+                   (tool-prof-modifiers (keys tool)))}))))
 
 (defn total-levels-prereq [level & [class-key]]
   (fn [c] (>= (if class-key

@@ -274,8 +274,15 @@
 (defn proficiency-bonus [bonus]
   (mods/modifier ?proficiency-bonus bonus))
 
-(defn skill-proficiency [skill-kw]
-  (mods/set-mod ?skill-profs skill-kw (s/capitalize (-> skill-kw skill5e/skills-map :name)) "proficiency"))
+(defmacro skill-proficiency [skill-kw & [source conditions]]
+  `(mods/modifier ~'?skill-profs
+                  (assoc-in ~'?skill-profs
+                            [~skill-kw
+                             ~source]
+                            true)
+                 (s/capitalize (-> ~skill-kw skill5e/skills-map :name))
+                 "proficiency"
+                 ~conditions))
 
 (defn skill-bonus [skill-kw bonus]
   (mods/modifier ?additional-skill-bonuses

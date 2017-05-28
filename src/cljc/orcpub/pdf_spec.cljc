@@ -46,7 +46,7 @@
 
 (defn skill-fields [built-char]
   (let [skill-bonuses (es/entity-val built-char :skill-bonuses)
-        skill-profs (es/entity-val built-char :skill-profs)]
+        skill-profs (char5e/skill-proficiencies built-char)]
     (reduce
      (fn [m {k :key}]
        (-> m

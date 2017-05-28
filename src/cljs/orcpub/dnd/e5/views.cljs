@@ -980,7 +980,7 @@
                                                               default-image-url)
                                                      :on-error (fn [_] (dispatch [:failed-loading-image image-url]))
                                                      :on-load (fn [_] (if image-url-failed (dispatch [:loaded-image])))}]
-               [:div.p-20.bg-gray.b-rad-5.t-a-c
+               [:div.p-20.m-r-10.m-t-10.bg-gray.b-rad-5.t-a-c
                 {:style {:border "2px solid white"
                          :background-color "rgba(255,255,255,0.1)"}}
                 [:div (svg-icon "orc-head" 72 72)]
