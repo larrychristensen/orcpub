@@ -709,6 +709,7 @@
 (defn ability-subtitle [title]
   [:div.t-a-c.f-s-10.opacity-5 title])
 
+
 (defn ability-modifier [v]
   [:div.f-6-12.f-w-n.h-24
    (ability-subtitle "mod")

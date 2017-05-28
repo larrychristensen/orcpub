@@ -15,7 +15,8 @@
 (spec/def ::option-vec (spec/* ::option))
 (spec/def ::options (spec/map-of keyword? (spec/or :single ::option
                                                    :multiple ::option-vec)))
-(spec/def ::values (spec/map-of keyword? any?))
+(spec/def ::values (spec/or :map (spec/map-of keyword? any?)
+                            :nil nil?))
 (spec/def ::raw-entity (spec/keys :opt [::options
                                         ::values]))
 
@@ -56,8 +57,8 @@
         raw-character))
 
 (defn to-strict [{:keys [:db/id ::options ::values]}]
-  (cond-> {::strict/selections (to-strict-selections options)
-           ::strict/values (into {} (remove (comp nil? val)) values)}
+  (cond-> {::strict/selections (to-strict-selections options)}
+    values (assoc ::strict/values (into {} (remove (comp nil? val)) values))
     id (assoc :db/id id)
     true remove-empty-fields))
 
@@ -95,9 +96,9 @@
    selections))
 
 (defn from-strict [{:keys [:db/id ::strict/selections ::strict/values]}]
-  (cond-> {::options (from-strict-selections selections)
-           ::values values}
-    id (assoc :db/id id)))
+  (cond-> {::options (from-strict-selections selections)}
+    id (assoc :db/id id)
+    values (assoc ::values values)))
 
 (spec/fdef from-strict
            :args (spec/cat :entity ::strict/entity)

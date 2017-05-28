@@ -203,10 +203,14 @@
    [::custom-equipment ::custom-treasure]))
 
 (defn clean-values [raw-character]
-  (-> raw-character
-      (update-in [::entity/values] (fn [vs] (dissoc vs ::image-url-failed ::faction-image-url-failed)))
-      fix-quantities
-      fix-custom-quantities))
+  (cond-> raw-character
+    (-> raw-character ::entity-values seq)
+    (update ::entity/values
+            (fn [vs]
+              (dissoc vs ::image-url-failed ::faction-image-url-failed)))
+    
+    true fix-quantities
+    true fix-custom-quantities))
 
 (defn to-strict [raw-character]
   (entity/to-strict (clean-values raw-character)))
