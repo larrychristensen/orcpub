@@ -703,6 +703,7 @@
 (defn swap-abilities [i other-i k v]
   (stop-prop-fn
    (fn []
+     (prn "SWAP ABILITIES" i other-i k v)
      (dispatch [:swap-ability-values i other-i k v]))))
 
 (defn ability-subtitle [title]

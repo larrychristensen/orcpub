@@ -292,7 +292,7 @@
    character
    [::entity/options :ability-scores ::entity/value]
    (fn [a]
-     (let [a-vec (vec a)
+     (let [a-vec (vec (map (fn [k] [k (k a)]) char5e/ability-keys))
            other-index (mod other-i (count a-vec))
            [other-k other-v] (a-vec other-index)]
        (assoc a k other-v other-k v)))))
