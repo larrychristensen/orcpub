@@ -44,10 +44,13 @@
 (spec/def ::raw-character ::entity/raw-entity)
 
 (defn has-simple-keywords? [values]
-  (let [has? (some
-              (fn [[k v]] (simple-keyword? k))
-              values)]
-    has?))
+  (some
+   (fn [[k v]] (simple-keyword? k))
+   (if (map? values)
+     values
+     ;; some weird spec issue causes values to look like [:map values]
+     (if (and (vector? values) (= (first values) :map))
+       (second values)))))
 
 (defn equipment-has-simple-keywords? [equipment]
   (some
