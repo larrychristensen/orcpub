@@ -1067,6 +1067,7 @@
                selected-variant
                (abilities-entry character built-char built-template asi-selections))]}])])
 
+
 (defn skills-selector [{:keys [character selection built-char]}]
   (let [{:keys [::t/ref ::t/max ::t/options]} selection
         path (concat [::entity/options] ref)
@@ -1078,7 +1079,7 @@
     (doall
      (map
       (fn [{:keys [name key ability icon description]}]
-        (let [skill-profs (es/entity-val built-char :skill-profs)
+        (let [skill-profs (char5e/skill-proficiencies built-char)
               has-prof? (and skill-profs (skill-profs key))
               selected? (selected-skill-keys key)
               selectable? (available-skills key)
@@ -1106,6 +1107,7 @@
                                  :classes (if bad-selection? "b-red")
                                  :multiselect? true}]))
       skill5e/skills))))
+
 
 (def hit-points-headers
   [:tr.f-w-b.t-a-l

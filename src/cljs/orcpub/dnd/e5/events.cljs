@@ -688,7 +688,6 @@
  :send-password-reset-failure
  (fn [_ [_ response]]
    (let [error (-> response :body :error (= :no-account))]
-     (prn "RESPONSE " response error)
      (if error
        (dispatch (show-old-account-message))
        (show-generic-error)))))

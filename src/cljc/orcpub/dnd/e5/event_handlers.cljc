@@ -91,7 +91,6 @@
 
 (defn update-multi-select [new-option key]
   (fn [parent-vec]
-    (prn "UPDATE MULTI SELECT")
     (if (or (nil? parent-vec) (map? parent-vec))
       (with-meta
         [new-option]
@@ -107,11 +106,9 @@
                                 {:keys [option-path selected? selectable? meets-prereqs? has-selections? built-template new-option-path]
                                  {:keys [::t/min ::t/max ::t/multiselect?] :as selection} :selection
                                  {:keys [::t/key ::t/select-fn] :as option} :option}]]
-  (prn "SELECTION" selection)
   (let [multiselect? (or multiselect?
                          (nil? max)
                          (> max 1))]
-    (prn "VALS" multiselect? selected? meets-prereqs? selectable? has-selections?)
     (if (and (or multiselect?
                  (not selected?)
                  has-selections?)

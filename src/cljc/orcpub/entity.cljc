@@ -284,14 +284,11 @@
                conj
                []
                entity-path)]
-    (prn "PATHS" paths)
     (map #(meta (get-in entity %)) paths)))
 
 (defn update-option [template entity path update-fn]
   (let [entity-path (get-entity-path template entity path)
         updated (update-in entity entity-path update-fn)]
-    (prn "META PATH BEFORE" (meta-path entity-path entity))
-    (prn "META PATH AFTER" (meta-path entity-path updated))
     updated))
 
 (defn order-modifiers [modifiers order]
