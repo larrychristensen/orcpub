@@ -151,6 +151,7 @@
                 ::char5e/wis
                 ::char5e/cha]} (char5e/ability-values built-char)
         skill-profs (char5e/skill-proficiencies built-char)]
+    (prn "SKILL PROFS" skill-profs)
     (is (has-spell? built-char
                     1
                     {:key :illusory-script,
@@ -163,4 +164,4 @@
     (is (= int (+ keen-mind-int-bonus (base-abilities ::char5e/int))))
     (is (= wis (base-abilities ::char5e/wis)))
     (is (= cha (+ drow-cha-bonus (base-abilities ::char5e/cha))))
-    (is (= skill-profs (union elf-skill-profs spy-skill-profs selected-skill-profs)))))
+    (is (= (set (keys skill-profs)) (union elf-skill-profs spy-skill-profs selected-skill-profs)))))
