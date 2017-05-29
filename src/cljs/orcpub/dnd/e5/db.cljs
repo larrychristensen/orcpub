@@ -5,12 +5,13 @@
             [orcpub.dnd.e5.character :as char5e]
             [re-frame.core :as re-frame]
             [orcpub.entity :as entity]
+            [orcpub.entity.strict :as se]
             [cljs.spec :as spec]
             [cljs.reader :as reader]
             [bidi.bidi :as bidi]
             [cljs-http.client :as http]))
 
-(def local-storage-character-key "char-meta")
+(def local-storage-character-key "character")
 (def local-storage-user-key "user")
 
 (def default-route route-map/dnd-e5-char-builder-route)
@@ -36,7 +37,7 @@
    :device-type (user-agent/device-type)})
 
 (defn character->local-store [character]
-  (.setItem js/window.localStorage local-storage-character-key (str character)))
+  (.setItem js/window.localStorage local-storage-character-key (str (char5e/to-strict character))))
 
 (defn user->local-store [user-data]
   (.setItem js/window.localStorage local-storage-user-key (str user-data)))
@@ -62,12 +63,9 @@
 (reg-local-store-cofx
  :local-store-character
  local-storage-character-key
- ::entity/raw-entity
+ ::se/entity
  (fn [char]
-   (char5e/fix-quantities
-    (if (spec/valid? ::char5e/unnamespaced-character char)
-      (char5e/add-namespaces char)
-      char))))
+   (char5e/from-strict char)))
 
 (spec/def ::username string?)
 (spec/def ::email string?)
