@@ -31,7 +31,8 @@
             [orcpub.entity.strict :as se]
             [orcpub.entity :as entity]
             [hiccup.page :as page]
-            [environ.core :as environ])
+            [environ.core :as environ]
+            [clojure.set :as sets])
   (:import (org.apache.pdfbox.pdmodel.interactive.form PDCheckBox PDComboBox PDListBox PDRadioButton PDTextField)
            (org.apache.pdfbox.pdmodel PDDocument PDPageContentStream)
            (org.apache.pdfbox.pdmodel.graphics.image PDImageXObject)
@@ -68,6 +69,13 @@
                    :where (or [?e :orcpub.user/username ?user-or-email]
                               [?e :orcpub.user/email ?user-or-email])]
                  username-or-email))
+
+(defn find-user-by-username [db username]
+  (first-user-by db
+                 '[:find ?e
+                   :in $ ?username
+                   :where [?e :orcpub.user/username ?username]]
+                 username))
 
 (defn lookup-user [db username password]
   (let [user (first-user-by db
@@ -481,24 +489,75 @@
 (defn check-email [{:keys [db query-params]}]
   (check-field email-query (:email query-params) db))
 
-(defn do-save-character [conn transit-params identity]
-  (let [character (entity/remove-empty-fields transit-params)]
+(defn character-for-id [db id]
+  (d/pull db '[*] id))
+
+(defn children [n]
+  (cond
+    (map? n) (filter
+              (fn [v]
+                (or (map? v)
+                    (sequential? v)))
+              (vals n))
+    (sequential? n) n
+    :else nil))
+
+(defn db-ids [entity]
+  (disj (set (map :db/id (tree-seq children children entity))) nil))
+
+(defn owns-entity? [db username entity-id]
+  (let [{:keys [:orcpub.user/username :orcpub.user/email]} (find-user-by-username db username)
+        {:keys [:orcpub.entity.strict/owner]} (d/pull db '[:orcpub.entity.strict/owner] entity-id)]
+    (#{username email} owner)))
+
+(defn update-character [db conn character username]
+  (let [id (:db/id character)]
+    (if (owns-entity? db username id)
+      (let [current-character (d/pull db '[*] id)
+            current-ids (db-ids current-character)
+            new-ids (db-ids character)
+            _ (prn "CURRENT CHARACTER" current-character)
+            _ (prn "CURRENT IDS" current-ids)
+            _ (prn "NEW IDS" new-ids)
+            retract-ids (sets/difference current-ids new-ids)
+            _ (prn "RETRACT_IDS" retract-ids)
+            retractions (map
+                         (fn [retract-id]
+                           [:db/retractEntity retract-id])
+                         retract-ids)
+            tx (conj retractions
+                     (assoc character :orcpub.entity.strict/owner username))
+            _ (prn "TX" tx)
+            result @(d/transact conn tx)]
+        {:status 200
+         :body (d/pull (d/db conn) '[*] id)})
+      {:status 401 :body "You do not own this character"})))
+
+(defn create-new-character [conn character username]
+  (let [result @(d/transact conn
+                            [(assoc character
+                                    :db/id "tempid"
+                                    :orcpub.entity.strict/owner username)])
+        new-id (-> result :tempids (get "tempid"))]
+    {:status 200
+     :body (d/pull (d/db conn) '[*] new-id)}))
+
+(defn do-save-character [db conn transit-params identity]
+  (let [character (entity/remove-empty-fields transit-params)
+        username (:user identity)
+        current-id (:db/id character)]
+    (prn "USER" username)
+    (prn "CHARACTER" character)
     (try
       (if-let [data (spec/explain-data ::se/entity character)]
         {:status 400 :body data}
-        (let [current-id (:db/id character)
-              result @(d/transact conn [(if current-id
-                                          character
-                                          (assoc character
-                                                 :db/id "tempid"
-                                                 :orcpub.entity.strict/owner (:user identity)))])
-              new-id (or current-id (-> result :tempids (get "tempid")))
-              new-character (d/pull (d/db conn) '[*] new-id)]
-          {:status 200 :body new-character}))
+        (if (:db/id character)
+          (update-character db conn character username)
+          (create-new-character conn character username)))
       (catch Exception e (do (prn "ERROR" e) (throw e))))))
 
 (defn save-character [{:keys [db transit-params body conn identity] :as request}]
-  (do-save-character conn transit-params identity))
+  (do-save-character db conn transit-params identity))
 
 (defn character-list [{:keys [db transit-params body conn identity] :as request}]
   (let [username (:user identity)
@@ -515,13 +574,12 @@
 
 (defn delete-character [{:keys [db conn identity] {:keys [id]} :path-params}]
   (let [parsed-id (Long/parseLong id)
-        username (:user identity)
-        {:keys [:orcpub.entity.strict/owner]} (d/pull db '[:orcpub.entity.strict/owner] parsed-id)]
-    (if owner
+        username (:user identity)]
+    (if (owns-entity? db username parsed-id)
       (do
         @(d/transact conn [[:db/retractEntity parsed-id]])
         {:status 200})
-      {:status 401})))
+      {:status 401 :body "You do not own this character"})))
 
 (def header-style
   {:style "color:#2c3445"})
