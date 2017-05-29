@@ -1093,8 +1093,8 @@
                   image-url (char/image-url built-character)
                   expanded? (get expanded-characters id)]
               [:div.pointer
-               {:on-click #(dispatch [:toggle-character-expanded id])}
                [:div.flex.justify-cont-s-b.align-items-c
+                {:on-click #(dispatch [:toggle-character-expanded id])}
                 [:div.m-l-10.flex.align-items-c
                  (if image-url
                    [:img.m-r-20.m-t-10.m-b-10 {:src image-url
@@ -1121,3 +1121,4 @@
                     "DELETE"]]
                   [character-display built-character false (if (= :mobile device-type) 1 2)]])])])
          characters))]]]))
+
