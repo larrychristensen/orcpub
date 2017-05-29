@@ -181,9 +181,28 @@
 (defn character-textarea [entity-values prop-name & [cls-str]]
   [character-field entity-values prop-name :textarea cls-str])
 
+(defn meets-prereqs? [built-char option]
+  (every?
+   (fn [{:keys [::t/prereq-fn] :as prereq}]
+     (if prereq-fn
+       (prereq-fn built-char)
+       (js/console.warn "NO PREREQ_FN" (::t/name option) prereq)))
+   (::t/prereqs option)))
+
+(defn prereq-failures [built-char option]
+  (remove
+   nil?
+   (map
+    (fn [{:keys [::t/prereq-fn ::t/label] :as prereq}]
+      (if prereq-fn
+        (if (not (prereq-fn built-char))
+          label)
+        (js/console.warn "NO PREREQ_FN" (::t/name option) prereq)))
+    (::t/prereqs option))))
+
 (defn class-level-selector []
   (let [expanded? (r/atom false)]
-    (fn [i key selected-class options unselected-classes-set multiclass-options]
+    (fn [i key selected-class options unselected-classes-set built-char]
       (let [options-map (zipmap (map ::t/key options) options)
             class-template-option (options-map key)
             path [:class-levels key]]
@@ -197,16 +216,16 @@
            (doall
             (map
              (fn [{:keys [::t/key ::t/name] :as option}]
-               ^{:key key}
-               [:option.builder-dropdown-item
-                {:value key}
-                name])
+               (let [failed-prereqs (if (pos? i) (prereq-failures built-char option))]
+                 ^{:key key}
+                 [:option.builder-dropdown-item
+                  {:value key
+                   :disabled (seq failed-prereqs)}
+                  (str name (if (seq failed-prereqs) (str " (" (s/join ", " failed-prereqs) ")")))]))
              (filter
               #(or (= key (::t/key %))
                    (unselected-classes-set (::t/key %)))
-              (if (zero? i)
-                options
-                multiclass-options))))]
+              options)))]
           (if (::t/help class-template-option)
             [show-info-button expanded?])
           (let [selected-levels (get-in selected-class [::entity/options :levels])
@@ -240,18 +259,10 @@
                     s))
                 (::t/selections option))]
     (assoc
-     (select-keys option [::t/key ::t/name ::t/help ::t/associated-options])
+     (select-keys option [::t/key ::t/prereqs ::t/name ::t/help ::t/associated-options])
      ::t/selections
      [{::t/key (::t/key levels)
        ::t/options (map #(select-keys % [::t/key]) (::t/options levels))}])))
-
-(defn meets-prereqs? [built-char option]
-  (every?
-   (fn [{:keys [::t/prereq-fn] :as prereq}]
-     (if prereq-fn
-       (prereq-fn built-char)
-       (js/console.warn "NO PREREQ_FN" (::t/name option) prereq)))
-   (::t/prereqs option)))
 
 (defn class-levels-selector [{:keys [character selection built-char]}]
   (let [options (::t/options selection)
@@ -271,11 +282,8 @@
       (doall
        (map-indexed
         (fn [i {:keys [::entity/key] :as selected-class}]
-          (let [multiclass-options (filter
-                                    (partial meets-prereqs? built-char)
-                                    options)]
-            ^{:key key}
-            [class-level-selector i key selected-class (map class-level-data options) unselected-classes-set (map class-level-data multiclass-options)]))
+          ^{:key key}
+          [class-level-selector i key selected-class (map class-level-data options) unselected-classes-set built-char])
         selected-classes))]
      (if (seq remaining-classes)
        [:div.orange.p-5.underline.pointer
