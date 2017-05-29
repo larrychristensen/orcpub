@@ -802,3 +802,8 @@
    (assoc db
           :login-message-shown? true
           :login-message message)))
+
+(reg-event-db
+ :hide-warning
+ (fn [db _]
+   (assoc db :warning-hidden true)))

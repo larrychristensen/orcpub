@@ -218,3 +218,8 @@
  :device-type
  (fn [db _]
    (:device-type db)))
+
+(reg-sub
+ :warning-hidden
+ (fn [db _]
+   (:warning-hidden db)))
