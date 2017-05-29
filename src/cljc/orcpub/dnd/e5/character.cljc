@@ -105,13 +105,18 @@
     option))
 
 (defn add-equipment-namespace [raw-character equipment-key]
+  (prn "ADD EQUIP NAM" equipment-key)
   (let [path [::entity/options equipment-key]]
     (if (get-in raw-character path)
       (update-in raw-character
                  path
-                 #(mapv
-                   add-equipment-namespace-to-option
-                   %))
+                 (fn [eq]
+                   (prn "META" meta eq)
+                   (with-meta
+                     (mapv
+                      add-equipment-namespace-to-option
+                      eq)
+                     (meta eq))))
       raw-character)))
 
 (defn add-custom-equipment-namespaces [raw-character]
@@ -158,6 +163,7 @@
       add-namespaces-to-values))
 
 (defn fix-quantities [raw-character]
+  (prn "FIX QTYS" raw-character)
   (reduce
    (fn [char equipment-key]
      (let [path [::entity/options equipment-key]]
@@ -165,18 +171,20 @@
          (update-in char
                     path
                     (fn [equipment-vec]
-                      (mapv
-                       (fn [equipment]
-                         (update-in
-                          equipment
-                          [::entity/value ::equip/quantity]
-                          (fn [qty]
-                            (if (string? qty)
-                              (if (s/blank? qty)
-                                0
-                                (read-string qty))
-                              qty))))
-                       equipment-vec)))
+                      (with-meta
+                        (mapv
+                         (fn [equipment]
+                           (update-in
+                            equipment
+                            [::entity/value ::equip/quantity]
+                            (fn [qty]
+                              (if (string? qty)
+                                (if (s/blank? qty)
+                                  0
+                                  (read-string qty))
+                                qty))))
+                         equipment-vec)
+                        (meta equipment-vec))))
          char)))
    raw-character
    equipment-keys))
@@ -189,18 +197,20 @@
          (update-in char
                     path
                     (fn [equipment-vec]
-                      (mapv
-                       (fn [equipment]
-                         (update
-                          equipment
-                          ::equip/quantity
-                          (fn [qty]
-                            (if (string? qty)
-                              (if (s/blank? qty)
-                                0
-                                (read-string qty))
-                              qty))))
-                       equipment-vec)))
+                      (with-meta
+                        (mapv
+                         (fn [equipment]
+                           (update
+                            equipment
+                            ::equip/quantity
+                            (fn [qty]
+                              (if (string? qty)
+                                (if (s/blank? qty)
+                                  0
+                                  (read-string qty))
+                                qty))))
+                         equipment-vec)
+                        (meta equipment-vec))))
          char)))
    raw-character
    [::custom-equipment ::custom-treasure]))
@@ -225,17 +235,20 @@
 (defn vectorize-equipment [raw-character]
   (reduce
    (fn [char equipment-key]
-     (update-in
-      char
-      [::entity/options equipment-key]
-      (fn [e-map]
-        (if (vector? e-map)
-          e-map
-          (mapv
-           (fn [[k v]]
-             {::entity/key k
-              ::entity/value v})
-           e-map)))))
+     (let [path [::entity/options equipment-key]]
+       (if (seq (get-in char path))
+         (update-in
+          char
+          path
+          (fn [e-map]
+            (if (vector? e-map)
+              e-map
+              (mapv
+               (fn [[k v]]
+                 {::entity/key k
+                  ::entity/value v})
+               e-map))))
+         char)))
    raw-character
    equipment-keys))
 

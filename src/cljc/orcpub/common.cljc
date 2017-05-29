@@ -98,12 +98,12 @@
            (let [[k v] x]
              [(if (simple-keyword? k)
                 (keyword ns-str (name k))
-                v)
+                k)
               v]))
          item)))
 
 (spec/fdef add-namespaces-to-keys
-           :args (spec/cat :ns-str string? :item (spec/map-of simple-keyword? any?))
+           :args (spec/cat :ns-str string? :item (spec/map-of keyword? any?))
            :ret (spec/map-of qualified-keyword? any?)
            :fn #(and (= (count (-> % :args :item))
                         (count (-> % :ret)))
