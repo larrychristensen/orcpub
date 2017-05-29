@@ -620,10 +620,11 @@
       [:div.flex.justify-cont-c.white
        [:div.content hdr]]
       (if (not @(subscribe [:warning-hidden]))
-        [:div.flex.align-items-c.justify-cont-s-b.white.bg-red.b-rad-5.p-10.f-w-b.m-l-5.m-r-5.m-b-5.pointer
-         {:on-click #(dispatch [:hide-warning])}
-         [:div "This application is not yet officially released and is under heavy development. We welcome you to try the application and report and bugs " [:a {:href "https://muut.com/orcpub" :target :_blank} "here"] " or by emailing " [:a {:href "mailto:redorc@orcpub.com"} "redorc@orcpub.com"] ". Please understand, however, that, until official release we may have to make changes that might cause you to lose your characters."]
-         [:i.fa.fa-times]])
+        [:div.container
+         [:div.flex.align-items-c.justify-cont-s-b.white.bg-light.b-rad-5.p-10.f-w-b.m-l-5.m-r-5.m-b-5.pointer.content
+          {:on-click #(dispatch [:hide-warning])}
+          [:div "This application is not yet officially released and is under heavy development. We welcome you to try the application and report any bugs " [:a {:href "https://muut.com/orcpub" :target :_blank} "here"] " or by emailing " [:a {:href "mailto:redorc@orcpub.com"} "redorc@orcpub.com"] ". Please understand, however, that, until official release we may have to make changes that might cause you to lose some data you enter here."]
+          [:i.fa.fa-times]]])
       [:div#app-main.container
        [:div.content.w-100-p content]]
       [:div.white.flex.justify-cont-c
