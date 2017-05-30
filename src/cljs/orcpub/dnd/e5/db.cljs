@@ -9,7 +9,8 @@
             [cljs.spec :as spec]
             [cljs.reader :as reader]
             [bidi.bidi :as bidi]
-            [cljs-http.client :as http]))
+            [cljs-http.client :as http]
+            [cljs.pprint :refer [pprint]]))
 
 (def local-storage-character-key "character")
 (def local-storage-user-key "user")
@@ -65,7 +66,12 @@
  local-storage-character-key
  ::se/entity
  (fn [char]
-   (char5e/from-strict char)))
+   (let [non-strict (char5e/from-strict char)]
+     (prn "LOCAL STORAGE CHARACTER")
+     (pprint char)
+     (prn "CONVERTE CHAR")
+     (pprint non-strict)
+     non-strict)))
 
 (spec/def ::username string?)
 (spec/def ::email string?)
