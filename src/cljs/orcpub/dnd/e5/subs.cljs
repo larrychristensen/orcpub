@@ -5,6 +5,7 @@
             [orcpub.registration :as registration]
             [orcpub.dnd.e5.template :as t5e]
             [orcpub.dnd.e5.db :refer [tab-path]]
+            [orcpub.dnd.e5.events :as events]
             [orcpub.route-map :as routes]
             [clojure.string :as s]
             [reagent.ratom :as ra]
@@ -185,9 +186,24 @@
           (dispatch [:set-loading false])
           (case (:status response)
             200 (dispatch [:set-dnd-5e-characters (-> response :body)])
-            401 (dispatch [:route routes/login-page-route]))))
+            401 (dispatch [:route routes/login-page-route])
+            500 (dispatch (events/show-generic-error)))))
     (ra/make-reaction
      (fn [] (get-in @app-db [:dnd :e5 :characters] [])))))
+
+(reg-sub-raw
+  :dnd-5e-character
+  (fn [app-db [_ id]]
+    (go (dispatch [:set-loading true])
+        (let [response (<! (http/get (routes/path-for routes/dnd-e5-char-route :id id)
+                                     {:accept :transit}))]
+          (dispatch [:set-loading false])
+          (case (:status response)
+            200 (dispatch [:set-dnd-5e-character id (-> response :body)])
+            401 (dispatch [:route routes/login-page-route])
+            500 (dispatch (events/show-generic-error)))))
+    (ra/make-reaction
+     (fn [] (get-in @app-db [:dnd :e5 :character-map id] [])))))
 
 (reg-sub
  :message-shown?

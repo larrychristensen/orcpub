@@ -441,6 +441,9 @@
 (defn character-list-page [req]
   (index req))
 
+(defn character-page [req]
+  (index req))
+
 (def user-by-password-reset-key-query
   '[:find ?e
     :in $ ?key
@@ -546,21 +549,35 @@
         {:keys [:orcpub.entity.strict/owner]} (d/pull db '[:orcpub.entity.strict/owner] entity-id)]
     (#{username email} owner)))
 
+(defn entity-problem [desc actual expected]
+  (str desc ", expected: " expected ", actual: " actual))
+
+(defn entity-type-problems [expected-game expected-version expected-type {:keys [::se/type ::se/game ::se/game-version]}]
+  (cond-> nil
+    (not= expected-game game) (conj (entity-problem "Entity is from the wrong game" game expected-game))
+    (not= expected-version game-version) (conj (entity-problem "Entity is from the wrong game version" game-version expected-version))
+    (not= expected-type type) (conj (entity-problem "Entity is wrong type" type expected-type))))
+
+(def dnd-e5-char-type-problems (partial entity-type-problems :dnd :e5 :character))
+
 (defn update-character [db conn character username]
   (let [id (:db/id character)]
     (if (owns-entity? db username id)
       (let [current-character (d/pull db '[*] id)
-            new-character (remove-orphan-ids character)
-            current-ids (db-ids current-character)
-            new-ids (db-ids new-character)
-            retract-ids (sets/difference current-ids new-ids)
-            retractions (map
-                         (fn [retract-id]
-                           [:db/retractEntity retract-id])
-                         retract-ids)
-            tx (conj retractions
-                     (assoc new-character :orcpub.entity.strict/owner username))
-            result @(d/transact conn tx)]
+            problems (dnd-e5-char-type-problems current-character)]
+        (if (seq problems)
+          {:status 400 :body problems}
+          (let [new-character (remove-orphan-ids character)
+                current-ids (db-ids current-character)
+                new-ids (db-ids new-character)
+                retract-ids (sets/difference current-ids new-ids)
+                retractions (map
+                             (fn [retract-id]
+                               [:db/retractEntity retract-id])
+                             retract-ids)
+                tx (conj retractions
+                         (assoc new-character :orcpub.entity.strict/owner username))
+                result @(d/transact conn tx)]))
         {:status 200
          :body (d/pull (d/db conn) '[*] id)})
       {:status 401 :body "You do not own this character"})))
@@ -569,7 +586,10 @@
   (let [result @(d/transact conn
                             [(assoc character
                                     :db/id "tempid"
-                                    :orcpub.entity.strict/owner username)])
+                                    ::se/owner username
+                                    ::se/game :dnd
+                                    ::se/game-version :e5
+                                    ::se/type :character)])
         new-id (-> result :tempids (get "tempid"))]
     {:status 200
      :body (d/pull (d/db conn) '[*] new-id)}))
@@ -597,7 +617,10 @@
         ids (d/q '[:find ?e
                    :in $ [?idents ...]
                    :where
-                   [?e :orcpub.entity.strict/owner ?idents]]
+                   [?e ::se/owner ?idents]
+                   [?e ::se/type :character]
+                   [?e ::se/game :dnd]
+                   [?e ::se/game-version :e5]]
                  db
                  [(:orcpub.user/username user)
                   (:orcpub.user/email user)])
@@ -606,12 +629,27 @@
 
 (defn delete-character [{:keys [db conn identity] {:keys [id]} :path-params}]
   (let [parsed-id (Long/parseLong id)
-        username (:user identity)]
+        username (:user identity)
+        character (d/pull db '[*] id)
+        problems (dnd-e5-char-type-problems character)]
     (if (owns-entity? db username parsed-id)
-      (do
-        @(d/transact conn [[:db/retractEntity parsed-id]])
-        {:status 200})
+      (if (empty? problems)
+        (do
+          @(d/transact conn [[:db/retractEntity parsed-id]])
+          {:status 200})
+        {:status 400 :body problems})
       {:status 401 :body "You do not own this character"})))
+
+(defn get-character-for-id [db id]
+  (let [{:keys [::se/type ::se/game ::se/game-version] :as character} (d/pull db '[*] id)
+        problems (dnd-e5-char-type-problems character)]
+    (if (seq problems)
+      {:status 400 :body problems}
+      character)))
+
+(defn get-character [{:keys [db] {:keys [:id]} :path-params}]
+  (let [parsed-id (Long/parseLong id)]
+    {:status 200 :body (get-character-for-id db parsed-id)}))
 
 (def header-style
   {:style "color:#2c3445"})
@@ -644,10 +682,14 @@
      [(route-map/path-for route-map/dnd-e5-char-list-route) ^:interceptors [(body-params/body-params) check-auth]
       {:post `save-character
        :get `character-list}]
-     [(route-map/path-for route-map/delete-dnd-e5-char-route :id ":id") ^:interceptors [check-auth]
+     [(route-map/path-for route-map/dnd-e5-char-route :id ":id") ^:interceptors [check-auth]
       {:delete `delete-character}]
+     [(route-map/path-for route-map/dnd-e5-char-route :id ":id")
+      {:get `get-character}]
      [(route-map/path-for route-map/dnd-e5-char-list-page-route) ^:interceptors [(body-params/body-params)]
       {:get `character-list-page}]
+     [(route-map/path-for route-map/dnd-e5-char-page-route :id ":id")
+      {:get `character-page}]
      [(route-map/path-for route-map/dnd-e5-char-builder-route) ^:interceptors [(body-params/body-params)]
       {:get `character-builder-page}]
      [(route-map/path-for route-map/login-route) ^:interceptors [(body-params/body-params)]

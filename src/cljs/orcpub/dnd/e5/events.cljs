@@ -421,14 +421,14 @@
 
 (reg-event-fx
  :route
- (fn [{:keys [db]} [_ new-route {:keys [return-route skip-path? event]}]]
+ (fn [{:keys [db]} [_ {:keys [handler route-params] :as new-route} {:keys [return-route skip-path? event]}]]
    (let [{:keys [route route-history]} db]
      (cond-> {:db (assoc db
                   :route new-route
                   :return-route (or return-route (:return-route db))
                   :route-history (conj route-history route))
-              :dispatch-n [[:hide-message]]}
-       (not skip-path?) (assoc :path (routes/path-for new-route))
+              :dispatch [:hide-message]}
+       (not skip-path?) (assoc :path (apply routes/path-for new-route (flatten (seq route-params))))
        event (update :dispatch-n conj event)))))
 
 (reg-event-db
@@ -740,6 +740,11 @@
  (fn [db [_ characters]]
    (assoc-in db dnd-5e-characters-path characters)))
 
+(reg-event-db
+ :set-dnd-5e-character
+ (fn [db [_ id character]]
+   (assoc-in db [:dnd :e5 :character-map id] character)))
+
 (reg-event-fx
  :edit-character
  (fn [{:keys [db]} [_ character]]
@@ -761,7 +766,7 @@
                      (remove #(-> % :db/id (= id)) chars)))
     :http {:method :delete
            :auth-token (get-auth-token db)
-           :url (backend-url (routes/path-for routes/delete-dnd-e5-char-route :id id))
+           :url (backend-url (routes/path-for routes/dnd-e5-char-route :id id))
            :on-success [:delete-character-success]}}))
 
 (reg-event-fx

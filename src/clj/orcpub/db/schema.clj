@@ -99,6 +99,17 @@
     :db/cardinality :db.cardinality/one
     :db/isComponent true}])
 
+(def entity-type-schema
+  [{:db/ident ::se/type
+    :db/valueType :db.type/keyword
+    :db/cardinality :db.cardinality/one}
+   {:db/ident ::se/game
+    :db/valueType :db.type/keyword
+    :db/cardinality :db.cardinality/one}
+   {:db/ident ::se/game-version
+    :db/valueType :db.type/keyword
+    :db/cardinality :db.cardinality/one}])
+
 (def character-schema
   (concat
    (map

@@ -27,6 +27,7 @@
    routes/default-route ch/character-builder
    routes/dnd-e5-char-builder-route ch/character-builder
    routes/dnd-e5-char-list-page-route views/character-list
+   routes/dnd-e5-char-page-route views/character-page
    routes/register-page-route views/register-form
    routes/verify-failed-route views/verify-failed
    routes/verify-success-route views/verify-success
@@ -56,9 +57,10 @@
                    (.setEnabled true)))
 
 (defn main-view []
-  (let [route @(subscribe [:route])
-        view (pages route)]
-    [view]))
+  (let [{:keys [handler route-params] :as route} @(subscribe [:route])
+        view (pages (or handler route))]
+    (prn "HANDLER " handler route-params route)
+    [view route-params]))
 
 (r/render (if (let [doc-style js/document.documentElement.style]
                 (and js/window.localStorage
