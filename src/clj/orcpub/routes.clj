@@ -502,8 +502,44 @@
     (sequential? n) n
     :else nil))
 
-(defn db-ids [entity]
-  (disj (set (map :db/id (tree-seq children children entity))) nil))
+(defn diff-branch [ids]
+  (fn [n]
+    (or
+     (and (map? n)
+          (ids (:db/id n)))
+     (sequential? n))))
+
+(defn db-ids [entity & [branch-fn]]
+  (disj
+   (set
+    (map
+     :db/id
+     (tree-seq
+      (or branch-fn children)
+      children
+      entity))) nil))
+
+(defn remove-orphan-ids-aux [remove-ids? entity]
+  (cond
+    (map? entity)
+    (into {}
+          (map
+           (fn [[k v]]
+             [k (remove-orphan-ids-aux (or remove-ids?
+                                           (-> entity :db/id nil?))
+                                       v)])
+           (if remove-ids?
+             (dissoc entity :db/id)
+             entity)))
+
+    (sequential? entity)
+    (map (partial remove-orphan-ids-aux remove-ids?) entity)
+
+    :else
+    entity))
+
+(defn remove-orphan-ids [entity]
+  (remove-orphan-ids-aux false entity))
 
 (defn owns-entity? [db username entity-id]
   (let [{:keys [:orcpub.user/username :orcpub.user/email]} (find-user-by-username db username)
@@ -514,20 +550,16 @@
   (let [id (:db/id character)]
     (if (owns-entity? db username id)
       (let [current-character (d/pull db '[*] id)
+            new-character (remove-orphan-ids character)
             current-ids (db-ids current-character)
-            new-ids (db-ids character)
-            _ (prn "CURRENT CHARACTER" current-character)
-            _ (prn "CURRENT IDS" current-ids)
-            _ (prn "NEW IDS" new-ids)
+            new-ids (db-ids new-character)
             retract-ids (sets/difference current-ids new-ids)
-            _ (prn "RETRACT_IDS" retract-ids)
             retractions (map
                          (fn [retract-id]
                            [:db/retractEntity retract-id])
                          retract-ids)
             tx (conj retractions
-                     (assoc character :orcpub.entity.strict/owner username))
-            _ (prn "TX" tx)
+                     (assoc new-character :orcpub.entity.strict/owner username))
             result @(d/transact conn tx)]
         {:status 200
          :body (d/pull (d/db conn) '[*] id)})
