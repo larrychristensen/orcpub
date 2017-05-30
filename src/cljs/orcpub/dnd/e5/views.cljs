@@ -4,6 +4,7 @@
             [orcpub.route-map :as routes]
             [orcpub.common :as common]
             [orcpub.entity-spec :as es]
+            [orcpub.entity.strict :as se]
             [orcpub.dnd.e5.subs :as subs]
             [orcpub.dnd.e5.character :as char]
             [orcpub.dnd.e5.character.equipment :as char-equip]
@@ -623,7 +624,7 @@
         [:div.container
          [:div.flex.align-items-c.justify-cont-s-b.white.bg-light.b-rad-5.p-10.f-w-b.m-l-5.m-r-5.m-b-5.pointer.content
           {:on-click #(dispatch [:hide-warning])}
-          [:div "This application is not yet officially released and is under heavy development. We welcome you to try the application and report any bugs " [:a {:href "https://muut.com/orcpub" :target :_blank} "here"] " or by emailing " [:a {:href "mailto:redorc@orcpub.com"} "redorc@orcpub.com"] ". Please understand, however, that, until official release we may have to make changes that might cause you to lose some data you enter here."]
+          [:div "This application is not yet officially released and is under heavy development. We welcome you to try the application and report feedback and bugs " [:a {:href "https://muut.com/orcpub" :target :_blank} "here"] " or by emailing " [:a {:href "mailto:redorc@orcpub.com"} "redorc@orcpub.com"] ". Please understand, however, that, until official release we may have to make changes that might cause you to lose some data you enter here."]
           [:i.fa.fa-times]]])
       [:div#app-main.container
        [:div.content.w-100-p content]]
@@ -1074,6 +1075,23 @@
   {:padding "20px 5px"
    :background-color "rgba(0,0,0,0.15)"})
 
+(defn character-page [{:keys [id]}]
+  (let [{:keys [::se/owner] :as strict-character} @(subscribe [:dnd-5e-character id])
+        character (char/from-strict strict-character)
+        built-template (subs/built-template (subs/selected-plugin-options character))
+        built-character (subs/built-character character built-template)
+        device-type @(subscribe [:device-type])
+        username @(subscribe [:username])]
+    [content-page
+     "Character Page"
+     (remove
+      nil?
+      [(if (= owner username)
+         {:title "Edit"
+          :on-click #(dispatch [:edit-character character])})])
+     [:div.p-5.white
+      [character-display built-character true (if (= :mobile device-type) 1 2)]]]))
+
 (defn character-list []
   (let [characters @(subscribe [:dnd-5e-characters])
         built-template @(subscribe [:built-template])
@@ -1122,6 +1140,9 @@
                    [:button.form-button
                     {:on-click #(dispatch [:edit-character character])}
                     "EDIT"]
+                   [:button.form-button.m-l-5
+                    {:on-click #(dispatch [:route (routes/match-route (routes/path-for routes/dnd-e5-char-page-route :id id))])}
+                    "VIEW"]
                    [:button.form-button.m-l-5
                     {:on-click #(dispatch [:delete-character id])}
                     "DELETE"]]
