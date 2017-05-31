@@ -282,46 +282,58 @@
    (:warning-hidden db)))
 
 (def character-subs
-  {::char5e/character-name #(char5e/character-name %)
-   ::char5e/race #(char5e/race %)
-   ::char5e/subrace #(char5e/subrace %)
-   ::char5e/alignment #(char5e/alignment %)
-   ::char5e/background #(char5e/background %)
-   ::char5e/classes #(char5e/classes %)
-   ::char5e/levels #(char5e/levels %)
-   ::char5e/darkvision #(char5e/darkvision %)
-   ::char5e/skill-profs #(char5e/skill-proficiencies %)
-   ::char5e/skill-bonuses #(char5e/skill-bonuses %)
-   ::char5e/tool-profs #(char5e/tool-proficiencies %)
-   ::char5e/weapon-profs #(char5e/weapon-proficiencies %)
-   ::char5e/armor-profs #(char5e/armor-proficiencies %)
-   ::char5e/resistances #(char5e/damage-resistances %)
-   ::char5e/damage-immunities #(char5e/damage-immunities %)
-   ::char5e/immunities #(char5e/immunities %)
-   ::char5e/condition-immunities #(char5e/condition-immunities %)
-   ::char5e/languages #(char5e/languages %)
-   ::char5e/abilities #(char5e/ability-values %)
-   ::char5e/ability-bonuses #(char5e/ability-bonuses %)
-   ::char5e/armor-class #(char5e/base-armor-class %)
-   ::char5e/armor-class-with-armor #(char5e/armor-class-with-armor %)
-   ::char5e/armor #(char5e/normal-armor-inventory %)
-   ::char5e/magic-armor #(char5e/magic-armor-inventory %)
-   ::char5e/spells-known #(char5e/spells-known %)
-   ::char5e/spell-slots #(char5e/spell-slots %)
-   ::char5e/spell-modifiers #(char5e/spell-modifiers %)
-   ::char5e/weapons #(char5e/normal-weapons-inventory %)
-   ::char5e/magic-weapons #(char5e/magic-weapons-inventory %)
-   ::char5e/equipment #(char5e/normal-equipment-inventory %)
-   ::char5e/magic-items #(char5e/magical-equipment-inventory %)
-   ::char5e/traits #(char5e/traits %)
-   ::char5e/attacks #(char5e/attacks %)
-   ::char5e/bonus-actions #(char5e/bonus-actions %)
-   ::char5e/reactions #(char5e/reactions %)
-   ::char5e/actions #(char5e/actions %)
-   ::char5e/image-url #(char5e/image-url %)
-   ::char5e/image-url-failed #(char5e/image-url-failed %)
-   ::char5e/faction-image-url #(char5e/faction-image-url %)
-   ::char5e/faction-image-url-failed #(char5e/faction-image-url-failed %)})
+  {::char5e/base-swimming-speed char5e/base-swimming-speed
+   ::char5e/base-flying-speed char5e/base-flying-speed
+   ::char5e/base-land-speed char5e/base-land-speed
+   ::char5e/speed-with-armor char5e/land-speed-with-armor
+   ::char5e/unarmored-speed-bonus char5e/unarmored-speed-bonus
+   ::char5e/max-hit-points char5e/max-hit-points 
+   ::char5e/initiative char5e/initiative 
+   ::char5e/passive-perception char5e/passive-perception 
+   ::char5e/character-name char5e/character-name 
+   ::char5e/proficiency-bonus char5e/proficiency-bonus 
+   ::char5e/save-bonuses char5e/save-bonuses 
+   ::char5e/saving-throws char5e/saving-throws 
+   ::char5e/race char5e/race 
+   ::char5e/subrace char5e/subrace 
+   ::char5e/alignment char5e/alignment 
+   ::char5e/background char5e/background 
+   ::char5e/classes char5e/classes 
+   ::char5e/levels char5e/levels 
+   ::char5e/darkvision char5e/darkvision 
+   ::char5e/skill-profs char5e/skill-proficiencies 
+   ::char5e/skill-bonuses char5e/skill-bonuses 
+   ::char5e/tool-profs char5e/tool-proficiencies 
+   ::char5e/weapon-profs char5e/weapon-proficiencies 
+   ::char5e/armor-profs char5e/armor-proficiencies 
+   ::char5e/resistances char5e/damage-resistances 
+   ::char5e/damage-immunities char5e/damage-immunities 
+   ::char5e/immunities char5e/immunities 
+   ::char5e/condition-immunities char5e/condition-immunities 
+   ::char5e/languages char5e/languages 
+   ::char5e/abilities char5e/ability-values 
+   ::char5e/ability-bonuses char5e/ability-bonuses 
+   ::char5e/armor-class char5e/base-armor-class 
+   ::char5e/armor-class-with-armor char5e/armor-class-with-armor 
+   ::char5e/armor char5e/normal-armor-inventory 
+   ::char5e/magic-armor char5e/magic-armor-inventory 
+   ::char5e/all-armor-inventory char5e/all-armor-inventory 
+   ::char5e/spells-known char5e/spells-known 
+   ::char5e/spell-slots char5e/spell-slots 
+   ::char5e/spell-modifiers char5e/spell-modifiers 
+   ::char5e/weapons char5e/normal-weapons-inventory 
+   ::char5e/magic-weapons char5e/magic-weapons-inventory
+   ::char5e/equipment char5e/normal-equipment-inventory
+   ::char5e/magic-items char5e/magical-equipment-inventory
+   ::char5e/traits char5e/traits
+   ::char5e/attacks char5e/attacks
+   ::char5e/bonus-actions char5e/bonus-actions
+   ::char5e/reactions char5e/reactions
+   ::char5e/actions char5e/actions
+   ::char5e/image-url char5e/image-url
+   ::char5e/image-url-failed char5e/image-url-failed
+   ::char5e/faction-image-url char5e/faction-image-url
+   ::char5e/faction-image-url-failed char5e/faction-image-url-failed})
 
 (doseq [[sub-key char-fn] character-subs]
   (reg-sub
@@ -339,3 +351,10 @@
  :<- [::char5e/armor]
  (fn [[magic-armor armor] _]
    (merge magic-armor armor)))
+
+(reg-sub
+ ::char5e/all-weapons
+ :<- [::char5e/magic-weapons]
+ :<- [::char5e/weapons]
+ (fn [[magic-weapons weapons] _]
+   (merge magic-weapons weapons)))
