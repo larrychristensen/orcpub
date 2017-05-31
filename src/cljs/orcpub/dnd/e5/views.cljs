@@ -184,7 +184,7 @@
                  :background-color "#1a2532"
                  :border-right "1px solid white"}}
         [:img.pointer
-         {:src "image/orcpub-logo.svg"
+         {:src "/image/orcpub-logo.svg"
           :style {:height "25.3px"}
           :on-click #(dispatch [:route :default])}]]
        [:div.flex-grow-1 content]
@@ -646,14 +646,17 @@
 (def list-style
   {:border-top "1px solid rgba(255,255,255,0.5)"})
 
-(defn character-summary [built-char & [include-name?]]
-  [:div.flex.character-summary
-   (let [nm (char/character-name built-char)]
-      (if (and nm include-name?) [:span.m-r-20.m-b-5 nm]))
-   [:span.m-r-10.m-b-5
-    [:span (char/race built-char)]
-    [:div.f-s-12.m-t-5.opacity-6 (char/subrace built-char)]]
-   (let [levels (char/levels built-char)]
+(defn character-summary [id & [include-name?]]
+  (let [character-name @(subscribe [::char/character-name id])
+        race @(subscribe [::char/race id])
+        subrace @(subscribe [::char/subrace id])
+        levels @(subscribe [::char/levels id])
+        classes @(subscribe [::char/classes id])]
+    [:div.flex.character-summary
+     (if (and character-name include-name?) [:span.m-r-20.m-b-5 character-name])
+     [:span.m-r-10.m-b-5
+      [:span race]
+      [:div.f-s-12.m-t-5.opacity-6 subrace]]
      (if (seq levels)
        [:span.flex
         (map-indexed
@@ -667,7 +670,7 @@
                [:span
                 [:span (str class-name " (" class-level ")")]
                 [:div.f-s-12.m-t-5.opacity-6 (if subclass (common/kw-to-name subclass true))]]))
-           (char/classes built-char))))]))])
+           classes)))])]))
 
 (defn realize-char [built-char]
   (reduce-kv
@@ -906,170 +909,226 @@
 
 (def no-https-images "Sorry, we don't currently support images that start with https")
 
-(defn default-image [built-char]
-  (if (and (let [race (char/race built-char)]
-             (or (= "Human" race)
-                 (nil? race)))
-           (= :barbarian (first (char/classes built-char))))
+(defn default-image [race classes]
+  (if (and (or (= "Human" race)
+               (nil? race))
+           (= :barbarian (first classes)))
     "/image/barbarian.png"))
 
-(defn character-display [built-char show-summary? num-columns]
-  (let [race (char/race built-char)
-        subrace (char/subrace built-char)
-        alignment (char/alignment built-char)
-        background (char/background built-char)
-        classes (char/classes built-char)
-        levels (char/levels built-char)
-        darkvision (char/darkvision built-char)
-        skill-profs (char/skill-proficiencies built-char)
-        tool-profs (char/tool-proficiencies built-char)
-        weapon-profs (char/weapon-proficiencies built-char)
-        armor-profs (char/armor-proficiencies built-char)
-        resistances (char/damage-resistances built-char)
-        damage-immunities (char/damage-immunities built-char)
-        immunities (char/immunities built-char)
-        condition-immunities (char/condition-immunities built-char)
-        languages (char/languages built-char)
-        abilities (char/ability-values built-char)
-        ability-bonuses (char/ability-bonuses built-char)
-        armor-class (char/base-armor-class built-char)
-        armor-class-with-armor (char/armor-class-with-armor built-char)
-        armor (char/normal-armor-inventory built-char)
-        magic-armor (char/magic-armor-inventory built-char)
-        all-armor (merge magic-armor armor)
-        spells-known (char/spells-known built-char)
-        spell-slots (char/spell-slots built-char)
-        weapons (char/normal-weapons-inventory built-char)
-        magic-weapons (char/magic-weapons-inventory built-char)
-        equipment (char/normal-equipment-inventory built-char)
-        magic-items (char/magical-equipment-inventory built-char)
-        traits (char/traits built-char)
-        attacks (char/attacks built-char)
-        bonus-actions (char/bonus-actions built-char)
-        reactions (char/reactions built-char)
-        actions (char/actions built-char)
-        image-url (char/image-url built-char)
-        image-url-failed (es/entity-val built-char :image-url-failed)
-        faction-image-url (char/faction-image-url built-char)
-        faction-image-url-failed (es/entity-val built-char :faction-image-url-failed)]
-    [:div
-     (if show-summary?
-       [:div.f-s-24.f-w-600.m-b-16.text-shadow.flex
-        [character-summary built-char true]])
-     [:div.details-columns
-      {:class-name (if (= 2 num-columns) "flex")}
-      [:div.flex-grow-1
-       {:class-name (if (= 2 num-columns) "w-50-p")}
-       [:div.w-100-p.t-a-c
-        [:div.flex.justify-cont-s-b.p-10
-         (doall
-          (map
-           (fn [k]
-             ^{:key k}
-             [:div
-              (t/ability-icon k 32)
-              [:div.f-s-20.uppercase (name k)]
-              [:div.f-s-24.f-w-b (abilities k)]
-              [:div.f-s-12.opacity-5.m-b--2.m-t-2 "mod"]
-              [:div.f-s-18 (common/bonus-str (ability-bonuses k))]])
-           char/ability-keys))]]
-       [:div.flex
-        [:div.w-50-p
-         (if image-url-failed
-           [:div.p-10.red.f-s-18 (str (if (= :https image-url-failed)
-                                        no-https-images
-                                        "Image could not be loaded, please check the URL and try again"))]
-           (let [default-image-url (default-image built-char)
-                 image-url? (not (s/blank? image-url))]
-             (if (or default-image-url image-url?)
-               [:img.character-image.w-100-p.m-b-20 {:src (if image-url?
-                                                              image-url
-                                                              default-image-url)
-                                                     :on-error (fn [_] (dispatch [:failed-loading-image image-url]))
-                                                     :on-load (fn [_] (if image-url-failed (dispatch [:loaded-image])))}]
-               [:div.p-20.m-r-10.m-t-10.bg-gray.b-rad-5.t-a-c
-                {:style {:border "2px solid white"
-                         :background-color "rgba(255,255,255,0.1)"}}
-                [:div (svg-icon "orc-head" 72 72)]
-                [:div "No image set, you can set one using the 'Image URL' field in the 'Description' tab."]])))
-         (if faction-image-url-failed
-           [:div.p-10.red.f-s-18 (str (if (= :https faction-image-url-failed)
-                                        no-https-images
-                                        "Faction image could not be loaded, please check the URL and try again"))]
-           (if (not (s/blank? faction-image-url))
-             [:div.p-30 [:img.character-image.w-100-p.m-b-20 {:src faction-image-url
-                                                    :on-error (fn [_] (dispatch [:failed-loading-faction-image faction-image-url]))
-                                                    :on-load (fn [_] (if faction-image-url-failed (dispatch [:loaded-faction-image])))}]]))]
-        [:div.w-50-p.m-l-10
-         (if background [svg-icon-section "Background" "ages" [:span.f-s-18.f-w-n background]])
-         (if alignment [svg-icon-section "Alignment" "yin-yang" [:span.f-s-18.f-w-n alignment]])
-         [armor-class-section armor-class armor-class-with-armor all-armor]
-         [svg-icon-section "Hit Points" "health-normal" (char/max-hit-points built-char)]
-         [speed-section built-char all-armor]
-         [svg-icon-section "Darkvision" "night-vision" (if (and darkvision (pos? darkvision)) (str darkvision " ft.") "--")]
-         [svg-icon-section "Initiative" "sprint" (common/bonus-str (char/initiative built-char))]
-         [display-section "Proficiency Bonus" nil (common/bonus-str (char/proficiency-bonus built-char))]
-         [svg-icon-section "Passive Perception" "awareness" (char/passive-perception built-char)]
-         (let [num-attacks (char/number-of-attacks built-char)]
-           (if (> num-attacks 1)
-             [display-section "Number of Attacks" nil num-attacks]))
-         (let [criticals (char/critical-hit-values built-char)
-               min-crit (apply min criticals)
-               max-crit (apply max criticals)]
-           (if (not= min-crit max-crit)
-             (display-section "Critical Hit" nil (str min-crit "-" max-crit))))
-         [:div
-          [list-display-section
-           "Saving Throws" "dodging"
-           (map (fn [[k v]] (str (s/upper-case (name k)) (common/bonus-str v))) (char/save-bonuses built-char))]
-          (let [save-advantage (char/saving-throw-advantages built-char)]
-            [:ul.list-style-disc.m-t-5
-             (doall
-              (map-indexed
-               (fn [i {:keys [abilities types]}]
-                 ^{:key i}
-                 [:li (str "advantage on "
-                           (common/list-print (map (comp s/lower-case :name opt/abilities-map) abilities))
-                           " saves against "
-                           (common/list-print
-                            (map #(let [condition (opt/conditions-map %)]
-                                    (cond
-                                      condition (str "being " (s/lower-case (:name condition)))
-                                      (keyword? %) (name %)
-                                      :else %))
-                                 types)))])
-               save-advantage))])]]]]
-      [:div.flex-grow-1.details-column-2
-       {:class-name (if (= 2 num-columns) "w-50-p m-l-20")}
-       [list-display-section "Skill Proficiencies" "juggler"
-        (let [skill-bonuses (char/skill-bonuses built-char)]
-          (map
-           (fn [[skill-kw bonus]]
-             (str (s/capitalize (name skill-kw)) " " (common/bonus-str bonus)))
-           (filter (fn [[k bonus]]
-                     (not= bonus (ability-bonuses (:ability (skills/skills-map k)))))
-                   skill-bonuses)))]
-       [list-item-section "Languages" "lips" languages (partial prof-name opt/language-map)]
-       [list-item-section "Tool Proficiencies" "stone-crafting" tool-profs (partial prof-name equip/tools-map)]
-       [list-item-section "Weapon Proficiencies" "bowman" weapon-profs (partial prof-name weapon/weapons-map)]
-       [list-item-section "Armor Proficiencies" "mailed-fist" armor-profs (partial prof-name armor/armor-map)]
-       [list-item-section "Damage Resistances" "surrounded-shield" resistances resistance-str]
-       [list-item-section "Damage Immunities" nil damage-immunities resistance-str]
-       [list-item-section "Condition Immunities" nil condition-immunities resistance-str]
-       [list-item-section "Immunities" nil immunities resistance-str]
-       (if (seq spells-known) [spells-known-section spells-known spell-slots (es/entity-val built-char :spell-modifiers)])
-       [equipment-section "Weapons" "plain-dagger" (concat magic-weapons weapons) mi/all-weapons-map]
-       [equipment-section "Armor" "breastplate" (merge magic-armor armor) mi/all-armor-map]
-       [equipment-section "Equipment" "backpack" (concat magic-items
-                                                         equipment
-                                                         (map
-                                                          (juxt :name identity)
-                                                          (es/entity-val built-char :custom-equipment))) mi/all-equipment-map]
-       [attacks-section attacks]
-       [actions-section "Actions" "beams-aura" actions]
-       [actions-section "Bonus Actions" "run" bonus-actions]
-       [actions-section "Reactions" "van-damme-split" reactions]
-       [actions-section "Features, Traits, and Feats" "vitruvian-man" traits]]]]))
+(defn proficiency-details [num-columns id]
+  (let [ability-bonuses @(subscribe [::char/ability-bonuses id])]
+    [:div.details-columns
+     {:class-name (if (= 2 num-columns) "flex")}
+     [:div.flex-grow-1.details-column-2
+      {:class-name (if (= 2 num-columns) "w-50-p m-l-20")}
+      [list-display-section "Skill Proficiencies" "juggler"
+       (let [skill-bonuses @(subscribe [::char/skill-bonuses id])]
+         (map
+          (fn [[skill-kw bonus]]
+            (str (s/capitalize (name skill-kw)) " " (common/bonus-str bonus)))
+          (filter (fn [[k bonus]]
+                    (not= bonus (ability-bonuses (:ability (skills/skills-map k)))))
+                  skill-bonuses)))]
+      [list-item-section "Languages" "lips" @(subscribe [::char/languages id]) (partial prof-name opt/language-map)]
+      [list-item-section "Tool Proficiencies" "stone-crafting" @(subscribe [::char/tool-profs id]) (partial prof-name equip/tools-map)]
+      [list-item-section "Weapon Proficiencies" "bowman" @(subscribe [::char/weapon-profs id]) (partial prof-name weapon/weapons-map)]
+      [list-item-section "Armor Proficiencies" "mailed-fist" @(subscribe [::char/armor-profs id]) (partial prof-name armor/armor-map)]]]))
+
+(defn summary-details [num-columns id]
+  (let [built-char @(subscribe [:built-character id])
+        abilities @(subscribe [::char/abilities id])
+        ability-bonuses @(subscribe [::char/ability-bonuses id])
+        race @(subscribe [::char/race id])
+        classes @(subscribe [::char/classes id])
+        background @(subscribe [::char/background id])
+        alignment @(subscribe [::char/alignment id])
+        all-armor @(subscribe [::char/all-armor id])
+        darkvision @(subscribe [::char/darkvision id])
+        image-url-failed @(subscribe [::char/image-url-failed id])
+        image-url @(subscribe [::char/image-url id])
+        faction-image-url @(subscribe [::char/faction-image-url id])
+        faction-image-url-failed @(subscribe [::char/faction-image-url-failed id])
+        armor-class @(subscribe [::char/armor-class id])
+        armor-class-with-armor @(subscribe [::char/armor-class-with-armor id])]
+    [:div.details-columns
+     {:class-name (if (= 2 num-columns) "flex")}
+     [:div.flex-grow-1
+      {:class-name (if (= 2 num-columns) "w-50-p")}
+      [:div.w-100-p.t-a-c
+       [:div.flex.justify-cont-s-b.p-10
+        (doall
+         (map
+          (fn [k]
+            ^{:key k}
+            [:div
+             (t/ability-icon k 32)
+             [:div.f-s-20.uppercase (name k)]
+             [:div.f-s-24.f-w-b (abilities k)]
+             [:div.f-s-12.opacity-5.m-b--2.m-t-2 "mod"]
+             [:div.f-s-18 (common/bonus-str (ability-bonuses k))]])
+          char/ability-keys))]]
+      [:div.flex
+       [:div.w-50-p
+        (if image-url-failed
+          [:div.p-10.red.f-s-18 (str (if (= :https image-url-failed)
+                                       no-https-images
+                                       "Image could not be loaded, please check the URL and try again"))]
+          (let [default-image-url (default-image race classes)
+                image-url? (not (s/blank? image-url))]
+            (if (or default-image-url image-url?)
+              [:img.character-image.w-100-p.m-b-20 {:src (if image-url?
+                                                           image-url
+                                                           default-image-url)
+                                                    :on-error (fn [_] (dispatch [:failed-loading-image image-url]))
+                                                    :on-load (fn [_] (if image-url-failed (dispatch [:loaded-image])))}]
+              [:div.p-20.m-r-10.m-t-10.bg-gray.b-rad-5.t-a-c
+               {:style {:border "2px solid white"
+                        :background-color "rgba(255,255,255,0.1)"}}
+               [:div (svg-icon "orc-head" 72 72)]
+               [:div "No image set, you can set one using the 'Image URL' field in the 'Description' tab."]])))
+        (if faction-image-url-failed
+          [:div.p-10.red.f-s-18 (str (if (= :https faction-image-url-failed)
+                                       no-https-images
+                                       "Faction image could not be loaded, please check the URL and try again"))]
+          (if (not (s/blank? faction-image-url))
+            [:div.p-30 [:img.character-image.w-100-p.m-b-20 {:src faction-image-url
+                                                             :on-error (fn [_] (dispatch [:failed-loading-faction-image faction-image-url]))
+                                                             :on-load (fn [_] (if faction-image-url-failed (dispatch [:loaded-faction-image])))}]]))]
+       [:div.w-50-p.m-l-10
+        (if background [svg-icon-section "Background" "ages" [:span.f-s-18.f-w-n background]])
+        (if alignment [svg-icon-section "Alignment" "yin-yang" [:span.f-s-18.f-w-n alignment]])
+        [armor-class-section armor-class armor-class-with-armor all-armor]
+        [svg-icon-section "Hit Points" "health-normal" (char/max-hit-points built-char)]
+        [speed-section built-char all-armor]
+        [svg-icon-section "Darkvision" "night-vision" (if (and darkvision (pos? darkvision)) (str darkvision " ft.") "--")]
+        [svg-icon-section "Initiative" "sprint" (common/bonus-str (char/initiative built-char))]
+        [display-section "Proficiency Bonus" nil (common/bonus-str (char/proficiency-bonus built-char))]
+        [svg-icon-section "Passive Perception" "awareness" (char/passive-perception built-char)]
+        (let [num-attacks (char/number-of-attacks built-char)]
+          (if (> num-attacks 1)
+            [display-section "Number of Attacks" nil num-attacks]))
+        (let [criticals (char/critical-hit-values built-char)
+              min-crit (apply min criticals)
+              max-crit (apply max criticals)]
+          (if (not= min-crit max-crit)
+            (display-section "Critical Hit" nil (str min-crit "-" max-crit))))
+        [:div
+         [list-display-section
+          "Saving Throws" "dodging"
+          (map (fn [[k v]] (str (s/upper-case (name k)) (common/bonus-str v))) (char/save-bonuses built-char))]
+         (let [save-advantage (char/saving-throw-advantages built-char)]
+           [:ul.list-style-disc.m-t-5
+            (doall
+             (map-indexed
+              (fn [i {:keys [abilities types]}]
+                ^{:key i}
+                [:li (str "advantage on "
+                          (common/list-print (map (comp s/lower-case :name opt/abilities-map) abilities))
+                          " saves against "
+                          (common/list-print
+                           (map #(let [condition (opt/conditions-map %)]
+                                   (cond
+                                     condition (str "being " (s/lower-case (:name condition)))
+                                     (keyword? %) (name %)
+                                     :else %))
+                                types)))])
+              save-advantage))])]]]]]))
+
+(defn combat-details [num-columns id]
+  (let [weapon-profs @(subscribe [::char/weapon-profs id])
+        armor-profs @(subscribe [::char/armor-profs id])
+        resistances @(subscribe [::char/resistances id])
+        damage-immunities @(subscribe [::char/damage-immunities id])
+        condition-immunities @(subscribe [::char/condition-immunities id])
+        immunities @(subscribe [::char/immunities id])
+        weapons @(subscribe [::char/weapons id])
+        armor @(subscribe [::char/armor id])
+        magic-weapons @(subscribe [::char/magic-weapons id])
+        magic-armor @(subscribe [::char/magic-armor id])
+        attacks @(subscribe [::char/attacks id])]
+    [:div.details-columns
+     {:class-name (if (= 2 num-columns) "flex")}
+     [:div.flex-grow-1.details-column-2
+      {:class-name (if (= 2 num-columns) "w-50-p m-l-20")}
+      [list-item-section "Weapon Proficiencies" "bowman" weapon-profs (partial prof-name weapon/weapons-map)]
+      [list-item-section "Armor Proficiencies" "mailed-fist" armor-profs (partial prof-name armor/armor-map)]
+      [list-item-section "Damage Resistances" "surrounded-shield" resistances resistance-str]
+      [list-item-section "Damage Immunities" nil damage-immunities resistance-str]
+      [list-item-section "Condition Immunities" nil condition-immunities resistance-str]
+      [list-item-section "Immunities" nil immunities resistance-str]
+      [equipment-section "Weapons" "plain-dagger" (concat magic-weapons weapons) mi/all-weapons-map]
+      [equipment-section "Armor" "breastplate" (merge magic-armor armor) mi/all-armor-map]
+      [attacks-section attacks]]]))
+
+(defn features-details [num-columns id]
+  (let [resistances @(subscribe [::char/resistances id])
+        damage-immunities @(subscribe [::char/damage-immunities id])
+        condition-immunities @(subscribe [::char/condition-immunities id])
+        immunities @(subscribe [::char/immunities id])
+        actions @(subscribe [::char/actions id])
+        bonus-actions @(subscribe [::char/bonus-actions id])
+        reactions @(subscribe [::char/reactions id])
+        traits @(subscribe [::char/traits id])
+        attacks @(subscribe [::char/attacks id])]
+    [:div.details-columns
+     {:class-name (if (= 2 num-columns) "flex")}
+   
+     [:div.flex-grow-1.details-column-2
+      {:class-name (if (= 2 num-columns) "w-50-p m-l-20")}
+      [list-item-section "Damage Resistances" "surrounded-shield" resistances resistance-str]
+      [list-item-section "Damage Immunities" nil damage-immunities resistance-str]
+      [list-item-section "Condition Immunities" nil condition-immunities resistance-str]
+      [list-item-section "Immunities" nil immunities resistance-str]
+      [attacks-section attacks]
+      [actions-section "Actions" "beams-aura" actions]
+      [actions-section "Bonus Actions" "run" bonus-actions]
+      [actions-section "Reactions" "van-damme-split" reactions]
+      [actions-section "Features, Traits, and Feats" "vitruvian-man" traits]]]))
+
+(defn spell-details [num-columns id]
+  (let [spells-known @(subscribe [::char/spells-known id])
+        spell-slots @(subscribe [::char/spell-slots id])
+        spell-modifiers @(subscribe [::char/spell-modifiers id])]
+    [:div.details-columns
+     {:class-name (if (= 2 num-columns) "flex")}
+     [:div.flex-grow-1.details-column-2
+      {:class-name (if (= 2 num-columns) "w-50-p m-l-20")}
+      (if (seq spells-known) [spells-known-section spells-known spell-slots spell-modifiers])]]))
+
+(defn details-tab [title selected? on-select]
+  [:div.b-b-2.f-w-b.pointer.p-10
+   {:class-name (if selected? "b-orange" "b-gray")
+    :on-click on-select}
+   [:span.uppercase
+    {:class-name (if (not selected?) "opacity-2")}
+    title]])
+
+(def details-tabs
+  {"summary" summary-details
+   "combat" combat-details
+   "proficiencies" proficiency-details
+   "spells" spell-details
+   "features" features-details})
+
+(defn character-display []
+  (let [selected-tab (r/atom (ffirst details-tabs))]
+    (fn [id show-summary? num-columns]
+      (prn "ID CHAR_DISP" id)
+      [:div
+       (if show-summary?
+         [:div.f-s-24.f-w-600.m-b-16.text-shadow.flex
+          [character-summary id true]])
+       [:div.flex.p-l-10.m-b-10
+        (doall
+         (map
+          (fn [[title view]]
+            ^{:key title}
+            [details-tab
+             title
+             (= title @selected-tab)
+             #(reset! selected-tab title)])
+          details-tabs))]
+       [(details-tabs @selected-tab) num-columns id]])))
 
 (def character-display-style
   {:padding "20px 5px"
@@ -1090,11 +1149,10 @@
          {:title "Edit"
           :on-click #(dispatch [:edit-character character])})])
      [:div.p-5.white
-      [character-display built-character true (if (= :mobile device-type) 1 2)]]]))
+      [character-display id true (if (= :mobile device-type) 1 2)]]]))
 
 (defn character-list []
-  (let [characters @(subscribe [:dnd-5e-characters])
-        built-template @(subscribe [:built-template])
+  (let [characters @(subscribe [::char/characters])
         expanded-characters @(subscribe [:expanded-characters])
         device-type @(subscribe [:device-type])]
     [content-page
@@ -1111,9 +1169,7 @@
            ^{:key id}
            [:div.white
             {:style row-style}
-            (let [character (char/from-strict strict-character)
-                  built-template (subs/built-template (subs/selected-plugin-options character))
-                  built-character (subs/built-character character built-template)
+            (let [built-character @(subscribe [::char/built-character id])
                   image-url (char/image-url built-character)
                   expanded? (get expanded-characters id)]
               [:div.pointer
@@ -1126,7 +1182,7 @@
                  [:div.f-s-24.f-w-600
                   {:style summary-style}
                   [:div.list-character-summary
-                   [character-summary built-character true]]]]
+                   [character-summary id true]]]]
                 [:div.orange.pointer.m-r-10
                  (if (not= device-type :mobile) [:span.underline (if expanded?
                                            "collapse"
@@ -1138,7 +1194,7 @@
                   {:style character-display-style}
                   [:div.flex.justify-cont-end
                    [:button.form-button
-                    {:on-click #(dispatch [:edit-character character])}
+                    {:on-click #(dispatch [:edit-character @(subscribe [::char/internal-character id])])}
                     "EDIT"]
                    [:button.form-button.m-l-5
                     {:on-click #(dispatch [:route (routes/match-route (routes/path-for routes/dnd-e5-char-page-route :id id))])}
@@ -1146,6 +1202,6 @@
                    [:button.form-button.m-l-5
                     {:on-click #(dispatch [:delete-character id])}
                     "DELETE"]]
-                  [character-display built-character false (if (= :mobile device-type) 1 2)]])])])
+                  [character-display id false (if (= :mobile device-type) 1 2)]])])])
          characters))]]]))
 

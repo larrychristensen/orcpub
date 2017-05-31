@@ -41,7 +41,7 @@
             [re-frame.core :refer [subscribe dispatch dispatch-sync]])
   (:require-macros [cljs.core.async.macros :refer [go]]))
 
-(def print-disabled? false)
+(def print-disabled? true)
 (def print-enabled? (and (not print-disabled?)
                          (s/starts-with? js/window.location.href "http://localhost")))
 
@@ -1652,12 +1652,12 @@
          (case @current-tab
            :options [new-options-column 1]
            :description [description-fields]
-           [views5e/character-display @(subscribe [:built-character]) true 1])]]])))
+           [views5e/character-display nil true 1])]]])))
 
 (defn desktop-or-tablet-columns [device-type]
   (let [current-tab (r/atom :options)]
     (fn []
-      [:div
+      [:div.w-100-p
        [:div.flex-grow-1.flex.p-l-10.p-t-10
         [:div.w-50-p
          [:div.builder-tabs
@@ -1667,7 +1667,7 @@
            [new-options-column (if (= device-type :desktop) 2 1)]
            [description-fields])]
         [:div.w-50-p.m-l-20
-         [views5e/character-display @(subscribe [:built-character]) true 1]]]])))
+         [views5e/character-display nil true 1]]]])))
 
 (defn builder-columns []
   (let [device-type @(subscribe [:device-type])]

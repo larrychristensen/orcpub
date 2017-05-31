@@ -736,14 +736,16 @@
              :on-success [:password-reset-success]}})))
 
 (reg-event-db
- :set-dnd-5e-characters
+ ::char5e/set-characters
  (fn [db [_ characters]]
-   (assoc-in db dnd-5e-characters-path characters)))
+   (assoc db
+          ::char5e/characters characters
+          ::char5e/character-map (zipmap (map :db/id characters) characters))))
 
 (reg-event-db
- :set-dnd-5e-character
+ ::char5e/set-character
  (fn [db [_ id character]]
-   (assoc-in db [:dnd :e5 :character-map id] character)))
+   (assoc-in db [::char5e/character-map id] character)))
 
 (reg-event-fx
  :edit-character
