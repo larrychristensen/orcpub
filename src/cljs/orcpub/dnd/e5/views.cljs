@@ -954,23 +954,26 @@
                                                equipped-armor
                                                equipped-shields)]]]))
 
-(defn hit-points-section-2 [id]
+(defn basic-section [title icon v]
   [:div
    [:div.p-10.flex.flex-column.align-items-c
-    (section-header-2 "Max Hit Points" "health-normal")
-    [:div.f-s-24.f-w-b @(subscribe [::char/max-hit-points id])]]])
+    (section-header-2 title icon)
+    [:div.f-s-24.f-w-b v]]])
+
+(defn hit-points-section-2 [id]
+  (basic-section "Max Hit Points" "health-normal" @(subscribe [::char/max-hit-points id])))
 
 (defn initiative-section-2 [id]
-  [:div
-   [:div.p-10.flex.flex-column.align-items-c
-    (section-header-2 "Initiative" "sprint")
-    [:div.f-s-24.f-w-b @(subscribe [::char/initiative id])]]])
+  (basic-section "Initiative" "sprint" @(subscribe [::char/initiative id])))
+
+(defn passive-perception-section-2 [id]
+  (basic-section "Passive Perception" "awareness" @(subscribe [::char/passive-perception id])))
 
 (defn skills-section-2 [id]
   (let [skill-profs (or @(subscribe [::char/skill-profs id]) #{})
         skill-bonuses @(subscribe [::char/skill-bonuses id])]
-    (prn "SKILL_PROFS" skill-profs skill-bonuses)
     [:div
+     [passive-perception-section-2 id]
      [:div.p-10.flex.flex-column.align-items-c
       (section-header-2 "Skills" "juggler")
       [:table
@@ -1045,7 +1048,7 @@
                speed-with-armor)
          [:span.display-section-qualifier-text "(unarmored)"])]
       (if speed-with-armor
-        [:div
+        [:div.f-s-18
          (doall
           (map
            (fn [[armor-kw _]]
@@ -1058,14 +1061,14 @@
                  [:span.display-section-qualifier-text (str "(" (:name armor) " armor)")]]]))
            (dissoc all-armor :shield)))]
         (if unarmored-speed-bonus
-          [:div
+          [:div.f-s-18
            [:span
             [:span speed]
             [:span.display-section-qualifier-text "(armored)"]]]))
       (if swim-speed
-        [:div.f-s-20 [:span swim-speed] [:span.display-section-qualifier-text "(swim)"]])
+        [:div.f-s-18 [:span swim-speed] [:span.display-section-qualifier-text "(swim)"]])
       (if flying-speed
-        [:div.f-s-20 [:span flying-speed] [:span.display-section-qualifier-text "(fly)"]])]]))
+        [:div.f-s-18 [:span flying-speed] [:span.display-section-qualifier-text "(fly)"]])]]))
 
 (defn summary-details [num-columns id]
   (let [built-char @(subscribe [:built-character id])
@@ -1091,10 +1094,10 @@
         [:div.flex.p-10.justify-cont-s-a
          [skills-section-2 id]
          [:div
-          [saving-throws-section-2 id]
           [armor-class-section-2 id]
           [hit-points-section-2 id]
-          [speed-section-2 id]]]]]
+          [speed-section-2 id]
+          [saving-throws-section-2 id]]]]]
       #_[:div.flex
        [:div.w-50-p
         (if image-url-failed
@@ -1163,7 +1166,7 @@
               save-advantage))])]]]]]))
 
 (defn weapon-details-field [nm value]
-  [:div
+  [:div.p-2
    [:span.f-w-b nm ":"]
    [:span.m-l-5 value]])
 
@@ -1183,13 +1186,12 @@
                               versatile
                               thrown]}]
   [:div.m-t-10.i
-   (if type
-     (weapon-details-field "type" (common/safe-name type)))
-   (weapon-details-field "damage type" (common/safe-name damage-type))
-   (weapon-details-field "melee/ranged" (if melee? "melee" "ranged"))
-   (weapon-details-field "finesse?" (yes-no finesse?))
-   (weapon-details-field "two-handed?" (yes-no two-handed?))
-   (weapon-details-field "versatile" (if versatile
+   (weapon-details-field "Type" (common/safe-name type))
+   (weapon-details-field "Damage Type" (common/safe-name damage-type))
+   (weapon-details-field "Melee/Ranged" (if melee? "melee" "ranged"))
+   (weapon-details-field "Finesse?" (yes-no finesse?))
+   (weapon-details-field "Two-handed?" (yes-no two-handed?))
+   (weapon-details-field "Versatile" (if versatile
                                        (str (:damage-die-count versatile)
                                             "d"
                                             (:damage-die versatile)
@@ -1200,6 +1202,104 @@
    (if description
      [:div.m-t-10 description])])
 
+(defn armor-details-section [{:keys [type
+                                     base-ac
+                                     weight
+                                     description
+                                     max-dex-mod
+                                     min-str
+                                     magical-ac-bonus
+                                     stealth-disadvantage?]
+                              :or {magical-ac-bonus 0
+                                   base-ac 10}}
+                             {shield-magic-bonus :magical-ac-bonus :or {shield-magic-bonus 0} :as shield}
+                             expanded?]
+  [:div
+   [:div (str (if type (str (common/safe-name type) ", ")) "base AC " (+ magical-ac-bonus shield-magic-bonus base-ac (if shield 2 0)) (if stealth-disadvantage? ", stealth disadvantage"))]
+   (if expanded?
+     [:div
+      [:div.m-t-10.i
+       (if type
+         (weapon-details-field "Type" (common/safe-name type)))
+       (weapon-details-field "Base AC" base-ac)
+       (if (not= magical-ac-bonus 0)
+         (weapon-details-field "Magical AC Bonus" magical-ac-bonus))
+       (if shield
+         (weapon-details-field "Shield Base AC Bonus" 2))
+       (if (and shield
+                (not= shield-magic-bonus 0))
+         (weapon-details-field "Shield Magical AC Bonus" shield-magic-bonus))
+       (if max-dex-mod
+         (weapon-details-field "Max DEX AC Bonus" max-dex-mod))
+       (if min-str
+         (weapon-details-field "Min Strength" min-str))
+       (weapon-details-field "Stealth Disadvantage?" (yes-no stealth-disadvantage?))
+       (if weight
+         (weapon-details-field "Weight" (str weight " lbs.")))
+       (if description
+         [:div.m-t-10 (str "Armor: " description)])
+       (if (:description shield)
+         [:div.m-t-10 (str "Shield: " (:description shield))])]])])
+
+(defn armor-section-2 []
+  (let [expanded-details (r/atom {})]
+    (fn [id]
+      (let [all-armor @(subscribe [::char/all-armor id])
+            ac-with-armor @(subscribe [::char/armor-class-with-armor id])
+            armor-profs (set @(subscribe [::char/armor-profs id]))
+            device-type @(subscribe [:device-type])
+            mobile? (= :mobile device-type)
+            proficiency-bonus @(subscribe [::char/proficiency-bonus id])
+            all-armor-details (map mi/all-armor-map (keys all-armor))
+            armor-details (armor/non-shields all-armor-details)
+            shield-details (armor/shields all-armor-details)]
+        (prn "ARMOR DETAILS" armor-details)
+        (prn "SHIELD DETAILS" shield-details)
+        [:div
+         [:div.flex.align-items-c
+          (svg-icon "breastplate" 32 32)
+          [:span.m-l-5.f-w-b.f-s-18 "Armor"]]
+         [:div
+          [:table.w-100-p.t-a-l.striped
+           [:tbody
+            [:tr.f-w-b
+             {:class-name (if mobile? "f-s-12")}
+             [:th.p-10 "Name"]
+             (if (not mobile?) [:th.p-10 "Proficient?"])
+             [:th.p-10 "Details"]
+             [:th]
+             [:th.p-10 "AC"]]
+            (doall
+             (for [{:keys [name description type key] :as armor} (conj armor-details nil)
+                   shield (conj shield-details nil)]
+               (let [k (str key (:key shield))
+                     ac (ac-with-armor armor shield)
+                     proficient? (and
+                                  (or (nil? shield)
+                                      (armor-profs :shields))
+                                  (or
+                                   (nil? armor)
+                                   (armor-profs key)
+                                   (armor-profs type)))
+                     expanded? (@expanded-details k)]
+                 (prn "SHIELD" shield)
+                 ^{:key (str key (:key shield))}
+                 [:tr.pointer
+                  {:on-click #(swap! expanded-details (fn [d] (update d k not)))}
+                  [:td.p-10.f-w-b (str (or (:name armor) "unarmored")
+                                       (if shield (str " + " (:name shield))))]
+                  (if (not mobile?)
+                    [:td.p-10 [:i.fa {:class-name (if proficient? "fa-check green" "fa-times red")}]])
+                  [:td.p-10.w-100-p
+                   [:div
+                    (armor-details-section armor shield expanded?)]]
+                  [:td
+                   [:div.orange
+                    [:span.underline (if expanded? "less" "more")]
+                    [:i.fa.m-l-5
+                     {:class-name (if expanded? "fa-caret-up" "fa-caret-down")}]]]
+                  [:td.p-10.f-w-b.f-s-18 ac]])))]]]]))))
+
 (defn weapons-section-2 []
   (let [expanded-details (r/atom {})]
     (fn [id]
@@ -1208,10 +1308,9 @@
             device-type @(subscribe [:device-type])
             mobile? (= :mobile device-type)
             proficiency-bonus @(subscribe [::char/proficiency-bonus id])]
-        (prn "WEAPON PROFS" weapon-profs)
         [:div
          [:div.flex.align-items-c
-          (svg-icon "crossed-swords" 24 24)
+          (svg-icon "crossed-swords" 32 32)
           [:span.m-l-5.f-w-b.f-s-18 "Weapons"]]
          [:div
           [:table.w-100-p.t-a-l.striped
@@ -1230,11 +1329,10 @@
                       proficient? (or (weapon-key weapon-profs)
                                       (-> weapon :type weapon-profs))
                       expanded? (@expanded-details weapon-key)]
-                  (prn "WEAPON" weapon)
                   ^{:key weapon-key}
                   [:tr.pointer
                    {:on-click #(swap! expanded-details (fn [d] (update d weapon-key not)))}
-                   [:td.p-10 (:name weapon)]
+                   [:td.p-10.f-w-b (:name weapon)]
                    (if (not mobile?)
                      [:td.p-10 [:i.fa {:class-name (if proficient? "fa-check green" "fa-times red")}]])
                    [:td.p-10.w-100-p
@@ -1249,7 +1347,7 @@
                      [:span.underline (if expanded? "less" "more")]
                      [:i.fa.m-l-5
                       {:class-name (if expanded? "fa-caret-up" "fa-caret-down")}]]]
-                   [:td.p-10 (common/bonus-str (+ proficiency-bonus magical-damage-bonus))]]))
+                   [:td.p-10.f-w-b.f-s-18 (common/bonus-str (+ proficiency-bonus magical-damage-bonus))]]))
               all-weapons))]]]]))))
 
 (defn combat-details [num-columns id]
@@ -1271,18 +1369,24 @@
       [hit-points-section-2 id]
       [speed-section-2 id]
       [initiative-section-2 id]]
-     [weapons-section-2 id]
-     [:div.flex-grow-1.details-column-2
+     [:div.m-t-30
+      [list-item-section "Damage Resistances" "surrounded-shield" resistances resistance-str]]
+     [:div.m-t-30
+      [list-item-section "Damage Immunities" nil damage-immunities resistance-str]]
+     [:div.m-t-30
+      [list-item-section "Condition Immunities" nil condition-immunities resistance-str]]
+     [:div.m-t-30
+      [list-item-section "Immunities" nil immunities resistance-str]]
+     [:div.m-t-30
+      [attacks-section attacks]]
+     [:div.m-t-30
+      [weapons-section-2 id]]
+     [:div.m-t-30
+      [armor-section-2 id]]
+     [:div
       {:class-name (if (= 2 num-columns) "w-50-p m-l-20")}
       [list-item-section "Weapon Proficiencies" "bowman" weapon-profs (partial prof-name weapon/weapons-map)]
-      [list-item-section "Armor Proficiencies" "mailed-fist" armor-profs (partial prof-name armor/armor-map)]
-      [list-item-section "Damage Resistances" "surrounded-shield" resistances resistance-str]
-      [list-item-section "Damage Immunities" nil damage-immunities resistance-str]
-      [list-item-section "Condition Immunities" nil condition-immunities resistance-str]
-      [list-item-section "Immunities" nil immunities resistance-str]
-      [equipment-section "Weapons" "plain-dagger" (concat magic-weapons weapons) mi/all-weapons-map]
-      [equipment-section "Armor" "breastplate" (merge magic-armor armor) mi/all-armor-map]
-      [attacks-section attacks]]]))
+      [list-item-section "Armor Proficiencies" "mailed-fist" armor-profs (partial prof-name armor/armor-map)]]]))
 
 (defn features-details [num-columns id]
   (let [resistances @(subscribe [::char/resistances id])
