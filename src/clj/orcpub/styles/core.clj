@@ -146,6 +146,8 @@
     {:opacity "0.5"}]
    [:.opacity-6
     {:opacity "0.6"}]
+   [:.opacity-7
+    {:opacity "0.7"}]
 
    [:.m-b--2
     {:margin-bottom "-2px"}]

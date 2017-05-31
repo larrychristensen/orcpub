@@ -934,10 +934,141 @@
       [list-item-section "Weapon Proficiencies" "bowman" @(subscribe [::char/weapon-profs id]) (partial prof-name weapon/weapons-map)]
       [list-item-section "Armor Proficiencies" "mailed-fist" @(subscribe [::char/armor-profs id]) (partial prof-name armor/armor-map)]]]))
 
+(defn section-header-2 [title icon]
+  [:div
+   (svg-icon icon 24 24)
+   [:div.f-s-18.f-w-b.m-b-5 title]])
+
+(defn armor-class-section-2 [id]
+  (let [unarmored-armor-class @(subscribe [::char/armor-class id])
+        ac-with-armor-fn @(subscribe [::char/armor-class-with-armor id])
+        all-armor-inventory (mi/equipped-armor-details @(subscribe [::char/all-armor-inventory id]))
+        equipped-armor (armor/non-shields all-armor-inventory)
+        equipped-shields (armor/shields all-armor-inventory)]
+    [:div
+     [:div.p-10.flex.flex-column.align-items-c
+      (section-header-2 "Armor Class" "checked-shield")
+      [:div.f-s-24.f-w-b (char/max-armor-class unarmored-armor-class
+                                               ac-with-armor-fn
+                                               all-armor-inventory
+                                               equipped-armor
+                                               equipped-shields)]]]))
+
+(defn hit-points-section-2 [id]
+  [:div
+   [:div.p-10.flex.flex-column.align-items-c
+    (section-header-2 "Max Hit Points" "health-normal")
+    [:div.f-s-24.f-w-b @(subscribe [::char/max-hit-points id])]]])
+
+(defn initiative-section-2 [id]
+  [:div
+   [:div.p-10.flex.flex-column.align-items-c
+    (section-header-2 "Initiative" "sprint")
+    [:div.f-s-24.f-w-b @(subscribe [::char/initiative id])]]])
+
+(defn skills-section-2 [id]
+  (let [skill-profs (or @(subscribe [::char/skill-profs id]) #{})
+        skill-bonuses @(subscribe [::char/skill-bonuses id])]
+    (prn "SKILL_PROFS" skill-profs skill-bonuses)
+    [:div
+     [:div.p-10.flex.flex-column.align-items-c
+      (section-header-2 "Skills" "juggler")
+      [:table
+       [:tbody
+        (doall
+         (map
+          (fn [{skill-name :name skill-key :key icon :icon :as skill}]
+            ^{:key skill-key}
+            [:tr.t-a-l
+             {:class-name (if (skill-profs skill-key) "f-w-b" "opacity-7")}
+             [:td [:div
+                   (svg-icon icon 18 18)
+                   [:span.m-l-5 skill-name]]]
+             [:td [:div.p-5 (common/bonus-str (skill-bonuses skill-key))]]])
+          skills/skills))]]]]))
+
+(defn ability-scores-section-2 [id]
+  (let [abilities @(subscribe [::char/abilities id])
+        ability-bonuses @(subscribe [::char/ability-bonuses id])]
+    [:div
+     [:div.f-s-18.f-w-b "Ability Scores"]
+     [:div.flex.justify-cont-s-a.m-t-10
+      (doall
+       (map
+        (fn [k]
+          ^{:key k}
+          [:div
+           (t/ability-icon k 24)
+           [:div
+            [:span.f-s-20.uppercase (name k)]]
+           [:div.f-s-24.f-w-b (abilities k)]
+           [:div.f-s-12.opacity-5.m-b--2.m-t-2 "mod"]
+           [:div.f-s-18 (common/bonus-str (ability-bonuses k))]])
+        char/ability-keys))]]))
+
+(defn saving-throws-section-2 [id]
+  (let [save-bonuses @(subscribe [::char/save-bonuses id])
+        saving-throws @(subscribe [::char/saving-throws id])]
+    [:div.p-10.flex.flex-column.align-items-c
+     (section-header-2 "Saving Throws" "dodging")
+     [:table
+      [:tbody
+       (doall
+        (map
+         (fn [k]
+           ^{:key k}
+           [:tr.t-a-l
+            {:class-name (if (saving-throws k) "f-w-b" "opacity-7")}
+            [:td [:div
+                  (t/ability-icon k 18)
+                  [:span.m-l-5 (s/upper-case (name k))]]]
+            [:td [:div.p-5 (common/bonus-str (save-bonuses k))]]])
+         char/ability-keys))]]]))
+
+(defn speed-section-2 [id]
+  (let [speed @(subscribe [::char/base-land-speed id])
+        swim-speed @(subscribe [::char/base-swimming-speed id])
+        flying-speed @(subscribe [::char/base-flying-speed id])
+        speed-with-armor @(subscribe [::char/speed-with-armor id])
+        unarmored-speed-bonus @(subscribe [::char/unarmored-speed-bonus id])
+        equipped-armor @(subscribe [::char/armor id])
+        all-armor @(subscribe [::char/all-armor-inventory id])]
+    [:div.p-10
+     (section-header-2 "Speed" "walking-boot")
+     [:span.f-s-24.f-w-b
+      [:span
+       [:span (+ (or unarmored-speed-bonus 0)
+                 (if speed-with-armor
+                   (speed-with-armor nil)
+                   speed))]
+       (if (or unarmored-speed-bonus
+               speed-with-armor)
+         [:span.display-section-qualifier-text "(unarmored)"])]
+      (if speed-with-armor
+        [:div
+         (doall
+          (map
+           (fn [[armor-kw _]]
+             (let [armor (mi/all-armor-map armor-kw)
+                   speed (speed-with-armor armor)]
+               ^{:key armor-kw}
+               [:div
+                [:div
+                 [:span speed]
+                 [:span.display-section-qualifier-text (str "(" (:name armor) " armor)")]]]))
+           (dissoc all-armor :shield)))]
+        (if unarmored-speed-bonus
+          [:div
+           [:span
+            [:span speed]
+            [:span.display-section-qualifier-text "(armored)"]]]))
+      (if swim-speed
+        [:div.f-s-20 [:span swim-speed] [:span.display-section-qualifier-text "(swim)"]])
+      (if flying-speed
+        [:div.f-s-20 [:span flying-speed] [:span.display-section-qualifier-text "(fly)"]])]]))
+
 (defn summary-details [num-columns id]
   (let [built-char @(subscribe [:built-character id])
-        abilities @(subscribe [::char/abilities id])
-        ability-bonuses @(subscribe [::char/ability-bonuses id])
         race @(subscribe [::char/race id])
         classes @(subscribe [::char/classes id])
         background @(subscribe [::char/background id])
@@ -955,19 +1086,16 @@
      [:div.flex-grow-1
       {:class-name (if (= 2 num-columns) "w-50-p")}
       [:div.w-100-p.t-a-c
-       [:div.flex.justify-cont-s-b.p-10
-        (doall
-         (map
-          (fn [k]
-            ^{:key k}
-            [:div
-             (t/ability-icon k 32)
-             [:div.f-s-20.uppercase (name k)]
-             [:div.f-s-24.f-w-b (abilities k)]
-             [:div.f-s-12.opacity-5.m-b--2.m-t-2 "mod"]
-             [:div.f-s-18 (common/bonus-str (ability-bonuses k))]])
-          char/ability-keys))]]
-      [:div.flex
+       [:div
+        [ability-scores-section-2 id]
+        [:div.flex.p-10.justify-cont-s-a
+         [skills-section-2 id]
+         [:div
+          [saving-throws-section-2 id]
+          [armor-class-section-2 id]
+          [hit-points-section-2 id]
+          [speed-section-2 id]]]]]
+      #_[:div.flex
        [:div.w-50-p
         (if image-url-failed
           [:div.p-10.red.f-s-18 (str (if (= :https image-url-failed)
@@ -1034,6 +1162,96 @@
                                 types)))])
               save-advantage))])]]]]]))
 
+(defn weapon-details-field [nm value]
+  [:div
+   [:span.f-w-b nm ":"]
+   [:span.m-l-5 value]])
+
+(defn yes-no [v]
+  (if v "yes" "no"))
+
+(defn weapon-details [{:keys [description
+                              type
+                              damage-type
+                              magical-damage-bonus
+                              ranged?
+                              melee?
+                              range
+                              two-handed?
+                              finesse?
+                              link
+                              versatile
+                              thrown]}]
+  [:div.m-t-10.i
+   (if type
+     (weapon-details-field "type" (common/safe-name type)))
+   (weapon-details-field "damage type" (common/safe-name damage-type))
+   (weapon-details-field "melee/ranged" (if melee? "melee" "ranged"))
+   (weapon-details-field "finesse?" (yes-no finesse?))
+   (weapon-details-field "two-handed?" (yes-no two-handed?))
+   (weapon-details-field "versatile" (if versatile
+                                       (str (:damage-die-count versatile)
+                                            "d"
+                                            (:damage-die versatile)
+                                            (if magical-damage-bonus
+                                              (common/mod-str magical-damage-bonus))
+                                            " damage")
+                                       "no"))
+   (if description
+     [:div.m-t-10 description])])
+
+(defn weapons-section-2 []
+  (let [expanded-details (r/atom {})]
+    (fn [id]
+      (let [all-weapons @(subscribe [::char/all-weapons id])
+            weapon-profs (set @(subscribe [::char/weapon-profs id]))
+            device-type @(subscribe [:device-type])
+            mobile? (= :mobile device-type)
+            proficiency-bonus @(subscribe [::char/proficiency-bonus id])]
+        (prn "WEAPON PROFS" weapon-profs)
+        [:div
+         [:div.flex.align-items-c
+          (svg-icon "crossed-swords" 24 24)
+          [:span.m-l-5.f-w-b.f-s-18 "Weapons"]]
+         [:div
+          [:table.w-100-p.t-a-l.striped
+           [:tbody
+            [:tr.f-w-b
+             {:class-name (if mobile? "f-s-12")}
+             [:th.p-10 "Name"]
+             (if (not mobile?) [:th.p-10 "Proficient?"])
+             [:th.p-10 "Details"]
+             [:th]
+             [:th.p-10 (if mobile? "Atk" [:div.w-40 "Attack Bonus"])]]
+            (doall
+             (map
+              (fn [[weapon-key {:keys [equipped?]}]]
+                (let [{:keys [name magical-damage-bonus description] :as weapon} (mi/all-weapons-map weapon-key)
+                      proficient? (or (weapon-key weapon-profs)
+                                      (-> weapon :type weapon-profs))
+                      expanded? (@expanded-details weapon-key)]
+                  (prn "WEAPON" weapon)
+                  ^{:key weapon-key}
+                  [:tr.pointer
+                   {:on-click #(swap! expanded-details (fn [d] (update d weapon-key not)))}
+                   [:td.p-10 (:name weapon)]
+                   (if (not mobile?)
+                     [:td.p-10 [:i.fa {:class-name (if proficient? "fa-check green" "fa-times red")}]])
+                   [:td.p-10.w-100-p
+                    [:div
+                     (disp/attack-description (-> weapon
+                                                  (assoc :damage-modifier magical-damage-bonus)
+                                                  (dissoc :description)))]
+                    (if expanded?
+                      (weapon-details weapon))]
+                   [:td
+                    [:div.orange
+                     [:span.underline (if expanded? "less" "more")]
+                     [:i.fa.m-l-5
+                      {:class-name (if expanded? "fa-caret-up" "fa-caret-down")}]]]
+                   [:td.p-10 (common/bonus-str (+ proficiency-bonus magical-damage-bonus))]]))
+              all-weapons))]]]]))))
+
 (defn combat-details [num-columns id]
   (let [weapon-profs @(subscribe [::char/weapon-profs id])
         armor-profs @(subscribe [::char/armor-profs id])
@@ -1048,6 +1266,12 @@
         attacks @(subscribe [::char/attacks id])]
     [:div.details-columns
      {:class-name (if (= 2 num-columns) "flex")}
+     [:div.flex.justify-cont-s-a.t-a-c
+      [armor-class-section-2 id]
+      [hit-points-section-2 id]
+      [speed-section-2 id]
+      [initiative-section-2 id]]
+     [weapons-section-2 id]
      [:div.flex-grow-1.details-column-2
       {:class-name (if (= 2 num-columns) "w-50-p m-l-20")}
       [list-item-section "Weapon Proficiencies" "bowman" weapon-profs (partial prof-name weapon/weapons-map)]
@@ -1095,47 +1319,58 @@
       {:class-name (if (= 2 num-columns) "w-50-p m-l-20")}
       (if (seq spells-known) [spells-known-section spells-known spell-slots spell-modifiers])]]))
 
-(defn details-tab [title selected? on-select]
-  [:div.b-b-2.f-w-b.pointer.p-10
+(defn details-tab [title icon device-type selected? on-select]
+  [:div.b-b-2.f-w-b.pointer.p-10.hover-opacity-full
    {:class-name (if selected? "b-orange" "b-gray")
     :on-click on-select}
-   [:span.uppercase
-    {:class-name (if (not selected?) "opacity-2")}
-    title]])
+   [:div.hover-opacity-full
+    {:class-name (if (not selected?) "opacity-5")}
+    [:div (svg-icon icon 24 24)]
+    (if (not= device-type :mobile)
+      [:div.uppercase
+       title])]])
 
 (def details-tabs
-  {"summary" summary-details
-   "combat" combat-details
-   "proficiencies" proficiency-details
-   "spells" spell-details
-   "features" features-details})
+  {"summary" {:icon "stabbed-note"
+              :view summary-details}
+   "combat" {:icon "sword-clash"
+             :view combat-details}
+   "proficiencies" {:icon "juggler"
+                    :view proficiency-details}
+   "spells" {:icon "spell-book"
+             :view spell-details}
+   "features" {:icon "vitruvian-man"
+               :view features-details}})
 
 (defn character-display []
-  (let [selected-tab (r/atom (ffirst details-tabs))]
+  (let [selected-tab (r/atom "combat")
+        device-type @(subscribe [:device-type])]
     (fn [id show-summary? num-columns]
-      (prn "ID CHAR_DISP" id)
-      [:div
+      [:div.p-r-10
        (if show-summary?
-         [:div.f-s-24.f-w-600.m-b-16.text-shadow.flex
+         [:div.f-s-24.f-w-600.m-b-16.m-l-20.text-shadow.flex
           [character-summary id true]])
-       [:div.flex.p-l-10.m-b-10
+       [:div.flex.p-l-10.m-b-10.m-r-20
         (doall
          (map
-          (fn [[title view]]
+          (fn [[title {:keys [view icon]}]]
             ^{:key title}
-            [details-tab
-             title
-             (= title @selected-tab)
-             #(reset! selected-tab title)])
+            [:div.flex-grow-1.t-a-c
+             [details-tab
+              title
+              icon
+              device-type
+              (= title @selected-tab)
+              #(reset! selected-tab title)]])
           details-tabs))]
-       [(details-tabs @selected-tab) num-columns id]])))
+       [(-> @selected-tab details-tabs :view) num-columns id]])))
 
 (def character-display-style
   {:padding "20px 5px"
    :background-color "rgba(0,0,0,0.15)"})
 
 (defn character-page [{:keys [id]}]
-  (let [{:keys [::se/owner] :as strict-character} @(subscribe [:dnd-5e-character id])
+  (let [{:keys [::se/owner] :as strict-character} @(subscribe [::char/character id])
         character (char/from-strict strict-character)
         built-template (subs/built-template (subs/selected-plugin-options character))
         built-character (subs/built-character character built-template)

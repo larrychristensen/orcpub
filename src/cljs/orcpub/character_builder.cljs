@@ -41,7 +41,7 @@
             [re-frame.core :refer [subscribe dispatch dispatch-sync]])
   (:require-macros [cljs.core.async.macros :refer [go]]))
 
-(def print-disabled? true)
+(def print-disabled? false)
 (def print-enabled? (and (not print-disabled?)
                          (s/starts-with? js/window.location.href "http://localhost")))
 
@@ -1640,7 +1640,7 @@
     :on-click #(reset! current-tab key)} title])
 
 (defn mobile-columns []
-  (let [current-tab (r/atom :options)]
+  (let [current-tab (r/atom :details)]
     (fn []
       [:div.p-r-10.w-100-p
        [:div.flex-grow-1.flex.p-l-10.p-t-10

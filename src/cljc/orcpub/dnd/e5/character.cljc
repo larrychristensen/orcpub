@@ -513,6 +513,16 @@
 (defn faction-image-url-failed [built-char]
   (es/entity-val built-char ::faction-image-url-failed))
 
+(defn max-armor-class [unarmored-armor-class
+                       ac-with-armor-fn
+                       all-armor-inventory
+                       equipped-armor
+                       equipped-shields]
+  (let [all-armor-classes (for [armor (conj equipped-armor nil)
+                                shield (conj equipped-shields nil)]
+                            (ac-with-armor-fn armor shield))]
+    (apply max all-armor-classes)))
+
 (defn remove-custom-starting-equipment [character equipment-indicator path]
   (update-in
    character
