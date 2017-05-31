@@ -66,12 +66,7 @@
  local-storage-character-key
  ::se/entity
  (fn [char]
-   (let [non-strict (char5e/from-strict char)]
-     (prn "LOCAL STORAGE CHARACTER")
-     (pprint char)
-     (prn "CONVERTE CHAR")
-     (pprint non-strict)
-     non-strict)))
+   (char5e/from-strict char)))
 
 (spec/def ::username string?)
 (spec/def ::email string?)

@@ -105,13 +105,11 @@
     option))
 
 (defn add-equipment-namespace [raw-character equipment-key]
-  (prn "ADD EQUIP NAM" equipment-key)
   (let [path [::entity/options equipment-key]]
     (if (get-in raw-character path)
       (update-in raw-character
                  path
                  (fn [eq]
-                   (prn "META" meta eq)
                    (with-meta
                      (mapv
                       add-equipment-namespace-to-option
@@ -163,7 +161,6 @@
       add-namespaces-to-values))
 
 (defn fix-quantities [raw-character]
-  (prn "FIX QTYS" raw-character)
   (reduce
    (fn [char equipment-key]
      (let [path [::entity/options equipment-key]]
@@ -400,6 +397,9 @@
 
 (defn spell-slots [built-char]
   (es/entity-val built-char :spell-slots))
+
+(defn spell-modifiers [built-char]
+  (es/entity-val built-char :spell-modifiers))
 
 (defn traits [built-char]
   (es/entity-val built-char :traits))

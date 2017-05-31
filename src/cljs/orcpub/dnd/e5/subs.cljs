@@ -6,6 +6,7 @@
             [orcpub.dnd.e5.template :as t5e]
             [orcpub.dnd.e5.db :refer [tab-path]]
             [orcpub.dnd.e5.events :as events]
+            [orcpub.dnd.e5.character :as char5e]
             [orcpub.route-map :as routes]
             [clojure.string :as s]
             [reagent.ratom :as ra]
@@ -177,7 +178,7 @@
    (:expanded-characters db)))
 
 (reg-sub-raw
-  :dnd-5e-characters
+  ::char5e/characters
   (fn [app-db [_]]
     (go (dispatch [:set-loading true])
         (let [response (<! (http/get (routes/path-for routes/dnd-e5-char-list-route)
@@ -185,25 +186,65 @@
                                       :headers {"Authorization" (str "Token " (-> @app-db :user-data :token))}}))]
           (dispatch [:set-loading false])
           (case (:status response)
-            200 (dispatch [:set-dnd-5e-characters (-> response :body)])
+            200 (dispatch [::char5e/set-characters (-> response :body)])
             401 (dispatch [:route routes/login-page-route])
             500 (dispatch (events/show-generic-error)))))
     (ra/make-reaction
-     (fn [] (get-in @app-db [:dnd :e5 :characters] [])))))
+     (fn [] (get @app-db ::char5e/characters [])))))
+
+(reg-sub
+ ::char5e/character-map
+ (fn [db _]
+   (::char5e/character-map db)))
 
 (reg-sub-raw
-  :dnd-5e-character
+  ::char5e/character
   (fn [app-db [_ id]]
-    (go (dispatch [:set-loading true])
-        (let [response (<! (http/get (routes/path-for routes/dnd-e5-char-route :id id)
-                                     {:accept :transit}))]
-          (dispatch [:set-loading false])
-          (case (:status response)
-            200 (dispatch [:set-dnd-5e-character id (-> response :body)])
-            401 (dispatch [:route routes/login-page-route])
-            500 (dispatch (events/show-generic-error)))))
+    (if (nil? (get-in @app-db [::char5e/character-map id]))
+      (go (dispatch [:set-loading true])
+          (let [response (<! (http/get (routes/path-for routes/dnd-e5-char-route :id id)
+                                       {:accept :transit}))]
+            (dispatch [:set-loading false])
+            (case (:status response)
+              200 (dispatch [::char5e/set-character id (-> response :body)])
+              401 (dispatch [:route routes/login-page-route])
+              500 (dispatch (events/show-generic-error))))))
     (ra/make-reaction
-     (fn [] (get-in @app-db [:dnd :e5 :character-map id] [])))))
+     (fn [] (get-in @app-db [::char5e/character-map id] [])))))
+
+(reg-sub
+ ::char5e/internal-character
+ (fn [[_ id] _]
+   (subscribe [::char5e/character id])) 
+ (fn [character _ _]
+   (char5e/from-strict character)))
+
+(reg-sub
+ ::char5e/selected-plugin-options
+ (fn [[_ id] _]
+   (subscribe [::char5e/internal-character id]))
+ (fn [internal-character _ _]
+   (selected-plugin-options internal-character)))
+
+(reg-sub
+ ::char5e/template
+ (fn [db _]
+   (:template db)))
+
+(reg-sub
+ ::char5e/built-template
+ (fn [[_ id] _]
+   (subscribe [::char5e/selected-plugin-options id]))
+ (fn [selected-plugin-options _]
+   (built-template selected-plugin-options)))
+
+(reg-sub
+ ::char5e/built-character
+ (fn [[_ id] _]
+   [(subscribe [::char5e/internal-character id])
+    (subscribe [::char5e/built-template id])])
+ (fn [[character built-template] _ _]
+   (built-character character built-template)))
 
 (reg-sub
  :message-shown?
@@ -239,3 +280,62 @@
  :warning-hidden
  (fn [db _]
    (:warning-hidden db)))
+
+(def character-subs
+  {::char5e/character-name #(char5e/character-name %)
+   ::char5e/race #(char5e/race %)
+   ::char5e/subrace #(char5e/subrace %)
+   ::char5e/alignment #(char5e/alignment %)
+   ::char5e/background #(char5e/background %)
+   ::char5e/classes #(char5e/classes %)
+   ::char5e/levels #(char5e/levels %)
+   ::char5e/darkvision #(char5e/darkvision %)
+   ::char5e/skill-profs #(char5e/skill-proficiencies %)
+   ::char5e/skill-bonuses #(char5e/skill-bonuses %)
+   ::char5e/tool-profs #(char5e/tool-proficiencies %)
+   ::char5e/weapon-profs #(char5e/weapon-proficiencies %)
+   ::char5e/armor-profs #(char5e/armor-proficiencies %)
+   ::char5e/resistances #(char5e/damage-resistances %)
+   ::char5e/damage-immunities #(char5e/damage-immunities %)
+   ::char5e/immunities #(char5e/immunities %)
+   ::char5e/condition-immunities #(char5e/condition-immunities %)
+   ::char5e/languages #(char5e/languages %)
+   ::char5e/abilities #(char5e/ability-values %)
+   ::char5e/ability-bonuses #(char5e/ability-bonuses %)
+   ::char5e/armor-class #(char5e/base-armor-class %)
+   ::char5e/armor-class-with-armor #(char5e/armor-class-with-armor %)
+   ::char5e/armor #(char5e/normal-armor-inventory %)
+   ::char5e/magic-armor #(char5e/magic-armor-inventory %)
+   ::char5e/spells-known #(char5e/spells-known %)
+   ::char5e/spell-slots #(char5e/spell-slots %)
+   ::char5e/spell-modifiers #(char5e/spell-modifiers %)
+   ::char5e/weapons #(char5e/normal-weapons-inventory %)
+   ::char5e/magic-weapons #(char5e/magic-weapons-inventory %)
+   ::char5e/equipment #(char5e/normal-equipment-inventory %)
+   ::char5e/magic-items #(char5e/magical-equipment-inventory %)
+   ::char5e/traits #(char5e/traits %)
+   ::char5e/attacks #(char5e/attacks %)
+   ::char5e/bonus-actions #(char5e/bonus-actions %)
+   ::char5e/reactions #(char5e/reactions %)
+   ::char5e/actions #(char5e/actions %)
+   ::char5e/image-url #(char5e/image-url %)
+   ::char5e/image-url-failed #(char5e/image-url-failed %)
+   ::char5e/faction-image-url #(char5e/faction-image-url %)
+   ::char5e/faction-image-url-failed #(char5e/faction-image-url-failed %)})
+
+(doseq [[sub-key char-fn] character-subs]
+  (reg-sub
+   sub-key
+   (fn [[_ id]]
+     (if id
+       (subscribe [::char5e/built-character id])
+       (subscribe [:built-character])))
+   (fn [built-char _]
+     (char-fn built-char))))
+
+(reg-sub
+ ::char5e/all-armor
+ :<- [::char5e/magic-armor]
+ :<- [::char5e/armor]
+ (fn [[magic-armor armor] _]
+   (merge magic-armor armor)))
