@@ -637,7 +637,7 @@
 (defn delete-character [{:keys [db conn identity] {:keys [id]} :path-params}]
   (let [parsed-id (Long/parseLong id)
         username (:user identity)
-        character (d/pull db '[*] id)
+        character (d/pull db '[*] parsed-id)
         problems (dnd-e5-char-type-problems character)]
     (if (owns-entity? db username parsed-id)
       (if (empty? problems)
