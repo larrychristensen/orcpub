@@ -41,7 +41,7 @@
             [re-frame.core :refer [subscribe dispatch dispatch-sync]])
   (:require-macros [cljs.core.async.macros :refer [go]]))
 
-(def print-disabled? false)
+(def print-disabled? true)
 (def print-enabled? (and (not print-disabled?)
                          (s/starts-with? js/window.location.href "http://localhost")))
 
@@ -157,7 +157,7 @@
                :type :text
                :value (if (:focused @state)
                         (:temp-val @state)
-                        value)
+                        (or value (:temp-val @state)))
                :on-focus (fn [_]
                            (swap! state
                                   assoc
@@ -1573,8 +1573,16 @@
      starting-character)
    (range)))
 
+(def image-style
+  {:max-height "100px"
+   :max-width "200px"})
+
 (defn description-fields []
-  (let [entity-values @(subscribe [:entity-values])]
+  (let [entity-values @(subscribe [:entity-values])
+        image-url @(subscribe [::char5e/image-url])
+        image-url-failed @(subscribe [::char5e/image-url-failed])
+        faction-image-url @(subscribe [::char5e/faction-image-url])
+        faction-image-url-failed @(subscribe [::char5e/faction-image-url-failed])]
     [:div.flex-grow-1
      [:div.m-t-5
       [:span.personality-label.f-s-18 "Character Name"]
@@ -1620,18 +1628,63 @@
      [:div.field
       [:span.personality-label.f-s-18 "Flaws"]
       [character-textarea entity-values ::char5e/flaws]]
-     [:div.field
-      [:span.personality-label.f-s-18 "Image URL"]
-      [character-input entity-values ::char5e/image-url nil #(dispatch [:set-image-url %])]]
+     [:div.flex.align-items-c.w-100-p.m-t-30
+      (if (and image-url
+               (not image-url-failed))
+        [:img.m-r-10 {:src image-url
+                      :on-error (fn [_] (dispatch [:failed-loading-image image-url]))
+                      :on-load (fn [_] (if image-url-failed (dispatch [:loaded-image])))
+               :style image-style}])
+      [:div.flex-grow-1
+       [:span.personality-label.f-s-18 "Image URL"]
+       [character-input entity-values ::char5e/image-url nil #(dispatch [:set-image-url %])]
+       (if image-url-failed
+         [:div.red.m-t-5 "Image failed to load, please check the URL"])]]
      [:div.field
       [:span.personality-label.f-s-18 "Faction Name"]
       [character-input entity-values ::char5e/faction-name]]
-     [:div.field
-      [:span.personality-label.f-s-18 "Faction Image URL"]
-      [character-input entity-values ::char5e/faction-image-url nil #(dispatch [:set-faction-image-url %])]]
+     [:div.flex.align-items-c.w-100-p.m-t-30
+      (if (and faction-image-url
+               (not faction-image-url-failed))
+        [:img.m-r-10 {:src faction-image-url
+                      :on-error (fn [_] (dispatch [:failed-loading-faction-image faction-image-url]))
+                      :on-load (fn [_] (if faction-image-url-failed
+                                         (dispatch [:loaded-faction-image])))
+               :style image-style}])
+      [:div.flex-grow-1
+       [:span.personality-label.f-s-18 "Faction Image URL"]
+       [character-input entity-values ::char5e/faction-image-url nil #(dispatch [:set-faction-image-url %])]
+       (if faction-image-url-failed
+         [:div.red.m-t-5 "Image failed to load, please check the URL"])]]
      [:div.field
       [:span.personality-label.f-s-18 "Description/Backstory"]
       [character-textarea entity-values ::char5e/description "h-800"]]]))
+
+#_(if image-url-failed
+          [:div.p-10.red.f-s-18 (str (if (= :https image-url-failed)
+                                       no-https-images
+                                       "Image could not be loaded, please check the URL and try again"))]
+          (let [default-image-url (default-image race classes)
+                image-url? (not (s/blank? image-url))]
+            (if (or default-image-url image-url?)
+              [:img.character-image.w-100-p.m-b-20 {:src (if image-url?
+                                                           image-url
+                                                           default-image-url)
+                                                    :on-error (fn [_] (dispatch [:failed-loading-image image-url]))
+                                                    :on-load (fn [_] (if image-url-failed (dispatch [:loaded-image])))}]
+              [:div.p-20.m-r-10.m-t-10.bg-gray.b-rad-5.t-a-c
+               {:style {:border "2px solid white"
+                        :background-color "rgba(255,255,255,0.1)"}}
+               [:div (svg-icon "orc-head" 72 72)]
+               [:div "No image set, you can set one using the 'Image URL' field in the 'Description' tab."]])))
+        #_(if faction-image-url-failed
+          [:div.p-10.red.f-s-18 (str (if (= :https faction-image-url-failed)
+                                       no-https-images
+                                       "Faction image could not be loaded, please check the URL and try again"))]
+          (if (not (s/blank? faction-image-url))
+            [:div.p-30 [:img.character-image.w-100-p.m-b-20 {:src faction-image-url
+                                                             :on-error (fn [_] (dispatch [:failed-loading-faction-image faction-image-url]))
+                                                             :on-load (fn [_] (if faction-image-url-failed (dispatch [:loaded-faction-image])))}]]))
 
 (defn builder-tab [title key current-tab]
   [:span.builder-tab

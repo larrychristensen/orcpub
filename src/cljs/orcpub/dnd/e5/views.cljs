@@ -646,31 +646,39 @@
 (def list-style
   {:border-top "1px solid rgba(255,255,255,0.5)"})
 
+(def thumbnail-style
+  {:height "100px"})
+
 (defn character-summary [id & [include-name?]]
   (let [character-name @(subscribe [::char/character-name id])
+        image-url @(subscribe [::char/image-url id])
         race @(subscribe [::char/race id])
         subrace @(subscribe [::char/subrace id])
         levels @(subscribe [::char/levels id])
         classes @(subscribe [::char/classes id])]
-    [:div.flex.character-summary
-     (if (and character-name include-name?) [:span.m-r-20.m-b-5 character-name])
-     [:span.m-r-10.m-b-5
-      [:span race]
-      [:div.f-s-12.m-t-5.opacity-6 subrace]]
-     (if (seq levels)
-       [:span.flex
-        (map-indexed
-         (fn [i v]
-           (with-meta v {:key i}))
-         (interpose
-          [:span.m-l-5.m-r-5 "/"]
-          (map
-           (fn [cls-key]
-             (let [{:keys [class-name class-level subclass]} (levels cls-key)]
-               [:span
-                [:span (str class-name " (" class-level ")")]
-                [:div.f-s-12.m-t-5.opacity-6 (if subclass (common/kw-to-name subclass true))]]))
-           classes)))])]))
+    [:div.flex.align-items-c
+     (if image-url
+       [:img.m-r-20.m-t-10.m-b-10 {:src image-url
+                                   :style thumbnail-style}])
+     [:div.flex.character-summary
+      (if (and character-name include-name?) [:span.m-r-20.m-b-5 character-name])
+      [:span.m-r-10.m-b-5
+       [:span race]
+       [:div.f-s-12.m-t-5.opacity-6 subrace]]
+      (if (seq levels)
+        [:span.flex
+         (map-indexed
+          (fn [i v]
+            (with-meta v {:key i}))
+          (interpose
+           [:span.m-l-5.m-r-5 "/"]
+           (map
+            (fn [cls-key]
+              (let [{:keys [class-name class-level subclass]} (levels cls-key)]
+                [:span
+                 [:span (str class-name " (" class-level ")")]
+                 [:div.f-s-12.m-t-5.opacity-6 (if subclass (common/kw-to-name subclass true))]]))
+            classes)))])]]))
 
 (defn realize-char [built-char]
   (reduce-kv
@@ -681,9 +689,6 @@
          (assoc m k realized-value))))
    (sorted-map)
    built-char))
-
-(def thumbnail-style
-  {:height "100px"})
 
 (def summary-style
   {:padding "33px 0"})
@@ -1561,9 +1566,6 @@
                [:div.flex.justify-cont-s-b.align-items-c
                 {:on-click #(dispatch [:toggle-character-expanded id])}
                 [:div.m-l-10.flex.align-items-c
-                 (if image-url
-                   [:img.m-r-20.m-t-10.m-b-10 {:src image-url
-                                               :style thumbnail-style}])
                  [:div.f-s-24.f-w-600
                   {:style summary-style}
                   [:div.list-character-summary

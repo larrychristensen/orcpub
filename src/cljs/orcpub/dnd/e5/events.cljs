@@ -157,8 +157,9 @@
            assoc
            ::char5e/image-url
            image-url
-           :image-url-failed
-           (if (and image-url (s/starts-with? image-url "https"))
+           ::char5e/image-url-failed
+           nil
+           #_(if (and image-url (s/starts-with? image-url "https"))
              :https))))
 
 (reg-event-db
@@ -170,8 +171,9 @@
            assoc
            ::char5e/faction-image-url
            faction-image-url
-           :faction-image-url-failed
-           (if (and faction-image-url (s/starts-with? faction-image-url "https"))
+           ::char5e/faction-image-url-failed
+           nil
+           #_(if (and faction-image-url (s/starts-with? faction-image-url "https"))
              :https))))
 
 (reg-event-db
@@ -478,7 +480,7 @@
    (update character
            ::entity/values
            assoc
-           :image-url-failed
+           ::char5e/image-url-failed
            image-url)))
 
 (reg-event-db
@@ -488,7 +490,7 @@
    (update character
            ::entity/values
            assoc
-           :faction-image-url-failed
+           ::char5e/faction-image-url-failed
            faction-image-url)))
 
 (reg-event-db

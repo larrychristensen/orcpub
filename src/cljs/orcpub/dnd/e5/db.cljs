@@ -59,7 +59,9 @@
             (if-let [stored-item (get-local-storage-item local-storage-key)]
               (if (spec/valid? item-spec stored-item)
                 (if item-fn (item-fn stored-item) stored-item)
-                (js/console.warn "INVALID ITEM FOUND, IGNORING" key (spec/explain-data item-spec stored-item))))))))
+                (do
+                  (js/console.warn "INVALID ITEM FOUND, IGNORING")
+                  (pprint (spec/explain-data item-spec stored-item)))))))))
 
 (reg-local-store-cofx
  :local-store-character
