@@ -16,7 +16,7 @@
                  [org.clojure/test.check "0.9.0"]
                  [org.clojure/clojurescript "1.9.229"]
                  #_[org.clojure/core.async "0.2.391"
-                  :exclusions [org.clojure/tools.reader]]
+                    :exclusions [org.clojure/tools.reader]]
                  [cljsjs/react "15.3.1-0"]
                  [cljsjs/react-dom "15.3.1-0"]
                  [cljs-http "0.1.43"]
@@ -60,14 +60,14 @@
 
   :uberjar-name "orcpub.jar"
 
-  :garden {:builds [{;; Optional name of the build:
+  :garden {:builds [{ ;; Optional name of the build:
                      :id "screen"
                      ;; Source paths where the stylesheet source code is
                      :source-paths ["src/clj" "src/cljc"]
                      ;; The var containing your stylesheet:
                      :stylesheet orcpub.styles.core/app
                      ;; Compiler flags passed to `garden.core/css`:
-                     :compiler {;; Where to save the file:
+                     :compiler { ;; Where to save the file:
                                 :output-to "resources/public/css/compiled/styles.css"
                                 ;; Compress the output?
                                 :pretty-print? false}}]}
@@ -104,7 +104,7 @@
                            :optimizations :advanced
                            :pretty-print false}}]}
 
-  :figwheel {;; :http-server-root "public" ;; default and assumes "resources"
+  :figwheel { ;; :http-server-root "public" ;; default and assumes "resources"
              ;; :server-port 3449 ;; default
              ;; :server-ip "127.0.0.1"
 
@@ -145,6 +145,8 @@
   ;; Please see:
   ;; https://github.com/bhauman/lein-figwheel/wiki/Using-the-Figwheel-REPL-within-NRepl
 
+  :uberjar-inclusions [#"^\.ebextensions"]
+  :jar-inclusions [#"^\.ebextensions"]
 
   :profiles {:dev {:dependencies [[binaryage/devtools "0.9.4"]
                                   [figwheel-sidecar "0.5.8"]
@@ -154,7 +156,7 @@
                    :source-paths ["src/clj" "src/cljc" "src/cljs" "dev"]
                    ;; for CIDER
                    ;; :plugins [[cider/cider-nrepl "0.12.0"]]
-                   :repl-options {; for nREPL dev you really need to limit output
+                   :repl-options { ; for nREPL dev you really need to limit output
                                   :init (set! *print-length* 50)
                                   :nrepl-middleware [cemerick.piggieback/wrap-cljs-repl]}}
              :uberjar {:prep-tasks ["clean" "compile" ["cljsbuild" "once" "prod"]]
