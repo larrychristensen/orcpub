@@ -424,7 +424,8 @@
 
 (reg-event-fx
  :route
- (fn [{:keys [db]} [_ {:keys [handler route-params] :as new-route} {:keys [return-route skip-path? event secure?]}]]
+ (fn [{:keys [db]} [_ {:keys [handler route-params] :as new-route} {:keys [return? return-route skip-path? event secure?]}]]
+   (prn "RETURN " new-route return? return-route)
    (let [{:keys [route route-history]} db
          seq-params (seq route-params)
          flat-params (flatten seq-params)
@@ -436,13 +437,10 @@
                                                js/window.location.hostname
                                                path
                                                js/window.location.port))
-       (cond-> {:db (assoc db
-                           :route new-route
-                           :return-route (or return-route
-                                             (:return-route db)
-                                             routes/dnd-e5-char-builder-route)
-                           :route-history (conj route-history route))
+       (cond-> {:db (assoc db :route new-route)
                 :dispatch [:hide-message]}
+         return? (assoc-in [:db :return-route] new-route)
+         return-route (assoc-in [:db :return-route] return-route)
          (not skip-path?) (assoc :path path)
          event (update :dispatch-n conj event))))))
 
@@ -550,6 +548,7 @@
  :login-success
  [user->local-store-interceptor]
  (fn [{:keys [db]} [_ backtrack? response]]
+   (prn "RETOURN ROUTE" (:return-route db))
    {:db (assoc db :user-data (-> response :body))
     :dispatch [:route (if (-> db :return-route :handler (= :login-page))
                         routes/dnd-e5-char-builder-route
