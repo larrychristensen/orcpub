@@ -564,6 +564,7 @@
   (let [id (:db/id character)]
     (if (owns-entity? db username id)
       (let [current-character (d/pull db '[*] id)
+            _ (prn "CURRENT CHARACTER" current-character)
             problems (dnd-e5-char-type-problems current-character)]
         (if (seq problems)
           {:status 400 :body problems}

@@ -151,7 +151,6 @@
                 ::char5e/wis
                 ::char5e/cha]} (char5e/ability-values built-char)
         skill-profs (char5e/skill-proficiencies built-char)]
-    (prn "SKILL PROFS" skill-profs)
     (is (has-spell? built-char
                     1
                     {:key :illusory-script,

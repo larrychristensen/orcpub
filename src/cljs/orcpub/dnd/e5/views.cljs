@@ -915,25 +915,6 @@
            (= :barbarian (first classes)))
     "/image/barbarian.png"))
 
-(defn proficiency-details [num-columns id]
-  (let [ability-bonuses @(subscribe [::char/ability-bonuses id])]
-    [:div.details-columns
-     {:class-name (if (= 2 num-columns) "flex")}
-     [:div.flex-grow-1.details-column-2
-      {:class-name (if (= 2 num-columns) "w-50-p m-l-20")}
-      [list-display-section "Skill Proficiencies" "juggler"
-       (let [skill-bonuses @(subscribe [::char/skill-bonuses id])]
-         (map
-          (fn [[skill-kw bonus]]
-            (str (s/capitalize (name skill-kw)) " " (common/bonus-str bonus)))
-          (filter (fn [[k bonus]]
-                    (not= bonus (ability-bonuses (:ability (skills/skills-map k)))))
-                  skill-bonuses)))]
-      [list-item-section "Languages" "lips" @(subscribe [::char/languages id]) (partial prof-name opt/language-map)]
-      [list-item-section "Tool Proficiencies" "stone-crafting" @(subscribe [::char/tool-profs id]) (partial prof-name equip/tools-map)]
-      [list-item-section "Weapon Proficiencies" "bowman" @(subscribe [::char/weapon-profs id]) (partial prof-name weapon/weapons-map)]
-      [list-item-section "Armor Proficiencies" "mailed-fist" @(subscribe [::char/armor-profs id]) (partial prof-name armor/armor-map)]]]))
-
 (defn section-header-2 [title icon]
   [:div
    (svg-icon icon 24 24)
@@ -1241,6 +1222,9 @@
        (if (:description shield)
          [:div.m-t-10 (str "Shield: " (:description shield))])]])])
 
+(defn boolean-icon [v]
+  [:i.fa {:class-name (if v "fa-check green" "fa-times red")}])
+
 (defn armor-section-2 []
   (let [expanded-details (r/atom {})]
     (fn [id]
@@ -1253,8 +1237,6 @@
             all-armor-details (map mi/all-armor-map (keys all-armor))
             armor-details (armor/non-shields all-armor-details)
             shield-details (armor/shields all-armor-details)]
-        (prn "ARMOR DETAILS" armor-details)
-        (prn "SHIELD DETAILS" shield-details)
         [:div
          [:div.flex.align-items-c
           (svg-icon "breastplate" 32 32)
@@ -1282,20 +1264,20 @@
                                    (armor-profs key)
                                    (armor-profs type)))
                      expanded? (@expanded-details k)]
-                 (prn "SHIELD" shield)
                  ^{:key (str key (:key shield))}
                  [:tr.pointer
                   {:on-click #(swap! expanded-details (fn [d] (update d k not)))}
                   [:td.p-10.f-w-b (str (or (:name armor) "unarmored")
                                        (if shield (str " + " (:name shield))))]
                   (if (not mobile?)
-                    [:td.p-10 [:i.fa {:class-name (if proficient? "fa-check green" "fa-times red")}]])
+                    [:td.p-10 (boolean-icon proficient?)])
                   [:td.p-10.w-100-p
                    [:div
                     (armor-details-section armor shield expanded?)]]
                   [:td
                    [:div.orange
-                    [:span.underline (if expanded? "less" "more")]
+                    (if (not mobile?)
+                      [:span.underline (if expanded? "less" "more")])
                     [:i.fa.m-l-5
                      {:class-name (if expanded? "fa-caret-up" "fa-caret-down")}]]]
                   [:td.p-10.f-w-b.f-s-18 ac]])))]]]]))))
@@ -1334,7 +1316,7 @@
                    {:on-click #(swap! expanded-details (fn [d] (update d weapon-key not)))}
                    [:td.p-10.f-w-b (:name weapon)]
                    (if (not mobile?)
-                     [:td.p-10 [:i.fa {:class-name (if proficient? "fa-check green" "fa-times red")}]])
+                     [:td.p-10 (boolean-icon proficient?)])
                    [:td.p-10.w-100-p
                     [:div
                      (disp/attack-description (-> weapon
@@ -1344,11 +1326,60 @@
                       (weapon-details weapon))]
                    [:td
                     [:div.orange
-                     [:span.underline (if expanded? "less" "more")]
+                     (if (not mobile?)
+                       [:span.underline (if expanded? "less" "more")])
                      [:i.fa.m-l-5
                       {:class-name (if expanded? "fa-caret-up" "fa-caret-down")}]]]
                    [:td.p-10.f-w-b.f-s-18 (common/bonus-str (+ proficiency-bonus magical-damage-bonus))]]))
               all-weapons))]]]]))))
+
+(defn skill-details-section-2 []
+  (let [expanded-details (r/atom {})]
+    (fn [id]
+      (let [skill-profs (or @(subscribe [::char/skill-profs id]) #{})
+            skill-bonuses @(subscribe [::char/skill-bonuses id])
+            skill-expertise @(subscribe [::char/skill-expertise id])
+            device-type @(subscribe [:device-type])
+            mobile? (= :mobile device-type)]
+        [:div
+         [:div.flex.align-items-c
+          (svg-icon "juggler" 32 32)
+          [:span.m-l-5.f-w-b.f-s-18 "Skills"]]
+         [:div
+          [:table.w-100-p.t-a-l.striped
+           [:tbody
+            [:tr.f-w-b
+             {:class-name (if mobile? "f-s-12")}
+             [:th.p-10 "Name"]
+             [:td.p-10 (if mobile? "Prof?" "Proficient?")]
+             (if skill-expertise
+               [:th.p-10 "Expertise?"])
+             [:th.p-10 (if (not mobile?) [:div.w-40 "Bonus"])]]
+            (doall
+             (map
+              (fn [{:keys [key name]}]
+                (let [proficient? (key skill-profs)
+                      expertise? (key skill-expertise)]
+                  ^{:key key}
+                  [:tr
+                   [:td.p-10.f-w-b name]
+                   [:td.p-10 (boolean-icon proficient?)]
+                   (if skill-expertise
+                     [:td.p-10 (boolean-icon expertise?)])
+                   [:td.p-10.f-s-18.f-w-b (common/bonus-str (key skill-bonuses))]]))
+              skills/skills))]]]]))))
+
+(defn proficiency-details [num-columns id]
+  (let [ability-bonuses @(subscribe [::char/ability-bonuses id])]
+    [:div.details-columns
+     {:class-name (if (= 2 num-columns) "flex")}
+     [:div.flex-grow-1.details-column-2
+      {:class-name (if (= 2 num-columns) "w-50-p m-l-20")}
+      [skill-details-section-2 id]
+      [list-item-section "Languages" "lips" @(subscribe [::char/languages id]) (partial prof-name opt/language-map)]
+      [list-item-section "Tool Proficiencies" "stone-crafting" @(subscribe [::char/tool-profs id]) (partial prof-name equip/tools-map)]
+      [list-item-section "Weapon Proficiencies" "bowman" @(subscribe [::char/weapon-profs id]) (partial prof-name weapon/weapons-map)]
+      [list-item-section "Armor Proficiencies" "mailed-fist" @(subscribe [::char/armor-profs id]) (partial prof-name armor/armor-map)]]]))
 
 (defn combat-details [num-columns id]
   (let [weapon-profs @(subscribe [::char/weapon-profs id])
@@ -1362,8 +1393,7 @@
         magic-weapons @(subscribe [::char/magic-weapons id])
         magic-armor @(subscribe [::char/magic-armor id])
         attacks @(subscribe [::char/attacks id])]
-    [:div.details-columns
-     {:class-name (if (= 2 num-columns) "flex")}
+    [:div
      [:div.flex.justify-cont-s-a.t-a-c
       [armor-class-section-2 id]
       [hit-points-section-2 id]
@@ -1447,33 +1477,43 @@
                :view features-details}})
 
 (defn character-display []
-  (let [selected-tab (r/atom "combat")
+  (let [selected-tab (r/atom "proficiencies")
         device-type @(subscribe [:device-type])]
     (fn [id show-summary? num-columns]
-      [:div.p-r-10
-       (if show-summary?
-         [:div.f-s-24.f-w-600.m-b-16.m-l-20.text-shadow.flex
-          [character-summary id true]])
-       [:div.flex.p-l-10.m-b-10.m-r-20
-        (doall
-         (map
-          (fn [[title {:keys [view icon]}]]
-            ^{:key title}
-            [:div.flex-grow-1.t-a-c
-             [details-tab
-              title
-              icon
-              device-type
-              (= title @selected-tab)
-              #(reset! selected-tab title)]])
-          details-tabs))]
-       [(-> @selected-tab details-tabs :view) num-columns id]])))
+      (let [two-columns? (= 2 num-columns)]
+        [:div.w-100-p
+         [:div
+          (if show-summary?
+            [:div.f-s-24.f-w-600.m-b-16.m-l-20.text-shadow.flex
+             [character-summary id true]])
+          [:div.flex.w-100-p
+           (if two-columns?
+             [:div.w-50-p
+              [summary-details num-columns id]])
+           [:div
+            {:class-name (if two-columns? "w-50-p" "w-100-p")}
+            [:div.flex.p-l-10.m-b-10.m-r-10
+             (doall
+              (map
+               (fn [[title {:keys [view icon]}]]
+                 ^{:key title}
+                 [:div.flex-grow-1.t-a-c
+                  [details-tab
+                   title
+                   icon
+                   device-type
+                   (= title @selected-tab)
+                   #(reset! selected-tab title)]])
+               (if two-columns?
+                 (rest details-tabs)
+                 details-tabs)))]
+            [(-> @selected-tab details-tabs :view) num-columns id]]]]]))))
 
 (def character-display-style
   {:padding "20px 5px"
    :background-color "rgba(0,0,0,0.15)"})
 
-(defn character-page [{:keys [id]}]
+(defn character-page [{:keys [id] :as arg}]
   (let [{:keys [::se/owner] :as strict-character} @(subscribe [::char/character id])
         character (char/from-strict strict-character)
         built-template (subs/built-template (subs/selected-plugin-options character))
@@ -1486,8 +1526,9 @@
       nil?
       [(if (= owner username)
          {:title "Edit"
+          :icon "pencil"
           :on-click #(dispatch [:edit-character character])})])
-     [:div.p-5.white
+     [:div.p-10.white
       [character-display id true (if (= :mobile device-type) 1 2)]]]))
 
 (defn character-list []
