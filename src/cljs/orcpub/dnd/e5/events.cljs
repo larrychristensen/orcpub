@@ -779,10 +779,10 @@
 (reg-event-fx
  :delete-character
  (fn [{:keys [db]} [_ id]]
-   {:db (update-in db
-                   dnd-5e-characters-path
-                   (fn [chars]
-                     (remove #(-> % :db/id (= id)) chars)))
+   {:db (update db
+                ::char5e/characters
+                (fn [chars]
+                  (remove #(-> % :db/id (= id)) chars)))
     :http {:method :delete
            :auth-token (get-auth-token db)
            :url (backend-url (routes/path-for routes/dnd-e5-char-route :id id))
