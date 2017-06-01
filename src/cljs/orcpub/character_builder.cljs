@@ -711,7 +711,6 @@
 (defn swap-abilities [i other-i k v]
   (stop-prop-fn
    (fn []
-     (prn "SWAP ABILITIES" i other-i k v)
      (dispatch [:swap-ability-values i other-i k v]))))
 
 (defn ability-subtitle [title]
@@ -1652,12 +1651,12 @@
          (case @current-tab
            :options [new-options-column 1]
            :description [description-fields]
-           [views5e/character-display @(subscribe [:built-character]) true 1])]]])))
+           [views5e/character-display nil true 1])]]])))
 
 (defn desktop-or-tablet-columns [device-type]
   (let [current-tab (r/atom :options)]
     (fn []
-      [:div
+      [:div.w-100-p
        [:div.flex-grow-1.flex.p-l-10.p-t-10
         [:div.w-50-p
          [:div.builder-tabs
@@ -1666,21 +1665,14 @@
          (if (= @current-tab :options)
            [new-options-column (if (= device-type :desktop) 2 1)]
            [description-fields])]
-        [:div.w-50-p.m-l-20
-         [views5e/character-display @(subscribe [:built-character]) true 1]]]])))
+        [:div.w-50-p.m-l-20.m-r-10
+         [views5e/character-display nil true 1]]]])))
 
 (defn builder-columns []
   (let [device-type @(subscribe [:device-type])]
     (case device-type
       :mobile [mobile-columns]
-      [desktop-or-tablet-columns device-type]))
-  #_[:div.flex-grow-1.flex
-   {:class-name (s/join " " (map #(str (name %) "-tab-active") @(subscribe [:active-tabs])))}
-   [:div.builder-column.options-column
-    [new-options-column]]
-   [description-fields]
-   [:div.builder-column.details-column
-    [views5e/character-display @(subscribe [:built-character]) true]]])
+      [desktop-or-tablet-columns device-type])))
 
 (defn builder-tabs [active-tabs]
   [:div.hidden-lg.w-100-p

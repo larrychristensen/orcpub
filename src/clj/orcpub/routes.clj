@@ -564,6 +564,7 @@
   (let [id (:db/id character)]
     (if (owns-entity? db username id)
       (let [current-character (d/pull db '[*] id)
+            _ (prn "CURRENT CHARACTER" current-character)
             problems (dnd-e5-char-type-problems current-character)]
         (if (seq problems)
           {:status 400 :body problems}
@@ -618,9 +619,10 @@
                    :in $ [?idents ...]
                    :where
                    [?e ::se/owner ?idents]
-                   [?e ::se/type :character]
-                   [?e ::se/game :dnd]
-                   [?e ::se/game-version :e5]]
+                   ;; uncomment these once all characters have the data
+                   #_[?e ::se/type :character]
+                   #_[?e ::se/game :dnd]
+                   #_[?e ::se/game-version :e5]]
                  db
                  [(:orcpub.user/username user)
                   (:orcpub.user/email user)])
