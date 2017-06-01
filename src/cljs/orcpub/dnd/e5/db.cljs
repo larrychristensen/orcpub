@@ -18,9 +18,9 @@
 (def default-route route-map/dnd-e5-char-builder-route)
 
 (defn parse-route []
-  (let [{:keys [handler] :as parsed} (bidi/match-route route-map/routes js/window.location.pathname)]
-    (if handler
-      handler
+  (let [route (bidi/match-route route-map/routes js/window.location.pathname)]
+    (if route
+      route
       default-route)))
 
 (def default-character (char5e/set-class t5e/character :barbarian 0 t5e/barbarian-option))

@@ -327,6 +327,9 @@
 (defn skill-bonuses [built-char]
   (es/entity-val built-char :skill-bonuses))
 
+(defn skill-expertise [built-char]
+  (es/entity-val built-char :skill-expertise))
+
 (defn tool-proficiencies [built-char]
   (es/entity-val built-char :tool-profs))
 

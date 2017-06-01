@@ -199,7 +199,7 @@
 
 (reg-sub-raw
   ::char5e/character
-  (fn [app-db [_ id]]
+  (fn [app-db [_ id :as args]]
     (if (nil? (get-in @app-db [::char5e/character-map id]))
       (go (dispatch [:set-loading true])
           (let [response (<! (http/get (routes/path-for routes/dnd-e5-char-route :id id)
@@ -302,7 +302,8 @@
    ::char5e/levels char5e/levels 
    ::char5e/darkvision char5e/darkvision 
    ::char5e/skill-profs char5e/skill-proficiencies 
-   ::char5e/skill-bonuses char5e/skill-bonuses 
+   ::char5e/skill-bonuses char5e/skill-bonuses
+   ::char5e/skill-expertise char5e/skill-expertise
    ::char5e/tool-profs char5e/tool-proficiencies 
    ::char5e/weapon-profs char5e/weapon-proficiencies 
    ::char5e/armor-profs char5e/armor-proficiencies 

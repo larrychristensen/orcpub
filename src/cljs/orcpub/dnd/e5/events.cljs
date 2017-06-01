@@ -422,13 +422,15 @@
 (reg-event-fx
  :route
  (fn [{:keys [db]} [_ {:keys [handler route-params] :as new-route} {:keys [return-route skip-path? event]}]]
-   (let [{:keys [route route-history]} db]
+   (let [{:keys [route route-history]} db
+         seq-params (seq route-params)
+         flat-params (flatten seq-params)]
      (cond-> {:db (assoc db
                   :route new-route
                   :return-route (or return-route (:return-route db))
                   :route-history (conj route-history route))
               :dispatch [:hide-message]}
-       (not skip-path?) (assoc :path (apply routes/path-for new-route (flatten (seq route-params))))
+       (not skip-path?) (assoc :path (apply routes/path-for (or handler new-route) flat-params))
        event (update :dispatch-n conj event)))))
 
 (reg-event-db

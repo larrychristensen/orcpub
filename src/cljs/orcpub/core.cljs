@@ -59,6 +59,7 @@
 (defn main-view []
   (let [{:keys [handler route-params] :as route} @(subscribe [:route])
         view (pages (or handler route))]
+    (prn "HANDLER" handler route-params route)
     [view route-params]))
 
 (r/render (if (let [doc-style js/document.documentElement.style]
