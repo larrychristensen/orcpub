@@ -570,7 +570,7 @@
     (if (owns-entity? db username id)
       (let [current-character (d/pull db '[*] id)
             _ (prn "CURRENT CHARACTER" current-character)
-            problems (dnd-e5-char-type-problems current-character)]
+            problems [] #_(dnd-e5-char-type-problems current-character)]
         (if (seq problems)
           {:status 400 :body problems}
           (let [new-character (remove-orphan-ids character)
@@ -638,7 +638,7 @@
   (let [parsed-id (Long/parseLong id)
         username (:user identity)
         character (d/pull db '[*] parsed-id)
-        problems (dnd-e5-char-type-problems character)]
+        problems [] #_(dnd-e5-char-type-problems character)]
     (if (owns-entity? db username parsed-id)
       (if (empty? problems)
         (do
@@ -649,7 +649,7 @@
 
 (defn get-character-for-id [db id]
   (let [{:keys [::se/type ::se/game ::se/game-version] :as character} (d/pull db '[*] id)
-        problems (dnd-e5-char-type-problems character)]
+        problems [] #_(dnd-e5-char-type-problems character)]
     (if (seq problems)
       {:status 400 :body problems}
       character)))
