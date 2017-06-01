@@ -99,7 +99,7 @@
          "LOG OUT"]]
        [:span.pointer.flex.flex-column.align-items-end
         [:span.orange.underline.f-w-b.m-l-5
-         {:on-click #(dispatch [:route routes/login-page-route])}
+         {:on-click #(dispatch [:route routes/login-page-route {:secure? true}])}
          [:span "LOGIN"]]])]))
 
 (def header-tab-style
@@ -327,7 +327,7 @@
 
 (defn login-link []
   [:span.underline.f-w-b.m-l-10.pointer.orange
-   {:on-click #(dispatch [:route routes/login-page-route])}
+   {:on-click #(dispatch [:route routes/login-page-route {:secure? true}])}
    "LOGIN"])
 
 (defn verify-success []
@@ -528,12 +528,12 @@
           [:div.m-t-20
            [:span "Don't have a login? "]
            [:span.orange.underline.pointer
-            {:on-click #(dispatch [:route routes/register-page-route])}
+            {:on-click #(dispatch [:route routes/register-page-route {:secure true}])}
             "REGISTER NOW"]]
           [:div.m-t-20
            [:span "Forgot your password? "]
            [:span.orange.underline.pointer
-            {:on-click #(dispatch [:route routes/send-password-reset-page-route])}
+            {:on-click #(dispatch [:route routes/send-password-reset-page-route {:secure? true}])}
             "RESET PASSWORD"]]]]]))))
 
 (def loading-style

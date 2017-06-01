@@ -419,19 +419,30 @@
  :set-page
  set-page)
 
+(defn make-url [protocol hostname path & [port]]
+  (str protocol "://" hostname (if port (str ":" port)) path))
+
 (reg-event-fx
  :route
- (fn [{:keys [db]} [_ {:keys [handler route-params] :as new-route} {:keys [return-route skip-path? event]}]]
+ (fn [{:keys [db]} [_ {:keys [handler route-params] :as new-route} {:keys [return-route skip-path? event secure?]}]]
    (let [{:keys [route route-history]} db
          seq-params (seq route-params)
-         flat-params (flatten seq-params)]
-     (cond-> {:db (assoc db
-                  :route new-route
-                  :return-route (or return-route (:return-route db))
-                  :route-history (conj route-history route))
-              :dispatch [:hide-message]}
-       (not skip-path?) (assoc :path (apply routes/path-for (or handler new-route) flat-params))
-       event (update :dispatch-n conj event)))))
+         flat-params (flatten seq-params)
+         path (apply routes/path-for (or handler new-route) flat-params)]
+     (if (and secure?
+              (not= "localhost" js/window.location.hostname)
+              (not= js/window.location.protocol "https"))
+       (set! js/window.location.href (make-url "https"
+                                               js/window.location.hostname
+                                               path
+                                               js/window.location.port))
+       (cond-> {:db (assoc db
+                           :route new-route
+                           :return-route (or return-route (:return-route db))
+                           :route-history (conj route-history route))
+                :dispatch [:hide-message]}
+         (not skip-path?) (assoc :path path)
+         event (update :dispatch-n conj event))))))
 
 (reg-event-db
  :set-user-data
@@ -521,7 +532,7 @@
              (if (= 401 (:status response))
                (if on-unauthorized
                  (dispatch (conj on-unauthorized response))
-                 (dispatch [:route routes/login-page-route]))
+                 (dispatch [:route routes/login-page-route {:secure? true}]))
                (if on-failure
                  (dispatch (conj on-failure response))
                  (dispatch (show-generic-error))))))))))
