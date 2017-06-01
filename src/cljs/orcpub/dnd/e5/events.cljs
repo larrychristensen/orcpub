@@ -438,7 +438,9 @@
                                                js/window.location.port))
        (cond-> {:db (assoc db
                            :route new-route
-                           :return-route (or return-route (:return-route db))
+                           :return-route (or return-route
+                                             (:return-route db)
+                                             routes/dnd-e5-char-builder-route)
                            :route-history (conj route-history route))
                 :dispatch [:hide-message]}
          (not skip-path?) (assoc :path path)
@@ -549,7 +551,9 @@
  [user->local-store-interceptor]
  (fn [{:keys [db]} [_ backtrack? response]]
    {:db (assoc db :user-data (-> response :body))
-    :dispatch [:route (:return-route db)]}))
+    :dispatch [:route (if (-> db :return-route :handler (= :login-page))
+                        routes/dnd-e5-char-builder-route
+                        (:return-route db))]}))
 
 (defn show-old-account-message []
   [:show-login-message [:div  "There is no account for the email or username, please double-check it. You can also try to " [:a {:href (routes/path-for routes/register-page-route)} "register"] "." [:div.f-w-n.i.m-t-10 "Accounts from the old OrcPub have not been ported over yet, but you can create a new account in the mean time and we will link it with your old account as soon as possible if you use the same email address."]]])
