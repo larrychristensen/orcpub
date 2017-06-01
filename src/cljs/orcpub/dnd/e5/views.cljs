@@ -1477,10 +1477,15 @@
                :view features-details}})
 
 (defn character-display []
-  (let [selected-tab (r/atom "summary")
-        device-type @(subscribe [:device-type])]
+  (let [device-type @(subscribe [:device-type])
+        selected-tab (r/atom nil)]
     (fn [id show-summary? num-columns]
-      (let [two-columns? (= 2 num-columns)]
+      (let [two-columns? (= 2 num-columns)
+            tab (if @selected-tab
+                  @selected-tab
+                  (if two-columns?
+                    "combat"
+                    "summary"))]
         [:div.w-100-p
          [:div
           (if show-summary?
@@ -1502,12 +1507,12 @@
                    title
                    icon
                    device-type
-                   (= title @selected-tab)
+                   (= title tab)
                    #(reset! selected-tab title)]])
                (if two-columns?
                  (rest details-tabs)
                  details-tabs)))]
-            [(-> @selected-tab details-tabs :view) num-columns id]]]]]))))
+            [(-> tab details-tabs :view) num-columns id]]]]]))))
 
 (def character-display-style
   {:padding "20px 5px"
