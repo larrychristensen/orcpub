@@ -1477,7 +1477,7 @@
                :view features-details}})
 
 (defn character-display []
-  (let [selected-tab (r/atom "proficiencies")
+  (let [selected-tab (r/atom "summary")
         device-type @(subscribe [:device-type])]
     (fn [id show-summary? num-columns]
       (let [two-columns? (= 2 num-columns)]

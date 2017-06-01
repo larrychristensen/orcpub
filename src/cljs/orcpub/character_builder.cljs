@@ -1639,7 +1639,7 @@
     :on-click #(reset! current-tab key)} title])
 
 (defn mobile-columns []
-  (let [current-tab (r/atom :details)]
+  (let [current-tab (r/atom :options)]
     (fn []
       [:div.p-r-10.w-100-p
        [:div.flex-grow-1.flex.p-l-10.p-t-10
@@ -1665,21 +1665,14 @@
          (if (= @current-tab :options)
            [new-options-column (if (= device-type :desktop) 2 1)]
            [description-fields])]
-        [:div.w-50-p.m-l-20
+        [:div.w-50-p.m-l-20.m-r-10
          [views5e/character-display nil true 1]]]])))
 
 (defn builder-columns []
   (let [device-type @(subscribe [:device-type])]
     (case device-type
       :mobile [mobile-columns]
-      [desktop-or-tablet-columns device-type]))
-  #_[:div.flex-grow-1.flex
-   {:class-name (s/join " " (map #(str (name %) "-tab-active") @(subscribe [:active-tabs])))}
-   [:div.builder-column.options-column
-    [new-options-column]]
-   [description-fields]
-   [:div.builder-column.details-column
-    [views5e/character-display @(subscribe [:built-character]) true]]])
+      [desktop-or-tablet-columns device-type])))
 
 (defn builder-tabs [active-tabs]
   [:div.hidden-lg.w-100-p

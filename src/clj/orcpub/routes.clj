@@ -619,9 +619,10 @@
                    :in $ [?idents ...]
                    :where
                    [?e ::se/owner ?idents]
-                   [?e ::se/type :character]
-                   [?e ::se/game :dnd]
-                   [?e ::se/game-version :e5]]
+                   ;; uncomment these once all characters have the data
+                   #_[?e ::se/type :character]
+                   #_[?e ::se/game :dnd]
+                   #_[?e ::se/game-version :e5]]
                  db
                  [(:orcpub.user/username user)
                   (:orcpub.user/email user)])
