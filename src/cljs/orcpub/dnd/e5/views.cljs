@@ -125,7 +125,7 @@
         [:div.flex.justify-cont-s-b.align-items-c.w-100-p.p-l-20.p-r-20
          [:img.orcpub-logo.h-32.w-120.pointer
           {:src "/image/orcpub-logo.svg"
-           :on-click #(dispatch [:route routes/default-route])}]
+           :on-click #(dispatch [:route routes/default-route {:return? true}])}]
          [user-header-view]]]]]
      [:div.container
       [:div.content
@@ -134,7 +134,7 @@
          [header-tab
           "characters"
           "battle-gear"
-          #(dispatch [:route routes/dnd-e5-char-list-page-route])
+          #(dispatch [:route routes/dnd-e5-char-list-page-route {:return? true}])
           false
           device-type]
          [header-tab
@@ -190,7 +190,7 @@
        [:div.flex-grow-1 content]
        [legal-footer]]
       [:div.registration-image
-       {:style {:background-image "url(image/shutterstock_432001912.jpg)"
+       {:style {:background-image "url(/image/shutterstock_432001912.jpg)"
                 :background-size "1200px 800px"
                 :background-position "-350px 0px"
                 :background-clip :content-box
@@ -1577,7 +1577,8 @@
                     {:on-click #(dispatch [:edit-character @(subscribe [::char/internal-character id])])}
                     "EDIT"]
                    [:button.form-button.m-l-5
-                    {:on-click #(dispatch [:route (routes/match-route (routes/path-for routes/dnd-e5-char-page-route :id id))])}
+                    {:on-click #(let [route (routes/match-route (routes/path-for routes/dnd-e5-char-page-route :id id))]
+                                  (dispatch [:route route {:return? true}]))}
                     "VIEW"]
                    [:button.form-button.m-l-5
                     {:on-click #(dispatch [:delete-character id])}
