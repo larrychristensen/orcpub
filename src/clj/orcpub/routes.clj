@@ -126,6 +126,7 @@
                 :db/id] :as user} (lookup-user db username password)
         unverified? (not verified?)
         expired? (and verification-sent (verification-expired? verification-sent))]
+    (prn "LOGIN" username password unverified? expired?)
     (cond
       (nil? id) (let [user-for-username (find-user-by-username-or-email db username)]
                   (login-error (if (:db/id user-for-username)
