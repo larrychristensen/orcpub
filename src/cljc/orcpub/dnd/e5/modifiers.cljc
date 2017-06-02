@@ -201,6 +201,10 @@
    :qualifier qualifier
    :class class})
 
+
+(defn spells-known-mode [class-name mode]
+  (mods/map-mod ?spells-known-modes class-name mode))
+
 (defn spells-known [level spell-key spellcasting-ability class & [min-level qualifier class-key]]
   (mods/modifier
     ?spells-known

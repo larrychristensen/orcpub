@@ -41,12 +41,13 @@
             [re-frame.core :refer [subscribe dispatch dispatch-sync]])
   (:require-macros [cljs.core.async.macros :refer [go]]))
 
-(def print-disabled? true)
+(def print-disabled? false)
 (def print-enabled? (and (not print-disabled?)
                          (s/starts-with? js/window.location.href "http://localhost")))
 
 (defn stop-propagation [e]
   (.stopPropagation e))
+
 
 (defn stop-prop-fn [func]
   (fn [e]
@@ -1276,6 +1277,21 @@
         :remaining (if (pos? num-selections) (sum-remaining built-template character selections)) 
         :body (hit-points-entry character selections built-char built-template)}])))
 
+(defn known-mode-info []
+  (let [spells-known-modes @(subscribe [::char5e/spells-known-modes])
+        any-mode-class-names (into
+                              []
+                              (comp
+                               (filter (fn [[_ mode]]
+                                         (= mode :all)))
+                               (map key)
+                               (map (fn [nm] (str nm "s"))))
+                              spells-known-modes)]
+    (if (seq any-mode-class-names)
+      [:div.bg-light.b-rad-5.p-10.f-w-b.m-l-5.m-r-5
+       (str (common/list-print any-mode-class-names)
+            " do not need to select known spells since they can prepare any spell available in their class spell lists.")])))
+
 (def pages
   [{:name "Race"
     :icon "woman-elf-face"
@@ -1294,7 +1310,8 @@
              {:key :hit-points :group? true :ui-fn hit-points-editor}]}
    {:name "Spells"
     :icon "spell-book"
-    :tags #{:spells}}
+    :tags #{:spells}
+    :components [known-mode-info]}
    {:name "Proficiencies"
     :icon "juggler"
     :tags #{:profs}
@@ -1406,7 +1423,7 @@
         page @(subscribe [:page])
         page-index (or page 0)
         option-paths @(subscribe [:option-paths])
-        {:keys [tags ui-fns] :as page} (pages page-index)
+        {:keys [tags ui-fns components] :as page} (pages page-index)
         selections (entity/tagged-selections available-selections tags)
         combined-selections (entity/combine-selections selections)
         final-selections (remove #(and (zero? (::t/min %))
@@ -1449,6 +1466,13 @@
                               ui-fns)
             non-ui-fn-selections (sets/difference (set final-selections) (set ui-fn-selections))]
         [:div.p-5
+         [:div
+          (doall
+           (map-indexed
+            (fn [i component-fn]
+              ^{:key i}
+              [component-fn])
+            components))]
          [:div
           (doall
            (map

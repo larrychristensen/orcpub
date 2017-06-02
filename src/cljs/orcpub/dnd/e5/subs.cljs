@@ -319,7 +319,8 @@
    ::char5e/armor char5e/normal-armor-inventory 
    ::char5e/magic-armor char5e/magic-armor-inventory 
    ::char5e/all-armor-inventory char5e/all-armor-inventory 
-   ::char5e/spells-known char5e/spells-known 
+   ::char5e/spells-known char5e/spells-known
+   ::char5e/spells-known-modes char5e/spells-known-modes
    ::char5e/spell-slots char5e/spell-slots 
    ::char5e/spell-modifiers char5e/spell-modifiers 
    ::char5e/weapons char5e/normal-weapons-inventory 
