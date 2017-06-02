@@ -335,7 +335,13 @@
    ::char5e/image-url char5e/image-url
    ::char5e/image-url-failed char5e/image-url-failed
    ::char5e/faction-image-url char5e/faction-image-url
-   ::char5e/faction-image-url-failed char5e/faction-image-url-failed})
+   ::char5e/faction-image-url-failed char5e/faction-image-url-failed
+   ::char5e/personality-trait-1 char5e/personality-trait-1
+   ::char5e/personality-trait-2 char5e/personality-trait-2
+   ::char5e/ideals char5e/ideals
+   ::char5e/bonds char5e/bonds
+   ::char5e/flaws char5e/flaws
+   ::char5e/description char5e/description})
 
 (doseq [[sub-key char-fn] character-subs]
   (reg-sub

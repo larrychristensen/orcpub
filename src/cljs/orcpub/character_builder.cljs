@@ -1293,6 +1293,8 @@
             (common/list-print any-mode-class-names)
             " do not need to select known spells since they can prepare any spell available in their class spell lists.")])))
 
+(defn multiclass-spell-slots-info [])
+
 (def pages
   [{:name "Race"
     :icon "woman-elf-face"

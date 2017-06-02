@@ -1059,6 +1059,38 @@
       (if flying-speed
         [:div.f-s-18 [:span flying-speed] [:span.display-section-qualifier-text "(fly)"]])]]))
 
+(defn personality-section [title & descriptions]
+  (if descriptions
+    [:div.m-t-20.t-a-l
+     [:div.f-w-b.f-s-18 title]
+     [:div
+      (doall
+       (map
+        (fn [description]
+          [:div
+           (doall
+            (map
+             (fn [p]
+               [:p p])
+             (s/split
+              description
+              #"\n")))])
+        descriptions))]]))
+
+(defn description-section [id]
+  (let [personality-trait-1 @(subscribe [::char/personality-trait-1 id])
+        personality-trait-2 @(subscribe [::char/personality-trait-2 id])
+        ideals @(subscribe [::char/ideals id])
+        bonds @(subscribe [::char/bonds id])
+        flaws @(subscribe [::char/flaws id])
+        description @(subscribe [::char/description id])]
+    [:div
+     (personality-section "Personality Traits" personality-trait-1 personality-trait-2)
+     (personality-section "Ideals" ideals)
+     (personality-section "Bonds" bonds)
+     (personality-section "Flaws" flaws)
+     (personality-section "Description" description)]))
+
 (defn summary-details [num-columns id]
   (let [built-char @(subscribe [:built-character id])
         race @(subscribe [::char/race id])
@@ -1073,9 +1105,9 @@
         faction-image-url-failed @(subscribe [::char/faction-image-url-failed id])
         armor-class @(subscribe [::char/armor-class id])
         armor-class-with-armor @(subscribe [::char/armor-class-with-armor id])]
-    [:div.details-columns
+    [:div
      {:class-name (if (= 2 num-columns) "flex")}
-     [:div.flex-grow-1
+     [:div
       {:class-name (if (= 2 num-columns) "w-50-p")}
       [:div.w-100-p.t-a-c
        [:div
@@ -1086,73 +1118,8 @@
           [armor-class-section-2 id]
           [hit-points-section-2 id]
           [speed-section-2 id]
-          [saving-throws-section-2 id]]]]]
-      #_[:div.flex
-       [:div.w-50-p
-        (if image-url-failed
-          [:div.p-10.red.f-s-18 (str (if (= :https image-url-failed)
-                                       no-https-images
-                                       "Image could not be loaded, please check the URL and try again"))]
-          (let [default-image-url (default-image race classes)
-                image-url? (not (s/blank? image-url))]
-            (if (or default-image-url image-url?)
-              [:img.character-image.w-100-p.m-b-20 {:src (if image-url?
-                                                           image-url
-                                                           default-image-url)
-                                                    :on-error (fn [_] (dispatch [:failed-loading-image image-url]))
-                                                    :on-load (fn [_] (if image-url-failed (dispatch [:loaded-image])))}]
-              [:div.p-20.m-r-10.m-t-10.bg-gray.b-rad-5.t-a-c
-               {:style {:border "2px solid white"
-                        :background-color "rgba(255,255,255,0.1)"}}
-               [:div (svg-icon "orc-head" 72 72)]
-               [:div "No image set, you can set one using the 'Image URL' field in the 'Description' tab."]])))
-        (if faction-image-url-failed
-          [:div.p-10.red.f-s-18 (str (if (= :https faction-image-url-failed)
-                                       no-https-images
-                                       "Faction image could not be loaded, please check the URL and try again"))]
-          (if (not (s/blank? faction-image-url))
-            [:div.p-30 [:img.character-image.w-100-p.m-b-20 {:src faction-image-url
-                                                             :on-error (fn [_] (dispatch [:failed-loading-faction-image faction-image-url]))
-                                                             :on-load (fn [_] (if faction-image-url-failed (dispatch [:loaded-faction-image])))}]]))]
-       [:div.w-50-p.m-l-10
-        (if background [svg-icon-section "Background" "ages" [:span.f-s-18.f-w-n background]])
-        (if alignment [svg-icon-section "Alignment" "yin-yang" [:span.f-s-18.f-w-n alignment]])
-        [armor-class-section armor-class armor-class-with-armor all-armor]
-        [svg-icon-section "Hit Points" "health-normal" (char/max-hit-points built-char)]
-        [speed-section built-char all-armor]
-        [svg-icon-section "Darkvision" "night-vision" (if (and darkvision (pos? darkvision)) (str darkvision " ft.") "--")]
-        [svg-icon-section "Initiative" "sprint" (common/bonus-str (char/initiative built-char))]
-        [display-section "Proficiency Bonus" nil (common/bonus-str (char/proficiency-bonus built-char))]
-        [svg-icon-section "Passive Perception" "awareness" (char/passive-perception built-char)]
-        (let [num-attacks (char/number-of-attacks built-char)]
-          (if (> num-attacks 1)
-            [display-section "Number of Attacks" nil num-attacks]))
-        (let [criticals (char/critical-hit-values built-char)
-              min-crit (apply min criticals)
-              max-crit (apply max criticals)]
-          (if (not= min-crit max-crit)
-            (display-section "Critical Hit" nil (str min-crit "-" max-crit))))
-        [:div
-         [list-display-section
-          "Saving Throws" "dodging"
-          (map (fn [[k v]] (str (s/upper-case (name k)) (common/bonus-str v))) (char/save-bonuses built-char))]
-         (let [save-advantage (char/saving-throw-advantages built-char)]
-           [:ul.list-style-disc.m-t-5
-            (doall
-             (map-indexed
-              (fn [i {:keys [abilities types]}]
-                ^{:key i}
-                [:li (str "advantage on "
-                          (common/list-print (map (comp s/lower-case :name opt/abilities-map) abilities))
-                          " saves against "
-                          (common/list-print
-                           (map #(let [condition (opt/conditions-map %)]
-                                   (cond
-                                     condition (str "being " (s/lower-case (:name condition)))
-                                     (keyword? %) (name %)
-                                     :else %))
-                                types)))])
-              save-advantage))])]]]]]))
+          [saving-throws-section-2 id]]]
+        [description-section]]]]]))
 
 (defn weapon-details-field [nm value]
   [:div.p-2
