@@ -398,6 +398,9 @@
 (defn spells-known [built-char]
   (es/entity-val built-char :spells-known))
 
+(defn spells-known-modes [built-char]
+  (es/entity-val built-char :spells-known-modes))
+
 (defn spell-slots [built-char]
   (es/entity-val built-char :spell-slots))
 

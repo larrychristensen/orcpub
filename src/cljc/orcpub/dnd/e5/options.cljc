@@ -1823,6 +1823,8 @@
                   modifiers
                   level-modifiers
                   [(modifiers/subclass (:key cls) kw)]
+                  (if (:known-mode spellcasting)
+                    [(modifiers/spells-known-mode name (:known-mode spellcasting))])
                   (armor-prof-modifiers armor-profs)
                   (weapon-prof-modifiers weapon-profs)
                   (tool-prof-modifiers tool-profs)
@@ -2053,6 +2055,8 @@
                   (if level-factor [(modifiers/spell-slot-factor kw level-factor)])
                   (if (and source (not plugin?))
                     [(modifiers/used-resource source name)])
+                  (if (:known-mode spellcasting)
+                    [(modifiers/spells-known-mode name (:known-mode spellcasting))])
                   (remove
                    nil?
                    [(modifiers/cls kw)
