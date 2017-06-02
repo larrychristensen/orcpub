@@ -27,6 +27,7 @@
             [orcpub.errors :as errors]
             [orcpub.privacy :as privacy]
             [orcpub.email :as email]
+            [orcpub.pdf :as pdf]
             [orcpub.registration :as registration]
             [orcpub.entity.strict :as se]
             [orcpub.entity :as entity]
@@ -301,84 +302,6 @@
     :weapon-name-2 8
     :weapon-name-3 8}))
 
-(defn write-fields! [doc fields flatten]
-  (let [catalog (.getDocumentCatalog doc)
-        form (.getAcroForm catalog)]
-    (.setNeedAppearances form true)
-    (doseq [[k v] fields]
-      (try
-        (let [field (.getField form (name k))]
-          (when field
-            (if (and (font-sizes k) flatten)
-              (.setDefaultAppearance field (str "/Helv " (font-sizes k) " Tf 0 0 0 rg")))
-            (.setValue
-             field
-             (cond 
-               (instance? PDCheckBox field) (if v "Yes" "Off")
-               (instance? PDTextField field) (str v)
-               :else nil))))
-        (catch Exception e (prn "failed writing field: " k v (clojure.stacktrace/print-stack-trace e)))))
-    (when flatten
-      (.setNeedAppearances form false)
-      (.flatten form))))
-
-(defn content-stream [doc page]
-  (PDPageContentStream. doc page true false true))
-
-(defn in-to-sz [inches]
-  (float (* 72 inches)))
-
-(defn in-to-coord-x [inches]
-  (in-to-sz inches))
-
-(defn in-to-coord-y [inches]
-  (in-to-sz (- 11 inches)))
-
-(defn scale [[r-h r-w] [i-h i-w]]
-  (let [height-to-width (/ i-h i-w)
-        rect-height-to-width (/ r-h r-w)
-        height-ratio (/ r-h i-h)]
-    (if (> height-to-width rect-height-to-width)
-      [r-h (* r-h (/ i-w i-h))]
-      [(* r-w (/ i-h i-w)) r-w])))
-
-(defn draw-imagex [c-stream img x y width height]
-  (let [[scaled-height scaled-width] (scale [height width] [(.getHeight img) (.getWidth img)])]
-    (.drawImage
-     c-stream
-     img
-     (in-to-coord-x (+ x (if (< scaled-width width)
-                           (/ (- width scaled-width) 2)
-                           0)))
-     (in-to-coord-y (+ height y (if (< scaled-height height)
-                                  (/ (- scaled-height height) 2)
-                                  0)))
-     (in-to-sz scaled-width)
-     (in-to-sz scaled-height))))
-
-(defn draw-non-jpg [doc page url x y width height]
-  (with-open [c-stream (content-stream doc page)]
-    (let [img (LosslessFactory/createFromImage doc (ImageIO/read (URL. url)))]
-      (draw-imagex c-stream img x y width height))))
-
-(defn draw-jpg [doc page url x y width height]
-  (with-open [c-stream (content-stream doc page)
-              image-stream (.openStream (URL. url))]
-    (let [img (JPEGFactory/createFromStream doc image-stream)]
-      (draw-imagex c-stream img x y width height))))
-
-(defn draw-image! [doc page url x y width height]
-  (let [lower-case-url (s/lower-case url)
-        jpg? (or (s/ends-with? lower-case-url "jpg")
-                 (s/ends-with? lower-case-url "jpeg"))
-        draw-fn (if jpg? draw-jpg draw-non-jpg)]
-    (try
-      (draw-fn doc page url x y width height)
-      (catch Exception e (prn "failed loading image" (clojure.stacktrace/print-stack-trace e))))))
-
-(defn get-page [doc index]
-  (.getPage doc index))
-
 (defn character-pdf-2 [req]
   (let [fields (-> req :form-params :body clojure.edn/read-string)
         {:keys [image-url image-url-failed faction-image-url faction-image-url-failed]} fields
@@ -394,15 +317,15 @@
         user-agent (get-in req [:headers "user-agent"])
         chrome? (re-matches #".*Chrome.*" user-agent)]
     (with-open [doc (PDDocument/load input)]
-      (write-fields! doc fields (not chrome?))
+      (pdf/write-fields! doc fields (not chrome?))
       (if (and image-url
                (re-matches #"^(https?|ftp|file)://[-a-zA-Z0-9+&@#/%?=~_|!:,.;]*[-a-zA-Z0-9+&@#/%=~_|]" image-url)
                (not image-url-failed))
-        (draw-image! doc (get-page doc 1) image-url 0.45 1.75 2.35 3.15))
+        (pdf/draw-image! doc (pdf/get-page doc 1) image-url 0.45 1.75 2.35 3.15))
       (if (and faction-image-url
                (re-matches #"^(https?|ftp|file)://[-a-zA-Z0-9+&@#/%?=~_|!:,.;]*[-a-zA-Z0-9+&@#/%=~_|]" faction-image-url)
                (not faction-image-url-failed))
-        (draw-image! doc (get-page doc 1) faction-image-url 5.88 2.4 1.905 1.52))
+        (pdf/draw-image! doc (pdf/get-page doc 1) faction-image-url 5.88 2.4 1.905 1.52))
       (.save doc output))
     (let [a (.toByteArray output)]
       {:status 200 :body (ByteArrayInputStream. a)})))
