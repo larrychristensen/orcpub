@@ -126,7 +126,6 @@
                 :db/id] :as user} (lookup-user db username password)
         unverified? (not verified?)
         expired? (and verification-sent (verification-expired? verification-sent))]
-    (prn "LOGIN" username password unverified? expired?)
     (cond
       (nil? id) (let [user-for-username (find-user-by-username-or-email db username)]
                   (login-error (if (:db/id user-for-username)
@@ -550,6 +549,9 @@
 (defn remove-orphan-ids [entity]
   (remove-orphan-ids-aux false entity))
 
+(defn remove-ids [entity]
+  (remove-orphan-ids-aux true entity))
+
 (defn owns-entity? [db username entity-id]
   (let [{:keys [:orcpub.user/username :orcpub.user/email]} (find-user-by-username db username)
         {:keys [:orcpub.entity.strict/owner]} (d/pull db '[:orcpub.entity.strict/owner] entity-id)]
@@ -571,22 +573,33 @@
     (if (owns-entity? db username id)
       (let [current-character (d/pull db '[*] id)
             _ (prn "CURRENT CHARACTER" current-character)
-            problems [] #_(dnd-e5-char-type-problems current-character)]
+            problems [] #_(dnd-e5-char-type-problems current-character)
+            current-valid? (spec/valid? ::se/entity current-character)]
+        (if (not current-valid?)
+          (do (prn "INVALID CHARACTER FOUND, REPLACING" #_current-character)
+              (prn "INVALID CHARACTER EXPLANATION" #_(spec/explain-data ::se/entity current-character))))
         (if (seq problems)
           {:status 400 :body problems}
-          (let [new-character (remove-orphan-ids character)
-                current-ids (db-ids current-character)
-                new-ids (db-ids new-character)
-                retract-ids (sets/difference current-ids new-ids)
-                retractions (map
-                             (fn [retract-id]
-                               [:db/retractEntity retract-id])
-                             retract-ids)
-                tx (conj retractions
-                         (assoc new-character :orcpub.entity.strict/owner username))
-                result @(d/transact conn tx)]))
-        {:status 200
-         :body (d/pull (d/db conn) '[*] id)})
+          (if (not current-valid?)
+            (let [new-character (remove-ids character)
+                  tx [[:db/retractEntity (:db/id current-character)]
+                      (assoc new-character :db/id "tempid")]
+                  result @(d/transact conn tx)]
+              {:status 200
+               :body (d/pull (d/db conn) '[*] (-> result :tempids (get "tempid")))})
+            (let [new-character (remove-orphan-ids character)
+                  current-ids (db-ids current-character)
+                  new-ids (db-ids new-character)
+                  retract-ids (sets/difference current-ids new-ids)
+                  retractions (map
+                               (fn [retract-id]
+                                 [:db/retractEntity retract-id])
+                               retract-ids)
+                  tx (conj retractions
+                           (assoc new-character :orcpub.entity.strict/owner username))]
+              @(d/transact conn tx)
+              {:status 200
+               :body (d/pull (d/db conn) '[*] id)}))))
       {:status 401 :body "You do not own this character"})))
 
 (defn create-new-character [conn character username]

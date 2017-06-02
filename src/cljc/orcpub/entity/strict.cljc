@@ -20,5 +20,17 @@
 
 (spec/def ::values (spec/map-of qualified-keyword? some?))
 
-(spec/def ::entity (spec/keys :opt [::selections
-                                    ::values]))
+(defn has-duplicate-selections? [{:keys [::selections]}]
+  (let [key-set (into #{} (map ::key selections))]
+    (or (not= (count key-set)
+              (count selections))
+        (some
+         (fn [{:keys [::options ::option] :as selection}]
+           (some
+            has-duplicate-selections?
+            (or options [option])))
+         selections))))
+
+(spec/def ::entity (spec/and (spec/keys :opt [::selections
+                                              ::values])
+                             (complement has-duplicate-selections?)))
