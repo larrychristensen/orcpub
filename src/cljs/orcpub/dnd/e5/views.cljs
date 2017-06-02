@@ -62,7 +62,9 @@
    [:div.f-s-10.t-a-l.m-l-10 (:placeholder attrs)]
    [:div.flex.p-l-10.p-l-10.p-r-10
     [:input.flex-grow-1
-     attrs]]])
+     (merge
+      attrs
+      {:auto-complete :off})]]])
 
 (defn form-input []
   (let [blurred? (r/atom false)]
@@ -647,7 +649,8 @@
   {:border-top "1px solid rgba(255,255,255,0.5)"})
 
 (def thumbnail-style
-  {:height "100px"})
+  {:height "100px"
+   :max-width "200px"})
 
 (defn character-summary [id & [include-name?]]
   (let [character-name @(subscribe [::char/character-name id])
