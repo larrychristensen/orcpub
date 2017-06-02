@@ -1289,7 +1289,8 @@
                               spells-known-modes)]
     (if (seq any-mode-class-names)
       [:div.bg-light.b-rad-5.p-10.f-w-b.m-l-5.m-r-5
-       (str (common/list-print any-mode-class-names)
+       (str "Except for cantrips, "
+            (common/list-print any-mode-class-names)
             " do not need to select known spells since they can prepare any spell available in their class spell lists.")])))
 
 (def pages
