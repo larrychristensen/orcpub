@@ -925,7 +925,7 @@
 
 (defn section-header-2 [title icon]
   [:div
-   (svg-icon icon 24 24)
+   (if icon (svg-icon icon 24 24))
    [:div.f-s-18.f-w-b.m-b-5 title]])
 
 (defn armor-class-section-2 [id]
@@ -953,7 +953,16 @@
   (basic-section "Max Hit Points" "health-normal" @(subscribe [::char/max-hit-points id])))
 
 (defn initiative-section-2 [id]
-  (basic-section "Initiative" "sprint" @(subscribe [::char/initiative id])))
+  (basic-section "Initiative" "sprint" (common/bonus-str @(subscribe [::char/initiative id]))))
+
+(defn critical-hits-section-2 [id]
+  (let [critical-hit-values @(subscribe [::char/critical-hit-values])]
+    (basic-section "Critical Hits" nil (str (apply min critical-hit-values)
+                                            "-"
+                                            (apply max critical-hit-values)))))
+
+(defn number-of-attacks-section-2 [id]
+  (basic-section "Number of Attacks" nil @(subscribe [::char/number-of-attacks])))
 
 (defn passive-perception-section-2 [id]
   (basic-section "Passive Perception" "awareness" @(subscribe [::char/passive-perception id])))
@@ -1065,12 +1074,14 @@
      [:div.f-w-b.f-s-18 title]
      [:div
       (doall
-       (map
-        (fn [description]
+       (map-indexed
+        (fn [i description]
+          ^{:key i}
           [:div
            (doall
-            (map
-             (fn [p]
+            (map-indexed
+             (fn [j p]
+               ^{:key j}
                [:p p])
              (s/split
               description
@@ -1084,7 +1095,7 @@
         bonds @(subscribe [::char/bonds id])
         flaws @(subscribe [::char/flaws id])
         description @(subscribe [::char/description id])]
-    [:div
+    [:div.p-5
      (personality-section "Personality Traits" personality-trait-1 personality-trait-2)
      (personality-section "Ideals" ideals)
      (personality-section "Bonds" bonds)
@@ -1118,7 +1129,8 @@
           [armor-class-section-2 id]
           [hit-points-section-2 id]
           [speed-section-2 id]
-          [saving-throws-section-2 id]]]
+          [saving-throws-section-2 id]
+          ]]
         [description-section]]]]]))
 
 (defn weapon-details-field [nm value]
@@ -1367,13 +1379,22 @@
         armor @(subscribe [::char/armor id])
         magic-weapons @(subscribe [::char/magic-weapons id])
         magic-armor @(subscribe [::char/magic-armor id])
-        attacks @(subscribe [::char/attacks id])]
+        attacks @(subscribe [::char/attacks id])
+        critical-hit-values @(subscribe [::char/critical-hit-values id])
+        non-standard-crits? (> (count critical-hit-values) 1)
+        number-of-attacks @(subscribe [::char/number-of-attacks id])
+        non-standard-attack-number? (> number-of-attacks 1)]
     [:div
      [:div.flex.justify-cont-s-a.t-a-c
       [armor-class-section-2 id]
       [hit-points-section-2 id]
       [speed-section-2 id]
       [initiative-section-2 id]]
+     (if (or non-standard-crits?
+             non-standard-attack-number?)
+       [:div.flex.justify-cont-s-a.t-a-c
+        [critical-hits-section-2 id]
+        [number-of-attacks-section-2 id]])
      [:div.m-t-30
       [list-item-section "Damage Resistances" "surrounded-shield" resistances resistance-str]]
      [:div.m-t-30

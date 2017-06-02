@@ -341,7 +341,9 @@
    ::char5e/ideals char5e/ideals
    ::char5e/bonds char5e/bonds
    ::char5e/flaws char5e/flaws
-   ::char5e/description char5e/description})
+   ::char5e/description char5e/description
+   ::char5e/critical-hit-values char5e/critical-hit-values
+   ::char5e/number-of-attacks char5e/number-of-attacks})
 
 (doseq [[sub-key char-fn] character-subs]
   (reg-sub

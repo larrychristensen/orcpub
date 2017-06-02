@@ -133,7 +133,8 @@
                                  errors/no-account)))
       (and unverified? expired?) (login-error errors/unverified-expired)
       unverified? (login-error errors/unverified {:email email})
-      :else (let [token (create-token (:orcpub.user/username user) (-> 3 hours from-now))]
+      :else (let [token (create-token (:orcpub.user/username user)
+                                      (-> 24 hours from-now))]
               {:status 200 :body {:user-data {:username (:orcpub.user/username user)
                                               :email (:orcpub.user/email user)}
                                   :token token}}))))
