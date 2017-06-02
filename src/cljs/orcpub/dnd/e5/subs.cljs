@@ -187,7 +187,7 @@
           (dispatch [:set-loading false])
           (case (:status response)
             200 (dispatch [::char5e/set-characters (-> response :body)])
-            401 (dispatch [:route routes/login-page-route])
+            401 (dispatch [:route routes/login-page-route {:secure? true}])
             500 (dispatch (events/show-generic-error)))))
     (ra/make-reaction
      (fn [] (get @app-db ::char5e/characters [])))))
@@ -207,7 +207,7 @@
             (dispatch [:set-loading false])
             (case (:status response)
               200 (dispatch [::char5e/set-character id (-> response :body)])
-              401 (dispatch [:route routes/login-page-route])
+              401 (dispatch [:route routes/login-page-route {:secure? true}])
               500 (dispatch (events/show-generic-error))))))
     (ra/make-reaction
      (fn [] (get-in @app-db [::char5e/character-map id] [])))))
@@ -348,14 +348,16 @@
 
 (reg-sub
  ::char5e/all-armor
- :<- [::char5e/magic-armor]
- :<- [::char5e/armor]
+ (fn [[_ id]]
+   [(subscribe [::char5e/magic-armor id])
+    (subscribe [::char5e/armor id])])
  (fn [[magic-armor armor] _]
    (merge magic-armor armor)))
 
 (reg-sub
  ::char5e/all-weapons
- :<- [::char5e/magic-weapons]
- :<- [::char5e/weapons]
+ (fn [[_ id]]
+   [(subscribe [::char5e/magic-weapons id])
+    (subscribe [::char5e/weapons id])])
  (fn [[magic-weapons weapons] _]
    (merge magic-weapons weapons)))
