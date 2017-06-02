@@ -9,7 +9,7 @@
    (str "Dear " first-and-last-name ",")
    [:br]
    [:br]
-   "You OrcPub account is almost ready, we just need you to verify your email address going the following URL to confirm that you are authorized to use this email address:"
+   "Your OrcPub account is almost ready, we just need you to verify your email address going the following URL to confirm that you are authorized to use this email address:"
    [:br]
    [:br]
    [:a {:href verification-url} verification-url]
