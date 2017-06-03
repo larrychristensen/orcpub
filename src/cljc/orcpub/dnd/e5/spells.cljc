@@ -753,8 +753,9 @@ At Higher Levels. When you cast this spell using a spell slot of 2nd level or hi
     :casting-time "1 minute"
     :range "Self"
     :components {:verbal true :somatic true :material true :material-component "incense and a vial of holy or unholy water"}
-    :duration "1 minute You contact your deity or a divine proxy and ask up to three questions that can be answered with a yes or no. You must ask your questions before the spell ends. You receive a correct answer for each question."
-    :description "Divine beings aren't necessarily omniscient, so you might receive “unclear” as an answer if a question pertains to information that lies beyond the deity's knowledge. In a case where a one-word answer could be misleading or contrary to the deity's interests, the GM might offer a short phrase as an answer instead.
+    :duration "1 minute"
+    :description "You contact your deity or a divine proxy and ask up to three questions that can be answered with a yes or no. You must ask your questions before the spell ends. You receive a correct answer for each question.
+Divine beings aren't necessarily omniscient, so you might receive “unclear” as an answer if a question pertains to information that lies beyond the deity's knowledge. In a case where a one-word answer could be misleading or contrary to the deity's interests, the GM might offer a short phrase as an answer instead.
 If you cast the spell two or more times before finishing your next long rest, there is a cumulative 25 percent chance for each casting after the first that you get no answer. The GM makes this roll in secret."
     }
    {
@@ -4956,7 +4957,8 @@ The stress of casting this spell to produce any effect other than duplicating an
                 :school "conjuration"
                 :level 6
                 :casting-time "1 action"
-                :range "5 feet :components {:verbal true}"
+                :range "5 feet"
+                :components {:verbal true}
                 :duration "Instantaneous"
                 :description "You and up to five willing creatures within 5 feet of you instantly teleport to a previously designated sanctuary. You and any creatures that teleport with you appear in the nearest unoccupied space to the spot you designated when you prepared your sanctuary (see below). If you cast this spell without first preparing a sanctuary, the spell has no effect.
 You must designate a sanctuary by casting this spell within a location, such as a temple, dedicated to or strongly linked to your deity. If you attempt to cast the spell in this manner in an area that isn't dedicated to your deity, the spell has no effect."
