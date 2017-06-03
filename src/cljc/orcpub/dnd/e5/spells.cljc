@@ -2194,7 +2194,14 @@ explosive runes glyph increases by 1d8 for each slot level above 3rd. If you cre
     :duration "Instantaneous"
     :source :phb
     :page 246
-    }
+    :description "Up to ten berries appear in your hand and are 
+infused with magic for the duration. A creature can 
+use its action to eat one berry. Eating a berry 
+restores 1 hit point, and the berry provides enough 
+nourishment to sustain a creature for one day.
+The berries lose their potency if they have not 
+been consumed within 24 hours of the casting of this 
+spell."}
    {
     :name "Grasping Vine"
     :school "conjuration"
