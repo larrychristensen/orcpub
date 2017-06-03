@@ -421,7 +421,10 @@
    :selections [(opt5e/ability-increase-selection (disj (set char5e/ability-keys) ::char5e/cha) 2 true)
                 (opt5e/skill-selection 2)
                 (opt5e/language-selection opt5e/languages 1)]
-   :modifiers [(mod5e/saving-throw-advantage [:charmed])]})
+   :modifiers [(mod5e/saving-throw-advantage [:charmed])]
+   :traits [{:name "Fey Ancestry"
+             :page 39
+             :summary "advantage on charmed saves and immune to sleep magic"}]})
 
 (def half-orc-option-cfg
   {:name "Half-Orc"
