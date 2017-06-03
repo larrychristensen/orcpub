@@ -4470,11 +4470,24 @@ long rest."})]
                opt5e/background-option
                cos-backgrounds)})])
 
+(def eladrin-elf-option
+  {:name "Elf"
+   :source :dmg
+   :plugin? true
+   :subraces
+   [{:name "Eladrin Elf"
+     :source :dmg
+     :abilities {::char5e/int 1}
+     :modifiers [elf-weapon-training-mods
+                 (mod5e/spells-known 2 :misty-step ::char5e/int "Eladrin Elf" 1 "Once per rest")]}]})
+
 (def dmg-selections
   [(opt5e/class-selection
     {:options (map
                (fn [cfg] (opt5e/class-option (assoc cfg :plugin? true :source :dmg)))
-               dmg-classes)})])
+               dmg-classes)})
+   (opt5e/race-selection
+    {:options [(opt5e/race-option eladrin-elf-option)]})])
 
 (defn ability-item [name abbr desc]
   [:li.m-t-5 [:span.f-w-b.m-r-5 (str name " (" abbr ")")] desc])
@@ -4582,7 +4595,7 @@ long rest."})]
       :key :dmg
       :selections dmg-selections
       :help (amazon-frame-help dmg-amazon-frame
-                               [:span "Includes villainous class options, including Cleric: Death Domain and Paladin: Oathbreaker, neither of which are Adventurer's League legal."])}
+                               [:span "Includes Eladrin Elf and villainous class options, including Cleric: Death Domain and Paladin: Oathbreaker, neither of which are Adventurer's League legal."])}
      {:name "Curse of Strahd"
       :key :cos
       :selections cos-selections
