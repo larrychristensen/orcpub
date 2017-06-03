@@ -955,6 +955,9 @@
 (defn initiative-section-2 [id]
   (basic-section "Initiative" "sprint" (common/bonus-str @(subscribe [::char/initiative id]))))
 
+(defn darkvision-section-2 [id]
+  (basic-section "Darkvision" "night-vision" (str @(subscribe [::char/darkvision id]) " ft.")))
+
 (defn critical-hits-section-2 [id]
   (let [critical-hit-values @(subscribe [::char/critical-hit-values])]
     (basic-section "Critical Hits" nil (str (apply min critical-hit-values)
@@ -1026,6 +1029,9 @@
             [:td [:div.p-5 (common/bonus-str (save-bonuses k))]]])
          char/ability-keys))]]]))
 
+(defn feet-str [num]
+  (str num " ft."))
+
 (defn speed-section-2 [id]
   (let [speed @(subscribe [::char/base-land-speed id])
         swim-speed @(subscribe [::char/base-swimming-speed id])
@@ -1038,10 +1044,10 @@
      (section-header-2 "Speed" "walking-boot")
      [:span.f-s-24.f-w-b
       [:span
-       [:span (+ (or unarmored-speed-bonus 0)
-                 (if speed-with-armor
-                   (speed-with-armor nil)
-                   speed))]
+       [:span (feet-str (+ (or unarmored-speed-bonus 0)
+                      (if speed-with-armor
+                        (speed-with-armor nil)
+                        speed)))]
        (if (or unarmored-speed-bonus
                speed-with-armor)
          [:span.display-section-qualifier-text "(unarmored)"])]
@@ -1055,18 +1061,18 @@
                ^{:key armor-kw}
                [:div
                 [:div
-                 [:span speed]
+                 [:span (feet-str speed)]
                  [:span.display-section-qualifier-text (str "(" (:name armor) " armor)")]]]))
            (dissoc all-armor :shield)))]
         (if unarmored-speed-bonus
           [:div.f-s-18
            [:span
-            [:span speed]
+            [:span (feet-str speed)]
             [:span.display-section-qualifier-text "(armored)"]]]))
       (if swim-speed
-        [:div.f-s-18 [:span swim-speed] [:span.display-section-qualifier-text "(swim)"]])
+        [:div.f-s-18 [:span (feet-str swim-speed)] [:span.display-section-qualifier-text "(swim)"]])
       (if flying-speed
-        [:div.f-s-18 [:span flying-speed] [:span.display-section-qualifier-text "(fly)"]])]]))
+        [:div.f-s-18 [:span (feet-str flying-speed)] [:span.display-section-qualifier-text "(fly)"]])]]))
 
 (defn personality-section [title & descriptions]
   (if (and (seq descriptions)
@@ -1110,7 +1116,6 @@
         background @(subscribe [::char/background id])
         alignment @(subscribe [::char/alignment id])
         all-armor @(subscribe [::char/all-armor id])
-        darkvision @(subscribe [::char/darkvision id])
         image-url-failed @(subscribe [::char/image-url-failed id])
         image-url @(subscribe [::char/image-url id])
         faction-image-url @(subscribe [::char/faction-image-url id])
@@ -1131,7 +1136,7 @@
           [hit-points-section-2 id]
           [speed-section-2 id]
           [saving-throws-section-2 id]
-          ]]
+          [darkvision-section-2 id]]]
         [description-section]]]]]))
 
 (defn weapon-details-field [nm value]
