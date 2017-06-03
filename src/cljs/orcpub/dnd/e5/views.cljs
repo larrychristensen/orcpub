@@ -1069,7 +1069,8 @@
         [:div.f-s-18 [:span flying-speed] [:span.display-section-qualifier-text "(fly)"]])]]))
 
 (defn personality-section [title & descriptions]
-  (if descriptions
+  (if (and (seq descriptions)
+           (some (complement s/blank?) descriptions))
     [:div.m-t-20.t-a-l
      [:div.f-w-b.f-s-18 title]
      [:div
@@ -1274,6 +1275,7 @@
     (fn [id]
       (let [all-weapons @(subscribe [::char/all-weapons id])
             weapon-profs (set @(subscribe [::char/weapon-profs id]))
+            has-weapon-prof @(subscribe [::char/has-weapon-prof id])
             device-type @(subscribe [:device-type])
             mobile? (= :mobile device-type)
             proficiency-bonus @(subscribe [::char/proficiency-bonus id])]
@@ -1295,8 +1297,7 @@
              (map
               (fn [[weapon-key {:keys [equipped?]}]]
                 (let [{:keys [name magical-damage-bonus description ranged?] :as weapon} (mi/all-weapons-map weapon-key)
-                      proficient? (or (weapon-key weapon-profs)
-                                      (-> weapon :type weapon-profs))
+                      proficient? (has-weapon-prof weapon)
                       expanded? (@expanded-details weapon-key)]
                   ^{:key weapon-key}
                   [:tr.pointer
@@ -1318,7 +1319,9 @@
                        [:span.underline (if expanded? "less" "more")])
                      [:i.fa.m-l-5
                       {:class-name (if expanded? "fa-caret-up" "fa-caret-down")}]]]
-                   [:td.p-10.f-w-b.f-s-18 (common/bonus-str (+ proficiency-bonus magical-damage-bonus))]]))
+                   [:td.p-10.f-w-b.f-s-18 (common/bonus-str (+ (if proficient?
+                                                                 proficiency-bonus
+                                                                 0) magical-damage-bonus))]]))
               all-weapons))]]]]))))
 
 (defn skill-details-section-2 []

@@ -2395,6 +2395,7 @@ The boots regain 2 hours of flying capability for every 12 hours they aren’t i
            weapon
            item
            {:name name
+            :base-key (:key weapon)
             :key (common/name-to-kw name)}))))
     (add-key item)))
 
@@ -2410,6 +2411,7 @@ The boots regain 2 hours of flying capability for every 12 hours they aren’t i
            armor
            item
            {:name name
+            :base-armor (:key armor)
             :key (common/name-to-kw name)})))
       normal-version
       (merge

@@ -339,6 +339,9 @@
       [:simple :martial]
       proficiencies)))
 
+(defn has-weapon-prof [built-char]
+  (es/entity-val built-char :has-weapon-prof?))
+
 (defn armor-proficiencies [built-char]
   (es/entity-val built-char :armor-profs))
 

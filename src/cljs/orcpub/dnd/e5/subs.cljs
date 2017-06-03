@@ -343,7 +343,8 @@
    ::char5e/flaws char5e/flaws
    ::char5e/description char5e/description
    ::char5e/critical-hit-values char5e/critical-hit-values
-   ::char5e/number-of-attacks char5e/number-of-attacks})
+   ::char5e/number-of-attacks char5e/number-of-attacks
+   ::char5e/has-weapon-prof char5e/has-weapon-prof})
 
 (doseq [[sub-key char-fn] character-subs]
   (reg-sub
