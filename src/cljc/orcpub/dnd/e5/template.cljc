@@ -4298,7 +4298,7 @@ long rest."})]
                [aarakocra-option-cfg
                 ee-gnome-option-cfg
                 genasi-option-cfg
-                (assoc goliath-option-cfg :key :goliath-ee)])})])
+                goliath-option-cfg])})])
 
 (def keen-senses-option
   (t/option-cfg
