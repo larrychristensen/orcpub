@@ -1484,7 +1484,8 @@
                            armor-proficiencies
                            weapon-proficiencies
                            tool-proficiencies
-                           source]}]
+                           source
+                           plugin?]}]
   (t/option-cfg
    {:name name
     :key (or key (common/name-to-kw name))
@@ -1498,9 +1499,10 @@
                  (if (seq language-options) [(language-selection language-options)])
                  selections)
     :modifiers (concat
-                [(modifiers/race name)
-                 (modifiers/size size)
-                 (modifiers/speed speed)]
+                (if (not plugin?)
+                  [(modifiers/race name)
+                   (modifiers/size size)
+                   (modifiers/speed speed)])
                 (if darkvision
                   (darkvision-modifiers darkvision))
                 (map
