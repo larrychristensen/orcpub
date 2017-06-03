@@ -1275,6 +1275,7 @@
     (fn [id]
       (let [all-weapons @(subscribe [::char/all-weapons id])
             weapon-profs (set @(subscribe [::char/weapon-profs id]))
+            weapon-attack-modifier @(subscribe [::char/weapon-attack-modifier-fn id])
             has-weapon-prof @(subscribe [::char/has-weapon-prof id])
             device-type @(subscribe [:device-type])
             mobile? (= :mobile device-type)
@@ -1319,9 +1320,8 @@
                        [:span.underline (if expanded? "less" "more")])
                      [:i.fa.m-l-5
                       {:class-name (if expanded? "fa-caret-up" "fa-caret-down")}]]]
-                   [:td.p-10.f-w-b.f-s-18 (common/bonus-str (+ (if proficient?
-                                                                 proficiency-bonus
-                                                                 0) magical-damage-bonus))]]))
+                   [:td.p-10.f-w-b.f-s-18 (common/bonus-str (max (weapon-attack-modifier weapon true)
+                                                                 (weapon-attack-modifier weapon false)))]]))
               all-weapons))]]]]))))
 
 (defn skill-details-section-2 []

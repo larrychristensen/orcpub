@@ -458,8 +458,11 @@
 (defn saving-throw-advantages [built-char]
   (es/entity-val built-char :saving-throw-advantage))
 
+(defn weapon-attack-modifier-fn [built-char]
+  (es/entity-val built-char :weapon-attack-modifier))
+
 (defn weapon-attack-modifier [built-char weapon finesse?]
-  ((es/entity-val built-char :weapon-attack-modifier)
+  ((weapon-attack-modifier-fn built-char)
    weapon
    finesse?))
 
