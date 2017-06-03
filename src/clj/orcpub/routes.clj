@@ -310,8 +310,9 @@
                        (fn [{:keys [class key]}]
                          [class key])
                        flat-spells)
-        parts (partition-all 9 sorted-spells)]
-    (doseq [part parts]
+        parts (vec (partition-all 9 sorted-spells))]
+    (doseq [i (range (count parts))
+            :let [part (parts i)]]
       (let [page (PDPage.)
             cs (PDPageContentStream. doc page)]
         (.addPage doc page)
@@ -328,12 +329,13 @@
                                      doc
                                      2.5
                                      3.5
-                                     spells))
+                                     spells
+                                     i))
               back-page (PDPage.)
               _ (.close cs)
               back-page-cs (PDPageContentStream. doc back-page)]
           (.addPage doc back-page)
-          (pdf/print-backs back-page-cs doc 2.5 3.5 remaining-desc-lines)
+          (pdf/print-backs back-page-cs doc 2.5 3.5 remaining-desc-lines i)
           (.close back-page-cs))))))
 
 (defn character-pdf-2 [req]

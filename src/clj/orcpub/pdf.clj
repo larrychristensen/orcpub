@@ -235,7 +235,7 @@
       (s/replace #"Self.*" "Self")
       (s/replace #"feet" "ft")))
 
-(defn print-backs [cs document box-width box-height remaining-lines-vec]
+(defn print-backs [cs document box-width box-height remaining-lines-vec page-number]
   (let [num-boxes-x (int (/ 8.5 box-width))
         num-boxes-y (int (/ 11.0 box-height))
         total-width (* num-boxes-x box-width)
@@ -248,6 +248,13 @@
                 over-img-stream (io/input-stream (io/resource "public/image/clockwise-rotation.png"))]
       (let [img (LosslessFactory/createFromImage document (ImageIO/read img-stream))
             over-img (LosslessFactory/createFromImage document (ImageIO/read over-img-stream))]
+        (draw-grid cs 2.5 3.5)
+        (draw-text cs
+                   (str "Page " page-number " (reverse)")
+                   PDType1Font/HELVETICA_BOLD_OBLIQUE
+                   10
+                   0.12
+                   (- 11 0.15))
         (doall
          (for [i (range num-boxes-x)
                j (range num-boxes-y)]
@@ -256,7 +263,6 @@
                  spell-index (+ i (* j num-boxes-x))
                 
                  {:keys [remaining-lines spell-name]} (remaining-lines-vec spell-index)]
-             (draw-grid cs 2.5 3.5)
              (when (seq remaining-lines)
                (draw-text-to-box cs
                                spell-name
@@ -272,9 +278,17 @@
                                8
                                (+ x 0.12)
                                (- 11.0 y 0.24)
+                               (- box-height 0.2))
+               (draw-text-to-box cs
+                               "(reverse)"
+                               PDType1Font/HELVETICA_OBLIQUE
+                               10
+                               (+ x 0.15 (string-width spell-name PDType1Font/HELVETICA_BOLD 10))
+                               (- 11.0 y 0.08)
+                               (- box-width 0.3)
                                (- box-height 0.2))))))))))
 
-(defn print-spells [cs document box-width box-height spells]
+(defn print-spells [cs document box-width box-height spells page-number]
   (let [num-boxes-x (int (/ 8.5 box-width))
         num-boxes-y (int (/ 11.0 box-height))
         total-width (* num-boxes-x box-width)
@@ -287,6 +301,13 @@
                 over-img-stream (io/input-stream (io/resource "public/image/clockwise-rotation.png"))]
       (let [img (LosslessFactory/createFromImage document (ImageIO/read img-stream))
             over-img (LosslessFactory/createFromImage document (ImageIO/read over-img-stream))]
+        (draw-grid cs 2.5 3.5)
+        (draw-text cs
+                   (str "Page " page-number)
+                   PDType1Font/HELVETICA_BOLD_OBLIQUE
+                   10
+                   0.12
+                   (- 11 0.15))
         (doall
          (for [j (range num-boxes-y)
                i (range (dec num-boxes-x) -1 -1)
@@ -317,7 +338,6 @@
                                          (- 11.0 y 0.65)
                                          (- box-width 0.24)
                                          (- box-height 0.9))]
-                   (draw-grid cs 2.5 3.5)
                    (draw-imagex cs
                                 img
                                 (+ x 1.4)
