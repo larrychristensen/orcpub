@@ -216,12 +216,13 @@
     (subs s 0 len)))
 
 (defn abbreviate-duration [duration]
-  (-> duration
-      (s/replace #"Concentration,? up to " "Conc, ")
-      abbreviate-times
-      (s/replace #"Instantaneous.*" "Inst")
-      (s/replace #"round" "rnd")
-      (max-len 16)))
+  (if duration
+    (-> duration
+        (s/replace #"Concentration,? up to " "Conc, ")
+        abbreviate-times
+        (s/replace #"Instantaneous.*" "Inst")
+        (s/replace #"round" "rnd")
+        (max-len 16))))
 
 (defn abbreviate-casting-time [casting-time]
   (-> casting-time

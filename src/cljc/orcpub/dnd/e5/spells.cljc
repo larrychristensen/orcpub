@@ -4552,6 +4552,7 @@ If you cast this spell multiple times, you can have up to three of its 1-minute 
     :level 1
     :casting-time "1 bonus action"
     :range "Self"
+    :duration "Concentration, up to 1 minute"
     :components {:verbal true}
     :page 282
     :source :phb}
