@@ -975,6 +975,7 @@
                               :selections [(t/selection-cfg
                                             {:name "Totem Spirit"
                                              :tags #{:class}
+                                             :order 2
                                              :options [(t/option-cfg
                                                {:name "Bear"
                                                 :modifiers [(mod5e/trait-cfg
@@ -996,6 +997,7 @@
                            6 {:selections [(t/selection-cfg
                                             {:name "Aspect of the Beast"
                                              :tags #{:class}
+                                             :order 3
                                              :options [(t/option-cfg
                                                {:name "Bear"
                                                 :modifiers [(mod5e/trait-cfg
@@ -1018,6 +1020,7 @@
                            14 {:selections [(t/selection-cfg
                                              {:name "Totemic Attunement"
                                               :tags #{:class}
+                                              :order 4
                                               :options [(t/option-cfg
                                                         {:name "Bear"
                                                          :modifiers [(mod5e/trait-cfg
