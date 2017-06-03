@@ -242,10 +242,21 @@
                          (range 10))})))
      page-map)))
 
+(defn make-spell-card-info [spells-known save-dc-fn attack-mod-fn]
+  (let [flat-spells (flatten (vals spells-known))]
+    (reduce
+     (fn [m {:keys [key ability qualifier class]}]
+       (-> m
+           (assoc-in [:spell-save-dcs class] (save-dc-fn ability))
+           (assoc-in [:spell-attack-mods class] (attack-mod-fn ability))))
+     {:spells-known spells-known}
+     flat-spells)))
+
 (defn spell-page-fields [spells spell-slots save-dc-fn attack-mod-fn]
   (let [spell-pages (make-pages spells)]
     (apply
      merge
+     (make-spell-card-info spells save-dc-fn attack-mod-fn)
      (flatten
       (map-indexed
        (fn [i {:keys [ability classes spells]}]
@@ -274,9 +285,9 @@
        spell-pages)))))
 
 (defn spellcasting-fields [built-char]
-  (let [spells-known (es/entity-val built-char :spells-known)
-        spell-attack-modifier-fn (es/entity-val built-char :spell-attack-modifier)
-        spell-save-dc-fn (es/entity-val built-char :spell-save-dc)
+  (let [spells-known (char5e/spells-known built-char)
+        spell-attack-modifier-fn (char5e/spell-attack-modifier-fn built-char)
+        spell-save-dc-fn (char5e/spell-save-dc-fn built-char)
         spell-slots (char5e/spell-slots built-char)]
     (spell-page-fields spells-known spell-slots spell-save-dc-fn spell-attack-modifier-fn)))
 

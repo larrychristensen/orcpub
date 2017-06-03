@@ -21,6 +21,7 @@
             [clojure.spec :as spec]
             [orcpub.dnd.e5.skills :as skill5e]
             [orcpub.dnd.e5.character :as char5e]
+            [orcpub.dnd.e5.spells :as spells]
             [datomic.api :as d]
             [bidi.bidi :as bidi]
             [orcpub.route-map :as route-map]
@@ -35,7 +36,8 @@
             [environ.core :as environ]
             [clojure.set :as sets])
   (:import (org.apache.pdfbox.pdmodel.interactive.form PDCheckBox PDComboBox PDListBox PDRadioButton PDTextField)
-           (org.apache.pdfbox.pdmodel PDDocument PDPageContentStream)
+           
+           (org.apache.pdfbox.pdmodel PDDocument PDPage PDPageContentStream)
            (org.apache.pdfbox.pdmodel.graphics.image PDImageXObject)
            (java.io ByteArrayOutputStream ByteArrayInputStream)
            (org.apache.pdfbox.pdmodel.graphics.image JPEGFactory LosslessFactory)
@@ -302,9 +304,41 @@
     :weapon-name-2 8
     :weapon-name-3 8}))
 
+(defn add-spell-cards! [doc spells-known spell-save-dcs spell-attack-mods]
+  (let [flat-spells (flatten (vals spells-known))
+        sorted-spells (sort-by
+                       (fn [{:keys [class key]}]
+                         [class key])
+                       flat-spells)
+        parts (partition-all 9 sorted-spells)]
+    (doseq [part parts]
+      (let [page (PDPage.)
+            cs (PDPageContentStream. doc page)]
+        (.addPage doc page)
+        (let [spells (map
+                      (fn [{:keys [key class]}]
+                        {:spell (spells/spell-map key)
+                         :class-nm class
+                         :dc (spell-save-dcs class)
+                         :attack-bonus (spell-attack-mods class)})
+                      part)
+              remaining-desc-lines (vec
+                                    (pdf/print-spells
+                                     cs
+                                     doc
+                                     2.5
+                                     3.5
+                                     spells))
+              back-page (PDPage.)
+              _ (.close cs)
+              back-page-cs (PDPageContentStream. doc back-page)]
+          (.addPage doc back-page)
+          (pdf/print-backs back-page-cs doc 2.5 3.5 remaining-desc-lines)
+          (.close back-page-cs))))))
+
 (defn character-pdf-2 [req]
   (let [fields (-> req :form-params :body clojure.edn/read-string)
-        {:keys [image-url image-url-failed faction-image-url faction-image-url-failed]} fields
+        {:keys [image-url image-url-failed faction-image-url faction-image-url-failed spells-known spell-save-dcs spell-attack-mods]} fields
         input (.openStream (io/resource (cond
                                           (find fields :spellcasting-class-6) "fillable-char-sheet-6-spells.pdf"
                                           (find fields :spellcasting-class-5) "fillable-char-sheet-5-spells.pdf"
@@ -317,7 +351,9 @@
         user-agent (get-in req [:headers "user-agent"])
         chrome? (re-matches #".*Chrome.*" user-agent)]
     (with-open [doc (PDDocument/load input)]
-      (pdf/write-fields! doc fields (not chrome?))
+      (pdf/write-fields! doc fields (not chrome?) font-sizes)
+      (if (seq spells-known)
+        (add-spell-cards! doc spells-known spell-save-dcs spell-attack-mods))
       (if (and image-url
                (re-matches #"^(https?|ftp|file)://[-a-zA-Z0-9+&@#/%?=~_|!:,.;]*[-a-zA-Z0-9+&@#/%=~_|]" image-url)
                (not image-url-failed))

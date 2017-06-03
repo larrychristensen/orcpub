@@ -407,6 +407,12 @@
 (defn spell-modifiers [built-char]
   (es/entity-val built-char :spell-modifiers))
 
+(defn spell-attack-modifier-fn [built-char]
+  (es/entity-val built-char :spell-attack-modifier))
+
+(defn spell-save-dc-fn [built-char]
+  (es/entity-val built-char :spell-save-dc))
+
 (defn traits [built-char]
   (es/entity-val built-char :traits))
 
