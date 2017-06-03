@@ -1,7 +1,8 @@
 (ns orcpub.pdf
   (:require [clojure.string :as s]
             [orcpub.common :as common]
-            [orcpub.dnd.e5.display :as dis5e])
+            [orcpub.dnd.e5.display :as dis5e]
+            [clojure.java.io :as io])
   (:import (org.apache.pdfbox.pdmodel.interactive.form PDCheckBox PDComboBox PDListBox PDRadioButton PDTextField)
            (org.apache.pdfbox.pdmodel PDDocument PDPageContentStream)
            (org.apache.pdfbox.pdmodel.graphics.image PDImageXObject)
@@ -188,7 +189,7 @@
     (str "Level-" level " " school)))
 
 (defn draw-spell-field [cs document title value x y]
-  (with-open [img-stream (java.io.FileInputStream. (str "/home/larry/Documents/code/clojure/orcpub/resources/public/image/" title ".png"))]
+  (with-open [img-stream (io/input-stream (io/resource (str "public/image/" title ".png")))]
     (draw-imagex cs
                  (LosslessFactory/createFromImage document (ImageIO/read img-stream))
                  x
@@ -237,8 +238,8 @@
         margin-x (/ remaining-width 2)
         remaining-height (- 11.0 total-height)
         margin-y (/ remaining-height 2)]
-    (with-open [img-stream (java.io.FileInputStream. "/home/larry/Documents/code/clojure/orcpub/resources/public/image/orcpub-card-logo.png")
-                over-img-stream (java.io.FileInputStream. "/home/larry/Documents/code/clojure/orcpub/resources/public/image/clockwise-rotation.png")]
+    (with-open [img-stream (io/input-stream (io/resource "public/image/orcpub-card-logo.png"))
+                over-img-stream (io/input-stream (io/resource "public/image/clockwise-rotation.png"))]
       (let [img (LosslessFactory/createFromImage document (ImageIO/read img-stream))
             over-img (LosslessFactory/createFromImage document (ImageIO/read over-img-stream))]
         (doall
@@ -276,8 +277,8 @@
         margin-x (/ remaining-width 2)
         remaining-height (- 11.0 total-height)
         margin-y (/ remaining-height 2)]
-    (with-open [img-stream (java.io.FileInputStream. "/home/larry/Documents/code/clojure/orcpub/resources/public/image/orcpub-card-logo.png")
-                over-img-stream (java.io.FileInputStream. "/home/larry/Documents/code/clojure/orcpub/resources/public/image/clockwise-rotation.png")]
+    (with-open [img-stream (io/input-stream (io/resource "public/image/orcpub-card-logo.png"))
+                over-img-stream (io/input-stream (io/resource "public/image/clockwise-rotation.png"))]
       (let [img (LosslessFactory/createFromImage document (ImageIO/read img-stream))
             over-img (LosslessFactory/createFromImage document (ImageIO/read over-img-stream))]
         (doall
