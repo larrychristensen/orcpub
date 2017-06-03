@@ -2114,7 +2114,7 @@
                               (fn [{:keys [name key]}]
                                 (mod5e/language key))
                               opt5e/languages)}
-              14 {:modifiers [(mod5e/saving-throws char5e/ability-keys)
+              14 {:modifiers [(apply mod5e/saving-throws nil char5e/ability-keys)
                               (mod5e/unarmored-speed-bonus 5)]}
               18 {:modifiers [(mod5e/unarmored-speed-bonus 5)
                               (mod5e/action
