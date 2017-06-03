@@ -1855,6 +1855,15 @@
              :page 75
              :summary "teleport up to 30 ft. when you use Action Surge"}]})
 
+(defn martial-maneuvers-selection [num]
+  (t/selection-cfg
+   {:name "Martial Maneuvers"
+    :options opt5e/maneuver-options
+    :ref [:class :fighter :levels :level-3 :martial-archetype :battle-master :martial-maneuvers]
+    :tags #{:class}
+    :min num
+    :max num}))
+
 
 (def fighter-option
   (opt5e/class-option
@@ -1967,12 +1976,7 @@
                                                            " HPs left, regain "
                                                            (+ 5 (?ability-bonuses ::char5e/con)) " HPs")})]}}}
                  {:name "Battle Master"
-                  :selections [(t/selection-cfg
-                                {:name "Martial Maneuvers"
-                                 :options opt5e/maneuver-options
-                                 :tags #{:class}
-                                 :min 3
-                                 :max 3})
+                  :selections [(martial-maneuvers-selection 3)
                                (opt5e/tool-selection (map :key equip5e/artisans-tools) 1)]
                   :modifiers [(mod/modifier ?maneuver-save-dc (max (?spell-save-dc ::char5e/dex)
                                                                    (?spell-save-dc ::char5e/str)))
@@ -1996,6 +2000,9 @@
                                                 die
                                                 "s), and maneuver save DC of "
                                                 ?maneuver-save-dc))})]
+                  :levels {7 {:selections [(martial-maneuvers-selection 2)]}
+                           10 {:selections [(martial-maneuvers-selection 2)]}
+                           15 {:selections [(martial-maneuvers-selection 2)]}}
                   :traits [{:name "Know Your Enemy"
                             :level 7
                             :page 73
