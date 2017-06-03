@@ -1294,7 +1294,7 @@
             (doall
              (map
               (fn [[weapon-key {:keys [equipped?]}]]
-                (let [{:keys [name magical-damage-bonus description] :as weapon} (mi/all-weapons-map weapon-key)
+                (let [{:keys [name magical-damage-bonus description ranged?] :as weapon} (mi/all-weapons-map weapon-key)
                       proficient? (or (weapon-key weapon-profs)
                                       (-> weapon :type weapon-profs))
                       expanded? (@expanded-details weapon-key)]
@@ -1307,6 +1307,7 @@
                    [:td.p-10.w-100-p
                     [:div
                      (disp/attack-description (-> weapon
+                                                  (assoc :attack-type (if ranged? :ranged :melee))
                                                   (assoc :damage-modifier magical-damage-bonus)
                                                   (dissoc :description)))]
                     (if expanded?
