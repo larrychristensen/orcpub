@@ -1929,9 +1929,9 @@
                                :modifiers [(mod5e/armor :chain-mail 1)]})
                              (t/option-cfg
                               {:name "Leather Armor, Longbow, 20 Arrows"
-                               :options [(mod5e/armor :leather 1)
-                                         (mod5e/weapon :longbow 1)
-                                         (mod5e/equipment :arrow 20)]})]})
+                               :modifiers [(mod5e/armor :leather 1)
+                                           (mod5e/weapon :longbow 1)
+                                           (mod5e/equipment :arrow 20)]})]})
                  (opt5e/new-starting-equipment-selection
                   :fighter
                   {:name "Weapons"
