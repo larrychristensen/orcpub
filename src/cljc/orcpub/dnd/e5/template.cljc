@@ -236,6 +236,15 @@
    :languages ["Halfling" "Common"]
    :modifiers [(mod5e/saving-throw-advantage [:frightened])]
    :subraces
+   :traits [{:name "Lucky"
+             :page 28
+             :summary "Reroll 1s on d20"}
+            {:name "Halfling Nimbleness"
+             :page 28
+             :summary "move through the space of larger creatures"}
+            {:name "Brave"
+             :page 28
+             :summary "Advantage on saves against being frightened"}]
    [{:name "Lightfoot"
      :abilities {::char5e/cha 1}
      :traits [{:name "Naturally Stealthy"
@@ -244,13 +253,7 @@
     {:name "Stout"
      :abilities {::char5e/con 1}
      :modifiers [(mod5e/damage-resistance :poison)
-                 (mod5e/saving-throw-advantage [:poisoned])]}]
-   :traits [{:name "Lucky"
-             :page 28
-             :summary "Reroll 1s on d20"}
-            {:name "Halfling Nimbleness"
-             :page 28
-             :summary "move through the space of larger creatures"}]})
+                 (mod5e/saving-throw-advantage [:poisoned])]}]})
 
 (def human-option-cfg
   {:name "Human"
