@@ -123,7 +123,24 @@ direction to the closest dragon within 30 miles of you that is of the same type 
 
     :attunement [:any]
     :description "While wearing this amulet, you can use an action to name a location that you are familiar with on another plane of existence. Then make a DC 15 Intelligence check. On a successful check, you cast the plane shift spell. On a failure, you and each creature and object within 15 feet of you travel to a random destination. Roll a d100. On a 1–60, you travel to a random location on the plane you named. On a 61–100, you travel to a randomly determined plane of existence."
-    }{
+      }
+   {
+    :name "Alchemy Jug"
+    :item-type :wondrous-item
+    :rarity :uncommon
+    :modifiers [(mod5e/action
+                 {:name "Alchemy Jug: Create Liquid"
+                  :page 150
+                  :source :dmg
+                  :frequncy {:units :day}
+                  :summary "Create acid, poison, beer, honey, or mayonnaise in the jug."})
+                (mod5e/action
+                 {:name "Alchemy Jug: Pour Liquid"
+                  :page 150
+                  :source :dmg
+                  :summary "Pour out liquid created in the jug."})]
+    :summary "Jug that creates acid, poison, beer, honey, or mayonnaise"}
+   {
     :name "Animated Shield"
     :item-type :armor
     :item-subtype :shield
@@ -146,23 +163,23 @@ The apparatus floats on water. It can also go underwater to a depth of 900 feet.
 A creature in the compartment can use an action to move as many as two of the apparatus’s levers up or down. After each use, a lever goes back to its neutral position. Each lever, from left to right, functions as shown in the Apparatus of the Crab Levers table."
     }{
     :name "Armor, +1"
-      :name-fn plus-1-name
-      :magical-ac-bonus 1
+    :name-fn plus-1-name
+    :magical-ac-bonus 1
     :item-type :armor
     :item-subtype not-shield?
     :rarity :rare
     :description "You have a +1 bonus to AC while wearing this armor."
     }{
-      :name "Armor, +2"
-      :magical-ac-bonus 2
+    :name "Armor, +2"
+    :magical-ac-bonus 2
     :name-fn plus-2-name
     :item-type :armor
     :item-subtype not-shield?
     :rarity :very-rare
     :description "You have a +2 bonus to AC while wearing this armor."
     }{
-      :name "Armor, +3"
-      :magical-ac-bonus 3
+    :name "Armor, +3"
+    :magical-ac-bonus 3
     :name-fn plus-3-name
     :item-type :armor
     :item-subtype not-shield?
@@ -174,8 +191,8 @@ A creature in the compartment can use an action to move as many as two of the ap
     :item-subtype :plate
     :rarity :legendary
 
-      :attunement [:any]
-      :modifiers [(mod5e/damage-resistance :nonmagical)]
+    :attunement [:any]
+    :modifiers [(mod5e/damage-resistance :nonmagical)]
     :description "You have resistance to nonmagical damage while you wear this armor. Additionally, you can use an action to make yourself immune to nonmagical damage for 10 minutes or until you are no longer wearing the armor. Once this special action is used, it can’t be used again until the next dawn."
     }{
     :name "Armor of Resistance"
@@ -258,7 +275,7 @@ An enclosed creature can use its action to push against the sphere’s wall, mov
     :attunement [:any]
     :modifiers [(belt-of-giant-strength-mod 21)]
     :description "While wearing this belt, your Strength score changes to 21. If your Strength is already equal to or greater than 21, the item has no effect on you."
-      }
+    }
       {
     :name "Belt of Stone Giant Strength"
 
@@ -432,7 +449,18 @@ The candle’s magic is activated when the candle is lit, which requires an acti
 While lit, the candle sheds dim light in a 30-foot radius. Any creature within that light whose alignment matches that of the candle makes attack rolls, saving throws, and ability checks with advantage. In addition, a cleric or druid in the light whose alignment matches the candle’s can cast 1stlevel
 spells he or she has prepared without expending spell slots, though the spell’s effect is as if cast with a 1st-level slot.
 Alternatively, when you light the candle for the first time, you can cast the gate spell with it. Doing so destroys the candle."
-    }{
+      }
+   {
+    :name "Cap of Water Breathing"
+    :item-type :wonderous-item
+    :rarity :uncommon
+    :modifiers [(mod5e/action
+                 {:name "Cap of Water Breathing"
+                  :page 157
+                  :source :dmg
+                  :summary "Create a bubble of air around you head in which you can breathe normally"})]
+    :summary "Breathe underwater"}
+   {
     :name "Cape of the Mountebank"
     :item-type :wondrous-item
     :rarity :rare
@@ -482,13 +510,13 @@ The chime can be used ten times. After the tenth time, it cracks and becomes use
     :rarity :very-rare
 
     :attunement [:any]
-      :modifiers [(mod5e/damage-resistance :poison)
-                  (mod5e/action 
-                   {:name "Cloak of Arachnidia"
-                    :page 158
-                    :source :dmg
-                    :frequency {:units :day}
-                    :summary "cast 'web' with save DC 13 and 2X area"})]
+    :modifiers [(mod5e/damage-resistance :poison)
+                (mod5e/action 
+                 {:name "Cloak of Arachnidia"
+                  :page 158
+                  :source :dmg
+                  :frequency {:units :day}
+                  :summary "cast 'web' with save DC 13 and 2X area"})]
     :description "This fine garment is made of black silk interwoven with faint silvery threads. While wearing it, you gain the following benefits:
 • You have resistance to poison damage.
 • You have a climbing speed equal to your walking speed.
@@ -734,7 +762,29 @@ You and any creature you designate when you use the shackles can use an action t
     :description "You gain a +1 bonus to attack and damage rolls made with this magic weapon.
 When you hit a dragon with this weapon, the dragon takes an extra 3d6 damage of the weapon’s type. For the purpose of this weapon, “dragon”
 refers to any creature with the dragon type, including dragon turtles and wyverns."
-    }{
+ }
+   {
+    :name "Driftglobe"
+    :item-type :wonderous-item
+    :rarity :uncommon
+    :modifiers [(mod5e/trait-cfg
+                 {:name "Driftglobe Emanation (light)"
+                  :page 166
+                  :source :dmg
+                  :summary "Cause driftglobe to emanate light as from the light spell"})
+                (mod5e/trait-cfg
+                 {:name "Driftglobe Emanation (daylight)"
+                  :page 166
+                  :source :dmg
+                  :frequency {:units :day}
+                  :summary "Cause driftglobe to emanate light as from the daylight spell"})
+                (mod5e/action
+                 {:name "Driftglobe Hover"
+                  :page 166
+                  :source :dmg
+                  :summary "Cause driftglobe to hover"})]
+    :summary "Emanates light as with daylight or light spell and can hover"}
+   {
     :name "Dust of Disappearance"
     :item-type :wondrous-item
     :rarity :uncommon
@@ -759,12 +809,12 @@ spell can also end the effect on a creature.}{"
     :item-type :armor
     :item-subtype :plate
     :rarity :very-rare
-      :magical-ac-bonus 2
-      :modifiers [(mod5e/reaction
-                   {:name "Dwarven Plate"
-                    :page 167
-                    :source :dmg
-                    :summary "if an effect moves you against your will along the ground, you can use your reaction to reduce the distance you are moved by up to 10 feet"})]
+    :magical-ac-bonus 2
+    :modifiers [(mod5e/reaction
+                 {:name "Dwarven Plate"
+                  :page 167
+                  :source :dmg
+                  :summary "if an effect moves you against your will along the ground, you can use your reaction to reduce the distance you are moved by up to 10 feet"})]
     :description "While wearing this armor, you gain a +2 bonus to AC. In addition, if an effect moves you against your will along the ground, you can use your reaction to reduce the distance you are moved by up to 10 feet."
     }{
     :name "Dwarven Thrower"
@@ -800,8 +850,8 @@ spell, and the gem’s magic is lost. The type of gem determines the elemental s
     :item-type :armor
     :item-subtype :chain-shirt
     :rarity :rare
-      :magical-ac-bonus 1
-      :modifiers [(mod5e/armor-proficiency :elven-chain)]
+    :magical-ac-bonus 1
+    :modifiers [(mod5e/armor-proficiency :elven-chain)]
     :description "You gain a +1 bonus to AC while you wear this armor. You are considered proficient with this armor even if you lack proficiency with medium armor."
     }{
     :name "Eversmoking Bottle"
@@ -815,15 +865,15 @@ The cloud persists as long as the bottle is open. Closing the bottle requires yo
 
     :rarity :uncommon
 
-      :attunement [:any]
-      :modifiers [(mod5e/action
-                   {:name "Eyes of Charming"
-                    :page 168
-                    :source :dmg
-                    :frequency {:units :day}
-                    :range {:units :feet
-                            :amount 30}
-                    :summary "cast 'charm person'"})]
+    :attunement [:any]
+    :modifiers [(mod5e/action
+                 {:name "Eyes of Charming"
+                  :page 168
+                  :source :dmg
+                  :frequency {:units :day}
+                  :range {:units :feet
+                          :amount 30}
+                  :summary "cast 'charm person'"})]
     :description "These crystal lenses fit over the eyes. They have 3 charges. While wearing them, you can expend 1 charge as an action to cast the charm person spell
 (save DC 13) on a humanoid within 30 feet of you, provided that you and the target can see each other. The lenses regain all expended charges daily at dawn."
     }{
@@ -914,8 +964,8 @@ When you draw this weapon, you can extinguish all nonmagical flames within 30 fe
     :rarity :uncommon
 
     :attunement [:any]
-      :modifiers [(mod5e/ability-override ::char5e/str 19)
-                  (mod/modifier ?giants-bane-gauntlet true)]
+    :modifiers [(mod5e/ability-override ::char5e/str 19)
+                (mod/modifier ?giants-bane-gauntlet true)]
     :description "Your Strength score is 19 while you wear these gauntlets. They have no effect on you if your Strength is already 19 or higher."
     }{
     :name "Gem of Brightness"
@@ -950,12 +1000,12 @@ When you hit a giant with it, the giant takes an extra 2d6 damage of the weapon�
     :item-type :armor
     :item-subtype :studded-leather
     :rarity :rare
-      :magical-ac-bonus 1
-      :modifiers [(mod5e/bonus-action
-                   {:name "Glamoured Studded Leather"
-                    :page 172
-                    :source :dmg
-                    :summary "change the armor to assume the appearance of normal clothing or some other armor"})]
+    :magical-ac-bonus 1
+    :modifiers [(mod5e/bonus-action
+                 {:name "Glamoured Studded Leather"
+                  :page 172
+                  :source :dmg
+                  :summary "change the armor to assume the appearance of normal clothing or some other armor"})]
     :description "While wearing this armor, you gain a +1 bonus to AC. You can also use a bonus action to speak the armor’s command word and cause the armor to assume the appearance of a normal set of clothing or some other kind of armor. You decide what it looks like, including color, style, and accessories, but the armor retains its normal bulk and weight. The illusory appearance lasts until you use this property again or remove the armor."
     }{
     :name "Gloves of Missile Snaring"
@@ -963,12 +1013,12 @@ When you hit a giant with it, the giant takes an extra 2d6 damage of the weapon�
 
     :rarity :uncommon
 
-      :attunement [:any]
-      :modifiers [(mod5e/reaction
-                   {:name "Gloves of Missile Snaring"
-                    :page 172
-                    :source :dmg
-                    :summary (str "when hit by a ranged weapon attack, reduce the damage by 1d10 + DEX mod")})]
+    :attunement [:any]
+    :modifiers [(mod5e/reaction
+                 {:name "Gloves of Missile Snaring"
+                  :page 172
+                  :source :dmg
+                  :summary (str "when hit by a ranged weapon attack, reduce the damage by 1d10 + DEX mod")})]
     :description "These gloves seem to almost meld into your hands when you don them. When a ranged weapon attack hits you while you’re wearing them, you can use your reaction to reduce the damage by 1d10 + your Dexterity modifier, provided that you have a free hand. If you reduce the damage to 0, you can catch the missile if it is small enough for you to hold in that hand."
     }{
     :name "Gloves of Swimming and Climbing"
@@ -978,7 +1028,7 @@ When you hit a giant with it, the giant takes an extra 2d6 damage of the weapon�
 
     :attunement [:any]
     :description "While wearing these gloves, climbing and swimming don’t cost you extra movement, and you gain a +5 bonus to Strength (Athletics) checks made to climb or swim."
-      }
+    }
    {
     :name "Goggles of Night"
     :item-type :wondrous-item
@@ -1860,7 +1910,19 @@ The rope has AC 20 and 20 hit points. It regains 1 hit point every 5 minutes as 
     :magical-attack-bonus 2
     :magical-damage-bonus 2
     :description "You gain a +2 bonus to attack and damage rolls made with this magic weapon. In addition, you can make one attack with it as a bonus action on each of your turns."
-    }{
+      }
+   {
+    :name "Sending Stones"
+    :item-type :wonderous-item
+    :rarity :uncommon
+    :modifiers [(mod5e/action
+                 {:name "Sending Stones"
+                  :page 199
+                  :source :dmg
+                  :frequency {:units :day}
+                  :summary "Cast sending to communicate with the holder of the other stone"})]
+    :summary "Cast sending between stones"}
+   {
     :name "Shield +1"
     :name-fn plus-1-name
     :item-type :armor

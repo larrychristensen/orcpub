@@ -1123,9 +1123,9 @@
         armor-class @(subscribe [::char/armor-class id])
         armor-class-with-armor @(subscribe [::char/armor-class-with-armor id])]
     [:div
-     {:class-name (if (= 2 num-columns) "flex")}
+     #_{:class-name (if (= 2 num-columns) "flex")}
      [:div
-      {:class-name (if (= 2 num-columns) "w-50-p")}
+      #_{:class-name (if (= 2 num-columns) "w-50-p")}
       [:div.w-100-p.t-a-c
        [:div
         [ability-scores-section-2 id]
@@ -1402,6 +1402,7 @@
                        [:td.p-10 (boolean-icon expertise?)])
                      [:td.p-10.f-s-18.f-w-b (common/bonus-str (tool-bonus-fn key))]]))
                 tool-profs))]]]])))))
+
 
 (defn proficiency-details [num-columns id]
   (let [ability-bonuses @(subscribe [::char/ability-bonuses id])]

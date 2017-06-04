@@ -2052,7 +2052,8 @@
      :weapon-choices [{:name "Weapon"
                        :options {:shortsword 1
                                  :simple 1}}]
-     :modifiers [(mod/vec-mod ?unarmored-defense :monk)
+     :modifiers [
+                 (mod/vec-mod ?unarmored-defense :monk)
                  (mod/cum-sum-mod ?unarmored-ac-bonus
                                   (?ability-bonuses ::char5e/wis)
                                   nil
@@ -2872,7 +2873,7 @@
                  {:name "Arcane Trickster"
                   :spellcasting {:level-factor 3}
                   :modifiers [(mod5e/spells-known 0 :mage-hand ::char5e/int "Arcane Trickster")]
-                  :levels {3 {:selections [(arcane-trickster-cantrip 3)
+                  :levels {3 {:selections [(arcane-trickster-cantrip 2)
                                            (arcane-trickster-spell-selection 2 [1])
                                            (arcane-trickster-any-spell-selection 1 [1])]}
                            4 {:selections [(arcane-trickster-spell-selection 1 [1])]}
@@ -4567,7 +4568,7 @@ long rest."})]
 
 
 (def srd-link
-  [:a.orange {:href "SRD-OGL_V5.1.pdf" :target "_blank"} "the 5e SRD"])
+  [:a.orange {:href "/SRD-OGL_V5.1.pdf" :target "_blank"} "the 5e SRD"])
 
 
 (def plugins
