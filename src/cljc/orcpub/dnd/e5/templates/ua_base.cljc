@@ -8,7 +8,8 @@
             [orcpub.dnd.e5.options :as opt5e]
             [orcpub.dnd.e5.weapons :as weapon5e]
             [orcpub.dnd.e5.spell-lists :as sl]
-            [orcpub.dnd.e5.templates.ua-mystic :as ua-mystic]))
+            [orcpub.dnd.e5.templates.ua-mystic :as ua-mystic]
+            [orcpub.dnd.e5.templates.ua-artificer :as ua-artificer]))
 
 (defn ua-help [name url]
   [:a {:href url :target :_blank} name])
@@ -601,6 +602,12 @@
    ua-mystic-order-of-the-soul-knife
    ua-mystic-order-of-the-wu-jen])
 
+(def ua-artificer-plugin
+  {:name "Unearthed Arcana: Artificer"
+   :key :ua-artificer
+   :selections [(opt5e/class-selection
+                 {:options [ua-artificer/artificer-option]})]})
+
 (def ua-mystic-plugin
   {:name "Unearthed Arcana: Mystic"
    :key ua-mystic-kw
@@ -950,8 +957,11 @@
   (map
    (fn [{:keys [name key] :as plugin}]
      (assoc plugin :help (ua-help name (opt5e/source-url key))))
-   [ua-trio-of-subclasses-plugin
-    ua-revised-subclasses-plugin
-    ua-mystic-plugin
-    ua-waterborne-plugin
-    ua-eberron-plugin]))
+   (sort-by
+    :name
+    [ua-artificer-plugin
+     ua-mystic-plugin
+     ua-trio-of-subclasses-plugin
+     ua-revised-subclasses-plugin
+     ua-waterborne-plugin
+     ua-eberron-plugin])))

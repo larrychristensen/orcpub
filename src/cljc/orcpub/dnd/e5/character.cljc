@@ -333,6 +333,12 @@
 (defn tool-proficiencies [built-char]
   (es/entity-val built-char :tool-profs))
 
+(defn tool-expertise [built-char]
+  (es/entity-val built-char :tool-expertise))
+
+(defn tool-bonus-fn [built-char]
+  (es/entity-val built-char :tool-bonus-fn))
+
 (defn weapon-proficiencies [built-char]
   (let [proficiencies (es/entity-val built-char :weapon-profs)]
     (if (and proficiencies (proficiencies :martial))

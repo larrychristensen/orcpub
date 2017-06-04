@@ -117,7 +117,7 @@
    {:name (:name tool)
     :key (:key tool)
     :icon (:icon tool)
-    :options [(modifiers/tool-proficiency (:key tool))]}))
+    :modifiers [(modifiers/tool-proficiency (:key tool))]}))
 
 (defn weapon-option [weapon & [num]]
   (t/option-cfg
@@ -723,26 +723,27 @@
      :tags #{:skill-profs :profs}
      :prereq-fn prereq-fn})))
 
+(defn tool-proficiency-selection [{:keys [options num]}]
+  (t/selection-cfg
+   {:name "Tool Proficiency"
+    :help (proficiency-help num "a tool" "tools")
+    :options options
+    :min num
+    :max num
+    :tags #{:tool-profs :profs}}))
+
 (defn tool-selection
   ([num]
-   (t/selection-cfg
-    {:name "Tool Proficiency"
-     :help (proficiency-help num "a tool" "tools")
-     :options (tool-options equipment/tools)
-     :min num
-     :max num
-     :tags #{:tool-profs :profs}}))
+   (tool-proficiency-selection
+    {:options (tool-options equipment/tools)
+     :num num}))
   ([options num]
-   (t/selection-cfg
-    {:name "Tool Proficiency"
-     :help (proficiency-help num "a tool" "tools")
-     :options (tool-options
+   (tool-proficiency-selection
+    {:options (tool-options
                (filter
                 (comp (set options) :key)
                 equipment/tools))
-     :min num
-     :max num
-     :tags #{:tool-profs :profs}})))
+     :num num})))
 
 
 (defn weapon-proficiency-selection
@@ -1337,7 +1338,8 @@
               (t/option-cfg
                {:name "One Skill/Theives Tools"
                 :selections [(expertise-selection 1 :one-skill-thieves-tools)]
-                :modifiers [(modifiers/tool-proficiency :thieves-tools)]})]}))
+                :modifiers [(modifiers/tool-proficiency :thieves-tools)
+                            (modifiers/tool-expertise :thieves-tools)]})]}))
 
 (defn cleric-spell [spell-level spell-key min-level]
   (modifiers/spells-known spell-level spell-key ::character/wis "Cleric" min-level nil :cleric))

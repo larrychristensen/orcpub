@@ -1365,6 +1365,44 @@
                    [:td.p-10.f-s-18.f-w-b (common/bonus-str (key skill-bonuses))]]))
               skills/skills))]]]]))))
 
+(defn tool-prof-details-section-2 []
+  (let [expanded-details (r/atom {})]
+    (fn [id]
+      (let [tool-profs (or @(subscribe [::char/tool-profs id]) #{})
+            tool-expertise @(subscribe [::char/tool-expertise id])
+            tool-bonus-fn @(subscribe [::char/tool-bonus-fn id])
+            device-type @(subscribe [:device-type])
+            mobile? (= :mobile device-type)]
+        (if (seq tool-profs)
+          [:div
+           [:div.flex.align-items-c
+            (svg-icon "stone-crafting" 32 32)
+            [:span.m-l-5.f-w-b.f-s-18 "Tools"]]
+           [:div
+            [:table.w-100-p.t-a-l.striped
+             [:tbody
+              [:tr.f-w-b
+               {:class-name (if mobile? "f-s-12")}
+               [:th.p-10 "Name"]
+               [:td.p-10 (if mobile? "Prof?" "Proficient?")]
+               (if tool-expertise
+                 [:th.p-10 "Expertise?"])
+               [:th.p-10 (if (not mobile?) [:div.w-40 "Bonus"])]]
+              (doall
+               (map
+                (fn [key]
+                  (let [name (-> equip/tools-map key :name)
+                        proficient? (key tool-profs)
+                        expertise? (key tool-expertise)]
+                    ^{:key key}
+                    [:tr
+                     [:td.p-10.f-w-b name]
+                     [:td.p-10 (boolean-icon proficient?)]
+                     (if tool-expertise
+                       [:td.p-10 (boolean-icon expertise?)])
+                     [:td.p-10.f-s-18.f-w-b (common/bonus-str (tool-bonus-fn key))]]))
+                tool-profs))]]]])))))
+
 (defn proficiency-details [num-columns id]
   (let [ability-bonuses @(subscribe [::char/ability-bonuses id])]
     [:div.details-columns
@@ -1372,6 +1410,8 @@
      [:div.flex-grow-1.details-column-2
       {:class-name (if (= 2 num-columns) "w-50-p m-l-20")}
       [skill-details-section-2 id]
+      [:div.m-t-20
+       [tool-prof-details-section-2 id]]
       [list-item-section "Languages" "lips" @(subscribe [::char/languages id]) (partial prof-name opt/language-map)]
       [list-item-section "Tool Proficiencies" "stone-crafting" @(subscribe [::char/tool-profs id]) (partial prof-name equip/tools-map)]
       [list-item-section "Weapon Proficiencies" "bowman" @(subscribe [::char/weapon-profs id]) (partial prof-name weapon/weapons-map)]
@@ -1468,6 +1508,7 @@
     (if (not= device-type :mobile)
       [:div.uppercase
        title])]])
+
 
 (def details-tabs
   {"summary" {:icon "stabbed-note"
