@@ -424,10 +424,22 @@
     (fn [cfg] (mods/map-mod ?treasure treasure-kw (equipment-cfg cfg)))
     1))
 
+(defn magic-item [item-kw item item-cfg]
+  (let [item-fn (deferred-magic-item-fn
+                  (fn [cfg]
+                    (mods/map-mod ?magic-items item-kw (equipment-cfg item-cfg)))
+                  item
+                  true)]
+    (item-fn item-cfg)))
+
 (defn deferred-magic-item [item-kw item]
   (mods/deferred-modifier
     ?magic-items
-    (deferred-magic-item-fn (fn [cfg] (mods/map-mod ?magic-items item-kw (equipment-cfg cfg))) item true)
+    (deferred-magic-item-fn
+      (fn [cfg]
+        (mods/map-mod ?magic-items item-kw (equipment-cfg cfg)))
+      item
+      true)
     1
     "MAGIC ITEM"))
 

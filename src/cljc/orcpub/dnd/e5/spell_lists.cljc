@@ -1,7 +1,56 @@
 (ns orcpub.dnd.e5.spell-lists)
 
 (def spell-lists
-  {:bard
+  {:artificer
+   {1
+    [:alarm	
+     :cure-wounds
+     :disguise-self
+     :expeditious-retreat
+     :false-life
+     :jump
+     :longstrider
+     :sanctuary
+     :shield-of-faith]
+    2
+    [:aid
+     :alter-self
+     :arcane-lock
+     :blur
+     :continual-flame
+     :darkvision
+     :enhance-ability
+     :enlarge-reduce
+     :invisibility
+     :lesser-restoration
+     :levitate
+     :magic-weapon
+     :protection-from-poison
+     :rope-trick
+     :see-invisibility
+     :spider-climb]
+    3
+    [:blink
+     :fly
+     :gaseous-form
+     :glyph-of-warding
+     :haste
+     :protection-from-energy
+     :revivify
+     :water-breathing
+     :water-walk]
+    4
+    [:arcane-eye
+     :death-ward
+     :fabricate
+     :freedom-of-movement
+     :leomunds-secret-chest
+     :mordenkainens-faithful-hound
+     :mordenkainens-private-sanctum
+     :otilukes-resilient-sphere
+     :stone-shape
+     :stoneskin]}
+   :bard
    {0
     [:blade-ward :dancing-lights :friends :light :mage-hand :mending :message :minor-illusion
      :prestidigitation :true-strike :vicious-mockery
