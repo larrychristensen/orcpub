@@ -338,6 +338,15 @@
     :range {:min 100, :max 400},
     :key :crossbow-heavy
     :two-handed? true}
+   {:name "Thunder Cannon",
+    :damage-type :piercing,
+    :damage-die 6,
+    :type :special
+    :damage-die-count 2,
+    :ranged? true,
+    :range {:min 150, :max 500},
+    :key :thunder-cannon
+    :two-handed? true}
    {:name "Longbow",
     :damage-type :piercing,
     :damage-die 8,
