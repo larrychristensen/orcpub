@@ -1346,7 +1346,7 @@
              :on-click (fn [_] (dispatch [:set-page i]))}
             [:div
              {:class-name class-name}
-             (if (not= :mobile device-type)
+             (if (= :desktop device-type)
                [:div.f-s-10.m-b-2
                 name])
              [:div.t-a-c
@@ -1903,7 +1903,9 @@
       {:title "Print"
        :icon "print"
        :on-click (export-pdf built-char)}
-      {:title "Save"
+      {:title (if (:db/id character)
+                "Update Existing Character"
+                "Save New Character")
        :icon "save"
        :on-click #(dispatch [:save-character])}]
      [:div

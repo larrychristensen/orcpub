@@ -1163,6 +1163,8 @@
    (weapon-details-field "Type" (common/safe-name type))
    (weapon-details-field "Damage Type" (common/safe-name damage-type))
    (weapon-details-field "Melee/Ranged" (if melee? "melee" "ranged"))
+   (if range
+     (weapon-details-field "Range" (str (:min range) "/" (:max range) " ft.")))
    (weapon-details-field "Finesse?" (yes-no finesse?))
    (weapon-details-field "Two-handed?" (yes-no two-handed?))
    (weapon-details-field "Versatile" (if versatile
@@ -1373,6 +1375,7 @@
             tool-bonus-fn @(subscribe [::char/tool-bonus-fn id])
             device-type @(subscribe [:device-type])
             mobile? (= :mobile device-type)]
+        (prn "TOOL PROFS" tool-profs)
         (if (seq tool-profs)
           [:div
            [:div.flex.align-items-c
@@ -1390,17 +1393,18 @@
                [:th.p-10 (if (not mobile?) [:div.w-40 "Bonus"])]]
               (doall
                (map
-                (fn [key]
-                  (let [name (-> equip/tools-map key :name)
-                        proficient? (key tool-profs)
-                        expertise? (key tool-expertise)]
-                    ^{:key key}
+                (fn [kw]
+                  (prn "KW" kw)
+                  (let [name (-> equip/tools-map kw :name)
+                        proficient? (kw tool-profs)
+                        expertise? (kw tool-expertise)]
+                    ^{:key kw}
                     [:tr
                      [:td.p-10.f-w-b name]
                      [:td.p-10 (boolean-icon proficient?)]
                      (if tool-expertise
                        [:td.p-10 (boolean-icon expertise?)])
-                     [:td.p-10.f-s-18.f-w-b (common/bonus-str (tool-bonus-fn key))]]))
+                     [:td.p-10.f-s-18.f-w-b (common/bonus-str (tool-bonus-fn kw))]]))
                 tool-profs))]]]])))))
 
 
@@ -1506,7 +1510,7 @@
    [:div.hover-opacity-full
     {:class-name (if (not selected?) "opacity-5")}
     [:div (svg-icon icon 24 24)]
-    (if (not= device-type :mobile)
+    (if (= device-type :desktop)
       [:div.uppercase
        title])]])
 
