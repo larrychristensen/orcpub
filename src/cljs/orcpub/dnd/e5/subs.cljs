@@ -304,7 +304,9 @@
    ::char5e/skill-profs char5e/skill-proficiencies 
    ::char5e/skill-bonuses char5e/skill-bonuses
    ::char5e/skill-expertise char5e/skill-expertise
-   ::char5e/tool-profs char5e/tool-proficiencies 
+   ::char5e/tool-profs char5e/tool-proficiencies
+   ::char5e/tool-expertise char5e/tool-expertise
+   ::char5e/tool-bonus-fn char5e/tool-bonus-fn 
    ::char5e/weapon-profs char5e/weapon-proficiencies 
    ::char5e/armor-profs char5e/armor-proficiencies 
    ::char5e/resistances char5e/damage-resistances 

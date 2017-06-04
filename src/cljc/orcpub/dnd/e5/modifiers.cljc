@@ -306,6 +306,9 @@
 (defn skill-expertise [key]
   (mods/set-mod ?skill-expertise key))
 
+(defn tool-expertise [key]
+  (mods/set-mod ?tool-expertise key))
+
 (defn tool-proficiency [key & [first-class? cls-kw]]
   (if first-class?
     (mods/set-mod ?tool-profs

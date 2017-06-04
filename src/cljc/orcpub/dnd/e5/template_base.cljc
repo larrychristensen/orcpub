@@ -52,7 +52,7 @@
                            :medium (min ?max-medium-armor-bonus dex-bonus)
                            0)))
     ?shield-ac-bonus (fn [shield]
-                    (+ 2 (or (:magical-ac-bonus shield) 0)))
+                       (+ 2 (or (:magical-ac-bonus shield) 0)))
     ?unarmored-armor-class (+ ?base-armor-class ?unarmored-ac-bonus ?ac-bonus)
     ?unarmored-with-shield-armor-class (fn [shield]
                                          (+ ?base-armor-class
@@ -60,21 +60,24 @@
                                             ?ac-bonus
                                             (?shield-ac-bonus shield)))
     ?armor-class-with-armor-base (fn [armor & [shield]]
-                              (cond (and (nil? armor)
-                                         (nil? shield)) ?unarmored-armor-class
-                                    (nil? armor) (?unarmored-with-shield-armor-class shield)
-                                    :else (+ (if shield (?shield-ac-bonus shield) 0)
-                                             (+ (?armor-dex-bonus armor)
-                                                (or ?armored-ac-bonus 0)
-                                                (:base-ac armor)
-                                                (:magical-ac-bonus armor)
-                                                ?ac-bonus)
-                                             ?magical-ac-bonus)))
+                                   (cond (and (nil? armor)
+                                              (nil? shield)) ?unarmored-armor-class
+                                         (nil? armor) (?unarmored-with-shield-armor-class shield)
+                                         :else (+ (if shield (?shield-ac-bonus shield) 0)
+                                                  (+ (?armor-dex-bonus armor)
+                                                     (or ?armored-ac-bonus 0)
+                                                     (:base-ac armor)
+                                                     (:magical-ac-bonus armor)
+                                                     ?ac-bonus)
+                                                  ?magical-ac-bonus)))
     ?armor-class-with-armor (fn [armor & [shield]]
                               (apply +
-                                     (?armor-class-with-armor-base armor shield)
+                                     (apply max
+                                            (?armor-class-with-armor-base armor shield)
+                                            (map #(% armor shield) ?ac-fns))
                                      (map #(% armor shield) ?ac-bonus-fns)))
     ?ac-bonus-fns []
+    ?ac-fns []
     ?abilities (reduce
                 (fn [m k]
                   (let [overrides (filter
@@ -123,6 +126,11 @@
                                     (get ?additional-skill-bonuses 0))))
                     {}
                     ?skill-prof-bonuses)
+    ?tool-bonus-fn (fn [tool-kw]
+                     (* (if (?tool-profs tool-kw) ?prof-bonus 0)
+                        (if (?tool-expertise tool-kw) 2 1)))
+    ?tool-expertise #{}
+    ?tool-profs #{}
     ?additional-skill-bonuses {}
     ?passive-perception (+ 10 (?skill-bonuses :perception))
     ?passive-investigation (+ 10 (?skill-bonuses :investigation))
