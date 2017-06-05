@@ -623,7 +623,7 @@
          hdr]]]
       [:div.flex.justify-cont-c.white
        [:div.content hdr]]
-      (if (not @(subscribe [:warning-hidden]))
+      #_(if (not @(subscribe [:warning-hidden]))
         [:div.container
          [:div.flex.align-items-c.justify-cont-s-b.white.bg-light.b-rad-5.p-10.f-w-b.m-l-5.m-r-5.m-b-5.pointer.content
           {:on-click #(dispatch [:hide-warning])}

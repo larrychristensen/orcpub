@@ -218,7 +218,8 @@
    [(subscribe [::char5e/internal-character id])
     (subscribe [:character])])
  (fn [[saved-character character] _]
-   (not= character saved-character)))
+   (and (:db/id saved-character)
+        (not= character saved-character))))
 
 (reg-sub
  ::char5e/internal-character
