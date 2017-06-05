@@ -120,27 +120,30 @@
 
 (defn login-response
   [{:keys [json-params db] :as request}]
-  (let [{:keys [username password]} json-params
-        username (s/trim username)
-        password (s/trim password)
-        {:keys [:orcpub.user/verified?
-                :orcpub.user/verification-sent
-                :orcpub.user/email
-                :db/id] :as user} (lookup-user db username password)
-        unverified? (not verified?)
-        expired? (and verification-sent (verification-expired? verification-sent))]
+  (let [{raw-username :username raw-password :password} json-params]
     (cond
-      (nil? id) (let [user-for-username (find-user-by-username-or-email db username)]
-                  (login-error (if (:db/id user-for-username)
-                                 errors/bad-credentials
-                                 errors/no-account)))
-      (and unverified? expired?) (login-error errors/unverified-expired)
-      unverified? (login-error errors/unverified {:email email})
-      :else (let [token (create-token (:orcpub.user/username user)
-                                      (-> 24 hours from-now))]
-              {:status 200 :body {:user-data {:username (:orcpub.user/username user)
-                                              :email (:orcpub.user/email user)}
-                                  :token token}}))))
+      (s/blank? raw-username) (login-error :username-required)
+      (s/blank? raw-password) (login-error :password-required)
+      :else (let [username (s/trim raw-username)
+                  password (s/trim raw-password)
+                  {:keys [:orcpub.user/verified?
+                          :orcpub.user/verification-sent
+                          :orcpub.user/email
+                          :db/id] :as user} (lookup-user db username password)
+                  unverified? (not verified?)
+                  expired? (and verification-sent (verification-expired? verification-sent))]
+              (cond
+                (nil? id) (let [user-for-username (find-user-by-username-or-email db username)]
+                            (login-error (if (:db/id user-for-username)
+                                           errors/bad-credentials
+                                           errors/no-account)))
+                (and unverified? expired?) (login-error errors/unverified-expired)
+                unverified? (login-error errors/unverified {:email email})
+                :else (let [token (create-token (:orcpub.user/username user)
+                                                (-> 24 hours from-now))]
+                        {:status 200 :body {:user-data {:username (:orcpub.user/username user)
+                                                        :email (:orcpub.user/email user)}
+                                            :token token}}))))))
 
 (defn login [{:keys [json-params db] :as request}]
   (try
@@ -285,9 +288,10 @@
     (let [{:keys [password verify-password]} json-params
           username (:user identity)
           {:keys [:db/id] :as user} (first-user-by db username-query username)]
-      (if (= password verify-password)
-        (do-password-reset conn id password)
-        {:status 400 :message "Passwords do not match"}))
+      (cond
+        (not= password verify-password) {:status 400 :message "Passwords do not match"}
+        (seq (registration/validate-password password)) {:status 400 :message "New password is invalid"}
+        :else (do-password-reset conn id password)))
     (catch Throwable t (do (prn t) (throw t)))))
 
 (def font-sizes
