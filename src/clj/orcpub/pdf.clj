@@ -196,13 +196,13 @@
                  (- 11 y 0.12)
                  0.25
                  0.25))
-  (.setNonStrokingColor cs 0 0 0 225)
+  (.setNonStrokingColor cs 0 0 0)
   (draw-text cs
              value
-             PDType1Font/HELVETICA_BOLD
+             PDType1Font/HELVETICA_BOLD_OBLIQUE
              8
              x
-             (- y 0.05))
+             (- y 0.07))
   (.setNonStrokingColor cs 0 0 0))
 
 (defn abbreviate-times [time]
@@ -251,7 +251,7 @@
             over-img (LosslessFactory/createFromImage document (ImageIO/read over-img-stream))]
         (draw-grid cs 2.5 3.5)
         (draw-text cs
-                   (str "Page " page-number " (reverse)")
+                   (str "Page " (inc page-number) " (reverse)")
                    PDType1Font/HELVETICA_BOLD_OBLIQUE
                    10
                    0.12
@@ -304,7 +304,7 @@
             over-img (LosslessFactory/createFromImage document (ImageIO/read over-img-stream))]
         (draw-grid cs 2.5 3.5)
         (draw-text cs
-                   (str "Page " page-number)
+                   (str "Page " (inc page-number))
                    PDType1Font/HELVETICA_BOLD_OBLIQUE
                    10
                    0.12
