@@ -373,9 +373,10 @@
 
 (defn verify-sent []
   (email-sent
-   (str "We sent a verification email to "
-        @(subscribe [:temp-email])
-        ". You must verify to complete registration and the link we sent will only be valid for 24 hours.")))
+   [:div
+    [:span "We sent a verification email to "]
+    [:span.f-w-b.red.f-s-18 @(subscribe [:temp-email])]
+    [:span ". You must verify to complete registration and the link we sent will only be valid for 24 hours."]]))
 
 (defn password-reset-sent []
   (email-sent
@@ -411,6 +412,12 @@
                     :messages (:email registration-validation)
                     :type :email
                     :on-change (fn [e] (dispatch [:registration-email (event-value e)]))}]
+       [form-input {:title "Verify Email"
+                    :key :verify-email
+                    :value (:verify-email registration-form)
+                    :messages (:verify-email registration-validation)
+                    :type :email
+                    :on-change (fn [e] (dispatch [:registration-verify-email (event-value e)]))}]
        [form-input {:title "Username"
                     :key :username
                     :value (:username registration-form)

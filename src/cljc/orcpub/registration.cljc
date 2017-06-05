@@ -38,14 +38,16 @@
 (defn bad-username? [username]
   (fails-match? #"^[A-Za-z0-9]+$" username))
 
-(defn validate-registration [{:keys [email username password first-and-last-name]} email-taken? username-taken?]
+(defn validate-registration [{:keys [email verify-email username password first-and-last-name]} email-taken? username-taken?]
   (let [bad-email-format? (bad-email? email)
+        emails-dont-match (not= email verify-email)
         username-too-short? (or (nil? username) (< (count username) 3))
         username-email-format? (not (bad-email? email))
         bad-username-format? (bad-username? username)]
     (cond-> {}
       (s/blank? first-and-last-name) (update :first-and-last-name conj "Name is required")
       email-taken? (update :email conj "Email address is already associated with another account")
+      emails-dont-match (update :verify-email conj "Email addresses don't match")
       bad-email-format? (update :email conj (if (s/blank? email)
                                               "Email is required"
                                               "Email is not a valid email format"))
