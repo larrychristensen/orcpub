@@ -55,7 +55,7 @@
                                               19 7
                                               :default 1}
                                              )
-                                            "d6 fire damage to creatures within a 5 ft. that fail a "
+                                            "d6 fire damage to creatures within a 5 ft. that fail a DC "
                                             (?spell-save-dc :int)
                                             " DEX save")})]})
               (t/option-cfg
@@ -79,7 +79,7 @@
                                               19 10
                                               :default 1}
                                              )
-                                            "d6 acid damage to creatures within a 5 ft. that fail a "
+                                            "d6 acid damage to creatures within a 5 ft. that fail a DC "
                                              (?spell-save-dc :int)
                                              " DEX save")})]})
               (t/option-cfg
@@ -101,9 +101,7 @@
                                               17 9
                                               19 10
                                               :default 1})
-                                            "d8 hit points"
-                                            (?spell-save-dc :int)
-                                            " DEX save")})]})
+                                            "d8 hit points")})]})
               (t/option-cfg
                {:name "Smoke Stick"
                 :modifiers [(mod5e/action
@@ -277,10 +275,10 @@
                             :source :ua-artificer
                             :summary "You craft a satchel that contains your alchemical materials"}]
                   :selections [alchemical-formula-selection]
-                  :levels {3 [alchemical-formula-selection]
-                           9 [alchemical-formula-selection]
-                           14 [alchemical-formula-selection]
-                           17 [alchemical-formula-selection]}}
+                  :levels {3 {:selections [alchemical-formula-selection]}
+                           9 {:selections [alchemical-formula-selection]}
+                           14 {:selections [alchemical-formula-selection]}
+                           17 {:selections [alchemical-formula-selection]}}}
                  {:name "Gunsmith"
                   :modifiers (concat
                               (artificer-tool-prof-mods :smiths-tools)
