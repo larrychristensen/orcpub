@@ -558,10 +558,11 @@
        title]
       [:div.flex.align-items-c.justify-cont-end.flex-wrap.m-r-10.m-l-10
        (map-indexed
-        (fn [i {:keys [title icon on-click]}]
+        (fn [i {:keys [title icon on-click style]}]
           ^{:key i}
           [:button.form-button.h-40.m-l-5.m-t-5.m-b-5
-           {:on-click on-click}
+           {:on-click on-click
+            :style style}
            [:span
             [:i.fa.f-s-18
              (if icon {:class-name (str "fa-" icon)})]]
