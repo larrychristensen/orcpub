@@ -622,6 +622,11 @@
     :dispatch [:check-email email]}))
 
 (reg-event-fx
+ :registration-verify-email
+ (fn [{:keys [db]} [_ email]]
+   {:db (assoc-in db [:registration-form :verify-email] email)}))
+
+(reg-event-fx
  :registration-username
  (fn [{:keys [db]} [_ username]]
    {:db (assoc-in db [:registration-form :username] username)
