@@ -213,6 +213,14 @@
      (fn [] (get-in @app-db [::char5e/character-map id] [])))))
 
 (reg-sub
+ ::char5e/character-changed?
+ (fn [[_ id]]
+   [(subscribe [::char5e/internal-character id])
+    (subscribe [:character])])
+ (fn [[saved-character character] _]
+   (not= character saved-character)))
+
+(reg-sub
  ::char5e/internal-character
  (fn [[_ id] _]
    (subscribe [::char5e/character id])) 

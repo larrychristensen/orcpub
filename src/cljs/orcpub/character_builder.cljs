@@ -32,6 +32,7 @@
             [orcpub.route-map :as routes]
             [orcpub.pdf-spec :as pdf-spec]
             [orcpub.user-agent :as user-agent]
+            [orcpub.dnd.e5.db :as db]
 
             [clojure.spec :as spec]
             [clojure.spec.test :as stest]
@@ -1801,7 +1802,7 @@
             al-legal? (and (empty? al-illegal-reasons)
                            (not multiple-resources?))]
         [:div.m-l-20.m-b-20
-         [:div.flex
+         [:div.flex.align-items-c
           [:div.i
            {:class-name
             (if al-legal?
@@ -1869,6 +1870,8 @@
    :z-index 100
    :background-color "rgba(0,0,0,0.6)"})
 
+(def unsaved-button-style {:background "#9a031e"})
+
 (defn character-builder []
   (let [character @(subscribe [:character])
         _  (if print-enabled? (cljs.pprint/pprint character))
@@ -1884,7 +1887,15 @@
                                    selection-validation-messages)
         used-resources (es/entity-val built-char :used-resources)
         loading @(subscribe [:loading])
-        locked-components @(subscribe [:locked-components])]
+        locked-components @(subscribe [:locked-components])
+        character-map @(subscribe [::char5e/character-map])
+        character-id (:db/id character)
+        saved-character (if (and character-id
+                                 character-map)
+                          (character-map character-id))
+        character-changed? (if character-id
+                             @(subscribe [::char5e/character-changed? character-id])
+                             (not= db/default-character character))]
     (if print-enabled? (print-char built-char))
     [views5e/content-page
      "Character Builder"
@@ -1897,8 +1908,8 @@
                                                built-template
                                                locked-components)]
                       (dispatch [:set-character new-char]))))}
-      {:title "Reset"
-       :icon "undo"
+      {:title "New"
+       :icon "plus"
        :on-click (fn [_] (dispatch [:reset-character]))}
       {:title "Print"
        :icon "print"
@@ -1907,12 +1918,17 @@
                 "Update Existing Character"
                 "Save New Character")
        :icon "save"
+       :style (if character-changed? unsaved-button-style) 
        :on-click #(dispatch [:save-character])}]
      [:div
       [download-form]
       [:div.container
        [:div.content
-        [al-legality al-illegal-reasons used-resources]]]
+        [:div.flex.justify-cont-s-b.align-items-c.flex-wrap
+         [al-legality al-illegal-reasons used-resources]
+         (if character-changed? [:div.red.f-w-b.m-r-10.m-l-10.flex.align-items-c
+                                 (views5e/svg-icon "thunder-skull" 24 24)
+                                 [:span "You have unsaved changes"]])]]]
       [:div.flex.justify-cont-c.p-b-40
        [:div.f-s-14.white.content
         [:div.flex.w-100-p

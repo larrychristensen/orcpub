@@ -77,21 +77,9 @@
    (let [strict-character (:body response)
          character (char5e/from-strict strict-character)
          id (:db/id character)]
-     {:db (-> db
-              (assoc :character character)
-              (update-in
-               dnd-5e-characters-path
-               (fn [chars]
-                 (let [new? (not-any? #(-> % :db/id (= id)) chars)]
-                   (if new?
-                     (conj chars character)
-                     (map
-                      (fn [char]
-                        (if (= id (:db/id char))
-                          character
-                          char))
-                      chars))))))
-      :dispatch [:show-message "Your character has been saved."]})))
+     {:dispatch-n [[:show-message "Your character has been saved."]
+                   [:set-character character]
+                   [::char5e/set-character id strict-character]]})))
 
 (reg-event-fx
  :save-character
