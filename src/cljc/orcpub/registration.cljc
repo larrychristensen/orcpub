@@ -38,13 +38,29 @@
 (defn bad-username? [username]
   (fails-match? #"^[A-Za-z0-9]+$" username))
 
+(defn bad-gmail? [email]
+  (if (some? email)
+    (let [[_ bad-host] (re-matches #".*(gmial|gmal|gmil|gmai|gmaal|gmiil|gmaail|gmaiil)\.(.*)" email)
+          [_ bad-domain] (re-matches #".*gmail\.(cm|co|coom)$" email)]
+      (cond
+        bad-host (str "Invalid host '" bad-host "' did you mean 'gmail'?")
+        bad-domain (str "Invalid host 'gmail." bad-domain "' did you mean 'gmail.com'?")
+        :else false))))
+
+(defn bad-hotmail? [email]
+  (and email (second (re-matches #".*(hotmil|hotmall|htmail|htmial|hotmial).(.*)" email))))
+
 (defn validate-registration [{:keys [email verify-email username password first-and-last-name]} email-taken? username-taken?]
   (let [bad-email-format? (bad-email? email)
+        bad-gmail-domain (bad-gmail? email)
+        bad-hotmail-domain (bad-hotmail? email)
         emails-dont-match (not= email verify-email)
         username-too-short? (or (nil? username) (< (count username) 3))
         username-email-format? (not (bad-email? email))
         bad-username-format? (bad-username? username)]
     (cond-> {}
+      bad-gmail-domain (update :email conj bad-gmail-domain)
+      bad-hotmail-domain (update :email conj (str "Invalid domain '" bad-hotmail-domain "' did you mean 'hotmail'?"))
       (s/blank? first-and-last-name) (update :first-and-last-name conj "Name is required")
       email-taken? (update :email conj "Email address is already associated with another account")
       emails-dont-match (update :verify-email conj "Email addresses don't match")

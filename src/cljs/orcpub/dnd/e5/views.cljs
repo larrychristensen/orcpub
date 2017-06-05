@@ -49,7 +49,7 @@
 
 (defn validation-messages [messages]
   (if messages
-    [:ul.t-a-l.p-l-20.p-r-20
+    [:ul.t-a-l.p-l-20.p-r-20.m-b-10
      (doall
       (map-indexed
        (fn [i msg]
@@ -67,20 +67,27 @@
       {:auto-complete :off})]]])
 
 (defn form-input []
-  (let [blurred? (r/atom false)]
+  (let [blurred? (r/atom false)
+        temp-val (r/atom nil)]
     (fn [{:keys [title key value messages type on-change]}]
       [:div
        [base-input
         {:name key
          :type type
-         :value value
+         :value (or @temp-val value)
          :placeholder title
          :style input-style
          :class-name (if (and @blurred? (seq messages))
                        "b-red"
                        "b-gray")
-         :on-change on-change
-         :on-blur #(swap! blurred? (fn [_] true))}]
+         :on-focus (fn [_] (reset! blurred? false))
+         :on-mouse-out (fn [e]
+                         (on-change e)
+                         (reset! temp-val (event-value e)))
+         :on-change (fn [e] (reset! temp-val (event-value e)))
+         :on-blur (fn [e]
+                    (on-change e)
+                    (reset! blurred? true))}]
        (if @blurred? (validation-messages messages))])))
 
 (defn svg-icon [icon-name & [size]]
@@ -1383,7 +1390,6 @@
             tool-bonus-fn @(subscribe [::char/tool-bonus-fn id])
             device-type @(subscribe [:device-type])
             mobile? (= :mobile device-type)]
-        (prn "TOOL PROFS" tool-profs)
         (if (seq tool-profs)
           [:div
            [:div.flex.align-items-c
@@ -1402,7 +1408,6 @@
               (doall
                (map
                 (fn [kw]
-                  (prn "KW" kw)
                   (let [name (-> equip/tools-map kw :name)
                         proficient? (kw tool-profs)
                         expertise? (kw tool-expertise)]
