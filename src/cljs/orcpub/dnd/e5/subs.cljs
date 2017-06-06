@@ -271,6 +271,16 @@
    (:message db)))
 
 (reg-sub
+ :confirmation-shown?
+ (fn [db _]
+   (:confirmation-shown? db)))
+
+(reg-sub
+ :confirmation-cfg
+ (fn [db _]
+   (:confirmation-cfg db)))
+
+(reg-sub
  :login-message
  (fn [db _]
    (:login-message db)))

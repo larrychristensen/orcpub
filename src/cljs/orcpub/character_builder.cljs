@@ -44,6 +44,7 @@
 
 (def print-disabled? true)
 
+
 (def print-enabled? (and (not print-disabled?)
                          (s/starts-with? js/window.location.href "http://localhost")))
 
@@ -188,14 +189,6 @@
 (defn character-textarea [entity-values prop-name & [cls-str]]
   [character-field entity-values prop-name :textarea cls-str])
 
-(defn meets-prereqs? [option]
-  (every?
-   (fn [{:keys [::t/prereq-fn] :as prereq}]
-     (if prereq-fn
-       (prereq-fn)
-       (js/console.warn "NO PREREQ_FN" (::t/name option) prereq)))
-   (::t/prereqs option)))
-
 (defn prereq-failures [option]
   (remove
    nil?
@@ -282,7 +275,7 @@
                            (fn [option]
                              (and
                               (unselected-classes-set (::t/key option))
-                              (meets-prereqs? option)))
+                              (entity/meets-prereqs? option)))
                            options)]
     [:div
      [:div
@@ -457,46 +450,11 @@
      {:class-name (str "h-" size " w-" size " f-s-" font-size)})
    remaining])
 
-(defn actual-path [{:keys [::t/ref ::entity/path] :as selection}]
-  (vec (if ref (if (sequential? ref) ref [ref]) path)))
-
-(defn get-option [built-template entity path]
-  (get-in entity (entity/get-entity-path built-template entity path)))
-
-(defn option-selected? [require-value? option]
-  (and (or (::entity/value option)
-           (not require-value?))
-       (::entity/key option)))
-
-(defn count-remaining [built-template character {:keys [::t/min ::t/max ::t/require-value?] :as selection}]
-  (let [actual-path (actual-path selection)
-        selected-options (get-option built-template character actual-path)
-        selected-count (cond
-                         (sequential? selected-options)
-                         (count (if require-value?
-                                  (filter (partial option-selected? require-value?) selected-options)
-                                  selected-options))
-                         
-                         (map? selected-options)
-                         (if (option-selected? require-value? selected-options)
-                           1
-                           0)
-                         
-                         :else 0)]
-    (cond (< selected-count min)
-          (- min selected-count)
-
-          (and max (> selected-count max))
-          (- max selected-count)
-
-          :else
-          0)))
-
 (defn validate-selections [built-template character selections]
   (mapcat
    (fn [{:keys [::t/name ::t/tags] :as selection}]
      (if (not (tags :starting-equipment))
-       (let [remaining (count-remaining built-template character selection)]
+       (let [remaining (entity/count-remaining built-template character selection)]
          (cond
            (pos? remaining) [(str "You have " remaining " more '" name "' selection" (if (> remaining 1) "s") " to make.")]
            (neg? remaining) [(str "You must remove " (Math/abs remaining) " '" name "' selection" (if (< remaining -1) "s") ".")]
@@ -647,8 +605,8 @@
 
 
 (defn selection-section [character built-template option-paths ui-fns {:keys [::t/key ::t/name ::t/help ::t/options ::t/min ::t/max ::t/ref ::t/icon ::t/multiselect? ::entity/path ::entity/parent] :as selection} num-columns]
-  (let [actual-path (actual-path selection)
-        remaining (count-remaining built-template character selection)
+  (let [actual-path (entity/actual-path selection)
+        remaining (entity/count-remaining built-template character selection)
         expanded? (r/atom false)
         ancestor-names (ancestor-names-string built-template actual-path)]
     [selection-section-base {:path actual-path
@@ -1029,7 +987,7 @@
         (doall
          (map-indexed
           (fn [i {:keys [::t/key ::t/min ::t/max ::t/options ::entity/path] :as selection}]
-            (let [remaining (count-remaining built-template character selection)]
+            (let [remaining (entity/count-remaining built-template character selection)]
               ^{:key i}
               [selection-section-base
                {:path path
@@ -1264,7 +1222,7 @@
            [:td.p-5 total-hps]]]]])]))
 
 (defn sum-remaining [built-template character selections]
-  (apply + (map #(Math/abs (count-remaining built-template character %)) selections)))
+  (apply + (map #(Math/abs (entity/count-remaining built-template character %)) selections)))
 
 (defn hit-points-editor [{:keys [character built-template option-paths selections]}]
   (let [num-selections (count selections)]
@@ -1430,7 +1388,7 @@
         combined-selections (entity/combine-selections selections)
         final-selections (remove #(and (zero? (::t/min %))
                                        (zero? (::t/max %))
-                                       (zero? (count-remaining built-template character %)))
+                                       (zero? (entity/count-remaining built-template character %)))
                                  combined-selections)]
     ;;(if print-enabled? (js/console.log "FINAL SELECTIONS" (clj->js final-selections)))
     [:div.w-100-p
@@ -1502,101 +1460,6 @@
                 ^{:key (::entity/path selection)}
                 [:div (selection-section character built-template option-paths nil selection num-columns)])
               (into (sorted-set-by compare-selections) non-ui-fn-selections)))])])]]))
-
-
-(defn random-sequential-selection [built-template character {:keys [::t/min ::t/max ::t/options ::entity/path] :as selection}]
-  (let [num (inc (rand-int (count options)))
-        actual-path (actual-path selection)]
-    (entity/update-option
-     built-template
-     character
-     actual-path
-     (fn [_]
-       (mapv
-        (fn [{:keys [::t/key]}]
-          {::entity/key key})
-        (take num options))))))
-
-(defn random-selection [built-template character {:keys [::t/key ::t/min ::t/max ::t/options ::t/multiselect? ::entity/path] :as selection}]
-  (let [built-char (entity/build character built-template)
-        new-options (take (count-remaining built-template character selection)
-                          (shuffle (filter
-                                    (fn [o]
-                                      (and (meets-prereqs? o)
-                                           (not= :none (::t/key o))))
-                                    options)))]
-    (reduce
-     (fn [new-character {:keys [::t/key]}]
-       (let [new-option {::entity/key key}
-             multiselect? (or multiselect?
-                              (> min 1)
-                              (nil? max))]
-         (entity/update-option
-          built-template
-          new-character
-          (conj (actual-path selection) key)
-          (fn [options] (if multiselect? (conj (or options []) new-option) new-option)))))
-     character
-     (if (and (= :class key) (empty? new-options))
-       [{::t/key :fighter}]
-       new-options))))
-
-
-(def selection-randomizers
-  {:ability-scores (fn [s _]
-                     (fn [_] {::entity/key :standard-roll
-                             ::entity/value (char5e/standard-ability-rolls)}))
-   :hit-points (fn [{[_ class-kw] ::entity/path} built-char]
-                 (fn [_]
-                   (events5e/random-hit-points-option (char5e/levels built-char) class-kw)))})
-
-(def max-iterations 100)
-
-(defn keep-options [built-template entity option-paths]
-  (reduce
-   (fn [new-entity option-path]
-     (entity/update-option
-      built-template
-      new-entity
-      option-path
-      (fn [_] (get-option built-template entity option-path))))
-   {}
-   option-paths))
-
-(defn random-character [current-character built-template locked-components]
-  (reduce
-   (fn [character i]
-     (if (< i 10)
-       (let [built-char (entity/build character built-template)
-             available-selections (entity/available-selections character built-char built-template)
-             combined-selections (entity/combine-selections available-selections)
-             pending-selections (filter
-                                 (fn [{:keys [::entity/path] :as selection}]
-                                   (let [remaining (count-remaining built-template character selection)]
-                                     (and (pos? remaining)
-                                          (not (locked-components path)))))
-                                 combined-selections)]
-         (if (empty? pending-selections)
-           (reduced character)
-           (reduce
-            (fn [new-character {:keys [::t/key ::t/sequential?] :as selection}]
-              (let [selection-randomizer (selection-randomizers key)]
-                (if selection-randomizer
-                  (let [random-value (selection-randomizer selection)]
-                    (entity/update-option
-                     built-template
-                     new-character
-                     (actual-path selection)
-                     (selection-randomizer selection built-char)))
-                    (if sequential?
-                      (random-sequential-selection built-template new-character selection)
-                      (random-selection built-template new-character selection)))))
-            character
-            pending-selections)))
-       (reduced character)))
-   (let [starting-character (keep-options built-template current-character (conj (vec locked-components) [:optional-content]))]
-     starting-character)
-   (range)))
 
 (def image-style
   {:max-height "100px"
@@ -1869,6 +1732,12 @@
 
 (def unsaved-button-style {:background "#9a031e"})
 
+(defn confirm-handler [character-changed? {:keys [event] :as cfg}]
+  (fn [_]
+    (if character-changed?
+      (dispatch [:show-confirmation cfg])
+      (dispatch event))))
+
 (defn character-builder []
   (let [character @(subscribe [:character])
         _  (if print-enabled? (cljs.pprint/pprint character))
@@ -1898,16 +1767,18 @@
      "Character Builder"
      [{:title "Random"
        :icon "random"
-       :on-click (fn [_]
-                   (dispatch [:set-loading true])
-                   (go (let [new-char
-                             (random-character character
-                                               built-template
-                                               locked-components)]
-                      (dispatch [:set-character new-char]))))}
+       :on-click (confirm-handler
+                  character-changed?
+                  {:confirm-button-text "GENERATE RANDOM CHARACTER"
+                   :question "You have unsaved changes, are you sure you want to discard them and generate a random character?"
+                   :event [:random-character character built-template locked-components]})}
       {:title "New"
        :icon "plus"
-       :on-click (fn [_] (dispatch [:reset-character]))}
+       :on-click (confirm-handler
+                  character-changed?
+                  {:confirm-button-text "CREATE NEW CHARACTER"
+                   :question "You have unsaved changes, are you sure you want to discard them and create a new character?"
+                   :event [:reset-character]})}
       {:title "Print"
        :icon "print"
        :on-click (export-pdf built-char)}

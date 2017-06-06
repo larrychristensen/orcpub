@@ -61,13 +61,121 @@
             local-store-character (assoc :character local-store-character)
             local-store-user (assoc :user-data local-store-user)))}))
 
-(defn reset-character [_ [_]]
+(defn reset-character [_ _]
   (char5e/set-class t5e/character :barbarian 0 t5e/barbarian-option))
 
 (reg-event-db
  :reset-character
  character-interceptors
  reset-character)
+
+(defn random-sequential-selection [built-template character {:keys [::t/min ::t/max ::t/options ::entity/path] :as selection}]
+  (let [num (inc (rand-int (count options)))
+        actual-path (entity/actual-path selection)]
+    (entity/update-option
+     built-template
+     character
+     actual-path
+     (fn [_]
+       (mapv
+        (fn [{:keys [::t/key]}]
+          {::entity/key key})
+        (take num options))))))
+
+(defn random-selection [built-template character {:keys [::t/key ::t/min ::t/max ::t/options ::t/multiselect? ::entity/path] :as selection}]
+  (let [built-char (entity/build character built-template)
+        new-options (take (entity/count-remaining built-template character selection)
+                          (shuffle (filter
+                                    (fn [o]
+                                      (and (entity/meets-prereqs? o)
+                                           (not= :none (::t/key o))))
+                                    options)))]
+    (reduce
+     (fn [new-character {:keys [::t/key]}]
+       (let [new-option {::entity/key key}
+             multiselect? (or multiselect?
+                              (> min 1)
+                              (nil? max))]
+         (entity/update-option
+          built-template
+          new-character
+          (conj (entity/actual-path selection) key)
+          (fn [options] (if multiselect? (conj (or options []) new-option) new-option)))))
+     character
+     (if (and (= :class key) (empty? new-options))
+       [{::t/key :fighter}]
+       new-options))))
+
+(defn random-hit-points-option [levels class-kw]
+  {::entity/key :roll
+   ::entity/value (dice/die-roll (-> levels class-kw :hit-die))})
+
+(def selection-randomizers
+  {:ability-scores (fn [s _]
+                     (fn [_] {::entity/key :standard-roll
+                             ::entity/value (char5e/standard-ability-rolls)}))
+   :hit-points (fn [{[_ class-kw] ::entity/path} built-char]
+                 (fn [_]
+                   (random-hit-points-option (char5e/levels built-char) class-kw)))})
+
+(def max-iterations 100)
+
+(defn keep-options [built-template entity option-paths]
+  (reduce
+   (fn [new-entity option-path]
+     (entity/update-option
+      built-template
+      new-entity
+      option-path
+      (fn [_] (entity/get-option built-template entity option-path))))
+   {}
+   option-paths))
+
+(defn random-character [current-character built-template locked-components]
+  (reduce
+   (fn [character i]
+     (if (< i 10)
+       (let [built-char (entity/build character built-template)
+             available-selections (entity/available-selections character built-char built-template)
+             combined-selections (entity/combine-selections available-selections)
+             pending-selections (filter
+                                 (fn [{:keys [::entity/path] :as selection}]
+                                   (let [remaining (entity/count-remaining built-template character selection)]
+                                     (and (pos? remaining)
+                                          (not (locked-components path)))))
+                                 combined-selections)]
+         (if (empty? pending-selections)
+           (reduced character)
+           (reduce
+            (fn [new-character {:keys [::t/key ::t/sequential?] :as selection}]
+              (let [selection-randomizer (selection-randomizers key)]
+                (if selection-randomizer
+                  (let [random-value (selection-randomizer selection)]
+                    (entity/update-option
+                     built-template
+                     new-character
+                     (entity/actual-path selection)
+                     (selection-randomizer selection built-char)))
+                    (if sequential?
+                      (random-sequential-selection built-template new-character selection)
+                      (random-selection built-template new-character selection)))))
+            character
+            pending-selections)))
+       (reduced character)))
+   (let [starting-character (keep-options built-template current-character (conj (vec locked-components) [:optional-content]))]
+     starting-character)
+   (range)))
+
+(reg-event-fx
+ :set-random-character
+ (fn [{:keys [db]} [_ character built-template locked-components]]
+   {:dispatch [:set-character (random-character character built-template locked-components)]}))
+
+(reg-event-fx
+ :random-character
+ (fn [_ [_ character built-template locked-components]]
+   {:dispatch-n [[:set-loading true]
+                 [:set-random-character character built-template locked-components]]}))
 
 (def dnd-5e-characters-path [:dnd :e5 :characters])
 
@@ -83,7 +191,7 @@
 
 (reg-event-fx
  :save-character
- (fn [{:keys [db]} [_]]
+ (fn [{:keys [db]} _]
    (let [strict (char5e/to-strict (:character db))]
      {:dispatch [:set-loading true]
       :http {:method :post
@@ -362,10 +470,6 @@
  :set-total-hps
  character-interceptors
  set-total-hps)
-
-(defn random-hit-points-option [levels class-kw]
-  {::entity/key :roll
-   ::entity/value (dice/die-roll (-> levels class-kw :hit-die))})
 
 (defn randomize-hit-points [character [_ built-template path levels class-kw]]
   (assoc-in
@@ -787,18 +891,18 @@
 
 (reg-event-fx
  :new-character
- (fn [{:keys [db]} [_]]
+ (fn [{:keys [db]} _]
    {:db (assoc db :character default-character)
     :dispatch [:route routes/dnd-e5-char-builder-route]}))
 
 (reg-event-db
  :hide-message
- (fn [db [_]]
+ (fn [db _]
    (assoc db :message-shown? false)))
 
 (reg-event-db
  :hide-login-message
- (fn [db [_]]
+ (fn [db _]
    (assoc db :login-message-shown? false)))
 
 (reg-event-db
@@ -828,3 +932,21 @@
  :hide-warning
  (fn [db _]
    (assoc db :warning-hidden true)))
+
+(reg-event-db
+ :hide-confirmation
+ (fn [db _]
+   (assoc db :confirmation-shown? false)))
+
+(reg-event-fx
+ :confirm
+ (fn [_ [_ event]]
+   {:dispatch-n [[:hide-confirmation]
+                 event]}))
+
+(reg-event-db
+ :show-confirmation
+ (fn [db [_ cfg]]
+   (assoc db
+          :confirmation-shown? true
+          :confirmation-cfg cfg)))
