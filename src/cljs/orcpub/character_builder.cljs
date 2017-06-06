@@ -1376,6 +1376,13 @@
   (< (selection-order-title s1)
      (selection-order-title s2)))
 
+(defn compare-paths [s1 s2]
+  (< (::entity/path s1)
+     (::entity/path s2)))
+
+(defn sorted-selection-set [selections]
+  (into (sorted-set-by compare-paths) selections))
+
 (defn new-options-column [num-columns]
   (let [character @(subscribe [:character])
         built-template @(subscribe [:built-template])
@@ -1425,7 +1432,8 @@
                                     (matches-non-group-fn key)
                                     final-selections)]))
                               ui-fns)
-            non-ui-fn-selections (sets/difference (set final-selections) (set ui-fn-selections))]
+            non-ui-fn-selections (sets/difference (sorted-selection-set final-selections)
+                                                  (sorted-selection-set ui-fn-selections))]
         [:div.p-5
          [:div
           (doall
@@ -1455,12 +1463,13 @@
             ui-fns))]
          (when (seq non-ui-fn-selections)
            [:div.m-t-20
-            (doall
-             (map
-              (fn [selection]
-                ^{:key (::entity/path selection)}
-                [:div (selection-section character built-template option-paths nil selection num-columns)])
-              (into (sorted-set-by compare-selections) non-ui-fn-selections)))])])]]))
+            (let [sorted-selections (into (sorted-set-by compare-selections) non-ui-fn-selections)]
+              (doall
+               (map
+                (fn [selection]
+                  ^{:key (::entity/path selection)}
+                  [:div (selection-section character built-template option-paths nil selection num-columns)])
+                sorted-selections)))])])]]))
 
 (def image-style
   {:max-height "100px"
