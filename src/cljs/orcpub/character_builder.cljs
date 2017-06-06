@@ -158,14 +158,15 @@
     (fn [entity-values prop-name type & [cls-str handler]]
       (let [value (get entity-values prop-name)
             leave-handler (fn [_]
-                            (if (not (and (s/blank? (:temp-val @state))
-                                          (s/blank? value)))
-                              (if handler
-                                (handler (:temp-val @state))
-                                (dispatch-sync [:update-value-field prop-name (:temp-val @state)])))
-                            (swap! state
-                                   assoc
-                                   :focused false))]
+                            (if (:focused @state)
+                              (if (not (and (s/blank? (:temp-val @state))
+                                            (s/blank? value)))
+                                (if handler
+                                  (handler (:temp-val @state))
+                                  (dispatch-sync [:update-value-field prop-name (:temp-val @state)])))
+                              (swap! state
+                                     assoc
+                                     :focused false)))]
         [type {:class-name (str "input " cls-str)
                :type :text
                :value (if (:focused @state)
