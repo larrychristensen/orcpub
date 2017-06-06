@@ -217,7 +217,8 @@
                                  :key key
                                  :modifiers (artificer-tool-prof-mods key)}))
                              equip5e/tools)})]
-    :modifiers [(mod5e/tool-proficiency :thieves-tools)]
+    :modifiers [(mod5e/tool-proficiency :thieves-tools)
+                opt5e/ua-al-illegal]
     :levels {2 {:modifiers [(mod5e/tool-expertise :thieves-tools)]
                 :selections [(wonderous-invention-selection
                               [:bag-of-holding

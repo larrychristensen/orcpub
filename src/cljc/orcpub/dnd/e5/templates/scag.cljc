@@ -8,7 +8,8 @@
             [orcpub.dnd.e5.weapons :as weapon5e]
             [orcpub.dnd.e5.equipment :as equip5e]
             [orcpub.dnd.e5.spell-lists :as sl]
-            [orcpub.dnd.e5.options :as opt5e]))
+            [orcpub.dnd.e5.options :as opt5e]
+            [re-frame.core :refer [subscribe]]))
 
 (def scag-barbarian
   {:name "Barbarian"
@@ -20,7 +21,7 @@
                  :source :scag
                  :prereqs [(t/option-prereq
                             "Dwarves only"
-                            (fn [c] (= "Dwarf" (es/entity-val c :race))))]
+                            (fn [c] (= "Dwarf" @(subscribe [::char5e/race]))))]
                  :modifiers [(mod5e/bonus-action
                               {:name "Spiked Armor Attack"
                                :page 121
@@ -447,7 +448,7 @@
                          :tool {:thieves-tools false}}
                  :prereqs [(t/option-prereq
                             "Elves only"
-                            (fn [c] (= "Elf" (es/entity-val c :race))))]
+                            (fn [c] (= "Elf" @(subscribe [::char5e/race]))))]
                  :modifiers [(mod5e/skill-proficiency :performance)]
                  :selections [(opt5e/weapon-proficiency-selection
                                (map

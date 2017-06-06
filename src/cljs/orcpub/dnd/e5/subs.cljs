@@ -296,7 +296,8 @@
    ::char5e/base-land-speed char5e/base-land-speed
    ::char5e/speed-with-armor char5e/land-speed-with-armor
    ::char5e/unarmored-speed-bonus char5e/unarmored-speed-bonus
-   ::char5e/max-hit-points char5e/max-hit-points 
+   ::char5e/max-hit-points char5e/max-hit-points
+   ::char5e/hit-point-level-bonus char5e/hit-point-level-bonus
    ::char5e/initiative char5e/initiative 
    ::char5e/passive-perception char5e/passive-perception 
    ::char5e/character-name char5e/character-name 
@@ -323,7 +324,9 @@
    ::char5e/immunities char5e/immunities 
    ::char5e/condition-immunities char5e/condition-immunities 
    ::char5e/languages char5e/languages 
-   ::char5e/abilities char5e/ability-values 
+   ::char5e/abilities char5e/ability-values
+   ::char5e/race-ability-increases char5e/race-ability-increases
+   ::char5e/subrace-ability-increases char5e/subrace-ability-increases
    ::char5e/ability-bonuses char5e/ability-bonuses 
    ::char5e/armor-class char5e/base-armor-class 
    ::char5e/armor-class-with-armor char5e/armor-class-with-armor 
@@ -356,8 +359,13 @@
    ::char5e/critical-hit-values char5e/critical-hit-values
    ::char5e/number-of-attacks char5e/number-of-attacks
    ::char5e/has-weapon-prof char5e/has-weapon-prof
-   ::char5e/weapon-attack-modifier-fn char5e/weapon-attack-modifier-fn})
-
+   ::char5e/weapon-attack-modifier-fn char5e/weapon-attack-modifier-fn
+   ::char5e/total-levels char5e/total-levels
+   ::char5e/class-level-fn char5e/class-level-fn
+   ::char5e/option-sources char5e/option-sources
+   ::char5e/used-resources char5e/used-resources
+   ::char5e/al-illegal-reasons char5e/al-illegal-reasons
+   ::char5e/feats char5e/feats})
 
 (doseq [[sub-key char-fn] character-subs]
   (reg-sub

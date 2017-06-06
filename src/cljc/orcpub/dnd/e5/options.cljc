@@ -18,7 +18,7 @@
             [orcpub.dnd.e5.display :as disp]
             [orcpub.dnd.e5.skills :as skills]
             [orcpub.dnd.e5.event-handlers :as eh]
-            [re-frame.core :refer [dispatch]])
+            [re-frame.core :refer [dispatch subscribe]])
   #?(:cljs (:require-macros [orcpub.dnd.e5.modifiers :as modifiers])))
 
 (def ft-5 {:units :feet
@@ -146,6 +146,13 @@
     weapons/weapons)
    num))
 
+(defn simple-weapon-options [num]
+  (weapon-options
+   (filter
+    #(= :simple (:type %))
+    weapons/weapons)
+   num))
+
 (defn skill-options [skills]
   (map
    skill-option
@@ -196,7 +203,7 @@
     :modifiers [(modifiers/deferred-ability-increases)]}))
 
 (defn min-ability [ability-kw min-value]
-  (fn [c] (>= (ability-kw (es/entity-val c :abilities)) min-value)))
+  (fn [c] (>= (ability-kw @(subscribe [::character/abilities])) min-value)))
 
 (defn ability-prereq [ability-kw min-value]
   (t/option-prereq (str "Requires " (s/upper-case (name ability-kw)) " " min-value " or higher")
@@ -204,7 +211,7 @@
 
 (defn armor-prereq [armor-kw]
   (t/option-prereq (str "Requires proficiency with " (name armor-kw) " armor")
-                   (fn [c] (let [prof-keys (:armor-profs c)]
+                   (fn [_] (let [prof-keys @(subscribe [::character/armor-profs])]
                              (boolean (and prof-keys (prof-keys armor-kw)))))))
 
 (def languages
@@ -365,7 +372,9 @@
   (t/option-cfg
    {:name name
     :modifiers [(modifiers/language key)]
-    :prereqs [(t/option-prereq "You already have this language" (fn [c] (not (get (es/entity-val c :languages) key))))]}))
+    :prereqs [(t/option-prereq
+               "You already have this language"
+               (fn [_] (not (get @(subscribe [::character/languages]) key))))]}))
 
 (defn key-to-name [key]
   (s/join " " (map s/capitalize (s/split (name key) #"-"))))
@@ -403,7 +412,7 @@
       :help (spell-help spell)
       :prereqs [(t/option-prereq
                  "You already know this spell"
-                 (fn [c] (let [spells-known (es/entity-val c :spells-known)]
+                 (fn [c] (let [spells-known @(subscribe [::character/spells-known])]
                            (or (not spells-known)
                                (not (some #(= key (:key %))
                                           (spells-known level)))))))
@@ -411,7 +420,7 @@
                  "You aren't using this source"
                  (fn [c] (or (nil? source)
                              (= :phb source)
-                             (get (es/entity-val c :option-sources) source)))
+                             (get @(subscribe [::character/option-sources]) source)))
                  true)]
       :modifiers [(modifiers/spells-known level key spellcasting-ability class-name nil qualifier)]})))
 
@@ -648,8 +657,9 @@
     (t/option-cfg
      {:name (name class-key)
       :key class-key
-      :prereqs [(t/option-prereq "There are no attack cantrips for this class with the 'Option Sources' you have selected"
-                                 (fn [_] (seq options)))]
+      :prereqs [(t/option-prereq
+                 "There are no attack cantrips for this class with the 'Option Sources' you have selected"
+                 (fn [_] (seq options)))]
       :selections [(t/selection-cfg
                     {:name "Attack Cantrip"
                      :tags #{:spells}
@@ -834,11 +844,11 @@
 
 (def can-cast-spell-prereq
   (t/option-prereq "Requires the ability to cast at least one spell."
-                   (fn [c] (some (fn [[k v]] (seq v)) (es/entity-val c :spells-known)))))
+                   (fn [c] (some (fn [[k v]] (seq v)) @(subscribe [::character/spells-known])))))
 
 (defn does-not-have-feat-prereq [kw]
   {::t/label "You already have this feat."
-   ::t/prereq-fn (fn [c] (let [feats (es/entity-val c :feats)]
+   ::t/prereq-fn (fn [c] (let [feats @(subscribe [::character/feats])]
                            (not (and feats (feats kw)))))})
 
 (defn feat-option [cfg & [multiselect?]]
@@ -1123,7 +1133,7 @@
                               (ritual-caster-option :wizard "Wizard" ::character/int sl/spell-lists)]})]
      :prereqs [(t/option-prereq "Requires Intelligence or Wisdom 13 or higher"
                                 (fn [c]
-                                  (let [{:keys [::character/wis ::character/int] :as abilities} (es/entity-val c :abilities)]
+                                  (let [{:keys [::character/wis ::character/int] :as abilities} @(subscribe [::character/abilities])]
                                     (or (and wis (>= wis 13))
                                         (and int (>= int 13))))))]})
    (feat-option
@@ -1304,7 +1314,7 @@
                   :modifiers [(modifiers/skill-expertise key)]
                   :prereqs [(t/option-prereq (str "Requires proficiency in " name)
                                              (fn [built-char]
-                                               (let [skill-profs (character/skill-proficiencies built-char)]
+                                               (let [skill-profs @(subscribe [::character/skill-profs])]
                                                  (and skill-profs (skill-profs key)))))]}))
               skills/skills)
     :min num
@@ -1564,7 +1574,7 @@
         :tags #{:profs :tool-profs}}))))
 
 (defn first-class? [class-kw & [classes]]
-  (fn [c] (= class-kw (first (or classes (es/entity-val c :classes))))))
+  (fn [c] (= class-kw (first (or classes @(subscribe [::character/classes]))))))
 
 (defn new-starting-equipment-selection [class-kw {:keys [name options] :as cfg}]
   (t/selection-cfg
@@ -1667,7 +1677,7 @@
                                    0
                                    nil
                                    (fn [c]
-                                     (let [skill-profs (es/entity-val c :skill-profs)
+                                     (let [skill-profs @(subscribe [::character/skill-profs])
                                            skill-sources (get skill-profs skill-kw)
                                            passes? (and skill-sources
                                                         (not (skill-sources background-nm)))]
@@ -1725,9 +1735,15 @@
                    (tool-prof-modifiers (keys tool)))}))))
 
 (defn total-levels-prereq [level & [class-key]]
+  (fn [_] (>= (if class-key
+                (@(subscribe [::character/class-level-fn]) class-key)
+                @(subscribe [::character/total-levels]))
+              level)))
+
+(defn total-levels-prereq-2 [level & [class-key]]
   (fn [c] (>= (if class-key
-                ((es/entity-val c :class-level) class-key)
-                (es/entity-val c :total-levels))
+                ((character/class-level-fn c) class-key)
+                (character/total-levels c))
               level)))
 
 (defn total-levels-option-prereq [level & [class-key]]
@@ -1744,7 +1760,7 @@
      modifier
      ::mods/conditions
      conj
-     (total-levels-prereq lvl (:key cls)))))
+     (total-levels-prereq-2 lvl (:key cls)))))
 
 (defn subclass-option [cls
                        {:keys [name
@@ -1776,7 +1792,7 @@
                           (fn [[lvl selections]]
                             (map
                              (fn [selection]
-                               (assoc selection ::t/prereq-fn (fn [c] (let [total-levels (es/entity-val c :total-levels)]
+                               (assoc selection ::t/prereq-fn (fn [_] (let [total-levels @(subscribe [::character/total-levels])]
                                                                         (>= lvl total-levels)))))
                              selections))
                           (:selections spellcasting-template))
@@ -1914,7 +1930,7 @@
                       [(assoc
                         (hit-points-selection hit-die name i)
                         ::t/prereq-fn
-                        (fn [c] (or (not (= kw (first (es/entity-val c :classes))))
+                        (fn [c] (or (not (= kw (first @(subscribe [::character/classes]))))
                                     (> i 1))))])))
       :modifiers (concat
                   (if (= :all (:known-mode spellcasting))
@@ -1994,7 +2010,7 @@
         {level-factor :level-factor} spellcasting
         save-profs (keys save)
         spellcasting-template (spellcasting-template (assoc spellcasting :class-key kw) cls)
-        first-class? (fn [c] (= kw (first (es/entity-val c :classes))))]
+        first-class? (fn [_] (= kw (first @(subscribe [::character/classes]))))]
     (t/option-cfg
      {:name name
       :key kw

@@ -1249,7 +1249,14 @@
                               {:name "Light Crossbow and 20 Bolts"
                                :modifiers [(mod5e/weapon :crossbow-light 1)
                                            (mod5e/equipment :crossbow-bolt 20)]})
-                             (opt5e/weapon-option :cleric [:simple 1])]})
+                             (t/option-cfg
+                              {:name "Simple Weapon"
+                               :selections [(opt5e/new-starting-equipment-selection
+                                             :cleric
+                                             {:name "Simple Weapon"
+                                              :options (opt5e/simple-weapon-options 1)
+                                              :min 1
+                                              :max 1})]})]})
                  (opt5e/new-starting-equipment-selection
                   :cleric
                   {:name "Holy Symbol"
@@ -1601,7 +1608,14 @@
                    :options [(t/option-cfg
                               {:name "Wooden Shield"
                                :modifiers [(mod5e/armor :shield 1)]})
-                             (opt5e/weapon-option :druid [:simple 1])]})
+                             (t/option-cfg
+                              {:name "Simple Weapon"
+                               :selections [(opt5e/new-starting-equipment-selection
+                                             :druid
+                                             {:name "Simple Weapon"
+                                              :options (opt5e/simple-weapon-options 1)
+                                              :min 1
+                                              :max 1})]})]})
                  (opt5e/new-starting-equipment-selection
                   :druid
                   {:name "Melee Weapon"
@@ -1885,7 +1899,7 @@
             :skill-options {:choose 2 :options {:acrobatics true :animal-handling true :athletics true :history true :insight true :intimidation true :perception true :survival true}}}
     :multiclass-prereqs [(t/option-prereq "Requires Strength 13 or Dexterity 13"
                                           (fn [c]
-                                            (let [abilities (es/entity-val c :abilities)]
+                                            (let [abilities @(subscribe [::char5e/abilities])]
                                               (or (>= (::char5e/str abilities) 13)
                                                   (>= (::char5e/dex abilities) 13)))))]
     :equipment-choices [{:name "Equipment Pack"
@@ -2043,7 +2057,7 @@
              :skill-options {:choose 2 :options {:acrobatics true :athletics true :history true :insight true :religion true :stealth true}}}
      :multiclass-prereqs [(t/option-prereq "Requires Wisdom 13 and Dexterity 13"
                                            (fn [c]
-                                             (let [abilities (es/entity-val c :abilities)]
+                                             (let [abilities @(subscribe [::char5e/abilities])]
                                                (and (>= (::char5e/wis abilities) 13)
                                                     (>= (::char5e/dex abilities) 13)))))]
      :equipment-choices [{:name "Equipment Pack"
@@ -2232,7 +2246,7 @@
              :skill-options {:choose 2 :options {:athletics true :insight true :intimidation true :medicine true :persuasion true :religion true}}}
      :multiclass-prereqs [(t/option-prereq "Requires Strength 13 or Charisma 13"
                                            (fn [c]
-                                             (let [abilities (es/entity-val c :abilities)]
+                                             (let [abilities @(subscribe [::char5e/abilities])]
                                                (and (>= (::char5e/str abilities) 13)
                                                     (>= (::char5e/cha abilities) 13)))))]
      :equipment-choices [{:name "Equipment Pack"
@@ -2553,7 +2567,7 @@
              :multiclass-skill-options {:choose 1 :options ranger-skills}}
      :multiclass-prereqs [(t/option-prereq "Requires Wisdom 13 and Dexterity 13"
                                            (fn [c]
-                                             (let [abilities (es/entity-val c :abilities)]
+                                             (let [abilities @(subscribe [::char5e/abilities])]
                                                (and (>= (::char5e/wis abilities) 13)
                                                     (>= (::char5e/dex abilities) 13)))))]
      :ability-increase-levels [4 8 10 16 19]
@@ -2998,7 +3012,14 @@
                               {:name "Light Crossbow"
                                :modifiers [(mod5e/weapon :crossbow-light 1)
                                            (mod5e/equipment :crossbow-bolt 20)]})
-                             (opt5e/weapon-option :sorcerer [:simple 1])]})]
+                             (t/option-cfg
+                              {:name "Simple Weapon"
+                               :selections [(opt5e/new-starting-equipment-selection
+                                             :sorcerer
+                                             {:name "Simple Weapon"
+                                              :options (opt5e/simple-weapon-options 1)
+                                              :min 1
+                                              :max 1})]})]})]
     :levels {2 {:modifiers [(mod5e/dependent-trait
                              {:name "Sorcery Points"
                               :level 2
@@ -3091,15 +3112,6 @@
 (defn spell-in-spells-known? [known level spell-key]
   (and known (some #(= spell-key (:key %)) (known level))))
 
-(defn has-spell? [c level spell-key]
-  (spell-in-spells-known? (es/entity-val c :spells-known) level spell-key))
-
-(defn has-illusionist-cantrip? [c]
-  (es/entity-val c :illusionist-cantrip))
-
-(defn has-minor-illusion? [c]
-  (has-spell? c 0 :minor-illusion))
-
 (defn spell-mastery-selection [level]
   (t/selection-cfg
    {:name (str "Spell Mastery Level " level " Spell")
@@ -3113,7 +3125,7 @@
                     :modifiers [(mod/set-mod ?spell-mastery name)]
                     :prereqs [(t/option-prereq
                                nil
-                               (fn [c] (some #(= spell-kw (:key %)) (get (char5e/spells-known c) level)))
+                               (fn [c] (some #(= spell-kw (:key %)) (get @(subscribe [::char5e/spells-known]) level)))
                                true)]})))
               (get-in sl/spell-lists [:wizard level]))}))
 
@@ -3132,7 +3144,7 @@
                     :modifiers [(mod/set-mod ?signature-spells name)]
                     :prereqs [(t/option-prereq
                                nil
-                               (fn [c] (some #(= spell-kw (:key %)) (get (char5e/spells-known c) 3)))
+                               (fn [c] (some #(= spell-kw (:key %)) (get @(subscribe [::char5e/spells-known]) 3)))
                                true)]})))
               (get-in sl/spell-lists [:wizard 3]))}))
 
@@ -3292,7 +3304,7 @@
                                  :tags (opt5e/spell-tags :wizard 0)
                                  :options (opt5e/spell-options (get-in sl/spell-lists [:wizard 0]) ::char5e/int "Wizard")
                                  :prereq-fn (fn [c]
-                                              (let [spells-known (es/entity-val c :spells-known)
+                                              (let [spells-known @(subscribe [::char5e/spells-known])
                                                     passes? (or (nil? spells-known)
                                                                 (some
                                                                  (fn [s]
@@ -3361,7 +3373,7 @@
 (defn has-trait-with-name-prereq [name]
   (t/option-prereq
    (str "You must have " name)
-   (fn [c] (some #(= name (:name %)) (es/entity-val c :traits)))))
+   (fn [c] (some #(= name (:name %)) @(subscribe [::char5e/traits])))))
 
 (def pact-of-the-tome-name "Pact Boon: Pact of the Tome")
 (def pact-of-the-chain-name "Pact Boon: Pact of the Chain")
@@ -3371,7 +3383,7 @@
   (t/option-prereq
    "You must know the edritch blast spell"
    (fn [c] (some #(= :eldritch-blast (:key %))
-                 (get (es/entity-val c :spells-known) 0)))))
+                 (get @(subscribe [::char5e/spells-known]) 0)))))
 
 (def pact-boon-options
   [(t/option-cfg
@@ -3718,7 +3730,14 @@ long rest."})]
                               {:name "Light Crossbow & 20 Bolts"
                                :modifiers [(mod5e/weapon :crossbow-light 1)
                                            (mod5e/equipment :crossbow-bolt 20)]})
-                             (opt5e/weapon-option :warlock [:simple 1])]})
+                             (t/option-cfg
+                              {:name "Simple Weapon"
+                               :selections [(opt5e/new-starting-equipment-selection
+                                             :warlock
+                                             {:name "Simple Weapon"
+                                              :options (opt5e/simple-weapon-options 1)
+                                              :min 1
+                                              :max 1})]})]})
                  (opt5e/simple-weapon-selection 1 :warlock)]
     :equipment-choices [{:name "Equipment Pack"
                          :options {:scholars-pack 1
