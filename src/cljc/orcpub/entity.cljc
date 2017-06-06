@@ -599,3 +599,46 @@
 
 (defn get-option-value-path [template entity path]
   (conj (get-entity-path template entity path) ::value))
+
+(defn actual-path [{:keys [::t/ref ::path] :as selection}]
+  (vec (if ref (if (sequential? ref) ref [ref]) path)))
+
+(defn get-option [built-template entity path]
+  (get-in entity (get-entity-path built-template entity path)))
+
+(defn option-selected? [require-value? option]
+  (and (or (::value option)
+           (not require-value?))
+       (::key option)))
+
+(defn count-remaining [built-template character {:keys [::t/min ::t/max ::t/require-value?] :as selection}]
+  (let [actual-path (actual-path selection)
+        selected-options (get-option built-template character actual-path)
+        selected-count (cond
+                         (sequential? selected-options)
+                         (count (if require-value?
+                                  (filter (partial option-selected? require-value?) selected-options)
+                                  selected-options))
+                         
+                         (map? selected-options)
+                         (if (option-selected? require-value? selected-options)
+                           1
+                           0)
+                         
+                         :else 0)]
+    (cond (< selected-count min)
+          (- min selected-count)
+
+          (and max (> selected-count max))
+          (- max selected-count)
+
+          :else
+          0)))
+
+(defn meets-prereqs? [option]
+  (every?
+   (fn [{:keys [::t/prereq-fn] :as prereq}]
+     (if prereq-fn
+       (prereq-fn)
+       (js/console.warn "NO PREREQ_FN" (::t/name option) prereq)))
+   (::t/prereqs option)))

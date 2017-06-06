@@ -576,6 +576,18 @@
              (if icon {:class-name (str "fa-" icon)})]]
            [:span.m-l-5.header-button-text title]])
         button-cfgs)]]
+     (if @(subscribe [:confirmation-shown?])
+       [:div.flex.justify-cont-end.m-r-10.m-b-20.m-l-10
+        (let [cfg @(subscribe [:confirmation-cfg])]
+          [:div
+           [:div.f-w-b (:question cfg)]
+           [:div.flex.justify-cont-end.m-t-5
+            [:button.form-button
+             {:on-click #(dispatch [:hide-confirmation])}
+             "CANCEL"]
+            [:button.link-button.underline.f-w-b
+             {:on-click #(dispatch [:confirm (:event cfg)])}
+             (:confirm-button-text cfg)]]])])
      (if @(subscribe [:message-shown?])
        [:div.p-b-10.p-r-10.p-l-10
         [message
