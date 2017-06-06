@@ -640,5 +640,5 @@
    (fn [{:keys [::t/prereq-fn] :as prereq}]
      (if prereq-fn
        (prereq-fn)
-       (js/console.warn "NO PREREQ_FN" (::t/name option) prereq)))
+       #?(:cljs (js/console.warn "NO PREREQ_FN" (::t/name option) prereq))))
    (::t/prereqs option)))
