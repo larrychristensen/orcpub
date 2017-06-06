@@ -92,7 +92,8 @@
   (.getPage doc index))
 
 (defn string-width [text font font-size]
-  (/ (* (/ (.getStringWidth font text) 1000.0) font-size) 72))
+  (if text
+    (/ (* (/ (.getStringWidth font text) 1000.0) font-size) 72)))
 
 (defn split-lines [text font-size width]
   (let [words (s/split text #"\s")]
@@ -315,117 +316,118 @@
                :let [spell-index (+ i (* j num-boxes-x))]]
            (if-let [{:keys [class-nm dc attack-bonus spell] :as spell-data}
                     (get (vec spells) spell-index)]
-             (if spell
-               (do
-                 (let [x (+ margin-x (* box-width i))
-                       y (+ margin-y (* box-height j))
+             (do
+              (if spell
+                (do
+                  (let [x (+ margin-x (* box-width i))
+                        y (+ margin-y (* box-height j))
 
-                       {:keys [page source description]} spell
+                        {:keys [page source description]} spell
 
-                       dc-str (str "DC " dc)
-                       dc-offset (+ x 0.22 (string-width class-nm PDType1Font/HELVETICA_BOLD 10))
-                       remaining-desc-lines
-                       (draw-text-to-box cs
-                                         (or description
-                                             (str "see "
-                                                  (if source
-                                                    (s/upper-case (name source))
-                                                    "PHB")
-                                                  " "
-                                                  page))
-                                         PDType1Font/HELVETICA
-                                         8
-                                         (+ x 0.12)
-                                         (- 11.0 y 0.65)
-                                         (- box-width 0.24)
-                                         (- box-height 0.9))]
-                   (draw-imagex cs
-                                img
-                                (+ x 1.4)
-                                (+ y 0.05)
-                                1.0
-                                0.25)
-                   (draw-text-to-box cs
-                                     (spell-school-level spell)
-                                     PDType1Font/HELVETICA_OBLIQUE
-                                     8
-                                     (+ x 0.12)
-                                     (- 11.0 y 0.10)
-                                     (- box-width 0.24)
-                                     0.25)
-                   (draw-text-to-box cs
-                                     (:name spell)
-                                     PDType1Font/HELVETICA_BOLD
-                                     10
-                                     (+ x 0.12)
-                                     (- 11.0 y 0.27)
-                                     (- box-width 0.3)
-                                     0.25)
-                   (draw-spell-field cs
-                                     document
-                                     "magic-swirl"
-                                     (abbreviate-casting-time
-                                      (first
-                                       (s/split
-                                        (:casting-time spell)
-                                        #",")))
-                                     (+ x 0.12)
-                                     (- 11.0 y 0.55))
-                   (draw-spell-field cs
-                                     document
-                                     "arrow-dunk"
-                                     (abbreviate-range (:range spell))
-                                     (+ x 0.62)
-                                     (- 11.0 y 0.55))
-                   (draw-spell-field cs
-                                     document
-                                     "shiny-purse"
-                                     (s/join
-                                      ","
-                                      (remove
-                                       nil?
-                                       (map
-                                        (fn [[k v]]
-                                          (if (-> spell :components k)
-                                            v))
-                                        {:verbal "V"
-                                         :somatic "S"
-                                         :material "M"})))
-                                     (+ x 1.12)
-                                     (- 11.0 y 0.55))
-                   (draw-spell-field cs
-                                     document
-                                     "sands-of-time"
-                                     (abbreviate-duration (:duration spell))
-                                     (+ x 1.62)
-                                     (- 11.0 y 0.55))
-                   (draw-text cs
-                              class-nm
-                              PDType1Font/HELVETICA_BOLD
-                              10
-                              (+ x 0.12)
-                              (- 11.0 y 3.4)
-                              [186 21 3])
-                   (draw-text cs
-                              dc-str
-                              PDType1Font/HELVETICA_BOLD_OBLIQUE
-                              8
-                              dc-offset
-                              (- 11.0 y 3.4)
-                              [186 21 3])
-                   (draw-text cs
-                              (str "Atk " (common/bonus-str attack-bonus))
-                              PDType1Font/HELVETICA_BOLD_OBLIQUE
-                              8
-                              (+ dc-offset (string-width dc-str PDType1Font/HELVETICA_BOLD 10))
-                              (- 11.0 y 3.4)
-                              [186 21 3])
-                   (if (seq remaining-desc-lines)
-                     (draw-imagex cs
-                                  over-img
-                                  (+ x 2.2)
-                                  (+ y 3.2)
-                                  0.25
-                                  0.25))
-                   {:remaining-lines remaining-desc-lines
-                    :spell-name (:name spell)}))))))))))
+                        dc-str (str "DC " dc)
+                        dc-offset (+ x 0.22 (string-width class-nm PDType1Font/HELVETICA_BOLD 10))
+                        remaining-desc-lines
+                        (draw-text-to-box cs
+                                          (or description
+                                              (str "see "
+                                                   (if source
+                                                     (s/upper-case (name source))
+                                                     "PHB")
+                                                   " "
+                                                   page))
+                                          PDType1Font/HELVETICA
+                                          8
+                                          (+ x 0.12)
+                                          (- 11.0 y 0.65)
+                                          (- box-width 0.24)
+                                          (- box-height 0.9))]
+                    (draw-imagex cs
+                                 img
+                                 (+ x 1.4)
+                                 (+ y 0.05)
+                                 1.0
+                                 0.25)
+                    (draw-text-to-box cs
+                                      (spell-school-level spell)
+                                      PDType1Font/HELVETICA_OBLIQUE
+                                      8
+                                      (+ x 0.12)
+                                      (- 11.0 y 0.10)
+                                      (- box-width 0.24)
+                                      0.25)
+                    (draw-text-to-box cs
+                                      (:name spell)
+                                      PDType1Font/HELVETICA_BOLD
+                                      10
+                                      (+ x 0.12)
+                                      (- 11.0 y 0.27)
+                                      (- box-width 0.3)
+                                      0.25)
+                    (draw-spell-field cs
+                                      document
+                                      "magic-swirl"
+                                      (abbreviate-casting-time
+                                       (first
+                                        (s/split
+                                         (:casting-time spell)
+                                         #",")))
+                                      (+ x 0.12)
+                                      (- 11.0 y 0.55))
+                    (draw-spell-field cs
+                                      document
+                                      "arrow-dunk"
+                                      (abbreviate-range (:range spell))
+                                      (+ x 0.62)
+                                      (- 11.0 y 0.55))
+                    (draw-spell-field cs
+                                      document
+                                      "shiny-purse"
+                                      (s/join
+                                       ","
+                                       (remove
+                                        nil?
+                                        (map
+                                         (fn [[k v]]
+                                           (if (-> spell :components k)
+                                             v))
+                                         {:verbal "V"
+                                          :somatic "S"
+                                          :material "M"})))
+                                      (+ x 1.12)
+                                      (- 11.0 y 0.55))
+                    (draw-spell-field cs
+                                      document
+                                      "sands-of-time"
+                                      (abbreviate-duration (:duration spell))
+                                      (+ x 1.62)
+                                      (- 11.0 y 0.55))
+                    (draw-text cs
+                               class-nm
+                               PDType1Font/HELVETICA_BOLD
+                               10
+                               (+ x 0.12)
+                               (- 11.0 y 3.4)
+                               [186 21 3])
+                    (draw-text cs
+                               dc-str
+                               PDType1Font/HELVETICA_BOLD_OBLIQUE
+                               8
+                               dc-offset
+                               (- 11.0 y 3.4)
+                               [186 21 3])
+                    (draw-text cs
+                               (str "Atk " (common/bonus-str attack-bonus))
+                               PDType1Font/HELVETICA_BOLD_OBLIQUE
+                               8
+                               (+ dc-offset (string-width dc-str PDType1Font/HELVETICA_BOLD 10))
+                               (- 11.0 y 3.4)
+                               [186 21 3])
+                    (if (seq remaining-desc-lines)
+                      (draw-imagex cs
+                                   over-img
+                                   (+ x 2.2)
+                                   (+ y 3.2)
+                                   0.25
+                                   0.25))
+                    {:remaining-lines remaining-desc-lines
+                     :spell-name (:name spell)})))))))))))
