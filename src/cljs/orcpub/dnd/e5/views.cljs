@@ -67,27 +67,21 @@
       {:auto-complete :off})]]])
 
 (defn form-input []
-  (let [blurred? (r/atom false)
-        temp-val (r/atom nil)]
+  (let [blurred? (r/atom false)]
     (fn [{:keys [title key value messages type on-change]}]
       [:div
        [base-input
         {:name key
          :type type
-         :value (or @temp-val value)
+         :value value
          :placeholder title
          :style input-style
          :class-name (if (and @blurred? (seq messages))
                        "b-red"
                        "b-gray")
          :on-focus (fn [_] (reset! blurred? false))
-         :on-mouse-out (fn [e]
-                         (on-change e)
-                         (reset! temp-val (event-value e)))
-         :on-change (fn [e] (reset! temp-val (event-value e)))
-         :on-blur (fn [e]
-                    (on-change e)
-                    (reset! blurred? true))}]
+         :on-change on-change
+         :on-blur (fn [e] (reset! blurred? true))}]
        (if @blurred? (validation-messages messages))])))
 
 (defn svg-icon [icon-name & [size]]

@@ -122,8 +122,8 @@
   [{:keys [json-params db] :as request}]
   (let [{raw-username :username raw-password :password} json-params]
     (cond
-      (s/blank? raw-username) (login-error :username-required)
-      (s/blank? raw-password) (login-error :password-required)
+      (s/blank? raw-username) (login-error errors/username-required)
+      (s/blank? raw-password) (login-error errors/password-required)
       :else (let [username (s/trim raw-username)
                   password (s/trim raw-password)
                   {:keys [:orcpub.user/verified?

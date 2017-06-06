@@ -545,19 +545,24 @@
 (defn show-old-account-message []
   [:show-login-message [:div  "There is no account for the email or username, please double-check it. You can also try to " [:a {:href (routes/path-for routes/register-page-route)} "register"] "." [:div.f-w-n.i.m-t-10 "Accounts from the old OrcPub have not been ported over yet, but you can create a new account in the mean time and we will link it with your old account as soon as possible if you use the same email address."]]])
 
+(defn dispatch-login-failure [message]
+  {:dispatch-n [[:set-user-data nil]
+                [:show-login-message message]]})
+
 (reg-event-fx
  :login-failure
  (fn [{:keys [db]} [_ response]]
    (let [error-code (-> response :body :error)]
      (cond
-       (= error-code errors/bad-credentials) {:dispatch-n [[:set-user-data nil]
-                                                           [:show-login-message "Password is incorrect."]]}
+       (= error-code errors/username-required) (dispatch-login-failure "Username is required.")
+       (= error-code errors/password-required) (dispatch-login-failure "Password is required.")
+       (= error-code errors/bad-credentials) (dispatch-login-failure "Password is incorrect.") 
        (= error-code errors/no-account) {:dispatch-n [[:set-user-data nil]
                                                       (show-old-account-message)]}
        (= error-code errors/unverified) {:db (assoc db :temp-email (-> response :body :email))
                                          :dispatch [:route routes/verify-sent-route]}
        (= error-code errors/unverified-expired) {:dispatch [:route routes/verify-failed-route]}
-       :else {}))))
+       :else (dispatch-login-failure [:div "An error occurred. If the problem persists please email " [:a {:href "mailto:redorc@orcpub.com" :target :blank} "redorc@orcpub.com"]])))))
 
 (reg-event-fx
  :logout
