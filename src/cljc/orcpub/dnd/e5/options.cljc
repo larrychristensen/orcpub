@@ -1184,7 +1184,7 @@
      :icon "broken-bottle"
      :page 170
      :summary "increase STR or CON by 1; improvised weapon proficiency; d4 damage on unarmed strike; grapple as bonus action"
-     :selections [(ability-increase-selection [::character/str ::character/dex] 1 false)]
+     :selections [(ability-increase-selection [::character/str ::character/con] 1 false)]
      :modifiers [(modifiers/weapon-proficiency :improvised)
                  (modifiers/bonus-action
                   {:name "Tavern Brawler: Grapple"
