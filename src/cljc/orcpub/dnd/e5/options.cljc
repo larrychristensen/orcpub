@@ -21,6 +21,8 @@
             [re-frame.core :refer [dispatch subscribe]])
   #?(:cljs (:require-macros [orcpub.dnd.e5.modifiers :as modifiers])))
 
+#?(:cljs (enable-console-print!))
+
 (def ft-5 {:units :feet
            :amount 5})
 
