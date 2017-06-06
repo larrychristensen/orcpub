@@ -9,7 +9,8 @@
             [orcpub.dnd.e5.weapons :as weapon5e]
             [orcpub.dnd.e5.spell-lists :as sl]
             [orcpub.dnd.e5.templates.ua-mystic :as ua-mystic]
-            [orcpub.dnd.e5.templates.ua-artificer :as ua-artificer]))
+            [orcpub.dnd.e5.templates.ua-artificer :as ua-artificer]
+            [re-frame.core :refer [subscribe]]))
 
 (defn ua-help [name url]
   [:a {:href url :target :_blank} name])
@@ -622,7 +623,7 @@
                                       :skill-options {:choose 2 :options {:arcana true :history true :insight true :medicine true :nature true :perception true :religion true}}}
                               :multiclass-prereqs [(t/option-prereq "Requires Intelligence 13"
                                                                     (fn [c]
-                                                                      (let [abilities (es/entity-val c :abilities)]
+                                                                      (let [abilities @(subscribe [::char5e/abilities])]
                                                                         (>= (::char5e/int abilities) 13))))]
                               :equipment-choices [{:name "Equipment Pack"
                                                    :options {:scholars-pack 1

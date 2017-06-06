@@ -279,114 +279,129 @@
    ability-keys
    as))
 
+(defn get-prop [built-char prop]
+  (es/entity-val built-char prop))
+
 (defn alignment [built-char]
-  (es/entity-val built-char :alignment))
+  (get-prop built-char :alignment))
 
 (defn levels [built-char]
-  (es/entity-val built-char :levels))
+  (get-prop built-char :levels))
+
+(defn total-levels [built-char]
+  (get-prop built-char :total-levels))
+
+(defn class-level-fn [built-char]
+  (get-prop built-char :class-level))
 
 (defn background [built-char]
-  (es/entity-val built-char :background))
+  (get-prop built-char :background))
+
+(defn race-ability-increases [built-char]
+  (get-prop built-char :race-ability-increases))
+
+(defn subrace-ability-increases [built-char]
+  (get-prop built-char :subrace-ability-increases))
 
 (defn ability-values [built-char]
-  (es/entity-val built-char :abilities))
+  (get-prop built-char :abilities))
 
 (defn ability-bonuses [built-char]
-  (es/entity-val built-char :ability-bonuses))
+  (get-prop built-char :ability-bonuses))
 
 (defn base-land-speed [built-char]
-  (es/entity-val built-char :total-speed))
+  (get-prop built-char :total-speed))
 
 (defn base-swimming-speed [built-char]
-  (es/entity-val built-char :swimming-speed))
+  (get-prop built-char :swimming-speed))
 
 (defn base-flying-speed [built-char]
-  (es/entity-val built-char :flying-speed))
+  (get-prop built-char :flying-speed))
 
 (defn land-speed-with-armor [built-char]
-  (es/entity-val built-char :speed-with-armor))
+  (get-prop built-char :speed-with-armor))
 
 (defn unarmored-speed-bonus [built-char]
-  (es/entity-val built-char :unarmored-speed-bonus))
+  (get-prop built-char :unarmored-speed-bonus))
 
 (defn race [built-char]
-  (es/entity-val built-char :race))
+  (get-prop built-char :race))
 
 (defn subrace [built-char]
-  (es/entity-val built-char :subrace))
+  (get-prop built-char :subrace))
 
 (defn classes [built-char]
-  (es/entity-val built-char :classes))
+  (get-prop built-char :classes))
 
 (defn darkvision [built-char]
-  (es/entity-val built-char :total-darkvision))
+  (get-prop built-char :total-darkvision))
 
 (defn skill-proficiencies [built-char]
-  (es/entity-val built-char :skill-profs))
+  (get-prop built-char :skill-profs))
 
 (defn skill-bonuses [built-char]
-  (es/entity-val built-char :skill-bonuses))
+  (get-prop built-char :skill-bonuses))
 
 (defn skill-expertise [built-char]
-  (es/entity-val built-char :skill-expertise))
+  (get-prop built-char :skill-expertise))
 
 (defn tool-proficiencies [built-char]
-  (es/entity-val built-char :tool-profs))
+  (get-prop built-char :tool-profs))
 
 (defn tool-expertise [built-char]
-  (es/entity-val built-char :tool-expertise))
+  (get-prop built-char :tool-expertise))
 
 (defn tool-bonus-fn [built-char]
-  (es/entity-val built-char :tool-bonus-fn))
+  (get-prop built-char :tool-bonus-fn))
 
 (defn weapon-proficiencies [built-char]
-  (let [proficiencies (es/entity-val built-char :weapon-profs)]
+  (let [proficiencies (get-prop built-char :weapon-profs)]
     (if (and proficiencies (proficiencies :martial))
       [:simple :martial]
       proficiencies)))
 
 (defn has-weapon-prof [built-char]
-  (es/entity-val built-char :has-weapon-prof?))
+  (get-prop built-char :has-weapon-prof?))
 
 (defn armor-proficiencies [built-char]
-  (es/entity-val built-char :armor-profs))
+  (get-prop built-char :armor-profs))
 
 (defn damage-resistances [built-char]
-  (es/entity-val built-char :damage-resistances))
+  (get-prop built-char :damage-resistances))
 
 (defn damage-immunities [built-char]
-  (es/entity-val built-char :damage-immunities))
+  (get-prop built-char :damage-immunities))
 
 (defn immunities [built-char]
-  (es/entity-val built-char :immunities))
+  (get-prop built-char :immunities))
 
 (defn condition-immunities [built-char]
-  (es/entity-val built-char :condition-immunities))
+  (get-prop built-char :condition-immunities))
 
 (defn languages [built-char]
-  (es/entity-val built-char :languages))
+  (get-prop built-char :languages))
 
 (defn base-armor-class [built-char]
-  (es/entity-val built-char :armor-class))
+  (get-prop built-char :armor-class))
 
 (defn armor-class-with-armor [built-char]
-  (es/entity-val built-char :armor-class-with-armor))
+  (get-prop built-char :armor-class-with-armor))
 
 (defn normal-armor-inventory [built-char]
-  (es/entity-val built-char :armor))
+  (get-prop built-char :armor))
 
 (defn magic-armor-inventory [built-char]
-  (es/entity-val built-char :magic-armor))
+  (get-prop built-char :magic-armor))
 
 (defn all-armor-inventory [built-char]
   (merge (normal-armor-inventory built-char)
          (magic-armor-inventory built-char)))
 
 (defn normal-weapons-inventory [built-char]
-  (es/entity-val built-char :weapons))
+  (get-prop built-char :weapons))
 
 (defn magic-weapons-inventory [built-char]
-  (es/entity-val built-char :magic-weapons))
+  (get-prop built-char :magic-weapons))
 
 (defn all-weapons-inventory [built-char]
   (merge (normal-weapons-inventory built-char)
@@ -399,73 +414,82 @@
   (::custom-treasure built-char))
 
 (defn normal-equipment-inventory [built-char]
-  (es/entity-val built-char :equipment))
+  (get-prop built-char :equipment))
 
 (defn magical-equipment-inventory [built-char]
-  (es/entity-val built-char :magic-items))
+  (get-prop built-char :magic-items))
 
 (defn spells-known [built-char]
-  (es/entity-val built-char :spells-known))
+  (get-prop built-char :spells-known))
 
 (defn spells-known-modes [built-char]
-  (es/entity-val built-char :spells-known-modes))
+  (get-prop built-char :spells-known-modes))
 
 (defn spell-slots [built-char]
-  (es/entity-val built-char :spell-slots))
+  (get-prop built-char :spell-slots))
 
 (defn spell-modifiers [built-char]
-  (es/entity-val built-char :spell-modifiers))
+  (get-prop built-char :spell-modifiers))
 
 (defn spell-attack-modifier-fn [built-char]
-  (es/entity-val built-char :spell-attack-modifier))
+  (get-prop built-char :spell-attack-modifier))
 
 (defn spell-save-dc-fn [built-char]
-  (es/entity-val built-char :spell-save-dc))
+  (get-prop built-char :spell-save-dc))
 
 (defn traits [built-char]
-  (es/entity-val built-char :traits))
+  (get-prop built-char :traits))
 
 (defn attacks [built-char]
-  (es/entity-val built-char :attacks))
+  (get-prop built-char :attacks))
 
 (defn bonus-actions [built-char]
-  (es/entity-val built-char :bonus-actions))
+  (get-prop built-char :bonus-actions))
 
 (defn reactions [built-char]
-  (es/entity-val built-char :reactions))
+  (get-prop built-char :reactions))
 
 (defn actions [built-char]
-  (es/entity-val built-char :actions))
+  (get-prop built-char :actions))
 
 (defn max-hit-points [built-char]
-  (es/entity-val built-char :max-hit-points))
+  (get-prop built-char :max-hit-points))
+
+(defn hit-point-level-bonus [built-char]
+  (get-prop built-char :hit-point-level-bonus))
 
 (defn initiative [built-char]
-  (es/entity-val built-char :initiative))
+  (get-prop built-char :initiative))
 
 (defn proficiency-bonus [built-char]
-  (es/entity-val built-char :prof-bonus))
+  (get-prop built-char :prof-bonus))
 
 (defn passive-perception [built-char]
-  (es/entity-val built-char :passive-perception))
+  (get-prop built-char :passive-perception))
 
 (defn number-of-attacks [built-char]
-  (es/entity-val built-char :num-attacks))
+  (get-prop built-char :num-attacks))
 
 (defn critical-hit-values [built-char]
-  (es/entity-val built-char :critical))
+  (get-prop built-char :critical))
 
 (defn saving-throws [built-char]
-  (es/entity-val built-char :saving-throws))
+  (get-prop built-char :saving-throws))
 
 (defn save-bonuses [built-char]
-  (es/entity-val built-char :save-bonuses))
+  (get-prop built-char :save-bonuses))
 
 (defn saving-throw-advantages [built-char]
-  (es/entity-val built-char :saving-throw-advantage))
+  (get-prop built-char :saving-throw-advantage))
 
 (defn weapon-attack-modifier-fn [built-char]
-  (es/entity-val built-char :weapon-attack-modifier))
+  (get-prop built-char :weapon-attack-modifier))
+
+(defn option-sources [built-char]
+  (get-prop built-char :option-sources))
+
+(defn feats [built-char]
+  (get-prop built-char :feats))
 
 (defn weapon-attack-modifier [built-char weapon finesse?]
   ((weapon-attack-modifier-fn built-char)
@@ -473,69 +497,75 @@
    finesse?))
 
 (defn weapon-damage-modifier [built-char weapon finesse?]
-  ((es/entity-val built-char :weapon-damage-modifier)
+  ((get-prop built-char :weapon-damage-modifier)
    weapon
    finesse?))
 
 (defn age [built-char]
-  (es/entity-val built-char ::age))
+  (get-prop built-char ::age))
 
 (defn sex [built-char]
-  (es/entity-val built-char ::sex))
+  (get-prop built-char ::sex))
 
 (defn height [built-char]
-  (es/entity-val built-char ::height))
+  (get-prop built-char ::height))
 
 (defn weight [built-char]
-  (es/entity-val built-char ::weight))
+  (get-prop built-char ::weight))
 
 (defn skin [built-char]
-  (es/entity-val built-char ::skin))
+  (get-prop built-char ::skin))
 
 (defn eyes [built-char]
-  (es/entity-val built-char ::eyes))
+  (get-prop built-char ::eyes))
 
 (defn hair [built-char]
-  (es/entity-val built-char ::hair))
+  (get-prop built-char ::hair))
 
 (defn image-url [built-char]
-  (es/entity-val built-char ::image-url))
+  (get-prop built-char ::image-url))
 
 (defn faction-image-url [built-char]
-  (es/entity-val built-char ::faction-image-url))
+  (get-prop built-char ::faction-image-url))
 
 (defn faction-name [built-char]
-  (es/entity-val built-char ::faction-name))
+  (get-prop built-char ::faction-name))
 
 (defn character-name [built-char]
-  (es/entity-val built-char ::character-name))
+  (get-prop built-char ::character-name))
 
 (defn player-name [built-char]
-  (es/entity-val built-char ::player-name))
+  (get-prop built-char ::player-name))
 
 (defn personality-trait-1 [built-char]
-  (es/entity-val built-char ::personality-trait-1))
+  (get-prop built-char ::personality-trait-1))
 
 (defn personality-trait-2 [built-char]
-  (es/entity-val built-char ::personality-trait-2))
+  (get-prop built-char ::personality-trait-2))
 
 (defn ideals [built-char]
-  (es/entity-val built-char ::ideals))
+  (get-prop built-char ::ideals))
 
 (defn bonds [built-char]
-  (es/entity-val built-char ::bonds))
+  (get-prop built-char ::bonds))
 
 (defn flaws [built-char]
-  (es/entity-val built-char ::flaws))
+  (get-prop built-char ::flaws))
 
 (defn description [built-char]
-  (es/entity-val built-char ::description))
+  (get-prop built-char ::description))
 
 (defn image-url-failed [built-char]
-  (es/entity-val built-char ::image-url-failed))
+  (get-prop built-char ::image-url-failed))
 
 (defn faction-image-url-failed [built-char]
-  (es/entity-val built-char ::faction-image-url-failed))
+  (get-prop built-char ::faction-image-url-failed))
+
+(defn used-resources [built-char]
+  (get-prop built-char :used-resources))
+
+(defn al-illegal-reasons [built-char]
+  (get-prop built-char :al-illegal-reasons))
 
 (defn max-armor-class [unarmored-armor-class
                        ac-with-armor-fn

@@ -16,10 +16,10 @@
            (vec (concat levels (map
                                 (fn [lvl] {::entity/key (keyword (str "level-" (inc lvl)))})
                                 (range current-highest-level new-highest-level))))
-         
+           
            (< new-highest-level current-highest-level)
            (vec (take new-highest-level levels))
-         
+           
            :else levels)
          (meta levels))))))
 
