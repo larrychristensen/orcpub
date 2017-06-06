@@ -367,20 +367,6 @@
     :modifiers [(modifiers/language key)]
     :prereqs [(t/option-prereq "You already have this language" (fn [c] (not (get (es/entity-val c :languages) key))))]}))
 
-(def class-names
-  {:barbarian "Barbarian"
-   :bard "Bard"
-   :cleric "Cleric"
-   :druid "Druid"
-   :fighter "Fighter"
-   :monk "Monk"
-   :paladin "Paladin"
-   :ranger "Ranger"
-   :rogue "Rogue"
-   :sorcerer "Sorcerer"
-   :wizard "Wizard"
-   :warlock "Warlock"})
-
 (defn key-to-name [key]
   (s/join " " (map s/capitalize (s/split (name key) #"-"))))
 
@@ -532,13 +518,13 @@
                    spells))
                 filtered-spells-by-level)})))
 
-(defn cantrip-selections [class-key ability cantrips-known]
+(defn cantrip-selections [class-key class-name ability cantrips-known]
   (reduce
    (fn [m [k v]]
      (assoc m k [(spell-selection {:class-key class-key
                                    :level 0
                                    :spellcasting-ability ability
-                                   :class-name (class-names class-key)
+                                   :class-name class-name
                                    :num v})]))
    {}
    cantrips-known))
@@ -588,7 +574,7 @@
                                    (if (nil? (:name spell)) (js/console.warn (str "Spell is missing name: " spell-key)))])
                               (spell-option
                                ability
-                               (class-names class-key)
+                               (:name cls-cfg)
                                spell-key
                                true)))
                           (apply-spell-restriction spell-keys restriction)))
@@ -614,34 +600,34 @@
                                      ability] :as cfg}
                              cls-cfg]
   (let [spell-selections (spells-known-selections cfg cls-cfg)
-        cantrip-selections (cantrip-selections class-key ability cantrips-known)]
+        cantrip-selections (cantrip-selections class-key (:name cls-cfg) ability cantrips-known)]
     {:selections (merge-with
                   concat
                   cantrip-selections
                   spell-selections)}))
 
-(defn magic-initiate-option [class-key spellcasting-ability spell-lists]
+(defn magic-initiate-option [class-key class-name spellcasting-ability spell-lists]
   (t/option-cfg
    {:name (name class-key)
     :selections [(t/selection-cfg
                   {:name "Cantrip"
                    :order 1
                    :tags #{:spells}
-                   :options (spell-options (get-in spell-lists [class-key 0]) spellcasting-ability (class-names class-key))
+                   :options (spell-options (get-in spell-lists [class-key 0]) spellcasting-ability class-name)
                    :min 2
                    :max 2})
                  (t/selection-cfg
                   {:name "Level 1 Spell"
                    :order 2
                    :tags #{:spells}
-                   :options (spell-options (get-in spell-lists [class-key 1]) spellcasting-ability (class-names class-key))
+                   :options (spell-options (get-in spell-lists [class-key 1]) spellcasting-ability class-name)
                    :min 1
                    :max 1})]}))
 
 (defn ritual-spell? [spell]
   (:ritual spell))
 
-(defn ritual-caster-option [class-key spellcasting-ability spell-lists]
+(defn ritual-caster-option [class-key class-name spellcasting-ability spell-lists]
   (t/option-cfg
    {:name (name class-key)
     :key class-key
@@ -651,14 +637,14 @@
                    :options (spell-options
                              (filter (fn [spell-kw] (ritual-spell? (spells/spell-map spell-kw))) (get-in spell-lists [class-key 1]))
                              spellcasting-ability
-                             (class-names class-key)
+                             class-name
                              false
                              "Ritual Only")
                    :min 2
                    :max 2})]}))
 
-(defn spell-sniper-option [class-key spellcasting-ability spell-lists]
-  (let [options (spell-options (filter (fn [spell-kw] (:attack-roll? (spells/spell-map spell-kw))) (get-in spell-lists [class-key 0])) spellcasting-ability (class-names class-key))]
+(defn spell-sniper-option [class-key class-name spellcasting-ability spell-lists]
+  (let [options (spell-options (filter (fn [spell-kw] (:attack-roll? (spells/spell-map spell-kw))) (get-in spell-lists [class-key 0])) spellcasting-ability class-name)]
     (t/option-cfg
      {:name (name class-key)
       :key class-key
@@ -1048,12 +1034,12 @@
                    {:name "Spell Class"
                     :order 0
                     :tags #{:spells}
-                    :options [(magic-initiate-option :bard ::character/cha sl/spell-lists)
-                              (magic-initiate-option :cleric ::character/wis sl/spell-lists)
-                              (magic-initiate-option :druid ::character/wis sl/spell-lists)
-                              (magic-initiate-option :sorcerer ::character/cha sl/spell-lists)
-                              (magic-initiate-option :warlock ::character/cha sl/spell-lists)
-                              (magic-initiate-option :wizard ::character/int sl/spell-lists)]})]})
+                    :options [(magic-initiate-option :bard "Bard" ::character/cha sl/spell-lists)
+                              (magic-initiate-option :cleric "Cleric" ::character/wis sl/spell-lists)
+                              (magic-initiate-option :druid "Druid" ::character/wis sl/spell-lists)
+                              (magic-initiate-option :sorcerer "Sorcerer" ::character/cha sl/spell-lists)
+                              (magic-initiate-option :warlock "Warlock" ::character/cha sl/spell-lists)
+                              (magic-initiate-option :wizard "Wizard" ::character/int sl/spell-lists)]})]})
    (feat-option
     {:name "Martial Adept"
      :icon "visored-helm"
@@ -1129,12 +1115,12 @@
      :selections [(t/selection-cfg
                    {:name "Ritual Caster: Spell Class"
                     :tags #{:spells}
-                    :options [(ritual-caster-option :bard ::character/cha sl/spell-lists)
-                              (ritual-caster-option :cleric ::character/wis sl/spell-lists)
-                              (ritual-caster-option :druid ::character/wis sl/spell-lists)
-                              (ritual-caster-option :sorcerer ::character/cha sl/spell-lists)
-                              (ritual-caster-option :warlock ::character/cha sl/spell-lists)
-                              (ritual-caster-option :wizard ::character/int sl/spell-lists)]})]
+                    :options [(ritual-caster-option :bard "Bard" ::character/cha sl/spell-lists)
+                              (ritual-caster-option :cleric "Cleric" ::character/wis sl/spell-lists)
+                              (ritual-caster-option :druid "Druid" ::character/wis sl/spell-lists)
+                              (ritual-caster-option :sorcerer "Sorcerer" ::character/cha sl/spell-lists)
+                              (ritual-caster-option :warlock "Warlock" ::character/cha sl/spell-lists)
+                              (ritual-caster-option :wizard "Wizard" ::character/int sl/spell-lists)]})]
      :prereqs [(t/option-prereq "Requires Intelligence or Wisdom 13 or higher"
                                 (fn [c]
                                   (let [{:keys [::character/wis ::character/int] :as abilities} (es/entity-val c :abilities)]
@@ -1187,12 +1173,12 @@
      :selections [(t/selection-cfg
                    {:name "Spell Sniper: Spell Class"
                     :tags #{:spells}
-                    :options [(spell-sniper-option :bard ::character/cha sl/spell-lists)
-                              (spell-sniper-option :cleric ::character/wis sl/spell-lists)
-                              (spell-sniper-option :druid ::character/wis sl/spell-lists)
-                              (spell-sniper-option :sorcerer ::character/cha sl/spell-lists)
-                              (spell-sniper-option :warlock ::character/cha sl/spell-lists)
-                              (spell-sniper-option :wizard ::character/int sl/spell-lists)]})]})
+                    :options [(spell-sniper-option :bard "Bard" ::character/cha sl/spell-lists)
+                              (spell-sniper-option :cleric "Cleric" ::character/wis sl/spell-lists)
+                              (spell-sniper-option :druid "Druid" ::character/wis sl/spell-lists)
+                              (spell-sniper-option :sorcerer "Sorcerer" ::character/cha sl/spell-lists)
+                              (spell-sniper-option :warlock "Warlock" ::character/cha sl/spell-lists)
+                              (spell-sniper-option :wizard "Wizard" ::character/int sl/spell-lists)]})]})
    (feat-option
     {:name "Tavern Brawler"
      :icon "broken-bottle"

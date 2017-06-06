@@ -343,34 +343,36 @@
           (.close back-page-cs))))))
 
 (defn character-pdf-2 [req]
-  (let [fields (-> req :form-params :body clojure.edn/read-string)
-        {:keys [image-url image-url-failed faction-image-url faction-image-url-failed spells-known spell-save-dcs spell-attack-mods]} fields
-        input (.openStream (io/resource (cond
-                                          (find fields :spellcasting-class-6) "fillable-char-sheet-6-spells.pdf"
-                                          (find fields :spellcasting-class-5) "fillable-char-sheet-5-spells.pdf"
-                                          (find fields :spellcasting-class-4) "fillable-char-sheet-4-spells.pdf"
-                                          (find fields :spellcasting-class-3) "fillable-char-sheet-3-spells.pdf"
-                                          (find fields :spellcasting-class-2) "fillable-char-sheet-2-spells.pdf"
-                                          (find fields :spellcasting-class-1) "fillable-char-sheet-1-spells.pdf"
-                                          :else "fillable-char-sheet-0-spells.pdf")))
-        output (ByteArrayOutputStream.)
-        user-agent (get-in req [:headers "user-agent"])
-        chrome? (re-matches #".*Chrome.*" user-agent)]
-    (with-open [doc (PDDocument/load input)]
-      (pdf/write-fields! doc fields (not chrome?) font-sizes)
-      (if (seq spells-known)
-        (add-spell-cards! doc spells-known spell-save-dcs spell-attack-mods))
-      (if (and image-url
-               (re-matches #"^(https?|ftp|file)://[-a-zA-Z0-9+&@#/%?=~_|!:,.;]*[-a-zA-Z0-9+&@#/%=~_|]" image-url)
-               (not image-url-failed))
-        (pdf/draw-image! doc (pdf/get-page doc 1) image-url 0.45 1.75 2.35 3.15))
-      (if (and faction-image-url
-               (re-matches #"^(https?|ftp|file)://[-a-zA-Z0-9+&@#/%?=~_|!:,.;]*[-a-zA-Z0-9+&@#/%=~_|]" faction-image-url)
-               (not faction-image-url-failed))
-        (pdf/draw-image! doc (pdf/get-page doc 1) faction-image-url 5.88 2.4 1.905 1.52))
-      (.save doc output))
-    (let [a (.toByteArray output)]
-      {:status 200 :body (ByteArrayInputStream. a)})))
+  (try
+    (let [fields (-> req :form-params :body clojure.edn/read-string)
+          {:keys [image-url image-url-failed faction-image-url faction-image-url-failed spells-known spell-save-dcs spell-attack-mods]} fields
+          input (.openStream (io/resource (cond
+                                            (find fields :spellcasting-class-6) "fillable-char-sheet-6-spells.pdf"
+                                            (find fields :spellcasting-class-5) "fillable-char-sheet-5-spells.pdf"
+                                            (find fields :spellcasting-class-4) "fillable-char-sheet-4-spells.pdf"
+                                            (find fields :spellcasting-class-3) "fillable-char-sheet-3-spells.pdf"
+                                            (find fields :spellcasting-class-2) "fillable-char-sheet-2-spells.pdf"
+                                            (find fields :spellcasting-class-1) "fillable-char-sheet-1-spells.pdf"
+                                            :else "fillable-char-sheet-0-spells.pdf")))
+          output (ByteArrayOutputStream.)
+          user-agent (get-in req [:headers "user-agent"])
+          chrome? (re-matches #".*Chrome.*" user-agent)]
+      (with-open [doc (PDDocument/load input)]
+        (pdf/write-fields! doc fields (not chrome?) font-sizes)
+        (if (seq spells-known)
+          (add-spell-cards! doc spells-known spell-save-dcs spell-attack-mods))
+        (if (and image-url
+                 (re-matches #"^(https?|ftp|file)://[-a-zA-Z0-9+&@#/%?=~_|!:,.;]*[-a-zA-Z0-9+&@#/%=~_|]" image-url)
+                 (not image-url-failed))
+          (pdf/draw-image! doc (pdf/get-page doc 1) image-url 0.45 1.75 2.35 3.15))
+        (if (and faction-image-url
+                 (re-matches #"^(https?|ftp|file)://[-a-zA-Z0-9+&@#/%?=~_|!:,.;]*[-a-zA-Z0-9+&@#/%=~_|]" faction-image-url)
+                 (not faction-image-url-failed))
+          (pdf/draw-image! doc (pdf/get-page doc 1) faction-image-url 5.88 2.4 1.905 1.52))
+        (.save doc output))
+      (let [a (.toByteArray output)]
+        {:status 200 :body (ByteArrayInputStream. a)}))
+    (catch Throwable t (prn "EXCEPTIONS" t))))
 
 (defn html-response
   [html & [response]]
