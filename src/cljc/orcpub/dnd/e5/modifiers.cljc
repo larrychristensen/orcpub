@@ -40,6 +40,12 @@
 (defn background [nm]
   (mods/modifier ?background nm))
 
+(defn deferred-background []
+  (mods/deferred-modifier
+    ?background
+    background
+    ""))
+
 (defn subrace [nm]
   (mods/modifier ?subrace nm))
 

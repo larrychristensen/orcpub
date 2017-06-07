@@ -42,7 +42,7 @@
             [re-frame.core :refer [subscribe dispatch dispatch-sync]])
   (:require-macros [cljs.core.async.macros :refer [go]]))
 
-(def print-disabled? false)
+(def print-disabled? true)
 
 (def print-enabled? (and (not print-disabled?)
                          (s/starts-with? js/window.location.href "http://localhost")))
@@ -465,7 +465,6 @@
                            disable-select-new?
                            {:keys [::t/key ::t/name ::t/path ::t/help ::t/selections ::t/prereqs
                                    ::t/modifiers ::t/select-fn ::t/ui-fn ::t/icon] :as option}]
-  (prn "DISABLE SELECT NEW" disable-select-new? ref min max)
   (let [built-template @(subscribe [:built-template])
         character @(subscribe [:character])
         option-paths @(subscribe [:option-paths])
@@ -571,16 +570,16 @@
               :on-click #(do (dispatch [:toggle-locked path]))}])]
          (if (and help path @expanded?)
            [help-section help])
-         (if (or (and (pos? min)
-                      (nil? max))
-                 (= min max))
-           (if (int? min)
-             [:div.p-5.f-s-16
-              [:div.flex.align-items-c.justify-cont-s-b
-               [:span.i.m-r-10 (str "select " (if (= min max)
-                                                min
-                                                (str "at least " min)))]
-               (remaining-component max remaining)]]))
+         (if (int? min)
+           [:div.p-5.f-s-16
+            [:div.flex.align-items-c.justify-cont-s-b
+             [:span.i.m-r-10 (str "select " (cond
+                                              (= min max) min
+                                              (zero? min) (if (nil? max)
+                                                            "any number"
+                                                            (str "up to " max))
+                                              :else (str "at least " min)))]
+             (remaining-component max remaining)]])
          body]))))
 
 (def ignore-paths-ending-with #{:class :levels :asi-or-feat :ability-score-improvement})
@@ -612,7 +611,11 @@
   (let [actual-path (entity/actual-path selection)
         remaining (entity/count-remaining built-template character selection)
         expanded? (r/atom false)
-        ancestor-names (ancestor-names-string built-template actual-path)]
+        ancestor-names (ancestor-names-string built-template actual-path)
+        disable-select-new? (and (not (nil? max))
+                                 (or (and max (> min 1))
+                                     multiselect?)
+                                 (not (pos? remaining)))]
     [selection-section-base {:path actual-path
                              :parent-title (if (not (s/blank? ancestor-names)) ancestor-names)
                              :name name
@@ -637,10 +640,7 @@
                                                (new-option-selector
                                                 actual-path
                                                 selection
-                                                (and (not (nil? max))
-                                                     (or (and max (> min 1))
-                                                         multiselect?)
-                                                     (not (pos? remaining)))
+                                                disable-select-new?
                                                 option))
                                              (sort-by ::t/name options)))]
                                        [:div.flex
