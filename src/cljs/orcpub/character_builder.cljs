@@ -42,15 +42,13 @@
             [re-frame.core :refer [subscribe dispatch dispatch-sync]])
   (:require-macros [cljs.core.async.macros :refer [go]]))
 
-(def print-disabled? true)
-
+(def print-disabled? false)
 
 (def print-enabled? (and (not print-disabled?)
                          (s/starts-with? js/window.location.href "http://localhost")))
 
 (defn stop-propagation [e]
   (.stopPropagation e))
-
 
 (defn stop-prop-fn [func]
   (fn [e]
@@ -463,10 +461,11 @@
    (entity/combine-selections selections)))
 
 (defn new-option-selector [option-path
-                           {:keys [::t/min ::t/max ::t/options ::t/multiselect?] :as selection}
+                           {:keys [::t/min ::t/max ::t/options ::t/multiselect? ::t/ref] :as selection}
                            disable-select-new?
                            {:keys [::t/key ::t/name ::t/path ::t/help ::t/selections ::t/prereqs
                                    ::t/modifiers ::t/select-fn ::t/ui-fn ::t/icon] :as option}]
+  (prn "DISABLE SELECT NEW" disable-select-new? ref min max)
   (let [built-template @(subscribe [:built-template])
         character @(subscribe [:character])
         option-paths @(subscribe [:option-paths])
@@ -489,7 +488,11 @@
                                (str name " " value))
                              (filter ::mod/name (flatten modifiers)))
         has-named-mods? (seq named-modifiers)
-        modifiers-str (s/join ", " named-modifiers)]
+        modifiers-str (s/join ", " named-modifiers)
+        multiselect? (or multiselect?
+                         ref
+                         (> min 1)
+                         (nil? max))]
     (if (not-any? ::t/hide-if-fail? failed-prereqs)
       ^{:key key}
       [option-selector-base {:name name
@@ -501,19 +504,19 @@
                              :selected? selected?
                              :selectable? selectable?
                              :option-path new-option-path
-                             :multiselect? (or multiselect?
-                                               (> min 1)
-                                               (nil? max))
+                             :multiselect? multiselect?
                              :select-fn (fn [e]
-                                          (dispatch [:select-option {:option-path option-path
-                                                                     :selected? selected?
-                                                                     :selectable? selectable?
-                                                                     :meets-prereqs? meets-prereqs?
-                                                                     :selection selection
-                                                                     :option option
-                                                                     :has-selections? has-selections?
-                                                                     :built-template built-template
-                                                                     :new-option-path new-option-path}])
+                                          (if (or multiselect?
+                                                  (not selected?))
+                                            (dispatch [:select-option {:option-path option-path
+                                                                       :selected? selected?
+                                                                       :selectable? selectable?
+                                                                       :meets-prereqs? meets-prereqs?
+                                                                       :selection selection
+                                                                       :option option
+                                                                       :has-selections? has-selections?
+                                                                       :built-template built-template
+                                                                       :new-option-path new-option-path}]))
                                           (.stopPropagation e))
                              :content (if (and (or selected? (= 1 (count options))) ui-fn)
                                         (ui-fn new-option-path built-template))
@@ -712,12 +715,15 @@
     [:div
      (doall
       (map-indexed
-       (fn [i {:keys [::t/name ::t/key ::t/min ::t/options ::t/different? ::entity/path] :as selection}]
+       (fn [i {:keys [::t/name ::t/key ::t/min ::t/max ::t/options ::t/different? ::entity/path] :as selection}]
          (let [increases-path (entity/get-entity-path built-template character path)
                selected-options (get-in character increases-path)
                ability-increases (frequencies (map ::entity/key selected-options))
                num-increased (apply + (vals ability-increases))
-               num-remaining (- min num-increased)
+               num-remaining (if (or (nil? max)
+                                     (<= min num-increased max))
+                               0
+                               (- min num-increased))
                allowed-abilities (into #{} (map ::t/key options))
                ancestors-title (ancestor-names-string built-template path)]
            ^{:key i}
@@ -734,7 +740,8 @@
                (fn [i k]
                  (let [ability-disabled? (not (allowed-abilities k))
                        increase-disabled? (or ability-disabled?
-                                              (zero? num-remaining)
+                                              (and (some? max)
+                                                   (zero? (- max num-increased)))
                                               (and different? (pos? (ability-increases k)))
                                               (>= (total-abilities k) 20))
                        decrease-disabled? (or ability-disabled?

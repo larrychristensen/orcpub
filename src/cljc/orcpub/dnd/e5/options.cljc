@@ -179,12 +179,12 @@
 (defn get-raw-abilities [character]
   (get-in character [::entity/options :ability-scores ::entity/value]))
 
-(defn ability-increase-selection [ability-keys num-increases & [different? modifier-fns]]
+(defn ability-increase-selection-2 [{:keys [ability-keys num-increases min max different? modifier-fns]}]
   (t/selection-cfg
    {:name "Ability Score Improvement"
     :key :asi
-    :min num-increases
-    :max num-increases
+    :min (or num-increases min)
+    :max (or num-increases max)
     :tags #{:ability-scores}
     :different? different?
     :multiselect? true
@@ -195,7 +195,14 @@
                   :key k
                   :modifiers (conj (map #(% k) modifier-fns)
                                    (modifiers/level-ability-increase k 1))}))
-              ability-keys)}))
+              (or ability-keys
+                  character/ability-keys))}))
+
+(defn ability-increase-selection [ability-keys num-increases & [different? modifier-fns]]
+  (ability-increase-selection-2 {:ability-keys ability-keys
+                                 :num-increases num-increases
+                                 :different? different?
+                                 :modifier-fns modifier-fns}))
 
 (defn ability-increase-option [num-increases different? ability-keys]
   (t/option-cfg
@@ -701,33 +708,41 @@
 (defn proficiency-help [num singular plural]
   (str "Select additional " (if (> num 1) plural singular) " for which you are proficient."))
 
+(defn skill-selection-2 [{:keys [options num min max order key prereq-fn]}]
+  (t/selection-cfg
+   {:name "Skill Proficiency"
+    :key key
+    :order (or order 0)
+    :help (proficiency-help (or num min) "a skill" "skills")
+    :options (skill-options
+              (filter
+               (comp (set options) :key)
+               skills/skills))
+    :min (or min num)
+    :max (or max num)
+    :multiselect? true
+    :ref [:skill-profs]
+    :tags #{:skill-profs :profs}
+    :prereq-fn prereq-fn}))
+
 (defn skill-selection
   ([num]
-   (skill-selection (map :key skills/skills) num))
+   (skill-selection-2 {:num num
+                       :options (map :key skills/skills)}))
   ([options num & [order key prereq-fn]]
-   (t/selection-cfg
-    {:name "Skill Proficiency"
-     :key key
-     :order (or order 0)
-     :help (proficiency-help num "a skill" "skills")
-     :options (skill-options
-               (filter
-                (comp (set options) :key)
-                skills/skills))
-     :min num
-     :max num
-     :multiselect? true
-     :ref [:skill-profs]
-     :tags #{:skill-profs :profs}
-     :prereq-fn prereq-fn})))
+   (skill-selection-2 {:options options
+                       :num num
+                       :order order
+                       :key key
+                       :prereq-fn prereq-fn})))
 
-(defn tool-proficiency-selection [{:keys [options num]}]
+(defn tool-proficiency-selection [{:keys [options num min max]}]
   (t/selection-cfg
    {:name "Tool Proficiency"
-    :help (proficiency-help num "a tool" "tools")
+    :help (proficiency-help (or num min) "a tool" "tools")
     :options options
-    :min num
-    :max num
+    :min (or num min)
+    :max (or num max)
     :tags #{:tool-profs :profs}}))
 
 (defn tool-selection
@@ -1466,8 +1481,45 @@
 (defn darkvision-modifiers [range]
   [(modifiers/darkvision range)])
 
+(defn feat-selection-2 [cfg]
+  (t/selection-cfg
+   (merge
+    {:name "Feats"
+     :ref [:feats]
+     :tags #{:feats}
+     :multiselect? true}
+    cfg)))
+
+(defn custom-race-builder []
+  [:div.m-t-10
+   [:span "Name"]
+   [:input.input
+    {:value @(subscribe [:custom-race-name])
+     :on-change (fn [e] (dispatch [:set-custom-race (.. e -target -value)]))}]])
+
+(def custom-race-option
+  (t/option-cfg
+   {:name "Custom"
+    :icon "beer-stein"
+    :ui-fn custom-race-builder
+    :help "Homebrew race. This allows you to use a race that is not on the list."
+    :modifiers [(modifiers/deferred-race)]
+    :selections [(skill-selection-2 {:min 0
+                                     :max 100
+                                     :options (map :key skills/skills)})
+                 (tool-proficiency-selection
+                  {:options (tool-options equipment/tools)
+                   :min 0
+                   :max 100})
+                 (ability-increase-selection-2
+                  {:min 2})
+                 (feat-selection-2
+                  {:min 0
+                   :options feat-options})]}))
+
 
 (defn race-option [{:keys [name
+                           icon
                            key
                            help
                            abilities
@@ -1488,6 +1540,7 @@
                            plugin?]}]
   (t/option-cfg
    {:name name
+    :icon icon
     :key (or key (common/name-to-kw name))
     :help help
     :selections (concat
@@ -2103,13 +2156,4 @@
      :order 0
      :help "Race determines your appearance and helps shape your culture and background. It also affects you ability scores, size, speed, languages, and many other crucial inherent traits."
      :tags #{:race}}
-    cfg)))
-
-(defn feat-selection-2 [cfg]
-  (t/selection-cfg
-   (merge
-    {:name "Feats"
-     :ref [:feats]
-     :tags #{:feats}
-     :multiselect? true}
     cfg)))
