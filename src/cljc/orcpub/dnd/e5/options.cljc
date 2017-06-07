@@ -1490,33 +1490,62 @@
      :multiselect? true}
     cfg)))
 
-(defn custom-race-builder []
+(defn custom-option-builder [name-sub-key name-event-key]
   [:div.m-t-10
    [:span "Name"]
    [:input.input
-    {:value @(subscribe [:custom-race-name])
-     :on-change (fn [e] (dispatch [:set-custom-race (.. e -target -value)]))}]])
+    {:value @(subscribe [name-sub-key])
+     :on-change (fn [e] (dispatch [name-event-key (.. e -target -value)]))}]])
+
+(defn custom-race-builder []
+  (custom-option-builder
+   :custom-race-name
+   :set-custom-race))
 
 (def custom-race-option
   (t/option-cfg
    {:name "Custom"
     :icon "beer-stein"
     :ui-fn custom-race-builder
-    :help "Homebrew race. This allows you to use a race that is not on the list."
+    :help "Homebrew race. This allows you to use a race that is not on the list. This will allow unrestricted access to skill and tool proficiencies, racial ability increases, and feats."
     :modifiers [(modifiers/deferred-race)]
     :selections [(skill-selection-2 {:min 0
-                                     :max 100
+                                     :max nil
                                      :options (map :key skills/skills)})
                  (tool-proficiency-selection
                   {:options (tool-options equipment/tools)
                    :min 0
-                   :max 100})
+                   :max nil})
                  (ability-increase-selection-2
                   {:min 2})
                  (feat-selection-2
                   {:min 0
+                   :max nil
                    :options feat-options})]}))
 
+(defn custom-background-builder []
+  (custom-option-builder
+   :custom-background-name
+   :set-custom-background))
+
+(def custom-background-option
+  (t/option-cfg
+   {:name "Custom"
+    :icon "beer-stein"
+    :ui-fn custom-background-builder
+    :help "Homebrew backgound. This allows you to use a background that is not on the list. This will allow unrestricted access to skill and tool proficiencies and feats."
+    :modifiers [(modifiers/deferred-background)]
+    :selections [(skill-selection-2 {:min 0
+                                     :max nil
+                                     :options (map :key skills/skills)})
+                 (tool-proficiency-selection
+                  {:options (tool-options equipment/tools)
+                   :min 0
+                   :max nil})
+                 (feat-selection-2
+                  {:min 0
+                   :max nil
+                   :options feat-options})]}))
 
 (defn race-option [{:keys [name
                            icon

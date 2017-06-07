@@ -613,6 +613,16 @@
               ::entity/value]
              name)))
 
+(reg-event-db
+ :set-custom-background
+ character-interceptors
+ (fn [character [_ name]]
+   (assoc-in character
+             [::entity/options
+              :background
+              ::entity/value]
+             name)))
+
 (defn cookies []
   (let [cookie js/document.cookie]
     (into {}

@@ -91,6 +91,12 @@
    (get-in options [:race ::entity/value])))
 
 (reg-sub
+ :custom-background-name
+ :<- [:entity-options]
+ (fn [options _]
+   (get-in options [:background ::entity/value])))
+
+(reg-sub
  :option-paths
  :<- [:character]
  (fn [character _]

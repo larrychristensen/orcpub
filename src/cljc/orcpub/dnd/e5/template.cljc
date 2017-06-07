@@ -4750,9 +4750,11 @@ long rest."})]
                opt5e/custom-race-option)})
    (opt5e/background-selection
     {:help "Background broadly describes your character origin. It also affords you two skill proficiencies and possibly proficiencies with tools or languages."
-     :options (map
-               opt5e/background-option
-               backgrounds)})
+     :options (conj
+               (map
+                opt5e/background-option
+                backgrounds)
+               opt5e/custom-background-option)})
    (opt5e/feat-selection-2
     {:options opt5e/feat-options
      :min 0
