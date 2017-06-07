@@ -1490,6 +1490,9 @@
      :multiselect? true}
     cfg)))
 
+(def homebrew-al-illegal
+  (modifiers/al-illegal "Homebrew options are not allowed"))
+
 (defn custom-option-builder [name-sub-key name-event-key]
   [:div.m-t-10
    [:span "Name"]
@@ -1497,18 +1500,19 @@
     {:value @(subscribe [name-sub-key])
      :on-change (fn [e] (dispatch [name-event-key (.. e -target -value)]))}]])
 
-(defn custom-race-builder []
+(defn custom-subrace-builder []
   (custom-option-builder
-   :custom-race-name
-   :set-custom-race))
+   :custom-subrace-name
+   :set-custom-subrace))
 
-(def custom-race-option
+(def custom-subrace-option
   (t/option-cfg
    {:name "Custom"
     :icon "beer-stein"
-    :ui-fn custom-race-builder
-    :help "Homebrew race. This allows you to use a race that is not on the list. This will allow unrestricted access to skill and tool proficiencies, racial ability increases, and feats."
-    :modifiers [(modifiers/deferred-race)]
+    :ui-fn custom-subrace-builder
+    :help "Homebrew subrace. This allows you to use a subrace that is not on the list. This will allow unrestricted access to skill and tool proficiencies, racial ability increases, and feats."
+    :modifiers [(modifiers/deferred-subrace)
+                homebrew-al-illegal]
     :selections [(skill-selection-2 {:min 0
                                      :max nil
                                      :options (map :key skills/skills)})
@@ -1523,19 +1527,33 @@
                    :max nil
                    :options feat-options})]}))
 
-(defn custom-subrace-builder []
+(defn custom-race-builder []
   (custom-option-builder
-   :custom-subrace-name
-   :set-custom-subrace))
+   :custom-race-name
+   :set-custom-race))
 
-(def custom-subrace-option
+(defn subrace-selection [source subraces]
+  (t/selection-cfg
+   {:name "Subrace"
+    :tags #{:subrace}
+    :options (conj
+              (map
+               (partial subrace-option source)
+               (if source
+                 (map (fn [sr] (assoc sr :source source)) subraces)
+                 subraces))
+              custom-subrace-option)}))
+
+(def custom-race-option
   (t/option-cfg
    {:name "Custom"
     :icon "beer-stein"
-    :ui-fn custom-subrace-builder
-    :help "Homebrew subrace. This allows you to use a subrace that is not on the list. This will allow unrestricted access to skill and tool proficiencies, racial ability increases, and feats."
-    :modifiers [(modifiers/deferred-subrace)]
-    :selections [(skill-selection-2 {:min 0
+    :ui-fn custom-race-builder
+    :help "Homebrew race. This allows you to use a race that is not on the list. This will allow unrestricted access to skill and tool proficiencies, racial ability increases, and feats."
+    :modifiers [(modifiers/deferred-race)
+                homebrew-al-illegal]
+    :selections [(subrace-selection nil nil)
+                 (skill-selection-2 {:min 0
                                      :max nil
                                      :options (map :key skills/skills)})
                  (tool-proficiency-selection
@@ -1560,7 +1578,8 @@
     :icon "beer-stein"
     :ui-fn custom-background-builder
     :help "Homebrew backgound. This allows you to use a background that is not on the list. This will allow unrestricted access to skill and tool proficiencies and feats."
-    :modifiers [(modifiers/deferred-background)]
+    :modifiers [(modifiers/deferred-background)
+                homebrew-al-illegal]
     :selections [(skill-selection-2 {:min 0
                                      :max nil
                                      :options (map :key skills/skills)})
@@ -1599,17 +1618,7 @@
     :key (or key (common/name-to-kw name))
     :help help
     :selections (concat
-                 (if subraces
-                   [(t/selection-cfg
-                     {:name "Subrace"
-                      :tags #{:subrace}
-                      :options (conj
-                                (map
-                                 (partial subrace-option source)
-                                 (if source
-                                   (map (fn [sr] (assoc sr :source source)) subraces)
-                                   subraces))
-                                custom-subrace-option)})])
+                 [(subrace-selection source subraces)]
                  (if (seq language-options) [(language-selection language-options)])
                  selections)
     :modifiers (concat
