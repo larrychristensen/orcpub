@@ -94,6 +94,9 @@
    {:db/ident ::se/int-value
     :db/valueType :db.type/long
     :db/cardinality :db.cardinality/one}
+   {:db/ident ::se/string-value
+    :db/valueType :db.type/string
+    :db/cardinality :db.cardinality/one}
    {:db/ident ::se/map-value
     :db/valueType :db.type/ref
     :db/cardinality :db.cardinality/one

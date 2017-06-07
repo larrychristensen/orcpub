@@ -31,6 +31,12 @@
 (defn race [nm]
   (mods/modifier ?race nm))
 
+(defn deferred-race []
+  (mods/deferred-modifier
+    ?race
+    race
+    ""))
+
 (defn background [nm]
   (mods/modifier ?background nm))
 
@@ -127,6 +133,7 @@
   [(ability ability-kw bonus)
    (mods/modifier ?subrace-ability-increases
                   (update ?subrace-ability-increases ability-kw add-bonus bonus))])
+
 
 (defn abilities [abilities]
   (mods/modifier ?base-abilities abilities))
