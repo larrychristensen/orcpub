@@ -31,11 +31,29 @@
 (defn race [nm]
   (mods/modifier ?race nm))
 
+(defn deferred-race []
+  (mods/deferred-modifier
+    ?race
+    race
+    ""))
+
 (defn background [nm]
   (mods/modifier ?background nm))
 
+(defn deferred-background []
+  (mods/deferred-modifier
+    ?background
+    background
+    ""))
+
 (defn subrace [nm]
   (mods/modifier ?subrace nm))
+
+(defn deferred-subrace []
+  (mods/deferred-modifier
+    ?subrace
+    subrace
+    ""))
 
 (defn resistance-cfg [value qualifier]
   {:value value
@@ -127,6 +145,7 @@
   [(ability ability-kw bonus)
    (mods/modifier ?subrace-ability-increases
                   (update ?subrace-ability-increases ability-kw add-bonus bonus))])
+
 
 (defn abilities [abilities]
   (mods/modifier ?base-abilities abilities))

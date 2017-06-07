@@ -79,6 +79,33 @@
    (get-in character [::entity/values])))
 
 (reg-sub
+ :entity-options
+ :<- [:character]
+ (fn [character _]
+   (get-in character [::entity/options])))
+
+(reg-sub
+ :custom-race-name
+ :<- [:entity-options]
+ (fn [options _]
+   (get-in options [:race ::entity/value])))
+
+(reg-sub
+ :custom-subrace-name
+ :<- [:entity-options]
+ (fn [options _]
+   (get-in options [:race
+                    ::entity/options
+                    :subrace
+                    ::entity/value])))
+
+(reg-sub
+ :custom-background-name
+ :<- [:entity-options]
+ (fn [options _]
+   (get-in options [:background ::entity/value])))
+
+(reg-sub
  :option-paths
  :<- [:character]
  (fn [character _]

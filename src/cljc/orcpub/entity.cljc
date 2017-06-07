@@ -41,6 +41,7 @@
     id (assoc :db/id id)
     options (assoc ::strict/selections (to-strict-selections options))
     (int? value) (assoc ::strict/int-value value)
+    (string? value) (assoc ::strict/string-value value)
     (map? value) (assoc ::strict/map-value value)))
 
 (defn remove-empty-fields [raw-character]
@@ -72,8 +73,9 @@
                                   ::strict/key
                                   ::strict/selections
                                   ::strict/int-value
+                                  ::strict/string-value
                                   ::strict/map-value]}]
-  (let [value (or int-value map-value)]
+  (let [value (or int-value map-value string-value)]
     (cond-> {::key key}
       id (assoc :db/id id)
       selections (assoc ::options (from-strict-selections selections))

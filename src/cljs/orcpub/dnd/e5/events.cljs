@@ -603,6 +603,38 @@
            dissoc
            :faction-image-url-failed)))
 
+(reg-event-db
+ :set-custom-race
+ character-interceptors
+ (fn [character [_ name]]
+   (assoc-in character
+             [::entity/options
+              :race
+              ::entity/value]
+             name)))
+
+(reg-event-db
+ :set-custom-subrace
+ character-interceptors
+ (fn [character [_ name]]
+   (assoc-in character
+             [::entity/options
+              :race
+              ::entity/options
+              :subrace
+              ::entity/value]
+             name)))
+
+(reg-event-db
+ :set-custom-background
+ character-interceptors
+ (fn [character [_ name]]
+   (assoc-in character
+             [::entity/options
+              :background
+              ::entity/value]
+             name)))
+
 (defn cookies []
   (let [cookie js/document.cookie]
     (into {}
