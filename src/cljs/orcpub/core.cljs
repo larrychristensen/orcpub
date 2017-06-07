@@ -26,7 +26,6 @@
                     "http://localhost:8890/register"
                     "/register"))
 
-
 (def pages
   {nil ch/character-builder
    routes/default-route ch/character-builder

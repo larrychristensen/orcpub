@@ -514,25 +514,26 @@
              :source :vgm
              :summary "Beast and plants can understand you and you have advantage on Charisma checks to influence them."}]})
 
-(def goliath-option-cfg
-  {:name "Goliath"
+(defn goliath-option-cfg [source page]
+  {:name (str "Goliath (" (s/upper-case (name source)) ")")
+   :key (if (= :vgm source) :goliath :goliath-ee)
    :abilities {::char5e/str 2 ::char5e/con 1}
    :size :medium
    :speed 30
    :languages ["Common" "Giant"]
    :profs {:skill {:athletics true}}
-   :source :vgm
+   :source source
    :modifiers [(mod5e/reaction
                 {:name "Stone's Endurance"
                  :frequency opt5e/rests-1
-                 :page 109
-                 :source :vgm
+                 :page page
+                 :source source
                  :summary (str "Reduce damage taken by 1d12 + " (::char5e/con ?ability-bonuses))})]
    
    :traits [{:name "Mountain Born"
-             :page 109
+             :page page
              :summary "Adapted to high altitude and cold climates."}
-            (powerful-build 109)]})
+            (powerful-build page)]})
 
 (def kenku-option-cfg
   {:name "Kenku"
@@ -4204,7 +4205,7 @@ long rest."})]
                  (opt5e/race-option (assoc race :source :vgm)))
                [aasimar-option-cfg
                 firbolg-option-cfg
-                goliath-option-cfg
+                (goliath-option-cfg :vgm 109)
                 kenku-option-cfg
                 lizardfolk-option-cfg
                 tabaxi-option-cfg
@@ -4324,7 +4325,7 @@ long rest."})]
                [aarakocra-option-cfg
                 ee-gnome-option-cfg
                 genasi-option-cfg
-                goliath-option-cfg])})])
+                (goliath-option-cfg :ee 11)])})])
 
 (def keen-senses-option
   (t/option-cfg
@@ -4620,7 +4621,12 @@ long rest."})]
       :key :cos
       :selections cos-selections
       :help (amazon-frame-help cos-amazon-frame
-                               [:span "Includes the Haunted One background"])}]
+                               [:span "Includes the Haunted One background"])}
+     {:name "Homebrew"
+      :key :homebrew
+      :icon "beer-stein"
+      :modifiers [opt5e/homebrew-al-illegal]
+      :help "This removes all restrictions and allows you to build your character however you want. Homebrew is not legal in the Adventurer's League."}]
     ua/ua-plugins)))
 
 (def optional-content-selection
@@ -4634,9 +4640,10 @@ long rest."})]
                               " or are OrcPub summaries. See the Player's Handbook for in-depth, official rules and descriptions."])
     :options (map
               #(t/option-cfg
-                (merge
+                (merge-with
+                 concat
                  {:modifiers [(mod/set-mod ?option-sources (:key %))]}
-                 (select-keys % [:name :key :help])))
+                 (select-keys % [:name :key :help :icon :modifiers])))
               plugins)
     :multiselect? true
     :min 0
