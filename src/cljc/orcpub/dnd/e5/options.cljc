@@ -1505,6 +1505,21 @@
     :ref [:tool-profs]
     :options (tool-options equipment/tools)}))
 
+(def homebrew-skill-prof-selection
+  (skill-selection-2 {:min 0
+                      :max nil
+                      :options (map :key skills/skills)}))
+
+(def homebrew-ability-increase-selection
+  (ability-increase-selection-2
+   {:min 0}))
+
+(def homebrew-feat-selection
+  (feat-selection-2
+   {:min 0
+    :max nil
+    :options feat-options}))
+
 (def homebrew-al-illegal
   (modifiers/al-illegal "Homebrew options are not allowed"))
 
@@ -1528,16 +1543,10 @@
     :help "Homebrew subrace. This allows you to use a subrace that is not on the list. This will allow unrestricted access to skill and tool proficiencies, racial ability increases, and feats."
     :modifiers [(modifiers/deferred-subrace)
                 homebrew-al-illegal]
-    :selections [(skill-selection-2 {:min 0
-                                     :max nil
-                                     :options (map :key skills/skills)})
+    :selections [homebrew-skill-prof-selection
                  homebrew-tool-prof-selection
-                 (ability-increase-selection-2
-                  {:min 0})
-                 (feat-selection-2
-                  {:min 0
-                   :max nil
-                   :options feat-options})]}))
+                 homebrew-ability-increase-selection
+                 homebrew-feat-selection]}))
 
 (defn custom-race-builder []
   (custom-option-builder
@@ -1565,16 +1574,10 @@
     :modifiers [(modifiers/deferred-race)
                 homebrew-al-illegal]
     :selections [(subrace-selection nil nil)
-                 (skill-selection-2 {:min 0
-                                     :max nil
-                                     :options (map :key skills/skills)})
+                 homebrew-skill-prof-selection
                  homebrew-tool-prof-selection
-                 (ability-increase-selection-2
-                  {:min 2})
-                 (feat-selection-2
-                  {:min 0
-                   :max nil
-                   :options feat-options})]}))
+                 homebrew-ability-increase-selection
+                 homebrew-feat-selection]}))
 
 (defn custom-background-builder []
   (custom-option-builder
@@ -1589,14 +1592,9 @@
     :help "Homebrew backgound. This allows you to use a background that is not on the list. This will allow unrestricted access to skill and tool proficiencies and feats."
     :modifiers [(modifiers/deferred-background)
                 homebrew-al-illegal]
-    :selections [(skill-selection-2 {:min 0
-                                     :max nil
-                                     :options (map :key skills/skills)})
+    :selections [homebrew-skill-prof-selection
                  homebrew-tool-prof-selection
-                 (feat-selection-2
-                  {:min 0
-                   :max nil
-                   :options feat-options})]}))
+                 homebrew-feat-selection]}))
 
 (defn race-option [{:keys [name
                            icon
