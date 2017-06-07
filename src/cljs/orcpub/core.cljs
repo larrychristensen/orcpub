@@ -16,11 +16,16 @@
 
 (enable-console-print!)
 
+(if (not (or (s/starts-with? js/window.location.href "https")
+             (s/starts-with? js/window.location.href "http://localhost")))
+  (set! js/window.location.protocol "https"))
+
 (dispatch-sync [:initialize-db])
 
 (def register-url (if (s/starts-with? js/window.location.href "http://localhost")
                     "http://localhost:8890/register"
                     "/register"))
+
 
 (def pages
   {nil ch/character-builder
