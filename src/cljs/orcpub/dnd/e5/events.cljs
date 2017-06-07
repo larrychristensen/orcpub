@@ -614,6 +614,18 @@
              name)))
 
 (reg-event-db
+ :set-custom-subrace
+ character-interceptors
+ (fn [character [_ name]]
+   (assoc-in character
+             [::entity/options
+              :race
+              ::entity/options
+              :subrace
+              ::entity/value]
+             name)))
+
+(reg-event-db
  :set-custom-background
  character-interceptors
  (fn [character [_ name]]

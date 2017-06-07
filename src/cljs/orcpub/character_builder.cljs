@@ -42,7 +42,7 @@
             [re-frame.core :refer [subscribe dispatch dispatch-sync]])
   (:require-macros [cljs.core.async.macros :refer [go]]))
 
-(def print-disabled? true)
+(def print-disabled? false)
 
 (def print-enabled? (and (not print-disabled?)
                          (s/starts-with? js/window.location.href "http://localhost")))
@@ -1062,7 +1062,8 @@
               bad-selection? (and selected? (not selectable?))
               allow-select? (or selected?
                                 (and (not selected?)
-                                     (pos? remaining)
+                                     (or (pos? remaining)
+                                         (nil? max))
                                      selectable?
                                      (not has-prof?))
                                 bad-selection?)]

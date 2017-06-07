@@ -1523,6 +1523,32 @@
                    :max nil
                    :options feat-options})]}))
 
+(defn custom-subrace-builder []
+  (custom-option-builder
+   :custom-subrace-name
+   :set-custom-subrace))
+
+(def custom-subrace-option
+  (t/option-cfg
+   {:name "Custom"
+    :icon "beer-stein"
+    :ui-fn custom-subrace-builder
+    :help "Homebrew subrace. This allows you to use a subrace that is not on the list. This will allow unrestricted access to skill and tool proficiencies, racial ability increases, and feats."
+    :modifiers [(modifiers/deferred-subrace)]
+    :selections [(skill-selection-2 {:min 0
+                                     :max nil
+                                     :options (map :key skills/skills)})
+                 (tool-proficiency-selection
+                  {:options (tool-options equipment/tools)
+                   :min 0
+                   :max nil})
+                 (ability-increase-selection-2
+                  {:min 2})
+                 (feat-selection-2
+                  {:min 0
+                   :max nil
+                   :options feat-options})]}))
+
 (defn custom-background-builder []
   (custom-option-builder
    :custom-background-name
@@ -1577,7 +1603,13 @@
                    [(t/selection-cfg
                      {:name "Subrace"
                       :tags #{:subrace}
-                      :options (map (partial subrace-option source) (if source (map (fn [sr] (assoc sr :source source)) subraces) subraces))})])
+                      :options (conj
+                                (map
+                                 (partial subrace-option source)
+                                 (if source
+                                   (map (fn [sr] (assoc sr :source source)) subraces)
+                                   subraces))
+                                custom-subrace-option)})])
                  (if (seq language-options) [(language-selection language-options)])
                  selections)
     :modifiers (concat
