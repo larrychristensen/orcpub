@@ -91,6 +91,15 @@
    (get-in options [:race ::entity/value])))
 
 (reg-sub
+ :custom-subrace-name
+ :<- [:entity-options]
+ (fn [options _]
+   (get-in options [:race
+                    ::entity/options
+                    :subrace
+                    ::entity/value])))
+
+(reg-sub
  :custom-background-name
  :<- [:entity-options]
  (fn [options _]

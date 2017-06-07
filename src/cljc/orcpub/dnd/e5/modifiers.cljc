@@ -49,6 +49,12 @@
 (defn subrace [nm]
   (mods/modifier ?subrace nm))
 
+(defn deferred-subrace []
+  (mods/deferred-modifier
+    ?subrace
+    subrace
+    ""))
+
 (defn resistance-cfg [value qualifier]
   {:value value
    :qualifier qualifier})
