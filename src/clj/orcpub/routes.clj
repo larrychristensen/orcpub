@@ -384,10 +384,16 @@
                            "Expires" "0"}})]
     merged))
 
-(defn index [req & [response]]
-  (html-response
-   (slurp (io/resource "public/index.html"))
-   response))
+(defn index [{:keys [headers scheme uri server-name]} & [response]]
+  (prn "HEADERS" headers scheme uri server-name)
+  (try
+    (if (and (not= :https scheme)
+             (not= "localhost" server-name))
+      (ring-resp/redirect (str "https://" (headers "host") uri))
+      (html-response
+       (slurp (io/resource "public/index.html"))
+       response))
+    (catch Throwable t (prn "T" t))))
 
 (defn empty-index [req & [response]]
   (html-response

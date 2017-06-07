@@ -4691,6 +4691,13 @@ long rest."})]
       [:td 15]
       [:td 9]]]]])
 
+(defn custom-race-builder []
+  [:div.m-t-10
+   [:span "Name"]
+   [:input.input
+    {:value @(subscribe [:custom-race-name])
+     :on-change (fn [e] (dispatch [:set-custom-race (.. e -target -value)]))}]])
+
 (def template-selections
   [optional-content-selection
    (t/selection-cfg
@@ -4728,22 +4735,26 @@ long rest."})]
                    :modifiers [(mod5e/alignment alignment)]}))
                ["Lawful Good" "Lawful Neutral" "Lawful Evil" "Neutral Good" "Neutral" "Neutral Evil" "Chaotic Good" "Chaotic Neutral" "Chaotic Evil"])})
    (opt5e/race-selection
-    {:options (map
-               opt5e/race-option
-               [dwarf-option-cfg
-                elf-option-cfg
-                halfling-option-cfg
-                human-option-cfg
-                dragonborn-option-cfg
-                gnome-option-cfg
-                half-elf-option-cfg
-                half-orc-option-cfg
-                tiefling-option-cfg])})
+    {:options (conj
+               (map
+                opt5e/race-option
+                [dwarf-option-cfg
+                 elf-option-cfg
+                 halfling-option-cfg
+                 human-option-cfg
+                 dragonborn-option-cfg
+                 gnome-option-cfg
+                 half-elf-option-cfg
+                 half-orc-option-cfg
+                 tiefling-option-cfg])
+               opt5e/custom-race-option)})
    (opt5e/background-selection
     {:help "Background broadly describes your character origin. It also affords you two skill proficiencies and possibly proficiencies with tools or languages."
-     :options (map
-               opt5e/background-option
-               backgrounds)})
+     :options (conj
+               (map
+                opt5e/background-option
+                backgrounds)
+               opt5e/custom-background-option)})
    (opt5e/feat-selection-2
     {:options opt5e/feat-options
      :min 0
@@ -4766,7 +4777,6 @@ long rest."})]
                sorcerer-option
                warlock-option
                wizard-option]})
-   ;;(opt5e/skill-selection 0)
    (inventory-selection "Treasure" "cash" equip5e/treasure mod5e/deferred-treasure)
    (inventory-selection "Weapons" "plain-dagger" weapon5e/weapons mod5e/deferred-weapon)
    (inventory-selection "Magic Weapons" "lightning-bow" mi/magic-weapons mod5e/deferred-magic-weapon)
