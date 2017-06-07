@@ -29,6 +29,51 @@
                                                                 ::char-equip5e/equipped? true})]})))
               item-kws)}))
 
+(def alchemical-fire-mod
+  (mod5e/action
+   {:name "Alchemical Fire"
+    :page 5
+    :source :ua-artificer
+    :range opt5e/ft-30
+    :summary (str "Hurl a vial of alchemical fire that does "
+                  (mod5e/level-val
+                   (?class-level :artificer)
+                   {4 2
+                    7 3
+                    10 4
+                    13 5
+                    16 6
+                    19 7
+                    :default 1}
+                   )
+                  "d6 fire damage to creatures within a 5 ft. that fail a DC "
+                  (?spell-save-dc :int)
+                  " DEX save")}))
+
+(def alchemical-acid-mod
+  (mod5e/action
+   {:name "Alchemical Acid"
+    :page 5
+    :source :ua-artificer
+    :range opt5e/ft-30
+    :summary (str "Hurl a vial of acid that does "
+                  (mod5e/level-val
+                   (?class-level :artificer)
+                   {3 2
+                    5 3
+                    7 4
+                    9 5
+                    11 6
+                    13 7
+                    15 8
+                    17 9
+                    19 10
+                    :default 1}
+                   )
+                  "d6 acid damage to creatures within a 5 ft. that fail a DC "
+                  (?spell-save-dc :int)
+                  " DEX save")}))
+
 (def alchemical-formula-selection
   (t/selection-cfg
    {:name "Alchemical Formulas"
@@ -38,51 +83,6 @@
     :tags #{:class}
     :ref [:class :artificer :levels :level-1 :artificer-specialty :alchemist :alchemical-formulas]
     :options [(t/option-cfg
-               {:name "Alchemical Fire"
-                :modifiers [(mod5e/action
-                             {:name "Alchemical Fire"
-                              :page 5
-                              :source :ua-artificer
-                              :range opt5e/ft-30
-                              :summary (str "Hurl a vial of alchemical fire that does "
-                                            (mod5e/level-val
-                                             (?class-level :artificer)
-                                             {4 2
-                                              7 3
-                                              10 4
-                                              13 5
-                                              16 6
-                                              19 7
-                                              :default 1}
-                                             )
-                                            "d6 fire damage to creatures within a 5 ft. that fail a DC "
-                                            (?spell-save-dc :int)
-                                            " DEX save")})]})
-              (t/option-cfg
-               {:name "Alchemical Acid"
-                :modifiers [(mod5e/action
-                             {:name "Alchemical Acid"
-                              :page 5
-                              :source :ua-artificer
-                              :range opt5e/ft-30
-                              :summary (str "Hurl a vial of acid that does "
-                                            (mod5e/level-val
-                                             (?class-level :artificer)
-                                             {3 2
-                                              5 3
-                                              7 4
-                                              9 5
-                                              11 6
-                                              13 7
-                                              15 8
-                                              17 9
-                                              19 10
-                                              :default 1}
-                                             )
-                                            "d6 acid damage to creatures within a 5 ft. that fail a DC "
-                                             (?spell-save-dc :int)
-                                             " DEX save")})]})
-              (t/option-cfg
                {:name "Healing Draught"
                 :modifiers [(mod5e/action
                              {:name "Healing Draught"
@@ -276,6 +276,8 @@
                             :source :ua-artificer
                             :summary "You craft a satchel that contains your alchemical materials"}]
                   :selections [alchemical-formula-selection]
+                  :modifiers [alchemical-fire-mod
+                              alchemical-acid-mod]
                   :levels {3 {:selections [alchemical-formula-selection]}
                            9 {:selections [alchemical-formula-selection]}
                            14 {:selections [alchemical-formula-selection]}
