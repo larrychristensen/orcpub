@@ -4626,8 +4626,13 @@ long rest."})]
       :key :homebrew
       :icon "beer-stein"
       :modifiers [opt5e/homebrew-al-illegal]
+      :selections [opt5e/homebrew-tool-prof-selection
+                   opt5e/homebrew-skill-prof-selection
+                   opt5e/homebrew-ability-increase-selection
+                   opt5e/homebrew-feat-selection]
       :help "This removes all restrictions and allows you to build your character however you want. Homebrew is not legal in the Adventurer's League."}]
     ua/ua-plugins)))
+
 
 (def optional-content-selection
   (t/selection-cfg
@@ -4643,11 +4648,12 @@ long rest."})]
                 (merge-with
                  concat
                  {:modifiers [(mod/set-mod ?option-sources (:key %))]}
-                 (select-keys % [:name :key :help :icon :modifiers])))
+                 (select-keys % [:name :key :help :icon :modifiers :selections])))
               plugins)
     :multiselect? true
     :min 0
     :max nil}))
+
 
 (def plugin-map
   (into {} (map (juxt :key identity) plugins)))
