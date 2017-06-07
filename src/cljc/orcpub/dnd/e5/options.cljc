@@ -736,14 +736,22 @@
                        :key key
                        :prereq-fn prereq-fn})))
 
-(defn tool-proficiency-selection [{:keys [options num min max]}]
+(defn tool-proficiency-selection-2 [{:keys [num min max] :as cfg}]
   (t/selection-cfg
-   {:name "Tool Proficiency"
-    :help (proficiency-help (or num min) "a tool" "tools")
-    :options options
-    :min (or num min)
-    :max (or num max)
-    :tags #{:tool-profs :profs}}))
+   (merge
+    {:name "Tool Proficiency"
+     :help (proficiency-help (or num min) "a tool" "tools")
+     :min (or num min)
+     :max (or num max)
+     :tags #{:tool-profs :profs}}
+    cfg)))
+
+(defn tool-proficiency-selection [{:keys [options num min max]}]
+  (tool-proficiency-selection-2
+   {:options options
+    :num num
+    :min min
+    :max max}))
 
 (defn tool-selection
   ([num]
@@ -1490,6 +1498,13 @@
      :multiselect? true}
     cfg)))
 
+(def homebrew-tool-prof-selection
+  (tool-proficiency-selection-2
+   {:min 0
+    :max nil
+    :ref [:tool-profs]
+    :options (tool-options equipment/tools)}))
+
 (def homebrew-al-illegal
   (modifiers/al-illegal "Homebrew options are not allowed"))
 
@@ -1516,12 +1531,9 @@
     :selections [(skill-selection-2 {:min 0
                                      :max nil
                                      :options (map :key skills/skills)})
-                 (tool-proficiency-selection
-                  {:options (tool-options equipment/tools)
-                   :min 0
-                   :max nil})
+                 homebrew-tool-prof-selection
                  (ability-increase-selection-2
-                  {:min 2})
+                  {:min 0})
                  (feat-selection-2
                   {:min 0
                    :max nil
@@ -1556,10 +1568,7 @@
                  (skill-selection-2 {:min 0
                                      :max nil
                                      :options (map :key skills/skills)})
-                 (tool-proficiency-selection
-                  {:options (tool-options equipment/tools)
-                   :min 0
-                   :max nil})
+                 homebrew-tool-prof-selection
                  (ability-increase-selection-2
                   {:min 2})
                  (feat-selection-2
@@ -1583,10 +1592,7 @@
     :selections [(skill-selection-2 {:min 0
                                      :max nil
                                      :options (map :key skills/skills)})
-                 (tool-proficiency-selection
-                  {:options (tool-options equipment/tools)
-                   :min 0
-                   :max nil})
+                 homebrew-tool-prof-selection
                  (feat-selection-2
                   {:min 0
                    :max nil
