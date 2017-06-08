@@ -4645,7 +4645,11 @@ long rest."})]
                               " or are OrcPub summaries. See the Player's Handbook for in-depth, official rules and descriptions."])
     :options (map
               #(t/option-cfg
-                (update % :modifiers conj (mod/set-mod ?option-sources (:key %))))
+                (merge-with
+                 concat
+                 {:modifiers [(mod/set-mod ?option-sources (:key %))]}
+                 ;; don't want selections to show up
+                 (select-keys % [:name :key :help :icon :modifiers])))
               plugins)
     :multiselect? true
     :min 0
