@@ -4452,10 +4452,7 @@ long rest."})]
                                                                      (al-illegal-flying-mod "Winged Tiefling Variant")
                                                                      (tiefling-spell-removal-modifier 0 :thaumaturgy)
                                                                      (tiefling-spell-removal-modifier 1 :hellish-rebuke)
-                                                                     (tiefling-spell-removal-modifier 2 :darkness)]})]})]})]})]
-   :modifiers [(mod5e/spells-known 0 :thaumaturgy ::char5e/cha "Tiefling")
-               (mod5e/spells-known 1 :hellish-rebuke ::char5e/cha "Tiefling" 3)
-               (mod5e/spells-known 2 :darkness ::char5e/cha "Tiefling" 5)]})
+                                                                     (tiefling-spell-removal-modifier 2 :darkness)]})]})]})]})]})
 
 (def scag-halfling-option-cfg
   {:name "Halfling"
