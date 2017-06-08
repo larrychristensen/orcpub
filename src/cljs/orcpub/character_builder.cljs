@@ -569,7 +569,7 @@
             [:i.fa.f-s-16.m-l-10.m-r-5.pointer
              {:class-name (if locked? "fa-lock" "fa-unlock-alt opacity-5 hover-opacity-full")
               :on-click #(dispatch [:toggle-locked path])}])
-          [:span.pointer
+          #_[:span.pointer
            {:class-name (if (not homebrew?) "opacity-5 hover-opacity-full")
             :on-click #(dispatch [:toggle-homebrew path])}
            (views5e/svg-icon "beer-stein" 18)]]
