@@ -290,6 +290,7 @@
     (map #(meta (get-in entity %)) paths)))
 
 (defn update-option [template entity path update-fn]
+  (prn "PATH" path)
   (let [entity-path (get-entity-path template entity path)
         updated (update-in entity entity-path update-fn)]
     updated))

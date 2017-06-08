@@ -4621,18 +4621,21 @@ long rest."})]
       :key :cos
       :selections cos-selections
       :help (amazon-frame-help cos-amazon-frame
-                               [:span "Includes the Haunted One background"])}
-     {:name "Homebrew"
-      :key :homebrew
-      :icon "beer-stein"
-      :modifiers [opt5e/homebrew-al-illegal]
-      :selections [opt5e/homebrew-tool-prof-selection
-                   opt5e/homebrew-skill-prof-selection
-                   opt5e/homebrew-ability-increase-selection
-                   opt5e/homebrew-feat-selection]
-      :help "This removes all restrictions and allows you to build your character however you want. Homebrew is not legal in the Adventurer's League."}]
+                               [:span "Includes the Haunted One background"])}]
     ua/ua-plugins)))
 
+(def homebrew-plugin
+  (t/option-cfg
+   {:name "Homebrew"
+    :key :homebrew
+    :icon "beer-stein"
+    :modifiers [opt5e/homebrew-al-illegal]
+    :selections [opt5e/homebrew-tool-prof-selection
+                 opt5e/homebrew-skill-prof-selection
+                 opt5e/homebrew-ability-increase-selection
+                 opt5e/homebrew-feat-selection
+                 opt5e/homebrew-spell-selection]
+    :help "This removes all restrictions and allows you to build your character however you want. Homebrew is not legal in the Adventurer's League."}))
 
 (def optional-content-selection
   (t/selection-cfg
@@ -4645,10 +4648,7 @@ long rest."})]
                               " or are OrcPub summaries. See the Player's Handbook for in-depth, official rules and descriptions."])
     :options (map
               #(t/option-cfg
-                (merge-with
-                 concat
-                 {:modifiers [(mod/set-mod ?option-sources (:key %))]}
-                 (select-keys % [:name :key :help :icon :modifiers :selections])))
+                (update % :modifiers conj (mod/set-mod ?option-sources (:key %))))
               plugins)
     :multiselect? true
     :min 0

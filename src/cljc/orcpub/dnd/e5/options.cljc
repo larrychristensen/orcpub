@@ -1498,6 +1498,15 @@
      :multiselect? true}
     cfg)))
 
+(def homebrew-spell-selection
+  (spell-selection
+   {:class-key :homebrew
+    :class-name "Homebrew"
+    :ref [:optional-content :homebrew :spells-known]
+    :min 0
+    :max nil
+    :spell-keys (keys spells/spell-map)}))
+
 (def homebrew-tool-prof-selection
   (tool-proficiency-selection-2
    {:min 0
@@ -1522,6 +1531,11 @@
 
 (def homebrew-al-illegal
   (modifiers/al-illegal "Homebrew options are not allowed"))
+
+(def none-option
+  (t/option-cfg
+   {:name "<none>"
+    :key :none}))
 
 (defn custom-option-builder [name-sub-key name-event-key]
   [:div.m-t-10
@@ -1563,7 +1577,8 @@
                (if source
                  (map (fn [sr] (assoc sr :source source)) subraces)
                  subraces))
-              custom-subrace-option)}))
+              custom-subrace-option
+              none-option)}))
 
 (def custom-race-option
   (t/option-cfg
