@@ -829,15 +829,16 @@
     [:div.f-s-14
      [:span.f-w-b "Spell Save DC: "]
      [:span.f-w-n (s/join ", " (map (fn [[class {:keys [spell-save-dc ability]}]]
-                                      (str spell-save-dc
-                                           (if (-> spell-modifiers count (> 1))
+                                      (str (if spell-save-dc spell-save-dc)
+                                           (if (and ability (-> spell-modifiers count (> 1)))
                                              (str " (" class ", " (s/upper-case (name ability)) ")"))))
                                     spell-modifiers))]]
     [:div.f-s-14
      [:span.f-w-b "Spell Attack Bonus: "]
      [:span.f-w-n (s/join ", " (map (fn [[class {:keys [spell-attack-modifier ability]}]]
-                                      (str (common/bonus-str spell-attack-modifier)
-                                           (if (-> spell-modifiers count (> 1))
+                                      (str (if spell-attack-modifier
+                                             (common/bonus-str spell-attack-modifier))
+                                           (if (and ability (-> spell-modifiers count (> 1)))
                                              (str " (" class ", " (s/upper-case (name ability)) ")"))))
                                     spell-modifiers))]]
     [:div.f-s-14.flex.flex-wrap
@@ -856,15 +857,18 @@
                  [:div
                   (str
                    (:name (spells/spell-map (:key spell)))
-                   " ("
-                   (s/join
-                    ", "
-                    (remove
-                     nil?
-                     [(if (:ability spell) (s/upper-case (name (:ability spell))))
-                      (if (:qualifier spell) (:qualifier spell))]))
-                
-                   ")")]))
+                    (if (or (:ability spell)
+                            (:qualifier spell))
+                      (str
+                       " ("
+                       (s/join
+                        ", "
+                        (remove
+                         nil?
+                         [(if (:ability spell) (s/upper-case (name (:ability spell))))
+                          (if (:qualifier spell) (:qualifier spell))]))
+                    
+                       ")")))]))
              (into
               (sorted-set-by compare-spell)
               (filter
@@ -1158,7 +1162,7 @@
           [speed-section-2 id]
           [saving-throws-section-2 id]
           [darkvision-section-2 id]]]
-        [description-section]]]]]))
+        [description-section id]]]]]))
 
 (defn weapon-details-field [nm value]
   [:div.p-2

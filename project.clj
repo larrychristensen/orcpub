@@ -43,6 +43,7 @@
                  [com.amazonaws/aws-java-sdk-dynamodb "1.11.6"]
                  [com.fasterxml.jackson.core/jackson-databind "2.7.0"]
 
+                 [binaryage/devtools "0.9.4"]
                  [hiccup "1.0.5"]
                  [com.draines/postal "2.0.2"]
                  [environ "1.1.0"]]

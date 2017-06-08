@@ -53,6 +53,12 @@
    (get-in db [:locked-components path])))
 
 (reg-sub
+ :homebrew?
+ (fn [db [_ path]]
+   (let [homebrew? (get-in db [:homebrew-components path])]
+     homebrew?)))
+
+(reg-sub
  :locked-components
  (fn [db []]
    (get db :locked-components)))

@@ -401,27 +401,28 @@
                                       (abbreviate-duration (:duration spell))
                                       (+ x 1.62)
                                       (- 11.0 y 0.55))
-                    (draw-text cs
-                               class-nm
-                               PDType1Font/HELVETICA_BOLD
-                               10
-                               (+ x 0.12)
-                               (- 11.0 y 3.4)
-                               [186 21 3])
-                    (draw-text cs
-                               dc-str
-                               PDType1Font/HELVETICA_BOLD_OBLIQUE
-                               8
-                               dc-offset
-                               (- 11.0 y 3.4)
-                               [186 21 3])
-                    (draw-text cs
-                               (str "Atk " (common/bonus-str attack-bonus))
-                               PDType1Font/HELVETICA_BOLD_OBLIQUE
-                               8
-                               (+ dc-offset (string-width dc-str PDType1Font/HELVETICA_BOLD 10))
-                               (- 11.0 y 3.4)
-                               [186 21 3])
+                    (when (not= class-nm "Homebrew")
+                      (draw-text cs
+                                 class-nm
+                                 PDType1Font/HELVETICA_BOLD
+                                 10
+                                 (+ x 0.12)
+                                 (- 11.0 y 3.4)
+                                 [186 21 3])
+                     (draw-text cs
+                                dc-str
+                                PDType1Font/HELVETICA_BOLD_OBLIQUE
+                                8
+                                dc-offset
+                                (- 11.0 y 3.4)
+                                [186 21 3])
+                     (draw-text cs
+                                (str "Atk " (common/bonus-str attack-bonus))
+                                PDType1Font/HELVETICA_BOLD_OBLIQUE
+                                8
+                                (+ dc-offset (string-width dc-str PDType1Font/HELVETICA_BOLD 10))
+                                (- 11.0 y 3.4)
+                                [186 21 3]))
                     (if (seq remaining-desc-lines)
                       (draw-imagex cs
                                    over-img

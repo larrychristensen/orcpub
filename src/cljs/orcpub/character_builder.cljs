@@ -555,7 +555,8 @@
 (defn selection-section-base []
   (let [expanded? (r/atom false)]
     (fn [{:keys [path parent-title name icon help max min remaining body hide-lock?]}]
-      (let [locked? @(subscribe [:locked path])]
+      (let [locked? @(subscribe [:locked path])
+            homebrew? @(subscribe [:homebrew? path])]
         [:div.p-5.m-b-20.m-b-0-last
          (if parent-title
            (selection-section-parent-title parent-title))
@@ -565,9 +566,13 @@
           (if (and path help)
             [show-info-button expanded?])
           (if (not hide-lock?)
-            [:i.fa.f-s-16.m-l-10.m-r-5.pointer.opacity-5.hover-opacity-full
-             {:class-name (if locked? "fa-lock" "fa-unlock-alt")
-              :on-click #(do (dispatch [:toggle-locked path]))}])]
+            [:i.fa.f-s-16.m-l-10.m-r-5.pointer
+             {:class-name (if locked? "fa-lock" "fa-unlock-alt opacity-5 hover-opacity-full")
+              :on-click #(dispatch [:toggle-locked path])}])
+          [:span.pointer
+           {:class-name (if (not homebrew?) "opacity-5 hover-opacity-full")
+            :on-click #(dispatch [:toggle-homebrew path])}
+           (views5e/svg-icon "beer-stein" 18)]]
          (if (and help path @expanded?)
            [help-section help])
          (if (int? min)
@@ -986,9 +991,9 @@
 (defn abilities-editor [{:keys [character built-template option-paths selections]}]
   [:div
    (let [asi-or-feat-selections (filter
-                         (fn [s]
-                           (= :asi-or-feat (::t/key s)))
-                         selections)]
+                                 (fn [s]
+                                   (= :asi-or-feat (::t/key s)))
+                                 selections)]
      (if (seq asi-or-feat-selections)
        [:div
         [:div.m-l-5 (selection-section-title "Ability Score Improvements")]
@@ -1395,7 +1400,7 @@
   (let [character @(subscribe [:character])
         built-template @(subscribe [:built-template])
         available-selections @(subscribe [:available-selections])
-        ;;_ (if print-enabled? (js/console.log "AVAILABLE SELECTIONS" available-selections))
+        _ (if print-enabled? (js/console.log "AVAILABLE SELECTIONS" available-selections))
         page @(subscribe [:page])
         page-index (or page 0)
         option-paths @(subscribe [:option-paths])
@@ -1406,7 +1411,7 @@
                                        (zero? (::t/max %))
                                        (zero? (entity/count-remaining built-template character %)))
                                  combined-selections)]
-    ;;(if print-enabled? (js/console.log "FINAL SELECTIONS" (clj->js final-selections)))
+    (if print-enabled? (js/console.log "FINAL SELECTIONS" (clj->js final-selections)))
     [:div.w-100-p
      [option-sources]
      [:div#options-column.b-1.b-rad-5

@@ -566,6 +566,12 @@
                                      (conj comps path))))))
 
 (reg-event-db
+ :toggle-homebrew
+ (fn [db [_ path]]
+   (prn "TOGGLE HOMEBREW" path)
+   (update-in db [:homebrew-components path] not)))
+
+(reg-event-db
  :failed-loading-image
  character-interceptors
  (fn [character [_ image-url]]
