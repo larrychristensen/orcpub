@@ -13,7 +13,7 @@
                                       tab-path
                                       default-character]]
             [re-frame.core :refer [reg-event-db reg-event-fx reg-fx inject-cofx path trim-v
-                                   after debug dispatch]]
+                                   after debug dispatch subscribe]]
             [cljs.spec :as spec]
             [cljs-http.client :as http]
             [cljs.core.async :refer [<!]]
@@ -567,9 +567,12 @@
 
 (reg-event-db
  :toggle-homebrew
- (fn [db [_ path]]
-   (prn "TOGGLE HOMEBREW" path)
-   (update-in db [:homebrew-components path] not)))
+ character-interceptors
+ (fn [character [_ path]]
+   (prn "PATH" path)
+   (update-in character
+              [::entity/homebrew-paths path]
+              not)))
 
 (reg-event-db
  :failed-loading-image

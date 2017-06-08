@@ -460,9 +460,11 @@
            :else nil))))
    (entity/combine-selections selections)))
 
+
 (defn new-option-selector [option-path
                            {:keys [::t/min ::t/max ::t/options ::t/multiselect? ::t/ref] :as selection}
                            disable-select-new?
+                           homebrew?
                            {:keys [::t/key ::t/name ::t/path ::t/help ::t/selections ::t/prereqs
                                    ::t/modifiers ::t/select-fn ::t/ui-fn ::t/icon] :as option}]
   (let [built-template @(subscribe [:built-template])
@@ -478,10 +480,11 @@
                         []
                         prereqs)
         meets-prereqs? (empty? failed-prereqs)
-        selectable? (and (or selected?
-                             meets-prereqs?)
-                         (or (not disable-select-new?)
-                             selected?))
+        selectable? (or homebrew?
+                        (and (or selected?
+                                 meets-prereqs?)
+                             (or (not disable-select-new?)
+                                 selected?)))
         has-selections? (seq selections)
         named-modifiers (map (fn [{:keys [::mod/name ::mod/value]}]
                                (str name " " value))
@@ -554,7 +557,7 @@
 
 (defn selection-section-base []
   (let [expanded? (r/atom false)]
-    (fn [{:keys [path parent-title name icon help max min remaining body hide-lock?]}]
+    (fn [{:keys [path parent-title name icon help max min remaining body hide-lock? hide-homebrew?]}]
       (let [locked? @(subscribe [:locked path])
             homebrew? @(subscribe [:homebrew? path])]
         [:div.p-5.m-b-20.m-b-0-last
@@ -569,10 +572,11 @@
             [:i.fa.f-s-16.m-l-10.m-r-5.pointer
              {:class-name (if locked? "fa-lock" "fa-unlock-alt opacity-5 hover-opacity-full")
               :on-click #(dispatch [:toggle-locked path])}])
-          #_[:span.pointer
-           {:class-name (if (not homebrew?) "opacity-5 hover-opacity-full")
-            :on-click #(dispatch [:toggle-homebrew path])}
-           (views5e/svg-icon "beer-stein" 18)]]
+          (if (not hide-homebrew?)
+            [:span.pointer
+             {:class-name (if (not homebrew?) "opacity-5 hover-opacity-full")
+              :on-click #(dispatch [:toggle-homebrew path])}
+             (views5e/svg-icon "beer-stein" 18)])]
          (if (and help path @expanded?)
            [help-section help])
          (if (int? min)
@@ -611,16 +615,19 @@
       [:div selector])
     option-selectors)))
 
-
-(defn selection-section [character built-template option-paths ui-fns {:keys [::t/key ::t/name ::t/help ::t/options ::t/min ::t/max ::t/ref ::t/icon ::t/multiselect? ::entity/path ::entity/parent] :as selection} num-columns]
+(defn selection-section [character built-template option-paths ui-fns {:keys [::t/key ::t/name ::t/help ::t/options ::t/min ::t/max ::t/ref ::t/icon ::t/multiselect? ::entity/path ::entity/parent] :as selection} num-columns & [hide-homebrew?]]
   (let [actual-path (entity/actual-path selection)
         remaining (entity/count-remaining built-template character selection)
         expanded? (r/atom false)
         ancestor-names (ancestor-names-string built-template actual-path)
-        disable-select-new? (and (not (nil? max))
-                                 (or (and max (> min 1))
-                                     multiselect?)
+        homebrew? @(subscribe [:homebrew? (or ref path)])
+        has-custom-item? (some #(= :custom (::t/key %)) options)
+        multiselect? (or (nil? max)
+                         multiselect?
+                         (and max (> min 1)))
+        disable-select-new? (and multiselect?
                                  (not (pos? remaining)))]
+    (prn "HOMEBREW" (or ref path) homebrew?)
     [selection-section-base {:path actual-path
                              :parent-title (if (not (s/blank? ancestor-names)) ancestor-names)
                              :name name
@@ -630,6 +637,7 @@
                              :min min
                              :num-columns num-columns
                              :remaining remaining
+                             :hide-homebrew? (or hide-homebrew? (not (or multiselect? has-custom-item?)))
                              :body (if (and ui-fns (or (ui-fns ref)
                                                        (ui-fns key)))
                                      (let [ui-fn (or (ui-fns ref)
@@ -646,8 +654,9 @@
                                                 actual-path
                                                 selection
                                                 disable-select-new?
+                                                homebrew?
                                                 option))
-                                             (sort-by ::t/name options)))]
+                                             (sort-by (juxt ::t/order ::t/name) options)))]
                                        [:div.flex
                                         (doall
                                          (map-indexed
@@ -1013,7 +1022,11 @@
                        (map
                         (fn [option]
                           ^{:key (::t/key option)}
-                          (new-option-selector path selection (and max (> min 1) (zero? remaining)) option))
+                          (new-option-selector path
+                                               selection
+                                               (and max (> min 1) (zero? remaining))
+                                               false
+                                               option))
                         (sort-by ::t/name options)))}]))
           asi-or-feat-selections))]))
    (let [asi-selections (filter (fn [s] (= :asi (::t/key s))) selections)
@@ -1023,6 +1036,7 @@
        :name "Abilities Variant"
        :min 1
        :max 1
+       :hide-homebrew? true
        :body [:div
               (ability-variant-option-selector
                "Point Buy"
@@ -1065,7 +1079,9 @@
               selected? (selected-skill-keys key)
               selectable? (available-skills key)
               bad-selection? (and selected? (not selectable?))
-              allow-select? (or selected?
+              homebrew? @(subscribe [:homebrew? ref])
+              allow-select? (or homebrew?
+                                selected?
                                 (and (not selected?)
                                      (or (pos? remaining)
                                          (nil? max))
@@ -1244,6 +1260,7 @@
       [selection-section-base
        {:name "Hit Points"
         :hide-lock? true
+        :hide-homebrew? true
         :min (if (pos? num-selections) num-selections)
         :max (if (pos? num-selections) num-selections)
         :remaining (if (pos? num-selections) (sum-remaining built-template character selections)) 
@@ -1294,13 +1311,27 @@
    {:name "Equipment"
     :icon "backpack"
     :tags #{:equipment :starting-equipment}
-    :ui-fns [{:key :weapons :ui-fn (partial inventory-selector weapon5e/weapons-map 60)}
-             {:key :magic-weapons :ui-fn (partial inventory-selector mi5e/magic-weapon-map 60)}
-             {:key :armor :ui-fn (partial inventory-selector armor5e/armor-map 60)}
-             {:key :magic-armor :ui-fn (partial inventory-selector mi5e/magic-armor-map 60)}
-             {:key :equipment :ui-fn #(inventory-selector equip5e/equipment-map 60 % ::char5e/custom-equipment)}
-             {:key :other-magic-items :ui-fn (partial inventory-selector mi5e/other-magic-item-map 60)}
-             {:key :treasure :ui-fn #(inventory-selector equip5e/treasure-map 100 % ::char5e/custom-treasure)}]}])
+    :ui-fns [{:key :weapons
+              :hide-homebrew? true
+              :ui-fn (partial inventory-selector weapon5e/weapons-map 60)}
+             {:key :magic-weapons
+              :hide-homebrew? true
+              :ui-fn (partial inventory-selector mi5e/magic-weapon-map 60)}
+             {:key :armor
+              :hide-homebrew? true
+              :ui-fn (partial inventory-selector armor5e/armor-map 60)}
+             {:key :magic-armor
+              :hide-homebrew? true
+              :ui-fn (partial inventory-selector mi5e/magic-armor-map 60)}
+             {:key :equipment
+              :hide-homebrew? true
+              :ui-fn #(inventory-selector equip5e/equipment-map 60 % ::char5e/custom-equipment)}
+             {:key :other-magic-items
+              :hide-homebrew? true
+              :ui-fn (partial inventory-selector mi5e/other-magic-item-map 60)}
+             {:key :treasure
+              :hide-homebrew? true
+              :ui-fn #(inventory-selector equip5e/treasure-map 100 % ::char5e/custom-treasure)}]}])
 
 (defn section-tabs [available-selections built-template character page-index]
   (let [device-type @(subscribe [:device-type])]
@@ -1366,6 +1397,7 @@
               (new-option-selector [(::t/key t5e/optional-content-selection)]
                                    t5e/optional-content-selection
                                    false
+                                   false
                                    option))
             (::t/options t5e/optional-content-selection)))]
          [:div
@@ -1407,11 +1439,11 @@
         {:keys [tags ui-fns components] :as page} (pages page-index)
         selections (entity/tagged-selections available-selections tags)
         combined-selections (entity/combine-selections selections)
-        final-selections (remove #(and (zero? (::t/min %))
+        final-selections combined-selections #_(remove #(and (zero? (::t/min %))
                                        (zero? (::t/max %))
                                        (zero? (entity/count-remaining built-template character %)))
                                  combined-selections)]
-    (if print-enabled? (js/console.log "FINAL SELECTIONS" (clj->js final-selections)))
+    (if print-enabled? (js/console.log "FINAL SELECTIONS" final-selections))
     [:div.w-100-p
      [option-sources]
      [:div#options-column.b-1.b-rad-5
@@ -1458,7 +1490,7 @@
          [:div
           (doall
            (map
-            (fn [{:keys [key group? ui-fn]}]
+            (fn [{:keys [key group? ui-fn hide-homebrew?]}]
               ^{:key key}
               [:div.m-t-20
                (if group?
@@ -1472,7 +1504,7 @@
                  (let [selection (some
                                   (matches-non-group-fn key)
                                   final-selections)]
-                   (selection-section character built-template option-paths {key ui-fn} selection num-columns)))])
+                   (selection-section character built-template option-paths {key ui-fn} selection num-columns hide-homebrew?)))])
             ui-fns))]
          (when (seq non-ui-fn-selections)
            [:div.m-t-20
@@ -1682,8 +1714,10 @@
     (fn [al-illegal-reasons used-resources]
       (let [num-resources (count (into #{} (map :resource-key used-resources)))
             multiple-resources? (> num-resources 1)
+            has-homebrew? @(subscribe [:has-homebrew?])
             al-legal? (and (empty? al-illegal-reasons)
-                           (not multiple-resources?))]
+                           (not multiple-resources?)
+                           (not has-homebrew?))]
         [:div.m-l-20.m-b-20
          [:div.flex.align-items-c
           [:div.i
@@ -1711,9 +1745,9 @@
             (map-indexed
              (fn [i reason]
                ^{:key i} [:div (str common/dot-char " " reason)])
-             (if multiple-resources?
-               (conj al-illegal-reasons
-                     (str "You are only allowed to use content from one resource beyond the Player's Handbook, you are using "
+             (cond-> al-illegal-reasons
+               multiple-resources?
+               (conj (str "You are only allowed to use content from one resource beyond the Player's Handbook, you are using "
                           num-resources
                           ": "
                           (s/join
@@ -1722,7 +1756,8 @@
                             (fn [{:keys [resource-key option-name]}]
                               (str option-name " from " (:abbr (disp5e/sources resource-key))))
                             used-resources))))
-               al-illegal-reasons))])]))))
+               has-homebrew?
+               (conj "Homebrew is not allowed")))])]))))
 
 (defn app-header []
   [:div#app-header.app-header.flex.flex-column.justify-cont-s-b

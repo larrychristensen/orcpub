@@ -616,6 +616,7 @@
 
 (defn count-remaining [built-template character {:keys [::t/min ::t/max ::t/require-value?] :as selection}]
   (let [actual-path (actual-path selection)
+        homebrew? (get-in character [::homebrew-paths actual-path])
         selected-options (get-option built-template character actual-path)
         selected-count (cond
                          (sequential? selected-options)
@@ -629,7 +630,9 @@
                            0)
                          
                          :else 0)]
-    (cond (< selected-count min)
+    (cond homebrew? 0
+
+          (< selected-count min)
           (- min selected-count)
 
           (and max (> selected-count max))

@@ -746,12 +746,9 @@
      :tags #{:tool-profs :profs}}
     cfg)))
 
-(defn tool-proficiency-selection [{:keys [options num min max]}]
+(defn tool-proficiency-selection [cfg]
   (tool-proficiency-selection-2
-   {:options options
-    :num num
-    :min min
-    :max max}))
+   cfg))
 
 (defn tool-selection
   ([num]
@@ -1532,10 +1529,15 @@
 (def homebrew-al-illegal
   (modifiers/al-illegal "Homebrew options are not allowed"))
 
-(def none-option
+(defn none-option [path]
   (t/option-cfg
    {:name "<none>"
-    :key :none}))
+    :key :none
+    :order 1001
+    :prereqs [(t/option-prereq
+               nil
+               (fn [_] @(subscribe [:homebrew? path]))
+               true)]}))
 
 (defn custom-option-builder [name-sub-key name-event-key]
   [:div.m-t-10
@@ -1549,7 +1551,7 @@
    :custom-subrace-name
    :set-custom-subrace))
 
-(def custom-subrace-option
+(defn custom-subrace-option [path]
   (t/option-cfg
    {:name "Custom"
     :icon "beer-stein"
@@ -1557,6 +1559,11 @@
     :help "Homebrew subrace. This allows you to use a subrace that is not on the list. This will allow unrestricted access to skill and tool proficiencies, racial ability increases, and feats."
     :modifiers [(modifiers/deferred-subrace)
                 homebrew-al-illegal]
+    :order 1000
+    :prereqs [(t/option-prereq
+               nil
+               (fn [_] @(subscribe [:homebrew? path]))
+               true)]
     :selections [homebrew-skill-prof-selection
                  homebrew-tool-prof-selection
                  homebrew-ability-increase-selection
@@ -1567,18 +1574,20 @@
    :custom-race-name
    :set-custom-race))
 
-(defn subrace-selection [source subraces]
-  (t/selection-cfg
-   {:name "Subrace"
-    :tags #{:subrace}
-    :options (conj
-              (map
-               (partial subrace-option source)
-               (if source
-                 (map (fn [sr] (assoc sr :source source)) subraces)
-                 subraces))
-              custom-subrace-option
-              none-option)}))
+(defn subrace-selection [source subraces path]
+  (let [subrace-path (conj path :subrace)]
+    (t/selection-cfg
+     {:name "Subrace"
+      :tags #{:subrace}
+      :options (if subraces
+                 (conj
+                  (map
+                   (partial subrace-option source)
+                   (if source
+                     (map (fn [sr] (assoc sr :source source)) subraces)
+                     subraces))
+                  (custom-subrace-option subrace-path)
+                  (none-option subrace-path)))})))
 
 (def custom-race-option
   (t/option-cfg
@@ -1588,7 +1597,12 @@
     :help "Homebrew race. This allows you to use a race that is not on the list. This will allow unrestricted access to skill and tool proficiencies, racial ability increases, and feats."
     :modifiers [(modifiers/deferred-race)
                 homebrew-al-illegal]
-    :selections [(subrace-selection nil nil)
+    :prereqs [(t/option-prereq
+               nil
+               (fn [_] @(subscribe [:homebrew? [:race]]))
+               true)]
+    :order 1000
+    :selections [(subrace-selection nil nil [:race :custom])
                  homebrew-skill-prof-selection
                  homebrew-tool-prof-selection
                  homebrew-ability-increase-selection
@@ -1605,6 +1619,11 @@
     :icon "beer-stein"
     :ui-fn custom-background-builder
     :help "Homebrew backgound. This allows you to use a background that is not on the list. This will allow unrestricted access to skill and tool proficiencies and feats."
+    :prereqs [(t/option-prereq
+               nil
+               (fn [_] @(subscribe [:homebrew? [:background]]))
+               true)]
+    :order 1000
     :modifiers [(modifiers/deferred-background)
                 homebrew-al-illegal]
     :selections [homebrew-skill-prof-selection
@@ -1631,36 +1650,37 @@
                            tool-proficiencies
                            source
                            plugin?]}]
-  (t/option-cfg
-   {:name name
-    :icon icon
-    :key (or key (common/name-to-kw name))
-    :help help
-    :selections (concat
-                 [(subrace-selection source subraces)]
-                 (if (seq language-options) [(language-selection language-options)])
-                 selections)
-    :modifiers (concat
-                (if (not plugin?)
-                  [(modifiers/race name)
-                   (modifiers/size size)
-                   (modifiers/speed speed)])
-                (if darkvision
-                  (darkvision-modifiers darkvision))
-                (map
-                 (fn [language]
-                   (modifiers/language (common/name-to-kw language)))
-                 languages)
-                (map
-                 (fn [[k v]]
-                   (modifiers/race-ability k v))
-                 abilities)
-                modifiers
-                (tool-prof-modifiers tool-proficiencies)
-                (traits-modifiers traits nil source)
-                (armor-prof-modifiers armor-proficiencies)
-                (weapon-prof-modifiers weapon-proficiencies)
-                (if source [(modifiers/used-resource source name)]))}))
+  (let [key (or key (common/name-to-kw name))]
+    (t/option-cfg
+     {:name name
+      :icon icon
+      :key key
+      :help help
+      :selections (concat
+                   [(subrace-selection source subraces [:race key])]
+                   (if (seq language-options) [(language-selection language-options)])
+                   selections)
+      :modifiers (concat
+                  (if (not plugin?)
+                    [(modifiers/race name)
+                     (modifiers/size size)
+                     (modifiers/speed speed)])
+                  (if darkvision
+                    (darkvision-modifiers darkvision))
+                  (map
+                   (fn [language]
+                     (modifiers/language (common/name-to-kw language)))
+                   languages)
+                  (map
+                   (fn [[k v]]
+                     (modifiers/race-ability k v))
+                   abilities)
+                  modifiers
+                  (tool-prof-modifiers tool-proficiencies)
+                  (traits-modifiers traits nil source)
+                  (armor-prof-modifiers armor-proficiencies)
+                  (weapon-prof-modifiers weapon-proficiencies)
+                  (if source [(modifiers/used-resource source name)]))})))
 
 (defn add-sources [source background]
   (-> background
