@@ -53,10 +53,20 @@
    (get-in db [:locked-components path])))
 
 (reg-sub
+ :has-homebrew?
+ :<- [:character]
+ (fn [character _]
+   (some
+    (fn [[k v]]
+      v)
+    (get character ::entity/homebrew-paths))))
+
+(reg-sub
  :homebrew?
- (fn [db [_ path]]
-   (let [homebrew? (get-in db [:homebrew-components path])]
-     homebrew?)))
+ :<- [:character]
+ (fn [character [_ path]]
+   (get-in character
+           [::entity/homebrew-paths path])))
 
 (reg-sub
  :locked-components
