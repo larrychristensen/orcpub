@@ -112,7 +112,7 @@
                "You already have this skill"
                (fn [c]
                  (let [skill-profs @(subscribe [::character/skill-profs nil c])]
-                   (not (skill-profs (:key skill))))))]
+                   (not (get skill-profs (:key skill))))))]
     :modifiers [(modifiers/skill-proficiency (:key skill))]}))
 
 (defn weapon-proficiency-option [{:keys [name key]}]
@@ -2133,16 +2133,6 @@
                         (fn [c] (or (not (= kw (first @(subscribe [::character/classes nil c]))))
                                     (> i 1))))])))
       :modifiers (concat
-                  (if (= :all (:known-mode spellcasting))
-                    (let [slots (total-slots i (:level-factor spellcasting))
-                          prev-level-slots (total-slots (dec i) (:level-factor spellcasting))
-                          new-slots (apply dissoc slots (keys prev-level-slots))]
-                      (if (seq new-slots)
-                        (let [lvl (key (first new-slots))]
-                          (map
-                           (fn [kw]
-                             (modifiers/spells-known lvl kw (:ability spellcasting) name))
-                           (get-in sl/spell-lists [kw lvl]))))))
                   (some-> levels (get i) :modifiers)
                   (traits-modifiers
                    (filter
@@ -2151,8 +2141,7 @@
                     traits)
                    kw)
                   (if (and (not plugin?)
-                           (= i 1)
-                           ())
+                           (= i 1))
                     [(mods/cum-sum-mod
                       ?hit-point-level-increases
                       hit-die
@@ -2257,6 +2246,21 @@
                             (class-starting-equipment-entity-options :equipment equipment)])
       :modifiers (concat
                   modifiers
+                  (if (= :all (:known-mode spellcasting))
+                    (let [spell-list (sl/spell-lists kw)]
+                      (mapcat
+                       (fn [[lvl spell-keys]]
+                         (map
+                          (fn [spell-key]
+                            (modifiers/spells-known-cfg lvl
+                                                        {:class-key kw
+                                                         :key spell-key
+                                                         :class name
+                                                         :ability (:ability spellcasting)}
+                                                        1
+                                                        [(get ?spell-slots lvl)]))
+                          spell-keys))
+                       spell-list)))
                   (if armor-profs (armor-prof-modifiers armor-profs kw))
                   (if weapon-profs (weapon-prof-modifiers weapon-profs kw))
                   (if tool (tool-prof-modifiers tool kw))
