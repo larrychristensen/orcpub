@@ -4627,7 +4627,8 @@ long rest."})]
    {:name "Homebrew"
     :key :homebrew
     :icon "beer-stein"
-    :modifiers [opt5e/homebrew-al-illegal]
+    :modifiers [opt5e/homebrew-al-illegal
+                (mod/set-mod ?option-sources :homebrew)]
     :selections [opt5e/homebrew-tool-prof-selection
                  opt5e/homebrew-skill-prof-selection
                  opt5e/homebrew-ability-increase-selection
@@ -4644,21 +4645,26 @@ long rest."})]
                               "Base options are from the Player's Handbook, although descriptions are either from the "
                               srd-link
                               " or are OrcPub summaries. See the Player's Handbook for in-depth, official rules and descriptions."])
-    :options (map
-              #(t/option-cfg
-                (merge-with
-                 concat
-                 {:modifiers [(mod/set-mod ?option-sources (:key %))]}
-                 ;; don't want selections to show up
-                 (select-keys % [:name :key :help :icon :modifiers])))
-              plugins)
+    :options (conj
+              (map
+               #(t/option-cfg
+                 (merge-with
+                  concat
+                  {:modifiers [(mod/set-mod ?option-sources (:key %))]}
+                  ;; don't want selections to show up
+                  (select-keys % [:name :key :help :icon :modifiers])))
+               plugins)
+              homebrew-plugin)
     :multiselect? true
     :min 0
     :max nil}))
 
 
 (def plugin-map
-  (into {} (map (juxt :key identity) plugins)))
+  (merge
+   {:homebrew {:name "Homebrew"}}
+   (into {} (map (juxt :key identity)
+                 plugins))))
 
 (defn al-illegal-abilities-mod [reason]
   (mod5e/al-illegal (str reason " The only legal options are 'Point Buy' or 'Standard Scores'")))

@@ -164,3 +164,22 @@
   (let [strict {:db/id 17592186056112, :orcpub.entity.strict/selections [{:db/id 17592186056113, :orcpub.entity.strict/key :ability-scores, :orcpub.entity.strict/option {:db/id 17592186056114, :orcpub.entity.strict/key :standard-scores, :orcpub.entity.strict/map-value {:db/id 17592186056115, :orcpub.dnd.e5.character/str 15, :orcpub.dnd.e5.character/dex 14, :orcpub.dnd.e5.character/con 13, :orcpub.dnd.e5.character/int 12, :orcpub.dnd.e5.character/wis 10, :orcpub.dnd.e5.character/cha 8}}} {:db/id 17592186056116, :orcpub.entity.strict/key :class, :orcpub.entity.strict/options [{:db/id 17592186056117, :orcpub.entity.strict/key :warlock, :orcpub.entity.strict/selections [{:db/id 17592186056118, :orcpub.entity.strict/key :levels, :orcpub.entity.strict/options [{:db/id 17592186056119, :orcpub.entity.strict/key :level-1}]}]}]} {:db/id 17592186056123, :orcpub.entity.strict/key :equipment} {:db/id 17592186056127, :orcpub.entity.strict/key :weapons, :orcpub.entity.strict/options [{:db/id 17592186056128, :orcpub.entity.strict/key :dagger, :orcpub.entity.strict/map-value {:db/id 17592186056129, :orcpub.dnd.e5.character.equipment/quantity 2, :orcpub.dnd.e5.character.equipment/equipped? true, :orcpub.dnd.e5.character.equipment/class-starting-equipment? true}}]} {:db/id 17592186056130, :orcpub.entity.strict/key :armor, :orcpub.entity.strict/options [{:db/id 17592186056131, :orcpub.entity.strict/key :leather, :orcpub.entity.strict/map-value {:db/id 17592186056132, :orcpub.dnd.e5.character.equipment/quantity 1, :orcpub.dnd.e5.character.equipment/equipped? true, :orcpub.dnd.e5.character.equipment/class-starting-equipment? true}}]}]}]
     (prn "DIFF" (diff strict (strict-round-trip strict)))
     (is (= strict (strict-round-trip strict)))))
+
+(deftest to-strict--homebrew-paths
+  (let [non-strict {::entity/options {:race
+                                      {:orcpub.entity/key :human,
+                                       :orcpub.entity/options
+                                       {:subrace
+                                        {:orcpub.entity/key :custom,
+                                         :orcpub.entity/value "Sancho"}}}}
+                    ::entity/homebrew-paths {[:race] true
+                                             [:race :human :subrace] true}}
+        expected {::e/selections [{::e/key :race
+                                   ::e/homebrew? true
+                                   ::e/option {::e/key :human
+                                               ::e/selections [{::e/key :subrace
+                                                                ::e/homebrew? true
+                                                                ::e/option {::e/key :custom
+                                                                            ::e/string-value "Sancho"}}]}}]}]
+    (is (= expected (entity/to-strict non-strict)))
+    (is (= non-strict (entity/from-strict (entity/to-strict non-strict))))))

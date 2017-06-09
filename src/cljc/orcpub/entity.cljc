@@ -26,20 +26,22 @@
 
 (declare to-strict-option)
 
-(defn to-strict-selections [options]
+(defn to-strict-selections [options path homebrew-paths]
   (mapv
    (fn [[k v]]
-     (let [id (-> v meta :db/id)]
+     (let [id (-> v meta :db/id)
+           new-path (conj path k)]
        (cond-> {::strict/key k}
          id (assoc :db/id id)
-         (sequential? v) (assoc ::strict/options (map to-strict-option v))
-         (map? v) (assoc ::strict/option (to-strict-option v)))))
+         (get homebrew-paths new-path) (assoc ::strict/homebrew? true)
+         (sequential? v) (assoc ::strict/options (map #(to-strict-option % new-path homebrew-paths) v))
+         (map? v) (assoc ::strict/option (to-strict-option v new-path homebrew-paths)))))
    options))
 
-(defn to-strict-option [{:keys [:db/id ::key ::value ::options]}]
+(defn to-strict-option [{:keys [:db/id ::key ::value ::options]} path homebrew-paths]
   (cond-> {::strict/key key}
     id (assoc :db/id id)
-    options (assoc ::strict/selections (to-strict-selections options))
+    options (assoc ::strict/selections (to-strict-selections options (conj path key) homebrew-paths))
     (int? value) (assoc ::strict/int-value value)
     (string? value) (assoc ::strict/string-value value)
     (map? value) (assoc ::strict/map-value value)))
@@ -52,13 +54,25 @@
          (map
           (fn [[k v]]
             [k (cond
-                 (sequential? v) (mapv remove-empty-fields v)
+                 (sequential? v) (mapv #(if (map? %)
+                                          (remove-empty-fields %)
+                                          %)
+                                       v)
                  (map? v) (remove-empty-fields v)
                  :else v)])))
         raw-character))
 
-(defn to-strict [{:keys [:db/id ::options ::values]}]
-  (cond-> {::strict/selections (to-strict-selections options)}
+(defn to-strict-homebrew-paths [homebrew-paths]
+  (reduce
+   (fn [ps [path set?]]
+     (if set?
+       (conj ps {::strict/homebrew-path path})
+       ps))
+   []
+   homebrew-paths))
+
+(defn to-strict [{:keys [:db/id ::options ::values ::homebrew-paths]}]
+  (cond-> {::strict/selections (to-strict-selections options [] homebrew-paths)}
     values (assoc ::strict/values (into {} (remove (comp nil? val)) values))
     id (assoc :db/id id)
     true remove-empty-fields))
@@ -97,10 +111,45 @@
    {}
    selections))
 
+(defn from-strict-homebrew-paths [homebrew-paths]
+  (reduce
+   (fn [ps {:keys [homebrew-path]}]
+     (assoc ps homebrew-path true))
+   {}
+   homebrew-paths))
+
+(declare selections-homebrew-paths)
+
+(defn option-homebrew-paths [{:keys [::strict/key ::strict/selections]} path]
+  (selections-homebrew-paths selections (conj path key)))
+
+(defn options-homebrew-paths [options path]
+  (reduce
+   (fn [paths option]
+     (merge
+      paths
+      (option-homebrew-paths option path)))
+   {}
+   options))
+
+(defn selections-homebrew-paths [selections path]
+  (reduce
+   (fn [paths {:keys [::strict/key ::strict/homebrew? ::strict/option ::strict/options]}]
+     (let [new-path (conj path key)]
+       (merge
+        paths
+        (if homebrew? {new-path true})
+        (option-homebrew-paths option new-path)
+        (options-homebrew-paths options new-path))))
+   {}
+   selections))
+
 (defn from-strict [{:keys [:db/id ::strict/selections ::strict/values]}]
-  (cond-> {::options (from-strict-selections selections)}
-    id (assoc :db/id id)
-    values (assoc ::values values)))
+  (let [homebrew-paths (selections-homebrew-paths selections [])]
+    (cond-> {::options (from-strict-selections selections)}
+      (seq homebrew-paths) (assoc ::homebrew-paths homebrew-paths) 
+      id (assoc :db/id id)
+      values (assoc ::values values))))
 
 (spec/fdef from-strict
            :args (spec/cat :entity ::strict/entity)

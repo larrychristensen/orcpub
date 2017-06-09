@@ -106,7 +106,6 @@
                                 {:keys [option-path selected? selectable? meets-prereqs? has-selections? built-template new-option-path homebrew?]
                                  {:keys [::t/min ::t/max ::t/multiselect?] :as selection} :selection
                                  {:keys [::t/key ::t/select-fn] :as option} :option}]]
-  (prn "SELECT OPTION" option-path homebrew?)
   (if (and (or multiselect?
                (not selected?)
                has-selections?)
