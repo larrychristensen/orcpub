@@ -42,7 +42,7 @@
             [re-frame.core :refer [subscribe dispatch dispatch-sync]])
   (:require-macros [cljs.core.async.macros :refer [go]]))
 
-(def print-disabled? false)
+(def print-disabled? true)
 
 (def print-enabled? (and (not print-disabled?)
                          (s/starts-with? js/window.location.href "http://localhost")))
@@ -169,7 +169,6 @@
       (let [options-map (zipmap (map ::t/key options) options)
             class-template-option (options-map key)
             path [:class-levels key]]
-        (prn "SELECTED_CLASS" selected-class)
         [:div.m-b-5
          {:class-name (if @expanded? "b-1 b-rad-5 p-5")}
          [:div.flex.align-items-c
@@ -351,7 +350,7 @@
        [:div
         (doall
          (map-indexed
-          (fn [i {:keys [::char-equip5e/name ::char-equip5e/quantity ::char-equip5e/equipped?]}]
+          (fn [i {:keys [::char-equip5e/name ::char-equip5e/quantity ::char-equip5e/equipped?] :as item}]
             (let [item-key (common/name-to-kw name)]
               ^{:key item-key}
               [inventory-item {:selection-key custom-equipment-key
@@ -368,7 +367,7 @@
                                                   (dispatch [:change-custom-inventory-item-quantity custom-equipment-key i qty])))
                                :remove-fn (fn [_]
                                             (dispatch [:remove-custom-inventory-item custom-equipment-key name]))}]))
-          @(subscribe [:entity-values custom-equipment-key])))])]))
+          @(subscribe [:entity-value custom-equipment-key])))])]))
 
 (defn option-selector-base []
   (let [expanded? (r/atom false)]
@@ -588,7 +587,8 @@
         homebrew? @(subscribe [:homebrew? (or ref path)])
         has-custom-item? (some #(= :custom (::t/key %)) options)
         disable-select-new? (and multiselect?
-                                 (not (pos? remaining)))]
+                                 (not (pos? remaining))
+                                 (some? max))]
     [selection-section-base {:path actual-path
                              :parent-title (if (not (s/blank? ancestor-names)) ancestor-names)
                              :name name
@@ -1022,8 +1022,9 @@
                (abilities-entry built-template asi-selections))]}])])
 
 
-(defn skills-selector [{:keys [character selection]}]
+(defn skills-selector [{:keys [selection]}]
   (let [{:keys [::t/ref ::t/max ::t/options]} selection
+        character @(subscribe [:character])
         path (concat [::entity/options] ref)
         selected-skills (get-in character path)
         selected-count (count selected-skills)
@@ -1266,7 +1267,8 @@
    {:name "Proficiencies"
     :icon "juggler"
     :tags #{:profs}
-    :ui-fns [{:key :skill-proficiency :ui-fn skills-selector}]}
+    ;;:ui-fns [{:key :skill-proficiency :ui-fn skills-selector}]
+    }
    {:name "Equipment"
     :icon "backpack"
     :tags #{:equipment :starting-equipment}
@@ -1369,9 +1371,10 @@
              (map
               (fn [{:keys [name url]}]
                 [:a.orange {:href url :target :_blank} name])
-              (cons {:name "Player's Handbook"
-                     :url disp5e/phb-url}
-                    (map t5e/plugin-map @(subscribe [:selected-plugin-options])))))))])])))
+              (let [option-sources @(subscribe [::char5e/option-sources])]
+                (cons {:name "Player's Handbook"
+                       :url disp5e/phb-url}
+                      (map t5e/plugin-map option-sources)))))))])])))
 
 (def selection-order-title
   (juxt ::t/order ::t/name ::entity/path))

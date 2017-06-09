@@ -105,8 +105,14 @@
 (defn skill-option [skill]
   (t/option-cfg
    {:name (:name skill)
+    :icon (:icon skill)
     :key (:key skill)
     :help (:description skill)
+    :prereqs [(t/option-prereq
+               "You already have this skill"
+               (fn [c]
+                 (let [skill-profs @(subscribe [::character/skill-profs nil c])]
+                   (not (skill-profs (:key skill))))))]
     :modifiers [(modifiers/skill-proficiency (:key skill))]}))
 
 (defn weapon-proficiency-option [{:keys [name key]}]
@@ -714,14 +720,15 @@
     :key key
     :order (or order 0)
     :help (proficiency-help (or num min) "a skill" "skills")
-    :options (skill-options
-              (filter
-               (comp (set options) :key)
-               skills/skills))
+    :options (let [key-set (set options)]
+               (skill-options
+                (filter
+                 (comp key-set :key)
+                 skills/skills)))
     :min (or min num)
     :max (or max num)
     :multiselect? true
-    :ref [:skill-profs]
+    ;;:ref [:skill-profs]
     :tags #{:skill-profs :profs}
     :prereq-fn prereq-fn}))
 
@@ -741,9 +748,9 @@
    (merge
     {:name "Tool Proficiency"
      :help (proficiency-help (or num min) "a tool" "tools")
-     :min (or num min)
-     :max (or num max)
+     :multiselect 2
      :tags #{:tool-profs :profs}}
+    (if num {:min num :max num})
     cfg)))
 
 (defn tool-proficiency-selection [cfg]
@@ -1508,6 +1515,7 @@
   (tool-proficiency-selection-2
    {:min 0
     :max nil
+    :multiselect? true
     :ref [:tool-profs]
     :options (tool-options equipment/tools)}))
 
@@ -1579,15 +1587,15 @@
     (t/selection-cfg
      {:name "Subrace"
       :tags #{:subrace}
-      :options (if subraces
-                 (conj
+      :options (conj
+                (if (seq subraces)
                   (map
                    (partial subrace-option source)
                    (if source
                      (map (fn [sr] (assoc sr :source source)) subraces)
                      subraces))
-                  (custom-subrace-option subrace-path)
-                  (none-option subrace-path)))})))
+                  [(none-option subrace-path)])
+                (custom-subrace-option subrace-path))})))
 
 (def custom-race-option
   (t/option-cfg
@@ -1657,7 +1665,8 @@
       :key key
       :help help
       :selections (concat
-                   [(subrace-selection source subraces [:race key])]
+                   (if (seq subraces)
+                     [(subrace-selection source subraces [:race key])])
                    (if (seq language-options) [(language-selection language-options)])
                    selections)
       :modifiers (concat

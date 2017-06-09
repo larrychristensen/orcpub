@@ -535,6 +535,7 @@
 (def dnd-e5-char-type-problems (partial entity-type-problems :dnd :e5 :character))
 
 (defn update-character [db conn character username]
+  (prn "CONN" conn db)
   (let [id (:db/id character)]
     (if (owns-entity? db username id)
       (let [current-character (d/pull db '[*] id)

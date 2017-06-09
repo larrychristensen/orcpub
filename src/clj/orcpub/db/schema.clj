@@ -75,6 +75,9 @@
    {:db/ident ::se/owner
     :db/valueType :db.type/string
     :db/cardinality :db.cardinality/one}
+   {:db/ident ::se/homebrew?
+    :db/valueType :db.type/boolean
+    :db/cardinality :db.cardinality/one}
    {:db/ident ::se/option
     :db/valueType :db.type/ref
     :db/cardinality :db.cardinality/one
