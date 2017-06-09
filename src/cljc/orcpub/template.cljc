@@ -1,5 +1,6 @@
 (ns orcpub.template
   (:require [clojure.spec :as spec]
+            [clojure.spec.test :as stest]
             [orcpub.modifiers :as modifiers]
             [orcpub.common :as common]))
 
@@ -43,11 +44,11 @@
      ::options options
      ::help help
      ::min (or min 1)
-     ::max max
+     ::max (or max (if (not multiselect?) (or min 1)))
      ::sequential? (boolean sequential?)
      ::collapsible? collapsible?
      ::quantity? quantity?
-     ::multiselect? multiselect?
+     ::multiselect? (or multiselect? (and (some? max) (> max 1)))
      ::ui-fn ui-fn
      ::tags tags
      ::ref ref
@@ -63,6 +64,8 @@
  selection-cfg
  :args (spec/cat :cfg ::selection-cfg)
  :ret ::selection)
+
+#_(stest/instrument `selection-cfg)
 
 (defn option-prereq [explanation func & [hide-if-fail?]]
   {::label explanation

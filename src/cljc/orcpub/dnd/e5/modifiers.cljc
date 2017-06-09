@@ -25,6 +25,15 @@
 (defn subclass [cls-key subclass-key]
   (mods/modifier ?levels (assoc-in ?levels [cls-key :subclass] subclass-key)))
 
+(defn subclass-name [cls-key subclass-name]
+  (mods/modifier ?levels (assoc-in ?levels [cls-key :subclass-name] subclass-name)))
+
+(defn deferred-subclass-name [cls-key]
+  (mods/deferred-modifier
+    ?levels
+    (partial subclass-name cls-key)
+    ""))
+
 (defn alignment [alignment]
   (mods/modifier ?alignment alignment))
 

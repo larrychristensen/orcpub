@@ -13,7 +13,7 @@
                                       tab-path
                                       default-character]]
             [re-frame.core :refer [reg-event-db reg-event-fx reg-fx inject-cofx path trim-v
-                                   after debug dispatch subscribe]]
+                                   after debug dispatch dispatch-sync subscribe]]
             [cljs.spec :as spec]
             [cljs-http.client :as http]
             [cljs.core.async :refer [<!]]
@@ -69,7 +69,7 @@
  character-interceptors
  reset-character)
 
-(defn random-sequential-selection [built-template character {:keys [::t/min ::t/max ::t/options ::entity/path] :as selection}]
+(defn random-sequential-selection [built-template character {:keys [::t/min ::t/options ::entity/path] :as selection}]
   (let [num (inc (rand-int (count options)))
         actual-path (entity/actual-path selection)]
     (entity/update-option
@@ -82,20 +82,17 @@
           {::entity/key key})
         (take num options))))))
 
-(defn random-selection [built-template character {:keys [::t/key ::t/min ::t/max ::t/options ::t/multiselect? ::entity/path] :as selection}]
+(defn random-selection [built-template character {:keys [::t/key ::t/min ::t/options ::t/multiselect? ::entity/path] :as selection}]
   (let [built-char (entity/build character built-template)
         new-options (take (entity/count-remaining built-template character selection)
                           (shuffle (filter
                                     (fn [o]
-                                      (and (entity/meets-prereqs? o)
+                                      (and (entity/meets-prereqs? o built-char)
                                            (not= :none (::t/key o))))
                                     options)))]
     (reduce
      (fn [new-character {:keys [::t/key]}]
-       (let [new-option {::entity/key key}
-             multiselect? (or multiselect?
-                              (> min 1)
-                              (nil? max))]
+       (let [new-option {::entity/key key}]
          (entity/update-option
           built-template
           new-character
@@ -131,6 +128,7 @@
    {}
    option-paths))
 
+
 (defn random-character [current-character built-template locked-components]
   (reduce
    (fn [character i]
@@ -139,7 +137,7 @@
              available-selections (entity/available-selections character built-char built-template)
              combined-selections (entity/combine-selections available-selections)
              pending-selections (filter
-                                 (fn [{:keys [::entity/path] :as selection}]
+                                 (fn [{:keys [::entity/path ::t/ref] :as selection}]
                                    (let [remaining (entity/count-remaining built-template character selection)]
                                      (and (pos? remaining)
                                           (not (locked-components path)))))
@@ -156,9 +154,9 @@
                      new-character
                      (entity/actual-path selection)
                      (selection-randomizer selection built-char)))
-                    (if sequential?
-                      (random-sequential-selection built-template new-character selection)
-                      (random-selection built-template new-character selection)))))
+                  (if sequential?
+                    (random-sequential-selection built-template new-character selection)
+                    (random-selection built-template new-character selection)))))
             character
             pending-selections)))
        (reduced character)))
@@ -569,7 +567,6 @@
  :toggle-homebrew
  character-interceptors
  (fn [character [_ path]]
-   (prn "PATH" path)
    (update-in character
               [::entity/homebrew-paths path]
               not)))
@@ -633,6 +630,18 @@
               :subrace
               ::entity/value]
              name)))
+
+(reg-event-db
+ :set-custom-subclass
+ character-interceptors
+ (fn [character [_ path name]]
+   (let [entity-path (entity/get-option-value-path
+                      @(subscribe [:built-template])
+                      character
+                      path)]
+     (assoc-in character
+               entity-path
+               name))))
 
 (reg-event-db
  :set-custom-background

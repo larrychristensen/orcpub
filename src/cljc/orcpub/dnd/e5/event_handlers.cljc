@@ -103,33 +103,32 @@
           (conj parent-vec new-option))))))
 
 (defn select-option [character [_
-                                {:keys [option-path selected? selectable? meets-prereqs? has-selections? built-template new-option-path]
+                                {:keys [option-path selected? selectable? meets-prereqs? has-selections? built-template new-option-path homebrew?]
                                  {:keys [::t/min ::t/max ::t/multiselect?] :as selection} :selection
                                  {:keys [::t/key ::t/select-fn] :as option} :option}]]
-  (let [multiselect? (or multiselect?
-                         (nil? max)
-                         (> max 1))]
-    (if (and (or multiselect?
-                 (not selected?)
-                 has-selections?)
-             (or selected?
-                 meets-prereqs?)
-             selectable?)
-      (do
-        (if select-fn
-          (select-fn (entity/get-option-value-path
-                      built-template
-                      character
-                      new-option-path)
-                     nil))
-        (let [new-option {::entity/key key}]
-          (entity/update-option
-           built-template
-           character
-           (if multiselect?
-             option-path
-             new-option-path)
-           (if multiselect?
-             (update-multi-select new-option key)
-             (update-single-select multiselect? new-option)))))
-      character)))
+  (prn "SELECT OPTION" option-path homebrew?)
+  (if (and (or multiselect?
+               (not selected?)
+               has-selections?)
+           (or selected?
+               meets-prereqs?
+               homebrew?)
+           selectable?)
+    (do
+      (if select-fn
+        (select-fn (entity/get-option-value-path
+                    built-template
+                    character
+                    new-option-path)
+                   nil))
+      (let [new-option {::entity/key key}]
+        (entity/update-option
+         built-template
+         character
+         (if multiselect?
+           option-path
+           new-option-path)
+         (if multiselect?
+           (update-multi-select new-option key)
+           (update-single-select multiselect? new-option)))))
+    character))

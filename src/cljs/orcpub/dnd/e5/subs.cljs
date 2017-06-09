@@ -95,10 +95,34 @@
    (get-in character [::entity/values])))
 
 (reg-sub
+ :entity-value
+ :<- [:entity-values]
+ (fn [entity-values [_ kw]]
+   (get entity-values kw)))
+
+(reg-sub
  :entity-options
  :<- [:character]
  (fn [character _]
    (get-in character [::entity/options])))
+
+(reg-sub
+ ::char5e/ability-scores-option-value
+ :<- [:entity-option :ability-scores]
+ (fn [option _]
+   (get option ::entity/value)))
+
+(reg-sub
+ ::char5e/ability-scores-option-key
+ :<- [:entity-option :ability-scores]
+ (fn [option _]
+   (get option ::entity/key)))
+
+(reg-sub
+ :entity-option
+ :<- [:entity-options]
+ (fn [entity-options [_ kw]]
+   (get entity-options kw)))
 
 (reg-sub
  :custom-race-name
@@ -114,6 +138,16 @@
                     ::entity/options
                     :subrace
                     ::entity/value])))
+
+(reg-sub
+ :custom-subclass-name
+ :<- [:character]
+ :<- [:built-template]
+ (fn [[character built-template] [_ path]]
+   (get-in character
+           (entity/get-option-value-path built-template
+                                         character
+                                         path))))
 
 (reg-sub
  :custom-background-name
@@ -423,10 +457,12 @@
 (doseq [[sub-key char-fn] character-subs]
   (reg-sub
    sub-key
-   (fn [[_ id]]
+   (fn [[_ id override-built-char]]
      (if id
        (subscribe [::char5e/built-character id])
-       (subscribe [:built-character])))
+       (if override-built-char
+         (atom override-built-char)
+         (subscribe [:built-character]))))
    (fn [built-char _]
      (char-fn built-char))))
 

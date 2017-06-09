@@ -1900,7 +1900,7 @@
             :skill-options {:choose 2 :options {:acrobatics true :animal-handling true :athletics true :history true :insight true :intimidation true :perception true :survival true}}}
     :multiclass-prereqs [(t/option-prereq "Requires Strength 13 or Dexterity 13"
                                           (fn [c]
-                                            (let [abilities @(subscribe [::char5e/abilities])]
+                                            (let [abilities @(subscribe [::char5e/abilities nil c])]
                                               (or (>= (::char5e/str abilities) 13)
                                                   (>= (::char5e/dex abilities) 13)))))]
     :equipment-choices [{:name "Equipment Pack"
@@ -2058,7 +2058,7 @@
              :skill-options {:choose 2 :options {:acrobatics true :athletics true :history true :insight true :religion true :stealth true}}}
      :multiclass-prereqs [(t/option-prereq "Requires Wisdom 13 and Dexterity 13"
                                            (fn [c]
-                                             (let [abilities @(subscribe [::char5e/abilities])]
+                                             (let [abilities @(subscribe [::char5e/abilities nil c])]
                                                (and (>= (::char5e/wis abilities) 13)
                                                     (>= (::char5e/dex abilities) 13)))))]
      :equipment-choices [{:name "Equipment Pack"
@@ -2247,7 +2247,7 @@
              :skill-options {:choose 2 :options {:athletics true :insight true :intimidation true :medicine true :persuasion true :religion true}}}
      :multiclass-prereqs [(t/option-prereq "Requires Strength 13 or Charisma 13"
                                            (fn [c]
-                                             (let [abilities @(subscribe [::char5e/abilities])]
+                                             (let [abilities @(subscribe [::char5e/abilities nil c])]
                                                (and (>= (::char5e/str abilities) 13)
                                                     (>= (::char5e/cha abilities) 13)))))]
      :equipment-choices [{:name "Equipment Pack"
@@ -2568,7 +2568,7 @@
              :multiclass-skill-options {:choose 1 :options ranger-skills}}
      :multiclass-prereqs [(t/option-prereq "Requires Wisdom 13 and Dexterity 13"
                                            (fn [c]
-                                             (let [abilities @(subscribe [::char5e/abilities])]
+                                             (let [abilities @(subscribe [::char5e/abilities nil c])]
                                                (and (>= (::char5e/wis abilities) 13)
                                                     (>= (::char5e/dex abilities) 13)))))]
      :ability-increase-levels [4 8 10 16 19]
@@ -3126,7 +3126,7 @@
                     :modifiers [(mod/set-mod ?spell-mastery name)]
                     :prereqs [(t/option-prereq
                                nil
-                               (fn [c] (some #(= spell-kw (:key %)) (get @(subscribe [::char5e/spells-known]) level)))
+                               (fn [c] (some #(= spell-kw (:key %)) (get @(subscribe [::char5e/spells-known nil c]) level)))
                                true)]})))
               (get-in sl/spell-lists [:wizard level]))}))
 
@@ -3145,7 +3145,7 @@
                     :modifiers [(mod/set-mod ?signature-spells name)]
                     :prereqs [(t/option-prereq
                                nil
-                               (fn [c] (some #(= spell-kw (:key %)) (get @(subscribe [::char5e/spells-known]) 3)))
+                               (fn [c] (some #(= spell-kw (:key %)) (get @(subscribe [::char5e/spells-known nil c]) 3)))
                                true)]})))
               (get-in sl/spell-lists [:wizard 3]))}))
 
@@ -3305,7 +3305,7 @@
                                  :tags (opt5e/spell-tags :wizard 0)
                                  :options (opt5e/spell-options (get-in sl/spell-lists [:wizard 0]) ::char5e/int "Wizard")
                                  :prereq-fn (fn [c]
-                                              (let [spells-known @(subscribe [::char5e/spells-known])
+                                              (let [spells-known @(subscribe [::char5e/spells-known nil c])
                                                     passes? (or (nil? spells-known)
                                                                 (some
                                                                  (fn [s]
@@ -3374,7 +3374,7 @@
 (defn has-trait-with-name-prereq [name]
   (t/option-prereq
    (str "You must have " name)
-   (fn [c] (some #(= name (:name %)) @(subscribe [::char5e/traits])))))
+   (fn [c] (some #(= name (:name %)) @(subscribe [::char5e/traits nil c])))))
 
 (def pact-of-the-tome-name "Pact Boon: Pact of the Tome")
 (def pact-of-the-chain-name "Pact Boon: Pact of the Chain")
@@ -3384,7 +3384,7 @@
   (t/option-prereq
    "You must know the edritch blast spell"
    (fn [c] (some #(= :eldritch-blast (:key %))
-                 (get @(subscribe [::char5e/spells-known]) 0)))))
+                 (get @(subscribe [::char5e/spells-known nil c]) 0)))))
 
 (def pact-boon-options
   [(t/option-cfg
@@ -4222,7 +4222,7 @@ long rest."})]
    (partial opt5e/add-sources :cos)
    [{:name "Haunted One"
      :help "You have been subjected to an unimaginable horror"
-     :profs {:skill-options {:choose 1 :options {:arcana true :investigation true :religion true :survival true}}
+     :profs {:skill-options {:choose 2 :options {:arcana true :investigation true :religion true :survival true}}
              :language-options {:choose 2 :options {:abyssal true :celestial true :deep-speech true :draconic true :infernal true :primordial true :sylvan true :undercommon true}}}
      :equipment {:monster-hunters-pack 1}
      :traits [{:name "Heart of Darkness"
@@ -4525,6 +4525,7 @@ long rest."})]
    {:name item-type-name
     :min 0
     :max nil
+    :multiselect? true
     :sequential? false
     :quantity? true
     :collapsible? true
