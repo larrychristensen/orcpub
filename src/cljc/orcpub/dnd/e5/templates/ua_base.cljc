@@ -623,7 +623,7 @@
                                       :skill-options {:choose 2 :options {:arcana true :history true :insight true :medicine true :nature true :perception true :religion true}}}
                               :multiclass-prereqs [(t/option-prereq "Requires Intelligence 13"
                                                                     (fn [c]
-                                                                      (let [abilities @(subscribe [::char5e/abilities])]
+                                                                      (let [abilities @(subscribe [::char5e/abilities nil c])]
                                                                         (>= (::char5e/int abilities) 13))))]
                               :equipment-choices [{:name "Equipment Pack"
                                                    :options {:scholars-pack 1

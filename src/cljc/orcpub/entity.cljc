@@ -268,9 +268,7 @@
            entity-items (get-in entity selection-path)
            [entity-i _] (entity-item-with-key entity-items option-k)
            path-i (if (and (or option-k entity-i)
-                           (or (nil? max)
-                               (> max 1)
-                               multiselect?))
+                           multiselect?)
                     (if (nat-int? option-k)
                       option-k
                       entity-i))
@@ -290,7 +288,6 @@
     (map #(meta (get-in entity %)) paths)))
 
 (defn update-option [template entity path update-fn]
-  (prn "PATH" path)
   (let [entity-path (get-entity-path template entity path)
         updated (update-in entity entity-path update-fn)]
     updated))
@@ -641,10 +638,10 @@
           :else
           0)))
 
-(defn meets-prereqs? [option]
+(defn meets-prereqs? [option & [built-char]]
   (every?
    (fn [{:keys [::t/prereq-fn] :as prereq}]
      (if prereq-fn
-       (prereq-fn)
+       (prereq-fn built-char)
        #?(:cljs (js/console.warn "NO PREREQ_FN" (::t/name option) prereq))))
    (::t/prereqs option)))

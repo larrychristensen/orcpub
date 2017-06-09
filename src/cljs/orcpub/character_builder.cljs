@@ -55,42 +55,6 @@
     (func e)
     (stop-propagation e)))
 
-#_(def stored-char-str (.getItem js/window.localStorage "char-meta"))
-#_(defn remove-stored-char [stored-char-str & [more-info]]
-  (js/console.warn (str "Invalid char-meta: " stored-char-str more-info))
-  (.removeItem js/window.localStorage "char-meta"))
-#_(def stored-char (if stored-char-str (try (let [v (reader/read-string stored-char-str)]
-                                            (if (spec/valid? ::entity/raw-entity v)
-                                              v
-                                              (remove-stored-char stored-char-str (str (spec/explain-data ::entity/raw-entity v)))))
-                                          (catch js/Object
-                                              e
-                                            (remove-stored-char stored-char-str)))))
-
-#_(defonce history
-  (r/atom (list (:character @app-state))))
-
-#_(defn undo! []
-  (when (> (count @history) 1)
-    (swap! history pop)
-    (swap! app-state events5e/set-character [(peek @history)])))
-
-#_(if print-enabled?
-  (add-watch app-state :log (fn [k r os ns]
-                              (js/console.log "OLD" (clj->js os))
-                              (js/console.log "NEW" (clj->js ns)))))
-
-#_(add-watch app-state
-           :local-storage
-           (fn [k r os ns]
-             (.setItem js/window.localStorage "char-meta" (str (:character ns)))))
-
-#_(add-watch app-state
-           :history
-           (fn [k r os ns]
-             (if (not= (:character ns) (peek @history))
-               (swap! history conj (:character ns)))))
-
 (defn selector-id [path]
   (s/join "--" (map name path)))
 
@@ -205,6 +169,7 @@
       (let [options-map (zipmap (map ::t/key options) options)
             class-template-option (options-map key)
             path [:class-levels key]]
+        (prn "SELECTED_CLASS" selected-class)
         [:div.m-b-5
          {:class-name (if @expanded? "b-1 b-rad-5 p-5")}
          [:div.flex.align-items-c
@@ -227,10 +192,9 @@
               options)))]
           (if (::t/help class-template-option)
             [show-info-button expanded?])
-          (let [selected-levels (get-in selected-class [::entity/options :levels])
-                levels-selection (some #(if (= :levels (::t/key %)) %) (::t/selections class-template-option))
+          (let [levels-selection (some #(if (= :levels (::t/key %)) %) (::t/selections class-template-option))
                 available-levels (::t/options levels-selection)
-                last-level-key (::entity/key (last selected-levels))]
+                last-level-key (str "level-" (:class-level selected-class))]
             [:select.builder-option.builder-option-dropdown.m-t-0.m-l-5.w-100
              {:value last-level-key
               :on-change
@@ -263,11 +227,11 @@
      [{::t/key (::t/key levels)
        ::t/options (map #(select-keys % [::t/key]) (::t/options levels))}])))
 
-(defn class-levels-selector [{:keys [character selection]}]
+(defn class-levels-selector [{:keys [selection]}]
   (let [options (::t/options selection)
-        selected-classes (get-in character [::entity/options :class])
+        selected-classes @(subscribe [::char5e/levels])
         unselected-classes (remove
-                            (into #{} (map ::entity/key selected-classes))
+                            (into #{} (keys selected-classes))
                             (map ::t/key options))
         unselected-classes-set (set unselected-classes)
         remaining-classes (filter
@@ -280,7 +244,7 @@
      [:div
       (doall
        (map-indexed
-        (fn [i {:keys [::entity/key] :as selected-class}]
+        (fn [i [key selected-class]]
           ^{:key key}
           [class-level-selector i key selected-class (map class-level-data options) unselected-classes-set])
         selected-classes))]
@@ -330,9 +294,9 @@
          {:on-click remove-fn}]]
        (if @expanded? [:div.m-t-5 item-description])])))
 
-(defn inventory-selector [item-map qty-input-width {:keys [character selection]} & [custom-equipment-key]]
+(defn inventory-selector [item-map qty-input-width {:keys [selection]} & [custom-equipment-key]]
   (let [{:keys [::t/key ::t/options]} selection
-        selected-items (get-in character [::entity/options key])
+        selected-items @(subscribe [:entity-option key])
         selected-keys (into #{} (map ::entity/key selected-items))]
     [:div
      [:select.builder-option.builder-option-dropdown
@@ -404,7 +368,7 @@
                                                   (dispatch [:change-custom-inventory-item-quantity custom-equipment-key i qty])))
                                :remove-fn (fn [_]
                                             (dispatch [:remove-custom-inventory-item custom-equipment-key name]))}]))
-          (get-in character [::entity/values custom-equipment-key])))])]))
+          @(subscribe [:entity-values custom-equipment-key])))])]))
 
 (defn option-selector-base []
   (let [expanded? (r/atom false)]
@@ -468,7 +432,6 @@
                            {:keys [::t/key ::t/name ::t/path ::t/help ::t/selections ::t/prereqs
                                    ::t/modifiers ::t/select-fn ::t/ui-fn ::t/icon] :as option}]
   (let [built-template @(subscribe [:built-template])
-        character @(subscribe [:character])
         option-paths @(subscribe [:option-paths])
         new-option-path (conj (vec option-path) key)
         selected? (get-in option-paths new-option-path)
@@ -513,6 +476,7 @@
                                             (dispatch [:select-option {:option-path option-path
                                                                        :selected? selected?
                                                                        :selectable? selectable?
+                                                                       :homebrew? homebrew?
                                                                        :meets-prereqs? meets-prereqs?
                                                                        :selection selection
                                                                        :option option
@@ -615,19 +579,16 @@
       [:div selector])
     option-selectors)))
 
-(defn selection-section [character built-template option-paths ui-fns {:keys [::t/key ::t/name ::t/help ::t/options ::t/min ::t/max ::t/ref ::t/icon ::t/multiselect? ::entity/path ::entity/parent] :as selection} num-columns & [hide-homebrew?]]
+(defn selection-section [built-template option-paths ui-fns {:keys [::t/key ::t/name ::t/help ::t/options ::t/min ::t/max ::t/ref ::t/icon ::t/multiselect? ::entity/path ::entity/parent] :as selection} num-columns & [hide-homebrew?]]
   (let [actual-path (entity/actual-path selection)
+        character @(subscribe [:character])
         remaining (entity/count-remaining built-template character selection)
         expanded? (r/atom false)
         ancestor-names (ancestor-names-string built-template actual-path)
         homebrew? @(subscribe [:homebrew? (or ref path)])
         has-custom-item? (some #(= :custom (::t/key %)) options)
-        multiselect? (or (nil? max)
-                         multiselect?
-                         (and max (> min 1)))
         disable-select-new? (and multiselect?
                                  (not (pos? remaining)))]
-    (prn "HOMEBREW" (or ref path) homebrew?)
     [selection-section-base {:path actual-path
                              :parent-title (if (not (s/blank? ancestor-names)) ancestor-names)
                              :name name
@@ -724,8 +685,9 @@
 (defn ability-value [v]
   [:div.f-s-18.f-w-b v])
 
-(defn ability-increases-component [character built-template asi-selections ability-keys]
-  (let [total-abilities @(subscribe [::char5e/abilities])]
+(defn ability-increases-component [built-template asi-selections ability-keys]
+  (let [total-abilities @(subscribe [::char5e/abilities])
+        character @(subscribe [:character])]
     [:div
      (doall
       (map-indexed
@@ -842,27 +804,25 @@
         (ability-subtitle "base")])
      ability-keys))])
 
-(defn abilities-component [character
-                           built-template
+(defn abilities-component [built-template
                            asi-selections
                            content]
   (let [total-abilities @(subscribe [::char5e/abilities])]
     [:div
      (abilities-header char5e/ability-keys)
      content
-     (ability-increases-component character built-template asi-selections char5e/ability-keys)
+     (ability-increases-component built-template asi-selections char5e/ability-keys)
      (abilities-matrix-footer char5e/ability-keys)]))
 
 
-(defn point-buy-abilities [character built-template asi-selections]
+(defn point-buy-abilities [built-template asi-selections]
   (let [default-base-abilities (char5e/abilities 8 8 8 8 8 8)
-        abilities (or (get-in character [::entity/options :ability-scores ::entity/value])
+        abilities (or @(subscribe [::char5e/ability-scores-option-value])
                       default-base-abilities)
         points-used (apply + (map (comp score-costs second) abilities))
         points-remaining (- point-buy-points points-used)
         total-abilities @(subscribe [::char5e/abilities])]
     (abilities-component
-     character
      built-template
      asi-selections
      [:div
@@ -906,9 +866,9 @@
                               (if (not increase-disabled?) (set-abilities! (update abilities k inc)))))}]]]))
          char5e/ability-keys))]])))
 
-(defn abilities-standard [character]
+(defn abilities-standard []
   [:div.flex.justify-cont-s-a
-   (let [abilities (or (get-in character [::entity/options :ability-scores ::entity/value])
+   (let [abilities (or @(subscribe [::char5e/ability-scores-option-value])
                        (char5e/abilities 15 14 13 12 10 8))
           abilities-vec (map (fn [k] [k (abilities k)]) char5e/ability-keys)]
       (doall
@@ -923,28 +883,26 @@
              {:on-click (swap-abilities i (inc i) k v)}]]])
         abilities-vec)))])
 
-(defn abilities-roller [character built-template asi-selections]
+(defn abilities-roller [built-template asi-selections]
   (abilities-component
-   character
    built-template
    asi-selections
    [:div
-    (abilities-standard character)
+    (abilities-standard)
     [:button.form-button.m-t-5
      {:on-click (stop-prop-fn
                  (fn [e]
                    (reroll-abilities)))}
      "Re-Roll"]]))
 
-(defn abilities-standard-editor [character built-template asi-selections]
+(defn abilities-standard-editor [built-template asi-selections]
   (abilities-component
-   character
    built-template
    asi-selections
-   (abilities-standard character)))
+   (abilities-standard)))
 
-(defn abilities-entry [character built-template asi-selections]
-  (let [abilities (or (opt5e/get-raw-abilities character)
+(defn abilities-entry [built-template asi-selections]
+  (let [abilities (or @(subscribe [::char5e/ability-scores-option-value])
                       (char5e/abilities 15 14 13 12 10 8))
         total-abilities @(subscribe [::char5e/abilities])]
     [:div
@@ -962,7 +920,7 @@
                                               (js/parseInt value))]
                                   (dispatch [:set-ability-score k new-v])))}]])
         char5e/ability-keys))]
-     (ability-increases-component character built-template asi-selections char5e/ability-keys)
+     (ability-increases-component built-template asi-selections char5e/ability-keys)
      (race-abilities-component char5e/ability-keys)
      [:div.flex.justify-cont-s-a
       (doall
@@ -997,12 +955,13 @@
                    (if select-fn (select-fn))
                    (dispatch [:set-ability-score-variant key])))}])
 
-(defn abilities-editor [{:keys [character built-template option-paths selections]}]
+(defn abilities-editor [{:keys [built-template option-paths selections]}]
   [:div
    (let [asi-or-feat-selections (filter
                                  (fn [s]
                                    (= :asi-or-feat (::t/key s)))
-                                 selections)]
+                                 selections)
+         character @(subscribe [:character])]
      (if (seq asi-or-feat-selections)
        [:div
         [:div.m-l-5 (selection-section-title "Ability Score Improvements")]
@@ -1030,7 +989,7 @@
                         (sort-by ::t/name options)))}]))
           asi-or-feat-selections))]))
    (let [asi-selections (filter (fn [s] (= :asi (::t/key s))) selections)
-         selected-variant (get-in character [::entity/options :ability-scores ::entity/key])]
+         selected-variant @(subscribe [::char5e/ability-scores-option-key])]
      [selection-section-base
       {:path [:ability-scores]
        :name "Abilities Variant"
@@ -1042,25 +1001,25 @@
                "Point Buy"
                :point-buy
                selected-variant
-               (point-buy-abilities character built-template asi-selections)
+               (point-buy-abilities built-template asi-selections)
                #(set-abilities! (char5e/abilities 8 8 8 8 8 8)))
               (ability-variant-option-selector
                "Dice Roll"
                :standard-roll
                selected-variant
-               (abilities-roller character built-template asi-selections)
+               (abilities-roller built-template asi-selections)
                #(reroll-abilities))
               (ability-variant-option-selector
                "Standard Scores"
                :standard-scores
                selected-variant
-               (abilities-standard-editor character built-template asi-selections)
+               (abilities-standard-editor built-template asi-selections)
                #(set-abilities! (char5e/abilities 15 14 13 12 10 8)))
               (ability-variant-option-selector
                "Manual Entry"
                :manual-entry
                selected-variant
-               (abilities-entry character built-template asi-selections))]}])])
+               (abilities-entry built-template asi-selections))]}])])
 
 
 (defn skills-selector [{:keys [character selection]}]
@@ -1504,7 +1463,7 @@
                  (let [selection (some
                                   (matches-non-group-fn key)
                                   final-selections)]
-                   (selection-section character built-template option-paths {key ui-fn} selection num-columns hide-homebrew?)))])
+                   (selection-section built-template option-paths {key ui-fn} selection num-columns hide-homebrew?)))])
             ui-fns))]
          (when (seq non-ui-fn-selections)
            [:div.m-t-20
@@ -1513,7 +1472,7 @@
                (map
                 (fn [selection]
                   ^{:key (::entity/path selection)}
-                  [:div (selection-section character built-template option-paths nil selection num-columns)])
+                  [:div (selection-section built-template option-paths nil selection num-columns)])
                 sorted-selections)))])])]]))
 
 (def image-style

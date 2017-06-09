@@ -212,7 +212,7 @@
     :modifiers [(modifiers/deferred-ability-increases)]}))
 
 (defn min-ability [ability-kw min-value]
-  (fn [c] (>= (ability-kw @(subscribe [::character/abilities])) min-value)))
+  (fn [c] (>= (ability-kw @(subscribe [::character/abilities nil c])) min-value)))
 
 (defn ability-prereq [ability-kw min-value]
   (t/option-prereq (str "Requires " (s/upper-case (name ability-kw)) " " min-value " or higher")
@@ -220,7 +220,7 @@
 
 (defn armor-prereq [armor-kw]
   (t/option-prereq (str "Requires proficiency with " (name armor-kw) " armor")
-                   (fn [_] (let [prof-keys @(subscribe [::character/armor-profs])]
+                   (fn [c] (let [prof-keys @(subscribe [::character/armor-profs nil c])]
                              (boolean (and prof-keys (prof-keys armor-kw)))))))
 
 (def languages
@@ -383,7 +383,7 @@
     :modifiers [(modifiers/language key)]
     :prereqs [(t/option-prereq
                "You already have this language"
-               (fn [_] (not (get @(subscribe [::character/languages]) key))))]}))
+               (fn [c] (not (get @(subscribe [::character/languages nil c]) key))))]}))
 
 (defn key-to-name [key]
   (s/join " " (map s/capitalize (s/split (name key) #"-"))))
@@ -421,7 +421,7 @@
       :help (spell-help spell)
       :prereqs [(t/option-prereq
                  "You already know this spell"
-                 (fn [c] (let [spells-known @(subscribe [::character/spells-known])]
+                 (fn [c] (let [spells-known @(subscribe [::character/spells-known nil c])]
                            (or (not spells-known)
                                (not (some #(= key (:key %))
                                           (spells-known level)))))))
@@ -429,7 +429,7 @@
                  "You aren't using this source"
                  (fn [c] (or (nil? source)
                              (= :phb source)
-                             (get @(subscribe [::character/option-sources]) source)))
+                             (get @(subscribe [::character/option-sources nil c]) source)))
                  true)]
       :modifiers [(modifiers/spells-known level key spellcasting-ability class-name nil qualifier)]})))
 
@@ -866,11 +866,11 @@
 
 (def can-cast-spell-prereq
   (t/option-prereq "Requires the ability to cast at least one spell."
-                   (fn [c] (some (fn [[k v]] (seq v)) @(subscribe [::character/spells-known])))))
+                   (fn [c] (some (fn [[k v]] (seq v)) @(subscribe [::character/spells-known nil c])))))
 
 (defn does-not-have-feat-prereq [kw]
   {::t/label "You already have this feat."
-   ::t/prereq-fn (fn [c] (let [feats @(subscribe [::character/feats])]
+   ::t/prereq-fn (fn [c] (let [feats @(subscribe [::character/feats nil c])]
                            (not (and feats (feats kw)))))})
 
 (defn feat-option [cfg & [multiselect?]]
@@ -1155,7 +1155,7 @@
                               (ritual-caster-option :wizard "Wizard" ::character/int sl/spell-lists)]})]
      :prereqs [(t/option-prereq "Requires Intelligence or Wisdom 13 or higher"
                                 (fn [c]
-                                  (let [{:keys [::character/wis ::character/int] :as abilities} @(subscribe [::character/abilities])]
+                                  (let [{:keys [::character/wis ::character/int] :as abilities} @(subscribe [::character/abilities nil c])]
                                     (or (and wis (>= wis 13))
                                         (and int (>= int 13))))))]})
    (feat-option
@@ -1336,7 +1336,7 @@
                   :modifiers [(modifiers/skill-expertise key)]
                   :prereqs [(t/option-prereq (str "Requires proficiency in " name)
                                              (fn [built-char]
-                                               (let [skill-profs @(subscribe [::character/skill-profs])]
+                                               (let [skill-profs @(subscribe [::character/skill-profs nil built-char])]
                                                  (and skill-profs (skill-profs key)))))]}))
               skills/skills)
     :min num
@@ -1539,17 +1539,17 @@
                (fn [_] @(subscribe [:homebrew? path]))
                true)]}))
 
-(defn custom-option-builder [name-sub-key name-event-key]
+(defn custom-option-builder [name-sub name-event]
   [:div.m-t-10
    [:span "Name"]
    [:input.input
-    {:value @(subscribe [name-sub-key])
-     :on-change (fn [e] (dispatch [name-event-key (.. e -target -value)]))}]])
+    {:value @(subscribe name-sub)
+     :on-change (fn [e] (dispatch (conj name-event (.. e -target -value))))}]])
 
 (defn custom-subrace-builder []
   (custom-option-builder
-   :custom-subrace-name
-   :set-custom-subrace))
+   [:custom-subrace-name]
+   [:set-custom-subrace]))
 
 (defn custom-subrace-option [path]
   (t/option-cfg
@@ -1571,8 +1571,8 @@
 
 (defn custom-race-builder []
   (custom-option-builder
-   :custom-race-name
-   :set-custom-race))
+   [:custom-race-name]
+   [:set-custom-race]))
 
 (defn subrace-selection [source subraces path]
   (let [subrace-path (conj path :subrace)]
@@ -1610,8 +1610,8 @@
 
 (defn custom-background-builder []
   (custom-option-builder
-   :custom-background-name
-   :set-custom-background))
+   [:custom-background-name]
+   [:set-custom-background]))
 
 (def custom-background-option
   (t/option-cfg
@@ -1738,7 +1738,7 @@
         :tags #{:profs :tool-profs}}))))
 
 (defn first-class? [class-kw & [classes]]
-  (fn [c] (= class-kw (first (or classes @(subscribe [::character/classes]))))))
+  (fn [c] (= class-kw (first (or classes @(subscribe [::character/classes nil c]))))))
 
 (defn new-starting-equipment-selection [class-kw {:keys [name options] :as cfg}]
   (t/selection-cfg
@@ -1841,7 +1841,7 @@
                                    0
                                    nil
                                    (fn [c]
-                                     (let [skill-profs @(subscribe [::character/skill-profs])
+                                     (let [skill-profs @(subscribe [::character/skill-profs nil c])
                                            skill-sources (get skill-profs skill-kw)
                                            passes? (and skill-sources
                                                         (not (skill-sources background-nm)))]
@@ -1899,9 +1899,9 @@
                    (tool-prof-modifiers (keys tool)))}))))
 
 (defn total-levels-prereq [level & [class-key]]
-  (fn [_] (>= (if class-key
-                (@(subscribe [::character/class-level-fn]) class-key)
-                @(subscribe [::character/total-levels]))
+  (fn [c] (>= (if class-key
+                (@(subscribe [::character/class-level-fn nil c]) class-key)
+                @(subscribe [::character/total-levels nil c]))
               level)))
 
 (defn total-levels-prereq-2 [level & [class-key]]
@@ -1956,7 +1956,7 @@
                           (fn [[lvl selections]]
                             (map
                              (fn [selection]
-                               (assoc selection ::t/prereq-fn (fn [_] (let [total-levels @(subscribe [::character/total-levels])]
+                               (assoc selection ::t/prereq-fn (fn [c] (let [total-levels @(subscribe [::character/total-levels nil c])]
                                                                         (>= lvl total-levels)))))
                              selections))
                           (:selections spellcasting-template))
@@ -1992,7 +1992,8 @@
       :modifiers (concat
                   modifiers
                   level-modifiers
-                  [(modifiers/subclass (:key cls) kw)]
+                  [(modifiers/subclass (:key cls) kw)
+                   (modifiers/subclass-name (:key cls) name)]
                   (if (:known-mode spellcasting)
                     [(modifiers/spells-known-mode name (:known-mode spellcasting))])
                   (armor-prof-modifiers armor-profs)
@@ -2050,6 +2051,29 @@
                   :help (str "This option just gives you the average value (" average ") for the die roll (1D" die "). Choose this option if you're not feeling lucky.")
                   :modifiers [(modifiers/max-hit-points average)]}))]}))
 
+(defn custom-subclass-builder [path]
+  (custom-option-builder
+   [:custom-subclass-name path]
+   [:set-custom-subclass path]))
+
+(defn custom-subclass-option [cls-key level-key subclass-selection-key]
+  (let [path [:class cls-key :levels level-key subclass-selection-key]]
+    (t/option-cfg
+     {:name "Custom"
+      :icon "beer-stein"
+      :ui-fn #(custom-subclass-builder path)
+      :help "Homebrew subclass. This allows you to use a subclass that is not on the list. This will allow unrestricted access to skill and tool proficiencies and feats."
+      :prereqs [(t/option-prereq
+                 nil
+                 (fn [_] @(subscribe [:homebrew? path]))
+                 true)]
+      :order 1000
+      :modifiers [(modifiers/deferred-subclass-name cls-key)
+                  homebrew-al-illegal]
+      :selections [homebrew-skill-prof-selection
+                   homebrew-tool-prof-selection
+                   homebrew-feat-selection]})))
+
 (defn level-option [{:keys [name
                             plugin?
                             hit-die
@@ -2079,22 +2103,25 @@
                     (some-> levels (get i) :selections)
                     (some-> spellcasting-template :selections (get i))
                     (if (= i subclass-level)
-                      [(t/selection-cfg
-                        {:name subclass-title
-                         :key (common/name-to-kw subclass-title)
-                         :help subclass-help
-                         :tags #{:subclass}
-                         :order 2
-                         :options (map
-                                   #(subclass-option (assoc cls :key kw) %)
-                                   (if source (map (fn [sc] (assoc sc :source source)) subclasses) subclasses))})])
+                      (let [subclass-selection-key (common/name-to-kw subclass-title)]
+                        [(t/selection-cfg
+                          {:name subclass-title
+                           :key subclass-selection-key
+                           :help subclass-help
+                           :tags #{:subclass}
+                           :order 2
+                           :options (conj
+                                     (map
+                                      #(subclass-option (assoc cls :key kw) %)
+                                      (if source (map (fn [sc] (assoc sc :source source)) subclasses) subclasses))
+                                     (custom-subclass-option kw level-kw subclass-selection-key))})]))
                     (if (and (not plugin?) (ability-inc-set i))
                       [(ability-score-improvement-selection name i)])
                     (if (not plugin?)
                       [(assoc
                         (hit-points-selection hit-die name i)
                         ::t/prereq-fn
-                        (fn [c] (or (not (= kw (first @(subscribe [::character/classes]))))
+                        (fn [c] (or (not (= kw (first @(subscribe [::character/classes nil c]))))
                                     (> i 1))))])))
       :modifiers (concat
                   (if (= :all (:known-mode spellcasting))
@@ -2174,7 +2201,8 @@
         {level-factor :level-factor} spellcasting
         save-profs (keys save)
         spellcasting-template (spellcasting-template (assoc spellcasting :class-key kw) cls)
-        first-class? (fn [_] (= kw (first @(subscribe [::character/classes]))))]
+        first-class? (fn [c] (let [first-class (first @(subscribe [::character/classes nil c]))]
+                               (= kw first-class)))]
     (t/option-cfg
      {:name name
       :key kw
@@ -2211,6 +2239,7 @@
                                  (range 1 21))
                        :min 1
                        :sequential? true
+                       :multiselect? true
                        :max nil})]))
       :associated-options (remove
                            nil?
@@ -2255,7 +2284,10 @@
    (merge
     {:name "Class"
      :order 0
-     :tags #{:class}}
+     :tags #{:class}
+     :multiselect? true
+     :min 1
+     :max nil}
     cfg)))
 
 (defn race-selection [cfg]

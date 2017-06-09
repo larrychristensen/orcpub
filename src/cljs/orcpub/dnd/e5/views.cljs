@@ -698,10 +698,10 @@
            [:span.m-l-5.m-r-5 "/"]
            (map
             (fn [cls-key]
-              (let [{:keys [class-name class-level subclass]} (levels cls-key)]
+              (let [{:keys [class-name class-level subclass subclass-name]} (levels cls-key)]
                 [:span
                  [:span (str class-name " (" class-level ")")]
-                 [:div.f-s-12.m-t-5.opacity-6 (if subclass (common/kw-to-name subclass true))]]))
+                 [:div.f-s-12.m-t-5.opacity-6 (if subclass-name subclass-name)]]))
             classes)))])]]))
 
 (defn realize-char [built-char]
