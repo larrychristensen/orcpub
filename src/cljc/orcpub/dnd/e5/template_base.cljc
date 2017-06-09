@@ -194,7 +194,8 @@
                       (->> ?spells-known vals flatten))
     ?spell-slots (merge-with
                   +
-                  (if (> (count ?spell-slot-factors) 1)
+                  (cond
+                    (> (count ?spell-slot-factors) 1)
                     (do
                       (opt5e/total-slots
                        (apply + (map (fn [[cls-kw factor]]
@@ -205,9 +206,11 @@
                                            int))
                                      ?spell-slot-factors))
                        1))
-                    (let [slots (opt5e/total-slots (-> (?levels (first ?classes)) :class-level)
-                                                   (-> ?spell-slot-factors first val))]
-                      slots))
+                    (= 1 (count ?spell-slot-factors))
+                    (opt5e/total-slots (-> (?levels (first ?classes)) :class-level)
+                                       (some-> ?spell-slot-factors first val))
+
+                    :else {})
                   (if ?pact-magic?
                     (warlock-spell-slot-schedule (?class-level :warlock))))
     ?classes []
