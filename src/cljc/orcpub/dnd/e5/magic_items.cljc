@@ -1936,7 +1936,7 @@ The rope has AC 20 and 20 hit points. It regains 1 hit point every 5 minutes as 
     :item-type :armor
     :item-subtype :shield
     :rarity :rare
-    :magical-ac-bonus 1
+    :magical-ac-bonus 2
     :description "While holding this shield, you have a +2 bonus to AC determined by the shield’s rarity."
     }{
     :name "Shield +3"
