@@ -171,7 +171,7 @@
                          search-input-style)
                 :value search-text
                 :on-change #(dispatch [:set-search-text (event-value %)])}]]
-             [:div.opacity-1 (svg-icon "crystal-ball" 48 48)]]])
+             [:div.opacity-1.p-r-10 (svg-icon "hood" 48 48)]]])
          [user-header-view]]]]]
      [:div.container
       [:div.content
@@ -746,6 +746,10 @@
                       :left 0
                       :right 0
                       :bottom 0}}
+        [:div.flex.justify-cont-s-a.m-t-10
+         [:div.flex.align-items-c
+          [:span.white.f-s-32 "Orcacle"]
+          [:div.m-l-10 (svg-icon "hood" 48 48)]]]
         [:div.p-10
          [:input.input
           {:value search-text
