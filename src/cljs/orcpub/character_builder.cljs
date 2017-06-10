@@ -1677,10 +1677,14 @@
       (let [num-resources (count (into #{} (map :resource-key used-resources)))
             multiple-resources? (> num-resources 1)
             has-homebrew? @(subscribe [:has-homebrew?])
+            mobile? @(subscribe [:mobile?])
             al-legal? (and (empty? al-illegal-reasons)
                            (not multiple-resources?)
                            (not has-homebrew?))]
-        [:div.m-l-20.m-b-20
+        [:div
+         {:class-name (if (not mobile?)
+                        "m-l-20 m-b-20"
+                        "m-l-10")}
          [:div.flex.align-items-c
           [:div.i
            {:class-name
@@ -1694,10 +1698,12 @@
                "fa-times")}]
            [:a.m-l-5.f-w-b
             {:href "https://media.wizards.com/2016/dnd/downloads/AL_PH_SKT.pdf" :target :_blank}
-            (str "Adventurer's League "
-                 (if al-legal?
-                   "Legal"
-                   "Illegal"))]]
+            (if mobile?
+              "AL"
+              (str "Adventurer's League "
+                   (if al-legal?
+                     "Legal"
+                     "Illegal")))]]
           (if (not al-legal?)
             [:span.m-l-10.f-s-14
              [expand-button "hide reasons" "show reasons" expanded?]])]
@@ -1767,6 +1773,7 @@
         active-tab @(subscribe [:active-tabs])
         view-width (.-width (gdom/getViewportSize js/window))
         plugins @(subscribe [:plugins])
+        mobile? @(subscribe [:mobile?])
         all-selections (entity/available-selections character built-char built-template)
         selection-validation-messages (validate-selections built-template character all-selections)
         al-illegal-reasons (concat @(subscribe [::char5e/al-illegal-reasons])
@@ -1816,7 +1823,8 @@
          [al-legality al-illegal-reasons used-resources]
          (if character-changed? [:div.red.f-w-b.m-r-10.m-l-10.flex.align-items-c
                                  (views5e/svg-icon "thunder-skull" 24 24)
-                                 [:span "You have unsaved changes"]])]]]
+                                 (if (not mobile?)
+                                   [:span "You have unsaved changes"])])]]]
       [:div.flex.justify-cont-c.p-b-40
        [:div.f-s-14.white.content
         [:div.flex.w-100-p

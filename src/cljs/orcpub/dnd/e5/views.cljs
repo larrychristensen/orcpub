@@ -179,11 +179,13 @@
          [user-header-view]]]]]
      [:div.container
       [:div.content
-       [:div.flex.justify-cont-s-b.w-100-p.align-items-end
-        [:div.white.p-10
-         (social-icon "facebook" "https://www.facebook.com/orcpub")
-         (social-icon "twitter" "https://twitter.com/OrcPub")
-         (social-icon "reddit" "https://www.reddit.com/r/orcpub/")]
+       [:div.flex.w-100-p.align-items-end
+        {:class-name (if mobile? "justify-cont-end" "justify-cont-s-b")}
+        (if (not mobile?)
+          [:div.white.p-10
+           (social-icon "facebook" "https://www.facebook.com/orcpub")
+           (social-icon "twitter" "https://twitter.com/OrcPub")
+           (social-icon "reddit" "https://www.reddit.com/r/orcpub/")])
         [:div.flex.m-b-5.m-r-5
          [header-tab
           "characters"
