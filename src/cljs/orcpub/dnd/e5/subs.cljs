@@ -373,6 +373,12 @@
    (:device-type db)))
 
 (reg-sub
+ :mobile?
+ :<- [:device-type]
+ (fn [device-type _]
+   (= :mobile device-type)))
+
+(reg-sub
  :warning-hidden
  (fn [db _]
    (:warning-hidden db)))
