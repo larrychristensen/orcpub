@@ -123,7 +123,7 @@
                     (fn [m k v]
                       (assoc m k (+ v
                                     (?ability-bonuses (skill5e/skill-abilities k))
-                                    (get ?additional-skill-bonuses 0))))
+                                    (get ?additional-skill-bonuses k 0))))
                     {}
                     ?skill-prof-bonuses)
     ?tool-bonus-fn (fn [tool-kw]
