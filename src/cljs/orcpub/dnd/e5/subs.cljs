@@ -481,3 +481,19 @@
     (subscribe [::char5e/weapons id])])
  (fn [[magic-weapons weapons] _]
    (merge magic-weapons weapons)))
+
+(reg-sub
+ :search-text
+ (fn [db _]
+   (:search-text db)))
+
+(reg-sub
+ :search-results
+ (fn [db _]
+   (:search-results db)))
+
+(reg-sub
+ :search-text?
+ :<- [:search-text]
+ (fn [search-text _]
+   (not (s/blank? search-text))))

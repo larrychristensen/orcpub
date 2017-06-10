@@ -5,6 +5,7 @@
             [orcpub.dice :as dice]
             [orcpub.dnd.e5.template :as t5e]
             [orcpub.dnd.e5.character :as char5e]
+            [orcpub.dnd.e5.spells :as spells]
             [orcpub.dnd.e5.event-handlers :as event-handlers]
             [orcpub.dnd.e5.character.equipment :as char-equip5e]
             [orcpub.dnd.e5.db :refer [default-value
@@ -1000,3 +1001,20 @@
    (assoc db
           :confirmation-shown? true
           :confirmation-cfg cfg)))
+
+(defn search-results [search-text]
+  (let [dice-result (dice/dice-roll-text search-text)
+        kw (if search-text (common/name-to-kw search-text))]
+    (cond
+      dice-result {:top-result {:type :dice-roll
+                                :result dice-result}}
+      (spells/spell-map kw) {:top-result {:type :spell
+                                          :result (spells/spell-map kw)}}
+      :else nil)))
+
+(reg-event-db
+ :set-search-text
+ (fn [db [_ search-text]]
+   (assoc db
+          :search-text search-text
+          :search-results (search-results search-text))))

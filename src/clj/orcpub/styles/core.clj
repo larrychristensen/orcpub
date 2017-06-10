@@ -69,7 +69,9 @@
    [:.f-s-32
     {:font-size "32px !important"}]
    [:.f-s-36
-    {:font-size "36px"}]])
+    {:font-size "36px !important"}]
+   [:.f-s-48
+    {:font-size "48px !important"}]])
 
 (def props
   [[:.sans
@@ -247,6 +249,8 @@
     {:width "24px"}]
    [:.w-32
     {:width "32px"}]
+   [:.w-36
+    {:width "36px"}]
    [:.w-40
     {:width "40px"}]
    [:.w-48
@@ -298,6 +302,8 @@
     {:height "25px"}]
    [:.h-32
     {:height "32px"}]
+   [:.h-36
+    {:height "36px"}]
    [:.h-40
     {:height "40px"}]
    [:.h-48
