@@ -600,6 +600,8 @@
    :darkvision 60
    :source :vgm
    :modifiers [(mod5e/climbing-speed 20)
+               (mod5e/skill-proficiency :perception)
+               (mod5e/skill-proficiency :stealth)
                (mod5e/attack
                 {:name "Cat's Claws"
                  :page 115
@@ -610,7 +612,6 @@
                  :damage-die-count 1
                  :damage-modifier (::char5e/str ?ability-bonuses)})]
    :language-options {:choose 1 :options {:any true}}
-   :profs {:skill {:perception true :stealth true}}
    :traits [{:name "Feline Agility"
              :page 115
              :summary "Double speed when moving on your turn in combat."}]})
