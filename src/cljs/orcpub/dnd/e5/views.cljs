@@ -714,6 +714,91 @@
          (s/split (or summary description) #"\n"))
         (disp/source-description source page))]]]])
 
+(def aboleth
+  {
+   :name "Aboleth"
+   :size "Large"
+   :type "aberration"
+   :alignment "lawful evil"
+   :armor-class 17
+   :armor-notes "(natural armor)"
+   :hit-points {:mean 135 :die-count 18 :die 10 :modifier 36}
+   :speed "10 ft., swim 40 ft."
+
+   :str 21
+   :dex 9
+   :con 15
+   :int 18
+   :wis 15
+   :cha 18
+
+   :saving-throws {:con 6, :int 8, :wis 6}
+
+   :skills {:history 12, :perception 10}
+   :senses "darkvision 120 ft., passive Perception 20"
+   :languages "Deep Speech, telepathy 120 ft."
+   :challenge 10
+
+   :traits [{:name "Amphibious" :description "The aboleth can breathe air and water."}
+            {:name "Mucous Cloud" :description "While underwater, the aboleth is surrounded by transformative mucus. A creature that touches the aboleth or that hits it with a melee attack while within 5 feet of it must make a DC 14 Constitution saving throw. On a failure, the creature is diseased for 1d4 hours. The diseased creature can breathe only underwater."}
+            {:name "Probing Telepathy" :description "If a creature communicates telepathically with the aboleth, the aboleth learns the creature's greatest desires if the aboleth can see the creature."}]
+
+   :actions [{:name "Multiattack" :description "The aboleth makes three tentacle attacks."}
+             {:name "Tentacle" :description "Melee Weapon Attack: +9 to hit, reach 10 ft., one target. Hit: 12 (2d6 + 5) bludgeoning damage. If the target is a creature, it must succeed on a DC 14 Constitution saving throw or become diseased. The disease has no effect for 1 minute and can be removed by any magic that cures disease. After 1 minute, the diseased creature's skin becomes translucent and slimy, the creature can't regain hit points unless it is underwater, and the disease can be removed only by heal or another disease-curing spell of 6th level or higher. When the creature is outside a body of water, it takes 6 (1d12) acid damage every 10 minutes unless moisture is applied to the skin before 10 minutes have passed."}
+             {:name "Tail" :description "Melee Weapon Attack: +9 to hit, reach 10 ft. one target. Hit: 15 (3d6 + 5) bludgeoning damage."}
+             {:name "Enslave " :notes "3/Day" :description "The aboleth targets one creature it can see within 30 feet of it. The target must succeed on a DC 14 Wisdom saving throw or be magically charmed by the aboleth until the aboleth dies or until it is on a different plane of existence from the target. The charmed target is under the aboleth's control and can't take reactions, and the aboleth and the target can communicate telepathically with each other over any distance.
+Whenever the charmed target takes damage, the target can repeat the saving throw. On a success, the effect ends. No more than once every 24 hours, the target can also repeat the saving throw when it is at least 1 mile away from the aboleth."}]
+
+   :legendary-actions {
+                       :description "The aboleth can take 3 legendary actions, choosing from the options below. Only one legendary action option can be used at a time and only at the end of another creature's turn. The aboleth regains spent legendary actions at the start of its turn."
+                       :actions [{:name "Detect" :description "The aboleth makes a Wisdom (Perception) check."}
+                                 {:name "Tail Swipe" :description "The aboleth makes one tail attack."}
+                                 {:name "Psychic Drain " :notes "Costs 2 Actions" :description "One creature charmed by the aboleth takes 10 (3d6) psychic damage, and the aboleth regains hit points equal to the damage the creature takes.
+"}]}
+
+   })
+
+(defn print-bonus-map [m]
+  (s/join ", "
+          (map
+           (fn [[k v]] (str (s/capitalize (clojure.core/name k)) " " (common/bonus-str v)))
+           m)))
+
+(defn monster-result [{:keys [name size type hit-points alignment armor-class armor-notes speed saving-throws skills senses languages challenge source page] :as monster}]
+  [:div.white
+   [:div.flex
+    (svg-icon "hydra" 36 36)
+    [:div.m-l-10
+     [:span.f-s-24.f-w-b name]
+     [:div.f-s-18.i.f-w-b (str size " " type ", " alignment)]
+     (spell-field "Armor Class" (str armor-class (if armor-notes (str " (" armor-notes ")"))))
+     (let [{:keys [mean die-count die modifier]} hit-points]
+       (spell-field "Hit Points" (str die-count
+                                      "d"
+                                      die
+                                      (if modifier (common/mod-str modifier))
+                                      (if mean (str " (" mean ")")))))
+     (spell-field "Speed" speed)
+     [:div.m-t-10.flex.justify-cont-s-a
+      (doall
+       (map
+        (fn [ability-key]
+          ^{:key ability-key}
+          [:div.t-a-c.p-5
+           [:div.f-w-b.f-s-14 (s/upper-case (clojure.core/name ability-key))]
+           (let [ability-value (get monster ability-key)]
+             [:div ability-value " (" (common/bonus-str (opt/ability-bonus ability-value)) ")"])])
+        [:str :dex :con :int :wis :cha]))]
+     [:div.m-t-10 (spell-field "Saving Throws" (print-bonus-map saving-throws))]
+     (if skills (spell-field "Skills" (print-bonus-map skills)))
+     (if senses (spell-field "Senses" senses))
+     (if languages (spell-field "Languages" languages))
+     (if challenge (spell-field "Challenge" (case challenge
+                                              0.125 "1/8"
+                                              0.25 "1/4"
+                                              0.5 "1/2"
+                                              :else challenge)))]]])
+
 (defn search-results []
   (if-let [{{:keys [result] :as top-result} :top-result :as search-results}
            @(subscribe [:search-results])]
@@ -722,6 +807,7 @@
       (case (:type top-result)
         :dice-roll (dice-roll-result result)
         :spell (spell-result result)
+        :monster (monster-result result)
         :else nil)]]))
 
 (defn content-page [title button-cfgs content]
@@ -768,7 +854,7 @@
              :on-change #(dispatch [:set-search-text (event-value %)])
              :style (merge search-input-style
                            {:background-color "rgba(255,255,255,0.1)"})}]
-           [:span.white.f-s-14.i.opacity-5 "\"8d10 + 2\", \"magic missile\", etc."]]
+           [:span.white.f-s-14.i.opacity-5 "\"8d10 + 2\", \"magic missile\", \"kobold\", etc."]]
           [:div.flex-grow-1
            [search-results]]]))
      (let [hdr [header title button-cfgs]]
