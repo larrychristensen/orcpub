@@ -1505,8 +1505,23 @@ This potion’s transparent liquid has floating in it a sliver of fingernail fro
     }{
     :name "Potion of Healing"
     :item-type :potion
-    :rarity "rarity varies"
-    :description "You regain hit points when you drink this potion. The number of hit points depends on the potion’s rarity, as shown in the Potions of Healing table. Whatever its potency, the potion’s red liquid glimmers when agitated."
+    :rarity :common
+    :description "You regain 2d4 + 2 hit points when you drink this potion"
+    }{
+    :name "Potion of Greater Healing"
+    :item-type :potion
+    :rarity :common
+    :description "You regain 4d4 + 4 hit points when you drink this potion"
+    }{
+    :name "Potion of Superior Healing"
+    :item-type :potion
+    :rarity :common
+    :description "You regain 8d4 + 8 hit points when you drink this potion"
+    }{
+    :name "Potion of Supreme Healing"
+    :item-type :potion
+    :rarity :common
+    :description "You regain 10d4 + 20 hit points when you drink this potion"
     }{
     :name "Potion of Heroism"
     :item-type :potion
