@@ -6,6 +6,7 @@
             [orcpub.dnd.e5.template :as t5e]
             [orcpub.dnd.e5.character :as char5e]
             [orcpub.dnd.e5.spells :as spells]
+            [orcpub.dnd.e5.monsters :as monsters]
             [orcpub.dnd.e5.event-handlers :as event-handlers]
             [orcpub.dnd.e5.character.equipment :as char-equip5e]
             [orcpub.dnd.e5.db :refer [default-value
@@ -1010,6 +1011,8 @@
                                 :result dice-result}}
       (spells/spell-map kw) {:top-result {:type :spell
                                           :result (spells/spell-map kw)}}
+      (monsters/monster-map kw) {:top-result {:type :monster
+                                              :result (monsters/monster-map kw)}}
       :else nil)))
 
 (reg-event-db
