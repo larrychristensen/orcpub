@@ -1028,7 +1028,13 @@ When you hit a giant with it, the giant takes an extra 2d6 damage of the weaponâ
 
     :attunement [:any]
     :description "While wearing these gloves, climbing and swimming donâ€™t cost you extra movement, and you gain a +5 bonus to Strength (Athletics) checks made to climb or swim."
-    }
+      } {
+         :name "Gloves of Thievery"
+         :item-type :wonderous-item
+         :rarity :uncommon
+         :modifiers [(mod5e/skill-bonus :sleight-of-hand 5)]
+         :page 172
+         :description "+5 to Sleight of Hand and lock pick checks"}
    {
     :name "Goggles of Night"
     :item-type :wondrous-item
