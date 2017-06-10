@@ -119,6 +119,17 @@
       (if (not mobile?)
         [:div.title.uppercase title])]]))
 
+(def social-icon-style
+  {:color :white
+   :font-size "20px"})
+
+(defn social-icon [icon link]
+  [:a.p-5.opacity-5.hover-opacity-full.white
+   {:style social-icon-style
+    :href link :target :_blank}
+   [:i.fa
+    {:class-name (str "fa-" icon)}]])
+
 (defn app-header []
   (let [device-type @(subscribe [:device-type])]
     [:div#app-header.app-header.flex.flex-column.justify-cont-s-b
@@ -132,7 +143,11 @@
          [user-header-view]]]]]
      [:div.container
       [:div.content
-       [:div.flex.justify-cont-end.w-100-p
+       [:div.flex.justify-cont-s-b.w-100-p.align-items-end
+        [:div.white.p-10
+         (social-icon "facebook" "https://www.facebook.com/orcpub")
+         (social-icon "twitter" "https://twitter.com/OrcPub")
+         (social-icon "reddit" "https://www.reddit.com/r/orcpub/")]
         [:div.flex.m-b-5.m-r-5
          [header-tab
           "characters"
