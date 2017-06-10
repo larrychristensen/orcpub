@@ -1015,6 +1015,12 @@
 (reg-event-db
  :set-search-text
  (fn [db [_ search-text]]
-   (assoc db
-          :search-text search-text
-          :search-results (search-results search-text))))
+   (cond-> db
+     true (assoc :search-text search-text
+                 :search-results (search-results search-text))
+     (s/blank? search-text) (assoc :orcacle-clicked? false))))
+
+(reg-event-db
+ :toggle-orcacle
+ (fn [db _]
+   (update db :orcacle-clicked? not)))

@@ -497,3 +497,15 @@
  :<- [:search-text]
  (fn [search-text _]
    (not (s/blank? search-text))))
+
+(reg-sub
+ :orcacle-clicked?
+ (fn [db _]
+   (:orcacle-clicked? db)))
+
+(reg-sub
+ :orcacle-open?
+ :<- [:search-text?]
+ :<- [:orcacle-clicked?]
+ (fn [[search-text? orcacle-clicked?]]
+   (or search-text? orcacle-clicked?)))

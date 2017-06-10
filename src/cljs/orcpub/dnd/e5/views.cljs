@@ -142,7 +142,8 @@
    :right 25})
 
 (defn app-header []
-  (let [device-type @(subscribe [:device-type])]
+  (let [device-type @(subscribe [:device-type])
+        mobile? (= :mobile device-type)]
     [:div#app-header.app-header.flex.flex-column.justify-cont-s-b
      [:div.app-header-bar.container
       [:div.content
@@ -154,7 +155,7 @@
          (let [search-text @(subscribe [:search-text])
                search-text? @(subscribe [:search-text?])]
            [:div.flex-grow-1.p-l-20.p-r-20
-            {:style (if search-text?
+            #_{:style (if search-text?
                       {:position :fixed
                        :left 0
                        :right 0
@@ -171,7 +172,10 @@
                          search-input-style)
                 :value search-text
                 :on-change #(dispatch [:set-search-text (event-value %)])}]]
-             [:div.opacity-1.p-r-10 (svg-icon "hood" 48 48)]]])
+             [:div.opacity-1.p-r-10.pointer
+              {:class-name (if mobile? "opacity-5" "opacity-1")
+               :on-click #(dispatch [:toggle-orcacle])}
+              (svg-icon "hood" (if mobile? 32 48) (if mobile? 32 48))]]])
          [user-header-view]]]]]
      [:div.container
       [:div.content
@@ -711,80 +715,81 @@
 (defn search-results []
   (if-let [{{:keys [result] :as top-result} :top-result :as search-results}
            @(subscribe [:search-results])]
-    [:div.p-20
-     (case (:type top-result)
-       :dice-roll (dice-roll-result result)
-       :spell (spell-result result)
-       :else nil)]))
+    [:div
+     [:div.p-20
+      (case (:type top-result)
+        :dice-roll (dice-roll-result result)
+        :spell (spell-result result)
+        :else nil)]]))
 
 (defn content-page [title button-cfgs content]
-  [:div.app
-   {:on-scroll (fn [e]
-                 (let [app-header (js/document.getElementById "app-header")
-                       header-height (.-offsetHeight app-header)
-                       scroll-top (.-scrollTop (.-target e))
-                       sticky-header (js/document.getElementById "sticky-header")
-                       app-main (js/document.getElementById "app-main")
-                       scrollbar-width (- js/window.innerWidth (.-offsetWidth app-main))
-                       header-container (js/document.getElementById "header-container")]
-                   (set! (.-paddingRight (.-style header-container)) (str scrollbar-width "px"))
-                   (if (>= scroll-top header-height)
-                     (set! (.-display (.-style sticky-header)) "block")
-                     (set! (.-display (.-style sticky-header)) "none"))))}
-   (if @(subscribe [:loading])
-     [:div {:style loading-style}
-      [:div.flex.justify-cont-s-a.align-items-c.h-100-p
-       [:img.h-200.w-200.m-t-200 {:src "/image/spiral.gif"}]]])
-   [app-header]
-   (let [search-text @(subscribe [:search-text])
-         search-text? @(subscribe [:search-text?])]
-     (if search-text?
-       [:div {:style {:position :fixed
-                      :z-index 1
-                      :background-color "rgba(0,0,0,0.95)"
-                      :top 0
-                      :left 0
-                      :right 0
-                      :bottom 0}}
-        [:div.flex.justify-cont-s-a.m-t-10
-         [:div.flex.align-items-c
-          [:span.white.f-s-32 "Orcacle"]
-          [:div.m-l-10 (svg-icon "hood" 48 48)]]]
-        [:div.p-10
-         [:input.input
-          {:value search-text
-           :on-change #(dispatch [:set-search-text (event-value %)])
-           :style (merge search-input-style
-                         {:background-color "rgba(255,255,255,0.1)"})}]
-         [:span.white.f-s-14.i.opacity-5 "\"8d10 + 2\", \"magic missile\", etc."]]
-        [search-results]]))
-   (let [hdr [header title button-cfgs]]
-     [:div
-      [:div#sticky-header.sticky-header.w-100-p.posn-fixed
-       [:div.flex.justify-cont-c.bg-light
-        [:div#header-container.f-s-14.white.content
-         hdr]]]
-      [:div.flex.justify-cont-c.white
-       [:div.content hdr]]
-      #_(if (not @(subscribe [:warning-hidden]))
-        [:div.container
-         [:div.flex.align-items-c.justify-cont-s-b.white.bg-light.b-rad-5.p-10.f-w-b.m-l-5.m-r-5.m-b-5.pointer.content
-          {:on-click #(dispatch [:hide-warning])}
-          [:div "This application is not yet officially released and is under heavy development. We welcome you to try the application and report feedback and bugs " [:a {:href "https://muut.com/orcpub" :target :_blank} "here"] " or by emailing " [:a {:href "mailto:redorc@orcpub.com"} "redorc@orcpub.com"] ". Please understand, however, that, until official release we may have to make changes that might cause you to lose some data you enter here."]
-          [:i.fa.fa-times]]])
-      [:div#app-main.container
-       [:div.content.w-100-p content]]
-      [:div.white.flex.justify-cont-c
-       [:div.content.f-w-n.f-s-12
-        [:div.flex.justify-cont-s-b.align-items-c.w-100-p.flex-wrap
-         [:div.p-10
-          [:div.m-b-5 "Icons made by Lorc, Caduceus, and Delapouite. Available on " [:a.orange {:href "http://game-icons.net"} "http://game-icons.net"]]]
-         [:div.m-l-10
-          [:a {:href "https://muut.com/orcpub" :target :_blank} "Feedback/Bug Reports"]]
-         [:div.m-l-10.m-r-10
-          [:a {:href "/privacy-policy" :target :_blank} "Privacy Policy"]
-          [:a.m-l-5 {:href "/terms-of-use" :target :_blank} "Terms of Use"]]]
-        [debug-data]]]])])
+  (let [orcacle-open? @(subscribe [:orcacle-open?])]
+    [:div.app
+     {:on-scroll (fn [e]
+                   (if (not orcacle-open?)
+                     (let [app-header (js/document.getElementById "app-header")
+                           header-height (.-offsetHeight app-header)
+                           scroll-top (.-scrollTop (.-target e))
+                           sticky-header (js/document.getElementById "sticky-header")
+                           app-main (js/document.getElementById "app-main")
+                           scrollbar-width (- js/window.innerWidth (.-offsetWidth app-main))
+                           header-container (js/document.getElementById "header-container")]
+                       (set! (.-paddingRight (.-style header-container)) (str scrollbar-width "px"))
+                       (if (>= scroll-top header-height)
+                         (set! (.-display (.-style sticky-header)) "block")
+                         (set! (.-display (.-style sticky-header)) "none")))))}
+     (if @(subscribe [:loading])
+       [:div {:style loading-style}
+        [:div.flex.justify-cont-s-a.align-items-c.h-100-p
+         [:img.h-200.w-200.m-t-200 {:src "/image/spiral.gif"}]]])
+     [app-header]
+     (let [search-text @(subscribe [:search-text])]
+       (if orcacle-open?
+         [:div.flex.flex-column.h-100-p
+          {:style {:overflow-y :scroll
+                   :position :fixed
+                   :z-index 1
+                   :background-color "rgba(0,0,0,0.95)"
+                   :top 0
+                   :left 0
+                   :right 0
+                   :bottom 0}}
+          [:div
+           [:div.flex.justify-cont-s-a.m-t-10
+            [:div.flex.align-items-c.pointer
+             {:on-click #(dispatch [:toggle-orcacle])}
+             [:span.white.f-s-32 "Orcacle"]
+             [:div.m-l-10 (svg-icon "hood" 48 48)]]]]
+          [:div.p-10
+           [:input.input
+            {:value search-text
+             :on-change #(dispatch [:set-search-text (event-value %)])
+             :style (merge search-input-style
+                           {:background-color "rgba(255,255,255,0.1)"})}]
+           [:span.white.f-s-14.i.opacity-5 "\"8d10 + 2\", \"magic missile\", etc."]]
+          [:div.flex-grow-1
+           [search-results]]]))
+     (let [hdr [header title button-cfgs]]
+       [:div
+        [:div#sticky-header.sticky-header.w-100-p.posn-fixed
+         [:div.flex.justify-cont-c.bg-light
+          [:div#header-container.f-s-14.white.content
+           hdr]]]
+        [:div.flex.justify-cont-c.white
+         [:div.content hdr]]
+        [:div#app-main.container
+         [:div.content.w-100-p content]]
+        [:div.white.flex.justify-cont-c
+         [:div.content.f-w-n.f-s-12
+          [:div.flex.justify-cont-s-b.align-items-c.w-100-p.flex-wrap
+           [:div.p-10
+            [:div.m-b-5 "Icons made by Lorc, Caduceus, and Delapouite. Available on " [:a.orange {:href "http://game-icons.net"} "http://game-icons.net"]]]
+           [:div.m-l-10
+            [:a {:href "https://muut.com/orcpub" :target :_blank} "Feedback/Bug Reports"]]
+           [:div.m-l-10.m-r-10
+            [:a {:href "/privacy-policy" :target :_blank} "Privacy Policy"]
+            [:a.m-l-5 {:href "/terms-of-use" :target :_blank} "Terms of Use"]]]
+          [debug-data]]]])]))
 
 (def row-style
   {:border-bottom "1px solid rgba(255,255,255,0.5)"})
