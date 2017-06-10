@@ -185,7 +185,7 @@
           [:div.white.p-10
            (social-icon "facebook" "https://www.facebook.com/orcpub")
            (social-icon "twitter" "https://twitter.com/OrcPub")
-           (social-icon "reddit" "https://www.reddit.com/r/orcpub/")])
+           (social-icon "reddit-alien" "https://www.reddit.com/r/orcpub/")])
         [:div.flex.m-b-5.m-r-5
          [header-tab
           "characters"
