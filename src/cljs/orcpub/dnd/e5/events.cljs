@@ -1023,4 +1023,6 @@
 (reg-event-db
  :toggle-orcacle
  (fn [db _]
-   (update db :orcacle-clicked? not)))
+   (-> db
+       (update :orcacle-clicked? not)
+       (dissoc :search-text))))
