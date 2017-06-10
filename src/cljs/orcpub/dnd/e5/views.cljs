@@ -130,16 +130,48 @@
    [:i.fa
     {:class-name (str "fa-" icon)}]])
 
+(def search-input-style
+  {:height "60px"
+   :margin-top "0px"
+   :border :none
+   :font-size "28px"
+   :background-color :transparent})
+
+(def search-icon-style
+  {:top 6
+   :right 25})
+
 (defn app-header []
   (let [device-type @(subscribe [:device-type])]
     [:div#app-header.app-header.flex.flex-column.justify-cont-s-b
      [:div.app-header-bar.container
       [:div.content
        [:div.flex.align-items-c.h-100-p
-        [:div.flex.justify-cont-s-b.align-items-c.w-100-p.p-l-20.p-r-20
+        [:div.flex.justify-cont-s-b.align-items-c.w-100-p.p-l-20.p-r-20.h-100-p
          [:img.orcpub-logo.h-32.w-120.pointer
           {:src "/image/orcpub-logo.svg"
            :on-click #(dispatch [:route routes/default-route {:return? true}])}]
+         (let [search-text @(subscribe [:search-text])
+               search-text? @(subscribe [:search-text?])]
+           [:div.flex-grow-1.p-l-20.p-r-20
+            {:style (if search-text?
+                      {:position :fixed
+                       :left 0
+                       :right 0
+                       :background-color "rgba(0,0,0,0.95)"
+                       :z-index 101})}
+            [:div.b-rad-5.flex.align-items-c
+             {:style {:background-color "rgba(0,0,0,0.1)"}}
+             [:div.p-l-20.flex-grow-1
+              [:input.w-100-p.white
+               {:style (if search-text?
+                         (merge
+                          search-input-style
+                          {:color :transparent})
+                         search-input-style)
+                :value search-text
+                :on-change #(dispatch [:set-search-text (event-value %)])}]]
+             [:div.opacity-1 (svg-icon "crystal-ball" 48 48)]]])
          [user-header-view]]]]]
      [:div.container
       [:div.content
@@ -630,6 +662,60 @@
                         :platform-version (user-agent/platform-version)
                         :character @(subscribe [:character])})}])])))
 
+(defn dice-roll-result [{:keys [total rolls mod raw-mod plus-minus]}]
+  [:div.white.f-s-32.flex.align-items-c
+   (svg-icon "rolling-dices" 36 36)
+   [:div.m-l-10
+    [:span.f-w-b total]
+    [:span.m-l-10.m-r-10 "="]
+    [:span (s/join " + " rolls)]
+    (if (not= 0 raw-mod) [:span (if (pos? plus-minus) " + " " - ")])
+    (if (not= 0 raw-mod) [:span raw-mod])]])
+
+(defn spell-field [name value]
+  [:div
+   [:span.f-w-b name ":"]
+   [:span.m-l-10 value]])
+
+(defn spell-result [{:keys [name level school casting-time range duration components description summary page source] :as spell}]
+  [:div.white
+   [:div.flex
+    (svg-icon "spell-book" 36 36)
+    [:div.m-l-10
+     [:span.f-s-24.f-w-b name]
+     [:div.f-s-18.i.f-w-b (str (if (pos? level)
+                                 (str "Level-" level))
+                               " "
+                               (s/capitalize school)
+                               (if (zero? level)
+                                 " cantrip"))]
+     (spell-field "Casting Time" casting-time)
+     (spell-field "Range" range)
+     (spell-field "Duration" duration)
+     (let [{:keys [verbal somatic material material-component]} components]
+       (spell-field "Components" (str (s/join ", " (remove
+                                                nil?
+                                                [(if verbal "V")
+                                                 (if somatic "S")
+                                                 (if material "M")]))
+                                      (if material-component
+                                        (str " (" material-component ")")))))
+     [:div.m-t-10
+      (if (or summary description)
+        (map-indexed
+         (fn [i p]
+           ^{:key i} [:p p])
+         (s/split (or summary description) #"\n"))
+        (disp/source-description source page))]]]])
+
+(defn search-results []
+  (if-let [{{:keys [result] :as top-result} :top-result :as search-results}
+           @(subscribe [:search-results])]
+    [:div.p-20
+     (case (:type top-result)
+       :dice-roll (dice-roll-result result)
+       :spell (spell-result result)
+       :else nil)]))
 
 (defn content-page [title button-cfgs content]
   [:div.app
@@ -650,6 +736,24 @@
       [:div.flex.justify-cont-s-a.align-items-c.h-100-p
        [:img.h-200.w-200.m-t-200 {:src "/image/spiral.gif"}]]])
    [app-header]
+   (let [search-text @(subscribe [:search-text])
+         search-text? @(subscribe [:search-text?])]
+     (if search-text?
+       [:div {:style {:position :fixed
+                      :z-index 1
+                      :background-color "rgba(0,0,0,0.95)"
+                      :top 0
+                      :left 0
+                      :right 0
+                      :bottom 0}}
+        [:div.p-10
+         [:input.input
+          {:value search-text
+           :on-change #(dispatch [:set-search-text (event-value %)])
+           :style (merge search-input-style
+                         {:background-color "rgba(255,255,255,0.1)"})}]
+         [:span.white.f-s-14.i.opacity-5 "\"8d10 + 2\", \"magic missile\", etc."]]
+        [search-results]]))
    (let [hdr [header title button-cfgs]]
      [:div
       [:div#sticky-header.sticky-header.w-100-p.posn-fixed
