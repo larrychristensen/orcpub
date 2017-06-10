@@ -419,7 +419,10 @@
    :darkvision 60
    :languages ["Common" "Elvish"]
    :selections [(opt5e/ability-increase-selection (disj (set char5e/ability-keys) ::char5e/cha) 2 true)
-                (opt5e/skill-selection 2)
+                (assoc
+                 (opt5e/skill-selection 2)
+                 ::t/ref
+                 [:race :half-elf :skill-proficiency])
                 (opt5e/language-selection opt5e/languages 1)]
    :modifiers [(mod5e/saving-throw-advantage [:charmed])]
    :traits [{:name "Fey Ancestry"
@@ -4367,7 +4370,10 @@ long rest."})]
                             (t/option-cfg
                              {:name "Sword Coast Variant"
                               :help "The half-elf variants presented in the Sword Coast Adventurer's Guide"
-                              :selections [(opt5e/skill-selection -2)
+                              :selections [(assoc
+                                            (opt5e/skill-selection -2)
+                                            ::t/ref
+                                            [:race :half-elf :skill-proficiency])
                                            (t/selection-cfg
                                             {:name "Elf Parentage"
                                              :tags #{:race}
