@@ -797,7 +797,7 @@ Whenever the charmed target takes damage, the target can repeat the saving throw
                                               0.125 "1/8"
                                               0.25 "1/4"
                                               0.5 "1/2"
-                                              :else challenge)))]]])
+                                              challenge)))]]])
 
 (defn search-results []
   (if-let [{{:keys [result] :as top-result} :top-result :as search-results}
