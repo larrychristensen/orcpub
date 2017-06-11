@@ -7,6 +7,7 @@
             [orcpub.dnd.e5.character :as char5e]
             [orcpub.dnd.e5.spells :as spells]
             [orcpub.dnd.e5.monsters :as monsters]
+            [orcpub.dnd.e5.magic-items :as magic-items]
             [orcpub.dnd.e5.event-handlers :as event-handlers]
             [orcpub.dnd.e5.character.equipment :as char-equip5e]
             [orcpub.dnd.e5.db :refer [default-value
@@ -1013,6 +1014,8 @@
                                           :result (spells/spell-map kw)}}
       (monsters/monster-map kw) {:top-result {:type :monster
                                               :result (monsters/monster-map kw)}}
+      (magic-items/magic-item-map kw) {:top-result {:type :magic-item
+                                              :result (magic-items/magic-item-map kw)}}
       :else nil)))
 
 (reg-event-db

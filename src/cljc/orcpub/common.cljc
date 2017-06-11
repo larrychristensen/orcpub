@@ -49,15 +49,16 @@
    {}
    m))
 
-(defn list-print [list]
-  (case (count list)
-    0 ""
-    1 (str (first list))
-    2 (s/join " and " list)
-    (str
-     (s/join ", " (butlast list))
-     ", and "
-     (last list))))
+(defn list-print [list & [preceding-last]]
+  (let [preceding-last (or preceding-last "and")]
+    (case (count list)
+      0 ""
+      1 (str (first list))
+      2 (s/join (str " " preceding-last " ") list)
+      (str
+       (s/join ", " (butlast list))
+       (str ", " preceding-last " ")
+       (last list)))))
 
 (defn round-up [num]
   (int (Math/ceil (double num))))
