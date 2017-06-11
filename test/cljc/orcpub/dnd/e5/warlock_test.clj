@@ -39,7 +39,11 @@
     :class
     [{:orcpub.entity/key :warlock,
       :orcpub.entity/options
-      {:levels
+      {:skill-proficiency
+       (mapv
+        (fn [kw] {:orcpub.entity/key kw})
+        selected-skill-profs)
+       :levels
        [{:orcpub.entity/key :level-1,
          :orcpub.entity/options
          {:otherworldly-patron {:orcpub.entity/key :the-archfey}}}
@@ -123,11 +127,7 @@
        {:orcpub.entity/key :any-simple-weapon,
         :orcpub.entity/options
         {:starting-equipment-simple-weapon
-         {:orcpub.entity/key :shortbow}}}}}],
-    :skill-profs
-    (mapv
-     (fn [kw] {:orcpub.entity/key kw})
-     selected-skill-profs), 
+         {:orcpub.entity/key :shortbow}}}}}], 
     :optional-content nil}})
 
 (defn has-spell? [built-char level spell-cfg]
