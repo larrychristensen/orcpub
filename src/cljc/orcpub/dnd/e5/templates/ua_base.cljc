@@ -617,7 +617,7 @@
                              {:name "Mystic",
                               :hit-die 8,
                               :ability-increase-levels [4 8 12 16 19]
-                              :profs {:armor {:light false :medium false}
+                              :profs {:armor {:light false}
                                       :weapon {:simple false} 
                                       :save {::char5e/int true ::char5e/wis true}
                                       :skill-options {:choose 2 :options {:arcana true :history true :insight true :medicine true :nature true :perception true :religion true}}}
@@ -695,11 +695,11 @@
                                                        (t/option-cfg
                                                         {:name "Two Handaxes"
                                                          :modifiers [(mod5e/weapon :handaxe 2)]})]})]
-                              :levels {2 {:modifiers [(mod5e/dependent-trait
+                              :levels {2 {:modifiers [(mod5e/bonus-action
                                                        {:name "Mystical Recovery"
                                                         :page 4
                                                         :source ua-mystic-kw
-                                                        :summary (str "regain " (?ability-bonuses ::char5e/int) " HPs when you spend psi points on psychic discipline of your order and you have less than " (inc (int (/ ?max-hit-points 2))) "HPs remaining")})
+                                                        :summary "Regain HPs equal to the number of psi points you spend on a psionic discipline"})
                                                       (mod5e/trait-cfg
                                                        {:name "Telepathy"
                                                         :page 4
@@ -802,7 +802,7 @@
                               :modifiers [opt5e/ua-al-illegal
                                           (mod5e/attack
                                            {:name "Horns"
-                                            :damage-die 12
+                                            :damage-die 10
                                             :damage-die-count 1
                                             :damage-type :piercing
                                             :page 2
