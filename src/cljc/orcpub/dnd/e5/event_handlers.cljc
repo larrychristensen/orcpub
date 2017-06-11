@@ -1,6 +1,7 @@
 (ns orcpub.dnd.e5.event-handlers
   (:require [orcpub.entity :as entity]
             [orcpub.template :as t]
+            [orcpub.common :as common]
             [orcpub.dnd.e5.character :as char5e]
             [orcpub.dnd.e5.character.equipment :as char-equip5e]))
 
@@ -131,3 +132,10 @@
            (update-multi-select new-option key)
            (update-single-select multiselect? new-option)))))
     character))
+
+(def name-query-regex
+  #"(male|female)?\s?(human|elf|dwarf|halfling|half-elf|half-orc|dragonborn|tiefling)?\s?(calishite|chondathan|damaran|illuskan|mulan|rashemi|shou|tehryian|turami)?\s?name")
+
+(defn parse-name-query [search-text]
+  (let [match (re-matches name-query-regex search-text)]
+    (if match (map common/name-to-kw (rest match)))))

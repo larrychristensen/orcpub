@@ -5,6 +5,7 @@
             [orcpub.dice :as dice]
             [orcpub.dnd.e5.template :as t5e]
             [orcpub.dnd.e5.character :as char5e]
+            [orcpub.dnd.e5.character.random :as char-rand5e]
             [orcpub.dnd.e5.spells :as spells]
             [orcpub.dnd.e5.monsters :as monsters]
             [orcpub.dnd.e5.magic-items :as magic-items]
@@ -1004,9 +1005,20 @@
           :confirmation-shown? true
           :confirmation-cfg cfg)))
 
+(defn name-result [search-text]
+  (let [[sex race subrace :as result] (event-handlers/parse-name-query search-text)]
+    (prn "RESULT" result)
+    (if result
+      {:top-result {:type :name
+                    :result (char-rand5e/random-name
+                             {:race race
+                              :subrace subrace
+                              :sex sex})}})))
+
 (defn search-results [search-text]
   (let [dice-result (dice/dice-roll-text search-text)
-        kw (if search-text (common/name-to-kw search-text))]
+        kw (if search-text (common/name-to-kw search-text))
+        name-result (name-result search-text)]
     (cond
       dice-result {:top-result {:type :dice-roll
                                 :result dice-result}}
@@ -1015,8 +1027,10 @@
       (monsters/monster-map kw) {:top-result {:type :monster
                                               :result (monsters/monster-map kw)}}
       (magic-items/magic-item-map kw) {:top-result {:type :magic-item
-                                              :result (magic-items/magic-item-map kw)}}
+                                                    :result (magic-items/magic-item-map kw)}}
+      name-result name-result
       :else nil)))
+
 
 (reg-event-db
  :set-search-text
