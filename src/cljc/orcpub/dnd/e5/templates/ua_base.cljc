@@ -497,7 +497,7 @@
 (def ua-mystic-order-of-the-immortal
   {:name "Order of the Immortal"
    :selections [(psionic-disciplines-selection 2 "Order of the Immortal" (fn [d] (= :immortal (:mystic-order d))))]
-   :modifiers [(mods/cum-sum-mod ?hit-point-level-increases (?class-level :mystic))
+   :modifiers [(mods/cum-sum-mod ?hit-point-level-bonus 1)
                (mod5e/ac-bonus-fn
                 (fn [armor shield]
                   (if (and (nil? shield)
