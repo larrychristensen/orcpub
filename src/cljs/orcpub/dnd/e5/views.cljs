@@ -764,7 +764,7 @@ Whenever the charmed target takes damage, the target can repeat the saving throw
            (fn [[k v]] (str (s/capitalize (clojure.core/name k)) " " (common/bonus-str v)))
            m)))
 
-(defn monster-result [{:keys [name size type hit-points alignment armor-class armor-notes speed saving-throws skills senses languages challenge traits actions source page] :as monster}]
+(defn monster-result [{:keys [name size type hit-points alignment armor-class armor-notes speed saving-throws skills senses languages challenge traits actions legendary-actions source page] :as monster}]
   [:div.white
    [:div.flex
     (svg-icon "hydra" 36 36)
@@ -816,7 +816,20 @@ Whenever the charmed target takes damage, the target can repeat the saving throw
            (fn [i {:keys [name description]}]
              ^{:key i}
              [:div.m-t-10 (spell-field name description)])
-           actions))]])]]])
+           actions))]])
+     (if legendary-actions
+       [:div.m-t-20
+        [:div.i.f-w-b.f-s-18 "Legendary Actions"]
+        (if (:description legendary-actions)
+          [:div (:description legendary-actions)])
+        (if (:actions legendary-actions)
+          [:div
+           (doall
+            (map-indexed
+             (fn [i {:keys [name description]}]
+               ^{:key i}
+               [:div.m-t-10 (spell-field name description)])
+             (:actions legendary-actions)))])])]]])
 
 (defn search-results []
   (if-let [{{:keys [result] :as top-result} :top-result :as search-results}
