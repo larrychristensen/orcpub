@@ -683,6 +683,38 @@
    [:span.f-w-b name ":"]
    [:span.m-l-10 value]])
 
+(defn paragraphs [str]
+  (doall
+   (map-indexed
+    (fn [i p]
+      ^{:key i} [:p p])
+    (s/split str #"\n"))))
+
+(defn magic-item-result [{:keys [name item-type item-subtype rarity attunement description summary] :as spell}]
+  [:div.white
+   [:div.flex
+    (svg-icon "orb-wand" 36 36)
+    [:div.m-l-10
+     [:span.f-s-24.f-w-b name]
+     [:div.f-s-18.i.f-w-b (str (s/capitalize (common/kw-to-name item-type))
+                               ", "
+                               (if (string? rarity)
+                                 rarity
+                                 (common/kw-to-name rarity))
+                               (if attunement
+                                 (str
+                                  " (requires attunement"
+                                  (case attunement
+                                    [:any] nil
+                                    [:good] " by a creature of good alignment"
+                                    [:evil] " by a creature of evil alignment"
+                                    [:spellcaster] " by a spellcaster"
+                                    (str " by a "
+                                         (common/list-print (map clojure.core/name attunement) "or")))
+                                  ")")))]
+     (if (or summary description)
+       (paragraphs (or summary description)))]]])
+
 (defn spell-result [{:keys [name level school casting-time range duration components description summary page source] :as spell}]
   [:div.white
    [:div.flex
@@ -708,10 +740,7 @@
                                         (str " (" material-component ")")))))
      [:div.m-t-10
       (if (or summary description)
-        (map-indexed
-         (fn [i p]
-           ^{:key i} [:p p])
-         (s/split (or summary description) #"\n"))
+        (paragraphs (or summary description))
         (disp/source-description source page))]]]])
 
 (def aboleth
@@ -840,6 +869,7 @@ Whenever the charmed target takes damage, the target can repeat the saving throw
         :dice-roll (dice-roll-result result)
         :spell (spell-result result)
         :monster (monster-result result)
+        :magic-item (magic-item-result result)
         :else nil)]]))
 
 (defn content-page [title button-cfgs content]

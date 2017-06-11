@@ -1516,17 +1516,17 @@ This potion’s transparent liquid has floating in it a sliver of fingernail fro
     }{
     :name "Potion of Greater Healing"
     :item-type :potion
-    :rarity :common
+    :rarity :uncommon
     :description "You regain 4d4 + 4 hit points when you drink this potion"
     }{
     :name "Potion of Superior Healing"
     :item-type :potion
-    :rarity :common
+    :rarity :rare
     :description "You regain 8d4 + 8 hit points when you drink this potion"
     }{
     :name "Potion of Supreme Healing"
     :item-type :potion
-    :rarity :common
+    :rarity :very-rare
     :description "You regain 10d4 + 20 hit points when you drink this potion"
     }{
     :name "Potion of Heroism"
@@ -2087,7 +2087,7 @@ You have a 50 percent chance to instantly travel to a random plane of existence,
 The staff has 10 charges. When you hit with a melee attack using it, you can expend up to 3 of its charges. For each charge you expend, the target takes an extra 1d6 force damage. The staff regains 1d6 + 4 expended charges daily at dawn. If you expend the last charge, roll a d20. On a 1, the staff becomes a nonmagical quarterstaff."
     }{
     :name "Staff of Swarming Insects"
-    :item-type :taff, 
+    :item-type :staff, 
     :rarity :rare 
     :attunement [:bard, :cleric, :druid, :sorcerer, :warlock, :wizard]
 
