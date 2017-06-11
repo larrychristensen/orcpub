@@ -1,5 +1,5 @@
 (ns orcpub.dnd.e5.event-handlers-test
-  (:require [clojure.test :refer [deftest is]]
+  (:require [clojure.test :refer [deftest is testing]]
             [clojure.data :refer [diff]]
             [orcpub.entity :as entity]
             [orcpub.template :as t]
@@ -254,3 +254,11 @@
         back-to-strict (entity/to-strict change-back)]
     (is (= skills-id (get-skills-id non-strict)))
     (is (= strict back-to-strict))))
+
+(deftest test-parse-name-query
+  (testing "parse-name-query"
+    (is (= [nil nil nil] (eh/parse-name-query "name")))
+    (is (= [nil :human nil] (eh/parse-name-query "human name")))
+    (is (= [nil nil :chondathan] (eh/parse-name-query "chondathan name")))
+    (is (= [:female nil :chondathan] (eh/parse-name-query "female chondathan name")))
+    (is (= [:female :elf nil] (eh/parse-name-query "female elf name")))))
