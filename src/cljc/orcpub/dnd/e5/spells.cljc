@@ -1617,7 +1617,7 @@ The spell creates more than one beam when you reach higher levels: two beams at 
                 :duration "Concentration, up to 1 hour"
                 :source :phb
                 :page 237
-                }
+                :summary "Choose a damage type of acid, cold, fire, lightning, or thunder and touch a non-magic weapon. For the duration, it gains a +1 attack bonus and deals an extra 1d4 damage of the chosen type."}
                {
                 :name "Enhance Ability"
                 :school "transmutation"
@@ -1659,7 +1659,7 @@ Reduce. The target's size is halved in all dimensions, and its weight is reduced
                 :duration "Concentration, up to 1 minute"
                 :source :phb
                 :page 237
-                }
+                :summary "The next creature you hit with a weapon attack is restrained unless it succeeds on a STR save (Large or larger creatures have advantage). While restrained the creature takes 1d6 piercing damage at the start of it's turns. The creature or another can use an action to make a STR check to free it."}
                {
                 :name "Entangle"
                 :school "conjuration"
@@ -1823,7 +1823,7 @@ heal, or wish."
     :duration "1 hour"
     :source :phb
     :page 240
-    }
+    :summary "Put a willing creature into a state indistinguishable from death, during which it has resistance to all damage except psychic, and poison and disease don't affect it until the spell ends. You can use an action to touch the creature and end the spell."}
    {
     :name "Find Familiar"
     :ritual true
@@ -1835,7 +1835,7 @@ heal, or wish."
     :duration "Instantaneous"
     :source :phb
     :page 240
-    }
+    :description "Summon a familiar that obeys your commands."}
    {
     :name "Find Steed"
     :school "conjuration"
@@ -2076,7 +2076,8 @@ The target can also spend 5 feet of movement to automatically escape from nonmag
     :components {:somatic true :material true :material-component "apply a bit of makeup while casting the spell"}
     :duration "Concentration, up to 1 minute"
     :source :phb
-    :page 244}
+    :page 244
+    :summary "Gain advantage on all CHA checks on a non-hostile creature of your choice. It is aware of the charm after the spell ends."}
    {:name "Frostbite"
     :school "evocation"
     :level 0
@@ -2219,7 +2220,7 @@ spell."}
     :duration "Concentration, up to 1 minute"
     :source :phb
     :page 246
-    }
+    :summary "Conjure a vine that lashes out at a creature within 30 ft. of it. The creature must succeed on a DEX save or be pulled 20 ft. toward the vine. For the duration you can use a bonus action to target the same creature or another on each of your turns."}
    {
     :name "Grease"
     :school "conjuration"
@@ -2273,7 +2274,7 @@ When the grease appears, each creature standing in its area must succeed on a De
     :duration "8 hours"
     :source :phb
     :page 246
-    }
+    :summary "Create a guardian that deals 20 radiant damage to hostile creatures the first time they move within 10 ft. of it on their turn, half on successful DEX save. When it has dealt 60 damage it disappears."}
    {
     :name "Guards and Wards"
     :school "abjuration"
@@ -2350,10 +2351,10 @@ As a bonus action on each of your turns before the spell ends, you can change th
     :casting-time "1 bonus action"
     :range "Self"
     :components {:verbal true}
-    :duration "Concentratio, up to 1 minute"
+    :duration "Concentration, up to 1 minute"
     :source :phb
     :page 249
-    }{
+    :summary "When you next hit a creature with a ranged weapon attack deal 1d10 piercing damage to creatures within 5 ft. of the target, half on successful DEX save. Damage increase by 1d10 for each slot level above 1st, to max 6d10."}{
     :name "Hallow"
     :school "evocation"
     :level 5
@@ -2481,7 +2482,7 @@ At Higher Levels. When you cast this spell using a spell slot of 2nd level or hi
     :duration "Concentration, up to 1 hour"
     :source :phb
     :page 251
-    }
+    :summary "Curse a creature, it takes an extra 1d6 damage necrotic damage from your attacks and has disadvantage on ability checks of a type you choose. You can retarget the curse if the creature falls to 0 HPs. Increase duration to 8 hrs. with 3rd or 4th level slot or to 24 hrs. with a 5th level or higher slot."}
    {
     :name "Hold Monster"
     :school "enchantment"
@@ -2524,7 +2525,7 @@ At Higher Levels. When you cast this spell using a spell slot of 3rd level or hi
     :duration "Concentration, up to 1 minute"
     :source :phb
     :page 251
-    }
+    :summary "Create a 20 ft. radius orb of darkness that cannot be illuminated. Creatures fully within the orb are blinded. It is difficult terrain and creatures that start their turn there takes 2d6 cold damage. Any creature that ends it's turn there must succeed on a DEX save or take 2d6 acid damage."}
    {
     :name "Hunter's Mark"
     :school "divination"
@@ -2535,7 +2536,7 @@ At Higher Levels. When you cast this spell using a spell slot of 3rd level or hi
     :duration "Concentration, up to 1 hour"
     :source :phb
     :page 251
-    }
+    :summary "Mark a target, your weapon attacks deal an extra 1d6 damage on hit against it and you have advantage on Perception or Survival checks to find it. You can retarget the spell if it falls to 0 HPs. Increase duration to 8 hrs. with 3rd or 4th level slot or to 24 hrs. with a 5th level or higher slot."} 
    {
     :name "Hypnotic Pattern"
     :school "illusion"
@@ -2818,8 +2819,7 @@ If you target an object held or worn by a hostile creature, that creature must s
     :components {:verbal true :somatic true}
     :duration "Concentration, up 1 minute"
     :source :phb
-    :page 255
-    }
+    :page 255}
    {
     :name "Lightning Bolt"
     :school "evocation"
