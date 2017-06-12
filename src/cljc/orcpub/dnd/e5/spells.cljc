@@ -10,14 +10,18 @@
     :duration "Instantaneous"
     :components {:verbal true :somatic true :material true :material-component "bit of sponge"}
     :source :ee
-    :page 14}
+    :page 15
+    :summary "Creates within a 30 ft cube must make CON save or take 10d8 necrotic damage, half on successful save. Water elementals and plants have disadvantage on the save."}
    {:name "Absorb Elements"
     :school "abjuration"
     :level 1
     :casting-time "1 reaction, when you take thunder, lightning, cold, or fire damage"
     :range "Self"
     :duration "1 round"
-    :components {:somatic true}}
+    :components {:somatic true}
+    :source :ee
+    :page 15
+    :summary "Until the start of your next turn, you have resistance to the triggering damage and your first melee attack hit next turn deals 1d6 of the same type of damage. The damage increases by 1d6 per additional level spell slot."}
    {
     :name "Acid Splash"
     :school "conjuration"
@@ -49,7 +53,8 @@ increase by an additional 5 for each slot level above 2nd."
     :duration "Instantaneous"
     :components {:verbal true :somatic true :material true :material-component "red dragon scale"}
     :page 15
-    :source :ee}
+    :source :ee
+    :summary "Creates in a 30 ft. x 5 ft. line from take 3d8 fire damage, half on successful DEX save. For each slot above 2nd, damage increases by 1d8."}
    {
     :name "Alarm"
     :ritual true
@@ -383,7 +388,8 @@ If the target is native to a different plane of existence than the one you're on
     :duration "Concentration, up to 10 minutes"
     :components {:verbal true :somatic true :material true :material-component "fur wrapped in cloth"}
     :page 15
-    :source :ee}
+    :source :ee
+    :summary "Touch a beast with INT less than 4 and establish a telepathic link, through which you can communicate basic concepts and emotions. The beast has advantage on attacks against creatures within 5 ft. of you."}
    {
     :name "Beast Sense"
     :ritual true
@@ -529,7 +535,8 @@ While on the Ethereal Plane, you can see and hear the plane you originated from,
     :duration "Instantaneous"
     :components {:verbal true :somatic true}
     :page 15
-    :source :ee}
+    :source :ee
+    :summary "Up to 6 pillars, 5 ft. in diameter, 30 ft. high, AC 5 and 30 HPs, burst from the ground at points you can see. Creatures above where the pillars emerge must succeed on a DEX save or be lifted with it, causing 6d6 bludgeoning damage to the creature and it is restrained if it hits an obstacle. The creature can end the restraint with a STR or DEX save against the spell save DC. Two additional pillars are created for each slot level above 6th."}
    {:name "Booming Blade"
     :level 0
     :school "evocation"
@@ -644,7 +651,7 @@ This spell's damage increases by 1d8 when you reach 5th level (2d8), 11th level 
     :duration "Instantaneous"
     :source :phb
     :page 221
-    }
+    :summary "Ranged spell attack with an orb, causing 3d8 of your choice of acid, cold, fire, lighting, poison, or thunder damage on successful hit."}
    {
     :name "Circle of Death"
     :school "necromancy"
@@ -667,7 +674,7 @@ At Higher Levels. When you cast this spell using a spell slot of 7th level or hi
     :duration "Concentration, up to 10 minutes"
     :source :phb
     :page 221
-    }
+    :summary "Friendly creatures within 30 ft. gain advantage on saves against magic and on such saves that deal half damage on success, friendly creature instead take none."}
    {
     :name "Clairvoyance"
     :school "divination"
@@ -702,7 +709,7 @@ At any time after the clone matures, if the original creature dies, its soul tra
     :duration "Concentration, up to 1 minute"
     :source :phb
     :page 222
-    }
+    :summary "Fill a 5 ft. cube with spinning daggers, creatures take 4d4 slashing damage the first time they enter on their turn or start their turn there. Each slot above 2nd increases the damage by 2d4."}
    {
     :name "Cloudkill"
     :school "conjuration"
@@ -786,7 +793,7 @@ For example, you could determine the location of powerful undead in the area, th
     :duration "Concentration, up to 1 minute"
     :source :phb
     :page 224
-    }
+    :summary "A creature must make a WIS save or has disadvantage on attacks against creatures other than you. It must success on a WIS save to move more than 30 ft. from you. The spell ends if you attack or cast a spell against another creature, if you end your turn more than 30 ft. away from the creature, or a companion attacks the creature."}
    {
     :name "Comprehend Languages"
     :ritual true
@@ -809,7 +816,7 @@ This spell doesn't decode secret messages in a text or a glyph, such as an arcan
     :duration "Concentration, up to 1 minute"
     :source :phb
     :page 224
-    }
+    :summary "Choose creatures within range you can see and can hear you to make a WIS save. On a failed save, until the spell ends, you can use a bonus action to force the creature to move in a direction horizontal to you. If can't be forced to move into a hazard, but it will provoke opportunity attacks."}
    {
     :name "Cone of Cold"
     :school "evocation"
@@ -868,7 +875,7 @@ At Higher Levels. When you cast this spell using certain higher-level spell slot
     :duration "Instantaneous"
     :source :phb
     :page 222
-    }
+    :summary "Each creature within a 60 ft. cone takes 3d8 damage, half on successful DEX save. The damage if of the type of weapon used as component."}
    {
     :name "Conjure Celestial"
     :school "conjuration"
@@ -938,7 +945,7 @@ At Higher Levels. When you cast this spell using certain higher-level spell slot
     :duration "Instantaneous"
     :source :phb
     :page 226
-    }
+    :summary "Creatures in a 40 ft. radius, 20 ft. high cylinder centered on a point take 8d8 damage, half on a successful DEX save. The damage is of the type of the component used."}
    {
     :name "Conjure Woodland Beings"
     :school "conjuration"
@@ -1089,7 +1096,7 @@ Stage Condition
     :duration "8 hours"
     :source :phb
     :page 228
-    }
+    :summary "Put 4 pieces of non-magic ammunition in the ground. Until the spell ends, creatures that come within 30 ft. of the ammunition take 1d6 damage on a failed DEX save. You may designate creatures to be immune. Increase the damage by 2 for each slot above 2nd."}
    {
     :name "Counterspell"
     :school "abjuration"
@@ -1100,7 +1107,7 @@ Stage Condition
     :duration "Instantaneous"
     :source :phb
     :page 228
-    }
+    :summary "Interrupt a spell of 3rd level or lower or make a spellcasting ability check of DC 10 + spells level to interrupt a spell of 4th level or greater. At higher levels, the spell is automatically countered if it is of level equal to or lower than the slot used."}
    {:name "Create Bonfire"
     :school "conjuration"
     :level 0
@@ -1177,7 +1184,7 @@ At Higher Levels. When you cast this spell using a spell slot of 6th level or hi
     :duration "Concentration, up to 1 minute"
     :source :phb
     :page 229
-    }
+    :summary "A humanoid must succeed on a WIS save or be charmed by you. You can force it to make an attack on a creature other than itself. The spell ends if, on subsequent turns, you don't use an action to maintain the control. The target can also end the spell if it succeeds on a WIS save at the end it it's turn."}
    {
     :name "Crusader's Mantle"
     :school "evocation"
@@ -1188,7 +1195,7 @@ At Higher Levels. When you cast this spell using a spell slot of 6th level or hi
     :duration "Concentration, up to 1 minute"
     :source :phb
     :page 230
-    }
+    :summary "Creatures within 30 ft. of you deal an extra 1d4 radiant damage with melee attack hits."}
    {
     :name "Cure Wounds"
     :school "evocation"
@@ -1292,7 +1299,7 @@ Each time you cast this spell, you can create a new demiplane, or have the shado
                 :duration "Instantaneous"
                 :source :phb
                 :page 231
-                }
+                :summary "Creatures you choose within 30 ft. of you take 5d6 radiant damage and are knocked prone, half damage on successful CON save and aren't knocked prone."}
                {
                 :name "Detect Evil and Good"
                 :school "divination"
@@ -1417,7 +1424,7 @@ At Higher Levels. When you cast this spell using a spell slot of 4th level or hi
                 :duration "Instantaneous"
                 :source :phb
                 :page 234
-                }
+                :summary "A creature takes 3d6 psychic damage and must use its reaction to move as far away from you as it can. It takes half damage and doesn't have to move on successful WIS save. Damage increases by 1d6 for each slot above 1st."}
                {
                 :name "Divination"
                 :ritual true
@@ -1536,7 +1543,7 @@ If you have a body part, lock of hair, clipping from a nail, or similar portion 
                 :duration "Instantaneous"
                 :source :phb
                 :page 236
-                }
+                :summary "Create 1 effect: 1) predict the weather for the next 24 hours in your current location. 2) make a flower blossom, or similar effect. 3) create a harmless senory effect that fits within a 5 ft. cube. 4) light or snuff a small fire."}
                {:name "Dust Devil"
                 :school "conjuration"
                 :level 2
