@@ -699,6 +699,109 @@
                    "raven"
                    "hawk"]})
 
+(def rashemi-names
+  {::male ["Borivik"
+           "Faurgar"
+           "Jandar"
+           "Kanithar"
+           "Madislak"
+           "Ralmevik"
+           "Shaumar"
+           "Vladislak"
+           "Bogdan"
+           "Bogumir"
+           "Milodrag"]
+   ::pre ["Madi"
+          "Vladi"
+          "Ludi"
+          "Kani"
+          "Brato"
+          "Desi"
+          "Drago"
+          "Kazi"
+          "Lyud"
+          "Radomir"
+          "Rosti"
+          "Stanis"
+          "Sobe"
+          "Tomi"
+          "Veli"
+          "Vito"
+          "Valsti"
+          "Vsevo"
+          "Yaro"
+          "Zvoni"]
+   ::male-post ["slak"
+                "vik"
+                "mar"
+                "thar"
+                "mir"
+                "mil"]
+   ::female ["Fyevarra"
+             "Hulmarra"
+             "Immith"
+             "Imzel"
+             "Navarra"
+             "Shevarra"
+             "Tammith"
+             "Yuldra"
+             "Bogdana"
+             "Bozhena"
+             "Elena"]
+   ::female-post ["slaka"
+                  "vika"
+                  "mara"
+                  "thara"]
+   ::surname-pre ["Char"
+                  "Iltazy"
+                  "Murnye"
+                  "Staya"
+                  "Ulmo"
+                  "Nau"
+                  "Ned"
+                  "Novo"
+                  "Ognya"
+                  "Pakul"
+                  "Pade"
+                  "Pav"
+                  "Pavi"
+                  "Pavlo"
+                  "Pecha"
+                  "Pia"
+                  "Pulkra"
+                  "Rezni"
+                  "Rudaw"
+                  "Sla"
+                  "Soko"
+                  "Stol"
+                  "Svoba"
+                  "Trifo"
+                  "Vanche"
+                  "Velich"
+                  "Wola"
+                  "Zabe"
+                  "Zori"]
+   ::surname-post ["yov"
+                   "kov"
+                   "mov"
+                   "vic"
+                   "til"
+                   "lek"
+                   "goba"
+                   "yara"
+                   "thara"
+                   "noga"
+                   "kina"
+                   "balek"
+                   "vak"
+                   "sad"
+                   "nov"
+                   "lov"
+                   "tek"
+                   "bek"
+                   "zak"
+                   "zyk"]})
+
 (defn name-search-match [text]
   (re-matches #".*\bname\b.*" text))
 
@@ -830,6 +933,26 @@
 (defmethod random-name [::illuskan nil] [_]
   (illuskan-name
    (set-name illuskan-names (rand-nth [::male ::female]))))
+
+(defn rashemi-name [first]
+  (join-names
+   first
+   (combined-name rashemi-names ::surname-pre ::surname-post)))
+
+(defmethod random-name [::rashemi ::male] [_]
+  (rashemi-name
+   (random-set-or-combined rashemi-names ::male ::pre ::male-post)))
+
+(defmethod random-name [::rashemi ::female] [_]
+  (rashemi-name
+   (random-set-or-combined rashemi-names ::female ::pre ::female-post)))
+
+(defmethod random-name [::rashemi nil] [_]
+  (rashemi-name
+   (apply random-set-or-combined rashemi-names (rand-nth
+                                                [[::male ::pre ::male-post]
+                                                 [::female ::pre ::female-post]]))))
+
 
 (defn random-human-subrace []
   (rand-nth [::calishite
