@@ -5,19 +5,19 @@
 
 (def dot-char "•")
 
-(defn- name-to-kw-aux [name]
+(defn- name-to-kw-aux [name ns]
   (if (string? name)
-    (-> name
-        clojure.string/lower-case
-        (clojure.string/replace #"'" "")
-        (clojure.string/replace #"\W" "-")
-        (clojure.string/replace #"\-+" "-")
-        keyword)))
+    (as-> name $
+        (s/lower-case $)
+        (s/replace $ #"'" "")
+        (s/replace $ #"\W" "-")
+        (s/replace $ #"\-+" "-")
+        (keyword ns $))))
 
 (def memoized-name-to-kw (memoize name-to-kw-aux))
 
-(defn name-to-kw [name]
-  (memoized-name-to-kw name))
+(defn name-to-kw [name & [ns]]
+  (memoized-name-to-kw name ns))
 
 (defn kw-to-name [kw & [capitalize?]]
   (if (keyword? kw)
