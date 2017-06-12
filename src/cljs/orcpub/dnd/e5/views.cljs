@@ -172,6 +172,7 @@
                           {:color :transparent})
                          search-input-style)
                 :value search-text
+                :on-key-press #(if (= "Enter" (.-key %)) (dispatch [:set-search-text search-text]))
                 :on-change #(dispatch [:set-search-text (event-value %)])}]]
              [:div.opacity-1.p-r-10.pointer
               {:class-name (if mobile? "opacity-5" "opacity-1")
@@ -823,17 +824,15 @@
 (defn search-results []
   (if-let [{{:keys [result] :as top-result} :top-result :as search-results}
            @(subscribe [:search-results])]
-    (do
-      (prn "SEARCH RESULTS" search-results)
-     [:div
-      [:div.p-20
-       (case (:type top-result)
-         :dice-roll (dice-roll-result result)
-         :spell (spell-result result)
-         :monster (monster-result result)
-         :magic-item (magic-item-result result)
-         :name (name-result result)
-         :else nil)]])))
+    [:div
+     [:div.p-20
+      (case (:type top-result)
+        :dice-roll (dice-roll-result result)
+        :spell (spell-result result)
+        :monster (monster-result result)
+        :magic-item (magic-item-result result)
+        :name (name-result result)
+        :else nil)]]))
 
 
 (defn content-page [title button-cfgs content]
@@ -878,9 +877,10 @@
            [:input.input
             {:value search-text
              :on-change #(dispatch [:set-search-text (event-value %)])
+             :on-key-press #(if (= "Enter" (.-key %)) (dispatch [:set-search-text search-text]))
              :style (merge search-input-style
                            {:background-color "rgba(255,255,255,0.1)"})}]
-           [:span.white.f-s-14.i.opacity-5 "\"8d10 + 2\", \"magic missile\", \"kobold\", etc."]]
+           [:span.white.f-s-14.i.opacity-5 "\"8d10 + 2\", \"magic missile\", \"kobold\", \"female calishite name\", etc."]]
           [:div.flex-grow-1
            [search-results]]]))
      (let [hdr [header title button-cfgs]]
