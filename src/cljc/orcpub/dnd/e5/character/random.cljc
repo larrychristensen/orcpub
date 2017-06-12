@@ -713,7 +713,14 @@
                   "Lack"
                   "Stead"
                   "Sky"
-                  "Green"]
+                  "Green"
+                  "Gray"
+                  "Black"
+                  "Fall"
+                  "Summer"
+                  "Spring"
+                  "Winter"
+                  "Ice"]
    ::surname-post ["rivver"
                    "wood"
                    "man"
@@ -726,7 +733,13 @@
                    "mount"
                    "grass"
                    "raven"
-                   "hawk"]})
+                   "hawk"
+                   "wave"
+                   "crow"
+                   "shear"
+                   "sea"
+                   "lake"
+                   "wolf"]})
 
 (def rashemi-names
   {::male ["Borivik"
@@ -1573,12 +1586,15 @@
                    "hill"
                    "barrel"
                    "bottle"
+                   "breeze"
                    "topple"
                    "leaf"
                    "grass"
                    "bough"
                    "cobble"
+                   "darrow"
                    "gallow"
+                   "dimple"
                    "grove"
                    "pot"
                    "fern"
@@ -1630,16 +1646,14 @@
 (derive ::tethyrian ::chondathan)
 
 (defmulti random-name (fn [{:keys [race subrace sex]}]
-                        [(or subrace race) sex]))
+                        (prn "RANDOM NAME" race subrace sex)
+                        [race subrace sex]))
 
-(defmethod random-name [::calishite ::male] [_]
+(defmethod random-name [::human ::calishite ::male] [_]
   (first-last calishite-names ::male))
 
-(defmethod random-name [::calishite ::female] [_]
+(defmethod random-name [::human ::calishite ::female] [_]
   (first-last calishite-names ::female))
-
-(defmethod random-name [::calishite nil] [_]
-  (first-last calishite-names (random-sex)))
 
 (defn chondathan-surname []
   (str (random-item chondathan-names ::surname-pre)
@@ -1649,19 +1663,14 @@
   (str (random-item chondathan-names ::male-pre)
        (random-item chondathan-names ::male-post)))
 
-(defmethod random-name [::chondathan ::male] [_]
+(defmethod random-name [::human ::chondathan ::male] [_]
   (join-names
    (random-item chondathan-names ::male)
    (chondathan-surname)))
 
-(defmethod random-name [::chondathan ::female] [_]
+(defmethod random-name [::human ::chondathan ::female] [_]
   (join-names
    (random-item chondathan-names ::female)
-   (chondathan-surname)))
-
-(defmethod random-name [::chondathan nil] [_]
-  (join-names
-   (random-item chondathan-names (random-sex))
    (chondathan-surname)))
 
 (defn set-name [list type]
@@ -1677,21 +1686,14 @@
       (set-name list type)
       (combined-name list pre-type post-type))))
 
-(defmethod random-name [::turami ::male] [_]
+(defmethod random-name [::human ::turami ::male] [_]
   (join-names
    (random-set-or-combined turami-names ::male ::male-pre ::male-post)
    (random-set-or-combined turami-names ::surname ::surname-pre ::surname-post)))
 
-(defmethod random-name [::turami ::female] [_]
+(defmethod random-name [::human ::turami ::female] [_]
   (join-names
    (random-set-or-combined turami-names ::female ::female-pre ::female-post)
-   (random-set-or-combined turami-names ::surname ::surname-pre ::surname-post)))
-
-(defmethod random-name [::turami nil] [_]
-  (join-names
-   (apply random-set-or-combined turami-names
-          (rand-nth [[::female ::female-pre ::female-post]
-                     [::male ::male-pre ::male-post]]))
    (random-set-or-combined turami-names ::surname ::surname-pre ::surname-post)))
 
 (defn shou-name [first]
@@ -1699,117 +1701,118 @@
    first
    (random-set-or-combined shou-names ::surname :pre :post)))
 
-(defmethod random-name [::shou ::male] [_]
+(defmethod random-name [::human ::shou ::male] [_]
   (shou-name
    (random-set-or-combined shou-names ::male :pre :post)))
 
-(defmethod random-name [::shou ::female] [_]
+(defmethod random-name [::human ::shou ::female] [_]
   (shou-name
    (random-set-or-combined shou-names ::female :pre :post)))
-
-(defmethod random-name [::shou nil] [_]
-  (shou-name
-   (random-set-or-combined shou-names (random-sex) :pre :post)))
 
 (defn damaran-name [first]
   (join-names
    first
    (random-set-or-combined damaran-names ::surname ::surname-pre ::surname-post)))
 
-(defmethod random-name [::damaran ::male] [_]
+(defmethod random-name [::human ::damaran ::male] [_]
   (damaran-name
    (random-set-or-combined damaran-names ::male ::male-pre ::male-post)))
 
-(defmethod random-name [::damaran ::female] [_]
+(defmethod random-name [::human ::damaran ::female] [_]
   (damaran-name
    (random-set-or-combined damaran-names ::female ::female-pre ::female-post)))
-
-(defmethod random-name [::damaran nil] [_]
-  (damaran-name
-   (apply random-set-or-combined damaran-names (rand-nth
-                                                [[::female ::female-pre ::female-post]
-                                                 [::male ::male-pre ::male-post]]))))
 
 (defn illuskan-name [first]
   (join-names
    first
    (combined-name illuskan-names ::surname-pre ::surname-post)))
 
-(defmethod random-name [::illuskan ::male] [_]
+(defmethod random-name [::human ::illuskan ::male] [_]
   (illuskan-name
    (set-name illuskan-names ::male)))
 
-(defmethod random-name [::illuskan ::female] [_]
+(defmethod random-name [::human ::illuskan ::female] [_]
   (illuskan-name
    (set-name illuskan-names ::female)))
-
-(defmethod random-name [::illuskan nil] [_]
-  (illuskan-name
-   (set-name illuskan-names (rand-nth [::male ::female]))))
 
 (defn rashemi-name [first]
   (join-names
    first
    (combined-name rashemi-names ::surname-pre ::surname-post)))
 
-(defmethod random-name [::rashemi ::male] [_]
+(defmethod random-name [::human ::rashemi ::male] [_]
   (rashemi-name
    (random-set-or-combined rashemi-names ::male ::pre ::male-post)))
 
-(defmethod random-name [::rashemi ::female] [_]
+(defmethod random-name [::human ::rashemi ::female] [_]
   (rashemi-name
    (random-set-or-combined rashemi-names ::female ::pre ::female-post)))
-
-(defmethod random-name [::rashemi nil] [_]
-  (rashemi-name
-   (apply random-set-or-combined rashemi-names (rand-nth
-                                                [[::male ::pre ::male-post]
-                                                 [::female ::pre ::female-post]]))))
 
 (defn mulan-name [first]
   (join-names
    first
    (set-name mulan-names ::surname)))
 
-(defmethod random-name [::mulan ::male] [_]
+(defmethod random-name [::human ::mulan ::male] [_]
   (mulan-name
    (set-name mulan-names ::male)))
 
-(defmethod random-name [::mulan ::female] [_]
+(defmethod random-name [::human ::mulan ::female] [_]
   (mulan-name
    (set-name mulan-names ::female)))
 
-(defmethod random-name [::mulan nil] [_]
-  (mulan-name
-   (set-name mulan-names (rand-nth [::male ::female]))))
+(def human-subraces
+  [::calishite
+   ::chondathan
+   ::shou
+   ::turami
+   ::illuskan
+   ::damaran
+   ::rashemi
+   ::mulan])
+
+(def human-subraces-set
+  (into #{} human-subraces))
+
+(def races-and-subraces
+  (concat (vec human-subraces)
+          [::elf
+           ::dwarf
+           ::halfling]))
+
+(defn random-race []
+  (rand-nth
+   [::elf
+    ::dwarf
+    ::halfling
+    ::human
+    ::human
+    ::human]))
 
 (defn random-human-subrace []
-  (rand-nth [::calishite
-             ::chondathan
-             ::shou
-             ::turami
-             ::illuskan
-             ::damaran
-             ::rashemi
-             ::mulan]))
+  (rand-nth human-subraces))
+
+(defn random-subrace [race]
+  (prn "RANDOM SUBRACE" race)
+  (case race
+    ::human (random-human-subrace)
+    nil))
+
+(defn random-race-or-subrace []
+  (rand-nth races-and-subraces))
 
 (defn elf-name [first]
   (join-names
    first
    (random-set-or-combined elf-names ::surname ::surname-pre ::surname-post)))
 
-(defmethod random-name [::elf ::male] [_]
+(defmethod random-name [::elf nil ::male] [_]
   (elf-name
    (random-set-or-combined elf-names ::male ::male-pre ::male-post)))
 
-(defmethod random-name [::elf ::female] [_]
+(defmethod random-name [::elf nil ::female] [_]
   (elf-name
    (random-set-or-combined elf-names ::female ::female-pre ::female-post)))
-
-(defmethod random-name [::elf nil] [_]
-  (elf-name
-   (apply random-set-or-combined elf-names (rand-nth [[::male ::male-pre ::male-post]
-                                                      [::female ::female-pre ::female-post]]))))
 
 (defn dwarf-name [first]
   (join-names
@@ -1817,47 +1820,326 @@
    (apply random-set-or-combined dwarf-names (rand-nth [[::surname ::surname-pre-1 ::surname-post-1]
                                                          [::surname ::surname-pre-2 ::surname-post-2]]))))
 
-(defmethod random-name [::dwarf ::male] [_]
+(defmethod random-name [::dwarf nil ::male] [_]
   (dwarf-name
    (random-set-or-combined dwarf-names ::male ::male-pre ::male-post)))
 
-(defmethod random-name [::dwarf ::female] [_]
+(defmethod random-name [::dwarf nil ::female] [_]
   (dwarf-name
    (random-set-or-combined dwarf-names ::female ::female-pre ::female-post)))
-
-(defmethod random-name [::dwarf nil] [_]
-  (dwarf-name
-   (apply random-set-or-combined dwarf-names (rand-nth [[::male ::male-pre ::male-post]
-                                                        [::female ::female-pre ::female-post]]))))
 
 (defn halfling-name [first]
   (join-names
    first
    (random-set-or-combined halfling-names ::surname ::surname-pre ::surname-post)))
 
-(defmethod random-name [::halfling ::male] [_]
+(defmethod random-name [::halfling nil ::male] [_]
   (halfling-name
    (set-name halfling-names ::male)))
 
-(defmethod random-name [::halfling ::female] [_]
+(defmethod random-name [::halfling nil ::female] [_]
   (halfling-name
    (set-name halfling-names ::female)))
 
-(defmethod random-name [::halfling nil] [_]
-  (halfling-name
-   (set-name halfling-names (rand-nth [::male ::female]))))
+(defn random-name-result [{:keys [sex race subrace]}]
+  (prn "RANDOM NAME_RESULT" sex race subrace)
+  (let [final-race (if (human-subraces-set subrace) ::human
+                       (or race (random-race)))
+        final-subrace (or subrace (random-subrace final-race))
+        final-sex (or sex (random-sex))
+        cfg {:race final-race
+             :subrace final-subrace
+             :sex final-sex}]
+    (prn "AFERT" final-race final-subrace final-sex)
+    (assoc cfg :name (random-name cfg))))
 
-(defmethod random-name [nil nil] [_]
-  (random-name {:subrace (random-human-subrace)
-                :sex (random-sex)}))
+(def tavern-names
+  {::pre ["Red"
+          "Green"
+          "Blue"
+          "Purple"
+          "Yellow"
+          "Gray"
+          "Black"
+          "White"
+          "Rusty"
+          "Rusted"
+          "Iron"
+          "Copper"
+          "Bronze"
+          "Gold"
+          "Golden"
+          "Silver"
+          "Platinum"
+          "Fat"
+          "Prancing"
+          "Dancing"
+          "Salty"
+          "Giant"
+          "Faithful"
+          "Bearded"
+          "Surly"
+          "Brawling"
+          "Fighting"
+          "Horned"
+          "Sunken"
+          "Shaven"
+          "Limping"
+          "Lisping"
+          "Smiling"
+          "Laughing"
+          "Smirking"
+          "Quivering"
+          "Silent"
+          "Frosty"
+          "Scorched"
+          "Scorned"
+          "Lucky"
+          "Limber"
+          "Mustachioed"
+          "Tattooed"
+          "Gelded"
+          "Gilded"
+          "Fierce"
+          "Naked"
+          "Leaping"
+          "Gallivanting"
+          "Gregarious"
+          "Great"
+          "Preening"
+          "Pretentious"
+          "Noble"
+          "Wooden"
+          "Woolen"
+          "Forged"
+          "Warty"
+          "Flamboyant"
+          "Swashbuckling"
+          "Glamourous"
+          "Resplendent"
+          "Flaming"
+          "Bombastic"
+          "Dazzling"
+          "Flatulent"
+          "Bulging"
+          "Barking"
+          "Bursting"
+          "Flirting"
+          "Bawdy"
+          "Flirtatious"
+          "Flippant"
+          "Ancient"
+          "Olde"
+          "Cheeky"
+          "Waggish"
+          "Fearless"
+          "Bloated"
+          "Starving"]
+   ::post ["Goblin"
+           "Dragon"
+           "Manticore"
+           "Griffin"
+           "Orc"
+           "Hobgoblin"
+           "Stallion"
+           "Mule"
+           "Dog"
+           "Monkey"
+           "Clam"
+           "Stag"
+           "Goat"
+           "Bear"
+           "Bat"
+           "Owlbear"
+           "Dogfish"
+           "Lobster"
+           "Flumph"
+           "Crab"
+           "Wench"
+           "Barmaid"
+           "Mug"
+           "Banshee"
+           "Hag"
+           "Harpy"
+           "Mermaid"
+           "Medusa"
+           "Minotaur"
+           "Bugbear"
+           "Golem"
+           "Troll"
+           "Sprite"
+           "Pixie"
+           "Ogre"
+           "Pegasus"
+           "Kobold"
+           "Half-Dragon"
+           "Gnome"
+           "Dryad"
+           "Centaur"
+           "Rust Monster"
+           "Sword"
+           "Shield"
+           "Spear"
+           "Dagger"
+           "Halberd"
+           "Quarterstaff"
+           "Helm"
+           "Mace"
+           "Ship"
+           "Sail"
+           "Goblet"
+           "Crown"
+           "Mug"
+           "Bow"
+           "Quiver"
+           "Gauntlet"
+           "Fiend"
+           "Hole"
+           "Harp"
+           "Flute"
+           "Gem"
+           "Diamond"
+           "Emerald"
+           "Ruby"
+           "Tome"
+           "Tomb"
+           "Table"
+           "Chair"
+           "Throne"
+           "Imp"
+           "Blackfish"
+           "Swordfish"
+           "Satyr"]
+   ::pre-2 ["The Manticore"
+            "The Captain"
+            "The Dragon"
+            "The Red Dragon"
+            "The Green Dragon"
+            "The White Dragon"
+            "The Gold Dragon"
+            "The Dragon Turtle"
+            "The Kraken"
+            "The Aboleth"
+            "The Bard"
+            "The Warrior"
+            "The Barbarian"
+            "The Priest"
+            "The Maiden"
+            "The King"
+            "The Queen"
+            "The Duke"
+            "The Griffon"
+            "The Harpy"
+            "The Medusa"
+            "The Goblin"
+            "The Hobgoblin"
+            "The Orc"
+            "The Giant"
+            "The Hill Giant"
+            "The Storm Giant"
+            "The Cloud Giant"
+            "The Hero"
+            "The Witch"
+            "The Owlbear"
+            "The Keeper"
+            "The Frostmaiden"
+            "The High One"
+            "The Black Hand"
+            "The Quiet One"
+            "The Watcher"
+            "The Satyr"
+            "The Dryad"
+            "Doombringer"
+            "The Morninglord"
+            "Mistshadow"
+            "Joybringer"
+            "The Beastlord"
+            "The Reaper"
+            "Binder"
+            "The Moonmaiden"
+            "The Dark Lady"
+            "Lady Firehair"
+            "The Stormlord"
+            "Foehammer"
+            "The Lady Luck"
+            "Grimjaw"
+            "The Wavemother"
+            "The Coinmaiden"
+            "The Lover"
+            "The Beholder"
+            "The Hunter"
+            "The Enchantress"
+            "The Beast"
+            "The Angel"
+            "The Imp"]
+   ::post-2 ["Purse"
+             "Hump"
+             "Wings"
+             "Hoofs"
+             "Talons"
+             "Hearth"
+             "Goblet"
+             "Mug"
+             "Horn"
+             "Horns"
+             "Cup"
+             "Plate"
+             "Hindquarters"
+             "Small Clothes"
+             "Shield"
+             "Helm"
+             "Mace"
+             "Crown"
+             "Dagger"
+             "Spear"
+             "Sword"
+             "Shield"
+             "Dog"
+             "Goat"
+             "Maiden"
+             "Mistress"
+             "Rest"
+             "Respite"
+             "Kiss"
+             "Caress"
+             "Embrace"
+             "Steed"
+             "Companion"
+             "Torch"
+             "Bow"
+             "Quiver"
+             "Hand"
+             "Foot"
+             "Finger"
+             "Toe"
+             "Hoard"
+             "Lair"
+             "Moustache"
+             "Eye"
+             "Skull"
+             "Fist"
+             "Tattoo"
+             "Secret"
+             "Guantlet"
+             "Tryst"
+             "Whisper"
+             "Flute"
+             "Harp"
+             "Table"
+             "Chair"
+             "Throne"]})
 
-(defmethod random-name [nil ::male] [_]
-  (random-name {:subrace (random-human-subrace)
-                :sex ::male}))
+(defn random-tavern-name-1 []
+  (str "The "
+       (random-item tavern-names ::pre)
+       " "
+       (random-item tavern-names ::post)))
 
-(defmethod random-name [nil ::female] [_]
-  (random-name {:subrace (random-human-subrace)
-                :sex ::female}))
+(defn random-tavern-name-2 []
+  (str (random-item tavern-names ::pre-2)
+       "'s "
+       (random-item tavern-names ::post-2)))
 
-(defmethod random-name :default [_]
-  (random-name {}))
+(defn random-tavern-name []
+  (rand-nth [(random-tavern-name-1)
+             (random-tavern-name-2)]))
