@@ -1913,6 +1913,7 @@
           "Woolen"
           "Forged"
           "Warty"
+          "Barmy"
           "Flamboyant"
           "Swashbuckling"
           "Glamourous"
@@ -1934,8 +1935,14 @@
           "Waggish"
           "Fearless"
           "Bloated"
-          "Starving"]
+          "Starving"
+          "Thirsty"]
    ::post ["Goblin"
+           "Cock"
+           "Hippogriff"
+           "Lion"
+           "Cockatrice"
+           "Gorgon"
            "Dragon"
            "Manticore"
            "Griffin"
@@ -1988,6 +1995,8 @@
            "Ship"
            "Sail"
            "Goblet"
+           "Flagon"
+           "Decanter"
            "Crown"
            "Mug"
            "Bow"
@@ -2009,7 +2018,11 @@
            "Imp"
            "Blackfish"
            "Swordfish"
-           "Satyr"]
+           "Satyr"
+           "Knob"
+           "Door"
+           "Keg"
+           "Tap"]
    ::pre-2 ["The Manticore"
             "The Captain"
             "The Dragon"
@@ -2127,7 +2140,11 @@
              "Harp"
              "Table"
              "Chair"
-             "Throne"]})
+             "Throne"
+             "Flagon"
+             "Decanter"
+             "Keg"
+             "Tap"]})
 
 (defn random-tavern-name-1 []
   (str "The "
