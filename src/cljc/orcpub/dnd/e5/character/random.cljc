@@ -257,7 +257,25 @@
           "Mort"
           "Randal"
           "Stedd"
-          "Reed"]
+           "Reed"
+           "Elric"
+           "Wilmot"
+           "Larkin"
+           "Jackin"
+           "Elis"
+           "Cenric"
+           "Cerdic"
+           "Dunstan"
+           "Eadwig"
+           "Hrodulf"
+           "Leofric"
+           "Osgar"
+           "Osmund"
+           "Oswald"
+           "Wulfric"
+           "Wulfstan"
+           "Wynnstan"
+           "Wulfnod"]
    ::female ["Arveene"
             "Esvele"
             "Jhessail"
@@ -268,7 +286,13 @@
             "Rowan"
             "Shandri"
             "Shandra"
-            "Tessele"]
+             "Tessele"
+             "Royce"
+             "Hild"
+             "Hilda"
+             "Wassa"
+             "Mildryd"
+             "Mildgyd"]
    ::surname-pre ["Amble"
                  "Buck"
                  "Dun"
@@ -802,6 +826,151 @@
                    "zak"
                    "zyk"]})
 
+(def mulan-names
+  {::male ["Aos"
+           "Adiur"
+           "Abil-Ili"
+           "Ahimelek"
+           "Alaparos"
+           "Alorus"
+           "Amatnim"
+           "Amelagar"
+           "Amempsin"
+           "Anshar"
+           "Ardates"
+           "Belibni"
+           "Bel-Samu"
+           "Dagan"
+           "Dapinu"
+           "Boktnassar"
+           "Duzi"
+           "Gamil"
+           "Gahal"
+           "Gadatas"
+           "Gobryas"
+           "Haban"
+           "Hassimir"
+           "Igigi"
+           "Immertum"
+           "Irshusin"
+           "Itti-Bel"
+           "Iva"
+           "Kara-Bel"
+           "Kha-Hea"
+           "Lakhmu"
+           "Lidan-Gula"
+           "Maruduk"
+           "Moumis"
+           "Murdus"
+           "Nabu"
+           "Nabua"
+           "Nabu-Ikbi"
+           "Namtar"
+           "Naramsin"
+           "Nazaratus"
+           "Nebo"
+           "Ninib"
+           "Ninip"
+           "Ramman"
+           "Samas"
+           "Sar"
+           "Sar-Ili"
+           "Sharyukin"
+           "Silani"
+           "Suzub"
+           "Tammuz"
+           "Tamzi"
+           "Uras"
+           "Zur"]
+   ::female ["Arizima"
+             "Chathi"
+             "Nephis"
+             "Nulara"
+             "Murithi"
+             "Sefris"
+             "Thola"
+             "Umara"
+             "Zolis"
+             "Allatu"
+             "Anatu"
+             "Anunit"
+             "Aralu"
+             "Aruru"
+             "Atanah-Ili"
+             "Belatsunat"
+             "Belili"
+             "Belit"
+             "Damkina"
+             "Davcina"
+             "Davke"
+             "Ellat-Gula"
+             "Gula"
+             "Ishtar"
+             "Istar"
+             "Kishar"
+             "Kissare"
+             "Mot"
+             "Mummu"
+             "Mylitta"
+             "Nana"
+             "Ni"
+             "Nin-Marki"
+             "Omarosa"
+             "Ri"
+             "Rubati"
+             "Sabitum"
+             "Shala"
+             "Tauthe"
+             "Zirat-Banit"]
+   ::surname ["Adrahasis"
+              "Adapa"
+              "Ahiyababa"
+              "Akki"
+              "Almelon"
+              "Ammenon"
+              "Ammidikaga"
+              "Amurkkan"
+              "Anunnaki"
+              "Arakhu"
+              "Ardusin"
+              "Arua"
+              "Asardin"
+              "Awil"
+              "Balasu"
+              "Belteshazzar"
+              "Berosus"
+              "Baktnassar"
+              "Chinzirus"
+              "Gadatas"
+              "Gahal"
+              "Gamil"
+              "Gandu"
+              "Gobryas"
+              "Gudea"
+              "Harbshihu"
+              "Ibilsin"
+              "Immertum"
+              "Irigbel"
+              "Ishum"
+              "Kandalanu"
+              "Labynetus"
+              "Kurigalzu"
+              "Nabonidus"
+              "Naditabirus"
+              "Orchamus"
+              "Otiartes"
+              "Putur"
+              "Sadudu"
+              "Sargina"
+              "Sardanapalus"
+              "Shukura"
+              "Sin"
+              "Sisit"
+              "Sumai"
+              "Tu"
+              "Urhammu"
+              "Zabu"]})
+
 (defn name-search-match [text]
   (re-matches #".*\bname\b.*" text))
 
@@ -818,6 +987,8 @@
 
 (defn random-sex []
   (rand-nth [::male ::female]))
+
+(derive ::tethyrian ::chondathan)
 
 (defmulti random-name (fn [{:keys [race subrace sex]}]
                         (prn "RANDOM NAME" race subrace sex)
@@ -914,8 +1085,9 @@
 
 (defmethod random-name [::damaran nil] [_]
   (damaran-name
-   (apply random-set-or-combined damaran-names (rand-nth [[::female ::female-pre ::female-post]
-                                                          [::male ::male-pre ::male-post]]))))
+   (apply random-set-or-combined damaran-names (rand-nth
+                                                [[::female ::female-pre ::female-post]
+                                                 [::male ::male-pre ::male-post]]))))
 
 (defn illuskan-name [first]
   (join-names
@@ -953,6 +1125,22 @@
                                                 [[::male ::pre ::male-post]
                                                  [::female ::pre ::female-post]]))))
 
+(defn mulan-name [first]
+  (join-names
+   (set-name mulan-names ::male)
+   (set-name mulan-names ::surname)))
+
+(defmethod random-name [::mulan ::male] [_]
+  (mulan-name
+   (set-name mulan-names ::male)))
+
+(defmethod random-name [::mulan ::female] [_]
+  (mulan-name
+   (set-name mulan-names ::female)))
+
+(defmethod random-name [::mulan nil] [_]
+  (mulan-name
+   (set-name mulan-names (rand-nth [::male ::female]))))
 
 (defn random-human-subrace []
   (rand-nth [::calishite
@@ -960,7 +1148,9 @@
              ::shou
              ::turami
              ::illuskan
-             ::damaran]))
+             ::damaran
+             ::rashemi
+             ::mulan]))
 
 (defmethod random-name [nil nil] [_]
   (random-name {:subrace (random-human-subrace)

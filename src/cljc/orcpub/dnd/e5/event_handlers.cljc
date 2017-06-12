@@ -134,7 +134,7 @@
     character))
 
 (def name-query-regex
-  #"(male|female)?\s?(human|elf|dwarf|halfling|half-elf|half-orc|dragonborn|tiefling)?\s?(calishite|chondathan|damaran|illuskan|mulan|rashemi|shou|tehryian|turami)?\s?name")
+  #"(male|female)?\s?(human|elf|dwarf|halfling|half-elf|half-orc|dragonborn|tiefling)?\s?(calishite|chondathan|damaran|illuskan|mulan|rashemi|shou|tethyrian|turami)?\s?name")
 
 (defn parse-name-query [search-text]
   (let [match (re-matches name-query-regex search-text)]
