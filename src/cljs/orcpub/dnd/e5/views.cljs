@@ -717,8 +717,14 @@
      (if (or summary description)
        (paragraphs (or summary description)))]]])
 
-(defn name-result [result]
-  [:span.f-s-24.f-w-b.white result])
+(defn name-result [{:keys [sex race subrace] :as result}]
+  [:div
+   [:span.f-s-24.f-w-b.white (:name result)]
+   [:div
+    [:span.f-s-14.white.opacity-5.i (s/join " " (map (fn [k] (if k (name k))) [sex race subrace]))]]])
+
+(defn tavern-name-result [name]
+  [:span.f-s-24.f-w-b.white name])
 
 (defn spell-result [{:keys [name level school casting-time range duration components description summary page source] :as spell}]
   [:div.white
@@ -832,6 +838,7 @@
         :monster (monster-result result)
         :magic-item (magic-item-result result)
         :name (name-result result)
+        :tavern-name (tavern-name-result result)
         :else nil)]]))
 
 
@@ -880,7 +887,7 @@
              :on-key-press #(if (= "Enter" (.-key %)) (dispatch [:set-search-text search-text]))
              :style (merge search-input-style
                            {:background-color "rgba(255,255,255,0.1)"})}]
-           [:span.white.f-s-14.i.opacity-5 "\"8d10 + 2\", \"magic missile\", \"kobold\", \"female calishite name\", etc."]]
+           [:span.white.f-s-14.i.opacity-5 "\"8d10 + 2\", \"magic missile\", \"kobold\", \"female calishite name\", \"tavern name\", etc."]]
           [:div.flex-grow-1
            [search-results]]]))
      (let [hdr [header title button-cfgs]]

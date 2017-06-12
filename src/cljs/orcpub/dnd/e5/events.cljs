@@ -1009,7 +1009,7 @@
   (let [[sex race subrace :as result] (event-handlers/parse-name-query search-text)]
     (if result
       {:top-result {:type :name
-                    :result (char-rand5e/random-name
+                    :result (char-rand5e/random-name-result
                              {:race race
                               :subrace subrace
                               :sex sex})}})))
@@ -1027,6 +1027,8 @@
                                               :result (monsters/monster-map kw)}}
       (magic-items/magic-item-map kw) {:top-result {:type :magic-item
                                                     :result (magic-items/magic-item-map kw)}}
+      (= "tavern name" search-text) {:top-result {:type :tavern-name
+                                                  :result (char-rand5e/random-tavern-name)}}
       name-result name-result
       :else nil)))
 
