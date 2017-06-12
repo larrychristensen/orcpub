@@ -1007,7 +1007,6 @@
 
 (defn name-result [search-text]
   (let [[sex race subrace :as result] (event-handlers/parse-name-query search-text)]
-    (prn "RESULT" result)
     (if result
       {:top-result {:type :name
                     :result (char-rand5e/random-name

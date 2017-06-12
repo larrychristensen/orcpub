@@ -976,6 +976,205 @@
               "Urhammu"
               "Zabu"]})
 
+(def elf-names
+  {::male ["Adran"
+           "Aelar"
+           "Aramil"
+           "Arrannis"
+           "Aust"
+           "Beiro"
+           "Berrian"
+           "Carric"
+           "Enialis"
+           "Erdan"
+           "Erevan"
+           "Galinndan"
+           "Hadarai"
+           "Heian"
+           "Himo"
+           "Immeral"
+           "Ivellios"
+           "Laucian"
+           "Mindartis"
+           "Paelias"
+           "Peren"
+           "Quarion"
+           "Riardon"
+           "Rolen"
+           "Soveliss"
+           "Thamior"
+           "Theren"
+           "Varis"]
+   ::male-pre ["Ad"
+               "Ae"
+               "Pae"
+               "Pe"
+               "Tha"
+               "The"
+               "Sove"
+               "Qua"
+               "Mina"
+               "Hadda"
+               "Lau"
+               "Ive"
+               "Enia"
+               "Car"
+               "Be"
+               "Arra"]
+   ::male-post ["rris"
+                "ris"
+                "rai"
+                "rrai"
+                "tis"
+                "ran"
+                "rran"
+                "rian"
+                "rrian"
+                "ren"
+                "rren"
+                "liss"
+                "lis"
+                "llis"
+                "lar"
+                "llar"
+                "lias"
+                "llias"
+                "liar"
+                "lliar"
+                "lior"
+                "llior"
+                "mior"
+                "rion"
+                "rtis"
+                "cian"
+                "llios"
+                "lios"
+                "ric"
+                "nis"
+                "nnis"]
+   ::female ["Adrie"
+             "Althaea"
+             "Anastrianna"
+             "Andraste"
+             "Antinua"
+             "Bethrynna"
+             "Birel"
+             "Caelynn"
+             "Drusilia"
+             "Enna"
+             "Felosial"
+             "Ielenia"
+             "Jelenneth"
+             "Keyleth"
+             "Leshanna"
+             "Lia"
+             "Meriele"
+             "Mialee"
+             "Naivara"
+             "Quelanna"
+             "Quillathe"
+             "Sariel"
+             "Shanairra"
+             "Shava"
+             "Silaqui"
+             "Theirsatra"
+             "Thia"
+             "Vadania"
+             "Valanthe"
+             "Xanaphia"]
+   ::female-pre ["A"
+                 "Ana"
+                 "Dru"
+                 "Cae"
+                 "Felo"
+                 "Ie"
+                 "Le"
+                 "Key"
+                 "Me"
+                 "Mia"
+                 "Nai"
+                 "Sil"
+                 "Xana"
+                 "Thie"
+                 "Va"
+                 "Qui"
+                 "Sa"
+                 "Thia"]
+   ::female-post ["thaea"
+                  "strianna"
+                  "lenneth"
+                  "rianna"
+                  "raste"
+                  "draste"
+                  "rynna"
+                  "lynn"
+                  "silia"
+                  "sial"
+                  "lenia"
+                  "leth"
+                  "shanna"
+                  "riele"
+                  "vara"
+                  "riel"
+                  "nairra"
+                  "va"
+                  "rsatra"
+                  "phia"
+                  "laqui"
+                  "dania"
+                  "lanthe"
+                  "llath"
+                  "lee"]
+   ::surname ["Amakiir"
+              "Amastacia"
+              "Galanodel"
+              "Holimion"
+              "Ilphelkiir"
+              "Liadon"
+              "Meliamne"
+              "Nailo"
+              "Siannodel"
+              "Xiloscient"]
+   ::surname-pre ["Mith"
+                  "Ald"
+                  "Tor"
+                  "Eal"
+                  "Kev"
+                  "Lan"
+                  "Nor"
+                  "Mithr"
+                  "Mithd"
+                  "Mithy"
+                  "Cel"
+                  "Amast"
+                  "Am"
+                  "Ilph"
+                  "Xil"
+                  "Tal"
+                  "Und"
+                  "Tath"
+                  "El"
+                  "Ond"]
+   ::surname-post ["aviel"
+                   "amirta"
+                   "osum"
+                   "adhrinian"
+                   "ethryl"
+                   "oval"
+                   "aiseer"
+                   "etaryl"
+                   "acia"
+                   "elkiir"
+                   "akiir"
+                   "oscient"
+                   "aiil"
+                   "oeme"
+                   "elon"
+                   "enval"
+                   "irmae"
+                   "athir"
+                   "olithe"]})
+
 (defn name-search-match [text]
   (re-matches #".*\bname\b.*" text))
 
@@ -1037,8 +1236,11 @@
   (str (random-item list pre-type)
        (random-item list post-type)))
 
-(defn random-set-or-combined [list type pre-type post-type]
-  (rand-nth [(set-name list type) (combined-name list pre-type post-type)]))
+(defn random-set-or-combined [list type pre-type post-type & [fraction-set]]
+  (let [r (rand)]
+    (if (< r (or fraction-set 0.2))
+      (set-name list type)
+      (combined-name list pre-type post-type))))
 
 (defmethod random-name [::turami ::male] [_]
   (join-names
@@ -1131,7 +1333,7 @@
 
 (defn mulan-name [first]
   (join-names
-   (set-name mulan-names ::male)
+   first
    (set-name mulan-names ::surname)))
 
 (defmethod random-name [::mulan ::male] [_]
@@ -1155,6 +1357,24 @@
              ::damaran
              ::rashemi
              ::mulan]))
+
+(defn elf-name [first]
+  (join-names
+   first
+   (random-set-or-combined elf-names ::surname ::surname-pre ::surname-post)))
+
+(defmethod random-name [::elf ::male] [_]
+  (elf-name
+   (set-name elf-names ::male)))
+
+(defmethod random-name [::elf ::female] [_]
+  (elf-name
+   (set-name elf-names ::female)))
+
+(defmethod random-name [::elf nil] [_]
+  (elf-name
+   (set-name elf-names (rand-nth [::male ::female]))))
+
 
 (defmethod random-name [nil nil] [_]
   (random-name {:subrace (random-human-subrace)
