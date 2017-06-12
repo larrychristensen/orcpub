@@ -4603,11 +4603,15 @@ long rest."})]
    (concat
     [{:name "Sword Coast Adventurer's Guide"
       :key :scag
+      :race-options? true
+      :class-options? true
+      :background-options? true
       :selections sword-coast-adventurers-guide-selections
       :help (amazon-frame-help scag-amazon-frame
                                [:span "Incudes too many new, exciting subraces, race variants, subclasses, and backgrounds to list, as well as a ton of other info to help you create in-depth characters in the Sword Coast or elsewhere."])}
      {:name "Volo's Guide to Monsters"
       :key :vgm
+      :race-options? true
       :selections volos-guide-to-monsters-selections
       :help (amazon-frame-help volos-amazon-frame
                                [:div
@@ -4615,14 +4619,20 @@ long rest."})]
                                 (content-list ["Aasimar" "Firbolg" "Goliath" "Kenku" "Lizardfolk" "Tabaxi" "Triton" "Bugbear" "Goblin" "Hobgoblin" "Kobold" "Orc" "Yuan-Ti Pureblood"])])}
      {:name "Elemental Evil Player's Companion"
       :key :ee
+      :race-options? true
+      :class-options? true
+      :spell-options? true
       :selections elemental-evil-selections
       :help [:div "Race and spell options from the " [:a {:href "https://media.wizards.com/2015/downloads/dnd/EE_PlayersCompanion.pdf" :target :_blank} "player's companion to Prince's of the Apocalypse"]]}
      {:name "Dungeon Master's Guide"
       :key :dmg
+      :class-options? true
+      :race-options? true
       :selections dmg-selections
       :help (amazon-frame-help dmg-amazon-frame
                                [:span "Includes Eladrin Elf and villainous class options, including Cleric: Death Domain and Paladin: Oathbreaker, neither of which are Adventurer's League legal."])}
      {:name "Curse of Strahd"
+      :background-options? true
       :key :cos
       :selections cos-selections
       :help (amazon-frame-help cos-amazon-frame

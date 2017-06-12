@@ -170,6 +170,7 @@
 
 (def ua-trio-of-subclasses-plugin
   {:name "Unearthed Arcana: A Trio of Subclasses"
+   :class-options? true
    :key ua-trio-of-subclasses-kw
    :selections [(opt5e/class-selection
                  {:options (map
@@ -443,6 +444,7 @@
 
 (def ua-revised-subclasses-plugin
   {:name "Unearthed Arcana: Revised Subclasses"
+   :class-options? true
    :key ua-revised-subclasses-kw
    :selections [(opt5e/class-selection
                  {:options (map
@@ -606,12 +608,14 @@
 (def ua-artificer-plugin
   {:name "Unearthed Arcana: Artificer"
    :key :ua-artificer
+   :class-options? true
    :selections [(opt5e/class-selection
                  {:options [ua-artificer/artificer-option]})]})
 
 (def ua-mystic-plugin
   {:name "Unearthed Arcana: Mystic"
    :key ua-mystic-kw
+   :class-options? true
    :selections [(opt5e/class-selection
                  {:options [(opt5e/class-option
                              {:name "Mystic",
@@ -785,6 +789,8 @@
 (def ua-waterborne-plugin
   {:name "Unearthed Arcana: Waterborne Adventures"
    :key ua-waterborne-kw
+   :class-options? true
+   :race-options? true
    :selections [(opt5e/class-selection
                  {:options [(mariner-class-option "Fighter" :fighter 1)
                             (mariner-class-option "Paladin" :paladin 2)
@@ -839,6 +845,9 @@
 (def ua-eberron-plugin
   {:name "Unearthed Arcana: Eberron"
    :key ua-eberron-kw
+   :race-options? true
+   :class-options? true
+   :feat-options? true
    :selections [(opt5e/race-selection
                  {:options (map
                             (fn [race] (opt5e/race-option (assoc race :source ua-eberron-kw)))
