@@ -595,7 +595,109 @@
             "Qiu"
             "Ting"
             "Wei"
-            "Wen"]})
+             "Wen"]})
+
+(def illuskan-names
+  {::male ["Ander"
+          "Blath"
+          "Bran"
+          "Frath"
+          "Geth"
+          "Lander"
+          "Luth"
+          "Malcer"
+          "Stor"
+          "Taman"
+           "Urth"
+           "Alwyn"
+           "Andras"
+           "Anwen"
+           "Arwyn"
+           "Bron"
+           "Brin"
+           "Delwyn"
+           "Drystan"
+           "Emlyn"
+           "Gareth"
+           "Glendower"
+           "Gwil"
+           "Gwilym"
+           "Gwyn"
+           "Ilar"
+           "Ivor"
+           "Madoc"
+           "Maldwyn"
+           "Meuric"
+           "Morgan"
+           "Owena"
+           "Pryce"
+           "Rhodri"
+           "Rhydderch"
+           "Roderick"
+           "Sawyl"
+           "Sieffre"
+           "Siorus"
+           "Talfryn"
+           "Taliesin"
+           "Trystan"
+           "Tudor"
+           "Urien"
+           "Wynfor"
+           "Tomi"]
+   ::female ["Amafrey"
+             "Betha"
+             "Cefrey"
+             "Kethra"
+             "Mara"
+             "Olga"
+             "Silifrey"
+             "Westra"
+             "Carys"
+             "Ceri"
+             "Delwyn"
+             "Delyth"
+             "Deryn"
+             "Elain"
+             "Eurwen"
+             "Gaenor"
+             "Glenda"
+             "Glenys"
+             "Glynn"
+             "Gwen"
+             "Gwenda"
+             "Olwyn"
+             "Owena"
+             "Rhian"
+             "Rhiannon"
+             "Rhonwen"
+             "Rhosyn"
+             "Siana"
+             "Sian"
+             "Siwan"
+             "Tegan"
+             "Winifrey"
+             "Willafrey"]
+   ::surname-pre ["Wind"
+                  "Storm"
+                  "Bright"
+                  "Horn"
+                  "Lack"
+                  "Stead"
+                  "Sky"
+                  "Green"]
+   ::surname-post ["rivver"
+                   "wood"
+                   "man"
+                   "hallow"
+                   "harrow"
+                   "fforest"
+                   "llost"
+                   "water"
+                   "mor"
+                   "mount"
+                   "grass"
+                   "raven"
+                   "hawk"]})
 
 (defn name-search-match [text]
   (re-matches #".*\bname\b.*" text))
@@ -677,20 +779,22 @@
                      [::male ::male-pre ::male-post]]))
    (random-set-or-combined turami-names ::surname ::surname-pre ::surname-post)))
 
-(defmethod random-name [::shou ::male] [_]
+(defn shou-name [first]
   (join-names
-   (random-set-or-combined shou-names ::male :pre :post)
+   first
    (random-set-or-combined shou-names ::surname :pre :post)))
+
+(defmethod random-name [::shou ::male] [_]
+  (shou-name
+   (random-set-or-combined shou-names ::male :pre :post)))
 
 (defmethod random-name [::shou ::female] [_]
-  (join-names
-   (random-set-or-combined shou-names ::female :pre :post)
-   (random-set-or-combined shou-names ::surname :pre :post)))
+  (shou-name
+   (random-set-or-combined shou-names ::female :pre :post)))
 
 (defmethod random-name [::shou nil] [_]
-  (join-names
-   (random-set-or-combined shou-names (random-sex) :pre :post)
-   (random-set-or-combined shou-names ::surname :pre :post)))
+  (shou-name
+   (random-set-or-combined shou-names (random-sex) :pre :post)))
 
 (defn damaran-name [first]
   (join-names
@@ -710,11 +814,30 @@
    (apply random-set-or-combined damaran-names (rand-nth [[::female ::female-pre ::female-post]
                                                           [::male ::male-pre ::male-post]]))))
 
+(defn illuskan-name [first]
+  (join-names
+   first
+   (combined-name illuskan-names ::surname-pre ::surname-post)))
+
+(defmethod random-name [::illuskan ::male] [_]
+  (illuskan-name
+   (set-name illuskan-names ::male)))
+
+(defmethod random-name [::illuskan ::female] [_]
+  (illuskan-name
+   (set-name illuskan-names ::female)))
+
+(defmethod random-name [::illuskan nil] [_]
+  (illuskan-name
+   (set-name illuskan-names (rand-nth [::male ::female]))))
+
 (defn random-human-subrace []
   (rand-nth [::calishite
              ::chondathan
              ::shou
-             ::turami]))
+             ::turami
+             ::illuskan
+             ::damaran]))
 
 (defmethod random-name [nil nil] [_]
   (random-name {:subrace (random-human-subrace)
