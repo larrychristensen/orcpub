@@ -1175,6 +1175,213 @@
                    "athir"
                    "olithe"]})
 
+(def dwarf-names
+  {::male ["Adrik"
+           "Alberich"
+           "Baern"
+           "Barenedd"
+           "Brottor"
+           "Bruenor"
+           "Dain"
+           "Darrak"
+           "Delg"
+           "Eberk"
+           "Einkil"
+           "Fargrim"
+           "Flint"
+           "Gardain"
+           "Harbek"
+           "Kildrak"
+           "Morgran"
+           "Orsik"
+           "Oskar"
+           "Rangrim"
+           "Rurik"
+           "Taklinn"
+           "Thoradin"
+           "Thorin"
+           "Tordek"
+           "Traubon"
+           "Travok"
+           "Ulfgar"
+           "Veit"
+           "Vondal"]
+   ::male-pre ["Tra"
+               "Trau"
+               "Tor"
+               "Tak"
+               "Ru"
+               "Ran"
+               "Os"
+               "Or"
+               "Mor"
+               "Thor"
+               "Kil"
+               "Har"
+               "Gar"
+               "Far"
+               "Ein"
+               "E"
+               "Brue"
+               "Dar"
+               "Bro"
+               "Brog"
+               "Delg"
+               "Dalg"
+               "Drag"]
+   ::male-post ["dan"
+                "den"
+                "din"
+                "nor"
+                "ner"
+                "nir"
+                "dal"
+                "del"
+                "bon"
+                "ben"
+                "rak"
+                "rek"
+                "rik"
+                "grim"
+                "gram"
+                "kil"
+                "kel"
+                "kal"
+                "dain"
+                "drak"
+                "drek"
+                "drik"
+                "bek"
+                "bik"
+                "sik"
+                "sek"
+                "sok"
+                "dek"
+                "dik"
+                "vok"
+                "vik"
+                "vek"
+                "vak"
+                "kar"
+                "ker"
+                "kir"
+                "berk"
+                "birk"
+                "ttor"]
+   ::female ["Amber"
+             "Artin"
+             "Audhild"
+             "Bardryn"
+             "Dagnal"
+             "Diesa"
+             "Eldeth"
+             "Falkrunn"
+             "Finellen"
+             "Gunnloda"
+             "Gurdis"
+             "Helja"
+             "Hlin"
+             "Kathra"
+             "Kristryd"
+             "Ilde"
+             "Liftrasa"
+             "Mardred"
+             "Riswynn"
+             "Sannl"
+             "Torbera"
+             "Torgga"
+             "Vistra"]
+   ::female-pre ["Fine"
+                 "Aud"
+                 "Bar"
+                 "Gunn"
+                 "Gur"
+                 "Hel"
+                 "Ka"
+                 "Kri"
+                 "Lift"
+                 "Mar"
+                 "Ris"
+                 "Tor"
+                 "Vis"]
+   ::female-post ["stryd"
+                  "dred"
+                  "wynn"
+                  "rgga"
+                  "ja"
+                  "ga"
+                  "hild"
+                  "dryn"
+                  "tin"
+                  "llen"
+                  "deth"
+                  "loda"
+                  "lis"
+                  "dis"
+                  "thra"
+                  "rasa"
+                  "berra"]
+   ::surname ["Balderk"
+              "Battlehammer"
+              "Brawnanvil"
+              "Dankil"
+              "Fireforge"
+              "Frostbeard"
+              "Gorunn"
+              "Holderhek"
+              "Ironfist"
+              "Loderr"
+              "Lutgehr"
+              "Rumnaheim"
+              "Strakeln"
+              "Torunn"
+              "Ungart"]
+   ::surname-pre-1 ["Battle"
+                    "Iron"
+                    "Fire"
+                    "Brawn"
+                    "Oaken"
+                    "Stout"
+                    "Fast"
+                    "Swift"
+                    "Hard"
+                    "War"]
+   ::surname-post-1 ["axe"
+                     "hammer"
+                     "fist"
+                     "beard"
+                     "forge"
+                     "anvil"
+                     "shield"
+                     "helm"]
+   ::surname-pre-2 ["Bal"
+                    "Bel"
+                    "Rumna"
+                    "Stra"
+                    "Un"
+                    "On"
+                    "An"
+                    "Ald"
+                    "Eld"
+                    "Aud"
+                    "Lut"
+                    "Lat"
+                    "Go"
+                    "God"
+                    "To"
+                    "Tod"]
+   ::surname-post-2 ["derk"
+                     "berk"
+                     "heim"
+                     "keln"
+                     "gart"
+                     "gert"
+                     "gehr"
+                     "gahr"
+                     "gar"
+                     "gorr"
+                     "runn"]})
+
 (defn name-search-match [text]
   (re-matches #".*\bname\b.*" text))
 
@@ -1365,16 +1572,35 @@
 
 (defmethod random-name [::elf ::male] [_]
   (elf-name
-   (set-name elf-names ::male)))
+   (random-set-or-combined elf-names ::male ::male-pre ::male-post)))
 
 (defmethod random-name [::elf ::female] [_]
   (elf-name
-   (set-name elf-names ::female)))
+   (random-set-or-combined elf-names ::female ::female-pre ::female-post)))
 
 (defmethod random-name [::elf nil] [_]
   (elf-name
-   (set-name elf-names (rand-nth [::male ::female]))))
+   (apply random-set-or-combined elf-names (rand-nth [[::male ::male-pre ::male-post]
+                                                      [::female ::female-pre ::female-post]]))))
 
+(defn dwarf-name [first]
+  (join-names
+   first
+   (apply random-set-or-combined dwarf-names (rand-nth [[::surname ::surname-pre-1 ::surname-post-1]
+                                                         [::surname ::surname-pre-2 ::surname-post-2]]))))
+
+(defmethod random-name [::dwarf ::male] [_]
+  (dwarf-name
+   (random-set-or-combined dwarf-names ::male ::male-pre ::male-post)))
+
+(defmethod random-name [::dwarf ::female] [_]
+  (dwarf-name
+   (random-set-or-combined dwarf-names ::female ::female-pre ::female-post)))
+
+(defmethod random-name [::dwarf nil] [_]
+  (dwarf-name
+   (apply random-set-or-combined dwarf-names (rand-nth [[::male ::male-pre ::male-post]
+                                                      [::female ::female-pre ::female-post]]))))
 
 (defmethod random-name [nil nil] [_]
   (random-name {:subrace (random-human-subrace)
