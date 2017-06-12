@@ -2,7 +2,7 @@
   (:require [clojure.string :as s]))
 
 (def calishite-names
-  {:male ["Aseir"
+  {::male ["Aseir"
           "Bardeid"
           "Haseid"
           "Khemed"
@@ -117,7 +117,7 @@
           "Zand"
           "Zartosht"
           "Zurvan"]
-   :female ["Atala"
+   ::female ["Atala"
             "Ceidil"
             "Hama"
             "Jasmal"
@@ -181,7 +181,7 @@
             "Zarine"
             "Zhila"
             "Zaynab"]
-   :surname ["Basha"
+   ::surname ["Basha"
              "Dumein"
              "Jassan"
              "Khalid"
@@ -243,7 +243,7 @@
              "Turani"]})
 
 (def chondathan-names
-  {:male ["Darvin"
+  {::male ["Darvin"
           "Dorn"
           "Evendur"
           "Gorstag"
@@ -258,7 +258,7 @@
           "Randal"
           "Stedd"
           "Reed"]
-   :female ["Arveene"
+   ::female ["Arveene"
             "Esvele"
             "Jhessail"
             "Kerri"
@@ -269,7 +269,7 @@
             "Shandri"
             "Shandra"
             "Tessele"]
-   :surname-pre ["Amble"
+   ::surname-pre ["Amble"
                  "Buck"
                  "Dun"
                  "Even"
@@ -280,15 +280,142 @@
                  "Gold"
                  "Silver"
                  "High"]
-   :surname-post ["crown"
+   ::surname-post ["crown"
                  "man"
                  "dragon"
                  "wood"
                  "castle"
                   "stag"]})
 
+;; macedonian based
+(def damaran-names
+  {::male ["Bor"
+          "Fodel"
+          "Glar"
+          "Grigor"
+          "Igan"
+          "Ivor"
+          "Kosef"
+          "Mival"
+          "Orel"
+          "Pavel"
+          "Sergor"
+          "Andon"
+          "Bogdan"
+          "Bogomil"
+          "Bojan"
+          "Darko"
+          "Dragan"
+          "Emil"
+          "Kiril"
+          "Kliment"
+          "Vasko"
+          "Dzvonko"
+          "Dimitar"]
+   ::male-pre ["To"
+              "Ho"
+              "Ris"
+              "Mir"
+              "Mar"
+              "Jor"
+              "Jo"
+              "I"
+              "Gli"
+              "Gri"
+              "E"
+              "Dar"
+              "Bor"]
+   ::male-post ["do"
+               "dor"
+               "to"
+               "ko"
+               "tej"
+               "dan"
+               "sif"
+               "vo"
+               "sim"
+               "gor"
+               "mil"]
+   ::female ["Alethra"
+            "Kara"
+            "Katernin"
+            "Mara"
+            "Natali"
+            "Olma"
+            "Tana"
+            "Zora"
+            "Bogdana"
+            "Dafina"
+            "Danica"
+            "Dragana"
+            "Elena"
+            "Gordana"
+            "Gorica"
+            "Vaska"
+            "Vera"
+            "Vesna"]
+   ::female-pre ["Dan"
+                "Daf"
+                "Gal"
+                "Fros"
+                "Filim"
+                "Is"
+                "Iv"
+                "Jasm"
+                "Jord"
+                "Kal"
+                "Kat"
+                "Lilj"
+                "Lid"
+                "Mar"
+                "Melan"
+                "Mil"
+                "Mir"
+                "Rum"
+                "Ram"
+                "Sof"]
+   ::female-post ["ica"
+                 "ina"
+                 "ana"
+                 "ena"
+                 "ona"
+                 "ija"]
+   ::surname ["Bersk"
+             "Chernin"
+             "Dotsk"
+             "Kulenov"
+             "Marsk"
+             "Nemetsk"
+             "Shemov"
+             "Starag"]
+   ::surname-pre ["Mark"
+                 "Panch"
+                 "Naum"
+                 "Nikol"
+                 "Lazar"
+                 "Koch"
+                 "Ilich"
+                 "Jan"
+                 "Jovan"
+                 "Stojon"
+                 "Rus"
+                 "Rist"
+                 "Ris"
+                 "Pand"
+                 "Petk"
+                 "Mitr"]
+   ::surname-post ["ev"
+                   "ov"
+                   "ovsk"
+                   "ovski"
+                   "evski"
+                   "evsk"
+                   "esk"
+                   "eski"
+                   "etsk"]})
+
 (def turami-names
-  {:male ["Anton"
+  {::male ["Anton"
           "Diero"
           "Marcon"
           "Pieron"
@@ -296,7 +423,7 @@
           "Romero"
           "Salazar"
           "Umbero"]
-   :male-pre ["An"
+   ::male-pre ["An"
               "Pie"
               "Ri"
               "Sala"
@@ -305,7 +432,7 @@
               "Ba"
               "Ab"
               "Bar"]
-   :male-post ["ro"
+   ::male-post ["ro"
                "dol"
                "tol"
                "ron"
@@ -314,7 +441,7 @@
                "zar"
                "mardo"
                "kar"]
-   :female ["Balama"
+   ::female ["Balama"
             "Dona"
             "Faila"
             "Jalana"
@@ -323,7 +450,7 @@
             "Quara"
             "Selise"
             "Vonda"]
-   :female-pre ["Do"
+   ::female-pre ["Do"
                 "Bala"
                 "Aba"
                 "Qua"
@@ -332,14 +459,14 @@
                 "Lui"
                 "Ara"
                 "Bibi"]
-   :female-post ["da"
+   ::female-post ["da"
                  "na"
                  "sa"
                  "ma"
                  "se"
                  "rne"
                  "ne"]
-   :surname ["Agosto"
+   ::surname ["Agosto"
              "Astorio"
              "Calabra"
              "Domine"
@@ -363,7 +490,7 @@
              "Zabala"
              "Zubiondo"
              "Eneko"]
-   :surname-pre ["Mari"
+   ::surname-pre ["Mari"
                  "Asta"
                  "Asto"
                  "Do"
@@ -371,7 +498,7 @@
                  "Pisa"
                  "I"
                  "Za"]
-   :surname-post ["buri"
+   ::surname-post ["buri"
                   "buru"
                   "lando"
                   "mondo"
@@ -388,7 +515,7 @@
                   "barri"]})
 
 (def shou-names
-  {:male ["An"
+  {::male ["An"
           "Chen"
           "Chi"
           "Fai"
@@ -425,7 +552,7 @@
           "ong"
           "en"
           "on"]
-   :surname ["Chien"
+   ::surname ["Chien"
              "Huang"
              "Kao"
              "Kung"
@@ -445,7 +572,7 @@
              "He"
              "Hu"
              "Mao"]
-   :female ["Bai"
+   ::female ["Bai"
             "Chao"
             "Jia"
             "Lie"
@@ -476,7 +603,7 @@
 (defn first-last [list sex]
   (str (-> list sex rand-nth)
        " "
-       (-> list :surname rand-nth)))
+       (-> list ::surname rand-nth)))
 
 (defn join-names [first last]
   (str first " " last))
@@ -485,40 +612,40 @@
   (-> list key rand-nth))
 
 (defn random-sex []
-  (rand-nth [:male :female]))
+  (rand-nth [::male ::female]))
 
 (defmulti random-name (fn [{:keys [race subrace sex]}]
                         (prn "RANDOM NAME" race subrace sex)
                         [(or subrace race) sex]))
 
-(defmethod random-name [:calishite :male] [_]
-  (first-last calishite-names :male))
+(defmethod random-name [::calishite ::male] [_]
+  (first-last calishite-names ::male))
 
-(defmethod random-name [:calishite :female] [_]
-  (first-last calishite-names :female))
+(defmethod random-name [::calishite ::female] [_]
+  (first-last calishite-names ::female))
 
-(defmethod random-name [:calishite nil] [_]
+(defmethod random-name [::calishite nil] [_]
   (first-last calishite-names (random-sex)))
 
 (defn chondathan-surname []
-  (str (random-item chondathan-names :surname-pre)
-       (random-item chondathan-names :surname-post)))
+  (str (random-item chondathan-names ::surname-pre)
+       (random-item chondathan-names ::surname-post)))
 
 (defn chondathan-male-name []
-  (str (random-item chondathan-names :male-pre)
-       (random-item chondathan-names :male-post)))
+  (str (random-item chondathan-names ::male-pre)
+       (random-item chondathan-names ::male-post)))
 
-(defmethod random-name [:chondathan :male] [_]
+(defmethod random-name [::chondathan ::male] [_]
   (join-names
-   (random-item chondathan-names :male)
+   (random-item chondathan-names ::male)
    (chondathan-surname)))
 
-(defmethod random-name [:chondathan :female] [_]
+(defmethod random-name [::chondathan ::female] [_]
   (join-names
-   (random-item chondathan-names :female)
+   (random-item chondathan-names ::female)
    (chondathan-surname)))
 
-(defmethod random-name [:chondathan nil] [_]
+(defmethod random-name [::chondathan nil] [_]
   (join-names
    (random-item chondathan-names (random-sex))
    (chondathan-surname)))
@@ -533,51 +660,73 @@
 (defn random-set-or-combined [list type pre-type post-type]
   (rand-nth [(set-name list type) (combined-name list pre-type post-type)]))
 
-(defmethod random-name [:turami :male] [_]
+(defmethod random-name [::turami ::male] [_]
   (join-names
-   (random-set-or-combined turami-names :male :male-pre :male-post)
-   (random-set-or-combined turami-names :surname :surname-pre :surname-post)))
+   (random-set-or-combined turami-names ::male ::male-pre ::male-post)
+   (random-set-or-combined turami-names ::surname ::surname-pre ::surname-post)))
 
-(defmethod random-name [:turami :female] [_]
+(defmethod random-name [::turami ::female] [_]
   (join-names
-   (random-set-or-combined turami-names :female :female-pre :female-post)
-   (random-set-or-combined turami-names :surname :surname-pre :surname-post)))
+   (random-set-or-combined turami-names ::female ::female-pre ::female-post)
+   (random-set-or-combined turami-names ::surname ::surname-pre ::surname-post)))
 
-(defmethod random-name [:turami nil] [_]
+(defmethod random-name [::turami nil] [_]
   (join-names
    (apply random-set-or-combined turami-names
-          (rand-nth [[:female :female-pre :female-post]
-                     [:male :male-pre :male-post]]))
-   (random-set-or-combined turami-names :surname :surname-pre :surname-post)))
+          (rand-nth [[::female ::female-pre ::female-post]
+                     [::male ::male-pre ::male-post]]))
+   (random-set-or-combined turami-names ::surname ::surname-pre ::surname-post)))
 
-(defmethod random-name [:shou :male] [_]
+(defmethod random-name [::shou ::male] [_]
   (join-names
-   (random-set-or-combined shou-names :male :pre :post)
-   (random-set-or-combined shou-names :surname :pre :post)))
+   (random-set-or-combined shou-names ::male :pre :post)
+   (random-set-or-combined shou-names ::surname :pre :post)))
 
-(defmethod random-name [:shou :female] [_]
+(defmethod random-name [::shou ::female] [_]
   (join-names
-   (random-set-or-combined shou-names :female :pre :post)
-   (random-set-or-combined shou-names :surname :pre :post)))
+   (random-set-or-combined shou-names ::female :pre :post)
+   (random-set-or-combined shou-names ::surname :pre :post)))
 
-(defmethod random-name [:shou nil] [_]
+(defmethod random-name [::shou nil] [_]
   (join-names
    (random-set-or-combined shou-names (random-sex) :pre :post)
-   (random-set-or-combined shou-names :surname :pre :post)))
+   (random-set-or-combined shou-names ::surname :pre :post)))
+
+(defn damaran-name [first]
+  (join-names
+   first
+   (random-set-or-combined damaran-names ::surname ::surname-pre ::surname-post)))
+
+(defmethod random-name [::damaran ::male] [_]
+  (damaran-name
+   (random-set-or-combined damaran-names ::male ::male-pre ::male-post)))
+
+(defmethod random-name [::damaran ::female] [_]
+  (damaran-name
+   (random-set-or-combined damaran-names ::female ::female-pre ::female-post)))
+
+(defmethod random-name [::damaran nil] [_]
+  (damaran-name
+   (apply random-set-or-combined damaran-names (rand-nth [[::female ::female-pre ::female-post]
+                                                          [::male ::male-pre ::male-post]]))))
+
+(defn random-human-subrace []
+  (rand-nth [::calishite
+             ::chondathan
+             ::shou
+             ::turami]))
 
 (defmethod random-name [nil nil] [_]
-  (random-name {:race :human
-                :subrace :chondathan}))
+  (random-name {:subrace (random-human-subrace)
+                :sex (random-sex)}))
 
-(defmethod random-name [nil :male] [_]
-  (random-name {:race :human
-                :subrace :chondathan
-                :sex :male}))
+(defmethod random-name [nil ::male] [_]
+  (random-name {:subrace (random-human-subrace)
+                :sex ::male}))
 
-(defmethod random-name [nil :female] [_]
-  (random-name {:race :human
-                :subrace :chondathan
-                :sex :female}))
+(defmethod random-name [nil ::female] [_]
+  (random-name {:subrace (random-human-subrace)
+                :sex ::female}))
 
 (defmethod random-name :default [_]
-  (random-name {:race :human}))
+  (random-name {}))
