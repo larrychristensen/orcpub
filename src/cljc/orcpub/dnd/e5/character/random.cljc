@@ -303,13 +303,18 @@
                  "Green"
                  "Gold"
                  "Silver"
-                 "High"]
+                  "High"
+                  "Black"]
    ::surname-post ["crown"
-                 "man"
-                 "dragon"
-                 "wood"
-                 "castle"
-                  "stag"]})
+                   "man"
+                   "dragon"
+                   "wood"
+                   "castle"
+                   "stag"
+                   "sail"
+                   "hammer"
+                   "mast"
+                   "staff"]})
 
 ;; macedonian based
 (def damaran-names
@@ -991,7 +996,6 @@
 (derive ::tethyrian ::chondathan)
 
 (defmulti random-name (fn [{:keys [race subrace sex]}]
-                        (prn "RANDOM NAME" race subrace sex)
                         [(or subrace race) sex]))
 
 (defmethod random-name [::calishite ::male] [_]
