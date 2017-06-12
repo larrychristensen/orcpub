@@ -217,6 +217,7 @@
    (-> db :user-data :user-data :username)))
 
 (defn built-template [selected-plugin-options]
+  (prn "SELECTEDPLUGINOPTOINS" selected-plugin-options)
   (let [selected-plugins (map
                           :selections
                           (filter

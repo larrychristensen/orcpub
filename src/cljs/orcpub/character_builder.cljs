@@ -1226,6 +1226,10 @@
         :remaining (if (pos? num-selections) (sum-remaining built-template character selections)) 
         :body (hit-points-entry character selections built-template)}])))
 
+(defn info-block [text]
+  [:div.bg-light.b-rad-5.p-10.f-w-b.m-l-5.m-r-5.m-b-5
+   text])
+
 (defn known-mode-info []
   (let [spells-known-modes @(subscribe [::char5e/spells-known-modes])
         any-mode-class-names (into
@@ -1237,33 +1241,46 @@
                                (map (fn [nm] (str nm "s"))))
                               spells-known-modes)]
     (if (seq any-mode-class-names)
-      [:div.bg-light.b-rad-5.p-10.f-w-b.m-l-5.m-r-5
+      (info-block
        (str "Except for cantrips, "
             (common/list-print any-mode-class-names)
-            " do not need to select known spells since they can prepare any spell available in their class spell lists.")])))
+            " do not need to select known spells since they can prepare any spell available in their class spell lists.")))))
 
-(defn multiclass-spell-slots-info [])
+(defn more-selection-info [key name]
+  (let [selected-plugin-options @(subscribe [:selected-plugin-options])
+        unselected-plugins (remove
+                            (comp selected-plugin-options :key)
+                            t5e/plugins)]
+    (if (some
+         key
+         unselected-plugins)
+      (info-block (str "There are more " name " options available if you click 'select sources' above and add more sources.")))))
 
 (def pages
   [{:name "Race"
     :icon "woman-elf-face"
-    :tags #{:race :subrace}}
+    :tags #{:race :subrace}
+    :components [#(more-selection-info :race-options? "race")]}
    {:name "Ability Scores / Feats"
     :icon "strong"
     :tags #{:ability-scores :feats}
-    :ui-fns [{:key :ability-scores :group? true :ui-fn abilities-editor}]}
+    :ui-fns [{:key :ability-scores :group? true :ui-fn abilities-editor}]
+    :components [#(more-selection-info :feat-options? "feat")]}
    {:name "Background"
     :icon "ages"
-    :tags #{:background}}
+    :tags #{:background}
+    :components [#(more-selection-info :background-options? "background")]}
    {:name "Class"
     :icon "mounted-knight"
     :tags #{:class :subclass}
     :ui-fns [{:key :class :ui-fn class-levels-selector}
-             {:key :hit-points :group? true :ui-fn hit-points-editor}]}
+             {:key :hit-points :group? true :ui-fn hit-points-editor}]
+    :components [#(more-selection-info :class-options? "class")]}
    {:name "Spells"
     :icon "spell-book"
     :tags #{:spells}
-    :components [known-mode-info]}
+    :components [#(more-selection-info :spell-options? "spell")
+                 known-mode-info]}
    {:name "Proficiencies"
     :icon "juggler"
     :tags #{:profs}
