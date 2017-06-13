@@ -1014,8 +1014,9 @@
                               :subrace subrace
                               :sex sex})}})))
 
-(defn search-results [search-text]
-  (let [dice-result (dice/dice-roll-text search-text)
+(defn search-results [text]
+  (let [search-text (s/lower-case text)
+        dice-result (dice/dice-roll-text search-text)
         kw (if search-text (common/name-to-kw search-text))
         name-result (name-result search-text)]
     (cond
@@ -1042,8 +1043,15 @@
      (s/blank? search-text) (assoc :orcacle-clicked? false))))
 
 (reg-event-db
- :toggle-orcacle
+ :close-orcacle
  (fn [db _]
    (-> db
-       (update :orcacle-clicked? not)
+       (assoc :orcacle-clicked? false)
+       (dissoc :search-text))))
+
+(reg-event-db
+ :open-orcacle
+ (fn [db _]
+   (-> db
+       (assoc :orcacle-clicked? true)
        (dissoc :search-text))))

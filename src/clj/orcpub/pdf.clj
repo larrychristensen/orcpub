@@ -322,19 +322,21 @@
                   (let [x (+ margin-x (* box-width i))
                         y (+ margin-y (* box-height j))
 
-                        {:keys [page source description]} spell
+                        {:keys [page source description summary]} spell
 
                         dc-str (str "DC " dc)
                         dc-offset (+ x 0.22 (string-width class-nm PDType1Font/HELVETICA_BOLD 10))
                         remaining-desc-lines
                         (draw-text-to-box cs
                                           (or description
-                                              (str "see "
+                                              (str summary
+                                                   " (see "
                                                    (if source
                                                      (s/upper-case (name source))
                                                      "PHB")
                                                    " "
-                                                   page))
+                                                   page
+                                                   " for more details)"))
                                           PDType1Font/HELVETICA
                                           8
                                           (+ x 0.12)
