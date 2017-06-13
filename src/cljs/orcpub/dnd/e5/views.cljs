@@ -841,6 +841,21 @@
         :tavern-name (tavern-name-result result)
         :else nil)]]))
 
+(def oracle-frame-style
+  {:overflow-y :scroll
+   :position :fixed
+   :z-index 1
+   :background-color "rgba(0,0,0,0.95)"
+   :top 0
+   :left 0
+   :right 0
+   :bottom 0})
+
+(def close-icon-style
+  {:top 0
+   :right 0
+   :padding "17px"})
+
 
 (defn content-page [title button-cfgs content]
   (let [orcacle-open? @(subscribe [:orcacle-open?])]
@@ -866,14 +881,12 @@
      (let [search-text @(subscribe [:search-text])]
        (if orcacle-open?
          [:div.flex.flex-column.h-100-p
-          {:style {:overflow-y :scroll
-                   :position :fixed
-                   :z-index 1
-                   :background-color "rgba(0,0,0,0.95)"
-                   :top 0
-                   :left 0
-                   :right 0
-                   :bottom 0}}
+          {:style oracle-frame-style}
+          [:i.fa.fa-times-circle.white.f-s-24.orange.pointer
+           {:on-click #(dispatch [:toggle-orcacle])
+            :style {:position :fixed
+                    :top 20
+                    :right 40}}]
           [:div
            [:div.flex.justify-cont-s-a.m-t-10
             [:div.flex.align-items-c.pointer
@@ -881,12 +894,16 @@
              [:span.white.f-s-32 "Orcacle"]
              [:div.m-l-10 (svg-icon "hood" 48 48)]]]]
           [:div.p-10
-           [:input.input
-            {:value search-text
-             :on-change #(dispatch [:set-search-text (event-value %)])
-             :on-key-press #(if (= "Enter" (.-key %)) (dispatch [:set-search-text search-text]))
-             :style (merge search-input-style
-                           {:background-color "rgba(255,255,255,0.1)"})}]
+           [:div.posn-rel
+            [:input.input
+             {:value search-text
+              :on-change #(dispatch [:set-search-text (event-value %)])
+              :on-key-press #(if (= "Enter" (.-key %)) (dispatch [:set-search-text search-text]))
+              :style (merge search-input-style
+                            {:background-color "rgba(255,255,255,0.1)"})}]
+            [:i.fa.fa-times.white.posn-abs.f-s-24.pointer
+             {:style close-icon-style
+              :on-click #(dispatch [:set-search-text ""])}]]
            [:span.white.f-s-14.i.opacity-5 "\"8d10 + 2\", \"magic missile\", \"kobold\", \"female calishite name\", \"tavern name\", etc."]]
           [:div.flex-grow-1
            [search-results]]]))
