@@ -1866,7 +1866,23 @@
             "Where Eagles Dare"
             "Black Sails on Sunset"
             "The Ghost in the Darkness"
-            "The Eye of the Beholder"]
+            "The Eye of the Beholder"
+            "The Quick and the Dead"
+            "The Waking Nightmare"
+            "The Beginning of the End"
+            "The Burned Bridge"
+            "The Naughty Nymph"
+            "The Weakest Link"
+            "The Fate Worse Than Death"
+            "The Fools Paradise"
+            "The Fool and His Money"
+            "The Hair of the Dog"
+            "The Hairy Eyeball"
+            "The Powers That Be"
+            "The Elephant and the Room"
+            "The Crack of Doom"
+            "The Birds and the Bees"
+            "Three Sheets to the Wind"]
    ::pre-creature ["Fat"
                    "Prancing"
                    "Dancing"
@@ -1952,7 +1968,9 @@
                    "Enraged"
                    "Headstrong"
                    "Triumphant"
-                   "Scarred"]
+                   "Scarred"
+                   "Quavering"
+                   "Hairy"]
    ::pre ["Red"
           "Green"
           "Blue"
@@ -2079,7 +2097,9 @@
           "Cowled"
           "Caged"
           "Chained"
-          "Unchained"]
+          "Unchained"
+          "Wicked"
+          "Quiescent"]
    ::creature ["Goblin"
                "Cock"
                "Hippogriff"
@@ -2204,7 +2224,8 @@
                "Pirate"
                "Smuggler"
                "Wight"
-               "Wraith"]
+               "Wraith"
+               "Nymph"]
    ::object ["Mug"
              "Sword"
              "Shield"
@@ -2371,7 +2392,13 @@
              "Keep"
              "Barge"
              "Schooner"
-             "Skiff"]})
+             "Skiff"
+             "Wall"
+             "Quill"
+             "Barnacle"
+             "Paradise"
+             "Game"
+             "Card"]})
 
 (defn random-tavern-name-1 []
   (str "The "
@@ -2411,5 +2438,3 @@
               random-tavern-name-3
               random-tavern-name-4
               random-tavern-name-5])))
-
-

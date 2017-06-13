@@ -2043,12 +2043,6 @@
                             :summary "you regain 1 superiority die when you roll iniative and have no remaining superiority dice"}]}
                  eldritch-knight-cfg]}))
 
-(defn evasion [level page]
-  {:name "Evasion"
-   :page page
-   :level level
-   :summary "when you succeed on a DEX save to take half damage, you take none, if you fail, you take half"})
-
 (def monk-option
   (opt5e/class-option
    (merge
@@ -2159,7 +2153,7 @@
                :page 79
                :level 6
                :summary "your unarmed strikes count as magical"}
-              (evasion 7 79)
+              (opt5e/evasion 7 79)
               {:name "Tongue of the Sun and Moon"
                :page 79
                :level 13
@@ -2455,8 +2449,6 @@
                              :page 88
                              :summary "when you hit with opportunity attack, you can also move up to half your speed after the attack without provoking opportunity attacks"}]}]})))
 
-(def ranger-skills {:animal-handling true :athletics true :insight true :investigation true :nature true :perception true :stealth true :survival true})
-
 (def favored-enemy-types
   {:aberration [:deep-speech :undercommon :grell :slaad]
    :beast [:giant-elk :giant-eagle :giant-owl]
@@ -2554,12 +2546,6 @@
          :modifiers [(mod/set-mod ?ranger-favored-terrain terrain)]}))
      [:arctic :coast :desert :forest :grassland :mountain :swamp :underdark])}))
 
-(defn uncanny-dodge-modifier [page]
-  (mod5e/reaction
-   {:name "Uncanny Dodge"
-    :page page
-    :summary "halve the damage from an attacker you can see that hits you"}))
-
 (def ranger-option
   (opt5e/class-option
    (merge
@@ -2568,8 +2554,8 @@
      :profs {:armor {:light false :medium false :shields false}
              :weapon {:simple false :martial false}
              :save {::char5e/str true ::char5e/dex true}
-             :skill-options {:choose 3 :options ranger-skills}
-             :multiclass-skill-options {:choose 1 :options ranger-skills}}
+             :skill-options {:choose 3 :options opt5e/ranger-skills}
+             :multiclass-skill-options {:choose 1 :options opt5e/ranger-skills}}
      :multiclass-prereqs [(t/option-prereq "Requires Wisdom 13 and Dexterity 13"
                                            (fn [c]
                                              (let [abilities @(subscribe [::char5e/abilities nil c])]
@@ -2720,7 +2706,7 @@
                                                :options [(t/option-cfg
                                                           {:name "Evasion"
                                                            :modifiers [(mod5e/trait-cfg
-                                                                        (evasion 15 93))]})
+                                                                        (opt5e/evasion 15 93))]})
                                                          (t/option-cfg
                                                           {:name "Stand Against the Tide"
                                                            :modifiers  [(mod5e/reaction
@@ -2730,7 +2716,7 @@
                                                                           })]})
                                                          (t/option-cfg
                                                           {:name "Uncanny Dodge"
-                                                           :modifiers [(uncanny-dodge-modifier 93)]})]})]}}}
+                                                           :modifiers [(opt5e/uncanny-dodge-modifier 93)]})]})]}}}
                   {:name "Beast Master"
                    :selections [(t/selection-cfg
                                  {:name "Ranger's Companion"
@@ -2796,7 +2782,7 @@
                               :frequency opt5e/turns-1
                               :summary "Dash, Disengage or Hide"
 })]}
-             5 {:modifiers [(uncanny-dodge-modifier 96)]}
+             5 {:modifiers [(opt5e/uncanny-dodge-modifier 96)]}
              6 {:selections [(assoc
                               opt5e/rogue-expertise-selection
                               ::t/order
@@ -2821,7 +2807,7 @@
               :page 96
               :summary "convey secret messages hidden in normal conversation"
 }
-             (evasion 7 96)
+             (opt5e/evasion 7 96)
              {:level 11
               :name "Reliable Talent"
               :page 96
