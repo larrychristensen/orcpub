@@ -2819,7 +2819,8 @@ If you target an object held or worn by a hostile creature, that creature must s
     :components {:verbal true :somatic true}
     :duration "Concentration, up 1 minute"
     :source :phb
-    :page 255}
+    :page 255
+    :summary "Transform a piece of ammunition into a bolt of lighting for one attack. When you make a ranged weapon attack with it it deals 4d8 lighting damage instead of its regular damage if hits, half as much if misses. Each creature within 10 ft. takes 2d10 damage, half on successful DEX save. Increase damage by 1d6 for each spell slot above 3rd."}
    {
     :name "Lightning Bolt"
     :school "evocation"
@@ -3539,7 +3540,7 @@ The target's gear melds into the new form. The creature can't activate, use, wie
     :duration "Instantaneous"
     :source :phb
     :page 266
-    }
+    :summary "Heal one creature's hit points fully and end charmed, frightened, paralyzed, or stunned conditions on it. If prone, the creature can stand up using a reaction."}
    {
     :name "Power Word Kill"
     :school "enchantment"
@@ -3787,7 +3788,7 @@ The spell's damage increases by 1d8 when you reach 5th level (2d8), 11th level (
     :duration "Instantaneous"
     :source :phb
     :page 271
-    }
+    :summary "Make a ranged spell attack. The target takes 2d8 poison damage on hit, and is poisoned until the end of your next turn if it fails a CON save. Increase the damage by 1d8 for each spell slot above 1st."}
    {
     :name "Regenerate"
     :school "transmutation"
@@ -3963,7 +3964,7 @@ Instead of targeting a creature, you can choose a location you have seen before 
     :duration "Concentration, up to 1 minute"
     :source :phb
     :page 274
-    }
+    :summary "You next melee weapon attack hit deals an extra 1d6 fire damage. The target makes a CON save at the start of each of it's turns for the duration of the spell. On failure it takes 1d6 fire damage, on success the spell ends."}
    {
     :name "See Invisibility"
     :school "divination"
@@ -4283,7 +4284,7 @@ At Higher Levels. When you cast this spell using a spell slot of 3rd level or hi
     :duration "Concentration, up to 1 minute"
     :source :phb
     :page 278
-    }
+    :summary "Your next melee weapon attack hit deals an extra 4d6 psychic damage and the target must make a WIS save. On failed save it cannot take reactions and has disadvantage on ability checks and attack rolls."}
    {
     :name "Stinking Cloud"
     :school "conjuration"
@@ -4387,7 +4388,7 @@ This spell dispels any darkness in its area that was created by a spell."
     :duration "Concentration, up to 1 minute"
     :source :phb
     :page 279
-    }
+    :summary "Temporarily tranform a quiver into a magical one. Until the spell ends, take a bonus action on each of your turns to make two attacks with a weapon that uses the quiver's type of ammunition. Each time you fire, the ammunition is immediately replaced with another piece of non-magical ammunition. The ammunition disappears when the spell ends."}
    {:name "Sword Burst"
     :school "conjuration"
     :level 0
@@ -4458,7 +4459,7 @@ You can exert fine control on objects with your telekinetic grip, such as manipu
     :duration "24 hours"
     :source :phb
     :page 281
-    }
+    :summary "Create a telepathic link with another creature on the same plane through which you can communicate."}
    {
     :name "Teleport"
     :school "conjuration"
@@ -4545,7 +4546,7 @@ If you cast this spell multiple times, you can have up to three of its 1-minute 
     :source :phb
     :page 282
     :attack-roll? true
-    }
+    :summary "Create a whip that deals 1d6 piercing damage and pulls a Large or smaller creature 10 ft. toward you. The damage increases to 2d6 at 5th level, 3d6 at 11th level, and 4d6 at 17th level."}
    {:name "Thunderclap"
     :school "evocation"
     :level 0
@@ -4563,7 +4564,8 @@ If you cast this spell multiple times, you can have up to three of its 1-minute 
     :duration "Concentration, up to 1 minute"
     :components {:verbal true}
     :page 282
-    :source :phb}
+    :source :phb
+    :summary "You next melee weapon attack hit deals an extra 2d6 thunder damage. It also pushes the target 10 ft. away on failed STR save."}
    {
     :name "Thunderwave"
     :school "evocation"
@@ -4695,7 +4697,7 @@ The spell can even provide a new body if the original no longer exists, in which
     :duration "Concentration, up to 6 rounds"
     :source :phb
     :page 284
-    }])
+    :summary "Create a wall of water 300 ft. long, 300 ft. high, and 50 ft. thick. Creatures within the are of the wall when it appears take 6d10 bludgeoning damage, half on successful STR save. The wall moves 50 ft. away on each of your turns and reduces by 50 ft. in height and deals 1d10 less damage to creatures within it."}])
 
 (def u-spells [{
                 :name "Unseen Servant"
@@ -4732,7 +4734,7 @@ At Higher Levels. When you cast this spell using a spell slot of 4th level or hi
                 :duration "Instantaneous"
                 :source :phb
                 :page 285
-                }
+                :summary "Target on creature, if it can hear you it takes 1d4 psychic damage on a failed WIS save. On failed save it also has disadvantage on its next attack roll before the end of your next turn."}
                {:name "Vitriolic Sphere"
                 :school "evocation"
                 :level 4
@@ -4967,7 +4969,7 @@ The stress of casting this spell to produce any effect other than duplicating an
                 :duration "Concentration, up to 1 minute"
                 :source :phb
                 :page 289
-                }
+                :summary "Make a ranged spell attack against a creature, on hit the target takes 1d12 lightning damage. On each of your subsequent turns for the duration, you can use your action to deal an automatic 1d12 lightning damage to the target. The spell ends if the target is out of range, has total cover, or you use you action for something else."}
                {
                 :name "Word of Recall"
                 :school "conjuration"
@@ -4989,7 +4991,7 @@ You must designate a sanctuary by casting this spell within a location, such as 
                 :duration "Concentration, up to 1 minute"
                 :source :phb
                 :page 289
-                }])
+                :summary "Your next melee weapon attack hit deals an extra 1d6 psychic damage, the target must make a WIS save, and on a failed save it is frightened of you until the spell ends. The target can end the spell if it uses an action to make a successful WIS save."}])
 
 (def z-spells [{
                 :name "Zone of Truth"
