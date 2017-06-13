@@ -2259,6 +2259,10 @@
                                :page 85
                                :summary "immune to disease"})]}
               5 {:modifiers [(mod5e/extra-attack)]}
+              6 {:modifiers (map
+                             #(mod/modifier ?saving-throw-bonuses
+                                            (update ?saving-throw-bonuses % + (?ability-bonuses ::char5e/cha)))
+                             char5e/ability-keys)}
               14 {:modifiers [(mod5e/action
                                {:name "Cleansing Touch"
                                 :level 14
