@@ -176,7 +176,7 @@
                 :on-change #(dispatch [:set-search-text (event-value %)])}]]
              [:div.opacity-1.p-r-10.pointer
               {:class-name (if mobile? "opacity-5" "opacity-1")
-               :on-click #(dispatch [:toggle-orcacle])}
+               :on-click #(dispatch [:open-orcacle])}
               (svg-icon "hood" (if mobile? 32 48) (if mobile? 32 48))]]])
          [user-header-view]]]]]
      [:div.container
@@ -750,9 +750,12 @@
                                       (if material-component
                                         (str " (" material-component ")")))))
      [:div.m-t-10
-      (if (or summary description)
-        (paragraphs (or summary description))
-        (disp/source-description source page))]]]])
+      (if description
+        (paragraphs description)
+        [:div
+         (if summary (paragraphs summary))
+         [:span (str "(" (disp/source-description source page) " for more details)")]])]]]])
+
 
 (defn print-bonus-map [m]
   (s/join ", "
@@ -882,15 +885,15 @@
        (if orcacle-open?
          [:div.flex.flex-column.h-100-p
           {:style oracle-frame-style}
-          [:i.fa.fa-times-circle.white.f-s-24.orange.pointer
-           {:on-click #(dispatch [:toggle-orcacle])
+          [:i.fa.fa-times-circle.f-s-24.orange.pointer
+           {:on-click #(dispatch [:close-orcacle])
             :style {:position :fixed
                     :top 20
                     :right 40}}]
           [:div
            [:div.flex.justify-cont-s-a.m-t-10
             [:div.flex.align-items-c.pointer
-             {:on-click #(dispatch [:toggle-orcacle])}
+             {:on-click #(dispatch [:close-orcacle])}
              [:span.white.f-s-32 "Orcacle"]
              [:div.m-l-10 (svg-icon "hood" 48 48)]]]]
           [:div.p-10

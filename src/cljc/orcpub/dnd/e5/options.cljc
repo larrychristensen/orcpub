@@ -399,25 +399,26 @@
    [:span.f-w-b (str name ": ")]
    [:span.f-w-n value]])
 
-(defn spell-help [{:keys [school casting-time range duration description source page]}]
+(defn spell-help [{:keys [school casting-time range duration description summary source page]}]
   [:div
    [:div.m-b-5
     (spell-field "School" school)
     (spell-field "Casting Time" casting-time)
     (spell-field "Range" range)
     (spell-field "Duration" duration)]
-   [:div.f-w-n (if description
+   [:div.f-w-n (if (or description summary)
                  (doall
                   (map-indexed
                    (fn [i p]
                      ^{:key i} [:p.m-t-5 p])
-                   (s/split description #"\n")))
-                 (if source
-                   (let [{:keys [abbr url]} (disp/sources source)]
-                     [:div
-                      [:span "See"]
-                      [:a.m-l-5 {:href url :target :_blank} abbr]
-                      [:span.m-l-5 (str "page " page)]])))]])
+                   (s/split (or description summary) #"\n"))))]
+   (if source
+     (let [{:keys [abbr url]} (disp/sources source)]
+       [:div.f-w-n
+        [:span "(see"]
+        [:a.m-l-5 {:href url :target :_blank} abbr]
+        [:span.m-l-5 (str "page " page)]
+        [:span " for more details)"]]))])
 
 (defn spell-option [spellcasting-ability class-name key & [prepend-level? qualifier]]
   (let [{:keys [name level source] :as spell} (spells/spell-map key)]
