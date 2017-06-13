@@ -9,6 +9,7 @@
             [orcpub.dnd.e5.weapons :as weapon5e]
             [orcpub.dnd.e5.spell-lists :as sl]
             [orcpub.dnd.e5.templates.ua-mystic :as ua-mystic]
+            [orcpub.dnd.e5.templates.ua-revised-ranger :as ua-revised-ranger]
             [orcpub.dnd.e5.templates.ua-artificer :as ua-artificer]
             [re-frame.core :refer [subscribe]]))
 
@@ -612,6 +613,13 @@
    :selections [(opt5e/class-selection
                  {:options [ua-artificer/artificer-option]})]})
 
+(def ua-revised-ranger-plugin
+  {:name "Unearthed Arcana: Revised Ranger"
+   :key :ua-revised-ranger
+   :class-options? true
+   :selections [(opt5e/class-selection
+                 {:options [ua-revised-ranger/revised-ranger-option]})]})
+
 (def ua-mystic-plugin
   {:name "Unearthed Arcana: Mystic"
    :key ua-mystic-kw
@@ -971,6 +979,7 @@
     :name
     [ua-artificer-plugin
      ua-mystic-plugin
+     ua-revised-ranger-plugin
      ua-trio-of-subclasses-plugin
      ua-revised-subclasses-plugin
      ua-waterborne-plugin

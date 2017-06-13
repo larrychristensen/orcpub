@@ -2312,3 +2312,17 @@
      :help "Race determines your appearance and helps shape your culture and background. It also affects you ability scores, size, speed, languages, and many other crucial inherent traits."
      :tags #{:race}}
     cfg)))
+
+(def ranger-skills {:animal-handling true :athletics true :insight true :investigation true :nature true :perception true :stealth true :survival true})
+
+(defn evasion [level page]
+  {:name "Evasion"
+   :page page
+   :level level
+   :summary "when you succeed on a DEX save to take half damage, you take none, if you fail, you take half"})
+
+(defn uncanny-dodge-modifier [page]
+  (modifiers/reaction
+   {:name "Uncanny Dodge"
+    :page page
+    :summary "halve the damage from an attacker you can see that hits you"}))

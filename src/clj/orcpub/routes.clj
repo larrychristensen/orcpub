@@ -298,7 +298,11 @@
   (merge
    (zipmap (map :key skill5e/skills) (repeat 8))
    (zipmap (map (fn [k] (keyword (str (name k) "-save"))) char5e/ability-keys) (repeat 8))
-   {:features-and-traits 8
+   {:personality-traits 8
+    :ideals 8
+    :bonds 8
+    :flaws 8
+    :features-and-traits 8
     :features-and-traits-2 8
     :attacks-and-spellcasting 8
     :backstory 8
