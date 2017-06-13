@@ -1431,7 +1431,9 @@
 (defn traits-modifiers [traits & [class-key source]]
   (map
    (fn [trait]
-     (modifiers/trait-cfg (assoc trait :source source :class-key class-key)))
+     (modifiers/trait-cfg (merge {:source source
+                                  :class-key class-key}
+                                 trait)))
    traits))
 
 (defn armor-prof-modifiers [armor-proficiencies & [cls-kw]]
@@ -2326,3 +2328,16 @@
    {:name "Uncanny Dodge"
     :page page
     :summary "halve the damage from an attacker you can see that hits you"}))
+
+(defn divine-strike [damage-desc page & [source]]
+  (modifiers/dependent-trait
+   {:level 8
+    :name "Divine Strike"
+    :page page
+    :source source
+    :frequency turns-1
+    :summary (str "Add "
+                  (if (>= (?class-level :cleric) 14) 2 1)
+                  "d8 "
+                  damage-desc
+                  " damage to a successful weapon attack's damage")}))

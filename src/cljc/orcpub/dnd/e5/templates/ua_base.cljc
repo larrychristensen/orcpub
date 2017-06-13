@@ -11,6 +11,7 @@
             [orcpub.dnd.e5.templates.ua-mystic :as ua-mystic]
             [orcpub.dnd.e5.templates.ua-revised-ranger :as ua-revised-ranger]
             [orcpub.dnd.e5.templates.ua-artificer :as ua-artificer]
+            [orcpub.dnd.e5.templates.ua-cleric :as ua-cleric]
             [re-frame.core :refer [subscribe]]))
 
 (defn ua-help [name url]
@@ -620,6 +621,13 @@
    :selections [(opt5e/class-selection
                  {:options [ua-revised-ranger/revised-ranger-option]})]})
 
+(def ua-cleric-plugin
+  {:name "Unearthed Arcana: Cleric"
+   :key :ua-cleric
+   :class-options? true
+   :selections [(opt5e/class-selection
+                 {:options [(opt5e/class-option ua-cleric/ua-cleric-cfg)]})]})
+
 (def ua-mystic-plugin
   {:name "Unearthed Arcana: Mystic"
    :key ua-mystic-kw
@@ -983,4 +991,5 @@
      ua-trio-of-subclasses-plugin
      ua-revised-subclasses-plugin
      ua-waterborne-plugin
-     ua-eberron-plugin])))
+     ua-eberron-plugin
+     ua-cleric-plugin])))

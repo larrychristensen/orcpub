@@ -1195,19 +1195,6 @@
       :modifiers [(mod5e/skill-proficiency skill-kw)
                   (mod5e/skill-expertise skill-kw)]})))
 
-(defn divine-strike [damage-desc page & [source]]
-  (mod5e/dependent-trait
-   {:level 8
-    :name "Divine Strike"
-    :page page
-    :source source
-    :frequency opt5e/turns-1
-    :summary (str "Add "
-                  (if (>= (?class-level :cleric) 14) 2 1)
-                  "d8 "
-                  damage-desc
-                  " damage to a successful weapon attack's damage")}))
-
 (defn starting-equipment-option [equipment num]
   (t/option-cfg
    {:name (:name equipment)
@@ -1317,7 +1304,7 @@
                                             :summary (str "Distribute "
                                                           (* 5 (?class-level :cleric))
                                                           " HPs healing among any creatures within 30 ft., each can be restored to at most 1/2 their HP max")})]}
-                           8 {:modifiers [(divine-strike "radiant" 60)]}}
+                           8 {:modifiers [(opt5e/divine-strike "radiant" 60)]}}
                   :traits [{:level 1
                             :name "Disciple of Life"
                             :page 60
@@ -1435,7 +1422,7 @@
                                             :range {:plural :feet
                                                     :amount 30}
                                             :summary "to a creature that takes fire, cold, acid, lighting, or thunder damage, grant resistance to that damage"})]}
-                           8 {:modifiers [(divine-strike "cold, fire, or lighting" 62)]}
+                           8 {:modifiers [(opt5e/divine-strike "cold, fire, or lighting" 62)]}
                            17 {:modifiers [(mod5e/bonus-action
                                             {:name "Master of Nature"
                                              :level 17
@@ -1471,7 +1458,7 @@
                                             :page 62
                                             :level 2
                                             :summary "Rather than roll lighting or thunder damage, deal max damage"})]}
-                           8 {:modifiers [(divine-strike "thunder" 62)]}
+                           8 {:modifiers [(opt5e/divine-strike "thunder" 62)]}
                            17 {:modifiers [(mod5e/flying-speed-equal-to-walking)]}}
                   :traits [{:name "Thunderbolt Strike"
                             :page 62
@@ -1507,7 +1494,7 @@
                                             :level 6
                                             :page 63
                                             :summary "become invisible until end of your next turn"})]}
-                           8 {:modifiers [(divine-strike "poison" 63)]}
+                           8 {:modifiers [(opt5e/divine-strike "poison" 63)]}
                            17 {:modifiers [(mod5e/action
                                             {:name "Improved Duplicity"
                                              :level 17
@@ -1538,7 +1525,7 @@
                                             :level 6
                                             :page 63
                                             :summary "+10 to an attack roll made by a creature within 30 ft."})]}
-                           8 {:modifiers [(divine-strike nil 63)]}}
+                           8 {:modifiers [(opt5e/divine-strike nil 63)]}}
                   :traits [
                            {:name "Channel Divinity: Guided Strike"
                             :page 63
@@ -4265,7 +4252,7 @@ long rest."})]
                                             :page 97
                                             :source :dmg
                                             :summary "Your cleric spells and Channel Divinity ignore necrotic damage resistance"})]}
-                           8 {:modifiers [(divine-strike "necrotic" 97 :dmg)]}}
+                           8 {:modifiers [(opt5e/divine-strike "necrotic" 97 :dmg)]}}
                   :traits [{:level 17
                             :name "Improved Reaper"
                             :summary "If you cast a necromancy spell that targets only 1 creature, you can instead target two within 5 ft. of each other"}]}]}
