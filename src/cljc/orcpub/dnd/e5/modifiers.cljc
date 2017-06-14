@@ -316,6 +316,13 @@
                  "proficiency"
                  ~conditions))
 
+(defmacro skill-expertise [kw & [conditions]]
+  `(mods/set-mod ~'?skill-expertise
+                 ~kw
+                 nil
+                 nil
+                 ~conditions))
+
 (defn skill-bonus [skill-kw bonus]
   (mods/modifier ?additional-skill-bonuses
                  (update ?additional-skill-bonuses skill-kw + bonus)))
@@ -330,9 +337,6 @@
     1
     "HP"
     mods/bonus-str))
-
-(defn skill-expertise [key]
-  (mods/set-mod ?skill-expertise key))
 
 (defn tool-expertise [key]
   (mods/set-mod ?tool-expertise key))

@@ -602,6 +602,7 @@
    :speed 30
    :darkvision 60
    :source :vgm
+   :languages ["Common"]
    :modifiers [(mod5e/climbing-speed 20)
                (mod5e/skill-proficiency :perception)
                (mod5e/skill-proficiency :stealth)

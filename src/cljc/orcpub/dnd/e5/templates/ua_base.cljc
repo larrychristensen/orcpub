@@ -13,6 +13,7 @@
             [orcpub.dnd.e5.templates.ua-artificer :as ua-artificer]
             [orcpub.dnd.e5.templates.ua-cleric :as ua-cleric]
             [orcpub.dnd.e5.templates.ua-bard :as ua-bard]
+            [orcpub.dnd.e5.templates.ua-race-feats :as ua-race-feats]
             [re-frame.core :refer [subscribe]]))
 
 (defn ua-help [name url]
@@ -1001,4 +1002,6 @@
      ua-waterborne-plugin
      ua-eberron-plugin
      ua-cleric-plugin
-     ua-bard-plugin])))
+     ua-bard-plugin
+     ua-race-feats/ua-race-feats-plugin])))
+

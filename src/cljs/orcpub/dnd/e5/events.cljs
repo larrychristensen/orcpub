@@ -1014,6 +1014,7 @@
                               :subrace subrace
                               :sex sex})}})))
 
+
 (defn search-results [text]
   (let [search-text (s/lower-case text)
         dice-result (dice/dice-roll-text search-text)
