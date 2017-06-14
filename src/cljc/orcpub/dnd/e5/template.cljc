@@ -28,7 +28,13 @@
   {::entity/options {:ability-scores {::entity/key :standard-scores
                                       ::entity/value (char5e/abilities 15 14 13 12 10 8)}
                      :class [{::entity/key :barbarian
-                              ::entity/options {:levels [{::entity/key :level-1}]}}]}})
+                              ::entity/options {:levels [{::entity/key :level-1}]}}]
+                     :optional-content
+                     [{:orcpub.entity/key :vgm}
+                      {:orcpub.entity/key :scag}
+                      {:orcpub.entity/key :ee}
+                      {:orcpub.entity/key :dmg}
+                      {:orcpub.entity/key :cos}]}})
 
 (defn set-ability! [app-state ability-key ability-value]
   (swap! app-state
