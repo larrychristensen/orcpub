@@ -892,6 +892,7 @@
                                            (modifiers/trait-cfg
                                             {:name (str (:name cfg) " Feat")
                                              :page (:page cfg)
+                                             :source (:source cfg)
                                              :summary summary}))
        true (update :modifiers
                     conj
@@ -2341,3 +2342,11 @@
                   "d8 "
                   damage-desc
                   " damage to a successful weapon attack's damage")}))
+
+
+(defn skill-prof-or-expertise [skill-kw source]
+  [(modifiers/skill-proficiency skill-kw source)
+   (modifiers/skill-expertise skill-kw [(some
+                                     (fn [[k v]]
+                                       (not= k source))
+                                     (?skill-profs skill-kw))])])
