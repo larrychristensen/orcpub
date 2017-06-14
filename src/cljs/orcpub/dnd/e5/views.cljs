@@ -1264,10 +1264,14 @@
 (defn passive-perception-section-2 [id]
   (basic-section "Passive Perception" "awareness" @(subscribe [::char/passive-perception id])))
 
+(defn proficiency-bonus-section-2 [id]
+  (basic-section "Proficiency Bonus" nil (common/bonus-str @(subscribe [::char/proficiency-bonus id]))))
+
 (defn skills-section-2 [id]
   (let [skill-profs (or @(subscribe [::char/skill-profs id]) #{})
         skill-bonuses @(subscribe [::char/skill-bonuses id])]
     [:div
+     [proficiency-bonus-section-2 id]
      [passive-perception-section-2 id]
      [:div.p-10.flex.flex-column.align-items-c
       (section-header-2 "Skills" "juggler")

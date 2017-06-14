@@ -733,6 +733,27 @@
     :tags #{:skill-profs :profs}
     :prereq-fn prereq-fn}))
 
+(defn skill-prof-or-expertise [skill-kw source]
+  [(modifiers/skill-proficiency skill-kw source)
+   (modifiers/skill-expertise skill-kw [(some
+                                     (fn [[k v]]
+                                       (not= k source))
+                                     (?skill-profs skill-kw))])])
+
+(defn skill-or-expertise-selection [num skill-kws option-source]
+  (t/selection-cfg
+   {:name "Skill Proficiency"
+    :order 0
+    :tags #{:skill-profs :profs}
+    :options (map
+              (fn [skill-kw]
+                (let [{:keys [name icon]} (skills/skills-map skill-kw)]
+                  (t/option-cfg
+                   {:name name
+                    :icon icon
+                    :modifiers [(skill-prof-or-expertise skill-kw option-source)]})))
+              [:acrobatics :athletics])}))
+
 (defn skill-selection
   ([num]
    (skill-selection-2 {:num num
@@ -2343,10 +2364,42 @@
                   damage-desc
                   " damage to a successful weapon attack's damage")}))
 
+(def favored-enemy-types
+  {:aberration [:deep-speech :undercommon :grell :slaad]
+   :beast [:giant-elk :giant-eagle :giant-owl]
+   :celestial language-keys
+   :construct [:modron]
+   :dragon [:aquan :draconic :sylvan]
+   :elemental [:auran :terran :ignan :aquan]
+   :fey [:draconic :elvish :sylvan :abyssal :infernal :primoridial :aquan :giant]
+   :fiend language-keys
+   :giant [:giant :orc :undercommon]
+   :monstrosity [:draconic :sylvan :elvish :hook-horror :abyssal :celestial :infernal :primordial :aquan :sphynx :umber-hulk :yeti :winter-wolf :goblin :worg]
+   :ooze []
+   :plant [:druidic :elvish :sylvan]
+   :undead language-keys})
 
-(defn skill-prof-or-expertise [skill-kw source]
-  [(modifiers/skill-proficiency skill-kw source)
-   (modifiers/skill-expertise skill-kw [(some
-                                     (fn [[k v]]
-                                       (not= k source))
-                                     (?skill-profs skill-kw))])])
+(def humanoid-enemies
+  {:bugbear [:goblin]
+   :bullywug [:bullywug]
+   :githyanki [:gith]
+   :gitzerai [:gith]
+   :gnoll [:gnoll :abyssal]
+   :goblin [:goblin]
+   :grimlock [:undercommon]
+   :hobgoblin [:goblin]
+   :kobold [:draconic]
+   :koa-toa [:undercommon]
+   :lizardfolk [:draconic :abyssal]
+   :merfolk [:aquan]
+   :orc [:orc]
+   :thri-kreen [:thri-kreen]
+   :troglodyte [:troglodyte]
+   :yuan-ti-pureblood {:name "Yuan-Ti Pureblood"
+                       :languages [:abyssal :draconic]}})
+
+(defn druid-cantrip-selection [class-nm]
+  (t/selection-cfg
+   {:name "Druid Cantrip"
+    :tags #{:spells}
+    :options (spell-options (get-in sl/spell-lists [:druid 0]) ::character/wis class-nm)}))
