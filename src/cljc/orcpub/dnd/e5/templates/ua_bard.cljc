@@ -8,6 +8,7 @@
     :subclass-level 3
     :subclass-title "Bard College"
     :source :ua-bard
+    :plugin? true
     :subclasses [{:name "College of Glamour"
                   :source :ua-bard
                   :modifiers [opt5e/ua-al-illegal]
