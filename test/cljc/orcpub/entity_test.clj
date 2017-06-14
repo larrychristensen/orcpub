@@ -183,3 +183,51 @@
                                                                             ::e/string-value "Sancho"}}]}}]}]
     (is (= expected (entity/to-strict non-strict)))
     (is (= non-strict (entity/from-strict (entity/to-strict non-strict))))))
+
+(deftest get-entity-path
+  (let [warlock-entity {:orcpub.entity/options
+                        {:ability-scores
+                         {:orcpub.entity/key :standard-scores,
+                          :orcpub.entity/value
+                          {:orcpub.dnd.e5.character/str 15,
+                           :orcpub.dnd.e5.character/dex 14,
+                           :orcpub.dnd.e5.character/con 13,
+                           :orcpub.dnd.e5.character/int 12,
+                           :orcpub.dnd.e5.character/wis 10,
+                           :orcpub.dnd.e5.character/cha 8}},
+                         :class
+                         [{:orcpub.entity/key :warlock,
+                           :orcpub.entity/options
+                           {:levels
+                            [{:orcpub.entity/key :level-1}
+                             {:orcpub.entity/key :level-2}
+                             {:orcpub.entity/key :level-3,
+                              :orcpub.entity/options
+                              {:pact-boon {:orcpub.entity/key :pact-of-the-tome}}}],
+                            :eldritch-invocations
+                            [{:orcpub.entity/key :book-of-ancient-secrets}]}}],
+                         :optional-content
+                         [{:orcpub.entity/key :vgm}
+                          {:orcpub.entity/key :scag}
+                          {:orcpub.entity/key :ee}
+                          {:orcpub.entity/key :dmg}
+                          {:orcpub.entity/key :cos}],
+                         :weapons
+                         [{:orcpub.entity/key :dagger,
+                           :orcpub.entity/value
+                           {:orcpub.dnd.e5.character.equipment/quantity 2,
+                            :orcpub.dnd.e5.character.equipment/equipped? true,
+                            :orcpub.dnd.e5.character.equipment/class-starting-equipment?
+                            true}}],
+                         :armor
+                         [{:orcpub.entity/key :leather,
+                           :orcpub.entity/value
+                           {:orcpub.dnd.e5.character.equipment/quantity 1,
+                            :orcpub.dnd.e5.character.equipment/equipped? true,
+                            :orcpub.dnd.e5.character.equipment/class-starting-equipment?
+                            true}}]}}]
+    (is (= (entity/get-entity-path
+            t5e/template
+            warlock-entity
+            [:class :warlock :eldritch-invocations :book-of-ancient-secrets :book-of-ancient-secrets-rituals])
+           [:orcpub.entity/options :class 0 :orcpub.entity/options :eldritch-invocations 0 :orcpub.entity/options :book-of-ancient-secrets-rituals]))))

@@ -317,7 +317,9 @@
            entity-items (get-in entity selection-path)
            [entity-i _] (entity-item-with-key entity-items option-k)
            path-i (if (and (or option-k entity-i)
-                           multiselect?)
+                           (or (nil? max)
+                               (> max 1)
+                               multiselect?))
                     (if (nat-int? option-k)
                       option-k
                       entity-i))
@@ -336,8 +338,11 @@
                entity-path)]
     (map #(meta (get-in entity %)) paths)))
 
+#_[:orcpub.entity/options :class 0 :orcpub.entity/options :eldritch-invocations :orcpub.entity/options :book-of-ancient-secrets-rituals]
+
 (defn update-option [template entity path update-fn]
   (let [entity-path (get-entity-path template entity path)
+        _ (prn "ENTITY_PATH" entity-path)
         updated (update-in entity entity-path update-fn)]
     updated))
 
