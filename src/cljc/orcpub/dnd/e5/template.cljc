@@ -3573,15 +3573,14 @@ long rest."})]
                    :page 111
                    :frequency opt5e/long-rests-1
                    :summary "cast bestow curse using warlock spell slot"})]
-     :prereqs [(opt5e/total-levels-option-prereq 7 :warlock)]})
+     :prereqs [(opt5e/total-levels-option-prereq 5 :warlock)]})
    (t/option-cfg
     {:name "Thief of Five Fates"
      :modifiers [(mod5e/trait-cfg
                   {:name "Eldritch Invocation: Thief of Five Fates"
                    :page 111
                    :frequency opt5e/long-rests-1
-                   :summary "cast bane warlock spell slot"})]
-     :prereqs [(opt5e/total-levels-option-prereq 7 :warlock)]})
+                   :summary "cast bane warlock spell slot"})]})
    (t/option-cfg
     {:name "Thirsting Blade"
      :modifiers [(mod5e/trait-cfg
