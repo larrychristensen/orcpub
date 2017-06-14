@@ -415,7 +415,7 @@
 (defn validate-selections [built-template character selections]
   (mapcat
    (fn [{:keys [::t/name ::t/tags] :as selection}]
-     (if (not (tags :starting-equipment))
+     (if (not (get tags :starting-equipment))
        (let [remaining (entity/count-remaining built-template character selection)]
          (cond
            (pos? remaining) [(str "You have " remaining " more '" name "' selection" (if (> remaining 1) "s") " to make.")]
@@ -749,6 +749,7 @@
 (defn race-abilities-component [ability-keys]
   (let [race-ability-increases @(subscribe [::char5e/race-ability-increases])
         subrace-ability-increases @(subscribe [::char5e/subrace-ability-increases])
+        ability-increases @(subscribe [::char5e/ability-increases])
         total-abilities @(subscribe [::char5e/abilities])]
     [:div.flex.justify-cont-s-a
      (doall
@@ -773,7 +774,18 @@
                [:div
                 {:class-name (if (zero? subrace-v)
                                "opacity-5")}
-                (ability-value subrace-v)])])])
+                (ability-value subrace-v)])])
+          (if (seq ability-increases)
+            [:div
+             [:div.m-t-10.m-b-10 "+"]
+             (ability-subtitle "other")
+             (let [other-v (- (get ability-increases k 0)
+                              (get race-ability-increases k 0)
+                              (get subrace-ability-increases k 0))]
+               [:div
+                {:class-name (if (zero? other-v)
+                               "opacity-5")}
+                (ability-value other-v)])])])
        ability-keys))]))
 
 (defn abilities-matrix-footer [ability-keys]

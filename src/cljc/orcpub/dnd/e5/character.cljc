@@ -297,6 +297,9 @@
 (defn background [built-char]
   (get-prop built-char :background))
 
+(defn ability-increases [built-char]
+  (get-prop built-char :ability-increases))
+
 (defn race-ability-increases [built-char]
   (get-prop built-char :race-ability-increases))
 

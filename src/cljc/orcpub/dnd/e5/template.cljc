@@ -1429,10 +1429,7 @@
                                              :level 17
                                              :page 62
                                              :summary "command creatures charmed with your Charm Animals and Plants"})]}}
-                  :selections [(t/selection-cfg
-                                {:name "Druid Cantrip"
-                                 :tags #{:spells}
-                                 :options (opt5e/spell-options (get-in sl/spell-lists [:druid 0]) ::char5e/wis "Druid")})]}
+                  :selections [(opt5e/druid-cantrip-selection "Cleric")]}
                  {:name "Tempest Domain"
                   :profs {:armor {:heavy true}
                           :weapon {:martial true}}
@@ -2441,40 +2438,6 @@
                              :page 88
                              :summary "when you hit with opportunity attack, you can also move up to half your speed after the attack without provoking opportunity attacks"}]}]})))
 
-(def favored-enemy-types
-  {:aberration [:deep-speech :undercommon :grell :slaad]
-   :beast [:giant-elk :giant-eagle :giant-owl]
-   :celestial opt5e/language-keys
-   :construct [:modron]
-   :dragon [:aquan :draconic :sylvan]
-   :elemental [:auran :terran :ignan :aquan]
-   :fey [:draconic :elvish :sylvan :abyssal :infernal :primoridial :aquan :giant]
-   :fiend opt5e/language-keys
-   :giant [:giant :orc :undercommon]
-   :monstrosity [:draconic :sylvan :elvish :hook-horror :abyssal :celestial :infernal :primordial :aquan :sphynx :umber-hulk :yeti :winter-wolf :goblin :worg]
-   :ooze []
-   :plant [:druidic :elvish :sylvan]
-   :undead opt5e/language-keys})
-
-(def humanoid-enemies
-  {:bugbear [:goblin]
-   :bullywug [:bullywug]
-   :githyanki [:gith]
-   :gitzerai [:gith]
-   :gnoll [:gnoll :abyssal]
-   :goblin [:goblin]
-   :grimlock [:undercommon]
-   :hobgoblin [:goblin]
-   :kobold [:draconic]
-   :koa-toa [:undercommon]
-   :lizardfolk [:draconic :abyssal]
-   :merfolk [:aquan]
-   :orc [:orc]
-   :thri-kreen [:thri-kreen]
-   :troglodyte [:troglodyte]
-   :yuan-ti-pureblood {:name "Yuan-Ti Pureblood"
-                       :languages [:abyssal :draconic]}})
-
 (defn favored-enemy-option [[enemy-type info]]
   (let [vec-info? (sequential? info)
         languages (if vec-info? info (:languages info))
@@ -2509,7 +2472,7 @@
                                :ref [:class :ranger :favored-enemy-type]
                                :options (map
                                          favored-enemy-option
-                                         favored-enemy-types)})]})
+                                         opt5e/favored-enemy-types)})]})
               (t/option-cfg
                {:name "Two Humanoid Races"
                 :selections [(t/selection-cfg
@@ -2522,7 +2485,7 @@
                                :ref [:class :ranger :favored-enemy-race]
                                :options (map
                                          favored-enemy-option
-                                         humanoid-enemies)})]})]}))
+                                         opt5e/humanoid-enemies)})]})]}))
 
 (defn favored-terrain-selection [order]
   (t/selection-cfg

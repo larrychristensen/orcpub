@@ -420,6 +420,7 @@
    ::char5e/abilities char5e/ability-values
    ::char5e/race-ability-increases char5e/race-ability-increases
    ::char5e/subrace-ability-increases char5e/subrace-ability-increases
+   ::char5e/ability-increases char5e/ability-increases
    ::char5e/ability-bonuses char5e/ability-bonuses 
    ::char5e/armor-class char5e/base-armor-class 
    ::char5e/armor-class-with-armor char5e/armor-class-with-armor 
