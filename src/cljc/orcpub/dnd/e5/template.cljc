@@ -3429,6 +3429,7 @@
      :selections [(t/selection-cfg
                    {:name "Book of Ancient Secrets Rituals"
                     :tags #{:spells}
+                    :multiselect? true
                     :options (opt5e/spell-options
                               (map
                                (fn [s] (or (:key s)
@@ -3661,9 +3662,9 @@ long rest."})
     :options eldritch-invocation-options
     :min (or num 1)
     :max (or num 1)
+    :multiselect? true
     :ref [:class :warlock :eldritch-invocations]
-    :tags #{:spells}
-    :simple? true}))
+    :tags #{:spells}}))
 
 (defn mystic-arcanum-selection [spell-level]
   (t/selection-cfg

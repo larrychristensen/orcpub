@@ -1005,5 +1005,5 @@
      ua-cleric-plugin
      ua-bard-plugin
      ua-race-feats/ua-race-feats-plugin
-     ua-skill-feats/ua-skill-feats-plugin])))
+     #_ua-skill-feats/ua-skill-feats-plugin])))
 
