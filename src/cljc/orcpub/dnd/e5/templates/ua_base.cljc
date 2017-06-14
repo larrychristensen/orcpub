@@ -14,6 +14,7 @@
             [orcpub.dnd.e5.templates.ua-cleric :as ua-cleric]
             [orcpub.dnd.e5.templates.ua-bard :as ua-bard]
             [orcpub.dnd.e5.templates.ua-race-feats :as ua-race-feats]
+            [orcpub.dnd.e5.templates.ua-skill-feats :as ua-skill-feats]
             [re-frame.core :refer [subscribe]]))
 
 (defn ua-help [name url]
@@ -1003,5 +1004,6 @@
      ua-eberron-plugin
      ua-cleric-plugin
      ua-bard-plugin
-     ua-race-feats/ua-race-feats-plugin])))
+     ua-race-feats/ua-race-feats-plugin
+     ua-skill-feats/ua-skill-feats-plugin])))
 
