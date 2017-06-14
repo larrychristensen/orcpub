@@ -36,6 +36,8 @@
                    :url "http://media.wizards.com/2015/downloads/dnd/UA_Waterborne_v3.pdf"}
    :ua-mystic {:abbr "UA-Mystic"
                :url "http://media.wizards.com/2017/dnd/downloads/UAMystic3.pdf"}
+   :ua-bard {:abbr "UA-Bard"
+             :url "https://media.wizards.com/2016/dnd/downloads/UA_Bard.pdf"}
    :ua-revised-subclasses {:abbr "UA-Revised-Subclasses"
                            :url "http://media.wizards.com/2017/dnd/downloads/UA-RevisedSubclasses.pdf"}
    :ua-trio-of-subclasses {:abbr "UA-Trio-of-Subclasses"
