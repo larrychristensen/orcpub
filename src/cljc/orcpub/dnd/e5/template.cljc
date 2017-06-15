@@ -569,6 +569,7 @@
    :speed 30
    :source :vgm
    :languages ["Common" "Draconic"]
+   :selections [(opt5e/skill-selection [:animal-handling :nature :perception :stealth :survival] 2)]
    :modifiers [(mod5e/swimming-speed 30)
                (mod/modifier ?natural-ac-bonus 3)
                (mod/modifier ?armor-class-with-armor
