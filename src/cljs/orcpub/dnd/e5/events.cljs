@@ -1056,3 +1056,13 @@
    (-> db
        (assoc :orcacle-clicked? true)
        (dissoc :search-text))))
+
+(reg-event-db
+ ::char5e/set-selected-display-tab
+ (fn [db [_ tab]]
+   (assoc db ::char5e/selected-display-tab tab)))
+
+(reg-event-db
+ ::char5e/set-builder-tab
+ (fn [db [_ tab]]
+   (assoc db ::char5e/builder-tab tab)))

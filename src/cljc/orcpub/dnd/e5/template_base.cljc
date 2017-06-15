@@ -192,19 +192,20 @@
                                         :spell-attack-modifier (?spell-attack-modifier ability)}))
                       {}
                       (->> ?spells-known vals flatten))
+    ?total-spellcaster-levels (apply + (map (fn [[cls-kw factor]]
+                                              (-> ?levels
+                                                  cls-kw
+                                                  :class-level
+                                                  (/ factor)
+                                                  int))
+                                            ?spell-slot-factors))
     ?spell-slots (merge-with
                   +
                   (cond
                     (> (count ?spell-slot-factors) 1)
                     (do
                       (opt5e/total-slots
-                       (apply + (map (fn [[cls-kw factor]]
-                                       (-> ?levels
-                                           cls-kw
-                                           :class-level
-                                           (/ factor)
-                                           int))
-                                     ?spell-slot-factors))
+                       ?total-spellcaster-levels
                        1))
                     (= 1 (count ?spell-slot-factors))
                     (opt5e/total-slots (-> (?levels (first ?classes)) :class-level)

@@ -110,3 +110,10 @@
                         (count (-> % :ret)))
                      (= (set (-> % :args :item keys))
                         (set (->> % :ret keys (map (fn [k] (keyword (name k)))))))))
+
+(defn ordinal [i]
+  (case i
+    1 "1st"
+    2 "2nd"
+    3 "3rd"
+    (str i "th")))

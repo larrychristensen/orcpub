@@ -1622,38 +1622,37 @@
 
 (defn builder-tab [title key current-tab]
   [:span.builder-tab
-   {:class-name (if (= @current-tab key) "selected-builder-tab")
-    :on-click #(reset! current-tab key)} title])
+   {:class-name (if (= current-tab key) "selected-builder-tab")
+    :on-click #(dispatch [::char5e/set-builder-tab key])} title])
 
 (defn mobile-columns []
-  (let [current-tab (r/atom :options)]
-    (fn []
-      [:div.p-r-10.w-100-p
-       [:div.flex-grow-1.flex.p-l-10.p-t-10
-        [:div.w-100-p
-         [:div.builder-tabs
-          [builder-tab "Options" :options current-tab]
-          [builder-tab "Description" :description current-tab]
-          [builder-tab "Details" :details current-tab]]
-         (case @current-tab
-           :options [new-options-column 1]
-           :description [description-fields]
-           [views5e/character-display nil true 1])]]])))
+  (let [current-tab (or @(subscribe [::char5e/builder-tab]) :options)]
+    (prn "CURRENT TAB" current-tab)
+    [:div.p-r-10.w-100-p
+     [:div.flex-grow-1.flex.p-l-10.p-t-10
+      [:div.w-100-p
+       [:div.builder-tabs
+        [builder-tab "Options" :options current-tab]
+        [builder-tab "Description" :description current-tab]
+        [builder-tab "Details" :details current-tab]]
+       (case current-tab
+         :options [new-options-column 1]
+         :description [description-fields]
+         [views5e/character-display nil true 1])]]]))
 
 (defn desktop-or-tablet-columns [device-type]
-  (let [current-tab (r/atom :options)]
-    (fn []
-      [:div.w-100-p
-       [:div.flex-grow-1.flex.p-l-10.p-t-10
-        [:div.w-50-p
-         [:div.builder-tabs
-          [builder-tab "Options" :options current-tab]
-          [builder-tab "Description" :details current-tab]]
-         (if (= @current-tab :options)
-           [new-options-column (if (= device-type :desktop) 2 1)]
-           [description-fields])]
-        [:div.w-50-p.m-l-20.m-r-10
-         [views5e/character-display nil true 1]]]])))
+  (let [current-tab (or @(subscribe [::char5e/builder-tab]) :options)]
+    [:div.w-100-p
+     [:div.flex-grow-1.flex.p-l-10.p-t-10
+      [:div.w-50-p
+       [:div.builder-tabs
+        [builder-tab "Options" :options current-tab]
+        [builder-tab "Description" :details current-tab]]
+       (if (= current-tab :options)
+         [new-options-column (if (= device-type :desktop) 2 1)]
+         [description-fields])]
+      [:div.w-50-p.m-l-20.m-r-10
+       [views5e/character-display nil true 1]]]]))
 
 (defn builder-columns []
   (let [device-type @(subscribe [:device-type])]
