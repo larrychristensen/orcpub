@@ -240,4 +240,29 @@
                             :level 15
                             :page 7
                             :source :ua-revised-ranger
-                            :summary "When an attacker hits your companion with an attack, it can, as a reaction, halve the damage."}]}]}))
+                            :summary "When an attacker hits your companion with an attack, it can, as a reaction, halve the damage."}]}
+                 {:name "Deep Stalker Conclave"
+                  :levels {3 {:modifiers [(mod5e/trait-cfg
+                                           {:name "Underdark Scout"
+                                            :page 8
+                                            :source :ua-revised-ranger
+                                            :summary "During your first turn in combat, you can make an additional attack and gain +10 bonus to speed. Creatures that rely on darkvision don't benefit from it when attempting to detect you in dimness and darkness"})
+                                          (mod5e/darkvision 90)
+                                          (mod5e/spells-known 1 :disguise-self ::char5e/wis "Ranger (Revised)")]}
+                           5 {:modifiers [(mod5e/spells-known 2 :rope-trick ::char5e/wis "Ranger (Revised)")
+                                          (mod5e/extra-attack)]}
+                           7 {:modifiers [(mod5e/saving-throws nil ::char5e/wis)]}
+                           9 {:modifiers [(mod5e/spells-known 3 :glyph-of-warding ::char5e/wis "Ranger (Revised)")]}
+                           11 {:modifiers [(mod5e/trait-cfg
+                                           {:name "Stalker's Fury"
+                                            :page 8
+                                            :source :ua-revised-ranger
+                                            :frequency {:units :turn}
+                                            :summary "When you miss with an attack, you can make another"})]}
+                           13 {:modifiers [(mod5e/spells-known 4 :greater-invisibility ::char5e/wis "Ranger (Revised)")]}
+                           15 {:modifiers [(mod5e/reaction
+                                            {:name "Stalker's Dodge"
+                                             :page 8
+                                             :source :ua-revised-ranger
+                                             :summary "Impose disadvantage on a creature's attacks against you if it doesn't have advantage"})]}
+                           17 {:modifiers [(mod5e/spells-known 5 :seeming ::char5e/wis "Ranger (Revised)")]}}}]}))
