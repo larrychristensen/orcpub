@@ -34,6 +34,8 @@
                 :url "http://media.wizards.com/2015/downloads/dnd/UA_Eberron_v1.1.pdf"}
    :ua-race-feats {:abbr "UA-Race-Feats"
                    :url "http://media.wizards.com/2017/dnd/downloads/RJSJC2017_04UASkillFeats_24v10.pdf"}
+   :ua-skill-feats {:abbr "UA-Skill-Feats"
+                    :url "http://media.wizards.com/2017/dnd/downloads/UA-SkillFeats.pdf"}
    :ua-waterborne {:abbr "UA-Waterborne"
                    :url "http://media.wizards.com/2015/downloads/dnd/UA_Waterborne_v3.pdf"}
    :ua-mystic {:abbr "UA-Mystic"
