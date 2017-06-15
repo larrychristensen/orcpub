@@ -726,35 +726,40 @@
 (defn tavern-name-result [name]
   [:span.f-s-24.f-w-b.white name])
 
-(defn spell-result [{:keys [name level school casting-time range duration components description summary page source] :as spell}]
+(defn spell-component [{:keys [name level school casting-time range duration components description summary page source] :as spell} include-name? & [subheader-size]]
+  [:div.m-l-10
+   (if include-name? [:span.f-s-24.f-w-b name])
+   [:div.i.f-w-b
+    {:class-name (str "f-s-" (or subheader-size 18))}
+    (str (if (pos? level)
+           (str (common/ordinal level) "-level"))
+         " "
+         (s/capitalize school)
+         (if (zero? level)
+           " cantrip"))]
+   (spell-field "Casting Time" casting-time)
+   (spell-field "Range" range)
+   (spell-field "Duration" duration)
+   (let [{:keys [verbal somatic material material-component]} components]
+     (spell-field "Components" (str (s/join ", " (remove
+                                                  nil?
+                                                  [(if verbal "V")
+                                                   (if somatic "S")
+                                                   (if material "M")]))
+                                    (if material-component
+                                      (str " (" material-component ")")))))
+   [:div.m-t-10
+    (if description
+      (paragraphs description)
+      [:div
+       (if summary (paragraphs summary))
+       [:span (str "(" (disp/source-description source page) " for more details)")]])]])
+
+(defn spell-result [spell]
   [:div.white
    [:div.flex
     (svg-icon "spell-book" 36 36)
-    [:div.m-l-10
-     [:span.f-s-24.f-w-b name]
-     [:div.f-s-18.i.f-w-b (str (if (pos? level)
-                                 (str "Level-" level))
-                               " "
-                               (s/capitalize school)
-                               (if (zero? level)
-                                 " cantrip"))]
-     (spell-field "Casting Time" casting-time)
-     (spell-field "Range" range)
-     (spell-field "Duration" duration)
-     (let [{:keys [verbal somatic material material-component]} components]
-       (spell-field "Components" (str (s/join ", " (remove
-                                                nil?
-                                                [(if verbal "V")
-                                                 (if somatic "S")
-                                                 (if material "M")]))
-                                      (if material-component
-                                        (str " (" material-component ")")))))
-     [:div.m-t-10
-      (if description
-        (paragraphs description)
-        [:div
-         (if summary (paragraphs summary))
-         [:span (str "(" (disp/source-description source page) " for more details)")]])]]]])
+    [spell-component spell true]]])
 
 
 (defn print-bonus-map [m]
@@ -1196,24 +1201,83 @@
                    [:td.p-5 slots])
                  spell-slots))])]]]]))))
 
+(defn spell-row [spell-modifiers {:keys [key ability qualifier class]} expanded? on-click]
+  (let [spell (spells/spell-map key)
+        cls-mods (get spell-modifiers class)]
+    (if (nil? (:name spell))
+      (prn "NIL NAME" key))
+    [[:tr.pointer
+      {:on-click on-click}
+      [:td.p-10.f-w-b (:name spell)]
+      [:td.p-10 class]
+      [:td.p-10 (s/upper-case (name ability))]
+      [:td.p-10 (get cls-mods :spell-save-dc)]
+      [:td.p-10 (common/bonus-str (get cls-mods :spell-attack-modifier))]
+      [:td.p-r-10.orange
+       [:i.fa
+        {:class-name (if expanded? "fa-caret-up" "fa-caret-down")}]]]
+     (if expanded?
+       [:tr {:style {:background-color "rgba(0,0,0,0.05)"}}
+        [:td {:col-span 6}
+         [:div.p-10
+          [spell-component spell false 14]]]])]))
+
+(defn spells-table []
+  (let [expanded-spells (r/atom {})]
+    (fn [lvl spells spell-modifiers]
+      [:div.m-t-10.m-b-30
+       [:span.f-w-b.i (if (pos? lvl)
+                        (str (common/ordinal lvl) " Level")
+                        "Cantrip")]
+       [:table.w-100-p.t-a-l.striped
+        [:tbody
+         [:tr.f-w-b
+          [:th.p-10 "Name"]
+          [:th.p-10 "Source"]
+          [:th.p-10 "Ability"]
+          [:th.p-10 "DC"]
+          [:th.p-10 "Atk."]]
+         (doall
+          (map-indexed
+           (fn [i r] (with-meta r {:key i}))
+           (mapcat
+            (fn [{:keys [key class] :as spell}]
+              (let [k (str key class)]
+                (spell-row spell-modifiers spell (@expanded-spells k) #(swap! expanded-spells update k not))))
+            (sort-by :key spells))))]]])))
+
+
+(defn spells-tables [spells-known spell-slots spell-modifiers]
+  (let [active-tab (r/atom nil)]
+    [:div.f-s-14.f-w-n
+     [:span.f-w-b.f-s-16 "Spells By Level"]
+     (doall
+      (map
+       (fn [[lvl spells]]
+         ^{:key lvl}
+         [spells-table lvl spells spell-modifiers])
+       spells-known))]))
+
 (defn spells-known-section [spells-known spell-slots spell-modifiers spell-slot-factors total-spellcaster-levels levels]
   (let [mobile? @(subscribe [:mobile?])
         multiclass? (> (count spell-slot-factors) 1)]
     [display-section "Spells" "spell-book"
      [:div.m-t-20
       (if multiclass?
-        [:div.m-b-10
+        [:div.m-b-20
          [spellcaster-levels-table spell-slot-factors total-spellcaster-levels levels mobile?]])
-      [:div.m-b-10   
+      [:div.m-b-20 
        [spell-slots-table spell-slots spell-slot-factors total-spellcaster-levels levels mobile?]]
-      [:div.f-s-14
+      [:div.m-b-20
+       [spells-tables spells-known spell-slots spell-modifiers]]
+      #_[:div.f-s-14
        [:span.f-w-b "Spell Save DC: "]
        [:span.f-w-n (s/join ", " (map (fn [[class {:keys [spell-save-dc ability]}]]
                                         (str (if spell-save-dc spell-save-dc)
                                              (if (and ability (-> spell-modifiers count (> 1)))
                                                (str " (" class ", " (s/upper-case (name ability)) ")"))))
                                       spell-modifiers))]]
-      [:div.f-s-14
+      #_[:div.f-s-14
        [:span.f-w-b "Spell Attack Bonus: "]
        [:span.f-w-n (s/join ", " (map (fn [[class {:keys [spell-attack-modifier ability]}]]
                                         (str (if spell-attack-modifier
@@ -1221,7 +1285,7 @@
                                              (if (and ability (-> spell-modifiers count (> 1)))
                                                (str " (" class ", " (s/upper-case (name ability)) ")"))))
                                       spell-modifiers))]]
-      [:div.f-s-14.flex.flex-wrap
+      #_[:div.f-s-14.flex.flex-wrap
        (doall
         (map
          (fn [[level spells]]

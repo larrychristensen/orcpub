@@ -169,6 +169,8 @@
     {:margin-bottom "19px"}]
    [:.m-b-20
     {:margin-bottom "20px"}]
+   [:.m-b-30
+    {:margin-bottom "30px"}]
 
    [:.m-l--10
     {:margin-left "-10px"}]
