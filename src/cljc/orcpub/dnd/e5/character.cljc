@@ -431,6 +431,12 @@
 (defn spell-slots [built-char]
   (get-prop built-char :spell-slots))
 
+(defn spell-slot-factors [built-char]
+  (get-prop built-char :spell-slot-factors))
+
+(defn total-spellcaster-levels [built-char]
+  (get-prop built-char :total-spellcaster-levels))
+
 (defn spell-modifiers [built-char]
   (get-prop built-char :spell-modifiers))
 

@@ -1089,64 +1089,175 @@
   (let [key-fn (juxt :key :ability)]
     (compare (key-fn spell-1) (key-fn spell-2))))
 
-(defn spells-known-section [spells-known spell-slots spell-modifiers]
-  [display-section "Spells" "spell-book"
-   [:div
-    [:div.f-s-14
-     [:span.f-w-b "Slots: "]
-     [:span.f-w-n (s/join ", " (map (fn [[level slots]] (str level " - " slots)) spell-slots))]]
-    [:div.f-s-14
-     [:span.f-w-b "Spell Save DC: "]
-     [:span.f-w-n (s/join ", " (map (fn [[class {:keys [spell-save-dc ability]}]]
-                                      (str (if spell-save-dc spell-save-dc)
-                                           (if (and ability (-> spell-modifiers count (> 1)))
-                                             (str " (" class ", " (s/upper-case (name ability)) ")"))))
-                                    spell-modifiers))]]
-    [:div.f-s-14
-     [:span.f-w-b "Spell Attack Bonus: "]
-     [:span.f-w-n (s/join ", " (map (fn [[class {:keys [spell-attack-modifier ability]}]]
-                                      (str (if spell-attack-modifier
-                                             (common/bonus-str spell-attack-modifier))
-                                           (if (and ability (-> spell-modifiers count (> 1)))
-                                             (str " (" class ", " (s/upper-case (name ability)) ")"))))
-                                    spell-modifiers))]]
-    [:div.f-s-14.flex.flex-wrap
-     (doall
-      (map
-       (fn [[level spells]]
-         ^{:key level}
-         [:div.m-t-10.w-200
-          [:span.f-w-b (str (if (zero? level) "Cantrip" (str "Level " level)))]
-          [:div.i.f-w-n
-           (doall
-            (map-indexed
-             (fn [i spell]
-               (let [spell-data (spells/spell-map (:key spell))]
+(defn details-button [expanded? on-click]
+  [:span.orange.underline.pointer
+   {:on-click on-click}
+   [:span (if expanded? "hide" "details")]
+   [:i.fa.m-l-5
+    {:class-name (if expanded? "fa-caret-up" "fa-caret-down")}]])
+
+
+(defn spellcaster-levels-table []
+  (let [expanded? (r/atom false)]
+    (fn [spell-slot-factors total-spellcaster-levels levels mobile?]
+      [:div.f-s-14.f-w-n
+       [:div.flex.justify-cont-s-b
+        [:div
+         [:span.f-w-b.f-s-16 "Total Spellcaster Levels: "]
+         [:span.f-s-16.f-w-n total-spellcaster-levels]]
+        (details-button @expanded? #(swap! expanded? not))]
+       (if @expanded?
+         [:div:div.f-s-14
+          [:table.w-100-p.t-a-l.striped
+           [:tbody
+            [:tr.f-w-b
+             [:th.p-10 "Class"]
+             [:th.p-10 (if mobile? "Sub." "Subclass")]
+             [:th.p-10 (if mobile? "Lvl." "Level")]
+             [:th.p-10 (if mobile? "Mult." "Multiplier")]
+             [:th.p-10 (if mobile? "Tot." "Total")]]
+            (doall
+             (map
+              (fn [[class-key factor]]
+                (let [{:keys [class-name class-level subclass-name]} (levels class-key)]
+                  ^{:key class-key}
+                  [:tr
+                   [:td.p-10 class-name]
+                   [:td.p-10 subclass-name]
+                   [:td.p-10 class-level]
+                   [:td.p-10 (if (= 1 factor) 1 (str "1/" factor))]
+                   [:td.p-10 (int (/ class-level factor))]]))
+              spell-slot-factors))
+            [:tr
+             [:td.p-10 "Total"]
+             [:td]
+             [:td]
+             [:td]
+             [:td.p-10 total-spellcaster-levels]]]]])])))
+
+(defn spell-slots-table []
+  (let [expanded? (r/atom false)]
+    (fn [spell-slots spell-slot-factors total-spellcaster-levels levels mobile?]
+      (let [multiclass? (> (count spell-slot-factors) 1)
+            first-class-level (-> levels first val :class-level)]
+        [:div.f-s-14.f-w-n
+         [:div.flex.justify-cont-s-b
+          [:div
+           [:span.f-w-b.f-s-16 (str "Slots" (if multiclass? " (Multiclass)") ": ")]]
+          (details-button @expanded? #(swap! expanded? not))]
+         [:div.f-w-n.f-s-14
+          [:table.w-100-p.t-a-l.striped
+           [:tbody
+            [:tr.f-w-b
+             [:th.p-5 (if mobile? "Lvl." "Caster Levels")]
+             (doall
+              (map
+               (fn [i]
                  ^{:key i}
-                 [:div
-                  (str
-                   (:name (spells/spell-map (:key spell)))
-                    (if (or (:ability spell)
-                            (:qualifier spell))
-                      (str
-                       " ("
-                       (s/join
-                        ", "
-                        (remove
-                         nil?
-                         [(if (:ability spell) (s/upper-case (name (:ability spell))))
-                          (if (:qualifier spell) (:qualifier spell))]))
-                    
-                       ")")))]))
-             (into
-              (sorted-set-by compare-spell)
-              (filter
-               (fn [{k :key}]
-                 (spells/spell-map k))
-               spells))))]])
-       (filter
-        (comp seq second)
-        spells-known)))]]])
+                 [:th.p-5 (if (and mobile?
+                                   (or @expanded?
+                                       (> (count spell-slots) 8)))
+                            (inc i)
+                            (common/ordinal (inc i)))])
+               (range (if @expanded?
+                        9
+                        (count spell-slots)))))]
+            (if @expanded?
+              (doall
+               (map
+                (fn [lvl]
+                  (let [highlight? (or (and multiclass?
+                                            (= total-spellcaster-levels lvl))
+                                       (and (not multiclass?)
+                                            (= first-class-level lvl)))]
+                    ^{:key lvl}
+                    [:tr
+                     {:class-name (if highlight?
+                                    "f-w-b")
+                      :style (if highlight?
+                               {:background-color "rgba(255,255,255,0.3)"})}
+                     [:td.p-5 lvl]
+                     (let [total-slots (opt/total-slots lvl (if multiclass? 1 (-> spell-slot-factors first val)))]
+                       (doall
+                        (map
+                         (fn [spell-lvl]
+                           ^{:key spell-lvl}
+                           [:td.p-5 (get total-slots spell-lvl)])
+                         (range 1 10))))]))
+                (range 1 21)))
+              [:tr
+               [:th.p-5 (if multiclass?
+                          total-spellcaster-levels
+                          first-class-level)]
+               (doall
+                (map
+                 (fn [[level slots]]
+                   ^{:key level}
+                   [:td.p-5 slots])
+                 spell-slots))])]]]]))))
+
+(defn spells-known-section [spells-known spell-slots spell-modifiers spell-slot-factors total-spellcaster-levels levels]
+  (let [mobile? @(subscribe [:mobile?])
+        multiclass? (> (count spell-slot-factors) 1)]
+    [display-section "Spells" "spell-book"
+     [:div.m-t-20
+      (if multiclass?
+        [:div.m-b-10
+         [spellcaster-levels-table spell-slot-factors total-spellcaster-levels levels mobile?]])
+      [:div.m-b-10   
+       [spell-slots-table spell-slots spell-slot-factors total-spellcaster-levels levels mobile?]]
+      [:div.f-s-14
+       [:span.f-w-b "Spell Save DC: "]
+       [:span.f-w-n (s/join ", " (map (fn [[class {:keys [spell-save-dc ability]}]]
+                                        (str (if spell-save-dc spell-save-dc)
+                                             (if (and ability (-> spell-modifiers count (> 1)))
+                                               (str " (" class ", " (s/upper-case (name ability)) ")"))))
+                                      spell-modifiers))]]
+      [:div.f-s-14
+       [:span.f-w-b "Spell Attack Bonus: "]
+       [:span.f-w-n (s/join ", " (map (fn [[class {:keys [spell-attack-modifier ability]}]]
+                                        (str (if spell-attack-modifier
+                                               (common/bonus-str spell-attack-modifier))
+                                             (if (and ability (-> spell-modifiers count (> 1)))
+                                               (str " (" class ", " (s/upper-case (name ability)) ")"))))
+                                      spell-modifiers))]]
+      [:div.f-s-14.flex.flex-wrap
+       (doall
+        (map
+         (fn [[level spells]]
+           ^{:key level}
+           [:div.m-t-10.w-200
+            [:span.f-w-b (str (if (zero? level) "Cantrip" (str "Level " level)))]
+            [:div.i.f-w-n
+             (doall
+              (map-indexed
+               (fn [i spell]
+                 (let [spell-data (spells/spell-map (:key spell))]
+                   ^{:key i}
+                   [:div
+                    (str
+                     (:name (spells/spell-map (:key spell)))
+                     (if (or (:ability spell)
+                             (:qualifier spell))
+                       (str
+                        " ("
+                        (s/join
+                         ", "
+                         (remove
+                          nil?
+                          [(if (:ability spell) (s/upper-case (name (:ability spell))))
+                           (if (:qualifier spell) (:qualifier spell))]))
+                      
+                        ")")))]))
+               (into
+                (sorted-set-by compare-spell)
+                (filter
+                 (fn [{k :key}]
+                   (spells/spell-map k))
+                 spells))))]])
+         (filter
+          (comp seq second)
+          spells-known)))]]]))
 
 (defn equipment-section [title icon-name equipment equipment-map]
   [list-display-section title icon-name
@@ -1421,9 +1532,7 @@
         armor-class @(subscribe [::char/armor-class id])
         armor-class-with-armor @(subscribe [::char/armor-class-with-armor id])]
     [:div
-     #_{:class-name (if (= 2 num-columns) "flex")}
      [:div
-      #_{:class-name (if (= 2 num-columns) "w-50-p")}
       [:div.w-100-p.t-a-c
        [:div
         [ability-scores-section-2 id]
@@ -1792,12 +1901,21 @@
 (defn spell-details [num-columns id]
   (let [spells-known @(subscribe [::char/spells-known id])
         spell-slots @(subscribe [::char/spell-slots id])
-        spell-modifiers @(subscribe [::char/spell-modifiers id])]
+        spell-modifiers @(subscribe [::char/spell-modifiers id])
+        spell-slot-factors @(subscribe [::char/spell-slot-factors id])
+        total-spellcaster-levels @(subscribe [::char/total-spellcaster-levels id])
+        levels @(subscribe [::char/levels id])]
     [:div.details-columns
      {:class-name (if (= 2 num-columns) "flex")}
      [:div.flex-grow-1.details-column-2
       {:class-name (if (= 2 num-columns) "w-50-p m-l-20")}
-      (if (seq spells-known) [spells-known-section spells-known spell-slots spell-modifiers])]]))
+      (if (seq spells-known) [spells-known-section
+                              spells-known
+                              spell-slots
+                              spell-modifiers
+                              spell-slot-factors
+                              total-spellcaster-levels
+                              levels])]]))
 
 (defn details-tab [title icon device-type selected? on-select]
   [:div.b-b-2.f-w-b.pointer.p-10.hover-opacity-full
@@ -1823,43 +1941,42 @@
    "features" {:icon "vitruvian-man"
                :view features-details}})
 
-(defn character-display []
+(defn character-display [id show-summary? num-columns]
   (let [device-type @(subscribe [:device-type])
-        selected-tab (r/atom nil)]
-    (fn [id show-summary? num-columns]
-      (let [two-columns? (= 2 num-columns)
-            tab (if @selected-tab
-                  @selected-tab
-                  (if two-columns?
-                    "combat"
-                    "summary"))]
-        [:div.w-100-p
+        selected-tab @(subscribe [::char/selected-display-tab])]
+    (let [two-columns? (= 2 num-columns)
+          tab (if selected-tab
+                selected-tab
+                (if two-columns?
+                  "combat"
+                  "summary"))]
+      [:div.w-100-p
+       [:div
+        (if show-summary?
+          [:div.f-s-24.f-w-600.m-b-16.m-l-20.text-shadow.flex
+           [character-summary id true]])
+        [:div.flex.w-100-p
+         (if two-columns?
+           [:div.w-50-p
+            [summary-details num-columns id]])
          [:div
-          (if show-summary?
-            [:div.f-s-24.f-w-600.m-b-16.m-l-20.text-shadow.flex
-             [character-summary id true]])
-          [:div.flex.w-100-p
-           (if two-columns?
-             [:div.w-50-p
-              [summary-details num-columns id]])
-           [:div
-            {:class-name (if two-columns? "w-50-p" "w-100-p")}
-            [:div.flex.p-l-10.m-b-10.m-r-10
-             (doall
-              (map
-               (fn [[title {:keys [view icon]}]]
-                 ^{:key title}
-                 [:div.flex-grow-1.t-a-c
-                  [details-tab
-                   title
-                   icon
-                   device-type
-                   (= title tab)
-                   #(reset! selected-tab title)]])
-               (if two-columns?
-                 (rest details-tabs)
-                 details-tabs)))]
-            [(-> tab details-tabs :view) num-columns id]]]]]))))
+          {:class-name (if two-columns? "w-50-p" "w-100-p")}
+          [:div.flex.p-l-10.m-b-10.m-r-10
+           (doall
+            (map
+             (fn [[title {:keys [view icon]}]]
+               ^{:key title}
+               [:div.flex-grow-1.t-a-c
+                [details-tab
+                 title
+                 icon
+                 device-type
+                 (= title tab)
+                 #(dispatch [::char/set-selected-display-tab title])]])
+             (if two-columns?
+               (rest details-tabs)
+               details-tabs)))]
+          [(-> tab details-tabs :view) num-columns id]]]]])))
 
 (def character-display-style
   {:padding "20px 5px"

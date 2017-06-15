@@ -430,7 +430,9 @@
    ::char5e/spells-known char5e/spells-known
    ::char5e/spells-known-modes char5e/spells-known-modes
    ::char5e/spell-slots char5e/spell-slots 
-   ::char5e/spell-modifiers char5e/spell-modifiers 
+   ::char5e/spell-modifiers char5e/spell-modifiers
+   ::char5e/spell-slot-factors char5e/spell-slot-factors
+   ::char5e/total-spellcaster-levels char5e/total-spellcaster-levels
    ::char5e/weapons char5e/normal-weapons-inventory 
    ::char5e/magic-weapons char5e/magic-weapons-inventory
    ::char5e/equipment char5e/normal-equipment-inventory
@@ -516,3 +518,15 @@
  :<- [:orcacle-clicked?]
  (fn [[search-text? orcacle-clicked?]]
    (or search-text? orcacle-clicked?)))
+
+(reg-sub
+ ::char5e/selected-display-tab
+ (fn [db _]
+   (::char5e/selected-display-tab db)))
+
+(reg-sub
+ ::char5e/builder-tab
+ (fn [db _]
+   (::char5e/builder-tab db)))
+
+
