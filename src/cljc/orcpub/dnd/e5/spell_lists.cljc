@@ -158,7 +158,7 @@
      :freedom-of-movement :giant-insect :grasping-vine :hallucinatory-terrain
      :ice-storm :locate-creature :polymorph :stone-shape :stoneskin
      :wall-of-fire
-     :elemenal-bane :watery-sphere],
+     :elemental-bane :watery-sphere],
     5
     [:antilife-shell :awaken :commune-with-nature :conjure-elemental
      :contagion :geas :greater-restoration :insect-plague
@@ -168,7 +168,7 @@
     6
     [:conjure-fey :find-the-path :heal :heroes-feast :move-earth
      :sunbeam :transport-via-plants :wall-of-thorns :wind-walk
-     :bones-of-earth :investiture-of-flame :investiture-of-ice :investiture-of-stone :investiture-of-wind :primoridal-ward],
+     :bones-of-the-earth :investiture-of-flame :investiture-of-ice :investiture-of-stone :investiture-of-wind :primordial-ward],
     7
     [:fire-storm :mirage-arcane :plane-shift :regenerate
      :reverse-gravity :whirlwind],

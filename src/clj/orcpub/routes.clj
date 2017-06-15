@@ -554,7 +554,9 @@
           (if (not current-valid?)
             (let [new-character (remove-ids character)
                   tx [[:db/retractEntity (:db/id current-character)]
-                      (assoc new-character :db/id "tempid")]
+                      (assoc new-character
+                             :db/id "tempid"
+                             :orcpub.entity.strict/owner username)]
                   result @(d/transact conn tx)]
               {:status 200
                :body (d/pull (d/db conn) '[*] (-> result :tempids (get "tempid")))})

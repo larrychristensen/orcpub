@@ -301,7 +301,7 @@ If you cast the spell two or more times before completing your next long rest, t
     :duration "Concentration, up to 10 minutes"
     :source :phb
     :page 216
-    }
+    :summary "Radiate a 30 ft. aura. Non-hostile creatures within the aura have resistance to necrotic damage, their HP max cannot be reduced, and they regain 1 HP when they start their turn there an have 0 HPs"}
    {
     :name "Aura of Purity"
     :school "abjuration"
@@ -312,6 +312,19 @@ If you cast the spell two or more times before completing your next long rest, t
     :duration "Concentration, up to 10 minutes"
     :source :phb
     :page 216
+    :summary "Radiant a 30 ft. aura. Non-hostile creatures within the cannot become diseased, are resitant to poison, and have advantage on saves against becoming: stunned, poisoned, paralyzed, frightened, deafened, charmed, or blinded"
+    }
+   {
+    :name "Aura of Vitality"
+    :school "evocation"
+    :level 3
+    :casting-time "1 action"
+    :range "Self (30-foot radius)"
+    :components {:verbal true}
+    :duration "Concentration, up to 10 minutes"
+    :source :phb
+    :page 216
+    :summary "Radiant a 30 ft. aura. Use a bonus action to heal a creature in the aura 2d6 HPs."
     }
    {
     :name "Awaken"
