@@ -1144,7 +1144,8 @@
   (let [expanded? (r/atom false)]
     (fn [spell-slots spell-slot-factors total-spellcaster-levels levels mobile?]
       (let [multiclass? (> (count spell-slot-factors) 1)
-            first-class-level (-> levels first val :class-level)]
+            first-factor-key (-> spell-slot-factors first key)
+            first-class-level (-> levels first-factor-key :class-level)]
         [:div.f-s-14.f-w-n
          [:div.flex.justify-cont-s-b
           [:div
@@ -1269,59 +1270,7 @@
       [:div.m-b-20 
        [spell-slots-table spell-slots spell-slot-factors total-spellcaster-levels levels mobile?]]
       [:div.m-b-20
-       [spells-tables spells-known spell-slots spell-modifiers]]
-      #_[:div.f-s-14
-       [:span.f-w-b "Spell Save DC: "]
-       [:span.f-w-n (s/join ", " (map (fn [[class {:keys [spell-save-dc ability]}]]
-                                        (str (if spell-save-dc spell-save-dc)
-                                             (if (and ability (-> spell-modifiers count (> 1)))
-                                               (str " (" class ", " (s/upper-case (name ability)) ")"))))
-                                      spell-modifiers))]]
-      #_[:div.f-s-14
-       [:span.f-w-b "Spell Attack Bonus: "]
-       [:span.f-w-n (s/join ", " (map (fn [[class {:keys [spell-attack-modifier ability]}]]
-                                        (str (if spell-attack-modifier
-                                               (common/bonus-str spell-attack-modifier))
-                                             (if (and ability (-> spell-modifiers count (> 1)))
-                                               (str " (" class ", " (s/upper-case (name ability)) ")"))))
-                                      spell-modifiers))]]
-      #_[:div.f-s-14.flex.flex-wrap
-       (doall
-        (map
-         (fn [[level spells]]
-           ^{:key level}
-           [:div.m-t-10.w-200
-            [:span.f-w-b (str (if (zero? level) "Cantrip" (str "Level " level)))]
-            [:div.i.f-w-n
-             (doall
-              (map-indexed
-               (fn [i spell]
-                 (let [spell-data (spells/spell-map (:key spell))]
-                   ^{:key i}
-                   [:div
-                    (str
-                     (:name (spells/spell-map (:key spell)))
-                     (if (or (:ability spell)
-                             (:qualifier spell))
-                       (str
-                        " ("
-                        (s/join
-                         ", "
-                         (remove
-                          nil?
-                          [(if (:ability spell) (s/upper-case (name (:ability spell))))
-                           (if (:qualifier spell) (:qualifier spell))]))
-                      
-                        ")")))]))
-               (into
-                (sorted-set-by compare-spell)
-                (filter
-                 (fn [{k :key}]
-                   (spells/spell-map k))
-                 spells))))]])
-         (filter
-          (comp seq second)
-          spells-known)))]]]))
+       [spells-tables spells-known spell-slots spell-modifiers]]]]))
 
 (defn equipment-section [title icon-name equipment equipment-map]
   [list-display-section title icon-name

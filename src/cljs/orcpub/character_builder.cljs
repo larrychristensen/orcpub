@@ -1640,6 +1640,7 @@
          :description [description-fields]
          [views5e/character-display nil true 1])]]]))
 
+
 (defn desktop-or-tablet-columns [device-type]
   (let [current-tab (or @(subscribe [::char5e/builder-tab]) :options)]
     [:div.w-100-p
