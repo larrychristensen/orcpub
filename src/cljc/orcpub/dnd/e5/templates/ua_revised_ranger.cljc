@@ -22,6 +22,7 @@
                   :selections [(opt5e/language-selection opt5e/languages 1)]}))
               types)}))
 
+
 (def revised-ranger-option
   (opt5e/class-option
    {:name "Ranger (Revised)"
@@ -41,6 +42,7 @@
     :spellcaster true
     :spellcasting {:level-factor 2
                    :known-mode :schedule
+                   :spell-list :ranger
                    :spells-known {2 2
                                   3 1
                                   5 1
@@ -61,7 +63,8 @@
     :weapons {:longbow 1}
     :equipment {:quiver 1
                 :arrow 20}
-    :modifiers [(mod5e/dependent-trait
+    :modifiers [(mod5e/al-illegal "Death Domain is not allowed")
+                (mod5e/dependent-trait
                  {:name "Favored Enemy"
                   :page 2
                   :source :ua-revised-ranger
