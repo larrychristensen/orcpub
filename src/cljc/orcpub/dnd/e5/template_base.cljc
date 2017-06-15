@@ -203,12 +203,12 @@
                   +
                   (cond
                     (> (count ?spell-slot-factors) 1)
-                    (do
-                      (opt5e/total-slots
-                       ?total-spellcaster-levels
-                       1))
+                    (opt5e/total-slots
+                     ?total-spellcaster-levels
+                     1)
                     (= 1 (count ?spell-slot-factors))
-                    (opt5e/total-slots (-> (?levels (first ?classes)) :class-level)
+                    (opt5e/total-slots (let [k (some-> ?spell-slot-factors first key)]
+                                         (:class-level (?levels k)))
                                        (some-> ?spell-slot-factors first val))
 
                     :else {})
