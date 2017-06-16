@@ -812,6 +812,7 @@
                                                    :source ua-waterborne-kw
                                                    :summary "while not wearing heavy armor, gain +1 AC bonus and you have swimming speed and climbing speed equal to your land speed"})]})])]}}}))
 
+
 (def ua-waterborne-plugin
   {:name "Unearthed Arcana: Waterborne Adventures"
    :key ua-waterborne-kw

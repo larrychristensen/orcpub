@@ -1285,8 +1285,9 @@
       (if multiclass?
         [:div.m-b-20
          [spellcaster-levels-table spell-slot-factors total-spellcaster-levels levels mobile?]])
-      [:div.m-b-20 
-       [spell-slots-table spell-slots spell-slot-factors total-spellcaster-levels levels mobile?]]
+      (if spell-slot-factors
+        [:div.m-b-20 
+         [spell-slots-table spell-slots spell-slot-factors total-spellcaster-levels levels mobile?]])
       [:div.m-b-20
        [spells-tables spells-known spell-slots spell-modifiers]]]]))
 
