@@ -959,6 +959,38 @@
   {:height "100px"
    :max-width "200px"})
 
+(defn character-summary-2 [{:keys [::char/character-name
+                                   ::char/image-url
+                                   ::char/race-name
+                                   ::char/subrace-name
+                                   ::char/classes]}
+                           include-name?
+                           text-classes]
+  [:div.flex.align-items-c
+   (if image-url
+     [:img.m-r-20.m-t-10.m-b-10 {:src image-url
+                                 :style thumbnail-style}])
+   [:div.flex.character-summary
+    {:class-name text-classes}
+    (if (and character-name include-name?) [:span.m-r-20.m-b-5 character-name])
+    [:span.m-r-10.m-b-5
+     [:span race-name]
+     [:div.f-s-12.m-t-5.opacity-6 subrace-name]]
+    (if (seq classes)
+      [:span.flex
+       (map-indexed
+        (fn [i v]
+          (with-meta v {:key i}))
+        (interpose
+         [:span.m-l-5.m-r-5 "/"]
+         (map
+          (fn [{:keys [::char/class-name ::char/level ::char/subclass-name]}]
+            (let []
+              [:span
+               [:span (str class-name " (" level ")")]
+               [:div.f-s-12.m-t-5.opacity-6 (if subclass-name subclass-name)]]))
+          classes)))])]])
+
 (defn character-summary [id & [include-name? text-classes]]
   (let [character-name @(subscribe [::char/character-name id])
         image-url @(subscribe [::char/image-url id])
@@ -966,30 +998,19 @@
         subrace @(subscribe [::char/subrace id])
         levels @(subscribe [::char/levels id])
         classes @(subscribe [::char/classes id])]
-    [:div.flex.align-items-c
-     (if image-url
-       [:img.m-r-20.m-t-10.m-b-10 {:src image-url
-                                   :style thumbnail-style}])
-     [:div.flex.character-summary
-      {:class-name text-classes}
-      (if (and character-name include-name?) [:span.m-r-20.m-b-5 character-name])
-      [:span.m-r-10.m-b-5
-       [:span race]
-       [:div.f-s-12.m-t-5.opacity-6 subrace]]
-      (if (seq levels)
-        [:span.flex
-         (map-indexed
-          (fn [i v]
-            (with-meta v {:key i}))
-          (interpose
-           [:span.m-l-5.m-r-5 "/"]
-           (map
-            (fn [cls-key]
-              (let [{:keys [class-name class-level subclass subclass-name]} (levels cls-key)]
-                [:span
-                 [:span (str class-name " (" class-level ")")]
-                 [:div.f-s-12.m-t-5.opacity-6 (if subclass-name subclass-name)]]))
-            classes)))])]]))
+    (character-summary-2
+     {::char/character-name character-name
+      ::char/image-url image-url
+      ::char/race-name race
+      ::char/subrace-name subrace
+      ::char/classes (map
+                      (fn [{:keys [class-name class-level subclass-name]}]
+                        {::char/class-name class-name
+                         ::char/level class-level
+                         ::char/subclass-name subclass-name})
+                      classes)}
+     include-name?
+     text-classes)))
 
 (defn monster-summary [name size type]
   [:span.m-r-10.m-b-5
@@ -1223,8 +1244,6 @@
 (defn spell-row [spell-modifiers {:keys [key ability qualifier class]} expanded? on-click]
   (let [spell (spells/spell-map key)
         cls-mods (get spell-modifiers class)]
-    (if (nil? (:name spell))
-      (prn "NIL NAME" key))
     [[:tr.pointer
       {:on-click on-click}
       [:td.p-10.f-w-b (:name spell)]
@@ -2046,13 +2065,11 @@
        {:style list-style}
        (doall
         (map
-         (fn [{:keys [:db/id] :as strict-character}]
-           ^{:key id}
-           [:div.white
-            {:style row-style}
-            (let [built-character @(subscribe [::char/built-character id])
-                  image-url (char/image-url built-character)
-                  expanded? (get expanded-characters id)]
+         (fn [{:keys [:db/id] :as summary}]
+           (let [expanded? (get expanded-characters id)]
+             ^{:key id}
+             [:div.white
+              {:style row-style}
               [:div.pointer
                [:div.flex.justify-cont-s-b.align-items-c
                 {:on-click #(dispatch [:toggle-character-expanded id])}
@@ -2060,7 +2077,7 @@
                  [:div.f-s-24.f-w-600
                   #_{:style summary-style}
                   [:div.list-character-summary
-                   [character-summary id true "m-t-20 m-b-20"]]]]
+                   [character-summary-2 summary true "m-t-20 m-b-20"]]]]
                 [:div.orange.pointer.m-r-10
                  (if (not= device-type :mobile) [:span.underline (if expanded?
                                                                    "collapse"
@@ -2081,7 +2098,7 @@
                    [:button.form-button.m-l-5
                     {:on-click #(dispatch [:delete-character id])}
                     "DELETE"]]
-                  [character-display id false (if (= :mobile device-type) 1 2)]])])])
+                  [character-display id false (if (= :mobile device-type) 1 2)]])]]))
          characters))]]]))
 
 (defn monster-list []
