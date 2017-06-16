@@ -151,7 +151,6 @@
   (let [device-type @(subscribe [:device-type])
         mobile? (= :mobile device-type)
         active-route @(subscribe [:route])]
-    (prn "ROUTE" active-route)
     [:div#app-header.app-header.flex.flex-column.justify-cont-s-b
      [:div.app-header-bar.container
       [:div.content
@@ -201,7 +200,7 @@
           "battle-gear"
           #(dispatch [:route routes/dnd-e5-char-list-page-route {:return? true}])
           false
-          (routes/dnd-e5-char-page-routes active-route)
+          (routes/dnd-e5-char-page-routes (or (:handler active-route) active-route))
           device-type]
          [header-tab
           "spells"
@@ -215,7 +214,7 @@
           "hydra"
           #(dispatch [:route routes/dnd-e5-monster-list-page-route {:return? true}])
           false
-          (routes/dnd-e5-monster-page-routes active-route)
+          (routes/dnd-e5-monster-page-routes (or (:handler active-route) active-route))
           device-type]]]]]
      #_[:div.container.header-links
         [:div.content
