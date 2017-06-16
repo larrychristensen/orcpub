@@ -7,6 +7,7 @@
             [orcpub.dnd.e5.db :refer [tab-path]]
             [orcpub.dnd.e5.events :as events]
             [orcpub.dnd.e5.character :as char5e]
+            [orcpub.dnd.e5.monsters :as monsters5e]
             [orcpub.route-map :as routes]
             [clojure.string :as s]
             [reagent.ratom :as ra]
@@ -253,6 +254,11 @@
  :expanded-characters
  (fn [db _]
    (:expanded-characters db)))
+
+(reg-sub
+ :expanded-monsters
+ (fn [db _]
+   (:expanded-monsters db)))
 
 (reg-sub-raw
   ::char5e/characters
@@ -528,5 +534,11 @@
  ::char5e/builder-tab
  (fn [db _]
    (::char5e/builder-tab db)))
+
+(reg-sub
+ ::char5e/filtered-monsters
+ (fn [db _]
+   (or (::char5e/filtered-monsters db)
+       (sort-by :name monsters5e/monsters))))
 
 

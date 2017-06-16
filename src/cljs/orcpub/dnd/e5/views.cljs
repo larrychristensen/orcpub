@@ -12,6 +12,7 @@
             [cljs.pprint :refer [pprint]]
             [orcpub.registration :as registration]
             [orcpub.dnd.e5.magic-items :as mi]
+            [orcpub.dnd.e5.monsters :as monsters]
             [orcpub.dnd.e5.spells :as spells]
             [orcpub.dnd.e5.skills :as skills]
             [orcpub.dnd.e5.equipment :as equip]
@@ -109,16 +110,20 @@
 (def header-tab-style
   {:width "85px"})
 
-(defn header-tab [title icon on-click disabled device-type]
+(defn header-tab [title icon on-click disabled active device-type]
   (let [mobile? (= :mobile device-type)]
-    [:div.white.f-w-b.f-s-14.t-a-c.p-10.header-tab.m-5
+    [:div.white.f-w-b.f-s-14.t-a-c.header-tab.m-5
      {:on-click on-click
-      :class-name (str (if disabled "disabled") " " (if (not mobile?) " w-90"))}
-     [:div
-      {:class-name (if disabled "opacity-2" "pointer")}
+      :style (if active {:background-color "rgba(240, 161, 0, 0.5)"})
+      :class-name (str (if disabled "disabled" "pointer")
+                       " "
+                       (if (not mobile?) " w-110"))}
+     [:div.p-10
+      {:class-name (if (not active) (if disabled "opacity-2" "opacity-2 hover-opacity-full"))}
       (let [size (if mobile? 24 48)] (svg-icon icon size size))
       (if (not mobile?)
         [:div.title.uppercase title])]]))
+
 
 (def social-icon-style
   {:color :white
@@ -144,7 +149,9 @@
 
 (defn app-header []
   (let [device-type @(subscribe [:device-type])
-        mobile? (= :mobile device-type)]
+        mobile? (= :mobile device-type)
+        active-route @(subscribe [:route])]
+    (prn "ROUTE" active-route)
     [:div#app-header.app-header.flex.flex-column.justify-cont-s-b
      [:div.app-header-bar.container
       [:div.content
@@ -194,18 +201,21 @@
           "battle-gear"
           #(dispatch [:route routes/dnd-e5-char-list-page-route {:return? true}])
           false
+          (routes/dnd-e5-char-page-routes active-route)
           device-type]
          [header-tab
           "spells"
           "spell-book"
           (fn [])
           true
+          false
           device-type]
          [header-tab
           "monsters"
           "hydra"
-          (fn [])
-          true
+          #(dispatch [:route routes/dnd-e5-monster-list-page-route {:return? true}])
+          false
+          (routes/dnd-e5-monster-page-routes active-route)
           device-type]]]]]
      #_[:div.container.header-links
         [:div.content
@@ -768,11 +778,8 @@
            (fn [[k v]] (str (s/capitalize (clojure.core/name k)) " " (common/bonus-str v)))
            m)))
 
-(defn monster-result [{:keys [name size type hit-points alignment armor-class armor-notes speed saving-throws skills senses languages challenge traits actions legendary-actions source page] :as monster}]
-  [:div.white
-   [:div.flex
-    (svg-icon "hydra" 36 36)
-    [:div.m-l-10
+(defn monster-component [{:keys [name size type hit-points alignment armor-class armor-notes speed saving-throws skills senses languages challenge traits actions legendary-actions source page] :as monster}]
+  [:div.m-l-10
      [:span.f-s-24.f-w-b name]
      [:div.f-s-18.i.f-w-b (str size " " type ", " alignment)]
      (spell-field "Armor Class" (str armor-class (if armor-notes (str " (" armor-notes ")"))))
@@ -833,7 +840,13 @@
              (fn [i {:keys [name description]}]
                ^{:key i}
                [:div.m-t-10 (spell-field name description)])
-             (:actions legendary-actions)))])])]]])
+             (:actions legendary-actions)))])])])
+
+(defn monster-result [monster]
+  [:div.white
+   [:div.flex
+    (svg-icon "hydra" 36 36)
+    [monster-component monster]]])
 
 (defn search-results []
   (if-let [{{:keys [result] :as top-result} :top-result :as search-results}
@@ -947,7 +960,7 @@
   {:height "100px"
    :max-width "200px"})
 
-(defn character-summary [id & [include-name?]]
+(defn character-summary [id & [include-name? text-classes]]
   (let [character-name @(subscribe [::char/character-name id])
         image-url @(subscribe [::char/image-url id])
         race @(subscribe [::char/race id])
@@ -959,6 +972,7 @@
        [:img.m-r-20.m-t-10.m-b-10 {:src image-url
                                    :style thumbnail-style}])
      [:div.flex.character-summary
+      {:class-name text-classes}
       (if (and character-name include-name?) [:span.m-r-20.m-b-5 character-name])
       [:span.m-r-10.m-b-5
        [:span race]
@@ -977,6 +991,11 @@
                  [:span (str class-name " (" class-level ")")]
                  [:div.f-s-12.m-t-5.opacity-6 (if subclass-name subclass-name)]]))
             classes)))])]]))
+
+(defn monster-summary [name size type]
+  [:span.m-r-10.m-b-5
+   [:div name]
+   [:div.f-s-12.m-t-5.opacity-6 (str size " " type)]])
 
 (defn realize-char [built-char]
   (reduce-kv
@@ -2039,13 +2058,13 @@
                 {:on-click #(dispatch [:toggle-character-expanded id])}
                 [:div.m-l-10.flex.align-items-c
                  [:div.f-s-24.f-w-600
-                  {:style summary-style}
+                  #_{:style summary-style}
                   [:div.list-character-summary
-                   [character-summary id true]]]]
+                   [character-summary id true "m-t-20 m-b-20"]]]]
                 [:div.orange.pointer.m-r-10
                  (if (not= device-type :mobile) [:span.underline (if expanded?
-                                           "collapse"
-                                           "open")])
+                                                                   "collapse"
+                                                                   "open")])
                  [:i.fa.m-l-5
                   {:class-name (if expanded? "fa-caret-up" "fa-caret-down")}]]]
                (if expanded?
@@ -2064,4 +2083,42 @@
                     "DELETE"]]
                   [character-display id false (if (= :mobile device-type) 1 2)]])])])
          characters))]]]))
+
+(defn monster-list []
+  (let [expanded-monsters @(subscribe [:expanded-monsters])
+        device-type @(subscribe [:device-type])]
+    [content-page
+     "Monsters"
+     []
+     [:div.p-l-5.p-r-5.p-b-10
+      [:div.p-b-10.p-l-10.p-r-10
+       [:input.input.f-s-24.p-l-20
+        {:style {:height "60px"}
+         :on-change #(dispatch [::char/filter-monsters (event-value %)])}]]
+      [:div
+       {:style list-style}
+       (doall
+        (map
+         (fn [{:keys [name size type hit-points alignment armor-class armor-notes speed saving-throws skills senses languages challenge traits actions legendary-actions source page] :as monster}]
+           (let [expanded? (get expanded-monsters name)]
+             ^{:key name}
+            [:div.white
+             {:style row-style}
+             [:div.pointer
+              [:div.flex.justify-cont-s-b.align-items-c
+               {:on-click #(dispatch [:toggle-monster-expanded name])}
+               [:div.m-l-10
+                [:div.f-s-24.f-w-600
+                 [monster-summary name size type]]]
+               [:div.orange.pointer.m-r-10
+                (if (not= device-type :mobile) [:span.underline (if expanded?
+                                                                  "collapse"
+                                                                  "open")])
+                [:i.fa.m-l-5
+                 {:class-name (if expanded? "fa-caret-up" "fa-caret-down")}]]]
+              (if expanded?
+                [:div.p-10
+                 {:style character-display-style}
+                 [monster-component monster]])]]))
+         @(subscribe [::char/filtered-monsters])))]]]))
 

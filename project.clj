@@ -46,7 +46,9 @@
                  [binaryage/devtools "0.9.4"]
                  [hiccup "1.0.5"]
                  [com.draines/postal "2.0.2"]
-                 [environ "1.1.0"]]
+                 [environ "1.1.0"]
+
+                 [pdfkit-clj "0.1.6"]]
 
   :plugins [[lein-figwheel "0.5.8"]
             [lein-cljsbuild "1.1.4" :exclusions [[org.clojure/clojure]]]

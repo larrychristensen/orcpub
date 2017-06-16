@@ -6,6 +6,13 @@
 (def dnd-e5-char-route :char-5e)
 (def dnd-e5-char-page-route :char-5e-page)
 (def dnd-e5-char-list-page-route :char-list-5e-page)
+
+(def dnd-e5-char-page-routes #{dnd-e5-char-builder-route dnd-e5-char-list-page-route})
+
+(def dnd-e5-monster-list-page-route :monster-list-5e-page)
+
+(def dnd-e5-monster-page-routes #{dnd-e5-monster-list-page-route})
+
 (def default-route :default)
 (def register-route :register)
 (def register-page-route :register-page)
@@ -66,7 +73,8 @@
                             {"5e/"
                              {"character-builder" dnd-e5-char-builder-route
                               "characters" {"" dnd-e5-char-list-page-route
-                                            ["/" :id] dnd-e5-char-page-route}}}}}])
+                                            ["/" :id] dnd-e5-char-page-route}
+                              "monsters" dnd-e5-monster-list-page-route}}}}])
 
 (defn path-for [& args]
   (apply bidi/path-for routes args))

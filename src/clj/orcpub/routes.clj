@@ -416,6 +416,9 @@
 (defn character-list-page [req]
   (index req))
 
+(defn monster-list-page [req]
+  (index req))
+
 (defn character-page [req]
   (index req))
 
@@ -682,6 +685,8 @@
       {:get `get-character}]
      [(route-map/path-for route-map/dnd-e5-char-list-page-route) ^:interceptors [(body-params/body-params)]
       {:get `character-list-page}]
+     [(route-map/path-for route-map/dnd-e5-monster-list-page-route) ^:interceptors [(body-params/body-params)]
+      {:get `monster-list-page}]
      [(route-map/path-for route-map/dnd-e5-char-page-route :id ":id")
       {:get `character-page}]
      [(route-map/path-for route-map/dnd-e5-char-builder-route) ^:interceptors [(body-params/body-params)]
