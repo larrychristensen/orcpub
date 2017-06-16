@@ -607,21 +607,24 @@
 (defn save-character [{:keys [db transit-params body conn identity] :as request}]
   (do-save-character db conn transit-params identity))
 
-(defn character-list [{:keys [db transit-params body conn identity] :as request}]
+(defn character-list [{:keys [db body conn identity] :as request}]
   (let [username (:user identity)
         user (find-user-by-username-or-email db username)
-        ids (d/q '[:find ?e
-                   :in $ [?idents ...]
-                   :where
-                   [?e ::se/owner ?idents]
-                   ;; uncomment these once all characters have the data
-                   #_[?e ::se/type :character]
-                   #_[?e ::se/game :dnd]
-                   #_[?e ::se/game-version :e5]]
-                 db
-                 [(:orcpub.user/username user)
-                  (:orcpub.user/email user)])
-        characters (d/pull-many db '[*] (map first ids))]
+        results (d/q '[:find (pull ?s [*]) ?e
+                       :in $ [?idents ...]
+                       :where
+                       [?e ::se/owner ?idents]
+                       [?e ::se/summary ?s]
+                       ;; uncomment these once all characters have the data
+                       #_[?e ::se/type :character]
+                       #_[?e ::se/game :dnd]
+                       #_[?e ::se/game-version :e5]]
+                     db
+                     [(:orcpub.user/username user)
+                      (:orcpub.user/email user)])
+        characters (map (fn [[summary id]]
+                          (assoc summary :db/id id))
+                        results)]
     {:status 200 :body characters}))
 
 (defn delete-character [{:keys [db conn identity] {:keys [id]} :path-params}]

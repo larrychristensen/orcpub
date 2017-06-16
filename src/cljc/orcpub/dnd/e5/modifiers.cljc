@@ -182,7 +182,9 @@
 
 (defn saving-throw-bonus [ability-kw bonus]
   (mods/modifier ?saving-throw-bonuses
-                 (update ?saving-throw-bonuses ability-kw + bonus)))
+                 (merge-with +
+                             ?saving-throw-bonuses
+                             {ability-kw bonus})))
 
 (defn saving-throw-bonuses [bonus]
   (mods/modifier ?saving-throw-bonuses

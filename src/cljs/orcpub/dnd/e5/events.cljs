@@ -192,15 +192,39 @@
                    [:set-character character]
                    [::char5e/set-character id strict-character]]})))
 
+(defn insert-summary [{:keys [:db/id] :as strict-char} built-char]
+  (let [classes (char5e/classes built-char)
+        levels (char5e/levels built-char)
+        race (char5e/race built-char)
+        subrace (char5e/subrace built-char)
+        character-name (char5e/character-name built-char)
+        image-url (char5e/image-url built-char)]
+    (assoc strict-char
+           :orcpub.entity.strict/summary
+           (cond-> {}
+             character-name (assoc ::char5e/character-name character-name)
+             image-url (assoc ::char5e/image-url image-url)
+             race (assoc ::char5e/race-name race)
+             subrace (assoc ::char5e/subrace-name subrace)
+             (seq classes) (assoc ::char5e/classes (map
+                                                    (fn [cls-nm]
+                                                      (let [{:keys [class-name subclass-name class-level]}
+                                                            (levels cls-nm)]
+                                                        (cond-> {}
+                                                          class-name (assoc ::char5e/class-name class-name)
+                                                          subclass-name (assoc ::char5e/subclass-name subclass-name)
+                                                          class-level (assoc ::char5e/level class-level))))
+                                                    classes))))))
+
 (reg-event-fx
  :save-character
  (fn [{:keys [db]} _]
-   (let [strict (char5e/to-strict (:character db))]
+   (let [{:keys [:db/id] :as strict} (char5e/to-strict (:character db))]
      {:dispatch [:set-loading true]
       :http {:method :post
              :headers {"Authorization" (str "Token " (-> db :user-data :token))}
              :url (backend-url (bidi/path-for routes/routes routes/dnd-e5-char-list-route))
-             :transit-params strict
+             :transit-params (insert-summary strict @(subscribe [::char5e/built-character id]))
              :on-success [:character-save-success]}})))
 
 (defn set-character [db [_ character]]
@@ -917,8 +941,7 @@
  ::char5e/set-characters
  (fn [db [_ characters]]
    (assoc db
-          ::char5e/characters characters
-          ::char5e/character-map (zipmap (map :db/id characters) characters))))
+          ::char5e/characters characters)))
 
 (reg-event-db
  ::char5e/set-character

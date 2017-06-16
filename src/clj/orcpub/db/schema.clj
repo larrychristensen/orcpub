@@ -90,6 +90,10 @@
     :db/valueType :db.type/ref
     :db/cardinality :db.cardinality/one
     :db/isComponent true}
+   {:db/ident ::se/summary
+    :db/valueType :db.type/ref
+    :db/cardinality :db.cardinality/one
+    :db/isComponent true}
    {:db/ident ::se/selections
     :db/valueType :db.type/ref
     :db/cardinality :db.cardinality/many
@@ -121,7 +125,8 @@
    (map
     many-ref
     [::char5e/custom-equipment
-     ::char5e/custom-treasure])
+     ::char5e/custom-treasure
+     ::char5e/classes])
    (map
     long-prop
     [::char5e/str
@@ -129,14 +134,19 @@
      ::char5e/con
      ::char5e/int
      ::char5e/wis
-     ::char5e/cha])
+     ::char5e/cha
+     ::char5e/level])
    (map
     fulltext-prop
     [::char5e/character-name
      ::char5e/description])
    (map
     string-prop
-    [::char5e/weight
+    [::char5e/race-name
+     ::char5e/subrace-name
+     ::char5e/class-name
+     ::char5e/subclass-name
+     ::char5e/weight
      ::char5e/faction-image-url
      ::char5e/hair
      ::char5e/player-name
