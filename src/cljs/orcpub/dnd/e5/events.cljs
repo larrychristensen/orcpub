@@ -24,7 +24,8 @@
             [clojure.string :as s]
             [bidi.bidi :as bidi]
             [orcpub.route-map :as routes]
-            [orcpub.errors :as errors])
+            [orcpub.errors :as errors]
+            [clojure.string :as s])
   (:require-macros [cljs.core.async.macros :refer [go]]))
 
 (defn check-and-throw
@@ -209,6 +210,11 @@
  :toggle-character-expanded
  (fn [db [_ character-id]]
    (update-in db [:expanded-characters character-id] not)))
+
+(reg-event-db
+ :toggle-monster-expanded
+ (fn [db [_ monster-name]]
+   (update-in db [:expanded-monsters monster-name] not)))
 
 (reg-event-db
  :set-character
@@ -1066,3 +1072,17 @@
  ::char5e/set-builder-tab
  (fn [db [_ tab]]
    (assoc db ::char5e/builder-tab tab)))
+
+(defn filter-monsters [filter-text]
+  (let [pattern (re-pattern (str ".*" (s/lower-case filter-text) ".*"))]
+    (sort-by
+     :name
+     (filter
+      (fn [monster]
+        (re-matches pattern (s/lower-case (:name monster))))
+      monsters/monsters))))
+
+(reg-event-db
+ ::char5e/filter-monsters
+ (fn [db [_ filter-text]]
+   (assoc db ::char5e/filtered-monsters (filter-monsters filter-text))))

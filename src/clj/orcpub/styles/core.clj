@@ -271,6 +271,8 @@
     {:width "90px"}]
    [:.w-100
     {:width "100px"}]
+   [:.w-110
+    {:width "110px"}]
    [:.w-120
     {:width "120px"}]
    [:.w-200
@@ -901,7 +903,7 @@
        :width "24px"}]
      {:width "30px"}]
 
-    [:.header-tab:hover
+    #_[:.header-tab:hover
      [(garden.selectors/& (garden.selectors/not :.disabled))
       {:background-color orange}]]
 
