@@ -1696,9 +1696,11 @@
                    selections)
       :modifiers (concat
                   (if (not plugin?)
-                    [(modifiers/race name)
-                     (modifiers/size size)
-                     (modifiers/speed speed)])
+                    (remove
+                     nil?
+                     [(modifiers/race name)
+                      (if size (modifiers/size size))
+                      (if speed (modifiers/speed speed))]))
                   (if darkvision
                     (darkvision-modifiers darkvision))
                   (map
