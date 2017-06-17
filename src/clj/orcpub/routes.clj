@@ -118,6 +118,16 @@
              :exp exp}
             (environ/env :signature)))
 
+(defn following-usernames [db ids]
+  (prn "IDS" ids)
+  (map :orcpub.user/username
+       (d/pull-many db '[:orcpub.user/username] ids)))
+
+(defn user-body [db user]
+  {:username (:orcpub.user/username user)
+   :email (:orcpub.user/email user)
+   :following (following-usernames db (map :db/id (:orcpub.user/following user)))})
+
 (defn login-response
   [{:keys [json-params db] :as request}]
   (let [{raw-username :username raw-password :password} json-params]
@@ -141,8 +151,7 @@
                 unverified? (login-error errors/unverified {:email email})
                 :else (let [token (create-token (:orcpub.user/username user)
                                                 (-> 24 hours from-now))]
-                        {:status 200 :body {:user-data {:username (:orcpub.user/username user)
-                                                        :email (:orcpub.user/email user)}
+                        {:status 200 :body {:user-data (user-body db user)
                                             :token token}}))))))
 
 (defn login [{:keys [json-params db] :as request}]
@@ -212,6 +221,14 @@
 
 (defn user-for-email [db email]
   (first-user-by db user-for-email-query email))
+
+(defn user-id-for-username [db username]
+  (d/q
+   '[:find ?e .
+     :in $ ?username
+     :where [?e :orcpub.user/username ?username]]
+   db
+   username))
 
 (defn verify [{:keys [query-params db conn] :as request}]
   (let [key (:key query-params)
@@ -542,7 +559,6 @@
 (def dnd-e5-char-type-problems (partial entity-type-problems :dnd :e5 :character))
 
 (defn update-character [db conn character username]
-  (prn "CONN" conn db)
   (let [id (:db/id character)]
     (if (owns-entity? db username id)
       (let [current-character (d/pull db '[*] id)
@@ -607,12 +623,32 @@
 (defn save-character [{:keys [db transit-params body conn identity] :as request}]
   (do-save-character db conn transit-params identity))
 
-(defn character-list [{:keys [db body conn identity] :as request}]
+(defn character-list [{:keys [db transit-params body conn identity] :as request}]
   (let [username (:user identity)
         user (find-user-by-username-or-email db username)
-        results (d/q '[:find (pull ?s [*]) ?e
+        ids (d/q '[:find ?e
+                   :in $ [?idents ...]
+                   :where
+                   [?e ::se/owner ?idents]
+                   ;; uncomment these once all characters have the data
+                   #_[?e ::se/type :character]
+                   #_[?e ::se/game :dnd]
+                   #_[?e ::se/game-version :e5]]
+                 db
+                 [(:orcpub.user/username user)
+                  (:orcpub.user/email user)])
+        characters (d/pull-many db '[*] (map first ids))]
+    {:status 200 :body characters}))
+
+(defn character-summary-list [{:keys [db body conn identity] :as request}]
+  (let [username (:user identity)
+        user (find-user-by-username-or-email db username)
+        following-ids (map :db/id (:orcpub.user/following user))
+        following-usernames (following-usernames db following-ids)
+        results (d/q '[:find (pull ?s [*]) ?e ?owner
                        :in $ [?idents ...]
                        :where
+                       [?e ::se/owner ?owner]
                        [?e ::se/owner ?idents]
                        [?e ::se/summary ?s]
                        ;; uncomment these once all characters have the data
@@ -620,12 +656,31 @@
                        #_[?e ::se/game :dnd]
                        #_[?e ::se/game-version :e5]]
                      db
-                     [(:orcpub.user/username user)
-                      (:orcpub.user/email user)])
-        characters (map (fn [[summary id]]
-                          (assoc summary :db/id id))
+                     (concat
+                      [(:orcpub.user/username user)
+                       (:orcpub.user/email user)]
+                      following-usernames))
+        characters (map (fn [[summary id owner]]
+                          (assoc summary
+                                 :db/id id
+                                 :orcpub.entity.strict/owner owner))
                         results)]
     {:status 200 :body characters}))
+
+(defn follow-user [{:keys [db conn identity] {:keys [user]} :path-params}]
+  (let [other-user-id (user-id-for-username db user)
+        username (:user identity)
+        user-id (user-id-for-username db username)]
+    @(d/transact conn [{:db/id user-id
+                        :orcpub.user/following other-user-id}])
+    {:status 200}))
+
+(defn unfollow-user [{:keys [db conn identity] {:keys [user]} :path-params}]
+  (let [other-user-id (user-id-for-username db user)
+        username (:user identity)
+        user-id (user-id-for-username db username)]
+    @(d/transact conn [[:db/retract user-id :orcpub.user/following other-user-id]])
+    {:status 200}))
 
 (defn delete-character [{:keys [db conn identity] {:keys [id]} :path-params}]
   (let [parsed-id (Long/parseLong id)
@@ -650,6 +705,11 @@
 (defn get-character [{:keys [db] {:keys [:id]} :path-params}]
   (let [parsed-id (Long/parseLong id)]
     {:status 200 :body (get-character-for-id db parsed-id)}))
+
+(defn get-user [{:keys [db identity]}]
+  (let [username (:user identity)
+        user (find-user-by-username-or-email db username)]
+    {:status 200 :body (user-body db user)}))
 
 (def header-style
   {:style "color:#2c3445"})
@@ -679,9 +739,16 @@
    [[["/" {:get `index}]
      [(route-map/path-for route-map/register-route) ^:interceptors [(body-params/body-params)]
       {:post `register}]
+     [(route-map/path-for route-map/user-route) ^:interceptors [check-auth]
+      {:get `get-user}]
+     [(route-map/path-for route-map/follow-user-route :user ":user") ^:interceptors [check-auth]
+      {:post `follow-user
+       :delete `unfollow-user}]
      [(route-map/path-for route-map/dnd-e5-char-list-route) ^:interceptors [(body-params/body-params) check-auth]
       {:post `save-character
        :get `character-list}]
+     [(route-map/path-for route-map/dnd-e5-char-summary-list-route) ^:interceptors [(body-params/body-params) check-auth]
+      {:get `character-summary-list}]
      [(route-map/path-for route-map/dnd-e5-char-route :id ":id") ^:interceptors [check-auth]
       {:delete `delete-character}]
      [(route-map/path-for route-map/dnd-e5-char-route :id ":id")

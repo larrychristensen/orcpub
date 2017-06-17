@@ -1939,10 +1939,16 @@
               level)))
 
 (defn total-levels-prereq-2 [level & [class-key]]
-  (fn [c] (>= (if class-key
-                ((character/class-level-fn c) class-key)
-                (character/total-levels c))
-              level)))
+  (fn [c]
+    (and c
+         (character/class-level-fn c)
+         level
+         (>= (or (if class-key
+                   ((character/class-level-fn c) class-key)
+                   (character/total-levels c))
+                 0)
+             (or level 0)))))
+
 
 (defn total-levels-option-prereq [level & [class-key]]
   (t/option-prereq

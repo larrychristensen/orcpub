@@ -77,7 +77,7 @@
 
   :cljsbuild {:builds
               [{:id "dev"
-                :source-paths ["src/clj" "src/cljc" "src/cljs"]
+                :source-paths ["src/cljc" "src/cljs"]
 
                 ;; the presence of a :figwheel configuration here
                 ;; will cause figwheel to inject the figwheel client
@@ -101,7 +101,7 @@
                ;; production. You can build this with:
                ;; lein cljsbuild once min
                {:id "min"
-                :source-paths ["src/clj" "src/cljc" "src/cljs"]
+                :source-paths ["src/cljc" "src/cljs"]
                 :compiler {:output-to "resources/public/js/compiled/orcpub.js"
                            :main orcpub.core
                            :optimizations :advanced
@@ -168,7 +168,7 @@
                        :omit-source true
                        :cljsbuild {:builds
                                    [{:id "prod"
-                                     :source-paths ["src/clj" "src/cljc" "src/cljs"]
+                                     :source-paths ["src/cljc" "src/cljs"]
                                      :figwheel { :on-jsload "orcpub.core/on-js-reload" }
                                      :compiler {:main orcpub.core
                                                 :asset-path "/js/compiled/out"

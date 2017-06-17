@@ -264,7 +264,7 @@
   ::char5e/characters
   (fn [app-db [_]]
     (go (dispatch [:set-loading true])
-        (let [response (<! (http/get (routes/path-for routes/dnd-e5-char-list-route)
+        (let [response (<! (http/get (routes/path-for routes/dnd-e5-char-summary-list-route)
                                      {:accept :transit
                                       :headers {"Authorization" (str "Token " (-> @app-db :user-data :token))}}))]
           (dispatch [:set-loading false])
@@ -275,6 +275,25 @@
     (ra/make-reaction
      (fn [] (get @app-db ::char5e/characters [])))))
 
+(reg-sub-raw
+  :user
+  (fn [app-db [_ required?]]
+    (go (let [response (<! (http/get (routes/path-for routes/user-route)
+                                     {:accept :transit
+                                      :headers {"Authorization" (str "Token " (-> @app-db :user-data :token))}}))]
+          (case (:status response)
+            200 (dispatch [:set-user (-> response :body)])
+            401 (if required? (dispatch [:route routes/login-page-route {:secure? true}]))
+            500 (if required? (dispatch (events/show-generic-error))))))
+    (ra/make-reaction
+     (fn [] (get @app-db :user [])))))
+
+(reg-sub
+ :following-users
+ :<- [:user]
+ (fn [user _]
+   (into #{} (:following user))))
+
 (reg-sub
  ::char5e/character-map
  (fn [db _]
@@ -283,15 +302,17 @@
 (reg-sub-raw
   ::char5e/character
   (fn [app-db [_ id :as args]]
-    (if (nil? (get-in @app-db [::char5e/character-map id]))
-      (go (dispatch [:set-loading true])
-          (let [response (<! (http/get (routes/path-for routes/dnd-e5-char-route :id id)
-                                       {:accept :transit}))]
-            (dispatch [:set-loading false])
-            (case (:status response)
-              200 (dispatch [::char5e/set-character id (-> response :body)])
-              401 (dispatch [:route routes/login-page-route {:secure? true}])
-              500 (dispatch (events/show-generic-error))))))
+    (if (some? id)
+      (if (nil? (get-in @app-db [::char5e/character-map id]))
+        (go (dispatch [:set-loading true])
+            (let [response (<! (http/get (routes/path-for routes/dnd-e5-char-route :id id)
+                                         {:accept :transit}))]
+              (dispatch [:set-loading false])
+              (case (:status response)
+                200 (dispatch [::char5e/set-character id (-> response :body)])
+                401 (dispatch [:route routes/login-page-route {:secure? true}])
+                500 (dispatch (events/show-generic-error))))))
+      (prn "ID WAS NIL"))
     (ra/make-reaction
      (fn [] (get-in @app-db [::char5e/character-map id] [])))))
 
@@ -540,5 +561,3 @@
  (fn [db _]
    (or (::char5e/filtered-monsters db)
        (sort-by :name monsters5e/monsters))))
-
-

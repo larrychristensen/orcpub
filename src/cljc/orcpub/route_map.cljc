@@ -6,8 +6,11 @@
 (def dnd-e5-char-route :char-5e)
 (def dnd-e5-char-page-route :char-5e-page)
 (def dnd-e5-char-list-page-route :char-list-5e-page)
+(def dnd-e5-char-summary-list-route :char-summary-list-5e-page)
 
-(def dnd-e5-char-page-routes #{dnd-e5-char-builder-route dnd-e5-char-list-page-route})
+(def dnd-e5-char-page-routes #{dnd-e5-char-builder-route
+                               dnd-e5-char-list-page-route
+                               dnd-e5-char-page-route})
 
 (def dnd-e5-monster-list-page-route :monster-list-5e-page)
 
@@ -23,6 +26,8 @@
 (def verify-sent-route :verify-sent)
 (def login-route :login)
 (def login-page-route :login-page)
+(def user-route :user)
+(def follow-user-route :follow-user)
 (def character-pdf-route :character-pdf)
 (def check-email-route :check-email)
 (def check-username-route :check-username)
@@ -47,6 +52,7 @@
                   "re-verify" re-verify-route
                   "register" register-route
                   "login" login-route
+                  "user" user-route
                   
                   "character.pdf" character-pdf-route
                   "check-email" check-email-route
@@ -62,9 +68,13 @@
                   "privacy-policy" privacy-policy-route
                   "community-guidelines" community-guidelines-route
                   "cookies-policy" cookies-policy-route
+
+                  "following/users" {["/" :user] follow-user-route}
+                  
                   "dnd/"
                   {"5e/" {"characters" {"" dnd-e5-char-list-route
-                                        ["/" :id] dnd-e5-char-route}}}
+                                        ["/" :id] dnd-e5-char-route}
+                          "character-summaries" dnd-e5-char-summary-list-route}}
                   "pages/" {"register-page" register-page-route
                             "login-page" login-page-route
                             "reset-password-page" reset-password-page-route

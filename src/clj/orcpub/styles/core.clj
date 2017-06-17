@@ -135,6 +135,8 @@
     {:margin-top "2px"}]
    [:.m-t-30
     {:margin-top "30px"}]
+   [:.m-t-40
+    {:margin-top "40px"}]
    [:.m-t-21
     {:margin-top "21px"}]
 
@@ -171,6 +173,8 @@
     {:margin-bottom "20px"}]
    [:.m-b-30
     {:margin-bottom "30px"}]
+   [:.m-b-40
+    {:margin-bottom "40px"}]
 
    [:.m-l--10
     {:margin-left "-10px"}]
