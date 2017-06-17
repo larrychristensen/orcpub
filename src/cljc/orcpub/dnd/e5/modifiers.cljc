@@ -415,7 +415,6 @@
 
 (defn deferred-magic-item-fn [equipment-mod-fn {:keys [magical-ac-bonus modifiers]} & [include-magic-bonus?]]
   (fn [cfg]
-    (prn "EQUIEPMENT MOD FN" equipment-mod-fn cfg)
     (let [equipment-mod (equipment-mod-fn cfg)]
       (if (::char-equip/equipped? cfg)
         (let [mods (concat [equipment-mod]
