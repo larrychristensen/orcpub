@@ -1004,10 +1004,12 @@
       ::char/race-name race
       ::char/subrace-name subrace
       ::char/classes (map
-                      (fn [{:keys [class-name class-level subclass-name]}]
-                        {::char/class-name class-name
-                         ::char/level class-level
-                         ::char/subclass-name subclass-name})
+                      (fn [class-kw]
+                        (let [{:keys [class-name class-level subclass-name] :as cfg}
+                              (get levels class-kw)]
+                          {::char/class-name class-name
+                           ::char/level class-level
+                           ::char/subclass-name subclass-name}))
                       classes)}
      include-name?
      text-classes)))
