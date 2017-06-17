@@ -396,7 +396,10 @@
   (mods/modifier ?size size))
 
 (defn equipment-cfg [cfg]
-  (if (int? cfg) {::char-equip/quantity cfg ::char-equip/equipped? true} cfg))
+  (if (int? cfg)
+    {::char-equip/quantity cfg
+     ::char-equip/equipped? true}
+    cfg))
 
 (defn weapon [weapon-kw cfg]
   (mods/map-mod ?weapons weapon-kw (equipment-cfg cfg)))
@@ -411,14 +414,16 @@
     1))
 
 (defn deferred-magic-item-fn [equipment-mod-fn {:keys [magical-ac-bonus modifiers]} & [include-magic-bonus?]]
-  (fn [cfg] (let [equipment-mod (equipment-mod-fn cfg)]
-              (if (::char-equip/equipped? cfg)
-                (let [mods (concat [equipment-mod]
-                                   (if (and include-magic-bonus? magical-ac-bonus)
-                                     [(mods/cum-sum-mod ?magical-ac-bonus magical-ac-bonus)])
-                                   modifiers)]
-                  mods)
-                equipment-mod))))
+  (fn [cfg]
+    (prn "EQUIEPMENT MOD FN" equipment-mod-fn cfg)
+    (let [equipment-mod (equipment-mod-fn cfg)]
+      (if (::char-equip/equipped? cfg)
+        (let [mods (concat [equipment-mod]
+                           (if (and include-magic-bonus? magical-ac-bonus)
+                             [(mods/cum-sum-mod ?magical-ac-bonus magical-ac-bonus)])
+                           modifiers)]
+          mods)
+        equipment-mod))))
 
 (defn deferred-magic-weapon [weapon-kw {:keys [magical-ac-bonus modifiers] :as weapon}]
   (mods/deferred-modifier
