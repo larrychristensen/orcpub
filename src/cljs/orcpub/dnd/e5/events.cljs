@@ -201,8 +201,7 @@
         image-url (char5e/image-url built-char)]
     (assoc strict-char
            :orcpub.entity.strict/summary
-           (cond-> {}
-             character-name (assoc ::char5e/character-name character-name)
+           (cond-> {::char5e/character-name (or character-name "")}
              image-url (assoc ::char5e/image-url image-url)
              race (assoc ::char5e/race-name race)
              subrace (assoc ::char5e/subrace-name subrace)
