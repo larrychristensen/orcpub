@@ -66,7 +66,10 @@
     :db/cardinality :db.cardinality/one}
    {:db/ident :orcpub.user/password-reset-key
     :db/valueType :db.type/string
-    :db/cardinality :db.cardinality/one}])
+    :db/cardinality :db.cardinality/one}
+   {:db/ident :orcpub.user/following
+    :db/valueType :db.type/ref
+    :db/cardinality :db.cardinality/many}])
 
 (def entity-schema
   [{:db/ident ::se/key

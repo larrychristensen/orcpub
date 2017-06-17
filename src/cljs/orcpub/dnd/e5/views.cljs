@@ -953,11 +953,30 @@
   {:border-bottom "1px solid rgba(255,255,255,0.5)"})
 
 (def list-style
-  {:border-top "1px solid rgba(255,255,255,0.5)"})
+  {:border-top "2px solid rgba(255,255,255,0.5)"})
 
 (def thumbnail-style
   {:height "100px"
    :max-width "200px"})
+
+(defn other-user-component [owner & [text-classes]]
+  (let [following-users @(subscribe [:following-users])
+        following? (get following-users owner)
+        username @(subscribe [:username])]
+    [:div.flex.m-l-10.align-items-c
+     (svg-icon "orc-head" 32 32)
+     [:div.f-s-18.m-l-5
+      {:class-name text-classes}
+      owner]
+     (if (not= username owner)
+       [:button.form-button.m-l-10.p-6
+        {:on-click #(dispatch [(if following?
+                                 :unfollow-user
+                                 :follow-user)
+                               owner])}
+        (if following?
+          "unfollow"
+          "follow")])]))
 
 (defn character-summary-2 [{:keys [::char/character-name
                                    ::char/image-url
@@ -965,39 +984,47 @@
                                    ::char/subrace-name
                                    ::char/classes]}
                            include-name?
-                           text-classes]
-  [:div.flex.align-items-c
-   (if image-url
-     [:img.m-r-20.m-t-10.m-b-10 {:src image-url
-                                 :style thumbnail-style}])
-   [:div.flex.character-summary
-    {:class-name text-classes}
-    (if (and character-name include-name?) [:span.m-r-20.m-b-5 character-name])
-    [:span.m-r-10.m-b-5
-     [:span race-name]
-     [:div.f-s-12.m-t-5.opacity-6 subrace-name]]
-    (if (seq classes)
-      [:span.flex
-       (map-indexed
-        (fn [i v]
-          (with-meta v {:key i}))
-        (interpose
-         [:span.m-l-5.m-r-5 "/"]
-         (map
-          (fn [{:keys [::char/class-name ::char/level ::char/subclass-name]}]
-            (let []
-              [:span
-               [:span (str class-name " (" level ")")]
-               [:div.f-s-12.m-t-5.opacity-6 (if subclass-name subclass-name)]]))
-          classes)))])]])
+                           owner
+                           show-owner?]
+  (let [username @(subscribe [:username])]
+    [:div.flex.justify-cont-s-b.w-100-p
+     [:div.flex.align-items-c
+      (if image-url
+        [:img.m-r-20.m-t-10.m-b-10 {:src image-url
+                                    :style thumbnail-style}])
+      [:div.flex.character-summary.m-t-20.m-b-20
+       (if (and character-name include-name?) [:span.m-r-20.m-b-5 character-name])
+       [:span.m-r-10.m-b-5
+        [:span race-name]
+        [:div.f-s-12.m-t-5.opacity-6 subrace-name]]
+       (if (seq classes)
+         [:span.flex
+          (map-indexed
+           (fn [i v]
+             (with-meta v {:key i}))
+           (interpose
+            [:span.m-l-5.m-r-5 "/"]
+            (map
+             (fn [{:keys [::char/class-name ::char/level ::char/subclass-name]}]
+               (let []
+                 [:span
+                  [:span (str class-name " (" level ")")]
+                  [:div.f-s-12.m-t-5.opacity-6 (if subclass-name subclass-name)]]))
+             classes)))])]]
+     (if (and show-owner?
+              (some? owner)
+              (some? username)
+              (not= username owner))
+       [other-user-component owner])]))
 
-(defn character-summary [id & [include-name? text-classes]]
+(defn character-summary [id & [include-name?]]
   (let [character-name @(subscribe [::char/character-name id])
         image-url @(subscribe [::char/image-url id])
         race @(subscribe [::char/race id])
         subrace @(subscribe [::char/subrace id])
         levels @(subscribe [::char/levels id])
-        classes @(subscribe [::char/classes id])]
+        classes @(subscribe [::char/classes id])
+        {:keys [::se/owner] :as strict-character} @(subscribe [::char/character id])]
     (character-summary-2
      {::char/character-name character-name
       ::char/image-url image-url
@@ -1012,7 +1039,8 @@
                            ::char/subclass-name subclass-name}))
                       classes)}
      include-name?
-     text-classes)))
+     owner
+     true)))
 
 (defn monster-summary [name size type]
   [:span.m-r-10.m-b-5
@@ -2056,7 +2084,8 @@
 (defn character-list []
   (let [characters @(subscribe [::char/characters])
         expanded-characters @(subscribe [:expanded-characters])
-        device-type @(subscribe [:device-type])]
+        device-type @(subscribe [:device-type])
+        username @(subscribe [:username])]
     [content-page
      "Characters"
      [{:title "New"
@@ -2064,44 +2093,64 @@
        :on-click #(dispatch [:new-character])}]
      [:div.p-5
       [:div
-       {:style list-style}
-       (doall
-        (map
-         (fn [{:keys [:db/id] :as summary}]
-           (let [expanded? (get expanded-characters id)]
-             ^{:key id}
-             [:div.white
-              {:style row-style}
-              [:div.pointer
-               [:div.flex.justify-cont-s-b.align-items-c
-                {:on-click #(dispatch [:toggle-character-expanded id])}
-                [:div.m-l-10.flex.align-items-c
-                 [:div.f-s-24.f-w-600
-                  #_{:style summary-style}
-                  [:div.list-character-summary
-                   [character-summary-2 summary true "m-t-20 m-b-20"]]]]
-                [:div.orange.pointer.m-r-10
-                 (if (not= device-type :mobile) [:span.underline (if expanded?
-                                                                   "collapse"
-                                                                   "open")])
-                 [:i.fa.m-l-5
-                  {:class-name (if expanded? "fa-caret-up" "fa-caret-down")}]]]
-               (if expanded?
-                 [:div
-                  {:style character-display-style}
-                  [:div.flex.justify-cont-end
-                   [:button.form-button
-                    {:on-click #(dispatch [:edit-character @(subscribe [::char/internal-character id])])}
-                    "EDIT"]
-                   [:button.form-button.m-l-5
-                    {:on-click #(let [route (routes/match-route (routes/path-for routes/dnd-e5-char-page-route :id id))]
-                                  (dispatch [:route route {:return? true}]))}
-                    "VIEW"]
-                   [:button.form-button.m-l-5
-                    {:on-click #(dispatch [:delete-character id])}
-                    "DELETE"]]
-                  [character-display id false (if (= :mobile device-type) 1 2)]])]]))
-         characters))]]]))
+       (let [grouped-characters (group-by ::se/owner characters)]
+         (doall
+          (map
+           (fn [[owner owner-characters]]
+             ^{:key owner}
+             [:div.m-b-40
+              [:div.m-b-10.white.f-w-b.f-s-16
+               [other-user-component owner "f-s-24 m-l-10 m-r-20 i"]]
+              [:div
+               {:style list-style}
+               (doall
+                (map
+                 (fn [{:keys [:db/id ::se/owner] :as summary}]
+                   (let [expanded? (get expanded-characters id)
+                         char-page-path (routes/path-for routes/dnd-e5-char-page-route :id id)
+                         char-page-route (routes/match-route char-page-path)]
+                     ^{:key id}
+                     [:div.white
+                      {:style row-style}
+                      [:div.pointer
+                       [:div.flex.justify-cont-s-b.align-items-c
+                        {:on-click #(dispatch [:toggle-character-expanded id])}
+                        [:div.m-l-10.flex.align-items-c
+                         [:div.f-s-24.f-w-600
+                          #_{:style summary-style}
+                          [:div.list-character-summary
+                           [character-summary-2 summary true owner false]]]]
+                        [:div.orange.pointer.m-r-10
+                         (if (not= device-type :mobile) [:span.underline (if expanded?
+                                                                           "collapse"
+                                                                           "open")])
+                         [:i.fa.m-l-5
+                          {:class-name (if expanded? "fa-caret-up" "fa-caret-down")}]]]
+                       (if expanded?
+                         [:div
+                          {:style character-display-style}
+                          [:div.flex.justify-cont-end.uppercase.align-items-c
+                           [:a.m-r-5
+                            {:href (str "mailto:?subject=My%20OrcPub%20Character%20"
+                                        @(subscribe [::char/character-name id])
+                                        "&body=https://"
+                                        js/window.location.hostname
+                                        char-page-path)}
+                            [:i.fa.fa-envelope.m-r-5]
+                            "share"]
+                           [:button.form-button
+                            {:on-click #(dispatch [:edit-character @(subscribe [::char/internal-character id])])}
+                            "edit"]
+                           [:button.form-button.m-l-5
+                            {:on-click #(let [route char-page-route]
+                                          (dispatch [:route route {:return? true}]))}
+                            "view"]
+                           [:button.form-button.m-l-5
+                            {:on-click #(dispatch [:delete-character id])}
+                            "delete"]]
+                          [character-display id false (if (= :mobile device-type) 1 2)]])]]))
+                 owner-characters))]])
+           grouped-characters)))]]]))
 
 (defn monster-list []
   (let [expanded-monsters @(subscribe [:expanded-monsters])

@@ -216,16 +216,48 @@
                                                           class-level (assoc ::char5e/level class-level))))
                                                     classes))))))
 
+(defn authorization-headers [db]
+  {"Authorization" (str "Token " (-> db :user-data :token))})
+
 (reg-event-fx
  :save-character
  (fn [{:keys [db]} _]
    (let [{:keys [:db/id] :as strict} (char5e/to-strict (:character db))]
      {:dispatch [:set-loading true]
       :http {:method :post
-             :headers {"Authorization" (str "Token " (-> db :user-data :token))}
+             :headers (authorization-headers db)
              :url (backend-url (bidi/path-for routes/routes routes/dnd-e5-char-list-route))
              :transit-params (insert-summary strict @(subscribe [::char5e/built-character id]))
              :on-success [:character-save-success]}})))
+
+(reg-event-fx
+ :follow-user-success
+ (fn []))
+
+(reg-event-fx
+ :follow-user
+ (fn [{:keys [db]} [_ username]]
+   (let [path (routes/path-for routes/follow-user-route :user username)]
+     {:dispatch [:set-user (update (:user db) :following conj username)]
+      :http {:method :post
+             :headers (authorization-headers db)
+             :url (backend-url path)
+             :on-success [:follow-user-success]}})))
+
+(reg-event-fx
+ :unfollow-user-success
+ (fn []))
+
+(reg-event-fx
+ :unfollow-user
+ (fn [{:keys [db]} [_ username]]
+   (let [path (routes/path-for routes/follow-user-route :user username)]
+     {:dispatch-n [[:set-user (update (:user db) :following #(remove (partial = username) %))]
+                   [::char5e/remove-user-characters username]]
+      :http {:method :delete
+             :headers (authorization-headers db)
+             :url (backend-url path)
+             :on-success [:unfollow-user-success]}})))
 
 (defn set-character [db [_ character]]
   (assoc db :character character :loading false))
@@ -574,6 +606,11 @@
  [user->local-store-interceptor]
  (fn [db [_ user-data]]
    (assoc db :user-data user-data)))
+
+(reg-event-db
+ :set-user
+ (fn [db [_ user-data]]
+   (assoc db :user user-data)))
 
 (defn set-active-tabs [db [_ active-tabs]]
   (assoc-in db tab-path active-tabs))
@@ -940,8 +977,16 @@
 (reg-event-db
  ::char5e/set-characters
  (fn [db [_ characters]]
-   (assoc db
-          ::char5e/characters characters)))
+   (assoc db ::char5e/characters characters)))
+
+(reg-event-db
+ ::char5e/remove-user-characters
+ (fn [db [_ user]]
+   (update db ::char5e/characters (fn [characters]
+                                    (remove
+                                     (fn [{:keys [:orcpub.entity.strict/owner]}]
+                                       (= owner user))
+                                     characters)))))
 
 (reg-event-db
  ::char5e/set-character
