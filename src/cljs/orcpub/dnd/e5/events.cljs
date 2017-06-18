@@ -223,7 +223,7 @@
       :http {:method :post
              :headers {"Authorization" (str "Token " (-> db :user-data :token))}
              :url (backend-url (bidi/path-for routes/routes routes/dnd-e5-char-list-route))
-             :transit-params (insert-summary strict @(subscribe [::char5e/built-character id]))
+             :transit-params (insert-summary strict @(subscribe [:built-character]))
              :on-success [:character-save-success]}})))
 
 (defn set-character [db [_ character]]
