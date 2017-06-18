@@ -1223,8 +1223,6 @@
 (defn spell-row [spell-modifiers {:keys [key ability qualifier class]} expanded? on-click]
   (let [spell (spells/spell-map key)
         cls-mods (get spell-modifiers class)]
-    (if (nil? (:name spell))
-      (prn "NIL NAME" key))
     [[:tr.pointer
       {:on-click on-click}
       [:td.p-10.f-w-b (:name spell)]

@@ -1627,7 +1627,6 @@
 
 (defn mobile-columns []
   (let [current-tab (or @(subscribe [::char5e/builder-tab]) :options)]
-    (prn "CURRENT TAB" current-tab)
     [:div.p-r-10.w-100-p
      [:div.flex-grow-1.flex.p-l-10.p-t-10
       [:div.w-100-p
