@@ -16,7 +16,8 @@
 
 (def dnd-e5-char-page-routes #{dnd-e5-char-builder-route
                                dnd-e5-char-list-page-route
-                               dnd-e5-char-page-route})
+                               dnd-e5-char-page-route
+                               dnd-e5-char-parties-page-route})
 
 (def dnd-e5-monster-list-page-route :monster-list-5e-page)
 

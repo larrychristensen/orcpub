@@ -52,12 +52,11 @@
                       character-id :transit-params
                       {:keys [id]} :path-params}]
   @(d/transact conn [{:db/id id
-                      ::party/character-ids (Long/parseLong character-id)}])
+                      ::party/character-ids character-id}])
   {:status 200 :body (d/pull db '[*] id)})
 
 (defn remove-character [{:keys [db conn identity]
-                      character-id :transit-params
-                         {:keys [id]} :path-params}]
+                         {:keys [id character-id]} :path-params}]
   @(d/transact conn [[:db/retract id ::party/character-ids (Long/parseLong character-id)]])
   {:status 200 :body (d/pull db '[*] id)})
 

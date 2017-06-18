@@ -293,6 +293,52 @@
            :transit-params new-name}}))
 
 (reg-event-fx
+ ::party5e/remove-character
+ (fn [{:keys [db]} [_ id character-id]]
+   {:db (update
+         db
+         ::char5e/parties
+         (fn [parties]
+           (map
+            (fn [party]
+              (if (= id (:db/id party))
+                (update
+                 party
+                 ::party5e/character-ids
+                 (fn [character-ids]
+                   (remove
+                    (fn [{:keys [:db/id]}]
+                      (= character-id id))
+                    character-ids)))
+                party))
+            parties)))
+    :http {:method :delete
+           :headers (authorization-headers db)
+           :url (url-for-route routes/dnd-e5-char-party-character-route :id id :character-id character-id)}}))
+
+(reg-event-fx
+ ::party5e/add-character
+ (fn [{:keys [db]} [_ id character-id]]
+   {:db (update
+         db
+         ::char5e/parties
+         (fn [parties]
+           (map
+            (fn [party]
+              (if (= id (:db/id party))
+                (update
+                 party
+                 ::party5e/character-ids
+                 conj
+                 (get @(subscribe [::char5e/summary-map]) character-id))
+                party))
+            parties)))
+    :http {:method :post
+           :headers (authorization-headers db)
+           :transit-params character-id
+           :url (url-for-route routes/dnd-e5-char-party-characters-route :id id)}}))
+
+(reg-event-fx
  :follow-user-success
  (fn []))
 
@@ -1039,12 +1085,16 @@
 (reg-event-db
  ::char5e/set-characters
  (fn [db [_ characters]]
-   (assoc db ::char5e/characters characters)))
+   (assoc db
+          ::char5e/characters characters
+          ::char5e/summary-map (common/map-by :db/id characters))))
 
 (reg-event-db
  ::party5e/set-parties
  (fn [db [_ parties]]
-   (assoc db ::char5e/parties parties)))
+   (assoc db
+          ::char5e/parties parties
+          ::char5e/parties-map (common/map-by :db/id parties))))
 
 (reg-event-db
  ::char5e/remove-user-characters

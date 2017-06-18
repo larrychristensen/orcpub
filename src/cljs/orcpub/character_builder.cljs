@@ -292,24 +292,21 @@
         selected-items @(subscribe [:entity-option key])
         selected-keys (into #{} (map ::entity/key selected-items))]
     [:div
-     [:select.builder-option.builder-option-dropdown
-      {:value ""
-       :on-change
-       (fn [e]
+     [comps/selection-adder
+      (sort-by
+         :name
+         (sequence
+          (comp
+           (remove
+            #(selected-keys (::t/key %)))
+           (map
+            (fn [{:keys [::t/name ::t/key]}]
+              {:name name
+               :key key})))
+          options))
+      (fn [e]
          (let [kw (keyword (.. e -target -value))]
-           (dispatch [:add-inventory-item key kw])))}
-      [:option.builder-dropdown-item
-       {:value ""
-        :disabled true}
-       "<select to add>"]
-      (doall
-       (map
-        (fn [{:keys [::t/key ::t/name]}]
-          ^{:key key}
-          [:option.builder-dropdown-item
-           {:value key}
-           name])
-        (sort-by ::t/name (remove #(selected-keys (::t/key %)) options))))]
+           (dispatch [:add-inventory-item key kw])))]
      (if (seq selected-items)
        [:div.flex.f-s-12.opacity-5.m-t-10.justify-cont-s-b
         [:div.m-r-10 "Equipped?"]

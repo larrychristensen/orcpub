@@ -27,8 +27,11 @@
       (if capitalize? (map s/capitalize $) $)
       (s/join " " $))))
 
+(defn map-by [by values]
+  (zipmap (map by values) values))
+
 (defn map-by-key [values]
-  (zipmap (map :key values) values))
+  (map-by :key values))
 
 (defmacro ptime [message body]
   `(do (prn ~message)

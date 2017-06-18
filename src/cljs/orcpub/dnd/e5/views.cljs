@@ -143,10 +143,12 @@
               (fn [{:keys [name route]}]
                 ^{:key name}
                 [:div.p-10.opacity-5.hover-opacity-full
-                 {:class-name (if (= route @(subscribe [:route])) "bg-orange")
-                  :on-click (fn [e]
-                              (dispatch [:route route {:return true}])
-                              (.stopPropagation e))}
+                 (let [current-route @(subscribe [:route])]
+                   {:class-name (if (or (= route current-route)
+                                        (= route (get current-route :handler))) "bg-orange")
+                    :on-click (fn [e]
+                                (dispatch [:route route {:return true}])
+                                (.stopPropagation e))})
                  name])
               buttons))])]))))
 
@@ -2200,7 +2202,8 @@
            grouped-characters)))]]]))
 
 (def party-name-editor-style
-  {:width "200px"})
+  {:width "200px"
+   :height "42px"})
 
 (defn parties []
   (let [editing-parties (r/atom {})]
@@ -2229,6 +2232,17 @@
                         {:value (or (@editing-parties id) name)
                          :style party-name-editor-style
                          :on-change #(swap! editing-parties assoc id (event-value %))}]
+                       [:div.m-l-10
+                        {:style {:width "200px"}}
+                        [comps/selection-adder
+                         (map
+                          (fn [{:keys [:db/id ::char/character-name]}]
+                            {:name character-name
+                             :key id})
+                          @(subscribe [::char/characters]))
+                         (fn [e]
+                           (let [selected-id (js/parseInt (.. e -target -value))]
+                             (dispatch [::party/add-character id selected-id])))]]
                        [:div.m-t-5
                         [:button.form-button.m-l-10
                          {:on-click #(do (dispatch [::party/rename-party id (@editing-parties id)])
@@ -2248,16 +2262,17 @@
                    {:style list-style}
                    (doall
                     (map
-                     (fn [{:keys [:db/id ::se/owner] :as summary}]
-                       (let [expanded? (get expanded-characters id)
-                             char-page-path (routes/path-for routes/dnd-e5-char-page-route :id id)
+                     (fn [{:keys [::se/owner] :as summary}]
+                       (let [character-id (:db/id summary)
+                             expanded? (get expanded-characters character-id)
+                             char-page-path (routes/path-for routes/dnd-e5-char-page-route :id character-id)
                              char-page-route (routes/match-route char-page-path)]
-                         ^{:key id}
+                         ^{:key character-id}
                          [:div.white
                           {:style row-style}
                           [:div.pointer
                            [:div.flex.justify-cont-s-b.align-items-c
-                            {:on-click #(dispatch [:toggle-character-expanded id])}
+                            {:on-click #(dispatch [:toggle-character-expanded character-id])}
                             [:div.m-l-10.flex.align-items-c
                              [:div.f-s-24.f-w-600
                               [:div.list-character-summary
@@ -2274,15 +2289,15 @@
                               [:div.flex.justify-cont-end.uppercase.align-items-c
                                (if (= username owner)
                                  [:button.form-button
-                                  {:on-click #(dispatch [:edit-character @(subscribe [::char/internal-character id])])}
+                                  {:on-click #(dispatch [:edit-character @(subscribe [::char/internal-character character-id])])}
                                   "edit"])
                                [:button.form-button.m-l-5
-                                {:on-click #(let [route char-page-route]
-                                              (dispatch [:route route {:return? true}]))}
+                                {:on-click #(dispatch [:route char-page-route {:return? true}])}
                                 "view"]
                                [:button.form-button.m-l-5
+                                {:on-click #(dispatch [::party/remove-character id character-id])}
                                 "remove from party"]]
-                              [character-display id false (if (= :mobile device-type) 1 2)]])]]))
+                              [character-display character-id false (if (= :mobile device-type) 1 2)]])]]))
                      characters))]]))
              parties))]]]))))
 

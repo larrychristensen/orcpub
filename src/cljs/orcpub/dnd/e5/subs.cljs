@@ -315,6 +315,11 @@
  (fn [db _]
    (::char5e/character-map db)))
 
+(reg-sub
+ ::char5e/summary-map
+ (fn [db _]
+   (::char5e/summary-map db)))
+
 (reg-sub-raw
   ::char5e/character
   (fn [app-db [_ id :as args]]
