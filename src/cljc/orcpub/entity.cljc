@@ -342,7 +342,6 @@
 
 (defn update-option [template entity path update-fn]
   (let [entity-path (get-entity-path template entity path)
-        _ (prn "ENTITY_PATH" entity-path)
         updated (update-in entity entity-path update-fn)]
     updated))
 
