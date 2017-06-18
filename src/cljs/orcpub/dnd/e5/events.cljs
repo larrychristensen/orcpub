@@ -5,6 +5,7 @@
             [orcpub.dice :as dice]
             [orcpub.dnd.e5.template :as t5e]
             [orcpub.dnd.e5.character :as char5e]
+            [orcpub.dnd.e5.party :as party5e]
             [orcpub.dnd.e5.character.random :as char-rand5e]
             [orcpub.dnd.e5.spells :as spells]
             [orcpub.dnd.e5.monsters :as monsters]
@@ -192,43 +193,104 @@
                    [:set-character character]
                    [::char5e/set-character id strict-character]]})))
 
-(defn insert-summary [{:keys [:db/id] :as strict-char} built-char]
+(defn make-summary [built-char]
   (let [classes (char5e/classes built-char)
         levels (char5e/levels built-char)
         race (char5e/race built-char)
         subrace (char5e/subrace built-char)
         character-name (char5e/character-name built-char)
         image-url (char5e/image-url built-char)]
-    (assoc strict-char
-           :orcpub.entity.strict/summary
-           (cond-> {}
-             character-name (assoc ::char5e/character-name character-name)
-             image-url (assoc ::char5e/image-url image-url)
-             race (assoc ::char5e/race-name race)
-             subrace (assoc ::char5e/subrace-name subrace)
-             (seq classes) (assoc ::char5e/classes (map
-                                                    (fn [cls-nm]
-                                                      (let [{:keys [class-name subclass-name class-level]}
-                                                            (levels cls-nm)]
-                                                        (cond-> {}
-                                                          class-name (assoc ::char5e/class-name class-name)
-                                                          subclass-name (assoc ::char5e/subclass-name subclass-name)
-                                                          class-level (assoc ::char5e/level class-level))))
-                                                    classes))))))
+    (cond-> {::char5e/character-name (or character-name "")}
+      image-url (assoc ::char5e/image-url image-url)
+      race (assoc ::char5e/race-name race)
+      subrace (assoc ::char5e/subrace-name subrace)
+      (seq classes) (assoc ::char5e/classes (map
+                                             (fn [cls-nm]
+                                               (let [{:keys [class-name subclass-name class-level]}
+                                                     (levels cls-nm)]
+                                                 (cond-> {}
+                                                   class-name (assoc ::char5e/class-name class-name)
+                                                   subclass-name (assoc ::char5e/subclass-name subclass-name)
+                                                   class-level (assoc ::char5e/level class-level))))
+                                             classes)))))
 
 (defn authorization-headers [db]
   {"Authorization" (str "Token " (-> db :user-data :token))})
 
+(defn url-for-route [route & args]
+  (backend-url (apply routes/path-for route args)))
+
 (reg-event-fx
  :save-character
  (fn [{:keys [db]} _]
-   (let [{:keys [:db/id] :as strict} (char5e/to-strict (:character db))]
+   (let [{:keys [:db/id] :as strict} (char5e/to-strict (:character db))
+         built-character @(subscribe [:built-character])
+         summary (make-summary built-character)]
+     (prn "BUITLCHAR" id (char5e/character-name built-character))
+     (prn "SUMMARY" summary)
      {:dispatch [:set-loading true]
       :http {:method :post
              :headers (authorization-headers db)
-             :url (backend-url (bidi/path-for routes/routes routes/dnd-e5-char-list-route))
-             :transit-params (insert-summary strict @(subscribe [::char5e/built-character id]))
+             :url (url-for-route routes/dnd-e5-char-list-route)
+             :transit-params (assoc strict :orcpub.entity.strict/summary summary)
              :on-success [:character-save-success]}})))
+
+(reg-event-fx
+ ::party5e/make-party-success
+ (fn []
+   {:dispatch [:show-message [:div
+                              "Your party has been created. View it on the "
+                              [:span.underline.pointer.orange
+                               {:on-click #(dispatch [:route routes/dnd-e5-char-parties-page-route])}
+                               "Parties Page"]]]}))
+
+(reg-event-fx
+ ::party5e/make-party
+ (fn [{:keys [db]} _]
+   (let [character-ids @(subscribe [::char5e/selected])]
+     (prn "CHARACTER_IDS" character-ids)
+     {:dispatch [:set-loading true]
+      :http {:method :post
+             :headers (authorization-headers db)
+             :url (url-for-route routes/dnd-e5-char-parties-route)
+             :transit-params {::party5e/name "New Party"
+                              ::party5e/character-ids character-ids}
+             :on-success [::party5e/make-party-success]}})))
+
+(reg-event-fx
+ ::party5e/rename-party
+ (fn [{:keys [db]} [_ id new-name]]
+   (prn "NEW NAME" new-name)
+   {:db (update
+         db
+         ::char5e/parties
+         (fn [parties]
+           (map
+            (fn [party]
+              (if (= id (:db/id party))
+                (assoc party ::party5e/name new-name)
+                party))
+            parties)))
+    :http {:method :put
+           :headers (authorization-headers db)
+           :url (url-for-route routes/dnd-e5-char-party-name-route :id id)
+           :transit-params new-name}}))
+
+(reg-event-fx
+ ::party5e/delete-party
+ (fn [{:keys [db]} [_ id new-name]]
+   {:db (update
+         db
+         ::char5e/parties
+         (fn [parties]
+           (remove
+            (fn [party]
+              (= id (:db/id party)))
+            parties)))
+    :http {:method :delete
+           :headers (authorization-headers db)
+           :url (url-for-route routes/dnd-e5-char-party-route :id id)
+           :transit-params new-name}}))
 
 (reg-event-fx
  :follow-user-success
@@ -742,7 +804,7 @@
      (go (let [response (<! (http/request final-cfg))]
            (dispatch [:set-loading false])
            (if (<= 200 (:status response) 299)
-             (dispatch (conj on-success response))
+             (if on-success (dispatch (conj on-success response)))
              (if (= 401 (:status response))
                (if on-unauthorized
                  (dispatch (conj on-unauthorized response))
@@ -980,6 +1042,11 @@
    (assoc db ::char5e/characters characters)))
 
 (reg-event-db
+ ::party5e/set-parties
+ (fn [db [_ parties]]
+   (assoc db ::char5e/parties parties)))
+
+(reg-event-db
  ::char5e/remove-user-characters
  (fn [db [_ user]]
    (update db ::char5e/characters (fn [characters]
@@ -1154,3 +1221,13 @@
  ::char5e/filter-monsters
  (fn [db [_ filter-text]]
    (assoc db ::char5e/filtered-monsters (filter-monsters filter-text))))
+
+(reg-event-db
+ ::char5e/toggle-selected
+ (fn [db [_ id]]
+   (update db
+           ::char5e/selected
+           (fn [s]
+             (if (get s id)
+               (disj s id)
+               (conj (or s #{}) id))))))

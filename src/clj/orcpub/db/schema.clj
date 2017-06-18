@@ -1,6 +1,7 @@
 (ns orcpub.db.schema
   (:require [orcpub.entity.strict :as se]
             [orcpub.dnd.e5.character :as char5e]
+            [orcpub.dnd.e5.party :as party5e]
             [orcpub.dnd.e5.character.equipment :as char-equip-5e]))
 
 (defn string-prop [key]
@@ -169,6 +170,17 @@
      ::char5e/bonds
      ::char5e/faction-name])))
 
+(def party-schema
+  [{:db/ident ::party5e/owner
+    :db/valueType :db.type/string
+    :db/cardinality :db.cardinality/one}
+   {:db/ident ::party5e/name
+    :db/valueType :db.type/string
+    :db/cardinality :db.cardinality/one}
+   {:db/ident ::party5e/character-ids
+    :db/valueType :db.type/ref
+    :db/cardinality :db.cardinality/many}])
+
 (def character-equipment-schema
   (concat
    [(string-prop ::char-equip-5e/name)
@@ -183,5 +195,7 @@
   (concat
    user-schema
    entity-schema
+   entity-type-schema
    character-schema
-   character-equipment-schema))
+   character-equipment-schema
+   party-schema))
