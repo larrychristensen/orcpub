@@ -789,12 +789,13 @@
        :get `party/parties}]
      [(route-map/path-for route-map/dnd-e5-char-party-route :id ":id") ^:interceptors [(body-params/body-params) check-auth parse-id check-party-owner]
       {:delete `party/delete-party}]
-     
      [(route-map/path-for route-map/dnd-e5-char-party-name-route :id ":id") ^:interceptors [(body-params/body-params) check-auth parse-id check-party-owner]
       {:put `party/update-party-name}]
      [(route-map/path-for route-map/dnd-e5-char-party-characters-route :id ":id") ^:interceptors [(body-params/body-params) check-auth parse-id check-party-owner]
       {:post `party/add-character}]
-     [(route-map/path-for route-map/dnd-e5-char-party-character-route :id ":id" :character-id ":character-id") ^:interceptors [(body-params/body-params) check-auth parse-id check-party-owner]
+     [(let [path (route-map/path-for route-map/dnd-e5-char-party-character-route :id ":id" :character-id ":character-id")]
+        (prn "PATH" path)
+        path) ^:interceptors [(body-params/body-params) check-auth parse-id check-party-owner]
       {:delete `party/remove-character}]
      [(route-map/path-for route-map/dnd-e5-char-list-page-route) ^:interceptors [(body-params/body-params)]
       {:get `character-list-page}]
