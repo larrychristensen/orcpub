@@ -152,6 +152,8 @@
     {:opacity "0.6"}]
    [:.opacity-7
     {:opacity "0.7"}]
+   [:.opacity-9
+    {:opacity "0.9"}]
 
    [:.m-b--2
     {:margin-bottom "-2px"}]
@@ -896,8 +898,9 @@
 
     [:.header-tab
      {:background-color "rgba(0, 0, 0, 0.25)"
-      :-webkit-backdrop-filter "blur(5px)"
-      :backdrop-filter "blur(5px)"}]
+      ;;:-webkit-backdrop-filter "blur(5px)"
+      ;;:backdrop-filter "blur(5px)"
+      }]
 
     [:.header-tab.mobile
      [:.title

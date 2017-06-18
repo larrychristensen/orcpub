@@ -7,6 +7,7 @@
             [orcpub.dnd.e5.db :refer [tab-path]]
             [orcpub.dnd.e5.events :as events]
             [orcpub.dnd.e5.character :as char5e]
+            [orcpub.dnd.e5.party :as party5e]
             [orcpub.dnd.e5.monsters :as monsters5e]
             [orcpub.route-map :as routes]
             [clojure.string :as s]
@@ -276,6 +277,21 @@
      (fn [] (get @app-db ::char5e/characters [])))))
 
 (reg-sub-raw
+  ::party5e/parties
+  (fn [app-db [_]]
+    (go (dispatch [:set-loading true])
+        (let [response (<! (http/get (routes/path-for routes/dnd-e5-char-parties-route)
+                                     {:accept :transit
+                                      :headers {"Authorization" (str "Token " (-> @app-db :user-data :token))}}))]
+          (dispatch [:set-loading false])
+          (case (:status response)
+            200 (dispatch [::party5e/set-parties (-> response :body)])
+            401 (dispatch [:route routes/login-page-route {:secure? true}])
+            500 (dispatch (events/show-generic-error)))))
+    (ra/make-reaction
+     (fn [] (get @app-db ::char5e/parties [])))))
+
+(reg-sub-raw
   :user
   (fn [app-db [_ required?]]
     (go (let [response (<! (http/get (routes/path-for routes/user-route)
@@ -311,8 +327,7 @@
               (case (:status response)
                 200 (dispatch [::char5e/set-character id (-> response :body)])
                 401 (dispatch [:route routes/login-page-route {:secure? true}])
-                500 (dispatch (events/show-generic-error))))))
-      (prn "ID WAS NIL"))
+                500 (dispatch (events/show-generic-error)))))))
     (ra/make-reaction
      (fn [] (get-in @app-db [::char5e/character-map id] [])))))
 
@@ -324,6 +339,21 @@
  (fn [[saved-character character] _]
    (and (:db/id saved-character)
         (not= character saved-character))))
+
+(reg-sub
+ ::char5e/has-selected?
+ (fn [db _]
+   (->> db ::char5e/selected seq)))
+
+(reg-sub
+ ::char5e/selected?
+ (fn [db [_ id]]
+   (get-in db [::char5e/selected id])))
+
+(reg-sub
+ ::char5e/selected
+ (fn [db _]
+   (get db ::char5e/selected)))
 
 (reg-sub
  ::char5e/internal-character

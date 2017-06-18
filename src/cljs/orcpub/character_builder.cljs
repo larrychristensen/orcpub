@@ -14,6 +14,7 @@
             [orcpub.entity-spec :as es]
             [orcpub.dice :as dice]
             [orcpub.modifiers :as mod]
+            [orcpub.components :as comps]
             [orcpub.dnd.e5.character :as char5e]
             [orcpub.dnd.e5.character.equipment :as char-equip5e]
             [orcpub.dnd.e5.modifiers :as mod5e]
@@ -257,13 +258,6 @@
               (dispatch [:add-class first-unselected])))}
          "Add Class"]])]))
 
-(defn checkbox [selected? disable?]
-  [:i.fa.fa-check.f-s-14.bg-white.orange-shadow.m-r-10
-   {:class-name (str (if selected? "black slight-text-shadow" "transparent")
-                     " "
-                     (if disable?
-                       "opacity-5"))}])
-
 (defn inventory-item []
   (let [expanded? (r/atom false)]
     (fn [{:keys [selection-key
@@ -281,7 +275,7 @@
        [:div.f-w-b.flex.align-items-c
         [:div.pointer.m-l-5
          {:on-click check-fn}
-         (checkbox equipped? false)]
+         (comps/checkbox equipped? false)]
         [:div.flex-grow-1 item-name]
         (if item-description [:div.w-60 [show-info-button expanded?]])
         [:input.input.m-l-5.m-t-0.
@@ -383,7 +377,7 @@
         [:div.flex-grow-1
          [:div.flex.align-items-c
           (if multiselect?
-            (checkbox selected? disable-checkbox?))
+            (comps/checkbox selected? disable-checkbox?))
           (if icon [:div.m-r-5 (views5e/svg-icon icon 24)])
           [:span.f-w-b.f-s-1.flex-grow-1 name]
           (if help
@@ -1627,7 +1621,6 @@
 
 (defn mobile-columns []
   (let [current-tab (or @(subscribe [::char5e/builder-tab]) :options)]
-    (prn "CURRENT TAB" current-tab)
     [:div.p-r-10.w-100-p
      [:div.flex-grow-1.flex.p-l-10.p-t-10
       [:div.w-100-p

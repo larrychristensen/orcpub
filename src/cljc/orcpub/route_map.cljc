@@ -7,6 +7,12 @@
 (def dnd-e5-char-page-route :char-5e-page)
 (def dnd-e5-char-list-page-route :char-list-5e-page)
 (def dnd-e5-char-summary-list-route :char-summary-list-5e-page)
+(def dnd-e5-char-parties-route :char-parties-5e)
+(def dnd-e5-char-party-route :char-party-5e)
+(def dnd-e5-char-party-name-route :char-party-name-5e)
+(def dnd-e5-char-party-characters-route :char-party-characters-5e)
+(def dnd-e5-char-party-character-route :char-party-character-5e)
+(def dnd-e5-char-parties-page-route :char-parties-5e-page)
 
 (def dnd-e5-char-page-routes #{dnd-e5-char-builder-route
                                dnd-e5-char-list-page-route
@@ -74,6 +80,11 @@
                   "dnd/"
                   {"5e/" {"characters" {"" dnd-e5-char-list-route
                                         ["/" :id] dnd-e5-char-route}
+                          "parties" {"" dnd-e5-char-parties-route
+                                     ["/" :id] {"" dnd-e5-char-party-route
+                                                "/name" dnd-e5-char-party-name-route
+                                                "/characters" {"" dnd-e5-char-party-characters-route
+                                                               ["/" :character-id] dnd-e5-char-party-character-route}}}
                           "character-summaries" dnd-e5-char-summary-list-route}}
                   "pages/" {"register-page" register-page-route
                             "login-page" login-page-route
@@ -84,9 +95,11 @@
                              {"character-builder" dnd-e5-char-builder-route
                               "characters" {"" dnd-e5-char-list-page-route
                                             ["/" :id] dnd-e5-char-page-route}
+                              "parties" dnd-e5-char-parties-page-route
                               "monsters" dnd-e5-monster-list-page-route}}}}])
 
 (defn path-for [& args]
+  (prn "ARGS" args)
   (apply bidi/path-for routes args))
 
 (defn match-route [path]

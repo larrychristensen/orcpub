@@ -33,6 +33,7 @@
    routes/dnd-e5-char-list-page-route views/character-list
    routes/dnd-e5-monster-list-page-route views/monster-list
    routes/dnd-e5-char-page-route views/character-page
+   routes/dnd-e5-char-parties-page-route views/parties
    routes/register-page-route views/register-form
    routes/verify-failed-route views/verify-failed
    routes/verify-success-route views/verify-success
@@ -64,6 +65,7 @@
 (defn main-view []
   (let [{:keys [handler route-params] :as route} @(subscribe [:route])
         view (pages (or handler route))]
+    (prn "VIEW" view route-params)
     [view route-params]))
 
 (r/render (if (let [doc-style js/document.documentElement.style]

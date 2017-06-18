@@ -32,6 +32,7 @@
             [orcpub.registration :as registration]
             [orcpub.entity.strict :as se]
             [orcpub.entity :as entity]
+            [orcpub.routes.party :as party]
             [hiccup.page :as page]
             [environ.core :as environ]
             [clojure.set :as sets])
@@ -102,8 +103,35 @@
                     terminate
                     (assoc :response {:status 401 :body {:message "Unauthorized"}})))))})
 
+(defn party-owner [db id]
+  (d/q '[:find ?owner .
+         :in $ ?id
+         :where [?id :orcpub.dnd.e5.party/owner ?owner]]
+       db
+       id))
+
+(def parse-id
+  {:name :parse-id
+   :enter (fn [context]
+            (update-in context
+                       [:request :path-params :id]
+                       (fn [id] (if id (Long/parseLong id)))))})
+
+
+(def check-party-owner
+  {:name :check-party-owner
+   :enter (fn [context]
+            (let [{:keys [identity db] {:keys [id]} :path-params} (:request context)
+                  party-owner (party-owner db id)]
+              (if (= (:user identity) party-owner)
+                context
+                (-> context
+                    terminate
+                    (assoc :response {:status 401 :body {:message "You don't own the party"}})))))})
+
 (defn redirect [route-key]
   (ring-resp/redirect (route-map/path-for route-key)))
+
 
 (defn verification-expired? [verification-sent]
   (t/before? (from-date verification-sent) (-> 24 hours ago)))
@@ -433,6 +461,9 @@
 (defn character-list-page [req]
   (index req))
 
+(defn parties-page [req]
+  (index req))
+
 (defn monster-list-page [req]
   (index req))
 
@@ -753,12 +784,27 @@
       {:delete `delete-character}]
      [(route-map/path-for route-map/dnd-e5-char-route :id ":id")
       {:get `get-character}]
+     [(route-map/path-for route-map/dnd-e5-char-parties-route) ^:interceptors [(body-params/body-params) check-auth]
+      {:post `party/create-party
+       :get `party/parties}]
+     [(route-map/path-for route-map/dnd-e5-char-party-route :id ":id") ^:interceptors [(body-params/body-params) check-auth parse-id check-party-owner]
+      {:delete `party/delete-party}]
+     
+     [(route-map/path-for route-map/dnd-e5-char-party-name-route :id ":id") ^:interceptors [(body-params/body-params) check-auth parse-id check-party-owner]
+      {:put `party/update-party-name}]
+     [(route-map/path-for route-map/dnd-e5-char-party-characters-route :id ":id") ^:interceptors [(body-params/body-params) check-auth parse-id check-party-owner]
+      {:post `party/add-character}]
+     [(route-map/path-for route-map/dnd-e5-char-party-character-route :id ":id" :character-id ":character-id") ^:interceptors [(body-params/body-params) check-auth parse-id check-party-owner]
+      {:delete `party/remove-character}]
      [(route-map/path-for route-map/dnd-e5-char-list-page-route) ^:interceptors [(body-params/body-params)]
       {:get `character-list-page}]
+     [(route-map/path-for route-map/dnd-e5-char-parties-page-route)
+      {:get `parties-page}]
      [(route-map/path-for route-map/dnd-e5-monster-list-page-route) ^:interceptors [(body-params/body-params)]
       {:get `monster-list-page}]
      [(route-map/path-for route-map/dnd-e5-char-page-route :id ":id")
       {:get `character-page}]
+     
      [(route-map/path-for route-map/dnd-e5-char-builder-route) ^:interceptors [(body-params/body-params)]
       {:get `character-builder-page}]
      [(route-map/path-for route-map/login-route) ^:interceptors [(body-params/body-params)]
