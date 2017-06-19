@@ -15,6 +15,7 @@
             [orcpub.dnd.e5.templates.ua-bard :as ua-bard]
             [orcpub.dnd.e5.templates.ua-race-feats :as ua-race-feats]
             [orcpub.dnd.e5.templates.ua-skill-feats :as ua-skill-feats]
+            [orcpub.dnd.e5.templates.ua-revised-class-options :as ua-revised-class-options]
             [re-frame.core :refer [subscribe]]))
 
 (defn ua-help [name url]
@@ -1006,5 +1007,6 @@
      ua-cleric-plugin
      ua-bard-plugin
      ua-race-feats/ua-race-feats-plugin
-     ua-skill-feats/ua-skill-feats-plugin])))
+     ua-skill-feats/ua-skill-feats-plugin
+     ua-revised-class-options/ua-revised-class-options-plugin])))
 

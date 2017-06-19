@@ -114,6 +114,12 @@
 (defn swimming-speed [value]
   (mods/cum-sum-mod ?swimming-speed value "swimming" (mods/bonus-str value)))
 
+(defn swimming-speed-equal-to-walking []
+  (mods/modifier ?swimming-speed (if (and (int? ?swimming-speed)
+                                          (> ?swimming-speed ?speed))
+                                   ?swimming-speed
+                                   ?speed)))
+
 (defn climbing-speed [value]
   (mods/cum-sum-mod ?climbing-speed value "climbing" (mods/bonus-str value)))
 

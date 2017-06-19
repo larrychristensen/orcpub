@@ -21,7 +21,7 @@
                  :source :scag
                  :prereqs [(t/option-prereq
                             "Dwarves only"
-                            (fn [c] (= "Dwarf" @(subscribe [::char5e/race]))))]
+                            (fn [c] (= "Dwarf" @(subscribe [::char5e/race nil c]))))]
                  :modifiers [(mod5e/bonus-action
                               {:name "Spiked Armor Attack"
                                :page 121
@@ -271,7 +271,7 @@
                                :page 133
                                :source :scag
                                :summary "take damage another creature would take"})]}
-              15 {:modifier [(mod5e/saving-throw-advantage [:paralyzed :stunned])
+              15 {:modifiers [(mod5e/saving-throw-advantage [:paralyzed :stunned])
                              (mod5e/trait-cfg
                               {:name "Unyielding Spirit"
                                :page 133
