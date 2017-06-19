@@ -2036,6 +2036,13 @@
                             :summary "you regain 1 superiority die when you roll iniative and have no remaining superiority dice"}]}
                  eldritch-knight-cfg]}))
 
+(defn monk-weapon? [{:keys [key type melee? heavy? two-handed?]}]
+  (or (= key :shortsword)
+      (and (= type :simple)
+           melee?
+           (not heavy?)
+           (not two-handed?))))
+
 (def monk-option
   (opt5e/class-option
    (merge
@@ -2058,7 +2065,11 @@
      :weapon-choices [{:name "Weapon"
                        :options {:shortsword 1
                                  :simple 1}}]
-     :modifiers [
+     :modifiers [(mod/vec-mod ?weapon-ability-modifiers
+                              (fn [weapon finesse?]
+                                (if (monk-weapon? weapon)
+                                  (get ?ability-bonuses ::char5e/dex)
+                                  0)))
                  (mod/vec-mod ?unarmored-defense :monk)
                  (mod/cum-sum-mod ?unarmored-ac-bonus
                                   (?ability-bonuses ::char5e/wis)
