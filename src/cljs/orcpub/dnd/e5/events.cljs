@@ -226,8 +226,6 @@
    (let [{:keys [:db/id] :as strict} (char5e/to-strict (:character db))
          built-character @(subscribe [:built-character])
          summary (make-summary built-character)]
-     (prn "BUITLCHAR" id (char5e/character-name built-character))
-     (prn "SUMMARY" summary)
      {:dispatch [:set-loading true]
       :http {:method :post
              :headers (authorization-headers db)
@@ -248,7 +246,6 @@
  ::party5e/make-party
  (fn [{:keys [db]} _]
    (let [character-ids @(subscribe [::char5e/selected])]
-     (prn "CHARACTER_IDS" character-ids)
      {:dispatch [:set-loading true]
       :http {:method :post
              :headers (authorization-headers db)
@@ -260,7 +257,6 @@
 (reg-event-fx
  ::party5e/rename-party
  (fn [{:keys [db]} [_ id new-name]]
-   (prn "NEW NAME" new-name)
    {:db (update
          db
          ::char5e/parties

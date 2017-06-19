@@ -112,6 +112,8 @@
 (def header-tab-style
   {:width "85px"})
 
+(def active-style {:background-color "rgba(240, 161, 0, 0.7)"})
+
 (defn header-tab []
   (let [hovered? (r/atom false)]
     (fn [title icon on-click disabled active device-type & buttons]
@@ -122,7 +124,7 @@
           :on-mouse-out #(reset! hovered? false)
           :style (merge
                   {:position :relative}
-                  (if active {:background-color "rgb(240, 161, 0)"}))
+                  (if active active-style))
           :class-name (str (if disabled "disabled" "pointer")
                            " "
                            (if (not mobile?) " w-110"))}
@@ -144,8 +146,8 @@
                 ^{:key name}
                 [:div.p-10.opacity-5.hover-opacity-full
                  (let [current-route @(subscribe [:route])]
-                   {:class-name (if (or (= route current-route)
-                                        (= route (get current-route :handler))) "bg-orange")
+                   {:style (if (or (= route current-route)
+                                        (= route (get current-route :handler))) active-style)
                     :on-click (fn [e]
                                 (dispatch [:route route {:return true}])
                                 (.stopPropagation e))})
@@ -189,25 +191,21 @@
            :on-click #(dispatch [:route routes/default-route {:return? true}])}]
          (let [search-text @(subscribe [:search-text])
                search-text? @(subscribe [:search-text?])]
-           [:div.flex-grow-1.p-l-20.p-r-20
-            #_{:style (if search-text?
-                      {:position :fixed
-                       :left 0
-                       :right 0
-                       :background-color "rgba(0,0,0,0.95)"
-                       :z-index 101})}
+           [:div
+            {:class-name (if mobile? "p-l-10 p-r-10" "p-l-20 p-r-20 flex-grow-1")}
             [:div.b-rad-5.flex.align-items-c
              {:style {:background-color "rgba(0,0,0,0.1)"}}
-             [:div.p-l-20.flex-grow-1
-              [:input.w-100-p.white
-               {:style (if search-text?
-                         (merge
-                          search-input-style
-                          {:color :transparent})
-                         search-input-style)
-                :value search-text
-                :on-key-press #(if (= "Enter" (.-key %)) (dispatch [:set-search-text search-text]))
-                :on-change #(dispatch [:set-search-text (event-value %)])}]]
+             (if (not mobile?)
+               [:div.p-l-20.flex-grow-1
+                [:input.w-100-p.white
+                 {:style (if search-text?
+                           (merge
+                            search-input-style
+                            {:color :transparent})
+                           search-input-style)
+                  :value search-text
+                  :on-key-press #(if (= "Enter" (.-key %)) (dispatch [:set-search-text search-text]))
+                  :on-change #(dispatch [:set-search-text (event-value %)])}]])
              [:div.opacity-1.p-r-10.pointer
               {:class-name (if mobile? "opacity-5" "opacity-1")
                :on-click #(dispatch [:open-orcacle])}
@@ -2135,7 +2133,12 @@
        :on-click #(if has-selected? (dispatch [::party/make-party]))}]
      [:div.p-5
       [:div
-       (let [grouped-characters (group-by ::se/owner characters)]
+       (let [grouped-characters (group-by ::se/owner characters)
+             user-characters (find grouped-characters username)
+             other-characters (sort-by key (dissoc grouped-characters username))
+             sorted-groups (if user-characters
+                             (cons user-characters other-characters)
+                             other-characters)]
          (doall
           (map
            (fn [[owner owner-characters]]
@@ -2199,7 +2202,7 @@
                               "delete"])]
                           [character-display id false (if (= :mobile device-type) 1 2)]])]]))
                  owner-characters))]])
-           grouped-characters)))]]]))
+           sorted-groups)))]]]))
 
 (def party-name-editor-style
   {:width "200px"
@@ -2220,7 +2223,8 @@
            (doall
             (map
              (fn [{:keys [:db/id ::party/name] characters ::party/character-ids}]
-               (let [editing? (get @editing-parties id)]
+               (let [editing? (get @editing-parties id)
+                     character-ids (into #{} (map :db/id) characters)]
                  ^{:key id}
                  [:div.m-b-40
                   [:div.m-b-10.white.f-w-b.f-s-16
@@ -2235,10 +2239,15 @@
                        [:div.m-l-10
                         {:style {:width "200px"}}
                         [comps/selection-adder
-                         (map
-                          (fn [{:keys [:db/id ::char/character-name]}]
-                            {:name character-name
-                             :key id})
+                         (sequence
+                          (comp
+                           (remove
+                            (fn [{:keys [:db/id]}]
+                              (character-ids id)))
+                           (map
+                            (fn [{:keys [:db/id ::char/character-name]}]
+                              {:name character-name
+                               :key id})))
                           @(subscribe [::char/characters]))
                          (fn [e]
                            (let [selected-id (js/parseInt (.. e -target -value))]

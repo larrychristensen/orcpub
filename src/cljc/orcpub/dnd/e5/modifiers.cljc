@@ -327,7 +327,10 @@
 
 (defn skill-bonus [skill-kw bonus]
   (mods/modifier ?additional-skill-bonuses
-                 (update ?additional-skill-bonuses skill-kw + bonus)))
+                 (merge-with
+                  +
+                  ?additional-skill-bonuses
+                  {skill-kw bonus})))
 
 (defn max-hit-points [bonus]
   (mods/cum-sum-mod ?hit-point-level-increases bonus "HP" (mods/bonus-str bonus)))
