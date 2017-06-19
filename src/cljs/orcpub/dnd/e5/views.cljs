@@ -119,7 +119,9 @@
     (fn [title icon on-click disabled active device-type & buttons]
       (let [mobile? (= :mobile device-type)]
         [:div.white.f-w-b.f-s-14.t-a-c.header-tab.m-5
-         {:on-click on-click
+         {:on-click (fn [e] (if (seq buttons)
+                              #(swap! hovered? not)
+                              (on-click e)))
           :on-mouse-over #(reset! hovered? true)
           :on-mouse-out #(reset! hovered? false)
           :style (merge
