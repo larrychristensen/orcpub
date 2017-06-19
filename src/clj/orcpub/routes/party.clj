@@ -42,7 +42,6 @@
 (defn update-party-name [{:keys [db conn identity]
                           party-name :transit-params
                           {:keys [id]} :path-params}]
-  (prn "NEW NAME" party-name id)
   @(d/transact conn [{:db/id id
                       ::party/name party-name}])
   {:status 200

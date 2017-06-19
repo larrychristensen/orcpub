@@ -100,7 +100,6 @@
                               "monsters" dnd-e5-monster-list-page-route}}}}])
 
 (defn path-for [& args]
-  (prn "ARGS" args)
   (apply bidi/path-for routes args))
 
 (defn match-route [path]

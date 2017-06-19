@@ -22,6 +22,7 @@
             [orcpub.dnd.e5.skills :as skill5e]
             [orcpub.dnd.e5.character :as char5e]
             [orcpub.dnd.e5.spells :as spells]
+            [orcpub.dnd.e5.template :as t5e]
             [datomic.api :as d]
             [bidi.bidi :as bidi]
             [orcpub.route-map :as route-map]
@@ -671,31 +672,101 @@
         characters (d/pull-many db '[*] (map first ids))]
     {:status 200 :body characters}))
 
+(defn build-template [selected-plugin-options]
+  (let [selected-plugins (map
+                          :selections
+                          (filter
+                           (fn [{:keys [key]}]
+                             (selected-plugin-options key))
+                           t5e/plugins))]
+    (if (seq selected-plugins)
+      (update t5e/template
+              ::t/selections
+              (fn [s]
+                (apply
+                 entity/merge-multiple-selections
+                 s
+                 selected-plugins)))
+      t5e/template)))
+
+(defn make-summary [built-char]
+  (let [classes (char5e/classes built-char)
+        levels (char5e/levels built-char)
+        race (char5e/race built-char)
+        subrace (char5e/subrace built-char)
+        character-name (char5e/character-name built-char)
+        image-url (char5e/image-url built-char)]
+    (cond-> {::char5e/character-name (or character-name "")}
+      image-url (assoc ::char5e/image-url image-url)
+      race (assoc ::char5e/race-name race)
+      subrace (assoc ::char5e/subrace-name subrace)
+      (seq classes) (assoc ::char5e/classes
+                           (map
+                            (fn [cls-nm]
+                              (let [{:keys [class-name subclass-name class-level]}
+                                    (levels cls-nm)]
+                                (cond-> {}
+                                  class-name (assoc ::char5e/class-name class-name)
+                                  subclass-name (assoc ::char5e/subclass-name subclass-name)
+                                  class-level (assoc ::char5e/level class-level))))
+                            classes)))))
+
+(def built-template (build-template (into #{} (map :key t5e/plugins))))
+
+(defn insert-summary! [id conn]
+  (let [strict-char (d/pull (d/db conn) '[*] id)
+        character (char5e/from-strict strict-char)
+        built-char (entity/build character built-template)
+        summary (make-summary built-char)
+        with-summary (assoc strict-char ::se/summary summary)]
+    @(d/transact conn [with-summary])
+    summary))
+
+(defn empty-summary? [{:keys [::char5e/character-name
+                             ::char5e/race-name
+                             ::char5e/subrace-name
+                             ::char5e/classes] :as summary}]
+  (or (nil? summary)
+      (and (s/blank? character-name)
+           (nil? race-name)
+           (nil? subrace-name)
+           (nil? classes))))
+
 (defn character-summary-list [{:keys [db body conn identity] :as request}]
   (let [username (:user identity)
         user (find-user-by-username-or-email db username)
         following-ids (map :db/id (:orcpub.user/following user))
         following-usernames (following-usernames db following-ids)
-        results (d/q '[:find (pull ?s [*]) ?e ?owner
-                       :in $ [?idents ...]
-                       :where
-                       [?e ::se/owner ?owner]
-                       [?e ::se/owner ?idents]
-                       [?e ::se/summary ?s]
-                       ;; uncomment these once all characters have the data
-                       #_[?e ::se/type :character]
-                       #_[?e ::se/game :dnd]
-                       #_[?e ::se/game-version :e5]]
-                     db
-                     (concat
-                      [(:orcpub.user/username user)
-                       (:orcpub.user/email user)]
-                      following-usernames))
-        characters (map (fn [[summary id owner]]
-                          (assoc summary
-                                 :db/id id
-                                 :orcpub.entity.strict/owner owner))
-                        results)]
+        ids (d/q '[:find ?e
+                   :in $ [?idents ...]
+                   :where
+                   [?e ::se/owner ?idents]
+                   ;; uncomment these once all characters have the data
+                   #_[?e ::se/type :character]
+                   #_[?e ::se/game :dnd]
+                   #_[?e ::se/game-version :e5]]
+                 db
+                 (concat
+                  [(:orcpub.user/username user)
+                   (:orcpub.user/email user)]
+                  following-usernames))
+        results (d/pull-many
+                 db
+                 '[:db/id
+                   ::se/owner
+                   ::se/summary]
+                 (map first ids))
+        characters (mapv
+                    (fn [{:keys [:db/id ::se/owner ::se/summary]}]
+                      (assoc
+                       (if (empty-summary? summary)
+                         (do
+                           (prn "SUMMARY MISSING, INSERTING" summary id)
+                           (insert-summary! id conn))
+                         summary)
+                       :db/id id
+                       ::se/owner owner))
+                    results)]
     {:status 200 :body characters}))
 
 (defn follow-user [{:keys [db conn identity] {:keys [user]} :path-params}]
