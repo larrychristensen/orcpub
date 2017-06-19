@@ -44,8 +44,7 @@
                     13 5
                     16 6
                     19 7
-                    :default 1}
-                   )
+                    :default 1})
                   "d6 fire damage to creatures within a 5 ft. that fail a DC "
                   (?spell-save-dc :int)
                   " DEX save")}))

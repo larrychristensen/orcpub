@@ -182,7 +182,7 @@
     ?spell-save-dc (fn [ability-kw]
                      (+ 8
                         ?prof-bonus
-                        (?ability-bonuses ability-kw)
+                        (get ?ability-bonuses ability-kw 0)
                         ?spell-save-dc-bonus))
     ?spell-modifiers (reduce
                       (fn [m {:keys [ability class]}]

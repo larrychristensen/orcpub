@@ -783,6 +783,7 @@
 
 (def ee-gnome-option-cfg
   {:name "Gnome"
+   :plugin? true
    :subraces
    [{:name "Deep Gnome"
      :abilities {::char5e/dex 1}
@@ -904,14 +905,14 @@
                   :page 48
                   :duration opt5e/minutes-1
                   :frequency {:units :rest
-                              :amount (condp <= (?class-level ?levels :barbarian)
+                              :amount (condp <= (?class-level :barbarian)
                                         17 6
                                         12 5
                                         6 4
                                         3 3
                                         2)}
                   :summary (str "Advantage on Strength checks and saves; melee damage bonus "
-                                (common/bonus-str (condp <= (?class-level ?levels :barbarian)
+                                (common/bonus-str (condp <= (?class-level :barbarian)
                                                     16 4
                                                     9 3
                                                     2))
@@ -928,7 +929,7 @@
              9 {:modifiers [(mod5e/dependent-trait
                              {:name "Brutal Critical"
                               :page 49
-                              :summary (let [die-count (condp <= (class-level ?levels :barbarian)
+                              :summary (let [die-count (condp <= (?class-level :barbarian)
                                                          17 "three"
                                                          13 "two"
                                                          "one")]
@@ -1133,7 +1134,7 @@
                               :level 2
                               :summary (str "With a song, you and friendly creatures gain 1d"
                                             (mod5e/level-val
-                                             (class-level ?levels :bard)
+                                             (?class-level :bard)
                                              {9 8
                                               13 10
                                               17 12
@@ -1290,7 +1291,7 @@
                                :page 59
                                :summary (str
                                          "You call for aid from your deity, succeeding "
-                                         (if (= 20 (class-level ?levels :cleric))
+                                         (if (= 20 (?class-level :cleric))
                                            "automatically"
                                            "if you make a percentile roll less than or equal to your cleric level"))})]}}
     :subclass-level 1
@@ -2253,7 +2254,9 @@
               5 {:modifiers [(mod5e/extra-attack)]}
               6 {:modifiers (map
                              #(mod/modifier ?saving-throw-bonuses
-                                            (update ?saving-throw-bonuses % + (?ability-bonuses ::char5e/cha)))
+                                            (merge-with +
+                                                        ?saving-throw-bonuses
+                                                        {% (get ?ability-bonuses ::char5e/cha 0)}))
                              char5e/ability-keys)}
               14 {:modifiers [(mod5e/action
                                {:name "Cleansing Touch"
@@ -4328,6 +4331,7 @@ long rest."})
 
 (def scag-half-elf-option-cfg
   {:name "Half-Elf"
+   :plugin? true
    :selections [(t/selection-cfg
                  {:name "Half-Elf Variant"
                   :tags #{:race}
@@ -4380,6 +4384,7 @@ long rest."})
 
 (def scag-tiefling-option-cfg
   {:name "Tiefling"
+   :plugin? true
    :selections [(t/selection-cfg
                  {:name "Tiefling Variant"
                   :tags #{:race}
@@ -4431,6 +4436,7 @@ long rest."})
 
 (def scag-halfling-option-cfg
   {:name "Halfling"
+   :plugin? true
    :subraces
    [{:name "Ghostwise"
      :abilities {::char5e/wis 1}
