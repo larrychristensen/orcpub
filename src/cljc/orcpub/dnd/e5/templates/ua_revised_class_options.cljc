@@ -115,6 +115,7 @@
   {:name "Warlock"
    :subclass-level 1
    :subclass-title "Otherworldly Patron"
+   :plugin? true
    :source :ua-revised-class-options
    :subclasses [{:name "The Celestial"
                  :traits [

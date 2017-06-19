@@ -2460,3 +2460,16 @@
    (fn [c] (some #(= :eldritch-blast (:key %))
                  (get @(subscribe [::character/spells-known nil c]) 0)))))
 
+(defn deep-gnome-option-cfg [key source page]
+  {:name "Gnome"
+   :plugin? true
+   :subraces
+   [{:name (str "Deep Gnome (" (s/upper-case (name source)) ")")
+     :key key
+     :abilities {::character/dex 1}
+     :modifiers [(modifiers/darkvision 120)]
+     :source source
+     :traits [{:name "Stone Camouflage"
+               :source source
+               :page page
+               :summary "Advantage on hide checks in rocky terrain"}]}]})

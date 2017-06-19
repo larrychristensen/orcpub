@@ -782,17 +782,7 @@
                  :damage-modifier (?ability-bonuses ::char5e/str)})]})
 
 (def ee-gnome-option-cfg
-  {:name "Gnome"
-   :plugin? true
-   :subraces
-   [{:name "Deep Gnome"
-     :abilities {::char5e/dex 1}
-     :modifiers [(mod5e/darkvision 120)]
-     :source :ee
-     :traits [{:name "Stone Camouflage"
-               :source :ee
-               :page 5
-               :summary "Advantage on hide checks in rocky terrain"}]}]})
+  (opt5e/deep-gnome-option-cfg :deep-gnome-ee :ee 7))
 
 (def genasi-option-cfg
   {:name "Genasi"
@@ -4321,6 +4311,9 @@ long rest."})
                           {:name "High Elf Cantrip"
                            :selections [high-elf-cantrip-selection]})]))
 
+(def scag-deep-gnome-cfg
+  (opt5e/deep-gnome-option-cfg :deep-gnome-scag :scag 115))
+
 (def scag-half-elf-option-cfg
   {:name "Half-Elf"
    :plugin? true
@@ -4449,7 +4442,8 @@ long rest."})
                (fn [race] (opt5e/race-option (assoc race :source :scag)))
                [scag-half-elf-option-cfg
                 scag-tiefling-option-cfg
-                scag-halfling-option-cfg])})
+                scag-halfling-option-cfg
+                scag-deep-gnome-cfg])})
    (opt5e/class-selection
     {:options (map
                (fn [cfg] (opt5e/class-option (assoc cfg :plugin? true :source :scag)))
