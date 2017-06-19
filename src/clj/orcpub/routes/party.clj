@@ -35,7 +35,6 @@
                                ::se/owner owner))
                       chars))))
                 result)]
-    (prn "MAPPED" mapped)
     {:status 200
      :body mapped}))
 
