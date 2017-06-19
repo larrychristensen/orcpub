@@ -149,30 +149,38 @@
                          (if (?has-weapon-prof? weapon)
                            ?prof-bonus
                            0))
+    ?weapon-ability-modifiers [(fn [weapon finesse?]
+                                 (let [definitely-finesse?
+                                       (and finesse?
+                                            (:finesse? weapon))
+                                       melee? (:melee? weapon)]
+                                   (?ability-bonuses
+                                    (if (or (and melee? (not definitely-finesse?))
+                                            (and (not melee?) definitely-finesse?))
+                                      ::char5e/str
+                                      ::char5e/dex))))]
+    ?weapon-ability-modifier (fn [weapon finesse?]
+                               (apply
+                                max
+                                (map
+                                 (fn [mod-fn]
+                                   (mod-fn weapon finesse?))
+                                 ?weapon-ability-modifiers)))
     ?weapon-attack-modifier (fn [weapon finesse?]
-                              (let [definitely-finesse? (and finesse?
-                                                             (:finesse? weapon))]
-                                (+ (?weapon-prof-bonus weapon)
-                                   (or (:magical-attack-bonus weapon) 0)
-                                   (or (:attack-bonus weapon) 0)
-                                   (if (:melee? weapon)
-                                     (+ (?ability-bonuses
-                                         (if definitely-finesse? ::char5e/dex ::char5e/str))
-                                        (or ?melee-attack-bonus 0))
-                                     (+ (?ability-bonuses
-                                         (if definitely-finesse? ::char5e/str ::char5e/dex))
-                                        (or ?ranged-attack-bonus 0))))))
+                              (+ (?weapon-prof-bonus weapon)
+                                 (or (:magical-attack-bonus weapon) 0)
+                                 (or (:attack-bonus weapon) 0)
+                                 (if (:melee? weapon)
+                                   (or ?melee-attack-bonus 0)
+                                   (or ?ranged-attack-bonus 0))
+                                 (?weapon-ability-modifier weapon finesse?)))
     ?weapon-damage-modifier (fn [weapon finesse?]
                               (let [definitely-finesse? (and finesse?
                                                              (:finesse? weapon))
                                     melee? (:melee? weapon)]
                                 (+ (or (:magical-damage-bonus weapon) 0)
                                    (or (:damage-bonus weapon) 0)
-                                   (?ability-bonuses
-                                    (if (or (and melee? (not definitely-finesse?))
-                                            (and (not melee?) definitely-finesse?))
-                                      ::char5e/str
-                                      ::char5e/dex)))))
+                                   (?weapon-ability-modifier weapon finesse?))))
     ?spell-attack-modifier-bonus 0
     ?spell-attack-modifier (fn [ability-kw]
                              (+ ?prof-bonus
