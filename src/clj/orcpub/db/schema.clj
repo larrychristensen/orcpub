@@ -1,6 +1,7 @@
 (ns orcpub.db.schema
   (:require [orcpub.entity.strict :as se]
             [orcpub.dnd.e5.character :as char5e]
+            [orcpub.dnd.e5.party :as party5e]
             [orcpub.dnd.e5.character.equipment :as char-equip-5e]))
 
 (defn string-prop [key]
@@ -66,7 +67,10 @@
     :db/cardinality :db.cardinality/one}
    {:db/ident :orcpub.user/password-reset-key
     :db/valueType :db.type/string
-    :db/cardinality :db.cardinality/one}])
+    :db/cardinality :db.cardinality/one}
+   {:db/ident :orcpub.user/following
+    :db/valueType :db.type/ref
+    :db/cardinality :db.cardinality/many}])
 
 (def entity-schema
   [{:db/ident ::se/key
@@ -87,6 +91,10 @@
     :db/cardinality :db.cardinality/many
     :db/isComponent true}
    {:db/ident ::se/values
+    :db/valueType :db.type/ref
+    :db/cardinality :db.cardinality/one
+    :db/isComponent true}
+   {:db/ident ::se/summary
     :db/valueType :db.type/ref
     :db/cardinality :db.cardinality/one
     :db/isComponent true}
@@ -121,7 +129,8 @@
    (map
     many-ref
     [::char5e/custom-equipment
-     ::char5e/custom-treasure])
+     ::char5e/custom-treasure
+     ::char5e/classes])
    (map
     long-prop
     [::char5e/str
@@ -129,14 +138,19 @@
      ::char5e/con
      ::char5e/int
      ::char5e/wis
-     ::char5e/cha])
+     ::char5e/cha
+     ::char5e/level])
    (map
     fulltext-prop
     [::char5e/character-name
      ::char5e/description])
    (map
     string-prop
-    [::char5e/weight
+    [::char5e/race-name
+     ::char5e/subrace-name
+     ::char5e/class-name
+     ::char5e/subclass-name
+     ::char5e/weight
      ::char5e/faction-image-url
      ::char5e/hair
      ::char5e/player-name
@@ -156,6 +170,17 @@
      ::char5e/bonds
      ::char5e/faction-name])))
 
+(def party-schema
+  [{:db/ident ::party5e/owner
+    :db/valueType :db.type/string
+    :db/cardinality :db.cardinality/one}
+   {:db/ident ::party5e/name
+    :db/valueType :db.type/string
+    :db/cardinality :db.cardinality/one}
+   {:db/ident ::party5e/character-ids
+    :db/valueType :db.type/ref
+    :db/cardinality :db.cardinality/many}])
+
 (def character-equipment-schema
   (concat
    [(string-prop ::char-equip-5e/name)
@@ -170,5 +195,7 @@
   (concat
    user-schema
    entity-schema
+   entity-type-schema
    character-schema
-   character-equipment-schema))
+   character-equipment-schema
+   party-schema))

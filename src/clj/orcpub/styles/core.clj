@@ -135,6 +135,8 @@
     {:margin-top "2px"}]
    [:.m-t-30
     {:margin-top "30px"}]
+   [:.m-t-40
+    {:margin-top "40px"}]
    [:.m-t-21
     {:margin-top "21px"}]
 
@@ -150,6 +152,8 @@
     {:opacity "0.6"}]
    [:.opacity-7
     {:opacity "0.7"}]
+   [:.opacity-9
+    {:opacity "0.9"}]
 
    [:.m-b--2
     {:margin-bottom "-2px"}]
@@ -171,6 +175,8 @@
     {:margin-bottom "20px"}]
    [:.m-b-30
     {:margin-bottom "30px"}]
+   [:.m-b-40
+    {:margin-bottom "40px"}]
 
    [:.m-l--10
     {:margin-left "-10px"}]
@@ -892,8 +898,9 @@
 
     [:.header-tab
      {:background-color "rgba(0, 0, 0, 0.25)"
-      :-webkit-backdrop-filter "blur(5px)"
-      :backdrop-filter "blur(5px)"}]
+      ;;:-webkit-backdrop-filter "blur(5px)"
+      ;;:backdrop-filter "blur(5px)"
+      }]
 
     [:.header-tab.mobile
      [:.title

@@ -3,10 +3,12 @@
             [reagent.core :as r]
             [orcpub.route-map :as routes]
             [orcpub.common :as common]
+            [orcpub.components :as comps]
             [orcpub.entity-spec :as es]
             [orcpub.entity.strict :as se]
             [orcpub.dnd.e5.subs :as subs]
             [orcpub.dnd.e5.character :as char]
+            [orcpub.dnd.e5.party :as party]
             [orcpub.dnd.e5.character.random :as char-random]
             [orcpub.dnd.e5.character.equipment :as char-equip]
             [cljs.pprint :refer [pprint]]
@@ -110,19 +112,49 @@
 (def header-tab-style
   {:width "85px"})
 
-(defn header-tab [title icon on-click disabled active device-type]
-  (let [mobile? (= :mobile device-type)]
-    [:div.white.f-w-b.f-s-14.t-a-c.header-tab.m-5
-     {:on-click on-click
-      :style (if active {:background-color "rgba(240, 161, 0, 0.5)"})
-      :class-name (str (if disabled "disabled" "pointer")
-                       " "
-                       (if (not mobile?) " w-110"))}
-     [:div.p-10
-      {:class-name (if (not active) (if disabled "opacity-2" "opacity-2 hover-opacity-full"))}
-      (let [size (if mobile? 24 48)] (svg-icon icon size size))
-      (if (not mobile?)
-        [:div.title.uppercase title])]]))
+(def active-style {:background-color "rgba(240, 161, 0, 0.7)"})
+
+(defn header-tab []
+  (let [hovered? (r/atom false)]
+    (fn [title icon on-click disabled active device-type & buttons]
+      (let [mobile? (= :mobile device-type)]
+        [:div.white.f-w-b.f-s-14.t-a-c.header-tab.m-5
+         {:on-click (fn [e] (if (seq buttons)
+                              #(swap! hovered? not)
+                              (on-click e)))
+          :on-mouse-over #(reset! hovered? true)
+          :on-mouse-out #(reset! hovered? false)
+          :style (merge
+                  {:position :relative}
+                  (if active active-style))
+          :class-name (str (if disabled "disabled" "pointer")
+                           " "
+                           (if (not mobile?) " w-110"))}
+         [:div.p-10
+          {:class-name (if (not active) (if disabled "opacity-2" "opacity-2 hover-opacity-full"))}
+          (let [size (if mobile? 24 48)] (svg-icon icon size size))
+          (if (not mobile?)
+            [:div.title.uppercase title])]
+         (if (and (seq buttons)
+                  @hovered?)
+           [:div.uppercase
+            {:style {:position :absolute
+                     :background-color "#2c3445"
+                     :top (if mobile? 46 84)
+                     :right 0}}
+            (doall
+             (map
+              (fn [{:keys [name route]}]
+                ^{:key name}
+                [:div.p-10.opacity-5.hover-opacity-full
+                 (let [current-route @(subscribe [:route])]
+                   {:style (if (or (= route current-route)
+                                        (= route (get current-route :handler))) active-style)
+                    :on-click (fn [e]
+                                (dispatch [:route route {:return true}])
+                                (.stopPropagation e))})
+                 name])
+              buttons))])]))))
 
 
 (def social-icon-style
@@ -161,25 +193,21 @@
            :on-click #(dispatch [:route routes/default-route {:return? true}])}]
          (let [search-text @(subscribe [:search-text])
                search-text? @(subscribe [:search-text?])]
-           [:div.flex-grow-1.p-l-20.p-r-20
-            #_{:style (if search-text?
-                      {:position :fixed
-                       :left 0
-                       :right 0
-                       :background-color "rgba(0,0,0,0.95)"
-                       :z-index 101})}
+           [:div
+            {:class-name (if mobile? "p-l-10 p-r-10" "p-l-20 p-r-20 flex-grow-1")}
             [:div.b-rad-5.flex.align-items-c
              {:style {:background-color "rgba(0,0,0,0.1)"}}
-             [:div.p-l-20.flex-grow-1
-              [:input.w-100-p.white
-               {:style (if search-text?
-                         (merge
-                          search-input-style
-                          {:color :transparent})
-                         search-input-style)
-                :value search-text
-                :on-key-press #(if (= "Enter" (.-key %)) (dispatch [:set-search-text search-text]))
-                :on-change #(dispatch [:set-search-text (event-value %)])}]]
+             (if (not mobile?)
+               [:div.p-l-20.flex-grow-1
+                [:input.w-100-p.white
+                 {:style (if search-text?
+                           (merge
+                            search-input-style
+                            {:color :transparent})
+                           search-input-style)
+                  :value search-text
+                  :on-key-press #(if (= "Enter" (.-key %)) (dispatch [:set-search-text search-text]))
+                  :on-change #(dispatch [:set-search-text (event-value %)])}]])
              [:div.opacity-1.p-r-10.pointer
               {:class-name (if mobile? "opacity-5" "opacity-1")
                :on-click #(dispatch [:open-orcacle])}
@@ -201,7 +229,13 @@
           #(dispatch [:route routes/dnd-e5-char-list-page-route {:return? true}])
           false
           (routes/dnd-e5-char-page-routes (or (:handler active-route) active-route))
-          device-type]
+          device-type
+          {:name "Character List"
+           :route routes/dnd-e5-char-list-page-route}
+          {:name "Builder"
+           :route routes/dnd-e5-char-builder-route}
+          {:name "Parties"
+           :route routes/dnd-e5-char-parties-page-route}]
          [header-tab
           "spells"
           "spell-book"
@@ -630,10 +664,11 @@
        title]
       [:div.flex.align-items-c.justify-cont-end.flex-wrap.m-r-10.m-l-10
        (map-indexed
-        (fn [i {:keys [title icon on-click style]}]
+        (fn [i {:keys [title icon on-click style class-name]}]
           ^{:key i}
           [:button.form-button.h-40.m-l-5.m-t-5.m-b-5
            {:on-click on-click
+            :class-name class-name
             :style style}
            [:span
             [:i.fa.f-s-18
@@ -953,43 +988,96 @@
   {:border-bottom "1px solid rgba(255,255,255,0.5)"})
 
 (def list-style
-  {:border-top "1px solid rgba(255,255,255,0.5)"})
+  {:border-top "2px solid rgba(255,255,255,0.5)"})
 
 (def thumbnail-style
   {:height "100px"
    :max-width "200px"})
 
-(defn character-summary [id & [include-name? text-classes]]
+(defn other-user-component [owner & [text-classes show-follow?]]
+  (let [following-users @(subscribe [:following-users])
+        following? (get following-users owner)
+        username @(subscribe [:username])]
+    [:div.flex.m-l-10.align-items-c
+     (svg-icon "orc-head" 32 32)
+     [:div.f-s-18.m-l-5
+      {:class-name text-classes}
+      owner]
+     (if (and show-follow? username (not= username owner))
+       [:button.form-button.m-l-10.p-6
+        {:on-click #(dispatch [(if following?
+                                 :unfollow-user
+                                 :follow-user)
+                               owner])}
+        (if following?
+          "unfollow"
+          "follow")])]))
+
+(defn character-summary-2 [{:keys [::char/character-name
+                                   ::char/image-url
+                                   ::char/race-name
+                                   ::char/subrace-name
+                                   ::char/classes]}
+                           include-name?
+                           owner
+                           show-owner?
+                           show-follow?]
+  (let [username @(subscribe [:username])]
+    [:div.flex.justify-cont-s-b.w-100-p.align-items-c
+     [:div.flex.align-items-c
+      (if image-url
+        [:img.m-r-20.m-t-10.m-b-10 {:src image-url
+                                    :style thumbnail-style}])
+      [:div.flex.character-summary.m-t-20.m-b-20
+       (if (and character-name include-name?) [:span.m-r-20.m-b-5 character-name])
+       [:span.m-r-10.m-b-5
+        [:span race-name]
+        [:div.f-s-12.m-t-5.opacity-6 subrace-name]]
+       (if (seq classes)
+         [:span.flex
+          (map-indexed
+           (fn [i v]
+             (with-meta v {:key i}))
+           (interpose
+            [:span.m-l-5.m-r-5 "/"]
+            (map
+             (fn [{:keys [::char/class-name ::char/level ::char/subclass-name]}]
+               (let []
+                 [:span
+                  [:span (str class-name " (" level ")")]
+                  [:div.f-s-12.m-t-5.opacity-6 (if subclass-name subclass-name)]]))
+             classes)))])]]
+     (if (and show-owner?
+              (some? owner)
+              (some? username)
+              (not= username owner))
+       [:div.m-l-10 [other-user-component owner nil show-follow?]])]))
+
+(defn character-summary [id & [include-name?]]
   (let [character-name @(subscribe [::char/character-name id])
         image-url @(subscribe [::char/image-url id])
         race @(subscribe [::char/race id])
         subrace @(subscribe [::char/subrace id])
         levels @(subscribe [::char/levels id])
-        classes @(subscribe [::char/classes id])]
-    [:div.flex.align-items-c
-     (if image-url
-       [:img.m-r-20.m-t-10.m-b-10 {:src image-url
-                                   :style thumbnail-style}])
-     [:div.flex.character-summary
-      {:class-name text-classes}
-      (if (and character-name include-name?) [:span.m-r-20.m-b-5 character-name])
-      [:span.m-r-10.m-b-5
-       [:span race]
-       [:div.f-s-12.m-t-5.opacity-6 subrace]]
-      (if (seq levels)
-        [:span.flex
-         (map-indexed
-          (fn [i v]
-            (with-meta v {:key i}))
-          (interpose
-           [:span.m-l-5.m-r-5 "/"]
-           (map
-            (fn [cls-key]
-              (let [{:keys [class-name class-level subclass subclass-name]} (levels cls-key)]
-                [:span
-                 [:span (str class-name " (" class-level ")")]
-                 [:div.f-s-12.m-t-5.opacity-6 (if subclass-name subclass-name)]]))
-            classes)))])]]))
+        classes @(subscribe [::char/classes id])
+        {:keys [::se/owner] :as strict-character} @(subscribe [::char/character id])]
+    (character-summary-2
+     {::char/character-name character-name
+      ::char/image-url image-url
+      ::char/race-name race
+      ::char/subrace-name subrace
+      ::char/classes (map
+                      (fn [class-kw]
+                        (let [{:keys [class-name class-level subclass-name] :as cfg}
+                              (get levels class-kw)]
+                          {::char/class-name class-name
+                           ::char/level class-level
+                           ::char/subclass-name subclass-name}))
+                      classes)}
+     include-name?
+     owner
+     true
+     true)))
 
 (defn monster-summary [name size type]
   [:span.m-r-10.m-b-5
@@ -1984,7 +2072,7 @@
        [:div
         (if show-summary?
           [:div.f-s-24.f-w-600.m-b-16.m-l-20.text-shadow.flex
-           [character-summary id true]])
+           [character-summary id true true]])
         [:div.flex.w-100-p
          (if two-columns?
            [:div.w-50-p
@@ -2033,54 +2121,196 @@
 (defn character-list []
   (let [characters @(subscribe [::char/characters])
         expanded-characters @(subscribe [:expanded-characters])
-        device-type @(subscribe [:device-type])]
+        device-type @(subscribe [:device-type])
+        username @(subscribe [:username])
+        has-selected? @(subscribe [::char/has-selected?])]
     [content-page
      "Characters"
      [{:title "New"
        :icon "plus"
-       :on-click #(dispatch [:new-character])}]
+       :on-click #(dispatch [:new-character])}
+      {:title "Make Party"
+       :icon "users"
+       :class-name (if (not has-selected?) "opacity-5 cursor-disabled")
+       :on-click #(if has-selected? (dispatch [::party/make-party]))}]
      [:div.p-5
       [:div
-       {:style list-style}
-       (doall
-        (map
-         (fn [{:keys [:db/id] :as strict-character}]
-           ^{:key id}
-           [:div.white
-            {:style row-style}
-            (let [built-character @(subscribe [::char/built-character id])
-                  image-url (char/image-url built-character)
-                  expanded? (get expanded-characters id)]
-              [:div.pointer
-               [:div.flex.justify-cont-s-b.align-items-c
-                {:on-click #(dispatch [:toggle-character-expanded id])}
-                [:div.m-l-10.flex.align-items-c
-                 [:div.f-s-24.f-w-600
-                  #_{:style summary-style}
-                  [:div.list-character-summary
-                   [character-summary id true "m-t-20 m-b-20"]]]]
-                [:div.orange.pointer.m-r-10
-                 (if (not= device-type :mobile) [:span.underline (if expanded?
-                                                                   "collapse"
-                                                                   "open")])
-                 [:i.fa.m-l-5
-                  {:class-name (if expanded? "fa-caret-up" "fa-caret-down")}]]]
-               (if expanded?
-                 [:div
-                  {:style character-display-style}
-                  [:div.flex.justify-cont-end
-                   [:button.form-button
-                    {:on-click #(dispatch [:edit-character @(subscribe [::char/internal-character id])])}
-                    "EDIT"]
-                   [:button.form-button.m-l-5
-                    {:on-click #(let [route (routes/match-route (routes/path-for routes/dnd-e5-char-page-route :id id))]
-                                  (dispatch [:route route {:return? true}]))}
-                    "VIEW"]
-                   [:button.form-button.m-l-5
-                    {:on-click #(dispatch [:delete-character id])}
-                    "DELETE"]]
-                  [character-display id false (if (= :mobile device-type) 1 2)]])])])
-         characters))]]]))
+       (let [grouped-characters (group-by ::se/owner characters)
+             user-characters (find grouped-characters username)
+             other-characters (sort-by key (dissoc grouped-characters username))
+             sorted-groups (if user-characters
+                             (cons user-characters other-characters)
+                             other-characters)]
+         (doall
+          (map
+           (fn [[owner owner-characters]]
+             ^{:key owner}
+             [:div.m-b-40
+              [:div.m-b-10.white.f-w-b.f-s-16
+               [other-user-component owner "f-s-24 m-l-10 m-r-20 i" true]]
+              [:div
+               {:style list-style}
+               (doall
+                (map
+                 (fn [{:keys [:db/id ::se/owner] :as summary}]
+                   (let [expanded? (get expanded-characters id)
+                         char-page-path (routes/path-for routes/dnd-e5-char-page-route :id id)
+                         char-page-route (routes/match-route char-page-path)]
+                     ^{:key id}
+                     [:div.white
+                      {:style row-style}
+                      [:div.pointer
+                       [:div.flex.justify-cont-s-b.align-items-c
+                        {:on-click #(dispatch [:toggle-character-expanded id])}
+                        [:div.m-l-10.flex.align-items-c
+                         [:div.p-5
+                          {:on-click (fn [e]
+                                       (dispatch [::char/toggle-selected id])
+                                       (.stopPropagation e))}
+                          (comps/checkbox @(subscribe [::char/selected? id]) false)]
+                         [:div.f-s-24.f-w-600
+                          [:div.list-character-summary
+                           [character-summary-2 summary true owner false]]]]
+                        [:div.orange.pointer.m-r-10
+                         (if (not= device-type :mobile) [:span.underline (if expanded?
+                                                                           "collapse"
+                                                                           "open")])
+                         [:i.fa.m-l-5
+                          {:class-name (if expanded? "fa-caret-up" "fa-caret-down")}]]]
+                       (if expanded?
+                         [:div
+                          {:style character-display-style}
+                          [:div.flex.justify-cont-end.uppercase.align-items-c
+                           (if (= username owner)
+                             [:a.m-r-5.f-s-14
+                              {:href (str "mailto:?subject=My%20OrcPub%20Character%20"
+                                          @(subscribe [::char/character-name id])
+                                          "&body=https://"
+                                          js/window.location.hostname
+                                          char-page-path)}
+                              [:i.fa.fa-envelope.m-r-5]
+                              "share"])
+                           (if (= username owner)
+                             [:button.form-button
+                              {:on-click #(dispatch [:edit-character @(subscribe [::char/internal-character id])])}
+                              "edit"])
+                           [:button.form-button.m-l-5
+                            {:on-click #(let [route char-page-route]
+                                          (dispatch [:route route {:return? true}]))}
+                            "view"]
+                           (if (= username owner)
+                             [:button.form-button.m-l-5
+                              {:on-click #(dispatch [:delete-character id])}
+                              "delete"])]
+                          [character-display id false (if (= :mobile device-type) 1 2)]])]]))
+                 owner-characters))]])
+           sorted-groups)))]]]))
+
+(def party-name-editor-style
+  {:width "200px"
+   :height "42px"})
+
+(defn parties []
+  (let [editing-parties (r/atom {})]
+    (fn []
+      (let [parties @(subscribe [::party/parties])
+            expanded-characters @(subscribe [:expanded-characters])
+            device-type @(subscribe [:device-type])
+            username @(subscribe [:username])]
+        [content-page
+         "Parties"
+         []
+         [:div.p-5
+          [:div
+           (doall
+            (map
+             (fn [{:keys [:db/id ::party/name] characters ::party/character-ids}]
+               (let [editing? (get @editing-parties id)
+                     character-ids (into #{} (map :db/id) characters)]
+                 ^{:key id}
+                 [:div.m-b-40
+                  [:div.m-b-10.white.f-w-b.f-s-16
+                   [:div.flex.align-items-c
+                    [:i.fa.fa-users.m-l-10]
+                    (if editing?
+                      [:div.flex.align-items-c.flex-wrap
+                       [:input.input.m-l-10
+                        {:value (or (@editing-parties id) name)
+                         :style party-name-editor-style
+                         :on-change #(swap! editing-parties assoc id (event-value %))}]
+                       [:div.m-l-10
+                        {:style {:width "200px"}}
+                        [comps/selection-adder
+                         (sequence
+                          (comp
+                           (remove
+                            (fn [{:keys [:db/id]}]
+                              (character-ids id)))
+                           (map
+                            (fn [{:keys [:db/id ::char/character-name]}]
+                              {:name character-name
+                               :key id})))
+                          @(subscribe [::char/characters]))
+                         (fn [e]
+                           (let [selected-id (js/parseInt (.. e -target -value))]
+                             (dispatch [::party/add-character id selected-id])))]]
+                       [:div.m-t-5
+                        [:button.form-button.m-l-10
+                         {:on-click #(do (dispatch [::party/rename-party id (@editing-parties id)])
+                                         (swap! editing-parties assoc id nil))}
+                         "save"]
+                        [:button.form-button.m-l-10
+                         {:on-click #(dispatch [::party/delete-party id])}
+                         "delete"]
+                        [:button.form-button.m-l-10
+                         {:on-click #(swap! editing-parties assoc id nil)}
+                         "cancel"]]]
+                      [:div.flex.align-items-c
+                       [:span.m-l-5 name]
+                       [:i.fa.fa-pencil.m-l-10.opacity-5.hover-opacity-full.pointer
+                        {:on-click #(swap! editing-parties assoc id name)}]])]]
+                  [:div
+                   {:style list-style}
+                   (doall
+                    (map
+                     (fn [{:keys [::se/owner] :as summary}]
+                       (let [character-id (:db/id summary)
+                             expanded? (get expanded-characters character-id)
+                             char-page-path (routes/path-for routes/dnd-e5-char-page-route :id character-id)
+                             char-page-route (routes/match-route char-page-path)]
+                         ^{:key character-id}
+                         [:div.white
+                          {:style row-style}
+                          [:div.pointer
+                           [:div.flex.justify-cont-s-b.align-items-c
+                            {:on-click #(dispatch [:toggle-character-expanded character-id])}
+                            [:div.m-l-10.flex.align-items-c
+                             [:div.f-s-24.f-w-600
+                              [:div.list-character-summary
+                               [character-summary-2 summary true owner true false]]]]
+                            [:div.orange.pointer.m-r-10
+                             (if (not= device-type :mobile) [:span.underline (if expanded?
+                                                                               "collapse"
+                                                                               "open")])
+                             [:i.fa.m-l-5
+                              {:class-name (if expanded? "fa-caret-up" "fa-caret-down")}]]]
+                           (if expanded?
+                             [:div
+                              {:style character-display-style}
+                              [:div.flex.justify-cont-end.uppercase.align-items-c
+                               (if (= username owner)
+                                 [:button.form-button
+                                  {:on-click #(dispatch [:edit-character @(subscribe [::char/internal-character character-id])])}
+                                  "edit"])
+                               [:button.form-button.m-l-5
+                                {:on-click #(dispatch [:route char-page-route {:return? true}])}
+                                "view"]
+                               [:button.form-button.m-l-5
+                                {:on-click #(dispatch [::party/remove-character id character-id])}
+                                "remove from party"]]
+                              [character-display character-id false (if (= :mobile device-type) 1 2)]])]]))
+                     characters))]]))
+             parties))]]]))))
 
 (defn monster-list []
   (let [expanded-monsters @(subscribe [:expanded-monsters])

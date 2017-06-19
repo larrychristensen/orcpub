@@ -112,8 +112,13 @@
 (defmacro map-mod [k key val]
   `(modifier ~k (assoc ~k ~key ~val)))
 
+(defn default-to-zero [k]
+  (if (number? k)
+    k
+    0))
+
 (defmacro cum-sum-mod [k bonus]
-  `(modifier ~k (+ ~k ~bonus)))
+  `(modifier ~k (+ (default-to-zero ~k) ~bonus)))
 
 (defmacro modifiers [& mods]
   (mapv
