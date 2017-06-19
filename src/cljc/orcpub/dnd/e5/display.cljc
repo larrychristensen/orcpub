@@ -45,7 +45,11 @@
    :ua-revised-subclasses {:abbr "UA-Revised-Subclasses"
                            :url "http://media.wizards.com/2017/dnd/downloads/UA-RevisedSubclasses.pdf"}
    :ua-trio-of-subclasses {:abbr "UA-Trio-of-Subclasses"
-                           :url "http://media.wizards.com/2017/dnd/downloads/UAThreeSubclasses.pdf"}})
+                           :url "http://media.wizards.com/2017/dnd/downloads/UAThreeSubclasses.pdf"}
+   :ua-revised-class-options {:abbr "UA-Revised-Class-Options"
+                              :url "http://media.wizards.com/2017/dnd/downloads/June5UA_RevisedClassOptv1.pdf"}
+   :ua-warlock-and-wizard {:abbr "UA-Warlock-and-Wizard"
+                           :url "http://media.wizards.com/2017/dnd/downloads/20170213_Wizrd_Wrlck_UAv2_i48nf.pdf"}})
 
 (def plural-map
   {:feet :feet})

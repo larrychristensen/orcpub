@@ -99,6 +99,21 @@
    {:name "Stunned"}
    {:name "Unconscious"}])
 
+(def damage-types
+  [:acid
+   :bludgeoning
+   :cold
+   :fire
+   :force
+   :lightning
+   :necrotic
+   :piercing
+   :poison
+   :psychic
+   :radiant
+   :slashing
+   :thunder])
+
 (def conditions-map
   (common/map-by-key (common/add-keys conditions)))
 
@@ -2411,3 +2426,37 @@
    {:name "Druid Cantrip"
     :tags #{:spells}
     :options (spell-options (get-in sl/spell-lists [:druid 0]) ::character/wis class-nm)}))
+
+(defn eldritch-invocation-selection [cfg]
+  (t/selection-cfg
+   (merge
+    {:name "Eldritch Invocations"
+     :multiselect? true
+     :ref [:class :warlock :eldritch-invocations]
+     :tags #{:spells}}
+    cfg)))
+
+(def pact-of-the-tome-name "Pact Boon: Pact of the Tome")
+(def pact-of-the-chain-name "Pact Boon: Pact of the Chain")
+(def pact-of-the-blade-name "Pact Boon: Pact of the Blade")
+
+(defn has-trait-with-name-prereq [name]
+  (t/option-prereq
+   (str "You must have " name)
+   (fn [c] (some #(= name (:name %)) @(subscribe [::character/traits nil c])))))
+
+(def pact-of-the-tome-prereq
+  (has-trait-with-name-prereq pact-of-the-tome-name))
+
+(def pact-of-the-blade-prereq
+  (has-trait-with-name-prereq pact-of-the-blade-name))
+
+(def pact-of-the-chain-prereq
+  (has-trait-with-name-prereq pact-of-the-chain-name))
+
+(def has-eldritch-blast-prereq
+  (t/option-prereq
+   "You must know the edritch blast spell"
+   (fn [c] (some #(= :eldritch-blast (:key %))
+                 (get @(subscribe [::character/spells-known nil c]) 0)))))
+

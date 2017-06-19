@@ -3337,33 +3337,18 @@
                             :frequency opt5e/long-rests-1
                             :summary "cast polymorph without a spell slot to turn into a CR 1 or less beast"}]}]}))
 
-(defn has-trait-with-name-prereq [name]
-  (t/option-prereq
-   (str "You must have " name)
-   (fn [c] (some #(= name (:name %)) @(subscribe [::char5e/traits nil c])))))
-
-(def pact-of-the-tome-name "Pact Boon: Pact of the Tome")
-(def pact-of-the-chain-name "Pact Boon: Pact of the Chain")
-(def pact-of-the-blade-name "Pact Boon: Pact of the Blade")
-
-(def has-eldritch-blast-prereq
-  (t/option-prereq
-   "You must know the edritch blast spell"
-   (fn [c] (some #(= :eldritch-blast (:key %))
-                 (get @(subscribe [::char5e/spells-known nil c]) 0)))))
-
 (def pact-boon-options
   [(t/option-cfg
     {:name "Pact of the Chain"
      :modifiers [(mod5e/spells-known 1 :find-familiar ::char5e/cha "Warlock")
                  (mod5e/trait-cfg
-                  {:name pact-of-the-chain-name
+                  {:name opt5e/pact-of-the-chain-name
                    :page 107
                    :summary "Can cast find familiar as a ritual, use your attack action to give your familiar an attack as a reaction"})]})
    (t/option-cfg
     {:name "Pact of the Blade"
      :modifiers [(mod5e/trait-cfg
-                  {:name pact-of-the-blade-name
+                  {:name opt5e/pact-of-the-blade-name
                    :page 107
                    :summary "summon a magical weapon"})]})
    (t/option-cfg
@@ -3384,7 +3369,7 @@
                                                   false
                                                   "uses Book of Shadows")})]
      :modifiers [(mod5e/trait-cfg
-                  {:name pact-of-the-tome-name
+                  {:name opt5e/pact-of-the-tome-name
                    :page 108
                    :summary "you have a spellbook with 3 extra cantrips"})]})])
 
@@ -3396,7 +3381,7 @@
                   {:name "Eldritch Invocation: Agonizing Blast"
                    :page 110
                    :summary (str "add " (?ability-bonuses ::char5e/cha) " to eldritch blast spell damage")})]
-     :prereqs [has-eldritch-blast-prereq]})
+     :prereqs [opt5e/has-eldritch-blast-prereq]})
    (t/option-cfg
     {:name "Armor of Shadows"
      :modifiers [(mod5e/trait-cfg
@@ -3458,7 +3443,7 @@
                               "Book of Ancient Secrets Ritual")
                     :min 2
                     :max 2})]
-     :prereqs [(has-trait-with-name-prereq pact-of-the-tome-name)]})
+     :prereqs [opt5e/pact-of-the-tome-prereq]})
    (t/option-cfg
     {:name "Chains of Carceri"
      :modifiers [(mod5e/trait-cfg
@@ -3467,7 +3452,7 @@
                    :frequency opt5e/long-rests-1
                    :summary "cast hold monster at will on celestials, fiends, or elementals"})
                  (mod5e/spells-known 5 :hold-monster ::char5e/cha "Warlock" 0 "at will")]
-     :prereqs [(has-trait-with-name-prereq pact-of-the-chain-name)
+     :prereqs [opt5e/pact-of-the-chain-prereq
                (opt5e/total-levels-option-prereq 15 :warlock)]})
    (t/option-cfg
     {:name "Devil's Sight"
@@ -3499,7 +3484,7 @@
                   {:name "Eldritch Invocation: Eldritch Spear"
                    :page 111
                    :summary "eldrich blast with range 300 ft."})]
-     :prereqs [has-eldritch-blast-prereq]})
+     :prereqs [opt5e/has-eldritch-blast-prereq]})
    (t/option-cfg
     {:name "Eyes of the Rune Keeper"
      :modifiers [(mod5e/trait-cfg
@@ -3524,7 +3509,7 @@
                    :page 111
                    :summary (str "extra " (max 1 (?ability-bonuses ::char5e/cha)) " necrotic damage with your pact weapon")})]
      :prereqs [(opt5e/total-levels-option-prereq 12 :warlock)
-               (has-trait-with-name-prereq pact-of-the-blade-name)]})
+               opt5e/pact-of-the-blade-prereq]})
    (t/option-cfg
     {:name "Mask of Many Faces"
      :modifiers [(mod5e/trait-cfg
@@ -3587,7 +3572,7 @@ long rest."})
                   {:name "Eldritch Invocation: Repelling Blast"
                    :page 111
                    :summary "push the creature 10 ft when you cast eldritch blast"})]
-     :prereqs [has-eldritch-blast-prereq]})
+     :prereqs [opt5e/has-eldritch-blast-prereq]})
    (t/option-cfg
     {:name "Sculptor of Flesh"
      :modifiers [(mod5e/trait-cfg
@@ -3621,7 +3606,7 @@ long rest."})
                    :page 111
                    :summary "when using Attack action, attack with pact blade twice"})]
      :prereqs [(opt5e/total-levels-option-prereq 5 :warlock)
-               (has-trait-with-name-prereq pact-of-the-blade-name)]})
+               opt5e/pact-of-the-blade-prereq]})
    (t/option-cfg
     {:name "Visions of Distant Realms"
      :modifiers [(mod5e/trait-cfg
@@ -3636,7 +3621,7 @@ long rest."})
                   {:name "Eldritch Invocation: Voice of the Chain Master"
                    :page 111
                    :summary "communicate telepathically with, perceive through, and speak through your familiar"})]
-     :prereqs [(has-trait-with-name-prereq pact-of-the-chain-name)]})
+     :prereqs [opt5e/pact-of-the-chain-prereq]})
    (t/option-cfg
     {:name "Whispers of the Grave"
      :modifiers [(mod5e/trait-cfg
@@ -3672,14 +3657,10 @@ long rest."})
    19 1})
 
 (defn eldritch-invocation-selection [& [num]]
-  (t/selection-cfg
-   {:name "Eldritch Invocations"
-    :options eldritch-invocation-options
+  (opt5e/eldritch-invocation-selection
+   {:options eldritch-invocation-options
     :min (or num 1)
-    :max (or num 1)
-    :multiselect? true
-    :ref [:class :warlock :eldritch-invocations]
-    :tags #{:spells}}))
+    :max (or num 1)}))
 
 (defn mystic-arcanum-selection [spell-level]
   (t/selection-cfg
