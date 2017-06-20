@@ -16,6 +16,7 @@
             [orcpub.dnd.e5.templates.ua-race-feats :as ua-race-feats]
             [orcpub.dnd.e5.templates.ua-skill-feats :as ua-skill-feats]
             [orcpub.dnd.e5.templates.ua-revised-class-options :as ua-revised-class-options]
+            [orcpub.dnd.e5.templates.ua-warlock-and-wizard :as ua-warlock-and-wizard]
             [re-frame.core :refer [subscribe]]))
 
 (defn ua-help [name url]
@@ -1008,5 +1009,6 @@
      ua-bard-plugin
      ua-race-feats/ua-race-feats-plugin
      ua-skill-feats/ua-skill-feats-plugin
-     ua-revised-class-options/ua-revised-class-options-plugin])))
+     ua-revised-class-options/ua-revised-class-options-plugin
+     ua-warlock-and-wizard/ua-warlock-and-wizard-plugin])))
 

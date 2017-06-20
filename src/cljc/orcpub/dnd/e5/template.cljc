@@ -3994,9 +3994,9 @@ long rest."})
                  {:name "Noble Feature"
                   :tags #{:background}
                   :options [(t/option-cfg
-                             {:name "Position of Priviledge"
+                             {:name "Position of Privilege"
                               :modifiers [(mod5e/trait-cfg
-                                           {:name "Position of Priviledge"
+                                           {:name "Position of Privilege"
                                             :page 135
                                             :summary "you are welcome in high society and common folk try to accomodate you"})]})
                             (t/option-cfg

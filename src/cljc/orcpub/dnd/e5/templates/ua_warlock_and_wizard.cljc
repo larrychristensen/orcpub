@@ -73,11 +73,61 @@
                                             :source :ua-warlock-and-wizard})
                                           (mod5e/spells-known 7 :finger-of-death ::char5e/cha "Warlock" 0)]}}}]})
 
+(def wizard-option-cfg
+  {:name "Wizard",
+   :subclass-level 2
+   :subclass-title "Arcane Tradition"
+   :subclasses [{:name "Lore Mastery"
+                 :modifiers [(mod5e/skill-expertise :arcana)
+                             (mod5e/skill-expertise :history)
+                             (mod5e/skill-expertise :nature)
+                             (mod5e/skill-expertise :religion)
+                             (mod5e/trait-cfg
+                              {:name "Lore Master"
+                               :page 6
+                               :source :ua-warlock-and-wizard})
+                             (mod5e/trait-cfg
+                              {:name "Spell Secrets"
+                               :page 6
+                               :source :ua-warlock-and-wizard})]
+                 :levels {6 {:modifiers [(mod5e/trait-cfg
+                                          {:name "Alchemical Casting"
+                                           :page 6
+                                           :source :ua-warlock-and-wizard})]}
+                          10 {:modifiers [(mod5e/bonus-action
+                                           {:name "Prodigious Memory"
+                                            :page 6
+                                            :source :ua-warlock-and-wizard})]}
+                          14 {:modifiers [(mod5e/bonus-action
+                                           {:name "Master of Magic"
+                                            :page 6
+                                            :source :ua-warlock-and-wizard})]}}}]})
+
 (defn patron-prereq [patron]
   (t/option-prereq
    (str "Your patron must be " patron)
-   (fn [c] (= @(subscribe [::char5e/subclass nil c])
-              patron))))
+   (fn [c] (some
+            (fn [[k {:keys [subclass-name]}]]
+              (= patron subclass-name))
+            @(subscribe [::char5e/levels nil c])))))
+
+(def hexblade-prereq
+  (patron-prereq "The Hexblade"))
+
+(def great-old-one-prereq
+  (patron-prereq "The Great Old One"))
+
+(def raven-queen-prereq
+  (patron-prereq "The Raven Queen"))
+
+(def fiend-prereq
+  (patron-prereq "The Fiend"))
+
+(def archfey-prereq
+  (patron-prereq "The Archfey"))
+
+(def seeker-prereq
+  (patron-prereq "The Seeker"))
 
 (def eldritch-invocation-selection
   (opt5e/eldritch-invocation-selection
@@ -86,120 +136,198 @@
     :options (map
               (fn [o]
                 (update o ::t/modifiers conj opt5e/ua-al-illegal))
-              [(t/option-cfg
+              [(opt5e/eldritch-invocation-option
+                {:name "Aspect of the Moon (UAWW)"
+                 :prereqs [archfey-prereq]
+                 :page 3
+                 :source :ua-warlock-and-wizard
+                 :summary "You don't need sleep and can't be forced to sleep."})
+               (opt5e/eldritch-invocation-option
                 {:name "Burning Hex"
-                 :prereqs [(patron-prereq "The Hexblade")]
-                 :modifiers [(mod5e/bonus-action
-                              {:name "Burning Hex"
-                               :page 3
-                               :source :ua-warlock-and-wizard
-                               :summary (str "Cause a target cursed by your Hexblade's Curse to take " (?ability-bonuses ::char5e/cha) " points of fire damage.")})]})
-               (t/option-cfg
+                 :prereqs [hexblade-prereq]
+                 :page 3
+                 :source :ua-warlock-and-wizard
+                 :summary (str "Cause a target cursed by your Hexblade's Curse to take " (?ability-bonuses ::char5e/cha) " points of fire damage.")
+                 :trait-type :bonus-action})
+               (opt5e/eldritch-invocation-option
                 {:name "Caiphon's Beacon"
-                 :prereqs [(patron-prereq "The Great Old One")]
+                 :prereqs [great-old-one-prereq]
+                 :page 3
+                 :source :ua-warlock-and-wizard
+                 :summary "You have advantage on attack rolls against charmed targets"
                  :modifiers [(mod5e/skill-proficiency :deception)
-                             (mod5e/skill-proficiency :stealth)
-                             (mod5e/trait-cfg
-                              {:name "Caiphon's Beacon"
-                               :page 3
-                               :source :ua-warlock-and-wizard
-                               :summary "You have advantage on attack rolls against charmed targets"})]})
-               (t/option-cfg
+                             (mod5e/skill-proficiency :stealth)]})
+               (opt5e/eldritch-invocation-option
                 {:name "Chilling Hex"
-                 :prereqs [(patron-prereq "The Hexblade")]
-                 :modifiers [(mod5e/bonus-action
-                              {:name "Chilling Hex"
-                               :page 3
-                               :source :ua-warlock-and-wizard
-                               :summary (str "Deal " (?ability-bonuses ::char5e/cha) " points of fire damage to all of your enemies within 5 ft. of a target cursed with your Hexblade's Curse")})]})
-               (t/option-cfg
+                 :prereqs [hexblade-prereq]
+                 :page 3
+                 :source :ua-warlock-and-wizard
+                 :summary (str "Deal " (?ability-bonuses ::char5e/cha) " points of fire damage to all of your enemies within 5 ft. of a target cursed with your Hexblade's Curse")
+                 :trait-type :bonus-action})
+               (opt5e/eldritch-invocation-option
                 {:name "Chronicle of the Raven Queen"
-                 :prereqs [(patron-prereq "The Raven Queen")
+                 :prereqs [raven-queen-prereq
                            opt5e/pact-of-the-tome-prereq]
-                 :modifiers [(mod5e/action
-                              {:name "Chronicle of the Raven Queen"
-                               :page 2
-                               :source :ua-warlock-and-wizard
-                               :duration {:units :turn}
-                               :summary "Gain the ability to see through objects to 30 ft, with darkvision within that range."})]})
-               (t/option-cfg
-                {:name "Gift of the Depths"
-                 :prereqs [(opt5e/total-levels-option-prereq 5 :warlock)]
-                 :modifiers [(mod5e/swimming-speed-equal-to-walking)
-                             (mod5e/spells-known 3 :water-breathing ::char5e/cha "Warlock" 0 "once per long rest")
-                             (mod5e/trait-cfg
-                              {:name "Gift of the Depths"
-                               :page 6
-                               :summary "You can breath underwater"})]})
-               (t/option-cfg
-                {:name "Gift of the Ever-Living Ones"
-                 :prereqs [opt5e/pact-of-the-chain-prereq]
-                 :modifiers [(mod5e/trait-cfg
-                              {:name "Gift of the Ever-Living Ones"
-                               :page 6
-                               :summary "If your familiar is within 100 ft. when you regain hit points, you regain the max for rolls"})]})
-               (t/option-cfg
-                {:name "Grasp of Hadar"
-                 :prereqs [opt5e/has-eldritch-blast-prereq]
-                 :modifiers [(mod5e/trait-cfg
-                              {:name "Grasp of Hadar"
-                               :page 6
-                               :summary "When you hit with 'eldritch blast' you can move the target up to 10 ft. toward you."})]})
-               (t/option-cfg
-                {:name "Improved Pact Weapon"
-                 :prereqs [opt5e/pact-of-the-blade-prereq]
-                 :modifiers [(mod5e/trait-cfg
-                              {:name "Improved Pact Weapon"
-                               :page 6
-                               :summary "Use weapons summoned as spellcasting focus. If the weapon is non-magical, it counts as magic and have a +1 bonus to attack and damage."})]})
-               (t/option-cfg
-                {:name "Kiss of Mephistopheles"
+                 :page 3
+                 :source :ua-warlock-and-wizard
+                 :duration {:units :turn}
+                 :trait-type :bonus-action
+                 :summary "Gain the ability to see through objects to 30 ft, with darkvision within that range."})
+               (opt5e/eldritch-invocation-option
+                {:name "Claw of Acamar"
+                 :prereqs [great-old-one-prereq
+                           opt5e/pact-of-the-blade-prereq]
+                 :page 3
+                 :summary "Create a flail with the reach property. You can expend a spell slot to do an extra 2d8 necrotic damage per slot level when you hit with it. The creature's speed also becomes 0 until the end of your next turn."
+                 :source :ua-warlock-and-wizard})
+               (opt5e/eldritch-invocation-option
+                {:name "Cloak of Baalzebul"
+                 :prereqs [fiend-prereq]
+                 :page 3
+                 :source :ua-warlock-and-wizard
+                 :summary (str "You gain a 5 ft. radius aura that gives you advantage on Intimidation, but disadvantage on other CHA checks. Other creatures in the aura at the start of their turn take " (?ability-bonuses ::char5e/cha) " points of poison damage.")
+                 :trait-type :bonus-action})
+               (opt5e/eldritch-invocation-option
+                {:name "Curse Bringer"
+                 :prereqs [hexblade-prereq]
+                 :page 6
+                 :source :ua-warlock-and-wizard
+                 :summary "When you hit with 'eldritch blast' you can move the target up to 10 ft. toward you."})
+               (opt5e/eldritch-invocation-option
+                {:name "Kiss of Mephistopheles (UAWW)"
                  :prereqs [(opt5e/total-levels-option-prereq 5 :warlock)
+                           fiend-prereq
                            opt5e/has-eldritch-blast-prereq]
-                 :modifiers [(mod5e/bonus-action
-                              {:name "Kiss of Mephistopheles"
-                               :page 6
-                               :summary "When you hit with 'eldritch blast', cast 'fireball' centered on the target using a warlock spell slot"})]})
-               (t/option-cfg
-                {:name "Maddening Hex"
-                 :prereqs [(opt5e/total-levels-option-prereq 5 :warlock)]
-                 :modifiers [(mod5e/bonus-action
-                              {:name "Maddening Hex"
-                               :page 6
-                               :source :ua-revised-class-options
-                               :summary (str "When you hex a target, deal " (max 0 (?ability-bonuses ::char5e/cha)) " psychic damage to it and other creatures you choose within 5 ft of it.")})]})
-               (t/option-cfg
-                {:name "Relentless Hex"
-                 :prereqs [(opt5e/total-levels-option-prereq 7 :warlock)]
-                 :modifiers [(mod5e/bonus-action
-                              {:name "Relentless Hex"
-                               :page 6
-                               :source :ua-revised-class-options
-                               :summary "When you hex a target, transport up to 30 ft. to an unoccupied space within 5 ft. of it."})]})
-               (t/option-cfg
-                {:name "Shroud of Shadow"
-                 :modifiers [(mod5e/trait-cfg
-                              {:name "Eldritch Invocation: Shroud of Shadow"
-                               :page 6
-                               :source :ua-revised-class-options
-                               :summary "cast invisibility at will"})
-                             (mod5e/spells-known 2 :invisibility ::char5e/cha "Warlock" 0 "at will")]
-                 :prereqs [(opt5e/total-levels-option-prereq 15 :warlock)]})
-               (t/option-cfg
-                {:name "Tomb of Levistus"
-                 :prereqs [(opt5e/total-levels-option-prereq 5 :warlock)]
-                 :modifiers [(mod5e/reaction
-                              {:name "Tomb of Levistus"
-                               :page 6
-                               :source :ua-revised-class-options
-                               :summary "When you take damage, gain 10 temp HPs. In addition, gain vulnerability to fire damage, and speed is 0, which go away at the end of your next turn."})]})
-               (t/option-cfg
-                {:name "Trickster's Escape"
-                 :modifiers [(mod5e/trait-cfg
-                              {:name "Eldritch Invocation: Trickster's Escape"
-                               :page 6
-                               :frequency opt5e/long-rests-1
-                               :source :ua-revised-class-options
-                               :summary "cast bane warlock spell slot"
-                               :prereqs [(opt5e/total-levels-option-prereq 7 :warlock)]})
-                             (mod5e/spells-known 4 :freedom-of-movement ::char5e/cha "Warlock" 0 "once per long rest")]})])}))
+                 :page 6
+                 :summary "When you hit with 'eldritch blast', cast 'fireball' centered on the target using a warlock spell slot"
+                 :trait-type :bonus-action})
+               (opt5e/eldritch-invocation-option
+                {:name "Frost Lance (UAWW)"
+                 :prereqs [archfey-prereq
+                           opt5e/has-eldritch-blast-prereq]
+                 :page 4
+                 :source :ua-warlock-and-wizard
+                 :frequency {:units :turn}
+                 :summary "When you hit with eldritch blast, you can reduce the target's speed by 10 ft. until your next turn."
+                 :trait-type :bonus-action})
+               (opt5e/eldritch-invocation-option
+                {:name "Gaze of Khirad"
+                 :prereqs [(opt5e/total-levels-option-prereq 7 :warlock)
+                           great-old-one-prereq]
+                 :page 4
+                 :source :ua-warlock-and-wizard
+                 :duration {:units :turn}
+                 :summary "Gain the ability to see through objects to 30 ft, with darkvision within that range."
+                 :trait-type :action})
+               (opt5e/eldritch-invocation-option
+                {:name "Grasp of Hadar (UAWW)"
+                 :prereqs [great-old-one-prereq
+                           opt5e/has-eldritch-blast-prereq]
+                 :page 4
+                 :source :ua-warlock-and-wizard
+                 :frequency {:units :turn}
+                 :summary "When you hit with 'eldritch blast' you can move the target up to 10 ft. toward you."})
+               (opt5e/eldritch-invocation-option
+                {:name "Green Lord's Gift"
+                 :prereqs [archfey-prereq]
+                 :page 4
+                 :source :ua-warlock-and-wizard
+                 :summary "If your familiar is within 100 ft. when you regain hit points, you regain the max for rolls"})
+               (opt5e/eldritch-invocation-option
+                {:name "Improved Pact Weapon (UAWW)"
+                 :prereqs [(opt5e/total-levels-option-prereq 5 :warlock)
+                           opt5e/pact-of-the-blade-prereq]
+                 :page 4
+                 :source :ua-warlock-and-wizard
+                 :summary "If your Pact of the Blade weapon is non-magical, it counts as magic and has a +1 bonus to attack and damage."})
+               (opt5e/eldritch-invocation-option
+                {:name "Mace of Dispater"
+                 :prereqs [fiend-prereq
+                           opt5e/pact-of-the-blade-prereq]
+                 :page 4
+                 :source :ua-warlock-and-wizard
+                 :summary "When you create a mace pact weapon, it has a special property. You can expend a spell slot and it will deal an extra 2d8 force damage per spell level of the slot and can knock a Huge or smaller target prone."})
+               (opt5e/eldritch-invocation-option
+                {:name "Moon Bow"
+                 :prereqs [archfey-prereq
+                           opt5e/pact-of-the-blade-prereq]
+                 :page 4
+                 :source :ua-warlock-and-wizard
+                 :summary "Create a longbow as your pact weapon. You can expend a spell slot and it will deal an extra 2d8 radiant damage per spell level of the slot"})
+               (opt5e/eldritch-invocation-option
+                {:name "Path of the Seeker"
+                 :prereqs [seeker-prereq]
+                 :page 4
+                 :source :ua-warlock-and-wizard
+                 :modifiers [(mod5e/saving-throw-advantage [:paralyzed])]
+                 :summary "You ignore difficult terrain, have advantage on saves against being paralyzed, and have advantage on checks to escape rope binding, manacels, or grapples."})
+               (opt5e/eldritch-invocation-option
+                {:name "Raven Queen's Blessing"
+                 :prereqs [raven-queen-prereq
+                           opt5e/has-eldritch-blast-prereq]
+                 :page 5
+                 :source :ua-warlock-and-wizard
+                 :summary "When you crit with 'eldritch blast', you or an ally may expend and roll an HD to regain HPs equal to the roll plus it's CON mod."})
+               (opt5e/eldritch-invocation-option
+                {:name "Relentless Hex (UAWW)"
+                 :prereqs [(opt5e/total-levels-option-prereq 5 :warlock)
+                           hexblade-prereq]
+                 :page 5
+                 :source :ua-warlock-and-wizard
+                 :summary "You can transport up to 30 ft. to an unoccupied space within 5 ft. of a creature affected by your hex."
+                 :trait-type :bonus-action})
+               (opt5e/eldritch-invocation-option
+                {:name "Sea Twin's Gift"
+                 :prereqs [archfey-prereq]
+                 :page 5
+                 :source :ua-warlock-and-wizard
+                 :summary "You can breath underwater"
+                 :modifiers [(mod5e/swimming-speed-equal-to-walking)
+                             (mod5e/spells-known 3 :water-breathing ::char5e/cha "Warlock" 0 "once per long rest")]})
+               (opt5e/eldritch-invocation-option
+                {:name "Seeker's Speech"
+                 :prereqs [seeker-prereq]
+                 :page 5
+                 :source :ua-warlock-and-wizard
+                 :summary "Choose two languages when you finish a long rest, you have mastered them until you finish your next long rest"})
+               (opt5e/eldritch-invocation-option
+                {:name "Shroud of Ulban"
+                 :prereqs [(opt5e/total-levels-option-prereq 18 :warlock)
+                           great-old-one-prereq]
+                 :page 5
+                 :source :ua-warlock-and-wizard
+                 :trait-type :action
+                 :summary "Turn invisible for 1 minute"})
+               (opt5e/eldritch-invocation-option
+                {:name "Superior Pact Weapon"
+                 :prereqs [(opt5e/total-levels-option-prereq 9 :warlock)
+                           opt5e/pact-of-the-blade-prereq]
+                 :page 5
+                 :source :ua-warlock-and-wizard
+                 :summary "If your Pact of the Blade weapon is non-magical, it counts as magic and has a +2 bonus to attack and damage."})
+               (opt5e/eldritch-invocation-option
+                {:name "Tomb of Levistus (UAWW)"
+                 :prereqs [fiend-prereq]
+                 :page 5
+                 :source :ua-warlock-and-wizard
+                 :trait-type :reaction
+                 :frequency {:units :rest}
+                 :summary "When you take damage, gain 10 temp HPs. In addition, gain vulnerability to fire damage, and speed is 0, which go away at the end of your next turn."})
+               (opt5e/eldritch-invocation-option
+                {:name "Ultimate Pact Weapon"
+                 :prereqs [(opt5e/total-levels-option-prereq 15 :warlock)
+                           opt5e/pact-of-the-blade-prereq]
+                 :page 5
+                 :source :ua-warlock-and-wizard
+                 :summary "If your Pact of the Blade weapon is non-magical, it counts as magic and has a +3 bonus to attack and damage."})])}))
+
+(def ua-warlock-and-wizard-plugin
+  {:name "Unearthed Arcana: Warlock and Wizard"
+   :class-options? true
+   :key :ua-warlock-and-wizard
+   :selections [(opt5e/class-selection
+                 {:options (map
+                            opt5e/class-option
+                            [warlock-option-cfg
+                             wizard-option-cfg])})
+                eldritch-invocation-selection]})
