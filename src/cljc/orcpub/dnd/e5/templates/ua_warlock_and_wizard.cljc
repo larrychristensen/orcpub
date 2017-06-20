@@ -13,6 +13,7 @@
    :plugin? true
    :source :ua-warlock-and-wizard
    :subclasses [{:name "The Hexblade"
+                 :modifiers [opt5e/ua-al-illegal]
                  :levels {1 {:modifiers [(mod5e/armor-proficiency :medium)
                                          (mod5e/armor-proficiency :shields)
                                          (mod5e/weapon-proficiency :martial)
@@ -46,6 +47,7 @@
                                             :page 2
                                             :source :ua-warlock-and-wizard})]}}}
                 {:name "The Raven Queen"
+                 :modifiers [opt5e/ua-al-illegal]
                  :levels {1 {:modifiers [(mod5e/bonus-action
                                            {:name "Sentinel Raven"
                                             :page 2
@@ -78,8 +80,10 @@
    :subclass-level 2
    :subclass-title "Arcane Tradition"
    :plugin? true
+   :source :ua-warlock-and-wizard
    :subclasses [{:name "Lore Mastery"
-                 :modifiers [(mod5e/skill-expertise :arcana)
+                 :modifiers [opt5e/ua-al-illegal
+                             (mod5e/skill-expertise :arcana)
                              (mod5e/skill-expertise :history)
                              (mod5e/skill-expertise :nature)
                              (mod5e/skill-expertise :religion)

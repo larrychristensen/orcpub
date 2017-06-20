@@ -16,9 +16,12 @@
    :plugin? true
    :subclass-level 3
    :subclass-title "Martial Archetype"
+   :source :ua-fighter
    :subclasses [ua-options/arcane-archer-option-cfg
                 {:name "Knight"
-                 :levels {3 {:modifiers [(mod5e/trait-cfg
+                 :modifiers [opt5e/ua-al-illegal]
+                 :levels {3 {:modifiers [opt5e/ua-al-illegal
+                                         (mod5e/trait-cfg
                                           {:name "Born to the Saddle"
                                            :page 2
                                            :source :ua-fighter})
@@ -40,7 +43,9 @@
                                             :page 3
                                             :source :ua-fighter})]}}}
                 {:name "Samurai"
-                 :levels {3 {:modifiers [(mod5e/trait-cfg
+                 :modifiers [opt5e/ua-al-illegal]
+                 :levels {3 {:modifiers [opt5e/ua-al-illegal
+                                         (mod5e/trait-cfg
                                           {:name "Fighting Spirit"
                                            :page 3
                                            :source :ua-fighter})]}
@@ -58,6 +63,7 @@
                                             :page 3
                                             :source :ua-fighter})]}}}
                 {:name "Sharpshooter"
+                 :modifiers [opt5e/ua-al-illegal]
                  :levels {3 {:modifiers [(mod5e/trait-cfg
                                           {:name "Steady Aim"
                                            :page 3
@@ -76,6 +82,7 @@
                                            {:name "Snap Shot"
                                             :page 3
                                             :source :ua-fighter})]}}}]})
+
 
 (def ua-fighter-plugin
   {:name "Unearthed Arcana: Fighter"
