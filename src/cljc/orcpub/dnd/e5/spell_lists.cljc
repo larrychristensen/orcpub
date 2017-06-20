@@ -312,7 +312,7 @@
      :shatter :spider-climb :suggestion :web
      :aganazzars-scorcher :dust-devil :earthbind :maximilians-earthen-grasp :pyrotechnics :skywrite :snillocs-snowball-swarm],
     3
-    [:animate-dead :bestow-curse :blink :clairvoyance :dispel-magic
+    [:animate-dead :bestow-curse :blink :clairvoyance :counterspell :dispel-magic
      :fear :feign-death :fireball :fly :gaseous-form :glyph-of-warding :haste
      :hypnotic-pattern :leomunds-tiny-hut :lightning-bolt :magic-circle :major-image
      :nondetection :phantom-steed :protection-from-energy :remove-curse
