@@ -497,7 +497,7 @@ The chime can be used ten times. After the tenth time, it cracks and becomes use
     :item-type :wondrous-item
     :rarity :uncommon
     :modifiers [(mod5e/action 
-                 {:name "Cape of the Mountebank"
+                 {:name "Circlet of Blasting"
                   :page 158
                   :source :dmg
                   :frequency {:units :day}
@@ -2480,7 +2480,13 @@ The boots regain 2 hours of flying capability for every 12 hours they aren’t i
            {:name name
             :base-key (:key weapon)
             :key (common/name-to-kw name)}))))
-    (add-key item)))
+    (let [weapon (weapons/weapons-map item-subtype)]
+      (add-key
+       (if weapon
+         (merge
+          weapon
+          item)
+         item)))))
 
 (defn expand-armor [{:keys [item-subtype name-fn] :as item}]
   (let [normal-version (armor5e/armor-map item-subtype)]
