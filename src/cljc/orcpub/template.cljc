@@ -34,7 +34,7 @@
 
 (spec/def ::selection-cfg (spec/keys :req-un [::tags ::options]))
 
-(defn selection-cfg [{:keys [name key source page order options help min sequential? multiselect? quantity? collapsible? ui-fn new-item-text new-item-fn prereq-fn simple? tags ref icon different? require-value?] :as cfg}]
+(defn selection-cfg [{:keys [name key source page order options help min sequential? multiselect? quantity? collapsible? ui-fn new-item-text new-item-fn prereq-fn simple? tags ref icon different? require-value? show-if-zero?] :as cfg}]
   (let [max (if (find cfg :max) (:max cfg) 1)]
     {::name name
      ::key (or key (common/name-to-kw name))
@@ -58,7 +58,9 @@
      ::prereq-fn prereq-fn
      ::simple? simple?
      ::different? different?
+     ::show-if-zero? show-if-zero?
      ::require-value? require-value?}))
+
 
 (spec/fdef
  selection-cfg

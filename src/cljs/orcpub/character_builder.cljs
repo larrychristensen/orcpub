@@ -515,11 +515,14 @@
       (let [locked? @(subscribe [:locked path])
             homebrew? @(subscribe [:homebrew? path])]
         [:div.p-5.m-b-20.m-b-0-last
-         (if parent-title
+         (if (and name parent-title)
            (selection-section-parent-title parent-title))
-         [:div.flex.align-items-c
+         [:div.flex.align-items-c.w-100-p.justify-cont-s-b
           (if icon (views5e/svg-icon icon 24))
-          (selection-section-title name)
+          (if name
+            (selection-section-title name)
+            (if parent-title
+              (selection-section-parent-title parent-title)))
           (if (and path help)
             [show-info-button expanded?])
           (if (not hide-lock?)
@@ -569,10 +572,9 @@
       [:div selector])
     option-selectors)))
 
-(defn selection-section [built-template option-paths ui-fns {:keys [::t/key ::t/name ::t/help ::t/options ::t/min ::t/max ::t/ref ::t/icon ::t/multiselect? ::entity/path ::entity/parent] :as selection} num-columns & [hide-homebrew?]]
+(defn selection-section [built-template option-paths ui-fns {:keys [::t/key ::t/name ::t/help ::t/options ::t/min ::t/max ::t/ref ::t/icon ::t/multiselect? ::entity/path ::entity/parent] :as selection} num-columns remaining & [hide-homebrew?]]
   (let [actual-path (entity/actual-path selection)
         character @(subscribe [:character])
-        remaining (entity/count-remaining built-template character selection)
         expanded? (r/atom false)
         ancestor-names (ancestor-names-string built-template actual-path)
         homebrew? @(subscribe [:homebrew? (or ref path)])
@@ -1485,17 +1487,23 @@
                            :selections group}))
                  (let [selection (some
                                   (matches-non-group-fn key)
-                                  final-selections)]
-                   (selection-section built-template option-paths {key ui-fn} selection num-columns hide-homebrew?)))])
+                                  final-selections)
+                       remaining (entity/count-remaining built-template character selection)]
+                   (selection-section built-template option-paths {key ui-fn} selection num-columns remaining hide-homebrew?)))])
             ui-fns))]
          (when (seq non-ui-fn-selections)
            [:div.m-t-20
             (let [sorted-selections (into (sorted-set-by compare-selections) non-ui-fn-selections)]
               (doall
                (map
-                (fn [selection]
-                  ^{:key (::entity/path selection)}
-                  [:div (selection-section built-template option-paths nil selection num-columns)])
+                (fn [{:keys [::t/min ::t/max ::t/show-if-zero?] :as selection}]
+                  (let [remaining (entity/count-remaining built-template character selection)]
+                    (if (or (nil? max)
+                            (pos? max)
+                            (not (zero? remaining))
+                            show-if-zero?)
+                      ^{:key (::entity/path selection)}
+                      [:div (selection-section built-template option-paths nil selection num-columns remaining)])))
                 sorted-selections)))])])]]))
 
 (def image-style

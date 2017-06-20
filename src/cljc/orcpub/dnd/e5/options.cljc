@@ -1354,6 +1354,7 @@
     :multiselect? true
     :tags #{:feats}
     :ref [:feats]
+    :show-if-zero? true
     :min num
     :max num}))
 
@@ -1538,6 +1539,7 @@
    (merge
     {:name "Feats"
      :ref [:feats]
+     :show-if-zero? true
      :tags #{:feats}
      :multiselect? true}
     cfg)))

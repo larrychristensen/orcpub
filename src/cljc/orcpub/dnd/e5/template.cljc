@@ -4755,6 +4755,7 @@ long rest."})
                opt5e/custom-background-option)})
    (opt5e/feat-selection-2
     {:options opt5e/feat-options
+     :show-if-zero? true
      :min 0
      :max 0})
    (opt5e/class-selection
