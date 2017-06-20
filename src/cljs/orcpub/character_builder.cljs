@@ -231,6 +231,9 @@
      [{::t/key (::t/key levels)
        ::t/options (map #(select-keys % [::t/key]) (::t/options levels))}])))
 
+(def level-label-style
+  {:margin-right "50px"})
+
 (defn class-levels-selector [{:keys [selection]}]
   (let [options (::t/options selection)
         selected-classes @(subscribe [::char5e/levels])
@@ -515,16 +518,16 @@
 
 (defn selection-section-base []
   (let [expanded? (r/atom false)]
-    (fn [{:keys [path parent-title name icon help max min remaining body hide-lock? hide-homebrew?]}]
+    (fn [{:keys [title path parent-title name icon help max min remaining body hide-lock? hide-homebrew?]}]
       (let [locked? @(subscribe [:locked path])
             homebrew? @(subscribe [:homebrew? path])]
         [:div.p-5.m-b-20.m-b-0-last
-         (if (and name parent-title)
+         (if (and (or title name) parent-title)
            (selection-section-parent-title parent-title))
          [:div.flex.align-items-c.w-100-p.justify-cont-s-b
           (if icon (views5e/svg-icon icon 24))
-          (if name
-            (selection-section-title name)
+          (if (or title name)
+            (selection-section-title (or title name))
             (if parent-title
               (selection-section-parent-title parent-title)))
           (if (and path help)
@@ -576,7 +579,7 @@
       [:div selector])
     option-selectors)))
 
-(defn selection-section [built-template option-paths ui-fns {:keys [::t/key ::t/name ::t/help ::t/options ::t/min ::t/max ::t/ref ::t/icon ::t/multiselect? ::entity/path ::entity/parent] :as selection} num-columns remaining & [hide-homebrew?]]
+(defn selection-section [title built-template option-paths ui-fns {:keys [::t/key ::t/name ::t/help ::t/options ::t/min ::t/max ::t/ref ::t/icon ::t/multiselect? ::entity/path ::entity/parent] :as selection} num-columns remaining & [hide-homebrew?]]
   (let [actual-path (entity/actual-path selection)
         character @(subscribe [:character])
         expanded? (r/atom false)
@@ -586,7 +589,8 @@
         disable-select-new? (and multiselect?
                                  (not (pos? remaining))
                                  (some? max))]
-    [selection-section-base {:path actual-path
+    [selection-section-base {:title title
+                             :path actual-path
                              :parent-title (if (not (s/blank? ancestor-names)) ancestor-names)
                              :name name
                              :icon icon
@@ -1279,10 +1283,10 @@
     :icon "ages"
     :tags #{:background}
     :components [#(more-selection-info :background-options? "background")]}
-   {:name "Class"
+   {:name "Class / Level"
     :icon "mounted-knight"
     :tags #{:class :subclass}
-    :ui-fns [{:key :class :ui-fn class-levels-selector}
+    :ui-fns [{:key :class :title "Class / Level" :ui-fn class-levels-selector}
              {:key :hit-points :group? true :ui-fn hit-points-editor}]
     :components [#(more-selection-info :class-options? "class")]}
    {:name "Spells"
@@ -1478,7 +1482,7 @@
          [:div
           (doall
            (map
-            (fn [{:keys [key group? ui-fn hide-homebrew?]}]
+            (fn [{:keys [key group? ui-fn hide-homebrew? title]}]
               ^{:key key}
               [:div.m-t-20
                (if group?
@@ -1493,7 +1497,7 @@
                                   (matches-non-group-fn key)
                                   final-selections)
                        remaining (entity/count-remaining built-template character selection)]
-                   (selection-section built-template option-paths {key ui-fn} selection num-columns remaining hide-homebrew?)))])
+                   (selection-section (or title (::t/name selection)) built-template option-paths {key ui-fn} selection num-columns remaining hide-homebrew?)))])
             ui-fns))]
          (when (seq non-ui-fn-selections)
            [:div.m-t-20
@@ -1507,7 +1511,7 @@
                             (not (zero? remaining))
                             show-if-zero?)
                       ^{:key (::entity/path selection)}
-                      [:div (selection-section built-template option-paths nil selection num-columns remaining)])))
+                      [:div (selection-section (::t/name selection) built-template option-paths nil selection num-columns remaining)])))
                 sorted-selections)))])])]]))
 
 (def image-style
