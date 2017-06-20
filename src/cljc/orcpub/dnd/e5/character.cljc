@@ -555,6 +555,9 @@
 (defn ideals [built-char]
   (get-prop built-char ::ideals))
 
+(defn xps [built-char]
+  (get-prop built-char ::xps))
+
 (defn bonds [built-char]
   (get-prop built-char ::bonds))
 
