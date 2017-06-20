@@ -1839,6 +1839,11 @@
   (halfling-name
    (set-name halfling-names ::female)))
 
+(defmethod random-name :default [_]
+  (random-name {:race ::human
+                :subrace (random-human-subrace)
+                :sex (random-sex)}))
+
 (defn random-name-result [{:keys [sex race subrace]}]
   (let [final-race (if (human-subraces-set subrace) ::human
                        (or race (random-race)))
@@ -1882,7 +1887,11 @@
             "The Elephant and the Room"
             "The Crack of Doom"
             "The Birds and the Bees"
-            "Three Sheets to the Wind"]
+            "Three Sheets to the Wind"
+            "Thick as Thieves"
+            "The Gilded Gold"
+            "The Painted Lily"
+            "Without a Paddle"]
    ::pre-creature ["Fat"
                    "Prancing"
                    "Dancing"

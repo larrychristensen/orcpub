@@ -265,6 +265,7 @@
                                :page 6
                                :source :ua-revised-class-options
                                :trait-type :reaction
+                               :frequency {:units :rest}
                                :summary "When you take damage, gain 10 temp HPs. In addition, gain vulnerability to fire damage, and speed is 0, which go away at the end of your next turn."})
                              (opt5e/eldritch-invocation-option
                               {:name "Trickster's Escape"
