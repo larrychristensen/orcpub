@@ -1523,7 +1523,11 @@
     [:div.flex-grow-1
      [:div.m-t-5
       [:span.personality-label.f-s-18 "Character Name"]
-      [character-input entity-values ::char5e/character-name]]
+      [:div.flex.align-items-c
+       [character-input entity-values ::char5e/character-name]
+       [:button.form-button.p-10.m-t-5.m-l-5
+        {:on-click (fn [_] (dispatch [::char5e/set-random-name]))}
+        [:i.fa.fa-random.white.f-s-16]]]]
      [:div.flex.justify-cont-s-b
       [:div.field.flex-grow-1.m-r-2
        [:span.personality-label.f-s-18 "Player Name"]

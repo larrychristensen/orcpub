@@ -460,7 +460,8 @@
    ::char5e/save-bonuses char5e/save-bonuses 
    ::char5e/saving-throws char5e/saving-throws 
    ::char5e/race char5e/race 
-   ::char5e/subrace char5e/subrace 
+   ::char5e/subrace char5e/subrace
+   ::char5e/sex char5e/sex
    ::char5e/alignment char5e/alignment 
    ::char5e/background char5e/background 
    ::char5e/classes char5e/classes 

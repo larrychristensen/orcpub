@@ -395,6 +395,21 @@
  character-interceptors
  update-value-field)
 
+(reg-event-fx
+ ::char5e/set-random-name
+ (fn [_ _]
+   (let [race-name @(subscribe [::char5e/race])
+         race-kw (common/name-to-kw race-name "orcpub.dnd.e5.character.random")
+         subrace-name @(subscribe [::char5e/subrace])
+         subrace-kw (common/name-to-kw subrace-name "orcpub.dnd.e5.character.random")
+         sex @(subscribe [::char5e/sex])
+         sex-kw (common/name-to-kw sex "orcpub.dnd.e5.character.random")]
+     {:dispatch [:update-value-field ::char5e/character-name (:name
+                                                              (char-rand5e/random-name-result
+                                                               {:race race-kw
+                                                                :subrace (if (= ::char-rand5e/human subrace-kw) subrace-kw)
+                                                                :sex sex-kw}))]})))
+
 (reg-event-db
  :select-option
  character-interceptors
@@ -1191,6 +1206,8 @@
    (assoc db
           :confirmation-shown? true
           :confirmation-cfg cfg)))
+
+
 
 (defn name-result [search-text]
   (let [[sex race subrace :as result] (event-handlers/parse-name-query search-text)]
