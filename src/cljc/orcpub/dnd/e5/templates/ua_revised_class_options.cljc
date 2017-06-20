@@ -166,130 +166,112 @@
                   :options (map
                             (fn [o]
                               (update o ::t/modifiers conj opt5e/ua-al-illegal))
-                            [(t/option-cfg
+                            [(opt5e/eldritch-invocation-option
                               {:name "Aspect of the Moon"
                                :prereqs [opt5e/pact-of-the-tome-prereq]
-                               :modifiers [(mod5e/trait-cfg
-                                            {:name "Aspect of the Moon"
-                                             :page 5
-                                             :source :ua-revised-class-options
-                                             :summary "You don't need sleep and can't be forced to sleep."})]})
-                             (t/option-cfg
+                               :page 5
+                               :source :ua-revised-class-options
+                               :summary "You don't need sleep and can't be forced to sleep."})
+                             (opt5e/eldritch-invocation-option
                               {:name "Cloak of Flies"
                                :prereqs [(opt5e/total-levels-option-prereq 5 :warlock)]
-                               :modifiers [(mod5e/bonus-action
-                                            {:name "Cloak of Flies"
-                                             :page 5
-                                             :source :ua-revised-class-options
-                                             :summary (str "You gain a 5 ft. radius aura that gives you advantage on Intimidation, but disadvantage on other CHA checks. Other creatures in the aura at the start of their turn take " (?ability-bonuses ::char5e/cha) " points of poison damage.")})]})
-                             (t/option-cfg
+                               :page 5
+                               :source :ua-revised-class-options
+                               :summary (str "You gain a 5 ft. radius aura that gives you advantage on Intimidation, but disadvantage on other CHA checks. Other creatures in the aura at the start of their turn take " (max 0 (?ability-bonuses ::char5e/cha)) " points of poison damage.")})
+                             (opt5e/eldritch-invocation-option
                               {:name "Eldritch Smite"
                                :prereqs [(opt5e/total-levels-option-prereq 5 :warlock)
                                          opt5e/pact-of-the-blade-prereq]
-                               :modifiers [(mod5e/trait-cfg
-                                            {:name "Eldritch Smite"
-                                             :frequency {:units :turn}
-                                             :page 6
-                                             :source :ua-revised-class-options
-                                             :summary "When you hit with your pact weapon, you can expend a spell slot to do (X + 1)d8 extra force damage, where X is the slot level, and the target is knocked prone if it takes any of the damage and is Huge or smaller."})]})
-                             (t/option-cfg
+                               :page 6
+                               :source :ua-revised-class-options
+                               :summary "When you hit with your pact weapon, you can expend a spell slot to do (X + 1)d8 extra force damage, where X is the slot level, and the target is knocked prone if it takes any of the damage and is Huge or smaller."
+                               :frequency {:units :turn}})
+                             (opt5e/eldritch-invocation-option
                               {:name "Frost Lance"
                                :prereqs [opt5e/has-eldritch-blast-prereq]
-                               :modifiers [(mod5e/bonus-action
-                                            {:name "Frost Lance"
-                                             :page 6
-                                             :source :ua-revised-class-options
-                                             :frequency {:units :turn}
-                                             :summary "When you hit with eldritch blast, you can reduce the target's speed by 10 ft. until your next turn."})]})
-                             (t/option-cfg
+                               :page 6
+                               :source :ua-revised-class-options
+                               :frequency {:units :turn}
+                               :summary "When you hit with eldritch blast, you can reduce the target's speed by 10 ft. until your next turn."
+                               :trait-type :bonus-action})
+                             (opt5e/eldritch-invocation-option
                               {:name "Ghostly Gaze"
                                :prereqs [(opt5e/total-levels-option-prereq 7 :warlock)]
-                               :modifiers [(mod5e/action
-                                            {:name "Ghostly Gaze"
-                                             :page 6
-                                             :source :ua-revised-class-options
-                                             :frequency {:units :rest}
-                                             :duration {:units :turn}
-                                             :summary "Gain the ability to see through objects to 30 ft, with darkvision within that range."})]})
-                             (t/option-cfg
+                               :page 6
+                               :source :ua-revised-class-options
+                               :frequency {:units :rest}
+                               :duration {:units :turn}
+                               :summary "Gain the ability to see through objects to 30 ft, with darkvision within that range."
+                               :trait-type :bonus-action})
+                             (opt5e/eldritch-invocation-option
                               {:name "Gift of the Depths"
                                :prereqs [(opt5e/total-levels-option-prereq 5 :warlock)]
+                               :page 6
+                               :source :ua-revised-class-options
+                               :summary "You can breath underwater"
                                :modifiers [(mod5e/swimming-speed-equal-to-walking)
-                                           (mod5e/spells-known 3 :water-breathing ::char5e/cha "Warlock" 0 "once per long rest")
-                                           (mod5e/trait-cfg
-                                            {:name "Gift of the Depths"
-                                             :page 6
-                                             :summary "You can breath underwater"})]})
-                             (t/option-cfg
+                                           (mod5e/spells-known 3 :water-breathing ::char5e/cha "Warlock" 0 "once per long rest")]})
+                             (opt5e/eldritch-invocation-option
                               {:name "Gift of the Ever-Living Ones"
                                :prereqs [opt5e/pact-of-the-chain-prereq]
-                               :modifiers [(mod5e/trait-cfg
-                                            {:name "Gift of the Ever-Living Ones"
-                                             :page 6
-                                             :summary "If your familiar is within 100 ft. when you regain hit points, you regain the max for rolls"})]})
-                             (t/option-cfg
+                               :page 6
+                               :source :ua-revised-class-options
+                               :summary "If your familiar is within 100 ft. when you regain hit points, you regain the max for rolls"})
+                             (opt5e/eldritch-invocation-option
                               {:name "Grasp of Hadar"
                                :prereqs [opt5e/has-eldritch-blast-prereq]
-                               :modifiers [(mod5e/trait-cfg
-                                            {:name "Grasp of Hadar"
-                                             :page 6
-                                             :summary "When you hit with 'eldritch blast' you can move the target up to 10 ft. toward you."})]})
-                             (t/option-cfg
+                               :page 6
+                               :source :ua-revised-class-options
+                               :frequency {:units :turn}
+                               :summary "When you hit with 'eldritch blast' you can move the target up to 10 ft. toward you."})
+                             (opt5e/eldritch-invocation-option
                               {:name "Improved Pact Weapon"
                                :prereqs [opt5e/pact-of-the-blade-prereq]
-                               :modifiers [(mod5e/trait-cfg
-                                            {:name "Improved Pact Weapon"
-                                             :page 6
-                                             :summary "Use weapons summoned as spellcasting focus. If the weapon is non-magical, it counts as magic and have a +1 bonus to attack and damage."})]})
-                             (t/option-cfg
+                               :page 6
+                               :source :ua-revised-class-options
+                               :summary "Use weapons summoned as spellcasting focus. If the weapon is non-magical, it counts as magic and have a +1 bonus to attack and damage."})
+                             (opt5e/eldritch-invocation-option
                               {:name "Kiss of Mephistopheles"
                                :prereqs [(opt5e/total-levels-option-prereq 5 :warlock)
                                          opt5e/has-eldritch-blast-prereq]
-                               :modifiers [(mod5e/bonus-action
-                                            {:name "Kiss of Mephistopheles"
-                                             :page 6
-                                             :summary "When you hit with 'eldritch blast', cast 'fireball' centered on the target using a warlock spell slot"})]})
-                             (t/option-cfg
+                               :page 6
+                               :source :ua-revised-class-options
+                               :summary "When you hit with 'eldritch blast', cast 'fireball' centered on the target using a warlock spell slot"
+                               :trait-type :bonus-action})
+                             (opt5e/eldritch-invocation-option
                               {:name "Maddening Hex"
                                :prereqs [(opt5e/total-levels-option-prereq 5 :warlock)]
-                               :modifiers [(mod5e/bonus-action
-                                            {:name "Maddening Hex"
-                                             :page 6
-                                             :source :ua-revised-class-options
-                                             :summary (str "When you hex a target, deal " (max 0 (?ability-bonuses ::char5e/cha)) " psychic damage to it and other creatures you choose within 5 ft of it.")})]})
-                             (t/option-cfg
+                               :page 6
+                               :source :ua-revised-class-options
+                               :summary (str "When you hex a target, deal " (max 0 (?ability-bonuses ::char5e/cha)) " psychic damage to it and other creatures you choose within 5 ft of it.")
+                               :trait-type :bonus-action})
+                             (opt5e/eldritch-invocation-option
                               {:name "Relentless Hex"
                                :prereqs [(opt5e/total-levels-option-prereq 7 :warlock)]
-                               :modifiers [(mod5e/bonus-action
-                                            {:name "Relentless Hex"
-                                             :page 6
-                                             :source :ua-revised-class-options
-                                             :summary "When you hex a target, transport up to 30 ft. to an unoccupied space within 5 ft. of it."})]})
-                             (t/option-cfg
+                               :page 6
+                               :source :ua-revised-class-options
+                               :summary "When you hex a target, transport up to 30 ft. to an unoccupied space within 5 ft. of it."
+                               :trait-type :bonus-action})
+                             (opt5e/eldritch-invocation-option
                               {:name "Shroud of Shadow"
-                               :modifiers [(mod5e/trait-cfg
-                                            {:name "Eldritch Invocation: Shroud of Shadow"
-                                             :page 6
-                                             :source :ua-revised-class-options
-                                             :summary "cast invisibility at will"})
-                                           (mod5e/spells-known 2 :invisibility ::char5e/cha "Warlock" 0 "at will")]
+                               :page 6
+                               :source :ua-revised-class-options
+                               :summary "cast invisibility at will"
+                               :modifiers [(mod5e/spells-known 2 :invisibility ::char5e/cha "Warlock" 0 "at will")]
                                :prereqs [(opt5e/total-levels-option-prereq 15 :warlock)]})
-                             (t/option-cfg
+                             (opt5e/eldritch-invocation-option
                               {:name "Tomb of Levistus"
                                :prereqs [(opt5e/total-levels-option-prereq 5 :warlock)]
-                               :modifiers [(mod5e/reaction
-                                            {:name "Tomb of Levistus"
-                                             :page 6
-                                             :source :ua-revised-class-options
-                                             :summary "When you take damage, gain 10 temp HPs. In addition, gain vulnerability to fire damage, and speed is 0, which go away at the end of your next turn."})]})
-                             (t/option-cfg
+                               :page 6
+                               :source :ua-revised-class-options
+                               :trait-type :reaction
+                               :summary "When you take damage, gain 10 temp HPs. In addition, gain vulnerability to fire damage, and speed is 0, which go away at the end of your next turn."})
+                             (opt5e/eldritch-invocation-option
                               {:name "Trickster's Escape"
-                               :modifiers [(mod5e/trait-cfg
-                                            {:name "Eldritch Invocation: Trickster's Escape"
-                                             :page 6
-                                             :frequency opt5e/long-rests-1
-                                             :source :ua-revised-class-options
-                                             :summary "cast bane warlock spell slot"
-                                             :prereqs [(opt5e/total-levels-option-prereq 7 :warlock)]})
-                                           (mod5e/spells-known 4 :freedom-of-movement ::char5e/cha "Warlock" 0 "once per long rest")]})])})]})
+                               :page 6
+                               :frequency opt5e/long-rests-1
+                               :source :ua-revised-class-options
+                               :summary "cast bane using a warlock spell slot"
+                               :prereqs [(opt5e/total-levels-option-prereq 7 :warlock)]
+                               :modifiers [(mod5e/spells-known 4 :freedom-of-movement ::char5e/cha "Warlock" 0 "once per long rest")]})])})]})
 

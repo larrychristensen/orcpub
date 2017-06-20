@@ -2475,3 +2475,21 @@
                :source source
                :page page
                :summary "Advantage on hide checks in rocky terrain"}]}]})
+
+(defmacro eldritch-invocation-option [{:keys [name summary source page prereqs modifiers trait-type frequency range]}]
+  `(t/option-cfg
+    {:name ~name
+     :prereqs ~prereqs
+     :modifiers (conj
+                 ~modifiers
+                 (~(case trait-type
+                    :action `modifiers/action
+                    :bonus-action `modifiers/bonus-action
+                    :reaction `modifiers/reaction
+                    `modifiers/dependent-trait)
+                  {:name (str "Eldritch Invocation: " ~name)
+                   :page ~page
+                   :source ~source
+                   :summary ~summary
+                   :frequency ~frequency
+                   :range ~range}))}))
