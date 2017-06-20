@@ -8,10 +8,12 @@
             [orcpub.dnd.e5.options :as opt5e]
             [orcpub.dnd.e5.weapons :as weapon5e]
             [orcpub.dnd.e5.spell-lists :as sl]
+            [orcpub.dnd.e5.templates.ua-options :as ua-options]
             [orcpub.dnd.e5.templates.ua-mystic :as ua-mystic]
             [orcpub.dnd.e5.templates.ua-revised-ranger :as ua-revised-ranger]
             [orcpub.dnd.e5.templates.ua-artificer :as ua-artificer]
             [orcpub.dnd.e5.templates.ua-cleric :as ua-cleric]
+            [orcpub.dnd.e5.templates.ua-fighter :as ua-fighter]
             [orcpub.dnd.e5.templates.ua-bard :as ua-bard]
             [orcpub.dnd.e5.templates.ua-race-feats :as ua-race-feats]
             [orcpub.dnd.e5.templates.ua-skill-feats :as ua-skill-feats]
@@ -184,8 +186,6 @@
                             opt5e/class-option
                             ua-trio-of-subclasses-classes)})]})
 
-(def ua-revised-subclasses-kw :ua-revised-subclasses)
-
 (defn kensei-weapon-selection [num]
   (t/selection-cfg
    {:name "Kensei Weapons"
@@ -211,20 +211,20 @@
    :plugin? true
    :subclass-level 3
    :subclass-title "Primal Path"
-   :source ua-revised-subclasses-kw
+   :source ua-options/ua-revised-subclasses-kw
    :subclasses [{:name "Path of the Ancestral Guardian"
-                 :source ua-revised-subclasses-kw
+                 :source ua-options/ua-revised-subclasses-kw
                  :modifiers [opt5e/ua-al-illegal
                              (mod5e/bonus-action
                               {:name "Ancestral Protectors"
                                :page 1
-                               :source ua-revised-subclasses-kw
+                               :source ua-options/ua-revised-subclasses-kw
                                :duration {:units :round}
                                :summary "while raging, the first creature you hit with an attack on your turn gains disadvantage on attacks that don't target you and other creatures have reistance to the targets attacks"})]
                  :levels {6 {:modifiers [(mod5e/reaction
                                           {:name "Spirit Shield"
                                            :page 1
-                                           :source ua-revised-subclasses-kw
+                                           :source ua-options/ua-revised-subclasses-kw
                                            :summary (str "reduce the damage a creature takes by " (mod5e/level-val
                                                                                                    (?class-level :barbarian)
                                                                                                    {10 3
@@ -233,19 +233,19 @@
                  :traits [{:name "Consult the Spirits"
                            :level 10
                            :page 1
-                           :source ua-revised-subclasses-kw
+                           :source ua-options/ua-revised-subclasses-kw
                            :frequency {:units :rest}
                            :summary "cast 'clairvoyance' spell without a slot and with WIS as ability"}
                           {:name "Vengeful Ancestors"
                            :level 14
                            :page 1
-                           :source ua-revised-subclasses-kw
+                           :source ua-options/ua-revised-subclasses-kw
                            :summary "when you use Spirit Shield to prevent damage, the attacker takes the prevented damage"}]}]})
 
 (def bard-college-of-swords
   {:name "Bard"
    :plugin? true
-   :source ua-revised-subclasses-kw
+   :source ua-options/ua-revised-subclasses-kw
    :subclass-level 3
    :subclass-title "Bard College"
    :subclasses [{:name "College of Swords"
@@ -255,30 +255,30 @@
                              (mod5e/action
                               {:name "Blade Flourish"
                                :page 2
-                               :source ua-revised-subclasses-kw
+                               :source ua-options/ua-revised-subclasses-kw
                                :summary "make a melee weapon attack with one of the Blade Flourish options and gain +10 walking speed"})
                              (mod5e/action
                               {:name "Blade Flourish: Defensive Flourish"
                                :page 2
-                               :source ua-revised-subclasses-kw
+                               :source ua-options/ua-revised-subclasses-kw
                                :duration opt5e/rounds-1
                                :summary "add a Bardic Inspiration die to your AC"})
                              (mod5e/action
                               {:name "Blade Flourish: Slashing Flourish"
                                :page 2
-                               :source ua-revised-subclasses-kw
+                               :source ua-options/ua-revised-subclasses-kw
                                :range opt5e/ft-5
                                :summary "if the attack hits, do a Bardic Inspiration die worth of damage to other creatures of your choice"})
                              (mod5e/action
                               {:name "Blade Flourish: Mobile Flourish"
                                :page 2
-                               :source ua-revised-subclasses-kw
+                               :source ua-options/ua-revised-subclasses-kw
                                :summary "if the attack hits, use a Bardic Inspiration to push the target 5 + the Bardic Inpiration roll ft. away, and you may use reaction to move to within 5 ft of target"})]
                  :selections [(opt5e/fighting-style-selection :bard #{:dueling :two-weapon-fighting})]
                  :levels {6 {:modifiers [(mod5e/trait-cfg
                                           {:name "Cunning Flourish"
                                            :page 2
-                                           :source ua-revised-subclasses-kw
+                                           :source ua-options/ua-revised-subclasses-kw
                                            :summary "attack twice when you use Blade Flourish"})]}
                           14 {:modifiers [(mod5e/trait-cfg
                                            {:name "Master's Flourish"
@@ -291,85 +291,13 @@
    :plugin? true
    :subclass-level 3
    :subclass-title "Martial Archetype"
-   :source ua-revised-subclasses-kw
-   :subclasses [{:name "Arcane Archer"
-                 :levels {3 {:modifiers [opt5e/ua-al-illegal
-                                         (mod5e/trait-cfg
-                                          {:name "Magic Arrow"
-                                           :page 3
-                                           :source ua-revised-subclasses-kw
-                                           :summary "when you fire a non-magical arrow, you can temporarily make it magic with +1 bonus"})
-                                         (mod5e/dependent-trait
-                                          {:name "Arcane Shot"
-                                           :page 3
-                                           :source ua-revised-subclasses-kw
-                                           :frequency {:units :rest
-                                                       :amount (mod5e/level-val
-                                                                (?class-level :fighter)
-                                                                {7 3
-                                                                 10 4
-                                                                 15 5
-                                                                 18 6
-                                                                 :default 2})}
-                                           :summary "when you fire a magic arrow as part of an Attack, you can use an Arcane Shot Option"})
-                                         (mod5e/dependent-trait
-                                          {:name "Arcane Shot: Banishing Arrow"
-                                           :page 3
-                                           :source ua-revised-subclasses-kw
-                                           :summary (str "If the arrow hits, banish the creature until the end of it's next turn, it's speed becomes 0 and it is incapacitated unless it succeeds on a DC " (?spell-save-dc ::char5e/int) " CHA save. " (if (>= (?class-level :fighter) 18) " The target also takes 2d6 force damage."))})
-                                         (mod5e/dependent-trait
-                                          {:name "Arcane Shot: Brute Bane Arrow"
-                                           :page 3
-                                           :source ua-revised-subclasses-kw
-                                           :summary (str "If the arrow hits, deal " (if (>= (?class-level :fighter) 18) 4 2) "d6 extra necrotic damage to the target, if it fails a DC " (?spell-save-dc ::char5e/int) " CON save, it's attacks deal half damage until start of your next turn")})
-                                         (mod5e/dependent-trait
-                                          {:name "Arcane Shot: Bursting Arrow"
-                                           :page 3
-                                           :source ua-revised-subclasses-kw
-                                           :summary (str "if the arrow hits, deal and extra " (if (>= (?class-level :fighter) 18) 4 2) "d6 force damage to creatures within 10 ft. of the target")})
-                                         (mod5e/dependent-trait
-                                          {:name "Arcane Shot: Grasping Arrow"
-                                           :page 3
-                                           :source ua-revised-subclasses-kw
-                                           :summary (let [die-count (if (>= (?class-level :fighter) 18) 4 2)]
-                                                      (str "if the arrow hits, grasping brambles deal an extra " die-count "d6 poison damage, target's speed is reduced by 10 ft. and takes " die-count "d6 slashing damage the first time it moves on each of it's turns. The brambles can be removed with a DC " (?spell-save-dc ::char5e/int) " STR save."))})
-                                         (mod5e/dependent-trait
-                                          {:name "Arcane Shot: Mind Scrambling Arrow"
-                                           :page 4
-                                           :source ua-revised-subclasses-kw
-                                           :summary (str "if the arrow hits, deal an extra " (if (>= (?class-level :fighter) 18) 4 2) "d6 psychic damage, and the target must succeed on a DC " (?spell-save-dc ::char5e/int) " WIS save or cannot harm an ally of your choosing")})
-                                         (mod5e/dependent-trait
-                                          {:name "Arcane Shot: Piercing Arrow"
-                                           :page 4
-                                           :source ua-revised-subclasses-kw
-                                           :summary (str "instead of an attack roll, you deal the arrows damage to all creatures within a 1 ft. X 30 ft. line plus an extra " (if (>= (?class-level :fighter) 18) 2 1) "d6 piercing damage, half damage on successful DC " (?spell-save-dc ::char5e/int) " DEX save")})
-                                         (mod5e/dependent-trait
-                                          {:name "Arcane Shot: Seeking Arrow"
-                                           :page 4
-                                           :source ua-revised-subclasses-kw
-                                           :summary (str "instead of an attack roll, choose 1 creature you have seen in the past minute, it must succeed on a DC " (?spell-save-dc ::char5e/int) " DEX save or be hit by the arrow, which can move around corners, taking the arrow's damage plus an extra " (if (>= (?class-level :fighter) 18) 2 1) "d6 force damage, half on a successful save")})
-                                         (mod5e/dependent-trait
-                                          {:name "Arcane Shot: Shadow Arrow"
-                                           :page 4
-                                           :source ua-revised-subclasses-kw
-                                           :duration {:units :round}
-                                           :summary (str "if the arrow hits, deal an extra " (if (>= (?class-level :fighter) 18) 4 2) "d6 psychic damage and target must succeed on a DC " (?spell-save-dc ::char5e/int) " WIS save or cannot see beyond 5 ft")})]
-                             :selections [(opt5e/skill-selection [:arcana :nature] 1)]}
-                          7 {:modifiers [(mod5e/bonus-action
-                                          {:name "Curving Shot"
-                                           :page 3
-                                           :source ua-revised-subclasses-kw
-                                           :summary "when you miss with a magic arrow, you may reroll the attack against another target within 60 ft. of the original"})]}
-                          15 {:modifiers [(mod5e/trait-cfg
-                                           {:page 3
-                                            :source ua-revised-subclasses-kw
-                                            :name "Ever-Ready Shot"
-                                            :summary "Regain a use of Arcane Shot if you roll initiative and have none"})]}}}]})
+   :source ua-options/ua-revised-subclasses-kw
+   :subclasses [ua-options/arcane-archer-option-cfg]})
 
 (def monk-way-of-the-kensei
   (merge
     opt5e/monk-base-cfg
-    {:source ua-revised-subclasses-kw
+    {:source ua-options/ua-revised-subclasses-kw
      :plugin? true
      :subclasses [{:name "Way of the Kensei"
                    :selections [(kensei-weapon-selection 2)]
@@ -377,27 +305,27 @@
                                (mod5e/dependent-trait
                                 {:name "Path of the Kensei"
                                  :page 4
-                                 :source ua-revised-subclasses-kw
+                                 :source ua-options/ua-revised-subclasses-kw
                                  :summary (str "Your kensei weapons are " (common/list-print ?kensei-weapons) ". If you make an unarmed strike Attack and you have a melee kensei weapon in hand, gain +2 AC until start of your next turn. You can use a bonus action to add 1d4 damage to your ranged kensei weapon attacks for your turn.")})]
                    :levels {6 {:selections [(kensei-weapon-selection 1)]
                                :modifiers [(mod5e/trait-cfg
                                             {:name "One with the Blade"
                                              :page 5
-                                             :source ua-revised-subclasses-kw
+                                             :source ua-options/ua-revised-subclasses-kw
                                              :frequency {:units :round}
                                              :summary "kensei weapons count as magical; when you hit with a kensei weapon you may spend 1 ki to add damage equal to you Martial Arts die"})]}
                             11 {:selections [(kensei-weapon-selection 1)]
                                 :modifiers [(mod5e/bonus-action
                                              {:name "Sharpen the Blade"
                                               :page 5
-                                              :source ua-revised-subclasses-kw
+                                              :source ua-options/ua-revised-subclasses-kw
                                               :duration {:units :minute}
                                               :summary "spend X ki (max 3) to grant a kensei weapon an X bonus to attack and damage rolls"})]}
                             17 {:selections [(kensei-weapon-selection 1)]
                                 :modifiers [(mod5e/trait-cfg
                                              {:name "Unerring Accuracy"
                                               :page 5
-                                              :source ua-revised-subclasses-kw
+                                              :source ua-options/ua-revised-subclasses-kw
                                               :frequency {:units :round}
                                               :summary "if you miss with a monk weapon, reroll the attack"})]}}}]}))
 
@@ -412,7 +340,7 @@
                              (mod5e/trait-cfg
                               {:name "Favored by the Gods"
                                :page 5
-                               :source ua-revised-subclasses-kw
+                               :source ua-options/ua-revised-subclasses-kw
                                :frequency {:units :rest}
                                :summary "if you fail a save or miss an attack, you may roll 2d4 and add it to the missed roll"})]
                  :selections [(opt5e/subclass-cantrip-selection :sorcerer "Sorcerer" ::char5e/cha (get-in sl/spell-lists [:cleric 0]) 0)
@@ -422,7 +350,7 @@
                           6 {:modifiers [(mod5e/dependent-trait
                                           {:name "Empowered Healing"
                                            :page 5
-                                           :source ua-revised-subclasses-kw
+                                           :source ua-options/ua-revised-subclasses-kw
                                            :summary "you may reroll healing dice once"})]}
                           7 {:selections [(opt5e/subclass-spell-selection :sorcerer "Sorcerer" ::char5e/cha (get-in sl/spell-lists [:cleric 4]) 0)]}
                           9 {:selections [(opt5e/subclass-spell-selection :sorcerer "Sorcerer" ::char5e/cha (get-in sl/spell-lists [:cleric 5]) 0)]}
@@ -433,12 +361,12 @@
                           14 {:modifiers [(mod5e/bonus-action
                                            {:name "Angelic Form"
                                             :page 5
-                                            :source ua-revised-subclasses-kw
+                                            :source ua-options/ua-revised-subclasses-kw
                                             :summary "gain flying speed of 30 ft."})]}
                           18 {:modifiers [(mod5e/bonus-action
                                            {:name "Unearthly Recovery"
                                             :page 5
-                                            :source ua-revised-subclasses-kw
+                                            :source ua-options/ua-revised-subclasses-kw
                                             :frequency {:units :long-rest}
                                             :summary (str "regain " (int (/ ?max-hit-points)) " HPs if you have that many or fewer left")})]}}}]})
 
@@ -452,7 +380,7 @@
 (def ua-revised-subclasses-plugin
   {:name "Unearthed Arcana: Revised Subclasses"
    :class-options? true
-   :key ua-revised-subclasses-kw
+   :key ua-options/ua-revised-subclasses-kw
    :selections [(opt5e/class-selection
                  {:options (map
                             opt5e/class-option
@@ -1007,8 +935,8 @@
      ua-eberron-plugin
      ua-cleric-plugin
      ua-bard-plugin
+     ua-fighter/ua-fighter-plugin
      ua-race-feats/ua-race-feats-plugin
      ua-skill-feats/ua-skill-feats-plugin
      ua-revised-class-options/ua-revised-class-options-plugin
      ua-warlock-and-wizard/ua-warlock-and-wizard-plugin])))
-
