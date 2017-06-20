@@ -118,7 +118,7 @@
   (let [state (r/atom
                {:focused false
                 :temp-val ""})]
-    (fn [entity-values prop-name type & [cls-str handler]]
+    (fn [entity-values prop-name type & [cls-str handler input-type]]
       (let [value (get entity-values prop-name)
             leave-handler (fn [_]
                             (if (:focused @state)
@@ -131,7 +131,7 @@
                                      assoc
                                      :focused false)))]
         [type {:class-name (str "input " cls-str)
-               :type :text
+               :type (or input-type :text)
                :value (if (:focused @state)
                         (:temp-val @state)
                         (or value (:temp-val @state)))
@@ -145,10 +145,14 @@
                :on-change #(let [v (get-event-value %)]
                              (swap! state
                                     assoc
-                                    :temp-val v))}]))))
+                                    :temp-val (if (= :number input-type)
+                                                (if (not (s/blank? v))
+                                                  (js/parseInt v)
+                                                  0)
+                                                v)))}]))))
 
-(defn character-input [entity-values prop-name & [cls-str handler]]
-  [character-field entity-values prop-name :input cls-str handler])
+(defn character-input [entity-values prop-name & [cls-str handler type]]
+  [character-field entity-values prop-name :input cls-str handler type])
 
 (defn character-textarea [entity-values prop-name & [cls-str]]
   [character-field entity-values prop-name :textarea cls-str])
@@ -1520,9 +1524,13 @@
      [:div.m-t-5
       [:span.personality-label.f-s-18 "Character Name"]
       [character-input entity-values ::char5e/character-name]]
-     [:div.field
-      [:span.personality-label.f-s-18 "Player Name"]
-      [character-input entity-values ::char5e/player-name]]
+     [:div.flex.justify-cont-s-b
+      [:div.field.flex-grow-1.m-r-2
+       [:span.personality-label.f-s-18 "Player Name"]
+       [character-input entity-values ::char5e/player-name]]
+      [:div.field.flex-grow-1.m-l-2
+       [:span.personality-label.f-s-18 "Experience Points"]
+       [character-input entity-values ::char5e/xps nil nil :number]]]
      [:div.flex.justify-cont-s-b
       [:div.field.flex-grow-1.m-r-2
        [:span.personality-label.f-s-18 "Age"]

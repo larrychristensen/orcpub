@@ -77,6 +77,7 @@
   {:name "Wizard",
    :subclass-level 2
    :subclass-title "Arcane Tradition"
+   :plugin? true
    :subclasses [{:name "Lore Mastery"
                  :modifiers [(mod5e/skill-expertise :arcana)
                              (mod5e/skill-expertise :history)

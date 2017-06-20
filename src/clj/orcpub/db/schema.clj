@@ -139,7 +139,8 @@
      ::char5e/int
      ::char5e/wis
      ::char5e/cha
-     ::char5e/level])
+     ::char5e/level
+     ::char5e/xps])
    (map
     fulltext-prop
     [::char5e/character-name
