@@ -141,6 +141,7 @@
     ?num-attacks 1
     ?critical #{20}
     ?has-weapon-prof? (fn [weapon]
+                        (prn "WEAPON" weapon)
                         (or (?weapon-profs :martial)
                             (?weapon-profs (:key weapon))
                             (?weapon-profs (:type weapon))
