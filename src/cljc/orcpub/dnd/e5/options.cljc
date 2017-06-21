@@ -1406,7 +1406,8 @@
                             (modifiers/tool-expertise :thieves-tools)]})]}))
 
 (defn cleric-spell [spell-level spell-key min-level]
-  (modifiers/spells-known spell-level spell-key ::character/wis "Cleric" min-level nil :cleric))
+  (modifiers/spells-known spell-level spell-key ::character/wis "Cleric" min-level "Domain" :cleric))
+
 
 (defn potent-spellcasting [page & [source]]
   (modifiers/dependent-trait

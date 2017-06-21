@@ -6,12 +6,12 @@
   :main orcpub.server
 
   :min-lein-version "2.7.1"
-
+ 
   :repositories [["apache" "http://repository.apache.org/snapshots/"]
                  ["my.datomic.com" {:url "https://my.datomic.com/repo"
                                     :username [:gpg :env]
                                     :password [:gpg :env]}]]
-
+ 
   :dependencies [[org.clojure/clojure "1.9.0-alpha14"]
                  [org.clojure/test.check "0.9.0"]
                  [org.clojure/clojurescript "1.9.229"]
@@ -53,13 +53,16 @@
   :plugins [[lein-figwheel "0.5.8"]
             [lein-cljsbuild "1.1.4" :exclusions [[org.clojure/clojure]]]
             [lein-garden "0.3.0"]
-            [lein-environ "1.1.0"]]
+            [lein-environ "1.1.0"]
+            #_[lein-resource "16.9.1"]]
 
   :source-paths ["src/clj" "src/cljc" "src/cljs"]
 
   :test-paths ["test/clj" "test/cljc" "test/cljs"]
 
   :clean-targets ^{:protect false} ["resources/public/js/compiled" "target"]
+
+  :resource-paths ["resources" "resources/.ebextensions/*.config"]
 
   :uberjar-name "orcpub.jar"
 
@@ -74,6 +77,10 @@
                                 :output-to "resources/public/css/compiled/styles.css"
                                 ;; Compress the output?
                                 :pretty-print? false}}]}
+
+  :resource {
+             :resource-paths ["resources/copy" {:target-path "/"}]
+             }
 
   :cljsbuild {:builds
               [{:id "dev"

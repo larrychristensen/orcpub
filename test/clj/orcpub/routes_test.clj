@@ -1,6 +1,7 @@
 (ns orcpub.routes-test
   (:require [orcpub.routes :as routes]
-            [clojure.test :refer [deftest is]]))
+            [clojure.test :refer [deftest is testing]]
+            [orcpub.errors :as errors]))
 
 (deftest test-db-ids
   (let [e-1 {:db/id 1
