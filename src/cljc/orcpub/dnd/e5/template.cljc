@@ -217,6 +217,7 @@
    :darkvision 60
    :languages ["Dwarvish" "Common"]
    :weapon-proficiencies [:handaxe :battleaxe :light-hammer :warhammer]
+   :selections [(opt5e/tool-selection [:smiths-tools :brewers-supplies :masons-tools] 1)]
    :traits [{:name "Dwarven Resilience"
              :summary "Advantage on poison saves, resistance to poison damage"
              :page 20},
@@ -225,7 +226,6 @@
              :page 20}]
    :subraces [{:name "Hill Dwarf",
                :abilities {::char5e/wis 1}
-               :selections [(opt5e/tool-selection [:smiths-tools :brewers-supplies :masons-tools] 1)]
                :modifiers [(mod/modifier ?hit-point-level-bonus (+ 1 ?hit-point-level-bonus))]}
               {:name "Mountain Dwarf"
                :abilities {::char5e/str 2}
@@ -4439,7 +4439,9 @@ long rest."})
                scag/sword-coast-adventurers-guide-backgrounds)})
    (opt5e/race-selection
     {:options (map
-               (fn [race] (opt5e/race-option (assoc race :source :scag)))
+               (fn [race] (opt5e/race-option (if (not (:plugin? race))
+                                               (assoc race :source :scag)
+                                               race)))
                [scag-half-elf-option-cfg
                 scag-tiefling-option-cfg
                 scag-halfling-option-cfg
