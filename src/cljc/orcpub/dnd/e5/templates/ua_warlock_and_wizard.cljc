@@ -6,6 +6,7 @@
             [orcpub.template :as t]
             [re-frame.core :refer [subscribe]]))
 
+
 (def warlock-option-cfg
   {:name "Warlock"
    :subclass-level 1
@@ -19,7 +20,7 @@
                                          (mod5e/weapon-proficiency :martial)
                                          (mod/vec-mod ?weapon-ability-modifiers
                                                       (fn [weapon finesse?]
-                                                        (if (and (?has-weapon-prof weapon)
+                                                        (if (and (?has-weapon-prof? weapon)
                                                                  (not (:two-handed? weapon)))
                                                           (get ?ability-bonuses ::char5e/cha)
                                                           0)))
