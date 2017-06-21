@@ -899,6 +899,7 @@
    (let [error-code (-> response :body :error)]
      (cond
        (= error-code errors/username-required) (dispatch-login-failure "Username is required.")
+       (= error-code errors/too-many-attempts) (dispatch-login-failure "You have made too many login attempts, you account is locked for 15 minutes. Please do not try to login again until 15 minutes have passed.")
        (= error-code errors/password-required) (dispatch-login-failure "Password is required.")
        (= error-code errors/bad-credentials) (dispatch-login-failure "Password is incorrect.") 
        (= error-code errors/no-account) {:dispatch-n [[:set-user-data nil]

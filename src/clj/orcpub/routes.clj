@@ -33,6 +33,7 @@
             [orcpub.registration :as registration]
             [orcpub.entity.strict :as se]
             [orcpub.entity :as entity]
+            [orcpub.security :as security]
             [orcpub.routes.party :as party]
             [hiccup.page :as page]
             [environ.core :as environ]
@@ -47,6 +48,8 @@
            (javax.imageio ImageIO)
            (java.net URL))
   (:gen-class))
+
+(deftype FixedBuffer [^long len])
 
 (def backend (backends/jws {:secret (environ/env :signature)}))
 
@@ -157,8 +160,17 @@
    :email (:orcpub.user/email user)
    :following (following-usernames db (map :db/id (:orcpub.user/following user)))})
 
+(defn bad-credentials-response [db username ip]
+  (security/add-failed-login-attempt! username ip)
+  (if (security/too-many-attempts-for-username? username)
+    (login-error errors/too-many-attempts) 
+    (let [user-for-username (find-user-by-username-or-email db username)]
+      (login-error (if (:db/id user-for-username)
+                     errors/bad-credentials
+                     errors/no-account)))))
+
 (defn login-response
-  [{:keys [json-params db] :as request}]
+  [{:keys [json-params db remote-addr] :as request}]
   (let [{raw-username :username raw-password :password} json-params]
     (cond
       (s/blank? raw-username) (login-error errors/username-required)
@@ -172,10 +184,7 @@
                   unverified? (not verified?)
                   expired? (and verification-sent (verification-expired? verification-sent))]
               (cond
-                (nil? id) (let [user-for-username (find-user-by-username-or-email db username)]
-                            (login-error (if (:db/id user-for-username)
-                                           errors/bad-credentials
-                                           errors/no-account)))
+                (nil? id) (bad-credentials-response db username remote-addr)
                 (and unverified? expired?) (login-error errors/unverified-expired)
                 unverified? (login-error errors/unverified {:email email})
                 :else (let [token (create-token (:orcpub.user/username user)
@@ -864,9 +873,7 @@
       {:put `party/update-party-name}]
      [(route-map/path-for route-map/dnd-e5-char-party-characters-route :id ":id") ^:interceptors [(body-params/body-params) check-auth parse-id check-party-owner]
       {:post `party/add-character}]
-     [(let [path (route-map/path-for route-map/dnd-e5-char-party-character-route :id ":id" :character-id ":character-id")]
-        (prn "PATH" path)
-        path) ^:interceptors [(body-params/body-params) check-auth parse-id check-party-owner]
+     [(route-map/path-for route-map/dnd-e5-char-party-character-route :id ":id" :character-id ":character-id") ^:interceptors [(body-params/body-params) check-auth parse-id check-party-owner]
       {:delete `party/remove-character}]
      [(route-map/path-for route-map/dnd-e5-char-list-page-route) ^:interceptors [(body-params/body-params)]
       {:get `character-list-page}]
