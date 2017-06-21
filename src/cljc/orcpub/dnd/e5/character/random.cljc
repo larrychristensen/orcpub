@@ -1640,8 +1640,35 @@
 (defn random-item [list key]
   (-> list key rand-nth))
 
+(def sexes
+  [::male ::female])
+
+(def sexes-set (into #{} sexes))
+
+(def human-subraces
+  [::calishite
+   ::chondathan
+   ::shou
+   ::turami
+   ::illuskan
+   ::damaran
+   ::rashemi
+   ::mulan])
+
+(def subraces-set (into #{} human-subraces))
+
+(def races
+  [::elf
+   ::dwarf
+   ::halfling
+   ::human
+   ::human
+   ::human])
+
+(def races-set (into #{} races))
+
 (defn random-sex []
-  (rand-nth [::male ::female]))
+  (rand-nth sexes))
 
 (derive ::tethyrian ::chondathan)
 
@@ -1760,16 +1787,6 @@
   (mulan-name
    (set-name mulan-names ::female)))
 
-(def human-subraces
-  [::calishite
-   ::chondathan
-   ::shou
-   ::turami
-   ::illuskan
-   ::damaran
-   ::rashemi
-   ::mulan])
-
 (def human-subraces-set
   (into #{} human-subraces))
 
@@ -1781,12 +1798,7 @@
 
 (defn random-race []
   (rand-nth
-   [::elf
-    ::dwarf
-    ::halfling
-    ::human
-    ::human
-    ::human]))
+   races))
 
 (defn random-human-subrace []
   (rand-nth human-subraces))
@@ -1845,13 +1857,15 @@
                 :sex (random-sex)}))
 
 (defn random-name-result [{:keys [sex race subrace]}]
-  (let [final-race (if (human-subraces-set subrace) ::human
-                       (or race (random-race)))
-        final-subrace (or subrace (random-subrace final-race))
-        final-sex (or sex (random-sex))
+  (let [final-race (if (human-subraces-set subrace)
+                     ::human
+                     (or (races-set race) (random-race)))
+        final-subrace (or (subraces-set subrace) (random-subrace final-race))
+        final-sex (or (sexes-set sex) (random-sex))
         cfg {:race final-race
              :subrace final-subrace
              :sex final-sex}]
+    (prn "RANDOM NAME" [sex race subrace] [final-race final-subrace final-sex])
     (assoc cfg :name (random-name cfg))))
 
 (def tavern-names
