@@ -22,7 +22,12 @@
 (def dnd-e5-monster-list-page-route :monster-list-5e-page)
 (def dnd-e5-monster-page-route :monster-5e-page)
 
-(def dnd-e5-monster-page-routes #{dnd-e5-monster-list-page-route})
+(def dnd-e5-monster-page-routes #{dnd-e5-monster-list-page-route dnd-e5-monster-page-route})
+
+(def dnd-e5-spell-list-page-route :spell-list-5e-page)
+(def dnd-e5-spell-page-route :spell-5e-page)
+
+(def dnd-e5-spell-page-routes #{dnd-e5-spell-list-page-route dnd-e5-spell-page-route})
 
 (def default-route :default)
 (def register-route :register)
@@ -98,7 +103,10 @@
                               "characters" {"" dnd-e5-char-list-page-route
                                             ["/" :id] dnd-e5-char-page-route}
                               "parties" dnd-e5-char-parties-page-route
-                              "monsters" dnd-e5-monster-list-page-route}}}}])
+                              "spells" {"" dnd-e5-spell-list-page-route
+                                        ["/" :key] dnd-e5-spell-page-route}
+                              "monsters" {"" dnd-e5-monster-list-page-route
+                                          ["/" :key] dnd-e5-monster-page-route}}}}}])
 
 (defn path-for [& args]
   (apply bidi/path-for routes args))

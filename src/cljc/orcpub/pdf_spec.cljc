@@ -416,6 +416,7 @@
       :backstory (char5e/description built-char)
       :character-name character-name
       :character-name-2 character-name
+      :xp (char5e/xps built-char)
       :player-name (char5e/player-name built-char)
       :age (char5e/age built-char)
       :height (char5e/height built-char)
