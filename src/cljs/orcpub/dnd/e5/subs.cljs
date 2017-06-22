@@ -606,6 +606,16 @@
        (sort-by :name monsters5e/monsters))))
 
 (reg-sub
+ ::char5e/spell-text-filter
+ (fn [db _]
+   (::char5e/spell-text-filter db)))
+
+(reg-sub
+ ::char5e/monster-text-filter
+ (fn [db _]
+   (::char5e/monster-text-filter db)))
+
+(reg-sub
  ::char5e/filtered-spells
  (fn [db _]
    (or (::char5e/filtered-spells db)

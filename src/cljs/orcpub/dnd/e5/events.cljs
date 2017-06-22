@@ -1298,12 +1298,16 @@
 (reg-event-db
  ::char5e/filter-monsters
  (fn [db [_ filter-text]]
-   (assoc db ::char5e/filtered-monsters (filter-monsters filter-text))))
+   (assoc db
+          ::char5e/monster-text-filter filter-text
+          ::char5e/filtered-monsters (filter-monsters filter-text))))
 
 (reg-event-db
  ::char5e/filter-spells
  (fn [db [_ filter-text]]
-   (assoc db ::char5e/filtered-spells (filter-spells filter-text))))
+   (assoc db
+          ::char5e/spell-text-filter filter-text
+          ::char5e/filtered-spells (filter-spells filter-text))))
 
 (reg-event-db
  ::char5e/toggle-selected

@@ -771,7 +771,7 @@
   [:span.f-s-24.f-w-b.white name])
 
 (defn spell-summary [name level school include-name? & [subheader-size]]
-  [:div.p-20
+  [:div.p-t-20.p-b-20
    (if include-name? [:span.f-s-24.f-w-b name])
    [:div.i.f-w-b
     {:class-name (str "f-s-" (or subheader-size 18))}
@@ -2328,6 +2328,7 @@
       [:div.p-b-10.p-l-10.p-r-10
        [:input.input.f-s-24.p-l-20
         {:style {:height "60px"}
+         :value @(subscribe [::char/monster-text-filter])
          :on-change #(dispatch [::char/filter-monsters (event-value %)])}]]
       [:div
        {:style list-style}
@@ -2366,6 +2367,7 @@
       [:div.p-b-10.p-l-10.p-r-10
        [:input.input.f-s-24.p-l-20
         {:style {:height "60px"}
+         :value @(subscribe [::char/spell-text-filter])
          :on-change #(dispatch [::char/filter-spells (event-value %)])}]]
       [:div
        {:style list-style}
@@ -2381,7 +2383,7 @@
                {:on-click #(dispatch [:toggle-spell-expanded name])}
                [:div.m-l-10
                 [:div.f-s-24.f-w-600
-                 [spell-summary name level school true]]]
+                 [spell-summary name level school true 12]]]
                [:div.orange.pointer.m-r-10
                 (if (not= device-type :mobile) [:span.underline (if expanded?
                                                                   "collapse"
