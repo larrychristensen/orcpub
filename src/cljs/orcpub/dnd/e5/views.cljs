@@ -239,9 +239,9 @@
          [header-tab
           "spells"
           "spell-book"
-          (fn [])
-          true
+          #(dispatch [:route routes/dnd-e5-spell-list-page-route {:return? true}])
           false
+          (routes/dnd-e5-spell-page-routes (or (:handler active-route) active-route))
           device-type]
          [header-tab
           "monsters"
@@ -770,8 +770,8 @@
 (defn tavern-name-result [name]
   [:span.f-s-24.f-w-b.white name])
 
-(defn spell-component [{:keys [name level school casting-time range duration components description summary page source] :as spell} include-name? & [subheader-size]]
-  [:div.m-l-10
+(defn spell-summary [name level school include-name? & [subheader-size]]
+  [:div.p-20
    (if include-name? [:span.f-s-24.f-w-b name])
    [:div.i.f-w-b
     {:class-name (str "f-s-" (or subheader-size 18))}
@@ -780,7 +780,11 @@
          " "
          (s/capitalize school)
          (if (zero? level)
-           " cantrip"))]
+           " cantrip"))]])
+
+(defn spell-component [{:keys [name level school casting-time range duration components description summary page source] :as spell} include-name? & [subheader-size]]
+  [:div.m-l-10
+   [spell-summary name level school include-name? subheader-size]
    (spell-field "Casting Time" casting-time)
    (spell-field "Range" range)
    (spell-field "Duration" duration)
@@ -2329,7 +2333,7 @@
        {:style list-style}
        (doall
         (map
-         (fn [{:keys [name size type hit-points alignment armor-class armor-notes speed saving-throws skills senses languages challenge traits actions legendary-actions source page] :as monster}]
+         (fn [{:keys [name size type] :as monster}]
            (let [expanded? (get expanded-monsters name)]
              ^{:key name}
             [:div.white
@@ -2351,4 +2355,42 @@
                  {:style character-display-style}
                  [monster-component monster]])]]))
          @(subscribe [::char/filtered-monsters])))]]]))
+
+(defn spell-list []
+  (let [expanded-spells @(subscribe [:expanded-spells])
+        device-type @(subscribe [:device-type])]
+    [content-page
+     "Spells"
+     []
+     [:div.p-l-5.p-r-5.p-b-10
+      [:div.p-b-10.p-l-10.p-r-10
+       [:input.input.f-s-24.p-l-20
+        {:style {:height "60px"}
+         :on-change #(dispatch [::char/filter-spells (event-value %)])}]]
+      [:div
+       {:style list-style}
+       (doall
+        (map
+         (fn [{:keys [name level school] :as spell}]
+           (let [expanded? (get expanded-spells name)]
+             ^{:key name}
+            [:div.white
+             {:style row-style}
+             [:div.pointer
+              [:div.flex.justify-cont-s-b.align-items-c
+               {:on-click #(dispatch [:toggle-spell-expanded name])}
+               [:div.m-l-10
+                [:div.f-s-24.f-w-600
+                 [spell-summary name level school true]]]
+               [:div.orange.pointer.m-r-10
+                (if (not= device-type :mobile) [:span.underline (if expanded?
+                                                                  "collapse"
+                                                                  "open")])
+                [:i.fa.m-l-5
+                 {:class-name (if expanded? "fa-caret-up" "fa-caret-down")}]]]
+              (if expanded?
+                [:div.p-10
+                 {:style character-display-style}
+                 [spell-component spell true]])]]))
+         @(subscribe [::char/filtered-spells])))]]]))
 
