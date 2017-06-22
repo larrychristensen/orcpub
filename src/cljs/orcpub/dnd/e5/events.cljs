@@ -377,6 +377,11 @@
    (update-in db [:expanded-monsters monster-name] not)))
 
 (reg-event-db
+ :toggle-spell-expanded
+ (fn [db [_ spell-name]]
+   (update-in db [:expanded-spells spell-name] not)))
+
+(reg-event-db
  :set-character
  [db-char->local-store]
  set-character)
@@ -1281,10 +1286,24 @@
         (re-matches pattern (s/lower-case (:name monster))))
       monsters/monsters))))
 
+(defn filter-spells [filter-text]
+  (let [pattern (re-pattern (str ".*" (s/lower-case filter-text) ".*"))]
+    (sort-by
+     :name
+     (filter
+      (fn [spell]
+        (re-matches pattern (s/lower-case (:name spell))))
+      spells/spells))))
+
 (reg-event-db
  ::char5e/filter-monsters
  (fn [db [_ filter-text]]
    (assoc db ::char5e/filtered-monsters (filter-monsters filter-text))))
+
+(reg-event-db
+ ::char5e/filter-spells
+ (fn [db [_ filter-text]]
+   (assoc db ::char5e/filtered-spells (filter-spells filter-text))))
 
 (reg-event-db
  ::char5e/toggle-selected

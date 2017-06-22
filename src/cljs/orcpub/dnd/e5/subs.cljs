@@ -9,6 +9,7 @@
             [orcpub.dnd.e5.character :as char5e]
             [orcpub.dnd.e5.party :as party5e]
             [orcpub.dnd.e5.monsters :as monsters5e]
+            [orcpub.dnd.e5.spells :as spells5e]
             [orcpub.route-map :as routes]
             [clojure.string :as s]
             [reagent.ratom :as ra]
@@ -260,6 +261,11 @@
  :expanded-monsters
  (fn [db _]
    (:expanded-monsters db)))
+
+(reg-sub
+ :expanded-spells
+ (fn [db _]
+   (:expanded-spells db)))
 
 (reg-sub-raw
   ::char5e/characters
@@ -598,3 +604,9 @@
  (fn [db _]
    (or (::char5e/filtered-monsters db)
        (sort-by :name monsters5e/monsters))))
+
+(reg-sub
+ ::char5e/filtered-spells
+ (fn [db _]
+   (or (::char5e/filtered-spells db)
+       (sort-by :name spells5e/spells))))
