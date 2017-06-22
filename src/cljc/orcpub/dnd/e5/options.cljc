@@ -2326,10 +2326,10 @@
                     (if save-profs (apply modifiers/saving-throws kw save-profs))]))})))
 
 (defn source-url [source]
-  (-> disp/sources source :url))
+  (some-> disp/sources source :url))
 
 (defn spell-level [spell-kw]
-  (-> spells/spell-map spell-kw :level))
+  (some-> spells/spell-map spell-kw :level))
 
 (def ranger-base-cfg
   {:name "Ranger"

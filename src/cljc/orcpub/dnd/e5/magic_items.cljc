@@ -2183,6 +2183,7 @@ The staff can be wielded as a magic quarterstaff. On a hit, it deals damage as a
     :attunement [:any]
     :magical-attack-bonus 2
       :magical-damage-bonus 2
+      :finesse? true
       :damage-type :radiant
     :description "This item appears to be a longsword hilt. While grasping the hilt, you can use a bonus action to cause a blade of pure radiance to spring into existence, or make the blade disappear. While the blade exists, this magic longsword has the finesse property. If you are proficient with shortswords or longswords, you are proficient with the sun blade.
 You gain a +2 bonus to attack and damage rolls made with this weapon, which deals radiant damage instead of slashing damage. When you hit an undead with it, that target takes an extra 1d8 radiant damage.

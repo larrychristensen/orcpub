@@ -20,6 +20,7 @@
                                dnd-e5-char-parties-page-route})
 
 (def dnd-e5-monster-list-page-route :monster-list-5e-page)
+(def dnd-e5-monster-page-route :monster-5e-page)
 
 (def dnd-e5-monster-page-routes #{dnd-e5-monster-list-page-route})
 
