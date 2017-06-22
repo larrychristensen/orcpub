@@ -7,7 +7,7 @@
 :type "aberration"
 :alignment "lawful evil"
 :armor-class 17
-:armor-notes "(natural armor)"
+:armor-notes "natural armor"
 :hit-points {:mean 135 :die-count 18 :die 10 :modifier 36}
 :speed "10 ft., swim 40 ft."
 
@@ -48,7 +48,7 @@ Whenever the charmed target takes damage, the target can repeat the saving throw
 :type "celestial"
 :alignment "lawful good"
 :armor-class 17
-:armor-notes "(natural armor)"
+:armor-notes "natural armor"
 :hit-points {:mean 136 :die-count 16 :die 8 :modifier 64}
 :speed "30 ft., fly 90 ft."
 
@@ -86,7 +86,7 @@ In a new form, the deva retains its game statistics and ability to speak, but it
 :type "celestial"
 :alignment "lawful good"
 :armor-class 19
-:armor-notes "(natural armor)"
+:armor-notes "natural armor"
 :hit-points {:mean 200 :die-count 16 :die 10 :modifier 112}
 :speed "40 ft., fly 120 ft."
 
@@ -125,7 +125,7 @@ strike, raise dead
 :type "celestial"
 :alignment "lawful good"
 :armor-class 21
-:armor-notes "(natural armor)"
+:armor-notes "natural armor"
 :hit-points {:mean 243 :die-count 18 :die 10 :modifier 144}
 :speed "50 ft., fly 150 ft."
 
@@ -175,7 +175,7 @@ points and is freed from any curse, disease, poison, blindness, or deafness.
 :type "construct"
 :alignment "unaligned"
 :armor-class 18
-:armor-notes "(natural armor)"
+:armor-notes "natural armor"
 :hit-points {:mean 33 :die-count 6 :die 8 :modifier 6}
 :speed "25 ft."
 
@@ -204,7 +204,7 @@ Constitution saving throw against the caster's spell save DC or fall unconscious
 :type "construct"
 :alignment "unaligned"
 :armor-class 17
-:armor-notes "(natural armor)"
+:armor-notes "natural armor"
 :hit-points {:mean 17 :die-count 5 :die 6}
 :speed "0 ft., fly 50 ft. (hover)"
 
@@ -261,7 +261,7 @@ Constitution saving throw against the caster's spell save DC or fall unconscious
 :type "monstrosity"
 :alignment "unaligned"
 :armor-class 14
-:armor-notes "(natural armor), 11 while prone"
+:armor-notes "natural armor, 11 while prone"
 :hit-points {:mean 39 :die-count 6 :die 10 :modifier 6}
 :speed "30 ft., burrow 10 ft."
 
@@ -313,7 +313,7 @@ Constitution saving throw against the caster's spell save DC or fall unconscious
 :type "monstrosity"
 :alignment "unaligned"
 :armor-class 15
-:armor-notes "(natural armor)"
+:armor-notes "natural armor"
 :hit-points {:mean 52 :die-count 8 :die 8 :modifier 16}
 :speed "20 ft."
 
@@ -339,7 +339,7 @@ If the basilisk sees its reflection within 30 feet of it in bright light, it mis
 :type "monstrosity"
 :alignment "neutral evil"
 :armor-class 17
-:armor-notes "(natural armor)"
+:armor-notes "natural armor"
 :hit-points {:mean 168 :die-count 16 :die 12 :modifier 64}
 :speed "50 ft., climb 40 ft."
 
@@ -398,7 +398,7 @@ If the behir takes 30 damage or more on a single turn from the swallowed creatur
 :type "monstrosity"
 :alignment "unaligned"
 :armor-class 17
-:armor-notes "(natural armor)"
+:armor-notes "natural armor"
 :hit-points {:mean 94 :die-count 9 :die 10 :modifier 45}
 :speed "40 ft., burrow 40 ft."
 
@@ -450,7 +450,7 @@ If the behir takes 30 damage or more on a single turn from the swallowed creatur
 :type "monstrosity"
 :alignment "chaotic evil"
 :armor-class 14
-:armor-notes "(natural armor)"
+:armor-notes "natural armor"
 :hit-points {:mean 114 :die-count 12 :die 10 :modifier 48}
 :speed "30 ft., fly 60 ft."
 
@@ -478,7 +478,7 @@ If the behir takes 30 damage or more on a single turn from the swallowed creatur
 :type "aberration"
 :alignment "chaotic evil"
 :armor-class 16
-:armor-notes "(natural armor)"
+:armor-notes "natural armor"
 :hit-points {:mean 93 :die-count 11 :die 10 :modifier 33}
 :speed "30 ft., swim 30 ft."
 
@@ -510,7 +510,7 @@ If the behir takes 30 damage or more on a single turn from the swallowed creatur
 :type "aberration"
 :alignment "chaotic neutral"
 :armor-class 14
-:armor-notes "(natural armor)"
+:armor-notes "natural armor"
 :hit-points {:mean 78 :die-count 12 :die 10 :modifier 12}
 :speed "10 ft., fly 40 ft."
 
@@ -566,7 +566,7 @@ A duplicate has the cloaker's AC and uses its saving throws. If an attack hits a
 :type "celestial"
 :alignment "lawful good"
 :armor-class 19
-:armor-notes "(natural armor)"
+:armor-notes "natural armor"
 :hit-points {:mean 97 :die-count 13 :die 8 :modifier 39}
 :speed "30 ft., fly 90 ft."
 
@@ -632,7 +632,7 @@ A creature can detach the darkmantle by making a successful DC 13 Strength check
 :type "fiend (demon)"
 :alignment "chaotic evil"
 :armor-class 19
-:armor-notes "(natural armor)"
+:armor-notes "natural armor"
 :hit-points {:mean 262 :die-count 21 :die 12 :modifier 126}
 :speed "40 ft., fly 80 ft."
 
@@ -668,7 +668,7 @@ A creature can detach the darkmantle by making a successful DC 13 Strength check
 :type "fiend (demon)"
 :alignment "chaotic evil"
 :armor-class 11
-:armor-notes "(natural armor)"
+:armor-notes "natural armor"
 :hit-points {:mean 18 :die-count 4 :die 6 :modifier 4}
 :speed "20 ft."
 
@@ -698,7 +698,7 @@ A creature can detach the darkmantle by making a successful DC 13 Strength check
 :type "fiend (demon)"
 :alignment "chaotic evil"
 :armor-class 17
-:armor-notes "(natural armor)"
+:armor-notes "natural armor"
 :hit-points {:mean 157 :die-count 15 :die 10 :modifier 75}
 :speed "40 ft."
 
@@ -732,7 +732,7 @@ At will: darkness, detect magic, dispel magic 1/day each: confusion, fly, power 
 :type "fiend (demon)"
 :alignment "chaotic evil"
 :armor-class 16
-:armor-notes "(natural armor)"
+:armor-notes "natural armor"
 :hit-points {:mean 136 :die-count 13 :die 10 :modifier 65}
 :speed "30 ft."
 
@@ -765,7 +765,7 @@ At will: darkness, detect magic, dispel magic 1/day each: confusion, fly, power 
 :type "fiend (demon)"
 :alignment "chaotic evil"
 :armor-class 18
-:armor-notes "(natural armor)"
+:armor-notes "natural armor"
 :hit-points {:mean 189 :die-count 18 :die 10 :modifier 90}
 :speed "40 ft."
 
@@ -803,7 +803,7 @@ At will: darkness, detect magic, dispel magic 1/day each: confusion, fly, power 
 :type "fiend (demon)"
 :alignment "chaotic evil"
 :armor-class 18
-:armor-notes "(natural armor)"
+:armor-notes "natural armor"
 :hit-points {:mean 184 :die-count 16 :die 10 :modifier 96}
 :speed "20 ft., fly 30 ft."
 
@@ -870,7 +870,7 @@ creature is immune to the nalfeshnee's Horror Nimbus for the next 24 hours."}
 :type "fiend (demon)"
 :alignment "chaotic evil"
 :armor-class 15
-:armor-notes "(natural armor)"
+:armor-notes "natural armor"
 :hit-points {:mean 104 :die-count 11 :die 10 :modifier 44}
 :speed "40 ft., fly 60 ft."
 
@@ -904,7 +904,7 @@ creature is immune to the nalfeshnee's Horror Nimbus for the next 24 hours."}
 :type "fiend (devil)"
 :alignment "lawful evil"
 :armor-class 15
-:armor-notes "(natural armor)"
+:armor-notes "natural armor"
 :hit-points {:mean 110 :die-count 13 :die 8 :modifier 52}
 :speed "30 ft."
 
@@ -939,7 +939,7 @@ a flammable object that isn't being worn or carried, it also catches fire."}]
 :type "fiend (devil)"
 :alignment "lawful evil"
 :armor-class 13
-:armor-notes "(natural armor)"
+:armor-notes "natural armor"
 :hit-points {:mean 52 :die-count 8 :die 8 :modifier 16}
 :speed "30 ft."
 
@@ -974,7 +974,7 @@ successful DC 12 Wisdom (Medicine) check. The wound also closes if the target re
 :type "fiend (devil)"
 :alignment "lawful evil"
 :armor-class 19
-:armor-notes "(natural armor)"
+:armor-notes "natural armor"
 :hit-points {:mean 142 :die-count 15 :die 10 :modifier 60}
 :speed "40 ft., fly 40 ft."
 
@@ -1009,7 +1009,7 @@ successful DC 12 Wisdom (Medicine) check. The wound also closes if the target re
 :type "fiend (devil)"
 :alignment "lawful evil"
 :armor-class 16
-:armor-notes "(natural armor)"
+:armor-notes "natural armor"
 :hit-points {:mean 85 :die-count 10 :die 8 :modifier 40}
 :speed "30 ft."
 
@@ -1086,7 +1086,7 @@ Wisdom saving throw or be frightened until the end of its turn.
 :type "fiend (devil)"
 :alignment "lawful evil"
 :armor-class 18
-:armor-notes "(natural armor)"
+:armor-notes "natural armor"
 :hit-points {:mean 148 :die-count 17 :die 10 :modifier 55}
 :speed "20 ft., fly 60 ft."
 
@@ -1119,7 +1119,7 @@ Wisdom saving throw or be frightened until the end of its turn.
 :type "fiend (devil)"
 :alignment "lawful evil"
 :armor-class 18
-:armor-notes "(natural armor)"
+:armor-notes "natural armor"
 :hit-points {:mean 180 :die-count 19 :die 10 :modifier 76}
 :speed "40 ft."
 
@@ -1214,7 +1214,7 @@ Devil's Sight. Magical darkness doesn't impede the imp's darkvision."}
 :type "fiend (devil)"
 :alignment "lawful evil"
 :armor-class 19
-:armor-notes "(natural armor)"
+:armor-notes "natural armor"
 :hit-points {:mean 300 :die-count 24 :die 10 :modifier 168}
 :speed "30 ft., fly 60 ft."
 
@@ -1253,7 +1253,7 @@ At will: detect magic, fireball
 :type "beast"
 :alignment "unaligned"
 :armor-class 13
-:armor-notes "(natural armor)"
+:armor-notes "natural armor"
 :hit-points {:mean 68 :die-count 8 :die 10 :modifier 24}
 :speed "20 ft., swim 40 ft."
 
@@ -1279,7 +1279,7 @@ At will: detect magic, fireball
 :type "beast"
 :alignment "unaligned"
 :armor-class 13
-:armor-notes "(natural armor)"
+:armor-notes "natural armor"
 :hit-points {:mean 95 :die-count 10 :die 12 :modifier 30}
 :speed "50 ft."
 
@@ -1306,7 +1306,7 @@ If the target is prone, the triceratops can make one stomp attack against it as 
 :type "beast"
 :alignment "unaligned"
 :armor-class 13
-:armor-notes "(natural armor)"
+:armor-notes "natural armor"
 :hit-points {:mean 136 :die-count 13 :die 12 :modifier 52}
 :speed "50 ft."
 
@@ -1363,7 +1363,7 @@ If the target is prone, the triceratops can make one stomp attack against it as 
 :type "dragon"
 :alignment "chaotic evil"
 :armor-class 22
-:armor-notes "(natural armor)"
+:armor-notes "natural armor"
 :hit-points {:mean 367 :die-count 21 :die 20 :modifier 147}
 :speed "40 ft., fly 80 ft., swim 40 ft."
 
@@ -1406,7 +1406,7 @@ If the target is prone, the triceratops can make one stomp attack against it as 
 :type "dragon"
 :alignment "chaotic evil"
 :armor-class 19
-:armor-notes "(natural armor)"
+:armor-notes "natural armor"
 :hit-points {:mean 195 :die-count 17 :die 12 :modifier 85}
 :speed "40 ft., fly 80 ft., swim 40 ft."
 
@@ -1450,7 +1450,7 @@ the saving throw at the end of each of its turns, ending the effect on itself on
 :type "dragon"
 :alignment "chaotic evil"
 :armor-class 18
-:armor-notes "(natural armor)"
+:armor-notes "natural armor"
 :hit-points {:mean 127 :die-count 15 :die 10 :modifier 45}
 :speed "40 ft., fly 80 ft., swim 40 ft."
 
@@ -1481,7 +1481,7 @@ the saving throw at the end of each of its turns, ending the effect on itself on
 :type "dragon"
 :alignment "chaotic evil"
 :armor-class 17
-:armor-notes "(natural armor)"
+:armor-notes "natural armor"
 :hit-points {:mean 33 :die-count 6 :die 8 :modifier 6}
 :speed "30 ft., fly 60 ft., swim 30 ft."
 
@@ -1511,7 +1511,7 @@ the saving throw at the end of each of its turns, ending the effect on itself on
 :type "dragon"
 :alignment "lawful evil"
 :armor-class 22
-:armor-notes "(natural armor)"
+:armor-notes "natural armor"
 :hit-points {:mean 481 :die-count 26 :die 20 :modifier 208}
 :speed "40 ft., burrow 40 ft., fly 80 ft."
 
@@ -1554,7 +1554,7 @@ failed save, or half as much damage on a successful one.
 :type "dragon"
 :alignment "lawful evil"
 :armor-class 19
-:armor-notes "(natural armor)"
+:armor-notes "natural armor"
 :hit-points {:mean 225 :die-count 18 :die 12 :modifier 108}
 :speed "40 ft., burrow 30 ft., fly 80 ft."
 
@@ -1597,7 +1597,7 @@ failed save, or half as much damage on a successful one.
 :type "dragon"
 :alignment "lawful evil"
 :armor-class 18
-:armor-notes "(natural armor)"
+:armor-notes "natural armor"
 :hit-points {:mean 152 :die-count 16 :die 10 :modifier 64}
 :speed "40 ft., burrow 20 ft., fly 80 ft."
 
@@ -1629,7 +1629,7 @@ failed save, or half as much damage on a successful one.
 :type "dragon"
 :alignment "lawful evil"
 :armor-class 17
-:armor-notes "(natural armor)"
+:armor-notes "natural armor"
 :hit-points {:mean 52 :die-count 8 :die 8 :modifier 16}
 :speed "30 ft., burrow 15 ft., fly 60 ft."
 
@@ -1660,7 +1660,7 @@ Green Dragon
 :type "dragon"
 :alignment "lawful evil"
 :armor-class 21
-:armor-notes "(natural armor)"
+:armor-notes "natural armor"
 :hit-points {:mean 385 :die-count 22 :die 20 :modifier 154}
 :speed "40 ft., fly 80 ft., swim 40 ft."
 
@@ -1704,7 +1704,7 @@ Green Dragon
 :type "dragon"
 :alignment "lawful evil"
 :armor-class 19
-:armor-notes "(natural armor)"
+:armor-notes "natural armor"
 :hit-points {:mean 207 :die-count 18 :die 12 :modifier 90}
 :speed "40 ft., fly 80 ft., swim 40 ft."
 
@@ -1749,7 +1749,7 @@ Green Dragon
 :type "dragon"
 :alignment "lawful evil"
 :armor-class 18
-:armor-notes "(natural armor)"
+:armor-notes "natural armor"
 :hit-points {:mean 136 :die-count 16 :die 10 :modifier 48}
 :speed "40 ft., fly 80 ft., swim 40 ft."
 
@@ -1783,7 +1783,7 @@ Green Dragon
 :type "dragon"
 :alignment "lawful evil"
 :armor-class 17
-:armor-notes "(natural armor)"
+:armor-notes "natural armor"
 :hit-points {:mean 38 :die-count 7 :die 8 :modifier 7}
 :speed "30 ft., fly 60 ft., swim 30 ft."
 
@@ -1814,7 +1814,7 @@ Green Dragon
 :type "dragon"
 :alignment "chaotic evil"
 :armor-class 22
-:armor-notes "(natural armor)"
+:armor-notes "natural armor"
 :hit-points {:mean 546 :die-count 28 :die 20 :modifier 252}
 :speed "40 ft., climb 40 ft., fly 80 ft."
 
@@ -1856,7 +1856,7 @@ Green Dragon
 :type "dragon"
 :alignment "chaotic evil"
 :armor-class 19
-:armor-notes "(natural armor)"
+:armor-notes "natural armor"
 :hit-points {:mean 256 :die-count 19 :die 12 :modifier 133}
 :speed "40 ft., climb 40 ft., fly 80 ft."
 
@@ -1898,7 +1898,7 @@ Green Dragon
 :type "dragon"
 :alignment "chaotic evil"
 :armor-class 18
-:armor-notes "(natural armor)"
+:armor-notes "natural armor"
 :hit-points {:mean 178 :die-count 17 :die 10 :modifier 85}
 :speed "40 ft., climb 40 ft., fly 80 ft."
 
@@ -1929,7 +1929,7 @@ Green Dragon
 :type "dragon"
 :alignment "chaotic evil"
 :armor-class 17
-:armor-notes "(natural armor)"
+:armor-notes "natural armor"
 :hit-points {:mean 75 :die-count 10 :die 8 :modifier 30}
 :speed "30 ft., climb 30 ft., fly 60 ft."
 
@@ -1958,7 +1958,7 @@ Green Dragon
 :type "dragon"
 :alignment "chaotic evil"
 :armor-class 20
-:armor-notes "(natural armor)"
+:armor-notes "natural armor"
 :hit-points {:mean 333 :die-count 18 :die 20 :modifier 144}
 :speed "40 ft., burrow 40 ft., fly 80 ft., swim 40 ft."
 
@@ -2001,7 +2001,7 @@ Green Dragon
 :type "dragon"
 :alignment "chaotic evil"
 :armor-class 18
-:armor-notes "(natural armor)"
+:armor-notes "natural armor"
 :hit-points {:mean 200 :die-count 16 :die 12 :modifier 96}
 :speed "40 ft., burrow 30 ft., fly 80 ft., swim 40 ft."
 
@@ -2043,7 +2043,7 @@ Green Dragon
 :type "dragon"
 :alignment "chaotic evil"
 :armor-class 17
-:armor-notes "(natural armor)"
+:armor-notes "natural armor"
 :hit-points {:mean 133 :die-count 14 :die 10 :modifier 56}
 :speed "40 ft., burrow 20 ft., fly 80 ft., swim 40 ft."
 
@@ -2075,7 +2075,7 @@ Green Dragon
 :type "dragon"
 :alignment "chaotic evil"
 :armor-class 16
-:armor-notes "(natural armor)"
+:armor-notes "natural armor"
 :hit-points {:mean 32 :die-count 5 :die 8 :modifier 10}
 :speed "30 ft., burrow 15 ft., fly 60 ft., swim 30 ft."
 
@@ -2104,7 +2104,7 @@ Green Dragon
 :type "dragon"
 :alignment "chaotic good"
 :armor-class 20
-:armor-notes "(natural armor)"
+:armor-notes "natural armor"
 :hit-points {:mean 297 :die-count 17 :die 20 :modifier 119}
 :speed "40 ft., burrow 40 ft., fly 80 ft."
 
@@ -2152,7 +2152,7 @@ In a new form, the dragon retains its alignment, hit points, Hit Dice, ability t
 :type "dragon"
 :alignment "chaotic good"
 :armor-class 18
-:armor-notes "(natural armor)"
+:armor-notes "natural armor"
 :hit-points {:mean 172 :die-count 15 :die 12 :modifier 75}
 :speed "40 ft., burrow 30 ft., fly 80 ft."
 
@@ -2196,7 +2196,7 @@ In a new form, the dragon retains its alignment, hit points, Hit Dice, ability t
 :type "dragon"
 :alignment "chaotic good"
 :armor-class 17
-:armor-notes "(natural armor)"
+:armor-notes "natural armor"
 :hit-points {:mean 110 :die-count 13 :die 10 :modifier 39}
 :speed "40 ft., burrow 20 ft., fly 80 ft."
 
@@ -2229,7 +2229,7 @@ In a new form, the dragon retains its alignment, hit points, Hit Dice, ability t
 :type "dragon"
 :alignment "chaotic good"
 :armor-class 16
-:armor-notes "(natural armor)"
+:armor-notes "natural armor"
 :hit-points {:mean 16 :die-count 3 :die 8 :modifier 3}
 :speed "30 ft., burrow 15 ft., fly 60 ft."
 
@@ -2260,7 +2260,7 @@ In a new form, the dragon retains its alignment, hit points, Hit Dice, ability t
 :type "dragon"
 :alignment "lawful good"
 :armor-class 22
-:armor-notes "(natural armor)"
+:armor-notes "natural armor"
 :hit-points {:mean 444 :die-count 24 :die 20 :modifier 192}
 :speed "40 ft., fly 80 ft., swim 40 ft."
 
@@ -2306,7 +2306,7 @@ In a new form, the dragon retains its alignment, hit points, Hit Dice, ability t
 :type "dragon"
 :alignment "lawful good"
 :armor-class 19
-:armor-notes "(natural armor)"
+:armor-notes "natural armor"
 :hit-points {:mean 212 :die-count 17 :die 12 :modifier 102}
 :speed "40 ft., fly 80 ft., swim 40 ft."
 
@@ -2354,7 +2354,7 @@ In a new form, the dragon retains its alignment, hit points, Hit Dice, ability t
 :type "dragon"
 :alignment "lawful good"
 :armor-class 18
-:armor-notes "(natural armor)"
+:armor-notes "natural armor"
 :hit-points {:mean 142 :die-count 15 :die 10 :modifier 60}
 :speed "40 ft., fly 80 ft., swim 40 ft."
 
@@ -2389,7 +2389,7 @@ In a new form, the dragon retains its alignment, hit points, Hit Dice, ability t
 :type "dragon"
 :alignment "lawful good"
 :armor-class 17
-:armor-notes "(natural armor)"
+:armor-notes "natural armor"
 :hit-points {:mean 32 :die-count 5 :die 8 :modifier 10}
 :speed "30 ft., fly 60 ft., swim 30 ft."
 
@@ -2422,7 +2422,7 @@ In a new form, the dragon retains its alignment, hit points, Hit Dice, ability t
 :type "dragon"
 :alignment "chaotic good"
 :armor-class 21
-:armor-notes "(natural armor)"
+:armor-notes "natural armor"
 :hit-points {:mean 350 :die-count 20 :die 20 :modifier 140}
 :speed "40 ft., climb 40 ft., fly 80 ft."
 
@@ -2466,7 +2466,7 @@ In a new form, the dragon retains its alignment, hit points, Hit Dice, ability t
 :type "dragon"
 :alignment "chaotic good"
 :armor-class 18
-:armor-notes "(natural armor)"
+:armor-notes "natural armor"
 :hit-points {:mean 184 :die-count 16 :die 12 :modifier 80}
 :speed "40 ft., climb 40 ft., fly 80 ft."
 
@@ -2508,7 +2508,7 @@ In a new form, the dragon retains its alignment, hit points, Hit Dice, ability t
 :type "dragon"
 :alignment "chaotic good"
 :armor-class 17
-:armor-notes "(natural armor)"
+:armor-notes "natural armor"
 :hit-points {:mean 119 :die-count 14 :die 10 :modifier 42}
 :speed "40 ft., climb 40 ft., fly 80 ft."
 
@@ -2539,7 +2539,7 @@ In a new form, the dragon retains its alignment, hit points, Hit Dice, ability t
 :type "dragon"
 :alignment "chaotic good"
 :armor-class 16
-:armor-notes "(natural armor)"
+:armor-notes "natural armor"
 :hit-points {:mean 22 :die-count 4 :die 8 :modifier 4}
 :speed "30 ft., climb 30 ft., fly 60 ft."
 
@@ -2568,7 +2568,7 @@ In a new form, the dragon retains its alignment, hit points, Hit Dice, ability t
 :type "dragon"
 :alignment "lawful good"
 :armor-class 22
-:armor-notes "(natural armor)"
+:armor-notes "natural armor"
 :hit-points {:mean 546 :die-count 28 :die 20 :modifier 252}
 :speed "40 ft., fly 80 ft., swim 40 ft."
 
@@ -2616,7 +2616,7 @@ In a new form, the dragon retains its alignment, hit points, Hit Dice, ability t
 :type "dragon"
 :alignment "lawful good"
 :armor-class 19
-:armor-notes "(natural armor)"
+:armor-notes "natural armor"
 :hit-points {:mean 256 :die-count 19 :die 12 :modifier 133}
 :speed "40 ft., fly 80 ft., swim 40 ft."
 
@@ -2664,7 +2664,7 @@ In a new form, the dragon retains its alignment, hit points, Hit Dice, ability t
 :type "dragon"
 :alignment "lawful good"
 :armor-class 18
-:armor-notes "(natural armor)"
+:armor-notes "natural armor"
 :hit-points {:mean 178 :die-count 17 :die 10 :modifier 85}
 :speed "40 ft., fly 80 ft., swim 40 ft."
 
@@ -2699,7 +2699,7 @@ In a new form, the dragon retains its alignment, hit points, Hit Dice, ability t
 :type "dragon"
 :alignment "lawful good"
 :armor-class 17
-:armor-notes "(natural armor)"
+:armor-notes "natural armor"
 :hit-points {:mean 60 :die-count 8 :die 8 :modifier 24}
 :speed "30 ft., fly 60 ft., swim 30 ft."
 
@@ -2732,7 +2732,7 @@ In a new form, the dragon retains its alignment, hit points, Hit Dice, ability t
 :type "dragon"
 :alignment "lawful good"
 :armor-class 22
-:armor-notes "(natural armor)"
+:armor-notes "natural armor"
 :hit-points {:mean 487 :die-count 25 :die 20 :modifier 225}
 :speed "40 ft., fly 80 ft."
 
@@ -2776,7 +2776,7 @@ In a new form, the dragon retains its alignment, hit points, Hit Dice, ability t
 :type "dragon"
 :alignment "lawful good"
 :armor-class 19
-:armor-notes "(natural armor)"
+:armor-notes "natural armor"
 :hit-points {:mean 243 :die-count 18 :die 12 :modifier 126}
 :speed "40 ft., fly 80 ft."
 
@@ -2820,7 +2820,7 @@ In a new form, the dragon retains its alignment, hit points, Hit Dice, ability t
 :type "dragon"
 :alignment "lawful good"
 :armor-class 18
-:armor-notes "(natural armor)"
+:armor-notes "natural armor"
 :hit-points {:mean 168 :die-count 16 :die 10 :modifier 80}
 :speed "40 ft., fly 80 ft."
 
@@ -2852,7 +2852,7 @@ In a new form, the dragon retains its alignment, hit points, Hit Dice, ability t
 :type "dragon"
 :alignment "lawful good"
 :armor-class 17
-:armor-notes "(natural armor)"
+:armor-notes "natural armor"
 :hit-points {:mean 45 :die-count 6 :die 8 :modifier 18}
 :speed "30 ft., fly 60 ft."
 
@@ -2883,7 +2883,7 @@ In a new form, the dragon retains its alignment, hit points, Hit Dice, ability t
 :type "dragon"
 :alignment "neutral"
 :armor-class 20
-:armor-notes "(natural armor)"
+:armor-notes "natural armor"
 :hit-points {:mean 341 :die-count 22 :die 20 :modifier 110}
 :speed "20 ft., swim 40 ft."
 
@@ -2915,7 +2915,7 @@ In a new form, the dragon retains its alignment, hit points, Hit Dice, ability t
 :type "monstrosity"
 :alignment "chaotic evil"
 :armor-class 19
-:armor-notes "(natural armor)"
+:armor-notes "natural armor"
 :hit-points {:mean 123 :die-count 13 :die 10 :modifier 52}
 :speed "30 ft., climb 30 ft."
 
@@ -3052,7 +3052,7 @@ Any equipment the duergar wears or carries is invisible with it."}
 :type "elemental"
 :alignment "neutral"
 :armor-class 17
-:armor-notes "(natural armor)"
+:armor-notes "natural armor"
 :hit-points {:mean 126 :die-count 12 :die 10 :modifier 60}
 :speed "30 ft., burrow 30 ft."
 
@@ -3116,7 +3116,7 @@ takes an action to douse the fire, the creature takes 5 (1d10) fire damage at th
 :type "elemental"
 :alignment "neutral"
 :armor-class 14
-:armor-notes "(natural armor)"
+:armor-notes "natural armor"
 :hit-points {:mean 114 :die-count 12 :die 10 :modifier 48}
 :speed "30 ft., swim 90 ft."
 
@@ -3181,7 +3181,7 @@ damage, and the target must succeed on a DC 13 Constitution saving throw or be p
 :type "monstrosity"
 :alignment "neutral evil"
 :armor-class 13
-:armor-notes "(natural armor)"
+:armor-notes "natural armor"
 :hit-points {:mean 44 :die-count 8 :die 8 :modifier 8}
 :speed "30 ft., climb 30 ft."
 
@@ -3213,7 +3213,7 @@ also ends if the webbing is destroyed. The webbing has AC 10, 5 hit points, vuln
 :type "giant"
 :alignment "chaotic evil"
 :armor-class 12
-:armor-notes "(natural armor)"
+:armor-notes "natural armor"
 :hit-points {:mean 85 :die-count 10 :die 10 :modifier 30}
 :speed "40 ft."
 
@@ -3293,7 +3293,7 @@ also ends if the webbing is destroyed. The webbing has AC 10, 5 hit points, vuln
 :type "elemental"
 :alignment "chaotic evil"
 :armor-class 15
-:armor-notes "(natural armor)"
+:armor-notes "natural armor"
 :hit-points {:mean 52 :die-count 7 :die 8 :modifier 21}
 :speed "30 ft., fly 60 ft."
 
@@ -3324,7 +3324,7 @@ also ends if the webbing is destroyed. The webbing has AC 10, 5 hit points, vuln
 :type "elemental"
 :alignment "chaotic good"
 :armor-class 17
-:armor-notes "(natural armor)"
+:armor-notes "natural armor"
 :hit-points {:mean 161 :die-count 14 :die 10 :modifier 84}
 :speed "30 ft., fly 90 ft."
 
@@ -3358,7 +3358,7 @@ A creature can use its action to free a creature restrained by the whirlwind, in
 :type "elemental"
 :alignment "lawful evil"
 :armor-class 17
-:armor-notes "(natural armor)"
+:armor-notes "natural armor"
 :hit-points {:mean 200 :die-count 16 :die 10 :modifier 112}
 :speed "40 ft., fly 60 ft."
 
@@ -3479,7 +3479,7 @@ The possession lasts until the body drops to 0 hit points, the ghost ends it as 
 :type "giant"
 :alignment "neutral good (50%) or neutral evil (50%)"
 :armor-class 14
-:armor-notes "(natural armor)"
+:armor-notes "natural armor"
 :hit-points {:mean 200 :die-count 16 :die 12 :modifier 96}
 :speed "40 ft."
 
@@ -3574,7 +3574,7 @@ At will: detect magic, fog cloud, light
 :type "giant"
 :alignment "chaotic evil"
 :armor-class 13
-:armor-notes "(natural armor)"
+:armor-notes "natural armor"
 :hit-points {:mean 105 :die-count 10 :die 12 :modifier 40}
 :speed "40 ft."
 
@@ -3602,7 +3602,7 @@ At will: detect magic, fog cloud, light
 :type "giant"
 :alignment "neutral"
 :armor-class 17
-:armor-notes "(natural armor)"
+:armor-notes "natural armor"
 :hit-points {:mean 126 :die-count 11 :die 12 :modifier 55}
 :speed "40 ft."
 
@@ -3762,7 +3762,7 @@ At will: nondetection (self only)
 :type "construct"
 :alignment "unaligned"
 :armor-class 14
-:armor-notes "(natural armor)"
+:armor-notes "natural armor"
 :hit-points {:mean 133 :die-count 14 :die 10 :modifier 56}
 :speed "20 ft."
 
@@ -3859,7 +3859,7 @@ The golem's creator, if within 60 feet of the berserk golem, can try to calm it 
 :type "construct"
 :alignment "unaligned"
 :armor-class 20
-:armor-notes "(natural armor)"
+:armor-notes "natural armor"
 :hit-points {:mean 210 :die-count 20 :die 10 :modifier 100}
 :speed "30 ft."
 
@@ -3892,7 +3892,7 @@ The golem's creator, if within 60 feet of the berserk golem, can try to calm it 
 :type "construct"
 :alignment "unaligned"
 :armor-class 17
-:armor-notes "(natural armor)"
+:armor-notes "natural armor"
 :hit-points {:mean 178 :die-count 17 :die 10 :modifier 85}
 :speed "30 ft."
 
@@ -3923,7 +3923,7 @@ The golem's creator, if within 60 feet of the berserk golem, can try to calm it 
 :type "monstrosity"
 :alignment "unaligned"
 :armor-class 19
-:armor-notes "(natural armor)"
+:armor-notes "natural armor"
 :hit-points {:mean 114 :die-count 12 :die 10 :modifier 48}
 :speed "40 ft."
 
@@ -3953,7 +3953,7 @@ The golem's creator, if within 60 feet of the berserk golem, can try to calm it 
 :type "monstrosity"
 :alignment "neutral"
 :armor-class 14
-:armor-notes "(natural armor)"
+:armor-notes "natural armor"
 :hit-points {:mean 27 :die-count 6 :die 8}
 :speed "30 ft., climb 30 ft."
 
@@ -4034,7 +4034,7 @@ Keen Hearing and Smell. The grimlock has advantage on Wisdom (Perception) checks
 :type "fey"
 :alignment "neutral evil"
 :armor-class 17
-:armor-notes "(natural armor)"
+:armor-notes "natural armor"
 :hit-points {:mean 82 :die-count 11 :die 8 :modifier 33}
 :speed "30 ft."
 
@@ -4065,7 +4065,7 @@ The changes wrought by this effect fail to hold up to physical inspection. For e
 :type "fiend"
 :alignment "neutral evil"
 :armor-class 17
-:armor-notes "(natural armor)"
+:armor-notes "natural armor"
 :hit-points {:mean 112 :die-count 15 :die 8 :modifier 45}
 :speed "30 ft."
 
@@ -4100,7 +4100,7 @@ At will: detect magic, magic missile
 :type "fey"
 :alignment "chaotic evil"
 :armor-class 14
-:armor-notes "(natural armor)"
+:armor-notes "natural armor"
 :hit-points {:mean 52 :die-count 7 :die 8 :modifier 21}
 :speed "30 ft., swim 40 ft."
 
@@ -4554,7 +4554,7 @@ Cantrips (at will): mage hand, prestidigitation, ray of frost
 :type "humanoid (human, shapechanger)"
 :alignment "neutral good"
 :armor-class 10
-:armor-notes "in humanoid form, 11 (natural armor) in bear and hybrid form"
+:armor-notes "in humanoid form, 11 natural armor in bear and hybrid form"
 :hit-points {:mean 135 :die-count 18 :die 8 :modifier 54}
 :speed "30 ft. (40 ft., climb 30 ft. in bear or hybrid form)"
 
@@ -4588,7 +4588,7 @@ Cantrips (at will): mage hand, prestidigitation, ray of frost
 :type "humanoid (human, shapechanger)"
 :alignment "neutral evil"
 :armor-class 10
-:armor-notes "in humanoid form, 11 (natural armor) in boar or hybrid form"
+:armor-notes "in humanoid form, 11 natural armor in boar or hybrid form"
 :hit-points {:mean 78 :die-count 12 :die 8 :modifier 24}
 :speed "30 ft. (40 ft. in boar form)"
 
@@ -4690,7 +4690,7 @@ Keen Hearing and Smell. The weretiger has advantage on Wisdom (Perception) check
 :type "humanoid (human, shapechanger)"
 :alignment "chaotic evil"
 :armor-class 11
-:armor-notes "in humanoid form, 12 (natural armor) in wolf or hybrid form"
+:armor-notes "in humanoid form, 12 natural armor in wolf or hybrid form"
 :hit-points {:mean 58 :die-count 9 :die 8 :modifier 18}
 :speed "30 ft. (40 ft. in wolf form)"
 

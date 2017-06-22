@@ -380,11 +380,15 @@
     {:padding-top "5px"}]
    [:.p-t-10
     {:padding-top "10px"}]
+   [:.p-t-20
+    {:padding-top "20px"}]
 
    [:.p-b-5
     {:padding-bottom "5px"}]
    [:.p-b-10
     {:padding-bottom "10px"}]
+   [:.p-b-20
+    {:padding-bottom "20px"}]
    [:.p-b-40
     {:padding-bottom "40px"}]
    [:.p-0
