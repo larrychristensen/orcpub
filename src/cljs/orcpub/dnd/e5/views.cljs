@@ -1698,7 +1698,9 @@
                               finesse?
                               link
                               versatile
-                              thrown]}]
+                              thrown]
+                       :as weapon}
+                      damage-modifier-fn]
   [:div.m-t-10.i
    (weapon-details-field "Type" (common/safe-name type))
    (weapon-details-field "Damage Type" (common/safe-name damage-type))
@@ -1711,8 +1713,7 @@
                                        (str (:damage-die-count versatile)
                                             "d"
                                             (:damage-die versatile)
-                                            (if magical-damage-bonus
-                                              (common/mod-str magical-damage-bonus))
+                                            (common/mod-str (damage-modifier-fn weapon false))
                                             " damage")
                                        "no"))
    (if description
@@ -1863,7 +1864,7 @@
                                                   (assoc :damage-modifier damage-modifier)
                                                   (dissoc :description)))]
                     (if expanded?
-                      (weapon-details weapon))]
+                      (weapon-details weapon weapon-damage-modifier))]
                    [:td
                     [:div.orange
                      (if (not mobile?)
