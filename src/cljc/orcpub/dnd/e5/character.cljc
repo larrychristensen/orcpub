@@ -494,6 +494,9 @@
 (defn weapon-attack-modifier-fn [built-char]
   (get-prop built-char :weapon-attack-modifier))
 
+(defn weapon-damage-modifier-fn [built-char]
+  (get-prop built-char :weapon-damage-modifier))
+
 (defn option-sources [built-char]
   (get-prop built-char :option-sources))
 

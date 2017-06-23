@@ -1823,6 +1823,7 @@
       (let [all-weapons @(subscribe [::char/all-weapons id])
             weapon-profs (set @(subscribe [::char/weapon-profs id]))
             weapon-attack-modifier @(subscribe [::char/weapon-attack-modifier-fn id])
+            weapon-damage-modifier @(subscribe [::char/weapon-damage-modifier-fn id])
             has-weapon-prof @(subscribe [::char/has-weapon-prof id])
             device-type @(subscribe [:device-type])
             mobile? (= :mobile device-type)
@@ -1846,7 +1847,9 @@
               (fn [[weapon-key {:keys [equipped?]}]]
                 (let [{:keys [name magical-damage-bonus description ranged?] :as weapon} (mi/all-weapons-map weapon-key)
                       proficient? (has-weapon-prof weapon)
-                      expanded? (@expanded-details weapon-key)]
+                      expanded? (@expanded-details weapon-key)
+                      damage-modifier (max (weapon-damage-modifier weapon false)
+                                           (weapon-damage-modifier weapon true))]
                   ^{:key weapon-key}
                   [:tr.pointer
                    {:on-click #(swap! expanded-details (fn [d] (update d weapon-key not)))}
@@ -1857,7 +1860,7 @@
                     [:div
                      (disp/attack-description (-> weapon
                                                   (assoc :attack-type (if ranged? :ranged :melee))
-                                                  (assoc :damage-modifier magical-damage-bonus)
+                                                  (assoc :damage-modifier damage-modifier)
                                                   (dissoc :description)))]
                     (if expanded?
                       (weapon-details weapon))]
@@ -2116,6 +2119,42 @@
    :background-color "rgba(0,0,0,0.15)"})
 
 (defn character-page [{:keys [id] :as arg}]
+  (let [{:keys [::se/owner] :as strict-character} @(subscribe [::char/character id])
+        character (char/from-strict strict-character)
+        built-template (subs/built-template (subs/selected-plugin-options character))
+        built-character (subs/built-character character built-template)
+        device-type @(subscribe [:device-type])
+        username @(subscribe [:username])]
+    [content-page
+     "Character Page"
+     (remove
+      nil?
+      [(if (= owner username)
+         {:title "Edit"
+          :icon "pencil"
+          :on-click #(dispatch [:edit-character character])})])
+     [:div.p-10.white
+      [character-display id true (if (= :mobile device-type) 1 2)]]]))
+
+(defn monster-page [{:keys [id] :as arg}]
+  (let [{:keys [::se/owner] :as strict-character} @(subscribe [::char/character id])
+        character (char/from-strict strict-character)
+        built-template (subs/built-template (subs/selected-plugin-options character))
+        built-character (subs/built-character character built-template)
+        device-type @(subscribe [:device-type])
+        username @(subscribe [:username])]
+    [content-page
+     "Character Page"
+     (remove
+      nil?
+      [(if (= owner username)
+         {:title "Edit"
+          :icon "pencil"
+          :on-click #(dispatch [:edit-character character])})])
+     [:div.p-10.white
+      [character-display id true (if (= :mobile device-type) 1 2)]]]))
+
+(defn spell-page [{:keys [id] :as arg}]
   (let [{:keys [::se/owner] :as strict-character} @(subscribe [::char/character id])
         character (char/from-strict strict-character)
         built-template (subs/built-template (subs/selected-plugin-options character))

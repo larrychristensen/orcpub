@@ -526,6 +526,7 @@
    ::char5e/number-of-attacks char5e/number-of-attacks
    ::char5e/has-weapon-prof char5e/has-weapon-prof
    ::char5e/weapon-attack-modifier-fn char5e/weapon-attack-modifier-fn
+   ::char5e/weapon-damage-modifier-fn char5e/weapon-damage-modifier-fn
    ::char5e/total-levels char5e/total-levels
    ::char5e/class-level-fn char5e/class-level-fn
    ::char5e/option-sources char5e/option-sources
