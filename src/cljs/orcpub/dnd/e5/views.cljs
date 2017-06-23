@@ -825,7 +825,7 @@
        ", "
        alignment))
 
-(defn monster-component [{:keys [name size type subtypes hit-points alignment armor-class armor-notes speed saving-throws skills senses languages challenge traits actions legendary-actions source page] :as monster}]
+(defn monster-component [{:keys [name size type subtypes hit-points alignment armor-class armor-notes speed saving-throws skills damage-vulnerabilities damage-resistances damage-immunities condition-immunities senses languages challenge traits actions legendary-actions source page] :as monster}]
   [:div.m-l-10
      [:span.f-s-24.f-w-b name]
    [:div.f-s-18.i.f-w-b (monster-subheader size type subtypes alignment)]
@@ -837,7 +837,7 @@
                                       (if modifier (common/mod-str modifier))
                                       (if mean (str " (" mean ")")))))
      (spell-field "Speed" speed)
-     [:div.m-t-10.flex.justify-cont-s-a
+     [:div.m-t-10.flex.justify-cont-s-a.m-b-10
       {:style {:max-width "300px"}}
       (doall
        (map
@@ -848,15 +848,24 @@
            (let [ability-value (get monster ability-key)]
              [:div ability-value " (" (common/bonus-str (opt/ability-bonus ability-value)) ")"])])
         [:str :dex :con :int :wis :cha]))]
-     [:div.m-t-10 (spell-field "Saving Throws" (print-bonus-map saving-throws))]
-     (if skills (spell-field "Skills" (print-bonus-map skills)))
+   (if (seq saving-throws)
+     (spell-field "Saving Throws" (print-bonus-map saving-throws)))
+   (if skills (spell-field "Skills" (print-bonus-map skills)))
+   (if damage-vulnerabilities (spell-field "Damage Vulnerabilities" damage-vulnerabilities))
+   (if damage-resistances (spell-field "Damage Resistances" damage-resistances))
+   (if damage-immunities (spell-field "Damage Immunities" damage-immunities))
+   (if condition-immunities (spell-field "Condition Immunities" condition-immunities))
      (if senses (spell-field "Senses" senses))
      (if languages (spell-field "Languages" languages))
-     (if challenge (spell-field "Challenge" (case challenge
-                                              0.125 "1/8"
-                                              0.25 "1/4"
-                                              0.5 "1/2"
-                                              challenge)))
+   (if challenge (spell-field "Challenge" (str
+                                           (case challenge
+                                             0.125 "1/8"
+                                             0.25 "1/4"
+                                             0.5 "1/2"
+                                             challenge)
+                                           " ("
+                                           (monsters/challenge-ratings challenge)
+                                           " XP)")))
      (if traits
        [:div.m-t-20
         (doall
