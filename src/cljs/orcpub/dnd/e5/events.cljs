@@ -1283,6 +1283,7 @@
 
 (defn all-subtypes-removed? [subtypes hidden-subtypes]
   (and (seq subtypes)
+       (seq hidden-subtypes)
        (->> subtypes
             (remove
              hidden-subtypes)

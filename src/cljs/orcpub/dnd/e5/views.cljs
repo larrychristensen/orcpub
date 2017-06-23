@@ -2378,7 +2378,6 @@
                      (common/kw-to-name type)])
                   @(subscribe [::char/monster-types])))]]
               (let [subtypes @(subscribe [::char/monster-subtypes])]
-                (prn "SUBTYPES" subtypes)
                 [:div.white.p-20
                  [:div.f-s-16.f-w-b "Subtype"]
                  [:div

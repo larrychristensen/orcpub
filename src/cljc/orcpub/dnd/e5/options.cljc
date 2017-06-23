@@ -2326,7 +2326,7 @@
                     (if save-profs (apply modifiers/saving-throws kw save-profs))]))})))
 
 (defn source-url [source]
-  (some-> disp/sources source :url))
+  (some-> source disp/sources :url))
 
 (defn spell-level [spell-kw]
   (some-> spells/spell-map spell-kw :level))
