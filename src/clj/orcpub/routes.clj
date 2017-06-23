@@ -897,13 +897,9 @@
      [(apply route-map/path-for route args) :get `index :route-name route])
    index-page-paths))
 
-(prn "INDEX ROUTES" index-page-routes)
-
 (def expanded-index-routes
   (route/expand-routes
    (into #{} index-page-routes)))
-
-(prn "EXPANDED INDEX ROUTES" expanded-index-routes)
 
 (def routes
   (concat
@@ -969,5 +965,3 @@
        {:get `check-username}]
       ["/health"
        {:get `health-check}]]])))
-
-(prn "ROUTES" routes)

@@ -273,7 +273,7 @@
      :suggestion
      :earthbind],
     3
-    [:counterspell :dispel-magic :fear :fly :gaseous-form :hypnotic-pattern
+    [:counterspell :dispel-magic :fear :fly :gaseous-form :hunger-of-hadar :hypnotic-pattern
      :magic-circle :major-image :remove-curse :tongues :vampiric-touch],
     4 [:banishment :blight :dimension-door :hallucinatory-terrain :elemental-bane],
     5 [:contact-other-plane :dream :hold-monster :scrying],
