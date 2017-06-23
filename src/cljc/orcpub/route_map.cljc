@@ -1,6 +1,7 @@
 (ns orcpub.route-map
   (:require [bidi.bidi :as bidi]))
 
+(def default-route :default)
 (def dnd-e5-char-builder-route :char-builder-5e)
 (def dnd-e5-char-list-route :char-list-5e)
 (def dnd-e5-char-route :char-5e)
@@ -14,7 +15,8 @@
 (def dnd-e5-char-party-character-route :char-party-character-5e)
 (def dnd-e5-char-parties-page-route :char-parties-5e-page)
 
-(def dnd-e5-char-page-routes #{dnd-e5-char-builder-route
+(def dnd-e5-char-page-routes #{default-route
+                               dnd-e5-char-builder-route
                                dnd-e5-char-list-page-route
                                dnd-e5-char-page-route
                                dnd-e5-char-parties-page-route})
@@ -29,7 +31,6 @@
 
 (def dnd-e5-spell-page-routes #{dnd-e5-spell-list-page-route dnd-e5-spell-page-route})
 
-(def default-route :default)
 (def register-route :register)
 (def register-page-route :register-page)
 (def verify-route :verify)
