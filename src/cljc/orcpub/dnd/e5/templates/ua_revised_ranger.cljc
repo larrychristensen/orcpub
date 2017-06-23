@@ -63,7 +63,7 @@
     :weapons {:longbow 1}
     :equipment {:quiver 1
                 :arrow 20}
-    :modifiers [(mod5e/al-illegal "Death Domain is not allowed")
+    :modifiers [opt5e/ua-al-illegal
                 (mod5e/dependent-trait
                  {:name "Favored Enemy"
                   :page 2

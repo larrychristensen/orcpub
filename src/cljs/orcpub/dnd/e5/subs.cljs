@@ -606,6 +606,21 @@
        (sort-by :name monsters5e/monsters))))
 
 (reg-sub
+ ::char5e/monster-types
+ (fn [_ _]
+   (into #{} (map :type monsters5e/monsters))))
+
+(reg-sub
+ ::char5e/monster-subtypes
+ (fn [_ _]
+   (into #{} (mapcat :subtypes monsters5e/monsters))))
+
+(reg-sub
+ ::char5e/monster-sizes
+ (fn [_ _]
+   (into #{} (map :size monsters5e/monsters))))
+
+(reg-sub
  ::char5e/spell-text-filter
  (fn [db _]
    (::char5e/spell-text-filter db)))
@@ -620,3 +635,8 @@
  (fn [db _]
    (or (::char5e/filtered-spells db)
        (sort-by :name spells5e/spells))))
+
+(reg-sub
+ ::char5e/monster-filter-hidden?
+ (fn [db [_ filter value]]
+   (get-in db [::char5e/monster-filter-hidden? filter value])))
