@@ -2530,6 +2530,7 @@ At Higher Levels. When you cast this spell using a spell slot of 3rd level or hi
     }
    {
     :name "Hunger of Had."
+    :key :hunger-of-hadar
     :school "conjuration"
     :level 3
     :casting-time "1 action"

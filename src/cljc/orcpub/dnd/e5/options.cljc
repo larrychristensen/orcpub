@@ -716,6 +716,9 @@
                     (keys lang-options))]
      (language-selection (map language-map lang-kws) lang-num))))
 
+(defn any-language-selection [num]
+  (language-selection languages num))
+
 (defn maneuver-option [name & [desc]]
   (t/option-cfg
    {:name name
@@ -1667,19 +1670,23 @@
 (def custom-background-option
   (t/option-cfg
    {:name "Custom"
-    :icon "beer-stein"
     :ui-fn custom-background-builder
-    :help "Homebrew backgound. This allows you to use a background that is not on the list. This will allow unrestricted access to skill and tool proficiencies and feats."
-    :prereqs [(t/option-prereq
-               nil
-               (fn [_] @(subscribe [:homebrew? [:background]]))
-               true)]
     :order 1000
-    :modifiers [(modifiers/deferred-background)
-                homebrew-al-illegal]
-    :selections [homebrew-skill-prof-selection
-                 homebrew-tool-prof-selection
-                 homebrew-feat-selection]}))
+    :modifiers [(modifiers/deferred-background)]
+    :selections [(skill-selection 2)
+                 (t/selection-cfg
+                  {:name "Tool / Language Proficiencies"
+                   :tags #{:profs}
+                   :options [(t/option-cfg
+                              {:name "Two Tools"
+                               :selections [(tool-selection 2)]})
+                             (t/option-cfg
+                              {:name "One Tool / One Language"
+                               :selections [(tool-selection 1)
+                                            (any-language-selection 1)]})
+                             (t/option-cfg
+                              {:name "Two Languages"
+                               :selections [(any-language-selection 2)]})]})]}))
 
 (defn race-option [{:keys [name
                            icon
@@ -1945,7 +1952,6 @@
                     (if (seq language-options) [(language-selection language-options)]))
        :modifiers (concat
                    [(modifiers/background name)]
-                   (if source [(modifiers/used-resource source name)])
                    (traits-modifiers traits)
                    modifiers
                    (armor-prof-modifiers (keys armor-profs))
