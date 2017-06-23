@@ -131,7 +131,7 @@
                            " "
                            (if (not mobile?) " w-110"))}
          [:div.p-10
-          {:class-name (if (not active) (if disabled "opacity-2" "opacity-2 hover-opacity-full"))}
+          {:class-name (if (not active) (if disabled "opacity-2" "opacity-6 hover-opacity-full"))}
           (let [size (if mobile? 24 48)] (svg-icon icon size size))
           (if (not mobile?)
             [:div.title.uppercase title])]
@@ -196,7 +196,7 @@
            [:div
             {:class-name (if mobile? "p-l-10 p-r-10" "p-l-20 p-r-20 flex-grow-1")}
             [:div.b-rad-5.flex.align-items-c
-             {:style {:background-color "rgba(0,0,0,0.1)"}}
+             {:style {:background-color "rgba(0,0,0,0.15)"}}
              (if (not mobile?)
                [:div.p-l-20.flex-grow-1
                 [:input.w-100-p.white
@@ -209,9 +209,9 @@
                   :on-key-press #(if (= "Enter" (.-key %)) (dispatch [:set-search-text search-text]))
                   :on-change #(dispatch [:set-search-text (event-value %)])}]])
              [:div.opacity-1.p-r-10.pointer
-              {:class-name (if mobile? "opacity-5" "opacity-1")
+              {:class-name (if mobile? "opacity-5" "opacity-8")
                :on-click #(dispatch [:open-orcacle])}
-              (svg-icon "hood" (if mobile? 32 48) (if mobile? 32 48))]]])
+              (svg-icon "magnifying-glass" (if mobile? 32 48) (if mobile? 32 48))]]])
          [user-header-view]]]]]
      [:div.container
       [:div.content

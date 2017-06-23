@@ -901,7 +901,7 @@
       :height (px const/header-height)}]
 
     [:.header-tab
-     {:background-color "rgba(0, 0, 0, 0.25)"
+     {:background-color "rgba(0, 0, 0, 0.5)"
       ;;:-webkit-backdrop-filter "blur(5px)"
       ;;:backdrop-filter "blur(5px)"
       }]
