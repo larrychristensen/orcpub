@@ -26,7 +26,7 @@
             [bidi.bidi :as bidi]
             [orcpub.route-map :as routes]
             [orcpub.errors :as errors]
-            [clojure.string :as s])
+            [clojure.set :as sets])
   (:require-macros [cljs.core.async.macros :refer [go]]))
 
 (defn check-and-throw
@@ -1277,13 +1277,30 @@
  (fn [db [_ tab]]
    (assoc db ::char5e/builder-tab tab)))
 
-(defn filter-monsters [filter-text]
-  (let [pattern (re-pattern (str ".*" (s/lower-case filter-text) ".*"))]
+(defn remove-subtypes [subtypes hidden-subtypes]
+  (let [result (sets/difference subtypes hidden-subtypes)]
+    result))
+
+(defn all-subtypes-removed? [subtypes hidden-subtypes]
+  (and (seq subtypes)
+       (->> subtypes
+            (remove
+             hidden-subtypes)
+            empty?)))
+
+(defn filter-monsters [filter-text monster-filters]
+  (let [pattern (if filter-text
+                  (re-pattern (str ".*" (s/lower-case filter-text) ".*")))]
     (sort-by
      :name
-     (filter
-      (fn [monster]
-        (re-matches pattern (s/lower-case (:name monster))))
+     (sequence
+      (filter
+       (fn [{:keys [name type subtypes size]}]
+         (and (or (s/blank? filter-text)
+                  (re-matches pattern (s/lower-case name)))
+              (not (or (-> monster-filters :size size)
+                       (-> monster-filters :type type)
+                       (all-subtypes-removed? subtypes (:subtype monster-filters)))))))
       monsters/monsters))))
 
 (defn filter-spells [filter-text]
@@ -1300,7 +1317,7 @@
  (fn [db [_ filter-text]]
    (assoc db
           ::char5e/monster-text-filter filter-text
-          ::char5e/filtered-monsters (filter-monsters filter-text))))
+          ::char5e/filtered-monsters (filter-monsters filter-text (::char5e/monster-filter-hidden? db)))))
 
 (reg-event-db
  ::char5e/filter-spells
@@ -1318,3 +1335,12 @@
              (if (get s id)
                (disj s id)
                (conj (or s #{}) id))))))
+
+(reg-event-db
+ ::char5e/toggle-monster-filter-hidden
+ (fn [db [_ filter value]]
+   (let [updated (update-in db [::char5e/monster-filter-hidden? filter value] not)]
+     (assoc updated
+            ::char5e/filtered-monsters
+            (filter-monsters (::char5e/monster-text-filter updated)
+                             (::char5e/monster-filter-hidden? updated))))))

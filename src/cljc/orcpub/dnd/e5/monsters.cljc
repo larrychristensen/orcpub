@@ -1,10 +1,18 @@
 (ns orcpub.dnd.e5.monsters
   (:require [orcpub.common :refer [name-to-kw]]))
 
+(def monster-sizes
+  {:huge "Huge"
+   :medium "Medium"
+   :gargantuan "Gargantuan"
+   :tiny "Tiny"
+   :large "Large"
+   :small "Small"})
+
 (def monsters [{
 :name "Aboleth"
-:size "Large"
-:type "aberration"
+:size :large
+:type :aberration
 :alignment "lawful evil"
 :armor-class 17
 :armor-notes "natural armor"
@@ -44,8 +52,8 @@ Whenever the charmed target takes damage, the target can repeat the saving throw
 
 }{
 :name "Deva"
-:size "Medium"
-:type "celestial"
+:size :medium
+:type :celestial
 :alignment "lawful good"
 :armor-class 17
 :armor-notes "natural armor"
@@ -82,8 +90,8 @@ In a new form, the deva retains its game statistics and ability to speak, but it
 
 }{
 :name "Planetar"
-:size "Large"
-:type "celestial"
+:size :large
+:type :celestial
 :alignment "lawful good"
 :armor-class 19
 :armor-notes "natural armor"
@@ -121,8 +129,8 @@ strike, raise dead
 
 }{
 :name "Solar"
-:size "Large"
-:type "celestial"
+:size :large
+:type :celestial
 :alignment "lawful good"
 :armor-class 21
 :armor-notes "natural armor"
@@ -171,8 +179,8 @@ points and is freed from any curse, disease, poison, blindness, or deafness.
 }{
 
 :name "Animated Armor"
-:size "Medium"
-:type "construct"
+:size :medium
+:type :construct
 :alignment "unaligned"
 :armor-class 18
 :armor-notes "natural armor"
@@ -200,8 +208,8 @@ Constitution saving throw against the caster's spell save DC or fall unconscious
 
 }{
 :name "Flying Sword"
-:size "Small"
-:type "construct"
+:size :small
+:type :construct
 :alignment "unaligned"
 :armor-class 17
 :armor-notes "natural armor"
@@ -229,8 +237,8 @@ Constitution saving throw against the caster's spell save DC or fall unconscious
 
 }{
 :name "Rug of Smothering"
-:size "Large"
-:type "construct"
+:size :large
+:type :construct
 :alignment "unaligned"
 :armor-class 12
 :hit-points {:mean 33 :die-count 6 :die 10}
@@ -257,8 +265,8 @@ Constitution saving throw against the caster's spell save DC or fall unconscious
 
 }{
 :name "Ankheg"
-:size "Large"
-:type "monstrosity"
+:size :large
+:type :monstrosity
 :alignment "unaligned"
 :armor-class 14
 :armor-notes "natural armor, 11 while prone"
@@ -279,8 +287,8 @@ Constitution saving throw against the caster's spell save DC or fall unconscious
 
 }{
 :name "Azer"
-:size "Medium"
-:type "elemental"
+:size :medium
+:type :elemental
 :alignment "lawful neutral"
 :armor-class 17
 :armor-notes "(natural armor, shield)"
@@ -309,8 +317,8 @@ Constitution saving throw against the caster's spell save DC or fall unconscious
 
 }{
 :name "Basilisk"
-:size "Medium"
-:type "monstrosity"
+:size :medium
+:type :monstrosity
 :alignment "unaligned"
 :armor-class 15
 :armor-notes "natural armor"
@@ -335,8 +343,8 @@ If the basilisk sees its reflection within 30 feet of it in bright light, it mis
 
 }{
 :name "Behir"
-:size "Huge"
-:type "monstrosity"
+:size :huge
+:type :monstrosity
 :alignment "neutral evil"
 :armor-class 17
 :armor-notes "natural armor"
@@ -364,8 +372,9 @@ If the basilisk sees its reflection within 30 feet of it in bright light, it mis
 If the behir takes 30 damage or more on a single turn from the swallowed creature, the behir must succeed on a DC 14 Constitution saving throw at the end of that turn or regurgitate the creature, which falls prone in a space within 10 feet of the behir. If the behir dies, a swallowed creature is no longer restrained by it and can escape from the corpse by using 15 feet of movement, exiting prone."}]
 }{
 :name "Bugbear"
-:size "Medium"
-:type "humanoid (goblinoid)"
+:size :medium
+:type :humanoid
+:subtypes #{:goblinoid}
 :alignment "chaotic evil"
 :armor-class 16
 :armor-notes "(hide armor, shield)"
@@ -394,8 +403,8 @@ If the behir takes 30 damage or more on a single turn from the swallowed creatur
 
 }{
 :name "Bulette"
-:size "Large"
-:type "monstrosity"
+:size :large
+:type :monstrosity
 :alignment "unaligned"
 :armor-class 17
 :armor-notes "natural armor"
@@ -419,8 +428,8 @@ If the behir takes 30 damage or more on a single turn from the swallowed creatur
 {:name "Deadly Leap" :description "If the bulette jumps at least 15 feet as part of its movement, it can then use this action to land on its feet in a space that contains one or more other creatures. Each of those creatures must succeed on a DC 16 Strength or Dexterity saving throw (target's choice) or be knocked prone and take 14 (3d6 + 4) bludgeoning damage plus 14 (3d6 + 4) slashing damage. On a successful save, the creature takes only half the damage, isn't knocked prone, and is pushed 5 feet out of the bulette's space into an unoccupied space of the creature's choice. If no unoccupied space is within range, the creature instead falls prone in the bulette's space."}]
 }{
 :name "Centaur"
-:size "Large"
-:type "monstrosity"
+:size :large
+:type :monstrosity
 :alignment "neutral good"
 :armor-class 12
 :hit-points {:mean 45 :die-count 6 :die 10 :modifier 12}
@@ -446,8 +455,8 @@ If the behir takes 30 damage or more on a single turn from the swallowed creatur
 {:name "Longbow" :description "Ranged Weapon Attack: +4 to hit, range 150/600 ft., one target. Hit: 6 (1d8 + 2) piercing damage."}]
 }{
 :name "Chimera"
-:size "Large"
-:type "monstrosity"
+:size :large
+:type :monstrosity
 :alignment "chaotic evil"
 :armor-class 14
 :armor-notes "natural armor"
@@ -474,8 +483,8 @@ If the behir takes 30 damage or more on a single turn from the swallowed creatur
 
 }{
 :name "Chuul"
-:size "Large"
-:type "aberration"
+:size :large
+:type :aberration
 :alignment "chaotic evil"
 :armor-class 16
 :armor-notes "natural armor"
@@ -506,8 +515,8 @@ If the behir takes 30 damage or more on a single turn from the swallowed creatur
 
 }{
 :name "Cloaker"
-:size "Large"
-:type "aberration"
+:size :large
+:type :aberration
 :alignment "chaotic neutral"
 :armor-class 14
 :armor-notes "natural armor"
@@ -540,8 +549,8 @@ A duplicate has the cloaker's AC and uses its saving throws. If an attack hits a
 
 }{
 :name "Cockatrice"
-:size "Small"
-:type "monstrosity"
+:size :small
+:type :monstrosity
 :alignment "unaligned"
 :armor-class 11
 :hit-points {:mean 27 :die-count 6 :die 6 :modifier 6}
@@ -562,8 +571,8 @@ A duplicate has the cloaker's AC and uses its saving throws. If an attack hits a
 
 }{
 :name "Couatl"
-:size "Medium"
-:type "celestial"
+:size :medium
+:type :celestial
 :alignment "lawful good"
 :armor-class 19
 :armor-notes "natural armor"
@@ -599,8 +608,8 @@ In a new form, the couatl retains its game statistics and ability to speak, but 
 
 }{
 :name "Darkmantle"
-:size "Small"
-:type "monstrosity"
+:size :small
+:type :monstrosity
 :alignment "unaligned"
 :armor-class 11
 :hit-points {:mean 22 :die-count 5 :die 6 :modifier 5}
@@ -628,8 +637,9 @@ A creature can detach the darkmantle by making a successful DC 13 Strength check
 
 }{
 :name "Balor"
-:size "Huge"
-:type "fiend (demon)"
+:size :huge
+:type :fiend
+:subtypes #{:demon}
 :alignment "chaotic evil"
 :armor-class 19
 :armor-notes "natural armor"
@@ -664,8 +674,9 @@ A creature can detach the darkmantle by making a successful DC 13 Strength check
 
 }{
 :name "Dretch"
-:size "Small"
-:type "fiend (demon)"
+:size :small
+:type :fiend
+:subtypes #{:demon}
 :alignment "chaotic evil"
 :armor-class 11
 :armor-notes "natural armor"
@@ -694,8 +705,9 @@ A creature can detach the darkmantle by making a successful DC 13 Strength check
 
 }{
 :name "Glabrezu"
-:size "Large"
-:type "fiend (demon)"
+:size :large
+:type :fiend
+:subtypes #{:demon}
 :alignment "chaotic evil"
 :armor-class 17
 :armor-notes "natural armor"
@@ -728,8 +740,9 @@ At will: darkness, detect magic, dispel magic 1/day each: confusion, fly, power 
 
 }{
 :name "Hezrou"
-:size "Large"
-:type "fiend (demon)"
+:size :large
+:type :fiend
+:subtypes #{:demon}
 :alignment "chaotic evil"
 :armor-class 16
 :armor-notes "natural armor"
@@ -761,8 +774,9 @@ At will: darkness, detect magic, dispel magic 1/day each: confusion, fly, power 
 
 }{
 :name "Marilith"
-:size "Large"
-:type "fiend (demon)"
+:size :large
+:type :fiend
+:subtypes #{:demon}
 :alignment "chaotic evil"
 :armor-class 18
 :armor-notes "natural armor"
@@ -799,8 +813,9 @@ At will: darkness, detect magic, dispel magic 1/day each: confusion, fly, power 
 
 }{
 :name "Nalfeshnee"
-:size "Large"
-:type "fiend (demon)"
+:size :large
+:type :fiend
+:subtypes #{:demon}
 :alignment "chaotic evil"
 :armor-class 18
 :armor-notes "natural armor"
@@ -834,8 +849,9 @@ creature is immune to the nalfeshnee's Horror Nimbus for the next 24 hours."}
 
 }{
 :name "Quasit"
-:size "Tiny"
-:type "fiend (demon, shapechanger)"
+:size :tiny
+:type :fiend
+:subtypes #{:demon, :shapechanger}
 :alignment "chaotic evil"
 :armor-class 13
 :hit-points {:mean 7 :die-count 3 :die 4}
@@ -866,8 +882,9 @@ creature is immune to the nalfeshnee's Horror Nimbus for the next 24 hours."}
 
 }{
 :name "Vrock"
-:size "Large"
-:type "fiend (demon)"
+:size :large
+:type :fiend
+:subtypes #{:demon}
 :alignment "chaotic evil"
 :armor-class 15
 :armor-notes "natural armor"
@@ -900,8 +917,9 @@ creature is immune to the nalfeshnee's Horror Nimbus for the next 24 hours."}
 
 }{
 :name "Barbed Devil"
-:size "Medium"
-:type "fiend (devil)"
+:size :medium
+:type :fiend
+:subtypes #{:devil}
 :alignment "lawful evil"
 :armor-class 15
 :armor-notes "natural armor"
@@ -935,8 +953,9 @@ a flammable object that isn't being worn or carried, it also catches fire."}]
 
 }{
 :name "Bearded Devil"
-:size "Medium"
-:type "fiend (devil)"
+:size :medium
+:type :fiend
+:subtypes #{:devil}
 :alignment "lawful evil"
 :armor-class 13
 :armor-notes "natural armor"
@@ -970,8 +989,9 @@ successful DC 12 Wisdom (Medicine) check. The wound also closes if the target re
 
 }{
 :name "Bone Devil"
-:size "Large"
-:type "fiend (devil)"
+:size :large
+:type :fiend
+:subtypes #{:devil}
 :alignment "lawful evil"
 :armor-class 19
 :armor-notes "natural armor"
@@ -1005,8 +1025,9 @@ successful DC 12 Wisdom (Medicine) check. The wound also closes if the target re
 
 }{
 :name "Chain Devil"
-:size "Medium"
-:type "fiend (devil)"
+:size :medium
+:type :fiend
+:subtypes #{:devil}
 :alignment "lawful evil"
 :armor-class 16
 :armor-notes "natural armor"
@@ -1045,8 +1066,9 @@ Wisdom saving throw or be frightened until the end of its turn.
 
 }{
 :name "Erinyes"
-:size "Medium"
-:type "fiend (devil)"
+:size :medium
+:type :fiend
+:subtypes #{:devil}
 :alignment "lawful evil"
 :armor-class 18
 :armor-notes "(plate)"
@@ -1082,8 +1104,9 @@ Wisdom saving throw or be frightened until the end of its turn.
 
 }{
 :name "Horned Devil"
-:size "Large"
-:type "fiend (devil)"
+:size :large
+:type :fiend
+:subtypes #{:devil}
 :alignment "lawful evil"
 :armor-class 18
 :armor-notes "natural armor"
@@ -1115,8 +1138,9 @@ Wisdom saving throw or be frightened until the end of its turn.
 
 }{
 :name "Ice Devil"
-:size "Large"
-:type "fiend (devil)"
+:size :large
+:type :fiend
+:subtypes #{:devil}
 :alignment "lawful evil"
 :armor-class 18
 :armor-notes "natural armor"
@@ -1151,8 +1175,9 @@ The wall lasts for 1 minute or until the devil is incapacitated or dies. The wal
 
 }{
 :name "Imp"
-:size "Tiny"
-:type "fiend (devil, shapechanger)"
+:size :tiny
+:type :fiend
+:subtypes #{:devil, :shapechanger}
 :alignment "lawful evil"
 :armor-class 13
 :hit-points {:mean 10 :die-count 3 :die 4 :modifier 3}
@@ -1183,8 +1208,9 @@ Devil's Sight. Magical darkness doesn't impede the imp's darkvision."}
 
 }{
 :name "Lemure"
-:size "Medium"
-:type "fiend (devil)"
+:size :medium
+:type :fiend
+:subtypes #{:devil}
 :alignment "lawful evil"
 :armor-class 7
 :hit-points {:mean 13 :die-count 3 :die 8}
@@ -1210,8 +1236,9 @@ Devil's Sight. Magical darkness doesn't impede the imp's darkvision."}
 
 }{
 :name "Pit Fiend"
-:size "Large"
-:type "fiend (devil)"
+:size :large
+:type :fiend
+:subtypes #{:devil}
 :alignment "lawful evil"
 :armor-class 19
 :armor-notes "natural armor"
@@ -1249,8 +1276,8 @@ At will: detect magic, fireball
 
 }{
 :name "Plesiosaurus"
-:size "Large"
-:type "beast"
+:size :large
+:type :beast
 :alignment "unaligned"
 :armor-class 13
 :armor-notes "natural armor"
@@ -1275,8 +1302,8 @@ At will: detect magic, fireball
 
 }{
 :name "Triceratops"
-:size "Huge"
-:type "beast"
+:size :huge
+:type :beast
 :alignment "unaligned"
 :armor-class 13
 :armor-notes "natural armor"
@@ -1302,8 +1329,8 @@ If the target is prone, the triceratops can make one stomp attack against it as 
 
 }{
 :name "Tyrannosaurus Rex"
-:size "Huge"
-:type "beast"
+:size :huge
+:type :beast
 :alignment "unaligned"
 :armor-class 13
 :armor-notes "natural armor"
@@ -1328,8 +1355,9 @@ If the target is prone, the triceratops can make one stomp attack against it as 
 
 }{
 :name "Doppelganger"
-:size "Medium"
-:type "monstrosity (shapechanger)"
+:size :medium
+:type :monstrosity
+:subtypes #{:shapechanger}
 :alignment " neutral"
 :armor-class 14
 :hit-points {:mean 52 :die-count 8 :die 8 :modifier 16}
@@ -1359,8 +1387,8 @@ If the target is prone, the triceratops can make one stomp attack against it as 
 
 }{
 :name "Ancient Black Dragon"
-:size "Gargantuan"
-:type "dragon"
+:size :gargantuan
+:type :dragon
 :alignment "chaotic evil"
 :armor-class 22
 :armor-notes "natural armor"
@@ -1402,8 +1430,8 @@ If the target is prone, the triceratops can make one stomp attack against it as 
 
 }{
 :name "Adult Black Dragon"
-:size "Huge"
-:type "dragon"
+:size :huge
+:type :dragon
 :alignment "chaotic evil"
 :armor-class 19
 :armor-notes "natural armor"
@@ -1446,8 +1474,8 @@ the saving throw at the end of each of its turns, ending the effect on itself on
 
 }{
 :name "Young Black Dragon"
-:size "Large"
-:type "dragon"
+:size :large
+:type :dragon
 :alignment "chaotic evil"
 :armor-class 18
 :armor-notes "natural armor"
@@ -1477,8 +1505,8 @@ the saving throw at the end of each of its turns, ending the effect on itself on
 
 }{
 :name "Black Dragon Wyrmling"
-:size "Medium"
-:type "dragon"
+:size :medium
+:type :dragon
 :alignment "chaotic evil"
 :armor-class 17
 :armor-notes "natural armor"
@@ -1507,8 +1535,8 @@ the saving throw at the end of each of its turns, ending the effect on itself on
 "}]
 }{
 :name "Ancient Blue Dragon"
-:size "Gargantuan"
-:type "dragon"
+:size :gargantuan
+:type :dragon
 :alignment "lawful evil"
 :armor-class 22
 :armor-notes "natural armor"
@@ -1550,8 +1578,8 @@ failed save, or half as much damage on a successful one.
 
 }{
 :name "Adult Blue Dragon"
-:size "Huge"
-:type "dragon"
+:size :huge
+:type :dragon
 :alignment "lawful evil"
 :armor-class 19
 :armor-notes "natural armor"
@@ -1593,8 +1621,8 @@ failed save, or half as much damage on a successful one.
 
 }{
 :name "Young Blue Dragon"
-:size "Large"
-:type "dragon"
+:size :large
+:type :dragon
 :alignment "lawful evil"
 :armor-class 18
 :armor-notes "natural armor"
@@ -1625,8 +1653,8 @@ failed save, or half as much damage on a successful one.
 
 }{
 :name "Blue Dragon Wyrmling"
-:size "Medium"
-:type "dragon"
+:size :medium
+:type :dragon
 :alignment "lawful evil"
 :armor-class 17
 :armor-notes "natural armor"
@@ -1656,8 +1684,8 @@ Green Dragon
 
 }{
 :name "Ancient Green Dragon"
-:size "Gargantuan"
-:type "dragon"
+:size :gargantuan
+:type :dragon
 :alignment "lawful evil"
 :armor-class 21
 :armor-notes "natural armor"
@@ -1700,8 +1728,8 @@ Green Dragon
 
 }{
 :name "Adult Green Dragon"
-:size "Huge"
-:type "dragon"
+:size :huge
+:type :dragon
 :alignment "lawful evil"
 :armor-class 19
 :armor-notes "natural armor"
@@ -1745,8 +1773,8 @@ Green Dragon
 
 }{
 :name "Young Green Dragon"
-:size "Large"
-:type "dragon"
+:size :large
+:type :dragon
 :alignment "lawful evil"
 :armor-class 18
 :armor-notes "natural armor"
@@ -1779,8 +1807,8 @@ Green Dragon
 
 }{
 :name "Green Dragon Wyrmling"
-:size "Medium"
-:type "dragon"
+:size :medium
+:type :dragon
 :alignment "lawful evil"
 :armor-class 17
 :armor-notes "natural armor"
@@ -1810,8 +1838,8 @@ Green Dragon
 
 }{
 :name "Ancient Red Dragon"
-:size "Gargantuan"
-:type "dragon"
+:size :gargantuan
+:type :dragon
 :alignment "chaotic evil"
 :armor-class 22
 :armor-notes "natural armor"
@@ -1852,8 +1880,8 @@ Green Dragon
 
 }{
 :name "Adult Red Dragon"
-:size "Huge"
-:type "dragon"
+:size :huge
+:type :dragon
 :alignment "chaotic evil"
 :armor-class 19
 :armor-notes "natural armor"
@@ -1894,8 +1922,8 @@ Green Dragon
 
 }{
 :name "Young Red Dragon"
-:size "Large"
-:type "dragon"
+:size :large
+:type :dragon
 :alignment "chaotic evil"
 :armor-class 18
 :armor-notes "natural armor"
@@ -1925,8 +1953,8 @@ Green Dragon
 
 }{
 :name "Red Dragon Wyrmling"
-:size "Medium"
-:type "dragon"
+:size :medium
+:type :dragon
 :alignment "chaotic evil"
 :armor-class 17
 :armor-notes "natural armor"
@@ -1954,8 +1982,8 @@ Green Dragon
 
 }{
 :name "Ancient White Dragon"
-:size "Gargantuan"
-:type "dragon"
+:size :gargantuan
+:type :dragon
 :alignment "chaotic evil"
 :armor-class 20
 :armor-notes "natural armor"
@@ -1997,8 +2025,8 @@ Green Dragon
 
 }{
 :name "Adult White Dragon"
-:size "Huge"
-:type "dragon"
+:size :huge
+:type :dragon
 :alignment "chaotic evil"
 :armor-class 18
 :armor-notes "natural armor"
@@ -2039,8 +2067,8 @@ Green Dragon
 
 }{
 :name "Young White Dragon"
-:size "Large"
-:type "dragon"
+:size :large
+:type :dragon
 :alignment "chaotic evil"
 :armor-class 17
 :armor-notes "natural armor"
@@ -2071,8 +2099,8 @@ Green Dragon
 
 }{
 :name "White Dragon Wyrmling"
-:size "Medium"
-:type "dragon"
+:size :medium
+:type :dragon
 :alignment "chaotic evil"
 :armor-class 16
 :armor-notes "natural armor"
@@ -2100,8 +2128,8 @@ Green Dragon
 
 }{
 :name "Ancient Brass Dragon"
-:size "Gargantuan"
-:type "dragon"
+:size :gargantuan
+:type :dragon
 :alignment "chaotic good"
 :armor-class 20
 :armor-notes "natural armor"
@@ -2148,8 +2176,8 @@ In a new form, the dragon retains its alignment, hit points, Hit Dice, ability t
 
 }{
 :name "Adult Brass Dragon"
-:size "Huge"
-:type "dragon"
+:size :huge
+:type :dragon
 :alignment "chaotic good"
 :armor-class 18
 :armor-notes "natural armor"
@@ -2192,8 +2220,8 @@ In a new form, the dragon retains its alignment, hit points, Hit Dice, ability t
 
 }{
 :name "Young Brass Dragon"
-:size "Large"
-:type "dragon"
+:size :large
+:type :dragon
 :alignment "chaotic good"
 :armor-class 17
 :armor-notes "natural armor"
@@ -2225,8 +2253,8 @@ In a new form, the dragon retains its alignment, hit points, Hit Dice, ability t
 
 }{
 :name "Brass Dragon Wyrmling"
-:size "Medium"
-:type "dragon"
+:size :medium
+:type :dragon
 :alignment "chaotic good"
 :armor-class 16
 :armor-notes "natural armor"
@@ -2256,8 +2284,8 @@ In a new form, the dragon retains its alignment, hit points, Hit Dice, ability t
 
 }{
 :name "Ancient Bronze Dragon"
-:size "Gargantuan"
-:type "dragon"
+:size :gargantuan
+:type :dragon
 :alignment "lawful good"
 :armor-class 22
 :armor-notes "natural armor"
@@ -2302,8 +2330,8 @@ In a new form, the dragon retains its alignment, hit points, Hit Dice, ability t
 "}]}
 }{
 :name "Adult Bronze Dragon"
-:size "Huge"
-:type "dragon"
+:size :huge
+:type :dragon
 :alignment "lawful good"
 :armor-class 19
 :armor-notes "natural armor"
@@ -2350,8 +2378,8 @@ In a new form, the dragon retains its alignment, hit points, Hit Dice, ability t
 
 }{
 :name "Young Bronze Dragon"
-:size "Large"
-:type "dragon"
+:size :large
+:type :dragon
 :alignment "lawful good"
 :armor-class 18
 :armor-notes "natural armor"
@@ -2385,8 +2413,8 @@ In a new form, the dragon retains its alignment, hit points, Hit Dice, ability t
 
 }{
 :name "Bronze Dragon Wyrmling"
-:size "Medium"
-:type "dragon"
+:size :medium
+:type :dragon
 :alignment "lawful good"
 :armor-class 17
 :armor-notes "natural armor"
@@ -2418,8 +2446,8 @@ In a new form, the dragon retains its alignment, hit points, Hit Dice, ability t
 
 }{
 :name "Ancient Copper Dragon"
-:size "Gargantuan"
-:type "dragon"
+:size :gargantuan
+:type :dragon
 :alignment "chaotic good"
 :armor-class 21
 :armor-notes "natural armor"
@@ -2462,8 +2490,8 @@ In a new form, the dragon retains its alignment, hit points, Hit Dice, ability t
 
 }{
 :name "Adult Copper Dragon"
-:size "Huge"
-:type "dragon"
+:size :huge
+:type :dragon
 :alignment "chaotic good"
 :armor-class 18
 :armor-notes "natural armor"
@@ -2504,8 +2532,8 @@ In a new form, the dragon retains its alignment, hit points, Hit Dice, ability t
 
 }{
 :name "Young Copper Dragon"
-:size "Large"
-:type "dragon"
+:size :large
+:type :dragon
 :alignment "chaotic good"
 :armor-class 17
 :armor-notes "natural armor"
@@ -2535,8 +2563,8 @@ In a new form, the dragon retains its alignment, hit points, Hit Dice, ability t
 
 }{
 :name "Copper Dragon Wyrmling"
-:size "Medium"
-:type "dragon"
+:size :medium
+:type :dragon
 :alignment "chaotic good"
 :armor-class 16
 :armor-notes "natural armor"
@@ -2564,8 +2592,8 @@ In a new form, the dragon retains its alignment, hit points, Hit Dice, ability t
 
 }{
 :name "Ancient Gold Dragon"
-:size "Gargantuan"
-:type "dragon"
+:size :gargantuan
+:type :dragon
 :alignment "lawful good"
 :armor-class 22
 :armor-notes "natural armor"
@@ -2612,8 +2640,8 @@ In a new form, the dragon retains its alignment, hit points, Hit Dice, ability t
 
 }{
 :name "Adult Gold Dragon"
-:size "Huge"
-:type "dragon"
+:size :huge
+:type :dragon
 :alignment "lawful good"
 :armor-class 19
 :armor-notes "natural armor"
@@ -2660,8 +2688,8 @@ In a new form, the dragon retains its alignment, hit points, Hit Dice, ability t
 
 }{
 :name "Young Gold Dragon"
-:size "Large"
-:type "dragon"
+:size :large
+:type :dragon
 :alignment "lawful good"
 :armor-class 18
 :armor-notes "natural armor"
@@ -2695,8 +2723,8 @@ In a new form, the dragon retains its alignment, hit points, Hit Dice, ability t
 
 }{
 :name "Gold Dragon Wyrmling"
-:size "Medium"
-:type "dragon"
+:size :medium
+:type :dragon
 :alignment "lawful good"
 :armor-class 17
 :armor-notes "natural armor"
@@ -2728,8 +2756,8 @@ In a new form, the dragon retains its alignment, hit points, Hit Dice, ability t
 
 }{
 :name "Ancient Silver Dragon"
-:size "Gargantuan"
-:type "dragon"
+:size :gargantuan
+:type :dragon
 :alignment "lawful good"
 :armor-class 22
 :armor-notes "natural armor"
@@ -2772,8 +2800,8 @@ In a new form, the dragon retains its alignment, hit points, Hit Dice, ability t
 
 }{
 :name "Adult Silver Dragon"
-:size "Huge"
-:type "dragon"
+:size :huge
+:type :dragon
 :alignment "lawful good"
 :armor-class 19
 :armor-notes "natural armor"
@@ -2816,8 +2844,8 @@ In a new form, the dragon retains its alignment, hit points, Hit Dice, ability t
 
 }{
 :name "Young Silver Dragon"
-:size "Large"
-:type "dragon"
+:size :large
+:type :dragon
 :alignment "lawful good"
 :armor-class 18
 :armor-notes "natural armor"
@@ -2848,8 +2876,8 @@ In a new form, the dragon retains its alignment, hit points, Hit Dice, ability t
 
 }{
 :name "Silver Dragon Wyrmling"
-:size "Medium"
-:type "dragon"
+:size :medium
+:type :dragon
 :alignment "lawful good"
 :armor-class 17
 :armor-notes "natural armor"
@@ -2879,8 +2907,8 @@ In a new form, the dragon retains its alignment, hit points, Hit Dice, ability t
 
 }{
 :name "Dragon Turtle"
-:size "Gargantuan"
-:type "dragon"
+:size :gargantuan
+:type :dragon
 :alignment "neutral"
 :armor-class 20
 :armor-notes "natural armor"
@@ -2911,8 +2939,8 @@ In a new form, the dragon retains its alignment, hit points, Hit Dice, ability t
 
 }{
 :name "Drider"
-:size "Large"
-:type "monstrosity"
+:size :large
+:type :monstrosity
 :alignment "chaotic evil"
 :armor-class 19
 :armor-notes "natural armor"
@@ -2949,8 +2977,8 @@ At will: dancing lights
 
 }{
 :name "Dryad"
-:size "Medium"
-:type "fey"
+:size :medium
+:type :fey
 :alignment "neutral"
 :armor-class 11
 :armor-notes "(16 with barkskin)"
@@ -2986,8 +3014,9 @@ The dryad can have no more than one humanoid and up to three beasts charmed at a
 
 }{
 :name "Duergar"
-:size "Medium"
-:type "humanoid (dwarf)"
+:size :medium
+:type :humanoid
+:subtypes #{:dwarf}
 :alignment "lawful evil"
 :armor-class 16
 :armor-notes "(scale mail, shield)"
@@ -3020,8 +3049,8 @@ Any equipment the duergar wears or carries is invisible with it."}
 
 }{
 :name "Air Elemental"
-:size "Large"
-:type "elemental"
+:size :large
+:type :elemental
 :alignment "neutral"
 :armor-class 15
 :hit-points {:mean 90 :die-count 12 :die 10 :modifier 24}
@@ -3048,8 +3077,8 @@ Any equipment the duergar wears or carries is invisible with it."}
 {:name "Whirlwind " :notes "Recharge 4–6" :description "Each creature in the elemental's space must make a DC 13 Strength saving throw. On a failure, a target takes 15 (3d8 + 2) bludgeoning damage and is flung up 20 feet away from the elemental in a random direction and knocked prone. If a thrown target strikes an object, such as a"}]
 }{
 :name "Earth Elemental"
-:size "Large"
-:type "elemental"
+:size :large
+:type :elemental
 :alignment "neutral"
 :armor-class 17
 :armor-notes "natural armor"
@@ -3080,8 +3109,8 @@ Any equipment the duergar wears or carries is invisible with it."}
 
 }{
 :name "Fire Elemental"
-:size "Large"
-:type "elemental"
+:size :large
+:type :elemental
 :alignment "neutral"
 :armor-class 13
 :hit-points {:mean 102 :die-count 12 :die 10 :modifier 36}
@@ -3112,8 +3141,8 @@ takes an action to douse the fire, the creature takes 5 (1d10) fire damage at th
 
 }{
 :name "Water Elemental"
-:size "Large"
-:type "elemental"
+:size :large
+:type :elemental
 :alignment "neutral"
 :armor-class 14
 :armor-notes "natural armor"
@@ -3144,8 +3173,9 @@ The elemental can grapple one Large creature or up to two Medium or smaller crea
 
 }{
 :name "Elf, Drow"
-:size "Medium"
-:type "humanoid (elf)"
+:size :medium
+:type :humanoid
+:subtypes #{:elf}
 :alignment "neutral evil"
 :armor-class 15
 :armor-notes "(chain shirt)"
@@ -3177,8 +3207,8 @@ damage, and the target must succeed on a DC 13 Constitution saving throw or be p
 
 }{
 :name "Ettercap"
-:size "Medium"
-:type "monstrosity"
+:size :medium
+:type :monstrosity
 :alignment "neutral evil"
 :armor-class 13
 :armor-notes "natural armor"
@@ -3209,8 +3239,8 @@ also ends if the webbing is destroyed. The webbing has AC 10, 5 hit points, vuln
 
 }{
 :name "Ettin"
-:size "Large"
-:type "giant"
+:size :large
+:type :giant
 :alignment "chaotic evil"
 :armor-class 12
 :armor-notes "natural armor"
@@ -3239,8 +3269,8 @@ also ends if the webbing is destroyed. The webbing has AC 10, 5 hit points, vuln
 
 }{
 :name "Shrieker"
-:size "Medium"
-:type "plant"
+:size :medium
+:type :plant
 :alignment "unaligned"
 :armor-class 5
 :hit-points {:mean 13 :die-count 3 :die 8}
@@ -3265,8 +3295,8 @@ also ends if the webbing is destroyed. The webbing has AC 10, 5 hit points, vuln
 
 }{
 :name "Violet Fungus"
-:size "Medium"
-:type "plant"
+:size :medium
+:type :plant
 :alignment "unaligned"
 :armor-class 5
 :hit-points {:mean 18 :die-count 4 :die 8}
@@ -3289,8 +3319,8 @@ also ends if the webbing is destroyed. The webbing has AC 10, 5 hit points, vuln
 {:name "Rotting Touch" :description "Melee Weapon Attack: +2 to hit, reach 10ft., one creature. Hit: 4 (1d8) necrotic damage"}]
 }{
 :name "Gargoyle"
-:size "Medium"
-:type "elemental"
+:size :medium
+:type :elemental
 :alignment "chaotic evil"
 :armor-class 15
 :armor-notes "natural armor"
@@ -3320,8 +3350,8 @@ also ends if the webbing is destroyed. The webbing has AC 10, 5 hit points, vuln
 
 }{
 :name "Djinni"
-:size "Large"
-:type "elemental"
+:size :large
+:type :elemental
 :alignment "chaotic good"
 :armor-class 17
 :armor-notes "natural armor"
@@ -3354,8 +3384,8 @@ A creature can use its action to free a creature restrained by the whirlwind, in
 
 }{
 :name "Efreeti"
-:size "Large"
-:type "elemental"
+:size :large
+:type :elemental
 :alignment "lawful evil"
 :armor-class 17
 :armor-notes "natural armor"
@@ -3388,8 +3418,8 @@ At will: detect magic
 
 }{
 :name "Ghost"
-:size "Medium"
-:type "undead"
+:size :medium
+:type :undead
 :alignment "any alignment"
 :armor-class 11
 :hit-points {:mean 45 :die-count 10 :die 8}
@@ -3421,8 +3451,8 @@ The possession lasts until the body drops to 0 hit points, the ghost ends it as 
 
 }{
 :name "Ghast"
-:size "Medium"
-:type "undead"
+:size :medium
+:type :undead
 :alignment "chaotic evil"
 :armor-class 13
 :hit-points {:mean 36 :die-count 8 :die 8}
@@ -3450,8 +3480,8 @@ The possession lasts until the body drops to 0 hit points, the ghost ends it as 
 
 }{
 :name "Ghoul"
-:size "Medium"
-:type "undead"
+:size :medium
+:type :undead
 :alignment "chaotic evil"
 :armor-class 12
 :hit-points {:mean 22 :die-count 5 :die 8}
@@ -3475,8 +3505,8 @@ The possession lasts until the body drops to 0 hit points, the ghost ends it as 
 
 }{
 :name "Cloud Giant"
-:size "Huge"
-:type "giant"
+:size :huge
+:type :giant
 :alignment "neutral good (50%) or neutral evil (50%)"
 :armor-class 14
 :armor-notes "natural armor"
@@ -3509,8 +3539,8 @@ At will: detect magic, fog cloud, light
 
 }{
 :name "Fire Giant"
-:size "Huge"
-:type "giant"
+:size :huge
+:type :giant
 :alignment "lawful evil"
 :armor-class 18
 :armor-notes "(plate)"
@@ -3539,8 +3569,8 @@ At will: detect magic, fog cloud, light
 
 }{
 :name "Frost Giant"
-:size "Huge"
-:type "giant"
+:size :huge
+:type :giant
 :alignment "neutral evil"
 :armor-class 15
 :armor-notes "(patchwork armor)"
@@ -3570,8 +3600,8 @@ At will: detect magic, fog cloud, light
 
 }{
 :name "Hill Giant"
-:size "Huge"
-:type "giant"
+:size :huge
+:type :giant
 :alignment "chaotic evil"
 :armor-class 13
 :armor-notes "natural armor"
@@ -3598,8 +3628,8 @@ At will: detect magic, fog cloud, light
 
 }{
 :name "Stone Giant"
-:size "Huge"
-:type "giant"
+:size :huge
+:type :giant
 :alignment "neutral"
 :armor-class 17
 :armor-notes "natural armor"
@@ -3632,8 +3662,8 @@ At will: detect magic, fog cloud, light
 
 }{
 :name "Storm Giant"
-:size "Huge"
-:type "giant"
+:size :huge
+:type :giant
 :alignment "chaotic good"
 :armor-class 16
 :armor-notes "(scale mail)"
@@ -3668,8 +3698,8 @@ At will: detect magic, feather fall, levitate, light
 
 }{
 :name "Gibbering Mouther"
-:size "Medium"
-:type "aberration"
+:size :medium
+:type :aberration
 :alignment "neutral"
 :armor-class 9
 :hit-points {:mean 67 :die-count 9 :die 8 :modifier 27}
@@ -3697,8 +3727,9 @@ At will: detect magic, feather fall, levitate, light
 
 }{
 :name "Gnoll"
-:size "Medium"
-:type "humanoid (gnoll)"
+:size :medium
+:type :humanoid
+:subtypes #{:gnoll}
 :alignment "chaotic evil"
 :armor-class 15
 :armor-notes "(hide armor, shield)"
@@ -3725,8 +3756,9 @@ At will: detect magic, feather fall, levitate, light
 
 }{
 :name "Gnome,  Deep (Svirfneblin)"
-:size "Small"
-:type "humanoid (gnome)"
+:size :small
+:type :humanoid
+:subtypes #{:gnome}
 :alignment "neutral good"
 :armor-class 15
 :armor-notes "(chain shirt)"
@@ -3758,8 +3790,8 @@ At will: nondetection (self only)
 
 }{
 :name "Clay Golem"
-:size "Large"
-:type "construct"
+:size :large
+:type :construct
 :alignment "unaligned"
 :armor-class 14
 :armor-notes "natural armor"
@@ -3794,8 +3826,9 @@ near enough to move to and attack, the golem attacks an object, with preference 
 
 }{
 :name "Goblin"
-:size "Small"
-:type "humanoid (goblinoid)"
+:size :small
+:type :humanoid
+:subtypes #{:goblinoid}
 :alignment "neutral evil"
 :armor-class 15
 :armor-notes "(leather armor, shield)"
@@ -3821,8 +3854,8 @@ near enough to move to and attack, the golem attacks an object, with preference 
 
 }{
 :name "Flesh Golem"
-:size "Medium"
-:type "construct"
+:size :medium
+:type :construct
 :alignment "neutral"
 :armor-class 9
 :hit-points {:mean 93 :die-count 11 :die 8 :modifier 44}
@@ -3855,8 +3888,8 @@ The golem's creator, if within 60 feet of the berserk golem, can try to calm it 
 
 }{
 :name "Iron Golem"
-:size "Large"
-:type "construct"
+:size :large
+:type :construct
 :alignment "unaligned"
 :armor-class 20
 :armor-notes "natural armor"
@@ -3888,8 +3921,8 @@ The golem's creator, if within 60 feet of the berserk golem, can try to calm it 
 
 }{
 :name "Stone Golem"
-:size "Large"
-:type "construct"
+:size :large
+:type :construct
 :alignment "unaligned"
 :armor-class 17
 :armor-notes "natural armor"
@@ -3919,8 +3952,8 @@ The golem's creator, if within 60 feet of the berserk golem, can try to calm it 
 
 }{
 :name "Gorgon"
-:size "Large"
-:type "monstrosity"
+:size :large
+:type :monstrosity
 :alignment "unaligned"
 :armor-class 19
 :armor-notes "natural armor"
@@ -3949,8 +3982,8 @@ The golem's creator, if within 60 feet of the berserk golem, can try to calm it 
 
 }{
 :name "Grick"
-:size "Medium"
-:type "monstrosity"
+:size :medium
+:type :monstrosity
 :alignment "neutral"
 :armor-class 14
 :armor-notes "natural armor"
@@ -3976,8 +4009,8 @@ The golem's creator, if within 60 feet of the berserk golem, can try to calm it 
 "}]
 }{
 :name "Griffon"
-:size "Large"
-:type "monstrosity"
+:size :large
+:type :monstrosity
 :alignment "unaligned"
 :armor-class 12
 :hit-points {:mean 59 :die-count 7 :die 10 :modifier 21}
@@ -4002,8 +4035,9 @@ The golem's creator, if within 60 feet of the berserk golem, can try to calm it 
 
 }{
 :name "Grimlock"
-:size "Medium"
-:type "humanoid (grimlock)"
+:size :medium
+:type :humanoid
+:subtypes #{:grimlock}
 :alignment "neutral evil"
 :armor-class 11
 :hit-points {:mean 11 :die-count 2 :die 8 :modifier 2}
@@ -4030,8 +4064,8 @@ Keen Hearing and Smell. The grimlock has advantage on Wisdom (Perception) checks
 :actions [{:name "Spiked Bone Club" :description "Melee Weapon Attack: +5 to hit, reach 5 ft., one target. Hit: 5 (1d4 + 3) bludgeoning damage plus 2 (1d4) piercing damage."}]
 }{
 :name "Green Hag"
-:size "Medium"
-:type "fey"
+:size :medium
+:type :fey
 :alignment "neutral evil"
 :armor-class 17
 :armor-notes "natural armor"
@@ -4061,8 +4095,8 @@ The changes wrought by this effect fail to hold up to physical inspection. For e
 {:name "Invisible Passage" :description "The hag magically turns invisible until she attacks or casts a spell, or until her concentration ends (as if concentrating on a spell). While invisible, she leaves no physical evidence of her passage, so she can be tracked only by magic. Any equipment she wears or carries is invisible with her."}]
 }{
 :name "Night Hag"
-:size "Medium"
-:type "fiend"
+:size :medium
+:type :fiend
 :alignment "neutral evil"
 :armor-class 17
 :armor-notes "natural armor"
@@ -4096,8 +4130,8 @@ At will: detect magic, magic missile
 
 }{
 :name "Sea Hag"
-:size "Medium"
-:type "fey"
+:size :medium
+:type :fey
 :alignment "chaotic evil"
 :armor-class 14
 :armor-notes "natural armor"
@@ -4127,8 +4161,9 @@ The changes wrought by this effect fail to hold up to physical inspection. For e
 
 }{
 :name "Half-Red Dragon Veteran"
-:size "Medium"
-:type "humanoid (human)"
+:size :medium
+:type :humanoid
+:subtypes #{:human}
 :alignment "any alignment"
 :armor-class 18
 :armor-notes "(plate)"
@@ -4158,8 +4193,8 @@ The changes wrought by this effect fail to hold up to physical inspection. For e
 "}]
 }{
 :name "Harpy"
-:size "Medium"
-:type "monstrosity"
+:size :medium
+:type :monstrosity
 :alignment "chaotic evil"
 :armor-class 11
 :hit-points {:mean 38 :die-count 7 :die 8 :modifier 7}
@@ -4186,8 +4221,8 @@ A target that successfully saves is immune to this harpy's song for the next 24 
 
 }{
 :name "Hell Hound"
-:size "Medium"
-:type "fiend"
+:size :medium
+:type :fiend
 :alignment "lawful evil"
 :armor-class 15
 :armor-notes "natural armor"
@@ -4217,8 +4252,8 @@ A target that successfully saves is immune to this harpy's song for the next 24 
 
 }{
 :name "Hippogriff"
-:size "Large"
-:type "monstrosity"
+:size :large
+:type :monstrosity
 :alignment "unaligned"
 :armor-class 11
 :hit-points {:mean 19 :die-count 3 :die 10 :modifier 3}
@@ -4243,8 +4278,9 @@ A target that successfully saves is immune to this harpy's song for the next 24 
 
 }{
 :name "Hobgoblin"
-:size "Medium"
-:type "humanoid (goblinoid)"
+:size :medium
+:type :humanoid
+:subtypes #{:goblinoid}
 :alignment "lawful evil"
 :armor-class 18
 :armor-notes "chain mail, shield"
@@ -4271,8 +4307,8 @@ A target that successfully saves is immune to this harpy's song for the next 24 
 
 }{
 :name "Homunculus"
-:size "Tiny"
-:type "construct"
+:size :tiny
+:type :construct
 :alignment "neutral"
 :armor-class 13
 :armor-notes "natural armor"
@@ -4299,8 +4335,8 @@ A target that successfully saves is immune to this harpy's song for the next 24 
 
 }{
 :name "Hydra"
-:size "Huge"
-:type "monstrosity"
+:size :huge
+:type :monstrosity
 :alignment "unaligned"
 :armor-class 15
 :armor-notes "natural armor"
@@ -4330,8 +4366,8 @@ At the end of its turn, it grows two heads for each of its heads that died since
 
 }{
 :name "Invisible Stalker"
-:size "Medium"
-:type "elemental"
+:size :medium
+:type :elemental
 :alignment "neutral"
 :armor-class 14
 :hit-points {:mean 104 :die-count 16 :die 8 :modifier 32}
@@ -4363,8 +4399,9 @@ At the end of its turn, it grows two heads for each of its heads that died since
 
 }{
 :name "Kobold"
-:size "Small"
-:type "humanoid (kobold)"
+:size :small
+:type :humanoid
+:subtypes #{:kobold}
 :alignment "lawful evil"
 :armor-class 12
 :hit-points {:mean 5 :die-count 2 :die 6 :modifier -2}
@@ -4390,8 +4427,9 @@ At the end of its turn, it grows two heads for each of its heads that died since
 
 }{
 :name "Kraken"
-:size "Gargantuan"
-:type "monstrosity (titan)"
+:size :gargantuan
+:type :monstrosity
+:subtypes #{:titan}
 :alignment "chaotic evil"
 :armor-class 18
 :armor-notes "natural armor"
@@ -4434,8 +4472,8 @@ If the kraken takes 50 damage or more on a single turn from a creature inside it
 
 }{
 :name "Lamia"
-:size "Large"
-:type "monstrosity"
+:size :large
+:type :monstrosity
 :alignment "chaotic evil"
 :armor-class 13
 :armor-notes "natural armor"
@@ -4468,8 +4506,8 @@ At will: disguise self (any humanoid form), major image
 
 }{
 :name "Lich"
-:size "Medium"
-:type "undead"
+:size :medium
+:type :undead
 :alignment "any evil alignment"
 :armor-class 17
 :armor-notes "natural armor"
@@ -4519,8 +4557,9 @@ Cantrips (at will): mage hand, prestidigitation, ray of frost
 
 }{
 :name "Lizardfolk"
-:size "Medium"
-:type "humanoid (lizardfolk)"
+:size :medium
+:type :humanoid
+:subtypes #{:lizardfolk}
 :alignment "neutral"
 :armor-class 15
 :armor-notes "natural armor, shield"
@@ -4550,8 +4589,9 @@ Cantrips (at will): mage hand, prestidigitation, ray of frost
 
 }{
 :name "Werebear"
-:size "Medium"
-:type "humanoid (human, shapechanger)"
+:size :medium
+:type :humanoid
+:subtypes #{:human, :shapechanger}
 :alignment "neutral good"
 :armor-class 10
 :armor-notes "in humanoid form, 11 natural armor in bear and hybrid form"
@@ -4584,8 +4624,9 @@ Cantrips (at will): mage hand, prestidigitation, ray of frost
 
 }{
 :name "Wereboar"
-:size "Medium"
-:type "humanoid (human, shapechanger)"
+:size :medium
+:type :humanoid
+:subtypes #{:human, :shapechanger}
 :alignment "neutral evil"
 :armor-class 10
 :armor-notes "in humanoid form, 11 natural armor in boar or hybrid form"
@@ -4619,8 +4660,9 @@ or back into its true form, which is humanoid. Its statistics, other than its AC
 
 }{
 :name "Wererat"
-:size "Medium"
-:type "humanoid (human, shapechanger)"
+:size :medium
+:type :humanoid
+:subtypes #{:human, :shapechanger}
 :alignment "lawful evil"
 :armor-class 12
 :hit-points {:mean 33 :die-count 6 :die 8 :modifier 6}
@@ -4651,8 +4693,9 @@ rat, or back into its true form, which is humanoid. Its statistics, other than i
 
 }{
 :name "Weretiger"
-:size "Medium"
-:type "humanoid (human, shapechanger)"
+:size :medium
+:type :humanoid
+:subtypes #{:human, :shapechanger}
 :alignment " neutral"
 :armor-class 12
 :hit-points {:mean 120 :die-count 16 :die 8 :modifier 48}
@@ -4686,8 +4729,9 @@ Keen Hearing and Smell. The weretiger has advantage on Wisdom (Perception) check
 
 }{
 :name "Werewolf"
-:size "Medium"
-:type "humanoid (human, shapechanger)"
+:size :medium
+:type :humanoid
+:subtypes #{:human, :shapechanger}
 :alignment "chaotic evil"
 :armor-class 11
 :armor-notes "in humanoid form, 12 natural armor in wolf or hybrid form"
@@ -4718,8 +4762,8 @@ Keen Hearing and Smell. The werewolf has advantage on Wisdom (Perception) checks
 
 }{
 :name "Magmin"
-:size "Small"
-:type "elemental"
+:size :small
+:type :elemental
 :alignment "chaotic neutral"
 :armor-class 14
 :armor-notes "natural armor"
@@ -4746,8 +4790,8 @@ Keen Hearing and Smell. The werewolf has advantage on Wisdom (Perception) checks
 
 }{
 :name "Manticore"
-:size "Large"
-:type "monstrosity"
+:size :large
+:type :monstrosity
 :alignment "lawful evil"
 :armor-class 14
 :armor-notes "natural armor"
@@ -4774,8 +4818,8 @@ Keen Hearing and Smell. The werewolf has advantage on Wisdom (Perception) checks
 
 }{
 :name "Medusa"
-:size "Medium"
-:type "monstrosity"
+:size :medium
+:type :monstrosity
 :alignment "lawful evil"
 :armor-class 15
 :armor-notes "natural armor"
@@ -4806,8 +4850,8 @@ If the medusa sees itself reflected on a polished surface within 30 feet of it a
 "}]
 }{
 :name "Dust Mephit"
-:size "Small"
-:type "elemental"
+:size :small
+:type :elemental
 :alignment "neutral evil"
 :armor-class 12
 :hit-points {:mean 17 :die-count 5 :die 6}
@@ -4837,8 +4881,8 @@ If the medusa sees itself reflected on a polished surface within 30 feet of it a
 
 }{
 :name "Ice Mephit"
-:size "Small"
-:type "elemental"
+:size :small
+:type :elemental
 :alignment "neutral evil"
 :armor-class 11
 :hit-points {:mean 21 :die-count 6 :die 6}
@@ -4868,8 +4912,8 @@ If the medusa sees itself reflected on a polished surface within 30 feet of it a
 
 }{
 :name "Magma Mephit"
-:size "Small"
-:type "elemental"
+:size :small
+:type :elemental
 :alignment "neutral evil"
 :armor-class 11
 :hit-points {:mean 22 :die-count 5 :die 6 :modifier 5}
@@ -4900,8 +4944,8 @@ If the medusa sees itself reflected on a polished surface within 30 feet of it a
 
 }{
 :name "Steam Mephit"
-:size "Small"
-:type "elemental"
+:size :small
+:type :elemental
 :alignment "neutral evil"
 :armor-class 10
 :hit-points {:mean 21 :die-count 6 :die 6}
@@ -4928,8 +4972,9 @@ If the medusa sees itself reflected on a polished surface within 30 feet of it a
 
 }{
 :name "Merfolk"
-:size "Medium"
-:type "humanoid (merfolk)"
+:size :medium
+:type :humanoid
+:subtypes #{:merfolk}
 :alignment "neutral"
 :armor-class 11
 :hit-points {:mean 11 :die-count 2 :die 8 :modifier 2}
@@ -4955,8 +5000,8 @@ If the medusa sees itself reflected on a polished surface within 30 feet of it a
 
 }{
 :name "Merrow"
-:size "Large"
-:type "monstrosity"
+:size :large
+:type :monstrosity
 :alignment "chaotic evil"
 :armor-class 13
 :armor-notes "natural armor"
@@ -4984,8 +5029,9 @@ If the medusa sees itself reflected on a polished surface within 30 feet of it a
 
 }{
 :name "Mimic"
-:size "Medium"
-:type "monstrosity (shapechanger)"
+:size :medium
+:type :monstrosity
+:subtypes #{:shapechanger}
 :alignment " neutral"
 :armor-class 12
 :armor-notes "natural armor"
@@ -5018,8 +5064,8 @@ If the medusa sees itself reflected on a polished surface within 30 feet of it a
 
 }{
 :name "Minotaur"
-:size "Large"
-:type "monstrosity"
+:size :large
+:type :monstrosity
 :alignment "chaotic evil"
 :armor-class 14
 :armor-notes "natural armor"
@@ -5047,8 +5093,8 @@ during that turn, but attack rolls against it have advantage until the start of 
 {:name "Gore" :description "Melee Weapon Attack: +6 to hit, reach 5 ft., one target. Hit: 13 (2d8 + 4) piercing damage.
 "}]}{
 :name "Mummy"
-:size "Medium"
-:type "undead"
+:size :medium
+:type :undead
 :alignment "lawful evil"
 :armor-class 11
 :armor-notes "natural armor"
@@ -5079,8 +5125,8 @@ mummies (but not mummy lords) for the next 24 hours.
 
 }{
 :name "Mummy Lord"
-:size "Medium"
-:type "undead"
+:size :medium
+:type :undead
 :alignment "lawful evil"
 :armor-class 17
 :armor-notes "natural armor"
@@ -5129,8 +5175,8 @@ Cantrips (at will): sacred flame, thaumaturgy
 
 }{
 :name "Guardian Naga"
-:size "Large"
-:type "monstrosity"
+:size :large
+:type :monstrosity
 :alignment "lawful good"
 :armor-class 18
 :armor-notes "natural armor"
@@ -5168,8 +5214,8 @@ Cantrips (at will): mending, sacred flame, thaumaturgy
 
 }{
 :name "Spirit Naga"
-:size "Large"
-:type "monstrosity"
+:size :large
+:type :monstrosity
 :alignment "chaotic evil"
 :armor-class 15
 :armor-notes "natural armor"
@@ -5205,8 +5251,8 @@ Cantrips (at will): mage hand, minor illusion, ray of frost
 
 }{
 :name "Nightmare"
-:size "Large"
-:type "fiend"
+:size :large
+:type :fiend
 :alignment "neutral evil"
 :armor-class 13
 :armor-notes "natural armor"
@@ -5236,8 +5282,8 @@ Cantrips (at will): mage hand, minor illusion, ray of frost
 
 }{
 :name "Ogre"
-:size "Large"
-:type "giant"
+:size :large
+:type :giant
 :alignment "chaotic evil"
 :armor-class 11
 :armor-notes "hide armor"
@@ -5261,8 +5307,8 @@ Cantrips (at will): mage hand, minor illusion, ray of frost
 
 }{
 :name "Oni"
-:size "Large"
-:type "giant"
+:size :large
+:type :giant
 :alignment "lawful evil"
 :armor-class 16
 :armor-notes "chain mail"
@@ -5295,8 +5341,8 @@ At will: darkness, invisibility
 
 }{
 :name "Black Pudding"
-:size "Large"
-:type "ooze"
+:size :large
+:type :ooze
 :alignment "unaligned"
 :armor-class 7
 :hit-points {:mean 85 :die-count 10 :die 10 :modifier 30}
@@ -5328,8 +5374,8 @@ The pudding can eat through 2-inch-thick, nonmagical wood or metal in 1 round."}
 
 }{
 :name "Gelatinous Cube"
-:size "Large"
-:type "ooze"
+:size :large
+:type :ooze
 :alignment "unaligned"
 :armor-class 6
 :hit-points {:mean 84 :die-count 8 :die 10 :modifier 40}
@@ -5362,8 +5408,8 @@ An engulfed creature can try to escape by taking an action to make a DC 12 Stren
 
 }{
 :name "Gray Ooze"
-:size "Medium"
-:type "ooze"
+:size :medium
+:type :ooze
 :alignment "unaligned"
 :armor-class 8
 :hit-points {:mean 22 :die-count 3 :die 8 :modifier 9}
@@ -5392,8 +5438,8 @@ The ooze can eat through 2-inch-thick, nonmagical metal in 1 round."}
 
 }{
 :name "Ochre Jelly"
-:size "Large"
-:type "ooze"
+:size :large
+:type :ooze
 :alignment "unaligned"
 :armor-class 8
 :hit-points {:mean 45 :die-count 6 :die 10 :modifier 12}
@@ -5424,8 +5470,9 @@ The ooze can eat through 2-inch-thick, nonmagical metal in 1 round."}
 
 }{
 :name "Orc"
-:size "Medium"
-:type "humanoid (orc)"
+:size :medium
+:type :humanoid
+:subtypes #{:orc}
 :alignment "chaotic evil"
 :armor-class 13
 :armor-notes "hide armor"
@@ -5454,8 +5501,8 @@ The ooze can eat through 2-inch-thick, nonmagical metal in 1 round."}
 
   } {
       :name "Otyugh"
-      :size "Large"
-      :type "aberration"
+      :size :large
+      :type :aberration
       :alignment "neutral"
       :armor-class 14
       :armor-notes "natural armor"
@@ -5485,8 +5532,8 @@ The ooze can eat through 2-inch-thick, nonmagical metal in 1 round."}
 
       }{
       :name "Owlbear"
-      :size "Large"
-      :type "monstrosity"
+      :size :large
+      :type :monstrosity
       :alignment "unaligned"
       :armor-class 13
       :armor-notes "natural armor"
@@ -5515,8 +5562,8 @@ The ooze can eat through 2-inch-thick, nonmagical metal in 1 round."}
 
       }{
       :name "Pegasus"
-      :size "Large"
-      :type "celestial"
+      :size :large
+      :type :celestial
       :alignment "chaotic good"
       :armor-class 12
       :hit-points {:mean 59 :die-count 7 :die 10 :modifier 21}
@@ -5539,8 +5586,8 @@ The ooze can eat through 2-inch-thick, nonmagical metal in 1 round."}
 
       }{
       :name "Pseudodragon"
-      :size "Tiny"
-      :type "dragon"
+      :size :tiny
+      :type :dragon
       :alignment "neutral good"
       :armor-class 13
       :armor-notes "natural armor"
@@ -5569,8 +5616,8 @@ The ooze can eat through 2-inch-thick, nonmagical metal in 1 round."}
 
       }{
       :name "Purple Worm"
-      :size "Gargantuan"
-      :type " monstrosity"
+      :size :gargantuan
+      :type :monstrosity
       :alignment "unaligned"
       :armor-class 18
       :armor-notes "natural armor"
@@ -5599,8 +5646,8 @@ If the worm takes 30 damage or more on a single turn from a creature inside it, 
 
       }{
       :name "Rakshasa"
-      :size "Medium"
-      :type "fiend"
+      :size :medium
+      :type :fiend
       :alignment "lawful evil"
       :armor-class 16
       :armor-notes "natural armor"
@@ -5634,8 +5681,8 @@ At will: detect thoughts, disguise self, mage hand, minor illusion
 
       }{
       :name "Remorhaz"
-      :size "Huge"
-      :type "monstrosity"
+      :size :huge
+      :type :monstrosity
       :alignment "unaligned"
       :armor-class 17
       :armor-notes "natural armor"
@@ -5661,8 +5708,8 @@ If the remorhaz takes 30 damage or more on a single turn from a creature inside 
 
       }{
       :name "Roc"
-      :size "Gargantuan"
-      :type " monstrosity"
+      :size :gargantuan
+      :type :monstrosity
       :alignment "unaligned"
       :armor-class 15
       :armor-notes "natural armor"
@@ -5690,8 +5737,8 @@ If the remorhaz takes 30 damage or more on a single turn from a creature inside 
 
       }{
       :name "Roper"
-      :size "Large"
-      :type "monstrosity"
+      :size :large
+      :type :monstrosity
       :alignment "neutral evil"
       :armor-class 20
       :armor-notes "natural armor"
@@ -5723,8 +5770,8 @@ Destroying a tendril deals no damage to the roper, which can extrude a replaceme
 
       }{
       :name "Rust Monster"
-      :size "Medium"
-      :type "monstrosity"
+      :size :medium
+      :type :monstrosity
       :alignment "unaligned"
       :armor-class 14
       :armor-notes "natural armor"
@@ -5752,8 +5799,9 @@ If the object touched is either metal armor or a metal shield being worn or carr
 
       }{
       :name "Sahuagin"
-      :size "Medium"
-      :type "humanoid (sahuagin)"
+      :size :medium
+      :type :humanoid
+:subtypes #{:sahuagin}
       :alignment "lawful evil"
       :armor-class 12
       :armor-notes "natural armor"
@@ -5786,8 +5834,8 @@ If the object touched is either metal armor or a metal shield being worn or carr
 
       }{
       :name "Salamander"
-      :size "Large"
-      :type "elemental"
+      :size :large
+      :type :elemental
       :alignment "neutral evil"
       :armor-class 15
       :armor-notes "natural armor"
@@ -5819,8 +5867,8 @@ If the object touched is either metal armor or a metal shield being worn or carr
       }{
 
       :name "Satyr"
-      :size "Medium"
-      :type "fey"
+      :size :medium
+      :type :fey
       :alignment "chaotic neutral"
       :armor-class 14
       :armor-notes "leather armor"
@@ -5849,8 +5897,8 @@ If the object touched is either metal armor or a metal shield being worn or carr
 
       }{
       :name "Shadow"
-      :size "Medium"
-      :type "undead"
+      :size :medium
+      :type :undead
       :alignment "chaotic evil"
       :armor-class 12
       :hit-points {:mean 16 :die-count 3 :die 8 :modifier 3}
@@ -5882,8 +5930,8 @@ If a non-evil humanoid dies from this attack, a new shadow rises from the corpse
 
       }{
       :name "Shambling Mound"
-      :size "Large"
-      :type "plant"
+      :size :large
+      :type :plant
       :alignment "unaligned"
       :armor-class 15
       :armor-notes "natural armor"
@@ -5914,8 +5962,8 @@ If a non-evil humanoid dies from this attack, a new shadow rises from the corpse
 
       }{
       :name "Shield Guardian"
-      :size "Large"
-      :type "construct"
+      :size :large
+      :type :construct
       :alignment "unaligned"
       :armor-class 17
       :armor-notes "natural armor"
@@ -5949,8 +5997,8 @@ If a non-evil humanoid dies from this attack, a new shadow rises from the corpse
 
       }{
       :name "Skeleton"
-      :size "Medium"
-      :type "undead"
+      :size :medium
+      :type :undead
       :alignment "lawful evil"
       :armor-class 13
       :armor-notes "armor scraps"
@@ -5977,8 +6025,8 @@ If a non-evil humanoid dies from this attack, a new shadow rises from the corpse
 
       }{
       :name "Warhorse  Skeleton"
-      :size "Large"
-      :type "undead"
+      :size :large
+      :type :undead
       :alignment "lawful evil"
       :armor-class 13
       :armor-notes "barding scraps"
@@ -6003,8 +6051,8 @@ If a non-evil humanoid dies from this attack, a new shadow rises from the corpse
 
       }{
       :name "Minotaur Skeleton"
-      :size "Large"
-      :type "undead"
+      :size :large
+      :type :undead
       :alignment "lawful evil"
       :armor-class 12
       :armor-notes "natural armor"
@@ -6033,8 +6081,8 @@ If a non-evil humanoid dies from this attack, a new shadow rises from the corpse
 
       }{
       :name "Specter"
-      :size "Medium"
-      :type "undead"
+      :size :medium
+      :type :undead
       :alignment "chaotic evil"
       :armor-class 12
       :hit-points {:mean 22 :die-count 5 :die 8}
@@ -6062,8 +6110,8 @@ If a non-evil humanoid dies from this attack, a new shadow rises from the corpse
 
       }{
       :name "Androsphinx"
-      :size "Large"
-      :type "monstrosity"
+      :size :large
+      :type :monstrosity
       :alignment "lawful neutral"
       :armor-class 17
       :armor-notes "natural armor"
@@ -6112,8 +6160,8 @@ Cantrips (at will): sacred flame, spare the dying, thaumaturgy
 
       }{
       :name "Gynosphinx"
-      :size "Large"
-      :type "monstrosity"
+      :size :large
+      :type :monstrosity
       :alignment "lawful neutral"
       :armor-class 17
       :armor-notes "natural armor"
@@ -6161,8 +6209,8 @@ Cantrips (at will): mage hand, minor illusion, prestidigitation
 
       }{
       :name "Sprite"
-      :size "Tiny"
-      :type "fey"
+      :size :tiny
+      :type :fey
       :alignment "neutral good"
       :armor-class 15
       :armor-notes "leather armor"
@@ -6190,8 +6238,8 @@ magically knows the creature's current emotional state. If the target fails a DC
 
       }{
       :name "Stirge"
-      :size "Tiny"
-      :type "beast"
+      :size :tiny
+      :type :beast
       :alignment "unaligned"
       :armor-class 14
       :armor-notes "natural armor"
@@ -6213,8 +6261,9 @@ The stirge can detach itself by spending 5 feet of its movement. It does so afte
 
       }{
       :name "Succubus/Incubus"
-      :size "Medium"
-      :type "fiend (shapechanger)"
+      :size :medium
+      :type :fiend
+:subtypes #{:shapechanger}
       :alignment "neutral evil"
       :armor-class 15
       :armor-notes "natural armor"
@@ -6251,8 +6300,9 @@ Constitution saving throw against this magic, taking 32 (5d10 + 5) psychic damag
 
       }{
       :name "Tarrasque"
-      :size "Gargantuan"
-      :type "monstrosity (titan)"
+      :size :gargantuan
+      :type :monstrosity
+:subtypes #{:titan}
       :alignment "unaligned"
       :armor-class 25
       :armor-notes "natural armor"
@@ -6296,8 +6346,8 @@ If the tarrasque takes 60 damage or more on a single turn from a creature inside
 
       }{
       :name "Treant"
-      :size "Huge"
-      :type "plant"
+      :size :huge
+      :type :plant
       :alignment "chaotic good"
       :armor-class 16
       :armor-notes "natural armor"
@@ -6327,8 +6377,8 @@ If the tarrasque takes 60 damage or more on a single turn from a creature inside
 
       }{
       :name "Troll"
-      :size "Large"
-      :type "giant"
+      :size :large
+      :type :giant
       :alignment "chaotic evil"
       :armor-class 15
       :armor-notes "natural armor"
@@ -6358,8 +6408,8 @@ If the tarrasque takes 60 damage or more on a single turn from a creature inside
 
       }{
       :name "Unicorn"
-      :size "Large"
-      :type "celestial"
+      :size :large
+      :type :celestial
       :alignment "lawful good"
       :armor-class 12
       :hit-points {:mean 67 :die-count 9 :die 10 :modifier 18}
@@ -6400,8 +6450,9 @@ At will: detect evil and good, druidcraft, pass without trace
 
       }{
       :name "Vampire"
-      :size "Medium"
-      :type "undead (shapechanger)"
+      :size :medium
+      :type :undead
+:subtypes #{:shapechanger}
       :alignment "lawful evil"
       :armor-class 16
       :armor-notes "natural armor"
@@ -6455,8 +6506,8 @@ Children of the Night (1/Day). The vampire magically calls 2d4 swarms of bats or
 
       }{
       :name "Vampire Spawn"
-      :size "Medium"
-      :type "undead"
+      :size :medium
+      :type :undead
       :alignment "neutral evil"
       :armor-class 15
       :armor-notes "natural armor"
@@ -6493,8 +6544,8 @@ Stake to the Heart. The vampire is destroyed if a piercing weapon made of wood i
 
       }{
       :name "Wight"
-      :size "Medium"
-      :type "undead"
+      :size :medium
+      :type :undead
       :alignment "neutral evil"
       :armor-class 14
       :armor-notes "studded leather"
@@ -6530,8 +6581,8 @@ A humanoid slain by this attack rises 24 hours later as a zombie under the wight
 
       }{
       :name "Will-o'-Wisp"
-      :size "Tiny"
-      :type "undead"
+      :size :tiny
+      :type :undead
       :alignment "chaotic evil"
       :armor-class 19
       :hit-points {:mean 22 :die-count 9 :die 4}
@@ -6561,8 +6612,8 @@ A humanoid slain by this attack rises 24 hours later as a zombie under the wight
 
       }{
       :name "Wraith"
-      :size "Medium"
-      :type "undead"
+      :size :medium
+      :type :undead
       :alignment "neutral evil"
       :armor-class 13
       :hit-points {:mean 67 :die-count 9 :die 8 :modifier 27}
@@ -6591,8 +6642,8 @@ specter in the space of its corpse or in the nearest unoccupied space. The spect
 
       }{
       :name "Wyvern"
-      :size "Large"
-      :type "dragon"
+      :size :large
+      :type :dragon
       :alignment "unaligned"
       :armor-class 13
       :armor-notes "natural armor"
@@ -6621,8 +6672,8 @@ specter in the space of its corpse or in the nearest unoccupied space. The spect
 
       }{
       :name "Xorn"
-      :size "Medium"
-      :type "elemental"
+      :size :medium
+      :type :elemental
       :alignment "neutral"
       :armor-class 19
       :armor-notes "natural armor"
@@ -6653,8 +6704,8 @@ specter in the space of its corpse or in the nearest unoccupied space. The spect
 
       }{
       :name "Zombie"
-      :size "Medium"
-      :type "undead"
+      :size :medium
+      :type :undead
       :alignment "neutral evil"
       :armor-class 8
       :hit-points {:mean 22 :die-count 3 :die 8 :modifier 9}
@@ -6681,8 +6732,8 @@ specter in the space of its corpse or in the nearest unoccupied space. The spect
 
       }{
       :name "Ogre Zombie"
-      :size "Large"
-      :type "undead"
+      :size :large
+      :type :undead
       :alignment "neutral evil"
       :armor-class 8
       :hit-points {:mean 85 :die-count 9 :die 10 :modifier 36}
@@ -6709,8 +6760,8 @@ This appendix contains statistics for various animals, vermin, and other critter
 
       }{
       :name "Ape"
-      :size "Medium"
-      :type "beast"
+      :size :medium
+      :type :beast
       :alignment "unaligned"
       :armor-class 12
       :hit-points {:mean 19 :die-count 3 :die 8 :modifier 6}
@@ -6735,8 +6786,8 @@ This appendix contains statistics for various animals, vermin, and other critter
       }{
 
       :name "Awakened Shrub"
-      :size "Small"
-      :type "plant"
+      :size :small
+      :type :plant
       :alignment "unaligned"
       :armor-class 9
       :hit-points {:mean 10 :die-count 3 :die 6}
@@ -6763,8 +6814,8 @@ This appendix contains statistics for various animals, vermin, and other critter
 
       }{
       :name "Awakened Tree"
-      :size "Huge"
-      :type "plant"
+      :size :huge
+      :type :plant
       :alignment "unaligned"
       :armor-class 13
       :armor-notes "natural armor"
@@ -6794,8 +6845,8 @@ This appendix contains statistics for various animals, vermin, and other critter
 
       }{
       :name "Axe Beak"
-      :size "Large"
-      :type "beast"
+      :size :large
+      :type :beast
       :alignment "unaligned"
       :armor-class 11
       :hit-points {:mean 19 :die-count 3 :die 10 :modifier 3}
@@ -6818,8 +6869,8 @@ This appendix contains statistics for various animals, vermin, and other critter
 
       }{
       :name "Baboon"
-      :size "Small"
-      :type "beast"
+      :size :small
+      :type :beast
       :alignment "unaligned"
       :armor-class 12
       :hit-points {:mean 3 :die-count 1 :die 6}
@@ -6842,8 +6893,8 @@ This appendix contains statistics for various animals, vermin, and other critter
 
       }{
       :name "Bat"
-      :size "Tiny"
-      :type "beast"
+      :size :tiny
+      :type :beast
       :alignment "unaligned"
       :armor-class 12
       :hit-points {:mean 1 :die-count 1 :die 6 :modifier -1}
@@ -6867,8 +6918,8 @@ This appendix contains statistics for various animals, vermin, and other critter
 
       }{
       :name "Badger"
-      :size "Tiny"
-      :type "beast"
+      :size :tiny
+      :type :beast
       :alignment "unaligned"
       :armor-class 10
       :hit-points {:mean 3 :die-count 1 :die 4 :modifier 1}
@@ -6892,8 +6943,8 @@ This appendix contains statistics for various animals, vermin, and other critter
 
       }{
       :name "Black Bear"
-      :size "Medium"
-      :type "beast"
+      :size :medium
+      :type :beast
       :alignment "unaligned"
       :armor-class 11
       :armor-notes "natural armor"
@@ -6919,8 +6970,8 @@ This appendix contains statistics for various animals, vermin, and other critter
 
       }{
       :name "Blink Dog"
-      :size "Medium"
-      :type "fey"
+      :size :medium
+      :type :fey
       :alignment "lawful good"
       :armor-class 13
       :hit-points {:mean 22 :die-count 4 :die 8 :modifier 4}
@@ -6945,8 +6996,8 @@ This appendix contains statistics for various animals, vermin, and other critter
 
       }{
       :name "Blood Hawk"
-      :size "Small"
-      :type "beast"
+      :size :small
+      :type :beast
       :alignment "unaligned"
       :armor-class 12
       :hit-points {:mean 7 :die-count 2 :die 6}
@@ -6970,8 +7021,8 @@ This appendix contains statistics for various animals, vermin, and other critter
 
       }{
       :name "Boar"
-      :size "Medium"
-      :type "beast"
+      :size :medium
+      :type :beast
       :alignment "unaligned"
       :armor-class 11
       :armor-notes "natural armor"
@@ -6996,8 +7047,8 @@ the same turn, the target takes an extra 3 (1d6) slashing damage. If the target 
 
       }{
       :name "Brown Bear"
-      :size "Large"
-      :type "beast"
+      :size :large
+      :type :beast
       :alignment "unaligned"
       :armor-class 11
       :armor-notes "natural armor"
@@ -7023,8 +7074,8 @@ the same turn, the target takes an extra 3 (1d6) slashing damage. If the target 
 
       }{
       :name "Camel"
-      :size "Large"
-      :type "beast"
+      :size :large
+      :type :beast
       :alignment "unaligned"
       :armor-class 9
       :hit-points {:mean 15 :die-count 2 :die 10 :modifier 4}
@@ -7045,8 +7096,8 @@ the same turn, the target takes an extra 3 (1d6) slashing damage. If the target 
 
       }{
       :name "Cat"
-      :size "Tiny"
-      :type "beast"
+      :size :tiny
+      :type :beast
       :alignment "unaligned"
       :armor-class 12
       :hit-points {:mean 2 :die-count 1 :die 4}
@@ -7071,8 +7122,8 @@ the same turn, the target takes an extra 3 (1d6) slashing damage. If the target 
 
       }{
       :name "Constrictor Snake"
-      :size "Large"
-      :type "beast"
+      :size :large
+      :type :beast
       :alignment "unaligned"
       :armor-class 12
       :hit-points {:mean 13 :die-count 2 :die 10 :modifier 2}
@@ -7093,8 +7144,8 @@ the same turn, the target takes an extra 3 (1d6) slashing damage. If the target 
 
       }{
       :name "Crab"
-      :size "Tiny"
-      :type "beast"
+      :size :tiny
+      :type :beast
       :alignment "unaligned"
       :armor-class 11
       :armor-notes "natural armor"
@@ -7118,8 +7169,8 @@ the same turn, the target takes an extra 3 (1d6) slashing damage. If the target 
 
       }{
       :name "Crocodile"
-      :size "Large"
-      :type "beast"
+      :size :large
+      :type :beast
       :alignment "unaligned"
       :armor-class 12
       :armor-notes "natural armor"
@@ -7143,8 +7194,8 @@ the same turn, the target takes an extra 3 (1d6) slashing damage. If the target 
 
       }{
       :name "Death Dog"
-      :size "Medium"
-      :type "monstrosity"
+      :size :medium
+      :type :monstrosity
       :alignment "neutral evil"
       :armor-class 12
       :hit-points {:mean 39 :die-count 6 :die 8 :modifier 12}
@@ -7171,8 +7222,8 @@ the same turn, the target takes an extra 3 (1d6) slashing damage. If the target 
 
       }{
       :name "Deer"
-      :size "Medium"
-      :type "beast"
+      :size :medium
+      :type :beast
       :alignment "unaligned"
       :armor-class 13
       :hit-points {:mean 4 :die-count 1 :die 8}
@@ -7191,8 +7242,8 @@ the same turn, the target takes an extra 3 (1d6) slashing damage. If the target 
 
       }{
       :name "Dire Wolf"
-      :size "Large"
-      :type "beast"
+      :size :large
+      :type :beast
       :alignment "unaligned"
       :armor-class 14
       :armor-notes "natural armor"
@@ -7218,8 +7269,8 @@ the same turn, the target takes an extra 3 (1d6) slashing damage. If the target 
 
       }{
       :name "Draft Horse"
-      :size "Large"
-      :type "beast"
+      :size :large
+      :type :beast
       :alignment "unaligned"
       :armor-class 10
       :hit-points {:mean 19 :die-count 3 :die 10 :modifier 3}
@@ -7239,8 +7290,8 @@ the same turn, the target takes an extra 3 (1d6) slashing damage. If the target 
 
       }{
       :name "Eagle"
-      :size "Small"
-      :type "beast"
+      :size :small
+      :type :beast
       :alignment "unaligned"
       :armor-class 12
       :hit-points {:mean 3 :die-count 1 :die 6}
@@ -7265,8 +7316,8 @@ the same turn, the target takes an extra 3 (1d6) slashing damage. If the target 
 
       }{
       :name "Elephant"
-      :size "Huge"
-      :type "beast"
+      :size :huge
+      :type :beast
       :alignment "unaligned"
       :armor-class 12
       :armor-notes "natural armor"
@@ -7291,8 +7342,8 @@ on a DC 12 Strength saving throw or be knocked prone. If the target is prone, th
 
       }{
       :name "Elk"
-      :size "Large"
-      :type "beast"
+      :size :large
+      :type :beast
       :alignment "unaligned"
       :armor-class 10
       :hit-points {:mean 13 :die-count 2 :die 10 :modifier 2}
@@ -7317,8 +7368,8 @@ on a DC 12 Strength saving throw or be knocked prone. If the target is prone, th
       }{
 
       :name "Flying Snake"
-      :size "Tiny"
-      :type "beast"
+      :size :tiny
+      :type :beast
       :alignment "unaligned"
       :armor-class 14
       :hit-points {:mean 5 :die-count 2 :die 4}
@@ -7342,8 +7393,8 @@ on a DC 12 Strength saving throw or be knocked prone. If the target is prone, th
 
       }{
       :name "Frog"
-      :size "Tiny"
-      :type "beast"
+      :size :tiny
+      :type :beast
       :alignment "unaligned"
       :armor-class 11
       :hit-points {:mean 1 :die-count 1 :die 4 :modifier -1}
@@ -7367,8 +7418,8 @@ on a DC 12 Strength saving throw or be knocked prone. If the target is prone, th
 
       }{
       :name "Giant Ape"
-      :size "Huge"
-      :type "beast"
+      :size :huge
+      :type :beast
       :alignment "unaligned"
       :armor-class 12
       :hit-points {:mean 157 :die-count 15 :die 12 :modifier 60}
@@ -7393,8 +7444,8 @@ on a DC 12 Strength saving throw or be knocked prone. If the target is prone, th
 
       }{
       :name "Giant Badger"
-      :size "Medium"
-      :type "beast"
+      :size :medium
+      :type :beast
       :alignment "unaligned"
       :armor-class 10
       :hit-points {:mean 13 :die-count 2 :die 8 :modifier 4}
@@ -7420,8 +7471,8 @@ on a DC 12 Strength saving throw or be knocked prone. If the target is prone, th
 
       }{
       :name "Giant Bat"
-      :size "Large"
-      :type "beast"
+      :size :large
+      :type :beast
       :alignment "unaligned"
       :armor-class 13
       :hit-points {:mean 22 :die-count 4 :die 10}
@@ -7445,8 +7496,8 @@ on a DC 12 Strength saving throw or be knocked prone. If the target is prone, th
 
       }{
       :name "Giant Boar"
-      :size "Large"
-      :type "beast"
+      :size :large
+      :type :beast
       :alignment "unaligned"
       :armor-class 12
       :armor-notes "natural armor"
@@ -7471,8 +7522,8 @@ on a DC 12 Strength saving throw or be knocked prone. If the target is prone, th
 
       }{
       :name "Giant Centipede"
-      :size "Small"
-      :type "beast"
+      :size :small
+      :type :beast
       :alignment "unaligned"
       :armor-class 13
       :armor-notes "natural armor"
@@ -7494,8 +7545,8 @@ on a DC 12 Strength saving throw or be knocked prone. If the target is prone, th
 
       }{
       :name "Giant Constrictor Snake"
-      :size "Huge"
-      :type "beast"
+      :size :huge
+      :type :beast
       :alignment "unaligned"
       :armor-class 12
       :hit-points {:mean 60 :die-count 8 :die 12 :modifier 8}
@@ -7517,8 +7568,8 @@ on a DC 12 Strength saving throw or be knocked prone. If the target is prone, th
 
       }{
       :name "Giant Crab"
-      :size "Medium"
-      :type "beast"
+      :size :medium
+      :type :beast
       :alignment "unaligned"
       :armor-class 15
       :armor-notes "natural armor"
@@ -7544,8 +7595,8 @@ on a DC 12 Strength saving throw or be knocked prone. If the target is prone, th
 
       }{
       :name "Giant Crocodile"
-      :size "Huge"
-      :type "beast"
+      :size :huge
+      :type :beast
       :alignment "unaligned"
       :armor-class 14
       :armor-notes "natural armor"
@@ -7572,8 +7623,8 @@ on a DC 12 Strength saving throw or be knocked prone. If the target is prone, th
 
       }{
       :name "Giant Eagle"
-      :size "Large"
-      :type "beast"
+      :size :large
+      :type :beast
       :alignment "neutral good"
       :armor-class 13
       :hit-points {:mean 26 :die-count 4 :die 10 :modifier 4}
@@ -7600,8 +7651,8 @@ on a DC 12 Strength saving throw or be knocked prone. If the target is prone, th
 
       }{
       :name "Giant Fire Beetle"
-      :size "Small"
-      :type "beast"
+      :size :small
+      :type :beast
       :alignment "unaligned"
       :armor-class 13
       :armor-notes "natural armor"
@@ -7627,8 +7678,8 @@ on a DC 12 Strength saving throw or be knocked prone. If the target is prone, th
 
       }{
       :name "Giant Elk"
-      :size "Huge"
-      :type "beast"
+      :size :huge
+      :type :beast
       :alignment "unaligned"
       :armor-class 14
       :armor-notes "natural armor"
@@ -7657,8 +7708,8 @@ on a DC 12 Strength saving throw or be knocked prone. If the target is prone, th
 
       }{
       :name "Giant Frog"
-      :size "Medium"
-      :type "beast"
+      :size :medium
+      :type :beast
       :alignment "unaligned"
       :armor-class 11
       :hit-points {:mean 18 :die-count 4 :die 8}
@@ -7685,8 +7736,8 @@ If the frog dies, a swallowed creature is no longer restrained by it and can esc
 
       }{
       :name "Giant Goat"
-      :size "Large"
-      :type "beast"
+      :size :large
+      :type :beast
       :alignment "unaligned"
       :armor-class 11
       :armor-notes "natural armor"
@@ -7710,8 +7761,8 @@ Sure-Footed. The goat has advantage on Strength and Dexterity saving throws made
 
       }{
       :name "Giant Hyena"
-      :size "Large"
-      :type "beast"
+      :size :large
+      :type :beast
       :alignment "unaligned"
       :armor-class 12
       :hit-points {:mean 45 :die-count 6 :die 10 :modifier 12}
@@ -7736,8 +7787,8 @@ take a bonus action to move up to half its speed and make a bite attack."}]
 
       }{
       :name "Giant Lizard"
-      :size "Large"
-      :type "beast"
+      :size :large
+      :type :beast
       :alignment "unaligned"
       :armor-class 12
       :armor-notes "natural armor"
@@ -7760,8 +7811,8 @@ take a bonus action to move up to half its speed and make a bite attack."}]
 
       }{
       :name "Giant Octopus"
-      :size "Large"
-      :type "beast"
+      :size :large
+      :type :beast
       :alignment "unaligned"
       :armor-class 11
       :hit-points {:mean 52 :die-count 8 :die 10 :modifier 8}
@@ -7789,8 +7840,8 @@ the target is a creature, it is grappled (escape DC 16). Until this grapple ends
 
       }{
       :name "Giant Owl"
-      :size "Large"
-      :type "beast"
+      :size :large
+      :type :beast
       :alignment "neutral"
       :armor-class 12
       :hit-points {:mean 19 :die-count 3 :die 10 :modifier 3}
@@ -7818,8 +7869,8 @@ Keen Hearing and Sight. The owl has advantage on Wisdom (Perception) checks that
 
       }{
       :name "Giant Poisonous Snake"
-      :size "Medium"
-      :type "beast"
+      :size :medium
+      :type :beast
       :alignment "unaligned"
       :armor-class 14
       :hit-points {:mean 11 :die-count 2 :die 8 :modifier 2}
@@ -7841,8 +7892,8 @@ must make a DC 11 Constitution saving throw, taking 10 (3d6) poison damage on a 
 
       }{
       :name "Giant Scorpion"
-      :size "Large"
-      :type "beast"
+      :size :large
+      :type :beast
       :alignment "unaligned"
       :armor-class 15
       :armor-notes "natural armor"
@@ -7866,8 +7917,8 @@ must make a DC 11 Constitution saving throw, taking 10 (3d6) poison damage on a 
 
       }{
       :name "Giant Rat"
-      :size "Small"
-      :type "beast"
+      :size :small
+      :type :beast
       :alignment "unaligned"
       :armor-class 12
       :hit-points {:mean 7 :die-count 2 :die 6}
@@ -7891,8 +7942,8 @@ must make a DC 11 Constitution saving throw, taking 10 (3d6) poison damage on a 
 
       }{
       :name "Giant Sea Horse"
-      :size "Large"
-      :type "beast"
+      :size :large
+      :type :beast
       :alignment "unaligned"
       :armor-class 13
       :armor-notes "natural armor"
@@ -7919,8 +7970,8 @@ must make a DC 11 Constitution saving throw, taking 10 (3d6) poison damage on a 
 
       }{
       :name "Giant Shark"
-      :size "Huge"
-      :type "beast"
+      :size :huge
+      :type :beast
       :alignment "unaligned"
       :armor-class 13
       :armor-notes "natural armor"
@@ -7947,8 +7998,8 @@ A giant shark is 30 feet long and normally found in deep oceans. Utterly fearles
 
       }{
       :name "Giant Spider"
-      :size "Large"
-      :type "beast"
+      :size :large
+      :type :beast
       :alignment "unaligned"
       :armor-class 14
       :armor-notes "natural armor"
@@ -7978,8 +8029,8 @@ A giant shark is 30 feet long and normally found in deep oceans. Utterly fearles
 
       }{
       :name "Giant Toad"
-      :size "Large"
-      :type "beast"
+      :size :large
+      :type :beast
       :alignment "unaligned"
       :armor-class 11
       :hit-points {:mean 39 :die-count 6 :die 10 :modifier 6}
@@ -8004,8 +8055,8 @@ If the toad dies, a swallowed creature is no longer restrained by it and can esc
 
       }{
       :name "Giant Vulture"
-      :size "Large"
-      :type "beast"
+      :size :large
+      :type :beast
       :alignment "neutral evil"
       :armor-class 10
       :hit-points {:mean 22 :die-count 3 :die 10 :modifier 6}
@@ -8033,8 +8084,8 @@ If the toad dies, a swallowed creature is no longer restrained by it and can esc
 "}]
       :description "A giant vulture has advanced intelligence and a malevolent bent. Unlike its smaller kin, it will attack a wounded creature to hasten its end. Giant vultures have been known to haunt a thirsty, starving  creature for days to enjoy its suffering."}{
       :name "Giant Wasp"
-      :size "Medium"
-      :type "beast"
+      :size :medium
+      :type :beast
       :alignment "unaligned"
       :armor-class 12
       :hit-points {:mean 13 :die-count 3 :die 8}
@@ -8056,8 +8107,8 @@ target must make a DC 11 Constitution saving throw, taking 10 (3d6) poison damag
 
       }{
       :name "Giant Weasel"
-      :size "Medium"
-      :type "beast"
+      :size :medium
+      :type :beast
       :alignment "unaligned"
       :armor-class 13
       :hit-points {:mean 9 :die-count 2 :die 8}
@@ -8081,8 +8132,8 @@ target must make a DC 11 Constitution saving throw, taking 10 (3d6) poison damag
 
       }{
       :name "Giant Wolf Spider"
-      :size "Medium"
-      :type "beast"
+      :size :medium
+      :type :beast
       :alignment "unaligned"
       :armor-class 13
       :hit-points {:mean 11 :die-count 2 :die 8 :modifier 2}
@@ -8111,8 +8162,8 @@ target must make a DC 11 Constitution saving throw, taking 10 (3d6) poison damag
 
       }{
       :name "Goat"
-      :size "Medium"
-      :type "beast"
+      :size :medium
+      :type :beast
       :alignment "unaligned"
       :armor-class 10
       :hit-points {:mean 4 :die-count 1 :die 8}
@@ -8136,8 +8187,8 @@ target must make a DC 11 Constitution saving throw, taking 10 (3d6) poison damag
 
       }{
       :name "Hawk"
-      :size "Tiny"
-      :type "beast"
+      :size :tiny
+      :type :beast
       :alignment "unaligned"
       :armor-class 13
       :hit-points {:mean 1 :die-count 1 :die 4 :modifier -1}
@@ -8161,8 +8212,8 @@ target must make a DC 11 Constitution saving throw, taking 10 (3d6) poison damag
 
       }{
       :name "Hunter Shark"
-      :size "Large"
-      :type "beast"
+      :size :large
+      :type :beast
       :alignment "unaligned"
       :armor-class 12
       :armor-notes "natural armor"
@@ -8191,8 +8242,8 @@ target must make a DC 11 Constitution saving throw, taking 10 (3d6) poison damag
 
       }{
       :name "Hyena"
-      :size "Medium"
-      :type "beast"
+      :size :medium
+      :type :beast
       :alignment "unaligned"
       :armor-class 11
       :hit-points {:mean 5 :die-count 1 :die 8 :modifier 1}
@@ -8217,8 +8268,8 @@ target must make a DC 11 Constitution saving throw, taking 10 (3d6) poison damag
 
       }{
       :name "Jackal"
-      :size "Small"
-      :type "beast"
+      :size :small
+      :type :beast
       :alignment "unaligned"
       :armor-class 12
       :hit-points {:mean 3 :die-count 1 :die 6}
@@ -8242,8 +8293,8 @@ target must make a DC 11 Constitution saving throw, taking 10 (3d6) poison damag
 
       }{
       :name "Killer Whale"
-      :size "Huge"
-      :type "beast"
+      :size :huge
+      :type :beast
       :alignment "unaligned"
       :armor-class 12
       :armor-notes "natural armor"
@@ -8270,8 +8321,8 @@ target must make a DC 11 Constitution saving throw, taking 10 (3d6) poison damag
 
       }{
       :name "Lion"
-      :size "Large"
-      :type "beast"
+      :size :large
+      :type :beast
       :alignment "unaligned"
       :armor-class 12
       :hit-points {:mean 26 :die-count 4 :die 10 :modifier 4}
@@ -8299,8 +8350,8 @@ target must make a DC 11 Constitution saving throw, taking 10 (3d6) poison damag
 
       }{
       :name "Lizard"
-      :size "Tiny"
-      :type "beast"
+      :size :tiny
+      :type :beast
       :alignment "unaligned"
       :armor-class 10
       :hit-points {:mean 2 :die-count 1 :die 4}
@@ -8320,8 +8371,8 @@ target must make a DC 11 Constitution saving throw, taking 10 (3d6) poison damag
 
       }{
       :name "Mammoth"
-      :size "Huge"
-      :type "beast"
+      :size :huge
+      :type :beast
       :alignment "unaligned"
       :armor-class 13
       :armor-notes "natural armor"
@@ -8347,8 +8398,8 @@ target must make a DC 11 Constitution saving throw, taking 10 (3d6) poison damag
 
       }{
       :name "Mastiff"
-      :size "Medium"
-      :type "beast"
+      :size :medium
+      :type :beast
       :alignment "unaligned"
       :armor-class 12
       :hit-points {:mean 5 :die-count 1 :die 8 :modifier 1}
@@ -8374,8 +8425,8 @@ target must make a DC 11 Constitution saving throw, taking 10 (3d6) poison damag
 
       }{
       :name "Mule"
-      :size "Medium"
-      :type "beast"
+      :size :medium
+      :type :beast
       :alignment "unaligned"
       :armor-class 10
       :hit-points {:mean 11 :die-count 2 :die 8 :modifier 2}
@@ -8398,8 +8449,8 @@ Sure-Footed. The mule has advantage on Strength and Dexterity saving throws made
 
       }{
       :name "Octopus"
-      :size "Small"
-      :type "beast"
+      :size :small
+      :type :beast
       :alignment "unaligned"
       :armor-class 12
       :hit-points {:mean 3 :die-count 1 :die 6}
@@ -8427,8 +8478,8 @@ Sure-Footed. The mule has advantage on Strength and Dexterity saving throws made
 
       }{
       :name "Panther"
-      :size "Medium"
-      :type "beast"
+      :size :medium
+      :type :beast
       :alignment "unaligned"
       :armor-class 12
       :hit-points {:mean 13 :die-count 3 :die 8}
@@ -8456,8 +8507,8 @@ Sure-Footed. The mule has advantage on Strength and Dexterity saving throws made
 
       }{
       :name "Owl"
-      :size "Tiny"
-      :type "beast"
+      :size :tiny
+      :type :beast
       :alignment "unaligned"
       :armor-class 11
       :hit-points {:mean 1 :die-count 1 :die 4 :modifier -1}
@@ -8482,8 +8533,8 @@ Sure-Footed. The mule has advantage on Strength and Dexterity saving throws made
 
       }{
       :name "Phase Spider"
-      :size "Large"
-      :type "monstrosity"
+      :size :large
+      :type :monstrosity
       :alignment "unaligned"
       :armor-class 13
       :armor-notes "natural armor"
@@ -8514,8 +8565,8 @@ Sure-Footed. The mule has advantage on Strength and Dexterity saving throws made
 
       }{
       :name "Poisonous Snake"
-      :size "Tiny"
-      :type "beast"
+      :size :tiny
+      :type :beast
       :alignment "unaligned"
       :armor-class 13
       :hit-points {:mean 2 :die-count 1 :die 4}
@@ -8536,8 +8587,8 @@ Sure-Footed. The mule has advantage on Strength and Dexterity saving throws made
 
       }{
       :name "Polar Bear"
-      :size "Large"
-      :type "beast"
+      :size :large
+      :type :beast
       :alignment "unaligned"
       :armor-class 12
       :armor-notes "natural armor"
@@ -8565,8 +8616,8 @@ Sure-Footed. The mule has advantage on Strength and Dexterity saving throws made
 
       }{
       :name "Pony"
-      :size "Medium"
-      :type "beast"
+      :size :medium
+      :type :beast
       :alignment "unaligned"
       :armor-class 10
       :hit-points {:mean 11 :die-count 2 :die 8 :modifier 2}
@@ -8586,8 +8637,8 @@ Sure-Footed. The mule has advantage on Strength and Dexterity saving throws made
 
       }{
       :name "Quipper"
-      :size "Tiny"
-      :type "beast"
+      :size :tiny
+      :type :beast
       :alignment "unaligned"
       :armor-class 13
       :hit-points {:mean 1 :die-count 1 :die 4 :modifier -1}
@@ -8614,8 +8665,8 @@ Sure-Footed. The mule has advantage on Strength and Dexterity saving throws made
 
       }{
       :name "Rat"
-      :size "Tiny"
-      :type "beast"
+      :size :tiny
+      :type :beast
       :alignment "unaligned"
       :armor-class 10
       :hit-points {:mean 1 :die-count 1 :die 4 :modifier -1}
@@ -8639,8 +8690,8 @@ Sure-Footed. The mule has advantage on Strength and Dexterity saving throws made
 
       }{
       :name "Raven"
-      :size "Tiny"
-      :type "beast"
+      :size :tiny
+      :type :beast
       :alignment "unaligned"
       :armor-class 12
       :hit-points {:mean 1 :die-count 1 :die 4 :modifier -1}
@@ -8665,8 +8716,8 @@ Sure-Footed. The mule has advantage on Strength and Dexterity saving throws made
 
       }{
       :name "Reef Shark"
-      :size "Medium"
-      :type "beast"
+      :size :medium
+      :type :beast
       :alignment "unaligned"
       :armor-class 12
       :armor-notes "natural armor"
@@ -8695,8 +8746,8 @@ within 5 feet of the creature and the ally isn't incapacitated."}
 
       }{
       :name "Saber-Toothed Tiger"
-      :size "Large"
-      :type "beast"
+      :size :large
+      :type :beast
       :alignment "unaligned"
       :armor-class 12
       :hit-points {:mean 52 :die-count 7 :die 10 :modifier 14}
@@ -8722,8 +8773,8 @@ within 5 feet of the creature and the ally isn't incapacitated."}
 
       }{
       :name "Rhinoceros"
-      :size "Large"
-      :type "beast"
+      :size :large
+      :type :beast
       :alignment "unaligned"
       :armor-class 11
       :armor-notes "natural armor"
@@ -8747,8 +8798,8 @@ within 5 feet of the creature and the ally isn't incapacitated."}
 
       }{
       :name "Riding Horse"
-      :size "Large"
-      :type "beast"
+      :size :large
+      :type :beast
       :alignment "unaligned"
       :armor-class 10
       :hit-points {:mean 13 :die-count 2 :die 10 :modifier 2}
@@ -8768,8 +8819,8 @@ within 5 feet of the creature and the ally isn't incapacitated."}
 
       }{
       :name "Scorpion"
-      :size "Tiny"
-      :type "beast"
+      :size :tiny
+      :type :beast
       :alignment "unaligned"
       :armor-class 11
       :armor-notes "natural armor"
@@ -8790,8 +8841,8 @@ within 5 feet of the creature and the ally isn't incapacitated."}
 
       }{
       :name "Sea Horse"
-      :size "Tiny"
-      :type "beast"
+      :size :tiny
+      :type :beast
       :alignment "unaligned"
       :armor-class 11
       :hit-points {:mean 1 :die-count 1 :die 4 :modifier -1}
@@ -8812,8 +8863,8 @@ within 5 feet of the creature and the ally isn't incapacitated."}
 
       }{
       :name "Spider"
-      :size "Tiny"
-      :type "beast"
+      :size :tiny
+      :type :beast
       :alignment "unaligned"
       :armor-class 12
       :hit-points {:mean 1 :die-count 1 :die 4 :modifier -1}
@@ -8840,8 +8891,8 @@ within 5 feet of the creature and the ally isn't incapacitated."}
 
       }{
       :name "Swarm of Bats"
-      :size "Medium"
-      :type "swarm of Tiny beasts"
+      :size :medium
+      :type :swarm-of-tiny-beasts
       :alignment "unaligned"
       :armor-class 12
       :hit-points {:mean 22 :die-count 5 :die 8}
@@ -8867,8 +8918,8 @@ within 5 feet of the creature and the ally isn't incapacitated."}
 
       }{
       :name "Swarm of Insects"
-      :size "Medium"
-      :type "swarm of Tiny beasts"
+      :size :medium
+      :type :swarm-of-tiny-beasts
       :alignment "unaligned"
       :armor-class 12
       :armor-notes "natural armor"
@@ -8894,8 +8945,8 @@ within 5 feet of the creature and the ally isn't incapacitated."}
 
       }{
       :name "Swarm of Poisonous Snakes"
-      :size "Medium"
-      :type "swarm of Tiny beasts"
+      :size :medium
+      :type :swarm-of-tiny-beasts
       :alignment "unaligned"
       :armor-class 14
       :hit-points {:mean 36 :die-count 8 :die 8}
@@ -8920,8 +8971,8 @@ within 5 feet of the creature and the ally isn't incapacitated."}
 
       }{
       :name "Swarm of Quippers"
-      :size "Medium"
-      :type "swarm of Tiny beasts"
+      :size :medium
+      :type :swarm-of-tiny-beasts
       :alignment "unaligned"
       :armor-class 13
       :hit-points {:mean 28 :die-count 8 :die 8 :modifier -8}
@@ -8947,8 +8998,8 @@ within 5 feet of the creature and the ally isn't incapacitated."}
 
       }{
       :name "Swarm of Rats"
-      :size "Medium"
-      :type "swarm of Tiny beasts"
+      :size :medium
+      :type :swarm-of-tiny-beasts
       :alignment "unaligned"
       :armor-class 10
       :hit-points {:mean 24 :die-count 7 :die 8 :modifier -7}
@@ -8973,8 +9024,8 @@ within 5 feet of the creature and the ally isn't incapacitated."}
 
       }{
       :name "Swarm of Ravens"
-      :size "Medium"
-      :type "swarm of Tiny beasts"
+      :size :medium
+      :type :swarm-of-tiny-beasts
       :alignment "unaligned"
       :armor-class 12
       :hit-points {:mean 24 :die-count 7 :die 8 :modifier -7}
@@ -9000,8 +9051,8 @@ within 5 feet of the creature and the ally isn't incapacitated."}
 
       }{
       :name "Tiger"
-      :size "Large"
-      :type "beast"
+      :size :large
+      :type :beast
       :alignment "unaligned"
       :armor-class 12
       :hit-points {:mean 37 :die-count 5 :die 10 :modifier 10}
@@ -9029,8 +9080,8 @@ target is prone, the tiger can make one bite attack against it as a bonus action
 
       }{
       :name "Vulture"
-      :size "Medium"
-      :type "beast"
+      :size :medium
+      :type :beast
       :alignment "unaligned"
       :armor-class 10
       :hit-points {:mean 5 :die-count 1 :die 8 :modifier 1}
@@ -9055,8 +9106,8 @@ target is prone, the tiger can make one bite attack against it as a bonus action
 
       }{
       :name "Warhorse"
-      :size "Large"
-      :type "beast"
+      :size :large
+      :type :beast
       :alignment "unaligned"
       :armor-class 11
       :hit-points {:mean 19 :die-count 3 :die 10 :modifier 3}
@@ -9078,8 +9129,8 @@ target is prone, the tiger can make one bite attack against it as a bonus action
 
       }{
       :name "Weasel"
-      :size "Tiny"
-      :type "beast"
+      :size :tiny
+      :type :beast
       :alignment "unaligned"
       :armor-class 13
       :hit-points {:mean 1 :die-count 1 :die 4 :modifier -1}
@@ -9103,8 +9154,8 @@ target is prone, the tiger can make one bite attack against it as a bonus action
 
       }{
       :name "Winter Wolf"
-      :size "Large"
-      :type "monstrosity"
+      :size :large
+      :type :monstrosity
       :alignment "neutral evil"
       :armor-class 13
       :armor-notes "natural armor"
@@ -9138,8 +9189,8 @@ Frost giants use these evil creatures as guards and hunting companions, putting 
 
       }{
       :name "Wolf"
-      :size "Medium"
-      :type "beast"
+      :size :medium
+      :type :beast
       :alignment "unaligned"
       :armor-class 13
       :armor-notes "natural armor"
@@ -9166,8 +9217,8 @@ Frost giants use these evil creatures as guards and hunting companions, putting 
 
       }{
       :name "Worg"
-      :size "Large"
-      :type "monstrosity"
+      :size :large
+      :type :monstrosity
       :alignment "neutral evil"
       :armor-class 13
       :armor-notes "natural armor"
@@ -9197,8 +9248,9 @@ and Goblin, and a few learn to speak Common as well."
 
       }{
       :name "Acolyte"
-      :size "Medium"
-      :type "humanoid (any race)"
+      :size :medium
+      :type :humanoid
+:subtypes #{:any-race}
       :alignment "any alignment"
       :armor-class 10
       :hit-points {:mean 9 :die-count 2 :die 8}
@@ -9228,8 +9280,9 @@ Cantrips (at will): light, sacred flame, thaumaturgy
 
       }{
       :name "Archmage"
-      :size "Medium"
-      :type "humanoid (any race)"
+      :size :medium
+      :type :humanoid
+:subtypes #{:any-race}
       :alignment "any alignment"
       :armor-class 12
       :armor-notes "15 with mage armor"
@@ -9270,8 +9323,9 @@ An archmage typically has one or more apprentice mages, and an archmage's abode 
 
       }{
       :name "Assassin"
-      :size "Medium"
-      :type "humanoid (any race)"
+      :size :medium
+      :type :humanoid
+:subtypes #{:any-race}
       :alignment "any non-good alignment"
       :armor-class 15
       :armor-notes "studded leather"
@@ -9305,8 +9359,9 @@ An archmage typically has one or more apprentice mages, and an archmage's abode 
 
       }{
       :name "Bandit"
-      :size "Medium"
-      :type "humanoid (any race)"
+      :size :medium
+      :type :humanoid
+:subtypes #{:any-race}
       :alignment "any non-lawful alignment"
       :armor-class 12
       :armor-notes "leather armor"
@@ -9332,8 +9387,9 @@ Pirates are bandits of the high seas. They might be freebooters interested only 
 
       }{
       :name "Bandit Captain"
-      :size "Medium"
-      :type "humanoid (any race)"
+      :size :medium
+      :type :humanoid
+:subtypes #{:any-race}
       :alignment "any non-lawful alignment"
       :armor-class 15
       :armor-notes "studded leather"
@@ -9368,8 +9424,9 @@ More than treasure, a bandit captain or pirate captain craves infamy. A prisoner
 
       }{
       :name "Berserker"
-      :size "Medium"
-      :type "humanoid (any race)"
+      :size :medium
+      :type :humanoid
+:subtypes #{:any-race}
       :alignment "any chaotic alignment"
       :armor-class 13
       :armor-notes "hide armor"
@@ -9395,8 +9452,9 @@ More than treasure, a bandit captain or pirate captain craves infamy. A prisoner
 
       }{
       :name "Commoner"
-      :size "Medium"
-      :type "humanoid (any race)"
+      :size :medium
+      :type :humanoid
+:subtypes #{:any-race}
       :alignment "any alignment"
       :armor-class 10
       :hit-points {:mean 4 :die-count 1 :die 8}
@@ -9419,8 +9477,9 @@ More than treasure, a bandit captain or pirate captain craves infamy. A prisoner
 
       }{
       :name "Cultist"
-      :size "Medium"
-      :type "humanoid (any race)"
+      :size :medium
+      :type :humanoid
+:subtypes #{:any-race}
       :alignment "any non-good alignment"
       :armor-class 12
       :armor-notes "leather armor"
@@ -9450,8 +9509,9 @@ acolytes, cultists often show signs of insanity in their beliefs and practices."
 
       }{
       :name "Cult Fanatic"
-      :size "Medium"
-      :type "humanoid (any race)"
+      :size :medium
+      :type :humanoid
+:subtypes #{:any-race}
       :alignment "any non-good alignment"
       :armor-class 13
       :armor-notes "leather armor"
@@ -9486,8 +9546,9 @@ Cantrips (at will): light, sacred flame, thaumaturgy
 
       }{
       :name "Druid"
-      :size "Medium"
-      :type "humanoid (any race)"
+      :size :medium
+      :type :humanoid
+:subtypes #{:any-race}
       :alignment "any alignment"
       :armor-class 11
       :armor-notes "16 with barkskin"
@@ -9519,8 +9580,9 @@ Cantrips (at will): druidcraft, produce flame, shillelagh
 
       }{
       :name "Gladiator"
-      :size "Medium"
-      :type "humanoid (any race)"
+      :size :medium
+      :type :humanoid
+:subtypes #{:any-race}
       :alignment "any alignment"
       :armor-class 16
       :armor-notes "studded leather, shield"
@@ -9557,8 +9619,9 @@ Cantrips (at will): druidcraft, produce flame, shillelagh
 
       }{
       :name "Guard"
-      :size "Medium"
-      :type "humanoid (any race)"
+      :size :medium
+      :type :humanoid
+:subtypes #{:any-race}
       :alignment "any alignment"
       :armor-class 16
       :armor-notes "chain shirt, shield"
@@ -9585,8 +9648,9 @@ piercing damage, or 5 (1d8 + 1) piercing damage if used with two hands to make a
 
       }{
       :name "Knight"
-      :size "Medium"
-      :type "humanoid (any race)"
+      :size :medium
+      :type :humanoid
+:subtypes #{:any-race}
       :alignment "any alignment"
       :armor-class 18
       :armor-notes "plate"
@@ -9622,8 +9686,9 @@ alignment determines the extent to which a pledge is honored. Whether undertakin
 
       }{
       :name "Mage"
-      :size "Medium"
-      :type "humanoid (any race)"
+      :size :medium
+      :type :humanoid
+:subtypes #{:any-race}
       :alignment "any alignment"
       :armor-class 12
       :armor-notes "15 with mage armor"
@@ -9657,8 +9722,9 @@ Cantrips (at will): fire bolt, light, mage hand, prestidigitation
 
       }{
       :name "Noble"
-      :size "Medium"
-      :type "humanoid (any race)"
+      :size :medium
+      :type :humanoid
+:subtypes #{:any-race}
       :alignment "any alignment"
       :armor-class 15
       :armor-notes "breastplate"
@@ -9689,8 +9755,9 @@ courtiers who aren't of noble birth."
 
       }{
       :name "Priest"
-      :size "Medium"
-      :type "humanoid (any race)"
+      :size :medium
+      :type :humanoid
+:subtypes #{:any-race}
       :alignment "any alignment"
       :armor-class 13
       :armor-notes "chain shirt"
@@ -9723,8 +9790,9 @@ A priest typically has one or more acolytes to help with religious ceremonies an
 
       }{
       :name "Scout"
-      :size "Medium"
-      :type "humanoid (any race)"
+      :size :medium
+      :type :humanoid
+:subtypes #{:any-race}
       :alignment "any alignment"
       :armor-class 13
       :armor-notes "leather armor"
@@ -9754,8 +9822,9 @@ A priest typically has one or more acolytes to help with religious ceremonies an
 
       }{
       :name "Spy"
-      :size "Medium"
-      :type "humanoid (any race)"
+      :size :medium
+      :type :humanoid
+:subtypes #{:any-race}
       :alignment "any alignment"
       :armor-class 12
       :hit-points {:mean 27 :die-count 6 :die 8}
@@ -9787,8 +9856,9 @@ A priest typically has one or more acolytes to help with religious ceremonies an
 
       }{
       :name "Thug"
-      :size "Medium"
-      :type "humanoid (any race)"
+      :size :medium
+      :type :humanoid
+:subtypes #{:any-race}
       :alignment "any non-good alignment"
       :armor-class 11
       :armor-notes "leather armor"
@@ -9820,8 +9890,9 @@ A priest typically has one or more acolytes to help with religious ceremonies an
 
       }{
       :name "Tribal Warrior"
-      :size "Medium"
-      :type "humanoid (any race)"
+      :size :medium
+      :type :humanoid
+:subtypes #{:any-race}
       :alignment "any alignment"
       :armor-class 12
       :armor-notes "hide armor"
@@ -9848,8 +9919,9 @@ A priest typically has one or more acolytes to help with religious ceremonies an
 
       }{
       :name "Veteran"
-      :size "Medium"
-      :type "humanoid (any race)"
+      :size :medium
+      :type :humanoid
+:subtypes #{:any-race}
       :alignment "any alignment"
       :armor-class 17
       :armor-notes "splint"

@@ -816,10 +816,19 @@
            (fn [[k v]] (str (s/capitalize (clojure.core/name k)) " " (common/bonus-str v)))
            m)))
 
-(defn monster-component [{:keys [name size type hit-points alignment armor-class armor-notes speed saving-throws skills senses languages challenge traits actions legendary-actions source page] :as monster}]
+(defn monster-subheader [size type subtypes alignment]
+  (str (common/kw-to-name size)
+       " "
+       (common/kw-to-name type)
+       (if (seq subtypes)
+         (str " (" (s/join ", " (map common/kw-to-name subtypes)) ")"))
+       ", "
+       alignment))
+
+(defn monster-component [{:keys [name size type subtypes hit-points alignment armor-class armor-notes speed saving-throws skills senses languages challenge traits actions legendary-actions source page] :as monster}]
   [:div.m-l-10
      [:span.f-s-24.f-w-b name]
-     [:div.f-s-18.i.f-w-b (str size " " type ", " alignment)]
+   [:div.f-s-18.i.f-w-b (monster-subheader size type subtypes alignment)]
      (spell-field "Armor Class" (str armor-class (if armor-notes (str " (" armor-notes ")"))))
      (let [{:keys [mean die-count die modifier]} hit-points]
        (spell-field "Hit Points" (str die-count
@@ -1083,10 +1092,10 @@
      true
      true)))
 
-(defn monster-summary [name size type]
+(defn monster-summary [name size type subtypes alignment]
   [:span.m-r-10.m-b-5
    [:div name]
-   [:div.f-s-12.m-t-5.opacity-6 (str size " " type)]])
+   [:div.f-s-12.m-t-5.opacity-6 (monster-subheader size type subtypes alignment)]])
 
 (defn realize-char [built-char]
   (reduce-kv
@@ -1319,7 +1328,7 @@
       {:on-click on-click}
       [:td.p-10.f-w-b (:name spell)]
       [:td.p-10 class]
-      [:td.p-10 (s/upper-case (name ability))]
+      [:td.p-10 (if ability (s/upper-case (name ability)))]
       [:td.p-10 (get cls-mods :spell-save-dc)]
       [:td.p-10 (common/bonus-str (get cls-mods :spell-attack-modifier))]
       [:td.p-r-10.orange
@@ -2319,43 +2328,95 @@
              parties))]]]))))
 
 (defn monster-list []
-  (let [expanded-monsters @(subscribe [:expanded-monsters])
-        device-type @(subscribe [:device-type])]
-    [content-page
-     "Monsters"
-     []
-     [:div.p-l-5.p-r-5.p-b-10
-      [:div.p-b-10.p-l-10.p-r-10
-       [:input.input.f-s-24.p-l-20
-        {:style {:height "60px"}
-         :value @(subscribe [::char/monster-text-filter])
-         :on-change #(dispatch [::char/filter-monsters (event-value %)])}]]
-      [:div
-       {:style list-style}
-       (doall
-        (map
-         (fn [{:keys [name size type] :as monster}]
-           (let [expanded? (get expanded-monsters name)]
-             ^{:key name}
-            [:div.white
-             {:style row-style}
-             [:div.pointer
-              [:div.flex.justify-cont-s-b.align-items-c
-               {:on-click #(dispatch [:toggle-monster-expanded name])}
-               [:div.m-l-10
-                [:div.f-s-24.f-w-600
-                 [monster-summary name size type]]]
-               [:div.orange.pointer.m-r-10
-                (if (not= device-type :mobile) [:span.underline (if expanded?
-                                                                  "collapse"
-                                                                  "open")])
-                [:i.fa.m-l-5
-                 {:class-name (if expanded? "fa-caret-up" "fa-caret-down")}]]]
-              (if expanded?
-                [:div.p-10
-                 {:style character-display-style}
-                 [monster-component monster]])]]))
-         @(subscribe [::char/filtered-monsters])))]]]))
+  (let [filters-expanded? (r/atom false)]
+    (fn []
+      (let [expanded-monsters @(subscribe [:expanded-monsters])
+            device-type @(subscribe [:device-type])]
+        [content-page
+         "Monsters"
+         []
+         [:div.p-l-5.p-r-5.p-b-10
+          [:div.p-b-10.p-l-10.p-r-10
+           [:input.input.f-s-24.p-l-20
+            {:style {:height "60px"}
+             :value @(subscribe [::char/monster-text-filter])
+             :on-change #(dispatch [::char/filter-monsters (event-value %)])}]]
+          [:div
+           [:div.flex.justify-cont-end.m-b-10
+            [:div.orange.pointer.m-r-10
+             {:on-click #(swap! filters-expanded? not)}
+             (if (not= device-type :mobile)
+               [:span.underline (if @filters-expanded?
+                                  "hide"
+                                  "filters")])
+             [:i.fa.m-l-5
+              {:class-name (if @filters-expanded? "fa-caret-up" "fa-caret-down")}]]]
+           (if @filters-expanded?
+             [:div.flex.flex-wrap
+              [:div.white.p-20
+               [:div.f-s-16.f-w-b "Size"]
+               [:div
+                (doall
+                 (map
+                  (fn [size]
+                    ^{:key size}
+                    [:div.p-5.pointer
+                     {:on-click #(dispatch [::char/toggle-monster-filter-hidden :size size])}
+                     (comps/checkbox (not @(subscribe [::char/monster-filter-hidden? :size size])) false)
+                     (common/kw-to-name size)])
+                  @(subscribe [::char/monster-sizes])))]]
+              [:div.white.p-20
+               [:div.f-s-16.f-w-b "Type"]
+               [:div
+                (doall
+                 (map
+                  (fn [type]
+                    ^{:key type}
+                    [:div.p-5.pointer
+                     {:on-click #(dispatch [::char/toggle-monster-filter-hidden :type type])}
+                     (comps/checkbox (not @(subscribe [::char/monster-filter-hidden? :type type])) false)
+                     (common/kw-to-name type)])
+                  @(subscribe [::char/monster-types])))]]
+              (let [subtypes @(subscribe [::char/monster-subtypes])]
+                (prn "SUBTYPES" subtypes)
+                [:div.white.p-20
+                 [:div.f-s-16.f-w-b "Subtype"]
+                 [:div
+                  (doall
+                   (map
+                    (fn [subtype]
+                      ^{:key subtype}
+                      [:div.p-5.pointer
+                       {:on-click #(dispatch [::char/toggle-monster-filter-hidden :subtype subtype])}
+                       (comps/checkbox (not @(subscribe [::char/monster-filter-hidden? :subtype subtype])) false)
+                       (common/kw-to-name subtype)])
+                    subtypes))]])])]
+          [:div
+           {:style list-style}
+           (doall
+            (map
+             (fn [{:keys [name size type subtypes alignment] :as monster}]
+               (let [expanded? (get expanded-monsters name)]
+                 ^{:key name}
+                 [:div.white
+                  {:style row-style}
+                  [:div.pointer
+                   [:div.flex.justify-cont-s-b.align-items-c
+                    {:on-click #(dispatch [:toggle-monster-expanded name])}
+                    [:div.m-l-10
+                     [:div.f-s-24.f-w-600
+                      [monster-summary name size type subtypes alignment]]]
+                    [:div.orange.pointer.m-r-10
+                     (if (not= device-type :mobile) [:span.underline (if expanded?
+                                                                       "collapse"
+                                                                       "open")])
+                     [:i.fa.m-l-5
+                      {:class-name (if expanded? "fa-caret-up" "fa-caret-down")}]]]
+                   (if expanded?
+                     [:div.p-10
+                      {:style character-display-style}
+                      [monster-component monster]])]]))
+             @(subscribe [::char/filtered-monsters])))]]]))))
 
 (defn spell-list []
   (let [expanded-spells @(subscribe [:expanded-spells])
