@@ -2,7 +2,8 @@
   (:require [orcpub.dnd.e5.options :as opt5e]
             [orcpub.dnd.e5.modifiers :as mod5e]
             [orcpub.dnd.e5.character :as char5e]
-            [orcpub.template :as t]))
+            [orcpub.template :as t])
+  (:require-macros [orcpub.dnd.e5.options]))
 
 (def druid-option-cfg
   {:name "Druid"
