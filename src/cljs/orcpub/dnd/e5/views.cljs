@@ -1504,12 +1504,8 @@
   (basic-section "Darkvision" "night-vision" (str @(subscribe [::char/darkvision id]) " ft.")))
 
 (defn critical-hits-section-2 [id]
-  (let [critical-hit-values @(subscribe [::char/critical-hit-values])]
-    (basic-section "Critical Hits" nil (if (> (count critical-hit-values) 1)
-                                         (str (apply min critical-hit-values)
-                                              "-"
-                                              (apply max critical-hit-values))
-                                         (first critical-hit-values)))))
+  (let [crit-values-str @(subscribe [::char/crit-values-str])]
+    (basic-section "Critical Hits" nil crit-values-str)))
 
 (defn number-of-attacks-section-2 [id]
   (basic-section "Number of Attacks" nil @(subscribe [::char/number-of-attacks])))
