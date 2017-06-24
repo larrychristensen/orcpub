@@ -66,7 +66,15 @@
 While wearing this armor, you gain a +1 bonus to AC, you have advantage on saving throws against the Frightful Presence and breath weapons of dragons, and you have resistance to " (name resistance-kw) " damage.
 Additionally, you can focus your senses as an action to magically discern the distance and
 direction to the closest dragon within 30 miles of you that is of the same type as the armor. This special action can’t be used again until the next dawn."
-   )})
+                     )})
+
+(defn rod-of-the-pact-keeper [bonus]
+  {:name (str "Rod of the Pact Keeper +" bonus)
+   :item-type :rod
+   :rarity :uncommon
+   :attunment [:warlock]
+   :modifiers [(mod5e/spell-save-dc-bonus bonus)
+               (mod5e/spell-attack-modifier-bonus bonus)]})
                             
 (def raw-magic-items
   [{
@@ -1879,7 +1887,11 @@ If you press button 6, the rod assumes or remains in its normal form and indicat
 Drain Life. When you hit a creature with a melee attack using the rod, you can force the target to make a DC 17 Constitution saving throw. On a failure, the target takes an extra 4d6 necrotic damage, and you regain a number of hit points equal to half that necrotic damage. This property can’t be used again until the next dawn.
 Paralyze. When you hit a creature with a melee attack using the rod, you can force the target to make a DC 17 Strength saving throw. On a failure, the target is paralyzed for 1 minute. The target can repeat the saving throw at the end of each of its turns, ending the effect on a success. This property can’t be used again until the next dawn.
 Terrify. While holding the rod, you can use an action to force each creature you can see within 30 feet of you to make a DC 17 Wisdom saving throw. On a failure, a target is frightened of you for 1 minute. A frightened target can repeat the saving throw at the end of each of its turns, ending the effect on itself on a success. This property can’t be used again until the next dawn."
-    }{
+      }
+   (rod-of-the-pact-keeper 1)
+   (rod-of-the-pact-keeper 2)
+   (rod-of-the-pact-keeper 3)
+   {
     :name "Rod of Rulership"
     :item-type :rod
 
@@ -1931,7 +1943,7 @@ The rope has AC 20 and 20 hit points. It regains 1 hit point every 5 minutes as 
     :magical-attack-bonus 2
     :magical-damage-bonus 2
     :description "You gain a +2 bonus to attack and damage rolls made with this magic weapon. In addition, you can make one attack with it as a bonus action on each of your turns."
-      }
+    }
    {
     :name "Sending Stones"
     :item-type :wonderous-item
@@ -2431,7 +2443,14 @@ The wand regains 1d6 + 1 expended charges daily at dawn. If you expend the wand�
     :magical-attack-bonus 3
     :magical-damage-bonus 3
     :description "You have a +3 bonus to attack and damage rolls made with this magic weapon."
-    }{
+      }
+   {:name "Weapon of Warning"
+    :item-type :weapon
+    :item-subtype weapon-not-ammunition?
+    :rarity :uncommon
+    :attunement [:any]
+    :description "Advantage on initiative; you and companions in 30 ft. can't be surprised"}
+   {
     :name "Well of Many Worlds"
     :item-type :wondrous-item
     :rarity :legendary
