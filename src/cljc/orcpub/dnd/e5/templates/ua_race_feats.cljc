@@ -145,6 +145,14 @@
                                :prereqs [(race-prereq ["Elf" "Half-Elf"])]
                                :modifiers [(mod5e/ability ::char5e/dex 1)]})
                              (opt5e/feat-option
+                              {:name "Everybody's Friend"
+                               :page 2
+                               :source :ua-race-feats
+                               :prereqs [(race-prereq ["Half-Elf"])]
+                               :modifiers [(mod5e/ability ::char5e/cha 1)
+                                           (opt5e/skill-prof-or-expertise :deception :everybodys-friend)
+                                           (opt5e/skill-prof-or-expertise :persuasion :everybodys-friend)]})
+                             (opt5e/feat-option
                               {:name "Fade Away"
                                :page 1
                                :source :ua-race-feats

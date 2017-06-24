@@ -4,25 +4,32 @@
             [orcpub.dnd.e5.display :as dis5e]
             [clojure.java.io :as io])
   (:import (org.apache.pdfbox.pdmodel.interactive.form PDCheckBox PDComboBox PDListBox PDRadioButton PDTextField)
-           (org.apache.pdfbox.pdmodel PDDocument PDPageContentStream)
+           (org.apache.pdfbox.cos COSName)
+           (org.apache.pdfbox.pdmodel PDDocument PDPageContentStream PDResources)
            (org.apache.pdfbox.pdmodel.graphics.image PDImageXObject)
            (java.io ByteArrayOutputStream ByteArrayInputStream)
            (org.apache.pdfbox.pdmodel.graphics.image JPEGFactory LosslessFactory)
-           (org.apache.pdfbox.pdmodel.font PDType1Font)
+           (org.apache.pdfbox.pdmodel.font PDType1Font PDType0Font)
            (org.eclipse.jetty.server.handler.gzip GzipHandler)
            (javax.imageio ImageIO)
            (java.net URL)))
 
 (defn write-fields! [doc fields flatten font-sizes]
   (let [catalog (.getDocumentCatalog doc)
-        form (.getAcroForm catalog)]
+        form (.getAcroForm catalog)
+        res (or (.getDefaultResources form) (PDResources.))
+        font (PDType0Font/load doc (io/file (io/resource "LiberationSans-Regular.ttf")))
+        font-name (.add res font)]
     (.setNeedAppearances form true)
+    (.setDefaultResources form res)
     (doseq [[k v] fields]
       (try
         (let [field (.getField form (name k))]
           (when field
-            (if (and (font-sizes k) flatten)
-              (.setDefaultAppearance field (str "/Helv " (font-sizes k) " Tf 0 0 0 rg")))
+            
+            (if (and flatten (font-sizes k) (instance? PDTextField field))
+              #_(.setDefaultAppearance field (str "/Helv " " " (font-sizes k) " Tf 0 0 0 rg"))
+              (.setDefaultAppearance field (str COSName/DA "/" (.getName font-name) " " (font-sizes k 8) " Tf 0 0 0 rg")))
             (.setValue
              field
              (cond 
