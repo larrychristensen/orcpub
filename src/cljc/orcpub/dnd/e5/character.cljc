@@ -482,6 +482,14 @@
 (defn critical-hit-values [built-char]
   (get-prop built-char :critical))
 
+(defn crit-values-str [built-char]
+  (let [critical-hit-values (critical-hit-values built-char)]
+    (if (> (count critical-hit-values) 1)
+      (str (apply min critical-hit-values)
+           "-"
+           (apply max critical-hit-values))
+      (first critical-hit-values))))
+
 (defn saving-throws [built-char]
   (get-prop built-char :saving-throws))
 

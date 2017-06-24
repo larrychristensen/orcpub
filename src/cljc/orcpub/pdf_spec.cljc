@@ -103,11 +103,15 @@
         damage-resistances (char5e/damage-resistances built-char)
         damage-immunities (char5e/damage-immunities built-char)
         condition-immunities (char5e/condition-immunities built-char)
-        immunities (char5e/immunities built-char)]
+        immunities (char5e/immunities built-char)
+        number-of-attacks (char5e/number-of-attacks built-char)
+        crit-values (char5e/critical-hit-values built-char)]
     (s/join
      "\n"
      (remove nil?
              [(if (and darkvision (pos? darkvision)) (str "Darkvision: " darkvision " ft."))
+              (if (> number-of-attacks 1) (str "Number of Attacks: " number-of-attacks))
+              (if (> (count crit-values) 1) (str "Critical Hits: " (char5e/crit-values-str built-char)))
               (vec-trait "Damage Resistances" (resistance-strings damage-resistances))
               (vec-trait "Damage Immunities" (resistance-strings damage-immunities))
               (vec-trait "Condition Immunities" (resistance-strings condition-immunities))
