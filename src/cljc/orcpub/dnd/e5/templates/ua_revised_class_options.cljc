@@ -126,7 +126,7 @@
                            :source :scag
                            :summary "don't need to breath, eat, drink, or sleep"}]
                  :levels {1 {:modifiers [(mod5e/spells-known 0 :sacred-flame ::char5e/cha "Warlock")
-                                         (mod5e/spells-known 0 :burning-hands ::char5e/cha "Warlock")
+                                         (mod5e/spells-known 0 :light ::char5e/cha "Warlock")
                                          (mod5e/trait-cfg
                                           {:name "Healing Light"
                                            :page 6
