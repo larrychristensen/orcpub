@@ -129,6 +129,8 @@
 
    [:.m-t--10
     {:margin-top "-10px"}]
+   [:.m-t--20
+    {:margin-top "-20px"}]
    [:.m-t--5
     {:margin-top "-5px"}]
    [:.m-t-2

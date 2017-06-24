@@ -601,11 +601,21 @@
  (fn [db _]
    (::char5e/builder-tab db)))
 
+(def sorted-monsters
+  (delay (sort-by :name monsters5e/monsters)))
+
+(reg-sub
+ ::char5e/sorted-monsters
+ (fn [db _]
+   @sorted-monsters))
+
 (reg-sub
  ::char5e/filtered-monsters
- (fn [db _]
+ :<- [:db]
+ :<- [::char5e/sorted-monsters]
+ (fn [[db sorted-monsters] _]
    (or (::char5e/filtered-monsters db)
-       (sort-by :name monsters5e/monsters))))
+       sorted-monsters)))
 
 (reg-sub
  ::char5e/monster-types
@@ -632,11 +642,21 @@
  (fn [db _]
    (::char5e/monster-text-filter db)))
 
+(def sorted-spells
+  (delay (sort-by :name spells5e/spells)))
+
+(reg-sub
+ ::char5e/sorted-spells
+ (fn [db _]
+   @sorted-spells))
+
 (reg-sub
  ::char5e/filtered-spells
- (fn [db _]
+ :<- [:db]
+ :<- [::char5e/sorted-spells]
+ (fn [[db sorted-spells] _]
    (or (::char5e/filtered-spells db)
-       (sort-by :name spells5e/spells))))
+       sorted-spells)))
 
 (reg-sub
  ::char5e/monster-filter-hidden?
