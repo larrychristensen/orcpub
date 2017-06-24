@@ -4064,7 +4064,7 @@ long rest."})
    :help "You were a member of a crew for a seagoing vessel."
    :traits [ships-passage-trait-cfg]
    :profs {:skill {:athletics true :perception true}
-           :tool {:navigators-tools true :water-vehices true}}
+           :tool {:navigators-tools true :water-vehicles true}}
    :weapons {:club 1}
    :equipment {:rope-silk 1
                :clothes-common 1
@@ -4078,7 +4078,7 @@ long rest."})
   {:name "Pirate"
    :help "You were a member of a crew for a seagoing vessel."
    :profs {:skill {:athletics true :perception true}
-           :tool {:navigators-tools true :water-vehices true}}
+           :tool {:navigators-tools true :water-vehicles true}}
    :weapons {:club 1}
    :equipment {:rope-silk 1
                :clothes-common 1
