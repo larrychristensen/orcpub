@@ -719,7 +719,8 @@
                                                path
                                                js/window.location.port))
        (cond-> {:db (assoc db :route new-route)
-                :dispatch [:hide-message]}
+                :dispatch-n [[:hide-message]
+                             [:close-orcacle]]}
          return? (assoc-in [:db :return-route] new-route)
          return-route (assoc-in [:db :return-route] return-route)
          (not skip-path?) (assoc :path path)
@@ -1224,25 +1225,77 @@
                               :subrace subrace
                               :sex sex})}})))
 
+(defn remove-subtypes [subtypes hidden-subtypes]
+  (let [result (sets/difference subtypes hidden-subtypes)]
+    result))
+
+(defn all-subtypes-removed? [subtypes hidden-subtypes]
+  (and (seq subtypes)
+       (seq hidden-subtypes)
+       (->> subtypes
+            (remove
+             hidden-subtypes)
+            empty?)))
+
+(defn filter-monsters [filter-text monster-filters]
+  (let [pattern (if filter-text
+                  (re-pattern (str ".*" (s/lower-case filter-text) ".*")))]
+    (sort-by
+     :name
+     (sequence
+      (filter
+       (fn [{:keys [name type subtypes size]}]
+         (and (or (s/blank? filter-text)
+                  (re-matches pattern (s/lower-case name)))
+              (not (or (-> monster-filters :size size)
+                       (-> monster-filters :type type)
+                       (all-subtypes-removed? subtypes (:subtype monster-filters)))))))
+      @(subscribe [::char5e/sorted-monsters])))))
+
+(defn filter-by-name-xform [filter-text]
+  (let [pattern (re-pattern (str ".*" (s/lower-case filter-text) ".*"))]
+    (filter
+     (fn [{:keys [name]}]
+       (re-matches pattern (s/lower-case name))))))
+
+(defn filter-spells [filter-text]
+  (sort-by
+   :name
+   (sequence (filter-by-name-xform filter-text) @(subscribe [::char5e/sorted-spells]))))
 
 (defn search-results [text]
   (let [search-text (s/lower-case text)
         dice-result (dice/dice-roll-text search-text)
         kw (if search-text (common/name-to-kw search-text))
         name-result (name-result search-text)]
-    (cond
-      dice-result {:top-result {:type :dice-roll
-                                :result dice-result}}
-      (spells/spell-map kw) {:top-result {:type :spell
-                                          :result (spells/spell-map kw)}}
-      (monsters/monster-map kw) {:top-result {:type :monster
-                                              :result (monsters/monster-map kw)}}
-      (magic-items/magic-item-map kw) {:top-result {:type :magic-item
-                                                    :result (magic-items/magic-item-map kw)}}
-      (= "tavern name" search-text) {:top-result {:type :tavern-name
-                                                  :result (char-rand5e/random-tavern-name)}}
-      name-result name-result
-      :else nil)))
+    (let [top-result (cond
+                       dice-result {:type :dice-roll
+                                    :result dice-result}
+                       (spells/spell-map kw) {:type :spell
+                                              :result (spells/spell-map kw)}
+                       (monsters/monster-map kw) {:type :monster
+                                                  :result (monsters/monster-map kw)}
+                       (magic-items/magic-item-map kw) {:type :magic-item
+                                                        :result (magic-items/magic-item-map kw)}
+                       (= "tavern name" search-text) {:type :tavern-name
+                                                      :result (char-rand5e/random-tavern-name)}
+                       name-result name-result
+                       :else nil)
+          filter-xform (filter-by-name-xform search-text)
+          top-spells (if (>= (count text) 3)
+                       (sequence
+                        filter-xform
+                        spells/spells))
+          top-monsters (if (>= (count text) 3)
+                         (sequence
+                          filter-xform
+                          monsters/monsters))]
+      (cond-> {}
+        top-result (assoc :top-result top-result)
+        (seq top-spells) (update :results conj {:type :spell
+                                                :results top-spells})
+        (seq top-monsters) (update :results conj {:type :monster
+                                                  :results top-monsters})))))
 
 
 (reg-event-db
@@ -1277,55 +1330,23 @@
  (fn [db [_ tab]]
    (assoc db ::char5e/builder-tab tab)))
 
-(defn remove-subtypes [subtypes hidden-subtypes]
-  (let [result (sets/difference subtypes hidden-subtypes)]
-    result))
-
-(defn all-subtypes-removed? [subtypes hidden-subtypes]
-  (and (seq subtypes)
-       (seq hidden-subtypes)
-       (->> subtypes
-            (remove
-             hidden-subtypes)
-            empty?)))
-
-(defn filter-monsters [filter-text monster-filters]
-  (let [pattern (if filter-text
-                  (re-pattern (str ".*" (s/lower-case filter-text) ".*")))]
-    (sort-by
-     :name
-     (sequence
-      (filter
-       (fn [{:keys [name type subtypes size]}]
-         (and (or (s/blank? filter-text)
-                  (re-matches pattern (s/lower-case name)))
-              (not (or (-> monster-filters :size size)
-                       (-> monster-filters :type type)
-                       (all-subtypes-removed? subtypes (:subtype monster-filters)))))))
-      monsters/monsters))))
-
-(defn filter-spells [filter-text]
-  (let [pattern (re-pattern (str ".*" (s/lower-case filter-text) ".*"))]
-    (sort-by
-     :name
-     (filter
-      (fn [spell]
-        (re-matches pattern (s/lower-case (:name spell))))
-      spells/spells))))
-
 (reg-event-db
  ::char5e/filter-monsters
  (fn [db [_ filter-text]]
    (assoc db
           ::char5e/monster-text-filter filter-text
-          ::char5e/filtered-monsters (filter-monsters filter-text (::char5e/monster-filter-hidden? db)))))
+          ::char5e/filtered-monsters (if (>= (count filter-text) 3)
+                                       (filter-monsters filter-text (::char5e/monster-filter-hidden? db))
+                                       @(subscribe [::char5e/sorted-monsters])))))
 
 (reg-event-db
  ::char5e/filter-spells
  (fn [db [_ filter-text]]
    (assoc db
           ::char5e/spell-text-filter filter-text
-          ::char5e/filtered-spells (filter-spells filter-text))))
+          ::char5e/filtered-spells (if (>= (count filter-text) 3)
+                                     (filter-spells filter-text)
+                                     @(subscribe [::char5e/sorted-spells])))))
 
 (reg-event-db
  ::char5e/toggle-selected
