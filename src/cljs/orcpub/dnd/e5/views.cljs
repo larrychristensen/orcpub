@@ -733,7 +733,9 @@
    [:span.f-w-b name ":"]
    [:span.m-l-10 value]])
 
-(def two-columns-style {:column-count 2})
+(def two-columns-style {:column-count 2
+                        :-webkit-column-count 2
+                        :-moz-column-count 2})
 
 (defn paragraphs [str]
   (let [mobile? @(subscribe [:mobile?])
@@ -812,7 +814,7 @@
    [:div.m-t-10
     (if description
       (paragraphs description)
-      [:div.flex
+      [:div
        (if summary (paragraphs summary))
        [:span (str "(" (disp/source-description source page) " for more details)")]])]])
 
@@ -879,7 +881,7 @@
 
 (defn monster-component [{:keys [name size type subtypes hit-points alignment armor-class armor-notes speed saving-throws skills damage-vulnerabilities damage-resistances damage-immunities condition-immunities senses languages challenge traits actions legendary-actions source page] :as monster}]
   [:div.m-l-10
-   {:style two-columns-style}
+   (if (not @(subscribe [:mobile?])) {:style two-columns-style})
    [:span.f-s-24.f-w-b name]
    [:div.f-s-18.i.f-w-b (monster-subheader size type subtypes alignment)]
    (spell-field "Armor Class" (str armor-class (if armor-notes (str " (" armor-notes ")"))))
