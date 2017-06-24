@@ -733,12 +733,21 @@
    [:span.f-w-b name ":"]
    [:span.m-l-10 value]])
 
+(def two-columns-style {:column-count 2})
+
 (defn paragraphs [str]
-  (doall
-   (map-indexed
-    (fn [i p]
-      ^{:key i} [:p p])
-    (s/split str #"\n"))))
+  (let [mobile? @(subscribe [:mobile?])
+        ps (s/split str #"\n")
+        p-els (doall
+               (map-indexed
+                (fn [i p]
+                  ^{:key i} [:p p])
+                ps))]
+    (if mobile?
+      p-els
+      [:div
+       {:style two-columns-style}
+       p-els])))
 
 (defn magic-item-result [{:keys [name item-type item-subtype rarity attunement description summary] :as spell}]
   [:div.white
@@ -803,7 +812,7 @@
    [:div.m-t-10
     (if description
       (paragraphs description)
-      [:div
+      [:div.flex
        (if summary (paragraphs summary))
        [:span (str "(" (disp/source-description source page) " for more details)")]])]])
 
@@ -840,7 +849,7 @@
        alignment))
 
 (defn monster-summary [name size type subtypes alignment]
-  [:div.m-r-10.p-b-20
+  [:div.m-r-10
    [:div name]
    [:div.f-s-14.i.opacity-5 (monster-subheader size type subtypes alignment)]])
 
@@ -853,7 +862,7 @@
       (map
        (fn [{:keys [key name size type subtypes alignment]}]
          ^{:key name}
-         [:div.pointer.f-s-24.f-w-600
+         [:div.pointer.f-s-24.f-w-600.m-b-20
           {:on-click (fn [_]
                        (let [monster-page-path (routes/path-for routes/dnd-e5-monster-page-route :key key)
                              monster-page-route (routes/match-route monster-page-path)]
@@ -870,27 +879,28 @@
 
 (defn monster-component [{:keys [name size type subtypes hit-points alignment armor-class armor-notes speed saving-throws skills damage-vulnerabilities damage-resistances damage-immunities condition-immunities senses languages challenge traits actions legendary-actions source page] :as monster}]
   [:div.m-l-10
-     [:span.f-s-24.f-w-b name]
+   {:style two-columns-style}
+   [:span.f-s-24.f-w-b name]
    [:div.f-s-18.i.f-w-b (monster-subheader size type subtypes alignment)]
-     (spell-field "Armor Class" (str armor-class (if armor-notes (str " (" armor-notes ")"))))
-     (let [{:keys [mean die-count die modifier]} hit-points]
-       (spell-field "Hit Points" (str die-count
-                                      "d"
-                                      die
-                                      (if modifier (common/mod-str modifier))
-                                      (if mean (str " (" mean ")")))))
-     (spell-field "Speed" speed)
-     [:div.m-t-10.flex.justify-cont-s-a.m-b-10
-      {:style {:max-width "300px"}}
-      (doall
-       (map
-        (fn [ability-key]
-          ^{:key ability-key}
-          [:div.t-a-c.p-5
-           [:div.f-w-b.f-s-14 (s/upper-case (clojure.core/name ability-key))]
-           (let [ability-value (get monster ability-key)]
-             [:div ability-value " (" (common/bonus-str (opt/ability-bonus ability-value)) ")"])])
-        [:str :dex :con :int :wis :cha]))]
+   (spell-field "Armor Class" (str armor-class (if armor-notes (str " (" armor-notes ")"))))
+   (let [{:keys [mean die-count die modifier]} hit-points]
+     (spell-field "Hit Points" (str die-count
+                                    "d"
+                                    die
+                                    (if modifier (common/mod-str modifier))
+                                    (if mean (str " (" mean ")")))))
+   (spell-field "Speed" speed)
+   [:div.m-t-10.flex.justify-cont-s-a.m-b-10
+    {:style {:max-width "300px"}}
+    (doall
+     (map
+      (fn [ability-key]
+        ^{:key ability-key}
+        [:div.t-a-c.p-5
+         [:div.f-w-b.f-s-14 (s/upper-case (clojure.core/name ability-key))]
+         (let [ability-value (get monster ability-key)]
+           [:div ability-value " (" (common/bonus-str (opt/ability-bonus ability-value)) ")"])])
+      [:str :dex :con :int :wis :cha]))]
    (if (seq saving-throws)
      (spell-field "Saving Throws" (print-bonus-map saving-throws)))
    (if skills (spell-field "Skills" (print-bonus-map skills)))
@@ -898,8 +908,8 @@
    (if damage-resistances (spell-field "Damage Resistances" damage-resistances))
    (if damage-immunities (spell-field "Damage Immunities" damage-immunities))
    (if condition-immunities (spell-field "Condition Immunities" condition-immunities))
-     (if senses (spell-field "Senses" senses))
-     (if languages (spell-field "Languages" languages))
+   (if senses (spell-field "Senses" senses))
+   (if languages (spell-field "Languages" languages))
    (if challenge (spell-field "Challenge" (str
                                            (case challenge
                                              0.125 "1/8"
@@ -909,37 +919,37 @@
                                            " ("
                                            (monsters/challenge-ratings challenge)
                                            " XP)")))
-     (if traits
-       [:div.m-t-20
-        (doall
-         (map-indexed
-          (fn [i {:keys [name description]}]
-            ^{:key i}
-            [:div.m-t-10 (spell-field name description)])
-          traits))])
-     (if actions
-       [:div.m-t-20
-        [:div.i.f-w-b.f-s-18 "Actions"]
+   (if traits
+     [:div.m-t-20
+      (doall
+       (map-indexed
+        (fn [i {:keys [name description]}]
+          ^{:key i}
+          [:div.m-t-10 (spell-field name description)])
+        traits))])
+   (if actions
+     [:div.m-t-20
+      [:div.i.f-w-b.f-s-18 "Actions"]
+      [:div
+       (doall
+        (map-indexed
+         (fn [i {:keys [name description]}]
+           ^{:key i}
+           [:div.m-t-10 (spell-field name description)])
+         actions))]])
+   (if legendary-actions
+     [:div.m-t-20
+      [:div.i.f-w-b.f-s-18 "Legendary Actions"]
+      (if (:description legendary-actions)
+        [:div (:description legendary-actions)])
+      (if (:actions legendary-actions)
         [:div
          (doall
           (map-indexed
            (fn [i {:keys [name description]}]
              ^{:key i}
              [:div.m-t-10 (spell-field name description)])
-           actions))]])
-     (if legendary-actions
-       [:div.m-t-20
-        [:div.i.f-w-b.f-s-18 "Legendary Actions"]
-        (if (:description legendary-actions)
-          [:div (:description legendary-actions)])
-        (if (:actions legendary-actions)
-          [:div
-           (doall
-            (map-indexed
-             (fn [i {:keys [name description]}]
-               ^{:key i}
-               [:div.m-t-10 (spell-field name description)])
-             (:actions legendary-actions)))])])])
+           (:actions legendary-actions)))])])])
 
 (defn monster-result [monster]
   [:div.white
@@ -2410,7 +2420,6 @@
              parties))]]]))))
 
 (defn monster-list-items [expanded-monsters device-type]
-  (prn "MONSTER LIST ITEMS")
   [:div
    {:style list-style}
    (doall
@@ -2420,7 +2429,7 @@
              monster-page-path (routes/path-for routes/dnd-e5-monster-page-route :key key)
              monster-page-route (routes/match-route monster-page-path)]
          ^{:key name}
-         [:div.white.p-t-20
+         [:div.white.p-t-20.p-b-20
           {:style row-style}
           [:div.pointer
            [:div.flex.justify-cont-s-b.align-items-c
