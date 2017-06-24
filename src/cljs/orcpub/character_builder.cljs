@@ -1835,29 +1835,32 @@
     (if print-enabled? (print-char built-char))
     [views5e/content-page
      "Character Builder"
-     [{:title "Random"
-       :icon "random"
-       :on-click (confirm-handler
-                  character-changed?
-                  {:confirm-button-text "GENERATE RANDOM CHARACTER"
-                   :question "You have unsaved changes, are you sure you want to discard them and generate a random character?"
-                   :event [:random-character character built-template locked-components]})}
-      {:title "New"
-       :icon "plus"
-       :on-click (confirm-handler
-                  character-changed?
-                  {:confirm-button-text "CREATE NEW CHARACTER"
-                   :question "You have unsaved changes, are you sure you want to discard them and create a new character?"
-                   :event [:reset-character]})}
-      {:title "Print"
-       :icon "print"
-       :on-click (export-pdf built-char)}
-      {:title (if (:db/id character)
-                "Update Existing Character"
-                "Save New Character")
-       :icon "save"
-       :style (if character-changed? unsaved-button-style) 
-       :on-click #(dispatch [:save-character])}]
+     (remove
+      nil?
+      [(if character-id [views5e/share-link character-id])
+       {:title "Random"
+        :icon "random"
+        :on-click (confirm-handler
+                   character-changed?
+                   {:confirm-button-text "GENERATE RANDOM CHARACTER"
+                    :question "You have unsaved changes, are you sure you want to discard them and generate a random character?"
+                    :event [:random-character character built-template locked-components]})}
+       {:title "New"
+        :icon "plus"
+        :on-click (confirm-handler
+                   character-changed?
+                   {:confirm-button-text "CREATE NEW CHARACTER"
+                    :question "You have unsaved changes, are you sure you want to discard them and create a new character?"
+                    :event [:reset-character]})}
+       {:title "Print"
+        :icon "print"
+        :on-click (export-pdf built-char)}
+       {:title (if (:db/id character)
+                 "Update Existing Character"
+                 "Save New Character")
+        :icon "save"
+        :style (if character-changed? unsaved-button-style) 
+        :on-click #(dispatch [:save-character])}])
      [:div
       [download-form]
       [:div.container
