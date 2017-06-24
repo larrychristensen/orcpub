@@ -2315,7 +2315,8 @@
                                                          :class name
                                                          :ability (:ability spellcasting)}
                                                         1
-                                                        [(get ?spell-slots lvl)]))
+                                                        [(let [slots (?class-spell-slots kw)]
+                                                           (slots lvl))]))
                           spell-keys))
                        spell-list)))
                   (if armor-profs (armor-prof-modifiers armor-profs kw))

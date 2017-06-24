@@ -207,6 +207,10 @@
                                                   (/ factor)
                                                   int))
                                             ?spell-slot-factors))
+    ?class-spell-slots (fn [class-kw]
+                         (opt5e/total-slots
+                          (?class-level class-kw)
+                          (get ?spell-slot-factors class-kw)))
     ?spell-slots (merge-with
                   +
                   (cond
