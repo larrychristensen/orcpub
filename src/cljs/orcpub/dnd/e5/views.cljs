@@ -664,16 +664,20 @@
        title]
       [:div.flex.align-items-c.justify-cont-end.flex-wrap.m-r-10.m-l-10
        (map-indexed
-        (fn [i {:keys [title icon on-click style class-name]}]
-          ^{:key i}
-          [:button.form-button.h-40.m-l-5.m-t-5.m-b-5
-           {:on-click on-click
-            :class-name class-name
-            :style style}
-           [:span
-            [:i.fa.f-s-18
-             (if icon {:class-name (str "fa-" icon)})]]
-           [:span.m-l-5.header-button-text title]])
+        (fn [i {:keys [title icon on-click style class-name] :as cfg}]
+          (if (vector? cfg)
+            (with-meta
+              cfg
+              {:key i})
+            ^{:key i}
+            [:button.form-button.h-40.m-l-5.m-t-5.m-b-5
+             {:on-click on-click
+              :class-name class-name
+              :style style}
+             [:span
+              [:i.fa.f-s-18
+               (if icon {:class-name (str "fa-" icon)})]]
+             [:span.m-l-5.header-button-text title]]))
         button-cfgs)]]
      (if @(subscribe [:confirmation-shown?])
        [:div.flex.justify-cont-end.m-r-10.m-b-20.m-l-10
@@ -2120,6 +2124,16 @@
                details-tabs)))]
           [(-> tab details-tabs :view) num-columns id]]]]])))
 
+(defn share-link [id]
+  [:a.m-r-5.f-s-14
+   {:href (str "mailto:?subject=My%20OrcPub%20Character%20"
+               @(subscribe [::char/character-name id])
+               "&body=https://"
+               js/window.location.hostname
+               (routes/path-for routes/dnd-e5-char-page-route :id id))}
+   [:i.fa.fa-envelope.m-r-5]
+   "share"])
+
 (def character-display-style
   {:padding "20px 5px"
    :background-color "rgba(0,0,0,0.15)"})
@@ -2135,7 +2149,8 @@
      "Character Page"
      (remove
       nil?
-      [(if (= owner username)
+      [[share-link id]
+       (if (= owner username)
          {:title "Edit"
           :icon "pencil"
           :on-click #(dispatch [:edit-character character])})])
@@ -2150,7 +2165,7 @@
         device-type @(subscribe [:device-type])
         username @(subscribe [:username])]
     [content-page
-     "Character Page"
+     "Monster Page"
      (remove
       nil?
       [(if (= owner username)
@@ -2168,7 +2183,7 @@
         device-type @(subscribe [:device-type])
         username @(subscribe [:username])]
     [content-page
-     "Character Page"
+     "Spell Page"
      (remove
       nil?
       [(if (= owner username)
@@ -2242,14 +2257,7 @@
                           {:style character-display-style}
                           [:div.flex.justify-cont-end.uppercase.align-items-c
                            (if (= username owner)
-                             [:a.m-r-5.f-s-14
-                              {:href (str "mailto:?subject=My%20OrcPub%20Character%20"
-                                          @(subscribe [::char/character-name id])
-                                          "&body=https://"
-                                          js/window.location.hostname
-                                          char-page-path)}
-                              [:i.fa.fa-envelope.m-r-5]
-                              "share"])
+                             [share-link id])
                            (if (= username owner)
                              [:button.form-button
                               {:on-click #(dispatch [:edit-character @(subscribe [::char/internal-character id])])}
