@@ -244,15 +244,14 @@
 
 (reg-event-fx
  ::party5e/make-party
- (fn [{:keys [db]} _]
-   (let [character-ids @(subscribe [::char5e/selected])]
-     {:dispatch [:set-loading true]
-      :http {:method :post
-             :headers (authorization-headers db)
-             :url (url-for-route routes/dnd-e5-char-parties-route)
-             :transit-params {::party5e/name "New Party"
-                              ::party5e/character-ids character-ids}
-             :on-success [::party5e/make-party-success]}})))
+ (fn [{:keys [db]} [_ character-ids]]
+   {:dispatch [:set-loading true]
+    :http {:method :post
+           :headers (authorization-headers db)
+           :url (url-for-route routes/dnd-e5-char-parties-route)
+           :transit-params {::party5e/name "New Party"
+                            ::party5e/character-ids character-ids}
+           :on-success [::party5e/make-party-success]}}))
 
 (reg-event-fx
  ::party5e/rename-party
@@ -313,8 +312,28 @@
            :url (url-for-route routes/dnd-e5-char-party-character-route :id id :character-id character-id)}}))
 
 (reg-event-fx
+ ::party5e/add-character-remote-success
+ (fn [_ [_ show-confirmation?]]
+   (if show-confirmation?
+     {:dispatch [:show-message [:div
+                                "Character has been added to the party. View it on the "
+                                [:span.underline.pointer.orange
+                                 {:on-click #(dispatch [:route routes/dnd-e5-char-parties-page-route])}
+                                 "Parties Page"]]]})))
+
+(reg-event-fx
+ ::party5e/add-character-remote
+ (fn [{:keys [db]} [_ id character-id show-confirmation?]]
+   {:http {:method :post
+           :headers (authorization-headers db)
+           :transit-params character-id
+           :url (url-for-route routes/dnd-e5-char-party-characters-route :id id)
+           :on-success [::party5e/add-character-remote-success show-confirmation?]}}))
+
+(reg-event-fx
  ::party5e/add-character
- (fn [{:keys [db]} [_ id character-id]]
+ (fn [{:keys [db]} [_ id character-id show-confirmation?]]
+   (prn "IDs" id character-id)
    {:db (update
          db
          ::char5e/parties
@@ -326,13 +345,10 @@
                  party
                  ::party5e/character-ids
                  conj
-                 (get @(subscribe [::char5e/summary-map]) character-id))
+                 (get-in db [::char5e/summary-map character-id]))
                 party))
             parties)))
-    :http {:method :post
-           :headers (authorization-headers db)
-           :transit-params character-id
-           :url (url-for-route routes/dnd-e5-char-party-characters-route :id id)}}))
+    :dispatch [::party5e/add-character-remote id character-id show-confirmation?]}))
 
 (reg-event-fx
  :follow-user-success

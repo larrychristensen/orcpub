@@ -2200,6 +2200,34 @@
   {:padding "20px 5px"
    :background-color "rgba(0,0,0,0.15)"})
 
+(defn add-to-party-component []
+  (let [party-id (r/atom nil)]
+    (fn [character-id]
+      [:div.m-l-10.f-w-b
+       [:span "Add to Party:"]
+       [:div.flex
+        [:select.builder-option.builder-option-dropdown
+         {:on-change (fn [e] (let [value (event-value e)
+                                   id (if (not (s/blank? value))
+                                        (js/parseInt value))]
+                               (if id
+                                 (reset! party-id id))))}
+         [:option.builder-dropdown-item
+          "<new party>"]
+         (doall
+          (map
+           (fn [{:keys [:db/id ::party/name]}]
+             ^{:key id}
+             [:option.builder-dropdown-item
+              {:value id}
+              name])
+           @(subscribe [::party/parties])))]
+        [:button.form-button.m-t-5.m-l-5
+         {:on-click #(if @party-id
+                       (dispatch [::party/add-character-remote @party-id character-id true])
+                       (dispatch [::party/make-party #{character-id}]))}
+         "ADD"]]])))
+
 (defn character-page [{:keys [id] :as arg}]
   (let [{:keys [::se/owner] :as strict-character} @(subscribe [::char/character id])
         character (char/from-strict strict-character)
@@ -2215,7 +2243,9 @@
        (if (= owner username)
          {:title "Edit"
           :icon "pencil"
-          :on-click #(dispatch [:edit-character character])})])
+          :on-click #(dispatch [:edit-character character])})
+       (if (not= owner username)
+         [add-to-party-component (js/parseInt id)])])
      [:div.p-10.white
       [character-display id true (if (= :mobile device-type) 1 2)]]]))
 
@@ -2242,6 +2272,7 @@
         expanded-characters @(subscribe [:expanded-characters])
         device-type @(subscribe [:device-type])
         username @(subscribe [:username])
+        selected-ids @(subscribe [::char/selected])
         has-selected? @(subscribe [::char/has-selected?])]
     [content-page
      "Characters"
@@ -2251,7 +2282,7 @@
       {:title "Make Party"
        :icon "users"
        :class-name (if (not has-selected?) "opacity-5 cursor-disabled")
-       :on-click #(if has-selected? (dispatch [::party/make-party]))}]
+       :on-click #(if has-selected? (dispatch [::party/make-party selected-ids]))}]
      [:div.p-5
       [:div
        (let [grouped-characters (group-by ::se/owner characters)
@@ -2286,7 +2317,7 @@
                           {:on-click (fn [e]
                                        (dispatch [::char/toggle-selected id])
                                        (.stopPropagation e))}
-                          (comps/checkbox @(subscribe [::char/selected? id]) false)]
+                          (comps/checkbox (get selected-ids id) false)]
                          [:div.f-s-24.f-w-600
                           [:div.list-character-summary
                            [character-summary-2 summary true owner false]]]]
@@ -2323,10 +2354,10 @@
    :height "42px"})
 
 (defn parties []
-  (let [editing-parties (r/atom {})]
+  (let [editing-parties (r/atom {})
+        expanded-characters (r/atom {})]
     (fn []
       (let [parties @(subscribe [::party/parties])
-            expanded-characters @(subscribe [:expanded-characters])
             device-type @(subscribe [:device-type])
             username @(subscribe [:username])]
         [content-page
@@ -2387,7 +2418,7 @@
                     (map
                      (fn [{:keys [::se/owner] :as summary}]
                        (let [character-id (:db/id summary)
-                             expanded? (get expanded-characters character-id)
+                             expanded? (get-in @expanded-characters [id character-id])
                              char-page-path (routes/path-for routes/dnd-e5-char-page-route :id character-id)
                              char-page-route (routes/match-route char-page-path)]
                          ^{:key character-id}
@@ -2395,7 +2426,7 @@
                           {:style row-style}
                           [:div.pointer
                            [:div.flex.justify-cont-s-b.align-items-c
-                            {:on-click #(dispatch [:toggle-character-expanded character-id])}
+                            {:on-click #(swap! expanded-characters update-in [id character-id] not)}
                             [:div.m-l-10.flex.align-items-c
                              [:div.f-s-24.f-w-600
                               [:div.list-character-summary
