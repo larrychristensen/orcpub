@@ -2,6 +2,7 @@
   (:require [re-frame.core :refer [reg-sub reg-sub-raw subscribe dispatch]]
             [orcpub.entity :as entity]
             [orcpub.template :as t]
+            [orcpub.common :as common]
             [orcpub.registration :as registration]
             [orcpub.dnd.e5.template :as t5e]
             [orcpub.dnd.e5.db :refer [tab-path]]
@@ -323,8 +324,15 @@
 
 (reg-sub
  ::char5e/summary-map
- (fn [db _]
-   (::char5e/summary-map db)))
+ :-> [::char5e/characters]
+ (fn [characters _]
+   (common/map-by :db/id characters)))
+
+(reg-sub
+ ::char5e/summary
+ :-> [::char5e/summary-map]
+ (fn [character-map [_ id]]
+   (get character-map id)))
 
 (reg-sub-raw
   ::char5e/character
