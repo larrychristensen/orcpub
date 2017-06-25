@@ -1866,7 +1866,14 @@
       [:div.container
        [:div.content
         [:div.flex.justify-cont-s-b.align-items-c.flex-wrap
-         [al-legality al-illegal-reasons used-resources]
+         [:div
+          [al-legality al-illegal-reasons used-resources]
+          #_[:div.white.m-l-20.pointer
+           {:on-click #(dispatch [:toggle-public])}
+           [comps/checkbox @(subscribe [::char5e/public?]) false]
+           [:span (if mobile?
+                    "Public?"
+                    "Allow others users view this character?")]]]
          (if character-changed? [:div.red.f-w-b.m-r-10.m-l-10.flex.align-items-c
                                  (views5e/svg-icon "thunder-skull" 24 24)
                                  (if (not mobile?)

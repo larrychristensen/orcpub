@@ -539,6 +539,7 @@
    ::char5e/total-levels char5e/total-levels
    ::char5e/class-level-fn char5e/class-level-fn
    ::char5e/option-sources char5e/option-sources
+   ::char5e/public? char5e/public?
    ::char5e/used-resources char5e/used-resources
    ::char5e/al-illegal-reasons char5e/al-illegal-reasons
    ::char5e/feats char5e/feats})
