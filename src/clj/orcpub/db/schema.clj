@@ -126,6 +126,9 @@
 
 (def character-schema
   (concat
+   [{:db/ident ::char5e/share?
+    :db/valueType :db.type/boolean
+    :db/cardinality :db.cardinality/one}]
    (map
     many-ref
     [::char5e/custom-equipment

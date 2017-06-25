@@ -584,6 +584,9 @@
 (defn faction-image-url-failed [built-char]
   (get-prop built-char ::faction-image-url-failed))
 
+(defn public? [built-char]
+  (get-prop built-char ::share?))
+
 (defn used-resources [built-char]
   (get-prop built-char :used-resources))
 

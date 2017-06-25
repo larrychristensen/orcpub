@@ -460,7 +460,17 @@
            ::char5e/image-url-failed
            nil
            #_(if (and image-url (s/starts-with? image-url "https"))
-             :https))))
+               :https))))
+
+(reg-event-db
+ :toggle-public
+ character-interceptors
+ (fn [character _]
+   (update character
+           ::entity/values
+           update
+           ::char5e/share?
+           not)))
 
 (reg-event-db
  :set-faction-image-url
