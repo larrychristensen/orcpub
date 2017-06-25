@@ -1089,16 +1089,25 @@
    (assoc db :route routes/password-reset-success-route)))
 
 (reg-event-fx
+ :password-reset-failure
+ (fn [_ _]
+   (dispatch-login-failure "There was an error resetting your password.")))
+
+(reg-event-fx
  :password-reset
  (fn [{:keys [db]} [_ params]]
+   (prn "CALLING RESET PASSWORD" params (backend-url (bidi/path-for routes/routes routes/reset-password-route)))
    (let [c (cookies)
          token (c "token")]
+     (prn "TOKEN" token c)
      {:db (assoc db :temp-email (:email params))
       :http {:method :post
              :auth-token token
              :url (backend-url (bidi/path-for routes/routes routes/reset-password-route))
              :json-params params
-             :on-success [:password-reset-success]}})))
+             :on-success [:password-reset-success]
+             :on-unauthorized [:password-reset-failure]
+             :on-failure [:password-reset-failure]}})))
 
 (reg-event-db
  ::char5e/set-characters

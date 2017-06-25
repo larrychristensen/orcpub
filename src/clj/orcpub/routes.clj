@@ -151,7 +151,6 @@
             (environ/env :signature)))
 
 (defn following-usernames [db ids]
-  (prn "IDS" ids)
   (map :orcpub.user/username
        (d/pull-many db '[:orcpub.user/username] ids)))
 
@@ -334,7 +333,7 @@
   @(d/transact
     conn
     [{:db/id user-id
-      :orcpub.user/password (hashers/encrypt password)
+      :orcpub.user/password (hashers/encrypt (s/trim password))
       :orcpub.user/password-reset (java.util.Date.)}])
   {:status 200})
 
@@ -883,7 +882,6 @@
    [route-map/dnd-e5-spell-page-route :key ":key"]
    [route-map/dnd-e5-char-page-route :id ":id"]
    [route-map/dnd-e5-char-builder-route]
-   [route-map/reset-password-page-route]
    [route-map/send-password-reset-page-route]
    [route-map/register-page-route]
    [route-map/login-page-route]
@@ -945,6 +943,8 @@
        {:get `re-verify}]
       [(route-map/path-for route-map/reset-password-route) ^:interceptors [(body-params/body-params) ring/cookies check-auth]
        {:post `reset-password}]
+      [(route-map/path-for route-map/reset-password-page-route) ^:interceptors [ring/cookies]
+       {:get `reset-password-page}]
       [(route-map/path-for route-map/send-password-reset-route) ^:interceptors [(body-params/body-params)]
        {:get `send-password-reset}]
       [(route-map/path-for route-map/verify-failed-route)

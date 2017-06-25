@@ -18,7 +18,7 @@
   (let [catalog (.getDocumentCatalog doc)
         form (.getAcroForm catalog)
         res (or (.getDefaultResources form) (PDResources.))
-        font (PDType0Font/load doc (io/file (io/resource "LiberationSans-Regular.ttf")))
+        font (PDType0Font/load doc (.openStream (io/resource "LiberationSans-Regular.ttf")))
         font-name (.add res font)]
     (.setNeedAppearances form true)
     (.setDefaultResources form res)
@@ -77,7 +77,9 @@
 
 (defn draw-non-jpg [doc page url x y width height]
   (with-open [c-stream (content-stream doc page)]
-    (let [img (LosslessFactory/createFromImage doc (ImageIO/read (URL. url)))]
+    (let [buff-image (ImageIO/read (.openStream (URL. url)))
+          _ (prn "IMAGE STREAM" buff-image)
+          img (LosslessFactory/createFromImage doc buff-image)]
       (draw-imagex c-stream img x y width height))))
 
 (defn draw-jpg [doc page url x y width height]
@@ -93,7 +95,8 @@
         draw-fn (if jpg? draw-jpg draw-non-jpg)]
     (try
       (draw-fn doc page url x y width height)
-      (catch Exception e (prn "failed loading image" (clojure.stacktrace/print-stack-trace e))))))
+      (catch Exception e
+        (prn "failed loading image" (clojure.stacktrace/print-stack-trace e))))))
 
 (defn get-page [doc index]
   (.getPage doc index))

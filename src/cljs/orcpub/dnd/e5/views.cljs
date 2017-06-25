@@ -417,6 +417,11 @@
                         :type :password
                         :messages (if different? ["Passwords do not match"])
                         :on-change (fn [e] (swap! params assoc :verify-password (event-value e)))}]
+           (if @(subscribe [:login-message-shown?])
+             [:div.m-t-5.p-r-5.p-l-5 [message
+                                      :error
+                                      @(subscribe [:login-message])
+                                      [:hide-login-message]]])
            [:button.form-button.m-l-20.m-t-10
             {:style {:height "40px"
                      :width "174px"
@@ -624,8 +629,6 @@
              @(subscribe [:login-message])
              [:hide-login-message]]])
          [:div {:style {:margin-top "40px"}}
-          #_[:span "Already have an account?"]
-          #_[:span.hover-underline.f-w-b.m-l-10.pointer "LOGIN"]
           [:button.form-button.m-l-20
            {:style {:height "40px"
                     :width "174px"
