@@ -89,8 +89,12 @@
   (let [user (first-user-by db
                          '{:find [?e]
                            :in [$ [?username ?password]]
-                           :where [(or [?e :orcpub.user/username ?username]
-                                       [?e :orcpub.user/email ?username])
+                           :where [(or-join [?e ?username]
+                                            [?e :orcpub.user/username ?username]
+                                            [?e :orcpub.user/email ?username]
+                                            (and [?e :orcpub.user/email ?email]
+                                                 [(clojure.string/lower-case ?username) ?email]))
+                                   [?e :orcpub.user/email ?email]
                                    [?e :orcpub.user/password ?enc]
                                    [(buddy.hashers/check ?password ?enc)]]}
                          [username password])]
@@ -221,7 +225,7 @@
 (defn register [{:keys [json-params db conn] :as request}]
   (let [{:keys [username email password first-and-last-name send-updates?]} json-params
         username (s/trim username)
-        email (s/trim email)
+        email (-> email s/trim s/lower-case)
         password (s/trim password)
         validation (registration/validate-registration
                     json-params
@@ -251,13 +255,15 @@
 (def user-for-email-query
   '[:find ?e
     :in $ ?email
-    :where [?e :orcpub.user/email ?email]])
+    :where
+    [?e :orcpub.user/email ?email-2]
+    [(clojure.string/lower-case ?email-2) ?email]])
 
 (defn user-for-verification-key [db key]
   (first-user-by db user-for-verification-key-query key))
 
 (defn user-for-email [db email]
-  (first-user-by db user-for-email-query email))
+  (first-user-by db user-for-email-query (s/lower-case email)))
 
 (defn user-id-for-username [db username]
   (d/q
