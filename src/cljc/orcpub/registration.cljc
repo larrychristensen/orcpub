@@ -32,8 +32,10 @@
       ;;password-missing-special-character? (update :password conj "Password must have a least one of the following characters: !, @, #, $, %, ^, &, or *")
       password-too-short? (update :password conj "Password must be at least 6 characters"))))
 
+(def email-format #"[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,4}")
+
 (defn bad-email? [email]
-  (fails-match? #"[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,4}" email))
+  (fails-match? email-format email))
 
 (defn bad-username? [username]
   (fails-match? #"^[A-Za-z0-9]+$" username))
