@@ -6,6 +6,24 @@
         <title>OrcPub</title>
 	<link rel="stylesheet" href="/css/style.css" type="text/css">
 	<link rel="stylesheet" href="/css/compiled/styles.css" type="text/css">
+	<script>
+	  window.fbAsyncInit = function() {
+	  FB.init({
+	  appId      : '948998158489252',
+	  xfbml      : true,
+	  version    : 'v2.9'
+	  });
+	  FB.AppEvents.logPageView();
+	  };
+
+	  (function(d, s, id){
+	  var js, fjs = d.getElementsByTagName(s)[0];
+	  if (d.getElementById(id)) {return;}
+	  js = d.createElement(s); js.id = id;
+	  js.src = "//connect.facebook.net/en_US/sdk.js";
+	  fjs.parentNode.insertBefore(js, fjs);
+	  }(document, 'script', 'facebook-jssdk'));
+	</script>
     </head>
     <body style="margin:0">
         <div id="app">
@@ -27,25 +45,6 @@
 	  ga('create', 'UA-69209720-3', 'auto');
 	  ga('send', 'pageview');
 
-	</script>
-
-	<script>
-	  window.fbAsyncInit = function() {
-	  FB.init({
-	  appId      : '948998158489252',
-	  xfbml      : true,
-	  version    : 'v2.9'
-	  });
-	  FB.AppEvents.logPageView();
-	  };
-
-	  (function(d, s, id){
-	  var js, fjs = d.getElementsByTagName(s)[0];
-	  if (d.getElementById(id)) {return;}
-	  js = d.createElement(s); js.id = id;
-	  js.src = "//connect.facebook.net/en_US/sdk.js";
-	  fjs.parentNode.insertBefore(js, fjs);
-	  }(document, 'script', 'facebook-jssdk'));
 	</script>
     </body>
 </html>
