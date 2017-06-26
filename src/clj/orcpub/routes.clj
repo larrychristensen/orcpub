@@ -237,7 +237,7 @@
 (defn register [{:keys [json-params db conn] :as request}]
   (let [{:keys [username email password first-and-last-name send-updates?]} json-params
         username (s/trim username)
-        email (s/trim email)
+        email (s/lower-case (s/trim email))
         password (s/trim password)
         validation (registration/validate-registration
                     json-params
@@ -273,7 +273,14 @@
   (first-user-by db user-for-verification-key-query key))
 
 (defn user-for-email [db email]
-  (first-user-by db user-for-email-query email))
+  (let [user (first-user-by db
+                            '{:find [?e]
+                              :in [$ ?email]
+                              :where [[?e :orcpub.user/email ?email-2]
+                                      [(clojure.string/lower-case ?email-2)
+                                       ?email]]}
+                            (s/lower-case email))]
+    user))
 
 (defn user-id-for-username [db username]
   (d/q
