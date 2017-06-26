@@ -835,7 +835,7 @@
      :headers {"Content-Type" "text/html"}
      :body
      (index-page
-      {:url (str (name scheme) "://" host uri)
+      {:url (str "http://" host uri)
        :title character-name
        :description (str (character-summary-description summary)
                          "\n"
