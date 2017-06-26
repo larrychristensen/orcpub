@@ -14,10 +14,10 @@
    :plugin? true
    :source :ua-warlock-and-wizard
    :subclasses [{:name "The Hexblade"
-                 :modifiers [opt5e/ua-al-illegal]
-                 :levels {1 {:modifiers [(mod5e/armor-proficiency :medium)
-                                         (mod5e/armor-proficiency :shields)
-                                         (mod5e/weapon-proficiency :martial)
+                 :modifiers [opt5e/ua-al-illegal
+                             (mod5e/armor-proficiency :medium)
+                             (mod5e/armor-proficiency :shields)]
+                 :levels {1 {:modifiers [(mod5e/weapon-proficiency :martial)
                                          (mod/vec-mod ?weapon-ability-modifiers
                                                       (fn [weapon finesse?]
                                                         (if (and (?has-weapon-prof? weapon)
