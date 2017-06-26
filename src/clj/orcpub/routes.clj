@@ -29,6 +29,7 @@
             [orcpub.errors :as errors]
             [orcpub.privacy :as privacy]
             [orcpub.email :as email]
+            [orcpub.index :refer [index-page]]
             [orcpub.pdf :as pdf]
             [orcpub.registration :as registration]
             [orcpub.entity.strict :as se]
@@ -475,33 +476,6 @@
    (slurp (io/resource "public/blank.html"))
    response))
 
-(defn verification-expired [req]
-  (index req))
-
-(defn verification-successful [req]
-  (index req))
-
-(defn verify-sent [req]
-  (index req))
-
-(defn registration-page [req]
-  (index req))
-
-(defn login-page [req]
-  (index req))
-
-(defn character-list-page [req]
-  (index req))
-
-(defn parties-page [req]
-  (index req))
-
-(defn monster-list-page [req]
-  (index req))
-
-(defn character-page [req]
-  (index req))
-
 (def user-by-password-reset-key-query
   '[:find ?e
     :in $ ?key
@@ -521,21 +495,6 @@
       already-reset? (redirect route-map/password-reset-used-route)
       :else (let [token (create-token username (-> 1 hours from-now))]
               (index req {:cookies {"token" token}})))))
-
-(defn password-reset-sent-page [req]
-  (index req))
-
-(defn password-reset-expired-page [req]
-  (index req))
-
-(defn password-reset-used-page [req]
-  (index req))
-
-(defn send-password-reset-page [req]
-  (index req))
-
-(defn character-builder-page [req]
-  (index req))
 
 (defn check-field [query value db]
   {:status 200
@@ -693,10 +652,9 @@
                    :in $ [?idents ...]
                    :where
                    [?e ::se/owner ?idents]
-                   ;; uncomment these once all characters have the data
-                   #_[?e ::se/type :character]
-                   #_[?e ::se/game :dnd]
-                   #_[?e ::se/game-version :e5]]
+                   [?e ::se/type :character]
+                   [?e ::se/game :dnd]
+                   [?e ::se/game-version :e5]]
                  db
                  [(:orcpub.user/username user)
                   (:orcpub.user/email user)])
@@ -773,9 +731,9 @@
                    :where
                    [?e ::se/owner ?idents]
                    ;; uncomment these once all characters have the data
-                   #_[?e ::se/type :character]
-                   #_[?e ::se/game :dnd]
-                   #_[?e ::se/game-version :e5]]
+                   [?e ::se/type :character]
+                   [?e ::se/game :dnd]
+                   [?e ::se/game-version :e5]]
                  db
                  (concat
                   [(:orcpub.user/username user)
@@ -832,10 +790,13 @@
 
 (defn get-character-for-id [db id]
   (let [{:keys [::se/type ::se/game ::se/game-version] :as character} (d/pull db '[*] id)
-        problems [] #_(dnd-e5-char-type-problems character)]
+        problems (dnd-e5-char-type-problems character)]
     (if (seq problems)
       {:status 400 :body problems}
       character)))
+
+(defn character-summary-for-id [db id]
+  {:keys [::se/summary]} (d/pull db '[::se/summary {::se/description [::char5e/description ::char5e/image-url]}] id))
 
 (defn get-character [{:keys [db] {:keys [:id]} :path-params}]
   (let [parsed-id (Long/parseLong id)]
@@ -845,6 +806,40 @@
   (let [username (:user identity)
         user (find-user-by-username-or-email db username)]
     {:status 200 :body (user-body db user)}))
+
+(defn character-summary-description [{:keys [::char5e/race-name ::char5e/subrace-name ::char5e/classes]}]
+  (str race-name
+       " "
+       (if subrace-name (str "(" subrace-name ") "))
+       " "
+       (if (seq classes)
+         (s/join
+          " / "
+          (map
+           (fn [{:keys [::char5e/class-name
+                        ::char5e/subclass-name
+                        ::char5e/level]}]
+             (str class-name " (" level ")"))
+           classes)))))
+
+(defn character-page [{:keys [db conn identity headers scheme uri] {:keys [id]} :path-params :as request}]
+  (prn "REQUEST" request headers scheme uri)
+  (let [host (headers "host")
+        {:keys [::se/summary
+                ::se/values]} (character-summary-for-id db (Long/parseLong id))
+        {:keys [::char5e/character-name]} summary
+        {:keys [::char5e/description
+                ::char5e/image-url]} values]
+    {:status 200
+     :headers {"Content-Type" "text/html"}
+     :body
+     (index-page
+      {:url (str (name scheme) "://" host uri)
+       :title character-name
+       :description (str (character-summary-description summary)
+                         "\n"
+                         description)
+       :image image-url})}))
 
 (def header-style
   {:style "color:#2c3445"})
@@ -895,7 +890,6 @@
 [(route-map/path-for route-map/password-reset-used-route)
  {:get `password-reset-used-page}]
 
-
 (def index-page-paths
   [[route-map/dnd-e5-char-list-page-route]
    [route-map/dnd-e5-char-parties-page-route]
@@ -903,7 +897,6 @@
    [route-map/dnd-e5-monster-page-route :key ":key"]
    [route-map/dnd-e5-spell-list-page-route]
    [route-map/dnd-e5-spell-page-route :key ":key"]
-   [route-map/dnd-e5-char-page-route :id ":id"]
    [route-map/dnd-e5-char-builder-route]
    [route-map/send-password-reset-page-route]
    [route-map/register-page-route]
@@ -943,6 +936,8 @@
        {:delete `delete-character}]
       [(route-map/path-for route-map/dnd-e5-char-route :id ":id")
        {:get `get-character}]
+      [(route-map/path-for route-map/dnd-e5-char-page-route :id ":id") ^:interceptors [(body-params/body-params)]
+       {:get `character-page}]
       [(route-map/path-for route-map/dnd-e5-char-parties-route) ^:interceptors [(body-params/body-params) check-auth]
        {:post `party/create-party
         :get `party/parties}]
