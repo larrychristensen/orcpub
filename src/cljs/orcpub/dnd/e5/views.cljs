@@ -2240,11 +2240,14 @@
      (remove
       nil?
       [[share-link id]
-       (if (= owner username)
+       [:div.fb-share-button
+        {:data-layout "button"
+         :data-url js/window.location.url}]
+       (if (and username owner (= owner username))
          {:title "Edit"
           :icon "pencil"
           :on-click #(dispatch [:edit-character character])})
-       (if (not= owner username)
+       (if (and username owner (not= owner username))
          [add-to-party-component (js/parseInt id)])])
      [:div.p-10.white
       [character-display id true (if (= :mobile device-type) 1 2)]]]))
