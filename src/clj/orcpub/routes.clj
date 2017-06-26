@@ -796,7 +796,7 @@
       character)))
 
 (defn character-summary-for-id [db id]
-  {:keys [::se/summary]} (d/pull db '[::se/summary {::se/description [::char5e/description ::char5e/image-url]}] id))
+  {:keys [::se/summary]} (d/pull db '[::se/summary {::se/values [::char5e/description ::char5e/image-url]}] id))
 
 (defn get-character [{:keys [db] {:keys [:id]} :path-params}]
   (let [parsed-id (Long/parseLong id)]
@@ -826,10 +826,11 @@
   (prn "REQUEST" request headers scheme uri)
   (let [host (headers "host")
         {:keys [::se/summary
-                ::se/values]} (character-summary-for-id db (Long/parseLong id))
+                ::se/values] :as summary-obj} (character-summary-for-id db (Long/parseLong id))
         {:keys [::char5e/character-name]} summary
         {:keys [::char5e/description
                 ::char5e/image-url]} values]
+    (prn "IMAGE URL" image-url summary-obj)
     {:status 200
      :headers {"Content-Type" "text/html"}
      :body
@@ -901,9 +902,12 @@
    [route-map/send-password-reset-page-route]
    [route-map/register-page-route]
    [route-map/login-page-route]
+   [route-map/verify-sent-route]
    [route-map/password-reset-sent-route]
    [route-map/password-reset-expired-route]
-   [route-map/password-reset-used-route]])
+   [route-map/password-reset-used-route]
+   [route-map/verify-failed-route]
+   [route-map/verify-success-route]])
 
 (def index-page-routes
   (mapv
@@ -955,8 +959,6 @@
        {:post `character-pdf-2}]
       [(route-map/path-for route-map/verify-route)
        {:get `verify}]
-      [(route-map/path-for route-map/verify-sent-route)
-       {:get `verify-sent}]
       [(route-map/path-for route-map/re-verify-route) ^:interceptors [(body-params/body-params)]
        {:get `re-verify}]
       [(route-map/path-for route-map/reset-password-route) ^:interceptors [(body-params/body-params) ring/cookies check-auth]
@@ -965,10 +967,6 @@
        {:get `reset-password-page}]
       [(route-map/path-for route-map/send-password-reset-route) ^:interceptors [(body-params/body-params)]
        {:get `send-password-reset}]
-      [(route-map/path-for route-map/verify-failed-route)
-       {:get `verification-expired}]
-      [(route-map/path-for route-map/verify-success-route)
-       {:get `verification-successful}]
       [(route-map/path-for route-map/privacy-policy-route)
        {:get `privacy-policy-page}]
       [(route-map/path-for route-map/terms-of-use-route)
