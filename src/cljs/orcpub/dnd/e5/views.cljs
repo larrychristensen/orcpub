@@ -740,7 +740,7 @@
                         :-webkit-column-count 2
                         :-moz-column-count 2})
 
-(defn paragraphs [str]
+(defn paragraphs [str & [single-column?]]
   (let [mobile? @(subscribe [:mobile?])
         ps (s/split str #"\n")
         p-els (doall
@@ -748,11 +748,23 @@
                 (fn [i p]
                   ^{:key i} [:p p])
                 ps))]
-    (if mobile?
+    (if (or mobile? single-column?)
       p-els
       [:div
        {:style two-columns-style}
        p-els])))
+
+(defn requires-attunement [attunement]
+  (str
+   " (requires attunement"
+   (case attunement
+     [:any] nil
+     [:good] " by a creature of good alignment"
+     [:evil] " by a creature of evil alignment"
+     [:spellcaster] " by a spellcaster"
+     (str " by a "
+          (common/list-print (map clojure.core/name attunement) "or")))
+   ")"))
 
 (defn magic-item-result [{:keys [name item-type item-subtype rarity attunement description summary] :as spell}]
   [:div.white
@@ -766,16 +778,7 @@
                                  rarity
                                  (common/kw-to-name rarity))
                                (if attunement
-                                 (str
-                                  " (requires attunement"
-                                  (case attunement
-                                    [:any] nil
-                                    [:good] " by a creature of good alignment"
-                                    [:evil] " by a creature of evil alignment"
-                                    [:spellcaster] " by a spellcaster"
-                                    (str " by a "
-                                         (common/list-print (map clojure.core/name attunement) "or")))
-                                  ")")))]
+                                 (requires-attunement attunement)))]
      (if (or summary description)
        (paragraphs (or summary description)))]]])
 
@@ -1946,6 +1949,97 @@
                                                                  (weapon-attack-modifier weapon false)))]]))
               all-weapons))]]]]))))
 
+
+(defn magic-items-section-2 []
+  (let [expanded-details (r/atom {})]
+    (fn [id]
+      (let [mobile? @(subscribe [:mobile?])
+            magic-item-cfgs @(subscribe [::char/magic-items])
+            magic-weapon-cfgs @(subscribe [::char/magic-weapons])
+            magic-armor-cfgs @(subscribe [::char/magic-items])]
+        [:div
+         [:div.flex.align-items-c
+          (svg-icon "orb-wand" 32 32)
+          [:span.m-l-5.f-w-b.f-s-18 "Other Magic Items"]]
+         [:div
+          [:table.w-100-p.t-a-l.striped
+           [:tbody
+            [:tr.f-w-b
+             {:class-name (if mobile? "f-s-12")}
+             [:th.p-10 "Name"]
+             [:th.p-10 "Details"]
+             [:th]]
+            (doall
+             (map
+              (fn [[item-kw item-cfg]]
+                (let [{:keys [item-type item-subtype rarity attunement description summary] :as item} (mi/magic-item-map item-kw)
+                      expanded? (@expanded-details item-kw)]
+                  [:tr.pointer
+                   {:on-click #(swap! expanded-details (fn [d] (update d item-kw not)))}
+                   [:td.p-10.f-w-b (:name item)]
+                   [:td.p-10.w-100-p
+                    [:div
+                     [:div
+                      (str (s/capitalize (common/kw-to-name item-type))
+                           ", "
+                           (common/kw-to-name rarity))]
+                     (if expanded?
+                       [:div
+                        (if (seq attunement)
+                          [:div.m-t-10.i
+                           (requires-attunement attunement)])
+                        [:div.m-t-10 (paragraphs
+                                      (or description summary)
+                                      true)]])]]
+                   [:td.p-r-5
+                    [:div.orange
+                     (if (not mobile?)
+                       [:span.underline (if expanded? "less" "more")])
+                     [:i.fa.m-l-5
+                      {:class-name (if expanded? "fa-caret-up" "fa-caret-down")}]]]]))
+              (merge
+               magic-item-cfgs
+               magic-weapon-cfgs
+               magic-armor-cfgs)))]]]]))))
+
+(defn other-equipment-section-2 []
+  (let [expanded-details (r/atom {})]
+    (fn [id]
+      (let [mobile? @(subscribe [:mobile?])
+            equipment-cfgs @(subscribe [::char/equipment])]
+        [:div
+         [:div.flex.align-items-c
+          (svg-icon "backpack" 32 32)
+          [:span.m-l-5.f-w-b.f-s-18 "Other Equipment"]]
+         [:div
+          [:table.w-100-p.t-a-l.striped
+           [:tbody
+            [:tr.f-w-b
+             {:class-name (if mobile? "f-s-12")}
+             [:th.p-10 "Name"]
+             [:th.p-10 "Qty."]
+             [:th.p-10 "Details"]
+             [:th]]
+            (doall
+             (map
+              (fn [[item-kw item-cfg]]
+                (let [{:keys [name cost weight] :as item} (equip/equipment-map item-kw)
+                      expanded? (@expanded-details item-kw)]
+                  [:tr.pointer
+                   {:on-click #(swap! expanded-details (fn [d] (update d item-kw not)))}
+                   [:td.p-10.f-w-b (:name item)]
+                   [:td.p-10 (::char-equip/quantity item-cfg)]
+                   [:td.p-10
+                    [:div
+                     [:div
+                      (str (if cost
+                             (str (:num cost)
+                                  " "
+                                  (common/safe-name (:type cost))
+                                  ", "))
+                           weight)]]]]))
+              equipment-cfgs))]]]]))))
+
 (defn skill-details-section-2 []
   (let [expanded-details (r/atom {})]
     (fn [id]
@@ -2125,6 +2219,17 @@
                               total-spellcaster-levels
                               levels])]]))
 
+(defn equipment-details [num-columns id]
+  [:div
+   [:div.m-t-10
+    [weapons-section-2]]
+   [:div.m-t-30
+    [armor-section-2]]
+   [:div.m-t-30
+    [magic-items-section-2]]
+   [:div.m-t-30
+    [other-equipment-section-2]]])
+
 (defn details-tab [title icon device-type selected? on-select]
   [:div.b-b-2.f-w-b.pointer.p-10.hover-opacity-full
    {:class-name (if selected? "b-orange" "b-gray")
@@ -2133,7 +2238,7 @@
     {:class-name (if (not selected?) "opacity-5")}
     [:div (svg-icon icon 24 24)]
     (if (= device-type :desktop)
-      [:div.uppercase
+      [:div.uppercase.f-s-10
        title])]])
 
 
@@ -2147,7 +2252,9 @@
    "spells" {:icon "spell-book"
              :view spell-details}
    "features" {:icon "vitruvian-man"
-               :view features-details}})
+               :view features-details}
+   "equipment" {:icon "backpack"
+                :view equipment-details}})
 
 (defn character-display [id show-summary? num-columns]
   (let [device-type @(subscribe [:device-type])
