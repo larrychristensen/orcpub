@@ -65,15 +65,9 @@
                                        #(handle-url-change %))
                    (.setEnabled true)))
 
-(defn fb-init []
-  (try
-    ((goog.object.get js/window "fbAsyncInit"))
-    (catch :default e)))
-
 (defn main-view []
   (let [{:keys [handler route-params] :as route} @(subscribe [:route])
         view (pages (or handler route))]
-    (fb-init)
     [view route-params]))
 
 (r/render (if (let [doc-style js/document.documentElement.style]
