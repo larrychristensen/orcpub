@@ -68,8 +68,7 @@
 (defn fb-init []
   (try
     ((goog.object.get js/window "fbAsyncInit"))
-    (catch :default e
-      (js/console.warn "E" e))))
+    (catch :default e)))
 
 (defn main-view []
   (let [{:keys [handler route-params] :as route} @(subscribe [:route])
