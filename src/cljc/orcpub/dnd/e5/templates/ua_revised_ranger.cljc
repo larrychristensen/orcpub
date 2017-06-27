@@ -154,7 +154,7 @@
                                                                        :page 93
                                                                        :frequency opt5e/turns-1
                                                                        :summary "when you attack one creature, attack another creature within 5 feet of it with the same action"})]})]})]}
-                           5 {:modifiers [(mod5e/extra-attack)]}
+                           5 {:modifiers [(mod5e/num-attacks 2)]}
                            7 {:selections [(t/selection-cfg
                                             {:name "Defensive Tactics"
                                              :tags #{:class}
@@ -250,7 +250,7 @@
                                           (mod5e/darkvision 90)
                                           (mod5e/spells-known 1 :disguise-self ::char5e/wis "Ranger (Revised)")]}
                            5 {:modifiers [(mod5e/spells-known 2 :rope-trick ::char5e/wis "Ranger (Revised)")
-                                          (mod5e/extra-attack)]}
+                                          (mod5e/num-attacks 2)]}
                            7 {:modifiers [(mod5e/saving-throws nil ::char5e/wis)]}
                            9 {:modifiers [(mod5e/spells-known 3 :glyph-of-warding ::char5e/wis "Ranger (Revised)")]}
                            11 {:modifiers [(mod5e/trait-cfg
