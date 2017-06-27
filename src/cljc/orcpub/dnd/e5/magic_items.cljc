@@ -77,19 +77,26 @@ direction to the closest dragon within 30 miles of you that is of the same type 
                (mod5e/spell-attack-modifier-bonus bonus)]})
 
 (defn ioun-stone [name rarity description & modifiers]
-  {
-   :name (str "Ioun Stone (" name ")")
-   :item-type :wondrous-item
-   :rarity rarity
-   :modifiers modifiers
-   :attunement [:any]
-   :description (str "An Ioun stone is named after Ioun, a god of knowledge and prophecy revered on some worlds. Many types of Ioun stone exist, each type a distinct combination of shape and color.
+  (let [full-name (str "Ioun Stone (" name ")")]
+    {
+     :name full-name
+     :item-type :wondrous-item
+     :rarity rarity
+     :modifiers (conj
+                 modifiers
+                 (mod5e/trait-cfg
+                  {:name full-name
+                   :page 177
+                   :source :dmg
+                   :summary description}))
+     :attunement [:any]
+     :description (str "An Ioun stone is named after Ioun, a god of knowledge and prophecy revered on some worlds. Many types of Ioun stone exist, each type a distinct combination of shape and color.
 When you use an action to toss one of these stones into the air, the stone orbits your head at a distance of 1d3 feet and confers a benefit to you. Thereafter, another creature must use an action to grasp or net the stone to separate it from you, either by making a successful attack roll against AC 24 or a successful DC 24 Dexterity (Acrobatics) check. You can use an action to seize and stow the stone, ending its effect.
 A stone has AC 24, 10 hit points, and resistance to all damage. It is considered to be an object that is being worn while it orbits your head.
 Absorption (Very Rare). While this pale lavender ellipsoid orbits your head, you can use your reaction to cancel a spell of 4th level or lower cast by a creature you can see and targeting only you.
 Once the stone has canceled 20 levels of spells, it burns out and turns dull gray, losing its magic. If you are targeted by a spell whose level is higher than the number of spell levels the stone has left, the stone can’t cancel it.
 " description)
-   })
+     }))
                             
 (def raw-magic-items
   [{
@@ -1198,32 +1205,38 @@ The tower is made of adamantine, and its magic prevents it from being tipped ove
 Once the stone has canceled 20 levels of spells, it burns out and turns dull gray, losing its magic. If you are targeted by a spell whose level is higher than the number of spell levels the stone has left, the stone can’t cancel it.")
    (ioun-stone "Agility"
                :very-rare
-               "Your Dexterity score increases by 2, to a maximum of 20, while this deep red sphere orbits your head.")
+               "Your Dexterity score increases by 2, to a maximum of 20, while this deep red sphere orbits your head."
+               (mod5e/ability ::char5e/dex 2))
    (ioun-stone "Awareness"
                :rare
                "You can’t be surprised while this dark blue rhomboid orbits your head.")
    (ioun-stone "Fortitude"
                :very-rare
-               "Your Constitution score increases by 2, to a maximum of 20, while this pink rhomboid orbits your head.")
+               "Your Constitution score increases by 2, to a maximum of 20, while this pink rhomboid orbits your head."
+               (mod5e/ability ::char5e/con 2))
    (ioun-stone "Greater Absorption"
                :legendary
                "While this marbled lavender and green ellipsoid orbits your head, you can use your reaction to cancel a spell of 8th level or lower cast by a creature you can see and targeting only you.
 Once the stone has canceled 50 levels of spells, it burns out and turns dull gray, losing its magic. If you are targeted by a spell whose level is higher than the number of spell levels the stone has left, the stone can’t cancel it.")
    (ioun-stone "Insight"
                :legendary
-               "Your Wisdom score increases by 2, to a maximum of 20, while this incandescent blue sphere orbits your head.")
+               "Your Wisdom score increases by 2, to a maximum of 20, while this incandescent blue sphere orbits your head."
+               (mod5e/ability ::char5e/wis 2))
    (ioun-stone "Intellect"
                :very-rare
-               "Your Intelligence score increases by 2, to a maximum of 20, while this marbled scarlet and blue sphere orbits your head.")
+               "Your Intelligence score increases by 2, to a maximum of 20, while this marbled scarlet and blue sphere orbits your head."
+               (mod5e/ability ::char5e/int 2))
    (ioun-stone "Leadership"
                :very-rare
                "Your Charisma score increases by 2, to a maximum of 20, while this marbled pink and green sphere orbits your head.")
    (ioun-stone "Mastery"
                :legendary
-               "Your proficiency bonus increases by 1 while this pale green prism orbits your head.")
+               "Your proficiency bonus increases by 1 while this pale green prism orbits your head."
+               (mod5e/proficiency-bonus-increase 1))
    (ioun-stone "Protection"
                :rare
-               "You gain a +1 bonus to AC while this dusty rose prism orbits your head.")
+               "You gain a +1 bonus to AC while this dusty rose prism orbits your head."
+               (mod5e/ac-bonus-fn (fn [_ _] 1)))
    (ioun-stone "Regeneration"
                :legendary
                "You regain 15 hit points at the end of each hour this pearly white spindle orbits your head, provided that you have at least 1 hit point.")
@@ -1234,7 +1247,8 @@ Any creature can cast a spell of 1st through 3rd level into the stone by touchin
 While this stone orbits your head, you can cast any spell stored in it. The spell uses the slot level, spell save DC, spell attack bonus, and spellcasting ability of the original caster, but is otherwise treated as if you cast the spell. The spell cast from the stone is no longer stored in it, freeing up space.")
    (ioun-stone "Strength"
                :very-rare
-               "Your Strength score increases by 2, to a maximum of 20, while this pale blue rhomboid orbits your head.")
+               "Your Strength score increases by 2, to a maximum of 20, while this pale blue rhomboid orbits your head."
+               (mod5e/ability ::char5e/int 2))
    (ioun-stone "Sustenance"
                :rare
                "You don’t need to eat or drink while this clear spindle orbits your head.")
