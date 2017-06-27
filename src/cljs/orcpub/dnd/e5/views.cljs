@@ -2228,17 +2228,27 @@
                        (dispatch [::party/make-party #{character-id}]))}
          "ADD"]]])))
 
-(defn facebook-share-button [url]
+(defn facebook-share-button-comp [url]
   [:div.fb-share-button
    {:data-layout "button"
     :data-href url}])
 
+(defn fb-init []
+  (try
+    ((goog.object.get js/window "fbAsyncInit"))
+    (catch :default e)))
+
+(def facebook-share-button
+  (with-meta
+    facebook-share-button-comp
+    {:component-did-mount #(fb-init)}))
+
 (defn character-page-fb-button [id]
-  (facebook-share-button
+  [facebook-share-button
    (str
     "http://"
     js/window.location.hostname
-    (routes/path-for routes/dnd-e5-char-page-route :id id))))
+    (routes/path-for routes/dnd-e5-char-page-route :id id))])
 
 (defn character-page [{:keys [id] :as arg}]
   (let [{:keys [::se/owner] :as strict-character} @(subscribe [::char/character id])
@@ -2252,7 +2262,7 @@
      (remove
       nil?
       [[share-link id]
-       (character-page-fb-button id)
+       [character-page-fb-button id]
        (if (and username owner (= owner username))
          {:title "Edit"
           :icon "pencil"
@@ -2345,7 +2355,7 @@
                           {:style character-display-style}
                           [:div.flex.justify-cont-end.uppercase.align-items-c
                            [share-link id]
-                           #_[:div.m-r-5 (character-page-fb-button id)]
+                           [:div.m-r-5 [character-page-fb-button id]]
                            (if (= username owner)
                              [:button.form-button
                               {:on-click #(dispatch [:edit-character @(subscribe [::char/internal-character id])])}
