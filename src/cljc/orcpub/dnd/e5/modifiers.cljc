@@ -491,7 +491,10 @@
     "MAGIC ITEM"))
 
 (defn extra-attack []
-  (mods/cum-sum-mod ?num-attacks 1))
+  (mods/cum-sum-mod ?extra-attacks 1))
+
+(defn num-attacks [num]
+  (mods/vec-mod ?number-of-attacks num))
 
 (defn ranged-attack-bonus [bonus]
   (mods/cum-sum-mod ?ranged-attack-bonus bonus))

@@ -105,6 +105,7 @@
                                 (fn [type-kw]
                                   (mod5e/damage-resistance type-kw))
                                 opt5e/damage-types)
+                               ;; it explicitly says an extra attack
                                (mod5e/extra-attack)
                                (mod5e/critical 19)
                                (mod5e/trait-cfg
