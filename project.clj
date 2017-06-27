@@ -6,7 +6,7 @@
   :main orcpub.server
 
   :min-lein-version "2.7.1"
- 
+  
   :repositories [["apache" "http://repository.apache.org/snapshots/"]
                  ["my.datomic.com" {:url "https://my.datomic.com/repo"
                                     :username [:gpg :env]
@@ -30,7 +30,7 @@
                  [io.pedestal/pedestal.route "0.5.1"]
                  [io.pedestal/pedestal.jetty "0.5.1"]
                  [org.clojure/data.json "0.2.6"]
-                 [org.slf4j/slf4j-simple "1.7.21"]
+                 [org.slf4j/slf4j-simple "1.7.21"] 
                  [buddy/buddy-auth "1.4.1"]
                  [buddy/buddy-hashers "1.2.0"]
                  [reloaded.repl "0.2.3"]

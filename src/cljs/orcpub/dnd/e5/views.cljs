@@ -2231,7 +2231,7 @@
 (defn facebook-share-button [url]
   [:div.fb-share-button
    {:data-layout "button"
-    :data-url url}])
+    :data-href url}])
 
 (defn character-page-fb-button [id]
   (facebook-share-button
