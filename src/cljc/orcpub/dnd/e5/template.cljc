@@ -2192,7 +2192,7 @@
                                 {:name "Shadow Arts"
                                  :page 80
                                  :summary "spend 2 ki to cast 'darkness', 'darkvision', 'pass without trace', or 'silence' spell"})]
-                   :levels {6 {:modfifiers [(mod5e/bonus-action
+                   :levels {6 {:modifiers [(mod5e/bonus-action
                                              {:name "Shadow Step"
                                               :page 80
                                               :summary "teleport 60 ft. and gain advantage on first melee attack before end of turn"})]}
