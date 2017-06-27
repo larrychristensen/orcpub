@@ -63,7 +63,9 @@
   (reduce-kv
    (fn [m k v]
      (let [realized-value (es/entity-val built-char k)]
-       (if (fn? realized-value)
+       (if (or (fn? realized-value)
+               (and (seq realized-value)
+                    (every? fn? realized-value)))
          m
          (assoc m k realized-value))))
    (sorted-map)
