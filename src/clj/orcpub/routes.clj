@@ -838,9 +838,7 @@
       {:url (str "http://" host uri)
        :title character-name
        :description (str (character-summary-description summary)
-                         "
-
-"
+                         ". "
                          description)
        :image image-url})}))
 
