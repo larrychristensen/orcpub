@@ -468,7 +468,7 @@
                                            :frequency {:units :rest
                                                        :amount 2}
                                            :summary (let [bonus (common/bonus-str (max 1 (?ability-bonuses ::char5e/int)))] (str bonus " AC; +10 speed; advantage on Acrobatics; " bonus " on concentration saves"))})]}
-                          6 {:modifiers [(mod5e/extra-attack)
+                          6 {:modifiers [(mod5e/num-attacks 2)
                                          (mod5e/trait-cfg
                                           {:name "Extra Attack"
                                            :page 142

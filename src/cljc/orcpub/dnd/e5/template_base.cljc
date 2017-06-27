@@ -138,7 +138,9 @@
     ?hit-point-level-increases 0
     ?max-hit-points (max 1 (+ ?hit-point-level-increases (* ?total-levels ?hit-point-level-bonus)))
     ?initiative (?ability-bonuses ::char5e/dex)
-    ?num-attacks 1
+    ?number-of-attacks [1]
+    ?extra-attacks 0
+    ?num-attacks (apply max ?extra-attacks ?number-of-attacks)
     ?critical #{20}
     ?has-weapon-prof? (fn [weapon]
                         (or (?weapon-profs :martial)

@@ -908,7 +908,7 @@
                                                     2))
                                 "; resistance to bludgeoning, piercing, and slashing damage")})]
     :levels {5 {:modifiers [(extra-attack-trait 49)
-                            (mod5e/extra-attack)
+                            (mod5e/num-attacks 2)
                             (mod/modifier ?speed-with-armor (fn [armor] (if (not= :heavy (:type armor))
                                                                             (+ 10 ?speed)
                                                                             ?speed)))
@@ -1180,7 +1180,7 @@
                                             :page 55
                                             :summary "a creature can add your bardic inspiration to a damage roll or to it's AC against an attack"})]}
                            6 {:modifiers [(extra-attack-trait 55)
-                                          (mod5e/extra-attack)]}
+                                          (mod5e/num-attacks 2)]}
                            14 {:modifiers [(mod5e/bonus-action
                                            {:name "Battle Magic"
                                             :page 55
@@ -1909,7 +1909,7 @@
                                                     2
                                                     1)}
                               :summary "take an extra action"})]}
-             5 {:modifiers [(mod5e/extra-attack)]}
+             5 {:modifiers [(mod5e/num-attacks 2)]}
              9 {:modifiers [(mod5e/dependent-trait
                              {:level 9
                               :name "Indomitable"
@@ -1921,8 +1921,8 @@
                                                     17 3
                                                     :default 1})}
                               :summary "reroll a save if you fail"})]}
-             11 {:modifiers [(mod5e/extra-attack)]}
-             20 {:modifiers [(mod5e/extra-attack)]}}
+             11 {:modifiers [(mod5e/num-attacks 3)]}
+             20 {:modifiers [(mod5e/num-attacks 4)]}}
     :subclass-level 3
     :subclass-title "Martial Archetype"
     :selections [(opt5e/fighting-style-selection :fighter)
@@ -2110,7 +2110,7 @@
                                :page 78
                                :level 4
                                :summary (str "reduce falling damage by " (* 5  (?class-level :monk)))})]}
-              5 {:modifiers [(mod5e/extra-attack)
+              5 {:modifiers [(mod5e/num-attacks 2)
                              (mod5e/dependent-trait
                               {:name "Stunning Strike"
                                :page 79
@@ -2252,7 +2252,7 @@
                               {:name "Divine Health"
                                :page 85
                                :summary "immune to disease"})]}
-              5 {:modifiers [(mod5e/extra-attack)]}
+              5 {:modifiers [(mod5e/num-attacks 2)]}
               6 {:modifiers (map
                              #(mod/modifier ?saving-throw-bonuses
                                             (merge-with +
@@ -2583,7 +2583,7 @@
                                :level 3
                                :page 92
                                :summary (str "spend an X-level spell slot, for X minutes, you sense the types of creatures within 1 mile" (if (seq ?ranger-favored-terrain) (str "(6 if " (common/list-print (map #(common/kw-to-name % false) ?ranger-favored-terrain))) ")") )})]}
-              5 {:modifiers [(mod5e/extra-attack)]}
+              5 {:modifiers [(mod5e/num-attacks 2)]}
               6 {:selections [(favored-enemy-selection 2)
                               (favored-terrain-selection 2)]}
               10 {:selections [(favored-terrain-selection 3)]}

@@ -102,7 +102,7 @@
        [:span.white.f-w-b.t-a-r
         [:span.m-r-5 username]
         [:span.orange.underline.pointer
-         {:on-click (fn [] (dispatch [:logout]))}
+         {:on-click #(dispatch [:logout])}
          "LOG OUT"]]
        [:span.pointer.flex.flex-column.align-items-end
         [:span.orange.underline.f-w-b.m-l-5
