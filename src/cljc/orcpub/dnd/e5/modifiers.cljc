@@ -314,6 +314,9 @@
 (defn proficiency-bonus [bonus]
   (mods/modifier ?proficiency-bonus bonus))
 
+(defn proficiency-bonus-increase [value]
+  (mods/cum-sum-mod ?proficiency-bonus-increase value))
+
 (defmacro skill-proficiency [skill-kw & [source conditions]]
   `(mods/modifier ~'?skill-profs
                   (assoc-in ~'?skill-profs

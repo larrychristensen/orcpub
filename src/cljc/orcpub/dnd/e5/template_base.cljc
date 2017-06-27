@@ -108,7 +108,8 @@
                    ?ability-bonuses)
     ?total-levels (apply + (map (fn [[k {l :class-level}]] l) ?levels))
     ?class-level (fn [class-kw] (get-in ?levels [class-kw :class-level]))
-    ?prof-bonus (+ (int (/ (dec ?total-levels) 4)) 2)
+    ?proficiency-bonus-increase 0
+    ?prof-bonus (+ (int (/ (dec ?total-levels) 4)) 2 ?proficiency-bonus-increase)
     ?default-skill-bonus {}
     ?skill-prof-bonuses (reduce
                          (fn [m {k :key}]
