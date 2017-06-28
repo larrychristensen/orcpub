@@ -1614,10 +1614,10 @@
     :modifiers [(modifiers/deferred-subrace)
                 homebrew-al-illegal]
     :order 1000
-    :prereqs [(t/option-prereq
-               nil
-               (fn [_] @(subscribe [:homebrew? path]))
-               true)]
+    #_:prereqs #_[(t/option-prereq
+                   nil
+                   (fn [_] @(subscribe [:homebrew? path]))
+                   true)]
     :selections [homebrew-skill-prof-selection
                  homebrew-tool-prof-selection
                  homebrew-ability-increase-selection
@@ -1651,7 +1651,7 @@
     :help "Homebrew race. This allows you to use a race that is not on the list. This will allow unrestricted access to skill and tool proficiencies, racial ability increases, and feats."
     :modifiers [(modifiers/deferred-race)
                 homebrew-al-illegal]
-    :prereqs [(t/option-prereq
+    #_:prereqs #_[(t/option-prereq
                nil
                (fn [_] @(subscribe [:homebrew? [:race]]))
                true)]
@@ -2129,10 +2129,10 @@
       :icon "beer-stein"
       :ui-fn #(custom-subclass-builder path)
       :help "Homebrew subclass. This allows you to use a subclass that is not on the list. This will allow unrestricted access to skill and tool proficiencies and feats."
-      :prereqs [(t/option-prereq
-                 nil
-                 (fn [_] @(subscribe [:homebrew? path]))
-                 true)]
+      #_:prereqs #_[(t/option-prereq
+                     nil
+                     (fn [_] @(subscribe [:homebrew? path]))
+                     true)]
       :order 1000
       :modifiers [(modifiers/deferred-subclass-name cls-key)
                   homebrew-al-illegal]
@@ -2303,6 +2303,8 @@
                             (class-starting-equipment-entity-options :equipment equipment)])
       :modifiers (concat
                   modifiers
+                  (if (:prepares-spells? spellcasting)
+                    [(mods/map-mod ?prepares-spells name true)])
                   (if (= :all (:known-mode spellcasting))
                     (let [spell-list (sl/spell-lists kw)]
                       (mapcat

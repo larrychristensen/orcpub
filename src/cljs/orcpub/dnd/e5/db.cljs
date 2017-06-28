@@ -6,7 +6,7 @@
             [re-frame.core :as re-frame]
             [orcpub.entity :as entity]
             [orcpub.entity.strict :as se]
-            [cljs.spec :as spec]
+            [cljs.spec.alpha :as spec]
             [cljs.reader :as reader]
             [bidi.bidi :as bidi]
             [cljs-http.client :as http]
@@ -57,6 +57,7 @@
      (assoc cofx
             key
             (if-let [stored-item (get-local-storage-item local-storage-key)]
+              #_(if item-fn (item-fn stored-item) stored-item)
               (if (spec/valid? item-spec stored-item)
                 (if item-fn (item-fn stored-item) stored-item)
                 (do

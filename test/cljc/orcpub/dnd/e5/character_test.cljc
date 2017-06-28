@@ -1,6 +1,6 @@
 (ns orcpub.dnd.e5.character-test
-  (:require [clojure.spec :as spec]
-            [clojure.spec.test :as stest]
+  (:require [clojure.spec.alpha :as spec]
+            [clojure.spec.alpha.test :as stest]
             [clojure.test :refer [deftest testing is]]
             [clojure.test.check :as tc]
             [clojure.test.check.generators :as gen]

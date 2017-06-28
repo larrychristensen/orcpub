@@ -1,6 +1,6 @@
 (ns orcpub.dnd.e5.options-test
   (:require [clojure.test :refer [is deftest testing]]
-            [clojure.spec :as spec]
+            [clojure.spec.alpha :as spec]
             [clojure.data :refer [diff]]
             [orcpub.dnd.e5.options :as opt]
             [orcpub.entity :as entity]))

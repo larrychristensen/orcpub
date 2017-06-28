@@ -719,7 +719,7 @@
                         :device-type (user-agent/device-type)
                         :platform (user-agent/platform)
                         :platform-version (user-agent/platform-version)
-                        :character @(subscribe [:character])})}])])))
+                        :character (char/to-strict @(subscribe [:character]))})}])])))
 
 (defn dice-roll-result [{:keys [total rolls mod raw-mod plus-minus]}]
   [:div.white.f-s-32.flex.align-items-c
@@ -1399,16 +1399,23 @@
                    [:td.p-5 slots])
                  spell-slots))])]]]]))))
 
-(defn spell-row [spell-modifiers {:keys [key ability qualifier class]} expanded? on-click]
+(defn spell-row [id spell-modifiers prepares-spells {:keys [key ability qualifier class]} expanded? on-click]
   (let [spell (spells/spell-map key)
         cls-mods (get spell-modifiers class)]
     [[:tr.pointer
       {:on-click on-click}
-      [:td.p-10.f-w-b (:name spell)]
-      [:td.p-10 class]
-      [:td.p-10 (if ability (s/upper-case (name ability)))]
-      [:td.p-10 (get cls-mods :spell-save-dc)]
-      [:td.p-10 (common/bonus-str (get cls-mods :spell-attack-modifier))]
+      [:td.p-l-10.p-b-10.p-t-10.f-w-b
+       (if (get prepares-spells class)
+         [:span
+          {:on-click (fn [e]
+                       (dispatch [::char/toggle-spell-prepared id class key])
+                       (.stopPropagation e))}
+          (comps/checkbox @(subscribe [::char/spell-prepared? id class key]) false)])
+       (:name spell)]
+      [:td.p-l-10.p-b-10.p-t-10 class]
+      [:td.p-l-10.p-b-10.p-t-10 (if ability (s/upper-case (name ability)))]
+      [:td.p-l-10.p-b-10.p-t-10 (get cls-mods :spell-save-dc)]
+      [:td.p-l-10.p-b-10.p-t-10 (common/bonus-str (get cls-mods :spell-attack-modifier))]
       [:td.p-r-10.orange
        [:i.fa
         {:class-name (if expanded? "fa-caret-up" "fa-caret-down")}]]]
@@ -1419,31 +1426,42 @@
           [spell-component spell false 14]]]])]))
 
 (defn spells-table []
-  (let [expanded-spells (r/atom {})]
-    (fn [lvl spells spell-modifiers]
-      [:div.m-t-10.m-b-30
-       [:span.f-w-b.i (if (pos? lvl)
-                        (str (common/ordinal lvl) " Level")
-                        "Cantrip")]
-       [:table.w-100-p.t-a-l.striped
-        [:tbody
-         [:tr.f-w-b
-          [:th.p-10 "Name"]
-          [:th.p-10 "Source"]
-          [:th.p-10 "Ability"]
-          [:th.p-10 "DC"]
-          [:th.p-10 "Atk."]]
-         (doall
-          (map-indexed
-           (fn [i r] (with-meta r {:key i}))
-           (mapcat
-            (fn [{:keys [key class] :as spell}]
-              (let [k (str key class)]
-                (spell-row spell-modifiers spell (@expanded-spells k) #(swap! expanded-spells update k not))))
-            (sort-by :key spells))))]]])))
+  (let [expanded-spells (r/atom {})
+        mobile? @(subscribe [:mobile?])]
+    (fn [id lvl spells spell-modifiers]
+      (let [prepares-spells @(subscribe [::char/prepares-spells id])]
+        [:div.m-t-10.m-b-30
+         [:span.f-w-b.i (if (pos? lvl)
+                          (str (common/ordinal lvl) " Level")
+                          "Cantrip")]
+         [:table.w-100-p.t-a-l.striped
+          [:tbody
+           [:tr.f-w-b
+            [:th.p-l-10.p-b-10.p-t-10 (if (seq prepares-spells)
+                                        "Prepared? / Name"
+                                        "Name")]
+            [:th.p-l-10.p-b-10.p-t-10 (if mobile? "Src" "Source")]
+            [:th.p-l-10.p-b-10.p-t-10 (if mobile? "Aby" "Ability")]
+            [:th.p-l-10.p-b-10.p-t-10 "DC"]
+            [:th.p-l-10
+             {:class-name (if (not mobile?) "p-b-10 p-t-10")}
+             "Atk."]]
+           (doall
+            (map-indexed
+             (fn [i r] (with-meta r {:key i}))
+             (mapcat
+              (fn [{:keys [key class] :as spell}]
+                (let [k (str key class)]
+                  (spell-row id
+                             spell-modifiers
+                             prepares-spells
+                             spell
+                             (@expanded-spells k)
+                             #(swap! expanded-spells update k not))))
+              (sort-by :key spells))))]]]))))
 
 
-(defn spells-tables [spells-known spell-slots spell-modifiers]
+(defn spells-tables [id spells-known spell-slots spell-modifiers]
   (let [active-tab (r/atom nil)]
     [:div.f-s-14.f-w-n
      [:span.f-w-b.f-s-16 "Spells By Level"]
@@ -1451,12 +1469,14 @@
       (map
        (fn [[lvl spells]]
          ^{:key lvl}
-         [spells-table lvl spells spell-modifiers])
+         [spells-table id lvl spells spell-modifiers])
        spells-known))]))
 
-(defn spells-known-section [spells-known spell-slots spell-modifiers spell-slot-factors total-spellcaster-levels levels]
+(defn spells-known-section [id spells-known spell-slots spell-modifiers spell-slot-factors total-spellcaster-levels levels]
   (let [mobile? @(subscribe [:mobile?])
-        multiclass? (> (count spell-slot-factors) 1)]
+        multiclass? (> (count spell-slot-factors) 1)
+        prepares-spells @(subscribe [::char/prepares-spells id])
+        prepare-spell-count-fn @(subscribe [::char/prepare-spell-count-fn id])]
     [display-section "Spells" "spell-book"
      [:div.m-t-20
       (if multiclass?
@@ -1466,7 +1486,24 @@
         [:div.m-b-20 
          [spell-slots-table spell-slots spell-slot-factors total-spellcaster-levels levels mobile?]])
       [:div.m-b-20
-       [spells-tables spells-known spell-slots spell-modifiers]]]]))
+       [:span.f-w-b.f-s-16 "Spell Preparation"]
+       (if (seq prepares-spells)
+         [:table.w-100-p.t-a-l.striped.f-s-14
+          [:tbody
+           [:tr.f-w-b
+            [:th.p-10 "Class"]
+            [:th.p-10 "Can Prepare"]]
+           (doall
+            (map
+             (fn [[class-nm]]
+               ^{:key class-nm}
+               [:tr.f-w-n
+                [:td.p-10 class-nm]
+                [:td.p-10 (str (prepare-spell-count-fn class-nm) "/day")]])
+             prepares-spells))]]
+         [:div.f-s-14.f-w-n.i.m-t-5 "You don't need to prepare spells"])]
+      [:div.m-b-20
+       [spells-tables id spells-known spell-slots spell-modifiers]]]]))
 
 (defn equipment-section [title icon-name equipment equipment-map]
   [list-display-section title icon-name
@@ -2212,6 +2249,7 @@
      [:div.flex-grow-1.details-column-2
       {:class-name (if (= 2 num-columns) "w-50-p m-l-20")}
       (if (seq spells-known) [spells-known-section
+                              id
                               spells-known
                               spell-slots
                               spell-modifiers
@@ -2465,7 +2503,7 @@
                            [:div.m-r-5 [character-page-fb-button id]]
                            (if (= username owner)
                              [:button.form-button
-                              {:on-click #(dispatch [:edit-character @(subscribe [::char/internal-character id])])}
+                              {:on-click #(dispatch [:edit-character @(subscribe [::char/character id])])}
                               "edit"])
                            [:button.form-button.m-l-5
                             {:on-click #(let [route char-page-route]
@@ -2573,7 +2611,7 @@
                               [:div.flex.justify-cont-end.uppercase.align-items-c
                                (if (= username owner)
                                  [:button.form-button
-                                  {:on-click #(dispatch [:edit-character @(subscribe [::char/internal-character character-id])])}
+                                  {:on-click #(dispatch [:edit-character @(subscribe [::char/character character-id])])}
                                   "edit"])
                                [:button.form-button.m-l-5
                                 {:on-click #(dispatch [:route char-page-route {:return? true}])}

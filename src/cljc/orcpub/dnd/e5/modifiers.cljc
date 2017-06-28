@@ -1,5 +1,5 @@
 (ns orcpub.dnd.e5.modifiers
-  (:require [clojure.spec :as spec]
+  (:require [clojure.spec.alpha :as spec]
             [clojure.string :as s]
             [orcpub.common :as common]
             [orcpub.modifiers :as mods]

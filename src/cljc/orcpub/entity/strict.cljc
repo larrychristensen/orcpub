@@ -1,6 +1,6 @@
 (ns orcpub.entity.strict
-  (:require #?(:clj [clojure.spec :as spec])
-            #?(:cljs [cljs.spec :as spec])))
+  (:require #?(:clj [clojure.spec.alpha :as spec])
+            #?(:cljs [cljs.spec.alpha :as spec])))
 
 (spec/def ::int-value int?)
 (spec/def ::map-value map?)
