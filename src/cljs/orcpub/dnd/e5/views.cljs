@@ -1418,7 +1418,7 @@
           {:on-click (fn [e]
                        (dispatch [::char/toggle-spell-prepared id class key])
                        (.stopPropagation e))}
-          (comps/checkbox @(subscribe [::char/spell-prepared? id class key])
+          (comps/checkbox (get-in prepared-spells-by-class [class key])
                           (not (pos? remaining-preps)))])
        (:name spell)]
       [:td.p-l-10.p-b-10.p-t-10 class]
