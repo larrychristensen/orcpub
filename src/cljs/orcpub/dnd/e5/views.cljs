@@ -1399,13 +1399,12 @@
                    [:td.p-5 slots])
                  spell-slots))])]]]]))))
 
-(defn spell-row [id lvl spell-modifiers prepares-spells {:keys [key ability qualifier class]} expanded? on-click]
+(defn spell-row [id lvl spell-modifiers prepares-spells prepared-spells-by-class {:keys [key ability qualifier class]} expanded? on-click]
   (let [spell (spells/spell-map key)
         cls-mods (get spell-modifiers class)
-        prepared-spells @(subscribe [::char/prepared-spells-by-class id])
         prepare-spell-count-fn @(subscribe [::char/prepare-spell-count-fn id])
         prepared-spell-count (or (some-> class
-                                         prepared-spells
+                                         prepared-spells-by-class
                                          count)
                                  0)
         remaining-preps (- (prepare-spell-count-fn class)
@@ -1438,12 +1437,16 @@
 (defn spells-table []
   (let [expanded-spells (r/atom {})
         mobile? @(subscribe [:mobile?])]
-    (fn [id lvl spells spell-modifiers]
-      (let [prepares-spells @(subscribe [::char/prepares-spells id])]
+    (fn [id lvl spells spell-modifiers hide-unprepared?]
+      (let [prepares-spells @(subscribe [::char/prepares-spells id])
+            prepared-spells-by-class @(subscribe [::char/prepared-spells-by-class id])]
         [:div.m-t-10.m-b-30
-         [:span.f-w-b.i (if (pos? lvl)
-                          (str (common/ordinal lvl) " Level")
-                          "Cantrip")]
+         [:div
+          [:span.f-w-b.i (if (pos? lvl)
+                           (str (common/ordinal lvl) " Level")
+                           "Cantrip")]
+          (if hide-unprepared?
+            [:span.i.opacity-5.m-l-5 "(unprepared hidden)"])]
          [:table.w-100-p.t-a-l.striped
           [:tbody
            [:tr.f-w-b
@@ -1463,29 +1466,36 @@
              (mapcat
               (fn [{:keys [key class] :as spell}]
                 (let [k (str key class)]
-                  (spell-row id
-                             lvl
-                             spell-modifiers
-                             prepares-spells
-                             spell
-                             (@expanded-spells k)
-                             #(swap! expanded-spells update k not))))
+                  (if (or (not hide-unprepared?)
+                          (get-in prepared-spells-by-class [class key]))
+                    (spell-row id
+                               lvl
+                               spell-modifiers
+                               prepares-spells
+                               prepared-spells-by-class
+                               spell
+                               (@expanded-spells k)
+                               #(swap! expanded-spells update k not)))))
               (sort-by :key spells))))]]]))))
 
 
-(defn spells-tables [id spells-known spell-slots spell-modifiers]
-  (let [active-tab (r/atom nil)]
-    [:div.f-s-14.f-w-n
-     [:div.flex.justify-cont-s-b
-      [:span.f-w-b.f-s-16 "Spells By Level"]
-      #_[:button.form-button.p-5
-       "Hide Unprepared"]]
-     (doall
-      (map
-       (fn [[lvl spells]]
-         ^{:key lvl}
-         [spells-table id lvl spells spell-modifiers])
-       spells-known))]))
+(defn spells-tables []
+  (let [hide-unprepared? (r/atom false)]
+    (fn [id spells-known spell-slots spell-modifiers]
+      [:div.f-s-14.f-w-n
+       [:div.flex.justify-cont-s-b
+        [:span.f-w-b.f-s-16 "Spells By Level"]
+        [:button.form-button.p-5
+         {:on-click #(swap! hide-unprepared? not)}
+         (if @hide-unprepared?
+           "Show All"
+           "Hide Unprepared")]]
+       (doall
+        (map
+         (fn [[lvl spells]]
+           ^{:key lvl}
+           [spells-table id lvl spells spell-modifiers @hide-unprepared?])
+         spells-known))])))
 
 (defn spells-known-section [id spells-known spell-slots spell-modifiers spell-slot-factors total-spellcaster-levels levels]
   (let [mobile? @(subscribe [:mobile?])
