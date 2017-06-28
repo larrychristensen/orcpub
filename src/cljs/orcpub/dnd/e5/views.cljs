@@ -1476,7 +1476,10 @@
 (defn spells-tables [id spells-known spell-slots spell-modifiers]
   (let [active-tab (r/atom nil)]
     [:div.f-s-14.f-w-n
-     [:span.f-w-b.f-s-16 "Spells By Level"]
+     [:div.flex.justify-cont-s-b
+      [:span.f-w-b.f-s-16 "Spells By Level"]
+      #_[:button.form-button.p-5
+       "Hide Unprepared"]]
      (doall
       (map
        (fn [[lvl spells]]
@@ -1622,11 +1625,11 @@
   (basic-section "Darkvision" "night-vision" (str @(subscribe [::char/darkvision id]) " ft.")))
 
 (defn critical-hits-section-2 [id]
-  (let [crit-values-str @(subscribe [::char/crit-values-str])]
+  (let [crit-values-str @(subscribe [::char/crit-values-str id])]
     (basic-section "Critical Hits" nil crit-values-str)))
 
 (defn number-of-attacks-section-2 [id]
-  (basic-section "Number of Attacks" nil @(subscribe [::char/number-of-attacks])))
+  (basic-section "Number of Attacks" nil @(subscribe [::char/number-of-attacks id])))
 
 (defn passive-perception-section-2 [id]
   (basic-section "Passive Perception" "awareness" @(subscribe [::char/passive-perception id])))
@@ -2003,9 +2006,9 @@
   (let [expanded-details (r/atom {})]
     (fn [id]
       (let [mobile? @(subscribe [:mobile?])
-            magic-item-cfgs @(subscribe [::char/magic-items])
-            magic-weapon-cfgs @(subscribe [::char/magic-weapons])
-            magic-armor-cfgs @(subscribe [::char/magic-items])]
+            magic-item-cfgs @(subscribe [::char/magic-items id])
+            magic-weapon-cfgs @(subscribe [::char/magic-weapons id])
+            magic-armor-cfgs @(subscribe [::char/magic-items id])]
         [:div
          [:div.flex.align-items-c
           (svg-icon "orb-wand" 32 32)
@@ -2055,7 +2058,7 @@
   (let [expanded-details (r/atom {})]
     (fn [id]
       (let [mobile? @(subscribe [:mobile?])
-            equipment-cfgs @(subscribe [::char/equipment])]
+            equipment-cfgs @(subscribe [::char/equipment id])]
         [:div
          [:div.flex.align-items-c
           (svg-icon "backpack" 32 32)
@@ -2272,13 +2275,13 @@
 (defn equipment-details [num-columns id]
   [:div
    [:div.m-t-10
-    [weapons-section-2]]
+    [weapons-section-2 id]]
    [:div.m-t-30
-    [armor-section-2]]
+    [armor-section-2 id]]
    [:div.m-t-30
-    [magic-items-section-2]]
+    [magic-items-section-2 id]]
    [:div.m-t-30
-    [other-equipment-section-2]]])
+    [other-equipment-section-2 id]]])
 
 (defn details-tab [title icon device-type selected? on-select]
   [:div.b-b-2.f-w-b.pointer.p-10.hover-opacity-full
