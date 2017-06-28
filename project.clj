@@ -51,8 +51,8 @@
 
                  [pdfkit-clj "0.1.6"]]
 
-  :plugins [[lein-figwheel "0.5.8"]
-            [lein-cljsbuild "1.1.4" :exclusions [[org.clojure/clojure]]]
+  :plugins [[lein-figwheel "0.5.10"]
+            [lein-cljsbuild "1.1.6" :exclusions [[org.clojure/clojure]]]
             [lein-garden "0.3.0"]
             [lein-environ "1.1.0"]
             #_[lein-resource "16.9.1"]]
@@ -160,7 +160,7 @@
   :jar-inclusions [#"^\.ebextensions"]
 
   :profiles {:dev {:dependencies [[binaryage/devtools "0.9.4"]
-                                  [figwheel-sidecar "0.5.8"]
+                                  [figwheel-sidecar "0.5.10"]
                                   [com.cemerick/piggieback "0.2.1"]
                                   [org.clojure/test.check "0.9.0"]]
                    ;; need to add dev source path here to get user.clj loaded

@@ -499,6 +499,9 @@
 (defn max-hit-points [built-char]
   (get-prop built-char :max-hit-points))
 
+(defn current-hit-points [built-char]
+  (get-prop built-char ::current-hit-points))
+
 (defn hit-point-level-bonus [built-char]
   (get-prop built-char :hit-point-level-bonus))
 
@@ -612,6 +615,9 @@
 
 (defn description [built-char]
   (get-prop built-char ::description))
+
+(defn notes [built-char]
+  (get-prop built-char ::notes))
 
 (defn image-url-failed [built-char]
   (get-prop built-char ::image-url-failed))
