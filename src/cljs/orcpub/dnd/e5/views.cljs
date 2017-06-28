@@ -1399,18 +1399,28 @@
                    [:td.p-5 slots])
                  spell-slots))])]]]]))))
 
-(defn spell-row [id spell-modifiers prepares-spells {:keys [key ability qualifier class]} expanded? on-click]
+(defn spell-row [id lvl spell-modifiers prepares-spells {:keys [key ability qualifier class]} expanded? on-click]
   (let [spell (spells/spell-map key)
-        cls-mods (get spell-modifiers class)]
+        cls-mods (get spell-modifiers class)
+        prepared-spells @(subscribe [::char/prepared-spells-by-class id])
+        prepare-spell-count-fn @(subscribe [::char/prepare-spell-count-fn id])
+        prepared-spell-count (or (some-> class
+                                         prepared-spells
+                                         count)
+                                 0)
+        remaining-preps (- (prepare-spell-count-fn class)
+                           prepared-spell-count)]
     [[:tr.pointer
       {:on-click on-click}
       [:td.p-l-10.p-b-10.p-t-10.f-w-b
-       (if (get prepares-spells class)
+       (if (and (pos? lvl)
+                (get prepares-spells class))
          [:span
           {:on-click (fn [e]
                        (dispatch [::char/toggle-spell-prepared id class key])
                        (.stopPropagation e))}
-          (comps/checkbox @(subscribe [::char/spell-prepared? id class key]) false)])
+          (comps/checkbox @(subscribe [::char/spell-prepared? id class key])
+                          (not (pos? remaining-preps)))])
        (:name spell)]
       [:td.p-l-10.p-b-10.p-t-10 class]
       [:td.p-l-10.p-b-10.p-t-10 (if ability (s/upper-case (name ability)))]
@@ -1437,7 +1447,8 @@
          [:table.w-100-p.t-a-l.striped
           [:tbody
            [:tr.f-w-b
-            [:th.p-l-10.p-b-10.p-t-10 (if (seq prepares-spells)
+            [:th.p-l-10.p-b-10.p-t-10 (if (and (not (zero? lvl))
+                                               (seq prepares-spells))
                                         "Prepared? / Name"
                                         "Name")]
             [:th.p-l-10.p-b-10.p-t-10 (if mobile? "Src" "Source")]
@@ -1453,6 +1464,7 @@
               (fn [{:keys [key class] :as spell}]
                 (let [k (str key class)]
                   (spell-row id
+                             lvl
                              spell-modifiers
                              prepares-spells
                              spell
