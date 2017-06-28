@@ -399,6 +399,9 @@
    :darkvision 60
    :languages ["Gnomish" "Common"]
    :modifiers [(mod5e/saving-throw-advantage [:magic] [::char5e/int ::char5e/wis ::char5e/cha])]
+   :traits [{:name "Gnome Cunning"
+             :page 37
+             :summary "Advantage on INT, WIS, and CHA saves against magic"}]
    :subraces
    [{:name "Rock Gnome"
      :abilities {::char5e/con 1}

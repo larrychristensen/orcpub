@@ -462,6 +462,7 @@
    ::char5e/speed-with-armor char5e/land-speed-with-armor
    ::char5e/unarmored-speed-bonus char5e/unarmored-speed-bonus
    ::char5e/max-hit-points char5e/max-hit-points
+   ::char5e/current-hit-points char5e/current-hit-points
    ::char5e/hit-point-level-bonus char5e/hit-point-level-bonus
    ::char5e/initiative char5e/initiative 
    ::char5e/passive-perception char5e/passive-perception 
@@ -528,6 +529,7 @@
    ::char5e/bonds char5e/bonds
    ::char5e/flaws char5e/flaws
    ::char5e/description char5e/description
+   ::char5e/notes char5e/notes
    ::char5e/critical-hit-values char5e/critical-hit-values
    ::char5e/crit-values-str char5e/crit-values-str
    ::char5e/number-of-attacks char5e/number-of-attacks
