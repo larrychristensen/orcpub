@@ -1,7 +1,7 @@
 (ns orcpub.common
   (:require [clojure.string :as s]
-            #?(:clj [clojure.spec :as spec])
-            #?(:cljs [cljs.spec :as spec])))
+            #?(:clj [clojure.spec.alpha :as spec])
+            #?(:cljs [cljs.spec.alpha :as spec])))
 
 (def dot-char "•")
 

@@ -1213,7 +1213,8 @@
     :spellcasting {:level-factor 1
                    :cantrips-known {1 3 4 1 10 1}
                    :known-mode :all
-                   :ability ::char5e/wis}
+                   :ability ::char5e/wis
+                   :prepares-spells? true}
     :multiclass-prereqs [(opt5e/ability-prereq ::char5e/wis 13)]
     :spellcaster true
     :hit-die 8,
@@ -1550,7 +1551,8 @@
     :spellcasting {:level-factor 1
                    :cantrips-known {1 2 4 1 10 1}
                    :known-mode :all
-                   :ability ::char5e/wis}
+                   :ability ::char5e/wis
+                   :prepares-spells? true}
     :multiclass-prereqs [(opt5e/ability-prereq ::char5e/wis 13)]
     :ability-increase-levels [4 8 12 16 19]
     :profs {:armor {:light false :medium false :shields false}
@@ -2230,7 +2232,8 @@
      :spellcaster true
      :spellcasting {:level-factor 2
                     :known-mode :all
-                    :ability ::char5e/cha}
+                    :ability ::char5e/cha
+                    :prepares-spells? true}
      :hit-die 10
      :ability-increase-levels [4 8 12 16 19]
      :profs {:armor {:light false :medium false :heavy true :shields false}
@@ -3112,7 +3115,8 @@
                    :cantrips-known {1 3 4 1 10 1}
                    :known-mode :acquire
                    :spells-known (zipmap (range 1 21) (cons 6 (repeat 2)))
-                   :ability ::char5e/int}
+                   :ability ::char5e/int
+                   :prepares-spells? true}
     :spellcaster true
     :multiclass-prereqs [(opt5e/ability-prereq ::char5e/int 13)]
     :hit-die 6

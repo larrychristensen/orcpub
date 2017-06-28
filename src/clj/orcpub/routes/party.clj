@@ -1,5 +1,5 @@
 (ns orcpub.routes.party
-  (:require [clojure.spec :as spec]
+  (:require [clojure.spec.alpha :as spec]
             [datomic.api :as d]
             [orcpub.dnd.e5.party :as party]
             [orcpub.entity.strict :as se]))

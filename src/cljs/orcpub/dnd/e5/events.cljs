@@ -1,5 +1,6 @@
 (ns orcpub.dnd.e5.events
   (:require [orcpub.entity :as entity]
+            [orcpub.entity.strict :as se]
             [orcpub.template :as t]
             [orcpub.common :as common]
             [orcpub.dice :as dice]
@@ -19,7 +20,7 @@
                                       default-character]]
             [re-frame.core :refer [reg-event-db reg-event-fx reg-fx inject-cofx path trim-v
                                    after debug dispatch dispatch-sync subscribe]]
-            [cljs.spec :as spec]
+            [cljs.spec.alpha :as spec]
             [cljs-http.client :as http]
             [cljs.core.async :refer [<!]]
             [clojure.string :as s]
@@ -191,7 +192,7 @@
          id (:db/id character)]
      {:dispatch-n [[:show-message "Your character has been saved."]
                    [:set-character character]
-                   [::char5e/set-character id strict-character]]})))
+                   [::char5e/set-character id character]]})))
 
 (defn make-summary [built-char]
   (let [classes (char5e/classes built-char)
@@ -333,7 +334,6 @@
 (reg-event-fx
  ::party5e/add-character
  (fn [{:keys [db]} [_ id character-id show-confirmation?]]
-   (prn "IDs" id character-id)
    {:db (update
          db
          ::char5e/parties
@@ -1122,10 +1122,8 @@
 (reg-event-fx
  :password-reset
  (fn [{:keys [db]} [_ params]]
-   (prn "CALLING RESET PASSWORD" params (backend-url (bidi/path-for routes/routes routes/reset-password-route)))
    (let [c (cookies)
          token (c "token")]
-     (prn "TOKEN" token c)
      {:db (assoc db :temp-email (:email params))
       :http {:method :post
              :auth-token token
@@ -1161,7 +1159,9 @@
 (reg-event-db
  ::char5e/set-character
  (fn [db [_ id character]]
-   (assoc-in db [::char5e/character-map id] character)))
+   (assoc-in db
+             [::char5e/character-map id]
+             character)))
 
 (reg-event-fx
  :edit-character
@@ -1401,3 +1401,27 @@
             ::char5e/filtered-monsters
             (filter-monsters (::char5e/monster-text-filter updated)
                              (::char5e/monster-filter-hidden? updated))))))
+
+(defn toggle-set [key set]
+  (if (get set key)
+    (disj set key)
+    (conj (or set #{}) key)))
+
+(defn toggle-character-spell-prepared [class spell-key character]
+  (update-in
+   character
+   [::entity/values
+    ::char5e/prepared-spells-by-class
+    class]
+   (partial toggle-set spell-key)))
+
+(reg-event-fx
+ ::char5e/toggle-spell-prepared
+ (fn [{:keys [db]} [_ id class spell-key]]
+   (let [update-fn (partial toggle-character-spell-prepared class spell-key)]
+     (if id
+       {:db (update-in
+             db
+             [::char5e/character-map id]
+             update-fn)}
+       {:dispatch [:set-character (update-fn (:character db))]}))))
