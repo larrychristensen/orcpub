@@ -685,7 +685,7 @@
  ::char5e/prepared-spells-by-class
  (fn [[_ id] _]
    (subscribe [::char5e/character id]))
- (fn [character [_ id class spell-key]]
+ (fn [character _]
    (get-in character
            [::entity/values
             ::char5e/prepared-spells-by-class])))
