@@ -1,6 +1,7 @@
 (ns orcpub.dnd.e5.template-base
   (:require [orcpub.entity-spec :as es]
             [orcpub.template :as t]
+            [orcpub.common :as common]
             [orcpub.dnd.e5.options :as opt5e]
             [orcpub.dnd.e5.character :as char5e]
             [orcpub.dnd.e5.skills :as skill5e]
@@ -214,6 +215,15 @@
                          (opt5e/total-slots
                           (?class-level class-kw)
                           (get ?spell-slot-factors class-kw)))
+    ?prepare-spell-count (fn [class-name]
+                           (let [class-kw (common/name-to-kw class-name)
+                                 slot-factor (get ?spell-slot-factors class-kw)
+                                 spell-mods ?spell-modifiers
+                                 ability (some-> class-name
+                                                 spell-mods
+                                                 :ability)
+                                 ability-mod (get ?ability-bonuses ability 0)]
+                             (+ ability-mod (or (?class-level class-kw) 0))))
     ?spell-slots (merge-with
                   +
                   (cond

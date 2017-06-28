@@ -1865,7 +1865,6 @@
         cfg {:race final-race
              :subrace final-subrace
              :sex final-sex}]
-    (prn "RANDOM NAME" [sex race subrace] [final-race final-subrace final-sex])
     (assoc cfg :name (random-name cfg))))
 
 (def tavern-names

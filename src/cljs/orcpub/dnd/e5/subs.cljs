@@ -1,6 +1,7 @@
 (ns orcpub.dnd.e5.subs
   (:require [re-frame.core :refer [reg-sub reg-sub-raw subscribe dispatch]]
             [orcpub.entity :as entity]
+            [orcpub.entity.strict :as se]
             [orcpub.template :as t]
             [orcpub.common :as common]
             [orcpub.registration :as registration]
@@ -344,16 +345,18 @@
                                          {:accept :transit}))]
               (dispatch [:set-loading false])
               (case (:status response)
-                200 (dispatch [::char5e/set-character id (-> response :body)])
+                200 (dispatch [::char5e/set-character id (char5e/from-strict (-> response :body))])
                 401 (dispatch [:route routes/login-page-route {:secure? true}])
                 500 (dispatch (events/show-generic-error)))))))
     (ra/make-reaction
-     (fn [] (get-in @app-db [::char5e/character-map id] [])))))
+     (fn [] (if id
+              (get-in @app-db [::char5e/character-map id] [])
+              (get @app-db :character))))))
 
 (reg-sub
  ::char5e/character-changed?
  (fn [[_ id]]
-   [(subscribe [::char5e/internal-character id])
+   [(subscribe [::char5e/character id])
     (subscribe [:character])])
  (fn [[saved-character character] _]
    (and (:db/id saved-character)
@@ -375,18 +378,11 @@
    (get db ::char5e/selected)))
 
 (reg-sub
- ::char5e/internal-character
- (fn [[_ id] _]
-   (subscribe [::char5e/character id])) 
- (fn [character _ _]
-   (char5e/from-strict character)))
-
-(reg-sub
  ::char5e/selected-plugin-options
  (fn [[_ id] _]
-   (subscribe [::char5e/internal-character id]))
- (fn [internal-character _ _]
-   (selected-plugin-options internal-character)))
+   (subscribe [::char5e/character id]))
+ (fn [character _ _]
+   (selected-plugin-options character)))
 
 (reg-sub
  ::char5e/template
@@ -403,7 +399,7 @@
 (reg-sub
  ::char5e/built-character
  (fn [[_ id] _]
-   [(subscribe [::char5e/internal-character id])
+   [(subscribe [::char5e/character id])
     (subscribe [::char5e/built-template id])])
  (fn [[character built-template] _ _]
    (built-character character built-template)))
@@ -506,7 +502,9 @@
    ::char5e/all-armor-inventory char5e/all-armor-inventory 
    ::char5e/spells-known char5e/spells-known
    ::char5e/spells-known-modes char5e/spells-known-modes
-   ::char5e/spell-slots char5e/spell-slots 
+   ::char5e/spell-slots char5e/spell-slots
+   ::char5e/prepares-spells char5e/prepares-spells
+   ::char5e/prepare-spell-count-fn char5e/prepare-spell-count-fn
    ::char5e/spell-modifiers char5e/spell-modifiers
    ::char5e/spell-slot-factors char5e/spell-slot-factors
    ::char5e/total-spellcaster-levels char5e/total-spellcaster-levels
@@ -671,3 +669,14 @@
  ::char5e/monster-filter-hidden?
  (fn [db [_ filter value]]
    (get-in db [::char5e/monster-filter-hidden? filter value])))
+
+(reg-sub
+ ::char5e/spell-prepared?
+ (fn [[_ id] _]
+   (subscribe [::char5e/character id]))
+ (fn [character [_ id class spell-key :as args]]
+   (get-in character
+           [::entity/values
+            ::char5e/prepared-spells-by-class
+            class
+            spell-key])))

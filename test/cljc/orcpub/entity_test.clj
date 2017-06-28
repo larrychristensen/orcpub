@@ -1,7 +1,7 @@
 (ns orcpub.entity-test
   (:require [clojure.test :refer :all]
-            [clojure.spec :as spec]
-            [clojure.spec.test :as stest]
+            [clojure.spec.alpha :as spec]
+            [clojure.spec.alpha.test :as stest]
             [clojure.data :refer [diff]]
             [orcpub.entity.strict :as e]
             [orcpub.entity :as entity]

@@ -35,8 +35,8 @@
             [orcpub.user-agent :as user-agent]
             [orcpub.dnd.e5.db :as db]
 
-            [clojure.spec :as spec]
-            [clojure.spec.test :as stest]
+            [clojure.spec.alpha :as spec]
+            [clojure.spec.test.alpha :as stest]
             [cljs.core.async :refer [<!]]
 
             [reagent.core :as r]
@@ -1337,7 +1337,7 @@
                total-remaining (sum-remaining built-template character combined-selections)
                class-name (if (= i page-index) "selected-tab" "opacity-5 hover-opacity-full")]
            ^{:key name}
-           [:div.p-5.hover-opacity-full.pointer.flex.flex-column.align-items-c
+           [:div.p-5.hover-opacity-full.pointer.flex.flex-column.align-items-c.t-a-c
             {:class-name (if (= i page-index) "b-b-2 b-orange" "")
              :on-click (fn [_] (dispatch [:set-page i]))}
             [:div

@@ -1,5 +1,5 @@
 (ns orcpub.dice
-  (:require [clojure.spec :as spec]
+  (:require [clojure.spec.alpha :as spec]
             [orcpub.common :as common]))
 
 (defn die-roll [sides]

@@ -1,8 +1,8 @@
 (ns orcpub.dnd.e5.character
-  (:require #?(:clj [clojure.spec :as spec])
-            #?(:cljs [cljs.spec :as spec])
-            #?(:clj [clojure.spec.test :as stest])
-            #?(:cljs [cljs.spec.test :as stest])
+  (:require #?(:clj [clojure.spec.alpha :as spec])
+            #?(:cljs [cljs.spec.alpha :as spec])
+            #?(:clj [clojure.spec.test.alpha :as stest])
+            #?(:cljs [cljs.spec.test.alpha :as stest])
             #?(:clj [clojure.edn :refer [read-string]])
             #?(:cljs [cljs.reader :refer [read-string]])
             [clojure.string :as s]
@@ -212,12 +212,28 @@
    raw-character
    [::custom-equipment ::custom-treasure]))
 
+(defn to-strict-prepared-spells [[class-nm spell-keys]]
+  {::class-name class-nm
+   ::prepared-spells spell-keys})
+
+(defn remove-image-failed-flags [values]
+  (dissoc values ::image-url-failed ::faction-image-url-failed))
+
+(defn to-strict-prepared-spells-list [values]
+  (update
+   values
+   ::prepared-spells-by-class
+   #(map
+    to-strict-prepared-spells
+    %)))
+
 (defn clean-values [raw-character]
   (cond-> raw-character
-    (-> raw-character ::entity-values seq)
+    (-> raw-character ::entity/values seq)
     (update ::entity/values
-            (fn [vs]
-              (dissoc vs ::image-url-failed ::faction-image-url-failed)))
+            #(cond-> %
+               true remove-image-failed-flags
+               (::prepared-spells-by-class %) to-strict-prepared-spells-list))
     
     true fix-quantities
     true fix-custom-quantities))
@@ -249,9 +265,22 @@
    raw-character
    equipment-keys))
 
+(defn update-values-from-strict [character]
+  (update-in character
+             [::entity/values
+              ::prepared-spells-by-class]
+             (fn [prepared-spells]
+               (into
+                {}
+                (map
+                 (fn [{:keys [::class-name ::prepared-spells]}]
+                   [class-name (set prepared-spells)])
+                 prepared-spells)))))
+
 (defn from-strict [raw-character]
-  (vectorize-equipment
-   (entity/from-strict raw-character)))
+  (-> (entity/from-strict raw-character)
+      vectorize-equipment
+      update-values-from-strict))
 
 (defn standard-ability-roll []
   (dice/dice-roll {:num 4 :sides 6 :drop-num 1}))
@@ -439,6 +468,12 @@
 
 (defn spell-modifiers [built-char]
   (get-prop built-char :spell-modifiers))
+
+(defn prepares-spells [built-char]
+  (get-prop built-char :prepares-spells))
+
+(defn prepare-spell-count-fn [built-char]
+  (get-prop built-char :prepare-spell-count))
 
 (defn spell-attack-modifier-fn [built-char]
   (get-prop built-char :spell-attack-modifier))

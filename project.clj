@@ -12,9 +12,10 @@
                                     :username [:gpg :env]
                                     :password [:gpg :env]}]]
  
-  :dependencies [[org.clojure/clojure "1.9.0-alpha14"]
+  :dependencies [[org.clojure/clojure "1.9.0-alpha17"]
                  [org.clojure/test.check "0.9.0"]
-                 [org.clojure/clojurescript "1.9.229"]
+                 [org.clojure/clojurescript "1.9.660"]
+                 [org.clojure/core.async "0.3.443"]
                  #_[org.clojure/core.async "0.2.391"
                     :exclusions [org.clojure/tools.reader]]
                  [cljsjs/react "15.3.1-0"]
@@ -37,7 +38,7 @@
                  [bidi "2.0.17"]
 
                  [com.stuartsierra/component "0.3.2"]
-                 [com.google.guava/guava "19.0"]
+                 [com.google.guava/guava "21.0"]
 
                  [com.datomic/datomic-pro "0.9.5561"]
                  [com.amazonaws/aws-java-sdk-dynamodb "1.11.6"]
