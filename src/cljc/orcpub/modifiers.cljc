@@ -1,5 +1,5 @@
 (ns orcpub.modifiers
-  (:require [clojure.spec :as spec]
+  (:require [clojure.spec.alpha :as spec]
             [orcpub.entity-spec :as es]))
 
 (def cumulative-numeric-modifier-type ::cumulative-numeric)

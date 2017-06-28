@@ -18,7 +18,7 @@
             [clj-time.core :as t :refer [hours from-now ago]]
             [clj-time.coerce :as tc :refer [from-date]]
             [clojure.string :as s]
-            [clojure.spec :as spec]
+            [clojure.spec.alpha :as spec]
             [orcpub.dnd.e5.skills :as skill5e]
             [orcpub.dnd.e5.character :as char5e]
             [orcpub.dnd.e5.spells :as spells]
@@ -553,7 +553,7 @@
              entity)))
 
     (sequential? entity)
-    (map (partial remove-orphan-ids-aux remove-ids?) entity)
+    (mapv (partial remove-orphan-ids-aux remove-ids?) entity)
 
     :else
     entity))
@@ -579,6 +579,12 @@
     (not= expected-type type) (conj (entity-problem "Entity is wrong type" type expected-type))))
 
 (def dnd-e5-char-type-problems (partial entity-type-problems :dnd :e5 :character))
+
+(defn add-dnd-5e-character-tags [character]
+  (assoc character
+         ::se/game :dnd
+         ::se/game-version :e5
+         ::se/type :character))
 
 (defn update-character [db conn character username]
   (let [id (:db/id character)]
@@ -610,7 +616,9 @@
                                  [:db/retractEntity retract-id])
                                retract-ids)
                   tx (conj retractions
-                           (assoc new-character :orcpub.entity.strict/owner username))]
+                           (-> new-character
+                               (assoc :orcpub.entity.strict/owner username)
+                               add-dnd-5e-character-tags))]
               @(d/transact conn tx)
               {:status 200
                :body (d/pull (d/db conn) '[*] id)}))))
@@ -618,12 +626,10 @@
 
 (defn create-new-character [conn character username]
   (let [result @(d/transact conn
-                            [(assoc character
-                                    :db/id "tempid"
-                                    ::se/owner username
-                                    ::se/game :dnd
-                                    ::se/game-version :e5
-                                    ::se/type :character)])
+                            [(-> character
+                                 (assoc :db/id "tempid"
+                                        ::se/owner username)
+                                 add-dnd-5e-character-tags)])
         new-id (-> result :tempids (get "tempid"))]
     {:status 200
      :body (d/pull (d/db conn) '[*] new-id)}))
@@ -652,9 +658,9 @@
                    :in $ [?idents ...]
                    :where
                    [?e ::se/owner ?idents]
-                   [?e ::se/type :character]
-                   [?e ::se/game :dnd]
-                   [?e ::se/game-version :e5]]
+                   #_[?e ::se/type :character]
+                   #_[?e ::se/game :dnd]
+                   #_[?e ::se/game-version :e5]]
                  db
                  [(:orcpub.user/username user)
                   (:orcpub.user/email user)])
@@ -790,7 +796,7 @@
 
 (defn get-character-for-id [db id]
   (let [{:keys [::se/type ::se/game ::se/game-version] :as character} (d/pull db '[*] id)
-        problems (dnd-e5-char-type-problems character)]
+        problems [] #_(dnd-e5-char-type-problems character)]
     (if (seq problems)
       {:status 400 :body problems}
       character)))

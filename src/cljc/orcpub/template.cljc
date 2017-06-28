@@ -1,6 +1,6 @@
 (ns orcpub.template
-  (:require [clojure.spec :as spec]
-            [clojure.spec.test :as stest]
+  (:require [clojure.spec.alpha :as spec]
+            [clojure.spec.test.alpha :as stest]
             [orcpub.modifiers :as modifiers]
             [orcpub.common :as common]))
 

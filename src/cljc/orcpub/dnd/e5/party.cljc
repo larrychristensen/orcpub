@@ -1,5 +1,5 @@
 (ns orcpub.dnd.e5.party
-  (:require [clojure.spec :as spec]))
+  (:require [clojure.spec.alpha :as spec]))
 
 (spec/def ::name string?)
 

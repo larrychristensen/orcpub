@@ -1,8 +1,9 @@
 (ns orcpub.entity.strict-test
-  (:require [clojure.spec :as spec]
+  (:require [clojure.spec.alpha :as spec]
             [clojure.test :refer [deftest is]]
             [orcpub.entity.strict :as e]
             [orcpub.dnd.e5.character.equipment :as equip]))
+
 (def entity {:db/id 17592186485120,
                 :orcpub.entity.strict/owner "znax",
                 :orcpub.entity.strict/values

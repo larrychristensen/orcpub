@@ -1,5 +1,5 @@
 (ns orcpub.dnd.e5.character.equipment
-  (:require [clojure.spec :as spec]
+  (:require [clojure.spec.alpha :as spec]
             [orcpub.common :as common]))
 
 (spec/def ::name string?)

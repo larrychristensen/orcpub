@@ -128,7 +128,24 @@
   (concat
    [{:db/ident ::char5e/share?
     :db/valueType :db.type/boolean
-    :db/cardinality :db.cardinality/one}]
+     :db/cardinality :db.cardinality/one}
+    {:db/ident ::char5e/prepared-spells-by-class
+     :db/valueType :db.type/ref
+     :db/cardinality :db.cardinality/many
+     :db/isComponent true
+     :db/noHistory true}
+    {:db/ident ::char5e/prepared-spells
+     :db/valueType :db.type/keyword
+     :db/cardinality :db.cardinality/many
+     :db/noHistory true}
+    {:db/ident ::char5e/current-hit-points
+     :db/valueType :db.type/long
+     :db/cardinality :db.cardinality/one
+     :db/noHistory true}
+    {:db/ident ::char5e/notes
+     :db/valueType :db.type/string
+     :db/cardinality :db.cardinality/one
+     :db/noHistory true}]
    (map
     many-ref
     [::char5e/custom-equipment

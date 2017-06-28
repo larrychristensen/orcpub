@@ -1,6 +1,6 @@
 (ns orcpub.entity
-  (:require #?(:clj [clojure.spec :as spec])
-            #?(:cljs [cljs.spec :as spec])
+  (:require #?(:clj [clojure.spec.alpha :as spec])
+            #?(:cljs [cljs.spec.alpha :as spec])
             [orcpub.common :as common]
             [orcpub.modifiers :as mods]
             [orcpub.entity-spec :as es]

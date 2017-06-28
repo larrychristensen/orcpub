@@ -1,6 +1,6 @@
 (ns orcpub.common-test
   (:require [clojure.test :refer [is deftest]]
-            [clojure.spec.test :as stest]
+            [clojure.spec.alpha.test :as stest]
             [orcpub.common :as common]))
 
 (deftest test-add-namespaces-to-keys
