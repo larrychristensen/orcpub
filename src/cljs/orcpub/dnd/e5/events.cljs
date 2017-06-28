@@ -1415,13 +1415,40 @@
     class]
    (partial toggle-set spell-key)))
 
+(defn update-character-fx [db id update-fn]
+  (if id
+    {:db (update-in
+          db
+          [::char5e/character-map id]
+          update-fn)}
+    {:dispatch [:set-character (update-fn (:character db))]}))
+
 (reg-event-fx
  ::char5e/toggle-spell-prepared
  (fn [{:keys [db]} [_ id class spell-key]]
    (let [update-fn (partial toggle-character-spell-prepared class spell-key)]
-     (if id
-       {:db (update-in
-             db
-             [::char5e/character-map id]
-             update-fn)}
-       {:dispatch [:set-character (update-fn (:character db))]}))))
+     (update-character-fx db id update-fn))))
+
+(defn set-current-hit-points [character current-hit-points]
+  (assoc-in
+   character
+   [::entity/values
+    ::char5e/current-hit-points]
+   current-hit-points))
+
+(defn set-notes [character notes]
+  (assoc-in
+   character
+   [::entity/values
+    ::char5e/notes]
+   notes))
+
+(reg-event-fx
+ ::char5e/set-current-hit-points
+ (fn [{:keys [db]} [_ id current-hit-points]]
+   (update-character-fx db id #(set-current-hit-points % current-hit-points))))
+
+(reg-event-fx
+ ::char5e/set-notes
+ (fn [{:keys [db]} [_ id notes]]
+   (update-character-fx db id #(set-notes % notes))))
