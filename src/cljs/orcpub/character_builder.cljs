@@ -930,6 +930,7 @@
           [:div.p-1
            [:input.input.f-s-18.m-b-5.p-l-0
             {:value (k abilities)
+             :type :number
              :on-change (fn [e] (let [value (.-value (.-target e))
                                       new-v (if (not (s/blank? value))
                                               (js/parseInt value))]
@@ -948,6 +949,7 @@
            [:input.input.b-3.f-s-18.m-b-5.p-l-0
             {:value (if (abilities k)
                       (total-abilities k))
+             :type :number
              :on-change (fn [e] (let [total (total-abilities k)                                     
                                       value (.-value (.-target e))
                                       diff (- total
