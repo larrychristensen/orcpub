@@ -1615,8 +1615,27 @@
     (section-header-2 title icon)
     [:div.f-s-24.f-w-b v]]])
 
+(def current-hit-points-editor-style
+  {:width "60px"
+   :margin-top 0})
+
 (defn hit-points-section-2 [id]
-  (basic-section "Max Hit Points" "health-normal" @(subscribe [::char/max-hit-points id])))
+  (basic-section "Max Hit Points"
+                 "health-normal"
+                 [:div.flex.align-items-c
+                  [:input.input
+                   {:style current-hit-points-editor-style
+                    :type :number
+                    :value (or @(subscribe [::char/current-hit-points id])
+                               @(subscribe [::char/max-hit-points id]))
+                    :on-change #(dispatch [::char/set-current-hit-points
+                                           id
+                                           (or (-> %
+                                                event-value
+                                                js/parseInt)
+                                               0)])}]
+                  [:span.m-l-5 "/"]
+                  [:span.m-l-5 @(subscribe [::char/max-hit-points id])]]))
 
 (defn initiative-section-2 [id]
   (basic-section "Initiative" "sprint" (common/bonus-str @(subscribe [::char/initiative id]))))
@@ -1777,6 +1796,9 @@
      (personality-section "Flaws" flaws)
      (personality-section "Description" description)]))
 
+(def notes-style
+  {:height "400px"})
+
 (defn summary-details [num-columns id]
   (let [built-char @(subscribe [:built-character id])
         race @(subscribe [::char/race id])
@@ -1803,7 +1825,13 @@
           [speed-section-2 id]
           [saving-throws-section-2 id]
           [darkvision-section-2 id]]]
-        [description-section id]]]]]))
+        [description-section id]
+        [:span.f-s-18.f-w-b.m-b-5 "Notes"]
+        [:div.p-l-20.p-r-20
+         [:textarea.input
+          {:style notes-style
+           :value @(subscribe [::char/notes id])
+           :on-change #(dispatch [::char/set-notes id (event-value %)])}]]]]]]))
 
 (defn weapon-details-field [nm value]
   [:div.p-2
@@ -2077,6 +2105,7 @@
               (fn [[item-kw item-cfg]]
                 (let [{:keys [name cost weight] :as item} (equip/equipment-map item-kw)
                       expanded? (@expanded-details item-kw)]
+                  ^{:key item-kw}
                   [:tr.pointer
                    {:on-click #(swap! expanded-details (fn [d] (update d item-kw not)))}
                    [:td.p-10.f-w-b (:name item)]
@@ -2091,6 +2120,7 @@
                                   ", "))
                            weight)]]]]))
               equipment-cfgs))]]]]))))
+
 
 (defn skill-details-section-2 []
   (let [expanded-details (r/atom {})]
@@ -2492,8 +2522,8 @@
                      ^{:key id}
                      [:div.white
                       {:style row-style}
-                      [:div.pointer
-                       [:div.flex.justify-cont-s-b.align-items-c
+                      [:div
+                       [:div.flex.justify-cont-s-b.align-items-c.pointer
                         {:on-click #(dispatch [:toggle-character-expanded id])}
                         [:div.m-l-10.flex.align-items-c
                          [:div.p-5
