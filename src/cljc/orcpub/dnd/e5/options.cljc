@@ -1409,7 +1409,16 @@
                             (modifiers/tool-expertise :thieves-tools)]})]}))
 
 (defn cleric-spell [spell-level spell-key min-level]
-  (modifiers/spells-known spell-level spell-key ::character/wis "Cleric" min-level "Domain" :cleric))
+  (modifiers/spells-known-cfg
+   spell-level
+   {:key spell-key
+    :ability ::character/wis
+    :class "Cleric"
+    :qualifier "Domain"
+    :class-kw :cleric
+    :always-prepared? true}
+   min-level
+   nil))
 
 
 (defn potent-spellcasting [page & [source]]
@@ -1447,7 +1456,14 @@
                   subclasses)}))
 
 (defn paladin-spell [spell-level key min-level]
-  (modifiers/spells-known spell-level key ::character/cha "Paladin" min-level nil :paladin))
+  (modifiers/spells-known-cfg spell-level
+                              {:key key
+                               :ability ::character/cha
+                               :class "Paladin"
+                               :always-prepared? true
+                               :class-key :paladin}
+                              min-level
+                              nil))
 
 (defn subclass-spell-selection [class-key class-name ability spells num]
   (spell-selection
