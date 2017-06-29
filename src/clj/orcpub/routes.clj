@@ -788,7 +788,7 @@
   (let [parsed-id (Long/parseLong id)
         username (:user identity)
         character (d/pull db '[*] parsed-id)
-        problems [] #_(dnd-e5-char-type-problems character)]    
+        problems [] #_(dnd-e5-char-type-problems character)]
     (if (owns-entity? db username parsed-id)
       (if (empty? problems)
         (do
@@ -931,7 +931,7 @@
         {:get `get-character}]
        [(route-map/path-for route-map/dnd-e5-char-page-route :id ":id")
         {:get `character-page}]
-       [(route-map/path-for route-map/dnd-e5-char-parties-route)
+       [(route-map/path-for route-map/dnd-e5-char-parties-route) ^:interceptors [check-auth]
         {:post `party/create-party
          :get `party/parties}]
        [(route-map/path-for route-map/dnd-e5-char-party-route :id ":id") ^:interceptors [check-auth parse-id check-party-owner]
