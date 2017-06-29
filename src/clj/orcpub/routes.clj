@@ -392,7 +392,8 @@
     :weapon-name-3 8}))
 
 (defn add-spell-cards! [doc spells-known spell-save-dcs spell-attack-mods]
-  (let [flat-spells (char5e/flat-spells spells-known)
+  (prn "SPELLS KNOWN" spells-known)
+  (let [flat-spells (-> spells-known vals flatten)
         sorted-spells (sort-by
                        (fn [{:keys [class key]}]
                          [class key])
