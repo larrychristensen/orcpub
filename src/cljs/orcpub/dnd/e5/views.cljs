@@ -1406,8 +1406,8 @@
   (let [spell (spells/spell-map key)
         cls-mods (get spell-modifiers class)
         prepare-spell-count-fn @(subscribe [::char/prepare-spell-count-fn id])
-        prepared-spell-count (or (some-> class
-                                         prepared-spells-by-class
+        prepared-spell-count (or (some->> class
+                                         (get prepared-spells-by-class)
                                          count)
                                  0)
         remaining-preps (- (prepare-spell-count-fn class)
@@ -1497,7 +1497,7 @@
         (map
          (fn [[lvl spells]]
            ^{:key lvl}
-           [spells-table id lvl spells spell-modifiers @hide-unprepared?])
+           [spells-table id lvl (vals spells) spell-modifiers @hide-unprepared?])
          spells-known))])))
 
 (defn spells-known-section [id spells-known spell-slots spell-modifiers spell-slot-factors total-spellcaster-levels levels]

@@ -210,7 +210,7 @@
 (defn make-page-map [spells-known]
   (reduce-kv
    (fn [m k s]
-     (let [by-ability (group-by :ability s)]
+     (let [by-ability (group-by :ability (vals s))]
        (reduce-kv
         (fn [am a a-s]
           (assoc-in am [a k] (sort-by (comp :name spells/spell-map :key) a-s)))
@@ -247,9 +247,10 @@
      page-map)))
 
 (defn make-spell-card-info [spells-known save-dc-fn attack-mod-fn]
-  (let [flat-spells (flatten (vals spells-known))]
+  (let [flat-spells (char5e/flat-spells spells-known)]
     (reduce
      (fn [m {:keys [key ability qualifier class]}]
+       (prn "ABILITY" ability)
        (-> m
            (assoc-in [:spell-save-dcs class] (save-dc-fn ability))
            (assoc-in [:spell-attack-mods class] (attack-mod-fn ability))))
