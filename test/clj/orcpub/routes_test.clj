@@ -1,7 +1,20 @@
 (ns orcpub.routes-test
   (:require [orcpub.routes :as routes]
             [clojure.test :refer [deftest is testing]]
-            [orcpub.errors :as errors]))
+            [orcpub.errors :as errors]
+            [io.pedestal.http :as http]
+            [io.pedestal.test :refer [response-for]]))
+
+(def service
+  (::http/service-fn (http/create-servlet {::http/routes routes/routes
+                                           ::http/type :jetty
+                                           ::http/port 8080})))
+
+(deftest test-index
+  (let [response (response-for service :get "/")]
+    (prn "RESPONSE" response)
+    (is (= (:status response)
+           200))))
 
 (deftest test-db-ids
   (let [e-1 {:db/id 1

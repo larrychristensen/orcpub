@@ -179,8 +179,7 @@
 (reg-event-fx
  :random-character
  (fn [_ [_ character built-template locked-components]]
-   {:dispatch-n [[:set-loading true]
-                 [:set-random-character character built-template locked-components]]}))
+   {:dispatch [:set-random-character character built-template locked-components]}))
 
 (def dnd-5e-characters-path [:dnd :e5 :characters])
 
