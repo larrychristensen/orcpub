@@ -484,19 +484,22 @@
     :where [?e :orcpub.user/password-reset-key ?key]])
 
 (defn reset-password-page [{:keys [query-params db conn] :as req}]
-  (let [key (:key query-params)
-        {:keys [:db/id
-                :orcpub.user/username
-                :orcpub.user/password-reset-key
-                :orcpub.user/password-reset-sent
-                :orcpub.user/password-reset] :as user} (first-user-by db user-by-password-reset-key-query key)
-        expired? (password-reset-expired? password-reset-sent) 
-        already-reset? (password-already-reset? password-reset password-reset-sent)]
-    (cond
-      expired? (redirect route-map/password-reset-expired-route)
-      already-reset? (redirect route-map/password-reset-used-route)
-      :else (let [token (create-token username (-> 1 hours from-now))]
-              (index req {:cookies {"token" token}})))))
+  (if-let [key (:key query-params)]
+    (let [{:keys [:db/id
+                  :orcpub.user/username
+                  :orcpub.user/password-reset-key
+                  :orcpub.user/password-reset-sent
+                  :orcpub.user/password-reset] :as user}
+          (first-user-by db user-by-password-reset-key-query key)
+          expired? (password-reset-expired? password-reset-sent) 
+          already-reset? (password-already-reset? password-reset password-reset-sent)]
+      (cond
+        expired? (redirect route-map/password-reset-expired-route)
+        already-reset? (redirect route-map/password-reset-used-route)
+        :else (let [token (create-token username (-> 1 hours from-now))]
+                (index req {:cookies {"token" token}}))))
+    {:status 400
+     :body "Key is required"}))
 
 (defn check-field [query value db]
   {:status 200
