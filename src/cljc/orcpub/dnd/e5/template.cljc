@@ -759,7 +759,22 @@
    :speed 30
    :darkvision 60
    :languages ["Common" "Infernal"]
-   :modifiers [(mod5e/spells-known 0 :thaumaturgy ::char5e/cha "Tiefling")
+   :modifiers [(mod5e/trait-cfg
+                {:name "Hellish Resistance"
+                 :page 43
+                 :summary "Resistance to fire damage"})
+               (mod5e/dependent-trait
+                {:name "Infernal Legacy"
+                 :page 43
+                 :summary (str "You know thaumaturgy and can cast "
+                               (common/list-print
+                                (let [lvl ?total-levels]
+                                  (cond-> []
+                                    (>= lvl 3) (conj "Hellish Rebuke")
+                                    (>= lvl 5) (conj "Darkness"))))
+                               " once per day. CHA is the spellcasting ability.")})
+               (mod5e/damage-resistance :fire)
+               (mod5e/spells-known 0 :thaumaturgy ::char5e/cha "Tiefling")
                (mod5e/spells-known 1 :hellish-rebuke ::char5e/cha "Tiefling" 3)
                (mod5e/spells-known 2 :darkness ::char5e/cha "Tiefling" 5)]})
 
