@@ -1415,7 +1415,7 @@
     :ability ::character/wis
     :class "Cleric"
     :qualifier "Domain"
-    :class-kw :cleric
+    :class-key :cleric
     :always-prepared? true}
    min-level
    nil))

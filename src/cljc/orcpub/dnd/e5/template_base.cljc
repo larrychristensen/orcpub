@@ -225,7 +225,7 @@
                                  ability-mod (get ?ability-bonuses ability 0)]
                              (+ ability-mod (or (let [lvl (?class-level class-kw)]
                                                   (if lvl
-                                                    (int (/ lvl 2))))
+                                                    (int (/ lvl slot-factor))))
                                                 0))))
     ?spell-slots (merge-with
                   +
