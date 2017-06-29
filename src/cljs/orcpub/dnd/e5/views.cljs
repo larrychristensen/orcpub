@@ -692,7 +692,10 @@
              {:on-click #(dispatch [:hide-confirmation])}
              "CANCEL"]
             [:button.link-button.underline.f-w-b
-             {:on-click #(dispatch [:confirm (:event cfg)])}
+             {:on-click #(do
+                           (if (:pre cfg)
+                             ((:pre cfg)))
+                           (dispatch [:confirm (:event cfg)]))}
              (:confirm-button-text cfg)]]])])
      (if @(subscribe [:message-shown?])
        [:div.p-b-10.p-r-10.p-l-10
@@ -804,7 +807,7 @@
            " cantrip"))]])
 
 (defn spell-component [{:keys [name level school casting-time range duration components description summary page source] :as spell} include-name? & [subheader-size]]
-  [:div.m-l-10
+  [:div.m-l-10.l-h-19
    [spell-summary name level school include-name? subheader-size]
    (spell-field "Casting Time" casting-time)
    (spell-field "Range" range)
@@ -886,7 +889,7 @@
            m)))
 
 (defn monster-component [{:keys [name size type subtypes hit-points alignment armor-class armor-notes speed saving-throws skills damage-vulnerabilities damage-resistances damage-immunities condition-immunities senses languages challenge traits actions legendary-actions source page] :as monster}]
-  [:div.m-l-10
+  [:div.m-l-10.l-h-19
    (if (not @(subscribe [:mobile?])) {:style two-columns-style})
    [:span.f-s-24.f-w-b name]
    [:div.f-s-18.i.f-w-b (monster-subheader size type subtypes alignment)]

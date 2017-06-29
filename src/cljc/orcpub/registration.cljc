@@ -19,10 +19,10 @@
                     password-too-short?]))))
 
 (defn validate-password [password]
-  (let [password-missing-special-character? (fails-match? #".*[!@#\$%\^&\*].*" password)
-        password-missing-number? (fails-match? #".*[0-9].*" password)
-        password-missing-uppercase? (fails-match? #".*[A-Z].*" password)
-        password-missing-lowercase? (fails-match? #".*[a-z].*" password)
+  (let [;;password-missing-special-character? (fails-match? #".*[!@#\$%\^&\*].*" password)
+        ;;password-missing-number? (fails-match? #".*[0-9].*" password)
+        ;;password-missing-uppercase? (fails-match? #".*[A-Z].*" password)
+        ;;password-missing-lowercase? (fails-match? #".*[a-z].*" password)
         password-too-short? (or (nil? password) (< (count password) 6))]
     {}
     (cond-> {}
