@@ -5,12 +5,12 @@
             [io.pedestal.http :as http]
             [io.pedestal.test :refer [response-for]]))
 
-(def service
+#_(def service
   (::http/service-fn (http/create-servlet {::http/routes routes/routes
                                            ::http/type :jetty
                                            ::http/port 8080})))
 
-(deftest test-index
+#_(deftest test-index
   (let [response (response-for service :get "/")]
     (prn "RESPONSE" response)
     (is (= (:status response)
