@@ -71,3 +71,14 @@
                         :body (reset-password-email
                                first-and-last-name
                                (str base-url (routes/path-for routes/reset-password-page-route) "?key=" reset-key))}))
+
+(defn send-error-email [context exception]
+  (postal/send-message (email-cfg)
+                       {:from "OrcPub Errors <no-reply@orcpub.com>"
+                        :to "redorc@orcpub.com"
+                        :subject "Exception"
+                        :body [{:type "text/plain"
+                                :content (let [writer (java.io.StringWriter.)]
+                                           (do (clojure.pprint/pprint (:request context) writer)
+                                               (clojure.pprint/pprint (or (ex-data exception) exception) writer)
+                                               (str writer)))}]}))

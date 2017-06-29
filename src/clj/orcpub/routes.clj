@@ -787,7 +787,7 @@
   (let [parsed-id (Long/parseLong id)
         username (:user identity)
         character (d/pull db '[*] parsed-id)
-        problems [] #_(dnd-e5-char-type-problems character)]
+        problems [] #_(dnd-e5-char-type-problems character)]    
     (if (owns-entity? db username parsed-id)
       (if (empty? problems)
         (do
@@ -927,65 +927,72 @@
   (route/expand-routes
    (into #{} index-page-routes)))
 
+(def service-error-handler
+  (error-int/error-dispatch [ctx ex]
+                            :else (do
+                                    (email/send-error-email ctx ex)
+                                    (assoc ctx :io.pedestal.interceptor.chain/error ex))))
+
 (def routes
   (concat
-   expanded-index-routes
    (route/expand-routes
-    [[["/" {:get `index}]
-      [(route-map/path-for route-map/register-route) ^:interceptors [(body-params/body-params)]
-       {:post `register}]
-      [(route-map/path-for route-map/user-route) ^:interceptors [check-auth]
-       {:get `get-user}]
-      [(route-map/path-for route-map/follow-user-route :user ":user") ^:interceptors [check-auth]
-       {:post `follow-user
-        :delete `unfollow-user}]
-      [(route-map/path-for route-map/dnd-e5-char-list-route) ^:interceptors [(body-params/body-params) check-auth]
-       {:post `save-character
-        :get `character-list}]
-      [(route-map/path-for route-map/dnd-e5-char-summary-list-route) ^:interceptors [(body-params/body-params) check-auth]
-       {:get `character-summary-list}]
-      [(route-map/path-for route-map/dnd-e5-char-route :id ":id") ^:interceptors [check-auth]
-       {:delete `delete-character}]
-      [(route-map/path-for route-map/dnd-e5-char-route :id ":id")
-       {:get `get-character}]
-      [(route-map/path-for route-map/dnd-e5-char-page-route :id ":id") ^:interceptors [(body-params/body-params)]
-       {:get `character-page}]
-      [(route-map/path-for route-map/dnd-e5-char-parties-route) ^:interceptors [(body-params/body-params) check-auth]
-       {:post `party/create-party
-        :get `party/parties}]
-      [(route-map/path-for route-map/dnd-e5-char-party-route :id ":id") ^:interceptors [(body-params/body-params) check-auth parse-id check-party-owner]
-       {:delete `party/delete-party}]
-      [(route-map/path-for route-map/dnd-e5-char-party-name-route :id ":id") ^:interceptors [(body-params/body-params) check-auth parse-id check-party-owner]
-       {:put `party/update-party-name}]
-      [(route-map/path-for route-map/dnd-e5-char-party-characters-route :id ":id") ^:interceptors [(body-params/body-params) check-auth parse-id check-party-owner]
-       {:post `party/add-character}]
-      [(route-map/path-for route-map/dnd-e5-char-party-character-route :id ":id" :character-id ":character-id") ^:interceptors [(body-params/body-params) check-auth parse-id check-party-owner]
-       {:delete `party/remove-character}]
-      [(route-map/path-for route-map/login-route) ^:interceptors [(body-params/body-params)]
-       {:post `login}]
-      [(route-map/path-for route-map/character-pdf-route) ^:interceptors [(body-params/body-params)]
-       {:post `character-pdf-2}]
-      [(route-map/path-for route-map/verify-route)
-       {:get `verify}]
-      [(route-map/path-for route-map/re-verify-route) ^:interceptors [(body-params/body-params)]
-       {:get `re-verify}]
-      [(route-map/path-for route-map/reset-password-route) ^:interceptors [(body-params/body-params) ring/cookies check-auth]
-       {:post `reset-password}]
-      [(route-map/path-for route-map/reset-password-page-route) ^:interceptors [ring/cookies]
-       {:get `reset-password-page}]
-      [(route-map/path-for route-map/send-password-reset-route) ^:interceptors [(body-params/body-params)]
-       {:get `send-password-reset}]
-      [(route-map/path-for route-map/privacy-policy-route)
-       {:get `privacy-policy-page}]
-      [(route-map/path-for route-map/terms-of-use-route)
-       {:get `terms-of-use-page}]
-      [(route-map/path-for route-map/community-guidelines-route)
-       {:get `community-guidelines-page}]
-      [(route-map/path-for route-map/cookies-policy-route)
-       {:get `cookie-policy-page}]
-      [(route-map/path-for route-map/check-email-route)
-       {:get `check-email}]
-      [(route-map/path-for route-map/check-username-route)
-       {:get `check-username}]
-      ["/health"
-       {:get `health-check}]]])))
+    [[["/" {:get `index}
+       ^:interceptors [(body-params/body-params) service-error-handler]
+       [(route-map/path-for route-map/register-route) ^:interceptors [(body-params/body-params)]
+        {:post `register}]
+       [(route-map/path-for route-map/user-route) ^:interceptors [check-auth]
+        {:get `get-user}]
+       [(route-map/path-for route-map/follow-user-route :user ":user") ^:interceptors [check-auth]
+        {:post `follow-user
+         :delete `unfollow-user}]
+       [(route-map/path-for route-map/dnd-e5-char-list-route) ^:interceptors [(body-params/body-params) check-auth]
+        {:post `save-character
+         :get `character-list}]
+       [(route-map/path-for route-map/dnd-e5-char-summary-list-route) ^:interceptors [(body-params/body-params) check-auth]
+        {:get `character-summary-list}]
+       [(route-map/path-for route-map/dnd-e5-char-route :id ":id") ^:interceptors [check-auth]
+        {:delete `delete-character}]
+       [(route-map/path-for route-map/dnd-e5-char-route :id ":id")
+        {:get `get-character}]
+       [(route-map/path-for route-map/dnd-e5-char-page-route :id ":id") ^:interceptors [(body-params/body-params)]
+        {:get `character-page}]
+       [(route-map/path-for route-map/dnd-e5-char-parties-route) ^:interceptors [(body-params/body-params) check-auth]
+        {:post `party/create-party
+         :get `party/parties}]
+       [(route-map/path-for route-map/dnd-e5-char-party-route :id ":id") ^:interceptors [(body-params/body-params) check-auth parse-id check-party-owner]
+        {:delete `party/delete-party}]
+       [(route-map/path-for route-map/dnd-e5-char-party-name-route :id ":id") ^:interceptors [(body-params/body-params) check-auth parse-id check-party-owner]
+        {:put `party/update-party-name}]
+       [(route-map/path-for route-map/dnd-e5-char-party-characters-route :id ":id") ^:interceptors [(body-params/body-params) check-auth parse-id check-party-owner]
+        {:post `party/add-character}]
+       [(route-map/path-for route-map/dnd-e5-char-party-character-route :id ":id" :character-id ":character-id") ^:interceptors [(body-params/body-params) check-auth parse-id check-party-owner]
+        {:delete `party/remove-character}]
+       [(route-map/path-for route-map/login-route) ^:interceptors [(body-params/body-params)]
+        {:post `login}]
+       [(route-map/path-for route-map/character-pdf-route) ^:interceptors [(body-params/body-params)]
+        {:post `character-pdf-2}]
+       [(route-map/path-for route-map/verify-route)
+        {:get `verify}]
+       [(route-map/path-for route-map/re-verify-route) ^:interceptors [(body-params/body-params)]
+        {:get `re-verify}]
+       [(route-map/path-for route-map/reset-password-route) ^:interceptors [(body-params/body-params) ring/cookies check-auth]
+        {:post `reset-password}]
+       [(route-map/path-for route-map/reset-password-page-route) ^:interceptors [ring/cookies]
+        {:get `reset-password-page}]
+       [(route-map/path-for route-map/send-password-reset-route) ^:interceptors [(body-params/body-params)]
+        {:get `send-password-reset}]
+       [(route-map/path-for route-map/privacy-policy-route)
+        {:get `privacy-policy-page}]
+       [(route-map/path-for route-map/terms-of-use-route)
+        {:get `terms-of-use-page}]
+       [(route-map/path-for route-map/community-guidelines-route)
+        {:get `community-guidelines-page}]
+       [(route-map/path-for route-map/cookies-policy-route)
+        {:get `cookie-policy-page}]
+       [(route-map/path-for route-map/check-email-route)
+        {:get `check-email}]
+       [(route-map/path-for route-map/check-username-route)
+        {:get `check-username}]
+       ["/health"
+        {:get `health-check}]]]])
+   expanded-index-routes))
