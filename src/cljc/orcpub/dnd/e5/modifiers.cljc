@@ -217,14 +217,21 @@
             total-levels)
           level)))
 
+(defn add-spell [spells-known level {:keys [class key] :as cfg}]
+  (update-in
+   spells-known
+   [level
+    [class key]]
+   merge
+   cfg))
+
 (defmacro spells-known-cfg [level {class-key :class-key :as spell-cfg} min-level conditions]
   `(mods/modifier
     ~'?spells-known
     (if (enough-levels? ~class-key ~'?total-levels ~'?class-level ~min-level)
-      (update
+      (add-spell
        ~'?spells-known
        ~level
-       conj
        ~spell-cfg)
       ~'?spells-known)
     nil
@@ -245,10 +252,9 @@
   (mods/modifier
     ?spells-known
     (if (enough-levels? class-key ?total-levels ?class-level min-level)
-      (update
+      (add-spell
        ?spells-known
        level
-       conj
        (spell-data
         spell-key
         spellcasting-ability
