@@ -95,7 +95,7 @@
                           (shuffle (filter
                                     (fn [o]
                                       (and (entity/meets-prereqs? o built-char)
-                                           (not= :none (::t/key o))))
+                                           (not (#{:none :custom} (::t/key o)))))
                                     options)))]
     (reduce
      (fn [new-character {:keys [::t/key]}]
