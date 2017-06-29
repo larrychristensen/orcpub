@@ -237,9 +237,10 @@
 
 (defn register [{:keys [json-params db conn] :as request}]
   (let [{:keys [username email password first-and-last-name send-updates?]} json-params
-        username (s/trim username)
-        email (s/lower-case (s/trim email))
-        password (s/trim password)
+        _ (prn "REGEISTER" username email password first-and-last-name)
+        username (if username (s/trim username))
+        email (if email (s/lower-case (s/trim email)))
+        password (if password (s/trim password))
         validation (registration/validate-registration
                     json-params
                     (seq (d/q email-query db email))
@@ -873,32 +874,6 @@
 (defn health-check [_]
   {:status 200 :body "OK"})
 
-[(route-map/path-for route-map/dnd-e5-char-list-page-route) ^:interceptors [(body-params/body-params)]
- {:get `character-list-page}]
-[(route-map/path-for route-map/dnd-e5-char-parties-page-route)
- {:get `parties-page}]
-[(route-map/path-for route-map/dnd-e5-monster-list-page-route) ^:interceptors [(body-params/body-params)]
- {:get `monster-list-page}]
-[(route-map/path-for route-map/dnd-e5-char-page-route :id ":id")
- {:get `character-page}]
-
-[(route-map/path-for route-map/dnd-e5-char-builder-route) ^:interceptors [(body-params/body-params)]
- {:get `character-builder-page}]
-[(route-map/path-for route-map/reset-password-page-route) ^:interceptors [ring/cookies]
- {:get `reset-password-page}]
-[(route-map/path-for route-map/send-password-reset-page-route)
- {:get `send-password-reset-page}]
-[(route-map/path-for route-map/register-page-route)
- {:get `registration-page}]
-[(route-map/path-for route-map/login-page-route)
- {:get `login-page}]
-[(route-map/path-for route-map/password-reset-sent-route)
- {:get `password-reset-sent-page}]
-[(route-map/path-for route-map/password-reset-expired-route)
- {:get `password-reset-expired-page}]
-[(route-map/path-for route-map/password-reset-used-route)
- {:get `password-reset-used-page}]
-
 (def index-page-paths
   [[route-map/dnd-e5-char-list-page-route]
    [route-map/dnd-e5-char-parties-page-route]
@@ -938,48 +913,48 @@
    (route/expand-routes
     [[["/" {:get `index}
        ^:interceptors [(body-params/body-params) service-error-handler]
-       [(route-map/path-for route-map/register-route) ^:interceptors [(body-params/body-params)]
+       [(route-map/path-for route-map/register-route)
         {:post `register}]
        [(route-map/path-for route-map/user-route) ^:interceptors [check-auth]
         {:get `get-user}]
        [(route-map/path-for route-map/follow-user-route :user ":user") ^:interceptors [check-auth]
         {:post `follow-user
          :delete `unfollow-user}]
-       [(route-map/path-for route-map/dnd-e5-char-list-route) ^:interceptors [(body-params/body-params) check-auth]
+       [(route-map/path-for route-map/dnd-e5-char-list-route) ^:interceptors [check-auth]
         {:post `save-character
          :get `character-list}]
-       [(route-map/path-for route-map/dnd-e5-char-summary-list-route) ^:interceptors [(body-params/body-params) check-auth]
+       [(route-map/path-for route-map/dnd-e5-char-summary-list-route) ^:interceptors [check-auth]
         {:get `character-summary-list}]
        [(route-map/path-for route-map/dnd-e5-char-route :id ":id") ^:interceptors [check-auth]
         {:delete `delete-character}]
        [(route-map/path-for route-map/dnd-e5-char-route :id ":id")
         {:get `get-character}]
-       [(route-map/path-for route-map/dnd-e5-char-page-route :id ":id") ^:interceptors [(body-params/body-params)]
+       [(route-map/path-for route-map/dnd-e5-char-page-route :id ":id")
         {:get `character-page}]
-       [(route-map/path-for route-map/dnd-e5-char-parties-route) ^:interceptors [(body-params/body-params) check-auth]
+       [(route-map/path-for route-map/dnd-e5-char-parties-route)
         {:post `party/create-party
          :get `party/parties}]
-       [(route-map/path-for route-map/dnd-e5-char-party-route :id ":id") ^:interceptors [(body-params/body-params) check-auth parse-id check-party-owner]
+       [(route-map/path-for route-map/dnd-e5-char-party-route :id ":id") ^:interceptors [check-auth parse-id check-party-owner]
         {:delete `party/delete-party}]
-       [(route-map/path-for route-map/dnd-e5-char-party-name-route :id ":id") ^:interceptors [(body-params/body-params) check-auth parse-id check-party-owner]
+       [(route-map/path-for route-map/dnd-e5-char-party-name-route :id ":id") ^:interceptors [check-auth parse-id check-party-owner]
         {:put `party/update-party-name}]
-       [(route-map/path-for route-map/dnd-e5-char-party-characters-route :id ":id") ^:interceptors [(body-params/body-params) check-auth parse-id check-party-owner]
+       [(route-map/path-for route-map/dnd-e5-char-party-characters-route :id ":id") ^:interceptors [check-auth parse-id check-party-owner]
         {:post `party/add-character}]
-       [(route-map/path-for route-map/dnd-e5-char-party-character-route :id ":id" :character-id ":character-id") ^:interceptors [(body-params/body-params) check-auth parse-id check-party-owner]
+       [(route-map/path-for route-map/dnd-e5-char-party-character-route :id ":id" :character-id ":character-id") ^:interceptors [check-auth parse-id check-party-owner]
         {:delete `party/remove-character}]
-       [(route-map/path-for route-map/login-route) ^:interceptors [(body-params/body-params)]
+       [(route-map/path-for route-map/login-route)
         {:post `login}]
-       [(route-map/path-for route-map/character-pdf-route) ^:interceptors [(body-params/body-params)]
+       [(route-map/path-for route-map/character-pdf-route)
         {:post `character-pdf-2}]
        [(route-map/path-for route-map/verify-route)
         {:get `verify}]
-       [(route-map/path-for route-map/re-verify-route) ^:interceptors [(body-params/body-params)]
+       [(route-map/path-for route-map/re-verify-route)
         {:get `re-verify}]
-       [(route-map/path-for route-map/reset-password-route) ^:interceptors [(body-params/body-params) ring/cookies check-auth]
+       [(route-map/path-for route-map/reset-password-route) ^:interceptors [ring/cookies check-auth]
         {:post `reset-password}]
        [(route-map/path-for route-map/reset-password-page-route) ^:interceptors [ring/cookies]
         {:get `reset-password-page}]
-       [(route-map/path-for route-map/send-password-reset-route) ^:interceptors [(body-params/body-params)]
+       [(route-map/path-for route-map/send-password-reset-route)
         {:get `send-password-reset}]
        [(route-map/path-for route-map/privacy-policy-route)
         {:get `privacy-policy-page}]

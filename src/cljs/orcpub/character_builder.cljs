@@ -1805,11 +1805,13 @@
 
 (def unsaved-button-style {:background "#9a031e"})
 
-(defn confirm-handler [character-changed? {:keys [event] :as cfg}]
+(defn confirm-handler [character-changed? {:keys [event pre] :as cfg}]
   (fn [_]
     (if character-changed?
       (dispatch [:show-confirmation cfg])
-      (dispatch event))))
+      (do
+        (if pre (pre))
+        (dispatch event)))))
 
 (defn character-builder []
   (let [character @(subscribe [:character])
@@ -1849,6 +1851,7 @@
                    character-changed?
                    {:confirm-button-text "GENERATE RANDOM CHARACTER"
                     :question "You have unsaved changes, are you sure you want to discard them and generate a random character?"
+                    :pre (fn [] (dispatch-sync [:set-loading true]))
                     :event [:random-character character built-template locked-components]})}
        {:title "New"
         :icon "plus"

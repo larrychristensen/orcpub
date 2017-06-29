@@ -107,6 +107,11 @@
    [:.f-w-600
     {:font-weight 600}]
 
+   [:.l-h-19
+    {:line-height "19px"}]
+   [:.l-h-20
+    {:line-height "20px"}]
+
    [:.m-r--10
     {:margin-right "-10px"}]
    [:.m-r--5
