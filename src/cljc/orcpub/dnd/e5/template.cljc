@@ -3103,7 +3103,9 @@
                     :modifiers [(mod/set-mod ?spell-mastery name)]
                     :prereqs [(t/option-prereq
                                nil
-                               (fn [c] (some #(= spell-kw (:key %)) (get @(subscribe [::char5e/spells-known nil c]) level)))
+                               (fn [c]
+                                 (let [spells-known @(subscribe [::char5e/spells-known nil c])]
+                                   (get-in spells-known [level ["Wizard" spell-kw]])))
                                true)]})))
               (get-in sl/spell-lists [:wizard level]))}))
 
@@ -3122,7 +3124,9 @@
                     :modifiers [(mod/set-mod ?signature-spells name)]
                     :prereqs [(t/option-prereq
                                nil
-                               (fn [c] (some #(= spell-kw (:key %)) (get @(subscribe [::char5e/spells-known nil c]) 3)))
+                               (fn [c]
+                                 (let [spells-known @(subscribe [::char5e/spells-known nil c])]
+                                   (get-in spells-known [3 ["Wizard" spell-kw]])))
                                true)]})))
               (get-in sl/spell-lists [:wizard 3]))}))
 
@@ -3289,7 +3293,7 @@
                                                                  (fn [s]
                                                                    (and (= :minor-illusion (:key s))
                                                                         (not (:illusionist-cantrip? s))))
-                                                                 (spells-known 0)))]
+                                                                 (vals (spells-known 0))))]
                                                 passes?))})]
                   :levels {6 {:modifiers [(mod5e/action
                                            {:name "Malleable Illusions"

@@ -454,6 +454,9 @@
 (defn spells-known [built-char]
   (get-prop built-char :spells-known))
 
+(defn flat-spells [spells-known]
+  (->> spells-known vals (map vals) flatten))
+
 (defn spells-known-modes [built-char]
   (get-prop built-char :spells-known-modes))
 

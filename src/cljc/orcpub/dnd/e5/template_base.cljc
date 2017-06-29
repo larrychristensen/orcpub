@@ -203,7 +203,7 @@
                                         :spell-save-dc (?spell-save-dc ability)
                                         :spell-attack-modifier (?spell-attack-modifier ability)}))
                       {}
-                      (->> ?spells-known vals flatten))
+                      (->> ?spells-known vals (map vals) flatten))
     ?total-spellcaster-levels (apply + (map (fn [[cls-kw factor]]
                                               (-> ?levels
                                                   cls-kw
@@ -223,7 +223,10 @@
                                                  spell-mods
                                                  :ability)
                                  ability-mod (get ?ability-bonuses ability 0)]
-                             (+ ability-mod (or (?class-level class-kw) 0))))
+                             (+ ability-mod (or (let [lvl (?class-level class-kw)]
+                                                  (if lvl
+                                                    (int (/ lvl 2))))
+                                                0))))
     ?spell-slots (merge-with
                   +
                   (cond
