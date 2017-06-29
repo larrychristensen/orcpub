@@ -1553,7 +1553,14 @@
                             :summary "from non-magical weapons, resistance to slashing, bludgeoning, and piercing damage"}]}]}))
 
 (defn druid-spell [spell-level spell-key min-level]
-  (mod5e/spells-known spell-level spell-key ::char5e/wis "Druid" min-level nil :druid))
+  (mod5e/spells-known-cfg spell-level
+                      {:key spell-key
+                       :ability ::char5e/wis
+                       :class "Druid"
+                       :class-key :druid
+                       :always-prepared? true}
+                      min-level
+                      nil))
 
 (defn lands-stride [level]
   {:name "Land's Stride"

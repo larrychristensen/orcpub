@@ -1402,7 +1402,7 @@
                    [:td.p-5 slots])
                  spell-slots))])]]]]))))
 
-(defn spell-row [id lvl spell-modifiers prepares-spells prepared-spells-by-class {:keys [key ability qualifier class]} expanded? on-click]
+(defn spell-row [id lvl spell-modifiers prepares-spells prepared-spells-by-class {:keys [key ability qualifier class always-prepared?]} expanded? on-click]
   (let [spell (spells/spell-map key)
         cls-mods (get spell-modifiers class)
         prepare-spell-count-fn @(subscribe [::char/prepare-spell-count-fn id])
@@ -1418,11 +1418,16 @@
        (if (and (pos? lvl)
                 (get prepares-spells class))
          [:span
-          {:on-click (fn [e]
-                       (dispatch [::char/toggle-spell-prepared id class key])
+          {:class-name (if always-prepared?
+                         "cursor-disabled")
+           :on-click (fn [e]
+                       (if (not always-prepared?)
+                         (dispatch [::char/toggle-spell-prepared id class key]))
                        (.stopPropagation e))}
-          (comps/checkbox (get-in prepared-spells-by-class [class key])
-                          (not (pos? remaining-preps)))])
+          (comps/checkbox (or always-prepared?
+                              (get-in prepared-spells-by-class [class key]))
+                          (or always-prepared?
+                              (not (pos? remaining-preps))))])
        (:name spell)]
       [:td.p-l-10.p-b-10.p-t-10 class]
       [:td.p-l-10.p-b-10.p-t-10 (if ability (s/upper-case (name ability)))]
