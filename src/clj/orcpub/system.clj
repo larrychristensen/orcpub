@@ -41,7 +41,8 @@
             prod-service-map
             (if (= :dev env) dev-service-map-overrides))
      true http/default-interceptors
-     (= :dev env) http/dev-interceptors)
+     (= :dev env) http/dev-interceptors
+     (= :test env) (do (prn "TEST") http/dev-interceptors))
 
    :pedestal
    (component/using
