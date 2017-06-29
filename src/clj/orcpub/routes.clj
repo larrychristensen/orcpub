@@ -601,9 +601,10 @@
           (if (not current-valid?)
             (let [new-character (remove-ids character)
                   tx [[:db/retractEntity (:db/id current-character)]
-                      (assoc new-character
-                             :db/id "tempid"
-                             :orcpub.entity.strict/owner username)]
+                      (-> new-character
+                          (assoc :db/id "tempid"
+                                 :orcpub.entity.strict/owner username)
+                          add-dnd-5e-character-tags)]
                   result @(d/transact conn tx)]
               {:status 200
                :body (d/pull (d/db conn) '[*] (-> result :tempids (get "tempid")))})
@@ -737,9 +738,10 @@
                    :where
                    [?e ::se/owner ?idents]
                    ;; uncomment these once all characters have the data
-                   [?e ::se/type :character]
-                   [?e ::se/game :dnd]
-                   [?e ::se/game-version :e5]]
+                   ;;[?e ::se/type :character]
+                   ;;[?e ::se/game :dnd]
+                   ;;[?e ::se/game-version :e5]
+                   ]
                  db
                  (concat
                   [(:orcpub.user/username user)
