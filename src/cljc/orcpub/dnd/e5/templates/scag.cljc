@@ -4,6 +4,7 @@
             [orcpub.entity-spec :as es]
             [orcpub.modifiers :as mod]
             [orcpub.dnd.e5.modifiers :as mod5e]
+            [orcpub.dnd.e5.units :as units5e]
             [orcpub.dnd.e5.character :as char5e]
             [orcpub.dnd.e5.weapons :as weapon5e]
             [orcpub.dnd.e5.equipment :as equip5e]
@@ -171,7 +172,7 @@
                                             :page 128
                                             :class-key :fighter
                                             :source :scag
-                                            :range opt5e/ft-60
+                                            :range units5e/ft-60
                                             :summary (str "When you Action Surge, choose "
                                                           (if (>= (?class-level :fighter) 17)
                                                             2
@@ -199,7 +200,7 @@
                                            {:name "Hour of Reaping"
                                             :page 130
                                             :source :scag
-                                            :duration opt5e/turns-1
+                                            :duration units5e/turns-1
                                             :summary (str "creatures within 30 ft. are frightened of you on failed DC " (?spell-save-dc ::char5e/wis) " WIS save")})]}
                            11 {:modifiers [(mod5e/trait-cfg
                                             {:name "Mastery of Death"
@@ -217,7 +218,7 @@
                                 :page 131
                                 :source :scag
                                 :attack-type :ranged
-                                :range opt5e/ft-30
+                                :range units5e/ft-30
                                 :damage-die ?martial-arts-die
                                 :damage-die-count 1
                                 :damage-type :radiant
@@ -281,8 +282,8 @@
                                {:name "Exalted Champion"
                                 :page 86
                                 :source :scag
-                                :frequency opt5e/long-rests-1
-                                :duration opt5e/hours-1
+                                :frequency units5e/long-rests-1
+                                :duration units5e/hours-1
                                 :summary "resistance to non-magical weapon slashing, bludgeoning, and piercing damage; allies within 30 ft. have advantage on death saves; you and allies have advantage on WIS saves"})]}}}]
    false))
 
@@ -335,7 +336,7 @@
                                            :level 3
                                            :page 136
                                            :source :scag
-                                           :duration opt5e/minutes-1
+                                           :duration units5e/minutes-1
                                            :summary "impose disadvantage on creature's attacks on others besides you if you success a CHA check contested by it's WIS check; it can only take opportunity attacks against you"})]}
                           13 {:modifiers [(mod5e/bonus-action
                                            {:name "Elegance Maneuver"
@@ -352,7 +353,7 @@
                            :level 17
                            :page 136
                            :source :scag
-                           :frequency opt5e/rests-1
+                           :frequency units5e/rests-1
                            :summary "reroll a missed attack roll, this time with advantage"}]}]})
 
 (def scag-sorcerer
@@ -382,7 +383,7 @@
                                            {:name "Storm Guide: Wind"
                                             :page 137
                                             :source :scag
-                                            :duration opt5e/rounds-1
+                                            :duration units5e/rounds-1
                                             :summary "if windy, choose the direction of wind within 100 foot radius sphere around you"})]}
                            14 {:modifiers [(mod5e/reaction
                                             {:name "Storm's Fury"
@@ -396,8 +397,8 @@
                                             {:name "Wind Soul"
                                              :page 137
                                              :source :scag
-                                             :duration opt5e/hours-1
-                                             :frequency opt5e/rests-1
+                                             :duration units5e/hours-1
+                                             :frequency units5e/rests-1
                                              :summary (str "temporarily sacrifice 30 ft. of your flying speed to give 30 ft. to up to " (+ 3 (?ability-bonuses ::char5e/cha)) " other creatures")})]}}}]})
 
 (def scag-warlock
@@ -426,7 +427,7 @@
                                             :level 6
                                             :page 140
                                             :source :scag
-                                            :frequency opt5e/long-rests-1
+                                            :frequency units5e/long-rests-1
                                             :summary (str "regain 1d8 " (common/bonus-str (?ability-bonuses ::char5e/con)) " HPs when you succeed on a death save or stabilize with spare the dying")})]}
                           7 {:selections [(opt5e/warlock-subclass-spell-selection [:aura-of-life :death-ward])]}
                           9 {:selections [(opt5e/warlock-subclass-spell-selection [:contagion :legend-lore])]}
@@ -436,7 +437,7 @@
                                             :page 140
                                             :source :scag
                                             :summary (str "regain 1d8 " (common/bonus-str (?class-level :warlock)) " HPs and reattach severed parts")
-                                            :frequency opt5e/rests-1})]}}}]})
+                                            :frequency units5e/rests-1})]}}}]})
 
 (def scag-wizard
   {:name "Wizard",
@@ -464,9 +465,8 @@
                                            :name "Bladesong"
                                            :page 142
                                            :source :scag
-                                           :duration opt5e/minutes-1
-                                           :frequency {:units :rest
-                                                       :amount 2}
+                                           :duration units5e/minutes-1
+                                           :frequency (units5e/rests 2)
                                            :summary (let [bonus (common/bonus-str (max 1 (?ability-bonuses ::char5e/int)))] (str bonus " AC; +10 speed; advantage on Acrobatics; " bonus " on concentration saves"))})]}
                           6 {:modifiers [(mod5e/num-attacks 2)
                                          (mod5e/trait-cfg

@@ -2,6 +2,7 @@
   (:require [orcpub.dnd.e5.options :as opt5e]
             [orcpub.dnd.e5.modifiers :as mod5e]
             [orcpub.dnd.e5.character :as char5e]
+            [orcpub.dnd.e5.units :as units5e]
             [orcpub.modifiers :as mod]
             [orcpub.template :as t]
             [re-frame.core :refer [subscribe]]))
@@ -27,7 +28,7 @@
                                          (mod5e/bonus-action
                                           {:name "Hexblade's Curse"
                                            :page 1
-                                           :frequency {:units :rest}
+                                           :frequency units5e/rests-1
                                            :source :ua-warlock-and-wizard})]
                              :selections [(opt5e/warlock-subclass-spell-selection [:shield :wrathful-smite])]}
                           3 {:selections [(opt5e/warlock-subclass-spell-selection [:branding-smite :magic-weapon])]}
@@ -176,7 +177,7 @@
                            opt5e/pact-of-the-tome-prereq]
                  :page 3
                  :source :ua-warlock-and-wizard
-                 :duration {:units :turn}
+                 :duration units5e/turns-1
                  :trait-type :bonus-action
                  :summary "Gain the ability to see through objects to 30 ft, with darkvision within that range."})
                (opt5e/eldritch-invocation-option
@@ -213,7 +214,7 @@
                            opt5e/has-eldritch-blast-prereq]
                  :page 4
                  :source :ua-warlock-and-wizard
-                 :frequency {:units :turn}
+                 :frequency units5e/turns-1
                  :summary "When you hit with eldritch blast, you can reduce the target's speed by 10 ft. until your next turn."
                  :trait-type :bonus-action})
                (opt5e/eldritch-invocation-option
@@ -222,7 +223,7 @@
                            great-old-one-prereq]
                  :page 4
                  :source :ua-warlock-and-wizard
-                 :duration {:units :turn}
+                 :duration units5e/turns-1
                  :summary "Gain the ability to see through objects to 30 ft, with darkvision within that range."
                  :trait-type :action})
                (opt5e/eldritch-invocation-option
@@ -231,7 +232,7 @@
                            opt5e/has-eldritch-blast-prereq]
                  :page 4
                  :source :ua-warlock-and-wizard
-                 :frequency {:units :turn}
+                 :frequency units5e/turns-1
                  :summary "When you hit with 'eldritch blast' you can move the target up to 10 ft. toward you."})
                (opt5e/eldritch-invocation-option
                 {:name "Green Lord's Gift"
@@ -317,7 +318,7 @@
                  :page 5
                  :source :ua-warlock-and-wizard
                  :trait-type :reaction
-                 :frequency {:units :rest}
+                 :frequency units5e/rests-1
                  :summary "When you take damage, gain 10 temp HPs. In addition, gain vulnerability to fire damage, and speed is 0, which go away at the end of your next turn."})
                (opt5e/eldritch-invocation-option
                 {:name "Ultimate Pact Weapon"

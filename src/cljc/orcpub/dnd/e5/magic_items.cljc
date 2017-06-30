@@ -6,7 +6,8 @@
             [orcpub.dnd.e5.equipment :as equip5e]
             [orcpub.dnd.e5.character :as char5e]
             [orcpub.dnd.e5.character.equipment :as char-equip5e]
-            [orcpub.dnd.e5.modifiers :as mod5e])
+            [orcpub.dnd.e5.modifiers :as mod5e]
+            [orcpub.dnd.e5.units :as units5e])
   #?(:cljs (:require-macros [orcpub.dnd.e5.modifiers :as mod5e])))
 
 (defn sword? [w]
@@ -60,7 +61,7 @@
                 {:name "Dragon Scale Mail"
                  :page 165
                  :source :dmg
-                 :frequency {:units :day}
+                 :frequency units5e/days-1
                  :summary "know location of closest dragon within 30 miles"})]
    :description (str "Dragon scale mail is made of the scales of one kind of dragon. Sometimes dragons collect their cast-off scales and gift them to humanoids. Other times, hunters carefully skin and preserve the hide of a dead dragon. In either case, dragon scale mail is highly valued.
 While wearing this armor, you gain a +1 bonus to AC, you have advantage on saving throws against the Frightful Presence and breath weapons of dragons, and you have resistance to " (name resistance-kw) " damage.
@@ -79,7 +80,7 @@ direction to the closest dragon within 30 miles of you that is of the same type 
                 {:name "Rod of the Pact Keeper"
                  :page 197
                  :source :dmg
-                 :frequency {:units :long-rest}
+                 :frequency units5e/long-rests-1
                  :summary "Regain a warlock spell slot"})]
    :summary (str (common/bonus-str bonus)
                      " to spell attack rolls and saving throw DCs for your warlock spells")})
@@ -167,7 +168,7 @@ A stone has AC 24, 10 hit points, and resistance to all damage. It is considered
                  {:name "Alchemy Jug: Create Liquid"
                   :page 150
                   :source :dmg
-                  :frequncy {:units :day}
+                  :frequncy units5e/days-1
                   :summary "Create acid, poison, beer, honey, or mayonnaise in the jug."})
                 (mod5e/action
                  {:name "Alchemy Jug: Pour Liquid"
@@ -406,9 +407,8 @@ Whenever a hostile creature damages you while the axe is in your possession, you
     	         {:name "Boots of Speed"
 		  :source :dmg
 		  :page 155
-                  :frequency {:units :long-rest}
-                  :duration {:units :minute
-                             :amount 10}
+                  :frequency units5e/long-rests-1
+                  :duration units5e/minutes-10
 		  :summary "Activate Boots of Speed and double your walking speed and opportunity attacks against you have disadvantage"})]
 
     :description "While you wear these boots, you can use a bonus action and click the boots’ heels together. If you do, the boots double your walking speed, and any creature that makes an opportunity attack against you has disadvantage on the attack roll. If you click your heels together again, you end the effect.
@@ -503,7 +503,7 @@ Alternatively, when you light the candle for the first time, you can cast the ga
                  {:name "Cape of the Mountebank"
                   :page 157
                   :source :dmg
-                  :frequency {:units :day}
+                  :frequency units5e/days-1
                   :summary "Cast 'dimension door'"})]
     :description "This cape smells faintly of brimstone. While wearing it, you can use it to cast the dimension door spell as an action. This property of the cape can’t be used again until the next dawn.
 When you disappear, you leave behind a cloud of smoke, and you appear in a similar cloud of smoke at your destination. The smoke lightly obscures the space you left and the space you appear in, and it dissipates at the end of your next turn. A light or stronger wind disperses the smoke."
@@ -535,7 +535,7 @@ The chime can be used ten times. After the tenth time, it cracks and becomes use
                  {:name "Circlet of Blasting"
                   :page 158
                   :source :dmg
-                  :frequency {:units :day}
+                  :frequency units5e/days-1
                   :summary "cast 'scorching ray' with +5 attack bonus"})]
     :description "While wearing this circlet, you can use an action to cast the scorching ray spell with it. When you make the spell’s attacks, you do so with an attack bonus of +5. The circlet can’t be used this way again until the next dawn."
     }{
@@ -550,7 +550,7 @@ The chime can be used ten times. After the tenth time, it cracks and becomes use
                  {:name "Cloak of Arachnidia"
                   :page 158
                   :source :dmg
-                  :frequency {:units :day}
+                  :frequency units5e/days-1
                   :summary "cast 'web' with save DC 13 and 2X area"})]
     :description "This fine garment is made of black silk interwoven with faint silvery threads. While wearing it, you gain the following benefits:
 • You have resistance to poison damage.
@@ -592,9 +592,8 @@ shifts to camouflage you. Pulling the hood up or down requires an action."
                  {:name "Cloak of Invisibility"
                   :page 158
                   :source :dmg
-                  :duration {:units :hour
-                             :amount 2}
-                  :frequency {:units :day}
+                  :duration units5e/hours-2
+                  :frequency units5e/days-1
                   :summary "Pull hood up and become invisible"})]
     :description "While you wear this cloak with its hood up, Wisdom (Perception) checks made to see you have disadvantage, and you have advantage on Dexterity (Stealth) checks made to hide, as the cloak’s color
 shifts to camouflage you. Pulling the hood up or down requires an action."}
@@ -618,7 +617,7 @@ shifts to camouflage you. Pulling the hood up or down requires an action."}
                    {:name "Cloak of the Bat"
                     :page 159
                     :source :dmg
-                    :frequency {:units :day}
+                    :frequency units5e/days-1
                     :summary "'polymorph' into a bat"})]
     :description "While wearing this cloak, you have advantage on Dexterity (Stealth) checks. In an area of dim light or darkness, you can grip the edges of the cloak with both hands and use it to fly at a speed of 40 feet. If you ever fail to grip the cloak’s edges while flying in this way, or if you are no longer in dim light or darkness, you lose this flying speed.
 While wearing the cloak in an area of dim light or darkness, you can use your action to cast polymorph
@@ -811,7 +810,7 @@ refers to any creature with the dragon type, including dragon turtles and wyvern
                  {:name "Driftglobe Emanation (daylight)"
                   :page 166
                   :source :dmg
-                  :frequency {:units :day}
+                  :frequency units5e/days-1
                   :summary "Cause driftglobe to emanate light as from the daylight spell"})
                 (mod5e/action
                  {:name "Driftglobe Hover"
@@ -905,9 +904,8 @@ The cloud persists as long as the bottle is open. Closing the bottle requires yo
                  {:name "Eyes of Charming"
                   :page 168
                   :source :dmg
-                  :frequency {:units :day}
-                  :range {:units :feet
-                          :amount 30}
+                  :frequency units5e/days-1
+                  :range units5e/ft-30
                   :summary "cast 'charm person'"})]
     :description "These crystal lenses fit over the eyes. They have 3 charges. While wearing them, you can expend 1 charge as an action to cast the charm person spell
 (save DC 13) on a humanoid within 30 feet of you, provided that you and the target can see each other. The lenses regain all expended charges daily at dawn."
@@ -2006,7 +2004,7 @@ The rope has AC 20 and 20 hit points. It regains 1 hit point every 5 minutes as 
                  {:name "Sending Stones"
                   :page 199
                   :source :dmg
-                  :frequency {:units :day}
+                  :frequency units5e/days-1
                   :summary "Cast sending to communicate with the holder of the other stone"})]
     :summary "Cast sending between stones"}
    {

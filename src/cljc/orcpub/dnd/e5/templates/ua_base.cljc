@@ -7,6 +7,7 @@
             [orcpub.dnd.e5.character :as char5e]
             [orcpub.dnd.e5.options :as opt5e]
             [orcpub.dnd.e5.weapons :as weapon5e]
+            [orcpub.dnd.e5.units :as units5e]
             [orcpub.dnd.e5.spell-lists :as sl]
             [orcpub.dnd.e5.templates.ua-options :as ua-options]
             [orcpub.dnd.e5.templates.ua-mystic :as ua-mystic]
@@ -75,7 +76,7 @@
                                {:name "Tipsy Sway"
                                 :page 1
                                 :source ua-trio-of-subclasses-kw
-                                :frequency {:units :rest}
+                                :frequency units5e/rests-1
                                 :summary "When an enemy misses you with melee attack you can have the attack hit another creature within 5 ft. of you"})]}
                11 {:modifiers [(mod5e/trait-cfg
                                 {:name "Drunkard's Luck"
@@ -112,7 +113,7 @@
                    {:name "Warrior of Reconciliation"
                     :source ua-trio-of-subclasses-kw
                     :page 2
-                    :duration opt5e/minutes-1
+                    :duration units5e/minutes-1
                     :summary "when using a simple bludgeoning weapon and you reduce a creature to 0 HPs, the creature is charmed instead"})
                   (mod5e/bonus-action
                    {:name "Channel Divinity: Emissary of Peace"
@@ -123,13 +124,13 @@
                    {:name "Channel Divinity: Rebuke the Violent"
                     :page 2
                     :source ua-trio-of-subclasses-kw
-                    :range opt5e/ft-10
+                    :range units5e/ft-10
                     :summary (str "when an enemy deals melee damage to someone other than you, it takes radiant damage equal to the amount it dealt, half on a successful DC " (?spell-save-dc ::char5e/cha) " WIS save.")})]
       :levels {7 {:modifiers [(mod5e/reaction
                                {:name "Aura of the Guardian"
                                 :page 2
                                 :source ua-trio-of-subclasses-kw
-                                :range opt5e/ft-10
+                                :range units5e/ft-10
                                 :summary "magically absorb the damage an ally would take"})]}
                15 {:modifiers [(mod5e/dependent-trait
                                 {:name "Protective Spirit"
@@ -153,7 +154,7 @@
                    {:name "Slayer's Eye"
                     :page 3
                     :source ua-trio-of-subclasses-kw
-                    :range opt5e/ft-120
+                    :range units5e/ft-120
                     :summary "learn creature's vulnerabilities, immunities, and resistances, as well as special effects triggered by damage; target also takes 1d6 the first time you hit with a weapon attack"})]
       :levels {5 {:modifiers [(mod5e/spells-known 2 :zone-of-truth ::char5e/wis "Ranger")]}
                7 {:modifiers [(mod5e/trait-cfg
@@ -166,7 +167,7 @@
                                 {:name "Relentless Slayer"
                                  :page 3
                                  :source ua-trio-of-subclasses-kw
-                                 :range opt5e/ft-30
+                                 :range units5e/ft-30
                                  :summary "when the target of your Slayer's Eye tries to change shape, teleport, travel to another plane, or turn gaseous, make a contested WIS check with the target, if you succeed, it fails the attempt"})]}
                13 {:modifiers [(mod5e/spells-known 4 :banishment ::char5e/wis "Ranger")]}
                15 {:modifiers [(mod5e/reaction
@@ -219,7 +220,7 @@
                               {:name "Ancestral Protectors"
                                :page 1
                                :source ua-options/ua-revised-subclasses-kw
-                               :duration {:units :round}
+                               :duration units5e/rounds-1
                                :summary "while raging, the first creature you hit with an attack on your turn gains disadvantage on attacks that don't target you and other creatures have reistance to the targets attacks"})]
                  :levels {6 {:modifiers [(mod5e/reaction
                                           {:name "Spirit Shield"
@@ -234,7 +235,7 @@
                            :level 10
                            :page 1
                            :source ua-options/ua-revised-subclasses-kw
-                           :frequency {:units :rest}
+                           :frequency units5e/rests-1
                            :summary "cast 'clairvoyance' spell without a slot and with WIS as ability"}
                           {:name "Vengeful Ancestors"
                            :level 14
@@ -261,13 +262,13 @@
                               {:name "Blade Flourish: Defensive Flourish"
                                :page 2
                                :source ua-options/ua-revised-subclasses-kw
-                               :duration opt5e/rounds-1
+                               :duration units5e/rounds-1
                                :summary "add a Bardic Inspiration die to your AC"})
                              (mod5e/action
                               {:name "Blade Flourish: Slashing Flourish"
                                :page 2
                                :source ua-options/ua-revised-subclasses-kw
-                               :range opt5e/ft-5
+                               :range units5e/ft-5
                                :summary "if the attack hits, do a Bardic Inspiration die worth of damage to other creatures of your choice"})
                              (mod5e/action
                               {:name "Blade Flourish: Mobile Flourish"
@@ -312,21 +313,21 @@
                                             {:name "One with the Blade"
                                              :page 5
                                              :source ua-options/ua-revised-subclasses-kw
-                                             :frequency {:units :round}
+                                             :frequency units5e/rounds-1
                                              :summary "kensei weapons count as magical; when you hit with a kensei weapon you may spend 1 ki to add damage equal to you Martial Arts die"})]}
                             11 {:selections [(kensei-weapon-selection 1)]
                                 :modifiers [(mod5e/bonus-action
                                              {:name "Sharpen the Blade"
                                               :page 5
                                               :source ua-options/ua-revised-subclasses-kw
-                                              :duration {:units :minute}
+                                              :duration units5e/minutes-1
                                               :summary "spend X ki (max 3) to grant a kensei weapon an X bonus to attack and damage rolls"})]}
                             17 {:selections [(kensei-weapon-selection 1)]
                                 :modifiers [(mod5e/trait-cfg
                                              {:name "Unerring Accuracy"
                                               :page 5
                                               :source ua-options/ua-revised-subclasses-kw
-                                              :frequency {:units :round}
+                                              :frequency units5e/rounds-1
                                               :summary "if you miss with a monk weapon, reroll the attack"})]}}}]}))
 
 (def sorcerer-favored-soul
@@ -341,7 +342,7 @@
                               {:name "Favored by the Gods"
                                :page 5
                                :source ua-options/ua-revised-subclasses-kw
-                               :frequency {:units :rest}
+                               :frequency units5e/rests-1
                                :summary "if you fail a save or miss an attack, you may roll 2d4 and add it to the missed roll"})]
                  :selections [(opt5e/subclass-cantrip-selection :sorcerer "Sorcerer" ::char5e/cha (get-in sl/spell-lists [:cleric 0]) 0)
                               (opt5e/subclass-spell-selection :sorcerer "Sorcerer" ::char5e/cha (get-in sl/spell-lists [:cleric 1]) 0)]
@@ -367,7 +368,7 @@
                                            {:name "Unearthly Recovery"
                                             :page 5
                                             :source ua-options/ua-revised-subclasses-kw
-                                            :frequency {:units :long-rest}
+                                            :frequency units5e/long-rests-1
                                             :summary (str "regain " (int (/ ?max-hit-points)) " HPs if you have that many or fewer left")})]}}}]})
 
 (def ua-revised-classes
@@ -394,13 +395,13 @@
                             {:name "Psionic Surge"
                              :page 6
                              :source ua-mystic-kw
-                             :range opt5e/ft-30
+                             :range units5e/ft-30
                              :summary "use psionic focus to impose disadvantage on saves against your psionic disciplines or talents"})]}
             14 {:modifiers [(mod5e/action
                              {:page 6
                               :name "Spectral Form"
-                              :range opt5e/ft-30
-                              :duration opt5e/minutes-10
+                              :range units5e/ft-30
+                              :duration units5e/minutes-10
                               :summary "gain resistance to all damage; move at half speed; can pass through creatures and objects"})]}}
    :traits [{:name "Psionic Investigation"
              :level 3
@@ -417,18 +418,18 @@
                              {:name "Avatar of Healing"
                               :page 6
                               :source ua-mystic-kw
-                              :range opt5e/ft-30
+                              :range units5e/ft-30
                               :summary (str "allies regain additional " (max 0 (?ability-bonuses ::char5e/int)) " HPs from psionic disciplines")})]}
              14 {:modifiers [(mod5e/dependent-trait
                               {:page 6
                                :name "Avatar of Speed"
-                               :range opt5e/ft-30
+                               :range units5e/ft-30
                                :summary "an ally can Dash as bonus action"})]}}
     :traits [{:name "Avatar of Battle"
               :level 3
               :page 5
               :source ua-mystic-kw
-              :range opt5e/ft-30
+              :range units5e/ft-30
               :summary "give an ally +2 initiative bonus"}]})
 
 (def ua-mystic-order-of-the-immortal
@@ -463,8 +464,8 @@
                  {:name "Breadth of Knowledge"
                   :page 7
                   :source ua-mystic-kw
-                  :duration opt5e/long-rests-1
-                  :frequency opt5e/long-rests-1
+                  :duration units5e/long-rests-1
+                  :frequency units5e/long-rests-1
                   :summary "gain two skill or tool proficiencies"})]
     :levels {3 {:modifiers [(mod5e/reaction
                              {:name "Memory of One Thousand Steps"
@@ -493,7 +494,7 @@
                             {:name "Psionic Resilience"
                              :page 8
                              :source ua-mystic-kw
-                             :duration opt5e/minutes-10
+                             :duration units5e/minutes-10
                              :summary "spend psi to gain bonus to attack and damage: 2 psi for +1, 5 psi for +2, 7 psi for +4"})]}
             6 {:modifiers [(mod5e/trait-cfg
                             {:name "Consumptive Knife"
@@ -664,7 +665,7 @@
                                                        {:name "Telepathy"
                                                         :page 4
                                                         :source ua-mystic-kw
-                                                        :range opt5e/ft-120
+                                                        :range units5e/ft-120
                                                         :summary "telepathically speak to a creature"})]}
                                        3 {:selections [ua-mystic/psionic-talents-selection
                                                        (psionic-disciplines-selection 1)]}
@@ -679,7 +680,7 @@
                                                        {:name "Potent Psionics"
                                                         :page 4
                                                         :source ua-mystic-kw
-                                                        :frequency opt5e/rounds-1
+                                                        :frequency units5e/rounds-1
                                                         :summary (str "deal an extra "
                                                                       (if (>= (?class-level :mystic) 14)
                                                                         2
@@ -690,20 +691,19 @@
                                                        {:name "Consumptive Power"
                                                         :page 4
                                                         :source ua-mystic-kw
-                                                        :frequency opt5e/long-rests-1
+                                                        :frequency units5e/long-rests-1
                                                         :summary (str "activate a psionic discipline with HPs instead of psi points (affects current and max HPs)")})]
                                            :selections [ua-mystic/psionic-talents-selection]}
                                        11 {:modifiers [(mod5e/action
                                                         {:name "Psionic Mastery"
                                                          :page 5
                                                          :source ua-mystic-kw
-                                                         :frequency {:units :long-rest
-                                                                     :amount (mod5e/level-val
-                                                                              (?class-level :mystic)
-                                                                              {13 2
-                                                                               15 3
-                                                                               17 4
-                                                                               :default 1})}
+                                                         :frequency (units5e/long-rests (mod5e/level-val
+                                                                                       (?class-level :mystic)
+                                                                                       {13 2
+                                                                                        15 3
+                                                                                        17 4
+                                                                                        :default 1}))
                                                          :summary (str "gain "
                                                                        (if (>= (?class-level :mystic) 15)
                                                                          11
@@ -832,7 +832,7 @@
                                            {:name "Shifting"
                                             :page 2
                                             :source ua-eberron-kw
-                                            :duration opt5e/minutes-1
+                                            :duration units5e/minutes-1
                                             :summary (str "gain "
                                                           (max 1 (+ ?total-levels (?ability-bonuses ::char5e/con)))
                                                           " temp HPs"
@@ -893,8 +893,7 @@
                                                                      {:name "Infuse Weapons and Armor"
                                                                       :page 4
                                                                       :source ua-eberron-kw
-                                                                      :duration {:units :hour
-                                                                                 :amount 8}
+                                                                      :duration units5e/hours-8
                                                                       :summary "create magic weapon or armor"})]}
                                                      10 {:modifiers [(mod5e/trait-cfg
                                                                       {:name "Superior Artificer"

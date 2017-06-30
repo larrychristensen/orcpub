@@ -227,12 +227,19 @@
     to-strict-prepared-spells
     %)))
 
+(defn remove-nans [values]
+  (let [current-hit-points (::current-hit-points values)]
+    (if (and current-hit-points
+             (not (int? current-hit-points)))
+      (dissoc values ::current-hit-points))))
+
 (defn clean-values [raw-character]
   (cond-> raw-character
     (-> raw-character ::entity/values seq)
     (update ::entity/values
             #(cond-> %
                true remove-image-failed-flags
+               true remove-nans
                (::prepared-spells-by-class %) to-strict-prepared-spells-list))
     
     true fix-quantities
