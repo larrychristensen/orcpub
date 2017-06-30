@@ -144,12 +144,13 @@
    {}
    selections))
 
-(defn from-strict [{:keys [:db/id ::strict/selections ::strict/values]}]
+(defn from-strict [{:keys [:db/id ::strict/selections ::strict/values ::strict/owner] :as strict-entity}]
   (let [homebrew-paths (selections-homebrew-paths selections [])]
     (cond-> {::options (from-strict-selections selections)}
       (seq homebrew-paths) (assoc ::homebrew-paths homebrew-paths) 
       id (assoc :db/id id)
-      values (assoc ::values values))))
+      values (assoc ::values values)
+      owner (assoc ::owner owner))))
 
 (spec/fdef from-strict
            :args (spec/cat :entity ::strict/entity)
