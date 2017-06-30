@@ -1025,7 +1025,7 @@
     {:name "Inspiring Leader"
      :icon "public-speaker"
      :page 167
-     :summary "increase CHA by 1; give 6 friendly creatures within 30 ft. temp HPs equal to you CHA mod + your level"
+     :summary "give 6 friendly creatures within 30 ft. temp HPs equal to you CHA mod + your level"
      :prereqs [(ability-prereq ::character/cha 13)]})
    (feat-option
     {:name "Keen Mind"
