@@ -622,6 +622,9 @@
 (defn notes [built-char]
   (get-prop built-char ::notes))
 
+(defn features-used [built-char]
+  (get-prop built-char ::features-used))
+
 (defn image-url-failed [built-char]
   (get-prop built-char ::image-url-failed))
 

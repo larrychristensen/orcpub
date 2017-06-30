@@ -1475,6 +1475,8 @@
               (fn [{:keys [key class] :as spell}]
                 (let [k (str key class)]
                   (if (or (not hide-unprepared?)
+                          (zero? lvl)
+                          (not (get prepares-spells class))
                           (get-in prepared-spells-by-class [class key]))
                     (spell-row id
                                lvl
@@ -1585,11 +1587,20 @@
      [:div.f-s-14
       (doall
        (map
-        (fn [action]
+        (fn [{{:keys [units amount]} :frequency nm :name :as action}]
           ^{:key action}
           [:p.m-t-10
-           [:span.f-w-600.i (:name action) "."]
-           [:span.f-w-n.m-l-10 (add-links (common/sentensize (disp/action-description action)))]])
+           [:span.f-w-600.i nm "."]
+           [:span.f-w-n.m-l-10 (add-links (common/sentensize (disp/action-description action)))]
+           #_(if (and amount units)
+             [:span.m-l-10
+              (doall
+               (for [i (range amount)]
+                 (let [k (str nm "-" i)]
+                   ^{:key i}
+                   [:span
+                    {:on-click #(dispatch [::char/toggle-feature-used id units k])}
+                    (comps/checkbox @(subscribe [::char/feature-used? id units k]) false)])))])])
         (sort-by :name actions)))])))
 
 (defn prof-name [prof-map prof-kw]
