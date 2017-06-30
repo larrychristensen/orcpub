@@ -3,6 +3,7 @@
             [reagent.core :as r]
             [orcpub.route-map :as routes]
             [orcpub.common :as common]
+            [orcpub.entity :as entity]
             [orcpub.components :as comps]
             [orcpub.entity-spec :as es]
             [orcpub.entity.strict :as se]
@@ -2470,8 +2471,7 @@
     (routes/path-for routes/dnd-e5-char-page-route :id id))])
 
 (defn character-page [{:keys [id] :as arg}]
-  (let [{:keys [::se/owner] :as strict-character} @(subscribe [::char/character id])
-        character (char/from-strict strict-character)
+  (let [{:keys [::entity/owner] :as character} @(subscribe [::char/character id])
         built-template (subs/built-template (subs/selected-plugin-options character))
         built-character (subs/built-character character built-template)
         device-type @(subscribe [:device-type])
@@ -2482,7 +2482,9 @@
       nil?
       [[share-link id]
        [character-page-fb-button id]
-       (if (and username owner (= owner username))
+       (if (and username
+                owner
+                (= owner username))
          {:title "Edit"
           :icon "pencil"
           :on-click #(dispatch [:edit-character character])})
