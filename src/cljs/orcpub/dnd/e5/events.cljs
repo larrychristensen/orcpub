@@ -1453,12 +1453,16 @@
    (update-character-fx db id #(set-notes % notes))))
 
 (defn toggle-feature-used [character units nm]
-  (update-in
-   character
-   [::entity/values
-    ::char5e/features-used
-    units]
-   (partial toggle-set nm)))
+  (-> character
+   (update-in    
+    [::entity/values
+     ::char5e/features-used
+     units]
+    (partial toggle-set nm))
+   (dissoc
+    [::entity/values
+     ::char5e/features-used
+     :db/id])))
 
 (reg-event-fx
  ::char5e/toggle-feature-used
