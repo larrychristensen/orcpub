@@ -1982,10 +1982,16 @@
                               {:name "Two Martial Weapons"
                                :selections [(opt5e/new-starting-equipment-selection
                                              :fighter
-                                             {:name "Martial Weapons"
+                                             {:name "Martial Weapon 1"
                                               :options (opt5e/martial-weapon-options 1)
-                                              :min 2
-                                              :max 2})]})]})
+                                              :min 1
+                                              :max 1})
+                                            (opt5e/new-starting-equipment-selection
+                                             :fighter
+                                             {:name "Martial Weapon 2"
+                                              :options (opt5e/martial-weapon-options 1)
+                                              :min 1
+                                              :max 1})]})]})
                  (opt5e/new-starting-equipment-selection
                   :fighter
                   {:name "Additional Weapons"
