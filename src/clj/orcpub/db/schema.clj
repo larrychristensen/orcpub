@@ -1,6 +1,7 @@
 (ns orcpub.db.schema
   (:require [orcpub.entity.strict :as se]
             [orcpub.dnd.e5.character :as char5e]
+            [orcpub.dnd.e5.units :as units5e]
             [orcpub.dnd.e5.party :as party5e]
             [orcpub.dnd.e5.character.equipment :as char-equip-5e]))
 
@@ -191,6 +192,28 @@
      ::char5e/bonds
      ::char5e/faction-name])))
 
+(def features-used-schema
+  (concat
+   [{:db/ident ::char5e/features-used
+     :db/valueType :db.type/ref
+     :db/isComponent true
+     :db/cardinality :db.cardinality/one
+     :db/noHistory true}]
+   (map
+    (fn [unit]
+      {:db/ident unit
+       :db/valueType :db.type/string
+       :db/cardinality :db.cardinality/many
+       :db/noHistory true
+       :db/unique :db.unique/value})
+    [::units5e/minute-2
+     ::units5e/hour-2
+     ::units5e/turn-2
+     ::units5e/day-2
+     ::units5e/round-2
+     ::units5e/rest-2
+     ::units5e/long-rest-2])))
+
 (def party-schema
   [{:db/ident ::party5e/owner
     :db/valueType :db.type/string
@@ -219,4 +242,5 @@
    entity-type-schema
    character-schema
    character-equipment-schema
+   features-used-schema
    party-schema))
