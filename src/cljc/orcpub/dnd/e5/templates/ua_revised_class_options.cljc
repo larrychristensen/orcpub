@@ -1,9 +1,11 @@
 (ns orcpub.dnd.e5.templates.ua-revised-class-options
   (:require [orcpub.dnd.e5.options :as opt5e]
             [orcpub.dnd.e5.modifiers :as mod5e]
+            [orcpub.dnd.e5.units :as units5e]
             [orcpub.dnd.e5.character :as char5e]
             [orcpub.template :as t])
   #?(:cljs (:require-macros [orcpub.dnd.e5.options :as opt5e])))
+
 
 (def druid-option-cfg
   {:name "Druid"
@@ -187,13 +189,13 @@
                                :page 6
                                :source :ua-revised-class-options
                                :summary "When you hit with your pact weapon, you can expend a spell slot to do (X + 1)d8 extra force damage, where X is the slot level, and the target is knocked prone if it takes any of the damage and is Huge or smaller."
-                               :frequency {:units :turn}})
+                               :frequency units5e/turns-1})
                              (opt5e/eldritch-invocation-option
                               {:name "Frost Lance"
                                :prereqs [opt5e/has-eldritch-blast-prereq]
                                :page 6
                                :source :ua-revised-class-options
-                               :frequency {:units :turn}
+                               :frequency units5e/turns-1
                                :summary "When you hit with eldritch blast, you can reduce the target's speed by 10 ft. until your next turn."
                                :trait-type :bonus-action})
                              (opt5e/eldritch-invocation-option
@@ -201,8 +203,8 @@
                                :prereqs [(opt5e/total-levels-option-prereq 7 :warlock)]
                                :page 6
                                :source :ua-revised-class-options
-                               :frequency {:units :rest}
-                               :duration {:units :turn}
+                               :frequency units5e/rests-1
+                               :duration units5e/turns-1
                                :summary "Gain the ability to see through objects to 30 ft, with darkvision within that range."
                                :trait-type :bonus-action})
                              (opt5e/eldritch-invocation-option
@@ -224,7 +226,7 @@
                                :prereqs [opt5e/has-eldritch-blast-prereq]
                                :page 6
                                :source :ua-revised-class-options
-                               :frequency {:units :turn}
+                               :frequency units5e/turns-1
                                :summary "When you hit with 'eldritch blast' you can move the target up to 10 ft. toward you."})
                              (opt5e/eldritch-invocation-option
                               {:name "Improved Pact Weapon"
@@ -267,12 +269,12 @@
                                :page 6
                                :source :ua-revised-class-options
                                :trait-type :reaction
-                               :frequency {:units :rest}
+                               :frequency units5e/rests-1
                                :summary "When you take damage, gain 10 temp HPs. In addition, gain vulnerability to fire damage, and speed is 0, which go away at the end of your next turn."})
                              (opt5e/eldritch-invocation-option
                               {:name "Trickster's Escape"
                                :page 6
-                               :frequency opt5e/long-rests-1
+                               :frequency units5e/long-rests-1
                                :source :ua-revised-class-options
                                :summary "cast bane using a warlock spell slot"
                                :prereqs [(opt5e/total-levels-option-prereq 7 :warlock)]
