@@ -2485,8 +2485,9 @@
 (def has-eldritch-blast-prereq
   (t/option-prereq
    "You must know the edritch blast spell"
-   (fn [c] (some #(= :eldritch-blast (:key %))
-                 (get @(subscribe [::character/spells-known nil c]) 0)))))
+   (fn [c]
+     (get-in @(subscribe [::character/spells-known nil c])
+             [0 ["Warlock" :eldritch-blast]]))))
 
 (defn deep-gnome-option-cfg [key source page]
   {:name "Gnome"
