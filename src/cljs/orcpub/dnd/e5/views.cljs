@@ -1584,7 +1584,7 @@
   (if (seq actions)
     (display-section
      title icon-name
-     [:div.f-s-14
+     [:div.f-s-14.l-h-19
       (doall
        (map
         (fn [{{:keys [units amount]} :frequency nm :name :as action}]
