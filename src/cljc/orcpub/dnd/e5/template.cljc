@@ -10,6 +10,7 @@
             [orcpub.dnd.e5.character :as char5e]
             [orcpub.dnd.e5.modifiers :as mod5e]
             [orcpub.dnd.e5.options :as opt5e]
+            [orcpub.dnd.e5.units :as units5e]
             [orcpub.dnd.e5.weapons :as weapon5e]
             [orcpub.dnd.e5.equipment :as equip5e]
             [orcpub.dnd.e5.character.equipment :as char-equip5e]
@@ -23,6 +24,7 @@
             [orcpub.dnd.e5.templates.scag :as scag]
             [orcpub.dnd.e5.templates.ua-base :as ua]
             [re-frame.core :refer [subscribe dispatch]]))
+
 
 (def character
   {::entity/options {:ability-scores {::entity/key :standard-scores
@@ -515,8 +517,8 @@
                (mod5e/spells-known 1 :disguise-self ::char5e/wis "Firbolg" 1 "only to seem 3 ft. shorter")
                (mod5e/bonus-action
                 {:name "Hidden Step"
-                 :duration opt5e/rounds-1
-                 :frequency opt5e/rests-1
+                 :duration units5e/rounds-1
+                 :frequency units5e/rests-1
                  :page 107
                  :source :vgm
                  :summary "Turn invisible"})]
@@ -537,7 +539,7 @@
    :source source
    :modifiers [(mod5e/reaction
                 {:name "Stone's Endurance"
-                 :frequency opt5e/rests-1
+                 :frequency units5e/rests-1
                  :page page
                  :source source
                  :summary (str "Reduce damage taken by 1d12 + " (::char5e/con ?ability-bonuses))})]
@@ -584,7 +586,7 @@
                 {:name "Hungry Jaws"
                  :page 113
                  :source :vgm
-                 :frequency opt5e/rests-1
+                 :frequency units5e/rests-1
                  :summary (str "Special attack with your bite. If you hit, you gain "
                                (max 1 (::char5e/con ?ability-bonuses))
                                " temp. hit points")})
@@ -819,7 +821,7 @@
                         {:name "Mingle with the Wind"
                          :page 9
                          :source :ee
-                         :frequency opt5e/long-rests-1
+                         :frequency units5e/long-rests-1
                          :summary "cast levitate without material components"}]}
               {:name "Earth Genasi"
                :abilities {::char5e/str 1}
@@ -831,7 +833,7 @@
                         {:name "Merge with Stone"
                          :page 9
                          :source :ee
-                         :frequency opt5e/long-rests-1
+                         :frequency units5e/long-rests-1
                          :summary "cast pass without trace without material components"}]}
               {:name "Fire Genasi"
                :abilities {::char5e/int 1}
@@ -846,7 +848,7 @@
                         {:name "Reach to the Blaze"
                          :page 10
                          :source :ee
-                         :frequency opt5e/long-rests-1
+                         :frequency units5e/long-rests-1
                          :summary "have 'produce flame' cantrip; at level 3 can cast burning hands"}]}
               {:name "Water Genasi"
                :abilities {::char5e/wis 1}
@@ -869,7 +871,7 @@
                         {:name "Call to the Wave"
                          :page 10
                          :source :ee
-                         :frequency opt5e/long-rests-1
+                         :frequency units5e/long-rests-1
                          :summary "have 'shape water' cantrip; at level 3 can cast create or destroy water as 2nd level"}]}]})
 
 (defn class-level [levels class-kw]
@@ -911,14 +913,13 @@
                 (mod5e/bonus-action
                  {:name "Rage"
                   :page 48
-                  :duration opt5e/minutes-1
-                  :frequency {:units :rest
-                              :amount (condp <= (?class-level :barbarian)
-                                        17 6
-                                        12 5
-                                        6 4
-                                        3 3
-                                        2)}
+                  :duration units5e/minutes-1
+                  :frequency (units5e/rests (condp <= (?class-level :barbarian)
+                                            17 6
+                                            12 5
+                                            6 4
+                                            3 3
+                                            2))
                   :summary (str "Advantage on Strength checks and saves; melee damage bonus "
                                 (common/bonus-str (condp <= (?class-level :barbarian)
                                                     16 4
@@ -1277,12 +1278,11 @@
                              {:page 59
                               :name "Channel Divinity"
                               :summary "Channel divine power using Turn Undead or one of your domain Channel Divinity options."
-                              :frequency {:units :rest
-                                          :amount (mod5e/level-val
-                                                   (?class-level :cleric)
-                                                   {6 2
-                                                    18 3
-                                                    :default 1})}})
+                              :frequency (units5e/rests (mod5e/level-val
+                                                       (?class-level :cleric)
+                                                       {6 2
+                                                        18 3
+                                                        :default 1}))})
                             (mod5e/action
                              {:page 59
                               :name "Channel Divinity: Turn Undead"
@@ -1395,8 +1395,8 @@
                                {:name "Warding Flare"
                                 :page 61
                                 :summary "impose disadvantage on an attack roll against you"
-                                :frequency {:units :long-rest
-                                            :amount (max 1 (?ability-bonuses ::char5e/wis))}})]
+                                :frequency (units5e/long-rests
+                                            (max 1 (?ability-bonuses ::char5e/wis)))})]
                   :levels {2 {:modifiers [(mod5e/action
                                            {:level 2
                                             :class-key :cleric
@@ -1472,8 +1472,8 @@
                               (mod5e/reaction
                                {:name "Wrath of the Storm"
                                 :page 62
-                                :frequency {:units :long-rest
-                                            :amount (max 1 (?ability-bonuses ::char5e/wis))}
+                                :frequency (units5e/long-rests
+                                            (max 1 (?ability-bonuses ::char5e/wis)))
                                 :summary (str "When a creature within 5 ft. hits you, you deal 2d8 lightning or thunder damage to them (half that on successful DC "
                                               (?spell-save-dc ::char5e/wis)
                                               " Dexterity save).")})]
@@ -1506,7 +1506,7 @@
                               (mod5e/action
                                {:name "Blessing of the Trickster"
                                 :page 63
-                                :duration opt5e/hours-1
+                                :duration units5e/hours-1
                                 :summary "Give another creature advantage on stealth checks"})]
                   :levels {2 {:modifiers [(mod5e/action
                                            {:name "Channel Divinity: Invoke Duplicity"
@@ -1541,8 +1541,8 @@
                                {:name "War Priest"
                                 :level 1
                                 :page 63
-                                :frequency {:units :long-rest
-                                            :amount (max 1 (?ability-bonuses ::char5e/wis))}
+                                :frequency (units5e/long-rests
+                                            (max 1 (?ability-bonuses ::char5e/wis)))
                                 :summary "make one extra weapon attack when you use the Attack action"})]
                   :levels {6 {:modifiers [(mod5e/reaction
                                            {:name "Channel Divinity: War God's Blessing"
@@ -1617,10 +1617,8 @@
                             (mod5e/action
                              {:name "Wild Shape"
                               :page 66
-                              :frequency {:units :rest
-                                          :amount 2}
-                              :duration {:units :hour
-                                         :amount (int (/ (?class-level :druid) 2))}
+                              :frequency (units5e/rests 2)
+                              :duration (units5e/hours (int (/ (?class-level :druid) 2)))
                               :summary (str "You can transform into a beast you have seen with CR "
                                             ?wild-shape-cr
                                             (if ?wild-shape-limitation (str " and " ?wild-shape-limitation)))})]}}
@@ -1930,7 +1928,7 @@
     :modifiers [(mod5e/bonus-action
                  {:name "Second Wind"
                   :page 72
-                  :frequency opt5e/rests-1
+                  :frequency units5e/rests-1
                   :summary (str "regain 1d10 "
                                 (common/mod-str (?class-level :fighter))
                                 " HPs")})]
@@ -1938,22 +1936,21 @@
                              {:level 2
                               :name "Action Surge"
                               :page 72
-                              :frequency {:units :rest
-                                          :amount (if (>= (?class-level :fighter) 17)
-                                                    2
-                                                    1)}
+                              :frequency (units5e/rests (if (>= (?class-level :fighter) 17)
+                                                        2
+                                                        1))
                               :summary "take an extra action"})]}
              5 {:modifiers [(mod5e/num-attacks 2)]}
              9 {:modifiers [(mod5e/dependent-trait
                              {:level 9
                               :name "Indomitable"
                               :page 72
-                              :frequency {:units :long-rest
-                                          :amount (mod5e/level-val
-                                                   (?class-level :fighter)
-                                                   {13 2
-                                                    17 3
-                                                    :default 1})}
+                              :frequency (units5e/long-rests
+                                          (mod5e/level-val
+                                           (?class-level :fighter)
+                                           {13 2
+                                            17 3
+                                            :default 1}))
                               :summary "reroll a save if you fail"})]}
              11 {:modifiers [(mod5e/num-attacks 3)]}
              20 {:modifiers [(mod5e/num-attacks 4)]}}
@@ -2169,7 +2166,7 @@
                                {:name "Empty Body: Invisibility"
                                 :level 18
                                 :page 79
-                                :duration opt5e/minutes-1
+                                :duration units5e/minutes-1
                                 :summary "spend 4 ki points to become invisible and have resistance to all damage but force damage"})
                               (mod5e/action
                                {:name "Empty Body: Astral Projection"
@@ -2208,7 +2205,7 @@
                                             {:name "Wholeness of Body"
                                              :page 79
                                              :level 6
-                                             :frequency opt5e/long-rests-1
+                                             :frequency units5e/long-rests-1
                                              :summary (str "heal yourself " (* 3 (?class-level :monk)) " HPs")})]}
                             11 {:modifiers [(mod5e/dependent-trait
                                              {:name "Tranquility"
@@ -2298,20 +2295,19 @@
                                {:name "Cleansing Touch"
                                 :level 14
                                 :page 85
-                                :frequency {:units :long-rest
-                                            :amount (?ability-bonuses ::char5e/cha)}
+                                :frequency (units5e/long-rests (?ability-bonuses ::char5e/cha))
                                 :summary "end a spell on yourself or willing creature"})]}}
      :modifiers [(mod/modifier ?paladin-aura (if (< (?class-level :paladin) 18) 10 30))
                  (mod5e/action
                   {:name "Divine Sense"
                    :page 84
-                   :frequency {:units :long-rest
-                               :amount (inc (?ability-bonuses ::char5e/cha))}
+                   :frequency (units5e/long-rests
+                               (inc (?ability-bonuses ::char5e/cha)))
                    :summary "within 60 ft., detect presense of undead, celestial, or fiend. Also detect consecrated or desecrated object or place"})
                  (mod5e/action
                   {:name "Lay on Hands"
                    :page 84
-                   :frequency opt5e/long-rests-1
+                   :frequency units5e/long-rests-1
                    :summary (str "you have a healing pool of " (* 5 (?class-level :paladin)) " HPs, with it you can heal a creature or expend 5 points to cure disease or neutralize poison")})
                  (mod5e/dependent-trait
                   {:name "Aura of Protection"
@@ -2327,7 +2323,7 @@
                   {:name "Channel Divinity"
                    :page 85
                    :level 3
-                   :frequency opt5e/rests-1
+                   :frequency units5e/rests-1
                    :summary "your oath provides specific options"})]
      :selections [(opt5e/new-starting-equipment-selection
                    :paladin
@@ -2383,12 +2379,12 @@
                                (mod5e/action
                                 {:name "Channel Divinity: Sacred Weapon"
                                  :page 86
-                                 :duration opt5e/minutes-1
+                                 :duration units5e/minutes-1
                                  :summary (str "make a weapon magical, with a " (common/bonus-str (max 1 (?ability-bonuses ::char5e/cha))) " attack bonus and magical light (20 ft./20 ft.)")})
                                (mod5e/action
                                 {:name "Channel Divinity: Turn the Unholy"
                                  :page 86
-                                 :duration opt5e/minutes-1
+                                 :duration units5e/minutes-1
                                  :summary (str "each undead or fiend within 30 ft. must make a DC " (?spell-save-dc ::char5e/cha) " WIS save or be turned for 1 min.")})]
                    :levels {7 {:modifiers [(mod5e/dependent-trait
                                             {:name "Aura of Devotion"
@@ -2399,8 +2395,8 @@
                                              {:name "Holy Nimbus"
                                               :level 20
                                               :page 86
-                                              :frequency opt5e/long-rests-1
-                                              :duration opt5e/minutes-1
+                                              :frequency units5e/long-rests-1
+                                              :duration units5e/minutes-1
                                               :summary "you emanate a bright light with 30 ft radius, an enemy that starts its turn there takes 10 radiant damage. You also have advantage on saves against spells cast by fiends and undead"})]}}
                    :traits [{:name "Purity of Spirit"
                              :level 15
@@ -2426,7 +2422,7 @@
                                 {:name "Channel Divinity: Turn the Faithless"
                                  :level 3
                                  :page 87
-                                 :duration opt5e/minutes-1
+                                 :duration units5e/minutes-1
                                  :summary "turn and reveal the true form of fey and fiends within 30 ft."})]
                    :levels {7 {:modifiers [(mod5e/dependent-trait
                                             {:name "Aura of Warding"
@@ -2436,13 +2432,13 @@
                    :traits [{:name "Undying Sentinal"
                              :level 15
                              :page 87
-                             :frequency opt5e/long-rests-1
+                             :frequency units5e/long-rests-1
                              :summary "when you are reduced to 0 HP without being killed, you drop to 1 instead"}
                             {:name "Elder Champion"
                              :level 20
                              :page 87
-                             :frequency opt5e/long-rests-1
-                             :duration opt5e/minutes-1
+                             :frequency units5e/long-rests-1
+                             :duration units5e/minutes-1
                              :summary "undergo a tranformation where you 1) regain 10 HPs at start of your turns 2) can cast spells with casting time action as bonus action 3) enemies within 10 ft. have disadvantage on saves against your Channel Divinity and spells"}]}
                   {:name "Oath of Vengeance"
                    :modifiers [(opt5e/paladin-spell 1 :bane 3)
@@ -2459,13 +2455,13 @@
                                 {:name "Channel Divinity: Abjure Enemy"
                                  :level 3
                                  :page 88
-                                 :duration opt5e/minutes-1
+                                 :duration units5e/minutes-1
                                  :summary (str "a creature of your choosing within 60 ft. must succeed on a DC " (?spell-save-dc ::char5e/cha) " WIS save or be frightened and have a speed of 0, speed is halved on successful save")})
                                (mod5e/bonus-action
                                 {:name "Channel Divinity: Vow of Eternity"
                                  :level 3
                                  :page 88
-                                 :duration opt5e/minutes-1
+                                 :duration units5e/minutes-1
                                  :summary "gain advantage on attacks against a creature"})]
                    :levels {15 {:modifiers [(mod5e/reaction
                                              {:name "Soul of Vengeance"
@@ -2476,8 +2472,8 @@
                                              {:name "Avenging Angel"
                                               :level 20
                                               :page 88
-                                              :duration opt5e/hours-1
-                                              :frequency opt5e/long-rests-1
+                                              :duration units5e/hours-1
+                                              :frequency units5e/long-rests-1
                                               :summary (str "transform, gain flying speed of 60 ft., emanate a 30 ft. aura and creatures within it must succeed on a DC " (?spell-save-dc ::char5e/cha) " WIS or be frightened for 1 min and attacks against them have advantage")})]}}
                    :traits [{:name "Relentless Avenger"
                              :level 7
@@ -2625,7 +2621,7 @@
               14 {:selections [(favored-enemy-selection 3)]}
               20 {:modifiers [(mod5e/dependent-trait
                                {:name "Foe Slayer"
-                                :frequency opt5e/turns-1
+                                :frequency units5e/turns-1
                                 :level 20
                                 :page 92
                                 :summary (str "add " (common/bonus-str (?ability-bonuses ::char5e/wis)) " to an attack or damage roll") })]}}
@@ -2651,21 +2647,21 @@
                                                           :modifiers [(mod5e/trait-cfg
                                                                        {:name "Colossus Slayer"
                                                                         :page 93
-                                                                        :frequency opt5e/turns-1
+                                                                        :frequency units5e/turns-1
                                                                         :summary "deal an extra d8 damage when you hit a creature that is below its HP max with a weapon attack"})]})
                                                         (t/option-cfg
                                                          {:name "Giant Killer"
                                                           :modifiers [(mod5e/reaction
                                                                        {:name "Giant Killer"
                                                                         :page 93
-                                                                        :frequency opt5e/turns-1
+                                                                        :frequency units5e/turns-1
                                                                         :summary "attack a Large or larger creature within 5 ft that misses an attack against you"})]})
                                                         (t/option-cfg
                                                          {:name "Horde Breaker"
                                                           :modifiers [(mod5e/trait-cfg
                                                                        {:name "Horde Breaker"
                                                                         :page 93
-                                                                        :frequency opt5e/turns-1
+                                                                        :frequency units5e/turns-1
                                                                         :summary "when you attack one creature, attack another creature within 5 feet of it with the same action"})]})]})]}
                             7 {:selections [(t/selection-cfg
                                              {:name "Defensive Tactics"
@@ -2674,13 +2670,13 @@
                                                          {:name "Escape the Horde"
                                                           :modifiers [(mod5e/trait-cfg
                                                                        {:name "Escape the Horde"
-                                                                        :frequency opt5e/turns-1
+                                                                        :frequency units5e/turns-1
                                                                         :page 93})]})
                                                         (t/option-cfg
                                                          {:name "Multiattack Defense"
                                                           :modifiers [(mod5e/trait-cfg
                                                                        {:name "Multiattack Defense"
-                                                                        :frequency opt5e/turns-1
+                                                                        :frequency units5e/turns-1
                                                                         :page 93})]})
                                                         (t/option-cfg
                                                          {:name "Steel Will"
@@ -2773,14 +2769,14 @@
     :modifiers [(mod5e/dependent-trait
                  {:name "Sneak Attack"
                   :page 96
-                  :frequency opt5e/turns-1
+                  :frequency units5e/turns-1
                   :summary (str (common/round-up (/ (?class-level :rogue) 2)) "d6 extra damage on attack where you have advantage or another enemy of creature is within 5 ft.")
 })]
     :levels {2 {:modifiers [(mod5e/bonus-action
                              {:level 2
                               :name "Cunning Action"
                               :page 96
-                              :frequency opt5e/turns-1
+                              :frequency units5e/turns-1
                               :summary "Dash, Disengage or Hide"
 })]}
              5 {:modifiers [(opt5e/uncanny-dodge-modifier 96)]}
@@ -2827,7 +2823,7 @@
              {:level 20
               :name "Stroke of Luck"
               :page 97
-              :frequency opt5e/rests-1
+              :frequency units5e/rests-1
               :summary "turn missed attack into a hit or a failed ability check roll as 20"
 }]
     :subclass-level 3
@@ -3084,7 +3080,7 @@
                             :level 1
                             :summary "Gain advantage on a roll"
                             :page 103
-                            :frequency opt5e/long-rests-1}
+                            :frequency units5e/long-rests-1}
                            {:name "Controlled Chaos"
                             :level 14
                             :page 103
@@ -3093,7 +3089,7 @@
                             :level 18
                             :page 103
                             :summary "When you roll a die for spell damage, roll max rolls an additional time"
-                            :frequency opt5e/turns-1}]}]}))
+                            :frequency units5e/turns-1}]}]}))
 
 (defn spell-school-savant [school page]
   {:level 2
@@ -3213,7 +3209,7 @@
                   :levels {6 {:modifiers [(mod5e/reaction
                                            {:name "Projected Ward"
                                             :page 115
-                                            :range opt5e/ft-30
+                                            :range units5e/ft-30
                                             :summary "shield a creature using your ward"})]}
                            10 {:modifiers [(mod5e/dependent-trait
                                             {:name "Improved Abjuration"
@@ -3229,13 +3225,13 @@
                   :levels {6 {:modifiers [(mod5e/action
                                            {:name "Benign Transposition"
                                             :page 116
-                                            :range opt5e/ft-30
+                                            :range units5e/ft-30
                                             :summary "Teleport to unoccupied space or swap spaces with willing Small or Medium creature"})]}}
                   :traits [(spell-school-savant "conjuration" 116)
                            {:name "Minor Conjuration"
                             :level 2
                             :page 116
-                            :duration opt5e/hours-1
+                            :duration units5e/hours-1
                             :summary "conjure an inanimate object 3 ft per side or less and 15 lbs or less, it radiates dim light to 5 ft."}
                            {:name "Focused Conjuration"
                             :level 10
@@ -3249,12 +3245,12 @@
                                             {:name "The Third Eye"
                                              :level 10
                                              :page 117
-                                             :frequency opt5e/long-rests-1
+                                             :frequency units5e/long-rests-1
                                              :summary "gain one: 1) darkvision 60 ft., 2) see etherial plane 60 ft. 3) read any language 4) see invisible within 10 ft."})]}}
                   :traits [(spell-school-savant "divination" 116)
                            {:name "Portent"
                             :level 2
-                            :frequency opt5e/long-rests-1
+                            :frequency units5e/long-rests-1
                             :summary "roll 2 d20s after long rest, can replace rolls you or a creature you can see make with these"}
                            {:name "Expert Divination"
                             :level 6
@@ -3269,13 +3265,13 @@
                                            {:name "Hypnotic Gaze"
                                             :level 2
                                             :page 117
-                                            :range opt5e/ft-5
+                                            :range units5e/ft-5
                                             :summary (str "charm a creature until end of your next turn unless it succeeds on a DC " (?spell-save-dc ::char5e/int) " WIS save, it is incapacitated and dazed")})]}
                            6 {:modifiers [(mod5e/reaction
                                            {:name "Instinctive Charm"
                                             :page 117
-                                            :range opt5e/ft-30
-                                            :frequency opt5e/long-rests-1
+                                            :range units5e/ft-30
+                                            :frequency units5e/long-rests-1
                                             :summary (str "redirect a creature's attack against you to the creature closest to it, not including you, if it fails a DC " (?spell-save-dc ::char5e/int) " WIS save")})]}
                            14 {:modifiers [(mod5e/dependent-trait
                                             {:name "Alter Memories"
@@ -3316,7 +3312,7 @@
                            10 {:modifiers [(mod5e/reaction
                                             {:name "Illusory Self"
                                              :page 118
-                                             :frequency opt5e/rests-1
+                                             :frequency units5e/rests-1
                                              :summary "attacker hits an illusion of you instead of you"})]}
                            14 {:modifiers [(mod5e/bonus-action
                                             {:name "Illusory Reality"
@@ -3336,7 +3332,7 @@
                            {:name "Grim Harvest"
                             :level 2
                             :page 118
-                            :frequency opt5e/turns-1
+                            :frequency units5e/turns-1
                             :summary "when you kill a creature with a spell, you regain HPs equal to 2X the spell level or 3X the spell level for necromancy spells"}
                            {:name "Undead Thralls"
                             :page 119
@@ -3355,7 +3351,7 @@
                            {:name "Minor Alchemy"
                             :level 2
                             :page 119
-                            :duration opt5e/hours-1
+                            :duration units5e/hours-1
                             :summary "transform an object of one substance to another substance"}
                            {:name "Transmuter's Stone"
                             :level 6
@@ -3364,7 +3360,7 @@
                            {:name "Shapechanger"
                             :level 10
                             :page 119
-                            :frequency opt5e/long-rests-1
+                            :frequency units5e/long-rests-1
                             :summary "cast polymorph without a spell slot to turn into a CR 1 or less beast"}]}]}))
 
 (def pact-boon-options
@@ -3447,7 +3443,7 @@
      :modifiers [(mod5e/trait-cfg
                   {:name "Eldritch Invocation: Bewitching Whispers"
                    :page 110
-                   :frequency opt5e/long-rests-1
+                   :frequency units5e/long-rests-1
                    :summary "cast compulsion once using warlock spell slot"})
                  (mod5e/spells-known 4 :compulsion ::char5e/cha "Warlock" 0 "once per long rest")]})
    (t/option-cfg
@@ -3479,7 +3475,7 @@
      :modifiers [(mod5e/trait-cfg
                   {:name "Eldritch Invocation: Chains of Carceri"
                    :page 110
-                   :frequency opt5e/long-rests-1
+                   :frequency units5e/long-rests-1
                    :summary "cast hold monster at will on celestials, fiends, or elementals"})
                  (mod5e/spells-known 5 :hold-monster ::char5e/cha "Warlock" 0 "at will")]
      :prereqs [opt5e/pact-of-the-chain-prereq
@@ -3490,7 +3486,7 @@
                  (mod5e/trait-cfg
                   {:name "Eldritch Invocation: Devil's Sight"
                    :page 110
-                   :range opt5e/ft-120
+                   :range units5e/ft-120
                    :summary "see normally in magical and nonmagical darkness"})]})
    (t/option-cfg
     {:name "Dreadful Word"
@@ -3498,7 +3494,7 @@
                   {:name "Eldritch Invocation: Dreadful Word"
                    :page 110
                    :summary "use warlock spell slot to cast confusion"
-                   :frequency opt5e/long-rests-1})
+                   :frequency units5e/long-rests-1})
                  (mod5e/spells-known 4 :confusion ::char5e/cha "Warlock" 0 "once per long rest")]
      :prereqs [(opt5e/total-levels-option-prereq 7 :warlock)]})
    (t/option-cfg
@@ -3560,7 +3556,7 @@
      :modifiers [(mod5e/trait-cfg
                   {:name "Eldritch Invocation: Minions of Chaos"
                    :page 111
-                   :frequency opt5e/long-rests-1
+                   :frequency units5e/long-rests-1
                    :summary "cast conjure elemental using warlock spell slot
 long rest."})
                  (mod5e/spells-known 5 :conjure-elemental ::char5e/cha "Warlock" 0 "once per rest")]
@@ -3570,7 +3566,7 @@ long rest."})
      :modifiers [(mod5e/trait-cfg
                   {:name "Eldritch Invocation: Mire the Mind"
                    :page 111
-                   :frequency opt5e/long-rests-1
+                   :frequency units5e/long-rests-1
                    :summary "cast slow using warlock spell slot"})
                  (mod5e/spells-known 3 :slow ::char5e/cha "Warlock" 0 "at will")]
      :prereqs [(opt5e/total-levels-option-prereq 5 :warlock)]})
@@ -3608,7 +3604,7 @@ long rest."})
      :modifiers [(mod5e/trait-cfg
                   {:name "Eldritch Invocation: Sculptor of Flesh"
                    :page 111
-                   :frequency opt5e/long-rests-1
+                   :frequency units5e/long-rests-1
                    :summary "cast polymorph using a warlock spell slot"})
                  (mod5e/spells-known 4 :polymorph ::char5e/cha "Warlock" 0 "once per long rest")]
      :prereqs [(opt5e/total-levels-option-prereq 7 :warlock)]})
@@ -3617,7 +3613,7 @@ long rest."})
      :modifiers [(mod5e/trait-cfg
                   {:name "Eldritch Invocation: Sign of Ill Omen"
                    :page 111
-                   :frequency opt5e/long-rests-1
+                   :frequency units5e/long-rests-1
                    :summary "cast bestow curse using warlock spell slot"})
                  (mod5e/spells-known 3 :bestow-curse ::char5e/cha "Warlock" 0 "once per long rest")]
      :prereqs [(opt5e/total-levels-option-prereq 5 :warlock)]})
@@ -3626,7 +3622,7 @@ long rest."})
      :modifiers [(mod5e/trait-cfg
                   {:name "Eldritch Invocation: Thief of Five Fates"
                    :page 111
-                   :frequency opt5e/long-rests-1
+                   :frequency units5e/long-rests-1
                    :summary "cast bane warlock spell slot"})
                  (mod5e/spells-known 1 :bane ::char5e/cha "Warlock" 0 "once per long rest")]})
    (t/option-cfg
@@ -3664,7 +3660,7 @@ long rest."})
     {:name "Witch Sight"
      :modifiers [(mod5e/trait-cfg
                   {:name "Eldritch Invocation: Witch Sight"
-                   :range opt5e/ft-30
+                   :range units5e/ft-30
                    :page 111
                    :summary "see the true form of a creature"})]
      :prereqs [(opt5e/total-levels-option-prereq 15 :warlock)]})])
@@ -3760,13 +3756,13 @@ long rest."})
                                :level 11
                                :page 108
                                :summary "You gain a 6th level spell you can cast without expending a slot, more at higher levels"
-                               :frequency {:units :long-rest
-                                           :amount (mod5e/level-val
-                                                    (?class-level :warlock)
-                                                    {13 2
-                                                     15 3
-                                                     17 4
-                                                     :default 1})}})]}
+                               :frequency (units5e/long-rests
+                                           (mod5e/level-val
+                                            (?class-level :warlock)
+                                            {13 2
+                                             15 3
+                                             17 4
+                                             :default 1}))})]}
              13 {:selections [(mystic-arcanum-selection 7)]}
              15 {:selections [(eldritch-invocation-selection)
                               (mystic-arcanum-selection 8)]}
@@ -3776,7 +3772,7 @@ long rest."})
               :level 20
               :page 108
               :summary "Regain all Pact Magic spell slots"
-              :frequency opt5e/long-rests-1}]
+              :frequency units5e/long-rests-1}]
     :subclass-level 1
     :subclass-title "Otherworldly Patron"
     :subclasses [{:name "The Fiend"
@@ -3784,7 +3780,7 @@ long rest."})
                             :level 6
                             :page 109
                             :summary "add d10 to an attack or save roll"
-                            :frequency opt5e/rests-1}
+                            :frequency units5e/rests-1}
                            {:name "Fiendish Resilience"
                             :level 10
                             :page 109
@@ -3793,7 +3789,7 @@ long rest."})
                             :level 14
                             :page 109
                             :summary "deal 10d10 psychic damage when you hit with an attack"
-                            :frequency opt5e/rests-1}]
+                            :frequency units5e/rests-1}]
                   :levels {1 {:modifiers [(mod5e/dependent-trait
                                            {:name "Dark One's Blessing"
                                             :page 109
@@ -3809,16 +3805,16 @@ long rest."})
                                {:name "Fey Presence"
                                 :page 109
                                 :summary (str "charm or frighten creatures in a 10 ft cube from you unless the succeed on a DC " (?spell-save-dc ::char5e/cha) " WIS save.")
-                                :duration opt5e/turns-1
-                                :frequency opt5e/rests-1})]
+                                :duration units5e/turns-1
+                                :frequency units5e/rests-1})]
                   :levels {1 {:selections [(opt5e/warlock-subclass-spell-selection [:faerie-fire :sleep])]}
                            3 {:selections [(opt5e/warlock-subclass-spell-selection [:calm-emotions :phantasmal-force])]}
                            5 {:selections [(opt5e/warlock-subclass-spell-selection [:blink :plant-growth])]}
                            6 {:modifiers [(mod5e/reaction
                                            {:name "Misty Escape"
                                             :page 109
-                                            :frequency opt5e/rests-1
-                                            :duration opt5e/rounds-1
+                                            :frequency units5e/rests-1
+                                            :duration units5e/rounds-1
                                             :summary "when you take damage, turn invisible and teleport up to 60 ft."})]}
                            7 {:selections [(opt5e/warlock-subclass-spell-selection [:dominate-beast :greater-invisibility])]}
                            9 {:selections [(opt5e/warlock-subclass-spell-selection [:dominate-person :seeming])]}
@@ -3826,13 +3822,13 @@ long rest."})
                                            (mod5e/reaction
                                             {:name "Beguiling Defenses"
                                              :page 109
-                                             :duration opt5e/minutes-1
+                                             :duration units5e/minutes-1
                                              :summary (str "when a creature attempts to charm you, you can turn it back on them with a spell save DC " (?spell-save-dc ::char5e/cha) " WIS save")})]}
                            14 {:modifiers [(mod5e/action
                                             {:name "Dark Delerium"
                                              :page 109
                                              :summary (str "charm or frighten a creature within 60 ft., spell save DC " (?spell-save-dc ::char5e/cha) "WIS save")
-                                             :frequency opt5e/rests-1})]}}}
+                                             :frequency units5e/rests-1})]}}}
                  {:name "The Great Old One"
                   :levels {1 {:selections [(opt5e/warlock-subclass-spell-selection [:dissonant-whispers :tashas-hideous-laughter])]}
                            3 {:selections [(opt5e/warlock-subclass-spell-selection [:detect-thoughts :phantasmal-force])]}
@@ -3840,7 +3836,7 @@ long rest."})
                            6 {:modifiers [(mod5e/reaction
                                            {:name "Entropic Ward"
                                             :page 110
-                                            :frequency opt5e/rests-1
+                                            :frequency units5e/rests-1
                                             :summary "impose disadvantage on an attack roll against you, if it misses, gain advantage on your next attack roll against the attacker"})]}
                            7 {:selections [(opt5e/warlock-subclass-spell-selection [:dominate-beast :evards-black-tentacles])]}
                            9 {:selections [(opt5e/warlock-subclass-spell-selection [:dominate-person :telekinesis])]}
@@ -3849,7 +3845,7 @@ long rest."})
                             :level 1
                             :page 110
                             :summary "speak telepathically to a creature"
-                            :range opt5e/ft-30}
+                            :range units5e/ft-30}
                            {:name "Thought Shield"
                             :level 10
                             :page 110
@@ -4309,9 +4305,9 @@ long rest."})
                                 {:name "Dread Lord"
                                  :page 97
                                  :source :dmg
-                                 :frequency opt5e/long-rests-1
-                                 :duration opt5e/minutes-1
-                                 :range opt5e/ft-30
+                                 :frequency units5e/long-rests-1
+                                 :duration units5e/minutes-1
+                                 :range units5e/ft-30
                                  :summary (str "create an aura that: reduces bright light to dim; frightened enemies within aura take 4d10 psychic damage; creatures that rely on sight have disadvantage on attack rolls agains you and allies within aura; as a bonus action make a melee spell attack on a creature within aura that deals 3d10 " (common/mod-str (?ability-bonuses ::char5e/cha)) "necrotic damage")})]}}}]
     true)])
 
@@ -4469,7 +4465,7 @@ long rest."})
      :traits [{:name "Silent Speech"
                :source :scag
                :page 110
-               :range opt5e/ft-30
+               :range units5e/ft-30
                :summary "Speak telepathically to 1 creature who understands your language"}]}]})
 
 (def sword-coast-adventurers-guide-selections

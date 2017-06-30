@@ -2,6 +2,7 @@
   (:require [orcpub.dnd.e5.options :as opt5e]
             [orcpub.dnd.e5.character :as char5e]
             [orcpub.dnd.e5.modifiers :as mod5e]
+            [orcpub.dnd.e5.units :as units5e]
             [orcpub.modifiers :as mod]
             [orcpub.template :as t]
             [orcpub.common :as common]
@@ -110,7 +111,7 @@
                                 :summary "Take the Hide action; can't be tracked with magic"})]}
              20 {:modifiers [(mod5e/dependent-trait
                               {:name "Foe Slayer"
-                               :frequency opt5e/turns-1
+                               :frequency units5e/turns-1
                                :level 20
                                :page 92
                                :summary (str "add " (common/bonus-str (?ability-bonuses ::char5e/wis)) " to an attack or damage roll")})]}}
@@ -138,21 +139,21 @@
                                                          :modifiers [(mod5e/trait-cfg
                                                                       {:name "Colossus Slayer"
                                                                        :page 93
-                                                                       :frequency opt5e/turns-1
+                                                                       :frequency units5e/turns-1
                                                                        :summary "deal an extra d8 damage when you hit a creature that is below its HP max with a weapon attack"})]})
                                                        (t/option-cfg
                                                         {:name "Giant Killer"
                                                          :modifiers [(mod5e/reaction
                                                                       {:name "Giant Killer"
                                                                        :page 93
-                                                                       :frequency opt5e/turns-1
+                                                                       :frequency units5e/turns-1
                                                                        :summary "attack a Large or larger creature within 5 ft that misses an attack against you"})]})
                                                        (t/option-cfg
                                                         {:name "Horde Breaker"
                                                          :modifiers [(mod5e/trait-cfg
                                                                       {:name "Horde Breaker"
                                                                        :page 93
-                                                                       :frequency opt5e/turns-1
+                                                                       :frequency units5e/turns-1
                                                                        :summary "when you attack one creature, attack another creature within 5 feet of it with the same action"})]})]})]}
                            5 {:modifiers [(mod5e/num-attacks 2)]}
                            7 {:selections [(t/selection-cfg
@@ -162,13 +163,13 @@
                                                         {:name "Escape the Horde"
                                                          :modifiers [(mod5e/trait-cfg
                                                                       {:name "Escape the Horde"
-                                                                       :frequency opt5e/turns-1
+                                                                       :frequency units5e/turns-1
                                                                        :page 93})]})
                                                        (t/option-cfg
                                                         {:name "Multiattack Defense"
                                                          :modifiers [(mod5e/trait-cfg
                                                                       {:name "Multiattack Defense"
-                                                                       :frequency opt5e/turns-1
+                                                                       :frequency units5e/turns-1
                                                                        :page 93})]})
                                                        (t/option-cfg
                                                         {:name "Steel Will"
@@ -257,7 +258,7 @@
                                            {:name "Stalker's Fury"
                                             :page 8
                                             :source :ua-revised-ranger
-                                            :frequency {:units :turn}
+                                            :frequency units5e/turns-1
                                             :summary "When you miss with an attack, you can make another"})]}
                            13 {:modifiers [(mod5e/spells-known 4 :greater-invisibility ::char5e/wis "Ranger (Revised)")]}
                            15 {:modifiers [(mod5e/reaction

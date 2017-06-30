@@ -1,7 +1,8 @@
 (ns orcpub.dnd.e5.templates.ua-options
   (:require [orcpub.dnd.e5.modifiers :as mod5e]
             [orcpub.dnd.e5.character :as char5e]
-            [orcpub.dnd.e5.options :as opt5e]))
+            [orcpub.dnd.e5.options :as opt5e]
+            [orcpub.dnd.e5.units :as units5e]))
 
 (def ua-revised-subclasses-kw :ua-revised-subclasses)
 
@@ -17,14 +18,14 @@
                             {:name "Arcane Shot"
                              :page 3
                              :source ua-revised-subclasses-kw
-                             :frequency {:units :rest
-                                         :amount (mod5e/level-val
-                                                  (?class-level :fighter)
-                                                  {7 3
-                                                   10 4
-                                                   15 5
-                                                   18 6
-                                                   :default 2})}
+                             :frequency (units5e/rests
+                                         (mod5e/level-val
+                                          (?class-level :fighter)
+                                          {7 3
+                                           10 4
+                                           15 5
+                                           18 6
+                                           :default 2}))
                              :summary "when you fire a magic arrow as part of an Attack, you can use an Arcane Shot Option"})
                            (mod5e/dependent-trait
                             {:name "Arcane Shot: Banishing Arrow"
@@ -66,7 +67,7 @@
                             {:name "Arcane Shot: Shadow Arrow"
                              :page 4
                              :source ua-revised-subclasses-kw
-                             :duration {:units :round}
+                             :duration units5e/rounds-1
                              :summary (str "if the arrow hits, deal an extra " (if (>= (?class-level :fighter) 18) 4 2) "d6 psychic damage and target must succeed on a DC " (?spell-save-dc ::char5e/int) " WIS save or cannot see beyond 5 ft")})]
                :selections [(opt5e/skill-selection [:arcana :nature] 1)]}
             7 {:modifiers [(mod5e/bonus-action
