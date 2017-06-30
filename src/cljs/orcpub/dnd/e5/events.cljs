@@ -1451,3 +1451,17 @@
  ::char5e/set-notes
  (fn [{:keys [db]} [_ id notes]]
    (update-character-fx db id #(set-notes % notes))))
+
+(defn toggle-feature-used [character units nm]
+  (update-in
+   character
+   [::entity/values
+    ::char5e/features-used
+    units
+    nm]
+   not))
+
+(reg-event-fx
+ ::char5e/toggle-feature-used
+ (fn [{:keys [db]} [_ id units nm]]
+   (update-character-fx db id #(toggle-feature-used % units nm))))

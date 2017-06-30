@@ -542,7 +542,8 @@
    ::char5e/public? char5e/public?
    ::char5e/used-resources char5e/used-resources
    ::char5e/al-illegal-reasons char5e/al-illegal-reasons
-   ::char5e/feats char5e/feats})
+   ::char5e/feats char5e/feats
+   ::char5e/features-used char5e/features-used})
 
 (doseq [[sub-key char-fn] character-subs]
   (reg-sub
@@ -691,3 +692,10 @@
    (get-in character
            [::entity/values
             ::char5e/prepared-spells-by-class])))
+
+(reg-sub
+ ::char5e/feature-used?
+ (fn [[_ id units nm]]
+   (subscribe [::char5e/features-used id]))
+ (fn [features-used [_ id units nm]]
+   (get-in features-used [units nm])))
