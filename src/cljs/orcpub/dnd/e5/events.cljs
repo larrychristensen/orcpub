@@ -6,6 +6,7 @@
             [orcpub.dice :as dice]
             [orcpub.dnd.e5.template :as t5e]
             [orcpub.dnd.e5.character :as char5e]
+            [orcpub.dnd.e5.units :as units5e]
             [orcpub.dnd.e5.party :as party5e]
             [orcpub.dnd.e5.character.random :as char-rand5e]
             [orcpub.dnd.e5.spells :as spells]
@@ -1468,3 +1469,30 @@
  ::char5e/toggle-feature-used
  (fn [{:keys [db]} [_ id units nm]]
    (update-character-fx db id #(toggle-feature-used % units nm))))
+
+(defn clear-period [db id & units]
+  (update-character-fx db id #(update-in
+                               %
+                               [::entity/values ::char5e/features-used]
+                               (fn [features-used]
+                                 (apply dissoc features-used units)))))
+
+(reg-event-fx
+ ::char5e/finish-long-rest
+ (fn [{:keys [db]} [_ id]]
+   (clear-period db id ::units5e/long-rest ::units5e/rest)))
+
+(reg-event-fx
+ ::char5e/finish-short-rest
+ (fn [{:keys [db]} [_ id]]
+   (clear-period db id ::units5e/short-rest ::units5e/rest)))
+
+(reg-event-fx
+ ::char5e/new-round
+ (fn [{:keys [db]} [_ id]]
+   (clear-period db id ::units5e/round)))
+
+(reg-event-fx
+ ::char5e/new-turn
+ (fn [{:keys [db]} [_ id]]
+   (clear-period db id ::units5e/turn)))

@@ -294,10 +294,8 @@
           {}
           (map
            (fn [[k v]]
-             (if (not= k :db/id)
-               [k (into #{} v)]
-               [k v]))
-           features-used))))))
+             [k (into #{} v)])
+           (dissoc features-used :db/id)))))))
 
 (defn from-strict [raw-character]
   (-> (entity/from-strict raw-character)
