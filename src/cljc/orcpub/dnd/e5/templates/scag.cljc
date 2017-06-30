@@ -626,8 +626,11 @@
      :treasure {:gp 10}}
     {:name "Urban Bounty Hunter"
      :source "Sword Coast Adventurer's Guide"
-     :profs {:skill-options {:choose 2 :options {:deception true :insight true :persuasion true :stealth true}}
-             :tool-options {:gaming-set 1 :musical-instrument 1 :thieves-tools 1}}
+     :profs {:skill-options {:choose 2 :options {:deception true :insight true :persuasion true :stealth true}}}
+     :selections [(opt5e/tool-selection (concat [:thieves-tools]
+                                                (map :key equip5e/gaming-sets)
+                                                (map :key equip5e/musical-instruments))
+                                        2)]
      :traits [{:name "Ear to the Ground"
                :page 153
                :summary "you have contacts in any city that can provide info about people and places"}]
