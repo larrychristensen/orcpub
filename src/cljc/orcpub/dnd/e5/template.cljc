@@ -1273,9 +1273,18 @@
                    :options (map
                              #(starting-equipment-option % 1)
                              equip5e/holy-symbols)})]
-    :levels {2 {:modifiers [(mod5e/action
-                             {:level 2
-                              :page 59
+    :levels {2 {:modifiers [(mod5e/dependent-trait
+                             {:page 59
+                              :name "Channel Divinity"
+                              :summary "Channel divine power using Turn Undead or one of your domain Channel Divinity options."
+                              :frequency {:units :rest
+                                          :amount (mod5e/level-val
+                                                   (?class-level :cleric)
+                                                   {6 2
+                                                    18 3
+                                                    :default 1})}})
+                            (mod5e/action
+                             {:page 59
                               :name "Channel Divinity: Turn Undead"
                               :summary (str "undead within 30 feet must make a DC "
                                             (?spell-save-dc ::char5e/wis)
@@ -1354,18 +1363,18 @@
                                            ["Arcana" "History" "Nature" "Religion"])
                                  :min 2
                                  :max 2})]
-                  :levels {6 {:modifiers [(mod5e/action
-                                           {:level 6
-                                            :page 59
+                  :levels {2 {:modifiers [(mod5e/action
+                                           {:page 59
+                                            :summary "Become proficient in a tool or skill for 10 mins."
+                                            :name "Channel Divinity: Knowledge of the Ages"})]}
+                           6 {:modifiers [(mod5e/action
+                                           {:page 59
                                             :name "Channel Divinity: Read Thoughts"
                                             :summary (str "a creature within 60 ft. must make a DC "
                                                           (?spell-save-dc ::char5e/wis)
                                                           " Wisdom save or you can read it's thoughts for 1 min, use an action to end the effect and cast 'suggestion' without using a slot and with no save")})]}
                            8 {:modifiers [(opt5e/potent-spellcasting 60)]}}
-                  :traits [{:level 2
-                            :page 59
-                            :summary "Become proficient in a tool or skill for 10 mins."
-                            :name "Channel Divinity: Knowledge of the Ages"}
+                  :traits [
                            {:level 17
                             :page 60
                             :name "Visions of the Past"
@@ -1541,12 +1550,10 @@
                                             :page 63
                                             :summary "+10 to an attack roll made by a creature within 30 ft."})]}
                            8 {:modifiers [(opt5e/divine-strike nil 63)]}}
-                  :traits [
-                           {:name "Channel Divinity: Guided Strike"
+                  :traits [{:name "Channel Divinity: Guided Strike"
                             :page 63
                             :level 2
                             :summary "+10 to an attack roll"}
-                           
                            {:name "Avatar of Battle"
                             :page 63
                             :level 17

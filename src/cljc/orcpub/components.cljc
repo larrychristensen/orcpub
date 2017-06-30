@@ -2,7 +2,7 @@
   (:require [re-frame.core :refer [dispatch]]))
 
 (defn checkbox [selected? disable?]
-  [:i.fa.fa-check.f-s-14.bg-white.orange-shadow.m-r-10
+  [:i.fa.fa-check.f-s-14.bg-white.orange-shadow.m-r-10.pointer
    {:class-name (str (if selected? "black slight-text-shadow" "transparent")
                      " "
                      (if disable?
