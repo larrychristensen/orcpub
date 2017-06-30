@@ -1593,7 +1593,7 @@
           [:p.m-t-10
            [:span.f-w-600.i nm "."]
            [:span.f-w-n.m-l-10 (add-links (common/sentensize (disp/action-description action)))]
-           #_(if (and amount units)
+           (if (and amount units)
              [:span.m-l-10
               (doall
                (for [i (range amount)]
