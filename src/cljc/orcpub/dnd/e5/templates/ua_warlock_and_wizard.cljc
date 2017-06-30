@@ -199,7 +199,7 @@
                  :prereqs [hexblade-prereq]
                  :page 6
                  :source :ua-warlock-and-wizard
-                 :summary "When you hit with 'eldritch blast' you can move the target up to 10 ft. toward you."})
+                 :summary "Create a special greatsword as your pact weapon. When you reduce a creature cursed with your Hexblade Curse to 0 HPs with it, you can change the target of the curse. Also, when you hit a creature with it, you can expend a spell slot to deal 2d8 extra damage per slot level plus reduce the target's speed to 0 ft until the end or your next turn."})
                (opt5e/eldritch-invocation-option
                 {:name "Kiss of Mephistopheles (UAWW)"
                  :prereqs [(opt5e/total-levels-option-prereq 5 :warlock)
