@@ -9,6 +9,7 @@
             [orcpub.entity.strict :as se]
             [orcpub.dnd.e5.subs :as subs]
             [orcpub.dnd.e5.character :as char]
+            [orcpub.dnd.e5.units :as units]
             [orcpub.dnd.e5.party :as party]
             [orcpub.dnd.e5.character.random :as char-random]
             [orcpub.dnd.e5.character.equipment :as char-equip]
@@ -2296,7 +2297,9 @@
         bonus-actions @(subscribe [::char/bonus-actions id])
         reactions @(subscribe [::char/reactions id])
         traits @(subscribe [::char/traits id])
-        attacks @(subscribe [::char/attacks id])]
+        attacks @(subscribe [::char/attacks id])
+        all-traits (concat actions bonus-actions reaction traits attacks)
+        freqs (into #{} (map #(some-> % :frequency :units) all-traits))]
     [:div.details-columns
      {:class-name (if (= 2 num-columns) "flex")}
    
@@ -2306,6 +2309,25 @@
       [list-item-section "Damage Immunities" nil damage-immunities resistance-str]
       [list-item-section "Condition Immunities" nil condition-immunities resistance-str]
       [list-item-section "Immunities" nil immunities resistance-str]
+      [:div.flex.justify-cont-end.align-items-c
+       (if (or (freqs ::units/long-rest)
+               (freqs ::units/rest))
+         [:button.form-button.p-5
+          {:on-click #(dispatch [::char/finish-long-rest])}
+          "finish long rest"])
+       (if (or (freqs ::units/short-rest)
+               (freqs ::units/rest))
+         [:button.form-button.p-5.m-l-5
+          {:on-click #(dispatch [::char/finish-short-rest])}
+          "finish short rest"])
+       (if (freqs ::units/round)
+         [:button.form-button.p-5.m-l-5
+          {:on-click #(dispatch [::char/new-round])}
+          "new round"])
+       (if (freqs ::units/turn)
+         [:button.form-button.p-5.m-l-5
+          {:on-click #(dispatch [::char/new-turn])}
+          "new turn"])]
       [attacks-section attacks]
       [actions-section "Actions" "beams-aura" actions]
       [actions-section "Bonus Actions" "run" bonus-actions]
