@@ -294,7 +294,9 @@
           {}
           (map
            (fn [[k v]]
-             [k (into #{} v)])
+             (if (not= k :db/id)
+               [k (into #{} v)]
+               [k v]))
            features-used))))))
 
 (defn from-strict [raw-character]
