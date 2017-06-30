@@ -1457,9 +1457,8 @@
    character
    [::entity/values
     ::char5e/features-used
-    units
-    nm]
-   not))
+    units]
+   (partial toggle-set nm)))
 
 (reg-event-fx
  ::char5e/toggle-feature-used

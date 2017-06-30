@@ -231,7 +231,8 @@
   (let [current-hit-points (::current-hit-points values)]
     (if (and current-hit-points
              (not (int? current-hit-points)))
-      (dissoc values ::current-hit-points))))
+      (dissoc values ::current-hit-points)
+      values)))
 
 (defn clean-values [raw-character]
   (cond-> raw-character
@@ -246,7 +247,8 @@
     true fix-custom-quantities))
 
 (defn to-strict [raw-character]
-  (entity/to-strict (clean-values raw-character)))
+  (let [cleaned (clean-values raw-character)]
+    (entity/to-strict cleaned)))
 
 (spec/fdef to-strict
            :args ::raw-character
@@ -273,16 +275,27 @@
    equipment-keys))
 
 (defn update-values-from-strict [character]
-  (update-in character
-             [::entity/values
-              ::prepared-spells-by-class]
-             (fn [prepared-spells]
-               (into
-                {}
-                (map
-                 (fn [{:keys [::class-name ::prepared-spells]}]
-                   [class-name (set prepared-spells)])
-                 prepared-spells)))))
+  (-> character
+      (update-in
+       [::entity/values
+        ::prepared-spells-by-class]
+       (fn [prepared-spells]
+         (into
+          {}
+          (map
+           (fn [{:keys [::class-name ::prepared-spells]}]
+             [class-name (set prepared-spells)])
+           prepared-spells))))
+      (update-in
+       [::entity/values
+        ::features-used]
+       (fn [features-used]
+         (into
+          {}
+          (map
+           (fn [[k v]]
+             [k (into #{} v)])
+           features-used))))))
 
 (defn from-strict [raw-character]
   (-> (entity/from-strict raw-character)
