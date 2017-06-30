@@ -2344,11 +2344,17 @@
                               (t/option-cfg
                                {:name "Two Martial Weapons"
                                 :selections [(opt5e/new-starting-equipment-selection
-                                              :paladin
-                                              {:name "Martial Weapons"
-                                               :options (opt5e/martial-weapon-options 1)
-                                               :min 2
-                                               :max 2})]})]})
+                                             :paladin
+                                             {:name "Martial Weapon 1"
+                                              :options (opt5e/martial-weapon-options 1)
+                                              :min 1
+                                              :max 1})
+                                            (opt5e/new-starting-equipment-selection
+                                             :paladin
+                                             {:name "Martial Weapon 2"
+                                              :options (opt5e/martial-weapon-options 1)
+                                              :min 1
+                                              :max 1})]})]})
                   (opt5e/new-starting-equipment-selection
                    :paladin
                    {:name "Melee Weapon"
