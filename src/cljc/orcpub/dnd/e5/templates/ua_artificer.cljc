@@ -3,6 +3,7 @@
             [orcpub.dnd.e5.character.equipment :as char-equip5e]
             [orcpub.dnd.e5.options :as opt5e]
             [orcpub.dnd.e5.modifiers :as mod5e]
+            [orcpub.dnd.e5.units :as units5e]
             [orcpub.dnd.e5.equipment :as equip5e]
             [orcpub.dnd.e5.magic-items :as mi5e]
             [orcpub.modifiers :as mod]
@@ -34,7 +35,7 @@
    {:name "Alchemical Fire"
     :page 5
     :source :ua-artificer
-    :range opt5e/ft-30
+    :range units5e/ft-30
     :summary (str "Hurl a vial of alchemical fire that does "
                   (mod5e/level-val
                    (?class-level :artificer)
@@ -54,7 +55,7 @@
    {:name "Alchemical Acid"
     :page 5
     :source :ua-artificer
-    :range opt5e/ft-30
+    :range units5e/ft-30
     :summary (str "Hurl a vial of acid that does "
                   (mod5e/level-val
                    (?class-level :artificer)
@@ -107,7 +108,7 @@
                              {:name "Smoke Stick"
                               :page 5
                               :source :ua-artificer
-                              :range opt5e/ft-30
+                              :range units5e/ft-30
                               :summary "Create a stick that produces a thick smoke within a 10 ft. radius that blocks vision"})]})
               (t/option-cfg
                {:name "Swift Step Draught"
@@ -115,8 +116,8 @@
                              {:name "Swift Step Draught"
                               :page 5
                               :source :ua-artificer
-                              :duration opt5e/minutes-1
-                              :frequency opt5e/minutes-1
+                              :duration units5e/minutes-1
+                              :frequency units5e/minutes-1
                               :summary "Produce a vial of liquid that increases a creature's speed by 20"})]})
               (t/option-cfg
                {:name "Tanglefoot Bag"
@@ -124,8 +125,8 @@
                              {:name "Tanglefoot Bag"
                               :page 6
                               :source :ua-artificer
-                              :range opt5e/ft-30
-                              :frequency opt5e/minutes-1
+                              :range units5e/ft-30
+                              :frequency units5e/minutes-1
                               :summary "Produce a bag that, when thrown, covers a 5 ft. radius with a sticky goo. Creatures that start their turn in the goo have their speed halved that turn."})]})
               (t/option-cfg
                {:name "Thunderstone"
@@ -133,7 +134,7 @@
                              {:name "Thunderstone"
                               :page 6
                               :source :ua-artificer
-                              :range opt5e/ft-30
+                              :range units5e/ft-30
                               :summary (str "Hurl a shard. Creatures within 10 ft. of the impact point must make a DC " (?spell-save-dc :int) " CON save or be knocked prone and pushed 10 ft. away.")})]})]}))
 
 (defn artificer-tool-prof-mods [tool-key]

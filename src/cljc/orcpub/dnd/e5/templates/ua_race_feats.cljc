@@ -2,6 +2,7 @@
   (:require [orcpub.dnd.e5.modifiers :as mod5e]
             [orcpub.dnd.e5.options :as opt5e]
             [orcpub.dnd.e5.character :as char5e]
+            [orcpub.dnd.e5.units :as units5e]
             [orcpub.template :as t]
             [orcpub.common :as common]
             [re-frame.core :refer [subscribe]]
@@ -164,7 +165,7 @@
                                             {:name "Fade Away Feat"
                                              :page 2
                                              :source :ua-race-feats
-                                             :frequency {:units :rest}
+                                             :frequency units5e/rests-1
                                              :summary "When you take damage, become invisible until end of your next turn."})]})
                              (opt5e/feat-option
                               {:name "Fey Teleportation"
@@ -201,7 +202,7 @@
                                             {:name "Human Determination Feat; you may make an attack roll, ability check, or save with advantage"
                                              :page 3
                                              :source :ua-race-feats
-                                             :frequency {:units :rest}
+                                             :frequency units5e/rests-1
                                              :summary "You may make an attack roll, ability check, or save with advantage."})]
                                :selections [(opt5e/ability-increase-selection char5e/ability-keys 1 false)]})
                              (opt5e/feat-option
@@ -234,7 +235,7 @@
                                             {:name "Orcish Fury Feat"
                                              :page 4
                                              :source :ua-race-feats
-                                             :frequency {:units :rest}
+                                             :frequency units5e/rests-1
                                              :summary "Reroll one weapon damage die an additional time as extra damage"})
                                            (mod5e/reaction
                                             {:name "Orcish Fury Reaction"
@@ -260,7 +261,7 @@
                                             {:name "Second Chance Feat"
                                              :page 4
                                              :source :ua-race-feats
-                                             :frequency {:units :rest}
+                                             :frequency units5e/rests-1
                                              :summary "Force a creature to reroll a hitting attack roll"})]})
                              (opt5e/feat-option
                               {:name "Squat Nibleness"

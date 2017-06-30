@@ -11,6 +11,7 @@
             [orcpub.dnd.e5.character.equipment :as char-equip]
             [orcpub.dnd.e5.modifiers :as modifiers]
             [orcpub.dnd.e5.weapons :as weapons]
+            [orcpub.dnd.e5.units :as units5e]
             [orcpub.dnd.e5.armor :as armor]
             [orcpub.dnd.e5.spells :as spells]
             [orcpub.dnd.e5.equipment :as equipment]
@@ -22,49 +23,6 @@
   #?(:cljs (:require-macros [orcpub.dnd.e5.modifiers :as modifiers])))
 
 #?(:cljs (enable-console-print!))
-
-(def ft-5 {:units :feet
-           :amount 5})
-
-(def ft-10 {:units :feet
-           :amount 10})
-
-(def ft-30 {:units :feet
-            :amount 30})
-
-(def ft-60 {:units :feet
-            :amount 60})
-
-(def ft-90 {:units :feet
-            :amount 90})
-
-(def ft-120 {:units :feet
-             :amount 120})
-
-(def turns-1 {:units :turn})
-
-(def rounds-1 {:units :round})
-
-(def minutes-1 {:units :minute})
-
-(def minutes-10 {:units :minute
-                 :amount 10})
-
-(def hours-1 {:units :hour})
-
-(def conc-minutes-1 {:units :minute
-                     :concentration true})
-
-(def conc-minutes-10 {:units :minute
-                      :amount 10
-                      :concentration true})
-
-(def conc-hours-1 {:units :hour
-              :concentration true})
-
-(def rests-1 {:units :rest})
-
-(def long-rests-1 {:units :long-rest})
 
 (def abilities
   [{:key ::character/str
@@ -1101,8 +1059,7 @@
      :summary "use reaction to attack a caster within 5 ft.; impose disadvantage to a caster's concentration check when you attack; advantage on saves against spells cast within 5ft."
      :modifiers [(modifiers/reaction
                   {:name "Mage Slayer"
-                   :range {:units :feet
-                           :amount 5}
+                   :range units5e/ft-5
                    :page 168
                    :summary "attack a creature that casts a spell"})]})
    (feat-option
@@ -2408,7 +2365,7 @@
     :name "Divine Strike"
     :page page
     :source source
-    :frequency turns-1
+    :frequency units5e/turns-1
     :summary (str "Add "
                   (if (>= (?class-level :cleric) 14) 2 1)
                   "d8 "
