@@ -73,28 +73,30 @@
     :where [?e :orcpub.user/email ?email]])
 
 (defn find-user-by-username-or-email [db username-or-email]
-  (first-user-by db
-                 '[:find ?e
-                   :in $ ?user-or-email
-                   :where (or [?e :orcpub.user/username ?user-or-email]
-                              [?e :orcpub.user/email ?user-or-email])]
-                 username-or-email))
+  (d/q
+   '[:find (pull ?e [*]) .
+     :in $ ?user-or-email
+     :where (or [?e :orcpub.user/username ?user-or-email]
+                [?e :orcpub.user/email ?user-or-email])]
+   db
+   username-or-email))
 
 (defn find-user-by-username [db username]
-  (first-user-by db
-                 '[:find ?e
-                   :in $ ?username
-                   :where [?e :orcpub.user/username ?username]]
-                 username))
+  (d/q '[:find (pull ?e [*]) .
+         :in $ ?username
+         :where [?e :orcpub.user/username ?username]]
+       db
+       username))
 
 (defn lookup-user-by-username [db username password]
-  (let [user (first-user-by db
-                         '{:find [?e]
-                           :in [$ [?username ?password]]
-                           :where [[?e :orcpub.user/username ?username]
-                                   [?e :orcpub.user/password ?enc]
-                                   [(buddy.hashers/check ?password ?enc)]]}
-                         [username password])]
+  (let [user (d/q '[:find (pull ?e [*]) .
+                    :in $ [?username ?password]
+                    :where
+                    [?e :orcpub.user/username ?username]
+                    [?e :orcpub.user/password ?enc]
+                    [(buddy.hashers/check ?password ?enc)]]
+                  db
+                  [username password])]
     user))
 
 (defn lookup-user-by-email [db email password]
@@ -572,11 +574,12 @@
 
 (defn owns-entity? [db username entity-id]
   (let [user (find-user-by-username db username)
-        username (:orcpub.entity.strict/username user)
-        email (:orcpub.entity.strict/email user)
+        username (:orcpub.user/username user)
+        email (:orcpub.user/email user)
         entity (d/pull db '[:orcpub.entity.strict/owner] entity-id)
         owner (:orcpub.entity.strict/owner entity)]
-    ((into #{} [username email]) owner)))
+    (or (= email owner)
+        (= username owner))))
 
 (defn entity-problem [desc actual expected]
   (str desc ", expected: " expected ", actual: " actual))
