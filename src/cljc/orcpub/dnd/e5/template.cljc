@@ -1532,7 +1532,7 @@
                               (opt5e/cleric-spell 2 :magic-weapon 3)
                               (opt5e/cleric-spell 2 :spiritual-weapon 3)
                               (opt5e/cleric-spell 3 :crusaders-mantle 5)
-                              (opt5e/cleric-spell 3 :spirits-guardians 5)
+                              (opt5e/cleric-spell 3 :spirit-guardians 5)
                               (opt5e/cleric-spell 4 :freedom-of-movement 7)
                               (opt5e/cleric-spell 4 :stoneskin 7)
                               (opt5e/cleric-spell 5 :flame-strike 9)
