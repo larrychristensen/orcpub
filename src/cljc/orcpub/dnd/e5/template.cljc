@@ -2259,6 +2259,7 @@
                              :page 81
                              :summary "create minor elemental effect"}]}]})))
 
+
 (def paladin-option
   (opt5e/class-option
    (merge
@@ -2291,7 +2292,7 @@
                                :page 85
                                :summary "immune to disease"})]}
               5 {:modifiers [(mod5e/num-attacks 2)]}
-              6 {:modifiers (concat
+              6 {:modifiers (conj
                              (map
                               #(mod/modifier ?saving-throw-bonuses
                                              (merge-with +
