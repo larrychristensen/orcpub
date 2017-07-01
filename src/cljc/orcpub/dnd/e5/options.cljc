@@ -403,8 +403,10 @@
                  "You already know this spell"
                  (fn [c] (let [spells-known @(subscribe [::character/spells-known nil c])]
                            (or (not spells-known)
-                               (not (some #(= key (:key %))
-                                          (spells-known level)))))))
+                               (not-any?
+                                (fn [[[_ kw]]]
+                                  (= key kw))
+                                (get spells-known level))))))
                 (t/option-prereq
                  "You aren't using this source"
                  (fn [c] (or (nil? source)
@@ -412,6 +414,7 @@
                              (get @(subscribe [::character/option-sources nil c]) source)))
                  true)]
       :modifiers [(modifiers/spells-known level key spellcasting-ability class-name nil qualifier)]})))
+
 
 (def memoized-spell-option (memoize spell-option))
 
