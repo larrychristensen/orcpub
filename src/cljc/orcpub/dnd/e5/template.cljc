@@ -2291,15 +2291,23 @@
                                :page 85
                                :summary "immune to disease"})]}
               5 {:modifiers [(mod5e/num-attacks 2)]}
-              6 {:modifiers (map
-                             #(mod/modifier ?saving-throw-bonuses
-                                            (merge-with +
-                                                        ?saving-throw-bonuses
-                                                        {% (get ?ability-bonuses ::char5e/cha 0)}))
-                             char5e/ability-keys)}
+              6 {:modifiers (concat
+                             (map
+                              #(mod/modifier ?saving-throw-bonuses
+                                             (merge-with +
+                                                         ?saving-throw-bonuses
+                                                         {% (get ?ability-bonuses ::char5e/cha 0)}))
+                              char5e/ability-keys)
+                             (mod5e/dependent-trait
+                              {:name "Aura of Protection"
+                               :page 85
+                               :summary (str "you and friendly creatures within " ?paladin-aura " ft. have a " (common/bonus-str (max 1 (?ability-bonuses ::char5e/cha))) " bonus to saves")}))}
+              10 {:modifiers [(mod5e/dependent-trait
+                               {:name "Aura of Courage"
+                                :page 85
+                                :summary (str (str "you and friendly creatures within " ?paladin-aura " ft. can't be frightened"))})]}
               14 {:modifiers [(mod5e/action
                                {:name "Cleansing Touch"
-                                :level 14
                                 :page 85
                                 :frequency (units5e/long-rests (?ability-bonuses ::char5e/cha))
                                 :summary "end a spell on yourself or willing creature"})]}}
@@ -2315,16 +2323,6 @@
                    :page 84
                    :frequency units5e/long-rests-1
                    :summary (str "you have a healing pool of " (* 5 (?class-level :paladin)) " HPs, with it you can heal a creature or expend 5 points to cure disease or neutralize poison")})
-                 (mod5e/dependent-trait
-                  {:name "Aura of Protection"
-                   :level 6
-                   :page 85
-                   :summary (str "you and friendly creatures within " ?paladin-aura " ft. have a " (common/bonus-str (max 1 (?ability-bonuses ::char5e/cha))) " bonus to saves")})
-                 (mod5e/dependent-trait
-                  {:name "Aura of Courage"
-                   :level 10
-                   :page 85
-                   :summary (str (str "you and friendly creatures within " ?paladin-aura " ft. can't be frightened"))})
                  (mod5e/dependent-trait
                   {:name "Channel Divinity"
                    :page 85
@@ -2400,12 +2398,10 @@
                                  :summary (str "each undead or fiend within 30 ft. must make a DC " (?spell-save-dc ::char5e/cha) " WIS save or be turned for 1 min.")})]
                    :levels {7 {:modifiers [(mod5e/dependent-trait
                                             {:name "Aura of Devotion"
-                                             :level 7
                                              :page 86
                                              :summary (str "you and friendly creatures within " ?paladin-aura " ft. can't be charmed")})]}
                             20 {:modifiers [(mod5e/action
                                              {:name "Holy Nimbus"
-                                              :level 20
                                               :page 86
                                               :frequency units5e/long-rests-1
                                               :duration units5e/minutes-1
