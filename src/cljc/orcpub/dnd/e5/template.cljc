@@ -4413,7 +4413,8 @@ long rest."})
                 (update
                  ?spells-known
                  level
-                 #(remove (fn [s] (= spell-key (:key s))) %))))
+                 dissoc
+                 ["Tiefling" spell-key])))
 
 (def scag-tiefling-option-cfg
   {:name "Tiefling"
