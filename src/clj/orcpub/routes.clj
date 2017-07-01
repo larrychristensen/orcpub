@@ -59,6 +59,7 @@
                     db
                     value)
         user-id (ffirst result)]
+    (prn "RESULT" result user-id)
     (d/pull db '[*] user-id)))
 
 (def username-query
@@ -570,9 +571,12 @@
   (remove-orphan-ids-aux true entity))
 
 (defn owns-entity? [db username entity-id]
-  (let [{:keys [:orcpub.user/username :orcpub.user/email]} (find-user-by-username db username)
-        {:keys [:orcpub.entity.strict/owner]} (d/pull db '[:orcpub.entity.strict/owner] entity-id)]
-    (#{username email} owner)))
+  (let [user (find-user-by-username db username)
+        username (:orcpub.entity.strict/username user)
+        email (:orcpub.entity.strict/email user)
+        entity (d/pull db '[:orcpub.entity.strict/owner] entity-id)
+        owner (:orcpub.entity.strict/owner entity)]
+    ((into #{} [username email]) owner)))
 
 (defn entity-problem [desc actual expected]
   (str desc ", expected: " expected ", actual: " actual))
