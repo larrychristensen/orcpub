@@ -1175,7 +1175,7 @@
     :subclasses [{:name "College of Lore"
                   :profs {:skill-options {:choose 3 :options {:any true}}}
                   :modifiers [(mod5e/reaction
-                               {:name "Cutting Wounds"
+                               {:name "Cutting Words"
                                 :level 3
                                 :page 54
                                 :summary (str "expend a use of Bardic Inspiration to subtract 1d"

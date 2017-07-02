@@ -2444,7 +2444,7 @@
 
 (def has-eldritch-blast-prereq
   (t/option-prereq
-   "You must know the edritch blast spell"
+   "You must know the edritch blast cantrip"
    (fn [c]
      (get-in @(subscribe [::character/spells-known nil c])
              [0 ["Warlock" :eldritch-blast]]))))
