@@ -1,7 +1,7 @@
 (ns orcpub.entity-test
   (:require [clojure.test :refer :all]
             [clojure.spec.alpha :as spec]
-            [clojure.spec.alpha.test :as stest]
+            [clojure.spec.test.alpha :as stest]
             [clojure.data :refer [diff]]
             [orcpub.entity.strict :as e]
             [orcpub.entity :as entity]
@@ -231,3 +231,18 @@
             warlock-entity
             [:class :warlock :eldritch-invocations :book-of-ancient-secrets :book-of-ancient-secrets-rituals])
            [:orcpub.entity/options :class 0 :orcpub.entity/options :eldritch-invocations 0 :orcpub.entity/options :book-of-ancient-secrets-rituals]))))
+
+(deftest remove-rempty-fields
+  (let [entity {:orcpub.entity.strict/values
+                {:x :y
+                 :orcpub.dnd.e5.features-used
+                 {:orcpub.dnd.e5.units/long-rest #{}}
+                 :orcpub.dnd.e5.character/prepared-spells-by-class
+                 {"Cleric" #{}}}}
+        entity-2 {:x :y
+                  :orcpub.dnd.e5.character/prepared-spells-by-class
+                  {"Cleric" #{:cure-wounds :healing-word}}}]
+    (is (= {:orcpub.entity.strict/values {:x :y}}
+           (entity/remove-empty-fields entity)))
+    (is (= entity-2
+           (entity/remove-empty-fields entity-2)))))
