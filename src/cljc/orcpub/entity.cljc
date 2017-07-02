@@ -49,17 +49,21 @@
 (defn remove-empty-fields [raw-character]
   (into {}
         (comp
-         (remove
-          (fn [[k v]] (and (coll? v) (empty? v))))
          (map
           (fn [[k v]]
             [k (cond
-                 (sequential? v) (mapv #(if (map? %)
-                                          (remove-empty-fields %)
-                                          %)
-                                       v)
+                 (sequential? v)
+                 (mapv #(if (map? %)
+                          (remove-empty-fields %)
+                          %)
+                       v)
+                 
                  (map? v) (remove-empty-fields v)
-                 :else v)])))
+                 :else v)]))
+         (remove
+          (fn [[k v]]
+            (and (coll? v)
+                 (empty? v)))))
         raw-character))
 
 (defn to-strict-homebrew-paths [homebrew-paths]
