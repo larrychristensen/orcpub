@@ -276,26 +276,26 @@
 
 (defn update-values-from-strict [character]
   (-> character
-      (update-in
-       [::entity/values
-        ::prepared-spells-by-class]
-       (fn [prepared-spells]
-         (into
-          {}
-          (map
-           (fn [{:keys [::class-name ::prepared-spells]}]
-             [class-name (set prepared-spells)])
-           prepared-spells))))
-      (update-in
-       [::entity/values
-        ::features-used]
-       (fn [features-used]
-         (into
-          {}
-          (map
-           (fn [[k v]]
-             [k (into #{} v)])
-           (dissoc features-used :db/id)))))))
+    (update-in
+     [::entity/values
+      ::prepared-spells-by-class]
+     (fn [prepared-spells]
+       (into
+        {}
+        (map
+         (fn [{:keys [::class-name ::prepared-spells]}]
+           [class-name (set prepared-spells)])
+         prepared-spells))))
+    (update-in
+     [::entity/values
+      ::features-used]
+     (fn [features-used]
+       (into
+        {}
+        (map
+         (fn [[k v]]
+           [k (into #{} v)])
+         (dissoc features-used :db/id)))))))
 
 (defn from-strict [raw-character]
   (-> (entity/from-strict raw-character)

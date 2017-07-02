@@ -1474,12 +1474,13 @@
             (map-indexed
              (fn [i r] (with-meta r {:key i}))
              (mapcat
-              (fn [{:keys [key class] :as spell}]
+              (fn [{:keys [key class always-prepared?] :as spell}]
                 (let [k (str key class)]
                   (if (or (not hide-unprepared?)
                           (zero? lvl)
                           (not (get prepares-spells class))
-                          (get-in prepared-spells-by-class [class key]))
+                          (get-in prepared-spells-by-class [class key])
+                          always-prepared?)
                     (spell-row id
                                lvl
                                spell-modifiers
