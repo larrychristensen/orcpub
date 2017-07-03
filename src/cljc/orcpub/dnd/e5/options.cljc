@@ -715,9 +715,9 @@
 (defn skill-prof-or-expertise [skill-kw source]
   [(modifiers/skill-proficiency skill-kw source)
    (modifiers/skill-expertise skill-kw [(some
-                                     (fn [[k v]]
-                                       (not= k source))
-                                     (?skill-profs skill-kw))])])
+                                         (fn [[k v]]
+                                           (not= k source))
+                                         (?skill-profs skill-kw))])])
 
 (defn skill-or-expertise-selection [num skill-kws option-source]
   (t/selection-cfg

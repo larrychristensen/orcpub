@@ -57,7 +57,7 @@
                               "Diplomat" 2 ::char5e/cha :persuasion
                               {:trait-desc "charm a creature you spend 1 minute talking to"})
                              (skill-feat
-                              "Ephatic" 2 ::char5e/wis :insight
+                              "Empathic" 2 ::char5e/wis :insight
                               {:trait-desc "make an Insight check contested by an opponents Deception check, on success, gain advantage on attack rolls and ability checks against it until end of next turn"
                                :trait-type action})
                              (skill-feat
