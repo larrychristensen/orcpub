@@ -98,6 +98,12 @@
                         (assoc m k (opt5e/ability-bonus v)))
                       {}
                       ?abilities)
+    ?str-mod (?ability-bonuses ::char5e/str)
+    ?dex-mod (?ability-bonuses ::char5e/dex)
+    ?con-mod (?ability-bonuses ::char5e/con)
+    ?int-mod (?ability-bonuses ::char5e/int)
+    ?wis-mod (?ability-bonuses ::char5e/wis)
+    ?cha-mod (?ability-bonuses ::char5e/cha)
     ?ability-overrides []
     ?saving-throw-bonuses {}
     ?save-bonuses (reduce-kv
@@ -108,7 +114,20 @@
                    {}
                    ?ability-bonuses)
     ?total-levels (apply + (map (fn [[k {l :class-level}]] l) ?levels))
+    
     ?class-level (fn [class-kw] (get-in ?levels [class-kw :class-level]))
+    ?barbarian-level (?class-level :barbarian)
+    ?bard-level (?class-level :bard)
+    ?cleric-level (?class-level :cleric)
+    ?druid-level (?class-level :druid)
+    ?fighter-level (?class-level :fighter)
+    ?monk-level (?class-level :monk)
+    ?paladin-level (?class-level :paladin)
+    ?ranger-level (?class-level :ranger)
+    ?sorcerer-level (?class-level :sorcerer)
+    ?warlock-level (?class-level :warlock)
+    ?wizard-level (?class-level :wizard)
+    
     ?proficiency-bonus-increase 0
     ?prof-bonus (+ (int (/ (dec ?total-levels) 4)) 2 ?proficiency-bonus-increase)
     ?default-skill-bonus {}

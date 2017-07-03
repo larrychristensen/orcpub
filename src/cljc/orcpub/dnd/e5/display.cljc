@@ -51,7 +51,9 @@
    :ua-warlock-and-wizard {:abbr "UA-Warlock-and-Wizard"
                            :url "http://media.wizards.com/2017/dnd/downloads/20170213_Wizrd_Wrlck_UAv2_i48nf.pdf"}
    :ua-fighter {:abbr "UA-Fighter"
-                :url "http://media.wizards.com/2016/dnd/downloads/2016_Fighter_UA_1205_1.pdf"}})
+                :url "http://media.wizards.com/2016/dnd/downloads/2016_Fighter_UA_1205_1.pdf"}
+   :ua-sorcerer {:abbr "UA-Sorcerer"
+                :url "https://media.wizards.com/2017/dnd/downloads/26_UASorcererUA020617s.pdf"}})
 
 (def plural-map
   {:feet :feet})

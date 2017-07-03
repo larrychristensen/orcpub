@@ -15,6 +15,7 @@
             [orcpub.dnd.e5.templates.ua-artificer :as ua-artificer]
             [orcpub.dnd.e5.templates.ua-cleric :as ua-cleric]
             [orcpub.dnd.e5.templates.ua-fighter :as ua-fighter]
+            [orcpub.dnd.e5.templates.ua-sorcerer :as ua-sorcerer]
             [orcpub.dnd.e5.templates.ua-bard :as ua-bard]
             [orcpub.dnd.e5.templates.ua-race-feats :as ua-race-feats]
             [orcpub.dnd.e5.templates.ua-skill-feats :as ua-skill-feats]
@@ -330,53 +331,12 @@
                                               :frequency units5e/rounds-1
                                               :summary "if you miss with a monk weapon, reroll the attack"})]}}}]}))
 
-(def sorcerer-favored-soul
-  {:name "Sorcerer"
-   :subclass-title "Sorcerous Origin"
-   :subclass-level 1
-   :plugin? true
-   :subclasses [{:name "Favored Soul"
-                 :modifiers [opt5e/ua-al-illegal
-                             (mod5e/spells-known 1 :cure-wounds ::char5e/cha "Sorcerer")
-                             (mod5e/trait-cfg
-                              {:name "Favored by the Gods"
-                               :page 5
-                               :source ua-options/ua-revised-subclasses-kw
-                               :frequency units5e/rests-1
-                               :summary "if you fail a save or miss an attack, you may roll 2d4 and add it to the missed roll"})]
-                 :selections [(opt5e/subclass-cantrip-selection :sorcerer "Sorcerer" ::char5e/cha (get-in sl/spell-lists [:cleric 0]) 0)
-                              (opt5e/subclass-spell-selection :sorcerer "Sorcerer" ::char5e/cha (get-in sl/spell-lists [:cleric 1]) 0)]
-                 :levels {3 {:selections [(opt5e/subclass-spell-selection :sorcerer "Sorcerer" ::char5e/cha (get-in sl/spell-lists [:cleric 2]) 0)]}
-                          5 {:selections [(opt5e/subclass-spell-selection :sorcerer "Sorcerer" ::char5e/cha (get-in sl/spell-lists [:cleric 3]) 0)]}
-                          6 {:modifiers [(mod5e/dependent-trait
-                                          {:name "Empowered Healing"
-                                           :page 5
-                                           :source ua-options/ua-revised-subclasses-kw
-                                           :summary "you may reroll healing dice once"})]}
-                          7 {:selections [(opt5e/subclass-spell-selection :sorcerer "Sorcerer" ::char5e/cha (get-in sl/spell-lists [:cleric 4]) 0)]}
-                          9 {:selections [(opt5e/subclass-spell-selection :sorcerer "Sorcerer" ::char5e/cha (get-in sl/spell-lists [:cleric 5]) 0)]}
-                          11 {:selections [(opt5e/subclass-spell-selection :sorcerer "Sorcerer" ::char5e/cha (get-in sl/spell-lists [:cleric 6]) 0)]}
-                          13 {:selections [(opt5e/subclass-spell-selection :sorcerer "Sorcerer" ::char5e/cha (get-in sl/spell-lists [:cleric 7]) 0)]}
-                          15 {:selections [(opt5e/subclass-spell-selection :sorcerer "Sorcerer" ::char5e/cha (get-in sl/spell-lists [:cleric 8]) 0)]}
-                          17 {:selections [(opt5e/subclass-spell-selection :sorcerer "Sorcerer" ::char5e/cha (get-in sl/spell-lists [:cleric 9]) 0)]}
-                          14 {:modifiers [(mod5e/bonus-action
-                                           {:name "Angelic Form"
-                                            :page 5
-                                            :source ua-options/ua-revised-subclasses-kw
-                                            :summary "gain flying speed of 30 ft."})]}
-                          18 {:modifiers [(mod5e/bonus-action
-                                           {:name "Unearthly Recovery"
-                                            :page 5
-                                            :source ua-options/ua-revised-subclasses-kw
-                                            :frequency units5e/long-rests-1
-                                            :summary (str "regain " (int (/ ?max-hit-points)) " HPs if you have that many or fewer left")})]}}}]})
-
 (def ua-revised-classes
   [barbarian-path-of-the-ancestral-guardian
    bard-college-of-swords
    fighter-arcane-archer
    monk-way-of-the-kensei
-   sorcerer-favored-soul])
+   ua-sorcerer/sorcerer-favored-soul])
 
 (def ua-revised-subclasses-plugin
   {:name "Unearthed Arcana: Revised Subclasses"
@@ -938,4 +898,5 @@
      ua-race-feats/ua-race-feats-plugin
      ua-skill-feats/ua-skill-feats-plugin
      ua-revised-class-options/ua-revised-class-options-plugin
-     ua-warlock-and-wizard/ua-warlock-and-wizard-plugin])))
+     ua-warlock-and-wizard/ua-warlock-and-wizard-plugin
+     ua-sorcerer/ua-sorcerer-plugin])))
