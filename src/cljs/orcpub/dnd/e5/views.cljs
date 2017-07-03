@@ -2129,6 +2129,7 @@
               (fn [[item-kw item-cfg]]
                 (let [{:keys [item-type item-subtype rarity attunement description summary] :as item} (mi/magic-item-map item-kw)
                       expanded? (@expanded-details item-kw)]
+                  ^{:key item-kw}
                   [:tr.pointer
                    {:on-click #(swap! expanded-details (fn [d] (update d item-kw not)))}
                    [:td.p-10.f-w-b (:name item)]
