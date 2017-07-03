@@ -20,20 +20,22 @@
                     :exclusions [org.clojure/tools.reader]]
                  [cljsjs/react "15.3.1-0"]
                  [cljsjs/react-dom "15.3.1-0"]
+                 [cljsjs/facebook "v20150729-0"]
                  [cljs-http "0.1.43"]
+                 [clj-http "3.6.1"]
                  
                  ;;[org.clojure/core.match "0.3.0-alpha4"]
                  [re-frame "0.9.0"]
                  [reagent "0.7.0"]
                  [garden "1.3.2"]
                  [org.apache.pdfbox/pdfbox "2.1.0-20170324.170253-831"]
-                 [io.pedestal/pedestal.service "0.5.1"]
+                 [io.pedestal/pedestal.service "0.5.1"] 
                  [io.pedestal/pedestal.route "0.5.1"]
                  [io.pedestal/pedestal.jetty "0.5.1"]
-                 [org.clojure/data.json "0.2.6"]
+                 [org.clojure/data.json "0.2.6"] 
                  [org.slf4j/slf4j-simple "1.7.21"] 
                  [buddy/buddy-auth "1.4.1"]
-                 [buddy/buddy-hashers "1.2.0"]
+                 [buddy/buddy-hashers "1.2.0"] 
                  [reloaded.repl "0.2.3"]
                  [bidi "2.0.17"]
 
@@ -182,6 +184,4 @@
                                                 :asset-path "/js/compiled/out"
                                                 :output-to "resources/public/js/compiled/orcpub.js"
                                                 :optimizations :advanced
-                                                :pretty-print false}}]}}}
-
-  )
+                                                :pretty-print false}}]}}})
