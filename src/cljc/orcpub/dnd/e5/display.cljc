@@ -53,7 +53,9 @@
    :ua-fighter {:abbr "UA-Fighter"
                 :url "http://media.wizards.com/2016/dnd/downloads/2016_Fighter_UA_1205_1.pdf"}
    :ua-sorcerer {:abbr "UA-Sorcerer"
-                :url "https://media.wizards.com/2017/dnd/downloads/26_UASorcererUA020617s.pdf"}})
+                 :url "https://media.wizards.com/2017/dnd/downloads/26_UASorcererUA020617s.pdf"}
+   :ua-gothic-heroes {:abbr "UA-Gothic-Heroes"
+                      :url "https://dnd.wizards.com/sites/default/files/media/upload/articles/UA%20Gothic%20Characters.pdf"}})
 
 (def plural-map
   {:feet :feet})
