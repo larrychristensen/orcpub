@@ -16,6 +16,7 @@
             [orcpub.dnd.e5.templates.ua-cleric :as ua-cleric]
             [orcpub.dnd.e5.templates.ua-fighter :as ua-fighter]
             [orcpub.dnd.e5.templates.ua-sorcerer :as ua-sorcerer]
+            [orcpub.dnd.e5.templates.ua-gothic-heroes :as ua-gothic]
             [orcpub.dnd.e5.templates.ua-bard :as ua-bard]
             [orcpub.dnd.e5.templates.ua-race-feats :as ua-race-feats]
             [orcpub.dnd.e5.templates.ua-skill-feats :as ua-skill-feats]
@@ -899,4 +900,5 @@
      ua-skill-feats/ua-skill-feats-plugin
      ua-revised-class-options/ua-revised-class-options-plugin
      ua-warlock-and-wizard/ua-warlock-and-wizard-plugin
-     ua-sorcerer/ua-sorcerer-plugin])))
+     ua-sorcerer/ua-sorcerer-plugin
+     ua-gothic/ua-gothic-heroes-plugin])))
