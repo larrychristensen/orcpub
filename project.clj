@@ -21,6 +21,7 @@
                  [cljsjs/react "15.3.1-0"]
                  [cljsjs/react-dom "15.3.1-0"]
                  [cljsjs/facebook "v20150729-0"]
+                 [cljsjs/google-platformjs-extern "1.0.0-0"]
                  [cljs-http "0.1.43"]
                  [clj-http "3.6.1"]
                  
