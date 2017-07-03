@@ -11,6 +11,7 @@ pom.xml
 .lein-plugins/
 .lein-env
 profiles.clj
+env.sh
 .repl
 .nrepl-port
 /resources/*_backup.pdf

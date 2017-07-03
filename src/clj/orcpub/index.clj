@@ -1,5 +1,6 @@
 (ns orcpub.index
-  (:require [hiccup.page :refer [html5 include-css include-js]]))
+  (:require [hiccup.page :refer [html5 include-css include-js]]
+            [orcpub.oauth :as oauth]))
 
 (defn meta-tag [property content]
   (if content
@@ -27,10 +28,13 @@
     (include-css "/css/style.css"
                  "/css/compiled/styles.css")
     [:script
-     "window.fbAsyncInit = function() {
+     (format
+      "    console.log('HOST', window.location.hostname);
+          window.fbAsyncInit = function() {
 	  FB.init({
-	  appId      : '1673290702980265',
+	  appId      : '%s',
 	  xfbml      : true,
+          cookie     : true,
 	  version    : 'v2.9'
 	  });
 	  FB.AppEvents.logPageView();
@@ -42,7 +46,8 @@
 	  js = d.createElement(s); js.id = id;
 	  js.src = \"//connect.facebook.net/en_US/sdk.js\";
 	  fjs.parentNode.insertBefore(js, fjs);
-	  }(document, 'script', 'facebook-jssdk'));"]]
+	  }(document, 'script', 'facebook-jssdk'));"
+      (oauth/app-id url))]]
    [:body {:style "margin:0"}
     [:div#app
      [:div {:style "display:flex;justify-content:space-around"}

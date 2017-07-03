@@ -204,15 +204,14 @@
       {:db/ident unit
        :db/valueType :db.type/string
        :db/cardinality :db.cardinality/many
-       :db/noHistory true
-       :db/unique :db.unique/value})
-    [::units5e/minute-2
-     ::units5e/hour-2
-     ::units5e/turn-2
-     ::units5e/day-2
-     ::units5e/round-2
-     ::units5e/rest-2
-     ::units5e/long-rest-2])))
+       :db/noHistory true})
+    [::units5e/minute
+     ::units5e/hour
+     ::units5e/turn
+     ::units5e/day
+     ::units5e/round
+     ::units5e/rest
+     ::units5e/long-rest])))
 
 (def party-schema
   [{:db/ident ::party5e/owner

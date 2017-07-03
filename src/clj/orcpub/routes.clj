@@ -36,6 +36,7 @@
             [orcpub.entity :as entity]
             [orcpub.security :as security]
             [orcpub.routes.party :as party]
+            [orcpub.oauth :as oauth]
             [hiccup.page :as page]
             [environ.core :as environ]
             [clojure.set :as sets])
@@ -188,6 +189,14 @@
                      errors/bad-credentials
                      errors/no-account)))))
 
+(defn create-login-response [db user & [headers]]
+  (let [token (create-token (:orcpub.user/username user)
+                            (-> 24 hours from-now))]
+    {:status 200
+     :headers headers
+     :body {:user-data (user-body db user)
+            :token token}}))
+
 (defn login-response
   [{:keys [json-params db remote-addr] :as request}]
   (let [{raw-username :username raw-password :password} json-params]
@@ -206,15 +215,61 @@
                 (nil? id) (bad-credentials-response db username remote-addr)
                 (and unverified? expired?) (login-error errors/unverified-expired)
                 unverified? (login-error errors/unverified {:email email})
-                :else (let [token (create-token (:orcpub.user/username user)
-                                                (-> 24 hours from-now))]
-                        {:status 200 :body {:user-data (user-body db user)
-                                            :token token}}))))))
+                :else (create-login-response db user))))))
 
 (defn login [{:keys [json-params db] :as request}]
   (try
     (login-response request)
     (catch Throwable e (do (prn "E" e) (throw e)))))
+
+(defn user-for-email [db email]
+  (let [user (first-user-by db
+                            '{:find [?e]
+                              :in [$ ?email]
+                              :where [[?e :orcpub.user/email ?email-2]
+                                      [(clojure.string/lower-case ?email-2)
+                                       ?email]]}
+                            (s/lower-case email))]
+    user))
+
+
+(defn get-or-create-oauth-user [conn db oauth-email]
+  (let [user (user-for-email db oauth-email)]
+    (if user
+      user
+      (do
+        @(d/transact
+          conn
+          [{:orcpub.user/email oauth-email
+            :orcpub.user/username oauth-email
+            :orcpub.user/send-updates? false
+            :orcpub.user/created (java.util.Date.)
+            :orcpub.user/verified? true}])
+        (user-for-email db oauth-email)))))
+
+(defn oauth-login [email-fn]
+  (fn [{:keys [conn db] :as request}]
+    (let [fb-email (email-fn request)
+          user (get-or-create-oauth-user conn db fb-email)]
+      (create-login-response db user))))
+
+(defn fb-login [{:keys [json-params db remote-addr] :as request}]
+  (let [access-token (-> json-params :authResponse :accessToken)
+        fb-user (oauth/get-fb-user access-token)
+        email (:email fb-user)
+        user (user-for-email db email)]
+    (create-login-response db user)))
+
+(def google-login
+  (oauth-login oauth/get-google-email))
+
+
+(defn google-oauth-code [request]
+  (ring-resp/redirect (str oauth/google-oauth-url (oauth/get-google-redirect-uri request))))
+
+(defn fb-oauth-code [request]
+  (prn "FB_OAUTH_CODE")
+  (ring-resp/redirect (str oauth/fb-oauth-url (oauth/get-fb-redirect-uri request))))
 
 (defn base-url [{:keys [scheme headers]}]
   (str (name scheme) "://" (headers "host")))
@@ -276,16 +331,6 @@
 
 (defn user-for-verification-key [db key]
   (first-user-by db user-for-verification-key-query key))
-
-(defn user-for-email [db email]
-  (let [user (first-user-by db
-                            '{:find [?e]
-                              :in [$ ?email]
-                              :where [[?e :orcpub.user/email ?email-2]
-                                      [(clojure.string/lower-case ?email-2)
-                                       ?email]]}
-                            (s/lower-case email))]
-    user))
 
 (defn user-id-for-username [db username]
   (d/q
@@ -842,25 +887,64 @@
              (str class-name " (" level ")"))
            classes)))))
 
+(def index-page-paths
+  [[route-map/dnd-e5-char-list-page-route]
+   [route-map/dnd-e5-char-parties-page-route]
+   [route-map/dnd-e5-monster-list-page-route]
+   [route-map/dnd-e5-monster-page-route :key ":key"]
+   [route-map/dnd-e5-spell-list-page-route]
+   [route-map/dnd-e5-spell-page-route :key ":key"]
+   [route-map/dnd-e5-char-builder-route]
+   [route-map/send-password-reset-page-route]
+   [route-map/register-page-route]
+   [route-map/login-page-route]
+   [route-map/verify-sent-route]
+   [route-map/password-reset-sent-route]
+   [route-map/password-reset-expired-route]
+   [route-map/password-reset-used-route]
+   [route-map/verify-failed-route]
+   [route-map/verify-success-route]])
+
+(def default-title
+  "The New OrcPub: D&D 5e Character Builder/Generator")
+
+(def default-description
+  "The most advanced Dungeons & Dragons 5th Edition (D&D 5e) character builder/generator in the multiverse.")
+
+(defn default-image-url [host]
+  (str "http://" host "/image/orcpub-box-logo.png"))
+
+(defn index-page-response [{:keys [headers uri] :as request}
+                           {:keys [title description image-url]}]
+  (prn "INDEX PAGE RESPONSE")
+  (let [host (headers "host")]
+    {:status 200
+     :headers {"Content-Type" "text/html"
+               "My-Cool-Header" "cool"
+               "Access-Control-Allow-Origin" "https://www.facebook.com"}
+     :body
+     (index-page
+      {:url (str "http://" host uri)
+       :title (or title default-title)
+       :description (or description default-description)
+       :image (or image-url (default-image-url host))})}))
+
+(defn default-index-page [request]
+  (index-page-response request {}))
+
 (defn character-page [{:keys [db conn identity headers scheme uri] {:keys [id]} :path-params :as request}]
-  (prn "REQUEST" request headers scheme uri)
   (let [host (headers "host")
         {:keys [::se/summary
                 ::se/values] :as summary-obj} (character-summary-for-id db (Long/parseLong id))
         {:keys [::char5e/character-name]} summary
         {:keys [::char5e/description
                 ::char5e/image-url]} values]
-    (prn "IMAGE URL" image-url summary-obj)
-    {:status 200
-     :headers {"Content-Type" "text/html"}
-     :body
-     (index-page
-      {:url (str "http://" host uri)
-       :title character-name
-       :description (str (character-summary-description summary)
-                         ". "
-                         description)
-       :image image-url})}))
+    (index-page-response request
+                         {:title character-name
+                          :description (str (character-summary-description summary)
+                                            ". "
+                                            description)
+                          :image-url image-url})))
 
 (def header-style
   {:style "color:#2c3445"})
@@ -885,28 +969,10 @@
 (defn health-check [_]
   {:status 200 :body "OK"})
 
-(def index-page-paths
-  [[route-map/dnd-e5-char-list-page-route]
-   [route-map/dnd-e5-char-parties-page-route]
-   [route-map/dnd-e5-monster-list-page-route]
-   [route-map/dnd-e5-monster-page-route :key ":key"]
-   [route-map/dnd-e5-spell-list-page-route]
-   [route-map/dnd-e5-spell-page-route :key ":key"]
-   [route-map/dnd-e5-char-builder-route]
-   [route-map/send-password-reset-page-route]
-   [route-map/register-page-route]
-   [route-map/login-page-route]
-   [route-map/verify-sent-route]
-   [route-map/password-reset-sent-route]
-   [route-map/password-reset-expired-route]
-   [route-map/password-reset-used-route]
-   [route-map/verify-failed-route]
-   [route-map/verify-success-route]])
-
 (def index-page-routes
   (mapv
    (fn [[route & args]]
-     [(apply route-map/path-for route args) :get `index :route-name route])
+     [(apply route-map/path-for route args) :get `default-index-page :route-name route])
    index-page-paths))
 
 (def expanded-index-routes
@@ -956,6 +1022,14 @@
         {:delete `party/remove-character}]
        [(route-map/path-for route-map/login-route)
         {:post `login}]
+       ["/code/fb"
+        {:get `fb-oauth-code}]
+       ["/code/google"
+        {:get `google-oauth-code}]
+       [(route-map/path-for route-map/fb-login-route)
+        {:post `fb-login}]
+       #_[(route-map/path-for route-map/google-login-route)
+        {:get `google-login}]
        [(route-map/path-for route-map/character-pdf-route)
         {:post `character-pdf-2}]
        [(route-map/path-for route-map/verify-route)

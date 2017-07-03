@@ -250,7 +250,6 @@
   (let [flat-spells (char5e/flat-spells spells-known)]
     (reduce
      (fn [m {:keys [key ability qualifier class]}]
-       (prn "ABILITY" ability)
        (-> m
            (assoc-in [:spell-save-dcs class] (save-dc-fn ability))
            (assoc-in [:spell-attack-mods class] (attack-mod-fn ability))))
