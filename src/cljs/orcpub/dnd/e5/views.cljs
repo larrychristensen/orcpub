@@ -96,6 +96,38 @@
      {:class-name (str "h-" size " w-" size)
       :src (str "/image/" icon-name ".svg")}]))
 
+(defn facebook-share-button-comp [url]
+  [:div.fb-share-button
+   {:data-layout "button"
+    :data-href url}])
+
+(defn fb-login-button-comp []
+  [:div.flex.justify-cont-s-a
+   [:button.form-button.flex.align-items-c
+    {:on-click #(dispatch [:fb-login])}
+    [:i.fa.fa-facebook.f-s-18]
+    [:span.m-l-10.f-s-14 "Login with Facebook"]]])
+
+(defn add-facebook-init [comp]
+  (with-meta
+    comp
+    {:component-did-mount #(dispatch [:init-fb])}))
+
+(def facebook-login-button
+  (add-facebook-init
+   fb-login-button-comp))
+
+(def facebook-share-button
+  (add-facebook-init
+    facebook-share-button-comp))
+
+(defn character-page-fb-button [id]
+  [facebook-share-button
+   (str
+    "http://"
+    js/window.location.hostname
+    (routes/path-for routes/dnd-e5-char-page-route :id id))])
+
 (defn user-header-view []
   (let [username @(subscribe [:username])]
     [:div.flex.align-items-c
@@ -613,6 +645,8 @@
                        :text-shadow "1px 2px 1px rgba(0,0,0,0.37)"
                        :margin-top "20px"}}
          "LOGIN"]
+        [:div.m-t-10
+         [facebook-login-button]]
         [:div
          {:style {:margin-top "50px"}}
          [form-input {:title "Username or Email"
@@ -630,8 +664,8 @@
              :error
              @(subscribe [:login-message])
              [:hide-login-message]]])
-         [:div {:style {:margin-top "40px"}}
-          [:button.form-button.m-l-20
+         [:div.m-t-10
+          [:button.form-button
            {:style {:height "40px"
                     :width "174px"
                     :font-size "16px"
@@ -2470,28 +2504,6 @@
                        (dispatch [::party/add-character-remote @party-id character-id true])
                        (dispatch [::party/make-party #{character-id}]))}
          "ADD"]]])))
-
-(defn facebook-share-button-comp [url]
-  [:div.fb-share-button
-   {:data-layout "button"
-    :data-href url}])
-
-(defn fb-init []
-  (try
-    ((goog.object.get js/window "fbAsyncInit"))
-    (catch :default e)))
-
-(def facebook-share-button
-  (with-meta
-    facebook-share-button-comp
-    {:component-did-mount #(fb-init)}))
-
-(defn character-page-fb-button [id]
-  [facebook-share-button
-   (str
-    "http://"
-    js/window.location.hostname
-    (routes/path-for routes/dnd-e5-char-page-route :id id))])
 
 (defn character-page [{:keys [id] :as arg}]
   (let [{:keys [::entity/owner] :as character} @(subscribe [::char/character id])

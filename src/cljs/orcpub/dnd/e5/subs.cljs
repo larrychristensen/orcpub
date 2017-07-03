@@ -269,6 +269,18 @@
  (fn [db _]
    (:expanded-spells db)))
 
+(defn get-fb-login-status [callback]
+  (.getLoginStatus (fb) callback))
+
+(reg-sub-raw
+ :fb-logged-in?
+ (fn [app-db _]
+   (get-fb-login-status
+    (fn [response]
+      (dispatch [:set-fb-logged-in (= "connected" (.-status response))])))
+   (ra/make-reaction
+     (fn [] (get @app-db :fb-logged-in? false)))))
+
 (reg-sub-raw
   ::char5e/characters
   (fn [app-db [_]]
