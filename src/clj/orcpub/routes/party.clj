@@ -5,7 +5,6 @@
             [orcpub.entity.strict :as se]))
 
 (defn create-party [{:keys [db conn identity] party :transit-params}]
-  (prn "PARTY" party identity)
   (if (spec/valid? ::party/party party)
     (let [username (:user identity)
           result @(d/transact conn [(assoc party ::party/owner username)])

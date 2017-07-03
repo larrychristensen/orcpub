@@ -23,7 +23,7 @@
                                    after debug dispatch dispatch-sync subscribe]]
             [cljs.spec.alpha :as spec]
             [cljs-http.client :as http]
-            [cljs.core.async :refer [<!]]
+            [cljs.core.async :refer [<! timeout]]
             [clojure.string :as s]
             [bidi.bidi :as bidi]
             [orcpub.route-map :as routes]
@@ -941,10 +941,56 @@
        (= error-code errors/unverified-expired) {:dispatch [:route routes/verify-failed-route]}
        :else (dispatch-login-failure [:div "An error occurred. If the problem persists please email " [:a {:href "mailto:redorc@orcpub.com" :target :blank} "redorc@orcpub.com"]])))))
 
+(defn fb []
+  js/FB)
+
+(defn get-fb-user [callback]
+  (.api (fb) "/me?fields=email" callback))
+
+(defn fb-init []
+  (try
+    ((goog.object.get js/window "fbAsyncInit"))
+    (catch :default e (prn "E" e))))
+
+(defn fb-login-callback [response]
+  (if (= "connected" (.-status response))
+    (do (dispatch [:hide-login-message])
+        (go (let [path (routes/path-for routes/fb-login-route)
+                  url (backend-url path)
+                  response (<! (http/post url
+                                          {:json-params (js->clj response)}))]
+              (dispatch [:login-success true response]))))))
+
+(reg-event-fx
+ :init-fb
+ (fn [_ _]
+   (fb-init)))
+
+(reg-event-db
+ :set-fb-logged-in
+ (fn [db [_ logged-in?]]
+   (assoc db :fb-logged-in? logged-in?)))
+
+(reg-event-fx
+ :fb-login
+ (fn [db _]
+   (if (not (:fb-logged-in? db))
+     (do (go (<! (timeout 1000))
+             (dispatch [:show-login-message "You must enable popups to allow Facebook login."]))
+         (.login (fb) fb-login-callback (clj->js {:scope "email"}))))))
+
+(reg-event-fx
+ :fb-logout
+ (fn [_ _]
+   (let [facebook (fb)]
+     (if facebook
+       (.logout facebook (fn []))))))
+
 (reg-event-fx
  :logout
  (fn [cofx [_ response]]
-   {:dispatch [:set-user-data nil]}))
+   {:dispatch-n [[:set-user-data nil]
+                 [:fb-logout]]}))
 
 (def login-routes
   #{routes/login-page-route
@@ -1206,6 +1252,9 @@
 (reg-event-db
  :show-message
  (fn [db [_ message]]
+   (go (<! (timeout 5000))
+       (prn "HIDE")
+       (dispatch [:hide-message]))
    (assoc db
           :message-shown? true
           :message message
@@ -1214,6 +1263,9 @@
 (reg-event-db
  :show-error-message
  (fn [db [_ message]]
+   (go (<! (timeout 5000))
+       (prn "HIDE")
+       (dispatch [:hide-message]))
    (assoc db
           :message-shown? true
           :message message
@@ -1222,6 +1274,9 @@
 (reg-event-db
  :show-login-message
  (fn [db [_ message]]
+   (go (<! (timeout 10000))
+       (prn "HIDE")
+       (dispatch [:hide-login-message]))
    (assoc db
           :login-message-shown? true
           :login-message message)))
