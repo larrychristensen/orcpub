@@ -20,14 +20,15 @@
                 modifiers
                 (remove
                  nil?
-                 [(mod5e/ability ability-kw 1)
-                  (if trait-type
-                    (trait-type
-                     {:name (str nm " Feat")
-                      :page page
-                      :source :ua-skill-feats
-                      :summary trait-desc}))
-                  (opt5e/skill-prof-or-expertise skill-kw nm)]))}))
+                 (concat
+                  [(mod5e/ability ability-kw 1)
+                   (if trait-type
+                     (trait-type
+                      {:name (str nm " Feat")
+                       :page page
+                       :source :ua-skill-feats
+                       :summary trait-desc}))]
+                  (opt5e/skill-prof-or-expertise skill-kw (str nm "-UA-Skill-Feats")))))}))
 
 (def ua-skill-feats-plugin
   {:name "Unearthed Arcana: Feats for Skills"
