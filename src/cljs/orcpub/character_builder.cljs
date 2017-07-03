@@ -192,10 +192,12 @@
                   {:value key
                    :disabled (seq failed-prereqs)}
                   (str name (if (seq failed-prereqs) (str " (" (s/join ", " failed-prereqs) ")")))]))
-             (filter
-              #(or (= key (::t/key %))
-                   (unselected-classes-set (::t/key %)))
-              options)))]
+             (sort-by
+              ::t/name
+              (filter
+               #(or (= key (::t/key %))
+                    (unselected-classes-set (::t/key %)))
+               options))))]
           (if (::t/help class-template-option)
             [show-info-button expanded?])
           (let [levels-selection (some #(if (= :levels (::t/key %)) %) (::t/selections class-template-option))
