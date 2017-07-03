@@ -25,9 +25,12 @@
             [orcpub.dnd.e5.display :as disp]
             [orcpub.dnd.e5.template :as t]
             [orcpub.dnd.e5.options :as opt]
+            [orcpub.dnd.e5.events :as events]
             [clojure.string :as s]
             [orcpub.user-agent :as user-agent]
-            [bidi.bidi :as bidi]))
+            [cljs.core.async :refer [<! timeout]]
+            [bidi.bidi :as bidi])
+  (:require-macros [cljs.core.async.macros :refer [go]]))
 
 (def text-color "#484848")
 
@@ -101,10 +104,16 @@
    {:data-layout "button"
     :data-href url}])
 
+(defn on-fb-login [logged-in?]
+  (if (not logged-in?)
+    (do (go (<! (timeout 1000))
+            (dispatch [:show-login-message "You must enable popups to allow Facebook login."]))
+        (.login js/FB events/fb-login-callback (clj->js {:scope "email"})))))
+
 (defn fb-login-button-comp []
   [:div.flex.justify-cont-s-a
    [:button.form-button.flex.align-items-c
-    {:on-click #(dispatch [:fb-login])}
+    {:on-click #(on-fb-login @(subscribe [:fb-logged-in?]))}
     [:i.fa.fa-facebook.f-s-18]
     [:span.m-l-10.f-s-14 "Login with Facebook"]]])
 

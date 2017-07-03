@@ -270,7 +270,7 @@
    (:expanded-spells db)))
 
 (defn get-fb-login-status [callback]
-  (.getLoginStatus (fb) callback))
+  (.getLoginStatus js/FB callback))
 
 (reg-sub-raw
  :fb-logged-in?
