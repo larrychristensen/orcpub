@@ -850,7 +850,7 @@
      {:background-image "linear-gradient(182deg, #2c3445, #000000)"}]]
    
    [[:.app
-     {:background-image "linear-gradient(182deg, #2c3445, #000000)"
+     {:background-image "linear-gradient(182deg, #313A4D, #080A0D)"
       :font-family font-family
       :height "100%"
       :overflow :auto}]

@@ -1,5 +1,6 @@
 (ns orcpub.dnd.e5.templates.ua-sorcerer
   (:require [orcpub.common :as common]
+            [orcpub.modifiers :as mod]
             [orcpub.dnd.e5.modifiers :as mod5e]
             [orcpub.dnd.e5.character :as char5e]
             [orcpub.dnd.e5.options :as opt5e]
@@ -118,6 +119,7 @@
                (mod5e/armor-proficiency :shields)
                (mod5e/weapon-proficiency :simple)
                (mod5e/weapon-proficiency :martial)
+               (mod/cum-sum-mod ?hit-point-level-increases ?sorcerer-level)
                (mod5e/action
                 {:name "Stones Durability"
                  :page 4
