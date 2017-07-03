@@ -234,18 +234,19 @@
 
 
 (defn get-or-create-oauth-user [conn db oauth-email]
-  (let [user (user-for-email db oauth-email)]
-    (if user
+  (let [{:keys [username] :as user} (user-for-email db oauth-email)]
+    (prn "USER FOR EMAIL" user oauth-email)
+    (if username
       user
-      (do
-        @(d/transact
-          conn
-          [{:orcpub.user/email oauth-email
-            :orcpub.user/username oauth-email
-            :orcpub.user/send-updates? false
-            :orcpub.user/created (java.util.Date.)
-            :orcpub.user/verified? true}])
-        (user-for-email db oauth-email)))))
+      (let [result @(d/transact
+                     conn
+                     [{:orcpub.user/email oauth-email
+                       :orcpub.user/username oauth-email
+                       :orcpub.user/send-updates? false
+                       :orcpub.user/created (java.util.Date.)
+                       :orcpub.user/verified? true}])]
+        (prn "RESULT" result)
+        (user-for-email (d/db conn) oauth-email)))))
 
 (defn oauth-login [email-fn]
   (fn [{:keys [conn db] :as request}]
@@ -253,11 +254,12 @@
           user (get-or-create-oauth-user conn db fb-email)]
       (create-login-response db user))))
 
-(defn fb-login [{:keys [json-params db remote-addr] :as request}]
+(defn fb-login [{:keys [json-params db conn remote-addr] :as request}]
   (let [access-token (-> json-params :authResponse :accessToken)
         fb-user (oauth/get-fb-user access-token)
         email (:email fb-user)
-        user (user-for-email db email)]
+        user (get-or-create-oauth-user conn db email)]
+    (prn "USER" user)
     (create-login-response db user)))
 
 (def google-login
@@ -295,7 +297,6 @@
 
 (defn register [{:keys [json-params db conn] :as request}]
   (let [{:keys [username email password first-and-last-name send-updates?]} json-params
-        _ (prn "REGEISTER" username email password first-and-last-name)
         username (if username (s/trim username))
         email (if email (s/lower-case (s/trim email)))
         password (if password (s/trim password))
@@ -440,7 +441,6 @@
     :weapon-name-3 8}))
 
 (defn add-spell-cards! [doc spells-known spell-save-dcs spell-attack-mods]
-  (prn "SPELLS KNOWN" spells-known)
   (let [flat-spells (-> spells-known vals flatten)
         sorted-spells (sort-by
                        (fn [{:keys [class key]}]
@@ -916,7 +916,6 @@
 
 (defn index-page-response [{:keys [headers uri] :as request}
                            {:keys [title description image-url]}]
-  (prn "INDEX PAGE RESPONSE")
   (let [host (headers "host")]
     {:status 200
      :headers {"Content-Type" "text/html"

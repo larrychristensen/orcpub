@@ -1253,7 +1253,6 @@
  :show-message
  (fn [db [_ message]]
    (go (<! (timeout 5000))
-       (prn "HIDE")
        (dispatch [:hide-message]))
    (assoc db
           :message-shown? true
@@ -1264,7 +1263,6 @@
  :show-error-message
  (fn [db [_ message]]
    (go (<! (timeout 5000))
-       (prn "HIDE")
        (dispatch [:hide-message]))
    (assoc db
           :message-shown? true
@@ -1275,7 +1273,6 @@
  :show-login-message
  (fn [db [_ message]]
    (go (<! (timeout 10000))
-       (prn "HIDE")
        (dispatch [:hide-login-message]))
    (assoc db
           :login-message-shown? true
