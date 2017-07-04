@@ -524,6 +524,9 @@
    ::char5e/weapons char5e/normal-weapons-inventory 
    ::char5e/magic-weapons char5e/magic-weapons-inventory
    ::char5e/equipment char5e/normal-equipment-inventory
+   ::char5e/custom-equipment char5e/custom-equipment
+   ::char5e/treasure char5e/treasure
+   ::char5e/custom-treasure char5e/custom-treasure
    ::char5e/magic-items char5e/magical-equipment-inventory
    ::char5e/traits char5e/traits
    ::char5e/attacks char5e/attacks
