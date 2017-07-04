@@ -1115,13 +1115,10 @@
                                   7 1
                                   8 1
                                   9 1
-                                  10 2
                                   11 1
                                   13 1
-                                  14 2
                                   15 1
-                                  17 1
-                                  18 2}
+                                  17 1}
                    :known-mode :schedule
                    :ability ::char5e/cha}
     :modifiers [(mod5e/bonus-action
