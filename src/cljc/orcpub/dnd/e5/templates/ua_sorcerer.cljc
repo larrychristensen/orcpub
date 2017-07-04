@@ -124,14 +124,14 @@
                 {:name "Stones Durability"
                  :page 4
                  :source :ua-sorcerer})]
-   :levels {3 {:selections [(opt5e/subclass-spell-selection :sorcerer "Sorcerer" ::char5e/cha [:compelling-duel :searing-smite :thunderous-smite :wrathful-smite] 0)]}
-            5 {:selections [(opt5e/subclass-spell-selection :sorcerer "Sorcerer" ::char5e/cha [:branding-smite :magic-weapon] 0)]}
+   :levels {1 {:selections [(opt5e/subclass-spell-selection :sorcerer "Sorcerer" ::char5e/cha [:compelled-duel :searing-smite :thunderous-smite :wrathful-smite] 0)]}
+            3 {:selections [(opt5e/subclass-spell-selection :sorcerer "Sorcerer" ::char5e/cha [:branding-smite :magic-weapon] 0)]}
             6 {:modifiers [(mod5e/bonus-action
                             {:name "Stone Aegis"
                              :page 4
                              :source :ua-sorcerer})]}
-            7 {:selections [(opt5e/subclass-spell-selection :sorcerer "Sorcerer" ::char5e/cha [:blinding-smite :elemental-weapon] 0)]}
-            9 {:selections [(opt5e/subclass-spell-selection :sorcerer "Sorcerer" ::char5e/cha [:staggering-smite] 0)]}
+            5 {:selections [(opt5e/subclass-spell-selection :sorcerer "Sorcerer" ::char5e/cha [:blinding-smite :elemental-weapon] 0)]}
+            7 {:selections [(opt5e/subclass-spell-selection :sorcerer "Sorcerer" ::char5e/cha [:staggering-smite] 0)]}
             14 {:modifiers [(mod5e/trait-cfg
                              {:name "Stone's Edge"
                               :page 4
