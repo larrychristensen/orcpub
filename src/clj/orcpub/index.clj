@@ -21,6 +21,7 @@
     (meta-tag "og:title" title)
     (meta-tag "og:description" description)
     (meta-tag "og:image" image)
+    (meta-tag "google-signin-client_id" "86323071944-te5j96nbke0duomgm24j2on4rs4p7ob9.apps.googleusercontent.com")
     [:meta {:charset "UTF-8"}]
     [:meta {:name "viewport"
             :content "width=device-width, initial-scale=1"}]
@@ -29,8 +30,7 @@
                  "/css/compiled/styles.css")
     [:script
      (format
-      "    console.log('HOST', window.location.hostname);
-          window.fbAsyncInit = function() {
+      "   window.fbAsyncInit = function() {
 	  FB.init({
 	  appId      : '%s',
 	  xfbml      : true,

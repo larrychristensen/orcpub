@@ -1904,10 +1904,12 @@
         [description-section id]
         [:span.f-s-18.f-w-b.m-b-5 "Notes"]
         [:div.p-l-20.p-r-20
-         [:textarea.input
+         [comps/input-field
+          :textarea
+          @(subscribe [::char/notes id])
+          #(dispatch [::char/set-notes id %])
           {:style notes-style
-           :value @(subscribe [::char/notes id])
-           :on-change #(dispatch [::char/set-notes id (event-value %)])}]]]]]]))
+           :class-name "input"}]]]]]]))
 
 (defn weapon-details-field [nm value]
   [:div.p-2
@@ -2163,7 +2165,9 @@
   (let [expanded-details (r/atom {})]
     (fn [id]
       (let [mobile? @(subscribe [:mobile?])
-            equipment-cfgs @(subscribe [::char/equipment id])]
+            equipment-cfgs (merge
+                            @(subscribe [::char/equipment id])
+                            (zipmap (range) @(subscribe [::char/custom-equipment id])))]
         [:div
          [:div.flex.align-items-c
           (svg-icon "backpack" 32 32)
@@ -2180,12 +2184,13 @@
             (doall
              (map
               (fn [[item-kw item-cfg]]
-                (let [{:keys [name cost weight] :as item} (equip/equipment-map item-kw)
+                (let [item-name (::char-equip/name item-cfg)
+                      {:keys [name cost weight] :as item} (equip/equipment-map item-kw)
                       expanded? (@expanded-details item-kw)]
                   ^{:key item-kw}
                   [:tr.pointer
                    {:on-click #(swap! expanded-details (fn [d] (update d item-kw not)))}
-                   [:td.p-10.f-w-b (:name item)]
+                   [:td.p-10.f-w-b (or (:name item) item-name)]
                    [:td.p-10 (::char-equip/quantity item-cfg)]
                    [:td.p-10
                     [:div
