@@ -797,7 +797,7 @@ You instantly gain knowledge of up to three facts of your choice about any of th
 For example, you could determine the location of powerful undead in the area, the location of major sources of safe drinking water, and the location of any nearby towns."
     }
    {
-    :name "Compelling Duel"
+    :name "Compelled Duel"
     :school "enchantment"
     :level 1
     :casting-time "1 bonus action"

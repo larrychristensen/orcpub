@@ -247,7 +247,7 @@
    :scag
    [{:name "Oath of the Crown"
      :modifiers [(opt5e/paladin-spell 1 :command 3)
-                 (opt5e/paladin-spell 1 :compelling-duel 3)
+                 (opt5e/paladin-spell 1 :compelled-duel 3)
                  (opt5e/paladin-spell 2 :warding-bond 5)
                  (opt5e/paladin-spell 2 :zone-of-truth 5)
                  (opt5e/paladin-spell 3 :aura-of-vitality 9)
