@@ -580,12 +580,10 @@
  event-handlers/remove-inventory-item)
 
 (defn remove-custom-inventory-item [character [_ custom-equipment-key name]]
-  (prn "NAME" name)
   (update-in
    character
    [::entity/values custom-equipment-key]
    (fn [items]
-     (prn "ITEMS" items)
      (vec (remove #(= name (::char-equip5e/name %)) items)))))
 
 (reg-event-db
@@ -983,7 +981,7 @@
 
 (reg-event-fx
  :fb-logout
- (fn [_ _]
+ (fn [{:keys [db]} _]
    (let [facebook (fb)]
      (if facebook
        (.logout facebook (fn []))))))
@@ -992,7 +990,8 @@
  :logout
  (fn [cofx [_ response]]
    {:dispatch-n [[:set-user-data nil]
-                 [:fb-logout]]}))
+                 [:fb-logout]
+                 [:set-fb-logged-in false]]}))
 
 (def login-routes
   #{routes/login-page-route
