@@ -875,7 +875,7 @@
                             (dragonmark-feat "Making" ::char5e/int [:identify :mending] :magic-weapon :fabricate)
                             (dragonmark-feat "Passage" ::char5e/int [:expeditious-retreat :light] :misty-step :teleportation-circle)
                             (dragonmark-feat "Scribing" ::char5e/int [:comprehend-languages :message] :sending :tongues)
-                            (dragonmark-feat "Sentinel" ::char5e/wis [:blade-ward :compelling-duel] :blur :protection-from-energy)
+                            (dragonmark-feat "Sentinel" ::char5e/wis [:blade-ward :compelled-duel] :blur :protection-from-energy)
                             (dragonmark-feat "Shadow" ::char5e/cha [:dancing-lights :disguise-self] :darkness :nondetection)
                             (dragonmark-feat "Storm" ::char5e/int [:fog-cloud :shocking-grasp] :gust-of-wind :sleet-storm)
                             (dragonmark-feat "Warding" ::char5e/int [:alarm :resistance] :arcane-lock :magic-circle)]})]})
