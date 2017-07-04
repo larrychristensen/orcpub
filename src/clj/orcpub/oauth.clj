@@ -34,9 +34,14 @@
   (let [resp (client/get
               "https://graph.facebook.com/me"
               {:query-params {:access_token access-token
-                              :fields "email"}})
+                              :fields "email"
+                              :debug "all"}})
         body (json/parse-string (:body resp) true)]
-    body))
+    (if (:email body)
+      body
+      (throw (ex-info "Failed getting facebook user."
+                      {:response resp
+                       :access-token access-token})))))
 
 (defn get-google-user [access-token]
   (let [resp (client/get
