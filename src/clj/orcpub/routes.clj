@@ -235,7 +235,6 @@
 
 (defn get-or-create-oauth-user [conn db oauth-email]
   (let [{:keys [username] :as user} (user-for-email db oauth-email)]
-    (prn "USER FOR EMAIL" user oauth-email)
     (if username
       user
       (let [result @(d/transact
@@ -245,7 +244,6 @@
                        :orcpub.user/send-updates? false
                        :orcpub.user/created (java.util.Date.)
                        :orcpub.user/verified? true}])]
-        (prn "RESULT" result)
         (user-for-email (d/db conn) oauth-email)))))
 
 (defn oauth-login [email-fn]
@@ -255,12 +253,12 @@
       (create-login-response db user))))
 
 (defn fb-login [{:keys [json-params db conn remote-addr] :as request}]
-  (let [access-token (-> json-params :authResponse :accessToken)
-        fb-user (oauth/get-fb-user access-token)
-        email (:email fb-user)
-        user (get-or-create-oauth-user conn db email)]
-    (prn "USER" user)
-    (create-login-response db user)))
+  (if-let [access-token (-> json-params :authResponse :accessToken)]
+    (let [fb-user (oauth/get-fb-user access-token)
+          email (:email fb-user)
+          user (get-or-create-oauth-user conn db email)]
+      (create-login-response db user))
+    {:status 400}))
 
 (def google-login
   (oauth-login oauth/get-google-email))
