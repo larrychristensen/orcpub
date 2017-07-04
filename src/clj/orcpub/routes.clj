@@ -122,7 +122,8 @@
    :enter (fn [context]
             (let [request (:request context)
                   updated-request (authentication-request request backend)]
-              (if (:identity updated-request)
+              (if (and (:identity updated-request)
+                       (-> updated-request :identity :user))
                 (assoc context :request updated-request)
                 (-> context
                     terminate
