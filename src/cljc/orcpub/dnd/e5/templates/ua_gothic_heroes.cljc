@@ -64,6 +64,7 @@
 (def rogue-option-cfg
   {:name "Rogue"
    :subclass-level 3
+   :plugin? true
    :subclass-title "Roguish Archetype"
    :subclasses [{:name "Inquisitive"
                  :source :ua-gothic-heroes
