@@ -2002,6 +2002,7 @@
     :subclasses [{:name "Champion"
                   :levels {3 {:modifiers [(mod5e/critical 19)]}
                            7 {:modifiers [(mod/modifier ?default-skill-bonus (let [b (int (/ ?prof-bonus 2))] {::char5e/str b ::char5e/dex b ::char5e/con b}))
+                                          (mod/cum-sum-mod ?initiative (common/round-up (/ ?prof-bonus 2)))
                                           (mod5e/dependent-trait
                                            {:level 7
                                             :name "Remarkable Athlete"
