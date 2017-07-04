@@ -1306,11 +1306,11 @@
 (defn name-result [search-text]
   (let [[sex race subrace :as result] (event-handlers/parse-name-query search-text)]
     (if result
-      {:top-result {:type :name
-                    :result (char-rand5e/random-name-result
-                             {:race race
-                              :subrace subrace
-                              :sex sex})}})))
+      {:type :name
+       :result (char-rand5e/random-name-result
+                {:race race
+                 :subrace subrace
+                 :sex sex})})))
 
 (defn remove-subtypes [subtypes hidden-subtypes]
   (let [result (sets/difference subtypes hidden-subtypes)]
