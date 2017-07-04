@@ -882,7 +882,7 @@
           (s/split cookie "; "))))
 
 (defn show-generic-error []
-  [:show-error-message [:div "There was an error, please try again later. If the problem persists please contact " [:a {:href "mailto:redorc@orcpub.com"} "redorc@orcpub.com."]]])
+  [:show-error-message [:div "There was an error, please refresh your browser and try again. If the problem persists please contact " [:a {:href "mailto:redorc@orcpub.com"} "redorc@orcpub.com."]]])
 
 (reg-fx
  :http
