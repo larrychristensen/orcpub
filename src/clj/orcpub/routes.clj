@@ -234,7 +234,8 @@
 
 
 (defn get-or-create-oauth-user [conn db oauth-email]
-  (let [{:keys [username] :as user} (user-for-email db oauth-email)]
+  (let [{:keys [:orcpub.user/username] :as user} (user-for-email db oauth-email)]
+    (prn "USER" user)
     (if username
       user
       (let [result @(d/transact
