@@ -30,7 +30,6 @@
   (let [state (atom {:timeout nil
                        :temp-val nil})]
     (fn [type value on-change attrs]
-      (prn "TYPE" type value on-change attrs)
       [type
        (merge
         attrs
