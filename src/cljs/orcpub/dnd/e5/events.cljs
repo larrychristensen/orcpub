@@ -580,11 +580,13 @@
  event-handlers/remove-inventory-item)
 
 (defn remove-custom-inventory-item [character [_ custom-equipment-key name]]
+  (prn "NAME" name)
   (update-in
    character
    [::entity/values custom-equipment-key]
    (fn [items]
-     (vec (remove #(= name (:name %)) items)))))
+     (prn "ITEMS" items)
+     (vec (remove #(= name (::char-equip5e/name %)) items)))))
 
 (reg-event-db
  :remove-custom-inventory-item
@@ -1548,3 +1550,28 @@
  ::char5e/new-turn
  (fn [{:keys [db]} [_ id]]
    (clear-period db id ::units5e/turn)))
+
+(reg-event-db
+ ::char5e/new-custom-item
+ (fn [db [_ items-key]]
+   (update-in
+    db
+    [:character
+     ::entity/values
+     items-key]
+    conj
+    {::char-equip5e/name "New Custom Item"
+     ::char-equip5e/quantity 1
+     ::char-equip5e/equipped? true})))
+
+(reg-event-db
+ ::char5e/set-custom-item-name
+ (fn [db [_ items-key i value]]
+   (assoc-in
+    db
+    [:character
+     ::entity/values
+     items-key
+     i
+     ::char-equip5e/name]
+    value)))

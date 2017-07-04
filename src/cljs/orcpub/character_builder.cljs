@@ -43,7 +43,7 @@
             [re-frame.core :refer [subscribe dispatch dispatch-sync]])
   (:require-macros [cljs.core.async.macros :refer [go]]))
 
-(def print-disabled? true)
+(def print-disabled? false)
 
 (def print-enabled? (and (not print-disabled?)
                          (s/starts-with? js/window.location.href "http://localhost")))
@@ -115,25 +115,8 @@
 (defn character-state-path [path]
   (concat [:character] path))
 
-(defn input-field []
-  (let [state (r/atom {:timeout nil
-                       :temp-val nil})]
-    (fn [type value on-change attrs]
-      [type
-       (merge
-        attrs
-        {:value (or (:temp-val @state) value "")
-         :on-change #(swap! state
-                            (fn [{:keys [timeout temp-val] :as s}]
-                              (if timeout
-                                (js/clearTimeout timeout))
-                              (let [v (get-event-value %)]
-                                (assoc s
-                                       :timeout (js/setTimeout (fn [] (on-change v)) 500)
-                                       :temp-val v))))})])))
-
 (defn character-field [entity-values prop-name type & [cls-str handler input-type]]
-  [input-field
+  [comps/input-field
    type
    (get entity-values prop-name)
    #(dispatch [:update-value-field prop-name %])
@@ -264,6 +247,7 @@
                  item-qty
                  item-description
                  equipped?
+                 user-created?
                  i
                  qty-input-width
                  check-fn
@@ -274,9 +258,15 @@
         [:div.pointer.m-l-5
          {:on-click check-fn}
          (comps/checkbox equipped? false)]
-        [:div.flex-grow-1 item-name]
+        (if user-created?
+          [comps/input-field
+           :input
+           item-name
+           #(dispatch [::char5e/set-custom-item-name selection-key i %])
+           {:class-name "input m-t-0"}]
+          [:div.flex-grow-1 item-name])
         (if item-description [:div.w-60 [show-info-button expanded?]])
-        [:input.input.m-l-5.m-t-0.
+        [:input.input.m-l-5.m-t-0
          {:class-name (str "w-" (or qty-input-width 60))
           :type :number
           :value item-qty
@@ -327,8 +317,7 @@
                              :equipped? equipped?
                              :i i
                              :qty-input-width qty-input-width
-                             :check-fn (fn [_]
-                                         (dispatch [:toggle-inventory-item-equipped key i]))
+                             :check-fn #(dispatch [:toggle-inventory-item-equipped key i])
                              :qty-change-fn (fn [e]
                                               (let [qty (.. e -target -value)]
                                                 (dispatch [:change-inventory-item-quantity key i qty])))
@@ -337,26 +326,38 @@
         selected-items))]
      (if custom-equipment-key
        [:div
-        (doall
-         (map-indexed
-          (fn [i {:keys [::char-equip5e/name ::char-equip5e/quantity ::char-equip5e/equipped?] :as item}]
-            (let [item-key (common/name-to-kw name)]
-              ^{:key item-key}
-              [inventory-item {:selection-key custom-equipment-key
-                               :item-key item-key
-                               :item-name name
-                               :item-qty quantity
-                               :equipped? equipped?
-                               :i i
-                               :qty-input-width qty-input-width
-                               :check-fn (fn [_]
-                                           (dispatch [:toggle-custom-inventory-item-equipped custom-equipment-key i]))
-                               :qty-change-fn (fn [e]
-                                                (let [qty (.. e -target -value)]
-                                                  (dispatch [:change-custom-inventory-item-quantity custom-equipment-key i qty])))
-                               :remove-fn (fn [_]
-                                            (dispatch [:remove-custom-inventory-item custom-equipment-key name]))}]))
-          @(subscribe [:entity-value custom-equipment-key])))])]))
+        [:div
+         (doall
+          (map-indexed
+           (fn [i {:keys [::char-equip5e/name
+                          ::char-equip5e/quantity
+                          ::char-equip5e/equipped?
+                          ::char-equip5e/background-starting-equipment?
+                          ::char-equip5e/class-starting-equipment?] :as item}]
+             (let [item-key (common/name-to-kw name)]
+               ^{:key i}
+               [inventory-item {:selection-key custom-equipment-key
+                                :item-key item-key
+                                :item-name name
+                                :item-qty quantity
+                                :equipped? equipped?
+                                :user-created? (not (or background-starting-equipment?
+                                                        class-starting-equipment?))
+                                :i i
+                                :qty-input-width qty-input-width
+                                :check-fn (fn [_]
+                                            (dispatch [:toggle-custom-inventory-item-equipped custom-equipment-key i]))
+                                :qty-change-fn (fn [e]
+                                                 (let [qty (.. e -target -value)]
+                                                   (dispatch [:change-custom-inventory-item-quantity custom-equipment-key i qty])))
+                                :remove-fn (fn [_]
+                                             (dispatch [:remove-custom-inventory-item custom-equipment-key name]))}]))
+           @(subscribe [:entity-value custom-equipment-key])))]
+        [:div.flex.justify-cont-end
+         [:div.orange.pointer.m-t-5.m-r-5
+          {:on-click #(dispatch [::char5e/new-custom-item custom-equipment-key])}
+          [:span.underline "Add Custom Item"]
+          [:i.fa.fa-plus-circle.m-l-5.f-s-16]]]])]))
 
 (defn option-selector-base []
   (let [expanded? (r/atom false)]
@@ -1309,7 +1310,8 @@
               :ui-fn (partial inventory-selector mi5e/magic-armor-map 60)}
              {:key :equipment
               :hide-homebrew? true
-              :ui-fn #(inventory-selector equip5e/equipment-map 60 % ::char5e/custom-equipment)}
+              :ui-fn (fn [v]
+                       [inventory-selector equip5e/equipment-map 60 v ::char5e/custom-equipment])}
              {:key :other-magic-items
               :hide-homebrew? true
               :ui-fn (partial inventory-selector mi5e/other-magic-item-map 60)}

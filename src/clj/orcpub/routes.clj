@@ -123,7 +123,7 @@
             (let [request (:request context)
                   updated-request (authentication-request request backend)]
               (if (and (:identity updated-request)
-                       (-> updated-request :identity :user))
+                       (get-in updated-request [:identity :user]))
                 (assoc context :request updated-request)
                 (-> context
                     terminate
