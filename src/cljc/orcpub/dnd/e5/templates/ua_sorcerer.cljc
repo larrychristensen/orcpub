@@ -130,7 +130,8 @@
                             {:name "Stone Aegis"
                              :page 4
                              :source :ua-sorcerer})]}
-            7 {:selections [(opt5e/subclass-spell-selection :sorcerer "Sorcerer" ::char5e/cha [:blinding-smite :elemental-weapon :staggering-smite] 0)]}
+            7 {:selections [(opt5e/subclass-spell-selection :sorcerer "Sorcerer" ::char5e/cha [:blinding-smite :elemental-weapon] 0)]}
+            9 {:selections [(opt5e/subclass-spell-selection :sorcerer "Sorcerer" ::char5e/cha [:staggering-smite] 0)]}
             14 {:modifiers [(mod5e/trait-cfg
                              {:name "Stone's Edge"
                               :page 4

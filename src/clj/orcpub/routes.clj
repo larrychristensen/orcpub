@@ -189,6 +189,9 @@
                      errors/bad-credentials
                      errors/no-account)))))
 
+(defn create-fake-login-response [username email]
+  (let [token (create-token (or username ))]))
+
 (defn create-login-response [db user & [headers]]
   (let [token (create-token (:orcpub.user/username user)
                             (-> 24 hours from-now))]
