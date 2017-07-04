@@ -178,7 +178,7 @@
     9 [:foresight :shapechange :storm-of-vengeance :true-resurrection]},
    :paladin
    {1
-    [:bless :command :compelling-duel :cure-wounds :detect-evil-and-good :detect-magic
+    [:bless :command :compelled-duel :cure-wounds :detect-evil-and-good :detect-magic
      :detect-poison-and-disease :divine-favor :heroism
      :protection-from-evil-and-good :purify-food-and-drink
      :searing-smite :shield-of-faith :thunderous-smite :wrathful-smite],

@@ -75,7 +75,7 @@
                  :source :ua-cleric
                  :modifiers [(mod5e/al-illegal "Protection Domain is not allowed")
                              (mod5e/armor-proficiency :heavy)
-                             (opt5e/cleric-spell 1 :compelling-duel 1)
+                             (opt5e/cleric-spell 1 :compelled-duel 1)
                              (opt5e/cleric-spell 1 :protection-from-evil-and-good 1)
                              (opt5e/cleric-spell 2 :aid 3)
                              (opt5e/cleric-spell 2 :protection-from-poison 3)
