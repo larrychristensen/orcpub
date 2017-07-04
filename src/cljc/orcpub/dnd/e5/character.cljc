@@ -465,6 +465,9 @@
 (defn custom-treasure [built-char]
   (::custom-treasure built-char))
 
+(defn treasure [built-char]
+  (get-prop built-char :treasure))
+
 (defn normal-equipment-inventory [built-char]
   (get-prop built-char :equipment))
 
