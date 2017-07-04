@@ -1021,14 +1021,15 @@
     [:div
      (if top-result
        [:div.p-20.m-b-20
-        (case (:type top-result)
-          :dice-roll (dice-roll-result result)
-          :spell (spell-result result)
-          :monster (monster-result result)
-          :magic-item (magic-item-result result)
-          :name (name-result result)
-          :tavern-name (tavern-name-result result)
-          :else nil)])
+        (let [type (:type top-result)]
+          (case type
+            :dice-roll (dice-roll-result result)
+            :spell (spell-result result)
+            :monster (monster-result result)
+            :magic-item (magic-item-result result)
+            :name (name-result result)
+            :tavern-name (tavern-name-result result)
+            nil))])
      (if (seq results)
        (doall
         (map
