@@ -189,9 +189,6 @@
                      errors/bad-credentials
                      errors/no-account)))))
 
-(defn create-fake-login-response [username email]
-  (let [token (create-token (or username ))]))
-
 (defn create-login-response [db user & [headers]]
   (let [token (create-token (:orcpub.user/username user)
                             (-> 24 hours from-now))]
@@ -693,6 +690,13 @@
     {:status 200
      :body (d/pull (d/db conn) '[*] new-id)}))
 
+(defn clean-up-character [character]
+  (if (-> character ::se/values ::char5e/xps string?)
+    (update-in character
+               [::se/values ::char5e/xps]
+               #(Long/parseLong %))
+    character))
+
 (defn do-save-character [db conn transit-params identity]
   (let [character (entity/remove-empty-fields transit-params)
         username (:user identity)
@@ -702,9 +706,10 @@
     (try
       (if-let [data (spec/explain-data ::se/entity character)]
         {:status 400 :body data}
-        (if (:db/id character)
-          (update-character db conn character username)
-          (create-new-character conn character username)))
+        (let [clean-character (clean-up-character character)]
+          (if (:db/id clean-character)
+            (update-character db conn clean-character username)
+            (create-new-character conn clean-character username))))
       (catch Exception e (do (prn "ERROR" e) (throw e))))))
 
 (defn save-character [{:keys [db transit-params body conn identity] :as request}]
