@@ -695,7 +695,11 @@
   (if (-> character ::se/values ::char5e/xps string?)
     (update-in character
                [::se/values ::char5e/xps]
-               #(Long/parseLong %))
+               #(try
+                  (if (not (s/blank? %))
+                    (Long/parseLong %)
+                    0)
+                  (catch NumberFormatException e 0)))
     character))
 
 (defn do-save-character [db conn transit-params identity]
