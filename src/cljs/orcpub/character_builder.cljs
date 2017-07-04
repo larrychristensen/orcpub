@@ -43,7 +43,7 @@
             [re-frame.core :refer [subscribe dispatch dispatch-sync]])
   (:require-macros [cljs.core.async.macros :refer [go]]))
 
-(def print-disabled? false)
+(def print-disabled? true)
 
 (def print-enabled? (and (not print-disabled?)
                          (s/starts-with? js/window.location.href "http://localhost")))
@@ -115,43 +115,30 @@
 (defn character-state-path [path]
   (concat [:character] path))
 
+(defn input-field []
+  (let [state (r/atom {:timeout nil
+                       :temp-val nil})]
+    (fn [type value on-change attrs]
+      [type
+       (merge
+        attrs
+        {:value (or (:temp-val @state) value "")
+         :on-change #(swap! state
+                            (fn [{:keys [timeout temp-val] :as s}]
+                              (if timeout
+                                (js/clearTimeout timeout))
+                              (let [v (get-event-value %)]
+                                (assoc s
+                                       :timeout (js/setTimeout (fn [] (on-change v)) 500)
+                                       :temp-val v))))})])))
 
-(defn character-field []
-  (let [state (r/atom
-               {:focused false
-                :temp-val ""})]
-    (fn [entity-values prop-name type & [cls-str handler input-type]]
-      (let [value (get entity-values prop-name)
-            leave-handler (fn [_]
-                            (if (:focused @state)
-                              (if (not (and (s/blank? (:temp-val @state))
-                                            (s/blank? value)))
-                                (if handler
-                                  (handler (:temp-val @state))
-                                  (dispatch-sync [:update-value-field prop-name (:temp-val @state)])))
-                              (swap! state
-                                     assoc
-                                     :focused false)))]
-        [type {:class-name (str "input " cls-str)
-               :type (or input-type :text)
-               :value (if (:focused @state)
-                        (:temp-val @state)
-                        (or value (:temp-val @state)))
-               :on-focus (fn [_]
-                           (swap! state
-                                  assoc
-                                  :focused true
-                                  :temp-val value))
-               :on-mouse-out leave-handler
-               :on-blur leave-handler
-               :on-change #(let [v (get-event-value %)]
-                             (swap! state
-                                    assoc
-                                    :temp-val (if (= :number input-type)
-                                                (if (not (s/blank? v))
-                                                  (js/parseInt v)
-                                                  0)
-                                                v)))}]))))
+(defn character-field [entity-values prop-name type & [cls-str handler input-type]]
+  [input-field
+   type
+   (get entity-values prop-name)
+   #(dispatch [:update-value-field prop-name %])
+   {:type type
+    :class-name (str "input " cls-str)}])
 
 (defn character-input [entity-values prop-name & [cls-str handler type]]
   [character-field entity-values prop-name :input cls-str handler type])
