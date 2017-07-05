@@ -945,7 +945,8 @@
   js/FB)
 
 (defn get-fb-user [callback]
-  (.api (fb) "/me?fields=email" callback))
+  (if js/FB
+    (.api js/FB "/me?fields=email" callback)))
 
 (defn fb-init []
   (try
@@ -977,9 +978,10 @@
 (reg-event-fx
  :fb-logout
  (fn [{:keys [db]} _]
-   (let [facebook (fb)]
-     (if facebook
-       (.logout facebook (fn []))))
+   (if js/FB
+     (let [facebook js/FB]
+       (if facebook
+         (.logout facebook (fn [])))))
    {:db (assoc db :fb-logged-in? false)}))
 
 (reg-event-fx
