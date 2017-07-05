@@ -109,7 +109,8 @@
     (do (go (<! (timeout 2000))
             (if (not @(subscribe [:login-message-shown?]))
               (dispatch [:show-login-message "You must enable popups to allow Facebook login."])))
-        (.login js/FB events/fb-login-callback (clj->js {:scope "email"})))))
+        (if js/FB
+          (.login js/FB events/fb-login-callback (clj->js {:scope "email"}))))))
 
 (defn fb-login-button-comp []
   (let [logged-in? @(subscribe [:fb-logged-in?])]
