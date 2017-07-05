@@ -3764,8 +3764,8 @@ long rest."})
              5 {:selections [(eldritch-invocation-selection)]}
              7 {:selections [(eldritch-invocation-selection)]}
              9 {:selections [(eldritch-invocation-selection)]}
-             12 {:selections [(eldritch-invocation-selection)
-                              (mystic-arcanum-selection 6)]
+             11 {:selections [(mystic-arcanum-selection 6)]}
+             12 {:selections [(eldritch-invocation-selection)]
                  :modifiers [(mod5e/dependent-trait
                               {:name "Mystic Arcanum"
                                :level 11
