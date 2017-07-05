@@ -342,18 +342,22 @@
    username))
 
 (defn verify [{:keys [query-params db conn] :as request}]
-  (let [key (:key query-params)
-        {:keys [:orcpub.user/verification-sent
-                :orcpub.user/verified?
-                :db/id] :as user} (user-for-verification-key (d/db conn) key)]
-    (if verified?
-      (redirect route-map/verify-success-route)
-      (if (or (nil? verification-sent)
-              (verification-expired? verification-sent))
-        (redirect route-map/verify-failed-route)
-        (do (d/transact conn [{:db/id id
-                               :orcpub.user/verified? true}])
-            (redirect route-map/verify-success-route))))))
+  (if-let [key (:key query-params)]
+    (let [{:keys [:orcpub.user/verification-sent
+                  :orcpub.user/verified?
+                  :orcpub.user/username
+                  :db/id] :as user} (user-for-verification-key (d/db conn) key)]
+      (if username
+        (if verified?
+          (redirect route-map/verify-success-route)
+          (if (or (nil? verification-sent)
+                  (verification-expired? verification-sent))
+            (redirect route-map/verify-failed-route)
+            (do (d/transact conn [{:db/id id
+                                   :orcpub.user/verified? true}])
+                (redirect route-map/verify-success-route))))
+        {:status 400}))
+    {:status 400}))
 
 (defn re-verify [{:keys [query-params db conn] :as request}]
   (let [email (:email query-params)
