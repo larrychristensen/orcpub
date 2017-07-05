@@ -2,6 +2,7 @@
   (:require [orcpub.dnd.e5.options :as opt5e]
             [orcpub.dnd.e5.modifiers :as mod5e]
             [orcpub.dnd.e5.units :as units5e]
+            [orcpub.dnd.e5.damage-types :as damage-types5e]
             [orcpub.dnd.e5.character :as char5e]
             [orcpub.template :as t])
   #?(:cljs (:require-macros [orcpub.dnd.e5.options :as opt5e])))
@@ -106,7 +107,7 @@
                                (map
                                 (fn [type-kw]
                                   (mod5e/damage-resistance type-kw))
-                                opt5e/damage-types)
+                                damage-types5e/damage-types)
                                ;; it explicitly says an extra attack
                                (mod5e/extra-attack)
                                (mod5e/critical 19)
