@@ -223,7 +223,7 @@ As an action, you can move the eye up to 30 feet in any direction. There is no l
     :duration "Concentration, up to 10 minutes"
     :source :phb
     :page 214
-    }
+    :summary "Create linked portals between a point within 10 ft of you and a point within 500 ft of you."}
    {
     :name "Arcane Lock"
     :school "abjuration"
@@ -246,7 +246,7 @@ While affected by this spell, the object is more difficult to break or force ope
     :duration "1 hour"
     :source :phb
     :page 215
-    }
+    :summary "Gain 5x temp HPs and creatures that hit you take 5x cold damage, where x is the level of the spell slot used."}
    {
     :name "Arms of Had."
     :key :arms-of-hadar
@@ -258,7 +258,7 @@ While affected by this spell, the object is more difficult to break or force ope
     :duration "Instantaneous"
     :source :phb
     :page 215
-    }
+    :summary "Each creature within 10 ft. must succeed on a STR save or take 2d6 necrotic damage and, until it's next turn, can't take reactions, half damage and no other effects on successful save. The damage increases by 1d6 for each spell slot above 1st."}
    {
     :name "Astral Projection"
     :school "necromancy"
@@ -324,8 +324,7 @@ If you cast the spell two or more times before completing your next long rest, t
     :duration "Concentration, up to 10 minutes"
     :source :phb
     :page 216
-    :summary "Radiant a 30 ft. aura. Use a bonus action to heal a creature in the aura 2d6 HPs."
-    }
+    :summary "Radiant a 30 ft. aura. Use a bonus action to heal a creature in the aura 2d6 HPs."}
    {
     :name "Awaken"
     :school "transmutation"
@@ -360,7 +359,7 @@ At Higher Levels. When you cast this spell using a spell slot of 2nd level or hi
     :duration "Concentration, up to 1 minute"
     :source :phb
     :page 216
-    }
+    :summary "Your next hit with a weapon attack deals an extra 5d10 force damage. The target is banished if reduced to fewer than 50 HPs. If it is from a different plane, it returns there. If it is from the plane you are on it is banished to a harmless plane and returns when the spell"}
    {
     :name "Banishment"
     :school "abjuration"
@@ -414,7 +413,7 @@ If the target is native to a different plane of existence than the one you're on
     :duration "Concentration, up to 1 hour"
     :source :phb
     :page 217
-    }
+    :summary "Temporarily see and hear through the senses of willing beast you touch."}
    {
     :name "Bestow Curse"
     :school "necromancy"
@@ -470,7 +469,8 @@ When a creature enters the wall's area for the first time on a turn or starts it
     :components {:verbal true :somatic true}
     :duration "1 round"
     :source :phb
-    :page 218}
+    :page 218
+    :summary "You have resistance to bludgeoning, slashing, and piercing damage."}
    {
     :name "Bless"
     :school "enchantment"
@@ -506,7 +506,7 @@ At Higher Levels. When you cast this spell using a spell slot of 5th level or hi
     :duration "Concentration, up to 1 minute"
     :source :phb
     :page 219
-    }
+    :summary "Your next hit with a weapon attack deals an extra 3d8 radiant damage. On a failed CON save the target is blinded for the spell's duration, making another save at the end of each of it's turns."}
    {
     :name "Blindness/Deafness"
     :school "necromancy"
@@ -569,7 +569,7 @@ While on the Ethereal Plane, you can see and hear the plane you originated from,
     :duration "Concentration, up to 1 minute"
     :source :phb
     :page 220
-    }
+    :summary "Your next hit with a weapon attack deals an extra 2d6 radiant damage. The target also sheds a dim light for 5 ft."}
    {
     :name "Burning Hands"
     :school "evocation"
