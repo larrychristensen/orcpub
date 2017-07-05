@@ -130,11 +130,10 @@
          {:orcpub.entity/key :shortbow}}}}}], 
     :optional-content nil}})
 
-(defn has-spell? [built-char level spell-cfg]
-  (as-> built-char $
-      (es/entity-val $ :spells-known)
-      (get $ level)
-      (some (fn [s] (= s spell-cfg)) $)))
+(defn has-spell? [built-char level class-nm spell-key]
+  (let [spells-known (char5e/spells-known built-char)]
+    (prn "SPELLS KNOWN" spells-known)
+    (get-in spells-known [level [class-nm spell-key]])))
 
 (def elf-dex-bonus 2)
 (def drow-cha-bonus 1)
@@ -153,10 +152,8 @@
         skill-profs (char5e/skill-proficiencies built-char)]
     (is (has-spell? built-char
                     1
-                    {:key :illusory-script,
-                     :ability :orcpub.dnd.e5.character/cha,
-                     :qualifier "Book of Ancient Secrets Ritual",
-                     :class "Warlock"}))
+                    "Warlock"
+                    :illusory-script))
     (is (= str (base-abilities ::char5e/str)))
     (is (= dex (+ elf-dex-bonus (base-abilities ::char5e/dex))))
     (is (= con (base-abilities ::char5e/con)))
