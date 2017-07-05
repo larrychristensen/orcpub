@@ -1,3 +1,3 @@
 (ns orcpub.dice-test
-  (:require [clojure.spec.alpha.test :as stest]
+  (:require [clojure.spec.test.alpha :as stest]
             [orcpub.dice :as dice]))
