@@ -256,10 +256,10 @@
 
 (defn fb-login [{:keys [json-params db conn remote-addr] :as request}]
   (if-let [access-token (-> json-params :authResponse :accessToken)]
-    (let [fb-user (oauth/get-fb-user access-token)
-          email (:email fb-user)
-          user (get-or-create-oauth-user conn db email)]
-      (create-login-response db user))
+    (let [fb-user (oauth/get-fb-user access-token)]
+      (if-let [email (:email fb-user)]
+        (create-login-response db (get-or-create-oauth-user conn db email))
+        (login-error errors/fb-email-permission)))
     {:status 400}))
 
 (def google-login

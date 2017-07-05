@@ -37,11 +37,7 @@
                               :fields "email"
                               :debug "all"}})
         body (json/parse-string (:body resp) true)]
-    (if (:email body)
-      body
-      (throw (ex-info "Failed getting facebook user."
-                      {:response resp
-                       :access-token access-token})))))
+    body))
 
 (defn get-google-user [access-token]
   (let [resp (client/get
