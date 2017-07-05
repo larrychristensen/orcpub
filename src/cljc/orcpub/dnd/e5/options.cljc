@@ -2480,3 +2480,36 @@
                    :summary ~summary
                    :frequency ~frequency
                    :range ~range}))}))
+
+(defn race-prereq [race-nms]
+  (let [name-set (if (string? race-nms)
+                   #{race-nms}
+                   (into #{} race-nms))]
+    (t/option-prereq
+     (str (common/list-print name-set "or") " Only")
+     (fn [c] (name-set @(subscribe [::character/race nil c]))))))
+
+(defn subrace-prereq [race-nm subrace-nm]
+  (t/option-prereq
+   (str subrace-nm " Only")
+   (fn [c] (and (= race-nm @(subscribe [::character/race nil c]))
+                (= subrace-nm @(subscribe [::character/subrace nil c]))))))
+
+(def deep-gnome-prereq
+  (t/option-prereq
+   "Deep Gnome only"
+   (fn [c] (let [subrace @(subscribe [::character/subrace nil c])]
+             (or (= "Deep Gnome (EE)" subrace)
+                 (= "Deep Gnome (SCAG)" subrace))))))
+
+(defn svirfneblin-magic-feat [source page]
+  (feat-option
+   {:name (str "Svirfneblin Magic (" (s/upper-case (name source)) ")")
+    :page page
+    :source source
+    :summary "Can cast 'nondetection', 'blindness/deafness', 'blur', and 'disguise self'"
+    :prereqs [deep-gnome-prereq]
+    :modifiers [(modifiers/spells-known 3 :nondetection ::character/cha "Deep Gnome" 0 "at will")
+                (modifiers/spells-known 2 :blindness-deafness ::character/cha "Deep Gnome" 0 "once per long rest")
+                (modifiers/spells-known 2 :blur ::character/cha "Deep Gnome" 0 "once per long rest")
+                (modifiers/spells-known 1 :disguise-self ::character/cha "Deep Gnome" 0 "once per long rest")]}))

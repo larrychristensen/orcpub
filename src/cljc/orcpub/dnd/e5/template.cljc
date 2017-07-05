@@ -4319,7 +4319,9 @@ long rest."})
     true)])
 
 (def elemental-evil-selections
-  [(opt5e/race-selection
+  [(opt5e/feat-selection-2
+    {:options [(opt5e/svirfneblin-magic-feat :ee 7)]})
+   (opt5e/race-selection
     {:options (map
                opt5e/race-option
                [aarakocra-option-cfg
@@ -4477,7 +4479,9 @@ long rest."})
                :summary "Speak telepathically to 1 creature who understands your language"}]}]})
 
 (def sword-coast-adventurers-guide-selections
-  [(opt5e/background-selection
+  [(opt5e/feat-selection-2
+    {:options [(opt5e/svirfneblin-magic-feat :scag 115)]})
+   (opt5e/background-selection
     {:options (map
                opt5e/background-option
                scag/sword-coast-adventurers-guide-backgrounds)})
