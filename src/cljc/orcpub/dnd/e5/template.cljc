@@ -1127,8 +1127,9 @@
                   :summary (str "Inspire another creature with a 1d"
                                 (bardic-inspiration-die ?levels)
                                 " that it can, within the next 10 min., add to a d20 roll")})]
-    :levels {2 {:modifiers [(mod/modifier ?default-skill-bonus (let [b (int (/ ?prof-bonus 2))]
-                                                                 (zipmap char5e/ability-keys (repeat b))))
+    :levels {2 {:modifiers [(mod/vec-mod ?default-skill-bonus-fns
+                                          (fn [_]
+                                            (int (/ ?prof-bonus 2))))
                             (mod/cum-sum-mod ?initiative (int (/ ?prof-bonus 2)))
                             (mod5e/dependent-trait
                              {:name "Jack of All Trades"
@@ -2001,7 +2002,14 @@
                                :modifiers [(mod5e/weapon :handaxe 2)]})]})]
     :subclasses [{:name "Champion"
                   :levels {3 {:modifiers [(mod5e/critical 19)]}
-                           7 {:modifiers [(mod/modifier ?default-skill-bonus (let [b (int (/ ?prof-bonus 2))] {::char5e/str b ::char5e/dex b ::char5e/con b}))
+                           7 {:modifiers [(mod/vec-mod ?default-skill-bonus-fns
+                                                       (fn [ability-kw]
+                                                         (if (#{::char5e/str
+                                                                ::char5e/dex
+                                                                ::char5e/con}
+                                                              ability-kw)
+                                                           (common/round-up (/ ?prof-bonus 2))
+                                                           0)))
                                           (mod/cum-sum-mod ?initiative (common/round-up (/ ?prof-bonus 2)))
                                           (mod5e/dependent-trait
                                            {:level 7
