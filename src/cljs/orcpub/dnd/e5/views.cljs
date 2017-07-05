@@ -120,9 +120,7 @@
                   (on-fb-login logged-in?))}
     [:i.fa.fa-facebook.f-s-18]
     [:span.m-l-10.f-s-14
-     (if @(subscribe [:fb-logged-in?])
-       "Log Out of Facebook"
-       "Login with Facebook")]]])
+     "Login with Facebook"]]])
 
 (defn add-facebook-init [comp]
   (with-meta
