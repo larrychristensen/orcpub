@@ -105,7 +105,6 @@
     :data-href url}])
 
 (defn on-fb-login [logged-in?]
-  (prn "LOGGED IN?" logged-in?)
   (if (not logged-in?)
     (do (go (<! (timeout 2000))
             (if (not @(subscribe [:login-message-shown?]))
