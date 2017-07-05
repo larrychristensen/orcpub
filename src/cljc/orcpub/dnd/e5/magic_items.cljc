@@ -148,11 +148,27 @@ Curse. This armor is cursed, a fact that is revealed only when an identify spell
                           " damage.")
         }))
    vulnerable-types))
+
+(def rings-of-resistance
+  (map
+   (fn [damage-type]
+     {
+      :name (str "Ring of Resistance (" (s/capitalize (name damage-type)) ")")
+      :item-type :ring
+
+      :rarity :rare
+
+      :modifiers [(mod5e/damage-resistance damage-type)]
+      :attunement [:any]
+      :description (str "You have resistance to " (name damage-type) " damage.")
+      })
+   damage-types5e/damage-types))
                             
 (def raw-magic-items
   (concat
    armors-of-resistance
    armors-of-vulnerability
+   rings-of-resistance
    [{
      :name "Adamantine Armor"
      :item-type :armor
@@ -1777,14 +1793,6 @@ If you die while wearing the ring, your soul enters it, unless it already houses
 
      :attunement [:any]
      :description "While wearing this ring, you regain 1d6 hit points every 10 minutes, provided that you have at least 1 hit point. If you lose a body part, the ring causes the missing part to regrow and return to full functionality after 1d6 + 1 days if you have at least 1 hit point the whole time."
-     }{
-     :name "Ring of Resistance"
-     :item-type :ring
-
-     :rarity :rare
-
-     :attunement [:any]
-     :description "You have resistance to one damage type while wearing this ring. The gem in the ring indicates the type, which the GM chooses or determines randomly."
      }{
      :name "Ring of Shooting Stars"
      :item-type :ring
