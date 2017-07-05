@@ -959,7 +959,6 @@
                   url (backend-url path)
                   {:keys [status] :as response} (<! (http/post url
                                                      {:json-params (js->clj response)}))]
-              (prn "RESPONSE" response)
               (case status
                 200 (dispatch [:login-success true response])
                 401 (dispatch [:show-login-message "You must allow OrcPub to view your email address so we can create your account. We will not send you emails unless you later give us permission to. In Facebook, please go to 'Settings' > 'Apps', delete 'orcpub', and try again."])
