@@ -5,7 +5,8 @@
             [orcpub.template :as t]
             [orcpub.entity.strict :as se]
             [orcpub.dnd.e5.template :as t5e]
-            [orcpub.dnd.e5.event-handlers :as eh]))
+            [orcpub.dnd.e5.event-handlers :as eh]
+            [orcpub.dnd.e5.character.random :as char-rand]))
 
 (def character
   {:orcpub.entity/options
@@ -258,7 +259,7 @@
 (deftest test-parse-name-query
   (testing "parse-name-query"
     (is (= [nil nil nil] (eh/parse-name-query "name")))
-    (is (= [nil :human nil] (eh/parse-name-query "human name")))
-    (is (= [nil nil :chondathan] (eh/parse-name-query "chondathan name")))
-    (is (= [:female nil :chondathan] (eh/parse-name-query "female chondathan name")))
-    (is (= [:female :elf nil] (eh/parse-name-query "female elf name")))))
+    (is (= [nil ::char-rand/human nil] (eh/parse-name-query "human name")))
+    (is (= [nil nil ::char-rand/chondathan] (eh/parse-name-query "chondathan name")))
+    (is (= [::char-rand/female nil ::char-rand/chondathan] (eh/parse-name-query "female chondathan name")))
+    (is (= [::char-rand/female ::char-rand/elf nil] (eh/parse-name-query "female elf name")))))
