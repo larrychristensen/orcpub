@@ -500,7 +500,8 @@
    ::char5e/tool-bonus-fn char5e/tool-bonus-fn 
    ::char5e/weapon-profs char5e/weapon-proficiencies 
    ::char5e/armor-profs char5e/armor-proficiencies 
-   ::char5e/resistances char5e/damage-resistances 
+   ::char5e/resistances char5e/damage-resistances
+   ::char5e/damage-vulnerabilities char5e/damage-vulnerabilities
    ::char5e/damage-immunities char5e/damage-immunities 
    ::char5e/immunities char5e/immunities 
    ::char5e/condition-immunities char5e/condition-immunities 

@@ -2305,6 +2305,7 @@
         armor-profs @(subscribe [::char/armor-profs id])
         resistances @(subscribe [::char/resistances id])
         damage-immunities @(subscribe [::char/damage-immunities id])
+        damage-vulnerabilities @(subscribe [::char/damage-vulnerabilities id])
         condition-immunities @(subscribe [::char/condition-immunities id])
         immunities @(subscribe [::char/immunities id])
         weapons @(subscribe [::char/weapons id])
@@ -2330,6 +2331,8 @@
      [:div.m-t-30
       [list-item-section "Damage Resistances" "surrounded-shield" resistances resistance-str]]
      [:div.m-t-30
+      [list-item-section "Damage Vulnerabilities" nil damage-vulnerabilities resistance-str]]
+     [:div.m-t-30
       [list-item-section "Damage Immunities" nil damage-immunities resistance-str]]
      [:div.m-t-30
       [list-item-section "Condition Immunities" nil condition-immunities resistance-str]]
@@ -2349,6 +2352,7 @@
 (defn features-details [num-columns id]
   (let [resistances @(subscribe [::char/resistances id])
         damage-immunities @(subscribe [::char/damage-immunities id])
+        damage-vulnerabilities @(subscribe [::char/damage-vulnerabilities id])
         condition-immunities @(subscribe [::char/condition-immunities id])
         immunities @(subscribe [::char/immunities id])
         actions @(subscribe [::char/actions id])
@@ -2364,6 +2368,7 @@
      [:div.flex-grow-1.details-column-2
       {:class-name (if (= 2 num-columns) "w-50-p m-l-20")}
       [list-item-section "Damage Resistances" "surrounded-shield" resistances resistance-str]
+      [list-item-section "Damage Vulnerabilities" nil damage-vulnerabilities resistance-str]
       [list-item-section "Damage Immunities" nil damage-immunities resistance-str]
       [list-item-section "Condition Immunities" nil condition-immunities resistance-str]
       [list-item-section "Immunities" nil immunities resistance-str]

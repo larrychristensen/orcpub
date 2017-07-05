@@ -71,6 +71,9 @@
 (defn damage-resistance [value & [qualifier-text]]
   (mods/set-mod ?damage-resistances (resistance-cfg value qualifier-text) (name value) "damage resistance"))
 
+(defn damage-vulnerability [value & [qualifier-text]]
+  (mods/set-mod ?damage-vulnerabilities (resistance-cfg value qualifier-text) (name value) "damage vulnerability"))
+
 (defn damage-immunity [value & [qualifier-text]]
   (mods/set-mod ?damage-immunities (resistance-cfg value qualifier-text) (name value) "damage immunity"))
 
