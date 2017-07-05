@@ -91,7 +91,7 @@ Natural Weapons. You grow claws, fangs, spines, horns, or a different natural we
     :duration "24 hours"
     :source :phb
     :page 212
-    }
+    :summary "Charm a beast of INT 3 or lower if it fails a WIS save. You can charm 1 additional beast for each slot above 1st."}
    {
     :name "Animal Messenger"
     :ritual true

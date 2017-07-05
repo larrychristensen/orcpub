@@ -421,6 +421,9 @@
 (defn damage-resistances [built-char]
   (get-prop built-char :damage-resistances))
 
+(defn damage-vulnerabilities [built-char]
+  (get-prop built-char :damage-vulnerabilities))
+
 (defn damage-immunities [built-char]
   (get-prop built-char :damage-immunities))
 
