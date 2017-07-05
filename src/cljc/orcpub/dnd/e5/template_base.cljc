@@ -131,13 +131,17 @@
     ?proficiency-bonus-increase 0
     ?prof-bonus (+ (int (/ (dec ?total-levels) 4)) 2 ?proficiency-bonus-increase)
     ?default-skill-bonus {}
+    ?default-skill-bonus-fns []
     ?skill-prof-bonuses (reduce
                          (fn [m {k :key}]
-                           (assoc m k (if (k ?skill-profs)
-                                        (if (k ?skill-expertise)
-                                          (* 2 ?prof-bonus)
-                                          ?prof-bonus)
-                                        (or (?default-skill-bonus (skill5e/skill-abilities k)) 0))))
+                           (let [skill-ability (skill5e/skill-abilities k)]
+                             (assoc m k (if (k ?skill-profs)
+                                          (if (k ?skill-expertise)
+                                            (* 2 ?prof-bonus)
+                                            ?prof-bonus)
+                                          (or (apply max
+                                                     (map #(% skill-ability) ?default-skill-bonus-fns))
+                                              0)))))
                          {}
                          skill5e/skills)
     ?skill-bonuses (reduce-kv
