@@ -1,7 +1,7 @@
 (ns orcpub.template-test
   (:require [clojure.spec.alpha :as spec]
-            [clojure.spec.alpha.test :as stest]
-            [clojure.spec.alpha.gen :as sgen]
+            [clojure.spec.test.alpha :as stest]
+            [clojure.spec.gen.alpha :as sgen]
             [clojure.test :refer [deftest testing is]]
             [clojure.test.check :as tc]
             [clojure.test.check.generators :as gen]
