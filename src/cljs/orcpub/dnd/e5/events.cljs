@@ -957,9 +957,13 @@
     (do (dispatch [:hide-login-message])
         (go (let [path (routes/path-for routes/fb-login-route)
                   url (backend-url path)
-                  response (<! (http/post url
-                                          {:json-params (js->clj response)}))]
-              (dispatch [:login-success true response]))))))
+                  {:keys [status] :as response} (<! (http/post url
+                                                     {:json-params (js->clj response)}))]
+              (prn "RESPONSE" response)
+              (case status
+                200 (dispatch [:login-success true response])
+                401 (dispatch [:show-login-message "You must allow OrcPub to view your email address so we can create your account. We will not send you emails unless you later give us permission to. In Facebook, please go to 'Settings' > 'Apps', delete 'orcpub', and try again."])
+                nil))))))
 
 (reg-event-fx
  :init-fb
@@ -972,19 +976,12 @@
    (assoc db :fb-logged-in? logged-in?)))
 
 (reg-event-fx
- :fb-login
- (fn [db _]
-   (if (not (:fb-logged-in? db))
-     (do (go (<! (timeout 1000))
-             (dispatch [:show-login-message "You must enable popups to allow Facebook login."]))
-         (.login (fb) fb-login-callback (clj->js {:scope "email"}))))))
-
-(reg-event-fx
  :fb-logout
  (fn [{:keys [db]} _]
    (let [facebook (fb)]
      (if facebook
-       (.logout facebook (fn []))))))
+       (.logout facebook (fn []))))
+   {:db (assoc db :fb-logged-in? false)}))
 
 (reg-event-fx
  :logout
@@ -1273,7 +1270,7 @@
 (reg-event-db
  :show-login-message
  (fn [db [_ message]]
-   (go (<! (timeout 10000))
+   (go (<! (timeout 15000))
        (dispatch [:hide-login-message]))
    (assoc db
           :login-message-shown? true
