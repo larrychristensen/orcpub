@@ -105,17 +105,25 @@
     :data-href url}])
 
 (defn on-fb-login [logged-in?]
+  (prn "LOGGED IN?" logged-in?)
   (if (not logged-in?)
-    (do (go (<! (timeout 1000))
-            (dispatch [:show-login-message "You must enable popups to allow Facebook login."]))
+    (do (go (<! (timeout 2000))
+            (if (not @(subscribe [:login-message-shown?]))
+              (dispatch [:show-login-message "You must enable popups to allow Facebook login."])))
         (.login js/FB events/fb-login-callback (clj->js {:scope "email"})))))
 
 (defn fb-login-button-comp []
-  [:div.flex.justify-cont-s-a
-   [:button.form-button.flex.align-items-c
-    {:on-click #(on-fb-login @(subscribe [:fb-logged-in?]))}
-    [:i.fa.fa-facebook.f-s-18]
-    [:span.m-l-10.f-s-14 "Login with Facebook"]]])
+  (let [logged-in? @(subscribe [:fb-logged-in?])]
+    [:div.flex.justify-cont-s-a
+     [:button.form-button.flex.align-items-c
+      {:on-click #(if logged-in?
+                    (dispatch [:fb-logout])
+                    (on-fb-login logged-in?))}
+      [:i.fa.fa-facebook.f-s-18]
+      [:span.m-l-10.f-s-14
+       (if logged-in?
+         "Log Out of Facebook"
+         "Login with Facebook")]]]))
 
 (defn add-facebook-init [comp]
   (with-meta
