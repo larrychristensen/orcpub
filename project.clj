@@ -11,7 +11,7 @@
                  ["my.datomic.com" {:url "https://my.datomic.com/repo"
                                     :username [:gpg :env]
                                     :password [:gpg :env]}]]
- 
+  
   :dependencies [[org.clojure/clojure "1.9.0-alpha17"]
                  [org.clojure/test.check "0.9.0"]
                  [org.clojure/clojurescript "1.9.660"]
@@ -81,10 +81,6 @@
                                 :output-to "resources/public/css/compiled/styles.css"
                                 ;; Compress the output?
                                 :pretty-print? false}}]}
-
-  :resource {
-             :resource-paths ["resources/copy" {:target-path "/"}]
-             }
 
   :cljsbuild {:builds
               [{:id "dev"
@@ -159,8 +155,8 @@
   ;; Please see:
   ;; https://github.com/bhauman/lein-figwheel/wiki/Using-the-Figwheel-REPL-within-NRepl
 
-  :uberjar-inclusions [#"^\.ebextensions"]
-  :jar-inclusions [#"^\.ebextensions"]
+  :uberjar-inclusions [".ebextensions"]
+  :jar-inclusions [".ebextensions"]
 
   :profiles {:dev {:dependencies [[binaryage/devtools "0.9.4"]
                                   [figwheel-sidecar "0.5.10"]
