@@ -1575,3 +1575,13 @@
      i
      ::char-equip5e/name]
     value)))
+
+(reg-event-db
+ :toggle-theme
+ [user->local-store-interceptor]
+ (fn [db _]
+   (update-in db [:user-data :theme]
+              (fn [theme]
+                (if (= theme "light-theme")
+                  "dark-theme"
+                  "light-theme")))))

@@ -3,7 +3,7 @@
             #?(:cljs [reagent.core :refer [atom]])))
 
 (defn checkbox [selected? disable?]
-  [:i.fa.fa-check.f-s-14.bg-white.orange-shadow.m-r-10.pointer
+  [:i.fa.fa-check.f-s-14.bg-white.b-color-gray.orange-shadow.m-r-10.pointer.b-1
    {:class-name (str (if selected? "black slight-text-shadow" "white transparent")
                      " "
                      (if disable?
