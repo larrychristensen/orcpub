@@ -717,3 +717,8 @@
    (subscribe [::char5e/features-used id]))
  (fn [features-used [_ id units nm]]
    (get-in features-used [units nm])))
+
+(reg-sub
+ :theme
+ (fn [db _]
+   (get-in db [:user-data :theme])))
