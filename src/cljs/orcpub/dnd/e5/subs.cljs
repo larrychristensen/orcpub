@@ -721,4 +721,4 @@
 (reg-sub
  :theme
  (fn [db _]
-   (:theme db)))
+   (get-in db [:user-data :theme])))
