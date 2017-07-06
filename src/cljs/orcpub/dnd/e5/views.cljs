@@ -1518,7 +1518,7 @@
             [:th.p-l-10.p-b-10.p-t-10 "DC"]
             [:th.p-l-10
              {:class-name (if (not mobile?) "p-b-10 p-t-10")}
-             "Atk."]]
+             "Mod."]]
            (doall
             (map-indexed
              (fn [i r] (with-meta r {:key i}))

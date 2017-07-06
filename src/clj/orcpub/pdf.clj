@@ -430,7 +430,7 @@
                                 (- 11.0 y 3.4)
                                 [186 21 3])
                      (draw-text cs
-                                (str "Atk " (common/bonus-str attack-bonus))
+                                (str "Mod " (common/bonus-str attack-bonus))
                                 PDType1Font/HELVETICA_BOLD_OBLIQUE
                                 8
                                 (+ dc-offset (string-width dc-str PDType1Font/HELVETICA_BOLD 10))
