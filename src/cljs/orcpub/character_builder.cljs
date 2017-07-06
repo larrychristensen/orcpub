@@ -1526,7 +1526,7 @@
        [character-input entity-values ::char5e/character-name]
        [:button.form-button.p-10.m-t-5.m-l-5
         {:on-click (fn [_] (dispatch [::char5e/set-random-name]))}
-        [:i.fa.fa-random.white.f-s-16]]]]
+        [:i.fa.fa-random.main-text-color.f-s-16]]]]
      [:div.flex.justify-cont-s-b
       [:div.field.flex-grow-1.m-r-2
        [:span.personality-label.f-s-18 "Player Name"]
@@ -1773,11 +1773,11 @@
    [:div.container.header-links
     [:div.content
      [:div
-      [:div.m-l-10.white.hidden-xs.hidden-sm
+      [:div.m-l-10.main-text-color.hidden-xs.hidden-sm
        [:span "Questions? Comments? Issues? Feature Requests? We'd love to hear them, "]
        [:a {:href "https://muut.com/orcpub" :target :_blank} "report them here."]]
       [:div.hidden-xs.hidden-sm
-       [:div.flex.align-items-c.f-w-b.f-s-18.m-t-10.m-l-10.white
+       [:div.flex.align-items-c.f-w-b.f-s-18.m-t-10.m-l-10.main-text-color
         [:span.hidden-xs "Please support continuing development on "]
         [:a.m-l-5 patreon-link-props [:span "Patreon"]]
         [:a.m-l-5 patreon-link-props
@@ -1867,7 +1867,7 @@
         [:div.flex.justify-cont-s-b.align-items-c.flex-wrap
          [:div
           [al-legality al-illegal-reasons used-resources]
-          #_[:div.white.m-l-20.pointer
+          #_[:div.main-text-color.m-l-20.pointer
            {:on-click #(dispatch [:toggle-public])}
            [comps/checkbox @(subscribe [::char5e/public?]) false]
            [:span (if mobile?
@@ -1878,6 +1878,6 @@
                                  (if (not mobile?)
                                    [:span "You have unsaved changes"])])]]]
       [:div.flex.justify-cont-c.p-b-40
-       [:div.f-s-14.white.content
+       [:div.f-s-14.main-text-color.content
         [:div.flex.w-100-p
          [builder-columns]]]]]]))
