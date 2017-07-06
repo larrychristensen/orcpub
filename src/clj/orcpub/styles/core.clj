@@ -342,6 +342,8 @@
     {:position :absolute}]
    [:.posn-fixed
     {:position :fixed}]
+   [:.main-text-color
+    {:color :white}]
    [:.white
     {:color :white}]
    [:.black
@@ -846,9 +848,6 @@
 
 (def app
   (concat
-   [[:#app
-     {:background-image "linear-gradient(182deg, #2c3445, #000000)"}]]
-   
    [[:.app
      {:background-image "linear-gradient(182deg, #313A4D, #080A0D)"
       :font-family font-family
@@ -1160,7 +1159,25 @@
     [:.option-header
      {:display :flex
       :justify-content :space-between
-      :align-items :center}]]
+      :align-items :center}]
+
+    [:.app.light-theme
+     {:background-image "linear-gradient(182deg, #FFFFFF, #D1D7E6)"}
+
+     [:.main-text-color
+      {:color :black}]
+
+     [:.input
+     {:background-color :transparent
+      :color :black
+      :border "1px solid black"
+      :border-radius "5px"
+      :margin-top "5px"
+      :display :block
+      :padding "10px"
+      :width "100%"
+      :box-sizing :border-box
+      :font-size "14px"}]]]
    margin-lefts
    margin-tops
    font-sizes
