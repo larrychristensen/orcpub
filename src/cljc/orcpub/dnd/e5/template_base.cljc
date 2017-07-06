@@ -139,9 +139,10 @@
                                           (if (k ?skill-expertise)
                                             (* 2 ?prof-bonus)
                                             ?prof-bonus)
-                                          (or (apply max
-                                                     (map #(% skill-ability) ?default-skill-bonus-fns))
-                                              0)))))
+                                          (if (seq? ?default-skill-bonus-fns)
+                                            (apply max
+                                                   (map #(% skill-ability) ?default-skill-bonus-fns))
+                                            0)))))
                          {}
                          skill5e/skills)
     ?skill-bonuses (reduce-kv
