@@ -4369,6 +4369,21 @@ long rest."})
                           {:name "High Elf Cantrip"
                            :selections [high-elf-cantrip-selection]})]))
 
+(def scag-human-option-cfg
+  {:name "Human"
+   :plugin? true
+   :subraces
+   [{:name "Arkaiun"}
+    {:name "Bedine"}
+    {:name "Ffolk"}
+    {:name "Gur"}
+    {:name "Halruaan"}
+    {:name "Imaskari"}
+    {:name "Nar"}
+    {:name "Shaaran"}
+    {:name "Tuigan"}
+    {:name "Ulutiun"}]})
+
 (def scag-deep-gnome-cfg
   (opt5e/deep-gnome-option-cfg :deep-gnome-scag :scag 115))
 
@@ -4506,7 +4521,8 @@ long rest."})
                [scag-half-elf-option-cfg
                 scag-tiefling-option-cfg
                 scag-halfling-option-cfg
-                scag-deep-gnome-cfg])})
+                scag-deep-gnome-cfg
+                scag-human-option-cfg])})
    (opt5e/class-selection
     {:options (map
                (fn [cfg] (opt5e/class-option (assoc cfg :plugin? true :source :scag)))
