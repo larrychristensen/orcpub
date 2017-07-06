@@ -961,16 +961,18 @@
       :font-weight 600}]
 
     [:.builder-tab
-     {:opacity 0.2
-      :flex-grow 1
+     {:flex-grow 1
       :padding-bottom "13px"
       :text-align :center
       :cursor :pointer
-      :border-bottom "5px solid rgba(255, 255, 255, 0.3)"}]
-
+      :border-bottom "5px solid rgba(72,72,72,0.37)"}
+     [:.builder-tab-text
+      {:opacity 0.2}]]
+ 
     [:.selected-builder-tab
-     {:border-bottom-color "#f1a20f"
-      :opacity 1}]
+     {:border-bottom-color "#f1a20f"}
+     [:.builder-tab-text
+      {:opacity 1}]]
 
     [:.collapsed-list-builder-option
      {:padding "1px"}]
@@ -1162,7 +1164,7 @@
       :align-items :center}]
 
     [:.app.light-theme
-     {:background-image "linear-gradient(182deg, #FFFFFF, #D1D7E6)"}
+     {:background-image "linear-gradient(182deg, #FFFFFF, #DDDDDD)"}
 
      [:.main-text-color
       {:color :black}]
@@ -1177,7 +1179,42 @@
       :padding "10px"
       :width "100%"
       :box-sizing :border-box
-      :font-size "14px"}]]]
+      :font-size "14px"}]
+
+     [:.orange
+      {:color "rgba(0,0,0,0.8)"}]
+
+     [:.b-orange
+      {:border-color "rgba(0,0,0,0.6)"}]
+
+     [:.text-shadow
+      {:text-shadow :none}]
+
+     [:.bg-light
+      {:background-color "rgba(0,0,0,0.4)"}]
+
+     [:.b-color-gray
+      {:border-color "rgba(0,0,0,0.3)"}]
+
+     [:.builder-option-dropdown
+      (merge
+       {:border "1px solid black"
+        :color :black})
+
+      [:&:active :&:focus
+       {:outline :none}]]
+
+     [:.builder-dropdown-item
+      {:background-color :white
+       :color :black}]
+
+     [:.sticky-header
+      {:background-color :white}]
+
+     [:table.striped
+      [:tr
+       [(s/& (s/nth-child :even))
+        {:background-color "rgba(0, 0, 0, 0.1)"}]]]]]
    margin-lefts
    margin-tops
    font-sizes
