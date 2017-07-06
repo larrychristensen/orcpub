@@ -3178,6 +3178,11 @@
     :profs {:weapon {:dagger true :dart true :sling true :quarterstaff true :crossbow-light true}
             :save {::char5e/int true ::char5e/wis true}
             :skill-options {:choose 2 :options {:arcana true :history true :insight true :investigation true :medicine true :religion true}}}
+    :modifiers [(mod5e/dependent-trait
+                 {:name "Arcane Recovery"
+                  :page 115
+                  :frequency units5e/days-1
+                  :summary (str "When you finish a short rest, regain spell slots totalling no more than " (int (/ ?wizard-level 2)) ", and each must be 5th level or lower.")})]
     :levels {18 {:selections [(spell-mastery-selection 1)
                               (spell-mastery-selection 2)]
                  :modifiers [(mod5e/dependent-trait
