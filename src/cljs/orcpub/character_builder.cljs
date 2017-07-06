@@ -362,10 +362,10 @@
 (defn option-selector-base []
   (let [expanded? (r/atom false)]
     (fn [{:keys [name key help selected? selectable? option-path select-fn content explanation-text icon classes multiselect? disable-checkbox?]}]
-      [:div.p-10.b-1.b-rad-5.m-5.b-orange.hover-shadow
+      [:div.p-10.b-1.b-rad-5.m-5.b-orange
        {:class-name (s/join " " (conj
                                  (remove nil? [(if selected? "b-w-5")
-                                               (if selectable? "pointer")
+                                               (if selectable? "pointer hover-shadow")
                                                (if (not selectable?) "opacity-5")])
                                  classes))
         :on-click select-fn}
@@ -396,7 +396,7 @@
    [:p description]])
 
 (defn remaining-indicator [remaining & [size font-size]]
-  [:span.bg-red.t-a-c.p-t-4.b-rad-50-p.inline-block.f-w-b
+  [:span.bg-red.t-a-c.p-t-4.b-rad-50-p.inline-block.f-w-b.white
    (let [size (or size 18)
          font-size (or font-size 14)]
      {:class-name (str "h-" size " w-" size " f-s-" font-size)})
@@ -798,16 +798,17 @@
         ability-keys))]]))
 
 (defn abilities-header [ability-keys]
-  [:div.flex.justify-cont-s-a
-   (doall
-    (map-indexed
-     (fn [i k]
-       ^{:key k}
-       [:div.m-t-10.t-a-c
-        (t5e/ability-icon k 24)
-        [:div.uppercase (name k)]
-        (ability-subtitle "base")])
-     ability-keys))])
+  (let [theme @(subscribe [:theme])]
+    [:div.flex.justify-cont-s-a
+     (doall
+      (map-indexed
+       (fn [i k]
+         ^{:key k}
+         [:div.m-t-10.t-a-c
+          (t5e/ability-icon k 24 theme)
+          [:div.uppercase (name k)]
+          (ability-subtitle "base")])
+       ability-keys))]))
 
 (defn abilities-component [built-template
                            asi-selections
@@ -1234,7 +1235,7 @@
         :body (hit-points-entry character selections built-template)}])))
 
 (defn info-block [text]
-  [:div.bg-light.b-rad-5.p-10.f-w-b.m-l-5.m-r-5.m-b-5
+  [:div.bg-light.b-rad-5.p-10.f-w-b.m-l-5.m-r-5.m-b-5.white
    text])
 
 (defn known-mode-info []
@@ -1633,7 +1634,8 @@
 (defn builder-tab [title key current-tab]
   [:span.builder-tab
    {:class-name (if (= current-tab key) "selected-builder-tab")
-    :on-click #(dispatch [::char5e/set-builder-tab key])} title])
+    :on-click #(dispatch [::char5e/set-builder-tab key])}
+   [:span.builder-tab-text title]])
 
 (defn mobile-columns []
   (let [current-tab (or @(subscribe [::char5e/builder-tab]) :options)]
@@ -1804,6 +1806,13 @@
         (if pre (pre))
         (dispatch event)))))
 
+(defn theme-toggle []
+  (let [theme @(subscribe [:theme])]
+    [:div.pointer
+     {:on-click #(dispatch [:toggle-theme])}
+     (comps/checkbox (= "light-theme" theme) false)
+     [:span.main-text-color "Light Theme"]]))
+
 (defn character-builder []
   (let [character @(subscribe [:character])
         _  (if print-enabled? (cljs.pprint/pprint character))
@@ -1873,10 +1882,12 @@
            [:span (if mobile?
                     "Public?"
                     "Allow others users view this character?")]]]
-         (if character-changed? [:div.red.f-w-b.m-r-10.m-l-10.flex.align-items-c
-                                 (views5e/svg-icon "thunder-skull" 24 24)
-                                 (if (not mobile?)
-                                   [:span "You have unsaved changes"])])]]]
+         [:div.flex
+          [theme-toggle]
+          (if character-changed? [:div.red.f-w-b.m-r-10.m-l-10.flex.align-items-c
+                                  (views5e/svg-icon "thunder-skull" 24 24)
+                                  (if (not mobile?)
+                                    [:span "You have unsaved changes"])])]]]]
       [:div.flex.justify-cont-c.p-b-40
        [:div.f-s-14.main-text-color.content
         [:div.flex.w-100-p
