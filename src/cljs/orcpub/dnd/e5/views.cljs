@@ -93,11 +93,12 @@
          :on-blur (fn [e] (reset! blurred? true))}]
        (if @blurred? (validation-messages messages))])))
 
-(defn svg-icon [icon-name & [size]]
-  (let [size (or size 32)]
-    [:img
-     {:class-name (str "h-" size " w-" size)
-      :src (str "/image/" icon-name ".svg")}]))
+(defn svg-icon [icon-name & [size theme-override]]
+  (let [theme (or theme-override @(subscribe [:theme]))]
+    (let [size (or size 32)]
+      [:img
+       {:class-name (str "h-" size " w-" size)
+        :src (str (if (= "light-theme" theme) "/image/black/" "/image/") icon-name ".svg")}])))
 
 (defn facebook-share-button-comp [url]
   [:div.fb-share-button
@@ -142,19 +143,24 @@
     js/window.location.hostname
     (routes/path-for routes/dnd-e5-char-page-route :id id))])
 
+(def login-style
+  {:color "#f0a100"})
+
 (defn user-header-view []
   (let [username @(subscribe [:username])]
     [:div.flex.align-items-c
-     [:div.user-icon [svg-icon "orc-head" 40 40]]
+     [:div.user-icon [svg-icon "orc-head" 40 ""]]
      (if username
-       [:span.white.f-w-b.t-a-r
-        [:span.m-r-5 username]
-        [:span.orange.underline.pointer
-         {:on-click #(dispatch [:logout])}
+       [:span.f-w-b.t-a-r
+        (if (not @(subscribe [:mobile?])) [:span.m-r-5 username])
+        [:span.underline.pointer
+         {:style login-style
+          :on-click #(dispatch [:logout])}
          "LOG OUT"]]
        [:span.pointer.flex.flex-column.align-items-end
         [:span.orange.underline.f-w-b.m-l-5
-         {:on-click #(dispatch [:route routes/login-page-route {:secure? true}])}
+         {:style login-style
+          :on-click #(dispatch [:route routes/login-page-route {:secure? true}])}
          [:span "LOGIN"]]])]))
 
 (def header-tab-style
@@ -166,7 +172,7 @@
   (let [hovered? (r/atom false)]
     (fn [title icon on-click disabled active device-type & buttons]
       (let [mobile? (= :mobile device-type)]
-        [:div.white.f-w-b.f-s-14.t-a-c.header-tab.m-5
+        [:div.f-w-b.f-s-14.t-a-c.header-tab.m-5
          {:on-click (fn [e] (if (seq buttons)
                               #(swap! hovered? not)
                               (on-click e)))
@@ -180,7 +186,7 @@
                            (if (not mobile?) " w-110"))}
          [:div.p-10
           {:class-name (if (not active) (if disabled "opacity-2" "opacity-6 hover-opacity-full"))}
-          (let [size (if mobile? 24 48)] (svg-icon icon size size))
+          (let [size (if mobile? 24 48)] (svg-icon icon size ""))
           (if (not mobile?)
             [:div.title.uppercase title])]
          (if (and (seq buttons)
@@ -210,7 +216,7 @@
    :font-size "20px"})
 
 (defn social-icon [icon link]
-  [:a.p-5.opacity-5.hover-opacity-full.white
+  [:a.p-5.opacity-5.hover-opacity-full.main-text-color
    {:style social-icon-style
     :href link :target :_blank}
    [:i.fa
@@ -231,7 +237,7 @@
   (let [device-type @(subscribe [:device-type])
         mobile? (= :mobile device-type)
         active-route @(subscribe [:route])]
-    [:div#app-header.app-header.flex.flex-column.justify-cont-s-b
+    [:div#app-header.app-header.flex.flex-column.justify-cont-s-b.white
      [:div.app-header-bar.container
       [:div.content
        [:div.flex.align-items-c.h-100-p
@@ -247,7 +253,7 @@
              {:style {:background-color "rgba(0,0,0,0.15)"}}
              (if (not mobile?)
                [:div.p-l-20.flex-grow-1
-                [:input.w-100-p.white
+                [:input.w-100-p.main-text-color
                  {:style (if search-text?
                            (merge
                             search-input-style
@@ -259,14 +265,14 @@
              [:div.opacity-1.p-r-10.pointer
               {:class-name (if mobile? "opacity-5" "opacity-8")
                :on-click #(dispatch [:open-orcacle])}
-              (svg-icon "magnifying-glass" (if mobile? 32 48) (if mobile? 32 48))]]])
+              (svg-icon "magnifying-glass" (if mobile? 32 48) "")]]])
          [user-header-view]]]]]
      [:div.container
       [:div.content
        [:div.flex.w-100-p.align-items-end
         {:class-name (if mobile? "justify-cont-end" "justify-cont-s-b")}
         (if (not mobile?)
-          [:div.white.p-10
+          [:div.main-text-color.p-10
            (social-icon "facebook" "https://www.facebook.com/orcpub")
            (social-icon "twitter" "https://twitter.com/OrcPub")
            (social-icon "reddit-alien" "https://www.reddit.com/r/orcpub/")])
@@ -297,19 +303,7 @@
           #(dispatch [:route routes/dnd-e5-monster-list-page-route {:return? true}])
           false
           (routes/dnd-e5-monster-page-routes (or (:handler active-route) active-route))
-          device-type]]]]]
-     #_[:div.container.header-links
-        [:div.content
-         [:div.hidden-xs.hidden-sm
-          [:div.m-l-10.white
-           [:span "Questions? Comments? Issues? Feature Requests? We'd love to hear them, "]
-           [:a {:href "https://muut.com/orcpub" :target :_blank} "report them here."]]
-          [:div
-           [:div.flex.align-items-c.f-w-b.f-s-18.m-t-10.m-l-10.white
-            [:span.hidden-xs "Please support continuing development on "]
-            [:a.m-l-5 patreon-link-props [:span "Patreon"]]
-            [:a.m-l-5 patreon-link-props
-             [:img.h-32.w-32 {:src "https://www.patreon.com/images/patreon_navigation_logo_mini_orange.png"}]]]]]]]]))
+          device-type]]]]]]))
 
 (defn legal-footer []
   [:div.m-l-15.m-b-10.m-t-10 {:style {:text-align :left}}
@@ -380,7 +374,7 @@
 (defn message [message-type message-text close-event]
   [:div.pointer.f-w-b ;;.h-0.opacity-0.fade-out
    {:on-click #(dispatch close-event)}
-   [:div.white
+   [:div.main-text-color
     {:style message-style
      :class-name (case message-type
                    :error "bg-red"
@@ -607,7 +601,7 @@
                      :transition "width 1s"
                      :width (str (* 100 (float (/ password-strength 5))) "%")}
              :class-name color}]
-           [:div.white.p-l-10.b-rad-5
+           [:div.main-text-color.p-l-10.b-rad-5
             {:style {:position :absolute
                      :padding-top "6px"}}
              [:span "Password Strength:"]
@@ -775,8 +769,8 @@
                         :character (char/to-strict @(subscribe [:character]))})}])])))
 
 (defn dice-roll-result [{:keys [total rolls mod raw-mod plus-minus]}]
-  [:div.white.f-s-32.flex.align-items-c
-   (svg-icon "rolling-dices" 36 36)
+  [:div.main-text-color.f-s-32.flex.align-items-c
+   (svg-icon "rolling-dices" 36 "")
    [:div.m-l-10
     [:span.f-w-b total]
     [:span.m-l-10.m-r-10 "="]
@@ -820,9 +814,9 @@
    ")"))
 
 (defn magic-item-result [{:keys [name item-type item-subtype rarity attunement description summary] :as spell}]
-  [:div.white
+  [:div.main-text-color
    [:div.flex
-    (svg-icon "orb-wand" 36 36)
+    (svg-icon "orb-wand" 36 "")
     [:div.m-l-10
      [:span.f-s-24.f-w-b name]
      [:div.f-s-18.i.f-w-b (str (s/capitalize (common/kw-to-name item-type))
@@ -837,12 +831,12 @@
 
 (defn name-result [{:keys [sex race subrace] :as result}]
   [:div
-   [:span.f-s-24.f-w-b.white (:name result)]
+   [:span.f-s-24.f-w-b.main-text-color (:name result)]
    [:div
-    [:span.f-s-14.white.opacity-5.i (s/join " " (map (fn [k] (if k (name k))) [sex race subrace]))]]])
+    [:span.f-s-14.main-text-color.opacity-5.i (s/join " " (map (fn [k] (if k (name k))) [sex race subrace]))]]])
 
 (defn tavern-name-result [name]
-  [:span.f-s-24.f-w-b.white name])
+  [:span.f-s-24.f-w-b.main-text-color name])
 
 (defn spell-summary [name level school include-name? & [subheader-size]]
   [:div.p-b-20
@@ -878,13 +872,13 @@
        [:span (str "(" (disp/source-description source page) " for more details)")]])]])
 
 (defn spell-result [spell]
-  [:div.white
+  [:div.main-text-color
    [:div.flex
-    (svg-icon "spell-book" 36 36)
+    (svg-icon "spell-book" 36 "")
     [spell-component spell true]]])
 
 (defn spell-results [results]
-  [:div.white
+  [:div.main-text-color
    [:div.flex
     (svg-icon "spell-book" 36 36)
     [:div.m-l-10
@@ -915,9 +909,9 @@
    [:div.f-s-14.i.opacity-5 (monster-subheader size type subtypes alignment)]])
 
 (defn monster-results [results]
-  [:div.white
+  [:div.main-text-color
    [:div.flex
-    (svg-icon "hydra" 36 36)
+    (svg-icon "hydra" 36 "")
     [:div.m-l-10
      (doall
       (map
@@ -1013,9 +1007,9 @@
            (:actions legendary-actions)))])])])
 
 (defn monster-result [monster]
-  [:div.white
+  [:div.main-text-color
    [:div.flex
-    (svg-icon "hydra" 36 36)
+    (svg-icon "hydra" 36 "")
     [monster-component monster]]])
 
 (defn search-results []
@@ -1063,9 +1057,11 @@
 
 
 (defn content-page [title button-cfgs content]
-  (let [orcacle-open? @(subscribe [:orcacle-open?])]
+  (let [orcacle-open? @(subscribe [:orcacle-open?])
+        theme @(subscribe [:theme])]
     [:div.app
-     {:on-scroll (fn [e]
+     {:class-name theme
+      :on-scroll (fn [e]
                    (if (not orcacle-open?)
                      (let [app-header (js/document.getElementById "app-header")
                            header-height (.-offsetHeight app-header)
@@ -1096,8 +1092,8 @@
            [:div.flex.justify-cont-s-a.m-t-10
             [:div.flex.align-items-c.pointer
              {:on-click #(dispatch [:close-orcacle])}
-             [:span.white.f-s-32 "Orcacle"]
-             [:div.m-l-10 (svg-icon "hood" 48 48)]]]]
+             [:span.main-text-color.f-s-32 "Orcacle"]
+             [:div.m-l-10 (svg-icon "hood" 48 "")]]]]
           [:div.p-10
            [:div.posn-rel
             [:input.input
@@ -1106,23 +1102,23 @@
               :on-key-press #(if (= "Enter" (.-key %)) (dispatch [:set-search-text search-text]))
               :style (merge search-input-style
                             {:background-color "rgba(255,255,255,0.1)"})}]
-            [:i.fa.fa-times.white.posn-abs.f-s-24.pointer
+            [:i.fa.fa-times.main-text-color.posn-abs.f-s-24.pointer
              {:style close-icon-style
               :on-click #(dispatch [:set-search-text ""])}]]
-           [:span.white.f-s-14.i.opacity-5 "\"8d10 + 2\", \"magic missile\", \"kobold\", \"female calishite name\", \"tavern name\", etc."]]
+           [:span.main-text-color.f-s-14.i.opacity-5 "\"8d10 + 2\", \"magic missile\", \"kobold\", \"female calishite name\", \"tavern name\", etc."]]
           [:div.flex-grow-1
            [search-results]]]))
      (let [hdr [header title button-cfgs]]
        [:div
         [:div#sticky-header.sticky-header.w-100-p.posn-fixed
-         [:div.flex.justify-cont-c.bg-light
-          [:div#header-container.f-s-14.white.content
+         [:div.flex.justify-cont-c
+          [:div#header-container.f-s-14.main-text-color.content
            hdr]]]
-        [:div.flex.justify-cont-c.white
+        [:div.flex.justify-cont-c.main-text-color
          [:div.content hdr]]
         [:div#app-main.container
          [:div.content.w-100-p content]]
-        [:div.white.flex.justify-cont-c
+        [:div.main-text-color.flex.justify-cont-c
          [:div.content.f-w-n.f-s-12
           [:div.flex.justify-cont-s-b.align-items-c.w-100-p.flex-wrap
            [:div.p-10
@@ -1149,7 +1145,7 @@
         following? (get following-users owner)
         username @(subscribe [:username])]
     [:div.flex.m-l-10.align-items-c
-     (svg-icon "orc-head" 32 32)
+     (svg-icon "orc-head" 32)
      [:div.f-s-18.m-l-5
       {:class-name text-classes}
       owner]
@@ -1672,7 +1668,7 @@
 
 (defn section-header-2 [title icon]
   [:div
-   (if icon (svg-icon icon 24 24))
+   (if icon (svg-icon icon 24))
    [:div.f-s-18.f-w-b.m-b-5 title]])
 
 (defn armor-class-section-2 [id]
@@ -1754,14 +1750,15 @@
             [:tr.t-a-l
              {:class-name (if (skill-profs skill-key) "f-w-b" "opacity-7")}
              [:td [:div
-                   (svg-icon icon 18 18)
+                   (svg-icon icon 18)
                    [:span.m-l-5 skill-name]]]
              [:td [:div.p-5 (common/bonus-str (skill-bonuses skill-key))]]])
           skills/skills))]]]]))
 
 (defn ability-scores-section-2 [id]
   (let [abilities @(subscribe [::char/abilities id])
-        ability-bonuses @(subscribe [::char/ability-bonuses id])]
+        ability-bonuses @(subscribe [::char/ability-bonuses id])
+        theme @(subscribe [:theme])]
     [:div
      [:div.f-s-18.f-w-b "Ability Scores"]
      [:div.flex.justify-cont-s-a.m-t-10
@@ -1770,7 +1767,7 @@
         (fn [k]
           ^{:key k}
           [:div
-           (t/ability-icon k 24)
+           (t/ability-icon k 24 theme)
            [:div
             [:span.f-s-20.uppercase (name k)]]
            [:div.f-s-24.f-w-b (abilities k)]
@@ -1780,7 +1777,8 @@
 
 (defn saving-throws-section-2 [id]
   (let [save-bonuses @(subscribe [::char/save-bonuses id])
-        saving-throws @(subscribe [::char/saving-throws id])]
+        saving-throws @(subscribe [::char/saving-throws id])
+        theme @(subscribe [:theme])]
     [:div.p-10.flex.flex-column.align-items-c
      (section-header-2 "Saving Throws" "dodging")
      [:table
@@ -1792,7 +1790,7 @@
            [:tr.t-a-l
             {:class-name (if (saving-throws k) "f-w-b" "opacity-7")}
             [:td [:div
-                  (t/ability-icon k 18)
+                  (t/ability-icon k 18 theme)
                   [:span.m-l-5 (s/upper-case (name k))]]]
             [:td [:div.p-5 (common/bonus-str (save-bonuses k))]]])
          char/ability-keys))]]]))
@@ -2012,7 +2010,7 @@
             shield-details (armor/shields all-armor-details)]
         [:div
          [:div.flex.align-items-c
-          (svg-icon "breastplate" 32 32)
+          (svg-icon "breastplate" 32)
           [:span.m-l-5.f-w-b.f-s-18 "Armor"]]
          [:div
           [:table.w-100-p.t-a-l.striped
@@ -2068,7 +2066,7 @@
             proficiency-bonus @(subscribe [::char/proficiency-bonus id])]
         [:div
          [:div.flex.align-items-c
-          (svg-icon "crossed-swords" 32 32)
+          (svg-icon "crossed-swords" 32)
           [:span.m-l-5.f-w-b.f-s-18 "Weapons"]]
          [:div
           [:table.w-100-p.t-a-l.striped
@@ -2122,7 +2120,7 @@
             magic-armor-cfgs @(subscribe [::char/magic-items id])]
         [:div
          [:div.flex.align-items-c
-          (svg-icon "orb-wand" 32 32)
+          (svg-icon "orb-wand" 32)
           [:span.m-l-5.f-w-b.f-s-18 "Other Magic Items"]]
          [:div
           [:table.w-100-p.t-a-l.striped
@@ -2175,7 +2173,7 @@
                             (zipmap (range) @(subscribe [::char/custom-equipment id])))]
         [:div
          [:div.flex.align-items-c
-          (svg-icon "backpack" 32 32)
+          (svg-icon "backpack" 32)
           [:span.m-l-5.f-w-b.f-s-18 "Other Equipment"]]
          [:div
           [:table.w-100-p.t-a-l.striped
@@ -2219,7 +2217,7 @@
             mobile? (= :mobile device-type)]
         [:div
          [:div.flex.align-items-c
-          (svg-icon "juggler" 32 32)
+          (svg-icon "juggler" 32)
           [:span.m-l-5.f-w-b.f-s-18 "Skills"]]
          [:div
           [:table.w-100-p.t-a-l.striped
@@ -2256,7 +2254,7 @@
         (if (seq tool-profs)
           [:div
            [:div.flex.align-items-c
-            (svg-icon "stone-crafting" 32 32)
+            (svg-icon "stone-crafting" 32)
             [:span.m-l-5.f-w-b.f-s-18 "Tools"]]
            [:div
             [:table.w-100-p.t-a-l.striped
@@ -2432,7 +2430,7 @@
     :on-click on-select}
    [:div.hover-opacity-full
     {:class-name (if (not selected?) "opacity-5")}
-    [:div (svg-icon icon 24 24)]
+    [:div (svg-icon icon 24)]
     (if (= device-type :desktop)
       [:div.uppercase.f-s-10
        title])]])
@@ -2551,7 +2549,7 @@
           :on-click #(dispatch [:edit-character character])})
        (if (and username owner (not= owner username))
          [add-to-party-component (js/parseInt id)])])
-     [:div.p-10.white
+     [:div.p-10.main-text-color
       [character-display id true (if (= :mobile device-type) 1 2)]]]))
 
 (defn monster-page [{:keys [key] :as arg}]
@@ -2559,7 +2557,7 @@
     [content-page
      "Monster Page"
      []
-     [:div.p-10.white
+     [:div.p-10.main-text-color
       [monster-component monster]]]))
 
 (defn spell-page [{:keys [key] :as arg}]
@@ -2569,7 +2567,7 @@
      (remove
       nil?
       [])
-     [:div.p-10.white
+     [:div.p-10.main-text-color
       [spell-component spell true]]]))
 
 (defn character-list []
@@ -2601,7 +2599,7 @@
            (fn [[owner owner-characters]]
              ^{:key owner}
              [:div.m-b-40
-              [:div.m-b-10.white.f-w-b.f-s-16
+              [:div.m-b-10.main-text-color.f-w-b.f-s-16
                [other-user-component owner "f-s-24 m-l-10 m-r-20 i" true]]
               [:div
                {:style list-style}
@@ -2612,7 +2610,7 @@
                          char-page-path (routes/path-for routes/dnd-e5-char-page-route :id id)
                          char-page-route (routes/match-route char-page-path)]
                      ^{:key id}
-                     [:div.white
+                     [:div.main-text-color
                       {:style row-style}
                       [:div
                        [:div.flex.justify-cont-s-b.align-items-c.pointer
@@ -2677,7 +2675,7 @@
                      character-ids (into #{} (map :db/id) characters)]
                  ^{:key id}
                  [:div.m-b-40
-                  [:div.m-b-10.white.f-w-b.f-s-16
+                  [:div.m-b-10.main-text-color.f-w-b.f-s-16
                    [:div.flex.align-items-c
                     [:i.fa.fa-users.m-l-10]
                     (if editing?
@@ -2727,7 +2725,7 @@
                              char-page-path (routes/path-for routes/dnd-e5-char-page-route :id character-id)
                              char-page-route (routes/match-route char-page-path)]
                          ^{:key character-id}
-                         [:div.white
+                         [:div.main-text-color
                           {:style row-style}
                           [:div.pointer
                            [:div.flex.justify-cont-s-b.align-items-c
@@ -2770,7 +2768,7 @@
              monster-page-path (routes/path-for routes/dnd-e5-monster-page-route :key key)
              monster-page-route (routes/match-route monster-page-path)]
          ^{:key name}
-         [:div.white.p-t-20.p-b-20
+         [:div.main-text-color.p-t-20.p-b-20
           {:style row-style}
           [:div.pointer
            [:div.flex.justify-cont-s-b.align-items-c
@@ -2820,7 +2818,7 @@
               {:class-name (if @filters-expanded? "fa-caret-up" "fa-caret-down")}]]]
            (if @filters-expanded?
              [:div.flex.flex-wrap
-              [:div.white.p-20
+              [:div.main-text-color.p-20
                [:div.f-s-16.f-w-b "Size"]
                [:div
                 (doall
@@ -2832,7 +2830,7 @@
                      (comps/checkbox (not @(subscribe [::char/monster-filter-hidden? :size size])) false)
                      (common/kw-to-name size)])
                   @(subscribe [::char/monster-sizes])))]]
-              [:div.white.p-20
+              [:div.main-text-color.p-20
                [:div.f-s-16.f-w-b "Type"]
                [:div
                 (doall
@@ -2845,7 +2843,7 @@
                      (common/kw-to-name type)])
                   @(subscribe [::char/monster-types])))]]
               (let [subtypes @(subscribe [::char/monster-subtypes])]
-                [:div.white.p-20
+                [:div.main-text-color.p-20
                  [:div.f-s-16.f-w-b "Subtype"]
                  [:div
                   (doall
@@ -2869,7 +2867,7 @@
              spell-page-path (routes/path-for routes/dnd-e5-spell-page-route :key key)
              spell-page-route (routes/match-route spell-page-path)]
          ^{:key name}
-         [:div.white
+         [:div.main-text-color
           {:style row-style}
           [:div.pointer
            [:div.flex.justify-cont-s-b.align-items-c
