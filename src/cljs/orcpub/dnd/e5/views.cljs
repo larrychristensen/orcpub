@@ -227,7 +227,8 @@
    :margin-top "0px"
    :border :none
    :font-size "28px"
-   :background-color :transparent})
+   :background-color :transparent
+   :color :white})
 
 (def search-icon-style
   {:top 6
@@ -300,6 +301,13 @@
          [header-tab
           "monsters"
           "hydra"
+          #(dispatch [:route routes/dnd-e5-monster-list-page-route {:return? true}])
+          false
+          (routes/dnd-e5-monster-page-routes (or (:handler active-route) active-route))
+          device-type]
+         #_[header-tab
+          "items"
+          "all-for-one"
           #(dispatch [:route routes/dnd-e5-monster-list-page-route {:return? true}])
           false
           (routes/dnd-e5-monster-page-routes (or (:handler active-route) active-route))
@@ -814,7 +822,7 @@
    ")"))
 
 (defn magic-item-result [{:keys [name item-type item-subtype rarity attunement description summary] :as spell}]
-  [:div.main-text-color
+  [:div.white
    [:div.flex
     (svg-icon "orb-wand" 36 "")
     [:div.m-l-10
@@ -836,7 +844,7 @@
     [:span.f-s-14.main-text-color.opacity-5.i (s/join " " (map (fn [k] (if k (name k))) [sex race subrace]))]]])
 
 (defn tavern-name-result [name]
-  [:span.f-s-24.f-w-b.main-text-color name])
+  [:span.f-s-24.f-w-b.white name])
 
 (defn spell-summary [name level school include-name? & [subheader-size]]
   [:div.p-b-20
@@ -872,13 +880,13 @@
        [:span (str "(" (disp/source-description source page) " for more details)")]])]])
 
 (defn spell-result [spell]
-  [:div.main-text-color
+  [:div.white
    [:div.flex
     (svg-icon "spell-book" 36 "")
     [spell-component spell true]]])
 
 (defn spell-results [results]
-  [:div.main-text-color
+  [:div.white
    [:div.flex
     (svg-icon "spell-book" 36 36)
     [:div.m-l-10
@@ -909,7 +917,7 @@
    [:div.f-s-14.i.opacity-5 (monster-subheader size type subtypes alignment)]])
 
 (defn monster-results [results]
-  [:div.main-text-color
+  [:div.white
    [:div.flex
     (svg-icon "hydra" 36 "")
     [:div.m-l-10
@@ -1081,7 +1089,7 @@
      [app-header]
      (let [search-text @(subscribe [:search-text])]
        (if orcacle-open?
-         [:div.flex.flex-column.h-100-p
+         [:div.flex.flex-column.h-100-p.white
           {:style oracle-frame-style}
           [:i.fa.fa-times-circle.f-s-24.orange.pointer
            {:on-click #(dispatch [:close-orcacle])
@@ -1092,7 +1100,7 @@
            [:div.flex.justify-cont-s-a.m-t-10
             [:div.flex.align-items-c.pointer
              {:on-click #(dispatch [:close-orcacle])}
-             [:span.main-text-color.f-s-32 "Orcacle"]
+             [:span.f-s-32 "Orcacle"]
              [:div.m-l-10 (svg-icon "hood" 48 "")]]]]
           [:div.p-10
            [:div.posn-rel
@@ -1102,10 +1110,10 @@
               :on-key-press #(if (= "Enter" (.-key %)) (dispatch [:set-search-text search-text]))
               :style (merge search-input-style
                             {:background-color "rgba(255,255,255,0.1)"})}]
-            [:i.fa.fa-times.main-text-color.posn-abs.f-s-24.pointer
+            [:i.fa.fa-times.posn-abs.f-s-24.pointer
              {:style close-icon-style
               :on-click #(dispatch [:set-search-text ""])}]]
-           [:span.main-text-color.f-s-14.i.opacity-5 "\"8d10 + 2\", \"magic missile\", \"kobold\", \"female calishite name\", \"tavern name\", etc."]]
+           [:span.f-s-14.i.opacity-5 "\"8d10 + 2\", \"magic missile\", \"kobold\", \"female calishite name\", \"tavern name\", etc."]]
           [:div.flex-grow-1
            [search-results]]]))
      (let [hdr [header title button-cfgs]]
@@ -1132,6 +1140,9 @@
 
 (def row-style
   {:border-bottom "1px solid rgba(255,255,255,0.5)"})
+
+(def light-row-style
+  {:border-bottom "1px solid rgba(0,0,0,0.5)"})
 
 (def list-style
   {:border-top "2px solid rgba(255,255,255,0.5)"})
@@ -2110,7 +2121,6 @@
                                                                  (weapon-attack-modifier weapon false)))]]))
               all-weapons))]]]]))))
 
-
 (defn magic-items-section-2 []
   (let [expanded-details (r/atom {})]
     (fn [id]
@@ -2138,21 +2148,7 @@
                   ^{:key item-kw}
                   [:tr.pointer
                    {:on-click #(swap! expanded-details (fn [d] (update d item-kw not)))}
-                   [:td.p-10.f-w-b (:name item)]
-                   [:td.p-10.w-100-p
-                    [:div
-                     [:div
-                      (str (s/capitalize (common/kw-to-name item-type))
-                           ", "
-                           (common/kw-to-name rarity))]
-                     (if expanded?
-                       [:div
-                        (if (seq attunement)
-                          [:div.m-t-10.i
-                           (requires-attunement attunement)])
-                        [:div.m-t-10 (paragraphs
-                                      (or description summary)
-                                      true)]])]]
+                   [item-summary]
                    [:td.p-r-5
                     [:div.orange
                      (if (not mobile?)
@@ -2601,8 +2597,7 @@
              [:div.m-b-40
               [:div.m-b-10.main-text-color.f-w-b.f-s-16
                [other-user-component owner "f-s-24 m-l-10 m-r-20 i" true]]
-              [:div
-               {:style list-style}
+              [:div.item-list
                (doall
                 (map
                  (fn [{:keys [:db/id ::se/owner] :as summary}]
@@ -2610,8 +2605,7 @@
                          char-page-path (routes/path-for routes/dnd-e5-char-page-route :id id)
                          char-page-route (routes/match-route char-page-path)]
                      ^{:key id}
-                     [:div.main-text-color
-                      {:style row-style}
+                     [:div.main-text-color.item-list-item
                       [:div
                        [:div.flex.justify-cont-s-b.align-items-c.pointer
                         {:on-click #(dispatch [:toggle-character-expanded id])}
@@ -2715,8 +2709,7 @@
                        [:span.m-l-5 name]
                        [:i.fa.fa-pencil.m-l-10.opacity-5.hover-opacity-full.pointer
                         {:on-click #(swap! editing-parties assoc id name)}]])]]
-                  [:div
-                   {:style list-style}
+                  [:div.item-list
                    (doall
                     (map
                      (fn [{:keys [::se/owner] :as summary}]
@@ -2725,8 +2718,7 @@
                              char-page-path (routes/path-for routes/dnd-e5-char-page-route :id character-id)
                              char-page-route (routes/match-route char-page-path)]
                          ^{:key character-id}
-                         [:div.main-text-color
-                          {:style row-style}
+                         [:div.main-text-color.item-list-item
                           [:div.pointer
                            [:div.flex.justify-cont-s-b.align-items-c
                             {:on-click #(swap! expanded-characters update-in [id character-id] not)}
@@ -2759,8 +2751,7 @@
              parties))]]]))))
 
 (defn monster-list-items [expanded-monsters device-type]
-  [:div
-   {:style list-style}
+  [:div.item-list
    (doall
     (map
      (fn [{:keys [name size type subtypes alignment key] :as monster}]
@@ -2768,8 +2759,7 @@
              monster-page-path (routes/path-for routes/dnd-e5-monster-page-route :key key)
              monster-page-route (routes/match-route monster-page-path)]
          ^{:key name}
-         [:div.main-text-color.p-t-20.p-b-20
-          {:style row-style}
+         [:div.main-text-color.p-t-20.p-b-20.item-list-item
           [:div.pointer
            [:div.flex.justify-cont-s-b.align-items-c
             {:on-click #(dispatch [:toggle-monster-expanded name])}
@@ -2858,8 +2848,7 @@
           [monster-list-items expanded-monsters device-type]]]))))
 
 (defn spell-list-items [expanded-spells device-type]
-  [:div
-   {:style list-style}
+  [:div.item-list
    (doall
     (map
      (fn [{:keys [name level school key] :as spell}]
@@ -2867,8 +2856,7 @@
              spell-page-path (routes/path-for routes/dnd-e5-spell-page-route :key key)
              spell-page-route (routes/match-route spell-page-path)]
          ^{:key name}
-         [:div.main-text-color
-          {:style row-style}
+         [:div.main-text-color.item-list-item
           [:div.pointer
            [:div.flex.justify-cont-s-b.align-items-c
             {:on-click #(dispatch [:toggle-spell-expanded name])}
@@ -2904,4 +2892,58 @@
          :value @(subscribe [::char/spell-text-filter])
          :on-change #(dispatch [::char/filter-spells (event-value %)])}]]
       [spell-list-items expanded-spells device-type]]]))
+
+(defn item-summary [{:keys [name type subtype rarity attunement description summary] :as item}]
+  [:div.p-b-20
+   [:span.f-s-24.f-w-b name]
+   [:div.i.f-w-b.opacity-5.f-s-18
+    (str (common/safe-name type)
+         " "
+         (common/safe-name subtype))]])
+
+(defn item-list-items [expanded-items device-type]
+  [:div.item-list
+   (doall
+    (map
+     (fn [{:keys [name type subtype rarity attunement description summary] :as item}]
+       (let [expanded? (get expanded-items name)
+             item-page-path (routes/path-for routes/dnd-e5-item-page-route :key key)
+             item-page-route (routes/match-route item-page-path)]
+         ^{:key name}
+         [:div.main-text-color.item-list-item
+          [:div.pointer
+           [:div.flex.justify-cont-s-b.align-items-c
+            {:on-click #(dispatch [:toggle-item-expanded name])}
+            [:div.m-l-10
+             [:div.f-s-24.f-w-600.p-t-20
+              [item-summary name level school true 12]]]
+            [:div.orange.pointer.m-r-10
+             (if (not= device-type :mobile) [:span.underline (if expanded?
+                                                               "collapse"
+                                                               "open")])
+             [:i.fa.m-l-5
+              {:class-name (if expanded? "fa-caret-up" "fa-caret-down")}]]]
+           (if expanded?
+             [:div.p-10
+              {:style character-display-style}
+              [:div.flex.justify-cont-end.uppercase.align-items-c
+               [:button.form-button.m-l-5
+                {:on-click #(dispatch [:route item-page-route {:return? true}])}
+                "view"]]
+              [item-component item true]])]]))
+     @(subscribe [::char/filtered-items])))])
+
+(defn item-list []
+  (let [expanded-spells @(subscribe [:expanded-items])
+        device-type @(subscribe [:device-type])]
+    [content-page
+     "Items"
+     []
+     [:div.p-l-5.p-r-5.p-b-10
+      [:div.p-b-10.p-l-10.p-r-10
+       [:input.input.f-s-24.p-l-20
+        {:style {:height "60px"}
+         :value @(subscribe [::char/item-text-filter])
+         :on-change #(dispatch [::char/filter-items (event-value %)])}]]
+      [item-list-items expanded-items device-type]]]))
 
