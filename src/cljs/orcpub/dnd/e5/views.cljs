@@ -305,12 +305,12 @@
           false
           (routes/dnd-e5-monster-page-routes (or (:handler active-route) active-route))
           device-type]
-         #_[header-tab
+         [header-tab
           "items"
           "all-for-one"
-          #(dispatch [:route routes/dnd-e5-monster-list-page-route {:return? true}])
+          #(dispatch [:route routes/dnd-e5-item-list-page-route {:return? true}])
           false
-          (routes/dnd-e5-monster-page-routes (or (:handler active-route) active-route))
+          (routes/dnd-e5-item-page-routes (or (:handler active-route) active-route))
           device-type]]]]]]))
 
 (defn legal-footer []
@@ -821,19 +821,24 @@
           (common/list-print (map clojure.core/name attunement) "or")))
    ")"))
 
+(defn item-summary [name item-type item-subtype rarity attunement]
+  [:div.p-b-20
+   [:span.f-s-24.f-w-b name]
+   [:div.f-s-16.i.f-w-b.opacity-5
+    (str (s/capitalize (common/kw-to-name item-type))
+         ", "
+         (if (string? rarity)
+           rarity
+           (common/kw-to-name rarity))
+         (if attunement
+           (requires-attunement attunement)))]])
+
 (defn magic-item-result [{:keys [name item-type item-subtype rarity attunement description summary] :as spell}]
   [:div.white
    [:div.flex
     (svg-icon "orb-wand" 36 "")
     [:div.m-l-10
-     [:span.f-s-24.f-w-b name]
-     [:div.f-s-18.i.f-w-b (str (s/capitalize (common/kw-to-name item-type))
-                               ", "
-                               (if (string? rarity)
-                                 rarity
-                                 (common/kw-to-name rarity))
-                               (if attunement
-                                 (requires-attunement attunement)))]
+     [item-summary name item-type item-subtype rarity attunement]
      (if (or summary description)
        (paragraphs (or summary description)))]]])
 
@@ -2893,19 +2898,11 @@
          :on-change #(dispatch [::char/filter-spells (event-value %)])}]]
       [spell-list-items expanded-spells device-type]]]))
 
-(defn item-summary [{:keys [name type subtype rarity attunement description summary] :as item}]
-  [:div.p-b-20
-   [:span.f-s-24.f-w-b name]
-   [:div.i.f-w-b.opacity-5.f-s-18
-    (str (common/safe-name type)
-         " "
-         (common/safe-name subtype))]])
-
 (defn item-list-items [expanded-items device-type]
   [:div.item-list
    (doall
     (map
-     (fn [{:keys [name type subtype rarity attunement description summary] :as item}]
+     (fn [{:keys [key name item-type item-subtype rarity attunement description summary] :as item}]
        (let [expanded? (get expanded-items name)
              item-page-path (routes/path-for routes/dnd-e5-item-page-route :key key)
              item-page-route (routes/match-route item-page-path)]
@@ -2916,7 +2913,7 @@
             {:on-click #(dispatch [:toggle-item-expanded name])}
             [:div.m-l-10
              [:div.f-s-24.f-w-600.p-t-20
-              [item-summary name level school true 12]]]
+              [item-summary name item-type item-subtype rarity attunement]]]
             [:div.orange.pointer.m-r-10
              (if (not= device-type :mobile) [:span.underline (if expanded?
                                                                "collapse"
