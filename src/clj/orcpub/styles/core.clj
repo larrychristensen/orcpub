@@ -848,7 +848,10 @@
 
 (def app
   (concat
-   [[:.app
+   [[:#app
+     {:background-image "linear-gradient(182deg, #313A4D, #080A0D)"}]
+
+    [:.app
      {:background-image "linear-gradient(182deg, #313A4D, #080A0D)"
       :font-family font-family
       :height "100%"
@@ -919,6 +922,12 @@
       {:height "24px"
        :width "24px"}]
      {:width "30px"}]
+
+    [:.item-list
+     {:border-top "1px solid rgba(255,255,255,0.5)"}]
+
+    [:.item-list-item
+     {:border-bottom "1px solid rgba(255,255,255,0.5)"}]
 
     #_[:.header-tab:hover
      [(garden.selectors/& (garden.selectors/not :.disabled))
@@ -1165,6 +1174,12 @@
 
     [:.app.light-theme
      {:background-image "linear-gradient(182deg, #FFFFFF, #DDDDDD)"}
+
+     [:.item-list
+      {:border-top "1px solid rgba(0,0,0,0.5)"}]
+
+     [:.item-list-item
+      {:border-bottom "1px solid rgba(0,0,0,0.5)"}]
 
      [:.main-text-color
       {:color :black}]
