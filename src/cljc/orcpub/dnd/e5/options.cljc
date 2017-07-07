@@ -1547,15 +1547,9 @@
                       :max nil
                       :options (map :key skills/skills)}))
 
-(def subrace-ability-increase-selection
+(def homebrew-ability-increase-selection
   (ability-increase-selection-2
-   {:min 0
-    :modifier-fn #(modifiers/subrace-ability % 1)}))
-
-(def race-ability-increase-selection
-  (ability-increase-selection-2
-   {:min 0
-    :modifier-fn #(modifiers/race-ability % 1)}))
+   {:min 0}))
 
 (def homebrew-feat-selection
   (feat-selection-2
@@ -1599,7 +1593,7 @@
     :order 1000
     :selections [homebrew-skill-prof-selection
                  homebrew-tool-prof-selection
-                 subrace-ability-increase-selection
+                 homebrew-ability-increase-selection
                  homebrew-feat-selection]}))
 
 (defn custom-race-builder []
@@ -1640,7 +1634,7 @@
     :selections [(subrace-selection false nil nil [:race :custom])
                  homebrew-skill-prof-selection
                  homebrew-tool-prof-selection
-                 race-ability-increase-selection
+                 homebrew-ability-increase-selection
                  homebrew-feat-selection]}))
 
 (defn custom-background-builder []
