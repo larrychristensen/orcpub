@@ -266,14 +266,29 @@
    (:expanded-monsters db)))
 
 (reg-sub
+ :monster-expanded?
+ (fn [db [_ name]]
+   (get-in db [:expanded-monsters name])))
+
+(reg-sub
  :expanded-spells
  (fn [db _]
    (:expanded-spells db)))
 
 (reg-sub
+ :spell-expanded?
+ (fn [db [_ name]]
+   (get-in db [:expanded-spells name])))
+
+(reg-sub
  :expanded-items
  (fn [db _]
    (:expanded-items db)))
+
+(reg-sub
+ :item-expanded?
+ (fn [db [_ name]]
+   (get-in db [:expanded-items name])))
 
 (defn get-fb-login-status [callback]
   (if (and js/FB
