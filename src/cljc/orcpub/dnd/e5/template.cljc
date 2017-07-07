@@ -4687,7 +4687,8 @@ long rest."})
                 (mod/set-mod ?option-sources :homebrew)]
     :selections [opt5e/homebrew-tool-prof-selection
                  opt5e/homebrew-skill-prof-selection
-                 opt5e/homebrew-ability-increase-selection
+                 (opt5e/ability-increase-selection-2
+                  {:min 0})
                  opt5e/homebrew-feat-selection
                  opt5e/homebrew-spell-selection]
     :help "This removes all restrictions and allows you to build your character however you want. Homebrew is not legal in the Adventurer's League."}))
