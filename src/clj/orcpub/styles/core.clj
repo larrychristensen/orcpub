@@ -893,7 +893,8 @@
      {:top 0
       :box-shadow "0 2px 6px 0 rgba(0, 0, 0, 0.5)"
       :z-index 100
-      :display :none}]
+      :display :none
+      :background-color "#313A4D"}]
 
     [:.container
      container-style]
