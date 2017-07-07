@@ -1349,6 +1349,11 @@
    :name
    (sequence (filter-by-name-xform filter-text) @(subscribe [::char5e/sorted-spells]))))
 
+(defn filter-items [filter-text]
+  (sort-by
+   :name
+   (sequence (filter-by-name-xform filter-text) @(subscribe [::char5e/sorted-items]))))
+
 (defn search-results [text]
   (let [search-text (s/lower-case text)
         dice-result (dice/dice-roll-text search-text)
@@ -1433,6 +1438,15 @@
           ::char5e/filtered-spells (if (>= (count filter-text) 3)
                                      (filter-spells filter-text)
                                      @(subscribe [::char5e/sorted-spells])))))
+
+(reg-event-db
+ ::char5e/filter-items
+ (fn [db [_ filter-text]]
+   (assoc db
+          ::char5e/item-text-filter filter-text
+          ::char5e/filtered-items (if (>= (count filter-text) 3)
+                                     (filter-items filter-text)
+                                     @(subscribe [::char5e/sorted-items])))))
 
 (reg-event-db
  ::char5e/toggle-selected

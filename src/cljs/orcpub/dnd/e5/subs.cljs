@@ -12,6 +12,7 @@
             [orcpub.dnd.e5.party :as party5e]
             [orcpub.dnd.e5.monsters :as monsters5e]
             [orcpub.dnd.e5.spells :as spells5e]
+            [orcpub.dnd.e5.magic-items :as mi5e]
             [orcpub.route-map :as routes]
             [clojure.string :as s]
             [reagent.ratom :as ra]
@@ -268,6 +269,11 @@
  :expanded-spells
  (fn [db _]
    (:expanded-spells db)))
+
+(reg-sub
+ :expanded-items
+ (fn [db _]
+   (:expanded-items db)))
 
 (defn get-fb-login-status [callback]
   (if (and js/FB
@@ -666,12 +672,25 @@
    (::char5e/spell-text-filter db)))
 
 (reg-sub
+ ::char5e/item-text-filter
+ (fn [db _]
+   (::char5e/item-text-filter db)))
+
+(reg-sub
  ::char5e/monster-text-filter
  (fn [db _]
    (::char5e/monster-text-filter db)))
 
 (def sorted-spells
   (delay (sort-by :name spells5e/spells)))
+
+(def sorted-items
+  (delay (sort-by :name mi5e/magic-items)))
+
+(reg-sub
+ ::char5e/sorted-items
+ (fn [db _]
+   @sorted-items))
 
 (reg-sub
  ::char5e/sorted-spells
@@ -685,6 +704,14 @@
  (fn [[db sorted-spells] _]
    (or (::char5e/filtered-spells db)
        sorted-spells)))
+
+(reg-sub
+ ::char5e/filtered-items
+ :<- [:db]
+ :<- [::char5e/sorted-items]
+ (fn [[db sorted-items] _]
+   (or (::char5e/filtered-items db)
+       sorted-items)))
 
 (reg-sub
  ::char5e/monster-filter-hidden?
