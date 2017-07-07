@@ -398,6 +398,11 @@
    (update-in db [:expanded-spells spell-name] not)))
 
 (reg-event-db
+ :toggle-item-expanded
+ (fn [db [_ item-name]]
+   (update-in db [:expanded-items item-name] not)))
+
+(reg-event-db
  :set-character
  [db-char->local-store]
  set-character)
