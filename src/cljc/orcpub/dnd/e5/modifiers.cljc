@@ -162,8 +162,7 @@
 (defn subrace-ability [ability-kw bonus]
   [(ability ability-kw bonus)
    (mods/modifier ?subrace-ability-increases
-                  (do (prn "BONUS" ability-kw bonus)
-                      (update ?subrace-ability-increases ability-kw add-bonus bonus)))])
+                  (update ?subrace-ability-increases ability-kw add-bonus bonus))])
 
 
 (defn abilities [abilities]
