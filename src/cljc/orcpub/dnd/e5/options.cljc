@@ -158,7 +158,8 @@
 (defn get-raw-abilities [character]
   (get-in character [::entity/options :ability-scores ::entity/value]))
 
-(defn ability-increase-selection-2 [{:keys [ability-keys num-increases min max different? modifier-fns]}]
+(defn ability-increase-selection-2 [{:keys [ability-keys num-increases min max different? modifier-fn]}]
+  (prn "MODIFIER FN" modifier-fn)
   (t/selection-cfg
    {:name "Ability Score Improvement"
     :key :asi
@@ -172,16 +173,16 @@
                 (t/option-cfg
                  {:name (:name (abilities-map k))
                   :key k
-                  :modifiers (conj (map #(% k) modifier-fns)
-                                   (modifiers/level-ability-increase k 1))}))
+                  :modifiers [(if modifier-fn
+                                (modifier-fn k)
+                                (modifiers/level-ability-increase k 1))]}))
               (or ability-keys
                   character/ability-keys))}))
 
-(defn ability-increase-selection [ability-keys num-increases & [different? modifier-fns]]
+(defn ability-increase-selection [ability-keys num-increases & [different?]]
   (ability-increase-selection-2 {:ability-keys ability-keys
                                  :num-increases num-increases
-                                 :different? different?
-                                 :modifier-fns modifier-fns}))
+                                 :different? different?}))
 
 (defn ability-increase-option [num-increases different? ability-keys]
   (t/option-cfg
@@ -1546,9 +1547,15 @@
                       :max nil
                       :options (map :key skills/skills)}))
 
-(def homebrew-ability-increase-selection
+(def subrace-ability-increase-selection
   (ability-increase-selection-2
-   {:min 0}))
+   {:min 0
+    :modifier-fn #(modifiers/subrace-ability % 1)}))
+
+(def race-ability-increase-selection
+  (ability-increase-selection-2
+   {:min 0
+    :modifier-fn #(modifiers/race-ability % 1)}))
 
 (def homebrew-feat-selection
   (feat-selection-2
@@ -1590,13 +1597,9 @@
     :modifiers [(modifiers/deferred-subrace)
                 homebrew-al-illegal]
     :order 1000
-    #_:prereqs #_[(t/option-prereq
-                   nil
-                   (fn [_] @(subscribe [:homebrew? path]))
-                   true)]
     :selections [homebrew-skill-prof-selection
                  homebrew-tool-prof-selection
-                 homebrew-ability-increase-selection
+                 subrace-ability-increase-selection
                  homebrew-feat-selection]}))
 
 (defn custom-race-builder []
@@ -1604,12 +1607,12 @@
    [:custom-race-name]
    [:set-custom-race]))
 
-(defn subrace-selection [source subraces path]
+(defn subrace-selection [plugin? source subraces path]
   (let [subrace-path (conj path :subrace)]
     (t/selection-cfg
      {:name "Subrace"
       :tags #{:subrace}
-      :options (conj
+      :options (cond->
                 (if (seq subraces)
                   (map
                    (partial subrace-option source)
@@ -1617,7 +1620,9 @@
                      (map (fn [sr] (assoc sr :source source)) subraces)
                      subraces))
                   [(none-option subrace-path)])
-                (custom-subrace-option subrace-path))})))
+                 
+                 (not plugin?)
+                 (conj (custom-subrace-option subrace-path)))})))
 
 (def custom-race-option
   (t/option-cfg
@@ -1632,10 +1637,10 @@
                (fn [_] @(subscribe [:homebrew? [:race]]))
                true)]
     :order 1000
-    :selections [(subrace-selection nil nil [:race :custom])
+    :selections [(subrace-selection false nil nil [:race :custom])
                  homebrew-skill-prof-selection
                  homebrew-tool-prof-selection
-                 homebrew-ability-increase-selection
+                 race-ability-increase-selection
                  homebrew-feat-selection]}))
 
 (defn custom-background-builder []
@@ -1692,7 +1697,7 @@
       :help help
       :selections (concat
                    (if (seq subraces)
-                     [(subrace-selection source subraces [:race key])])
+                     [(subrace-selection plugin? source subraces [:race key])])
                    (if (seq language-options) [(language-selection language-options)])
                    selections)
       :modifiers (concat
