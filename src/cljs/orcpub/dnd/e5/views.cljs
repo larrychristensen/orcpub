@@ -821,11 +821,13 @@
           (common/list-print (map clojure.core/name attunement) "or")))
    ")"))
 
-(defn item-summary [name item-type item-subtype rarity attunement]
+(defn item-summary [{:keys [name item-type item-subtype rarity attunement]}]
   [:div.p-b-20
    [:span.f-s-24.f-w-b name]
    [:div.f-s-16.i.f-w-b.opacity-5
     (str (s/capitalize (common/kw-to-name item-type))
+         (if (keyword? item-subtype)
+           (str " (" (s/capitalize (common/kw-to-name item-subtype)) ")"))
          ", "
          (if (string? rarity)
            rarity
@@ -833,14 +835,20 @@
          (if attunement
            (requires-attunement attunement)))]])
 
-(defn magic-item-result [{:keys [name item-type item-subtype rarity attunement description summary] :as spell}]
+(defn item-details [{:keys [summary description]}]
+  (if (or summary description)
+    (paragraphs (or summary description))))
+
+(defn item-component [item]
+  [:div.m-l-10.l-h-19
+   [:div [item-summary item]]
+   [:div [item-details item]]])
+
+(defn magic-item-result [item]
   [:div.white
    [:div.flex
     (svg-icon "orb-wand" 36 "")
-    [:div.m-l-10
-     [item-summary name item-type item-subtype rarity attunement]
-     (if (or summary description)
-       (paragraphs (or summary description)))]]])
+    [item-component item]]])
 
 (defn name-result [{:keys [sex race subrace] :as result}]
   [:div
@@ -2571,6 +2579,16 @@
      [:div.p-10.main-text-color
       [spell-component spell true]]]))
 
+(defn item-page [{:keys [key] :as arg}]
+  (let [item (mi/magic-item-map (common/name-to-kw key))]
+    [content-page
+     "Magic Item Page"
+     (remove
+      nil?
+      [])
+     [:div.p-10.main-text-color
+      [item-component item true]]]))
+
 (defn character-list []
   (let [characters @(subscribe [::char/characters])
         expanded-characters @(subscribe [:expanded-characters])
@@ -2755,36 +2773,39 @@
                      characters))]]))
              parties))]]]))))
 
+(defn monster-list-item [{:keys [name size type subtypes alignment key] :as monster}]
+  (let [expanded? @(subscribe [:monster-expanded? name])
+        monster-page-path (routes/path-for routes/dnd-e5-monster-page-route :key key)
+        monster-page-route (routes/match-route monster-page-path)]
+    [:div.main-text-color.p-t-20.p-b-20.item-list-item
+     [:div.pointer
+      [:div.flex.justify-cont-s-b.align-items-c
+       {:on-click #(dispatch [:toggle-monster-expanded name])}
+       [:div.m-l-10
+        [:div.f-s-24.f-w-600
+         [monster-summary name size type subtypes alignment]]]
+       [:div.orange.pointer.m-r-10
+        (if (not= device-type :mobile) [:span.underline (if expanded?
+                                                          "collapse"
+                                                          "open")])
+        [:i.fa.m-l-5
+         {:class-name (if expanded? "fa-caret-up" "fa-caret-down")}]]]
+      (if expanded?
+        [:div.p-10
+         {:style character-display-style}
+         [:div.flex.justify-cont-end.uppercase.align-items-c
+          [:button.form-button.m-l-5
+           {:on-click #(dispatch [:route monster-page-route {:return? true}])}
+           "view"]]
+         [monster-component monster]])]]))
+
 (defn monster-list-items [expanded-monsters device-type]
   [:div.item-list
    (doall
     (map
-     (fn [{:keys [name size type subtypes alignment key] :as monster}]
-       (let [expanded? (get expanded-monsters name)
-             monster-page-path (routes/path-for routes/dnd-e5-monster-page-route :key key)
-             monster-page-route (routes/match-route monster-page-path)]
-         ^{:key name}
-         [:div.main-text-color.p-t-20.p-b-20.item-list-item
-          [:div.pointer
-           [:div.flex.justify-cont-s-b.align-items-c
-            {:on-click #(dispatch [:toggle-monster-expanded name])}
-            [:div.m-l-10
-             [:div.f-s-24.f-w-600
-              [monster-summary name size type subtypes alignment]]]
-            [:div.orange.pointer.m-r-10
-             (if (not= device-type :mobile) [:span.underline (if expanded?
-                                                               "collapse"
-                                                               "open")])
-             [:i.fa.m-l-5
-              {:class-name (if expanded? "fa-caret-up" "fa-caret-down")}]]]
-           (if expanded?
-             [:div.p-10
-              {:style character-display-style}
-              [:div.flex.justify-cont-end.uppercase.align-items-c
-               [:button.form-button.m-l-5
-                {:on-click #(dispatch [:route monster-page-route {:return? true}])}
-                "view"]]
-              [monster-component monster]])]]))
+     (fn [{:keys [name] :as monster}]
+       ^{:key name}
+       [monster-list-item monster])
      @(subscribe [::char/filtered-monsters])))])
 
 (defn monster-list []
@@ -2852,41 +2873,43 @@
                     subtypes))]])])]
           [monster-list-items expanded-monsters device-type]]]))))
 
+(defn spell-list-item [{:keys [name level school key] :as spell}]
+  (let [expanded? @(subscribe [:spell-expanded? name])
+        spell-page-path (routes/path-for routes/dnd-e5-spell-page-route :key key)
+        spell-page-route (routes/match-route spell-page-path)]
+    [:div.main-text-color.item-list-item
+     [:div.pointer
+      [:div.flex.justify-cont-s-b.align-items-c
+       {:on-click #(dispatch [:toggle-spell-expanded name])}
+       [:div.m-l-10
+        [:div.f-s-24.f-w-600.p-t-20
+         [spell-summary name level school true 12]]]
+       [:div.orange.pointer.m-r-10
+        (if (not= device-type :mobile) [:span.underline (if expanded?
+                                                          "collapse"
+                                                          "open")])
+        [:i.fa.m-l-5
+         {:class-name (if expanded? "fa-caret-up" "fa-caret-down")}]]]
+      (if expanded?
+        [:div.p-10
+         {:style character-display-style}
+         [:div.flex.justify-cont-end.uppercase.align-items-c
+          [:button.form-button.m-l-5
+           {:on-click #(dispatch [:route spell-page-route {:return? true}])}
+           "view"]]
+         [spell-component spell true]])]]))
+
 (defn spell-list-items [expanded-spells device-type]
   [:div.item-list
    (doall
     (map
      (fn [{:keys [name level school key] :as spell}]
-       (let [expanded? (get expanded-spells name)
-             spell-page-path (routes/path-for routes/dnd-e5-spell-page-route :key key)
-             spell-page-route (routes/match-route spell-page-path)]
-         ^{:key name}
-         [:div.main-text-color.item-list-item
-          [:div.pointer
-           [:div.flex.justify-cont-s-b.align-items-c
-            {:on-click #(dispatch [:toggle-spell-expanded name])}
-            [:div.m-l-10
-             [:div.f-s-24.f-w-600.p-t-20
-              [spell-summary name level school true 12]]]
-            [:div.orange.pointer.m-r-10
-             (if (not= device-type :mobile) [:span.underline (if expanded?
-                                                               "collapse"
-                                                               "open")])
-             [:i.fa.m-l-5
-              {:class-name (if expanded? "fa-caret-up" "fa-caret-down")}]]]
-           (if expanded?
-             [:div.p-10
-              {:style character-display-style}
-              [:div.flex.justify-cont-end.uppercase.align-items-c
-               [:button.form-button.m-l-5
-                {:on-click #(dispatch [:route spell-page-route {:return? true}])}
-                "view"]]
-              [spell-component spell true]])]]))
+       ^{:key name}
+       [spell-list-item spell])
      @(subscribe [::char/filtered-spells])))])
 
 (defn spell-list []
-  (let [expanded-spells @(subscribe [:expanded-spells])
-        device-type @(subscribe [:device-type])]
+  (let [device-type @(subscribe [:device-type])]
     [content-page
      "Spells"
      []
@@ -2898,41 +2921,44 @@
          :on-change #(dispatch [::char/filter-spells (event-value %)])}]]
       [spell-list-items expanded-spells device-type]]]))
 
-(defn item-list-items [expanded-items device-type]
+(defn item-list-item [{:keys [key name] :as item} expanded?]
+  (let [expanded? @(subscribe [:item-expanded? name])
+        item-page-path (routes/path-for routes/dnd-e5-item-page-route :key key)
+        item-page-route (routes/match-route item-page-path)]
+    [:div.main-text-color.item-list-item
+     [:div.pointer
+      [:div.flex.justify-cont-s-b.align-items-c
+       {:on-click #(dispatch [:toggle-item-expanded name])}
+       [:div.m-l-10
+        [:div.f-s-24.f-w-600.p-t-20
+         [item-summary item]]]
+       [:div.orange.pointer.m-r-10
+        (if (not= device-type :mobile) [:span.underline (if expanded?
+                                                          "collapse"
+                                                          "open")])
+        [:i.fa.m-l-5
+         {:class-name (if expanded? "fa-caret-up" "fa-caret-down")}]]]
+      (if expanded?
+        [:div.p-10
+         {:style character-display-style}
+         [:div.flex.justify-cont-end.uppercase.align-items-c
+          [:button.form-button.m-l-5
+           {:on-click #(do (prn "ITEM PAGE ROUTE" item-page-route)
+                           (dispatch [:route item-page-route {:return? true}]))}
+           "view"]]
+         [item-component item]])]]))
+
+(defn item-list-items [device-type]
   [:div.item-list
    (doall
     (map
-     (fn [{:keys [key name item-type item-subtype rarity attunement description summary] :as item}]
-       (let [expanded? (get expanded-items name)
-             item-page-path (routes/path-for routes/dnd-e5-item-page-route :key key)
-             item-page-route (routes/match-route item-page-path)]
-         ^{:key name}
-         [:div.main-text-color.item-list-item
-          [:div.pointer
-           [:div.flex.justify-cont-s-b.align-items-c
-            {:on-click #(dispatch [:toggle-item-expanded name])}
-            [:div.m-l-10
-             [:div.f-s-24.f-w-600.p-t-20
-              [item-summary name item-type item-subtype rarity attunement]]]
-            [:div.orange.pointer.m-r-10
-             (if (not= device-type :mobile) [:span.underline (if expanded?
-                                                               "collapse"
-                                                               "open")])
-             [:i.fa.m-l-5
-              {:class-name (if expanded? "fa-caret-up" "fa-caret-down")}]]]
-           (if expanded?
-             [:div.p-10
-              {:style character-display-style}
-              [:div.flex.justify-cont-end.uppercase.align-items-c
-               [:button.form-button.m-l-5
-                {:on-click #(dispatch [:route item-page-route {:return? true}])}
-                "view"]]
-              [item-component item true]])]]))
+     (fn [{:keys [name] :as item}]
+       ^{:key name}
+       [item-list-item item])
      @(subscribe [::char/filtered-items])))])
 
 (defn item-list []
-  (let [expanded-spells @(subscribe [:expanded-items])
-        device-type @(subscribe [:device-type])]
+  (let [device-type @(subscribe [:device-type])]
     [content-page
      "Items"
      []
