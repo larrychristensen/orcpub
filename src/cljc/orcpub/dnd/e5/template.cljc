@@ -152,9 +152,10 @@
 (def elf-weapon-training-mods
   (opt5e/weapon-prof-modifiers [:longsword :shortsword :shortbow :longbow]))
 
-(defn sunlight-sensitivity [page]
+(defn sunlight-sensitivity [page & [source]]
   {:name "Sunlight Sensitivity"
    :summary "Disadvantage on attack and perception rolls in direct sunlight"
+   :source (or source :phb)
    :page 24})
 
 (def mask-of-the-wild-mod
@@ -4387,6 +4388,30 @@ long rest."})
 (def scag-deep-gnome-cfg
   (opt5e/deep-gnome-option-cfg :deep-gnome-scag :scag 115))
 
+(def scag-dwarf-option-cfg
+  {:name "Dwarf",
+   :plugin? true
+   :subraces [{:name "Gray Dwarf (Duerger)",
+               :abilities {::char5e/str 1}
+               :modifiers [(mod5e/darkvision 120)
+                           (mod5e/language :undercommon)
+                           (mod5e/trait-cfg
+                            {:name "Duergar Resilience"
+                             :page 104
+                             :source :scag
+                             :summary "Advantage on saves against being charmed or paralyzed and against illusions."})
+                           (mod5e/trait-cfg
+                            {:name "Duergar Magic"
+                             :page 104
+                             :source :scag
+                             :summary "At 3rd level, can cast enlarge/reduce (enlarge only); at 5th level can cast invisibility. Each can be cast without material components and once per long rest."})
+                           (sunlight-sensitivity 104 :scag)
+                           (mod5e/saving-throw-advantage [:charmed])
+                           (mod5e/saving-throw-advantage [:paralyzed])
+                           (mod5e/saving-throw-advantage [:illusions])
+                           (mod5e/spells-known 2 :enlarge-reduce ::char5e/int "Duergar" 3 "enlarge only, once per long rest")
+                           (mod5e/spells-known 2 :invisibility ::char5e/int "Duergar" 5 "once per long rest")]}]})
+
 (def scag-half-elf-option-cfg
   {:name "Half-Elf"
    :plugin? true
@@ -4522,7 +4547,8 @@ long rest."})
                 scag-tiefling-option-cfg
                 scag-halfling-option-cfg
                 scag-deep-gnome-cfg
-                scag-human-option-cfg])})
+                scag-human-option-cfg
+                scag-dwarf-option-cfg])})
    (opt5e/class-selection
     {:options (map
                (fn [cfg] (opt5e/class-option (assoc cfg :plugin? true :source :scag)))
