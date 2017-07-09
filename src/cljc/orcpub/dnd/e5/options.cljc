@@ -19,6 +19,7 @@
             [orcpub.dnd.e5.display :as disp]
             [orcpub.dnd.e5.skills :as skills]
             [orcpub.dnd.e5.event-handlers :as eh]
+            [orcpub.components :as comps]
             [re-frame.core :refer [dispatch subscribe]])
   #?(:cljs (:require-macros [orcpub.dnd.e5.modifiers :as modifiers])))
 
@@ -518,7 +519,7 @@
 (defn bard-magical-secrets [min-level]
   (let [max-level (key (last (total-slots min-level 1)))
         spells-by-level (group-by :level spells/spells)
-        filtered-spells-by-level (select-keys spells-by-level (range 1 (inc max-level)))]
+        filtered-spells-by-level (select-keys spells-by-level (range 0 (inc max-level)))]
     (t/selection-cfg
      {:name "Bard Magical Secrets"
       :tags #{:spells}
@@ -1591,9 +1592,12 @@
 (defn custom-option-builder [name-sub name-event]
   [:div.m-t-10
    [:span "Name"]
-   [:input.input
-    {:value @(subscribe name-sub)
-     :on-change (fn [e] (dispatch (conj name-event (.. e -target -value))))}]])
+   [comps/input-field
+    :input
+    @(subscribe name-sub)
+    (fn [value] (dispatch (conj name-event value)))
+    {:class-name "input"}]])
+
 
 (defn custom-subrace-builder []
   (custom-option-builder

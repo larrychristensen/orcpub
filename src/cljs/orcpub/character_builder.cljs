@@ -43,7 +43,7 @@
             [re-frame.core :refer [subscribe dispatch dispatch-sync]])
   (:require-macros [cljs.core.async.macros :refer [go]]))
 
-(def print-disabled? false)
+(def print-disabled? true)
 
 (def print-enabled? (and (not print-disabled?)
                          (s/starts-with? js/window.location.href "http://localhost")))
@@ -125,6 +125,7 @@
 
 (defn character-input [entity-values prop-name & [cls-str handler type]]
   [character-field entity-values prop-name :input cls-str handler type])
+
 
 (defn character-textarea [entity-values prop-name & [cls-str]]
   [character-field entity-values prop-name :textarea cls-str])
