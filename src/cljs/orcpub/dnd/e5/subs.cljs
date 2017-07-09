@@ -12,6 +12,7 @@
             [orcpub.dnd.e5.party :as party5e]
             [orcpub.dnd.e5.monsters :as monsters5e]
             [orcpub.dnd.e5.spells :as spells5e]
+            [orcpub.dnd.e5.armor :as armor5e]
             [orcpub.dnd.e5.magic-items :as mi5e]
             [orcpub.route-map :as routes]
             [clojure.string :as s]
@@ -764,3 +765,8 @@
  :theme
  (fn [db _]
    (get-in db [:user-data :theme])))
+
+(reg-sub
+ ::mi5e/builder-item
+ (fn [db _]
+   (::mi5e/builder-item db)))

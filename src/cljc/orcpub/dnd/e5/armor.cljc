@@ -1,5 +1,8 @@
 (ns orcpub.dnd.e5.armor)
 
+(def armor-types
+  [:light :medium :heavy])
+
 (def armor
   [{:name "Shield"
     :type :shield

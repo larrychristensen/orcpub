@@ -24,6 +24,13 @@
 
 #?(:cljs (enable-console-print!))
 
+(def alignments
+  (map
+   (fn [alignment]
+     {:name alignment
+      :key (common/name-to-kw alignment)})
+   ["Lawful Good" "Lawful Neutral" "Lawful Evil" "Neutral Good" "Neutral" "Neutral Evil" "Chaotic Good" "Chaotic Neutral" "Chaotic Evil"]))
+
 (def abilities
   [{:key ::character/str
     :name "Strength"}
@@ -158,7 +165,7 @@
 (defn get-raw-abilities [character]
   (get-in character [::entity/options :ability-scores ::entity/value]))
 
-(defn ability-increase-selection-2 [{:keys [ability-keys num-increases min max different? modifier-fns]}]
+(defn ability-increase-selection-2 [{:keys [ability-keys num-increases min max different? modifier-fn modifier-fns]}]
   (t/selection-cfg
    {:name "Ability Score Improvement"
     :key :asi
@@ -172,8 +179,13 @@
                 (t/option-cfg
                  {:name (:name (abilities-map k))
                   :key k
-                  :modifiers (conj (map #(% k) modifier-fns)
-                                   (modifiers/level-ability-increase k 1))}))
+                  :modifiers (concat
+                              [(if modifier-fn
+                                 (modifier-fn k)
+                                 (modifiers/level-ability-increase k 1))]
+                              (map
+                               #(% k)
+                               modifier-fns))}))
               (or ability-keys
                   character/ability-keys))}))
 
@@ -1146,7 +1158,11 @@
      :icon "dodging"
      :page 168
      :summary "increase ability by 1 and gain proficiency in saves with that ability"
-     :selections [(ability-increase-selection character/ability-keys 1 false [(fn [k] (modifiers/saving-throws nil k))])]})
+     :selections [(ability-increase-selection
+                   character/ability-keys
+                   1
+                   false
+                   [(fn [k] (modifiers/saving-throws nil k))])]})
    (feat-option
     {:name "Ritual Caster"
      :icon "gift-of-knowledge"
@@ -1590,10 +1606,6 @@
     :modifiers [(modifiers/deferred-subrace)
                 homebrew-al-illegal]
     :order 1000
-    #_:prereqs #_[(t/option-prereq
-                   nil
-                   (fn [_] @(subscribe [:homebrew? path]))
-                   true)]
     :selections [homebrew-skill-prof-selection
                  homebrew-tool-prof-selection
                  homebrew-ability-increase-selection
@@ -1604,12 +1616,12 @@
    [:custom-race-name]
    [:set-custom-race]))
 
-(defn subrace-selection [source subraces path]
+(defn subrace-selection [plugin? source subraces path]
   (let [subrace-path (conj path :subrace)]
     (t/selection-cfg
      {:name "Subrace"
       :tags #{:subrace}
-      :options (conj
+      :options (cond->
                 (if (seq subraces)
                   (map
                    (partial subrace-option source)
@@ -1617,7 +1629,9 @@
                      (map (fn [sr] (assoc sr :source source)) subraces)
                      subraces))
                   [(none-option subrace-path)])
-                (custom-subrace-option subrace-path))})))
+                 
+                 (not plugin?)
+                 (conj (custom-subrace-option subrace-path)))})))
 
 (def custom-race-option
   (t/option-cfg
@@ -1632,7 +1646,7 @@
                (fn [_] @(subscribe [:homebrew? [:race]]))
                true)]
     :order 1000
-    :selections [(subrace-selection nil nil [:race :custom])
+    :selections [(subrace-selection false nil nil [:race :custom])
                  homebrew-skill-prof-selection
                  homebrew-tool-prof-selection
                  homebrew-ability-increase-selection
@@ -1692,7 +1706,7 @@
       :help help
       :selections (concat
                    (if (seq subraces)
-                     [(subrace-selection source subraces [:race key])])
+                     [(subrace-selection plugin? source subraces [:race key])])
                    (if (seq language-options) [(language-selection language-options)])
                    selections)
       :modifiers (concat
