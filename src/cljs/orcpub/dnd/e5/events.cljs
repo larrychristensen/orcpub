@@ -17,6 +17,7 @@
             [orcpub.dnd.e5.db :refer [default-value
                                       character->local-store
                                       user->local-store
+                                      magic-item->local-store
                                       tab-path
                                       default-character]]
             [re-frame.core :refer [reg-event-db reg-event-fx reg-fx inject-cofx path trim-v
@@ -44,6 +45,8 @@
 (def db-char->local-store (after (fn [db] (character->local-store (:character db)))))
 
 (def user->local-store-interceptor (after (fn [db] (user->local-store (:user-data db)))))
+
+(def magic-item->local-store-interceptor (after (fn [db] (magic-item->local-store (::magic-items/builder-item db)))))
 
 (def character-interceptors [check-spec-interceptor
                              (path :character)
@@ -1604,3 +1607,10 @@
                 (if (= theme "light-theme")
                   "dark-theme"
                   "light-theme")))))
+
+(reg-event-db
+ ::magic-items/set-builder-item
+ [magic-item->local-store-interceptor]
+ (fn [db [_ magic-item]]
+   (prn "SET MAGIC ITEM" magic-item)
+   (assoc db ::magic-items/builder-item magic-item)))
