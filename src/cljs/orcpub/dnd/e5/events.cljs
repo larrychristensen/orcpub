@@ -17,6 +17,7 @@
             [orcpub.dnd.e5.db :refer [default-value
                                       character->local-store
                                       user->local-store
+                                      magic-item->local-store
                                       tab-path
                                       default-character]]
             [re-frame.core :refer [reg-event-db reg-event-fx reg-fx inject-cofx path trim-v
@@ -44,6 +45,8 @@
 (def db-char->local-store (after (fn [db] (character->local-store (:character db)))))
 
 (def user->local-store-interceptor (after (fn [db] (user->local-store (:user-data db)))))
+
+(def magic-item->local-store-interceptor (after (fn [db] (magic-item->local-store (::magic-items/builder-item db)))))
 
 (def character-interceptors [check-spec-interceptor
                              (path :character)
@@ -396,6 +399,11 @@
  :toggle-spell-expanded
  (fn [db [_ spell-name]]
    (update-in db [:expanded-spells spell-name] not)))
+
+(reg-event-db
+ :toggle-item-expanded
+ (fn [db [_ item-name]]
+   (update-in db [:expanded-items item-name] not)))
 
 (reg-event-db
  :set-character
@@ -1349,6 +1357,11 @@
    :name
    (sequence (filter-by-name-xform filter-text) @(subscribe [::char5e/sorted-spells]))))
 
+(defn filter-items [filter-text]
+  (sort-by
+   :name
+   (sequence (filter-by-name-xform filter-text) @(subscribe [::char5e/sorted-items]))))
+
 (defn search-results [text]
   (let [search-text (s/lower-case text)
         dice-result (dice/dice-roll-text search-text)
@@ -1433,6 +1446,15 @@
           ::char5e/filtered-spells (if (>= (count filter-text) 3)
                                      (filter-spells filter-text)
                                      @(subscribe [::char5e/sorted-spells])))))
+
+(reg-event-db
+ ::char5e/filter-items
+ (fn [db [_ filter-text]]
+   (assoc db
+          ::char5e/item-text-filter filter-text
+          ::char5e/filtered-items (if (>= (count filter-text) 3)
+                                     (filter-items filter-text)
+                                     @(subscribe [::char5e/sorted-items])))))
 
 (reg-event-db
  ::char5e/toggle-selected
@@ -1585,3 +1607,10 @@
                 (if (= theme "light-theme")
                   "dark-theme"
                   "light-theme")))))
+
+(reg-event-db
+ ::magic-items/set-builder-item
+ [magic-item->local-store-interceptor]
+ (fn [db [_ magic-item]]
+   (prn "SET MAGIC ITEM" magic-item)
+   (assoc db ::magic-items/builder-item magic-item)))

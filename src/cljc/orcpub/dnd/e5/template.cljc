@@ -535,9 +535,9 @@
    :size :medium
    :speed 30
    :languages ["Common" "Giant"]
-   :profs {:skill {:athletics true}}
    :source source
-   :modifiers [(mod5e/reaction
+   :modifiers [(mod5e/skill-proficiency :athletics)
+               (mod5e/reaction
                 {:name "Stone's Endurance"
                  :frequency units5e/rests-1
                  :page page
@@ -4776,6 +4776,20 @@ long rest."})
     {:value @(subscribe [:custom-race-name])
      :on-change (fn [e] (dispatch [:set-custom-race (.. e -target -value)]))}]])
 
+(def base-class-options
+  [barbarian-option
+   bard-option
+   cleric-option
+   druid-option
+   fighter-option
+   monk-option
+   paladin-option
+   ranger-option
+   rogue-option
+   sorcerer-option
+   warlock-option
+   wizard-option])
+
 (def template-selections
   [optional-content-selection
    (t/selection-cfg
@@ -4811,7 +4825,7 @@ long rest."})
                  (t/option-cfg
                   {:name alignment
                    :modifiers [(mod5e/alignment alignment)]}))
-               ["Lawful Good" "Lawful Neutral" "Lawful Evil" "Neutral Good" "Neutral" "Neutral Evil" "Chaotic Good" "Chaotic Neutral" "Chaotic Evil"])})
+               opt5e/alignment-titles)})
    (opt5e/race-selection
     {:options (conj
                (map
@@ -4844,18 +4858,7 @@ long rest."})
             [:p.m-t-10 "Select your class using the selector at the top of the 'Class' section. Multiclassing is uncommon, but you may multiclass by clicking the 'Add Class' button at the end of the 'Class' section."]]
      :max nil
      :sequential? false
-     :options [barbarian-option
-               bard-option
-               cleric-option
-               druid-option
-               fighter-option
-               monk-option
-               paladin-option
-               ranger-option
-               rogue-option
-               sorcerer-option
-               warlock-option
-               wizard-option]})
+     :options base-class-options})
    (inventory-selection "Treasure" "cash" equip5e/treasure mod5e/deferred-treasure)
    (inventory-selection "Weapons" "plain-dagger" weapon5e/weapons mod5e/deferred-weapon)
    (inventory-selection "Magic Weapons" "lightning-bow" mi/magic-weapons mod5e/deferred-magic-weapon)

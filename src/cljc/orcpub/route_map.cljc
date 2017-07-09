@@ -31,6 +31,12 @@
 
 (def dnd-e5-spell-page-routes #{dnd-e5-spell-list-page-route dnd-e5-spell-page-route})
 
+(def dnd-e5-item-list-page-route :item-list-5e-page)
+(def dnd-e5-item-page-route :item-5e-page)
+(def dnd-e5-item-builder-page-route :item-builder-5e-page)
+
+(def dnd-e5-item-page-routes #{dnd-e5-item-list-page-route dnd-e5-item-page-route})
+
 (def register-route :register)
 (def register-page-route :register-page)
 (def verify-route :verify)
@@ -110,6 +116,9 @@
                               "parties" dnd-e5-char-parties-page-route
                               "spells" {"" dnd-e5-spell-list-page-route
                                         ["/" :key] dnd-e5-spell-page-route}
+                              "magic-item-builder" dnd-e5-item-builder-page-route
+                              "magic-items" {"" dnd-e5-item-list-page-route
+                                             ["/" :key] dnd-e5-item-page-route}
                               "monsters" {"" dnd-e5-monster-list-page-route
                                           ["/" :key] dnd-e5-monster-page-route}}}}}])
 
