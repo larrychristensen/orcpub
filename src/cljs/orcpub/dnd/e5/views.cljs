@@ -804,6 +804,9 @@
 (def three-columns-style
   (columns-style 3))
 
+(def two-columns-second-empty-style
+  {:width "50%"})
+
 (defn paragraphs [str & [single-column?]]
   (let [mobile? @(subscribe [:mobile?])
         ps (s/split str #"\n")
@@ -812,10 +815,14 @@
                 (fn [i p]
                   ^{:key i} [:p p])
                 ps))]
-    (if (or mobile? single-column?)
-      p-els
+    (if (or mobile?
+            single-column?)
       [:div
-       {:style two-columns-style}
+       p-els]
+      [:div
+       {:style (if (= 1 (count ps))
+                 two-columns-second-empty-style
+                 two-columns-style)}
        p-els])))
 
 (defn requires-attunement [attunement]
@@ -3071,10 +3078,14 @@
          []
          [:div.p-l-5.p-r-5.p-b-10
           [:div.p-b-10.p-l-10.p-r-10
-           [:input.input.f-s-24.p-l-20
-            {:style {:height "60px"}
-             :value @(subscribe [::char/monster-text-filter])
-             :on-change #(dispatch [::char/filter-monsters (event-value %)])}]]
+           [:div.posn-rel
+            [:input.input.f-s-24.p-l-20
+             {:style {:height "60px"}
+              :value @(subscribe [::char/monster-text-filter])
+              :on-change #(dispatch [::char/filter-monsters (event-value %)])}]
+            [:i.fa.fa-times.posn-abs.f-s-24.pointer.main-text-color
+             {:style close-icon-style
+              :on-click #(dispatch [::char/filter-monsters ""])}]]]
           [:div
            [:div.flex.justify-cont-end.m-b-10
             [:div.orange.pointer.m-r-10
@@ -3168,10 +3179,14 @@
      []
      [:div.p-l-5.p-r-5.p-b-10
       [:div.p-b-10.p-l-10.p-r-10
-       [:input.input.f-s-24.p-l-20
-        {:style {:height "60px"}
-         :value @(subscribe [::char/spell-text-filter])
-         :on-change #(dispatch [::char/filter-spells (event-value %)])}]]
+       [:div.posn-rel
+        [:input.input.f-s-24.p-l-20
+         {:style {:height "60px"}
+          :value @(subscribe [::char/spell-text-filter])
+          :on-change #(dispatch [::char/filter-spells (event-value %)])}]
+        [:i.fa.fa-times.posn-abs.f-s-24.pointer.main-text-color
+         {:style close-icon-style
+          :on-click #(dispatch [::char/filter-spells ""])}]]]
       [spell-list-items expanded-spells device-type]]]))
 
 (defn item-list-item [{:keys [key name] :as item} expanded?]
@@ -3220,9 +3235,13 @@
         [:span "New Item"]]]]
      [:div.p-l-5.p-r-5.p-b-10
       [:div.p-b-10.p-l-10.p-r-10
-       [:input.input.f-s-24.p-l-20
-        {:style {:height "60px"}
-         :value @(subscribe [::char/item-text-filter])
-         :on-change #(dispatch [::char/filter-items (event-value %)])}]]
+       [:div.posn-rel
+        [:input.input.f-s-24.p-l-20
+         {:style {:height "60px"}
+          :value @(subscribe [::char/item-text-filter])
+          :on-change #(dispatch [::char/filter-items (event-value %)])}]
+        [:i.fa.fa-times.posn-abs.f-s-24.pointer.main-text-color
+         {:style close-icon-style
+          :on-click #(dispatch [::char/filter-items ""])}]]]
       [item-list-items expanded-items device-type]]]))
 
