@@ -3213,7 +3213,7 @@
   (let [device-type @(subscribe [:device-type])]
     [content-page
      "Magic Items"
-     [[:button.form-button
+     [#_[:button.form-button
        {:on-click #(dispatch [:route routes/dnd-e5-item-builder-page-route])}
        [:div.flex.align-items-c
         [svg-icon "beer-stein" 18]
