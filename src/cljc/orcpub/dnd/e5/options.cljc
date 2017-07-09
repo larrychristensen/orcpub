@@ -24,12 +24,15 @@
 
 #?(:cljs (enable-console-print!))
 
+(def alignment-titles
+  ["Lawful Good" "Lawful Neutral" "Lawful Evil" "Neutral Good" "Neutral" "Neutral Evil" "Chaotic Good" "Chaotic Neutral" "Chaotic Evil"])
+
 (def alignments
   (map
    (fn [alignment]
      {:name alignment
       :key (common/name-to-kw alignment)})
-   ["Lawful Good" "Lawful Neutral" "Lawful Evil" "Neutral Good" "Neutral" "Neutral Evil" "Chaotic Good" "Chaotic Neutral" "Chaotic Evil"]))
+   alignment-titles))
 
 (def abilities
   [{:key ::character/str
