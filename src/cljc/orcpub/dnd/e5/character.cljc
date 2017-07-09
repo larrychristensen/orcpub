@@ -12,6 +12,7 @@
             [orcpub.template :as t]
             [orcpub.entity :as entity]
             [orcpub.entity.strict :as se]
+            [orcpub.dnd.e5.skills :as skills]
             [orcpub.dnd.e5.character.equipment :as equip]))
 
 (spec/def ::armor-class nat-int?)
@@ -763,3 +764,20 @@
     (if (zero? class-index)
       with-new-starting-equipment
       with-new-class)))
+
+(defn skill-prof-bonuses [prof-bonus skill-profs skill-expertise default-skill-bonus-fns]
+  (reduce
+   (fn [m {k :key}]
+     (let [skill-ability (skills/skill-abilities k)]
+       (assoc m k (if (k skill-profs)
+                    (if (k skill-expertise)
+                      (* 2 prof-bonus)
+                      prof-bonus)
+                    (if (seq default-skill-bonus-fns)
+                      (apply max
+                             (map
+                              #(% skill-ability)
+                              default-skill-bonus-fns))
+                      0)))))
+   {}
+   skills/skills))
