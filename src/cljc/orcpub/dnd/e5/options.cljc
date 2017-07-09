@@ -1604,6 +1604,28 @@
    [:custom-subrace-name]
    [:set-custom-subrace]))
 
+(def homebrew-speed-selection
+  (t/selection-cfg
+   {:name "Speed"
+    :tags #{:race}
+    :options (map
+              (fn [speed]
+                (t/option-cfg
+                 {:name (str speed " ft.")
+                  :modifiers [(modifiers/speed speed)]}))
+              (range 5 55 5))}))
+
+(def homebrew-darkvision-selection
+  (t/selection-cfg
+   {:name "Darkvision"
+    :tags #{:race}
+    :options (map
+              (fn [distance]
+                (t/option-cfg
+                 {:name (str distance " ft.")
+                  :modifiers [(modifiers/darkvision distance)]}))
+              (range 0 150 30))}))
+
 (defn custom-subrace-option [path]
   (t/option-cfg
    {:name "Custom"
@@ -1616,7 +1638,9 @@
     :selections [homebrew-skill-prof-selection
                  homebrew-tool-prof-selection
                  homebrew-ability-increase-selection
-                 homebrew-feat-selection]}))
+                 homebrew-feat-selection
+                 homebrew-speed-selection
+                 homebrew-darkvision-selection]}))
 
 (defn custom-race-builder []
   (custom-option-builder
@@ -1657,7 +1681,9 @@
                  homebrew-skill-prof-selection
                  homebrew-tool-prof-selection
                  homebrew-ability-increase-selection
-                 homebrew-feat-selection]}))
+                 homebrew-feat-selection
+                 homebrew-speed-selection
+                 homebrew-darkvision-selection]}))
 
 (defn custom-background-builder []
   (custom-option-builder
