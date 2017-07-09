@@ -33,9 +33,12 @@
    routes/dnd-e5-char-list-page-route views/character-list
    routes/dnd-e5-monster-list-page-route views/monster-list
    routes/dnd-e5-spell-list-page-route views/spell-list
+   routes/dnd-e5-item-list-page-route views/item-list
    routes/dnd-e5-char-page-route views/character-page
    routes/dnd-e5-monster-page-route views/monster-page
    routes/dnd-e5-spell-page-route views/spell-page
+   routes/dnd-e5-item-page-route views/item-page
+   routes/dnd-e5-item-builder-page-route views/item-builder-page
    routes/dnd-e5-char-parties-page-route views/parties
    routes/register-page-route views/register-form
    routes/verify-failed-route views/verify-failed

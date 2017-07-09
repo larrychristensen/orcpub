@@ -14,6 +14,7 @@
 
 (def local-storage-character-key "character")
 (def local-storage-user-key "user")
+(def local-storage-magic-item-key "magic-item")
 
 (def default-route route-map/dnd-e5-char-builder-route)
 
@@ -42,6 +43,9 @@
 
 (defn user->local-store [user-data]
   (.setItem js/window.localStorage local-storage-user-key (str user-data)))
+
+(defn magic-item->local-store [magic-item]
+  (.setItem js/window.localStorage local-storage-magic-item-key (str magic-item)))
 
 (def tab-path [:builder :character :tab])
 
