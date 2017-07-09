@@ -1128,7 +1128,7 @@
                                 (bardic-inspiration-die ?levels)
                                 " that it can, within the next 10 min., add to a d20 roll")})]
     :levels {2 {:modifiers [(mod/vec-mod ?default-skill-bonus-fns
-                                          (fn [_]
+                                         (fn [_]
                                             (int (/ ?prof-bonus 2))))
                             (mod/cum-sum-mod ?initiative (int (/ ?prof-bonus 2)))
                             (mod5e/dependent-trait
