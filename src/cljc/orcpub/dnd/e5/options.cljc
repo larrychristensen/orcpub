@@ -192,10 +192,11 @@
               (or ability-keys
                   character/ability-keys))}))
 
-(defn ability-increase-selection [ability-keys num-increases & [different?]]
+(defn ability-increase-selection [ability-keys num-increases & [different? modifier-fns]]
   (ability-increase-selection-2 {:ability-keys ability-keys
                                  :num-increases num-increases
-                                 :different? different?}))
+                                 :different? different?
+                                 :modifier-fns modifier-fns}))
 
 (defn ability-increase-option [num-increases different? ability-keys]
   (t/option-cfg
