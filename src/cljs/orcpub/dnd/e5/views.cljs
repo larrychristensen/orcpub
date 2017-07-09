@@ -24,6 +24,7 @@
             [orcpub.dnd.e5.armor :as armor]
             [orcpub.dnd.e5.display :as disp]
             [orcpub.dnd.e5.template :as t]
+            [orcpub.template :as template]
             [orcpub.dnd.e5.options :as opt]
             [orcpub.dnd.e5.events :as events]
             [clojure.string :as s]
@@ -777,7 +778,7 @@
                         :character (char/to-strict @(subscribe [:character]))})}])])))
 
 (defn dice-roll-result [{:keys [total rolls mod raw-mod plus-minus]}]
-  [:div.main-text-color.f-s-32.flex.align-items-c
+  [:div.white.f-s-32.flex.align-items-c
    (svg-icon "rolling-dices" 36 "")
    [:div.m-l-10
     [:span.f-w-b total]
@@ -791,9 +792,17 @@
    [:span.f-w-b name ":"]
    [:span.m-l-10 value]])
 
-(def two-columns-style {:column-count 2
-                        :-webkit-column-count 2
-                        :-moz-column-count 2})
+(defn columns-style [num]
+  {:line-height "19px"
+   :column-count num
+   :-webkit-column-count num
+   :-moz-column-count num})
+
+(def two-columns-style
+  (columns-style 2))
+
+(def three-columns-style
+  (columns-style 3))
 
 (defn paragraphs [str & [single-column?]]
   (let [mobile? @(subscribe [:mobile?])
@@ -851,10 +860,10 @@
     [item-component item]]])
 
 (defn name-result [{:keys [sex race subrace] :as result}]
-  [:div
-   [:span.f-s-24.f-w-b.main-text-color (:name result)]
+  [:div.white
+   [:span.f-s-24.f-w-b (:name result)]
    [:div
-    [:span.f-s-14.main-text-color.opacity-5.i (s/join " " (map (fn [k] (if k (name k))) [sex race subrace]))]]])
+    [:span.f-s-14.opacity-5.i (s/join " " (map (fn [k] (if k (name k))) [sex race subrace]))]]])
 
 (defn tavern-name-result [name]
   [:span.f-s-24.f-w-b.white name])
@@ -1028,7 +1037,7 @@
            (:actions legendary-actions)))])])])
 
 (defn monster-result [monster]
-  [:div.main-text-color
+  [:div.white
    [:div.flex
     (svg-icon "hydra" 36 "")
     [monster-component monster]]])
@@ -2589,6 +2598,250 @@
      [:div.p-10.main-text-color
       [item-component item true]]]))
 
+(defn base-builder-field [name comp]
+  [:div.field.main-text-color.m-t-0
+   [:div.personality-label.f-s-18 name]
+   comp])
+
+(defn builder-field [el-type name value on-change attrs & [children]]
+  (base-builder-field
+   name
+   [comps/input-field
+    el-type
+    value
+    on-change
+    (update
+     attrs
+     :style
+     assoc
+     :height
+     "40px")]))
+
+(defn select-builder-field [name value on-change children]
+  (base-builder-field
+   name
+   (cond-> [:select.builder-option.builder-option-dropdown
+            [:option {:value :none}
+             "None"]]
+     children (concat children))))
+
+(defn input-builder-field [name value on-change attrs]
+  [builder-field :input name value on-change attrs])
+
+(defn labeled-checkbox [label selected?]
+  [:div.flex.align-items-c.pointer.m-b-10
+   (comps/checkbox selected? false)
+   [:span.m-l-5.f-s-14 label]])
+
+(defn attunement-selector []
+  (base-builder-field
+   [:div
+    [:div.flex.align-items-c.m-b-10
+     (comps/checkbox false false)
+     [:span.f-s-24.f-w-b "Attunement"]]
+    [:div.flex.flex-wrap
+     [:div.flex-grow-1
+      (base-builder-field
+       [:div.f-w-b.m-b-5 "Class"]
+       [:div
+        [labeled-checkbox "Any" false]
+        [labeled-checkbox "Spellcaster" false]
+        (doall
+         (map
+          (fn [{:keys [::template/key ::template/name]}]
+            ^{:key key}
+            [labeled-checkbox name false])
+          t/base-class-options))])]
+     [:div.flex-grow-1
+      (base-builder-field
+       [:div.f-w-b.m-b-5 "Alignment"]
+       [:div
+        [:div.m-b-5]
+        (doall
+         (map
+          (fn [{:keys [key name]}]
+            ^{:key key}
+            [:div.m-b-5
+             [labeled-checkbox name false]])
+          (concat
+           [{:name "Any"
+             :key :any}
+            {:name "Good"
+             :key :good}
+            {:name "Evil"
+             :key :evil}]
+           opt/alignments)))])]]]))
+
+(defn base-armor-selector []
+  (let [mobile? @(subscribe [:mobile?])]
+    [:div.m-b-20
+     [:div.main-text-color.m-b-10
+      [:span.f-s-24.f-w-b "Base Armor"]]
+     [:div.flex.flex-wrap
+      [:div.flex-grow-1
+       (base-builder-field
+        [:div.f-w-b.m-b-5 "Armor Type"]
+        [:div
+         {:style (if mobile?
+                   two-columns-style
+                   three-columns-style)}
+         [labeled-checkbox "All" false]
+         (doall
+          (map
+           (fn [{:keys [:key :name]}]
+             ^{:key key}
+             [labeled-checkbox name false])
+           (concat
+            (map
+             (fn [type]
+               {:name (str "All " (clojure.core/name type))
+                :key type})
+             armor/armor-types)
+            armor/armor)))
+         [:div.m-b-5
+          [labeled-checkbox "Other" false]]])]]]))
+
+(defn base-weapon-selector []
+  (let [mobile? @(subscribe [:mobile?])]
+    [:div.m-b-20
+     [:div.main-text-color.m-b-10
+      [:span.f-s-24.f-w-b "Base Weapon"]]
+     [:div.flex.flex-wrap
+      [:div.flex-grow-1
+       (base-builder-field
+        [:div.f-w-b.m-b-5 "Weapon Type"]
+        [:div
+         {:style (if mobile?
+                   two-columns-style
+                   three-columns-style)}
+         [labeled-checkbox "All" false]
+         [labeled-checkbox "All Swords" false]
+         [labeled-checkbox "All Axes" false]
+         (doall
+          (map
+           (fn [{:keys [:key :name]}]
+             ^{:key key}
+             [labeled-checkbox name false])
+           weapon/weapons))
+         [:div.m-b-5
+          [labeled-checkbox "Other" false]]])]]]))
+
+(defn item-ability-bonuses []
+  (base-builder-field
+   [:div.f-w-b.m-b-5 "Ability Bonus"]
+   [:div
+    (doall
+     (map
+      (fn [ability-kw]
+        ^{:key ability-kw}
+        [:div.flex.align-items-c
+         [:div.w-40 (s/upper-case (name ability-kw))]
+         [:div
+          [:select.builder-option.builder-option-dropdown
+           [:option.builder-dropdown-item
+            "Becomes At Least"]
+           [:option.builder-dropdown-item
+            "Increases By"]]]
+         [:input.input.w-60.m-l-5
+          {:type :number}]])
+      char/ability-keys))]))
+
+(defn saving-throw-bonuses []
+  (base-builder-field
+   [:div.f-w-b.m-b-5 "Saving Throw Bonus"]
+   [:div
+    (doall
+     (map
+      (fn [ability-kw]
+        ^{:key ability-kw}
+        [:div.flex.align-items-c
+         [:div.w-40 (str (s/upper-case (name ability-kw)) " Save")]
+         [:div
+          [:select.builder-option.builder-option-dropdown
+           [:option.builder-dropdown-item
+            "Increases By"]]]
+         [:input.input.w-60.m-l-5
+          {:type :number}]])
+      char/ability-keys))]))
+
+(defn item-speed-bonuses []
+  (base-builder-field
+   [:div.f-w-b.m-b-5 "Speed Bonus"]
+   [:div
+    (doall
+     (map
+      (fn [type-kw]
+        ^{:key type-kw}
+        [:div.flex.align-items-c
+         [:div.w-100 (s/capitalize (common/kw-to-name type-kw))]
+         [:div
+          [:select.builder-option.builder-option-dropdown.w-200
+           [:option.builder-dropdown-item
+            "Becomes At Least"]
+           [:option.builder-dropdown-item
+            "Increases By"]
+           [:option.builder-dropdown-item
+            "Multiplies By"]
+           (if (not= :speed type-kw)
+             [:option.builder-dropdown-item
+              "Equals Walking Speed"])]]
+         [:input.input.w-60.m-l-5
+          {:type :number}]])
+      [:speed :flying-speed :swimming-speed :climbing-speed]))]))
+
+(defn item-bonuses []
+  [:div.m-b-20
+   [:div.main-text-color.m-b-10
+    [:span.f-s-24.f-w-b "Item Properties"]]
+   [:div.flex.flex-wrap
+    [:div.flex-grow-1
+     [item-ability-bonuses]]
+    [:div.flex-grow-1
+     [saving-throw-bonuses]]
+    [:div.flex-grow-1
+     [item-speed-bonuses]]]])
+
+(defn item-builder []
+  (let [data @(subscribe [::mi/builder-item])]
+    [:div.p-20
+     [:div.flex.w-100-p.flex-wrap
+      [:div.flex-grow-1.m-b-20 [input-builder-field "Item Name" "" (fn []) {:class-name "input"}]]
+      [:div.flex-grow-1.m-l-5.m-b-20
+       (base-builder-field
+        "Type"
+        [:select.builder-option.builder-option-dropdown
+         {:value (or (:type data) "")
+          :on-change #(dispatch [::mi/set-builder-item (assoc data :type (-> % event-value common/name-to-kw))])}
+         (doall
+          (map
+           (fn [type-kw]
+             ^{:key type-kw}
+             [:option.builder-dropdown-item
+              {:value type-kw}
+              (common/kw-to-name type-kw)])
+           [:wondrous-item :weapon :armor :ring :wand :rod :scroll :potion :other]))])]
+      [:div.flex-grow-1.m-l-5.m-b-40
+       (base-builder-field
+        "Subtype"
+        [:select.builder-option.builder-option-dropdown])]
+      [:div.flex-grow-1.m-l-5.m-b-40
+       (base-builder-field
+        "Rarity"
+        [:select.builder-option.builder-option-dropdown])]]
+     (if (= :armor (:type data))
+       [:div.m-b-40 [base-armor-selector]])
+     (if (= :weapon (:type data))
+       [:div.m-b-40 [base-weapon-selector]])
+     [:div.m-b-40
+      [attunement-selector]]
+     [item-bonuses]]))
+
+(defn item-builder-page []
+  [content-page
+   "Item Builder Page"
+   []
+   [item-builder]])
+
 (defn character-list []
   (let [characters @(subscribe [::char/characters])
         expanded-characters @(subscribe [:expanded-characters])
@@ -2943,8 +3196,7 @@
          {:style character-display-style}
          [:div.flex.justify-cont-end.uppercase.align-items-c
           [:button.form-button.m-l-5
-           {:on-click #(do (prn "ITEM PAGE ROUTE" item-page-route)
-                           (dispatch [:route item-page-route {:return? true}]))}
+           {:on-click #(dispatch [:route item-page-route {:return? true}])}
            "view"]]
          [item-component item]])]]))
 
@@ -2960,8 +3212,12 @@
 (defn item-list []
   (let [device-type @(subscribe [:device-type])]
     [content-page
-     "Items"
-     []
+     "Magic Items"
+     [[:button.form-button
+       {:on-click #(dispatch [:route routes/dnd-e5-item-builder-page-route])}
+       [:div.flex.align-items-c
+        [svg-icon "beer-stein" 18]
+        [:span "New Item"]]]]
      [:div.p-l-5.p-r-5.p-b-10
       [:div.p-b-10.p-l-10.p-r-10
        [:input.input.f-s-24.p-l-20
