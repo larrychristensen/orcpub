@@ -24,6 +24,16 @@
 
 #?(:cljs (enable-console-print!))
 
+(def alignment-titles
+  ["Lawful Good" "Lawful Neutral" "Lawful Evil" "Neutral Good" "Neutral" "Neutral Evil" "Chaotic Good" "Chaotic Neutral" "Chaotic Evil"])
+
+(def alignments
+  (map
+   (fn [alignment]
+     {:name alignment
+      :key (common/name-to-kw alignment)})
+   alignment-titles))
+
 (def abilities
   [{:key ::character/str
     :name "Strength"}
@@ -158,8 +168,7 @@
 (defn get-raw-abilities [character]
   (get-in character [::entity/options :ability-scores ::entity/value]))
 
-(defn ability-increase-selection-2 [{:keys [ability-keys num-increases min max different? modifier-fn]}]
-  (prn "MODIFIER FN" modifier-fn)
+(defn ability-increase-selection-2 [{:keys [ability-keys num-increases min max different? modifier-fn modifier-fns]}]
   (t/selection-cfg
    {:name "Ability Score Improvement"
     :key :asi
@@ -173,9 +182,13 @@
                 (t/option-cfg
                  {:name (:name (abilities-map k))
                   :key k
-                  :modifiers [(if modifier-fn
-                                (modifier-fn k)
-                                (modifiers/level-ability-increase k 1))]}))
+                  :modifiers (concat
+                              [(if modifier-fn
+                                 (modifier-fn k)
+                                 (modifiers/level-ability-increase k 1))]
+                              (map
+                               #(% k)
+                               modifier-fns))}))
               (or ability-keys
                   character/ability-keys))}))
 
@@ -1147,7 +1160,11 @@
      :icon "dodging"
      :page 168
      :summary "increase ability by 1 and gain proficiency in saves with that ability"
-     :selections [(ability-increase-selection character/ability-keys 1 false [(fn [k] (modifiers/saving-throws nil k))])]})
+     :selections [(ability-increase-selection
+                   character/ability-keys
+                   1
+                   false
+                   [(fn [k] (modifiers/saving-throws nil k))])]})
    (feat-option
     {:name "Ritual Caster"
      :icon "gift-of-knowledge"
