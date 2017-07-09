@@ -535,9 +535,9 @@
    :size :medium
    :speed 30
    :languages ["Common" "Giant"]
-   :profs {:skill {:athletics true}}
    :source source
-   :modifiers [(mod5e/reaction
+   :modifiers [(mod5e/skill-proficiency :athletics)
+               (mod5e/reaction
                 {:name "Stone's Endurance"
                  :frequency units5e/rests-1
                  :page page
@@ -4824,7 +4824,7 @@ long rest."})
                  (t/option-cfg
                   {:name alignment
                    :modifiers [(mod5e/alignment alignment)]}))
-               ["Lawful Good" "Lawful Neutral" "Lawful Evil" "Neutral Good" "Neutral" "Neutral Evil" "Chaotic Good" "Chaotic Neutral" "Chaotic Evil"])})
+               opt5e/alignment-titles)})
    (opt5e/race-selection
     {:options (conj
                (map
