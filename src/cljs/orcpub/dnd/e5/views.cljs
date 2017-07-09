@@ -3037,12 +3037,12 @@
   (let [expanded? @(subscribe [:monster-expanded? name])
         monster-page-path (routes/path-for routes/dnd-e5-monster-page-route :key key)
         monster-page-route (routes/match-route monster-page-path)]
-    [:div.main-text-color.p-t-20.p-b-20.item-list-item
+    [:div.main-text-color.item-list-item
      [:div.pointer
       [:div.flex.justify-cont-s-b.align-items-c
        {:on-click #(dispatch [:toggle-monster-expanded name])}
        [:div.m-l-10
-        [:div.f-s-24.f-w-600
+        [:div.f-s-24.f-w-600.p-b-20.p-t-20
          [monster-summary name size type subtypes alignment]]]
        [:div.orange.pointer.m-r-10
         (if (not= device-type :mobile) [:span.underline (if expanded?
