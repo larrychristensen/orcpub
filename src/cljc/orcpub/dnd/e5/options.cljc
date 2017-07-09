@@ -1612,6 +1612,7 @@
               (fn [speed]
                 (t/option-cfg
                  {:name (str speed " ft.")
+                  :key (keyword (str "ft-" speed))
                   :modifiers [(modifiers/speed speed)]}))
               (range 5 55 5))}))
 
@@ -1623,6 +1624,7 @@
               (fn [distance]
                 (t/option-cfg
                  {:name (str distance " ft.")
+                  :key (keyword (str "ft-" distance))
                   :modifiers [(modifiers/darkvision distance)]}))
               (range 0 150 30))}))
 
