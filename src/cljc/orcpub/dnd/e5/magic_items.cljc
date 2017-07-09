@@ -535,7 +535,7 @@ Alternatively, when you light the candle for the first time, you can cast the ga
      }
     {
      :name "Cap of Water Breathing"
-     :item-type :wonderous-item
+     :item-type :wondrous-item
      :rarity :uncommon
      :modifiers [(mod5e/action
                   {:name "Cap of Water Breathing"
@@ -847,7 +847,7 @@ refers to any creature with the dragon type, including dragon turtles and wyvern
      }
     {
      :name "Driftglobe"
-     :item-type :wonderous-item
+     :item-type :wondrous-item
      :rarity :uncommon
      :modifiers [(mod5e/trait-cfg
                   {:name "Driftglobe Emanation (light)"
@@ -1111,7 +1111,7 @@ When you hit a giant with it, the giant takes an extra 2d6 damage of the weaponâ
      :description "While wearing these gloves, climbing and swimming donâ€™t cost you extra movement, and you gain a +5 bonus to Strength (Athletics) checks made to climb or swim."
      } {
      :name "Gloves of Thievery"
-     :item-type :wonderous-item
+     :item-type :wondrous-item
      :rarity :uncommon
      :modifiers [(mod5e/skill-bonus :sleight-of-hand 5)]
      :page 172
@@ -2038,7 +2038,7 @@ The rope has AC 20 and 20 hit points. It regains 1 hit point every 5 minutes as 
      }
     {
      :name "Sending Stones"
-     :item-type :wonderous-item
+     :item-type :wondrous-item
      :rarity :uncommon
      :modifiers [(mod5e/action
                   {:name "Sending Stones"
