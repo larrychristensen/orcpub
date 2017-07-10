@@ -45,6 +45,25 @@
 (def plus-2-name (bonus-name-fn 2))
 (def plus-3-name (bonus-name-fn 3))
 
+(defn potion-of-giant-strength [name strength rarity]
+  {
+   :name (str "Potion of " name " Strength")
+   :item-type :potion
+   :rarity rarity
+   :description (str "When you drink this potion, your Strength score becomes " strength " for 1 hour. The potion has no effect on you if your Strength is equal to or greater than " strength ".
+This potion’s transparent liquid has floating in it a sliver of fingernail from a giant of the appropriate type. The potion of frost giant strength and the potion of stone giant strength have the same effect.")})
+
+(defn figurine-of-wondrous-power [rarity name description]
+  {
+   :name (str "Figurine of Wondrous Power: " name)
+   :item-type :wondrous-item
+   :rarity rarity
+   :description (str "A figurine of wondrous power is a statuette of a beast small enough to fit in a pocket. If you use an action to speak the command word and throw the figurine to a point on the ground within 60 feet of you, the figurine becomes a living creature. If the space where the creature would appear is occupied by other creatures or objects, or if there isn’t enough space for the creature, the figurine doesn’t become a creature.
+The creature is friendly to you and your companions. It understands your languages and obeys your spoken commands. If you issue no
+commands, the creature defends itself but takes no other actions.
+The creature exists for a duration specific to each figurine. At the end of the duration, the creature reverts to its figurine form. It reverts to a figurine early if it drops to 0 hit points or if you use an action to speak the command word again while touching it. When the creature becomes a figurine again, its property can’t be used again until a certain amount of time has passed, as specified in the figurine’s description.
+" description)})
+
 (defn belt-of-giant-strength-mod [value]
   (mod/vec-mod ?ability-overrides {:ability :orcpub.dnd.e5.character/str :value (min 30 (+ value (if (and ?giants-bane-gauntlet ?giants-bane-hammer) 4 0)))}))
 
@@ -697,7 +716,7 @@ on yourself, transforming into a bat. While you are in the form of the bat, you 
      :description "While touching it, you can cast the scrying spell (save DC 17) with it. While scrying with the crystal ball, you can communicate telepathically with creatures you can see within 30 feet of the spell’s sensor. You can also use an action to cast the suggestion spell (save DC 17) through the sensor on
 one of those creatures. You don’t need to concentrate on this suggestion to maintain it during its duration, but it ends if scrying ends. Once used, the suggestion power of the crystal ball can’t be used again until the next dawn."}
     {
-     :name "Crystal Ball of Mind Reading"
+     :name "Crystal Ball of True Seeing"
      :item-type :wondrous-item
      :rarity :legendary
      :attunement [:any]
@@ -997,30 +1016,49 @@ boat shaped like a swan takes its place. The boat is self-propelled and moves ac
 Tree. You must be outdoors to use this token. You can use an action to touch it to an unoccupied space on the ground. The token disappears, and in its place a nonmagical oak tree springs into existence. The tree is 60 feet tall and has a 5-foot-diameter trunk, and its branches at the top spread out in a 20-foot radius.
 Whip. You can use an action to throw the token to a point within 10 feet of you. The token disappears, and a floating whip takes its place. You can then use a bonus action to make a melee spell attack against a creature within 10 feet of the whip, with an attack bonus of +9. On a hit, the target takes 1d6 + 5 force damage.
 As a bonus action on your turn, you can direct the whip to fly up to 20 feet and repeat the attack against a creature within 10 feet of it. The whip disappears after 1 hour, when you use an action to dismiss it, or when you are incapacitated or die."
-     }{
-     :name "Figurine of Wondrous Power"
-     :item-type :wondrous-item
-     :rarity "rarity by figurine"
-     :description "A figurine of wondrous power is a statuette of a beast small enough to fit in a pocket. If you use an action to speak the command word and throw the figurine to a point on the ground within 60 feet of you, the figurine becomes a living creature. If the space where the creature would appear is occupied by other creatures or objects, or if there isn’t enough space for the creature, the figurine doesn’t become a creature.
-The creature is friendly to you and your companions. It understands your languages and obeys your spoken commands. If you issue no
-commands, the creature defends itself but takes no other actions.
-The creature exists for a duration specific to each figurine. At the end of the duration, the creature reverts to its figurine form. It reverts to a figurine early if it drops to 0 hit points or if you use an action to speak the command word again while touching it. When the creature becomes a figurine again, its property can’t be used again until a certain amount of time has passed, as specified in the figurine’s description.
-Bronze Griffon (Rare). This bronze statuette is of a griffon rampant. It can become a griffon for up to 6 hours. Once it has been used, it can’t be used again until 5 days have passed.
-Ebony Fly (Rare). This ebony statuette is carved in the likeness of a horsefly. It can become a giant fly for up to 12 hours and can be ridden as a mount. Once it has been used, it can’t be used again until 2 days have passed.
-Golden Lions (Rare). These gold statuettes of lions are always created in pairs. You can use one figurine or both simultaneously. Each can become a lion for up to 1 hour. Once a lion has been used, it
-can’t be used again until 7 days have passed.
-Ivory Goats (Rare). These ivory statuettes of goats are always created in sets of three. Each goat looks unique and functions differently from the others. Their properties are as follows:
+       }
+    (figurine-of-wondrous-power
+     :rare
+     "Bronze Griffon"
+     "This bronze statuette is of a griffon rampant. It can become a griffon for up to 6 hours. Once it has been used, it can’t be used again until 5 days have passed.")
+    (figurine-of-wondrous-power
+     :rare
+     "Ebony Fly"
+     "This ebony statuette is carved in the likeness of a horsefly. It can become a giant fly for up to 12 hours and can be ridden as a mount. Once it has been used, it can’t be used again until 2 days have passed.")
+    (figurine-of-wondrous-power
+     :rare
+     "Golden Lions"
+     "These gold statuettes of lions are always created in pairs. You can use one figurine or both simultaneously. Each can become a lion for up to 1 hour. Once a lion has been used, it can’t be used again until 7 days have passed.")
+    (figurine-of-wondrous-power
+     :rare
+     "Ivory Goats"
+     "These ivory statuettes of goats are always created in sets of three. Each goat looks unique and functions differently from the others. Their properties are as follows:
 • The goat of traveling can become a Large goat with the same statistics as a riding horse. It has 24 charges, and each hour or portion thereof it spends in beast form costs 1 charge. While it has charges, you can use it as often as you wish. When it runs out of charges, it reverts to a figurine and can’t be used again until 7 days have passed, when it regains all its charges.
 • The goat of travail becomes a giant goat for up to 3 hours. Once it has been used, it can’t be used again until 30 days have passed.
-• The goat of terror becomes a giant goat for up to 3 hours. The goat can’t attack, but you can remove its horns and use them as weapons. One horn becomes a +1 lance, and the other becomes a +2 longsword. Removing a horn requires an action, and the weapons disappear and the horns return when the goat reverts to figurine form. In addition, the goat radiates a 30-foot-radius aura of terror while you are riding it. Any creature hostile to you that starts its turn in the aura must succeed on a DC 15 Wisdom saving throw or be frightened of the goat for 1 minute, or until the goat reverts to figurine form. The frightened creature can repeat the saving throw at the end of each of its turns, ending the effect on itself on a success. Once it successfully saves against the effect, a creature is immune to the goat’s aura for the next 24 hours. Once the figurine has been used, it can’t be used again until 15 days have passed.
-Marble Elephant (Rare). This marble statuette is about 4 inches high and long. It can become an elephant for up to 24 hours. Once it has been used, it can’t be used again until 7 days have passed.
-Obsidian Steed (Very Rare). This polished obsidian horse can become a nightmare for up to 24 hours. The nightmare fights only to defend itself. Once it has been used, it can’t be used again until 5 days have passed.
-If you have a good alignment, the figurine has a 10 percent chance each time you use it to ignore your orders, including a command to revert to figurine form. If you mount the nightmare while it is ignoring your orders, you and the nightmare are instantly transported to a random location on the plane of Hades, where the nightmare reverts to figurine form.
-Onyx Dog (Rare). This onyx statuette of a dog can become a mastiff for up to 6 hours. The mastiff has an Intelligence of 8 and can speak Common. It also has darkvision out to a range of 60 feet and can see invisible creatures and objects within that range. Once it has been used, it can’t be used again until 7 days have passed.
-Serpentine Owl (Rare). This serpentine statuette of an owl can become a giant owl for up to 8 hours. Once it has been used, it can’t be used again until 2 days have passed. The owl can telepathically communicate with you at any range if you and it are on the same plane of existence.
-Silver Raven (Uncommon). This silver statuette of a raven can become a raven for up to 12 hours. Once
-it has been used, it can’t be used again until 2 days have passed. While in raven form, the figurine allows you to cast the animal messenger spell on it at will."
-     }{
+• The goat of terror becomes a giant goat for up to 3 hours. The goat can’t attack, but you can remove its horns and use them as weapons. One horn becomes a +1 lance, and the other becomes a +2 longsword. Removing a horn requires an action, and the weapons disappear and the horns return when the goat reverts to figurine form. In addition, the goat radiates a 30-foot-radius aura of terror while you are riding it. Any creature hostile to you that starts its turn in the aura must succeed on a DC 15 Wisdom saving throw or be frightened of the goat for 1 minute, or until the goat reverts to figurine form. The frightened creature can repeat the saving throw at the end of each of its turns, ending the effect on itself on a success. Once it successfully saves against the effect, a creature is immune to the goat’s aura for the next 24 hours. Once the figurine has been used, it can’t be used again until 15 days have passed.")
+    (figurine-of-wondrous-power
+     :rare
+     "Marble Elephant"
+     "This marble statuette is about 4 inches high and long. It can become an elephant for up to 24 hours. Once it has been used, it can’t be used again until 7 days have passed.")
+    (figurine-of-wondrous-power
+     :very-rare
+     "Obsidian Steed"
+     "This polished obsidian horse can become a nightmare for up to 24 hours. The nightmare fights only to defend itself. Once it has been used, it can’t be used again until 5 days have passed.
+If you have a good alignment, the figurine has a 10 percent chance each time you use it to ignore your orders, including a command to revert to figurine form. If you mount the nightmare while it is ignoring your orders, you and the nightmare are instantly transported to a random location on the plane of Hades, where the nightmare reverts to figurine form.")
+    (figurine-of-wondrous-power
+     :very-rare
+     "Onyx Dog"
+     "This onyx statuette of a dog can become a mastiff for up to 6 hours. The mastiff has an Intelligence of 8 and can speak Common. It also has darkvision out to a range of 60 feet and can see invisible creatures and objects within that range. Once it has been used, it can’t be used again until 7 days have passed.")
+    (figurine-of-wondrous-power
+     :rare
+     "Serpentine Owl"
+     "This serpentine statuette of an owl can become a giant owl for up to 8 hours. Once it has been used, it can’t be used again until 2 days have passed. The owl can telepathically communicate with you at any range if you and it are on the same plane of existence.")
+    (figurine-of-wondrous-power
+     :uncommon
+     "Silver Raven"
+     "This silver statuette of a raven can become a raven for up to 12 hours. Once
+it has been used, it can’t be used again until 2 days have passed. While in raven form, the figurine allows you to cast the animal messenger spell on it at will.")
+    {
      :name "Flame Tongue"
      :item-type :weapon
      :item-subtype sword?
@@ -1600,7 +1638,7 @@ Placing a portable hole inside an extradimensional space created by a bag of hol
      }{
      :name "Potion of Climbing"
      :item-type :potion
-     :rarity "common"
+     :rarity :common
      :description "When you drink this potion, you gain a climbing speed equal to your walking speed for 1 hour. During this time, you have advantage on Strength (Athletics) checks you make to climb. The potion is separated into brown, silver, and gray layers resembling bands of stone. Shaking the bottle fails to mix the colors."
      }{
      :name "Potion of Diminution"
@@ -1617,13 +1655,14 @@ Placing a portable hole inside an extradimensional space created by a bag of hol
      :item-type :potion
      :rarity :rare
      :description "When you drink this potion, you gain the effect of the gaseous form spell for 1 hour (no concentration required) or until you end the effect as a bonus action. This potion’s container seems to hold fog that moves and pours like water."
-     }{
-     :name "Potion of Giant Strength"
-     :item-type :potion
-     :rarity "rarity varies"
-     :description "When you drink this potion, your Strength score changes for 1 hour. The type of giant determines the score (see the table below). The potion has no effect on you if your Strength is equal to or greater than that score.
-This potion’s transparent liquid has floating in it a sliver of fingernail from a giant of the appropriate type. The potion of frost giant strength and the potion of stone giant strength have the same effect."
-     }{
+       }
+    (potion-of-giant-strength "Hill Giant" 21 :uncommon)
+    (potion-of-giant-strength "Frost Giant" 23 :rare)
+    (potion-of-giant-strength "Stone Giant" 23 :rare)
+    (potion-of-giant-strength "Fire Giant" 25 :rare)
+    (potion-of-giant-strength "Cloud Giant" 27 :very-rare)
+    (potion-of-giant-strength "Storm Giant" 29 :legendary)
+    {
      :name "Potion of Growth"
      :item-type :potion
      :rarity :uncommon
@@ -2112,7 +2151,7 @@ One ounce of the glue can cover a 1-foot square surface. The glue takes 1 minute
 
      :item-type :scroll
 
-     :rarity "varies"
+     :rarity :varies
      :description "A spell scroll bears the words of a single spell, written in a mystical cipher. If the spell is on your class’s spell list, you can read the scroll and cast its spell without providing any material components. Otherwise, the scroll is unintelligible. Casting the spell by reading the scroll requires the spell’s normal casting time. Once the spell is cast, the words on the
 scroll fade, and it crumbles to dust. If the casting is interrupted, the scroll is not lost.
 If the spell is on your class’s spell list but of a higher level than you can normally cast, you must make an ability check using your spellcasting ability to determine whether you cast it successfully. The DC equals 10 + the spell’s level. On a failed check, the spell disappears from the scroll with no other effect.
