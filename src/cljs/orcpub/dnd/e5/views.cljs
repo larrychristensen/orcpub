@@ -837,19 +837,20 @@
           (common/list-print (map clojure.core/name attunement) "or")))
    ")"))
 
-(defn item-summary [{:keys [name item-type item-subtype rarity attunement]}]
-  [:div.p-b-20
-   [:span.f-s-24.f-w-b name]
-   [:div.f-s-16.i.f-w-b.opacity-5
-    (str (s/capitalize (common/kw-to-name item-type))
-         (if (keyword? item-subtype)
-           (str " (" (s/capitalize (common/kw-to-name item-subtype)) ")"))
-         ", "
-         (if (string? rarity)
-           rarity
-           (common/kw-to-name rarity))
-         (if attunement
-           (requires-attunement attunement)))]])
+(defn item-summary [{:keys [name item-type item-subtype rarity attunement] :as item}]
+  (if item
+    [:div.p-b-20
+     [:span.f-s-24.f-w-b name]
+     [:div.f-s-16.i.f-w-b.opacity-5
+      (str (s/capitalize (common/kw-to-name item-type))
+           (if (keyword? item-subtype)
+             (str " (" (s/capitalize (common/kw-to-name item-subtype)) ")"))
+           ", "
+           (if (string? rarity)
+             rarity
+             (common/kw-to-name rarity))
+           (if attunement
+             (requires-attunement attunement)))]]))
 
 (defn item-details [{:keys [summary description]}]
   (if (or summary description)
@@ -2172,13 +2173,16 @@
             (doall
              (map
               (fn [[item-kw item-cfg]]
-                (let [{:keys [item-type item-subtype rarity attunement description summary] :as item} (mi/magic-item-map item-kw)
+                (let [{:keys [name item-type item-subtype rarity attunement description summary] :as item} (mi/magic-item-map item-kw)
                       expanded? (@expanded-details item-kw)]
                   ^{:key item-kw}
                   [:tr.pointer
                    {:on-click #(swap! expanded-details (fn [d] (update d item-kw not)))}
-                   [item-summary]
-                   [:td.p-r-5
+                   [:td.p-10.f-s-16.f-w-b name]
+                   [:td (str (common/kw-to-name item-type)
+                             ", "
+                             (common/kw-to-name rarity))]
+                   #_[:td.p-r-5
                     [:div.orange
                      (if (not mobile?)
                        [:span.underline (if expanded? "less" "more")])
@@ -2926,7 +2930,7 @@
                               {:on-click #(dispatch [:delete-character id])}
                               "delete"])]
                           [character-display id false (if (= :mobile device-type) 1 2)]])]]))
-                 owner-characters))]])
+                 (sort-by ::char/character-name owner-characters)))]])
            sorted-groups)))]]]))
 
 (def party-name-editor-style
