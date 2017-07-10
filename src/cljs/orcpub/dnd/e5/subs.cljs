@@ -779,10 +779,11 @@
 (reg-sub
  ::mi5e/rarities
  (fn [db _]
-   [:common :uncommon :rare :very-rare :legendary]))
+   [:common :uncommon :rare :very-rare :legendary :varies]))
 
-(reg-sub
- ::mi5e/item-subtypes
- (fn [db [_ item-type]]
-   (case item-type
-     ::mi5e/weapon nil)))
+(doseq [toggle-mod [:damage-resistance :damage-vulnerability :damage-immunity :condition-immunity]]
+  (reg-sub
+   (keyword "orcpub.dnd.e5.magic-items" (str "has-" (name toggle-mod) "?"))
+   :<- [::mi5e/builder-item]
+   (fn [item [_ type]]
+     (get-in item [::mi5e/modifiers (events/mod-cfg toggle-mod type)]))))

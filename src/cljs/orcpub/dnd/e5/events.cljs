@@ -4,6 +4,7 @@
             [orcpub.template :as t]
             [orcpub.common :as common]
             [orcpub.dice :as dice]
+            [orcpub.modifiers :as mod]
             [orcpub.dnd.e5.template :as t5e]
             [orcpub.dnd.e5.character :as char5e]
             [orcpub.dnd.e5.units :as units5e]
@@ -1623,7 +1624,22 @@
  (fn [item _]
    (if (::mi/attunement item)
      (dissoc item ::mi/attunement)
-     (assoc item ::mi/attunement [:any]))))
+     (assoc item ::mi/attunement #{:any}))))
+
+(defn set-any-attunement [attunement]
+  (if (empty? attunement)
+    (conj attunement :any)
+    (disj attunement :any)))
+
+(reg-event-db
+ ::mi/toggle-attunement-value
+ item-interceptors
+ (fn [item [_ value]]
+   (update item
+           ::mi/attunement
+           #(->> %
+                 (toggle-set value)
+                 set-any-attunement))))
 
 (reg-event-db
  ::mi/set-item-name
@@ -1632,7 +1648,45 @@
    (assoc item ::mi/name item-name)))
 
 (reg-event-db
+ ::mi/set-item-description
+ item-interceptors
+ (fn [item [_ item-description]]
+   (assoc item ::mi/description item-description)))
+
+(reg-event-db
  ::mi/set-item-type
  item-interceptors
  (fn [item [_ item-type-str]]
-   (assoc item ::mi/type (keyword "orcpub.dnd.e5.magic-items" item-type-str))))
+   (assoc item ::mi/type (keyword item-type-str))))
+
+(reg-event-db
+ ::mi/set-item-rarity
+ item-interceptors
+ (fn [item [_ item-type-str]]
+   (assoc item ::mi/rarity (keyword item-type-str))))
+
+(reg-event-db
+ ::mi/set-item-damage-bonus
+ item-interceptors
+ (fn [item [_ bonus-str]]
+   (assoc item ::mi/magical-damage-bonus (js/parseInt bonus-str))))
+
+(reg-event-db
+ ::mi/set-item-attack-bonus
+ item-interceptors
+ (fn [item [_ bonus-str]]
+   (assoc item ::mi/magical-attack-bonus (js/parseInt bonus-str))))
+
+(defn mod-cfg [key & args]
+  {::mod/key key
+   ::mod/args args})
+
+(doseq [toggle-mod [:damage-resistance :damage-vulnerability :damage-immunity :condition-immunity]]
+  (reg-event-db
+   (keyword "orcpub.dnd.e5.magic-items" (str "toggle-" (name toggle-mod)))
+   item-interceptors
+   (fn [item [_ type]]
+     (update item
+             ::mi/modifiers
+             (partial toggle-set
+                      (mod-cfg toggle-mod type))))))
