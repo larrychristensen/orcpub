@@ -770,3 +770,19 @@
  ::mi5e/builder-item
  (fn [db _]
    (::mi5e/builder-item db)))
+
+(reg-sub
+ ::mi5e/item-types
+ (fn [db _]
+   [:wondrous-item :weapon ::mi5e/armor :ring :wand :rod :scroll :potion :other]))
+
+(reg-sub
+ ::mi5e/rarities
+ (fn [db _]
+   [:common :uncommon :rare :very-rare :legendary]))
+
+(reg-sub
+ ::mi5e/item-subtypes
+ (fn [db [_ item-type]]
+   (case item-type
+     ::mi5e/weapon nil)))
