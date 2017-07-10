@@ -11,7 +11,7 @@
             [orcpub.dnd.e5.character.random :as char-rand5e]
             [orcpub.dnd.e5.spells :as spells]
             [orcpub.dnd.e5.monsters :as monsters]
-            [orcpub.dnd.e5.magic-items :as magic-items]
+            [orcpub.dnd.e5.magic-items :as mi]
             [orcpub.dnd.e5.event-handlers :as event-handlers]
             [orcpub.dnd.e5.character.equipment :as char-equip5e]
             [orcpub.dnd.e5.db :refer [default-value
@@ -46,11 +46,14 @@
 
 (def user->local-store-interceptor (after (fn [db] (user->local-store (:user-data db)))))
 
-(def magic-item->local-store-interceptor (after (fn [db] (magic-item->local-store (::magic-items/builder-item db)))))
+(def magic-item->local-store-interceptor (after (fn [db] (magic-item->local-store (::mi/builder-item db)))))
 
 (def character-interceptors [check-spec-interceptor
                              (path :character)
                              ->local-store])
+
+(def item-interceptors [(path ::mi/builder-item)
+                        magic-item->local-store-interceptor])
 
 
 ;; -- Event Handlers --------------------------------------------------
@@ -1374,8 +1377,8 @@
                                               :result (spells/spell-map kw)}
                        (monsters/monster-map kw) {:type :monster
                                                   :result (monsters/monster-map kw)}
-                       (magic-items/magic-item-map kw) {:type :magic-item
-                                                        :result (magic-items/magic-item-map kw)}
+                       (mi/magic-item-map kw) {:type :magic-item
+                                                        :result (mi/magic-item-map kw)}
                        (= "tavern name" search-text) {:type :tavern-name
                                                       :result (char-rand5e/random-tavern-name)}
                        name-result name-result
@@ -1609,8 +1612,27 @@
                   "light-theme")))))
 
 (reg-event-db
- ::magic-items/set-builder-item
+ ::mi/set-builder-item
  [magic-item->local-store-interceptor]
  (fn [db [_ magic-item]]
-   (prn "SET MAGIC ITEM" magic-item)
-   (assoc db ::magic-items/builder-item magic-item)))
+   (assoc db ::mi/builder-item magic-item)))
+
+(reg-event-db
+ ::mi/toggle-attunement
+ item-interceptors
+ (fn [item _]
+   (if (::mi/attunement item)
+     (dissoc item ::mi/attunement)
+     (assoc item ::mi/attunement [:any]))))
+
+(reg-event-db
+ ::mi/set-item-name
+ item-interceptors
+ (fn [item [_ item-name]]
+   (assoc item ::mi/name item-name)))
+
+(reg-event-db
+ ::mi/set-item-type
+ item-interceptors
+ (fn [item [_ item-type-str]]
+   (assoc item ::mi/type (keyword "orcpub.dnd.e5.magic-items" item-type-str))))
