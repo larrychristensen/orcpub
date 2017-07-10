@@ -45,6 +45,21 @@
 (def plus-2-name (bonus-name-fn 2))
 (def plus-3-name (bonus-name-fn 3))
 
+(defn horn-of-valhalla [name rarity die & [requirement]]
+  {
+   :name (str name " Horn of Valhalla")
+   :item-type :wondrous-item
+   :rarity rarity
+   :description (str "You can use an action to blow this horn. In response, "
+                     die "d4 + " die " warrior spirits from the Valhalla appear within 60 feet of you. They use the statistics of a berserker.
+They return to Valhalla after 1 hour or when they drop to 0 hit points. Once you use the horn, it can’t be used again until 7 days have passed."
+                     (if requirement
+                       (str "
+You must have proficiency with all "
+                            requirement
+                            ". If you blow the horn without meeting this requirement, the summoned berserkers attack you. If you meet the requirement, they are friendly to you and your companions and follow your commands."))) 
+   })
+
 (defn potion-of-giant-strength [name strength rarity]
   {
    :name (str "Potion of " name " Strength")
@@ -1268,15 +1283,12 @@ on saving throws against spells and other magical effects. If you have 17 or mor
      :rarity :rare
      :description "You can use an action to speak the horn’s command word and then blow the horn, which emits a thunderous blast in a 30-foot cone that is audible 600 feet away. Each creature in the cone must make a DC 15 Constitution saving throw. On a failed save, a creature takes 5d6 thunder damage and is deafened for 1 minute. On a successful save, a creature takes half as much damage and isn’t deafened. Creatures and objects made of glass or crystal have disadvantage on the saving throw and take 10d6 thunder damage instead of 5d6.
 Each use of the horn’s magic has a 20 percent chance of causing the horn to explode. The explosion deals 10d6 fire damage to the blower and destroys the horn."
-     }{
-     :name "Horn of Valhalla"
-     :item-type :wondrous-item
-     :rarity "rare (silver or brass), very rare (bronze), or legendary (iron)"
-     :description "You can use an action to blow this horn. In response, warrior spirits from the Valhalla appear within 60 feet of you. They use the statistics of a berserker.
-They return to Valhalla after 1 hour or when they drop to 0 hit points. Once you use the horn, it can’t be used again until 7 days have passed.
-Four types of horn of Valhalla are known to exist, each made of a different metal. The horn’s type determines how many berserkers answer its summons, as well as the requirement for its use. The GM chooses the horn’s type or determines it randomly.
-If you blow the horn without meeting its requirement, the summoned berserkers attack you. If you meet the requirement, they are friendly to you and your companions and follow your commands."
-     }{
+       }
+    (horn-of-valhalla "Silver" :rare 2)
+    (horn-of-valhalla "Brass" :rare 3 "simple weapons")
+    (horn-of-valhalla "Bronze" :rare 4 "medium armor")
+    (horn-of-valhalla "Iron" :rare 5 "martial weapons")
+    {
      :name "Horseshoes of a Zephyr"
      :item-type :wondrous-item
      :rarity :very-rare
@@ -1846,8 +1858,10 @@ If you die while wearing the ring, your soul enters it, unless it already houses
      :description "While wearing this ring, you regain 1d6 hit points every 10 minutes, provided that you have at least 1 hit point. If you lose a body part, the ring causes the missing part to regrow and return to full functionality after 1d6 + 1 days if you have at least 1 hit point the whole time."
      }{
      :name "Ring of Shooting Stars"
-     :item-type :ring
-     :rarity "very rare (requires attunement outdoors at night)"
+       :item-type :ring
+       :rarity :very-rare
+       :attunement [:any]
+       :attunement-details "requires attunement outdoors at night" 
      :description "While wearing this ring in dim light or darkness, you can cast dancing lights and light from the ring at will. Casting either spell from the ring requires an action.
 The ring has 6 charges for the following other properties. The ring regains 1d6 expended charges daily at dawn.
 Faerie Fire. You can expend 1 charge as an action to cast faerie fire from the ring.
