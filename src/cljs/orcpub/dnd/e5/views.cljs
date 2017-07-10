@@ -2684,6 +2684,11 @@
    {:class-name "input"
     :type :number}])
 
+(defn attunement-value [attunement key name]
+  [:div
+   {:on-click #(dispatch [::mi/toggle-attunement-value key])}
+   [labeled-checkbox name (attunement key)]])
+
 (defn attunement-selector [attunement]
   (prn "ATTUNMENT" attunement)
   (base-builder-field
@@ -2694,19 +2699,21 @@
      [:span.f-s-24.f-w-b "Attunement"]]
     (if attunement
       [:div
-       [labeled-checkbox "Any" (= [:any] attunement)]
+       [labeled-checkbox "Any" (= #{:any} attunement)]
        [:div.flex.flex-wrap
         [:div.flex-grow-1
          (base-builder-field
           [:div.f-w-b.m-b-5 "Class"]
           [:div
-           [labeled-checkbox "Spellcaster" false]
            (doall
             (map
              (fn [{:keys [::template/key ::template/name]}]
                ^{:key key}
-               [labeled-checkbox name false])
-             t/base-class-options))])]
+               [attunement-value attunement key name])
+             (cons
+              {::template/key :spellcaster
+               ::template/name "Spellcaster"}
+              t/base-class-options)))])]
         [:div.flex-grow-1
          (base-builder-field
           [:div.f-w-b.m-b-5 "Alignment"]
@@ -2716,8 +2723,7 @@
             (map
              (fn [{:keys [key name]}]
                ^{:key key}
-               [:div.m-b-5
-                [labeled-checkbox name false]])
+               [attunement-value attunement key name])
              (concat
               [{:name "Good"
                 :key :good}
@@ -2842,40 +2848,49 @@
           {:type :number}]])
       [:speed :flying-speed :swimming-speed :climbing-speed]))]))
 
-(defn item-damage-resistances []
+(defn item-modifier-toggles [title item-kws toggle-event has-sub]
   (base-builder-field
-   [:div.f-w-b.m-b-5 "Damage Resistances"]
+   [:div.f-w-b.m-b-5 title]
    [:div
     (doall
      (map
       (fn [type-kw]
         ^{:key type-kw}
-        [labeled-checkbox (s/capitalize (name type-kw)) false])
-      opt/damage-types))]))
+        [:div
+         {:on-click #(dispatch [toggle-event type-kw])}
+         [labeled-checkbox (s/capitalize (name type-kw)) @(subscribe [has-sub type-kw])]])
+      item-kws))]))
+
+(defn item-damage-resistances []
+  [item-modifier-toggles
+   "Damage Resistances"
+   opt/damage-types
+   ::mi/toggle-damage-resistance
+   ::mi/has-damage-resistance?])
+
+(defn item-damage-vulnerabilities []
+  [item-modifier-toggles
+   "Damage Vulnerabilities"
+   opt/damage-types
+   ::mi/toggle-damage-vulnerability
+   ::mi/has-damage-vulnerability?])
 
 (defn item-damage-immunities []
-  (base-builder-field
-   [:div.f-w-b.m-b-5 "Damage Immunities"]
-   [:div
-    (doall
-     (map
-      (fn [type-kw]
-        ^{:key type-kw}
-        [labeled-checkbox (s/capitalize (name type-kw)) false])
-      opt/damage-types))]))
+  [item-modifier-toggles
+   "Damage Immunities"
+   opt/damage-types
+   ::mi/toggle-damage-immunity
+   ::mi/has-damage-immunity?])
 
 (defn item-condition-immunities []
-  (base-builder-field
-   [:div.f-w-b.m-b-5 "Condition Immunities"]
-   [:div
-    (doall
-     (map
-      (fn [{:keys [name]}]
-        ^{:key name}
-        [labeled-checkbox name false])
-      opt/conditions))]))
+  [item-modifier-toggles
+   "Condition Immunities"
+   (keys opt/conditions-map)
+   ::mi/toggle-condition-immunity
+   ::mi/has-condition-immunity?])
 
-(defn item-bonuses []
+(defn item-bonuses [{:keys [::mi/magical-damage-bonus
+                            ::mi/magical-attack-bonus]}]
   [:div.m-b-20
    [:div.m-b-10
     [:span.f-s-24.f-w-b "Item Properties"]]
@@ -2883,13 +2898,13 @@
     [:div
      [:div.f-w-b.m-b-5 "Damage Bonus"]
      [number-field
-      {:value 0
-       :on-change (fn [])}]]
+      {:value magical-damage-bonus
+       :on-change #(dispatch [::mi/set-item-damage-bonus %])}]]
     [:div.m-l-20
      [:div.f-w-b.m-b-5 "Attack Bonus"]
      [number-field
-      {:value 0
-       :on-change (fn [])}]]]
+      {:value magical-attack-bonus
+       :on-change #(dispatch [::mi/set-item-attack-bonus %])}]]]
    [:div.flex.flex-wrap.m-b-20
     [:div.flex-grow-1
      [item-ability-bonuses]]
@@ -2901,14 +2916,29 @@
     [:div.flex-grow-1
      [item-damage-resistances]]
     [:div.flex-grow-1
+     [item-damage-vulnerabilities]]
+    [:div.flex-grow-1
      [item-damage-immunities]]
     [:div.flex-grow-1
      [item-condition-immunities]]]])
 
+(defn dropdown [{:keys [items value on-change]}]
+  [:select.builder-option.builder-option-dropdown
+   {:value (or value "")
+    :on-change #(on-change (event-value %))}
+   (doall
+    (map
+     (fn [{:keys [value title]}]
+       ^{:key value}
+       [:option.builder-dropdown-item
+        {:value value}
+        title])
+     items))])
+
 (defn item-builder []
-  (let [{:keys [::mi/name ::mi/type ::mi/attunement] :as item} @(subscribe [::mi/builder-item])
-        item-types @(subscribe [::mi/item-types])]
-    (prn "ITEM TYPES" item-types)
+  (let [{:keys [::mi/name ::mi/type ::mi/rarity ::mi/description ::mi/attunement] :as item} @(subscribe [::mi/builder-item])
+        item-types @(subscribe [::mi/item-types])
+        item-rarities @(subscribe [::mi/rarities])]
     (prn "ITEM" item)
     [:div.p-20.main-text-color
      [:div.flex.w-100-p.flex-wrap
@@ -2921,26 +2951,32 @@
       [:div.flex-grow-1.m-l-5
        (base-builder-field
         "Type"
-        [:select.builder-option.builder-option-dropdown
-         {:value (or type "")
-          :on-change #(dispatch [::mi/set-item-type (event-value %)])}
-         (doall
-          (map
-           (fn [type-kw]
-             (prn "TYPE KE" type-kw)
-             ^{:key type-kw}
-             [:option.builder-dropdown-item
-              {:value type-kw}
-              (common/kw-to-name type-kw)])
-           item-types))])]
+        [dropdown
+         {:items (map
+                  (fn [type-kw]
+                    {:value type-kw
+                     :title (common/kw-to-name type-kw)})
+                  item-types)
+          :value type
+          :on-change #(dispatch [::mi/set-item-type %])}])]
       [:div.flex-grow-1.m-l-5
        (base-builder-field
         "Rarity"
+        [dropdown
+         {:items (map
+                  (fn [rarity]
+                    {:value rarity
+                     :title (clojure.core/name rarity)})
+                  item-rarities)
+          :value rarity
+          :on-change #(dispatch [::mi/set-item-rarity %])}]
         [:select.builder-option.builder-option-dropdown])]]
-     [:div.m-b-40 (base-builder-field "Description" [textarea-field "" (fn [])])]
-     (if (= ::mi/armor type)
+     [:div.m-b-40 (base-builder-field "Description" [textarea-field
+                                                     {:value description
+                                                      :on-change #(dispatch [::mi/set-item-description %])}])]
+     (if (= :armor type)
        [:div.m-b-40 [base-armor-selector]])
-     (if (= ::mi/weapon type)
+     (if (= :weapon type)
        [:div.m-b-40 [base-weapon-selector]])
      [:div.m-b-40
       [attunement-selector attunement]]

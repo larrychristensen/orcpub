@@ -83,6 +83,12 @@
 (defn condition-immunity [value & [qualifier-text]]
   (mods/set-mod ?condition-immunities (resistance-cfg value qualifier-text) (name value) " condition immunity"))
 
+(def mods-map
+  {:damage-resistance damage-resistance
+   :damage-vulnerability damage-vulnerability
+   :damage-immunity damage-immunity
+   :condition-immunity condition-immunity})
+
 (defn darkvision [value & [order-number]]
   (mods/modifier
    ?darkvision
