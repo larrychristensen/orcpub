@@ -2662,44 +2662,68 @@
    (comps/checkbox selected? false)
    [:span.m-l-5.f-s-14 label]])
 
-(defn attunement-selector []
+(defn text-field [{:keys [value on-change]}]
+  [comps/input-field
+   :input
+   value
+   on-change
+   {:class-name "input"}])
+
+(defn textarea-field [{:keys [value on-change]}]
+  [comps/input-field
+   :textarea
+   value
+   on-change
+   {:class-name "input"}])
+
+(defn number-field [{:keys [value on-change]}]
+  [comps/input-field
+   :input
+   value
+   on-change
+   {:class-name "input"
+    :type :number}])
+
+(defn attunement-selector [attunement]
+  (prn "ATTUNMENT" attunement)
   (base-builder-field
    [:div
     [:div.flex.align-items-c.m-b-10
-     (comps/checkbox false false)
+     {:on-click #(dispatch [::mi/toggle-attunement])}
+     (comps/checkbox attunement false)
      [:span.f-s-24.f-w-b "Attunement"]]
-    [:div.flex.flex-wrap
-     [:div.flex-grow-1
-      (base-builder-field
-       [:div.f-w-b.m-b-5 "Class"]
-       [:div
-        [labeled-checkbox "Any" false]
-        [labeled-checkbox "Spellcaster" false]
-        (doall
-         (map
-          (fn [{:keys [::template/key ::template/name]}]
-            ^{:key key}
-            [labeled-checkbox name false])
-          t/base-class-options))])]
-     [:div.flex-grow-1
-      (base-builder-field
-       [:div.f-w-b.m-b-5 "Alignment"]
-       [:div
-        [:div.m-b-5]
-        (doall
-         (map
-          (fn [{:keys [key name]}]
-            ^{:key key}
-            [:div.m-b-5
-             [labeled-checkbox name false]])
-          (concat
-           [{:name "Any"
-             :key :any}
-            {:name "Good"
-             :key :good}
-            {:name "Evil"
-             :key :evil}]
-           opt/alignments)))])]]]))
+    (if attunement
+      [:div
+       [labeled-checkbox "Any" (= [:any] attunement)]
+       [:div.flex.flex-wrap
+        [:div.flex-grow-1
+         (base-builder-field
+          [:div.f-w-b.m-b-5 "Class"]
+          [:div
+           [labeled-checkbox "Spellcaster" false]
+           (doall
+            (map
+             (fn [{:keys [::template/key ::template/name]}]
+               ^{:key key}
+               [labeled-checkbox name false])
+             t/base-class-options))])]
+        [:div.flex-grow-1
+         (base-builder-field
+          [:div.f-w-b.m-b-5 "Alignment"]
+          [:div
+           [:div.m-b-5]
+           (doall
+            (map
+             (fn [{:keys [key name]}]
+               ^{:key key}
+               [:div.m-b-5
+                [labeled-checkbox name false]])
+             (concat
+              [{:name "Good"
+                :key :good}
+               {:name "Evil"
+                :key :evil}]
+              opt/alignments)))])]]])]))
 
 (defn base-armor-selector []
   (let [mobile? @(subscribe [:mobile?])]
@@ -2818,51 +2842,108 @@
           {:type :number}]])
       [:speed :flying-speed :swimming-speed :climbing-speed]))]))
 
+(defn item-damage-resistances []
+  (base-builder-field
+   [:div.f-w-b.m-b-5 "Damage Resistances"]
+   [:div
+    (doall
+     (map
+      (fn [type-kw]
+        ^{:key type-kw}
+        [labeled-checkbox (s/capitalize (name type-kw)) false])
+      opt/damage-types))]))
+
+(defn item-damage-immunities []
+  (base-builder-field
+   [:div.f-w-b.m-b-5 "Damage Immunities"]
+   [:div
+    (doall
+     (map
+      (fn [type-kw]
+        ^{:key type-kw}
+        [labeled-checkbox (s/capitalize (name type-kw)) false])
+      opt/damage-types))]))
+
+(defn item-condition-immunities []
+  (base-builder-field
+   [:div.f-w-b.m-b-5 "Condition Immunities"]
+   [:div
+    (doall
+     (map
+      (fn [{:keys [name]}]
+        ^{:key name}
+        [labeled-checkbox name false])
+      opt/conditions))]))
+
 (defn item-bonuses []
   [:div.m-b-20
-   [:div.main-text-color.m-b-10
+   [:div.m-b-10
     [:span.f-s-24.f-w-b "Item Properties"]]
-   [:div.flex.flex-wrap
+   [:div.flex.m-b-20
+    [:div
+     [:div.f-w-b.m-b-5 "Damage Bonus"]
+     [number-field
+      {:value 0
+       :on-change (fn [])}]]
+    [:div.m-l-20
+     [:div.f-w-b.m-b-5 "Attack Bonus"]
+     [number-field
+      {:value 0
+       :on-change (fn [])}]]]
+   [:div.flex.flex-wrap.m-b-20
     [:div.flex-grow-1
      [item-ability-bonuses]]
     [:div.flex-grow-1
      [saving-throw-bonuses]]
     [:div.flex-grow-1
-     [item-speed-bonuses]]]])
+     [item-speed-bonuses]]]
+   [:div.flex.flex-wrap
+    [:div.flex-grow-1
+     [item-damage-resistances]]
+    [:div.flex-grow-1
+     [item-damage-immunities]]
+    [:div.flex-grow-1
+     [item-condition-immunities]]]])
 
 (defn item-builder []
-  (let [data @(subscribe [::mi/builder-item])]
-    [:div.p-20
+  (let [{:keys [::mi/name ::mi/type ::mi/attunement] :as item} @(subscribe [::mi/builder-item])
+        item-types @(subscribe [::mi/item-types])]
+    (prn "ITEM TYPES" item-types)
+    (prn "ITEM" item)
+    [:div.p-20.main-text-color
      [:div.flex.w-100-p.flex-wrap
-      [:div.flex-grow-1.m-b-20 [input-builder-field "Item Name" "" (fn []) {:class-name "input"}]]
-      [:div.flex-grow-1.m-l-5.m-b-20
+      [:div.flex-grow-1.m-b-20
+       [input-builder-field
+        "Item Name"
+        name
+        #(dispatch [::mi/set-item-name %])
+        {:class-name "input"}]]
+      [:div.flex-grow-1.m-l-5
        (base-builder-field
         "Type"
         [:select.builder-option.builder-option-dropdown
-         {:value (or (:type data) "")
-          :on-change #(dispatch [::mi/set-builder-item (assoc data :type (-> % event-value common/name-to-kw))])}
+         {:value (or type "")
+          :on-change #(dispatch [::mi/set-item-type (event-value %)])}
          (doall
           (map
            (fn [type-kw]
+             (prn "TYPE KE" type-kw)
              ^{:key type-kw}
              [:option.builder-dropdown-item
               {:value type-kw}
               (common/kw-to-name type-kw)])
-           [:wondrous-item :weapon :armor :ring :wand :rod :scroll :potion :other]))])]
-      [:div.flex-grow-1.m-l-5.m-b-40
-       (base-builder-field
-        "Subtype"
-        [:select.builder-option.builder-option-dropdown])]
-      [:div.flex-grow-1.m-l-5.m-b-40
+           item-types))])]
+      [:div.flex-grow-1.m-l-5
        (base-builder-field
         "Rarity"
         [:select.builder-option.builder-option-dropdown])]]
-     (if (= :armor (:type data))
+     [:div.m-b-40 (base-builder-field "Description" [textarea-field "" (fn [])])]
+     (if (= ::mi/armor type)
        [:div.m-b-40 [base-armor-selector]])
-     (if (= :weapon (:type data))
+     (if (= ::mi/weapon type)
        [:div.m-b-40 [base-weapon-selector]])
      [:div.m-b-40
-      [attunement-selector]]
+      [attunement-selector attunement]]
      [item-bonuses]]))
 
 (defn item-builder-page []
@@ -3250,11 +3331,11 @@
   (let [device-type @(subscribe [:device-type])]
     [content-page
      "Magic Items"
-     [#_[:button.form-button
+     [[:button.form-button
        {:on-click #(dispatch [:route routes/dnd-e5-item-builder-page-route])}
-       [:div.flex.align-items-c
+       [:div.flex.align-items-c.white
         [svg-icon "beer-stein" 18]
-        [:span "New Item"]]]]
+        [:span.m-l-5 "New Item"]]]]
      [:div.p-l-5.p-r-5.p-b-10
       [:div.p-b-10.p-l-10.p-r-10
        [:div.posn-rel
