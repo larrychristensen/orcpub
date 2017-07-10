@@ -169,6 +169,7 @@
 
 (def active-style {:background-color "rgba(240, 161, 0, 0.7)"})
 
+
 (defn header-tab []
   (let [hovered? (r/atom false)]
     (fn [title icon on-click disabled active device-type & buttons]
@@ -195,6 +196,7 @@
            [:div.uppercase
             {:style {:position :absolute
                      :background-color "#2c3445"
+                     :z-index 10000
                      :top (if mobile? 46 84)
                      :right 0}}
             (doall
@@ -852,14 +854,15 @@
            (if attunement
              (requires-attunement attunement)))]]))
 
-(defn item-details [{:keys [summary description]}]
+(defn item-details [{:keys [summary description]} single-column?]
   (if (or summary description)
-    (paragraphs (or summary description))))
+    (paragraphs (or summary description) single-column?)))
 
-(defn item-component [item]
+(defn item-component [item & [hide-summary? single-column?]]
   [:div.m-l-10.l-h-19
-   [:div [item-summary item]]
-   [:div [item-details item]]])
+   (if (not hide-summary?)
+     [:div [item-summary item]])
+   [:div [item-details item single-column?]]])
 
 (defn magic-item-result [item]
   [:div.white
@@ -2151,6 +2154,33 @@
                                                                  (weapon-attack-modifier weapon false)))]]))
               all-weapons))]]]]))))
 
+(defn magic-item-rows [expanded-details magic-item-cfgs magic-weapon-cfgs magic-armor-cfgs]
+  (mapcat
+   (fn [[item-kw item-cfg]]
+     (let [{:keys [name item-type item-subtype rarity attunement description summary] :as item} (mi/magic-item-map item-kw)
+           expanded? (@expanded-details item-kw)]
+       [[:tr.pointer
+         {:on-click #(swap! expanded-details (fn [d] (update d item-kw not)))}
+         [:td.p-10.f-s-16.f-w-b name]
+         [:td.p-10 (str (common/kw-to-name item-type)
+                   ", "
+                   (common/kw-to-name rarity))]
+         [:td.p-r-5
+          [:div.orange
+           (if (not mobile?)
+             [:span.underline (if expanded? "less" "more")])
+           [:i.fa.m-l-5
+            {:class-name (if expanded? "fa-caret-up" "fa-caret-down")}]]]]
+        (if expanded?
+          [:tr
+           [:td.p-10
+            {:col-span 3}
+            [item-component item true true]]])]))
+   (merge
+    magic-item-cfgs
+    magic-weapon-cfgs
+    magic-armor-cfgs)))
+
 (defn magic-items-section-2 []
   (let [expanded-details (r/atom {})]
     (fn [id]
@@ -2171,27 +2201,15 @@
              [:th.p-10 "Details"]
              [:th]]
             (doall
-             (map
-              (fn [[item-kw item-cfg]]
-                (let [{:keys [name item-type item-subtype rarity attunement description summary] :as item} (mi/magic-item-map item-kw)
-                      expanded? (@expanded-details item-kw)]
-                  ^{:key item-kw}
-                  [:tr.pointer
-                   {:on-click #(swap! expanded-details (fn [d] (update d item-kw not)))}
-                   [:td.p-10.f-s-16.f-w-b name]
-                   [:td (str (common/kw-to-name item-type)
-                             ", "
-                             (common/kw-to-name rarity))]
-                   #_[:td.p-r-5
-                    [:div.orange
-                     (if (not mobile?)
-                       [:span.underline (if expanded? "less" "more")])
-                     [:i.fa.m-l-5
-                      {:class-name (if expanded? "fa-caret-up" "fa-caret-down")}]]]]))
-              (merge
-               magic-item-cfgs
-               magic-weapon-cfgs
-               magic-armor-cfgs)))]]]]))))
+             (map-indexed
+              (fn [i row]
+                (with-meta
+                  row
+                  {:key i}))
+              (magic-item-rows expanded-details
+                               magic-item-cfgs
+                               magic-weapon-cfgs
+                               magic-armor-cfgs)))]]]]))))
 
 (defn other-equipment-section-2 []
   (let [expanded-details (r/atom {})]
