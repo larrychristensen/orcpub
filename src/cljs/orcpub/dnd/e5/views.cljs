@@ -2813,7 +2813,7 @@
             :on-change #(dispatch [::mi/set-ability-mod-value ability-kw %])}]]])
       char/ability-keys))]))
 
-(defn saving-throw-bonuses []
+(defn item-saving-throw-bonuses []
   (base-builder-field
    [:div.f-w-b.m-b-5 "Saving Throw Bonus"]
    [:div
@@ -2824,11 +2824,14 @@
         [:div.flex.align-items-c
          [:div.w-40 (str (s/upper-case (name ability-kw)) " Save")]
          [:div
-          [:select.builder-option.builder-option-dropdown
-           [:option.builder-dropdown-item
-            "Increases By"]]]
-         [:input.input.w-60.m-l-5
-          {:type :number}]])
+          [dropdown
+           {:value :increases-by
+            :items [{:value :increases-by
+                     :title "Increases By"}]}]]
+         [:div.w-60.m-l-5
+          [number-field
+           {:value @(subscribe [::mi/save-mod-value ability-kw])
+            :on-change #(dispatch [::mi/set-save-mod-value ability-kw %])}]]])
       char/ability-keys))]))
 
 (defn item-speed-bonuses []
@@ -2842,20 +2845,22 @@
         [:div.flex.align-items-c
          [:div.w-100 (s/capitalize (common/kw-to-name type-kw))]
          [:div
-          [:select.builder-option.builder-option-dropdown.w-200
-           [:option.builder-dropdown-item
-            "Becomes At Least"]
-           [:option.builder-dropdown-item
-            "Increases By"]
-           [:option.builder-dropdown-item
-            "Multiplies By"]
-           (if (not= :speed type-kw)
-             [:option.builder-dropdown-item
-              "Equals Walking Speed"])]]
+          [dropdown
+           {:value @(subscribe [::mi/speed-mod-type type-kw])
+            :on-change #(dispatch [::mi/set-speed-mod-type type-kw %])
+            :items (let [items [{:value :becomes-at-least
+                                 :title "Becomes At Least"}
+                                {:value :increases-by
+                                 :title "Increases By"}]]
+                     (if (= :speed type-kw)
+                       items
+                       (conj items
+                             {:value :equals-walking-speed
+                              :title "Equals Walking Speed"})))}]]
          [:div.w-60.m-l-5
           [number-field
-           {:value 0
-            :on-change (fn [])}]]])
+           {:value @(subscribe [::mi/speed-mod-value type-kw])
+            :on-change #(dispatch [::mi/set-speed-mod-value type-kw %])}]]])
       [:speed :flying-speed :swimming-speed :climbing-speed]))]))
 
 (defn item-modifier-toggles [title item-kws toggle-event has-sub]
@@ -2919,7 +2924,7 @@
     [:div.flex-grow-1
      [item-ability-bonuses]]
     [:div.flex-grow-1
-     [saving-throw-bonuses]]
+     [item-saving-throw-bonuses]]
     [:div.flex-grow-1
      [item-speed-bonuses]]]
    [:div.flex.flex-wrap
