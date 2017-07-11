@@ -1193,7 +1193,6 @@
       :margin-top "5px"
       :display :block
       :padding "10px"
-      :width "100%"
       :box-sizing :border-box
       :font-size "14px"}]
 
