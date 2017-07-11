@@ -91,4 +91,4 @@
 (reg-local-store-cofx
  :local-store-magic-item
  local-storage-magic-item-key
- ::mi5e/magic-item)
+ ::mi5e/internal-magic-item)

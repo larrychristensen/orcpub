@@ -105,32 +105,32 @@
 (defn speed-override [value]
   (mods/vec-mod ?speed-overrides value))
 
-(defn flying-speed [value]
-  (mods/modifier ?flying-speed value "flying" (mods/bonus-str value)))
+(defn flying-speed-bonus [value]
+  (mods/cum-sum-mod ?flying-speed-bonus value "flying speed" (mods/bonus-str value)))
+
+(defn flying-speed-override [value]
+  (mods/vec-mod ?flying-speed-overrides value))
 
 (defn flying-speed-equal-to-walking []
-  (mods/modifier ?flying-speed (if (and (int? ?flying-speed)
-                                        (> ?flying-speed ?speed))
-                                 ?flying-speed
-                                 ?speed)))
+  (mods/vec-mod ?flying-speed-overrides ?speed))
 
 (defn swimming-speed [value]
-  (mods/cum-sum-mod ?swimming-speed value "swimming" (mods/bonus-str value)))
+  (mods/cum-sum-mod ?swimming-speed-bonus value "swimming" (mods/bonus-str value)))
+
+(defn swimming-speed-override [value]
+  (mods/vec-mod ?swimming-speed-overrides value))
 
 (defn swimming-speed-equal-to-walking []
-  (mods/modifier ?swimming-speed (if (and (int? ?swimming-speed)
-                                          (> ?swimming-speed ?speed))
-                                   ?swimming-speed
-                                   ?speed)))
+  (mods/vec-mod ?swimming-speed-overrides ?speed))
 
 (defn climbing-speed [value]
-  (mods/cum-sum-mod ?climbing-speed value "climbing" (mods/bonus-str value)))
+  (mods/cum-sum-mod ?climbing-speed-bonus value "climbing" (mods/bonus-str value)))
+
+(defn climbing-speed-override [value]
+  (mods/vec-mod ?climbing-speed-overrides value))
 
 (defn climbing-speed-equal-to-walking []
-  (mods/modifier ?climbing-speed (if (and (int? ?climbing-speed)
-                                          (> ?climbing-speed ?speed))
-                                   ?climbing-speed
-                                   ?speed)))
+  (mods/vec-mod ?climbing-speed-overrides ?speed))
 
 (defn unarmored-speed-bonus [value]
   (mods/cum-sum-mod ?unarmored-speed-bonus value "unarmored speed" (mods/bonus-str value)))
@@ -165,11 +165,14 @@
    :darkvision-bonus darkvision-bonus
    :speed speed
    :speed-override speed-override
-   :flying-speed flying-speed
+   :flying-speed-bonus flying-speed-bonus
+   :flying-speed-override flying-speed-override
    :flying-speed-equal-to-walking flying-speed-equal-to-walking
    :swimming-speed swimming-speed
+   :swimming-speed-override swimming-speed-override
    :swimming-speed-equal-to-walking swimming-speed-equal-to-walking
    :climbing-speed climbing-speed
+   :climbing-speed-override climbing-speed-override
    :climbing-speed-equal-to-walking climbing-speed-equal-to-walking})
 
 (defn level-ability-increase [ability bonus]

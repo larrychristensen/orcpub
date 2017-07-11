@@ -787,7 +787,9 @@
    (keyword "orcpub.dnd.e5.magic-items" (str "has-" (name toggle-mod) "?"))
    :<- [::mi5e/builder-item]
    (fn [item [_ type]]
-     (get-in item [::mi5e/modifiers (events/mod-cfg toggle-mod type)]))))
+     (get-in item [::mi5e/internal-modifiers
+                   toggle-mod
+                   type]))))
 
 (reg-sub
  ::mi5e/item-ability-bonus
@@ -797,7 +799,7 @@
                                    :ability-override
                                    :ability)
                                  ability)
-         modifiers (events/default-mod-set (::mi5e/modifiers item))
+         modifiers (events/default-mod-set (::mi5e/internal-modifiers item))
          modifier (get modifiers mod-cfg)
          args (::mod/args modifier)]
      (second args))))
@@ -810,7 +812,7 @@
                                    :ability-override
                                    :ability)
                                  ability)
-         modifiers (events/default-mod-set (::mi5e/modifiers item))
+         modifiers (events/default-mod-set (::mi5e/internal-modifiers item))
          modifier (get modifiers mod-cfg)
          args (::mod/args modifier)]
      (second args))))
@@ -820,7 +822,7 @@
  :<- [::mi5e/builder-item]
  (fn [item [_ ability-kw]]
    (get-in item
-           [::mi5e/modifiers
+           [::mi5e/internal-modifiers
             :ability
             ability-kw
             :type])))
@@ -830,9 +832,27 @@
  :<- [::mi5e/builder-item]
  (fn [item [_ ability-kw]]
    (get-in item
-           [::mi5e/modifiers
+           [::mi5e/internal-modifiers
             :ability
             ability-kw
+            :value])))
+
+(reg-sub
+ ::mi5e/speed-mod-type
+ :<- [::mi5e/builder-item]
+ (fn [item [_ speed-type-kw]]
+   (get-in item
+           [::mi5e/internal-modifiers
+            speed-type-kw
+            :type])))
+
+(reg-sub
+ ::mi5e/speed-mod-value
+ :<- [::mi5e/builder-item]
+ (fn [item [_ speed-type-kw]]
+   (get-in item
+           [::mi5e/internal-modifiers
+            speed-type-kw
             :value])))
 
 (reg-sub
@@ -840,7 +860,7 @@
  :<- [::mi5e/builder-item]
  (fn [item [_ ability-kw]]
    (get-in item
-           [::mi5e/modifiers
+           [::mi5e/internal-modifiers
             :save
             ability-kw
             :value])))

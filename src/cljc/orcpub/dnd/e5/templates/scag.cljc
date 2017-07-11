@@ -392,7 +392,7 @@
                                              :summary (str "when hit with melee attack, deal " (?class-level :sorcerer) " lightning damage to attacker, if it fails a DC " (?spell-save-dc ::char5e/cha) " STR save it is pushed 20 ft. from you")})]}
                            18 {:modifiers [(mod5e/damage-immunity :lightning)
                                            (mod5e/damage-immunity :thunder)
-                                           (mod5e/flying-speed 60)
+                                           (mod5e/flying-speed-override 60)
                                            (mod5e/action
                                             {:name "Wind Soul"
                                              :page 137
