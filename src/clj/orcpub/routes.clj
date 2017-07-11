@@ -22,6 +22,7 @@
             [orcpub.dnd.e5.skills :as skill5e]
             [orcpub.dnd.e5.character :as char5e]
             [orcpub.dnd.e5.spells :as spells]
+            [orcpub.dnd.e5.magic-items :as mi5e]
             [orcpub.dnd.e5.template :as t5e]
             [datomic.api :as d]
             [bidi.bidi :as bidi]
@@ -686,13 +687,16 @@
                :body (d/pull (d/db conn) '[*] id)}))))
       {:status 401 :body "You do not own this character"})))
 
+(defn get-new-id [temp-id result]
+  (-> result :tempids (get temp-id)))
+
 (defn create-new-character [conn character username]
   (let [result @(d/transact conn
                             [(-> character
                                  (assoc :db/id "tempid"
                                         ::se/owner username)
                                  add-dnd-5e-character-tags)])
-        new-id (-> result :tempids (get "tempid"))]
+        new-id (get-new-id "tempid" result)]
     {:status 200
      :body (d/pull (d/db conn) '[*] new-id)}))
 
@@ -724,6 +728,19 @@
 
 (defn save-character [{:keys [db transit-params body conn identity] :as request}]
   (do-save-character db conn transit-params identity))
+
+(defn save-item [{:keys [db transit-params body conn identity] :as request}]
+  (if-let [data (spec/explain-data ::mi5e/magic-item transit-params)]
+    {:status 400 :body data}
+    (as-> transit-params $
+      (assoc $
+             ::mi5e/owner (:user identity)
+             :db/id "tempid")
+      @(d/transact conn [$])
+      (get-new-id "tempid" $)
+      (d/pull (d/db conn) '[*] $)
+      {:status 200
+       :body $})))
 
 (defn character-list [{:keys [db transit-params body conn identity] :as request}]
   (let [username (:user identity)
@@ -871,7 +888,7 @@
 
 (defn get-character-for-id [db id]
   (let [{:keys [::se/type ::se/game ::se/game-version] :as character} (d/pull db '[*] id)
-        problems [] #_(dnd-e5-char-type-problems character)]
+        problems (dnd-e5-char-type-problems character)]
     (if (seq problems)
       {:status 400 :body problems}
       character)))
@@ -1016,6 +1033,20 @@
        [(route-map/path-for route-map/follow-user-route :user ":user") ^:interceptors [check-auth]
         {:post `follow-user
          :delete `unfollow-user}]
+
+       ;; Items
+       [(route-map/path-for route-map/dnd-e5-items-route) ^:interceptors [check-auth]
+        {:post `save-item
+         ;;:get `item-list
+         }]
+       #_[(route-map/path-for route-map/dnd-e5-item-summaries-route) ^:interceptors [check-auth]
+        {:get `item-summary-list}]
+       #_[(route-map/path-for route-map/dnd-e5-item-route :id ":id") ^:interceptors [check-auth]
+        {:delete `delete-item}]
+       #_[(route-map/path-for route-map/dnd-e5-item-route :id ":id")
+        {:get `get-item}]
+
+       ;; Characters
        [(route-map/path-for route-map/dnd-e5-char-list-route) ^:interceptors [check-auth]
         {:post `save-character
          :get `character-list}]
@@ -1025,6 +1056,7 @@
         {:delete `delete-character}]
        [(route-map/path-for route-map/dnd-e5-char-route :id ":id")
         {:get `get-character}]
+
        [(route-map/path-for route-map/dnd-e5-char-page-route :id ":id")
         {:get `character-page}]
        [(route-map/path-for route-map/dnd-e5-char-parties-route) ^:interceptors [check-auth]

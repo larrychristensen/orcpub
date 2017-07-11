@@ -28,7 +28,7 @@
 
 (defn input-field []
   (let [state (atom {:timeout nil
-                       :temp-val nil})]
+                     :temp-val nil})]
     (fn [type value on-change attrs]
       [type
        (merge
@@ -41,5 +41,9 @@
                                           (js/clearTimeout timeout))
                                         (let [v (.. e -target -value)]
                                           (assoc s
-                                                 :timeout (js/setTimeout (fn [] (on-change v)) 500)
+                                                 :timeout (js/setTimeout
+                                                           (fn []
+                                                             (on-change v)
+                                                             (swap! state dissoc :temp-val))
+                                                           500)
                                                  :temp-val v))))))})])))

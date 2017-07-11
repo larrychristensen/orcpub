@@ -2778,17 +2778,19 @@
          {:style (if mobile?
                    two-columns-style
                    three-columns-style)}
-         [labeled-checkbox "All" false]
-         [labeled-checkbox "All Swords" false]
-         [labeled-checkbox "All Axes" false]
          (doall
           (map
            (fn [{:keys [:key :name]}]
              ^{:key key}
-             [labeled-checkbox name false])
-           weapon/weapons))
-         [:div.m-b-5
-          [labeled-checkbox "Other" false]]])]]]))
+             [:div
+              {:on-click #(dispatch [::mi/toggle-subtype key])}
+              [labeled-checkbox name @(subscribe [::mi/has-subtype? key])]])
+           (concat
+            [{:name "All" :key :all}
+             {:name "All Swords" :key :all-swords}
+             {:name "All Axes" :key :all-axes}]
+            weapon/weapons
+            [{:name "Other" :key :other}])))])]]]))
 
 (defn item-ability-bonuses []
   (base-builder-field
@@ -3002,8 +3004,14 @@
 (defn item-builder-page []
   [content-page
    "Item Builder Page"
-   []
+   [{:title "New Item"
+     :icon "plus"
+     :on-click #(dispatch [::mi/reset-item])}
+    {:title "Save"
+     :icon "save"
+     :on-click #(dispatch [::mi/save-item])}]
    [item-builder]])
+
 
 (defn character-list []
   (let [characters @(subscribe [::char/characters])
