@@ -276,10 +276,11 @@
        [:div.flex.w-100-p.align-items-end
         {:class-name (if mobile? "justify-cont-s-b" "justify-cont-s-b")}
         [:div
-         [:img.h-32.m-l-10.m-b-5.pointer.opacity-7.hover-opacity-full
-          {:src (if mobile?
-                  "https://c5.patreon.com/external/logo/downloads_logomark_color_on_navy.png"
-                  "https://c5.patreon.com/external/logo/become_a_patron_button.png")}]
+         [:a {:href "https://www.patreon.com/orcpub" :target :_blank}
+          [:img.h-32.m-l-10.m-b-5.pointer.opacity-7.hover-opacity-full
+           {:src (if mobile?
+                   "https://c5.patreon.com/external/logo/downloads_logomark_color_on_navy.png"
+                   "https://c5.patreon.com/external/logo/become_a_patron_button.png")}]]
          (if (not mobile?)
            [:div.main-text-color.p-10
             (social-icon "facebook" "https://www.facebook.com/orcpub")
