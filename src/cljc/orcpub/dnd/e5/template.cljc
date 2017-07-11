@@ -791,7 +791,7 @@
    :speed 25
    :languages ["Common" "Aarakocra" "Auran"]
    :source :ee
-   :modifiers [(mod5e/flying-speed 50)
+   :modifiers [(mod5e/flying-speed-override 50)
                (al-illegal-flying-mod "Aarakocra")
                (mod5e/attack
                 {:name "Talons"
@@ -4512,7 +4512,7 @@ long rest."})
                                                                      (tiefling-spell-removal-modifier 1 :hellish-rebuke)]})
                                                        (t/option-cfg
                                                         {:name "Winged"
-                                                         :modifiers [(mod5e/flying-speed 30)
+                                                         :modifiers [(mod5e/flying-speed-override 30)
                                                                      (al-illegal-flying-mod "Winged Tiefling Variant")
                                                                      (tiefling-spell-removal-modifier 0 :thaumaturgy)
                                                                      (tiefling-spell-removal-modifier 1 :hellish-rebuke)

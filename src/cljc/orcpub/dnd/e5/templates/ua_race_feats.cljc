@@ -101,7 +101,7 @@
                                :source :ua-race-feats
                                :prereqs [(opt5e/race-prereq "Dragonborn")]
                                :summary "You have a flying speed of 20 ft. when you haven't exceeded carrying capacity and aren't wearing heavy armor."
-                               :modifiers [(mod5e/flying-speed 20)]})
+                               :modifiers [(mod5e/flying-speed-override 20)]})
                              (opt5e/feat-option
                               {:name "Drow High Magic"
                                :page 2

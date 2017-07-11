@@ -28,6 +28,12 @@
                    ::description
                    ::modifiers]))
 
+(spec/def ::internal-magic-item
+  (spec/keys :opt [::name
+                   ::item-type
+                   ::rarity
+                   ::description]))
+
 (defn sword? [w]
   (= :sword (:subtype w)))
 
