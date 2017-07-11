@@ -19,6 +19,11 @@
 (spec/def ::modifiers (spec/+ ::modifier))
 (spec/def ::keywords (spec/+ keyword?))
 
+(spec/def ::key keyword?)
+(spec/def ::args sequential?)
+(spec/def ::mod-cfg (spec/keys :req [::key]
+                               :opt [::args]))
+
 (defn bonus-str [bonus]
   (if (pos? bonus)
     (str "+" bonus)
