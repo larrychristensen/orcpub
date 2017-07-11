@@ -244,6 +244,26 @@
              :on-success [:character-save-success]}})))
 
 (reg-event-fx
+ :item-save-success
+ (fn [{:keys [db]} [_ response]]
+   (let [strict-item (:body response)
+         item (mi/to-internal-item strict-item)]
+     {:dispatch-n [[:show-message "Your item has been saved."]
+                   [::mi/set-item item]]})))
+
+(reg-event-fx
+ ::mi/save-item
+ (fn [{:keys [db]} _]
+   (let [strict-item (mi/from-internal-item (::mi/builder-item db))]
+     (prn "STRICT ITEM" strict-item)
+     {:dispatch [:set-loading true]
+      :http {:method :post
+             :headers (authorization-headers db)
+             :url (url-for-route routes/dnd-e5-items-route)
+             :transit-params strict-item
+             :on-success [:item-save-success]}})))
+
+(reg-event-fx
  ::party5e/make-party-success
  (fn []
    {:dispatch [:show-message [:div
@@ -1659,7 +1679,9 @@
  ::mi/set-item-type
  item-interceptors
  (fn [item [_ item-type-str]]
-   (assoc item ::mi/type (keyword item-type-str))))
+   (-> item
+       (assoc ::mi/type (keyword item-type-str))
+       (dissoc ::mi/subtypes))))
 
 (reg-event-db
  ::mi/set-item-rarity
@@ -1717,6 +1739,19 @@
                 not))))
 
 (reg-event-db
+ ::mi/set-item
+ item-interceptors
+ (fn [_ [_ item]]
+   item))
+
+(reg-event-db
+ ::mi/reset-item
+ item-interceptors
+ (fn [_ _]
+   {::mi/type :wondrous-item
+    ::mi/rarity :common}))
+
+(reg-event-db
  ::mi/set-ability-mod-type
  item-interceptors
  (fn [item [_ ability-kw type]]
@@ -1769,3 +1804,10 @@
               :value]
              (js/parseInt value))))
 
+(reg-event-db
+ ::mi/toggle-subtype
+ item-interceptors
+ (fn [item [_ type]]
+   (update item
+           ::mi/subtypes
+           (partial toggle-set type))))

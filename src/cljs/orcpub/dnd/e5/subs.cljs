@@ -864,3 +864,9 @@
             :save
             ability-kw
             :value])))
+
+(reg-sub
+ ::mi5e/has-subtype?
+ :< [::mi5e/builder-item]
+ (fn [item [_ type]]
+   (get (::mi5e/subtypes item) type)))
