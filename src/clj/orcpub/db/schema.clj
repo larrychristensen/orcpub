@@ -1,8 +1,10 @@
 (ns orcpub.db.schema
-  (:require [orcpub.entity.strict :as se]
+  (:require [orcpub.modifiers :as mod]
+            [orcpub.entity.strict :as se]
             [orcpub.dnd.e5.character :as char5e]
             [orcpub.dnd.e5.units :as units5e]
             [orcpub.dnd.e5.party :as party5e]
+            [orcpub.dnd.e5.magic-items :as mi5e]
             [orcpub.dnd.e5.character.equipment :as char-equip-5e]))
 
 (defn string-prop [key]
@@ -26,11 +28,21 @@
    :db/valueType :db.type/boolean
    :db/cardinality :db.cardinality/one})
 
+(defn kw-prop [key]
+  {:db/ident key
+   :db/valueType :db.type/keyword
+   :db/cardinality :db.cardinality/one})
+
 (defn many-ref [key]
   {:db/ident key
    :db/valueType :db.type/ref
    :db/cardinality :db.cardinality/many
    :db/isComponent true})
+
+(defn many-kws [key]
+  {:db/ident key
+   :db/valueType :db.type/keyword
+   :db/cardinality :db.cardinality/many})
 
 (def user-schema
   [{:db/ident :orcpub.user/username
@@ -234,6 +246,33 @@
      ::char-equip-5e/background-starting-equipment?
      ::char-equip-5e/class-starting-equipment?])))
 
+(def magic-item-schema
+  (concat
+   (map
+    string-prop
+    [::mi5e/name
+     ::mi5e/owner
+     ::mi5e/description
+     ::mi5e/string-arg])
+   (map
+    many-ref
+    [::mod/args
+     ::mi5e/modifiers])
+   (map
+    many-kws
+    [::mi5e/subtypes])
+   (map
+    long-prop
+    [::mod/int-arg
+     ::mi5e/magical-damage-bonus
+     ::mi5e/magical-attack-bonus])
+   (map
+    kw-prop
+    [::mod/key
+     ::mod/keyword-arg
+     ::mi5e/type
+     ::mi5e/rarity])))
+
 (def all-schemas
   (concat
    user-schema
@@ -242,4 +281,5 @@
    character-schema
    character-equipment-schema
    features-used-schema
-   party-schema))
+   party-schema
+   magic-item-schema))

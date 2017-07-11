@@ -31,6 +31,9 @@
 
 (def dnd-e5-spell-page-routes #{dnd-e5-spell-list-page-route dnd-e5-spell-page-route})
 
+(def dnd-e5-items-route :items-5e)
+(def dnd-e5-item-summaries-route :item-summaries-5e)
+(def dnd-e5-item-route :item-5e)
 (def dnd-e5-item-list-page-route :item-list-5e-page)
 (def dnd-e5-item-page-route :item-5e-page)
 (def dnd-e5-item-builder-page-route :item-builder-5e-page)
@@ -98,6 +101,9 @@
                   "dnd/"
                   {"5e/" {"characters" {"" dnd-e5-char-list-route
                                         ["/" :id] dnd-e5-char-route}
+                          "items" {"" dnd-e5-items-route
+                                   ["/" :id] dnd-e5-item-route}
+                          "item-summaries" dnd-e5-item-summaries-route
                           "parties" {"" dnd-e5-char-parties-route
                                      ["/" :id] {"" dnd-e5-char-party-route
                                                 "/name" dnd-e5-char-party-name-route
