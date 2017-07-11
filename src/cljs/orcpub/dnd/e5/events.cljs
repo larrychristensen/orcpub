@@ -1710,50 +1710,18 @@
    (keyword "orcpub.dnd.e5.magic-items" (str "toggle-" (name toggle-mod)))
    item-interceptors
    (fn [item [_ type]]
-     (update item
-             ::mi/modifiers
-             (fn [mods]
-               (toggle-set (mod-cfg toggle-mod type) (default-mod-set mods)))))))
-
-(defn remove-ability-mod [mods]
-  (remove
-   (fn [{:keys [::mod/key ::mod/args]}]
-     (let [ability (first args)]
-       (and (= ))))
-   mods))
-
-(defn ability-mod-cfg [type ability value]
-  (mod-cfg
-   (if (= :becomes-at-least type)
-     :ability-override
-     :ability)
-   ability
-   (js/parseInt value)))
-
-(reg-event-db
- ::mi/set-ability-mod
- item-interceptors
- (fn [item [_ type ability value]]
-   (update item
-           ::mi/modifiers
-           (fn [mods]
-             (let [cfg (ability-mod-cfg type ability value)
-                   other-cfg (update cfg
-                                     ::mod/key
-                                     #(if (= :ability %) :ability-override :ability))]
-               (conj
-                (disj
-                 (default-mod-set mods)
-                 cfg
-                 other-cfg)
-                cfg))))))
+     (update-in item
+                [::mi/internal-modifiers
+                 toggle-mod
+                 type]
+                not))))
 
 (reg-event-db
  ::mi/set-ability-mod-type
  item-interceptors
  (fn [item [_ ability-kw type]]
    (assoc-in item
-             [::mi/modifiers
+             [::mi/internal-modifiers
               :ability
               ability-kw
               :type]
@@ -1764,9 +1732,29 @@
  item-interceptors
  (fn [item [_ ability-kw value]]
    (assoc-in item
-             [::mi/modifiers
+             [::mi/internal-modifiers
               :ability
               ability-kw
+              :value]
+             (js/parseInt value))))
+
+(reg-event-db
+ ::mi/set-speed-mod-type
+ item-interceptors
+ (fn [item [_ speed-type-kw mod-type]]
+   (assoc-in item
+             [::mi/internal-modifiers
+              speed-type-kw
+              :type]
+             (keyword mod-type))))
+
+(reg-event-db
+ ::mi/set-speed-mod-value
+ item-interceptors
+ (fn [item [_ speed-type-kw value]]
+   (assoc-in item
+             [::mi/internal-modifiers
+              speed-type-kw
               :value]
              (js/parseInt value))))
 
@@ -1775,8 +1763,9 @@
  item-interceptors
  (fn [item [_ ability-kw value]]
    (assoc-in item
-             [::mi/modifiers
+             [::mi/internal-modifiers
               :save
               ability-kw
               :value]
              (js/parseInt value))))
+

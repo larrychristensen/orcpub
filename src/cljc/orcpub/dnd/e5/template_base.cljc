@@ -271,8 +271,17 @@
     ?saving-throws #{}
     ?spells-known (sorted-map)
     ?speed-overrides []
+    ?flying-speed-overrides []
+    ?swimming-speed-overrides []
+    ?climbing-speed-overrides []
     ?speed 0
+    ?flying-speed-bonus 0
+    ?swimming-speed-bonus 0
+    ?climbing-speed-bonus 0
     ?total-speed (apply max ?speed ?speed-overrides)
+    ?flying-speed (apply max ?flying-speed-bonus ?flying-speed-overrides)
+    ?swimming-speed (apply max ?swimming-speed-bonus ?swimming-speed-overrides)
+    ?climbing-speed (apply max ?climbing-speed-bonus ?climbing-speed-overrides)
     ?darkvision-bonus 0
     ?darkvision 0
     ?total-darkvision (+ ?darkvision ?darkvision-bonus)

@@ -366,10 +366,13 @@
   (get-prop built-char :total-speed))
 
 (defn base-swimming-speed [built-char]
-  (get-prop built-char :swimming-speed))
+  (get-prop built-char :total-swimming-speed))
 
 (defn base-flying-speed [built-char]
-  (get-prop built-char :flying-speed))
+  (get-prop built-char :total-flying-speed))
+
+(defn base-climbing-speed [built-char]
+  (get-prop built-char :total-climbing-speed))
 
 (defn land-speed-with-armor [built-char]
   (get-prop built-char :speed-with-armor))
