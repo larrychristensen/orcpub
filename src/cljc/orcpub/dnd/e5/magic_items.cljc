@@ -20,19 +20,156 @@
 (spec/def ::magical-attack-bonus int?)
 (spec/def ::magical-damage-bonus int?)
 (spec/def ::modifiers (spec/coll-of ::mod/mod-cfg))
+(spec/def ::subtypes (spec/coll-of keyword?))
+(spec/def ::attunment (spec/coll-of keyword?))
 
 (spec/def ::magic-item
-  (spec/keys :opt [::name
-                   ::item-type
+  (spec/keys :req [::name]
+             :opt [::item-type
                    ::rarity
                    ::description
-                   ::modifiers]))
+                   ::modifiers
+                   ::magical-attack-bonus
+                   ::magical-damage-bonus
+                   ::owner
+                   ::subtypes
+                   ::attunement]))
 
 (spec/def ::internal-magic-item
   (spec/keys :opt [::name
                    ::item-type
                    ::rarity
-                   ::description]))
+                   ::description
+                   ::magical-attack-bonus
+                   ::magical-damage-bonus
+                   ::attunement]))
+
+(def toggle-mod-keys
+  #{:damage-resistance
+    :damage-vulnerability
+    :damage-immunity
+    :condition-immunity})
+
+(def ability-mod-keys
+  #{:ability
+    :ability-override})
+
+(def speed-mod-keys
+  #{:speed
+    :flying-speed
+    :swimming-speed
+    :climbing-speed})
+
+(defn to-internal-modifiers [modifiers]
+  (reduce
+   (fn [mod-map {:keys [::mod/key ::mod/args]}]
+     (let [raw-args (map (fn [{:keys [::mod/int-arg ::mod/string-arg ::mod/keyword-arg]}]
+                           (or int-arg string-arg keyword-arg))
+                         args)]
+       (cond
+         (toggle-mod-keys key) (assoc-in mod-map [key (first raw-args)] true)
+         (ability-mod-keys key) (assoc-in mod-map
+                                          [:ability (first raw-args)]
+                                          {:value (second raw-args)
+                                           :type (if (= :ability key)
+                                                   :increases-by
+                                                   :becomes-at-least)})
+         (= key :saving-throw-bonus) (assoc-in mod-map
+                                               [:save (first raw-args)]
+                                               {:value (second raw-args)})
+         (speed-mod-keys key) (assoc-in mod-map (cons key raw-args)))))
+   {}
+   modifiers))
+
+(defn to-internal-item [{:keys [::modifiers ::subtypes] :as item}]
+  (cond-> item
+    (seq modifiers) (assoc ::internal-modifiers (to-internal-modifiers (::modifiers item)))
+    true (dissoc ::modifiers)
+    (seq subtypes) (update ::subtypes #(into #{} %))))
+
+(defn mod-args [args]
+  (map
+   (fn [arg]
+     (cond
+       (string? arg) {::mod/string-arg arg}
+       (keyword? arg) {::mod/keyword-arg arg}
+       (int? arg) {::mod/int-arg arg}))
+   args))
+
+(defn mod-cfg [key & args]
+  (cond-> {::mod/key key}
+    (seq args) (assoc ::mod/args (mod-args args))))
+
+(defn toggle-mods [kw value-map]
+  (sequence
+   (comp
+    (filter val)
+    (map #(mod-cfg kw (key %))))
+   value-map))
+
+(defn ability-mods [items]
+  (map
+   (fn [[ability-kw {:keys [value type]}]]
+     (if (= type :increases-by)
+       (mod-cfg :ability ability-kw value)
+       (mod-cfg :ability-override ability-kw value)))
+   items))
+
+(defn speed-mod-fn [{:keys [increases-by becomes-at-least equals-walking-speed]}]
+  (fn [{:keys [type value]}]
+    (case type
+      :increases-by (mod-cfg increases-by value)
+      :equals-walking-speed (mod-cfg equals-walking-speed)
+      (mod-cfg becomes-at-least value))))
+
+(defn speed-mod [{:keys [type value]}]
+  (speed-mod-fn
+   {:increases-by :speed
+    :becomes-at-least :speed-override}))
+
+(def flying-speed-mod
+  (speed-mod-fn
+   {:increases-by :flying-speed-bonus
+    :becomes-at-least :flying-speed-override
+    :equals-walking-speed :flying-speed-equal-to-walking}))
+
+(def swimming-speed-mod
+  (speed-mod-fn
+   {:increases-by :swimming-speed
+    :becomes-at-least :swimming-speed-override
+    :equals-walking-speed :swimming-speed-equals-walking-speed}))
+
+(def climbing-speed-mod
+  (speed-mod-fn
+   {:increases-by :climbing-speed
+    :becomes-at-least :climbing-speed-override
+    :equals-walking-speed :climbing-speed-equals-walking-speed}))
+
+(defn save-mods [items]
+  (map
+   (fn [[ability-kw {:keys [value]}]]
+     (mod-cfg :saving-throw-bonus ability-kw value))
+   items))
+
+(defn from-internal-modifiers [modifiers]
+  (reduce
+   (fn [mod-vec [k v]]
+     (concat mod-vec
+             (cond
+               (toggle-mod-keys k) (toggle-mods k v)
+               (= :ability k) (ability-mods v)
+               (= :save k) (save-mods v)
+               (= :speed k) [(speed-mod v)]
+               (= :flying-speed k) [(flying-speed-mod v)]
+               (= :swimming-speed k) [(swimming-speed-mod v)]
+               (= :climbing-speed k) [(climbing-speed-mod v)])))
+   []
+   modifiers))
+
+(defn from-internal-item [item]
+  (-> item
+      (assoc ::modifiers (from-internal-modifiers (::internal-modifiers item)))
+      (dissoc ::internal-modifiers)))
 
 (defn sword? [w]
   (= :sword (:subtype w)))
