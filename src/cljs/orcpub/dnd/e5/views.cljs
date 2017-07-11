@@ -2690,7 +2690,6 @@
    [labeled-checkbox name (attunement key)]])
 
 (defn attunement-selector [attunement]
-  (prn "ATTUNMENT" attunement)
   (base-builder-field
    [:div
     [:div.flex.align-items-c.m-b-10
@@ -2796,13 +2795,17 @@
         [:div.flex.align-items-c
          [:div.w-40 (s/upper-case (name ability-kw))]
          [:div
-          [:select.builder-option.builder-option-dropdown
-           [:option.builder-dropdown-item
-            "Becomes At Least"]
-           [:option.builder-dropdown-item
-            "Increases By"]]]
-         [:input.input.w-60.m-l-5
-          {:type :number}]])
+          [dropdown
+           {:value @(subscribe [::mi/ability-mod-type ability-kw])
+            :on-change #(dispatch [::mi/set-ability-mod-type ability-kw %])
+            :items [{:value :becomes-at-least
+                     :title "Becomes At Least"}
+                    {:value :increases-by
+                     :title "Increases By"}]}]]
+         [:div.w-60.m-l-5
+          [number-field
+           {:value @(subscribe [::mi/ability-mod-value ability-kw])
+            :on-change #(dispatch [::mi/set-ability-mod-value ability-kw %])}]]])
       char/ability-keys))]))
 
 (defn saving-throw-bonuses []
@@ -2844,8 +2847,10 @@
            (if (not= :speed type-kw)
              [:option.builder-dropdown-item
               "Equals Walking Speed"])]]
-         [:input.input.w-60.m-l-5
-          {:type :number}]])
+         [:div.w-60.m-l-5
+          [number-field
+           {:value 0
+            :on-change (fn [])}]]])
       [:speed :flying-speed :swimming-speed :climbing-speed]))]))
 
 (defn item-modifier-toggles [title item-kws toggle-event has-sub]
@@ -2890,7 +2895,7 @@
    ::mi/has-condition-immunity?])
 
 (defn item-bonuses [{:keys [::mi/magical-damage-bonus
-                            ::mi/magical-attack-bonus]}]
+                            ::mi/magical-attack-bonus] :as item}]
   [:div.m-b-20
    [:div.m-b-10
     [:span.f-s-24.f-w-b "Item Properties"]]
@@ -2936,7 +2941,8 @@
      items))])
 
 (defn item-builder []
-  (let [{:keys [::mi/name ::mi/type ::mi/rarity ::mi/description ::mi/attunement] :as item} @(subscribe [::mi/builder-item])
+  (let [{:keys [::mi/name ::mi/type ::mi/rarity ::mi/description ::mi/attunement] :as item}
+        @(subscribe [::mi/builder-item])
         item-types @(subscribe [::mi/item-types])
         item-rarities @(subscribe [::mi/rarities])]
     (prn "ITEM" item)
@@ -2980,7 +2986,7 @@
        [:div.m-b-40 [base-weapon-selector]])
      [:div.m-b-40
       [attunement-selector attunement]]
-     [item-bonuses]]))
+     [item-bonuses item]]))
 
 (defn item-builder-page []
   [content-page
@@ -3370,7 +3376,7 @@
      [[:button.form-button
        {:on-click #(dispatch [:route routes/dnd-e5-item-builder-page-route])}
        [:div.flex.align-items-c.white
-        [svg-icon "beer-stein" 18]
+        [svg-icon "beer-stein" 18 ""]
         [:span.m-l-5 "New Item"]]]]
      [:div.p-l-5.p-r-5.p-b-10
       [:div.p-b-10.p-l-10.p-r-10

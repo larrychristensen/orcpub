@@ -3,6 +3,7 @@
             [orcpub.user-agent :as user-agent]
             [orcpub.dnd.e5.template :as t5e]
             [orcpub.dnd.e5.character :as char5e]
+            [orcpub.dnd.e5.magic-items :as mi5e]
             [re-frame.core :as re-frame]
             [orcpub.entity :as entity]
             [orcpub.entity.strict :as se]
@@ -45,6 +46,7 @@
   (.setItem js/window.localStorage local-storage-user-key (str user-data)))
 
 (defn magic-item->local-store [magic-item]
+  (prn "MAGIC ITEM" magic-item)
   (.setItem js/window.localStorage local-storage-magic-item-key (str magic-item)))
 
 (def tab-path [:builder :character :tab])
@@ -85,3 +87,8 @@
  :local-store-user
  local-storage-user-key
  ::user)
+
+(reg-local-store-cofx
+ :local-store-magic-item
+ local-storage-magic-item-key
+ ::mi5e/magic-item)

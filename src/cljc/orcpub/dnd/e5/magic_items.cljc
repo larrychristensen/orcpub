@@ -1,5 +1,6 @@
 (ns orcpub.dnd.e5.magic-items
-  (:require [orcpub.common :as common]
+  (:require [clojure.spec.alpha :as spec]
+            [orcpub.common :as common]
             [orcpub.modifiers :as mod]
             [orcpub.dnd.e5.weapons :as weapons]
             [orcpub.dnd.e5.armor :as armor5e]
@@ -11,6 +12,21 @@
             [orcpub.dnd.e5.units :as units5e]
             [clojure.string :as s])
   #?(:cljs (:require-macros [orcpub.dnd.e5.modifiers :as mod5e])))
+
+(spec/def ::name string?)
+(spec/def ::item-type keyword?)
+(spec/def ::rarity keyword?)
+(spec/def ::description string?)
+(spec/def ::magical-attack-bonus int?)
+(spec/def ::magical-damage-bonus int?)
+(spec/def ::modifiers (spec/coll-of ::mod/mod-cfg))
+
+(spec/def ::magic-item
+  (spec/keys :opt [::name
+                   ::item-type
+                   ::rarity
+                   ::description
+                   ::modifiers]))
 
 (defn sword? [w]
   (= :sword (:subtype w)))

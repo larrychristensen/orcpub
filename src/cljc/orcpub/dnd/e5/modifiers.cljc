@@ -83,12 +83,6 @@
 (defn condition-immunity [value & [qualifier-text]]
   (mods/set-mod ?condition-immunities (resistance-cfg value qualifier-text) (name value) " condition immunity"))
 
-(def mods-map
-  {:damage-resistance damage-resistance
-   :damage-vulnerability damage-vulnerability
-   :damage-immunity damage-immunity
-   :condition-immunity condition-immunity})
-
 (defn darkvision [value & [order-number]]
   (mods/modifier
    ?darkvision
@@ -132,6 +126,12 @@
 (defn climbing-speed [value]
   (mods/cum-sum-mod ?climbing-speed value "climbing" (mods/bonus-str value)))
 
+(defn climbing-speed-equal-to-walking []
+  (mods/modifier ?climbing-speed (if (and (int? ?climbing-speed)
+                                          (> ?climbing-speed ?speed))
+                                   ?climbing-speed
+                                   ?speed)))
+
 (defn unarmored-speed-bonus [value]
   (mods/cum-sum-mod ?unarmored-speed-bonus value "unarmored speed" (mods/bonus-str value)))
 
@@ -153,6 +153,24 @@
 
 (defn ability-override [ability value]
   (mods/vec-mod ?ability-overrides {:ability ability :value value}))
+
+(def mods-map
+  {:ability ability
+   :ability-override ability-override
+   :damage-resistance damage-resistance
+   :damage-vulnerability damage-vulnerability
+   :damage-immunity damage-immunity
+   :condition-immunity condition-immunity
+   :darkvision darkvision
+   :darkvision-bonus darkvision-bonus
+   :speed speed
+   :speed-override speed-override
+   :flying-speed flying-speed
+   :flying-speed-equal-to-walking flying-speed-equal-to-walking
+   :swimming-speed swimming-speed
+   :swimming-speed-equal-to-walking swimming-speed-equal-to-walking
+   :climbing-speed climbing-speed
+   :climbing-speed-equal-to-walking climbing-speed-equal-to-walking})
 
 (defn level-ability-increase [ability bonus]
   (mods/modifier ?level-ability-increases
