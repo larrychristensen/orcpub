@@ -757,8 +757,9 @@
   (let [associated-options (::t/associated-options new-class-option)
         with-new-class (assoc-in
                         character
-                        [::entity/options :class class-index ::entity/key]
-                        class-key)
+                        [::entity/options :class class-index]
+                        {::entity/key class-key
+                         ::entity/options {:levels [{::entity/key :level-1}]}})
         without-starting-equipment (remove-starting-equipment with-new-class ::equip/class-starting-equipment?)
         with-new-starting-equipment (add-associated-options without-starting-equipment associated-options)]
     (if (zero? class-index)
