@@ -47,7 +47,7 @@
 
 (def user->local-store-interceptor (after (fn [db] (user->local-store (:user-data db)))))
 
-(def magic-item->local-store-interceptor (after (fn [db] (magic-item->local-store (::mi/builder-item db)))))
+(def magic-item->local-store-interceptor (after magic-item->local-store))
 
 (def character-interceptors [check-spec-interceptor
                              (path :character)
@@ -68,13 +68,15 @@
  :initialize-db
  [(inject-cofx :local-store-character)
   (inject-cofx :local-store-user)
+  (inject-cofx :local-store-magic-item)
   check-spec-interceptor]
- (fn [{:keys [db local-store-character local-store-user]} _]
+ (fn [{:keys [db local-store-character local-store-user local-store-magic-item]} _]
    {:db (if (seq db)
           db
           (cond-> default-value
             local-store-character (assoc :character local-store-character)
-            local-store-user (assoc :user-data local-store-user)))}))
+            local-store-user (assoc :user-data local-store-user)
+            local-store-magic-item (assoc ::mi/builder-item local-store-magic-item)))}))
 
 (defn reset-character [_ _]
   (char5e/set-class t5e/character :barbarian 0 t5e/barbarian-option))
@@ -1681,6 +1683,28 @@
   {::mod/key key
    ::mod/args args})
 
+(defmulti mod-key (fn [{:keys [::mod/key ::mod/args] :as item}]
+                    key))
+
+(defmethod mod-key :ability [{:keys [::mod/key ::mod/args]}]
+  [key (first args)])
+
+(defmethod mod-key :ability-override [{:keys [::mod/key ::mod/args]}]
+  [key (first args)])
+
+(defmethod mod-key :default [{:keys [::mod/key ::mod/args]}]
+  [key args])
+
+(defn compare-mod-keys [item-1 item-2]
+  (compare (mod-key item-1)
+           (mod-key item-2)))
+
+(defn default-mod-set [mod-set]
+  (if (and (set? mod-set)
+           (sorted? mod-set))
+    mod-set
+    (into (sorted-set-by compare-mod-keys) mod-set)))
+
 (doseq [toggle-mod [:damage-resistance :damage-vulnerability :damage-immunity :condition-immunity]]
   (reg-event-db
    (keyword "orcpub.dnd.e5.magic-items" (str "toggle-" (name toggle-mod)))
@@ -1688,5 +1712,71 @@
    (fn [item [_ type]]
      (update item
              ::mi/modifiers
-             (partial toggle-set
-                      (mod-cfg toggle-mod type))))))
+             (fn [mods]
+               (toggle-set (mod-cfg toggle-mod type) (default-mod-set mods)))))))
+
+(defn remove-ability-mod [mods]
+  (remove
+   (fn [{:keys [::mod/key ::mod/args]}]
+     (let [ability (first args)]
+       (and (= ))))
+   mods))
+
+(defn ability-mod-cfg [type ability value]
+  (mod-cfg
+   (if (= :becomes-at-least type)
+     :ability-override
+     :ability)
+   ability
+   (js/parseInt value)))
+
+(reg-event-db
+ ::mi/set-ability-mod
+ item-interceptors
+ (fn [item [_ type ability value]]
+   (update item
+           ::mi/modifiers
+           (fn [mods]
+             (let [cfg (ability-mod-cfg type ability value)
+                   other-cfg (update cfg
+                                     ::mod/key
+                                     #(if (= :ability %) :ability-override :ability))]
+               (conj
+                (disj
+                 (default-mod-set mods)
+                 cfg
+                 other-cfg)
+                cfg))))))
+
+(reg-event-db
+ ::mi/set-ability-mod-type
+ item-interceptors
+ (fn [item [_ ability-kw type]]
+   (assoc-in item
+             [::mi/modifiers
+              :ability
+              ability-kw
+              :type]
+             (keyword type))))
+
+(reg-event-db
+ ::mi/set-ability-mod-value
+ item-interceptors
+ (fn [item [_ ability-kw value]]
+   (assoc-in item
+             [::mi/modifiers
+              :ability
+              ability-kw
+              :value]
+             (js/parseInt value))))
+
+(reg-event-db
+ ::mi/set-save-mod-value
+ item-interceptors
+ (fn [item [_ ability-kw value]]
+   (assoc-in item
+             [::mi/modifiers
+              :save
+              ability-kw
+              :value]
+             (js/parseInt value))))

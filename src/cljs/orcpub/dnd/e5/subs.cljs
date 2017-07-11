@@ -4,6 +4,7 @@
             [orcpub.entity.strict :as se]
             [orcpub.template :as t]
             [orcpub.common :as common]
+            [orcpub.modifiers :as mod]
             [orcpub.registration :as registration]
             [orcpub.dnd.e5.template :as t5e]
             [orcpub.dnd.e5.db :refer [tab-path]]
@@ -787,3 +788,59 @@
    :<- [::mi5e/builder-item]
    (fn [item [_ type]]
      (get-in item [::mi5e/modifiers (events/mod-cfg toggle-mod type)]))))
+
+(reg-sub
+ ::mi5e/item-ability-bonus
+ :<- [::mi5e/builder-item]
+ (fn [item [_ type ability]]
+   (let [mod-cfg (events/mod-cfg (if (= type :becomes-at-least)
+                                   :ability-override
+                                   :ability)
+                                 ability)
+         modifiers (events/default-mod-set (::mi5e/modifiers item))
+         modifier (get modifiers mod-cfg)
+         args (::mod/args modifier)]
+     (second args))))
+
+(reg-sub
+ ::mi5e/item-ability-mod-type
+ :<- [::mi5e/builder-item]
+ (fn [item [_ type ability]]
+   (let [mod-cfg (events/mod-cfg (if (= type :becomes-at-least)
+                                   :ability-override
+                                   :ability)
+                                 ability)
+         modifiers (events/default-mod-set (::mi5e/modifiers item))
+         modifier (get modifiers mod-cfg)
+         args (::mod/args modifier)]
+     (second args))))
+
+(reg-sub
+ ::mi5e/ability-mod-type
+ :<- [::mi5e/builder-item]
+ (fn [item [_ ability-kw]]
+   (get-in item
+           [::mi5e/modifiers
+            :ability
+            ability-kw
+            :type])))
+
+(reg-sub
+ ::mi5e/ability-mod-value
+ :<- [::mi5e/builder-item]
+ (fn [item [_ ability-kw]]
+   (get-in item
+           [::mi5e/modifiers
+            :ability
+            ability-kw
+            :value])))
+
+(reg-sub
+ ::mi5e/save-mod-value
+ :<- [::mi5e/builder-item]
+ (fn [item [_ ability-kw]]
+   (get-in item
+           [::mi5e/modifiers
+            :save
+            ability-kw
+            :value])))
