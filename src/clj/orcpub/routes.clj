@@ -729,18 +729,26 @@
 (defn save-character [{:keys [db transit-params body conn identity] :as request}]
   (do-save-character db conn transit-params identity))
 
+(defn owns-item [db username item-id]
+  (let [item (d/pull db '[::mi5e/owner] item-id)]
+    (= username (::mi5e/owner item))))
+
 (defn save-item [{:keys [db transit-params body conn identity] :as request}]
   (if-let [data (spec/explain-data ::mi5e/magic-item transit-params)]
     {:status 400 :body data}
-    (as-> transit-params $
-      (assoc $
-             ::mi5e/owner (:user identity)
-             :db/id "tempid")
-      @(d/transact conn [$])
-      (get-new-id "tempid" $)
-      (d/pull (d/db conn) '[*] $)
-      {:status 200
-       :body $})))
+    (let [item (entity/remove-empty-fields transit-params)
+          id (:db/id item)
+          username (:user identity)]
+      (if (and id (not (owns-item db username id)))
+        {:status 400 :body "You don't own this item."}
+        (as-> transit-params $
+          (assoc $ ::mi5e/owner username)
+          (if (not id) (assoc $ :db/id "tempid") $)
+          @(d/transact conn [$])
+          (or id (get-new-id "tempid" $))
+          (d/pull (d/db conn) '[*] $)
+          {:status 200
+           :body $})))))
 
 (defn character-list [{:keys [db transit-params body conn identity] :as request}]
   (let [username (:user identity)

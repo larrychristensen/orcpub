@@ -2844,26 +2844,28 @@
     (doall
      (map
       (fn [type-kw]
-        ^{:key type-kw}
-        [:div.flex.align-items-c
-         [:div.w-100 (s/capitalize (common/kw-to-name type-kw))]
-         [:div
-          [dropdown
-           {:value @(subscribe [::mi/speed-mod-type type-kw])
-            :on-change #(dispatch [::mi/set-speed-mod-type type-kw %])
-            :items (let [items [{:value :becomes-at-least
-                                 :title "Becomes At Least"}
-                                {:value :increases-by
-                                 :title "Increases By"}]]
-                     (if (= :speed type-kw)
-                       items
-                       (conj items
-                             {:value :equals-walking-speed
-                              :title "Equals Walking Speed"})))}]]
-         [:div.w-60.m-l-5
-          [number-field
-           {:value @(subscribe [::mi/speed-mod-value type-kw])
-            :on-change #(dispatch [::mi/set-speed-mod-value type-kw %])}]]])
+        (let [speed-mod-type @(subscribe [::mi/speed-mod-type type-kw])]
+          ^{:key type-kw}
+          [:div.flex.align-items-c
+           [:div.w-100 (s/capitalize (common/kw-to-name type-kw))]
+           [:div
+            [dropdown
+             {:value speed-mod-type
+              :on-change #(dispatch [::mi/set-speed-mod-type type-kw %])
+              :items (let [items [{:value :becomes-at-least
+                                   :title "Becomes At Least"}
+                                  {:value :increases-by
+                                   :title "Increases By"}]]
+                       (if (= :speed type-kw)
+                         items
+                         (conj items
+                               {:value :equals-walking-speed
+                                :title "Equals Walking Speed"})))}]]
+           (if (not= :equals-walking-speed speed-mod-type)
+             [:div.w-60.m-l-5
+              [number-field
+               {:value @(subscribe [::mi/speed-mod-value type-kw])
+                :on-change #(dispatch [::mi/set-speed-mod-value type-kw %])}]])]))
       [:speed :flying-speed :swimming-speed :climbing-speed]))]))
 
 (defn item-modifier-toggles [title item-kws toggle-event has-sub]
