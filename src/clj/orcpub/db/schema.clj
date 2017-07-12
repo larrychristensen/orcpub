@@ -12,26 +12,57 @@
    :db/valueType :db.type/string
    :db/cardinality :db.cardinality/one})
 
+(defn string-prop-no-history [key]
+  {:db/ident key
+   :db/valueType :db.type/string
+   :db/cardinality :db.cardinality/one
+   :db/noHistory true})
+
 (defn fulltext-prop [key]
   {:db/ident key
    :db/valueType :db.type/string
    :db/cardinality :db.cardinality/one
    :db/fulltext true})
 
+(defn fulltext-prop [key]
+  {:db/ident key
+   :db/valueType :db.type/string
+   :db/cardinality :db.cardinality/one
+   :db/fulltext true
+   :db/noHistory true})
+
 (defn long-prop [key]
   {:db/ident key
    :db/valueType :db.type/long
    :db/cardinality :db.cardinality/one})
+
+(defn long-prop-no-history [key]
+  {:db/ident key
+   :db/valueType :db.type/long
+   :db/cardinality :db.cardinality/one
+   :db/noHistory true})
 
 (defn bool-prop [key]
   {:db/ident key
    :db/valueType :db.type/boolean
    :db/cardinality :db.cardinality/one})
 
+(defn bool-prop-no-history [key]
+  {:db/ident key
+   :db/valueType :db.type/boolean
+   :db/cardinality :db.cardinality/one
+   :db/noHistory true})
+
 (defn kw-prop [key]
   {:db/ident key
    :db/valueType :db.type/keyword
    :db/cardinality :db.cardinality/one})
+
+(defn kw-prop-no-history [key]
+  {:db/ident key
+   :db/valueType :db.type/keyword
+   :db/cardinality :db.cardinality/one
+   :db/noHistory true})
 
 (defn many-ref [key]
   {:db/ident key
@@ -39,10 +70,23 @@
    :db/cardinality :db.cardinality/many
    :db/isComponent true})
 
+(defn many-ref-no-history [key]
+  {:db/ident key
+   :db/valueType :db.type/ref
+   :db/cardinality :db.cardinality/many
+   :db/isComponent true
+   :db/noHistory true})
+
 (defn many-kws [key]
   {:db/ident key
    :db/valueType :db.type/keyword
    :db/cardinality :db.cardinality/many})
+
+(defn many-kws-no-history [key]
+  {:db/ident key
+   :db/valueType :db.type/keyword
+   :db/cardinality :db.cardinality/many
+   :db/noHistory true})
 
 (def user-schema
   [{:db/ident :orcpub.user/username
@@ -249,25 +293,25 @@
 (def magic-item-schema
   (concat
    (map
-    string-prop
+    string-prop-no-history
     [::mi5e/name
      ::mi5e/owner
      ::mi5e/description
      ::mi5e/string-arg])
    (map
-    many-ref
+    many-ref-no-history
     [::mod/args
      ::mi5e/modifiers])
    (map
-    many-kws
+    many-kws-no-history
     [::mi5e/subtypes])
    (map
-    long-prop
+    long-prop-no-history
     [::mod/int-arg
      ::mi5e/magical-damage-bonus
      ::mi5e/magical-attack-bonus])
    (map
-    kw-prop
+    kw-prop-no-history
     [::mod/key
      ::mod/keyword-arg
      ::mi5e/type

@@ -52,7 +52,8 @@
                  [com.draines/postal "2.0.2"]
                  [environ "1.1.0"]
 
-                 [pdfkit-clj "0.1.6"]]
+                 [pdfkit-clj "0.1.6"]
+                 [vvvvalvalval/datomock "0.2.0"]]
 
   :plugins [[lein-figwheel "0.5.10"]
             [lein-cljsbuild "1.1.6" :exclusions [[org.clojure/clojure]]]
