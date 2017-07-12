@@ -597,30 +597,84 @@
       children
       entity))) nil))
 
-(defn remove-orphan-ids-aux [remove-ids? entity]
+(defn remove-orphan-ids-aux [remove-ids? entity & [ids]]
   (cond
     (map? entity)
     (into {}
           (map
            (fn [[k v]]
              [k (remove-orphan-ids-aux (or remove-ids?
+                                           (get ids (:db/id entity))
                                            (-> entity :db/id nil?))
-                                       v)])
-           (if remove-ids?
+                                       v
+                                       ids)])
+           (if (or remove-ids?
+                   (get ids (:db/id entity)))
              (dissoc entity :db/id)
              entity)))
 
     (sequential? entity)
-    (mapv (partial remove-orphan-ids-aux remove-ids?) entity)
+    (mapv #(remove-orphan-ids-aux remove-ids? % ids) entity)
 
     :else
     entity))
+
+(defn remove-specific-ids [entity ids]
+  (remove-orphan-ids-aux false entity ids))
 
 (defn remove-orphan-ids [entity]
   (remove-orphan-ids-aux false entity))
 
 (defn remove-ids [entity]
   (remove-orphan-ids-aux true entity))
+
+(defn get-new-id [temp-id result]
+  (-> result :tempids (get temp-id)))
+
+(defn create-entity [conn username entity owner-prop]
+  (as-> entity $
+    (remove-ids $)
+    (assoc $
+           :db/id "tempid"
+           owner-prop username)
+    @(d/transact conn [$])
+    (get-new-id "tempid" $)
+    (d/pull (d/db conn) '[*] $)))
+
+(defn email-for-username [db username]
+  (d/q '[:find ?email .
+         :in $ ?username
+         :where
+         [?e :orcpub.user/username ?username]
+         [?e :orcpub.user/email ?email]]
+       db
+       username))
+
+(defn update-entity [conn username entity owner-prop]
+  (let [id (:db/id entity)
+        current (d/pull (d/db conn) '[*] id)
+        owner (get current owner-prop)
+        email (email-for-username (d/db conn) username)]
+    (if (#{username email} owner)
+      (let [current-ids (db-ids current)
+            new-ids (db-ids entity)
+            retract-ids (sets/difference current-ids new-ids)
+            retractions (map
+                         (fn [retract-id]
+                           [:db/retractEntity retract-id])
+                         retract-ids)
+            remove-ids (sets/difference new-ids current-ids)
+            with-ids-removed (remove-specific-ids entity remove-ids)
+            new-entity (assoc with-ids-removed owner-prop username)
+            result @(d/transact conn (concat retractions [new-entity]))]
+        (d/pull (d/db conn) '[*] id))
+      (throw (ex-info "Not user entity"
+                      {:error :not-user-entity})))))
+
+(defn save-entity [conn username entity owner-prop]
+  (if (:db/id entity)
+    (update-entity conn username entity owner-prop)
+    (create-entity conn username entity owner-prop)))
 
 (defn owns-entity? [db username entity-id]
   (let [user (find-user-by-username db username)
@@ -686,9 +740,6 @@
               {:status 200
                :body (d/pull (d/db conn) '[*] id)}))))
       {:status 401 :body "You do not own this character"})))
-
-(defn get-new-id [temp-id result]
-  (-> result :tempids (get temp-id)))
 
 (defn create-new-character [conn character username]
   (let [result @(d/transact conn
