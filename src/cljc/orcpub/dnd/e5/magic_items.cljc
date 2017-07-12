@@ -56,28 +56,50 @@
 
 (def speed-mod-keys
   #{:speed
-    :flying-speed
+    :speed-override
+    :flying-speed-bonus
+    :flying-speed-override
+    :flying-speed-equal-to-walking
     :swimming-speed
-    :climbing-speed})
+    :swimming-speed-override
+    :swimming-speed-equal-to-walking
+    :climbing-speed
+    :climbing-speed-override
+    :climbing-speed-equal-to-walking})
+
+(defn add-internal-speed [mod-map speed-type mod-type value]
+  (let [cfg {:type mod-type}]
+    (assoc mod-map speed-type (if value (assoc cfg :value value) cfg))))
 
 (defn to-internal-modifiers [modifiers]
   (reduce
    (fn [mod-map {:keys [::mod/key ::mod/args]}]
-     (let [raw-args (map (fn [{:keys [::mod/int-arg ::mod/string-arg ::mod/keyword-arg]}]
-                           (or int-arg string-arg keyword-arg))
-                         args)]
+     (let [[arg-1 arg-2] (map (fn [{:keys [::mod/int-arg ::mod/string-arg ::mod/keyword-arg]}]
+                                (or int-arg string-arg keyword-arg))
+                              args)]
        (cond
-         (toggle-mod-keys key) (assoc-in mod-map [key (first raw-args)] true)
+         (toggle-mod-keys key) (assoc-in mod-map [key arg-1] true)
          (ability-mod-keys key) (assoc-in mod-map
-                                          [:ability (first raw-args)]
-                                          {:value (second raw-args)
+                                          [:ability arg-1]
+                                          {:value arg-2
                                            :type (if (= :ability key)
                                                    :increases-by
                                                    :becomes-at-least)})
          (= key :saving-throw-bonus) (assoc-in mod-map
-                                               [:save (first raw-args)]
-                                               {:value (second raw-args)})
-         (speed-mod-keys key) (assoc-in mod-map (cons key raw-args)))))
+                                               [:save arg-1]
+                                               {:value arg-2})
+         :else (case key
+                 :speed (add-internal-speed mod-map :speed :increases-by arg-1)
+                 :speed-override (add-internal-speed mod-map :speed :becomes-at-least arg-1)
+                 :flying-speed-bonus (add-internal-speed mod-map :flying-speed :increases-by arg-1)
+                 :flying-speed-override (add-internal-speed mod-map :flying-speed :becomes-at-least arg-1)
+                 :flying-speed-equal-to-walking (add-internal-speed mod-map :flying-speed :equals-walking-speed nil)
+                 :swimming-speed (add-internal-speed mod-map :swimming-speed :increases-by arg-1)
+                 :swimming-speed-override (add-internal-speed mod-map :swimming-speed :becomes-at-least arg-1)
+                 :swimming-speed-equal-to-walking (add-internal-speed mod-map :swimming-speed :equals-walking-speed nil)
+                 :climbing-speed (add-internal-speed mod-map :climbing-speed :increases-by arg-1)
+                 :climbing-speed-override (add-internal-speed mod-map :climbing-speed :becomes-at-least arg-1)
+                 :climbing-speed-equal-to-walking (add-internal-speed mod-map :climbing-speed :equals-walking-speed nil)))))
    {}
    modifiers))
 
@@ -122,7 +144,7 @@
       :equals-walking-speed (mod-cfg equals-walking-speed)
       (mod-cfg becomes-at-least value))))
 
-(defn speed-mod [{:keys [type value]}]
+(def speed-mod
   (speed-mod-fn
    {:increases-by :speed
     :becomes-at-least :speed-override}))
@@ -137,13 +159,13 @@
   (speed-mod-fn
    {:increases-by :swimming-speed
     :becomes-at-least :swimming-speed-override
-    :equals-walking-speed :swimming-speed-equals-walking-speed}))
+    :equals-walking-speed :swimming-speed-equal-to-walking}))
 
 (def climbing-speed-mod
   (speed-mod-fn
    {:increases-by :climbing-speed
     :becomes-at-least :climbing-speed-override
-    :equals-walking-speed :climbing-speed-equals-walking-speed}))
+    :equals-walking-speed :climbing-speed-equal-to-walking}))
 
 (defn save-mods [items]
   (map
@@ -159,7 +181,9 @@
                (toggle-mod-keys k) (toggle-mods k v)
                (= :ability k) (ability-mods v)
                (= :save k) (save-mods v)
-               (= :speed k) [(speed-mod v)]
+               (= :speed k) (let [s-mod (speed-mod v)]
+                              (prn "SPEED MOD" s-mod)
+                              [s-mod])
                (= :flying-speed k) [(flying-speed-mod v)]
                (= :swimming-speed k) [(swimming-speed-mod v)]
                (= :climbing-speed k) [(climbing-speed-mod v)])))
