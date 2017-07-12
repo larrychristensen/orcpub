@@ -23,17 +23,24 @@
       (is (= internal-item expected-item))))
   (testing "Save modifier"
     (let [item {::mi/modifiers [{::mod/key :saving-throw-bonus
-                                          ::mod/args [{::mod/keyword-arg ::char/str}
-                                                      {::mod/int-arg 1}]}]}
+                                 ::mod/args [{::mod/keyword-arg ::char/str}
+                                             {::mod/int-arg 1}]}]}
           expected-item {::mi/internal-modifiers {:save {::char/str {:value 1}}}}
           internal-item (mi/to-internal-item item)]
       (is (= internal-item expected-item))))
   (testing "Resistance modifier"
     (let [item {::mi/modifiers [{::mod/key :damage-resistance
-                                          ::mod/args [{::mod/keyword-arg :fire}]}
-                                         {::mod/key :damage-resistance
-                                          ::mod/args [{::mod/keyword-arg :necrotic}]}]}
+                                 ::mod/args [{::mod/keyword-arg :fire}]}
+                                {::mod/key :damage-resistance
+                                 ::mod/args [{::mod/keyword-arg :necrotic}]}]}
           expected-item {:orcpub.dnd.e5.magic-items/internal-modifiers {:damage-resistance {:fire true, :necrotic true}}}
+          internal-item (mi/to-internal-item item)]
+      (is (= internal-item expected-item))))
+  (testing "Speed modifier"
+    (let [item {::mi/modifiers [{::mod/key :flying-speed-equal-to-walking}
+                                {::mod/key :swimming-speed-override
+                                 ::mod/args [{::mod/int-arg 10}]}]}
+          expected-item {:orcpub.dnd.e5.magic-items/internal-modifiers {:flying-speed {:type :equals-walking-speed}, :swimming-speed {:type :becomes-at-least :value 10}}}
           internal-item (mi/to-internal-item item)]
       (is (= internal-item expected-item)))))
 
