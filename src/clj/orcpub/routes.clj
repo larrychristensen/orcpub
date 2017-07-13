@@ -655,7 +655,7 @@
         current (d/pull (d/db conn) '[*] id)
         owner (get current owner-prop)
         email (email-for-username (d/db conn) username)]
-    (if (#{username email} owner)
+    (if ((set [username email]) owner)
       (let [current-ids (db-ids current)
             new-ids (db-ids entity)
             retract-ids (sets/difference current-ids new-ids)
@@ -671,10 +671,11 @@
       (throw (ex-info "Not user entity"
                       {:error :not-user-entity})))))
 
-(defn save-entity [conn username entity owner-prop]
-  (if (:db/id entity)
-    (update-entity conn username entity owner-prop)
-    (create-entity conn username entity owner-prop)))
+(defn save-entity [conn username e owner-prop]
+  (let [without-empty-fields (entity/remove-empty-fields e)]
+    (if (:db/id without-empty-fields)
+      (update-entity conn username without-empty-fields owner-prop)
+      (create-entity conn username without-empty-fields owner-prop))))
 
 (defn owns-entity? [db username entity-id]
   (let [user (find-user-by-username db username)
@@ -787,21 +788,22 @@
 (defn save-item [{:keys [db transit-params body conn identity] :as request}]
   (if-let [data (spec/explain-data ::mi5e/magic-item transit-params)]
     {:status 400 :body data}
-    (let [item (entity/remove-empty-fields transit-params)
-          id (:db/id item)
-          username (:user identity)]
-      (if (and id (not (owns-item db username id)))
-        {:status 400 :body "You don't own this item."}
-        (as-> transit-params $
-          (assoc $ ::mi5e/owner username)
-          (if (not id) (assoc $ :db/id "tempid") $)
-          @(d/transact conn [$])
-          (or id (get-new-id "tempid" $))
-          (d/pull (d/db conn) '[*] $)
-          {:status 200
-           :body $})))))
+    (let [username (:user identity)
+          result (save-entity conn username transit-params ::mi5e/owner)]
+      {:status 200
+       :body result})))
 
-(defn character-list [{:keys [db transit-params body conn identity] :as request}]
+(defn item-list [{:keys [db identity]}]
+  (let [username (:user identity)
+        items (d/q '[:find (pull ?e [*])
+                     :in $ ?username
+                     :where
+                     [?e ::mi5e/owner ?username]]
+                   db
+                   username)]
+    {:status 200 :body (map first items)}))
+
+(defn character-list [{:keys [db identity] :as request}]
   (let [username (:user identity)
         user (find-user-by-username-or-email db username)
         ids (d/q '[:find ?e
@@ -1096,10 +1098,8 @@
        ;; Items
        [(route-map/path-for route-map/dnd-e5-items-route) ^:interceptors [check-auth]
         {:post `save-item
-         ;;:get `item-list
+         :get `item-list
          }]
-       #_[(route-map/path-for route-map/dnd-e5-item-summaries-route) ^:interceptors [check-auth]
-        {:get `item-summary-list}]
        #_[(route-map/path-for route-map/dnd-e5-item-route :id ":id") ^:interceptors [check-auth]
         {:delete `delete-item}]
        #_[(route-map/path-for route-map/dnd-e5-item-route :id ":id")
