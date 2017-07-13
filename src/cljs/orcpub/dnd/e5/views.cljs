@@ -845,22 +845,25 @@
           (common/list-print (map clojure.core/name attunement) "or")))
    ")"))
 
-(defn item-summary [{:keys [name item-type item-subtype rarity attunement] :as item}]
+(defn item-summary [{:keys [::mi/owner ::mi/name ::mi/type ::mi/item-subtype ::mi/rarity ::mi/attunement] :as item}]
   (if item
-    [:div.p-b-20
-     [:span.f-s-24.f-w-b name]
-     [:div.f-s-16.i.f-w-b.opacity-5
-      (str (s/capitalize (common/kw-to-name item-type))
-           (if (keyword? item-subtype)
-             (str " (" (s/capitalize (common/kw-to-name item-subtype)) ")"))
-           ", "
-           (if (string? rarity)
-             rarity
-             (common/kw-to-name rarity))
-           (if attunement
-             (requires-attunement attunement)))]]))
+    [:div.p-b-20.flex.align-items-c
+     (if owner
+       [:div.m-r-5 [svg-icon "beer-stein" 24]])
+     [:div
+      [:span.f-s-24.f-w-b name]
+      [:div.f-s-16.i.f-w-b.opacity-5
+       (str (s/capitalize (common/kw-to-name type))
+            (if (keyword? item-subtype)
+              (str " (" (s/capitalize (common/kw-to-name item-subtype)) ")"))
+            ", "
+            (if (string? rarity)
+              rarity
+              (common/kw-to-name rarity))
+            (if attunement
+              (requires-attunement attunement)))]]]))
 
-(defn item-details [{:keys [summary description]} single-column?]
+(defn item-details [{:keys [::mi/summary ::mi/description]} single-column?]
   (if (or summary description)
     (paragraphs (or summary description) single-column?)))
 
@@ -3355,9 +3358,9 @@
           :on-click #(dispatch [::char/filter-spells ""])}]]]
       [spell-list-items expanded-spells device-type]]]))
 
-(defn item-list-item [{:keys [key name] :as item} expanded?]
+(defn item-list-item [{:keys [:key ::mi/name :db/id] :as item} expanded?]
   (let [expanded? @(subscribe [:item-expanded? name])
-        item-page-path (routes/path-for routes/dnd-e5-item-page-route :key key)
+        item-page-path (routes/path-for routes/dnd-e5-item-page-route :key (or id key))
         item-page-route (routes/match-route item-page-path)]
     [:div.main-text-color.item-list-item
      [:div.pointer
@@ -3385,8 +3388,8 @@
   [:div.item-list
    (doall
     (map
-     (fn [{:keys [name] :as item}]
-       ^{:key name}
+     (fn [{:keys [:db/id ::mi/name] :as item}]
+       ^{:key (or id name)}
        [item-list-item item])
      @(subscribe [::char/filtered-items])))])
 

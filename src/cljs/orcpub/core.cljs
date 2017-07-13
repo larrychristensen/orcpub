@@ -2,6 +2,7 @@
   (:require-macros [cljs.core.async.macros :refer [go]])
   (:require [orcpub.character-builder :as ch]
             [orcpub.dnd.e5.subs]
+            [orcpub.dnd.e5.equipment-subs]
             [orcpub.dnd.e5.events]
             [orcpub.dnd.e5.views :as views]
             [orcpub.route-map :as routes]
