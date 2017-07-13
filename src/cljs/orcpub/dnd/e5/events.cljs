@@ -741,14 +741,14 @@
 (reg-event-fx
  :route
  (fn [{:keys [db]} [_ {:keys [handler route-params] :as new-route} {:keys [no-return? skip-path? event secure?]}]]
-   (prn "ROUTE" new-route no-return?)
+   (prn "PROTOCOL" js/window.location.protocol)
    (let [{:keys [route route-history]} db
          seq-params (seq route-params)
          flat-params (flatten seq-params)
          path (apply routes/path-for (or handler new-route) flat-params)]
      (if (and secure?
               (not= "localhost" js/window.location.hostname)
-              (not= js/window.location.protocol "https"))
+              (not= js/window.location.protocol "https:"))
        (set! js/window.location.href (make-url "https"
                                                js/window.location.hostname
                                                path

@@ -51,6 +51,7 @@
 (defn stop-propagation [e]
   (.stopPropagation e))
 
+
 (defn stop-prop-fn [func]
   (fn [e]
     (func e)
