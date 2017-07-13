@@ -1866,7 +1866,13 @@
                  "Save New Character")
         :icon "save"
         :style (if character-changed? unsaved-button-style) 
-        :on-click #(dispatch [:save-character])}])
+        :on-click #(dispatch [:save-character])}
+       (if (:db/id character)
+         {:title "View"
+          :icon "eye"
+          :on-click #(let [char-page-path (routes/path-for routes/dnd-e5-char-page-route :id (:db/id character))
+                           char-page-route (routes/match-route char-page-path)]
+                       (dispatch [:route char-page-route]))})])
      [:div
       [download-form]
       [:div.container
