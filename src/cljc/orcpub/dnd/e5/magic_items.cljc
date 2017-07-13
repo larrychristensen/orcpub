@@ -1079,7 +1079,7 @@ When you hit a giant with it, the giant takes an extra 2d6 damage of the weaponâ
      }{
      :name "Glamoured Studded Leather"
      :item-type :armor
-     :item-subtype :studded-leather
+     :item-subtype :studded
      :rarity :rare
      :magical-ac-bonus 1
      :modifiers [(mod5e/bonus-action
