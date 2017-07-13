@@ -304,7 +304,10 @@
     (fn [response]
       (dispatch [:set-fb-logged-in (= "connected" (.-status response))])))
    (ra/make-reaction
-     (fn [] (get @app-db :fb-logged-in? false)))))
+    (fn [] (get @app-db :fb-logged-in? false)))))
+
+(defn auth-headers [db]
+  {"Authorization" (str "Token " (-> db :user-data :token))})
 
 (reg-sub-raw
   ::char5e/characters
@@ -312,7 +315,7 @@
     (go (dispatch [:set-loading true])
         (let [response (<! (http/get (routes/path-for routes/dnd-e5-char-summary-list-route)
                                      {:accept :transit
-                                      :headers {"Authorization" (str "Token " (-> @app-db :user-data :token))}}))]
+                                      :headers (auth-headers @app-db)}))]
           (dispatch [:set-loading false])
           (case (:status response)
             200 (dispatch [::char5e/set-characters (-> response :body)])
@@ -327,7 +330,7 @@
     (go (dispatch [:set-loading true])
         (let [response (<! (http/get (routes/path-for routes/dnd-e5-char-parties-route)
                                      {:accept :transit
-                                      :headers {"Authorization" (str "Token " (-> @app-db :user-data :token))}}))]
+                                      :headers (auth-headers @app-db)}))]
           (dispatch [:set-loading false])
           (case (:status response)
             200 (dispatch [::party5e/set-parties (-> response :body)])
@@ -341,7 +344,7 @@
   (fn [app-db [_ required?]]
     (go (let [response (<! (http/get (routes/path-for routes/user-route)
                                      {:accept :transit
-                                      :headers {"Authorization" (str "Token " (-> @app-db :user-data :token))}}))]
+                                      :headers (auth-headers @app-db)}))]
           (case (:status response)
             200 (dispatch [:set-user (-> response :body)])
             401 (if required? (dispatch [:route routes/login-page-route {:secure? true}]))
@@ -700,14 +703,6 @@
 
 (def sorted-spells
   (delay (sort-by :name spells5e/spells)))
-
-(def sorted-items
-  (delay (sort-by :name mi5e/magic-items)))
-
-(reg-sub
- ::char5e/sorted-items
- (fn [db _]
-   @sorted-items))
 
 (reg-sub
  ::char5e/sorted-spells

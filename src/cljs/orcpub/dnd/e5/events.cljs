@@ -1220,6 +1220,11 @@
           ::char5e/summary-map (common/map-by :db/id characters))))
 
 (reg-event-db
+ ::mi/set-custom-items
+ (fn [db [_ items]]
+   (assoc db ::mi/custom-items items)))
+
+(reg-event-db
  ::party5e/set-parties
  (fn [db [_ parties]]
    (assoc db
@@ -1372,21 +1377,21 @@
                        (all-subtypes-removed? subtypes (:subtype monster-filters)))))))
       @(subscribe [::char5e/sorted-monsters])))))
 
-(defn filter-by-name-xform [filter-text]
+(defn filter-by-name-xform [filter-text name-key]
   (let [pattern (re-pattern (str ".*" (s/lower-case filter-text) ".*"))]
     (filter
-     (fn [{:keys [name]}]
-       (re-matches pattern (s/lower-case name))))))
+     (fn [x]
+       (re-matches pattern (s/lower-case (name-key x)))))))
 
 (defn filter-spells [filter-text]
   (sort-by
    :name
-   (sequence (filter-by-name-xform filter-text) @(subscribe [::char5e/sorted-spells]))))
+   (sequence (filter-by-name-xform filter-text :name) @(subscribe [::char5e/sorted-spells]))))
 
 (defn filter-items [filter-text]
   (sort-by
-   :name
-   (sequence (filter-by-name-xform filter-text) @(subscribe [::char5e/sorted-items]))))
+   mi/name-key
+   (sequence (filter-by-name-xform filter-text mi/name-key) @(subscribe [::char5e/sorted-items]))))
 
 (defn search-results [text]
   (let [search-text (s/lower-case text)
@@ -1406,7 +1411,7 @@
                                                       :result (char-rand5e/random-tavern-name)}
                        name-result name-result
                        :else nil)
-          filter-xform (filter-by-name-xform search-text)
+          filter-xform (filter-by-name-xform search-text :name)
           top-spells (if (>= (count text) 3)
                        (sequence
                         filter-xform
