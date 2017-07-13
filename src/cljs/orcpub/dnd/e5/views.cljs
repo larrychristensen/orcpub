@@ -3107,7 +3107,7 @@
          [:div.p-l-5.p-r-5.p-b-10
           [:div.p-b-10.p-l-10.p-r-10
            [:div.posn-rel
-            [:input.input.f-s-24.p-l-20
+            [:input.input.f-s-24.p-l-20.w-100-p
              {:style {:height "60px"}
               :value @(subscribe [::char/monster-text-filter])
               :on-change #(dispatch [::char/filter-monsters (event-value %)])}]
@@ -3208,7 +3208,7 @@
      [:div.p-l-5.p-r-5.p-b-10
       [:div.p-b-10.p-l-10.p-r-10
        [:div.posn-rel
-        [:input.input.f-s-24.p-l-20
+        [:input.input.f-s-24.p-l-20.w-100-p
          {:style {:height "60px"}
           :value @(subscribe [::char/spell-text-filter])
           :on-change #(dispatch [::char/filter-spells (event-value %)])}]
@@ -3264,7 +3264,7 @@
      [:div.p-l-5.p-r-5.p-b-10
       [:div.p-b-10.p-l-10.p-r-10
        [:div.posn-rel
-        [:input.input.f-s-24.p-l-20
+        [:input.input.f-s-24.p-l-20.w-100-p
          {:style {:height "60px"}
           :value @(subscribe [::char/item-text-filter])
           :on-change #(dispatch [::char/filter-items (event-value %)])}]
