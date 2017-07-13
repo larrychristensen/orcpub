@@ -53,6 +53,5 @@
      #?(:cljs
         (let [v (if (not (s/blank? str-v))
                   (js/parseInt str-v))]
-          (prn "V" v)
           (on-change v))))
    (assoc attrs :type :number)])
