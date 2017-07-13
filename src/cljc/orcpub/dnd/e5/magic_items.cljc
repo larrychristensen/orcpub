@@ -2275,7 +2275,9 @@ The staff can be wielded as a magic quarterstaff. On a hit, it deals damage as a
 
      :rarity :uncommon
 
-     :attunement [:any]
+       :attunement [:any]
+       :modifiers [(mod5e/all-skills-bonus 1)
+                   (mod5e/saving-throw-bonuses 1)]
      :description "While this polished agate is on your person, you gain a +1 bonus to ability checks and saving throws."
      }{
      :name "Sun Blade"
