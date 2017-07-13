@@ -350,6 +350,18 @@
                   ?additional-skill-bonuses
                   {skill-kw bonus})))
 
+(defn all-skills-bonus [bonus]
+  (mods/modifier ?additional-skill-bonuses
+                 (merge-with
+                  +
+                  ?additional-skill-bonuses
+                  (into
+                   {}
+                   (map
+                    (fn [k]
+                      [k bonus])
+                    skill5e/skill-keys)))))
+
 (defn max-hit-points [bonus]
   (mods/cum-sum-mod ?hit-point-level-increases bonus "HP" (mods/bonus-str bonus)))
 
