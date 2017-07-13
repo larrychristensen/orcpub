@@ -4599,6 +4599,33 @@ long rest."})
    :page page
    :source source})
 
+(defn magic-item-selection [item-type-name icon item-sub modifier-fn & [converter]]
+  (t/selection-cfg
+   {:name item-type-name
+    :min 0
+    :max nil
+    :multiselect? true
+    :sequential? false
+    :quantity? true
+    :collapsible? true
+    :icon icon
+    :new-item-fn (fn [selection selected-items _ key]
+                   {::entity/key key
+                    ::entity/value 1})
+    :tags #{:equipment}
+    :options-ref #(delay
+                   (map
+                    (fn [item]
+                      (let [{:keys [name key description page source]} (if converter (converter item) item)]
+                        (t/option-cfg
+                         {:name name
+                          :key key
+                          :help (if (or description
+                                        page)
+                                  (inventory-help description page source))
+                          :modifiers [(modifier-fn key item)]})))
+                    @(subscribe item-sub)))}))
+
 (defn inventory-selection [item-type-name icon items modifier-fn & [converter]]
   (t/selection-cfg
    {:name item-type-name
@@ -4895,11 +4922,11 @@ long rest."})
      :options base-class-options})
    (inventory-selection "Treasure" "cash" equip5e/treasure mod5e/deferred-treasure)
    (inventory-selection "Weapons" "plain-dagger" weapon5e/weapons mod5e/deferred-weapon)
-   (inventory-selection "Magic Weapons" "lightning-bow" mi/magic-weapons mod5e/deferred-magic-weapon magic-item-details)
+   (magic-item-selection "Magic Weapons" "lightning-bow" [::mi/magic-weapons] mod5e/deferred-magic-weapon magic-item-details)
    (inventory-selection "Armor" "breastplate" armor5e/armor mod5e/deferred-armor)
-   (inventory-selection "Magic Armor" "magic-shield" mi/magic-armor mod5e/deferred-magic-armor magic-item-details)
+   (magic-item-selection "Magic Armor" "magic-shield" [::mi/magic-armor] mod5e/deferred-magic-armor magic-item-details)
    (inventory-selection "Equipment" "backpack" equip5e/equipment mod5e/deferred-equipment)
-   (inventory-selection "Other Magic Items" "orb-wand" mi/other-magic-items mod5e/deferred-magic-item magic-item-details)])
+   (magic-item-selection "Other Magic Items" "orb-wand" [::mi/other-magic-items] mod5e/deferred-magic-item magic-item-details)])
 
 (def template
   {::t/base t-base/template-base

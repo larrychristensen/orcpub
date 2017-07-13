@@ -5,7 +5,10 @@
 (spec/def ::int-value int?)
 (spec/def ::map-value map?)
 
-(spec/def ::key keyword?)
+(spec/def ::keyword-key (fn [k] (and (keyword? k)
+                             (not (re-matches #"^[0-9].*" (name k))))))
+(spec/def ::key (spec/or :keyword ::keyword-key
+                         :int int?))
 (spec/def ::option (spec/keys :req [::key]
                               :opt [::int-value
                                     ::map-value

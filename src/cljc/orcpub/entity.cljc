@@ -8,8 +8,7 @@
             [orcpub.entity.strict :as strict]
             [clojure.set :refer [difference union intersection]]))
 
-(spec/def ::key (fn [k] (and (keyword? k)
-                             (not (re-matches #"^[0-9].*" (name k))))))
+(spec/def ::key ::strict/key)
 (spec/def ::option (spec/keys :req [::key]
                               :opt [::options]))
 (spec/def ::option-vec (spec/* ::option))
@@ -25,6 +24,11 @@
 (spec/def ::flat-options (spec/+ ::flat-option))
 
 (declare to-strict-option)
+
+(defn selection-options [{:keys [::t/options ::t/options-ref]}]
+  (if options-ref
+    @(options-ref)
+    options))
 
 (defn to-strict-selections [options path homebrew-paths]
   (mapv
@@ -243,7 +247,7 @@
                 (fn [i s]
                   (if (= (::t/key s) f)
                     [s i]))
-                (::t/options selection)))
+                (selection-options selection)))
         next-path (vec (concat current-path [::t/options option-i]))]
     (if (seq r)
       (get-template-selection-path option r next-path)
@@ -316,7 +320,8 @@
   ([template entity current-path [selection-k option-k & ks :as option-path]]
    (if selection-k
      (let [[selection-i selection] (template-item-with-key (::t/selections template) selection-k)
-           {:keys [::t/min ::t/max ::t/options ::t/multiselect?]} selection
+           {:keys [::t/min ::t/max ::t/multiselect?]} selection
+           options (selection-options selection)
            [option-i option] (template-item-with-key options option-k)
            selection-path (vec (concat current-path [::options selection-k]))
            entity-items (get-in entity selection-path)
@@ -361,7 +366,10 @@
        first-selection
        ::t/min (apply + (map ::t/min selections))
        ::t/max (if (every? ::t/max selections) (apply + (map ::t/max selections)))
-       ::t/options (into (sorted-set-by #(compare (::t/key %) (::t/key %2))) (apply concat (map ::t/options selections)))))))
+       ::t/options (into
+                    (sorted-set-by
+                     #(compare (::t/key %) (::t/key %2)))
+                    (apply concat (map selection-options selections)))))))
 
 (defn combine-selections [selections]
   (let [by-ref (group-by ::t/ref selections)
@@ -388,9 +396,10 @@
          used-ref-option-paths #{}
          accum-selections []]
     (if current
-      (let [{:keys [::t/options ::t/selections ::path ::t/ref]} current
+      (let [{:keys [::t/selections ::path ::t/ref]} current
+            options (selection-options current)
             selection? options
-            children (or options selections)
+            children (or selections options)
             children-with-paths (add-child-paths path ref children)
             active-children (filter
                              (fn [{:keys [::path]}]
@@ -463,7 +472,7 @@
                   (filter
                    (fn [{:keys [::t/key] :as option}]
                      (= option-key key))
-                   (vec (::t/options ref-selection))))
+                   (vec (selection-options ref-selection))))
                  (let [template-path (get-template-selection-path template path [])]
                    (get-in-lazy template template-path)))]
     (::t/modifiers option)))
@@ -486,14 +495,14 @@
 
 (defn make-template-option-map [selections]
   (reduce
-   (fn [m {:keys [::path ::t/ref ::t/options]}]
+   (fn [m {:keys [::path ::t/ref] :as selection}]
      (merge m
             (reduce
              (fn [m2 {:keys [::t/key] :as option}]
                (let [option-path (conj (vec (or ref path)) key)]
                  (assoc m2 option-path option)))
              {}
-             options)))
+             (selection-options selection))))
    {}
    selections))
 
@@ -579,7 +588,9 @@
                     (assoc
                      s1
                      ::t/options
-                     (merge-options (::t/options s1) (::t/options s2))))
+                     (merge-options
+                      (selection-options s1)
+                      (selection-options s2))))
                   sel-map
                   other-sel-map)]
       (vec
@@ -594,33 +605,6 @@
   (reduce
    merge-selections
    selections))
-
-(declare sort-selections)
-
-(defn sort-options [s]
-  (update
-   s
-   ::t/options
-   (fn [options]
-     (vec
-      (sort-by
-       (juxt ::t/order ::t/name)
-       (map
-        sort-selections
-        options))))))
-
-(defn sort-selections [o]
-  (update
-   o
-   ::t/selections
-   (fn [selections]
-     (vec
-      (sort-by
-       (fn [selection]
-         (or (::t/order selection) 1000))
-       (map
-        sort-options
-        selections))))))
 
 (defn build-template-aux [plugins template]
   (reduce
