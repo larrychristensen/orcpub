@@ -315,7 +315,7 @@
           (dispatch [:set-loading false])
           (case (:status response)
             200 (dispatch [::char5e/set-characters (-> response :body)])
-            401 (dispatch [:route routes/login-page-route {:secure? true}])
+            401 (dispatch [:route-to-login])
             500 (dispatch (events/show-generic-error)))))
     (ra/make-reaction
      (fn [] (get @app-db ::char5e/characters [])))))
@@ -330,7 +330,7 @@
           (dispatch [:set-loading false])
           (case (:status response)
             200 (dispatch [::party5e/set-parties (-> response :body)])
-            401 (dispatch [:route routes/login-page-route {:secure? true}])
+            401 (dispatch [:route-to-login])
             500 (dispatch (events/show-generic-error)))))
     (ra/make-reaction
      (fn [] (get @app-db ::char5e/parties [])))))
@@ -343,7 +343,7 @@
                                       :headers {"Authorization" (str "Token " (-> @app-db :user-data :token))}}))]
           (case (:status response)
             200 (dispatch [:set-user (-> response :body)])
-            401 (if required? (dispatch [:route routes/login-page-route {:secure? true}]))
+            401 (if required? (dispatch [:route-to-login]))
             500 (if required? (dispatch (events/show-generic-error))))))
     (ra/make-reaction
      (fn [] (get @app-db :user [])))))
@@ -382,7 +382,7 @@
               (dispatch [:set-loading false])
               (case (:status response)
                 200 (dispatch [::char5e/set-character id (char5e/from-strict (-> response :body))])
-                401 (dispatch [:route routes/login-page-route {:secure? true}])
+                401 (dispatch [:route-to-login])
                 500 (dispatch (events/show-generic-error)))))))
     (ra/make-reaction
      (fn [] (if id

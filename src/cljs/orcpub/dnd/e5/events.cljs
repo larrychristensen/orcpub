@@ -740,7 +740,7 @@
 
 (reg-event-fx
  :route
- (fn [{:keys [db]} [_ {:keys [handler route-params] :as new-route} {:keys [return? return-route skip-path? event secure?]}]]
+ (fn [{:keys [db]} [_ {:keys [handler route-params] :as new-route} {:keys [no-return? skip-path? event secure?]}]]
    (let [{:keys [route route-history]} db
          seq-params (seq route-params)
          flat-params (flatten seq-params)
@@ -752,13 +752,13 @@
                                                js/window.location.hostname
                                                path
                                                js/window.location.port))
-       (cond-> {:db (assoc db :route new-route)
-                :dispatch-n [[:hide-message]
-                             [:close-orcacle]]}
-         return? (assoc-in [:db :return-route] new-route)
-         return-route (assoc-in [:db :return-route] return-route)
-         (not skip-path?) (assoc :path path)
-         event (update :dispatch-n conj event))))))
+       (let [cfg (cond-> {:db (assoc db :route new-route)
+                          :dispatch-n [[:hide-message]
+                                       [:close-orcacle]]}
+                   (not no-return?) (assoc-in [:db :return-route] new-route)
+                   (not skip-path?) (assoc :path path)
+                   event (update :dispatch-n conj event))]
+         cfg)))))
 
 (reg-event-db
  :set-user-data
@@ -905,7 +905,7 @@
              (if (= 401 (:status response))
                (if on-unauthorized
                  (dispatch (conj on-unauthorized response))
-                 (dispatch [:route routes/login-page-route {:secure? true}]))
+                 (dispatch [:route-to-login]))
                (if on-failure
                  (dispatch (conj on-failure response))
                  (dispatch (show-generic-error))))))))))
@@ -922,9 +922,9 @@
  [user->local-store-interceptor]
  (fn [{:keys [db]} [_ backtrack? response]]
    {:db (assoc db :user-data (-> response :body))
-    :dispatch [:route (if (-> db :return-route :handler (= :login-page))
-                        routes/dnd-e5-char-builder-route
-                        (:return-route db))]}))
+    :dispatch [:route (or
+                       (:return-route db)
+                        routes/dnd-e5-char-builder-route)]}))
 
 (defn show-old-account-message []
   [:show-login-message [:div  "There is no account for the email or username, please double-check it. Usernames and passwords are case sensitive, email addresses are not. You can also try to " [:a {:href (routes/path-for routes/register-page-route)} "register"] "." [:div.f-w-n.i.m-t-10 "Accounts from the old OrcPub have not been ported over yet, but you can create a new account in the mean time and we will link it with your old account as soon as possible if you use the same email address."]]])
@@ -1014,8 +1014,7 @@
 (reg-event-fx
  :login
  (fn [{:keys [db]} [_ params backtrack?]]
-   {:db (assoc db :return-route (some #(if (not (login-routes %)) %) (:route-history db)))
-    :http {:method :post
+   {:http {:method :post
            :url login-url
            :json-params params
            :on-success [:login-success backtrack?]
@@ -1612,5 +1611,9 @@
  ::magic-items/set-builder-item
  [magic-item->local-store-interceptor]
  (fn [db [_ magic-item]]
-   (prn "SET MAGIC ITEM" magic-item)
    (assoc db ::magic-items/builder-item magic-item)))
+
+(reg-event-fx
+ :route-to-login
+ (fn [_ _]
+   {:dispatch [:route routes/login-page-route {:secure? true :no-return? true}]}))
