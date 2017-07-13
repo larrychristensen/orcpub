@@ -1690,22 +1690,6 @@
       :on-click (fn [_]
                   (dispatch [:set-active-tabs #{:details}]))} "Details"]]])
 
-(defn export-pdf [built-char]
-  (fn [_]
-    (let [field (.getElementById js/document "fields-input")]
-      (aset field "value" (str (pdf-spec/make-spec built-char)))
-      (.submit (.getElementById js/document "download-form")))))
-
-(defn download-form [built-char]
-  [:form.download-form
-   {:id "download-form"
-    :action (if (s/starts-with? js/window.location.href "http://localhost")
-              "http://localhost:8890/character.pdf"
-              "/character.pdf")
-    :method "POST"
-    :target "_blank"}
-   [:input {:type "hidden" :name "body" :id "fields-input"}]])
-
 (def patreon-link-props
   {:href "https://www.patreon.com/user?u=5892323" :target "_blank"})
 
@@ -1860,7 +1844,7 @@
                     :event [:reset-character]})}
        {:title "Print"
         :icon "print"
-        :on-click (export-pdf built-char)}
+        :on-click (views5e/export-pdf built-char)}
        {:title (if (:db/id character)
                  "Update Existing Character"
                  "Save New Character")
@@ -1874,7 +1858,6 @@
                            char-page-route (routes/match-route char-page-path)]
                        (dispatch [:route char-page-route]))})])
      [:div
-      [download-form]
       [:div.container
        [:div.content
         [:div.flex.justify-cont-s-b.align-items-c.flex-wrap
