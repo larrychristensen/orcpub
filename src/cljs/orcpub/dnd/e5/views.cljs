@@ -6,6 +6,7 @@
             [orcpub.entity :as entity]
             [orcpub.components :as comps]
             [orcpub.entity-spec :as es]
+            [orcpub.pdf-spec :as pdf-spec]
             [orcpub.entity.strict :as se]
             [orcpub.dnd.e5.subs :as subs]
             [orcpub.dnd.e5.character :as char]
@@ -93,6 +94,22 @@
          :on-change on-change
          :on-blur (fn [e] (reset! blurred? true))}]
        (if @blurred? (validation-messages messages))])))
+
+(defn export-pdf [built-char]
+  (fn [_]
+    (let [field (.getElementById js/document "fields-input")]
+      (aset field "value" (str (pdf-spec/make-spec built-char)))
+      (.submit (.getElementById js/document "download-form")))))
+
+(defn download-form [built-char]
+  [:form.download-form
+   {:id "download-form"
+    :action (if (s/starts-with? js/window.location.href "http://localhost")
+              "http://localhost:8890/character.pdf"
+              "/character.pdf")
+    :method "POST"
+    :target "_blank"}
+   [:input {:type "hidden" :name "body" :id "fields-input"}]])
 
 (defn svg-icon [icon-name & [size theme-override]]
   (let [theme (or theme-override @(subscribe [:theme]))]
@@ -1121,6 +1138,7 @@
                        (if (>= scroll-top header-height)
                          (set! (.-display (.-style sticky-header)) "block")
                          (set! (.-display (.-style sticky-header)) "none")))))}
+     [download-form]
      (if @(subscribe [:loading])
        [:div {:style loading-style}
         [:div.flex.justify-cont-s-a.align-items-c.h-100-p
@@ -2600,6 +2618,9 @@
          {:title "Edit"
           :icon "pencil"
           :on-click #(dispatch [:edit-character character])})
+       {:title "Print"
+        :icon "print"
+        :on-click (export-pdf built-character)}
        (if (and username owner (not= owner username))
          [add-to-party-component (js/parseInt id)])])
      [:div.p-10.main-text-color
@@ -2949,6 +2970,9 @@
                             {:on-click #(let [route char-page-route]
                                           (dispatch [:route route]))}
                             "view"]
+                           [:button.form-button.m-l-5
+                            {:on-click (export-pdf @(subscribe [::char/built-character id]))}
+                            "print"]
                            (if (= username owner)
                              [:button.form-button.m-l-5
                               {:on-click #(dispatch [:delete-character id])}
