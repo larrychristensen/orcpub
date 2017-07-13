@@ -267,11 +267,10 @@
            {:class-name "input m-t-0"}]
           [:div.flex-grow-1 item-name])
         (if item-description [:div.w-60 [show-info-button expanded?]])
-        [:input.input.m-l-5.m-t-0
-         {:class-name (str "w-" (or qty-input-width 60))
-          :type :number
-          :value item-qty
-          :on-change qty-change-fn}]
+        [comps/int-field
+         item-qty
+         qty-change-fn
+         {:class-name (str "input m-l-5 m-t-0 w-" (or qty-input-width 60))}]
         [:i.fa.fa-minus-circle.orange.f-s-16.m-l-5.pointer
          {:on-click remove-fn}]]
        (if @expanded? [:div.m-t-5 item-description])])))
@@ -319,9 +318,7 @@
                              :i i
                              :qty-input-width qty-input-width
                              :check-fn #(dispatch [:toggle-inventory-item-equipped key i])
-                             :qty-change-fn (fn [e]
-                                              (let [qty (.. e -target -value)]
-                                                (dispatch [:change-inventory-item-quantity key i qty])))
+                             :qty-change-fn #(dispatch [:change-inventory-item-quantity key i %])
                              :remove-fn (fn [_]
                                           (dispatch [:remove-inventory-item key item-key]))}]))
         selected-items))]
