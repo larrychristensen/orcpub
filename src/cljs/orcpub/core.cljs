@@ -58,7 +58,7 @@
     (dispatch [:route route (if (events/login-routes (:handler route))
                               (merge
                                config
-                               {:secure? true :no-return? true})
+                               {:no-return? true})
                               config)])))
 
 (defn make-history []
