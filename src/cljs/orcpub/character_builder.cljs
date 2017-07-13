@@ -121,7 +121,7 @@
    (get entity-values prop-name)
    #(dispatch [:update-value-field prop-name %])
    {:type input-type
-    :class-name (str "input " cls-str)}])
+    :class-name (str "input w-100-p " cls-str)}])
 
 (defn character-input [entity-values prop-name & [cls-str handler type]]
   [character-field entity-values prop-name :input cls-str handler type])
