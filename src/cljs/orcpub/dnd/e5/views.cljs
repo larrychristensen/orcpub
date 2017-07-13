@@ -161,7 +161,7 @@
        [:span.pointer.flex.flex-column.align-items-end
         [:span.orange.underline.f-w-b.m-l-5
          {:style login-style
-          :on-click #(dispatch [:route routes/login-page-route {:secure? true}])}
+          :on-click #(dispatch [:route-to-login])}
          [:span "LOGIN"]]])]))
 
 (def header-tab-style
@@ -206,9 +206,9 @@
                 [:div.p-10.opacity-5.hover-opacity-full
                  (let [current-route @(subscribe [:route])]
                    {:style (if (or (= route current-route)
-                                        (= route (get current-route :handler))) active-style)
+                                   (= route (get current-route :handler))) active-style)
                     :on-click (fn [e]
-                                (dispatch [:route route {:return true}])
+                                (dispatch [:route route])
                                 (.stopPropagation e))})
                  name])
               buttons))])]))))
@@ -248,7 +248,7 @@
         [:div.flex.justify-cont-s-b.align-items-c.w-100-p.p-l-20.p-r-20.h-100-p
          [:img.orcpub-logo.h-32.w-120.pointer
           {:src "/image/orcpub-logo.svg"
-           :on-click #(dispatch [:route routes/default-route {:return? true}])}]
+           :on-click #(dispatch [:route routes/default-route])}]
          (let [search-text @(subscribe [:search-text])
                search-text? @(subscribe [:search-text?])]
            [:div
@@ -290,7 +290,7 @@
          [header-tab
           "characters"
           "battle-gear"
-          #(dispatch [:route routes/dnd-e5-char-list-page-route {:return? true}])
+          #(dispatch [:route routes/dnd-e5-char-list-page-route])
           false
           (routes/dnd-e5-char-page-routes (or (:handler active-route) active-route))
           device-type
@@ -303,21 +303,21 @@
          [header-tab
           "spells"
           "spell-book"
-          #(dispatch [:route routes/dnd-e5-spell-list-page-route {:return? true}])
+          #(dispatch [:route routes/dnd-e5-spell-list-page-route])
           false
           (routes/dnd-e5-spell-page-routes (or (:handler active-route) active-route))
           device-type]
          [header-tab
           "monsters"
           "hydra"
-          #(dispatch [:route routes/dnd-e5-monster-list-page-route {:return? true}])
+          #(dispatch [:route routes/dnd-e5-monster-list-page-route])
           false
           (routes/dnd-e5-monster-page-routes (or (:handler active-route) active-route))
           device-type]
          [header-tab
           "items"
           "all-for-one"
-          #(dispatch [:route routes/dnd-e5-item-list-page-route {:return? true}])
+          #(dispatch [:route routes/dnd-e5-item-list-page-route])
           false
           (routes/dnd-e5-item-page-routes (or (:handler active-route) active-route))
           device-type]]]]]]))
@@ -492,7 +492,7 @@
 
 (defn login-link []
   [:span.underline.f-w-b.m-l-10.pointer.orange
-   {:on-click #(dispatch [:route routes/login-page-route {:secure? true}])}
+   {:on-click #(dispatch [:route-to-login])}
    "LOGIN"])
 
 (defn verify-success []
@@ -700,12 +700,12 @@
           [:div.m-t-20
            [:span "Don't have a login? "]
            [:span.orange.underline.pointer
-            {:on-click #(dispatch [:route routes/register-page-route {:secure true}])}
+            {:on-click #(dispatch [:route routes/register-page-route {:secure true :no-return? true}])}
             "REGISTER NOW"]]
           [:div.m-t-20
            [:span "Forgot your password? "]
            [:span.orange.underline.pointer
-            {:on-click #(dispatch [:route routes/send-password-reset-page-route {:secure? true}])}
+            {:on-click #(dispatch [:route routes/send-password-reset-page-route {:secure? true :no-return? true}])}
             "RESET PASSWORD"]]]]]))))
 
 (def loading-style
@@ -2947,7 +2947,7 @@
                               "edit"])
                            [:button.form-button.m-l-5
                             {:on-click #(let [route char-page-route]
-                                          (dispatch [:route route {:return? true}]))}
+                                          (dispatch [:route route]))}
                             "view"]
                            (if (= username owner)
                              [:button.form-button.m-l-5
@@ -3052,7 +3052,7 @@
                                   {:on-click #(dispatch [:edit-character @(subscribe [::char/character character-id])])}
                                   "edit"])
                                [:button.form-button.m-l-5
-                                {:on-click #(dispatch [:route char-page-route {:return? true}])}
+                                {:on-click #(dispatch [:route char-page-route])}
                                 "view"]
                                [:button.form-button.m-l-5
                                 {:on-click #(dispatch [::party/remove-character id character-id])}
@@ -3083,7 +3083,7 @@
          {:style character-display-style}
          [:div.flex.justify-cont-end.uppercase.align-items-c
           [:button.form-button.m-l-5
-           {:on-click #(dispatch [:route monster-page-route {:return? true}])}
+           {:on-click #(dispatch [:route monster-page-route])}
            "view"]]
          [monster-component monster]])]]))
 
@@ -3187,7 +3187,7 @@
          {:style character-display-style}
          [:div.flex.justify-cont-end.uppercase.align-items-c
           [:button.form-button.m-l-5
-           {:on-click #(dispatch [:route spell-page-route {:return? true}])}
+           {:on-click #(dispatch [:route spell-page-route])}
            "view"]]
          [spell-component spell true]])]]))
 
@@ -3239,7 +3239,7 @@
          {:style character-display-style}
          [:div.flex.justify-cont-end.uppercase.align-items-c
           [:button.form-button.m-l-5
-           {:on-click #(dispatch [:route item-page-route {:return? true}])}
+           {:on-click #(dispatch [:route item-page-route])}
            "view"]]
          [item-component item]])]]))
 
