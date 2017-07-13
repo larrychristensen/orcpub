@@ -1,5 +1,6 @@
 (ns orcpub.components
   (:require [re-frame.core :refer [dispatch]]
+            [clojure.string :as s]
             #?(:cljs [reagent.core :refer [atom]])))
 
 (defn checkbox [selected? disable?]
@@ -43,3 +44,15 @@
                                           (assoc s
                                                  :timeout (js/setTimeout (fn [] (on-change v)) 500)
                                                  :temp-val v))))))})])))
+
+(defn int-field [value on-change attrs]
+  [input-field
+   :input
+   value
+   (fn [str-v]
+     #?(:cljs
+        (let [v (if (not (s/blank? str-v))
+                  (js/parseInt str-v))]
+          (prn "V" v)
+          (on-change v))))
+   (assoc attrs :type :number)])

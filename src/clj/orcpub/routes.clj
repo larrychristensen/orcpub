@@ -870,18 +870,18 @@
       {:status 401 :body "You do not own this character"})))
 
 (defn get-character-for-id [db id]
-  (let [{:keys [::se/type ::se/game ::se/game-version] :as character} (d/pull db '[*] id)
+  (let [{:keys [::se/owner] :as character} (d/pull db '[*] id)
         problems [] #_(dnd-e5-char-type-problems character)]
-    (if (seq problems)
+    (if (or (not owner) (seq problems))
       {:status 400 :body problems}
-      character)))
+      {:status 200 :body character})))
 
 (defn character-summary-for-id [db id]
   {:keys [::se/summary]} (d/pull db '[::se/summary {::se/values [::char5e/description ::char5e/image-url]}] id))
 
 (defn get-character [{:keys [db] {:keys [:id]} :path-params}]
   (let [parsed-id (Long/parseLong id)]
-    {:status 200 :body (get-character-for-id db parsed-id)}))
+    (get-character-for-id db parsed-id)))
 
 (defn get-user [{:keys [db identity]}]
   (let [username (:user identity)
