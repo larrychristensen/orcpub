@@ -43,7 +43,7 @@
             [re-frame.core :refer [subscribe dispatch dispatch-sync]])
   (:require-macros [cljs.core.async.macros :refer [go]]))
 
-(def print-disabled? true)
+(def print-disabled? false)
 
 (def print-enabled? (and (not print-disabled?)
                          (s/starts-with? js/window.location.href "http://localhost")))
@@ -277,25 +277,31 @@
        (if @expanded? [:div.m-t-5 item-description])])))
 
 (defn inventory-selector [item-map qty-input-width {:keys [selection]} & [custom-equipment-key]]
-  (let [{:keys [::t/key ::t/options]} selection
+  (let [{:keys [::t/key]} selection
         selected-items @(subscribe [:entity-option key])
-        selected-keys (into #{} (map ::entity/key selected-items))]
+        selected-keys (into #{} (map ::entity/key selected-items))
+        options (entity/selection-options selection)
+        magic-weapons (= key :magic-weapons)]
     [:div
      [comps/selection-adder
       (sort-by
-         :name
-         (sequence
-          (comp
-           (remove
-            #(selected-keys (::t/key %)))
-           (map
-            (fn [{:keys [::t/name ::t/key]}]
-              {:name name
-               :key key})))
-          options))
+       :name
+       (sequence
+        (comp
+         (remove
+          #(selected-keys (::t/key %)))
+         (map
+          (fn [{:keys [::t/name ::t/key] :as option}]
+            {:name name
+             :key key})))
+        options))
       (fn [e]
-         (let [kw (keyword (.. e -target -value))]
-           (dispatch [:add-inventory-item key kw])))]
+        (let [value (.. e -target -value)
+              item-key (if (re-matches #"\d+" value)
+                         (js/parseInt value)
+                         (keyword value))]
+          (prn "KW" item-key)
+          (dispatch [:add-inventory-item key item-key])))]
      (if (seq selected-items)
        [:div.flex.f-s-12.opacity-5.m-t-10.justify-cont-s-b
         [:div.m-r-10 "Equipped?"]
@@ -307,8 +313,9 @@
                                        equipped? ::char-equip5e/equipped?
                                        item-name ::char-equip5e/name} ::entity/value}]
           (let [item (item-map item-key)
-                item-name (or item-name (:name item))
+                item-name (or item-name (:name item) (::mi5e/name item))
                 item-description (:description item)]
+            (prn "ITEM" item)
             ^{:key item-key}
             [inventory-item {:selection-key key
                              :item-key item-key
@@ -1303,20 +1310,20 @@
               :ui-fn (partial inventory-selector weapon5e/weapons-map 60)}
              {:key :magic-weapons
               :hide-homebrew? true
-              :ui-fn (partial inventory-selector mi5e/magic-weapon-map 60)}
+              :ui-fn (partial inventory-selector @(subscribe [::mi5e/magic-weapon-map]) 60)}
              {:key :armor
               :hide-homebrew? true
               :ui-fn (partial inventory-selector armor5e/armor-map 60)}
              {:key :magic-armor
               :hide-homebrew? true
-              :ui-fn (partial inventory-selector mi5e/magic-armor-map 60)}
+              :ui-fn (partial inventory-selector @(subscribe [::mi5e/magic-armor-map]) 60)}
              {:key :equipment
               :hide-homebrew? true
               :ui-fn (fn [v]
                        [inventory-selector equip5e/equipment-map 60 v ::char5e/custom-equipment])}
              {:key :other-magic-items
               :hide-homebrew? true
-              :ui-fn (partial inventory-selector mi5e/other-magic-item-map 60)}
+              :ui-fn (partial inventory-selector @(subscribe [::mi5e/other-magic-items-map]) 60)}
              {:key :treasure
               :hide-homebrew? true
               :ui-fn #(inventory-selector equip5e/treasure-map 100 % ::char5e/custom-treasure)}]}])

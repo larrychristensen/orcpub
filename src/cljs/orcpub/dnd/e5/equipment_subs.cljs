@@ -1,5 +1,6 @@
 (ns orcpub.dnd.e5.equipment-subs
   (:require [re-frame.core :refer [reg-sub reg-sub-raw dispatch]]
+            [orcpub.common :as common]
             [orcpub.dnd.e5.magic-items :as mi5e]
             [orcpub.dnd.e5.character :as char5e]
             [orcpub.route-map :as routes]
@@ -46,6 +47,19 @@
     mi5e/magic-weapon-xform
     sorted-items)))
 
+(defn map-by-key-or-id [items]
+  (reduce
+   (fn [m {:keys [:db/id key] :as item}]
+     (assoc m (or id key) item))
+   {}
+   items))
+
+(reg-sub
+ ::mi5e/magic-weapon-map
+ :<- [::mi5e/magic-weapons]
+ (fn [magic-weapons _]
+   (map-by-key-or-id magic-weapons)))
+
 (reg-sub
  ::mi5e/magic-armor
  :<- [::char5e/sorted-items]
@@ -55,9 +69,21 @@
     sorted-items)))
 
 (reg-sub
+ ::mi5e/magic-armor-map
+ :<- [::mi5e/magic-armor]
+ (fn [magic-armor _]
+   (map-by-key-or-id magic-armor)))
+
+(reg-sub
  ::mi5e/other-magic-items
  :<- [::char5e/sorted-items]
  (fn [sorted-items _]
    (sequence
     mi5e/other-magic-items-xform
     sorted-items)))
+
+(reg-sub
+ ::mi5e/other-magic-items-map
+ :<- [::mi5e/other-magic-items]
+ (fn [magic-items _]
+   (map-by-key-or-id magic-items)))
