@@ -741,7 +741,6 @@
 (reg-event-fx
  :route
  (fn [{:keys [db]} [_ {:keys [handler route-params] :as new-route} {:keys [no-return? skip-path? event secure?]}]]
-   (prn "PROTOCOL" js/window.location.protocol)
    (let [{:keys [route route-history]} db
          seq-params (seq route-params)
          flat-params (flatten seq-params)
@@ -922,7 +921,6 @@
  :login-success
  [user->local-store-interceptor]
  (fn [{:keys [db]} [_ backtrack? response]]
-   (prn "LOGIN_SUCCESS" (:return-route db))
    {:db (assoc db :user-data (-> response :body))
     :dispatch [:route (or
                        (:return-route db)
