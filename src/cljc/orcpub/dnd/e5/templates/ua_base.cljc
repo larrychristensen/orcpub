@@ -822,7 +822,7 @@
                               :size :medium
                               :speed 30
                               :modifiers [opt5e/ua-al-illegal
-                                          (mod5e/natural-ac-bonus 1)
+                                          (mod5e/ac-bonus-fn (fn [] 1))
                                           (mod5e/immunity :disease)
                                           (mod5e/trait-cfg
                                            {:name "Living Construct"

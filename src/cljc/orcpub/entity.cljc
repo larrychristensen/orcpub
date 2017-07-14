@@ -9,8 +9,7 @@
             [clojure.set :refer [difference union intersection]]))
 
 (spec/def ::key ::strict/key)
-(spec/def ::option (spec/keys :req [::key]
-                              :opt [::options]))
+(spec/def ::option (spec/keys :opt [::key ::options]))
 (spec/def ::option-vec (spec/* ::option))
 (spec/def ::options (spec/map-of keyword? (spec/or :single ::option
                                                    :multiple ::option-vec)))
@@ -42,9 +41,10 @@
          (map? v) (assoc ::strict/option (to-strict-option v new-path homebrew-paths)))))
    options))
 
-(defn to-strict-option [{:keys [:db/id ::key ::value ::options]} path homebrew-paths]
-  (cond-> {::strict/key key}
+(defn to-strict-option [{:keys [:db/id ::key ::value ::options] :as option} path homebrew-paths]
+  (cond-> {}
     id (assoc :db/id id)
+    key (assoc ::strict/key key)
     options (assoc ::strict/selections (to-strict-selections options (conj path key) homebrew-paths))
     (int? value) (assoc ::strict/int-value value)
     (string? value) (assoc ::strict/string-value value)
@@ -96,10 +96,12 @@
                                   ::strict/selections
                                   ::strict/int-value
                                   ::strict/string-value
-                                  ::strict/map-value]}]
+                                  ::strict/map-value]
+                           :as option}]
   (let [value (or int-value map-value string-value)]
-    (cond-> {::key key}
+    (cond-> {}
       id (assoc :db/id id)
+      key (assoc ::key key)
       selections (assoc ::options (from-strict-selections selections))
       value (assoc ::value value))))
 
