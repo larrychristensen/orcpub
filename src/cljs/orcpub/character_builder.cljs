@@ -906,6 +906,10 @@
    asi-selections
    (abilities-standard)))
 
+(def ability-input-style
+  {:width "65px"})
+
+
 (defn abilities-entry [built-template asi-selections]
   (let [abilities (or @(subscribe [::char5e/ability-scores-option-value])
                       (char5e/abilities 15 14 13 12 10 8))
@@ -917,9 +921,10 @@
        (map
         (fn [k]
           ^{:key k}
-          [:div.p-1
-           [:input.input.f-s-18.m-b-5.p-l-0
+          [:div.p-1.flex-grow-1
+           [:input.input.f-s-18.m-b-5.p-l-0.w-100-p
             {:value (k abilities)
+             ;;:style ability-input-style
              :type :number
              :on-change (fn [e] (let [value (.-value (.-target e))
                                       new-v (if (not (s/blank? value))
@@ -933,13 +938,14 @@
        (map
         (fn [[k v]]
           ^{:key k}
-          [:div.t-a-c.p-1
+          [:div.t-a-c.p-1.flex-grow-1
            [:div.m-t-10.m-b-10 "="]
            [:div.f-w-b "total"]
-           [:input.input.b-3.f-s-18.m-b-5.p-l-0
+           [:input.input.b-3.f-s-18.m-b-5.p-l-0.w-100-p
             {:value (if (abilities k)
                       (total-abilities k))
              :type :number
+             ;;:style ability-input-style
              :on-change (fn [e] (let [total (total-abilities k)                                     
                                       value (.-value (.-target e))
                                       diff (- total
