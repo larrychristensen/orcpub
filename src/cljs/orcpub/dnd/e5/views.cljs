@@ -6,6 +6,7 @@
             [orcpub.entity :as entity]
             [orcpub.components :as comps]
             [orcpub.entity-spec :as es]
+            [orcpub.pdf-spec :as pdf-spec]
             [orcpub.entity.strict :as se]
             [orcpub.dnd.e5.subs :as subs]
             [orcpub.dnd.e5.character :as char]
@@ -94,6 +95,22 @@
          :on-blur (fn [e] (reset! blurred? true))}]
        (if @blurred? (validation-messages messages))])))
 
+(defn export-pdf [built-char]
+  (fn [_]
+    (let [field (.getElementById js/document "fields-input")]
+      (aset field "value" (str (pdf-spec/make-spec built-char)))
+      (.submit (.getElementById js/document "download-form")))))
+
+(defn download-form [built-char]
+  [:form.download-form
+   {:id "download-form"
+    :action (if (s/starts-with? js/window.location.href "http://localhost")
+              "http://localhost:8890/character.pdf"
+              "/character.pdf")
+    :method "POST"
+    :target "_blank"}
+   [:input {:type "hidden" :name "body" :id "fields-input"}]])
+
 (defn svg-icon [icon-name & [size theme-override]]
   (let [theme (or theme-override @(subscribe [:theme]))]
     (let [size (or size 32)]
@@ -161,7 +178,7 @@
        [:span.pointer.flex.flex-column.align-items-end
         [:span.orange.underline.f-w-b.m-l-5
          {:style login-style
-          :on-click #(dispatch [:route routes/login-page-route {:secure? true}])}
+          :on-click #(dispatch [:route-to-login])}
          [:span "LOGIN"]]])]))
 
 (def header-tab-style
@@ -206,9 +223,9 @@
                 [:div.p-10.opacity-5.hover-opacity-full
                  (let [current-route @(subscribe [:route])]
                    {:style (if (or (= route current-route)
-                                        (= route (get current-route :handler))) active-style)
+                                   (= route (get current-route :handler))) active-style)
                     :on-click (fn [e]
-                                (dispatch [:route route {:return true}])
+                                (dispatch [:route route])
                                 (.stopPropagation e))})
                  name])
               buttons))])]))))
@@ -248,7 +265,7 @@
         [:div.flex.justify-cont-s-b.align-items-c.w-100-p.p-l-20.p-r-20.h-100-p
          [:img.orcpub-logo.h-32.w-120.pointer
           {:src "/image/orcpub-logo.svg"
-           :on-click #(dispatch [:route routes/default-route {:return? true}])}]
+           :on-click #(dispatch [:route routes/default-route])}]
          (let [search-text @(subscribe [:search-text])
                search-text? @(subscribe [:search-text?])]
            [:div
@@ -290,7 +307,7 @@
          [header-tab
           "characters"
           "battle-gear"
-          #(dispatch [:route routes/dnd-e5-char-list-page-route {:return? true}])
+          #(dispatch [:route routes/dnd-e5-char-list-page-route])
           false
           (routes/dnd-e5-char-page-routes (or (:handler active-route) active-route))
           device-type
@@ -303,21 +320,21 @@
          [header-tab
           "spells"
           "spell-book"
-          #(dispatch [:route routes/dnd-e5-spell-list-page-route {:return? true}])
+          #(dispatch [:route routes/dnd-e5-spell-list-page-route])
           false
           (routes/dnd-e5-spell-page-routes (or (:handler active-route) active-route))
           device-type]
          [header-tab
           "monsters"
           "hydra"
-          #(dispatch [:route routes/dnd-e5-monster-list-page-route {:return? true}])
+          #(dispatch [:route routes/dnd-e5-monster-list-page-route])
           false
           (routes/dnd-e5-monster-page-routes (or (:handler active-route) active-route))
           device-type]
          [header-tab
           "items"
           "all-for-one"
-          #(dispatch [:route routes/dnd-e5-item-list-page-route {:return? true}])
+          #(dispatch [:route routes/dnd-e5-item-list-page-route])
           false
           (routes/dnd-e5-item-page-routes (or (:handler active-route) active-route))
           device-type]]]]]]))
@@ -492,7 +509,7 @@
 
 (defn login-link []
   [:span.underline.f-w-b.m-l-10.pointer.orange
-   {:on-click #(dispatch [:route routes/login-page-route {:secure? true}])}
+   {:on-click #(dispatch [:route-to-login])}
    "LOGIN"])
 
 (defn verify-success []
@@ -700,12 +717,12 @@
           [:div.m-t-20
            [:span "Don't have a login? "]
            [:span.orange.underline.pointer
-            {:on-click #(dispatch [:route routes/register-page-route {:secure true}])}
+            {:on-click #(dispatch [:route routes/register-page-route {:secure true :no-return? true}])}
             "REGISTER NOW"]]
           [:div.m-t-20
            [:span "Forgot your password? "]
            [:span.orange.underline.pointer
-            {:on-click #(dispatch [:route routes/send-password-reset-page-route {:secure? true}])}
+            {:on-click #(dispatch [:route routes/send-password-reset-page-route {:secure? true :no-return? true}])}
             "RESET PASSWORD"]]]]]))))
 
 (def loading-style
@@ -1124,6 +1141,7 @@
                        (if (>= scroll-top header-height)
                          (set! (.-display (.-style sticky-header)) "block")
                          (set! (.-display (.-style sticky-header)) "none")))))}
+     [download-form]
      (if @(subscribe [:loading])
        [:div {:style loading-style}
         [:div.flex.justify-cont-s-a.align-items-c.h-100-p
@@ -1929,7 +1947,8 @@
      (personality-section "Description" description)]))
 
 (def notes-style
-  {:height "400px"})
+  {:height "400px"
+   :width "100%"})
 
 (defn summary-details [num-columns id]
   (let [built-char @(subscribe [:built-character id])
@@ -1960,12 +1979,13 @@
         [description-section id]
         [:span.f-s-18.f-w-b.m-b-5 "Notes"]
         [:div.p-l-20.p-r-20
-         [comps/input-field
-          :textarea
-          @(subscribe [::char/notes id])
-          #(dispatch [::char/set-notes id %])
-          {:style notes-style
-           :class-name "input"}]]]]]]))
+         [:div.w-100-p
+          [comps/input-field
+           :textarea
+           @(subscribe [::char/notes id])
+           #(dispatch [::char/set-notes id %])
+           {:style notes-style
+            :class-name "input"}]]]]]]]))
 
 (defn weapon-details-field [nm value]
   [:div.p-2
@@ -2166,7 +2186,7 @@
 (defn magic-item-rows [expanded-details magic-item-cfgs magic-weapon-cfgs magic-armor-cfgs]
   (mapcat
    (fn [[item-kw item-cfg]]
-     (let [{:keys [name item-type item-subtype rarity attunement description summary] :as item} (mi/magic-item-map item-kw)
+     (let [{:keys [::mi/name ::mi/type ::mi/item-subtype ::mi/rarity ::mi/attunement ::mi/description ::mi/summary] :as item} (mi/magic-item-map item-kw)
            expanded? (@expanded-details item-kw)]
        [[:tr.pointer
          {:on-click #(swap! expanded-details (fn [d] (update d item-kw not)))}
@@ -2603,6 +2623,9 @@
          {:title "Edit"
           :icon "pencil"
           :on-click #(dispatch [:edit-character character])})
+       {:title "Print"
+        :icon "print"
+        :on-click (export-pdf built-character)}
        (if (and username owner (not= owner username))
          [add-to-party-component (js/parseInt id)])])
      [:div.p-10.main-text-color
@@ -2963,7 +2986,6 @@
         @(subscribe [::mi/builder-item])
         item-types @(subscribe [::mi/item-types])
         item-rarities @(subscribe [::mi/rarities])]
-    (prn "ITEM" item)
     [:div.p-20.main-text-color
      [:div.flex.w-100-p.flex-wrap
       [:div.flex-grow-1.m-b-20
@@ -3088,8 +3110,11 @@
                               "edit"])
                            [:button.form-button.m-l-5
                             {:on-click #(let [route char-page-route]
-                                          (dispatch [:route route {:return? true}]))}
+                                          (dispatch [:route route]))}
                             "view"]
+                           [:button.form-button.m-l-5
+                            {:on-click (export-pdf @(subscribe [::char/built-character id]))}
+                            "print"]
                            (if (= username owner)
                              [:button.form-button.m-l-5
                               {:on-click #(dispatch [:delete-character id])}
@@ -3193,7 +3218,7 @@
                                   {:on-click #(dispatch [:edit-character @(subscribe [::char/character character-id])])}
                                   "edit"])
                                [:button.form-button.m-l-5
-                                {:on-click #(dispatch [:route char-page-route {:return? true}])}
+                                {:on-click #(dispatch [:route char-page-route])}
                                 "view"]
                                [:button.form-button.m-l-5
                                 {:on-click #(dispatch [::party/remove-character id character-id])}
@@ -3224,7 +3249,7 @@
          {:style character-display-style}
          [:div.flex.justify-cont-end.uppercase.align-items-c
           [:button.form-button.m-l-5
-           {:on-click #(dispatch [:route monster-page-route {:return? true}])}
+           {:on-click #(dispatch [:route monster-page-route])}
            "view"]]
          [monster-component monster]])]]))
 
@@ -3248,7 +3273,7 @@
          [:div.p-l-5.p-r-5.p-b-10
           [:div.p-b-10.p-l-10.p-r-10
            [:div.posn-rel
-            [:input.input.f-s-24.p-l-20
+            [:input.input.f-s-24.p-l-20.w-100-p
              {:style {:height "60px"}
               :value @(subscribe [::char/monster-text-filter])
               :on-change #(dispatch [::char/filter-monsters (event-value %)])}]
@@ -3328,7 +3353,7 @@
          {:style character-display-style}
          [:div.flex.justify-cont-end.uppercase.align-items-c
           [:button.form-button.m-l-5
-           {:on-click #(dispatch [:route spell-page-route {:return? true}])}
+           {:on-click #(dispatch [:route spell-page-route])}
            "view"]]
          [spell-component spell true]])]]))
 
@@ -3349,7 +3374,7 @@
      [:div.p-l-5.p-r-5.p-b-10
       [:div.p-b-10.p-l-10.p-r-10
        [:div.posn-rel
-        [:input.input.f-s-24.p-l-20
+        [:input.input.f-s-24.p-l-20.w-100-p
          {:style {:height "60px"}
           :value @(subscribe [::char/spell-text-filter])
           :on-change #(dispatch [::char/filter-spells (event-value %)])}]
@@ -3380,7 +3405,7 @@
          {:style character-display-style}
          [:div.flex.justify-cont-end.uppercase.align-items-c
           [:button.form-button.m-l-5
-           {:on-click #(dispatch [:route item-page-route {:return? true}])}
+           {:on-click #(dispatch [:route item-page-route])}
            "view"]]
          [item-component item]])]]))
 
@@ -3405,7 +3430,7 @@
      [:div.p-l-5.p-r-5.p-b-10
       [:div.p-b-10.p-l-10.p-r-10
        [:div.posn-rel
-        [:input.input.f-s-24.p-l-20
+        [:input.input.f-s-24.p-l-20.w-100-p
          {:style {:height "60px"}
           :value @(subscribe [::char/item-text-filter])
           :on-change #(dispatch [::char/filter-items (event-value %)])}]

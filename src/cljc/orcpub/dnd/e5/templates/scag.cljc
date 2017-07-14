@@ -448,8 +448,8 @@
                          :save {::char5e/dex true ::char5e/int true}
                          :tool {:thieves-tools false}}
                  :prereqs [(t/option-prereq
-                            "Elves only"
-                            (fn [c] (= "Elf" @(subscribe [::char5e/race]))))]
+                            "Elves and Half-Elves Only"
+                            (fn [c] (#{"Elf" "Half-Elf"} @(subscribe [::char5e/race]))))]
                  :modifiers [(mod5e/skill-proficiency :performance)]
                  :selections [(opt5e/weapon-proficiency-selection
                                (map
