@@ -7,10 +7,9 @@
 
 (spec/def ::keyword-key (fn [k] (and (keyword? k)
                              (not (re-matches #"^[0-9].*" (name k))))))
-(spec/def ::key (spec/or :keyword ::keyword-key
-                         :int int?))
-(spec/def ::option (spec/keys :req [::key]
-                              :opt [::int-value
+(spec/def ::key ::keyword-key)
+(spec/def ::option (spec/keys :opt [::key
+                                    ::int-value
                                     ::map-value
                                     ::selections]))
 

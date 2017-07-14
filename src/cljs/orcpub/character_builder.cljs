@@ -43,13 +43,14 @@
             [re-frame.core :refer [subscribe dispatch dispatch-sync]])
   (:require-macros [cljs.core.async.macros :refer [go]]))
 
-(def print-disabled? false)
+(def print-disabled? true)
 
 (def print-enabled? (and (not print-disabled?)
                          (s/starts-with? js/window.location.href "http://localhost")))
 
 (defn stop-propagation [e]
   (.stopPropagation e))
+
 
 (defn stop-prop-fn [func]
   (fn [e]
@@ -121,7 +122,7 @@
    (get entity-values prop-name)
    #(dispatch [:update-value-field prop-name %])
    {:type input-type
-    :class-name (str "input " cls-str)}])
+    :class-name (str "input w-100-p " cls-str)}])
 
 (defn character-input [entity-values prop-name & [cls-str handler type]]
   [character-field entity-values prop-name :input cls-str handler type])
@@ -267,41 +268,41 @@
            {:class-name "input m-t-0"}]
           [:div.flex-grow-1 item-name])
         (if item-description [:div.w-60 [show-info-button expanded?]])
-        [:input.input.m-l-5.m-t-0
-         {:class-name (str "w-" (or qty-input-width 60))
-          :type :number
-          :value item-qty
-          :on-change qty-change-fn}]
+        [comps/int-field
+         item-qty
+         qty-change-fn
+         {:class-name (str "input m-l-5 m-t-0 w-" (or qty-input-width 60))}]
         [:i.fa.fa-minus-circle.orange.f-s-16.m-l-5.pointer
          {:on-click remove-fn}]]
        (if @expanded? [:div.m-t-5 item-description])])))
 
-(defn inventory-selector [item-map qty-input-width {:keys [selection]} & [custom-equipment-key]]
+(defn inventory-adder [key options selected-keys]
+  [comps/selection-adder
+   (sort-by
+    :name
+    (sequence
+     (comp
+      (remove
+       #(selected-keys (or :db/id (::t/key %))))
+      (map
+       (fn [{:keys [:db/id ::t/name ::t/key]}]
+         {:name name
+          :key (or id key)})))
+     options))
+   (fn [e]
+     (let [value (.. e -target -value)
+           item-key (keyword value)]
+       (dispatch [:add-inventory-item key item-key])))])
+
+(defn inventory-selector [item-map-sub qty-input-width {:keys [selection]} & [custom-equipment-key]]
   (let [{:keys [::t/key]} selection
         selected-items @(subscribe [:entity-option key])
+        item-map @(subscribe item-map-sub)
         selected-keys (into #{} (map ::entity/key selected-items))
         options (entity/selection-options selection)
         magic-weapons (= key :magic-weapons)]
     [:div
-     [comps/selection-adder
-      (sort-by
-       :name
-       (sequence
-        (comp
-         (remove
-          #(selected-keys (::t/key %)))
-         (map
-          (fn [{:keys [::t/name ::t/key] :as option}]
-            {:name name
-             :key key})))
-        options))
-      (fn [e]
-        (let [value (.. e -target -value)
-              item-key (if (re-matches #"\d+" value)
-                         (js/parseInt value)
-                         (keyword value))]
-          (prn "KW" item-key)
-          (dispatch [:add-inventory-item key item-key])))]
+     [inventory-adder key options selected-keys]
      (if (seq selected-items)
        [:div.flex.f-s-12.opacity-5.m-t-10.justify-cont-s-b
         [:div.m-r-10 "Equipped?"]
@@ -309,13 +310,13 @@
      [:div
       (doall
        (map-indexed
-        (fn [i {item-key ::entity/key {item-qty ::char-equip5e/quantity
-                                       equipped? ::char-equip5e/equipped?
-                                       item-name ::char-equip5e/name} ::entity/value}]
+        (fn [i {item-key ::entity/key
+                {item-qty ::char-equip5e/quantity
+                 equipped? ::char-equip5e/equipped?
+                 item-name ::char-equip5e/name} ::entity/value}]
           (let [item (item-map item-key)
-                item-name (or item-name (:name item) (::mi5e/name item))
+                item-name (or item-name (::mi5e/name item) (:name item))
                 item-description (:description item)]
-            (prn "ITEM" item)
             ^{:key item-key}
             [inventory-item {:selection-key key
                              :item-key item-key
@@ -326,9 +327,7 @@
                              :i i
                              :qty-input-width qty-input-width
                              :check-fn #(dispatch [:toggle-inventory-item-equipped key i])
-                             :qty-change-fn (fn [e]
-                                              (let [qty (.. e -target -value)]
-                                                (dispatch [:change-inventory-item-quantity key i qty])))
+                             :qty-change-fn #(dispatch [:change-inventory-item-quantity key i %])
                              :remove-fn (fn [_]
                                           (dispatch [:remove-inventory-item key item-key]))}]))
         selected-items))]
@@ -915,6 +914,10 @@
    asi-selections
    (abilities-standard)))
 
+(def ability-input-style
+  {:width "65px"})
+
+
 (defn abilities-entry [built-template asi-selections]
   (let [abilities (or @(subscribe [::char5e/ability-scores-option-value])
                       (char5e/abilities 15 14 13 12 10 8))
@@ -926,9 +929,10 @@
        (map
         (fn [k]
           ^{:key k}
-          [:div.p-1
-           [:input.input.f-s-18.m-b-5.p-l-0
+          [:div.p-1.flex-grow-1
+           [:input.input.f-s-18.m-b-5.p-l-0.w-100-p
             {:value (k abilities)
+             ;;:style ability-input-style
              :type :number
              :on-change (fn [e] (let [value (.-value (.-target e))
                                       new-v (if (not (s/blank? value))
@@ -942,13 +946,14 @@
        (map
         (fn [[k v]]
           ^{:key k}
-          [:div.t-a-c.p-1
+          [:div.t-a-c.p-1.flex-grow-1
            [:div.m-t-10.m-b-10 "="]
            [:div.f-w-b "total"]
-           [:input.input.b-3.f-s-18.m-b-5.p-l-0
+           [:input.input.b-3.f-s-18.m-b-5.p-l-0.w-100-p
             {:value (if (abilities k)
                       (total-abilities k))
              :type :number
+             ;;:style ability-input-style
              :on-change (fn [e] (let [total (total-abilities k)                                     
                                       value (.-value (.-target e))
                                       diff (- total
@@ -1307,26 +1312,26 @@
     :tags #{:equipment :starting-equipment}
     :ui-fns [{:key :weapons
               :hide-homebrew? true
-              :ui-fn (partial inventory-selector weapon5e/weapons-map 60)}
+              :ui-fn (partial inventory-selector [::equip5e/weapons-map] 60)}
              {:key :magic-weapons
               :hide-homebrew? true
-              :ui-fn (partial inventory-selector @(subscribe [::mi5e/magic-weapon-map]) 60)}
+              :ui-fn (partial inventory-selector [::mi5e/magic-weapon-map] 60)}
              {:key :armor
               :hide-homebrew? true
-              :ui-fn (partial inventory-selector armor5e/armor-map 60)}
+              :ui-fn (partial inventory-selector [::equip5e/armor-map] 60)}
              {:key :magic-armor
               :hide-homebrew? true
-              :ui-fn (partial inventory-selector @(subscribe [::mi5e/magic-armor-map]) 60)}
+              :ui-fn (partial inventory-selector [::mi5e/magic-armor-map] 60)}
              {:key :equipment
               :hide-homebrew? true
               :ui-fn (fn [v]
-                       [inventory-selector equip5e/equipment-map 60 v ::char5e/custom-equipment])}
+                       [inventory-selector [::equip5e/equipment-map] 60 v ::char5e/custom-equipment])}
              {:key :other-magic-items
               :hide-homebrew? true
-              :ui-fn (partial inventory-selector @(subscribe [::mi5e/other-magic-items-map]) 60)}
+              :ui-fn (partial inventory-selector [::mi5e/other-magic-items-map] 60)}
              {:key :treasure
               :hide-homebrew? true
-              :ui-fn #(inventory-selector equip5e/treasure-map 100 % ::char5e/custom-treasure)}]}])
+              :ui-fn #(inventory-selector [::equip5e/treasure-map] 100 % ::char5e/custom-treasure)}]}])
 
 (defn section-tabs [available-selections built-template character page-index]
   (let [device-type @(subscribe [:device-type])]
@@ -1700,22 +1705,6 @@
       :on-click (fn [_]
                   (dispatch [:set-active-tabs #{:details}]))} "Details"]]])
 
-(defn export-pdf [built-char]
-  (fn [_]
-    (let [field (.getElementById js/document "fields-input")]
-      (aset field "value" (str (pdf-spec/make-spec built-char)))
-      (.submit (.getElementById js/document "download-form")))))
-
-(defn download-form [built-char]
-  [:form.download-form
-   {:id "download-form"
-    :action (if (s/starts-with? js/window.location.href "http://localhost")
-              "http://localhost:8890/character.pdf"
-              "/character.pdf")
-    :method "POST"
-    :target "_blank"}
-   [:input {:type "hidden" :name "body" :id "fields-input"}]])
-
 (def patreon-link-props
   {:href "https://www.patreon.com/user?u=5892323" :target "_blank"})
 
@@ -1870,15 +1859,20 @@
                     :event [:reset-character]})}
        {:title "Print"
         :icon "print"
-        :on-click (export-pdf built-char)}
+        :on-click (views5e/export-pdf built-char)}
        {:title (if (:db/id character)
                  "Update Existing Character"
                  "Save New Character")
         :icon "save"
         :style (if character-changed? unsaved-button-style) 
-        :on-click #(dispatch [:save-character])}])
+        :on-click #(dispatch [:save-character])}
+       (if (:db/id character)
+         {:title "View"
+          :icon "eye"
+          :on-click #(let [char-page-path (routes/path-for routes/dnd-e5-char-page-route :id (:db/id character))
+                           char-page-route (routes/match-route char-page-path)]
+                       (dispatch [:route char-page-route]))})])
      [:div
-      [download-form]
       [:div.container
        [:div.content
         [:div.flex.justify-cont-s-b.align-items-c.flex-wrap

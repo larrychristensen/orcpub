@@ -112,3 +112,8 @@
          e)))
    entity
    modifiers))
+
+(defn raw-args [args]
+  (map (fn [{:keys [::int-arg ::string-arg ::keyword-arg]}]
+         (or int-arg string-arg keyword-arg))
+       args))

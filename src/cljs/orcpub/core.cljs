@@ -3,7 +3,7 @@
   (:require [orcpub.character-builder :as ch]
             [orcpub.dnd.e5.subs]
             [orcpub.dnd.e5.equipment-subs]
-            [orcpub.dnd.e5.events]
+            [orcpub.dnd.e5.events :as events]
             [orcpub.dnd.e5.views :as views]
             [orcpub.route-map :as routes]
             [cljs-http.client :as http]
@@ -54,8 +54,13 @@
    routes/password-reset-used-route views/password-reset-used-page})
 
 (defn handle-url-change [_]
-  (let [route (routes/match-route js/window.location.pathname)]
-    (dispatch [:route route {:skip-path? true}])))
+  (let [route (routes/match-route js/window.location.pathname)
+        config {:skip-path? true}]
+    (dispatch [:route route (if (events/login-routes (:handler route))
+                              (merge
+                               config
+                               {:no-return? true})
+                              config)])))
 
 (defn make-history []
   (doto (Html5History.)

@@ -21,7 +21,7 @@
 (spec/def ::magical-damage-bonus int?)
 (spec/def ::modifiers (spec/coll-of ::mod/mod-cfg))
 (spec/def ::subtypes (spec/coll-of keyword?))
-(spec/def ::attunment (spec/coll-of keyword?))
+(spec/def ::attunement (spec/coll-of keyword?))
 
 (def name-key ::name)
 (def item-type-key ::type)
@@ -85,9 +85,7 @@
 (defn to-internal-modifiers [modifiers]
   (reduce
    (fn [mod-map {:keys [::mod/key ::mod/args]}]
-     (let [[arg-1 arg-2] (map (fn [{:keys [::mod/int-arg ::mod/string-arg ::mod/keyword-arg]}]
-                                (or int-arg string-arg keyword-arg))
-                              args)]
+     (let [[arg-1 arg-2] (mod/raw-args args)]
        (cond
          (toggle-mod-keys key) (assoc-in mod-map [key arg-1] true)
          (ability-mod-keys key) (assoc-in mod-map
@@ -192,9 +190,7 @@
                (toggle-mod-keys k) (toggle-mods k v)
                (= :ability k) (ability-mods v)
                (= :save k) (save-mods v)
-               (= :speed k) (let [s-mod (speed-mod v)]
-                              (prn "SPEED MOD" s-mod)
-                              [s-mod])
+               (= :speed k) [(speed-mod v)]
                (= :flying-speed k) [(flying-speed-mod v)]
                (= :swimming-speed k) [(swimming-speed-mod v)]
                (= :climbing-speed k) [(climbing-speed-mod v)])))
@@ -285,7 +281,7 @@ The creature exists for a duration specific to each figurine. At the end of the 
    ::rarity :very-rare
 
    ::attunement [:any]
-   :modifiers [(mod5e/damage-resistance resistance-kw)
+   ::modifiers [(mod5e/damage-resistance resistance-kw)
                (mod5e/saving-throw-advantage ["'Frightful Presence' spell" "breath weapons of dragons"])
                (mod5e/action
                 {:name "Dragon Scale Mail"
@@ -304,7 +300,7 @@ direction to the closest dragon within 30 miles of you that is of the same type 
    ::type :rod
    ::rarity :uncommon
    ::attunement [:warlock]
-   :modifiers [(mod5e/spell-save-dc-bonus bonus)
+   ::modifiers [(mod5e/spell-save-dc-bonus bonus)
                (mod5e/spell-attack-modifier-bonus bonus)
                (mod5e/bonus-action
                 {:name "Rod of the Pact Keeper"
@@ -321,7 +317,7 @@ direction to the closest dragon within 30 miles of you that is of the same type 
      name-key full-name
      ::type :wondrous-item
      ::rarity rarity
-     :modifiers (conj
+     ::modifiers (conj
                  modifiers
                  (mod5e/trait-cfg
                   {:name full-name
@@ -344,7 +340,7 @@ A stone has AC 24, 10 hit points, and resistance to all damage. It is considered
       ::rarity :rare
 
       ::attunement [:any]
-      :modifiers [(mod5e/damage-resistance damage-type)]
+      ::modifiers [(mod5e/damage-resistance damage-type)]
       ::description "You have resistance to one type of damage while you wear this armor. The GM chooses the type or determines it randomly from the options below."
       })
    damage-types5e/damage-types))
@@ -361,7 +357,7 @@ A stone has AC 24, 10 hit points, and resistance to all damage. It is considered
         ::item-subtype :plate
         ::rarity :rare
 
-        :modifiers (conj
+        ::modifiers (conj
                     (map
                      (fn [other-type]
                        (mod5e/damage-vulnerability other-type))
@@ -386,7 +382,7 @@ Curse. This armor is cursed, a fact that is revealed only when an identify spell
 
       ::rarity :rare
 
-      :modifiers [(mod5e/damage-resistance damage-type)]
+      ::modifiers [(mod5e/damage-resistance damage-type)]
       ::attunement [:any]
       ::description (str "You have resistance to " (name damage-type) " damage.")
       })
@@ -407,7 +403,7 @@ Curse. This armor is cursed, a fact that is revealed only when an identify spell
      name-key "Alchemy Jug"
      ::type :wondrous-item
      ::rarity :uncommon
-     :modifiers [(mod5e/action
+     ::modifiers [(mod5e/action
                   {:name "Alchemy Jug: Create Liquid"
                    :page 150
                    :source :dmg
@@ -425,8 +421,8 @@ Curse. This armor is cursed, a fact that is revealed only when an identify spell
      ::type :weapon
      ::item-subtype ammunition?
      ::rarity :uncommon
-     :magical-attack-bonus 1
-     :magical-damage-bonus 1
+     ::magical-attack-bonus 1
+     ::magical-damage-bonus 1
      ::description "You have a +1 bonus to attack and damage rolls made with this piece of magic ammunition. Once it hits a target, the ammunition is no longer magical."
      }{
      name-key "Ammunition, +2"
@@ -434,8 +430,8 @@ Curse. This armor is cursed, a fact that is revealed only when an identify spell
      ::type :weapon
      ::item-subtype ammunition?
      ::rarity :rare
-     :magical-attack-bonus 2
-     :magical-damage-bonus 2
+     ::magical-attack-bonus 2
+     ::magical-damage-bonus 2
      ::description "You have a +2 bonus to attack and damage rolls made with this piece of magic ammunition. Once it hits a target, the ammunition is no longer magical."
      }{
      name-key "Ammunition, +3"
@@ -443,15 +439,15 @@ Curse. This armor is cursed, a fact that is revealed only when an identify spell
      ::type :weapon
      ::item-subtype ammunition?
      ::rarity :very-rare
-     :magical-attack-bonus 3
-     :magical-damage-bonus 3
+     ::magical-attack-bonus 3
+     ::magical-damage-bonus 3
      ::description "You have a +3 bonus to attack and damage rolls made with this piece of magic ammunition. The bonus is determined by the rarity of the ammunition. Once it hits a target, the ammunition is no longer magical."
      }{
      name-key "Amulet of Health"
      ::type :wondrous-item
      ::rarity :rare
      ::attunement [:any]
-     :modifiers [(mod5e/ability-override ::char5e/con 19)]
+     ::modifiers [(mod5e/ability-override ::char5e/con 19)]
      ::description "Your Constitution score is 19 while you wear this amulet. It has no effect on you if your Constitution is already 19 or higher."
      }{
      name-key "Amulet of Proof against Detection and Location"
@@ -521,7 +517,7 @@ A creature in the compartment can use an action to move as many as two of the ap
      ::rarity :legendary
 
      ::attunement [:any]
-     :modifiers [(mod5e/damage-resistance :nonmagical)]
+     ::modifiers [(mod5e/damage-resistance :nonmagical)]
      ::description "You have resistance to nonmagical damage while you wear this armor. Additionally, you can use an action to make yourself immune to nonmagical damage for 10 minutes or until you are no longer wearing the armor. Once this special action is used, it can’t be used again until the next dawn."
      }{
      name-key "Arrow-Catching Shield"
@@ -585,7 +581,7 @@ An enclosed creature can use its action to push against the sphere’s wall, mov
      ::rarity :rare
 
      ::attunement [:any]
-     :modifiers [(belt-of-giant-strength-mod 21)]
+     ::modifiers [(belt-of-giant-strength-mod 21)]
      ::description "While wearing this belt, your Strength score changes to 21. If your Strength is already equal to or greater than 21, the item has no effect on you."
      }
     {
@@ -596,7 +592,7 @@ An enclosed creature can use its action to push against the sphere’s wall, mov
      ::rarity :very-rare
 
      ::attunement [:any]
-     :modifiers [(belt-of-giant-strength-mod 23)]
+     ::modifiers [(belt-of-giant-strength-mod 23)]
      ::description "While wearing this belt, your Strength score changes to 23. If your Strength is already equal to or greater than 23, the item has no effect on you."
      }
     {
@@ -607,7 +603,7 @@ An enclosed creature can use its action to push against the sphere’s wall, mov
      ::rarity :very-rare
 
      ::attunement [:any]
-     :modifiers [(belt-of-giant-strength-mod 23)]
+     ::modifiers [(belt-of-giant-strength-mod 23)]
     
      ::description "While wearing this belt, your Strength score changes to 23. If your Strength is already equal to or greater than 23, the item has no effect on you."
      }
@@ -619,7 +615,7 @@ An enclosed creature can use its action to push against the sphere’s wall, mov
      ::rarity :very-rare
 
      ::attunement [:any]
-     :modifiers [(belt-of-giant-strength-mod 25)]
+     ::modifiers [(belt-of-giant-strength-mod 25)]
      ::description "While wearing this belt, your Strength score changes to 25. If your Strength is already equal to or greater than 25, the item has no effect on you."
      }
     {
@@ -630,7 +626,7 @@ An enclosed creature can use its action to push against the sphere’s wall, mov
      ::rarity :legendary
 
      ::attunement [:any]
-     :modifiers [(belt-of-giant-strength-mod 27)]
+     ::modifiers [(belt-of-giant-strength-mod 27)]
      ::description "While wearing this belt, your Strength score changes to 27. If your Strength is already equal to or greater than 27, the item has no effect on you."
      }
     {
@@ -641,7 +637,7 @@ An enclosed creature can use its action to push against the sphere’s wall, mov
      ::rarity :legendary
 
      ::attunement [:any]
-     :modifiers [(belt-of-giant-strength-mod 29)]
+     ::modifiers [(belt-of-giant-strength-mod 29)]
      ::description "While wearing this belt, your Strength score changes to 29. If your Strength is already equal to or greater than 29, the item has no effect on you."
      }
     {
@@ -649,8 +645,8 @@ An enclosed creature can use its action to push against the sphere’s wall, mov
      ::type :weapon
      ::item-subtype axe?
      ::rarity :rare
-     :magical-attack-bonus 1
-     :magical-damage-bonus 1
+     ::magical-attack-bonus 1
+     ::magical-damage-bonus 1
      ::attunement [:any]
      ::description "You gain a +1 bonus to attack and damage rolls made with this magic weapon. In addition, while you are attuned to this weapon, your hit point maximum increases by 1 for each level you have attained.
 Curse. This axe is cursed, and becoming attuned to it extends the curse to you. As long as you remain cursed, you are unwilling to part with the axe, keeping it within reach at all times. You also have disadvantage on attack rolls with weapons other
@@ -668,7 +664,7 @@ Whenever a hostile creature damages you while the axe is in your possession, you
 
      ::attunement [:any]
      ::description "While you wear these boots, you can use an action to cast the levitate spell on yourself at will."
-     :modifiers [(mod5e/action
+     ::modifiers [(mod5e/action
                   {:name "Levitate"
                    :source :dmg
                    :page 155
@@ -679,7 +675,7 @@ Whenever a hostile creature damages you while the axe is in your possession, you
      ::rarity :rare
 
      ::attunement [:any]
-     :modifiers [(mod5e/bonus-action
+     ::modifiers [(mod5e/bonus-action
                   {:name "Boots of Speed"
                    :source :dmg
                    :page 155
@@ -695,7 +691,7 @@ When the boots’ property has been used for a total of 10 minutes, the magic ce
      ::rarity :uncommon
 
      ::attunement [:any]
-     :modifiers [(mod5e/speed-override 30)]
+     ::modifiers [(mod5e/speed-override 30)]
      ::description "While you wear these boots, your walking speed becomes 30 feet, unless your walking speed is higher, and your speed isn’t reduced if you are encumbered or wearing heavy armor. In addition, you can jump three times the normal distance, though you can’t jump farther than your remaining movement would allow."
      }{
      name-key "Boots of the Winterlands"
@@ -703,7 +699,7 @@ When the boots’ property has been used for a total of 10 minutes, the magic ce
      ::rarity :uncommon
 
      ::attunement [:any]
-     :modifiers [(mod5e/damage-resistance :cold)]
+     ::modifiers [(mod5e/damage-resistance :cold)]
      ::description "These furred boots are snug and feel quite warm. While you wear them, you gain the following benefits:
 • You have resistance to cold damage.
 • You ignore difficult terrain created by ice or snow.
@@ -727,7 +723,7 @@ The bowl is about 1 foot in diameter and half as deep. It weighs 3 pounds and ho
      ::rarity :rare
 
      ::attunement [:any]
-     :modifiers [(mod5e/unarmored-ac-bonus 2)]
+     ::modifiers [(mod5e/unarmored-ac-bonus 2)]
      ::description "While wearing these bracers, you gain a +2 bonus to AC if you are wearing no armor and using no shield."
      }{
      name-key "Brazier of Commanding Fire Elementals"
@@ -741,7 +737,7 @@ The brazier weighs 5 pounds."
      ::rarity :uncommon
 
      ::attunement [:any]
-     :modifiers [(mod5e/damage-resistance :force) (mod5e/damage-immunity :magic-missile)]
+     ::modifiers [(mod5e/damage-resistance :force) (mod5e/damage-immunity :magic-missile)]
      ::description "While wearing this brooch, you have resistance to force damage, and you have immunity to damage from the magic missile spell."
      }{
      name-key "Broom of Flying"
@@ -765,7 +761,7 @@ Alternatively, when you light the candle for the first time, you can cast the ga
      name-key "Cap of Water Breathing"
      ::type :wondrous-item
      ::rarity :uncommon
-     :modifiers [(mod5e/action
+     ::modifiers [(mod5e/action
                   {:name "Cap of Water Breathing"
                    :page 157
                    :source :dmg
@@ -775,7 +771,7 @@ Alternatively, when you light the candle for the first time, you can cast the ga
      name-key "Cape of the Mountebank"
      ::type :wondrous-item
      ::rarity :rare
-     :modifiers [(mod5e/action 
+     ::modifiers [(mod5e/action 
                   {:name "Cape of the Mountebank"
                    :page 157
                    :source :dmg
@@ -807,7 +803,7 @@ The chime can be used ten times. After the tenth time, it cracks and becomes use
      name-key "Circlet of Blasting"
      ::type :wondrous-item
      ::rarity :uncommon
-     :modifiers [(mod5e/action 
+     ::modifiers [(mod5e/action 
                   {:name "Circlet of Blasting"
                    :page 158
                    :source :dmg
@@ -821,7 +817,7 @@ The chime can be used ten times. After the tenth time, it cracks and becomes use
      ::rarity :very-rare
 
      ::attunement [:any]
-     :modifiers [(mod5e/damage-resistance :poison)
+     ::modifiers [(mod5e/damage-resistance :poison)
                  (mod5e/action 
                   {:name "Cloak of Arachnidia"
                    :page 158
@@ -849,7 +845,7 @@ The chime can be used ten times. After the tenth time, it cracks and becomes use
      ::rarity :uncommon
 
      ::attunement [:any]
-     :modifiers [(mod5e/action
+     ::modifiers [(mod5e/action
                   {:name "Cloak of Elvenkind"
                    :page 158
                    :source :dmg
@@ -864,7 +860,7 @@ shifts to camouflage you. Pulling the hood up or down requires an action."
      ::rarity :legendary
 
      ::attunement [:any]
-     :modifiers [(mod5e/action
+     ::modifiers [(mod5e/action
                   {:name "Cloak of Invisibility"
                    :page 158
                    :source :dmg
@@ -879,7 +875,7 @@ shifts to camouflage you. Pulling the hood up or down requires an action."}
 
      ::rarity :uncommon
      :magical-ac-bonus 1
-     :modifiers (map #(mod5e/saving-throw-bonus % 1) char5e/ability-keys)
+     ::modifiers (map #(mod5e/saving-throw-bonus % 1) char5e/ability-keys)
      ::attunement [:any]
      ::description "You gain a +1 bonus to AC and saving throws while you wear this cloak."
      }{
@@ -889,7 +885,7 @@ shifts to camouflage you. Pulling the hood up or down requires an action."}
      ::rarity :rare
 
      ::attunement [:any]
-     :modifiers [(mod5e/action 
+     ::modifiers [(mod5e/action 
                   {:name "Cloak of the Bat"
                    :page 159
                    :source :dmg
@@ -902,7 +898,7 @@ on yourself, transforming into a bat. While you are in the form of the bat, you 
      name-key "Cloak of the Manta Ray"
      ::type :wondrous-item
      ::rarity :uncommon
-     :modifiers [(mod5e/swimming-speed 60)]
+     ::modifiers [(mod5e/swimming-speed 60)]
      ::description "While wearing this cloak with its hood up, you can breathe underwater, and you have a swimming speed of 60 feet. Pulling the hood up or down requires an action."
      }
     {
@@ -953,8 +949,8 @@ The cube has 3 charges. Each use of the cube expends 1 charge. The cube regains 
      ::type :weapon
      ::item-subtype :dagger
      ::rarity :rare
-     :magical-attack-bonus 1
-     :magical-damage-bonus 1
+     ::magical-attack-bonus 1
+     ::magical-damage-bonus 1
      ::description "You gain a +1 bonus to attack and damage rolls made with this magic weapon.
 You can use an action to cause thick, black poison to coat the blade. The poison remains for 1 minute or until an attack using this weapon hits a creature. That creature must succeed on a DC 15 Constitution saving throw or take 2d10 poison damage and become poisoned for 1 minute. The dagger can’t be used this way again until the next dawn."
      }{
@@ -965,7 +961,7 @@ You can use an action to cause thick, black poison to coat the blade. The poison
      ::rarity :very-rare
 
      ::attunement [:any]
-     :modifiers [(mod5e/bonus-action
+     ::modifiers [(mod5e/bonus-action
                   {:name "Dancing Sword"
                    :page 161
                    :source :dmg
@@ -1034,8 +1030,8 @@ The Void. This black card spells disaster. Your soul is drawn from your body and
      ::rarity :legendary
 
      ::attunement [:any]
-     :magical-attack-bonus 3
-     :magical-damage-bonus 3
+     ::magical-attack-bonus 3
+     ::magical-damage-bonus 3
      ::description "You gain a +3 bonus to attack and damage rolls made with this magic weapon.
 The first time you attack with the sword on each of your turns, you can transfer some or all of the sword’s bonus to your Armor Class, instead of using the bonus on any attacks that turn. For example, you could reduce the bonus to your attack and damage rolls to +1 and gain a +2 bonus to AC. The adjusted bonuses remain in effect until the start of your next turn, although you must hold the sword to gain a bonus to AC from it."
      }{
@@ -1046,7 +1042,7 @@ The first time you attack with the sword on each of your turns, you can transfer
 
      ::rarity :very-rare
      ::attunement [:any]
-     :modifiers [(mod5e/language :abyssal)
+     ::modifiers [(mod5e/language :abyssal)
                  (mod5e/attack
                   {:name "Demon Armor Gauntlets"
                    :damage-die 8
@@ -1079,8 +1075,8 @@ You and any creature you designate when you use the shackles can use an action t
      ::type :weapon
      ::item-subtype sword?
      ::rarity :rare
-     :magical-attack-bonus 1
-     :magical-damage-bonus 1
+     ::magical-attack-bonus 1
+     ::magical-damage-bonus 1
      ::description "You gain a +1 bonus to attack and damage rolls made with this magic weapon.
 When you hit a dragon with this weapon, the dragon takes an extra 3d6 damage of the weapon’s type. For the purpose of this weapon, “dragon”
 refers to any creature with the dragon type, including dragon turtles and wyverns."
@@ -1089,7 +1085,7 @@ refers to any creature with the dragon type, including dragon turtles and wyvern
      name-key "Driftglobe"
      ::type :wondrous-item
      ::rarity :uncommon
-     :modifiers [(mod5e/trait-cfg
+     ::modifiers [(mod5e/trait-cfg
                   {:name "Driftglobe Emanation (light)"
                    :page 166
                    :source :dmg
@@ -1132,7 +1128,7 @@ spell can also end the effect on a creature.}{"
      ::item-subtype :plate
      ::rarity :very-rare
      :magical-ac-bonus 2
-     :modifiers [(mod5e/reaction
+     ::modifiers [(mod5e/reaction
                   {:name "Dwarven Plate"
                    :page 167
                    :source :dmg
@@ -1146,8 +1142,8 @@ spell can also end the effect on a creature.}{"
      ::rarity :very-rare
 
      ::attunement [:dwarf]
-     :magical-attack-bonus 3
-     :magical-damage-bonus 3
+     ::magical-attack-bonus 3
+     ::magical-damage-bonus 3
      ::description "You gain a +3 bonus to attack and damage rolls made with this magic weapon. It has the thrown property with a normal range of 20 feet and a long range of 60 feet. When you hit with a ranged attack using this weapon, it deals an extra 1d8 damage or, if the target is a giant, 2d8 damage. Immediately after the attack, the weapon flies back to your hand."
      }{
      name-key "Efficient Quiver"
@@ -1173,7 +1169,7 @@ spell, and the gem’s magic is lost. The type of gem determines the elemental s
      ::item-subtype :chain-shirt
      ::rarity :rare
      :magical-ac-bonus 1
-     :modifiers [(mod5e/armor-proficiency :elven-chain)]
+     ::modifiers [(mod5e/armor-proficiency :elven-chain)]
      ::description "You gain a +1 bonus to AC while you wear this armor. You are considered proficient with this armor even if you lack proficiency with medium armor."
      }{
      name-key "Eversmoking Bottle"
@@ -1188,7 +1184,7 @@ The cloud persists as long as the bottle is open. Closing the bottle requires yo
      ::rarity :uncommon
 
      ::attunement [:any]
-     :modifiers [(mod5e/action
+     ::modifiers [(mod5e/action
                   {:name "Eyes of Charming"
                    :page 168
                    :source :dmg
@@ -1304,7 +1300,7 @@ When you draw this weapon, you can extinguish all nonmagical flames within 30 fe
      ::rarity :uncommon
 
      ::attunement [:any]
-     :modifiers [(mod5e/ability-override ::char5e/str 19)
+     ::modifiers [(mod5e/ability-override ::char5e/str 19)
                  (mod/modifier ?giants-bane-gauntlet true)]
      ::description "Your Strength score is 19 while you wear these gauntlets. They have no effect on you if your Strength is already 19 or higher."
      }{
@@ -1331,8 +1327,8 @@ The gem regains 1d3 expended charges daily at dawn."
      ::type :weapon
      ::item-subtype (fn [w] (or (axe? w) (sword? w)))
      ::rarity :rare
-     :magical-attack-bonus 1
-     :magical-damage-bonus 1
+     ::magical-attack-bonus 1
+     ::magical-damage-bonus 1
      ::description "You gain a +1 bonus to attack and damage rolls made with this magic weapon.
 When you hit a giant with it, the giant takes an extra 2d6 damage of the weapon’s type and must succeed on a DC 15 Strength saving throw or fall prone. For the purpose of this weapon, “giant” refers to any creature with the giant type, including ettins and trolls."
      }{
@@ -1341,7 +1337,7 @@ When you hit a giant with it, the giant takes an extra 2d6 damage of the weapon�
      ::item-subtype :studded-leather
      ::rarity :rare
      :magical-ac-bonus 1
-     :modifiers [(mod5e/bonus-action
+     ::modifiers [(mod5e/bonus-action
                   {:name "Glamoured Studded Leather"
                    :page 172
                    :source :dmg
@@ -1354,7 +1350,7 @@ When you hit a giant with it, the giant takes an extra 2d6 damage of the weapon�
      ::rarity :uncommon
 
      ::attunement [:any]
-     :modifiers [(mod5e/reaction
+     ::modifiers [(mod5e/reaction
                   {:name "Gloves of Missile Snaring"
                    :page 172
                    :source :dmg
@@ -1372,24 +1368,24 @@ When you hit a giant with it, the giant takes an extra 2d6 damage of the weapon�
      name-key "Gloves of Thievery"
      ::type :wondrous-item
      ::rarity :uncommon
-     :modifiers [(mod5e/skill-bonus :sleight-of-hand 5)]
+     ::modifiers [(mod5e/skill-bonus :sleight-of-hand 5)]
      :page 172
      ::description "+5 to Sleight of Hand and lock pick checks"}
     {
      name-key "Goggles of Night"
      ::type :wondrous-item
      ::rarity :uncommon
-     :modifiers [(mod5e/darkvision-bonus 60)]
+     ::modifiers [(mod5e/darkvision-bonus 60)]
      ::description "While wearing these dark lenses, you have darkvision out to a range of 60 feet. If you already have darkvision, wearing the goggles increases its range by 60 feet."
      }{
      name-key "Hammer of Thunderbolts"
      ::type :weapon
      ::item-subtype :maul
      ::rarity :legendary
-     :magical-attack-bonus 1
-     :magical-damage-bonus 1
+     ::magical-attack-bonus 1
+     ::magical-damage-bonus 1
      ::attunement [:any]
-     :modifiers [(mod/modifier ?giants-bane-hammer true)]
+     ::modifiers [(mod/modifier ?giants-bane-hammer true)]
      ::description "You gain a +1 bonus to attack and damage rolls made with this magic weapon.
 Giant’s Bane. You must be wearing a belt of giant strength (any variety) and gauntlets of ogre power to attune to this weapon. The attunement ends if you take off either of those items. While you are attuned to this weapon and holding it, your Strength score increases by 4 and can exceed 20, but not 30. When you roll a 20 on an attack roll made with this weapon against a giant, the giant must succeed on a DC 17 Constitution saving throw or die.
 The hammer also has 5 charges. While attuned to it, you can expend 1 charge and make a ranged weapon attack with the hammer, hurling it as if it had the thrown property with a normal range of 20 feet and a long range of 60 feet. If the attack hits, the hammer unleashes a thunderclap audible out to 300 feet. The target and every creature within 30 feet of it must succeed on a DC 17 Constitution saving throw or be stunned until the end of your next turn. The hammer regains 1d4 + 1 expended charges daily at dawn."
@@ -1416,7 +1412,7 @@ Placing the haversack inside an extradimensional space created by a bag of holdi
      ::rarity :uncommon
 
      ::attunement [:any]
-     :modifiers [(mod5e/ability-override ::char5e/int 19)]
+     ::modifiers [(mod5e/ability-override ::char5e/int 19)]
      ::description "Your Intelligence score is 19 while you wear this headband. It has no effect on you if your Intelligence is already 19 or higher."
      }{
      name-key "Helm of Brilliance"
@@ -1466,9 +1462,10 @@ While focusing on a creature with detect thoughts, you can use an action to cast
      ::rarity :legendary
 
      ::attunement [:paladin]
-     :magical-attack-bonus 1
-     :magical-damage-bonus 1
+     ::magical-attack-bonus 3
+     ::magical-damage-bonus 3
      ::description "You gain a +3 bonus to attack and damage rolls made with this magic weapon. When you hit a fiend or an undead with it, that creature takes an extra 2d10 radiant damage.
+>>>>>>> master
 While you hold the drawn sword, it creates an aura in a 10-foot radius around you. You and all creatures friendly to you in the aura have advantage
 on saving throws against spells and other magical effects. If you have 17 or more levels in the paladin class, the radius of the aura increases to 30 feet."
      }{
@@ -1595,9 +1592,9 @@ foot radius."
      ::rarity :legendary
 
      ::attunement [:any]
-     :magical-attack-bonus 1
-     :magical-damage-bonus 1
-     :modifiers [(mod5e/saving-throw-bonuses 1)]
+     ::magical-attack-bonus 1
+     ::magical-damage-bonus 1
+     ::modifiers [(mod5e/saving-throw-bonuses 1)]
      ::description "You gain a +1 bonus to attack and damage rolls made with this magic weapon. While the sword is on your person, you also gain a +1 bonus to saving throws.
 Luck. If the sword is on your person, you can call on its luck (no action required) to reroll one attack roll, ability check, or saving throw you dislike. You must use the second roll. This property can’t be used again until the next dawn.
 Wish. The sword has 1d4 – 1 charges. While holding it, you can use an action to expend 1 charge and cast the wish spell from it. This property can’t be used again until the next dawn. The sword loses this property if it has no charges."
@@ -1616,8 +1613,8 @@ While you hold this weapon, it sheds bright light in a 20-foot radius and dim li
      ::type :weapon
      ::item-subtype :mace
      ::rarity :rare
-     :magical-attack-bonus 1
-     :magical-damage-bonus 1
+     ::magical-attack-bonus 1
+     ::magical-damage-bonus 1
      ::description "You gain a +1 bonus to attack and damage rolls made with this magic weapon. The bonus increases to +3 when you use the mace to attack a construct.
 When you roll a 20 on an attack roll made with this weapon, the target takes an extra 2d6 bludgeoning damage, or 4d6 bludgeoning damage if it’s a construct. If a construct has 25 hit points or fewer after taking this damage, it is destroyed."
      }{
@@ -1638,7 +1635,7 @@ The mace regains 1d3 expended charges daily at dawn."
      ::rarity :rare
 
      ::attunement [:any]
-     :modifiers [(mod5e/saving-throw-advantage ["spells"])]
+     ::modifiers [(mod5e/saving-throw-advantage ["spells"])]
      ::description "You have advantage on saving throws against spells while you wear this cloak."
      }{
      name-key "Manual of Bodily Health"
@@ -1733,8 +1730,8 @@ is cast, that bead can’t be used again until the next dawn."
      ::rarity :very-rare
 
      ::attunement [:any]
-     :magical-attack-bonus 2
-     :magical-damage-bonus 2
+     ::magical-attack-bonus 2
+     ::magical-damage-bonus 2
      ::description "You gain a +2 bonus to attack and damage rolls made with this magic weapon.
 The sword has 1d8 + 1 charges. If you score a critical hit against a creature that has fewer than 100 hit points, it must succeed on a DC 15 Constitution saving throw or be slain instantly as the sword tears its life force from its body (a construct or an undead is immune). The sword loses 1 charge if the creature is slain. When the sword has no charges remaining, it loses this property."
      }{
@@ -2040,7 +2037,7 @@ If you die while wearing the ring, your soul enters it, unless it already houses
 
      ::attunement [:any]
      :magical-ac-bonus 1
-     :modifiers (map #(mod5e/saving-throw-bonus % 1) char5e/ability-keys)
+     ::modifiers (map #(mod5e/saving-throw-bonus % 1) char5e/ability-keys)
      ::description "You gain a +1 bonus to AC and saving throws while wearing this ring."
      }{
      name-key "Ring of Regeneration"
@@ -2169,7 +2166,7 @@ While you wear the robe, you can use an action to enter the Astral Plane along w
      ::rarity :legendary
 
      ::attunement [:sorcerer, :warlock, :wizard]
-     :modifiers [(mod5e/spell-save-dc-bonus 2)
+     ::modifiers [(mod5e/spell-save-dc-bonus 2)
                  (mod5e/spell-attack-modifier-bonus 2)
                  (mod5e/saving-throw-advantage ["Spells and other magical effects"])
                  (mod5e/ac-bonus-fn
@@ -2225,8 +2222,8 @@ The rod’s head stops glowing and the effect ends after 10 minutes, or when a c
      ::rarity :legendary
 
      ::attunement [:any]
-     :magical-attack-bonus 3
-     :magical-damage-bonus 3
+     ::magical-attack-bonus 3
+     ::magical-damage-bonus 3
      ::description "This rod has a flanged head, and it functions as a magic mace that grants a +3 bonus to attack and damage rolls made with it. The rod has properties associated with six different buttons that are set in a row along the haft. It has three other properties as well, detailed below.
 Six Buttons. You can press one of the rod’s six buttons as a bonus action. A button’s effect lasts until you push a different button or until you push the same button again, which causes the rod to revert to its normal form.
 If you press button 1, the rod becomes a flame tongue, as a fiery blade sprouts from the end opposite the rod’s flanged head.
@@ -2291,15 +2288,15 @@ The rope has AC 20 and 20 hit points. It regains 1 hit point every 5 minutes as 
      ::rarity :very-rare
 
      ::attunement [:any]
-     :magical-attack-bonus 2
-     :magical-damage-bonus 2
+     ::magical-attack-bonus 2
+     ::magical-damage-bonus 2
      ::description "You gain a +2 bonus to attack and damage rolls made with this magic weapon. In addition, you can make one attack with it as a bonus action on each of your turns."
      }
     {
      name-key "Sending Stones"
      ::type :wondrous-item
      ::rarity :uncommon
-     :modifiers [(mod5e/action
+     ::modifiers [(mod5e/action
                   {:name "Sending Stones"
                    :page 199
                    :source :dmg
@@ -2429,8 +2426,8 @@ The staff regains 1d6 + 4 expended charges daily at dawn. If you expend the last
      ::rarity :very-rare
 
      ::attunement [:sorcerer, :warlock, :wizard]
-     :magical-attack-bonus 2
-     :magical-damage-bonus 2
+     ::magical-attack-bonus 2
+     ::magical-damage-bonus 2
      ::description "This staff can be wielded as a magic quarterstaff that grants a +2 bonus to attack and damage rolls made with it. While holding it, you gain a +2 bonus to Armor Class, saving throws, and spell attack rolls.
 The staff has 20 charges for the following properties. The staff regains 2d8 + 4 expended charges daily at dawn. If you expend the last charge, roll a d20. On a 1, the staff retains its +2 bonus to attack and damage rolls but loses all other properties. On a 20, the staff regains 1d8 + 2 charges.
 Power Strike. When you hit with a melee attack using the staff, you can expend 1 charge to deal an extra 1d6 force damage to the target.
@@ -2444,8 +2441,8 @@ You have a 50 percent chance to instantly travel to a random plane of existence,
      ::rarity :very-rare
 
      ::attunement [:any]
-     :magical-attack-bonus 3
-     :magical-damage-bonus 3
+     ::magical-attack-bonus 3
+     ::magical-damage-bonus 3
      ::description "This staff can be wielded as a magic quarterstaff that grants a +3 bonus to attack and damage rolls made with it.
 The staff has 10 charges. When you hit with a melee attack using it, you can expend up to 3 of its charges. For each charge you expend, the target takes an extra 1d6 force damage. The staff regains 1d6 + 4 expended charges daily at dawn. If you expend the last charge, roll a d20. On a 1, the staff becomes a nonmagical quarterstaff."
      }{
@@ -2464,8 +2461,8 @@ Insect Cloud. While holding the staff, you can use an action and expend 1 charge
      ::rarity :legendary
 
      ::attunement [:sorcerer, :warlock, :wizard]
-     :magical-attack-bonus 2
-     :magical-damage-bonus 2
+     ::magical-attack-bonus 2
+     ::magical-damage-bonus 2
      ::description "This staff can be wielded as a magic quarterstaff that grants a +2 bonus to attack and damage rolls made with it. While you hold it, you gain a +2 bonus to spell attack rolls.
 The staff has 50 charges for the following properties. It regains 4d6 + 2 expended charges daily at dawn. If you expend the last charge, roll a d20. On a 20, the staff regains 1d12 + 1 charges.
 Spell Absorption. While holding the staff, you have advantage on saving throws against spells. In addition, you can use your reaction when another creature casts a spell that targets only you. If you do, the staff absorbs the magic of the spell, canceling its effect and gaining a number of charges equal to the absorbed spell’s level. However, if doing so brings the staff’s total number of charges above 50, the staff explodes as if you activated its retributive strike (see below).
@@ -2491,8 +2488,8 @@ If the snake is reduced to 0 hit points, it dies and reverts to its staff form. 
      ::rarity :rare
 
      ::attunement [:druid]
-     :magical-attack-bonus 2
-     :magical-damage-bonus 2
+     ::magical-attack-bonus 2
+     ::magical-damage-bonus 2
      ::description "This staff can be wielded as a magic quarterstaff that grants a +2 bonus to attack and damage rolls made with it. While holding it, you have a +2 bonus to spell attack rolls.
 The staff has 10 charges for the following properties. It regains 1d6 + 4 expended charges daily at dawn. If you expend the last charge, roll a d20. On a 1, the staff loses its properties and becomes a nonmagical quarterstaff.
 Spells. You can use an action to expend 1 or more of the staff’s charges to cast one of the following spells from it, using your spell save DC: animal friendship (1 charge), awaken (5 charges), barkskin
@@ -2506,8 +2503,8 @@ Tree Form. You can use an action to plant one end of the staff in fertile earth 
      ::rarity :very-rare
 
      ::attunement [:any]
-     :magical-attack-bonus 2
-     :magical-damage-bonus 2
+     ::magical-attack-bonus 2
+     ::magical-damage-bonus 2
      ::description "This staff can be wielded as a magic quarterstaff that grants a +2 bonus to attack and damage rolls made with it. It also has the following additional properties. When one of these properties is used, it can’t be used again until the next dawn.
 Lightning. When you hit with a melee attack using the staff, you can cause the target to take an extra 2d6 lightning damage.
 Thunder. When you hit with a melee attack using the staff, you can cause the staff to emit a crack of thunder, audible out to 300 feet. The target you hit must succeed on a DC 17 Constitution saving throw or become stunned until the end of your next turn.
@@ -2534,7 +2531,9 @@ The staff can be wielded as a magic quarterstaff. On a hit, it deals damage as a
 
      ::rarity :uncommon
 
-     ::attunement [:any]
+       ::attunement [:any]
+       ::modifiers [(mod5e/all-skills-bonus 1)
+                   (mod5e/saving-throw-bonuses 1)]
      ::description "While this polished agate is on your person, you gain a +1 bonus to ability checks and saving throws."
      }{
      name-key "Sun Blade"
@@ -2544,8 +2543,8 @@ The staff can be wielded as a magic quarterstaff. On a hit, it deals damage as a
      ::rarity :rare
 
      ::attunement [:any]
-     :magical-attack-bonus 2
-     :magical-damage-bonus 2
+     ::magical-attack-bonus 2
+     ::magical-damage-bonus 2
      :finesse? true
      :damage-type :radiant
      ::description "This item appears to be a longsword hilt. While grasping the hilt, you can use a bonus action to cause a blade of pure radiance to spring into existence, or make the blade disappear. While the blade exists, this magic longsword has the finesse property. If you are proficient with shortswords or longswords, you are proficient with the sun blade.
@@ -2647,8 +2646,8 @@ on a beast that has an innate swimming speed. The trident regains 1d3 expended c
      ::item-subtype slashing-sword?
      ::rarity :legendary
      ::attunement [:any]
-     :magical-attack-bonus 3
-     :magical-damage-bonus 3
+     ::magical-attack-bonus 3
+     ::magical-damage-bonus 3
      ::description "You gain a +3 bonus to attack and damage rolls made with this magic weapon. In addition, the weapon ignores resistance to slashing damage.
 When you attack a creature that has at least one head with this weapon and roll a 20 on the attack roll, you cut off one of the creature’s heads. The creature dies if it can’t survive without the lost head. A creature is immune to this effect if it is immune to slashing damage, doesn’t have or need a head, has legendary actions, or the GM decides that the creature is too big for its head to be cut off with this weapon. Such a creature instead takes an extra 6d8 slashing damage from the hit."
      }{
@@ -2773,8 +2772,8 @@ The wand regains 1d6 + 1 expended charges daily at dawn. If you expend the wand�
      ::type :weapon
      ::item-subtype weapon-not-ammunition?
      ::rarity :uncommon
-     :magical-attack-bonus 1
-     :magical-damage-bonus 1
+     ::magical-attack-bonus 1
+     ::magical-damage-bonus 1
      ::description "You have a +1 bonus to attack and damage rolls made with this magic weapon."
      }{
      name-key "Weapon, +2"
@@ -2782,8 +2781,8 @@ The wand regains 1d6 + 1 expended charges daily at dawn. If you expend the wand�
      ::type :weapon
      ::item-subtype weapon-not-ammunition?
      ::rarity :rare
-     :magical-attack-bonus 2
-     :magical-damage-bonus 2
+     ::magical-attack-bonus 2
+     ::magical-damage-bonus 2
      ::description "You have a +2 bonus to attack and damage rolls made with this magic weapon."
      }{
      name-key "Weapon, +3"
@@ -2791,8 +2790,8 @@ The wand regains 1d6 + 1 expended charges daily at dawn. If you expend the wand�
      ::type :weapon
      ::item-subtype weapon-not-ammunition?
      ::rarity :very-rare
-     :magical-attack-bonus 3
-     :magical-damage-bonus 3
+     ::magical-attack-bonus 3
+     ::magical-damage-bonus 3
      ::description "You have a +3 bonus to attack and damage rolls made with this magic weapon."
      }
     {name-key "Weapon of Warning"
@@ -2837,7 +2836,7 @@ The boots regain 2 hours of flying capability for every 12 hours they aren’t i
 (defn add-key [item]
   (assoc item :key (common/name-to-kw (name-key item))))
 
-(defn expand-weapon [{:keys [item-subtype name-fn] :as item}]
+(defn expand-weapon [{:keys [::item-subtype name-fn] :as item}]
   (if (fn? item-subtype)
     (let [of-type (filter item-subtype weapons-and-ammunition)]
       (for [weapon of-type]
@@ -2861,7 +2860,7 @@ The boots regain 2 hours of flying capability for every 12 hours they aren’t i
           item)
          item)))))
 
-(defn expand-armor [{:keys [item-subtype name-fn] :as item}]
+(defn expand-armor [{:keys [::item-subtype name-fn] :as item}]
   (let [normal-version (armor5e/armor-map item-subtype)]
     (cond
       (fn? item-subtype)
@@ -2885,8 +2884,8 @@ The boots regain 2 hours of flying capability for every 12 hours they aren’t i
 (def magic-items
   (flatten
    (map
-    (fn [{:keys [item-type item-subtype] :as item}]
-      (case item-type
+    (fn [{:keys [::type ::item-subtype] :as item}]
+      (case type
         :weapon (expand-weapon item)
         :armor (expand-armor item)
         (add-key item)))
