@@ -1944,7 +1944,8 @@
      (personality-section "Description" description)]))
 
 (def notes-style
-  {:height "400px"})
+  {:height "400px"
+   :width "100%"})
 
 (defn summary-details [num-columns id]
   (let [built-char @(subscribe [:built-character id])
@@ -1975,12 +1976,13 @@
         [description-section id]
         [:span.f-s-18.f-w-b.m-b-5 "Notes"]
         [:div.p-l-20.p-r-20
-         [comps/input-field
-          :textarea
-          @(subscribe [::char/notes id])
-          #(dispatch [::char/set-notes id %])
-          {:style notes-style
-           :class-name "input"}]]]]]]))
+         [:div.w-100-p
+          [comps/input-field
+           :textarea
+           @(subscribe [::char/notes id])
+           #(dispatch [::char/set-notes id %])
+           {:style notes-style
+            :class-name "input"}]]]]]]]))
 
 (defn weapon-details-field [nm value]
   [:div.p-2
