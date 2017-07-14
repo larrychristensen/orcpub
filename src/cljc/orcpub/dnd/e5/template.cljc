@@ -1706,7 +1706,8 @@
                                    {:name "Swamp"
                                     :modifiers [(druid-spell 2 :darkness 3)
                                                 (druid-spell 2 :melfs-acid-arrow 3)
-                                                (druid-spell 3 :stinking-cloud 5)]})
+                                                (druid-spell 3 :stinking-cloud 5)
+                                                (druid-spell 3 :water-walk 5)]})
                                   (t/option-cfg
                                    {:name "Underdark"
                                     :modifiers [(druid-spell 2 :spider-climb 3)
@@ -4615,15 +4616,17 @@ long rest."})
     :tags #{:equipment}
     :options-ref #(delay
                    (map
-                    (fn [item]
-                      (let [{:keys [name key description page source]} (if converter (converter item) item)]
+                    (fn [{:keys [:db/id ::mi/name ::mi/key ::mi/description ::mi/page ::mi/source] :as item}]
+                      (let [full-item (update item
+                                              ::mi/modifiers
+                                              mod5e/build-modifiers)]
                         (t/option-cfg
                          {:name name
-                          :key key
+                          :key (if id (keyword (str "id-" id)) key)
                           :help (if (or description
                                         page)
                                   (inventory-help description page source))
-                          :modifiers [(modifier-fn key item)]})))
+                          :modifiers [(modifier-fn key full-item)]})))
                     @(subscribe item-sub)))}))
 
 (defn inventory-selection [item-type-name icon items modifier-fn & [converter]]

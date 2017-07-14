@@ -1,8 +1,11 @@
 (ns orcpub.dnd.e5.equipment-subs
-  (:require [re-frame.core :refer [reg-sub reg-sub-raw dispatch]]
+  (:require [re-frame.core :refer [reg-sub reg-sub-raw dispatch subscribe]]
             [orcpub.common :as common]
             [orcpub.dnd.e5.magic-items :as mi5e]
             [orcpub.dnd.e5.character :as char5e]
+            [orcpub.dnd.e5.weapons :as weapon5e]
+            [orcpub.dnd.e5.armor :as armor5e]
+            [orcpub.dnd.e5.equipment :as equipment5e]
             [orcpub.route-map :as routes]
             [orcpub.dnd.e5.events :as events]
             [reagent.ratom :as ra]
@@ -17,23 +20,24 @@
   {"Authorization" (str "Token " (-> db :user-data :token))})
 
 (reg-sub-raw
-  ::mi5e/custom-items
-  (fn [app-db [_]]
-    (go (dispatch [:set-loading true])
-        (let [response (<! (http/get (routes/path-for routes/dnd-e5-items-route)
-                                     {:accept :transit
-                                      :headers (auth-headers @app-db)}))]
-          (dispatch [:set-loading false])
-          (case (:status response)
-            200 (dispatch [::mi5e/set-custom-items (-> response :body)])
-            401 (dispatch [:route routes/login-page-route {:secure? true}])
-            500 (dispatch (events/show-generic-error)))))
-    (ra/make-reaction
-     (fn [] (get @app-db ::mi5e/custom-items [])))))
+ ::mi5e/custom-items
+ (fn [app-db [_ user-data]]
+   (go (dispatch [:set-loading true])
+       (let [response (<! (http/get (routes/path-for routes/dnd-e5-items-route)
+                                    {:accept :transit
+                                     :headers (auth-headers @app-db)}))]
+         (dispatch [:set-loading false])
+         (case (:status response)
+           200 (dispatch [::mi5e/set-custom-items (-> response :body)])
+           401 (dispatch [:route routes/login-page-route {:secure? true}])
+           500 (dispatch (events/show-generic-error)))))
+   (ra/make-reaction
+    (fn [] (get @app-db ::mi5e/custom-items [])))))
 
 (reg-sub
  ::char5e/sorted-items
- :<- [::mi5e/custom-items]
+ (fn [_ _]
+   (subscribe [::mi5e/custom-items (subscribe [:user-data])]))
  (fn [custom-items _]
    (concat
     custom-items
@@ -50,7 +54,7 @@
 (defn map-by-key-or-id [items]
   (reduce
    (fn [m {:keys [:db/id key] :as item}]
-     (assoc m (or id key) item))
+     (assoc m (or (keyword (str "id-" id)) key) item))
    {}
    items))
 
@@ -87,3 +91,23 @@
  :<- [::mi5e/other-magic-items]
  (fn [magic-items _]
    (map-by-key-or-id magic-items)))
+
+(reg-sub
+ ::equipment5e/weapons-map
+ (fn [_ _]
+   weapon5e/weapons-map))
+
+(reg-sub
+ ::equipment5e/armor-map
+ (fn [_ _]
+   armor5e/armor-map))
+
+(reg-sub
+ ::equipment5e/equipment-map
+ (fn [_ _]
+   equipment5e/equipment-map))
+
+(reg-sub
+ ::equipment5e/treasure-map
+ (fn [_ _]
+   equipment5e/treasure-map))

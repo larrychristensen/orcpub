@@ -175,6 +175,23 @@
    :climbing-speed-override climbing-speed-override
    :climbing-speed-equal-to-walking climbing-speed-equal-to-walking})
 
+(defn prn-and-return [arg]
+  (prn "ARG" arg)
+  arg)
+
+(defn build-modifiers [mod-cfgs]
+  (sequence
+   (comp
+    (filter ::mods/args)
+    (map
+     (fn [{:keys [::mods/key ::mods/args]}]
+       (let [raw-args (mods/raw-args args)
+             mod-fn (mods-map key)]
+         (if mod-fn
+           (apply mod-fn raw-args)))))
+    (remove nil?))
+   mod-cfgs))
+
 (defn level-ability-increase [ability bonus]
   (mods/modifier ?level-ability-increases
                  (update ?level-ability-increases ability add-bonus bonus)
@@ -377,6 +394,18 @@
                   ?additional-skill-bonuses
                   {skill-kw bonus})))
 
+(defn all-skills-bonus [bonus]
+  (mods/modifier ?additional-skill-bonuses
+                 (merge-with
+                  +
+                  ?additional-skill-bonuses
+                  (into
+                   {}
+                   (map
+                    (fn [k]
+                      [k bonus])
+                    skill5e/skill-keys)))))
+
 (defn max-hit-points [bonus]
   (mods/cum-sum-mod ?hit-point-level-increases bonus "HP" (mods/bonus-str bonus)))
 
@@ -463,7 +492,7 @@
     (fn [cfg] (mods/map-mod ?weapons weapon-kw (equipment-cfg cfg)))
     1))
 
-(defn deferred-magic-item-fn [equipment-mod-fn {:keys [magical-ac-bonus modifiers]} & [include-magic-bonus?]]
+(defn deferred-magic-item-fn [equipment-mod-fn {:keys [:orcpub.dnd.e5.magic-items/magical-ac-bonus :orcpub.dnd.e5.magic-items/modifiers]} & [include-magic-bonus?]]
   (fn [cfg]
     (let [equipment-mod (equipment-mod-fn cfg)]
       (if (::char-equip/equipped? cfg)

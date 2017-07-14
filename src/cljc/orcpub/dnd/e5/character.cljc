@@ -3,8 +3,6 @@
             #?(:cljs [cljs.spec.alpha :as spec])
             #?(:clj [clojure.spec.test.alpha :as stest])
             #?(:cljs [cljs.spec.test.alpha :as stest])
-            #?(:clj [clojure.edn :refer [read-string]])
-            #?(:cljs [cljs.reader :refer [read-string]])
             [clojure.string :as s]
             [orcpub.entity-spec :as es]
             [orcpub.dice :as dice]
@@ -161,6 +159,16 @@
       add-ability-namespaces
       add-namespaces-to-values))
 
+(defn fix-quantity [qty]
+  (if (string? qty)
+    (if (s/blank? qty)
+      0
+      #?(:cljs
+         (try
+           (js/parseInt qty)
+           (catch Object e 0))))
+    (int qty)))
+
 (defn fix-quantities [raw-character]
   (reduce
    (fn [char equipment-key]
@@ -175,12 +183,7 @@
                            (update-in
                             equipment
                             [::entity/value ::equip/quantity]
-                            (fn [qty]
-                              (if (string? qty)
-                                (if (s/blank? qty)
-                                  0
-                                  (read-string qty))
-                                qty))))
+                            fix-quantity))
                          equipment-vec)
                         (meta equipment-vec))))
          char)))
@@ -201,12 +204,7 @@
                            (update
                             equipment
                             ::equip/quantity
-                            (fn [qty]
-                              (if (string? qty)
-                                (if (s/blank? qty)
-                                  0
-                                  (read-string qty))
-                                qty))))
+                            fix-quantity))
                          equipment-vec)
                         (meta equipment-vec))))
          char)))

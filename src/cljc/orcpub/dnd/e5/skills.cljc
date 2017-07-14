@@ -95,6 +95,8 @@ check. The GM might also call for a Dexterity (Sleight of Hand) check to determi
               :icon "footsteps"
               :description "The GM might ask you to make a Wisdom (Survival) check to follow tracks, hunt wild game, guide your group through frozen wastelands, identify signs that owlbears live nearby, predict the weather, or avoid quicksand and other natural hazards."}])
 
+(def skill-keys (map :key skills))
+
 (def skills-map (common/map-by-key skills))
 
 (def skill-abilities

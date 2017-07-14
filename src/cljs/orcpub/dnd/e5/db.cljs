@@ -46,7 +46,6 @@
   (.setItem js/window.localStorage local-storage-user-key (str user-data)))
 
 (defn magic-item->local-store [magic-item]
-  (prn "MAGIC ITEM" magic-item)
   (.setItem js/window.localStorage local-storage-magic-item-key (str magic-item)))
 
 (def tab-path [:builder :character :tab])
