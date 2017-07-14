@@ -276,26 +276,29 @@
          {:on-click remove-fn}]]
        (if @expanded? [:div.m-t-5 item-description])])))
 
+(defn inventory-adder [key options selected-keys]
+  [comps/selection-adder
+   (sort-by
+    :name
+    (sequence
+     (comp
+      (remove
+       #(selected-keys (::t/key %)))
+      (map
+       (fn [{:keys [::t/name ::t/key]}]
+         {:name name
+          :key key})))
+     options))
+   (fn [e]
+     (let [kw (keyword (.. e -target -value))]
+       (dispatch [:add-inventory-item key kw])))])
+
 (defn inventory-selector [item-map qty-input-width {:keys [selection]} & [custom-equipment-key]]
   (let [{:keys [::t/key ::t/options]} selection
         selected-items @(subscribe [:entity-option key])
         selected-keys (into #{} (map ::entity/key selected-items))]
     [:div
-     [comps/selection-adder
-      (sort-by
-         :name
-         (sequence
-          (comp
-           (remove
-            #(selected-keys (::t/key %)))
-           (map
-            (fn [{:keys [::t/name ::t/key]}]
-              {:name name
-               :key key})))
-          options))
-      (fn [e]
-         (let [kw (keyword (.. e -target -value))]
-           (dispatch [:add-inventory-item key kw])))]
+     [inventory-adder key options selected-keys]
      (if (seq selected-items)
        [:div.flex.f-s-12.opacity-5.m-t-10.justify-cont-s-b
         [:div.m-r-10 "Equipped?"]
