@@ -1706,7 +1706,8 @@
                                    {:name "Swamp"
                                     :modifiers [(druid-spell 2 :darkness 3)
                                                 (druid-spell 2 :melfs-acid-arrow 3)
-                                                (druid-spell 3 :stinking-cloud 5)]})
+                                                (druid-spell 3 :stinking-cloud 5)
+                                                (druid-spell 3 :water-walk 5)]})
                                   (t/option-cfg
                                    {:name "Underdark"
                                     :modifiers [(druid-spell 2 :spider-climb 3)
