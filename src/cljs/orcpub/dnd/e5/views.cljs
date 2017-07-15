@@ -868,7 +868,7 @@
      (if owner
        [:div.m-r-5 [svg-icon "beer-stein" 24]])
      [:div
-      [:span.f-s-24.f-w-b name]
+      [:span.f-s-24.f-w-b (or (:name item) name)]
       [:div.f-s-16.i.f-w-b.opacity-5
        (str (s/capitalize (common/kw-to-name type))
             (if (keyword? item-subtype)
@@ -1998,7 +1998,8 @@
 (defn weapon-details [{:keys [description
                               type
                               damage-type
-                              magical-damage-bonus
+                              ::mi/magical-damage-bonus
+                              ::mi/magical-attack-bonus
                               ranged?
                               melee?
                               range
@@ -2012,6 +2013,10 @@
   [:div.m-t-10.i
    (weapon-details-field "Type" (common/safe-name type))
    (weapon-details-field "Damage Type" (common/safe-name damage-type))
+   (if magical-damage-bonus
+     (weapon-details-field "Magical Damage Bonus" magical-damage-bonus))
+   (if magical-attack-bonus
+     (weapon-details-field "Magical Attack Bonus" magical-attack-bonus))
    (weapon-details-field "Melee/Ranged" (if melee? "melee" "ranged"))
    (if range
      (weapon-details-field "Range" (str (:min range) "/" (:max range) " ft.")))
@@ -2033,11 +2038,11 @@
                                      description
                                      max-dex-mod
                                      min-str
-                                     magical-ac-bonus
+                                     ::mi/magical-ac-bonus
                                      stealth-disadvantage?]
                               :or {magical-ac-bonus 0
                                    base-ac 10}}
-                             {shield-magic-bonus :magical-ac-bonus :or {shield-magic-bonus 0} :as shield}
+                             {shield-magic-bonus ::magical-ac-bonus :or {shield-magic-bonus 0} :as shield}
                              expanded?]
   [:div
    [:div (str (if type (str (common/safe-name type) ", ")) "base AC " (+ magical-ac-bonus shield-magic-bonus base-ac (if shield 2 0)) (if stealth-disadvantage? ", stealth disadvantage"))]
@@ -2078,7 +2083,7 @@
             device-type @(subscribe [:device-type])
             mobile? (= :mobile device-type)
             proficiency-bonus @(subscribe [::char/proficiency-bonus id])
-            all-armor-details (map mi/all-armor-map (keys all-armor))
+            all-armor-details (map @(subscribe [::mi/all-armor-map]) (keys all-armor))
             armor-details (armor/non-shields all-armor-details)
             shield-details (armor/shields all-armor-details)]
         [:div
@@ -2111,7 +2116,7 @@
                  ^{:key (str key (:key shield))}
                  [:tr.pointer
                   {:on-click #(swap! expanded-details (fn [d] (update d k not)))}
-                  [:td.p-10.f-w-b (str (or (:name armor) "unarmored")
+                  [:td.p-10.f-w-b (str (or (::mi/name armor) (:name armor) "unarmored")
                                        (if shield (str " + " (:name shield))))]
                   (if (not mobile?)
                     [:td.p-10 (boolean-icon proficient?)])
@@ -2136,7 +2141,8 @@
             has-weapon-prof @(subscribe [::char/has-weapon-prof id])
             device-type @(subscribe [:device-type])
             mobile? (= :mobile device-type)
-            proficiency-bonus @(subscribe [::char/proficiency-bonus id])]
+            proficiency-bonus @(subscribe [::char/proficiency-bonus id])
+            all-weapons-map @(subscribe [::mi/all-weapons-map])]
         [:div
          [:div.flex.align-items-c
           (svg-icon "crossed-swords" 32)
@@ -2154,7 +2160,7 @@
             (doall
              (map
               (fn [[weapon-key {:keys [equipped?]}]]
-                (let [{:keys [name magical-damage-bonus description ranged?] :as weapon} (mi/all-weapons-map weapon-key)
+                (let [{:keys [name description ranged?] :as weapon} (all-weapons-map weapon-key)
                       proficient? (has-weapon-prof weapon)
                       expanded? (@expanded-details weapon-key)
                       damage-modifier (max (weapon-damage-modifier weapon false)
@@ -2184,15 +2190,14 @@
               all-weapons))]]]]))))
 
 (defn magic-item-rows [expanded-details magic-item-cfgs magic-weapon-cfgs magic-armor-cfgs]
-  (let [magic-item-map @(subscribe [::mi/other-magic-items-map])]
-    (prn "KEYS" (keys magic-item-map))
+  (let [magic-item-map @(subscribe [::mi/all-magic-items-map])]
     (mapcat
      (fn [[item-kw item-cfg]]
        (let [{:keys [::mi/name ::mi/type ::mi/item-subtype ::mi/rarity ::mi/attunement ::mi/description ::mi/summary] :as item} (magic-item-map item-kw)
              expanded? (@expanded-details item-kw)]
          [[:tr.pointer
            {:on-click #(swap! expanded-details (fn [d] (update d item-kw not)))}
-           [:td.p-10.f-w-b name]
+           [:td.p-10.f-w-b (or (:name item) name)]
            [:td.p-10 (str (common/kw-to-name type)
                           ", "
                           (common/kw-to-name rarity))]
@@ -2777,21 +2782,22 @@
          {:style (if mobile?
                    two-columns-style
                    three-columns-style)}
-         [labeled-checkbox "All" false]
          (doall
           (map
            (fn [{:keys [:key :name]}]
              ^{:key key}
-             [labeled-checkbox name false])
+             [:div
+              {:on-click #(dispatch [::mi/toggle-subtype key])}
+              [labeled-checkbox name @(subscribe [::mi/has-subtype? key])]])
            (concat
+            [{:name "All"
+              :key :all}]
             (map
              (fn [type]
                {:name (str "All " (clojure.core/name type))
                 :key type})
              armor/armor-types)
-            armor/armor)))
-         [:div.m-b-5
-          [labeled-checkbox "Other" false]]])]]]))
+            armor/armor)))])]]]))
 
 (defn base-weapon-selector []
   (let [mobile? @(subscribe [:mobile?])]
@@ -2815,8 +2821,8 @@
               [labeled-checkbox name @(subscribe [::mi/has-subtype? key])]])
            (concat
             [{:name "All" :key :all}
-             {:name "All Swords" :key :all-swords}
-             {:name "All Axes" :key :all-axes}]
+             {:name "All Swords" :key :sword}
+             {:name "All Axes" :key :axe}]
             weapon/weapons
             [{:name "Other" :key :other}])))])]]]))
 
@@ -2938,21 +2944,27 @@
    ::mi/has-condition-immunity?])
 
 (defn item-bonuses [{:keys [::mi/magical-damage-bonus
-                            ::mi/magical-attack-bonus] :as item}]
+                            ::mi/magical-attack-bonus
+                            ::mi/magical-ac-bonus] :as item}]
   [:div.m-b-20
    [:div.m-b-10
     [:span.f-s-24.f-w-b "Item Properties"]]
    [:div.flex.m-b-20
     [:div
-     [:div.f-w-b.m-b-5 "Damage Bonus"]
+     [:div.f-w-b.m-b-5 "Magical Damage Bonus"]
      [number-field
       {:value magical-damage-bonus
        :on-change #(dispatch [::mi/set-item-damage-bonus %])}]]
     [:div.m-l-20
-     [:div.f-w-b.m-b-5 "Attack Bonus"]
+     [:div.f-w-b.m-b-5 "Magical Attack Bonus"]
      [number-field
       {:value magical-attack-bonus
-       :on-change #(dispatch [::mi/set-item-attack-bonus %])}]]]
+       :on-change #(dispatch [::mi/set-item-attack-bonus %])}]]
+    [:div.m-l-20
+     [:div.f-w-b.m-b-5 "Magical AC Bonus"]
+     [number-field
+      {:value magical-ac-bonus
+       :on-change #(dispatch [::mi/set-item-ac-bonus %])}]]]
    [:div.flex.flex-wrap.m-b-20
     [:div.flex-grow-1
      [item-ability-bonuses]]
@@ -3385,7 +3397,7 @@
           :on-click #(dispatch [::char/filter-spells ""])}]]]
       [spell-list-items expanded-spells device-type]]]))
 
-(defn item-list-item [{:keys [:key ::mi/name ::mi/owner :db/id] :as item} expanded?]
+(defn item-list-item [{:keys [key name ::mi/owner :db/id] :as item} expanded?]
   (let [expanded? @(subscribe [:item-expanded? name])
         username @(subscribe [:username])
         item-page-path (routes/path-for routes/dnd-e5-item-page-route :key (or id key))
@@ -3420,8 +3432,8 @@
   [:div.item-list
    (doall
     (map
-     (fn [{:keys [:db/id ::mi/name] :as item}]
-       ^{:key (or id name)}
+     (fn [{:keys [:db/id key] :as item}]
+       ^{:key (or key id)}
        [item-list-item item])
      @(subscribe [::char/filtered-items])))])
 
