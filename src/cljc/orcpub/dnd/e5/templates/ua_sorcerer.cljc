@@ -8,41 +8,42 @@
             [orcpub.dnd.e5.templates.ua-options :as ua-options]
             [orcpub.dnd.e5.spell-lists :as sl]))
 
-(def favored-soul {:name "Favored Soul"
-                   :modifiers [opt5e/ua-al-illegal
-                               (mod5e/spells-known 1 :cure-wounds ::char5e/cha "Sorcerer")
-                               (mod5e/trait-cfg
-                                {:name "Favored by the Gods"
-                                 :page 5
-                                 :source ua-options/ua-revised-subclasses-kw
-                                 :frequency units5e/rests-1
-                                 :summary "if you fail a save or miss an attack, you may roll 2d4 and add it to the missed roll"})]
-                   :selections [(opt5e/subclass-cantrip-selection :sorcerer "Sorcerer" ::char5e/cha (get-in sl/spell-lists [:cleric 0]) 0)
-                                (opt5e/subclass-spell-selection :sorcerer "Sorcerer" ::char5e/cha (get-in sl/spell-lists [:cleric 1]) 0)]
-                   :levels {3 {:selections [(opt5e/subclass-spell-selection :sorcerer "Sorcerer" ::char5e/cha (get-in sl/spell-lists [:cleric 2]) 0)]}
-                            5 {:selections [(opt5e/subclass-spell-selection :sorcerer "Sorcerer" ::char5e/cha (get-in sl/spell-lists [:cleric 3]) 0)]}
-                            6 {:modifiers [(mod5e/dependent-trait
-                                            {:name "Empowered Healing"
-                                             :page 5
-                                             :source ua-options/ua-revised-subclasses-kw
-                                             :summary "you may reroll healing dice once"})]}
-                            7 {:selections [(opt5e/subclass-spell-selection :sorcerer "Sorcerer" ::char5e/cha (get-in sl/spell-lists [:cleric 4]) 0)]}
-                            9 {:selections [(opt5e/subclass-spell-selection :sorcerer "Sorcerer" ::char5e/cha (get-in sl/spell-lists [:cleric 5]) 0)]}
-                            11 {:selections [(opt5e/subclass-spell-selection :sorcerer "Sorcerer" ::char5e/cha (get-in sl/spell-lists [:cleric 6]) 0)]}
-                            13 {:selections [(opt5e/subclass-spell-selection :sorcerer "Sorcerer" ::char5e/cha (get-in sl/spell-lists [:cleric 7]) 0)]}
-                            15 {:selections [(opt5e/subclass-spell-selection :sorcerer "Sorcerer" ::char5e/cha (get-in sl/spell-lists [:cleric 8]) 0)]}
-                            17 {:selections [(opt5e/subclass-spell-selection :sorcerer "Sorcerer" ::char5e/cha (get-in sl/spell-lists [:cleric 9]) 0)]}
-                            14 {:modifiers [(mod5e/bonus-action
-                                             {:name "Angelic Form"
-                                              :page 5
-                                              :source ua-options/ua-revised-subclasses-kw
-                                              :summary "gain flying speed of 30 ft."})]}
-                            18 {:modifiers [(mod5e/bonus-action
-                                             {:name "Unearthly Recovery"
-                                              :page 5
-                                              :source ua-options/ua-revised-subclasses-kw
-                                              :frequency units5e/long-rests-1
-                                              :summary (str "regain " (int (/ ?max-hit-points)) " HPs if you have that many or fewer left")})]}}})
+(defn favored-soul [suffix]
+  {:name (str "Favored Soul" (if suffix (str " (" suffix ")")))
+   :modifiers [opt5e/ua-al-illegal
+               (mod5e/spells-known 1 :cure-wounds ::char5e/cha "Sorcerer")
+               (mod5e/trait-cfg
+                {:name "Favored by the Gods"
+                 :page 5
+                 :source ua-options/ua-revised-subclasses-kw
+                 :frequency units5e/rests-1
+                 :summary "if you fail a save or miss an attack, you may roll 2d4 and add it to the missed roll"})]
+   :selections [(opt5e/subclass-cantrip-selection :sorcerer "Sorcerer" ::char5e/cha (get-in sl/spell-lists [:cleric 0]) 0)
+                (opt5e/subclass-spell-selection :sorcerer "Sorcerer" ::char5e/cha (get-in sl/spell-lists [:cleric 1]) 0)]
+   :levels {3 {:selections [(opt5e/subclass-spell-selection :sorcerer "Sorcerer" ::char5e/cha (get-in sl/spell-lists [:cleric 2]) 0)]}
+            5 {:selections [(opt5e/subclass-spell-selection :sorcerer "Sorcerer" ::char5e/cha (get-in sl/spell-lists [:cleric 3]) 0)]}
+            6 {:modifiers [(mod5e/dependent-trait
+                            {:name "Empowered Healing"
+                             :page 5
+                             :source ua-options/ua-revised-subclasses-kw
+                             :summary "you may reroll healing dice once"})]}
+            7 {:selections [(opt5e/subclass-spell-selection :sorcerer "Sorcerer" ::char5e/cha (get-in sl/spell-lists [:cleric 4]) 0)]}
+            9 {:selections [(opt5e/subclass-spell-selection :sorcerer "Sorcerer" ::char5e/cha (get-in sl/spell-lists [:cleric 5]) 0)]}
+            11 {:selections [(opt5e/subclass-spell-selection :sorcerer "Sorcerer" ::char5e/cha (get-in sl/spell-lists [:cleric 6]) 0)]}
+            13 {:selections [(opt5e/subclass-spell-selection :sorcerer "Sorcerer" ::char5e/cha (get-in sl/spell-lists [:cleric 7]) 0)]}
+            15 {:selections [(opt5e/subclass-spell-selection :sorcerer "Sorcerer" ::char5e/cha (get-in sl/spell-lists [:cleric 8]) 0)]}
+            17 {:selections [(opt5e/subclass-spell-selection :sorcerer "Sorcerer" ::char5e/cha (get-in sl/spell-lists [:cleric 9]) 0)]}
+            14 {:modifiers [(mod5e/bonus-action
+                             {:name "Angelic Form"
+                              :page 5
+                              :source ua-options/ua-revised-subclasses-kw
+                              :summary "gain flying speed of 30 ft."})]}
+            18 {:modifiers [(mod5e/bonus-action
+                             {:name "Unearthly Recovery"
+                              :page 5
+                              :source ua-options/ua-revised-subclasses-kw
+                              :frequency units5e/long-rests-1
+                              :summary (str "regain " (int (/ ?max-hit-points)) " HPs if you have that many or fewer left")})]}}})
 
 (def phoenix-sorcery {:name "Phoenix Sorcery"
                    :modifiers [opt5e/ua-al-illegal
@@ -149,7 +150,7 @@
    :subclasses subclasses})
 
 (def sorcerer-favored-soul
-  (sorcerer-plugin [favored-soul]))
+  (sorcerer-plugin [(favored-soul nil)]))
 
 (def ua-sorcerer-plugin
   {:name "Unearthed Arcana: Sorcerer"
@@ -158,7 +159,7 @@
    :selections [(opt5e/class-selection
                  {:options [(opt5e/class-option
                              (sorcerer-plugin
-                              [favored-soul
+                              [(favored-soul "UA Sorcerer")
                                phoenix-sorcery
                                sea-sorcery
                                stone-sorcery]))]})]})
