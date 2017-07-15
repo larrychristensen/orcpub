@@ -54,7 +54,7 @@
    {0
     [:blade-ward :dancing-lights :friends :light :mage-hand :mending :message :minor-illusion
      :prestidigitation :true-strike :vicious-mockery
-     :thunderclap],
+     :thunderclap]
     1
     [:animal-friendship :bane :charm-person :comprehend-languages :cure-wounds
      :detect-magic :disguise-self :dissonant-whispers :faerie-fire :feather-fall
