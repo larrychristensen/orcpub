@@ -4,13 +4,15 @@
             [orcpub.modifiers :as mod]
             [orcpub.dnd.e5.weapons :as weapons]
             [orcpub.dnd.e5.armor :as armor5e]
+            [orcpub.dnd.e5.weapons :as weapons5e]
             [orcpub.dnd.e5.equipment :as equip5e]
             [orcpub.dnd.e5.character :as char5e]
             [orcpub.dnd.e5.damage-types :as damage-types5e]
             [orcpub.dnd.e5.character.equipment :as char-equip5e]
             [orcpub.dnd.e5.modifiers :as mod5e]
             [orcpub.dnd.e5.units :as units5e]
-            [clojure.string :as s])
+            [clojure.string :as s]
+            [clojure.set :refer [intersection difference]])
   #?(:cljs (:require-macros [orcpub.dnd.e5.modifiers :as mod5e])))
 
 (spec/def ::name string?)
@@ -200,7 +202,17 @@
 (defn from-internal-item [item]
   (-> item
       (assoc ::modifiers (from-internal-modifiers (::internal-modifiers item)))
-      (dissoc ::internal-modifiers)))
+      (select-keys [:db/id
+                    ::name
+                    ::type
+                    ::subtypes
+                    ::rarity
+                    ::description
+                    ::attunment
+                    ::magical-damage-bonus
+                    ::magical-attack-bonus
+                    ::magical-ac-bonus
+                    ::modifiers])))
 
 (defn sword? [w]
   (= :sword (:subtype w)))
@@ -274,7 +286,7 @@ The creature exists for a duration specific to each figurine. At the end of the 
 
 (defn dragon-scale-mail [color-nm resistance-kw]
   {name-key (str "Dragon Scale Mail, " color-nm)
-   :magical-ac-bonus 1
+   ::magical-ac-bonus 1
    ::type :armor
    ::item-subtype :scale-mail
 
@@ -489,14 +501,14 @@ A creature in the compartment can use an action to move as many as two of the ap
      }{
      name-key "Armor, +1"
      :name-fn plus-1-name
-     :magical-ac-bonus 1
+     ::magical-ac-bonus 1
      ::type :armor
      ::item-subtype not-shield?
      ::rarity :rare
      ::description "You have a +1 bonus to AC while wearing this armor."
      }{
      name-key "Armor, +2"
-     :magical-ac-bonus 2
+     ::magical-ac-bonus 2
      :name-fn plus-2-name
      ::type :armor
      ::item-subtype not-shield?
@@ -504,7 +516,7 @@ A creature in the compartment can use an action to move as many as two of the ap
      ::description "You have a +2 bonus to AC while wearing this armor."
      }{
      name-key "Armor, +3"
-     :magical-ac-bonus 3
+     ::magical-ac-bonus 3
      :name-fn plus-3-name
      ::type :armor
      ::item-subtype not-shield?
@@ -874,7 +886,7 @@ shifts to camouflage you. Pulling the hood up or down requires an action."}
      ::type :wondrous-item
 
      ::rarity :uncommon
-     :magical-ac-bonus 1
+     ::magical-ac-bonus 1
      ::modifiers (map #(mod5e/saving-throw-bonus % 1) char5e/ability-keys)
      ::attunement [:any]
      ::description "You gain a +1 bonus to AC and saving throws while you wear this cloak."
@@ -1036,7 +1048,7 @@ The Void. This black card spells disaster. Your soul is drawn from your body and
 The first time you attack with the sword on each of your turns, you can transfer some or all of the sword’s bonus to your Armor Class, instead of using the bonus on any attacks that turn. For example, you could reduce the bonus to your attack and damage rolls to +1 and gain a +2 bonus to AC. The adjusted bonuses remain in effect until the start of your next turn, although you must hold the sword to gain a bonus to AC from it."
      }{
      name-key "Demon Armor"
-     :magical-ac-bonus 1
+     ::magical-ac-bonus 1
      ::type :armor
      ::item-subtype :plate
 
@@ -1127,7 +1139,7 @@ spell can also end the effect on a creature.}{"
      ::type :armor
      ::item-subtype :plate
      ::rarity :very-rare
-     :magical-ac-bonus 2
+     ::magical-ac-bonus 2
      ::modifiers [(mod5e/reaction
                   {:name "Dwarven Plate"
                    :page 167
@@ -1168,7 +1180,7 @@ spell, and the gem’s magic is lost. The type of gem determines the elemental s
      ::type :armor
      ::item-subtype :chain-shirt
      ::rarity :rare
-     :magical-ac-bonus 1
+     ::magical-ac-bonus 1
      ::modifiers [(mod5e/armor-proficiency :elven-chain)]
      ::description "You gain a +1 bonus to AC while you wear this armor. You are considered proficient with this armor even if you lack proficiency with medium armor."
      }{
@@ -1336,7 +1348,7 @@ When you hit a giant with it, the giant takes an extra 2d6 damage of the weapon�
      ::type :armor
      ::item-subtype :studded-leather
      ::rarity :rare
-     :magical-ac-bonus 1
+     ::magical-ac-bonus 1
      ::modifiers [(mod5e/bonus-action
                   {:name "Glamoured Studded Leather"
                    :page 172
@@ -2036,7 +2048,7 @@ If you die while wearing the ring, your soul enters it, unless it already houses
      ::rarity :rare
 
      ::attunement [:any]
-     :magical-ac-bonus 1
+     ::magical-ac-bonus 1
      ::modifiers (map #(mod5e/saving-throw-bonus % 1) char5e/ability-keys)
      ::description "You gain a +1 bonus to AC and saving throws while wearing this ring."
      }{
@@ -2309,7 +2321,7 @@ The rope has AC 20 and 20 hit points. It regains 1 hit point every 5 minutes as 
      ::type :armor
      ::item-subtype :shield
      ::rarity :uncommon
-     :magical-ac-bonus 1
+     ::magical-ac-bonus 1
      ::description "While holding this shield, you have a +1 bonus to AC. This bonus is in addition to the shield’s normal bonus to AC."
      }{
      name-key "Shield +2"
@@ -2317,7 +2329,7 @@ The rope has AC 20 and 20 hit points. It regains 1 hit point every 5 minutes as 
      ::type :armor
      ::item-subtype :shield
      ::rarity :rare
-     :magical-ac-bonus 2
+     ::magical-ac-bonus 2
      ::description "While holding this shield, you have a +2 bonus to AC determined by the shield’s rarity."
      }{
      name-key "Shield +3"
@@ -2325,7 +2337,7 @@ The rope has AC 20 and 20 hit points. It regains 1 hit point every 5 minutes as 
      ::type :armor
      ::item-subtype :shield
      ::rarity :very-rare
-     :magical-ac-bonus 3
+     ::magical-ac-bonus 3
      ::description "While holding this shield, you have a +3 bonus to AC. This bonus is in addition to the shield’s normal bonus to AC."
      }{
      name-key "Shield of Missile Attraction"
@@ -2836,55 +2848,103 @@ The boots regain 2 hours of flying capability for every 12 hours they aren’t i
 (defn add-key [item]
   (assoc item :key (common/name-to-kw (name-key item))))
 
-(defn expand-weapon [{:keys [::item-subtype name-fn] :as item}]
-  (if (fn? item-subtype)
-    (let [of-type (filter item-subtype weapons-and-ammunition)]
-      (for [weapon of-type]
-        (let [name (if name-fn 
-                     (name-fn weapon)
-                     (if (> (count of-type) 1)
-                       (str (name-key item) ", " (:name weapon))
-                       (name-key item)))]
-          (merge
-           weapon
-           item
-           {name-key name
-            :base-key (:key weapon)
-            :key (common/name-to-kw name)}))))
-    (let [weapon (weapons/weapons-map item-subtype)]
-      (add-key
-       (if weapon
-         (merge
-          {:base-key (:key weapon)}
-          weapon
-          item)
-         item)))))
+(def weapon-subtypes
+  #{:axe :sword})
 
-(defn expand-armor [{:keys [::item-subtype name-fn] :as item}]
-  (let [normal-version (armor5e/armor-map item-subtype)]
-    (cond
-      (fn? item-subtype)
-      (for [armor (filter item-subtype armor5e/armor)]
-        (let [name (if name-fn 
-                     (name-fn armor)
-                     (str (name-key item) ", " (:name armor)))]
-          (merge
-           armor
-           item
-           {name-key name
-            :base-armor (:key armor)
-            :key (common/name-to-kw name)})))
-      normal-version
-      (merge
-       normal-version
-       item
-       {:key (common/name-to-kw (name-key item))})
-      :else (add-key item))))
+(defn any-fn [item]
+  true)
+
+(defn types-fn [types]
+  (fn [{:keys [type]}]
+    (types type)))
+
+(defn subtypes-fn [subtypes]
+  (fn [{:keys [subtype]}]
+    (subtypes subtype)))
+
+(defn keys-fn [keys]
+  (fn [item]
+    (keys (:key item))))
+
+(defn make-base-weapon-fn [item-subtype subtypes]
+  (let [subtypes-set (into #{}
+                           (if (and item-subtype (not (fn? item-subtype)))
+                               (conj subtypes item-subtype)
+                               subtypes))
+        type-intersection (intersection subtypes-set weapon-subtypes)
+        diff (difference subtypes-set weapon-subtypes)]
+    (if (subtypes-set :all)
+      any-fn
+      (apply
+       some-fn
+       (cond-> []
+         (fn? item-subtype) (conj item-subtype)
+         (seq type-intersection) (conj (subtypes-fn type-intersection))
+         (seq diff) (conj (keys-fn diff)))))))
+
+(defn expand-weapon [{:keys [::item-subtype name-fn ::subtypes] :as item}]
+  (let [base-weapon-fn (make-base-weapon-fn item-subtype subtypes)
+        of-type (filter base-weapon-fn weapons5e/weapons)]
+    (map
+     (fn [weapon]
+       (let [name (if name-fn 
+                    (name-fn weapon)
+                    (if (> (count of-type) 1)
+                      (str (name-key item) ", " (:name weapon))
+                      (name-key item)))
+             item-key (common/name-to-kw name)]
+         (merge
+          weapon
+          item
+          {name-key (name-key item)
+           :name name
+           :base-key (:key weapon)
+           :key item-key})))
+     of-type)))
+
+(def armor-types
+  #{:light :medium :heavy :shield})
+
+(defn make-base-armor-fn [item-subtype subtypes]
+  (let [subtypes-set (into #{}
+                           (if (and item-subtype (not (fn? item-subtype)))
+                               (conj subtypes item-subtype)
+                               subtypes))
+        type-intersection (intersection subtypes-set armor-types)
+        diff (difference subtypes-set armor-types)]
+    (if (subtypes-set :all)
+      any-fn
+      (apply
+       some-fn
+       (cond-> []
+         (fn? item-subtype) (conj item-subtype)
+         (seq type-intersection) (conj (types-fn type-intersection))
+         (seq diff) (conj (keys-fn diff)))))))
+
+(defn expand-armor [{:keys [::item-subtype name-fn ::subtypes] :as item}]
+  (let [base-armor-fn (make-base-armor-fn item-subtype subtypes)]
+    (sequence
+     (comp
+      (filter base-armor-fn)
+      (map
+       (fn [armor]
+         (let [name (if name-fn 
+                      (name-fn armor)
+                      (str (name-key item) ", " (:name armor)))
+               item-key (common/name-to-kw name)]
+           (merge
+            armor
+            item
+            {name-key (name-key item)
+             :name name
+             :base-armor (:key armor)
+             :key item-key})))))
+     armor5e/armor)))
 
 (defn expand-magic-items [magic-items]
   (flatten
    (map
-    (fn [{:keys [::type ::item-subtype] :as item}]
+    (fn [{:keys [::type] :as item}]
       (case type
         :weapon (expand-weapon item)
         :armor (expand-armor item)
@@ -2939,6 +2999,12 @@ The boots regain 2 hours of flying capability for every 12 hours they aren’t i
   (sequence
    other-magic-items-xform
    magic-items))
+
+(def all-magic-items-map
+  (merge
+   magic-armor-map
+   magic-weapon-map
+   other-magic-item-map))
 
 (def other-magic-item-map
   (common/map-by-key other-magic-items))

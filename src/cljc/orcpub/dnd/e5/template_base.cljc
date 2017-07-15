@@ -6,6 +6,7 @@
             [orcpub.dnd.e5.character :as char5e]
             [orcpub.dnd.e5.skills :as skill5e]
             [orcpub.dnd.e5.modifiers :as mod5e]
+            [orcpub.dnd.e5.magic-items :as mi5e]
             [orcpub.dnd.e5.character.equipment :as char-equip5e]))
 
 (def warlock-spell-slot-schedule
@@ -53,7 +54,7 @@
                            :medium (min ?max-medium-armor-bonus dex-bonus)
                            0)))
     ?shield-ac-bonus (fn [shield]
-                       (+ 2 (or (:magical-ac-bonus shield) 0)))
+                       (+ 2 (or (::mi5e/magical-ac-bonus shield) 0)))
     ?unarmored-armor-class (+ ?base-armor-class ?unarmored-ac-bonus ?ac-bonus)
     ?unarmored-with-shield-armor-class (fn [shield]
                                          (+ ?base-armor-class
@@ -68,7 +69,7 @@
                                                   (+ (?armor-dex-bonus armor)
                                                      (or ?armored-ac-bonus 0)
                                                      (:base-ac armor)
-                                                     (:magical-ac-bonus armor)
+                                                     (::mi5e/magical-ac-bonus armor)
                                                      ?ac-bonus)
                                                   ?magical-ac-bonus)))
     ?armor-class-with-armor (fn [armor & [shield]]
@@ -188,7 +189,7 @@
                                  ?weapon-ability-modifiers)))
     ?weapon-attack-modifier (fn [weapon finesse?]
                               (+ (?weapon-prof-bonus weapon)
-                                 (or (:magical-attack-bonus weapon) 0)
+                                 (or (::mi5e/magical-attack-bonus weapon) 0)
                                  (or (:attack-bonus weapon) 0)
                                  (if (:melee? weapon)
                                    (or ?melee-attack-bonus 0)
@@ -198,7 +199,7 @@
                               (let [definitely-finesse? (and finesse?
                                                              (:finesse? weapon))
                                     melee? (:melee? weapon)]
-                                (+ (or (:magical-damage-bonus weapon) 0)
+                                (+ (or (::mi5e/magical-damage-bonus weapon) 0)
                                    (or (:damage-bonus weapon) 0)
                                    (?weapon-ability-modifier weapon finesse?))))
     ?spell-attack-modifier-bonus 0

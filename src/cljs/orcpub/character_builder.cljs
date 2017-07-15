@@ -43,7 +43,7 @@
             [re-frame.core :refer [subscribe dispatch dispatch-sync]])
   (:require-macros [cljs.core.async.macros :refer [go]]))
 
-(def print-disabled? false)
+(def print-disabled? true)
 
 (def print-enabled? (and (not print-disabled?)
                          (s/starts-with? js/window.location.href "http://localhost")))
@@ -283,11 +283,13 @@
     (sequence
      (comp
       (remove
-       #(selected-keys (or :db/id (::t/key %))))
+       #(or (selected-keys (::t/key %))
+            (selected-keys (:db/id %))))
       (map
        (fn [{:keys [:db/id ::t/name ::t/key]}]
+         ;;(prn "KEY" key id)
          {:name name
-          :key (or id key)})))
+          :key (or key id)})))
      options))
    (fn [e]
      (let [value (.. e -target -value)
@@ -315,12 +317,12 @@
                  equipped? ::char-equip5e/equipped?
                  item-name ::char-equip5e/name} ::entity/value}]
           (let [item (item-map item-key)
-                item-name (or item-name (::mi5e/name item) (:name item))
+                final-name (or item-name (:name item) (::mi5e/name item))
                 item-description (:description item)]
             ^{:key item-key}
             [inventory-item {:selection-key key
                              :item-key item-key
-                             :item-name item-name
+                             :item-name final-name
                              :item-qty item-qty
                              :item-description item-description
                              :equipped? equipped?
