@@ -4616,17 +4616,18 @@ long rest."})
     :tags #{:equipment}
     :options-ref #(delay
                    (map
-                    (fn [{:keys [:db/id ::mi/name ::mi/key ::mi/description ::mi/page ::mi/source] :as item}]
-                      (let [full-item (update item
+                    (fn [{:keys [:db/id ::mi/name :key ::mi/description ::mi/page ::mi/source] :as item}]
+                      (let [item-key (if id (keyword (str "id-" id)) key)
+                            full-item (update item
                                               ::mi/modifiers
                                               mod5e/build-modifiers)]
                         (t/option-cfg
                          {:name name
-                          :key (if id (keyword (str "id-" id)) key)
+                          :key item-key
                           :help (if (or description
                                         page)
                                   (inventory-help description page source))
-                          :modifiers [(modifier-fn key full-item)]})))
+                          :modifiers [(modifier-fn item-key full-item)]})))
                     @(subscribe item-sub)))}))
 
 (defn inventory-selection [item-type-name icon items modifier-fn & [converter]]

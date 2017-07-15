@@ -33,6 +33,9 @@
 (defn map-by-key [values]
   (map-by :key values))
 
+(defn map-by-id [values]
+  (map-by :db/id values))
+
 (defmacro ptime [message body]
   `(do (prn ~message)
        (time ~body)))

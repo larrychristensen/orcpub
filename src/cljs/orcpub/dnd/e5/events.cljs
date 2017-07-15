@@ -1215,7 +1215,7 @@
  (fn [db [_ characters]]
    (assoc db
           ::char5e/characters characters
-          ::char5e/summary-map (common/map-by :db/id characters))))
+          ::char5e/summary-map (common/map-by-id characters))))
 
 (reg-event-db
  ::mi/set-custom-items
@@ -1227,7 +1227,7 @@
  (fn [db [_ parties]]
    (assoc db
           ::char5e/parties parties
-          ::char5e/parties-map (common/map-by :db/id parties))))
+          ::char5e/parties-map (common/map-by-id parties))))
 
 (reg-event-db
  ::char5e/remove-user-characters
@@ -1250,6 +1250,12 @@
  (fn [{:keys [db]} [_ character]]
    {:dispatch-n [[:set-character character]
                  [:route routes/dnd-e5-char-builder-route]]}))
+
+(reg-event-fx
+ ::mi/edit-custom-item
+ (fn [{:keys [db]} [_ item]]
+   {:dispatch-n [[::mi/set-item (mi/to-internal-item item)]
+                 [:route routes/dnd-e5-item-builder-page-route]]}))
 
 (reg-event-fx
  :delete-character-success
@@ -1747,12 +1753,18 @@
  (fn [_ [_ item]]
    item))
 
-(reg-event-db
+(reg-event-fx
  ::mi/reset-item
- item-interceptors
  (fn [_ _]
-   {::mi/type :wondrous-item
-    ::mi/rarity :common}))
+   {:dispatch [::mi/set-item
+               {::mi/type :wondrous-item
+                ::mi/rarity :common}]}))
+
+(reg-event-fx
+ ::mi/new-item
+ (fn [_ _]
+   {:dispatch-n [[::mi/reset-item]
+                 [:route routes/dnd-e5-item-builder-page-route]]}))
 
 (reg-event-db
  ::mi/set-ability-mod-type
