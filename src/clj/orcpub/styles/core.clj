@@ -25,7 +25,7 @@
   (map
    (fn [v]
      [(keyword (str "." (name abbr) "-" v))
-      {kw (px v)}])
+      {kw (str v "px !important")}])
    values))
 
 (def margin-lefts
@@ -38,7 +38,13 @@
   (px-prop
    :margin-top
    :m-t
-   (concat (range 0 10) (range 10 30 5))))
+   (concat (range 0 10) [21] (range 10 30 5))))
+
+(def widths
+  (px-prop
+   :width
+   :w
+   [12 14 15 18 20 24 32 36 40 48 50 60 70 80 85 90 100 110 120 200 220 250 300 500 1440]))
 
 (defn handle-browsers [property value]
   {(keyword (str "-webkit-" (name property))) value
@@ -250,57 +256,6 @@
    [:.w-100-p
     {:width "100%"}]
 
-   [:.w-12
-    {:width "12px"}]
-   [:.w-14
-    {:width "14px"}]
-   [:.w-15
-    {:width "15px"}]
-   [:.w-18
-    {:width "18px"}]
-   [:.w-20
-    {:width "20px"}]
-   [:.w-24
-    {:width "24px"}]
-   [:.w-32
-    {:width "32px"}]
-   [:.w-36
-    {:width "36px"}]
-   [:.w-40
-    {:width "40px"}]
-   [:.w-48
-    {:width "48px"}]
-   [:.w-50
-    {:width "50px"}]
-   [:.w-60
-    {:width "60px"}]
-   [:.w-70
-    {:width "70px"}]
-   [:.w-80
-    {:width "80px"}]
-   [:.w-85
-    {:width "85px"}]
-   [:.w-90
-    {:width "90px"}]
-   [:.w-100
-    {:width "100px"}]
-   [:.w-110
-    {:width "110px"}]
-   [:.w-120
-    {:width "120px"}]
-   [:.w-200
-    {:width "200px"}]
-   [:.w-220
-    {:width "220px"}]
-   [:.w-250
-    {:width "250px"}]
-   [:.w-300
-    {:width "300px"}]
-   [:.w-500
-    {:width "500px"}]
-   [:.w-1440
-    {:width "1440px"}]
-
    [:.h-0
     {:height "0px"}]
    [:.h-12
@@ -347,7 +302,7 @@
    [:.white
     {:color :white}]
    [:.black
-    {:color :black}]
+    {:color "#191919"}]
    [:.orange
     {:color button-color}
 
@@ -1183,12 +1138,12 @@
       {:border-bottom "1px solid rgba(0,0,0,0.5)"}]
 
      [:.main-text-color
-      {:color :black}]
+      {:color "#282828"}]
 
      [:.input
      {:background-color :transparent
       :color :black
-      :border "1px solid black"
+      :border "1px solid #282828"
       :border-radius "5px"
       :margin-top "5px"
       :display :block
@@ -1196,6 +1151,9 @@
       :width "100%"
       :box-sizing :border-box
       :font-size "14px"}]
+
+     [:.form-button
+      {:background-image "linear-gradient(to bottom, #33658A, #33658A)"}]
 
      [:.orange
       {:color "rgba(0,0,0,0.8)"}]
@@ -1214,15 +1172,15 @@
 
      [:.builder-option-dropdown
       (merge
-       {:border "1px solid black"
-        :color :black})
+       {:border "1px solid #282828"
+        :color "#282828"})
 
       [:&:active :&:focus
        {:outline :none}]]
 
      [:.builder-dropdown-item
       {:background-color :white
-       :color :black}]
+       :color "#282828"}]
 
      [:.sticky-header
       {:background-color :white}]
@@ -1233,6 +1191,7 @@
         {:background-color "rgba(0, 0, 0, 0.1)"}]]]]]
    margin-lefts
    margin-tops
+   widths
    font-sizes
    props
    media-queries))

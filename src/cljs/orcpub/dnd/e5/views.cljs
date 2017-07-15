@@ -1192,10 +1192,10 @@
            [:div.p-10
             [:div.m-b-5 "Icons made by Lorc, Caduceus, and Delapouite. Available on " [:a.orange {:href "http://game-icons.net"} "http://game-icons.net"]]]
            [:div.m-l-10
-            [:a {:href "https://muut.com/orcpub" :target :_blank} "Feedback/Bug Reports"]]
+            [:a.orange {:href "https://muut.com/orcpub" :target :_blank} "Feedback/Bug Reports"]]
            [:div.m-l-10.m-r-10
-            [:a {:href "/privacy-policy" :target :_blank} "Privacy Policy"]
-            [:a.m-l-5 {:href "/terms-of-use" :target :_blank} "Terms of Use"]]]
+            [:a.orange {:href "/privacy-policy" :target :_blank} "Privacy Policy"]
+            [:a.orange.m-l-5 {:href "/terms-of-use" :target :_blank} "Terms of Use"]]]
           [debug-data]]]])]))
 
 (def row-style
@@ -2184,31 +2184,33 @@
               all-weapons))]]]]))))
 
 (defn magic-item-rows [expanded-details magic-item-cfgs magic-weapon-cfgs magic-armor-cfgs]
-  (mapcat
-   (fn [[item-kw item-cfg]]
-     (let [{:keys [::mi/name ::mi/type ::mi/item-subtype ::mi/rarity ::mi/attunement ::mi/description ::mi/summary] :as item} (mi/magic-item-map item-kw)
-           expanded? (@expanded-details item-kw)]
-       [[:tr.pointer
-         {:on-click #(swap! expanded-details (fn [d] (update d item-kw not)))}
-         [:td.p-10.f-s-16.f-w-b name]
-         [:td.p-10 (str (common/kw-to-name item-type)
-                   ", "
-                   (common/kw-to-name rarity))]
-         [:td.p-r-5
-          [:div.orange
-           (if (not mobile?)
-             [:span.underline (if expanded? "less" "more")])
-           [:i.fa.m-l-5
-            {:class-name (if expanded? "fa-caret-up" "fa-caret-down")}]]]]
-        (if expanded?
-          [:tr
-           [:td.p-10
-            {:col-span 3}
-            [item-component item true true]]])]))
-   (merge
-    magic-item-cfgs
-    magic-weapon-cfgs
-    magic-armor-cfgs)))
+  (let [magic-item-map @(subscribe [::mi/other-magic-items-map])]
+    (prn "KEYS" (keys magic-item-map))
+    (mapcat
+     (fn [[item-kw item-cfg]]
+       (let [{:keys [::mi/name ::mi/type ::mi/item-subtype ::mi/rarity ::mi/attunement ::mi/description ::mi/summary] :as item} (magic-item-map item-kw)
+             expanded? (@expanded-details item-kw)]
+         [[:tr.pointer
+           {:on-click #(swap! expanded-details (fn [d] (update d item-kw not)))}
+           [:td.p-10.f-w-b name]
+           [:td.p-10 (str (common/kw-to-name type)
+                          ", "
+                          (common/kw-to-name rarity))]
+           [:td.p-r-5
+            [:div.orange
+             (if (not mobile?)
+               [:span.underline (if expanded? "less" "more")])
+             [:i.fa.m-l-5
+              {:class-name (if expanded? "fa-caret-up" "fa-caret-down")}]]]]
+          (if expanded?
+            [:tr
+             [:td.p-10
+              {:col-span 3}
+              [item-component item true true]]])]))
+     (merge
+      magic-item-cfgs
+      magic-weapon-cfgs
+      magic-armor-cfgs))))
 
 (defn magic-items-section-2 []
   (let [expanded-details (r/atom {})]
@@ -2221,7 +2223,7 @@
          [:div.flex.align-items-c
           (svg-icon "orb-wand" 32)
           [:span.m-l-5.f-w-b.f-s-18 "Other Magic Items"]]
-         [:div
+         [:div.f-s-14
           [:table.w-100-p.t-a-l.striped
            [:tbody
             [:tr.f-w-b
@@ -3383,8 +3385,9 @@
           :on-click #(dispatch [::char/filter-spells ""])}]]]
       [spell-list-items expanded-spells device-type]]]))
 
-(defn item-list-item [{:keys [:key ::mi/name :db/id] :as item} expanded?]
+(defn item-list-item [{:keys [:key ::mi/name ::mi/owner :db/id] :as item} expanded?]
   (let [expanded? @(subscribe [:item-expanded? name])
+        username @(subscribe [:username])
         item-page-path (routes/path-for routes/dnd-e5-item-page-route :key (or id key))
         item-page-route (routes/match-route item-page-path)]
     [:div.main-text-color.item-list-item
@@ -3406,7 +3409,11 @@
          [:div.flex.justify-cont-end.uppercase.align-items-c
           [:button.form-button.m-l-5
            {:on-click #(dispatch [:route item-page-route])}
-           "view"]]
+           "view"]
+          (if (= username owner)
+            [:button.form-button.m-l-5
+             {:on-click #(dispatch [::mi/edit-custom-item @(subscribe [::mi/custom-item id])])}
+             "edit"])]
          [item-component item]])]]))
 
 (defn item-list-items [device-type]
@@ -3423,7 +3430,7 @@
     [content-page
      "Magic Items"
      [[:button.form-button
-       {:on-click #(dispatch [:route routes/dnd-e5-item-builder-page-route])}
+       {:on-click #(dispatch [::mi/new-item])}
        [:div.flex.align-items-c.white
         [svg-icon "beer-stein" 18 ""]
         [:span.m-l-5 "New Item"]]]]
