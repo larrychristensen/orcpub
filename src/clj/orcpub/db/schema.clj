@@ -309,7 +309,8 @@
     long-prop-no-history
     [::mod/int-arg
      ::mi5e/magical-damage-bonus
-     ::mi5e/magical-attack-bonus])
+     ::mi5e/magical-attack-bonus
+     ::mi5e/magical-ac-bonus])
    (map
     kw-prop-no-history
     [::mod/key

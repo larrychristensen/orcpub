@@ -504,7 +504,7 @@
           mods)
         equipment-mod))))
 
-(defn deferred-magic-weapon [weapon-kw {:keys [magical-ac-bonus modifiers] :as weapon}]
+(defn deferred-magic-weapon [weapon-kw {:keys [modifiers] :as weapon}]
   (mods/deferred-modifier
     ?magic-weapons
     (deferred-magic-item-fn #(mods/map-mod ?magic-weapons weapon-kw (equipment-cfg %)) weapon)

@@ -1710,6 +1710,12 @@
  (fn [item [_ bonus-str]]
    (assoc item ::mi/magical-attack-bonus (js/parseInt bonus-str))))
 
+(reg-event-db
+ ::mi/set-item-ac-bonus
+ item-interceptors
+ (fn [item [_ bonus-str]]
+   (assoc item ::mi/magical-ac-bonus (js/parseInt bonus-str))))
+
 (defn mod-cfg [key & args]
   {::mod/key key
    ::mod/args args})
