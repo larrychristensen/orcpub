@@ -741,21 +741,19 @@
          seq-params (seq route-params)
          flat-params (flatten seq-params)
          path (apply routes/path-for (or handler new-route) flat-params)]
-     (let [cfg (cond-> {:db (assoc db :route new-route)
+     (if (and secure?
+              (not= "localhost" js/window.location.hostname))
+       (set! js/window.location.href (make-url "https"
+                                               js/window.location.hostname
+                                               path
+                                               js/window.location.port))
+       (let [cfg (cond-> {:db (assoc db :route new-route)
                           :dispatch-n [[:hide-message]
                                        [:close-orcacle]]}
                    (not no-return?) (assoc-in [:db :return-route] new-route)
                    (not skip-path?) (assoc :path path)
                    event (update :dispatch-n conj event))]
-         cfg)
-     #_(if (and secure?
-              (not= "localhost" js/window.location.hostname)
-              (not= js/window.location.protocol "https:"))
-       (set! js/window.location.href (make-url "https"
-                                               js/window.location.hostname
-                                               path
-                                               js/window.location.port))
-       ))))
+         cfg)))))
 
 (reg-event-db
  :set-user-data
