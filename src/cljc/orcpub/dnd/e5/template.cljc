@@ -4600,35 +4600,19 @@ long rest."})
    :page page
    :source source})
 
-(defn magic-item-selection [item-type-name icon item-sub modifier-fn & [converter]]
+(defn magic-item-selection [item-type-name icon options modifier-fn & [converter]]
   (t/selection-cfg
    {:name item-type-name
     :min 0
     :max nil
     :multiselect? true
     :sequential? false
-    :quantity? true
-    :collapsible? true
     :icon icon
     :new-item-fn (fn [selection selected-items _ key]
                    {::entity/key key
                     ::entity/value 1})
     :tags #{:equipment}
-    :options-ref #(delay
-                   (map
-                    (fn [{:keys [:db/id ::mi/name :key ::mi/description ::mi/page ::mi/source] :as item}]
-                      (let [item-key (if id (keyword (str "id-" id)) key)
-                            full-item (update item
-                                              ::mi/modifiers
-                                              mod5e/build-modifiers)]
-                        (t/option-cfg
-                         {:name name
-                          :key item-key
-                          :help (if (or description
-                                        page)
-                                  (inventory-help description page source))
-                          :modifiers [(modifier-fn item-key full-item)]})))
-                    @(subscribe item-sub)))}))
+    :options options}))
 
 (defn inventory-selection [item-type-name icon items modifier-fn & [converter]]
   (t/selection-cfg
@@ -4637,8 +4621,6 @@ long rest."})
     :max nil
     :multiselect? true
     :sequential? false
-    :quantity? true
-    :collapsible? true
     :icon icon
     :new-item-fn (fn [selection selected-items _ key]
                    {::entity/key key
@@ -4855,7 +4837,7 @@ long rest."})
    warlock-option
    wizard-option])
 
-(def template-selections
+(defn template-selections [magic-weapon-options magic-armor-options other-magic-item-options]
   [optional-content-selection
    (t/selection-cfg
     {:name "Base Ability Scores"
@@ -4926,12 +4908,12 @@ long rest."})
      :options base-class-options})
    (inventory-selection "Treasure" "cash" equip5e/treasure mod5e/deferred-treasure)
    (inventory-selection "Weapons" "plain-dagger" weapon5e/weapons mod5e/deferred-weapon)
-   (magic-item-selection "Magic Weapons" "lightning-bow" [::mi/magic-weapons] mod5e/deferred-magic-weapon magic-item-details)
+   (magic-item-selection "Magic Weapons" "lightning-bow" magic-weapon-options mod5e/deferred-magic-weapon magic-item-details)
    (inventory-selection "Armor" "breastplate" armor5e/armor mod5e/deferred-armor)
-   (magic-item-selection "Magic Armor" "magic-shield" [::mi/magic-armor] mod5e/deferred-magic-armor magic-item-details)
+   (magic-item-selection "Magic Armor" "magic-shield" magic-armor-options mod5e/deferred-magic-armor magic-item-details)
    (inventory-selection "Equipment" "backpack" equip5e/equipment mod5e/deferred-equipment)
-   (magic-item-selection "Other Magic Items" "orb-wand" [::mi/other-magic-items] mod5e/deferred-magic-item magic-item-details)])
+   (magic-item-selection "Other Magic Items" "orb-wand" other-magic-item-options mod5e/deferred-magic-item magic-item-details)])
 
-(def template
+(defn template [selections]
   {::t/base t-base/template-base
-   ::t/selections template-selections})
+   ::t/selections selections})

@@ -24,10 +24,8 @@
 
 (declare to-strict-option)
 
-(defn selection-options [{:keys [::t/options ::t/options-ref]}]
-  (if options-ref
-    @(options-ref)
-    options))
+(defn selection-options [{:keys [::t/options]}]
+  options)
 
 (defn to-strict-selections [options path homebrew-paths]
   (mapv

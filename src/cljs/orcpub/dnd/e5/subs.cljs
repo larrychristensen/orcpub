@@ -224,7 +224,7 @@
  (fn [db _]
    (-> db :user-data :user-data :username)))
 
-(defn built-template [selected-plugin-options]
+(defn built-template [template selected-plugin-options]
   (let [selected-plugins (map
                           :selections
                           (filter
@@ -232,20 +232,21 @@
                              (selected-plugin-options key))
                            t5e/plugins))]
     (if (seq selected-plugins)
-      (update t5e/template
+      (update template
               ::t/selections
               (fn [s]
                 (apply
                  entity/merge-multiple-selections
                  s
                  selected-plugins)))
-      t5e/template)))
+      template)))
 
 (reg-sub
  :built-template
  :<- [:selected-plugin-options]
- (fn [selected-plugin-options _]
-   (built-template selected-plugin-options)))
+ :<- [::char5e/template]
+ (fn [[selected-plugin-options template] _]
+   (built-template template selected-plugin-options)))
 
 (defn built-character [character built-template]
   (entity/build character built-template))
@@ -424,7 +425,7 @@
  (fn [character _ _]
    (selected-plugin-options character)))
 
-(reg-sub
+#_(reg-sub
  ::char5e/template
  (fn [db _]
    (:template db)))
@@ -432,9 +433,10 @@
 (reg-sub
  ::char5e/built-template
  (fn [[_ id] _]
-   (subscribe [::char5e/selected-plugin-options id]))
- (fn [selected-plugin-options _]
-   (built-template selected-plugin-options)))
+   [(subscribe [::char5e/selected-plugin-options id])
+    (subscribe [::char5e/template])])
+ (fn [[selected-plugin-options template] _]
+   (built-template template selected-plugin-options)))
 
 (reg-sub
  ::char5e/built-character
