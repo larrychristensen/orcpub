@@ -492,7 +492,8 @@
     (fn [cfg] (mods/map-mod ?weapons weapon-kw (equipment-cfg cfg)))
     1))
 
-(defn deferred-magic-item-fn [equipment-mod-fn {:keys [:orcpub.dnd.e5.magic-items/magical-ac-bonus :orcpub.dnd.e5.magic-items/modifiers]} & [include-magic-bonus?]]
+(defn deferred-magic-item-fn [equipment-mod-fn {:keys [:orcpub.dnd.e5.magic-items/magical-ac-bonus
+                                                       :orcpub.dnd.e5.magic-items/modifiers]} & [include-magic-bonus?]]
   (fn [cfg]
     (let [equipment-mod (equipment-mod-fn cfg)]
       (if (::char-equip/equipped? cfg)
