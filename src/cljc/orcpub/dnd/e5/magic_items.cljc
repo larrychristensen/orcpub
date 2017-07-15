@@ -2881,7 +2881,7 @@ The boots regain 2 hours of flying capability for every 12 hours they aren’t i
        {:key (common/name-to-kw (name-key item))})
       :else (add-key item))))
 
-(def magic-items
+(defn expand-magic-items [magic-items]
   (flatten
    (map
     (fn [{:keys [::type ::item-subtype] :as item}]
@@ -2889,7 +2889,10 @@ The boots regain 2 hours of flying capability for every 12 hours they aren’t i
         :weapon (expand-weapon item)
         :armor (expand-armor item)
         (add-key item)))
-    raw-magic-items)))
+    magic-items)))
+
+(def magic-items
+  (expand-magic-items raw-magic-items))
 
 (def magic-item-map
   (into {} (map (fn [i] [(:key i) i])) magic-items))

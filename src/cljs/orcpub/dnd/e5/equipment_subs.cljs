@@ -35,6 +35,17 @@
     (fn [] (get @app-db ::mi5e/custom-items [])))))
 
 (reg-sub
+ ::mi5e/custom-item-map
+ (fn [db _]
+   (::mi5e/custom-item-map db)))
+
+(reg-sub
+ ::mi5e/custom-item
+ :<- [::mi5e/custom-item-map]
+ (fn [custom-item-map [_ id]]
+   (get custom-item-map id)))
+
+(reg-sub
  ::char5e/sorted-items
  (fn [_ _]
    (subscribe [::mi5e/custom-items (subscribe [:user-data])]))
@@ -54,7 +65,7 @@
 (defn map-by-key-or-id [items]
   (reduce
    (fn [m {:keys [:db/id key] :as item}]
-     (assoc m (or (keyword (str "id-" id)) key) item))
+     (assoc m (or key (keyword (str "id-" id))) item))
    {}
    items))
 
