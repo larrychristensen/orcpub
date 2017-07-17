@@ -32,7 +32,7 @@
          (dispatch [:set-loading false])
          (case (:status response)
            200 (dispatch [::mi5e/set-custom-items (-> response :body)])
-           401 (dispatch [:route routes/login-page-route {:secure? true}])
+           401 nil ;;(dispatch [:route routes/login-page-route {:secure? true}])
            500 (dispatch (events/show-generic-error)))))
    (ra/make-reaction
     (fn [] (get @app-db ::mi5e/custom-items [])))))
