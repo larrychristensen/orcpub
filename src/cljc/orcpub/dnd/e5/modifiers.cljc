@@ -154,19 +154,6 @@
 (defn ability-override [ability value]
   (mods/vec-mod ?ability-overrides {:ability ability :value value}))
 
-(defn build-modifiers [mod-cfgs]
-  (sequence
-   (comp
-    (filter ::mods/args)
-    (map
-     (fn [{:keys [::mods/key ::mods/args]}]
-       (let [raw-args (mods/raw-args args)
-             mod-fn (mods-map key)]
-         (if mod-fn
-           (apply mod-fn raw-args)))))
-    (remove nil?))
-   mod-cfgs))
-
 (defn level-ability-increase [ability bonus]
   (mods/modifier ?level-ability-increases
                  (update ?level-ability-increases ability add-bonus bonus)
@@ -605,3 +592,17 @@
    :climbing-speed climbing-speed
    :climbing-speed-override climbing-speed-override
    :climbing-speed-equal-to-walking climbing-speed-equal-to-walking})
+
+
+(defn build-modifiers [mod-cfgs]
+  (sequence
+   (comp
+    (filter ::mods/args)
+    (map
+     (fn [{:keys [::mods/key ::mods/args]}]
+       (let [raw-args (mods/raw-args args)
+             mod-fn (mods-map key)]
+         (if mod-fn
+           (apply mod-fn raw-args)))))
+    (remove nil?))
+   mod-cfgs))
