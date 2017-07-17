@@ -55,7 +55,9 @@
    :ua-sorcerer {:abbr "UA-Sorcerer"
                  :url "https://media.wizards.com/2017/dnd/downloads/26_UASorcererUA020617s.pdf"}
    :ua-gothic-heroes {:abbr "UA-Gothic-Heroes"
-                      :url "https://dnd.wizards.com/sites/default/files/media/upload/articles/UA%20Gothic%20Characters.pdf"}})
+                      :url "https://dnd.wizards.com/sites/default/files/media/upload/articles/UA%20Gothic%20Characters.pdf"}
+   :ua-starter-spells {:abbr "UA-Starter-Spells"
+                       :url "http://media.wizards.com/2017/dnd/downloads/UA-Starter-Spells.pdf"}})
 
 (def plural-map
   {:feet :feet})

@@ -509,6 +509,11 @@
    :selections [(opt5e/class-selection
                  {:options [ua-artificer/artificer-option]})]})
 
+(def ua-starter-spells
+  {:name "Unearthed Arcana: Starter Spells"
+   :key :ua-starter-spells
+   :class-options? true})
+
 (def ua-revised-ranger-plugin
   {:name "Unearthed Arcana: Revised Ranger"
    :key :ua-revised-ranger
@@ -886,7 +891,8 @@
      (assoc plugin :help (ua-help name (opt5e/source-url key))))
    (sort-by
     :name
-    [ua-artificer-plugin
+    [ua-starter-spells
+     ua-artificer-plugin
      ua-mystic-plugin
      ua-revised-ranger-plugin
      ua-trio-of-subclasses-plugin
