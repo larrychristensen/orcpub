@@ -853,13 +853,16 @@
 (defn requires-attunement [attunement]
   (str
    " (requires attunement"
-   (case attunement
-     [:any] nil
-     [:good] " by a creature of good alignment"
-     [:evil] " by a creature of evil alignment"
-     [:spellcaster] " by a spellcaster"
+   (if (-> attunement set :any not)
      (str " by a "
-          (common/list-print (map clojure.core/name attunement) "or")))
+          (common/list-print
+           (map
+            (fn [kw]
+              (case kw
+                :good " creature of good alignment"
+                :evil " creature of evil alignment"
+                (common/kw-to-name kw)))
+            attunement) "or")))
    ")"))
 
 (defn item-summary [{:keys [::mi/owner ::mi/name ::mi/type ::mi/item-subtype ::mi/rarity ::mi/attunement] :as item}]
@@ -870,7 +873,7 @@
      [:div
       [:span.f-s-24.f-w-b (or (:name item) name)]
       [:div.f-s-16.i.f-w-b.opacity-5
-       (str (s/capitalize (common/kw-to-name type))
+       (str (if type (s/capitalize (common/kw-to-name type)))
             (if (keyword? item-subtype)
               (str " (" (s/capitalize (common/kw-to-name item-subtype)) ")"))
             ", "
@@ -880,7 +883,7 @@
             (if attunement
               (requires-attunement attunement)))]]]))
 
-(defn item-details [{:keys [::mi/summary ::mi/description]} single-column?]
+(defn item-details [{:keys [::mi/summary ::mi/description ::mi/attunment]} single-column?]
   (if (or summary description)
     (paragraphs (or summary description) single-column?)))
 
@@ -1194,6 +1197,7 @@
            [:div.m-l-10
             [:a.orange {:href "https://muut.com/orcpub" :target :_blank} "Feedback/Bug Reports"]]
            [:div.m-l-10.m-r-10
+            [:span.m-r-5 "© 2017 OrcPub"]
             [:a.orange {:href "/privacy-policy" :target :_blank} "Privacy Policy"]
             [:a.orange.m-l-5 {:href "/terms-of-use" :target :_blank} "Terms of Use"]]]
           [debug-data]]]])]))
@@ -1906,9 +1910,9 @@
            [:span
             [:span (feet-str speed)]
             [:span.display-section-qualifier-text "(armored)"]]]))
-      (if swim-speed
+      (if (and swim-speed (pos? swim-speed))
         [:div.f-s-18 [:span (feet-str swim-speed)] [:span.display-section-qualifier-text "(swim)"]])
-      (if flying-speed
+      (if (and flying-speed (pos? flying-speed))
         [:div.f-s-18 [:span (feet-str flying-speed)] [:span.display-section-qualifier-text "(fly)"]])]]))
 
 (defn personality-section [title & descriptions]
@@ -2657,14 +2661,26 @@
       [spell-component spell true]]]))
 
 (defn item-page [{:keys [key] :as arg}]
-  (let [item (mi/magic-item-map (common/name-to-kw key))]
+  (let [item-key (if (re-matches #"\d+" key)
+                   (js/parseInt key)
+                   (keyword key))
+        item @(subscribe [::mi/item item-key])
+        username @(subscribe [:username])
+        owner? (= username (::mi/owner item))]
     [content-page
-     "Magic Item Page"
+     "Item Page"
      (remove
       nil?
-      [])
+      [(if owner?
+         {:title "Delete"
+          :icon "trash"
+          :on-click #(dispatch [::mi/delete-custom-item item-key])})
+       (if owner?
+         {:title "Edit"
+          :icon "pencil"
+          :on-click #(dispatch [::mi/edit-custom-item item])})])
      [:div.p-10.main-text-color
-      [item-component item true]]]))
+      [item-component item]]]))
 
 (defn base-builder-field [name comp]
   [:div.field.main-text-color.m-t-0
@@ -2726,7 +2742,7 @@
 (defn attunement-value [attunement key name]
   [:div
    {:on-click #(dispatch [::mi/toggle-attunement-value key])}
-   [labeled-checkbox name (attunement key)]])
+   [labeled-checkbox name ((set attunement) key)]])
 
 (defn attunement-selector [attunement]
   (base-builder-field
@@ -2737,7 +2753,7 @@
      [:span.f-s-24.f-w-b "Attunement"]]
     (if attunement
       [:div
-       [labeled-checkbox "Any" (= #{:any} attunement)]
+       [labeled-checkbox "Any" (= #{:any} (set attunement))]
        [:div.flex.flex-wrap
         [:div.flex-grow-1
          (base-builder-field
@@ -2945,22 +2961,25 @@
 
 (defn item-bonuses [{:keys [::mi/magical-damage-bonus
                             ::mi/magical-attack-bonus
-                            ::mi/magical-ac-bonus] :as item}]
+                            ::mi/magical-ac-bonus
+                            ::mi/type] :as item}]
   [:div.m-b-20
    [:div.m-b-10
     [:span.f-s-24.f-w-b "Item Properties"]]
    [:div.flex.m-b-20
+    (if (= type :weapon)
+      [:div
+       [:div.f-w-b.m-b-5 "Magical Damage Bonus"]
+       [number-field
+        {:value magical-damage-bonus
+         :on-change #(dispatch [::mi/set-item-damage-bonus %])}]])
+    (if (= type :weapon)
+      [:div.m-l-20.m-r-20
+       [:div.f-w-b.m-b-5 "Magical Attack Bonus"]
+       [number-field
+        {:value magical-attack-bonus
+         :on-change #(dispatch [::mi/set-item-attack-bonus %])}]])
     [:div
-     [:div.f-w-b.m-b-5 "Magical Damage Bonus"]
-     [number-field
-      {:value magical-damage-bonus
-       :on-change #(dispatch [::mi/set-item-damage-bonus %])}]]
-    [:div.m-l-20
-     [:div.f-w-b.m-b-5 "Magical Attack Bonus"]
-     [number-field
-      {:value magical-attack-bonus
-       :on-change #(dispatch [::mi/set-item-attack-bonus %])}]]
-    [:div.m-l-20
      [:div.f-w-b.m-b-5 "Magical AC Bonus"]
      [number-field
       {:value magical-ac-bonus
@@ -3398,14 +3417,15 @@
       [spell-list-items expanded-spells device-type]]]))
 
 (defn item-list-item [{:keys [key name ::mi/owner :db/id] :as item} expanded?]
-  (let [expanded? @(subscribe [:item-expanded? name])
+  (let [expanded-key (or name (::mi/name item))
+        expanded? @(subscribe [:item-expanded? expanded-key])
         username @(subscribe [:username])
         item-page-path (routes/path-for routes/dnd-e5-item-page-route :key (or id key))
         item-page-route (routes/match-route item-page-path)]
     [:div.main-text-color.item-list-item
      [:div.pointer
       [:div.flex.justify-cont-s-b.align-items-c
-       {:on-click #(dispatch [:toggle-item-expanded name])}
+       {:on-click #(dispatch [:toggle-item-expanded expanded-key])}
        [:div.m-l-10
         [:div.f-s-24.f-w-600.p-t-20
          [item-summary item]]]
@@ -3428,7 +3448,7 @@
              "edit"])]
          [item-component item]])]]))
 
-(defn item-list-items [device-type]
+(defn item-list-items []
   [:div.item-list
    (doall
     (map
@@ -3456,5 +3476,5 @@
         [:i.fa.fa-times.posn-abs.f-s-24.pointer.main-text-color
          {:style close-icon-style
           :on-click #(dispatch [::char/filter-items ""])}]]]
-      [item-list-items expanded-items device-type]]]))
+      [item-list-items]]]))
 

@@ -304,7 +304,8 @@
      ::mi5e/modifiers])
    (map
     many-kws-no-history
-    [::mi5e/subtypes])
+    [::mi5e/subtypes
+     ::mi5e/attunement])
    (map
     long-prop-no-history
     [::mod/int-arg
