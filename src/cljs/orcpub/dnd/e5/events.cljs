@@ -511,9 +511,7 @@
            ::char5e/image-url
            image-url
            ::char5e/image-url-failed
-           nil
-           #_(if (and image-url (s/starts-with? image-url "https"))
-               :https))))
+           nil)))
 
 (reg-event-db
  :toggle-public
@@ -535,9 +533,7 @@
            ::char5e/faction-image-url
            faction-image-url
            ::char5e/faction-image-url-failed
-           nil
-           #_(if (and faction-image-url (s/starts-with? faction-image-url "https"))
-             :https))))
+           nil)))
 
 (reg-event-db
  :add-background-starting-equipment
@@ -791,8 +787,7 @@
          flat-params (flatten seq-params)
          path (apply routes/path-for (or handler new-route) flat-params)]
      (if (and secure?
-              (not= "localhost" js/window.location.hostname)
-              (not= js/window.location.protocol "https:"))
+              (not= "localhost" js/window.location.hostname))
        (set! js/window.location.href (make-url "https"
                                                js/window.location.hostname
                                                path
