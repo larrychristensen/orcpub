@@ -61,7 +61,6 @@
                     db
                     value)
         user-id (ffirst result)]
-    (prn "RESULT" result user-id)
     (d/pull db '[*] user-id)))
 
 (def username-query
@@ -118,17 +117,21 @@
     (lookup-user-by-email db username password)
     (lookup-user-by-username db username password)))
 
+(defn terminate-request [context status message]
+  (-> context
+      terminate
+      (assoc :response {:status status :body {:message message}})))
+
 (def check-auth
   {:name :check-auth
    :enter (fn [context]
             (let [request (:request context)
-                  updated-request (authentication-request request backend)]
+                  updated-request (authentication-request request backend)
+                  username (get-in updated-request [:identity :user])]
               (if (and (:identity updated-request)
-                       (get-in updated-request [:identity :user]))
-                (assoc context :request updated-request)
-                (-> context
-                    terminate
-                    (assoc :response {:status 401 :body {:message "Unauthorized"}})))))})
+                       username)
+                (assoc context :request (assoc updated-request :username username))
+                (terminate-request context 401 "Unauthorized"))))})
 
 (defn party-owner [db id]
   (d/q '[:find ?owner .
@@ -137,12 +140,17 @@
        db
        id))
 
+(def id-path [:request :path-params :id])
+
 (def parse-id
   {:name :parse-id
    :enter (fn [context]
-            (update-in context
-                       [:request :path-params :id]
-                       (fn [id] (if id (Long/parseLong id)))))})
+            (let [id-str (get-in context id-path)]
+              (if (and id-str (re-matches #"\d+" id-str))
+                (assoc-in context
+                          id-path
+                          (Long/parseLong id-str))
+                (terminate-request context 400 "Bad ID"))))})
 
 
 (def check-party-owner
@@ -152,9 +160,7 @@
                   party-owner (party-owner db id)]
               (if (= (:user identity) party-owner)
                 context
-                (-> context
-                    terminate
-                    (assoc :response {:status 401 :body {:message "You don't own the party"}})))))})
+                (terminate-request context 401 "You don't own this party"))))})
 
 (defn redirect [route-key]
   (ring-resp/redirect (route-map/path-for route-key)))
@@ -271,7 +277,6 @@
   (ring-resp/redirect (str oauth/google-oauth-url (oauth/get-google-redirect-uri request))))
 
 (defn fb-oauth-code [request]
-  (prn "FB_OAUTH_CODE")
   (ring-resp/redirect (str oauth/fb-oauth-url (oauth/get-fb-redirect-uri request))))
 
 (defn base-url [{:keys [scheme headers]}]
@@ -793,6 +798,21 @@
       {:status 200
        :body result})))
 
+(defn get-item [{:keys [db] {:keys [:id]} :path-params}]
+  (let [item (d/pull db '[*] id)]
+    (if (::mi5e/owner item)
+      {:status 200
+       :body item}
+      {:status 404})))
+
+(defn delete-item [{:keys [db conn username] {:keys [:id]} :path-params}]
+  (let [{:keys [::mi5e/owner]} (d/pull db '[::mi5e/owner] id)]
+    (if (= username owner)
+      (do
+        @(d/transact conn [[:db/retractEntity id]])
+        {:status 200})
+      {:status 401})))
+
 (defn item-list [{:keys [db identity]}]
   (let [username (:user identity)
         items (d/q '[:find (pull ?e [*])
@@ -1019,11 +1039,10 @@
        ;; Items
        [(route-map/path-for route-map/dnd-e5-items-route) ^:interceptors [check-auth]
         {:post `save-item
-         :get `item-list
-         }]
-       #_[(route-map/path-for route-map/dnd-e5-item-route :id ":id") ^:interceptors [check-auth]
+         :get `item-list}]
+       [(route-map/path-for route-map/dnd-e5-item-route :id ":id") ^:interceptors [check-auth parse-id]
         {:delete `delete-item}]
-       #_[(route-map/path-for route-map/dnd-e5-item-route :id ":id")
+       [(route-map/path-for route-map/dnd-e5-item-route :id ":id") ^:interceptors [parse-id]
         {:get `get-item}]
 
        ;; Characters

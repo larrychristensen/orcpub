@@ -57,8 +57,7 @@
 
 (reg-sub
  ::char5e/sorted-items
- (fn [_ _]
-   (subscribe [::mi5e/expanded-custom-items (subscribe [:user-data])]))
+ :<- [::mi5e/expanded-custom-items]
  (fn [custom-items _]
    (concat
     custom-items
@@ -75,7 +74,9 @@
 (defn map-by-key-or-id [items]
   (reduce
    (fn [m {:keys [:db/id key] :as item}]
-     (assoc m (or key (keyword (str "id-" id))) item))
+     (assoc m
+            key item
+            id item))
    {}
    items))
 
@@ -172,10 +173,35 @@
  :<- [::mi5e/magic-armor-map]
  :<- [::mi5e/other-magic-items-map]
  (fn [maps _]
-   (prn "MAPS COUNT" (count maps))
    (apply merge
           mi5e/all-magic-items-map
           maps)))
+
+(reg-sub
+ ::mi5e/remote-items
+ (fn [db _]
+   (::mi5e/remote-items db)))
+
+(reg-sub-raw
+ ::mi5e/remote-item
+ (fn [app-db [_ id]]
+   (go (dispatch [:set-loading true])
+       (let [response (<! (http/get (routes/path-for routes/dnd-e5-item-route :id id)
+                                    {:accept :transit
+                                     :headers (auth-headers @app-db)}))]
+         (dispatch [:set-loading false])
+         (case (:status response)
+           200 (dispatch [::mi5e/add-remote-item (-> response :body)])
+           500 (dispatch (events/show-generic-error)))))
+   (ra/make-reaction
+    (fn [] (get-in @app-db [::mi5e/remote-items id] {})))))
+
+(reg-sub
+ ::mi5e/item
+ (fn [item [_ key]]
+   (if (int? key)
+     @(subscribe [::mi5e/remote-item key])
+     (get mi5e/all-equipment-map key))))
 
 (reg-sub
  ::equipment5e/armor-map

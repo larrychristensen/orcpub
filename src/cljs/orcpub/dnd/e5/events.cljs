@@ -313,8 +313,28 @@
             parties)))
     :http {:method :delete
            :headers (authorization-headers db)
-           :url (url-for-route routes/dnd-e5-char-party-route :id id)
-           :transit-params new-name}}))
+           :url (url-for-route routes/dnd-e5-char-party-route :id id)}}))
+
+(reg-event-fx
+ ::mi/delete-custom-item-success
+ (fn [_ _]
+   {:dispatch [:route routes/dnd-e5-item-list-page-route]}))
+
+(reg-event-fx
+ ::mi/delete-custom-item
+ (fn [{:keys [db]} [_ id]]
+   {:db (update
+         db
+         ::mi/custom-items
+         (fn [custom-items]
+           (remove
+            (fn [item]
+              (= id (:db/id item)))
+            custom-items)))
+    :dispatch [::mi/delete-custom-item-success]
+    :http {:method :delete
+           :headers (authorization-headers db)
+           :url (url-for-route routes/dnd-e5-item-route :id id)}}))
 
 (reg-event-fx
  ::party5e/remove-character
@@ -1671,6 +1691,11 @@
            #(->> %
                  (toggle-set value)
                  set-any-attunement))))
+
+(reg-event-db
+ ::mi/add-remote-item
+ (fn [db [_ item]]
+   (assoc-in db [::mi/remote-items (:db/id item)] item)))
 
 (reg-event-db
  ::mi/set-item-name
