@@ -3000,14 +3000,14 @@ The boots regain 2 hours of flying capability for every 12 hours they aren’t i
    other-magic-items-xform
    magic-items))
 
+(def other-magic-item-map
+  (common/map-by-key other-magic-items))
+
 (def all-magic-items-map
   (merge
    magic-armor-map
    magic-weapon-map
    other-magic-item-map))
-
-(def other-magic-item-map
-  (common/map-by-key other-magic-items))
 
 (def all-equipment-map
   (merge
