@@ -33,7 +33,7 @@
 (def magical-attack-bonus-key ::magical-attack-bonus)
 (def magical-damage-bonus-key ::magical-damage-bonus)
 (def subtypes-key ::subtypes)
-(def attunment-key ::attunement)
+(def attunement-key ::attunement)
 (def modifiers-key ::modifiers)
 
 (spec/def ::magic-item
@@ -118,6 +118,7 @@
   (cond-> item
     (seq modifiers) (assoc ::internal-modifiers (to-internal-modifiers (::modifiers item)))
     true (dissoc ::modifiers)
+    true (update ::attunement set)
     (seq subtypes) (update ::subtypes #(into #{} %))))
 
 (defn mod-args [args]
@@ -208,7 +209,7 @@
                     ::subtypes
                     ::rarity
                     ::description
-                    ::attunment
+                    ::attunement
                     ::magical-damage-bonus
                     ::magical-attack-bonus
                     ::magical-ac-bonus

@@ -154,31 +154,6 @@
 (defn ability-override [ability value]
   (mods/vec-mod ?ability-overrides {:ability ability :value value}))
 
-(def mods-map
-  {:ability ability
-   :ability-override ability-override
-   :damage-resistance damage-resistance
-   :damage-vulnerability damage-vulnerability
-   :damage-immunity damage-immunity
-   :condition-immunity condition-immunity
-   :darkvision darkvision
-   :darkvision-bonus darkvision-bonus
-   :speed speed
-   :speed-override speed-override
-   :flying-speed-bonus flying-speed-bonus
-   :flying-speed-override flying-speed-override
-   :flying-speed-equal-to-walking flying-speed-equal-to-walking
-   :swimming-speed swimming-speed
-   :swimming-speed-override swimming-speed-override
-   :swimming-speed-equal-to-walking swimming-speed-equal-to-walking
-   :climbing-speed climbing-speed
-   :climbing-speed-override climbing-speed-override
-   :climbing-speed-equal-to-walking climbing-speed-equal-to-walking})
-
-(defn prn-and-return [arg]
-  (prn "ARG" arg)
-  arg)
-
 (defn build-modifiers [mod-cfgs]
   (sequence
    (comp
@@ -608,3 +583,25 @@
 (defmacro level-val [level mappings]
   (let [flat-mappings (conj (vec (apply concat (sort-by first > (dissoc mappings :default)))) (:default mappings))]
     `(condp <= ~level ~@flat-mappings)))
+
+(def mods-map
+  {:ability ability
+   :ability-override ability-override
+   :saving-throw-bonus saving-throw-bonus
+   :damage-resistance damage-resistance
+   :damage-vulnerability damage-vulnerability
+   :damage-immunity damage-immunity
+   :condition-immunity condition-immunity
+   :darkvision darkvision
+   :darkvision-bonus darkvision-bonus
+   :speed speed
+   :speed-override speed-override
+   :flying-speed-bonus flying-speed-bonus
+   :flying-speed-override flying-speed-override
+   :flying-speed-equal-to-walking flying-speed-equal-to-walking
+   :swimming-speed swimming-speed
+   :swimming-speed-override swimming-speed-override
+   :swimming-speed-equal-to-walking swimming-speed-equal-to-walking
+   :climbing-speed climbing-speed
+   :climbing-speed-override climbing-speed-override
+   :climbing-speed-equal-to-walking climbing-speed-equal-to-walking})
