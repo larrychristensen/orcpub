@@ -738,6 +738,7 @@
 
 (defn header [title button-cfgs]
   (let [device-type @(subscribe [:device-type])]
+    (prn "OPTIONS SHOWN" @(subscribe [::char/options-shown?]))
     [:div.w-100-p
      [:div.flex.align-items-c.justify-cont-s-b.flex-wrap
       [:h1.f-s-36.f-w-b.m-t-5.m-l-10
@@ -775,6 +776,8 @@
                              ((:pre cfg)))
                            (dispatch [:confirm (:event cfg)]))}
              (:confirm-button-text cfg)]]])])
+     (if @(subscribe [::char/options-shown?])
+       @(subscribe [::char/options-component]))
      (if @(subscribe [:message-shown?])
        [:div.p-b-10.p-r-10.p-l-10
         [message
@@ -1471,18 +1474,18 @@
         [:div.f-s-14.f-w-n
          [:div.flex.justify-cont-s-b
           [:div
-           [:span.f-w-b.f-s-16 (str "Slots" (if multiclass? " (Multiclass)") ": ")]]
+           [:span.f-w-b.f-s-16 (str "Slots" (if multiclass? " (Multiclass)"))]]
           (details-button @expanded? #(swap! expanded? not))]
          [:div.f-w-n.f-s-14
           [:table.w-100-p.t-a-l.striped
            [:tbody
             [:tr.f-w-b
-             [:th.p-5 (if mobile? "Lvl." "Caster Levels")]
+             [:th.p-10 (if mobile? "Lvl." "Caster Levels")]
              (doall
               (map
                (fn [i]
                  ^{:key i}
-                 [:th.p-5 (if (and mobile?
+                 [:th.p-10 (if (and mobile?
                                    (or @expanded?
                                        (> (count spell-slots) 8)))
                             (inc i)
@@ -1504,24 +1507,24 @@
                                     "f-w-b")
                       :style (if highlight?
                                {:background-color "rgba(255,255,255,0.3)"})}
-                     [:td.p-5 lvl]
+                     [:td.p-10 lvl]
                      (let [total-slots (opt/total-slots lvl (if multiclass? 1 (-> spell-slot-factors first val)))]
                        (doall
                         (map
                          (fn [spell-lvl]
                            ^{:key spell-lvl}
-                           [:td.p-5 (get total-slots spell-lvl)])
+                           [:td.p-10 (get total-slots spell-lvl)])
                          (range 1 10))))]))
                 (range 1 21)))
               [:tr
-               [:th.p-5 (if multiclass?
+               [:th.p-10 (if multiclass?
                           total-spellcaster-levels
                           first-class-level)]
                (doall
                 (map
                  (fn [[level slots]]
                    ^{:key level}
-                   [:td.p-5 slots])
+                   [:td.p-10 slots])
                  spell-slots))])]]]]))))
 
 (defn spell-row [id lvl spell-modifiers prepares-spells prepared-spells-by-class {:keys [key ability qualifier class always-prepared?]} expanded? on-click]
