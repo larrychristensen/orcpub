@@ -867,3 +867,13 @@
  :< [::mi5e/builder-item]
  (fn [item [_ type]]
    (get (::mi5e/subtypes item) type)))
+
+(reg-sub
+ ::char5e/options-shown?
+ (fn [db _]
+   (get db ::char5e/options-shown?)))
+
+(reg-sub
+ ::char5e/options-component
+ (fn [db _]
+   (get db ::char5e/options-component)))
