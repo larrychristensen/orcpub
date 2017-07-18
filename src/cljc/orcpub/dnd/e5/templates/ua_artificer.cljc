@@ -20,14 +20,16 @@
     :tags #{:equipment}
     :options (map
               (fn [item-kw]
-                (let [{:keys [name summary description] :as item} (mi5e/other-magic-item-map item-kw)]
+                (let [{:keys [::mi5e/name ::mi5e/summary ::mi5e/description] :as item} (mi5e/other-magic-item-map item-kw)]
                   (if (nil? item)
                     (do #?(:cljs (js/console.warn "MAGIC ITEM NOT FOUND" item-kw))))
                   (t/option-cfg
                    {:name name
                     :help (or summary description)
-                    :modifiers [(mod5e/magic-item item-kw item {::char-equip5e/quantity 1
-                                                                ::char-equip5e/equipped? true})]})))
+                    :modifiers [(mod5e/magic-item item-kw
+                                                  item
+                                                  {::char-equip5e/quantity 1
+                                                   ::char-equip5e/equipped? true})]})))
               item-kws)}))
 
 (def alchemical-fire-mod
