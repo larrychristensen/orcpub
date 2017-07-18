@@ -409,6 +409,11 @@
         [:span.m-l-5 (str "page " page)]
         [:span " for more details)"]]))])
 
+(defn using-source? [option-sources source]
+  (or (nil? source)
+      (= :phb source)
+      (get option-sources source)))
+
 (defn spell-option [spellcasting-ability class-name key & [prepend-level? qualifier]]
   (let [{:keys [name level source] :as spell} (spells/spell-map key)]
     (t/option-cfg
@@ -425,9 +430,9 @@
                                 (get spells-known level))))))
                 (t/option-prereq
                  "You aren't using this source"
-                 (fn [c] (or (nil? source)
-                             (= :phb source)
-                             (get @(subscribe [::character/option-sources nil c]) source)))
+                 (fn [c] (using-source?
+                          @(subscribe [::character/option-sources nil c])
+                          source))
                  true)]
       :modifiers [(modifiers/spells-known level key spellcasting-ability class-name nil qualifier)]})))
 
@@ -2342,7 +2347,10 @@
                                                          :ability (:ability spellcasting)}
                                                         1
                                                         [(let [slots (?class-spell-slots kw)]
-                                                           (slots lvl))]))
+                                                           (slots lvl))
+                                                         (let [spell (spells/spell-map spell-key)]
+                                                           (prn "OPTION SOURCES" ?option-sources (:source spell))
+                                                           (using-source? ?option-sources (:source spell)))]))
                           spell-keys))
                        spell-list)))
                   (if armor-profs (armor-prof-modifiers armor-profs kw))
