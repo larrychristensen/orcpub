@@ -3188,7 +3188,7 @@
                  {:name "Arcane Recovery"
                   :page 115
                   :frequency units5e/days-1
-                  :summary (str "When you finish a short rest, regain spell slots totalling no more than " (int (/ ?wizard-level 2)) ", and each must be 5th level or lower.")})]
+                  :summary (str "When you finish a short rest, regain spell slots totalling no more than " (common/round-up (/ ?wizard-level 2)) ", and each must be 5th level or lower.")})]
     :levels {18 {:selections [(spell-mastery-selection 1)
                               (spell-mastery-selection 2)]
                  :modifiers [(mod5e/dependent-trait
