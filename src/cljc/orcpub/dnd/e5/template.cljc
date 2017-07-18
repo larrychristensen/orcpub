@@ -1680,46 +1680,84 @@
                                  :tags #{:class}
                                  :options [(t/option-cfg
                                    {:name "Arctic"
-                                    :modifiers [(druid-spell 3 :slow 5)
+                                    :modifiers [(druid-spell 2 :hold-person 3)
+                                                (druid-spell 2 :spike-growth 3)
+                                                (druid-spell 3 :sleet-storm 5)
+                                                (druid-spell 3 :slow 5)
+                                                (druid-spell 4 :freedom-of-movement 7)
+                                                (druid-spell 4 :ice-storm 7)
+                                                (druid-spell 5 :commune-with-nature 9)
                                                 (druid-spell 5 :cone-of-cold 9)]})
                                   (t/option-cfg
                                    {:name "Coast"
                                     :modifiers [(druid-spell 2 :mirror-image 3)
-                                              (druid-spell 2 :misty-step 3)]})
+                                                (druid-spell 2 :misty-step 3)
+                                                (druid-spell 3 :water-breathing 5)
+                                                (druid-spell 3 :water-walk 5)
+                                                (druid-spell 4 :control-water 7)
+                                                (druid-spell 4 :freedom-of-movement 7)
+                                                (druid-spell 5 :conjure-elemental 9)
+                                                (druid-spell 5 :scrying 9)]})
                                   (t/option-cfg
                                    {:name "Desert"
                                     :modifiers [(druid-spell 2 :blur 3)
-                                              (druid-spell 2 :silence 3)
-                                              (druid-spell 3 :create-food-and-water 5)]})
+                                                (druid-spell 2 :silence 3)
+                                                (druid-spell 3 :create-food-and-water 5)
+                                                (druid-spell 3 :protection-from-energy 5)
+                                                (druid-spell 4 :blight 7)
+                                                (druid-spell 4 :hallucinatory-terrain 7)
+                                                (druid-spell 5 :insect-plague 9)
+                                                (druid-spell 5 :wall-of-stone 9)]})
                                   (t/option-cfg
                                    {:name "Forest"
-                                    :modifiers [(druid-spell 2 :spider-climb 3)
-                                              (druid-spell 4 :divination 7)]})
+                                    :modifiers [(druid-spell 2 :barkskin 3)
+                                                (druid-spell 2 :spider-climb 3)
+                                                (druid-spell 3 :call-lightning 5)
+                                                (druid-spell 3 :plant-growth 5)
+                                                (druid-spell 4 :divination 7)
+                                                (druid-spell 4 :freedom-of-movement 7)
+                                                (druid-spell 5 :commune-with-nature 9)
+                                                (druid-spell 5 :tree-stride 9)]})
                                   (t/option-cfg
                                    {:name "Grassland"
                                     :modifiers [(druid-spell 2 :invisibility 3)
-                                              (druid-spell 3 :haste 5)
-                                              (druid-spell 4 :divination 7)
-                                              (druid-spell 5 :dream 9)]})
+                                                (druid-spell 2 :pass-without-trace 3)
+                                                (druid-spell 3 :daylight 5)
+                                                (druid-spell 3 :haste 5)
+                                                (druid-spell 4 :divination 7)
+                                                (druid-spell 4 :freedom-of-movement 7)
+                                                (druid-spell 5 :dream 9)
+                                                (druid-spell 5 :insect-plague 9)]})
                                   (t/option-cfg
                                    {:name "Mountain"
                                     :modifiers [(druid-spell 2 :spider-climb 3)
+                                                (druid-spell 2 :spike-growth 3)
                                                 (druid-spell 3 :lightning-bolt 5)
-                                                (druid-spell 5 :passwall 9)]})
+                                                (druid-spell 3 :meld-into-stone 5)
+                                                (druid-spell 4 :stone-shape 7)
+                                                (druid-spell 4 :stoneskin 7)
+                                                (druid-spell 5 :passwall 9)
+                                                (druid-spell 5 :wall-of-stone 9)]})
                                   (t/option-cfg
                                    {:name "Swamp"
                                     :modifiers [(druid-spell 2 :darkness 3)
                                                 (druid-spell 2 :melfs-acid-arrow 3)
+                                                (druid-spell 3 :water-walk 5)
                                                 (druid-spell 3 :stinking-cloud 5)
-                                                (druid-spell 3 :water-walk 5)]})
+                                                (druid-spell 4 :freedom-of-movement 7)
+                                                (druid-spell 4 :locate-creature 7)
+                                                (druid-spell 5 :insect-plague 9)
+                                                (druid-spell 5 :scrying 9)]})
                                   (t/option-cfg
                                    {:name "Underdark"
                                     :modifiers [(druid-spell 2 :spider-climb 3)
                                                 (druid-spell 2 :web 3)
-                                                (druid-spell 3 :stinking-cloud 5)
                                                 (druid-spell 3 :gaseous-form 5)
+                                                (druid-spell 3 :stinking-cloud 5)
                                                 (druid-spell 4 :greater-invisibility 7)
-                                                (druid-spell 5 :cloudkill 9)]})]})]
+                                                (druid-spell 4 :stone-shape 7)
+                                                (druid-spell 5 :cloudkill 9)
+                                                (druid-spell 5 :insect-plague 9)]})]})]
                   :modifiers []
                   :levels {2 {:modifiers [(mod5e/dependent-trait
                                            {:name "Natural Recovery"
