@@ -1794,52 +1794,6 @@
      (comps/checkbox (= "light-theme" theme) false)
      [:span.main-text-color "Light Theme"]]))
 
-
-(defn print-options []
-  (let [print-character-sheet? @(subscribe [::char5e/print-character-sheet?])
-        print-spell-cards? @(subscribe [::char5e/print-spell-cards?])
-        print-prepared-spells? @(subscribe [::char5e/print-prepared-spells?])]
-    [:div.flex.justify-cont-end
-     [:div.p-20
-      [:div.f-s-24.f-w-b.m-b-10 "Print Options"]
-      [:div.m-b-20
-       #_[:div.m-b-10
-        [:span.f-w-b "Parts"]]
-       [:div.flex
-        #_[:div
-         {:on-click #(dispatch [::char5e/toggle-character-sheet-print])}
-         [views5e/labeled-checkbox
-          "Character Sheet"
-          print-character-sheet?]]
-        [:div
-         {:on-click #(dispatch [::char5e/toggle-spell-cards-print])}
-         [views5e/labeled-checkbox
-          "Print Spell Cards"
-          print-spell-cards?]]]]
-      [:div.m-b-10
-       [:div.m-b-10
-        [:span.f-w-b "Spells Printed"]]
-       [:div.flex
-        [:div
-         {:on-click #(dispatch [::char5e/toggle-known-spells-print])}
-         [views5e/labeled-checkbox
-          "Known"
-          (not print-prepared-spells?)]]
-        [:div.m-l-20
-         {:on-click #(dispatch [::char5e/toggle-known-spells-print])}
-         [views5e/labeled-checkbox
-          "Prepared"
-          print-prepared-spells?]]]]
-      [:span.orange.underline.pointer.uppercase.f-s-12
-       {:on-click #(dispatch [::char5e/hide-options])}
-       "Cancel"]
-      [:button.form-button.p-10.m-l-5
-       {:on-click (views5e/export-pdf @(subscribe [:built-character])
-                                      {:print-character-sheet? print-character-sheet?
-                                       :print-spell-cards? print-spell-cards?
-                                       :print-prepared-spells? print-prepared-spells?})}
-       "Print"]]]))
-
 (defn character-builder []
   (let [character @(subscribe [:character])
         _  (if print-enabled? (cljs.pprint/pprint character))
@@ -1889,10 +1843,7 @@
                     :event [:reset-character]})}
        {:title "Print"
         :icon "print"
-        :on-click #_(views5e/export-pdf built-char)
-        #(dispatch
-          [::char5e/show-options
-           [print-options]])}
+        :on-click (views5e/make-print-handler built-char)}
        {:title (if (:db/id character)
                  "Update Existing Character"
                  "Save New Character")
