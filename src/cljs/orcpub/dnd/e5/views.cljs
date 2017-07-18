@@ -2618,7 +2618,10 @@
 
 (defn character-page [{:keys [id] :as arg}]
   (let [{:keys [::entity/owner] :as character} @(subscribe [::char/character id])
-        built-template (subs/built-template (subs/selected-plugin-options character))
+        built-template (subs/built-template
+                        @(subscribe [::char/template])
+                        (subs/selected-plugin-options
+                         character))
         built-character (subs/built-character character built-template)
         device-type @(subscribe [:device-type])
         username @(subscribe [:username])]
