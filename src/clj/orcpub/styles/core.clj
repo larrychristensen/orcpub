@@ -816,7 +816,8 @@
      {:background-image "linear-gradient(182deg, #313A4D, #080A0D)"
       :font-family font-family
       :height "100%"
-      :overflow :scroll}]
+      :overflow-y :scroll
+      :-webkit-overflow-scrolling :touch}]
 
     [:.character-builder-header
      {:margin-bottom "19px"}]
