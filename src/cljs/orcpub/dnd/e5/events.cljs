@@ -1862,3 +1862,23 @@
    (assoc db
           ::char5e/options-shown? true
           ::char5e/options-component component)))
+
+(reg-event-db
+ ::char5e/hide-options
+ (fn [db _]
+   (assoc db ::char5e/options-shown? false)))
+
+(reg-event-db
+ ::char5e/toggle-character-sheet-print
+ (fn [db _]
+   (update db ::char5e/exclude-character-sheet-print? not)))
+
+(reg-event-db
+ ::char5e/toggle-spell-cards-print
+ (fn [db _]
+   (update db ::char5e/exclude-spell-cards-print? not)))
+
+(reg-event-db
+ ::char5e/toggle-known-spells-print
+ (fn [db _]
+   (update db ::char5e/print-prepared-spells? not)))

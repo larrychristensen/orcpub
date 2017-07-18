@@ -783,3 +783,19 @@
                       0)))))
    {}
    skills/skills))
+
+(defn prepared-spells-by-class [character]
+  (get-prop character ::prepared-spells-by-class))
+
+(defn spell-prepared? [{:keys [hide-unprepared?
+                               always-prepared?
+                               lvl
+                               class
+                               key
+                               prepares-spells
+                               prepared-spells-by-class] :as args}]
+  (or (not hide-unprepared?)
+      (zero? lvl)
+      (not (get prepares-spells class))
+      (get-in prepared-spells-by-class [class key])
+      always-prepared?))
