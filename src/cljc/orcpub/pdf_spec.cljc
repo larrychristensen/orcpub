@@ -207,10 +207,36 @@
    8 7
    9 7})
 
-(defn make-page-map [spells-known]
+(defn filter-prepared [spell-cfgs
+                       lvl
+                       prepares-spells
+                       prepared-spells-by-class]
+  (prn "LVL" lvl prepares-spells prepared-spells-by-class)
+  (filter
+   (fn [{:keys [key class always-prepared?]}]
+     (char5e/spell-prepared? {:hide-unprepared? true
+                              :always-prepared? always-prepared?
+                              :lvl lvl
+                              :key key
+                              :class class
+                              :prepares-spells prepares-spells
+                              :prepared-spells-by-class prepared-spells-by-class}))
+   spell-cfgs))
+
+(defn make-page-map [spells-known
+                     print-prepared-spells?
+                     prepares-spells
+                     prepared-spells-by-class]
   (reduce-kv
    (fn [m k s]
-     (let [by-ability (group-by :ability (vals s))]
+     (let [spell-cfgs (vals s)
+           filtered (if print-prepared-spells?
+                      (filter-prepared spell-cfgs
+                                       k
+                                       prepares-spells
+                                       prepared-spells-by-class)
+                      spell-cfgs)
+           by-ability (group-by :ability filtered)]
        (reduce-kv
         (fn [am a a-s]
           (assoc-in am [a k] (sort-by (comp :name spells/spell-map :key) a-s)))
@@ -219,8 +245,14 @@
    {}
    spells-known))
 
-(defn make-pages [spells]
-  (let [page-map (make-page-map spells)]
+(defn make-pages [spells
+                  print-prepared-spells
+                  prepares-spells
+                  prepared-spells-by-class]
+  (let [page-map (make-page-map spells
+                                print-prepared-spells
+                                prepares-spells
+                                prepared-spells-by-class)]
     (mapcat
      (fn [[ability levels]]
        (let [ability-classes (into
@@ -246,7 +278,12 @@
                          (range 10))})))
      page-map)))
 
-(defn make-spell-card-info [spells-known save-dc-fn attack-mod-fn]
+(defn make-spell-card-info [spells-known
+                            save-dc-fn
+                            attack-mod-fn
+                            print-prepared-spells?
+                            prepares-spells
+                            prepared-spells-by-class]
   (let [flat-spells (char5e/flat-spells spells-known)]
     (reduce
      (fn [m {:keys [key ability qualifier class]}]
@@ -255,16 +292,35 @@
            (assoc-in [:spell-attack-mods class] (attack-mod-fn ability))))
      {:spells-known (reduce
                      (fn [m [k v]]
-                       (assoc m k (vals v)))
+                       (assoc m k (if print-prepared-spells?
+                                    (filter-prepared (vals v)
+                                                     k
+                                                     prepares-spells
+                                                     prepared-spells-by-class)
+                                    (vals v))))
                      {}
                      spells-known)}
      flat-spells)))
 
-(defn spell-page-fields [spells spell-slots save-dc-fn attack-mod-fn]
-  (let [spell-pages (make-pages spells)]
+(defn spell-page-fields [spells
+                         spell-slots
+                         save-dc-fn
+                         attack-mod-fn
+                         print-prepared-spells?
+                         prepares-spells
+                         prepared-spells-by-class]
+  (let [spell-pages (make-pages spells
+                                print-prepared-spells?
+                                prepares-spells
+                                prepared-spells-by-class)]
     (apply
      merge
-     (make-spell-card-info spells save-dc-fn attack-mod-fn)
+     (make-spell-card-info spells
+                           save-dc-fn
+                           attack-mod-fn
+                           print-prepared-spells?
+                           prepares-spells
+                           prepared-spells-by-class)
      (flatten
       (map-indexed
        (fn [i {:keys [ability classes spells]}]
@@ -292,12 +348,21 @@
              spells)]))
        spell-pages)))))
 
-(defn spellcasting-fields [built-char]
+(defn spellcasting-fields [built-char print-prepared-spells?]
   (let [spells-known (char5e/spells-known built-char)
         spell-attack-modifier-fn (char5e/spell-attack-modifier-fn built-char)
         spell-save-dc-fn (char5e/spell-save-dc-fn built-char)
-        spell-slots (char5e/spell-slots built-char)]
-    (spell-page-fields spells-known spell-slots spell-save-dc-fn spell-attack-modifier-fn)))
+        spell-slots (char5e/spell-slots built-char)
+        prepares-spells (char5e/prepares-spells built-char)
+        prepared-spells-by-class (char5e/prepared-spells-by-class built-char)]
+    
+    (spell-page-fields spells-known
+                       spell-slots
+                       spell-save-dc-fn
+                       spell-attack-modifier-fn
+                       print-prepared-spells?
+                       prepares-spells
+                       prepared-spells-by-class)))
 
 (defn profs-paragraph [profs prof-map title]
   (if (seq profs)
@@ -382,7 +447,9 @@
       (str unarmored-speed "/" speed)
       speed)))
 
-(defn make-spec [built-char]
+(defn make-spec [built-char {:keys [print-character-sheet?
+                                    print-spell-cards?
+                                    print-prepared-spells?] :as options}]
   (let [race (char5e/race built-char)
         subrace (char5e/subrace built-char)
         abilities (char5e/ability-values built-char)
@@ -436,7 +503,9 @@
       :image-url-failed (char5e/image-url-failed built-char)
       :faction-image-url (char5e/faction-image-url built-char)
       :faction-image-url-failed (char5e/faction-image-url-failed built-char)
-      :faction-name (char5e/faction-name built-char)}
+      :faction-name (char5e/faction-name built-char)
+      :print-character-sheet? print-character-sheet?
+      :print-spell-cards? print-spell-cards?}
      (attacks-and-spellcasting-fields built-char)
      (skill-fields built-char)
      abilities
@@ -449,4 +518,4 @@
       char5e/ability-keys)
      (traits-fields built-char)
      (equipment-fields built-char)
-     (spellcasting-fields built-char))))
+     (spellcasting-fields built-char print-prepared-spells?))))

@@ -748,9 +748,7 @@
  (fn [[_ id] _]
    (subscribe [::char5e/character id]))
  (fn [character _]
-   (get-in character
-           [::entity/values
-            ::char5e/prepared-spells-by-class])))
+   (char5e/prepared-spells-by-class character)))
 
 (reg-sub
  ::char5e/feature-used?
@@ -877,3 +875,18 @@
  ::char5e/options-component
  (fn [db _]
    (get db ::char5e/options-component)))
+
+(reg-sub
+ ::char5e/print-spell-cards?
+ (fn [db _]
+   (-> db ::char5e/exclude-spell-cards-print? not)))
+
+(reg-sub
+ ::char5e/print-character-sheet?
+ (fn [db _]
+   (-> db ::char5e/exclude-character-sheet-print? not)))
+
+(reg-sub
+ ::char5e/print-prepared-spells?
+ (fn [db _]
+   (get db ::char5e/print-prepared-spells?)))

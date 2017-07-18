@@ -389,6 +389,8 @@
     {:padding-right "10px"}]
    [:.p-r-20
     {:padding-right "20px"}]
+   [:.p-r-40
+    {:padding-right "40px"}]
 
    [:.b-rad-50-p
     {:border-radius "50%"}]
@@ -458,7 +460,7 @@
     {:opacity 1.0}]
    
    [:.bg-light
-    {:background-color "#2c3445"}]
+    {:background-color "rgba(72,72,72,0.2)"}]
    [:.bg-orange
     {:background-color orange}]
    [:.bg-red
