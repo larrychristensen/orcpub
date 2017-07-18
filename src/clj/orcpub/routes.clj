@@ -856,7 +856,9 @@
                       (assoc
                        summary
                        :db/id id
-                       ::se/owner username))
+                       ::se/owner (if (= owner (:orcpub.user/email user))
+                                    (:orcpub.user/username user)
+                                    owner)))
                     results)]
     {:status 200 :body characters}))
 
