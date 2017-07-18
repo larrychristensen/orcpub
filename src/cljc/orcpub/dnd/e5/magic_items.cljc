@@ -141,20 +141,25 @@
     (map #(mod-cfg kw (key %))))
    value-map))
 
+(defn default-int [value]
+  (if (int? value)
+    value
+    0))
+
 (defn ability-mods [items]
   (map
    (fn [[ability-kw {:keys [value type]}]]
      (if (= type :increases-by)
-       (mod-cfg :ability ability-kw value)
-       (mod-cfg :ability-override ability-kw value)))
+       (mod-cfg :ability ability-kw (default-int value))
+       (mod-cfg :ability-override ability-kw (default-int value))))
    items))
 
 (defn speed-mod-fn [{:keys [increases-by becomes-at-least equals-walking-speed]}]
   (fn [{:keys [type value]}]
     (case type
-      :increases-by (mod-cfg increases-by value)
+      :increases-by (mod-cfg increases-by (default-int value))
       :equals-walking-speed (mod-cfg equals-walking-speed)
-      (mod-cfg becomes-at-least value))))
+      (mod-cfg becomes-at-least (default-int value)))))
 
 (def speed-mod
   (speed-mod-fn
@@ -182,7 +187,7 @@
 (defn save-mods [items]
   (map
    (fn [[ability-kw {:keys [value]}]]
-     (mod-cfg :saving-throw-bonus ability-kw value))
+     (mod-cfg :saving-throw-bonus ability-kw (default-int value)))
    items))
 
 (defn from-internal-modifiers [modifiers]
