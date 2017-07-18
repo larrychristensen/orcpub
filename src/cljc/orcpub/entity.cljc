@@ -24,6 +24,57 @@
 
 (declare to-strict-option)
 
+(defn children [n]
+  (cond
+    (map? n) (filter
+              (fn [v]
+                (or (map? v)
+                    (sequential? v)))
+              (vals n))
+    (sequential? n) n
+    :else nil))
+
+(defn db-ids [entity & [branch-fn]]
+  (disj
+   (set
+    (map
+     :db/id
+     (tree-seq
+      (or branch-fn children)
+      children
+      entity))) nil))
+
+(defn remove-orphan-ids-aux [remove-ids? entity & [ids]]
+  (cond
+    (map? entity)
+    (into {}
+          (map
+           (fn [[k v]]
+             [k (remove-orphan-ids-aux (or remove-ids?
+                                           (get ids (:db/id entity))
+                                           (-> entity :db/id nil?))
+                                       v
+                                       ids)])
+           (if (or remove-ids?
+                   (get ids (:db/id entity)))
+             (dissoc entity :db/id)
+             entity)))
+
+    (sequential? entity)
+    (mapv #(remove-orphan-ids-aux remove-ids? % ids) entity)
+
+    :else
+    entity))
+
+(defn remove-specific-ids [entity ids]
+  (remove-orphan-ids-aux false entity ids))
+
+(defn remove-orphan-ids [entity]
+  (remove-orphan-ids-aux false entity))
+
+(defn remove-ids [entity]
+  (remove-orphan-ids-aux true entity))
+
 (defn selection-options [{:keys [::t/options]}]
   options)
 
