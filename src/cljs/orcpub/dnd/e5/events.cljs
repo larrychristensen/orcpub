@@ -1358,8 +1358,6 @@
           :confirmation-shown? true
           :confirmation-cfg cfg)))
 
-
-
 (defn name-result [search-text]
   (let [[sex race subrace :as result] (event-handlers/parse-name-query search-text)]
     (if result
@@ -1857,3 +1855,10 @@
  :route-to-login
  (fn [_ _]
    {:dispatch [:route routes/login-page-route {:secure? true :no-return? true}]}))
+
+(reg-event-db
+ ::char5e/show-options
+ (fn [db [_ component]]
+   (assoc db
+          ::char5e/options-shown? true
+          ::char5e/options-component component)))

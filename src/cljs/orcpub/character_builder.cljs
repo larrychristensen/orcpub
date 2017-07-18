@@ -1766,24 +1766,6 @@
                has-homebrew?
                (conj "Homebrew is not allowed")))])]))))
 
-(defn app-header []
-  [:div#app-header.app-header.flex.flex-column.justify-cont-s-b
-   [:div.app-header-bar.container
-    [:div.content
-     [:img.orcpub-logo {:src "image/orcpub-logo.svg"}]]]
-   [:div.container.header-links
-    [:div.content
-     [:div
-      [:div.m-l-10.main-text-color.hidden-xs.hidden-sm
-       [:span "Questions? Comments? Issues? Feature Requests? We'd love to hear them, "]
-       [:a {:href "https://muut.com/orcpub" :target :_blank} "report them here."]]
-      [:div.hidden-xs.hidden-sm
-       [:div.flex.align-items-c.f-w-b.f-s-18.m-t-10.m-l-10.main-text-color
-        [:span.hidden-xs "Please support continuing development on "]
-        [:a.m-l-5 patreon-link-props [:span "Patreon"]]
-        [:a.m-l-5 patreon-link-props
-         [:img.h-32.w-32 {:src "https://www.patreon.com/images/patreon_navigation_logo_mini_orange.png"}]]]]]]]])
-
 (def loading-style
   {:position :absolute
    :height "100%"
@@ -1811,6 +1793,9 @@
      {:on-click #(dispatch [:toggle-theme])}
      (comps/checkbox (= "light-theme" theme) false)
      [:span.main-text-color "Light Theme"]]))
+
+(defn print-options []
+  [:div "PRINT OPTIONS"])
 
 (defn character-builder []
   (let [character @(subscribe [:character])
@@ -1861,7 +1846,9 @@
                     :event [:reset-character]})}
        {:title "Print"
         :icon "print"
-        :on-click (views5e/export-pdf built-char)}
+        :on-click (views5e/export-pdf built-char) #_#(dispatch
+                    [::char5e/show-options
+                     [print-options]])}
        {:title (if (:db/id character)
                  "Update Existing Character"
                  "Save New Character")

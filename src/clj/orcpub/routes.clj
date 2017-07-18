@@ -842,7 +842,8 @@
         following-ids (map :db/id (:orcpub.user/following user))
         following-usernames (following-usernames db following-ids)
         results (d/q '[:find (pull ?e [:db/id
-                                       ::se/summary])
+                                       ::se/summary
+                                       ::se/owner])
                        :in $ [?idents ...]
                        :where
                        [?e ::se/owner ?idents]]
@@ -974,7 +975,7 @@
 (defn character-page [{:keys [db conn identity headers scheme uri] {:keys [id]} :path-params :as request}]
   (let [host (headers "host")
         {:keys [::se/summary
-                ::se/values] :as summary-obj} (character-summary-for-id db (Long/parseLong id))
+                ::se/values] :as summary-obj} (character-summary-for-id db id)
         {:keys [::char5e/character-name]} summary
         {:keys [::char5e/description
                 ::char5e/image-url]} values]
@@ -1058,7 +1059,7 @@
        [(route-map/path-for route-map/dnd-e5-char-route :id ":id")
         {:get `get-character}]
 
-       [(route-map/path-for route-map/dnd-e5-char-page-route :id ":id")
+       [(route-map/path-for route-map/dnd-e5-char-page-route :id ":id") ^:interceptors [parse-id]
         {:get `character-page}]
        [(route-map/path-for route-map/dnd-e5-char-parties-route) ^:interceptors [check-auth]
         {:post `party/create-party
