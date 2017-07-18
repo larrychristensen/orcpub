@@ -95,10 +95,10 @@
          :on-blur (fn [e] (reset! blurred? true))}]
        (if @blurred? (validation-messages messages))])))
 
-(defn export-pdf [built-char]
+(defn export-pdf [built-char & [options]]
   (fn [_]
     (let [field (.getElementById js/document "fields-input")]
-      (aset field "value" (str (pdf-spec/make-spec built-char)))
+      (aset field "value" (str (pdf-spec/make-spec built-char options)))
       (.submit (.getElementById js/document "download-form")))))
 
 (defn download-form [built-char]
@@ -777,7 +777,7 @@
                            (dispatch [:confirm (:event cfg)]))}
              (:confirm-button-text cfg)]]])])
      (if @(subscribe [::char/options-shown?])
-       @(subscribe [::char/options-component]))
+       [:div.bg-light.m-b-10 @(subscribe [::char/options-component])])
      (if @(subscribe [:message-shown?])
        [:div.p-b-10.p-r-10.p-l-10
         [message
@@ -1599,11 +1599,13 @@
              (mapcat
               (fn [{:keys [key class always-prepared?] :as spell}]
                 (let [k (str key class)]
-                  (if (or (not hide-unprepared?)
-                          (zero? lvl)
-                          (not (get prepares-spells class))
-                          (get-in prepared-spells-by-class [class key])
-                          always-prepared?)
+                  (if (char/spell-prepared? {:hide-unprepared? hide-unprepared?
+                                             :always-prepared? always-prepared?
+                                             :lvl lvl
+                                             :key key
+                                             :class class
+                                             :prepares-spells prepares-spells
+                                             :prepared-spells-by-class prepared-spells-by-class})
                     (spell-row id
                                lvl
                                spell-modifiers
