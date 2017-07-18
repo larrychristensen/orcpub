@@ -2349,7 +2349,6 @@
                                                         [(let [slots (?class-spell-slots kw)]
                                                            (slots lvl))
                                                          (let [spell (spells/spell-map spell-key)]
-                                                           (prn "OPTION SOURCES" ?option-sources (:source spell))
                                                            (using-source? ?option-sources (:source spell)))]))
                           spell-keys))
                        spell-list)))
