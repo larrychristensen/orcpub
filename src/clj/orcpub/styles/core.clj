@@ -816,7 +816,7 @@
      {:background-image "linear-gradient(182deg, #313A4D, #080A0D)"
       :font-family font-family
       :height "100%"
-      :overflow :auto}]
+      :overflow :scroll}]
 
     [:.character-builder-header
      {:margin-bottom "19px"}]
