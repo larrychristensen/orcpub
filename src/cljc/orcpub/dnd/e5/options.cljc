@@ -1613,18 +1613,22 @@
   (t/selection-cfg
    {:name "Speed"
     :tags #{:race}
+    :min 0
+    :max 1
     :options (map
               (fn [speed]
                 (t/option-cfg
                  {:name (str speed " ft.")
                   :key (keyword (str "ft-" speed))
                   :modifiers [(modifiers/speed speed)]}))
-              (range 5 55 5))}))
+              (range -10 55 5))}))
 
 (def homebrew-darkvision-selection
   (t/selection-cfg
    {:name "Darkvision"
     :tags #{:race}
+    :min 0
+    :max 1
     :options (map
               (fn [distance]
                 (t/option-cfg

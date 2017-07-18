@@ -250,7 +250,7 @@
                                              :frequency units5e/rests-1
                                              :summary "Force a creature to reroll a hitting attack roll"})]})
                              (opt5e/feat-option
-                              {:name "Squat Nibleness"
+                              {:name "Squat Nimbleness"
                                :exclude-trait? true
                                :summary "Increase STR or DEX by 1; gain prof or expertise in acrobatics or athletics; increase speed by 5"
                                :prereqs [(opt5e/race-prereq ["Dwarf" "Gnome" "Halfling"])]
