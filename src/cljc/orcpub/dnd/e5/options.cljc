@@ -2504,7 +2504,8 @@
    [{:name (str "Deep Gnome (" (s/upper-case (name source)) ")")
      :key key
      :abilities {::character/dex 1}
-     :modifiers [(modifiers/darkvision 120)]
+     :modifiers [(modifiers/darkvision 120)
+                 (modifiers/language :undercommon)]
      :source source
      :traits [{:name "Stone Camouflage"
                :source source
