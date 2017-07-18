@@ -575,63 +575,12 @@
 (defn character-for-id [db id]
   (d/pull db '[*] id))
 
-(defn children [n]
-  (cond
-    (map? n) (filter
-              (fn [v]
-                (or (map? v)
-                    (sequential? v)))
-              (vals n))
-    (sequential? n) n
-    :else nil))
-
 (defn diff-branch [ids]
   (fn [n]
     (or
      (and (map? n)
           (ids (:db/id n)))
      (sequential? n))))
-
-(defn db-ids [entity & [branch-fn]]
-  (disj
-   (set
-    (map
-     :db/id
-     (tree-seq
-      (or branch-fn children)
-      children
-      entity))) nil))
-
-(defn remove-orphan-ids-aux [remove-ids? entity & [ids]]
-  (cond
-    (map? entity)
-    (into {}
-          (map
-           (fn [[k v]]
-             [k (remove-orphan-ids-aux (or remove-ids?
-                                           (get ids (:db/id entity))
-                                           (-> entity :db/id nil?))
-                                       v
-                                       ids)])
-           (if (or remove-ids?
-                   (get ids (:db/id entity)))
-             (dissoc entity :db/id)
-             entity)))
-
-    (sequential? entity)
-    (mapv #(remove-orphan-ids-aux remove-ids? % ids) entity)
-
-    :else
-    entity))
-
-(defn remove-specific-ids [entity ids]
-  (remove-orphan-ids-aux false entity ids))
-
-(defn remove-orphan-ids [entity]
-  (remove-orphan-ids-aux false entity))
-
-(defn remove-ids [entity]
-  (remove-orphan-ids-aux true entity))
 
 (defn get-new-id [temp-id result]
   (-> result :tempids (get temp-id)))
@@ -669,7 +618,7 @@
                            [:db/retractEntity retract-id])
                          retract-ids)
             remove-ids (sets/difference new-ids current-ids)
-            with-ids-removed (remove-specific-ids entity remove-ids)
+            with-ids-removed (entity/remove-specific-ids entity remove-ids)
             new-entity (assoc with-ids-removed owner-prop username)
             result @(d/transact conn (concat retractions [new-entity]))]
         (d/pull (d/db conn) '[*] id))
@@ -721,7 +670,7 @@
         (if (seq problems)
           {:status 400 :body problems}
           (if (not current-valid?)
-            (let [new-character (remove-ids character)
+            (let [new-character (entity/remove-ids character)
                   tx [[:db/retractEntity (:db/id current-character)]
                       (-> new-character
                           (assoc :db/id "tempid"
@@ -730,7 +679,7 @@
                   result @(d/transact conn tx)]
               {:status 200
                :body (d/pull (d/db conn) '[*] (-> result :tempids (get "tempid")))})
-            (let [new-character (remove-orphan-ids character)
+            (let [new-character (entity/remove-orphan-ids character)
                   current-ids (db-ids current-character)
                   new-ids (db-ids new-character)
                   retract-ids (sets/difference current-ids new-ids)

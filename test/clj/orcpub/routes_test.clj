@@ -3,6 +3,7 @@
             [orcpub.dnd.e5.magic-items :as mi]
             [orcpub.dnd.e5.character :as char]
             [orcpub.modifiers :as mod]
+            [orcpub.entity :as entity]
             [clojure.test :refer [deftest is testing]]
             [orcpub.errors :as errors]
             [io.pedestal.http :as http]
@@ -107,7 +108,7 @@
            :y {:db/id 3
                :z {:db/id 4}
                :x [{:db/id 5} {:db/id 6 :xx 2}]}}]
-    (is (= (routes/remove-specific-ids e #{4 6})
+    (is (= (entity/remove-specific-ids e #{4 6})
            {:db/id 2
             :y {:db/id 3
                 :z {}
@@ -173,8 +174,8 @@
                        :zz {:v 78
                             :zzz [{:db/id 7
                                    :s "String"}]}}]}}]
-    (is (= (routes/remove-orphan-ids e-1) e-1))
-    (is (= (routes/remove-orphan-ids e-2) {:db/id 1
+    (is (= (entity/remove-orphan-ids e-1) e-1))
+    (is (= (entity/remove-orphan-ids e-2) {:db/id 1
                                            :s "sere"
                                            :v 12324
                                            :x {:y [{:s "xx"
@@ -182,7 +183,7 @@
                                                :yy [{:v 34
                                                      :zz {:v 78
                                                           :zzz [{:s "String"}]}}]}}))
-    (is (= (routes/remove-orphan-ids e-3) {:db/id 1
+    (is (= (entity/remove-orphan-ids e-3) {:db/id 1
                                            :s "sere"
                                            :v 12324
                                            :x {:db/id 2
