@@ -203,7 +203,11 @@
     {:name "Dark Elf (Drow)"
      :abilities {::char5e/cha 1}
      :traits [(sunlight-sensitivity 24)]
-     :modifiers (conj drow-magic-mods (mod5e/darkvision 120))}]
+     :modifiers (conj drow-magic-mods
+                      (mod5e/weapon-proficiency :rapier)
+                      (mod5e/weapon-proficiency :shortsword)
+                      (mod5e/weapon-proficiency :crossbow-hand)
+                      (mod5e/darkvision 120))}]
    :traits [{:name "Fey Ancestry"
              :page 23
              :summary "advantage on charmed saves and immune to sleep magic"}
