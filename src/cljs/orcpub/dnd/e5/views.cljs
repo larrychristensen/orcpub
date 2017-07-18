@@ -738,7 +738,6 @@
 
 (defn header [title button-cfgs]
   (let [device-type @(subscribe [:device-type])]
-    (prn "OPTIONS SHOWN" @(subscribe [::char/options-shown?]))
     [:div.w-100-p
      [:div.flex.align-items-c.justify-cont-s-b.flex-wrap
       [:h1.f-s-36.f-w-b.m-t-5.m-l-10
@@ -2621,6 +2620,63 @@
                        (dispatch [::party/make-party #{character-id}]))}
          "ADD"]]])))
 
+(defn print-options []
+  (let [print-character-sheet? @(subscribe [::char/print-character-sheet?])
+        print-spell-cards? @(subscribe [::char/print-spell-cards?])
+        print-prepared-spells? @(subscribe [::char/print-prepared-spells?])]
+    [:div.flex.justify-cont-end
+     [:div.p-20
+      [:div.f-s-24.f-w-b.m-b-10 "Print Options"]
+      [:div.m-b-20
+       #_[:div.m-b-10
+        [:span.f-w-b "Parts"]]
+       [:div.flex
+        #_[:div
+         {:on-click #(dispatch [::char/toggle-character-sheet-print])}
+         [labeled-checkbox
+          "Character Sheet"
+          print-character-sheet?]]
+        [:div
+         {:on-click #(dispatch [::char/toggle-spell-cards-print])}
+         [labeled-checkbox
+          "Print Spell Cards"
+          print-spell-cards?]]]]
+      [:div.m-b-10
+       [:div.m-b-10
+        [:span.f-w-b "Spells Printed"]]
+       [:div.flex
+        [:div
+         {:on-click #(dispatch [::char/toggle-known-spells-print])}
+         [labeled-checkbox
+          "Known"
+          (not print-prepared-spells?)]]
+        [:div.m-l-20
+         {:on-click #(dispatch [::char/toggle-known-spells-print])}
+         [labeled-checkbox
+          "Prepared"
+          print-prepared-spells?]]]]
+      [:span.orange.underline.pointer.uppercase.f-s-12
+       {:on-click #(dispatch [::char/hide-options])}
+       "Cancel"]
+      [:button.form-button.p-10.m-l-5
+       {:on-click #(let [export-fn (export-pdf @(subscribe [:built-character])
+                                              {:print-character-sheet? print-character-sheet?
+                                               :print-spell-cards? print-spell-cards?
+                                               :print-prepared-spells? print-prepared-spells?})]
+                     (export-fn)
+                     (dispatch [::char/hide-options]))}
+       "Print"]]]))
+
+(defn make-print-handler [built-char]
+  (if (seq (char/spells-known built-char))
+    #(dispatch
+     [::char/show-options
+      [print-options]])
+    (export-pdf built-char
+                {:print-character-sheet? true
+                 :print-spell-cards? false
+                 :print-prepared-spells? false})))
+
 (defn character-page [{:keys [id] :as arg}]
   (let [{:keys [::entity/owner] :as character} @(subscribe [::char/character id])
         built-template (subs/built-template
@@ -2644,7 +2700,7 @@
           :on-click #(dispatch [:edit-character character])})
        {:title "Print"
         :icon "print"
-        :on-click (export-pdf built-character)}
+        :on-click (make-print-handler built-character)}
        (if (and username owner (not= owner username))
          [add-to-party-component (js/parseInt id)])])
      [:div.p-10.main-text-color
@@ -3154,7 +3210,11 @@
                                           (dispatch [:route route]))}
                             "view"]
                            [:button.form-button.m-l-5
-                            {:on-click (export-pdf @(subscribe [::char/built-character id]))}
+                            {:on-click (export-pdf
+                                        @(subscribe [::char/built-character id])
+                                        {:print-character-sheet? true
+                                         :print-spell-cards? true
+                                         :print-prepared-spells? false})}
                             "print"]
                            (if (= username owner)
                              [:button.form-button.m-l-5
