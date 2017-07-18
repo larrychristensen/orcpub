@@ -86,6 +86,27 @@
  character-interceptors
  reset-character)
 
+(defn prn-return [v message]
+  (do (prn message v))
+  v)
+
+(reg-event-fx
+ ::char5e/clone-character
+ (fn [{:keys [db]} _]
+   {:dispatch [:set-character (-> :character
+                                  db
+                                  (prn-return "original")
+                                  char5e/to-strict
+                                  (prn-return "strict")
+                                  entity/remove-ids
+                                  (prn-return "without ids")
+                                  char5e/from-strict
+                                  (prn-return "back to non-strict")
+                                  (update-in
+                                   [::entity/values ::char5e/character-name]
+                                   (fn [nm]
+                                     (str nm " (clone)"))))]}))
+
 (defn random-sequential-selection [built-template character {:keys [::t/min ::t/options ::entity/path] :as selection}]
   (let [num (inc (rand-int (count options)))
         actual-path (entity/actual-path selection)]

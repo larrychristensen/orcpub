@@ -1841,6 +1841,13 @@
                    {:confirm-button-text "CREATE NEW CHARACTER"
                     :question "You have unsaved changes, are you sure you want to discard them and create a new character?"
                     :event [:reset-character]})}
+       {:title "Clone"
+        :icon "clone"
+        :on-click (confirm-handler
+                   character-changed?
+                   {:confirm-button-text "CREATE CLONE"
+                    :question "You have unsaved changes, are you sure you want to discard them and clone this character? The new character will have the unsaved changes, the original will not."
+                    :event [::char5e/clone-character]})}
        {:title "Print"
         :icon "print"
         :on-click (views5e/make-print-handler built-char)}
