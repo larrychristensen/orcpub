@@ -748,7 +748,9 @@
  (fn [[_ id] _]
    (subscribe [::char5e/character id]))
  (fn [character _]
-   (char5e/prepared-spells-by-class character)))
+   (get-in character
+           [::entity/values
+            ::char5e/prepared-spells-by-class])))
 
 (reg-sub
  ::char5e/feature-used?

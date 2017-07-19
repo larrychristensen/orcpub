@@ -122,7 +122,10 @@
         levels-id (get-in strict (conj levels-strict-path :db/id))
         classes-id (get-in strict [::se/selections 0 :db/id])
         non-strict (entity/from-strict strict)
-        class-selection (some (fn [s] (if (= :class (::t/key s)) s)) (t5e/template ::t/selections))
+        template (t5e/template
+                  (t5e/template-selections nil nil nil))
+        class-selection (some (fn [s] (if (= :class (::t/key s)) s))
+                              (template ::t/selections))
         class-options (::t/options class-selection)
         class-option-map (zipmap (map ::t/key class-options) class-options)
         updated (-> non-strict

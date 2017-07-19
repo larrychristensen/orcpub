@@ -89,7 +89,13 @@
 (defn magic-item-options [modifier-fn]
   (fn [items _]
     (map
-     (fn [{:keys [:db/id ::mi5e/name key ::mi5e/description ::mi5e/page ::mi5e/source] :as item}]
+     (fn [{:keys [:db/id
+                  ::mi5e/name
+                  key
+                  ::mi5e/description
+                  ::mi5e/page
+                  ::mi5e/modifiers
+                  ::mi5e/source] :as item}]
        (let [item-key (or key (keyword (str "id-" id)))
              full-item (update item
                                ::mi5e/modifiers
@@ -100,7 +106,9 @@
            :help (if (or description
                          page)
                    (t5e/inventory-help description page source))
-           :modifiers [(modifier-fn item-key full-item)]})))
+           :modifiers [(modifier-fn
+                        item-key
+                        full-item)]})))
      items)))
 
 (reg-sub
