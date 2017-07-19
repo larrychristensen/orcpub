@@ -454,8 +454,10 @@
     (fn [cfg] (mods/map-mod ?weapons weapon-kw (equipment-cfg cfg)))
     1))
 
-(defn deferred-magic-item-fn [equipment-mod-fn {:keys [:orcpub.dnd.e5.magic-items/magical-ac-bonus
-                                                       :orcpub.dnd.e5.magic-items/modifiers]} & [include-magic-bonus?]]
+(defn deferred-magic-item-fn [equipment-mod-fn
+                              {:keys [:orcpub.dnd.e5.magic-items/magical-ac-bonus
+                                      :orcpub.dnd.e5.magic-items/modifiers] :as item}
+                              & [include-magic-bonus?]]
   (fn [cfg]
     (let [equipment-mod (equipment-mod-fn cfg)]
       (if (::char-equip/equipped? cfg)
@@ -595,14 +597,16 @@
 
 
 (defn build-modifiers [mod-cfgs]
-  (sequence
-   (comp
-    (filter ::mods/args)
-    (map
-     (fn [{:keys [::mods/key ::mods/args]}]
-       (let [raw-args (mods/raw-args args)
-             mod-fn (mods-map key)]
-         (if mod-fn
-           (apply mod-fn raw-args)))))
-    (remove nil?))
-   mod-cfgs))
+  (concat
+   (remove ::mods/args mod-cfgs)
+   (sequence
+    (comp
+     (filter ::mods/args)
+     (map
+      (fn [{:keys [::mods/key ::mods/args]}]
+        (let [raw-args (mods/raw-args args)
+              mod-fn (mods-map key)]
+          (if mod-fn
+            (apply mod-fn raw-args)))))
+     (remove nil?))
+    mod-cfgs)))

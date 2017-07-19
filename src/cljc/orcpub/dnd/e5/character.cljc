@@ -784,8 +784,8 @@
    {}
    skills/skills))
 
-(defn prepared-spells-by-class [character]
-  (get-prop character ::prepared-spells-by-class))
+(defn prepared-spells-by-class [built-character]
+  (get built-character ::prepared-spells-by-class))
 
 (defn spell-prepared? [{:keys [hide-unprepared?
                                always-prepared?

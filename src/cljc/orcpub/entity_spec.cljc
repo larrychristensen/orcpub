@@ -1,8 +1,6 @@
 (ns orcpub.entity-spec
   (:require [clojure.string :as s]
-            [clojure.set :as sets]
-            ;;[goog.string :as gs]
-            ))
+            [clojure.set :as sets]))
 
 (defn entity-val [entity k]
   (let [v (entity k)
