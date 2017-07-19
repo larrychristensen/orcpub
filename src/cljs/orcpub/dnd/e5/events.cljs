@@ -1270,7 +1270,7 @@
  ::char5e/set-character
  (fn [db [_ id character]]
    (assoc-in db
-             [::char5e/character-map id]
+             [::char5e/character-map (js/parseInt id)]
              character)))
 
 (reg-event-fx

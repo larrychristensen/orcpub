@@ -379,20 +379,23 @@
 (reg-sub-raw
   ::char5e/character
   (fn [app-db [_ id :as args]]
-    (if (some? id)
-      (if (nil? (get-in @app-db [::char5e/character-map id]))
-        (go (dispatch [:set-loading true])
-            (let [response (<! (http/get (routes/path-for routes/dnd-e5-char-route :id id)
-                                         {:accept :transit}))]
-              (dispatch [:set-loading false])
-              (case (:status response)
-                200 (dispatch [::char5e/set-character id (char5e/from-strict (-> response :body))])
-                401 (dispatch [:route-to-login])
-                500 (dispatch (events/show-generic-error)))))))
-    (ra/make-reaction
-     (fn [] (if id
-              (get-in @app-db [::char5e/character-map id] [])
-              (get @app-db :character))))))
+    (let [int-id (if id (js/parseInt id))]
+      (if (some? int-id)
+        (if (nil? (get-in @app-db [::char5e/character-map int-id]))
+          (go (dispatch [:set-loading true])
+              (let [response (<! (http/get (routes/path-for routes/dnd-e5-char-route :id int-id)
+                                           {:accept :transit}))]
+                (prn "RESPONSE" response)
+                (dispatch [:set-loading false])
+                (case (:status response)
+                  200 (dispatch [::char5e/set-character int-id (char5e/from-strict (-> response :body))])
+                  401 (dispatch [:route-to-login])
+                  500 (dispatch (events/show-generic-error)))))))
+      (ra/make-reaction
+       (fn []
+         (if int-id
+           (get-in @app-db [::char5e/character-map int-id] {})
+           (get @app-db :character)))))))
 
 (reg-sub
  ::char5e/character-changed?
