@@ -106,10 +106,14 @@
           (fn [[k v]]
             [k (cond
                  (sequential? v)
-                 (mapv #(if (map? %)
-                          (remove-empty-fields %)
-                          %)
-                       v)
+                 (vec
+                  (sequence
+                   (comp
+                    (map #(if (map? %)
+                            (remove-empty-fields %)
+                            %))
+                    (remove #(or (nil? %) (empty? %))))
+                   v))
                  
                  (map? v) (remove-empty-fields v)
                  :else v)]))
