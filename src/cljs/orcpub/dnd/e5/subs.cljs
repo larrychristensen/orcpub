@@ -385,7 +385,6 @@
           (go (dispatch [:set-loading true])
               (let [response (<! (http/get (routes/path-for routes/dnd-e5-char-route :id int-id)
                                            {:accept :transit}))]
-                (prn "RESPONSE" response)
                 (dispatch [:set-loading false])
                 (case (:status response)
                   200 (dispatch [::char5e/set-character int-id (char5e/from-strict (-> response :body))])
