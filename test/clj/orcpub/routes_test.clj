@@ -73,10 +73,10 @@
                                                    {::mod/int-arg 1}]}]}
               saved-entity (routes/save-entity mocked-conn "testy" entity ::mi/owner)
               root-id (:db/id saved-entity)
-              child-ids (disj (routes/db-ids saved-entity) root-id)
+              child-ids (disj (entity/db-ids saved-entity) root-id)
               update-entity (assoc-in saved-entity [::mi/modifiers 0 :db/id] nil)
               updated-entity (routes/save-entity mocked-conn "testy" update-entity ::mi/owner)
-              updated-entity-ids (routes/db-ids updated-entity)]
+              updated-entity-ids (entity/db-ids updated-entity)]
           (is (= root-id (:db/id updated-entity)))
           (is (empty? (intersection updated-entity-ids child-ids)))))
 
@@ -86,11 +86,11 @@
                                                    {::mod/int-arg 1}]}]}
               saved-entity (routes/save-entity mocked-conn "testy" entity ::mi/owner)
               root-id (:db/id saved-entity)
-              child-ids (disj (routes/db-ids saved-entity) root-id)
+              child-ids (disj (entity/db-ids saved-entity) root-id)
               saved-entity-2 (routes/save-entity mocked-conn "testy-2" entity ::mi/owner)
               update-entity (assoc-in saved-entity [::mi/modifiers 0 :db/id] (:db/id saved-entity-2))
               updated-entity (routes/save-entity mocked-conn "testy" update-entity ::mi/owner)
-              updated-entity-ids (routes/db-ids updated-entity)]
+              updated-entity-ids (entity/db-ids updated-entity)]
           (is (= root-id (:db/id updated-entity)))
           (is (empty? (intersection updated-entity-ids child-ids)))
           (is (not (updated-entity-ids (:db/id saved-entity-2)))))))))
@@ -100,8 +100,8 @@
              :x {:db/id 2
                  :y [{:db/id 3
                       :z {:db/id 4}}]}}]
-    (is (= (routes/db-ids e-1) #{1 2 3 4}))
-    (is (= (routes/db-ids e-1 (routes/diff-branch #{1 2})) #{1 2 3}))))
+    (is (= (entity/db-ids e-1) #{1 2 3 4}))
+    (is (= (entity/db-ids e-1 (routes/diff-branch #{1 2})) #{1 2 3}))))
 
 (deftest test-remove-specific-ids
   (let [e {:db/id 2
@@ -135,7 +135,7 @@
                  :yy [{:v 34
                        :zz {:v 78
                             :zzz [{:s "String"}]}}]}}]
-    (is (= e-2 (routes/remove-ids e-1)))))
+    (is (= e-2 (entity/remove-ids e-1)))))
 
 (deftest test-remove-orphan-ids
   (let [e-1 {:db/id 1

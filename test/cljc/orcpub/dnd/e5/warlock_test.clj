@@ -132,7 +132,6 @@
 
 (defn has-spell? [built-char level class-nm spell-key]
   (let [spells-known (char5e/spells-known built-char)]
-    (prn "SPELLS KNOWN" spells-known)
     (get-in spells-known [level [class-nm spell-key]])))
 
 (def elf-dex-bonus 2)
@@ -142,7 +141,10 @@
 (def spy-skill-profs #{:deception :stealth})
 
 (deftest book-of-ancient-secrets
-  (let [built-char (entity/build warlock-with-book-of-ancient-secrets t5e/template)
+  (let [built-char (entity/build
+                    warlock-with-book-of-ancient-secrets
+                    (t5e/template
+                     (t5e/template-selections nil nil nil)))
         {:keys [::char5e/str
                 ::char5e/dex
                 ::char5e/con

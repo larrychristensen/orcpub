@@ -115,7 +115,10 @@
                   :cantrips-known {:acid-splash {}, :blade-ward {}}}}}}}}}))))
 
 (deftest get-all-selections-aux-2
-  (let [selections (entity/get-all-selections-aux-2 t5e/template (entity/make-path-map arcane-trickster))
+  (let [selections (entity/get-all-selections-aux-2
+                    (t5e/template
+                     (t5e/template-selections nil nil nil))
+                    (entity/make-path-map arcane-trickster))
         ref-set (into #{} (map ::t/ref) selections)]
     (is (ref-set [:class
                   :rogue
@@ -126,7 +129,10 @@
                   :enchantment-or-illusion-spells-known]))))
 
 (deftest make-template-option-map
-  (let [selections (entity/get-all-selections-aux-2 t5e/template (entity/make-path-map arcane-trickster))
+  (let [selections (entity/get-all-selections-aux-2
+                    (t5e/template
+                     (t5e/template-selections nil nil nil))
+                    (entity/make-path-map arcane-trickster))
         template-option-map (entity/make-template-option-map selections)]
     (is (template-option-map [:class
                               :rogue
@@ -245,4 +251,356 @@
     (is (= {:orcpub.entity.strict/values {:x :y}}
            (entity/remove-empty-fields entity)))
     (is (= entity-2
-           (entity/remove-empty-fields entity-2)))))
+           (entity/remove-empty-fields entity-2))))
+
+  (testing "removes empty maps from sequences"
+    (let [entity '{:orcpub.entity.strict/selections
+                    [{:orcpub.entity.strict/key :weapons,
+                      :orcpub.entity.strict/options
+                      [{:orcpub.entity.strict/key :crossbow-light,
+                        :orcpub.entity.strict/map-value
+                        {:orcpub.dnd.e5.character.equipment/quantity 1,
+                         :orcpub.dnd.e5.character.equipment/equipped? true,
+                         :orcpub.dnd.e5.character.equipment/class-starting-equipment?
+                         true}}]}
+                     {:orcpub.entity.strict/key :race,
+                      :orcpub.entity.strict/option {:orcpub.entity.strict/key :goblin}}
+                     {:orcpub.entity.strict/key :ability-scores,
+                      :orcpub.entity.strict/option
+                      {:orcpub.entity.strict/key :standard-scores,
+                       :orcpub.entity.strict/map-value
+                       {:orcpub.dnd.e5.character/str 8,
+                        :orcpub.dnd.e5.character/dex 13,
+                        :orcpub.dnd.e5.character/con 14,
+                        :orcpub.dnd.e5.character/int 15,
+                        :orcpub.dnd.e5.character/wis 12,
+                        :orcpub.dnd.e5.character/cha 10}}}
+                     {:orcpub.entity.strict/key :alignment,
+                      :orcpub.entity.strict/option
+                      {:orcpub.entity.strict/key :neutral-evil}}
+                     {:orcpub.entity.strict/key :background,
+                      :orcpub.entity.strict/option
+                      {:orcpub.entity.strict/key :guild-artisan,
+                       :orcpub.entity.strict/selections
+                       [{:orcpub.entity.strict/key :tool-proficiency-artisans-tools,
+                         :orcpub.entity.strict/option
+                         {:orcpub.entity.strict/key :smiths-tools}}
+                        {:orcpub.entity.strict/key :starting-equipment-artisans-tool,
+                         :orcpub.entity.strict/option
+                         {:orcpub.entity.strict/key :leatherworkers-tools}}]}}
+                     {:orcpub.entity.strict/key :equipment,
+                      :orcpub.entity.strict/options
+                      [{:orcpub.entity.strict/key :clothes-traveler-s,
+                        :orcpub.entity.strict/map-value
+                        {:orcpub.dnd.e5.character.equipment/quantity 1,
+                         :orcpub.dnd.e5.character.equipment/equipped? true,
+                         :orcpub.dnd.e5.character.equipment/background-starting-equipment?
+                         true}}
+                       {:orcpub.entity.strict/key :pouch,
+                        :orcpub.entity.strict/map-value
+                        {:orcpub.dnd.e5.character.equipment/quantity 1,
+                         :orcpub.dnd.e5.character.equipment/equipped? true,
+                         :orcpub.dnd.e5.character.equipment/background-starting-equipment?
+                         true}}
+                       {:orcpub.entity.strict/key :crossbow-bolt,
+                        :orcpub.entity.strict/map-value
+                        {:orcpub.dnd.e5.character.equipment/quantity 20,
+                         :orcpub.dnd.e5.character.equipment/equipped? true,
+                         :orcpub.dnd.e5.character.equipment/class-starting-equipment?
+                         true}}
+                       {:orcpub.entity.strict/key :thieves-tools,
+                        :orcpub.entity.strict/map-value
+                        {:orcpub.dnd.e5.character.equipment/quantity 1,
+                         :orcpub.dnd.e5.character.equipment/equipped? true,
+                         :orcpub.dnd.e5.character.equipment/class-starting-equipment?
+                         true}}
+                       {:orcpub.entity.strict/key :dungeoneers-pack,
+                        :orcpub.entity.strict/map-value
+                        {:orcpub.dnd.e5.character.equipment/quantity 1,
+                         :orcpub.dnd.e5.character.equipment/equipped? true,
+                         :orcpub.dnd.e5.character.equipment/class-starting-equipment?
+                         true}}]}
+                     {:orcpub.entity.strict/key :treasure,
+                      :orcpub.entity.strict/options
+                      [{:orcpub.entity.strict/key :gp,
+                        :orcpub.entity.strict/map-value
+                        {:orcpub.dnd.e5.character.equipment/quantity 15,
+                         :orcpub.dnd.e5.character.equipment/equipped? true,
+                         :orcpub.dnd.e5.character.equipment/background-starting-equipment?
+                         true}}]}
+                     {:orcpub.entity.strict/key :class,
+                      :orcpub.entity.strict/options
+                      [{:orcpub.entity.strict/key :artificer,
+                        :orcpub.entity.strict/selections
+                        [{:orcpub.entity.strict/key :levels,
+                          :orcpub.entity.strict/options
+                          [{:orcpub.entity.strict/key :level-1,
+                            :orcpub.entity.strict/selections
+                            [{:orcpub.entity.strict/key :artificer-specialty,
+                              :orcpub.entity.strict/option
+                              {:orcpub.entity.strict/key :alchemist,
+                               :orcpub.entity.strict/selections
+                               [{:orcpub.entity.strict/key :alchemical-formulas,
+                                 :orcpub.entity.strict/options
+                                 [{:orcpub.entity.strict/key :thunderstone}
+                                  {:orcpub.entity.strict/key :smoke-stick}]}]}}]}
+                           {:orcpub.entity.strict/key :level-2,
+                            :orcpub.entity.strict/selections
+                            [{:orcpub.entity.strict/key :hit-points,
+                              :orcpub.entity.strict/option
+                              {:orcpub.entity.strict/key :average,
+                               :orcpub.entity.strict/int-value 5}}]}
+                           {:orcpub.entity.strict/key :level-3,
+                            :orcpub.entity.strict/selections
+                            [{:orcpub.entity.strict/key :hit-points,
+                              :orcpub.entity.strict/option
+                              {:orcpub.entity.strict/key :average,
+                               :orcpub.entity.strict/int-value 5}}]}
+                           {:orcpub.entity.strict/key :level-4,
+                            :orcpub.entity.strict/selections
+                            [{:orcpub.entity.strict/key :hit-points,
+                              :orcpub.entity.strict/option
+                              {:orcpub.entity.strict/key :average,
+                               :orcpub.entity.strict/int-value 5}}
+                             {:orcpub.entity.strict/key :asi-or-feat,
+                              :orcpub.entity.strict/option
+                              {:orcpub.entity.strict/key :ability-score-improvement,
+                               :orcpub.entity.strict/selections
+                               [{:orcpub.entity.strict/key :asi,
+                                 :orcpub.entity.strict/options
+                                 [{:orcpub.entity.strict/key
+                                   :orcpub.dnd.e5.character/con}
+                                  {:orcpub.entity.strict/key
+                                   :orcpub.dnd.e5.character/int}]}]}}]}
+                           {:orcpub.entity.strict/key :level-5,
+                            :orcpub.entity.strict/selections
+                            [{:orcpub.entity.strict/key :hit-points,
+                              :orcpub.entity.strict/option
+                              {:orcpub.entity.strict/key :average,
+                               :orcpub.entity.strict/int-value 5}}]}]}
+                         {:orcpub.entity.strict/key :artificer-spells-known,
+                          :orcpub.entity.strict/options
+                          [{:orcpub.entity.strict/key :alarm}
+                           {:orcpub.entity.strict/key :sanctuary}
+                           {:orcpub.entity.strict/key :longstrider}
+                           {:orcpub.entity.strict/key :false-life}]}
+                         {:orcpub.entity.strict/key :tool-proficiency,
+                          :orcpub.entity.strict/options
+                          [{:orcpub.entity.strict/key :tinkers-tools}
+                           {:orcpub.entity.strict/key :leatherworkers-tools}]}
+                         {:orcpub.entity.strict/key :skill-proficiency,
+                          :orcpub.entity.strict/options
+                          [{:orcpub.entity.strict/key :arcana}
+                           {:orcpub.entity.strict/key :history}
+                           {:orcpub.entity.strict/key :investigation}]}
+                         {:orcpub.entity.strict/key :starting-equipment-armor,
+                          :orcpub.entity.strict/option
+                          {:orcpub.entity.strict/key :studded}}
+                         {:orcpub.entity.strict/key :wonderous-inventions,
+                          :orcpub.entity.strict/homebrew? true,
+                          :orcpub.entity.strict/options [{} {} {} {} {} {} {}]}
+                         {:orcpub.entity.strict/key :starting-equipment-weapon,
+                          :orcpub.entity.strict/option
+                          {:orcpub.entity.strict/key :handaxe}}]}]}
+                     {:orcpub.entity.strict/key :armor,
+                      :orcpub.entity.strict/options
+                      [{:orcpub.entity.strict/key :leather,
+                        :orcpub.entity.strict/map-value
+                        {:orcpub.dnd.e5.character.equipment/quantity 1,
+                         :orcpub.dnd.e5.character.equipment/equipped? true,
+                         :orcpub.dnd.e5.character.equipment/class-starting-equipment?
+                         true}}]}
+                     {:orcpub.entity.strict/key :languages,
+                      :orcpub.entity.strict/options [{:orcpub.entity.strict/key :orc}]}
+                     {:orcpub.entity.strict/key :optional-content,
+                      :orcpub.entity.strict/options
+                      [{:orcpub.entity.strict/key :vgm}
+                       {:orcpub.entity.strict/key :scag}
+                       {:orcpub.entity.strict/key :ee}
+                       {:orcpub.entity.strict/key :dmg}
+                       {:orcpub.entity.strict/key :cos}
+                       {:orcpub.entity.strict/key :ua-artificer}
+                       {:orcpub.entity.strict/key :ua-race-feats}
+                       {:orcpub.entity.strict/key :ua-skill-feats}]}],
+                    :orcpub.entity.strict/summary
+                    {:orcpub.dnd.e5.character/character-name "",
+                     :orcpub.dnd.e5.character/race-name "Goblin",
+                     :orcpub.dnd.e5.character/classes
+                     ({:orcpub.dnd.e5.character/class-name "Artificer",
+                       :orcpub.dnd.e5.character/subclass-name "Alchemist",
+                       :orcpub.dnd.e5.character/level 5})}}
+          expected '{:orcpub.entity.strict/selections
+                    [{:orcpub.entity.strict/key :weapons,
+                      :orcpub.entity.strict/options
+                      [{:orcpub.entity.strict/key :crossbow-light,
+                        :orcpub.entity.strict/map-value
+                        {:orcpub.dnd.e5.character.equipment/quantity 1,
+                         :orcpub.dnd.e5.character.equipment/equipped? true,
+                         :orcpub.dnd.e5.character.equipment/class-starting-equipment?
+                         true}}]}
+                     {:orcpub.entity.strict/key :race,
+                      :orcpub.entity.strict/option {:orcpub.entity.strict/key :goblin}}
+                     {:orcpub.entity.strict/key :ability-scores,
+                      :orcpub.entity.strict/option
+                      {:orcpub.entity.strict/key :standard-scores,
+                       :orcpub.entity.strict/map-value
+                       {:orcpub.dnd.e5.character/str 8,
+                        :orcpub.dnd.e5.character/dex 13,
+                        :orcpub.dnd.e5.character/con 14,
+                        :orcpub.dnd.e5.character/int 15,
+                        :orcpub.dnd.e5.character/wis 12,
+                        :orcpub.dnd.e5.character/cha 10}}}
+                     {:orcpub.entity.strict/key :alignment,
+                      :orcpub.entity.strict/option
+                      {:orcpub.entity.strict/key :neutral-evil}}
+                     {:orcpub.entity.strict/key :background,
+                      :orcpub.entity.strict/option
+                      {:orcpub.entity.strict/key :guild-artisan,
+                       :orcpub.entity.strict/selections
+                       [{:orcpub.entity.strict/key :tool-proficiency-artisans-tools,
+                         :orcpub.entity.strict/option
+                         {:orcpub.entity.strict/key :smiths-tools}}
+                        {:orcpub.entity.strict/key :starting-equipment-artisans-tool,
+                         :orcpub.entity.strict/option
+                         {:orcpub.entity.strict/key :leatherworkers-tools}}]}}
+                     {:orcpub.entity.strict/key :equipment,
+                      :orcpub.entity.strict/options
+                      [{:orcpub.entity.strict/key :clothes-traveler-s,
+                        :orcpub.entity.strict/map-value
+                        {:orcpub.dnd.e5.character.equipment/quantity 1,
+                         :orcpub.dnd.e5.character.equipment/equipped? true,
+                         :orcpub.dnd.e5.character.equipment/background-starting-equipment?
+                         true}}
+                       {:orcpub.entity.strict/key :pouch,
+                        :orcpub.entity.strict/map-value
+                        {:orcpub.dnd.e5.character.equipment/quantity 1,
+                         :orcpub.dnd.e5.character.equipment/equipped? true,
+                         :orcpub.dnd.e5.character.equipment/background-starting-equipment?
+                         true}}
+                       {:orcpub.entity.strict/key :crossbow-bolt,
+                        :orcpub.entity.strict/map-value
+                        {:orcpub.dnd.e5.character.equipment/quantity 20,
+                         :orcpub.dnd.e5.character.equipment/equipped? true,
+                         :orcpub.dnd.e5.character.equipment/class-starting-equipment?
+                         true}}
+                       {:orcpub.entity.strict/key :thieves-tools,
+                        :orcpub.entity.strict/map-value
+                        {:orcpub.dnd.e5.character.equipment/quantity 1,
+                         :orcpub.dnd.e5.character.equipment/equipped? true,
+                         :orcpub.dnd.e5.character.equipment/class-starting-equipment?
+                         true}}
+                       {:orcpub.entity.strict/key :dungeoneers-pack,
+                        :orcpub.entity.strict/map-value
+                        {:orcpub.dnd.e5.character.equipment/quantity 1,
+                         :orcpub.dnd.e5.character.equipment/equipped? true,
+                         :orcpub.dnd.e5.character.equipment/class-starting-equipment?
+                         true}}]}
+                     {:orcpub.entity.strict/key :treasure,
+                      :orcpub.entity.strict/options
+                      [{:orcpub.entity.strict/key :gp,
+                        :orcpub.entity.strict/map-value
+                        {:orcpub.dnd.e5.character.equipment/quantity 15,
+                         :orcpub.dnd.e5.character.equipment/equipped? true,
+                         :orcpub.dnd.e5.character.equipment/background-starting-equipment?
+                         true}}]}
+                     {:orcpub.entity.strict/key :class,
+                      :orcpub.entity.strict/options
+                      [{:orcpub.entity.strict/key :artificer,
+                        :orcpub.entity.strict/selections
+                        [{:orcpub.entity.strict/key :levels,
+                          :orcpub.entity.strict/options
+                          [{:orcpub.entity.strict/key :level-1,
+                            :orcpub.entity.strict/selections
+                            [{:orcpub.entity.strict/key :artificer-specialty,
+                              :orcpub.entity.strict/option
+                              {:orcpub.entity.strict/key :alchemist,
+                               :orcpub.entity.strict/selections
+                               [{:orcpub.entity.strict/key :alchemical-formulas,
+                                 :orcpub.entity.strict/options
+                                 [{:orcpub.entity.strict/key :thunderstone}
+                                  {:orcpub.entity.strict/key :smoke-stick}]}]}}]}
+                           {:orcpub.entity.strict/key :level-2,
+                            :orcpub.entity.strict/selections
+                            [{:orcpub.entity.strict/key :hit-points,
+                              :orcpub.entity.strict/option
+                              {:orcpub.entity.strict/key :average,
+                               :orcpub.entity.strict/int-value 5}}]}
+                           {:orcpub.entity.strict/key :level-3,
+                            :orcpub.entity.strict/selections
+                            [{:orcpub.entity.strict/key :hit-points,
+                              :orcpub.entity.strict/option
+                              {:orcpub.entity.strict/key :average,
+                               :orcpub.entity.strict/int-value 5}}]}
+                           {:orcpub.entity.strict/key :level-4,
+                            :orcpub.entity.strict/selections
+                            [{:orcpub.entity.strict/key :hit-points,
+                              :orcpub.entity.strict/option
+                              {:orcpub.entity.strict/key :average,
+                               :orcpub.entity.strict/int-value 5}}
+                             {:orcpub.entity.strict/key :asi-or-feat,
+                              :orcpub.entity.strict/option
+                              {:orcpub.entity.strict/key :ability-score-improvement,
+                               :orcpub.entity.strict/selections
+                               [{:orcpub.entity.strict/key :asi,
+                                 :orcpub.entity.strict/options
+                                 [{:orcpub.entity.strict/key
+                                   :orcpub.dnd.e5.character/con}
+                                  {:orcpub.entity.strict/key
+                                   :orcpub.dnd.e5.character/int}]}]}}]}
+                           {:orcpub.entity.strict/key :level-5,
+                            :orcpub.entity.strict/selections
+                            [{:orcpub.entity.strict/key :hit-points,
+                              :orcpub.entity.strict/option
+                              {:orcpub.entity.strict/key :average,
+                               :orcpub.entity.strict/int-value 5}}]}]}
+                         {:orcpub.entity.strict/key :artificer-spells-known,
+                          :orcpub.entity.strict/options
+                          [{:orcpub.entity.strict/key :alarm}
+                           {:orcpub.entity.strict/key :sanctuary}
+                           {:orcpub.entity.strict/key :longstrider}
+                           {:orcpub.entity.strict/key :false-life}]}
+                         {:orcpub.entity.strict/key :tool-proficiency,
+                          :orcpub.entity.strict/options
+                          [{:orcpub.entity.strict/key :tinkers-tools}
+                           {:orcpub.entity.strict/key :leatherworkers-tools}]}
+                         {:orcpub.entity.strict/key :skill-proficiency,
+                          :orcpub.entity.strict/options
+                          [{:orcpub.entity.strict/key :arcana}
+                           {:orcpub.entity.strict/key :history}
+                           {:orcpub.entity.strict/key :investigation}]}
+                         {:orcpub.entity.strict/key :starting-equipment-armor,
+                          :orcpub.entity.strict/option
+                          {:orcpub.entity.strict/key :studded}}
+                         {:orcpub.entity.strict/key :wonderous-inventions,
+                          :orcpub.entity.strict/homebrew? true}
+                         {:orcpub.entity.strict/key :starting-equipment-weapon,
+                          :orcpub.entity.strict/option
+                          {:orcpub.entity.strict/key :handaxe}}]}]}
+                     {:orcpub.entity.strict/key :armor,
+                      :orcpub.entity.strict/options
+                      [{:orcpub.entity.strict/key :leather,
+                        :orcpub.entity.strict/map-value
+                        {:orcpub.dnd.e5.character.equipment/quantity 1,
+                         :orcpub.dnd.e5.character.equipment/equipped? true,
+                         :orcpub.dnd.e5.character.equipment/class-starting-equipment?
+                         true}}]}
+                     {:orcpub.entity.strict/key :languages,
+                      :orcpub.entity.strict/options [{:orcpub.entity.strict/key :orc}]}
+                     {:orcpub.entity.strict/key :optional-content,
+                      :orcpub.entity.strict/options
+                      [{:orcpub.entity.strict/key :vgm}
+                       {:orcpub.entity.strict/key :scag}
+                       {:orcpub.entity.strict/key :ee}
+                       {:orcpub.entity.strict/key :dmg}
+                       {:orcpub.entity.strict/key :cos}
+                       {:orcpub.entity.strict/key :ua-artificer}
+                       {:orcpub.entity.strict/key :ua-race-feats}
+                       {:orcpub.entity.strict/key :ua-skill-feats}]}],
+                    :orcpub.entity.strict/summary
+                    {:orcpub.dnd.e5.character/character-name "",
+                     :orcpub.dnd.e5.character/race-name "Goblin",
+                     :orcpub.dnd.e5.character/classes
+                     ({:orcpub.dnd.e5.character/class-name "Artificer",
+                       :orcpub.dnd.e5.character/subclass-name "Alchemist",
+                       :orcpub.dnd.e5.character/level 5})}}]
+      (is (= expected (entity/remove-empty-fields entity))))))

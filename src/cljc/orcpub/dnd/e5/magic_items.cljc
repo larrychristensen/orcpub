@@ -2,6 +2,7 @@
   (:require [clojure.spec.alpha :as spec]
             [orcpub.common :as common]
             [orcpub.modifiers :as mod]
+            [orcpub.entity :as entity]
             [orcpub.dnd.e5.weapons :as weapons]
             [orcpub.dnd.e5.armor :as armor5e]
             [orcpub.dnd.e5.weapons :as weapons5e]
@@ -119,7 +120,8 @@
     (seq modifiers) (assoc ::internal-modifiers (to-internal-modifiers (::modifiers item)))
     true (dissoc ::modifiers)
     true (update ::attunement set)
-    (seq subtypes) (update ::subtypes #(into #{} %))))
+    (seq subtypes) (update ::subtypes #(into #{} %))
+    true entity/remove-empty-fields))
 
 (defn mod-args [args]
   (map
@@ -218,7 +220,8 @@
                     ::magical-damage-bonus
                     ::magical-attack-bonus
                     ::magical-ac-bonus
-                    ::modifiers])))
+                    ::modifiers])
+      entity/remove-empty-fields))
 
 (defn sword? [w]
   (= :sword (:subtype w)))

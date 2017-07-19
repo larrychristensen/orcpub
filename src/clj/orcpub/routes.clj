@@ -587,7 +587,7 @@
 
 (defn create-entity [conn username entity owner-prop]
   (as-> entity $
-    (remove-ids $)
+    (entity/remove-ids $)
     (assoc $
            :db/id "tempid"
            owner-prop username)
@@ -610,8 +610,8 @@
         owner (get current owner-prop)
         email (email-for-username (d/db conn) username)]
     (if ((set [username email]) owner)
-      (let [current-ids (db-ids current)
-            new-ids (db-ids entity)
+      (let [current-ids (entity/db-ids current)
+            new-ids (entity/db-ids entity)
             retract-ids (sets/difference current-ids new-ids)
             retractions (map
                          (fn [retract-id]
@@ -680,8 +680,8 @@
               {:status 200
                :body (d/pull (d/db conn) '[*] (-> result :tempids (get "tempid")))})
             (let [new-character (entity/remove-orphan-ids character)
-                  current-ids (db-ids current-character)
-                  new-ids (db-ids new-character)
+                  current-ids (entity/db-ids current-character)
+                  new-ids (entity/db-ids new-character)
                   retract-ids (sets/difference current-ids new-ids)
                   retractions (map
                                (fn [retract-id]
