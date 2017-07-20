@@ -49,7 +49,7 @@
                     19 7
                     :default 1})
                   "d6 fire damage to creatures within a 5 ft. that fail a DC "
-                  (?spell-save-dc :int)
+                  (?spell-save-dc ::char5e/int)
                   " DEX save")}))
 
 (def alchemical-acid-mod
@@ -73,7 +73,7 @@
                     :default 1}
                    )
                   "d6 acid damage to creatures within a 5 ft. that fail a DC "
-                  (?spell-save-dc :int)
+                  (?spell-save-dc ::char5e/int)
                   " DEX save")}))
 
 (def alchemical-formula-selection
@@ -137,7 +137,7 @@
                               :page 6
                               :source :ua-artificer
                               :range units5e/ft-30
-                              :summary (str "Hurl a shard. Creatures within 10 ft. of the impact point must make a DC " (?spell-save-dc :int) " CON save or be knocked prone and pushed 10 ft. away.")})]})]}))
+                              :summary (str "Hurl a shard. Creatures within 10 ft. of the impact point must make a DC " (?spell-save-dc ::char5e/int) " CON save or be knocked prone and pushed 10 ft. away.")})]})]}))
 
 (defn artificer-tool-prof-mods [tool-key]
   [(mod5e/tool-proficiency tool-key)
@@ -313,7 +313,7 @@
                                             :page 6
                                             :source :ua-artificer
                                             :summary (str "Make a special Thunder Cannon attack that unleashes energy in a 15 ft. cone. Creatures in the area that fail a DC "
-                                                          (?spell-save-dc :int)
+                                                          (?spell-save-dc ::char5e/int)
                                                           " STR save take "
                                                           (mod5e/level-val
                                                            (?class-level :artificer)
@@ -326,7 +326,7 @@
                                              :page 6
                                              :source :ua-artificer
                                              :summary (str "Make a special Thunder Cannon attack that unleashes a 5 x 30 ft. lightning bolt. Creatures in the area that fail a DC "
-                                                           (?spell-save-dc :int)
+                                                           (?spell-save-dc ::char5e/int)
                                                            " DEX save take "
                                                            (mod5e/level-val
                                                             (?class-level :artificer)
@@ -338,7 +338,7 @@
                                             :page 6
                                             :source :ua-artificer
                                             :summary (str "Launch an explosive round that detonates in a 30 ft. radius. Creatures in the area that fail a DC "
-                                                          (?spell-save-dc :int)
+                                                          (?spell-save-dc ::char5e/int)
                                                           " DEX save take 4d8 fire damage")})]}}
                   :traits [{:name "Thunder Cannon"
                             :page 6
