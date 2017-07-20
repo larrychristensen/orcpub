@@ -22,10 +22,11 @@
                                       tab-path
                                       default-character]]
             [re-frame.core :refer [reg-event-db reg-event-fx reg-fx inject-cofx path trim-v
-                                   after debug dispatch dispatch-sync subscribe]]
+                                   after debug dispatch dispatch-sync subscribe ->interceptor]]
             [cljs.spec.alpha :as spec]
             [cljs-http.client :as http]
             [cljs.core.async :refer [<! timeout]]
+            [cljs-time.core :as time]
             [clojure.string :as s]
             [bidi.bidi :as bidi]
             [orcpub.route-map :as routes]
@@ -49,9 +50,16 @@
 
 (def magic-item->local-store-interceptor (after magic-item->local-store))
 
+(def set-changed (->interceptor
+                  :id :set-changed
+                  :before (fn [context]
+                            (assoc-in context [:coeffects :db :character :changed] true))))
+
 (def character-interceptors [check-spec-interceptor
+                             set-changed
                              (path :character)
                              ->local-store])
+
 
 (def item-interceptors [(path ::mi/builder-item)
                         magic-item->local-store-interceptor])
@@ -1269,9 +1277,14 @@
 (reg-event-db
  ::char5e/set-character
  (fn [db [_ id character]]
-   (assoc-in db
-             [::char5e/character-map (js/parseInt id)]
-             character)))
+   (let [int-id (js/parseInt id)
+         updated (assoc-in db
+                           [::char5e/character-map int-id]
+                           character)]
+     (if (and (= int-id (get-in db [:character :db/id]))
+              (not (get-in db [:character :changed])))
+       (assoc updated :character character)
+       updated))))
 
 (reg-event-fx
  :edit-character

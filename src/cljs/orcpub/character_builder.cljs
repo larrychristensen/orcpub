@@ -45,7 +45,6 @@
 
 (def print-disabled? true)
 
-
 (def print-enabled? (and (not print-disabled?)
                          (s/starts-with? js/window.location.href "http://localhost")))
 
