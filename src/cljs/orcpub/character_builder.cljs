@@ -287,7 +287,6 @@
             (selected-keys (:db/id %))))
       (map
        (fn [{:keys [:db/id ::t/name ::t/key]}]
-         ;;(prn "KEY" key id)
          {:name name
           :key (or key id)})))
      options))
@@ -1589,8 +1588,7 @@
       [:span.personality-label.f-s-18 "Flaws"]
       [character-textarea entity-values ::char5e/flaws]]
      [:div.flex.align-items-c.w-100-p.m-t-30
-      (if (and image-url
-               (not image-url-failed))
+      (if image-url
         [:img.m-r-10 {:src image-url
                       :on-error (fn [_] (dispatch [:failed-loading-image image-url]))
                       :on-load (fn [_] (if image-url-failed (dispatch [:loaded-image])))

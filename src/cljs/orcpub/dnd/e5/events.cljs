@@ -889,7 +889,7 @@
    (update character
            ::entity/values
            dissoc
-           :image-url-failed)))
+           ::char5e/image-url-failed)))
 
 (reg-event-db
  :loaded-faction-image
@@ -898,7 +898,7 @@
    (update character
            ::entity/values
            dissoc
-           :faction-image-url-failed)))
+           ::char5e/faction-image-url-failed)))
 
 (reg-event-db
  :set-custom-race
