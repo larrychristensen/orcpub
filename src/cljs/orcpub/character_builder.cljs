@@ -1602,8 +1602,7 @@
       [:span.personality-label.f-s-18 "Faction Name"]
       [character-input entity-values ::char5e/faction-name]]
      [:div.flex.align-items-c.w-100-p.m-t-30
-      (if (and faction-image-url
-               (not faction-image-url-failed))
+      (if faction-image-url
         [:img.m-r-10 {:src faction-image-url
                       :on-error (fn [_] (dispatch [:failed-loading-faction-image faction-image-url]))
                       :on-load (fn [_] (if faction-image-url-failed
