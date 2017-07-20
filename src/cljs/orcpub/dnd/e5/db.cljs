@@ -40,7 +40,10 @@
    :device-type (user-agent/device-type)})
 
 (defn character->local-store [character]
-  (.setItem js/window.localStorage local-storage-character-key (str (char5e/to-strict character))))
+  (.setItem js/window.localStorage local-storage-character-key
+            (str (assoc (char5e/to-strict character)
+                        :changed
+                        (:changed character)))))
 
 (defn user->local-store [user-data]
   (.setItem js/window.localStorage local-storage-user-key (str user-data)))
@@ -62,9 +65,10 @@
      (assoc cofx
             key
             (if-let [stored-item (get-local-storage-item local-storage-key)]
-              #_(if item-fn (item-fn stored-item) stored-item)
               (if (spec/valid? item-spec stored-item)
-                (if item-fn (item-fn stored-item) stored-item)
+                (if item-fn
+                  (item-fn stored-item)
+                  stored-item)
                 (do
                   (js/console.warn "INVALID ITEM FOUND, IGNORING")
                   (pprint (spec/explain-data item-spec stored-item)))))))))
@@ -74,7 +78,10 @@
  local-storage-character-key
  ::se/entity
  (fn [char]
-   (char5e/from-strict char)))
+   (assoc
+    (char5e/from-strict char)
+    :changed
+    (:changed char))))
 
 (spec/def ::username string?)
 (spec/def ::email string?)
