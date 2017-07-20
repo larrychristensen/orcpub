@@ -92,20 +92,9 @@
    (get-in db tab-path)))
 
 (reg-sub
- :editor-character
+ :character
  (fn [db _]
    (:character db)))
-
-(reg-sub
- :character
- (fn []
-   (let [editor-character (subscribe [:editor-character])
-         id (:db/id @editor-character)]
-     (if id
-       (subscribe [::char5e/character id])
-       editor-character)))
- (fn [character _]
-   character))
 
 (reg-sub
  :entity-values
