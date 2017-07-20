@@ -381,15 +381,14 @@
   (fn [app-db [_ id :as args]]
     (let [int-id (if id (js/parseInt id))]
       (if (some? int-id)
-        (if (nil? (get-in @app-db [::char5e/character-map int-id]))
-          (go (dispatch [:set-loading true])
-              (let [response (<! (http/get (routes/path-for routes/dnd-e5-char-route :id int-id)
-                                           {:accept :transit}))]
-                (dispatch [:set-loading false])
-                (case (:status response)
-                  200 (dispatch [::char5e/set-character int-id (char5e/from-strict (-> response :body))])
-                  401 (dispatch [:route-to-login])
-                  500 (dispatch (events/show-generic-error)))))))
+        (go (dispatch [:set-loading true])
+            (let [response (<! (http/get (routes/path-for routes/dnd-e5-char-route :id int-id)
+                                         {:accept :transit}))]
+              (dispatch [:set-loading false])
+              (case (:status response)
+                200 (dispatch [::char5e/set-character int-id (char5e/from-strict (-> response :body))])
+                401 (dispatch [:route-to-login])
+                500 (dispatch (events/show-generic-error))))))
       (ra/make-reaction
        (fn []
          (if int-id
