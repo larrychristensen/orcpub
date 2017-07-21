@@ -2892,24 +2892,26 @@ The boots regain 2 hours of flying capability for every 12 hours they aren’t i
          (seq diff) (conj (keys-fn diff)))))))
 
 (defn expand-weapon [{:keys [::item-subtype name-fn ::subtypes] :as item}]
-  (let [base-weapon-fn (make-base-weapon-fn item-subtype subtypes)
-        of-type (filter base-weapon-fn weapons5e/weapons)]
-    (map
-     (fn [weapon]
-       (let [name (if name-fn 
-                    (name-fn weapon)
-                    (if (> (count of-type) 1)
-                      (str (name-key item) ", " (:name weapon))
-                      (name-key item)))
-             item-key (common/name-to-kw name)]
-         (merge
-          weapon
-          item
-          {name-key (name-key item)
-           :name name
-           :base-key (:key weapon)
-           :key item-key})))
-     of-type)))
+  (if (or name-fn
+          (seq subtypes))
+    (let [base-weapon-fn (make-base-weapon-fn item-subtype subtypes)
+          of-type (filter base-weapon-fn weapons5e/weapons)]
+      (map
+       (fn [weapon]
+         (let [name (if name-fn 
+                      (name-fn weapon)
+                      (if (> (count of-type) 1)
+                        (str (name-key item) ", " (:name weapon))
+                        (name-key item)))
+               item-key (common/name-to-kw name)]
+           (merge
+            weapon
+            item
+            {name-key (name-key item)
+             :name name
+             :base-key (:key weapon)
+             :key item-key})))
+       of-type))))
 
 (def armor-types
   #{:light :medium :heavy :shield})
@@ -2931,24 +2933,27 @@ The boots regain 2 hours of flying capability for every 12 hours they aren’t i
          (seq diff) (conj (keys-fn diff)))))))
 
 (defn expand-armor [{:keys [::item-subtype name-fn ::subtypes] :as item}]
-  (let [base-armor-fn (make-base-armor-fn item-subtype subtypes)]
-    (sequence
-     (comp
-      (filter base-armor-fn)
-      (map
-       (fn [armor]
-         (let [name (if name-fn 
-                      (name-fn armor)
-                      (str (name-key item) ", " (:name armor)))
-               item-key (common/name-to-kw name)]
-           (merge
-            armor
-            item
-            {name-key (name-key item)
-             :name name
-             :base-armor (:key armor)
-             :key item-key})))))
-     armor5e/armor)))
+  (if (or name-fn
+          (seq subtypes))
+    (let [base-armor-fn (make-base-armor-fn item-subtype subtypes)]
+      (sequence
+       (comp
+        (filter base-armor-fn)
+        (map
+         (fn [armor]
+           (let [name (if name-fn 
+                        (name-fn armor)
+                        (str (name-key item) ", " (:name armor)))
+                 item-key (common/name-to-kw name)]
+             (merge
+              armor
+              item
+              {name-key (name-key item)
+               :name name
+               :base-armor (:key armor)
+               :key item-key})))))
+       armor5e/armor))
+    item))
 
 (defn expand-magic-items [magic-items]
   (flatten
