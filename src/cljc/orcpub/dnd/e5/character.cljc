@@ -504,6 +504,9 @@
 (defn spell-slots [built-char]
   (get-prop built-char :spell-slots))
 
+(defn pact-magic? [built-char]
+  (get-prop built-char :pact-magic?))
+
 (defn spell-slot-factors [built-char]
   (get-prop built-char :spell-slot-factors))
 
