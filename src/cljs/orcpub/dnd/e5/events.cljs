@@ -1655,32 +1655,42 @@
  (fn [{:keys [db]} [_ id units nm]]
    (update-character-fx db id #(toggle-feature-used % units nm))))
 
-(defn clear-period [db id & units]
-  (update-character-fx db id #(update-in
-                               %
-                               [::entity/values ::char5e/features-used]
-                               (fn [features-used]
-                                 (apply dissoc features-used units)))))
+(defn clear-period [db id update-fn & units]
+  (update-character-fx db id #(cond-> %
+                                true (update-in
+                                      [::entity/values ::char5e/features-used]
+                                      (fn [features-used]
+                                        (apply dissoc features-used units)))
+                                update-fn update-fn)))
 
 (reg-event-fx
  ::char5e/finish-long-rest
  (fn [{:keys [db]} [_ id]]
-   (clear-period db id ::units5e/long-rest ::units5e/rest)))
+   (clear-period db
+                 id
+                 (fn [character]
+                   (update
+                    character
+                    ::entity/values
+                    dissoc
+                    ::spells/slots-used))
+                 ::units5e/long-rest
+                 ::units5e/rest)))
 
 (reg-event-fx
  ::char5e/finish-short-rest
  (fn [{:keys [db]} [_ id]]
-   (clear-period db id ::units5e/short-rest ::units5e/rest)))
+   (clear-period db id nil ::units5e/short-rest ::units5e/rest)))
 
 (reg-event-fx
  ::char5e/new-round
  (fn [{:keys [db]} [_ id]]
-   (clear-period db id ::units5e/round)))
+   (clear-period db id nil ::units5e/round)))
 
 (reg-event-fx
  ::char5e/new-turn
  (fn [{:keys [db]} [_ id]]
-   (clear-period db id ::units5e/turn)))
+   (clear-period db id nil ::units5e/turn)))
 
 (defn vec-conj [v item]
   (conj (or v []) item))
