@@ -1908,3 +1908,13 @@
  ::char5e/toggle-known-spells-print
  (fn [db _]
    (update db ::char5e/print-prepared-spells? not)))
+
+(reg-event-db
+ ::char5e/show-delete-confirmation
+ (fn [db [_ id]]
+   (assoc-in db [::char5e/delete-confirmation-shown? id] true)))
+
+(reg-event-db
+ ::char5e/hide-delete-confirmation
+ (fn [db [_ id]]
+   (assoc-in db [::char5e/delete-confirmation-shown? id] false)))
