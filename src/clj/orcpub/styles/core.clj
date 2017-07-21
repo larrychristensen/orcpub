@@ -1055,10 +1055,8 @@
       :cursor :pointer
       :font-size "12px"
       :border-radius "5px"
-      :padding "10px 15px"}]
-
-    [:.link-button:hover
-     {:text-decoration :underline}]
+      :padding "10px 15px"
+      :text-decoration :underline}]
 
     [:.field
      {:margin-top "30px"}]

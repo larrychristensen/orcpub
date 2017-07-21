@@ -3218,8 +3218,19 @@
                             "print"]
                            (if (= username owner)
                              [:button.form-button.m-l-5
-                              {:on-click #(dispatch [:delete-character id])}
+                              {:on-click #(dispatch [::char/show-delete-confirmation id])}
                               "delete"])]
+                          (if @(subscribe [::char/delete-confirmation-shown? id])
+                            [:div.p-20.flex.justify-cont-end
+                             [:div
+                              [:div.m-b-10 "Are you sure you want to delete this character?"]
+                              [:div.flex
+                               [:button.form-button
+                                {:on-click #(dispatch [::char/hide-delete-confirmation id])}
+                                 "cancel"]
+                               [:span.link-button
+                                {:on-click #(dispatch [:delete-character id])}
+                                 "delete"]]]])
                           [character-display id false (if (= :mobile device-type) 1 2)]])]]))
                  (sort-by ::char/character-name owner-characters)))]])
            sorted-groups)))]]]))

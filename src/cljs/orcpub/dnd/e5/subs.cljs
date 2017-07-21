@@ -386,7 +386,9 @@
                                          {:accept :transit}))]
               (dispatch [:set-loading false])
               (case (:status response)
-                200 (dispatch [::char5e/set-character int-id (char5e/from-strict (-> response :body))])
+                200 (dispatch [::char5e/set-character
+                               int-id
+                               (char5e/from-strict (-> response :body))])
                 401 (dispatch [:route-to-login])
                 500 (dispatch (events/show-generic-error))))))
       (ra/make-reaction
@@ -893,3 +895,8 @@
  ::char5e/print-prepared-spells?
  (fn [db _]
    (get db ::char5e/print-prepared-spells?)))
+
+(reg-sub
+ ::char5e/delete-confirmation-shown?
+ (fn [db [_ id]]
+   (get-in db [::char5e/delete-confirmation-shown? id])))
