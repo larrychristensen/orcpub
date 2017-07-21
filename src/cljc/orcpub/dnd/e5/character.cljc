@@ -11,6 +11,7 @@
             [orcpub.entity :as entity]
             [orcpub.entity.strict :as se]
             [orcpub.dnd.e5.skills :as skills]
+            [orcpub.dnd.e5.spells :as spells]
             [orcpub.dnd.e5.character.equipment :as equip]))
 
 (spec/def ::armor-class nat-int?)
@@ -285,6 +286,18 @@
          (fn [{:keys [::class-name ::prepared-spells]}]
            [class-name (set prepared-spells)])
          prepared-spells))))
+    (update-in
+     [::entity/values
+      ::spells/slots-used]
+     (fn [slots-used]
+       (into
+        {}
+        (map
+         (fn [[k v]]
+           [k (if (vector? v)
+                (set v)
+                v)])
+         slots-used))))
     (update-in
      [::entity/values
       ::features-used]
