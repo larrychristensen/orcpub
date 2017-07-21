@@ -1696,6 +1696,8 @@
         prepare-spell-count-fn @(subscribe [::char/prepare-spell-count-fn id])]
     [display-section "Spells" "spell-book"
      [:div.m-t-20
+      [:div.flex.justify-cont-end
+       [finish-long-rest-button id]]
       (if multiclass?
         [:div.m-b-20
          [spellcaster-levels-table spell-slot-factors total-spellcaster-levels levels mobile?]])
@@ -2491,6 +2493,11 @@
       [list-item-section "Weapon Proficiencies" "bowman" weapon-profs (partial prof-name weapon/weapons-map)]
       [list-item-section "Armor Proficiencies" "mailed-fist" armor-profs (partial prof-name armor/armor-map)]]]))
 
+(defn finish-long-rest-button [id]
+  [:button.form-button.p-5
+   {:on-click #(dispatch [::char/finish-long-rest id])}
+   "finish long rest"])
+
 (defn features-details [num-columns id]
   (let [resistances @(subscribe [::char/resistances id])
         damage-immunities @(subscribe [::char/damage-immunities id])
@@ -2517,21 +2524,19 @@
       [:div.flex.justify-cont-end.align-items-c
        (if (or (freqs ::units/long-rest)
                (freqs ::units/rest))
-         [:button.form-button.p-5
-          {:on-click #(dispatch [::char/finish-long-rest])}
-          "finish long rest"])
+         [finish-long-rest-button id])
        (if (or (freqs ::units/short-rest)
                (freqs ::units/rest))
          [:button.form-button.p-5.m-l-5
-          {:on-click #(dispatch [::char/finish-short-rest])}
+          {:on-click #(dispatch [::char/finish-short-rest id])}
           "finish short rest"])
        (if (freqs ::units/round)
          [:button.form-button.p-5.m-l-5
-          {:on-click #(dispatch [::char/new-round])}
+          {:on-click #(dispatch [::char/new-round id])}
           "new round"])
        (if (freqs ::units/turn)
          [:button.form-button.p-5.m-l-5
-          {:on-click #(dispatch [::char/new-turn])}
+          {:on-click #(dispatch [::char/new-turn id])}
           "new turn"])]
       [attacks-section attacks]
       [actions-section "Actions" "beams-aura" actions]
