@@ -1467,15 +1467,16 @@
 (defn spell-slots-table []
   (let [expanded? (r/atom false)
         checkboxes-expanded? (r/atom false)]
-    (fn [id spell-slots spell-slot-factors total-spellcaster-levels levels mobile?]
+    (fn [id spell-slots spell-slot-factors total-spellcaster-levels levels mobile? pact-magic?]
       (let [multiclass? (> (count spell-slot-factors) 1)
-            first-factor-key (-> spell-slot-factors first key)
-            first-class-level (-> levels first-factor-key :class-level)]
+            first-factor-key (if spell-slot-factors (-> spell-slot-factors first key))
+            first-class-level (if first-factor-key (-> levels first-factor-key :class-level))]
         [:div.f-s-14.f-w-n
          [:div.flex.justify-cont-s-b
           [:div
            [:span.f-w-b.f-s-16 (str "Slots" (if multiclass? " (Multiclass)"))]]
-          (details-button @expanded? #(swap! expanded? not))]
+          (if (not pact-magic?)
+            (details-button @expanded? #(swap! expanded? not)))]
          [:div.f-w-n.f-s-14
           [:table.w-100-p.t-a-l.striped
            [:tbody
@@ -1492,9 +1493,9 @@
                             (common/ordinal (inc i)))])
                (range (if @expanded?
                         9
-                        (count spell-slots)))))
+                        (inc (apply max (keys spell-slots)))))))
              [:th]]
-            (if @expanded?
+            (if (and (not pact-magic?) @expanded?)
               (doall
                (map
                 (fn [lvl]
@@ -1520,14 +1521,14 @@
               [:tr.pointer
                {:on-click #(swap! checkboxes-expanded? not)}
                [:td.p-10 (if multiclass?
-                          total-spellcaster-levels
-                          first-class-level)]
+                           total-spellcaster-levels
+                           first-class-level)]
                (doall
                 (map
-                 (fn [[level slots]]
+                 (fn [level]
                    ^{:key level}
-                   [:td.p-10 slots])
-                 spell-slots))
+                   [:td.p-10 (spell-slots (inc level))])
+                 (range (apply max (keys spell-slots)))))
                [:td.p-r-5
                 [:i.fa.orange
                  {:class-name (if @checkboxes-expanded? "fa-caret-up" "fa-caret-down")}]]])]]]
@@ -1548,13 +1549,38 @@
                       (comps/checkbox @(subscribe [::char/spell-slot-used? id level i]) false)]))]])
               spell-slots))])]))))
 
+(defn cast-spell-component []
+  (let [selected-level (r/atom nil)]
+    (fn [id lvl]
+      (let [slot-levels-available @(subscribe [::char/slot-levels-available id])
+            usable-slot-levels (drop-while
+                                (partial > lvl)
+                                slot-levels-available)]
+        [:div.flex.justify-cont-end.align-items-c
+         [:div.w-80
+          [:span "Cast at level"]
+          [dropdown
+           {:items (map
+                    (fn [i]
+                      {:value i
+                       :title i})
+                    usable-slot-levels)
+            :value (or @selected-level lvl)
+            :on-change #(swap! selected-level (js/parseInt %))}]]
+         [:div.m-l-5
+          [:button.form-button.p-10
+           {:class-name (if (empty? usable-slot-levels) "disabled")
+            :on-click #(if (seq usable-slot-levels)
+                         (dispatch [::char/use-spell-slot id (or @selected-level (first usable-slot-levels))]))}
+           "cast spell"]]]))))
+
 (defn spell-row [id lvl spell-modifiers prepares-spells prepared-spells-by-class {:keys [key ability qualifier class always-prepared?]} expanded? on-click]
   (let [spell (spells/spell-map key)
         cls-mods (get spell-modifiers class)
         prepare-spell-count-fn @(subscribe [::char/prepare-spell-count-fn id])
         prepared-spell-count (or (some->> class
-                                         (get prepared-spells-by-class)
-                                         count)
+                                          (get prepared-spells-by-class)
+                                          count)
                                  0)
         remaining-preps (- (prepare-spell-count-fn class)
                            prepared-spell-count)]
@@ -1583,9 +1609,11 @@
        [:i.fa
         {:class-name (if expanded? "fa-caret-up" "fa-caret-down")}]]]
      (if expanded?
-       [:tr {:style {:background-color "rgba(0,0,0,0.05)"}}
+       [:tr {:style {:background-color "rgba(0,0,0,0.1)"}}
         [:td {:col-span 6}
          [:div.p-10
+          (if (pos? lvl)
+            [cast-spell-component id lvl])
           [spell-component spell false 14]]]])]))
 
 (defn spells-table []
@@ -1595,15 +1623,18 @@
       (let [prepares-spells @(subscribe [::char/prepares-spells id])
             prepared-spells-by-class @(subscribe [::char/prepared-spells-by-class id])]
         [:div.m-t-10.m-b-30
-         [:div
-          [:span.f-w-b.i (if (pos? lvl)
-                           (str (common/ordinal lvl) " Level")
-                           "Cantrip")]
-          (if hide-unprepared?
-            [:span.i.opacity-5.m-l-5 "(unprepared hidden)"])]
+         [:div.flex.justify-cont-s-b
+          [:div
+           [:span.f-w-b.i (if (pos? lvl)
+                            (str (common/ordinal lvl) " Level")
+                            "Cantrip")]
+           (if hide-unprepared?
+             [:span.i.opacity-5.m-l-5 "(unprepared hidden)"])]
+          (if (pos? lvl)
+            [:span.f-w-b (str @(subscribe [::char/spell-slots-remaining id lvl]) " remaining")])]
          [:table.w-100-p.t-a-l.striped
           [:tbody
-           [:tr.f-w-b
+           [:tr.f-w-b.f-s-12
             [:th.p-l-10.p-b-10.p-t-10 (if (and (not (zero? lvl))
                                                (seq prepares-spells))
                                         "Prepared? / Name"
@@ -1616,7 +1647,8 @@
              "Mod."]]
            (doall
             (map-indexed
-             (fn [i r] (with-meta r {:key i}))
+             (fn [i r]
+               (with-meta r {:key i}))
              (mapcat
               (fn [{:keys [key class always-prepared?] :as spell}]
                 (let [k (str key class)]
@@ -1660,19 +1692,20 @@
   (let [mobile? @(subscribe [:mobile?])
         multiclass? (> (count spell-slot-factors) 1)
         prepares-spells @(subscribe [::char/prepares-spells id])
+        pact-magic? @(subscribe [::char/pact-magic? id])
         prepare-spell-count-fn @(subscribe [::char/prepare-spell-count-fn id])]
     [display-section "Spells" "spell-book"
      [:div.m-t-20
       (if multiclass?
         [:div.m-b-20
          [spellcaster-levels-table spell-slot-factors total-spellcaster-levels levels mobile?]])
-      (if spell-slot-factors
+      (if (or pact-magic? spell-slot-factors)
         [:div.m-b-20 
-         [spell-slots-table id spell-slots spell-slot-factors total-spellcaster-levels levels mobile?]])
+         [spell-slots-table id spell-slots spell-slot-factors total-spellcaster-levels levels mobile? pact-magic?]])
       [:div.m-b-20
        [:span.f-w-b.f-s-16 "Spell Preparation"]
        (if (seq prepares-spells)
-         [:table.w-100-p.t-a-l.striped.f-s-14
+         [:table.w-100-p.t-a-l.striped.f-s-12
           [:tbody
            [:tr.f-w-b
             [:th.p-10 "Class"]
