@@ -1047,6 +1047,13 @@
     [:.form-button:hover
      {:box-shadow "0 2px 6px 0 rgba(0, 0, 0, 0.5)"}]
 
+    [:.form-button.disabled
+     {:opacity 0.5
+      :cursor :not-allowed}]
+
+    [:.form-button.disabled:hover
+     {:box-shadow :none}]
+
     [:.link-button
      {:color button-color
       :border :none
