@@ -1129,6 +1129,8 @@
     :modifiers [(mod5e/bonus-action
                  {:name "Bardic Inspiration"
                   :page 53
+                  :frequency (units5e/long-rests
+                              (max 1 (?ability-bonuses ::char5e/cha)))
                   :summary (str "Inspire another creature with a 1d"
                                 (bardic-inspiration-die ?levels)
                                 " that it can, within the next 10 min., add to a d20 roll")})]
