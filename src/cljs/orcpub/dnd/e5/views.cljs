@@ -1782,7 +1782,7 @@
                    ^{:key i}
                    [:span
                     {:on-click #(dispatch [::char/toggle-feature-used id units k])}
-                    (comps/checkbox @(subscribe [::char/feature-used? id units k]) false)])))])])
+                    [:span.m-r-5 (comps/checkbox @(subscribe [::char/feature-used? id units k]) false)]])))])])
         (sort-by :name actions)))])))
 
 (defn prof-name [prof-map prof-kw]
