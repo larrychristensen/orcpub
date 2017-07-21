@@ -1315,11 +1315,17 @@
 (def summary-style
   {:padding "33px 0"})
 
-(defn display-section [title icon-name value & [list?]]
+(defn display-section [title icon-name value & [list? buttons]]
   [:div.m-t-20
-   [:div.flex.align-items-c
-    (if icon-name (svg-icon icon-name))
-    [:span.m-l-5.f-s-16.f-w-600 title]]
+   [:div.flex.justify-cont-s-b
+    [:div.flex.align-items-c
+     (if icon-name (svg-icon icon-name))
+     [:span.m-l-5.f-s-16.f-w-600 title]]
+    (if (seq buttons)
+      (apply
+       conj
+       [:div]
+       buttons))]
    [:div {:class-name (if list? "m-t-0" "m-t-4")}
     [:span.f-s-24.f-w-600
      value]]])
@@ -1493,7 +1499,7 @@
                             (common/ordinal (inc i)))])
                (range (if @expanded?
                         9
-                        (inc (apply max (keys spell-slots)))))))
+                        (apply max (keys spell-slots))))))
              [:th]]
             (if (and (not pact-magic?) @expanded?)
               (doall
@@ -1694,10 +1700,10 @@
         prepares-spells @(subscribe [::char/prepares-spells id])
         pact-magic? @(subscribe [::char/pact-magic? id])
         prepare-spell-count-fn @(subscribe [::char/prepare-spell-count-fn id])]
-    [display-section "Spells" "spell-book"
+    [display-section
+     "Spells"
+     "spell-book"
      [:div.m-t-20
-      [:div.flex.justify-cont-end
-       [finish-long-rest-button id]]
       (if multiclass?
         [:div.m-b-20
          [spellcaster-levels-table spell-slot-factors total-spellcaster-levels levels mobile?]])
@@ -1722,7 +1728,9 @@
              prepares-spells))]]
          [:div.f-s-14.f-w-n.i.m-t-5 "You don't need to prepare spells"])]
       [:div.m-b-20
-       [spells-tables id spells-known spell-slots spell-modifiers]]]]))
+       [spells-tables id spells-known spell-slots spell-modifiers]]]
+     nil
+     [[finish-long-rest-button id]]]))
 
 (defn equipment-section [title icon-name equipment equipment-map]
   [list-display-section title icon-name
