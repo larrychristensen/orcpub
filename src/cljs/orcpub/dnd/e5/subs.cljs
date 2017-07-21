@@ -7,6 +7,7 @@
             [orcpub.modifiers :as mod]
             [orcpub.registration :as registration]
             [orcpub.dnd.e5.template :as t5e]
+            [orcpub.dnd.e5.common :as common5e]
             [orcpub.dnd.e5.db :refer [tab-path]]
             [orcpub.dnd.e5.events :as events]
             [orcpub.dnd.e5.character :as char5e]
@@ -550,6 +551,7 @@
    ::char5e/spells-known char5e/spells-known
    ::char5e/spells-known-modes char5e/spells-known-modes
    ::char5e/spell-slots char5e/spell-slots
+   ::char5e/pact-magic? char5e/pact-magic?
    ::char5e/prepares-spells char5e/prepares-spells
    ::char5e/prepare-spell-count-fn char5e/prepare-spell-count-fn
    ::char5e/spell-modifiers char5e/spell-modifiers
@@ -754,8 +756,50 @@
    (get-in character
            [::entity/values
             ::spells5e/slots-used
-            (orcpub.dnd.e5.common/slot-level-key level)
+            (common5e/slot-level-key level)
             i])))
+
+(reg-sub
+ ::char5e/all-spell-slots-used
+ (fn [[_ id] _]
+   (subscribe [::char5e/character id]))
+ (fn [character [_ id level i]]
+   (get-in character
+           [::entity/values
+            ::spells5e/slots-used])))
+
+(defn level-slots-used [slots-used level]
+  (count
+   (get slots-used (common5e/slot-level-key level))))
+
+(reg-sub
+ ::char5e/spell-slots-used
+ (fn [[_ id] _]
+   (subscribe [::char5e/all-spell-slots-used id]))
+ (fn [slots-used [_ id level i]]
+   (level-slots-used slots-used level)))
+
+(reg-sub
+ ::char5e/slot-levels-available
+ (fn [[_ id] _]
+   [(subscribe [::char5e/all-spell-slots-used id])
+    (subscribe [::char5e/spell-slots id])])
+ (fn [[slots-used spell-slots] _]
+   (map
+    first
+    (filter
+     (fn [[lvl slots]]
+       (pos? (- slots (level-slots-used slots-used lvl))))
+     spell-slots))))
+
+(reg-sub
+ ::char5e/spell-slots-remaining
+ (fn [[_ id level] _]
+   [(subscribe [::char5e/spell-slots-used id level])
+    (subscribe [::char5e/spell-slots id])])
+ (fn [[slots-used spell-slots] [_ _ level]]
+   (- (or (spell-slots level) 0)
+      slots-used)))
 
 (reg-sub
  ::char5e/prepared-spells-by-class

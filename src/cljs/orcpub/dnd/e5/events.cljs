@@ -1569,7 +1569,7 @@
    [::entity/values
     ::spells/slots-used
     (common5e/slot-level-key level)]
-  (partial toggle-set i)))
+   (partial toggle-set i)))
 
 (defn update-character-fx [db id update-fn]
   (if id
@@ -1583,6 +1583,29 @@
  ::char5e/toggle-spell-prepared
  (fn [{:keys [db]} [_ id class spell-key]]
    (let [update-fn (partial toggle-character-spell-prepared class spell-key)]
+     (update-character-fx db id update-fn))))
+
+(defn use-spell-slot [lvl character]
+  (prn "SLOT LEVEL KEY" (common5e/slot-level-key lvl))
+  (update-in
+   character
+   [::entity/values
+    ::spells/slots-used
+    (common5e/slot-level-key lvl)]
+   (fn [level-slots-used]
+     (let [first-empty-slot (some
+                             (fn [v]
+                               (if (not (get level-slots-used v))
+                                 v))
+                             (range))]
+       (prn "FIRST EMPTY" first-empty-slot)
+       (conj (or level-slots-used #{})
+             first-empty-slot)))))
+
+(reg-event-fx
+ ::char5e/use-spell-slot
+ (fn [{:keys [db]} [_ id lvl]]
+   (let [update-fn (partial use-spell-slot lvl)]
      (update-character-fx db id update-fn))))
 
 (reg-event-fx
