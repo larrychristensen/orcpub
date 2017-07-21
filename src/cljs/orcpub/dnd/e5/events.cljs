@@ -6,6 +6,7 @@
             [orcpub.dice :as dice]
             [orcpub.modifiers :as mod]
             [orcpub.dnd.e5.template :as t5e]
+            [orcpub.dnd.e5.common :as common5e]
             [orcpub.dnd.e5.character :as char5e]
             [orcpub.dnd.e5.units :as units5e]
             [orcpub.dnd.e5.party :as party5e]
@@ -1562,6 +1563,14 @@
     class]
    (partial toggle-set spell-key)))
 
+(defn toggle-spell-slot-used [level i character]
+  (update-in
+   character
+   [::entity/values
+    ::char5e/spell-slots-used-2
+    (common5e/slot-level-key level)]
+  (partial toggle-set i)))
+
 (defn update-character-fx [db id update-fn]
   (if id
     {:db (update-in
@@ -1574,6 +1583,12 @@
  ::char5e/toggle-spell-prepared
  (fn [{:keys [db]} [_ id class spell-key]]
    (let [update-fn (partial toggle-character-spell-prepared class spell-key)]
+     (update-character-fx db id update-fn))))
+
+(reg-event-fx
+ ::char5e/toggle-spell-slot-used
+ (fn [{:keys [db]} [_ id level i]]
+   (let [update-fn (partial toggle-spell-slot-used level i)]
      (update-character-fx db id update-fn))))
 
 (defn set-current-hit-points [character current-hit-points]
