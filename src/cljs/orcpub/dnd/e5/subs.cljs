@@ -747,6 +747,17 @@
             spell-key])))
 
 (reg-sub
+ ::char5e/spell-slot-used?
+ (fn [[_ id] _]
+   (subscribe [::char5e/character id]))
+ (fn [character [_ id level i]]
+   (get-in character
+           [::entity/values
+            ::char5e/spell-slots-used-2
+            (orcpub.dnd.e5.common/slot-level-key level)
+            i])))
+
+(reg-sub
  ::char5e/prepared-spells-by-class
  (fn [[_ id] _]
    (subscribe [::char5e/character id]))

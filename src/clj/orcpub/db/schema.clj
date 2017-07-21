@@ -36,6 +36,21 @@
    :db/valueType :db.type/long
    :db/cardinality :db.cardinality/one})
 
+(defn prop [key]
+  {:db/ident key})
+
+(defn long [cfg]
+  (assoc cfg :db/valueType :db.type/long))
+
+(defn no-history [cfg]
+  (assoc cfg :db/noHistory true))
+
+(defn many [cfg]
+  (assoc cfg :db/cardinality :db.cardinality/many))
+
+(defn one [cfg]
+  (assoc cfg :db/cardinality :db.cardinality/one))
+
 (defn long-prop-no-history [key]
   {:db/ident key
    :db/valueType :db.type/long
@@ -254,7 +269,14 @@
      :db/valueType :db.type/ref
      :db/isComponent true
      :db/cardinality :db.cardinality/one
-     :db/noHistory true}]
+     :db/noHistory true}
+    (many-ref-no-history ::char5e/spell-slots-used-2)]
+   (for [i (range 1 10)]
+     (->> (orcpub.dnd.e5.common/slot-level-key i)
+         prop
+         long
+         many
+         no-history))
    (map
     (fn [unit]
       {:db/ident unit

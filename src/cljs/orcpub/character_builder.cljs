@@ -43,7 +43,7 @@
             [re-frame.core :refer [subscribe dispatch dispatch-sync]])
   (:require-macros [cljs.core.async.macros :refer [go]]))
 
-(def print-disabled? true)
+(def print-disabled? false)
 
 (def print-enabled? (and (not print-disabled?)
                          (s/starts-with? js/window.location.href "http://localhost")))
@@ -257,7 +257,7 @@
                  remove-fn]}]
       [:div.p-5
        [:div.f-w-b.flex.align-items-c
-        [:div.pointer.m-l-5
+        [:div.pointer.m-l-5.m-r-5
          {:on-click check-fn}
          (comps/checkbox equipped? false)]
         (if user-created?
@@ -381,7 +381,7 @@
         [:div.flex-grow-1
          [:div.flex.align-items-c
           (if multiselect?
-            (comps/checkbox selected? disable-checkbox?))
+            [:span.m-r-5 (comps/checkbox selected? disable-checkbox?)])
           (if icon [:div.m-r-5 (views5e/svg-icon icon 24)])
           [:span.f-w-b.f-s-1.flex-grow-1 name]
           (if help
@@ -1788,7 +1788,7 @@
   (let [theme @(subscribe [:theme])]
     [:div.pointer
      {:on-click #(dispatch [:toggle-theme])}
-     (comps/checkbox (= "light-theme" theme) false)
+     [:span.m-r-5 (comps/checkbox (= "light-theme" theme) false)]
      [:span.main-text-color "Light Theme"]]))
 
 (defn character-builder []
