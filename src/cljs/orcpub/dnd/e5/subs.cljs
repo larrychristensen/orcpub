@@ -753,7 +753,7 @@
  (fn [character [_ id level i]]
    (get-in character
            [::entity/values
-            ::char5e/spell-slots-used-2
+            ::spells5e/slots-used
             (orcpub.dnd.e5.common/slot-level-key level)
             i])))
 

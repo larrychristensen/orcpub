@@ -5,6 +5,8 @@
             [orcpub.dnd.e5.units :as units5e]
             [orcpub.dnd.e5.party :as party5e]
             [orcpub.dnd.e5.magic-items :as mi5e]
+            [orcpub.dnd.e5.spells :as spells5e]
+            [orcpub.dnd.e5.common :as common5e]
             [orcpub.dnd.e5.character.equipment :as char-equip-5e]))
 
 (defn string-prop [key]
@@ -39,7 +41,7 @@
 (defn prop [key]
   {:db/ident key})
 
-(defn long [cfg]
+(defn long-type [cfg]
   (assoc cfg :db/valueType :db.type/long))
 
 (defn no-history [cfg]
@@ -89,6 +91,13 @@
   {:db/ident key
    :db/valueType :db.type/ref
    :db/cardinality :db.cardinality/many
+   :db/isComponent true
+   :db/noHistory true})
+
+(defn ref-no-history [key]
+  {:db/ident key
+   :db/valueType :db.type/ref
+   :db/cardinality :db.cardinality/one
    :db/isComponent true
    :db/noHistory true})
 
@@ -270,11 +279,11 @@
      :db/isComponent true
      :db/cardinality :db.cardinality/one
      :db/noHistory true}
-    (many-ref-no-history ::char5e/spell-slots-used-2)]
+    (ref-no-history ::spells5e/slots-used)]
    (for [i (range 1 10)]
-     (->> (orcpub.dnd.e5.common/slot-level-key i)
+     (->> (common5e/slot-level-key i)
          prop
-         long
+         long-type
          many
          no-history))
    (map

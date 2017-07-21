@@ -1567,7 +1567,7 @@
   (update-in
    character
    [::entity/values
-    ::char5e/spell-slots-used-2
+    ::spells/slots-used
     (common5e/slot-level-key level)]
   (partial toggle-set i)))
 
