@@ -505,7 +505,6 @@
                                                                {:race race-kw
                                                                 :subrace (if (= ::char-rand5e/human race-kw) subrace-kw)
                                                                 :sex sex-kw}))]})))
-
 (reg-event-db
  :select-option
  character-interceptors
