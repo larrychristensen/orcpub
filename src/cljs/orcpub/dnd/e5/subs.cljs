@@ -348,8 +348,11 @@
                                      {:accept :transit
                                       :headers (auth-headers @app-db)}))]
           (case (:status response)
-            200 (dispatch [:set-user (-> response :body)])
-            401 (if required? (dispatch [:route-to-login]))
+            200 nil
+            401 (do
+                  (dispatch [:set-user-data nil])
+                  (if required?
+                    (dispatch [:route-to-login])))
             500 (if required? (dispatch (events/show-generic-error))))))
     (ra/make-reaction
      (fn [] (get @app-db :user [])))))
