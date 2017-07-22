@@ -2911,7 +2911,8 @@ The boots regain 2 hours of flying capability for every 12 hours they aren’t i
              :name name
              :base-key (:key weapon)
              :key item-key})))
-       of-type))))
+       of-type))
+    (add-key item)))
 
 (def armor-types
   #{:light :medium :heavy :shield})
@@ -2953,7 +2954,7 @@ The boots regain 2 hours of flying capability for every 12 hours they aren’t i
                :base-armor (:key armor)
                :key item-key})))))
        armor5e/armor))
-    item))
+    (add-key item)))
 
 (defn expand-magic-items [magic-items]
   (flatten
