@@ -1585,7 +1585,6 @@
      (update-character-fx db id update-fn))))
 
 (defn use-spell-slot [lvl character]
-  (prn "SLOT LEVEL KEY" (common5e/slot-level-key lvl))
   (update-in
    character
    [::entity/values
@@ -1597,7 +1596,6 @@
                                (if (not (get level-slots-used v))
                                  v))
                              (range))]
-       (prn "FIRST EMPTY" first-empty-slot)
        (conj (or level-slots-used #{})
              first-empty-slot)))))
 
