@@ -1574,7 +1574,7 @@
   (if id
     {:db (update-in
           db
-          [::char5e/character-map id]
+          [::char5e/character-map (js/parseInt id)]
           update-fn)}
     {:dispatch [:set-character (update-fn (:character db))]}))
 
