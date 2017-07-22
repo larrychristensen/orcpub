@@ -79,6 +79,8 @@
         view (pages (or handler route))]
     [view route-params]))
 
+@(subscribe [:user false])
+
 (r/render (if (let [doc-style js/document.documentElement.style]
                 (and js/window.localStorage
                      (or (aget doc-style "flexWrap")
