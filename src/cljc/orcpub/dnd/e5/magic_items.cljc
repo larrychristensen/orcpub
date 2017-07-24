@@ -2893,6 +2893,7 @@ The boots regain 2 hours of flying capability for every 12 hours they aren’t i
 
 (defn expand-weapon [{:keys [::item-subtype name-fn ::subtypes] :as item}]
   (if (or name-fn
+          item-subtype
           (seq subtypes))
     (let [base-weapon-fn (make-base-weapon-fn item-subtype subtypes)
           of-type (filter base-weapon-fn weapons5e/weapons)]
@@ -2935,6 +2936,7 @@ The boots regain 2 hours of flying capability for every 12 hours they aren’t i
 
 (defn expand-armor [{:keys [::item-subtype name-fn ::subtypes] :as item}]
   (if (or name-fn
+          item-subtype
           (seq subtypes))
     (let [base-armor-fn (make-base-armor-fn item-subtype subtypes)]
       (sequence
