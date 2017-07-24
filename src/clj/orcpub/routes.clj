@@ -899,7 +899,7 @@
   "The New OrcPub: D&D 5e Character Builder/Generator")
 
 (def default-description
-  "The most advanced Dungeons & Dragons 5th Edition (D&D 5e) character builder/generator in the multiverse.")
+  "Dungeons & Dragons 5th Edition (D&D 5e) character builder/generator and digital character sheet far beyond any other in the multiverse.")
 
 (defn default-image-url [host]
   (str "http://" host "/image/orcpub-box-logo.png"))
