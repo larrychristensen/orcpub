@@ -1840,6 +1840,16 @@
   {:width "60px"
    :margin-top 0})
 
+(defn hit-dice-section-2 [id]
+  (let [levels @(subscribe [::char/levels id])]
+    (basic-section "Hit Dice"
+                   nil
+                   (s/join
+                    " / "
+                    (map
+                     (fn [{:keys [class-level hit-die]}] (str class-level "d" hit-die))
+                     (vals levels))))))
+
 (defn hit-points-section-2 [id]
   (basic-section "Max Hit Points"
                  "health-normal"
@@ -2479,6 +2489,7 @@
              non-standard-attack-number?)
        [:div.flex.justify-cont-s-a.t-a-c
         [critical-hits-section-2 id]
+        [hit-dice-section-2 id]
         [number-of-attacks-section-2 id]])
      [:div.m-t-30
       [list-item-section "Damage Resistances" "surrounded-shield" resistances resistance-str]]
