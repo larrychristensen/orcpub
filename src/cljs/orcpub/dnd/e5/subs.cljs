@@ -15,6 +15,7 @@
             [orcpub.dnd.e5.monsters :as monsters5e]
             [orcpub.dnd.e5.spells :as spells5e]
             [orcpub.dnd.e5.armor :as armor5e]
+            [orcpub.dnd.e5.weapons :as weapon5e]
             [orcpub.dnd.e5.magic-items :as mi5e]
             [orcpub.route-map :as routes]
             [clojure.string :as s]
@@ -874,6 +875,105 @@
          modifier (get modifiers mod-cfg)
          args (::mod/args modifier)]
      (second args))))
+
+(reg-sub
+ ::mi5e/item-damage-die
+ :<- [::mi5e/builder-item]
+ (fn [item _]
+   (get item ::weapon5e/damage-die)))
+
+(reg-sub
+ ::mi5e/item-damage-die-count
+ :<- [::mi5e/builder-item]
+ (fn [item _]
+   (get item ::weapon5e/damage-die-count)))
+
+(reg-sub
+ ::mi5e/item-versatile-damage-die
+ :<- [::mi5e/builder-item]
+ (fn [item _]
+   (get-in item [::weapon5e/versatile ::weapon5e/damage-die])))
+
+(reg-sub
+ ::mi5e/item-versatile-damage-die-count
+ :<- [::mi5e/builder-item]
+ (fn [item _]
+   (get-in item [::weapon5e/versatile ::weapon5e/damage-die-count])))
+
+(reg-sub
+ ::mi5e/item-range-min
+ :<- [::mi5e/builder-item]
+ (fn [item _]
+   (get-in item [::weapon5e/range ::weapon5e/min])))
+
+(reg-sub
+ ::mi5e/item-range-max
+ :<- [::mi5e/builder-item]
+ (fn [item _]
+   (get-in item [::weapon5e/range ::weapon5e/max])))
+
+(reg-sub
+ ::mi5e/item-weapon-type
+ :<- [::mi5e/builder-item]
+ (fn [item _]
+   (get item ::weapon5e/type)))
+
+(reg-sub
+ ::mi5e/item-melee-ranged
+ :<- [::mi5e/builder-item]
+ (fn [item _]
+   (cond
+     (get item ::weapon5e/melee?) :melee
+     (get item ::weapon5e/ranged?) :ranged
+     :else nil)))
+
+(reg-sub
+ ::mi5e/item-damage-type
+ :<- [::mi5e/builder-item]
+ (fn [item _]
+   (get item ::weapon5e/damage-type)))
+
+(reg-sub
+ ::mi5e/item-finesse?
+ :<- [::mi5e/builder-item]
+ (fn [item _]
+   (get item ::weapon5e/finesse?)))
+
+(reg-sub
+ ::mi5e/item-reach?
+ :<- [::mi5e/builder-item]
+ (fn [item _]
+   (get item ::weapon5e/reach?)))
+
+(reg-sub
+ ::mi5e/item-ammunition?
+ :<- [::mi5e/builder-item]
+ (fn [item _]
+   (get item ::weapon5e/ammunition?)))
+
+(reg-sub
+ ::mi5e/item-versatile?
+ :<- [::mi5e/builder-item]
+ (fn [item _]
+   (get item ::weapon5e/versatile)))
+
+(reg-sub
+ ::mi5e/item-heavy?
+ :<- [::mi5e/builder-item]
+ (fn [item _]
+   (get item ::weapon5e/heavy?)))
+
+(reg-sub
+ ::mi5e/item-two-handed?
+ :<- [::mi5e/builder-item]
+ (fn [item _]
+   (get item ::weapon5e/two-handed?)))
+
+(reg-sub
+ ::mi5e/item-thrown?
+ :<- [::mi5e/builder-item]
+ (fn [item _]
+   (get item ::weapon5e/thrown?)))
 
 (reg-sub
  ::mi5e/ability-mod-type

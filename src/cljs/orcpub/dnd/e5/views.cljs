@@ -17,6 +17,7 @@
             [cljs.pprint :refer [pprint]]
             [orcpub.registration :as registration]
             [orcpub.dnd.e5.magic-items :as mi]
+            [orcpub.dnd.e5.damage-types :as damage-types]
             [orcpub.dnd.e5.monsters :as monsters]
             [orcpub.dnd.e5.spells :as spells]
             [orcpub.dnd.e5.skills :as skills]
@@ -336,8 +337,14 @@
           "all-for-one"
           #(dispatch [:route routes/dnd-e5-item-list-page-route])
           false
-          (routes/dnd-e5-item-page-routes (or (:handler active-route) active-route))
-          device-type]]]]]]))
+          (routes/dnd-e5-item-page-routes
+           (or (:handler active-route)
+               active-route))
+          device-type
+          {:name "Item List"
+           :route routes/dnd-e5-item-list-page-route}
+          {:name "Item Builder"
+           :route routes/dnd-e5-item-builder-page-route}]]]]]]))
 
 (defn legal-footer []
   [:div.m-l-15.m-b-10.m-t-10 {:style {:text-align :left}}
@@ -2078,19 +2085,19 @@
 (defn yes-no [v]
   (if v "yes" "no"))
 
-(defn weapon-details [{:keys [description
-                              type
-                              damage-type
+(defn weapon-details [{:keys [::weapon/description
+                              ::weapon/type
+                              ::weapon/damage-type
                               ::mi/magical-damage-bonus
                               ::mi/magical-attack-bonus
-                              ranged?
-                              melee?
-                              range
-                              two-handed?
-                              finesse?
-                              link
-                              versatile
-                              thrown]
+                              ::weapon/ranged?
+                              ::weapon/melee?
+                              ::weapon/range
+                              ::weapon/two-handed?
+                              ::weapon/finesse?
+                              ::weapon/link
+                              ::weapon/versatile
+                              ::weapon/thrown]
                        :as weapon}
                       damage-modifier-fn]
   [:div.m-t-10.i
@@ -2102,13 +2109,13 @@
      (weapon-details-field "Magical Attack Bonus" magical-attack-bonus))
    (weapon-details-field "Melee/Ranged" (if melee? "melee" "ranged"))
    (if range
-     (weapon-details-field "Range" (str (:min range) "/" (:max range) " ft.")))
+     (weapon-details-field "Range" (str (::weapon/min range) "/" (::weapon/max range) " ft.")))
    (weapon-details-field "Finesse?" (yes-no finesse?))
    (weapon-details-field "Two-handed?" (yes-no two-handed?))
    (weapon-details-field "Versatile" (if versatile
-                                       (str (:damage-die-count versatile)
+                                       (str (::weapon/damage-die-count versatile)
                                             "d"
-                                            (:damage-die versatile)
+                                            (::weapon/damage-die versatile)
                                             (common/mod-str (damage-modifier-fn weapon false))
                                             " damage")
                                        "no"))
@@ -2251,7 +2258,8 @@
                   ^{:key weapon-key}
                   [:tr.pointer
                    {:on-click #(swap! expanded-details (fn [d] (update d weapon-key not)))}
-                   [:td.p-10.f-w-b (:name weapon)]
+                   [:td.p-10.f-w-b (or (:name weapon)
+                                       (::mi/name weapon))]
                    (if (not mobile?)
                      [:td.p-10 (boolean-icon proficient?)])
                    [:td.p-10.w-100-p
@@ -2879,7 +2887,6 @@
    :input
    value
    (fn [v]
-     (prn "V" v)
      (on-change
       (if (re-matches #"\d+" v) (js/parseInt v))))
    {:class-name "input"
@@ -2896,7 +2903,7 @@
     [:div.flex.align-items-c.m-b-10
      {:on-click #(dispatch [::mi/toggle-attunement])}
      (comps/checkbox attunement false)
-     [:span.f-s-24.f-w-b "Attunement"]]
+     [:span.f-s-24.f-w-b.m-l-5 "Attunement"]]
     (if attunement
       [:div
        [labeled-checkbox "Any" (= #{:any} (set attunement))]
@@ -2962,7 +2969,10 @@
             armor/armor)))])]]]))
 
 (defn base-weapon-selector []
-  (let [mobile? @(subscribe [:mobile?])]
+  (let [mobile? @(subscribe [:mobile?])
+        other? @(subscribe [::mi/has-subtype? :other])
+        versatile? @(subscribe [::mi/item-versatile?])
+        melee-ranged @(subscribe [::mi/item-melee-ranged])]
     [:div.m-b-20
      [:div.main-text-color.m-b-10
       [:span.f-s-24.f-w-b "Base Weapon"]]
@@ -2976,17 +2986,125 @@
                    three-columns-style)}
          (doall
           (map
-           (fn [{:keys [:key :name]}]
+           (fn [{:keys [::weapon/key ::weapon/name]}]
              ^{:key key}
              [:div
               {:on-click #(dispatch [::mi/toggle-subtype key])}
               [labeled-checkbox name @(subscribe [::mi/has-subtype? key])]])
            (concat
-            [{:name "All" :key :all}
-             {:name "All Swords" :key :sword}
-             {:name "All Axes" :key :axe}]
-            weapon/weapons
-            [{:name "Other" :key :other}])))])]]]))
+            [{::weapon/name "Custom" ::weapon/key :other}
+             {::weapon/name "All" ::weapon/key :all}
+             {::weapon/name "All Swords" ::weapon/key :sword}
+             {::weapon/name "All Axes" ::weapon/key :axe}]
+            weapon/weapons)))])]]
+     (if other?
+       [:div.main-text-color.m-b-10.m-t-10
+        [:span.f-s-18.f-w-b "Base Weapon Details"]
+        [:div.flex.flex-wrap.m-t-10
+         [:div
+          {:on-click #(dispatch [::mi/toggle-item-finesse?])}
+          [labeled-checkbox "Finesse?" @(subscribe [::mi/item-finesse?])]]
+         [:div.m-l-10
+          {:on-click #(dispatch [::mi/toggle-item-versatile?])}
+          [labeled-checkbox "Versatile?" versatile?]]
+         [:div.m-l-10
+          {:on-click #(dispatch [::mi/toggle-item-reach?])}
+          [labeled-checkbox "Reach?" @(subscribe [::mi/item-reach?])]]
+         [:div.m-l-10
+          {:on-click #(dispatch [::mi/toggle-item-two-handed?])}
+          [labeled-checkbox "Two-Handed?" @(subscribe [::mi/item-two-handed?])]]
+         [:div.m-l-10
+          {:on-click #(dispatch [::mi/toggle-item-thrown?])}
+          [labeled-checkbox "Thrown?" @(subscribe [::mi/item-thrown?])]]
+         [:div.m-l-10
+          {:on-click #(dispatch [::mi/toggle-item-heavy?])}
+          [labeled-checkbox "Heavy?" @(subscribe [::mi/item-heavy?])]]
+         [:div.m-l-10
+          {:on-click #(dispatch [::mi/toggle-item-ammunition?])}
+          [labeled-checkbox "Ammunition?" @(subscribe [::mi/item-ammunition?])]]]
+        [:div.flex.flex-wrap
+         [:div.m-t-10
+          [:div.f-w-b.m-b-5 "Damage Die Number"]
+          [dropdown
+           {:items (map
+                    (fn [v]
+                      {:value v
+                       :title v})
+                    (range 1 10))
+            :value @(subscribe [::mi/item-damage-die-count])
+            :on-change #(dispatch [::mi/set-item-damage-die-count (js/parseInt %)])}]]
+         [:div.m-l-10.m-t-10
+          [:div.f-w-b.m-b-5 "Damage Die"]
+          [dropdown
+           {:items (map
+                    (fn [v]
+                      {:value v
+                       :title (str "d" v)})
+                    [4 6 8 10 12 20 100])
+            :value @(subscribe [::mi/item-damage-die])
+            :on-change #(dispatch [::mi/set-item-damage-die (js/parseInt %)])}]]
+         (if versatile?
+           [:div.m-l-10.m-t-10
+            [:div.f-w-b.m-b-5 "Versatile Damage Die Number"]
+            [dropdown
+             {:items (map
+                      (fn [v]
+                        {:value v
+                         :title v})
+                      (range 1 10))
+              :value @(subscribe [::mi/item-versatile-damage-die-count])
+              :on-change #(dispatch [::mi/set-item-versatile-damage-die-count (js/parseInt %)])}]])
+         (if versatile?
+           [:div.m-l-10.m-t-10
+            [:div.f-w-b.m-b-5 "Versatile Damage Die"]
+            [dropdown
+             {:items (map
+                      (fn [v]
+                        {:value v
+                         :title (str "d" v)})
+                      [4 6 8 10 12 20 100])
+              :value @(subscribe [::mi/item-versatile-damage-die])
+              :on-change #(dispatch [::mi/set-item-versatile-damage-die (js/parseInt %)])}]])
+         [:div.m-l-10.m-t-10
+          [:div.f-w-b.m-b-5 "Simple / Martial?"]
+          [dropdown
+           {:items [{:value :simple
+                     :title "Simple"}
+                    {:value :martial
+                     :title "Martial"}]
+            :value @(subscribe [::mi/item-weapon-type])
+            :on-change #(dispatch [::mi/set-item-weapon-type %])}]]
+         [:div.m-l-10.m-t-10
+          [:div.f-w-b.m-b-5 "Melee / Ranged?"]
+          [dropdown
+           {:items [{:value :melee
+                     :title "Melee"}
+                    {:value :ranged
+                     :title "Ranged"}]
+            :value melee-ranged
+            :on-change #(dispatch [::mi/set-item-melee-ranged %])}]]
+         (if (= :ranged melee-ranged)
+           [:div.m-l-10.m-t-10
+            [:div.f-w-b.m-b-5 "Range Min"]
+            [number-field
+             {:value @(subscribe [::mi/item-range-min])
+              :on-change #(dispatch [::mi/set-item-range-min %])}]])
+         (if (= :ranged melee-ranged)
+           [:div.m-l-10.m-t-10
+            [:div.f-w-b.m-b-5 "Range Max"]
+            [number-field
+             {:value @(subscribe [::mi/item-range-max])
+              :on-change #(dispatch [::mi/set-item-range-max %])}]])
+         [:div.m-l-10.m-t-10
+          [:div.f-w-b.m-b-5 "Damage Type"]
+          [dropdown
+           {:items (map
+                    (fn [type]
+                      {:value type
+                       :title (name type)})
+                    damage-types/damage-types)
+            :value @(subscribe [::mi/item-damage-type])
+            :on-change #(dispatch [::mi/set-item-damage-type %])}]]]])]))
 
 (defn item-ability-bonuses []
   (base-builder-field
@@ -3109,7 +3227,6 @@
                             ::mi/magical-attack-bonus
                             ::mi/magical-ac-bonus
                             ::mi/type] :as item}]
-  (prn "ITEM" item)
   [:div.m-b-20
    [:div.m-b-10
     [:span.f-s-24.f-w-b "Item Properties"]]
@@ -3130,7 +3247,7 @@
      [:div.f-w-b.m-b-5 "Magical AC Bonus"]
      [number-field
       {:value magical-ac-bonus
-       :on-change #(do (prn "VALUE" %) (dispatch [::mi/set-item-ac-bonus %]))}]]]
+       :on-change #(dispatch [::mi/set-item-ac-bonus %])}]]]
    [:div.flex.flex-wrap.m-b-20
     [:div.flex-grow-1
      [item-ability-bonuses]]
@@ -3149,7 +3266,7 @@
      [item-condition-immunities]]]])
 
 (defn dropdown [{:keys [items value on-change]}]
-  [:select.builder-option.builder-option-dropdown
+  [:select.builder-option.builder-option-dropdown.m-t-0
    {:value (or value "")
     :on-change #(on-change (event-value %))}
    (doall
@@ -3166,6 +3283,7 @@
         @(subscribe [::mi/builder-item])
         item-types @(subscribe [::mi/item-types])
         item-rarities @(subscribe [::mi/rarities])]
+    (prn "ITEM" item)
     [:div.p-20.main-text-color
      [:div.flex.w-100-p.flex-wrap
       [:div.flex-grow-1.m-b-20
@@ -3177,25 +3295,27 @@
       [:div.flex-grow-1.m-l-5
        (base-builder-field
         "Type"
-        [dropdown
-         {:items (map
-                  (fn [type-kw]
-                    {:value type-kw
-                     :title (common/kw-to-name type-kw)})
-                  item-types)
-          :value type
-          :on-change #(dispatch [::mi/set-item-type %])}])]
+        [:div.m-t-5
+         [dropdown
+          {:items (map
+                   (fn [type-kw]
+                     {:value type-kw
+                      :title (common/kw-to-name type-kw)})
+                   item-types)
+           :value type
+           :on-change #(dispatch [::mi/set-item-type %])}]])]
       [:div.flex-grow-1.m-l-5
        (base-builder-field
         "Rarity"
-        [dropdown
-         {:items (map
-                  (fn [rarity]
-                    {:value rarity
-                     :title (clojure.core/name rarity)})
-                  item-rarities)
-          :value rarity
-          :on-change #(dispatch [::mi/set-item-rarity %])}]
+        [:div.m-t-5
+         [dropdown
+          {:items (map
+                   (fn [rarity]
+                     {:value rarity
+                      :title (clojure.core/name rarity)})
+                   item-rarities)
+           :value rarity
+           :on-change #(dispatch [::mi/set-item-rarity %])}]]
         [:select.builder-option.builder-option-dropdown])]]
      [:div.m-b-40 (base-builder-field "Description" [textarea-field
                                                      {:value description
