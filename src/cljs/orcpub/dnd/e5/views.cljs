@@ -2434,7 +2434,7 @@
                [:th.p-10 (if (not mobile?) [:div.w-40 "Bonus"])]]
               (doall
                (map
-                (fn [kw]
+                (fn [[kw]]
                   (let [name (-> equip/tools-map kw :name)
                         proficient? (kw tool-profs)
                         expertise? (kw tool-expertise)]
@@ -2458,7 +2458,7 @@
       [:div.m-t-20
        [tool-prof-details-section-2 id]]
       [list-item-section "Languages" "lips" @(subscribe [::char/languages id]) (partial prof-name opt/language-map)]
-      [list-item-section "Tool Proficiencies" "stone-crafting" @(subscribe [::char/tool-profs id]) (partial prof-name equip/tools-map)]
+      [list-item-section "Tool Proficiencies" "stone-crafting" @(subscribe [::char/tool-profs id]) (fn [[kw]] (prof-name equip/tools-map kw))]
       [list-item-section "Weapon Proficiencies" "bowman" @(subscribe [::char/weapon-profs id]) (partial prof-name weapon/weapons-map)]
       [list-item-section "Armor Proficiencies" "mailed-fist" @(subscribe [::char/armor-profs id]) (partial prof-name armor/armor-map)]]]))
 

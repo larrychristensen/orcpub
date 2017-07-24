@@ -48,6 +48,8 @@
                            :url "http://media.wizards.com/2017/dnd/downloads/UAThreeSubclasses.pdf"}
    :ua-revised-class-options {:abbr "UA-Revised-Class-Options"
                               :url "http://media.wizards.com/2017/dnd/downloads/June5UA_RevisedClassOptv1.pdf"}
+   :ua-feats {:abbr "UA-Feats"
+              :url "https://media.wizards.com/2016/downloads/DND/UA-Feats-V1.pdf"}
    :ua-warlock-and-wizard {:abbr "UA-Warlock-and-Wizard"
                            :url "http://media.wizards.com/2017/dnd/downloads/20170213_Wizrd_Wrlck_UAv2_i48nf.pdf"}
    :ua-fighter {:abbr "UA-Fighter"

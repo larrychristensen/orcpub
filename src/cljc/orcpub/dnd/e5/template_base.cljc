@@ -148,7 +148,7 @@
                      (* (if (?tool-profs tool-kw) ?prof-bonus 0)
                         (if (?tool-expertise tool-kw) 2 1)))
     ?tool-expertise #{}
-    ?tool-profs #{}
+    ?tool-profs {}
     ?additional-skill-bonuses {}
     ?passive-perception (+ 10 (?skill-bonuses :perception))
     ?passive-investigation (+ 10 (?skill-bonuses :investigation))
@@ -188,13 +188,18 @@
                                    (mod-fn weapon finesse?))
                                  ?weapon-ability-modifiers)))
     ?weapon-attack-modifier (fn [weapon finesse?]
-                              (+ (?weapon-prof-bonus weapon)
-                                 (or (::mi5e/magical-attack-bonus weapon) 0)
-                                 (or (:attack-bonus weapon) 0)
-                                 (if (:melee? weapon)
-                                   (or ?melee-attack-bonus 0)
-                                   (or ?ranged-attack-bonus 0))
-                                 (?weapon-ability-modifier weapon finesse?)))
+                              (prn "ATTACK MODIFER FNS" ?attack-modifier-fns)
+                              (apply +
+                                     (?weapon-prof-bonus weapon)
+                                     (or (::mi5e/magical-attack-bonus weapon) 0)
+                                     (or (:attack-bonus weapon) 0)
+                                     (if (:melee? weapon)
+                                       (or ?melee-attack-bonus 0)
+                                       (or ?ranged-attack-bonus 0))
+                                     (?weapon-ability-modifier weapon finesse?)
+                                     (map
+                                      #(% weapon)
+                                      ?attack-modifier-fns)))
     ?weapon-damage-modifier (fn [weapon finesse?]
                               (let [definitely-finesse? (and finesse?
                                                              (:finesse? weapon))
