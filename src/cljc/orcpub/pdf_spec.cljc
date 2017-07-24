@@ -211,7 +211,6 @@
                        lvl
                        prepares-spells
                        prepared-spells-by-class]
-  (prn "LVL" lvl prepares-spells prepared-spells-by-class)
   (filter
    (fn [{:keys [key class always-prepared?]}]
      (char5e/spell-prepared? {:hide-unprepared? true
@@ -385,7 +384,7 @@
      "\n\n"
      (remove
       nil?
-      [(profs-paragraph tool-profs equip5e/tools-map "Tool")
+      [(profs-paragraph (map first tool-profs) equip5e/tools-map "Tool")
        (profs-paragraph weapon-profs weapon5e/weapons-map "Weapon")
        (profs-paragraph armor-profs armor5e/armor-map "Armor")
        (profs-paragraph languages opt5e/language-map "Language")]))))
