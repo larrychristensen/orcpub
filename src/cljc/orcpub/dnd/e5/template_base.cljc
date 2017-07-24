@@ -188,7 +188,6 @@
                                    (mod-fn weapon finesse?))
                                  ?weapon-ability-modifiers)))
     ?weapon-attack-modifier (fn [weapon finesse?]
-                              (prn "ATTACK MODIFER FNS" ?attack-modifier-fns)
                               (apply +
                                      (?weapon-prof-bonus weapon)
                                      (or (::mi5e/magical-attack-bonus weapon) 0)
