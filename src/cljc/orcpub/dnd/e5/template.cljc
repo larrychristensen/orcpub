@@ -2328,7 +2328,7 @@
              :weapon {:simple false :martial false}
              :save {::char5e/wis true ::char5e/cha true}
              :skill-options {:choose 2 :options {:athletics true :insight true :intimidation true :medicine true :persuasion true :religion true}}}
-     :multiclass-prereqs [(t/option-prereq "Requires Strength 13 or Charisma 13"
+     :multiclass-prereqs [(t/option-prereq "Requires Strength 13 and Charisma 13"
                                            (fn [c]
                                              (let [abilities @(subscribe [::char5e/abilities nil c])]
                                                (and (>= (::char5e/str abilities) 13)
