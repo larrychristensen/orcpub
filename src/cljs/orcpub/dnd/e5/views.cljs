@@ -2878,7 +2878,10 @@
   [comps/input-field
    :input
    value
-   on-change
+   (fn [v]
+     (prn "V" v)
+     (on-change
+      (if (re-matches #"\d+" v) (js/parseInt v))))
    {:class-name "input"
     :type :number}])
 
@@ -3106,6 +3109,7 @@
                             ::mi/magical-attack-bonus
                             ::mi/magical-ac-bonus
                             ::mi/type] :as item}]
+  (prn "ITEM" item)
   [:div.m-b-20
    [:div.m-b-10
     [:span.f-s-24.f-w-b "Item Properties"]]
@@ -3126,7 +3130,7 @@
      [:div.f-w-b.m-b-5 "Magical AC Bonus"]
      [number-field
       {:value magical-ac-bonus
-       :on-change #(dispatch [::mi/set-item-ac-bonus %])}]]]
+       :on-change #(do (prn "VALUE" %) (dispatch [::mi/set-item-ac-bonus %]))}]]]
    [:div.flex.flex-wrap.m-b-20
     [:div.flex-grow-1
      [item-ability-bonuses]]
