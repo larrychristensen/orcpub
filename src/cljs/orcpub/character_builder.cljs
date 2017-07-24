@@ -318,6 +318,8 @@
           (let [item (item-map item-key)
                 final-name (or item-name (:name item) (::mi5e/name item))
                 item-description (:description item)]
+            (if (= :hammer-of-thunderbolts item-key)
+              (prn "ITEM" item))
             ^{:key item-key}
             [inventory-item {:selection-key key
                              :item-key item-key

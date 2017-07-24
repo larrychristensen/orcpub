@@ -5,6 +5,7 @@
             [orcpub.dnd.e5.units :as units5e]
             [orcpub.dnd.e5.party :as party5e]
             [orcpub.dnd.e5.magic-items :as mi5e]
+            [orcpub.dnd.e5.weapons :as weapon5e]
             [orcpub.dnd.e5.spells :as spells5e]
             [orcpub.dnd.e5.common :as common5e]
             [orcpub.dnd.e5.character.equipment :as char-equip-5e]))
@@ -350,6 +351,33 @@
      ::mi5e/type
      ::mi5e/rarity])))
 
+(def weapon-schema
+  (concat
+   [(ref-no-history ::weapon5e/range)
+    (ref-no-history ::weapon5e/versatile)]
+   (map
+    kw-prop-no-history
+    [::weapon5e/type
+     ::weapon5e/key
+     ::weapon5e/damage-type])
+   (map
+    long-prop-no-history
+    [::weapon5e/damage-die-count
+     ::weapon5e/damage-die
+     ::weapon5e/min
+     ::weapon5e/max])
+   (map
+    bool-prop-no-history
+    [::weapon5e/special?
+     ::weapon5e/melee?
+     ::weapon5e/ranged?
+     ::weapon5e/heavy?
+     ::weapon5e/thrown?
+     ::weapon5e/two-handed?
+     ::weapon5e/finesse?
+     ::weapon5e/reach?
+     ::weapon5e/ammunition?])))
+
 (def all-schemas
   (concat
    user-schema
@@ -359,4 +387,5 @@
    character-equipment-schema
    features-used-schema
    party-schema
-   magic-item-schema))
+   magic-item-schema
+   weapon-schema))

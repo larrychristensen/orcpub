@@ -216,11 +216,26 @@
                     ::subtypes
                     ::rarity
                     ::description
-                    ::attunement
+                    ::attunementb
                     ::magical-damage-bonus
                     ::magical-attack-bonus
                     ::magical-ac-bonus
-                    ::modifiers])
+                    ::modifiers
+                    ::weapons5e/type
+                    ::weapons5e/damage-type
+                    ::weapons5e/damage-die-count
+                    ::weapons5e/damage-die
+                    ::weapons5e/range
+                    ::weapons5e/versatile
+                    ::weapons5e/special?
+                    ::weapons5e/melee?
+                    ::weapons5e/ranged?
+                    ::weapons5e/heavy?
+                    ::weapons5e/thrown?
+                    ::weapons5e/two-handed?
+                    ::weapons5e/finesse?
+                    ::weapons5e/reach?
+                    ::weapons5e/ammunition?])
       entity/remove-empty-fields))
 
 (defn sword? [w]
@@ -249,12 +264,12 @@
 
 (defn not-shield? [a] (#{:light :medium :heavy} (:type a)))
 
-(defn bonus-name-fn [bonus]
-  (fn [item] (str (:name item) " +" bonus)))
+(defn bonus-name-fn [name-kw bonus]
+  (fn [item] (str (name-kw item) " +" bonus)))
 
-(def plus-1-name (bonus-name-fn 1))
-(def plus-2-name (bonus-name-fn 2))
-(def plus-3-name (bonus-name-fn 3))
+(defn plus-1-name [name-kw] (bonus-name-fn name-kw 1))
+(defn plus-2-name [name-kw] (bonus-name-fn name-kw 2))
+(defn plus-3-name [name-kw] (bonus-name-fn name-kw 3))
 
 (defn horn-of-valhalla [name rarity die & [requirement]]
   {
@@ -438,7 +453,7 @@ Curse. This armor is cursed, a fact that is revealed only when an identify spell
      ::summary "Jug that creates acid, poison, beer, honey, or mayonnaise"}
     {
      name-key "Ammunition, +1"
-     :name-fn plus-1-name
+     :name-fn (plus-1-name :name)
      ::type :weapon
      ::item-subtype ammunition?
      ::rarity :uncommon
@@ -447,7 +462,7 @@ Curse. This armor is cursed, a fact that is revealed only when an identify spell
      ::description "You have a +1 bonus to attack and damage rolls made with this piece of magic ammunition. Once it hits a target, the ammunition is no longer magical."
      }{
      name-key "Ammunition, +2"
-     :name-fn plus-2-name
+     :name-fn (plus-2-name :name)
      ::type :weapon
      ::item-subtype ammunition?
      ::rarity :rare
@@ -456,7 +471,7 @@ Curse. This armor is cursed, a fact that is revealed only when an identify spell
      ::description "You have a +2 bonus to attack and damage rolls made with this piece of magic ammunition. Once it hits a target, the ammunition is no longer magical."
      }{
      name-key "Ammunition, +3"
-     :name-fn plus-3-name
+     :name-fn (plus-3-name :name)
      ::type :weapon
      ::item-subtype ammunition?
      ::rarity :very-rare
@@ -509,7 +524,7 @@ The apparatus floats on water. It can also go underwater to a depth of 900 feet.
 A creature in the compartment can use an action to move as many as two of the apparatus’s levers up or down. After each use, a lever goes back to its neutral position. Each lever, from left to right, functions as shown in the Apparatus of the Crab Levers table."
      }{
      name-key "Armor, +1"
-     :name-fn plus-1-name
+     :name-fn (plus-1-name :name)
      ::magical-ac-bonus 1
      ::type :armor
      ::item-subtype not-shield?
@@ -518,7 +533,7 @@ A creature in the compartment can use an action to move as many as two of the ap
      }{
      name-key "Armor, +2"
      ::magical-ac-bonus 2
-     :name-fn plus-2-name
+     :name-fn (plus-2-name :name)
      ::type :armor
      ::item-subtype not-shield?
      ::rarity :very-rare
@@ -526,7 +541,7 @@ A creature in the compartment can use an action to move as many as two of the ap
      }{
      name-key "Armor, +3"
      ::magical-ac-bonus 3
-     :name-fn plus-3-name
+     :name-fn (plus-3-name :name)
      ::type :armor
      ::item-subtype not-shield?
      ::rarity :legendary
@@ -2326,7 +2341,7 @@ The rope has AC 20 and 20 hit points. It regains 1 hit point every 5 minutes as 
      ::summary "Cast sending between stones"}
     {
      name-key "Shield +1"
-     :name-fn plus-1-name
+     :name-fn (plus-1-name :name)
      ::type :armor
      ::item-subtype :shield
      ::rarity :uncommon
@@ -2334,7 +2349,7 @@ The rope has AC 20 and 20 hit points. It regains 1 hit point every 5 minutes as 
      ::description "While holding this shield, you have a +1 bonus to AC. This bonus is in addition to the shield’s normal bonus to AC."
      }{
      name-key "Shield +2"
-     :name-fn plus-2-name
+     :name-fn (plus-2-name :name)
      ::type :armor
      ::item-subtype :shield
      ::rarity :rare
@@ -2342,7 +2357,7 @@ The rope has AC 20 and 20 hit points. It regains 1 hit point every 5 minutes as 
      ::description "While holding this shield, you have a +2 bonus to AC determined by the shield’s rarity."
      }{
      name-key "Shield +3"
-     :name-fn plus-3-name
+     :name-fn (plus-3-name :name)
      ::type :armor
      ::item-subtype :shield
      ::rarity :very-rare
@@ -2789,7 +2804,7 @@ If an effect covers an area, you must center the spell on and include the target
 The wand regains 1d6 + 1 expended charges daily at dawn. If you expend the wand’s last charge, roll a d20. On a 1, the wand crumbles into dust and is destroyed."
      }{
      name-key "Weapon, +1"
-     :name-fn plus-1-name
+     :name-fn (plus-1-name :name)
      ::type :weapon
      ::item-subtype weapon-not-ammunition?
      ::rarity :uncommon
@@ -2798,7 +2813,7 @@ The wand regains 1d6 + 1 expended charges daily at dawn. If you expend the wand�
      ::description "You have a +1 bonus to attack and damage rolls made with this magic weapon."
      }{
      name-key "Weapon, +2"
-     :name-fn plus-2-name
+     :name-fn (plus-2-name :name)
      ::type :weapon
      ::item-subtype weapon-not-ammunition?
      ::rarity :rare
@@ -2807,7 +2822,7 @@ The wand regains 1d6 + 1 expended charges daily at dawn. If you expend the wand�
      ::description "You have a +2 bonus to attack and damage rolls made with this magic weapon."
      }{
      name-key "Weapon, +3"
-     :name-fn plus-3-name
+     :name-fn (plus-3-name :name)
      ::type :weapon
      ::item-subtype weapon-not-ammunition?
      ::rarity :very-rare
@@ -2868,7 +2883,7 @@ The boots regain 2 hours of flying capability for every 12 hours they aren’t i
     (types type)))
 
 (defn subtypes-fn [subtypes]
-  (fn [{:keys [subtype]}]
+  (fn [{:keys [::weapons/subtype]}]
     (subtypes subtype)))
 
 (defn keys-fn [keys]
@@ -2894,7 +2909,8 @@ The boots regain 2 hours of flying capability for every 12 hours they aren’t i
 (defn expand-weapon [{:keys [::item-subtype name-fn ::subtypes] :as item}]
   (if (or name-fn
           item-subtype
-          (seq subtypes))
+          (and (seq subtypes)
+               (not ((set subtypes) :other))))
     (let [base-weapon-fn (make-base-weapon-fn item-subtype subtypes)
           of-type (filter base-weapon-fn weapons5e/weapons)]
       (map
