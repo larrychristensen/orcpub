@@ -13,6 +13,7 @@
             [orcpub.dnd.e5.character.random :as char-rand5e]
             [orcpub.dnd.e5.spells :as spells]
             [orcpub.dnd.e5.monsters :as monsters]
+            [orcpub.dnd.e5.weapons :as weapons]
             [orcpub.dnd.e5.magic-items :as mi]
             [orcpub.dnd.e5.event-handlers :as event-handlers]
             [orcpub.dnd.e5.character.equipment :as char-equip5e]
@@ -1781,6 +1782,107 @@
        (assoc ::mi/type (keyword item-type-str))
        (dissoc ::mi/subtypes))))
 
+(reg-event-db
+ ::mi/set-item-weapon-type
+ item-interceptors
+ (fn [item [_ item-type-str]]
+   (assoc item ::weapons/type (keyword item-type-str))))
+
+(reg-event-db
+ ::mi/set-item-damage-type
+ item-interceptors
+ (fn [item [_ item-type-str]]
+   (assoc item ::weapons/damage-type (keyword item-type-str))))
+
+(reg-event-db
+ ::mi/set-item-melee-ranged
+ item-interceptors
+ (fn [item [_ item-type-str]]
+   (let [kw (keyword item-type-str)]
+     (assoc item
+            ::weapons/melee? (= kw :melee)
+            ::weapons/ranged? (= kw :ranged)))))
+
+(reg-event-db
+ ::mi/set-item-range-min
+ item-interceptors
+ (fn [item [_ v]]
+   (assoc-in item [::weapons/range ::weapons/min] v)))
+
+(reg-event-db
+ ::mi/set-item-range-max
+ item-interceptors
+ (fn [item [_ v]]
+   (assoc-in item [::weapons/range ::weapons/max] v)))
+
+(reg-event-db
+ ::mi/set-item-damage-die-count
+ item-interceptors
+ (fn [item [_ v]]
+   (assoc item ::weapons/damage-die-count v)))
+
+(reg-event-db
+ ::mi/set-item-damage-die
+ item-interceptors
+ (fn [item [_ v]]
+   (assoc item ::weapons/damage-die v)))
+
+(reg-event-db
+ ::mi/set-item-versatile-damage-die-count
+ item-interceptors
+ (fn [item [_ v]]
+   (assoc-in item [::weapons/versatile ::weapons/damage-die-count] v)))
+
+(reg-event-db
+ ::mi/set-item-versatile-damage-die
+ item-interceptors
+ (fn [item [_ v]]
+   (assoc-in item [::weapons/versatile ::weapons/damage-die] v)))
+
+(reg-event-db
+ ::mi/toggle-item-finesse?
+ item-interceptors
+ (fn [item _]
+   (update item ::weapons/finesse? not)))
+
+(reg-event-db
+ ::mi/toggle-item-reach?
+ item-interceptors
+ (fn [item _]
+   (update item ::weapons/reach? not)))
+
+(reg-event-db
+ ::mi/toggle-item-two-handed?
+ item-interceptors
+ (fn [item _]
+   (update item ::weapons/two-handed? not)))
+
+(reg-event-db
+ ::mi/toggle-item-heavy?
+ item-interceptors
+ (fn [item _]
+   (update item ::weapons/heavy? not)))
+
+(reg-event-db
+ ::mi/toggle-item-thrown?
+ item-interceptors
+ (fn [item _]
+   (update item ::weapons/thrown? not)))
+
+(reg-event-db
+ ::mi/toggle-item-ammunition?
+ item-interceptors
+ (fn [item _]
+   (update item ::weapons/ammunition? not)))
+
+(reg-event-db
+ ::mi/toggle-item-versatile?
+ item-interceptors
+ (fn [item _]
+   (if (::weapons/versatile item)
+     (dissoc item ::weapons/versatile)
+     (assoc item ::weapons/versatile {}))))
+
 (defn set-value [item kw value]
   (if value
     (assoc item kw value)
@@ -1928,13 +2030,37 @@
                   ability-kw
                   value)))
 
+(defn remove-custom-weapon-fields [item]
+  (dissoc item
+          ::weapons/finesse?
+          ::weapons/versatile?
+          ::weapons/reach?
+          ::weapons/two-handed?
+          ::weapons/thrown?
+          ::weapons/heavy?
+          ::weapons/ammunition?
+          ::weapons/damage-die-count
+          ::weapons/damage-die
+          ::weapons/versatile
+          ::weapons/melee?
+          ::weapons/ranged?
+          ::weapons/type
+          ::weapons/range
+          ::weapons/damage-type))
+
 (reg-event-db
  ::mi/toggle-subtype
  item-interceptors
  (fn [item [_ type]]
-   (update item
-           ::mi/subtypes
-           (partial toggle-set type))))
+   (remove-custom-weapon-fields
+    (case type
+      :other (assoc item ::mi/subtypes #{:other})
+      :all (assoc item ::mi/subtypes #{:all})
+      (update item
+              ::mi/subtypes
+              #(as-> % $
+                 (disj $ :other :all)
+                 (toggle-set type $)))))))
 
 (reg-event-fx
  :route-to-login

@@ -6,6 +6,7 @@
             [orcpub.dnd.e5.character :as char5e]
             [orcpub.dnd.e5.skills :as skill5e]
             [orcpub.dnd.e5.modifiers :as mod5e]
+            [orcpub.dnd.e5.weapons :as weapon5e]
             [orcpub.dnd.e5.magic-items :as mi5e]
             [orcpub.dnd.e5.character.equipment :as char-equip5e]))
 
@@ -162,9 +163,9 @@
     ?num-attacks (apply max ?extra-attacks ?number-of-attacks)
     ?critical #{20}
     ?has-weapon-prof? (fn [weapon]
-                        (or (?weapon-profs :martial)
-                            (?weapon-profs (:key weapon))
-                            (?weapon-profs (:type weapon))
+                        (or (?weapon-profs ::weapon5e/martial)
+                            (?weapon-profs (::weapon5e/key weapon))
+                            (?weapon-profs (::weapon5e/type weapon))
                             (?weapon-profs (:base-key weapon))))
     ?weapon-prof-bonus (fn [weapon]
                          (if (?has-weapon-prof? weapon)
@@ -173,8 +174,8 @@
     ?weapon-ability-modifiers [(fn [weapon finesse?]
                                  (let [definitely-finesse?
                                        (and finesse?
-                                            (:finesse? weapon))
-                                       melee? (:melee? weapon)]
+                                            (::weapon5e/finesse? weapon))
+                                       melee? (::weapon5e/melee? weapon)]
                                    (?ability-bonuses
                                     (if (or (and melee? (not definitely-finesse?))
                                             (and (not melee?) definitely-finesse?))
@@ -192,7 +193,7 @@
                                      (?weapon-prof-bonus weapon)
                                      (or (::mi5e/magical-attack-bonus weapon) 0)
                                      (or (:attack-bonus weapon) 0)
-                                     (if (:melee? weapon)
+                                     (if (::weapon5e/melee? weapon)
                                        (or ?melee-attack-bonus 0)
                                        (or ?ranged-attack-bonus 0))
                                      (?weapon-ability-modifier weapon finesse?)
@@ -201,10 +202,9 @@
                                       ?attack-modifier-fns)))
     ?weapon-damage-modifier (fn [weapon finesse?]
                               (let [definitely-finesse? (and finesse?
-                                                             (:finesse? weapon))
-                                    melee? (:melee? weapon)]
+                                                             (::weapon5e/finesse? weapon))
+                                    melee? (::weapon5e/melee? weapon)]
                                 (+ (or (::mi5e/magical-damage-bonus weapon) 0)
-                                   (or (:damage-bonus weapon) 0)
                                    (?weapon-ability-modifier weapon finesse?))))
     ?spell-attack-modifier-bonus 0
     ?spell-attack-modifier (fn [ability-kw]

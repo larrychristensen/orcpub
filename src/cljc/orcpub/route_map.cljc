@@ -38,7 +38,9 @@
 (def dnd-e5-item-page-route :item-5e-page)
 (def dnd-e5-item-builder-page-route :item-builder-5e-page)
 
-(def dnd-e5-item-page-routes #{dnd-e5-item-list-page-route dnd-e5-item-page-route})
+(def dnd-e5-item-page-routes #{dnd-e5-item-list-page-route
+                               dnd-e5-item-builder-page-route
+                               dnd-e5-item-page-route})
 
 (def register-route :register)
 (def register-page-route :register-page)
