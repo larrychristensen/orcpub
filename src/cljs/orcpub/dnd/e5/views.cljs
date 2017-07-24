@@ -2986,16 +2986,16 @@
                    three-columns-style)}
          (doall
           (map
-           (fn [{:keys [::weapon/key ::weapon/name]}]
+           (fn [{:keys [key name]}]
              ^{:key key}
              [:div
               {:on-click #(dispatch [::mi/toggle-subtype key])}
               [labeled-checkbox name @(subscribe [::mi/has-subtype? key])]])
            (concat
-            [{::weapon/name "Custom" ::weapon/key :other}
-             {::weapon/name "All" ::weapon/key :all}
-             {::weapon/name "All Swords" ::weapon/key :sword}
-             {::weapon/name "All Axes" ::weapon/key :axe}]
+            [{:name "Custom" :key :other}
+             {:name "All" :key :all}
+             {:name "All Swords" :key :sword}
+             {:name "All Axes" :key :axe}]
             weapon/weapons)))])]]
      (if other?
        [:div.main-text-color.m-b-10.m-t-10
@@ -3283,7 +3283,6 @@
         @(subscribe [::mi/builder-item])
         item-types @(subscribe [::mi/item-types])
         item-rarities @(subscribe [::mi/rarities])]
-    (prn "ITEM" item)
     [:div.p-20.main-text-color
      [:div.flex.w-100-p.flex-wrap
       [:div.flex-grow-1.m-b-20
