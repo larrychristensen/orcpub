@@ -740,6 +740,13 @@
                                            (not= k source))
                                          (?skill-profs skill-kw))])])
 
+(defn tool-prof-or-expertise [tool-kw source]
+  [(modifiers/tool-proficiency tool-kw false nil source)
+   (modifiers/tool-expertise tool-kw [(some
+                                         (fn [[k v]]
+                                           (not= k source))
+                                         (?tool-profs tool-kw))])])
+
 (defn skill-or-expertise-selection [num skill-kws option-source]
   (t/selection-cfg
    {:name "Skill Proficiency"
