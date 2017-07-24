@@ -11,6 +11,7 @@
             [orcpub.dnd.e5.spell-lists :as sl]
             [orcpub.dnd.e5.templates.ua-options :as ua-options]
             [orcpub.dnd.e5.templates.ua-mystic :as ua-mystic]
+            [orcpub.dnd.e5.templates.ua-feats :as ua-feats]
             [orcpub.dnd.e5.templates.ua-revised-ranger :as ua-revised-ranger]
             [orcpub.dnd.e5.templates.ua-artificer :as ua-artificer]
             [orcpub.dnd.e5.templates.ua-cleric :as ua-cleric]
@@ -907,4 +908,5 @@
      ua-revised-class-options/ua-revised-class-options-plugin
      ua-warlock-and-wizard/ua-warlock-and-wizard-plugin
      ua-sorcerer/ua-sorcerer-plugin
-     ua-gothic/ua-gothic-heroes-plugin])))
+     ua-gothic/ua-gothic-heroes-plugin
+     ua-feats/ua-feats-plugin])))

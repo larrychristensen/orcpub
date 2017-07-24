@@ -379,18 +379,28 @@
     "HP"
     mods/bonus-str))
 
-(defn tool-expertise [key]
-  (mods/set-mod ?tool-expertise key))
+(defmacro tool-expertise [kw & [conditions]]
+  `(mods/set-mod ~'?tool-expertise
+                 ~kw
+                 nil
+                 nil
+                 ~conditions))
 
-(defn tool-proficiency [key & [first-class? cls-kw]]
+(defn tool-proficiency [key & [first-class? cls-kw source]]
   (if first-class?
-    (mods/set-mod ?tool-profs
-                  key
+    (mods/modifier ?tool-profs
+                   (assoc-in ?tool-profs
+                             [key
+                              source]
+                             true)
                   nil
                   nil
                   [(= cls-kw (first ?classes))])
-    (mods/set-mod ?tool-profs
-                  key)))
+    (mods/modifier ?tool-profs
+                   (assoc-in ?tool-profs
+                             [key
+                              source]
+                             true))))
 
 (defn language [key]
   (mods/set-mod ?languages key))
@@ -531,6 +541,9 @@
 
 (defn ranged-attack-bonus [bonus]
   (mods/cum-sum-mod ?ranged-attack-bonus bonus))
+
+(defn attack-modifier-fn [bonus-fn]
+  (mods/vec-mod ?attack-modifier-fns bonus-fn))
 
 (defn armored-ac-bonus [bonus]
   (mods/cum-sum-mod ?armored-ac-bonus bonus))
