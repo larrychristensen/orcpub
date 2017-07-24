@@ -22,7 +22,8 @@
                              (opt5e/cleric-spell 4 :wall-of-fire 7)
                              (opt5e/cleric-spell 5 :animate-objects 9)
                              (opt5e/cleric-spell 5 :creation 9)]
-                 :levels {8 {:modifiers [(opt5e/divine-strike "fire" 1 :ua-cleric)]}}
+                 :levels {8 {:modifiers [(opt5e/divine-strike "fire" 1 :ua-cleric)]}
+                          17 {:modifiers [(mod5e/damage-immunity :fire)]}}
                  :traits [{:name "Blessings of the Forge"
                            :page 1
                            :source :ua-cleric}
