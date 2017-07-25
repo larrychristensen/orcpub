@@ -239,13 +239,13 @@
       entity/remove-empty-fields))
 
 (defn sword? [w]
-  (= :sword (:subtype w)))
+  (= :sword (::weapons5e/subtype w)))
 
 (defn axe? [w]
-  (= :axe (:subtype w)))
+  (= :axe (::weapons5e/subtype w)))
 
 (defn slashing-sword? [w]
- (and (= :slashing (:damage-type w))
+ (and (= :slashing (::weapons5e/damage-type w))
       (sword? w)))
 
 (defn javelin? [w]
@@ -254,7 +254,7 @@
 (defn mace? [w]
   (= :mace (:key w)))
 
-(defn ammunition? [i] (= :ammunition (:type i)))
+(defn ammunition? [i] (= :ammunition (::weapons5e/type i)))
 
 (def weapon-not-ammunition? (complement ammunition?))
 
@@ -1370,7 +1370,7 @@ When you hit a giant with it, the giant takes an extra 2d6 damage of the weapon�
      }{
      name-key "Glamoured Studded Leather"
      ::type :armor
-     ::item-subtype :studded-leather
+     ::item-subtype :studded
      ::rarity :rare
      ::magical-ac-bonus 1
      ::modifiers [(mod5e/bonus-action
@@ -2912,7 +2912,10 @@ The boots regain 2 hours of flying capability for every 12 hours they aren’t i
           (and (seq subtypes)
                (not ((set subtypes) :other))))
     (let [base-weapon-fn (make-base-weapon-fn item-subtype subtypes)
-          of-type (filter base-weapon-fn weapons5e/weapons)]
+          of-type (filter base-weapon-fn (concat weapons5e/weapons
+                                                 weapons5e/ammunition))]
+      (if (empty? of-type)
+        (throw (IllegalArgumentException. (str "No base types matched for weapon item!: " (::name item)))))
       (map
        (fn [weapon]
          (let [name (if name-fn 
@@ -2954,24 +2957,28 @@ The boots regain 2 hours of flying capability for every 12 hours they aren’t i
   (if (or name-fn
           item-subtype
           (seq subtypes))
-    (let [base-armor-fn (make-base-armor-fn item-subtype subtypes)]
-      (sequence
-       (comp
-        (filter base-armor-fn)
-        (map
-         (fn [armor]
-           (let [name (if name-fn 
+    (let [base-armor-fn (make-base-armor-fn item-subtype subtypes)
+          of-type (filter
+                   base-armor-fn
+                   armor5e/armor)]
+      (if (empty? of-type)
+        (throw (IllegalArgumentException. "No base types matched for armor item!")))
+      (map
+       (fn [armor]
+         (let [name (if (> (count of-type) 1)
+                      (if name-fn 
                         (name-fn armor)
                         (str (name-key item) ", " (:name armor)))
-                 item-key (common/name-to-kw name)]
-             (merge
-              armor
-              item
-              {name-key (name-key item)
-               :name name
-               :base-armor (:key armor)
-               :key item-key})))))
-       armor5e/armor))
+                      (name-key item))
+               item-key (common/name-to-kw name)]
+           (merge
+            armor
+            item
+            {name-key (name-key item)
+             :name name
+             :base-armor (:key armor)
+             :key item-key})))
+       of-type))
     (add-key item)))
 
 (defn expand-magic-items [magic-items]

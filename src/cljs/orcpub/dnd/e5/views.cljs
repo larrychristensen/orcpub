@@ -3741,7 +3741,7 @@
 (defn item-list []
   (let [device-type @(subscribe [:device-type])]
     [content-page
-     "Magic Items"
+     "Items"
      [[:button.form-button
        {:on-click #(dispatch [::mi/new-item])}
        [:div.flex.align-items-c.white

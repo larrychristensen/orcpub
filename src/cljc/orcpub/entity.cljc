@@ -112,8 +112,9 @@
                     (map #(if (map? %)
                             (remove-empty-fields %)
                             %))
-                    (remove #(or (nil? %) (and (seq? %)
-                                               (empty? %)))))
+                    (remove #(or (nil? %)
+                                 (and (coll? %)
+                                      (empty? %)))))
                    v))
                  
                  (map? v) (remove-empty-fields v)
