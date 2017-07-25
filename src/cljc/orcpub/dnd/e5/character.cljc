@@ -160,14 +160,20 @@
       add-ability-namespaces
       add-namespaces-to-values))
 
+(defn parse-int-aux [v]
+  #?(:cljs (js/parseInt v))
+  #?(:clj (Integer/parseInt v)))
+
+(defn parse-int [v]
+  (if (re-matches #"\d+" v)
+    (parse-int-aux v)
+    0))
+
 (defn fix-quantity [qty]
   (if (string? qty)
     (if (s/blank? qty)
       0
-      #?(:cljs
-         (try
-           (js/parseInt qty)
-           (catch Object e 0))))
+      (parse-int qty))
     (int qty)))
 
 (defn fix-quantities [raw-character]
