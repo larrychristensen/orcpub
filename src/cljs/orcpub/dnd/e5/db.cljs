@@ -20,7 +20,8 @@
 (def default-route route-map/dnd-e5-char-builder-route)
 
 (defn parse-route []
-  (let [route (bidi/match-route route-map/routes js/window.location.pathname)]
+  (let [route (if js/window.location
+                (bidi/match-route route-map/routes js/window.location.pathname))]
     (if route
       route
       default-route)))
@@ -40,21 +41,25 @@
    :device-type (user-agent/device-type)})
 
 (defn character->local-store [character]
-  (.setItem js/window.localStorage local-storage-character-key
-            (str (assoc (char5e/to-strict character)
-                        :changed
-                        (:changed character)))))
+  (if js/window.localStorage
+    (.setItem js/window.localStorage local-storage-character-key
+              (str (assoc (char5e/to-strict character)
+                          :changed
+                          (:changed character))))))
 
 (defn user->local-store [user-data]
-  (.setItem js/window.localStorage local-storage-user-key (str user-data)))
+  (if js/window.localStorage
+    (.setItem js/window.localStorage local-storage-user-key (str user-data))))
 
 (defn magic-item->local-store [magic-item]
-  (.setItem js/window.localStorage local-storage-magic-item-key (str magic-item)))
+  (if js/window.localStorage
+    (.setItem js/window.localStorage local-storage-magic-item-key (str magic-item))))
 
 (def tab-path [:builder :character :tab])
 
 (defn get-local-storage-item [local-storage-key]
-  (if-let [stored-str (.getItem js/window.localStorage local-storage-key)]
+  (if-let [stored-str (if js/window.localStorage
+                        (.getItem js/window.localStorage local-storage-key))]
     (try (reader/read-string stored-str)
          (catch js/Object e (js/console.warn "UNREADABLE ITEM FOUND" local-storage-key stored-str)))))
 
