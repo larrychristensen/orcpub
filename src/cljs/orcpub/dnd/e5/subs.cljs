@@ -371,13 +371,13 @@
 
 (reg-sub
  ::char5e/summary-map
- :-> [::char5e/characters]
+ :<- [::char5e/characters]
  (fn [characters _]
    (common/map-by :db/id characters)))
 
 (reg-sub
  ::char5e/summary
- :-> [::char5e/summary-map]
+ :<- [::char5e/summary-map]
  (fn [character-map [_ id]]
    (get character-map id)))
 
@@ -1025,7 +1025,7 @@
 
 (reg-sub
  ::mi5e/has-subtype?
- :< [::mi5e/builder-item]
+ :<- [::mi5e/builder-item]
  (fn [item [_ type]]
    (get (::mi5e/subtypes item) type)))
 
