@@ -22,20 +22,24 @@
 (defn auth-headers [db]
   {"Authorization" (str "Token " (-> db :user-data :token))})
 
-(reg-sub-raw
- ::mi5e/custom-items
- (fn [app-db [_ user-data]]
-   (go (dispatch [:set-loading true])
-       (let [response (<! (http/get (routes/path-for routes/dnd-e5-items-route)
-                                    {:accept :transit
-                                     :headers (auth-headers @app-db)}))]
-         (dispatch [:set-loading false])
-         (case (:status response)
-           200 (dispatch [::mi5e/set-custom-items (-> response :body)])
-           401 nil ;;(dispatch [:route routes/login-page-route {:secure? true}])
-           500 (dispatch (events/show-generic-error)))))
-   (ra/make-reaction
-    (fn [] (get @app-db ::mi5e/custom-items [])))))
+(if js/window.location
+  (reg-sub-raw
+   ::mi5e/custom-items
+   (fn [app-db [_ user-data]]
+     (go (dispatch [:set-loading true])
+         (let [response (<! (http/get (routes/path-for routes/dnd-e5-items-route)
+                                      {:accept :transit
+                                       :headers (auth-headers @app-db)}))]
+           (dispatch [:set-loading false])
+           (case (:status response)
+             200 (dispatch [::mi5e/set-custom-items (-> response :body)])
+             401 nil ;;(dispatch [:route routes/login-page-route {:secure? true}])
+             500 (dispatch (events/show-generic-error)))))
+     (ra/make-reaction
+      (fn [] (get @app-db ::mi5e/custom-items [])))))
+  (reg-sub
+   ::mi5e/custom-items
+   (fn [_ _] [])))
 
 (reg-sub
  ::mi5e/expanded-custom-items

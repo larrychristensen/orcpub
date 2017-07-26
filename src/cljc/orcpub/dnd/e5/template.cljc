@@ -76,7 +76,7 @@
 
 (defn ability-component [k v i app-state controls]
   [:div.m-t-10.t-a-c
-   (ability-icon k 24)
+   (ability-icon k 24 @(subscribe [:theme]))
    [:div.uppercase (name k)]
    [:div.f-s-18.f-w-b v]
    (ability-modifier v)

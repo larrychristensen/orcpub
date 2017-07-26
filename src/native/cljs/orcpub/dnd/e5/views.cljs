@@ -61,7 +61,6 @@
    selected-tab-style))
 
 (defn options-tab [title i selected-tab]
-  (prn "SELECTED TAB" @selected-tab)
   [touchable-without-feedback {:on-press #(do (prn "I" i) (reset! selected-tab i))}
    [view {:style (if (= i @selected-tab)
                    selected-options-tab-style
@@ -98,7 +97,6 @@
             {:keys [tags ui-fns components] :as page} (pages @selected-tab-index)
             selections (entity/tagged-selections available-selections tags)
             final-selections (entity/combine-selections selections)]
-        (prn "FINAL SELECTIOSN" (map ::t/name final-selections))
         [view
          [view {:style {:flex-direction :row
                         :justify-content :space-around}}
@@ -111,10 +109,11 @@
          [scroll-view
           (doall
            (map
-            (fn [selection]
+            (fn [{:keys [::t/key] :as selection}]
               ^{:key key}
               [selection-view selection])
             final-selections))]]))))
+
 
 (defn character-builder []
   (let [selected-tab (r/atom :options)]

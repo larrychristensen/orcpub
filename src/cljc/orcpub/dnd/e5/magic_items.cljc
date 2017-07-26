@@ -2914,8 +2914,8 @@ The boots regain 2 hours of flying capability for every 12 hours they aren’t i
     (let [base-weapon-fn (make-base-weapon-fn item-subtype subtypes)
           of-type (filter base-weapon-fn (concat weapons5e/weapons
                                                  weapons5e/ammunition))]
-      (if (empty? of-type)
-        (throw (IllegalArgumentException. (str "No base types matched for weapon item!: " (::name item)))))
+      #?(:clj (if (empty? of-type)
+                 (throw (IllegalArgumentException. (str "No base types matched for weapon item!: " (::name item))))))
       (map
        (fn [weapon]
          (let [name (if name-fn 
@@ -2961,8 +2961,8 @@ The boots regain 2 hours of flying capability for every 12 hours they aren’t i
           of-type (filter
                    base-armor-fn
                    armor5e/armor)]
-      (if (empty? of-type)
-        (throw (IllegalArgumentException. "No base types matched for armor item!")))
+      #?(:clj (if (empty? of-type)
+                 (throw (IllegalArgumentException. "No base types matched for armor item!"))))
       (map
        (fn [armor]
          (let [name (if (> (count of-type) 1)
