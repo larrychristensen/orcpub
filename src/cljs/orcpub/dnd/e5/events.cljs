@@ -70,7 +70,8 @@
 ;; -- Event Handlers --------------------------------------------------
 
 (defn backend-url [path]
-  (if (s/starts-with? js/window.location.href "http://localhost")
+  (if (and js/window.location
+           (s/starts-with? js/window.location.href "http://localhost"))
     (str "http://localhost:8890" (if (not (s/starts-with? path "/")) "/") path)
     path))
 
@@ -810,10 +811,11 @@
          path (apply routes/path-for (or handler new-route) flat-params)]
      (if (and secure?
               (not= "localhost" js/window.location.hostname))
-       (set! js/window.location.href (make-url "https"
-                                               js/window.location.hostname
-                                               path
-                                               js/window.location.port))
+       (if js/window.location.href
+         (set! js/window.location.href (make-url "https"
+                                                 js/window.location.hostname
+                                                 path
+                                                 js/window.location.port)))
        (let [cfg (cond-> {:db (assoc db :route new-route)
                           :dispatch-n [[:hide-message]
                                        [:close-orcacle]]}
