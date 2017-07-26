@@ -1,0 +1,13 @@
+{
+    "name": "orcpub",
+  "version": "0.0.1",
+  "description": "",
+  "author": "",
+  "private": true,
+  "main": "main.js",
+  "dependencies": {
+    "expo": "^17.0.0",
+    "react": "16.0.0-alpha.6",
+    "react-native": "https://github.com/expo/react-native/archive/sdk-17.0.0.tar.gz"
+  }
+}
