@@ -167,12 +167,15 @@
   {:margin-left 5
    :font-style :italic})
 
+(def remaining-view-style
+  {:align-items :center
+   :flex-direction :row})
+
 (defn remaining-component [max remaining]
   [view {:style {:margin-left 10}}
    (cond
      (pos? remaining)
-     [view {:style {:align-items :center
-                    :flex-direction :row}}
+     [view {:style remaining-view-style}
       (remaining-indicator remaining)
       [text {:style remaining-text-style}
        "remaining"]]
@@ -180,17 +183,17 @@
      (or (zero? remaining)
          (and (nil? max)
               (neg? remaining)))
-     [view {:style {:align-items :center
-                    :flex-direction :row}}
+     [view {:style remaining-view-style}
       (remaining-bubble "\u2713" :green -6 -9)
       [text {:style remaining-text-style}
        "complete"]]
 
      (neg? remaining)
-     [view {:style {:flex-direction :row}}
-      [text {:style {:font-style :italic}}
+     [view {:style remaining-view-style}
+      [text {:style {:font-style :italic
+                     :margin-right 5}}
        "remove"]
-      [text (Math/abs remaining)]])])
+      (remaining-bubble (Math/abs remaining) :red -4 -8)])])
 
 (defn selection-section-base []
   (let [expanded? (r/atom false)]
