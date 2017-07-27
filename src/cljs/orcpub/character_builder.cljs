@@ -507,8 +507,6 @@
              (remaining-component max remaining)]])
          body]))))
 
-(def ignore-paths-ending-with #{:class :levels :asi-or-feat :ability-score-improvement})
-
 (defn selection-section-column [option-selectors]
   (doall
    (map-indexed
@@ -553,31 +551,18 @@
         option-selectors)))]))
 
 (defn selection-section [title built-template option-paths ui-fns selection num-columns remaining & [hide-homebrew?]]
-  (let [actual-path (entity/actual-path selection)
-        character @(subscribe [:character])
-        expanded? (r/atom false)
-        ancestor-names (views-aux/ancestor-names-string built-template actual-path)
-        homebrew? @(subscribe [:homebrew? (or ref path)])
-        has-custom-item? (some #(= :custom (::t/key %)) options)
-        disable-select-new? (and multiselect?
-                                 (not (pos? remaining))
-                                 (some? max))
-        {:keys [path disable-selection-new homebrew?] :as data}
+  (let [{:keys [path disable-selection-new homebrew?] :as data}
         (views-aux/selection-section-data
          title
          built-template
          option-paths
          ui-fns
-         #(default-selection-section-body
-           path
-           selection
-           disable-select-new?
-           homebrew?
-           num-colums)
+         default-selection-section-body
          selection
          num-columns
          remaining
          hide-homebrew?)]
+    (prn "DATA" data)
     [selection-section-base data]))
 
 (defn set-abilities! [abilities]

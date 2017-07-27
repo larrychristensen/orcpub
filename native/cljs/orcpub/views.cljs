@@ -2,6 +2,12 @@
   (:require [reagent.core :as r :refer [atom]]))
 
 (def ReactNative (js/require "react-native"))
+#_(def FontAwesome (js/require "react-native-fontawesome"))
+#_(def FontAwesomeIcons (.-Icons FontAwesome))
+
+#_(def fa (r/adapt-react-class FontAwesome))
+#_(defn fa-icon [icon-name]
+  [fa (aget FontAwesomeIcons icon-name)])
 
 (def app-registry (.-AppRegistry ReactNative))
 (def text (r/adapt-react-class (.-Text ReactNative)))
