@@ -1,8 +1,8 @@
 {
   "expoServerPort": 19000,
-  "packagerPort": 19002,
-  "packagerPid": 18825,
+  "packagerPort": 19001,
+  "packagerPid": 28823,
   "expoServerNgrokUrl": "https://a2-dgb.larrychristensen.orcpub.exp.direct",
   "packagerNgrokUrl": "https://packager.a2-dgb.larrychristensen.orcpub.exp.direct",
-  "ngrokPid": 18950
+  "ngrokPid": 28936
 }
