@@ -811,7 +811,7 @@
          path (apply routes/path-for (or handler new-route) flat-params)]
      (if (and secure?
               (not= "localhost" js/window.location.hostname))
-       (if js/window.location.href
+       (if js/window.location
          (set! js/window.location.href (make-url "https"
                                                  js/window.location.hostname
                                                  path

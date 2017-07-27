@@ -105,7 +105,8 @@
 (defn download-form [built-char]
   [:form.download-form
    {:id "download-form"
-    :action (if (s/starts-with? js/window.location.href "http://localhost")
+    :action (if (and js/window.location
+                     (s/starts-with? js/window.location.href "http://localhost"))
               "http://localhost:8890/character.pdf"
               "/character.pdf")
     :method "POST"
@@ -135,9 +136,10 @@
 (defn fb-login-button-comp []
   [:div.flex.justify-cont-s-a
    [:button.form-button.flex.align-items-c
-    {:on-click #(if @(subscribe [:fb-logged-in?])
-                  (dispatch [:fb-logout])
-                  (on-fb-login logged-in?))}
+    (let [logged-in? @(subscribe [:fb-logged-in?])]
+      {:on-click #(if logged-in?
+                    (dispatch [:fb-logout])
+                    (on-fb-login logged-in?))})
     [:i.fa.fa-facebook.f-s-18]
     [:span.m-l-10.f-s-14
      "Login with Facebook"]]])
@@ -1562,6 +1564,19 @@
                       (comps/checkbox @(subscribe [::char/spell-slot-used? id level i]) false)]))]])
               spell-slots))])]))))
 
+(defn dropdown [{:keys [items value on-change]}]
+  [:select.builder-option.builder-option-dropdown.m-t-0
+   {:value (or value "")
+    :on-change #(on-change (event-value %))}
+   (doall
+    (map
+     (fn [{:keys [value title]}]
+       ^{:key value}
+       [:option.builder-dropdown-item
+        {:value value}
+        title])
+     items))])
+
 (defn cast-spell-component []
   (let [selected-level (r/atom nil)]
     (fn [id lvl]
@@ -1701,6 +1716,11 @@
            [spells-table id lvl (vals spells) spell-modifiers @hide-unprepared?])
          spells-known))])))
 
+(defn finish-long-rest-button [id]
+  [:button.form-button.p-5
+   {:on-click #(dispatch [::char/finish-long-rest id])}
+   "finish long rest"])
+
 (defn spells-known-section [id spells-known spell-slots spell-modifiers spell-slot-factors total-spellcaster-levels levels]
   (let [mobile? @(subscribe [:mobile?])
         multiclass? (> (count spell-slot-factors) 1)
@@ -1779,7 +1799,7 @@
            [:span.f-w-n.m-l-10 (add-links (common/sentensize (disp/attack-description attack)))]])
         attacks))])))
 
-(defn actions-section [title icon-name actions]
+(defn actions-section [id title icon-name actions]
   (if (seq actions)
     (display-section
      title icon-name
@@ -2281,7 +2301,8 @@
               all-weapons))]]]]))))
 
 (defn magic-item-rows [expanded-details magic-item-cfgs magic-weapon-cfgs magic-armor-cfgs]
-  (let [magic-item-map @(subscribe [::mi/all-magic-items-map])]
+  (let [magic-item-map @(subscribe [::mi/all-magic-items-map])
+        mobile? @(subscribe [:mobile?])]
     (mapcat
      (fn [[item-kw item-cfg]]
        (let [{:keys [::mi/name ::mi/type ::mi/item-subtype ::mi/rarity ::mi/attunement ::mi/description ::mi/summary] :as item} (magic-item-map item-kw)
@@ -2520,11 +2541,6 @@
       [list-item-section "Weapon Proficiencies" "bowman" weapon-profs (partial prof-name weapon/weapons-map)]
       [list-item-section "Armor Proficiencies" "mailed-fist" armor-profs (partial prof-name armor/armor-map)]]]))
 
-(defn finish-long-rest-button [id]
-  [:button.form-button.p-5
-   {:on-click #(dispatch [::char/finish-long-rest id])}
-   "finish long rest"])
-
 (defn features-details [num-columns id]
   (let [resistances @(subscribe [::char/resistances id])
         damage-immunities @(subscribe [::char/damage-immunities id])
@@ -2536,7 +2552,7 @@
         reactions @(subscribe [::char/reactions id])
         traits @(subscribe [::char/traits id])
         attacks @(subscribe [::char/attacks id])
-        all-traits (concat actions bonus-actions reaction traits attacks)
+        all-traits (concat actions bonus-actions reactions traits attacks)
         freqs (into #{} (map #(some-> % :frequency :units) all-traits))]
     [:div.details-columns
      {:class-name (if (= 2 num-columns) "flex")}
@@ -2566,10 +2582,10 @@
           {:on-click #(dispatch [::char/new-turn id])}
           "new turn"])]
       [attacks-section attacks]
-      [actions-section "Actions" "beams-aura" actions]
-      [actions-section "Bonus Actions" "run" bonus-actions]
-      [actions-section "Reactions" "van-damme-split" reactions]
-      [actions-section "Features, Traits, and Feats" "vitruvian-man" traits]]]))
+      [actions-section id "Actions" "beams-aura" actions]
+      [actions-section id "Bonus Actions" "run" bonus-actions]
+      [actions-section id "Reactions" "van-damme-split" reactions]
+      [actions-section id "Features, Traits, and Feats" "vitruvian-man" traits]]]))
 
 (defn spell-details [num-columns id]
   (let [spells-known @(subscribe [::char/spells-known id])
@@ -2706,6 +2722,11 @@
                        (dispatch [::party/add-character-remote @party-id character-id true])
                        (dispatch [::party/make-party #{character-id}]))}
          "ADD"]]])))
+
+(defn labeled-checkbox [label selected?]
+  [:div.flex.align-items-c.pointer.m-b-10
+   (comps/checkbox selected? false)
+   [:span.m-l-5.f-s-14 label]])
 
 (defn print-options []
   (let [print-character-sheet? @(subscribe [::char/print-character-sheet?])
@@ -2863,11 +2884,6 @@
 (defn input-builder-field [name value on-change attrs]
   [builder-field :input name value on-change attrs])
 
-(defn labeled-checkbox [label selected?]
-  [:div.flex.align-items-c.pointer.m-b-10
-   (comps/checkbox selected? false)
-   [:span.m-l-5.f-s-14 label]])
-
 (defn text-field [{:keys [value on-change]}]
   [comps/input-field
    :input
@@ -2899,6 +2915,7 @@
 
 (defn attunement-selector [attunement]
   (base-builder-field
+   "Attunement"
    [:div
     [:div.flex.align-items-c.m-b-10
      {:on-click #(dispatch [::mi/toggle-attunement])}
@@ -3265,19 +3282,6 @@
     [:div.flex-grow-1
      [item-condition-immunities]]]])
 
-(defn dropdown [{:keys [items value on-change]}]
-  [:select.builder-option.builder-option-dropdown.m-t-0
-   {:value (or value "")
-    :on-change #(on-change (event-value %))}
-   (doall
-    (map
-     (fn [{:keys [value title]}]
-       ^{:key value}
-       [:option.builder-dropdown-item
-        {:value value}
-        title])
-     items))])
-
 (defn item-builder []
   (let [{:keys [::mi/name ::mi/type ::mi/rarity ::mi/description ::mi/attunement] :as item}
         @(subscribe [::mi/builder-item])
@@ -3314,8 +3318,7 @@
                       :title (clojure.core/name rarity)})
                    item-rarities)
            :value rarity
-           :on-change #(dispatch [::mi/set-item-rarity %])}]]
-        [:select.builder-option.builder-option-dropdown])]]
+           :on-change #(dispatch [::mi/set-item-rarity %])}]])]]
      [:div.m-b-40 (base-builder-field "Description" [textarea-field
                                                      {:value description
                                                       :on-change #(dispatch [::mi/set-item-description %])}])]
@@ -3543,6 +3546,7 @@
 
 (defn monster-list-item [{:keys [name size type subtypes alignment key] :as monster}]
   (let [expanded? @(subscribe [:monster-expanded? name])
+        device-type @(subscribe [:device-type])
         monster-page-path (routes/path-for routes/dnd-e5-monster-page-route :key key)
         monster-page-route (routes/match-route monster-page-path)]
     [:div.main-text-color.item-list-item
@@ -3647,6 +3651,7 @@
 
 (defn spell-list-item [{:keys [name level school key] :as spell}]
   (let [expanded? @(subscribe [:spell-expanded? name])
+        device-type @(subscribe [:device-type])
         spell-page-path (routes/path-for routes/dnd-e5-spell-page-route :key key)
         spell-page-route (routes/match-route spell-page-path)]
     [:div.main-text-color.item-list-item
@@ -3671,7 +3676,7 @@
            "view"]]
          [spell-component spell true]])]]))
 
-(defn spell-list-items [expanded-spells device-type]
+(defn spell-list-items [device-type]
   [:div.item-list
    (doall
     (map
@@ -3695,10 +3700,11 @@
         [:i.fa.fa-times.posn-abs.f-s-24.pointer.main-text-color
          {:style close-icon-style
           :on-click #(dispatch [::char/filter-spells ""])}]]]
-      [spell-list-items expanded-spells device-type]]]))
+      [spell-list-items device-type]]]))
 
 (defn item-list-item [{:keys [key name ::mi/owner :db/id] :as item} expanded?]
   (let [expanded-key (or name (::mi/name item))
+        device-type @(subscribe [:device-type])
         expanded? @(subscribe [:item-expanded? expanded-key])
         username @(subscribe [:username])
         item-page-path (routes/path-for routes/dnd-e5-item-page-route :key (or id key))

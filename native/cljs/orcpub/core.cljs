@@ -6,7 +6,7 @@
               [orcpub.dnd.e5.subs]
               [orcpub.dnd.e5.db]
               [orcpub.views :refer [text view image touchable-without-feedback app-registry Alert]]
-              [orcpub.dnd.e5.views :as v5e]))
+              [orcpub.dnd.e5.native-views :as v5e]))
 
 (defn alert [title]
   (.alert Alert title))
@@ -17,17 +17,15 @@
     [text {:style {:color "white" :text-align "center" :font-weight "bold"}} "press me"]]])
 
 (defn app-root []
-  (try
-    [view
-     [view {:style {:background-color "#313a4d"
-                    :padding-top 20
-                    :padding-bottom 5
-                    :padding-left 5
-                    :padding-right 5
-                    :flex-direction :column}}
-      [image {:source (js/require "./assets/images/orcpub-logo.png")}]]
-     [v5e/character-builder]]
-    (catch js/Object e (prn "E" e))))
+  (prn "APP ROOT")
+  [view {:style {:flex 1}}
+   [view {:style {:background-color "#313a4d"
+                  :padding-top 20
+                  :padding-bottom 5
+                  :padding-left 5
+                  :padding-right 5}}
+    [image {:source (js/require "./assets/images/orcpub-logo.png")}]]
+   [v5e/character-builder]])
 
 (defn init []
   (dispatch-sync [:initialize-db])

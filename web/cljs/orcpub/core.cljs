@@ -17,15 +17,12 @@
 
 (enable-console-print!)
 
-(if (not (or (s/starts-with? js/window.location.href "https")
-             (s/starts-with? js/window.location.href "http://localhost")))
+(if (and js/window.location
+         (not (or (s/starts-with? js/window.location.href "https")
+                  (s/starts-with? js/window.location.href "http://localhost"))))
   (set! js/window.location.protocol "https"))
 
 (dispatch-sync [:initialize-db])
-
-(def register-url (if (s/starts-with? js/window.location.href "http://localhost")
-                    "http://localhost:8890/register"
-                    "/register"))
 
 (def pages
   {nil ch/character-builder
@@ -54,7 +51,8 @@
    routes/password-reset-used-route views/password-reset-used-page})
 
 (defn handle-url-change [_]
-  (let [route (routes/match-route js/window.location.pathname)
+  (let [route (if js/window.location
+                (routes/match-route js/window.location.pathname))
         config {:skip-path? true}]
     (dispatch [:route route (if (events/login-routes (:handler route))
                               (merge
