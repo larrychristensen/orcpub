@@ -19,6 +19,19 @@
 ;; and Component https://github.com/stuartsierra/component
 
 
+(defn get-cljs-builds
+  [id]
+  (let [project-config (->> "project.clj"
+                            slurp
+                            read-string
+                            (drop 1)
+                            (apply hash-map))
+        build (get-in project-config
+                      [:cljsbuild :builds id])]
+    (prn "BUILD" build)
+    [build]))
+
+
 (defn fig-start
   "This starts the figwheel server and watch based auto-compiler."
   []
@@ -27,7 +40,10 @@
   ;; and are not spread across different lein profiles
 
   ;; otherwise you can pass a configuration into start-figwheel! manually
-  (f/start-figwheel!))
+  (f/start-figwheel!
+   {:figwheel-options {}
+    :build-ids ["web"]
+    :all-builds (get-cljs-builds "web")}))
 
 (defn fig-stop
   "Stop the figwheel server and watch based auto-compiler."

@@ -91,8 +91,9 @@
 (spec/def ::username string?)
 (spec/def ::email string?)
 (spec/def ::token string?)
+(spec/def ::theme string?)
 (spec/def ::user-data (spec/keys :req-un [::username ::email]))
-(spec/def ::user (spec/keys :req-un [::user-data ::token]))
+(spec/def ::user (spec/keys :opt-un [::user-data ::token ::theme]))
 
 (reg-local-store-cofx
  :local-store-user

@@ -15,7 +15,11 @@
                             (drop 1)
                             (apply hash-map))
         profiles (:profiles project-config)]
-    (get-in profiles [:dev :cljsbuild :builds])))
+    (get-in project-config
+            [:profiles
+             :native-dev
+             :cljsbuild
+             :builds])))
 
 (defn enable-source-maps
   []
@@ -191,7 +195,7 @@
    {:figwheel-options {}
     :build-ids  (if (seq build-ids)
                   build-ids
-                  ["main"])
+                  ["native"])
     :all-builds (get-cljs-builds)})
   (ra/cljs-repl))
 
