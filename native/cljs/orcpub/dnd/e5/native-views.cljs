@@ -118,24 +118,151 @@
                      unselected-option-style)}
       [text name]]]))
 
-(defn selection-view [{:keys [::t/key ::t/name ::t/options] :as selection} path]
-  [view
-   [text {:style {:margin-left 5
-                  :font-size 16
+(defn selection-section-title [title]
+  (prn "SELETCION SECTION TITLE" title)
+  [view {:style {:margin-left 5}}
+   [text {:style {:font-size 16
                   :font-weight :bold}}
-    name]
-   [view {:style {:margin-bottom 10}}
-    (doall
-     (map
-      (fn [{:keys [::t/key ::t/name] :as option}]
-        ^{:key key}
-        [option-view
-         path
+    title]])
+
+(defn selection-section-parent-title [title]
+  (prn "SELECTION SECTION PARENT TITLE" title)
+  [view {:style {:margin-left 5
+                 :margin-bottom 2}}
+   [text {:style {:font-style :italic
+                  :font-size 14
+                  :color light-text-color}}
+    title]])
+
+(defn align-items-c [s]
+  (assoc s :align-items :center))
+
+(defn h [s v]
+  (assoc s :height v))
+
+(defn w [s v]
+  (assoc s :width v))
+
+(defn i [s]
+  (assoc s :font-style :italic))
+
+(defn remaining-bubble [value color left-offset top-offset]
+  [view {:style {:background-color color
+                 :border-color color
+                 :border-radius 12
+                 :border-width 12}}
+   [text
+    {:style {:position :absolute
+             :left left-offset
+             :top top-offset
+             :font-weight :bold
+             :font-size (or font-size 14)
+             :color :white}}
+    value]])
+
+(defn remaining-indicator [remaining & [size font-size]]
+  (remaining-bubble remaining :red -4 -8))
+
+(def remaining-text-style
+  {:margin-left 5
+   :font-style :italic})
+
+(defn remaining-component [max remaining]
+  [view {:style {:margin-left 10}}
+   (cond
+     (pos? remaining)
+     [view {:style {:align-items :center
+                    :flex-direction :row}}
+      (remaining-indicator remaining)
+      [text {:style remaining-text-style}
+       "remaining"]]
+
+     (or (zero? remaining)
+         (and (nil? max)
+              (neg? remaining)))
+     [view {:style {:align-items :center
+                    :flex-direction :row}}
+      (remaining-bubble "\u2713" :green -6 -9)
+      [text {:style remaining-text-style}
+       "complete"]]
+
+     (neg? remaining)
+     [view {:style {:flex-direction :row}}
+      [text {:style {:font-style :italic}}
+       "remove"]
+      [text (Math/abs remaining)]])])
+
+(defn selection-section-base []
+  (let [expanded? (r/atom false)]
+    (fn [{:keys [title path parent-title name icon help max min remaining body hide-lock? hide-homebrew?]}]
+      (let [locked? @(subscribe [:locked path])
+            homebrew? @(subscribe [:homebrew? path])]
+        [view {:style {:padding 5
+                       :margin-bottom 20}}
+         (if (and (or title name) parent-title)
+           (selection-section-parent-title parent-title))
+         [view
+          #_(if icon (views5e/svg-icon icon 24))
+          (if (or title name)
+            (selection-section-title (or title name))
+            (if parent-title
+              (selection-section-parent-title parent-title)))
+          #_(if (and path help)
+            [show-info-button expanded?])
+          #_(if (not hide-lock?)
+            [:i.fa.f-s-16.m-l-10.m-r-5.pointer
+             {:class-name (if locked? "fa-lock" "fa-unlock-alt opacity-5 hover-opacity-full")
+              :on-click #(dispatch [:toggle-locked path])}])
+          #_(if (not hide-homebrew?)
+            [:span.pointer
+             {:class-name (if (not homebrew?) "opacity-5 hover-opacity-full")
+              :on-click #(dispatch [:toggle-homebrew path])}
+             (views5e/svg-icon "beer-stein" 18)])]
+         #_(if (and help path @expanded?)
+           [help-section help])
+         (if (int? min)
+           [view {:style {:flex-direction :row
+                          :align-items :center
+                          :padding-horizontal 5
+                          :justify-content :space-between}}
+            [text {:style {:font-style :italic}}
+             (str "select " (cond
+                              (= min max) min
+                              (zero? min) (if (nil? max)
+                                            "any number"
+                                            (str "up to " max))
+                              :else (str "at least " min)))]
+            (remaining-component max remaining)])
+         body]))))
+
+(defn selection-view [path {:keys [::t/key ::t/name ::t/options] :as selection} _ _ _]
+  [view {:style {:margin-bottom 10}}
+   (doall
+    (map
+     (fn [{:keys [::t/key ::t/name] :as option}]
+       ^{:key key}
+       [option-view
+        path
+        selection
+        false
+        false
+        option])
+     options))])
+
+(defn selection-section [title built-template option-paths ui-fns selection num-columns remaining & [hide-homebrew?]]
+  (let [path (entity/actual-path selection)
+        {:keys [disable-select-new? homebrew?] :as data}
+        (views-aux/selection-section-data
+         title
+         built-template
+         option-paths
+         ui-fns
+         selection-view
          selection
-         false
-         false
-         option])
-      options))]])
+         num-columns
+         remaining
+         hide-homebrew?)]
+    [selection-section-base data]))
 
 (defn build-view []
   (let [selected-tab-index (r/atom 0)]
@@ -143,6 +270,7 @@
       (let [character @(subscribe [:character])
             built-template @(subscribe [:built-template])
             available-selections @(subscribe [:available-selections])
+            option-paths @(subscribe [:option-paths])
             built-char @(subscribe [:built-character])
             {:keys [tags ui-fns components] :as page} (pages @selected-tab-index)
             selections (entity/tagged-selections available-selections tags)
@@ -163,10 +291,18 @@
          [scroll-view {:style {:padding 10}}
           (doall
            (map
-            (fn [{:keys [::t/key] :as selection}]
+            (fn [{:keys [::t/key ::t/name] :as selection}]
               (let [path (entity/actual-path selection)]
                 ^{:key (s/join "," path)}
-                [selection-view selection path]))
+                [selection-section
+                 name
+                 built-template
+                 option-paths
+                 ui-fns
+                 selection
+                 1
+                 (entity/count-remaining built-template character selection)
+                 false]))
             final-selections))]]))))
 
 

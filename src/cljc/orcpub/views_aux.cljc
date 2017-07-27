@@ -1,6 +1,7 @@
 (ns orcpub.views-aux
   (:require [orcpub.template :as t]
             [orcpub.modifiers :as mod]
+            [orcpub.entity :as entity]
             [clojure.string :as s]
             [re-frame.core :refer [subscribe dispatch]]))
 
@@ -76,6 +77,8 @@
                            explanation-text)
        :icon icon})))
 
+(def ignore-paths-ending-with #{:class :levels :asi-or-feat :ability-score-improvement})
+
 (defn ancestor-names-string [built-template path]
   (let [ancestor-paths (map
                         (fn [p]
@@ -94,7 +97,7 @@
                               built-template
                               option-paths
                               ui-fns
-                              default-body
+                              default-body-fn
                               {:keys [::t/key ::t/name ::t/help ::t/options ::t/min ::t/max ::t/ref ::t/icon ::t/multiselect? ::entity/path ::entity/parent] :as selection}
                               num-columns
                               remaining
@@ -109,6 +112,7 @@
                                  (some? max))]
     {:title title
      :path actual-path
+     :disable-select-new? disable-select-new?
      :parent-title (if (not (s/blank? ancestor-names)) ancestor-names)
      :name name
      :icon icon
@@ -125,4 +129,9 @@
                (ui-fn
                 {:character character
                  :selection selection}))
-             default-body)}))
+             (default-body-fn
+              actual-path
+              selection
+              disable-select-new?
+              homebrew?
+              num-columns))}))
