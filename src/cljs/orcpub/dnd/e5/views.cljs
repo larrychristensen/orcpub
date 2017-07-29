@@ -687,52 +687,54 @@
 (defn login-page []
   (let [params (r/atom {})]
     (fn []
-      (registration-page
-       [:div {:style {:text-align :center}}
-        [:div {:style {:color orange
-                       :font-weight :bold
-                       :font-size "36px"
-                       :text-transform :uppercase
-                       :text-shadow "1px 2px 1px rgba(0,0,0,0.37)"
-                       :margin-top "20px"}}
-         "LOGIN"]
-        [:div.m-t-10
-         [facebook-login-button]]
-        [:div
-         {:style {:margin-top "50px"}}
-         [form-input {:title "Username or Email"
-                      :key :username
-                      :value (:username @params)
-                      :type :username
-                      :on-change #(swap! params assoc :username (event-value %))}]
-         [form-input {:title "Password"
-                      :key :password
-                      :value (:password @params)
-                      :type :password
-                      :on-change #(swap! params assoc :password (event-value %))}]
-         (if @(subscribe [:login-message-shown?])
-           [:div.m-t-5.p-r-5.p-l-5 [message
-             :error
-             @(subscribe [:login-message])
-             [:hide-login-message]]])
-         [:div.m-t-10
-          [:button.form-button
-           {:style {:height "40px"
-                    :width "174px"
-                    :font-size "16px"
-                    :font-weight "600"}
-            :on-click #(dispatch [:login @params true])}
+      (let [login-message-shown? @(subscribe [:login-message-shown?])
+            login-message @(subscribe [:login-message])]
+        (registration-page
+         [:div {:style {:text-align :center}}
+          [:div {:style {:color orange
+                         :font-weight :bold
+                         :font-size "36px"
+                         :text-transform :uppercase
+                         :text-shadow "1px 2px 1px rgba(0,0,0,0.37)"
+                         :margin-top "20px"}}
            "LOGIN"]
-          [:div.m-t-20
-           [:span "Don't have a login? "]
-           [:span.orange.underline.pointer
-            {:on-click #(dispatch [:route routes/register-page-route {:secure true :no-return? true}])}
-            "REGISTER NOW"]]
-          [:div.m-t-20
-           [:span "Forgot your password? "]
-           [:span.orange.underline.pointer
-            {:on-click #(dispatch [:route routes/send-password-reset-page-route {:secure? true :no-return? true}])}
-            "RESET PASSWORD"]]]]]))))
+          [:div.m-t-10
+           [facebook-login-button]]
+          [:div
+           {:style {:margin-top "50px"}}
+           [form-input {:title "Username or Email"
+                        :key :username
+                        :value (:username @params)
+                        :type :username
+                        :on-change #(swap! params assoc :username (event-value %))}]
+           [form-input {:title "Password"
+                        :key :password
+                        :value (:password @params)
+                        :type :password
+                        :on-change #(swap! params assoc :password (event-value %))}]
+           (if login-message-shown?
+             [:div.m-t-5.p-r-5.p-l-5 [message
+                                      :error
+                                      login-message
+                                      [:hide-login-message]]])
+           [:div.m-t-10
+            [:button.form-button
+             {:style {:height "40px"
+                      :width "174px"
+                      :font-size "16px"
+                      :font-weight "600"}
+              :on-click #(dispatch [:login @params true])}
+             "LOGIN"]
+            [:div.m-t-20
+             [:span "Don't have a login? "]
+             [:span.orange.underline.pointer
+              {:on-click #(dispatch [:route routes/register-page-route {:secure true :no-return? true}])}
+              "REGISTER NOW"]]
+            [:div.m-t-20
+             [:span "Forgot your password? "]
+             [:span.orange.underline.pointer
+              {:on-click #(dispatch [:route routes/send-password-reset-page-route {:secure? true :no-return? true}])}
+              "RESET PASSWORD"]]]]])))))
 
 (def loading-style
   {:position :absolute
@@ -2270,34 +2272,37 @@
             (doall
              (map
               (fn [[weapon-key {:keys [equipped?]}]]
-                (let [{:keys [name description ranged?] :as weapon} (all-weapons-map weapon-key)
+                (let [{:keys [name description ranged? ::weapon/type ::weapon/damage-die-count ::weapon/damage-die] :as weapon} (all-weapons-map weapon-key)
                       proficient? (has-weapon-prof weapon)
                       expanded? (@expanded-details weapon-key)
                       damage-modifier (max (weapon-damage-modifier weapon false)
                                            (weapon-damage-modifier weapon true))]
-                  ^{:key weapon-key}
-                  [:tr.pointer
-                   {:on-click #(swap! expanded-details (fn [d] (update d weapon-key not)))}
-                   [:td.p-10.f-w-b (or (:name weapon)
-                                       (::mi/name weapon))]
-                   (if (not mobile?)
-                     [:td.p-10 (boolean-icon proficient?)])
-                   [:td.p-10.w-100-p
-                    [:div
-                     (disp/attack-description (-> weapon
-                                                  (assoc :attack-type (if ranged? :ranged :melee))
-                                                  (assoc :damage-modifier damage-modifier)
-                                                  (dissoc :description)))]
-                    (if expanded?
-                      (weapon-details weapon weapon-damage-modifier))]
-                   [:td
-                    [:div.orange
-                     (if (not mobile?)
-                       [:span.underline (if expanded? "less" "more")])
-                     [:i.fa.m-l-5
-                      {:class-name (if expanded? "fa-caret-up" "fa-caret-down")}]]]
-                   [:td.p-10.f-w-b.f-s-18 (common/bonus-str (max (weapon-attack-modifier weapon true)
-                                                                 (weapon-attack-modifier weapon false)))]]))
+                  (if (not= type :ammunition)
+                    ^{:key weapon-key}
+                   [:tr.pointer
+                    {:on-click #(swap! expanded-details (fn [d] (update d weapon-key not)))}
+                    [:td.p-10.f-w-b (or (:name weapon)
+                                        (::mi/name weapon))]
+                    (if (not mobile?)
+                      [:td.p-10 (boolean-icon proficient?)])
+                    [:td.p-10.w-100-p
+                     [:div
+                      (disp/attack-description (-> weapon
+                                                   (assoc :attack-type (if ranged? :ranged :melee))
+                                                   (assoc :damage-modifier damage-modifier)
+                                                   (assoc :damage-die damage-die)
+                                                   (assoc :damage-die-count damage-die-count)
+                                                   (dissoc :description)))]
+                     (if expanded?
+                       (weapon-details weapon weapon-damage-modifier))]
+                    [:td
+                     [:div.orange
+                      (if (not mobile?)
+                        [:span.underline (if expanded? "less" "more")])
+                      [:i.fa.m-l-5
+                       {:class-name (if expanded? "fa-caret-up" "fa-caret-down")}]]]
+                    [:td.p-10.f-w-b.f-s-18 (common/bonus-str (max (weapon-attack-modifier weapon true)
+                                                                  (weapon-attack-modifier weapon false)))]])))
               all-weapons))]]]]))))
 
 (defn magic-item-rows [expanded-details magic-item-cfgs magic-weapon-cfgs magic-armor-cfgs]

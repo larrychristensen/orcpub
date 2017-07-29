@@ -86,7 +86,7 @@
           db
           (cond-> default-value
             local-store-character (assoc :character local-store-character)
-            local-store-user (assoc :user-data local-store-user)
+            local-store-user (update :user-data merge local-store-user)
             local-store-magic-item (assoc ::mi/builder-item local-store-magic-item)))}))
 
 (defn reset-character [_ _]
@@ -804,31 +804,36 @@
 
 (reg-event-fx
  :route
- (fn [{:keys [db]} [_ {:keys [handler route-params] :as new-route} {:keys [no-return? skip-path? event secure?]}]]
+ (fn [{:keys [db]} [_ {:keys [handler route-params] :as new-route} {:keys [no-return? skip-path? event secure?] :as options}]]
    (let [{:keys [route route-history]} db
          seq-params (seq route-params)
          flat-params (flatten seq-params)
          path (apply routes/path-for (or handler new-route) flat-params)]
-     (if (and secure?
+     (when (and js/window.location
+              secure?
               (not= "localhost" js/window.location.hostname))
-       (if js/window.location
-         (set! js/window.location.href (make-url "https"
-                                                 js/window.location.hostname
-                                                 path
-                                                 js/window.location.port)))
-       (let [cfg (cond-> {:db (assoc db :route new-route)
-                          :dispatch-n [[:hide-message]
-                                       [:close-orcacle]]}
-                   (not no-return?) (assoc-in [:db :return-route] new-route)
-                   (not skip-path?) (assoc :path path)
-                   event (update :dispatch-n conj event))]
-         cfg)))))
+       (set! js/window.location.href (make-url "https"
+                                               js/window.location.hostname
+                                               path
+                                               js/window.location.port)))
+     (cond-> {:db (assoc db :route new-route)
+              :dispatch-n [[:hide-message]
+                           [:close-orcacle]]}
+       (not no-return?) (assoc-in [:db :return-route] new-route)
+       (not skip-path?) (assoc :path path)
+       event (update :dispatch-n conj event)))))
 
 (reg-event-db
  :set-user-data
  [user->local-store-interceptor]
  (fn [db [_ user-data]]
-   (assoc db :user-data user-data)))
+   (update db :user-data merge user-data)))
+
+(reg-event-db
+ :clear-login
+ [user->local-store-interceptor]
+ (fn [db [_ user-data]]
+   (update db :user-data dissoc :user-data :token)))
 
 (reg-event-db
  :set-user
@@ -985,7 +990,7 @@
  :login-success
  [user->local-store-interceptor]
  (fn [{:keys [db]} [_ backtrack? response]]
-   {:db (assoc db :user-data (-> response :body))
+   {:db (update db :user-data merge (-> response :body))
     :dispatch [:route (or
                        (:return-route db)
                         routes/dnd-e5-char-builder-route)]}))
@@ -994,7 +999,7 @@
   [:show-login-message [:div  "There is no account for the email or username, please double-check it. Usernames and passwords are case sensitive, email addresses are not. You can also try to " [:a {:href (routes/path-for routes/register-page-route)} "register"] "." [:div.f-w-n.i.m-t-10 "Accounts from the old OrcPub have not been ported over yet, but you can create a new account in the mean time and we will link it with your old account as soon as possible if you use the same email address."]]])
 
 (defn dispatch-login-failure [message]
-  {:dispatch-n [[:set-user-data nil]
+  {:dispatch-n [[:clear-login]
                 [:show-login-message message]]})
 
 (reg-event-fx
@@ -1006,7 +1011,7 @@
        (= error-code errors/too-many-attempts) (dispatch-login-failure "You have made too many login attempts, you account is locked for 15 minutes. Please do not try to login again until 15 minutes have passed.")
        (= error-code errors/password-required) (dispatch-login-failure "Password is required.")
        (= error-code errors/bad-credentials) (dispatch-login-failure "Password is incorrect.") 
-       (= error-code errors/no-account) {:dispatch-n [[:set-user-data nil]
+       (= error-code errors/no-account) {:dispatch-n [[:clear-login]
                                                       (show-old-account-message)]}
        (= error-code errors/unverified) {:db (assoc db :temp-email (-> response :body :email))
                                          :dispatch [:route routes/verify-sent-route]}
@@ -1059,7 +1064,7 @@
 (reg-event-fx
  :logout
  (fn [cofx [_ response]]
-   {:dispatch-n [[:set-user-data nil]
+   {:dispatch-n [[:clear-login]
                  [:fb-logout]
                  [:set-fb-logged-in false]]}))
 
@@ -1087,14 +1092,14 @@
 (reg-event-db
  :register-success
  (fn [db [_ backtrack? response]]
-   (assoc db
-          :user-data (:body response)
-          :route :verify-sent)))
+   (-> db
+       (update :user-data merge (:body response))
+       (assoc :route :verify-sent))))
 
 (reg-event-fx
  :register-failure
  (fn [cofx [_ response]]
-   {:dispatch [:set-user-data nil]}))
+   {:dispatch [:clear-login]}))
 
 (defn validate-registration [])
 
