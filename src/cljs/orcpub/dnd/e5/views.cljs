@@ -1596,7 +1596,7 @@
                        :title i})
                     usable-slot-levels)
             :value (or @selected-level lvl)
-            :on-change #(swap! selected-level (js/parseInt %))}]]
+            :on-change #(reset! selected-level (js/parseInt %))}]]
          [:div.m-l-5
           [:button.form-button.p-10
            {:class-name (if (empty? usable-slot-levels) "disabled")
