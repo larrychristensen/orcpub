@@ -40,42 +40,41 @@
                          ref
                          (> min 1)
                          (nil? max))]
-    (if (not-any? ::t/hide-if-fail? failed-prereqs)
-      {:name name
-       :key key
-       :has-named-mods? has-named-mods?
-       :modifiers-str modifiers-str
-       :failed-prereqs failed-prereqs
-       :help help
-       #_:help #_(if (or help has-named-mods?)
-               [:div
-                (if has-named-mods? [:div.i modifiers-str])
-                [:div {:class-name (if has-named-mods? "m-t-5")} help]])
-       :selected? selected?
-       :selectable? selectable?
-       :option-path new-option-path
-       :multiselect? multiselect?
-       :select-fn (fn [e]
-                    (if (or multiselect?
-                            (not selected?))
-                      (dispatch [:select-option {:option-path option-path
-                                                 :selected? selected?
-                                                 :selectable? selectable?
-                                                 :homebrew? homebrew?
-                                                 :meets-prereqs? meets-prereqs?
-                                                 :selection selection
-                                                 :option option
-                                                 :has-selections? has-selections?
-                                                 :built-template built-template
-                                                 :new-option-path new-option-path}]))
-                    (.stopPropagation e))
-       :content (if (and (or selected? (= 1 (count options))) ui-fn)
-                  (ui-fn new-option-path built-template))
-       :explanation-text (let [explanation-text (if (and (not meets-prereqs?)
-                                                         (not selected?))
-                                                  (s/join ", " (map ::t/label failed-prereqs)))]                      
-                           explanation-text)
-       :icon icon})))
+    {:name name
+     :key key
+     :has-named-mods? has-named-mods?
+     :modifiers-str modifiers-str
+     :failed-prereqs failed-prereqs
+     :help help
+     #_:help #_(if (or help has-named-mods?)
+                 [:div
+                  (if has-named-mods? [:div.i modifiers-str])
+                  [:div {:class-name (if has-named-mods? "m-t-5")} help]])
+     :selected? selected?
+     :selectable? selectable?
+     :option-path new-option-path
+     :multiselect? multiselect?
+     :select-fn (fn [e]
+                  (if (or multiselect?
+                          (not selected?))
+                    (dispatch [:select-option {:option-path option-path
+                                               :selected? selected?
+                                               :selectable? selectable?
+                                               :homebrew? homebrew?
+                                               :meets-prereqs? meets-prereqs?
+                                               :selection selection
+                                               :option option
+                                               :has-selections? has-selections?
+                                               :built-template built-template
+                                               :new-option-path new-option-path}]))
+                  (.stopPropagation e))
+     :content (if (and (or selected? (= 1 (count options))) ui-fn)
+                (ui-fn new-option-path built-template))
+     :explanation-text (let [explanation-text (if (and (not meets-prereqs?)
+                                                       (not selected?))
+                                                (s/join ", " (map ::t/label failed-prereqs)))]                      
+                         explanation-text)
+     :icon icon}))
 
 (def ignore-paths-ending-with #{:class :levels :asi-or-feat :ability-score-improvement})
 

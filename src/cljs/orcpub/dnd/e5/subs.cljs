@@ -296,9 +296,11 @@
    (get-in db [:expanded-items name])))
 
 (defn get-fb-login-status [callback]
-  (if (and js/FB
-           (.-getLoginStatus js/FB))
-    (.getLoginStatus js/FB callback)))
+  (try
+    (if (and js/FB
+             (.-getLoginStatus js/FB))
+      (.getLoginStatus js/FB callback))
+    (catch js/Object e (js/console.log "FAILED GETTING FB LOGIN STATUE" e))))
 
 (reg-sub-raw
  :fb-logged-in?
@@ -310,15 +312,17 @@
     (fn [] (get @app-db :fb-logged-in? false)))))
 
 (defn auth-headers [db]
-  {"Authorization" (str "Token " (-> db :user-data :token))})
+  (let [token (-> db :user-data :token)]
+    (if token
+      {"Authorization" (str "Token " token)}
+      {})))
 
 (reg-sub-raw
   ::char5e/characters
   (fn [app-db [_]]
     (go (dispatch [:set-loading true])
         (let [response (<! (http/get (routes/path-for routes/dnd-e5-char-summary-list-route)
-                                     {:accept :transit
-                                      :headers (auth-headers @app-db)}))]
+                                     {:headers (auth-headers @app-db)}))]
           (dispatch [:set-loading false])
           (case (:status response)
             200 (dispatch [::char5e/set-characters (-> response :body)])
@@ -332,8 +336,7 @@
   (fn [app-db [_]]
     (go (dispatch [:set-loading true])
         (let [response (<! (http/get (routes/path-for routes/dnd-e5-char-parties-route)
-                                     {:accept :transit
-                                      :headers (auth-headers @app-db)}))]
+                                     {:headers (auth-headers @app-db)}))]
           (dispatch [:set-loading false])
           (case (:status response)
             200 (dispatch [::party5e/set-parties (-> response :body)])
@@ -345,13 +348,13 @@
 (reg-sub-raw
   :user
   (fn [app-db [_ required?]]
-    (go (let [response (<! (http/get (routes/path-for routes/user-route)
-                                     {:accept :transit
-                                      :headers (auth-headers @app-db)}))]
+    (go (let [path (routes/path-for routes/user-route)
+              hdrs (auth-headers @app-db)
+              response (<! (http/get path {:headers hdrs}))]
           (case (:status response)
             200 nil
             401 (do
-                  (dispatch [:set-user-data nil])
+                  (dispatch [:set-user-data (dissoc (:user-data @app-db) :user-data :token)])
                   (if required?
                     (dispatch [:route-to-login])))
             500 (if required? (dispatch (events/show-generic-error))))))
@@ -381,14 +384,14 @@
  (fn [character-map [_ id]]
    (get character-map id)))
 
+
 (reg-sub-raw
   ::char5e/character
   (fn [app-db [_ id :as args]]
     (let [int-id (if id (js/parseInt id))]
       (if (some? int-id)
         (go (dispatch [:set-loading true])
-            (let [response (<! (http/get (routes/path-for routes/dnd-e5-char-route :id int-id)
-                                         {:accept :transit}))]
+            (let [response (<! (http/get (routes/path-for routes/dnd-e5-char-route :id int-id)))]
               (dispatch [:set-loading false])
               (case (:status response)
                 200 (dispatch [::char5e/set-character

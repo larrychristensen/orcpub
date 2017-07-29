@@ -40,20 +40,25 @@
    :registration-form {:send-updates? true}
    :device-type (user-agent/device-type)})
 
+(defn set-item [key value]
+  (try
+    (.setItem js/window.localStorage key value)
+    (catch js/Object e (prn "FAILED SETTING LOCALSTORAGE ITEM"))))
+
 (defn character->local-store [character]
   (if js/window.localStorage
-    (.setItem js/window.localStorage local-storage-character-key
+    (set-item local-storage-character-key
               (str (assoc (char5e/to-strict character)
                           :changed
                           (:changed character))))))
 
 (defn user->local-store [user-data]
   (if js/window.localStorage
-    (.setItem js/window.localStorage local-storage-user-key (str user-data))))
+    (set-item local-storage-user-key (str user-data))))
 
 (defn magic-item->local-store [magic-item]
   (if js/window.localStorage
-    (.setItem js/window.localStorage local-storage-magic-item-key (str magic-item))))
+    (set-item local-storage-magic-item-key (str magic-item))))
 
 (def tab-path [:builder :character :tab])
 
