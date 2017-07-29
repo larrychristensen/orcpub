@@ -1774,7 +1774,7 @@
                     :event [::char5e/clone-character]})}
        {:title "Print"
         :icon "print"
-        :on-click (views5e/make-print-handler built-char)}
+        :on-click (views5e/make-print-handler (:db/id character) built-char)}
        {:title (if (:db/id character)
                  "Update Existing Character"
                  "Save New Character")
