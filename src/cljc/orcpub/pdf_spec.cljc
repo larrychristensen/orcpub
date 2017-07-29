@@ -396,7 +396,7 @@
 (defn attacks-and-spellcasting-fields [built-char]
   (let [all-weapons (mi5e/equipped-items-details (char5e/all-weapons-inventory built-char) mi5e/all-weapons-map)
         weapon-fields (mapcat
-                       (fn [{:keys [name damage-die damage-die-count damage-type] :as weapon}]
+                       (fn [{:keys [name ::weapon5e/damage-die ::weapon5e/damage-die-count ::weapon5e/damage-type] :as weapon}]
                          (let [versatile (:versatile weapon)
                                normal-damage-modifier (char5e/weapon-damage-modifier built-char weapon false)
                                finesse-damage-modifier (char5e/weapon-damage-modifier built-char weapon true)
@@ -414,7 +414,10 @@
                                {:name (str (:name weapon) " (finesse)")
                                 :attack-bonus (char5e/weapon-attack-modifier built-char weapon true)
                                 :damage (damage-str damage-die damage-die-count finesse-damage-modifier damage-type)})])))
-                       all-weapons)
+                       (remove
+                        (fn [{:keys [::weapon5e/type]}]
+                          (= type :ammunition))
+                        all-weapons))
         first-3-weapons (take 3 weapon-fields)
         rest-weapons (drop 3 weapon-fields)]
     (apply merge

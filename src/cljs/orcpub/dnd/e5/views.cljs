@@ -2290,8 +2290,6 @@
                       (disp/attack-description (-> weapon
                                                    (assoc :attack-type (if ranged? :ranged :melee))
                                                    (assoc :damage-modifier damage-modifier)
-                                                   (assoc :damage-die damage-die)
-                                                   (assoc :damage-die-count damage-die-count)
                                                    (dissoc :description)))]
                      (if expanded?
                        (weapon-details weapon weapon-damage-modifier))]
