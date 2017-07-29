@@ -1,6 +1,7 @@
 (ns orcpub.dnd.e5.display
   (:require [clojure.string :as s]
             [orcpub.common :as common]
+            [orcpub.dnd.e5.weapons :as weapons]
             [orcpub.dnd.e5.character.equipment :as char-equip]))
 
 (def phb-url "https://www.amazon.com/gp/product/0786965606/ref=as_li_tl?ie=UTF8&tag=orcpub-20&camp=1789&creative=9325&linkCode=as2&creativeASIN=0786965606&linkId=9cd9647802c714f226bd591d61058143")
@@ -108,7 +109,12 @@
                nil)
        :ranged "ranged, "
        "melee, ")
-     damage-die-count "d" damage-die (if damage-modifier (common/mod-str damage-modifier))
+     (or damage-die-count
+         (::weapons/damage-die-count attack))
+     "d"
+     (or damage-die
+         (::weapons/damage-die attack))
+     (if damage-modifier (common/mod-str damage-modifier))
      " "
      (if damage-type (common/safe-name damage-type))
      " damage"
