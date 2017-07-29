@@ -165,6 +165,7 @@
     ?has-weapon-prof? (fn [weapon]
                         (or (?weapon-profs ::weapon5e/martial)
                             (?weapon-profs (::weapon5e/key weapon))
+                            (?weapon-profs (:key weapon))
                             (?weapon-profs (::weapon5e/type weapon))
                             (?weapon-profs (:base-key weapon))))
     ?weapon-prof-bonus (fn [weapon]
