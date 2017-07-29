@@ -20,7 +20,10 @@
   (delay (sort-by mi5e/name-key mi5e/magic-items)))
 
 (defn auth-headers [db]
-  {"Authorization" (str "Token " (-> db :user-data :token))})
+  (let [token (-> db :user-data :token)]
+    (if token
+      {"Authorization" (str "Token " token)}
+      {})))
 
 (if js/window.location
   (reg-sub-raw
@@ -28,8 +31,7 @@
    (fn [app-db [_ user-data]]
      (go (dispatch [:set-loading true])
          (let [response (<! (http/get (routes/path-for routes/dnd-e5-items-route)
-                                      {:accept :transit
-                                       :headers (auth-headers @app-db)}))]
+                                      {:headers (auth-headers @app-db)}))]
            (dispatch [:set-loading false])
            (case (:status response)
              200 (dispatch [::mi5e/set-custom-items (-> response :body)])
@@ -199,8 +201,7 @@
  (fn [app-db [_ id]]
    (go (dispatch [:set-loading true])
        (let [response (<! (http/get (routes/path-for routes/dnd-e5-item-route :id id)
-                                    {:accept :transit
-                                     :headers (auth-headers @app-db)}))]
+                                    {:headers (auth-headers @app-db)}))]
          (dispatch [:set-loading false])
          (case (:status response)
            200 (dispatch [::mi5e/add-remote-item (-> response :body)])

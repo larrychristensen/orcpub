@@ -4,7 +4,9 @@
             [io.pedestal.test :as test]
             [io.pedestal.http.ring-middlewares :as ring]
             [ring.middleware.cookies :only [wrap-cookies]]
+            [ring.middleware.resource :as ring-resource]
             [ring.util.response :as ring-resp]
+            [ring.middleware.etag :refer [wrap-etag]]
             [io.pedestal.http.body-params :as body-params]
             [io.pedestal.interceptor.error :as error-int]
             [io.pedestal.interceptor.chain :refer [terminate]]
@@ -14,6 +16,7 @@
             [buddy.sign.jwt :as jwt]
             [buddy.hashers :as hashers]
             [buddy.auth.middleware :refer [authentication-request]]
+            [pandect.algo.sha1 :refer [sha1]]
             [clojure.java.io :as io]
             [clj-time.core :as t :refer [hours from-now ago]]
             [clj-time.coerce :as tc :refer [from-date]]
@@ -227,7 +230,9 @@
 
 (defn login [{:keys [json-params db] :as request}]
   (try
-    (login-response request)
+    (let [resp (login-response request)]
+      (prn "RESP" resp)
+      resp)
     (catch Throwable e (do (prn "E" e) (throw e)))))
 
 (defn user-for-email [db email]
@@ -520,10 +525,7 @@
                 response
                 {:status 200
                  :body html
-                 :headers {"Content-Type" "text/html"
-                           "Cache-Control" "no-cache, no-store, must-revalidate"
-                           "Pragma" "no-cache"
-                           "Expires" "0"}})]
+                 :headers {"Content-Type" "text/html"}})]
     merged))
 
 (defn index [{:keys [headers scheme uri server-name]} & [response]]
@@ -975,11 +977,31 @@
                                     (email/send-error-email ctx ex)
                                     (assoc ctx :io.pedestal.interceptor.chain/error ex))))
 
+(def file-hashes (atom {}))
+
+(defn get-file [{:keys [uri] :as request}]
+  (ring-resource/resource-request request "public"))
+
+(def get-css get-file)
+
+(def get-js get-file)
+
+(def get-fa get-file)
+
+(def get-image get-file)
+
+(def get-favicon get-file)
+
 (def routes
   (concat
    (route/expand-routes
     [[["/" {:get `index}
        ^:interceptors [(body-params/body-params) service-error-handler]
+       ["/js/*" {:get `get-js}]
+       ["/css/*" {:get `get-css}]
+       ["/font-awesome-4.7.0/*" {:get `get-fa}]
+       ["/image/*" {:get `get-image}]
+       ["/favicon.ico" {:get `get-favicon}]
        [(route-map/path-for route-map/register-route)
         {:post `register}]
        [(route-map/path-for route-map/user-route) ^:interceptors [check-auth]
@@ -1058,3 +1080,5 @@
        ["/health"
         {:get `health-check}]]]])
    expanded-index-routes))
+
+

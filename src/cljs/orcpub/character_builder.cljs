@@ -44,7 +44,7 @@
             [re-frame.core :refer [subscribe dispatch dispatch-sync]])
   (:require-macros [cljs.core.async.macros :refer [go]]))
 
-(def print-disabled? false)
+(def print-disabled? true)
 
 (def print-enabled? (and (not print-disabled?)
                          js/window.location
@@ -433,7 +433,7 @@
                                         homebrew?
                                         option)]
     (if (not-any? ::t/hide-if-fail? failed-prereqs)
-      ^{:key key}
+      ^{:key (::t/key option)}
       [option-selector-base (assoc data
                                    :help
                                    (if (or help has-named-mods?)
@@ -562,7 +562,6 @@
          num-columns
          remaining
          hide-homebrew?)]
-    (prn "DATA" data)
     [selection-section-base data]))
 
 (defn set-abilities! [abilities]
@@ -630,7 +629,7 @@
                                0
                                (- min num-increased))
                allowed-abilities (into #{} (map ::t/key options))
-               ancestors-title (ancestor-names-string built-template path)]
+               ancestors-title (views-aux/ancestor-names-string built-template path)]
            ^{:key i}
            [:div
             [:div.flex.justify-cont-s-a
@@ -922,7 +921,7 @@
               ^{:key i}
               [selection-section-base
                {:path path
-                :parent-title (ancestor-names-string built-template path)
+                :parent-title (views-aux/ancestor-names-string built-template path)
                 :max 1
                 :min 1
                 :remaining remaining
