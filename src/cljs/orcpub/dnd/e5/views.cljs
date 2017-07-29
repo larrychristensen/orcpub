@@ -2731,7 +2731,7 @@
    (comps/checkbox selected? false)
    [:span.m-l-5.f-s-14 label]])
 
-(defn print-options []
+(defn print-options [id built-char]
   (let [print-character-sheet? @(subscribe [::char/print-character-sheet?])
         print-spell-cards? @(subscribe [::char/print-spell-cards?])
         print-prepared-spells? @(subscribe [::char/print-prepared-spells?])]
@@ -2770,7 +2770,7 @@
        {:on-click #(dispatch [::char/hide-options])}
        "Cancel"]
       [:button.form-button.p-10.m-l-5
-       {:on-click #(let [export-fn (export-pdf @(subscribe [:built-character])
+       {:on-click #(let [export-fn (export-pdf built-char
                                               {:print-character-sheet? print-character-sheet?
                                                :print-spell-cards? print-spell-cards?
                                                :print-prepared-spells? print-prepared-spells?})]
@@ -2778,18 +2778,19 @@
                      (dispatch [::char/hide-options]))}
        "Print"]]]))
 
-(defn make-print-handler [built-char]
+(defn make-print-handler [id built-char]
   (if (seq (char/spells-known built-char))
     #(dispatch
      [::char/show-options
-      [print-options]])
+      [print-options id built-char]])
     (export-pdf built-char
                 {:print-character-sheet? true
                  :print-spell-cards? false
                  :print-prepared-spells? false})))
 
 (defn character-page [{:keys [id] :as arg}]
-  (let [{:keys [::entity/owner] :as character} @(subscribe [::char/character id])
+  (let [id (js/parseInt id)
+        {:keys [::entity/owner] :as character} @(subscribe [::char/character id])
         built-template (subs/built-template
                         @(subscribe [::char/template])
                         (subs/selected-plugin-options
@@ -2811,9 +2812,9 @@
           :on-click #(dispatch [:edit-character character])})
        {:title "Print"
         :icon "print"
-        :on-click (make-print-handler built-character)}
+        :on-click (make-print-handler id built-character)}
        (if (and username owner (not= owner username))
-         [add-to-party-component (js/parseInt id)])])
+         [add-to-party-component id])])
      [:div.p-10.main-text-color
       [character-display id true (if (= :mobile device-type) 1 2)]]]))
 
