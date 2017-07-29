@@ -16,15 +16,15 @@
                  [org.clojure/test.check "0.9.0"]
                  [org.clojure/clojurescript "1.9.660"]
                  [org.clojure/core.async "0.3.443"]
-                 #_[org.clojure/core.async "0.2.391"
-                    :exclusions [org.clojure/tools.reader]]
                  [cljsjs/react "15.3.1-0"]
                  [cljsjs/react-dom "15.3.1-0"]
                  [cljsjs/facebook "v20150729-0"]
                  [cljsjs/google-platformjs-extern "1.0.0-0"]
                  [cljs-http "0.1.43"]
                  [com.andrewmcveigh/cljs-time "0.5.0"]
+                 [clj-time "0.14.0"]
                  [clj-http "3.6.1"]
+                 [com.yetanalytics/ring-etag-middleware "0.1.1"]
                  
                  ;;[org.clojure/core.match "0.3.0-alpha4"]
                  [re-frame "0.9.0"]
@@ -109,7 +109,7 @@
                ;; This next build is an compressed minified build for
                ;; production. You can build this with:
                ;; lein cljsbuild once min
-               {:id "min"
+               #_{:id "min"
                 :source-paths ["src/cljc" "src/cljs"]
                 :compiler {:output-to "resources/public/js/compiled/orcpub.js"
                            :main orcpub.core
@@ -208,10 +208,11 @@
                        :omit-source true
                        :cljsbuild {:builds
                                    [{:id "prod"
-                                     :source-paths ["src/cljc" "src/cljs"]
-                                     :figwheel { :on-jsload "orcpub.core/on-js-reload" }
+                                     :source-paths ["web/cljs" "src/cljc" "src/cljs"]
                                      :compiler {:main orcpub.core
                                                 :asset-path "/js/compiled/out"
                                                 :output-to "resources/public/js/compiled/orcpub.js"
+                                                ;;:output-dir "resources/public/js/compiled/out"
                                                 :optimizations :advanced
-                                                :pretty-print false}}]}}})
+                                                :pretty-print false
+                                                }}]}}})

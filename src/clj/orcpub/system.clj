@@ -24,7 +24,7 @@
    ::http/port (let [port-str (System/getenv "PORT")]
                  (if port-str (Integer/parseInt port-str)))
    ::http/join false
-   ::http/resource-path "/public"
+   ;;::http/resource-path "/public"
    ::http/container-options {:context-configurator (fn [c]
                                                      (let [gzip-handler (GzipHandler.)]
                                                        (.setGzipHandler c gzip-handler)
