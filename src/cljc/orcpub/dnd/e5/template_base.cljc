@@ -258,10 +258,9 @@
                                                  spell-mods
                                                  :ability)
                                  ability-mod (get ?ability-bonuses ability 0)]
-                             (+ ability-mod (or (let [lvl (?class-level class-kw)]
-                                                  (if lvl
-                                                    (int (/ lvl slot-factor))))
-                                                0))))
+                             (+ ability-mod (if-let [lvl (?class-level class-kw)]
+                                              (int (/ lvl slot-factor))
+                                              0))))
     ?spell-slots (merge-with
                   +
                   (cond
