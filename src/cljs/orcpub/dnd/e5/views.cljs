@@ -1697,15 +1697,10 @@
 (def expanded-spell-background-style
   {:background-color "rgba(0,0,0,0.1)"})
 
-(defn spell-row [id lvl spell-modifiers prepares-spells prepared-spells-by-class {:keys [key ability qualifier class always-prepared?]} expanded? on-click]
+(defn spell-row [id lvl spell-modifiers prepares-spells prepared-spells-by-class {:keys [key ability qualifier class always-prepared?]} expanded? on-click prepare-spell-count prepared-spell-count]
   (let [spell (spells/spell-map key)
         cls-mods (get spell-modifiers class)
-        prepare-spell-count-fn @(subscribe [::char/prepare-spell-count-fn id])
-        prepared-spell-count (or (some->> class
-                                          (get prepared-spells-by-class)
-                                          count)
-                                 0)
-        remaining-preps (- (prepare-spell-count-fn class)
+        remaining-preps (- prepare-spell-count
                            prepared-spell-count)]
     [[:tr.pointer
       {:on-click on-click}
@@ -1742,7 +1737,7 @@
 (defn spells-table []
   (let [expanded-spells (r/atom {})
         mobile? @(subscribe [:mobile?])]
-    (fn [id lvl spells spell-modifiers hide-unprepared?]
+    (fn [id lvl spells spell-modifiers hide-unprepared? prepare-spell-count-fn]
       (let [prepares-spells @(subscribe [::char/prepares-spells id])
             prepared-spells-by-class @(subscribe [::char/prepared-spells-by-class id])]
         [:div.m-t-10.m-b-30
@@ -1774,7 +1769,12 @@
                (with-meta r {:key i}))
              (mapcat
               (fn [{:keys [key class always-prepared?] :as spell}]
-                (let [k (str key class)]
+                (let [k (str key class)
+                      prepared-spell-count (or (some->> class
+                                                        (get prepared-spells-by-class)
+                                                        count)
+                                               0)
+                      prepare-spell-count (prepare-spell-count-fn class)]
                   (if (char/spell-prepared? {:hide-unprepared? hide-unprepared?
                                              :always-prepared? always-prepared?
                                              :lvl lvl
@@ -1789,7 +1789,9 @@
                                prepared-spells-by-class
                                spell
                                (@expanded-spells k)
-                               #(swap! expanded-spells update k not)))))
+                               #(swap! expanded-spells update k not)
+                               prepare-spell-count
+                               prepared-spell-count))))
               (sort-by :key spells))))]]]))))
 
 
@@ -1804,12 +1806,13 @@
          (if @hide-unprepared?
            "Show All"
            "Hide Unprepared")]]
-       (doall
-        (map
-         (fn [[lvl spells]]
-           ^{:key lvl}
-           [spells-table id lvl (vals spells) spell-modifiers @hide-unprepared?])
-         spells-known))])))
+       (let [prepare-spell-count-fn (memoize @(subscribe [::char/prepare-spell-count-fn id]))]
+         (doall
+          (map
+           (fn [[lvl spells]]
+             ^{:key lvl}
+             [spells-table id lvl (vals spells) spell-modifiers @hide-unprepared? prepare-spell-count-fn])
+           spells-known)))])))
 
 (defn finish-long-rest-button [id]
   [:button.form-button.p-5
