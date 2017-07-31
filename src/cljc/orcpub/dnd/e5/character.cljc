@@ -593,11 +593,17 @@
 (defn saving-throw-advantages [built-char]
   (get-prop built-char :saving-throw-advantage))
 
+(defn best-weapon-attack-modifier-fn [built-char]
+  (get-prop built-char :best-weapon-attack-modifier))
+
 (defn weapon-attack-modifier-fn [built-char]
   (get-prop built-char :weapon-attack-modifier))
 
 (defn weapon-damage-modifier-fn [built-char]
   (get-prop built-char :weapon-damage-modifier))
+
+(defn best-weapon-damage-modifier-fn [built-char]
+  (get-prop built-char :best-weapon-damage-modifier))
 
 (defn option-sources [built-char]
   (get-prop built-char :option-sources))
@@ -610,10 +616,13 @@
    weapon
    finesse?))
 
-(defn weapon-damage-modifier [built-char weapon finesse?]
-  ((get-prop built-char :weapon-damage-modifier)
-   weapon
-   finesse?))
+(defn best-weapon-attack-modifier [built-char weapon]
+  ((best-weapon-attack-modifier-fn built-char)
+   weapon))
+
+(defn best-weapon-damage-modifier [built-char weapon finesse?]
+  ((best-weapon-damage-modifier-fn built-char)
+   weapon))
 
 (defn age [built-char]
   (get-prop built-char ::age))
