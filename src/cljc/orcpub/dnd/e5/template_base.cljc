@@ -155,8 +155,14 @@
     ?passive-investigation (+ 10 (?skill-bonuses :investigation))
     ?hit-point-level-bonus (?ability-bonuses ::char5e/con)
     ?hit-point-level-increases 0
-    ?max-hit-points (max 1 (+ ?hit-point-level-increases
-                              (* ?total-levels ?hit-point-level-bonus)))
+    ?class-hit-point-level-bonus {}
+    ?max-hit-points (max 1 (apply +
+                                  ?hit-point-level-increases
+                                  (* ?total-levels ?hit-point-level-bonus)
+                                  (map
+                                   (fn [[class-kw bonus]]
+                                     (* bonus (?class-level class-kw)))
+                                   ?class-hit-point-level-bonus)))
     ?initiative (?ability-bonuses ::char5e/dex)
     ?number-of-attacks [1]
     ?extra-attacks 0
