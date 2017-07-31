@@ -2273,7 +2273,7 @@
              (map
               (fn [[weapon-key {:keys [equipped?]}]]
                 (let [{:keys [name description ranged? ::weapon/type ::weapon/damage-die-count ::weapon/damage-die] :as weapon} (all-weapons-map weapon-key)
-                      proficient? (has-weapon-prof weapon)
+                      proficient? (if has-weapon-prof (has-weapon-prof weapon))
                       expanded? (@expanded-details weapon-key)
                       damage-modifier (max (weapon-damage-modifier weapon false)
                                            (weapon-damage-modifier weapon true))]
