@@ -2115,7 +2115,7 @@
                             :summary "you regain 1 superiority die when you roll iniative and have no remaining superiority dice"}]}
                  eldritch-knight-cfg]}))
 
-(defn monk-weapon? [{:keys [key type melee? heavy? two-handed?]}]
+(defn monk-weapon? [{:keys [key ::weapon5e/type ::weapon5e/melee? ::weapon5e/heavy? ::weapon5e/two-handed?]}]
   (or (= key :shortsword)
       (and (= type :simple)
            melee?
