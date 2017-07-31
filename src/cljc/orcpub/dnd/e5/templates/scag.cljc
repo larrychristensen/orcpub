@@ -456,8 +456,8 @@
                                 :key
                                 (filter
                                  (fn [weapon]
-                                   (and (:melee? weapon)
-                                        (not (:two-handed? weapon))))
+                                   (and (::weapon5e/melee? weapon)
+                                        (not (::weapon5e/two-handed? weapon))))
                                  weapon5e/weapons))
                                1)]
                  :levels {2 {:modifiers [(mod5e/bonus-action
