@@ -1058,7 +1058,8 @@
         total-misc-bonus (* misc-bonus (inc (count selections)))
         total-level-bonus (+ total-con-bonus total-misc-bonus)
         by-class (group-by :class all-level-values)
-        total-hps (+ total-con-bonus total-misc-bonus total-base-hps)]
+        total-hps (+ total-con-bonus total-misc-bonus total-base-hps)
+        class-hit-point-level-bonus @(subscribe [::char5e/class-hit-point-level-bonus])]
     [:div.m-t-5.p-5
      [:div.flex.align-items-c.justify-cont-s-b
       [:div.f-s-16.m-b-5
@@ -1102,8 +1103,9 @@
                                      (map :value level-values))
                num-level-values (count level-values)
                level-num (if (zero? i) (inc num-level-values) num-level-values)
+               cls-level-bonus (get class-hit-point-level-bonus cls 0)
                total-con-bonus (* con-bonus level-num)
-               total-misc-bonus (* misc-bonus level-num)]
+               total-misc-bonus (* (+ misc-bonus cls-level-bonus) level-num)]
            ^{:key i}
            [:div.m-b-20
             [:div.f-s-16.m-l-5.f-w-b
@@ -1119,7 +1121,7 @@
                  [:td.p-5 1]
                  [:td.p-5 first-class-hit-die]
                  [:td.p-5 con-bonus-str]
-                 [:td.p-5 misc-bonus-str]
+                 [:td.p-5 (common/bonus-str (+ misc-bonus cls-level-bonus))]
                  [:td.p-5 (+ (:hit-die first-class) level-bonus)]])
               (doall
                (map-indexed
@@ -1137,7 +1139,7 @@
                                              (dispatch [:set-level-hit-points built-template character level-value value])))
                               :value (:value level-value)}]]
                    [:td.p-5 con-bonus-str]
-                   [:td.p-5 misc-bonus-str]
+                   [:td.p-5 (common/bonus-str (+ misc-bonus cls-level-bonus))]
                    [:td.p-5 (+ (:value level-value) level-bonus)]])
                 level-values))
               [:tr
