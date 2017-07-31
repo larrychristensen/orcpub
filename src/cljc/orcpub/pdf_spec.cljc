@@ -401,7 +401,7 @@
                                normal-damage-modifier (char5e/weapon-damage-modifier built-char weapon false)
                                finesse-damage-modifier (char5e/weapon-damage-modifier built-char weapon true)
                                normal {:name (:name weapon)
-                                       :attack-bonus (char5e/weapon-attack-modifier built-char weapon false)
+                                       :attack-bonus (char5e/best-weapon-attack-modifier built-char weapon false)
                                        :damage (damage-str damage-die damage-die-count normal-damage-modifier damage-type)}]
                            (remove
                             nil?
@@ -409,11 +409,7 @@
                              (if (:versatile weapon)
                                {:name (str (:name weapon) " (two-handed)")
                                 :attack-bonus (char5e/weapon-attack-modifier built-char weapon false)
-                                :damage (damage-str (:damage-die versatile) (:damage-die-count versatile) normal-damage-modifier damage-type)})
-                             (if (:finesse? weapon)
-                               {:name (str (:name weapon) " (finesse)")
-                                :attack-bonus (char5e/weapon-attack-modifier built-char weapon true)
-                                :damage (damage-str damage-die damage-die-count finesse-damage-modifier damage-type)})])))
+                                :damage (damage-str (:damage-die versatile) (:damage-die-count versatile) normal-damage-modifier damage-type)})])))
                        (remove
                         (fn [{:keys [::weapon5e/type]}]
                           (= type :ammunition))
