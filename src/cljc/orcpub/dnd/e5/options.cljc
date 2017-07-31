@@ -127,21 +127,21 @@
 (defn simple-melee-weapon-options [num]
   (weapon-options
    (filter
-    #(and (= :simple (:type %)) (:melee? %))
+    #(and (= :simple (::weapons/type %)) (::weapons/melee? %))
     weapons/weapons)
    num))
 
 (defn martial-weapon-options [num]
   (weapon-options
    (filter
-    #(= :martial (:type %))
+    #(= :martial (::weapons/type %))
     weapons/weapons)
    num))
 
 (defn simple-weapon-options [num]
   (weapon-options
    (filter
-    #(= :simple (:type %))
+    #(= :simple (::weapons/type %))
     weapons/weapons)
    num))
 
