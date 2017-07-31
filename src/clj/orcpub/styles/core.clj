@@ -280,8 +280,12 @@
     {:height "40px"}]
    [:.h-48
     {:height "48px"}]
+   [:.h-60
+    {:height "60px"}]
    [:.h-72
     {:height "72px"}]
+   [:.h-200
+    {:height "200px"}]
    [:.h-800
     {:height "800px"}]
 
