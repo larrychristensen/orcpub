@@ -1714,10 +1714,13 @@
                        (if (not always-prepared?)
                          (dispatch [::char/toggle-spell-prepared id class key]))
                        (.stopPropagation e))}
-          (comps/checkbox (or always-prepared?
-                              (get-in prepared-spells-by-class [class key]))
-                          (or always-prepared?
-                              (not (pos? remaining-preps))))])
+          (let [selected? (or always-prepared?
+                              (get-in prepared-spells-by-class [class key]))]
+            (comps/checkbox
+             selected?
+             (and (not selected?)
+                  (or always-prepared?
+                      (not (pos? remaining-preps))))))])
        (:name spell)]
       [:td.p-l-10.p-b-10.p-t-10 class]
       [:td.p-l-10.p-b-10.p-t-10 (if ability (s/upper-case (name ability)))]

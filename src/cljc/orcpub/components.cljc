@@ -10,6 +10,11 @@
                      (if disable?
                        "opacity-5"))}])
 
+(defn selection-adder-item [key name]
+  [:option.builder-dropdown-item
+   {:value key}
+   name])
+
 (defn selection-adder [values on-change]
   [:select.builder-option.builder-option-dropdown
    {:value ""
@@ -22,9 +27,7 @@
     (map
      (fn [{:keys [key name]}]
        ^{:key key}
-       [:option.builder-dropdown-item
-        {:value key}
-        name])
+       [selection-adder-item key name])
      values))])
 
 (defn input-field []
