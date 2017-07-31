@@ -144,10 +144,13 @@
     [:span.m-l-10.f-s-14
      "Login with Facebook"]]])
 
+(defn dispatch-init-fb []
+  (dispatch [:init-fb]))
+
 (defn add-facebook-init [comp]
   (with-meta
     comp
-    {:component-did-mount #(dispatch [:init-fb])}))
+    {:component-did-mount dispatch-init-fb}))
 
 (def facebook-login-button
   (add-facebook-init
@@ -167,6 +170,12 @@
 (def login-style
   {:color "#f0a100"})
 
+(defn dispatch-logout []
+  (dispatch [:logout]))
+
+(defn dispatch-route-to-login []
+  (dispatch [:route-to-login]))
+
 (defn user-header-view []
   (let [username @(subscribe [:username])]
     [:div.flex.align-items-c
@@ -176,12 +185,12 @@
         (if (not @(subscribe [:mobile?])) [:span.m-r-5 username])
         [:span.underline.pointer
          {:style login-style
-          :on-click #(dispatch [:logout])}
+          :on-click dispatch-logout}
          "LOG OUT"]]
        [:span.pointer.flex.flex-column.align-items-end
         [:span.orange.underline.f-w-b.m-l-5
          {:style login-style
-          :on-click #(dispatch [:route-to-login])}
+          :on-click dispatch-route-to-login}
          [:span "LOGIN"]]])]))
 
 (def header-tab-style
@@ -189,20 +198,28 @@
 
 (def active-style {:background-color "rgba(240, 161, 0, 0.7)"})
 
+(def header-menu-item-style
+  {:position :absolute
+   :background-color "#2c3445"
+   :z-index 10000
+   :top 84
+   :right 0})
+
+(def mobile-header-menu-item-style
+  (assoc header-menu-item-style
+         :top 46))
 
 (defn header-tab []
   (let [hovered? (r/atom false)]
     (fn [title icon on-click disabled active device-type & buttons]
       (let [mobile? (= :mobile device-type)]
-        [:div.f-w-b.f-s-14.t-a-c.header-tab.m-5
+        [:div.f-w-b.f-s-14.t-a-c.header-tab.m-5.posn-rel
          {:on-click (fn [e] (if (seq buttons)
                               #(swap! hovered? not)
                               (on-click e)))
           :on-mouse-over #(reset! hovered? true)
           :on-mouse-out #(reset! hovered? false)
-          :style (merge
-                  {:position :relative}
-                  (if active active-style))
+          :style (if active active-style)
           :class-name (str (if disabled "disabled" "pointer")
                            " "
                            (if (not mobile?) " w-110"))}
@@ -214,11 +231,7 @@
          (if (and (seq buttons)
                   @hovered?)
            [:div.uppercase
-            {:style {:position :absolute
-                     :background-color "#2c3445"
-                     :z-index 10000
-                     :top (if mobile? 46 84)
-                     :right 0}}
+            {:style (if mobile? mobile-header-menu-item-style header-menu-item-style)}
             (doall
              (map
               (fn [{:keys [name route]}]
@@ -257,6 +270,39 @@
   {:top 6
    :right 25})
 
+(def search-input-parent-style
+  {:background-color "rgba(0,0,0,0.15)"})
+
+(def transparent-search-input-style
+  (assoc search-input-style :color :transparent))
+
+(defn route-to-default-route []
+  (dispatch [:route routes/default-route]))
+
+(defn search-input-keypress [e]
+  (if (= "Enter" (.-key e)) (dispatch [:set-search-text search-text])))
+
+(defn set-search-text [e]
+  (dispatch [:set-search-text (event-value e)]))
+
+(defn set-search-text-empty [e]
+  (dispatch [:set-search-text ""]))
+
+(defn open-orcacle []
+  (dispatch [:open-orcacle]))
+
+(defn route-to-character-list-page []
+  (dispatch [:route routes/dnd-e5-char-list-page-route]))
+
+(defn route-to-spell-list-page []
+  (dispatch [:route routes/dnd-e5-spell-list-page-route]))
+
+(defn route-to-monster-list-page []
+  (dispatch [:route routes/dnd-e5-monster-list-page-route]))
+
+(defn route-to-item-list-page []
+  (dispatch [:route routes/dnd-e5-item-list-page-route]))
+
 (defn app-header []
   (let [device-type @(subscribe [:device-type])
         mobile? (= :mobile device-type)
@@ -268,27 +314,25 @@
         [:div.flex.justify-cont-s-b.align-items-c.w-100-p.p-l-20.p-r-20.h-100-p
          [:img.orcpub-logo.h-32.w-120.pointer
           {:src "/image/orcpub-logo.svg"
-           :on-click #(dispatch [:route routes/default-route])}]
+           :on-click route-to-default-route}]
          (let [search-text @(subscribe [:search-text])
                search-text? @(subscribe [:search-text?])]
            [:div
             {:class-name (if mobile? "p-l-10 p-r-10" "p-l-20 p-r-20 flex-grow-1")}
             [:div.b-rad-5.flex.align-items-c
-             {:style {:background-color "rgba(0,0,0,0.15)"}}
+             {:style search-input-parent-style}
              (if (not mobile?)
                [:div.p-l-20.flex-grow-1
                 [:input.w-100-p.main-text-color
                  {:style (if search-text?
-                           (merge
-                            search-input-style
-                            {:color :transparent})
+                           transparent-search-input-style
                            search-input-style)
                   :value search-text
-                  :on-key-press #(if (= "Enter" (.-key %)) (dispatch [:set-search-text search-text]))
-                  :on-change #(dispatch [:set-search-text (event-value %)])}]])
+                  :on-key-press search-input-keypress
+                  :on-change set-search-text}]])
              [:div.opacity-1.p-r-10.pointer
               {:class-name (if mobile? "opacity-5" "opacity-8")
-               :on-click #(dispatch [:open-orcacle])}
+               :on-click open-orcacle}
               (svg-icon "magnifying-glass" (if mobile? 32 48) "")]]])
          [user-header-view]]]]]
      [:div.container
@@ -310,7 +354,7 @@
          [header-tab
           "characters"
           "battle-gear"
-          #(dispatch [:route routes/dnd-e5-char-list-page-route])
+          route-to-charater-list-page
           false
           (routes/dnd-e5-char-page-routes (or (:handler active-route) active-route))
           device-type
@@ -323,21 +367,21 @@
          [header-tab
           "spells"
           "spell-book"
-          #(dispatch [:route routes/dnd-e5-spell-list-page-route])
+          route-to-spell-list-page
           false
           (routes/dnd-e5-spell-page-routes (or (:handler active-route) active-route))
           device-type]
          [header-tab
           "monsters"
           "hydra"
-          #(dispatch [:route routes/dnd-e5-monster-list-page-route])
+          route-to-monster-list-page
           false
           (routes/dnd-e5-monster-page-routes (or (:handler active-route) active-route))
           device-type]
          [header-tab
           "items"
           "all-for-one"
-          #(dispatch [:route routes/dnd-e5-item-list-page-route])
+          route-to-item-list-page
           false
           (routes/dnd-e5-item-page-routes
            (or (:handler active-route)
@@ -349,39 +393,57 @@
            :route routes/dnd-e5-item-builder-page-route}]]]]]]))
 
 (defn legal-footer []
-  [:div.m-l-15.m-b-10.m-t-10 {:style {:text-align :left}}
+  [:div.m-l-15.m-b-10.m-t-10.t-a-l
    [:span "© 2017 OrcPub"]
    [:a.m-l-5 {:href "/terms-of-use" :target :_blank} "Terms of Use"]
    [:a.m-l-5 {:href "/privacy-policy" :target :_blank} "Privacy Policy"]])
+
+(def registration-content-style
+  {:background-color :white
+   :border "1px solid white"
+   :color text-color})
+
+(def registration-page-style
+  {:background-image "url(/image/shutterstock_432001912.jpg)"
+   :background-size "1200px 800px"
+   :background-position "-350px 0px"
+   :background-clip :content-box
+   :width "350px"
+   :min-height "600px"})
+
+(def registration-logo-style
+  {:height "25.3px"})
+
+(def registration-left-column-style
+  {:flex-direction :column
+   :width "435px"})
+
+(def registration-header-style
+  {:height "65px"
+   :background-color "#1a2532"
+   :border-right "1px solid white"})
+
+(defn route-to-default-page []
+  (dispatch [:route :default]))
 
 (defn registration-page [content]
   [:div.sans.h-100-p.flex
    {:style {:flex-direction :column}}
    [:div.flex.justify-cont-s-a.align-items-c.flex-grow-1.h-100-p
     [:div.registration-content
-     {:style {:background-color :white
-              :border "1px solid white"
-              :color text-color}}
+     {:style registration-content-style}
      [:div.flex.h-100-p
-      [:div.flex {:style {:flex-direction :column
-                          :width "435px"}}
+      [:div.flex {:style registration-left-column-style}
        [:div.flex.justify-cont-s-a.align-items-c
-        {:style {:height "65px"
-                 :background-color "#1a2532"
-                 :border-right "1px solid white"}}
+        {:style registration-header-style}
         [:img.pointer
          {:src "/image/orcpub-logo.svg"
-          :style {:height "25.3px"}
-          :on-click #(dispatch [:route :default])}]]
+          :style registration-logo-style
+          :on-click route-to-default-page}]]
        [:div.flex-grow-1 content]
        [legal-footer]]
       [:div.registration-image
-       {:style {:background-image "url(/image/shutterstock_432001912.jpg)"
-                :background-size "1200px 800px"
-                :background-position "-350px 0px"
-                :background-clip :content-box
-                :width "350px"
-                :min-height "600px"}}]]]]])
+       {:style registration-page-style}]]]]])
 
 (defn verify-failed []
   (let [params (r/atom {})]
@@ -414,9 +476,9 @@
    :display :flex
    :justify-content :space-between})
 
-(defn message [message-type message-text close-event]
+(defn message [message-type message-text close-handler]
   [:div.pointer.f-w-b ;;.h-0.opacity-0.fade-out
-   {:on-click #(dispatch close-event)}
+   {:on-click close-handler}
    [:div.main-text-color
     {:style message-style
      :class-name (case message-type
@@ -424,6 +486,9 @@
                    "bg-green")}
     [:span message-text]
     [:i.fa.fa-times]]])
+
+(defn hide-login-message []
+  (dispatch [:hide-login-message]))
 
 (defn send-password-reset-page []
   (let [params (r/atom {})]
@@ -453,7 +518,7 @@
               [message
                :error
                @(subscribe [:login-message])
-               [:hide-login-message]]])
+               hide-login-message]])
            [:button.form-button.m-t-10
             {:style {:height "40px"
                      :width "174px"
@@ -506,7 +571,7 @@
              [:div.m-t-5.p-r-5.p-l-5 [message
                                       :error
                                       @(subscribe [:login-message])
-                                      [:hide-login-message]]])
+                                      hide-login-message]])
            [:button.form-button.m-l-20.m-t-10
             {:style {:height "40px"
                      :width "174px"
@@ -518,7 +583,7 @@
 
 (defn login-link []
   [:span.underline.f-w-b.m-l-10.pointer.orange
-   {:on-click #(dispatch [:route-to-login])}
+   {:on-click dispatch-route-to-login}
    "LOGIN"])
 
 (defn verify-success []
@@ -683,6 +748,11 @@
         [:a.m-l-5 {:href "/privacy-policy" :target :_blank
                    :style {:color text-color}} "Privacy Policy"]]]])))
 
+(defn route-to-register-page []
+  (dispatch [:route routes/register-page-route {:secure true :no-return? true}]))
+
+(defn route-to-reset-password-page []
+  (dispatch [:route routes/send-password-reset-page-route {:secure? true :no-return? true}]))
 
 (defn login-page []
   (let [params (r/atom {})]
@@ -716,7 +786,7 @@
              [:div.m-t-5.p-r-5.p-l-5 [message
                                       :error
                                       login-message
-                                      [:hide-login-message]]])
+                                      hide-login-message]])
            [:div.m-t-10
             [:button.form-button
              {:style {:height "40px"
@@ -728,12 +798,12 @@
             [:div.m-t-20
              [:span "Don't have a login? "]
              [:span.orange.underline.pointer
-              {:on-click #(dispatch [:route routes/register-page-route {:secure true :no-return? true}])}
+              {:on-click route-to-register-page}
               "REGISTER NOW"]]
             [:div.m-t-20
              [:span "Forgot your password? "]
              [:span.orange.underline.pointer
-              {:on-click #(dispatch [:route routes/send-password-reset-page-route {:secure? true :no-return? true}])}
+              {:on-click route-to-reset-password-page}
               "RESET PASSWORD"]]]]])))))
 
 (def loading-style
@@ -746,6 +816,12 @@
    :left 0
    :z-index 100
    :background-color "rgba(0,0,0,0.6)"})
+
+(defn hide-confirmation []
+  (dispatch [:hide-confirmation]))
+
+(defn hide-message []
+  (dispatch [:hide-message]))
 
 (defn header [title button-cfgs]
   (let [device-type @(subscribe [:device-type])]
@@ -778,7 +854,7 @@
            [:div.f-w-b (:question cfg)]
            [:div.flex.justify-cont-end.m-t-5
             [:button.form-button
-             {:on-click #(dispatch [:hide-confirmation])}
+             {:on-click hide-confirmation}
              "CANCEL"]
             [:button.link-button.underline.f-w-b
              {:on-click #(do
@@ -793,7 +869,7 @@
         [message
          @(subscribe [:message-type])
          @(subscribe [:message])
-         [:hide-message]]])]))
+         hide-message]])]))
 
 (def debug-data-style {:width "400px" :height "400px"})
 
@@ -1015,6 +1091,9 @@
            (fn [[k v]] (str (s/capitalize (clojure.core/name k)) " " (common/bonus-str v)))
            m)))
 
+(def max-width-300
+  {:max-width "300px"})
+
 (defn monster-component [{:keys [name size type subtypes hit-points alignment armor-class armor-notes speed saving-throws skills damage-vulnerabilities damage-resistances damage-immunities condition-immunities senses languages challenge traits actions legendary-actions source page] :as monster}]
   [:div.m-l-10.l-h-19
    (if (not @(subscribe [:mobile?])) {:style two-columns-style})
@@ -1029,7 +1108,7 @@
                                     (if mean (str " (" mean ")")))))
    (spell-field "Speed" speed)
    [:div.m-t-10.flex.justify-cont-s-a.m-b-10
-    {:style {:max-width "300px"}}
+    {:style max-width-300}
     (doall
      (map
       (fn [ability-key]
@@ -1138,6 +1217,17 @@
    :right 0
    :padding "17px"})
 
+(def close-button-style
+  {:position :fixed
+   :top 20
+   :right 40})
+
+(def oracle-input-style
+  (merge search-input-style
+         {:background-color "rgba(255,255,255,0.1)"}))
+
+(defn close-orcacle []
+  (dispatch [:close-orcacle]))
 
 (defn content-page [title button-cfgs content]
   (let [orcacle-open? @(subscribe [:orcacle-open?])
@@ -1168,27 +1258,24 @@
          [:div.flex.flex-column.h-100-p.white
           {:style oracle-frame-style}
           [:i.fa.fa-times-circle.f-s-24.orange.pointer
-           {:on-click #(dispatch [:close-orcacle])
-            :style {:position :fixed
-                    :top 20
-                    :right 40}}]
+           {:on-click close-orcacle
+            :style close-button-style}]
           [:div
            [:div.flex.justify-cont-s-a.m-t-10
             [:div.flex.align-items-c.pointer
-             {:on-click #(dispatch [:close-orcacle])}
+             {:on-click close-orcacle}
              [:span.f-s-32 "Orcacle"]
              [:div.m-l-10 (svg-icon "hood" 48 "")]]]]
           [:div.p-10
            [:div.posn-rel
             [:input.input
              {:value search-text
-              :on-change #(dispatch [:set-search-text (event-value %)])
-              :on-key-press #(if (= "Enter" (.-key %)) (dispatch [:set-search-text search-text]))
-              :style (merge search-input-style
-                            {:background-color "rgba(255,255,255,0.1)"})}]
+              :on-change set-search-text
+              :on-key-press search-input-keypress
+              :style orcacle-input-style}]
             [:i.fa.fa-times.posn-abs.f-s-24.pointer
              {:style close-icon-style
-              :on-click #(dispatch [:set-search-text ""])}]]
+              :on-click set-search-text-empty}]]
            [:span.f-s-14.i.opacity-5 "\"8d10 + 2\", \"magic missile\", \"kobold\", \"female calishite name\", \"tavern name\", etc."]]
           [:div.flex-grow-1
            [search-results]]]))
@@ -1481,6 +1568,9 @@
              [:td]
              [:td.p-10 total-spellcaster-levels]]]]])])))
 
+(def highlight-spell-slot-row-style
+  {:background-color "rgba(255,255,255,0.3)"})
+
 (defn spell-slots-table []
   (let [expanded? (r/atom false)
         checkboxes-expanded? (r/atom false)]
@@ -1525,7 +1615,7 @@
                      {:class-name (if highlight?
                                     "f-w-b")
                       :style (if highlight?
-                               {:background-color "rgba(255,255,255,0.3)"})}
+                               highlight-spell-slot-row-style)}
                      [:td.p-10 lvl]
                      (let [total-slots (opt/total-slots lvl (if multiclass? 1 (-> spell-slot-factors first val)))]
                        (doall
@@ -1604,6 +1694,9 @@
                          (dispatch [::char/use-spell-slot id (or @selected-level (first usable-slot-levels))]))}
            "cast spell"]]]))))
 
+(def expanded-spell-background-style
+  {:background-color "rgba(0,0,0,0.1)"})
+
 (defn spell-row [id lvl spell-modifiers prepares-spells prepared-spells-by-class {:keys [key ability qualifier class always-prepared?]} expanded? on-click]
   (let [spell (spells/spell-map key)
         cls-mods (get spell-modifiers class)
@@ -1639,7 +1732,7 @@
        [:i.fa
         {:class-name (if expanded? "fa-caret-up" "fa-caret-down")}]]]
      (if expanded?
-       [:tr {:style {:background-color "rgba(0,0,0,0.1)"}}
+       [:tr {:style expanded-spell-background-style}
         [:td {:col-span 6}
          [:div.p-10
           (if (pos? lvl)
@@ -2870,12 +2963,7 @@
     el-type
     value
     on-change
-    (update
-     attrs
-     :style
-     assoc
-     :height
-     "40px")]))
+    attrs]))
 
 (defn select-builder-field [name value on-change children]
   (base-builder-field
@@ -3298,7 +3386,7 @@
         "Item Name"
         name
         #(dispatch [::mi/set-item-name %])
-        {:class-name "input"}]]
+        {:class-name "input h-40"}]]
       [:div.flex-grow-1.m-l-5
        (base-builder-field
         "Type"
@@ -3476,8 +3564,7 @@
                         {:value (or (@editing-parties id) name)
                          :style party-name-editor-style
                          :on-change #(swap! editing-parties assoc id (event-value %))}]
-                       [:div.m-l-10
-                        {:style {:width "200px"}}
+                       [:div.m-l-10.w-200
                         [comps/selection-adder
                          (sequence
                           (comp
@@ -3595,9 +3682,8 @@
          [:div.p-l-5.p-r-5.p-b-10
           [:div.p-b-10.p-l-10.p-r-10
            [:div.posn-rel
-            [:input.input.f-s-24.p-l-20.w-100-p
-             {:style {:height "60px"}
-              :value @(subscribe [::char/monster-text-filter])
+            [:input.input.f-s-24.p-l-20.w-100-p.h-60
+             {:value @(subscribe [::char/monster-text-filter])
               :on-change #(dispatch [::char/filter-monsters (event-value %)])}]
             [:i.fa.fa-times.posn-abs.f-s-24.pointer.main-text-color
              {:style close-icon-style
@@ -3697,9 +3783,8 @@
      [:div.p-l-5.p-r-5.p-b-10
       [:div.p-b-10.p-l-10.p-r-10
        [:div.posn-rel
-        [:input.input.f-s-24.p-l-20.w-100-p
-         {:style {:height "60px"}
-          :value @(subscribe [::char/spell-text-filter])
+        [:input.input.f-s-24.p-l-20.w-100-p.h-60
+         {:value @(subscribe [::char/spell-text-filter])
           :on-change #(dispatch [::char/filter-spells (event-value %)])}]
         [:i.fa.fa-times.posn-abs.f-s-24.pointer.main-text-color
          {:style close-icon-style
@@ -3760,9 +3845,8 @@
      [:div.p-l-5.p-r-5.p-b-10
       [:div.p-b-10.p-l-10.p-r-10
        [:div.posn-rel
-        [:input.input.f-s-24.p-l-20.w-100-p
-         {:style {:height "60px"}
-          :value @(subscribe [::char/item-text-filter])
+        [:input.input.f-s-24.p-l-20.w-100-p.h-60
+         {:value @(subscribe [::char/item-text-filter])
           :on-change #(dispatch [::char/filter-items (event-value %)])}]
         [:i.fa.fa-times.posn-abs.f-s-24.pointer.main-text-color
          {:style close-icon-style
