@@ -63,7 +63,7 @@
         (char5e/remove-custom-starting-equipment ::char-equip5e/background-starting-equipment? custom-equipment-path)
         (char5e/add-custom-equipment custom-equipment custom-equipment-path))))
 
-(defn add-inventory-item [character [_ selection-key item-key]]
+(defn add-inventory-item [character selection-key item-key]
   (update-in
    character
    [::entity/options selection-key]

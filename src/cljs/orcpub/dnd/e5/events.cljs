@@ -593,7 +593,8 @@
 (reg-event-db
  :add-inventory-item
  character-interceptors
- event-handlers/add-inventory-item)
+ (fn [character [_ selection-key item-key]]
+   (event-handlers/add-inventory-item character selection-key item-key)))
 
 (defn toggle-inventory-item-equipped [character [_ selection-key item-index]]
   (update-in

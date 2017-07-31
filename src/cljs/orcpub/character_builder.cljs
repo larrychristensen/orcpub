@@ -115,11 +115,16 @@
 (defn character-state-path [path]
   (concat [:character] path))
 
+(defn update-value-field-fn [prop-name]
+  #(dispatch [:update-value-field prop-name %]))
+
+(def update-value-field (memoize update-value-field-fn))
+
 (defn character-field [entity-values prop-name type & [cls-str handler input-type]]
   [comps/input-field
    type
    (get entity-values prop-name)
-   #(dispatch [:update-value-field prop-name %])
+   (update-value-field prop-name)
    {:type input-type
     :class-name (str "input w-100-p " cls-str)}])
 
@@ -141,10 +146,34 @@
         (js/console.warn "NO PREREQ_FN" (::t/name option) prereq)))
     (::t/prereqs option))))
 
+(defn set-class-fn [i options-map]
+  (fn [e] (let [new-key (keyword (.. e -target -value))]
+            (dispatch [:set-class new-key i options-map]))))
+
+(def set-class (memoize set-class-fn))
+
+(def make-options-map
+  (memoize
+   (fn [options]
+     (zipmap (map ::t/key options) options))))
+
+(defn set-class-level-fn [i]
+  (fn [e]
+    (let [new-highest-level-str (.. e -target -value)
+          new-highest-level (js/parseInt (last (s/split new-highest-level-str #"-")))]
+      (dispatch [:set-class-level i new-highest-level]))))
+
+(def set-class-level (memoize set-class-level-fn))
+
+(defn delete-class-fn [key i options-map]
+  (fn [_] (dispatch [:delete-class key i options-map])))
+
+(def delete-class (memoize delete-class-fn))
+
 (defn class-level-selector []
   (let [expanded? (r/atom false)]
     (fn [i key selected-class options unselected-classes-set]
-      (let [options-map (zipmap (map ::t/key options) options)
+      (let [options-map (make-options-map options)
             class-template-option (options-map key)
             path [:class-levels key]]
         [:div.m-b-5
@@ -152,8 +181,7 @@
          [:div.flex.align-items-c
           [:select.builder-option.builder-option-dropdown.flex-grow-1.m-t-0
            {:value key
-            :on-change (fn [e] (let [new-key (keyword (.. e -target -value))]
-                                 (dispatch [:set-class new-key i options-map])))}
+            :on-change (set-class i options-map)}
            (doall
             (map
              (fn [{:keys [::t/key ::t/name] :as option}]
@@ -177,10 +205,7 @@
             [:select.builder-option.builder-option-dropdown.m-t-0.m-l-5.w-100
              {:value last-level-key
               :on-change
-              (fn [e]
-                (let [new-highest-level-str (.. e -target -value)
-                      new-highest-level (js/parseInt (last (s/split new-highest-level-str #"-")))]
-                  (dispatch [:set-class-level i new-highest-level])))}
+              (set-class-level i)}
              (doall
               (map-indexed
                (fn [i {level-key ::t/key}]
@@ -190,7 +215,7 @@
                   (inc i)])
                available-levels))])
           [:i.fa.fa-minus-circle.orange.f-s-16.m-l-5.pointer
-           {:on-click (fn [_] (dispatch [:delete-class key i options-map]))}]]
+           {:on-click (delete-class key i options-map)}]]
          (if @expanded?
            [:div.m-t-5.m-b-10 (::t/help class-template-option)])]))))
 
@@ -208,6 +233,13 @@
 
 (def level-label-style
   {:margin-right "50px"})
+
+(defn add-class-fn [remaining-classes]
+  (fn [_]
+    (let [first-unselected (::t/key (first remaining-classes))]
+      (dispatch [:add-class first-unselected]))))
+
+(def add-class (memoize add-class-fn))
 
 (defn class-levels-selector [{:keys [selection]}]
   (let [options (::t/options selection)
@@ -235,10 +267,13 @@
         [:i.fa.fa-plus-circle.orange.f-s-16]
         [:span.m-l-5
          {:on-click
-          (fn [_]
-            (let [first-unselected (::t/key (first remaining-classes))]
-              (dispatch [:add-class first-unselected])))}
+          (add-class remaining-classes)}
          "Add Class"]])]))
+
+(defn set-custom-item-name-fn [selection-key i]
+  #(dispatch [::char5e/set-custom-item-name selection-key i %]))
+
+(def set-custom-item-name (memoize set-custom-item-name-fn))
 
 (defn inventory-item []
   (let [expanded? (r/atom false)]
@@ -263,7 +298,7 @@
           [comps/input-field
            :input
            item-name
-           #(dispatch [::char5e/set-custom-item-name selection-key i %])
+           (set-custom-item-name selection-key i)
            {:class-name "input m-t-0"}]
           [:div.flex-grow-1 item-name])
         (if item-description [:div.w-60 [show-info-button expanded?]])
@@ -274,6 +309,14 @@
         [:i.fa.fa-minus-circle.orange.f-s-16.m-l-5.pointer
          {:on-click remove-fn}]]
        (if @expanded? [:div.m-t-5 item-description])])))
+
+(defn add-inventory-item-fn [key]
+  (fn [e]
+     (let [value (.. e -target -value)
+           item-key (keyword value)]
+       (dispatch [:add-inventory-item key item-key]))))
+
+(def add-inventory-item (memoize add-inventory-item-fn))
 
 (defn inventory-adder [key options selected-keys]
   [comps/selection-adder
@@ -289,10 +332,46 @@
          {:name name
           :key (or key id)})))
      options))
-   (fn [e]
-     (let [value (.. e -target -value)
-           item-key (keyword value)]
-       (dispatch [:add-inventory-item key item-key])))])
+   (add-inventory-item key)])
+
+(defn inventory-check-fn [key i]
+  #(dispatch [:toggle-inventory-item-equipped key i]))
+
+(def inventory-check (memoize inventory-check-fn))
+
+(defn inventory-qty-change-fn [key i]
+  #(dispatch [:change-inventory-item-quantity key i %]))
+
+(def inventory-qty-change (memoize inventory-qty-change-fn))
+
+(defn remove-inventory-item-fn [key item-key]
+  (fn [_]
+    (dispatch [:remove-inventory-item key item-key])))
+
+(def remove-inventory-item (memoize remove-inventory-item-fn))
+
+(defn toggle-custom-inventory-item-equipped-fn [custom-equipment-key i]
+  (fn [_]
+    (dispatch [:toggle-custom-inventory-item-equipped custom-equipment-key i])))
+
+(def toggle-custom-inventory-item-equipped (memoize toggle-custom-inventory-item-equipped-fn))
+
+(defn change-custom-inventory-item-quantity-fn [custom-equipment-key i]
+  (fn [qty]
+    (dispatch [:change-custom-inventory-item-quantity custom-equipment-key i qty])))
+
+(def change-custom-inventory-item-quantity (memoize change-custom-inventory-item-quantity-fn))
+
+(defn remove-custom-inventory-item-fn [custom-equipment-key name]
+  (fn [_]
+    (dispatch [:remove-custom-inventory-item custom-equipment-key name])))
+
+(def remove-custom-inventory-item (memoize remove-custom-inventory-item-fn))
+
+(defn new-custom-item-fn [custom-equipment-key]
+  #(dispatch [::char5e/new-custom-item custom-equipment-key]))
+
+(def new-custom-item (memoize new-custom-item-fn))
 
 (defn inventory-selector [item-map-sub qty-input-width {:keys [selection]} & [custom-equipment-key]]
   (let [{:keys [::t/key]} selection
@@ -326,10 +405,9 @@
                              :equipped? equipped?
                              :i i
                              :qty-input-width qty-input-width
-                             :check-fn #(dispatch [:toggle-inventory-item-equipped key i])
-                             :qty-change-fn #(dispatch [:change-inventory-item-quantity key i %])
-                             :remove-fn (fn [_]
-                                          (dispatch [:remove-inventory-item key item-key]))}]))
+                             :check-fn (inventory-check key i)
+                             :qty-change-fn (inventory-qty-change key i)
+                             :remove-fn (remove-inventory-item key item-key)}]))
         selected-items))]
      (if custom-equipment-key
        [:div
@@ -352,17 +430,13 @@
                                                         class-starting-equipment?))
                                 :i i
                                 :qty-input-width qty-input-width
-                                :check-fn (fn [_]
-                                            (dispatch [:toggle-custom-inventory-item-equipped custom-equipment-key i]))
-                                :qty-change-fn (fn [e]
-                                                 (let [qty (.. e -target -value)]
-                                                   (dispatch [:change-custom-inventory-item-quantity custom-equipment-key i qty])))
-                                :remove-fn (fn [_]
-                                             (dispatch [:remove-custom-inventory-item custom-equipment-key name]))}]))
+                                :check-fn (toggle-custom-inventory-item-equipped custom-equipment-key i)
+                                :qty-change-fn (change-custom-inventory-item-quantity custom-equipment-key i)
+                                :remove-fn (remove-custom-inventory-item custom-equipment-key name)}]))
            @(subscribe [:entity-value custom-equipment-key])))]
         [:div.flex.justify-cont-end
          [:div.orange.pointer.m-t-5.m-r-5
-          {:on-click #(dispatch [::char5e/new-custom-item custom-equipment-key])}
+          {:on-click new-custom-item}
           [:span.underline "Add Custom Item"]
           [:i.fa.fa-plus-circle.m-l-5.f-s-16]]]])]))
 
@@ -860,7 +934,6 @@
           [:div.p-1.flex-grow-1
            [:input.input.f-s-18.m-b-5.p-l-0.w-100-p
             {:value (k abilities)
-             ;;:style ability-input-style
              :type :number
              :on-change (fn [e] (let [value (.-value (.-target e))
                                       new-v (if (not (s/blank? value))
@@ -881,7 +954,6 @@
             {:value (if (abilities k)
                       (total-abilities k))
              :type :number
-             ;;:style ability-input-style
              :on-change (fn [e] (let [total (total-abilities k)                                     
                                       value (.-value (.-target e))
                                       diff (- total
@@ -1240,28 +1312,29 @@
    {:name "Equipment"
     :icon "backpack"
     :tags #{:equipment :starting-equipment}
-    :ui-fns [{:key :weapons
-              :hide-homebrew? true
-              :ui-fn (partial inventory-selector [::equip5e/weapons-map] 60)}
-             {:key :magic-weapons
-              :hide-homebrew? true
-              :ui-fn (partial inventory-selector [::mi5e/magic-weapon-map] 60)}
-             {:key :armor
-              :hide-homebrew? true
-              :ui-fn (partial inventory-selector [::equip5e/armor-map] 60)}
-             {:key :magic-armor
-              :hide-homebrew? true
-              :ui-fn (partial inventory-selector [::mi5e/magic-armor-map] 60)}
-             {:key :equipment
-              :hide-homebrew? true
-              :ui-fn (fn [v]
-                       [inventory-selector [::equip5e/equipment-map] 60 v ::char5e/custom-equipment])}
-             {:key :other-magic-items
-              :hide-homebrew? true
-              :ui-fn (partial inventory-selector [::mi5e/other-magic-items-map] 60)}
-             {:key :treasure
-              :hide-homebrew? true
-              :ui-fn #(inventory-selector [::equip5e/treasure-map] 100 % ::char5e/custom-treasure)}]}])
+    :ui-fns (letfn [(select-selection [v] (select-keys v [:selection]))]
+              [{:key :weapons
+                :hide-homebrew? true
+                :ui-fn (fn [v] [inventory-selector [::equip5e/weapons-map] 60 (select-selection v)])}
+               {:key :magic-weapons
+                :hide-homebrew? true
+                :ui-fn (fn [v] [inventory-selector [::mi5e/magic-weapon-map] 60 (select-selection v)])}
+               {:key :armor
+                :hide-homebrew? true
+                :ui-fn (fn [v] [inventory-selector [::equip5e/armor-map] 60 (select-selection v)])}
+               {:key :magic-armor
+                :hide-homebrew? true
+                :ui-fn (fn [v] [inventory-selector [::mi5e/magic-armor-map] 60 (select-selection v)])}
+               {:key :equipment
+                :hide-homebrew? true
+                :ui-fn (fn [v]
+                         [inventory-selector [::equip5e/equipment-map] 60 (select-selection v) ::char5e/custom-equipment])}
+               {:key :other-magic-items
+                :hide-homebrew? true
+                :ui-fn (fn [v] [inventory-selector [::mi5e/other-magic-items-map] 60 (select-selection v)])}
+               {:key :treasure
+                :hide-homebrew? true
+                :ui-fn (fn [v] [inventory-selector [::equip5e/treasure-map] 100 (select-selection v) ::char5e/custom-treasure])}])}])
 
 (defn section-tabs [available-selections built-template character page-index]
   (let [device-type @(subscribe [:device-type])]
@@ -1457,6 +1530,26 @@
   {:max-height "100px"
    :max-width "200px"})
 
+(defn set-random-name []
+  (dispatch [::char5e/set-random-name]))
+
+(defn set-image-url [v]
+  (dispatch [:set-image-url v]))
+
+(defn set-faction-image-url [v]
+  (dispatch [:set-faction-image-url v]))
+
+(defn image-error-fn [event-key image-url]
+  (dispatch [event-key image-url]))
+
+(def image-error (memoize image-error-fn))
+
+(defn image-loaded []
+  (dispatch [:loaded-image]))
+
+(defn faction-image-loaded []
+  (dispatch [:loaded-faction-image]))
+
 (defn description-fields []
   (let [entity-values @(subscribe [:entity-values])
         image-url @(subscribe [::char5e/image-url])
@@ -1469,7 +1562,7 @@
       [:div.flex.align-items-c
        [character-input entity-values ::char5e/character-name]
        [:button.form-button.p-10.m-t-5.m-l-5
-        {:on-click (fn [_] (dispatch [::char5e/set-random-name]))}
+        {:on-click set-random-name}
         [:i.fa.fa-random.main-text-color.f-s-16]]]]
      [:div.flex.justify-cont-s-b
       [:div.field.flex-grow-1.m-r-2
@@ -1519,12 +1612,12 @@
      [:div.flex.align-items-c.w-100-p.m-t-30
       (if image-url
         [:img.m-r-10 {:src image-url
-                      :on-error (fn [_] (dispatch [:failed-loading-image image-url]))
-                      :on-load (fn [_] (if image-url-failed (dispatch [:loaded-image])))
+                      :on-error (image-error :failed-loading-image image-url)
+                      :on-load (if image-url-failed image-loaded)
                :style image-style}])
       [:div.flex-grow-1
        [:span.personality-label.f-s-18 "Image URL"]
-       [character-input entity-values ::char5e/image-url nil #(dispatch [:set-image-url %])]
+       [character-input entity-values ::char5e/image-url nil set-image-url]
        (if image-url-failed
          [:div.red.m-t-5 "Image failed to load, please check the URL"])]]
      [:div.field
@@ -1533,49 +1626,28 @@
      [:div.flex.align-items-c.w-100-p.m-t-30
       (if faction-image-url
         [:img.m-r-10 {:src faction-image-url
-                      :on-error (fn [_] (dispatch [:failed-loading-faction-image faction-image-url]))
-                      :on-load (fn [_] (if faction-image-url-failed
-                                         (dispatch [:loaded-faction-image])))
+                      :on-error (image-error :failed-loading-faction-image faction-image-url)
+                      :on-load (if faction-image-url-failed
+                                 faction-image-loaded)
                :style image-style}])
       [:div.flex-grow-1
        [:span.personality-label.f-s-18 "Faction Image URL"]
-       [character-input entity-values ::char5e/faction-image-url nil #(dispatch [:set-faction-image-url %])]
+       [character-input entity-values ::char5e/faction-image-url nil set-faction-image-url]
        (if faction-image-url-failed
          [:div.red.m-t-5 "Image failed to load, please check the URL"])]]
      [:div.field
       [:span.personality-label.f-s-18 "Description/Backstory"]
       [character-textarea entity-values ::char5e/description "h-800"]]]))
 
-#_(if image-url-failed
-          [:div.p-10.red.f-s-18 (str (if (= :https image-url-failed)
-                                       no-https-images
-                                       "Image could not be loaded, please check the URL and try again"))]
-          (let [default-image-url (default-image race classes)
-                image-url? (not (s/blank? image-url))]
-            (if (or default-image-url image-url?)
-              [:img.character-image.w-100-p.m-b-20 {:src (if image-url?
-                                                           image-url
-                                                           default-image-url)
-                                                    :on-error (fn [_] (dispatch [:failed-loading-image image-url]))
-                                                    :on-load (fn [_] (if image-url-failed (dispatch [:loaded-image])))}]
-              [:div.p-20.m-r-10.m-t-10.bg-gray.b-rad-5.t-a-c
-               {:style {:border "2px solid white"
-                        :background-color "rgba(255,255,255,0.1)"}}
-               [:div (svg-icon "orc-head" 72 72)]
-               [:div "No image set, you can set one using the 'Image URL' field in the 'Description' tab."]])))
-        #_(if faction-image-url-failed
-          [:div.p-10.red.f-s-18 (str (if (= :https faction-image-url-failed)
-                                       no-https-images
-                                       "Faction image could not be loaded, please check the URL and try again"))]
-          (if (not (s/blank? faction-image-url))
-            [:div.p-30 [:img.character-image.w-100-p.m-b-20 {:src faction-image-url
-                                                             :on-error (fn [_] (dispatch [:failed-loading-faction-image faction-image-url]))
-                                                             :on-load (fn [_] (if faction-image-url-failed (dispatch [:loaded-faction-image])))}]]))
+(defn set-builder-tab-fn [key]
+  #(dispatch [::char5e/set-builder-tab key]))
+
+(def set-builder-tab (memoize set-builder-tab-fn))
 
 (defn builder-tab [title key current-tab]
   [:span.builder-tab
    {:class-name (if (= current-tab key) "selected-builder-tab")
-    :on-click #(dispatch [::char5e/set-builder-tab key])}
+    :on-click (set-builder-tab key)}
    [:span.builder-tab-text title]])
 
 (defn mobile-columns []
@@ -1612,26 +1684,6 @@
     (case device-type
       :mobile [mobile-columns]
       [desktop-or-tablet-columns device-type])))
-
-(defn builder-tabs [active-tabs]
-  [:div.hidden-lg.w-100-p
-   [:div.builder-tabs
-    [:span.builder-tab.options-tab
-     {:class-name (if (active-tabs :options) "selected-builder-tab")
-      :on-click (fn [_]
-                  (dispatch [:set-active-tabs #{:build :options}]))} "Options"]
-    [:span.builder-tab.personality-tab
-     {:class-name (if (active-tabs :personality) "selected-builder-tab")
-      :on-click (fn [_]
-                  (dispatch [:set-active-tabs #{:build :personality}]))} "Description"]
-    [:span.builder-tab.build-tab
-     {:class-name (if (active-tabs :build) "selected-builder-tab")
-      :on-click (fn [_]
-                  (dispatch [:set-active-tabs #{:build :options}]))} "Build"]
-    [:span.builder-tab.details-tab
-     {:class-name (if (active-tabs :details) "selected-builder-tab")
-      :on-click (fn [_]
-                  (dispatch [:set-active-tabs #{:details}]))} "Details"]]])
 
 (def patreon-link-props
   {:href "https://www.patreon.com/user?u=5892323" :target "_blank"})
@@ -1705,7 +1757,7 @@
 
 (def unsaved-button-style {:background "#9a031e"})
 
-(defn confirm-handler [character-changed? {:keys [event pre] :as cfg}]
+(defn confirm-handler-fn [character-changed? {:keys [event pre] :as cfg}]
   (fn [_]
     (if character-changed?
       (dispatch [:show-confirmation cfg])
@@ -1713,12 +1765,31 @@
         (if pre (pre))
         (dispatch event)))))
 
+(def confirm-handler (memoize confirm-handler-fn))
+
+(defn toggle-theme []
+  (dispatch [:toggle-theme]))
+
 (defn theme-toggle []
   (let [theme @(subscribe [:theme])]
     [:div.pointer
-     {:on-click #(dispatch [:toggle-theme])}
+     {:on-click toggle-theme}
      [:span.m-r-5 (comps/checkbox (= "light-theme" theme) false)]
      [:span.main-text-color "Light Theme"]]))
+
+(defn set-loading []
+  (dispatch-sync [:set-loading true]))
+
+(defn save-character []
+  (dispatch [:save-character]))
+
+(defn load-character-page-fn [id]
+  (fn [_]
+    (let [char-page-path (routes/path-for routes/dnd-e5-char-page-route :id id)
+          char-page-route (routes/match-route char-page-path)]
+      (dispatch [:route char-page-route]))))
+
+(def load-character-page (memoize load-character-page-fn))
 
 (defn character-builder []
   (let [character @(subscribe [:character])
@@ -1758,7 +1829,7 @@
                    character-changed?
                    {:confirm-button-text "GENERATE RANDOM CHARACTER"
                     :question "You have unsaved changes, are you sure you want to discard them and generate a random character?"
-                    :pre (fn [] (dispatch-sync [:set-loading true]))
+                    :pre set-loading
                     :event [:random-character character built-template locked-components]})}
        {:title "New"
         :icon "plus"
@@ -1782,25 +1853,17 @@
                  "Save New Character")
         :icon "save"
         :style (if character-changed? unsaved-button-style) 
-        :on-click #(dispatch [:save-character])}
+        :on-click save-character}
        (if (:db/id character)
          {:title "View"
           :icon "eye"
-          :on-click #(let [char-page-path (routes/path-for routes/dnd-e5-char-page-route :id (:db/id character))
-                           char-page-route (routes/match-route char-page-path)]
-                       (dispatch [:route char-page-route]))})])
+          :on-click (load-character-page (:db/id character))})])
      [:div
       [:div.container
        [:div.content
         [:div.flex.justify-cont-s-b.align-items-c.flex-wrap
          [:div
-          [al-legality al-illegal-reasons used-resources]
-          #_[:div.main-text-color.m-l-20.pointer
-           {:on-click #(dispatch [:toggle-public])}
-           [comps/checkbox @(subscribe [::char5e/public?]) false]
-           [:span (if mobile?
-                    "Public?"
-                    "Allow others users view this character?")]]]
+          [al-legality al-illegal-reasons used-resources]]
          [:div.flex
           [theme-toggle]
           (if character-changed? [:div.red.f-w-b.m-r-10.m-l-10.flex.align-items-c
