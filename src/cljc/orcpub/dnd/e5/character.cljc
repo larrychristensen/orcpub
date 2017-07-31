@@ -620,6 +620,11 @@
   ((best-weapon-attack-modifier-fn built-char)
    weapon))
 
+(defn weapon-damage-modifier [built-char weapon finesse?]
+  ((weapon-damage-modifier-fn built-char)
+   weapon
+   finesse?))
+
 (defn best-weapon-damage-modifier [built-char weapon finesse?]
   ((best-weapon-damage-modifier-fn built-char)
    weapon))

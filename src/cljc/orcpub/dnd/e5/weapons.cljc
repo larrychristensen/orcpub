@@ -373,10 +373,10 @@
 
 (def ammunition
   (common/add-keys
-   [{:name "Arrow" ::type :ammunition :sell-qty 20 :cost {:num 1 ::type :gp} :weight "1 lb."}
-    {:name "Blowgun needle" ::type :ammunition :sell-qty 50 :cost {:num 1 ::type :gp} :weight "1 lb."}
-    {:name "Crossbow bolt" ::type :ammunition :sell-qty 20 :cost {:num 1 ::type :gp} :weight "1½ lb."}
-    {:name "Sling bullet" ::type :ammunition :sell-qty 20 :cost {:num 4 ::type :cp} :weight "1½ lb."}]))
+   [{:name "Arrow" ::type :ammunition :sell-qty 20 :cost {:num 1 :type :gp} :weight "1 lb."}
+    {:name "Blowgun needle" ::type :ammunition :sell-qty 50 :cost {:num 1 :type :gp} :weight "1 lb."}
+    {:name "Crossbow bolt" ::type :ammunition :sell-qty 20 :cost {:num 1 :type :gp} :weight "1½ lb."}
+    {:name "Sling bullet" ::type :ammunition :sell-qty 20 :cost {:num 4 :type :cp} :weight "1½ lb."}]))
 
 (def weapons-map
   (zipmap (map :key weapons) weapons))
