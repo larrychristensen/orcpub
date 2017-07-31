@@ -2,6 +2,7 @@
   (:require [orcpub.dnd.e5.options :as opt5e]
             [orcpub.dnd.e5.modifiers :as mod5e]
             [orcpub.dnd.e5.character :as char5e]
+            [orcpub.dnd.e5.weapons :as weapon5e]
             [orcpub.dnd.e5.units :as units5e]
             [orcpub.modifiers :as mod]
             [orcpub.template :as t]
@@ -22,7 +23,7 @@
                                          (mod/vec-mod ?weapon-ability-modifiers
                                                       (fn [weapon finesse?]
                                                         (if (and (?has-weapon-prof? weapon)
-                                                                 (not (:two-handed? weapon)))
+                                                                 (not (::weapon5e/two-handed? weapon)))
                                                           (get ?ability-bonuses ::char5e/cha)
                                                           0)))
                                          (mod5e/bonus-action

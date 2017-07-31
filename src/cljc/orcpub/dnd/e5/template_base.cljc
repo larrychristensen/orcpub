@@ -201,12 +201,18 @@
                                      (map
                                       #(% weapon)
                                       ?attack-modifier-fns)))
+    ?best-weapon-attack-modifier (fn [weapon]
+                                   (max (?weapon-attack-modifier weapon false)
+                                        (?weapon-attack-modifier weapon true)))
     ?weapon-damage-modifier (fn [weapon finesse?]
                               (let [definitely-finesse? (and finesse?
                                                              (::weapon5e/finesse? weapon))
                                     melee? (::weapon5e/melee? weapon)]
                                 (+ (or (::mi5e/magical-damage-bonus weapon) 0)
                                    (?weapon-ability-modifier weapon finesse?))))
+    ?best-weapon-damage-modifier (fn [weapon]
+                                   (max (?weapon-damage-modifier weapon false)
+                                        (?weapon-damage-modifier weapon true)))
     ?spell-attack-modifier-bonus 0
     ?spell-attack-modifier (fn [ability-kw]
                              (+ ?prof-bonus
