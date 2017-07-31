@@ -3092,7 +3092,9 @@
     :subclass-title "Sorcerous Origin"
     :subclass-level 1
     :subclasses [{:name "Draconic Bloodline"
-                  :modifiers [(mod/modifier ?hit-point-level-bonus (+ 1 ?hit-point-level-bonus))
+                  :modifiers [(mod/map-mod ?class-hit-point-level-bonus
+                                           :sorcerer
+                                           1)
                               (mod/modifier ?natural-ac-bonus 3)
                               (mod5e/language :draconic)]
                   :selections [(t/selection-cfg

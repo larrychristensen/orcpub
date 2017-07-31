@@ -517,6 +517,7 @@
    ::char5e/max-hit-points char5e/max-hit-points
    ::char5e/current-hit-points char5e/current-hit-points
    ::char5e/hit-point-level-bonus char5e/hit-point-level-bonus
+   ::char5e/class-hit-point-level-bonus char5e/class-hit-point-level-bonus
    ::char5e/initiative char5e/initiative 
    ::char5e/passive-perception char5e/passive-perception 
    ::char5e/character-name char5e/character-name 

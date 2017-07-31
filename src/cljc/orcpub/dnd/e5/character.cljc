@@ -558,6 +558,9 @@
 (defn hit-point-level-bonus [built-char]
   (get-prop built-char :hit-point-level-bonus))
 
+(defn class-hit-point-level-bonus [built-char]
+  (get-prop built-char :class-hit-point-level-bonus))
+
 (defn initiative [built-char]
   (get-prop built-char :initiative))
 
