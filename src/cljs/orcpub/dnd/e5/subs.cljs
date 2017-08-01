@@ -11,6 +11,7 @@
             [orcpub.dnd.e5.db :refer [tab-path]]
             [orcpub.dnd.e5.events :as events]
             [orcpub.dnd.e5.character :as char5e]
+            [orcpub.dnd.e5.character.equipment :as char-equip5e]
             [orcpub.dnd.e5.party :as party5e]
             [orcpub.dnd.e5.monsters :as monsters5e]
             [orcpub.dnd.e5.spells :as spells5e]
@@ -604,7 +605,12 @@
    ::char5e/used-resources char5e/used-resources
    ::char5e/al-illegal-reasons char5e/al-illegal-reasons
    ::char5e/feats char5e/feats
-   ::char5e/features-used char5e/features-used})
+   ::char5e/features-used char5e/features-used
+   ::char5e/main-hand-weapon char5e/main-hand-weapon
+   ::char5e/off-hand-weapon char5e/off-hand-weapon
+   ::char5e/worn-armor char5e/worn-armor
+   ::char5e/wielded-shield char5e/wielded-shield
+   ::char5e/attuned-magic-items char5e/attuned-magic-items})
 
 (doseq [[sub-key char-fn] character-subs]
   (reg-sub
@@ -619,6 +625,17 @@
      (char-fn built-char))))
 
 (reg-sub
+ ::char5e/current-armor-class
+ (fn [[_ id]]
+   [(subscribe [::char5e/armor-class-with-armor id])
+    (subscribe [::char5e/worn-armor id])
+    (subscribe [::char5e/wielded-shield id])
+    (subscribe [::mi5e/all-armor-map])])
+ (fn [[ac-fn armor-kw shield-kw all-armor-map]]
+   (ac-fn (all-armor-map armor-kw)
+          (all-armor-map shield-kw))))
+
+(reg-sub
  ::char5e/all-armor
  (fn [[_ id]]
    [(subscribe [::char5e/magic-armor id])
@@ -627,12 +644,58 @@
    (merge magic-armor armor)))
 
 (reg-sub
+ ::char5e/non-shield-armor
+ :<- [::char5e/all-armor]
+ :<- [::mi5e/all-armor-map]
+ (fn [[all-armor all-armor-map]]
+   (filter
+    (fn [[key]]
+      (let [item (all-armor-map key)]
+        (not= :shield (:type item))))
+    all-armor)))
+
+(reg-sub
+ ::char5e/shields
+ :<- [::char5e/all-armor]
+ :<- [::mi5e/all-armor-map]
+ (fn [[all-armor all-armor-map]]
+   (filter
+    (fn [[key]]
+      (let [item (all-armor-map key)]
+        (= :shield (:type item))))
+    all-armor)))
+
+(reg-sub
+ ::char5e/carried-armor
+ :<- [::char5e/non-shield-armor]
+ (fn [armor]
+   (filter
+    (comp ::char-equip5e/equipped? val)
+    armor)))
+
+(reg-sub
+ ::char5e/carried-shields
+ :<- [::char5e/shields]
+ (fn [armor]
+   (filter
+    (comp ::char-equip5e/equipped? val)
+    armor)))
+
+(reg-sub
  ::char5e/all-weapons
  (fn [[_ id]]
    [(subscribe [::char5e/magic-weapons id])
     (subscribe [::char5e/weapons id])])
  (fn [[magic-weapons weapons] _]
    (merge magic-weapons weapons)))
+
+(reg-sub
+ ::char5e/carried-weapons
+ :<- [::char5e/all-weapons]
+ (fn [weapons]
+   (filter
+    (comp ::char-equip5e/equipped? val)
+    weapons)))
 
 (reg-sub
  :search-text

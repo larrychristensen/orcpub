@@ -12,7 +12,8 @@
             [orcpub.dnd.e5.armor :as armor5e]
             [orcpub.dnd.e5.equipment :as equip5e]
             [orcpub.dnd.e5.magic-items :as mi5e]
-            [orcpub.dnd.e5.skills :as skill5e]))
+            [orcpub.dnd.e5.skills :as skill5e]
+            [re-frame.core :refer [subscribe]]))
 
 (defn entity-vals [built-char kws]
   (reduce
@@ -445,9 +446,12 @@
       (str unarmored-speed "/" speed)
       speed)))
 
-(defn make-spec [built-char {:keys [print-character-sheet?
-                                    print-spell-cards?
-                                    print-prepared-spells?] :as options}]
+
+(defn make-spec [built-char
+                 id
+                 {:keys [print-character-sheet?
+                         print-spell-cards?
+                         print-prepared-spells?] :as options}]
   (let [race (char5e/race built-char)
         subrace (char5e/subrace built-char)
         abilities (char5e/ability-values built-char)
@@ -461,6 +465,7 @@
                                 shield (conj equipped-shields nil)]
                             (ac-with-armor-fn armor shield))
         max-armor-class (apply max all-armor-classes)
+        current-ac @(subscribe [::char5e/current-armor-class id])
         levels (char5e/levels built-char)
         classes (char5e/classes built-char)
         character-name (char5e/character-name built-char)
@@ -475,7 +480,7 @@
       :class-level (class-string classes levels)
       :background (char5e/background built-char)
       :prof-bonus (common/bonus-str (es/entity-val built-char :prof-bonus))
-      :ac max-armor-class
+      :ac current-ac
       :hd-total total-hit-dice
       :initiative (common/bonus-str (es/entity-val built-char :initiative))
       :speed (speed built-char)
