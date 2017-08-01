@@ -2111,3 +2111,53 @@
  ::char5e/hide-delete-confirmation
  (fn [db [_ id]]
    (assoc-in db [::char5e/delete-confirmation-shown? id] false)))
+
+(reg-event-fx
+ ::char5e/don-armor
+ (fn [{:keys [db]} [_ id armor-kw]]
+   (prn "DON ARMOR" id armor-kw)
+   (update-character-fx db id #(assoc-in
+                                %
+                                [::entity/values
+                                 ::char5e/worn-armor]
+                                armor-kw))))
+
+(reg-event-fx
+ ::char5e/wield-shield
+ (fn [{:keys [db]} [_ id shield-kw]]
+   (update-character-fx db id #(assoc-in
+                                %
+                                [::entity/values
+                                 ::char5e/wielded-shield]
+                                shield-kw))))
+
+(reg-event-fx
+ ::char5e/wield-main-hand-weapon
+ (fn [{:keys [db]} [_ id weapon-kw]]
+   (update-character-fx db id #(assoc-in
+                                %
+                                [::entity/values
+                                 ::char5e/main-hand-weapon]
+                                weapon-kw))))
+
+(reg-event-fx
+ ::char5e/wield-off-hand-weapon
+ (fn [{:keys [db]} [_ id weapon-kw]]
+   (update-character-fx db id #(assoc-in
+                                %
+                                [::entity/values
+                                 ::char5e/off-hand-weapon]
+                                weapon-kw))))
+
+(reg-event-fx
+ ::char5e/attune-magic-item
+ (fn [{:keys [db]} [_ id i weapon-kw]]
+   (update-character-fx db id #(update-in
+                                %
+                                [::entity/values
+                                 ::char5e/attuned-magic-items]
+                                (fn [items]
+                                  (assoc
+                                   (or items [:none :none :none])
+                                   i
+                                   weapon-kw))))))
