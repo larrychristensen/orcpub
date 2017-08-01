@@ -48,9 +48,10 @@
    {:name "Club",
     ::damage-type :bludgeoning,
     ::damage-die 4,
-    ::damage-die-count 1,
+    ::damage-die-coun 1,
     ::type :simple,
     ::melee? true,
+    ::light? true
     :key :club
     ::link "https://en.wikipedia.org/wiki/Club_(weapon)"}
    {::melee? true,
@@ -62,6 +63,7 @@
     ::thrown true,
     ::finesse? true,
     ::damage-die 4,
+    ::light? true
     ::range {::min 20, ::max 60}
     ::link "https://en.wikipedia.org/wiki/Dagger"}
    {:name "Greatclub",
@@ -82,6 +84,7 @@
     ::thrown true,
     ::range {::min 20, ::max 60},
     :key :handaxe
+    ::light? true
     ::link "https://en.wikipedia.org/wiki/Battle_axe"}
    {:name "Javelin",
     ::damage-type :piercing,
@@ -102,6 +105,7 @@
     ::thrown true,
     ::range {::min 20, ::max 60},
     :key :light-hammer
+    ::light? true
     ::link "https://en.wikipedia.org/wiki/War_hammer"}
    {:name "Mace",
     ::damage-type :bludgeoning,
@@ -268,6 +272,7 @@
     ::finesse? true,
     ::melee? true,
     :key :scimitar
+    ::light? true
     ::link "https://en.wikipedia.org/wiki/Scimitar"}
    {:name "Shortsword",
     ::damage-type :piercing,
@@ -278,6 +283,7 @@
     ::damage-die-count 1,
     ::melee? true,
     :key :shortsword
+    ::light? true
     ::link "https://en.wikipedia.org/wiki/Sword"}
    {::melee? true,
     ::versatile {::damage-die 8, ::damage-die-count 1},
@@ -332,6 +338,7 @@
     ::ranged? true,
     ::range {::min 30, ::max 120},
     ::ammunition? true
+    ::light? true
     :key :crossbow-hand}
    {:name "Crossbow, heavy",
     ::damage-type :piercing,
@@ -389,3 +396,6 @@
 
 (defn simple-weapons [weapons]
   (weapons-of-type weapons :simple))
+
+(defn light-melee-weapon? [{:keys [::light? ::melee?]}]
+  (and melee? light?))

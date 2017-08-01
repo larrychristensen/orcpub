@@ -244,6 +244,12 @@
      ::char5e/level
      ::char5e/xps])
    (map
+    kw-prop-no-history
+    [::char5e/worn-armor
+     ::char5e/wielded-shield
+     ::char5e/main-hand-weapon
+     ::char5e/off-hand-weapon])
+   (map
     fulltext-prop
     [::char5e/character-name
      ::char5e/description])

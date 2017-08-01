@@ -96,10 +96,10 @@
          :on-blur (fn [e] (reset! blurred? true))}]
        (if @blurred? (validation-messages messages))])))
 
-(defn export-pdf [built-char & [options]]
+(defn export-pdf [built-char id & [options]]
   (fn [_]
     (let [field (.getElementById js/document "fields-input")]
-      (aset field "value" (str (pdf-spec/make-spec built-char options)))
+      (aset field "value" (str (pdf-spec/make-spec built-char id options)))
       (.submit (.getElementById js/document "download-form")))))
 
 (defn download-form [built-char]
@@ -1679,6 +1679,11 @@
         title])
      items))])
 
+(defn labeled-dropdown [label cfg]
+  [:div
+   [:div.f-w-b.m-b-5 label]
+   [dropdown cfg]])
+
 (defn cast-spell-component []
   (let [selected-level (r/atom nil)]
     (fn [id lvl]
@@ -1973,19 +1978,10 @@
    [:div.f-s-18.f-w-b.m-b-5 title]])
 
 (defn armor-class-section-2 [id]
-  (let [unarmored-armor-class @(subscribe [::char/armor-class id])
-        ac-with-armor-fn @(subscribe [::char/armor-class-with-armor id])
-        all-armor-inventory (mi/equipped-armor-details @(subscribe [::char/all-armor-inventory id]))
-        equipped-armor (armor/non-shields all-armor-inventory)
-        equipped-shields (armor/shields all-armor-inventory)]
-    [:div
-     [:div.p-10.flex.flex-column.align-items-c
-      (section-header-2 "Armor Class" "checked-shield")
-      [:div.f-s-24.f-w-b (char/max-armor-class unarmored-armor-class
-                                               ac-with-armor-fn
-                                               all-armor-inventory
-                                               equipped-armor
-                                               equipped-shields)]]]))
+  [:div
+   [:div.p-10.flex.flex-column.align-items-c
+    (section-header-2 "Armor Class" "checked-shield")
+    [:div.f-s-24.f-w-b @(subscribe [::char/current-armor-class])]]])
 
 (defn basic-section [title icon v]
   [:div
@@ -2641,9 +2637,107 @@
       [list-item-section "Weapon Proficiencies" "bowman" @(subscribe [::char/weapon-profs id]) (partial prof-name weapon/weapons-map)]
       [list-item-section "Armor Proficiencies" "mailed-fist" @(subscribe [::char/armor-profs id]) (partial prof-name armor/armor-map)]]]))
 
+(defn equipped-section-dropdown [label cfg]
+  [:div.m-t-10.m-r-5
+   [labeled-dropdown
+    label
+    cfg]])
+
+(def none-item
+  {:value :none
+   :title "<none>"})
+
+(defn wield-fn [event-kw id]
+  #(dispatch [event-kw id (keyword %)]))
+
+(def wield-handler (memoize wield-fn))
+
 (defn equipped-section [id]
   [:div
-   [section-header "battle-gear" "Equipped Items"]])
+   [section-header "battle-gear" "Equipped Items"]
+   [:div
+    (let [all-armor-map @(subscribe [::mi/all-armor-map])]
+      [:div.flex.flex-wrap
+       (let [carried-armor @(subscribe [::char/carried-armor])]
+         [equipped-section-dropdown
+          "Armor"
+          {:items (cons
+                   none-item
+                   (map
+                    (fn [[key]]
+                      (let [{:keys [name]} (all-armor-map key)]
+                        {:title name
+                         :value key}))
+                    carried-armor))
+           :value @(subscribe [::char/worn-armor id])
+           :on-change (wield-handler ::char/don-armor id)}])
+       (let [carried-shields @(subscribe [::char/carried-shields])]
+         [equipped-section-dropdown
+          "Shield"
+          {:items (cons
+                   none-item
+                   (map
+                    (fn [[key]]
+                      (let [{:keys [name]} (all-armor-map key)]
+                        {:title name
+                         :value key}))
+                    carried-shields))
+           :value @(subscribe [::char/wielded-shield id])
+           :on-change (wield-handler ::char/wield-shield id)}])])
+    (let [all-weapons-map @(subscribe [::mi/all-weapons-map])
+          carried-weapons @(subscribe [::char/carried-weapons])
+          main-hand-weapon-kw @(subscribe [::char/main-hand-weapon id])
+          main-hand-weapon (all-weapons-map main-hand-weapon-kw)]
+      (prn "MAIN HAND WEPAON" main-hand-weapon)
+      [:div.flex.flex-wrap
+       [equipped-section-dropdown
+        "Main Hand Weapon"
+        {:items (cons
+                 none-item
+                 (map
+                  (fn [[key]]
+                    (let [{:keys [name]} (all-weapons-map key)]
+                      {:title name
+                       :value key}))
+                  carried-weapons))
+         :value main-hand-weapon-kw
+         :on-change (wield-handler ::char/wield-main-hand-weapon id)}]
+       (if (weapon/light-melee-weapon? main-hand-weapon)
+         [equipped-section-dropdown
+          "Off Hand Weapon"
+          {:items (cons
+                   none-item
+                   (sequence
+                    (comp
+                     (filter
+                      (fn [[key]]
+                        (-> all-weapons-map
+                            key
+                            weapon/light-melee-weapon?)))
+                     (map
+                      (fn [[key]]
+                        (let [{:keys [name]} (all-weapons-map key)]
+                          {:title name
+                           :value key}))))
+                    carried-weapons))
+           :value @(subscribe [::char/off-hand-weapon id])
+           :on-change (wield-handler ::char/wield-off-hand-weapon id)}])
+       #_[:div.flex.flex-wrap
+        [equipped-section-dropdown
+         "Attuned Magic Item 1"
+         {:items [none-item]
+          :value nil
+          :on-change (fn [])}]
+        [equipped-section-dropdown
+         "Attuned Magic Item 2"
+         {:items [none-item]
+          :value nil
+          :on-change (fn [])}]
+        [equipped-section-dropdown
+         "Attuned Magic Item 3"
+         {:items [none-item]
+          :value nil
+          :on-change (fn [])}]]])]])
 
 (defn combat-details [num-columns id]
   (let [weapon-profs @(subscribe [::char/weapon-profs id])
@@ -2893,10 +2987,12 @@
    [:span.m-l-5.f-s-14 label]])
 
 (defn export-pdf-fn [built-char
+                     id
                      print-character-sheet?
                      print-spell-cards?
                      print-prepared-spells?]
   #(let [export-fn (export-pdf built-char
+                               id
                                {:print-character-sheet? print-character-sheet?
                                 :print-spell-cards? print-spell-cards?
                                 :print-prepared-spells? print-prepared-spells?})]
@@ -2938,6 +3034,7 @@
        "Cancel"]
       [:button.form-button.p-10.m-l-5
        {:on-click (export-pdf-handler built-char
+                                      id
                                       print-character-sheet?
                                       print-spell-cards?
                                       print-prepared-spells?)}
@@ -2949,6 +3046,7 @@
      [::char/show-options
       [print-options id built-char]])
     (export-pdf built-char
+                id
                 {:print-character-sheet? true
                  :print-spell-cards? false
                  :print-prepared-spells? false})))
@@ -3210,8 +3308,8 @@
           [labeled-checkbox "Ammunition?" @(subscribe [::mi/item-ammunition?])]]]
         [:div.flex.flex-wrap
          [:div.m-t-10
-          [:div.f-w-b.m-b-5 "Damage Die Number"]
-          [dropdown
+          [labeled-dropdown
+           "Damage Die Number"
            {:items (map
                     (fn [v]
                       {:value v
@@ -3220,8 +3318,8 @@
             :value @(subscribe [::mi/item-damage-die-count])
             :on-change (make-arg-event-handler ::mi/set-item-damage-die-count js/parseInt)}]]
          [:div.m-l-10.m-t-10
-          [:div.f-w-b.m-b-5 "Damage Die"]
-          [dropdown
+          [labeled-dropdown
+           "Damage Die"
            {:items (map
                     (fn [v]
                       {:value v
@@ -3231,8 +3329,8 @@
             :on-change (make-arg-event-handler ::mi/set-item-damage-die js/parseInt)}]]
          (if versatile?
            [:div.m-l-10.m-t-10
-            [:div.f-w-b.m-b-5 "Versatile Damage Die Number"]
-            [dropdown
+            [labeled-dropdown
+             "Versatile Damage Die Number"
              {:items (map
                       (fn [v]
                         {:value v
@@ -3242,8 +3340,8 @@
               :on-change (make-arg-event-handler ::mi/set-item-versatile-damage-die-count js/parseInt)}]])
          (if versatile?
            [:div.m-l-10.m-t-10
-            [:div.f-w-b.m-b-5 "Versatile Damage Die"]
-            [dropdown
+            [labeled-dropdown
+             "Versatile Damage Die"
              {:items (map
                       (fn [v]
                         {:value v
@@ -3252,8 +3350,8 @@
               :value @(subscribe [::mi/item-versatile-damage-die])
               :on-change (make-arg-event-handler ::mi/set-item-versatile-damage-die js/parseInt)}]])
          [:div.m-l-10.m-t-10
-          [:div.f-w-b.m-b-5 "Simple / Martial?"]
-          [dropdown
+          [labeled-dropdown
+           "Simple / Martial?"
            {:items [{:value :simple
                      :title "Simple"}
                     {:value :martial
@@ -3261,8 +3359,8 @@
             :value @(subscribe [::mi/item-weapon-type])
             :on-change (make-arg-event-handler ::mi/set-item-weapon-type)}]]
          [:div.m-l-10.m-t-10
-          [:div.f-w-b.m-b-5 "Melee / Ranged?"]
-          [dropdown
+          [labeled-dropdown
+           "Melee / Ranged?"
            {:items [{:value :melee
                      :title "Melee"}
                     {:value :ranged
@@ -3282,8 +3380,8 @@
              {:value @(subscribe [::mi/item-range-max])
               :on-change (make-arg-event-handler ::mi/set-item-range-max)}]])
          [:div.m-l-10.m-t-10
-          [:div.f-w-b.m-b-5 "Damage Type"]
-          [dropdown
+          [labeled-dropdown
+           "Damage Type"
            {:items (map
                     (fn [type]
                       {:value type
@@ -3586,6 +3684,7 @@
                            [:button.form-button.m-l-5
                             {:on-click (export-pdf
                                         @(subscribe [::char/built-character id])
+                                        id
                                         {:print-character-sheet? true
                                          :print-spell-cards? true
                                          :print-prepared-spells? false})}

@@ -444,7 +444,7 @@
      [inventory-adder key options selected-keys]
      (if (seq selected-items)
        [:div.flex.f-s-12.opacity-5.m-t-10.justify-cont-s-b
-        [:div.m-r-10 "Equipped?"]
+        [:div.m-r-10 "Carried?"]
         [:div.m-r-30 "Quantity"]])
      [:div
       (doall

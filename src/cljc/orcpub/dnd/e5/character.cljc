@@ -629,6 +629,21 @@
   ((best-weapon-damage-modifier-fn built-char)
    weapon))
 
+(defn main-hand-weapon [built-char]
+  (get-prop built-char ::main-hand-weapon))
+
+(defn off-hand-weapon [built-char]
+  (get-prop built-char ::off-hand-weapon))
+
+(defn worn-armor [built-char]
+  (get-prop built-char ::worn-armor))
+
+(defn wielded-shield [built-char]
+  (get-prop built-char ::wielded-shield))
+
+(defn attuned-magic-items [built-char]
+  (get-prop built-char ::attuned-magic-items))
+
 (defn age [built-char]
   (get-prop built-char ::age))
 
