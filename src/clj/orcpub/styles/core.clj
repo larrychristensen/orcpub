@@ -1156,7 +1156,7 @@
       {:border-bottom "1px solid rgba(0,0,0,0.5)"}]
 
      [:.main-text-color
-      {:color "#282828"}]
+      {:color "#363636"}]
 
      [:.input
      {:background-color :transparent
