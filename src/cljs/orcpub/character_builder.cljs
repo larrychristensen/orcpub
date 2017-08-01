@@ -170,6 +170,14 @@
 
 (def delete-class (memoize delete-class-fn))
 
+(defn filter-classes-fn [key unselected-classes-set]
+  #(or (= key (::t/key %))
+       (unselected-classes-set (::t/key %))))
+
+(def filter-classes (memoize filter-classes-fn))
+
+(def levels-selection #(if (= :levels (::t/key %)) %))
+
 (defn class-level-selector []
   (let [expanded? (r/atom false)]
     (fn [i key selected-class options unselected-classes-set]
@@ -194,12 +202,11 @@
              (sort-by
               ::t/name
               (filter
-               #(or (= key (::t/key %))
-                    (unselected-classes-set (::t/key %)))
+               (filter-classes key unselected-classes-set)
                options))))]
           (if (::t/help class-template-option)
             [show-info-button expanded?])
-          (let [levels-selection (some #(if (= :levels (::t/key %)) %) (::t/selections class-template-option))
+          (let [levels-selection (some levels-selection (::t/selections class-template-option))
                 available-levels (::t/options levels-selection)
                 last-level-key (str "level-" (:class-level selected-class))]
             [:select.builder-option.builder-option-dropdown.m-t-0.m-l-5.w-100
@@ -219,6 +226,8 @@
          (if @expanded?
            [:div.m-t-5.m-b-10 (::t/help class-template-option)])]))))
 
+(def select-template-key #(select-keys % [::t/key]))
+
 (defn class-level-data [option]
   (let [levels (some
                 (fn [s]
@@ -229,7 +238,7 @@
      (select-keys option [::t/key ::t/prereqs ::t/name ::t/help ::t/associated-options])
      ::t/selections
      [{::t/key (::t/key levels)
-       ::t/options (map #(select-keys % [::t/key]) (::t/options levels))}])))
+       ::t/options (map select-template-key (::t/options levels))}])))
 
 (def level-label-style
   {:margin-right "50px"})
@@ -318,6 +327,16 @@
 
 (def add-inventory-item (memoize add-inventory-item-fn))
 
+(defn inventory-option-selected-fn [selected-keys]
+  #(or (selected-keys (::t/key %))
+       (selected-keys (:db/id %))))
+
+(def inventory-option-selected? (memoize inventory-option-selected-fn))
+
+(defn name-and-key [{:keys [:db/id ::t/name ::t/key]}]
+  {:name name
+   :key (or key id)})
+
 (defn inventory-adder [key options selected-keys]
   [comps/selection-adder
    (sort-by
@@ -325,12 +344,9 @@
     (sequence
      (comp
       (remove
-       #(or (selected-keys (::t/key %))
-            (selected-keys (:db/id %))))
+       (inventory-option-selected? selected-keys))
       (map
-       (fn [{:keys [:db/id ::t/name ::t/key]}]
-         {:name name
-          :key (or key id)})))
+       name-and-key))
      options))
    (add-inventory-item key)])
 
@@ -373,6 +389,50 @@
 
 (def new-custom-item (memoize new-custom-item-fn))
 
+(defn make-inventory-item-fn [key item-map]
+  (fn [i {item-key ::entity/key
+          {item-qty ::char-equip5e/quantity
+           equipped? ::char-equip5e/equipped?
+           item-name ::char-equip5e/name} ::entity/value}]
+    (let [item (item-map item-key)
+          final-name (or item-name (:name item) (::mi5e/name item))
+          item-description (:description item)]
+      ^{:key item-key}
+      [inventory-item {:selection-key key
+                       :item-key item-key
+                       :item-name final-name
+                       :item-qty item-qty
+                       :item-description item-description
+                       :equipped? equipped?
+                       :i i
+                       :qty-input-width qty-input-width
+                       :check-fn (inventory-check key i)
+                       :qty-change-fn (inventory-qty-change key i)
+                       :remove-fn (remove-inventory-item key item-key)}])))
+
+(def make-inventory-item (memoize make-inventory-item-fn))
+
+(defn make-custom-inventory-item [custom-equipment-key]
+  (fn [i {:keys [::char-equip5e/name
+                 ::char-equip5e/quantity
+                 ::char-equip5e/equipped?
+                 ::char-equip5e/background-starting-equipment?
+                 ::char-equip5e/class-starting-equipment?] :as item}]
+    (let [item-key (common/name-to-kw name)]
+      ^{:key i}
+      [inventory-item {:selection-key custom-equipment-key
+                       :item-key item-key
+                       :item-name name
+                       :item-qty quantity
+                       :equipped? equipped?
+                       :user-created? (not (or background-starting-equipment?
+                                               class-starting-equipment?))
+                       :i i
+                       :qty-input-width qty-input-width
+                       :check-fn (toggle-custom-inventory-item-equipped custom-equipment-key i)
+                       :qty-change-fn (change-custom-inventory-item-quantity custom-equipment-key i)
+                       :remove-fn (remove-custom-inventory-item custom-equipment-key name)}])))
+
 (defn inventory-selector [item-map-sub qty-input-width {:keys [selection]} & [custom-equipment-key]]
   (let [{:keys [::t/key]} selection
         selected-items @(subscribe [:entity-option key])
@@ -389,54 +449,18 @@
      [:div
       (doall
        (map-indexed
-        (fn [i {item-key ::entity/key
-                {item-qty ::char-equip5e/quantity
-                 equipped? ::char-equip5e/equipped?
-                 item-name ::char-equip5e/name} ::entity/value}]
-          (let [item (item-map item-key)
-                final-name (or item-name (:name item) (::mi5e/name item))
-                item-description (:description item)]
-            ^{:key item-key}
-            [inventory-item {:selection-key key
-                             :item-key item-key
-                             :item-name final-name
-                             :item-qty item-qty
-                             :item-description item-description
-                             :equipped? equipped?
-                             :i i
-                             :qty-input-width qty-input-width
-                             :check-fn (inventory-check key i)
-                             :qty-change-fn (inventory-qty-change key i)
-                             :remove-fn (remove-inventory-item key item-key)}]))
+        (make-inventory-item key item-map)
         selected-items))]
      (if custom-equipment-key
        [:div
         [:div
          (doall
           (map-indexed
-           (fn [i {:keys [::char-equip5e/name
-                          ::char-equip5e/quantity
-                          ::char-equip5e/equipped?
-                          ::char-equip5e/background-starting-equipment?
-                          ::char-equip5e/class-starting-equipment?] :as item}]
-             (let [item-key (common/name-to-kw name)]
-               ^{:key i}
-               [inventory-item {:selection-key custom-equipment-key
-                                :item-key item-key
-                                :item-name name
-                                :item-qty quantity
-                                :equipped? equipped?
-                                :user-created? (not (or background-starting-equipment?
-                                                        class-starting-equipment?))
-                                :i i
-                                :qty-input-width qty-input-width
-                                :check-fn (toggle-custom-inventory-item-equipped custom-equipment-key i)
-                                :qty-change-fn (change-custom-inventory-item-quantity custom-equipment-key i)
-                                :remove-fn (remove-custom-inventory-item custom-equipment-key name)}]))
+           (make-custom-inventory-item custom-equipment-key)
            @(subscribe [:entity-value custom-equipment-key])))]
         [:div.flex.justify-cont-end
          [:div.orange.pointer.m-t-5.m-r-5
-          {:on-click new-custom-item}
+          {:on-click (new-custom-item custom-equipment-key)}
           [:span.underline "Add Custom Item"]
           [:i.fa.fa-plus-circle.m-l-5.f-s-16]]]])]))
 
@@ -542,6 +566,16 @@
       [:span.i.m-r-5 "remove"]
       [:span.bg-red.t-a-c.w-18.h-18.p-t-4.b-rad-50-p.inline-block.f-w-b (Math/abs remaining)]])])
 
+(defn toggle-locked-fn [path]
+  #(dispatch [:toggle-locked path]))
+
+(def toggle-locked (memoize toggle-locked-fn))
+
+(defn toggle-homebrew-fn [path]
+  #(dispatch [:toggle-homebrew path]))
+
+(def toggle-homebrew (memoize toggle-homebrew-fn))
+
 (defn selection-section-base []
   (let [expanded? (r/atom false)]
     (fn [{:keys [title path parent-title name icon help max min remaining body hide-lock? hide-homebrew?]}]
@@ -561,11 +595,11 @@
           (if (not hide-lock?)
             [:i.fa.f-s-16.m-l-10.m-r-5.pointer
              {:class-name (if locked? "fa-lock" "fa-unlock-alt opacity-5 hover-opacity-full")
-              :on-click #(dispatch [:toggle-locked path])}])
+              :on-click (toggle-locked path)}])
           (if (not hide-homebrew?)
             [:span.pointer
              {:class-name (if (not homebrew?) "opacity-5 hover-opacity-full")
-              :on-click #(dispatch [:toggle-homebrew path])}
+              :on-click (toggle-homebrew path)}
              (views5e/svg-icon "beer-stein" 18)])]
          (if (and help path @expanded?)
            [help-section help])
@@ -599,12 +633,12 @@
          nil?
          (map
           (fn [option]
-            (new-option-selector
+            [new-option-selector
              actual-path
              selection
              disable-select-new?
              homebrew?
-             option))
+             option])
           (sort-by (juxt ::t/order ::t/name) options)))]
     [:div.flex
      (doall
@@ -976,6 +1010,12 @@
                    (if select-fn (select-fn))
                    (dispatch [:set-ability-score-variant key])))}])
 
+(def point-buy-staring-abilities-fn #(set-abilities! (char5e/abilities 8 8 8 8 8 8)))
+
+(def reroll-abilities-fn #(reroll-abilities))
+
+(def standard-abilities-fn #(set-abilities! (char5e/abilities 15 14 13 12 10 8)))
+
 (defn abilities-editor [{:keys [built-template option-paths selections]}]
   [:div
    (let [asi-or-feat-selections (filter
@@ -1023,19 +1063,19 @@
                :point-buy
                selected-variant
                (point-buy-abilities built-template asi-selections)
-               #(set-abilities! (char5e/abilities 8 8 8 8 8 8)))
+               point-buy-starting-abilities-fn)
               (ability-variant-option-selector
                "Dice Roll"
                :standard-roll
                selected-variant
                (abilities-roller built-template asi-selections)
-               #(reroll-abilities))
+               reroll-abilities-fn)
               (ability-variant-option-selector
                "Standard Scores"
                :standard-scores
                selected-variant
                (abilities-standard-editor built-template asi-selections)
-               #(set-abilities! (char5e/abilities 15 14 13 12 10 8)))
+               standard-abilities-fn)
               (ability-variant-option-selector
                "Manual Entry"
                :manual-entry
@@ -1234,8 +1274,13 @@
            [:td.p-5 (common/bonus-str total-misc-bonus)]
            [:td.p-5 total-hps]]]]])]))
 
+(defn remaining-adjustments-fn [built-template character]
+  #(Math/abs (entity/count-remaining built-template character %)))
+
+(def remaining-adjustments (memoize remaining-adjustments-fn))
+
 (defn sum-remaining [built-template character selections]
-  (apply + (map #(Math/abs (entity/count-remaining built-template character %)) selections)))
+  (apply + (map (remaining-adjustments built-template character) selections)))
 
 (defn hit-points-editor [{:keys [character built-template option-paths selections]}]
   (let [num-selections (count selections)]
@@ -1443,10 +1488,7 @@
         {:keys [tags ui-fns components] :as page} (pages page-index)
         selections (entity/tagged-selections available-selections tags)
         combined-selections (entity/combine-selections selections)
-        final-selections combined-selections #_(remove #(and (zero? (::t/min %))
-                                       (zero? (::t/max %))
-                                       (zero? (entity/count-remaining built-template character %)))
-                                 combined-selections)]
+        final-selections combined-selections]
     (if print-enabled? (js/console.log "FINAL SELECTIONS" final-selections))
     [:div.w-100-p
      [option-sources]
