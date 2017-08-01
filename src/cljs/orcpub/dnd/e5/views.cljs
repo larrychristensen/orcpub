@@ -114,11 +114,12 @@
    [:input {:type "hidden" :name "body" :id "fields-input"}]])
 
 (defn svg-icon [icon-name & [size theme-override]]
-  (let [theme (or theme-override @(subscribe [:theme]))]
+  (let [theme (or theme-override @(subscribe [:theme]))
+        light-theme? (= "light-theme" theme)]
     (let [size (or size 32)]
       [:img
-       {:class-name (str "h-" size " w-" size)
-        :src (str (if (= "light-theme" theme) "/image/black/" "/image/") icon-name ".svg")}])))
+       {:class-name (str "h-" size " w-" size (if light-theme? " opacity-7"))
+        :src (str (if light-theme? "/image/black/" "/image/") icon-name ".svg")}])))
 
 (defn facebook-share-button-comp [url]
   [:div.fb-share-button
@@ -2385,6 +2386,11 @@
                      {:class-name (if expanded? "fa-caret-up" "fa-caret-down")}]]]
                   [:td.p-10.f-w-b.f-s-18 ac]])))]]]]))))
 
+(defn section-header [icon title]
+  [:div.flex.align-items-c
+   (svg-icon icon 32)
+   [:span.m-l-5.f-w-b.f-s-18 title]])
+
 (defn weapons-section-2 []
   (let [expanded-details (r/atom {})]
     (fn [id]
@@ -2398,9 +2404,7 @@
             proficiency-bonus @(subscribe [::char/proficiency-bonus id])
             all-weapons-map @(subscribe [::mi/all-weapons-map])]
         [:div
-         [:div.flex.align-items-c
-          (svg-icon "crossed-swords" 32)
-          [:span.m-l-5.f-w-b.f-s-18 "Weapons"]]
+         [section-header "crossed-swords" "Weapons"]
          [:div
           [:table.w-100-p.t-a-l.striped
            [:tbody
@@ -2637,6 +2641,10 @@
       [list-item-section "Weapon Proficiencies" "bowman" @(subscribe [::char/weapon-profs id]) (partial prof-name weapon/weapons-map)]
       [list-item-section "Armor Proficiencies" "mailed-fist" @(subscribe [::char/armor-profs id]) (partial prof-name armor/armor-map)]]]))
 
+(defn equipped-section [id]
+  [:div
+   [section-header "battle-gear" "Equipped Items"]])
+
 (defn combat-details [num-columns id]
   (let [weapon-profs @(subscribe [::char/weapon-profs id])
         armor-profs @(subscribe [::char/armor-profs id])
@@ -2666,6 +2674,8 @@
         [critical-hits-section-2 id]
         [hit-dice-section-2 id]
         [number-of-attacks-section-2 id]])
+     [:div.m-t-30
+      [equipped-section id]]
      [:div.m-t-30
       [list-item-section "Damage Resistances" "surrounded-shield" resistances resistance-str]]
      [:div.m-t-30
