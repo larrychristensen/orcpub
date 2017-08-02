@@ -632,8 +632,10 @@
     (subscribe [::char5e/wielded-shield id])
     (subscribe [::mi5e/all-armor-map])])
  (fn [[ac-fn armor-kw shield-kw all-armor-map]]
-   (ac-fn (all-armor-map armor-kw)
-          (all-armor-map shield-kw))))
+   ;; for some reason the map has nil as a key
+   (let [armor (if armor-kw (all-armor-map armor-kw))
+         shield (if shield-kw (all-armor-map shield-kw))]
+     (ac-fn armor shield))))
 
 (reg-sub
  ::char5e/all-armor
@@ -645,8 +647,9 @@
 
 (reg-sub
  ::char5e/non-shield-armor
- :<- [::char5e/all-armor]
- :<- [::mi5e/all-armor-map]
+ (fn [[_ id]]
+   [(subscribe [::char5e/all-armor id])
+    (subscribe [::mi5e/all-armor-map])])
  (fn [[all-armor all-armor-map]]
    (filter
     (fn [[key]]
@@ -656,8 +659,9 @@
 
 (reg-sub
  ::char5e/shields
- :<- [::char5e/all-armor]
- :<- [::mi5e/all-armor-map]
+ (fn [[_ id]]
+   [(subscribe [::char5e/all-armor id])
+    (subscribe [::mi5e/all-armor-map])])
  (fn [[all-armor all-armor-map]]
    (filter
     (fn [[key]]
@@ -667,7 +671,8 @@
 
 (reg-sub
  ::char5e/carried-armor
- :<- [::char5e/non-shield-armor]
+ (fn [[_ id]]
+   (subscribe [::char5e/non-shield-armor id]))
  (fn [armor]
    (filter
     (comp ::char-equip5e/equipped? val)
@@ -675,7 +680,8 @@
 
 (reg-sub
  ::char5e/carried-shields
- :<- [::char5e/shields]
+ (fn [[_ id]]
+   (subscribe [::char5e/shields id]))
  (fn [armor]
    (filter
     (comp ::char-equip5e/equipped? val)
@@ -691,7 +697,8 @@
 
 (reg-sub
  ::char5e/carried-weapons
- :<- [::char5e/all-weapons]
+ (fn [[_ id]]
+   (subscribe [::char5e/all-weapons id]))
  (fn [weapons]
    (filter
     (comp ::char-equip5e/equipped? val)
