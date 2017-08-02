@@ -214,15 +214,19 @@
     ?best-weapon-attack-modifier (fn [weapon]
                                    (max (?weapon-attack-modifier weapon false)
                                         (?weapon-attack-modifier weapon true)))
-    ?weapon-damage-modifier (fn [weapon finesse?]
+    ?weapon-ability-damage-modifier (fn [weapon finesse? off-hand?]
+                                      (if (not off-hand?)
+                                        (?weapon-ability-modifier weapon finesse?)
+                                        0))
+    ?weapon-damage-modifier (fn [weapon finesse? & [off-hand?]]
                               (let [definitely-finesse? (and finesse?
                                                              (::weapon5e/finesse? weapon))
                                     melee? (::weapon5e/melee? weapon)]
                                 (+ (or (::mi5e/magical-damage-bonus weapon) 0)
-                                   (?weapon-ability-modifier weapon finesse?))))
-    ?best-weapon-damage-modifier (fn [weapon]
-                                   (max (?weapon-damage-modifier weapon false)
-                                        (?weapon-damage-modifier weapon true)))
+                                   (?weapon-ability-damage-modifier weapon definitely-finesse? off-hand?))))
+    ?best-weapon-damage-modifier (fn [weapon & [off-hand?]]
+                                   (max (?weapon-damage-modifier weapon false off-hand?)
+                                        (?weapon-damage-modifier weapon true off-hand?)))
     ?spell-attack-modifier-bonus 0
     ?spell-attack-modifier (fn [ability-kw]
                              (+ ?prof-bonus
