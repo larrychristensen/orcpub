@@ -98,8 +98,9 @@
    "/"
    (s/replace (common/safe-name units) #"-" " ")))
 
-(defn attack-description [{:keys [description summary attack-type area-type damage-type damage-die damage-die-count damage-modifier save save-dc page source] :as attack}]
-  (let [summary (or summary description)]
+(defn attack-description [{:keys [description summary attack-type area-type damage-type damage-die damage-die-count damage-modifier attack-modifier save save-dc page source] :as attack}]
+  (let [summary (or summary description)
+        attack-mod-str (if attack-modifier (str (common/bonus-str attack-modifier) " to hit, "))]
     (str
      (if summary (str summary ", "))
      (case attack-type
@@ -107,8 +108,8 @@
                :line (str (:line-width attack) " x " (:line-length attack) " ft. line, ")
                :cone (str (:length attack) " ft. cone, ")
                nil)
-       :ranged "ranged, "
-       "melee, ")
+       :ranged (str "ranged, " attack-mod-str)
+       (str "melee, " attack-mod-str))
      (or damage-die-count
          (::weapons/damage-die-count attack))
      "d"
