@@ -1895,7 +1895,6 @@
          (doall
           (map
            (fn [{:keys [name area-type description damage-die damage-die-count damage-type save save-dc] :as attack}]
-             (prn "NAME" name)
              ^{:key name}
              [attack-comp name (add-links (common/sentensize (disp/attack-description attack)))])
            attacks))]]))))
@@ -2677,7 +2676,8 @@
          :value main-hand-weapon-kw
          :on-change (wield-handler ::char/wield-main-hand-weapon id)}]
        (if (or (equipped? off-hand-weapon-kw)
-               (dual-wield-weapon? main-hand-weapon))
+               (and (equipped? main-hand-weapon-kw)
+                    (dual-wield-weapon? main-hand-weapon)))
          [equipped-section-dropdown
           "Off Hand Weapon"
           {:items (cons
