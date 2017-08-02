@@ -993,12 +993,14 @@
                                [(let [main-hand-weapon ?orcpub.dnd.e5.character/main-hand-weapon
                                       off-hand-weapon ?orcpub.dnd.e5.character/off-hand-weapon
                                       all-weapons-map @(subscribe [::mi/all-weapons-map])]
-                                  (and (-> all-weapons-map
-                                           main-hand-weapon
-                                           ::weapons/melee?)
-                                       (-> all-weapons-map
-                                           off-hand-weapon
-                                           ::weapons/melee?)))])]})
+                                  (and (and main-hand-weapon
+                                            (-> all-weapons-map
+                                                main-hand-weapon
+                                                ::weapons/melee?))
+                                       (and off-hand-weapon
+                                            (-> all-weapons-map
+                                                off-hand-weapon
+                                                ::weapons/melee?))))])]})
    (feat-option
     {:name "Dungeon Delver"
      :icon "dungeon-gate"
