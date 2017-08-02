@@ -1456,71 +1456,6 @@
     (svg-icon icon-name)
     [:div.f-s-24.m-l-10.f-w-b content]]])
 
-(defn armor-class-section [armor-class armor-class-with-armor equipped-armor]
-  (let [equipped-armor-full (mi/equipped-armor-details equipped-armor)
-        shields (filter #(= :shield (:type %)) equipped-armor-full)
-        armor (filter #(not= :shield (:type %)) equipped-armor-full)
-        display-rows (for [a (conj armor nil)
-                           shield (conj shields nil)]
-                       (let [el (if (= nil a shield) :span :div)]
-                         ^{:key (common/name-to-kw (str (:name a) (:name shield)))}
-                        [el
-                         [el
-                          [:span.f-s-24.f-w-b (armor-class-with-armor a shield)]
-                          [:span.display-section-qualifier-text (str "("
-                                                                     (if a (:name a) "unarmored")
-                                                                     (if shield (str " & " (:name shield)))
-                                                                     ")")]]]))]
-    (svg-icon-section
-     "Armor Class"
-     "checked-shield"
-     [:span
-       (first display-rows)
-       [:div
-        (doall (rest display-rows))]])))
-
-(defn speed-section [built-char all-armor]
-  (let [speed (char/base-land-speed built-char)
-        speed-with-armor (char/land-speed-with-armor built-char)
-        unarmored-speed-bonus (char/unarmored-speed-bonus built-char)
-        equipped-armor (char/normal-armor-inventory built-char)]
-    [svg-icon-section
-     "Speed"
-     "walking-boot"
-     [:span
-      [:span
-       [:span (+ (or unarmored-speed-bonus 0)
-                 (if speed-with-armor
-                   (speed-with-armor nil)
-                   speed))]
-       (if (or unarmored-speed-bonus
-               speed-with-armor)
-         [:span.display-section-qualifier-text "(unarmored)"])]
-      (if speed-with-armor
-        [:div
-         (doall
-          (map
-           (fn [[armor-kw _]]
-             (let [armor (mi/all-armor-map armor-kw)
-                   speed (speed-with-armor armor)]
-               ^{:key armor-kw}
-               [:div
-                [:div
-                 [:span speed]
-                 [:span.display-section-qualifier-text (str "(" (:name armor) " armor)")]]]))
-           (dissoc all-armor :shield)))]
-        (if unarmored-speed-bonus
-          [:div
-           [:span
-            [:span speed]
-            [:span.display-section-qualifier-text "(armored)"]]]))
-      (let [swim-speed (char/base-swimming-speed built-char)]
-        (if swim-speed
-          [:div [:span swim-speed] [:span.display-section-qualifier-text "(swim)"]]))
-      (let [flying-speed (char/base-flying-speed built-char)]
-        (if flying-speed
-          [:div [:span flying-speed] [:span.display-section-qualifier-text "(fly)"]]))]]))
-
 (defn list-item-section [list-name icon-name items & [name-fn]]
   [list-display-section list-name icon-name
    (map
@@ -2656,7 +2591,10 @@
   [:div
    [section-header "battle-gear" "Equipped Items"]
    [:div
-    (let [all-armor-map @(subscribe [::mi/all-armor-map])]
+    (let [all-armor-map @(subscribe [::mi/all-armor-map])
+          worn-armor @(subscribe [::char/worn-armor id])
+          wielded-shield @(subscribe [::char/wielded-shield id])
+          best-armor-combo @(subscribe [::char/best-armor-combo])]
       [:div.flex.flex-wrap
        (let [carried-armor @(subscribe [::char/carried-armor id])]
          [equipped-section-dropdown
@@ -2669,7 +2607,7 @@
                         {:title name
                          :value key}))
                     carried-armor))
-           :value @(subscribe [::char/worn-armor id])
+           :value (or worn-armor (-> best-armor-combo :armor :key))
            :on-change (wield-handler ::char/don-armor id)}])
        (let [carried-shields @(subscribe [::char/carried-shields id])]
          [equipped-section-dropdown
@@ -2682,7 +2620,7 @@
                         {:title name
                          :value key}))
                     carried-shields))
-           :value @(subscribe [::char/wielded-shield id])
+           :value (or wielded-shield (-> best-armor-combo :shield :key))
            :on-change (wield-handler ::char/wield-shield id)}])])
     (let [all-weapons-map @(subscribe [::mi/all-weapons-map])
           carried-weapons @(subscribe [::char/carried-weapons id])

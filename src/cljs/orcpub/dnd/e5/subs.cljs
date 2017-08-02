@@ -624,18 +624,40 @@
    (fn [built-char _]
      (char-fn built-char))))
 
+(defn armor-calculations [ac-fn armor shields]
+  (for [armor-item (conj armor nil)
+         shield (conj shields nil)]
+     {:ac (ac-fn armor-item shield)
+      :armor armor-item
+      :shield shield}))
+
+(reg-sub
+ ::char5e/best-armor-combo
+ (fn [[_ id]]
+   [(subscribe [::char5e/armor-class-with-armor id])
+    (subscribe [::char5e/non-shield-armor-details id])
+    (subscribe [::char5e/shields-details id])])
+ (fn [[ac-fn armor shields]]
+   (apply max-key :ac (armor-calculations ac-fn armor shields))))
+
 (reg-sub
  ::char5e/current-armor-class
  (fn [[_ id]]
    [(subscribe [::char5e/armor-class-with-armor id])
     (subscribe [::char5e/worn-armor id])
     (subscribe [::char5e/wielded-shield id])
-    (subscribe [::mi5e/all-armor-map])])
- (fn [[ac-fn armor-kw shield-kw all-armor-map]]
+    (subscribe [::mi5e/all-armor-map])
+    (subscribe [::char5e/best-armor-combo id])])
+ (fn [[ac-fn armor-kw shield-kw all-armor-map best-armor-combo]]
    ;; for some reason the map has nil as a key
-   (let [armor (if armor-kw (all-armor-map armor-kw))
-         shield (if shield-kw (all-armor-map shield-kw))]
-     (ac-fn armor shield))))
+   (if (and (nil? armor-kw)
+            (nil? shield-kw))
+     (:ac best-armor-combo)
+     (let [armor (if armor-kw
+                   (all-armor-map armor-kw))
+           shield (if shield-kw
+                    (all-armor-map shield-kw))]
+       (ac-fn armor shield)))))
 
 (reg-sub
  ::char5e/all-armor
@@ -656,6 +678,28 @@
       (let [item (all-armor-map key)]
         (not= :shield (:type item))))
     all-armor)))
+
+(reg-sub
+ ::char5e/non-shield-armor-details
+ (fn [[_ id]]
+   [(subscribe [::char5e/non-shield-armor id])
+    (subscribe [::mi5e/all-armor-map])])
+ (fn [[armor armor-map]]
+   (map
+    (fn [[key]]
+      (armor-map key))
+    armor)))
+
+(reg-sub
+ ::char5e/shields-details
+ (fn [[_ id]]
+   [(subscribe [::char5e/shields id])
+    (subscribe [::mi5e/all-armor-map])])
+ (fn [[armor armor-map]]
+   (map
+    (fn [[key]]
+      (armor-map key))
+    armor)))
 
 (reg-sub
  ::char5e/shields
