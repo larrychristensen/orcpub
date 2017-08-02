@@ -68,8 +68,13 @@
             (es/dependencies ~prop ~full-body)
             (es/conditions ~conditions))))
 
-(defmacro vec-mod [prop val & [nm value]]
-  `(mod-f ~nm ~value (es/vec-mod ~prop ~val) (es/ref-sym-to-kw '~prop) (es/dependencies ~prop ~val)))
+(defmacro vec-mod [prop val & [nm value conditions]]
+  `(mod-f ~nm
+          ~value
+          (es/vec-mod ~prop ~val)
+          (es/ref-sym-to-kw '~prop)
+          (es/dependencies ~prop ~val)
+          (es/conditions ~conditions)))
 
 (defmacro set-mod [prop body & [nm value conditions]]
   (let [full-body (if conditions (conj conditions body) body)]
