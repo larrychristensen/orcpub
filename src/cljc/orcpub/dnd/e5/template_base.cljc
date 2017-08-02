@@ -62,6 +62,7 @@
                                             ?unarmored-with-shield-ac-bonus
                                             ?ac-bonus
                                             (?shield-ac-bonus shield)))
+    ?dual-wield-weapon? weapon5e/light-melee-weapon?
     ?armor-class-with-armor-base (fn [armor & [shield]]
                                    (cond (and (nil? armor)
                                               (nil? shield)) ?unarmored-armor-class
