@@ -2839,7 +2839,9 @@
 
 (defn equipment-details [num-columns id]
   [:div
-   [:div.m-t-10
+   [:div.m-t-30
+    [equipped-section id]]
+   [:div.m-t-30
     [weapons-section-2 id]]
    [:div.m-t-30
     [armor-section-2 id]]
