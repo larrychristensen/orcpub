@@ -2115,7 +2115,6 @@
 (reg-event-fx
  ::char5e/don-armor
  (fn [{:keys [db]} [_ id armor-kw]]
-   (prn "DON ARMOR" id armor-kw)
    (update-character-fx db id #(assoc-in
                                 %
                                 [::entity/values
