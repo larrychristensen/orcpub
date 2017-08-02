@@ -138,6 +138,5 @@
   (testing "throws if no items matched"
     (let [item {mi/name-key "My Item"
                 ::mi/type :armor
-                ::mi/item-subtype (constantly false)
-                ::mi/subtypes [:plate :chain-mail]}]
+                ::mi/item-subtype (constantly false)}]
       (is (thrown? IllegalArgumentException (mi/expand-armor item))))))

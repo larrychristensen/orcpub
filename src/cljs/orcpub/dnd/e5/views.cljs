@@ -1981,7 +1981,7 @@
   [:div
    [:div.p-10.flex.flex-column.align-items-c
     (section-header-2 "Armor Class" "checked-shield")
-    [:div.f-s-24.f-w-b @(subscribe [::char/current-armor-class])]]])
+    [:div.f-s-24.f-w-b @(subscribe [::char/current-armor-class id])]]])
 
 (defn basic-section [title icon v]
   [:div
@@ -2658,9 +2658,9 @@
    [:div
     (let [all-armor-map @(subscribe [::mi/all-armor-map])]
       [:div.flex.flex-wrap
-       (let [carried-armor @(subscribe [::char/carried-armor])]
+       (let [carried-armor @(subscribe [::char/carried-armor id])]
          [equipped-section-dropdown
-          "Armor"
+          "Worn Armor"
           {:items (cons
                    none-item
                    (map
@@ -2671,9 +2671,9 @@
                     carried-armor))
            :value @(subscribe [::char/worn-armor id])
            :on-change (wield-handler ::char/don-armor id)}])
-       (let [carried-shields @(subscribe [::char/carried-shields])]
+       (let [carried-shields @(subscribe [::char/carried-shields id])]
          [equipped-section-dropdown
-          "Shield"
+          "Wielded Shield"
           {:items (cons
                    none-item
                    (map
@@ -2685,10 +2685,9 @@
            :value @(subscribe [::char/wielded-shield id])
            :on-change (wield-handler ::char/wield-shield id)}])])
     (let [all-weapons-map @(subscribe [::mi/all-weapons-map])
-          carried-weapons @(subscribe [::char/carried-weapons])
+          carried-weapons @(subscribe [::char/carried-weapons id])
           main-hand-weapon-kw @(subscribe [::char/main-hand-weapon id])
           main-hand-weapon (all-weapons-map main-hand-weapon-kw)]
-      (prn "MAIN HAND WEPAON" main-hand-weapon)
       [:div.flex.flex-wrap
        [equipped-section-dropdown
         "Main Hand Weapon"

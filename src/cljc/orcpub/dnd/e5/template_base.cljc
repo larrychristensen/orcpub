@@ -74,11 +74,15 @@
                                                      ?ac-bonus)
                                                   ?magical-ac-bonus)))
     ?armor-class-with-armor (fn [armor & [shield]]
-                              (apply +
-                                     (apply max
-                                            (?armor-class-with-armor-base armor shield)
-                                            (map #(% armor shield) ?ac-fns))
-                                     (map #(% armor shield) ?ac-bonus-fns)))
+                              (prn "ARMOR" armor shield ?base-armor-class)
+                              (let [max-ac (apply max
+                                                  (?armor-class-with-armor-base armor shield)
+                                                  (map #(% armor shield) ?ac-fns))
+                                    bonuses (map #(% armor shield) ?ac-bonus-fns)]
+                                (prn "MAX AC" max-ac bonuses)
+                                (apply +
+                                       max-ac
+                                       bonuses)))
     ?ac-bonus-fns []
     ?ac-fns []
     ?abilities (reduce
