@@ -1849,20 +1849,54 @@
        [:span after]]
       desc)))
 
-(defn attacks-section [attacks]
-  (if (seq attacks)
-    (display-section
-     "Attacks"
-     "pointy-sword"
-     [:div.f-s-14
-      (doall
-       (map
-        (fn [{:keys [name area-type description damage-die damage-die-count damage-type save save-dc] :as attack}]
-          ^{:key name}
-          [:p.m-t-10
-           [:span.f-w-600.i name "."]
-           [:span.f-w-n.m-l-10 (add-links (common/sentensize (disp/attack-description attack)))]])
-        attacks))])))
+(defn attack-comp [name description]
+  [:p.m-t-10
+   [:span.f-w-600.i name "."]
+   [:span.f-w-n.m-l-10 description]])
+
+(defn weapon-name [weapon]
+  (or (:name weapon)
+      (::mi/name weapon)))
+
+(defn weapon-attack-description [{:keys [::weapon/ranged?] :as weapon} damage-modifier attack-modifier]
+  (disp/attack-description (-> weapon
+                               (assoc :attack-type (if ranged? :ranged :melee))
+                               (assoc :damage-modifier damage-modifier)
+                               (assoc :attack-modifier attack-modifier)
+                               (dissoc :description))))
+
+(defn weapon-attack-comp [weapon off-hand? weapon-attack-modifier weapon-damage-modifier]
+  [attack-comp
+   (str (weapon-name weapon) (if off-hand? " (off hand)"))
+   (weapon-attack-description weapon
+                              (weapon-damage-modifier weapon off-hand?)
+                              (weapon-attack-modifier weapon))])
+
+(defn attacks-section [id]
+  (let [attacks @(subscribe [::char/attacks id])
+        all-weapons-map @(subscribe [::mi/all-weapons-map])
+        main-hand-weapon-kw @(subscribe [::char/main-hand-weapon id])
+        main-hand-weapon (if main-hand-weapon-kw (all-weapons-map main-hand-weapon-kw))
+        off-hand-weapon-kw @(subscribe [::char/off-hand-weapon id])
+        weapon-attack-modifier @(subscribe [::char/best-weapon-attack-modifier-fn id])
+        weapon-damage-modifier @(subscribe [::char/best-weapon-damage-modifier-fn id])
+        off-hand-weapon (if off-hand-weapon-kw (all-weapons-map off-hand-weapon-kw))]
+    (if (or (seq attacks)
+            main-hand-weapon)
+      (display-section
+       "Attacks"
+       "pointy-sword"
+       [:div.f-s-14
+        (if main-hand-weapon
+          [weapon-attack-comp main-hand-weapon false weapon-attack-modifier weapon-damage-modifier])
+        (if off-hand-weapon
+          [weapon-attack-comp off-hand-weapon true weapon-attack-modifier weapon-damage-modifier])
+        (doall
+         (map
+          (fn [{:keys [name area-type description damage-die damage-die-count damage-type save save-dc] :as attack}]
+            ^{:key name}
+            [attack-comp name (add-links (common/sentensize (disp/attack-description attack)))])
+          attacks))]))))
 
 (defn toggle-feature-used-fn [id units k]
   #(dispatch [::char/toggle-feature-used id units k]))
@@ -2327,8 +2361,8 @@
     (fn [id]
       (let [all-weapons @(subscribe [::char/all-weapons id])
             weapon-profs (set @(subscribe [::char/weapon-profs id]))
-            weapon-attack-modifier @(subscribe [::char/weapon-attack-modifier-fn id])
-            weapon-damage-modifier @(subscribe [::char/weapon-damage-modifier-fn id])
+            weapon-attack-modifier @(subscribe [::char/best-weapon-attack-modifier-fn id])
+            weapon-damage-modifier @(subscribe [::char/best-weapon-damage-modifier-fn id])
             has-weapon-prof @(subscribe [::char/has-weapon-prof id])
             device-type @(subscribe [:device-type])
             mobile? (= :mobile device-type)
@@ -2352,8 +2386,7 @@
                 (let [{:keys [name description ranged? ::weapon/type ::weapon/damage-die-count ::weapon/damage-die] :as weapon} (all-weapons-map weapon-key)
                       proficient? (if has-weapon-prof (has-weapon-prof weapon))
                       expanded? (@expanded-details weapon-key)
-                      damage-modifier (max (weapon-damage-modifier weapon false)
-                                           (weapon-damage-modifier weapon true))]
+                      damage-modifier (weapon-damage-modifier weapon)]
                   (if (not= type :ammunition)
                     ^{:key weapon-key}
                    [:tr.pointer
@@ -2364,10 +2397,7 @@
                       [:td.p-10 (boolean-icon proficient?)])
                     [:td.p-10.w-100-p
                      [:div
-                      (disp/attack-description (-> weapon
-                                                   (assoc :attack-type (if ranged? :ranged :melee))
-                                                   (assoc :damage-modifier damage-modifier)
-                                                   (dissoc :description)))]
+                      (weapon-attack-description weapon damage-modifier nil)]
                      (if expanded?
                        (weapon-details weapon weapon-damage-modifier))]
                     [:td
@@ -2376,8 +2406,7 @@
                         [:span.underline (if expanded? "less" "more")])
                       [:i.fa.m-l-5
                        {:class-name (if expanded? "fa-caret-up" "fa-caret-down")}]]]
-                    [:td.p-10.f-w-b.f-s-18 (common/bonus-str (max (weapon-attack-modifier weapon true)
-                                                                  (weapon-attack-modifier weapon false)))]])))
+                    [:td.p-10.f-w-b.f-s-18 (common/bonus-str (weapon-attack-modifier weapon))]])))
               all-weapons))]]]]))))
 
 (defn magic-item-rows [expanded-details magic-item-cfgs magic-weapon-cfgs magic-armor-cfgs]
@@ -2588,7 +2617,6 @@
 (def wield-handler (memoize wield-fn))
 
 (defn equipped? [v]
-  (prn "V" v)
   (and (some? v)
        (not= :none v)))
 
@@ -2696,13 +2724,12 @@
         armor @(subscribe [::char/armor id])
         magic-weapons @(subscribe [::char/magic-weapons id])
         magic-armor @(subscribe [::char/magic-armor id])
-        attacks @(subscribe [::char/attacks id])
         critical-hit-values @(subscribe [::char/critical-hit-values id])
         non-standard-crits? (> (count critical-hit-values) 1)
         number-of-attacks @(subscribe [::char/number-of-attacks id])
         non-standard-attack-number? (> number-of-attacks 1)]
     [:div
-     [:div.flex.justify-cont-s-a.t-a-c
+     [:div.flex.flex-wrap.justify-cont-s-a.t-a-c
       [armor-class-section-2 id]
       [hit-points-section-2 id]
       [speed-section-2 id]
@@ -2713,6 +2740,8 @@
         [critical-hits-section-2 id]
         [hit-dice-section-2 id]
         [number-of-attacks-section-2 id]])
+     [:div.m-t-30
+      [attacks-section id]]
      [:div.m-t-30
       [equipped-section id]]
      [:div.m-t-30
@@ -2725,8 +2754,6 @@
       [list-item-section "Condition Immunities" nil condition-immunities resistance-str]]
      [:div.m-t-30
       [list-item-section "Immunities" nil immunities resistance-str]]
-     [:div.m-t-30
-      [attacks-section attacks]]
      [:div.m-t-30
       [weapons-section-2 id]]
      [:div.m-t-30
@@ -2784,7 +2811,7 @@
          [:button.form-button.p-5.m-l-5
           {:on-click (make-event-handler ::char/new-turn id)}
           "new turn"])]
-      [attacks-section attacks]
+      [attacks-section id]
       [actions-section id "Actions" "beams-aura" actions]
       [actions-section id "Bonus Actions" "run" bonus-actions]
       [actions-section id "Reactions" "van-damme-split" reactions]
