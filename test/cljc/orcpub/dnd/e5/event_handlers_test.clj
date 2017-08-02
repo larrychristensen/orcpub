@@ -164,7 +164,7 @@
   (let [strict {:db/id 17592186055339, :orcpub.entity.strict/selections [{:db/id 17592186055347, :orcpub.entity.strict/key :weapons, :orcpub.entity.strict/options [{:db/id 17592186055348, :orcpub.entity.strict/key :javelin, :orcpub.entity.strict/map-value {:db/id 17592186055349, :orcpub.dnd.e5.character.equipment/quantity 4, :orcpub.dnd.e5.character.equipment/equipped? true, :orcpub.dnd.e5.character.equipment/class-starting-equipment? true}}]} {:db/id 17592186055350, :orcpub.entity.strict/key :equipment, :orcpub.entity.strict/options [{:db/id 17592186055351, :orcpub.entity.strict/key :explorers-pack, :orcpub.entity.strict/map-value {:db/id 17592186055352, :orcpub.dnd.e5.character.equipment/quantity 1, :orcpub.dnd.e5.character.equipment/equipped? true, :orcpub.dnd.e5.character.equipment/class-starting-equipment? true}}]}]}
         non-strict (entity/from-strict strict)
         updated (-> non-strict
-                    (eh/add-inventory-item [:_ :weapons :dagger])
+                    (eh/add-inventory-item :weapons :dagger)
                     (eh/remove-inventory-item [:_ :weapons :dagger]))
         back-to-strict (entity/to-strict updated)]
     (is (= strict back-to-strict))))
