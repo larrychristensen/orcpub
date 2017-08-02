@@ -722,6 +722,9 @@
 (defn al-illegal-reasons [built-char]
   (get-prop built-char :al-illegal-reasons))
 
+(defn dual-wield-weapon-fn [built-char]
+  (get-prop built-char :dual-wield-weapon?))
+
 (defn max-armor-class [unarmored-armor-class
                        ac-with-armor-fn
                        all-armor-inventory
