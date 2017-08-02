@@ -48,7 +48,7 @@
    {:name "Club",
     ::damage-type :bludgeoning,
     ::damage-die 4,
-    ::damage-die-coun 1,
+    ::damage-die-count 1,
     ::type :simple,
     ::melee? true,
     ::light? true

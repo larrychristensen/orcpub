@@ -1888,15 +1888,17 @@
        "pointy-sword"
        [:div.f-s-14
         (if main-hand-weapon
-          [weapon-attack-comp main-hand-weapon false weapon-attack-modifier weapon-damage-modifier])
+          [:div [weapon-attack-comp main-hand-weapon false weapon-attack-modifier weapon-damage-modifier]])
         (if off-hand-weapon
-          [weapon-attack-comp off-hand-weapon true weapon-attack-modifier weapon-damage-modifier])
-        (doall
-         (map
-          (fn [{:keys [name area-type description damage-die damage-die-count damage-type save save-dc] :as attack}]
-            ^{:key name}
-            [attack-comp name (add-links (common/sentensize (disp/attack-description attack)))])
-          attacks))]))))
+          [:div [weapon-attack-comp off-hand-weapon true weapon-attack-modifier weapon-damage-modifier]])
+        [:div
+         (doall
+          (map
+           (fn [{:keys [name area-type description damage-die damage-die-count damage-type save save-dc] :as attack}]
+             (prn "NAME" name)
+             ^{:key name}
+             [attack-comp name (add-links (common/sentensize (disp/attack-description attack)))])
+           attacks))]]))))
 
 (defn toggle-feature-used-fn [id units k]
   #(dispatch [::char/toggle-feature-used id units k]))
