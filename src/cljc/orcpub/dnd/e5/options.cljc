@@ -18,6 +18,7 @@
             [orcpub.dnd.e5.spell-lists :as sl]
             [orcpub.dnd.e5.display :as disp]
             [orcpub.dnd.e5.skills :as skills]
+            [orcpub.dnd.e5.magic-items :as mi]
             [orcpub.dnd.e5.event-handlers :as eh]
             [orcpub.components :as comps]
             [re-frame.core :refer [dispatch subscribe]])
@@ -983,7 +984,21 @@
     {:name "Dual Wielder"
      :icon "rogue"
      :page 165
-     :summary "+1 AC bonus when wielding two melee weapons; two-weapon fighting with any one-handed melee weapon"})
+     :summary "+1 AC bonus when wielding two melee weapons; two-weapon fighting with any one-handed melee weapon"
+     :modifiers [(mods/modifier ?dual-wield-weapon? weapons/one-handed-weapon?)
+                 (mods/vec-mod ?ac-bonus-fns
+                               (fn [_ _] 1)
+                               nil
+                               nil
+                               [(let [main-hand-weapon ?orcpub.dnd.e5.character/main-hand-weapon
+                                      off-hand-weapon ?orcpub.dnd.e5.character/off-hand-weapon
+                                      all-weapons-map @(subscribe [::mi/all-weapons-map])]
+                                  (and (-> all-weapons-map
+                                           main-hand-weapon
+                                           ::weapons/melee?)
+                                       (-> all-weapons-map
+                                           off-hand-weapon
+                                           ::weapons/melee?)))])]})
    (feat-option
     {:name "Dungeon Delver"
      :icon "dungeon-gate"

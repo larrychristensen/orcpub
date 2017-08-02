@@ -399,3 +399,6 @@
 
 (defn light-melee-weapon? [{:keys [::light? ::melee?]}]
   (and melee? light?))
+
+(defn one-handed-weapon? [{:keys [::two-handed?]}]
+  (not two-handed?))

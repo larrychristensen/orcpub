@@ -2133,11 +2133,14 @@
 (reg-event-fx
  ::char5e/wield-main-hand-weapon
  (fn [{:keys [db]} [_ id weapon-kw]]
-   (update-character-fx db id #(assoc-in
+   (update-character-fx db id #(update
                                 %
-                                [::entity/values
-                                 ::char5e/main-hand-weapon]
-                                weapon-kw))))
+                                ::entity/values
+                                assoc
+                                ::char5e/main-hand-weapon
+                                weapon-kw
+                                ::char5e/off-hand-weapon
+                                :none))))
 
 (reg-event-fx
  ::char5e/wield-off-hand-weapon

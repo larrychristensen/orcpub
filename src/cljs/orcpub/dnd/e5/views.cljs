@@ -2587,6 +2587,11 @@
 
 (def wield-handler (memoize wield-fn))
 
+(defn equipped? [v]
+  (prn "V" v)
+  (and (some? v)
+       (not= :none v)))
+
 (defn equipped-section [id]
   [:div
    [section-header "battle-gear" "Equipped Items"]
@@ -2625,7 +2630,9 @@
     (let [all-weapons-map @(subscribe [::mi/all-weapons-map])
           carried-weapons @(subscribe [::char/carried-weapons id])
           main-hand-weapon-kw @(subscribe [::char/main-hand-weapon id])
-          main-hand-weapon (all-weapons-map main-hand-weapon-kw)]
+          main-hand-weapon (all-weapons-map main-hand-weapon-kw)
+          off-hand-weapon-kw @(subscribe [::char/off-hand-weapon id])
+          dual-wield-weapon? @(subscribe [::char/dual-wield-weapon-fn id])]
       [:div.flex.flex-wrap
        [equipped-section-dropdown
         "Main Hand Weapon"
@@ -2639,7 +2646,8 @@
                   carried-weapons))
          :value main-hand-weapon-kw
          :on-change (wield-handler ::char/wield-main-hand-weapon id)}]
-       (if (weapon/light-melee-weapon? main-hand-weapon)
+       (if (or (equipped? off-hand-weapon-kw)
+               (dual-wield-weapon? main-hand-weapon))
          [equipped-section-dropdown
           "Off Hand Weapon"
           {:items (cons
@@ -2650,14 +2658,14 @@
                       (fn [[key]]
                         (-> all-weapons-map
                             key
-                            weapon/light-melee-weapon?)))
+                            dual-wield-weapon?)))
                      (map
                       (fn [[key]]
                         (let [{:keys [name]} (all-weapons-map key)]
                           {:title name
                            :value key}))))
                     carried-weapons))
-           :value @(subscribe [::char/off-hand-weapon id])
+           :value off-hand-weapon-kw
            :on-change (wield-handler ::char/wield-off-hand-weapon id)}])
        #_[:div.flex.flex-wrap
         [equipped-section-dropdown
