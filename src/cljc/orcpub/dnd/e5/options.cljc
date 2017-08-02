@@ -1333,8 +1333,11 @@
    (t/option-cfg
     {:name"Two Weapon Fighting"
      :modifiers [(modifiers/trait-cfg
-       {:name "Two Weapon Fighting"
-        :description "When you engage in two-weapon fighting, you can add your ability modifier to the damage of the second attack."})]})])
+                  {:name "Two Weapon Fighting"
+                   :description "When you engage in two-weapon fighting, you can add your ability modifier to the damage of the second attack."})
+                 (mods/modifier ?weapon-ability-damage-modifier
+                                (fn [weapon finesse? _]
+                                  (?weapon-ability-modifier weapon finesse?)))]})])
 
 (defn fighting-style-selection-2 [class-kw num options]
   (t/selection-cfg
