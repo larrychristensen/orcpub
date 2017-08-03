@@ -25,7 +25,6 @@
             [orcpub.dnd.e5.templates.ua-base :as ua]
             [re-frame.core :refer [subscribe dispatch]]))
 
-
 (def character
   {::entity/options {:ability-scores {::entity/key :standard-scores
                                       ::entity/value (char5e/abilities 15 14 13 12 10 8)}
@@ -64,8 +63,9 @@
    ::char5e/cha "aura"})
 
 (defn ability-icon [k size theme]
-  [:img {:class-name (str "h-" size " w-" size)
-         :src (str (if (= "light-theme" theme) "/image/black/" "/image/") (ability-icons k) ".svg")}])
+  (let [light-theme? (= "light-theme" theme)]
+    [:img {:class-name (str "h-" size " w-" size (if light-theme? " opacity-7"))
+           :src (str (if light-theme? "/image/black/" "/image/") (ability-icons k) ".svg")}]))
 
 (defn ability-modifier [v]
   [:div.f-6-12.f-w-n.h-24
@@ -3431,6 +3431,25 @@
                             :frequency units5e/long-rests-1
                             :summary "cast polymorph without a spell slot to turn into a CR 1 or less beast"}]}]}))
 
+(def melee-weapons-xform
+  (comp
+   (filter
+    ::weapon5e/melee?)
+   (map
+    (fn [weapon]
+      (t/option-cfg
+       {:name (or (:name weapon) (::weapon5e/name weapon))})))))
+
+(defn pact-weapon-option [title weapons]
+  (t/option-cfg
+   {:name title
+    :selections [(t/selection-cfg
+                  {:name "Pact Weapon"
+                   :tags #{:class}
+                   :options (sequence
+                             melee-weapons-xform
+                             weapons)})]}))
+
 (def pact-boon-options
   [(t/option-cfg
     {:name "Pact of the Chain"
@@ -3441,6 +3460,13 @@
                    :summary "Can cast find familiar as a ritual, use your attack action to give your familiar an attack as a reaction"})]})
    (t/option-cfg
     {:name "Pact of the Blade"
+     #_:selections #_[(t/selection-cfg
+                   {:name "Pact Weapon Type"
+                    :tags #{:class}
+                    :min 0
+                    :max 1
+                    :options [(pact-weapon-option "Normal Weapon" weapon5e/weapons)
+                              (pact-weapon-option "Magic Weapon" mi/magic-weapons)]})]
      :modifiers [(mod5e/trait-cfg
                   {:name opt5e/pact-of-the-blade-name
                    :page 107
@@ -4883,7 +4909,9 @@ long rest."})
    warlock-option
    wizard-option])
 
-(defn template-selections [magic-weapon-options magic-armor-options other-magic-item-options]
+(defn template-selections [magic-weapon-options
+                           magic-armor-options
+                           other-magic-item-options]
   [optional-content-selection
    (t/selection-cfg
     {:name "Base Ability Scores"

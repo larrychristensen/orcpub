@@ -77,6 +77,20 @@
     mi5e/magic-weapon-xform
     sorted-items)))
 
+(reg-sub
+ ::mi5e/all-weapons
+ :<- [::char5e/magic-weapons]
+ (fn [magic-weapons]
+   (concat magic-weapons weapon5e/weapons)))
+
+(reg-sub
+ ::mi5e/all-melee-weapons
+ :<- [::char5e/all-weapons]
+ (fn [all-weapons]
+   (filter
+    ::weapon5e/melee?
+    all-weapons)))
+
 (defn map-by-key-or-id [items]
   (reduce
    (fn [m {:keys [:db/id key] :as item}]
