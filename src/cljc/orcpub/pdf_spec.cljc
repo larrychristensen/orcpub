@@ -399,7 +399,7 @@
         weapon-fields (mapcat
                        (fn [{:keys [name ::weapon5e/damage-die ::weapon5e/damage-die-count ::weapon5e/damage-type] :as weapon}]
                          (let [versatile (:versatile weapon)
-                               normal-damage-modifier (char5e/weapon-damage-modifier built-char weapon false)
+                               normal-damage-modifier (char5e/best-weapon-damage-modifier built-char weapon false)
                                finesse-damage-modifier (char5e/weapon-damage-modifier built-char weapon true)
                                normal {:name (:name weapon)
                                        :attack-bonus (char5e/best-weapon-attack-modifier built-char weapon false)
