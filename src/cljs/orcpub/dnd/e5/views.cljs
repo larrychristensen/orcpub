@@ -1886,7 +1886,6 @@
         weapon-attack-modifier @(subscribe [::char/best-weapon-attack-modifier-fn id])
         weapon-damage-modifier @(subscribe [::char/best-weapon-damage-modifier-fn id])
         off-hand-weapon (if off-hand-weapon-kw (all-weapons-map off-hand-weapon-kw))]
-    (prn "CARRIED WEAPONS" carried-weapons)
     (if (or (seq attacks)
             main-hand-weapon)
       (display-section
