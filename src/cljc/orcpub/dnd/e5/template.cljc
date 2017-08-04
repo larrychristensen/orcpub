@@ -2619,7 +2619,7 @@
                                              (let [abilities @(subscribe [::char5e/abilities nil c])]
                                                (and (>= (::char5e/wis abilities) 13)
                                                     (>= (::char5e/dex abilities) 13)))))]
-     :ability-increase-levels [4 8 10 16 19]
+     :ability-increase-levels [4 8 12 16 19]
      :spellcaster true
      :spellcasting {:level-factor 2
                     :known-mode :schedule
@@ -4635,13 +4635,13 @@ long rest."})
 
 (def eladrin-elf-option
   {:name "Elf"
-   :source :dmg
    :plugin? true
    :subraces
    [{:name "Eladrin Elf"
      :source :dmg
      :abilities {::char5e/int 1}
      :modifiers [elf-weapon-training-mods
+                 (mod5e/al-illegal "Eladrin Elf is not allowed")
                  (mod5e/spells-known 2 :misty-step ::char5e/int "Eladrin Elf" 1 "Once per rest")]}]})
 
 (def dmg-selections

@@ -94,9 +94,8 @@
 (defn map-by-key-or-id [items]
   (reduce
    (fn [m {:keys [:db/id key] :as item}]
-     (assoc m
-            key item
-            id item))
+     (cond-> (assoc m key item)
+       id (assoc id item)))
    {}
    items))
 
@@ -262,3 +261,13 @@
  :<- [::char5e/template-selections]
  (fn [template-selections _]
    (t5e/template template-selections)))
+
+(reg-sub
+ ::mi5e/can-attune?
+ (fn [[_ id]]
+   [(subscribe [::char5e/classes id])
+    (subscribe [::char5e/spellcaster? id])
+    (subscribe [::char5e/alignment id])])
+ (fn [[classes spellcaster? alignment]]
+   (fn [item]
+     (mi5e/can-attune? item classes spellcaster? alignment))))
