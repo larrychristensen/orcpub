@@ -1579,7 +1579,8 @@
     (common5e/slot-level-key level)]
    (partial toggle-set i)))
 
-(defn update-character-fx [db id update-fn]
+(defn update-character-fx [db id update-fn & [other-events]]
+  (prn "OTHER EVENTS" other-events)
   (if id
     {:db (update-in
           db
@@ -2112,54 +2113,129 @@
  (fn [db [_ id]]
    (assoc-in db [::char5e/delete-confirmation-shown? id] false)))
 
-(reg-event-fx
- ::char5e/don-armor
- (fn [{:keys [db]} [_ id armor-kw]]
-   (update-character-fx db id #(assoc-in
-                                %
-                                [::entity/values
-                                 ::char5e/worn-armor]
-                                armor-kw))))
+(defmulti toggle-prop (fn [prop-kw cfg]
+                        (let [v (prop-kw cfg)
+                              defaulted-v (if (nil? v)
+                                            (= prop-kw ::char-equip5e/carried?)
+                                            v)]
+                          (prn "DEFAULED" defaulted-v)
+                          [prop-kw defaulted-v])))
 
-(reg-event-fx
+(defn set-all-false [cfg]
+  (assoc cfg
+         ::char-equip5e/carried? false
+         ::char-equip5e/equipped? false
+         ::char-equip5e/attuned? false))
+
+(defmethod toggle-prop [::char-equip5e/carried? true] [prop-kw cfg]
+  (set-all-false cfg))
+
+(defmethod toggle-prop [::char-equip5e/equipped? true] [prop-kw cfg]
+  (assoc cfg
+         ::char-equip5e/equipped? false
+         ::char-equip5e/attuned? false))
+
+(defmethod toggle-prop [::char-equip5e/attuned? true] [prop-kw cfg]
+  (assoc cfg ::char-equip5e/attuned? false))
+
+(defmethod toggle-prop [::char-equip5e/attuned? false] [prop-kw cfg]
+  (assoc cfg
+         ::char-equip5e/carried? true
+         ::char-equip5e/equipped? true
+         ::char-equip5e/attuned? true))
+
+(defmethod toggle-prop [::char-equip5e/equipped? false] [prop-kw cfg]
+  (assoc cfg
+         ::char-equip5e/equipped? true
+         ::char-equip5e/carried? true))
+
+(defmethod toggle-prop [::char-equip5e/carried? false] [prop-kw cfg]
+  (assoc cfg ::char-equip5e/carried? true))
+
+(defn update-item-prop [character item-kw item-type-kw item-prop update-fn]
+  (update-in
+   character
+   [::entity/options
+    item-type-kw]
+   (fn [items]
+     (map
+      (fn [{:keys [::entity/key] :as item}]
+        (if (= key item-kw)
+          (update
+           item
+           ::entity/value
+           update-fn)
+          item))
+      items))))
+
+(defn toggle-item-prop [character item-kw item-type-kw item-prop]
+  (prn "TOGGLE ITEM PROP" item-kw item-type-kw item-prop)
+  (update-item-prop character item-kw item-type-kw item-prop (partial toggle-prop item-prop)))
+
+(defn set-item-prop [character item-kw item-type-kw item-prop]
+  (update-item-prop character item-kw item-type-kw item-prop #(toggle-prop item-prop (assoc % item-prop false))))
+
+(defn reg-wield-item-fx [event-kw value-prop item-type-kw]
+  (reg-event-fx
+   event-kw
+   (fn [{:keys [db]} [_ id item-kw attune?]]
+     (prn "WIELD ITEM" item-kw attune? event-kw value-prop item-type-kw)
+     (update-character-fx db
+                          id
+                          #(cond-> %
+                             true (assoc-in
+                                   [::entity/values
+                                    value-prop]
+                                   item-kw)
+                             attune? (set-item-prop item-kw item-type-kw ::char-equip5e/attuned?))))))
+
+(reg-wield-item-fx
+ ::char5e/don-armor
+ ::char5e/worn-armor
+ :magic-armor)
+
+(reg-wield-item-fx
  ::char5e/wield-shield
- (fn [{:keys [db]} [_ id shield-kw]]
-   (update-character-fx db id #(assoc-in
-                                %
-                                [::entity/values
-                                 ::char5e/wielded-shield]
-                                shield-kw))))
+ ::char5e/wielded-shield
+ :magic-armor)
 
 (reg-event-fx
  ::char5e/wield-main-hand-weapon
- (fn [{:keys [db]} [_ id weapon-kw]]
-   (update-character-fx db id #(update
-                                %
-                                ::entity/values
-                                assoc
-                                ::char5e/main-hand-weapon
-                                weapon-kw
-                                ::char5e/off-hand-weapon
-                                :none))))
+ (fn [{:keys [db]} [_ id weapon-kw attune?]]
+   (update-character-fx db
+                        id
+                        #(cond-> %
+                           true (update
+                                 ::entity/values
+                                 assoc
+                                 ::char5e/main-hand-weapon
+                                 weapon-kw
+                                 ::char5e/off-hand-weapon
+                                 :none)
+                           attune? (set-item-prop weapon-kw :magic-weapons ::char-equip5e/attuned?)))))
 
-(reg-event-fx
+(reg-wield-item-fx
  ::char5e/wield-off-hand-weapon
- (fn [{:keys [db]} [_ id weapon-kw]]
-   (update-character-fx db id #(assoc-in
-                                %
-                                [::entity/values
-                                 ::char5e/off-hand-weapon]
-                                weapon-kw))))
+ ::char5e/off-hand-weapon
+ :magic-weapons)
 
-(reg-event-fx
- ::char5e/attune-magic-item
- (fn [{:keys [db]} [_ id i weapon-kw]]
-   (update-character-fx db id #(update-in
-                                %
-                                [::entity/values
-                                 ::char5e/attuned-magic-items]
-                                (fn [items]
-                                  (assoc
-                                   (or items [:none :none :none])
-                                   i
-                                   weapon-kw))))))
+(defn toggle-item-cfg-prop [prop-kw cfg]
+  (toggle-prop prop-kw cfg))
+
+(defn reg-toggle-item-cfg-prop [event-kw item-prop]
+  (reg-event-fx
+   event-kw
+   (fn [{:keys [db]} [_ id item-type-kw item-kw]]
+     (update-character-fx db id #(toggle-item-prop % item-kw item-type-kw item-prop)))))
+
+(reg-toggle-item-cfg-prop
+ ::char5e/toggle-item-attuned
+ ::char-equip5e/attuned?)
+
+(reg-toggle-item-cfg-prop
+ ::char5e/toggle-item-equipped
+ ::char-equip5e/equipped?)
+
+(reg-toggle-item-cfg-prop
+ ::char5e/toggle-item-carried
+ ::char-equip5e/carried?)

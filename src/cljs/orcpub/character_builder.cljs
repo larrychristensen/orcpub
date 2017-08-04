@@ -44,7 +44,7 @@
             [re-frame.core :refer [subscribe dispatch dispatch-sync]])
   (:require-macros [cljs.core.async.macros :refer [go]]))
 
-(def print-disabled? true)
+(def print-disabled? false)
 
 (def print-enabled? (and (not print-disabled?)
                          js/window.location
@@ -291,7 +291,7 @@
                  item-name
                  item-qty
                  item-description
-                 equipped?
+                 carried?
                  user-created?
                  i
                  qty-input-width
@@ -302,7 +302,7 @@
        [:div.f-w-b.flex.align-items-c
         [:div.pointer.m-l-5.m-r-5
          {:on-click check-fn}
-         (comps/checkbox equipped? false)]
+         (comps/checkbox (not= carried? false) false)]
         (if user-created?
           [comps/input-field
            :input
@@ -319,7 +319,7 @@
          {:on-click remove-fn}]]
        (if @expanded? [:div.m-t-5 item-description])])))
 
-(defn add-inventory-item-fn [key]
+(defn add-inventory-item-fn [key all-magic-items-map]
   (fn [e]
      (let [value (.. e -target -value)
            item-key (keyword value)]
@@ -337,7 +337,7 @@
   {:name name
    :key (or key id)})
 
-(defn inventory-adder [key options selected-keys]
+(defn inventory-adder [key options selected-keys all-magic-items-map]
   [comps/selection-adder
    (sort-by
     :name
@@ -348,10 +348,10 @@
       (map
        name-and-key))
      options))
-   (add-inventory-item key)])
+   (add-inventory-item key all-magic-items-map)])
 
-(defn inventory-check-fn [key i]
-  #(dispatch [:toggle-inventory-item-equipped key i]))
+(defn inventory-check-fn [key item-key]
+  #(dispatch [::char5e/toggle-item-carried nil key item-key]))
 
 (def inventory-check (memoize inventory-check-fn))
 
@@ -393,6 +393,7 @@
   (fn [i {item-key ::entity/key
           {item-qty ::char-equip5e/quantity
            equipped? ::char-equip5e/equipped?
+           carried? ::char-equip5e/carried?
            item-name ::char-equip5e/name} ::entity/value}]
     (let [item (item-map item-key)
           final-name (or item-name (:name item) (::mi5e/name item))
@@ -404,9 +405,10 @@
                        :item-qty item-qty
                        :item-description item-description
                        :equipped? equipped?
+                       :carried? carried?
                        :i i
                        :qty-input-width qty-input-width
-                       :check-fn (inventory-check key i)
+                       :check-fn (inventory-check key item-key)
                        :qty-change-fn (inventory-qty-change key i)
                        :remove-fn (remove-inventory-item key item-key)}])))
 
@@ -439,9 +441,10 @@
         item-map @(subscribe item-map-sub)
         selected-keys (into #{} (map ::entity/key selected-items))
         options (entity/selection-options selection)
-        magic-weapons (= key :magic-weapons)]
+        magic-weapons (= key :magic-weapons)
+        magic-items-map @(subscribe [::mi5e/all-magic-items-map])]
     [:div
-     [inventory-adder key options selected-keys]
+     [inventory-adder key options selected-keys magic-items-map]
      (if (seq selected-items)
        [:div.flex.f-s-12.opacity-5.m-t-10.justify-cont-s-b
         [:div.m-r-10 "Carried?"]

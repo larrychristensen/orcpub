@@ -466,16 +466,22 @@
 
 (defn deferred-magic-item-fn [equipment-mod-fn
                               {:keys [:orcpub.dnd.e5.magic-items/magical-ac-bonus
-                                      :orcpub.dnd.e5.magic-items/modifiers] :as item}
+                                      :orcpub.dnd.e5.magic-items/modifiers
+                                      :orcpub.dnd.e5.magic-items/attunement] :as item}
                               & [include-magic-bonus?]]
   (fn [cfg]
     (let [equipment-mod (equipment-mod-fn cfg)]
-      (if (::char-equip/equipped? cfg)
-        (let [mods (concat [equipment-mod]
-                           (if (and include-magic-bonus? magical-ac-bonus)
-                             [(mods/cum-sum-mod ?magical-ac-bonus magical-ac-bonus)])
-                           modifiers)]
-          mods)
+      (prn "CFG" cfg)
+      (if (and (::char-equip/equipped? cfg)
+               (or (empty? attunement)
+                     (::char-equip/attuned? cfg)))
+        (do
+          (prn "APPLY MODS" (:key item) cfg)
+          (let [mods (concat [equipment-mod]
+                             (if (and include-magic-bonus? magical-ac-bonus)
+                               [(mods/cum-sum-mod ?magical-ac-bonus magical-ac-bonus)])
+                             modifiers)]
+            mods))
         equipment-mod))))
 
 (defn deferred-magic-weapon [weapon-kw {:keys [modifiers] :as weapon}]
