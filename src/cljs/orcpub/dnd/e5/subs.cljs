@@ -613,6 +613,12 @@
    ::char5e/wielded-shield char5e/wielded-shield
    ::char5e/attuned-magic-items char5e/attuned-magic-items})
 
+(reg-sub
+ ::char5e/spellcaster?
+ :<- [::char5e/spell-slot-factors]
+ (fn [spell-slot-factors]
+   (boolean spell-slot-factors)))
+
 (doseq [[sub-key char-fn] character-subs]
   (reg-sub
    sub-key
@@ -714,14 +720,18 @@
         (= :shield (:type item))))
     all-armor)))
 
+(defn carried? [cfg]
+  (-> cfg val ::char-equip5e/carried? (not= false)))
+
 (reg-sub
  ::char5e/carried-armor
  (fn [[_ id]]
    (subscribe [::char5e/non-shield-armor id]))
  (fn [armor]
    (filter
-    (comp ::char-equip5e/equipped? val)
+    carried?
     armor)))
+
 
 (reg-sub
  ::char5e/carried-shields
@@ -729,7 +739,7 @@
    (subscribe [::char5e/shields id]))
  (fn [armor]
    (filter
-    (comp ::char-equip5e/equipped? val)
+    carried?
     armor)))
 
 (reg-sub
@@ -746,7 +756,7 @@
    (subscribe [::char5e/all-weapons id]))
  (fn [weapons]
    (filter
-    (comp ::char-equip5e/equipped? val)
+    carried?
     weapons)))
 
 (reg-sub

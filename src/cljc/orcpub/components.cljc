@@ -8,7 +8,7 @@
    {:class-name (str (if selected? "black slight-text-shadow" "white transparent")
                      " "
                      (if disable?
-                       "opacity-5"))}])
+                       "opacity-5 cursor-disabled"))}])
 
 (defn selection-adder-item [key name]
   [:option.builder-dropdown-item
