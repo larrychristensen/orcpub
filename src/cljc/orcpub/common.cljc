@@ -123,3 +123,11 @@
     2 "2nd"
     3 "3rd"
     (str i "th")))
+
+(defn remove-at-index [v i]
+  (prn "V" v)
+  (vec
+   (concat
+    (subvec v 0 i)
+    (subvec v (inc i)))))
+

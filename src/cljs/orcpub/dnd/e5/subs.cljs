@@ -732,7 +732,6 @@
     carried?
     armor)))
 
-
 (reg-sub
  ::char5e/carried-shields
  (fn [[_ id]]
