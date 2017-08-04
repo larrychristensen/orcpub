@@ -325,6 +325,8 @@
    (map
     bool-prop
     [::char-equip-5e/equipped?
+     ::char-equip-5e/carried?
+     ::char-equip-5e/attuned?
      ::char-equip-5e/background-starting-equipment?
      ::char-equip-5e/class-starting-equipment?])))
 
