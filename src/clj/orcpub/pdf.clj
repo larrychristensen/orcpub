@@ -79,7 +79,6 @@
 (defn draw-non-jpg [doc page url x y width height]
   (with-open [c-stream (content-stream doc page)]
     (let [buff-image (ImageIO/read (.openStream (URL. url)))
-          _ (prn "IMAGE STREAM" buff-image)
           img (LosslessFactory/createFromImage doc buff-image)]
       (draw-imagex c-stream img x y width height))))
 
