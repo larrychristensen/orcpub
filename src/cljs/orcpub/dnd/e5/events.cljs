@@ -1580,7 +1580,6 @@
    (partial toggle-set i)))
 
 (defn update-character-fx [db id update-fn & [other-events]]
-  (prn "OTHER EVENTS" other-events)
   (if id
     {:db (update-in
           db
@@ -2118,7 +2117,6 @@
                               defaulted-v (if (nil? v)
                                             (= prop-kw ::char-equip5e/carried?)
                                             v)]
-                          (prn "DEFAULED" defaulted-v)
                           [prop-kw defaulted-v])))
 
 (defn set-all-false [cfg]
@@ -2169,7 +2167,6 @@
       items))))
 
 (defn toggle-item-prop [character item-kw item-type-kw item-prop]
-  (prn "TOGGLE ITEM PROP" item-kw item-type-kw item-prop)
   (update-item-prop character item-kw item-type-kw item-prop (partial toggle-prop item-prop)))
 
 (defn set-item-prop [character item-kw item-type-kw item-prop]
@@ -2179,7 +2176,6 @@
   (reg-event-fx
    event-kw
    (fn [{:keys [db]} [_ id item-kw attune?]]
-     (prn "WIELD ITEM" item-kw attune? event-kw value-prop item-type-kw)
      (update-character-fx db
                           id
                           #(cond-> %

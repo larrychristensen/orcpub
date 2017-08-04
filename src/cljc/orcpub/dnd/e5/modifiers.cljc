@@ -471,12 +471,10 @@
                               & [include-magic-bonus?]]
   (fn [cfg]
     (let [equipment-mod (equipment-mod-fn cfg)]
-      (prn "CFG" cfg)
       (if (and (::char-equip/equipped? cfg)
                (or (empty? attunement)
                      (::char-equip/attuned? cfg)))
         (do
-          (prn "APPLY MODS" (:key item) cfg)
           (let [mods (concat [equipment-mod]
                              (if (and include-magic-bonus? magical-ac-bonus)
                                [(mods/cum-sum-mod ?magical-ac-bonus magical-ac-bonus)])
