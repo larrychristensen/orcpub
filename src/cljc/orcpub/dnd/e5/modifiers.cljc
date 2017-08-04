@@ -470,10 +470,12 @@
                                       :orcpub.dnd.e5.magic-items/attunement] :as item}
                               & [include-magic-bonus?]]
   (fn [cfg]
-    (let [equipment-mod (equipment-mod-fn cfg)]
-      (if (and (::char-equip/equipped? cfg)
-               (or (empty? attunement)
-                     (::char-equip/attuned? cfg)))
+    (let [equipment-mod (equipment-mod-fn cfg)
+          status (::char-equip/status cfg)]
+      (if (or (= status :attuned)
+              (and (or (= status :equipped)
+                       (::char-equip/equipped? cfg))
+                   (empty? attunement)))
         (do
           (let [mods (concat [equipment-mod]
                              (if (and include-magic-bonus? magical-ac-bonus)

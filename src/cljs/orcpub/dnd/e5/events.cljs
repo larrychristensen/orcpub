@@ -151,7 +151,7 @@
 (def selection-randomizers
   {:ability-scores (fn [s _]
                      (fn [_] {::entity/key :standard-roll
-                             ::entity/value (char5e/standard-ability-rolls)}))
+                              ::entity/value (char5e/standard-ability-rolls)}))
    :hit-points (fn [{[_ class-kw] ::entity/path} built-char]
                  (fn [_]
                    (random-hit-points-option (char5e/levels built-char) class-kw)))})
@@ -652,6 +652,25 @@
  character-interceptors
  event-handlers/remove-inventory-item)
 
+(defn update-character-fx [db id update-fn & [other-events]]
+  (if id
+    {:db (update-in
+          db
+          [::char5e/character-map (js/parseInt id)]
+          update-fn)}
+    {:dispatch [:set-character (update-fn (:character db))]}))
+
+(reg-event-fx
+ ::char5e/remove-inventory-item
+ [db-char->local-store]
+ (fn [{:keys [db]} [_ id item-type item-index]]
+   (update-character-fx db id #(update-in
+                                %
+                                [::entity/options
+                                 item-type]
+                                common/remove-at-index
+                                item-index))))
+
 (defn remove-custom-inventory-item [character [_ custom-equipment-key name]]
   (update-in
    character
@@ -811,8 +830,8 @@
          flat-params (flatten seq-params)
          path (apply routes/path-for (or handler new-route) flat-params)]
      (when (and js/window.location
-              secure?
-              (not= "localhost" js/window.location.hostname))
+                secure?
+                (not= "localhost" js/window.location.hostname))
        (set! js/window.location.href (make-url "https"
                                                js/window.location.hostname
                                                path
@@ -994,7 +1013,7 @@
    {:db (update db :user-data merge (-> response :body))
     :dispatch [:route (or
                        (:return-route db)
-                        routes/dnd-e5-char-builder-route)]}))
+                       routes/dnd-e5-char-builder-route)]}))
 
 (defn show-old-account-message []
   [:show-login-message [:div  "There is no account for the email or username, please double-check it. Usernames and passwords are case sensitive, email addresses are not. You can also try to " [:a {:href (routes/path-for routes/register-page-route)} "register"] "." [:div.f-w-n.i.m-t-10 "Accounts from the old OrcPub have not been ported over yet, but you can create a new account in the mean time and we will link it with your old account as soon as possible if you use the same email address."]]])
@@ -1037,7 +1056,7 @@
         (go (let [path (routes/path-for routes/fb-login-route)
                   url (backend-url path)
                   {:keys [status] :as response} (<! (http/post url
-                                                     {:json-params (js->clj response)}))]
+                                                               {:json-params (js->clj response)}))]
               (case status
                 200 (dispatch [:login-success true response])
                 401 (dispatch [:show-login-message "You must allow OrcPub to view your email address so we can create your account. We will not send you emails unless you later give us permission to. In Facebook, please go to 'Settings' > 'Apps', delete 'orcpub', and try again."])
@@ -1458,7 +1477,7 @@
                        (monsters/monster-map kw) {:type :monster
                                                   :result (monsters/monster-map kw)}
                        (mi/magic-item-map kw) {:type :magic-item
-                                                        :result (mi/magic-item-map kw)}
+                                               :result (mi/magic-item-map kw)}
                        (= "tavern name" search-text) {:type :tavern-name
                                                       :result (char-rand5e/random-tavern-name)}
                        name-result name-result
@@ -1536,8 +1555,8 @@
    (assoc db
           ::char5e/item-text-filter filter-text
           ::char5e/filtered-items (if (>= (count filter-text) 3)
-                                     (filter-items filter-text)
-                                     @(subscribe [::char5e/sorted-items])))))
+                                    (filter-items filter-text)
+                                    @(subscribe [::char5e/sorted-items])))))
 
 (reg-event-db
  ::char5e/toggle-selected
@@ -1578,14 +1597,6 @@
     ::spells/slots-used
     (common5e/slot-level-key level)]
    (partial toggle-set i)))
-
-(defn update-character-fx [db id update-fn & [other-events]]
-  (if id
-    {:db (update-in
-          db
-          [::char5e/character-map (js/parseInt id)]
-          update-fn)}
-    {:dispatch [:set-character (update-fn (:character db))]}))
 
 (reg-event-fx
  ::char5e/toggle-spell-prepared
@@ -1646,15 +1657,15 @@
 
 (defn toggle-feature-used [character units nm]
   (-> character
-   (update-in    
-    [::entity/values
-     ::char5e/features-used
-     units]
-    (partial toggle-set nm))
-   (dissoc
-    [::entity/values
-     ::char5e/features-used
-     :db/id])))
+      (update-in    
+       [::entity/values
+        ::char5e/features-used
+        units]
+       (partial toggle-set nm))
+      (dissoc
+       [::entity/values
+        ::char5e/features-used
+        :db/id])))
 
 (reg-event-fx
  ::char5e/toggle-feature-used
@@ -2112,51 +2123,13 @@
  (fn [db [_ id]]
    (assoc-in db [::char5e/delete-confirmation-shown? id] false)))
 
-(defmulti toggle-prop (fn [prop-kw cfg]
-                        (let [v (prop-kw cfg)
-                              defaulted-v (if (nil? v)
-                                            (= prop-kw ::char-equip5e/carried?)
-                                            v)]
-                          [prop-kw defaulted-v])))
-
-(defn set-all-false [cfg]
-  (assoc cfg
-         ::char-equip5e/carried? false
-         ::char-equip5e/equipped? false
-         ::char-equip5e/attuned? false))
-
-(defmethod toggle-prop [::char-equip5e/carried? true] [prop-kw cfg]
-  (set-all-false cfg))
-
-(defmethod toggle-prop [::char-equip5e/equipped? true] [prop-kw cfg]
-  (assoc cfg
-         ::char-equip5e/equipped? false
-         ::char-equip5e/attuned? false))
-
-(defmethod toggle-prop [::char-equip5e/attuned? true] [prop-kw cfg]
-  (assoc cfg ::char-equip5e/attuned? false))
-
-(defmethod toggle-prop [::char-equip5e/attuned? false] [prop-kw cfg]
-  (assoc cfg
-         ::char-equip5e/carried? true
-         ::char-equip5e/equipped? true
-         ::char-equip5e/attuned? true))
-
-(defmethod toggle-prop [::char-equip5e/equipped? false] [prop-kw cfg]
-  (assoc cfg
-         ::char-equip5e/equipped? true
-         ::char-equip5e/carried? true))
-
-(defmethod toggle-prop [::char-equip5e/carried? false] [prop-kw cfg]
-  (assoc cfg ::char-equip5e/carried? true))
-
 (defn update-item-prop [character item-kw item-type-kw item-prop update-fn]
   (update-in
    character
    [::entity/options
     item-type-kw]
    (fn [items]
-     (map
+     (mapv
       (fn [{:keys [::entity/key] :as item}]
         (if (= key item-kw)
           (update
@@ -2169,21 +2142,31 @@
 (defn toggle-item-prop [character item-kw item-type-kw item-prop]
   (update-item-prop character item-kw item-type-kw item-prop (partial toggle-prop item-prop)))
 
-(defn set-item-prop [character item-kw item-type-kw item-prop]
-  (update-item-prop character item-kw item-type-kw item-prop #(toggle-prop item-prop (assoc % item-prop false))))
+(defn set-item-prop [character item-kw item-type-kw item-prop value]
+  (update-item-prop
+   character
+   item-kw
+   item-type-kw
+   item-prop
+   #(assoc % item-prop value)))
 
 (defn reg-wield-item-fx [event-kw value-prop item-type-kw]
   (reg-event-fx
    event-kw
+   [db-char->local-store]
    (fn [{:keys [db]} [_ id item-kw attune?]]
      (update-character-fx db
                           id
-                          #(cond-> %
-                             true (assoc-in
-                                   [::entity/values
-                                    value-prop]
-                                   item-kw)
-                             attune? (set-item-prop item-kw item-type-kw ::char-equip5e/attuned?))))))
+                          #(-> %
+                               (assoc-in
+                                [::entity/values
+                                 value-prop]
+                                item-kw)
+                               (set-item-prop
+                                weapon-kw
+                                item-type-kw
+                                ::char-equip5e/status
+                                (if attune? :attuned :equipped)))))))
 
 (reg-wield-item-fx
  ::char5e/don-armor
@@ -2197,41 +2180,40 @@
 
 (reg-event-fx
  ::char5e/wield-main-hand-weapon
+ [db-char->local-store]
  (fn [{:keys [db]} [_ id weapon-kw attune?]]
    (update-character-fx db
                         id
-                        #(cond-> %
-                           true (update
-                                 ::entity/values
-                                 assoc
-                                 ::char5e/main-hand-weapon
-                                 weapon-kw
-                                 ::char5e/off-hand-weapon
-                                 :none)
-                           attune? (set-item-prop weapon-kw :magic-weapons ::char-equip5e/attuned?)))))
+                        #(-> %
+                             (update
+                              ::entity/values
+                              assoc
+                              ::char5e/main-hand-weapon
+                              weapon-kw
+                              ::char5e/off-hand-weapon
+                              :none)
+                             (set-item-prop
+                              weapon-kw
+                              :magic-weapons
+                              ::char-equip5e/status
+                              (if attune? :attuned :equipped))))))
 
 (reg-wield-item-fx
  ::char5e/wield-off-hand-weapon
  ::char5e/off-hand-weapon
  :magic-weapons)
 
-(defn toggle-item-cfg-prop [prop-kw cfg]
-  (toggle-prop prop-kw cfg))
-
-(defn reg-toggle-item-cfg-prop [event-kw item-prop]
-  (reg-event-fx
-   event-kw
-   (fn [{:keys [db]} [_ id item-type-kw item-kw]]
-     (update-character-fx db id #(toggle-item-prop % item-kw item-type-kw item-prop)))))
-
-(reg-toggle-item-cfg-prop
- ::char5e/toggle-item-attuned
- ::char-equip5e/attuned?)
-
-(reg-toggle-item-cfg-prop
- ::char5e/toggle-item-equipped
- ::char-equip5e/equipped?)
-
-(reg-toggle-item-cfg-prop
- ::char5e/toggle-item-carried
- ::char-equip5e/carried?)
+(reg-event-fx
+ ::char5e/set-item-status
+ [db-char->local-store]
+ (fn [{:keys [db]} [_ id item-type item-index status-kw]]
+   (update-character-fx db
+                        id
+                        #(assoc-in
+                          %
+                          [::entity/options
+                           item-type
+                           item-index
+                           ::entity/value
+                           ::char-equip5e/status]
+                          status-kw))))
