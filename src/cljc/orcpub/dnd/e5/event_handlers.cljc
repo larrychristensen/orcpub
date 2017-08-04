@@ -73,8 +73,7 @@
         (conj
          items
          (cond-> {::entity/value {::char-equip5e/quantity 1
-                                  ::char-equip5e/equipped? true
-                                  ::char-equip5e/carried? true}}
+                                  ::char-equip5e/status :carried}}
            (int? item-key) (assoc ::entity/id item-key)
            (keyword item-key) (assoc ::entity/key item-key))))
        (meta items)))))
