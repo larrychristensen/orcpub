@@ -327,8 +327,7 @@ The creature exists for a duration specific to each figurine. At the end of the 
                  :summary "know location of closest dragon within 30 miles"})]
    ::description (str "Dragon scale mail is made of the scales of one kind of dragon. Sometimes dragons collect their cast-off scales and gift them to humanoids. Other times, hunters carefully skin and preserve the hide of a dead dragon. In either case, dragon scale mail is highly valued.
 While wearing this armor, you gain a +1 bonus to AC, you have advantage on saving throws against the Frightful Presence and breath weapons of dragons, and you have resistance to " (name resistance-kw) " damage.
-Additionally, you can focus your senses as an action to magically discern the distance and
-direction to the closest dragon within 30 miles of you that is of the same type as the armor. This special action can’t be used again until the next dawn."
+Additionally, you can focus your senses as an action to magically discern the distance and direction to the closest dragon within 30 miles of you that is of the same type as the armor. This special action can’t be used again until the next dawn."
                      )})
 
 (defn rod-of-the-pact-keeper [bonus]
@@ -1501,7 +1500,6 @@ While focusing on a creature with detect thoughts, you can use an action to cast
      ::magical-attack-bonus 3
      ::magical-damage-bonus 3
      ::description "You gain a +3 bonus to attack and damage rolls made with this magic weapon. When you hit a fiend or an undead with it, that creature takes an extra 2d10 radiant damage.
->>>>>>> master
 While you hold the drawn sword, it creates an aura in a 10-foot radius around you. You and all creatures friendly to you in the aura have advantage
 on saving throws against spells and other magical effects. If you have 17 or more levels in the paladin class, the radius of the aura increases to 30 feet."
      }{
@@ -2953,7 +2951,7 @@ The boots regain 2 hours of flying capability for every 12 hours they aren’t i
          (seq type-intersection) (conj (types-fn type-intersection))
          (seq diff) (conj (keys-fn diff)))))))
 
-(defn expand-armor [{:keys [::item-subtype name-fn ::subtypes] :as item}]
+(defn expand-armor [{:keys [key ::item-subtype name-fn ::subtypes] :as item}]
   (if (or name-fn
           item-subtype
           (seq subtypes))
@@ -2962,7 +2960,7 @@ The boots regain 2 hours of flying capability for every 12 hours they aren’t i
                    base-armor-fn
                    armor5e/armor)]
       #?(:clj (if (empty? of-type)
-                 (throw (IllegalArgumentException. "No base types matched for armor item!"))))
+                (throw (IllegalArgumentException. "No base types matched for armor item!"))))
       (map
        (fn [armor]
          (let [name (if (> (count of-type) 1)
@@ -2971,8 +2969,6 @@ The boots regain 2 hours of flying capability for every 12 hours they aren’t i
                         (str (name-key item) ", " (:name armor)))
                       (name-key item))
                item-key (common/name-to-kw name)]
-           (if (= nil item-key)
-             (prn "ITEM" item))
            (merge
             armor
             item
@@ -3071,3 +3067,15 @@ The boots regain 2 hours of flying capability for every 12 hours they aren’t i
 
 (defn equipped-armor-details [armor]
   (equipped-items-details armor all-armor-map))
+
+(defn can-attune? [{:keys [::attunement]} class-kws spellcaster? alignment]
+  (or (nil? attunement)
+      (let [attunement-set (into #{} attunement)
+            classes-set (into #{} class-kws)]
+        (or (:any attunement-set)
+            (seq (intersection attunement-set classes-set))
+            (and spellcaster? (:spellcaster attunement-set))
+            (and (:good attunement-set)
+                 (s/ends-with? alignment "Good"))
+            (and (:evil attunement-set)
+                 (s/ends-with? alignment "Evil"))))))

@@ -965,6 +965,18 @@
             attunement) "or")))
    ")"))
 
+(defn item-subtitle [{:keys [::mi/owner ::mi/name ::mi/type ::mi/item-subtype ::mi/rarity ::mi/attunement] :as item}]
+  [:div.i
+   (str (if type (s/capitalize (common/kw-to-name type)))
+        (if (keyword? item-subtype)
+          (str " (" (s/capitalize (common/kw-to-name item-subtype)) ")"))
+        ", "
+        (if (string? rarity)
+          rarity
+          (common/kw-to-name rarity))
+        (if attunement
+          (requires-attunement attunement)))])
+
 (defn item-summary [{:keys [::mi/owner ::mi/name ::mi/type ::mi/item-subtype ::mi/rarity ::mi/attunement] :as item}]
   (if item
     [:div.p-b-20.flex.align-items-c
@@ -972,16 +984,8 @@
        [:div.m-r-5 [svg-icon "beer-stein" 24]])
      [:div
       [:span.f-s-24.f-w-b (or (:name item) name)]
-      [:div.f-s-16.i.f-w-b.opacity-5
-       (str (if type (s/capitalize (common/kw-to-name type)))
-            (if (keyword? item-subtype)
-              (str " (" (s/capitalize (common/kw-to-name item-subtype)) ")"))
-            ", "
-            (if (string? rarity)
-              rarity
-              (common/kw-to-name rarity))
-            (if attunement
-              (requires-attunement attunement)))]]]))
+      [:div.f-s-16.opacity-5.f-w-b
+       [item-subtitle item]]]]))
 
 (defn item-details [{:keys [::mi/summary ::mi/description ::mi/attunment]} single-column?]
   (if (or summary description)
@@ -1488,7 +1492,7 @@
          [:div:div.f-s-14
           [:table.w-100-p.t-a-l.striped
            [:tbody
-            [:tr.f-w-b
+            [:tr.f-w-b.f-s-10
              [:th.p-10 "Class"]
              [:th.p-10 (if mobile? "Sub." "Subclass")]
              [:th.p-10 (if mobile? "Lvl." "Level")]
@@ -1532,7 +1536,7 @@
          [:div.f-w-n.f-s-14
           [:table.w-100-p.t-a-l.striped
            [:tbody
-            [:tr.f-w-b.f-s-12
+            [:tr.f-w-b.f-s-10
              [:th.p-5 (if mobile? "Lvl." "Caster Levels")]
              (doall
               (map
@@ -1710,7 +1714,7 @@
             [:span.f-w-b (str @(subscribe [::char/spell-slots-remaining id lvl]) " remaining")])]
          [:table.w-100-p.t-a-l.striped
           [:tbody
-           [:tr.f-w-b.f-s-12
+           [:tr.f-w-b.f-s-10
             [:th.p-l-10.p-b-10.p-t-10 (if (and (not (zero? lvl))
                                                (seq prepares-spells))
                                         "Prepared? / Name"
@@ -1807,7 +1811,7 @@
        (if (seq prepares-spells)
          [:table.w-100-p.t-a-l.striped.f-s-12
           [:tbody
-           [:tr.f-w-b
+           [:tr.f-w-b.f-s-10
             [:th.p-10 "Class"]
             [:th.p-10 "Can Prepare"]]
            (doall
@@ -1874,6 +1878,7 @@
 
 (defn attacks-section [id]
   (let [attacks @(subscribe [::char/attacks id])
+        carried-weapons (into {} @(subscribe [::char/carried-weapons]))
         all-weapons-map @(subscribe [::mi/all-weapons-map])
         main-hand-weapon-kw @(subscribe [::char/main-hand-weapon id])
         main-hand-weapon (if main-hand-weapon-kw (all-weapons-map main-hand-weapon-kw))
@@ -1881,15 +1886,18 @@
         weapon-attack-modifier @(subscribe [::char/best-weapon-attack-modifier-fn id])
         weapon-damage-modifier @(subscribe [::char/best-weapon-damage-modifier-fn id])
         off-hand-weapon (if off-hand-weapon-kw (all-weapons-map off-hand-weapon-kw))]
+    (prn "CARRIED WEAPONS" carried-weapons)
     (if (or (seq attacks)
             main-hand-weapon)
       (display-section
        "Attacks"
        "pointy-sword"
        [:div.f-s-14
-        (if main-hand-weapon
+        (if (and main-hand-weapon
+                 (get-in carried-weapons [main-hand-weapon-kw ::char-equip/carried?]))
           [:div [weapon-attack-comp main-hand-weapon false weapon-attack-modifier weapon-damage-modifier]])
-        (if off-hand-weapon
+        (if (and off-hand-weapon
+                 (get-in carried-weapons [off-hand-weapon-kw ::char-equip/carried?]))
           [:div [weapon-attack-comp off-hand-weapon true weapon-attack-modifier weapon-damage-modifier]])
         [:div
          (doall
@@ -2314,8 +2322,7 @@
          [:div
           [:table.w-100-p.t-a-l.striped
            [:tbody
-            [:tr.f-w-b
-             {:class-name (if mobile? "f-s-12")}
+            [:tr.f-w-b.f-s-10
              [:th.p-10 "Name"]
              (if (not mobile?) [:th.p-10 "Proficient?"])
              [:th.p-10 "Details"]
@@ -2374,8 +2381,7 @@
          [:div
           [:table.w-100-p.t-a-l.striped
            [:tbody
-            [:tr.f-w-b
-             {:class-name (if mobile? "f-s-12")}
+            [:tr.f-w-b.f-s-10
              [:th.p-10 "Name"]
              (if (not mobile?) [:th.p-10 "Proficient?"])
              [:th.p-10 "Details"]
@@ -2410,19 +2416,34 @@
                     [:td.p-10.f-w-b.f-s-18 (common/bonus-str (weapon-attack-modifier weapon))]])))
               all-weapons))]]]]))))
 
-(defn magic-item-rows [expanded-details magic-item-cfgs magic-weapon-cfgs magic-armor-cfgs]
+(defn item-type [type-kw]
+  (case type-kw
+    :weapon :magic-weapons
+    :armor :magic-armor
+    :other-magic-items))
+
+(defn magic-item-rows [id expanded-details item-cfgs]
   (let [magic-item-map @(subscribe [::mi/all-magic-items-map])
+        can-attune? @(subscribe [::mi/can-attune? id])
+        cant-attune? (complement can-attune?)
         mobile? @(subscribe [:mobile?])]
     (mapcat
      (fn [[item-kw item-cfg]]
        (let [{:keys [::mi/name ::mi/type ::mi/item-subtype ::mi/rarity ::mi/attunement ::mi/description ::mi/summary] :as item} (magic-item-map item-kw)
-             expanded? (@expanded-details item-kw)]
+             expanded? (@expanded-details item-kw)
+             attuned? (::char-equip/attuned? item-cfg)
+             equipped? (::char-equip/equipped? item-cfg)
+             item-entity-type (item-type type)]
          [[:tr.pointer
            {:on-click (toggle-details-expanded-handler expanded-details item-kw)}
+           [:td.p-l-10 (if attunement
+                       [:span
+                        {:on-click (make-stop-prop-handler ::char/toggle-item-attuned id item-entity-type item-kw)}
+                        (comps/checkbox attuned? (cant-attune? item))])]
+           [:td.p-l-10 [:span
+                      {:on-click (make-stop-prop-handler ::char/toggle-item-equipped id item-entity-type item-kw)}
+                      (comps/checkbox equipped? false)]]
            [:td.p-10.f-w-b (or (:name item) name)]
-           [:td.p-10 (str (common/kw-to-name type)
-                          ", "
-                          (common/kw-to-name rarity))]
            [:td.p-r-5
             [:div.orange
              (if (not mobile?)
@@ -2432,42 +2453,47 @@
           (if expanded?
             [:tr
              [:td.p-10
-              {:col-span 3}
-              [item-component item true true]]])]))
-     (merge
-      magic-item-cfgs
-      magic-weapon-cfgs
-      magic-armor-cfgs))))
+              {:col-span 4}
+              [:div.m-t-10
+               [:div.f-w-b.m-l-10 [item-subtitle item]]
+               [:div [item-component item true true]]]]])]))
+     (sort-by
+      key
+      item-cfgs))))
 
-(defn magic-items-section-2 []
+(defn magic-items-table []
   (let [expanded-details (r/atom {})]
-    (fn [id]
-      (let [mobile? @(subscribe [:mobile?])
-            magic-item-cfgs @(subscribe [::char/magic-items id])
-            magic-weapon-cfgs @(subscribe [::char/magic-weapons id])
-            magic-armor-cfgs @(subscribe [::char/magic-items id])]
-        [:div
-         [:div.flex.align-items-c
-          (svg-icon "orb-wand" 32)
-          [:span.m-l-5.f-w-b.f-s-18 "Other Magic Items"]]
-         [:div.f-s-14
-          [:table.w-100-p.t-a-l.striped
-           [:tbody
-            [:tr.f-w-b
-             {:class-name (if mobile? "f-s-12")}
-             [:th.p-10 "Name"]
-             [:th.p-10 "Details"]
-             [:th]]
-            (doall
-             (map-indexed
-              (fn [i row]
-                (with-meta
-                  row
-                  {:key i}))
-              (magic-item-rows expanded-details
-                               magic-item-cfgs
-                               magic-weapon-cfgs
-                               magic-armor-cfgs)))]]]]))))
+    (fn [id item-cfgs]
+      (let [mobile? @(subscribe [:mobile?])]
+        [:div.f-s-14
+         [:table.w-100-p.t-a-l.striped
+          [:tbody
+           [:tr.f-w-b.f-s-10
+            [:th "Attuned?"]
+            [:th.p-l-10 "Equipped?"]
+            [:th.p-10 "Name"]
+            [:th]]
+           (doall
+            (map-indexed
+             (fn [i row]
+               (with-meta
+                 row
+                 {:key i}))
+             (magic-item-rows id
+                              expanded-details
+                              item-cfgs)))]]]))))
+
+(defn magic-items-section-2 [id]
+  [:div
+   [:div.flex.align-items-c
+    (svg-icon "orb-wand" 32)
+    [:span.m-l-5.f-w-b.f-s-18 "Other Magic Items"]]
+   (let [magic-item-cfgs @(subscribe [::char/magic-items id])
+         magic-weapon-cfgs @(subscribe [::char/magic-weapons id])
+         magic-armor-cfgs @(subscribe [::char/magic-armor id])]
+     [magic-items-table id (merge magic-item-cfgs
+                                  magic-weapon-cfgs
+                                  magic-armor-cfgs)])])
 
 (defn other-equipment-section-2 []
   (let [expanded-details (r/atom {})]
@@ -2483,8 +2509,7 @@
          [:div
           [:table.w-100-p.t-a-l.striped
            [:tbody
-            [:tr.f-w-b
-             {:class-name (if mobile? "f-s-12")}
+            [:tr.f-w-b.f-s-10
              [:th.p-10 "Name"]
              [:th.p-10 "Qty."]
              [:th.p-10 "Details"]
@@ -2528,8 +2553,7 @@
          [:div
           [:table.w-100-p.t-a-l.striped
            [:tbody
-            [:tr.f-w-b
-             {:class-name (if mobile? "f-s-12")}
+            [:tr.f-w-b.f-s-10
              [:th.p-10 "Name"]
              [:td.p-10 (if mobile? "Prof?" "Proficient?")]
              (if skill-expertise
@@ -2565,8 +2589,7 @@
            [:div
             [:table.w-100-p.t-a-l.striped
              [:tbody
-              [:tr.f-w-b
-               {:class-name (if mobile? "f-s-12")}
+              [:tr.f-w-b.f-s-10
                [:th.p-10 "Name"]
                [:td.p-10 (if mobile? "Prof?" "Proficient?")]
                (if tool-expertise
@@ -2612,8 +2635,10 @@
   {:value :none
    :title "<none>"})
 
-(defn wield-fn [event-kw id]
-  #(dispatch [event-kw id (keyword %)]))
+(defn wield-fn [event-kw id item-map can-attune?]
+  #(let [item-kw (keyword %)
+         {:keys [::mi/attunement] :as item} (item-map item-kw)]
+     (dispatch [event-kw id item-kw (and attunement (can-attune? item))])))
 
 (def wield-handler (memoize wield-fn))
 
@@ -2621,60 +2646,88 @@
   (and (some? v)
        (not= :none v)))
 
+(defn map-lookup-xform [item-map]
+  (map
+   (fn [[key]]
+     (item-map key))))
+
+(def dropdown-items-xform
+  (map
+   (fn [{:keys [name key] item-name ::mi/name}]
+     {:title (or name item-name)
+      :value key})))
+
+(def requires-attunement-xform
+  (filter ::mi/attunement))
+
 (defn equipped-section [id]
   [:div
    [section-header "battle-gear" "Equipped Items"]
-   [:div
-    (let [all-armor-map @(subscribe [::mi/all-armor-map])
-          worn-armor @(subscribe [::char/worn-armor id])
-          wielded-shield @(subscribe [::char/wielded-shield id])
-          best-armor-combo @(subscribe [::char/best-armor-combo])]
+   (let [all-armor-map @(subscribe [::mi/all-armor-map])
+         worn-armor-kw @(subscribe [::char/worn-armor id])
+         worn-armor (all-armor-map worn-armor-kw)
+         wielded-shield-kw @(subscribe [::char/wielded-shield id])
+         wielded-shield (all-armor-map wielded-shield-kw)
+         best-armor-combo @(subscribe [::char/best-armor-combo])
+         best-armor (:armor best-armor-combo)
+         best-shield (:shield best-armor-combo)
+         all-weapons-map @(subscribe [::mi/all-weapons-map])
+         carried-weapons @(subscribe [::char/carried-weapons id])
+         main-hand-weapon-kw @(subscribe [::char/main-hand-weapon id])
+         main-hand-weapon (all-weapons-map main-hand-weapon-kw)
+         off-hand-weapon-kw @(subscribe [::char/off-hand-weapon id])
+         off-hand-weapon (all-weapons-map off-hand-weapon-kw)
+         dual-wield-weapon? @(subscribe [::char/dual-wield-weapon-fn id])
+         can-attune? @(subscribe [::mi/can-attune? id])
+         can-attune-xform (filter can-attune?)
+         full-armor-items-xform (comp (map-lookup-xform all-armor-map)
+                                      dropdown-items-xform)
+         weapon-lookup-xform (map-lookup-xform all-weapons-map)
+         armor-weapons-attuned-count (count
+                                      (filter
+                                       ::mi/attunement
+                                       [(if (or worn-armor (= :none worn-armor-kw))
+                                          worn-armor
+                                          best-armor)
+                                        (if (or wielded-shield (= :none wielded-shield-kw))
+                                          wielded-shield
+                                          best-shield)
+                                        main-hand-weapon
+                                        off-hand-weapon]))]
+     [:div
       [:div.flex.flex-wrap
        (let [carried-armor @(subscribe [::char/carried-armor id])]
          [equipped-section-dropdown
           "Worn Armor"
           {:items (cons
                    none-item
-                   (map
-                    (fn [[key]]
-                      (let [{:keys [name]} (all-armor-map key)]
-                        {:title name
-                         :value key}))
+                   (sequence
+                    full-armor-items-xform
                     carried-armor))
-           :value (or worn-armor (-> best-armor-combo :armor :key))
-           :on-change (wield-handler ::char/don-armor id)}])
+           :value (or worn-armor-kw (-> best-armor-combo :armor :key))
+           :on-change (wield-handler ::char/don-armor id all-armor-map can-attune?)}])
        (let [carried-shields @(subscribe [::char/carried-shields id])]
          [equipped-section-dropdown
           "Wielded Shield"
           {:items (cons
                    none-item
-                   (map
-                    (fn [[key]]
-                      (let [{:keys [name]} (all-armor-map key)]
-                        {:title name
-                         :value key}))
+                   (sequence
+                    full-armor-items-xform
                     carried-shields))
-           :value (or wielded-shield (-> best-armor-combo :shield :key))
-           :on-change (wield-handler ::char/wield-shield id)}])])
-    (let [all-weapons-map @(subscribe [::mi/all-weapons-map])
-          carried-weapons @(subscribe [::char/carried-weapons id])
-          main-hand-weapon-kw @(subscribe [::char/main-hand-weapon id])
-          main-hand-weapon (all-weapons-map main-hand-weapon-kw)
-          off-hand-weapon-kw @(subscribe [::char/off-hand-weapon id])
-          dual-wield-weapon? @(subscribe [::char/dual-wield-weapon-fn id])]
+           :value (or wielded-shield-kw (-> best-armor-combo :shield :key))
+           :on-change (wield-handler ::char/wield-shield id all-armor-map can-attune?)}])]
       [:div.flex.flex-wrap
        [equipped-section-dropdown
         "Main Hand Weapon"
         {:items (cons
                  none-item
-                 (map
-                  (fn [[key]]
-                    (let [{:keys [name]} (all-weapons-map key)]
-                      {:title name
-                       :value key}))
+                 (sequence
+                  (comp
+                   weapon-lookup-xform
+                   dropdown-items-xform)
                   carried-weapons))
          :value main-hand-weapon-kw
-         :on-change (wield-handler ::char/wield-main-hand-weapon id)}]
+         :on-change (wield-handler ::char/wield-main-hand-weapon id all-weapons-map can-attune?)}]
        (if (or (equipped? off-hand-weapon-kw)
                (and (equipped? main-hand-weapon-kw)
                     (dual-wield-weapon? main-hand-weapon)))
@@ -2684,35 +2737,25 @@
                    none-item
                    (sequence
                     (comp
+                     weapon-lookup-xform
                      (filter
-                      (fn [[key]]
+                      (fn [{:keys [key]}]
                         (-> all-weapons-map
                             key
                             dual-wield-weapon?)))
-                     (map
-                      (fn [[key]]
-                        (let [{:keys [name]} (all-weapons-map key)]
-                          {:title name
-                           :value key}))))
+                     dropdown-items-xform)
                     carried-weapons))
            :value off-hand-weapon-kw
-           :on-change (wield-handler ::char/wield-off-hand-weapon id)}])
-       #_[:div.flex.flex-wrap
-        [equipped-section-dropdown
-         "Attuned Magic Item 1"
-         {:items [none-item]
-          :value nil
-          :on-change (fn [])}]
-        [equipped-section-dropdown
-         "Attuned Magic Item 2"
-         {:items [none-item]
-          :value nil
-          :on-change (fn [])}]
-        [equipped-section-dropdown
-         "Attuned Magic Item 3"
-         {:items [none-item]
-          :value nil
-          :on-change (fn [])}]]])]])
+           :on-change (wield-handler ::char/wield-off-hand-weapon id all-weapons-map can-attune?)}])]
+      [:div.m-t-10
+       [:div.f-w-b "Magic Items"]
+       (let [magic-item-cfgs @(subscribe [::char/magic-items id])
+             magic-weapon-cfgs @(subscribe [::char/magic-weapons id])
+             magic-armor-cfgs @(subscribe [::char/magic-armor id])
+             all-cfgs (merge magic-item-cfgs
+                             magic-weapon-cfgs
+                             magic-armor-cfgs)]
+         [magic-items-table id all-cfgs])]])])
 
 (defn combat-details [num-columns id]
   (let [weapon-profs @(subscribe [::char/weapon-profs id])
@@ -2771,7 +2814,13 @@
 (def make-event-handler
   (memoize
    (fn [event-kw & args]
-      #(dispatch (vec (cons event-kw args))))))
+     #(dispatch (vec (cons event-kw args))))))
+
+(def make-stop-prop-handler
+  (memoize
+   (fn [event-kw & args]
+     #(do (dispatch (vec (cons event-kw args)))
+          (.stopPropagation %)))))
 
 (defn features-details [num-columns id]
   (let [resistances @(subscribe [::char/resistances id])
