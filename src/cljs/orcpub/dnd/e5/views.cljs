@@ -1608,7 +1608,9 @@
 (defn dropdown [{:keys [items value on-change]}]
   [:select.builder-option.builder-option-dropdown.m-t-0
    {:value (or value "")
-    :on-change #(on-change (event-value %))}
+    :on-change #(do (prn "ON CHANGE" on-change)
+                    (on-change (event-value %))
+                    (.stopPropagation %))}
    (doall
     (map
      (fn [{:keys [value title]}]
@@ -1617,6 +1619,7 @@
         {:value value}
         title])
      items))])
+
 
 (defn labeled-dropdown [label cfg]
   [:div
@@ -2421,56 +2424,87 @@
     :armor :magic-armor
     :other-magic-items))
 
-(defn magic-item-rows [id expanded-details item-cfgs]
+(defn set-item-status-fn [id item-type item-index]
+  #(do (dispatch [::char/set-item-status id item-type item-index (keyword %)])))
+
+(def set-item-status-handler (memoize set-item-status-fn))
+
+(defn magic-item-rows [id item-type-fn equippable? expanded-details item-cfgs item-map]
   (let [magic-item-map @(subscribe [::mi/all-magic-items-map])
         can-attune? @(subscribe [::mi/can-attune? id])
         cant-attune? (complement can-attune?)
         mobile? @(subscribe [:mobile?])]
-    (mapcat
-     (fn [[item-kw item-cfg]]
-       (let [{:keys [::mi/name ::mi/type ::mi/item-subtype ::mi/rarity ::mi/attunement ::mi/description ::mi/summary] :as item} (magic-item-map item-kw)
-             expanded? (@expanded-details item-kw)
-             attuned? (::char-equip/attuned? item-cfg)
-             equipped? (::char-equip/equipped? item-cfg)
-             item-entity-type (item-type type)]
-         [[:tr.pointer
-           {:on-click (toggle-details-expanded-handler expanded-details item-kw)}
-           [:td.p-l-10 (if attunement
-                       [:span
-                        {:on-click (make-stop-prop-handler ::char/toggle-item-attuned id item-entity-type item-kw)}
-                        (comps/checkbox attuned? (cant-attune? item))])]
-           [:td.p-l-10 [:span
-                      {:on-click (make-stop-prop-handler ::char/toggle-item-equipped id item-entity-type item-kw)}
-                      (comps/checkbox equipped? false)]]
-           [:td.p-10.f-w-b (or (:name item) name)]
-           [:td.p-r-5
-            [:div.orange
-             (if (not mobile?)
-               [:span.underline (if expanded? "less" "more")])
-             [:i.fa.m-l-5
-              {:class-name (if expanded? "fa-caret-up" "fa-caret-down")}]]]]
-          (if expanded?
-            [:tr
-             [:td.p-10
-              {:col-span 4}
-              [:div.m-t-10
-               [:div.f-w-b.m-l-10 [item-subtitle item]]
-               [:div [item-component item true true]]]]])]))
-     (sort-by
-      key
-      item-cfgs))))
+    (apply
+     concat
+     (map-indexed
+      (fn [i [item-kw item-cfg]]
+        (let [{:keys [::mi/name ::mi/type ::mi/item-subtype ::mi/rarity ::mi/attunement ::mi/description ::mi/summary] :as item} (item-map item-kw)
+              expanded? (@expanded-details item-kw)
+              expand-handler (toggle-details-expanded-handler expanded-details item-kw)
+              status (or (::char-equip/status item-cfg)
+                         (if (::char-equip/equipped? item-cfg)
+                           :equipped
+                           :carried))
+              item-entity-type (item-type-fn item)]
+          [[:tr.pointer
+            [:td.p-10.f-w-b
+             {:on-click expand-handler}
+             (or (:name item) name)]
+            [:td.p-5
+             [:div.w-100
+              [dropdown
+               {:items (cond-> [{:title "Stored"
+                                 :value :stored}
+                                {:title "Carried"
+                                 :value :carried}]
+                         equippable? (conj {:title "Equipped"
+                                            :value :equipped})
+                         (and attunement
+                              (can-attune? item)) (conj {:title "Attuned"
+                                                         :value :attuned}))
+                :on-change (set-item-status-handler id item-entity-type i)
+                :value status}]]]
+            [:td.p-5
+             [:div.w-80
+              [number-field {:value 5
+                             :on-change (fn [v])}]]]
+            [:td.p-r-5
+             {:on-click expand-handler}
+             [:div.orange
+              (if (not mobile?)
+                [:span.underline (if expanded? "less" "more")])
+              [:i.fa.m-l-5
+               {:class-name (if expanded? "fa-caret-up" "fa-caret-down")}]]]]
+           (if expanded?
+             [:tr
+              [:td.p-10
+               {:col-span 4}
+               [:div
+                [:div.flex.justify-cont-end.m-b-5
+                 [:button.form-button
+                  {:on-click (make-event-handler
+                              ::char/remove-inventory-item
+                              id
+                              item-entity-type
+                              i)}
+                  "Delete"]]
+                [:div.f-w-b.m-l-10 [item-subtitle item]]
+                [:div [item-component item true true]]]]])]))
+      (sort-by
+       key
+       item-cfgs)))))
 
 (defn magic-items-table []
   (let [expanded-details (r/atom {})]
-    (fn [id item-cfgs]
+    (fn [id item-type-fn equippable? item-cfgs item-map]
       (let [mobile? @(subscribe [:mobile?])]
         [:div.f-s-14
          [:table.w-100-p.t-a-l.striped
           [:tbody
            [:tr.f-w-b.f-s-10
-            [:th "Attuned?"]
-            [:th.p-l-10 "Equipped?"]
             [:th.p-10 "Name"]
+            [:th.p-10 "Status"]
+            [:th.p-10 "Quantity"]
             [:th]]
            (doall
             (map-indexed
@@ -2479,8 +2513,11 @@
                  row
                  {:key i}))
              (magic-item-rows id
+                              item-type-fn
+                              equippable?
                               expanded-details
-                              item-cfgs)))]]]))))
+                              item-cfgs
+                              item-map)))]]]))))
 
 (defn magic-items-section-2 [id]
   [:div
@@ -2490,9 +2527,12 @@
    (let [magic-item-cfgs @(subscribe [::char/magic-items id])
          magic-weapon-cfgs @(subscribe [::char/magic-weapons id])
          magic-armor-cfgs @(subscribe [::char/magic-armor id])]
-     [magic-items-table id (merge magic-item-cfgs
-                                  magic-weapon-cfgs
-                                  magic-armor-cfgs)])])
+     [magic-items-table
+      id
+      (merge magic-item-cfgs
+             magic-weapon-cfgs
+             magic-armor-cfgs)
+      @(subscribe [::mi/all-magic-items-map])])])
 
 (defn other-equipment-section-2 []
   (let [expanded-details (r/atom {})]
@@ -2659,6 +2699,91 @@
 (def requires-attunement-xform
   (filter ::mi/attunement))
 
+(def set-atom-handler
+  (memoize
+   (fn [a value]
+     #(reset! a value))))
+
+(defn add-inventory-item-fn [item-type-fn item-map]
+  (fn [e]
+     (let [value (event-value e)
+           item-key (keyword value)
+           item (get item-map item-key)
+           item-type-kw (item-type-fn item)]
+       (prn "ITEM TYPE KW" item-type-kw item-key)
+       (dispatch [:add-inventory-item item-type-kw item-key]))))
+
+(def add-inventory-item (memoize add-inventory-item-fn))
+
+(defn inventory-adder [item-type-fn items item-map]
+  [comps/selection-adder
+   (sort-by
+    :name
+    (map
+     (fn [{:keys [name key :db/id]
+           item-name ::mi/name}]
+       {:name (or name item-name)
+        :key (or id key)})
+     items))
+   (add-inventory-item item-type-fn item-map)])
+
+(defn magic-item-type [{:keys [::mi/type]}]
+  (item-type type))
+
+(def inventory-tabs
+  [{:title "Magic Weapons"
+    :type-fn magic-item-type
+    :sub-key ::mi/magic-weapons
+    :char-sub-key ::char/magic-weapons
+    :map-sub-key ::mi/magic-weapon-map
+    :equippable? true}
+   {:title "Magic Armor"
+    :type-fn magic-item-type
+    :sub-key ::mi/magic-armor
+    :char-sub-key ::char/magic-armor
+    :map-sub-key ::mi/magic-armor-map
+    :equippable? true}
+   {:title "Other Magic Items"
+    :type-fn magic-item-type
+    :sub-key ::mi/other-magic-items
+    :char-sub-key ::char/magic-items
+    :map-sub-key ::mi/other-magic-items-map
+    :equippable? true}
+   {:title "Treasure"
+    :type-fn (fn [_] :treasure)
+    :sub-key ::mi/treasure
+    :char-sub-key ::char/treasure
+    :map-sub-key ::mi/treasure-map}
+   {:title "Ammunition"}
+   {:title "Weapons"}
+   {:title "Armor"}
+   {:title "Misc."}])
+
+(def inventory-tabs-map
+  (common/map-by :title inventory-tabs))
+
+(defn inventory-manager []
+  (let [selected-tab (r/atom "Magic Weapons")]
+    (fn []
+      [:div.m-t-20
+       [:div.flex.flex-wrap
+        (doall
+         (map
+          (fn [{:keys [title]}]
+            ^{:key title}
+            [:button.p-10.m-t-5.m-r-5.f-s-10.no-box-shadow
+             {:on-click (set-atom-handler selected-tab title)
+              :class-name (if (= @selected-tab title)
+                            "form-button white"
+                            "empty-form-button main-text-color")}
+             title])
+          inventory-tabs))]
+       (let [{:keys [type-fn title char-sub-key sub-key map-sub-key equippable?]} (inventory-tabs-map @selected-tab)
+             item-map @(subscribe [map-sub-key])]
+         [:div
+          [magic-items-table id type-fn equippable? @(subscribe [char-sub-key]) item-map]
+          [inventory-adder type-fn @(subscribe [sub-key]) item-map]])])))
+
 (defn equipped-section [id]
   [:div
    [section-header "battle-gear" "Equipped Items"]
@@ -2746,15 +2871,7 @@
                     carried-weapons))
            :value off-hand-weapon-kw
            :on-change (wield-handler ::char/wield-off-hand-weapon id all-weapons-map can-attune?)}])]
-      [:div.m-t-10
-       [:div.f-w-b "Magic Items"]
-       (let [magic-item-cfgs @(subscribe [::char/magic-items id])
-             magic-weapon-cfgs @(subscribe [::char/magic-weapons id])
-             magic-armor-cfgs @(subscribe [::char/magic-armor id])
-             all-cfgs (merge magic-item-cfgs
-                             magic-weapon-cfgs
-                             magic-armor-cfgs)]
-         [magic-items-table id all-cfgs])]])])
+      [inventory-manager]])])
 
 (defn combat-details [num-columns id]
   (let [weapon-profs @(subscribe [::char/weapon-profs id])

@@ -168,6 +168,16 @@
     sorted-items)))
 
 (reg-sub
+ ::mi5e/treasure
+ (fn [_ _]
+   equipment5e/treasure))
+
+(reg-sub
+ ::mi5e/treasure-map
+ (fn [_ _]
+   equipment5e/treasure-map))
+
+(reg-sub
  ::mi5e/all-armor-map
  :<- [::mi5e/magic-armor-map]
  (fn [magic-armor-map]
