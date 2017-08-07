@@ -610,6 +610,7 @@
    ::char5e/feats char5e/feats
    ::char5e/features-used char5e/features-used
    ::char5e/main-hand-weapon char5e/main-hand-weapon
+   ::char5e/main-weapon-handedness char5e/main-weapon-handedness
    ::char5e/off-hand-weapon char5e/off-hand-weapon
    ::char5e/worn-armor char5e/worn-armor
    ::char5e/wielded-shield char5e/wielded-shield
@@ -674,8 +675,6 @@
    [(subscribe [::char5e/magic-armor id])
     (subscribe [::char5e/armor id])])
  (fn [[magic-armor armor] _]
-   (prn "MAGIC ARMOR" magic-armor)
-   (prn "ARMRO" armor)
    (concat magic-armor armor)))
 
 (reg-sub
@@ -724,8 +723,12 @@
         (= :shield (:type item))))
     all-armor)))
 
-(defn carried? [[_ cfg]]
-  (-> cfg ::char-equip5e/carried? (not= false)))
+(def carried-statuses
+  #{:carried :equipped :attuned})
+
+(defn carried? [[_ {:keys [::char-equip5e/carried? ::char-equip5e/status-2]}]]
+  (or (not= false carried?)
+      (carried-statuses status)))
 
 (reg-sub
  ::char5e/carried-armor

@@ -3073,15 +3073,27 @@ The boots regain 2 hours of flying capability for every 12 hours they aren’t i
    all-armor-map
    all-weapons-map))
 
+(defn item-details-xform [item-map]
+  (map
+   (fn [[item-kw cfg]]
+     (merge
+      cfg
+      (item-map item-kw)))))
+
+(defn item-details [items item-map]
+  (sequence
+   (item-details-xform item-map)
+   items))
+
 (defn equipped-items-details [items item-map]
-  (filter
-   ::char-equip5e/equipped?
-   (map
-    (fn [[item-kw cfg]]
-      (merge
-       cfg
-       (item-map item-kw)))
-    items)))
+  (sequence
+   (comp
+    (item-details-xform item-map)
+    (filter
+     (fn [{:keys [::char-equip5e/equipped? ::char-equip5e/status-2]}]
+       (or equipped?
+           (= :equipped status-2)))))
+   items))
 
 (defn equipped-armor-details [armor]
   (equipped-items-details armor all-armor-map))
