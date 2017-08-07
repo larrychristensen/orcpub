@@ -2217,3 +2217,18 @@
                            ::entity/value
                            ::char-equip5e/status]
                           status-kw))))
+
+(reg-event-fx
+ ::char5e/set-item-qty
+ [db-char->local-store]
+ (fn [{:keys [db]} [_ id item-type item-index qty]]
+   (update-character-fx db
+                        id
+                        #(assoc-in
+                          %
+                          [::entity/options
+                           item-type
+                           item-index
+                           ::entity/value
+                           ::char-equip5e/quantity]
+                          qty))))
