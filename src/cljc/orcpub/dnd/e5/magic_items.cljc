@@ -2997,7 +2997,25 @@ The boots regain 2 hours of flying capability for every 12 hours they aren’t i
 
 (def magic-weapon-xform
   (filter
-   #(= :weapon (::type %))))
+   #(and (= :weapon (::type %))
+         (not= :ammunition (::weapons/type %)))))
+
+(def magic-ammunition-xform
+  (filter
+   #(= :ammunition (::weapons/type %))))
+
+(def magic-ammunition
+  (sequence
+   magic-ammunition-xform
+   magic-items))
+
+(def all-ammunition
+  (concat
+   magic-ammunition
+   weapons/ammunition))
+
+(def magic-ammunition-map
+  (common/map-by-key magic-ammunition))
 
 (def magic-weapons
   (sequence

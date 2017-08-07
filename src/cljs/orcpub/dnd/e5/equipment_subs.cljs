@@ -78,6 +78,21 @@
     sorted-items)))
 
 (reg-sub
+ ::mi5e/magic-ammunition
+ :<- [::char5e/sorted-items]
+ (fn [sorted-items _]
+   (sequence
+    mi5e/magic-ammunition-xform
+    sorted-items)))
+
+(reg-sub
+ ::mi5e/all-ammunition
+ :<- [::mi5e/magic-ammunition]
+ (fn [magic-ammunition]
+   (concat magic-ammunition
+           weapon5e/ammunition)))
+
+(reg-sub
  ::mi5e/all-weapons
  :<- [::char5e/magic-weapons]
  (fn [magic-weapons]
@@ -104,6 +119,12 @@
  :<- [::mi5e/magic-weapons]
  (fn [magic-weapons _]
    (map-by-key-or-id magic-weapons)))
+
+(reg-sub
+ ::mi5e/magic-ammunition-map
+ :<- [::mi5e/magic-ammunition]
+ (fn [magic-ammunition _]
+   (map-by-key-or-id magic-ammunition)))
 
 (defn magic-item-options [modifier-fn]
   (fn [items _]
@@ -134,6 +155,11 @@
  ::mi5e/magic-weapon-options
  :<- [::mi5e/magic-weapons]
  (magic-item-options mod5e/deferred-magic-weapon))
+
+(reg-sub
+ ::mi5e/magic-ammunition-options
+ :<- [::mi5e/magic-ammunition]
+ (magic-item-options mod5e/deferred-magic-ammunition))
 
 (reg-sub
  ::mi5e/magic-armor-options
@@ -192,9 +218,42 @@
    (map-by-key-or-id magic-items)))
 
 (reg-sub
+ ::equipment5e/weapons
+ (fn [_ _]
+   weapon5e/weapons))
+
+(reg-sub
+ ::equipment5e/armor
+ (fn [_ _]
+   armor5e/armor))
+
+(reg-sub
  ::equipment5e/weapons-map
  (fn [_ _]
    weapon5e/weapons-map))
+
+(reg-sub
+ ::equipment5e/ammunition
+ (fn [_ _]
+   weapon5e/ammunition))
+
+(reg-sub
+ ::equipment5e/ammunition-map
+ (fn [_ _]
+   weapon5e/ammunition-map))
+
+(reg-sub
+ ::equipment5e/equipment
+ (fn [_ _]
+   (remove
+    (fn [{:key [::weapon5e/type]}]
+      (= type :ammunition))
+    equipment5e/equipment)))
+
+(reg-sub
+ ::equipment5e/equipment-map
+ (fn [_ _]
+   equipment5e/equipment-map))
 
 (reg-sub
  ::mi5e/all-weapons-map
@@ -203,6 +262,14 @@
    (merge
     magic-weapons-map
     weapon5e/weapons-map)))
+
+(reg-sub
+ ::mi5e/all-ammunition-map
+ :<- [::mi5e/magic-ammunition-map]
+ (fn [magic-ammunition-map]
+   (merge
+    magic-ammunition-map
+    weapon5e/ammunition-map)))
 
 (reg-sub
  ::mi5e/all-magic-items-map
@@ -257,12 +324,15 @@
 (reg-sub
  ::char5e/template-selections
  :<- [::mi5e/magic-weapon-options]
+ :<- [::mi5e/magic-ammunition-options]
  :<- [::mi5e/magic-armor-options]
  :<- [::mi5e/other-magic-item-options]
  (fn [[magic-weapon-options
+       magic-ammunition-options
        magic-armor-options
        other-magic-item-options] _]
    (t5e/template-selections magic-weapon-options
+                            magic-ammunition-options
                             magic-armor-options
                             other-magic-item-options)))
 
