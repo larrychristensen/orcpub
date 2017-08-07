@@ -1129,7 +1129,9 @@
     :modifiers [(mod5e/bonus-action
                  {:name "Bardic Inspiration"
                   :page 53
-                  :frequency (units5e/long-rests
+                  :frequency ((if (>= ?bard-level 5)
+                                units5e/rests
+                                units5e/long-rests)
                               (max 1 (?ability-bonuses ::char5e/cha)))
                   :summary (str "Inspire another creature with a 1d"
                                 (bardic-inspiration-die ?levels)
@@ -4910,6 +4912,7 @@ long rest."})
    wizard-option])
 
 (defn template-selections [magic-weapon-options
+                           magic-ammunition-options
                            magic-armor-options
                            other-magic-item-options]
   [optional-content-selection
@@ -4983,6 +4986,8 @@ long rest."})
    (inventory-selection "Treasure" "cash" equip5e/treasure mod5e/deferred-treasure)
    (inventory-selection "Weapons" "plain-dagger" weapon5e/weapons mod5e/deferred-weapon)
    (magic-item-selection "Magic Weapons" "lightning-bow" magic-weapon-options mod5e/deferred-magic-weapon magic-item-details)
+   (inventory-selection "Ammunition" "plain-dagger" weapon5e/ammunition mod5e/deferred-ammunition)
+   (magic-item-selection "Magic Ammunition" "lightning-bow" magic-ammunition-options mod5e/deferred-magic-ammunition magic-item-details)
    (inventory-selection "Armor" "breastplate" armor5e/armor mod5e/deferred-armor)
    (magic-item-selection "Magic Armor" "magic-shield" magic-armor-options mod5e/deferred-magic-armor magic-item-details)
    (inventory-selection "Equipment" "backpack" equip5e/equipment mod5e/deferred-equipment)
