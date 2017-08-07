@@ -251,11 +251,6 @@
     equipment5e/equipment)))
 
 (reg-sub
- ::equipment5e/equipment-map
- (fn [_ _]
-   equipment5e/equipment-map))
-
-(reg-sub
  ::mi5e/all-weapons-map
  :<- [::mi5e/magic-weapon-map]
  (fn [magic-weapons-map]

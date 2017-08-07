@@ -168,7 +168,7 @@
                                (map
                                 (juxt ::char-equip5e/name identity)
                                 (char5e/custom-treasure built-char)))
-        all-equipment (merge equipment custom-equipment custom-treasure magic-items armor magic-armor)
+        all-equipment (concat equipment custom-equipment custom-treasure magic-items armor magic-armor)
         treasure (es/entity-val built-char :treasure)
         treasure-map (into {} (map (fn [[kw {qty ::char-equip5e/quantity}]] [kw qty]) treasure))
         unequipped-items (filter
@@ -192,8 +192,8 @@
                   (map
                    (fn [[kw {count ::char-equip5e/quantity}]]
                      (str (disp5e/equipment-name mi5e/all-equipment-map kw) " (" count ")"))
-                   (merge
-                    (apply dissoc treasure coin-keys)
+                   (concat
+                    treasure
                     unequipped-items)))})))
 
 (def level-max-spells
@@ -394,44 +394,68 @@
   (str (dice/dice-string die-count die mod)
        (if damage-type (str " " (name damage-type)))))
 
-(defn attacks-and-spellcasting-fields [built-char]
-  (let [all-weapons (mi5e/equipped-items-details (char5e/all-weapons-inventory built-char) mi5e/all-weapons-map)
-        weapon-fields (mapcat
-                       (fn [{:keys [name ::weapon5e/damage-die ::weapon5e/damage-die-count ::weapon5e/damage-type] :as weapon}]
-                         (let [versatile (:versatile weapon)
-                               normal-damage-modifier (char5e/best-weapon-damage-modifier built-char weapon false)
-                               finesse-damage-modifier (char5e/weapon-damage-modifier built-char weapon true)
-                               normal {:name (:name weapon)
-                                       :attack-bonus (char5e/best-weapon-attack-modifier built-char weapon false)
-                                       :damage (damage-str damage-die damage-die-count normal-damage-modifier damage-type)}]
-                           (remove
-                            nil?
-                            [normal
-                             (if (:versatile weapon)
-                               {:name (str (:name weapon) " (two-handed)")
-                                :attack-bonus (char5e/weapon-attack-modifier built-char weapon false)
-                                :damage (damage-str (:damage-die versatile) (:damage-die-count versatile) normal-damage-modifier damage-type)})])))
-                       (remove
-                        (fn [{:keys [::weapon5e/type]}]
-                          (= type :ammunition))
-                        all-weapons))
-        first-3-weapons (take 3 weapon-fields)
-        rest-weapons (drop 3 weapon-fields)]
-    (apply merge
-     {:attacks-and-spellcasting (s/join "\n"
-                                        (concat (map
-                                                 attack-string
-                                                 (es/entity-val built-char :attacks))
-                                                (map
-                                                 (fn [{:keys [name attack-bonus damage]}]
-                                                   (str "- " name ". " (common/bonus-str attack-bonus) ", " damage))
-                                                 rest-weapons)))}
-     (map-indexed
-      (fn [i {:keys [name attack-bonus damage]}]
-        {(keyword (str "weapon-name-" (inc i))) name
-         (keyword (str "weapon-attack-bonus-" (inc i))) (common/bonus-str attack-bonus)
-         (keyword (str "weapon-damage-" (inc i))) damage})
-      first-3-weapons))))
+(defn sort-weapons [main-hand-weapon-kw off-hand-weapon-kw weapons]
+  (sort-by
+   (fn [{:keys [key]}]
+     (cond
+       (= main-hand-weapon-kw key) 0
+       (= off-hand-weapon-kw key) 1
+       :else 2))
+   weapons))
+
+(defn weapon-attack-string [{:keys [name] :as weapon} weapon-damage-modifier weapon-attack-modifier off-hand-weapon? main-hand-weapon? main-weapon-handedness]
+  (str
+   common/dot-char
+   " "
+   (or name (::mi5e/name weapon))
+   ". "
+   (disp5e/weapon-attack-description
+    weapon
+    weapon-damage-modifier
+    weapon-attack-modifier
+    off-hand-weapon?
+    main-hand-weapon?
+    main-weapon-handedness)))
+
+(defn attacks-and-spellcasting-fields [id built-char]
+  (let [weapons-map @(subscribe [::mi5e/all-weapons-map id])
+        all-weapons-inventory @(subscribe [::char5e/carried-weapons id])
+        main-hand-weapon-kw @(subscribe [::char5e/main-hand-weapon id])
+        off-hand-weapon-kw @(subscribe [::char5e/off-hand-weapon id])
+        main-weapon-handedness @(subscribe [::char5e/main-weapon-handedness id])
+        weapon-details (mi5e/item-details
+                        all-weapons-inventory
+                        weapons-map)
+        all-weapons (sort-weapons main-hand-weapon-kw off-hand-weapon-kw weapon-details)
+        weapon-attack-modifier @(subscribe [::char5e/best-weapon-attack-modifier-fn id])
+        weapon-damage-modifier @(subscribe [::char5e/best-weapon-damage-modifier-fn id])]
+    {:attacks-and-spellcasting (s/join "\n"
+                                       (concat (map
+                                                attack-string
+                                                (es/entity-val built-char :attacks))
+                                               (mapcat
+                                                (fn [{:keys [key name] :as weapon}]
+                                                  (let [main-hand-weapon? (= key main-hand-weapon-kw)
+                                                        off-hand-weapon? (= key off-hand-weapon-kw)
+                                                        attack-str-fn #(weapon-attack-string
+                                                                        weapon
+                                                                        weapon-damage-modifier
+                                                                        weapon-attack-modifier
+                                                                        %1
+                                                                        %2
+                                                                        main-weapon-handedness)]
+                                                    (if (and main-hand-weapon?
+                                                             (= main-hand-weapon-kw off-hand-weapon-kw))
+                                                      [(attack-str-fn
+                                                        false
+                                                        true)
+                                                       (attack-str-fn
+                                                        true
+                                                        false)]
+                                                      [(attack-str-fn
+                                                        off-hand-weapon?
+                                                        main-hand-weapon?)])))
+                                                all-weapons)))}))
 
 (defn speed [built-char]
   (let [speed (char5e/base-land-speed built-char)
@@ -509,7 +533,7 @@
       :faction-name (char5e/faction-name built-char)
       :print-character-sheet? print-character-sheet?
       :print-spell-cards? print-spell-cards?}
-     (attacks-and-spellcasting-fields built-char)
+     (attacks-and-spellcasting-fields id built-char)
      (skill-fields built-char)
      abilities
      (ability-bonuses built-char)

@@ -477,7 +477,7 @@
                               & [include-magic-bonus?]]
   (fn [cfg]
     (let [equipment-mod (equipment-mod-fn cfg)
-          status (::char-equip/status cfg)]
+          status (::char-equip/status-2 cfg)]
       (if (or (= status :attuned)
               (and (or (= status :equipped)
                        (::char-equip/equipped? cfg))
@@ -635,7 +635,6 @@
      (filter ::mods/args)
      (map
       (fn [{:keys [::mods/key ::mods/args]}]
-        (prn "KEY ARGS" key args)
         (let [raw-args (mods/raw-args args)
               mod-fn (mods-map key)]
           (if mod-fn

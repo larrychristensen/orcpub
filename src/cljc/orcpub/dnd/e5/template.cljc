@@ -602,7 +602,7 @@
                  :attack-type :melee
                  :damage-type :piercing
                  :damage-die 6
-                 :damage-die-count 1
+                 :damage-die-count (if (>= ?total-levels 11) 2 1)
                  :damage-modifier (::char5e/str ?ability-bonuses)})]
    :profs {:skill-options {:choose 2 :options {:animal-handling true :nature true :stealth true :perception true :survival true}}}
    :traits [{:name "Cunning Artisan"
