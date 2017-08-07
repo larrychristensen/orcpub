@@ -470,7 +470,7 @@
   (get-prop built-char :magic-armor))
 
 (defn all-armor-inventory [built-char]
-  (merge (normal-armor-inventory built-char)
+  (concat (normal-armor-inventory built-char)
          (magic-armor-inventory built-char)))
 
 (defn normal-weapons-inventory [built-char]
@@ -486,7 +486,7 @@
   (get-prop built-char :magic-weapons))
 
 (defn all-weapons-inventory [built-char]
-  (merge (normal-weapons-inventory built-char)
+  (concat (normal-weapons-inventory built-char)
          (magic-weapons-inventory built-char)))
 
 (defn custom-equipment [built-char]
@@ -637,6 +637,9 @@
 
 (defn main-hand-weapon [built-char]
   (get-prop built-char ::main-hand-weapon))
+
+(defn main-weapon-handedness [built-char]
+  (get-prop built-char ::main-weapon-handedness))
 
 (defn off-hand-weapon [built-char]
   (get-prop built-char ::off-hand-weapon))

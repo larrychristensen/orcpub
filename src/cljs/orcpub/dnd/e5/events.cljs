@@ -638,7 +638,11 @@
    (fn [item-cfg]
      ;; the select keys here is to keep :equipped and :name while wiping out the starting-equipment indicators
      (assoc
-      (select-keys item-cfg [::char-equip5e/name ::char-equip5e/equipped?])
+      (select-keys
+       item-cfg
+       [::char-equip5e/name
+        ::char-equip5e/equipped?
+        ::char-equip5e/status-2])
       ::char-equip5e/quantity
       quantity))))
 
@@ -668,6 +672,17 @@
                                 %
                                 [::entity/options
                                  item-type]
+                                common/remove-at-index
+                                item-index))))
+
+(reg-event-fx
+ ::char5e/remove-custom-inventory-item
+ [db-char->local-store]
+ (fn [{:keys [db]} [_ id custom-key item-index]]
+   (update-character-fx db id #(update-in
+                                %
+                                [::entity/values
+                                 custom-key]
                                 common/remove-at-index
                                 item-index))))
 
@@ -2165,7 +2180,7 @@
                                (set-item-prop
                                 weapon-kw
                                 item-type-kw
-                                ::char-equip5e/status
+                                ::char-equip5e/status-2
                                 (if attune? :attuned :equipped)))))))
 
 (reg-wield-item-fx
@@ -2178,30 +2193,95 @@
  ::char5e/wielded-shield
  :magic-armor)
 
+(defn update-main-hand-weapon-status [weapon-kw attune? kw _]
+  (if (= kw weapon-kw)
+    (if attune? :attuned :equipped)
+    :carried))
+
+(defn update-main-hand-weapon-statues [weapon-kw attune? weapons]
+  (mapv
+   (fn [{:keys [::entity/key] :as weapon-option}]
+     (update-in
+      weapon-option
+      [::entity/value ::char-equip5e/status-2]
+      (partial update-main-hand-weapon-status weapon-kw attune? key)))
+   weapons))
+
+(reg-event-fx
+ ::char5e/set-main-weapon-handedness
+ [db-char->local-store]
+ (fn [{:keys [db]} [_ id handedness]]
+   (update-character-fx db
+                        id
+                        #(update
+                          %
+                          ::entity/values
+                          assoc
+                          ::char5e/main-weapon-handedness
+                          handedness))))
+
 (reg-event-fx
  ::char5e/wield-main-hand-weapon
  [db-char->local-store]
  (fn [{:keys [db]} [_ id weapon-kw attune?]]
+   (let [status-update-fn (partial update-main-hand-weapon-statues weapon-kw attune?)]
+     (update-character-fx db
+                          id
+                          #(-> %
+                               (update
+                                ::entity/values
+                                assoc
+                                ::char5e/main-hand-weapon
+                                weapon-kw
+                                ::char5e/off-hand-weapon
+                                :none
+                                ::char5e/main-weapon-handedness
+                                nil)
+                               (update-in
+                                [::entity/options
+                                 :weapons]
+                                status-update-fn)
+                               (update-in
+                                [::entity/options
+                                 :magic-weapons]
+                                status-update-fn))))))
+
+(defn update-off-hand-weapon-statuses [weapon-kw main-hand-weapon-kw attune? weapons]
+  (mapv
+   (fn [{:keys [::entity/key] :as weapon-option}]
+     (update-in
+      weapon-option
+      [::entity/value ::char-equip5e/status-2]
+      (fn [status]
+        (if (= key weapon-kw)
+          (if attune? :attuned :equipped)
+          (if (= key main-hand-weapon-kw)
+            status
+            :carried)))))
+   weapons))
+
+(reg-event-fx
+ ::char5e/wield-off-hand-weapon
+ [db-char->local-store]
+ (fn [{:keys [db]} [_ id weapon-kw attune?]]
    (update-character-fx db
                         id
-                        #(-> %
-                             (update
-                              ::entity/values
-                              assoc
-                              ::char5e/main-hand-weapon
-                              weapon-kw
-                              ::char5e/off-hand-weapon
-                              :none)
-                             (set-item-prop
-                              weapon-kw
-                              :magic-weapons
-                              ::char-equip5e/status
-                              (if attune? :attuned :equipped))))))
-
-(reg-wield-item-fx
- ::char5e/wield-off-hand-weapon
- ::char5e/off-hand-weapon
- :magic-weapons)
+                        #(let [main-hand-weapon-kw (get-in % [::entity/values ::char5e/main-hand-weapon])
+                               status-update-fn (partial update-off-hand-weapon-statuses weapon-kw main-hand-weapon-kw attune?)]
+                           (-> %
+                               (update
+                                ::entity/values
+                                assoc
+                                ::char5e/off-hand-weapon
+                                weapon-kw)
+                               (update-in
+                                [::entity/options
+                                 :weapons]
+                                status-update-fn)
+                               (update-in
+                                [::entity/options
+                                 :magic-weapons]
+                                status-update-fn))))))
 
 (reg-event-fx
  ::char5e/set-item-status
@@ -2215,7 +2295,21 @@
                            item-type
                            item-index
                            ::entity/value
-                           ::char-equip5e/status]
+                           ::char-equip5e/status-2]
+                          status-kw))))
+
+(reg-event-fx
+ ::char5e/set-custom-item-status
+ [db-char->local-store]
+ (fn [{:keys [db]} [_ id custom-equipment-key item-index status-kw]]
+   (update-character-fx db
+                        id
+                        #(assoc-in
+                          %
+                          [::entity/values
+                           custom-equipment-key
+                           item-index
+                           ::char-equip5e/status-2]
                           status-kw))))
 
 (reg-event-fx
