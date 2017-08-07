@@ -476,6 +476,12 @@
 (defn normal-weapons-inventory [built-char]
   (get-prop built-char :weapons))
 
+(defn ammunition-inventory [built-char]
+  (get-prop built-char :ammunition))
+
+(defn magic-ammunition-inventory [built-char]
+  (get-prop built-char :magic-ammunition))
+
 (defn magic-weapons-inventory [built-char]
   (get-prop built-char :magic-weapons))
 

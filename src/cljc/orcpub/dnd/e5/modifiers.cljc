@@ -453,15 +453,21 @@
     cfg))
 
 (defn weapon [weapon-kw cfg]
-  (mods/map-mod ?weapons weapon-kw (equipment-cfg cfg)))
+  (mods/vec-mod ?weapons [weapon-kw (equipment-cfg cfg)]))
 
 (defn magic-weapon [weapon-kw cfg]
-  (mods/map-mod ?magic-weapons weapon-kw (equipment-cfg cfg)))
+  (mods/vec-mod ?magic-weapons [weapon-kw (equipment-cfg cfg)]))
 
 (defn deferred-weapon [weapon-kw weapon]
   (mods/deferred-modifier
     ?weapons
-    (fn [cfg] (mods/map-mod ?weapons weapon-kw (equipment-cfg cfg)))
+    (fn [cfg] (mods/vec-mod ?weapons [weapon-kw (equipment-cfg cfg)]))
+    1))
+
+(defn deferred-ammunition [ammunition-kw ammunition]
+  (mods/deferred-modifier
+    ?ammunition
+    (fn [cfg] (mods/vec-mod ?ammunition [ammunition-kw (equipment-cfg cfg)]))
     1))
 
 (defn deferred-magic-item-fn [equipment-mod-fn
@@ -487,43 +493,49 @@
 (defn deferred-magic-weapon [weapon-kw {:keys [modifiers] :as weapon}]
   (mods/deferred-modifier
     ?magic-weapons
-    (deferred-magic-item-fn #(mods/map-mod ?magic-weapons weapon-kw (equipment-cfg %)) weapon)
+    (deferred-magic-item-fn #(mods/vec-mod ?magic-weapons [weapon-kw (equipment-cfg %)]) weapon)
+    1))
+
+(defn deferred-magic-ammunition [ammunition-kw {:keys [modifiers] :as ammunition}]
+  (mods/deferred-modifier
+    ?magic-ammunition
+    (deferred-magic-item-fn #(mods/vec-mod ?magic-ammunition [ammunition-kw (equipment-cfg %)]) ammunition)
     1))
 
 (defn armor [armor-kw cfg]
-  (mods/map-mod ?armor armor-kw (equipment-cfg cfg)))
+  (mods/vec-mod ?armor [armor-kw (equipment-cfg cfg)]))
 
 (defn deferred-armor [armor-kw armor]
   (mods/deferred-modifier
     ?armor
-    (fn [cfg] (mods/map-mod ?armor armor-kw (equipment-cfg cfg)))
+    (fn [cfg] (mods/vec-mod ?armor [armor-kw (equipment-cfg cfg)]))
     1))
 
 (defn deferred-magic-armor [armor-kw armor]
   (mods/deferred-modifier
     ?armor
-    (deferred-magic-item-fn (fn [cfg] (mods/map-mod ?magic-armor armor-kw (equipment-cfg cfg))) armor)
+    (deferred-magic-item-fn (fn [cfg] (mods/vec-mod ?magic-armor [armor-kw (equipment-cfg cfg)])) armor)
     1))
 
 (defn equipment [equipment-kw cfg]
-  (mods/map-mod ?equipment equipment-kw (equipment-cfg cfg)))
+  (mods/vec-mod ?equipment [equipment-kw (equipment-cfg cfg)]))
 
 (defn deferred-equipment [equipment-kw equipment]
   (mods/deferred-modifier
     ?equipment
-    (fn [cfg] (mods/map-mod ?equipment equipment-kw (equipment-cfg cfg)))
+    (fn [cfg] (mods/vec-mod ?equipment [equipment-kw (equipment-cfg cfg)]))
     1))
 
 (defn deferred-treasure [treasure-kw treasure]
   (mods/deferred-modifier
     ?treasure
-    (fn [cfg] (mods/map-mod ?treasure treasure-kw (equipment-cfg cfg)))
+    (fn [cfg] (mods/vec-mod ?treasure [treasure-kw (equipment-cfg cfg)]))
     1))
 
 (defn magic-item [item-kw item item-cfg]
   (let [item-fn (deferred-magic-item-fn
                   (fn [cfg]
-                    (mods/map-mod ?magic-items item-kw (equipment-cfg item-cfg)))
+                    (mods/vec-mod ?magic-items [item-kw (equipment-cfg item-cfg)]))
                   item
                   true)]
     (item-fn item-cfg)))
@@ -533,7 +545,7 @@
     ?magic-items
     (deferred-magic-item-fn
       (fn [cfg]
-        (mods/map-mod ?magic-items item-kw (equipment-cfg cfg)))
+        (mods/vec-mod ?magic-items [item-kw (equipment-cfg cfg)]))
       item
       true)
     1
