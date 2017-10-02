@@ -385,9 +385,6 @@
     {:name "Crossbow bolt" ::type :ammunition :sell-qty 20 :cost {:num 1 :type :gp} :weight "1½ lb."}
     {:name "Sling bullet" ::type :ammunition :sell-qty 20 :cost {:num 4 :type :cp} :weight "1½ lb."}]))
 
-(def ammunition-map
-  (common/map-by-key ammunition))
-
 (def weapons-map
   (zipmap (map :key weapons) weapons))
 

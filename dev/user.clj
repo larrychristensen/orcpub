@@ -28,6 +28,7 @@
                             (apply hash-map))
         build (get-in project-config
                       [:cljsbuild :builds id])]
+    (prn "BUILD" build)
     [build]))
 
 

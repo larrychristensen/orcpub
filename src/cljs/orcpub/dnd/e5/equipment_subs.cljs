@@ -78,21 +78,6 @@
     sorted-items)))
 
 (reg-sub
- ::mi5e/magic-ammunition
- :<- [::char5e/sorted-items]
- (fn [sorted-items _]
-   (sequence
-    mi5e/magic-ammunition-xform
-    sorted-items)))
-
-(reg-sub
- ::mi5e/all-ammunition
- :<- [::mi5e/magic-ammunition]
- (fn [magic-ammunition]
-   (concat magic-ammunition
-           weapon5e/ammunition)))
-
-(reg-sub
  ::mi5e/all-weapons
  :<- [::char5e/magic-weapons]
  (fn [magic-weapons]
@@ -109,8 +94,9 @@
 (defn map-by-key-or-id [items]
   (reduce
    (fn [m {:keys [:db/id key] :as item}]
-     (cond-> (assoc m key item)
-       id (assoc id item)))
+     (assoc m
+            key item
+            id item))
    {}
    items))
 
@@ -119,12 +105,6 @@
  :<- [::mi5e/magic-weapons]
  (fn [magic-weapons _]
    (map-by-key-or-id magic-weapons)))
-
-(reg-sub
- ::mi5e/magic-ammunition-map
- :<- [::mi5e/magic-ammunition]
- (fn [magic-ammunition _]
-   (map-by-key-or-id magic-ammunition)))
 
 (defn magic-item-options [modifier-fn]
   (fn [items _]
@@ -155,11 +135,6 @@
  ::mi5e/magic-weapon-options
  :<- [::mi5e/magic-weapons]
  (magic-item-options mod5e/deferred-magic-weapon))
-
-(reg-sub
- ::mi5e/magic-ammunition-options
- :<- [::mi5e/magic-ammunition]
- (magic-item-options mod5e/deferred-magic-ammunition))
 
 (reg-sub
  ::mi5e/magic-armor-options
@@ -194,16 +169,6 @@
     sorted-items)))
 
 (reg-sub
- ::mi5e/treasure
- (fn [_ _]
-   equipment5e/treasure))
-
-(reg-sub
- ::mi5e/treasure-map
- (fn [_ _]
-   equipment5e/treasure-map))
-
-(reg-sub
  ::mi5e/all-armor-map
  :<- [::mi5e/magic-armor-map]
  (fn [magic-armor-map]
@@ -218,37 +183,9 @@
    (map-by-key-or-id magic-items)))
 
 (reg-sub
- ::equipment5e/weapons
- (fn [_ _]
-   weapon5e/weapons))
-
-(reg-sub
- ::equipment5e/armor
- (fn [_ _]
-   armor5e/armor))
-
-(reg-sub
  ::equipment5e/weapons-map
  (fn [_ _]
    weapon5e/weapons-map))
-
-(reg-sub
- ::equipment5e/ammunition
- (fn [_ _]
-   weapon5e/ammunition))
-
-(reg-sub
- ::equipment5e/ammunition-map
- (fn [_ _]
-   weapon5e/ammunition-map))
-
-(reg-sub
- ::equipment5e/equipment
- (fn [_ _]
-   (remove
-    (fn [{:key [::weapon5e/type]}]
-      (= type :ammunition))
-    equipment5e/equipment)))
 
 (reg-sub
  ::mi5e/all-weapons-map
@@ -257,14 +194,6 @@
    (merge
     magic-weapons-map
     weapon5e/weapons-map)))
-
-(reg-sub
- ::mi5e/all-ammunition-map
- :<- [::mi5e/magic-ammunition-map]
- (fn [magic-ammunition-map]
-   (merge
-    magic-ammunition-map
-    weapon5e/ammunition-map)))
 
 (reg-sub
  ::mi5e/all-magic-items-map
@@ -319,15 +248,12 @@
 (reg-sub
  ::char5e/template-selections
  :<- [::mi5e/magic-weapon-options]
- :<- [::mi5e/magic-ammunition-options]
  :<- [::mi5e/magic-armor-options]
  :<- [::mi5e/other-magic-item-options]
  (fn [[magic-weapon-options
-       magic-ammunition-options
        magic-armor-options
        other-magic-item-options] _]
    (t5e/template-selections magic-weapon-options
-                            magic-ammunition-options
                             magic-armor-options
                             other-magic-item-options)))
 
@@ -336,13 +262,3 @@
  :<- [::char5e/template-selections]
  (fn [template-selections _]
    (t5e/template template-selections)))
-
-(reg-sub
- ::mi5e/can-attune?
- (fn [[_ id]]
-   [(subscribe [::char5e/classes id])
-    (subscribe [::char5e/spellcaster? id])
-    (subscribe [::char5e/alignment id])])
- (fn [[classes spellcaster? alignment]]
-   (fn [item]
-     (mi5e/can-attune? item classes spellcaster? alignment))))

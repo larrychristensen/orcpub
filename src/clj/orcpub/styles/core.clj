@@ -1048,11 +1048,8 @@
       :cursor :pointer
       :background-image "linear-gradient(to bottom, #f1a20f, #dbab50)"}]
 
-    [:.form-button:hover :.empty-form-button:hover
+    [:.form-button:hover
      {:box-shadow "0 2px 6px 0 rgba(0, 0, 0, 0.5)"}]
-
-    [:.no-box-shadow
-     {:box-shadow "none !important"}]
 
     [:.form-button.disabled
      {:opacity 0.5
@@ -1060,15 +1057,6 @@
 
     [:.form-button.disabled:hover
      {:box-shadow :none}]
-
-    [:.empty-form-button
-     {:background-image :none
-      :background-color :transparent
-      :border-radius "5px"
-      :border "2px solid #f1a20f"
-      :text-transform :uppercase
-      :font-weight 600
-      :cursor :pointer}]
 
     [:.link-button
      {:color button-color
@@ -1184,9 +1172,6 @@
 
      [:.form-button
       {:background-image "linear-gradient(to bottom, #33658A, #33658A)"}]
-
-     [:.empty-form-button
-      {:border-color "#33658A"}]
 
      [:.orange
       {:color "rgba(0,0,0,0.8)"}]

@@ -950,109 +950,6 @@
                  two-columns-style)}
        p-els])))
 
-(defn armor-details [{:keys [type
-                             base-ac
-                             weight
-                             description
-                             max-dex-mod
-                             min-str
-                             subtype
-                             ::mi/magical-ac-bonus
-                             stealth-disadvantage?]
-                      :or {magical-ac-bonus 0
-                           base-ac 10}
-                      :as armor}
-                     {shield-magic-bonus ::magical-ac-bonus
-                      :or {shield-magic-bonus 0} :as shield}]
-  [:div
-   [:div.m-t-10.i
-    (if type
-      (weapon-details-field "Type" (common/safe-name type)))
-    (if armor
-      (weapon-details-field "Base AC" base-ac))
-    (if (not= magical-ac-bonus 0)
-      (weapon-details-field "Magical AC Bonus" magical-ac-bonus))
-    (if shield
-      (weapon-details-field "Shield Base AC Bonus" 2))
-    (if (and shield
-             (not= shield-magic-bonus 0))
-      (weapon-details-field "Shield Magical AC Bonus" shield-magic-bonus))
-    (if max-dex-mod
-      (weapon-details-field "Max DEX AC Bonus" max-dex-mod))
-    (if min-str
-      (weapon-details-field "Min Strength" min-str))
-    (if armor
-      (weapon-details-field "Stealth Disadvantage?" (yes-no stealth-disadvantage?)))
-    (if weight
-      (weapon-details-field "Weight" (str weight " lbs.")))
-    (if description
-      [:div.m-t-10 (str "Armor: " description)])
-    (if (:description shield)
-      [:div.m-t-10 (str "Shield: " (:description shield))])]])
-
-(defn armor-details-section [{:keys [type
-                                     base-ac
-                                     weight
-                                     description
-                                     max-dex-mod
-                                     min-str
-                                     ::mi/magical-ac-bonus
-                                     stealth-disadvantage?]
-                              :or {magical-ac-bonus 0
-                                   base-ac 10}
-                              :as armor}
-                             {shield-magic-bonus ::magical-ac-bonus :or {shield-magic-bonus 0} :as shield}
-                             expanded?]
-  [:div
-   [:div (str (if type (str (common/safe-name type) ", ")) "base AC " (+ magical-ac-bonus shield-magic-bonus base-ac (if shield 2 0)) (if stealth-disadvantage? ", stealth disadvantage"))]
-   (if expanded?
-     [armor-details armor shield])])
-
-(defn weapon-details-field [nm value]
-  [:div.p-2
-   [:span.f-w-b nm ":"]
-   [:span.m-l-5 value]])
-
-(defn yes-no [v]
-  (if v "yes" "no"))
-
-(defn weapon-details [{:keys [::weapon/description
-                              ::weapon/type
-                              ::weapon/damage-type
-                              ::mi/magical-damage-bonus
-                              ::mi/magical-attack-bonus
-                              ::weapon/ranged?
-                              ::weapon/melee?
-                              ::weapon/range
-                              ::weapon/two-handed?
-                              ::weapon/finesse?
-                              ::weapon/link
-                              ::weapon/versatile
-                              ::weapon/thrown]
-                       :as weapon}
-                      damage-modifier-fn]
-  [:div.m-t-10.i
-   (weapon-details-field "Type" (common/safe-name type))
-   (weapon-details-field "Damage Type" (common/safe-name damage-type))
-   (if magical-damage-bonus
-     (weapon-details-field "Magical Damage Bonus" magical-damage-bonus))
-   (if magical-attack-bonus
-     (weapon-details-field "Magical Attack Bonus" magical-attack-bonus))
-   (weapon-details-field "Melee/Ranged" (if melee? "melee" "ranged"))
-   (if range
-     (weapon-details-field "Range" (str (::weapon/min range) "/" (::weapon/max range) " ft.")))
-   (weapon-details-field "Finesse?" (yes-no finesse?))
-   (weapon-details-field "Two-handed?" (yes-no two-handed?))
-   (weapon-details-field "Versatile" (if versatile
-                                       (str (::weapon/damage-die-count versatile)
-                                            "d"
-                                            (::weapon/damage-die versatile)
-                                            (common/mod-str (damage-modifier-fn weapon false))
-                                            " damage")
-                                       "no"))
-   (if description
-     [:div.m-t-10 description])])
-
 (defn requires-attunement [attunement]
   (str
    " (requires attunement"
@@ -1068,19 +965,6 @@
             attunement) "or")))
    ")"))
 
-(defn item-subtitle [{:keys [::mi/owner ::mi/name ::mi/type ::mi/item-subtype ::mi/rarity ::mi/attunement] :as item}]
-  (if item-subtype
-    [:div.i
-     (str (if type (s/capitalize (common/kw-to-name type)))
-          (if (keyword? item-subtype)
-            (str " (" (s/capitalize (common/kw-to-name item-subtype)) ")"))
-          ", "
-          (if (string? rarity)
-            rarity
-            (common/kw-to-name rarity))
-          (if attunement
-            (requires-attunement attunement)))]))
-
 (defn item-summary [{:keys [::mi/owner ::mi/name ::mi/type ::mi/item-subtype ::mi/rarity ::mi/attunement] :as item}]
   (if item
     [:div.p-b-20.flex.align-items-c
@@ -1088,23 +972,26 @@
        [:div.m-r-5 [svg-icon "beer-stein" 24]])
      [:div
       [:span.f-s-24.f-w-b (or (:name item) name)]
-      [:div.f-s-16.opacity-5.f-w-b
-       [item-subtitle item]]]]))
+      [:div.f-s-16.i.f-w-b.opacity-5
+       (str (if type (s/capitalize (common/kw-to-name type)))
+            (if (keyword? item-subtype)
+              (str " (" (s/capitalize (common/kw-to-name item-subtype)) ")"))
+            ", "
+            (if (string? rarity)
+              rarity
+              (common/kw-to-name rarity))
+            (if attunement
+              (requires-attunement attunement)))]]]))
 
 (defn item-details [{:keys [::mi/summary ::mi/description ::mi/attunment]} single-column?]
   (if (or summary description)
     (paragraphs (or summary description) single-column?)))
 
-(defn item-component [{:keys [::mi/type ::mi/item-subtype] :as item} & [hide-summary? single-column? damage-modifier-fn]]
+(defn item-component [item & [hide-summary? single-column?]]
   [:div.m-l-10.l-h-19
    (if (not hide-summary?)
      [:div [item-summary item]])
-   [:div [item-details item single-column?]]
-   (case type
-     :weapon [weapon-details item damage-modifier-fn]
-     :armor (let [shield? (= item-subtype :shield)]
-              [armor-details (if shield? nil item) (if shield? item nil)])
-     nil)])
+   [:div [item-details item single-column?]]])
 
 (defn magic-item-result [item]
   [:div.white
@@ -1601,7 +1488,7 @@
          [:div:div.f-s-14
           [:table.w-100-p.t-a-l.striped
            [:tbody
-            [:tr.f-w-b.f-s-10
+            [:tr.f-w-b
              [:th.p-10 "Class"]
              [:th.p-10 (if mobile? "Sub." "Subclass")]
              [:th.p-10 (if mobile? "Lvl." "Level")]
@@ -1645,7 +1532,7 @@
          [:div.f-w-n.f-s-14
           [:table.w-100-p.t-a-l.striped
            [:tbody
-            [:tr.f-w-b.f-s-10
+            [:tr.f-w-b.f-s-12
              [:th.p-5 (if mobile? "Lvl." "Caster Levels")]
              (doall
               (map
@@ -1717,8 +1604,7 @@
 (defn dropdown [{:keys [items value on-change]}]
   [:select.builder-option.builder-option-dropdown.m-t-0
    {:value (or value "")
-    :on-change #(do (on-change (event-value %))
-                    (.stopPropagation %))}
+    :on-change #(on-change (event-value %))}
    (doall
     (map
      (fn [{:keys [value title]}]
@@ -1727,7 +1613,6 @@
         {:value value}
         title])
      items))])
-
 
 (defn labeled-dropdown [label cfg]
   [:div
@@ -1825,7 +1710,7 @@
             [:span.f-w-b (str @(subscribe [::char/spell-slots-remaining id lvl]) " remaining")])]
          [:table.w-100-p.t-a-l.striped
           [:tbody
-           [:tr.f-w-b.f-s-10
+           [:tr.f-w-b.f-s-12
             [:th.p-l-10.p-b-10.p-t-10 (if (and (not (zero? lvl))
                                                (seq prepares-spells))
                                         "Prepared? / Name"
@@ -1922,7 +1807,7 @@
        (if (seq prepares-spells)
          [:table.w-100-p.t-a-l.striped.f-s-12
           [:tbody
-           [:tr.f-w-b.f-s-10
+           [:tr.f-w-b
             [:th.p-10 "Class"]
             [:th.p-10 "Can Prepare"]]
            (doall
@@ -1973,25 +1858,26 @@
   (or (:name weapon)
       (::mi/name weapon)))
 
-(defn weapon-attack-comp [weapon off-hand? weapon-attack-modifier weapon-damage-modifier handedness]
+(defn weapon-attack-description [{:keys [::weapon/ranged?] :as weapon} damage-modifier attack-modifier]
+  (disp/attack-description (-> weapon
+                               (assoc :attack-type (if ranged? :ranged :melee))
+                               (assoc :damage-modifier damage-modifier)
+                               (assoc :attack-modifier attack-modifier)
+                               (dissoc :description))))
+
+(defn weapon-attack-comp [weapon off-hand? weapon-attack-modifier weapon-damage-modifier]
   [attack-comp
    (str (weapon-name weapon) (if off-hand? " (off hand)"))
-   (disp/weapon-attack-description
-    weapon
-    weapon-damage-modifier
-    weapon-attack-modifier
-    off-hand?
-    (not off-hand?)
-    handedness)])
+   (weapon-attack-description weapon
+                              (weapon-damage-modifier weapon off-hand?)
+                              (weapon-attack-modifier weapon))])
 
 (defn attacks-section [id]
   (let [attacks @(subscribe [::char/attacks id])
-        carried-weapons (into {} @(subscribe [::char/carried-weapons]))
         all-weapons-map @(subscribe [::mi/all-weapons-map])
         main-hand-weapon-kw @(subscribe [::char/main-hand-weapon id])
         main-hand-weapon (if main-hand-weapon-kw (all-weapons-map main-hand-weapon-kw))
         off-hand-weapon-kw @(subscribe [::char/off-hand-weapon id])
-        main-weapon-handedness @(subscribe [::char/main-weapon-handedness id])
         weapon-attack-modifier @(subscribe [::char/best-weapon-attack-modifier-fn id])
         weapon-damage-modifier @(subscribe [::char/best-weapon-damage-modifier-fn id])
         off-hand-weapon (if off-hand-weapon-kw (all-weapons-map off-hand-weapon-kw))]
@@ -2001,11 +1887,9 @@
        "Attacks"
        "pointy-sword"
        [:div.f-s-14
-        (if (and main-hand-weapon
-                 (get-in carried-weapons [main-hand-weapon-kw ::char-equip/status-2]))
-          [:div [weapon-attack-comp main-hand-weapon false weapon-attack-modifier weapon-damage-modifier main-weapon-handedness]])
-        (if (and off-hand-weapon
-                 (get-in carried-weapons [off-hand-weapon-kw ::char-equip/status-2]))
+        (if main-hand-weapon
+          [:div [weapon-attack-comp main-hand-weapon false weapon-attack-modifier weapon-damage-modifier]])
+        (if off-hand-weapon
           [:div [weapon-attack-comp off-hand-weapon true weapon-attack-modifier weapon-damage-modifier]])
         [:div
          (doall
@@ -2319,6 +2203,90 @@
            {:style notes-style
             :class-name "input"}]]]]]]]))
 
+(defn weapon-details-field [nm value]
+  [:div.p-2
+   [:span.f-w-b nm ":"]
+   [:span.m-l-5 value]])
+
+(defn yes-no [v]
+  (if v "yes" "no"))
+
+(defn weapon-details [{:keys [::weapon/description
+                              ::weapon/type
+                              ::weapon/damage-type
+                              ::mi/magical-damage-bonus
+                              ::mi/magical-attack-bonus
+                              ::weapon/ranged?
+                              ::weapon/melee?
+                              ::weapon/range
+                              ::weapon/two-handed?
+                              ::weapon/finesse?
+                              ::weapon/link
+                              ::weapon/versatile
+                              ::weapon/thrown]
+                       :as weapon}
+                      damage-modifier-fn]
+  [:div.m-t-10.i
+   (weapon-details-field "Type" (common/safe-name type))
+   (weapon-details-field "Damage Type" (common/safe-name damage-type))
+   (if magical-damage-bonus
+     (weapon-details-field "Magical Damage Bonus" magical-damage-bonus))
+   (if magical-attack-bonus
+     (weapon-details-field "Magical Attack Bonus" magical-attack-bonus))
+   (weapon-details-field "Melee/Ranged" (if melee? "melee" "ranged"))
+   (if range
+     (weapon-details-field "Range" (str (::weapon/min range) "/" (::weapon/max range) " ft.")))
+   (weapon-details-field "Finesse?" (yes-no finesse?))
+   (weapon-details-field "Two-handed?" (yes-no two-handed?))
+   (weapon-details-field "Versatile" (if versatile
+                                       (str (::weapon/damage-die-count versatile)
+                                            "d"
+                                            (::weapon/damage-die versatile)
+                                            (common/mod-str (damage-modifier-fn weapon false))
+                                            " damage")
+                                       "no"))
+   (if description
+     [:div.m-t-10 description])])
+
+(defn armor-details-section [{:keys [type
+                                     base-ac
+                                     weight
+                                     description
+                                     max-dex-mod
+                                     min-str
+                                     ::mi/magical-ac-bonus
+                                     stealth-disadvantage?]
+                              :or {magical-ac-bonus 0
+                                   base-ac 10}}
+                             {shield-magic-bonus ::magical-ac-bonus :or {shield-magic-bonus 0} :as shield}
+                             expanded?]
+  [:div
+   [:div (str (if type (str (common/safe-name type) ", ")) "base AC " (+ magical-ac-bonus shield-magic-bonus base-ac (if shield 2 0)) (if stealth-disadvantage? ", stealth disadvantage"))]
+   (if expanded?
+     [:div
+      [:div.m-t-10.i
+       (if type
+         (weapon-details-field "Type" (common/safe-name type)))
+       (weapon-details-field "Base AC" base-ac)
+       (if (not= magical-ac-bonus 0)
+         (weapon-details-field "Magical AC Bonus" magical-ac-bonus))
+       (if shield
+         (weapon-details-field "Shield Base AC Bonus" 2))
+       (if (and shield
+                (not= shield-magic-bonus 0))
+         (weapon-details-field "Shield Magical AC Bonus" shield-magic-bonus))
+       (if max-dex-mod
+         (weapon-details-field "Max DEX AC Bonus" max-dex-mod))
+       (if min-str
+         (weapon-details-field "Min Strength" min-str))
+       (weapon-details-field "Stealth Disadvantage?" (yes-no stealth-disadvantage?))
+       (if weight
+         (weapon-details-field "Weight" (str weight " lbs.")))
+       (if description
+         [:div.m-t-10 (str "Armor: " description)])
+       (if (:description shield)
+         [:div.m-t-10 (str "Shield: " (:description shield))])]])])
+
 (defn boolean-icon [v]
   [:i.fa {:class-name (if v "fa-check green" "fa-times red")}])
 
@@ -2346,7 +2314,8 @@
          [:div
           [:table.w-100-p.t-a-l.striped
            [:tbody
-            [:tr.f-w-b.f-s-10
+            [:tr.f-w-b
+             {:class-name (if mobile? "f-s-12")}
              [:th.p-10 "Name"]
              (if (not mobile?) [:th.p-10 "Proficient?"])
              [:th.p-10 "Details"]
@@ -2364,9 +2333,8 @@
                                    (nil? armor)
                                    (armor-profs key)
                                    (armor-profs type)))
-                     expanded? (@expanded-details k)
-                     react-key (str key (:key shield))]
-                 ^{:key react-key}
+                     expanded? (@expanded-details k)]
+                 ^{:key (str key (:key shield))}
                  [:tr.pointer
                   {:on-click (toggle-details-expanded-handler expanded-details k)}
                   [:td.p-10.f-w-b (str (or (::mi/name armor) (:name armor) "unarmored")
@@ -2406,7 +2374,8 @@
          [:div
           [:table.w-100-p.t-a-l.striped
            [:tbody
-            [:tr.f-w-b.f-s-10
+            [:tr.f-w-b
+             {:class-name (if mobile? "f-s-12")}
              [:th.p-10 "Name"]
              (if (not mobile?) [:th.p-10 "Proficient?"])
              [:th.p-10 "Details"]
@@ -2441,92 +2410,20 @@
                     [:td.p-10.f-w-b.f-s-18 (common/bonus-str (weapon-attack-modifier weapon))]])))
               all-weapons))]]]]))))
 
-(defn item-type [type-kw]
-  (case type-kw
-    :weapon :magic-weapons
-    :armor :magic-armor
-    :other-magic-items))
-
-(defn set-item-status-fn [id item-type item-index]
-  #(dispatch [::char/set-item-status id item-type item-index (keyword %)]))
-
-(def set-item-status-handler (memoize set-item-status-fn))
-
-(defn set-custom-item-status-fn [id custom-key item-index]
-  #(dispatch [::char/set-custom-item-status id custom-key item-index (keyword %)]))
-
-(def set-custom-item-status-handler (memoize set-custom-item-status-fn))
-
-(defn set-item-qty-fn [id item-type item-index]
-  #(dispatch [::char/set-item-qty id item-type item-index %]))
-
-(def set-item-qty-handler (memoize set-item-qty-fn))
-
-(defn change-custom-inventory-item-quantity-fn [custom-equipment-key i]
-  (fn [qty]
-    (dispatch [:change-custom-inventory-item-quantity custom-equipment-key i qty])))
-
-(def change-custom-inventory-item-quantity (memoize change-custom-inventory-item-quantity-fn))
-
-(defn set-custom-item-name-fn [selection-key i]
-  #(dispatch [::char/set-custom-item-name selection-key i %]))
-
-(def set-custom-item-name (memoize set-custom-item-name-fn))
-
-(defn magic-item-rows [id item-type-fn equippable? expanded-details item-cfgs item-map custom-key]
+(defn magic-item-rows [expanded-details magic-item-cfgs magic-weapon-cfgs magic-armor-cfgs]
   (let [magic-item-map @(subscribe [::mi/all-magic-items-map])
-        can-attune? @(subscribe [::mi/can-attune? id])
-        damage-modifier-fn @(subscribe [::char/weapon-damage-modifier-fn])
-        cant-attune? (complement can-attune?)
         mobile? @(subscribe [:mobile?])]
     (mapcat
-     (fn [item-data]
-       (let [item-cfg (if (vector? item-data) (second item-data) item-data)
-             i (:i item-cfg)
-             custom-name (::char-equip/name item-cfg)
-             item-kw (if (vector? item-data)
-                       (first item-data)
-                       i)
-             {:keys [::mi/name ::mi/type ::mi/item-subtype ::mi/rarity ::mi/attunement ::mi/description ::mi/summary] :as item} (item-map item-kw)
-             expanded? (@expanded-details item-kw)
-             expand-handler (toggle-details-expanded-handler expanded-details item-kw)
-             status (or (::char-equip/status-2 item-cfg)
-                        (if (::char-equip/equipped? item-cfg)
-                          :equipped
-                          :carried))
-             item-entity-type (item-type-fn item)]
+     (fn [[item-kw item-cfg]]
+       (let [{:keys [::mi/name ::mi/type ::mi/item-subtype ::mi/rarity ::mi/attunement ::mi/description ::mi/summary] :as item} (magic-item-map item-kw)
+             expanded? (@expanded-details item-kw)]
          [[:tr.pointer
-           [:td.p-10.f-w-b.w-100-p
-            (if custom-name
-              [text-field {:value custom-name
-                           :on-change (set-custom-item-name custom-key i)}]
-              [:div
-               {:on-click expand-handler}
-               (or (:name item) name)])]
-           [:td.p-5
-            [:div.w-100
-             [dropdown
-              {:items (cond-> [{:title "Stored"
-                                :value :stored}
-                               {:title "Carried"
-                                :value :carried}]
-                        equippable? (conj {:title "Equipped"
-                                           :value :equipped})
-                        (and attunement
-                             (can-attune? item)) (conj {:title "Attuned"
-                                                        :value :attuned}))
-               :on-change (if custom-key
-                            (set-custom-item-status-handler id custom-key i)
-                            (set-item-status-handler id item-entity-type i))
-               :value status}]]]
-           [:td.p-5
-            [:div.w-80
-             [number-field {:value (::char-equip/quantity item-cfg)
-                            :on-change (if custom-name
-                                         (change-custom-inventory-item-quantity custom-key i)
-                                         (set-item-qty-handler id item-entity-type i))}]]]
+           {:on-click (toggle-details-expanded-handler expanded-details item-kw)}
+           [:td.p-10.f-w-b (or (:name item) name)]
+           [:td.p-10 (str (common/kw-to-name type)
+                          ", "
+                          (common/kw-to-name rarity))]
            [:td.p-r-5
-            {:on-click expand-handler}
             [:div.orange
              (if (not mobile?)
                [:span.underline (if expanded? "less" "more")])
@@ -2535,79 +2432,42 @@
           (if expanded?
             [:tr
              [:td.p-10
-              {:col-span 4}
-              [:div
-               [:div.flex.justify-cont-end.m-b-5
-                [:button.form-button
-                 {:on-click (if custom-key
-                              (make-event-handler
-                               ::char/remove-custom-inventory-item
-                               id
-                               custom-key
-                               i)
-                              (make-event-handler
-                               ::char/remove-inventory-item
-                               id
-                               item-entity-type
-                               i))}
-                 "Delete"]]
-               [:div.f-w-b.m-l-10 [item-subtitle item]]
-               (let [with-type (case item-entity-type
-                                 :weapons (assoc item ::mi/type :weapon)
-                                 :armor (assoc item ::mi/type :armor)
-                                 item)]
-                 [:div [item-component with-type true true damage-modifier-fn]])]]])]))
-     (sort-by
-      (if custom-key
-        :i
-        key)
-      (map-indexed
-       (fn [i cfg]
-         (assoc-in cfg (if custom-key [:i] [1 :i]) i))
-       item-cfgs)))))
+              {:col-span 3}
+              [item-component item true true]]])]))
+     (merge
+      magic-item-cfgs
+      magic-weapon-cfgs
+      magic-armor-cfgs))))
 
-(defn magic-items-table []
+(defn magic-items-section-2 []
   (let [expanded-details (r/atom {})]
-    (fn [id item-type-fn equippable? item-cfgs item-map custom-key]
-      (let [mobile? @(subscribe [:mobile?])]
-        [:div.f-s-14
-         [:table.w-100-p.t-a-l.striped
-          [:tbody
-           [:tr.f-w-b.f-s-10
-            [:th.p-10 (if custom-key
-                        "Custom Item Name"
-                        "Item Name")]
-            [:th.p-10 "Status"]
-            [:th.p-10 "Quantity"]
-            [:th]]
-           (doall
-            (map-indexed
-             (fn [i row]
-               (with-meta
-                 row
-                 {:key i}))
-             (magic-item-rows id
-                              item-type-fn
-                              equippable?
-                              expanded-details
-                              item-cfgs
-                              item-map
-                              custom-key)))]]]))))
-
-(defn magic-items-section-2 [id]
-  [:div
-   [:div.flex.align-items-c
-    (svg-icon "orb-wand" 32)
-    [:span.m-l-5.f-w-b.f-s-18 "Other Magic Items"]]
-   (let [magic-item-cfgs @(subscribe [::char/magic-items id])
-         magic-weapon-cfgs @(subscribe [::char/magic-weapons id])
-         magic-armor-cfgs @(subscribe [::char/magic-armor id])]
-     [magic-items-table
-      id
-      (merge magic-item-cfgs
-             magic-weapon-cfgs
-             magic-armor-cfgs)
-      @(subscribe [::mi/all-magic-items-map])])])
+    (fn [id]
+      (let [mobile? @(subscribe [:mobile?])
+            magic-item-cfgs @(subscribe [::char/magic-items id])
+            magic-weapon-cfgs @(subscribe [::char/magic-weapons id])
+            magic-armor-cfgs @(subscribe [::char/magic-items id])]
+        [:div
+         [:div.flex.align-items-c
+          (svg-icon "orb-wand" 32)
+          [:span.m-l-5.f-w-b.f-s-18 "Other Magic Items"]]
+         [:div.f-s-14
+          [:table.w-100-p.t-a-l.striped
+           [:tbody
+            [:tr.f-w-b
+             {:class-name (if mobile? "f-s-12")}
+             [:th.p-10 "Name"]
+             [:th.p-10 "Details"]
+             [:th]]
+            (doall
+             (map-indexed
+              (fn [i row]
+                (with-meta
+                  row
+                  {:key i}))
+              (magic-item-rows expanded-details
+                               magic-item-cfgs
+                               magic-weapon-cfgs
+                               magic-armor-cfgs)))]]]]))))
 
 (defn other-equipment-section-2 []
   (let [expanded-details (r/atom {})]
@@ -2623,7 +2483,8 @@
          [:div
           [:table.w-100-p.t-a-l.striped
            [:tbody
-            [:tr.f-w-b.f-s-10
+            [:tr.f-w-b
+             {:class-name (if mobile? "f-s-12")}
              [:th.p-10 "Name"]
              [:th.p-10 "Qty."]
              [:th.p-10 "Details"]
@@ -2667,7 +2528,8 @@
          [:div
           [:table.w-100-p.t-a-l.striped
            [:tbody
-            [:tr.f-w-b.f-s-10
+            [:tr.f-w-b
+             {:class-name (if mobile? "f-s-12")}
              [:th.p-10 "Name"]
              [:td.p-10 (if mobile? "Prof?" "Proficient?")]
              (if skill-expertise
@@ -2703,7 +2565,8 @@
            [:div
             [:table.w-100-p.t-a-l.striped
              [:tbody
-              [:tr.f-w-b.f-s-10
+              [:tr.f-w-b
+               {:class-name (if mobile? "f-s-12")}
                [:th.p-10 "Name"]
                [:td.p-10 (if mobile? "Prof?" "Proficient?")]
                (if tool-expertise
@@ -2749,10 +2612,8 @@
   {:value :none
    :title "<none>"})
 
-(defn wield-fn [event-kw id item-map can-attune?]
-  #(let [item-kw (keyword %)
-         {:keys [::mi/attunement] :as item} (item-map item-kw)]
-     (dispatch [event-kw id item-kw (and attunement (can-attune? item))])))
+(defn wield-fn [event-kw id]
+  #(dispatch [event-kw id (keyword %)]))
 
 (def wield-handler (memoize wield-fn))
 
@@ -2760,253 +2621,98 @@
   (and (some? v)
        (not= :none v)))
 
-(defn map-lookup-xform [item-map]
-  (map
-   (fn [[key :as item]]
-     (item-map key))))
-
-(def dropdown-items-xform
-  (map
-   (fn [{:keys [name key] item-name ::mi/name}]
-     {:title (or name item-name)
-      :value key})))
-
-(def requires-attunement-xform
-  (filter ::mi/attunement))
-
-(def set-atom-handler
-  (memoize
-   (fn [a value]
-     #(reset! a value))))
-
-(defn add-inventory-item-fn [item-type-fn item-map custom-key]
-  (fn [e]
-     (let [value (event-value e)
-           item-key (keyword value)
-           item (get item-map item-key)
-           item-type-kw (item-type-fn item)
-           custom? (= :custom item-key)]
-       (if custom?
-         (dispatch [::char/new-custom-item custom-key])
-         (dispatch [:add-inventory-item item-type-kw item-key])))))
-
-(def add-inventory-item (memoize add-inventory-item-fn))
-
-(defn inventory-adder [item-type-fn items item-map & [unsorted? custom-key]]
-  [comps/selection-adder
-   (let [regular-items (map
-                        (fn [{:keys [name key :db/id]
-                              item-name ::mi/name}]
-                          {:name (or name item-name)
-                           :key (or id key)})
-                        items)
-         option-items (cond-> regular-items
-                        custom-key (conj {:name "<New Custom Item>"
-                                             :key :custom}))]
-     (if (not unsorted?)
-       (sort-by
-        :name
-        option-items)
-       option-items))
-   (add-inventory-item item-type-fn item-map custom-key)])
-
-(defn magic-item-type [{:keys [::mi/type]}]
-  (item-type type))
-
-(def inventory-tabs
-  [{:title "Magic Weapons"
-    :type-fn magic-item-type
-    :sub-key ::mi/magic-weapons
-    :char-sub-key ::char/magic-weapons
-    :map-sub-key ::mi/magic-weapon-map
-    :equippable? true}
-   {:title "Magic Ammunition"
-    :type-fn (fn [_] :magic-ammunition)
-    :sub-key ::mi/magic-ammunition
-    :char-sub-key ::char/magic-ammunition
-    :map-sub-key ::mi/magic-ammunition-map}
-   {:title "Magic Armor"
-    :type-fn magic-item-type
-    :sub-key ::mi/magic-armor
-    :char-sub-key ::char/magic-armor
-    :map-sub-key ::mi/magic-armor-map
-    :equippable? true}
-   {:title "Other Magic Items"
-    :type-fn magic-item-type
-    :sub-key ::mi/other-magic-items
-    :char-sub-key ::char/magic-items
-    :map-sub-key ::mi/other-magic-items-map
-    :equippable? true}
-   {:title "Ammunition"
-    :type-fn (fn [_] :ammunition)
-    :sub-key ::equip/ammunition
-    :char-sub-key ::char/ammunition
-    :map-sub-key ::equip/ammunition-map}
-   {:title "Weapons"
-    :type-fn (fn [_] :weapons)
-    :sub-key ::equip/weapons
-    :char-sub-key ::char/weapons
-    :map-sub-key ::equip/weapons-map
-    :equippable? true}
-   {:title "Armor"
-    :type-fn (fn [_] :armor)
-    :sub-key ::equip/armor
-    :char-sub-key ::char/armor
-    :map-sub-key ::equip/armor-map
-    :equippable? true}
-   {:title "Treasure"
-    :type-fn (fn [_] :treasure)
-    :sub-key ::mi/treasure
-    :char-sub-key ::char/treasure
-    :map-sub-key ::mi/treasure-map
-    :unsorted? true
-    :custom-key ::char/custom-treasure}
-   {:title "Misc."
-    :type-fn (fn [_] :equipment)
-    :sub-key ::equip/equipment
-    :char-sub-key ::char/equipment
-    :map-sub-key ::equip/equipment-map
-    :custom-key ::char/custom-equipment}])
-
-(def inventory-tabs-map
-  (common/map-by :title inventory-tabs))
-
-(defn inventory-manager []
-  (let [selected-tab (r/atom "Magic Weapons")]
-    (fn [id]
-      [:div
-       [:div.flex.flex-wrap
-        (doall
-         (map
-          (fn [{:keys [title]}]
-            ^{:key title}
-            [:button.p-10.m-t-5.m-r-5.f-s-10.no-box-shadow
-             {:on-click (set-atom-handler selected-tab title)
-              :class-name (if (= @selected-tab title)
-                            "form-button white"
-                            "empty-form-button main-text-color")}
-             title])
-          inventory-tabs))]
-       (let [{:keys [type-fn title char-sub-key sub-key map-sub-key equippable? unsorted? custom-key]} (inventory-tabs-map @selected-tab)
-             item-map @(subscribe [map-sub-key])]
-         [:div.m-t-10
-          [inventory-adder type-fn @(subscribe [sub-key]) item-map unsorted? custom-key]
-          [:div.m-t-10
-           [magic-items-table id type-fn equippable? @(subscribe [char-sub-key id]) item-map]]
-          (if custom-key
-            (let [custom-items @(subscribe [custom-key id])]
-              (if (seq custom-items)
-                [:div.m-t-10
-                 [magic-items-table id type-fn equippable? custom-items item-map custom-key]])))])])))
-
 (defn equipped-section [id]
   [:div
    [section-header "battle-gear" "Equipped Items"]
-   (let [all-armor-map @(subscribe [::mi/all-armor-map])
-         worn-armor-kw @(subscribe [::char/worn-armor id])
-         worn-armor (all-armor-map worn-armor-kw)
-         wielded-shield-kw @(subscribe [::char/wielded-shield id])
-         wielded-shield (all-armor-map wielded-shield-kw)
-         best-armor-combo @(subscribe [::char/best-armor-combo])
-         best-armor (:armor best-armor-combo)
-         best-shield (:shield best-armor-combo)
-         all-weapons-map @(subscribe [::mi/all-weapons-map])
-         carried-weapons @(subscribe [::char/carried-weapons id])
-         main-hand-weapon-kw @(subscribe [::char/main-hand-weapon id])
-         main-hand-weapon (all-weapons-map main-hand-weapon-kw)
-         main-weapon-handedness @(subscribe [::char/main-weapon-handedness id])
-         off-hand-weapon-kw @(subscribe [::char/off-hand-weapon id])
-         off-hand-weapon (all-weapons-map off-hand-weapon-kw)
-         dual-wield-weapon? @(subscribe [::char/dual-wield-weapon-fn id])
-         can-attune? @(subscribe [::mi/can-attune? id])
-         can-attune-xform (filter can-attune?)
-         full-armor-items-xform (comp (map-lookup-xform all-armor-map)
-                                      dropdown-items-xform)
-         weapon-lookup-xform (map-lookup-xform all-weapons-map)
-         armor-weapons-attuned-count (count
-                                      (filter
-                                       ::mi/attunement
-                                       [(if (or worn-armor (= :none worn-armor-kw))
-                                          worn-armor
-                                          best-armor)
-                                        (if (or wielded-shield (= :none wielded-shield-kw))
-                                          wielded-shield
-                                          best-shield)
-                                        main-hand-weapon
-                                        off-hand-weapon]))]
-     [:div
+   [:div
+    (let [all-armor-map @(subscribe [::mi/all-armor-map])
+          worn-armor @(subscribe [::char/worn-armor id])
+          wielded-shield @(subscribe [::char/wielded-shield id])
+          best-armor-combo @(subscribe [::char/best-armor-combo])]
       [:div.flex.flex-wrap
        (let [carried-armor @(subscribe [::char/carried-armor id])]
          [equipped-section-dropdown
           "Worn Armor"
           {:items (cons
                    none-item
-                   (into
-                    #{}
-                    full-armor-items-xform
+                   (map
+                    (fn [[key]]
+                      (let [{:keys [name]} (all-armor-map key)]
+                        {:title name
+                         :value key}))
                     carried-armor))
-           :value (or worn-armor-kw (-> best-armor-combo :armor :key))
-           :on-change (wield-handler ::char/don-armor id all-armor-map can-attune?)}])
+           :value (or worn-armor (-> best-armor-combo :armor :key))
+           :on-change (wield-handler ::char/don-armor id)}])
        (let [carried-shields @(subscribe [::char/carried-shields id])]
          [equipped-section-dropdown
           "Wielded Shield"
           {:items (cons
                    none-item
-                   (into
-                    #{}
-                    full-armor-items-xform
+                   (map
+                    (fn [[key]]
+                      (let [{:keys [name]} (all-armor-map key)]
+                        {:title name
+                         :value key}))
                     carried-shields))
-           :value (or wielded-shield-kw (-> best-armor-combo :shield :key))
-           :on-change (wield-handler ::char/wield-shield id all-armor-map can-attune?)}])]
+           :value (or wielded-shield (-> best-armor-combo :shield :key))
+           :on-change (wield-handler ::char/wield-shield id)}])])
+    (let [all-weapons-map @(subscribe [::mi/all-weapons-map])
+          carried-weapons @(subscribe [::char/carried-weapons id])
+          main-hand-weapon-kw @(subscribe [::char/main-hand-weapon id])
+          main-hand-weapon (all-weapons-map main-hand-weapon-kw)
+          off-hand-weapon-kw @(subscribe [::char/off-hand-weapon id])
+          dual-wield-weapon? @(subscribe [::char/dual-wield-weapon-fn id])]
       [:div.flex.flex-wrap
        [equipped-section-dropdown
         "Main Hand Weapon"
         {:items (cons
                  none-item
-                 (into
-                  #{}
-                  (comp
-                   weapon-lookup-xform
-                   dropdown-items-xform)
+                 (map
+                  (fn [[key]]
+                    (let [{:keys [name]} (all-weapons-map key)]
+                      {:title name
+                       :value key}))
                   carried-weapons))
          :value main-hand-weapon-kw
-         :on-change (wield-handler ::char/wield-main-hand-weapon id all-weapons-map can-attune?)}]
-       (if (::weapon/versatile main-hand-weapon)
-         [equipped-section-dropdown
-          "Two-Handed?"
-          {:items [{:title "One-Handed"
-                    :value :one-handed}
-                   {:title "Two-Handed"
-                    :value :two-handed}]
-           :value main-weapon-handedness
-           :on-change (make-args-event-handler
-                       ::char/set-main-weapon-handedness
-                       (fn [v]
-                         [id (keyword v)]))}])
+         :on-change (wield-handler ::char/wield-main-hand-weapon id)}]
        (if (or (equipped? off-hand-weapon-kw)
                (and (equipped? main-hand-weapon-kw)
-                    (not= :two-handed main-weapon-handedness)
                     (dual-wield-weapon? main-hand-weapon)))
          [equipped-section-dropdown
           "Off Hand Weapon"
           {:items (cons
                    none-item
-                   (into
-                    #{}
+                   (sequence
                     (comp
-                     weapon-lookup-xform
                      (filter
-                      (fn [{:keys [key]}]
+                      (fn [[key]]
                         (-> all-weapons-map
                             key
                             dual-wield-weapon?)))
-                     dropdown-items-xform)
+                     (map
+                      (fn [[key]]
+                        (let [{:keys [name]} (all-weapons-map key)]
+                          {:title name
+                           :value key}))))
                     carried-weapons))
            :value off-hand-weapon-kw
-           :on-change (wield-handler ::char/wield-off-hand-weapon id all-weapons-map can-attune?)}])]
-      [:div.m-t-20
-       [:div.f-w-b "Inventory"]
-       [inventory-manager id]]])])
+           :on-change (wield-handler ::char/wield-off-hand-weapon id)}])
+       #_[:div.flex.flex-wrap
+        [equipped-section-dropdown
+         "Attuned Magic Item 1"
+         {:items [none-item]
+          :value nil
+          :on-change (fn [])}]
+        [equipped-section-dropdown
+         "Attuned Magic Item 2"
+         {:items [none-item]
+          :value nil
+          :on-change (fn [])}]
+        [equipped-section-dropdown
+         "Attuned Magic Item 3"
+         {:items [none-item]
+          :value nil
+          :on-change (fn [])}]]])]])
 
 (defn combat-details [num-columns id]
   (let [weapon-profs @(subscribe [::char/weapon-profs id])
@@ -3050,9 +2756,9 @@
       [list-item-section "Condition Immunities" nil condition-immunities resistance-str]]
      [:div.m-t-30
       [list-item-section "Immunities" nil immunities resistance-str]]
-     #_[:div.m-t-30
+     [:div.m-t-30
       [weapons-section-2 id]]
-     #_[:div.m-t-30
+     [:div.m-t-30
       [armor-section-2 id]]
      [:div
       {:class-name (if (= 2 num-columns) "w-50-p m-l-20")}
@@ -3065,13 +2771,7 @@
 (def make-event-handler
   (memoize
    (fn [event-kw & args]
-     #(dispatch (vec (cons event-kw args))))))
-
-(def make-stop-prop-handler
-  (memoize
-   (fn [event-kw & args]
-     #(do (dispatch (vec (cons event-kw args)))
-          (.stopPropagation %)))))
+      #(dispatch (vec (cons event-kw args))))))
 
 (defn features-details [num-columns id]
   (let [resistances @(subscribe [::char/resistances id])
@@ -3143,13 +2843,13 @@
   [:div
    [:div.m-t-30
     [equipped-section id]]
-   #_[:div.m-t-30
+   [:div.m-t-30
     [weapons-section-2 id]]
-   #_[:div.m-t-30
+   [:div.m-t-30
     [armor-section-2 id]]
-   #_[:div.m-t-30
+   [:div.m-t-30
     [magic-items-section-2 id]]
-   #_[:div.m-t-30
+   [:div.m-t-30
     [other-equipment-section-2 id]]])
 
 (defn details-tab [title icon device-type selected? on-select]
@@ -3527,15 +3227,6 @@
   (memoize
    (fn [event-kw & [arg-fn]]
      #(dispatch [event-kw (if arg-fn (arg-fn %) %)]))))
-
-(def make-args-event-handler
-  (memoize
-   (fn [event-kw & [arg-fn]]
-     #(dispatch (vec
-                 (concat [event-kw]
-                         (if arg-fn
-                           (arg-fn %)
-                           [%])))))))
 
 (defn base-weapon-selector []
   (let [mobile? @(subscribe [:mobile?])
