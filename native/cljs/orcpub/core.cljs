@@ -17,6 +17,7 @@
     [text {:style {:color "white" :text-align "center" :font-weight "bold"}} "press me"]]])
 
 (defn app-root []
+  (prn "APP ROOT")
   [view {:style {:flex 1}}
    [view {:style {:background-color "#313a4d"
                   :padding-top 20
