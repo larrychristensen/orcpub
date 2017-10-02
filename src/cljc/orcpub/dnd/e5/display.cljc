@@ -98,12 +98,9 @@
    "/"
    (s/replace (common/safe-name units) #"-" " ")))
 
-(defn attack-description [{:keys [description summary attack-type area-type damage-type damage-die damage-die-count damage-modifier attack-modifier save save-dc page source wield-type] :as attack}]
+(defn attack-description [{:keys [description summary attack-type area-type damage-type damage-die damage-die-count damage-modifier attack-modifier save save-dc page source] :as attack}]
   (let [summary (or summary description)
-        attack-mod-str (if attack-modifier (str (common/bonus-str attack-modifier) " to hit, "))
-        two-handed-str (if wield-type
-                         (str (name wield-type) ", "))
-        attack-details (str two-handed-str attack-mod-str)]
+        attack-mod-str (if attack-modifier (str (common/bonus-str attack-modifier) " to hit, "))]
     (str
      (if summary (str summary ", "))
      (case attack-type
@@ -111,8 +108,8 @@
                :line (str (:line-width attack) " x " (:line-length attack) " ft. line, ")
                :cone (str (:length attack) " ft. cone, ")
                nil)
-       :ranged (str "ranged, " attack-details)
-       (str "melee, " attack-details))
+       :ranged (str "ranged, " attack-mod-str)
+       (str "melee, " attack-mod-str))
      (or damage-die-count
          (::weapons/damage-die-count attack))
      "d"
@@ -124,34 +121,6 @@
      " damage"
      (if save (str ", DC" save-dc " " (common/safe-name save) " save"))
      (if page (str " (" (source-description source page) ")")))))
-
-(defn wield-type [main-hand-weapon? off-hand-weapon? main-weapon-handedness]
-  (cond
-    (and
-     main-hand-weapon?
-     (= main-weapon-handedness
-        :two-handed)) :two-handed
-    main-hand-weapon? :main-hand
-    off-hand-weapon? :off-hand
-    :else nil))
-
-(defn weapon-attack-description [{:keys [::weapons/ranged? ::weapons/versatile ::weapons/two-handed?] :as weapon} damage-modifier-fn attack-modifier-fn off-hand-weapon? main-hand-weapon? main-weapon-handedness]
-  (let [wield-type (wield-type main-hand-weapon?
-                               off-hand-weapon?
-                               main-weapon-handedness)
-        wield-two-handed? (= wield-type :two-handed)
-        wield-main-hand? (= wield-type :main-hand)
-        wield-off-hand (= wield-type :off-hand)
-        versatile? (and versatile
-                        wield-two-handed?)]
-    (attack-description (cond-> weapon
-                          ranged? (assoc :attack-type :ranged)
-                          true (assoc :damage-modifier (damage-modifier-fn weapon off-hand-weapon?))
-                          true (assoc :attack-modifier (attack-modifier-fn weapon))
-                          versatile? (merge versatile)
-                          true (assoc :wield-type (if (or versatile? two-handed?)
-                                                    :two-handed
-                                                    wield-type))))))
 
 (defn action-description [{:keys [description summary source page duration range frequency qualifier]}]
   (str

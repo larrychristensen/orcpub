@@ -566,9 +566,7 @@
    ::char5e/spell-modifiers char5e/spell-modifiers
    ::char5e/spell-slot-factors char5e/spell-slot-factors
    ::char5e/total-spellcaster-levels char5e/total-spellcaster-levels
-   ::char5e/weapons char5e/normal-weapons-inventory
-   ::char5e/ammunition char5e/ammunition-inventory
-   ::char5e/magic-ammunition char5e/magic-ammunition-inventory
+   ::char5e/weapons char5e/normal-weapons-inventory 
    ::char5e/magic-weapons char5e/magic-weapons-inventory
    ::char5e/equipment char5e/normal-equipment-inventory
    ::char5e/custom-equipment char5e/custom-equipment
@@ -610,17 +608,10 @@
    ::char5e/feats char5e/feats
    ::char5e/features-used char5e/features-used
    ::char5e/main-hand-weapon char5e/main-hand-weapon
-   ::char5e/main-weapon-handedness char5e/main-weapon-handedness
    ::char5e/off-hand-weapon char5e/off-hand-weapon
    ::char5e/worn-armor char5e/worn-armor
    ::char5e/wielded-shield char5e/wielded-shield
    ::char5e/attuned-magic-items char5e/attuned-magic-items})
-
-(reg-sub
- ::char5e/spellcaster?
- :<- [::char5e/spell-slot-factors]
- (fn [spell-slot-factors]
-   (boolean spell-slot-factors)))
 
 (doseq [[sub-key char-fn] character-subs]
   (reg-sub
@@ -675,7 +666,7 @@
    [(subscribe [::char5e/magic-armor id])
     (subscribe [::char5e/armor id])])
  (fn [[magic-armor armor] _]
-   (concat magic-armor armor)))
+   (merge magic-armor armor)))
 
 (reg-sub
  ::char5e/non-shield-armor
@@ -723,20 +714,13 @@
         (= :shield (:type item))))
     all-armor)))
 
-(def carried-statuses
-  #{:carried :equipped :attuned})
-
-(defn carried? [[_ {:keys [::char-equip5e/carried? ::char-equip5e/status-2]}]]
-  (or (not= false carried?)
-      (carried-statuses status)))
-
 (reg-sub
  ::char5e/carried-armor
  (fn [[_ id]]
    (subscribe [::char5e/non-shield-armor id]))
  (fn [armor]
    (filter
-    carried?
+    (comp ::char-equip5e/equipped? val)
     armor)))
 
 (reg-sub
@@ -745,7 +729,7 @@
    (subscribe [::char5e/shields id]))
  (fn [armor]
    (filter
-    carried?
+    (comp ::char-equip5e/equipped? val)
     armor)))
 
 (reg-sub
@@ -754,15 +738,7 @@
    [(subscribe [::char5e/magic-weapons id])
     (subscribe [::char5e/weapons id])])
  (fn [[magic-weapons weapons] _]
-   (concat magic-weapons weapons)))
-
-(reg-sub
- ::char5e/all-ammunition
- (fn [[_ id]]
-   [(subscribe [::char5e/magic-ammunition id])
-    (subscribe [::char5e/ammunition id])])
- (fn [[magic-ammunition ammunition] _]
-   (concat magic-ammunition ammunition)))
+   (merge magic-weapons weapons)))
 
 (reg-sub
  ::char5e/carried-weapons
@@ -770,7 +746,7 @@
    (subscribe [::char5e/all-weapons id]))
  (fn [weapons]
    (filter
-    carried?
+    (comp ::char-equip5e/equipped? val)
     weapons)))
 
 (reg-sub
