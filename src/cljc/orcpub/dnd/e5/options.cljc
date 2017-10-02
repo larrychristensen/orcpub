@@ -1598,6 +1598,19 @@
                       :max nil
                       :options (map :key skills/skills)}))
 
+(def homebrew-armor-prof-selection
+  (t/selection-cfg
+   {:name "Armor Proficiency"
+    :key :armor-prof
+    :tags #{:profs}
+    :options (map
+              (fn [armor-type]
+                (t/option-cfg
+                 {:name (s/capitalize (name armor-type))
+                  :key armor-type
+                  :modifiers [(modifiers/armor-proficiency armor-type)]}))
+              [:light :medium :heavy :shields])}))
+
 (def homebrew-ability-increase-selection
   (ability-increase-selection-2
    {:min 0}))
@@ -1678,7 +1691,8 @@
                  homebrew-ability-increase-selection
                  homebrew-feat-selection
                  homebrew-speed-selection
-                 homebrew-darkvision-selection]}))
+                 homebrew-darkvision-selection
+                 homebrew-armor-prof-selection]}))
 
 (defn custom-race-builder []
   (custom-option-builder
@@ -1721,7 +1735,8 @@
                  homebrew-ability-increase-selection
                  homebrew-feat-selection
                  homebrew-speed-selection
-                 homebrew-darkvision-selection]}))
+                 homebrew-darkvision-selection
+                 homebrew-armor-prof-selection]}))
 
 (defn custom-background-builder []
   (custom-option-builder
@@ -2199,7 +2214,8 @@
                   homebrew-al-illegal]
       :selections [homebrew-skill-prof-selection
                    homebrew-tool-prof-selection
-                   homebrew-feat-selection]})))
+                   homebrew-feat-selection
+                   homebrew-armor-prof-selection]})))
 
 (defn level-option [{:keys [name
                             plugin?
