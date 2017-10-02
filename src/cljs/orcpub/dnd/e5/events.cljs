@@ -151,7 +151,7 @@
 (def selection-randomizers
   {:ability-scores (fn [s _]
                      (fn [_] {::entity/key :standard-roll
-                              ::entity/value (char5e/standard-ability-rolls)}))
+                             ::entity/value (char5e/standard-ability-rolls)}))
    :hit-points (fn [{[_ class-kw] ::entity/path} built-char]
                  (fn [_]
                    (random-hit-points-option (char5e/levels built-char) class-kw)))})
@@ -638,11 +638,7 @@
    (fn [item-cfg]
      ;; the select keys here is to keep :equipped and :name while wiping out the starting-equipment indicators
      (assoc
-      (select-keys
-       item-cfg
-       [::char-equip5e/name
-        ::char-equip5e/equipped?
-        ::char-equip5e/status-2])
+      (select-keys item-cfg [::char-equip5e/name ::char-equip5e/equipped?])
       ::char-equip5e/quantity
       quantity))))
 
@@ -655,36 +651,6 @@
  :remove-inventory-item
  character-interceptors
  event-handlers/remove-inventory-item)
-
-(defn update-character-fx [db id update-fn & [other-events]]
-  (if id
-    {:db (update-in
-          db
-          [::char5e/character-map (js/parseInt id)]
-          update-fn)}
-    {:dispatch [:set-character (update-fn (:character db))]}))
-
-(reg-event-fx
- ::char5e/remove-inventory-item
- [db-char->local-store]
- (fn [{:keys [db]} [_ id item-type item-index]]
-   (update-character-fx db id #(update-in
-                                %
-                                [::entity/options
-                                 item-type]
-                                common/remove-at-index
-                                item-index))))
-
-(reg-event-fx
- ::char5e/remove-custom-inventory-item
- [db-char->local-store]
- (fn [{:keys [db]} [_ id custom-key item-index]]
-   (update-character-fx db id #(update-in
-                                %
-                                [::entity/values
-                                 custom-key]
-                                common/remove-at-index
-                                item-index))))
 
 (defn remove-custom-inventory-item [character [_ custom-equipment-key name]]
   (update-in
@@ -845,8 +811,8 @@
          flat-params (flatten seq-params)
          path (apply routes/path-for (or handler new-route) flat-params)]
      (when (and js/window.location
-                secure?
-                (not= "localhost" js/window.location.hostname))
+              secure?
+              (not= "localhost" js/window.location.hostname))
        (set! js/window.location.href (make-url "https"
                                                js/window.location.hostname
                                                path
@@ -1028,7 +994,7 @@
    {:db (update db :user-data merge (-> response :body))
     :dispatch [:route (or
                        (:return-route db)
-                       routes/dnd-e5-char-builder-route)]}))
+                        routes/dnd-e5-char-builder-route)]}))
 
 (defn show-old-account-message []
   [:show-login-message [:div  "There is no account for the email or username, please double-check it. Usernames and passwords are case sensitive, email addresses are not. You can also try to " [:a {:href (routes/path-for routes/register-page-route)} "register"] "." [:div.f-w-n.i.m-t-10 "Accounts from the old OrcPub have not been ported over yet, but you can create a new account in the mean time and we will link it with your old account as soon as possible if you use the same email address."]]])
@@ -1071,7 +1037,7 @@
         (go (let [path (routes/path-for routes/fb-login-route)
                   url (backend-url path)
                   {:keys [status] :as response} (<! (http/post url
-                                                               {:json-params (js->clj response)}))]
+                                                     {:json-params (js->clj response)}))]
               (case status
                 200 (dispatch [:login-success true response])
                 401 (dispatch [:show-login-message "You must allow OrcPub to view your email address so we can create your account. We will not send you emails unless you later give us permission to. In Facebook, please go to 'Settings' > 'Apps', delete 'orcpub', and try again."])
@@ -1492,7 +1458,7 @@
                        (monsters/monster-map kw) {:type :monster
                                                   :result (monsters/monster-map kw)}
                        (mi/magic-item-map kw) {:type :magic-item
-                                               :result (mi/magic-item-map kw)}
+                                                        :result (mi/magic-item-map kw)}
                        (= "tavern name" search-text) {:type :tavern-name
                                                       :result (char-rand5e/random-tavern-name)}
                        name-result name-result
@@ -1570,8 +1536,8 @@
    (assoc db
           ::char5e/item-text-filter filter-text
           ::char5e/filtered-items (if (>= (count filter-text) 3)
-                                    (filter-items filter-text)
-                                    @(subscribe [::char5e/sorted-items])))))
+                                     (filter-items filter-text)
+                                     @(subscribe [::char5e/sorted-items])))))
 
 (reg-event-db
  ::char5e/toggle-selected
@@ -1612,6 +1578,14 @@
     ::spells/slots-used
     (common5e/slot-level-key level)]
    (partial toggle-set i)))
+
+(defn update-character-fx [db id update-fn]
+  (if id
+    {:db (update-in
+          db
+          [::char5e/character-map (js/parseInt id)]
+          update-fn)}
+    {:dispatch [:set-character (update-fn (:character db))]}))
 
 (reg-event-fx
  ::char5e/toggle-spell-prepared
@@ -1672,15 +1646,15 @@
 
 (defn toggle-feature-used [character units nm]
   (-> character
-      (update-in    
-       [::entity/values
-        ::char5e/features-used
-        units]
-       (partial toggle-set nm))
-      (dissoc
-       [::entity/values
-        ::char5e/features-used
-        :db/id])))
+   (update-in    
+    [::entity/values
+     ::char5e/features-used
+     units]
+    (partial toggle-set nm))
+   (dissoc
+    [::entity/values
+     ::char5e/features-used
+     :db/id])))
 
 (reg-event-fx
  ::char5e/toggle-feature-used
@@ -2138,191 +2112,54 @@
  (fn [db [_ id]]
    (assoc-in db [::char5e/delete-confirmation-shown? id] false)))
 
-(defn update-item-prop [character item-kw item-type-kw item-prop update-fn]
-  (update-in
-   character
-   [::entity/options
-    item-type-kw]
-   (fn [items]
-     (mapv
-      (fn [{:keys [::entity/key] :as item}]
-        (if (= key item-kw)
-          (update
-           item
-           ::entity/value
-           update-fn)
-          item))
-      items))))
-
-(defn toggle-item-prop [character item-kw item-type-kw item-prop]
-  (update-item-prop character item-kw item-type-kw item-prop (partial toggle-prop item-prop)))
-
-(defn set-item-prop [character item-kw item-type-kw item-prop value]
-  (update-item-prop
-   character
-   item-kw
-   item-type-kw
-   item-prop
-   #(assoc % item-prop value)))
-
-(defn reg-wield-item-fx [event-kw value-prop item-type-kw]
-  (reg-event-fx
-   event-kw
-   [db-char->local-store]
-   (fn [{:keys [db]} [_ id item-kw attune?]]
-     (update-character-fx db
-                          id
-                          #(-> %
-                               (assoc-in
-                                [::entity/values
-                                 value-prop]
-                                item-kw)
-                               (set-item-prop
-                                weapon-kw
-                                item-type-kw
-                                ::char-equip5e/status-2
-                                (if attune? :attuned :equipped)))))))
-
-(reg-wield-item-fx
+(reg-event-fx
  ::char5e/don-armor
- ::char5e/worn-armor
- :magic-armor)
-
-(reg-wield-item-fx
- ::char5e/wield-shield
- ::char5e/wielded-shield
- :magic-armor)
-
-(defn update-main-hand-weapon-status [weapon-kw attune? kw _]
-  (if (= kw weapon-kw)
-    (if attune? :attuned :equipped)
-    :carried))
-
-(defn update-main-hand-weapon-statues [weapon-kw attune? weapons]
-  (mapv
-   (fn [{:keys [::entity/key] :as weapon-option}]
-     (update-in
-      weapon-option
-      [::entity/value ::char-equip5e/status-2]
-      (partial update-main-hand-weapon-status weapon-kw attune? key)))
-   weapons))
+ (fn [{:keys [db]} [_ id armor-kw]]
+   (update-character-fx db id #(assoc-in
+                                %
+                                [::entity/values
+                                 ::char5e/worn-armor]
+                                armor-kw))))
 
 (reg-event-fx
- ::char5e/set-main-weapon-handedness
- [db-char->local-store]
- (fn [{:keys [db]} [_ id handedness]]
-   (update-character-fx db
-                        id
-                        #(update
-                          %
-                          ::entity/values
-                          assoc
-                          ::char5e/main-weapon-handedness
-                          handedness))))
+ ::char5e/wield-shield
+ (fn [{:keys [db]} [_ id shield-kw]]
+   (update-character-fx db id #(assoc-in
+                                %
+                                [::entity/values
+                                 ::char5e/wielded-shield]
+                                shield-kw))))
 
 (reg-event-fx
  ::char5e/wield-main-hand-weapon
- [db-char->local-store]
- (fn [{:keys [db]} [_ id weapon-kw attune?]]
-   (let [status-update-fn (partial update-main-hand-weapon-statues weapon-kw attune?)]
-     (update-character-fx db
-                          id
-                          #(-> %
-                               (update
+ (fn [{:keys [db]} [_ id weapon-kw]]
+   (update-character-fx db id #(update
+                                %
                                 ::entity/values
                                 assoc
                                 ::char5e/main-hand-weapon
                                 weapon-kw
                                 ::char5e/off-hand-weapon
-                                :none
-                                ::char5e/main-weapon-handedness
-                                nil)
-                               (update-in
-                                [::entity/options
-                                 :weapons]
-                                status-update-fn)
-                               (update-in
-                                [::entity/options
-                                 :magic-weapons]
-                                status-update-fn))))))
-
-(defn update-off-hand-weapon-statuses [weapon-kw main-hand-weapon-kw attune? weapons]
-  (mapv
-   (fn [{:keys [::entity/key] :as weapon-option}]
-     (update-in
-      weapon-option
-      [::entity/value ::char-equip5e/status-2]
-      (fn [status]
-        (if (= key weapon-kw)
-          (if attune? :attuned :equipped)
-          (if (= key main-hand-weapon-kw)
-            status
-            :carried)))))
-   weapons))
+                                :none))))
 
 (reg-event-fx
  ::char5e/wield-off-hand-weapon
- [db-char->local-store]
- (fn [{:keys [db]} [_ id weapon-kw attune?]]
-   (update-character-fx db
-                        id
-                        #(let [main-hand-weapon-kw (get-in % [::entity/values ::char5e/main-hand-weapon])
-                               status-update-fn (partial update-off-hand-weapon-statuses weapon-kw main-hand-weapon-kw attune?)]
-                           (-> %
-                               (update
-                                ::entity/values
-                                assoc
-                                ::char5e/off-hand-weapon
-                                weapon-kw)
-                               (update-in
-                                [::entity/options
-                                 :weapons]
-                                status-update-fn)
-                               (update-in
-                                [::entity/options
-                                 :magic-weapons]
-                                status-update-fn))))))
+ (fn [{:keys [db]} [_ id weapon-kw]]
+   (update-character-fx db id #(assoc-in
+                                %
+                                [::entity/values
+                                 ::char5e/off-hand-weapon]
+                                weapon-kw))))
 
 (reg-event-fx
- ::char5e/set-item-status
- [db-char->local-store]
- (fn [{:keys [db]} [_ id item-type item-index status-kw]]
-   (update-character-fx db
-                        id
-                        #(assoc-in
-                          %
-                          [::entity/options
-                           item-type
-                           item-index
-                           ::entity/value
-                           ::char-equip5e/status-2]
-                          status-kw))))
-
-(reg-event-fx
- ::char5e/set-custom-item-status
- [db-char->local-store]
- (fn [{:keys [db]} [_ id custom-equipment-key item-index status-kw]]
-   (update-character-fx db
-                        id
-                        #(assoc-in
-                          %
-                          [::entity/values
-                           custom-equipment-key
-                           item-index
-                           ::char-equip5e/status-2]
-                          status-kw))))
-
-(reg-event-fx
- ::char5e/set-item-qty
- [db-char->local-store]
- (fn [{:keys [db]} [_ id item-type item-index qty]]
-   (update-character-fx db
-                        id
-                        #(assoc-in
-                          %
-                          [::entity/options
-                           item-type
-                           item-index
-                           ::entity/value
-                           ::char-equip5e/quantity]
-                          qty))))
+ ::char5e/attune-magic-item
+ (fn [{:keys [db]} [_ id i weapon-kw]]
+   (update-character-fx db id #(update-in
+                                %
+                                [::entity/values
+                                 ::char5e/attuned-magic-items]
+                                (fn [items]
+                                  (assoc
+                                   (or items [:none :none :none])
+                                   i
+                                   weapon-kw))))))

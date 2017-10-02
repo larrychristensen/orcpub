@@ -248,8 +248,7 @@
     [::char5e/worn-armor
      ::char5e/wielded-shield
      ::char5e/main-hand-weapon
-     ::char5e/off-hand-weapon
-     ::char5e/main-weapon-handedness])
+     ::char5e/off-hand-weapon])
    (map
     fulltext-prop
     [::char5e/character-name
@@ -322,10 +321,9 @@
 (def character-equipment-schema
   (concat
    [(string-prop ::char-equip-5e/name)
-    (long-prop-no-history ::char-equip-5e/quantity)
-    (kw-prop-no-history ::char-equip-5e/status-2)]
+    (long-prop ::char-equip-5e/quantity)]
    (map
-    bool-prop-no-history
+    bool-prop
     [::char-equip-5e/equipped?
      ::char-equip-5e/background-starting-equipment?
      ::char-equip-5e/class-starting-equipment?])))

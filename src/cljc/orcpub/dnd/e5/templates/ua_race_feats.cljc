@@ -54,7 +54,7 @@
                                :page 1
                                :source :ua-race-feats
                                :prereqs [(opt5e/race-prereq "Halfling")]
-                               :summary "Allow an ally within 30 ft. to reroll a 1 on an attack roll, ability check, or save."})
+                               :summary "Allow and ally within 30 ft. to reroll a 1 on an attack roll, ability check, or save."})
                              (opt5e/feat-option
                               {:name "Critter Friend"
                                :page 1
