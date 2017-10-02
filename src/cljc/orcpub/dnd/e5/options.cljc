@@ -1603,6 +1603,9 @@
    {:name "Armor Proficiency"
     :key :armor-prof
     :tags #{:profs}
+    :min 0
+    :max nil
+    :multiselect? true
     :options (map
               (fn [armor-type]
                 (t/option-cfg
@@ -1610,6 +1613,27 @@
                   :key armor-type
                   :modifiers [(modifiers/armor-proficiency armor-type)]}))
               [:light :medium :heavy :shields])}))
+
+(def homebrew-weapon-prof-selection
+  (t/selection-cfg
+   {:name "Weapon Proficiency"
+    :key :weapon-prof
+    :tags #{:profs}
+    :min 0
+    :max nil
+    :multiselect? true
+    :options (map
+              (fn [{:keys [name key]}]
+                (t/option-cfg
+                 {:name name
+                  :key key
+                  :modifiers [(modifiers/weapon-proficiency key)]}))
+              (conj
+               weapons/weapons
+               {:name "Simple"
+                :key :simple}
+               {:name "Martial"
+                :key :martial}))}))
 
 (def homebrew-ability-increase-selection
   (ability-increase-selection-2
@@ -1692,7 +1716,8 @@
                  homebrew-feat-selection
                  homebrew-speed-selection
                  homebrew-darkvision-selection
-                 homebrew-armor-prof-selection]}))
+                 homebrew-armor-prof-selection
+                 homebrew-weapon-prof-selection]}))
 
 (defn custom-race-builder []
   (custom-option-builder
@@ -1736,7 +1761,8 @@
                  homebrew-feat-selection
                  homebrew-speed-selection
                  homebrew-darkvision-selection
-                 homebrew-armor-prof-selection]}))
+                 homebrew-armor-prof-selection
+                 homebrew-weapon-prof-selection]}))
 
 (defn custom-background-builder []
   (custom-option-builder
@@ -2215,7 +2241,8 @@
       :selections [homebrew-skill-prof-selection
                    homebrew-tool-prof-selection
                    homebrew-feat-selection
-                   homebrew-armor-prof-selection]})))
+                   homebrew-armor-prof-selection
+                   homebrew-weapon-prof-selection]})))
 
 (defn level-option [{:keys [name
                             plugin?
