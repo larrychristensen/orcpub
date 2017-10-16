@@ -1932,7 +1932,7 @@ At Higher Levels. When you cast this spell using a spell slot of 4th level or hi
                 :page 234
                 :summary "A creature takes 3d6 psychic damage and must use its reaction to move as far away from you as it can. It takes half damage and doesn't have to move on successful WIS save. Damage increases by 1d6 for each slot above 1st."}
                {
-                :name divination
+                :name "Divination"
                 :ritual true
                 :school divination
                 :level 4
