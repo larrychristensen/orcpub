@@ -680,7 +680,7 @@
                      :options options})]})))
 
 (defn language-selection
-  ([langs num]
+  ([langs & [num]]
   (t/selection-cfg
    {:name "Languages"
     :options (map
@@ -690,7 +690,7 @@
     :ref [:languages]
     :multiselect? true
     :tags #{:profs :language-profs}
-    :min num
+    :min (or num 0)
     :max num}))
   ([language-options]
    (let [{lang-num :choose lang-options :options} language-options
@@ -699,7 +699,7 @@
                     (keys lang-options))]
      (language-selection (map language-map lang-kws) lang-num))))
 
-(defn any-language-selection [num]
+(defn any-language-selection [& [num]]
   (language-selection languages num))
 
 (defn maneuver-option [name & [desc]]
@@ -1598,6 +1598,18 @@
                       :max nil
                       :options (map :key skills/skills)}))
 
+(defn homebrew-language-selection [& [min max]]
+  (t/selection-cfg
+   {:name "Languages"
+    :options (map
+              (fn [lang]
+                (language-option lang))
+              languages)
+    :multiselect? true
+    :tags #{:profs :language-profs}
+    :min (or min 0)
+    :max max}))
+
 (def homebrew-armor-prof-selection
   (t/selection-cfg
    {:name "Armor Proficiency"
@@ -1717,7 +1729,8 @@
                  homebrew-speed-selection
                  homebrew-darkvision-selection
                  homebrew-armor-prof-selection
-                 homebrew-weapon-prof-selection]}))
+                 homebrew-weapon-prof-selection
+                 (homebrew-language-selection)]}))
 
 (defn custom-race-builder []
   (custom-option-builder
@@ -1762,7 +1775,8 @@
                  homebrew-speed-selection
                  homebrew-darkvision-selection
                  homebrew-armor-prof-selection
-                 homebrew-weapon-prof-selection]}))
+                 homebrew-weapon-prof-selection
+                 (homebrew-language-selection)]}))
 
 (defn custom-background-builder []
   (custom-option-builder
@@ -1785,10 +1799,10 @@
                              (t/option-cfg
                               {:name "One Tool / One Language"
                                :selections [(tool-selection 1)
-                                            (any-language-selection 1)]})
+                                            (homebrew-language-selection 1 1)]})
                              (t/option-cfg
                               {:name "Two Languages"
-                               :selections [(any-language-selection 2)]})]})]}))
+                               :selections [(homebrew-language-selection 2 2)]})]})]}))
 
 (defn race-option [{:keys [name
                            icon
@@ -2124,8 +2138,10 @@
                           (fn [[lvl selections]]
                             (map
                              (fn [selection]
-                               (assoc selection ::t/prereq-fn (fn [c] (let [total-levels @(subscribe [::character/total-levels nil c])]
-                                                                        (>= lvl total-levels)))))
+                               (assoc selection
+                                      ::t/prereq-fn
+                                      (fn [c] (let [total-levels @(subscribe [::character/total-levels nil c])]
+                                                (>= lvl total-levels)))))
                              selections))
                           (:selections spellcasting-template))
         level-selections (mapcat
@@ -2216,7 +2232,7 @@
                 (t/option-cfg
                  {:name "Average"
                   :key :average
-                  :help (str "This option just gives you the average value (" average ") for the die roll (1D" die "). Choose this option if you're not feeling lucky.")
+                  :help (str "This option just gives you the average value (" average ") for the die roll (1D" die "). Choose this option if you're not feeling lucky, you are participating in Adventurer's League, or your DM says so.")
                   :modifiers [(modifiers/max-hit-points average)]}))]}))
 
 (defn custom-subclass-builder [path]
@@ -2224,7 +2240,56 @@
    [:custom-subclass-name path]
    [:set-custom-subclass path]))
 
-(defn custom-subclass-option [cls-key level-key subclass-selection-key]
+(defn custom-subclass-spell-selection [ability-kw level]
+  (t/selection-cfg
+   {:name (if (zero? level)
+            "Cantrips Known"
+            (str (common/ordinal level) "-Level Spells Known"))
+    :key (keyword (str "lvl-" level "-spells-known"))
+    :min 0
+    :max nil
+    :multiselect? true
+    :tags #{:spells}
+    :order level
+    :prereq-fn (fn [c] (or (zero? level)
+                           (-> @(subscribe [::character/total-levels nil c])
+                               (total-slots 3)
+                               (get level)
+                               pos?)))
+    
+    :options (sequence
+              (comp
+               (filter
+                (fn [s]
+                  (= level (:level s))))
+               (map :key)
+               (map (partial spell-option ability-kw "Custom")))
+              spells/spells)}))
+
+(defn custom-subclass-spellcasting-selection [cls-key]
+  (t/selection-cfg
+   {:name "Spellcasting Ability"
+    :key :spellcasting-ability
+    :min 0
+    :max 1
+    :tags #{:class}
+    :options (conj
+              (map
+               (fn [{ability-kw :key name :name}]
+                 (t/option-cfg
+                  {:name name
+                   :key ability-kw
+                   :modifiers [(modifiers/spell-slot-factor cls-key 3)]
+                   :selections (map
+                                (fn [level]
+                                  (custom-subclass-spell-selection ability-kw level))
+                                (range 0 5))}))
+               abilities)
+              (t/option-cfg
+               {:name "<none>"
+                :key :none}))}))
+
+(defn custom-subclass-option [cls-key level-key subclass-selection-key spellcasting-class?]
   (let [path [:class cls-key :levels level-key subclass-selection-key]]
     (t/option-cfg
      {:name "Custom"
@@ -2238,11 +2303,16 @@
       :order 1000
       :modifiers [(modifiers/deferred-subclass-name cls-key)
                   homebrew-al-illegal]
-      :selections [homebrew-skill-prof-selection
-                   homebrew-tool-prof-selection
-                   homebrew-feat-selection
-                   homebrew-armor-prof-selection
-                   homebrew-weapon-prof-selection]})))
+      :selections (let [selections
+                        [homebrew-skill-prof-selection
+                         homebrew-tool-prof-selection
+                         homebrew-feat-selection
+                         homebrew-armor-prof-selection
+                         homebrew-weapon-prof-selection]]
+                    (if spellcasting-class?
+                      selections
+                      (conj selections
+                            (custom-subclass-spellcasting-selection cls-key))))})))
 
 (defn level-option [{:keys [name
                             plugin?
@@ -2284,7 +2354,7 @@
                                      (map
                                       #(subclass-option (assoc cls :key kw) %)
                                       (if source (map (fn [sc] (assoc sc :source source)) subclasses) subclasses))
-                                     (custom-subclass-option kw level-kw subclass-selection-key))})]))
+                                     (custom-subclass-option kw level-kw subclass-selection-key (some? spellcasting)))})]))
                     (if (and (not plugin?) (ability-inc-set i))
                       [(ability-score-improvement-selection name i)])
                     (if (not plugin?)
