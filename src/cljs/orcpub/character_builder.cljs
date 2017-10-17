@@ -44,7 +44,7 @@
             [re-frame.core :refer [subscribe dispatch dispatch-sync]])
   (:require-macros [cljs.core.async.macros :refer [go]]))
 
-(def print-disabled? true)
+(def print-disabled? false)
 
 (def print-enabled? (and (not print-disabled?)
                          js/window.location
@@ -1314,6 +1314,24 @@
             (common/list-print any-mode-class-names)
             " do not need to select known spells since they can prepare any spell available in their class spell lists.")))))
 
+#_(defn feats-editor [{:keys [built-template option-paths selections]}]
+  [:div
+   [:div.m-l-5
+    [:div (selection-section-title "Feats")]
+    [:div
+     (doall
+      (map
+       (fn [i]
+         [:div.p-10.b-1.b-rad-5.m-5
+          [:div "Name"]
+          [:div
+           [comps/input-field
+            :input.input
+            ""
+            (fn [])
+            {}]]])
+       (range (-> selections first ::t/min))))]]])
+
 (defn more-selection-info [key name]
   (let [selected-plugin-options @(subscribe [:selected-plugin-options])
         unselected-plugins (remove
@@ -1332,7 +1350,8 @@
    {:name "Ability Scores / Feats"
     :icon "strong"
     :tags #{:ability-scores :feats}
-    :ui-fns [{:key :ability-scores :group? true :ui-fn abilities-editor}]
+    :ui-fns [{:key :ability-scores :group? true :ui-fn abilities-editor}
+             #_{:key :feats :group? true :ui-fn feats-editor}]
     :components [#(more-selection-info :feat-options? "feat")]}
    {:name "Background"
     :icon "ages"
