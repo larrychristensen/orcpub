@@ -1033,6 +1033,16 @@
                    false
                    (?armor-stealth-disadvantage? armor)))))
 
+(defn custom-option-builder [name-sub name-event]
+  [:div.m-t-10
+   [:span "Name"]
+   [comps/input-field
+    :input
+    @(subscribe name-sub)
+    (fn [value]
+      (dispatch (conj name-event value)))
+    {:class-name "input"}]])
+
 (def feat-options
   (concat
    [(feat-option
@@ -1385,129 +1395,160 @@
    (map
     (fn [i]
       (t/option-cfg
-       {:name (str "Custom Feat " (inc i))
-        :icon "beer-stein"
-        :order (inc i)
-        :selections [(t/selection-cfg
-                      {:name "Feat Modifiers"
-                       :min 0
-                       :max nil
-                       :multiselect? true
-                       :order 2
-                       :tags #{:feats}
-                       :options [(t/option-cfg
-                                  {:name "Ability Score Increase"
-                                   :help "This will allow you to select and ability score to increase by 1 (see the 'Abilities Variant' section above)"
-                                   :selections [(ability-increase-selection character/ability-keys 1 false)]})
-                                 (t/option-cfg
-                                  {:name "Extra 2 HPs Per Level"
-                                   :help "This will give you an extra 2 HPs per level"
-                                   :modifiers [(mods/modifier ?hit-point-level-bonus (+ 2 ?hit-point-level-bonus))]})
-                                 (t/option-cfg
-                                  {:name "Speed +10"
-                                   :help "Increase your speed by 10 ft."
-                                   :modifiers [(modifiers/speed 10)]})
-                                 (t/option-cfg
-                                  {:name "Passive Perception +5"
-                                   :help "Increase your passive perception by 5"
-                                   :modifiers [(modifiers/passive-perception 5)]})
-                                 (t/option-cfg
-                                  {:name "Passive Investigation +5"
-                                   :help "Increase your passive investigation by 5"
-                                   :modifiers [(modifiers/passive-perception 5)]})
-                                 (t/option-cfg
-                                  {:name "Save Proficiency"
-                                   :help "Select proficiency in saving throws with a particular ability (select on the 'Proficiencies' tab)"
-                                   :selections [(t/selection-cfg
-                                                 {:name "Saving Throw Proficiency"
-                                                  :tags #{:profs}
-                                                  :options (map
-                                                            (fn [k]
-                                                              (t/option-cfg
-                                                               {:name (:name (abilities-map k))
-                                                                :key k
-                                                                :modifiers [(modifiers/saving-throws nil k)]}))
-                                                            character/ability-keys)})]})
-                                 (t/option-cfg
-                                  {:name "Initiative +5"
-                                   :help "This will increase your initiative by 5."
-                                   :modifiers [(modifiers/initiative 5)]})
-                                 (t/option-cfg
-                                  {:name "Weapon Proficiency"
-                                   :help "This will allow you to select weapon proficiencies, from 'Simple', 'Martial', or specific weapons (select on the 'Proficiencies' tab)."
-                                   :selections [homebrew-weapon-prof-selection]})
-                                 (t/option-cfg
-                                  {:name "Improvised Weapons Proficiency"
-                                   :help "Gain proficiency in improvised weapons, such as broken bottles"})
-                                 (t/option-cfg
-                                  {:name "Armor Proficiency"
-                                   :help "This will allow you to select armor proficiencies, from 'Shields', 'Light', 'Medium', or 'Heavy' (select on the 'Proficiencies' tab)."
-                                   :selections [homebrew-armor-prof-selection]})
-                                 (t/option-cfg
-                                  {:name "Medium Armor: Max DEX Bonus of 3"
-                                   :help "This will set your max dexterity bonus with medium armor to 3 instead of 2"
-                                   :modifiers [medium-armor-master-max-bonus]})
-                                 (t/option-cfg
-                                  {:name "Ritual Spells"
-                                   :help "Learn 2 ritual spells from a particular class"
-                                   :selections [(t/selection-cfg
-                                                 {:name "Spellaster Class"
-                                                  :tags #{:spells}
-                                                  :options [(ritual-caster-option :bard "Bard" ::character/cha sl/spell-lists)
-                                                            (ritual-caster-option :cleric "Cleric" ::character/wis sl/spell-lists)
-                                                            (ritual-caster-option :druid "Druid" ::character/wis sl/spell-lists)
-                                                            (ritual-caster-option :sorcerer "Sorcerer" ::character/cha sl/spell-lists)
-                                                            (ritual-caster-option :warlock "Warlock" ::character/cha sl/spell-lists)
-                                                            (ritual-caster-option :wizard "Wizard" ::character/int sl/spell-lists)]})]})
-                                 (t/option-cfg
-                                  {:name "Three Skills or Tools"
-                                   :help "Select proficiency in three skills or tools"
-                                   :selections [(skilled-selection "Skill/Tool 1")
-                                                (skilled-selection "Skill/Tool 2")
-                                                (skilled-selection "Skill/tool 3")]})
-                                 (t/option-cfg
-                                  {:name "Attack Cantrip"
-                                   :help "Select a cantrip that requires an attack roll"
-                                   :selections [(t/selection-cfg
-                                                 {:name "Attack Cantrip Class"
-                                                  :tags #{:spells}
-                                                  :options [(spell-sniper-option :bard "Bard" ::character/cha sl/spell-lists)
-                                                            (spell-sniper-option :cleric "Cleric" ::character/wis sl/spell-lists)
-                                                            (spell-sniper-option :druid "Druid" ::character/wis sl/spell-lists)
-                                                            (spell-sniper-option :sorcerer "Sorcerer" ::character/cha sl/spell-lists)
-                                                            (spell-sniper-option :warlock "Warlock" ::character/cha sl/spell-lists)
-                                                            (spell-sniper-option :wizard "Wizard" ::character/int sl/spell-lists)]})]})
-                                 (t/option-cfg
-                                  {:name "Medium Armor: Stealthy"
-                                   :help "This will allow you to use medium armor without stealth disadvantage"
-                                   :modifiers [medium-armor-master-stealth]})
-                                 (t/option-cfg
-                                  {:name "Language Proficiency"
-                                   :help "This will allow you to select language proficiencies"
-                                   :selections [(homebrew-language-selection)]})
-                                 (t/option-cfg
-                                  {:name "Dual Wielding: AC +1"
-                                   :help "When wielding two-weapons, this will give you a +1 bonus to AC."
-                                   :key :dual-wield-ac-mod
-                                   :modifiers [dual-wield-ac-mod]})
-                                 (t/option-cfg
-                                  {:name "Dual Wielding: Any One-Handed Melee Weapon"
-                                   :help "This will allow you to engage in two-weapon fighting with any two single-handed melee weapons"
-                                   :key :dual-wield-weapon-mod
-                                   :modifiers [dual-wield-weapon-mod]})
-                                 (t/option-cfg
-                                  {:name "Spellcasting"
-                                   :help "Select low-level spells from a particular class"
-                                   :selections [(t/selection-cfg
-                                                 {:name "Spell Class"
-                                                  :order 0
-                                                  :tags #{:spells}
-                                                  :options [(magic-initiate-option :bard "Bard" ::character/cha sl/spell-lists)
-                                                            (magic-initiate-option :cleric "Cleric" ::character/wis sl/spell-lists)
-                                                            (magic-initiate-option :druid "Druid" ::character/wis sl/spell-lists)
-                                                            (magic-initiate-option :sorcerer "Sorcerer" ::character/cha sl/spell-lists)
-                                                            (magic-initiate-option :warlock "Warlock" ::character/cha sl/spell-lists)
-                                                            (magic-initiate-option :wizard "Wizard" ::character/int sl/spell-lists)]})]})]})]}))
+       (let [kw (keyword (str "custom-feat-" i))]
+         {:name (str "Custom Feat " (inc i))
+          :key kw
+          :icon "beer-stein"
+          :order (inc i)
+          :ui-fn #(custom-option-builder
+                   [:custom-feat-name [:feats kw]]
+                   [:set-custom-feat-name [:feats kw]])
+          :selections [(t/selection-cfg
+                        {:name "Feat Modifiers"
+                         :min 0
+                         :max nil
+                         :multiselect? true
+                         :order 2
+                         :tags #{:feats}
+                         :options [(t/option-cfg
+                                    {:name "Tool Proficiency or Expertise"
+                                     :help "Gain proficiency in a particular tool or expertise if you already have a proficiency in the tool (select on the 'Proficiencies' tab)."
+                                     :selections [(t/selection-cfg
+                                                   {:name "Tool Proficiency or Expertise"
+                                                    :tags #{:profs}
+                                                    :options (map
+                                                              (fn [{:keys [name key]}]
+                                                                (t/option-cfg
+                                                                 {:name name
+                                                                  :key key
+                                                                  :modifiers [(tool-prof-or-expertise key kw)]}))
+                                                              equipment/tools)})]})
+                                   (t/option-cfg
+                                    {:name "Skill Proficiency or Expertise"
+                                     :help "Gain proficiency in a particular skill or expertise if you already have proficiency in it"
+                                     :selections [(t/selection-cfg
+                                                   {:name "Skill Proficiency or Expertise"
+                                                    :tags #{:profs}
+                                                    :options (map
+                                                              (fn [{:keys [name key]}]
+                                                                (t/option-cfg
+                                                                 {:name name
+                                                                  :key key
+                                                                  :modifiers [(skill-prof-or-expertise key kw)]}))
+                                                              skills/skills)})]})
+                                   (t/option-cfg
+                                    {:name "Ability Score Increase"
+                                     :help "This will allow you to select and ability score to increase by 1 (see the 'Abilities Variant' section above)"
+                                     :selections [(ability-increase-selection character/ability-keys 1 false)]})
+                                   (t/option-cfg
+                                    {:name "Extra 2 HPs Per Level"
+                                     :help "This will give you an extra 2 HPs per level"
+                                     :modifiers [(mods/modifier ?hit-point-level-bonus (+ 2 ?hit-point-level-bonus))]})
+                                   (t/option-cfg
+                                    {:name "Speed +10"
+                                     :help "Increase your speed by 10 ft."
+                                     :modifiers [(modifiers/speed 10)]})
+                                   (t/option-cfg
+                                    {:name "Passive Perception +5"
+                                     :help "Increase your passive perception by 5"
+                                     :modifiers [(modifiers/passive-perception 5)]})
+                                   (t/option-cfg
+                                    {:name "Passive Investigation +5"
+                                     :help "Increase your passive investigation by 5"
+                                     :modifiers [(modifiers/passive-perception 5)]})
+                                   (t/option-cfg
+                                    {:name "Save Proficiency"
+                                     :help "Select proficiency in saving throws with a particular ability (select on the 'Proficiencies' tab)"
+                                     :selections [(t/selection-cfg
+                                                   {:name "Saving Throw Proficiency"
+                                                    :tags #{:profs}
+                                                    :options (map
+                                                              (fn [k]
+                                                                (t/option-cfg
+                                                                 {:name (:name (abilities-map k))
+                                                                  :key k
+                                                                  :modifiers [(modifiers/saving-throws nil k)]}))
+                                                              character/ability-keys)})]})
+                                   (t/option-cfg
+                                    {:name "Initiative +5"
+                                     :help "This will increase your initiative by 5."
+                                     :modifiers [(modifiers/initiative 5)]})
+                                   (t/option-cfg
+                                    {:name "Weapon Proficiency"
+                                     :help "This will allow you to select weapon proficiencies, from 'Simple', 'Martial', or specific weapons (select on the 'Proficiencies' tab)."
+                                     :selections [homebrew-weapon-prof-selection]})
+                                   (t/option-cfg
+                                    {:name "Improvised Weapons Proficiency"
+                                     :help "Gain proficiency in improvised weapons, such as broken bottles"})
+                                   (t/option-cfg
+                                    {:name "Armor Proficiency"
+                                     :help "This will allow you to select armor proficiencies, from 'Shields', 'Light', 'Medium', or 'Heavy' (select on the 'Proficiencies' tab)."
+                                     :selections [homebrew-armor-prof-selection]})
+                                   (t/option-cfg
+                                    {:name "Medium Armor: Max DEX Bonus of 3"
+                                     :help "This will set your max dexterity bonus with medium armor to 3 instead of 2"
+                                     :modifiers [medium-armor-master-max-bonus]})
+                                   (t/option-cfg
+                                    {:name "Ritual Spells"
+                                     :help "Learn 2 ritual spells from a particular class"
+                                     :selections [(t/selection-cfg
+                                                   {:name "Spellaster Class"
+                                                    :tags #{:spells}
+                                                    :options [(ritual-caster-option :bard "Bard" ::character/cha sl/spell-lists)
+                                                              (ritual-caster-option :cleric "Cleric" ::character/wis sl/spell-lists)
+                                                              (ritual-caster-option :druid "Druid" ::character/wis sl/spell-lists)
+                                                              (ritual-caster-option :sorcerer "Sorcerer" ::character/cha sl/spell-lists)
+                                                              (ritual-caster-option :warlock "Warlock" ::character/cha sl/spell-lists)
+                                                              (ritual-caster-option :wizard "Wizard" ::character/int sl/spell-lists)]})]})
+                                   (t/option-cfg
+                                    {:name "Three Skills or Tools"
+                                     :help "Select proficiency in three skills or tools"
+                                     :selections [(skilled-selection "Skill/Tool 1")
+                                                  (skilled-selection "Skill/Tool 2")
+                                                  (skilled-selection "Skill/tool 3")]})
+                                   (t/option-cfg
+                                    {:name "Attack Cantrip"
+                                     :help "Select a cantrip that requires an attack roll"
+                                     :selections [(t/selection-cfg
+                                                   {:name "Attack Cantrip Class"
+                                                    :tags #{:spells}
+                                                    :options [(spell-sniper-option :bard "Bard" ::character/cha sl/spell-lists)
+                                                              (spell-sniper-option :cleric "Cleric" ::character/wis sl/spell-lists)
+                                                              (spell-sniper-option :druid "Druid" ::character/wis sl/spell-lists)
+                                                              (spell-sniper-option :sorcerer "Sorcerer" ::character/cha sl/spell-lists)
+                                                              (spell-sniper-option :warlock "Warlock" ::character/cha sl/spell-lists)
+                                                              (spell-sniper-option :wizard "Wizard" ::character/int sl/spell-lists)]})]})
+                                   (t/option-cfg
+                                    {:name "Medium Armor: Stealthy"
+                                     :help "This will allow you to use medium armor without stealth disadvantage"
+                                     :modifiers [medium-armor-master-stealth]})
+                                   (t/option-cfg
+                                    {:name "Language Proficiency"
+                                     :help "This will allow you to select language proficiencies"
+                                     :selections [(homebrew-language-selection)]})
+                                   (t/option-cfg
+                                    {:name "Dual Wielding: AC +1"
+                                     :help "When wielding two-weapons, this will give you a +1 bonus to AC."
+                                     :key :dual-wield-ac-mod
+                                     :modifiers [dual-wield-ac-mod]})
+                                   (t/option-cfg
+                                    {:name "Dual Wielding: Any One-Handed Melee Weapon"
+                                     :help "This will allow you to engage in two-weapon fighting with any two single-handed melee weapons"
+                                     :key :dual-wield-weapon-mod
+                                     :modifiers [dual-wield-weapon-mod]})
+                                   (t/option-cfg
+                                    {:name "Spellcasting"
+                                     :help "Select low-level spells from a particular class"
+                                     :selections [(t/selection-cfg
+                                                   {:name "Spell Class"
+                                                    :order 0
+                                                    :tags #{:spells}
+                                                    :options [(magic-initiate-option :bard "Bard" ::character/cha sl/spell-lists)
+                                                              (magic-initiate-option :cleric "Cleric" ::character/wis sl/spell-lists)
+                                                              (magic-initiate-option :druid "Druid" ::character/wis sl/spell-lists)
+                                                              (magic-initiate-option :sorcerer "Sorcerer" ::character/cha sl/spell-lists)
+                                                              (magic-initiate-option :warlock "Warlock" ::character/cha sl/spell-lists)
+                                                              (magic-initiate-option :wizard "Wizard" ::character/int sl/spell-lists)]})]})]})]})))
     (range 10))))
 
 (def fighting-style-options
@@ -1810,15 +1851,6 @@
                nil
                (fn [_] @(subscribe [:homebrew? path]))
                true)]}))
-
-(defn custom-option-builder [name-sub name-event]
-  [:div.m-t-10
-   [:span "Name"]
-   [comps/input-field
-    :input
-    @(subscribe name-sub)
-    (fn [value] (dispatch (conj name-event value)))
-    {:class-name "input"}]])
 
 
 (defn custom-subrace-builder []
