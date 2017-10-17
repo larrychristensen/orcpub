@@ -38,6 +38,7 @@
        (merge
         attrs
         {:value (or (:temp-val @state) value "")
+         :on-click #(.stopPropagation %)
          :on-change (fn [e] #?(:cljs
                                (swap! state
                                       (fn [{:keys [timeout temp-val] :as s}]

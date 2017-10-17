@@ -944,6 +944,18 @@
                name))))
 
 (reg-event-db
+ :set-custom-feat-name
+ character-interceptors
+ (fn [character [_ path name]]
+   (let [entity-path (entity/get-option-value-path
+                      @(subscribe [:built-template])
+                      character
+                      path)]
+     (assoc-in character
+               entity-path
+               name))))
+
+(reg-event-db
  :set-custom-background
  character-interceptors
  (fn [character [_ name]]

@@ -161,6 +161,16 @@
                                          path))))
 
 (reg-sub
+ :custom-feat-name
+ :<- [:character]
+ :<- [:built-template]
+ (fn [[character built-template] [_ path]]
+   (get-in character
+           (entity/get-option-value-path built-template
+                                         character
+                                         path))))
+
+(reg-sub
  :custom-background-name
  :<- [:entity-options]
  (fn [options _]
