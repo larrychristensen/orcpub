@@ -1448,12 +1448,10 @@
         [expand-button "collapse" "select sources" expanded?]]
        (if @expanded?
          [:div
-          [option-selector-base {:name "Player's Handbook"
-                                 :help (t5e/amazon-frame-help t5e/phb-amazon-frame
-                                                              [:span
-                                                               "Base options are from the Player's Handbook, although descriptions are either from the "
-                                                               t5e/srd-link
-                                                               " or are OrcPub summaries. See the Player's Handbook for in-depth, official rules and descriptions."])
+          [option-selector-base {:name "5e SRD"
+                                 :help [:span
+                                        "Base options are from the "
+                                        t5e/srd-link]
                                  :selected? true
                                  :selectable? true
                                  :multiselect? true
@@ -1478,7 +1476,7 @@
               (fn [{:keys [name url]}]
                 [:a.orange {:href url :target :_blank} name])
               (let [option-sources @(subscribe [::char5e/option-sources])]
-                (cons {:name "Player's Handbook"
+                (cons {:name "5e SRD"
                        :url disp5e/phb-url}
                       (map t5e/plugin-map option-sources)))))))])])))
 
@@ -1778,7 +1776,7 @@
             {:href "https://media.wizards.com/2016/dnd/downloads/AL_PH_SKT.pdf" :target :_blank}
             (if mobile?
               "AL"
-              (str "Adventurer's League "
+              (str "AL "
                    (if al-legal?
                      "Legal"
                      "Illegal")))]]
@@ -1793,7 +1791,7 @@
                ^{:key i} [:div (str common/dot-char " " reason)])
              (cond-> al-illegal-reasons
                multiple-resources?
-               (conj (str "You are only allowed to use content from one resource beyond the Player's Handbook, you are using "
+               (conj (str "You are only allowed to use content from one resource beyond the PHB, you are using "
                           num-resources
                           ": "
                           (s/join

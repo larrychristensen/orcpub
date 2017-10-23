@@ -195,12 +195,12 @@
      :selections [high-elf-cantrip-selection
                   (opt5e/language-selection opt5e/languages 1)]
      :modifiers [elf-weapon-training-mods]}
-    {:name "Wood Elf"
+    #_{:name "Wood Elf"
      :abilities {::char5e/wis 1}
      :modifiers [(mod5e/speed 5)
                  mask-of-the-wild-mod
                  elf-weapon-training-mods]}
-    {:name "Dark Elf (Drow)"
+    #_{:name "Dark Elf (Drow)"
      :abilities {::char5e/cha 1}
      :traits [(sunlight-sensitivity 24)]
      :modifiers (conj drow-magic-mods
@@ -234,7 +234,7 @@
    :subraces [{:name "Hill Dwarf",
                :abilities {::char5e/wis 1}
                :modifiers [(mod/modifier ?hit-point-level-bonus (+ 1 ?hit-point-level-bonus))]}
-              {:name "Mountain Dwarf"
+              #_{:name "Mountain Dwarf"
                :abilities {::char5e/str 2}
                :armor-proficiencies [:light :medium]}]
    :modifiers [(mod5e/damage-resistance :poison)
@@ -254,7 +254,7 @@
      :traits [{:name "Naturally Stealthy"
                :page 28
                :summary "Hide behind creatures larger than you"}]}
-    {:name "Stout"
+    #_{:name "Stout"
      :abilities {::char5e/con 1}
      :modifiers [(mod5e/damage-resistance :poison)
                  (mod5e/saving-throw-advantage [:poisoned])]}]
@@ -419,7 +419,7 @@
               {:name "Tinker"
                :page 37
                :summary "Construct tiny clockwork devices."}]}
-    {:name "Forest Gnome"
+    #_{:name "Forest Gnome"
      :abilities {::char5e/dex 1}
      :modifiers [(mod5e/spells-known 0 :minor-illusion ::char5e/int "Forest Gnome")]
      :traits [{:name "Speak with Small Beasts"
@@ -461,7 +461,7 @@
              :page 41
              :summary "On critical hit, add additional damage dice roll"}]})
 
-(def aasimar-option-cfg
+#_(def aasimar-option-cfg
   {:name "Aasimar"
    :abilities {::char5e/cha 2}
    :size :medium
@@ -505,13 +505,13 @@
                              :source :vgm
                              :summary (str "For 1 minute, creatures within 10 ft. must succeed on a DC " (?spell-save-dc ::char5e/cha) " cha save or be frightened of you. During that time also deal an additional " ?total-levels " necrotic damage to one target you deal damage to with a spell or attack.")})]}]})
 
-(defn powerful-build [page]
+#_(defn powerful-build [page]
   {:name "Powerful Build"
    :page page
    :source :vgm
    :summary "Count as Large for purposes of determining weight you can carry, push, drag, or lift."})
 
-(def firbolg-option-cfg
+#_(def firbolg-option-cfg
   {:name "Firbolg"
    :abilities {::char5e/wis 2 ::char5e/str 1}
    :size :medium
@@ -533,7 +533,7 @@
              :source :vgm
              :summary "Beast and plants can understand you and you have advantage on Charisma checks to influence them."}]})
 
-(defn goliath-option-cfg [source page]
+#_(defn goliath-option-cfg [source page]
   {:name (str "Goliath (" (s/upper-case (name source)) ")")
    :key (if (= :vgm source) :goliath :goliath-ee)
    :abilities {::char5e/str 2 ::char5e/con 1}
@@ -554,7 +554,7 @@
              :summary "Adapted to high altitude and cold climates."}
             (powerful-build page)]})
 
-(def kenku-option-cfg
+#_(def kenku-option-cfg
   {:name "Kenku"
    :abilities {::char5e/dex 2 ::char5e/wis 1}
    :size :medium
@@ -572,7 +572,7 @@
              :page 111
              :summary "Advantage on checks to duplicate existing objects"}]})
 
-(def lizardfolk-option-cfg
+#_(def lizardfolk-option-cfg
   {:name "Lizardfolk"
    :abilities {::char5e/con 2 ::char5e/wis 1}
    :size :medium
@@ -612,7 +612,7 @@
              :page 113
              :summary "Up to 15 min."}]})
 
-(def tabaxi-option-cfg
+#_(def tabaxi-option-cfg
   {:name "Tabaxi"
    :abilities {::char5e/dex 2 ::char5e/cha 1}
    :size :medium
@@ -637,7 +637,7 @@
              :page 115
              :summary "Double speed when moving on your turn in combat."}]})
 
-(def triton-option-cfg
+#_(def triton-option-cfg
   {:name "Triton"
    :abilities {::char5e/str 1 ::char5e/con 1 ::char5e/cha 1}
    :size :medium
@@ -659,7 +659,7 @@
              :page 118
              :summary "No negative effects from deep, underwater environment."}]})
 
-(def bugbear-option-cfg
+#_(def bugbear-option-cfg
   {:name "Bugbear"
    :abilities {::char5e/str 2 ::char5e/dex 1}
    :size "Medium"
@@ -676,7 +676,7 @@
              :page 119
              :summary "Extra 2d6 damage when hitting a surprised creature."}]})
 
-(def goblin-option-cfg
+#_(def goblin-option-cfg
   {:name "Goblin"
    :abilities {::char5e/dex 2 ::char5e/con 1}
    :size "Medium"
@@ -693,7 +693,7 @@
                  :page 119
                  :summary "Disengage or Hide action as a bonus action."})]})
 
-(def hobgoblin-option-cfg
+#_(def hobgoblin-option-cfg
   {:name "Hobgoblin"
    :abilities {::char5e/con 2 ::char5e/int 1}
    :size "Medium"
@@ -712,7 +712,7 @@
              :page 119
              :summary "Add a bonus to a missed roll for each ally you can see, up to 5."}]})
 
-(def kobold-option-cfg
+#_(def kobold-option-cfg
   {:name "Kobold"
    :abilities {::char5e/dex 2 ::char5e/str -2}
    :size "Medium"
@@ -728,7 +728,7 @@
              :summary "Advantage on attacks if an ally is within 5 ft. of the target."}
             (sunlight-sensitivity 119)]})
 
-(def orc-option-cfg
+#_(def orc-option-cfg
   {:name "Orc"
    :abilities {::char5e/str 2 ::char5e/con 1 ::char5e/int -2}
    :size "Medium"
@@ -743,7 +743,7 @@
    :languages ["Common" "Orc"]
    :traits [(powerful-build 120)]})
 
-(def yuan-ti-option-cfg
+#_(def yuan-ti-option-cfg
   {:name "Yuan-Ti Pureblood"
    :abilities {::char5e/cha 2 ::char5e/int 1}
    :size "Medium"
@@ -785,10 +785,10 @@
                (mod5e/spells-known 1 :hellish-rebuke ::char5e/cha "Tiefling" 3)
                (mod5e/spells-known 2 :darkness ::char5e/cha "Tiefling" 5)]})
 
-(defn al-illegal-flying-mod [name]
+#_(defn al-illegal-flying-mod [name]
   (mod5e/al-illegal (str name " gains flying speed a 1st level, which is not legal")))
 
-(def aarakocra-option-cfg
+#_(def aarakocra-option-cfg
   {:name "Aarakocra"
    :abilities {::char5e/dex 2 ::char5e/wis 1}
    :size :medium
@@ -806,10 +806,10 @@
                  :damage-type :slashing
                  :damage-modifier (?ability-bonuses ::char5e/str)})]})
 
-(def ee-gnome-option-cfg
+#_(def ee-gnome-option-cfg
   (opt5e/deep-gnome-option-cfg :deep-gnome-ee :ee 7))
 
-(def genasi-option-cfg
+#_(def genasi-option-cfg
   {:name "Genasi"
    :source :ee
    :abilities {::char5e/con 2}
@@ -1003,7 +1003,7 @@
                             :level 6
                             :page 49
                             :summary "Can't be charmed or frightened while raging."}]}
-                 {:name "Path of the Totem Warrior"
+                 #_{:name "Path of the Totem Warrior"
                   :levels {3 {:modifiers [(mod5e/spells-known 2 :beast-sense nil "Barbarian" 1 "ritual only")
                                           (mod5e/spells-known 1 :speak-with-animals nil "Barbarian" 1 "ritual only")]
                               :selections [(t/selection-cfg
@@ -1195,7 +1195,7 @@
                                              :summary (str "expend one use of Bardic Inspiration to add 1d"
                                                            (bardic-inspiration-die ?levels)
                                                            " to an ability check")})]}}}
-                 {:name "College of Valor"
+                 #_{:name "College of Valor"
                   :profs {:armor {:medium true
                                   :shields true}
                           :weapon {:martial true}}
@@ -1348,7 +1348,7 @@
                            {:level 17
                             :name "Supreme Healing"
                             :summary "Instead of rolling healing, use max possible roll value." }]}
-                 {:name "Knowledge Domain"
+                 #_{:name "Knowledge Domain"
                   :modifiers [(opt5e/cleric-spell 1 :command 1)
                               (opt5e/cleric-spell 1 :identify 1)
                               (opt5e/cleric-spell 2 :augury 3)
@@ -1384,7 +1384,7 @@
                             :page 60
                             :name "Visions of the Past"
                             :summary "Learn the history of an object you hold or area you are in"}]}
-                 {:name "Light Domain"
+                 #_{:name "Light Domain"
                   :modifiers [(opt5e/cleric-spell 0 :light 1)
                               (opt5e/cleric-spell 1 :burning-hands 1)
                               (opt5e/cleric-spell 1 :faerie-fire 1)
@@ -1425,7 +1425,7 @@
                                              :page 61
                                              :name "Corona of Light"
                                              :summary "emit bright light for 60 ft. and 30 beyond that, enemies in the bright light have disadvantage on saves against spells that deal radiant or fire damage"})]}}}
-                 {:name "Nature Domain"
+                 #_{:name "Nature Domain"
                   :profs {:armor {:heavy true}
                           :skill-options {:choose 1 :options {:animal-handling true :nature true :survival true}}}
                   :modifiers [(opt5e/cleric-spell 1 :animal-friendship 1)
@@ -1461,7 +1461,7 @@
                                              :page 62
                                              :summary "command creatures charmed with your Charm Animals and Plants"})]}}
                   :selections [(opt5e/druid-cantrip-selection "Cleric")]}
-                 {:name "Tempest Domain"
+                 #_{:name "Tempest Domain"
                   :profs {:armor {:heavy true}
                           :weapon {:martial true}}
                   :modifiers [(opt5e/cleric-spell 1 :fog-cloud 1)
@@ -1497,7 +1497,7 @@
                             :page 62
                             :level 17
                             :summary "Flying speed equal to your walking speed"}]}
-                 {:name "Trickery Domain"
+                 #_{:name "Trickery Domain"
                   :modifiers [(opt5e/cleric-spell 1 :charm-person 1)
                               (opt5e/cleric-spell 1 :disguise-self 1)
                               (opt5e/cleric-spell 2 :mirror-image 3)
@@ -1529,7 +1529,7 @@
                                              :level 17
                                              :page 63
                                              :summary "when you use Invoke Duplicity, create up to 4 duplicates"})]}}}
-                 {:name "War Domain"
+                 #_{:name "War Domain"
                   :profs {:armor {:heavy true}
                           :weapon {:martial true}}
                   :modifiers [(opt5e/cleric-spell 1 :divine-favor 1)
@@ -1786,7 +1786,7 @@
                                                            (?spell-save-dc ::char5e/wis)
                                                            " Wisdom save or they cannot attack you.")})]}}
                   :traits [(lands-stride 6)]}
-                 {:name "Circle of the Moon"
+                 #_{:name "Circle of the Moon"
                   :levels {2 {:modifiers [(mod5e/bonus-action
                                            {:name "Combat Wild Shape"
                                             :page 69
@@ -1808,18 +1808,18 @@
                             :summary "cast alter self at will"
                             :level 14}]}]}))
 
-(defn eldritch-knight-spell? [s]
+#_(defn eldritch-knight-spell? [s]
   (let [school (:school s)]
     (or (= school "evocation")
         (= school "abjuration"))))
 
-(defn arcane-trickster-spell? [s]
+#_(defn arcane-trickster-spell? [s]
   (let [school (:school s)]
     (or (= school "enchantment")
         (= school "illusion"))))
 
 
-(defn subclass-wizard-spell-selection [title ref class-key class-name num spell-levels & [filter-fn]]
+#_(defn subclass-wizard-spell-selection [title ref class-key class-name num spell-levels & [filter-fn]]
   (opt5e/spell-selection {:title title
                           :class-key class-key
                           :ref ref
@@ -1838,17 +1838,17 @@
                                            spell-keys)
                                           spell-keys))}))
 
-(defn eldritch-knight-ref [subpath]
+#_(defn eldritch-knight-ref [subpath]
   (concat
    [:class :fighter :levels :level-3 :martial-archetype :eldritch-knight]
    subpath))
 
-(defn arcane-trickster-ref [subpath]
+#_(defn arcane-trickster-ref [subpath]
   (concat
    [:class :rogue :levels :level-3 :roguish-archetype :arcane-trickster]
    subpath))
 
-(defn eldritch-knight-spell-selection [num spell-levels]
+#_(defn eldritch-knight-spell-selection [num spell-levels]
   (subclass-wizard-spell-selection "Eldritch Knight Abjuration or Evocation Spells"
                                    (eldritch-knight-ref [:abjuration-or-evocation-spells-known])
                                    :fighter
@@ -1857,7 +1857,7 @@
                                    spell-levels
                                    eldritch-knight-spell?))
 
-(defn arcane-trickster-spell-selection [num spell-levels]
+#_(defn arcane-trickster-spell-selection [num spell-levels]
   (subclass-wizard-spell-selection "Arcane Trickster Enchantment or Illusion Spells"
                                    (arcane-trickster-ref [:enchantment-or-illusion-spells-known])
                                    :rogue
@@ -1866,7 +1866,7 @@
                                    spell-levels
                                    arcane-trickster-spell?))
 
-(defn eldritch-knight-any-spell-selection [num spell-levels]
+#_(defn eldritch-knight-any-spell-selection [num spell-levels]
   (subclass-wizard-spell-selection "Eldritch Knight Spells: Any School"
                                    (eldritch-knight-ref [:spells-known-any-school])
                                    :fighter
@@ -1874,7 +1874,7 @@
                                    num
                                    spell-levels))
 
-(defn arcane-trickster-any-spell-selection [num spell-levels]
+#_(defn arcane-trickster-any-spell-selection [num spell-levels]
   (subclass-wizard-spell-selection "Arcane Trickster Spells: Any School"
                                    (arcane-trickster-ref [:spells-known-any-school])
                                    :rogue
@@ -1882,7 +1882,7 @@
                                    num
                                    spell-levels))
 
-(defn eldritch-knight-cantrip [num]
+#_(defn eldritch-knight-cantrip [num]
   (opt5e/spell-selection {:class-key :fighter
                           :level 0
                           :ref (eldritch-knight-ref [:cantrips-known])
@@ -1891,7 +1891,7 @@
                           :num num
                           :spell-keys (get-in sl/spell-lists [:wizard 0])}))
 
-(defn arcane-trickster-cantrip [num]
+#_(defn arcane-trickster-cantrip [num]
   (opt5e/spell-selection {:class-key :rogue
                           :level 0
                           :ref (arcane-trickster-ref [:cantrips-known])
@@ -1900,7 +1900,7 @@
                           :num num
                           :spell-keys (get-in sl/spell-lists [:wizard 0])}))
 
-(def eldritch-knight-cfg
+#_(def eldritch-knight-cfg
   {:name "Eldritch Knight"
    :spellcasting {:level-factor 3}
    :modifiers [(mod5e/bonus-action
@@ -1942,7 +1942,7 @@
              :page 75
              :summary "teleport up to 30 ft. when you use Action Surge"}]})
 
-(defn martial-maneuvers-selection [num]
+#_(defn martial-maneuvers-selection [num]
   (t/selection-cfg
    {:name "Martial Maneuvers"
     :options opt5e/maneuver-options
@@ -2075,7 +2075,7 @@
                                                            #_(int (/ ?max-hit-points 2))
                                                            " HPs left, regain "
                                                            (+ 5 (?ability-bonuses ::char5e/con)) " HPs")})]}}}
-                 {:name "Battle Master"
+                 #_{:name "Battle Master"
                   :selections [(martial-maneuvers-selection 3)
                                (opt5e/tool-selection (map :key equip5e/artisans-tools) 1)]
                   :modifiers [(mod/modifier ?maneuver-save-dc (max (?spell-save-dc ::char5e/dex)
@@ -2113,7 +2113,7 @@
                             :page 74
                             :class-key :fighter
                             :summary "you regain 1 superiority die when you roll iniative and have no remaining superiority dice"}]}
-                 eldritch-knight-cfg]}))
+                 #_eldritch-knight-cfg]}))
 
 (defn monk-weapon? [{:keys [key ::weapon5e/type ::weapon5e/melee? ::weapon5e/heavy? ::weapon5e/two-handed?]}]
   (or (= key :shortsword)
@@ -2275,7 +2275,7 @@
                                               :level 17
                                               :page 80
                                               :summary (str "when you hit a creature with unarmed strike, set up vibrations that last " (?class-level :monk) " days. Use an action to end the vibrations, reducing the target to 0 HPs on failed DC " (?spell-save-dc ::char5e/wis) " CON save. It takes 10d10 necrotic damage on successful save.")})]}}}
-                  {:name "Way of Shadow"
+                  #_{:name "Way of Shadow"
                    :modifiers [(mod5e/spells-known 0 :minor-illusion ::char5e/wis "Monk (Way of Shadow)")
                                (mod5e/action
                                 {:name "Shadow Arts"
@@ -2295,7 +2295,7 @@
                                               :page 80
                                               :level 17
                                               :summary "when a creature within 5 ft. is hit by attack from someone else, make a melee attack"})]}}}
-                  {:name "Way of the Four Elements"
+                  #_{:name "Way of the Four Elements"
                    :modifiers [(mod5e/dependent-trait
                                 {:name "Disciple of the Elements"
                                  :page 80
@@ -2463,7 +2463,7 @@
                              :level 15
                              :page 86
                              :summary "always under effects of protection from evil and good spell"}]}
-                  {:name "Oath of the Ancients"
+                  #_{:name "Oath of the Ancients"
                    :modifiers [(opt5e/paladin-spell 1 :ensnaring-strike 3)
                                (opt5e/paladin-spell 1 :speak-with-animals 3)
                                (opt5e/paladin-spell 2 :misty-step 5)
@@ -2501,7 +2501,7 @@
                              :frequency units5e/long-rests-1
                              :duration units5e/minutes-1
                              :summary "undergo a tranformation where you 1) regain 10 HPs at start of your turns 2) can cast spells with casting time action as bonus action 3) enemies within 10 ft. have disadvantage on saves against your Channel Divinity and spells"}]}
-                  {:name "Oath of Vengeance"
+                  #_{:name "Oath of Vengeance"
                    :modifiers [(opt5e/paladin-spell 1 :bane 3)
                                (opt5e/paladin-spell 1 :hunters-mark 3)
                                (opt5e/paladin-spell 2 :hold-person 5)
@@ -2775,7 +2775,7 @@
                                                          (t/option-cfg
                                                           {:name "Uncanny Dodge"
                                                            :modifiers [(opt5e/uncanny-dodge-modifier 93)]})]})]}}}
-                  {:name "Beast Master"
+                  #_{:name "Beast Master"
                    :selections [(t/selection-cfg
                                  {:name "Ranger's Companion"
                                   :tags #{:class}
@@ -2914,7 +2914,7 @@
                             :name "Thief's Reflexes"
                             :page 97
                             :summary "when not surprised, take 2 turns in first round of combat, one at your normal initiative and the next at your initiative minus 10"}]}
-                 {:name "Assassin"
+                 #_{:name "Assassin"
                   :profs {:tool {:disguise-kit true :poisoners-kit true}}
                   :levels {17 {:modifiers [(mod5e/dependent-trait
                                             {:name "Death Strike"
@@ -2933,7 +2933,7 @@
                             :level 13
                             :page 97
                             :summary "accurately mimic the behavior, speech, and writing of another person"}]}
-                 {:name "Arcane Trickster"
+                 #_{:name "Arcane Trickster"
                   :spellcasting {:level-factor 3}
                   :modifiers [(mod5e/spells-known 0 :mage-hand ::char5e/int "Arcane Trickster")]
                   :levels {3 {:selections [(arcane-trickster-cantrip 2)
@@ -3129,7 +3129,7 @@
                                             {:name "Draconic Presence"
                                              :page 103
                                              :summary (str "Spend 5 sorcery pts. and create an aura that causes hostile creatures that start their turn within it to be charmed or afraid if they fail a DC " (?spell-save-dc ::char5e/cha) " Wisdom save.")})]}}}
-                 {:name "Wild Magic"
+                 #_{:name "Wild Magic"
                   :levels {6 {:modifiers [(mod5e/reaction
                                            {:name "Bend Luck"
                                             :level 6
@@ -3269,7 +3269,7 @@
                             :name "Overchannel"
                             :page 118
                             :summary "deal max damage with evocation spells 1st-5th level. You take necrotic damage if you use this feature more than once per long rest"}]}
-                 {:name "School of Abjuration"
+                 #_{:name "School of Abjuration"
                   :modifiers [(mod5e/dependent-trait
                                {:name "Arcane Ward"
                                 :page 115
@@ -3289,7 +3289,7 @@
                             :level 14
                             :page 116
                             :summary "advantage on saves against spells, resistance to damage from spells"}]}
-                 {:name "School of Conjuration"
+                 #_{:name "School of Conjuration"
                   :levels {6 {:modifiers [(mod5e/action
                                            {:name "Benign Transposition"
                                             :page 116
@@ -3308,7 +3308,7 @@
                            {:name "Durable Summons"
                             :level 14
                             :summary "creatures you conjure have 30 temp hit points"}]}
-                 {:name "School of Divination"
+                 #_{:name "School of Divination"
                   :levels {10 {:modifiers [(mod5e/action
                                             {:name "The Third Eye"
                                              :level 10
@@ -3328,7 +3328,7 @@
                             :level 14
                             :page 117
                             :summary "roll 3 d20s for your Portent feature"}]}
-                 {:name "School of Enchantment"
+                 #_{:name "School of Enchantment"
                   :levels {2 {:modifiers [(mod5e/action
                                            {:name "Hypnotic Gaze"
                                             :level 2
@@ -3351,7 +3351,7 @@
                             :level 10
                             :page 117
                             :summary "target 2 creatures with an enchantment spell that normally targets 1"}]}
-                 {:name "School of Illusion"
+                 #_{:name "School of Illusion"
                   :modifiers [(mod5e/spells-known-cfg 0
                                                       {:key :minor-illusion
                                                        :ability ::char5e/int
@@ -3390,7 +3390,7 @@
                            {:name "Improved Minor Illusion"
                             :page 118
                             :summary "can create a sound and an image with the same casting of minor illusion"}]}
-                 {:name "School of Necromancy"
+                 #_{:name "School of Necromancy"
                   :levels {10 {:modifiers [(mod5e/damage-resistance :necrotic)]}
                            14 {:modifiers [(mod5e/action
                                             {:name "Command Undead"
@@ -3409,7 +3409,7 @@
                            {:name "Inured to Undeath"
                             :level 10
                             :summary "resistant to necrotic damage; your HP max cannot be reduced"}]}
-                 {:name "School of Transmutation"
+                 #_{:name "School of Transmutation"
                   :modifiers [(mod5e/spells-known 4 :polymorph ::char5e/int "Wizard")]
                   :levels {14 {:modifiers [(mod5e/action
                                             {:name "Master Transmuter"
@@ -3894,7 +3894,7 @@ long rest."})
                            5 {:selections [(opt5e/warlock-subclass-spell-selection [:fireball :stinking-cloud])]}
                            7 {:selections [(opt5e/warlock-subclass-spell-selection [:fire-shield :wall-of-fire])]}
                            9 {:selections [(opt5e/warlock-subclass-spell-selection [:flame-strike :hallow])]}}}
-                 {:name "The Archfey"
+                 #_{:name "The Archfey"
                   :modifiers [(mod5e/action
                                {:name "Fey Presence"
                                 :page 109
@@ -3923,7 +3923,7 @@ long rest."})
                                              :page 109
                                              :summary (str "charm or frighten a creature within 60 ft., spell save DC " (?spell-save-dc ::char5e/cha) "WIS save")
                                              :frequency units5e/rests-1})]}}}
-                 {:name "The Great Old One"
+                 #_{:name "The Great Old One"
                   :levels {1 {:selections [(opt5e/warlock-subclass-spell-selection [:dissonant-whispers :tashas-hideous-laughter])]}
                            3 {:selections [(opt5e/warlock-subclass-spell-selection [:detect-thoughts :phantasmal-force])]}
                            5 {:selections [(opt5e/warlock-subclass-spell-selection [:clairvoyance :sending])]}
@@ -3949,14 +3949,7 @@ long rest."})
                             :page 110
                             :summary "charm incapacitated creature, it becomes charmed by you, you can communicate with it telepathically"}]}]}))
 
-(def arcane-tradition-options
-  [(t/option-cfg
-    {:name "School of Evocation"
-     :modifiers [(mod5e/subclass :wizard "School of Evocation")
-                 (mod5e/trait "Evocation Savant")
-                 (mod5e/trait "Sculpt Spells")]})])
-
-(defn criminal-background [nm]
+#_(defn criminal-background [nm]
   {:name nm
    :help "You have a history of criminal activity."
    :traits [{:name "Criminal Contact"
@@ -3970,7 +3963,7 @@ long rest."})
                :pouch 1}
    :treasure {:gp 15}})
 
-(def ships-passage-trait-cfg
+#_(def ships-passage-trait-cfg
   {:name "Ship's Passage"
    :page 139
    :summary "You are able to secure free passage on a sailing ship"})
@@ -3999,7 +3992,7 @@ long rest."})
              :page 127
              :summary "You and your companions can expect free healing at an establishment of your faith."}]})
 
-(def charlatan-bg
+#_(def charlatan-bg
   {:name "Charlatan"
    :help "You have a history of being able to work people to your advantage."
    :traits [{:name "False Identity"
@@ -4012,7 +4005,7 @@ long rest."})
                :pouch 1}
    :treasure {:gp 15}})
 
-(def entertainer-bg
+#_(def entertainer-bg
   {:name "Entertainer"
    :help "You have a history of entertaining people."
    :traits [{:name "By Popular Demand"
@@ -4026,7 +4019,7 @@ long rest."})
                :pouch 1}
    :treasure {:gp 15}})
 
-(def gladiator-bg
+#_(def gladiator-bg
   {:name "Gladiator"
    :help "You have a history of gladiatorial entertainment."
    :traits [{:name "By Popular Demand"
@@ -4043,7 +4036,7 @@ long rest."})
                :pouch 1}
    :treasure {:gp 15}})
 
-(def folk-hero-bg
+#_(def folk-hero-bg
   {:name "Folk Hero"
    :help "You are regarded as a hero by the people of your home village."
    :traits [{:name "Rustic Hospitality"
@@ -4059,7 +4052,7 @@ long rest."})
                :pouch 1}
    :treasure {:gp 10}})
 
-(def guild-artisan-bg
+#_(def guild-artisan-bg
   {:name "Guild Artisan"
    :help "You are an artisan and a member of a guild in a particular field."
    :traits [{:name "Guild Membership"
@@ -4073,7 +4066,7 @@ long rest."})
                :pouch 1}
    :treasure {:gp 15}})
 
-(def guild-merchant-bg
+#_(def guild-merchant-bg
   {:name "Guild Merchant"
    :help "You are member of a guild of merchants"
    :traits [{:name "Guild Membership"
@@ -4096,7 +4089,7 @@ long rest."})
                :cart 1}
    :treasure {:gp 15}})
 
-(def hermit-bg
+#_(def hermit-bg
   {:name "Hermit"
    :help "You have lived a secluded life."
    :traits [{:name "Discovery"
@@ -4113,7 +4106,7 @@ long rest."})
    :treasure {:gp 5}})
 
 
-(def noble-bg
+#_(def noble-bg
   {:name "Noble"
    :help "You are of noble birth."
    :traits []
@@ -4141,7 +4134,7 @@ long rest."})
    :custom-equipment {"Scroll of Pedigree" 1}
    :treasure {:gp 25}})
 
-(def knight-bg
+#_(def knight-bg
   {:name "Knight"
    :help "You are a knight."
    :traits [{:name "Retainers"
@@ -4157,7 +4150,7 @@ long rest."})
                       "Emblem of Chivalry" 1}
    :treasure {:gp 25}})
 
-(def outlander-bg
+#_(def outlander-bg
   {:name "Outlander"
    :help "You were raised in the wilds."
    :traits [{:name "Wanderer"
@@ -4173,7 +4166,7 @@ long rest."})
    :custom-equipment {"Trophy from Animal You Killed" 1}
    :treasure {:gp 10}})
 
-(def sage-bg
+#_(def sage-bg
   {:name "Sage"
    :help "You spent your life studying lore."
    :traits [{:name "Researcher"
@@ -4189,7 +4182,7 @@ long rest."})
                       "Letter with question from dead colleague" 1}
    :treasure {:gp 10}})
 
-(def sailor-bg
+#_(def sailor-bg
   {:name "Sailor"
    :help "You were a member of a crew for a seagoing vessel."
    :traits [ships-passage-trait-cfg]
@@ -4204,7 +4197,7 @@ long rest."})
    :treasure {:gp 10}})
 
 
-(def pirate-bg
+#_(def pirate-bg
   {:name "Pirate"
    :help "You were a member of a crew for a seagoing vessel."
    :profs {:skill {:athletics true :perception true}
@@ -4230,7 +4223,7 @@ long rest."})
                       "Lucky Charm" 1}
    :treasure {:gp 10}})
 
-(def soldier-bg
+#_(def soldier-bg
   {:name "Soldier"
    :help "You have spent your living by the sword."
    :traits [{:name "Military Rank"
@@ -4248,7 +4241,7 @@ long rest."})
                       "Trophy from Fallen Enemy" 1}
    :treasure {:gp 10}})
 
-(def urchin-bg
+#_(def urchin-bg
   {:name "Urchin"
    :help "You were a poor orphan living on the streets."
    :traits [{:name "City Streets"
@@ -4265,25 +4258,25 @@ long rest."})
    :treasure {:gp 10}})
 
 (def backgrounds [acolyte-bg
-                  charlatan-bg
-                  (criminal-background "Criminal")
-                  (criminal-background "Spy")
-                  entertainer-bg
-                  gladiator-bg
-                  folk-hero-bg
-                  guild-artisan-bg
-                  guild-merchant-bg
-                  hermit-bg
-                  noble-bg
-                  knight-bg
-                  outlander-bg
-                  sage-bg
-                  sailor-bg
-                  pirate-bg
-                  soldier-bg
-                  urchin-bg])
+                  #_charlatan-bg
+                  #_(criminal-background "Criminal")
+                  #_(criminal-background "Spy")
+                  #_entertainer-bg
+                  #_gladiator-bg
+                  #_folk-hero-bg
+                  #_guild-artisan-bg
+                  #_guild-merchant-bg
+                  #_hermit-bg
+                  #_noble-bg
+                  #_knight-bg
+                  #_outlander-bg
+                  #_sage-bg
+                  #_sailor-bg
+                  #_pirate-bg
+                  #_soldier-bg
+                  #_urchin-bg])
 
-(def volos-guide-to-monsters-selections
+#_(def volos-guide-to-monsters-selections
   [(t/selection-cfg
     {:name "Race"
      :tags #{:race}
@@ -4304,7 +4297,7 @@ long rest."})
                 orc-option-cfg
                 yuan-ti-option-cfg])})])
 
-(def cos-backgrounds
+#_(def cos-backgrounds
   (map
    (partial opt5e/add-sources :cos)
    [{:name "Haunted One"
@@ -4317,7 +4310,7 @@ long rest."})
                :source :cos
                :summary "Commoners do their utmost to help you, even fighting along side you"}]}]))
 
-(def dmg-classes
+#_(def dmg-classes
   [{:name "Cleric"
     :plugin? true
     :subclass-level 1
@@ -4405,7 +4398,7 @@ long rest."})
                                  :summary (str "create an aura that: reduces bright light to dim; frightened enemies within aura take 4d10 psychic damage; creatures that rely on sight have disadvantage on attack rolls agains you and allies within aura; as a bonus action make a melee spell attack on a creature within aura that deals 3d10 " (common/mod-str (?ability-bonuses ::char5e/cha)) "necrotic damage")})]}}}]
     true)])
 
-(def elemental-evil-selections
+#_(def elemental-evil-selections
   [(opt5e/feat-selection-2
     {:options [(opt5e/svirfneblin-magic-feat :ee 7)]})
    (opt5e/race-selection
@@ -4416,12 +4409,12 @@ long rest."})
                 genasi-option-cfg
                 (goliath-option-cfg :ee 11)])})])
 
-(def keen-senses-option
+#_(def keen-senses-option
   (t/option-cfg
    {:name "Keen Senses"
     :modifiers [(mod5e/skill-proficiency :perception)]}))
 
-(defn elf-parentage-option [name trait-options]
+#_(defn elf-parentage-option [name trait-options]
   (t/option-cfg
    {:name name
     :selections [(t/selection-cfg
@@ -4430,12 +4423,12 @@ long rest."})
                    :order 3
                    :options trait-options})]}))
 
-(def elf-weapon-training-option
+#_(def elf-weapon-training-option
   (t/option-cfg
    {:name "Elf Weapon Training"
     :modifiers elf-weapon-training-mods}))
 
-(defn high-elf-parentage-option [name]
+#_(defn high-elf-parentage-option [name]
   (elf-parentage-option name
                         [keen-senses-option
                          elf-weapon-training-option
@@ -4443,7 +4436,7 @@ long rest."})
                           {:name "High Elf Cantrip"
                            :selections [high-elf-cantrip-selection]})]))
 
-(def scag-human-option-cfg
+#_(def scag-human-option-cfg
   {:name "Human"
    :plugin? true
    :subraces
@@ -4458,10 +4451,10 @@ long rest."})
     {:name "Tuigan"}
     {:name "Ulutiun"}]})
 
-(def scag-deep-gnome-cfg
+#_(def scag-deep-gnome-cfg
   (opt5e/deep-gnome-option-cfg :deep-gnome-scag :scag 115))
 
-(def scag-dwarf-option-cfg
+#_(def scag-dwarf-option-cfg
   {:name "Dwarf",
    :plugin? true
    :subraces [{:name "Gray Dwarf (Duerger)",
@@ -4485,7 +4478,7 @@ long rest."})
                            (mod5e/spells-known 2 :enlarge-reduce ::char5e/int "Duergar" 3 "enlarge only, once per long rest")
                            (mod5e/spells-known 2 :invisibility ::char5e/int "Duergar" 5 "once per long rest")]}]})
 
-(def scag-half-elf-option-cfg
+#_(def scag-half-elf-option-cfg
   {:name "Half-Elf"
    :plugin? true
    :selections [(t/selection-cfg
@@ -4531,7 +4524,7 @@ long rest."})
                                                           {:name "Swimming Speed"
                                                            :modifiers [(mod5e/swimming-speed 30)]})])]})]})]})]})
 
-(defn tiefling-spell-removal-modifier [level spell-key]
+#_(defn tiefling-spell-removal-modifier [level spell-key]
   (mod/modifier ?spells-known
                 (update
                  ?spells-known
@@ -4539,7 +4532,7 @@ long rest."})
                  dissoc
                  ["Tiefling" spell-key])))
 
-(def scag-tiefling-option-cfg
+#_(def scag-tiefling-option-cfg
   {:name "Tiefling"
    :plugin? true
    :selections [(t/selection-cfg
@@ -4591,7 +4584,7 @@ long rest."})
                                                                      (tiefling-spell-removal-modifier 1 :hellish-rebuke)
                                                                      (tiefling-spell-removal-modifier 2 :darkness)]})]})]})]})]})
 
-(def scag-halfling-option-cfg
+#_(def scag-halfling-option-cfg
   {:name "Halfling"
    :plugin? true
    :subraces
@@ -4604,7 +4597,7 @@ long rest."})
                :range units5e/ft-30
                :summary "Speak telepathically to 1 creature who understands your language"}]}]})
 
-(def sword-coast-adventurers-guide-selections
+#_(def sword-coast-adventurers-guide-selections
   [(opt5e/feat-selection-2
     {:options [(opt5e/svirfneblin-magic-feat :scag 115)]})
    (opt5e/background-selection
@@ -4627,13 +4620,13 @@ long rest."})
                (fn [cfg] (opt5e/class-option (assoc cfg :plugin? true :source :scag)))
                scag/scag-classes)})])
 
-(def cos-selections
+#_(def cos-selections
   [(opt5e/background-selection
     {:options (map
                opt5e/background-option
                cos-backgrounds)})])
 
-(def eladrin-elf-option
+#_(def eladrin-elf-option
   {:name "Elf"
    :source :dmg
    :plugin? true
@@ -4644,7 +4637,7 @@ long rest."})
      :modifiers [elf-weapon-training-mods
                  (mod5e/spells-known 2 :misty-step ::char5e/int "Eladrin Elf" 1 "Once per rest")]}]})
 
-(def dmg-selections
+#_(def dmg-selections
   [(opt5e/class-selection
     {:options (map
                (fn [cfg] (opt5e/class-option (assoc cfg :plugin? true :source :dmg)))
@@ -4727,19 +4720,19 @@ long rest."})
        [:li.p-2 (str common/dot-char " " nm)])
      options))])
 
-(def scag-amazon-frame
+#_(def scag-amazon-frame
   (amazon-frame "//ws-na.amazon-adsystem.com/widgets/q?ServiceVersion=20070822&OneJS=1&Operation=GetAdHtml&MarketPlace=US&source=ac&ref=tf_til&ad_type=product_link&tracking_id=orcpub-20&marketplace=amazon&region=US&placement=0786965800&asins=0786965800&linkId=f35402a86dd0851190d952228fab36e9&show_border=false&link_opens_in_new_window=true&price_color=ffffff&title_color=f0a100&bg_color=2c3445"))
 
-(def volos-amazon-frame
+#_(def volos-amazon-frame
   (amazon-frame "//ws-na.amazon-adsystem.com/widgets/q?ServiceVersion=20070822&OneJS=1&Operation=GetAdHtml&MarketPlace=US&source=ac&ref=tf_til&ad_type=product_link&tracking_id=orcpub-20&marketplace=amazon&region=US&placement=0786966017&asins=0786966017&linkId=8c552e7b980d7d944bd12dec57e002e8&show_border=false&link_opens_in_new_window=true&price_color=ffffff&title_color=f0a100&bg_color=2c3445"))
 
 (def phb-amazon-frame
   (amazon-frame "//ws-na.amazon-adsystem.com/widgets/q?ServiceVersion=20070822&OneJS=1&Operation=GetAdHtml&MarketPlace=US&source=ac&ref=qf_sp_asin_til&ad_type=product_link&tracking_id=orcpub-20&marketplace=amazon&region=US&placement=0786965606&asins=0786965606&linkId=3b5b686390559c31dbc3c20d20f37ec4&show_border=false&link_opens_in_new_window=true&price_color=ffffff&title_color=f0a100&bg_color=2c3445"))
 
-(def dmg-amazon-frame
+#_(def dmg-amazon-frame
   (amazon-frame "//ws-na.amazon-adsystem.com/widgets/q?ServiceVersion=20070822&OneJS=1&Operation=GetAdHtml&MarketPlace=US&source=ac&ref=tf_til&ad_type=product_link&tracking_id=orcpub-20&marketplace=amazon&region=US&placement=0786965622&asins=0786965622&linkId=01922a9aafc4ea52eb90aed12bbeac04&show_border=false&link_opens_in_new_window=true&price_color=ffffff&title_color=f0a100&bg_color=2c3445"))
 
-(def cos-amazon-frame
+#_(def cos-amazon-frame
   (amazon-frame "//ws-na.amazon-adsystem.com/widgets/q?ServiceVersion=20070822&OneJS=1&Operation=GetAdHtml&MarketPlace=US&source=ac&ref=qf_sp_asin_til&ad_type=product_link&tracking_id=orcpub-20&marketplace=amazon&region=US&placement=0786965983&asins=0786965983&linkId=91dfcae14b0c8ecd3795eaf375104ca5&show_border=false&link_opens_in_new_window=true&price_color=ffffff&title_color=f0a100&bg_color=2c3445"))
 
 (defn amazon-frame-help [frame content]
@@ -4754,7 +4747,7 @@ long rest."})
   [:a.orange {:href "/SRD-OGL_V5.1.pdf" :target "_blank"} "the 5e SRD"])
 
 
-(def plugins
+#_(def plugins
   (map
    (fn [{:keys [key] :as plugin}]
      (assoc plugin :url (opt5e/source-url key)))
@@ -4816,28 +4809,32 @@ long rest."})
   (t/selection-cfg
    {:name "Optional Content"
     :tags #{:optional-content}
-    :help (amazon-frame-help phb-amazon-frame
+    :help [:span
+           "Base options are from the from the "
+           srd-link
+           " or are OrcPub summaries."] #_(amazon-frame-help phb-amazon-frame
                              [:span
-                              "Base options are from the Player's Handbook, although descriptions are either from the "
+                              "Base options are from the from the "
                               srd-link
-                              " or are OrcPub summaries. See the Player's Handbook for in-depth, official rules and descriptions."])
-    :options (conj
-              (map
-               #(t/option-cfg
-                 (merge-with
-                  concat
-                  {:modifiers [(mod/set-mod ?option-sources (:key %))]}
-                  ;; don't want selections to show up
-                  (select-keys % [:name :key :help :icon :modifiers])))
-               plugins)
-              homebrew-plugin)
+                              " or are OrcPub summaries."])
+    :options [homebrew-plugin] #_(conj
+                   (map
+                    #(t/option-cfg
+                      (merge-with
+                       concat
+                       {:modifiers [(mod/set-mod ?option-sources (:key %))]}
+                       ;; don't want selections to show up
+                       (select-keys % [:name :key :help :icon :modifiers])))
+                    plugins)
+                   homebrew-plugin)
     :multiselect? true
     :min 0
     :max nil}))
 
 
 (def plugin-map
-  (merge
+  {:homebrew {:name "Homebrew"}}
+  #_(merge
    {:homebrew {:name "Homebrew"}}
    (into {} (map (juxt :key identity)
                  plugins))))
