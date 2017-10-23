@@ -32,7 +32,7 @@
   {:builder {:character {:tab #{:build :options}}}
    :character default-character
    :template t5e/template
-   :plugins t5e/plugins
+   #_:plugins #_t5e/plugins
    :locked-components #{}
    :route (parse-route)
    :route-history (list default-route)
