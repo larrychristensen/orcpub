@@ -702,13 +702,13 @@
 (defn any-language-selection [& [num]]
   (language-selection languages num))
 
-(defn maneuver-option [name & [desc]]
+#_(defn maneuver-option [name & [desc]]
   (t/option-cfg
    {:name name
     :modifiers [(modifiers/trait (str name " Maneuver")
                       desc)]}))
 
-(defn mod-maneuver-option [name mods]
+#_(defn mod-maneuver-option [name mods]
   (t/option-cfg
    {:name name
     :modifiers mods}))
@@ -833,7 +833,7 @@
               {:name "Tool"
                :selections [(tool-selection 1)]})]}))
 
-(def maneuver-options
+#_(def maneuver-options
   [(maneuver-option "Commander's Strike"
                     "When you take Attack action, forgo one attack, expend a superiority die, give a creature an immediate reaction attack, adding superiority die to damage")
    (maneuver-option "Disarming Attack"
@@ -1045,25 +1045,25 @@
 
 (def feat-options
   (concat
-   [(feat-option
+   [#_(feat-option
      {:name "Alert"
       :icon "look-at"
       :page 165
       :summary "+5 initiative; can't be surprised; creatures don't gain advantage on attacks against you for being hidden"
       :modifiers [(modifiers/initiative 5)]})
-    (feat-option
+    #_(feat-option
      {:name "Athlete"
       :icon "weight-lifting-up"
       :page 165
       :summary "increase STR or DEX by 1; standing up only uses 5 ft movement; climbing doesn't cost extra movement; make running long or high jump after moving only 5 ft."
       :selections [(ability-increase-selection [::character/str ::character/dex] 1 false)]})
-    (feat-option
+    #_(feat-option
      {:name "Actor"
       :icon "drama-masks"
       :page 165
       :summary "increase CHA by 1; advantage on Deception and Performance when trying to pass as someone else; mimic the speech of a person you have heard"
       :modifiers [(modifiers/ability ::character/cha 1)]})
-    (feat-option
+    #_(feat-option
      {:name "Charger"
       :icon "charging-bull"
       :page 165
@@ -1072,7 +1072,7 @@
                    {:name "Charge"
                     :page 165
                     :summary charge-summary})]})
-    (feat-option
+    #_(feat-option
      {:name "Crossbow Expert"
       :icon "crossbow"
       :page 165
@@ -1081,7 +1081,7 @@
                    {:name "Crossbow Expert"
                     :page 165
                     :summary "when you Attack with 1 hand weapon, you can attack with a hand crossbow"})]})
-    (feat-option
+    #_(feat-option
      {:name "Defensive Duelist"
       :icon "spinning-sword"
       :page 165
@@ -1092,21 +1092,21 @@
                     :page 165
                     :summary defensive-duelist-summary})]
       :prereqs [(ability-prereq ::character/dex 13)]})
-    (feat-option
+    #_(feat-option
      {:name "Dual Wielder"
       :icon "rogue"
       :page 165
       :summary "+1 AC bonus when wielding two melee weapons; two-weapon fighting with any one-handed melee weapon"
       :modifiers [dual-wield-weapon-mod
                   dual-wield-ac-mod]})
-    (feat-option
+    #_(feat-option
      {:name "Dungeon Delver"
       :icon "dungeon-gate"
       :page 166
       :summary "advantage to detect secret doors; advantage on saves against and resistance to trap damage; search for traps at normal pace"
       :modifiers [(modifiers/damage-resistance :trap)
                   (modifiers/saving-throw-advantage [:traps])]})
-    (feat-option
+    #_(feat-option
      {:name "Durable"
       :icon "hospital-cross"
       :page 166
@@ -1117,7 +1117,7 @@
                    {:name "Durable"
                     :page 166
                     :summary (str "when you roll Hit Die to regain HPs, the min points regained is " (* 2 (?ability-bonuses ::character/con)))})]})
-    (feat-option
+    #_(feat-option
      {:name "Elemental Adept"
       :icon "wind-hole"
       :page 166
@@ -1134,7 +1134,7 @@
                     :page 167
                     :summary "restrain a creature you are grappling"})]
       :prereqs [(ability-prereq ::character/str 13)]})
-    (feat-option
+    #_(feat-option
      {:name "Great Weapon Master"
       :icon "broadsword"
       :page 167
@@ -1143,7 +1143,7 @@
                    {:name "Great Weapon Master"
                     :page 167
                     :summary "When you critical or reduce a creature to 0 HPs with melee weapon, make one melee weapon attack"})]})
-    (feat-option
+    #_(feat-option
      {:name "Healer"
       :icon "medical-pack-alt"
       :page 167
@@ -1152,7 +1152,7 @@
                    {:name "Healer Feat"
                     :page 167
                     :summary "use a healer's kit to restore 1d6 + 4 + creature's max hit dice HPs"})]})
-    (feat-option
+    #_(feat-option
      {:name "Heavily Armored"
       :icon "lamellar"
       :summary "increase STR by 1; proficiency in heavy armor"
@@ -1160,45 +1160,45 @@
       :modifiers [(modifiers/heavy-armor-proficiency)
                   (modifiers/ability ::character/str 1)]
       :prereqs [(armor-prereq :medium)]})
-    (feat-option
+    #_(feat-option
      {:name "Heavy Armor Master"
       :icon "gauntlet"
       :page 167
       :summary "increase STR by 1; when wearing heavy armor, slashing, piercing, and bludgeoning damage from non-magical weapons is 3 less"
       :modifiers [(modifiers/ability ::character/str 1)]
       :prereqs [(armor-prereq :heavy)]})
-    (feat-option
+    #_(feat-option
      {:name "Inspiring Leader"
       :icon "public-speaker"
       :page 167
       :summary "give 6 friendly creatures within 30 ft. temp HPs equal to you CHA mod + your level"
       :prereqs [(ability-prereq ::character/cha 13)]})
-    (feat-option
+    #_(feat-option
      {:name "Keen Mind"
       :icon "brain"
       :page 167
       :summary "increase INT by 1; always know which direction is north; know hours before sunset or sunrise; recall anything heard or seen within a month"
       :modifiers [(modifiers/ability ::character/int 1)]})
-    (feat-option
+    #_(feat-option
      {:name "Lightly Armored"
       :icon "scale-mail"
       :page 167
       :summary "increase STR or DEX by 1; proficiency in light armor"
       :selections [(ability-increase-selection [::character/str ::character/dex] 1 false)]
       :modifiers [(modifiers/light-armor-proficiency)]})
-    (feat-option
+    #_(feat-option
      {:name "Linguist"
       :icon "lips"
       :page 167
       :summary "increase INT by 1; learn 3 languages; create written ciphers"
       :selections [(language-selection languages 3)]
       :modifiers [(modifiers/ability ::character/int 1)]})
-    (feat-option
+    #_(feat-option
      {:name "Lucky"
       :icon "clover"
       :page 167
       :summary "3 luck points, which you can use to roll an additional d20 when rolling an attack, save, or ability check, and choose which one to use"})
-    (feat-option
+    #_(feat-option
      {:name "Mage Slayer"
       :icon "zeus-sword"
       :page 168
@@ -1208,7 +1208,7 @@
                     :range units5e/ft-5
                     :page 168
                     :summary "attack a creature that casts a spell"})]})
-    (feat-option
+    #_(feat-option
      {:name "Magic Initiate"
       :icon "magic-palm"
       :page 168
@@ -1223,7 +1223,7 @@
                                (magic-initiate-option :sorcerer "Sorcerer" ::character/cha sl/spell-lists)
                                (magic-initiate-option :warlock "Warlock" ::character/cha sl/spell-lists)
                                (magic-initiate-option :wizard "Wizard" ::character/int sl/spell-lists)]})]})
-    (feat-option
+    #_(feat-option
      {:name "Martial Adept"
       :icon "visored-helm"
       :page 168
@@ -1234,7 +1234,7 @@
                      :options maneuver-options
                      :min 2
                      :max 2})]})
-    (feat-option
+    #_(feat-option
      {:name "Medium Armor Master"
       :icon "bracers"
       :page 168
@@ -1242,13 +1242,13 @@
       :modifiers [medium-armor-master-max-bonus
                   medium-armor-master-stealth]
       :prereqs [(armor-prereq :medium)]})
-    (feat-option
+    #_(feat-option
      {:name "Mobile"
       :icon "move"
       :page 168
       :summary "speed increases by 10 ft.; Dash through difficult terrain doesn't cost extra movement; don't provoke opportunity attacks from a creature you made a melee attack against"
       :modifiers [(modifiers/speed 10)]})
-    (feat-option
+    #_(feat-option
      {:name "Moderately Armored"
       :icon "shoulder-armor"
       :page 168
@@ -1257,12 +1257,12 @@
       :modifiers [(modifiers/medium-armor-proficiency)
                   (modifiers/shield-armor-proficiency)]
       :prereqs [(armor-prereq :light)]})
-    (feat-option
+    #_(feat-option
      {:name "Mounted Combatant"
       :icon "cavalry"
       :page 168
       :summary "while mounted: advantage on attacks against unmounted creatures smaller than mount, force attack on mount to target you; mount takes no damage on sucessful DEX saves and half on failed"})
-    (feat-option
+    #_(feat-option
      {:name "Observant"
       :icon "surrounded-eye"
       :page 168
@@ -1270,7 +1270,7 @@
       :selections [(ability-increase-selection [::character/int ::character/wis] 1 false)]
       :modifiers [(modifiers/passive-perception 5)
                   (modifiers/passive-investigation 5)]})
-    (feat-option
+    #_(feat-option
      {:name "Polearm Master"
       :icon "halberd"
       :page 168
@@ -1280,7 +1280,7 @@
                    {:name "Polearm Master"
                     :page 168
                     :summary "when you make an Attack with a glaive, quarterstaff, or halberd, make an additionaal melee attack with the other end of the weapon, dealing d4 bludgeoning damage"})]})
-    (feat-option
+    #_(feat-option
      {:name "Resilient"
       :icon "dodging"
       :page 168
@@ -1290,7 +1290,7 @@
                     1
                     false
                     [(fn [k] (modifiers/saving-throws nil k))])]})
-    (feat-option
+    #_(feat-option
      {:name "Ritual Caster"
       :icon "gift-of-knowledge"
       :page 169
@@ -1309,22 +1309,22 @@
                                    (let [{:keys [::character/wis ::character/int] :as abilities} @(subscribe [::character/abilities nil c])]
                                      (or (and wis (>= wis 13))
                                          (and int (>= int 13))))))]})
-    (feat-option
+    #_(feat-option
      {:name "Savage Attacker"
       :icon "saber-slash"
       :page 169
       :summary "reroll melee weapon attack damage and use either total"})
-    (feat-option
+    #_(feat-option
      {:name "Sentinal"
       :icon "guards"
       :page 169
       :summary "reduce target's speed to 0 when you hit with opportunity attack; opportunity attacks even when target Disengages; use reaction to make a weapon attack against a creature within 5 ft. that attacks another target"})
-    (feat-option
+    #_(feat-option
      {:name "Sharpshooter"
       :icon "bullseye"
       :page 170
       :summary "no disadvantage for long range; ignore half and 3/4 cover; take -5 to ranged attack to gain +10 on damage"})
-    (feat-option
+    #_(feat-option
      {:name "Shield Master"
       :icon "attached-shield"
       :page 170
@@ -1333,7 +1333,7 @@
                    {:name "Shield Master: Shove"
                     :page 170
                     :summary "make a shove with shield when taking the Attack action"})]})
-    (feat-option
+    #_(feat-option
      {:name "Skilled"
       :icon "juggler"
       :page 170
@@ -1341,13 +1341,13 @@
       :selections [(skilled-selection "Skill/Tool 1")
                    (skilled-selection "Skill/Tool 2")
                    (skilled-selection "Skill/tool 3")]})
-    (feat-option
+    #_(feat-option
      {:name "Skulker"
       :icon "ghost-ally"
       :page 170
       :summary "hide when lightly obscured; when hiding, missing an attack doesn't reveal you; no disadvantage on Perception checks in dim light"
       :prereqs [(ability-prereq ::character/dex 13)]})
-    (feat-option
+    #_(feat-option
      {:name "Spell Sniper"
       :icon "laser-precision"
       :page 170
@@ -1362,7 +1362,7 @@
                                (spell-sniper-option :sorcerer "Sorcerer" ::character/cha sl/spell-lists)
                                (spell-sniper-option :warlock "Warlock" ::character/cha sl/spell-lists)
                                (spell-sniper-option :wizard "Wizard" ::character/int sl/spell-lists)]})]})
-    (feat-option
+    #_(feat-option
      {:name "Tavern Brawler"
       :icon "broken-bottle"
       :page 170
@@ -1373,19 +1373,19 @@
                    {:name "Tavern Brawler: Grapple"
                     :page 170
                     :summary "attempt grapple when you hit with improvised weapon or unarmed strike"})]})
-    (feat-option
+    #_(feat-option
      {:name "Tough"
       :icon "defensive-wall"
       :page 170
       :summary "2 extra HPs per level"
       :modifiers [(mods/modifier ?hit-point-level-bonus (+ 2 ?hit-point-level-bonus))]})
-    (feat-option
+    #_(feat-option
      {:name "War Caster"
       :icon "deadly-strike"
       :page 170
       :summary "adv. on CON saves for spell concentration; somatic components with weapons or shield in hand; cast spell as opporunity attack"
       :prereqs [can-cast-spell-prereq]})
-    (feat-option
+    #_(feat-option
      {:name "Weapon Master"
       :icon "sword-slice"
       :page 170
@@ -2405,7 +2405,7 @@
                 (t/option-cfg
                  {:name "Average"
                   :key :average
-                  :help (str "This option just gives you the average value (" average ") for the die roll (1D" die "). Choose this option if you're not feeling lucky, you are participating in Adventurer's League, or your DM says so.")
+                  :help (str "This option just gives you the average value (" average ") for the die roll (1D" die ").")
                   :modifiers [(modifiers/max-hit-points average)]}))]}))
 
 (defn custom-subclass-builder [path]
@@ -2439,7 +2439,7 @@
                (map (partial spell-option ability-kw "Custom")))
               spells/spells)}))
 
-(defn custom-subclass-spellcasting-selection [cls-key]
+#_(defn custom-subclass-spellcasting-selection [cls-key]
   (t/selection-cfg
    {:name "Spellcasting Ability"
     :key :spellcasting-ability
@@ -2482,7 +2482,8 @@
                          homebrew-feat-selection
                          homebrew-armor-prof-selection
                          homebrew-weapon-prof-selection]]
-                    (if spellcasting-class?
+                    selections
+                    #_(if spellcasting-class?
                       selections
                       (conj selections
                             (custom-subclass-spellcasting-selection cls-key))))})))
