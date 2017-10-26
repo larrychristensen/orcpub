@@ -2,6 +2,7 @@
   (:require [re-frame.core :refer [reg-sub reg-sub-raw dispatch subscribe]]
             [orcpub.common :as common]
             [orcpub.template :as t]
+            [orcpub.dnd.e5.spell-subs]
             [orcpub.dnd.e5.modifiers :as mod5e]
             [orcpub.dnd.e5.magic-items :as mi5e]
             [orcpub.dnd.e5.character :as char5e]
@@ -9,6 +10,7 @@
             [orcpub.dnd.e5.armor :as armor5e]
             [orcpub.dnd.e5.template :as t5e]
             [orcpub.dnd.e5.equipment :as equipment5e]
+            [orcpub.dnd.e5.spells :as spells5e]
             [orcpub.route-map :as routes]
             [orcpub.dnd.e5.events :as events]
             [reagent.ratom :as ra]
@@ -250,12 +252,18 @@
  :<- [::mi5e/magic-weapon-options]
  :<- [::mi5e/magic-armor-options]
  :<- [::mi5e/other-magic-item-options]
+ :<- [::spells5e/spell-lists]
+ :<- [::spells5e/spells-map]
  (fn [[magic-weapon-options
        magic-armor-options
-       other-magic-item-options] _]
+       other-magic-item-options
+       spell-lists
+       spells-map] _]
    (t5e/template-selections magic-weapon-options
                             magic-armor-options
-                            other-magic-item-options)))
+                            other-magic-item-options
+                            spell-lists
+                            spells-map)))
 
 (reg-sub
  ::char5e/template

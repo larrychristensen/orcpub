@@ -10,7 +10,7 @@
             [orcpub.template :as t]
             [orcpub.common :as common]))
 
-(defn wonderous-invention-selection [item-kws]
+#_(defn wonderous-invention-selection [item-kws]
   (t/selection-cfg
    {:name "Wonderous Inventions"
     :min 1
@@ -32,7 +32,7 @@
                                                    ::char-equip5e/equipped? true})]})))
               item-kws)}))
 
-(def alchemical-fire-mod
+#_(def alchemical-fire-mod
   (mod5e/action
    {:name "Alchemical Fire"
     :page 5
@@ -52,7 +52,7 @@
                   (?spell-save-dc ::char5e/int)
                   " DEX save")}))
 
-(def alchemical-acid-mod
+#_(def alchemical-acid-mod
   (mod5e/action
    {:name "Alchemical Acid"
     :page 5
@@ -76,7 +76,7 @@
                   (?spell-save-dc ::char5e/int)
                   " DEX save")}))
 
-(def alchemical-formula-selection
+#_(def alchemical-formula-selection
   (t/selection-cfg
    {:name "Alchemical Formulas"
     :min 1
@@ -139,7 +139,7 @@
                               :range units5e/ft-30
                               :summary (str "Hurl a shard. Creatures within 10 ft. of the impact point must make a DC " (?spell-save-dc ::char5e/int) " CON save or be knocked prone and pushed 10 ft. away.")})]})]}))
 
-(defn artificer-tool-prof-mods [tool-key]
+#_(defn artificer-tool-prof-mods [tool-key]
   [(mod5e/tool-proficiency tool-key)
    (mod/set-mod ?tool-expertise
                 tool-key
@@ -147,7 +147,7 @@
                 nil
                 [(>= (?class-level :artificer) 2)])])
 
-(def artificer-option
+#_(def artificer-option
   (opt5e/class-option
    {:name "Artificer"
     :hit-die 8

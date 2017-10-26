@@ -28,6 +28,7 @@
 
 (def dnd-e5-spell-list-page-route :spell-list-5e-page)
 (def dnd-e5-spell-page-route :spell-5e-page)
+(def dnd-e5-spell-builder-page-route :spell-builder-5e-page)
 
 (def dnd-e5-spell-page-routes #{dnd-e5-spell-list-page-route dnd-e5-spell-page-route})
 
@@ -122,6 +123,7 @@
                               "characters" {"" dnd-e5-char-list-page-route
                                             ["/" :id] dnd-e5-char-page-route}
                               "parties" dnd-e5-char-parties-page-route
+                              "spell-builder" dnd-e5-spell-builder-page-route
                               "spells" {"" dnd-e5-spell-list-page-route
                                         ["/" :key] dnd-e5-spell-page-route}
                               "magic-item-builder" dnd-e5-item-builder-page-route

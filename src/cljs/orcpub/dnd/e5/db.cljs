@@ -1,9 +1,11 @@
 (ns orcpub.dnd.e5.db
   (:require [orcpub.route-map :as route-map]
             [orcpub.user-agent :as user-agent]
+            [orcpub.dnd.e5 :as e5]
             [orcpub.dnd.e5.template :as t5e]
             [orcpub.dnd.e5.character :as char5e]
             [orcpub.dnd.e5.magic-items :as mi5e]
+            [orcpub.dnd.e5.spells :as spells5e]
             [re-frame.core :as re-frame]
             [orcpub.entity :as entity]
             [orcpub.entity.strict :as se]
@@ -16,6 +18,8 @@
 (def local-storage-character-key "character")
 (def local-storage-user-key "user")
 (def local-storage-magic-item-key "magic-item")
+(def local-storage-spell-key "spell")
+(def local-storage-plugins-key "plugins")
 
 (def default-route route-map/dnd-e5-char-builder-route)
 
@@ -28,6 +32,9 @@
 
 (def default-character (char5e/set-class t5e/character :barbarian 0 t5e/barbarian-option))
 
+(def default-spell {:level 0
+                    :school "abjuration"})
+
 (def default-value
   {:builder {:character {:tab #{:build :options}}}
    :character default-character
@@ -38,7 +45,8 @@
    :route-history (list default-route)
    :return-route default-route
    :registration-form {:send-updates? true}
-   :device-type (user-agent/device-type)})
+   :device-type (user-agent/device-type)
+   ::spells5e/builder-item default-spell})
 
 (defn set-item [key value]
   (try
@@ -59,6 +67,14 @@
 (defn magic-item->local-store [magic-item]
   (if js/window.localStorage
     (set-item local-storage-magic-item-key (str magic-item))))
+
+(defn spell->local-store [spell]
+  (if js/window.localStorage
+    (set-item local-storage-spell-key (str spell))))
+
+(defn plugins->local-store [plugins]
+  (if js/window.localStorage
+    (set-item local-storage-plugins-key (str plugins))))
 
 (def tab-path [:builder :character :tab])
 
@@ -109,3 +125,24 @@
  :local-store-magic-item
  local-storage-magic-item-key
  ::mi5e/internal-magic-item)
+
+(def test-plugins
+  {"EE" {:orcpub.dnd.e5/spell-lists {:bard
+                                     {2 [:dust-devil]}}
+         :orcpub.dnd.e5/spells {:dust-devil {:name "Dust Devil"
+                                             :key :dust-devil
+                                             :school "conjuration"
+                                             :level 2
+                                             :casting-time "actions-1"
+                                             :range "60 feet"
+                                             :duration "conc-1-min"
+                                             :components {:verbal true :somatic true :material true :material-component "fur wrapped in cloth"}
+                                             :page 17
+                                             :source :ee
+                                             :summary "Conjure dust devil"}}}})
+
+(reg-local-store-cofx
+ ::e5/plugins
+ local-storage-plugins-key
+ ::e5/plugins)
+
