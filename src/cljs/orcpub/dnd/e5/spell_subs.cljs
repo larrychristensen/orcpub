@@ -22,11 +22,17 @@
 (reg-sub
  ::e5/plugins
  (fn [db _]
-   (vals (get db :plugins))))
+   (get db :plugins)))
+
+(reg-sub
+ ::e5/plugin-vals
+ :<- [::e5/plugins]
+ (fn [plugins]
+   (vals plugins)))
 
 (reg-sub
  ::spells5e/plugin-spells
- :<- [::e5/plugins]
+ :<- [::e5/plugin-vals]
  (fn [plugins _]
    (apply concat (map (comp vals ::e5/spells) plugins))))
 

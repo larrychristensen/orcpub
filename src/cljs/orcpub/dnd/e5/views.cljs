@@ -3694,6 +3694,75 @@
      :on-click #(dispatch [::spells/save-spell])}]
    [spell-builder]])
 
+(defn expanded-character-list-item [id owner username]
+  [:div
+   {:style character-display-style}
+   [:div.flex.justify-cont-end.uppercase.align-items-c
+    [share-link id]
+    [:div.m-r-5 [character-page-fb-button id]]
+    (if (= username owner)
+      [:button.form-button
+       {:on-click (make-event-handler :edit-character @(subscribe [::char/character id]))}
+       "edit"])
+    [:button.form-button.m-l-5
+     {:on-click (make-event-handler :route char-page-route)}
+     "view"]
+    [:button.form-button.m-l-5
+     {:on-click (export-pdf
+                 @(subscribe [::char/built-character id])
+                 id
+                 {:print-character-sheet? true
+                  :print-spell-cards? true
+                  :print-prepared-spells? false})}
+     "print"]
+    (if (= username owner)
+      [:button.form-button.m-l-5
+       {:on-click (make-event-handler ::char/show-delete-confirmation id)}
+       "delete"])]
+   (if @(subscribe [::char/delete-confirmation-shown? id])
+     [:div.p-20.flex.justify-cont-end
+      [:div
+       [:div.m-b-10 "Are you sure you want to delete this character?"]
+       [:div.flex
+        [:button.form-button
+         {:on-click (make-event-handler ::char/hide-delete-confirmation id)}
+         "cancel"]
+        [:span.link-button
+         {:on-click (make-event-handler :delete-character id)}
+         "delete"]]]])
+   [character-display id false (if (= :mobile device-type) 1 2)]])
+
+(defn character-list-item [expanded-characters
+                           selected-ids
+                           id
+                           owner
+                           username
+                           summary]
+  (let [expanded? (get expanded-characters id)
+        char-page-path (routes/path-for routes/dnd-e5-char-page-route :id id)
+        char-page-route (routes/match-route char-page-path)]
+    [:div.main-text-color.item-list-item
+     [:div
+      [:div.flex.justify-cont-s-b.align-items-c.pointer
+       {:on-click (make-event-handler :toggle-character-expanded id)}
+       [:div.m-l-10.flex.align-items-c
+        [:div.p-5
+         {:on-click (fn [e]
+                      (dispatch [::char/toggle-selected id])
+                      (.stopPropagation e))}
+         (comps/checkbox (get selected-ids id) false)]
+        [:div.f-s-24.f-w-600
+         [:div.list-character-summary
+          [character-summary-2 summary true owner false]]]]
+       [:div.orange.pointer.m-r-10
+        (if (not= device-type :mobile) [:span.underline (if expanded?
+                                                          "collapse"
+                                                          "open")])
+        [:i.fa.m-l-5
+         {:class-name (if expanded? "fa-caret-up" "fa-caret-down")}]]]
+      (if expanded?
+        [expanded-character-list-item id owner username])]]))
+
 
 (defn character-list []
   (let [characters @(subscribe [::char/characters])
@@ -3730,66 +3799,14 @@
                (doall
                 (map
                  (fn [{:keys [:db/id ::se/owner] :as summary}]
-                   (let [expanded? (get expanded-characters id)
-                         char-page-path (routes/path-for routes/dnd-e5-char-page-route :id id)
-                         char-page-route (routes/match-route char-page-path)]
-                     ^{:key id}
-                     [:div.main-text-color.item-list-item
-                      [:div
-                       [:div.flex.justify-cont-s-b.align-items-c.pointer
-                        {:on-click (make-event-handler :toggle-character-expanded id)}
-                        [:div.m-l-10.flex.align-items-c
-                         [:div.p-5
-                          {:on-click (fn [e]
-                                       (dispatch [::char/toggle-selected id])
-                                       (.stopPropagation e))}
-                          (comps/checkbox (get selected-ids id) false)]
-                         [:div.f-s-24.f-w-600
-                          [:div.list-character-summary
-                           [character-summary-2 summary true owner false]]]]
-                        [:div.orange.pointer.m-r-10
-                         (if (not= device-type :mobile) [:span.underline (if expanded?
-                                                                           "collapse"
-                                                                           "open")])
-                         [:i.fa.m-l-5
-                          {:class-name (if expanded? "fa-caret-up" "fa-caret-down")}]]]
-                       (if expanded?
-                         [:div
-                          {:style character-display-style}
-                          [:div.flex.justify-cont-end.uppercase.align-items-c
-                           [share-link id]
-                           [:div.m-r-5 [character-page-fb-button id]]
-                           (if (= username owner)
-                             [:button.form-button
-                              {:on-click (make-event-handler :edit-character @(subscribe [::char/character id]))}
-                              "edit"])
-                           [:button.form-button.m-l-5
-                            {:on-click (make-event-handler :route char-page-route)}
-                            "view"]
-                           [:button.form-button.m-l-5
-                            {:on-click (export-pdf
-                                        @(subscribe [::char/built-character id])
-                                        id
-                                        {:print-character-sheet? true
-                                         :print-spell-cards? true
-                                         :print-prepared-spells? false})}
-                            "print"]
-                           (if (= username owner)
-                             [:button.form-button.m-l-5
-                              {:on-click (make-event-handler ::char/show-delete-confirmation id)}
-                              "delete"])]
-                          (if @(subscribe [::char/delete-confirmation-shown? id])
-                            [:div.p-20.flex.justify-cont-end
-                             [:div
-                              [:div.m-b-10 "Are you sure you want to delete this character?"]
-                              [:div.flex
-                               [:button.form-button
-                                {:on-click (make-event-handler ::char/hide-delete-confirmation id)}
-                                 "cancel"]
-                               [:span.link-button
-                                {:on-click (make-event-handler :delete-character id)}
-                                 "delete"]]]])
-                          [character-display id false (if (= :mobile device-type) 1 2)]])]]))
+                   ^{:key id}
+                   [character-list-item
+                    expanded-characters
+                    selected-ids
+                    id
+                    owner
+                    username
+                    summary])
                  (sort-by ::char/character-name owner-characters)))]])
            sorted-groups)))]]]))
 
