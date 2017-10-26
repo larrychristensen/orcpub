@@ -30,7 +30,7 @@
 
 (def ua-eberron-kw :ua-eberron)
 
-(defn dragonmark-spell-mod [kw ability-kw lvl]
+#_(defn dragonmark-spell-mod [kw ability-kw lvl]
   (mod5e/spells-known (opt5e/spell-level kw) kw ability-kw "Dragonmark" lvl))
 
 (def ua-mystic-kw :ua-mystic)
@@ -181,7 +181,7 @@
                17 {:modifiers [(mod5e/spells-known 5 :planar-binding ::char5e/wis "Ranger")]}}}]
     true)])
 
-(def ua-trio-of-subclasses-plugin
+#_(def ua-trio-of-subclasses-plugin
   {:name "Unearthed Arcana: A Trio of Subclasses"
    :class-options? true
    :key ua-trio-of-subclasses-kw
@@ -190,7 +190,7 @@
                             opt5e/class-option
                             ua-trio-of-subclasses-classes)})]})
 
-(defn kensei-weapon-selection [num]
+#_(defn kensei-weapon-selection [num]
   (t/selection-cfg
    {:name "Kensei Weapons"
     :min num
@@ -210,7 +210,7 @@
                      (:special weapon)))
                weapon5e/weapons))}))
 
-(def barbarian-path-of-the-ancestral-guardian
+#_(def barbarian-path-of-the-ancestral-guardian
   {:name "Barbarian"
    :plugin? true
    :subclass-level 3
@@ -246,7 +246,7 @@
                            :source ua-options/ua-revised-subclasses-kw
                            :summary "when you use Spirit Shield to prevent damage, the attacker takes the prevented damage"}]}]})
 
-(def bard-college-of-swords
+#_(def bard-college-of-swords
   {:name "Bard"
    :plugin? true
    :source ua-options/ua-revised-subclasses-kw
@@ -290,7 +290,7 @@
                                             :page 55
                                             :summary "when you use Blade Flourish, you can roll a d6 instead of expending a Bardic Inspiration"})]}}}]})
 
-(def fighter-arcane-archer
+#_(def fighter-arcane-archer
   {:name "Fighter",
    :plugin? true
    :subclass-level 3
@@ -298,7 +298,7 @@
    :source ua-options/ua-revised-subclasses-kw
    :subclasses [ua-options/arcane-archer-option-cfg]})
 
-(def monk-way-of-the-kensei
+#_(def monk-way-of-the-kensei
   (merge
     opt5e/monk-base-cfg
     {:source ua-options/ua-revised-subclasses-kw
@@ -333,14 +333,14 @@
                                               :frequency units5e/rounds-1
                                               :summary "if you miss with a monk weapon, reroll the attack"})]}}}]}))
 
-(def ua-revised-classes
+#_(def ua-revised-classes
   [barbarian-path-of-the-ancestral-guardian
    bard-college-of-swords
    fighter-arcane-archer
    monk-way-of-the-kensei
    ua-sorcerer/sorcerer-favored-soul])
 
-(def ua-revised-subclasses-plugin
+#_(def ua-revised-subclasses-plugin
   {:name "Unearthed Arcana: Revised Subclasses"
    :class-options? true
    :key ua-options/ua-revised-subclasses-kw
@@ -349,7 +349,7 @@
                             opt5e/class-option
                             ua-revised-classes)})]})
 
-(def ua-mystic-order-of-the-awakened
+#_(def ua-mystic-order-of-the-awakened
   {:name "Order of the Awakened"
    :selections [(psionic-disciplines-selection 2 "Order of the Awakened" (fn [d] (= :awakened (:mystic-order d))))
                 (opt5e/skill-selection [:animal-handling :deception :insight :intimidation :investigation :perception :persuasion] 2)]
@@ -468,7 +468,7 @@
                               :name "Phantom Knife"
                               :summary "make a soul knife attack against AC 10 instead of target's actual AC"})]}}})
 
-(def ua-mystic-order-of-the-wu-jen
+#_(def ua-mystic-order-of-the-wu-jen
   {:name "Order of the Wu Jen"
    :selections [(psionic-disciplines-selection 2 "Order of the Wu Jen" (fn [d] (= :wu-jen (:mystic-order d))))]
    :levels {3 {:modifiers [(mod5e/trait-cfg
@@ -495,7 +495,7 @@
                               :name "Elemental Mastery"
                               :summary "spend 2 psi to gain immunity to damage that you take that you are resistant to"})]}}})
 
-(def ua-mystic-subclasses
+#_(def ua-mystic-subclasses
   [ua-mystic-order-of-the-avatar
    ua-mystic-order-of-the-awakened
    ua-mystic-order-of-the-immortal
@@ -503,40 +503,40 @@
    ua-mystic-order-of-the-soul-knife
    ua-mystic-order-of-the-wu-jen])
 
-(def ua-artificer-plugin
+#_(def ua-artificer-plugin
   {:name "Unearthed Arcana: Artificer"
    :key :ua-artificer
    :class-options? true
    :selections [(opt5e/class-selection
                  {:options [ua-artificer/artificer-option]})]})
 
-(def ua-starter-spells
+#_(def ua-starter-spells
   {:name "Unearthed Arcana: Starter Spells"
    :key :ua-starter-spells
    :class-options? true})
 
-(def ua-revised-ranger-plugin
+#_(def ua-revised-ranger-plugin
   {:name "Unearthed Arcana: Revised Ranger"
    :key :ua-revised-ranger
    :class-options? true
    :selections [(opt5e/class-selection
                  {:options [ua-revised-ranger/revised-ranger-option]})]})
 
-(def ua-cleric-plugin
+#_(def ua-cleric-plugin
   {:name "Unearthed Arcana: Cleric"
    :key :ua-cleric
    :class-options? true
    :selections [(opt5e/class-selection
                  {:options [(opt5e/class-option ua-cleric/ua-cleric-cfg)]})]})
 
-(def ua-bard-plugin
+#_(def ua-bard-plugin
   {:name "Unearthed Arcana: Bard"
    :key :ua-bard
    :class-options? true
    :selections [(opt5e/class-selection
                  {:options [ua-bard/bard-option]})]})
 
-(def ua-mystic-plugin
+#_(def ua-mystic-plugin
   {:name "Unearthed Arcana: Mystic"
    :key ua-mystic-kw
    :class-options? true
@@ -686,7 +686,7 @@
 
 (def ua-waterborne-kw :ua-waterborne)
 
-(defn mariner-class-option [nm kw level]
+#_(defn mariner-class-option [nm kw level]
   (opt5e/class-option
    {:name nm
     :plugin? true
@@ -710,7 +710,7 @@
                                                    :summary "while not wearing heavy armor, gain +1 AC bonus and you have swimming speed and climbing speed equal to your land speed"})]})])]}}}))
 
 
-(def ua-waterborne-plugin
+#_(def ua-waterborne-plugin
   {:name "Unearthed Arcana: Waterborne Adventures"
    :key ua-waterborne-kw
    :class-options? true
@@ -752,7 +752,7 @@
                                         :source ua-waterborne-kw
                                         :summary "perfect recall of paths you've traveled"}]})]})]})
 
-(defn dragonmark-feat [nm ability-kw least lesser greater]
+#_(defn dragonmark-feat [nm ability-kw least lesser greater]
   (opt5e/feat-option
    {:name (str "Dragonmark: " nm)
     :page 5
@@ -766,7 +766,7 @@
                 (dragonmark-spell-mod greater ability-kw 9)
                 opt5e/ua-al-illegal)}))
 
-(def ua-eberron-plugin
+#_(def ua-eberron-plugin
   {:name "Unearthed Arcana: Eberron"
    :key ua-eberron-kw
    :race-options? true
@@ -851,7 +851,7 @@
                                                                       :page 3
                                                                       :source ua-eberron-kw
                                                                       :summary "create a potion"})
-                                                                    (mod5e/trait-cfg
+p                                                                    (mod5e/trait-cfg
                                                                      {:name "Infuse Scrolls"
                                                                       :page 4
                                                                       :source ua-eberron-kw
@@ -886,7 +886,7 @@
                             (dragonmark-feat "Storm" ::char5e/int [:fog-cloud :shocking-grasp] :gust-of-wind :sleet-storm)
                             (dragonmark-feat "Warding" ::char5e/int [:alarm :resistance] :arcane-lock :magic-circle)]})]})
 
-(def ua-plugins
+#_(def ua-plugins
   (map
    (fn [{:keys [name key] :as plugin}]
      (assoc plugin :help (ua-help name (opt5e/source-url key))))

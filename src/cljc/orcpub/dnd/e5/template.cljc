@@ -19,23 +19,17 @@
             [orcpub.dnd.e5.spells :as spells]
             [orcpub.dnd.e5.magic-items :as mi]
             [orcpub.dnd.e5.skills :as skill5e]
-            [orcpub.dnd.e5.display :as disp5e]
+            #_[orcpub.dnd.e5.display :as disp5e]
             [orcpub.dnd.e5.template-base :as t-base]
-            [orcpub.dnd.e5.templates.scag :as scag]
-            [orcpub.dnd.e5.templates.ua-base :as ua]
+            #_[orcpub.dnd.e5.templates.scag :as scag]
+            #_[orcpub.dnd.e5.templates.ua-base :as ua]
             [re-frame.core :refer [subscribe dispatch]]))
 
 (def character
   {::entity/options {:ability-scores {::entity/key :standard-scores
                                       ::entity/value (char5e/abilities 15 14 13 12 10 8)}
                      :class [{::entity/key :barbarian
-                              ::entity/options {:levels [{::entity/key :level-1}]}}]
-                     :optional-content
-                     [{:orcpub.entity/key :vgm}
-                      {:orcpub.entity/key :scag}
-                      {:orcpub.entity/key :ee}
-                      {:orcpub.entity/key :dmg}
-                      {:orcpub.entity/key :cos}]}})
+                              ::entity/options {:levels [{::entity/key :level-1}]}}]}})
 
 (defn set-ability! [app-state ability-key ability-value]
   (swap! app-state
@@ -164,8 +158,10 @@
     :page 24
     :summary "Hide when lightly obscured by natural phenomena."}))
 
-(def high-elf-cantrip-selection
+(defn high-elf-cantrip-selection [spell-lists spells-map]
   (opt5e/spell-selection
+   spell-lists
+   spells-map
    {:class-key :wizard
     :level 0
     :exclude-ref? true
@@ -178,7 +174,7 @@
    (mod5e/spells-known 1 :faerie-fire ::char5e/cha "Dark Elf" 3)
    (mod5e/spells-known 2 :darkness ::char5e/cha "Dark Elf" 5)])
 
-(def elf-option-cfg
+(defn elf-option-cfg [spell-lists spells-map]
   {:name "Elf"
    :help "Elves are graceful, magical creatures, with a slight build."
    :abilities {::char5e/dex 2}
@@ -192,7 +188,7 @@
    :subraces
    [{:name "High Elf"
      :abilities {::char5e/int 1}
-     :selections [high-elf-cantrip-selection
+     :selections [(high-elf-cantrip-selection spell-lists spells-map)
                   (opt5e/language-selection opt5e/languages 1)]
      :modifiers [elf-weapon-training-mods]}
     #_{:name "Wood Elf"
@@ -268,7 +264,7 @@
              :page 28
              :summary "you have advantage on saves against being frightened"}]})
 
-(def human-option-cfg
+(defn human-option-cfg [spell-lists spells-map]
   {:name "Human"
    :help "Humans are physically diverse and highly adaptable. They excel in nearly every profession."
    :size :medium
@@ -298,7 +294,7 @@
                                           (mod5e/race-ability ::char5e/cha 1)]})
                             (t/option-cfg
                              {:name "Variant Human"
-                              :selections [(opt5e/feat-selection 1)
+                              :selections [(opt5e/feat-selection spell-lists spells-map 1)
                                            (opt5e/skill-selection 1)
                                            (opt5e/ability-increase-selection char5e/ability-keys 2 true)]})]})]})
 
@@ -888,8 +884,10 @@
     :page page
     :summary "Attack twice when taking Attack action"}))
 
-(def barbarian-option
+(defn barbarian-option [spells spells-map]
   (opt5e/class-option
+   spells
+   spells-map
    {:name "Barbarian"
     :hit-die 12
     :ability-increase-levels [4 8 12 16 19]
@@ -1085,8 +1083,10 @@
   {:name "Musical Instrument"
    :options (zipmap (map :key equip5e/musical-instruments) (repeat 1))})
 
-(def bard-option
+(defn bard-option [spells spells-map]
   (opt5e/class-option
+   spells
+   spells-map
    {:name "Bard"
     :hit-die 8
     :ability-increase-levels [4 8 12 16 19]
@@ -1160,10 +1160,10 @@
                               :level 6
                               :page 54
                               :summary "performance during your turn that gives you and friendly creatures within 30 ft. advantage on frightened or charmed saves."})]}
-             10 {:selections (conj [(opt5e/bard-magical-secrets 10)]
+             10 {:selections (conj [(opt5e/bard-magical-secrets spells-map 10)]
                                    (opt5e/expertise-selection 2))}
-             14 {:selections [(opt5e/bard-magical-secrets 14)]}
-             18 {:selections [(opt5e/bard-magical-secrets 18)]}}
+             14 {:selections [(opt5e/bard-magical-secrets spells-map 14)]}
+             18 {:selections [(opt5e/bard-magical-secrets spells-map 18)]}}
     :traits [{:name "Font of Inspiration"
               :level 5
               :page 54
@@ -1187,7 +1187,7 @@
                                               (bardic-inspiration-die ?levels)
                                               " from an attack, ability, or damage roll made by a creature within 60 ft.")})]
                   
-                  :levels {6 {:selections [(opt5e/bard-magical-secrets 6)]}
+                  :levels {6 {:selections [(opt5e/bard-magical-secrets spells-map 6)]}
                            14 {:modifiers [(mod5e/dependent-trait
                                             {:name "Peerless Skill"
                                              :level 14
@@ -1231,8 +1231,10 @@
    4 7
    5 9})
 
-(def cleric-option
+(defn cleric-option [spells spells-map]
   (opt5e/class-option
+   spells
+   spells-map
    {:name "Cleric",
     :spellcasting {:level-factor 1
                    :cantrips-known {1 3 4 1 10 1}
@@ -1580,8 +1582,10 @@
    :page 69
    :summary "moving through nonmagical difficult terrain costs no extra movement, pass through nonmagical plants without being slowed by them and without taking damage from them"})
 
-(def druid-option
+(defn druid-option [spell-lists spells-map]
   (opt5e/class-option
+   spell-lists
+   spells-map
    {:name "Druid"
     :hit-die 8
     :spellcaster true
@@ -1672,6 +1676,8 @@
     :subclass-title "Druid Circle"
     :subclasses [{:name "Circle of the Land"
                   :selections [(opt5e/spell-selection
+                                spell-lists
+                                spells-map
                                 {:class-key :druid
                                  :level 0
                                  :spellcasting-ability ::char5e/wis
@@ -1952,8 +1958,10 @@
     :max num}))
 
 
-(def fighter-option
+(defn fighter-option [spells spells-map]
   (opt5e/class-option
+   spells
+   spells-map
    {:name "Fighter",
     :hit-die 10,
     :ability-increase-levels [4 6 8 12 14 16 19]
@@ -2122,8 +2130,10 @@
            (not heavy?)
            (not two-handed?))))
 
-(def monk-option
+(defn monk-option [spells spells-map]
   (opt5e/class-option
+   spells
+   spells-map
    (merge
     opt5e/monk-base-cfg
     {:hit-die 8
@@ -2312,8 +2322,10 @@
                              :summary "create minor elemental effect"}]}]})))
 
 
-(def paladin-option
+(defn paladin-option [spells spells-map]
   (opt5e/class-option
+   spells
+   spells-map
    (merge
     opt5e/paladin-base-cfg
     {:name "Paladin"
@@ -2604,8 +2616,9 @@
          :modifiers [(mod/set-mod ?ranger-favored-terrain terrain)]}))
      [:arctic :coast :desert :forest :grassland :mountain :swamp :underdark])}))
 
-(def ranger-option
+(defn ranger-option [spells spells-map]
   (opt5e/class-option
+   spells spells-map
    (merge
     opt5e/ranger-base-cfg
     {:hit-die 10
@@ -2804,8 +2817,10 @@
 
 (def rogue-skills {:acrobatics true :athletics true :deception true :insight true :intimidation true :investigation true :perception true :performance true :persuasion true :sleight-of-hand true :stealth true})
 
-(def rogue-option
+(defn rogue-option [spells spells-map]
   (opt5e/class-option
+   spells
+   spells-map
    {:name "Rogue",
     :hit-die 8
     :ability-increase-levels [4 8 10 12 16 19]
@@ -3026,8 +3041,10 @@
                               :page 102
                               :summary "spend X sorcery pts. (min 1) to target two creatures with a single target spell, where X is the spell level"})]})]}))
 
-(def sorcerer-option
+(defn sorcerer-option [spells spells-map]
   (opt5e/class-option
+   spells
+   spells-map
    {:name "Sorcerer"
     :spellcasting {:level-factor 1
                    :cantrips-known {1 4 4 1 10 1}
@@ -3203,8 +3220,10 @@
                                true)]})))
               (get-in sl/spell-lists [:wizard 3]))}))
 
-(def wizard-option
+(defn wizard-option [spells spells-map]
   (opt5e/class-option
+   spells
+   spells-map
    {:name "Wizard",
     :spellcasting {:level-factor 1
                    :cantrips-known {1 3 4 1 10 1}
@@ -3450,7 +3469,7 @@
                              melee-weapons-xform
                              weapons)})]}))
 
-(def pact-boon-options
+(defn pact-boon-options [spell-lists spells-map]
   [(t/option-cfg
     {:name "Pact of the Chain"
      :modifiers [(mod5e/spells-known 1 :find-familiar ::char5e/cha "Warlock")
@@ -3478,12 +3497,13 @@
                     :tags #{:spells}
                     :min 3
                     :max 3
-                    :options (opt5e/spell-options (into
+                    :options (opt5e/spell-options spells-map
+                                                  (into
                                                    #{}
                                                    (mapcat
                                                     (fn [[cls-kw spells-by-level]]
                                                       (spells-by-level 0))
-                                                    sl/spell-lists))
+                                                    spell-lists))
                                                   ::char5e/cha
                                                   "Warlock"
                                                   false
@@ -3494,7 +3514,7 @@
                    :summary "you have a spellbook with 3 extra cantrips"})]})])
 
 
-(def eldritch-invocation-options
+(defn eldritch-invocation-options [spell-lists spells-map]
   [(t/option-cfg
     {:name "Agonizing Blast"
      :modifiers [(mod5e/dependent-trait
@@ -3551,6 +3571,7 @@
                     :tags #{:spells}
                     :multiselect? true
                     :options (opt5e/spell-options
+                              spells-map
                               (map
                                (fn [s] (or (:key s)
                                            (common/name-to-kw (:name s))))
@@ -3776,25 +3797,28 @@ long rest."})
    17 1
    19 1})
 
-(defn eldritch-invocation-selection [& [num]]
+(defn eldritch-invocation-selection [spell-lists spells-map & [num]]
   (opt5e/eldritch-invocation-selection
-   {:options eldritch-invocation-options
+   {:options (eldritch-invocation-options spell-lists spells-map)
     :min (or num 1)
     :max (or num 1)}))
 
-(defn mystic-arcanum-selection [spell-level]
+(defn mystic-arcanum-selection [spells-map spell-level]
   (t/selection-cfg
    {:name (str "Mystic Arcanum: Spell Level " spell-level)
     :tags #{:spells}
     :options (opt5e/spell-options
+              spells-map
               (get-in sl/spell-lists [:warlock spell-level])
               ::char5e/cha
               "Warlock"
               false
               "uses Mystic Arcanum")}))
 
-(def warlock-option
+(defn warlock-option [spell-lists spells-map]
   (opt5e/class-option
+   spell-lists
+   spells-map
    {:name "Warlock"
     :spellcasting {:cantrips-known {1 2 4 1 10 1}
                    :spells-known warlock-spells-known
@@ -3835,15 +3859,15 @@ long rest."})
                                    :arcane-focus 1}}]
     :weapons {:dagger 2}
     :armor {:leather 1}
-    :levels {2 {:selections [(eldritch-invocation-selection 2)]}
+    :levels {2 {:selections [(eldritch-invocation-selection spell-lists spells-map 2)]}
              3 {:selections [(t/selection-cfg
                               {:name "Pact Boon"
                                :tags #{:class}
-                               :options pact-boon-options})]}
-             5 {:selections [(eldritch-invocation-selection)]}
-             7 {:selections [(eldritch-invocation-selection)]}
-             9 {:selections [(eldritch-invocation-selection)]}
-             11 {:selections [(mystic-arcanum-selection 6)]
+                               :options (pact-boon-options spell-lists spells-map)})]}
+             5 {:selections [(eldritch-invocation-selection spell-lists spells-map)]}
+             7 {:selections [(eldritch-invocation-selection spell-lists spells-map)]}
+             9 {:selections [(eldritch-invocation-selection spell-lists spells-map)]}
+             11 {:selections [(mystic-arcanum-selection spells-map 6)]
                  :modifiers [(mod5e/dependent-trait
                               {:name "Mystic Arcanum"
                                :level 11
@@ -3856,12 +3880,12 @@ long rest."})
                                              15 3
                                              17 4
                                              :default 1}))})]}
-             12 {:selections [(eldritch-invocation-selection)]}
-             13 {:selections [(mystic-arcanum-selection 7)]}
-             15 {:selections [(eldritch-invocation-selection)
-                              (mystic-arcanum-selection 8)]}
-             17 {:selections [(mystic-arcanum-selection 9)]}
-             18 {:selections [(eldritch-invocation-selection)]}}
+             12 {:selections [(eldritch-invocation-selection spell-lists spells-map)]}
+             13 {:selections [(mystic-arcanum-selection spells-map 7)]}
+             15 {:selections [(eldritch-invocation-selection spell-lists spells-map)
+                              (mystic-arcanum-selection spells-map 8)]}
+             17 {:selections [(mystic-arcanum-selection spells-map 9)]}
+             18 {:selections [(eldritch-invocation-selection spell-lists spells-map)]}}
     :traits [{:name "Eldrich Master"
               :level 20
               :page 108
@@ -3889,11 +3913,11 @@ long rest."})
                                             :page 109
                                             :summary (str "gain " (+ (?class-level :warlock)
                                                                      (?ability-bonuses ::char5e/cha)) " temp HPs when you reduce a hostile creature to 0 HPs")})]
-                              :selections [(opt5e/warlock-subclass-spell-selection [:burning-hands :command])]}
-                           3 {:selections [(opt5e/warlock-subclass-spell-selection [:blindness-deafness :scorching-ray])]}
-                           5 {:selections [(opt5e/warlock-subclass-spell-selection [:fireball :stinking-cloud])]}
-                           7 {:selections [(opt5e/warlock-subclass-spell-selection [:fire-shield :wall-of-fire])]}
-                           9 {:selections [(opt5e/warlock-subclass-spell-selection [:flame-strike :hallow])]}}}
+                              :selections [(opt5e/warlock-subclass-spell-selection spell-lists spells-map [:burning-hands :command])]}
+                           3 {:selections [(opt5e/warlock-subclass-spell-selection spell-lists spells-map [:blindness-deafness :scorching-ray])]}
+                           5 {:selections [(opt5e/warlock-subclass-spell-selection spell-lists spells-map [:fireball :stinking-cloud])]}
+                           7 {:selections [(opt5e/warlock-subclass-spell-selection spell-lists spells-map [:fire-shield :wall-of-fire])]}
+                           9 {:selections [(opt5e/warlock-subclass-spell-selection spell-lists spells-map [:flame-strike :hallow])]}}}
                  #_{:name "The Archfey"
                   :modifiers [(mod5e/action
                                {:name "Fey Presence"
@@ -4651,7 +4675,7 @@ long rest."})
 (defn inventory-help [description page source]
   [:div
    [:div description]
-   (if page (let [{:keys [abbr url]} (disp5e/get-source source)]
+   #_(if page (let [{:keys [abbr url]} (disp5e/get-source source)]
               [:span
                [:span "see"]
                [:a {:href url :target :_blank}
@@ -4892,23 +4916,25 @@ long rest."})
     {:value @(subscribe [:custom-race-name])
      :on-change (fn [e] (dispatch [:set-custom-race (.. e -target -value)]))}]])
 
-(def base-class-options
-  [barbarian-option
-   bard-option
-   cleric-option
-   druid-option
-   fighter-option
-   monk-option
-   paladin-option
-   ranger-option
-   rogue-option
-   sorcerer-option
-   warlock-option
-   wizard-option])
+(defn base-class-options [spell-lists spells-map]
+  [(barbarian-option spell-lists spells-map)
+   (bard-option spell-lists spells-map)
+   (cleric-option spell-lists spells-map)
+   (druid-option spell-lists spells-map)
+   (fighter-option spell-lists spells-map)
+   (monk-option spell-lists spells-map)
+   (paladin-option spell-lists spells-map)
+   (ranger-option spell-lists spells-map)
+   (rogue-option spell-lists spells-map)
+   (sorcerer-option spell-lists spells-map)
+   (warlock-option spell-lists spells-map)
+   (wizard-option spell-lists spells-map)])
 
 (defn template-selections [magic-weapon-options
                            magic-armor-options
-                           other-magic-item-options]
+                           other-magic-item-options
+                           spell-lists
+                           spells-map]
   [optional-content-selection
    (t/selection-cfg
     {:name "Base Ability Scores"
@@ -4949,15 +4975,15 @@ long rest."})
                (map
                 opt5e/race-option
                 [dwarf-option-cfg
-                 elf-option-cfg
+                 (elf-option-cfg spell-lists spells-map)
                  halfling-option-cfg
-                 human-option-cfg
+                 (human-option-cfg spell-lists spells-map)
                  dragonborn-option-cfg
                  gnome-option-cfg
                  half-elf-option-cfg
                  half-orc-option-cfg
                  tiefling-option-cfg])
-               opt5e/custom-race-option)})
+               (opt5e/custom-race-option spell-lists spells-map))})
    (opt5e/background-selection
     {:help "Background broadly describes your character origin. It also affords you two skill proficiencies and possibly proficiencies with tools or languages."
      :options (conj
@@ -4966,7 +4992,7 @@ long rest."})
                 backgrounds)
                opt5e/custom-background-option)})
    (opt5e/feat-selection-2
-    {:options opt5e/feat-options
+    {:options (opt5e/feat-options spell-lists spells-map)
      :show-if-zero? true
      :min 0
      :max 0})
@@ -4976,7 +5002,7 @@ long rest."})
             [:p.m-t-10 "Select your class using the selector at the top of the 'Class' section. Multiclassing is uncommon, but you may multiclass by clicking the 'Add Class' button at the end of the 'Class' section."]]
      :max nil
      :sequential? false
-     :options base-class-options})
+     :options (base-class-options spell-lists spells-map)})
    (inventory-selection "Treasure" "cash" equip5e/treasure mod5e/deferred-treasure)
    (inventory-selection "Weapons" "plain-dagger" weapon5e/weapons mod5e/deferred-weapon)
    (magic-item-selection "Magic Weapons" "lightning-bow" magic-weapon-options mod5e/deferred-magic-weapon magic-item-details)

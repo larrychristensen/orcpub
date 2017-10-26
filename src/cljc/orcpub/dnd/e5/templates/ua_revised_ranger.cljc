@@ -9,7 +9,7 @@
             [clojure.string :as s]
             [re-frame.core :refer [subscribe]]))
 
-(defn favored-enemy-selection [name types]
+#_(defn favored-enemy-selection [name types]
   (t/selection-cfg
    {:name name
     :tags #{:class}
@@ -24,7 +24,7 @@
               types)}))
 
 
-(def revised-ranger-option
+#_(def revised-ranger-option
   (opt5e/class-option
    {:name "Ranger (Revised)"
     :key :revised-ranger

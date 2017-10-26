@@ -9,7 +9,7 @@
             [re-frame.core :refer [subscribe]]))
 
 
-(def warlock-option-cfg
+#_(def warlock-option-cfg
   {:name "Warlock"
    :subclass-level 1
    :subclass-title "Otherworldly Patron"
@@ -78,7 +78,7 @@
                                             :source :ua-warlock-and-wizard})
                                           (mod5e/spells-known 7 :finger-of-death ::char5e/cha "Warlock" 0)]}}}]})
 
-(def wizard-option-cfg
+#_(def wizard-option-cfg
   {:name "Wizard",
    :subclass-level 2
    :subclass-title "Arcane Tradition"
@@ -111,7 +111,7 @@
                                             :page 6
                                             :source :ua-warlock-and-wizard})]}}}]})
 
-(defn patron-prereq [patron]
+#_(defn patron-prereq [patron]
   (t/option-prereq
    (str "Your patron must be " patron)
    (fn [c] (some
@@ -119,25 +119,25 @@
               (= patron subclass-name))
             @(subscribe [::char5e/levels nil c])))))
 
-(def hexblade-prereq
+#_(def hexblade-prereq
   (patron-prereq "The Hexblade"))
 
-(def great-old-one-prereq
+#_(def great-old-one-prereq
   (patron-prereq "The Great Old One"))
 
-(def raven-queen-prereq
+#_(def raven-queen-prereq
   (patron-prereq "The Raven Queen"))
 
-(def fiend-prereq
+#_(def fiend-prereq
   (patron-prereq "The Fiend"))
 
-(def archfey-prereq
+#_(def archfey-prereq
   (patron-prereq "The Archfey"))
 
-(def seeker-prereq
+#_(def seeker-prereq
   (patron-prereq "The Seeker"))
 
-(def eldritch-invocation-selection
+#_(def eldritch-invocation-selection
   (opt5e/eldritch-invocation-selection
    {:min 0
     :max 0
@@ -329,7 +329,7 @@
                  :source :ua-warlock-and-wizard
                  :summary "If your Pact of the Blade weapon is non-magical, it counts as magic and has a +3 bonus to attack and damage."})])}))
 
-(def ua-warlock-and-wizard-plugin
+#_(def ua-warlock-and-wizard-plugin
   {:name "Unearthed Arcana: Warlock and Wizard"
    :class-options? true
    :key :ua-warlock-and-wizard
