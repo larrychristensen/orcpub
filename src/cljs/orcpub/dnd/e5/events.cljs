@@ -316,6 +316,7 @@
          item-with-key (assoc item :key key)
          plugins (:plugins db)
          explanation (spec/explain-data ::spells/homebrew-spell item-with-key)]
+     (prn "EXPLANATION" explanation)
      (if (nil? explanation)
        (let [new-plugins (assoc-in plugins
                                    [option-pack ::e5/spells key]

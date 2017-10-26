@@ -35,10 +35,11 @@
 
 (spec/def ::option-pack string?)
 (spec/def ::homebrew (spec/keys :req-un [::option-pack]))
-(spec/def ::spell-lists (spec/and
-                         (spec/map-of common/keyword-starts-with-letter? boolean)
-                         (fn [lists]
-                           (some val lists))))
+(spec/def ::spell-lists (fn [lists]
+                          (let [s (into #{} (vals lists))]
+                            (and (s true)
+                                 (every? keyword? (keys lists))))))
+
 (spec/def ::has-spell-lists (spec/keys :req-un [::spell-lists]))
 
 (spec/def ::homebrew-spell (spec/and ::spell
