@@ -20,6 +20,7 @@
                  [cljsjs/react-dom "15.3.1-0"]
                  [cljsjs/facebook "v20150729-0"]
                  [cljsjs/google-platformjs-extern "1.0.0-0"]
+                 [cljsjs/filesaverjs "1.3.3-0"]
                  [cljs-http "0.1.43"]
                  [com.andrewmcveigh/cljs-time "0.5.0"]
                  [clj-time "0.14.0"]
