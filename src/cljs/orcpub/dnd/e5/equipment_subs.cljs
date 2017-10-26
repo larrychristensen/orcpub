@@ -108,7 +108,7 @@
  (fn [magic-weapons _]
    (map-by-key-or-id magic-weapons)))
 
-(defn magic-item-options [modifier-fn]
+(defn magic-item-options [modifier-fn nm]
   (fn [items _]
     (map
      (fn [{:keys [:db/id
@@ -136,17 +136,17 @@
 (reg-sub
  ::mi5e/magic-weapon-options
  :<- [::mi5e/magic-weapons]
- (magic-item-options mod5e/deferred-magic-weapon))
+ (magic-item-options mod5e/deferred-magic-weapon "Magic Weapon"))
 
 (reg-sub
  ::mi5e/magic-armor-options
  :<- [::mi5e/magic-armor]
- (magic-item-options mod5e/deferred-magic-armor))
+ (magic-item-options mod5e/deferred-magic-armor "Magic Armor"))
 
 (reg-sub
  ::mi5e/other-magic-item-options
  :<- [::mi5e/other-magic-items]
- (magic-item-options mod5e/deferred-magic-item))
+ (magic-item-options mod5e/deferred-magic-item "Magic Item"))
 
 (reg-sub
  ::mi5e/magic-armor

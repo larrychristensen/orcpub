@@ -1464,7 +1464,7 @@
                                  :selectable? true
                                  :multiselect? true
                                  :disable-checkbox? true}]
-          (doall
+          #_(doall
            (map
             (fn [option]
               (new-option-selector [(::t/key t5e/optional-content-selection)]
