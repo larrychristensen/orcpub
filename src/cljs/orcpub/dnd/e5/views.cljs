@@ -404,6 +404,19 @@
           {:name "Item List"
            :route routes/dnd-e5-item-list-page-route}
           {:name "Item Builder"
+           :route routes/dnd-e5-item-builder-page-route}]
+         #_[header-tab
+          "My Content"
+          "beer-stein"
+          route-to-item-list-page
+          false
+          (routes/dnd-e5-item-page-routes
+           (or (:handler active-route)
+               active-route))
+          device-type
+          {:name "Item List"
+           :route routes/dnd-e5-item-list-page-route}
+          {:name "Item Builder"
            :route routes/dnd-e5-item-builder-page-route}]]]]]]))
 
 (defn legal-footer []
@@ -2887,42 +2900,92 @@
    "equipment" {:icon "backpack"
                 :view equipment-details}})
 
-(defn character-display [id show-summary? num-columns]
-  (let [device-type @(subscribe [:device-type])
-        selected-tab @(subscribe [::char/selected-display-tab])]
-    (let [two-columns? (= 2 num-columns)
-          tab (if selected-tab
-                selected-tab
-                (if two-columns?
-                  "combat"
-                  "summary"))]
-      [:div.w-100-p
+(defn option-title [kw]
+  (str common/dot-char " " (common/kw-to-name kw)))
+
+(declare options-display)
+
+(defn option-display [{:keys [::entity/key ::entity/options]}]
+  [:div
+   [:span (option-title key)]
+   (if (seq options)
+     [:div.p-l-20
+      [options-display options]])])
+
+(defn options-display [options]
+  [:div
+   (doall
+    (map
+     (fn [[k v]]
+       ^{:key k}
        [:div
-        (if show-summary?
-          [:div.f-s-24.f-w-600.m-b-16.m-l-20.text-shadow.flex
-           [character-summary id true true]])
-        [:div.flex.w-100-p
-         (if two-columns?
-           [:div.w-50-p
-            [summary-details num-columns id]])
-         [:div
-          {:class-name (if two-columns? "w-50-p" "w-100-p")}
-          [:div.flex.p-l-10.m-b-10.m-r-10
+        [:span (option-title k)]
+        [:div.p-l-20
+         (if (vector? v)
            (doall
             (map
-             (fn [[title {:keys [view icon]}]]
-               ^{:key title}
-               [:div.flex-grow-1.t-a-c
-                [details-tab
-                 title
-                 icon
-                 device-type
-                 (= title tab)
-                 (make-event-handler ::char/set-selected-display-tab title)]])
-             (if two-columns?
-               (rest details-tabs)
-               details-tabs)))]
-          [(-> tab details-tabs :view) num-columns id]]]]])))
+             (fn [option]
+               ^{:key (::entity/key option)}
+               [option-display option])
+             v))
+           (option-display v))]])
+     options))])
+
+(defn character-selections [id]
+  (let [character @(subscribe [::char/character id])]
+    [:div.p-20
+     [:span.f-w-b.f-s-24 "Selections"]
+     [:div
+      (options-display (::entity/options character))]]))
+
+(defn character-display []
+  (let [show-selections? (r/atom false)]
+    (fn [id show-summary? num-columns]
+      (let [device-type @(subscribe [:device-type])
+            selected-tab @(subscribe [::char/selected-display-tab])
+            two-columns? (= 2 num-columns)
+            tab (if selected-tab
+                  selected-tab
+                  (if two-columns?
+                    "combat"
+                    "summary"))]
+        [:div.w-100-p
+         [:div
+          (if show-summary?
+            [:div.f-s-24.f-w-600.m-b-16.m-l-20.text-shadow.flex
+             [character-summary id true true]])
+          [:div.flex.w-100-p
+           (if two-columns?
+             [:div.w-50-p
+              [summary-details num-columns id]])
+           [:div
+            {:class-name (if two-columns? "w-50-p" "w-100-p")}
+            [:div.flex.p-l-10.m-b-10.m-r-10
+             (doall
+              (map
+               (fn [[title {:keys [view icon]}]]
+                 ^{:key title}
+                 [:div.flex-grow-1.t-a-c
+                  [details-tab
+                   title
+                   icon
+                   device-type
+                   (= title tab)
+                   (make-event-handler ::char/set-selected-display-tab title)]])
+               (if two-columns?
+                 (rest details-tabs)
+                 details-tabs)))]
+            [(-> tab details-tabs :view) num-columns id]]]
+          [:div.p-10
+           [:span.orange.underline.pointer
+            {:on-click #(swap! show-selections? not)}
+            [:span (if @show-selections?
+                     "hide selections"
+                     "show selections")]
+            [:i.fa.m-l-5
+             {:class-name (if expanded? "fa-caret-up" "fa-caret-down")}]]
+           (if @show-selections?
+             [character-selections id])]]]))))
 
 (defn share-link [id]
   [:a.m-r-5.f-s-14
@@ -3694,7 +3757,7 @@
      :on-click #(dispatch [::spells/save-spell])}]
    [spell-builder]])
 
-(defn expanded-character-list-item [id owner username]
+(defn expanded-character-list-item [id owner username char-page-route]
   [:div
    {:style character-display-style}
    [:div.flex.justify-cont-end.uppercase.align-items-c
@@ -3761,7 +3824,7 @@
         [:i.fa.m-l-5
          {:class-name (if expanded? "fa-caret-up" "fa-caret-down")}]]]
       (if expanded?
-        [expanded-character-list-item id owner username])]]))
+        [expanded-character-list-item id owner username char-page-route])]]))
 
 
 (defn character-list []

@@ -318,7 +318,6 @@
        (let [new-plugins (assoc-in plugins
                                    [option-pack ::e5/spells key]
                                    item-with-key)]
-         (prn "NEW_PLUIGINSf" new-plugins)
          {:dispatch [::e5/set-plugins new-plugins]})
        (prn "INVALID SPELL" explanation)))))
 
@@ -1110,10 +1109,13 @@
 (reg-event-fx
  :fb-logout
  (fn [{:keys [db]} _]
-   (if js/FB
-     (let [facebook js/FB]
-       (if facebook
-         (.logout facebook (fn [])))))
+   (let [facebook js/FB]
+     (if facebook
+       (try
+         (do
+           (prn "FB LOGOUT")
+           (.logout facebook (fn [])))
+         (catch js/Error e (prn "LOGOUT ERROR" e)))))
    {:db (assoc db :fb-logged-in? false)}))
 
 (reg-event-fx
