@@ -39,6 +39,7 @@
    routes/dnd-e5-item-page-route views/item-page
    routes/dnd-e5-item-builder-page-route views/item-builder-page
    routes/dnd-e5-char-parties-page-route views/parties
+   routes/dnd-e5-my-content-route views/my-content-page
    routes/register-page-route views/register-form
    routes/verify-failed-route views/verify-failed
    routes/verify-success-route views/verify-success
