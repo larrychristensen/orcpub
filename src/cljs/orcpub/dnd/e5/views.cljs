@@ -206,6 +206,10 @@
    :top 84
    :right 0})
 
+(def desktop-menu-item-style
+  (assoc header-menu-item-style
+         :width "100%"))
+
 (def mobile-header-menu-item-style
   (assoc header-menu-item-style
          :top 46))
@@ -376,7 +380,11 @@
           route-to-spell-list-page
           false
           (routes/dnd-e5-spell-page-routes (or (:handler active-route) active-route))
-          device-type]
+          device-type
+          {:name "Spell List"
+           :route routes/dnd-e5-spell-list-page-route}
+          {:name "Builder"
+           :route routes/dnd-e5-spell-builder-page-route}]
          [header-tab
           "monsters"
           "hydra"
@@ -1039,7 +1047,7 @@
       (paragraphs description)
       [:div
        (if summary (paragraphs summary))
-       [:span (str "(" (disp/source-description source page) " for more details)")]])]])
+       #_[:span (str "(" (disp/source-description source page) " for more details)")]])]])
 
 (defn spell-result [spell]
   [:div.white
@@ -3066,7 +3074,8 @@
       [monster-component monster]]]))
 
 (defn spell-page [{:keys [key] :as arg}]
-  (let [spell (spells/spell-map (common/name-to-kw key))]
+  (let [spell-map @(subscribe [::spells/spells-map])
+        spell (spell-map (common/name-to-kw key))]
     [content-page
      "Spell Page"
      (remove
@@ -3526,6 +3535,95 @@
     [:div.flex-grow-1
      [item-condition-immunities]]]])
 
+(defn spell-input-field [title prop spell & [class-names]]
+  [:div.flex-grow-1
+   {:class-name class-names
+    :name prop}
+   [input-builder-field
+    [:span.f-w-b title]
+    (prop spell)
+    #(dispatch [::spells/set-spell-prop prop %])
+    {:class-name "input h-40"}]])
+
+(defn component-checkbox [component spell]
+  [:span.m-r-20.pointer
+   {:on-click #(dispatch [::spells/toggle-component component])}
+   [comps/checkbox (get-in spell [:components component]) false]
+   [:span.m-l-5 (common/kw-to-name component)]])
+
+(defn spell-builder []
+  (let [{:keys [:level :school] :as spell} @(subscribe [::spells/builder-item])]
+    (prn "SPELL" spell)
+    [:div.p-20.main-text-color
+     [:div.flex.w-100-p.flex-wrap
+      [spell-input-field
+       "Name"
+       :name
+       spell
+       "m-b-20"]
+      [spell-input-field
+       [:span
+        [:span "Option Source Name"]
+        [:span.f-w-n.f-s-12.m-l-5 "(e.g. "
+         [:span.i "Player's Manual"]
+         [:span ", "]
+         [:span.i "Hodors Guide to Hodors"]
+         [:span ")"]]]
+       :option-pack
+       spell
+       "m-l-5"]]
+     [:div.m-b-20
+      [:div.f-w-b.m-b-10 "Spell Lists"]
+      [:div.flex.flex-wrap
+       (map
+        (fn [{:keys [key name]}]
+          ^{:key key}
+          [:div.m-r-10.pointer
+           {:on-click #(dispatch [::spells/toggle-spell-list key])}
+           [comps/checkbox (get-in spell [:spell-lists key])]
+           [:span.m-l-5 name]])
+        @(subscribe [::spells/spellcasting-classes]))]]
+     [:div.flex.w-100-p.flex-wrap
+      [:div.flex-grow-1.m-b-20
+       [labeled-dropdown
+        "Level"
+        {:items (map
+                 (fn [level] {:title (if (zero? level)
+                                       "Cantrip"
+                                       (str (common/ordinal level) "-level"))
+                              :value level})
+                 (range 10))
+         :value level
+         :on-change #(dispatch [::spells/set-spell-level %])}]]
+      [:div.flex-grow-1.m-l-5
+       [labeled-dropdown
+        "School"
+        {:items (map
+                 (fn [school] {:title school
+                               :value school})
+                 spells/schools)
+         :value school
+         :on-change #(dispatch [::spells/set-spell-prop :school %])}]]]
+     [:div.flex.w-100-p.flex-wrap
+      [spell-input-field "Casting Time" :casting-time spell "m-b-20"]
+      [spell-input-field "Range" :range spell "m-l-5"]
+      [spell-input-field "Duration" :duration spell "m-l-5"]]
+     [:div [:h2.f-s-24.f-w-b.m-b-10 "Components"]]
+     [:div.flex.w-100-p.flex-wrap
+      [component-checkbox :verbal spell]
+      [component-checkbox :somatic spell]
+      [component-checkbox :material spell]]
+     [:div.m-b-20
+      [textarea-field
+       {:value (get-in spell [:components :material-component])
+        :on-change #(dispatch [::spells/set-material-component %])}]]
+     [:div.w-100-p
+      [:div.f-s-24.f-w-b
+       "Description"]
+      [textarea-field
+       {:value (get spell :description)
+        :on-change #(dispatch [::spells/set-spell-prop :description %])}]]]))
+
 (defn item-builder []
   (let [{:keys [::mi/name ::mi/type ::mi/rarity ::mi/description ::mi/attunement] :as item}
         @(subscribe [::mi/builder-item])
@@ -3584,6 +3682,17 @@
      :icon "save"
      :on-click #(dispatch [::mi/save-item])}]
    [item-builder]])
+
+(defn spell-builder-page []
+  [content-page
+   "Spell Builder Page"
+   [{:title "New Spell"
+     :icon "plus"
+     :on-click #(dispatch [::spells/reset-spell])}
+    {:title "Save"
+     :icon "save"
+     :on-click #(dispatch [::spells/save-spell])}]
+   [spell-builder]])
 
 
 (defn character-list []
@@ -3908,13 +4017,16 @@
   (let [expanded? @(subscribe [:spell-expanded? name])
         device-type @(subscribe [:device-type])
         spell-page-path (routes/path-for routes/dnd-e5-spell-page-route :key key)
-        spell-page-route (routes/match-route spell-page-path)]
+        spell-page-route (routes/match-route spell-page-path)
+        homebrew? (:option-pack spell)]
     [:div.main-text-color.item-list-item
      [:div.pointer
       [:div.flex.justify-cont-s-b.align-items-c
        {:on-click (make-event-handler :toggle-spell-expanded name)}
        [:div.m-l-10
-        [:div.f-s-24.f-w-600.p-t-20
+        [:div.f-s-24.f-w-600.p-t-20.flex
+         (if homebrew?
+           [:div.m-r-10 (svg-icon "beer-stein" 24 @(subscribe [:theme]))])
          [spell-summary name level school true 12]]]
        [:div.orange.pointer.m-r-10
         (if (not= device-type :mobile) [:span.underline (if expanded?
@@ -3928,7 +4040,15 @@
          [:div.flex.justify-cont-end.uppercase.align-items-c
           [:button.form-button.m-l-5
            {:on-click (make-event-handler :route spell-page-route)}
-           "view"]]
+           "view"]
+          (if homebrew?
+            [:button.form-button.m-l-5
+             {:on-click (make-event-handler ::spells/edit-spell spell)}
+             "edit"])
+          (if homebrew?
+            [:button.form-button.m-l-5
+             {:on-click (make-event-handler ::spells/delete-spell spell)}
+             "delete"])]
          [spell-component spell true]])]]))
 
 (defn spell-list-items [device-type]

@@ -4,14 +4,14 @@
             [orcpub.template :as t]
             [orcpub.dnd.e5.templates.ua-options :as ua-options]))
 
-(defn rapid-strike [page]
+#_(defn rapid-strike [page]
   (mod5e/trait-cfg
    {:name "Rapid Strike"
     :page page
     :source :ua-fighter}))
 
 
-(def fighter-option-cfg
+#_(def fighter-option-cfg
   {:name "Fighter"
    :plugin? true
    :subclass-level 3
@@ -84,7 +84,7 @@
                                             :source :ua-fighter})]}}}]})
 
 
-(def ua-fighter-plugin
+#_(def ua-fighter-plugin
   {:name "Unearthed Arcana: Fighter"
    :class-options? true
    :key :ua-fighter

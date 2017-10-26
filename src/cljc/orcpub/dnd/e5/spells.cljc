@@ -1,5 +1,49 @@
 (ns orcpub.dnd.e5.spells
-  (:require [orcpub.common :as common]))
+  (:require [orcpub.common :as common]
+            #?(:cljs [cljs.spec.alpha :as spec])
+            #?(:clj [clojure.spec.alpha :as spec])
+            [clojure.string :as s]))
+
+(spec/def ::name (spec/and string? common/starts-with-letter?))
+(spec/def ::key (spec/and keyword? common/keyword-starts-with-letter?))
+(spec/def ::school string?)
+(spec/def ::level (spec/int-in 0 10))
+(spec/def ::casting-time string?)
+(spec/def ::duration string?)
+(spec/def ::range string?)
+(spec/def ::source keyword?)
+(spec/def ::page nat-int?)
+(spec/def ::summary string?)
+(spec/def ::description string?)
+
+(spec/def ::verbal boolean?)
+(spec/def ::somatic boolean?)
+(spec/def ::material boolean?)
+(spec/def ::material-component string?)
+
+(spec/def ::components (spec/keys :opt-un [::verbal ::somatic ::material ::material-component]))
+
+(spec/def ::spell (spec/keys :req-un [::name ::key ::school ::level]
+                             :opt-un [::casting-time
+                                      ::duration
+                                      ::range
+                                      ::source
+                                      ::page
+                                      ::summary
+                                      ::components
+                                      ::description]))
+
+(spec/def ::option-pack string?)
+(spec/def ::homebrew (spec/keys :req-un [::option-pack]))
+(spec/def ::spell-lists (spec/and
+                         (spec/map-of common/keyword-starts-with-letter? boolean)
+                         (fn [lists]
+                           (some val lists))))
+(spec/def ::has-spell-lists (spec/keys :req-un [::spell-lists]))
+
+(spec/def ::homebrew-spell (spec/and ::spell
+                                     ::homebrew
+                                     ::has-spell-lists))
 
 (def necromancy "necromancy")
 (def abjuration "abjuration")
@@ -9,6 +53,15 @@
 (def illusion "illusion")
 (def conjuration "conjuration")
 (def enchantment "enchantment")
+
+(def schools [necromancy
+              abjuration
+              evocation
+              divination
+              transmutation
+              illusion
+              conjuration
+              enchantment])
 
 (def conc-1-min "Concentration, up to 1 minute")
 (def conc-10-min "Concentration, up to 10 minutes")
@@ -2039,7 +2092,7 @@ If the target is asleep, the messenger appears in the target's dreams and can co
 the spell. The messenger can also shape the environment of the dream, creating landscapes, objects, and other images. The messenger can emerge from the trance at any time, ending the effect of the spell early. The target recalls the dream perfectly upon waking. If the target is awake when you cast the spell, the messenger knows it, and can either end the trance (and the spell) or wait for the target to fall asleep, at which point the messenger appears in the target's dreams. You can make the messenger appear monstrous and terrifying to the target. If you do, the messenger can deliver a message of no more than ten words and then the target must make a Wisdom saving throw. On a failed save, echoes of the phantasmal monstrosity spawn a nightmare that lasts the duration of the target's sleep and prevents the target from gaining any benefit from that rest. In addition, when the target wakes up, it takes 3d6 psychic damage.
 If you have a body part, lock of hair, clipping from a nail, or similar portion of the target's body, the target makes its saving throw with disadvantage."
                 }
-               #_{
+               {
                 :name "Druidcraft"
                 :school transmutation
                 :level 0
@@ -2047,12 +2100,24 @@ If you have a body part, lock of hair, clipping from a nail, or similar portion 
                 :range "30 feet"
                 :components {:verbal true :somatic true}
                 :duration instantaneous
-                :source :phb
-                :page 236
-                :summary "Create 1 effect: 1) predict the weather for the next 24 hours in your current location. 2) make a flower blossom, or similar effect. 3) create a harmless senory effect that fits within a 5 ft. cube. 4) light or snuff a small fire."}])
+                :description "Whispering to the spirits of nature, you create one of 
+the following effects within range:
+• You create a tiny, harmless sensory effect that 
+predicts what the weather will be at your location 
+for the next 24 hours. The effect might manifest as 
+a golden orb for clear skies, a cloud for rain, falling 
+snowflakes for snow, and so on. This effect 
+persists for 1 round.
+• You instantly make a flower blossom, a seed pod 
+open, or a leaf bud bloom.
+• You create an instantaneous, harmless sensory 
+effect, such as falling leaves, a puff of wind, the 
+sound of a small animal, or the faint odor of skunk. 
+The effect must fit in a 5-foot cube.
+• You instantly light or snuff out a candle, a torch, or 
+a small campfire."}])
 
-(def e-spells [
-               {
+(def e-spells [{
                 :name "Earthquake"
                 :school evocation
                 :level 8
@@ -2288,7 +2353,7 @@ heal, or wish."
     :source :phb
     :page 240
     :summary "Put a willing creature into a state indistinguishable from death, during which it has resistance to all damage except psychic, and poison and disease don't affect it until the spell ends. You can use an action to touch the creature and end the spell."}
-   #_{
+   {
     :name "Find Familiar"
     :ritual true
     :school conjuration
@@ -2297,7 +2362,6 @@ heal, or wish."
     :range "10 feet"
     :components {:verbal true :somatic true :material true :material-component "charcoal, herbs, and incense (10 gp worth) consumed in a fire in a brass brazier."}
     :duration instantaneous
-    :source :phb
     :page 240
     :description "Summon a familiar that obeys your commands."}
    {
@@ -4991,7 +5055,7 @@ If you command the servant to perform a task that would move it more than 60 fee
                 :description "The touch of your shadow-wreathed hand can siphon life force from others to heal your wounds. Make a melee spell attack against a creature within your reach. On a hit, the target takes 3d6 necrotic damage, and you regain hit points equal to half the amount of necrotic damage dealt. Until the spell ends, you can make the attack again on each of your turns as an action.
 At Higher Levels. When you cast this spell using a spell slot of 4th level or higher, the damage increases by 1d6 for each slot level above 3rd."
                 }
-               #_{
+               {
                 :name "Vicious Mockery"
                 :school enchantment
                 :level 0
@@ -5001,8 +5065,16 @@ At Higher Levels. When you cast this spell using a spell slot of 4th level or hi
                 :duration instantaneous
                 :source :phb
                 :page 285
-                :summary "Target on creature, if it can hear you it takes 1d4 psychic damage on a failed WIS save. On failed save it also has disadvantage on its next attack roll before the end of your next turn."}
-               ])
+                :summary "You unleash a string of insults laced with subtle 
+enchantments at a creature you can see within range. 
+If the target can hear you (though it need not
+understand you), it must succeed on a Wisdom 
+saving throw or take 1d4 psychic damage and have 
+disadvantage on the next attack roll it makes before 
+the end of its next turn.
+This spell's damage increases by 1d4 when you 
+reach 5th level (2d4), 11th level (3d4), and 17th 
+level (4d4)."}])
 
 (def w-spells [{
                 :name "Wall of Fire"
@@ -5247,8 +5319,8 @@ An affected creature is aware of the spell and can thus avoid answering question
     v-spells
     w-spells
     z-spells
-    ee-spells
-    ua-starter-spells)))
+    #_ee-spells
+    #_ua-starter-spells)))
 
 (def spell-map
   (into

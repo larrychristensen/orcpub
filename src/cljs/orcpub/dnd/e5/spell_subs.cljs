@@ -2,6 +2,7 @@
   (:require [re-frame.core :refer [reg-sub reg-sub-raw dispatch subscribe]]
             [orcpub.common :as common]
             [orcpub.template :as t]
+            [orcpub.dnd.e5 :as e5]
             [orcpub.dnd.e5.modifiers :as mod5e]
             [orcpub.dnd.e5.magic-items :as mi5e]
             [orcpub.dnd.e5.character :as char5e]
@@ -19,15 +20,24 @@
   (:require-macros [cljs.core.async.macros :refer [go]]))
 
 (reg-sub
+ ::e5/plugins
+ (fn [db _]
+   (vals (get db :plugins))))
+
+(reg-sub
+ ::spells5e/plugin-spells
+ :<- [::e5/plugins]
+ (fn [plugins _]
+   (prn "PLUGINS" plugins)
+   (apply concat (map (comp vals ::e5/spells) plugins))))
+
+(reg-sub
  ::spells5e/spells
- :<- [:selected-plugins]
- (fn [selected-plugins]
-   (apply
-    concat
+ :<- [::spells5e/plugin-spells]
+ (fn [plugin-spells]
+   (concat
     spells5e/spells
-    (map
-     :spells
-     selected-plugins))))
+    plugin-spells)))
 
 (reg-sub
  ::spells5e/spells-map
@@ -39,20 +49,77 @@
     {}
     spells)))
 
-(defn merge-class-lists [class-list-1 class-list-2]
-  (merge-with
+(defn merge-spell-lists [& spell-lists]
+  (apply
+   merge-with
    concat
-   class-list-1
-   class-list-2))
+   spell-lists))
+
+(reg-sub
+ ::spells5e/plugin-spell-lists
+ :<- [::spells5e/plugin-spells]
+ (fn [plugin-spells _]
+   (reduce
+    (fn [lists {:keys [key level spell-lists]}]
+      (reduce-kv
+       (fn [l k v]
+         (prn "L K V" l k v)
+         (update-in l [k level] conj key))
+       lists
+       spell-lists))
+    {}
+    plugin-spells)))
 
 (reg-sub
  ::spells5e/spell-lists
- :<- [:selected-plugins]
- (fn [selected-plugins]
-   (apply
-    merge-with
-    merge-class-lists
+ :<- [::spells5e/plugin-spell-lists]
+ (fn [plugin-spell-lists]
+   (prn "PLUGIN SPELL LISTS" plugin-spell-lists)
+   (merge-with
+    merge-spell-lists
     sl5e/spell-lists
-    (map
-     :spell-lists
-     selected-plugins))))
+    plugin-spell-lists)))
+
+(reg-sub
+ ::spells5e/spellcasting-classes
+ (fn []
+   (map
+    (fn [kw]
+      {:key kw
+       :name (common/kw-to-name kw)})
+    [:bard :cleric :druid :paladin :ranger :sorcerer :warlock :wizard])))
+
+(defn spell-option [spells-map [_ spell-key ability-key class-name]]
+   (let [spell (spells-map spell-key)
+         level (:level spell)]
+     (t/option-cfg
+      {:name (str level " - " (:name spell))
+       :key spell-key
+       :modifiers [(mod5e/spells-known
+                    (:level spell)
+                    spell-key
+                    ability-key
+                    class-name)]})))
+
+(reg-sub
+ ::spells5e/spell-option
+ :<- [::spells5e/spells-map]
+ spell-option)
+
+(reg-sub
+ ::spells5e/spell-options
+ :<- [::spells5e/spells-map]
+ :<- [::spells5e/spell-lists]
+ (fn [[spells-map spell-lists] [_ ability-key class-name levels]]
+   (apply concat
+          (sequence
+           (comp
+            (map spell-lists)
+            (map (fn [spell-key]
+                   (spell-option spells-map [nil spell-key ability-key class-name]))))
+           levels))))
+
+(reg-sub
+ ::spells5e/builder-item
+ (fn [db _]
+   (::spells5e/builder-item db)))

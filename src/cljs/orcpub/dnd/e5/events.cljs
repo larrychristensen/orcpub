@@ -5,6 +5,7 @@
             [orcpub.common :as common]
             [orcpub.dice :as dice]
             [orcpub.modifiers :as mod]
+            [orcpub.dnd.e5 :as e5]
             [orcpub.dnd.e5.template :as t5e]
             [orcpub.dnd.e5.common :as common5e]
             [orcpub.dnd.e5.character :as char5e]
@@ -21,8 +22,11 @@
                                       character->local-store
                                       user->local-store
                                       magic-item->local-store
+                                      spell->local-store
+                                      plugins->local-store
                                       tab-path
-                                      default-character]]
+                                      default-character
+                                      default-spell]]
             [re-frame.core :refer [reg-event-db reg-event-fx reg-fx inject-cofx path trim-v
                                    after debug dispatch dispatch-sync subscribe ->interceptor]]
             [cljs.spec.alpha :as spec]
@@ -52,6 +56,10 @@
 
 (def magic-item->local-store-interceptor (after magic-item->local-store))
 
+(def spell->local-store-interceptor (after spell->local-store))
+
+(def plugins->local-store-interceptor (after plugins->local-store))
+
 (def set-changed (->interceptor
                   :id :set-changed
                   :before (fn [context]
@@ -65,6 +73,12 @@
 
 (def item-interceptors [(path ::mi/builder-item)
                         magic-item->local-store-interceptor])
+
+(def spell-interceptors [(path ::spells/builder-item)
+                         spell->local-store-interceptor])
+
+(def plugins-interceptors [(path :plugins)
+                          plugins->local-store-interceptor])
 
 
 ;; -- Event Handlers --------------------------------------------------
@@ -80,11 +94,17 @@
  [(inject-cofx :local-store-character)
   (inject-cofx :local-store-user)
   (inject-cofx :local-store-magic-item)
+  (inject-cofx ::e5/plugins)
   check-spec-interceptor]
- (fn [{:keys [db local-store-character local-store-user local-store-magic-item]} _]
+ (fn [{:keys [db
+              local-store-character
+              local-store-user
+              local-store-magic-item
+              ::e5/plugins]} _]
    {:db (if (seq db)
           db
           (cond-> default-value
+            plugins (assoc :plugins plugins)
             local-store-character (assoc :character local-store-character)
             local-store-user (update :user-data merge local-store-user)
             local-store-magic-item (assoc ::mi/builder-item local-store-magic-item)))}))
@@ -285,6 +305,28 @@
              :url (url-for-route routes/dnd-e5-items-route)
              :transit-params strict-item
              :on-success [:item-save-success]}})))
+
+(reg-event-fx
+ ::spells/save-spell
+ (fn [{:keys [db]} _]
+   (let [{:keys [name option-pack] :as item} (::spells/builder-item db)
+         key (common/name-to-kw name)
+         item-with-key (assoc item :key key)
+         plugins (:plugins db)
+         explanation (spec/explain-data ::spells/homebrew-spell item-with-key)]
+     (if (nil? explanation)
+       (let [new-plugins (assoc-in plugins
+                                   [option-pack ::e5/spells key]
+                                   item-with-key)]
+         (prn "NEW_PLUIGINSf" new-plugins)
+         {:dispatch [::e5/set-plugins new-plugins]})
+       (prn "INVALID SPELL" explanation)))))
+
+(reg-event-fx
+ ::spells/delete-spell
+ (fn [{:keys [db]} [_ {:keys [key option-pack]}]]
+   (prn "KEY" key option-pack)
+   {:dispatch [::e5/set-plugins (update-in (:plugins db) [option-pack ::e5/spells] dissoc key)]}))
 
 (reg-event-fx
  ::party5e/make-party-success
@@ -1320,6 +1362,12 @@
                  [:route routes/dnd-e5-item-builder-page-route]]}))
 
 (reg-event-fx
+ ::spells/edit-spell
+ (fn [{:keys [db]} [_ spell]]
+   {:dispatch-n [[::spells/set-spell spell]
+                 [:route routes/dnd-e5-spell-builder-page-route]]}))
+
+(reg-event-fx
  :delete-character-success
  (fn [_ _]
    {:dispatch [:show-message "Character successfully deleted"]}))
@@ -1789,6 +1837,36 @@
    (assoc item ::mi/name item-name)))
 
 (reg-event-db
+ ::spells/set-spell-prop
+ spell-interceptors
+ (fn [spell [_ prop-key prop-value]]
+   (assoc spell prop-key prop-value)))
+
+(reg-event-db
+ ::spells/set-spell-level
+ spell-interceptors
+ (fn [spell [_ level]]
+   (assoc spell :level (js/parseInt level))))
+
+(reg-event-db
+ ::spells/toggle-component
+ spell-interceptors
+ (fn [spell [_ component]]
+   (update-in spell [:components component] not)))
+
+(reg-event-db
+ ::spells/toggle-spell-list
+ spell-interceptors
+ (fn [spell [_ class-key]]
+   (update-in spell [:spell-lists class-key] not)))
+
+(reg-event-db
+ ::spells/set-material-component
+ spell-interceptors
+ (fn [spell [_ material-component]]
+   (assoc-in spell [:components :material-component] material-component)))
+
+(reg-event-db
  ::mi/set-item-description
  item-interceptors
  (fn [item [_ item-description]]
@@ -1975,12 +2053,30 @@
  (fn [_ [_ item]]
    item))
 
+(reg-event-db
+ ::e5/set-plugins
+ plugins-interceptors
+ (fn [_ [_ plugins]]
+   plugins))
+
+(reg-event-db
+ ::spells/set-spell
+ spell-interceptors
+ (fn [_ [_ spell]]
+   spell))
+
 (reg-event-fx
  ::mi/reset-item
  (fn [_ _]
    {:dispatch [::mi/set-item
                {::mi/type :wondrous-item
                 ::mi/rarity :common}]}))
+
+(reg-event-fx
+ ::spells/reset-spell
+ (fn [_ _]
+   {:dispatch [::spells/set-spell
+               default-spell]}))
 
 (reg-event-fx
  ::mi/new-item

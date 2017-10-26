@@ -7,14 +7,14 @@
             [re-frame.core :refer [subscribe]]
             [clojure.string :as s]))
 
-(defn weapon-attack-bonus-mod [weapons bonus]
+#_(defn weapon-attack-bonus-mod [weapons bonus]
   (mod5e/attack-modifier-fn
    (fn [{kw :key base-kw :base-key}]
      (if (or (weapons kw))
        bonus
        0))))
 
-(def ua-feats-plugin
+#_(def ua-feats-plugin
   {:name "Unearthed Arcana: Feats"
    :key :ua-feats
    :feat-options? true

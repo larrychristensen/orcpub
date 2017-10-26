@@ -123,3 +123,10 @@
     2 "2nd"
     3 "3rd"
     (str i "th")))
+
+(defn starts-with-letter? [nm]
+  (re-matches #"^[a-zA-Z].*" nm))
+
+(defn keyword-starts-with-letter? [kw]
+  (and (keyword? kw)
+       (-> kw name starts-with-letter?)))

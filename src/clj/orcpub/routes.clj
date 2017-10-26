@@ -235,6 +235,7 @@
       resp)
     (catch Throwable e (do (prn "E" e) (throw e)))))
 
+
 (defn user-for-email [db email]
   (let [user (first-user-by db
                             '{:find [?e]
@@ -467,12 +468,15 @@
       (let [page (PDPage.)
             cs (PDPageContentStream. doc page)]
         (.addPage doc page)
-        (let [spells (map
-                      (fn [{:keys [key class]}]
-                        {:spell (spells/spell-map key)
-                         :class-nm class
-                         :dc (spell-save-dcs class)
-                         :attack-bonus (spell-attack-mods class)})
+        (let [spells (sequence
+                      (comp
+                       (filter (fn [spell] (spells/spell-map (:key spell))))
+                       (map
+                        (fn [{:keys [key class]}]
+                          {:spell (spells/spell-map key)
+                           :class-nm class
+                           :dc (spell-save-dcs class)
+                           :attack-bonus (spell-attack-mods class)})))
                       part)
               remaining-desc-lines (vec
                                     (pdf/print-spells
@@ -883,6 +887,7 @@
    [route-map/dnd-e5-monster-page-route :key ":key"]
    [route-map/dnd-e5-spell-list-page-route]
    [route-map/dnd-e5-spell-page-route :key ":key"]
+   [route-map/dnd-e5-spell-builder-page-route]
    [route-map/dnd-e5-item-list-page-route]
    [route-map/dnd-e5-item-page-route :key ":key"]
    [route-map/dnd-e5-item-builder-page-route]

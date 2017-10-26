@@ -239,7 +239,7 @@
            by-ability (group-by :ability filtered)]
        (reduce-kv
         (fn [am a a-s]
-          (assoc-in am [a k] (sort-by (comp :name spells/spell-map :key) a-s)))
+          (assoc-in am [a k] (sort-by (comp :name @(subscribe [::spells/spells-map]) :key) a-s)))
         m
         by-ability)))
    {}
@@ -312,7 +312,8 @@
   (let [spell-pages (make-pages spells
                                 print-prepared-spells?
                                 prepares-spells
-                                prepared-spells-by-class)]
+                                prepared-spells-by-class)
+        spells-map @(subscribe [::spells/spells-map])]
     (apply
      merge
      (make-spell-card-info spells
@@ -339,7 +340,7 @@
                 (map-indexed
                  (fn [spell-index spell]
                    {(keyword (str "spells-" level "-" (inc spell-index) suffix))
-                    (str (:name (spells/spell-map (:key spell))) (let [qualifier (:qualifier spell)]
+                    (str (:name (spells-map (:key spell))) (let [qualifier (:qualifier spell)]
                                                                    (if qualifier
                                                                      (str " (" qualifier ")"))))})
                  spells)

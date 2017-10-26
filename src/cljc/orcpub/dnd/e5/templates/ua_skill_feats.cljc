@@ -7,11 +7,11 @@
             [re-frame.core :refer [subscribe]]
             [clojure.string :as s]))
 
-(def action #(mod5e/action %))
+#_(def action #(mod5e/action %))
 
-(def bonus-action #(mod5e/bonus-action %))
+#_(def bonus-action #(mod5e/bonus-action %))
 
-(defn skill-feat [nm page ability-kw skill-kw {:keys [trait-desc trait-type modifiers]}]
+#_(defn skill-feat [nm page ability-kw skill-kw {:keys [trait-desc trait-type modifiers]}]
   (opt5e/feat-option
    {:name nm
     :exclude-trait? (and trait-desc trait-type)
@@ -30,7 +30,7 @@
                        :summary trait-desc}))]
                   (opt5e/skill-prof-or-expertise skill-kw (str nm "-UA-Skill-Feats")))))}))
 
-(def ua-skill-feats-plugin
+#_(def ua-skill-feats-plugin
   {:name "Unearthed Arcana: Feats for Skills"
    :key :ua-skill-feats
    :feat-options? true

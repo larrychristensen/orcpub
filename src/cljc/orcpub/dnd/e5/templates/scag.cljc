@@ -12,7 +12,7 @@
             [orcpub.dnd.e5.options :as opt5e]
             [re-frame.core :refer [subscribe]]))
 
-(def scag-barbarian
+#_(def scag-barbarian
   {:name "Barbarian"
    :plugin? true
    :subclass-level 3
@@ -103,7 +103,7 @@
                                                                        :source :scag
                                                                        :summary "make an additional melee weapon attack when you move 20+ ft. in a line and make a melee weapon attack"})]})]})]}}}]})
 
-(def scag-cleric
+#_(def scag-cleric
   {:name "Cleric"
    :plugin? true
    :subclass-level 1
@@ -152,7 +152,7 @@
                            :name "Supreme Healing"
                            :summary "Instead of rolling healing, use max possible roll value." }]}]})
 
-(def scag-fighter
+#_(def scag-fighter
   {:name "Fighter",
    :plugin? true
    :subclass-level 3
@@ -186,7 +186,7 @@
                                             :summary "When you use Indomitable, extend the benefit to 1 ally"})]}}}]})
 
 
-(def scag-monk
+#_(def scag-monk
   (merge
    opt5e/monk-base-cfg
    {:source :scag
@@ -241,7 +241,7 @@
                                              :summary (str "when hit with melee attack, deal " (+ 5 (?ability-bonuses ::char5e/wis)) " radiant damage to attacker; you also shed 30 ft. light")})]}}}]}))
 
 
-(def scag-paladin
+#_(def scag-paladin
   (opt5e/subclass-plugin
    opt5e/paladin-base-cfg
    :scag
@@ -287,7 +287,7 @@
                                 :summary "resistance to non-magical weapon slashing, bludgeoning, and piercing damage; allies within 30 ft. have advantage on death saves; you and allies have advantage on WIS saves"})]}}}]
    false))
 
-(def scag-rogue
+#_(def scag-rogue
   {:name "Rogue"
    :subclass-level 3
    :subclass-title "Roguish Archetype"
@@ -356,7 +356,7 @@
                            :frequency units5e/rests-1
                            :summary "reroll a missed attack roll, this time with advantage"}]}]})
 
-(def scag-sorcerer
+#_(def scag-sorcerer
   {:name "Sorcerer"
     :subclass-title "Sorcerous Origin"
     :subclass-level 1
@@ -401,7 +401,7 @@
                                              :frequency units5e/rests-1
                                              :summary (str "temporarily sacrifice 30 ft. of your flying speed to give 30 ft. to up to " (+ 3 (?ability-bonuses ::char5e/cha)) " other creatures")})]}}}]})
 
-(def scag-warlock
+#_(def scag-warlock
   {:name "Warlock"
    :subclass-level 1
    :subclass-title "Otherworldly Patron"
@@ -439,7 +439,7 @@
                                             :summary (str "regain 1d8 " (common/bonus-str (?class-level :warlock)) " HPs and reattach severed parts")
                                             :frequency units5e/rests-1})]}}}]})
 
-(def scag-wizard
+#_(def scag-wizard
   {:name "Wizard",
    :subclass-level 2
    :subclass-title "Arcane Tradition"
@@ -485,7 +485,7 @@
                                             :source :scag
                                             :summary (str "while bladesinging, add " (common/bonus-str (max 1 (?ability-bonuses ::char5e/int))) " to melee weapon attack damage")})]}}}]})
 
-(def scag-classes
+#_(def scag-classes
   [scag-barbarian
    scag-cleric
    scag-fighter
@@ -496,7 +496,7 @@
    scag-warlock
    scag-wizard])
 
-(def sword-coast-adventurers-guide-backgrounds
+#_(def sword-coast-adventurers-guide-backgrounds
   (map
    (partial opt5e/add-sources :scag)
    [{:name "City Watch"
