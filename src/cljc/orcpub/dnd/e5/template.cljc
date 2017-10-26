@@ -4814,7 +4814,7 @@ long rest."})
                                [:span "Includes the Haunted One background"])}]
     ua/ua-plugins)))
 
-(def homebrew-plugin
+#_(def homebrew-plugin
   (t/option-cfg
    {:name "Homebrew"
     :key :homebrew
@@ -4829,7 +4829,7 @@ long rest."})
                  opt5e/homebrew-spell-selection]
     :help "This removes all restrictions and allows you to build your character however you want. Homebrew is not legal in the Adventurer's League."}))
 
-(def optional-content-selection
+#_(def optional-content-selection
   (t/selection-cfg
    {:name "Optional Content"
     :tags #{:optional-content}
@@ -4856,7 +4856,7 @@ long rest."})
     :max nil}))
 
 
-(def plugin-map
+#_(def plugin-map
   {:homebrew {:name "Homebrew"}}
   #_(merge
    {:homebrew {:name "Homebrew"}}
@@ -4935,7 +4935,7 @@ long rest."})
                            other-magic-item-options
                            spell-lists
                            spells-map]
-  [optional-content-selection
+  [#_optional-content-selection
    (t/selection-cfg
     {:name "Base Ability Scores"
      :key :ability-scores
@@ -4973,7 +4973,7 @@ long rest."})
    (opt5e/race-selection
     {:options (conj
                (map
-                opt5e/race-option
+                (partial opt5e/race-option spell-lists spells-map)
                 [dwarf-option-cfg
                  (elf-option-cfg spell-lists spells-map)
                  halfling-option-cfg
