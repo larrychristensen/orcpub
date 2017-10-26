@@ -33,11 +33,13 @@
             [cljs-http.client :as http]
             [cljs.core.async :refer [<! timeout]]
             [cljs-time.core :as time]
+            [cljs.reader :as reader]
             [clojure.string :as s]
             [bidi.bidi :as bidi]
             [orcpub.route-map :as routes]
             [orcpub.errors :as errors]
-            [clojure.set :as sets])
+            [clojure.set :as sets]
+            [cljsjs.filesaverjs])
   (:require-macros [cljs.core.async.macros :refer [go]]))
 
 (defn check-and-throw
@@ -318,8 +320,12 @@
        (let [new-plugins (assoc-in plugins
                                    [option-pack ::e5/spells key]
                                    item-with-key)]
-         {:dispatch [::e5/set-plugins new-plugins]})
-       (prn "INVALID SPELL" explanation)))))
+         {:dispatch-n [[::e5/set-plugins new-plugins]
+                       [:show-message
+                        [:div "Spell saved to your browser which could be lost if you clear your history, please consider exporting and saving the content source by clicking " [:span.orange.pointer.underline
+                                                                                                                        {:on-click #(dispatch [::e5/export-plugin option-pack (str (plugins option-pack))])}
+                                                                                                                        "here"]]]]})
+       {:dispatch [:show-error-message "You must specify 'Name', 'Option Source Name', and at select at least one class in 'Class Spell Lists'"]}))))
 
 (reg-event-fx
  ::spells/delete-spell
@@ -2060,6 +2066,32 @@
  plugins-interceptors
  (fn [_ [_ plugins]]
    plugins))
+
+(reg-event-fx
+ ::e5/export-plugin
+ (fn [_ [_ name plugin]]
+   (let [blob (js/Blob.
+               (clj->js [(str plugin)])
+               (clj->js {:type "text/plain;charset=utf-8"}))]
+     (js/saveAs blob (str name ".orcbrew")))))
+
+(reg-event-fx
+ ::e5/delete-plugin
+ (fn [{:keys [db]} [_ name]]
+   {:dispatch [::e5/set-plugins (-> db :plugins (dissoc name))]}))
+
+(reg-event-fx
+ ::e5/import-plugin
+ (fn [{:keys [db]} [_ plugin-name plugin-text]]
+   (let [plugin (try
+                  (reader/read-string plugin-text)
+                  (catch js/Error e nil))]
+     (if (spec/valid? ::e5/plugin plugin)
+       {:dispatch-n [[::e5/set-plugins (assoc (:plugins db)
+                                              plugin-name
+                                              plugin)]
+                     [:show-message (str "File imported as '" plugin-name "'")]]}
+       {:dispatch [:show-error-message "Invalid .orcbrew file"]}))))
 
 (reg-event-db
  ::spells/set-spell
