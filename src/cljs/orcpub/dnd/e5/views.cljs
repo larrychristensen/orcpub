@@ -16,6 +16,7 @@
             [orcpub.dnd.e5.character.equipment :as char-equip]
             [cljs.pprint :refer [pprint]]
             [orcpub.registration :as registration]
+            [orcpub.dnd.e5 :as e5]
             [orcpub.dnd.e5.magic-items :as mi]
             [orcpub.dnd.e5.damage-types :as damage-types]
             [orcpub.dnd.e5.monsters :as monsters]
@@ -313,6 +314,9 @@
 (defn route-to-item-list-page []
   (dispatch [:route routes/dnd-e5-item-list-page-route]))
 
+(defn route-to-my-content-page []
+  (dispatch [:route routes/dnd-e5-my-content-route]))
+
 (defn app-header []
   (let [device-type @(subscribe [:device-type])
         mobile? (= :mobile device-type)
@@ -405,18 +409,18 @@
            :route routes/dnd-e5-item-list-page-route}
           {:name "Item Builder"
            :route routes/dnd-e5-item-builder-page-route}]
-         #_[header-tab
+         [header-tab
           "My Content"
           "beer-stein"
-          route-to-item-list-page
+          route-to-my-content-page
           false
-          (routes/dnd-e5-item-page-routes
+          (routes/dnd-e5-my-content-routes
            (or (:handler active-route)
                active-route))
           device-type
-          {:name "Item List"
+          #_{:name "Item List"
            :route routes/dnd-e5-item-list-page-route}
-          {:name "Item Builder"
+          #_{:name "Item Builder"
            :route routes/dnd-e5-item-builder-page-route}]]]]]]))
 
 (defn legal-footer []
@@ -506,7 +510,7 @@
 (defn message [message-type message-text close-handler]
   [:div.pointer.f-w-b ;;.h-0.opacity-0.fade-out
    {:on-click close-handler}
-   [:div.main-text-color
+   [:div.white
     {:style message-style
      :class-name (case message-type
                    :error "bg-red"
@@ -897,7 +901,7 @@
      (if @(subscribe [::char/options-shown?])
        [:div.bg-light.m-b-10 @(subscribe [::char/options-component])])
      (if @(subscribe [:message-shown?])
-       [:div.p-b-10.p-r-10.p-l-10
+       [:div.p-b-10.p-r-10.p-l-10.white
         [message
          @(subscribe [:message-type])
          @(subscribe [:message])
@@ -3636,7 +3640,7 @@
        spell
        "m-l-5"]]
      [:div.m-b-20
-      [:div.f-w-b.m-b-10 "Spell Lists"]
+      [:div.f-w-b.m-b-10 "Class Spell Lists"]
       [:div.flex.flex-wrap
        (map
         (fn [{:keys [key name]}]
@@ -3734,6 +3738,31 @@
      [:div.m-b-40
       [attunement-selector attunement]]
      [item-bonuses item]]))
+
+(defn import-file [e]
+  (let [reader (js/FileReader.)
+        file (.. e -target -files (item 0))
+        filename (.-name file)
+        nm (first (s/split filename #".orcbrew"))]
+    (.addEventListener
+     reader
+     "load"
+     (fn [e]
+       (let [text (.. e -target -result)]
+         (dispatch [::e5/import-plugin nm text]))))
+    (.readAsText reader file)))
+
+(defn my-content-page []
+  [content-page
+   "My Content"
+   []
+   [:div
+    [:div.p-20.bg-light.white.m-b-10.m-l-10.m-r-10.b-rad-5
+     [:div.f-w-b.f-s-24.m-b-5 "Import"]
+     [:input {:type "file"
+              :accept ".orcbrew"
+              :on-change import-file}]]
+    [my-content]]])
 
 (defn item-builder-page []
   [content-page
@@ -4155,6 +4184,24 @@
          {:style close-icon-style
           :on-click (make-event-handler ::char/filter-spells "")}]]]
       [spell-list-items device-type]]]))
+
+(defn my-content []
+  [:div
+   [:div.item-list
+    (doall
+     (map
+      (fn [[name plugin]]
+        ^{:key name}
+        [:div.p-20.item-list-item.pointer.flex.justify-cont-s-b.align-items-c.main-text-color
+         [:span.f-s-24 name]
+         [:div.flex.justify-cont-end.uppercase.align-items-c
+          [:button.form-button.m-l-5
+           {:on-click (make-event-handler ::e5/export-plugin name plugin)}
+           "export"]
+          [:button.form-button.m-l-5
+           {:on-click (make-event-handler ::e5/delete-plugin name)}
+           "delete"]]])
+      @(subscribe [::e5/plugins])))]])
 
 (defn item-list-item [{:keys [key name ::mi/owner :db/id] :as item} expanded?]
   (let [expanded-key (or name (::mi/name item))

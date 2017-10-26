@@ -43,6 +43,10 @@
                                dnd-e5-item-builder-page-route
                                dnd-e5-item-page-route})
 
+(def dnd-e5-my-content-route :my-content-5e-page)
+
+(def dnd-e5-my-content-routes #{dnd-e5-my-content-route})
+
 (def register-route :register)
 (def register-page-route :register-page)
 (def verify-route :verify)
@@ -104,6 +108,7 @@
                   "dnd/"
                   {"5e/" {"characters" {"" dnd-e5-char-list-route
                                         ["/" :id] dnd-e5-char-route}
+                          "my-content" dnd-e5-my-content-route
                           "items" {"" dnd-e5-items-route
                                    ["/" :id] dnd-e5-item-route}
                           "item-summaries" dnd-e5-item-summaries-route
