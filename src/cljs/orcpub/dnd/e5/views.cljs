@@ -1656,7 +1656,8 @@
   {:background-color "rgba(0,0,0,0.1)"})
 
 (defn spell-row [id lvl spell-modifiers prepares-spells prepared-spells-by-class {:keys [key ability qualifier class always-prepared?]} expanded? on-click prepare-spell-count prepared-spell-count]
-  (let [spell (spells/spell-map key)
+  (let [spell-map @(subscribe [::spells/spells-map])
+        spell (spell-map key)
         cls-mods (get spell-modifiers class)
         remaining-preps (- prepare-spell-count
                            prepared-spell-count)]
@@ -3553,7 +3554,6 @@
 
 (defn spell-builder []
   (let [{:keys [:level :school] :as spell} @(subscribe [::spells/builder-item])]
-    (prn "SPELL" spell)
     [:div.p-20.main-text-color
      [:div.flex.w-100-p.flex-wrap
       [spell-input-field
