@@ -1342,6 +1342,13 @@
          unselected-plugins)
       (info-block (str "There are more " name " options available if you click 'select sources' above and add more sources.")))))
 
+(defn add-spell-component []
+  (info-block [:span
+               [:span "Don't see a spell here that you want to use? "]
+               [:span.pointer.underline.orange
+                {:on-click #(dispatch [:route routes/dnd-e5-spell-builder-page-route])}
+                "CLICK HERE TO ADD A SPELL"]]))
+
 (def pages
   [{:name "Race"
     :icon "woman-elf-face"
@@ -1366,7 +1373,8 @@
    {:name "Spells"
     :icon "spell-book"
     :tags #{:spells}
-    :components [#(more-selection-info :spell-options? "spell")
+    :components [add-spell-component
+                 #(more-selection-info :spell-options? "spell")
                  known-mode-info]}
    {:name "Proficiencies"
     :icon "juggler"

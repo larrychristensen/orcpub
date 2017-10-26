@@ -28,7 +28,6 @@
  ::spells5e/plugin-spells
  :<- [::e5/plugins]
  (fn [plugins _]
-   (prn "PLUGINS" plugins)
    (apply concat (map (comp vals ::e5/spells) plugins))))
 
 (reg-sub
@@ -63,7 +62,6 @@
     (fn [lists {:keys [key level spell-lists]}]
       (reduce-kv
        (fn [l k v]
-         (prn "L K V" l k v)
          (update-in l [k level] conj key))
        lists
        spell-lists))
@@ -74,7 +72,6 @@
  ::spells5e/spell-lists
  :<- [::spells5e/plugin-spell-lists]
  (fn [plugin-spell-lists]
-   (prn "PLUGIN SPELL LISTS" plugin-spell-lists)
    (merge-with
     merge-spell-lists
     sl5e/spell-lists
