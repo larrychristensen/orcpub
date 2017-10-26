@@ -8,7 +8,7 @@
   #?(:cljs (:require-macros [orcpub.dnd.e5.options :as opt5e])))
 
 
-(def druid-option-cfg
+#_(def druid-option-cfg
   {:name "Druid"
    :plugin? true
    :subclass-level 2
@@ -35,7 +35,7 @@
                                             :page 2
                                             :source :ua-revised-class-options})]}}}]})
 
-(def fighter-option-cfg
+#_(def fighter-option-cfg
   {:name "Fighter"
    :plugin? true
    :subclass-level 3
@@ -71,7 +71,7 @@
                                             :page 3
                                             :source :ua-revised-class-options})]}}}]})
 
-(def paladin-option-cfg
+#_(def paladin-option-cfg
   (merge
    opt5e/paladin-base-cfg
    {:plugin? true
@@ -116,7 +116,7 @@
                                  :page 4
                                  :source :ua-revised-class-options}))}}}]}))
 
-(def warlock-option-cfg
+#_(def warlock-option-cfg
   {:name "Warlock"
    :subclass-level 1
    :subclass-title "Otherworldly Patron"
@@ -154,7 +154,7 @@
                                             :page 5
                                             :source :ua-revised-class-options})]}}}]})
 
-(def ua-revised-class-options-plugin
+#_(def ua-revised-class-options-plugin
   {:name "Unearthed Arcana: Revised Class Options"
    :class-options? true
    :key :ua-revised-class-options

@@ -8,7 +8,7 @@
             [re-frame.core :refer [subscribe]]
             [clojure.string :as s]))
 
-(def grudge-bearer-foe-selection
+#_(def grudge-bearer-foe-selection
   (t/selection-cfg
    {:name "Foe"
     :tags #{:feats}
@@ -28,7 +28,7 @@
                (seq opt5e/favored-enemy-types)
                (seq opt5e/humanoid-enemies)))}))
 
-(def ua-race-feats-plugin
+#_(def ua-race-feats-plugin
   {:name "Unearthed Arcana: Feats for Races"
    :key :ua-race-feats
    :feat-options? true

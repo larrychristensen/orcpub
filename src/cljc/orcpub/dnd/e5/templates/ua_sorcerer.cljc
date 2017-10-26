@@ -8,7 +8,7 @@
             [orcpub.dnd.e5.templates.ua-options :as ua-options]
             [orcpub.dnd.e5.spell-lists :as sl]))
 
-(defn favored-soul [suffix]
+#_(defn favored-soul [suffix]
   {:name (str "Favored Soul" (if suffix (str " (" suffix ")")))
    :modifiers [opt5e/ua-al-illegal
                (mod5e/spells-known 1 :cure-wounds ::char5e/cha "Sorcerer")
@@ -45,7 +45,7 @@
                               :frequency units5e/long-rests-1
                               :summary (str "regain " (int (/ ?max-hit-points)) " HPs if you have that many or fewer left")})]}}})
 
-(def phoenix-sorcery {:name "Phoenix Sorcery"
+#_(def phoenix-sorcery {:name "Phoenix Sorcery"
                    :modifiers [opt5e/ua-al-illegal
                                (mod5e/action
                                 {:name "Ignite"
@@ -82,7 +82,7 @@
                                               :source :ua-sorcerer
                                               :summary "While under effect of Mantle of Flame, you have a flying speed of 40 ft, have resistance to all damage, and your Phoenix Sparke deals and extra 20 fire damage"})]}}})
 
-(def sea-sorcery {:name "Sea Sorcery"
+#_(def sea-sorcery {:name "Sea Sorcery"
                   :modifiers [opt5e/ua-al-illegal
                               (mod5e/swimming-speed-equal-to-walking)
                                (mod5e/trait-cfg
@@ -114,7 +114,7 @@
                                              :source :ua-sorcerer
                                              :summary "don't need to eat, sleep, or drink; critical hits on you become normal hits; resistance to slashing, piercing, and bludgeoning damage."})]}}})
 
-(def stone-sorcery
+#_(def stone-sorcery
   {:name "Stone Sorcery"
    :modifiers [opt5e/ua-al-illegal
                (mod5e/armor-proficiency :shields)
@@ -142,17 +142,17 @@
                               :page 4
                               :source :ua-sorcerer})]}}})
 
-(defn sorcerer-plugin [subclasses]
+#_(defn sorcerer-plugin [subclasses]
   {:name "Sorcerer"
    :subclass-title "Sorcerous Origin"
    :subclass-level 1
    :plugin? true
    :subclasses subclasses})
 
-(def sorcerer-favored-soul
+#_(def sorcerer-favored-soul
   (sorcerer-plugin [(favored-soul nil)]))
 
-(def ua-sorcerer-plugin
+#_(def ua-sorcerer-plugin
   {:name "Unearthed Arcana: Sorcerer"
    :class-options? true
    :key :ua-sorcerer

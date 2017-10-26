@@ -22,7 +22,8 @@
             [clojure.string :as s]
             [reagent.ratom :as ra]
             [cljs.core.async :refer [<!]]
-            [cljs-http.client :as http])
+            [cljs-http.client :as http]
+            [orcpub.dnd.e5.spell-subs])
   (:require-macros [cljs.core.async.macros :refer [go]]))
 
 (reg-sub
@@ -843,13 +844,11 @@
  (fn [db _]
    (::char5e/monster-text-filter db)))
 
-(def sorted-spells
-  (delay (sort-by :name spells5e/spells)))
-
 (reg-sub
  ::char5e/sorted-spells
- (fn [db _]
-   @sorted-spells))
+ :<- [::spells5e/spells]
+ (fn [spells _]
+   (sort-by :name spells)))
 
 (reg-sub
  ::char5e/filtered-spells

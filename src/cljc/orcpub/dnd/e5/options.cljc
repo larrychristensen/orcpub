@@ -402,7 +402,7 @@
                    (fn [i p]
                      ^{:key i} [:p.m-t-5 p])
                    (s/split (or description summary) #"\n"))))]
-   (if source
+   #_(if source
      (let [{:keys [abbr url]} (disp/sources source)]
        [:div.f-w-n
         [:span "(see"]
@@ -415,8 +415,8 @@
       (= :phb source)
       (get option-sources source)))
 
-(defn spell-option [spellcasting-ability class-name key & [prepend-level? qualifier]]
-  (let [{:keys [name level source] :as spell} (spells/spell-map key)]
+(defn spell-option [spells-map spellcasting-ability class-name key & [prepend-level? qualifier]]
+  (let [{:keys [name level source] :as spell} (spells-map key)]
     (t/option-cfg
      {:name (if prepend-level? (str level " - " name) name)
       :key key
@@ -428,27 +428,21 @@
                                (not-any?
                                 (fn [[[_ kw]]]
                                   (= key kw))
-                                (get spells-known level))))))
-                (t/option-prereq
-                 "You aren't using this source"
-                 (fn [c] (using-source?
-                          @(subscribe [::character/option-sources nil c])
-                          source))
-                 true)]
+                                (get spells-known level))))))]
       :modifiers [(modifiers/spells-known level key spellcasting-ability class-name nil qualifier)]})))
 
 
 (def memoized-spell-option (memoize spell-option))
 
-(defn spell-options [spells spellcasting-ability class-name & [prepend-level? qualifier]]
+(defn spell-options [spells-map spells spellcasting-ability class-name & [prepend-level? qualifier]]
   (map
-   #(memoized-spell-option spellcasting-ability class-name % prepend-level? qualifier)
+   #(memoized-spell-option spells-map spellcasting-ability class-name % prepend-level? qualifier)
    (sort spells)))
 
 (defn spell-level-title [class-name level]
   (str class-name (if (and level (zero? level)) " Cantrips Known" (str " Spells Known" (if level (str " " level))))))
 
-(defn spell-selection [{:keys [title class-key level spellcasting-ability class-name num prepend-level? spell-keys options min max exclude-ref? ref]}]
+(defn spell-selection [spell-lists spells-map {:keys [title class-key level spellcasting-ability class-name num prepend-level? spell-keys options min max exclude-ref? ref]}]
   (let [title (or title (spell-level-title class-name level))
         kw (common/name-to-kw title)
         ref (or ref (if (not exclude-ref?) [:class class-key kw]))]
@@ -460,7 +454,8 @@
        :multiselect? true
        :options (or options
                     (spell-options
-                     (or spell-keys (get-in sl/spell-lists [class-key level]))
+                     spells-map
+                     (or spell-keys (get-in spell-lists [class-key level]))
                      spellcasting-ability
                      class-name
                      prepend-level?))
@@ -522,9 +517,9 @@
 (defn spell-tags [cls-key-nm level]
   #{:spells (keyword (str cls-key-nm "-spells")) (keyword (str "level-" level))})
 
-(defn bard-magical-secrets [min-level]
+(defn bard-magical-secrets [spells-map min-level]
   (let [max-level (key (last (total-slots min-level 1)))
-        spells-by-level (group-by :level spells/spells)
+        spells-by-level (group-by :level (vals spells-map))
         filtered-spells-by-level (select-keys spells-by-level (range 0 (inc max-level)))]
     (t/selection-cfg
      {:name "Bard Magical Secrets"
@@ -537,14 +532,16 @@
                   (map
                    (fn [{:keys [name] :as spell}]
                      (let [key (or (:key spell) (common/name-to-kw name))]
-                       (spell-option ::character/cha "Bard" key true)))
+                       (spell-option spells-map ::character/cha "Bard" key true)))
                    spells))
                 filtered-spells-by-level)})))
 
-(defn cantrip-selections [class-key class-name ability cantrips-known]
+(defn cantrip-selections [spell-lists spells-map class-key class-name ability cantrips-known]
   (reduce
    (fn [m [k v]]
-     (assoc m k [(spell-selection {:class-key class-key
+     (assoc m k [(spell-selection spell-lists
+                                  spells-map
+                                  {:class-key class-key
                                    :level 0
                                    :spellcasting-ability ability
                                    :class-name class-name
@@ -552,11 +549,11 @@
    {}
    cantrips-known))
 
-(defn apply-spell-restriction [spell-keys restriction]
+(defn apply-spell-restriction [spells-map spell-keys restriction]
   (if restriction
     (filter
      (fn [spell-key]
-       (restriction (spells/spell-map spell-key)))
+       (restriction (spells-map spell-key)))
      spell-keys)
     spell-keys))
 
@@ -569,7 +566,9 @@
   (keyword (str cls-key-nm "-spells-known")))
 
 
-(defn spells-known-selections [{:keys [class-key
+(defn spells-known-selections [spell-lists
+                               spells-map
+                               {:keys [class-key
                                        level-factor
                                        spells-known
                                        known-mode
@@ -583,7 +582,7 @@
      (let [[num restriction] (if (number? v) [v] ((juxt :num :restriction) v))
            slots (or (if slot-schedule (slot-schedule cls-lvl)) (total-slots cls-lvl level-factor))
            all-spells (select-keys
-                       (or spells (sl/spell-lists (or spell-list class-key)))
+                       (or spells (spell-lists (or spell-list class-key)))
                        (keys slots))
            acquire? (= :acquire known-mode)]
        (let [options (flatten
@@ -591,22 +590,25 @@
                        (fn [[lvl spell-keys]]
                          (map
                           (fn [spell-key]
-                            (let [spell (spells/spell-map spell-key)]
+                            (let [spell (spells-map spell-key)]
                               #?@(:cljs
                                   [(if (nil? spell) (js/console.warn (str "No spell found for key: " spell-key)))
                                    (if (nil? (:name spell)) (js/console.warn (str "Spell is missing name: " spell-key)))])
-                              (spell-option
+                              (memoized-spell-option
+                               spells-map
                                ability
                                (:name cls-cfg)
                                spell-key
                                true)))
-                          (apply-spell-restriction spell-keys restriction)))
+                          (apply-spell-restriction spells-map spell-keys restriction)))
                        all-spells))]
          (assoc m cls-lvl
                 [(let [cls-key-nm (class-key-name (:key cls-cfg) (:name cls-cfg))
                        kw (spell-selection-key cls-key-nm)
                        cls-nm (:name cls-cfg)]
                    (spell-selection
+                    spell-lists
+                    spells-map
                     {:class-key class-key
                      :class-name cls-nm
                      :min num
@@ -615,42 +617,44 @@
    {}
    spells-known))
 
-(defn spellcasting-template [{:keys [class-key
+(defn spellcasting-template [spell-lists
+                             spells-map
+                             {:keys [class-key
                                      level-factor
                                      cantrips-known
                                      spells-known
                                      known-mode
                                      ability] :as cfg}
                              cls-cfg]
-  (let [spell-selections (spells-known-selections cfg cls-cfg)
-        cantrip-selections (cantrip-selections class-key (:name cls-cfg) ability cantrips-known)]
+  (let [spell-selections (spells-known-selections spell-lists spells-map cfg cls-cfg)
+        cantrip-selections (cantrip-selections spell-lists spells-map class-key (:name cls-cfg) ability cantrips-known)]
     {:selections (merge-with
                   concat
                   cantrip-selections
                   spell-selections)}))
 
-(defn magic-initiate-option [class-key class-name spellcasting-ability spell-lists]
+(defn magic-initiate-option [spells-map class-key class-name spellcasting-ability spell-lists]
   (t/option-cfg
    {:name (name class-key)
     :selections [(t/selection-cfg
                   {:name "Cantrip"
                    :order 1
                    :tags #{:spells}
-                   :options (spell-options (get-in spell-lists [class-key 0]) spellcasting-ability class-name)
+                   :options (spell-options spells-map (get-in spell-lists [class-key 0]) spellcasting-ability class-name)
                    :min 2
                    :max 2})
                  (t/selection-cfg
                   {:name "Level 1 Spell"
                    :order 2
                    :tags #{:spells}
-                   :options (spell-options (get-in spell-lists [class-key 1]) spellcasting-ability class-name)
+                   :options (spell-options spells-map (get-in spell-lists [class-key 1]) spellcasting-ability class-name)
                    :min 1
                    :max 1})]}))
 
 (defn ritual-spell? [spell]
   (:ritual spell))
 
-(defn ritual-caster-option [class-key class-name spellcasting-ability spell-lists]
+(defn ritual-caster-option [spells-map class-key class-name spellcasting-ability spell-lists]
   (t/option-cfg
    {:name (name class-key)
     :key class-key
@@ -658,7 +662,8 @@
                   {:name "Level 1 Ritual"
                    :tags #{:spells}
                    :options (spell-options
-                             (filter (fn [spell-kw] (ritual-spell? (spells/spell-map spell-kw))) (get-in spell-lists [class-key 1]))
+                             spells-map
+                             (filter (fn [spell-kw] (ritual-spell? (spells-map spell-kw))) (get-in spell-lists [class-key 1]))
                              spellcasting-ability
                              class-name
                              false
@@ -666,8 +671,8 @@
                    :min 2
                    :max 2})]}))
 
-(defn spell-sniper-option [class-key class-name spellcasting-ability spell-lists]
-  (let [options (spell-options (filter (fn [spell-kw] (:attack-roll? (spells/spell-map spell-kw))) (get-in spell-lists [class-key 0])) spellcasting-ability class-name)]
+(defn spell-sniper-option [spells-map class-key class-name spellcasting-ability spell-lists]
+  (let [options (spell-options spells-map (filter (fn [spell-kw] (:attack-roll? (spells-map spell-kw))) (get-in spell-lists [class-key 0])) spellcasting-ability class-name)]
     (t/option-cfg
      {:name (name class-key)
       :key class-key
@@ -932,14 +937,16 @@
 
 (def defensive-duelist-summary "when you are hit with a melee attack, you can add your prof bonus to AC for the attack if you are wielding a finesse weapon you are proficient with")
 
-(def homebrew-spell-selection
+(defn homebrew-spell-selection [spell-lists spells-map]
   (spell-selection
+   spell-lists
+   spells-map
    {:class-key :homebrew
     :class-name "Homebrew"
     :ref [:optional-content :homebrew :spells-known]
     :min 0
     :max nil
-    :spell-keys (keys spells/spell-map)}))
+    :spell-keys (keys spells-map)}))
 
 (def homebrew-tool-prof-selection
   (tool-proficiency-selection-2
@@ -1043,7 +1050,7 @@
       (dispatch (conj name-event value)))
     {:class-name "input"}]])
 
-(def feat-options
+(defn feat-options [spell-lists spells-map]
   (concat
    [#_(feat-option
      {:name "Alert"
@@ -1494,12 +1501,12 @@
                                      :selections [(t/selection-cfg
                                                    {:name "Spellaster Class"
                                                     :tags #{:spells}
-                                                    :options [(ritual-caster-option :bard "Bard" ::character/cha sl/spell-lists)
-                                                              (ritual-caster-option :cleric "Cleric" ::character/wis sl/spell-lists)
-                                                              (ritual-caster-option :druid "Druid" ::character/wis sl/spell-lists)
-                                                              (ritual-caster-option :sorcerer "Sorcerer" ::character/cha sl/spell-lists)
-                                                              (ritual-caster-option :warlock "Warlock" ::character/cha sl/spell-lists)
-                                                              (ritual-caster-option :wizard "Wizard" ::character/int sl/spell-lists)]})]})
+                                                    :options [(ritual-caster-option spells-map :bard "Bard" ::character/cha spell-lists)
+                                                              (ritual-caster-option spells-map :cleric "Cleric" ::character/wis spell-lists)
+                                                              (ritual-caster-option spells-map :druid "Druid" ::character/wis spell-lists)
+                                                              (ritual-caster-option spells-map :sorcerer "Sorcerer" ::character/cha spell-lists)
+                                                              (ritual-caster-option spells-map :warlock "Warlock" ::character/cha spell-lists)
+                                                              (ritual-caster-option spells-map :wizard "Wizard" ::character/int spell-lists)]})]})
                                    (t/option-cfg
                                     {:name "Three Skills or Tools"
                                      :help "Select proficiency in three skills or tools"
@@ -1512,12 +1519,12 @@
                                      :selections [(t/selection-cfg
                                                    {:name "Attack Cantrip Class"
                                                     :tags #{:spells}
-                                                    :options [(spell-sniper-option :bard "Bard" ::character/cha sl/spell-lists)
-                                                              (spell-sniper-option :cleric "Cleric" ::character/wis sl/spell-lists)
-                                                              (spell-sniper-option :druid "Druid" ::character/wis sl/spell-lists)
-                                                              (spell-sniper-option :sorcerer "Sorcerer" ::character/cha sl/spell-lists)
-                                                              (spell-sniper-option :warlock "Warlock" ::character/cha sl/spell-lists)
-                                                              (spell-sniper-option :wizard "Wizard" ::character/int sl/spell-lists)]})]})
+                                                    :options [(spell-sniper-option spells-map :bard "Bard" ::character/cha spell-lists)
+                                                              (spell-sniper-option spells-map :cleric "Cleric" ::character/wis spell-lists)
+                                                              (spell-sniper-option spells-map :druid "Druid" ::character/wis spell-lists)
+                                                              (spell-sniper-option spells-map :sorcerer "Sorcerer" ::character/cha spell-lists)
+                                                              (spell-sniper-option spells-map :warlock "Warlock" ::character/cha spell-lists)
+                                                              (spell-sniper-option spells-map :wizard "Wizard" ::character/int spell-lists)]})]})
                                    (t/option-cfg
                                     {:name "Medium Armor: Stealthy"
                                      :help "This will allow you to use medium armor without stealth disadvantage"
@@ -1543,12 +1550,12 @@
                                                    {:name "Spell Class"
                                                     :order 0
                                                     :tags #{:spells}
-                                                    :options [(magic-initiate-option :bard "Bard" ::character/cha sl/spell-lists)
-                                                              (magic-initiate-option :cleric "Cleric" ::character/wis sl/spell-lists)
-                                                              (magic-initiate-option :druid "Druid" ::character/wis sl/spell-lists)
-                                                              (magic-initiate-option :sorcerer "Sorcerer" ::character/cha sl/spell-lists)
-                                                              (magic-initiate-option :warlock "Warlock" ::character/cha sl/spell-lists)
-                                                              (magic-initiate-option :wizard "Wizard" ::character/int sl/spell-lists)]})]})]})]})))
+                                                    :options [(magic-initiate-option spells-map :bard "Bard" ::character/cha spell-lists)
+                                                              (magic-initiate-option spells-map :cleric "Cleric" ::character/wis spell-lists)
+                                                              (magic-initiate-option spells-map :druid "Druid" ::character/wis spell-lists)
+                                                              (magic-initiate-option spells-map :sorcerer "Sorcerer" ::character/cha spell-lists)
+                                                              (magic-initiate-option spells-map :warlock "Warlock" ::character/cha spell-lists)
+                                                              (magic-initiate-option spells-map :wizard "Wizard" ::character/int spell-lists)]})]})]})]})))
     (range 10))))
 
 (def fighting-style-options
@@ -1614,10 +1621,10 @@
       fighting-style-options)
      fighting-style-options)))
 
-(defn feat-selection [num]
+(defn feat-selection [spell-lists spells-map num]
   (t/selection-cfg
    {:name "Feats"
-    :options feat-options
+    :options (feat-options spell-lists spells-map)
     :multiselect? true
     :tags #{:feats}
     :ref [:feats]
@@ -1625,7 +1632,7 @@
     :min num
     :max num}))
 
-(defn ability-score-improvement-selection [cls lvl]
+(defn ability-score-improvement-selection [spell-lists spells-map cls lvl]
   (t/selection-cfg
    {:name "Ability Score Improvement or Feat"
     :key :asi-or-feat
@@ -1633,7 +1640,7 @@
     :options [(ability-increase-option 2 false character/ability-keys)
               (t/option-cfg
                {:name "Feat"
-                :selections [(feat-selection 1)]})]}))
+                :selections [(feat-selection spell-lists spells-map 1)]})]}))
 
 (defn expertise-selection [num & [key]]
   (t/selection-cfg
@@ -1729,8 +1736,10 @@
                               min-level
                               nil))
 
-(defn subclass-spell-selection [class-key class-name ability spells num]
+(defn subclass-spell-selection [spell-lists spells-map class-key class-name ability spells num]
   (spell-selection
+   spell-lists
+   spells-map
    {:class-key class-key
     :spell-keys spells
     :spellcasting-ability ability
@@ -1738,8 +1747,10 @@
     :num num
     :prepend-level? true}))
 
-(defn subclass-cantrip-selection [class-key class-name ability spells num]
+(defn subclass-cantrip-selection [spell-lists spells-map class-key class-name ability spells num]
   (spell-selection
+   spell-lists
+   spells-map
    {:class-key class-key
     :level 0
     :spellcasting-ability ability
@@ -1747,8 +1758,8 @@
     :spell-keys spells
     :num num}))
 
-(defn warlock-subclass-spell-selection [spells]
-  (subclass-spell-selection :warlock "Warlock" ::character/cha spells 0))
+(defn warlock-subclass-spell-selection [spell-lists spells-map spells]
+  (subclass-spell-selection spell-lists spells-map :warlock "Warlock" ::character/cha spells 0))
 
 (defn traits-modifiers [traits & [class-key source]]
   (map
@@ -1833,11 +1844,11 @@
   (ability-increase-selection-2
    {:min 0}))
 
-(def homebrew-feat-selection
+(defn homebrew-feat-selection [spell-lists spells-map]
   (feat-selection-2
    {:min 0
     :max nil
-    :options feat-options}))
+    :options (feat-options spell-lists spells-map)}))
 
 (def homebrew-al-illegal
   (modifiers/al-illegal "Homebrew options are not allowed"))
@@ -1886,7 +1897,7 @@
                   :modifiers [(modifiers/darkvision distance)]}))
               (range 0 150 30))}))
 
-(defn custom-subrace-option [path]
+(defn custom-subrace-option [spell-lists spells-map path]
   (t/option-cfg
    {:name "Custom"
     :icon "beer-stein"
@@ -1898,7 +1909,7 @@
     :selections [homebrew-skill-prof-selection
                  homebrew-tool-prof-selection
                  homebrew-ability-increase-selection
-                 homebrew-feat-selection
+                 (homebrew-feat-selection spell-lists spells-map)
                  homebrew-speed-selection
                  homebrew-darkvision-selection
                  homebrew-armor-prof-selection
@@ -1910,11 +1921,12 @@
    [:custom-race-name]
    [:set-custom-race]))
 
-(defn subrace-selection [plugin? source subraces path]
+(defn subrace-selection [spell-lists spells-map plugin? source subraces path]
   (let [subrace-path (conj path :subrace)]
     (t/selection-cfg
      {:name "Subrace"
       :tags #{:subrace}
+      :min (if subraces 1 0)
       :options (cond->
                 (if (seq subraces)
                   (map
@@ -1925,9 +1937,9 @@
                   [(none-option subrace-path)])
                  
                  (not plugin?)
-                 (conj (custom-subrace-option subrace-path)))})))
+                 (conj (custom-subrace-option spell-lists spells-map subrace-path)))})))
 
-(def custom-race-option
+(defn custom-race-option [spell-lists spells-map]
   (t/option-cfg
    {:name "Custom"
     :icon "beer-stein"
@@ -1940,11 +1952,11 @@
                (fn [_] @(subscribe [:homebrew? [:race]]))
                true)]
     :order 1000
-    :selections [(subrace-selection false nil nil [:race :custom])
+    :selections [(subrace-selection spell-lists spells-map false nil nil [:race :custom])
                  homebrew-skill-prof-selection
                  homebrew-tool-prof-selection
                  homebrew-ability-increase-selection
-                 homebrew-feat-selection
+                 (homebrew-feat-selection spell-lists spells-map)
                  homebrew-speed-selection
                  homebrew-darkvision-selection
                  homebrew-armor-prof-selection
@@ -2281,7 +2293,9 @@
      conj
      (total-levels-prereq-2 lvl (:key cls)))))
 
-(defn subclass-option [cls
+(defn subclass-option [spell-lists
+                       spells-map
+                       cls
                        {:keys [name
                                source
                                profs
@@ -2302,6 +2316,8 @@
         weapon-profs (keys weapon)
         tool-profs (keys tool)
         spellcasting-template (spellcasting-template
+                               spell-lists
+                               spells-map
                                (assoc
                                 spellcasting
                                 :class-key
@@ -2413,7 +2429,7 @@
    [:custom-subclass-name path]
    [:set-custom-subclass path]))
 
-(defn custom-subclass-spell-selection [ability-kw level]
+#_(defn custom-subclass-spell-selection [ability-kw level]
   (t/selection-cfg
    {:name (if (zero? level)
             "Cantrips Known"
@@ -2462,7 +2478,7 @@
                {:name "<none>"
                 :key :none}))}))
 
-(defn custom-subclass-option [cls-key level-key subclass-selection-key spellcasting-class?]
+(defn custom-subclass-option [spell-lists spells-map cls-key level-key subclass-selection-key spellcasting-class?]
   (let [path [:class cls-key :levels level-key subclass-selection-key]]
     (t/option-cfg
      {:name "Custom"
@@ -2479,7 +2495,7 @@
       :selections (let [selections
                         [homebrew-skill-prof-selection
                          homebrew-tool-prof-selection
-                         homebrew-feat-selection
+                         (homebrew-feat-selection spell-lists spells-map)
                          homebrew-armor-prof-selection
                          homebrew-weapon-prof-selection]]
                     selections
@@ -2488,7 +2504,9 @@
                       (conj selections
                             (custom-subclass-spellcasting-selection cls-key))))})))
 
-(defn level-option [{:keys [name
+(defn level-option [spell-lists
+                    spells-map
+                    {:keys [name
                             plugin?
                             hit-die
                             profs
@@ -2526,11 +2544,11 @@
                            :order 2
                            :options (conj
                                      (map
-                                      #(subclass-option (assoc cls :key kw) %)
+                                      #(subclass-option spell-lists spells-map (assoc cls :key kw) %)
                                       (if source (map (fn [sc] (assoc sc :source source)) subclasses) subclasses))
-                                     (custom-subclass-option kw level-kw subclass-selection-key (some? spellcasting)))})]))
+                                     (custom-subclass-option spell-lists spells-map kw level-kw subclass-selection-key (some? spellcasting)))})]))
                     (if (and (not plugin?) (ability-inc-set i))
-                      [(ability-score-improvement-selection name i)])
+                      [(ability-score-improvement-selection spell-lists spells-map name i)])
                     (if (not plugin?)
                       [(assoc
                         (hit-points-selection hit-die name i)
@@ -2575,7 +2593,9 @@
    (class-help-field "Weapon Proficiencies" (s/join ", " (map (comp name key) weapon-profs)))
    (class-help-field "Armor Proficiencies" (s/join ", " (map (comp name key) armor-profs)))])
 
-(defn class-option [{:keys [name
+(defn class-option [spell-lists
+                    spells-map
+                    {:keys [name
                             key
                             help
                             hit-die
@@ -2603,7 +2623,11 @@
          armor-profs :armor weapon-profs :weapon} profs
         {level-factor :level-factor} spellcasting
         save-profs (keys save)
-        spellcasting-template (spellcasting-template (assoc spellcasting :class-key kw) cls)
+        spellcasting-template (spellcasting-template
+                               spell-lists
+                               spells-map
+                               (assoc spellcasting :class-key kw)
+                               cls)
         first-class? (fn [c] (let [first-class (first @(subscribe [::character/classes nil c]))]
                                (= kw first-class)))]
     (t/option-cfg
@@ -2637,7 +2661,7 @@
                                       {::entity/key (-> current-values count inc level-key)})
                        :tags #{kw}
                        :options (map
-                                 (partial level-option cls kw spellcasting-template)
+                                 (partial level-option spell-lists spells-map cls kw spellcasting-template)
                                  (range 1 21))
                        :min 1
                        :sequential? true
@@ -2653,7 +2677,7 @@
                   (if (:prepares-spells? spellcasting)
                     [(mods/map-mod ?prepares-spells name true)])
                   (if (= :all (:known-mode spellcasting))
-                    (let [spell-list (sl/spell-lists kw)]
+                    (let [spell-list (spell-lists kw)]
                       (mapcat
                        (fn [[lvl spell-keys]]
                          (map
@@ -2666,7 +2690,7 @@
                                                         1
                                                         [(let [slots (?class-spell-slots kw)]
                                                            (slots lvl))
-                                                         (let [spell (spells/spell-map spell-key)]
+                                                         (let [spell (spells-map spell-key)]
                                                            (using-source? ?option-sources (:source spell)))]))
                           spell-keys))
                        spell-list)))
@@ -2683,11 +2707,8 @@
                    [(modifiers/cls kw)
                     (if save-profs (apply modifiers/saving-throws kw save-profs))]))})))
 
-(defn source-url [source]
+#_(defn source-url [source]
   (some-> source disp/sources :url))
-
-(defn spell-level [spell-kw]
-  (some-> spells/spell-map spell-kw :level))
 
 (def ranger-base-cfg
   {:name "Ranger"
@@ -2782,11 +2803,11 @@
    :yuan-ti-pureblood {:name "Yuan-Ti Pureblood"
                        :languages [:abyssal :draconic]}})
 
-(defn druid-cantrip-selection [class-nm]
+(defn druid-cantrip-selection [spell-lists spells-map class-nm]
   (t/selection-cfg
    {:name "Druid Cantrip"
     :tags #{:spells}
-    :options (spell-options (get-in sl/spell-lists [:druid 0]) ::character/wis class-nm)}))
+    :options (spell-options spells-map (get-in spell-lists [:druid 0]) ::character/wis class-nm)}))
 
 (defn eldritch-invocation-selection [cfg]
   (t/selection-cfg
@@ -2869,14 +2890,14 @@
    (fn [c] (and (= race-nm @(subscribe [::character/race nil c]))
                 (= subrace-nm @(subscribe [::character/subrace nil c]))))))
 
-(def deep-gnome-prereq
+#_(def deep-gnome-prereq
   (t/option-prereq
    "Deep Gnome only"
    (fn [c] (let [subrace @(subscribe [::character/subrace nil c])]
              (or (= "Deep Gnome (EE)" subrace)
                  (= "Deep Gnome (SCAG)" subrace))))))
 
-(defn svirfneblin-magic-feat [source page]
+#_(defn svirfneblin-magic-feat [source page]
   (feat-option
    {:name (str "Svirfneblin Magic (" (s/upper-case (name source)) ")")
     :page page
