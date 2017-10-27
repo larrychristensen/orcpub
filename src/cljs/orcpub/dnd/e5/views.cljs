@@ -3660,6 +3660,20 @@
          #(dispatch [::bg/toggle-choice-tool-prof key num])]])
      (range 1 4)))])
 
+(defn language-choice-checkboxes [background]
+  [:div.flex.flex-wrap
+   (doall
+    (map
+     (fn [num]
+       ^{:key num}
+       [:span.m-r-20.m-b-10
+        [comps/labeled-checkbox
+         (str "Any " num)
+         (= num (get-in background [:profs :language-options :choose]))
+         false
+         #(dispatch [::bg/toggle-choice-language-prof num])]])
+     (range 1 4)))])
+
 (defn starting-equipment-choice-checkboxes [background equipment equipment-name]
   [:div.m-r-20.m-b-10
    [comps/labeled-checkbox
@@ -3694,6 +3708,95 @@
     [:span.i "Hodor's Guide to Hodors"]
     [:span ")"]]])
 
+(defn background-skill-proficiencies [background]
+  [:div.m-b-20
+   [:div.f-s-24.f-w-b.m-b-20 "Skill Proficiencies"]
+   [:div.flex.flex-wrap
+    (doall
+     (map
+      (fn [{:keys [name key]}]
+        ^{:key key}
+        [:span.m-r-20.m-b-10
+         [comps/labeled-checkbox
+          name
+          (get-in background [:profs :skill key])
+          false
+          #(dispatch [::bg/toggle-skill-prof key])]])
+      skills/skills))]])
+
+(defn background-languages [background]
+  [:div.m-t-20.m-b-20
+   [:div.f-s-24.f-w-b.m-b-20 "Languages"]
+   [:div
+    [language-choice-checkboxes background]]])
+
+(defn background-tool-proficiencies [background]
+  [:div.m-t-20.m-b-20
+   [:div.f-s-24.f-w-b.m-b-10 "Tool Proficiencies"]
+   [:div.m-b-10
+    [:div.f-s-18.f-w-b.m-b-10 "Artisans Tools"]
+    [:div
+     [tool-choice-checkboxes background :artisans-tool]]
+    [:div
+     [tool-prof-checkboxes background equip/artisans-tools]]]
+   [:div.m-b-10
+    [:div.f-s-18.f-w-b.m-b-10 "Musical Instruments"]
+    [tool-choice-checkboxes background :musical-instrument]]
+   [:div.m-b-10
+    [:div.f-s-18.f-w-b.m-b-10 "Gaming Set"]
+    [tool-choice-checkboxes background :gaming-set]]
+   [:div.m-b-10
+    [:div.f-s-18.f-w-b.m-b-10 "Vehicles"]
+    [tool-prof-checkboxes background equip/vehicle-types]]
+   [:div.m-b-10
+    [:div.f-s-18.f-w-b.m-b-10 "Other Tools"]
+    [tool-prof-checkboxes background equip/misc-tools]]])
+
+(defn background-starting-equipment [background]
+  [:div.m-t-20.m-b-20
+   [:div.f-s-24.f-w-b.m-b-10 "Starting Equipment"]
+   [:div.m-b-10
+    [:div.f-s-18.f-w-b.m-b-10 "Treasure"]
+    [input-builder-field
+     [:span.f-w-b "Gold"]
+     (get-in background [:treasure :gp])
+     #(dispatch [::bg/set-background-gold %])
+     {:class-name "input h-40"
+      :type number}]]
+   [:div.m-b-10
+    [:div.f-s-18.f-w-b.m-b-10 "Clothing"]
+    [:div [starting-equipment-checkboxes background equip/clothes]]]
+   [:div.m-b-10
+    [:div.f-s-18.f-w-b.m-b-10 "Artisan's Tools"]
+    [:div [starting-equipment-choice-checkboxes background equip/artisans-tools "Artisan's Tools"]]
+    [:div [starting-equipment-checkboxes background equip/artisans-tools]]]
+   [:div.m-b-20
+    [:div.f-s-18.f-w-b.m-b-10 "Musical Instruments"]
+    [starting-equipment-choice-checkboxes background equip/musical-instruments "Musical Instruments"]]
+   [:div.m-b-10
+    [:div.f-s-18.f-w-b.m-b-10 "Other Tools"]
+    [starting-equipment-checkboxes background equip/misc-tools]]
+   [:div.m-b-10
+    [:div.f-s-18.f-w-b.m-b-10 "Holy Symbols"]
+    [starting-equipment-checkboxes background equip/holy-symbols]]
+   [:div.m-b-10
+    [:div.f-s-18.f-w-b.m-b-10 "Other Equipment"]
+    [starting-equipment-checkboxes background equip/misc-equipment]]])
+
+(defn background-features [background]
+  [:div.m-t-20
+   [:div.f-s-24.f-w-b.m-b-10 "Feature"]
+   [input-builder-field
+    [:span.f-w-b "Feature Name"]
+    (get-in background [:traits 0 :name])
+    #(dispatch [::bg/set-feature-prop :name %])
+    {:class-name "input h-40 m-b-10"}]
+   [:div
+    [:span.f-w-b "Feature Description"]
+    [textarea-field
+     {:value (get-in background [:traits 0 :summary])
+      :on-change #(dispatch [::bg/set-feature-prop :summary %])}]]])
+
 (defn background-builder []
   (let [background @(subscribe [::bg/builder-item])]
     [:div.p-20.main-text-color
@@ -3707,81 +3810,11 @@
        :option-pack
        background
        "m-l-5 m-b-20"]]
-     [:div.m-b-20
-      [:div.f-s-24.f-w-b.m-b-20 "Skill Proficiencies"]
-      [:div.flex.flex-wrap
-       (doall
-        (map
-         (fn [{:keys [name key]}]
-           ^{:key key}
-           [:span.m-r-20.m-b-10
-            [comps/labeled-checkbox
-             name
-             (get-in background [:profs :skill key])
-             false
-             #(dispatch [::bg/toggle-skill-prof key])]])
-         skills/skills))]]
-     [:div.m-t-20.m-b-20
-      [:div.f-s-24.f-w-b.m-b-10 "Tool Proficiencies"]
-      [:div.m-b-10
-       [:div.f-s-18.f-w-b.m-b-10 "Artisans Tools"]
-       [:div
-        [tool-choice-checkboxes background :artisans-tool]]
-       [:div
-        [tool-prof-checkboxes background equip/artisans-tools]]]
-      [:div.m-b-10
-       [:div.f-s-18.f-w-b.m-b-10 "Musical Instruments"]
-       [tool-choice-checkboxes background :musical-instrument]]
-      [:div.m-b-10
-       [:div.f-s-18.f-w-b.m-b-10 "Gaming Set"]
-       [tool-choice-checkboxes background :gaming-set]]
-      [:div.m-b-10
-       [:div.f-s-18.f-w-b.m-b-10 "Vehicles"]
-       [tool-prof-checkboxes background equip/vehicle-types]]
-      [:div.m-b-10
-       [:div.f-s-18.f-w-b.m-b-10 "Other Tools"]
-       [tool-prof-checkboxes background equip/misc-tools]]]
-     [:div.m-t-20.m-b-20
-      [:div.f-s-24.f-w-b.m-b-10 "Starting Equipment"]
-      [:div.m-b-10
-       [:div.f-s-18.f-w-b.m-b-10 "Treasure"]
-       [input-builder-field
-        [:span.f-w-b "Gold"]
-        (get-in background [:treasure :gp])
-        #(dispatch [::bg/set-background-gold %])
-        {:class-name "input h-40"
-         :type number}]]
-      [:div.m-b-10
-       [:div.f-s-18.f-w-b.m-b-10 "Clothing"]
-       [starting-equipment-checkboxes background equip/clothes]]
-      [:div.m-b-10
-       [:div.f-s-18.f-w-b.m-b-10 "Artisan's Tools"]
-       [starting-equipment-choice-checkboxes background equip/artisans-tools "Artisan's Tools"]
-       [starting-equipment-checkboxes background equip/artisans-tools]]
-      [:div.m-b-20
-       [:div.f-s-18.f-w-b.m-b-10 "Musical Instruments"]
-       [starting-equipment-choice-checkboxes background equip/musical-instruments "Musical Instruments"]]
-      [:div.m-b-10
-       [:div.f-s-18.f-w-b.m-b-10 "Other Tools"]
-       [starting-equipment-checkboxes background equip/misc-tools]]
-      [:div.m-b-10
-       [:div.f-s-18.f-w-b.m-b-10 "Holy Symbols"]
-       [starting-equipment-checkboxes background equip/holy-symbols]]
-      [:div.m-b-10
-       [:div.f-s-18.f-w-b.m-b-10 "Other Equipment"]
-       [starting-equipment-checkboxes background equip/misc-equipment]]]
-     [:div.m-t-20
-      [:div.f-s-24.f-w-b.m-b-10 "Feature"]
-      [input-builder-field
-       [:span.f-w-b "Feature Name"]
-       (get-in background [:traits 0 :name])
-       #(dispatch [::bg/set-feature-prop :name %])
-       {:class-name "input h-40 m-b-10"}]
-      [:div
-       [:span.f-w-b "Feature Description"]
-       [textarea-field
-        {:value (get-in background [:traits 0 :summary])
-         :on-change #(dispatch [::bg/set-feature-prop :summary %])}]]]]))
+     [:div [background-skill-proficiencies background]]
+     [:div [background-languages background]]
+     [:div [background-tool-proficiencies background]]
+     [:div [background-starting-equipment background]]
+     [:div [background-features background]]]))
 
 (defn spell-builder []
   (let [{:keys [:level :school] :as spell} @(subscribe [::spells/builder-item])]
