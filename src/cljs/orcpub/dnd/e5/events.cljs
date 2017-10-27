@@ -10,6 +10,7 @@
             [orcpub.dnd.e5.common :as common5e]
             [orcpub.dnd.e5.character :as char5e]
             [orcpub.dnd.e5.backgrounds :as bg5e]
+            [orcpub.dnd.e5.races :as race5e]
             [orcpub.dnd.e5.units :as units5e]
             [orcpub.dnd.e5.party :as party5e]
             [orcpub.dnd.e5.character.random :as char-rand5e]
@@ -25,11 +26,13 @@
                                       magic-item->local-store
                                       spell->local-store
                                       background->local-store
+                                      race->local-store
                                       plugins->local-store
                                       tab-path
                                       default-character
                                       default-spell
-                                      default-background]]
+                                      default-background
+                                      default-race]]
             [re-frame.core :refer [reg-event-db reg-event-fx reg-fx inject-cofx path trim-v
                                    after debug dispatch dispatch-sync subscribe ->interceptor]]
             [cljs.spec.alpha :as spec]
@@ -65,6 +68,8 @@
 
 (def background->local-store-interceptor (after background->local-store))
 
+(def race->local-store-interceptor (after race->local-store))
+
 (def plugins->local-store-interceptor (after plugins->local-store))
 
 (def set-changed (->interceptor
@@ -85,7 +90,10 @@
                          spell->local-store-interceptor])
 
 (def background-interceptors [(path ::bg5e/builder-item)
-                         background->local-store-interceptor])
+                              background->local-store-interceptor])
+
+(def race-interceptors [(path ::race5e/builder-item)
+                         race->local-store-interceptor])
 
 (def plugins-interceptors [(path :plugins)
                           plugins->local-store-interceptor])
@@ -357,6 +365,14 @@
  ::e5/backgrounds
  "You must specify 'Name'")
 
+(reg-save-homebrew
+ "Race"
+ ::race5e/save-race
+ ::race5e/builder-item
+ ::race5e/homebrew-race
+ ::e5/races
+ "You must specify 'Name'")
+
 (defn reg-delete-homebrew [event-key plugin-key]
   (reg-event-fx
    event-key
@@ -370,6 +386,10 @@
 (reg-delete-homebrew
  ::bg5e/delete-background
  ::e5/backgrounds)
+
+(reg-delete-homebrew
+ ::race5e/delete-race
+ ::e5/races)
 
 (reg-event-fx
  ::party5e/make-party-success
@@ -1407,17 +1427,27 @@
    {:dispatch-n [[::mi/set-item (mi/to-internal-item item)]
                  [:route routes/dnd-e5-item-builder-page-route]]}))
 
-(reg-event-fx
- ::spells/edit-spell
- (fn [{:keys [db]} [_ spell]]
-   {:dispatch-n [[::spells/set-spell spell]
-                 [:route routes/dnd-e5-spell-builder-page-route]]}))
+(defn reg-edit-homebrew [event set-event route]
+  (reg-event-fx
+   event
+   (fn [{:keys [db]} [_ item]]
+     {:dispatch-n [[set-event item]
+                   [:route route]]})))
 
-(reg-event-fx
+(reg-edit-homebrew
+ ::spells/edit-spell
+ ::spells/set-spell
+ routes/dnd-e5-spell-builder-page-route)
+
+(reg-edit-homebrew
  ::bg5e/edit-background
- (fn [{:keys [db]} [_ bg]]
-   {:dispatch-n [[::bg5e/set-background bg]
-                 [:route routes/dnd-e5-background-builder-page-route]]}))
+ ::bg5e/set-background
+ routes/dnd-e5-background-builder-page-route)
+
+(reg-edit-homebrew
+ ::race5e/edit-race
+ ::race5e/set-race
+ routes/dnd-e5-race-builder-page-route)
 
 (reg-event-fx
  :delete-character-success
@@ -1901,6 +1931,12 @@
    (assoc background prop-key prop-value)))
 
 (reg-event-db
+ ::race5e/set-race-prop
+ race-interceptors
+ (fn [race [_ prop-key prop-value]]
+   (assoc race prop-key prop-value)))
+
+(reg-event-db
  ::bg5e/set-feature-prop
  background-interceptors
  (fn [background [_ prop-key prop-value]]
@@ -1911,6 +1947,18 @@
  background-interceptors
  (fn [background [_ amount]]
    (assoc-in background [:treasure :gp] (js/parseInt amount))))
+
+(reg-event-db
+ ::race5e/set-race-speed
+ race-interceptors
+ (fn [race [_ v]]
+   (assoc race :speed (js/parseInt v))))
+
+(reg-event-db
+ ::race5e/set-race-ability-increase
+ race-interceptors
+ (fn [race [_ ability-kw bonus]]
+   (assoc-in race [:abilities ability-kw] (js/parseInt bonus))))
 
 (reg-event-db
  ::spells/set-spell-level
@@ -1931,6 +1979,14 @@
    (if (get-in background [:profs :skill key])
      (update-in background [:profs :skill] dissoc key)
      (assoc-in background [:profs :skill key] true))))
+
+(reg-event-db
+ ::race5e/toggle-language
+ race-interceptors
+ (fn [race [_ nm]]
+   (if (get-in race [:languages nm])
+     (update race :languages disj nm)
+     (update race :languages conj nm))))
 
 (reg-event-db
  ::bg5e/toggle-tool-prof
@@ -2224,6 +2280,12 @@
  (fn [_ [_ background]]
    background))
 
+(reg-event-db
+ ::race5e/set-race
+ race-interceptors
+ (fn [_ [_ race]]
+   race))
+
 (reg-event-fx
  ::mi/reset-item
  (fn [_ _]
@@ -2244,22 +2306,35 @@
                default-background]}))
 
 (reg-event-fx
+ ::race5e/reset-race
+ (fn [_ _]
+   {:dispatch [::race5e/set-race
+               default-race]}))
+
+(defn reg-new-homebrew [event set-event default-val route]
+  (reg-event-fx
+   event
+   (fn [_ [_ option-pack]]
+     {:dispatch-n [[set-event (assoc default-val :option-pack option-pack)]
+                   [:route route]]})))
+
+(reg-new-homebrew
  ::spells/new-spell
- (fn [_ [_ option-pack]]
-   {:dispatch-n [[::spells/set-spell (assoc default-spell :option-pack option-pack)]
-                 [:route routes/dnd-e5-spell-builder-page-route]]}))
+ ::spells/set-race
+ default-spell
+ routes/dnd-e5-spell-builder-page-route)
 
-(reg-event-fx
+(reg-new-homebrew
  ::bg5e/new-background
- (fn [_ [_ option-pack]]
-   {:dispatch-n [[::bg5e/set-background (assoc default-background :option-pack option-pack)]
-                 [:route routes/dnd-e5-background-builder-page-route]]}))
+ ::bg5e/set-background
+ default-background
+ routes/dnd-e5-background-builder-page-route)
 
-(reg-event-fx
- ::bg5e/new-race
- (fn [_ [_ option-pack]]
-   {:dispatch-n [[::bg5e/set-race (assoc default-background :option-pack option-pack)]
-                 [:route routes/dnd-e5-background-builder-page-route]]}))
+(reg-new-homebrew
+ ::race5e/new-race
+ ::race5e/set-race
+ default-race
+ routes/dnd-e5-race-builder-page-route)
 
 (reg-event-fx
  ::mi/new-item
