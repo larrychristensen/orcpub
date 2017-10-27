@@ -316,7 +316,6 @@
          item-with-key (assoc item :key key)
          plugins (:plugins db)
          explanation (spec/explain-data ::spells/homebrew-spell item-with-key)]
-     (prn "EXPLANATION" explanation)
      (if (nil? explanation)
        (let [new-plugins (assoc-in plugins
                                    [option-pack ::e5/spells key]
@@ -2112,6 +2111,12 @@
  (fn [_ _]
    {:dispatch [::spells/set-spell
                default-spell]}))
+
+(reg-event-fx
+ ::spells/new-spell
+ (fn [_ _]
+   {:dispatch-n [[::spells/reset-spell]
+                 [:route routes/dnd-e5-spell-builder-page-route]]}))
 
 (reg-event-fx
  ::mi/new-item

@@ -3614,7 +3614,7 @@
     {:class-name "input h-40"}]])
 
 (defn component-checkbox [component spell]
-  [:span.m-r-20.pointer
+  [:span.m-r-20.pointer.m-b-10
    {:on-click #(dispatch [::spells/toggle-component component])}
    [comps/checkbox (get-in spell [:components component]) false]
    [:span.m-l-5 (common/kw-to-name component)]])
@@ -3638,14 +3638,14 @@
          [:span ")"]]]
        :option-pack
        spell
-       "m-l-5"]]
+       "m-l-5 m-b-20"]]
      [:div.m-b-20
       [:div.f-w-b.m-b-10 "Class Spell Lists"]
       [:div.flex.flex-wrap
        (map
         (fn [{:keys [key name]}]
           ^{:key key}
-          [:div.m-r-10.pointer
+          [:div.m-r-10.pointer.m-b-10
            {:on-click #(dispatch [::spells/toggle-spell-list key])}
            [comps/checkbox (get-in spell [:spell-lists key])]
            [:span.m-l-5 name]])
@@ -3673,8 +3673,8 @@
          :on-change #(dispatch [::spells/set-spell-prop :school %])}]]]
      [:div.flex.w-100-p.flex-wrap
       [spell-input-field "Casting Time" :casting-time spell "m-b-20"]
-      [spell-input-field "Range" :range spell "m-l-5"]
-      [spell-input-field "Duration" :duration spell "m-l-5"]]
+      [spell-input-field "Range" :range spell "m-l-5 m-b-20"]
+      [spell-input-field "Duration" :duration spell "m-l-5 m-b-20"]]
      [:div [:h2.f-s-24.f-w-b.m-b-10 "Components"]]
      [:div.flex.w-100-p.flex-wrap
       [component-checkbox :verbal spell]
@@ -4185,22 +4185,79 @@
           :on-click (make-event-handler ::char/filter-spells "")}]]]
       [spell-list-items device-type]]]))
 
+(defn my-backgrounds []
+  (let [expanded? (r/atom false)]
+    (fn [plugin]
+      [:div.flex.justify-cont-s-b.align-items-c.pointer.item-list-item.p-10
+       [:div.flex.align-items-c
+        [svg-icon "ages" 48 @(subscribe [:theme])]
+        [:span.m-l-10.f-s-24 (str (-> plugin ::e5/backgrounds count) " Backgrounds")]]])))
+
+(defn my-spells []
+  (let [expanded? (r/atom true)]
+    (fn [plugin]
+      (let [spells (::e5/spells plugin)]
+        [:div.pointer.item-list-item
+         [:div.flex.justify-cont-s-b.align-items-c.p-10
+          {:on-click #(swap! expanded? not)}
+          [:div.flex.align-items-c
+           [svg-icon "spell-book" 48 @(subscribe [:theme])]
+           [:span.m-l-10.f-s-24 (let [num (count spells)]
+                                  (str num " Spell" (if (not= 1 num) "s")))]]
+          [:i.fa
+           {:class-name (if expanded? "fa-caret-up" "fa-caret-down")}]]
+         (if @expanded?
+           [:div.bg-lighter.p-10
+            [:div.flex.justify-cont-end
+             [:button.form-button.m-l-5
+              {:on-click (make-event-handler ::spells/new-spell)}
+              "add spell"]]
+            [:div
+             (doall
+              (map
+               (fn [[key {:keys [name] :as spell}]]
+                 ^{:key key}
+                 [:div.p-t-10.p-b-10.f-w-b.flex.justify-cont-s-b.align-items-c
+                  [:span name]
+                  [:div
+                   [:button.form-button.m-l-5
+                    {:on-click (make-event-handler ::spells/edit-spell spell)}
+                    "edit"]
+                   [:button.form-button.m-l-5
+                    {:on-click (make-event-handler ::spells/delete-spell spell)}
+                    "delete"]]])
+               spells))]])]))))
+
+(defn my-content-item []
+  (let [expanded? (r/atom true)]
+    (fn [name plugin]
+      [:div.item-list-item
+       [:div.p-20.pointer.flex.justify-cont-s-b.align-items-c.main-text-color
+        {:on-click #(swap! expanded? not)}
+        [:span.f-s-24 name]
+        [:i.fa
+         {:class-name (if @expanded? "fa-caret-up" "fa-caret-down")}]]
+       (if @expanded?
+         [:div.bg-lighter.p-10
+          [:div.flex.justify-cont-end.uppercase.align-items-c.m-b-10
+           [:button.form-button.m-l-5
+            {:on-click (make-event-handler ::e5/export-plugin name plugin)}
+            "export"]
+           [:button.form-button.m-l-5
+            {:on-click (make-event-handler ::e5/delete-plugin name)}
+            "delete"]]
+          [:div.item-list
+           [my-spells plugin]
+           [my-backgrounds plugin]]])])))
+
 (defn my-content []
-  [:div
+  [:div.main-text-color
    [:div.item-list
     (doall
      (map
       (fn [[name plugin]]
         ^{:key name}
-        [:div.p-20.item-list-item.pointer.flex.justify-cont-s-b.align-items-c.main-text-color
-         [:span.f-s-24 name]
-         [:div.flex.justify-cont-end.uppercase.align-items-c
-          [:button.form-button.m-l-5
-           {:on-click (make-event-handler ::e5/export-plugin name plugin)}
-           "export"]
-          [:button.form-button.m-l-5
-           {:on-click (make-event-handler ::e5/delete-plugin name)}
-           "delete"]]])
+        [my-content-item name plugin])
       @(subscribe [::e5/plugins])))]])
 
 (defn item-list-item [{:keys [key name ::mi/owner :db/id] :as item} expanded?]
