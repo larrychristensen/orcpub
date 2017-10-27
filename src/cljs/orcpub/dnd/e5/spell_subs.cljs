@@ -81,9 +81,7 @@
  ::races5e/races
  :<- [::races5e/plugin-races]
  (fn [plugin-races]
-   (cons
-    acolyte-bg
-    plugin-races)))
+   plugin-races))
 
 (reg-sub
  ::spells5e/plugin-spells
