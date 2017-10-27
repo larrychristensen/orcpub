@@ -4905,7 +4905,8 @@ long rest."})
                            other-magic-item-options
                            spell-lists
                            spells-map
-                           backgrounds]
+                           backgrounds
+                           races]
   [#_optional-content-selection
    (t/selection-cfg
     {:name "Base Ability Scores"
@@ -4945,15 +4946,17 @@ long rest."})
     {:options (conj
                (map
                 (partial opt5e/race-option spell-lists spells-map)
-                [dwarf-option-cfg
-                 (elf-option-cfg spell-lists spells-map)
-                 halfling-option-cfg
-                 (human-option-cfg spell-lists spells-map)
-                 dragonborn-option-cfg
-                 gnome-option-cfg
-                 half-elf-option-cfg
-                 half-orc-option-cfg
-                 tiefling-option-cfg])
+                (concat
+                 [dwarf-option-cfg
+                  (elf-option-cfg spell-lists spells-map)
+                  halfling-option-cfg
+                  (human-option-cfg spell-lists spells-map)
+                  dragonborn-option-cfg
+                  gnome-option-cfg
+                  half-elf-option-cfg
+                  half-orc-option-cfg
+                  tiefling-option-cfg]
+                 races))
                (opt5e/custom-race-option spell-lists spells-map))})
    (opt5e/background-selection
     {:help "Background broadly describes your character origin. It also affords you two skill proficiencies and possibly proficiencies with tools or languages."
