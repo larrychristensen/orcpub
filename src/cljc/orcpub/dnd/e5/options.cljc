@@ -416,7 +416,6 @@
       (get option-sources source)))
 
 (defn spell-option [spells-map spellcasting-ability class-name key & [prepend-level? qualifier]]
-  #_(prn "SPELL_OPTION" class-name key)
   (let [{:keys [name level source] :as spell} (spells-map key)]
     (t/option-cfg
      {:name (if prepend-level? (str level " - " name) name)
