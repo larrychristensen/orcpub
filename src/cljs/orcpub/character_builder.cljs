@@ -1355,10 +1355,14 @@
 (defn add-background-component []
   (add-item-component "background" routes/dnd-e5-background-builder-page-route))
 
+(defn add-race-component []
+  (add-item-component "race" routes/dnd-e5-race-builder-page-route))
+
 (def pages
   [{:name "Race"
     :icon "woman-elf-face"
-    :tags #{:race :subrace}}
+    :tags #{:race :subrace}
+    :components [add-race-component]}
    {:name "Ability Scores / Feats"
     :icon "strong"
     :tags #{:ability-scores :feats}
