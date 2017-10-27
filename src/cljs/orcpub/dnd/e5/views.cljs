@@ -10,6 +10,7 @@
             [orcpub.entity.strict :as se]
             [orcpub.dnd.e5.subs :as subs]
             [orcpub.dnd.e5.character :as char]
+            [orcpub.dnd.e5.backgrounds :as bg]
             [orcpub.dnd.e5.units :as units]
             [orcpub.dnd.e5.party :as party]
             [orcpub.dnd.e5.character.random :as char-random]
@@ -3613,11 +3614,175 @@
     #(dispatch [::spells/set-spell-prop prop %])
     {:class-name "input h-40"}]])
 
+(defn background-input-field [title prop background & [class-names]]
+  [:div.flex-grow-1
+   {:class-name class-names
+    :name prop}
+   [input-builder-field
+    [:span.f-w-b title]
+    (prop background)
+    #(dispatch [::bg/set-background-prop prop %])
+    {:class-name "input h-40"}]])
+
 (defn component-checkbox [component spell]
-  [:span.m-r-20.pointer.m-b-10
-   {:on-click #(dispatch [::spells/toggle-component component])}
-   [comps/checkbox (get-in spell [:components component]) false]
-   [:span.m-l-5 (common/kw-to-name component)]])
+  [:span.m-r-20.m-b-10
+   [comps/labeled-checkbox
+    (common/kw-to-name component)
+    (get-in spell [:components component])
+    false
+    #(dispatch [::spells/toggle-component component])]])
+
+(defn tool-prof-checkboxes [background tools]
+  [:div.flex.flex-wrap
+   (doall
+    (map
+     (fn [{:keys [name key]}]
+       ^{:key key}
+       [:span.m-r-20.m-b-10
+        [comps/labeled-checkbox
+         name
+         (get-in background [:profs :tool key])
+         false
+         #(dispatch [::bg/toggle-tool-prof key])]])
+     tools))])
+
+(defn tool-choice-checkboxes [background key]
+  [:div.flex.flex-wrap
+   (doall
+    (map
+     (fn [num]
+       ^{:key num}
+       [:span.m-r-20.m-b-10
+        [comps/labeled-checkbox
+         (str "Any " num)
+         (= num (get-in background [:profs :tool-options key]))
+         false
+         #(dispatch [::bg/toggle-choice-tool-prof key num])]])
+     (range 1 4)))])
+
+(defn starting-equipment-choice-checkboxes [background equipment equipment-name]
+  [:div.m-r-20.m-b-10
+   [comps/labeled-checkbox
+    "Any 1"
+    (some
+     (fn [{:keys [name]}]
+       (= name equipment-name))
+     (:equipment-choices background))
+    false
+    #(dispatch [::bg/toggle-starting-equipment-choice equipment equipment-name])]])
+
+(defn starting-equipment-checkboxes [background equipment]
+  [:div.flex.flex-wrap
+   (doall
+    (map
+     (fn [{:keys [name key]}]
+       ^{:key key}
+       [:span.m-r-20.m-b-10
+        [comps/labeled-checkbox
+         name
+         (get-in background [:equipment key])
+         false
+         #(dispatch [::bg/toggle-starting-equipment key])]])
+     equipment))])
+
+(def option-source-name-label
+  [:span
+   [:span "Option Source Name"]
+   [:span.f-w-n.f-s-12.m-l-5 "(e.g. "
+    [:span.i "Player's Manual"]
+    [:span ", "]
+    [:span.i "Hodor's Guide to Hodors"]
+    [:span ")"]]])
+
+(defn background-builder []
+  (let [background @(subscribe [::bg/builder-item])]
+    (prn "BACKGROUND" background)
+    [:div.p-20.main-text-color
+     [:div.m-b-20.flex.flex-wrap
+      [background-input-field
+       "Name"
+       :name
+       background]
+      [background-input-field
+       option-source-name-label
+       :option-pack
+       background
+       "m-l-5 m-b-20"]]
+     [:div.m-b-20
+      [:div.f-s-24.f-w-b.m-b-20 "Skill Proficiencies"]
+      [:div.flex.flex-wrap
+       (doall
+        (map
+         (fn [{:keys [name key]}]
+           ^{:key key}
+           [:span.m-r-20.m-b-10
+            [comps/labeled-checkbox
+             name
+             (get-in background [:profs :skill key])
+             false
+             #(dispatch [::bg/toggle-skill-prof key])]])
+         skills/skills))]]
+     [:div.m-t-20.m-b-20
+      [:div.f-s-24.f-w-b.m-b-10 "Tool Proficiencies"]
+      [:div.m-b-10
+       [:div.f-s-18.f-w-b.m-b-10 "Artisans Tools"]
+       [:div
+        [tool-choice-checkboxes background :artisans-tool]]
+       [:div
+        [tool-prof-checkboxes background equip/artisans-tools]]]
+      [:div.m-b-10
+       [:div.f-s-18.f-w-b.m-b-10 "Musical Instruments"]
+       [tool-choice-checkboxes background :musical-instrument]]
+      [:div.m-b-10
+       [:div.f-s-18.f-w-b.m-b-10 "Gaming Set"]
+       [tool-choice-checkboxes background :gaming-set]]
+      [:div.m-b-10
+       [:div.f-s-18.f-w-b.m-b-10 "Vehicles"]
+       [tool-prof-checkboxes background equip/vehicle-types]]
+      [:div.m-b-10
+       [:div.f-s-18.f-w-b.m-b-10 "Other Tools"]
+       [tool-prof-checkboxes background equip/misc-tools]]]
+     [:div.m-t-20.m-b-20
+      [:div.f-s-24.f-w-b.m-b-10 "Starting Equipment"]
+      [:div.m-b-10
+       [:div.f-s-18.f-w-b.m-b-10 "Treasure"]
+       [input-builder-field
+        [:span.f-w-b "Gold"]
+        (get-in background [:treasure :gp])
+        #(dispatch [::bg/set-background-gold %])
+        {:class-name "input h-40"
+         :type number}]]
+      [:div.m-b-10
+       [:div.f-s-18.f-w-b.m-b-10 "Clothing"]
+       [starting-equipment-checkboxes background equip/clothes]]
+      [:div.m-b-10
+       [:div.f-s-18.f-w-b.m-b-10 "Artisan's Tools"]
+       [starting-equipment-choice-checkboxes background equip/artisans-tools "Artisan's Tools"]
+       [starting-equipment-checkboxes background equip/artisans-tools]]
+      [:div.m-b-20
+       [:div.f-s-18.f-w-b.m-b-10 "Musical Instruments"]
+       [starting-equipment-choice-checkboxes background equip/musical-instruments "Musical Instruments"]]
+      [:div.m-b-10
+       [:div.f-s-18.f-w-b.m-b-10 "Other Tools"]
+       [starting-equipment-checkboxes background equip/misc-tools]]
+      [:div.m-b-10
+       [:div.f-s-18.f-w-b.m-b-10 "Holy Symbols"]
+       [starting-equipment-checkboxes background equip/holy-symbols]]
+      [:div.m-b-10
+       [:div.f-s-18.f-w-b.m-b-10 "Other Equipment"]
+       [starting-equipment-checkboxes background equip/misc-equipment]]]
+     [:div.m-t-20
+      [:div.f-s-24.f-w-b.m-b-10 "Feature"]
+      [input-builder-field
+       [:span.f-w-b "Feature Name"]
+       (get-in background [:traits 0 :name])
+       #(dispatch [::bg/set-feature-prop :name %])
+       {:class-name "input h-40 m-b-10"}]
+      [:div
+       [:span.f-w-b "Feature Description"]
+       [textarea-field
+        {:value (get-in background [:traits 0 :summary])
+         :on-change #(dispatch [::bg/set-feature-prop :summary %])}]]]]))
 
 (defn spell-builder []
   (let [{:keys [:level :school] :as spell} @(subscribe [::spells/builder-item])]
@@ -3629,13 +3794,7 @@
        spell
        "m-b-20"]
       [spell-input-field
-       [:span
-        [:span "Option Source Name"]
-        [:span.f-w-n.f-s-12.m-l-5 "(e.g. "
-         [:span.i "Player's Manual"]
-         [:span ", "]
-         [:span.i "Hodors Guide to Hodors"]
-         [:span ")"]]]
+       option-source-name-label
        :option-pack
        spell
        "m-l-5 m-b-20"]]
@@ -3757,8 +3916,8 @@
    "My Content"
    []
    [:div
-    [:div.p-20.bg-light.white.m-b-10.m-l-10.m-r-10.b-rad-5
-     [:div.f-w-b.f-s-24.m-b-5 "Import"]
+    [:div.p-20.bg-lighter.main-text-color.m-b-10.m-l-10.m-r-10.b-rad-5
+     [:div.f-w-b.f-s-24.m-b-5 "Import Option Source"]
      [:input {:type "file"
               :accept ".orcbrew"
               :on-change import-file}]]
@@ -3766,7 +3925,7 @@
 
 (defn item-builder-page []
   [content-page
-   "Item Builder Page"
+   "Item Builder"
    [{:title "New Item"
      :icon "plus"
      :on-click #(dispatch [::mi/reset-item])}
@@ -3777,7 +3936,7 @@
 
 (defn spell-builder-page []
   [content-page
-   "Spell Builder Page"
+   "Spell Builder"
    [{:title "New Spell"
      :icon "plus"
      :on-click #(dispatch [::spells/reset-spell])}
@@ -3785,6 +3944,17 @@
      :icon "save"
      :on-click #(dispatch [::spells/save-spell])}]
    [spell-builder]])
+
+(defn background-builder-page []
+  [content-page
+   "Background Builder"
+   [{:title "New Background"
+     :icon "plus"
+     :on-click #(dispatch [::bg/reset-background])}
+    {:title "Save"
+     :icon "save"
+     :on-click #(dispatch [::bg/save-background])}]
+   [background-builder]])
 
 (defn expanded-character-list-item [id owner username char-page-route]
   [:div
@@ -4185,48 +4355,58 @@
           :on-click (make-event-handler ::char/filter-spells "")}]]]
       [spell-list-items device-type]]]))
 
-(defn my-backgrounds []
-  (let [expanded? (r/atom false)]
-    (fn [plugin]
-      [:div.flex.justify-cont-s-b.align-items-c.pointer.item-list-item.p-10
-       [:div.flex.align-items-c
-        [svg-icon "ages" 48 @(subscribe [:theme])]
-        [:span.m-l-10.f-s-24 (str (-> plugin ::e5/backgrounds count) " Backgrounds")]]])))
-
-(defn my-spells []
+(defn my-content-type [source-name type-name type-key icon add-event edit-event delete-event]
   (let [expanded? (r/atom true)]
     (fn [plugin]
-      (let [spells (::e5/spells plugin)]
+      (let [items (type-key plugin)]
         [:div.pointer.item-list-item
          [:div.flex.justify-cont-s-b.align-items-c.p-10
           {:on-click #(swap! expanded? not)}
           [:div.flex.align-items-c
-           [svg-icon "spell-book" 48 @(subscribe [:theme])]
-           [:span.m-l-10.f-s-24 (let [num (count spells)]
-                                  (str num " Spell" (if (not= 1 num) "s")))]]
+           [svg-icon icon 48 @(subscribe [:theme])]
+           [:span.m-l-10.f-s-24 (let [num (count items)]
+                                  (str num " " (s/capitalize type-name) (if (not= 1 num) "s")))]]
           [:i.fa
-           {:class-name (if expanded? "fa-caret-up" "fa-caret-down")}]]
+           {:class-name (if @expanded? "fa-caret-up" "fa-caret-down")}]]
          (if @expanded?
            [:div.bg-lighter.p-10
             [:div.flex.justify-cont-end
              [:button.form-button.m-l-5
-              {:on-click (make-event-handler ::spells/new-spell)}
-              "add spell"]]
+              {:on-click (make-event-handler add-event source-name)}
+              (str "add " type-name)]]
             [:div
              (doall
               (map
-               (fn [[key {:keys [name] :as spell}]]
+               (fn [[key {:keys [name] :as item}]]
                  ^{:key key}
                  [:div.p-t-10.p-b-10.f-w-b.flex.justify-cont-s-b.align-items-c
                   [:span name]
                   [:div
                    [:button.form-button.m-l-5
-                    {:on-click (make-event-handler ::spells/edit-spell spell)}
+                    {:on-click (make-event-handler edit-event item)}
                     "edit"]
                    [:button.form-button.m-l-5
-                    {:on-click (make-event-handler ::spells/delete-spell spell)}
+                    {:on-click (make-event-handler delete-event item)}
                     "delete"]]])
-               spells))]])]))))
+               items))]])]))))
+
+(defn my-spells [name]
+  (my-content-type name
+                   "spell"
+                   ::e5/spells
+                   "spell-book"
+                   ::spells/new-spell
+                   ::spells/edit-spell
+                   ::spells/delete-spell))
+
+(defn my-backgrounds [name]
+  (my-content-type name
+                   "background"
+                   ::e5/backgrounds
+                   "ages"
+                   ::bg/new-background
+                   ::bg/edit-background
+                   ::bg/delete-background))
 
 (defn my-content-item []
   (let [expanded? (r/atom true)]
@@ -4247,8 +4427,8 @@
             {:on-click (make-event-handler ::e5/delete-plugin name)}
             "delete"]]
           [:div.item-list
-           [my-spells plugin]
-           [my-backgrounds plugin]]])])))
+           [(my-spells name) plugin]
+           [(my-backgrounds name) plugin]]])])))
 
 (defn my-content []
   [:div.main-text-color

@@ -146,6 +146,8 @@
     {:margin-top "-5px"}]
    [:.m-t-2
     {:margin-top "2px"}]
+   [:.m-t-20
+    {:margin-top "20px"}]
    [:.m-t-30
     {:margin-top "30px"}]
    [:.m-t-40

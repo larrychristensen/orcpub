@@ -3,6 +3,7 @@
             [orcpub.common :as common]
             [orcpub.template :as t]
             [orcpub.dnd.e5 :as e5]
+            [orcpub.dnd.e5.backgrounds :as bg5e]
             [orcpub.dnd.e5.modifiers :as mod5e]
             [orcpub.dnd.e5.magic-items :as mi5e]
             [orcpub.dnd.e5.character :as char5e]
@@ -12,6 +13,7 @@
             [orcpub.dnd.e5.armor :as armor5e]
             [orcpub.dnd.e5.template :as t5e]
             [orcpub.dnd.e5.equipment :as equipment5e]
+            [orcpub.dnd.e5.options :as opt5e]
             [orcpub.route-map :as routes]
             [orcpub.dnd.e5.events :as events]
             [reagent.ratom :as ra]
@@ -29,6 +31,44 @@
  :<- [::e5/plugins]
  (fn [plugins]
    (vals plugins)))
+
+(reg-sub
+ ::bg5e/plugin-backgrounds
+ :<- [::e5/plugin-vals]
+ (fn [plugins _]
+   (apply concat (map (comp vals ::e5/backgrounds) plugins))))
+
+(def acolyte-bg
+  {:name "Acolyte"
+   :help "Your life has been devoted to serving a god or gods."
+   :profs {:skill {:insight true, :religion true}
+           :language-options {:choose 2 :options {:any true}}}
+   :equipment {:clothes-common 1
+               :pouch 1
+               :incense 5
+               :vestements 1}
+   :selections [(opt5e/new-starting-equipment-selection
+                 nil
+                 {:name "Holy Symbol"
+                  :options (map
+                            #(opt5e/starting-equipment-option % 1)
+                            equipment5e/holy-symbols)})
+                ]
+   :equipment-choices [{:name "Prayer Book/Wheel"
+                        :options {:prayer-book 1
+                                  :prayer-wheel 1}}]
+   :treasure {:gp 15}
+   :traits [{:name "Shelter the Faithful"
+             :page 127
+             :summary "You and your companions can expect free healing at an establishment of your faith."}]})
+
+(reg-sub
+ ::bg5e/backgrounds
+ :<- [::bg5e/plugin-backgrounds]
+ (fn [plugin-backgrounds]
+   (cons
+    acolyte-bg
+    plugin-backgrounds)))
 
 (reg-sub
  ::spells5e/plugin-spells
@@ -126,3 +166,8 @@
  ::spells5e/builder-item
  (fn [db _]
    (::spells5e/builder-item db)))
+
+(reg-sub
+ ::bg5e/builder-item
+ (fn [db _]
+   (::bg5e/builder-item db)))
