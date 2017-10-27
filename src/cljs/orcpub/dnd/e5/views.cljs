@@ -3606,25 +3606,24 @@
     [:div.flex-grow-1
      [item-condition-immunities]]]])
 
-(defn spell-input-field [title prop spell & [class-names]]
+(defn builder-input-field [title prop item prop-event & [class-names]]
   [:div.flex-grow-1
    {:class-name class-names
     :name prop}
    [input-builder-field
     [:span.f-w-b title]
-    (prop spell)
-    #(dispatch [::spells/set-spell-prop prop %])
+    (prop item)
+    #(dispatch [prop-event prop %])
     {:class-name "input h-40"}]])
 
-(defn background-input-field [title prop background & [class-names]]
-  [:div.flex-grow-1
-   {:class-name class-names
-    :name prop}
-   [input-builder-field
-    [:span.f-w-b title]
-    (prop background)
-    #(dispatch [::bg/set-background-prop prop %])
-    {:class-name "input h-40"}]])
+(defn spell-input-field [title prop spell & [class-names]]
+  (builder-input-field title prop spell ::spells/set-spell-prop class-names))
+
+(defn background-input-field [title prop bg & [class-names]]
+  (builder-input-field title prop bg ::bg/set-background-prop class-names))
+
+(defn race-input-field [title prop race & [class-names]]
+  (builder-input-field title prop race ::races/set-race-prop class-names))
 
 (defn component-checkbox [component spell]
   [:span.m-r-20.m-b-10
@@ -3647,6 +3646,20 @@
          false
          #(dispatch [::bg/toggle-tool-prof key])]])
      tools))])
+
+(defn language-checkboxes [race languages]
+  [:div.flex.flex-wrap
+   (doall
+    (map
+     (fn [{:keys [name key]}]
+       ^{:key key}
+       [:span.m-r-20.m-b-10
+        [comps/labeled-checkbox
+         name
+         (get-in race [:languages name])
+         false
+         #(dispatch [::races/toggle-language name])]])
+     languages))])
 
 (defn tool-choice-checkboxes [background key]
   [:div.flex.flex-wrap
@@ -3798,6 +3811,77 @@
     [textarea-field
      {:value (get-in background [:traits 0 :summary])
       :on-change #(dispatch [::bg/set-feature-prop :summary %])}]]])
+
+(defn race-builder []
+  (let [race @(subscribe [::races/builder-item])]
+    [:div.p-20.main-text-color
+     [:div.m-b-20.flex.flex-wrap
+      [race-input-field
+       "Name"
+       :name
+       race]
+      [race-input-field
+       option-source-name-label
+       :option-pack
+       race
+       "m-l-5 m-b-20"]]
+     [:div.m-b-20.flex.flex-wrap
+      [:div.m-r-5
+       [labeled-dropdown
+        "Size"
+        {:items (map
+                 (fn [kw]
+                   {:title (name kw)
+                    :value (name kw)})
+                 ["small" "medium" "large"])
+         :value (name (get race :size))
+         :on-change #(dispatch [::races/set-race-prop :size (keyword %)])}]]
+      [:div.m-r-5
+       [labeled-dropdown
+        "Speed"
+        {:items (map
+                 (fn [v]
+                   {:title v 
+                    :value v})
+                 (range 25 40 5))
+         :value (get race :speed)
+         :on-change #(dispatch [::races/set-race-speed %])}]]
+      [:div.m-r-5
+       [labeled-dropdown
+        "Darkvision"
+        {:items (map
+                 (fn [v]
+                   {:title v 
+                    :value v})
+                 [0 60 120])
+         :value (get race :darkvision)
+         :on-change #(dispatch [::races/set-race-prop :darkvision (js/parseInt %)])}]]]
+     [:div.m-b-20
+      [:div.f-s-24.f-w-b.m-b-10 "Ability Score Increases"]
+      [:div.flex.flex-wrap
+       (doall
+        (map
+         (fn [{:keys [name key]}]
+           ^{:key key}
+           [:div.m-l-5
+            [labeled-dropdown
+             name
+             {:items (map
+                      (fn [bonus]
+                        {:title (str bonus)
+                         :value bonus})
+                      (range 3))
+              :value (get-in race [:abilities key])
+              :on-change #(dispatch [::races/set-race-ability-increase key %])}]])
+         opt/abilities))]]
+     [:div.m-b-20
+      [:div.f-s-24.f-w-b.m-b-10 "Languages"]
+      [:div [language-checkboxes race opt/languages]]]
+     #_[:div [background-skill-proficiencies background]]
+     #_[:div [background-languages background]]
+     #_[:div [background-tool-proficiencies background]]
+     #_[:div [background-starting-equipment background]]
+     #_[:div [background-features background]]]))
 
 (defn background-builder []
   (let [background @(subscribe [::bg/builder-item])]
@@ -3989,6 +4073,17 @@
      :icon "save"
      :on-click #(dispatch [::bg/save-background])}]
    [background-builder]])
+
+(defn race-builder-page []
+  [content-page
+   "Race Builder"
+   [{:title "New Race"
+     :icon "plus"
+     :on-click #(dispatch [::races/reset-race])}
+    {:title "Save"
+     :icon "save"
+     :on-click #(dispatch [::races/save-race])}]
+   [race-builder]])
 
 (defn expanded-character-list-item [id owner username char-page-route]
   [:div
@@ -4472,7 +4567,7 @@
           [:div.item-list
            [(my-spells name) plugin]
            [(my-backgrounds name) plugin]
-           #_[(my-races name) plugin]]])])))
+           [(my-races name) plugin]]])])))
 
 (defn my-content []
   [:div.main-text-color

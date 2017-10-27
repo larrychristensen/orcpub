@@ -5,6 +5,7 @@
             [orcpub.dnd.e5.template :as t5e]
             [orcpub.dnd.e5.character :as char5e]
             [orcpub.dnd.e5.backgrounds :as bg5e]
+            [orcpub.dnd.e5.races :as race5e]
             [orcpub.dnd.e5.magic-items :as mi5e]
             [orcpub.dnd.e5.spells :as spells5e]
             [orcpub.dnd.e5.equipment :as equip5e]
@@ -22,6 +23,7 @@
 (def local-storage-magic-item-key "magic-item")
 (def local-storage-spell-key "spell")
 (def local-storage-background-key "background")
+(def local-storage-race-key "race")
 (def local-storage-plugins-key "plugins")
 
 (def default-route route-map/dnd-e5-char-builder-route)
@@ -40,6 +42,11 @@
 
 (def default-background {:traits []})
 
+(def default-race {:size :medium
+                   :speed 30
+                   :languages #{}
+                   :traits []})
+
 (def default-value
   {:builder {:character {:tab #{:build :options}}}
    :character default-character
@@ -52,7 +59,8 @@
    :registration-form {:send-updates? true}
    :device-type (user-agent/device-type)
    ::spells5e/builder-item default-spell
-   ::bg5e/builder-item default-background})
+   ::bg5e/builder-item default-background
+   ::race5e/builder-item default-race})
 
 (defn set-item [key value]
   (try
@@ -81,6 +89,10 @@
 (defn background->local-store [background]
   (if js/window.localStorage
     (set-item local-storage-background-key (str background))))
+
+(defn race->local-store [race]
+  (if js/window.localStorage
+    (set-item local-storage-race-key (str race))))
 
 (defn plugins->local-store [plugins]
   (if js/window.localStorage
@@ -140,7 +152,7 @@
   {:name "Musical Instrument"
    :options (zipmap (map :key equip5e/musical-instruments) (repeat 1))})
 
-(def test-plugins
+#_(def test-plugins
   {"EE" {:orcpub.dnd.e5/spell-lists {:bard
                                      {2 [:dust-devil]}}
          :orcpub.dnd.e5/backgrounds {:charlatan {:name "Charlatan"

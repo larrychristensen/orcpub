@@ -4,6 +4,7 @@
             [orcpub.template :as t]
             [orcpub.dnd.e5 :as e5]
             [orcpub.dnd.e5.backgrounds :as bg5e]
+            [orcpub.dnd.e5.races :as races5e]
             [orcpub.dnd.e5.modifiers :as mod5e]
             [orcpub.dnd.e5.magic-items :as mi5e]
             [orcpub.dnd.e5.character :as char5e]
@@ -38,6 +39,12 @@
  (fn [plugins _]
    (apply concat (map (comp vals ::e5/backgrounds) plugins))))
 
+(reg-sub
+ ::races5e/plugin-races
+ :<- [::e5/plugin-vals]
+ (fn [plugins _]
+   (apply concat (map (comp vals ::e5/races) plugins))))
+
 (def acolyte-bg
   {:name "Acolyte"
    :help "Your life has been devoted to serving a god or gods."
@@ -69,6 +76,14 @@
    (cons
     acolyte-bg
     plugin-backgrounds)))
+
+(reg-sub
+ ::races5e/races
+ :<- [::races5e/plugin-races]
+ (fn [plugin-races]
+   (cons
+    acolyte-bg
+    plugin-races)))
 
 (reg-sub
  ::spells5e/plugin-spells
@@ -171,3 +186,8 @@
  ::bg5e/builder-item
  (fn [db _]
    (::bg5e/builder-item db)))
+
+(reg-sub
+ ::races5e/builder-item
+ (fn [db _]
+   (::races5e/builder-item db)))

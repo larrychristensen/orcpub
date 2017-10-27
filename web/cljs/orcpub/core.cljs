@@ -33,6 +33,7 @@
    routes/dnd-e5-spell-list-page-route views/spell-list
    routes/dnd-e5-spell-builder-page-route views/spell-builder-page
    routes/dnd-e5-background-builder-page-route views/background-builder-page
+   routes/dnd-e5-race-builder-page-route views/race-builder-page
    routes/dnd-e5-item-list-page-route views/item-list
    routes/dnd-e5-char-page-route views/character-page
    routes/dnd-e5-monster-page-route views/monster-page
