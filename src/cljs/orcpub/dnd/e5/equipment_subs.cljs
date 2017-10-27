@@ -6,6 +6,7 @@
             [orcpub.dnd.e5.modifiers :as mod5e]
             [orcpub.dnd.e5.magic-items :as mi5e]
             [orcpub.dnd.e5.character :as char5e]
+            [orcpub.dnd.e5.backgrounds :as bg5e]
             [orcpub.dnd.e5.weapons :as weapon5e]
             [orcpub.dnd.e5.armor :as armor5e]
             [orcpub.dnd.e5.template :as t5e]
@@ -254,16 +255,19 @@
  :<- [::mi5e/other-magic-item-options]
  :<- [::spells5e/spell-lists]
  :<- [::spells5e/spells-map]
+ :<- [::bg5e/backgrounds]
  (fn [[magic-weapon-options
        magic-armor-options
        other-magic-item-options
        spell-lists
-       spells-map] _]
+       spells-map
+       backgrounds] _]
    (t5e/template-selections magic-weapon-options
                             magic-armor-options
                             other-magic-item-options
                             spell-lists
-                            spells-map)))
+                            spells-map
+                            backgrounds)))
 
 (reg-sub
  ::char5e/template

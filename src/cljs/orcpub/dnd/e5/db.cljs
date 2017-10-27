@@ -4,8 +4,10 @@
             [orcpub.dnd.e5 :as e5]
             [orcpub.dnd.e5.template :as t5e]
             [orcpub.dnd.e5.character :as char5e]
+            [orcpub.dnd.e5.backgrounds :as bg5e]
             [orcpub.dnd.e5.magic-items :as mi5e]
             [orcpub.dnd.e5.spells :as spells5e]
+            [orcpub.dnd.e5.equipment :as equip5e]
             [re-frame.core :as re-frame]
             [orcpub.entity :as entity]
             [orcpub.entity.strict :as se]
@@ -19,6 +21,7 @@
 (def local-storage-user-key "user")
 (def local-storage-magic-item-key "magic-item")
 (def local-storage-spell-key "spell")
+(def local-storage-background-key "background")
 (def local-storage-plugins-key "plugins")
 
 (def default-route route-map/dnd-e5-char-builder-route)
@@ -35,6 +38,8 @@
 (def default-spell {:level 0
                     :school "abjuration"})
 
+(def default-background {:traits []})
+
 (def default-value
   {:builder {:character {:tab #{:build :options}}}
    :character default-character
@@ -46,7 +51,8 @@
    :return-route default-route
    :registration-form {:send-updates? true}
    :device-type (user-agent/device-type)
-   ::spells5e/builder-item default-spell})
+   ::spells5e/builder-item default-spell
+   ::bg5e/builder-item default-background})
 
 (defn set-item [key value]
   (try
@@ -71,6 +77,10 @@
 (defn spell->local-store [spell]
   (if js/window.localStorage
     (set-item local-storage-spell-key (str spell))))
+
+(defn background->local-store [background]
+  (if js/window.localStorage
+    (set-item local-storage-background-key (str background))))
 
 (defn plugins->local-store [plugins]
   (if js/window.localStorage
@@ -126,16 +136,33 @@
  local-storage-magic-item-key
  ::mi5e/internal-magic-item)
 
+(def musical-instrument-choice-cfg
+  {:name "Musical Instrument"
+   :options (zipmap (map :key equip5e/musical-instruments) (repeat 1))})
+
 (def test-plugins
   {"EE" {:orcpub.dnd.e5/spell-lists {:bard
                                      {2 [:dust-devil]}}
+         :orcpub.dnd.e5/backgrounds {:charlatan {:name "Charlatan"
+                                                 :help "You have a history of being able to work people to your advantage."
+                                                 :traits [{:name "False Identity"
+                                                           :page 128
+                                                           :summary "you have a false identity; you can forge documents"}]
+                                                 :profs {:skill {:deception true :sleight-of-hand true}
+                                                         :tool {:disguise-kit true :forgery-kit true}}
+                                                 :equipment {:clothes-fine 1
+                                                             :disguise-kit 1
+                                                             :pouch 1}
+                                                 :treasure {:gp 15}}}
          :orcpub.dnd.e5/spells {:dust-devil {:name "Dust Devil"
+                                             :option-pack "EE"
                                              :key :dust-devil
                                              :school "conjuration"
                                              :level 2
                                              :casting-time "actions-1"
                                              :range "60 feet"
                                              :duration "conc-1-min"
+                                             :spell-lists {:bard true}
                                              :components {:verbal true :somatic true :material true :material-component "fur wrapped in cloth"}
                                              :page 17
                                              :source :ee
