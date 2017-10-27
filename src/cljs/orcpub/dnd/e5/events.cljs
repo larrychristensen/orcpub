@@ -9,6 +9,7 @@
             [orcpub.dnd.e5.template :as t5e]
             [orcpub.dnd.e5.common :as common5e]
             [orcpub.dnd.e5.character :as char5e]
+            [orcpub.dnd.e5.backgrounds :as bg5e]
             [orcpub.dnd.e5.units :as units5e]
             [orcpub.dnd.e5.party :as party5e]
             [orcpub.dnd.e5.character.random :as char-rand5e]
@@ -23,10 +24,12 @@
                                       user->local-store
                                       magic-item->local-store
                                       spell->local-store
+                                      background->local-store
                                       plugins->local-store
                                       tab-path
                                       default-character
-                                      default-spell]]
+                                      default-spell
+                                      default-background]]
             [re-frame.core :refer [reg-event-db reg-event-fx reg-fx inject-cofx path trim-v
                                    after debug dispatch dispatch-sync subscribe ->interceptor]]
             [cljs.spec.alpha :as spec]
@@ -60,6 +63,8 @@
 
 (def spell->local-store-interceptor (after spell->local-store))
 
+(def background->local-store-interceptor (after background->local-store))
+
 (def plugins->local-store-interceptor (after plugins->local-store))
 
 (def set-changed (->interceptor
@@ -78,6 +83,9 @@
 
 (def spell-interceptors [(path ::spells/builder-item)
                          spell->local-store-interceptor])
+
+(def background-interceptors [(path ::bg5e/builder-item)
+                         background->local-store-interceptor])
 
 (def plugins-interceptors [(path :plugins)
                           plugins->local-store-interceptor])
@@ -308,30 +316,60 @@
              :transit-params strict-item
              :on-success [:item-save-success]}})))
 
-(reg-event-fx
- ::spells/save-spell
- (fn [{:keys [db]} _]
-   (let [{:keys [name option-pack] :as item} (::spells/builder-item db)
-         key (common/name-to-kw name)
-         item-with-key (assoc item :key key)
-         plugins (:plugins db)
-         explanation (spec/explain-data ::spells/homebrew-spell item-with-key)]
-     (if (nil? explanation)
-       (let [new-plugins (assoc-in plugins
-                                   [option-pack ::e5/spells key]
-                                   item-with-key)]
-         {:dispatch-n [[::e5/set-plugins new-plugins]
-                       [:show-message
-                        [:div "Spell saved to your browser which could be lost if you clear your history, please consider exporting and saving the content source by clicking " [:span.orange.pointer.underline
-                                                                                                                        {:on-click #(dispatch [::e5/export-plugin option-pack (str (plugins option-pack))])}
-                                                                                                                        "here"]]]]})
-       {:dispatch [:show-error-message "You must specify 'Name', 'Option Source Name', and at select at least one class in 'Class Spell Lists'"]}))))
+(defn reg-save-homebrew [type-name
+                         event-key
+                         item-key
+                         spec-key
+                         plugin-key
+                         error-message]
+  (reg-event-fx
+   event-key
+   (fn [{:keys [db]} _]
+     (let [{:keys [name option-pack] :as item} (item-key db)
+           key (common/name-to-kw name)
+           item-with-key (assoc item :key key)
+           plugins (:plugins db)
+           explanation (spec/explain-data spec-key item-with-key)]
+       (if (nil? explanation)
+         (let [new-plugins (assoc-in plugins
+                                     [option-pack plugin-key key]
+                                     item-with-key)]
+           {:dispatch-n [[::e5/set-plugins new-plugins]
+                         [:show-message
+                          [:div (str type-name " saved to your browser which could be lost if you clear your history, please consider exporting and saving the content source by clicking ") [:span.orange.pointer.underline
+                                                                                                                                                                                {:on-click #(dispatch [::e5/export-plugin option-pack (str (plugins option-pack))])}
+                                                                                                                                                                                "here"]]]]})
+         {:dispatch [:show-error-message error-message]})))))
 
-(reg-event-fx
+(reg-save-homebrew
+ "Spell"
+ ::spells/save-spell
+ ::spells/builder-item
+ ::spells/homebrew-spell
+ ::e5/spells
+ "You must specify 'Name', 'Option Source Name', and at select at least one class in 'Class Spell Lists'")
+
+(reg-save-homebrew
+ "Background"
+ ::bg5e/save-background
+ ::bg5e/builder-item
+ ::bg5e/homebrew-background
+ ::e5/backgrounds
+ "You must specify 'Name'")
+
+(defn reg-delete-homebrew [event-key plugin-key]
+  (reg-event-fx
+   event-key
+   (fn [{:keys [db]} [_ {:keys [key option-pack]}]]
+     {:dispatch [::e5/set-plugins (update-in (:plugins db) [option-pack plugin-key] dissoc key)]})))
+
+(reg-delete-homebrew
  ::spells/delete-spell
- (fn [{:keys [db]} [_ {:keys [key option-pack]}]]
-   (prn "KEY" key option-pack)
-   {:dispatch [::e5/set-plugins (update-in (:plugins db) [option-pack ::e5/spells] dissoc key)]}))
+ ::e5/spells)
+
+(reg-delete-homebrew
+ ::bg5e/delete-background
+ ::e5/backgrounds)
 
 (reg-event-fx
  ::party5e/make-party-success
@@ -1376,6 +1414,12 @@
                  [:route routes/dnd-e5-spell-builder-page-route]]}))
 
 (reg-event-fx
+ ::bg5e/edit-background
+ (fn [{:keys [db]} [_ bg]]
+   {:dispatch-n [[::bg5e/set-background bg]
+                 [:route routes/dnd-e5-background-builder-page-route]]}))
+
+(reg-event-fx
  :delete-character-success
  (fn [_ _]
    {:dispatch [:show-message "Character successfully deleted"]}))
@@ -1851,6 +1895,24 @@
    (assoc spell prop-key prop-value)))
 
 (reg-event-db
+ ::bg5e/set-background-prop
+ background-interceptors
+ (fn [background [_ prop-key prop-value]]
+   (assoc background prop-key prop-value)))
+
+(reg-event-db
+ ::bg5e/set-feature-prop
+ background-interceptors
+ (fn [background [_ prop-key prop-value]]
+   (assoc-in background [:traits 0 prop-key] prop-value)))
+
+(reg-event-db
+ ::bg5e/set-background-gold
+ background-interceptors
+ (fn [background [_ amount]]
+   (assoc-in background [:treasure :gp] (js/parseInt amount))))
+
+(reg-event-db
  ::spells/set-spell-level
  spell-interceptors
  (fn [spell [_ level]]
@@ -1861,6 +1923,55 @@
  spell-interceptors
  (fn [spell [_ component]]
    (update-in spell [:components component] not)))
+
+(reg-event-db
+ ::bg5e/toggle-skill-prof
+ background-interceptors
+ (fn [background [_ key]]
+   (if (get-in background [:profs :skill key])
+     (update-in background [:profs :skill] dissoc key)
+     (assoc-in background [:profs :skill key] true))))
+
+(reg-event-db
+ ::bg5e/toggle-tool-prof
+ background-interceptors
+ (fn [background [_ key]]
+   (if (get-in background [:profs :tool key])
+     (update-in background [:profs :tool] dissoc key)
+     (assoc-in background [:profs :tool key] true))))
+
+(reg-event-db
+ ::bg5e/toggle-starting-equipment
+ background-interceptors
+ (fn [background [_ key]]
+   (if (get-in background [:equipment key])
+     (update-in background [:equipment] dissoc key)
+     (assoc-in background [:equipment key] 1))))
+
+(reg-event-db
+ ::bg5e/toggle-starting-equipment-choice
+ background-interceptors
+ (fn [background [_ equipment equipment-name]]
+   (letfn [(find-equipment [{:keys [name]}]
+             (= name equipment-name))]
+     (if (some
+          find-equipment
+          (:equipment-choices background))
+       (update background :equipment-choices #(remove find-equipment %))
+       (update background :equipment-choices conj {:name equipment-name
+                                                   :options (zipmap
+                                                             (map
+                                                              :key
+                                                              equipment)
+                                                             (repeat 1))})))))
+
+(reg-event-db
+ ::bg5e/toggle-choice-tool-prof
+ background-interceptors
+ (fn [background [_ key num]]
+   (if (= num (get-in background [:profs :tool-options key]))
+     (update-in background [:profs :tool-options] dissoc key)
+     (assoc-in background [:profs :tool-options key] num))))
 
 (reg-event-db
  ::spells/toggle-spell-list
@@ -2099,6 +2210,12 @@
  (fn [_ [_ spell]]
    spell))
 
+(reg-event-db
+ ::bg5e/set-background
+ background-interceptors
+ (fn [_ [_ background]]
+   background))
+
 (reg-event-fx
  ::mi/reset-item
  (fn [_ _]
@@ -2113,10 +2230,22 @@
                default-spell]}))
 
 (reg-event-fx
- ::spells/new-spell
+ ::bg5e/reset-background
  (fn [_ _]
-   {:dispatch-n [[::spells/reset-spell]
+   {:dispatch [::bg5e/set-background
+               default-background]}))
+
+(reg-event-fx
+ ::spells/new-spell
+ (fn [_ [_ option-pack]]
+   {:dispatch-n [[::spells/set-spell (assoc default-spell :option-pack option-pack)]
                  [:route routes/dnd-e5-spell-builder-page-route]]}))
+
+(reg-event-fx
+ ::bg5e/new-background
+ (fn [_ [_ option-pack]]
+   {:dispatch-n [[::bg5e/set-background (assoc default-background :option-pack option-pack)]
+                 [:route routes/dnd-e5-background-builder-page-route]]}))
 
 (reg-event-fx
  ::mi/new-item

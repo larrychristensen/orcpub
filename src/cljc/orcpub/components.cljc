@@ -10,6 +10,12 @@
                      (if disable?
                        "opacity-5"))}])
 
+(defn labeled-checkbox [label selected? disabled? on-click]
+  [:div.flex.pointer
+   {:on-click on-click}
+   [checkbox selected? disabled?]
+   [:span.m-l-5 label]])
+
 (defn selection-adder-item [key name]
   [:option.builder-dropdown-item
    {:value key}
