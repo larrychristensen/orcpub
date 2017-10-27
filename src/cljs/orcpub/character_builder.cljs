@@ -1342,39 +1342,41 @@
          unselected-plugins)
       (info-block (str "There are more " name " options available if you click 'select sources' above and add more sources.")))))
 
-(defn add-spell-component []
+(defn add-item-component [type-name event]
   (info-block [:span
-               [:span "Don't see a spell here that you want to use? "]
+               [:span (str "Don't see a " type-name " here that you want to use? ")]
                [:span.pointer.underline.orange
-                {:on-click #(dispatch [:route routes/dnd-e5-spell-builder-page-route])}
-                "CLICK HERE TO ADD A SPELL"]]))
+                {:on-click #(dispatch [:route event])}
+                (str "CLICK HERE TO ADD A " (s/upper-case type-name))]]))
+
+(defn add-spell-component []
+  (add-item-component "spell" routes/dnd-e5-spell-builder-page-route))
+
+(defn add-background-component []
+  (add-item-component "background" routes/dnd-e5-background-builder-page-route))
 
 (def pages
   [{:name "Race"
     :icon "woman-elf-face"
-    :tags #{:race :subrace}
-    :components [#(more-selection-info :race-options? "race")]}
+    :tags #{:race :subrace}}
    {:name "Ability Scores / Feats"
     :icon "strong"
     :tags #{:ability-scores :feats}
     :ui-fns [{:key :ability-scores :group? true :ui-fn abilities-editor}
-             #_{:key :feats :group? true :ui-fn feats-editor}]
-    :components [#(more-selection-info :feat-options? "feat")]}
+             #_{:key :feats :group? true :ui-fn feats-editor}]}
    {:name "Background"
     :icon "ages"
     :tags #{:background}
-    :components [#(more-selection-info :background-options? "background")]}
+    :components [add-background-component]}
    {:name "Class / Level"
     :icon "mounted-knight"
     :tags #{:class :subclass}
     :ui-fns [{:key :class :title "Class / Level" :ui-fn class-levels-selector}
-             {:key :hit-points :group? true :ui-fn hit-points-editor}]
-    :components [#(more-selection-info :class-options? "class")]}
+             {:key :hit-points :group? true :ui-fn hit-points-editor}]}
    {:name "Spells"
     :icon "spell-book"
     :tags #{:spells}
     :components [add-spell-component
-                 #(more-selection-info :spell-options? "spell")
                  known-mode-info]}
    {:name "Proficiencies"
     :icon "juggler"
