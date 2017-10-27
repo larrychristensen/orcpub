@@ -2971,8 +2971,6 @@ The boots regain 2 hours of flying capability for every 12 hours they aren’t i
                         (str (name-key item) ", " (:name armor)))
                       (name-key item))
                item-key (common/name-to-kw name)]
-           (if (= nil item-key)
-             (prn "ITEM" item))
            (merge
             armor
             item
