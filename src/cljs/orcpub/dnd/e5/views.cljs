@@ -3696,7 +3696,6 @@
 
 (defn background-builder []
   (let [background @(subscribe [::bg/builder-item])]
-    (prn "BACKGROUND" background)
     [:div.p-20.main-text-color
      [:div.m-b-20.flex.flex-wrap
       [background-input-field
