@@ -2061,7 +2061,7 @@
   (t/option-cfg
    {:name (:name equipment)
     :key (:key equipment)
-    :modifiers [(mod5e/equipment (:key equipment) num)]}))
+    :modifiers [(modifiers/equipment (:key equipment) num)]}))
 
 (defn class-starting-equipment-entity-options [key items]
   (eh/starting-equipment-entity-options ::char-equip/class-starting-equipment? key items))
