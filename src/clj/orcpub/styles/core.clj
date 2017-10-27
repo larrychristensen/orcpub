@@ -1188,6 +1188,8 @@
 
      [:.bg-light
       {:background-color "rgba(0,0,0,0.4)"}]
+     [:.bg-lighter
+      {:background-color "rgba(0,0,0,0.15)"}]
 
      [:.b-color-gray
       {:border-color "rgba(0,0,0,0.3)"}]

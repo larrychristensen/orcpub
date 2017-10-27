@@ -11,6 +11,7 @@
             [orcpub.dnd.e5.subs :as subs]
             [orcpub.dnd.e5.character :as char]
             [orcpub.dnd.e5.backgrounds :as bg]
+            [orcpub.dnd.e5.races :as races]
             [orcpub.dnd.e5.units :as units]
             [orcpub.dnd.e5.party :as party]
             [orcpub.dnd.e5.character.random :as char-random]
@@ -36,6 +37,7 @@
             [cljs.core.async :refer [<! timeout]]
             [bidi.bidi :as bidi])
   (:require-macros [cljs.core.async.macros :refer [go]]))
+
 
 (def text-color "#484848")
 
@@ -4388,7 +4390,7 @@
       [spell-list-items device-type]]]))
 
 (defn my-content-type [source-name type-name type-key icon add-event edit-event delete-event]
-  (let [expanded? (r/atom true)]
+  (let [expanded? (r/atom false)]
     (fn [plugin]
       (let [items (type-key plugin)]
         [:div.pointer.item-list-item
@@ -4440,8 +4442,17 @@
                    ::bg/edit-background
                    ::bg/delete-background))
 
+(defn my-races [name]
+  (my-content-type name
+                   "race"
+                   ::e5/races
+                   "woman-elf-face"
+                   ::races/new-race
+                   ::races/edit-race
+                   ::races/delete-race))
+
 (defn my-content-item []
-  (let [expanded? (r/atom true)]
+  (let [expanded? (r/atom false)]
     (fn [name plugin]
       [:div.item-list-item
        [:div.p-20.pointer.flex.justify-cont-s-b.align-items-c.main-text-color
@@ -4460,7 +4471,8 @@
             "delete"]]
           [:div.item-list
            [(my-spells name) plugin]
-           [(my-backgrounds name) plugin]]])])))
+           [(my-backgrounds name) plugin]
+           #_[(my-races name) plugin]]])])))
 
 (defn my-content []
   [:div.main-text-color

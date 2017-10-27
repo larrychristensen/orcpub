@@ -2256,6 +2256,12 @@
                  [:route routes/dnd-e5-background-builder-page-route]]}))
 
 (reg-event-fx
+ ::bg5e/new-race
+ (fn [_ [_ option-pack]]
+   {:dispatch-n [[::bg5e/set-race (assoc default-background :option-pack option-pack)]
+                 [:route routes/dnd-e5-background-builder-page-route]]}))
+
+(reg-event-fx
  ::mi/new-item
  (fn [_ _]
    {:dispatch-n [[::mi/reset-item]
