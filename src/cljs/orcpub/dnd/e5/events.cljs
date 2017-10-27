@@ -1974,6 +1974,14 @@
      (assoc-in background [:profs :tool-options key] num))))
 
 (reg-event-db
+ ::bg5e/toggle-choice-language-prof
+ background-interceptors
+ (fn [background [_ num]]
+   (if (= num (get-in background [:profs :language-options :choose]))
+     (update background :profs dissoc  :language-options)
+     (assoc-in background [:profs :language-options] {:choose num :options {:any true}}))))
+
+(reg-event-db
  ::spells/toggle-spell-list
  spell-interceptors
  (fn [spell [_ class-key]]
