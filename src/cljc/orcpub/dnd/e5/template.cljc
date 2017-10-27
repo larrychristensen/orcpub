@@ -1218,12 +1218,6 @@
       :modifiers [(mod5e/skill-proficiency skill-kw)
                   (mod5e/skill-expertise skill-kw)]})))
 
-(defn starting-equipment-option [equipment num]
-  (t/option-cfg
-   {:name (:name equipment)
-    :key (:key equipment)
-    :modifiers [(mod5e/equipment (:key equipment) num)]}))
-
 (def spell-level-to-cleric-level
   {1 1
    2 3
@@ -1279,7 +1273,7 @@
                   :cleric
                   {:name "Holy Symbol"
                    :options (map
-                             #(starting-equipment-option % 1)
+                             #(opt5e/starting-equipment-option % 1)
                              equip5e/holy-symbols)})]
     :levels {2 {:modifiers [(mod5e/dependent-trait
                              {:page 59
@@ -3992,30 +3986,6 @@ long rest."})
    :page 139
    :summary "You are able to secure free passage on a sailing ship"})
 
-(def acolyte-bg
-  {:name "Acolyte"
-   :help "Your life has been devoted to serving a god or gods."
-   :profs {:skill {:insight true, :religion true}
-           :language-options {:choose 2 :options {:any true}}}
-   :equipment {:clothes-common 1
-               :pouch 1
-               :incense 5
-               :vestements 1}
-   :selections [(opt5e/new-starting-equipment-selection
-                 nil
-                 {:name "Holy Symbol"
-                  :options (map
-                            #(starting-equipment-option % 1)
-                            equip5e/holy-symbols)})
-                ]
-   :equipment-choices [{:name "Prayer Book/Wheel"
-                        :options {:prayer-book 1
-                                  :prayer-wheel 1}}]
-   :treasure {:gp 15}
-   :traits [{:name "Shelter the Faithful"
-             :page 127
-             :summary "You and your companions can expect free healing at an establishment of your faith."}]})
-
 #_(def charlatan-bg
   {:name "Charlatan"
    :help "You have a history of being able to work people to your advantage."
@@ -4281,7 +4251,7 @@ long rest."})
                       "Token to remember your parents" 1}
    :treasure {:gp 10}})
 
-(def backgrounds [acolyte-bg
+#_(def backgrounds [acolyte-bg
                   #_charlatan-bg
                   #_(criminal-background "Criminal")
                   #_(criminal-background "Spy")
@@ -4934,7 +4904,8 @@ long rest."})
                            magic-armor-options
                            other-magic-item-options
                            spell-lists
-                           spells-map]
+                           spells-map
+                           backgrounds]
   [#_optional-content-selection
    (t/selection-cfg
     {:name "Base Ability Scores"

@@ -2057,6 +2057,12 @@
   {:name "Artisan's Tool"
    :options (zipmap (map :key equipment/artisans-tools) (repeat 1))})
 
+(defn starting-equipment-option [equipment num]
+  (t/option-cfg
+   {:name (:name equipment)
+    :key (:key equipment)
+    :modifiers [(mod5e/equipment (:key equipment) num)]}))
+
 (defn class-starting-equipment-entity-options [key items]
   (eh/starting-equipment-entity-options ::char-equip/class-starting-equipment? key items))
 
