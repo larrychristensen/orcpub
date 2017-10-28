@@ -4900,13 +4900,22 @@ long rest."})
    (warlock-option spell-lists spells-map)
    (wizard-option spell-lists spells-map)])
 
+(defn feat-option-from-cfg [{:keys [name
+                             key
+                             icon]}]
+  (t/option-cfg
+   {:name name
+    :key key
+    :icon icon}))
+
 (defn template-selections [magic-weapon-options
                            magic-armor-options
                            other-magic-item-options
                            spell-lists
                            spells-map
                            backgrounds
-                           races]
+                           races
+                           feats]
   [#_optional-content-selection
    (t/selection-cfg
     {:name "Base Ability Scores"
@@ -4966,7 +4975,11 @@ long rest."})
                 backgrounds)
                opt5e/custom-background-option)})
    (opt5e/feat-selection-2
-    {:options (opt5e/feat-options spell-lists spells-map)
+    {:options (concat
+               (opt5e/feat-options spell-lists spells-map)
+               (map
+                feat-option-from-cfg
+                feats))
      :show-if-zero? true
      :min 0
      :max 0})
