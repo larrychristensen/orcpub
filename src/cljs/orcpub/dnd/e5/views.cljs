@@ -1329,10 +1329,10 @@
            hdr]]]
         [:div.flex.justify-cont-c.main-text-color
          [:div.content hdr]]
-        [:div.p-10.m-l-20.m-r-20.f-w-b.f-s-18.bg-lighter
-         [:span "Due to licensing issues, we were forced to remove all non-SRD content, if you have questions about what is and is not SRD content please see the " srd-link ". If you would like to see the non-SRD content added back to OrcPub please sign our " [:a.orange {:href "https://www.change.org/p/wizards-of-the-coast-wizards-of-the-coast-please-grant-orc-pub-licensing-rights-to-your-content" :target "_blank"}
-                                                                                                                                                                                                                                                                     "petition here at change.org"]
-          "."]]
+        [:div.m-l-20.m-r-20.f-w-b.f-s-18.container.m-b-10
+         [:div.content.bg-lighter.p-10 [:span "Due to licensing issues, we were forced to remove all non-SRD content, if you have questions about what is and is not SRD content please see the " srd-link ". If you would like to see the non-SRD content added back to OrcPub please sign our " [:a.orange {:href "https://www.change.org/p/wizards-of-the-coast-wizards-of-the-coast-please-grant-orc-pub-licensing-rights-to-your-content" :target "_blank"}
+                                                                                                                                                                                                                                                                      "petition here at change.org"]
+           "."]]]
         [:div#app-main.container
          [:div.content.w-100-p content]]
         [:div.main-text-color.flex.justify-cont-c
