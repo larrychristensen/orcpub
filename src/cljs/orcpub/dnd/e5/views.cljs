@@ -12,6 +12,7 @@
             [orcpub.dnd.e5.character :as char]
             [orcpub.dnd.e5.backgrounds :as bg]
             [orcpub.dnd.e5.races :as races]
+            [orcpub.dnd.e5.feats :as feats]
             [orcpub.dnd.e5.units :as units]
             [orcpub.dnd.e5.party :as party]
             [orcpub.dnd.e5.character.random :as char-random]
@@ -1267,6 +1268,9 @@
 (defn close-orcacle []
   (dispatch [:close-orcacle]))
 
+(def srd-link
+  [:a.orange {:href "/SRD-OGL_V5.1.pdf" :target "_blank"} "the 5e SRD"])
+
 (defn content-page [title button-cfgs content]
   (let [orcacle-open? @(subscribe [:orcacle-open?])
         theme @(subscribe [:theme])]
@@ -1325,6 +1329,10 @@
            hdr]]]
         [:div.flex.justify-cont-c.main-text-color
          [:div.content hdr]]
+        [:div.p-10.m-l-20.m-r-20.f-w-b.f-s-18.bg-lighter
+         [:span "Due to licensing issues, we were forced to remove all non-SRD content, if you have questions about what is and is not SRD content please see the " srd-link ". If you would like to see the non-SRD content added back to OrcPub please sign our " [:a.orange {:href "https://www.change.org/p/wizards-of-the-coast-wizards-of-the-coast-please-grant-orc-pub-licensing-rights-to-your-content" :target "_blank"}
+                                                                                                                                                                                                                                                                     "petition here at change.org"]
+          "."]]
         [:div#app-main.container
          [:div.content.w-100-p content]]
         [:div.main-text-color.flex.justify-cont-c
@@ -3625,6 +3633,9 @@
 (defn race-input-field [title prop race & [class-names]]
   (builder-input-field title prop race ::races/set-race-prop class-names))
 
+(defn feat-input-field [title prop feat & [class-names]]
+  (builder-input-field title prop feat ::feats/set-feat-prop class-names))
+
 (defn component-checkbox [component spell]
   [:span.m-r-20.m-b-10
    [comps/labeled-checkbox
@@ -3811,6 +3822,171 @@
     [textarea-field
      {:value (get-in background [:traits 0 :summary])
       :on-change #(dispatch [::bg/set-feature-prop :summary %])}]]])
+
+(defn feat-builder []
+  (let [feat @(subscribe [::feats/builder-item])]
+    (prn "FEAT" feat)
+    [:div.p-20.main-text-color
+     [:div.m-b-20.flex.flex-wrap
+      [feat-input-field
+       "Name"
+       :name
+       feat]
+      [feat-input-field
+       option-source-name-label
+       :option-pack
+       feat
+       "m-l-5 m-b-20"]]
+     [:div.m-b-20
+      [:div.f-s-24.f-w-b.m-b-10 "Prerequisites"]
+      [:div.flex.flex-wrap
+       [:div.m-r-20.m-b-10
+        [comps/labeled-checkbox
+         "The ability to cast at least one spell"
+         false
+         false
+         (fn [])]]
+       [:div
+        (doall
+         (map
+          (fn [{:keys [name key]}]
+            ^{:key key}
+            [:div.m-r-20.m-b-10
+             [comps/labeled-checkbox
+              (str name " 13 or higher")
+              false
+              false
+              (fn [])]])
+          opt/abilities))]
+       [:div
+        (doall
+         (map
+          (fn [key]
+            ^{:key key}
+            [:div.m-r-20.m-b-10
+             [comps/labeled-checkbox
+              (str "Proficiency with " (name key) " armor")
+              false
+              false
+              (fn [])]])
+          armor/armor-types))]]]
+     [:div.m-b-20
+      [:div.f-s-24.f-w-b.m-b-10 "Ability Increase Options"]
+      [:div.flex.flex-wrap
+       (doall
+        (map
+         (fn [{:keys [name key]}]
+           ^{:key key}
+           [:div.m-r-20.m-b-10
+            [comps/labeled-checkbox
+             name
+             (get-in feat [:ability-increases key])
+             false
+             #(dispatch [::feats/toggle-feat-ability-increase key])]])
+         opt/abilities))]
+      [:div.m-r-20.m-b-10
+        [comps/labeled-checkbox
+         "You also gain proficiency in saving throws with the above chosen abilities"
+         false
+         false
+         (fn [])]]
+      [:div (let [increases (:ability-increases feat)]
+              (if (seq increases)
+                (str "= \"Increase your "
+                     (common/list-print
+                      (map
+                       (comp :name opt/abilities-map)
+                       increases)
+                      "or")
+                     " score by 1, to a maximum of 20.\"")))]]
+     [:div.m-b-20
+      [:div.f-s-24.f-w-b.m-b-10 "Armor Proficiency"]
+      [:div.flex.flex-wrap
+       (doall
+        (map
+         (fn [armor-type]
+           [:div.m-r-20.m-b-10
+            [comps/labeled-checkbox
+             (str "You gain proficiency with " (name armor-type) " armor")
+             false
+             false
+             (fn [])]])
+         armor/armor-types))
+       [:div.m-r-20.m-b-10
+        [comps/labeled-checkbox
+         "You gain proficiency with shields"
+         false
+         false
+         (fn [])]]
+       [:div.m-r-20.m-b-10
+        [comps/labeled-checkbox
+         "Wearing medium armor doesn't give disadvantage on Stealth checks"
+         false
+         false
+         (fn [])]]
+       [:div.m-r-20.m-b-10
+        [comps/labeled-checkbox
+         "When wearing medium armor, you can add 3 to your AC if your Dexterity is 16+"
+         false
+         false
+         (fn [])]]]]
+     [:div.m-b-20
+      [:div.f-s-24.f-w-b.m-b-10 "Misc. Modifiers"]
+      [:div.flex.flex-wrap
+       [:div.m-r-20.m-b-10
+        [comps/labeled-checkbox
+         "You gain +5 to Initiative"
+         false
+         false
+         (fn [])]]
+       [:div.m-r-20.m-b-10
+        [comps/labeled-checkbox
+         "+1 AC Bonus while wielding two melee weapons"
+         false
+         false
+         (fn [])]]
+       [:div.m-r-20.m-b-10
+        [comps/labeled-checkbox
+         "two-weapon fighting with any one-handed melee weapon"
+         false
+         false
+         (fn [])]]
+       [:div.m-r-20.m-b-10
+        [comps/labeled-checkbox
+         "Resistance to damage from traps"
+         false
+         false
+         (fn [])]]
+       [:div.m-r-20.m-b-10
+        [comps/labeled-checkbox
+         "Advantage on saving throws against traps"
+         false
+         false
+         (fn [])]]
+       [:div.m-r-20.m-b-10
+        [comps/labeled-checkbox
+         "You learn three languages of your choice"
+         false
+         false
+         (fn [])]]
+       [:div.m-r-20.m-b-10
+        [comps/labeled-checkbox
+         "Your speed is increased by 10 ft."
+         false
+         false
+         (fn [])]]
+       [:div.m-r-20.m-b-10
+        [comps/labeled-checkbox
+         "You gain a +5 to your passive Perception"
+         false
+         false
+         (fn [])]]
+       [:div.m-r-20.m-b-10
+        [comps/labeled-checkbox
+         "You gain a +5 to your passive Investigation"
+         false
+         false
+         (fn [])]]]]]))
 
 (defn race-builder []
   (let [race @(subscribe [::races/builder-item])]
@@ -4084,6 +4260,17 @@
      :icon "save"
      :on-click #(dispatch [::races/save-race])}]
    [race-builder]])
+
+(defn feat-builder-page []
+  [content-page
+   "Feat Builder"
+   [{:title "New Feat"
+     :icon "plus"
+     :on-click #(dispatch [::feats/reset-feat])}
+    {:title "Save"
+     :icon "save"
+     :on-click #(dispatch [::feats/save-feat])}]
+   [feat-builder]])
 
 (defn expanded-character-list-item [id owner username char-page-route]
   [:div
@@ -4546,6 +4733,15 @@
                    ::races/edit-race
                    ::races/delete-race))
 
+(defn my-feats [name]
+  (my-content-type name
+                   "feat"
+                   ::e5/feats
+                   "vitruvian-man"
+                   ::feats/new-feat
+                   ::feats/edit-feat
+                   ::feats/delete-feat))
+
 (defn my-content-item []
   (let [expanded? (r/atom false)]
     (fn [name plugin]
@@ -4567,7 +4763,8 @@
           [:div.item-list
            [(my-spells name) plugin]
            [(my-backgrounds name) plugin]
-           [(my-races name) plugin]]])])))
+           [(my-races name) plugin]
+           #_[(my-feats name) plugin]]])])))
 
 (defn my-content []
   [:div.main-text-color

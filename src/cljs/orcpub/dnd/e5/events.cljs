@@ -10,6 +10,7 @@
             [orcpub.dnd.e5.common :as common5e]
             [orcpub.dnd.e5.character :as char5e]
             [orcpub.dnd.e5.backgrounds :as bg5e]
+            [orcpub.dnd.e5.feats :as feats5e]
             [orcpub.dnd.e5.races :as race5e]
             [orcpub.dnd.e5.units :as units5e]
             [orcpub.dnd.e5.party :as party5e]
@@ -26,12 +27,14 @@
                                       magic-item->local-store
                                       spell->local-store
                                       background->local-store
+                                      feat->local-store
                                       race->local-store
                                       plugins->local-store
                                       tab-path
                                       default-character
                                       default-spell
                                       default-background
+                                      default-feat
                                       default-race]]
             [re-frame.core :refer [reg-event-db reg-event-fx reg-fx inject-cofx path trim-v
                                    after debug dispatch dispatch-sync subscribe ->interceptor]]
@@ -68,6 +71,8 @@
 
 (def background->local-store-interceptor (after background->local-store))
 
+(def feat->local-store-interceptor (after feat->local-store))
+
 (def race->local-store-interceptor (after race->local-store))
 
 (def plugins->local-store-interceptor (after plugins->local-store))
@@ -91,6 +96,9 @@
 
 (def background-interceptors [(path ::bg5e/builder-item)
                               background->local-store-interceptor])
+
+(def feat-interceptors [(path ::feats5e/builder-item)
+                         feat->local-store-interceptor])
 
 (def race-interceptors [(path ::race5e/builder-item)
                          race->local-store-interceptor])
@@ -366,6 +374,14 @@
  "You must specify 'Name'")
 
 (reg-save-homebrew
+ "Feat"
+ ::feats5e/save-feat
+ ::feats5e/builder-item
+ ::feats5e/homebrew-feat
+ ::e5/feats
+ "You must specify 'Name'")
+
+(reg-save-homebrew
  "Race"
  ::race5e/save-race
  ::race5e/builder-item
@@ -386,6 +402,10 @@
 (reg-delete-homebrew
  ::bg5e/delete-background
  ::e5/backgrounds)
+
+(reg-delete-homebrew
+ ::feats5e/delete-feat
+ ::e5/feats)
 
 (reg-delete-homebrew
  ::race5e/delete-race
@@ -1445,6 +1465,11 @@
  routes/dnd-e5-background-builder-page-route)
 
 (reg-edit-homebrew
+ ::feats5e/edit-feat
+ ::feats5e/set-feat
+ routes/dnd-e5-feat-builder-page-route)
+
+(reg-edit-homebrew
  ::race5e/edit-race
  ::race5e/set-race
  routes/dnd-e5-race-builder-page-route)
@@ -1937,10 +1962,26 @@
    (assoc race prop-key prop-value)))
 
 (reg-event-db
+ ::feats5e/set-feat-prop
+ feat-interceptors
+ (fn [feat [_ prop-key prop-value]]
+   (assoc feat prop-key prop-value)))
+
+(reg-event-db
  ::bg5e/set-feature-prop
  background-interceptors
  (fn [background [_ prop-key prop-value]]
    (assoc-in background [:traits 0 prop-key] prop-value)))
+
+(reg-event-db
+ ::feats5e/toggle-feat-ability-increase
+ feat-interceptors
+ (fn [feat [_ ability-key]]
+   (update feat :ability-increases (fn [s]
+                                     (if (s ability-key)
+                                       (disj s ability-key)
+                                       (conj s ability-key))))))
+
 
 (reg-event-db
  ::bg5e/set-background-gold
@@ -2281,6 +2322,12 @@
    background))
 
 (reg-event-db
+ ::feats5e/set-feat
+ feat-interceptors
+ (fn [_ [_ feat]]
+   feat))
+
+(reg-event-db
  ::race5e/set-race
  race-interceptors
  (fn [_ [_ race]]
@@ -2306,6 +2353,12 @@
                default-background]}))
 
 (reg-event-fx
+ ::feats5e/reset-feat
+ (fn [_ _]
+   {:dispatch [::feats5e/set-feat
+               default-feat]}))
+
+(reg-event-fx
  ::race5e/reset-race
  (fn [_ _]
    {:dispatch [::race5e/set-race
@@ -2329,6 +2382,12 @@
  ::bg5e/set-background
  default-background
  routes/dnd-e5-background-builder-page-route)
+
+(reg-new-homebrew
+ ::feats5e/new-feat
+ ::feats5e/set-feat
+ default-feat
+ routes/dnd-e5-feat-builder-page-route)
 
 (reg-new-homebrew
  ::race5e/new-race

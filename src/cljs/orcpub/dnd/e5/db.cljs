@@ -5,6 +5,7 @@
             [orcpub.dnd.e5.template :as t5e]
             [orcpub.dnd.e5.character :as char5e]
             [orcpub.dnd.e5.backgrounds :as bg5e]
+            [orcpub.dnd.e5.feats :as feats5e]
             [orcpub.dnd.e5.races :as race5e]
             [orcpub.dnd.e5.magic-items :as mi5e]
             [orcpub.dnd.e5.spells :as spells5e]
@@ -23,6 +24,7 @@
 (def local-storage-magic-item-key "magic-item")
 (def local-storage-spell-key "spell")
 (def local-storage-background-key "background")
+(def local-storage-feat-key "feat")
 (def local-storage-race-key "race")
 (def local-storage-plugins-key "plugins")
 
@@ -42,6 +44,8 @@
 
 (def default-background {:traits []})
 
+(def default-feat {:ability-increases #{}})
+
 (def default-race {:size :medium
                    :speed 30
                    :languages #{}
@@ -60,6 +64,7 @@
    :device-type (user-agent/device-type)
    ::spells5e/builder-item default-spell
    ::bg5e/builder-item default-background
+   ::feats5e/builder-item default-feat
    ::race5e/builder-item default-race})
 
 (defn set-item [key value]
@@ -89,6 +94,10 @@
 (defn background->local-store [background]
   (if js/window.localStorage
     (set-item local-storage-background-key (str background))))
+
+(defn feat->local-store [feat]
+  (if js/window.localStorage
+    (set-item local-storage-feat-key (str feat))))
 
 (defn race->local-store [race]
   (if js/window.localStorage
