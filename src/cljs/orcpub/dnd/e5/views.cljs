@@ -3868,10 +3868,10 @@
              name
              {:items (map
                       (fn [bonus]
-                        {:title (str bonus)
+                        {:title (common/bonus-str bonus)
                          :value bonus})
-                      (range 3))
-              :value (get-in race [:abilities key])
+                      (range -2 3 1))
+              :value (get-in race [:abilities key] 0)
               :on-change #(dispatch [::races/set-race-ability-increase key %])}]])
          opt/abilities))]]
      [:div.m-b-20
