@@ -31,6 +31,7 @@
 (def dnd-e5-spell-builder-page-route :spell-builder-5e-page)
 (def dnd-e5-background-builder-page-route :background-builder-5e-page)
 (def dnd-e5-race-builder-page-route :race-builder-5e-page)
+(def dnd-e5-feat-builder-page-route :feat-builder-5e-page)
 
 (def dnd-e5-spell-page-routes #{dnd-e5-spell-list-page-route dnd-e5-spell-page-route})
 
@@ -132,6 +133,7 @@
                               "parties" dnd-e5-char-parties-page-route
                               "background-builder" dnd-e5-background-builder-page-route
                               "race-builder" dnd-e5-race-builder-page-route
+                              "feat-builder" dnd-e5-feat-builder-page-route
                               "spell-builder" dnd-e5-spell-builder-page-route
                               "spells" {"" dnd-e5-spell-list-page-route
                                         ["/" :key] dnd-e5-spell-page-route}
