@@ -1974,6 +1974,27 @@
    (assoc-in background [:traits 0 prop-key] prop-value)))
 
 (reg-event-db
+ ::feats5e/toggle-feat-prop
+ feat-interceptors
+ (fn [feat [_ key]]
+   (update-in feat [:props key] not)))
+
+(reg-event-db
+ ::feats5e/toggle-feat-value-prop
+ feat-interceptors
+ (fn [feat [_ key num]]
+   (update feat :props (fn [m]
+                         (if (= (get m key) num)
+                           (dissoc m key)
+                           (assoc m key num))))))
+
+(reg-event-db
+ ::feats5e/toggle-feat-map-prop
+ feat-interceptors
+ (fn [feat [_ key value]]
+   (update-in feat [:props key value] not)))
+
+(reg-event-db
  ::feats5e/toggle-feat-ability-increase
  feat-interceptors
  (fn [feat [_ ability-key]]
@@ -1981,6 +2002,24 @@
                                      (if (s ability-key)
                                        (disj s ability-key)
                                        (conj s ability-key))))))
+
+(reg-event-db
+ ::feats5e/toggle-ability-prereq
+ feat-interceptors
+ (fn [feat [_ ability-key]]
+   (update feat :prereqs (fn [s]
+                           (if (s ability-key)
+                             (disj s ability-key)
+                             (conj s ability-key))))))
+
+(reg-event-db
+ ::feats5e/toggle-spellcasting-prereq
+ feat-interceptors
+ (fn [feat]
+   (update feat :prereqs (fn [s]
+                           (if (s :spellcasting)
+                             (disj s :spellcasting)
+                             (conj s :spellcasting))))))
 
 
 (reg-event-db
