@@ -1358,6 +1358,9 @@
 (defn add-race-component []
   (add-item-component "race" routes/dnd-e5-race-builder-page-route))
 
+(defn add-feat-component []
+  (add-item-component "feat" routes/dnd-e5-feat-builder-page-route))
+
 (def pages
   [{:name "Race"
     :icon "woman-elf-face"
@@ -1367,7 +1370,8 @@
     :icon "strong"
     :tags #{:ability-scores :feats}
     :ui-fns [{:key :ability-scores :group? true :ui-fn abilities-editor}
-             #_{:key :feats :group? true :ui-fn feats-editor}]}
+             #_{:key :feats :group? true :ui-fn feats-editor}]
+    :components [add-feat-component]}
    {:name "Background"
     :icon "ages"
     :tags #{:background}
