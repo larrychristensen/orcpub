@@ -306,12 +306,17 @@
    (let [{:keys [:db/id] :as strict} (char5e/to-strict (:character db))
          built-character @(subscribe [:built-character])
          summary (make-summary built-character)]
-     {:dispatch [:set-loading true]
-      :http {:method :post
-             :headers (authorization-headers db)
-             :url (url-for-route routes/dnd-e5-char-list-route)
-             :transit-params (assoc strict :orcpub.entity.strict/summary summary)
-             :on-success [:character-save-success]}})))
+     (if (every?
+          (fn [ability-kw]
+            (nat-int? (get-in built-character [:base-abilities ability-kw])))
+          char5e/ability-keys)
+       {:dispatch [:set-loading true]
+        :http {:method :post
+               :headers (authorization-headers db)
+               :url (url-for-route routes/dnd-e5-char-list-route)
+               :transit-params (assoc strict :orcpub.entity.strict/summary summary)
+               :on-success [:character-save-success]}}
+       {:dispatch [:show-error-message "You must provide values for all ability scores"]}))))
 
 (reg-event-fx
  :item-save-success
