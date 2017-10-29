@@ -1329,7 +1329,7 @@
            hdr]]]
         [:div.flex.justify-cont-c.main-text-color
          [:div.content hdr]]
-        [:div.m-l-20.m-r-20.f-w-b.f-s-18.container.m-b-10
+        [:div.m-l-20.m-r-20.f-w-b.f-s-18.container.m-b-10.main-text-color
          [:div.content.bg-lighter.p-10 [:span "Due to licensing issues, we were forced to remove all non-SRD content, if you have questions about what is and is not SRD content please see the " srd-link ". If you would like to see the non-SRD content added back to OrcPub please sign our " [:a.orange {:href "https://www.change.org/p/wizards-of-the-coast-wizards-of-the-coast-please-grant-orc-pub-licensing-rights-to-your-content" :target "_blank"}
                                                                                                                                                                                                                                                                       "petition here at change.org"]
            "."]]]
@@ -3823,6 +3823,279 @@
      {:value (get-in background [:traits 0 :summary])
       :on-change #(dispatch [::bg/set-feature-prop :summary %])}]]])
 
+(defn feat-prereqs [feat]
+  [:div.m-b-20
+   [:div.f-s-24.f-w-b.m-b-10 "Prerequisites"]
+   [:div.flex.flex-wrap
+    [:div.m-r-20.m-b-10
+     [comps/labeled-checkbox
+      "The ability to cast at least one spell"
+      (get-in feat [:prereqs :spellcasting])
+      false
+      #(dispatch [::feats/toggle-spellcasting-prereq])]]
+    [:div
+     (doall
+      (map
+       (fn [{:keys [name key]}]
+         ^{:key key}
+         [:div.m-r-20.m-b-10
+          [comps/labeled-checkbox
+           (str name " 13 or higher")
+           (get-in feat [:prereqs key])
+           false
+           #(dispatch [::feats/toggle-ability-prereq key])]])
+       opt/abilities))]
+    [:div
+     (doall
+      (map
+       (fn [key]
+         ^{:key key}
+         [:div.m-r-20.m-b-10
+          (let [prop-key (keyword (str (name key) "-armor"))]
+            [comps/labeled-checkbox
+             (str "Proficiency with " (name key) " armor")
+             (get-in feat [:prereqs prop-key])
+             false
+             #(dispatch [::feats/toggle-ability-prereq prop-key])])])
+       armor/armor-types))]]])
+
+(defn feat-ability-increase-options [feat]
+  [:div.m-b-20
+   [:div.f-s-18.f-w-b.m-b-10 "Ability Increase Options"]
+   [:div.flex.flex-wrap
+    (doall
+     (map
+      (fn [{:keys [name key]}]
+        ^{:key key}
+        [:div.m-r-20.m-b-10
+         [comps/labeled-checkbox
+          name
+          (get-in feat [:ability-increases key])
+          false
+          #(dispatch [::feats/toggle-feat-ability-increase key])]])
+      opt/abilities))]
+   [:div.m-r-20.m-b-10
+    [comps/labeled-checkbox
+     "You also gain proficiency in saving throws with the above chosen abilities"
+     (get-in feat [:ability-increases :saves?])
+     false
+     #(dispatch [::feats/toggle-feat-ability-increase :saves?])]]
+   [:div (let [increases (:ability-increases feat)
+               non-save (disj increases :saves?)]
+           (if (seq non-save)
+             (str "= \"Increase your "
+                  (common/list-print
+                   (map
+                    (comp :name opt/abilities-map)
+                    non-save)
+                   "or")
+                  " score by 1, to a maximum of 20."
+                  (if (increases :saves?)
+                    " You gain proficiency in the saves using the chosen ability.\""))))]])
+
+(defn feat-skill-proficiency [feat]
+  [:div.m-b-20
+   [:div.f-s-18.f-w-b.m-b-10 "Skill Proficiency"]
+   [:div.flex.flex-wrap
+    (doall
+     (map
+      (fn [num]
+        ^{:key num}
+        [:div.m-r-20.m-b-10
+         (let [kw :skill-tool-choice]
+           [comps/labeled-checkbox
+            (str "You gain proficiency in " num " skills or tools of your choice")
+            (= num (get-in feat [:props kw]))
+            false
+            #(dispatch [::feats/toggle-feat-value-prop kw num])])])
+      (range 1 4)))]])
+
+(defn feat-weapon-proficiency [feat]
+  [:div.m-b-20
+   [:div.f-s-18.f-w-b.m-b-10 "Weapon Proficiency"]
+   [:div.flex.flex-wrap
+    [:div.m-r-20.m-b-10
+     (let [kw :improvised-weapons-prof]
+       [comps/labeled-checkbox
+        "You gain proficiency with improvised weapons"
+        (get-in feat [:props kw])
+        false
+        #(dispatch [::feats/toggle-feat-prop kw])])]
+    (doall
+     (map
+      (fn [num]
+        ^{:key num}
+        [:div.m-r-20.m-b-10
+         (let [kw :weapon-prof-choice]
+           [comps/labeled-checkbox
+            (str "You gain proficiency with " num " weapons of your choice")
+            (= num (get-in feat [:props kw]))
+            false
+            #(dispatch [::feats/toggle-feat-value-prop kw num])])])
+      (range 3 5)))]])
+
+(defn feat-armor-proficiency [feat]
+  [:div.m-b-20
+   [:div.f-s-18.f-w-b.m-b-10 "Armor Proficiency"]
+   [:div.flex.flex-wrap
+    (doall
+     (map
+      (fn [armor-type]
+        ^{:key armor-type}
+        [:div.m-r-20.m-b-10
+         (let [kw :armor-prof]
+           [comps/labeled-checkbox
+            (str "You gain proficiency with " (name armor-type) (if (not= armor-type :shields) " armor"))
+            (get-in feat [:props kw armor-type])
+            false
+            #(dispatch [::feats/toggle-feat-map-prop kw armor-type])])])
+      (conj armor/armor-types :shields)))
+    [:div.m-r-20.m-b-10
+     (let [kw :medium-armor-stealth]
+       [comps/labeled-checkbox
+        "Wearing medium armor doesn't give disadvantage on Stealth checks"
+        (get-in feat [:props kw])
+        false
+        #(dispatch [::feats/toggle-feat-prop kw])])]
+    [:div.m-r-20.m-b-10
+     (let [kw :medium-armor-max-dex-3]
+       [comps/labeled-checkbox
+        "When wearing medium armor, you can add 3 to your AC if your Dexterity is 16+"
+        (get-in feat [:props kw])
+        false
+        #(dispatch [::feats/toggle-feat-prop kw])])]]])
+
+(defn feat-hps [feat]
+  [:div.m-b-20
+   [:div.f-s-18.f-w-b.m-b-10 "Hit Points"]
+   [:div.flex.flex-wrap
+    (doall
+     (map
+      (fn [num]
+        ^{:key num}
+        [:div.m-r-20.m-b-10
+         (let [kw :max-hp-bonus]
+           [comps/labeled-checkbox
+            (str "Your hit point maximum increases by " num " for each of your levels")
+            (= (get-in feat [:props kw]) num)
+            false
+            #(dispatch [::feats/toggle-feat-value-prop kw num])])])
+      (range 1 3)))]])
+
+(defn feat-speed-bonuses [feat]
+  [:div.m-b-20
+   [:div.f-s-18.f-w-b.m-b-10 "Speed Bonuses"]
+   [:div.flex.flex-wrap
+    (doall
+     (map
+      (fn [v]
+        ^{:key v}
+        [:div.m-r-20.m-b-10
+         (let [kw :speed]
+           [comps/labeled-checkbox
+            (str "Your speed is increased by " v " ft.")
+            (= v (get-in feat [:props kw]))
+            false
+            #(dispatch [::feats/toggle-feat-value-prop kw v])])])
+      (range 5 20 5)))]])
+
+(defn feat-initiative-bonuses [feat]
+  [:div.m-b-20
+   [:div.f-s-18.f-w-b.m-b-10 "Initiative Bonuses"]
+   [:div.flex.flex-wrap
+    (doall
+     (map
+      (fn [v]
+        ^{:key v}
+        [:div.m-r-20.m-b-10
+         (let [kw :initiative]
+           [comps/labeled-checkbox
+            (str "You gain a +" v " bonus to initiative")
+            (= v (get-in feat [:props kw]))
+            false
+            #(dispatch [::feats/toggle-feat-value-prop kw v])])])
+      (range 1 6)))]])
+
+(defn feat-languages [feat]
+  [:div.m-b-20
+   [:div.f-s-18.f-w-b.m-b-10 "Languages"]
+   [:div.flex.flex-wrap
+    (doall
+     (map
+      (fn [v]
+        ^{:key v}
+        [:div.m-r-20.m-b-10
+         (let [kw :language-choice]
+           [comps/labeled-checkbox
+            (str "You learn " v " languages of your choice.")
+            (= v (get-in feat [:props kw]))
+            false
+            #(dispatch [::feats/toggle-feat-value-prop kw v])])])
+      (range 1 4)))]])
+
+(defn feat-damage-resistance [feat]
+  [:div.m-b-20
+   [:div.f-s-18.f-w-b.m-b-10 "Damage Resistance"]
+   (let [kw :damage-resistance]
+     [:div.flex.flex-wrap
+      [:div.m-r-20.m-b-10
+       [comps/labeled-checkbox
+        "Resistance to damage from traps"
+        (get-in feat [:props kw :traps])
+        false
+        #(dispatch [::feats/toggle-feat-map-prop kw :traps])]]
+      (doall
+       (map
+        (fn [damage-type]
+          ^{:key damage-type}
+          [:div.m-r-20.m-b-10
+           [comps/labeled-checkbox
+            (str "Resistance to " (name damage-type) " damage")
+            (get-in feat [:props kw damage-type])
+            false
+            #(dispatch [::feats/toggle-feat-map-prop kw damage-type])]])
+        opt/damage-types))])])
+
+(defn feat-misc-modifiers [feat]
+  [:div.m-b-20
+   [:div.f-s-18.f-w-b.m-b-10 "Misc. Modifiers"]
+   [:div.flex.flex-wrap
+    [:div.m-r-20.m-b-10
+     (let [kw :two-weapon-ac-1]
+       [comps/labeled-checkbox
+        "+1 AC Bonus while wielding two melee weapons"
+        (get-in feat [:props kw])
+        false
+        #(dispatch [::feats/toggle-feat-prop kw])])]
+    [:div.m-r-20.m-b-10
+     (let [kw :two-weapon-any-one-handed]
+       [comps/labeled-checkbox
+        "You can use two-weapon fighting with any one-handed melee weapon"
+        (get-in feat [:props kw])
+        false
+        #(dispatch [::feats/toggle-feat-prop kw])])]
+    [:div.m-r-20.m-b-10
+     (let [kw :saving-throw-advantage-traps]
+       [comps/labeled-checkbox
+        "Advantage on saving throws against traps"
+        (get-in feat [:props kw])
+        false
+        #(dispatch [::feats/toggle-feat-prop kw])])]
+    [:div.m-r-20.m-b-10
+     (let [kw :passive-perception-5]
+       [comps/labeled-checkbox
+        "You gain a +5 to your passive Perception"
+        (get-in feat [:props kw])
+        false
+        #(dispatch [::feats/toggle-feat-prop kw])])]
+    [:div.m-r-20.m-b-10
+     (let [kw :passive-investigation-5]
+       [comps/labeled-checkbox
+        "You gain a +5 to your passive Investigation"
+        (get-in feat [:props kw])
+        false
+        #(dispatch [::feats/toggle-feat-prop kw])])]]])
+
 (defn feat-builder []
   (let [feat @(subscribe [::feats/builder-item])]
     (prn "FEAT" feat)
@@ -3836,157 +4109,25 @@
        option-source-name-label
        :option-pack
        feat
-       "m-l-5 m-b-20"]]
-     [:div.m-b-20
-      [:div.f-s-24.f-w-b.m-b-10 "Prerequisites"]
-      [:div.flex.flex-wrap
-       [:div.m-r-20.m-b-10
-        [comps/labeled-checkbox
-         "The ability to cast at least one spell"
-         false
-         false
-         (fn [])]]
-       [:div
-        (doall
-         (map
-          (fn [{:keys [name key]}]
-            ^{:key key}
-            [:div.m-r-20.m-b-10
-             [comps/labeled-checkbox
-              (str name " 13 or higher")
-              false
-              false
-              (fn [])]])
-          opt/abilities))]
-       [:div
-        (doall
-         (map
-          (fn [key]
-            ^{:key key}
-            [:div.m-r-20.m-b-10
-             [comps/labeled-checkbox
-              (str "Proficiency with " (name key) " armor")
-              false
-              false
-              (fn [])]])
-          armor/armor-types))]]]
-     [:div.m-b-20
-      [:div.f-s-24.f-w-b.m-b-10 "Ability Increase Options"]
-      [:div.flex.flex-wrap
-       (doall
-        (map
-         (fn [{:keys [name key]}]
-           ^{:key key}
-           [:div.m-r-20.m-b-10
-            [comps/labeled-checkbox
-             name
-             (get-in feat [:ability-increases key])
-             false
-             #(dispatch [::feats/toggle-feat-ability-increase key])]])
-         opt/abilities))]
-      [:div.m-r-20.m-b-10
-        [comps/labeled-checkbox
-         "You also gain proficiency in saving throws with the above chosen abilities"
-         false
-         false
-         (fn [])]]
-      [:div (let [increases (:ability-increases feat)]
-              (if (seq increases)
-                (str "= \"Increase your "
-                     (common/list-print
-                      (map
-                       (comp :name opt/abilities-map)
-                       increases)
-                      "or")
-                     " score by 1, to a maximum of 20.\"")))]]
-     [:div.m-b-20
-      [:div.f-s-24.f-w-b.m-b-10 "Armor Proficiency"]
-      [:div.flex.flex-wrap
-       (doall
-        (map
-         (fn [armor-type]
-           [:div.m-r-20.m-b-10
-            [comps/labeled-checkbox
-             (str "You gain proficiency with " (name armor-type) " armor")
-             false
-             false
-             (fn [])]])
-         armor/armor-types))
-       [:div.m-r-20.m-b-10
-        [comps/labeled-checkbox
-         "You gain proficiency with shields"
-         false
-         false
-         (fn [])]]
-       [:div.m-r-20.m-b-10
-        [comps/labeled-checkbox
-         "Wearing medium armor doesn't give disadvantage on Stealth checks"
-         false
-         false
-         (fn [])]]
-       [:div.m-r-20.m-b-10
-        [comps/labeled-checkbox
-         "When wearing medium armor, you can add 3 to your AC if your Dexterity is 16+"
-         false
-         false
-         (fn [])]]]]
-     [:div.m-b-20
-      [:div.f-s-24.f-w-b.m-b-10 "Misc. Modifiers"]
-      [:div.flex.flex-wrap
-       [:div.m-r-20.m-b-10
-        [comps/labeled-checkbox
-         "You gain +5 to Initiative"
-         false
-         false
-         (fn [])]]
-       [:div.m-r-20.m-b-10
-        [comps/labeled-checkbox
-         "+1 AC Bonus while wielding two melee weapons"
-         false
-         false
-         (fn [])]]
-       [:div.m-r-20.m-b-10
-        [comps/labeled-checkbox
-         "two-weapon fighting with any one-handed melee weapon"
-         false
-         false
-         (fn [])]]
-       [:div.m-r-20.m-b-10
-        [comps/labeled-checkbox
-         "Resistance to damage from traps"
-         false
-         false
-         (fn [])]]
-       [:div.m-r-20.m-b-10
-        [comps/labeled-checkbox
-         "Advantage on saving throws against traps"
-         false
-         false
-         (fn [])]]
-       [:div.m-r-20.m-b-10
-        [comps/labeled-checkbox
-         "You learn three languages of your choice"
-         false
-         false
-         (fn [])]]
-       [:div.m-r-20.m-b-10
-        [comps/labeled-checkbox
-         "Your speed is increased by 10 ft."
-         false
-         false
-         (fn [])]]
-       [:div.m-r-20.m-b-10
-        [comps/labeled-checkbox
-         "You gain a +5 to your passive Perception"
-         false
-         false
-         (fn [])]]
-       [:div.m-r-20.m-b-10
-        [comps/labeled-checkbox
-         "You gain a +5 to your passive Investigation"
-         false
-         false
-         (fn [])]]]]]))
+       "m-l-5 m-b-20"]
+      [:div.w-100-p
+       [:div.f-w-b
+        "Description"]
+       [textarea-field
+        {:value (get feat :description)
+         :on-change #(dispatch [::feats/set-feat-prop :description %])}]]]
+     [:div [feat-prereqs feat]]
+     [:div.f-s-24.f-w-b.m-b-10 "Modifiers"]
+     [:div [feat-ability-increase-options feat]]
+     [:div [feat-skill-proficiency feat]]
+     [:div [feat-languages feat]]
+     [:div [feat-weapon-proficiency feat]]
+     [:div [feat-armor-proficiency feat]]
+     [:div [feat-hps feat]]
+     [:div [feat-damage-resistance feat]]
+     [:div [feat-speed-bonuses feat]]
+     [:div [feat-initiative-bonuses feat]]
+     [:div [feat-misc-modifiers feat]]]))
 
 (defn race-builder []
   (let [race @(subscribe [::races/builder-item])]
@@ -4764,7 +4905,7 @@
            [(my-spells name) plugin]
            [(my-backgrounds name) plugin]
            [(my-races name) plugin]
-           #_[(my-feats name) plugin]]])])))
+           [(my-feats name) plugin]]])])))
 
 (defn my-content []
   [:div.main-text-color
