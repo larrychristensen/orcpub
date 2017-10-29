@@ -44,7 +44,8 @@
 
 (def default-background {:traits []})
 
-(def default-feat {:ability-increases #{}})
+(def default-feat {:ability-increases #{}
+                   :prereqs #{}})
 
 (def default-race {:size :medium
                    :speed 30
