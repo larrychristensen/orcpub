@@ -4900,13 +4900,156 @@ long rest."})
    (warlock-option spell-lists spells-map)
    (wizard-option spell-lists spells-map)])
 
+{:ability-increases
+ #{:orcpub.dnd.e5.character/str :orcpub.dnd.e5.character/con :saves?},
+ :prereqs
+ #{:orcpub.dnd.e5.character/str :orcpub.dnd.e5.character/con
+   :light-armor :medium-armor :spellcasting},
+ :option-pack "EE",
+ :name "Cool Feat",
+ :description "This is a cool feat.",
+ :props
+ {:max-hp-bonus 2,
+  :passive-investigation-5 true,
+  :medium-armor-max-dex-3 true,
+  :speed 10,
+  :passive-perception-5 true,
+  :initiative 1,
+  :weapon-prof-choice 3,
+  :two-weapon-any-one-handed true,
+  :saving-throw-advantage-traps true,
+  :language-choice 2,
+  :armor-prof {:light true, :medium true, :shields true},
+  :improvised-weapons-prof true,
+  :two-weapon-ac-1 true,
+  :skill-tool-choice 3,
+  :medium-armor-stealth true,
+  :damage-resistance {:traps true, :acid true, :poison true}}}
+
+(defn feat-prereqs [prereqs]
+  (map
+   (fn [prereq]
+     (cond
+       ((into #{} char5e/ability-keys) prereq)
+       (opt5e/ability-prereq prereq 13)
+
+       (= :spellcasting prereq)
+       opt5e/can-cast-spell-prereq
+
+       :else
+       (opt5e/armor-prereq prereq)))
+   prereqs))
+
+(def filter-true (filter val))
+
+(defn make-feat-selections [k v]
+  (if v
+    (case k
+      :weapon-prof-choice [(opt5e/weapon-proficiency-selection v)]
+      :language-choice [(opt5e/language-selection v)]
+      :skill-tool-choice (map
+                          (fn [i]
+                            (opt5e/skilled-selection (str "Skill/Tool " (inc i))))
+                          (range v))
+      nil)))
+
+(defn make-feat-modifiers [k v]
+  (if v
+    (case k
+      :initiative [(mod5e/initiative v)]
+      :two-weapon-ac-1 [opt5e/dual-wield-ac-mod]
+      :two-weapon-any-one-handed [opt5e/dual-wield-weapon-mod]
+      :max-hp-bonus [(mod/modifier ?hit-point-level-bonus (+ v ?hit-point-level-bonus))]
+      :passive-investigation-5 [(mod5e/passive-investigation 5)]
+      :passive-perception-5 [(mod5e/passive-perception 5)]
+      :medium-armor-max-dex-3 [opt5e/medium-armor-master-max-bonus]
+      :medium-armor-stealth [opt5e/medium-armor-master-stealth]
+      :speed [(mod5e/speed 10)]
+      :saving-throw-advantage-traps [(mod5e/saving-throw-advantage [:traps])]
+      :armor-prof (sequence
+                   (comp
+                    filter-true
+                    (map
+                     (fn [[k]]
+                       (mod5e/armor-proficiency k))))
+                   v)
+      :damage-resistance (sequence
+                          (comp
+                           filter-true
+                           (map
+                            (fn [[k]]
+                              (mod5e/damage-resistance k))))
+                          v)
+      nil)))
+
+(defn feat-modifiers [name description props ability-increases]
+  (let [without-saves (sets/intersection ability-increases
+                                          (into #{} char5e/ability-keys))]
+    (reduce
+     (fn [mods [k v]]
+       (let [feat-mods (make-feat-modifiers k v)]
+         (if feat-mods
+           (concat mods feat-mods)
+           mods)))
+     (conj
+      (if (= 1 (count without-saves))
+        (let [ability-kw (first without-saves)
+              ability-mod (mod5e/ability ability-kw 1)]
+          (if (:saves? ability-increases)
+            [ability-mod
+             (mod5e/saving-throws nil ability-kw)]
+            [ability-mod]))
+        [])
+      (mod5e/trait-cfg
+       {:name name
+        :description description}))
+     props)))
+
+(defn feat-selections [props ability-increases]
+  (let [without-saves (sets/intersection ability-increases
+                                         (into #{} char5e/ability-keys))]
+    (reduce
+     (fn [selections [k v]]
+       (let [feat-selections (make-feat-selections k v)]
+         (if feat-selections
+           (concat selections feat-selections)
+           selections)))
+     (if (seq without-saves)
+       [(if (:saves? ability-increases)
+          (opt5e/ability-increase-selection
+           without-saves
+           1
+           false
+           [(fn [k] (mod5e/saving-throws nil k))])
+          (opt5e/ability-increase-selection
+           without-saves
+           1
+           false))]
+       [])
+     props)))
+
+
 (defn feat-option-from-cfg [{:keys [name
-                             key
-                             icon]}]
-  (t/option-cfg
-   {:name name
-    :key key
-    :icon icon}))
+                                    key
+                                    icon
+                                    description
+                                    prereqs
+                                    props
+                                    ability-increases]}]
+  (let [feat-mods (feat-modifiers name
+                                  description
+                                  props
+                                  ability-increases)
+        feat-selections (feat-selections props
+                                         ability-increases)]
+    (t/option-cfg
+     {:name name
+      :key key
+      :icon icon
+      :modifiers feat-mods
+      :selections feat-selections
+      :summary description
+      :prereqs (feat-prereqs prereqs)})))
 
 (defn template-selections [magic-weapon-options
                            magic-armor-options

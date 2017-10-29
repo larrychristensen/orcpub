@@ -4098,7 +4098,6 @@
 
 (defn feat-builder []
   (let [feat @(subscribe [::feats/builder-item])]
-    (prn "FEAT" feat)
     [:div.p-20.main-text-color
      [:div.m-b-20.flex.flex-wrap
       [feat-input-field
