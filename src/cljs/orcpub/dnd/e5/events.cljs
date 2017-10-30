@@ -29,13 +29,15 @@
                                       background->local-store
                                       feat->local-store
                                       race->local-store
+                                      subrace->local-store
                                       plugins->local-store
                                       tab-path
                                       default-character
                                       default-spell
                                       default-background
                                       default-feat
-                                      default-race]]
+                                      default-race
+                                      default-subrace]]
             [re-frame.core :refer [reg-event-db reg-event-fx reg-fx inject-cofx path trim-v
                                    after debug dispatch dispatch-sync subscribe ->interceptor]]
             [cljs.spec.alpha :as spec]
@@ -75,6 +77,8 @@
 
 (def race->local-store-interceptor (after race->local-store))
 
+(def subrace->local-store-interceptor (after subrace->local-store))
+
 (def plugins->local-store-interceptor (after plugins->local-store))
 
 (def set-changed (->interceptor
@@ -101,7 +105,10 @@
                          feat->local-store-interceptor])
 
 (def race-interceptors [(path ::race5e/builder-item)
-                         race->local-store-interceptor])
+                        race->local-store-interceptor])
+
+(def subrace-interceptors [(path ::race5e/subrace-builder-item)
+                           subrace->local-store-interceptor])
 
 (def plugins-interceptors [(path :plugins)
                           plugins->local-store-interceptor])
@@ -376,7 +383,7 @@
  ::bg5e/builder-item
  ::bg5e/homebrew-background
  ::e5/backgrounds
- "You must specify 'Name'")
+ "You must specify 'Name', 'Option Source Name'")
 
 (reg-save-homebrew
  "Feat"
@@ -384,7 +391,7 @@
  ::feats5e/builder-item
  ::feats5e/homebrew-feat
  ::e5/feats
- "You must specify 'Name'")
+ "You must specify 'Name', 'Option Source Name'")
 
 (reg-save-homebrew
  "Race"
@@ -392,7 +399,15 @@
  ::race5e/builder-item
  ::race5e/homebrew-race
  ::e5/races
- "You must specify 'Name'")
+ "You must specify 'Name', 'Option Source Name'")
+
+(reg-save-homebrew
+ "Subrace"
+ ::race5e/save-subrace
+ ::race5e/subrace-builder-item
+ ::race5e/homebrew-subrace
+ ::e5/subraces
+ "You must specify 'Name', 'Option Source Name', and 'Race'")
 
 (defn reg-delete-homebrew [event-key plugin-key]
   (reg-event-fx
@@ -415,6 +430,10 @@
 (reg-delete-homebrew
  ::race5e/delete-race
  ::e5/races)
+
+(reg-delete-homebrew
+ ::race5e/delete-subrace
+ ::e5/subraces)
 
 (reg-event-fx
  ::party5e/make-party-success
@@ -1479,6 +1498,11 @@
  ::race5e/set-race
  routes/dnd-e5-race-builder-page-route)
 
+(reg-edit-homebrew
+ ::race5e/edit-subrace
+ ::race5e/set-subrace
+ routes/dnd-e5-subrace-builder-page-route)
+
 (reg-event-fx
  :delete-character-success
  (fn [_ _]
@@ -1967,6 +1991,12 @@
    (assoc race prop-key prop-value)))
 
 (reg-event-db
+ ::race5e/set-subrace-prop
+ subrace-interceptors
+ (fn [subrace [_ prop-key prop-value]]
+   (assoc subrace prop-key prop-value)))
+
+(reg-event-db
  ::feats5e/set-feat-prop
  feat-interceptors
  (fn [feat [_ prop-key prop-value]]
@@ -2040,10 +2070,22 @@
    (assoc race :speed (js/parseInt v))))
 
 (reg-event-db
+ ::race5e/set-subrace-speed
+ subrace-interceptors
+ (fn [subrace [_ v]]
+   (assoc subrace :speed (js/parseInt v))))
+
+(reg-event-db
  ::race5e/set-race-ability-increase
  race-interceptors
  (fn [race [_ ability-kw bonus]]
    (assoc-in race [:abilities ability-kw] (js/parseInt bonus))))
+
+(reg-event-db
+ ::race5e/set-subrace-ability-increase
+ race-interceptors
+ (fn [subrace [_ ability-kw bonus]]
+   (assoc-in subrace [:abilities ability-kw] (js/parseInt bonus))))
 
 (reg-event-db
  ::spells/set-spell-level
@@ -2377,6 +2419,12 @@
  (fn [_ [_ race]]
    race))
 
+(reg-event-db
+ ::race5e/set-subrace
+ subrace-interceptors
+ (fn [_ [_ subrace]]
+   subrace))
+
 (reg-event-fx
  ::mi/reset-item
  (fn [_ _]
@@ -2408,6 +2456,12 @@
    {:dispatch [::race5e/set-race
                default-race]}))
 
+(reg-event-fx
+ ::race5e/reset-subrace
+ (fn [_ _]
+   {:dispatch [::race5e/set-subrace
+               default-subrace]}))
+
 (defn reg-new-homebrew [event set-event default-val route]
   (reg-event-fx
    event
@@ -2417,7 +2471,7 @@
 
 (reg-new-homebrew
  ::spells/new-spell
- ::spells/set-race
+ ::spells/set-spell
  default-spell
  routes/dnd-e5-spell-builder-page-route)
 
@@ -2438,6 +2492,12 @@
  ::race5e/set-race
  default-race
  routes/dnd-e5-race-builder-page-route)
+
+(reg-new-homebrew
+ ::race5e/new-subrace
+ ::race5e/set-subrace
+ default-subrace
+ routes/dnd-e5-subrace-builder-page-route)
 
 (reg-event-fx
  ::mi/new-item

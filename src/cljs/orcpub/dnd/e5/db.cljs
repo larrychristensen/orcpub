@@ -26,6 +26,7 @@
 (def local-storage-background-key "background")
 (def local-storage-feat-key "feat")
 (def local-storage-race-key "race")
+(def local-storage-subrace-key "subrace")
 (def local-storage-plugins-key "plugins")
 
 (def default-route route-map/dnd-e5-char-builder-route)
@@ -52,6 +53,8 @@
                    :languages #{}
                    :traits []})
 
+(def default-subrace {:traits []})
+
 (def default-value
   {:builder {:character {:tab #{:build :options}}}
    :character default-character
@@ -66,7 +69,8 @@
    ::spells5e/builder-item default-spell
    ::bg5e/builder-item default-background
    ::feats5e/builder-item default-feat
-   ::race5e/builder-item default-race})
+   ::race5e/builder-item default-race
+   ::race5e/subrace-builder-itme default-subrace})
 
 (defn set-item [key value]
   (try
@@ -103,6 +107,10 @@
 (defn race->local-store [race]
   (if js/window.localStorage
     (set-item local-storage-race-key (str race))))
+
+(defn subrace->local-store [subrace]
+  (if js/window.localStorage
+    (set-item local-storage-subrace-key (str subrace))))
 
 (defn plugins->local-store [plugins]
   (if js/window.localStorage
