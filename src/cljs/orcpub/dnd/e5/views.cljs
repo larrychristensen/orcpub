@@ -4819,7 +4819,15 @@
          [:div.flex.justify-cont-s-b.align-items-c.p-10
           {:on-click #(swap! expanded? not)}
           [:div.flex.align-items-c
-           [svg-icon icon 48 @(subscribe [:theme])]
+           [:div.h-48.flex.align-items-c
+            (if (vector? icon)
+              (doall
+               (map-indexed
+                (fn [index ico]
+                  ^{:key index}
+                  [svg-icon ico (/ 48 (count icon)) @(subscribe [:theme])])
+                icon))
+              [svg-icon icon 48 @(subscribe [:theme])])]
            [:span.m-l-10.f-s-24 (let [num (count items)]
                                   (str num " " (s/capitalize type-name) (if (not= 1 num) "s")))]]
           [:i.fa
@@ -4873,6 +4881,16 @@
                    ::races/edit-race
                    ::races/delete-race))
 
+(defn my-subraces [name]
+  (my-content-type name
+                   "subrace"
+                   ::e5/subraces
+                   ["woman-elf-face"
+                    "woman-elf-face"]
+                   ::races/new-subrace
+                   ::races/edit-subrace
+                   ::races/delete-subrace))
+
 (defn my-feats [name]
   (my-content-type name
                    "feat"
@@ -4904,6 +4922,7 @@
            [(my-spells name) plugin]
            [(my-backgrounds name) plugin]
            [(my-races name) plugin]
+           #_[(my-subraces name) plugin]
            [(my-feats name) plugin]]])])))
 
 (defn my-content []
