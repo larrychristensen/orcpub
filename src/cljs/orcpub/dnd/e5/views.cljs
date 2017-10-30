@@ -342,15 +342,13 @@
              (if (not mobile?)
                [:div.p-l-20.flex-grow-1
                 [:input.w-100-p.main-text-color
-                 {:style (if search-text?
-                           transparent-search-input-style
-                           search-input-style)
+                 {:style search-input-style
                   :value search-text
                   :on-key-press search-input-keypress
-                  :on-change set-search-text}]])
-             [:div.opacity-1.p-r-10.pointer
-              {:class-name (if mobile? "opacity-5" "opacity-8")
-               :on-click open-orcacle}
+                  :on-change set-search-text
+                  :placeholder "search"}]])
+             [:div.p-r-10.pointer
+              {:on-click open-orcacle}
               (svg-icon "magnifying-glass" (if mobile? 32 48) "")]]])
          [user-header-view]]]]]
      [:div.container
@@ -3633,6 +3631,9 @@
 (defn race-input-field [title prop race & [class-names]]
   (builder-input-field title prop race ::races/set-race-prop class-names))
 
+(defn subrace-input-field [title prop subrace & [class-names]]
+  (builder-input-field title prop subrace ::races/set-subrace-prop class-names))
+
 (defn feat-input-field [title prop feat & [class-names]]
   (builder-input-field title prop feat ::feats/set-feat-prop class-names))
 
@@ -3965,7 +3966,7 @@
         false
         #(dispatch [::feats/toggle-feat-prop kw])])]]])
 
-(defn feat-hps [feat]
+(defn option-hps [option toggle-value-prop-event]
   [:div.m-b-20
    [:div.f-s-18.f-w-b.m-b-10 "Hit Points"]
    [:div.flex.flex-wrap
@@ -3977,10 +3978,13 @@
          (let [kw :max-hp-bonus]
            [comps/labeled-checkbox
             (str "Your hit point maximum increases by " num " for each of your levels")
-            (= (get-in feat [:props kw]) num)
+            (= (get-in option [:props kw]) num)
             false
-            #(dispatch [::feats/toggle-feat-value-prop kw num])])])
+            #(dispatch [toggle-value-prop-event kw num])])])
       (range 1 3)))]])
+
+(defn feat-hps [feat]
+  (option-hps feat ::feats/toggle-feat-value-prop))
 
 (defn feat-speed-bonuses [feat]
   [:div.m-b-20
@@ -4033,7 +4037,7 @@
             #(dispatch [::feats/toggle-feat-value-prop kw v])])])
       (range 1 4)))]])
 
-(defn feat-damage-resistance [feat]
+(defn option-damage-resistance [option toggle-map-prop-event]
   [:div.m-b-20
    [:div.f-s-18.f-w-b.m-b-10 "Damage Resistance"]
    (let [kw :damage-resistance]
@@ -4043,7 +4047,7 @@
         "Resistance to damage from traps"
         (get-in feat [:props kw :traps])
         false
-        #(dispatch [::feats/toggle-feat-map-prop kw :traps])]]
+        #(dispatch [toggle-map-prop-event kw :traps])]]
       (doall
        (map
         (fn [damage-type]
@@ -4051,10 +4055,33 @@
           [:div.m-r-20.m-b-10
            [comps/labeled-checkbox
             (str "Resistance to " (name damage-type) " damage")
-            (get-in feat [:props kw damage-type])
+            (get-in option [:props kw damage-type])
             false
-            #(dispatch [::feats/toggle-feat-map-prop kw damage-type])]])
+            #(dispatch [toggle-map-prop-event kw damage-type])]])
         opt/damage-types))])])
+
+(defn option-saving-throw-advantages [option toggle-map-prop-event]
+  [:div.m-b-20
+   [:div.f-s-18.f-w-b.m-b-10 "Saving Throw Advantage"]
+   (let [kw :saving-throw-advantage]
+     [:div.flex.flex-wrap
+      (doall
+       (map
+        (fn [{:keys [name key]}]
+          ^{:key key}
+          [:div.m-r-20.m-b-10
+           [comps/labeled-checkbox
+            (str "You have advantage on saving throws against being " name)
+            (get-in option [:props kw key])
+            false
+            #(dispatch [toggle-map-prop-event kw key])]])
+        opt/conditions))])])
+
+(defn feat-damage-resistance [feat]
+  (option-damage-resistance feat ::feats/toggle-feat-map-prop))
+
+(defn subrace-damage-resistance [subrace]
+  (option-damage-resistance subrace ::feats/toggle-subrace-map-prop))
 
 (defn feat-misc-modifiers [feat]
   [:div.m-b-20
@@ -4127,6 +4154,105 @@
      [:div [feat-speed-bonuses feat]]
      [:div [feat-initiative-bonuses feat]]
      [:div [feat-misc-modifiers feat]]]))
+
+(defn subrace-builder []
+  (let [subrace @(subscribe [::races/subrace-builder-item])
+        race-key (get subrace :race)
+        race @(subscribe [::races/race race-key])
+        races @(subscribe [::races/races])
+        mobile? @(subscribe [:mobile?])]
+    [:div.p-20.main-text-color
+     [:div.flex.flex-wrap
+      [:div.m-b-20
+       [subrace-input-field
+        "Name"
+        :name
+        subrace]]
+      [:div.m-l-5.m-b-20
+       [labeled-dropdown
+        "Race"
+        {:items (map
+                 (fn [{:keys [name key]}]
+                   {:title name
+                    :value (clojure.core/name key)})
+                 races)
+         :value (get subrace :race)
+         :on-change #(dispatch [::races/set-subrace-prop :race (keyword %)])}]]
+      [subrace-input-field
+       option-source-name-label
+       :option-pack
+       subrace
+       "m-l-5 m-b-20"]]
+     [:div.m-b-20.flex.flex-wrap
+      [:div.m-r-5
+       [labeled-dropdown
+        "Size"
+        {:items (map
+                 (fn [kw]
+                   {:title (name kw)
+                    :value (name kw)})
+                 ["small" "medium" "large"])
+         :value (name (or (get subrace :size)
+                          (get race :size)))
+         :on-change #(dispatch [::races/set-subrace-prop :size (keyword %)])}]]
+      [:div.m-r-5
+       [labeled-dropdown
+        "Speed"
+        {:items (map
+                 (fn [v]
+                   {:title v 
+                    :value v})
+                 (range 25 40 5))
+         :value (or (get subrace :speed)
+                    (get race :speed))
+         :on-change #(dispatch [::races/set-subrace-speed %])}]]
+      [:div.m-r-5
+       [labeled-dropdown
+        "Darkvision"
+        {:items (map
+                 (fn [v]
+                   {:title v 
+                    :value v})
+                 [0 60 120])
+         :value (or (get subrace :darkvision)
+                    (get race :darkvision))
+         :on-change #(dispatch [::races/set-subrace-prop :darkvision (js/parseInt %)])}]]]
+     [:div.m-b-20
+      [:div.f-s-24.f-w-b.m-b-10 "Ability Score Increases"]
+      [:table.t-a-c
+       [:tr.f-w-b
+        [:th.p-2.t-a-l "Ability"]
+        [:th.p-2 "Race Bonus"]
+        [:th.p-2]
+        [:th.p-2 "Subrace Bonus"]
+        [:th.p-2]
+        [:th.p-2 "Total"]]
+       (doall
+        (map
+         (fn [{:keys [name key abbr]}]
+           (let [race-bonus (get-in race [:abilities key] 0)
+                 subrace-bonus (get-in subrace [:abilities key] 0)]
+             ^{:key key}
+             [:tr
+              [:td.p-2.f-w-b.t-a-l (if mobile? abbr name)]
+              [:td.p-2 race-bonus]
+              [:td.p-2 "+"]
+              [:td.p-2 [dropdown
+                    {:items (map
+                             (fn [bonus]
+                               {:title (common/bonus-str bonus)
+                                :value bonus})
+                             (range -2 3 1))
+                     :value subrace-bonus
+                     :on-change #(dispatch [::races/set-subrace-ability-increase key %])}]]
+              [:td.p-2 "="]
+              [:td.p-2 (+ race-bonus subrace-bonus)]]))
+         opt/abilities))]]
+     [:div.m-b-20
+      [:div.f-s-24.f-w-b.m-b-10 "Modifiers"]
+      [:div [option-hps subrace ::races/toggle-subrace-value-prop]]
+      [:div [option-damage-resistance subrace ::races/toggle-subrace-map-prop]]
+      [:div [option-saving-throw-advantages subrace ::races/toggle-subrace-map-prop]]]]))
 
 (defn race-builder []
   (let [race @(subscribe [::races/builder-item])]
@@ -4400,6 +4526,17 @@
      :icon "save"
      :on-click #(dispatch [::races/save-race])}]
    [race-builder]])
+
+(defn subrace-builder-page []
+  [content-page
+   "Subace Builder"
+   [{:title "New Subace"
+     :icon "plus"
+     :on-click #(dispatch [::races/reset-subrace])}
+    {:title "Save"
+     :icon "save"
+     :on-click #(dispatch [::races/save-subrace])}]
+   [subrace-builder]])
 
 (defn feat-builder-page []
   [content-page
@@ -4922,7 +5059,7 @@
            [(my-spells name) plugin]
            [(my-backgrounds name) plugin]
            [(my-races name) plugin]
-           #_[(my-subraces name) plugin]
+           [(my-subraces name) plugin]
            [(my-feats name) plugin]]])])))
 
 (defn my-content []

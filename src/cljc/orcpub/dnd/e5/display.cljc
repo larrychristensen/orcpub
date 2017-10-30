@@ -125,7 +125,7 @@
 (defn action-description [{:keys [description summary source page duration range frequency qualifier]}]
   (str
    (or summary description)
-   (if (or range duration frequency page)
+   (if (or range duration frequency)
      (str
       " ("
       (s/join ", "
