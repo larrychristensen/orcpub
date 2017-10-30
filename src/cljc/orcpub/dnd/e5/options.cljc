@@ -38,36 +38,56 @@
 
 (def abilities
   [{:key ::character/str
-    :name "Strength"}
+    :name "Strength"
+    :abbr "STR"}
    {:key ::character/con
-    :name "Constitution"}
+    :name "Constitution"
+    :abbr "CON"}
    {:key ::character/dex
-    :name "Dexterity"}
+    :name "Dexterity"
+    :abbr "DEX"}
    {:key ::character/int
-    :name "Intelligence"}
+    :name "Intelligence"
+    :abbr "INT"}
    {:key ::character/wis
-    :name "Wisdom"}
+    :name "Wisdom"
+    :abbr "WIS"}
    {:key ::character/cha
-    :name "Charisma"}])
+    :name "Charisma"
+    :abbr "CHA"}])
 
 (def abilities-map
   (common/map-by-key abilities))
 
 (def conditions
-  [{:name "Blinded"}
-   {:name "Charmed"}
-   {:name "Deafened"}
-   {:name "Frightened"}
-   {:name "Grappled"}
-   {:name "Incapacitated"}
-   {:name "Invisible"}
-   {:name "Paralyzed"}
-   {:name "Petrified"}
-   {:name "Poisoned"}
-   {:name "Prone"}
-   {:name "Restrained"}
-   {:name "Stunned"}
-   {:name "Unconscious"}])
+  [{:name "Blinded"
+    :key :blinded}
+   {:name "Charmed"
+    :key :charmed}
+   {:name "Deafened"
+    :key :deafened}
+   {:name "Frightened"
+    :key :frightened}
+   {:name "Grappled"
+    :key :grappled}
+   {:name "Incapacitated"
+    :key :incapacitated}
+   {:name "Invisible"
+    :key :invisible}
+   {:name "Paralyzed"
+    :key :paralyzed}
+   {:name "Petrified"
+    :key :petrified}
+   {:name "Poisoned"
+    :key :poisoned}
+   {:name "Prone"
+    :key :prone}
+   {:name "Restrained"
+    :key :restrained}
+   {:name "Stunned"
+    :key :stunned}
+   {:name "Unconscious"
+    :key :unconscious}])
 
 (def damage-types
   [:acid
@@ -1792,13 +1812,15 @@
    weapon-proficiencies))
 
 
-(defn subrace-option [spell-lists
+(defn subrace-option [race
+                      spell-lists
                       spells-map
                       source
                       {:keys [name
                               abilities
                               size
                               speed
+                              darkvision
                               subrace-options
                               armor-proficiencies
                               weapon-proficiencies
@@ -1811,6 +1833,12 @@
     :selections selections
     :modifiers (concat
                 [(modifiers/subrace name)]
+                (if (and speed
+                         (not= speed (:speed race)))
+                  [(modifiers/speed (- speed (:speed race)))])
+                (if (and darkvision
+                         (not= darkvision (:darkvision race)))
+                  [(modifiers/darkvision darkvision)])
                 modifiers
                 (armor-prof-modifiers armor-proficiencies)
                 (weapon-prof-modifiers weapon-proficiencies)
@@ -1922,7 +1950,7 @@
    [:custom-race-name]
    [:set-custom-race]))
 
-(defn subrace-selection [spell-lists spells-map plugin? source subraces path]
+(defn subrace-selection [race spell-lists spells-map plugin? source subraces path]
   (let [subrace-path (conj path :subrace)]
     (t/selection-cfg
      {:name "Subrace"
@@ -1931,7 +1959,7 @@
       :options (cond->
                 (if (seq subraces)
                   (map
-                   (partial subrace-option spell-lists spells-map source)
+                   (partial subrace-option race spell-lists spells-map source)
                    (if source
                      (map (fn [sr] (assoc sr :source source)) subraces)
                      subraces))
@@ -1953,7 +1981,7 @@
                (fn [_] @(subscribe [:homebrew? [:race]]))
                true)]
     :order 1000
-    :selections [(subrace-selection spell-lists spells-map false nil nil [:race :custom])
+    :selections [(subrace-selection {} spell-lists spells-map false nil nil [:race :custom])
                  homebrew-skill-prof-selection
                  homebrew-tool-prof-selection
                  homebrew-ability-increase-selection
@@ -2011,7 +2039,8 @@
                            weapon-proficiencies
                            tool-proficiencies
                            source
-                           plugin?]}]
+                           plugin?]
+                    :as race}]
   (let [key (or key (common/name-to-kw name))]
     (t/option-cfg
      {:name name
@@ -2020,7 +2049,7 @@
       :help help
       :selections (concat
                    (if (seq subraces)
-                     [(subrace-selection spell-lists spells-map plugin? source subraces [:race key])])
+                     [(subrace-selection race spell-lists spells-map plugin? source subraces [:race key])])
                    (if (seq language-options) [(language-selection language-options)])
                    selections)
       :modifiers (concat
@@ -2917,3 +2946,140 @@
                 (modifiers/spells-known 2 :blindness-deafness ::character/cha "Deep Gnome" 0 "once per long rest")
                 (modifiers/spells-known 2 :blur ::character/cha "Deep Gnome" 0 "once per long rest")
                 (modifiers/spells-known 1 :disguise-self ::character/cha "Deep Gnome" 0 "once per long rest")]}))
+
+
+(defn feat-prereqs [prereqs]
+  (map
+   (fn [prereq]
+     (cond
+       ((into #{} character/ability-keys) prereq)
+       (ability-prereq prereq 13)
+
+       (= :spellcasting prereq)
+       can-cast-spell-prereq
+
+       :else
+       (armor-prereq prereq)))
+   prereqs))
+
+(def filter-true (filter val))
+
+(defn make-feat-selections [k v]
+  (if v
+    (case k
+      :weapon-prof-choice [(weapon-proficiency-selection v)]
+      :language-choice [(language-selection v)]
+      :skill-tool-choice (map
+                          (fn [i]
+                            (skilled-selection (str "Skill/Tool " (inc i))))
+                          (range v))
+      nil)))
+
+(defn make-feat-modifiers [k v]
+  (if v
+    (case k
+      :initiative [(modifiers/initiative v)]
+      :two-weapon-ac-1 [dual-wield-ac-mod]
+      :two-weapon-any-one-handed [dual-wield-weapon-mod]
+      :max-hp-bonus [(mods/modifier ?hit-point-level-bonus (+ v ?hit-point-level-bonus))]
+      :passive-investigation-5 [(modifiers/passive-investigation 5)]
+      :passive-perception-5 [(modifiers/passive-perception 5)]
+      :medium-armor-max-dex-3 [medium-armor-master-max-bonus]
+      :medium-armor-stealth [medium-armor-master-stealth]
+      :speed [(modifiers/speed 10)]
+      :saving-throw-advantage-traps [(modifiers/saving-throw-advantage [:traps])]
+      :saving-throw-advantage (sequence
+                               (comp
+                                filter-true
+                                (map
+                                 (fn [[k]]
+                                   (modifiers/saving-throw-advantage [k]))))
+                               v)
+      :armor-prof (sequence
+                   (comp
+                    filter-true
+                    (map
+                     (fn [[k]]
+                       (modifiers/armor-proficiency k))))
+                   v)
+      :damage-resistance (sequence
+                          (comp
+                           filter-true
+                           (map
+                            (fn [[k]]
+                              (modifiers/damage-resistance k))))
+                          v)
+      nil)))
+
+(defn plugin-modifiers [props]
+  (reduce
+   (fn [mods [k v]]
+     (let [feat-mods (make-feat-modifiers k v)]
+       (if feat-mods
+         (concat mods feat-mods)
+         mods)))
+   []
+   props))
+
+(defn feat-modifiers [name description props ability-increases]
+  (let [without-saves (sets/intersection ability-increases
+                                         (into #{} character/ability-keys))]
+    (concat
+     (plugin-modifiers props)
+     (if (= 1 (count without-saves))
+       (let [ability-kw (first without-saves)
+             ability-mod (modifiers/ability ability-kw 1)]
+         (if (:saves? ability-increases)
+           [ability-mod
+            (modifiers/saving-throws nil ability-kw)]
+           [ability-mod]))
+       [])
+     [(modifiers/trait-cfg
+       {:name name
+        :description description})])))
+
+(defn feat-selections [props ability-increases]
+  (let [without-saves (sets/intersection ability-increases
+                                         (into #{} character/ability-keys))]
+    (reduce
+     (fn [selections [k v]]
+       (let [feat-selections (make-feat-selections k v)]
+         (if feat-selections
+           (concat selections feat-selections)
+           selections)))
+     (if (seq without-saves)
+       [(if (:saves? ability-increases)
+          (ability-increase-selection
+           without-saves
+           1
+           false
+           [(fn [k] (modifiers/saving-throws nil k))])
+          (ability-increase-selection
+           without-saves
+           1
+           false))]
+       [])
+     props)))
+
+
+(defn feat-option-from-cfg [{:keys [name
+                                    key
+                                    icon
+                                    description
+                                    prereqs
+                                    props
+                                    ability-increases]}]
+  (let [feat-mods (feat-modifiers name
+                                  description
+                                  props
+                                  ability-increases)
+        feat-selections (feat-selections props
+                                         ability-increases)]
+    (t/option-cfg
+     {:name name
+      :key key
+      :icon icon
+      :modifiers feat-mods
+      :selections feat-selections
+      :summary description
+      :prereqs (feat-prereqs prereqs)})))

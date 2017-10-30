@@ -53,7 +53,8 @@
                    :languages #{}
                    :traits []})
 
-(def default-subrace {:traits []})
+(def default-subrace {:race :dwarf
+                      :traits []})
 
 (def default-value
   {:builder {:character {:tab #{:build :options}}}
@@ -70,7 +71,7 @@
    ::bg5e/builder-item default-background
    ::feats5e/builder-item default-feat
    ::race5e/builder-item default-race
-   ::race5e/subrace-builder-itme default-subrace})
+   ::race5e/subrace-builder-item default-subrace})
 
 (defn set-item [key value]
   (try

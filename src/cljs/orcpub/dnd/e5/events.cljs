@@ -2024,10 +2024,25 @@
                            (assoc m key num))))))
 
 (reg-event-db
+ ::race5e/toggle-subrace-value-prop
+ subrace-interceptors
+ (fn [subrace [_ key num]]
+   (update subrace :props (fn [m]
+                         (if (= (get m key) num)
+                           (dissoc m key)
+                           (assoc m key num))))))
+
+(reg-event-db
  ::feats5e/toggle-feat-map-prop
  feat-interceptors
  (fn [feat [_ key value]]
    (update-in feat [:props key value] not)))
+
+(reg-event-db
+ ::race5e/toggle-subrace-map-prop
+ subrace-interceptors
+ (fn [subrace [_ key value]]
+   (update-in subrace [:props key value] not)))
 
 (reg-event-db
  ::feats5e/toggle-feat-ability-increase
@@ -2083,7 +2098,7 @@
 
 (reg-event-db
  ::race5e/set-subrace-ability-increase
- race-interceptors
+ subrace-interceptors
  (fn [subrace [_ ability-kw bonus]]
    (assoc-in subrace [:abilities ability-kw] (js/parseInt bonus))))
 

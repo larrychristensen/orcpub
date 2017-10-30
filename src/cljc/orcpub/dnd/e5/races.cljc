@@ -10,3 +10,6 @@
                                 (spec/coll-of string?)))
 (spec/def ::homebrew-race (spec/keys :req-un [::name ::key ::option-pack]
                                      :opt-un [::languages]))
+
+(spec/def ::race (spec/and keyword? common/keyword-starts-with-letter?))
+(spec/def ::homebrew-subrace (spec/keys :req-un [::name ::key ::race ::option-pack]))
