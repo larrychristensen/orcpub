@@ -3002,6 +3002,13 @@
                      (fn [[k]]
                        (modifiers/armor-proficiency k))))
                    v)
+      :weapon-prof (sequence
+                    (comp
+                     filter-true
+                     (map
+                      (fn [[k]]
+                        (modifiers/weapon-proficiency k))))
+                    v)
       :damage-resistance (sequence
                           (comp
                            filter-true
