@@ -665,13 +665,13 @@
 
 (defn make-item-adder [{:keys [::entity/path]}]
   (cond
+    (-> path last (= :feats)) [feat-adder]
     (-> path last name (s/ends-with? "cantrips-known")) [cantrip-adder]
     (-> path last name (s/ends-with? "spells-known")) [spell-adder]
     :else (match path
             [:race _ :subrace] [subrace-adder path]
             [:race] [race-adder]
             [:background] [background-adder]
-            [:feats] [feat-adder]
             :else nil)))
 
 (defn default-selection-section-body [actual-path
