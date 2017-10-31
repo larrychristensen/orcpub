@@ -3810,20 +3810,6 @@
     [:div.f-s-18.f-w-b.m-b-10 "Other Equipment"]
     [starting-equipment-checkboxes background equip/misc-equipment]]])
 
-(defn background-features [background]
-  [:div.m-t-20
-   [:div.f-s-24.f-w-b.m-b-10 "Feature"]
-   [input-builder-field
-    [:span.f-w-b "Feature Name"]
-    (get-in background [:traits 0 :name])
-    #(dispatch [::bg/set-feature-prop :name %])
-    {:class-name "input h-40 m-b-10"}]
-   [:div
-    [:span.f-w-b "Feature Description"]
-    [textarea-field
-     {:value (get-in background [:traits 0 :summary])
-      :on-change #(dispatch [::bg/set-feature-prop :summary %])}]]])
-
 (defn feat-prereqs [feat]
   [:div.m-b-20
    [:div.f-s-24.f-w-b.m-b-10 "Prerequisites"]
@@ -4088,6 +4074,45 @@
              #(dispatch [toggle-map-prop-event kw key])]])
          weapon/weapons)))])])
 
+(defn option-traits [option
+                     option-key
+                     add-trait-event
+                     edit-trait-name-event
+                     edit-trait-description-event
+                     delete-trait-event]
+  (prn "OPTION" option)
+  [:div.m-b-20
+   [:div.p-t-10.p-b-10.f-w-b.flex.justify-cont-s-b.align-items-c
+    [:div.f-s-24.f-w-b.m-b-10 "Features/Traits"]
+    [:div
+     [:button.form-button.m-l-5
+      {:on-click (make-event-handler add-trait-event option-key)}
+      "add feature/trait"]]]
+   [:div
+    (doall
+     (map-indexed
+      (fn [i {:keys [name description]}]
+        ^{:key i}
+        [:div.m-b-30
+         [:div.flex.align-items-end.m-b-10
+          [:div.flex-grow-1
+           [input-builder-field
+            [:span.f-w-b "Name"]
+            name
+            #(dispatch [edit-trait-name-event i %])
+            {:class-name "input h-40"}]]
+          [:div
+           [:button.form-button.m-l-5
+            {:on-click #(dispatch [delete-trait-event i])}
+            "delete"]]]
+         [:div.w-100-p
+          [:div.f-w-b
+           "Description"]
+          [textarea-field
+           {:value description
+            :on-change #(dispatch [edit-trait-description-event i %])}]]])
+      (:traits option)))]])
+
 (defn option-saving-throw-advantages [option toggle-map-prop-event]
   [:div.m-b-20
    [:div.f-s-18.f-w-b.m-b-10 "Saving Throw Advantage"]
@@ -4281,7 +4306,14 @@
       [:div [option-hps subrace ::races/toggle-subrace-value-prop]]
       [:div [option-damage-resistance subrace ::races/toggle-subrace-map-prop]]
       [:div [option-saving-throw-advantages subrace ::races/toggle-subrace-map-prop]]
-      [:div [option-weapon-proficiency subrace ::races/toggle-subrace-map-prop]]]]))
+      [:div [option-weapon-proficiency subrace ::races/toggle-subrace-map-prop]]]
+     [option-traits
+      subrace
+      ::races/subrace-builder-item
+      ::e5/add-subrace-trait
+      ::e5/edit-subrace-trait-name
+      ::e5/edit-subrace-trait-description
+      ::e5/delete-subrace-trait]]))
 
 (defn race-builder []
   (let [race @(subscribe [::races/builder-item])]
@@ -4348,11 +4380,13 @@
      [:div.m-b-20
       [:div.f-s-24.f-w-b.m-b-10 "Languages"]
       [:div [language-checkboxes race opt/languages]]]
-     #_[:div [background-skill-proficiencies background]]
-     #_[:div [background-languages background]]
-     #_[:div [background-tool-proficiencies background]]
-     #_[:div [background-starting-equipment background]]
-     #_[:div [background-features background]]]))
+     [option-traits
+      race
+      ::races/race-builder-item
+      ::e5/add-race-trait
+      ::e5/edit-race-trait-name
+      ::e5/edit-race-trait-description
+      ::e5/delete-race-trait]]))
 
 (defn background-builder []
   (let [background @(subscribe [::bg/builder-item])]
@@ -4371,7 +4405,14 @@
      [:div [background-languages background]]
      [:div [background-tool-proficiencies background]]
      [:div [background-starting-equipment background]]
-     [:div [background-features background]]]))
+     [:div
+      [option-traits
+       background
+       ::bg/builder-item
+       ::e5/add-background-trait
+       ::e5/edit-background-trait-name
+       ::e5/edit-background-trait-description
+       ::e5/delete-background-trait]]]))
 
 (defn spell-builder []
   (let [{:keys [:level :school] :as spell} @(subscribe [::spells/builder-item])]

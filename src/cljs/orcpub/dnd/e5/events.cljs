@@ -2486,6 +2486,38 @@
                                   (merge option))]
                    [:route route]]})))
 
+(defn reg-option-traits [option-name option-key interceptors]
+  (reg-event-db
+   (keyword "orcpub.dnd.e5"
+            (str "add-" option-name "-trait"))
+   interceptors
+   (fn [option]
+     (prn "ADD RACE TRAIT" option)
+     (update option :traits (fn [t] (if (vector? t) (conj t {}) [{}])))))
+  (reg-event-db
+   (keyword "orcpub.dnd.e5"
+            (str "edit-" option-name "-trait-name"))
+   interceptors
+   (fn [option [_ index name]]
+     (assoc-in option [:traits index :name] name)))
+  (reg-event-db
+   (keyword "orcpub.dnd.e5"
+            (str "edit-" option-name "-trait-description"))
+   interceptors
+   (fn [option [_ index description]]
+     (assoc-in option [:traits index :description] description)))
+  (reg-event-db
+   (keyword "orcpub.dnd.e5"
+            (str "delete-" option-name "-trait"))
+   interceptors
+   (fn [option [_ index]]
+     (prn "OPTION INDEX" option index)
+     (update option :traits common/remove-at-index index))))
+
+(reg-option-traits "subrace" ::race5e/subrace-builder-item subrace-interceptors)
+(reg-option-traits "race" ::race5e/builder-item race-interceptors)
+(reg-option-traits "background" ::bg5e/builder-item background-interceptors)
+
 (reg-new-homebrew
  ::spells/new-spell
  ::spells/set-spell
