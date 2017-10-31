@@ -4060,6 +4060,34 @@
             #(dispatch [toggle-map-prop-event kw damage-type])]])
         opt/damage-types))])])
 
+(defn option-weapon-proficiency [option toggle-map-prop-event]
+  [:div.m-b-20
+   [:div.f-s-18.f-w-b.m-b-10 "Weapon Proficiency"]
+   (let [kw :weapon-prof]
+     [:div.flex.flex-wrap
+      (doall
+       (concat
+        (map
+         (fn [weapon-type]
+           ^{:key weapon-type}
+           [:div.m-r-20.m-b-10
+            [comps/labeled-checkbox
+             (str "All " (s/capitalize (name weapon-type)) " Weapons")
+             (get-in option [:props kw weapon-type])
+             false
+             #(dispatch [toggle-map-prop-event kw weapon-type])]])
+         [:simple :martial])
+        (map
+         (fn [{:keys [key name]}]
+           ^{:key key}
+           [:div.m-r-20.m-b-10
+            [comps/labeled-checkbox
+             name
+             (get-in option [:props kw key])
+             false
+             #(dispatch [toggle-map-prop-event kw key])]])
+         weapon/weapons)))])])
+
 (defn option-saving-throw-advantages [option toggle-map-prop-event]
   [:div.m-b-20
    [:div.f-s-18.f-w-b.m-b-10 "Saving Throw Advantage"]
@@ -4252,7 +4280,8 @@
       [:div.f-s-24.f-w-b.m-b-10 "Modifiers"]
       [:div [option-hps subrace ::races/toggle-subrace-value-prop]]
       [:div [option-damage-resistance subrace ::races/toggle-subrace-map-prop]]
-      [:div [option-saving-throw-advantages subrace ::races/toggle-subrace-map-prop]]]]))
+      [:div [option-saving-throw-advantages subrace ::races/toggle-subrace-map-prop]]
+      [:div [option-weapon-proficiency subrace ::races/toggle-subrace-map-prop]]]]))
 
 (defn race-builder []
   (let [race @(subscribe [::races/builder-item])]
