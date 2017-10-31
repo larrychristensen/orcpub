@@ -130,3 +130,11 @@
 (defn keyword-starts-with-letter? [kw]
   (and (keyword? kw)
        (-> kw name starts-with-letter?)))
+
+(defn remove-at-index [v index]
+  (vec
+   (keep-indexed
+    (fn [i item]
+      (if (not= i index)
+        item))
+    v)))
