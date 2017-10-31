@@ -2492,7 +2492,6 @@
             (str "add-" option-name "-trait"))
    interceptors
    (fn [option]
-     (prn "ADD RACE TRAIT" option)
      (update option :traits (fn [t] (if (vector? t) (conj t {}) [{}])))))
   (reg-event-db
    (keyword "orcpub.dnd.e5"
@@ -2511,7 +2510,6 @@
             (str "delete-" option-name "-trait"))
    interceptors
    (fn [option [_ index]]
-     (prn "OPTION INDEX" option index)
      (update option :traits common/remove-at-index index))))
 
 (reg-option-traits "subrace" ::race5e/subrace-builder-item subrace-interceptors)
