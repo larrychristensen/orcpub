@@ -60,7 +60,7 @@
   {:builder {:character {:tab #{:build :options}}}
    :character default-character
    :template t5e/template
-   #_:plugins #_t5e/plugins
+   :plugins {"Default Option Source" {}}
    :locked-components #{}
    :route (parse-route)
    :route-history (list default-route)
