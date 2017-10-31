@@ -2480,8 +2480,10 @@
 (defn reg-new-homebrew [event set-event default-val route]
   (reg-event-fx
    event
-   (fn [_ [_ option-pack]]
-     {:dispatch-n [[set-event (assoc default-val :option-pack option-pack)]
+   (fn [_ [_ option-pack option]]
+     {:dispatch-n [[set-event (-> default-val
+                                  (assoc :option-pack option-pack)
+                                  (merge option))]
                    [:route route]]})))
 
 (reg-new-homebrew
