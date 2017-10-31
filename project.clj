@@ -27,7 +27,7 @@
                  [clj-http "3.6.1"]
                  [com.yetanalytics/ring-etag-middleware "0.1.1"]
                  
-                 ;;[org.clojure/core.match "0.3.0-alpha4"]
+                 [org.clojure/core.match "0.3.0-alpha5"]
                  [re-frame "0.9.0"]
                  [reagent "0.7.0"]
                  [garden "1.3.2"]

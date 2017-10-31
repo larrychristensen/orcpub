@@ -22,6 +22,9 @@
             [orcpub.dnd.e5.options :as opt5e]
             [orcpub.dnd.e5.template :as t5e]
             [orcpub.dnd.e5.spells :as spells]
+            [orcpub.dnd.e5.feats :as feats]
+            [orcpub.dnd.e5.backgrounds :as backgrounds]
+            [orcpub.dnd.e5.races :as races]
             [orcpub.dnd.e5.weapons :as weapon5e]
             [orcpub.dnd.e5.armor :as armor5e]
             [orcpub.dnd.e5.magic-items :as mi5e]
@@ -39,12 +42,13 @@
             [clojure.spec.alpha :as spec]
             [clojure.spec.test.alpha :as stest]
             [cljs.core.async :refer [<!]]
+            [clojure.core.match :refer [match]]
 
             [reagent.core :as r]
             [re-frame.core :refer [subscribe dispatch dispatch-sync]])
   (:require-macros [cljs.core.async.macros :refer [go]]))
 
-(def print-disabled? false)
+(def print-disabled? true)
 
 (def print-enabled? (and (not print-disabled?)
                          js/window.location
@@ -623,6 +627,53 @@
       [:div selector])
     option-selectors)))
 
+(defn item-adder [title click-fn]
+  [:div.m-5.p-10.pointer.bg-lighter.b-rad-5
+   {:on-click click-fn}
+   [:i.fa.fa-plus]
+   [:span.orange.underline.m-l-5 title]])
+
+(defn cantrip-adder []
+  (item-adder
+   "Add Cantrip"
+   #(dispatch [::spells/new-spell "Default Option Source" {:level 0}])))
+
+(defn spell-adder []
+  (item-adder
+   "Add Spell"
+   #(dispatch [::spells/new-spell "Default Option Source" {:level 1}])))
+
+(defn subrace-adder [[_ race]]
+  (item-adder
+   "Add Subrace"
+   #(dispatch [::races/new-subrace "Default Option Source" {:race race}])))
+
+(defn race-adder []
+  (item-adder
+   "Add Race"
+   #(dispatch [::races/new-race "Default Option Source"])))
+
+(defn background-adder []
+  (item-adder
+   "Add Background"
+   #(dispatch [::backgrounds/new-background "Default Option Source"])))
+
+(defn feat-adder []
+  (item-adder
+   "Add Feat"
+   #(dispatch [::feats/new-feat "Default Option Source"])))
+
+(defn make-item-adder [{:keys [::entity/path]}]
+  (cond
+    (-> path last name (s/ends-with? "cantrips-known")) [cantrip-adder]
+    (-> path last name (s/ends-with? "spells-known")) [spell-adder]
+    :else (match path
+            [:race _ :subrace] [subrace-adder path]
+            [:race] [race-adder]
+            [:background] [background-adder]
+            [:feats] [feat-adder]
+            :else nil)))
+
 (defn default-selection-section-body [actual-path
                                       {:keys [::t/options] :as selection}
                                       disable-select-new?
@@ -639,7 +690,12 @@
              disable-select-new?
              homebrew?
              option])
-          (sort-by (juxt ::t/order ::t/name) options)))]
+          (sort-by (juxt ::t/order ::t/name) options)))
+        parts (partition-all
+               (common/round-up (/ (count option-selectors)
+                                   num-columns))
+               option-selectors)
+        item-adder (make-item-adder selection)]
     [:div.flex
      (doall
       (map-indexed
@@ -647,18 +703,25 @@
          ^{:key i}
          [:div.flex-grow-1
           {:class-name (str "w-" (int (/ 100 num-columns)) "-p")}
-          (doall
-           (map-indexed
-            (fn [j selector]
-              ^{:key j}
-              [:div selector])
-            part))])
-       (partition-all
-        (common/round-up (/ (count option-selectors)
-                            num-columns))
-        option-selectors)))]))
+          [:div
+           (doall
+            (map-indexed
+             (fn [j selector]
+               ^{:key j}
+               [:div selector])
+             part))]
+          (if (and item-adder (= i (dec (count parts))))
+            item-adder)])
+       parts))]))
 
-(defn selection-section [title built-template option-paths ui-fns selection num-columns remaining & [hide-homebrew?]]
+(defn selection-section [title
+                         built-template
+                         option-paths
+                         ui-fns
+                         selection
+                         num-columns
+                         remaining
+                         & [hide-homebrew?]]
   (let [{:keys [path disable-selection-new homebrew?] :as data}
         (views-aux/selection-section-data
          title
@@ -1364,18 +1427,15 @@
 (def pages
   [{:name "Race"
     :icon "woman-elf-face"
-    :tags #{:race :subrace}
-    :components [add-race-component]}
+    :tags #{:race :subrace}}
    {:name "Ability Scores / Feats"
     :icon "strong"
     :tags #{:ability-scores :feats}
     :ui-fns [{:key :ability-scores :group? true :ui-fn abilities-editor}
-             #_{:key :feats :group? true :ui-fn feats-editor}]
-    :components [add-feat-component]}
+             #_{:key :feats :group? true :ui-fn feats-editor}]}
    {:name "Background"
     :icon "ages"
-    :tags #{:background}
-    :components [add-background-component]}
+    :tags #{:background}}
    {:name "Class / Level"
     :icon "mounted-knight"
     :tags #{:class :subclass}
@@ -1384,8 +1444,7 @@
    {:name "Spells"
     :icon "spell-book"
     :tags #{:spells}
-    :components [add-spell-component
-                 known-mode-info]}
+    :components [known-mode-info]}
    {:name "Proficiencies"
     :icon "juggler"
     :tags #{:profs}
@@ -1586,7 +1645,15 @@
                                   (matches-non-group-fn key)
                                   final-selections)
                        remaining (entity/count-remaining built-template character selection)]
-                   (selection-section (or title (::t/name selection)) built-template option-paths {key ui-fn} selection num-columns remaining hide-homebrew?)))])
+                   (selection-section
+                    (or title (::t/name selection))
+                    built-template
+                    option-paths
+                    {key ui-fn}
+                    selection
+                    num-columns
+                    remaining
+                    hide-homebrew?)))])
             ui-fns))]
          (when (seq non-ui-fn-selections)
            [:div.m-t-20
@@ -1600,7 +1667,14 @@
                             (not (zero? remaining))
                             show-if-zero?)
                       ^{:key (::entity/path selection)}
-                      [:div (selection-section (::t/name selection) built-template option-paths nil selection num-columns remaining)])))
+                      [:div (selection-section
+                             (::t/name selection)
+                             built-template
+                             option-paths
+                             nil
+                             selection
+                             num-columns
+                             remaining)])))
                 sorted-selections)))])])]]))
 
 (def image-style

@@ -2775,7 +2775,7 @@
                                              (t/option-cfg
                                               {:name name
                                                :modifiers [(mod/modifier ?sorcerer-draconic-ancestry ancestry)]}))
-                                           draconic-ancestries)})]
+                                           opt5e/draconic-ancestries)})]
                   :traits [{:name "Draconic Resilience"
                             :page 102
                             :summary "+1 HP/level, unarmored AC 13 + DEX modifier"}]

@@ -3083,3 +3083,60 @@
       :selections feat-selections
       :summary description
       :prereqs (feat-prereqs prereqs)})))
+
+(def draconic-ancestries
+  [{:name "Black"
+    :breath-weapon {:damage-type :acid
+                    :area-type :line
+                    :line-width 5
+                    :line-length 30
+                    :save ::character/dex}}
+   {:name "Blue"
+    :breath-weapon {:damage-type :lightning
+                    :area-type :line
+                    :line-width 5
+                    :line-length 30
+                    :save ::character/dex}}
+   {:name "Brass"
+    :breath-weapon {:damage-type :fire
+                    :area-type :line
+                    :line-width 5
+                    :line-length 30
+                    :save ::character/dex}}
+   {:name "Bronze"
+    :breath-weapon {:damage-type :lightning
+                    :area-type :line
+                    :line-width 5
+                    :line-length 30
+                    :save ::character/dex}}
+   {:name "Copper"
+    :breath-weapon {:damage-type :acid
+                    :area-type :line
+                    :line-width 5
+                    :line-length 30
+                    :save ::character/dex}}
+   {:name "Gold"
+    :breath-weapon {:damage-type :fire
+                    :area-type :cone
+                    :length 15
+                    :save ::character/dex}}
+   {:name "Green"
+    :breath-weapon {:damage-type :poison
+                    :area-type :cone
+                    :length 15
+                    :save ::character/con}}
+   {:name "Red"
+    :breath-weapon {:damage-type :fire
+                    :area-type :cone
+                    :length 15
+                    :save ::character/dex}}
+   {:name "Silver"
+    :breath-weapon {:damage-type :cold
+                    :area-type :cone
+                    :length 15
+                    :save ::character/con}}
+   {:name "White"
+    :breath-weapon {:damage-type :cold
+                    :area-type :cone
+                    :length 15
+                    :save ::character/con}}])

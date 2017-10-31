@@ -260,63 +260,6 @@
     :modifiers [(mod5e/damage-resistance (:damage-type breath-weapon))
                 (mod/modifier ?draconic-ancestry-breath-weapon breath-weapon)]}))
 
-(def draconic-ancestries
-  [{:name "Black"
-    :breath-weapon {:damage-type :acid
-                    :area-type :line
-                    :line-width 5
-                    :line-length 30
-                    :save ::char5e/dex}}
-   {:name "Blue"
-    :breath-weapon {:damage-type :lightning
-                    :area-type :line
-                    :line-width 5
-                    :line-length 30
-                    :save ::char5e/dex}}
-   {:name "Brass"
-    :breath-weapon {:damage-type :fire
-                    :area-type :line
-                    :line-width 5
-                    :line-length 30
-                    :save ::char5e/dex}}
-   {:name "Bronze"
-    :breath-weapon {:damage-type :lightning
-                    :area-type :line
-                    :line-width 5
-                    :line-length 30
-                    :save ::char5e/dex}}
-   {:name "Copper"
-    :breath-weapon {:damage-type :acid
-                    :area-type :line
-                    :line-width 5
-                    :line-length 30
-                    :save ::char5e/dex}}
-   {:name "Gold"
-    :breath-weapon {:damage-type :fire
-                    :area-type :cone
-                    :length 15
-                    :save ::char5e/dex}}
-   {:name "Green"
-    :breath-weapon {:damage-type :poison
-                    :area-type :cone
-                    :length 15
-                    :save ::char5e/con}}
-   {:name "Red"
-    :breath-weapon {:damage-type :fire
-                    :area-type :cone
-                    :length 15
-                    :save ::char5e/dex}}
-   {:name "Silver"
-    :breath-weapon {:damage-type :cold
-                    :area-type :cone
-                    :length 15
-                    :save ::char5e/con}}
-   {:name "White"
-    :breath-weapon {:damage-type :cold
-                    :area-type :cone
-                    :length 15
-                    :save ::char5e/con}}])
-
 (def dragonborn-option-cfg
   {:name "Dragonborn"
    :key :dragonborn
@@ -347,7 +290,7 @@
                   :tags #{:subrace}
                   :options (map
                             draconic-ancestry-option
-                            draconic-ancestries)})]})
+                            opt5e/draconic-ancestries)})]})
 
 
 (def gnome-option-cfg

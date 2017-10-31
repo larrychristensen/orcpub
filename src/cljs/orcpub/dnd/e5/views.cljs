@@ -4529,7 +4529,7 @@
 
 (defn subrace-builder-page []
   [content-page
-   "Subace Builder"
+   "Subrace Builder"
    [{:title "New Subace"
      :icon "plus"
      :on-click #(dispatch [::races/reset-subrace])}
