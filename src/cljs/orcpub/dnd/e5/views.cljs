@@ -4289,7 +4289,7 @@
                  :values (concat
                           (map
                            (fn [type]
-                             {:title (str "All " type)
+                             {:title (str "All " (name type))
                               :value type})
                            [:simple :martial])
                           (map
