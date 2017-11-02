@@ -216,6 +216,18 @@
               20 {:selections [(eldritch-knight-any-spell-selection subclass-key spell-lists spells-map 1 [1 2 3 4])]}}
     nil))
 
+(defn merge-level [level-1 level-2]
+  (merge-with
+   concat
+   level-1
+   level-2))
+
+(defn merge-levels [& level-specs]
+  (apply
+   merge-with
+   merge-level
+   level-specs))
+
 (defn make-levels [spell-lists spells-map {:keys [key class spellcasting] :as option}]
   (let [modifiers (:level-modifiers option)
         by-level (group-by :level modifiers)
@@ -227,8 +239,19 @@
        (assoc-in levels
                  [(or level 1) :modifiers]
                  (map (partial level-modifier class) level-modifiers)))
-     (or spellcaster-levels
-         {})
+     (merge-levels
+      spellcaster-levels
+      (if (and (= class :warlock)
+               (:warlock-spells option))
+        (reduce-kv
+         (fn [levels spell-level spells]
+           (let [level (- (* 2 spell-level) 1)]
+             (if (and spell-level (seq (vals spells)))
+               (assoc-in levels
+                         [level :selections]
+                         [(opt5e/warlock-subclass-spell-selection spell-lists spells-map (vals spells))]))))
+         {}
+         (:warlock-spells option))))
      by-level)))
 
 (reg-sub
