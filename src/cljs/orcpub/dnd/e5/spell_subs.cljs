@@ -150,6 +150,7 @@
                                      num
                                      spell-levels))
 
+
 (defn arcane-trickster-any-spell-selection [subclass-key spell-lists spells-map num spell-levels]
   (subclass-wizard-spell-selection spell-lists
                                    spells-map
@@ -215,7 +216,7 @@
               20 {:selections [(eldritch-knight-any-spell-selection subclass-key spell-lists spells-map 1 [1 2 3 4])]}}
     nil))
 
-(defn make-levels [spell-lists spells-map {:keys [key class spellcasting]}]
+(defn make-levels [spell-lists spells-map {:keys [key class spellcasting] :as option}]
   (let [modifiers (:level-modifiers option)
         by-level (group-by :level modifiers)
         add-spellcasting? (and spellcasting
@@ -226,7 +227,8 @@
        (assoc-in levels
                  [(or level 1) :modifiers]
                  (map (partial level-modifier class) level-modifiers)))
-     spellcaster-levels
+     (or spellcaster-levels
+         {})
      by-level)))
 
 (reg-sub
@@ -237,10 +239,10 @@
  (fn [[plugins spell-lists spells-map] _]
    (map
     (fn [subclass]
-      (let [updated (assoc subclass
-                     :modifiers (opt5e/plugin-modifiers (:props subclass))
-                     :levels (make-levels spell-lists spells-map subclass))]
-        updated))
+      (let [levels (make-levels spell-lists spells-map subclass)]
+        (assoc subclass
+               :modifiers (opt5e/plugin-modifiers (:props subclass))
+               :levels levels)))
     (apply concat (map (comp vals ::e5/subclasses) plugins)))))
 
 
