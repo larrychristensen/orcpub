@@ -7,6 +7,7 @@
             [orcpub.dnd.e5.backgrounds :as bg5e]
             [orcpub.dnd.e5.feats :as feats5e]
             [orcpub.dnd.e5.races :as race5e]
+            [orcpub.dnd.e5.classes :as class5e]
             [orcpub.dnd.e5.magic-items :as mi5e]
             [orcpub.dnd.e5.spells :as spells5e]
             [orcpub.dnd.e5.equipment :as equip5e]
@@ -27,6 +28,7 @@
 (def local-storage-feat-key "feat")
 (def local-storage-race-key "race")
 (def local-storage-subrace-key "subrace")
+(def local-storage-subclass-key "subclass")
 (def local-storage-plugins-key "plugins")
 
 (def default-route route-map/dnd-e5-char-builder-route)
@@ -38,7 +40,7 @@
       route
       default-route)))
 
-(def default-character (char5e/set-class t5e/character :barbarian 0 t5e/barbarian-option))
+(def default-character (char5e/set-class t5e/character :barbarian 0 (class5e/barbarian-option nil nil nil)))
 
 (def default-spell {:level 0
                     :school "abjuration"})
@@ -56,6 +58,10 @@
 (def default-subrace {:race :dwarf
                       :traits []})
 
+(def default-subclass {:class :barbarian
+                       :traits []
+                       :level-modifiers []})
+
 (def default-value
   {:builder {:character {:tab #{:build :options}}}
    :character default-character
@@ -71,7 +77,8 @@
    ::bg5e/builder-item default-background
    ::feats5e/builder-item default-feat
    ::race5e/builder-item default-race
-   ::race5e/subrace-builder-item default-subrace})
+   ::race5e/subrace-builder-item default-subrace
+   ::class5e/subclass-builder-item default-subclass})
 
 (defn set-item [key value]
   (try
@@ -112,6 +119,10 @@
 (defn subrace->local-store [subrace]
   (if js/window.localStorage
     (set-item local-storage-subrace-key (str subrace))))
+
+(defn subclass->local-store [subclass]
+  (if js/window.localStorage
+    (set-item local-storage-subclass-key (str subclass))))
 
 (defn plugins->local-store [plugins]
   (if js/window.localStorage
