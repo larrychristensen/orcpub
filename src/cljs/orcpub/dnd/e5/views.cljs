@@ -4456,21 +4456,65 @@
        ::e5/edit-subclass-modifier-value
        ::e5/edit-subclass-modifier-level
        ::e5/delete-subclass-modifier]]
-     (if (#{:fighter :rogue} class-key)
+     (if (#{:fighter :rogue :warlock} class-key)
        (let [spellcasting (get subclass :spellcasting)
              spellcasting? (some? spellcasting)]
          [:div.m-b-20
           [:div.f-s-24.f-w-b.m-b-10 "Spellcasting"]
-          [:div.flex.flex-wrap
-           [labeled-dropdown
-            "Does this subclass cast wizard spells?"
-            {:items (map
-                     (fn [v]
-                       {:title (if v "Yes" "No")
-                        :value v})
-                     [false true])
-             :value spellcasting?
-             :on-change #(dispatch [::classes/toggle-subclass-spellcasting])}]]]))
+          (cond
+            (#{:fighter :rogue} class-key)
+            [:div.flex.flex-wrap
+             [labeled-dropdown
+              "Does this subclass cast wizard spells?"
+              {:items (map
+                       (fn [v]
+                         {:title (if v "Yes" "No")
+                          :value v})
+                       [false true])
+               :value spellcasting?
+               :on-change #(dispatch [::classes/toggle-subclass-spellcasting])}]]
+
+            (= :warlock class-key)
+            [:div
+             [:div.f-s-18.f-w-b.m-b-10 (str (:name subclass) " Expanded Spells")]
+             [:table
+              [:tbody
+               [:tr.f-w-b
+                [:th.p-5 "Spell Level"]
+                [:th.p-5.t-a-l "Spells"]]
+               (doall
+                (map
+                 (fn [level]
+                   ^{:key level}
+                   [:tr
+                    [:th.p-5 (common/ordinal level)]
+                    (let [spells (remove
+                                  (fn [{:keys [key]}]
+                                    ((into #{} (get-in spell-lists [:warlock level]))
+                                     key))
+                                  @(subscribe [::spells/spells-for-level level]))]
+                      [:th.p-5
+                       [:div.flex.flex-wrap
+                        (doall
+                         (map
+                          (fn [i]
+                            ^{:key i}
+                            [:div.m-l-5.m-b-10
+                             [dropdown
+                              {:items (cons
+                                       {:title "<select spell>"
+                                        :value :select
+                                        :disabled? true}
+                                       (map
+                                        (fn [{:keys [name key]}]
+                                          {:title name
+                                           :value key})
+                                        spells))
+                               :value (or (get-in subclass [:warlock-spells level i])
+                                          :select)
+                               :on-change #(dispatch [::classes/set-warlock-spell level i (keyword %)])}]])
+                          (range 2)))]])])
+                 (range 1 6)))]]])]))
      [option-traits
       subclass
       ::classes/subclass-builder-item
