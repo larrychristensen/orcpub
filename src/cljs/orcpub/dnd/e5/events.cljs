@@ -12,6 +12,7 @@
             [orcpub.dnd.e5.backgrounds :as bg5e]
             [orcpub.dnd.e5.feats :as feats5e]
             [orcpub.dnd.e5.races :as race5e]
+            [orcpub.dnd.e5.classes :as class5e]
             [orcpub.dnd.e5.units :as units5e]
             [orcpub.dnd.e5.party :as party5e]
             [orcpub.dnd.e5.character.random :as char-rand5e]
@@ -30,6 +31,7 @@
                                       feat->local-store
                                       race->local-store
                                       subrace->local-store
+                                      subclass->local-store
                                       plugins->local-store
                                       tab-path
                                       default-character
@@ -37,7 +39,8 @@
                                       default-background
                                       default-feat
                                       default-race
-                                      default-subrace]]
+                                      default-subrace
+                                      default-subclass]]
             [re-frame.core :refer [reg-event-db reg-event-fx reg-fx inject-cofx path trim-v
                                    after debug dispatch dispatch-sync subscribe ->interceptor]]
             [cljs.spec.alpha :as spec]
@@ -79,6 +82,8 @@
 
 (def subrace->local-store-interceptor (after subrace->local-store))
 
+(def subclass->local-store-interceptor (after subclass->local-store))
+
 (def plugins->local-store-interceptor (after plugins->local-store))
 
 (def set-changed (->interceptor
@@ -109,6 +114,9 @@
 
 (def subrace-interceptors [(path ::race5e/subrace-builder-item)
                            subrace->local-store-interceptor])
+
+(def subclass-interceptors [(path ::class5e/subclass-builder-item)
+                           subclass->local-store-interceptor])
 
 (def plugins-interceptors [(path :plugins)
                           plugins->local-store-interceptor])
@@ -409,6 +417,14 @@
  ::e5/subraces
  "You must specify 'Name', 'Option Source Name', and 'Race'")
 
+(reg-save-homebrew
+ "Subclass"
+ ::class5e/save-subclass
+ ::class5e/subclass-builder-item
+ ::class5e/homebrew-subclass
+ ::e5/subclasses
+ "You must specify 'Name', 'Option Source Name', and 'Class'")
+
 (defn reg-delete-homebrew [event-key plugin-key]
   (reg-event-fx
    event-key
@@ -434,6 +450,10 @@
 (reg-delete-homebrew
  ::race5e/delete-subrace
  ::e5/subraces)
+
+(reg-delete-homebrew
+ ::class5e/delete-subclass
+ ::e5/subclasses)
 
 (reg-event-fx
  ::party5e/make-party-success
@@ -1503,6 +1523,11 @@
  ::race5e/set-subrace
  routes/dnd-e5-subrace-builder-page-route)
 
+(reg-edit-homebrew
+ ::class5e/edit-subclass
+ ::class5e/set-subclass
+ routes/dnd-e5-subclass-builder-page-route)
+
 (reg-event-fx
  :delete-character-success
  (fn [_ _]
@@ -1997,6 +2022,26 @@
    (assoc subrace prop-key prop-value)))
 
 (reg-event-db
+ ::class5e/set-subclass-prop
+ subclass-interceptors
+ (fn [subclass [_ prop-key prop-value]]
+   (assoc subclass prop-key prop-value)))
+
+(reg-event-db
+ ::class5e/toggle-subclass-spellcasting
+ subclass-interceptors
+ (fn [subclass]
+   (if (:spellcasting subclass)
+     (dissoc subclass :spellcasting)
+     (assoc subclass :spellcasting {:level-factor 3}))))
+
+(reg-event-db
+ ::class5e/set-spell-list
+ subclass-interceptors
+ (fn [subclass [_ class-kw]]
+   (assoc-in subclass [:spellcasting :spell-list] class-kw)))
+
+(reg-event-db
  ::feats5e/set-feat-prop
  feat-interceptors
  (fn [feat [_ prop-key prop-value]]
@@ -2033,6 +2078,15 @@
                            (assoc m key num))))))
 
 (reg-event-db
+ ::class5e/toggle-subclass-value-prop
+ subclass-interceptors
+ (fn [subclass [_ key num]]
+   (update subclass :props (fn [m]
+                         (if (= (get m key) num)
+                           (dissoc m key)
+                           (assoc m key num))))))
+
+(reg-event-db
  ::feats5e/toggle-feat-map-prop
  feat-interceptors
  (fn [feat [_ key value]]
@@ -2043,6 +2097,12 @@
  subrace-interceptors
  (fn [subrace [_ key value]]
    (update-in subrace [:props key value] not)))
+
+(reg-event-db
+ ::class5e/toggle-subclass-map-prop
+ subclass-interceptors
+ (fn [subclass [_ key value]]
+   (update-in subclass [:props key value] not)))
 
 (reg-event-db
  ::feats5e/toggle-feat-ability-increase
@@ -2440,6 +2500,12 @@
  (fn [_ [_ subrace]]
    subrace))
 
+(reg-event-db
+ ::class5e/set-subclass
+ subclass-interceptors
+ (fn [_ [_ subclass]]
+   subclass))
+
 (reg-event-fx
  ::mi/reset-item
  (fn [_ _]
@@ -2477,6 +2543,12 @@
    {:dispatch [::race5e/set-subrace
                default-subrace]}))
 
+(reg-event-fx
+ ::class5e/reset-subclass
+ (fn [_ _]
+   {:dispatch [::class5e/set-subclass
+               default-subclass]}))
+
 (defn reg-new-homebrew [event set-event default-val route]
   (reg-event-fx
    event
@@ -2486,12 +2558,48 @@
                                   (merge option))]
                    [:route route]]})))
 
+(defn reg-option-modifiers [option-name option-key interceptors]
+  (reg-event-db
+   (keyword "orcpub.dnd.e5"
+            (str "add-" option-name "-modifier"))
+   interceptors
+   (fn [option]
+     (update option :level-modifiers (fn [t] (if (vector? t) (conj t {}) [{}])))))
+  (reg-event-db
+   (keyword "orcpub.dnd.e5"
+            (str "edit-" option-name "-modifier-type"))
+   interceptors
+   (fn [option [_ index type]]
+     (prn "TYPE" type)
+     (assoc-in option [:level-modifiers index :type] type)))
+  (reg-event-db
+   (keyword "orcpub.dnd.e5"
+            (str "edit-" option-name "-modifier-level"))
+   interceptors
+   (fn [option [_ index level]]
+     (assoc-in option [:level-modifiers index :level] level)))
+  (reg-event-db
+   (keyword "orcpub.dnd.e5"
+            (str "edit-" option-name "-modifier-value"))
+   interceptors
+   (fn [option [_ index value]]
+     (assoc-in option [:level-modifiers index :value] value)))
+  (reg-event-db
+   (keyword "orcpub.dnd.e5"
+            (str "delete-" option-name "-modifier"))
+   interceptors
+   (fn [option [_ index]]
+     (update option :level-modifiers common/remove-at-index index))))
+
+(reg-option-modifiers "subclass" ::class5e/subclass-builder-item subclass-interceptors)
+
 (defn reg-option-traits [option-name option-key interceptors]
   (reg-event-db
    (keyword "orcpub.dnd.e5"
             (str "add-" option-name "-trait"))
    interceptors
    (fn [option]
+     (prn "OPTION" option)
      (update option :traits (fn [t] (if (vector? t) (conj t {}) [{}])))))
   (reg-event-db
    (keyword "orcpub.dnd.e5"
@@ -2499,6 +2607,12 @@
    interceptors
    (fn [option [_ index name]]
      (assoc-in option [:traits index :name] name)))
+  (reg-event-db
+   (keyword "orcpub.dnd.e5"
+            (str "edit-" option-name "-trait-level"))
+   interceptors
+   (fn [option [_ index level]]
+     (assoc-in option [:traits index :level] level)))
   (reg-event-db
    (keyword "orcpub.dnd.e5"
             (str "edit-" option-name "-trait-description"))
@@ -2513,6 +2627,7 @@
      (update option :traits common/remove-at-index index))))
 
 (reg-option-traits "subrace" ::race5e/subrace-builder-item subrace-interceptors)
+(reg-option-traits "subclass" ::class5e/subclass-builder-item subclass-interceptors)
 (reg-option-traits "race" ::race5e/builder-item race-interceptors)
 (reg-option-traits "background" ::bg5e/builder-item background-interceptors)
 
@@ -2545,6 +2660,12 @@
  ::race5e/set-subrace
  default-subrace
  routes/dnd-e5-subrace-builder-page-route)
+
+(reg-new-homebrew
+ ::class5e/new-subclass
+ ::class5e/set-subclass
+ default-subclass
+ routes/dnd-e5-subclass-builder-page-route)
 
 (reg-event-fx
  ::mi/new-item

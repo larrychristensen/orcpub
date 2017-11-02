@@ -12,6 +12,7 @@
             [orcpub.dnd.e5.character :as char]
             [orcpub.dnd.e5.backgrounds :as bg]
             [orcpub.dnd.e5.races :as races]
+            [orcpub.dnd.e5.classes :as classes]
             [orcpub.dnd.e5.feats :as feats]
             [orcpub.dnd.e5.units :as units]
             [orcpub.dnd.e5.party :as party]
@@ -34,6 +35,7 @@
             [orcpub.dnd.e5.options :as opt]
             [orcpub.dnd.e5.events :as events]
             [clojure.string :as s]
+            [cljs.reader :as reader]
             [orcpub.user-agent :as user-agent]
             [cljs.core.async :refer [<! timeout]]
             [bidi.bidi :as bidi])
@@ -1641,10 +1643,11 @@
     :on-change #(on-change (event-value %))}
    (doall
     (map
-     (fn [{:keys [value title]}]
+     (fn [{:keys [value title disabled?]}]
        ^{:key value}
        [:option.builder-dropdown-item
-        {:value value}
+        (cond-> {:value value}
+          disabled? (assoc :disabled true))
         title])
      items))])
 
@@ -3634,6 +3637,9 @@
 (defn subrace-input-field [title prop subrace & [class-names]]
   (builder-input-field title prop subrace ::races/set-subrace-prop class-names))
 
+(defn subclass-input-field [title prop subclass & [class-names]]
+  (builder-input-field title prop subclass ::classes/set-subclass-prop class-names))
+
 (defn feat-input-field [title prop feat & [class-names]]
   (builder-input-field title prop feat ::feats/set-feat-prop class-names))
 
@@ -4079,39 +4085,56 @@
                      add-trait-event
                      edit-trait-name-event
                      edit-trait-description-event
-                     delete-trait-event]
-  (prn "OPTION" option)
+                     delete-trait-event
+                     & [edit-trait-level-event]]
   [:div.m-b-20
    [:div.p-t-10.p-b-10.f-w-b.flex.justify-cont-s-b.align-items-c
     [:div.f-s-24.f-w-b.m-b-10 "Features/Traits"]
     [:div
      [:button.form-button.m-l-5
       {:on-click (make-event-handler add-trait-event option-key)}
-      "add feature/trait"]]]
+      "add feature / trait"]]]
    [:div
-    (doall
-     (map-indexed
-      (fn [i {:keys [name description]}]
-        ^{:key i}
-        [:div.m-b-30
-         [:div.flex.align-items-end.m-b-10
-          [:div.flex-grow-1
-           [input-builder-field
-            [:span.f-w-b "Name"]
-            name
-            #(dispatch [edit-trait-name-event i %])
-            {:class-name "input h-40"}]]
-          [:div
-           [:button.form-button.m-l-5
-            {:on-click #(dispatch [delete-trait-event i])}
-            "delete"]]]
-         [:div.w-100-p
-          [:div.f-w-b
-           "Description"]
-          [textarea-field
-           {:value description
-            :on-change #(dispatch [edit-trait-description-event i %])}]]])
-      (:traits option)))]])
+    (if (seq (:traits option))
+      (doall
+       (map-indexed
+        (fn [i {:keys [name description level]}]
+          ^{:key i}
+          [:div.m-b-30
+           [:div.flex.align-items-end.m-b-10
+            [:div.flex-grow-1
+             [input-builder-field
+              [:span.f-w-b "Name"]
+              name
+              #(dispatch [edit-trait-name-event i %])
+              {:class-name "input h-40"}]]
+            (if edit-trait-level-event
+              [:div.m-l-5
+               [labeled-dropdown
+                "Unlocked at Level"
+                {:items (map
+                         (fn [lvl]
+                           {:title lvl
+                            :value lvl})
+                         (range 1 21))
+                 :value level
+                 :on-change #(dispatch [edit-trait-level-event i (js/parseInt %)])}]])
+            [:div
+             [:button.form-button.m-l-5
+              {:on-click #(dispatch [delete-trait-event i])}
+              "delete"]]]
+           [:div.w-100-p
+            [:div.f-w-b
+             "Description"]
+            [textarea-field
+             {:value description
+              :on-change #(dispatch [edit-trait-description-event i %])}]]])
+        (:traits option)))
+      [:div.p-10.bg-lighter.pointer
+       {:on-click #(dispatch [add-trait-event option-key])}
+       [:span "There are currently no features/traits, click "]
+       [:span.orange.underline "here"]
+       [:span " or on the button above to add one."]])]])
 
 (defn option-saving-throw-advantages [option toggle-map-prop-event]
   [:div.m-b-20
@@ -4207,6 +4230,257 @@
      [:div [feat-speed-bonuses feat]]
      [:div [feat-initiative-bonuses feat]]
      [:div [feat-misc-modifiers feat]]]))
+
+(defn spell-selector []
+  (let [level (r/atom 0)]
+    (fn [index spell-cfg value-change-event]
+      (let [spells @(subscribe [::spells/spells-for-level (:level spell-cfg)])
+            spells-map @(subscribe [::spells/spells-map])
+            spell (get spells-map spell-kw)]
+        [:div.flex
+         [:div.m-t-10
+          [labeled-dropdown
+           "Spell Level"
+           {:items (map
+                    (fn [lvl]
+                      {:title lvl
+                       :value lvl})
+                    (range 0 10))
+            :value (:level spell-cfg)
+            :on-change #(dispatch [value-change-event index (assoc spell-cfg :level (js/parseInt %))])}]]
+         [:div.m-l-5.m-t-10
+          [labeled-dropdown
+           "Spellcasting Ability"
+           {:items (map
+                    (fn [{:keys [name key]}]
+                      {:title name
+                       :value key})
+                    opt/abilities)
+            :value (:ability spell-cfg)
+            :on-change #(dispatch [value-change-event index (assoc spell-cfg :ability (keyword %))])}]]
+         [:div.m-l-5.m-t-10
+          [labeled-dropdown
+           "Spell"
+           {:items (cons
+                    {:title "<select spell>"
+                     :value :select
+                     :disabled? true}
+                    (map
+                     (fn [{:keys [name key]}]
+                       {:title name
+                        :value key})
+                     spells))
+            :value (or (:key spell-cfg) :select)
+            :on-change #(dispatch [value-change-event index (assoc spell-cfg :key (keyword %))])}]]]))))
+
+(def damage-dropdown-values
+  (map (fn [kw]
+         {:title (name kw)
+          :value kw})
+       opt/damage-types))
+
+(def modifier-values
+  (sorted-map-by
+   <
+   :weapon-prof {:name "Weapon Proficiency"
+                 :value-fn keyword
+                 :values (concat
+                          (map
+                           (fn [type]
+                             {:title (str "All " type)
+                              :value type})
+                           [:simple :martial])
+                          (map
+                           (fn [{:keys [key name]}]
+                             {:title name
+                              :value key})
+                           weapon/weapons))}
+   :num-attacks {:name "Number of Attacks"
+                 :value-fn js/parseInt
+                 :values (map
+                          (fn [v]
+                            {:title v
+                             :value v})
+                          (range 2 5))}
+   :damage-resistance {:name "Damage Resistance"
+                       :value-fn keyword
+                       :values damage-dropdown-values}
+   :damage-immunity {:name "Damage Immunity"
+                     :value-fn keyword
+                     :values damage-dropdown-values}
+   :saving-throw-advantage {:name "Saving Throw Advantage"
+                            :value-fn keyword
+                            :values (map
+                                     (fn [{:keys [key name]}]
+                                       {:title name
+                                        :value key})
+                                     opt/conditions)}
+   :skill-prof {:name "Skill Proficiency"
+                :value-fn keyword
+                :values (map
+                         (fn [{:keys [key name]}]
+                           {:title name
+                            :value key})
+                         skills/skills)}
+   :armor-prof {:name "Armor Proficiency"
+                :value-fn keyword
+                :values (concat
+                         (map
+                          (fn [armor-type]
+                            {:title armor-type
+                             :value (name armor-type)})
+                          [:light :medium :heavy :shields]))}
+   :flying-speed {:name "Flying Speed"
+                  :value-fn js/parseInt
+                  :values (map
+                           (fn [speed]
+                             {:title (str speed " ft.")
+                              :value speed})
+                           [30 60])}
+   :spell {:name "Spell"
+           :component spell-selector}))
+
+(defn option-level-modifier [{:keys [type value level]}
+                             index
+                             edit-modifier-type-event
+                             edit-modifier-value-event
+                             edit-modifier-level-event
+                             delete-modifier-event]
+  (let [{:keys [name values component value-fn]} (modifier-values type)]
+    [:div
+     [:div.flex.flex-wrap.align-items-end.m-b-20
+      [:div.m-t-10
+       [labeled-dropdown
+        "Unlock at Level"
+        {:items (map
+                 (fn [lvl]
+                   {:title lvl
+                    :value lvl})
+                 (range 1 21))
+         :value level
+         :on-change #(dispatch [edit-modifier-level-event index (js/parseInt %)])}]]
+      [:div.m-l-5.m-t-10
+       [labeled-dropdown
+        "Modifier Type"
+        {:items (cons
+                 {:title "<select type>"
+                  :disabled? true
+                  :value :select}
+                 (map
+                  (fn [[kw {:keys [name]}]]
+                    {:title name
+                     :value kw})
+                  modifier-values))
+         :value (if type (clojure.core/name type) :select)
+         :on-change #(dispatch [edit-modifier-type-event index (keyword %)])}]]
+      (if values
+        [:div.m-l-5.m-t-10
+         [labeled-dropdown
+          name
+          {:items (cons
+                   {:title "<select value>"
+                    :disabled? true
+                    :value :select}
+                   values)
+           :value (or value :select)
+           :on-change #(dispatch [edit-modifier-value-event index (value-fn %)])}]]
+        (if component
+          [:div.m-l-5 [component index value edit-modifier-value-event]]))
+      (if (or type level value)
+        [:div.m-t-10
+         [:button.form-button.m-l-5
+          {:on-click #(dispatch [delete-modifier-event index])}
+          "delete"]])]]))
+
+(defn option-level-modifiers [{:keys [level-modifiers]}
+                              add-modifier-event
+                              edit-modifier-type-event
+                              edit-modifier-value-event
+                              edit-modifier-level-event
+                              delete-modifier-event]
+  [:div
+   [:div
+    (doall
+     (map-indexed
+      (fn [index modifier]
+        ^{:key index}
+        [option-level-modifier         
+         modifier
+         index
+         edit-modifier-type-event
+         edit-modifier-value-event
+         edit-modifier-level-event
+         delete-modifier-event])
+      level-modifiers))]
+   [:div
+    [option-level-modifier
+     nil
+     (count level-modifiers)
+     edit-modifier-type-event
+     edit-modifier-value-event
+     edit-modifier-level-event
+     delete-modifier-event]]])
+
+(defn subclass-builder []
+  (let [subclass @(subscribe [::classes/subclass-builder-item])
+        spell-lists @(subscribe [::spells/spell-lists])
+        class-key (get subclass :class)
+        classes @(subscribe [::classes/classes])
+        mobile? @(subscribe [:mobile?])]
+    [:div.p-20.main-text-color
+     [:div.flex.flex-wrap
+      [:div.m-b-20
+       [subclass-input-field
+        "Name"
+        :name
+        subclass]]
+      [:div.m-l-5.m-b-20
+       [labeled-dropdown
+        "Class"
+        {:items (map
+                 (fn [{:keys [:orcpub.template/name :orcpub.template/key]}]
+                   {:title name
+                    :value (clojure.core/name key)})
+                 classes)
+         :value (get subclass :class)
+         :on-change #(dispatch [::classes/set-subclass-prop :class (keyword %)])}]]
+      [subclass-input-field
+       option-source-name-label
+       :option-pack
+       subclass
+       "m-l-5 m-b-20"]]
+     [:div.m-b-20
+      [:div.f-s-24.f-w-b.m-b-10 "Modifiers"]
+      [option-level-modifiers
+       subclass
+       ::e5/add-subclass-modifier
+       ::e5/edit-subclass-modifier-type
+       ::e5/edit-subclass-modifier-value
+       ::e5/edit-subclass-modifier-level
+       ::e5/delete-subclass-modifier]]
+     (if (#{:fighter :rogue} class-key)
+       (let [spellcasting (get subclass :spellcasting)
+             spellcasting? (some? spellcasting)]
+         [:div.m-b-20
+          [:div.f-s-24.f-w-b.m-b-10 "Spellcasting"]
+          [:div.flex.flex-wrap
+           [labeled-dropdown
+            "Does this subclass cast wizard spells?"
+            {:items (map
+                     (fn [v]
+                       {:title (if v "Yes" "No")
+                        :value v})
+                     [false true])
+             :value spellcasting?
+             :on-change #(dispatch [::classes/toggle-subclass-spellcasting])}]]]))
+     [option-traits
+      subclass
+      ::classes/subclass-builder-item
+      ::e5/add-subclass-trait
+      ::e5/edit-subclass-trait-name
+      ::e5/edit-subclass-trait-description
+      ::e5/delete-subclass-trait
+      ::e5/edit-subclass-trait-level]]))
 
 (defn subrace-builder []
   (let [subrace @(subscribe [::races/subrace-builder-item])
@@ -4607,6 +4881,17 @@
      :icon "save"
      :on-click #(dispatch [::races/save-subrace])}]
    [subrace-builder]])
+
+(defn subclass-builder-page []
+  [content-page
+   "Subclass Builder"
+   [{:title "New Subclass"
+     :icon "plus"
+     :on-click #(dispatch [::classes/reset-subclass])}
+    {:title "Save"
+     :icon "save"
+     :on-click #(dispatch [::classes/save-subclass])}]
+   [subclass-builder]])
 
 (defn feat-builder-page []
   [content-page
@@ -5018,7 +5303,7 @@
           :on-click (make-event-handler ::char/filter-spells "")}]]]
       [spell-list-items device-type]]]))
 
-(defn my-content-type [source-name type-name type-key icon add-event edit-event delete-event]
+(defn my-content-type [source-name type-name type-key icon add-event edit-event delete-event & [plural]]
   (let [expanded? (r/atom false)]
     (fn [plugin]
       (let [items (type-key plugin)]
@@ -5035,8 +5320,12 @@
                   [svg-icon ico (/ 48 (count icon)) @(subscribe [:theme])])
                 icon))
               [svg-icon icon 48 @(subscribe [:theme])])]
-           [:span.m-l-10.f-s-24 (let [num (count items)]
-                                  (str num " " (s/capitalize type-name) (if (not= 1 num) "s")))]]
+           [:span.m-l-10.f-s-24 (let [num (count items)
+                                      final-type-name (if plural
+                                                        (if (not= 1 num) plural type-name)
+                                                        (str type-name (if (not= 1 num) "s")))]
+                                  (str num " " (s/capitalize final-type-name))
+                                    )]]
           [:i.fa
            {:class-name (if @expanded? "fa-caret-up" "fa-caret-down")}]]
          (if @expanded?
@@ -5098,6 +5387,17 @@
                    ::races/edit-subrace
                    ::races/delete-subrace))
 
+(defn my-subclasses [name]
+  (my-content-type name
+                   "subclass"
+                   ::e5/subclasses
+                   ["mounted-knight"
+                    "mounted-knight"]
+                   ::classes/new-subclass
+                   ::classes/edit-subclass
+                   ::classes/delete-subclass
+                   "subclasses"))
+
 (defn my-feats [name]
   (my-content-type name
                    "feat"
@@ -5130,6 +5430,7 @@
            [(my-backgrounds name) plugin]
            [(my-races name) plugin]
            [(my-subraces name) plugin]
+           [(my-subclasses name) plugin]
            [(my-feats name) plugin]]])])))
 
 (defn my-content []

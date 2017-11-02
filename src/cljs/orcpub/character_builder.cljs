@@ -25,6 +25,7 @@
             [orcpub.dnd.e5.feats :as feats]
             [orcpub.dnd.e5.backgrounds :as backgrounds]
             [orcpub.dnd.e5.races :as races]
+            [orcpub.dnd.e5.classes :as classes]
             [orcpub.dnd.e5.weapons :as weapon5e]
             [orcpub.dnd.e5.armor :as armor5e]
             [orcpub.dnd.e5.magic-items :as mi5e]
@@ -663,15 +664,23 @@
    "Add Feat"
    #(dispatch [::feats/new-feat "Default Option Source"])))
 
+(defn subclass-adder []
+  (item-adder
+   "Add Subclass"
+   #(dispatch [::classes/new-subclass "Default Option Source"])))
+
 (defn make-item-adder [{:keys [::entity/path]}]
   (cond
     (-> path last (= :feats)) [feat-adder]
     (-> path last name (s/ends-with? "cantrips-known")) [cantrip-adder]
     (-> path last name (s/ends-with? "spells-known")) [spell-adder]
+    (-> path last name (s/ends-with? "-spells")) [spell-adder]
+    (-> path last name (s/ends-with? "-any-school")) [spell-adder]
     :else (match path
             [:race _ :subrace] [subrace-adder path]
             [:race] [race-adder]
             [:background] [background-adder]
+            [:class _ :levels _ _] [subclass-adder]
             :else nil)))
 
 (defn default-selection-section-body [actual-path
