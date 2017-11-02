@@ -2035,6 +2035,13 @@
      (dissoc subclass :spellcasting)
      (assoc subclass :spellcasting {:level-factor 3}))))
 
+
+(reg-event-db
+ ::class5e/set-warlock-spell
+ subclass-interceptors
+ (fn [subclass [_ level index spell-kw]]
+   (assoc-in subclass [:warlock-spells level index] spell-kw)))
+
 (reg-event-db
  ::class5e/set-spell-list
  subclass-interceptors
