@@ -2577,7 +2577,6 @@
             (str "edit-" option-name "-modifier-type"))
    interceptors
    (fn [option [_ index type]]
-     (prn "TYPE" type)
      (assoc-in option [:level-modifiers index :type] type)))
   (reg-event-db
    (keyword "orcpub.dnd.e5"
@@ -2606,7 +2605,6 @@
             (str "add-" option-name "-trait"))
    interceptors
    (fn [option]
-     (prn "OPTION" option)
      (update option :traits (fn [t] (if (vector? t) (conj t {}) [{}])))))
   (reg-event-db
    (keyword "orcpub.dnd.e5"

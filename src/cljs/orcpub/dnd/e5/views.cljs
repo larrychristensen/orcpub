@@ -4249,12 +4249,16 @@
      [:div.m-l-5.m-t-10
       [labeled-dropdown
        "Spellcasting Ability"
-       {:items (map
-                (fn [{:keys [name key]}]
-                  {:title name
-                   :value key})
-                opt/abilities)
-        :value (:ability spell-cfg)
+       {:items (cons
+                {:title "<select ability>"
+                 :value :select
+                 :disabled? true}
+                (map
+                 (fn [{:keys [name key]}]
+                   {:title name
+                    :value key})
+                 opt/abilities))
+        :value (or (:ability spell-cfg) :select)
         :on-change #(dispatch [value-change-event index (assoc spell-cfg :ability (keyword %))])}]]
      [:div.m-l-5.m-t-10
       [labeled-dropdown
