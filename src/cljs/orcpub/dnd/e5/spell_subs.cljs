@@ -6,9 +6,11 @@
             [orcpub.dnd.e5 :as e5]
             [orcpub.dnd.e5.backgrounds :as bg5e]
             [orcpub.dnd.e5.races :as races5e]
+            [orcpub.dnd.e5.classes :as classes5e]
             [orcpub.dnd.e5.feats :as feats5e]
             [orcpub.dnd.e5.modifiers :as mod5e]
             [orcpub.dnd.e5.magic-items :as mi5e]
+            [orcpub.dnd.e5.units :as units5e]
             [orcpub.dnd.e5.character :as char5e]
             [orcpub.dnd.e5.weapons :as weapon5e]
             [orcpub.dnd.e5.spells :as spells5e]
@@ -19,6 +21,7 @@
             [orcpub.dnd.e5.options :as opt5e]
             [orcpub.route-map :as routes]
             [orcpub.dnd.e5.events :as events]
+            [orcpub.dnd.e5.template-base :as t-base]
             [reagent.ratom :as ra]
             [clojure.string :as s]
             [cljs-http.client :as http]
@@ -56,6 +59,190 @@
     (fn [subrace]
       (assoc subrace :modifiers (opt5e/plugin-modifiers (:props subrace))))
     (apply concat (map (comp vals ::e5/subraces) plugins)))))
+
+(defn level-modifier [class-key {:keys [type value]}]
+  (case type
+    :weapon-prof (mod5e/weapon-proficiency value)
+    :num-attacks (mod5e/num-attacks value)
+    :damage-resistance (mod5e/damage-resistance value)
+    :damage-immunity (mod5e/damage-immunity value)
+    :saving-throw-advantage (mod5e/saving-throw-advantage value)
+    :skill-prof (mod5e/skill-proficiency value)
+    :armor-prof (mod5e/armor-proficiency value)
+    :flying-speed (mod5e/flying-speed-override value)
+    :spell (mod5e/spells-known (:level value)
+                               (:key value)
+                               (:ability value)
+                               (if (keyword? class-key)
+                                 (s/capitalize (name class-key))))))
+
+(defn eldritch-knight-spell? [s]
+    (let [school (:school s)]
+      (or (= school "evocation")
+          (= school "abjuration"))))
+
+(defn arcane-trickster-spell? [s]
+    (let [school (:school s)]
+      (or (= school "enchantment")
+          (= school "illusion"))))
+
+
+(defn subclass-wizard-spell-selection [spell-lists spells-map title ref class-key class-name num spell-levels & [filter-fn]]
+  (opt5e/spell-selection spell-lists
+                         spells-map
+                         {:title title
+                          :class-key class-key
+                          :ref ref
+                          :spellcasting-ability ::char5e/int
+                          :class-name class-name
+                          :num num
+                          :prepend-level? true
+                          :spell-keys (let [spell-keys
+                                            (mapcat
+                                             (fn [lvl] (get-in sl5e/spell-lists [:wizard lvl]))
+                                             spell-levels)]
+                                        (if filter-fn
+                                          (filter
+                                           (fn [spell-key]
+                                             (filter-fn (spells5e/spell-map spell-key)))
+                                           spell-keys)
+                                          spell-keys))}))
+
+(defn eldritch-knight-ref [subclass-key subpath]
+    (concat
+     [:class :fighter :levels :level-3 :martial-archetype subclass-key]
+     subpath))
+
+(defn arcane-trickster-ref [subclass-key subpath]
+    (concat
+     [:class :rogue :levels :level-3 :roguish-archetype subclass-key]
+     subpath))
+
+(defn eldritch-knight-spell-selection [subclass-key spell-lists spells-map num spell-levels]
+  (subclass-wizard-spell-selection spell-lists
+                                   spells-map
+                                   "Fighter Abjuration or Evocation Spells"
+                                   (eldritch-knight-ref subclass-key [:abjuration-or-evocation-spells-known])
+                                   :fighter
+                                   "Fighter"
+                                   num
+                                   spell-levels
+                                   eldritch-knight-spell?))
+
+(defn arcane-trickster-spell-selection [subclass-key spell-lists spells-map num spell-levels]
+  (subclass-wizard-spell-selection spell-lists
+                                   spells-map
+                                   "Rogue Enchantment or Illusion Spells"
+                                     (arcane-trickster-ref subclass-key [:enchantment-or-illusion-spells-known])
+                                     :rogue
+                                     "Rogue"
+                                     num
+                                     spell-levels
+                                     arcane-trickster-spell?))
+
+(defn eldritch-knight-any-spell-selection [subclass-key spell-lists spells-map num spell-levels]
+  (subclass-wizard-spell-selection spell-lists
+                                   spells-map
+                                   "Fighter Spells: Any School"
+                                     (eldritch-knight-ref subclass-key [:spells-known-any-school])
+                                     :fighter
+                                     "Fighter"
+                                     num
+                                     spell-levels))
+
+(defn arcane-trickster-any-spell-selection [subclass-key spell-lists spells-map num spell-levels]
+  (subclass-wizard-spell-selection spell-lists
+                                   spells-map
+                                   "Rogue Spells: Any School"
+                                     (arcane-trickster-ref subclass-key [:spells-known-any-school])
+                                     :rogue
+                                     "Rogue"
+                                     num
+                                     spell-levels))
+
+(defn eldritch-knight-cantrip [subclass-key spell-lists spells-map num]
+  (opt5e/spell-selection spell-lists
+                         spells-map
+                         {:class-key :fighter
+                          :level 0
+                          :ref (eldritch-knight-ref subclass-key [:cantrips-known])
+                          :spellcasting-ability ::char5e/int
+                          :class-name "Fighter"
+                          :num num
+                          :spell-keys (get-in sl5e/spell-lists [:wizard 0])}))
+
+(defn arcane-trickster-cantrip [subclass-key spell-lists spells-map num]
+  (opt5e/spell-selection spell-lists
+                         spells-map
+                         {:class-key :rogue
+                          :level 0
+                          :ref (arcane-trickster-ref subclass-key [:cantrips-known])
+                          :spellcasting-ability ::char5e/int
+                          :class-name "Rogue"
+                          :num num
+                          :spell-keys (get-in sl5e/spell-lists [:wizard 0])}))
+
+(defn spellcaster-subclass-levels [subclass-key spell-lists spells-map class-name]
+  (case class-name
+    :rogue {3 {:selections [(arcane-trickster-cantrip subclass-key spell-lists spells-map 2)
+                            (arcane-trickster-spell-selection subclass-key spell-lists spells-map 2 [1])
+                            (arcane-trickster-any-spell-selection subclass-key spell-lists spells-map 1 [1])]
+               :modifiers [(mod5e/spells-known 0 :mage-hand ::char5e/int "Arcane Trickster")]}
+            4 {:selections [(arcane-trickster-spell-selection subclass-key spell-lists spells-map 1 [1])]}
+            7 {:selections [(arcane-trickster-spell-selection subclass-key spell-lists spells-map 1 [1 2])]}
+            8 {:selections [(arcane-trickster-any-spell-selection subclass-key spell-lists spells-map 1 [1 2])]}
+            10 {:selections [(arcane-trickster-cantrip subclass-key spell-lists spells-map 1)
+                             (arcane-trickster-spell-selection subclass-key spell-lists spells-map 1 [1 2])]}
+            11 {:selections [(arcane-trickster-spell-selection subclass-key spell-lists spells-map 1 [1 2])]}
+            13 {:selections [(arcane-trickster-spell-selection subclass-key spell-lists spells-map 1 [1 2 3])]}
+            14 {:selections [(arcane-trickster-any-spell-selection subclass-key spell-lists spells-map 1 [1 2 3])]}
+            16 {:selections [(arcane-trickster-spell-selection subclass-key spell-lists spells-map 1 [1 2 3])]}
+            19 {:selections [(arcane-trickster-spell-selection subclass-key spell-lists spells-map 1 [1 2 3 4])]}
+            20 {:selections [(arcane-trickster-any-spell-selection subclass-key spell-lists spells-map 1 [1 2 3 4])]}}
+    :fighter {3 {:selections [(eldritch-knight-cantrip subclass-key spell-lists spells-map 2)
+                              (eldritch-knight-spell-selection subclass-key spell-lists spells-map 2 [1])
+                              (eldritch-knight-any-spell-selection subclass-key spell-lists spells-map 1 [1])]}
+              4 {:selections [(eldritch-knight-spell-selection subclass-key spell-lists spells-map 1 [1])]}
+              7 {:selections [(eldritch-knight-spell-selection subclass-key spell-lists spells-map 1 [1 2])]}
+              8 {:selections [(eldritch-knight-any-spell-selection subclass-key spell-lists spells-map 1 [1 2])]}
+              10 {:selections [(eldritch-knight-cantrip subclass-key spell-lists spells-map 1)
+                               (eldritch-knight-spell-selection subclass-key spell-lists spells-map 1 [1 2])]}
+              11 {:selections [(eldritch-knight-spell-selection subclass-key spell-lists spells-map 1 [1 2])]}
+              13 {:selections [(eldritch-knight-spell-selection subclass-key spell-lists spells-map 1 [1 2 3])]}
+              14 {:selections [(eldritch-knight-any-spell-selection subclass-key spell-lists spells-map 1 [1 2 3])]}
+              16 {:selections [(eldritch-knight-spell-selection subclass-key spell-lists spells-map 1 [1 2 3])]}
+              19 {:selections [(eldritch-knight-spell-selection subclass-key spell-lists spells-map 1 [1 2 3 4])]}
+              20 {:selections [(eldritch-knight-any-spell-selection subclass-key spell-lists spells-map 1 [1 2 3 4])]}}
+    nil))
+
+(defn make-levels [spell-lists spells-map {:keys [key class spellcasting]}]
+  (let [modifiers (:level-modifiers option)
+        by-level (group-by :level modifiers)
+        add-spellcasting? (and spellcasting
+                               (#{:fighter :rogue} class))
+        spellcaster-levels (spellcaster-subclass-levels key spell-lists spells-map class)]
+    (reduce-kv
+     (fn [levels level level-modifiers]
+       (assoc-in levels
+                 [(or level 1) :modifiers]
+                 (map (partial level-modifier class) level-modifiers)))
+     spellcaster-levels
+     by-level)))
+
+(reg-sub
+ ::classes5e/plugin-subclasses
+ :<- [::e5/plugin-vals]
+ :<- [::spells5e/spell-lists]
+ :<- [::spells5e/spells-map]
+ (fn [[plugins spell-lists spells-map] _]
+   (map
+    (fn [subclass]
+      (let [updated (assoc subclass
+                     :modifiers (opt5e/plugin-modifiers (:props subclass))
+                     :levels (make-levels spell-lists spells-map subclass))]
+        updated))
+    (apply concat (map (comp vals ::e5/subclasses) plugins)))))
+
 
 (reg-sub
  ::feats5e/plugin-feats
@@ -395,6 +582,12 @@
    (group-by :race plugin-subraces)))
 
 (reg-sub
+ ::classes5e/plugin-subclasses-map
+ :<- [::classes5e/plugin-subclasses]
+ (fn [plugin-subclasses]
+   (group-by :class plugin-subclasses)))
+
+(reg-sub
  ::races5e/races
  :<- [::races5e/plugin-races]
  :<- [::races5e/plugin-subraces-map]
@@ -417,6 +610,42 @@
       half-orc-option-cfg
       tiefling-option-cfg]
      plugin-races))))
+
+
+
+(defn base-class-options [spell-lists spells-map plugin-subclasses-map]
+  [(classes5e/barbarian-option spell-lists spells-map plugin-subclasses-map)
+   (classes5e/bard-option spell-lists spells-map plugin-subclasses-map)
+   (classes5e/cleric-option spell-lists spells-map plugin-subclasses-map)
+   (classes5e/druid-option spell-lists spells-map plugin-subclasses-map)
+   (classes5e/fighter-option spell-lists spells-map plugin-subclasses-map)
+   (classes5e/monk-option spell-lists spells-map plugin-subclasses-map)
+   (classes5e/paladin-option spell-lists spells-map plugin-subclasses-map)
+   (classes5e/ranger-option spell-lists spells-map plugin-subclasses-map)
+   (classes5e/rogue-option spell-lists spells-map plugin-subclasses-map)
+   (classes5e/sorcerer-option spell-lists spells-map plugin-subclasses-map)
+   (classes5e/warlock-option spell-lists spells-map plugin-subclasses-map)
+   (classes5e/wizard-option spell-lists spells-map plugin-subclasses-map)])
+
+(reg-sub
+ ::classes5e/classes
+ :<- [::spells5e/spell-lists]
+ :<- [::spells5e/spells-map]
+ :<- [::classes5e/plugin-subclasses-map]
+ (fn [[spell-lists spells-map plugin-subclasses-map] _]
+   (base-class-options spell-lists spells-map plugin-subclasses-map)))
+
+(reg-sub
+ ::classes5e/class-map
+ :<- [::classes5e/classes]
+ (fn [classes]
+   (common/map-by ::t/key classes)))
+
+(reg-sub
+ ::classes5e/class
+ :<- [::classes5e/class-map]
+ (fn [race-map [_ key]]
+   (race-map key)))
 
 (reg-sub
  ::races5e/race-map
@@ -449,6 +678,14 @@
    (concat
     spells5e/spells
     plugin-spells)))
+
+(reg-sub
+ ::spells5e/spells-for-level
+ :<- [::spells5e/spells]
+ (fn [spells [_ level]]
+   (filter
+    #(= (:level %) level)
+    spells)))
 
 (reg-sub
  ::spells5e/spells-map
@@ -547,6 +784,11 @@
  ::races5e/subrace-builder-item
  (fn [db _]
    (::races5e/subrace-builder-item db)))
+
+(reg-sub
+ ::classes5e/subclass-builder-item
+ (fn [db _]
+   (::classes5e/subclass-builder-item db)))
 
 (reg-sub
  ::feats5e/builder-item

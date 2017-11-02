@@ -9,6 +9,7 @@
             [orcpub.dnd.e5.backgrounds :as bg5e]
             [orcpub.dnd.e5.feats :as feats5e]
             [orcpub.dnd.e5.races :as races5e]
+            [orcpub.dnd.e5.classes :as classes5e]
             [orcpub.dnd.e5.weapons :as weapon5e]
             [orcpub.dnd.e5.armor :as armor5e]
             [orcpub.dnd.e5.template :as t5e]
@@ -259,6 +260,7 @@
  :<- [::spells5e/spells-map]
  :<- [::bg5e/backgrounds]
  :<- [::races5e/races]
+ :<- [::classes5e/classes]
  :<- [::feats5e/feats]
  (fn [[magic-weapon-options
        magic-armor-options
@@ -267,6 +269,7 @@
        spells-map
        backgrounds
        races
+       classes
        feats] _]
    (t5e/template-selections magic-weapon-options
                             magic-armor-options
@@ -275,6 +278,7 @@
                             spells-map
                             backgrounds
                             races
+                            classes
                             feats)))
 
 (reg-sub
