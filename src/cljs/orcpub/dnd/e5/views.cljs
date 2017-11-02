@@ -4231,47 +4231,45 @@
      [:div [feat-initiative-bonuses feat]]
      [:div [feat-misc-modifiers feat]]]))
 
-(defn spell-selector []
-  (let [level (r/atom 0)]
-    (fn [index spell-cfg value-change-event]
-      (let [spells @(subscribe [::spells/spells-for-level (:level spell-cfg)])
-            spells-map @(subscribe [::spells/spells-map])
-            spell (get spells-map spell-kw)]
-        [:div.flex
-         [:div.m-t-10
-          [labeled-dropdown
-           "Spell Level"
-           {:items (map
-                    (fn [lvl]
-                      {:title lvl
-                       :value lvl})
-                    (range 0 10))
-            :value (:level spell-cfg)
-            :on-change #(dispatch [value-change-event index (assoc spell-cfg :level (js/parseInt %))])}]]
-         [:div.m-l-5.m-t-10
-          [labeled-dropdown
-           "Spellcasting Ability"
-           {:items (map
-                    (fn [{:keys [name key]}]
-                      {:title name
-                       :value key})
-                    opt/abilities)
-            :value (:ability spell-cfg)
-            :on-change #(dispatch [value-change-event index (assoc spell-cfg :ability (keyword %))])}]]
-         [:div.m-l-5.m-t-10
-          [labeled-dropdown
-           "Spell"
-           {:items (cons
-                    {:title "<select spell>"
-                     :value :select
-                     :disabled? true}
-                    (map
-                     (fn [{:keys [name key]}]
-                       {:title name
-                        :value key})
-                     spells))
-            :value (or (:key spell-cfg) :select)
-            :on-change #(dispatch [value-change-event index (assoc spell-cfg :key (keyword %))])}]]]))))
+(defn spell-selector [index spell-cfg value-change-event]
+  (let [spells @(subscribe [::spells/spells-for-level (or (:level spell-cfg) 0)])
+        spells-map @(subscribe [::spells/spells-map])
+        spell (get spells-map spell-kw)]
+    [:div.flex
+     [:div.m-t-10
+      [labeled-dropdown
+       "Spell Level"
+       {:items (map
+                (fn [lvl]
+                  {:title lvl
+                   :value lvl})
+                (range 0 10))
+        :value (:level spell-cfg)
+        :on-change #(dispatch [value-change-event index (assoc spell-cfg :level (js/parseInt %))])}]]
+     [:div.m-l-5.m-t-10
+      [labeled-dropdown
+       "Spellcasting Ability"
+       {:items (map
+                (fn [{:keys [name key]}]
+                  {:title name
+                   :value key})
+                opt/abilities)
+        :value (:ability spell-cfg)
+        :on-change #(dispatch [value-change-event index (assoc spell-cfg :ability (keyword %))])}]]
+     [:div.m-l-5.m-t-10
+      [labeled-dropdown
+       "Spell"
+       {:items (cons
+                {:title "<select spell>"
+                 :value :select
+                 :disabled? true}
+                (map
+                 (fn [{:keys [name key]}]
+                   {:title name
+                    :value key})
+                 spells))
+        :value (or (:key spell-cfg) :select)
+        :on-change #(dispatch [value-change-event index (assoc spell-cfg :key (keyword %))])}]]]))
 
 (def damage-dropdown-values
   (map (fn [kw]
@@ -4373,7 +4371,7 @@
                   modifier-values))
          :value (if type (clojure.core/name type) :select)
          :on-change #(dispatch [edit-modifier-type-event index (keyword %)])}]]
-      (if values
+      (if (and type values)
         [:div.m-l-5.m-t-10
          [labeled-dropdown
           name
