@@ -4492,11 +4492,13 @@
                    ^{:key level}
                    [:tr
                     [:th.p-5 (common/ordinal level)]
-                    (let [spells (remove
+                    (let [spells-for-level @(subscribe [::spells/spells-for-level level])
+                          spells (remove
                                   (fn [{:keys [key]}]
-                                    ((into #{} (get-in spell-lists [:warlock level]))
-                                     key))
-                                  @(subscribe [::spells/spells-for-level level]))]
+                                    (let [level-spells (get-in spell-lists [:warlock level])]
+                                      ((into #{} level-spells)
+                                       key)))
+                                  spells-for-level)]
                       [:th.p-5
                        [:div.flex.flex-wrap
                         (doall

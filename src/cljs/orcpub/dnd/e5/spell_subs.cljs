@@ -700,9 +700,11 @@
  ::spells5e/spells
  :<- [::spells5e/plugin-spells]
  (fn [plugin-spells]
-   (concat
-    spells5e/spells
-    plugin-spells)))
+   (sort-by
+    :key
+    (concat
+     spells5e/spells
+     plugin-spells))))
 
 (reg-sub
  ::spells5e/spells-for-level
@@ -736,7 +738,9 @@
     (fn [lists {:keys [key level spell-lists]}]
       (reduce-kv
        (fn [l k v]
-         (update-in l [k level] conj key))
+         (if v
+           (update-in l [k level] conj key)
+           l))
        lists
        spell-lists))
     {}
