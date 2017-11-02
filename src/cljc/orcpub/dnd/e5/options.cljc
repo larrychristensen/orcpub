@@ -2633,6 +2633,7 @@
 
 (defn class-option [spell-lists
                     spells-map
+                    plugin-subclasses-map
                     {:keys [name
                             key
                             help
@@ -2656,7 +2657,8 @@
                             spellcasting
                             multiclass-prereqs]
                      :as cls}]
-  (let [kw (or key (common/name-to-kw name))
+  (let [merged-class (update cls :subclasses concat (get plugin-subclasses-map key))
+        kw (or key (common/name-to-kw name))
         {:keys [save skill-options multiclass-skill-options tool-options multiclass-tool-options tool]
          armor-profs :armor weapon-profs :weapon} profs
         {level-factor :level-factor} spellcasting
@@ -2665,7 +2667,7 @@
                                spell-lists
                                spells-map
                                (assoc spellcasting :class-key kw)
-                               cls)
+                               merged-class)
         first-class? (fn [c] (let [first-class (first @(subscribe [::character/classes nil c]))]
                                (= kw first-class)))]
     (t/option-cfg
@@ -2699,7 +2701,7 @@
                                       {::entity/key (-> current-values count inc level-key)})
                        :tags #{kw}
                        :options (map
-                                 (partial level-option spell-lists spells-map cls kw spellcasting-template)
+                                 (partial level-option spell-lists spells-map merged-class kw spellcasting-template)
                                  (range 1 21))
                        :min 1
                        :sequential? true
