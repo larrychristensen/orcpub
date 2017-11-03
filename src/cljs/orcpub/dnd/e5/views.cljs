@@ -4435,7 +4435,6 @@
         class-key (get subclass :class)
         classes @(subscribe [::classes/classes])
         mobile? @(subscribe [:mobile?])]
-    (prn "SUBCLASS" subclass)
     [:div.p-20.main-text-color
      [:div.flex.flex-wrap
       [:div.m-b-20
@@ -4552,7 +4551,7 @@
    (if (or level value)
      [:div.m-t-10
       [:button.form-button.m-l-5
-       {:on-click #(dispatch [delete-modifier-event index])}
+       {:on-click #(dispatch [::races/delete-subrace-spell index])}
        "delete"]])])
 
 (defn subrace-spells [subrace]
@@ -4561,7 +4560,6 @@
     (doall
      (map-indexed
       (fn [i spell-cfg]
-        (prn "SPELL CFG" spell-cfg)
         ^{:key i}
         [subrace-spell i spell-cfg])
       (:spells subrace)))]
@@ -4573,7 +4571,6 @@
         race @(subscribe [::races/race race-key])
         races @(subscribe [::races/races])
         mobile? @(subscribe [:mobile?])]
-    (prn "SUBRACE" subrace)
     [:div.p-20.main-text-color
      [:div.flex.flex-wrap
       [:div.m-b-20
