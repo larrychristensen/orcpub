@@ -80,7 +80,7 @@
     :damage-immunity (mod5e/damage-immunity value)
     :saving-throw-advantage (mod5e/saving-throw-advantage value)
     :skill-prof (mod5e/skill-proficiency value)
-    :armor-prof (do (prn "ARMOR PROF" value) (mod5e/armor-proficiency value))
+    :armor-prof (mod5e/armor-proficiency value)
     :flying-speed (mod5e/flying-speed-override value)
     :spell (mod5e/spells-known (:level value)
                                (:key value)
