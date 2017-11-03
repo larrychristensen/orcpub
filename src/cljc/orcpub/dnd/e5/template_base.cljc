@@ -172,6 +172,7 @@
     ?num-attacks (apply max ?extra-attacks ?number-of-attacks)
     ?critical #{20}
     ?weapon-profs #{}
+    ?armor-profs #{}
     ?has-weapon-prof? (fn [weapon]
                         (or (?weapon-profs ::weapon5e/martial)
                             (?weapon-profs (::weapon5e/key weapon))
