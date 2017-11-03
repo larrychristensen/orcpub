@@ -7,6 +7,7 @@
             [orcpub.dnd.e5.magic-items :as mi5e]
             [orcpub.dnd.e5.character :as char5e]
             [orcpub.dnd.e5.backgrounds :as bg5e]
+            [orcpub.dnd.e5.languages :as langs5e]
             [orcpub.dnd.e5.feats :as feats5e]
             [orcpub.dnd.e5.races :as races5e]
             [orcpub.dnd.e5.classes :as classes5e]
@@ -262,6 +263,7 @@
  :<- [::races5e/races]
  :<- [::classes5e/classes]
  :<- [::feats5e/feats]
+ :<- [::langs5e/language-map]
  (fn [[magic-weapon-options
        magic-armor-options
        other-magic-item-options
@@ -270,7 +272,8 @@
        backgrounds
        races
        classes
-       feats] _]
+       feats
+       language-map] _]
    (t5e/template-selections magic-weapon-options
                             magic-armor-options
                             other-magic-item-options
@@ -279,7 +282,8 @@
                             backgrounds
                             races
                             classes
-                            feats)))
+                            feats
+                            language-map)))
 
 (reg-sub
  ::char5e/template
