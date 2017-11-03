@@ -51,13 +51,25 @@
  (fn [plugins _]
    (apply concat (map (comp vals ::e5/races) plugins))))
 
+(defn subrace-spell-modifiers [{:keys [spells] :as subrace}]
+  (map
+   (fn [{:keys [level value]}]
+     (let [{:keys [ability key]} value]
+       (mod5e/spells-known (or (:level value) 0)
+                           key
+                           ability
+                           (s/capitalize (name (:race subrace)))
+                           level)))
+   spells))
+
 (reg-sub
  ::races5e/plugin-subraces
  :<- [::e5/plugin-vals]
  (fn [plugins _]
    (map
     (fn [subrace]
-      (assoc subrace :modifiers (opt5e/plugin-modifiers (:props subrace))))
+      (assoc subrace :modifiers (concat (opt5e/plugin-modifiers (:props subrace))
+                                        (subrace-spell-modifiers subrace))))
     (apply concat (map (comp vals ::e5/subraces) plugins)))))
 
 (defn level-modifier [class-key {:keys [type value]}]
@@ -68,7 +80,7 @@
     :damage-immunity (mod5e/damage-immunity value)
     :saving-throw-advantage (mod5e/saving-throw-advantage value)
     :skill-prof (mod5e/skill-proficiency value)
-    :armor-prof (mod5e/armor-proficiency value)
+    :armor-prof (do (prn "ARMOR PROF" value) (mod5e/armor-proficiency value))
     :flying-speed (mod5e/flying-speed-override value)
     :spell (mod5e/spells-known (:level value)
                                (:key value)
