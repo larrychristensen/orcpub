@@ -5,6 +5,7 @@
             [orcpub.modifiers :as mod]
             [orcpub.dnd.e5 :as e5]
             [orcpub.dnd.e5.backgrounds :as bg5e]
+            [orcpub.dnd.e5.languages :as langs5e]
             [orcpub.dnd.e5.races :as races5e]
             [orcpub.dnd.e5.classes :as classes5e]
             [orcpub.dnd.e5.feats :as feats5e]
@@ -44,6 +45,12 @@
  :<- [::e5/plugin-vals]
  (fn [plugins _]
    (apply concat (map (comp vals ::e5/backgrounds) plugins))))
+
+(reg-sub
+ ::langs5e/plugin-languages
+ :<- [::e5/plugin-vals]
+ (fn [plugins _]
+   (apply concat (map (comp vals ::e5/languages) plugins))))
 
 (reg-sub
  ::races5e/plugin-races
@@ -319,6 +326,54 @@
     acolyte-bg
     plugin-backgrounds)))
 
+(def languages
+  [{:name "Common"
+    :key :common}
+   {:name "Dwarvish"
+    :key :dwarvish}
+   {:name "Elvish"
+    :key :elvish}
+   {:name "Giant"
+    :key :giant}
+   {:name "Gnomish"
+    :key :gnomish}
+   {:name "Goblin"
+    :key :goblin}
+   {:name "Halfling"
+    :key :halfling}
+   {:name "Orc"
+    :key :orc}
+   {:name "Abyssal"
+    :key :abyssal}
+   {:name "Celestial"
+    :key :celestial}
+   {:name "Draconic"
+    :key :draconic}
+   {:name "Deep Speech"
+    :key :deep-speech}
+   {:name "Infernal"
+    :key :infernal}
+   {:name "Primordial"
+    :key :primordial}
+   {:name "Sylvan"
+    :key :sylvan}
+   {:name "Undercommon"
+    :key :undercommon}])
+
+(reg-sub
+ ::langs5e/languages
+ :<- [::langs5e/plugin-languages]
+ (fn [plugin-languages]
+   (concat
+    languages
+    plugin-languages)))
+
+(reg-sub
+ ::langs5e/language-map
+ :<- [::langs5e/languages]
+ (fn [languages]
+   (common/map-by-key languages)))
+
 (def elf-weapon-training-mods
   (opt5e/weapon-prof-modifiers [:longsword :shortsword :shortbow :longbow]))
 
@@ -350,7 +405,7 @@
    (mod5e/spells-known 1 :faerie-fire ::char5e/cha "Dark Elf" 3)
    (mod5e/spells-known 2 :darkness ::char5e/cha "Dark Elf" 5)])
 
-(defn elf-option-cfg [spell-lists spells-map]
+(defn elf-option-cfg [spell-lists spells-map language-map]
   {:name "Elf"
    :key :elf
    :help "Elves are graceful, magical creatures, with a slight build."
@@ -366,7 +421,7 @@
    [{:name "High Elf"
      :abilities {::char5e/int 1}
      :selections [(high-elf-cantrip-selection spell-lists spells-map)
-                  (opt5e/language-selection opt5e/languages 1)]
+                  (opt5e/language-selection-aux (vals language-map) 1)]
      :modifiers [elf-weapon-training-mods]}
     #_{:name "Wood Elf"
      :abilities {::char5e/wis 1}
@@ -443,7 +498,7 @@
              :page 28
              :summary "you have advantage on saves against being frightened"}]})
 
-(defn human-option-cfg [spell-lists spells-map]
+(defn human-option-cfg [spell-lists spells-map language-map]
   {:name "Human"
    :key :human
    :help "Humans are physically diverse and highly adaptable. They excel in nearly every profession."
@@ -460,7 +515,7 @@
     {:name "Shou"}
     {:name "Tethyrian"}
     {:name "Turami"}]
-   :selections [(opt5e/language-selection opt5e/languages 1)
+   :selections [(opt5e/language-selection-aux (vals language-map) 1)
                 (t/selection-cfg
                  {:name "Variant"
                   :tags #{:subrace}
@@ -547,7 +602,7 @@
                :page 37
                :summary "Communicate with Small or smaller beasts."}]}]})
 
-(def half-elf-option-cfg
+(defn half-elf-option-cfg [language-map]
   {:name "Half-Elf"
    :key :half-elf
    :help "Half-elves are charismatic, and bear a resemblance to both their elvish and human parents and share many of the traits of each."
@@ -561,7 +616,7 @@
                  (opt5e/skill-selection 2)
                  ::t/ref
                  [:race :half-elf :skill-proficiency])
-                (opt5e/language-selection opt5e/languages 1)]
+                (opt5e/language-selection-aux (vals language-map) 1)]
    :modifiers [(mod5e/saving-throw-advantage [:charmed])]
    :traits [{:name "Fey Ancestry"
              :page 39
@@ -630,7 +685,8 @@
  :<- [::races5e/plugin-subraces-map]
  :<- [::spells5e/spell-lists]
  :<- [::spells5e/spells-map]
- (fn [[plugin-races subraces-map spell-lists spells-map]]
+ :<- [::langs5e/language-map]
+ (fn [[plugin-races subraces-map spell-lists spells-map language-map]]
    (map
     (fn [{:keys [key] :as race}]
       (if (subraces-map key)
@@ -638,39 +694,39 @@
         race))
     (concat
      [dwarf-option-cfg
-      (elf-option-cfg spell-lists spells-map)
+      (elf-option-cfg spell-lists spells-map language-map)
       halfling-option-cfg
-      (human-option-cfg spell-lists spells-map)
+      (human-option-cfg spell-lists spells-map language-map)
       dragonborn-option-cfg
       gnome-option-cfg
-      half-elf-option-cfg
+      (half-elf-option-cfg language-map)
       half-orc-option-cfg
       tiefling-option-cfg]
      plugin-races))))
 
 
-
-(defn base-class-options [spell-lists spells-map plugin-subclasses-map]
-  [(classes5e/barbarian-option spell-lists spells-map plugin-subclasses-map)
-   (classes5e/bard-option spell-lists spells-map plugin-subclasses-map)
-   (classes5e/cleric-option spell-lists spells-map plugin-subclasses-map)
-   (classes5e/druid-option spell-lists spells-map plugin-subclasses-map)
-   (classes5e/fighter-option spell-lists spells-map plugin-subclasses-map)
-   (classes5e/monk-option spell-lists spells-map plugin-subclasses-map)
-   (classes5e/paladin-option spell-lists spells-map plugin-subclasses-map)
-   (classes5e/ranger-option spell-lists spells-map plugin-subclasses-map)
-   (classes5e/rogue-option spell-lists spells-map plugin-subclasses-map)
-   (classes5e/sorcerer-option spell-lists spells-map plugin-subclasses-map)
-   (classes5e/warlock-option spell-lists spells-map plugin-subclasses-map)
-   (classes5e/wizard-option spell-lists spells-map plugin-subclasses-map)])
+(defn base-class-options [spell-lists spells-map plugin-subclasses-map language-map]
+  [(classes5e/barbarian-option spell-lists spells-map plugin-subclasses-map language-map)
+   (classes5e/bard-option spell-lists spells-map plugin-subclasses-map language-map)
+   (classes5e/cleric-option spell-lists spells-map plugin-subclasses-map language-map)
+   (classes5e/druid-option spell-lists spells-map plugin-subclasses-map language-map)
+   (classes5e/fighter-option spell-lists spells-map plugin-subclasses-map language-map)
+   (classes5e/monk-option spell-lists spells-map plugin-subclasses-map language-map)
+   (classes5e/paladin-option spell-lists spells-map plugin-subclasses-map language-map)
+   (classes5e/ranger-option spell-lists spells-map plugin-subclasses-map language-map)
+   (classes5e/rogue-option spell-lists spells-map plugin-subclasses-map language-map)
+   (classes5e/sorcerer-option spell-lists spells-map plugin-subclasses-map language-map)
+   (classes5e/warlock-option spell-lists spells-map plugin-subclasses-map language-map)
+   (classes5e/wizard-option spell-lists spells-map plugin-subclasses-map language-map)])
 
 (reg-sub
  ::classes5e/classes
  :<- [::spells5e/spell-lists]
  :<- [::spells5e/spells-map]
  :<- [::classes5e/plugin-subclasses-map]
- (fn [[spell-lists spells-map plugin-subclasses-map] _]
-   (base-class-options spell-lists spells-map plugin-subclasses-map)))
+ :<- [::langs5e/language-map]
+ (fn [[spell-lists spells-map plugin-subclasses-map language-map] _]
+   (base-class-options spell-lists spells-map plugin-subclasses-map language-map)))
 
 (reg-sub
  ::classes5e/class-map
@@ -835,3 +891,8 @@
  ::feats5e/builder-item
  (fn [db _]
    (::feats5e/builder-item db)))
+
+(reg-sub
+ ::langs5e/builder-item
+ (fn [db _]
+   (::langs5e/builder-item db)))

@@ -1463,7 +1463,8 @@
                            backgrounds
                            races
                            classes
-                           feats]
+                           feats
+                           language-map]
   [#_optional-content-selection
    (t/selection-cfg
     {:name "Base Ability Scores"
@@ -1502,21 +1503,21 @@
    (opt5e/race-selection
     {:options (conj
                (map
-                (partial opt5e/race-option spell-lists spells-map)
+                (partial opt5e/race-option spell-lists spells-map language-map)
                 races)
-               (opt5e/custom-race-option spell-lists spells-map))})
+               (opt5e/custom-race-option spell-lists spells-map language-map))})
    (opt5e/background-selection
     {:help "Background broadly describes your character origin. It also affords you two skill proficiencies and possibly proficiencies with tools or languages."
      :options (conj
                (map
-                opt5e/background-option
+                (partial opt5e/background-option language-map)
                 backgrounds)
-               opt5e/custom-background-option)})
+               (opt5e/custom-background-option language-map))})
    (opt5e/feat-selection-2
     {:options (concat
                (opt5e/feat-options spell-lists spells-map)
                (map
-                opt5e/feat-option-from-cfg
+                (partial opt5e/feat-option-from-cfg language-map)
                 feats))
      :show-if-zero? true
      :min 0
