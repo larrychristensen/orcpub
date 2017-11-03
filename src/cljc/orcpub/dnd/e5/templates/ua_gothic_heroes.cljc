@@ -9,7 +9,7 @@
             [orcpub.dnd.e5.templates.ua-options :as ua-options]
             [orcpub.dnd.e5.spell-lists :as sl]))
 
-(def fighter-option-cfg
+#_(def fighter-option-cfg
   {:name "Fighter"
    :plugin? true
    :subclass-level 3
@@ -61,7 +61,7 @@
                                             :page 2
                                             :source :ua-gothic-heroes})]}}}]})
 
-(def rogue-option-cfg
+#_(def rogue-option-cfg
   {:name "Rogue"
    :subclass-level 3
    :plugin? true
@@ -89,7 +89,7 @@
                            :page 3
                            :source :ua-gothic-heroes}]}]})
 
-(def ua-gothic-heroes-plugin
+#_(def ua-gothic-heroes-plugin
   {:name "Unearthed Arcana: Gothic Heroes"
    :class-options? true
    :key :ua-gothic-heroes

@@ -5,6 +5,7 @@
             [orcpub.dnd.e5.template :as t5e]
             [orcpub.dnd.e5.character :as char5e]
             [orcpub.dnd.e5.backgrounds :as bg5e]
+            [orcpub.dnd.e5.languages :as langs5e]
             [orcpub.dnd.e5.feats :as feats5e]
             [orcpub.dnd.e5.races :as race5e]
             [orcpub.dnd.e5.classes :as class5e]
@@ -25,6 +26,7 @@
 (def local-storage-magic-item-key "magic-item")
 (def local-storage-spell-key "spell")
 (def local-storage-background-key "background")
+(def local-storage-language-key "language")
 (def local-storage-feat-key "feat")
 (def local-storage-race-key "race")
 (def local-storage-subrace-key "subrace")
@@ -40,12 +42,14 @@
       route
       default-route)))
 
-(def default-character (char5e/set-class t5e/character :barbarian 0 (class5e/barbarian-option nil nil nil)))
+(def default-character (char5e/set-class t5e/character :barbarian 0 (class5e/barbarian-option nil nil nil nil)))
 
 (def default-spell {:level 0
                     :school "abjuration"})
 
 (def default-background {:traits []})
+
+(def default-language {})
 
 (def default-feat {:ability-increases #{}
                    :prereqs #{}})
@@ -75,6 +79,7 @@
    :device-type (user-agent/device-type)
    ::spells5e/builder-item default-spell
    ::bg5e/builder-item default-background
+   ::langs5e/builder-item default-language
    ::feats5e/builder-item default-feat
    ::race5e/builder-item default-race
    ::race5e/subrace-builder-item default-subrace
@@ -107,6 +112,10 @@
 (defn background->local-store [background]
   (if js/window.localStorage
     (set-item local-storage-background-key (str background))))
+
+(defn language->local-store [language]
+  (if js/window.localStorage
+    (set-item local-storage-language-key (str language))))
 
 (defn feat->local-store [feat]
   (if js/window.localStorage

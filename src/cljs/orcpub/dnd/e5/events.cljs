@@ -10,6 +10,7 @@
             [orcpub.dnd.e5.common :as common5e]
             [orcpub.dnd.e5.character :as char5e]
             [orcpub.dnd.e5.backgrounds :as bg5e]
+            [orcpub.dnd.e5.languages :as langs5e]
             [orcpub.dnd.e5.feats :as feats5e]
             [orcpub.dnd.e5.races :as race5e]
             [orcpub.dnd.e5.classes :as class5e]
@@ -28,6 +29,7 @@
                                       magic-item->local-store
                                       spell->local-store
                                       background->local-store
+                                      language->local-store
                                       feat->local-store
                                       race->local-store
                                       subrace->local-store
@@ -37,6 +39,7 @@
                                       default-character
                                       default-spell
                                       default-background
+                                      default-language
                                       default-feat
                                       default-race
                                       default-subrace
@@ -76,6 +79,8 @@
 
 (def background->local-store-interceptor (after background->local-store))
 
+(def language->local-store-interceptor (after language->local-store))
+
 (def feat->local-store-interceptor (after feat->local-store))
 
 (def race->local-store-interceptor (after race->local-store))
@@ -105,6 +110,9 @@
 
 (def background-interceptors [(path ::bg5e/builder-item)
                               background->local-store-interceptor])
+
+(def language-interceptors [(path ::langs5e/builder-item)
+                            language->local-store-interceptor])
 
 (def feat-interceptors [(path ::feats5e/builder-item)
                          feat->local-store-interceptor])
@@ -394,6 +402,14 @@
  "You must specify 'Name', 'Option Source Name'")
 
 (reg-save-homebrew
+ "Language"
+ ::langs5e/save-language
+ ::langs5e/builder-item
+ ::langs5e/homebrew-language
+ ::e5/languages
+ "You must specify 'Name', 'Option Source Name'")
+
+(reg-save-homebrew
  "Feat"
  ::feats5e/save-feat
  ::feats5e/builder-item
@@ -438,6 +454,10 @@
 (reg-delete-homebrew
  ::bg5e/delete-background
  ::e5/backgrounds)
+
+(reg-delete-homebrew
+ ::langs5e/delete-language
+ ::e5/languages)
 
 (reg-delete-homebrew
  ::feats5e/delete-feat
@@ -1509,6 +1529,11 @@
  routes/dnd-e5-background-builder-page-route)
 
 (reg-edit-homebrew
+ ::langs5e/edit-language
+ ::langs5e/set-language
+ routes/dnd-e5-language-builder-page-route)
+
+(reg-edit-homebrew
  ::feats5e/edit-feat
  ::feats5e/set-feat
  routes/dnd-e5-feat-builder-page-route)
@@ -2010,6 +2035,12 @@
    (assoc background prop-key prop-value)))
 
 (reg-event-db
+ ::langs5e/set-language-prop
+ language-interceptors
+ (fn [language [_ prop-key prop-value]]
+   (assoc language prop-key prop-value)))
+
+(reg-event-db
  ::race5e/set-race-prop
  race-interceptors
  (fn [race [_ prop-key prop-value]]
@@ -2490,6 +2521,18 @@
    background))
 
 (reg-event-db
+ ::langs5e/set-language
+ language-interceptors
+ (fn [_ [_ language]]
+   language))
+
+(reg-event-db
+ ::langs5e/set-language
+ language-interceptors
+ (fn [_ [_ language]]
+   language))
+
+(reg-event-db
  ::feats5e/set-feat
  feat-interceptors
  (fn [_ [_ feat]]
@@ -2531,6 +2574,18 @@
  (fn [_ _]
    {:dispatch [::bg5e/set-background
                default-background]}))
+
+(reg-event-fx
+ ::langs5e/reset-language
+ (fn [_ _]
+   {:dispatch [::langs5e/set-language
+               default-language]}))
+
+(reg-event-fx
+ ::langs5e/reset-language
+ (fn [_ _]
+   {:dispatch [::langs5e/set-language
+               default-language]}))
 
 (reg-event-fx
  ::feats5e/reset-feat
@@ -2676,6 +2731,18 @@
  ::bg5e/set-background
  default-background
  routes/dnd-e5-background-builder-page-route)
+
+(reg-new-homebrew
+ ::langs5e/new-language
+ ::langs5e/set-language
+ default-language
+ routes/dnd-e5-language-builder-page-route)
+
+(reg-new-homebrew
+ ::langs5e/new-language
+ ::langs5e/set-language
+ default-language
+ routes/dnd-e5-language-builder-page-route)
 
 (reg-new-homebrew
  ::feats5e/new-feat

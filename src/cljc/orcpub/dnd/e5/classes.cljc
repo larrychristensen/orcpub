@@ -33,11 +33,12 @@
     :page page
     :summary "Attack twice when taking Attack action"}))
 
-(defn barbarian-option [spells spells-map plugin-subclasses-map]
+(defn barbarian-option [spells spells-map plugin-subclasses-map language-map]
   (opt5e/class-option
    spells
    spells-map
    plugin-subclasses-map
+   language-map
    {:name "Barbarian"
     :key :barbarian
     :hit-die 12
@@ -234,11 +235,12 @@
   {:name "Musical Instrument"
    :options (zipmap (map :key equipment5e/musical-instruments) (repeat 1))})
 
-(defn bard-option [spells spells-map plugin-subclasses-map]
+(defn bard-option [spells spells-map plugin-subclasses-map language-map]
   (opt5e/class-option
    spells
    spells-map
    plugin-subclasses-map
+   language-map
    {:name "Bard"
     :key :bard
     :hit-die 8
@@ -378,11 +380,12 @@
    4 7
    5 9})
 
-(defn cleric-option [spells spells-map plugin-subclasses-map]
+(defn cleric-option [spells spells-map plugin-subclasses-map language-map]
   (opt5e/class-option
    spells
    spells-map
    plugin-subclasses-map
+   language-map
    {:name "Cleric",
     :key :cleric
     :spellcasting {:level-factor 1
@@ -731,11 +734,12 @@
    :page 69
    :summary "moving through nonmagical difficult terrain costs no extra movement, pass through nonmagical plants without being slowed by them and without taking damage from them"})
 
-(defn druid-option [spell-lists spells-map plugin-subclasses-map]
+(defn druid-option [spell-lists spells-map plugin-subclasses-map language-map]
   (opt5e/class-option
    spell-lists
    spells-map
    plugin-subclasses-map
+   language-map
    {:name "Druid"
     :key :druid
     :hit-die 8
@@ -965,97 +969,7 @@
                               :summary "cast alter self at will"
                               :level 14}]}]}))
 
-#_(defn eldritch-knight-spell? [s]
-    (let [school (:school s)]
-      (or (= school "evocation")
-          (= school "abjuration"))))
 
-#_(defn arcane-trickster-spell? [s]
-    (let [school (:school s)]
-      (or (= school "enchantment")
-          (= school "illusion"))))
-
-
-#_(defn subclass-wizard-spell-selection [title ref class-key class-name num spell-levels & [filter-fn]]
-    (opt5e/spell-selection {:title title
-                            :class-key class-key
-                            :ref ref
-                            :spellcasting-ability ::char5e/int
-                            :class-name class-name
-                            :num num
-                            :prepend-level? true
-                            :spell-keys (let [spell-keys
-                                              (mapcat
-                                               (fn [lvl] (get-in sl/spell-lists [:wizard lvl]))
-                                               spell-levels)]
-                                          (if filter-fn
-                                            (filter
-                                             (fn [spell-key]
-                                               (filter-fn (spells/spell-map spell-key)))
-                                             spell-keys)
-                                            spell-keys))}))
-
-#_(defn eldritch-knight-ref [subpath]
-    (concat
-     [:class :fighter :levels :level-3 :martial-archetype :eldritch-knight]
-     subpath))
-
-#_(defn arcane-trickster-ref [subpath]
-    (concat
-     [:class :rogue :levels :level-3 :roguish-archetype :arcane-trickster]
-     subpath))
-
-#_(defn eldritch-knight-spell-selection [num spell-levels]
-    (subclass-wizard-spell-selection "Eldritch Knight Abjuration or Evocation Spells"
-                                     (eldritch-knight-ref [:abjuration-or-evocation-spells-known])
-                                     :fighter
-                                     "Eldritch Knight"
-                                     num
-                                     spell-levels
-                                     eldritch-knight-spell?))
-
-#_(defn arcane-trickster-spell-selection [num spell-levels]
-    (subclass-wizard-spell-selection "Arcane Trickster Enchantment or Illusion Spells"
-                                     (arcane-trickster-ref [:enchantment-or-illusion-spells-known])
-                                     :rogue
-                                     "Arcane Trickster"
-                                     num
-                                     spell-levels
-                                     arcane-trickster-spell?))
-
-#_(defn eldritch-knight-any-spell-selection [num spell-levels]
-    (subclass-wizard-spell-selection "Eldritch Knight Spells: Any School"
-                                     (eldritch-knight-ref [:spells-known-any-school])
-                                     :fighter
-                                     "Eldritch Knight"
-                                     num
-                                     spell-levels))
-
-#_(defn arcane-trickster-any-spell-selection [num spell-levels]
-    (subclass-wizard-spell-selection "Arcane Trickster Spells: Any School"
-                                     (arcane-trickster-ref [:spells-known-any-school])
-                                     :rogue
-                                     "Arcane Trickster"
-                                     num
-                                     spell-levels))
-
-#_(defn eldritch-knight-cantrip [num]
-    (opt5e/spell-selection {:class-key :fighter
-                            :level 0
-                            :ref (eldritch-knight-ref [:cantrips-known])
-                            :spellcasting-ability ::char5e/int
-                            :class-name "Eldritch Knight"
-                            :num num
-                            :spell-keys (get-in sl/spell-lists [:wizard 0])}))
-
-#_(defn arcane-trickster-cantrip [num]
-    (opt5e/spell-selection {:class-key :rogue
-                            :level 0
-                            :ref (arcane-trickster-ref [:cantrips-known])
-                            :spellcasting-ability ::char5e/int
-                            :class-name "Arcane Trickster"
-                            :num num
-                            :spell-keys (get-in sl/spell-lists [:wizard 0])}))
 
 #_(def eldritch-knight-cfg
     {:name "Eldritch Knight"
@@ -1109,11 +1023,12 @@
       :max num}))
 
 
-(defn fighter-option [spells spells-map plugin-subclasses-map]
+(defn fighter-option [spells spells-map plugin-subclasses-map language-map]
   (opt5e/class-option
    spells
    spells-map
    plugin-subclasses-map
+   language-map
    {:name "Fighter",
     :key :fighter
     :hit-die 10,
@@ -1283,11 +1198,12 @@
            (not heavy?)
            (not two-handed?))))
 
-(defn monk-option [spells spells-map plugin-subclasses-map]
+(defn monk-option [spells spells-map plugin-subclasses-map language-map]
   (opt5e/class-option
    spells
    spells-map
    plugin-subclasses-map
+   language-map
    (merge
     opt5e/monk-base-cfg
     {:hit-die 8
@@ -1381,7 +1297,7 @@
               13 {:modifiers (map
                               (fn [{:keys [name key]}]
                                 (mod5e/language key))
-                              opt5e/languages)}
+                              (vals language-map))}
               14 {:modifiers [(apply mod5e/saving-throws nil char5e/ability-keys)
                               (mod5e/unarmored-speed-bonus 5)]}
               18 {:modifiers [(mod5e/unarmored-speed-bonus 5)
@@ -1477,11 +1393,12 @@
                                :summary "create minor elemental effect"}]}]})))
 
 
-(defn paladin-option [spells spells-map plugin-subclasses-map]
+(defn paladin-option [spells spells-map plugin-subclasses-map language-map]
   (opt5e/class-option
    spells
    spells-map
    plugin-subclasses-map
+   language-map
    (merge
     opt5e/paladin-base-cfg
     {:name "Paladin"
@@ -1710,7 +1627,7 @@
                                :page 88
                                :summary "when you hit with opportunity attack, you can also move up to half your speed after the attack without provoking opportunity attacks"}]}]})))
 
-(defn favored-enemy-option [[enemy-type info]]
+(defn favored-enemy-option [language-map [enemy-type info]]
   (let [vec-info? (sequential? info)
         languages (if vec-info? info (:languages info))
         name (if vec-info? (common/kw-to-name enemy-type) (:name info))]
@@ -1718,9 +1635,10 @@
      {:name name
       :selections (if (> (count languages) 1)
                     [(opt5e/language-selection
+                      language-map
                       (map
                        (fn [lang]
-                         (or (opt5e/language-map lang) {:key lang :name (s/capitalize (common/kw-to-name lang))}))
+                         (or (language-map lang) {:key lang :name (s/capitalize (common/kw-to-name lang))}))
                        languages)
                       1)])
       :modifiers (remove
@@ -1729,7 +1647,7 @@
                      (mod5e/language (first languages)))
                    (mod/set-mod ?ranger-favored-enemies enemy-type)])})))
 
-(defn favored-enemy-selection [order]
+(defn favored-enemy-selection [language-map order]
   (t/selection-cfg
    {:name (str "Favored Enemy " order)
     :tags #{:class}
@@ -1743,8 +1661,8 @@
                                :multiselect? true
                                :ref [:class :ranger :favored-enemy-type]
                                :options (map
-                                         favored-enemy-option
-                                         opt5e/favored-enemy-types)})]})
+                                         (partial favored-enemy-option language-map)
+                                         (opt5e/favored-enemy-types language-map))})]})
               (t/option-cfg
                {:name "Two Humanoid Races"
                 :selections [(t/selection-cfg
@@ -1773,11 +1691,12 @@
                   :modifiers [(mod/set-mod ?ranger-favored-terrain terrain)]}))
               [:arctic :coast :desert :forest :grassland :mountain :swamp :underdark])}))
 
-(defn ranger-option [spells spells-map plugin-subclasses-map]
+(defn ranger-option [spells spells-map plugin-subclasses-map language-map]
   (opt5e/class-option
    spells
    spells-map
    plugin-subclasses-map
+   language-map
    (merge
     opt5e/ranger-base-cfg
     {:hit-die 10
@@ -1840,8 +1759,8 @@
                                                :options (opt5e/simple-melee-weapon-options 1)
                                                :min 2
                                                :max 2})]})]})
-                  (favored-enemy-selection 1)
-                  (favored-terrain-selection 1)]
+                  (favored-enemy-selection language-map 1)
+                  (favored-terrain-selection language-map 1)]
      :levels {2 {:selections [(opt5e/fighting-style-selection :ranger #{:archery :defense :dueling :two-weapon-fighting})]}
               3 {:modifiers [(mod5e/action
                               {:name "Primeval Awareness"
@@ -1849,10 +1768,10 @@
                                :page 92
                                :summary (str "spend an X-level spell slot, for X minutes, you sense the types of creatures within 1 mile" (if (seq ?ranger-favored-terrain) (str "(6 if " (common/list-print (map #(common/kw-to-name % false) ?ranger-favored-terrain))) ")") )})]}
               5 {:modifiers [(mod5e/num-attacks 2)]}
-              6 {:selections [(favored-enemy-selection 2)
+              6 {:selections [(favored-enemy-selection language-map 2)
                               (favored-terrain-selection 2)]}
               10 {:selections [(favored-terrain-selection 3)]}
-              14 {:selections [(favored-enemy-selection 3)]}
+              14 {:selections [(favored-enemy-selection language-map 3)]}
               20 {:modifiers [(mod5e/dependent-trait
                                {:name "Foe Slayer"
                                 :frequency units5e/turns-1
@@ -1977,11 +1896,12 @@
 
 (def rogue-skills {:acrobatics true :athletics true :deception true :insight true :intimidation true :investigation true :perception true :performance true :persuasion true :sleight-of-hand true :stealth true})
 
-(defn rogue-option [spells spells-map plugin-subclasses-map]
+(defn rogue-option [spells spells-map plugin-subclasses-map language-map]
   (opt5e/class-option
    spells
    spells-map
    plugin-subclasses-map
+   language-map
    {:name "Rogue",
     :key :rogue
     :hit-die 8
@@ -2203,11 +2123,12 @@
                               :page 102
                               :summary "spend X sorcery pts. (min 1) to target two creatures with a single target spell, where X is the spell level"})]})]}))
 
-(defn sorcerer-option [spells spells-map plugin-subclasses-map]
+(defn sorcerer-option [spells spells-map plugin-subclasses-map language-map]
   (opt5e/class-option
    spells
    spells-map
    plugin-subclasses-map
+   language-map
    {:name "Sorcerer"
     :key :sorcerer
     :spellcasting {:level-factor 1
@@ -2384,11 +2305,12 @@
                                true)]})))
               (get-in sl5e/spell-lists [:wizard 3]))}))
 
-(defn wizard-option [spells spells-map plugin-subclasses-map]
+(defn wizard-option [spells spells-map plugin-subclasses-map language-map]
   (opt5e/class-option
    spells
    spells-map
    plugin-subclasses-map
+   language-map
    {:name "Wizard",
     :key :wizard
     :spellcasting {:level-factor 1
@@ -2981,11 +2903,12 @@ long rest."})
               false
               "uses Mystic Arcanum")}))
 
-(defn warlock-option [spell-lists spells-map plugin-subclasses-map]
+(defn warlock-option [spell-lists spells-map plugin-subclasses-map language-map]
   (opt5e/class-option
    spell-lists
    spells-map
    plugin-subclasses-map
+   language-map
    {:name "Warlock"
     :key :warlock
     :spellcasting {:cantrips-known {1 2 4 1 10 1}

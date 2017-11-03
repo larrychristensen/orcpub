@@ -36,7 +36,9 @@
 (def dnd-e5-language-builder-page-route :language-builder-5e-page)
 (def dnd-e5-feat-builder-page-route :feat-builder-5e-page)
 
-(def dnd-e5-spell-page-routes #{dnd-e5-spell-list-page-route dnd-e5-spell-page-route})
+(def dnd-e5-spell-page-routes #{dnd-e5-spell-list-page-route
+                                dnd-e5-spell-page-route
+                                dnd-e5-spell-builder-page-route})
 
 (def dnd-e5-items-route :items-5e)
 (def dnd-e5-item-summaries-route :item-summaries-5e)
@@ -57,7 +59,8 @@
                                 dnd-e5-background-builder-page-route
                                 dnd-e5-race-builder-page-route
                                 dnd-e5-subrace-builder-page-route
-                                dnd-e5-subclass-builder-page-route})
+                                dnd-e5-subclass-builder-page-route
+                                dnd-e5-language-builder-page-route})
 
 (def register-route :register)
 (def register-page-route :register-page)

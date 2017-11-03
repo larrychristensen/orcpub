@@ -239,45 +239,6 @@
                    (fn [c] (let [prof-keys @(subscribe [::character/armor-profs nil c])]
                              (boolean (and prof-keys (prof-keys armor-kw)))))))
 
-(def languages
-  [{:name "Common"
-    :key :common}
-   {:name "Dwarvish"
-    :key :dwarvish}
-   {:name "Elvish"
-    :key :elvish}
-   {:name "Giant"
-    :key :giant}
-   {:name "Gnomish"
-    :key :gnomish}
-   {:name "Goblin"
-    :key :goblin}
-   {:name "Halfling"
-    :key :halfling}
-   {:name "Orc"
-    :key :orc}
-   {:name "Abyssal"
-    :key :abyssal}
-   {:name "Celestial"
-    :key :celestial}
-   {:name "Draconic"
-    :key :draconic}
-   {:name "Deep Speech"
-    :key :deep-speech}
-   {:name "Infernal"
-    :key :infernal}
-   {:name "Primordial"
-    :key :primordial}
-   {:name "Sylvan"
-    :key :sylvan}
-   {:name "Undercommon"
-    :key :undercommon}])
-
-(def language-keys (map :key languages))
-
-(def language-map
-  (zipmap language-keys languages))
-
 (def elemental-disciplines
   [(t/option-cfg
     {:name "Breath of Winter"
@@ -704,28 +665,28 @@
                      :tags #{:spells}
                      :options options})]})))
 
-(defn language-selection
-  ([langs & [num]]
+(defn language-selection-aux [languages num]
   (t/selection-cfg
    {:name "Languages"
     :options (map
-     (fn [lang]
-       (language-option lang))
-     langs)
+              (fn [lang]
+                (language-option lang))
+              languages)
     :ref [:languages]
     :multiselect? true
     :tags #{:profs :language-profs}
     :min (or num 0)
     :max num}))
-  ([language-options]
-   (let [{lang-num :choose lang-options :options} language-options
-         lang-kws (if (:any lang-options)
-                    (map :key languages)
-                    (keys lang-options))]
-     (language-selection (map language-map lang-kws) lang-num))))
 
-(defn any-language-selection [& [num]]
-  (language-selection languages num))
+(defn language-selection [language-map language-options]
+  (let [{lang-num :choose lang-options :options} language-options
+        languages (if (:any lang-options)
+                    (vals language-map)
+                    (map language-map (keys lang-options)))]
+    (language-selection-aux languages lang-num)))
+
+(defn any-language-selection [language-map & [num]]
+  (language-selection-aux (vals language-map) num))
 
 #_(defn maneuver-option [name & [desc]]
   (t/option-cfg
@@ -981,13 +942,13 @@
                       :max nil
                       :options (map :key skills/skills)}))
 
-(defn homebrew-language-selection [& [min max]]
+(defn homebrew-language-selection [language-map & [min max]]
   (t/selection-cfg
    {:name "Languages"
     :options (map
               (fn [lang]
                 (language-option lang))
-              languages)
+              (vals language-map))
     :multiselect? true
     :tags #{:profs :language-profs}
     :min (or min 0)
@@ -1815,6 +1776,7 @@
 (defn subrace-option [race
                       spell-lists
                       spells-map
+                      languages
                       source
                       {:keys [name
                               abilities
@@ -1926,7 +1888,7 @@
                   :modifiers [(modifiers/darkvision distance)]}))
               (range 0 150 30))}))
 
-(defn custom-subrace-option [spell-lists spells-map path]
+(defn custom-subrace-option [spell-lists spells-map language-map path]
   (t/option-cfg
    {:name "Custom"
     :icon "beer-stein"
@@ -1943,14 +1905,14 @@
                  homebrew-darkvision-selection
                  homebrew-armor-prof-selection
                  homebrew-weapon-prof-selection
-                 (homebrew-language-selection)]}))
+                 (homebrew-language-selection language-map)]}))
 
 (defn custom-race-builder []
   (custom-option-builder
    [:custom-race-name]
    [:set-custom-race]))
 
-(defn subrace-selection [race spell-lists spells-map plugin? source subraces path]
+(defn subrace-selection [race spell-lists spells-map language-map plugin? source subraces path]
   (let [subrace-path (conj path :subrace)]
     (t/selection-cfg
      {:name "Subrace"
@@ -1959,16 +1921,16 @@
       :options (cond->
                 (if (seq subraces)
                   (map
-                   (partial subrace-option race spell-lists spells-map source)
+                   (partial subrace-option race spell-lists spells-map language-map source)
                    (if source
                      (map (fn [sr] (assoc sr :source source)) subraces)
                      subraces))
                   [(none-option subrace-path)])
                  
                  (not plugin?)
-                 (conj (custom-subrace-option spell-lists spells-map subrace-path)))})))
+                 (conj (custom-subrace-option spell-lists spells-map language-map subrace-path)))})))
 
-(defn custom-race-option [spell-lists spells-map]
+(defn custom-race-option [spell-lists spells-map language-map]
   (t/option-cfg
    {:name "Custom"
     :icon "beer-stein"
@@ -1981,7 +1943,7 @@
                (fn [_] @(subscribe [:homebrew? [:race]]))
                true)]
     :order 1000
-    :selections [(subrace-selection {} spell-lists spells-map false nil nil [:race :custom])
+    :selections [(subrace-selection {} spell-lists spells-map language-map false nil nil [:race :custom])
                  homebrew-skill-prof-selection
                  homebrew-tool-prof-selection
                  homebrew-ability-increase-selection
@@ -1990,14 +1952,14 @@
                  homebrew-darkvision-selection
                  homebrew-armor-prof-selection
                  homebrew-weapon-prof-selection
-                 (homebrew-language-selection)]}))
+                 (homebrew-language-selection language-map)]}))
 
 (defn custom-background-builder []
   (custom-option-builder
    [:custom-background-name]
    [:set-custom-background]))
 
-(def custom-background-option
+(defn custom-background-option [language-map]
   (t/option-cfg
    {:name "Custom"
     :ui-fn custom-background-builder
@@ -2013,13 +1975,14 @@
                              (t/option-cfg
                               {:name "One Tool / One Language"
                                :selections [(tool-selection 1)
-                                            (homebrew-language-selection 1 1)]})
+                                            (homebrew-language-selection language-map 1 1)]})
                              (t/option-cfg
                               {:name "Two Languages"
-                               :selections [(homebrew-language-selection 2 2)]})]})]}))
+                               :selections [(homebrew-language-selection language-map 2 2)]})]})]}))
 
 (defn race-option [spell-lists
                    spells-map
+                   language-map
                    {:keys [name
                            icon
                            key
@@ -2049,8 +2012,8 @@
       :help help
       :selections (concat
                    (if (seq subraces)
-                     [(subrace-selection race spell-lists spells-map plugin? source subraces [:race key])])
-                   (if (seq language-options) [(language-selection language-options)])
+                     [(subrace-selection race spell-lists spells-map language-map plugin? source subraces [:race key])])
+                   (if (seq language-options) [(language-selection language-map language-options)])
                    selections)
       :modifiers (concat
                   (if (not plugin?)
@@ -2248,7 +2211,8 @@
                                        passes?))))
                 skill-kws)})
 
-(defn background-option [{:keys [name
+(defn background-option [language-map
+                         {:keys [name
                                  help
                                  page
                                  profs
@@ -2288,7 +2252,9 @@
                     (class-armor-options armor-choices nil)
                     (class-equipment-options equipment-choices nil)
                     (if (seq skill-kws) [(skill-selection skill-kws skill-num)])
-                    (if (seq language-options) [(language-selection language-options)]))
+                    (if (seq language-options) [(language-selection
+                                                 language-map
+                                                 language-options)]))
        :modifiers (concat
                    [(modifiers/background name)]
                    (traits-modifiers traits)
@@ -2333,6 +2299,7 @@
 
 (defn subclass-option [spell-lists
                        spells-map
+                       language-map
                        cls
                        {:keys [name
                                source
@@ -2399,7 +2366,7 @@
                     spell-selections
                     (if (seq tool-options) [(tool-prof-selection tool-options)])
                     (if (seq skill-kws) [(skill-selection skill-kws skill-num)])
-                    (if (seq language-options) [(language-selection language-options)])))
+                    (if (seq language-options) [(language-selection language-map language-options)])))
       :modifiers (concat
                   modifiers
                   level-modifiers
@@ -2544,6 +2511,7 @@
 
 (defn level-option [spell-lists
                     spells-map
+                    language-map
                     {:keys [name
                             plugin?
                             hit-die
@@ -2582,7 +2550,7 @@
                            :order 2
                            :options (conj
                                      (map
-                                      #(subclass-option spell-lists spells-map (assoc cls :key kw) %)
+                                      #(subclass-option spell-lists spells-map language-map (assoc cls :key kw) %)
                                       (if source (map (fn [sc] (assoc sc :source source)) subclasses) subclasses))
                                      (custom-subclass-option spell-lists spells-map kw level-kw subclass-selection-key (some? spellcasting)))})]))
                     (if (and (not plugin?) (ability-inc-set i))
@@ -2634,6 +2602,7 @@
 (defn class-option [spell-lists
                     spells-map
                     plugin-subclasses-map
+                    language-map
                     {:keys [name
                             key
                             help
@@ -2701,7 +2670,7 @@
                                       {::entity/key (-> current-values count inc level-key)})
                        :tags #{kw}
                        :options (map
-                                 (partial level-option spell-lists spells-map merged-class kw spellcasting-template)
+                                 (partial level-option spell-lists spells-map language-map merged-class kw spellcasting-template)
                                  (range 1 21))
                        :min 1
                        :sequential? true
@@ -2809,20 +2778,20 @@
                   damage-desc
                   " damage to a successful weapon attack's damage")}))
 
-(def favored-enemy-types
+(defn favored-enemy-types [language-map]
   {:aberration [:deep-speech :undercommon :grell :slaad]
    :beast [:giant-elk :giant-eagle :giant-owl]
-   :celestial language-keys
+   :celestial (keys language-map)
    :construct [:modron]
    :dragon [:aquan :draconic :sylvan]
    :elemental [:auran :terran :ignan :aquan]
    :fey [:draconic :elvish :sylvan :abyssal :infernal :primoridial :aquan :giant]
-   :fiend language-keys
+   :fiend (keys language-map)
    :giant [:giant :orc :undercommon]
    :monstrosity [:draconic :sylvan :elvish :hook-horror :abyssal :celestial :infernal :primordial :aquan :sphynx :umber-hulk :yeti :winter-wolf :goblin :worg]
    :ooze []
    :plant [:druidic :elvish :sylvan]
-   :undead language-keys})
+   :undead (keys language-map)})
 
 (def humanoid-enemies
   {:bugbear [:goblin]
@@ -2966,11 +2935,11 @@
 
 (def filter-true (filter val))
 
-(defn make-feat-selections [k v]
+(defn make-feat-selections [language-map k v]
   (if v
     (case k
       :weapon-prof-choice [(weapon-proficiency-selection v)]
-      :language-choice [(language-selection v)]
+      :language-choice [(language-selection-aux (vals language-map) v)]
       :skill-tool-choice (map
                           (fn [i]
                             (skilled-selection (str "Skill/Tool " (inc i))))
@@ -3047,12 +3016,12 @@
        {:name name
         :description description})])))
 
-(defn feat-selections [props ability-increases]
+(defn feat-selections [language-map props ability-increases]
   (let [without-saves (sets/intersection ability-increases
                                          (into #{} character/ability-keys))]
     (reduce
      (fn [selections [k v]]
-       (let [feat-selections (make-feat-selections k v)]
+       (let [feat-selections (make-feat-selections language-map k v)]
          (if feat-selections
            (concat selections feat-selections)
            selections)))
@@ -3071,7 +3040,8 @@
      props)))
 
 
-(defn feat-option-from-cfg [{:keys [name
+(defn feat-option-from-cfg [language-map
+                            {:keys [name
                                     key
                                     icon
                                     description
@@ -3082,7 +3052,8 @@
                                   description
                                   props
                                   ability-increases)
-        feat-selections (feat-selections props
+        feat-selections (feat-selections language-map
+                                         props
                                          ability-increases)]
     (t/option-cfg
      {:name name
