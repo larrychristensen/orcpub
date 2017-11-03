@@ -2577,19 +2577,25 @@
             (str "edit-" option-name "-modifier-type"))
    interceptors
    (fn [option [_ index type]]
-     (assoc-in option [:level-modifiers index :type] type)))
+     (cond-> option
+       (nil? (:level-modifiers option)) (assoc :level-modifiers [])
+       true (assoc-in [:level-modifiers index :type] type))))
   (reg-event-db
    (keyword "orcpub.dnd.e5"
             (str "edit-" option-name "-modifier-level"))
    interceptors
    (fn [option [_ index level]]
-     (assoc-in option [:level-modifiers index :level] level)))
+     (cond-> option
+       (nil? (:level-modifiers option)) (assoc :level-modifiers [])
+       true (assoc-in [:level-modifiers index :level] level))))
   (reg-event-db
    (keyword "orcpub.dnd.e5"
             (str "edit-" option-name "-modifier-value"))
    interceptors
    (fn [option [_ index value]]
-     (assoc-in option [:level-modifiers index :value] value)))
+     (cond-> option
+       (nil? (:level-modifiers option)) (assoc :level-modifiers [])
+       true (assoc-in [:level-modifiers index :value] value))))
   (reg-event-db
    (keyword "orcpub.dnd.e5"
             (str "delete-" option-name "-modifier"))
@@ -2598,6 +2604,29 @@
      (update option :level-modifiers common/remove-at-index index))))
 
 (reg-option-modifiers "subclass" ::class5e/subclass-builder-item subclass-interceptors)
+
+(reg-event-db
+ ::race5e/set-subrace-spell-level
+ subrace-interceptors
+ (fn [subrace [_ index level]]
+   (prn "INDEX" index level)
+   (cond-> subrace
+     (nil? (:spells subrace)) (assoc :spells [])
+     true (assoc-in [:spells index :level] level))))
+
+(reg-event-db
+ ::race5e/set-subrace-spell-value
+ subrace-interceptors
+ (fn [subrace [_ index value]]
+   (cond-> subrace
+     (nil? (:spells subrace)) (assoc :spells [])
+     true (assoc-in [:spells index :value] value))))
+
+(reg-event-db
+ ::race5e/delete-subrace-spell
+ subrace-interceptors
+ (fn [subrace [_ index]]
+   (update subrace :spells common/remove-at-index index)))
 
 (defn reg-option-traits [option-name option-key interceptors]
   (reg-event-db

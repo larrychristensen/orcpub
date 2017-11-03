@@ -4236,7 +4236,7 @@
         spells-map @(subscribe [::spells/spells-map])
         spell (get spells-map spell-kw)]
     [:div.flex
-     [:div.m-t-10
+     [:div
       [labeled-dropdown
        "Spell Level"
        {:items (map
@@ -4246,7 +4246,7 @@
                 (range 0 10))
         :value (:level spell-cfg)
         :on-change #(dispatch [value-change-event index (assoc spell-cfg :level (js/parseInt %))])}]]
-     [:div.m-l-5.m-t-10
+     [:div.m-l-5
       [labeled-dropdown
        "Spellcasting Ability"
        {:items (cons
@@ -4260,7 +4260,7 @@
                  opt/abilities))
         :value (or (:ability spell-cfg) :select)
         :on-change #(dispatch [value-change-event index (assoc spell-cfg :ability (keyword %))])}]]
-     [:div.m-l-5.m-t-10
+     [:div.m-l-5
       [labeled-dropdown
        "Spell"
        {:items (cons
@@ -4342,6 +4342,17 @@
    :spell {:name "Spell"
            :component spell-selector}))
 
+(defn modifier-level-selector [index level edit-modifier-level-event]
+  [labeled-dropdown
+   "Unlock at Level"
+   {:items (map
+            (fn [lvl]
+              {:title lvl
+               :value lvl})
+            (range 1 21))
+    :value level
+    :on-change #(dispatch [edit-modifier-level-event index (js/parseInt %)])}])
+
 (defn option-level-modifier [{:keys [type value level]}
                              index
                              edit-modifier-type-event
@@ -4353,19 +4364,9 @@
      [:div.flex.flex-wrap.align-items-end.m-b-20
       [:div.m-t-10
        [labeled-dropdown
-        "Unlock at Level"
-        {:items (map
-                 (fn [lvl]
-                   {:title lvl
-                    :value lvl})
-                 (range 1 21))
-         :value level
-         :on-change #(dispatch [edit-modifier-level-event index (js/parseInt %)])}]]
-      [:div.m-l-5.m-t-10
-       [labeled-dropdown
         "Modifier Type"
         {:items (cons
-                 {:title "<select type>"
+                 {:title "<select type to add>"
                   :disabled? true
                   :value :select}
                  (map
@@ -4375,6 +4376,9 @@
                   modifier-values))
          :value (if type (clojure.core/name type) :select)
          :on-change #(dispatch [edit-modifier-type-event index (keyword %)])}]]
+      (if type
+        [:div.m-t-10.m-l-5
+         [modifier-level-selector index level edit-modifier-level-event]])
       (if (and type values)
         [:div.m-l-5.m-t-10
          [labeled-dropdown
@@ -4412,7 +4416,8 @@
          edit-modifier-type-event
          edit-modifier-value-event
          edit-modifier-level-event
-         delete-modifier-event])
+         delete-modifier-event
+         subset])
       level-modifiers))]
    [:div
     [option-level-modifier
@@ -4421,7 +4426,8 @@
      edit-modifier-type-event
      edit-modifier-value-event
      edit-modifier-level-event
-     delete-modifier-event]]])
+     delete-modifier-event
+     subset]]])
 
 (defn subclass-builder []
   (let [subclass @(subscribe [::classes/subclass-builder-item])
@@ -4429,6 +4435,7 @@
         class-key (get subclass :class)
         classes @(subscribe [::classes/classes])
         mobile? @(subscribe [:mobile?])]
+    (prn "SUBCLASS" subclass)
     [:div.p-20.main-text-color
      [:div.flex.flex-wrap
       [:div.m-b-20
@@ -4530,12 +4537,43 @@
       ::e5/delete-subclass-trait
       ::e5/edit-subclass-trait-level]]))
 
+(defn subrace-spell [index 
+                     {:keys [level value] :as spell-cfg}]
+  [:div.flex.flex-wrap.m-b-10.align-items-end
+   [modifier-level-selector
+    index
+    level
+    ::races/set-subrace-spell-level]
+   [:div.m-l-5
+    [spell-selector
+     index
+     value
+     ::races/set-subrace-spell-value]]
+   (if (or level value)
+     [:div.m-t-10
+      [:button.form-button.m-l-5
+       {:on-click #(dispatch [delete-modifier-event index])}
+       "delete"]])])
+
+(defn subrace-spells [subrace]
+  [:div
+   [:div
+    (doall
+     (map-indexed
+      (fn [i spell-cfg]
+        (prn "SPELL CFG" spell-cfg)
+        ^{:key i}
+        [subrace-spell i spell-cfg])
+      (:spells subrace)))]
+   [:div [subrace-spell (count (:spells subrace)) {}]]])
+
 (defn subrace-builder []
   (let [subrace @(subscribe [::races/subrace-builder-item])
         race-key (get subrace :race)
         race @(subscribe [::races/race race-key])
         races @(subscribe [::races/races])
         mobile? @(subscribe [:mobile?])]
+    (prn "SUBRACE" subrace)
     [:div.p-20.main-text-color
      [:div.flex.flex-wrap
       [:div.m-b-20
@@ -4629,6 +4667,9 @@
       [:div [option-damage-resistance subrace ::races/toggle-subrace-map-prop]]
       [:div [option-saving-throw-advantages subrace ::races/toggle-subrace-map-prop]]
       [:div [option-weapon-proficiency subrace ::races/toggle-subrace-map-prop]]]
+     [:div.m-b-20
+      [:div.f-s-24.f-w-b.m-b-10 "Spells"]
+      [subrace-spells subrace]]
      [option-traits
       subrace
       ::races/subrace-builder-item
