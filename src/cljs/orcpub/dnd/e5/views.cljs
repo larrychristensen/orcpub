@@ -11,6 +11,7 @@
             [orcpub.dnd.e5.subs :as subs]
             [orcpub.dnd.e5.character :as char]
             [orcpub.dnd.e5.backgrounds :as bg]
+            [orcpub.dnd.e5.languages :as langs]
             [orcpub.dnd.e5.races :as races]
             [orcpub.dnd.e5.classes :as classes]
             [orcpub.dnd.e5.feats :as feats]
@@ -430,6 +431,8 @@
            :route routes/dnd-e5-feat-builder-page-route}
           {:name "Background Builder"
            :route routes/dnd-e5-background-builder-page-route}
+          {:name "Language Builder"
+           :route routes/dnd-e5-language-builder-page-route}
           {:name "Race Builder"
            :route routes/dnd-e5-race-builder-page-route}
           {:name "Subrace Builder"
@@ -1351,7 +1354,7 @@
            [:div.p-10
             [:div.m-b-5 "Icons made by Lorc, Caduceus, and Delapouite. Available on " [:a.orange {:href "http://game-icons.net"} "http://game-icons.net"]]]
            [:div.m-l-10
-            [:a.orange {:href "https://muut.com/orcpub" :target :_blank} "Feedback/Bug Reports"]]
+            [:a.orange {:href "https://www.facebook.com/orcpub" :target :_blank} "Feedback/Bug Reports"]]
            [:div.m-l-10.m-r-10
             [:span.m-r-5 "© 2017 OrcPub"]
             [:a.orange {:href "/privacy-policy" :target :_blank} "Privacy Policy"]
@@ -2637,7 +2640,8 @@
 
 
 (defn proficiency-details [num-columns id]
-  (let [ability-bonuses @(subscribe [::char/ability-bonuses id])]
+  (let [ability-bonuses @(subscribe [::char/ability-bonuses id])
+        language-map @(subscribe [::langs/language-map])]
     [:div.details-columns
      {:class-name (if (= 2 num-columns) "flex")}
      [:div.flex-grow-1.details-column-2
@@ -2645,7 +2649,7 @@
       [skill-details-section-2 id]
       [:div.m-t-20
        [tool-prof-details-section-2 id]]
-      [list-item-section "Languages" "lips" @(subscribe [::char/languages id]) (partial prof-name opt/language-map)]
+      [list-item-section "Languages" "lips" @(subscribe [::char/languages id]) (partial prof-name language-map)]
       [list-item-section "Tool Proficiencies" "stone-crafting" @(subscribe [::char/tool-profs id]) (fn [[kw]] (prof-name equip/tools-map kw))]
       [list-item-section "Weapon Proficiencies" "bowman" @(subscribe [::char/weapon-profs id]) (partial prof-name weapon/weapons-map)]
       [list-item-section "Armor Proficiencies" "mailed-fist" @(subscribe [::char/armor-profs id]) (partial prof-name armor/armor-map)]]]))
@@ -3638,6 +3642,9 @@
 (defn spell-input-field [title prop spell & [class-names]]
   (builder-input-field title prop spell ::spells/set-spell-prop class-names))
 
+(defn language-input-field [title prop language & [class-names]]
+  (builder-input-field title prop language ::langs/set-language-prop class-names))
+
 (defn background-input-field [title prop bg & [class-names]]
   (builder-input-field title prop bg ::bg/set-background-prop class-names))
 
@@ -3676,18 +3683,26 @@
      tools))])
 
 (defn language-checkboxes [race languages]
-  [:div.flex.flex-wrap
-   (doall
-    (map
-     (fn [{:keys [name key]}]
-       ^{:key key}
-       [:span.m-r-20.m-b-10
-        [comps/labeled-checkbox
-         name
-         (get-in race [:languages name])
-         false
-         #(dispatch [::races/toggle-language name])]])
-     languages))])
+  [:div
+   [:div.flex.flex-wrap
+    (doall
+     (map
+      (fn [{:keys [name key]}]
+        ^{:key key}
+        [:span.m-r-20.m-b-10
+         [comps/labeled-checkbox
+          name
+          (get-in race [:languages name])
+          false
+          #(dispatch [::races/toggle-language name])]])
+      (sort-by
+       :name
+       languages)))]
+   [:div.pointer.m-t-10
+    [:span.bg-lighter.p-5
+     {:on-click #(dispatch [:route routes/dnd-e5-language-builder-page-route])}
+     [:i.fa.fa-plus]
+     [:span.orange.underline.m-l-5 "Add Language"]]]])
 
 (defn tool-choice-checkboxes [background key]
   [:div.flex.flex-wrap
@@ -4749,7 +4764,7 @@
          opt/abilities))]]
      [:div.m-b-20
       [:div.f-s-24.f-w-b.m-b-10 "Languages"]
-      [:div [language-checkboxes race opt/languages]]]
+      [:div [language-checkboxes race @(subscribe [::langs/languages])]]]
      [option-traits
       race
       ::races/race-builder-item
@@ -4783,6 +4798,28 @@
        ::e5/edit-background-trait-name
        ::e5/edit-background-trait-description
        ::e5/delete-background-trait]]]))
+
+(defn language-builder []
+  (let [language @(subscribe [::langs/builder-item])]
+    (prn "LANGUAGE" language)
+    [:div.p-20.main-text-color
+     [:div.flex.w-100-p.flex-wrap
+      [language-input-field
+       "Name"
+       :name
+       language
+       "m-b-20"]
+      [language-input-field
+       option-source-name-label
+       :option-pack
+       language
+       "m-l-5 m-b-20"]]
+     [:div.w-100-p
+      [:div.f-s-24.f-w-b
+       "Description"]
+      [textarea-field
+       {:value (get language :description)
+        :on-change #(dispatch [::langs/set-language-prop :description %])}]]]))
 
 (defn spell-builder []
   (let [{:keys [:level :school] :as spell} @(subscribe [::spells/builder-item])]
@@ -4944,6 +4981,17 @@
      :icon "save"
      :on-click #(dispatch [::spells/save-spell])}]
    [spell-builder]])
+
+(defn language-builder-page []
+  [content-page
+   "Language Builder"
+   [{:title "New Language"
+     :icon "plus"
+     :on-click #(dispatch [::langs/reset-language])}
+    {:title "Save"
+     :icon "save"
+     :on-click #(dispatch [::langs/save-language])}]
+   [language-builder]])
 
 (defn background-builder-page []
   [content-page
@@ -5503,6 +5551,15 @@
                    ::feats/edit-feat
                    ::feats/delete-feat))
 
+(defn my-languages [name]
+  (my-content-type name
+                   "language"
+                   ::e5/languages
+                   "vitruvian-man"
+                   ::langs/new-language
+                   ::langs/edit-language
+                   ::langs/delete-language))
+
 (defn my-content-item []
   (let [expanded? (r/atom false)]
     (fn [name plugin]
@@ -5527,7 +5584,8 @@
            [(my-races name) plugin]
            [(my-subraces name) plugin]
            [(my-subclasses name) plugin]
-           [(my-feats name) plugin]]])])))
+           [(my-feats name) plugin]
+           [(my-languages name) plugin]]])])))
 
 (defn my-content []
   [:div.main-text-color

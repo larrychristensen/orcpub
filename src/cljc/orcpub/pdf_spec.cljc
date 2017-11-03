@@ -9,6 +9,7 @@
             [orcpub.dnd.e5.spells :as spells]
             [orcpub.dnd.e5.display :as disp5e]
             [orcpub.dnd.e5.weapons :as weapon5e]
+            [orcpub.dnd.e5.languages :as langs5e]
             [orcpub.dnd.e5.armor :as armor5e]
             [orcpub.dnd.e5.equipment :as equip5e]
             [orcpub.dnd.e5.magic-items :as mi5e]
@@ -381,7 +382,8 @@
   (let [tool-profs (char5e/tool-proficiencies built-char)
         weapon-profs (char5e/weapon-proficiencies built-char)
         armor-profs (char5e/armor-proficiencies built-char)
-        languages (char5e/languages built-char)]
+        languages (char5e/languages built-char)
+        language-map @(subscribe [::langs5e/language-map])]
     (s/join
      "\n\n"
      (remove
@@ -389,7 +391,7 @@
       [(profs-paragraph (map first tool-profs) equip5e/tools-map "Tool")
        (profs-paragraph weapon-profs weapon5e/weapons-map "Weapon")
        (profs-paragraph armor-profs armor5e/armor-map "Armor")
-       (profs-paragraph languages opt5e/language-map "Language")]))))
+       (profs-paragraph languages language-map "Language")]))))
 
 (defn damage-str [die die-count mod damage-type]
   (str (dice/dice-string die-count die mod)
