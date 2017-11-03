@@ -105,7 +105,7 @@
   `(modifier ~k (conj (or ~k []) ~val)))
 
 (defmacro set-mod [k val]
-  `(modifier ~k (conj (or ~k #{}) ~val)))
+  `(modifier ~k (conj (if (seq ~k) ~k #{}) ~val)))
 
 (defmacro map-mod [k key val]
   `(modifier ~k (assoc ~k ~key ~val)))
