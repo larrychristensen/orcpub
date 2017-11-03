@@ -33,6 +33,7 @@
 (def dnd-e5-race-builder-page-route :race-builder-5e-page)
 (def dnd-e5-subrace-builder-page-route :subrace-builder-5e-page)
 (def dnd-e5-subclass-builder-page-route :subclass-builder-5e-page)
+(def dnd-e5-language-builder-page-route :language-builder-5e-page)
 (def dnd-e5-feat-builder-page-route :feat-builder-5e-page)
 
 (def dnd-e5-spell-page-routes #{dnd-e5-spell-list-page-route dnd-e5-spell-page-route})
@@ -50,7 +51,13 @@
 
 (def dnd-e5-my-content-route :my-content-5e-page)
 
-(def dnd-e5-my-content-routes #{dnd-e5-my-content-route})
+(def dnd-e5-my-content-routes #{dnd-e5-my-content-route
+                                dnd-e5-spell-builder-page-route
+                                dnd-e5-feat-builder-page-route
+                                dnd-e5-background-builder-page-route
+                                dnd-e5-race-builder-page-route
+                                dnd-e5-subrace-builder-page-route
+                                dnd-e5-subclass-builder-page-route})
 
 (def register-route :register)
 (def register-page-route :register-page)
@@ -137,6 +144,7 @@
                               "race-builder" dnd-e5-race-builder-page-route
                               "subrace-builder" dnd-e5-subrace-builder-page-route
                               "subclass-builder" dnd-e5-subclass-builder-page-route
+                              "language-builder" dnd-e5-language-builder-page-route
                               "feat-builder" dnd-e5-feat-builder-page-route
                               "spell-builder" dnd-e5-spell-builder-page-route
                               "spells" {"" dnd-e5-spell-list-page-route

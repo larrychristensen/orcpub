@@ -422,10 +422,20 @@
            (or (:handler active-route)
                active-route))
           device-type
-          #_{:name "Item List"
-           :route routes/dnd-e5-item-list-page-route}
-          #_{:name "Item Builder"
-           :route routes/dnd-e5-item-builder-page-route}]]]]]]))
+          {:name "Content List"
+           :route routes/dnd-e5-my-content-route}
+          {:name "Spell Builder"
+           :route routes/dnd-e5-spell-builder-page-route}
+          {:name "Feat Builder"
+           :route routes/dnd-e5-feat-builder-page-route}
+          {:name "Background Builder"
+           :route routes/dnd-e5-background-builder-page-route}
+          {:name "Race Builder"
+           :route routes/dnd-e5-race-builder-page-route}
+          {:name "Subrace Builder"
+           :route routes/dnd-e5-subrace-builder-page-route}
+          {:name "Subclass Builder"
+           :route routes/dnd-e5-subclass-builder-page-route}]]]]]]))
 
 (defn legal-footer []
   [:div.m-l-15.m-b-10.m-t-10.t-a-l
