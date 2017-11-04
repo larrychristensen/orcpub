@@ -4671,34 +4671,35 @@
      [:div.m-b-20
       [:div.f-s-24.f-w-b.m-b-10 "Ability Score Increases"]
       [:table.t-a-c
-       [:tr.f-w-b
-        [:th.p-2.t-a-l "Ability"]
-        [:th.p-2 "Race Bonus"]
-        [:th.p-2]
-        [:th.p-2 "Subrace Bonus"]
-        [:th.p-2]
-        [:th.p-2 "Total"]]
-       (doall
-        (map
-         (fn [{:keys [name key abbr]}]
-           (let [race-bonus (get-in race [:abilities key] 0)
-                 subrace-bonus (get-in subrace [:abilities key] 0)]
-             ^{:key key}
-             [:tr
-              [:td.p-2.f-w-b.t-a-l (if mobile? abbr name)]
-              [:td.p-2 race-bonus]
-              [:td.p-2 "+"]
-              [:td.p-2 [dropdown
-                    {:items (map
-                             (fn [bonus]
-                               {:title (common/bonus-str bonus)
-                                :value bonus})
-                             (range -2 3 1))
-                     :value subrace-bonus
-                     :on-change #(dispatch [::races/set-subrace-ability-increase key %])}]]
-              [:td.p-2 "="]
-              [:td.p-2 (+ race-bonus subrace-bonus)]]))
-         opt/abilities))]]
+       [:tbody
+        [:tr.f-w-b
+         [:th.p-2.t-a-l "Ability"]
+         [:th.p-2 "Race Bonus"]
+         [:th.p-2]
+         [:th.p-2 "Subrace Bonus"]
+         [:th.p-2]
+         [:th.p-2 "Total"]]
+        (doall
+         (map
+          (fn [{:keys [name key abbr]}]
+            (let [race-bonus (get-in race [:abilities key] 0)
+                  subrace-bonus (get-in subrace [:abilities key] 0)]
+              ^{:key key}
+              [:tr
+               [:td.p-2.f-w-b.t-a-l (if mobile? abbr name)]
+               [:td.p-2 race-bonus]
+               [:td.p-2 "+"]
+               [:td.p-2 [dropdown
+                         {:items (map
+                                  (fn [bonus]
+                                    {:title (common/bonus-str bonus)
+                                     :value bonus})
+                                  (range -2 3 1))
+                          :value subrace-bonus
+                          :on-change #(dispatch [::races/set-subrace-ability-increase key %])}]]
+               [:td.p-2 "="]
+               [:td.p-2 (+ race-bonus subrace-bonus)]]))
+          opt/abilities))]]]
      [:div.m-b-20
       [:div.f-s-24.f-w-b.m-b-10 "Modifiers"]
       [:div [option-hps subrace ::races/toggle-subrace-value-prop]]
