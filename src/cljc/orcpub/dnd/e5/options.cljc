@@ -2966,6 +2966,13 @@
                                  (fn [[k]]
                                    (modifiers/saving-throw-advantage [k]))))
                                v)
+      :skill-prof (sequence
+                   (comp
+                    filter-true
+                    (map
+                     (fn [[k]]
+                       (modifiers/skill-proficiency k))))
+                   v)
       :armor-prof (sequence
                    (comp
                     filter-true

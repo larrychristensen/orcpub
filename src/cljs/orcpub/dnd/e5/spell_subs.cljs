@@ -56,7 +56,10 @@
  ::races5e/plugin-races
  :<- [::e5/plugin-vals]
  (fn [plugins _]
-   (apply concat (map (comp vals ::e5/races) plugins))))
+   (map
+    (fn [race]
+      (assoc race :modifiers (opt5e/plugin-modifiers (:props race))))
+    (apply concat (map (comp vals ::e5/races) plugins)))))
 
 (defn subrace-spell-modifiers [{:keys [spells] :as subrace}]
   (map
