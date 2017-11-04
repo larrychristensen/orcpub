@@ -2137,10 +2137,22 @@
    (update-in subrace [:props key value] not)))
 
 (reg-event-db
+ ::race5e/toggle-race-map-prop
+ race-interceptors
+ (fn [race [_ key value]]
+   (update-in race [:props key value] not)))
+
+(reg-event-db
  ::class5e/toggle-subclass-map-prop
  subclass-interceptors
  (fn [subclass [_ key value]]
    (update-in subclass [:props key value] not)))
+
+(reg-event-db
+ ::bg5e/toggle-background-map-prop
+ background-interceptors
+ (fn [background [_ key value]]
+   (update-in background [:props key value] not)))
 
 (reg-event-db
  ::feats5e/toggle-feat-ability-increase
@@ -2664,7 +2676,6 @@
  ::race5e/set-subrace-spell-level
  subrace-interceptors
  (fn [subrace [_ index level]]
-   (prn "INDEX" index level)
    (cond-> subrace
      (nil? (:spells subrace)) (assoc :spells [])
      true (assoc-in [:spells index :level] level))))
