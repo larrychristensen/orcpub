@@ -1417,9 +1417,10 @@
 (defn add-item-component [type-name event]
   (info-block [:span
                [:span (str "Don't see a " type-name " here that you want to use? ")]
-               [:span.pointer.underline.orange
-                {:on-click #(dispatch [:route event])}
-                (str "CLICK HERE TO ADD A " (s/upper-case type-name))]]))
+               [:div.m-t-5
+                [:span.pointer.underline.orange
+                 {:on-click #(dispatch [:route event])}
+                 (str "CLICK HERE TO ADD A " (s/upper-case type-name))]]]))
 
 (defn add-spell-component []
   (add-item-component "spell" routes/dnd-e5-spell-builder-page-route))
@@ -1428,32 +1429,49 @@
   (add-item-component "background" routes/dnd-e5-background-builder-page-route))
 
 (defn add-race-component []
-  (add-item-component "race" routes/dnd-e5-race-builder-page-route))
+  (info-block [:span
+               [:span (str "Don't see a race or subrace here that you want to use?")]
+               [:div.m-t-5
+                [:span.pointer.underline.orange
+                 {:on-click #(dispatch [:route routes/dnd-e5-race-builder-page-route])}
+                 (str "CLICK HERE TO ADD A RACE")]]
+               [:div.m-t-5
+                [:span.pointer.underline.orange
+                 {:on-click #(dispatch [:route routes/dnd-e5-subrace-builder-page-route])}
+                 (str "CLICK HERE TO ADD A SUBRACE")]]]))
 
 (defn add-feat-component []
   (add-item-component "feat" routes/dnd-e5-feat-builder-page-route))
 
+(defn add-subclass-component []
+  (add-item-component "subclass" routes/dnd-e5-subclass-builder-page-route))
+
 (def pages
   [{:name "Race"
     :icon "woman-elf-face"
-    :tags #{:race :subrace}}
+    :tags #{:race :subrace}
+    :components [add-race-component]}
    {:name "Ability Scores / Feats"
     :icon "strong"
     :tags #{:ability-scores :feats}
     :ui-fns [{:key :ability-scores :group? true :ui-fn abilities-editor}
-             #_{:key :feats :group? true :ui-fn feats-editor}]}
+             #_{:key :feats :group? true :ui-fn feats-editor}]
+    :components [add-feat-component]}
    {:name "Background"
     :icon "ages"
-    :tags #{:background}}
+    :tags #{:background}
+    :components [add-background-component]}
    {:name "Class / Level"
     :icon "mounted-knight"
     :tags #{:class :subclass}
     :ui-fns [{:key :class :title "Class / Level" :ui-fn class-levels-selector}
-             {:key :hit-points :group? true :ui-fn hit-points-editor}]}
+             {:key :hit-points :group? true :ui-fn hit-points-editor}]
+    :components [add-subclass-component]}
    {:name "Spells"
     :icon "spell-book"
     :tags #{:spells}
-    :components [known-mode-info]}
+    :components [known-mode-info
+                 add-spell-component]}
    {:name "Proficiencies"
     :icon "juggler"
     :tags #{:profs}
