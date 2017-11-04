@@ -3766,9 +3766,9 @@
     [:span.i "Hodor's Guide to Hodors"]
     [:span ")"]]])
 
-(defn background-skill-proficiencies [background]
+(defn option-skill-proficiency [option toggle-event]
   [:div.m-b-20
-   [:div.f-s-24.f-w-b.m-b-20 "Skill Proficiencies"]
+   [:div.f-s-18.f-w-b.m-b-20 "Skill Proficiencies"]
    [:div.flex.flex-wrap
     (doall
      (map
@@ -3777,10 +3777,13 @@
         [:span.m-r-20.m-b-10
          [comps/labeled-checkbox
           name
-          (get-in background [:profs :skill key])
+          (get-in option [:props :skill-prof key])
           false
-          #(dispatch [::bg/toggle-skill-prof key])]])
+          #(dispatch [toggle-event :skill-prof key])]])
       skills/skills))]])
+
+(defn background-skill-proficiencies [background]
+  [option-skill-proficiency background ::bg/toggle-background-map-prop])
 
 (defn background-languages [background]
   [:div.m-t-20.m-b-20
@@ -4688,7 +4691,8 @@
       [:div [option-hps subrace ::races/toggle-subrace-value-prop]]
       [:div [option-damage-resistance subrace ::races/toggle-subrace-map-prop]]
       [:div [option-saving-throw-advantages subrace ::races/toggle-subrace-map-prop]]
-      [:div [option-weapon-proficiency subrace ::races/toggle-subrace-map-prop]]]
+      [:div [option-weapon-proficiency subrace ::races/toggle-subrace-map-prop]]
+      [:div [option-skill-proficiency subrace ::races/toggle-subrace-map-prop]]]
      [:div.m-b-20
       [:div.f-s-24.f-w-b.m-b-10 "Spells"]
       [subrace-spells subrace]]
@@ -4763,8 +4767,14 @@
               :on-change #(dispatch [::races/set-race-ability-increase key %])}]])
          opt/abilities))]]
      [:div.m-b-20
-      [:div.f-s-24.f-w-b.m-b-10 "Languages"]
-      [:div [language-checkboxes race @(subscribe [::langs/languages])]]]
+      [:div.f-s-24.f-w-b.m-b-10 "Modifiers"]
+      [:div.m-b-20
+       [:div.f-s-18.f-w-b.m-b-10 "Languages"]
+       [:div [language-checkboxes race @(subscribe [::langs/languages])]]]
+      [:div.m-b-20
+       [:div [option-weapon-proficiency race ::races/toggle-race-map-prop]]]
+      [:div.m-b-20
+       [:div [option-skill-proficiency race ::races/toggle-race-map-prop]]]]
      [option-traits
       race
       ::races/race-builder-item
@@ -4801,7 +4811,6 @@
 
 (defn language-builder []
   (let [language @(subscribe [::langs/builder-item])]
-    (prn "LANGUAGE" language)
     [:div.p-20.main-text-color
      [:div.flex.w-100-p.flex-wrap
       [language-input-field
