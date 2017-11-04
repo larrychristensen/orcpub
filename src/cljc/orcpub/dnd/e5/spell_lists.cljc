@@ -379,18 +379,18 @@
     9 [:foresight :shapechange :storm-of-vengeance :true-resurrection]},
    :paladin
    {1
-    [:bless :command :compelled-duel :cure-wounds :detect-evil-and-good :detect-magic
+    [:bless :command :cure-wounds :detect-evil-and-good :detect-magic
      :detect-poison-and-disease :divine-favor :heroism
      :protection-from-evil-and-good :purify-food-and-drink
-     :searing-smite :shield-of-faith :thunderous-smite :wrathful-smite],
+     :shield-of-faith]
     2
     [:aid :branding-smite :find-steed :lesser-restoration :locate-object :magic-weapon
      :protection-from-poison :zone-of-truth],
     3
-    [:aura-of-vitality :branding-smite :create-food-and-water :crusaders-mantle :daylight
-     :dispel-magic :elemental-weapon :magic-circle :remove-curse :revivify],
-    4 [:aura-of-life :aura-of-purity :banishment :death-ward :locate-creature :staggering-smite],
-    5 [:branding-smite :circle-of-power :destructive-wave :dispel-evil-and-good :geas :raise-dead]},
+    [:create-food-and-water :daylight
+     :dispel-magic :magic-circle :remove-curse :revivify],
+    4 [:banishment :death-ward :locate-creature],
+    5 [:dispel-evil-and-good :geas :raise-dead]},
    :ranger
    {1
     [:alarm #_:animal-friendship :cure-wounds :detect-magic :detect-poison-and-disease

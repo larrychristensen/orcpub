@@ -1142,7 +1142,7 @@ While on the Ethereal Plane, you can see and hear the plane you originated from,
     :duration "1 round"
     :source :scag
     :page 142}
-   #_{
+   {
     :name "Branding Smite"
     :school evocation
     :level 2
