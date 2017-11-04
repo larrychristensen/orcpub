@@ -385,12 +385,12 @@
      :shield-of-faith]
     2
     [:aid :branding-smite :find-steed :lesser-restoration :locate-object :magic-weapon
-     :protection-from-poison :zone-of-truth],
+     :protection-from-poison :zone-of-truth]
     3
     [:create-food-and-water :daylight
-     :dispel-magic :magic-circle :remove-curse :revivify],
-    4 [:banishment :death-ward :locate-creature],
-    5 [:dispel-evil-and-good :geas :raise-dead]},
+     :dispel-magic :magic-circle :remove-curse :revivify]
+    4 [:banishment :death-ward :locate-creature]
+    5 [:dispel-evil-and-good :geas :raise-dead]}
    :ranger
    {1
     [:alarm #_:animal-friendship :cure-wounds :detect-magic :detect-poison-and-disease

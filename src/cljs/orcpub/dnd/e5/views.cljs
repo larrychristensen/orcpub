@@ -3783,7 +3783,20 @@
       skills/skills))]])
 
 (defn background-skill-proficiencies [background]
-  [option-skill-proficiency background ::bg/toggle-background-map-prop])
+  [:div.m-b-20
+   [:div.f-s-24.f-w-b.m-b-20 "Skill Proficiencies"]
+   [:div.flex.flex-wrap
+    (doall
+     (map
+      (fn [{:keys [name key]}]
+        ^{:key key}
+        [:span.m-r-20.m-b-10
+         [comps/labeled-checkbox
+          name
+          (get-in background [:profs :skill key])
+          false
+          #(dispatch [::bg/toggle-skill-prof key])]])
+      skills/skills))]])
 
 (defn background-languages [background]
   [:div.m-t-20.m-b-20
