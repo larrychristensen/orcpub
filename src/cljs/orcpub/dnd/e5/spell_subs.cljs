@@ -262,7 +262,8 @@
                  [(or level 1) :modifiers]
                  (map (partial level-modifier class) level-modifiers)))
      (merge-levels
-      spellcaster-levels
+      (if add-spellcasting?
+        spellcaster-levels)
       (if (and (= class :warlock)
                (:warlock-spells option))
         (reduce-kv
