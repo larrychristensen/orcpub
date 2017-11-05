@@ -3782,6 +3782,31 @@
           #(dispatch [toggle-event :skill-prof key])]])
       skills/skills))]])
 
+(defn option-languages [option toggle-map-prop-event]
+  (prn "OPTION" option)
+  (let [languages @(subscribe [::langs/languages])]
+    [:div.m-b-20
+     [:div.f-s-18.f-w-b.m-b-20 "Languages"]
+     [:div.flex.flex-wrap
+      (doall
+       (map
+        (fn [{:keys [name key]}]
+          ^{:key key}
+          [:span.m-r-20.m-b-10
+           [comps/labeled-checkbox
+            name
+            (get-in option [:props :language key])
+            false
+            #(dispatch [toggle-map-prop-event :language key])]])
+        (sort-by
+         :name
+         languages)))]
+     [:div.pointer.m-t-10
+      [:span.bg-lighter.p-5
+       {:on-click #(dispatch [:route routes/dnd-e5-language-builder-page-route])}
+       [:i.fa.fa-plus]
+       [:span.orange.underline.m-l-5 "Add Language"]]]]))
+
 (defn option-skill-proficiency-or-expertise [option toggle-event]
   [:div.m-b-20
    [:div.f-s-18.f-w-b.m-b-20 "Skill Proficiency or Expertise"]
@@ -4741,7 +4766,8 @@
       [:div [option-saving-throw-advantages subrace ::races/toggle-subrace-map-prop]]
       [:div [option-weapon-proficiency subrace ::races/toggle-subrace-map-prop]]
       [:div [option-armor-proficiency subrace ::races/toggle-subrace-map-prop]]
-      [:div [option-skill-proficiency subrace ::races/toggle-subrace-map-prop]]]
+      [:div [option-skill-proficiency subrace ::races/toggle-subrace-map-prop]]
+      [:div [option-languages subrace ::races/toggle-subrace-map-prop]]]
      [:div.m-b-20
       [:div.f-s-24.f-w-b.m-b-10 "Spells"]
       [subrace-spells subrace]]
