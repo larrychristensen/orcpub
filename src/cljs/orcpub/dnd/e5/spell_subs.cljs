@@ -58,7 +58,8 @@
  (fn [plugins _]
    (map
     (fn [race]
-      (assoc race :modifiers (opt5e/plugin-modifiers (:props race))))
+      (assoc race :modifiers (opt5e/plugin-modifiers (:props race)
+                                                     (:key race))))
     (apply concat (map (comp vals ::e5/races) plugins)))))
 
 (defn subrace-spell-modifiers [{:keys [spells] :as subrace}]
@@ -78,7 +79,8 @@
  (fn [plugins _]
    (map
     (fn [subrace]
-      (assoc subrace :modifiers (concat (opt5e/plugin-modifiers (:props subrace))
+      (assoc subrace :modifiers (concat (opt5e/plugin-modifiers (:props subrace)
+                                                                (:key subrace))
                                         (subrace-spell-modifiers subrace))))
     (apply concat (map (comp vals ::e5/subraces) plugins)))))
 
@@ -287,7 +289,8 @@
     (fn [subclass]
       (let [levels (make-levels spell-lists spells-map subclass)]
         (assoc subclass
-               :modifiers (opt5e/plugin-modifiers (:props subclass))
+               :modifiers (opt5e/plugin-modifiers (:props subclass)
+                                                  (:key subclass))
                :levels levels)))
     (apply concat (map (comp vals ::e5/subclasses) plugins)))))
 
