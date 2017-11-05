@@ -49,7 +49,6 @@
 (reg-sub
  :srd-message-closed?
  (fn [db [_]]
-   (prn "SRD MESSAGE CLSES")
    (get db :srd-message-closed? false)))
 
 (reg-sub
