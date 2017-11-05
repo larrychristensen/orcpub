@@ -252,6 +252,9 @@
    merge-level
    level-specs))
 
+(defn to-class-level [spell-level]
+  (- (* 2 spell-level) 1))
+
 (defn make-levels [spell-lists spells-map {:keys [key class spellcasting] :as option}]
   (let [modifiers (:level-modifiers option)
         by-level (group-by :level modifiers)
@@ -266,11 +269,23 @@
      (merge-levels
       (if add-spellcasting?
         spellcaster-levels)
+      (if (and (= class :cleric)
+               (:cleric-spells option))
+        {1 {:modifiers (reduce-kv
+                        (fn [mods spell-level spells]
+                          (concat
+                           mods
+                           (map
+                            (fn [spell-kw]
+                              (opt5e/cleric-spell spell-level spell-kw (to-class-level spell-level)))
+                            (vals spells))))
+                        []
+                        (:cleric-spells option))}})
       (if (and (= class :warlock)
                (:warlock-spells option))
         (reduce-kv
          (fn [levels spell-level spells]
-           (let [level (- (* 2 spell-level) 1)]
+           (let [level (to-class-level spell-level)]
              (if (and spell-level (seq (vals spells)))
                (assoc-in levels
                          [level :selections]
