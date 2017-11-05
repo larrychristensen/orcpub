@@ -47,6 +47,12 @@
    (get db :email-taken?)))
 
 (reg-sub
+ :srd-message-closed?
+ (fn [db [_]]
+   (prn "SRD MESSAGE CLSES")
+   (get db :srd-message-closed? false)))
+
+(reg-sub
  :registration-validation
  :<- [:registration-form]
  :<- [:email-taken?]
