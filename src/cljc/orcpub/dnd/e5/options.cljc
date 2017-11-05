@@ -2946,7 +2946,16 @@
                           (range v))
       nil)))
 
-(defn make-feat-modifiers [k v]
+(defn collect-map-modifiers [m modifier-fn]
+  (sequence
+   (comp
+    filter-true
+    (map
+     (fn [[k]]
+       (modifier-fn k))))
+   m))
+
+(defn make-feat-modifiers [k v option-key]
   (if v
     (case k
       :initiative [(modifiers/initiative v)]
@@ -2959,58 +2968,41 @@
       :medium-armor-stealth [medium-armor-master-stealth]
       :speed [(modifiers/speed 10)]
       :saving-throw-advantage-traps [(modifiers/saving-throw-advantage [:traps])]
-      :saving-throw-advantage (sequence
-                               (comp
-                                filter-true
-                                (map
-                                 (fn [[k]]
-                                   (modifiers/saving-throw-advantage [k]))))
-                               v)
-      :skill-prof (sequence
-                   (comp
-                    filter-true
-                    (map
-                     (fn [[k]]
-                       (modifiers/skill-proficiency k))))
-                   v)
-      :armor-prof (sequence
-                   (comp
-                    filter-true
-                    (map
-                     (fn [[k]]
-                       (modifiers/armor-proficiency k))))
-                   v)
-      :weapon-prof (sequence
-                    (comp
-                     filter-true
-                     (map
-                      (fn [[k]]
-                        (modifiers/weapon-proficiency k))))
-                    v)
-      :damage-resistance (sequence
-                          (comp
-                           filter-true
-                           (map
-                            (fn [[k]]
-                              (modifiers/damage-resistance k))))
-                          v)
+      :saving-throw-advantage (collect-map-modifiers
+                               v
+                               #(modifiers/saving-throw-advantage [%]))
+      :skill-prof (collect-map-modifiers
+                   v
+                   #(modifiers/skill-proficiency %))
+      :skill-prof-or-expertise (collect-map-modifiers
+                                v
+                                #(skill-prof-or-expertise % option-key))
+      :armor-prof (collect-map-modifiers
+                   v
+                   #(modifiers/armor-proficiency %))
+      :weapon-prof (collect-map-modifiers
+                   v
+                   #(modifiers/weapon-proficiency %))
+      :damage-resistance (collect-map-modifiers
+                          v
+                          #(modifiers/damage-resistance %))
       nil)))
 
-(defn plugin-modifiers [props]
+(defn plugin-modifiers [props option-key]
   (reduce
    (fn [mods [k v]]
-     (let [feat-mods (make-feat-modifiers k v)]
+     (let [feat-mods (make-feat-modifiers k v option-key)]
        (if feat-mods
          (concat mods feat-mods)
          mods)))
    []
    props))
 
-(defn feat-modifiers [name description props ability-increases]
+(defn feat-modifiers [key name description props ability-increases]
   (let [without-saves (sets/intersection ability-increases
                                          (into #{} character/ability-keys))]
     (concat
-     (plugin-modifiers props)
+     (plugin-modifiers props key)
      (if (= 1 (count without-saves))
        (let [ability-kw (first without-saves)
              ability-mod (modifiers/ability ability-kw 1)]
@@ -3055,7 +3047,8 @@
                                     prereqs
                                     props
                                     ability-increases]}]
-  (let [feat-mods (feat-modifiers name
+  (let [feat-mods (feat-modifiers key
+                                  name
                                   description
                                   props
                                   ability-increases)
