@@ -1328,107 +1328,108 @@
 (def pota-amazon-frame
   (amazon-frame "//ws-na.amazon-adsystem.com/widgets/q?ServiceVersion=20070822&OneJS=1&Operation=GetAdHtml&MarketPlace=US&source=ac&ref=qf_sp_asin_til&ad_type=product_link&tracking_id=orcpub-20&marketplace=amazon&region=US&placement=0786965789&asins=0786965789&linkId=a2c9018a5e1260f518fa6b0fd0812350&show_border=false&link_opens_in_new_window=true&price_color=ffffff&title_color=f0a100&bg_color=2c3445"))
 
-(defn content-page [title button-cfgs content]
-  (let [orcacle-open? @(subscribe [:orcacle-open?])
-        theme @(subscribe [:theme])
-        mobile? @(subscribe [:mobile?])
-        srd-message-closed? @(subscribe [:srd-message-closed?])]
-    [:div.app
-     {:class-name theme
-      :on-scroll (fn [e]
-                   (if (not orcacle-open?)
-                     (let [app-header (js/document.getElementById "app-header")
-                           header-height (.-offsetHeight app-header)
-                           scroll-top (.-scrollTop (.-target e))
-                           sticky-header (js/document.getElementById "sticky-header")
-                           app-main (js/document.getElementById "app-main")
-                           scrollbar-width (- js/window.innerWidth (.-offsetWidth app-main))
-                           header-container (js/document.getElementById "header-container")]
-                       (set! (.-paddingRight (.-style header-container)) (str scrollbar-width "px"))
-                       (if (>= scroll-top header-height)
-                         (set! (.-display (.-style sticky-header)) "block")
-                         (set! (.-display (.-style sticky-header)) "none")))))}
-     [download-form]
-     (if @(subscribe [:loading])
-       [:div {:style loading-style}
-        [:div.flex.justify-cont-s-a.align-items-c.h-100-p
-         [:img.h-200.w-200.m-t-200 {:src "/image/spiral.gif"}]]])
-     [app-header]
-     (let [search-text @(subscribe [:search-text])]
-       (if orcacle-open?
-         [:div.flex.flex-column.h-100-p.white
-          {:style oracle-frame-style}
-          [:i.fa.fa-times-circle.f-s-24.orange.pointer
-           {:on-click close-orcacle
-            :style close-button-style}]
-          [:div
-           [:div.flex.justify-cont-s-a.m-t-10
-            [:div.flex.align-items-c.pointer
-             {:on-click close-orcacle}
-             [:span.f-s-32 "Orcacle"]
-             [:div.m-l-10 (svg-icon "hood" 48 "")]]]]
-          [:div.p-10
-           [:div.posn-rel
-            [:input.input.orcacle-input
-             {:value search-text
-              :on-change set-search-text
-              :on-key-press search-input-keypress
-              :style orcacle-input-style}]
-            [:i.fa.fa-times.posn-abs.f-s-24.pointer
-             {:style close-icon-style
-              :on-click set-search-text-empty}]]
-           [:span.f-s-14.i.opacity-5 "\"8d10 + 2\", \"magic missile\", \"kobold\", \"female calishite name\", \"tavern name\", etc."]]
-          [:div.flex-grow-1
-           [search-results]]]))
-     (let [hdr [header title button-cfgs]]
-       [:div
-        [:div#sticky-header.sticky-header.w-100-p.posn-fixed
-         [:div.flex.justify-cont-c
-          [:div#header-container.f-s-14.main-text-color.content
-           hdr]]]
-        [:div.flex.justify-cont-c.main-text-color
-         [:div.content hdr]]
-        [:div.m-l-20.m-r-20.f-w-b.f-s-18.container.m-b-10.main-text-color
-         (if (not srd-message-closed?)
+(defn content-page []
+  (let [srd-message-closed? (r/atom false)]
+    (fn [title button-cfgs content]
+      (let [orcacle-open? @(subscribe [:orcacle-open?])
+            theme @(subscribe [:theme])
+            mobile? @(subscribe [:mobile?])]
+        [:div.app
+         {:class-name theme
+          :on-scroll (fn [e]
+                       (if (not orcacle-open?)
+                         (let [app-header (js/document.getElementById "app-header")
+                               header-height (.-offsetHeight app-header)
+                               scroll-top (.-scrollTop (.-target e))
+                               sticky-header (js/document.getElementById "sticky-header")
+                               app-main (js/document.getElementById "app-main")
+                               scrollbar-width (- js/window.innerWidth (.-offsetWidth app-main))
+                               header-container (js/document.getElementById "header-container")]
+                           (set! (.-paddingRight (.-style header-container)) (str scrollbar-width "px"))
+                           (if (>= scroll-top header-height)
+                             (set! (.-display (.-style sticky-header)) "block")
+                             (set! (.-display (.-style sticky-header)) "none")))))}
+         [download-form]
+         (if @(subscribe [:loading])
+           [:div {:style loading-style}
+            [:div.flex.justify-cont-s-a.align-items-c.h-100-p
+             [:img.h-200.w-200.m-t-200 {:src "/image/spiral.gif"}]]])
+         [app-header]
+         (let [search-text @(subscribe [:search-text])]
+           (if orcacle-open?
+             [:div.flex.flex-column.h-100-p.white
+              {:style oracle-frame-style}
+              [:i.fa.fa-times-circle.f-s-24.orange.pointer
+               {:on-click close-orcacle
+                :style close-button-style}]
+              [:div
+               [:div.flex.justify-cont-s-a.m-t-10
+                [:div.flex.align-items-c.pointer
+                 {:on-click close-orcacle}
+                 [:span.f-s-32 "Orcacle"]
+                 [:div.m-l-10 (svg-icon "hood" 48 "")]]]]
+              [:div.p-10
+               [:div.posn-rel
+                [:input.input.orcacle-input
+                 {:value search-text
+                  :on-change set-search-text
+                  :on-key-press search-input-keypress
+                  :style orcacle-input-style}]
+                [:i.fa.fa-times.posn-abs.f-s-24.pointer
+                 {:style close-icon-style
+                  :on-click set-search-text-empty}]]
+               [:span.f-s-14.i.opacity-5 "\"8d10 + 2\", \"magic missile\", \"kobold\", \"female calishite name\", \"tavern name\", etc."]]
+              [:div.flex-grow-1
+               [search-results]]]))
+         (let [hdr [header title button-cfgs]]
            [:div
-            [:div.content.bg-lighter.p-10.flex
-             [:div.flex-grow-1
-              [:div "Due to licensing issues, we were forced to remove all non-SRD content, if you have questions about what is and is not SRD content please see the " srd-link ". If you would like to see the non-SRD content added back to OrcPub please sign our " [:a.orange {:href "https://www.change.org/p/wizards-of-the-coast-wizards-of-the-coast-please-grant-orc-pub-licensing-rights-to-your-content" :target "_blank"}
-                                                                                                                                                                                                                                                                         "petition here at change.org"]
-               "."]
-              (if (not mobile?)
-                [:div.m-t-10 "You can add content from other sources using the builders in the 'My Content' menu. Here are some compatible sources: "
-                 [:div.flex.flex-wrap.m-t-10
-                  [:div.m-l-5 phb-amazon-frame]
-                  [:div.m-l-5 dmg-amazon-frame]
-                  [:div.m-l-5 mm-amazon-frame]
-                  [:div.m-l-5 xanathars-amazon-frame]
-                  [:div.m-l-5 scag-amazon-frame]
-                  [:div.m-l-5 volos-amazon-frame]
-                  [:div.m-l-5 toa-amazon-frame]
-                  [:div.m-l-5 yawning-portal-amazon-frame]
-                  [:div.m-l-5 cos-amazon-frame]
-                  [:div.m-l-5 skt-amazon-frame]
-                  #_[:div.m-l-5 oota-amazon-frame]
-                  [:div.m-l-5 pota-amazon-frame]]])]
-             [:i.fa.fa-times.p-10.pointer
-              {:on-click #(dispatch [:close-srd-message])}]]])]
-        [:div#app-main.container
-         [:div.content.w-100-p content]]
-        [:div.main-text-color.flex.justify-cont-c
-         [:div.content.f-w-n.f-s-12
-          [:div.flex.justify-cont-s-b.align-items-c.flex-wrap.p-10
-           [:div
-            [:div.m-b-5 "Icons made by Lorc, Caduceus, and Delapouite. Available on " [:a.orange {:href "http://game-icons.net"} "http://game-icons.net"]]]
-           [:div.m-l-10
-            [:a.orange {:href "https://www.facebook.com/orcpub" :target :_blank} "Feedback/Bug Reports"]]
-           [:div.m-l-10.m-r-10.p-10
-            [:a.orange {:href "/privacy-policy" :target :_blank} "Privacy Policy"]
-            [:a.orange.m-l-5 {:href "/terms-of-use" :target :_blank} "Terms of Use"]]
-           [:div.legal-footer
-            [:p "© 2017 OrcPub" [:span.m-l-20 "Contact: " [:a {:href "mailto:redorc@orcpub.com"} "redorc@orcpub.com"]]]
-            [:p "Wizards of the Coast, Dungeons & Dragons, D&D, and their logos are trademarks of Wizards of the Coast LLC in the United States and other countries. © 2017 Wizards. All Rights Reserved. OrcPub.com is not affiliated with, endorsed, sponsored, or specifically approved by Wizards of the Coast LLC."]]]
-          [debug-data]]]])]))
+            [:div#sticky-header.sticky-header.w-100-p.posn-fixed
+             [:div.flex.justify-cont-c
+              [:div#header-container.f-s-14.main-text-color.content
+               hdr]]]
+            [:div.flex.justify-cont-c.main-text-color
+             [:div.content hdr]]
+            [:div.m-l-20.m-r-20.f-w-b.f-s-18.container.m-b-10.main-text-color
+             (if (not @srd-message-closed?)
+               [:div
+                [:div.content.bg-lighter.p-10.flex
+                 [:div.flex-grow-1
+                  [:div "Due to licensing issues, we were forced to remove all non-SRD content, if you have questions about what is and is not SRD content please see the " srd-link ". If you would like to see the non-SRD content added back to OrcPub please sign our " [:a.orange {:href "https://www.change.org/p/wizards-of-the-coast-wizards-of-the-coast-please-grant-orc-pub-licensing-rights-to-your-content" :target "_blank"}
+                                                                                                                                                                                                                                                                             "petition here at change.org"]
+                   "."]
+                  (if (not mobile?)
+                    [:div.m-t-10 "You can add content from other sources using the builders in the 'My Content' menu. Here are some compatible sources (please help fund further development by buying on Amazon through these links): "
+                     [:div.flex.flex-wrap.m-t-10
+                      [:div.m-l-5 phb-amazon-frame]
+                      [:div.m-l-5 dmg-amazon-frame]
+                      [:div.m-l-5 mm-amazon-frame]
+                      [:div.m-l-5 xanathars-amazon-frame]
+                      [:div.m-l-5 scag-amazon-frame]
+                      [:div.m-l-5 volos-amazon-frame]
+                      [:div.m-l-5 toa-amazon-frame]
+                      [:div.m-l-5 yawning-portal-amazon-frame]
+                      [:div.m-l-5 cos-amazon-frame]
+                      [:div.m-l-5 skt-amazon-frame]
+                      #_[:div.m-l-5 oota-amazon-frame]
+                      [:div.m-l-5 pota-amazon-frame]]])]
+                 [:i.fa.fa-times.p-10.pointer
+                  {:on-click #(swap! srd-message-closed? not)}]]])]
+            [:div#app-main.container
+             [:div.content.w-100-p content]]
+            [:div.main-text-color.flex.justify-cont-c
+             [:div.content.f-w-n.f-s-12
+              [:div.flex.justify-cont-s-b.align-items-c.flex-wrap.p-10
+               [:div
+                [:div.m-b-5 "Icons made by Lorc, Caduceus, and Delapouite. Available on " [:a.orange {:href "http://game-icons.net"} "http://game-icons.net"]]]
+               [:div.m-l-10
+                [:a.orange {:href "https://www.facebook.com/orcpub" :target :_blank} "Feedback/Bug Reports"]]
+               [:div.m-l-10.m-r-10.p-10
+                [:a.orange {:href "/privacy-policy" :target :_blank} "Privacy Policy"]
+                [:a.orange.m-l-5 {:href "/terms-of-use" :target :_blank} "Terms of Use"]]
+               [:div.legal-footer
+                [:p "© 2017 OrcPub" [:span.m-l-20 "Contact: " [:a {:href "mailto:redorc@orcpub.com"} "redorc@orcpub.com"]]]
+                [:p "Wizards of the Coast, Dungeons & Dragons, D&D, and their logos are trademarks of Wizards of the Coast LLC in the United States and other countries. © 2017 Wizards. All Rights Reserved. OrcPub.com is not affiliated with, endorsed, sponsored, or specifically approved by Wizards of the Coast LLC."]]]
+              [debug-data]]]])]))))
 
 (def row-style
   {:border-bottom "1px solid rgba(255,255,255,0.5)"})
