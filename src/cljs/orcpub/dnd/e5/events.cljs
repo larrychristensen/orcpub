@@ -2972,3 +2972,8 @@
                                    (or items [:none :none :none])
                                    i
                                    weapon-kw))))))
+
+(reg-event-db
+ :close-srd-message
+ (fn [db [_]]
+   (assoc db :srd-message-closed? true)))
