@@ -3984,6 +3984,23 @@
             #(dispatch [::feats/toggle-feat-value-prop kw num])])])
       (range 3 5)))]])
 
+(defn option-armor-proficiency [option toggle-map-prop-event]
+  [:div.m-b-20
+   [:div.f-s-18.f-w-b.m-b-10 "Armor Proficiency"]
+   [:div.flex.flex-wrap
+    (doall
+     (map
+      (fn [armor-type]
+        ^{:key armor-type}
+        [:div.m-r-20.m-b-10
+         (let [kw :armor-prof]
+           [comps/labeled-checkbox
+            (str "You gain proficiency with " (name armor-type) (if (not= armor-type :shields) " armor"))
+            (get-in option [:props kw armor-type])
+            false
+            #(dispatch [toggle-map-prop-event kw armor-type])])])
+      (conj armor/armor-types :shields)))]])
+
 (defn feat-armor-proficiency [feat]
   [:div.m-b-20
    [:div.f-s-18.f-w-b.m-b-10 "Armor Proficiency"]
@@ -4723,6 +4740,7 @@
       [:div [option-damage-resistance subrace ::races/toggle-subrace-map-prop]]
       [:div [option-saving-throw-advantages subrace ::races/toggle-subrace-map-prop]]
       [:div [option-weapon-proficiency subrace ::races/toggle-subrace-map-prop]]
+      [:div [option-armor-proficiency subrace ::races/toggle-subrace-map-prop]]
       [:div [option-skill-proficiency subrace ::races/toggle-subrace-map-prop]]]
      [:div.m-b-20
       [:div.f-s-24.f-w-b.m-b-10 "Spells"]
@@ -4804,6 +4822,8 @@
        [:div [language-checkboxes race @(subscribe [::langs/languages])]]]
       [:div.m-b-20
        [:div [option-weapon-proficiency race ::races/toggle-race-map-prop]]]
+      [:div.m-b-20
+       [:div [option-armor-proficiency race ::races/toggle-race-map-prop]]]
       [:div.m-b-20
        [:div [option-skill-proficiency race ::races/toggle-race-map-prop]]]]
      [option-traits
