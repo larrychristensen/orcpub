@@ -3853,7 +3853,6 @@
       skills/skills))]])
 
 (defn option-languages [option toggle-map-prop-event]
-  (prn "OPTION" option)
   (let [languages @(subscribe [::langs/languages])]
     [:div.m-b-20
      [:div.f-s-18.f-w-b.m-b-20 "Languages"]
@@ -4622,7 +4621,6 @@
         class-key (get subclass :class)
         classes @(subscribe [::classes/classes])
         mobile? @(subscribe [:mobile?])]
-    (prn "SUBCLASS" subclass)
     [:div.p-20.main-text-color
      [:div.flex.flex-wrap
       [:div.m-b-20
