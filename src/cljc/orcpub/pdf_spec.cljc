@@ -264,7 +264,7 @@
                                levels))
              split-levels (common/map-vals
                            (fn [level spells]
-                             (vec (partition-all (level-max-spells level) spells)))
+                             (vec (partition-all (level-max-spells (or level 0)) spells)))
                            levels)
              num-pages (apply max
                               (map (fn [[level parts]]

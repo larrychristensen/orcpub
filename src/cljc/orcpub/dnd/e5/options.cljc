@@ -2968,9 +2968,9 @@
       :medium-armor-stealth [medium-armor-master-stealth]
       :speed [(modifiers/speed 10)]
       :saving-throw-advantage-traps [(modifiers/saving-throw-advantage [:traps])]
-      :language (do (prn "K V " k v option-key) (collect-map-modifiers
-                        v
-                        #(modifiers/language %)))
+      :language (collect-map-modifiers
+                 v
+                 #(modifiers/language %))
       :saving-throw-advantage (collect-map-modifiers
                                v
                                #(modifiers/saving-throw-advantage [%]))
