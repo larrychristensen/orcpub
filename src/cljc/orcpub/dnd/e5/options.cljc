@@ -2989,6 +2989,9 @@
       :damage-resistance (collect-map-modifiers
                           v
                           #(modifiers/damage-resistance %))
+      :damage-immunity (collect-map-modifiers
+                        v
+                        #(modifiers/damage-immunity %))
       nil)))
 
 (defn plugin-modifiers [props option-key]

@@ -4151,6 +4151,23 @@
             #(dispatch [toggle-map-prop-event kw damage-type])]])
         opt/damage-types))])])
 
+(defn option-damage-immunity [option toggle-map-prop-event]
+  [:div.m-b-20
+   [:div.f-s-18.f-w-b.m-b-10 "Damage Immunity"]
+   (let [kw :damage-immunity]
+     [:div.flex.flex-wrap
+      (doall
+       (map
+        (fn [damage-type]
+          ^{:key damage-type}
+          [:div.m-r-20.m-b-10
+           [comps/labeled-checkbox
+            (str "Immunity to " (name damage-type) " damage")
+            (get-in option [:props kw damage-type])
+            false
+            #(dispatch [toggle-map-prop-event kw damage-type])]])
+        opt/damage-types))])])
+
 (defn option-weapon-proficiency [option toggle-map-prop-event]
   [:div.m-b-20
    [:div.f-s-18.f-w-b.m-b-10 "Weapon Proficiency"]
@@ -4763,6 +4780,7 @@
       [:div.f-s-24.f-w-b.m-b-10 "Modifiers"]
       [:div [option-hps subrace ::races/toggle-subrace-value-prop]]
       [:div [option-damage-resistance subrace ::races/toggle-subrace-map-prop]]
+      [:div [option-damage-immunity subrace ::races/toggle-subrace-map-prop]]
       [:div [option-saving-throw-advantages subrace ::races/toggle-subrace-map-prop]]
       [:div [option-weapon-proficiency subrace ::races/toggle-subrace-map-prop]]
       [:div [option-armor-proficiency subrace ::races/toggle-subrace-map-prop]]
@@ -4851,7 +4869,11 @@
       [:div.m-b-20
        [:div [option-armor-proficiency race ::races/toggle-race-map-prop]]]
       [:div.m-b-20
-       [:div [option-skill-proficiency race ::races/toggle-race-map-prop]]]]
+       [:div [option-skill-proficiency race ::races/toggle-race-map-prop]]]
+      [:div.m-b-20
+       [:div [option-damage-resistance race ::races/toggle-race-map-prop]]]
+      [:div.m-b-20
+       [:div [option-damage-immunity race ::races/toggle-race-map-prop]]]]
      [option-traits
       race
       ::races/race-builder-item
