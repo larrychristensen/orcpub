@@ -4622,6 +4622,7 @@
         class-key (get subclass :class)
         classes @(subscribe [::classes/classes])
         mobile? @(subscribe [:mobile?])]
+    (prn "SUBCLASS" subclass)
     [:div.p-20.main-text-color
      [:div.flex.flex-wrap
       [:div.m-b-20
@@ -4653,7 +4654,7 @@
        ::e5/edit-subclass-modifier-value
        ::e5/edit-subclass-modifier-level
        ::e5/delete-subclass-modifier]]
-     (if (#{:fighter :rogue :warlock} class-key)
+     (if (#{:fighter :rogue :warlock :cleric} class-key)
        (let [spellcasting (get subclass :spellcasting)
              spellcasting? (some? spellcasting)]
          [:div.m-b-20
@@ -4670,6 +4671,44 @@
                        [false true])
                :value spellcasting?
                :on-change #(dispatch [::classes/toggle-subclass-spellcasting])}]]
+
+            (= :cleric class-key)
+            [:div
+             [:div.f-s-18.f-w-b.m-b-10 (str (:name subclass) " Domain Spells")]
+             [:table
+              [:tbody
+               [:tr.f-w-b
+                [:th.p-5 "Spell Level"]
+                [:th.p-5.t-a-l "Spells"]]
+               (doall
+                (map
+                 (fn [level]
+                   ^{:key level}
+                   [:tr
+                    [:th.p-5 (common/ordinal level)]
+                    (let [spells-for-level @(subscribe [::spells/spells-for-level level])]
+                      [:th.p-5
+                       [:div.flex.flex-wrap
+                        (doall
+                         (map
+                          (fn [i]
+                            ^{:key i}
+                            [:div.m-l-5.m-b-10
+                             [dropdown
+                              {:items (cons
+                                       {:title "<select spell>"
+                                        :value :select
+                                        :disabled? true}
+                                       (map
+                                        (fn [{:keys [name key]}]
+                                          {:title name
+                                           :value key})
+                                        spells-for-level))
+                               :value (or (get-in subclass [:cleric-spells level i])
+                                          :select)
+                               :on-change #(dispatch [::classes/set-class-spell :cleric-spells level i (keyword %)])}]])
+                          (range 2)))]])])
+                 (range 1 6)))]]]
 
             (= :warlock class-key)
             [:div
@@ -4711,7 +4750,7 @@
                                         spells))
                                :value (or (get-in subclass [:warlock-spells level i])
                                           :select)
-                               :on-change #(dispatch [::classes/set-warlock-spell level i (keyword %)])}]])
+                               :on-change #(dispatch [::classes/set-class-spell :warlock-spells level i (keyword %)])}]])
                           (range 2)))]])])
                  (range 1 6)))]]])]))
      [option-traits
