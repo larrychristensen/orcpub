@@ -2109,7 +2109,6 @@
  ::race5e/toggle-race-prop
  race-interceptors
  (fn [race [_ key]]
-   (prn "TOGGLE RACE PROP" race key)
    (update-in race [:props key] not)))
 
 (reg-event-db
@@ -2199,6 +2198,12 @@
  race-interceptors
  (fn [race [_ v]]
    (assoc race :speed (js/parseInt v))))
+
+(reg-event-db
+ ::race5e/set-race-value-prop
+ race-interceptors
+ (fn [race [_ k v]]
+   (assoc-in race [:props k] v)))
 
 (reg-event-db
  ::race5e/set-subrace-speed

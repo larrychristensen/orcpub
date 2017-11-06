@@ -2967,6 +2967,8 @@
       :medium-armor-max-dex-3 [medium-armor-master-max-bonus]
       :medium-armor-stealth [medium-armor-master-stealth]
       :speed [(modifiers/speed 10)]
+      :flying-speed [(modifiers/flying-speed-override v)]
+      :swimming-speed [(modifiers/swimming-speed-override v)]
       :saving-throw-advantage-traps [(modifiers/saving-throw-advantage [:traps])]
       :lizardfolk-ac (if v
                        [(mods/modifier ?natural-ac-bonus 3)
