@@ -4906,6 +4906,7 @@
 
 (defn race-builder []
   (let [race @(subscribe [::races/builder-item])]
+    (prn "RACE" race)
     [:div.p-20.main-text-color
      [:div.m-b-20.flex.flex-wrap
       [race-input-field
@@ -4948,6 +4949,20 @@
                  [0 60 120])
          :value (get race :darkvision)
          :on-change #(dispatch [::races/set-race-prop :darkvision (js/parseInt %)])}]]]
+     [:div.m-b-20
+      [:div.f-s-24.f-w-b.m-b-10 "Armor Class"]
+      [:div.flex.flex-wrap
+       [comps/labeled-checkbox
+        "Without armor your AC becomes 13 + your DEX modifier."
+        (get-in race [:props :lizardfolk-ac])
+        false
+        #(dispatch [::races/toggle-race-prop :lizardfolk-ac])]
+       [:div.m-l-20
+        [comps/labeled-checkbox
+         "Your AC is 17, regardless of your DEX modifier or armor."
+         (get-in race [:props :tortle-ac])
+         false
+         #(dispatch [::races/toggle-race-prop :tortle-ac])]]]]
      [:div.m-b-20
       [:div.f-s-24.f-w-b.m-b-10 "Ability Score Increases"]
       [:div.flex.flex-wrap

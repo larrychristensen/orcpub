@@ -2968,6 +2968,19 @@
       :medium-armor-stealth [medium-armor-master-stealth]
       :speed [(modifiers/speed 10)]
       :saving-throw-advantage-traps [(modifiers/saving-throw-advantage [:traps])]
+      :lizardfolk-ac (if v
+                       [(mods/modifier ?natural-ac-bonus 3)
+                        (mods/modifier ?armor-class-with-armor
+                                      (fn [armor & [shield]]
+                                        (max (+ ?base-armor-class
+                                                (if shield (?shield-ac-bonus shield) 0))
+                                             (?armor-class-with-armor armor shield))))])
+      :tortle-ac (if v
+                   [(mods/modifier ?natural-ac-bonus 7)
+                    (mods/modifier ?armor-class-with-armor
+                                  (fn [armor & [shield]]
+                                    (+ 17
+                                       (if shield (?shield-ac-bonus shield) 0))))])
       :language (collect-map-modifiers
                  v
                  #(modifiers/language %))
