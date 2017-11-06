@@ -4941,6 +4941,26 @@
          :on-change #(dispatch [::races/set-race-speed %])}]]
       [:div.m-r-5
        [labeled-dropdown
+        "Flying Speed"
+        {:items (map
+                 (fn [v]
+                   {:title v 
+                    :value v})
+                 (range 25 40 5))
+         :value (get-in race [:props :flying-speed])
+         :on-change #(dispatch [::races/set-race-value-prop :flying-speed (js/parseInt %)])}]]
+      [:div.m-r-5
+       [labeled-dropdown
+        "Swimming Speed"
+        {:items (map
+                 (fn [v]
+                   {:title v 
+                    :value v})
+                 (range 25 40 5))
+         :value (get-in race [:props :swimming-speed])
+         :on-change #(dispatch [::races/set-race-value-prop :swimming-speed (js/parseInt %)])}]]
+      [:div.m-r-5
+       [labeled-dropdown
         "Darkvision"
         {:items (map
                  (fn [v]
