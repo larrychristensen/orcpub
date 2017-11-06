@@ -4906,7 +4906,6 @@
 
 (defn race-builder []
   (let [race @(subscribe [::races/builder-item])]
-    (prn "RACE" race)
     [:div.p-20.main-text-color
      [:div.m-b-20.flex.flex-wrap
       [race-input-field
@@ -4942,22 +4941,28 @@
       [:div.m-r-5
        [labeled-dropdown
         "Flying Speed"
-        {:items (map
-                 (fn [v]
-                   {:title v 
-                    :value v})
-                 (range 25 40 5))
-         :value (get-in race [:props :flying-speed])
+        {:items (cons
+                 {:title 0
+                  :value 0}
+                 (map
+                  (fn [v]
+                    {:title v 
+                     :value v})
+                  (range 25 40 5)))
+         :value (or (get-in race [:props :flying-speed]) 0)
          :on-change #(dispatch [::races/set-race-value-prop :flying-speed (js/parseInt %)])}]]
       [:div.m-r-5
        [labeled-dropdown
         "Swimming Speed"
-        {:items (map
-                 (fn [v]
-                   {:title v 
-                    :value v})
-                 (range 25 40 5))
-         :value (get-in race [:props :swimming-speed])
+        {:items (cons
+                 {:title 0
+                  :value 0}
+                 (map
+                  (fn [v]
+                    {:title v 
+                     :value v})
+                  (range 25 40 5)))
+         :value (or (get-in race [:props :swimming-speed]) 0)
          :on-change #(dispatch [::races/set-race-value-prop :swimming-speed (js/parseInt %)])}]]
       [:div.m-r-5
        [labeled-dropdown
