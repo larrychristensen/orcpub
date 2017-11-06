@@ -2106,6 +2106,13 @@
                            (assoc m key num))))))
 
 (reg-event-db
+ ::race5e/toggle-race-prop
+ race-interceptors
+ (fn [race [_ key]]
+   (prn "TOGGLE RACE PROP" race key)
+   (update-in race [:props key] not)))
+
+(reg-event-db
  ::race5e/toggle-subrace-value-prop
  subrace-interceptors
  (fn [subrace [_ key num]]
