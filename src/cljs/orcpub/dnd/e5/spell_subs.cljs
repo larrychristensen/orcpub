@@ -15,6 +15,7 @@
             [orcpub.dnd.e5.character :as char5e]
             [orcpub.dnd.e5.weapons :as weapon5e]
             [orcpub.dnd.e5.spells :as spells5e]
+            [orcpub.dnd.e5.monsters :as monsters5e]
             [orcpub.dnd.e5.spell-lists :as sl5e]
             [orcpub.dnd.e5.armor :as armor5e]
             [orcpub.dnd.e5.template :as t5e]
@@ -922,3 +923,19 @@
  ::langs5e/builder-item
  (fn [db _]
    (::langs5e/builder-item db)))
+
+(reg-sub
+ ::monsters5e/builder-item
+ (fn [db _]
+   (::monsters5e/builder-item db)))
+
+
+(reg-sub
+ ::monsters5e/alignments
+ (fn [db _]
+   (into (sorted-set) (map :alignment) monsters5e/monsters)))
+
+(reg-sub
+ ::monsters5e/challenge-ratings
+ (fn [db _]
+   (into (sorted-set) (map :challenge) monsters5e/monsters)))
