@@ -1697,7 +1697,7 @@
               (not (or (-> monster-filters :size size)
                        (-> monster-filters :type type)
                        (all-subtypes-removed? subtypes (:subtype monster-filters)))))))
-      @(subscribe [::char5e/sorted-monsters])))))
+      @(subscribe [::monsters/sorted-monsters])))))
 
 (defn filter-by-name-xform [filter-text name-key]
   (let [pattern (re-pattern (str ".*" (s/lower-case filter-text) ".*"))]
@@ -1787,9 +1787,9 @@
  (fn [db [_ filter-text]]
    (assoc db
           ::char5e/monster-text-filter filter-text
-          ::char5e/filtered-monsters (if (>= (count filter-text) 3)
-                                       (filter-monsters filter-text (::char5e/monster-filter-hidden? db))
-                                       @(subscribe [::char5e/sorted-monsters])))))
+          ::monsters/filtered-monsters (if (>= (count filter-text) 3)
+                                           (filter-monsters filter-text (::char5e/monster-filter-hidden? db))
+                                           @(subscribe [::monsters/sorted-monsters])))))
 
 (reg-event-db
  ::char5e/filter-spells
@@ -2176,6 +2176,12 @@
  subrace-interceptors
  (fn [subrace [_ key value]]
    (update-in subrace [:props key value] not)))
+
+(reg-event-db
+ ::monsters/toggle-monster-map-prop
+ monster-interceptors
+ (fn [monster [_ key value]]
+   (update-in monster [:props key value] not)))
 
 (reg-event-db
  ::race5e/toggle-race-map-prop
