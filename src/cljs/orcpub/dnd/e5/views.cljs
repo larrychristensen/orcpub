@@ -3918,6 +3918,22 @@
           #(dispatch [toggle-event :skill-prof-or-expertise key])]])
       skills/skills))]])
 
+(defn option-tool-proficiency-or-expertise [option toggle-event]
+  [:div.m-b-20
+   [:div.f-s-18.f-w-b.m-b-20 "Tool Proficiency or Expertise"]
+   [:div.flex.flex-wrap
+    (doall
+     (map
+      (fn [{:keys [name key]}]
+        ^{:key key}
+        [:span.m-r-20.m-b-10
+         [comps/labeled-checkbox
+          name
+          (get-in option [:props :tool-prof-or-expertise key])
+          false
+          #(dispatch [toggle-event :tool-prof-or-expertise key])]])
+      equip/tools))]])
+
 (defn background-skill-proficiencies [background]
   [:div.m-b-20
    [:div.f-s-24.f-w-b.m-b-20 "Skill Proficiencies"]
@@ -4434,6 +4450,7 @@
      [:div [feat-ability-increase-options feat]]
      [:div [feat-skill-proficiency feat]]
      [:div [option-skill-proficiency-or-expertise feat ::feats/toggle-feat-map-prop]]
+     [:div [option-tool-proficiency-or-expertise feat ::feats/toggle-feat-map-prop]]
      [:div [feat-languages feat]]
      [:div [feat-weapon-proficiency feat]]
      [:div [feat-armor-proficiency feat]]

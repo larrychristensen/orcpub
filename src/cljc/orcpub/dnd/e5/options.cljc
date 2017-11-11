@@ -2966,7 +2966,7 @@
       :passive-perception-5 [(modifiers/passive-perception 5)]
       :medium-armor-max-dex-3 [medium-armor-master-max-bonus]
       :medium-armor-stealth [medium-armor-master-stealth]
-      :speed [(modifiers/speed 10)]
+      :speed [(modifiers/speed v)]
       :flying-speed [(modifiers/flying-speed-override v)]
       :swimming-speed [(modifiers/swimming-speed-override v)]
       :saving-throw-advantage-traps [(modifiers/saving-throw-advantage [:traps])]
@@ -2992,6 +2992,9 @@
       :skill-prof (collect-map-modifiers
                    v
                    #(modifiers/skill-proficiency %))
+      :tool-prof-or-expertise (collect-map-modifiers
+                                v
+                                #(tool-prof-or-expertise % option-key))
       :skill-prof-or-expertise (collect-map-modifiers
                                 v
                                 #(skill-prof-or-expertise % option-key))
