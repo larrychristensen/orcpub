@@ -1140,7 +1140,7 @@
 (defn print-bonus-map [m]
   (s/join ", "
           (map
-           (fn [[k v]] (str (s/capitalize (clojure.core/name k)) " " (common/bonus-str v)))
+           (fn [[k v]] (str (s/capitalize (common/safe-name k)) " " (common/bonus-str v)))
            m)))
 
 (def max-width-300
@@ -1166,7 +1166,7 @@
       (fn [ability-key]
         ^{:key ability-key}
         [:div.t-a-c.p-5
-         [:div.f-w-b.f-s-14 (s/upper-case (clojure.core/name ability-key))]
+         [:div.f-w-b.f-s-14 (s/upper-case (common/safe-name ability-key))]
          (let [ability-value (get monster ability-key)]
            [:div ability-value " (" (common/bonus-str (opt/ability-bonus ability-value)) ")"])])
       [:str :dex :con :int :wis :cha]))]
@@ -1284,7 +1284,34 @@
 (def srd-link
   [:a.orange {:href "/SRD-OGL_V5.1.pdf" :target "_blank"} "the 5e SRD"])
 
-(defn amazon-frame [link]
+(defn amazon-link [title url]
+  [:a.orange {:href url :target "_blank"} title])
+
+(def phb-link (amazon-link "PBH" "https://www.amazon.com/gp/product/0786965606/ref=as_li_tl?ie=UTF8&tag=orcpub-20&camp=1789&creative=9325&linkCode=as2&creativeASIN=0786965606&linkId=d0e5f5e84d625c00ca1e9f9086e5d7c4"))
+
+(def dmg-link (amazon-link "DMG" "https://www.amazon.com/gp/product/0786965622/ref=as_li_tl?ie=UTF8&tag=orcpub-20&camp=1789&creative=9325&linkCode=as2&creativeASIN=0786965622&linkId=067760cfb629d77c7162287b06684bf4"))
+
+(def mm-link (amazon-link "MM" "https://www.amazon.com/gp/product/0786965614/ref=as_li_tl?ie=UTF8&tag=orcpub-20&camp=1789&creative=9325&linkCode=as2&creativeASIN=0786965614&linkId=6d27c01945d45ceff0204eade602f998"))
+
+(def xge-link (amazon-link "XGE" "https://www.amazon.com/gp/product/0786966114/ref=as_li_tl?ie=UTF8&tag=orcpub-20&camp=1789&creative=9325&linkCode=as2&creativeASIN=0786966114&linkId=df71445fe4cab418c535a38d55c3b761"))
+
+(def scag-link (amazon-link "SCAG" "https://www.amazon.com/gp/product/0786965800/ref=as_li_tl?ie=UTF8&tag=orcpub-20&camp=1789&creative=9325&linkCode=as2&creativeASIN=0786965800&linkId=deac8f6d8ceeb243cc29931992bcde52"))
+
+(def volos-link (amazon-link "VGM" "https://www.amazon.com/gp/product/0786966017/ref=as_li_tl?ie=UTF8&tag=orcpub-20&camp=1789&creative=9325&linkCode=as2&creativeASIN=0786966017&linkId=1db974c1bc5c3f2f49971ad2e1fc7906"))
+
+(def toa-link (amazon-link "TOA" "https://www.amazon.com/gp/product/0786966106/ref=as_li_tl?ie=UTF8&tag=orcpub-20&camp=1789&creative=9325&linkCode=as2&creativeASIN=0786966106&linkId=83a1e9d255d69267b0b441e8a7bcde80"))
+
+(def skt-link (amazon-link "SKT" "https://www.amazon.com/gp/product/0786966009/ref=as_li_tl?ie=UTF8&tag=orcpub-20&camp=1789&creative=9325&linkCode=as2&creativeASIN=0786966009&linkId=191904c4573b03a08afbc490e1c94fd9"))
+
+(def oota-link (amazon-link "OOTA" "https://www.amazon.com/gp/product/0786965819/ref=as_li_tl?ie=UTF8&tag=orcpub-20&camp=1789&creative=9325&linkCode=as2&creativeASIN=0786965819&linkId=e00c6e6016c6d319a0191c35cde3d24b"))
+
+(def pota-link (amazon-link "POTA" "https://www.amazon.com/gp/product/0786965789/ref=as_li_tl?ie=UTF8&tag=orcpub-20&camp=1789&creative=9325&linkCode=as2&creativeASIN=0786965789&linkId=7db71e3ac545c311e302d15692072b74"))
+
+(def yp-link (amazon-link "YP" "https://www.amazon.com/gp/product/0786966092/ref=as_li_tl?ie=UTF8&tag=orcpub-20&camp=1789&creative=9325&linkCode=as2&creativeASIN=0786966092&linkId=09d5160452645b8c9cac1e66735120f3"))
+
+(def cos-link (amazon-link "COS" "https://www.amazon.com/gp/product/0786965983/ref=as_li_tl?ie=UTF8&tag=orcpub-20&camp=1789&creative=9325&linkCode=as2&creativeASIN=0786965983&linkId=b47dbcb3687fd053c365d68c7132937e"))
+
+#_(defn amazon-frame [link]
   [:iframe {:style {:width "120px" :height "240px"}
             :margin-width 0
             :margin-height 0
@@ -1292,144 +1319,143 @@
             :frame-border 0
             :src link}])
 
-(def scag-amazon-frame
+#_(def scag-amazon-frame
   (amazon-frame "//ws-na.amazon-adsystem.com/widgets/q?ServiceVersion=20070822&OneJS=1&Operation=GetAdHtml&MarketPlace=US&source=ac&ref=tf_til&ad_type=product_link&tracking_id=orcpub-20&marketplace=amazon&region=US&placement=0786965800&asins=0786965800&linkId=f35402a86dd0851190d952228fab36e9&show_border=false&link_opens_in_new_window=true&price_color=ffffff&title_color=f0a100&bg_color=2c3445"))
 
-(def volos-amazon-frame
+#_(def volos-amazon-frame
   (amazon-frame "//ws-na.amazon-adsystem.com/widgets/q?ServiceVersion=20070822&OneJS=1&Operation=GetAdHtml&MarketPlace=US&source=ac&ref=tf_til&ad_type=product_link&tracking_id=orcpub-20&marketplace=amazon&region=US&placement=0786966017&asins=0786966017&linkId=8c552e7b980d7d944bd12dec57e002e8&show_border=false&link_opens_in_new_window=true&price_color=ffffff&title_color=f0a100&bg_color=2c3445"))
 
-(def phb-amazon-frame
+#_(def phb-amazon-frame
   (amazon-frame "//ws-na.amazon-adsystem.com/widgets/q?ServiceVersion=20070822&OneJS=1&Operation=GetAdHtml&MarketPlace=US&source=ac&ref=qf_sp_asin_til&ad_type=product_link&tracking_id=orcpub-20&marketplace=amazon&region=US&placement=0786965606&asins=0786965606&linkId=3b5b686390559c31dbc3c20d20f37ec4&show_border=false&link_opens_in_new_window=true&price_color=ffffff&title_color=f0a100&bg_color=2c3445"))
 
-(def dmg-amazon-frame
+#_(def dmg-amazon-frame
   (amazon-frame "//ws-na.amazon-adsystem.com/widgets/q?ServiceVersion=20070822&OneJS=1&Operation=GetAdHtml&MarketPlace=US&source=ac&ref=tf_til&ad_type=product_link&tracking_id=orcpub-20&marketplace=amazon&region=US&placement=0786965622&asins=0786965622&linkId=01922a9aafc4ea52eb90aed12bbeac04&show_border=false&link_opens_in_new_window=true&price_color=ffffff&title_color=f0a100&bg_color=2c3445"))
 
-(def mm-amazon-frame
+#_(def mm-amazon-frame
   (amazon-frame "//ws-na.amazon-adsystem.com/widgets/q?ServiceVersion=20070822&OneJS=1&Operation=GetAdHtml&MarketPlace=US&source=ac&ref=qf_sp_asin_til&ad_type=product_link&tracking_id=orcpub-20&marketplace=amazon&region=US&placement=0786965614&asins=0786965614&linkId=5300756d865067bd552325212c176447&show_border=false&link_opens_in_new_window=true&price_color=ffffff&title_color=f0a100&bg_color=2c3445"))
 
-(def xanathars-amazon-frame
+#_(def xanathars-amazon-frame
   (amazon-frame "//ws-na.amazon-adsystem.com/widgets/q?ServiceVersion=20070822&OneJS=1&Operation=GetAdHtml&MarketPlace=US&source=ac&ref=tf_til&ad_type=product_link&tracking_id=orcpub-20&marketplace=amazon&region=US&placement=0786966114&asins=0786966114&linkId=b1241c813fda22ff1b5ba56ba52cee50&show_border=false&link_opens_in_new_window=true&price_color=ffffff&title_color=f0a100&bg_color=2c3445"))
 
-(def toa-amazon-frame
+#_(def toa-amazon-frame
   (amazon-frame "//ws-na.amazon-adsystem.com/widgets/q?ServiceVersion=20070822&OneJS=1&Operation=GetAdHtml&MarketPlace=US&source=ac&ref=tf_til&ad_type=product_link&tracking_id=orcpub-20&marketplace=amazon&region=US&placement=0786966106&asins=0786966106&linkId=8ef050066313a6092678df98f18401f7&show_border=false&link_opens_in_new_window=true&price_color=ffffff&title_color=f0a100&bg_color=2c3445"))
 
-(def yawning-portal-amazon-frame
+#_(def yawning-portal-amazon-frame
   (amazon-frame "//ws-na.amazon-adsystem.com/widgets/q?ServiceVersion=20070822&OneJS=1&Operation=GetAdHtml&MarketPlace=US&source=ac&ref=qf_sp_asin_til&ad_type=product_link&tracking_id=orcpub-20&marketplace=amazon&region=US&placement=0786966092&asins=0786966092&linkId=df092b3840d56523be6c3626966a0e47&show_border=false&link_opens_in_new_window=true&price_color=ffffff&title_color=f0a100&bg_color=2c3445"))
 
-(def cos-amazon-frame
+#_(def cos-amazon-frame
   (amazon-frame "//ws-na.amazon-adsystem.com/widgets/q?ServiceVersion=20070822&OneJS=1&Operation=GetAdHtml&MarketPlace=US&source=ac&ref=qf_sp_asin_til&ad_type=product_link&tracking_id=orcpub-20&marketplace=amazon&region=US&placement=0786965983&asins=0786965983&linkId=91dfcae14b0c8ecd3795eaf375104ca5&show_border=false&link_opens_in_new_window=true&price_color=ffffff&title_color=f0a100&bg_color=2c3445"))
 
-(def skt-amazon-frame
+#_(def skt-amazon-frame
   (amazon-frame "//ws-na.amazon-adsystem.com/widgets/q?ServiceVersion=20070822&OneJS=1&Operation=GetAdHtml&MarketPlace=US&source=ac&ref=qf_sp_asin_til&ad_type=product_link&tracking_id=orcpub-20&marketplace=amazon&region=US&placement=0786966009&asins=0786966009&linkId=b0fe41c5ff03ada5d23ebd4a176abcf6&show_border=false&link_opens_in_new_window=true&price_color=ffffff&title_color=f0a100&bg_color=2c3445"))
 
-(def oota-amazon-frame
+#_(def oota-amazon-frame
   (amazon-frame "//ws-na.amazon-adsystem.com/widgets/q?ServiceVersion=20070822&OneJS=1&Operation=GetAdHtml&MarketPlace=US&source=ac&ref=qf_sp_asin_til&ad_type=product_link&tracking_id=orcpub-20&marketplace=amazon&region=US&placement=0786965819&asins=0786965819&linkId=125c478897a63892c24d0ca46c198848&show_border=false&link_opens_in_new_window=true&price_color=ffffff&title_color=f0a100&bg_color=2c3445"))
 
-(def pota-amazon-frame
+#_(def pota-amazon-frame
   (amazon-frame "//ws-na.amazon-adsystem.com/widgets/q?ServiceVersion=20070822&OneJS=1&Operation=GetAdHtml&MarketPlace=US&source=ac&ref=qf_sp_asin_til&ad_type=product_link&tracking_id=orcpub-20&marketplace=amazon&region=US&placement=0786965789&asins=0786965789&linkId=a2c9018a5e1260f518fa6b0fd0812350&show_border=false&link_opens_in_new_window=true&price_color=ffffff&title_color=f0a100&bg_color=2c3445"))
 
-(defn content-page []
-  (let [srd-message-closed? (r/atom false)]
-    (fn [title button-cfgs content]
-      (let [orcacle-open? @(subscribe [:orcacle-open?])
-            theme @(subscribe [:theme])
-            mobile? @(subscribe [:mobile?])]
-        [:div.app
-         {:class-name theme
-          :on-scroll (fn [e]
-                       (if (not orcacle-open?)
-                         (let [app-header (js/document.getElementById "app-header")
-                               header-height (.-offsetHeight app-header)
-                               scroll-top (.-scrollTop (.-target e))
-                               sticky-header (js/document.getElementById "sticky-header")
-                               app-main (js/document.getElementById "app-main")
-                               scrollbar-width (- js/window.innerWidth (.-offsetWidth app-main))
-                               header-container (js/document.getElementById "header-container")]
-                           (set! (.-paddingRight (.-style header-container)) (str scrollbar-width "px"))
-                           (if (>= scroll-top header-height)
-                             (set! (.-display (.-style sticky-header)) "block")
-                             (set! (.-display (.-style sticky-header)) "none")))))}
-         [download-form]
-         (if @(subscribe [:loading])
-           [:div {:style loading-style}
-            [:div.flex.justify-cont-s-a.align-items-c.h-100-p
-             [:img.h-200.w-200.m-t-200 {:src "/image/spiral.gif"}]]])
-         [app-header]
-         (let [search-text @(subscribe [:search-text])]
-           (if orcacle-open?
-             [:div.flex.flex-column.h-100-p.white
-              {:style oracle-frame-style}
-              [:i.fa.fa-times-circle.f-s-24.orange.pointer
-               {:on-click close-orcacle
-                :style close-button-style}]
-              [:div
-               [:div.flex.justify-cont-s-a.m-t-10
-                [:div.flex.align-items-c.pointer
-                 {:on-click close-orcacle}
-                 [:span.f-s-32 "Orcacle"]
-                 [:div.m-l-10 (svg-icon "hood" 48 "")]]]]
-              [:div.p-10
-               [:div.posn-rel
-                [:input.input.orcacle-input
-                 {:value search-text
-                  :on-change set-search-text
-                  :on-key-press search-input-keypress
-                  :style orcacle-input-style}]
-                [:i.fa.fa-times.posn-abs.f-s-24.pointer
-                 {:style close-icon-style
-                  :on-click set-search-text-empty}]]
-               [:span.f-s-14.i.opacity-5 "\"8d10 + 2\", \"magic missile\", \"kobold\", \"female calishite name\", \"tavern name\", etc."]]
-              [:div.flex-grow-1
-               [search-results]]]))
-         (let [hdr [header title button-cfgs]]
+(defn content-page [title button-cfgs content]
+  (let [srd-message-closed? @(subscribe [:srd-message-closed?])
+        orcacle-open? @(subscribe [:orcacle-open?])
+        theme @(subscribe [:theme])
+        mobile? @(subscribe [:mobile?])]
+    [:div.app
+     {:class-name theme
+      :on-scroll (fn [e]
+                   (if (not orcacle-open?)
+                     (let [app-header (js/document.getElementById "app-header")
+                           header-height (.-offsetHeight app-header)
+                           scroll-top (.-scrollTop (.-target e))
+                           sticky-header (js/document.getElementById "sticky-header")
+                           app-main (js/document.getElementById "app-main")
+                           scrollbar-width (- js/window.innerWidth (.-offsetWidth app-main))
+                           header-container (js/document.getElementById "header-container")]
+                       (set! (.-paddingRight (.-style header-container)) (str scrollbar-width "px"))
+                       (if (>= scroll-top header-height)
+                         (set! (.-display (.-style sticky-header)) "block")
+                         (set! (.-display (.-style sticky-header)) "none")))))}
+     [download-form]
+     (if @(subscribe [:loading])
+       [:div {:style loading-style}
+        [:div.flex.justify-cont-s-a.align-items-c.h-100-p
+         [:img.h-200.w-200.m-t-200 {:src "/image/spiral.gif"}]]])
+     [app-header]
+     (let [search-text @(subscribe [:search-text])]
+       (if orcacle-open?
+         [:div.flex.flex-column.h-100-p.white
+          {:style oracle-frame-style}
+          [:i.fa.fa-times-circle.f-s-24.orange.pointer
+           {:on-click close-orcacle
+            :style close-button-style}]
+          [:div
+           [:div.flex.justify-cont-s-a.m-t-10
+            [:div.flex.align-items-c.pointer
+             {:on-click close-orcacle}
+             [:span.f-s-32 "Orcacle"]
+             [:div.m-l-10 (svg-icon "hood" 48 "")]]]]
+          [:div.p-10
+           [:div.posn-rel
+            [:input.input.orcacle-input
+             {:value search-text
+              :on-change set-search-text
+              :on-key-press search-input-keypress
+              :style orcacle-input-style}]
+            [:i.fa.fa-times.posn-abs.f-s-24.pointer
+             {:style close-icon-style
+              :on-click set-search-text-empty}]]
+           [:span.f-s-14.i.opacity-5 "\"8d10 + 2\", \"magic missile\", \"kobold\", \"female calishite name\", \"tavern name\", etc."]]
+          [:div.flex-grow-1
+           [search-results]]]))
+     (let [hdr [header title button-cfgs]]
+       [:div
+        [:div#sticky-header.sticky-header.w-100-p.posn-fixed
+         [:div.flex.justify-cont-c
+          [:div#header-container.f-s-14.main-text-color.content
+           hdr]]]
+        [:div.flex.justify-cont-c.main-text-color
+         [:div.content hdr]]
+        [:div.m-l-20.m-r-20.f-w-b.f-s-18.container.m-b-10.main-text-color
+         (if (not srd-message-closed?)
            [:div
-            [:div#sticky-header.sticky-header.w-100-p.posn-fixed
-             [:div.flex.justify-cont-c
-              [:div#header-container.f-s-14.main-text-color.content
-               hdr]]]
-            [:div.flex.justify-cont-c.main-text-color
-             [:div.content hdr]]
-            [:div.m-l-20.m-r-20.f-w-b.f-s-18.container.m-b-10.main-text-color
-             (if (not @srd-message-closed?)
-               [:div
-                [:div.content.bg-lighter.p-10.flex
-                 [:div.flex-grow-1
-                  [:div "Due to licensing issues, we were forced to remove all non-SRD content, if you have questions about what is and is not SRD content please see the " srd-link ". If you would like to see the non-SRD content added back to OrcPub please sign our " [:a.orange {:href "https://www.change.org/p/wizards-of-the-coast-wizards-of-the-coast-please-grant-orc-pub-licensing-rights-to-your-content" :target "_blank"}
-                                                                                                                                                                                                                                                                             "petition here at change.org"]
-                   "."]
-                  (if (not mobile?)
-                    [:div.m-t-10 "You can add content from other sources using the builders in the 'My Content' menu. Here are some compatible sources (please help fund further development by buying on Amazon through these links): "
-                     [:div.flex.flex-wrap.m-t-10
-                      [:div.m-l-5 phb-amazon-frame]
-                      [:div.m-l-5 dmg-amazon-frame]
-                      [:div.m-l-5 mm-amazon-frame]
-                      [:div.m-l-5 xanathars-amazon-frame]
-                      [:div.m-l-5 scag-amazon-frame]
-                      [:div.m-l-5 volos-amazon-frame]
-                      [:div.m-l-5 toa-amazon-frame]
-                      [:div.m-l-5 yawning-portal-amazon-frame]
-                      [:div.m-l-5 cos-amazon-frame]
-                      [:div.m-l-5 skt-amazon-frame]
-                      #_[:div.m-l-5 oota-amazon-frame]
-                      [:div.m-l-5 pota-amazon-frame]]])]
-                 [:i.fa.fa-times.p-10.pointer
-                  {:on-click #(swap! srd-message-closed? not)}]]])]
-            [:div#app-main.container
-             [:div.content.w-100-p content]]
-            [:div.main-text-color.flex.justify-cont-c
-             [:div.content.f-w-n.f-s-12
-              [:div.flex.justify-cont-s-b.align-items-c.flex-wrap.p-10
-               [:div
-                [:div.m-b-5 "Icons made by Lorc, Caduceus, and Delapouite. Available on " [:a.orange {:href "http://game-icons.net"} "http://game-icons.net"]]]
-               [:div.m-l-10
-                [:a.orange {:href "https://www.facebook.com/orcpub" :target :_blank} "Feedback/Bug Reports"]]
-               [:div.m-l-10.m-r-10.p-10
-                [:a.orange {:href "/privacy-policy" :target :_blank} "Privacy Policy"]
-                [:a.orange.m-l-5 {:href "/terms-of-use" :target :_blank} "Terms of Use"]]
-               [:div.legal-footer
-                [:p "© 2017 OrcPub" [:span.m-l-20 "Contact: " [:a {:href "mailto:redorc@orcpub.com"} "redorc@orcpub.com"]]]
-                [:p "Wizards of the Coast, Dungeons & Dragons, D&D, and their logos are trademarks of Wizards of the Coast LLC in the United States and other countries. © 2017 Wizards. All Rights Reserved. OrcPub.com is not affiliated with, endorsed, sponsored, or specifically approved by Wizards of the Coast LLC."]]]
-              [debug-data]]]])]))))
+            [:div.content.bg-lighter.p-10.flex
+             [:div.flex-grow-1
+              [:div "Due to licensing issues, we were forced to remove all non-SRD content, if you have questions about what is and is not SRD content please see the " srd-link ". If you would like to see the non-SRD content added back to OrcPub please sign our " [:a.orange {:href "https://www.change.org/p/wizards-of-the-coast-wizards-of-the-coast-please-grant-orc-pub-licensing-rights-to-your-content" :target "_blank"}
+                                                                                                                                                                                                                                                                         "petition here at change.org"]
+               "."]
+              (if (not mobile?)
+                [:div.m-t-10 "You can add content from other sources using the builders in the 'My Content' menu. Here are some compatible sources: "
+                 [:div.flex.flex-wrap.m-t-10
+                  [:div.m-l-5 phb-link]
+                  [:div.m-l-5 dmg-link]
+                  [:div.m-l-5 mm-link]
+                  [:div.m-l-5 xge-link]
+                  [:div.m-l-5 scag-link]
+                  [:div.m-l-5 vgm-link]
+                  [:div.m-l-5 toa-link]
+                  [:div.m-l-5 yp-link]
+                  [:div.m-l-5 cos-link]
+                  [:div.m-l-5 skt-link]
+                  [:div.m-l-5 oota-link]
+                  [:div.m-l-5 pota-link]]])]
+             [:i.fa.fa-times.p-10.pointer
+              {:on-click #(dispatch [:close-srd-message])}]]])]
+        [:div#app-main.container
+         [:div.content.w-100-p content]]
+        [:div.main-text-color.flex.justify-cont-c
+         [:div.content.f-w-n.f-s-12
+          [:div.flex.justify-cont-s-b.align-items-c.flex-wrap.p-10
+           [:div
+            [:div.m-b-5 "Icons made by Lorc, Caduceus, and Delapouite. Available on " [:a.orange {:href "http://game-icons.net"} "http://game-icons.net"]]]
+           [:div.m-l-10
+            [:a.orange {:href "https://www.facebook.com/orcpub" :target :_blank} "Feedback/Bug Reports"]]
+           [:div.m-l-10.m-r-10.p-10
+            [:a.orange {:href "/privacy-policy" :target :_blank} "Privacy Policy"]
+            [:a.orange.m-l-5 {:href "/terms-of-use" :target :_blank} "Terms of Use"]]
+           [:div.legal-footer
+            [:p "© 2017 OrcPub" [:span.m-l-20 "Contact: " [:a {:href "mailto:redorc@orcpub.com"} "redorc@orcpub.com"]]]
+            [:p "Wizards of the Coast, Dungeons & Dragons, D&D, and their logos are trademarks of Wizards of the Coast LLC in the United States and other countries. © 2017 Wizards. All Rights Reserved. OrcPub.com is not affiliated with, endorsed, sponsored, or specifically approved by Wizards of the Coast LLC."]]]
+          [debug-data]]]])]))
 
 (def row-style
   {:border-bottom "1px solid rgba(255,255,255,0.5)"})
@@ -1794,7 +1820,7 @@
                       (not (pos? remaining-preps))))))])
        (:name spell)]
       [:td.p-l-10.p-b-10.p-t-10 class]
-      [:td.p-l-10.p-b-10.p-t-10 (if ability (s/upper-case (name ability)))]
+      [:td.p-l-10.p-b-10.p-t-10 (if ability (s/upper-case (common/safe-name ability)))]
       [:td.p-l-10.p-b-10.p-t-10 (get cls-mods :spell-save-dc)]
       [:td.p-l-10.p-b-10.p-t-10 (common/bonus-str (get cls-mods :spell-attack-modifier))]
       [:td.p-r-10.orange
