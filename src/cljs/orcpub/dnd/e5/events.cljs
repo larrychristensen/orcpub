@@ -2693,6 +2693,28 @@
  (fn [subrace [_ index]]
    (update subrace :spells common/remove-at-index index)))
 
+(reg-event-db
+ ::race5e/set-race-spell-level
+ race-interceptors
+ (fn [race [_ index level]]
+   (cond-> race
+     (nil? (:spells race)) (assoc :spells [])
+     true (assoc-in [:spells index :level] level))))
+
+(reg-event-db
+ ::race5e/set-race-spell-value
+ race-interceptors
+ (fn [race [_ index value]]
+   (cond-> race
+     (nil? (:spells race)) (assoc :spells [])
+     true (assoc-in [:spells index :value] value))))
+
+(reg-event-db
+ ::race5e/delete-race-spell
+ race-interceptors
+ (fn [race [_ index]]
+   (update race :spells common/remove-at-index index)))
+
 (defn reg-option-traits [option-name option-key interceptors]
   (reg-event-db
    (keyword "orcpub.dnd.e5"

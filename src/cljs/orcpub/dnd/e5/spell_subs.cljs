@@ -52,26 +52,27 @@
  (fn [plugins _]
    (apply concat (map (comp vals ::e5/languages) plugins))))
 
-(reg-sub
- ::races5e/plugin-races
- :<- [::e5/plugin-vals]
- (fn [plugins _]
-   (map
-    (fn [race]
-      (assoc race :modifiers (opt5e/plugin-modifiers (:props race)
-                                                     (:key race))))
-    (apply concat (map (comp vals ::e5/races) plugins)))))
-
-(defn subrace-spell-modifiers [{:keys [spells] :as subrace}]
+(defn spell-modifiers [{:keys [spells]} class-name]
   (map
    (fn [{:keys [level value]}]
      (let [{:keys [ability key]} value]
        (mod5e/spells-known (or (:level value) 0)
                            key
                            ability
-                           (s/capitalize (common/safe-name (:race subrace)))
+                           class-name
                            level)))
    spells))
+
+(reg-sub
+ ::races5e/plugin-races
+ :<- [::e5/plugin-vals]
+ (fn [plugins _]
+   (map
+    (fn [race]
+      (assoc race :modifiers (concat (opt5e/plugin-modifiers (:props race)
+                                                             (:key race))
+                                     (spell-modifiers race (:key race)))))
+    (apply concat (map (comp vals ::e5/races) plugins)))))
 
 (reg-sub
  ::races5e/plugin-subraces
@@ -81,7 +82,10 @@
     (fn [subrace]
       (assoc subrace :modifiers (concat (opt5e/plugin-modifiers (:props subrace)
                                                                 (:key subrace))
-                                        (subrace-spell-modifiers subrace))))
+                                        (spell-modifiers subrace (some-> subrace
+                                                                         :race
+                                                                         common/safe-name
+                                                                         s/capitalize)))))
     (apply concat (map (comp vals ::e5/subraces) plugins)))))
 
 (defn level-modifier [class-key {:keys [type value]}]
