@@ -4862,7 +4862,7 @@
                  (fn [v]
                    {:title v 
                     :value v})
-                 (range 25 40 5))
+                 (range 5 55 5))
          :value (or (get subrace :speed)
                     (get race :speed))
          :on-change #(dispatch [::races/set-subrace-speed %])}]]
@@ -4961,33 +4961,27 @@
                  (fn [v]
                    {:title v 
                     :value v})
-                 (range 25 40 5))
+                 (range 0 55 5))
          :value (get race :speed)
          :on-change #(dispatch [::races/set-race-speed %])}]]
       [:div.m-r-5
        [labeled-dropdown
         "Flying Speed"
-        {:items (cons
-                 {:title 0
-                  :value 0}
-                 (map
-                  (fn [v]
-                    {:title v 
-                     :value v})
-                  (range 25 40 5)))
+        {:items (map
+                 (fn [v]
+                   {:title v 
+                    :value v})
+                 (range 0 55 5))
          :value (or (get-in race [:props :flying-speed]) 0)
          :on-change #(dispatch [::races/set-race-value-prop :flying-speed (js/parseInt %)])}]]
       [:div.m-r-5
        [labeled-dropdown
         "Swimming Speed"
-        {:items (cons
-                 {:title 0
-                  :value 0}
-                 (map
-                  (fn [v]
-                    {:title v 
-                     :value v})
-                  (range 25 40 5)))
+        {:items (map
+                 (fn [v]
+                   {:title v 
+                    :value v})
+                 (range 0 55 5))
          :value (or (get-in race [:props :swimming-speed]) 0)
          :on-change #(dispatch [::races/set-race-value-prop :swimming-speed (js/parseInt %)])}]]
       [:div.m-r-5
