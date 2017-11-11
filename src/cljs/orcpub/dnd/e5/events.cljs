@@ -28,6 +28,7 @@
                                       user->local-store
                                       magic-item->local-store
                                       spell->local-store
+                                      monster->local-store
                                       background->local-store
                                       language->local-store
                                       feat->local-store
@@ -38,6 +39,7 @@
                                       tab-path
                                       default-character
                                       default-spell
+                                      default-monster
                                       default-background
                                       default-language
                                       default-feat
@@ -77,6 +79,8 @@
 
 (def spell->local-store-interceptor (after spell->local-store))
 
+(def monster->local-store-interceptor (after monster->local-store))
+
 (def background->local-store-interceptor (after background->local-store))
 
 (def language->local-store-interceptor (after language->local-store))
@@ -107,6 +111,9 @@
 
 (def spell-interceptors [(path ::spells/builder-item)
                          spell->local-store-interceptor])
+
+(def monster-interceptors [(path ::monsters/builder-item)
+                         monster->local-store-interceptor])
 
 (def background-interceptors [(path ::bg5e/builder-item)
                               background->local-store-interceptor])
@@ -394,6 +401,14 @@
  "You must specify 'Name', 'Option Source Name', and at select at least one class in 'Class Spell Lists'")
 
 (reg-save-homebrew
+ "Monster"
+ ::monsters/save-monster
+ ::monsters/builder-item
+ ::monsters/homebrew-monster
+ ::e5/monsters
+ "You must specify 'Name', 'Option Source Name'")
+
+(reg-save-homebrew
  "Background"
  ::bg5e/save-background
  ::bg5e/builder-item
@@ -450,6 +465,10 @@
 (reg-delete-homebrew
  ::spells/delete-spell
  ::e5/spells)
+
+(reg-delete-homebrew
+ ::monsters/delete-monster
+ ::e5/monsters)
 
 (reg-delete-homebrew
  ::bg5e/delete-background
@@ -1524,6 +1543,11 @@
  routes/dnd-e5-spell-builder-page-route)
 
 (reg-edit-homebrew
+ ::monsters/edit-monster
+ ::monsters/set-monster
+ routes/dnd-e5-monster-builder-page-route)
+
+(reg-edit-homebrew
  ::bg5e/edit-background
  ::bg5e/set-background
  routes/dnd-e5-background-builder-page-route)
@@ -2027,6 +2051,18 @@
  spell-interceptors
  (fn [spell [_ prop-key prop-value]]
    (assoc spell prop-key prop-value)))
+
+(reg-event-db
+ ::monsters/set-monster-prop
+ monster-interceptors
+ (fn [monster [_ prop-key prop-value]]
+   (assoc monster prop-key prop-value)))
+
+(reg-event-db
+ ::monsters/set-monster-path-prop
+ monster-interceptors
+ (fn [monster [_ prop-path prop-value]]
+   (assoc-in monster prop-path prop-value)))
 
 (reg-event-db
  ::bg5e/set-background-prop
@@ -2538,6 +2574,12 @@
    spell))
 
 (reg-event-db
+ ::monsters/set-monster
+ monster-interceptors
+ (fn [_ [_ monster]]
+   monster))
+
+(reg-event-db
  ::bg5e/set-background
  background-interceptors
  (fn [_ [_ background]]
@@ -2585,6 +2627,12 @@
  (fn [_ _]
    {:dispatch [::spells/set-spell
                default-spell]}))
+
+(reg-event-fx
+ ::monsters/reset-monster
+ (fn [_ _]
+   {:dispatch [::monsters/set-monster
+               default-monster]}))
 
 (reg-event-fx
  ::bg5e/reset-background
@@ -2757,6 +2805,12 @@
  ::spells/set-spell
  default-spell
  routes/dnd-e5-spell-builder-page-route)
+
+(reg-new-homebrew
+ ::monsters/new-monster
+ ::monsters/set-monster
+ default-monster
+ routes/dnd-e5-monster-builder-page-route)
 
 (reg-new-homebrew
  ::bg5e/new-background
