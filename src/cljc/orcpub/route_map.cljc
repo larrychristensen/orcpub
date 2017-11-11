@@ -23,8 +23,9 @@
 
 (def dnd-e5-monster-list-page-route :monster-list-5e-page)
 (def dnd-e5-monster-page-route :monster-5e-page)
+(def dnd-e5-monster-builder-page-route :monster-builder-5e-page)
 
-(def dnd-e5-monster-page-routes #{dnd-e5-monster-list-page-route dnd-e5-monster-page-route})
+(def dnd-e5-monster-page-routes #{dnd-e5-monster-list-page-route dnd-e5-monster-page-route dnd-e5-monster-builder-page-route})
 
 (def dnd-e5-spell-list-page-route :spell-list-5e-page)
 (def dnd-e5-spell-page-route :spell-5e-page)
@@ -55,6 +56,7 @@
 
 (def dnd-e5-my-content-routes #{dnd-e5-my-content-route
                                 dnd-e5-spell-builder-page-route
+                                dnd-e5-monster-builder-page-route
                                 dnd-e5-feat-builder-page-route
                                 dnd-e5-background-builder-page-route
                                 dnd-e5-race-builder-page-route
@@ -150,6 +152,7 @@
                               "language-builder" dnd-e5-language-builder-page-route
                               "feat-builder" dnd-e5-feat-builder-page-route
                               "spell-builder" dnd-e5-spell-builder-page-route
+                              "monster-builder" dnd-e5-monster-builder-page-route
                               "spells" {"" dnd-e5-spell-list-page-route
                                         ["/" :key] dnd-e5-spell-page-route}
                               "magic-item-builder" dnd-e5-item-builder-page-route

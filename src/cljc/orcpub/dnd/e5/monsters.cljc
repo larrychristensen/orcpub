@@ -1,5 +1,19 @@
 (ns orcpub.dnd.e5.monsters
-  (:require [orcpub.common :refer [name-to-kw]]))
+  (:require #?(:clj [clojure.spec.alpha :as spec])
+            #?(:cljs [cljs.spec.alpha :as spec])
+            [orcpub.common :as common :refer [name-to-kw]]))
+
+(spec/def ::name (spec/and string? common/starts-with-letter?))
+(spec/def ::key (spec/and keyword? common/keyword-starts-with-letter?))
+(spec/def ::option-pack string?)
+(spec/def ::homebrew-monster (spec/keys :req-un [::name ::key ::option-pack]))
+
+
+(def monster-types
+  [:aberration :beast :celestial :construct :dragon :elemental :fey :fiend :giant :humanoid :monstrosity :ooze :plant :swarm-of-tiny-beasts :undead])
+
+(def monster-size-order
+  [:tiny :small :medium :large :huge :gargantuan])
 
 (def monster-sizes
   {:huge "Huge"
@@ -1360,7 +1374,7 @@ If the target is prone, the triceratops can make one stomp attack against it as 
 :size :medium
 :type :monstrosity
 :subtypes #{:shapechanger}
-:alignment " neutral"
+:alignment "neutral"
 :armor-class 14
 :hit-points {:mean 52 :die-count 8 :die 8 :modifier 16}
 :speed "30 ft."
@@ -4698,7 +4712,7 @@ rat, or back into its true form, which is humanoid. Its statistics, other than i
 :size :medium
 :type :humanoid
 :subtypes #{:human, :shapechanger}
-:alignment " neutral"
+:alignment "neutral"
 :armor-class 12
 :hit-points {:mean 120 :die-count 16 :die 8 :modifier 48}
 :speed "30 ft. (40 ft. in tiger form)"
@@ -5034,7 +5048,7 @@ If the medusa sees itself reflected on a polished surface within 30 feet of it a
 :size :medium
 :type :monstrosity
 :subtypes #{:shapechanger}
-:alignment " neutral"
+:alignment "neutral"
 :armor-class 12
 :armor-notes "natural armor"
 :hit-points {:mean 58 :die-count 9 :die 8 :modifier 18}

@@ -11,6 +11,7 @@
             [orcpub.dnd.e5.classes :as class5e]
             [orcpub.dnd.e5.magic-items :as mi5e]
             [orcpub.dnd.e5.spells :as spells5e]
+            [orcpub.dnd.e5.monsters :as monsters5e]
             [orcpub.dnd.e5.equipment :as equip5e]
             [re-frame.core :as re-frame]
             [orcpub.entity :as entity]
@@ -25,6 +26,7 @@
 (def local-storage-user-key "user")
 (def local-storage-magic-item-key "magic-item")
 (def local-storage-spell-key "spell")
+(def local-storage-monster-key "monster")
 (def local-storage-background-key "background")
 (def local-storage-language-key "language")
 (def local-storage-feat-key "feat")
@@ -46,6 +48,17 @@
 
 (def default-spell {:level 0
                     :school "abjuration"})
+
+(def default-monster {:size :large
+                      :type :aberration
+                      :alignment "neutral"
+                      :armor-class 10
+                      :str 10
+                      :dex 10
+                      :con 10
+                      :int 10
+                      :wis 10
+                      :cha 10})
 
 (def default-background {:traits []})
 
@@ -78,6 +91,7 @@
    :registration-form {:send-updates? true}
    :device-type (user-agent/device-type)
    ::spells5e/builder-item default-spell
+   ::monsters5e/builder-item default-monster
    ::bg5e/builder-item default-background
    ::langs5e/builder-item default-language
    ::feats5e/builder-item default-feat
@@ -108,6 +122,10 @@
 (defn spell->local-store [spell]
   (if js/window.localStorage
     (set-item local-storage-spell-key (str spell))))
+
+(defn monster->local-store [monster]
+  (if js/window.localStorage
+    (set-item local-storage-monster-key (str monster))))
 
 (defn background->local-store [background]
   (if js/window.localStorage

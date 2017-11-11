@@ -400,7 +400,11 @@
           route-to-monster-list-page
           false
           (routes/dnd-e5-monster-page-routes (or (:handler active-route) active-route))
-          device-type]
+          device-type
+          {:name "Monster List"
+           :route routes/dnd-e5-monster-list-page-route}
+          {:name "Builder"
+           :route routes/dnd-e5-monster-builder-page-route}]
          [header-tab
           "items"
           "all-for-one"
@@ -427,6 +431,8 @@
            :route routes/dnd-e5-my-content-route}
           {:name "Spell Builder"
            :route routes/dnd-e5-spell-builder-page-route}
+          {:name "Monster Builder"
+           :route routes/dnd-e5-monster-builder-page-route}
           {:name "Feat Builder"
            :route routes/dnd-e5-feat-builder-page-route}
           {:name "Background Builder"
@@ -1753,7 +1759,7 @@
    (doall
     (map
      (fn [{:keys [value title disabled?]}]
-       ^{:key value}
+       ^{:key (or value title)}
        [:option.builder-dropdown-item
         (cond-> {:value value}
           disabled? (assoc :disabled true))
@@ -3738,6 +3744,9 @@
 (defn spell-input-field [title prop spell & [class-names]]
   (builder-input-field title prop spell ::spells/set-spell-prop class-names))
 
+(defn monster-input-field [title prop monster & [class-names]]
+  (builder-input-field title prop monster ::monsters/set-monster-prop class-names))
+
 (defn language-input-field [title prop language & [class-names]]
   (builder-input-field title prop language ::langs/set-language-prop class-names))
 
@@ -5141,6 +5150,143 @@
        {:value (get language :description)
         :on-change #(dispatch [::langs/set-language-prop :description %])}]]]))
 
+(defn monster-builder []
+  (let [{:keys [name
+                size
+                type
+                alignment
+                armor-class
+                armor-notes
+                hit-points
+                speed
+                str
+                dex
+                con
+                int
+                wis
+                cha
+                saving-throws
+                skills
+                senses
+                languages
+                challenge
+                traits
+                actions
+                legendary-actions] :as monster}
+        @(subscribe [::monsters/builder-item])]
+    (prn "MONSTER" monster)
+    [:div.p-20.main-text-color
+     [:div.flex.w-100-p.flex-wrap
+      [monster-input-field
+       "Name"
+       :name
+       monster
+       "m-b-20"]
+      [monster-input-field
+       option-source-name-label
+       :option-pack
+       monster
+       "m-l-5 m-b-20"]]
+     [:div.flex.w-100-p.flex-wrap
+      [:div.flex-grow-1.m-b-20.m-l-5
+       [labeled-dropdown
+        "Challenge"
+        {:items (map
+                 (fn [v]
+                   {:title (if (< 0 v 1)
+                             (clojure.core/str "1/" (/ 1 v))
+                             v)
+                    :value v})
+                 @(subscribe [::monsters/challenge-ratings]))
+         :value (or challenge 0)
+         :on-change #(dispatch [::monsters/set-monster-prop :challenge (js/parseFloat %)])}]]
+      [:div.flex-grow-1.m-b-20.m-l-5
+       [labeled-dropdown
+        "Size"
+        {:items (map
+                 (fn [kw]
+                   {:title (monsters/monster-sizes kw)
+                    :value kw})
+                 monsters/monster-size-order)
+         :value (or size :tiny)
+         :on-change #(dispatch [::monsters/set-monster-prop :size (keyword %)])}]]
+      [:div.flex-grow-1.m-b-20.m-l-5
+       [labeled-dropdown
+        "Type"
+        {:items (map
+                 (fn [kw]
+                   {:title (common/kw-to-name kw)
+                    :value kw})
+                 monsters/monster-types)
+         :value (or type kw)
+         :on-change #(dispatch [::monsters/set-monster-prop :type (keyword %)])}]]
+      [:div.flex-grow-1.m-b-20.m-l-5
+       [labeled-dropdown
+        "Alignment"
+        {:items (map
+                 (fn [nm]
+                   {:title nm
+                    :value nm})
+                 @(subscribe [::monsters/alignments]))
+         :value (or alignment "neutral")
+         :on-change #(dispatch [::monsters/set-monster-prop :alignment %])}]]
+      [:div.flex-grow-1.m-b-20.m-l-5
+       [labeled-dropdown
+        "Armor Class"
+        {:items (map
+                 (fn [v]
+                   {:title v
+                    :value v})
+                 (range 5 25))
+         :value (or armor-class 10)
+         :on-change #(dispatch [::monsters/set-monster-prop :armor-class (js/parseInt %)])}]]]
+     [:div
+      [:div.f-s-24.f-w-b "Abilities"]
+      [:div.flex.w-100-p.flex-wrap
+       (doall
+        (map
+         (fn [{:keys [key name]}]
+           ^{:key key}
+           [:div.flex-grow-1.m-b-20.m-r-5
+            (let [simple-kw (-> key clojure.core/name keyword)]
+              [labeled-dropdown
+               name
+               {:items (map
+                        (fn [v]
+                          {:title v
+                           :value v})
+                        (range 1 31))
+                :value (or (simple-kw monster) 10)
+                :on-change #(dispatch [::monsters/set-monster-prop simple-kw (js/parseInt %)])}])])
+         opt/abilities))]]
+     [:div
+      [:div.f-s-24.f-w-b "Skills"]
+      [:div.flex.w-100-p.flex-wrap
+       (doall
+        (map
+         (fn [{:keys [key name]}]
+           ^{:key key}
+           [:div.m-b-20.m-r-5
+            (let [simple-kw (-> key clojure.core/name keyword)]
+              [labeled-dropdown
+               name
+               {:items (cons
+                        {:title "-"}
+                        (map
+                         (fn [v]
+                           {:title v
+                            :value v})
+                         (range 1 21)))
+                :value (get skills key 0)
+                :on-change #(dispatch [::monsters/set-monster-path-prop [:skills key] (js/parseInt %)])}])])
+         skills/skills))]]
+     [:div.w-100-p
+      [:div.f-s-24.f-w-b
+       "Description"]
+      [textarea-field
+       {:value (get monster :description)
+        :on-change #(dispatch [::monsters/set-monster-prop :description %])}]]]))
+
 (defn spell-builder []
   (let [{:keys [:level :school] :as spell} @(subscribe [::spells/builder-item])]
     [:div.p-20.main-text-color
@@ -5301,6 +5447,17 @@
      :icon "save"
      :on-click #(dispatch [::spells/save-spell])}]
    [spell-builder]])
+
+(defn monster-builder-page []
+  [content-page
+   "Monster Builder"
+   [{:title "New Monster"
+     :icon "plus"
+     :on-click #(dispatch [::monsters/reset-monster])}
+    {:title "Save"
+     :icon "save"
+     :on-click #(dispatch [::monsters/save-monster])}]
+   [monster-builder]])
 
 (defn language-builder-page []
   [content-page
@@ -5823,6 +5980,15 @@
                    ::spells/edit-spell
                    ::spells/delete-spell))
 
+(defn my-monsters [name]
+  (my-content-type name
+                   "monster"
+                   ::e5/monsters
+                   "hydra"
+                   ::monsters/new-monster
+                   ::monsters/edit-monster
+                   ::monsters/delete-monster))
+
 (defn my-backgrounds [name]
   (my-content-type name
                    "background"
@@ -5900,6 +6066,7 @@
             "delete"]]
           [:div.item-list
            [(my-spells name) plugin]
+           [(my-monsters name) plugin]
            [(my-backgrounds name) plugin]
            [(my-races name) plugin]
            [(my-subraces name) plugin]
