@@ -792,6 +792,81 @@
    (apply concat (map (comp vals ::e5/spells) plugins))))
 
 (reg-sub
+ ::monsters5e/plugin-monsters
+ :<- [::e5/plugin-vals]
+ (fn [plugins _]
+   (apply concat (map (comp vals ::e5/monsters) plugins))))
+
+(defn true-types [m]
+  (sequence
+   (comp
+    (filter val)
+    (map key)
+    (map common/kw-to-name))
+   m))
+
+(defn process-plugin-monster [{:keys [props] :as monster}]
+  (let [{:keys [damage-resistance
+                damage-immunity
+                damage-vulnerability
+                condition-immunity
+                language]} props
+        filtered-languages (true-types language)
+        filtered-resistances (true-types damage-vulnerability)
+        filtered-damage-immunities (true-types damage-immunity)
+        filtered-vulnerabilities (true-types damage-vulnerability)
+        filtered-condition-immunities (true-types condition-immunity)]
+    (prn "FILTERED RESITSNASCE" filtered-resistances)
+    (cond-> monster
+      (seq filtered-languages)
+      (assoc :languages (s/join ", " filtered-languages))
+      
+      (seq filtered-resistances)
+      (assoc :damage-resistances (s/join ", " filtered-resistances))
+
+      (seq filtered-damage-immunities)
+      (assoc :damage-immunities (s/join ", " filtered-damage-immunities))
+
+      (seq filtered-vulnerabilities)
+      (assoc :damage-vulnerabilities (s/join ", " filtered-vulnerabilities))
+
+      (seq filtered-condition-immunities)
+      (assoc :condition-immunities (s/join ", " filtered-condition-immunities)))))
+
+(reg-sub
+ ::monsters5e/monsters
+ :<- [::monsters5e/plugin-monsters]
+ (fn [plugin-monsters]
+   (concat
+    monsters5e/monsters
+    (map
+     process-plugin-monster
+     plugin-monsters))))
+
+(reg-sub
+ ::monsters5e/monster-map
+ :<- [::monsters5e/monsters]
+ (fn [monsters]
+   (common/map-by-key monsters)))
+
+(reg-sub
+ ::monsters5e/monster
+ :<- [::monsters5e/monster-map]
+ (fn [monster-map [_ key]]
+   (get monster-map key)))
+
+(reg-sub
+ ::monsters5e/sorted-monsters
+ :<- [::monsters5e/monsters]
+ (fn [monsters]
+   (sort-by :name monsters)))
+
+(reg-sub
+ ::monsters5e/filtered-monsters
+ (fn [db]
+   (::monsters5e/filtered-monsters db)))
+
+(reg-sub
  ::spells5e/spells
  :<- [::spells5e/plugin-spells]
  (fn [plugin-spells]
