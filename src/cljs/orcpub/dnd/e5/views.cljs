@@ -4786,34 +4786,51 @@
       ::e5/delete-subclass-trait
       ::e5/edit-subclass-trait-level]]))
 
-(defn subrace-spell [index 
-                     {:keys [level value] :as spell-cfg}]
+
+(defn option-spell [index 
+                     {:keys [level value] :as spell-cfg}
+                     set-spell-level-event
+                     set-spell-value-event
+                     delete-spell-event]
   [:div.flex.flex-wrap.m-b-10.align-items-end
    [modifier-level-selector
     index
     level
-    ::races/set-subrace-spell-level]
+    set-spell-level-event]
    [:div.m-l-5
     [spell-selector
      index
      value
-     ::races/set-subrace-spell-value]]
+     set-spell-value-event]]
    (if (or level value)
      [:div.m-t-10
       [:button.form-button.m-l-5
-       {:on-click #(dispatch [::races/delete-subrace-spell index])}
+       {:on-click #(dispatch [delete-spell-event index])}
        "delete"]])])
 
-(defn subrace-spells [subrace]
+(defn option-spells [option
+                     set-spell-level-event
+                     set-spell-value-event
+                     delete-spell-event]
   [:div
    [:div
     (doall
      (map-indexed
       (fn [i spell-cfg]
         ^{:key i}
-        [subrace-spell i spell-cfg])
-      (:spells subrace)))]
-   [:div [subrace-spell (count (:spells subrace)) {}]]])
+        [option-spell
+         i
+         spell-cfg
+         set-spell-level-event
+         set-spell-value-event
+         delete-spell-event])
+      (:spells option)))]
+   [:div [option-spell
+          (count (:spells option))
+          {}
+          set-spell-level-event
+          set-spell-value-event
+          delete-spell-event]]])
 
 (defn subrace-builder []
   (let [subrace @(subscribe [::races/subrace-builder-item])
@@ -4921,7 +4938,11 @@
       [:div [option-languages subrace ::races/toggle-subrace-map-prop]]]
      [:div.m-b-20
       [:div.f-s-24.f-w-b.m-b-10 "Spells"]
-      [subrace-spells subrace]]
+      [option-spells
+       subrace
+       ::races/set-subrace-spell-level
+       ::races/set-subrace-spell-value
+       ::races/delete-subrace-spell]]
      [option-traits
       subrace
       ::races/subrace-builder-item
@@ -5041,6 +5062,13 @@
        [:div [option-damage-resistance race ::races/toggle-race-map-prop]]]
       [:div.m-b-20
        [:div [option-damage-immunity race ::races/toggle-race-map-prop]]]]
+     [:div.m-b-20
+      [:div.f-s-24.f-w-b.m-b-10 "Spells"]
+      [option-spells
+       race
+       ::races/set-race-spell-level
+       ::races/set-race-spell-value
+       ::races/delete-race-spell]]
      [option-traits
       race
       ::races/race-builder-item
