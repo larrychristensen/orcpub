@@ -69,7 +69,7 @@
        (mod5e/spells-known (or (:level value) 0)
                            key
                            ability
-                           (s/capitalize (name (:race subrace)))
+                           (s/capitalize (common/safe-name (:race subrace)))
                            level)))
    spells))
 
@@ -98,7 +98,7 @@
                                (:key value)
                                (:ability value)
                                (if (keyword? class-key)
-                                 (s/capitalize (name class-key))))))
+                                 (s/capitalize (common/safe-name class-key))))))
 
 (defn eldritch-knight-spell? [s]
     (let [school (:school s)]
