@@ -1112,7 +1112,7 @@
        results))]]])
 
 (defn monster-subheader [size type subtypes alignment]
-  (str (s/capitalize (common/kw-to-name size))
+  (str (if size (s/capitalize (common/kw-to-name size)))
        " "
        (common/kw-to-name type)
        (if (seq subtypes)
@@ -3262,7 +3262,8 @@
       [character-display id true (if (= :mobile device-type) 1 2)]]]))
 
 (defn monster-page [{:keys [key] :as arg}]
-  (let [monster (monsters/monster-map (common/name-to-kw key))]
+  (let [monster @(subscribe [::monsters/monster (keyword key)])]
+    (prn "MONSTER" monster)
     [content-page
      "Monster Page"
      []
@@ -4256,7 +4257,7 @@
       [:div.m-r-20.m-b-10
        [comps/labeled-checkbox
         "Resistance to damage from traps"
-        (get-in feat [:props kw :traps])
+        (get-in option [:props kw :traps])
         false
         #(dispatch [toggle-map-prop-event kw :traps])]]
       (doall
@@ -4287,6 +4288,40 @@
             false
             #(dispatch [toggle-map-prop-event kw damage-type])]])
         opt/damage-types))])])
+
+(defn option-damage-vulnerability [option toggle-map-prop-event]
+  [:div.m-b-20
+   [:div.f-s-18.f-w-b.m-b-10 "Damage Vulnerability"]
+   (let [kw :damage-vulnerability]
+     [:div.flex.flex-wrap
+      (doall
+       (map
+        (fn [damage-type]
+          ^{:key damage-type}
+          [:div.m-r-20.m-b-10
+           [comps/labeled-checkbox
+            (str "Vulnerability to " (name damage-type) " damage")
+            (get-in option [:props kw damage-type])
+            false
+            #(dispatch [toggle-map-prop-event kw damage-type])]])
+        opt/damage-types))])])
+
+(defn option-condition-immunity [option toggle-map-prop-event]
+  [:div.m-b-20
+   [:div.f-s-18.f-w-b.m-b-10 "Condition Immunity"]
+   (let [kw :condition-immunity]
+     [:div.flex.flex-wrap
+      (doall
+       (map
+        (fn [{:keys [name key]}]
+          ^{:key key}
+          [:div.m-r-20.m-b-10
+           [comps/labeled-checkbox
+            (str "Immunity to being " name)
+            (get-in option [:props kw key])
+            false
+            #(dispatch [toggle-map-prop-event kw key])]])
+        opt/conditions))])])
 
 (defn option-weapon-proficiency [option toggle-map-prop-event]
   [:div.m-b-20
@@ -5260,6 +5295,27 @@
                 :on-change #(dispatch [::monsters/set-monster-prop simple-kw (js/parseInt %)])}])])
          opt/abilities))]]
      [:div
+      [:div.f-s-24.f-w-b "Saving Throws"]
+      [:div.flex.w-100-p.flex-wrap
+       (doall
+        (map
+         (fn [{:keys [key name]}]
+           ^{:key key}
+           [:div.flex-grow-1.m-b-20.m-r-5
+            (let [simple-kw (-> key clojure.core/name keyword)]
+              [labeled-dropdown
+               name
+               {:items (cons
+                        {:title "-"}
+                        (map
+                         (fn [v]
+                           {:title v
+                            :value v})
+                         (range 0 18)))
+                :value (get saving-throws simple-kw)
+                :on-change #(dispatch [::monsters/set-monster-path-prop [:saving-throws simple-kw] (let [parsed (js/parseInt %)] (if (not (js/isNaN parsed)) parsed))])}])])
+         opt/abilities))]]
+     [:div
       [:div.f-s-24.f-w-b "Skills"]
       [:div.flex.w-100-p.flex-wrap
        (doall
@@ -5280,6 +5336,11 @@
                 :value (get skills key 0)
                 :on-change #(dispatch [::monsters/set-monster-path-prop [:skills key] (js/parseInt %)])}])])
          skills/skills))]]
+     [option-languages monster ::monsters/toggle-monster-map-prop]
+     [option-damage-resistance monster ::monsters/toggle-monster-map-prop]
+     [option-damage-immunity monster ::monsters/toggle-monster-map-prop]
+     [option-damage-vulnerability monster ::monsters/toggle-monster-map-prop]
+     [option-condition-immunity monster ::monsters/toggle-monster-map-prop]
      [:div.w-100-p
       [:div.f-s-24.f-w-b
        "Description"]
@@ -5783,7 +5844,7 @@
      (fn [{:keys [name] :as monster}]
        ^{:key name}
        [monster-list-item monster])
-     @(subscribe [::char/filtered-monsters])))])
+     @(subscribe [::monsters/filtered-monsters])))])
 
 (defn clear-monsters-filter []
   (dispatch [::char/filter-monsters ""]))
