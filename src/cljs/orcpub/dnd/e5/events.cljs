@@ -2550,12 +2550,6 @@
    language))
 
 (reg-event-db
- ::langs5e/set-language
- language-interceptors
- (fn [_ [_ language]]
-   language))
-
-(reg-event-db
  ::feats5e/set-feat
  feat-interceptors
  (fn [_ [_ feat]]
@@ -2597,12 +2591,6 @@
  (fn [_ _]
    {:dispatch [::bg5e/set-background
                default-background]}))
-
-(reg-event-fx
- ::langs5e/reset-language
- (fn [_ _]
-   {:dispatch [::langs5e/set-language
-               default-language]}))
 
 (reg-event-fx
  ::langs5e/reset-language
@@ -2753,12 +2741,6 @@
  ::bg5e/set-background
  default-background
  routes/dnd-e5-background-builder-page-route)
-
-(reg-new-homebrew
- ::langs5e/new-language
- ::langs5e/set-language
- default-language
- routes/dnd-e5-language-builder-page-route)
 
 (reg-new-homebrew
  ::langs5e/new-language
