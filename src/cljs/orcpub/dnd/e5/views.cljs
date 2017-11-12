@@ -1021,9 +1021,9 @@
      [:div
       [:span.f-s-24.f-w-b (or (:name item) name)]
       [:div.f-s-16.i.f-w-b.opacity-5
-       (str (if type (s/capitalize (common/kw-to-name type)))
+       (str (if type (common/safe-capitalize-kw type))
             (if (keyword? item-subtype)
-              (str " (" (s/capitalize (common/kw-to-name item-subtype)) ")"))
+              (str " (" (common/safe-capitalize-kw item-subtype) ")"))
             ", "
             (if (string? rarity)
               rarity
@@ -1064,7 +1064,7 @@
     (str (if (pos? level)
            (str (common/ordinal level) "-level"))
          " "
-         (s/capitalize school)
+         (common/safe-capitalize school)
          (if (zero? level)
            " cantrip"))]])
 
@@ -1112,7 +1112,7 @@
        results))]]])
 
 (defn monster-subheader [size type subtypes alignment]
-  (str (if size (s/capitalize (common/kw-to-name size)))
+  (str (if size (common/safe-capitalize size))
        " "
        (common/kw-to-name type)
        (if (seq subtypes)
@@ -1146,7 +1146,7 @@
 (defn print-bonus-map [m]
   (s/join ", "
           (map
-           (fn [[k v]] (str (s/capitalize (common/safe-name k)) " " (common/bonus-str v)))
+           (fn [[k v]] (str (common/safe-capitalize k) " " (common/bonus-str v)))
            m)))
 
 (def max-width-300
@@ -3263,7 +3263,6 @@
 
 (defn monster-page [{:keys [key] :as arg}]
   (let [monster @(subscribe [::monsters/monster (keyword key)])]
-    (prn "MONSTER" monster)
     [content-page
      "Monster Page"
      []
@@ -3628,7 +3627,7 @@
         (let [speed-mod-type @(subscribe [::mi/speed-mod-type type-kw])]
           ^{:key type-kw}
           [:div.flex.align-items-c
-           [:div.w-100 (s/capitalize (common/kw-to-name type-kw))]
+           [:div.w-100 (common/safe-capitalize type-kw)]
            [:div
             [dropdown
              {:value speed-mod-type
@@ -3659,7 +3658,7 @@
         ^{:key type-kw}
         [:div
          {:on-click #(dispatch [toggle-event type-kw])}
-         [labeled-checkbox (s/capitalize (name type-kw)) @(subscribe [has-sub type-kw])]])
+         [labeled-checkbox (common/safe-capitalize-kw type-kw) @(subscribe [has-sub type-kw])]])
       item-kws))]))
 
 (defn item-damage-resistances []
@@ -4335,7 +4334,7 @@
            ^{:key weapon-type}
            [:div.m-r-20.m-b-10
             [comps/labeled-checkbox
-             (str "All " (s/capitalize (name weapon-type)) " Weapons")
+             (str "All " (common/safe-capitalize-kw weapon-type) " Weapons")
              (get-in option [:props kw weapon-type])
              false
              #(dispatch [toggle-map-prop-event kw weapon-type])]])
@@ -5209,7 +5208,6 @@
                 actions
                 legendary-actions] :as monster}
         @(subscribe [::monsters/builder-item])]
-    (prn "MONSTER" monster)
     [:div.p-20.main-text-color
      [:div.flex.w-100-p.flex-wrap
       [monster-input-field
@@ -6006,7 +6004,7 @@
                                       final-type-name (if plural
                                                         (if (not= 1 num) plural type-name)
                                                         (str type-name (if (not= 1 num) "s")))]
-                                  (str num " " (s/capitalize final-type-name))
+                                  (str num " " (common/safe-capitalize final-type-name))
                                     )]]
           [:i.fa
            {:class-name (if @expanded? "fa-caret-up" "fa-caret-down")}]]
