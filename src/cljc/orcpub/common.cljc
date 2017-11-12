@@ -78,6 +78,14 @@
     (name kw)
     (warn (str "non-keyword value passed to safe-name: " kw))))
 
+(defn safe-capitalize [s]
+  (if (string? s) (s/capitalize s)))
+
+(defn safe-capitalize-kw [kw]
+  (some-> kw
+          name
+          safe-capitalize))
+
 (defn sentensize [desc]
   (if desc
     (str
@@ -138,3 +146,4 @@
       (if (not= i index)
         item))
     v)))
+

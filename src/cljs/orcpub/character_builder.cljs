@@ -1210,7 +1210,7 @@
 
 (defn hp-selection-name-level [selection]
   (let [[_ class-kw _ level-kw _] (::entity/path selection)
-        class-name (s/capitalize (name class-kw))]
+        class-name (common/safe-capitalize-kw class-kw)]
     {:name class-name
      :level (js/parseInt (last (s/split (name level-kw) #"-")))
      :key class-kw}))
@@ -1293,7 +1293,7 @@
            ^{:key i}
            [:div.m-b-20
             [:div.f-s-16.m-l-5.f-w-b
-             (str (s/capitalize (name cls))
+             (str (common/safe-capitalize-kw cls)
                   " ("
                   "D"
                   (-> levels cls :hit-die) ")")]
