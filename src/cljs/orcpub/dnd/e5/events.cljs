@@ -2801,6 +2801,7 @@
    (fn [option [_ index]]
      (update option :traits common/remove-at-index index))))
 
+(reg-option-traits "monster" ::monsters/builder-item monster-interceptors)
 (reg-option-traits "subrace" ::race5e/subrace-builder-item subrace-interceptors)
 (reg-option-traits "subclass" ::class5e/subclass-builder-item subclass-interceptors)
 (reg-option-traits "race" ::race5e/builder-item race-interceptors)

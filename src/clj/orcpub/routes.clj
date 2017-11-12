@@ -29,6 +29,7 @@
             [orcpub.dnd.e5.template :as t5e]
             [datomic.api :as d]
             [bidi.bidi :as bidi]
+            [orcpub.common :as common]
             [orcpub.route-map :as route-map]
             [orcpub.errors :as errors]
             [orcpub.privacy :as privacy]
@@ -457,41 +458,44 @@
     :weapon-name-3 8}))
 
 (defn add-spell-cards! [doc spells-known spell-save-dcs spell-attack-mods]
-  (let [flat-spells (-> spells-known vals flatten)
-        sorted-spells (sort-by
-                       (fn [{:keys [class key]}]
-                         [class key])
-                       flat-spells)
-        parts (vec (partition-all 9 sorted-spells))]
-    (doseq [i (range (count parts))
-            :let [part (parts i)]]
-      (let [page (PDPage.)
-            cs (PDPageContentStream. doc page)]
-        (.addPage doc page)
-        (let [spells (sequence
-                      (comp
-                       (filter (fn [spell] (spells/spell-map (:key spell))))
-                       (map
-                        (fn [{:keys [key class]}]
-                          {:spell (spells/spell-map key)
-                           :class-nm class
-                           :dc (spell-save-dcs class)
-                           :attack-bonus (spell-attack-mods class)})))
-                      part)
-              remaining-desc-lines (vec
-                                    (pdf/print-spells
-                                     cs
-                                     doc
-                                     2.5
-                                     3.5
-                                     spells
-                                     i))
-              back-page (PDPage.)
-              _ (.close cs)
-              back-page-cs (PDPageContentStream. doc back-page)]
-          (.addPage doc back-page)
-          (pdf/print-backs back-page-cs doc 2.5 3.5 remaining-desc-lines i)
-          (.close back-page-cs))))))
+  (try
+    (let [flat-spells (-> spells-known vals flatten)
+          sorted-spells (sort-by
+                         (fn [{:keys [class key]}]
+                           [(if (keyword? class)
+                              (common/kw-to-name class)
+                              class)
+                            key])
+                         flat-spells)
+          parts (vec (partition-all 9 sorted-spells))]
+      (doseq [i (range (count parts))
+              :let [part (parts i)]]
+        (let [page (PDPage.)]
+          (.addPage doc page)
+          (with-open [cs (PDPageContentStream. doc page)]
+            (let [spells (sequence
+                          (comp
+                           (filter (fn [spell] (spells/spell-map (:key spell))))
+                           (map
+                            (fn [{:keys [key class]}]
+                              {:spell (spells/spell-map key)
+                               :class-nm class
+                               :dc (spell-save-dcs class)
+                               :attack-bonus (spell-attack-mods class)})))
+                          part)
+                  remaining-desc-lines (vec
+                                        (pdf/print-spells
+                                         cs
+                                         doc
+                                         2.5
+                                         3.5
+                                         spells
+                                         i))
+                  back-page (PDPage.)]
+              (with-open [back-page-cs (PDPageContentStream. doc back-page)]
+                (.addPage doc back-page)
+                (pdf/print-backs back-page-cs doc 2.5 3.5 remaining-desc-lines i)))))))
+    (catch Exception e (prn "FAILED ADDING SPELLS CARDS!" e))))
 
 (defn character-pdf-2 [req]
   (let [fields (-> req :form-params :body clojure.edn/read-string)
