@@ -7,6 +7,7 @@
             [orcpub.components :as comps]
             [orcpub.entity-spec :as es]
             [orcpub.pdf-spec :as pdf-spec]
+            [orcpub.dice :as dice]
             [orcpub.entity.strict :as se]
             [orcpub.dnd.e5.subs :as subs]
             [orcpub.dnd.e5.character :as char]
@@ -1175,7 +1176,13 @@
                                       "d"
                                       die
                                       (if modifier (common/mod-str modifier))
-                                      (if mean (str " (" mean ")")))))
+                                      (let [mean
+                                            (or mean
+                                                (if (and die die-count)
+                                                  (dice/dice-mean die
+                                                                  die-count
+                                                                  (or modifier 0))))]
+                                        (if mean (str " (" mean ")"))))))
      (spell-field "Speed" speed)
      [:div.m-t-10.flex.justify-cont-s-a.m-b-10
       {:style max-width-300}
@@ -3738,7 +3745,7 @@
     [:div.flex-grow-1
      [item-condition-immunities]]]])
 
-(defn builder-input-field [title prop item prop-event & [class-names]]
+(defn builder-input-field [title prop item prop-event & [class-names type]]
   [:div.flex-grow-1
    {:class-name class-names
     :name prop}
@@ -3746,13 +3753,14 @@
     [:span.f-w-b title]
     (prop item)
     #(dispatch [prop-event prop %])
-    {:class-name "input h-40"}]])
+    {:class-name "input h-40"
+     :type type}]])
 
 (defn spell-input-field [title prop spell & [class-names]]
   (builder-input-field title prop spell ::spells/set-spell-prop class-names))
 
-(defn monster-input-field [title prop monster & [class-names]]
-  (builder-input-field title prop monster ::monsters/set-monster-prop class-names))
+(defn monster-input-field [title prop monster & [class-names type]]
+  (builder-input-field title prop monster ::monsters/set-monster-prop class-names type))
 
 (defn language-input-field [title prop language & [class-names]]
   (builder-input-field title prop language ::langs/set-language-prop class-names))
@@ -5291,6 +5299,47 @@
                  (range 5 25))
          :value (or armor-class 10)
          :on-change #(dispatch [::monsters/set-monster-prop :armor-class (js/parseInt %)])}]]]
+     [:div.m-b-20
+      [monster-input-field
+       "Speed"
+       :speed
+       monster
+       "m-l-5 m-b-20"]]
+     [:div.m-b-20
+      [:div.f-s-24.f-w-b "Hit Points"]
+      [:div.flex.w-100-p.flex-wrap
+       [:div.m-r-5
+        [labeled-dropdown
+         "Die Count"
+         {:items (cons
+                  {:title "-"}
+                  (map
+                   (fn [v]
+                     {:title v
+                      :value v})
+                   (range 1 36)))
+          :value (get hit-points :die-count)
+          :on-change #(let [v (js/parseInt %)] (dispatch [::monsters/set-monster-path-prop [:hit-points :die-count] (if (not (js/isNaN v)) v)]))}]]
+       [:div.m-r-5
+        [labeled-dropdown
+         "Die"
+         {:items (cons
+                  {:title "-"}
+                  (map
+                   (fn [v]
+                     {:title v
+                      :value v})
+                   dice/dice-sides))
+          :value (get hit-points :die)
+          :on-change #(let [v (js/parseInt %)]
+                        (dispatch [::monsters/set-monster-path-prop [:hit-points :die] (if (not (js/isNaN v)) v)]))}]]
+       [:div.m-r-5
+        [input-builder-field
+         [:span.f-w-b "Modifier"]
+         (get hit-points :modifier 0)
+         #(let [v (js/parseInt %)]
+            (dispatch [::monsters/set-monster-path-prop [:hit-points :modifier] (if (not (js/isNaN v)) v)]))
+         {:class-name "input h-40"}]]]]
      [:div
       [:div.f-s-24.f-w-b "Abilities"]
       [:div.flex.w-100-p.flex-wrap
