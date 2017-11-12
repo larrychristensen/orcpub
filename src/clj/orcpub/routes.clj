@@ -897,6 +897,7 @@
    [route-map/dnd-e5-race-builder-page-route]
    [route-map/dnd-e5-subrace-builder-page-route]
    [route-map/dnd-e5-subclass-builder-page-route]
+   [route-map/dnd-e5-class-builder-page-route]
    [route-map/dnd-e5-language-builder-page-route]
    [route-map/dnd-e5-feat-builder-page-route]
    [route-map/dnd-e5-item-list-page-route]

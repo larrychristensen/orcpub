@@ -35,6 +35,7 @@
                                       race->local-store
                                       subrace->local-store
                                       subclass->local-store
+                                      class->local-store
                                       plugins->local-store
                                       tab-path
                                       default-character
@@ -45,6 +46,7 @@
                                       default-feat
                                       default-race
                                       default-subrace
+                                      default-class
                                       default-subclass]]
             [re-frame.core :refer [reg-event-db reg-event-fx reg-fx inject-cofx path trim-v
                                    after debug dispatch dispatch-sync subscribe ->interceptor]]
@@ -93,6 +95,8 @@
 
 (def subclass->local-store-interceptor (after subclass->local-store))
 
+(def class->local-store-interceptor (after class->local-store))
+
 (def plugins->local-store-interceptor (after plugins->local-store))
 
 (def set-changed (->interceptor
@@ -130,8 +134,11 @@
 (def subrace-interceptors [(path ::race5e/subrace-builder-item)
                            subrace->local-store-interceptor])
 
+(def class-interceptors [(path ::class5e/builder-item)
+                         class->local-store-interceptor])
+
 (def subclass-interceptors [(path ::class5e/subclass-builder-item)
-                           subclass->local-store-interceptor])
+                          subclass->local-store-interceptor])
 
 (def plugins-interceptors [(path :plugins)
                           plugins->local-store-interceptor])
@@ -456,6 +463,14 @@
  ::e5/subclasses
  "You must specify 'Name', 'Option Source Name', and 'Class'")
 
+(reg-save-homebrew
+ "Class"
+ ::class5e/save-class
+ ::class5e/builder-item
+ ::class5e/homebrew-class
+ ::e5/classes
+ "You must specify 'Name', 'Option Source Name'")
+
 (defn reg-delete-homebrew [event-key plugin-key]
   (reg-event-fx
    event-key
@@ -493,6 +508,10 @@
 (reg-delete-homebrew
  ::class5e/delete-subclass
  ::e5/subclasses)
+
+(reg-delete-homebrew
+ ::class5e/delete-class
+ ::e5/classes)
 
 (reg-event-fx
  ::party5e/make-party-success
@@ -1577,6 +1596,11 @@
  ::class5e/set-subclass
  routes/dnd-e5-subclass-builder-page-route)
 
+(reg-edit-homebrew
+ ::class5e/edit-class
+ ::class5e/set-class
+ routes/dnd-e5-class-builder-page-route)
+
 (reg-event-fx
  :delete-character-success
  (fn [_ _]
@@ -2065,6 +2089,12 @@
    (assoc-in monster prop-path prop-value)))
 
 (reg-event-db
+ ::class5e/set-class-path-prop
+ class-interceptors
+ (fn [class [_ prop-path prop-value]]
+   (assoc-in class prop-path prop-value)))
+
+(reg-event-db
  ::bg5e/set-background-prop
  background-interceptors
  (fn [background [_ prop-key prop-value]]
@@ -2093,6 +2123,25 @@
  subclass-interceptors
  (fn [subclass [_ prop-key prop-value]]
    (assoc subclass prop-key prop-value)))
+
+(reg-event-db
+ ::class5e/toggle-ability-increase-level
+ class-interceptors
+ (fn [class [_ level]]
+   (update class
+           :ability-increase-levels
+           (fn [levels]
+             (let [levels-set (into (sorted-set) levels)]
+               (vec
+                (if (levels-set level)
+                  (disj levels-set level)
+                  (conj levels-set level))))))))
+
+(reg-event-db
+ ::class5e/set-class-prop
+ class-interceptors
+ (fn [class [_ prop-key prop-value]]
+   (assoc class prop-key prop-value)))
 
 (reg-event-db
  ::class5e/toggle-subclass-spellcasting
@@ -2166,6 +2215,15 @@
                            (assoc m key num))))))
 
 (reg-event-db
+ ::class5e/toggle-class-value-prop
+ class-interceptors
+ (fn [class [_ key num]]
+   (update class :props (fn [m]
+                         (if (= (get m key) num)
+                           (dissoc m key)
+                           (assoc m key num))))))
+
+(reg-event-db
  ::feats5e/toggle-feat-map-prop
  feat-interceptors
  (fn [feat [_ key value]]
@@ -2184,6 +2242,12 @@
    (update-in monster [:props key value] not)))
 
 (reg-event-db
+ ::class5e/toggle-class-path-prop
+ class-interceptors
+ (fn [class [_ prop-path prop-value]]
+   (update-in class prop-path not)))
+
+(reg-event-db
  ::race5e/toggle-race-map-prop
  race-interceptors
  (fn [race [_ key value]]
@@ -2194,6 +2258,12 @@
  subclass-interceptors
  (fn [subclass [_ key value]]
    (update-in subclass [:props key value] not)))
+
+(reg-event-db
+ ::class5e/toggle-class-map-prop
+ class-interceptors
+ (fn [class [_ key value]]
+   (update-in class [:props key value] not)))
 
 (reg-event-db
  ::bg5e/toggle-background-map-prop
@@ -2621,6 +2691,12 @@
  (fn [_ [_ subclass]]
    subclass))
 
+(reg-event-db
+ ::class5e/set-class
+ class-interceptors
+ (fn [_ [_ class]]
+   class))
+
 (reg-event-fx
  ::mi/reset-item
  (fn [_ _]
@@ -2676,6 +2752,12 @@
    {:dispatch [::class5e/set-subclass
                default-subclass]}))
 
+(reg-event-fx
+ ::class5e/reset-class
+ (fn [_ _]
+   {:dispatch [::class5e/set-class
+               default-class]}))
+
 (defn reg-new-homebrew [event set-event default-val route]
   (reg-event-fx
    event
@@ -2724,6 +2806,7 @@
      (update option :level-modifiers common/remove-at-index index))))
 
 (reg-option-modifiers "subclass" ::class5e/subclass-builder-item subclass-interceptors)
+(reg-option-modifiers "class" ::class5e/builder-item class-interceptors)
 
 (reg-event-db
  ::race5e/set-subrace-spell-level
@@ -2811,6 +2894,7 @@
 (reg-option-traits "monster" ::monsters/builder-item monster-interceptors)
 (reg-option-traits "subrace" ::race5e/subrace-builder-item subrace-interceptors)
 (reg-option-traits "subclass" ::class5e/subclass-builder-item subclass-interceptors)
+(reg-option-traits "class" ::class5e/builder-item class-interceptors)
 (reg-option-traits "race" ::race5e/builder-item race-interceptors)
 (reg-option-traits "background" ::bg5e/builder-item background-interceptors)
 
@@ -2861,6 +2945,12 @@
  ::class5e/set-subclass
  default-subclass
  routes/dnd-e5-subclass-builder-page-route)
+
+(reg-new-homebrew
+ ::class5e/new-class
+ ::class5e/set-class
+ default-class
+ routes/dnd-e5-class-builder-page-route)
 
 (reg-event-fx
  ::mi/new-item
