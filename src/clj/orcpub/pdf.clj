@@ -104,7 +104,8 @@
 
 (defn string-width [text font font-size]
   (if text
-    (/ (* (/ (.getStringWidth font text) 1000.0) font-size) 72)))
+    (/ (* (/ (.getStringWidth font (if (keyword? text) (common/safe-name text) text)) 1000.0) font-size) 72)
+    0))
 
 (defn split-lines [text font-size width]
   (let [words (s/split text #"\s")]
@@ -149,17 +150,18 @@
   (.setNonStrokingColor cs r g b))
 
 (defn draw-text [cs text font font-size x y & [color]]
-  (let [units-x (* 72 x)
-        units-y (* 72 y)]
-    (.beginText cs)
-    (.setFont cs font font-size)
-    (if color
-      (apply set-text-color cs color))
-    (.moveTextPositionByAmount cs units-x units-y)
-    (.drawString cs text)
-    (if color
-      (set-text-color cs 0 0 0))
-    (.endText cs)))
+  (if text
+    (let [units-x (* 72 x)
+          units-y (* 72 y)]
+      (.beginText cs)
+      (.setFont cs font font-size)
+      (if color
+        (apply set-text-color cs color))
+      (.moveTextPositionByAmount cs units-x units-y)
+      (.drawString cs (if (keyword? text) (common/safe-name text) text))
+      (if color
+        (set-text-color cs 0 0 0))
+      (.endText cs))))
 
 (defn draw-line [cs start-x start-y end-x end-y]
   (.drawLine cs start-x start-y end-x end-y))
