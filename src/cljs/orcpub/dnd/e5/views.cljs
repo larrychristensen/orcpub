@@ -5186,6 +5186,7 @@
 
 (defn monster-builder []
   (let [{:keys [name
+                key
                 size
                 type
                 alignment
@@ -5344,7 +5345,15 @@
        "Description"]
       [textarea-field
        {:value (get monster :description)
-        :on-change #(dispatch [::monsters/set-monster-prop :description %])}]]]))
+        :on-change #(dispatch [::monsters/set-monster-prop :description %])}]]
+     [:div.m-t-30
+      [option-traits
+       monster
+       key
+       ::e5/add-monster-trait
+       ::e5/edit-monster-trait-name
+       ::e5/edit-monster-trait-description
+       ::e5/delete-monster-trait]]]))
 
 (defn spell-builder []
   (let [{:keys [:level :school] :as spell} @(subscribe [::spells/builder-item])]
