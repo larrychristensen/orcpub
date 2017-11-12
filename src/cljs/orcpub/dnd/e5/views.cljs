@@ -298,7 +298,7 @@
   (dispatch [:route routes/default-route]))
 
 (defn search-input-keypress [e]
-  (if (= "Enter" (.-key e)) (dispatch [:set-search-text search-text])))
+  (if (= "Enter" (.-key e)) (dispatch [:set-search-text @(subscribe [:search-text])])))
 
 (defn set-search-text [e]
   (dispatch [:set-search-text (event-value e)]))
@@ -373,7 +373,7 @@
          [header-tab
           "characters"
           "battle-gear"
-          route-to-charater-list-page
+          route-to-character-list-page
           false
           (routes/dnd-e5-char-page-routes (or (:handler active-route) active-route))
           device-type
@@ -498,6 +498,11 @@
        [legal-footer]]
       [:div.registration-image
        {:style registration-page-style}]]]]])
+
+(def make-event-handler
+  (memoize
+   (fn [event-kw & args]
+      #(dispatch (vec (cons event-kw args))))))
 
 (defn verify-failed []
   (let [params (r/atom {})]
@@ -1153,78 +1158,85 @@
   {:max-width "300px"})
 
 (defn monster-component [{:keys [name size type subtypes hit-points alignment armor-class armor-notes speed saving-throws skills damage-vulnerabilities damage-resistances damage-immunities condition-immunities senses languages challenge traits actions legendary-actions source page] :as monster}]
-  [:div.m-l-10.l-h-19
-   (if (not @(subscribe [:mobile?])) {:style two-columns-style})
-   [:span.f-s-24.f-w-b name]
-   [:div.f-s-18.i.f-w-b (monster-subheader size type subtypes alignment)]
-   (spell-field "Armor Class" (str armor-class (if armor-notes (str " (" armor-notes ")"))))
-   (let [{:keys [mean die-count die modifier]} hit-points]
-     (spell-field "Hit Points" (str die-count
-                                    "d"
-                                    die
-                                    (if modifier (common/mod-str modifier))
-                                    (if mean (str " (" mean ")")))))
-   (spell-field "Speed" speed)
-   [:div.m-t-10.flex.justify-cont-s-a.m-b-10
-    {:style max-width-300}
-    (doall
-     (map
-      (fn [ability-key]
-        ^{:key ability-key}
-        [:div.t-a-c.p-5
-         [:div.f-w-b.f-s-14 (s/upper-case (common/safe-name ability-key))]
-         (let [ability-value (get monster ability-key)]
-           [:div ability-value " (" (common/bonus-str (opt/ability-bonus ability-value)) ")"])])
-      [:str :dex :con :int :wis :cha]))]
-   (if (seq saving-throws)
-     (spell-field "Saving Throws" (print-bonus-map saving-throws)))
-   (if skills (spell-field "Skills" (print-bonus-map skills)))
-   (if damage-vulnerabilities (spell-field "Damage Vulnerabilities" damage-vulnerabilities))
-   (if damage-resistances (spell-field "Damage Resistances" damage-resistances))
-   (if damage-immunities (spell-field "Damage Immunities" damage-immunities))
-   (if condition-immunities (spell-field "Condition Immunities" condition-immunities))
-   (if senses (spell-field "Senses" senses))
-   (if languages (spell-field "Languages" languages))
-   (if challenge (spell-field "Challenge" (str
-                                           (case challenge
-                                             0.125 "1/8"
-                                             0.25 "1/4"
-                                             0.5 "1/2"
-                                             challenge)
-                                           " ("
-                                           (monsters/challenge-ratings challenge)
-                                           " XP)")))
-   (if traits
-     [:div.m-t-20
+  (let [traits-by-type (group-by :type traits)
+        traits (traits-by-type nil)
+        actions (concat actions (traits-by-type :action))
+        legendary (traits-by-type :legendary-action)
+        legendary-actions (if (seq legendary)
+                            (update legendary-actions :actions concat legendary)
+                            legendary-actions)]
+    [:div.m-l-10.l-h-19
+     (if (not @(subscribe [:mobile?])) {:style two-columns-style})
+     [:span.f-s-24.f-w-b name]
+     [:div.f-s-18.i.f-w-b (monster-subheader size type subtypes alignment)]
+     (spell-field "Armor Class" (str armor-class (if armor-notes (str " (" armor-notes ")"))))
+     (let [{:keys [mean die-count die modifier]} hit-points]
+       (spell-field "Hit Points" (str die-count
+                                      "d"
+                                      die
+                                      (if modifier (common/mod-str modifier))
+                                      (if mean (str " (" mean ")")))))
+     (spell-field "Speed" speed)
+     [:div.m-t-10.flex.justify-cont-s-a.m-b-10
+      {:style max-width-300}
       (doall
-       (map-indexed
-        (fn [i {:keys [name description]}]
-          ^{:key i}
-          [:div.m-t-10 (spell-field name description)])
-        traits))])
-   (if actions
-     [:div.m-t-20
-      [:div.i.f-w-b.f-s-18 "Actions"]
-      [:div
-       (doall
-        (map-indexed
-         (fn [i {:keys [name description]}]
-           ^{:key i}
-           [:div.m-t-10 (spell-field name description)])
-         actions))]])
-   (if legendary-actions
-     [:div.m-t-20
-      [:div.i.f-w-b.f-s-18 "Legendary Actions"]
-      (if (:description legendary-actions)
-        [:div (:description legendary-actions)])
-      (if (:actions legendary-actions)
+       (map
+        (fn [ability-key]
+          ^{:key ability-key}
+          [:div.t-a-c.p-5
+           [:div.f-w-b.f-s-14 (s/upper-case (common/safe-name ability-key))]
+           (let [ability-value (get monster ability-key)]
+             [:div ability-value " (" (common/bonus-str (opt/ability-bonus ability-value)) ")"])])
+        [:str :dex :con :int :wis :cha]))]
+     (if (seq saving-throws)
+       (spell-field "Saving Throws" (print-bonus-map saving-throws)))
+     (if skills (spell-field "Skills" (print-bonus-map skills)))
+     (if damage-vulnerabilities (spell-field "Damage Vulnerabilities" damage-vulnerabilities))
+     (if damage-resistances (spell-field "Damage Resistances" damage-resistances))
+     (if damage-immunities (spell-field "Damage Immunities" damage-immunities))
+     (if condition-immunities (spell-field "Condition Immunities" condition-immunities))
+     (if senses (spell-field "Senses" senses))
+     (if languages (spell-field "Languages" languages))
+     (if challenge (spell-field "Challenge" (str
+                                             (case challenge
+                                               0.125 "1/8"
+                                               0.25 "1/4"
+                                               0.5 "1/2"
+                                               challenge)
+                                             " ("
+                                             (monsters/challenge-ratings challenge)
+                                             " XP)")))
+     (if traits
+       [:div.m-t-20
+        (doall
+         (map-indexed
+          (fn [i {:keys [name description]}]
+            ^{:key i}
+            [:div.m-t-10 (spell-field name description)])
+          traits))])
+     (if actions
+       [:div.m-t-20
+        [:div.i.f-w-b.f-s-18 "Actions"]
         [:div
          (doall
           (map-indexed
            (fn [i {:keys [name description]}]
              ^{:key i}
              [:div.m-t-10 (spell-field name description)])
-           (:actions legendary-actions)))])])])
+           actions))]])
+     (if legendary-actions
+       [:div.m-t-20
+        [:div.i.f-w-b.f-s-18 "Legendary Actions"]
+        (if (:description legendary-actions)
+          [:div (:description legendary-actions)])
+        (if (:actions legendary-actions)
+          [:div
+           (doall
+            (map-indexed
+             (fn [i {:keys [name description]}]
+               ^{:key i}
+               [:div.m-t-10 (spell-field name description)])
+             (:actions legendary-actions)))])])]))
 
 (defn monster-result [monster]
   [:div.white
@@ -1303,7 +1315,7 @@
 
 (def scag-link (amazon-link "SCAG" "https://www.amazon.com/gp/product/0786965800/ref=as_li_tl?ie=UTF8&tag=orcpub-20&camp=1789&creative=9325&linkCode=as2&creativeASIN=0786965800&linkId=deac8f6d8ceeb243cc29931992bcde52"))
 
-(def volos-link (amazon-link "VGM" "https://www.amazon.com/gp/product/0786966017/ref=as_li_tl?ie=UTF8&tag=orcpub-20&camp=1789&creative=9325&linkCode=as2&creativeASIN=0786966017&linkId=1db974c1bc5c3f2f49971ad2e1fc7906"))
+(def vgm-link (amazon-link "VGM" "https://www.amazon.com/gp/product/0786966017/ref=as_li_tl?ie=UTF8&tag=orcpub-20&camp=1789&creative=9325&linkCode=as2&creativeASIN=0786966017&linkId=1db974c1bc5c3f2f49971ad2e1fc7906"))
 
 (def toa-link (amazon-link "TOA" "https://www.amazon.com/gp/product/0786966106/ref=as_li_tl?ie=UTF8&tag=orcpub-20&camp=1789&creative=9325&linkCode=as2&creativeASIN=0786966106&linkId=83a1e9d255d69267b0b441e8a7bcde80"))
 
@@ -1987,7 +1999,7 @@
            " (" (or item-qty num) ")"))
     equipment)])
 
-(defn add-links [desc]
+#_(defn add-links [desc]
   desc
   (let [{:keys [abbr url]} (some (fn [[_ source]]
                                    (if (and (:abbr source)
@@ -2049,7 +2061,7 @@
           (map
            (fn [{:keys [name area-type description damage-die damage-die-count damage-type save save-dc] :as attack}]
              ^{:key name}
-             [attack-comp name (add-links (common/sentensize (disp/attack-description attack)))])
+             [attack-comp name (common/sentensize (disp/attack-description attack))])
            attacks))]]))))
 
 (defn toggle-feature-used-fn [id units k]
@@ -2068,7 +2080,7 @@
           ^{:key action}
           [:p.m-t-10
            [:span.f-w-600.i nm "."]
-           [:span.f-w-n.m-l-10 (add-links (common/sentensize (disp/action-description action)))]
+           [:span.f-w-n.m-l-10 (common/sentensize (disp/action-description action))]
            (if (and amount units)
              [:span.m-l-10
               (doall
@@ -2922,11 +2934,6 @@
 (defn has-frequency-units? [trait]
   (some-> trait :frequency :units))
 
-(def make-event-handler
-  (memoize
-   (fn [event-kw & args]
-      #(dispatch (vec (cons event-kw args))))))
-
 (defn features-details [num-columns id]
   (let [resistances @(subscribe [::char/resistances id])
         damage-immunities @(subscribe [::char/damage-immunities id])
@@ -3115,7 +3122,7 @@
                      "hide selections"
                      "show selections")]
             [:i.fa.m-l-5
-             {:class-name (if expanded? "fa-caret-up" "fa-caret-down")}]]
+             {:class-name (if @show-selections? "fa-caret-up" "fa-caret-down")}]]
            (if @show-selections?
              [character-selections id])]]]))))
 
@@ -3380,7 +3387,7 @@
              (cons
               {::template/key :spellcaster
                ::template/name "Spellcaster"}
-              t/base-class-options)))])]
+              @(subscribe [::classes/classes]))))])]
         [:div.flex-grow-1
          (base-builder-field
           [:div.f-w-b.m-b-5 "Alignment"]
@@ -3997,7 +4004,7 @@
      (get-in background [:treasure :gp])
      #(dispatch [::bg/set-background-gold %])
      {:class-name "input h-40"
-      :type number}]]
+      :type :number}]]
    [:div.m-b-10
     [:div.f-s-18.f-w-b.m-b-10 "Clothing"]
     [:div [starting-equipment-checkboxes background equip/clothes]]]
@@ -4354,9 +4361,10 @@
                      option-key
                      add-trait-event
                      edit-trait-name-event
+                     edit-trait-type-event
                      edit-trait-description-event
                      delete-trait-event
-                     & [edit-trait-level-event]]
+                     & {:keys [edit-trait-level-event types]}]
   [:div.m-b-20
    [:div.p-t-10.p-b-10.f-w-b.flex.justify-cont-s-b.align-items-c
     [:div.f-s-24.f-w-b.m-b-10 "Features/Traits"]
@@ -4368,7 +4376,7 @@
     (if (seq (:traits option))
       (doall
        (map-indexed
-        (fn [i {:keys [name description level]}]
+        (fn [i {:keys [name type description level]}]
           ^{:key i}
           [:div.m-b-30
            [:div.flex.align-items-end.m-b-10
@@ -4378,6 +4386,13 @@
               name
               #(dispatch [edit-trait-name-event i %])
               {:class-name "input h-40"}]]
+            (if types
+              [:div.flex-grow-1.m-l-5
+               [labeled-dropdown
+                "Type"
+                {:items types
+                 :value type
+                 :on-change #(dispatch [edit-trait-type-event i (keyword %)])}]])
             (if edit-trait-level-event
               [:div.m-l-5
                [labeled-dropdown
@@ -4506,6 +4521,7 @@
 (defn spell-selector [index spell-cfg value-change-event]
   (let [spells @(subscribe [::spells/spells-for-level (or (:level spell-cfg) 0)])
         spells-map @(subscribe [::spells/spells-map])
+        spell-kw (get spell-cfg :key)
         spell (get spells-map spell-kw)]
     [:div.flex
      [:div
@@ -4688,8 +4704,7 @@
          edit-modifier-type-event
          edit-modifier-value-event
          edit-modifier-level-event
-         delete-modifier-event
-         subset])
+         delete-modifier-event])
       level-modifiers))]
    [:div
     [option-level-modifier
@@ -4698,8 +4713,7 @@
      edit-modifier-type-event
      edit-modifier-value-event
      edit-modifier-level-event
-     delete-modifier-event
-     subset]]])
+     delete-modifier-event]]])
 
 (defn subclass-builder []
   (let [subclass @(subscribe [::classes/subclass-builder-item])
@@ -4842,10 +4856,10 @@
       ::classes/subclass-builder-item
       ::e5/add-subclass-trait
       ::e5/edit-subclass-trait-name
+      ::e5/edit-subclass-trait-type
       ::e5/edit-subclass-trait-description
       ::e5/delete-subclass-trait
-      ::e5/edit-subclass-trait-level]]))
-
+      :edit-trait-level-event ::e5/edit-subclass-trait-level]]))
 
 (defn option-spell [index 
                      {:keys [level value] :as spell-cfg}
@@ -5008,6 +5022,7 @@
       ::races/subrace-builder-item
       ::e5/add-subrace-trait
       ::e5/edit-subrace-trait-name
+      ::e5/edit-subrace-trait-type
       ::e5/edit-subrace-trait-description
       ::e5/delete-subrace-trait]]))
 
@@ -5134,6 +5149,7 @@
       ::races/race-builder-item
       ::e5/add-race-trait
       ::e5/edit-race-trait-name
+      ::e5/edit-race-trait-type
       ::e5/edit-race-trait-description
       ::e5/delete-race-trait]]))
 
@@ -5160,6 +5176,7 @@
        ::bg/builder-item
        ::e5/add-background-trait
        ::e5/edit-background-trait-name
+       ::e5/edit-background-trait-type
        ::e5/edit-background-trait-description
        ::e5/delete-background-trait]]]))
 
@@ -5252,7 +5269,7 @@
                    {:title (common/kw-to-name kw)
                     :value kw})
                  monsters/monster-types)
-         :value (or type kw)
+         :value (or type :aberration)
          :on-change #(dispatch [::monsters/set-monster-prop :type (keyword %)])}]]
       [:div.flex-grow-1.m-b-20.m-l-5
        [labeled-dropdown
@@ -5335,25 +5352,37 @@
                 :value (get skills key 0)
                 :on-change #(dispatch [::monsters/set-monster-path-prop [:skills key] (js/parseInt %)])}])])
          skills/skills))]]
-     [option-languages monster ::monsters/toggle-monster-map-prop]
-     [option-damage-resistance monster ::monsters/toggle-monster-map-prop]
-     [option-damage-immunity monster ::monsters/toggle-monster-map-prop]
-     [option-damage-vulnerability monster ::monsters/toggle-monster-map-prop]
-     [option-condition-immunity monster ::monsters/toggle-monster-map-prop]
+     [:div [option-languages monster ::monsters/toggle-monster-map-prop]]
+     [:div [option-damage-resistance monster ::monsters/toggle-monster-map-prop]]
+     [:div [option-damage-immunity monster ::monsters/toggle-monster-map-prop]]
+     [:div [option-damage-vulnerability monster ::monsters/toggle-monster-map-prop]]
+     [:div [option-condition-immunity monster ::monsters/toggle-monster-map-prop]]
      [:div.w-100-p
       [:div.f-s-24.f-w-b
        "Description"]
       [textarea-field
        {:value (get monster :description)
         :on-change #(dispatch [::monsters/set-monster-prop :description %])}]]
+     [:div.w-100-p.m-t-30
+      [:div.f-s-24.f-w-b
+       "Legendary Actions Description"]
+      [textarea-field
+       {:value (get-in monster [:legendary-actions :description])
+        :on-change #(dispatch [::monsters/set-monster-path-prop [:legendary-actions :description] %])}]]
      [:div.m-t-30
       [option-traits
        monster
        key
        ::e5/add-monster-trait
        ::e5/edit-monster-trait-name
+       ::e5/edit-monster-trait-type
        ::e5/edit-monster-trait-description
-       ::e5/delete-monster-trait]]]))
+       ::e5/delete-monster-trait
+       :types [{:title "Other"}
+               {:title "Action"
+                :value :action}
+               {:title "Legendary Action"
+                :value :legendary-action}]]]]))
 
 (defn spell-builder []
   (let [{:keys [:level :school] :as spell} @(subscribe [::spells/builder-item])]
@@ -5481,6 +5510,166 @@
        (let [text (.. e -target -result)]
          (dispatch [::e5/import-plugin nm text]))))
     (.readAsText reader file)))
+
+(defn my-content-type [source-name type-name type-key icon add-event edit-event delete-event & [plural]]
+  (let [expanded? (r/atom false)]
+    (fn [plugin]
+      (let [items (type-key plugin)]
+        [:div.pointer.item-list-item
+         [:div.flex.justify-cont-s-b.align-items-c.p-10
+          {:on-click #(swap! expanded? not)}
+          [:div.flex.align-items-c
+           [:div.h-48.flex.align-items-c
+            (if (vector? icon)
+              (doall
+               (map-indexed
+                (fn [index ico]
+                  ^{:key index}
+                  [svg-icon ico (/ 48 (count icon)) @(subscribe [:theme])])
+                icon))
+              [svg-icon icon 48 @(subscribe [:theme])])]
+           [:span.m-l-10.f-s-24 (let [num (count items)
+                                      final-type-name (if plural
+                                                        (if (not= 1 num) plural type-name)
+                                                        (str type-name (if (not= 1 num) "s")))]
+                                  (str num " " (common/safe-capitalize final-type-name))
+                                    )]]
+          [:i.fa
+           {:class-name (if @expanded? "fa-caret-up" "fa-caret-down")}]]
+         (if @expanded?
+           [:div.bg-lighter.p-10
+            [:div.flex.justify-cont-end
+             [:button.form-button.m-l-5
+              {:on-click (make-event-handler add-event source-name)}
+              (str "add " type-name)]]
+            [:div
+             (doall
+              (map
+               (fn [[key {:keys [name] :as item}]]
+                 ^{:key key}
+                 [:div.p-t-10.p-b-10.f-w-b.flex.justify-cont-s-b.align-items-c
+                  [:span name]
+                  [:div
+                   [:button.form-button.m-l-5
+                    {:on-click (make-event-handler edit-event item)}
+                    "edit"]
+                   [:button.form-button.m-l-5
+                    {:on-click (make-event-handler delete-event item)}
+                    "delete"]]])
+               items))]])]))))
+
+(defn my-spells [name]
+  (my-content-type name
+                   "spell"
+                   ::e5/spells
+                   "spell-book"
+                   ::spells/new-spell
+                   ::spells/edit-spell
+                   ::spells/delete-spell))
+
+(defn my-monsters [name]
+  (my-content-type name
+                   "monster"
+                   ::e5/monsters
+                   "hydra"
+                   ::monsters/new-monster
+                   ::monsters/edit-monster
+                   ::monsters/delete-monster))
+
+(defn my-backgrounds [name]
+  (my-content-type name
+                   "background"
+                   ::e5/backgrounds
+                   "ages"
+                   ::bg/new-background
+                   ::bg/edit-background
+                   ::bg/delete-background))
+
+(defn my-races [name]
+  (my-content-type name
+                   "race"
+                   ::e5/races
+                   "woman-elf-face"
+                   ::races/new-race
+                   ::races/edit-race
+                   ::races/delete-race))
+
+(defn my-subraces [name]
+  (my-content-type name
+                   "subrace"
+                   ::e5/subraces
+                   ["woman-elf-face"
+                    "woman-elf-face"]
+                   ::races/new-subrace
+                   ::races/edit-subrace
+                   ::races/delete-subrace))
+
+(defn my-subclasses [name]
+  (my-content-type name
+                   "subclass"
+                   ::e5/subclasses
+                   ["mounted-knight"
+                    "mounted-knight"]
+                   ::classes/new-subclass
+                   ::classes/edit-subclass
+                   ::classes/delete-subclass
+                   "subclasses"))
+
+(defn my-feats [name]
+  (my-content-type name
+                   "feat"
+                   ::e5/feats
+                   "vitruvian-man"
+                   ::feats/new-feat
+                   ::feats/edit-feat
+                   ::feats/delete-feat))
+
+(defn my-languages [name]
+  (my-content-type name
+                   "language"
+                   ::e5/languages
+                   "vitruvian-man"
+                   ::langs/new-language
+                   ::langs/edit-language
+                   ::langs/delete-language))
+
+(defn my-content-item []
+  (let [expanded? (r/atom false)]
+    (fn [name plugin]
+      [:div.item-list-item
+       [:div.p-20.pointer.flex.justify-cont-s-b.align-items-c.main-text-color
+        {:on-click #(swap! expanded? not)}
+        [:span.f-s-24 name]
+        [:i.fa
+         {:class-name (if @expanded? "fa-caret-up" "fa-caret-down")}]]
+       (if @expanded?
+         [:div.bg-lighter.p-10
+          [:div.flex.justify-cont-end.uppercase.align-items-c.m-b-10
+           [:button.form-button.m-l-5
+            {:on-click (make-event-handler ::e5/export-plugin name plugin)}
+            "export"]
+           [:button.form-button.m-l-5
+            {:on-click (make-event-handler ::e5/delete-plugin name)}
+            "delete"]]
+          [:div.item-list
+           [(my-spells name) plugin]
+           [(my-monsters name) plugin]
+           [(my-backgrounds name) plugin]
+           [(my-races name) plugin]
+           [(my-subraces name) plugin]
+           [(my-subclasses name) plugin]
+           [(my-feats name) plugin]
+           [(my-languages name) plugin]]])])))
+
+(defn my-content []
+  [:div.main-text-color
+   [:div.item-list
+    (doall
+     (map
+      (fn [[name plugin]]
+        ^{:key name}
+        [my-content-item name plugin])
+      @(subscribe [::e5/plugins])))]])
 
 (defn my-content-page []
   [content-page
@@ -5629,7 +5818,7 @@
         [:span.link-button
          {:on-click (make-event-handler :delete-character id)}
          "delete"]]]])
-   [character-display id false (if (= :mobile device-type) 1 2)]])
+   [character-display id false (if (= :mobile @(subscribe [:device-type])) 1 2)]])
 
 (defn character-list-item [expanded-characters
                            selected-ids
@@ -5654,9 +5843,9 @@
          [:div.list-character-summary
           [character-summary-2 summary true owner false]]]]
        [:div.orange.pointer.m-r-10
-        (if (not= device-type :mobile) [:span.underline (if expanded?
-                                                          "collapse"
-                                                          "open")])
+        (if (not= @(subscribe [:device-type]) :mobile) [:span.underline (if expanded?
+                                                            "collapse"
+                                                            "open")])
         [:i.fa.m-l-5
          {:class-name (if expanded? "fa-caret-up" "fa-caret-down")}]]]
       (if expanded?
@@ -5821,13 +6010,16 @@
   (let [expanded? @(subscribe [:monster-expanded? name])
         device-type @(subscribe [:device-type])
         monster-page-path (routes/path-for routes/dnd-e5-monster-page-route :key key)
-        monster-page-route (routes/match-route monster-page-path)]
+        monster-page-route (routes/match-route monster-page-path)
+        homebrew? (:option-pack monster)]
     [:div.main-text-color.item-list-item
      [:div.pointer
       [:div.flex.justify-cont-s-b.align-items-c
        {:on-click #(dispatch [:toggle-monster-expanded name])}
        [:div.m-l-10
-        [:div.f-s-24.f-w-600.p-b-20.p-t-20
+        [:div.f-s-24.f-w-600.p-b-20.p-t-20.flex
+         (if homebrew?
+           [:div.m-r-10 (svg-icon "beer-stein" 24 @(subscribe [:theme]))])
          [monster-summary name size type subtypes alignment]]]
        [:div.orange.pointer.m-r-10
         (if (not= device-type :mobile) [:span.underline (if expanded?
@@ -5841,7 +6033,15 @@
          [:div.flex.justify-cont-end.uppercase.align-items-c
           [:button.form-button.m-l-5
            {:on-click #(dispatch [:route monster-page-route])}
-           "view"]]
+           "view"]
+          (if homebrew?
+            [:button.form-button.m-l-5
+             {:on-click (make-event-handler ::monsters/edit-monster monster)}
+             "edit"])
+          (if homebrew?
+            [:button.form-button.m-l-5
+             {:on-click (make-event-handler ::monsters/delete-monster monster)}
+             "delete"])]
          [monster-component monster]])]]))
 
 (defn monster-list-items [expanded-monsters device-type]
@@ -5991,166 +6191,6 @@
          {:style close-icon-style
           :on-click (make-event-handler ::char/filter-spells "")}]]]
       [spell-list-items device-type]]]))
-
-(defn my-content-type [source-name type-name type-key icon add-event edit-event delete-event & [plural]]
-  (let [expanded? (r/atom false)]
-    (fn [plugin]
-      (let [items (type-key plugin)]
-        [:div.pointer.item-list-item
-         [:div.flex.justify-cont-s-b.align-items-c.p-10
-          {:on-click #(swap! expanded? not)}
-          [:div.flex.align-items-c
-           [:div.h-48.flex.align-items-c
-            (if (vector? icon)
-              (doall
-               (map-indexed
-                (fn [index ico]
-                  ^{:key index}
-                  [svg-icon ico (/ 48 (count icon)) @(subscribe [:theme])])
-                icon))
-              [svg-icon icon 48 @(subscribe [:theme])])]
-           [:span.m-l-10.f-s-24 (let [num (count items)
-                                      final-type-name (if plural
-                                                        (if (not= 1 num) plural type-name)
-                                                        (str type-name (if (not= 1 num) "s")))]
-                                  (str num " " (common/safe-capitalize final-type-name))
-                                    )]]
-          [:i.fa
-           {:class-name (if @expanded? "fa-caret-up" "fa-caret-down")}]]
-         (if @expanded?
-           [:div.bg-lighter.p-10
-            [:div.flex.justify-cont-end
-             [:button.form-button.m-l-5
-              {:on-click (make-event-handler add-event source-name)}
-              (str "add " type-name)]]
-            [:div
-             (doall
-              (map
-               (fn [[key {:keys [name] :as item}]]
-                 ^{:key key}
-                 [:div.p-t-10.p-b-10.f-w-b.flex.justify-cont-s-b.align-items-c
-                  [:span name]
-                  [:div
-                   [:button.form-button.m-l-5
-                    {:on-click (make-event-handler edit-event item)}
-                    "edit"]
-                   [:button.form-button.m-l-5
-                    {:on-click (make-event-handler delete-event item)}
-                    "delete"]]])
-               items))]])]))))
-
-(defn my-spells [name]
-  (my-content-type name
-                   "spell"
-                   ::e5/spells
-                   "spell-book"
-                   ::spells/new-spell
-                   ::spells/edit-spell
-                   ::spells/delete-spell))
-
-(defn my-monsters [name]
-  (my-content-type name
-                   "monster"
-                   ::e5/monsters
-                   "hydra"
-                   ::monsters/new-monster
-                   ::monsters/edit-monster
-                   ::monsters/delete-monster))
-
-(defn my-backgrounds [name]
-  (my-content-type name
-                   "background"
-                   ::e5/backgrounds
-                   "ages"
-                   ::bg/new-background
-                   ::bg/edit-background
-                   ::bg/delete-background))
-
-(defn my-races [name]
-  (my-content-type name
-                   "race"
-                   ::e5/races
-                   "woman-elf-face"
-                   ::races/new-race
-                   ::races/edit-race
-                   ::races/delete-race))
-
-(defn my-subraces [name]
-  (my-content-type name
-                   "subrace"
-                   ::e5/subraces
-                   ["woman-elf-face"
-                    "woman-elf-face"]
-                   ::races/new-subrace
-                   ::races/edit-subrace
-                   ::races/delete-subrace))
-
-(defn my-subclasses [name]
-  (my-content-type name
-                   "subclass"
-                   ::e5/subclasses
-                   ["mounted-knight"
-                    "mounted-knight"]
-                   ::classes/new-subclass
-                   ::classes/edit-subclass
-                   ::classes/delete-subclass
-                   "subclasses"))
-
-(defn my-feats [name]
-  (my-content-type name
-                   "feat"
-                   ::e5/feats
-                   "vitruvian-man"
-                   ::feats/new-feat
-                   ::feats/edit-feat
-                   ::feats/delete-feat))
-
-(defn my-languages [name]
-  (my-content-type name
-                   "language"
-                   ::e5/languages
-                   "vitruvian-man"
-                   ::langs/new-language
-                   ::langs/edit-language
-                   ::langs/delete-language))
-
-(defn my-content-item []
-  (let [expanded? (r/atom false)]
-    (fn [name plugin]
-      [:div.item-list-item
-       [:div.p-20.pointer.flex.justify-cont-s-b.align-items-c.main-text-color
-        {:on-click #(swap! expanded? not)}
-        [:span.f-s-24 name]
-        [:i.fa
-         {:class-name (if @expanded? "fa-caret-up" "fa-caret-down")}]]
-       (if @expanded?
-         [:div.bg-lighter.p-10
-          [:div.flex.justify-cont-end.uppercase.align-items-c.m-b-10
-           [:button.form-button.m-l-5
-            {:on-click (make-event-handler ::e5/export-plugin name plugin)}
-            "export"]
-           [:button.form-button.m-l-5
-            {:on-click (make-event-handler ::e5/delete-plugin name)}
-            "delete"]]
-          [:div.item-list
-           [(my-spells name) plugin]
-           [(my-monsters name) plugin]
-           [(my-backgrounds name) plugin]
-           [(my-races name) plugin]
-           [(my-subraces name) plugin]
-           [(my-subclasses name) plugin]
-           [(my-feats name) plugin]
-           [(my-languages name) plugin]]])])))
-
-(defn my-content []
-  [:div.main-text-color
-   [:div.item-list
-    (doall
-     (map
-      (fn [[name plugin]]
-        ^{:key name}
-        [my-content-item name plugin])
-      @(subscribe [::e5/plugins])))]])
 
 (defn item-list-item [{:keys [key name ::mi/owner :db/id] :as item} expanded?]
   (let [expanded-key (or name (::mi/name item))
