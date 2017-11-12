@@ -21,7 +21,8 @@
                  [cljsjs/facebook "v20150729-0"]
                  [cljsjs/google-platformjs-extern "1.0.0-0"]
                  [cljsjs/filesaverjs "1.3.3-0"]
-                 [cljs-http "0.1.43"]
+                 [com.cognitect/transit-cljs "0.8.243"]
+                 [cljs-http "0.1.44"]
                  [com.andrewmcveigh/cljs-time "0.5.0"]
                  [clj-time "0.14.0"]
                  [clj-http "3.6.1"]
@@ -57,7 +58,7 @@
                  [pdfkit-clj "0.1.6"]
                  [vvvvalvalval/datomock "0.2.0"]]
 
-  :plugins [[lein-figwheel "0.5.10"]
+  :plugins [[lein-figwheel "0.5.14"]
             [lein-cljsbuild "1.1.6" :exclusions [[org.clojure/clojure]]]
             [lein-garden "0.3.0"]
             [lein-environ "1.1.0"]
@@ -170,7 +171,7 @@
             ["externs"
              ["with-profile" "prod" "cljsbuild" "once" "main"]]}
   :profiles {:dev {:dependencies [[binaryage/devtools "0.9.4"]
-                                  [figwheel-sidecar "0.5.10"]
+                                  [figwheel-sidecar "0.5.14"]
                                   [com.cemerick/piggieback "0.2.1"]
                                   [org.clojure/test.check "0.9.0"]]
                    ;; need to add dev source path here to get user.clj loaded
@@ -180,7 +181,7 @@
                    :repl-options { ; for nREPL dev you really need to limit output
                                   :init (set! *print-length* 50)
                                   :nrepl-middleware [cemerick.piggieback/wrap-cljs-repl]}}
-             :native-dev {:dependencies [[figwheel-sidecar "0.5.10"]
+             :native-dev {:dependencies [[figwheel-sidecar "0.5.14"]
                                          [com.cemerick/piggieback "0.2.1"]
                                          [org.clojure/test.check "0.9.0"]]
                           :source-paths ["src/cljs" "native/cljs" "src/cljc" "env/dev"]

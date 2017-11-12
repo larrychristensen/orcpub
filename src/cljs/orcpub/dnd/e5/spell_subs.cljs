@@ -802,7 +802,7 @@
     (map common/kw-to-name))
    m))
 
-(defn process-plugin-monster [{:keys [props] :as monster}]
+(defn process-plugin-monster [{:keys [props traits] :as monster}]
   (let [{:keys [damage-resistance
                 damage-immunity
                 damage-vulnerability
@@ -813,7 +813,7 @@
         filtered-damage-immunities (true-types damage-immunity)
         filtered-vulnerabilities (true-types damage-vulnerability)
         filtered-condition-immunities (true-types condition-immunity)]
-    (cond-> monster
+    (cond-> monster      
       (seq filtered-languages)
       (assoc :languages (s/join ", " filtered-languages))
       
