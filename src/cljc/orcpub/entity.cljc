@@ -610,7 +610,7 @@
 (def memoized-build-aux (memoize build-aux))
 
 (defn build [raw-entity template]
-  (memoized-build-aux raw-entity template))
+  (build-aux raw-entity template))
 
 (def memoized-make-modifier-map (memoize t/make-modifier-map))
 
@@ -680,7 +680,7 @@
 (def memoized-build-template-aux (memoize build-template-aux))
 
 (defn build-template [raw-entity template]
-  (let [plugin-map (memoized-make-modifier-map template)
+  (let [plugin-map (t/make-modifier-map template)
         options (flatten-options (::options raw-entity))
         plugins (collect-plugins options plugin-map)]
     (memoized-build-template-aux plugins template)))

@@ -394,7 +394,7 @@
 
 (def new-custom-item (memoize new-custom-item-fn))
 
-(defn make-inventory-item-fn [key item-map]
+(defn make-inventory-item-fn [key item-map qty-input-width]
   (fn [i {item-key ::entity/key
           {item-qty ::char-equip5e/quantity
            equipped? ::char-equip5e/equipped?
@@ -417,7 +417,7 @@
 
 (def make-inventory-item (memoize make-inventory-item-fn))
 
-(defn make-custom-inventory-item [custom-equipment-key]
+(defn make-custom-inventory-item [custom-equipment-key qty-input-width]
   (fn [i {:keys [::char-equip5e/name
                  ::char-equip5e/quantity
                  ::char-equip5e/equipped?
@@ -454,14 +454,14 @@
      [:div
       (doall
        (map-indexed
-        (make-inventory-item key item-map)
+        (make-inventory-item key item-map qty-input-width)
         selected-items))]
      (if custom-equipment-key
        [:div
         [:div
          (doall
           (map-indexed
-           (make-custom-inventory-item custom-equipment-key)
+           (make-custom-inventory-item custom-equipment-key qty-input-width)
            @(subscribe [:entity-value custom-equipment-key])))]
         [:div.flex.justify-cont-end
          [:div.orange.pointer.m-t-5.m-r-5
@@ -1082,7 +1082,7 @@
                    (if select-fn (select-fn))
                    (dispatch [:set-ability-score-variant key])))}])
 
-(def point-buy-staring-abilities-fn #(set-abilities! (char5e/abilities 8 8 8 8 8 8)))
+(def point-buy-starting-abilities-fn #(set-abilities! (char5e/abilities 8 8 8 8 8 8)))
 
 (def reroll-abilities-fn #(reroll-abilities))
 
@@ -1352,7 +1352,7 @@
 (def remaining-adjustments (memoize remaining-adjustments-fn))
 
 (defn sum-remaining [built-template character selections]
-  (apply + (map (remaining-adjustments built-template character) selections)))
+  (apply + (map (remaining-adjustments-fn built-template character) selections)))
 
 (defn hit-points-editor [{:keys [character built-template option-paths selections]}]
   (let [num-selections (count selections)]
@@ -1404,7 +1404,7 @@
             {}]]])
        (range (-> selections first ::t/min))))]]])
 
-(defn more-selection-info [key name]
+#_(defn more-selection-info [key name]
   (let [selected-plugin-options @(subscribe [:selected-plugin-options])
         unselected-plugins (remove
                             (comp selected-plugin-options :key)
@@ -1579,10 +1579,8 @@
              (map
               (fn [{:keys [name url]}]
                 [:a.orange {:href url :target :_blank} name])
-              (let [option-sources @(subscribe [::char5e/option-sources])]
-                (cons {:name "5e SRD"
-                       :url disp5e/phb-url}
-                      (map t5e/plugin-map option-sources)))))))])])))
+              [{:name "5e SRD"
+                :url t5e/srd-url}]))))])])))
 
 (def selection-order-title
   (juxt ::t/order ::t/name ::entity/path))
@@ -1909,8 +1907,8 @@
              (fn [i reason]
                ^{:key i} [:div (str common/dot-char " " reason)])
              (cond-> al-illegal-reasons
-               multiple-resources?
-               (conj (str "You are only allowed to use content from one resource beyond the PHB, you are using "
+               #_multiple-resources?
+               #_(conj (str "You are only allowed to use content from one resource beyond the PHB, you are using "
                           num-resources
                           ": "
                           (s/join
@@ -1921,6 +1919,8 @@
                             used-resources))))
                has-homebrew?
                (conj "Homebrew is not allowed")))])]))))
+
+
 
 (def loading-style
   {:position :absolute
@@ -1935,15 +1935,16 @@
 
 (def unsaved-button-style {:background "#9a031e"})
 
-(defn confirm-handler-fn [character-changed? {:keys [event pre] :as cfg}]
+(defn confirm-handler [character-changed? cfg]
+  #_(prn "CHAR CHANGED" character-changed? cfg)
   (fn [_]
     (if character-changed?
       (dispatch [:show-confirmation cfg])
       (do
-        (if pre (pre))
-        (dispatch event)))))
+        (if (:pre cfg) ((:pre cfg)))
+        (dispatch (:event cfg))))))
 
-(def confirm-handler (memoize confirm-handler-fn))
+#_(def confirm-handler (memoize confirm-handler-fn))
 
 (defn toggle-theme []
   (dispatch [:toggle-theme]))

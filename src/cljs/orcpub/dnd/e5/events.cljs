@@ -166,7 +166,7 @@
             local-store-magic-item (assoc ::mi/builder-item local-store-magic-item)))}))
 
 (defn reset-character [_ _]
-  (char5e/set-class t5e/character :barbarian 0 t5e/barbarian-option))
+  (char5e/set-class t5e/character :barbarian 0 (class5e/barbarian-option [] {} {} {})))
 
 (reg-event-db
  :reset-character
@@ -2782,6 +2782,13 @@
    interceptors
    (fn [option [_ index name]]
      (assoc-in option [:traits index :name] name)))
+  (reg-event-db
+   (keyword "orcpub.dnd.e5"
+            (str "edit-" option-name "-trait-type"))
+   interceptors
+   (fn [option [_ index type]]
+     (prn "TYPE" type)
+     (assoc-in option [:traits index :type] type)))
   (reg-event-db
    (keyword "orcpub.dnd.e5"
             (str "edit-" option-name "-trait-level"))

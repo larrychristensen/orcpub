@@ -1304,10 +1304,10 @@
     content]
    frame])
 
-
+(def srd-url "/SRD-OGL_V5.1.pdf")
 
 (def srd-link
-  [:a.orange {:href "/SRD-OGL_V5.1.pdf" :target "_blank"} "the 5e SRD"])
+  [:a.orange {:href srd-url :target "_blank"} "the 5e SRD"])
 
 
 #_(def plugins

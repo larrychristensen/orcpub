@@ -405,7 +405,7 @@
                                normal-damage-modifier (char5e/best-weapon-damage-modifier built-char weapon false)
                                finesse-damage-modifier (char5e/weapon-damage-modifier built-char weapon true)
                                normal {:name (:name weapon)
-                                       :attack-bonus (char5e/best-weapon-attack-modifier built-char weapon false)
+                                       :attack-bonus (char5e/best-weapon-attack-modifier built-char weapon)
                                        :damage (damage-str damage-die damage-die-count normal-damage-modifier damage-type)}]
                            (remove
                             nil?

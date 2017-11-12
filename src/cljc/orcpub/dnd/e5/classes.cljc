@@ -1636,11 +1636,11 @@
       :selections (if (> (count languages) 1)
                     [(opt5e/language-selection
                       language-map
-                      (map
-                       (fn [lang]
-                         (or (language-map lang) {:key lang :name (s/capitalize (common/kw-to-name lang))}))
-                       languages)
-                      1)])
+                      {:choose 1
+                       :options (map
+                                 (fn [lang]
+                                   (or (language-map lang) {:key lang :name (s/capitalize (common/kw-to-name lang))}))
+                                 languages)})])
       :modifiers (remove
                   nil?
                   [(if (= 1 (count languages))
@@ -1760,7 +1760,7 @@
                                                :min 2
                                                :max 2})]})]})
                   (favored-enemy-selection language-map 1)
-                  (favored-terrain-selection language-map 1)]
+                  (favored-terrain-selection 1)]
      :levels {2 {:selections [(opt5e/fighting-style-selection :ranger #{:archery :defense :dueling :two-weapon-fighting})]}
               3 {:modifiers [(mod5e/action
                               {:name "Primeval Awareness"
