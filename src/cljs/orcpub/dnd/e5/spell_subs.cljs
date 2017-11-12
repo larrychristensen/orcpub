@@ -72,7 +72,7 @@
     (fn [race]
       (assoc race :modifiers (concat (opt5e/plugin-modifiers (:props race)
                                                              (:key race))
-                                     (spell-modifiers race (:key race)))))
+                                     (spell-modifiers race (:name race)))))
     (apply concat (map (comp vals ::e5/races) plugins)))))
 
 (reg-sub
@@ -83,9 +83,7 @@
     (fn [subrace]
       (assoc subrace :modifiers (concat (opt5e/plugin-modifiers (:props subrace)
                                                                 (:key subrace))
-                                        (spell-modifiers subrace (some-> subrace
-                                                                         :race
-                                                                         common/safe-capitalize)))))
+                                        (spell-modifiers subrace (:name subrace)))))
     (apply concat (map (comp vals ::e5/subraces) plugins)))))
 
 (defn level-modifier [class-key {:keys [type value]}]
