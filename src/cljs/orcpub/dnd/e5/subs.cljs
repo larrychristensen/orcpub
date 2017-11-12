@@ -244,7 +244,8 @@
    (-> db :user-data :user-data :username)))
 
 (defn built-template [template selected-plugin-options]
-  (let [selected-plugins (map
+  template
+  #_(let [selected-plugins (map
                           :selections
                           (filter
                            (fn [{:keys [key]}]
