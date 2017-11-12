@@ -85,8 +85,7 @@
                                                                 (:key subrace))
                                         (spell-modifiers subrace (some-> subrace
                                                                          :race
-                                                                         common/safe-name
-                                                                         s/capitalize)))))
+                                                                         common/safe-capitalize)))))
     (apply concat (map (comp vals ::e5/subraces) plugins)))))
 
 (defn level-modifier [class-key {:keys [type value]}]
@@ -103,7 +102,7 @@
                                (:key value)
                                (:ability value)
                                (if (keyword? class-key)
-                                 (s/capitalize (common/safe-name class-key))))))
+                                 (common/safe-capitalize-kw class-key)))))
 
 (defn eldritch-knight-spell? [s]
     (let [school (:school s)]
@@ -581,7 +580,7 @@
                    breath-weapon
                    {:name "Breath Weapon"
                     :summary (if damage-type
-                               (s/capitalize (name damage-type)))
+                               (common/safe-capitalize-kw damage-type))
                     :attack-type :area
                     :damage-die 6
                     :page 34
@@ -816,7 +815,6 @@
         filtered-damage-immunities (true-types damage-immunity)
         filtered-vulnerabilities (true-types damage-vulnerability)
         filtered-condition-immunities (true-types condition-immunity)]
-    (prn "FILTERED RESITSNASCE" filtered-resistances)
     (cond-> monster
       (seq filtered-languages)
       (assoc :languages (s/join ", " filtered-languages))
