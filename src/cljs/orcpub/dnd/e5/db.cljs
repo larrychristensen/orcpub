@@ -33,6 +33,7 @@
 (def local-storage-race-key "race")
 (def local-storage-subrace-key "subrace")
 (def local-storage-subclass-key "subclass")
+(def local-storage-class-key "class")
 (def local-storage-plugins-key "plugins")
 
 (def default-route route-map/dnd-e5-char-builder-route)
@@ -80,6 +81,11 @@
                        :traits []
                        :level-modifiers []})
 
+(def default-class {:hit-die 6
+                    :ability-increase-levels [4 8 12 16 19]
+                    :traits []
+                    :level-modifiers []})
+
 (def default-value
   {:builder {:character {:tab #{:build :options}}}
    :character default-character
@@ -98,6 +104,7 @@
    ::feats5e/builder-item default-feat
    ::race5e/builder-item default-race
    ::race5e/subrace-builder-item default-subrace
+   ::class5e/builder-item default-class
    ::class5e/subclass-builder-item default-subclass})
 
 (defn set-item [key value]
@@ -151,6 +158,10 @@
 (defn subclass->local-store [subclass]
   (if js/window.localStorage
     (set-item local-storage-subclass-key (str subclass))))
+
+(defn class->local-store [class]
+  (if js/window.localStorage
+    (set-item local-storage-class-key (str class))))
 
 (defn plugins->local-store [plugins]
   (if js/window.localStorage

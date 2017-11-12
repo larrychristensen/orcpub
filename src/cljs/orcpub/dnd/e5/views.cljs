@@ -444,6 +444,8 @@
            :route routes/dnd-e5-race-builder-page-route}
           {:name "Subrace Builder"
            :route routes/dnd-e5-subrace-builder-page-route}
+          {:name "Class Builder"
+           :route routes/dnd-e5-class-builder-page-route}
           {:name "Subclass Builder"
            :route routes/dnd-e5-subclass-builder-page-route}]]]]]]))
 
@@ -3777,6 +3779,9 @@
 (defn subclass-input-field [title prop subclass & [class-names]]
   (builder-input-field title prop subclass ::classes/set-subclass-prop class-names))
 
+(defn class-input-field [title prop class & [class-names]]
+  (builder-input-field title prop class ::classes/set-class-prop class-names))
+
 (defn feat-input-field [title prop feat & [class-names]]
   (builder-input-field title prop feat ::feats/set-feat-prop class-names))
 
@@ -3886,9 +3891,38 @@
     [:span.i "Hodor's Guide to Hodors"]
     [:span ")"]]])
 
+(defn option-skill-proficiency-choice [option
+                                       set-path-prop-event
+                                       toggle-path-prop-event]
+  [:div.m-b-20
+   [:div.f-s-24.f-w-b.m-b-20 "Skill Proficiency Choice"]
+   [:div.m-b-10
+    [labeled-dropdown
+     "Choose"
+     {:items (map
+              (fn [v]
+                {:title v
+                 :value v})
+              (range 1 6))
+      :value (get-in option [:profs :skill-options :choose] 1)
+      :on-change #(dispatch [set-path-prop-event [:profs :skill-options :choose] (js/parseInt %)])}]]
+   [:div.f-s-18.f-w-b.m-b-20 "Options"]
+   [:div.flex.flex-wrap
+    (doall
+     (map
+      (fn [{:keys [name key]}]
+        ^{:key key}
+        [:span.m-r-20.m-b-10
+         [comps/labeled-checkbox
+          name
+          (get-in option [:profs :skill-options :options key])
+          false
+          #(dispatch [toggle-path-prop-event [:profs :skill-options :options key]])]])
+      skills/skills))]])
+
 (defn option-skill-proficiency [option toggle-event]
   [:div.m-b-20
-   [:div.f-s-18.f-w-b.m-b-20 "Skill Proficiencies"]
+   [:div.f-s-24.f-w-b.m-b-20 "Skill Proficiencies"]
    [:div.flex.flex-wrap
     (doall
      (map
@@ -4722,6 +4756,73 @@
      edit-modifier-value-event
      edit-modifier-level-event
      delete-modifier-event]]])
+
+(defn class-builder []
+  (let [class @(subscribe [::classes/builder-item])
+        spell-lists @(subscribe [::spells/spell-lists])
+        class-key (get class :class)
+        classes @(subscribe [::classes/classes])
+        mobile? @(subscribe [:mobile?])]
+    [:div.p-20.main-text-color
+     [:div.flex.flex-wrap
+      [:div.m-b-20.flex-grow-1
+       [class-input-field
+        "Name"
+        :name
+        class]]
+      [:div.m-b-20.flex-grow-1
+       [class-input-field
+        option-source-name-label
+        :option-pack
+        class
+        "m-l-5 m-b-20"]]
+      [:div.m-l-5.m-b-20.flex-grow-1
+       [labeled-dropdown
+        "Hit Die"
+        {:items (map
+                 (fn [sides]
+                   {:title sides
+                    :value sides})
+                 [6 8 10 12])
+         :value (:hit-die class)
+         :on-change #(dispatch [::classes/set-class-prop :hit-die (js/parseInt %)])}]]]
+     [:div.m-b-20
+      [:div.f-s-24.f-w-b.m-b-10 "Ability Increase Levels"]
+      [:div.flex.flex-wrap
+       (let [asi-levels-set (into #{} (:ability-increase-levels class))]
+         (doall
+          (map
+           (fn [level]
+             ^{:key level}
+             [:div.m-r-20.m-b-10
+              [comps/labeled-checkbox
+               level
+               (asi-levels-set level)
+               false
+               #(dispatch [::classes/toggle-ability-increase-level level])]])
+           (range 4 21))))]]
+     [option-skill-proficiency-choice
+      class
+      ::classes/set-class-path-prop
+      ::classes/toggle-class-path-prop]
+     [:div.m-b-20
+      [:div.f-s-24.f-w-b.m-b-10 "Modifiers"]
+      [option-level-modifiers
+       class
+       ::e5/add-class-modifier
+       ::e5/edit-class-modifier-type
+       ::e5/edit-class-modifier-value
+       ::e5/edit-class-modifier-level
+       ::e5/delete-class-modifier]]
+     [option-traits
+      class
+      ::classes/class-builder-item
+      ::e5/add-class-trait
+      ::e5/edit-class-trait-name
+      ::e5/edit-class-trait-type
+      ::e5/edit-class-trait-description
+      ::e5/delete-class-trait
+      :edit-trait-level-event ::e5/edit-class-trait-level]]))
 
 (defn subclass-builder []
   (let [subclass @(subscribe [::classes/subclass-builder-item])
@@ -5653,6 +5754,18 @@
                    ::races/edit-subrace
                    ::races/delete-subrace))
 
+
+(defn my-classes [name]
+  (my-content-type name
+                   "class"
+                   ::e5/classes
+                   ["mounted-knight"
+                    "mounted-knight"]
+                   ::classes/new-class
+                   ::classes/edit-class
+                   ::classes/delete-class
+                   "classes"))
+
 (defn my-subclasses [name]
   (my-content-type name
                    "subclass"
@@ -5706,6 +5819,7 @@
            [(my-backgrounds name) plugin]
            [(my-races name) plugin]
            [(my-subraces name) plugin]
+           [(my-classes name) plugin]
            [(my-subclasses name) plugin]
            [(my-feats name) plugin]
            [(my-languages name) plugin]]])])))
@@ -5819,6 +5933,17 @@
      :icon "save"
      :on-click #(dispatch [::classes/save-subclass])}]
    [subclass-builder]])
+
+(defn class-builder-page []
+  [content-page
+   "Class Builder"
+   [{:title "New Class"
+     :icon "plus"
+     :on-click #(dispatch [::classes/reset-class])}
+    {:title "Save"
+     :icon "save"
+     :on-click #(dispatch [::classes/save-class])}]
+   [class-builder]])
 
 (defn feat-builder-page []
   [content-page

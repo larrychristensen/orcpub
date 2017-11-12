@@ -37,6 +37,7 @@
    routes/dnd-e5-race-builder-page-route views/race-builder-page
    routes/dnd-e5-subrace-builder-page-route views/subrace-builder-page
    routes/dnd-e5-subclass-builder-page-route views/subclass-builder-page
+   routes/dnd-e5-class-builder-page-route views/class-builder-page
    routes/dnd-e5-feat-builder-page-route views/feat-builder-page
    routes/dnd-e5-language-builder-page-route views/language-builder-page
    routes/dnd-e5-item-list-page-route views/item-list

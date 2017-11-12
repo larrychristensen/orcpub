@@ -311,6 +311,11 @@
                :levels levels)))
     (apply concat (map (comp vals ::e5/subclasses) plugins)))))
 
+(reg-sub
+ ::classes5e/plugin-classes
+ :<- [::e5/plugin-vals]
+ (fn [plugins]
+   (apply concat (map (comp vals ::e5/classes) plugins))))
 
 (reg-sub
  ::feats5e/plugin-feats
@@ -749,8 +754,19 @@
  :<- [::spells5e/spells-map]
  :<- [::classes5e/plugin-subclasses-map]
  :<- [::langs5e/language-map]
- (fn [[spell-lists spells-map plugin-subclasses-map language-map] _]
-   (base-class-options spell-lists spells-map plugin-subclasses-map language-map)))
+ :<- [::classes5e/plugin-classes]
+ (fn [[spell-lists spells-map plugin-subclasses-map language-map plugin-classes] _]
+   (concat
+    (base-class-options spell-lists spells-map plugin-subclasses-map language-map)
+    (map
+     (fn [plugin-class]
+       (opt5e/class-option
+        spell-lists
+        spells-map
+        plugin-subclasses-map
+        language-map
+        plugin-class))
+     plugin-classes))))
 
 (reg-sub
  ::classes5e/class-map
@@ -984,6 +1000,11 @@
  ::classes5e/subclass-builder-item
  (fn [db _]
    (::classes5e/subclass-builder-item db)))
+
+(reg-sub
+ ::classes5e/builder-item
+ (fn [db _]
+   (::classes5e/builder-item db)))
 
 (reg-sub
  ::feats5e/builder-item
