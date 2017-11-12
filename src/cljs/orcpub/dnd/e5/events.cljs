@@ -406,7 +406,7 @@
  ::monsters/builder-item
  ::monsters/homebrew-monster
  ::e5/monsters
- "You must specify 'Name', 'Option Source Name'")
+ "You must specify 'Name', 'Option Source Name', 'Hit Points Die Count', and 'Hit Points Die'")
 
 (reg-save-homebrew
  "Background"

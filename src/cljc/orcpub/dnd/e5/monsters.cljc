@@ -6,7 +6,12 @@
 (spec/def ::name (spec/and string? common/starts-with-letter?))
 (spec/def ::key (spec/and keyword? common/keyword-starts-with-letter?))
 (spec/def ::option-pack string?)
-(spec/def ::homebrew-monster (spec/keys :req-un [::name ::key ::option-pack]))
+(spec/def ::die nat-int?)
+(spec/def ::die-count nat-int?)
+(spec/def ::modifier number?)
+(spec/def ::hit-points (spec/keys :req-un [::die ::die-count]
+                                  :opt-un [::modifier]))
+(spec/def ::homebrew-monster (spec/keys :req-un [::name ::key ::option-pack ::hit-points]))
 
 
 (def monster-types

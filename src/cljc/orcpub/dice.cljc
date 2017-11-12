@@ -2,6 +2,8 @@
   (:require [clojure.spec.alpha :as spec]
             [orcpub.common :as common]))
 
+(def dice-sides [4 6 8 10 12 20 100])
+
 (defn die-roll [sides]
   (inc (rand-int sides)))
 
@@ -19,6 +21,9 @@
 
 (defn die-mean [die]
   (int (Math/ceil (/ (apply + (range 1 (inc die))) die))))
+
+(defn dice-mean [num sides modifier]
+  (int (Math/ceil (+ modifier (* num (/ (apply + (range 1 (inc sides))) sides))))))
 
 (def dice-regex #"(\d+)?d(\d+)\s?([+-])?\s?(\d+)?")
 
