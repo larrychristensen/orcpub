@@ -803,22 +803,6 @@
  (fn [db _]
    (::char5e/builder-tab db)))
 
-(def sorted-monsters
-  (delay (sort-by :name monsters5e/monsters)))
-
-(reg-sub
- ::char5e/sorted-monsters
- (fn [db _]
-   @sorted-monsters))
-
-(reg-sub
- ::char5e/filtered-monsters
- :<- [:db]
- :<- [::char5e/sorted-monsters]
- (fn [[db sorted-monsters] _]
-   (or (::char5e/filtered-monsters db)
-       sorted-monsters)))
-
 (reg-sub
  ::char5e/monster-types
  (fn [_ _]
