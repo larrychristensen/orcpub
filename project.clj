@@ -12,9 +12,9 @@
                                     :username [:gpg :env]
                                     :password [:gpg :env]}]]
   
-  :dependencies [[org.clojure/clojure "1.9.0-alpha17"]
+  :dependencies [[org.clojure/clojure "1.9.0-RC1"]
                  [org.clojure/test.check "0.9.0"]
-                 [org.clojure/clojurescript "1.9.660"]
+                 [org.clojure/clojurescript "1.9.946"]
                  [org.clojure/core.async "0.3.443"]
                  [cljsjs/react "15.3.1-0"]
                  [cljsjs/react-dom "15.3.1-0"]
