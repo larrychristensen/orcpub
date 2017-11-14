@@ -464,10 +464,11 @@
                                    (not selection?)
                                    (and (get-in selected-option-paths path)
                                         (not (used-ref-option-paths path)))))
-                             children-with-paths)]
+                             children-with-paths)
+            active-children-paths (map ::path active-children)]
         (recur (concat active-children r)
                (if ref
-                 (union used-ref-option-paths (set (map ::path active-children)))
+                 (union used-ref-option-paths (set active-children-paths))
                  used-ref-option-paths)
                (if selection?
                  (conj accum-selections current)
@@ -496,7 +497,7 @@
 (def memoized-make-path-map-aux (memoize make-path-map-aux))
 
 (defn make-path-map [character]
-  (memoized-make-path-map-aux character))
+  (make-path-map-aux character))
 
 (defn available-selections [raw-entity built-entity template]
   (let [path-map (make-path-map raw-entity)
@@ -683,7 +684,7 @@
   (let [plugin-map (t/make-modifier-map template)
         options (flatten-options (::options raw-entity))
         plugins (collect-plugins options plugin-map)]
-    (memoized-build-template-aux plugins template)))
+    (build-template-aux plugins template)))
 
 (spec/fdef
  build

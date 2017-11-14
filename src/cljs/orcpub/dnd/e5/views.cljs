@@ -5759,12 +5759,12 @@
   (my-content-type name
                    "class"
                    ::e5/classes
-                   ["mounted-knight"
-                    "mounted-knight"]
+                   "mounted-knight"
                    ::classes/new-class
                    ::classes/edit-class
                    ::classes/delete-class
                    "classes"))
+
 
 (defn my-subclasses [name]
   (my-content-type name
