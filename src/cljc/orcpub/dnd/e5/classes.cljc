@@ -1631,21 +1631,19 @@
   (let [vec-info? (sequential? info)
         languages (if vec-info? info (:languages info))
         name (if vec-info? (common/kw-to-name enemy-type) (:name info))]
-    (t/option-cfg
-     {:name name
-      :selections (if (> (count languages) 1)
-                    [(opt5e/language-selection
-                      language-map
-                      {:choose 1
-                       :options (map
-                                 (fn [lang]
-                                   (or (language-map lang) {:key lang :name (s/capitalize (common/kw-to-name lang))}))
-                                 languages)})])
-      :modifiers (remove
-                  nil?
-                  [(if (= 1 (count languages))
-                     (mod5e/language (first languages)))
-                   (mod/set-mod ?ranger-favored-enemies enemy-type)])})))
+    (let [language-options (zipmap languages (repeat true))]
+      (t/option-cfg
+       {:name name
+        :selections (if (> (count languages) 1)
+                      [(opt5e/language-selection
+                        language-map
+                        {:choose 1
+                         :options language-options})])
+        :modifiers (remove
+                    nil?
+                    [(if (= 1 (count languages))
+                       (mod5e/language (first languages)))
+                     (mod/set-mod ?ranger-favored-enemies enemy-type)])}))))
 
 (defn favored-enemy-selection [language-map order]
   (t/selection-cfg
@@ -1674,7 +1672,7 @@
                                :multiselect? true
                                :ref [:class :ranger :favored-enemy-race]
                                :options (map
-                                         favored-enemy-option
+                                         (partial favored-enemy-option language-map)
                                          opt5e/humanoid-enemies)})]})]}))
 
 (defn favored-terrain-selection [order]
