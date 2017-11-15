@@ -1120,7 +1120,7 @@
        results))]]])
 
 (defn monster-subheader [size type subtypes alignment]
-  (str (if size (common/safe-capitalize size))
+  (str (if size (common/safe-capitalize-kw size))
        " "
        (common/kw-to-name type)
        (if (seq subtypes)
@@ -5568,7 +5568,7 @@
        spell
        "m-l-5 m-b-20"]]
      [:div.m-b-20
-      [:div.f-w-b.m-b-10 "Class Spell Lists"]
+      [:div.f-w-b.m-b-10 "Add This Spell to Which Class Spell Lists?"]
       [:div.flex.flex-wrap
        (map
         (fn [{:keys [key name]}]
