@@ -4095,7 +4095,8 @@
        (fn [key]
          ^{:key key}
          [:div.m-r-20.m-b-10
-          (let [prop-key (keyword (str (name key) "-armor"))]
+          (let [prop-key key]
+            (prn "PROP KEY" prop-key key)
             [comps/labeled-checkbox
              (str "Proficiency with " (name key) " armor")
              (get-in feat [:prereqs prop-key])
