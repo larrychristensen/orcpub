@@ -2626,7 +2626,7 @@
                             spellcasting
                             multiclass-prereqs]
                      :as cls}]
-  (let [merged-class (update cls :subclasses concat (get plugin-subclasses-map key))
+  (let [merged-class (update cls :subclasses #(into (sorted-set-by (fn [x y] (compare (:name x) (:name y)))) (concat (reverse (get plugin-subclasses-map key)) %)))
         kw (or key (common/name-to-kw name))
         {:keys [save skill-options multiclass-skill-options tool-options multiclass-tool-options tool]
          armor-profs :armor weapon-profs :weapon} profs
