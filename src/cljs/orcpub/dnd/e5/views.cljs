@@ -4775,7 +4775,8 @@
         option-source-name-label
         :option-pack
         class
-        "m-l-5 m-b-20"]]
+        "m-l-5 m-b-20"]]]
+     [:div.m-b-20.flex.flex-wrap
       [:div.m-l-5.m-b-20.flex-grow-1
        [labeled-dropdown
         "Hit Die"
@@ -4785,7 +4786,23 @@
                     :value sides})
                  [6 8 10 12])
          :value (:hit-die class)
-         :on-change #(dispatch [::classes/set-class-prop :hit-die (js/parseInt %)])}]]]
+         :on-change #(dispatch [::classes/set-class-prop :hit-die (js/parseInt %)])}]]
+      [:div.m-l-5.m-b-20.flex-grow-1
+       [labeled-dropdown
+        "Pick Subclass at Level"
+        {:items (map
+                 (fn [level]
+                   {:title level
+                    :value level})
+                 (range 1 4))
+         :value (:subclass-level class)
+         :on-change #(dispatch [::classes/set-class-prop :subclass-level (js/parseInt %)])}]]
+      [:div.m-b-20.flex-grow-1
+       [class-input-field
+        "Subclass Title"
+        :subclass-title
+        class
+        "m-l-5 m-b-20"]]]
      [:div.m-b-20
       [:div.f-s-24.f-w-b.m-b-10 "Ability Increase Levels"]
       [:div.flex.flex-wrap
@@ -4801,10 +4818,11 @@
                false
                #(dispatch [::classes/toggle-ability-increase-level level])]])
            (range 4 21))))]]
-     [option-skill-proficiency-choice
-      class
-      ::classes/set-class-path-prop
-      ::classes/toggle-class-path-prop]
+     [:div
+      [option-skill-proficiency-choice
+       class
+       ::classes/set-class-path-prop
+       ::classes/toggle-class-path-prop]]
      [:div.m-b-20
       [:div.f-s-24.f-w-b.m-b-10 "Modifiers"]
       [option-level-modifiers
@@ -4814,15 +4832,16 @@
        ::e5/edit-class-modifier-value
        ::e5/edit-class-modifier-level
        ::e5/delete-class-modifier]]
-     [option-traits
-      class
-      ::classes/class-builder-item
-      ::e5/add-class-trait
-      ::e5/edit-class-trait-name
-      ::e5/edit-class-trait-type
-      ::e5/edit-class-trait-description
-      ::e5/delete-class-trait
-      :edit-trait-level-event ::e5/edit-class-trait-level]]))
+     [:div
+      [option-traits
+       class
+       ::classes/class-builder-item
+       ::e5/add-class-trait
+       ::e5/edit-class-trait-name
+       ::e5/edit-class-trait-type
+       ::e5/edit-class-trait-description
+       ::e5/delete-class-trait
+       :edit-trait-level-event ::e5/edit-class-trait-level]]]))
 
 (defn subclass-builder []
   (let [subclass @(subscribe [::classes/subclass-builder-item])

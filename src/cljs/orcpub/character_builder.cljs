@@ -670,6 +670,7 @@
    #(dispatch [::classes/new-subclass "Default Option Source"])))
 
 (defn make-item-adder [{:keys [::entity/path]}]
+  (prn "PATH" path)
   (cond
     (-> path last (= :feats)) [feat-adder]
     (-> path last name (s/ends-with? "cantrips-known")) [cantrip-adder]
