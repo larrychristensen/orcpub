@@ -48,7 +48,15 @@
 (def default-character (char5e/set-class t5e/character :barbarian 0 (class5e/barbarian-option nil nil nil nil)))
 
 (def default-spell {:level 0
-                    :school "abjuration"})
+                    :school "abjuration"
+                    :spell-lists {:bard true
+                                  :cleric true
+                                  :druid true
+                                  :paladin true
+                                  :ranger true
+                                  :sorcerer true
+                                  :warlock true
+                                  :wizard true}})
 
 (def default-monster {:size :large
                       :type :aberration
