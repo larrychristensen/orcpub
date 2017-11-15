@@ -314,8 +314,17 @@
 (reg-sub
  ::classes5e/plugin-classes
  :<- [::e5/plugin-vals]
- (fn [plugins]
-   (apply concat (map (comp vals ::e5/classes) plugins))))
+ :<- [::spells5e/spell-lists]
+ :<- [::spells5e/spells-map]
+ (fn [[plugins spell-lists spells-map]]
+   (map
+    (fn [class]
+      (let [levels (make-levels spell-lists spells-map class)]
+        (assoc class
+               :modifiers (opt5e/plugin-modifiers (:props class)
+                                                  (:key class))
+               :levels levels)))
+    (apply concat (map (comp vals ::e5/classes) plugins)))))
 
 (reg-sub
  ::feats5e/plugin-feats
