@@ -2524,7 +2524,7 @@
                             subclass-help
                             subclass-level
                             subclasses
-                            source] :as cls}
+                            source] :or {subclass-level 1} :as cls}
                     kw
                     spellcasting-template
                     i]
@@ -2543,7 +2543,7 @@
                     (if (= i subclass-level)
                       (let [subclass-selection-key (common/name-to-kw subclass-title)]
                         [(t/selection-cfg
-                          {:name subclass-title
+                          {:name (or subclass-title (str name " Archetype"))
                            :key subclass-selection-key
                            :help subclass-help
                            :tags #{:subclass}
