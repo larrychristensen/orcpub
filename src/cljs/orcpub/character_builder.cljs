@@ -282,7 +282,7 @@
         [:span.m-l-5
          {:on-click
           (add-class remaining-classes)}
-         "Add Class"]])]))
+         "Add Levels in Another Class"]])]))
 
 (defn set-custom-item-name-fn [selection-key i]
   #(dispatch [::char5e/set-custom-item-name selection-key i %]))
@@ -1414,9 +1414,11 @@
          unselected-plugins)
       (info-block (str "There are more " name " options available if you click 'select sources' above and add more sources.")))))
 
+(def srd-prefix "The options here are the ones allowed by the SRD. ")
+
 (defn add-item-component [type-name event]
   (info-block [:span
-               [:span (str "Don't see a " type-name " here that you want to use? ")]
+               [:span (str srd-prefix "Don't see a " type-name " here that you want to use? ")]
                [:div.m-t-5
                 [:span.pointer.underline.orange
                  {:on-click #(dispatch [:route event])}
@@ -1430,7 +1432,7 @@
 
 (defn add-race-component []
   (info-block [:span
-               [:span (str "Don't see a race or subrace here that you want to use?")]
+               [:span (str srd-prefix "Don't see a race or subrace here that you want to use?")]
                [:div.m-t-5
                 [:span.pointer.underline.orange
                  {:on-click #(dispatch [:route routes/dnd-e5-race-builder-page-route])}
@@ -1444,7 +1446,16 @@
   (add-item-component "feat" routes/dnd-e5-feat-builder-page-route))
 
 (defn add-subclass-component []
-  (add-item-component "subclass" routes/dnd-e5-subclass-builder-page-route))
+  (info-block [:span
+               [:span (str srd-prefix "Don't see a class or class here that you want to use?")]
+               [:div.m-t-5
+                [:span.pointer.underline.orange
+                 {:on-click #(dispatch [:route routes/dnd-e5-class-builder-page-route])}
+                 (str "CLICK HERE TO ADD A CLASS")]]
+               [:div.m-t-5
+                [:span.pointer.underline.orange
+                 {:on-click #(dispatch [:route routes/dnd-e5-subclass-builder-page-route])}
+                 (str "CLICK HERE TO ADD A SUBCLASS")]]]))
 
 (def pages
   [{:name "Race"
