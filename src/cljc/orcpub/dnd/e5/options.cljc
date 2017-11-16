@@ -2006,16 +2006,26 @@
                            armor-proficiencies
                            weapon-proficiencies
                            tool-proficiencies
+                           profs
                            source
                            plugin?]
                     :as race}]
-  (let [key (or key (common/name-to-kw name))]
+  (let [key (or key (common/name-to-kw name))
+        {:keys [armor weapon save skill-options tool-options tool language-options]} profs
+        {skill-num :choose options :options} skill-options
+        skill-kws (if (:any options)
+                    (map :key skills/skills)
+                    (map
+                     clojure.core/key
+                     (filter val options)))]
     (t/option-cfg
      {:name name
       :icon icon
       :key key
       :help help
       :selections (concat
+                   (if (seq skill-kws)
+                     [(skill-selection skill-kws skill-num)])
                    (if (seq subraces)
                      [(subrace-selection race spell-lists spells-map language-map plugin? source subraces [:race key])])
                    (if (seq language-options) [(language-selection language-map language-options)])

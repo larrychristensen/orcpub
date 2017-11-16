@@ -2095,6 +2095,12 @@
    (assoc-in class prop-path prop-value)))
 
 (reg-event-db
+ ::race5e/set-race-path-prop
+ race-interceptors
+ (fn [race [_ prop-path prop-value]]
+   (assoc-in race prop-path prop-value)))
+
+(reg-event-db
  ::bg5e/set-background-prop
  background-interceptors
  (fn [background [_ prop-key prop-value]]
@@ -2246,6 +2252,12 @@
  class-interceptors
  (fn [class [_ prop-path prop-value]]
    (update-in class prop-path not)))
+
+(reg-event-db
+ ::race5e/toggle-race-path-prop
+ race-interceptors
+ (fn [race [_ prop-path prop-value]]
+   (update-in race prop-path not)))
 
 (reg-event-db
  ::race5e/toggle-race-map-prop
