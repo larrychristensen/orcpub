@@ -1,4 +1,4 @@
-(ns orcpub.dnd.e5.templates.ua-base
+#_(ns orcpub.dnd.e5.templates.ua-base
   (:require [orcpub.template :as t]
             [orcpub.common :as common]
             [orcpub.modifiers :as mods]
@@ -25,17 +25,17 @@
             [orcpub.dnd.e5.templates.ua-warlock-and-wizard :as ua-warlock-and-wizard]
             [re-frame.core :refer [subscribe]]))
 
-(defn ua-help [name url]
+#_(defn ua-help [name url]
   [:a {:href url :target :_blank} name])
 
-(def ua-eberron-kw :ua-eberron)
+#_(def ua-eberron-kw :ua-eberron)
 
 #_(defn dragonmark-spell-mod [kw ability-kw lvl]
   (mod5e/spells-known (opt5e/spell-level kw) kw ability-kw "Dragonmark" lvl))
 
-(def ua-mystic-kw :ua-mystic)
+#_(def ua-mystic-kw :ua-mystic)
 
-(defn psionic-discipline [name page summary type]
+#_(defn psionic-discipline [name page summary type]
   (let [trait-cfg {:name name
                    :page page
                    :source ua-mystic-kw
@@ -46,7 +46,8 @@
       :reaction (mod5e/reaction trait-cfg)
       :bonus-action (mod5e/bonus-action trait-cfg))))
 
-(defn psionic-disciplines-selection [num & [name filter-fn]]
+
+#_(defn psionic-disciplines-selection [num & [name filter-fn]]
   (t/selection-cfg
    {:name (str name (if name " ") "Psionic Disciplines")
     :tags #{:class}
@@ -62,9 +63,9 @@
                 (filter filter-fn ua-mystic/psionic-disciplines)
                 ua-mystic/psionic-disciplines))}))
 
-(def ua-trio-of-subclasses-kw :ua-trio-of-subclasses)
+#_(def ua-trio-of-subclasses-kw :ua-trio-of-subclasses)
 
-(def ua-trio-of-subclasses-classes
+#_(def ua-trio-of-subclasses-classes
   [(opt5e/subclass-plugin
     opt5e/monk-base-cfg
     ua-trio-of-subclasses-kw
@@ -128,7 +129,7 @@
                     :page 2
                     :source ua-trio-of-subclasses-kw
                     :range units5e/ft-10
-                    :summary (str "when an enemy deals melee damage to someone other than you, it takes radiant damage equal to the amount it dealt, half on a successful DC " (?spell-save-dc ::char5e/cha) " WIS save.")})]
+                    :summary (str "when an enemy deals melee damage to someone other than you, it takes radiant damage equal to the amount it dealt, half on a successful DC " (?spell-save-dc char5e/cha) " WIS save.")})]
       :levels {7 {:modifiers [(mod5e/reaction
                                {:name "Aura of the Guardian"
                                 :page 2
@@ -152,33 +153,33 @@
     opt5e/ranger-base-cfg
     ua-trio-of-subclasses-kw
     [{:name "Monster Slayer"
-      :modifiers [(mod5e/spells-known 1 :protection-from-evil-and-good ::char5e/wis "Ranger")
+      :modifiers [(mod5e/spells-known 1 :protection-from-evil-and-good char5e/wis "Ranger")
                   (mod5e/bonus-action
                    {:name "Slayer's Eye"
                     :page 3
                     :source ua-trio-of-subclasses-kw
                     :range units5e/ft-120
                     :summary "learn creature's vulnerabilities, immunities, and resistances, as well as special effects triggered by damage; target also takes 1d6 the first time you hit with a weapon attack"})]
-      :levels {5 {:modifiers [(mod5e/spells-known 2 :zone-of-truth ::char5e/wis "Ranger")]}
+      :levels {5 {:modifiers [(mod5e/spells-known 2 :zone-of-truth char5e/wis "Ranger")]}
                7 {:modifiers [(mod5e/trait-cfg
                                {:name "Supernatural Defense"
                                 :page 3
                                 :source ua-trio-of-subclasses-kw
                                 :summary "when the target of your Slayer's Eye causes you to make a save, add a 1d6 to your roll"})]}
-               9 {:modifiers [(mod5e/spells-known 3 :magic-circle ::char5e/wis "Ranger")]}
+               9 {:modifiers [(mod5e/spells-known 3 :magic-circle char5e/wis "Ranger")]}
                11 {:modifiers [(mod5e/reaction
                                 {:name "Relentless Slayer"
                                  :page 3
                                  :source ua-trio-of-subclasses-kw
                                  :range units5e/ft-30
                                  :summary "when the target of your Slayer's Eye tries to change shape, teleport, travel to another plane, or turn gaseous, make a contested WIS check with the target, if you succeed, it fails the attempt"})]}
-               13 {:modifiers [(mod5e/spells-known 4 :banishment ::char5e/wis "Ranger")]}
+               13 {:modifiers [(mod5e/spells-known 4 :banishment char5e/wis "Ranger")]}
                15 {:modifiers [(mod5e/reaction
                                 {:name "Slayer's Counter"
                                  :page 3
                                  :source ua-trio-of-subclasses-kw
                                  :summary "when the target of your Slayer's Eye forces you to make a save, make a weapon attack and, if it hits, you automatically succeed on the save"})]}
-               17 {:modifiers [(mod5e/spells-known 5 :planar-binding ::char5e/wis "Ranger")]}}}]
+               17 {:modifiers [(mod5e/spells-known 5 :planar-binding char5e/wis "Ranger")]}}}]
     true)])
 
 #_(def ua-trio-of-subclasses-plugin
@@ -371,7 +372,7 @@
              :source ua-mystic-kw
              :summary "learn basic facts about an object; embed a psionic sensor in an object"}]})
 
-(def ua-mystic-order-of-the-avatar
+#_(def ua-mystic-order-of-the-avatar
   {:name "Order of the Avatar"
     :selections [(psionic-disciplines-selection 2 "Order of the Avatar" (fn [d] (= :avatar (:mystic-order d))))]
     :modifiers [(mod5e/armor-proficiency :medium)
@@ -381,7 +382,7 @@
                               :page 6
                               :source ua-mystic-kw
                               :range units5e/ft-30
-                              :summary (str "allies regain additional " (max 0 (?ability-bonuses ::char5e/int)) " HPs from psionic disciplines")})]}
+                              :summary (str "allies regain additional " (max 0 (?ability-bonuses char5e/int)) " HPs from psionic disciplines")})]}
              14 {:modifiers [(mod5e/dependent-trait
                               {:page 6
                                :name "Avatar of Speed"
@@ -394,7 +395,7 @@
               :range units5e/ft-30
               :summary "give an ally +2 initiative bonus"}]})
 
-(def ua-mystic-order-of-the-immortal
+#_(def ua-mystic-order-of-the-immortal
   {:name "Order of the Immortal"
    :selections [(psionic-disciplines-selection 2 "Order of the Immortal" (fn [d] (= :immortal (:mystic-order d))))]
    :modifiers [(mods/cum-sum-mod ?hit-point-level-bonus 1)
@@ -402,13 +403,13 @@
                 (fn [armor shield]
                   (if (and (nil? shield)
                            (nil? armor))
-                    (?ability-bonuses ::char5e/con)
+                    (?ability-bonuses char5e/con)
                     0)))]
    :levels {3 {:modifiers [(mod5e/dependent-trait
                             {:name "Psionic Resilience"
                              :page 7
                              :source ua-mystic-kw
-                             :summary (str "at start of your turns, gain " (max 0 (?ability-bonuses ::char5e/int)) " temp HPs if you have at least 1 HP.")})]}
+                             :summary (str "at start of your turns, gain " (max 0 (?ability-bonuses char5e/int)) " temp HPs if you have at least 1 HP.")})]}
             6 {:modifiers [(mod5e/reaction
                             {:name "Surge of Health"
                              :page 7
@@ -417,9 +418,9 @@
             14 {:modifiers [(mod5e/dependent-trait
                              {:page 7
                               :name "Immortal Will"
-                              :summary (str "at end of your turn, if you have 0 HPs spend 5 psi to regain " (+ (?class-level :mystic) (?ability-bonuses ::char5e/con)) " HPs")})]}}})
+                              :summary (str "at end of your turn, if you have 0 HPs spend 5 psi to regain " (+ (?class-level :mystic) (?ability-bonuses char5e/con)) " HPs")})]}}})
 
-(def ua-mystic-order-of-the-nomad
+#_(def ua-mystic-order-of-the-nomad
   {:name "Order of the Nomad"
     :selections [(psionic-disciplines-selection 2 "Order of the Nomad" (fn [d] (= :nomad (:mystic-order d))))]
     :modifiers [(mod5e/trait-cfg
@@ -444,7 +445,7 @@
                                :name "Effortless Journey"
                                :summary "forfeit up to 30 ft of you movement to teleport that distance instead"})]}}})
 
-(def ua-mystic-order-of-the-soul-knife
+#_(def ua-mystic-order-of-the-soul-knife
   {:name "Order of the Soul Knife"
    :modifiers [(mod5e/armor-proficiency :medium)
                (mod5e/weapon-proficiency :martial)
@@ -478,7 +479,7 @@
                              :summary "Spend 1 extra psi point on a discipline to resistance"})]}
             6 {:selections [(opt5e/spell-selection {:title "Wu Jen Spells"
                                                     :ref [:class :mystic :levels :level-1 :mystic-order :order-of-the-wu-jen :spells-known]
-                                                    :spellcasting-ability ::char5e/int
+                                                    :spellcasting-ability char5e/int
                                                     :class-name "Order of the Wu Jen"
                                                     :num 3
                                                     :prepend-level? true
@@ -547,12 +548,12 @@
                               :ability-increase-levels [4 8 12 16 19]
                               :profs {:armor {:light false}
                                       :weapon {:simple false} 
-                                      :save {::char5e/int true ::char5e/wis true}
+                                      :save {char5e/int true char5e/wis true}
                                       :skill-options {:choose 2 :options {:arcana true :history true :insight true :medicine true :nature true :perception true :religion true}}}
                               :multiclass-prereqs [(t/option-prereq "Requires Intelligence 13"
                                                                     (fn [c]
-                                                                      (let [abilities @(subscribe [::char5e/abilities nil c])]
-                                                                        (>= (::char5e/int abilities) 13))))]
+                                                                      (let [abilities @(subscribe [char5e/abilities nil c])]
+                                                                        (>= (char5e/int abilities) 13))))]
                               :equipment-choices [{:name "Equipment Pack"
                                                    :options {:scholars-pack 1
                                                              :explorers-pack 1}}]
@@ -684,7 +685,7 @@
                               :subclass-title "Mystic Order"
                               :subclasses ua-mystic-subclasses})]})]})
 
-(def ua-waterborne-kw :ua-waterborne)
+#_(def ua-waterborne-kw :ua-waterborne)
 
 #_(defn mariner-class-option [nm kw level]
   (opt5e/class-option
@@ -722,8 +723,8 @@
                 (opt5e/race-selection
                  {:options [(opt5e/race-option
                              {:name "Minotaur (Krynn)"
-                              :abilities {::char5e/str 1}
-                              :selections [(opt5e/ability-increase-selection [::char5e/str ::char5e/int ::char5e/wis] 1 true)]
+                              :abilities {char5e/str 1}
+                              :selections [(opt5e/ability-increase-selection [char5e/str char5e/int char5e/wis] 1 true)]
                               :size :medium
                               :speed 30
                               :weapon-proficiencies [:horns]
@@ -776,7 +777,7 @@
                  {:options (map
                             (fn [race] (opt5e/race-option (assoc race :source ua-eberron-kw)))
                             [{:name "Changeling"
-                              :abilities {::char5e/dex 1 ::char5e/cha 1}
+                              :abilities {char5e/dex 1 char5e/cha 1}
                               :size :medium
                               :speed 30
                               :languages ["Common"]
@@ -789,7 +790,7 @@
                                             :summary "polymorph into a Medium humanoid you have seen"})]
                               :selections [(opt5e/language-selection opt5e/languages 2)]}
                              {:name "Shifter"
-                              :abilities {::char5e/dex 1}
+                              :abilities {char5e/dex 1}
                               :size :medium
                               :speed 30
                               :darkvision 60
@@ -801,30 +802,30 @@
                                             :source ua-eberron-kw
                                             :duration units5e/minutes-1
                                             :summary (str "gain "
-                                                          (max 1 (+ ?total-levels (?ability-bonuses ::char5e/con)))
+                                                          (max 1 (+ ?total-levels (?ability-bonuses char5e/con)))
                                                           " temp HPs"
                                                           (if ?shifting-feature
                                                             (str " and " ?shifting-feature)))})]
                               :subraces [{:name "Beasthide"
-                                          :abilities {::char5e/con 1}
+                                          :abilities {char5e/con 1}
                                           :modifiers [(mods/modifier ?shifting-feature "a +1 AC bonus")]}
                                          {:name "Cliffwalk"
-                                          :abilities {::char5e/dex 1}
+                                          :abilities {char5e/dex 1}
                                           :modifiers [(mods/modifier ?shifting-feature "climbing speed of 30")]}
                                          {:name "Longstride"
-                                          :abilities {::char5e/dex 1}
+                                          :abilities {char5e/dex 1}
                                           :modifiers [(mods/modifier ?shifting-feature "Dash as bonus action")]}
                                          {:name "Longtooth"
-                                          :abilities {::char5e/str 1}
+                                          :abilities {char5e/str 1}
                                           :modifiers [(mods/modifier ?shifting-feature "1d6 bite attack")]}
                                          {:name "Razorclaw"
-                                          :abilities {::char5e/dex 1}
+                                          :abilities {char5e/dex 1}
                                           :modifiers [(mods/modifier ?shifting-feature "unarmed strike as bonus action")]}
                                          {:name "Wildhunt"
-                                          :abilities {::char5e/wis 1}
+                                          :abilities {char5e/wis 1}
                                           :modifiers [(mods/modifier ?shifting-feature "advantage on WIS checks and saves")]}]}
                              {:name "Warforged"
-                              :abilities {::char5e/str 1 ::char5e/con 1}
+                              :abilities {char5e/str 1 char5e/con 1}
                               :size :medium
                               :speed 30
                               :modifiers [opt5e/ua-al-illegal
@@ -873,18 +874,19 @@ p                                                                    (mod5e/trai
                                                                        :source ua-eberron-kw
                                                                        :summary "create magic items from tables A or B of DMG"})]}}}]})]})
                 (opt5e/feat-selection-2
-                 {:options [(dragonmark-feat "Detection" ::char5e/wis [:detect-magic :mage-hand] :detect-thoughts :clairvoyance)
-                            (dragonmark-feat "Finding" ::char5e/wis [:identify :mage-hand] :locate-object :clairvoyance)
-                            (dragonmark-feat "Handling" ::char5e/wis [:druidcraft :speak-with-animals] :beast-sense :conjure-animals)
-                            (dragonmark-feat "Healing" ::char5e/wis [:cure-wounds :spare-the-dying] :lesser-restoration :revivify)
-                            (dragonmark-feat "Hospitality" ::char5e/wis [:friends :unseen-servant] :rope-trick :leomunds-tiny-hut)
-                            (dragonmark-feat "Making" ::char5e/int [:identify :mending] :magic-weapon :fabricate)
-                            (dragonmark-feat "Passage" ::char5e/int [:expeditious-retreat :light] :misty-step :teleportation-circle)
-                            (dragonmark-feat "Scribing" ::char5e/int [:comprehend-languages :message] :sending :tongues)
-                            (dragonmark-feat "Sentinel" ::char5e/wis [:blade-ward :compelled-duel] :blur :protection-from-energy)
-                            (dragonmark-feat "Shadow" ::char5e/cha [:dancing-lights :disguise-self] :darkness :nondetection)
-                            (dragonmark-feat "Storm" ::char5e/int [:fog-cloud :shocking-grasp] :gust-of-wind :sleet-storm)
-                            (dragonmark-feat "Warding" ::char5e/int [:alarm :resistance] :arcane-lock :magic-circle)]})]})
+                 {:options [(dragonmark-feat "Detection" char5e/wis [:detect-magic :mage-hand] :detect-thoughts :clairvoyance)
+                            (dragonmark-feat "Finding" char5e/wis [:identify :mage-hand] :locate-object :clairvoyance)
+                            (dragonmark-feat "Handling" char5e/wis [:druidcraft :speak-with-animals] :beast-sense :conjure-animals)
+                            (dragonmark-feat "Healing" char5e/wis [:cure-wounds :spare-the-dying] :lesser-restoration :revivify)
+                            (dragonmark-feat "Hospitality" char5e/wis [:friends :unseen-servant] :rope-trick :leomunds-tiny-hut)
+                            (dragonmark-feat "Making" char5e/int [:identify :mending] :magic-weapon :fabricate)
+                            (dragonmark-feat "Passage" char5e/int [:expeditious-retreat :light] :misty-step :teleportation-circle)
+                            (dragonmark-feat "Scribing" char5e/int [:comprehend-languages :message] :sending :tongues)
+                            (dragonmark-feat "Sentinel" char5e/wis [:blade-ward :compelled-duel] :blur :protection-from-energy)
+                            (dragonmark-feat "Shadow" char5e/cha [:dancing-lights :disguise-self] :darkness :nondetection)
+                            (dragonmark-feat "Storm" char5e/int [:fog-cloud :shocking-grasp] :gust-of-wind :sleet-storm)
+                            (dragonmark-feat "Warding" char5e/int [:alarm :resistance] :arcane-lock :magic-circle)]})]})
+
 
 #_(def ua-plugins
   (map
