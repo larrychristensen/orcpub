@@ -4550,8 +4550,6 @@
      [:div.f-s-24.f-w-b.m-b-10 "Modifiers"]
      [:div [feat-ability-increase-options feat]]
      [:div [feat-skill-proficiency feat]]
-     [:div [option-skill-proficiency-or-expertise feat ::feats/toggle-feat-map-prop]]
-     [:div [option-tool-proficiency-or-expertise feat ::feats/toggle-feat-map-prop]]
      [:div [feat-languages feat]]
      [:div [feat-weapon-proficiency feat]]
      [:div [feat-armor-proficiency feat]]
@@ -4559,7 +4557,9 @@
      [:div [feat-damage-resistance feat]]
      [:div [feat-speed-bonuses feat]]
      [:div [feat-initiative-bonuses feat]]
-     [:div [feat-misc-modifiers feat]]]))
+     [:div [feat-misc-modifiers feat]]
+     [:div [option-skill-proficiency-or-expertise feat ::feats/toggle-feat-map-prop]]
+     [:div [option-tool-proficiency-or-expertise feat ::feats/toggle-feat-map-prop]]]))
 
 (defn spell-selector [index spell-cfg value-change-event]
   (let [spells @(subscribe [::spells/spells-for-level (or (:level spell-cfg) 0)])
@@ -5226,11 +5226,16 @@
       [:div.m-b-20
        [:div [option-armor-proficiency race ::races/toggle-race-map-prop]]]
       [:div.m-b-20
-       [:div [option-skill-proficiency race ::races/toggle-race-map-prop]]]
-      [:div.m-b-20
        [:div [option-damage-resistance race ::races/toggle-race-map-prop]]]
       [:div.m-b-20
-       [:div [option-damage-immunity race ::races/toggle-race-map-prop]]]]
+       [:div [option-damage-immunity race ::races/toggle-race-map-prop]]]
+      [:div.m-b-20
+       [:div [option-skill-proficiency race ::races/toggle-race-map-prop]]]
+      [:div
+       [option-skill-proficiency-choice
+        race
+        ::races/set-race-path-prop
+        ::races/toggle-race-path-prop]]]
      [:div.m-b-20
       [:div.f-s-24.f-w-b.m-b-10 "Spells"]
       [option-spells
