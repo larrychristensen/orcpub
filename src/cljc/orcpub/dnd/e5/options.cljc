@@ -1706,14 +1706,19 @@
                    subclasses)
                   subclasses)}))
 
-(defn paladin-spell [spell-level key min-level]
+(defn paladin-spell [spell-level key]
   (modifiers/spells-known-cfg spell-level
                               {:key key
                                :ability ::character/cha
                                :class "Paladin"
                                :always-prepared? true
                                :class-key :paladin}
-                              min-level
+                              (case spell-level
+                                1 3
+                                2 5
+                                3 9
+                                4 13
+                                5 17)
                               nil))
 
 (defn subclass-spell-selection [spell-lists spells-map class-key class-name ability spells num]
