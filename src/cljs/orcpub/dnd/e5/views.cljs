@@ -4844,6 +4844,44 @@
        ::e5/delete-class-trait
        :edit-trait-level-event ::e5/edit-class-trait-level]]]))
 
+(defn subclass-spells [subclass spells-title spells-kw]
+  [:div
+   [:div.f-s-18.f-w-b.m-b-10 (str (:name subclass) " " spells-title)]
+   [:table
+    [:tbody
+     [:tr.f-w-b
+      [:th.p-5 "Spell Level"]
+      [:th.p-5.t-a-l "Spells"]]
+     (doall
+      (map
+       (fn [level]
+         ^{:key level}
+         [:tr
+          [:th.p-5 (common/ordinal level)]
+          (let [spells-for-level @(subscribe [::spells/spells-for-level level])]
+            [:th.p-5
+             [:div.flex.flex-wrap
+              (doall
+               (map
+                (fn [i]
+                  ^{:key i}
+                  [:div.m-l-5.m-b-10
+                   [dropdown
+                    {:items (cons
+                             {:title "<select spell>"
+                              :value :select
+                              :disabled? true}
+                             (map
+                              (fn [{:keys [name key]}]
+                                {:title name
+                                 :value key})
+                              spells-for-level))
+                     :value (or (get-in subclass [spells-kw level i])
+                                :select)
+                     :on-change #(dispatch [::classes/set-class-spell spells-kw level i (keyword %)])}]])
+                (range 2)))]])])
+       (range 1 6)))]]])
+
 (defn subclass-builder []
   (let [subclass @(subscribe [::classes/subclass-builder-item])
         spell-lists @(subscribe [::spells/spell-lists])
@@ -4881,7 +4919,7 @@
        ::e5/edit-subclass-modifier-value
        ::e5/edit-subclass-modifier-level
        ::e5/delete-subclass-modifier]]
-     (if (#{:fighter :rogue :warlock :cleric} class-key)
+     (if (#{:fighter :rogue :warlock :cleric :paladin} class-key)
        (let [spellcasting (get subclass :spellcasting)
              spellcasting? (some? spellcasting)]
          [:div.m-b-20
@@ -4899,87 +4937,14 @@
                :value spellcasting?
                :on-change #(dispatch [::classes/toggle-subclass-spellcasting])}]]
 
+            (= :paladin class-key)
+            [:div [subclass-spells subclass "Spells" :paladin-spells]]
+
             (= :cleric class-key)
-            [:div
-             [:div.f-s-18.f-w-b.m-b-10 (str (:name subclass) " Domain Spells")]
-             [:table
-              [:tbody
-               [:tr.f-w-b
-                [:th.p-5 "Spell Level"]
-                [:th.p-5.t-a-l "Spells"]]
-               (doall
-                (map
-                 (fn [level]
-                   ^{:key level}
-                   [:tr
-                    [:th.p-5 (common/ordinal level)]
-                    (let [spells-for-level @(subscribe [::spells/spells-for-level level])]
-                      [:th.p-5
-                       [:div.flex.flex-wrap
-                        (doall
-                         (map
-                          (fn [i]
-                            ^{:key i}
-                            [:div.m-l-5.m-b-10
-                             [dropdown
-                              {:items (cons
-                                       {:title "<select spell>"
-                                        :value :select
-                                        :disabled? true}
-                                       (map
-                                        (fn [{:keys [name key]}]
-                                          {:title name
-                                           :value key})
-                                        spells-for-level))
-                               :value (or (get-in subclass [:cleric-spells level i])
-                                          :select)
-                               :on-change #(dispatch [::classes/set-class-spell :cleric-spells level i (keyword %)])}]])
-                          (range 2)))]])])
-                 (range 1 6)))]]]
+            [:div [subclass-spells subclass "Domain Spells" :cleric-spells]]
 
             (= :warlock class-key)
-            [:div
-             [:div.f-s-18.f-w-b.m-b-10 (str (:name subclass) " Expanded Spells")]
-             [:table
-              [:tbody
-               [:tr.f-w-b
-                [:th.p-5 "Spell Level"]
-                [:th.p-5.t-a-l "Spells"]]
-               (doall
-                (map
-                 (fn [level]
-                   ^{:key level}
-                   [:tr
-                    [:th.p-5 (common/ordinal level)]
-                    (let [spells-for-level @(subscribe [::spells/spells-for-level level])
-                          spells (remove
-                                  (fn [{:keys [key]}]
-                                    (let [level-spells (get-in spell-lists [:warlock level])]
-                                      ((into #{} level-spells)
-                                       key)))
-                                  spells-for-level)]
-                      [:th.p-5
-                       [:div.flex.flex-wrap
-                        (doall
-                         (map
-                          (fn [i]
-                            ^{:key i}
-                            [:div.m-l-5.m-b-10
-                             [dropdown
-                              {:items (cons
-                                       {:title "<select spell>"
-                                        :value :select
-                                        :disabled? true}
-                                       (map
-                                        (fn [{:keys [name key]}]
-                                          {:title name
-                                           :value key})
-                                        spells))
-                               :value (or (get-in subclass [:warlock-spells level i])
-                                          :select)
-                               :on-change #(dispatch [::classes/set-class-spell :warlock-spells level i (keyword %)])}]])
-                          (range 2)))]])])
-                 (range 1 6)))]]])]))
+            [:div [subclass-spells subclass "Expanded Spells" :warlock-spells]])]))
      [option-traits
       subclass
       ::classes/subclass-builder-item

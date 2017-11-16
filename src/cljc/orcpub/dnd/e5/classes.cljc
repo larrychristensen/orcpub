@@ -1515,16 +1515,16 @@
      :subclass-level 3
      :subclass-title "Sacred Oath"
      :subclasses [{:name "Oath of Devotion"
-                   :modifiers [(opt5e/paladin-spell 1 :protection-from-evil-and-good 3)
-                               (opt5e/paladin-spell 1 :sanctuary 3)
-                               (opt5e/paladin-spell 2 :lesser-restoration 5)
-                               (opt5e/paladin-spell 2 :zone-of-truth 5)
-                               (opt5e/paladin-spell 3 :beacon-of-hope 9)
-                               (opt5e/paladin-spell 3 :dispel-magic 9)
-                               (opt5e/paladin-spell 4 :freedom-of-movement 13)
-                               (opt5e/paladin-spell 4 :guardian-of-faith 13)
-                               (opt5e/paladin-spell 5 :commune 17)
-                               (opt5e/paladin-spell 5 :flame-strike 17)
+                   :modifiers [(opt5e/paladin-spell 1 :protection-from-evil-and-good)
+                               (opt5e/paladin-spell 1 :sanctuary)
+                               (opt5e/paladin-spell 2 :lesser-restoration)
+                               (opt5e/paladin-spell 2 :zone-of-truth)
+                               (opt5e/paladin-spell 3 :beacon-of-hope)
+                               (opt5e/paladin-spell 3 :dispel-magic)
+                               (opt5e/paladin-spell 4 :freedom-of-movement)
+                               (opt5e/paladin-spell 4 :guardian-of-faith)
+                               (opt5e/paladin-spell 5 :commune)
+                               (opt5e/paladin-spell 5 :flame-strike)
                                (mod5e/action
                                 {:name "Channel Divinity: Sacred Weapon"
                                  :page 86

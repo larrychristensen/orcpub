@@ -271,6 +271,19 @@
      (merge-levels
       (if add-spellcasting?
         spellcaster-levels)
+      (if (and (= class :paladin)
+               (:paladin-spells option))
+        {1 {:modifiers (reduce-kv
+                        (fn [mods spell-level spells]
+                          (concat
+                           mods
+                           (map
+                            (fn [spell-kw]
+                              (opt5e/paladin-spell spell-level
+                                                   spell-kw))
+                            (vals spells))))
+                        []
+                        (:paladin-spells option))}})
       (if (and (= class :cleric)
                (:cleric-spells option))
         {1 {:modifiers (reduce-kv
