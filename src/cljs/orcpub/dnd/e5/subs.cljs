@@ -391,6 +391,12 @@
    (::char5e/character-map db)))
 
 (reg-sub
+ ::party5e/party-map
+ :<- [::party5e/parties]
+ (fn [parties _]
+   (common/map-by-id parties)))
+
+(reg-sub
  ::char5e/summary-map
  :<- [::char5e/characters]
  (fn [characters _]

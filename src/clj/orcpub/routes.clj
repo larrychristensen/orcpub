@@ -895,6 +895,7 @@
    [route-map/dnd-e5-monster-builder-page-route]
    [route-map/dnd-e5-background-builder-page-route]
    [route-map/dnd-e5-encounter-builder-page-route]
+   [route-map/dnd-e5-combat-tracker-page-route]
    [route-map/dnd-e5-race-builder-page-route]
    [route-map/dnd-e5-subrace-builder-page-route]
    [route-map/dnd-e5-subclass-builder-page-route]

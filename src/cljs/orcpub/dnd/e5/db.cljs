@@ -13,6 +13,7 @@
             [orcpub.dnd.e5.spells :as spells5e]
             [orcpub.dnd.e5.monsters :as monsters5e]
             [orcpub.dnd.e5.encounters :as encounters5e]
+            [orcpub.dnd.e5.combat :as combat5e]
             [orcpub.dnd.e5.equipment :as equip5e]
             [re-frame.core :as re-frame]
             [orcpub.entity :as entity]
@@ -29,6 +30,7 @@
 (def local-storage-spell-key "spell")
 (def local-storage-monster-key "monster")
 (def local-storage-encounter-key "encounter")
+(def local-storage-combat-key "combat")
 (def local-storage-background-key "background")
 (def local-storage-language-key "language")
 (def local-storage-feat-key "feat")
@@ -73,6 +75,9 @@
 
 (def default-encounter {:creatures []})
 
+(def default-combat {:parties []
+                     :encounters []})
+
 (def default-background {:traits []})
 
 (def default-language {})
@@ -112,6 +117,7 @@
    ::spells5e/builder-item default-spell
    ::monsters5e/builder-item default-monster
    ::encounters5e/builder-item default-encounter
+   ::combat5e/tracker-item default-combat
    ::bg5e/builder-item default-background
    ::langs5e/builder-item default-language
    ::feats5e/builder-item default-feat
@@ -151,6 +157,10 @@
 (defn encounter->local-store [encounter]
   (if js/window.localStorage
     (set-item local-storage-encounter-key (str encounter))))
+
+(defn combat->local-store [combat]
+  (if js/window.localStorage
+    (set-item local-storage-combat-key (str combat))))
 
 (defn background->local-store [background]
   (if js/window.localStorage

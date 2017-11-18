@@ -20,6 +20,7 @@
             [orcpub.dnd.e5.spells :as spells]
             [orcpub.dnd.e5.monsters :as monsters]
             [orcpub.dnd.e5.encounters :as encounters]
+            [orcpub.dnd.e5.combat :as combat]
             [orcpub.dnd.e5.weapons :as weapons]
             [orcpub.dnd.e5.magic-items :as mi]
             [orcpub.dnd.e5.event-handlers :as event-handlers]
@@ -31,6 +32,7 @@
                                       spell->local-store
                                       monster->local-store
                                       encounter->local-store
+                                      combat->local-store
                                       background->local-store
                                       language->local-store
                                       feat->local-store
@@ -44,6 +46,7 @@
                                       default-spell
                                       default-monster
                                       default-encounter
+                                      default-combat
                                       default-background
                                       default-language
                                       default-feat
@@ -88,6 +91,8 @@
 
 (def encounter->local-store-interceptor (after encounter->local-store))
 
+(def combat->local-store-interceptor (after combat->local-store))
+
 (def background->local-store-interceptor (after background->local-store))
 
 (def language->local-store-interceptor (after language->local-store))
@@ -125,7 +130,10 @@
                            monster->local-store-interceptor])
 
 (def encounter-interceptors [(path ::encounters/builder-item)
-                         encounter->local-store-interceptor])
+                             encounter->local-store-interceptor])
+
+(def combat-interceptors [(path ::combat/tracker-item)
+                         combat->local-store-interceptor])
 
 (def background-interceptors [(path ::bg5e/builder-item)
                               background->local-store-interceptor])
@@ -2120,10 +2128,51 @@
    (assoc-in monster prop-path prop-value)))
 
 (reg-event-db
+ ::combat/set-combat-prop
+ combat-interceptors
+ (fn [combat [_ prop-key prop-value]]
+   (assoc combat prop-key prop-value)))
+
+(reg-event-db
+ ::combat/next-initiative
+ combat-interceptors
+ (fn [combat]
+   (let [initiatives (->> combat
+                          :initiative
+                          vals
+                          (mapcat vals)
+                          (sort >))
+         current-initiative (:current-initiative combat)]
+     (assoc combat
+            :current-initiative
+            (if current-initiative
+              (or (first (drop-while #(>= % current-initiative) initiatives))
+                  (first initiatives))
+              (second initiatives))))))
+
+(reg-event-db
  ::encounters/set-encounter-path-prop
  encounter-interceptors
  (fn [encounter [_ prop-path prop-value]]
    (assoc-in encounter prop-path prop-value)))
+
+(reg-event-db
+ ::combat/delete-party
+ combat-interceptors
+ (fn [combat [_ index]]
+   (update combat :parties common/remove-at-index index)))
+
+(reg-event-db
+ ::combat/delete-encounter
+ combat-interceptors
+ (fn [combat [_ index]]
+   (update combat :encounters common/remove-at-index index)))
+
+(reg-event-db
+ ::combat/set-combat-path-prop
+ combat-interceptors
+ (fn [combat [_ path-prop prop-value]]
+   (assoc-in combat path-prop prop-value)))
 
 (reg-event-db
  ::encounters/delete-creature
@@ -2717,6 +2766,12 @@
    encounter))
 
 (reg-event-db
+ ::combat/set-combat
+ combat-interceptors
+ (fn [_ [_ combat]]
+   combat))
+
+(reg-event-db
  ::bg5e/set-background
  background-interceptors
  (fn [_ [_ background]]
@@ -2782,6 +2837,12 @@
  (fn [_ _]
    {:dispatch [::encounters/set-encounter
                default-encounter]}))
+
+(reg-event-fx
+ ::combat/reset-combat
+ (fn [_ _]
+   {:dispatch [::combat/set-combat
+               default-combat]}))
 
 (reg-event-fx
  ::bg5e/reset-background
