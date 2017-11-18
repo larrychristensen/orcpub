@@ -1076,7 +1076,7 @@
 (reg-sub
  ::encounters5e/builder-item
  (fn [db _]
-   (::encounters5e/tracker-item db)))
+   (::encounters5e/builder-item db)))
 
 (reg-sub
  ::combat5e/tracker-item
