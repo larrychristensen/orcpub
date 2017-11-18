@@ -34,6 +34,7 @@
    routes/dnd-e5-spell-builder-page-route views/spell-builder-page
    routes/dnd-e5-monster-builder-page-route views/monster-builder-page
    routes/dnd-e5-encounter-builder-page-route views/encounter-builder-page
+   routes/dnd-e5-combat-tracker-page-route views/combat-tracker-page
    routes/dnd-e5-background-builder-page-route views/background-builder-page
    routes/dnd-e5-race-builder-page-route views/race-builder-page
    routes/dnd-e5-subrace-builder-page-route views/subrace-builder-page
