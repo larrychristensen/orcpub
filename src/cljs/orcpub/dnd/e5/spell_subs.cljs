@@ -17,6 +17,7 @@
             [orcpub.dnd.e5.spells :as spells5e]
             [orcpub.dnd.e5.monsters :as monsters5e]
             [orcpub.dnd.e5.encounters :as encounters5e]
+            [orcpub.dnd.e5.combat :as combat5e]
             [orcpub.dnd.e5.spell-lists :as sl5e]
             [orcpub.dnd.e5.armor :as armor5e]
             [orcpub.dnd.e5.template :as t5e]
@@ -899,6 +900,12 @@
    plugin-encounters))
 
 (reg-sub
+ ::encounters5e/encounter-map
+ :<- [::encounters5e/encounters]
+ (fn [encounters]
+   (common/map-by-key encounters)))
+
+(reg-sub
  ::monsters5e/monster-map
  :<- [::monsters5e/monsters]
  (fn [monsters]
@@ -1069,7 +1076,12 @@
 (reg-sub
  ::encounters5e/builder-item
  (fn [db _]
-   (::encounters5e/builder-item db)))
+   (::encounters5e/tracker-item db)))
+
+(reg-sub
+ ::combat5e/tracker-item
+ (fn [db _]
+   (::combat5e/tracker-item db)))
 
 
 (reg-sub

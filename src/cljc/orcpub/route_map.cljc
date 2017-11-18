@@ -32,6 +32,7 @@
 (def dnd-e5-spell-builder-page-route :spell-builder-5e-page)
 (def dnd-e5-background-builder-page-route :background-builder-5e-page)
 (def dnd-e5-encounter-builder-page-route :encounter-builder-5e-page)
+(def dnd-e5-combat-tracker-page-route :combat-tracker-5e-page)
 (def dnd-e5-race-builder-page-route :race-builder-5e-page)
 (def dnd-e5-subrace-builder-page-route :subrace-builder-5e-page)
 (def dnd-e5-subclass-builder-page-route :subclass-builder-5e-page)
@@ -62,6 +63,7 @@
                                 dnd-e5-feat-builder-page-route
                                 dnd-e5-background-builder-page-route
                                 dnd-e5-encounter-builder-page-route
+                                dnd-e5-combat-tracker-page-route
                                 dnd-e5-race-builder-page-route
                                 dnd-e5-subrace-builder-page-route
                                 dnd-e5-subclass-builder-page-route
@@ -151,6 +153,7 @@
                               "parties" dnd-e5-char-parties-page-route
                               "background-builder" dnd-e5-background-builder-page-route
                               "encounter-builder" dnd-e5-encounter-builder-page-route
+                              "combat-tracker" dnd-e5-combat-tracker-page-route
                               "race-builder" dnd-e5-race-builder-page-route
                               "subrace-builder" dnd-e5-subrace-builder-page-route
                               "subclass-builder" dnd-e5-subclass-builder-page-route
