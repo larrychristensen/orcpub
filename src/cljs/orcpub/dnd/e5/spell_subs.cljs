@@ -16,6 +16,7 @@
             [orcpub.dnd.e5.weapons :as weapon5e]
             [orcpub.dnd.e5.spells :as spells5e]
             [orcpub.dnd.e5.monsters :as monsters5e]
+            [orcpub.dnd.e5.encounters :as encounters5e]
             [orcpub.dnd.e5.spell-lists :as sl5e]
             [orcpub.dnd.e5.armor :as armor5e]
             [orcpub.dnd.e5.template :as t5e]
@@ -840,6 +841,12 @@
  (fn [plugins _]
    (apply concat (map (comp vals ::e5/monsters) plugins))))
 
+(reg-sub
+ ::encounters5e/plugin-encounters
+ :<- [::e5/plugin-vals]
+ (fn [plugins _]
+   (apply concat (map (comp vals ::e5/encounters) plugins))))
+
 (defn true-types [m]
   (sequence
    (comp
@@ -884,6 +891,12 @@
     (map
      process-plugin-monster
      plugin-monsters))))
+
+(reg-sub
+ ::encounters5e/encounters
+ :<- [::encounters5e/plugin-encounters]
+ (fn [plugin-encounters]
+   plugin-encounters))
 
 (reg-sub
  ::monsters5e/monster-map
@@ -1052,6 +1065,11 @@
  ::monsters5e/builder-item
  (fn [db _]
    (::monsters5e/builder-item db)))
+
+(reg-sub
+ ::encounters5e/builder-item
+ (fn [db _]
+   (::encounters5e/builder-item db)))
 
 
 (reg-sub

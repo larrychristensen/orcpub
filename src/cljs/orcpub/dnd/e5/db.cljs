@@ -12,6 +12,7 @@
             [orcpub.dnd.e5.magic-items :as mi5e]
             [orcpub.dnd.e5.spells :as spells5e]
             [orcpub.dnd.e5.monsters :as monsters5e]
+            [orcpub.dnd.e5.encounters :as encounters5e]
             [orcpub.dnd.e5.equipment :as equip5e]
             [re-frame.core :as re-frame]
             [orcpub.entity :as entity]
@@ -27,6 +28,7 @@
 (def local-storage-magic-item-key "magic-item")
 (def local-storage-spell-key "spell")
 (def local-storage-monster-key "monster")
+(def local-storage-encounter-key "encounter")
 (def local-storage-background-key "background")
 (def local-storage-language-key "language")
 (def local-storage-feat-key "feat")
@@ -69,6 +71,8 @@
                       :wis 10
                       :cha 10})
 
+(def default-encounter {:creatures []})
+
 (def default-background {:traits []})
 
 (def default-language {})
@@ -107,6 +111,7 @@
    :device-type (user-agent/device-type)
    ::spells5e/builder-item default-spell
    ::monsters5e/builder-item default-monster
+   ::encounters5e/builder-item default-encounter
    ::bg5e/builder-item default-background
    ::langs5e/builder-item default-language
    ::feats5e/builder-item default-feat
@@ -142,6 +147,10 @@
 (defn monster->local-store [monster]
   (if js/window.localStorage
     (set-item local-storage-monster-key (str monster))))
+
+(defn encounter->local-store [encounter]
+  (if js/window.localStorage
+    (set-item local-storage-encounter-key (str encounter))))
 
 (defn background->local-store [background]
   (if js/window.localStorage
