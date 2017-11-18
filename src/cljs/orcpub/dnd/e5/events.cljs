@@ -2763,6 +2763,7 @@
  ::encounters/set-encounter
  encounter-interceptors
  (fn [_ [_ encounter]]
+   (prn "SET ENCOUTNER" encounter)
    encounter))
 
 (reg-event-db
