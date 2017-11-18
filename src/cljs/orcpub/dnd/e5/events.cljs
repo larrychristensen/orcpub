@@ -19,6 +19,7 @@
             [orcpub.dnd.e5.character.random :as char-rand5e]
             [orcpub.dnd.e5.spells :as spells]
             [orcpub.dnd.e5.monsters :as monsters]
+            [orcpub.dnd.e5.encounters :as encounters]
             [orcpub.dnd.e5.weapons :as weapons]
             [orcpub.dnd.e5.magic-items :as mi]
             [orcpub.dnd.e5.event-handlers :as event-handlers]
@@ -29,6 +30,7 @@
                                       magic-item->local-store
                                       spell->local-store
                                       monster->local-store
+                                      encounter->local-store
                                       background->local-store
                                       language->local-store
                                       feat->local-store
@@ -41,6 +43,7 @@
                                       default-character
                                       default-spell
                                       default-monster
+                                      default-encounter
                                       default-background
                                       default-language
                                       default-feat
@@ -83,6 +86,8 @@
 
 (def monster->local-store-interceptor (after monster->local-store))
 
+(def encounter->local-store-interceptor (after encounter->local-store))
+
 (def background->local-store-interceptor (after background->local-store))
 
 (def language->local-store-interceptor (after language->local-store))
@@ -117,7 +122,10 @@
                          spell->local-store-interceptor])
 
 (def monster-interceptors [(path ::monsters/builder-item)
-                         monster->local-store-interceptor])
+                           monster->local-store-interceptor])
+
+(def encounter-interceptors [(path ::encounters/builder-item)
+                         encounter->local-store-interceptor])
 
 (def background-interceptors [(path ::bg5e/builder-item)
                               background->local-store-interceptor])
@@ -416,6 +424,14 @@
  "You must specify 'Name', 'Option Source Name', 'Hit Points Die Count', and 'Hit Points Die'")
 
 (reg-save-homebrew
+ "Encounter"
+ ::encounters/save-encounter
+ ::encounters/builder-item
+ ::encounters/encounter
+ ::e5/encounters
+ "You must specify 'Name', 'Option Source Name'")
+
+(reg-save-homebrew
  "Background"
  ::bg5e/save-background
  ::bg5e/builder-item
@@ -484,6 +500,10 @@
 (reg-delete-homebrew
  ::monsters/delete-monster
  ::e5/monsters)
+
+(reg-delete-homebrew
+ ::encounters/delete-encounter
+ ::e5/encounters)
 
 (reg-delete-homebrew
  ::bg5e/delete-background
@@ -1567,6 +1587,11 @@
  routes/dnd-e5-monster-builder-page-route)
 
 (reg-edit-homebrew
+ ::encounters/edit-encounter
+ ::encounters/set-encounter
+ routes/dnd-e5-encounter-builder-page-route)
+
+(reg-edit-homebrew
  ::bg5e/edit-background
  ::bg5e/set-background
  routes/dnd-e5-background-builder-page-route)
@@ -2083,10 +2108,28 @@
    (assoc monster prop-key prop-value)))
 
 (reg-event-db
+ ::encounters/set-encounter-prop
+ encounter-interceptors
+ (fn [encounter [_ prop-key prop-value]]
+   (assoc encounter prop-key prop-value)))
+
+(reg-event-db
  ::monsters/set-monster-path-prop
  monster-interceptors
  (fn [monster [_ prop-path prop-value]]
    (assoc-in monster prop-path prop-value)))
+
+(reg-event-db
+ ::encounters/set-encounter-path-prop
+ encounter-interceptors
+ (fn [encounter [_ prop-path prop-value]]
+   (assoc-in encounter prop-path prop-value)))
+
+(reg-event-db
+ ::encounters/delete-creature
+ encounter-interceptors
+ (fn [encounter [_ index]]
+   (update encounter :creatures common/remove-at-index index)))
 
 (reg-event-db
  ::class5e/set-class-path-prop
@@ -2668,6 +2711,12 @@
    monster))
 
 (reg-event-db
+ ::encounters/set-encounter
+ encounter-interceptors
+ (fn [_ [_ encounter]]
+   encounter))
+
+(reg-event-db
  ::bg5e/set-background
  background-interceptors
  (fn [_ [_ background]]
@@ -2727,6 +2776,12 @@
  (fn [_ _]
    {:dispatch [::monsters/set-monster
                default-monster]}))
+
+(reg-event-fx
+ ::encounters/reset-encounter
+ (fn [_ _]
+   {:dispatch [::encounters/set-encounter
+               default-encounter]}))
 
 (reg-event-fx
  ::bg5e/reset-background
@@ -2921,6 +2976,12 @@
  ::monsters/set-monster
  default-monster
  routes/dnd-e5-monster-builder-page-route)
+
+(reg-new-homebrew
+ ::encounters/new-encounter
+ ::encounters/set-encounter
+ default-encounter
+ routes/dnd-e5-encounter-builder-page-route)
 
 (reg-new-homebrew
  ::bg5e/new-background

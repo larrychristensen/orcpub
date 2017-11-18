@@ -26,6 +26,7 @@
             [orcpub.dnd.e5.magic-items :as mi]
             [orcpub.dnd.e5.damage-types :as damage-types]
             [orcpub.dnd.e5.monsters :as monsters]
+            [orcpub.dnd.e5.encounters :as encounters]
             [orcpub.dnd.e5.spells :as spells]
             [orcpub.dnd.e5.skills :as skills]
             [orcpub.dnd.e5.equipment :as equip]
@@ -434,6 +435,8 @@
            :route routes/dnd-e5-spell-builder-page-route}
           {:name "Monster Builder"
            :route routes/dnd-e5-monster-builder-page-route}
+          {:name "Encounter Builder"
+           :route routes/dnd-e5-encounter-builder-page-route}
           {:name "Feat Builder"
            :route routes/dnd-e5-feat-builder-page-route}
           {:name "Background Builder"
@@ -3764,6 +3767,9 @@
 (defn monster-input-field [title prop monster & [class-names type]]
   (builder-input-field title prop monster ::monsters/set-monster-prop class-names type))
 
+(defn encounter-input-field [title prop encounter & [class-names type]]
+  (builder-input-field title prop encounter ::encounters/set-encounter-prop class-names type))
+
 (defn language-input-field [title prop language & [class-names]]
   (builder-input-field title prop language ::langs/set-language-prop class-names))
 
@@ -5524,6 +5530,105 @@
                {:title "Legendary Action"
                 :value :legendary-action}]]]]))
 
+(defn monster-selector [index {:keys [monster num]}]
+  (let [monsters @(subscribe [::monsters/sorted-monsters])]
+    [:div.flex.flex-wrap.m-l-5
+     [labeled-dropdown
+      "Monster Name"
+      {:items (map
+               (fn [{:keys [name key]}]
+                 {:title name
+                  :value key})
+               monsters)
+       :value monster
+       :on-change #(dispatch [::encounters/set-encounter-path-prop
+                              [:creatures index :creature :monster]
+                              (keyword %)])}]
+     [:div.m-l-5.m-b-10
+      [labeled-dropdown
+       "Number"
+       {:items (map
+                (fn [v]
+                  {:title v
+                   :value v})
+                (range 1 21))
+        :value (or num 1)
+        :on-change #(dispatch [::encounters/set-encounter-path-prop
+                               [:creatures index :creature :num]
+                               (js/parseInt %)])}]]]))
+
+(defn character-selector [index {:keys [character]}]
+  (let [characters @(subscribe [::char/characters])]
+    [:div.flex.flex-wrap.m-l-5
+     [:div.m-b-10
+      [labeled-dropdown
+       "Character Name"
+       {:items (map
+                (fn [{:keys [::char/character-name
+                             ::char/race-name
+                             ::char/classes] :as character-summary}]
+                  {:title (str character-name
+                               " - "
+                               race-name
+                               " "
+                               (s/join
+                                "/"
+                                (map
+                                 ::char/class-name
+                                 classes)))
+                   :value (:db/id character-summary)})
+                characters)
+        :value character
+        :on-change #(dispatch [::encounters/set-encounter-path-prop
+                               [:creatures index :creature :character]
+                               (js/parseInt %)])}]]]))
+
+(defn creature-selector [index {:keys [type creature] :as details}]
+  [:div.flex.flex-wrap.align-items-c
+   [:div.m-b-10
+    [labeled-dropdown
+     "Type"
+     {:items [{:title "<select type>"}
+              {:title "Monster"
+               :value :monster}
+              {:title "Non-Player Character"
+               :value :character}]
+      :value type
+      :on-change #(dispatch [::encounters/set-encounter-path-prop [:creatures index :type] (keyword %)])}]]
+   (case type
+     :monster [monster-selector index creature]
+     :character [character-selector index creature]
+     nil)
+   [:button.form-button.m-l-5.m-b-10
+    {:on-click #(dispatch [::encounters/delete-creature index])}
+    "delete"]])
+
+(defn encounter-builder []
+  (let [{:keys [creatures] :as encounter} @(subscribe [::encounters/builder-item])]
+    [:div.p-20.main-text-color
+     [:div.flex.w-100-p.flex-wrap
+      [encounter-input-field
+       "Name"
+       :name
+       encounter
+       "m-b-20"]
+      [encounter-input-field
+       option-source-name-label
+       :option-pack
+       encounter
+       "m-l-5 m-b-20"]]
+     [:div.m-t-20
+      [:div.f-s-24.f-w-b "Creatures"]
+      [:div
+       (doall
+        (map-indexed
+         (fn [index details]
+           ^{:key index}
+           [:div.m-t-10 [creature-selector index details]])
+         creatures))]
+      [:div.m-t-10
+       [creature-selector (count creatures) {}]]]]))
+
 (defn spell-builder []
   (let [{:keys [:level :school] :as spell} @(subscribe [::spells/builder-item])]
     [:div.p-20.main-text-color
@@ -5716,6 +5821,15 @@
                    ::monsters/edit-monster
                    ::monsters/delete-monster))
 
+(defn my-encounters [name]
+  (my-content-type name
+                   "encounter"
+                   ::e5/encounters
+                   "hydra"
+                   ::encounters/new-encounter
+                   ::encounters/edit-encounter
+                   ::encounters/delete-encounter))
+
 (defn my-backgrounds [name]
   (my-content-type name
                    "background"
@@ -5806,6 +5920,7 @@
           [:div.item-list
            [(my-spells name) plugin]
            [(my-monsters name) plugin]
+           [(my-encounters name) plugin]
            [(my-backgrounds name) plugin]
            [(my-races name) plugin]
            [(my-subraces name) plugin]
@@ -5836,115 +5951,49 @@
               :on-change import-file}]]
     [my-content]]])
 
-(defn item-builder-page []
+(defn builder-page [item-title reset-event save-event builder]
   [content-page
-   "Item Builder"
-   [{:title "New Item"
+   (str item-title " Builder")
+   [{:title (str "New " item-title)
      :icon "plus"
-     :on-click #(dispatch [::mi/reset-item])}
+     :on-click #(dispatch [reset-event])}
     {:title "Save"
      :icon "save"
-     :on-click #(dispatch [::mi/save-item])}]
-   [item-builder]])
+     :on-click #(dispatch [save-event])}]
+   [builder]])
+
+(defn item-builder-page []
+  (builder-page "Item" ::mi/reset-item ::mi/save-item item-builder))
 
 (defn spell-builder-page []
-  [content-page
-   "Spell Builder"
-   [{:title "New Spell"
-     :icon "plus"
-     :on-click #(dispatch [::spells/reset-spell])}
-    {:title "Save"
-     :icon "save"
-     :on-click #(dispatch [::spells/save-spell])}]
-   [spell-builder]])
+  (builder-page "Spell" ::spells/reset-spell ::spells/save-spell spell-builder))
 
 (defn monster-builder-page []
-  [content-page
-   "Monster Builder"
-   [{:title "New Monster"
-     :icon "plus"
-     :on-click #(dispatch [::monsters/reset-monster])}
-    {:title "Save"
-     :icon "save"
-     :on-click #(dispatch [::monsters/save-monster])}]
-   [monster-builder]])
+  (builder-page "Monster" ::monsters/reset-monster ::monsters/save-monster monster-builder))
+
+(defn encounter-builder-page []
+  (builder-page "Encounter" ::encounters/reset-encounter ::encounters/save-encounter encounter-builder))
 
 (defn language-builder-page []
-  [content-page
-   "Language Builder"
-   [{:title "New Language"
-     :icon "plus"
-     :on-click #(dispatch [::langs/reset-language])}
-    {:title "Save"
-     :icon "save"
-     :on-click #(dispatch [::langs/save-language])}]
-   [language-builder]])
+  (builder-page "Language" ::langs/reset-language ::langs/save-language language-builder))
 
 (defn background-builder-page []
-  [content-page
-   "Background Builder"
-   [{:title "New Background"
-     :icon "plus"
-     :on-click #(dispatch [::bg/reset-background])}
-    {:title "Save"
-     :icon "save"
-     :on-click #(dispatch [::bg/save-background])}]
-   [background-builder]])
+  (builder-page "Background" ::bg/reset-background ::bg/save-background background-builder))
 
 (defn race-builder-page []
-  [content-page
-   "Race Builder"
-   [{:title "New Race"
-     :icon "plus"
-     :on-click #(dispatch [::races/reset-race])}
-    {:title "Save"
-     :icon "save"
-     :on-click #(dispatch [::races/save-race])}]
-   [race-builder]])
+  (builder-page "Race" ::races/reset-race ::races/save-race race-builder))
 
 (defn subrace-builder-page []
-  [content-page
-   "Subrace Builder"
-   [{:title "New Subace"
-     :icon "plus"
-     :on-click #(dispatch [::races/reset-subrace])}
-    {:title "Save"
-     :icon "save"
-     :on-click #(dispatch [::races/save-subrace])}]
-   [subrace-builder]])
+  (builder-page "Subrace" ::races/reset-subrace ::races/save-subrace subrace-builder))
 
 (defn subclass-builder-page []
-  [content-page
-   "Subclass Builder"
-   [{:title "New Subclass"
-     :icon "plus"
-     :on-click #(dispatch [::classes/reset-subclass])}
-    {:title "Save"
-     :icon "save"
-     :on-click #(dispatch [::classes/save-subclass])}]
-   [subclass-builder]])
+  (builder-page "Subclass" ::classes/reset-subclass ::classes/save-subclass subclass-builder))
 
 (defn class-builder-page []
-  [content-page
-   "Class Builder"
-   [{:title "New Class"
-     :icon "plus"
-     :on-click #(dispatch [::classes/reset-class])}
-    {:title "Save"
-     :icon "save"
-     :on-click #(dispatch [::classes/save-class])}]
-   [class-builder]])
+  (builder-page "Class" ::classes/reset-class ::classes/save-class class-builder))
 
 (defn feat-builder-page []
-  [content-page
-   "Feat Builder"
-   [{:title "New Feat"
-     :icon "plus"
-     :on-click #(dispatch [::feats/reset-feat])}
-    {:title "Save"
-     :icon "save"
-     :on-click #(dispatch [::feats/save-feat])}]
-   [feat-builder]])
+  (builder-page "Feat" ::feats/reset-feat ::feats/save-feat feat-builder))
 
 (defn expanded-character-list-item [id owner username char-page-route]
   [:div
