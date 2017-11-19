@@ -127,12 +127,12 @@
                           :prepend-level? true
                           :spell-keys (let [spell-keys
                                             (mapcat
-                                             (fn [lvl] (get-in sl5e/spell-lists [:wizard lvl]))
+                                             (fn [lvl] (get-in spell-lists [:wizard lvl]))
                                              spell-levels)]
                                         (if filter-fn
                                           (filter
                                            (fn [spell-key]
-                                             (filter-fn (spells5e/spell-map spell-key)))
+                                             (filter-fn (spells-map spell-key)))
                                            spell-keys)
                                           spell-keys))}))
 
