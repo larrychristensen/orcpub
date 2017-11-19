@@ -174,19 +174,22 @@
   (inject-cofx :local-store-user)
   (inject-cofx :local-store-magic-item)
   (inject-cofx ::e5/plugins)
+  (inject-cofx ::combat/tracker-item)
   check-spec-interceptor]
  (fn [{:keys [db
               local-store-character
               local-store-user
               local-store-magic-item
-              ::e5/plugins]} _]
+              ::e5/plugins
+              ::combat/tracker-item]} _]
    {:db (if (seq db)
           db
           (cond-> default-value
             plugins (assoc :plugins plugins)
             local-store-character (assoc :character local-store-character)
             local-store-user (update :user-data merge local-store-user)
-            local-store-magic-item (assoc ::mi/builder-item local-store-magic-item)))}))
+            local-store-magic-item (assoc ::mi/builder-item local-store-magic-item)
+            tracker-item (assoc ::combat/tracker-item tracker-item)))}))
 
 (defn reset-character [_ _]
   (char5e/set-class t5e/character :barbarian 0 (class5e/barbarian-option [] {} {} {})))
@@ -2169,6 +2172,18 @@
    (update combat :encounters common/remove-at-index index)))
 
 (reg-event-db
+ ::combat/delete-character
+ combat-interceptors
+ (fn [combat [_ index]]
+   (update combat :characters common/remove-at-index index)))
+
+(reg-event-db
+ ::combat/delete-monster
+ combat-interceptors
+ (fn [combat [_ index]]
+   (update combat :monsters common/remove-at-index index)))
+
+(reg-event-db
  ::combat/set-combat-path-prop
  combat-interceptors
  (fn [combat [_ path-prop prop-value]]
@@ -2774,7 +2789,6 @@
  ::encounters/set-encounter
  encounter-interceptors
  (fn [_ [_ encounter]]
-   (prn "SET ENCOUTNER" encounter)
    encounter))
 
 (reg-event-db
@@ -3010,7 +3024,6 @@
             (str "edit-" option-name "-trait-type"))
    interceptors
    (fn [option [_ index type]]
-     (prn "TYPE" type)
      (assoc-in option [:traits index :type] type)))
   (reg-event-db
    (keyword "orcpub.dnd.e5"
