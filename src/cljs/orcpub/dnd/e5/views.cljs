@@ -5747,45 +5747,47 @@
                   (apply max)))]]
       [:div.f-s-18.f-w-b.m-b-10 "Combatants"]
       [:div.item-list
-       (doall
-        (map-indexed
-         (fn [index {:keys [type character monster]}]
-           (let [path [:initiative type (or (:db/id character) (:key monster))]
-                 initiative (get-in tracker-item path)]
-             ^{:key index}
-             [:div.item-list-item.f-s-18.f-w-b.flex.align-items-c
-              (if (= (:current-initiative tracker-item) initiative)
-                [:i.fa.fa-play.f-s-24.m-r-10])
-              [input-builder-field
-               [:span.f-w-b.f-s-12 "Initiative"]
-               initiative
-               #(dispatch [::combat/set-combat-path-prop path (js/parseInt %)])
-               {:class-name "input h-40 w-80 f-s-24 f-w-b m-r-10 m-t-10 m-b-10"
-                :type :number}]
-              [:div.m-r-10
-               [svg-icon
-                (case type
-                  :pc "orc-head"
-                  :npc "overlord-helm"
-                  :monster "hydra")
-                48]]
-              (if character
-                [character-summary-2 character true "bob" false]
-                [:div.p-t-20.p-b-20
-                 [monster-summary
-                  (:name monster)
-                  (:size monster)
-                  (:type monster)
-                  (:subtypes monster)
-                  (:alignment monster)]])]))
-         (if (:ordered? tracker-item)
-           (sort-by
-            (fn [{:keys [type character monster]}]
-              (let [key (or (:db/id character) (:key monster))]
-                (get-in tracker-item [:initiative type key])))
-            >
-            combatants)
-           combatants)))]]]))
+       (let [current-initiative (:current-initiative tracker-item)]
+         (doall
+          (map-indexed
+           (fn [index {:keys [type character monster]}]
+             (let [path [:initiative type (or (:db/id character) (:key monster))]
+                   initiative (get-in tracker-item path)]
+               ^{:key index}
+               [:div.item-list-item.f-s-18.f-w-b.flex.align-items-c
+                (if (and current-initiative
+                         (= current-initiative initiative))
+                  [:i.fa.fa-play.f-s-24.m-r-10])
+                [input-builder-field
+                 [:span.f-w-b.f-s-12 "Initiative"]
+                 initiative
+                 #(dispatch [::combat/set-combat-path-prop path (js/parseInt %)])
+                 {:class-name "input h-40 w-80 f-s-24 f-w-b m-r-10 m-t-10 m-b-10"
+                  :type :number}]
+                [:div.m-r-10
+                 [svg-icon
+                  (case type
+                    :pc "orc-head"
+                    :npc "overlord-helm"
+                    :monster "hydra")
+                  48]]
+                (if character
+                  [character-summary-2 character true "bob" false]
+                  [:div.p-t-20.p-b-20
+                   [monster-summary
+                    (:name monster)
+                    (:size monster)
+                    (:type monster)
+                    (:subtypes monster)
+                    (:alignment monster)]])]))
+           (if (:ordered? tracker-item)
+             (sort-by
+              (fn [{:keys [type character monster]}]
+                (let [key (or (:db/id character) (:key monster))]
+                  (get-in tracker-item [:initiative type key])))
+              >
+              combatants)
+             combatants))))]]]))
 
 (defn encounter-builder []
   (let [{:keys [creatures] :as encounter} @(subscribe [::encounters/builder-item])]
