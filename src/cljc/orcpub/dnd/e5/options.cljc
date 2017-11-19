@@ -3063,7 +3063,7 @@
          (if feat-selections
            (concat selections feat-selections)
            selections)))
-     (if (seq without-saves)
+     (if (< 1 (count without-saves))
        [(if (:saves? ability-increases)
           (ability-increase-selection
            without-saves
