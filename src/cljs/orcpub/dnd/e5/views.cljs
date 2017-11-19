@@ -4813,6 +4813,20 @@
         class
         "m-l-5 m-b-20"]]]
      [:div.m-b-20
+      [:div.f-s-24.f-w-b.m-b-10 "Saving Throws"]
+      [:div.flex.flex-wrap
+       (doall
+        (map
+         (fn [{:keys [name key]}]
+           ^{:key key}
+           [:div.m-r-20.m-b-10
+            [comps/labeled-checkbox
+             name
+             (get-in class [:profs :save key])
+             false
+             #(dispatch [::classes/toggle-save-prof key])]])
+         opt/abilities))]]
+     [:div.m-b-20
       [:div.f-s-24.f-w-b.m-b-10 "Ability Increase Levels"]
       [:div.flex.flex-wrap
        (let [asi-levels-set (into #{} (:ability-increase-levels class))]
