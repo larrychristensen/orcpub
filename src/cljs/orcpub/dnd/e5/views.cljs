@@ -5546,20 +5546,20 @@
                {:title "Legendary Action"
                 :value :legendary-action}]]]]))
 
-(defn monster-selector [index {:keys [monster num]}]
+(defn monster-selector [index {:keys [monster num]} on-key-change on-num-change]
   (let [monsters @(subscribe [::monsters/sorted-monsters])]
     [:div.flex.flex-wrap.m-l-5
      [labeled-dropdown
       "Monster Name"
-      {:items (map
-               (fn [{:keys [name key]}]
-                 {:title name
-                  :value key})
-               monsters)
+      {:items (cons
+               {:title "<select monster>"}
+               (map
+                (fn [{:keys [name key]}]
+                  {:title name
+                   :value key})
+                monsters))
        :value monster
-       :on-change #(dispatch [::encounters/set-encounter-path-prop
-                              [:creatures index :creature :monster]
-                              (keyword %)])}]
+       :on-change on-key-change}]
      [:div.m-l-5.m-b-10
       [labeled-dropdown
        "Number"
@@ -5569,35 +5569,33 @@
                    :value v})
                 (range 1 21))
         :value (or num 1)
-        :on-change #(dispatch [::encounters/set-encounter-path-prop
-                               [:creatures index :creature :num]
-                               (js/parseInt %)])}]]]))
+        :on-change on-num-change}]]]))
 
-(defn character-selector [index {:keys [character]}]
+(defn character-selector [index {:keys [character]} on-change]
   (let [characters @(subscribe [::char/characters])]
     [:div.flex.flex-wrap.m-l-5
      [:div.m-b-10
       [labeled-dropdown
        "Character Name"
-       {:items (map
-                (fn [{:keys [::char/character-name
-                             ::char/race-name
-                             ::char/classes] :as character-summary}]
-                  {:title (str character-name
-                               " - "
-                               race-name
-                               " "
-                               (s/join
-                                "/"
-                                (map
-                                 ::char/class-name
-                                 classes)))
-                   :value (:db/id character-summary)})
-                characters)
+       {:items (cons
+                {:title "<select character>"}
+                (map
+                 (fn [{:keys [::char/character-name
+                              ::char/race-name
+                              ::char/classes] :as character-summary}]
+                   {:title (str character-name
+                                " - "
+                                race-name
+                                " "
+                                (s/join
+                                 "/"
+                                 (map
+                                  ::char/class-name
+                                  classes)))
+                    :value (:db/id character-summary)})
+                 characters))
         :value character
-        :on-change #(dispatch [::encounters/set-encounter-path-prop
-                               [:creatures index :creature :character]
-                               (js/parseInt %)])}]]]))
+        :on-change on-change}]]]))
 
 (defn creature-selector [index {:keys [type creature] :as details}]
   [:div.flex.flex-wrap.align-items-c
@@ -5612,8 +5610,21 @@
       :value type
       :on-change #(dispatch [::encounters/set-encounter-path-prop [:creatures index :type] (keyword %)])}]]
    (case type
-     :monster [monster-selector index creature]
-     :character [character-selector index creature]
+     :monster [monster-selector
+               index
+               creature
+               #(dispatch [::encounters/set-encounter-path-prop
+                          [:creatures index :creature :monster]
+                           (keyword %)])
+               #(dispatch [::encounters/set-encounter-path-prop
+                           [:creatures index :creature :num]
+                           (js/parseInt %)])]
+     :character [character-selector
+                 index
+                 creature
+                 #(dispatch [::encounters/set-encounter-path-prop
+                             [:creatures index :creature :character]
+                             (js/parseInt %)])]
      nil)
    [:button.form-button.m-l-5.m-b-10
     {:on-click #(dispatch [::encounters/delete-creature index])}
@@ -5651,11 +5662,26 @@
 
 (def char-name #(-> % :character ::char/character-name))
 
+(defn on-character-change [index]
+  #(dispatch [::combat/set-combat-path-prop
+              [:characters index]
+              (js/parseInt %)]))
+
+(defn on-monster-change [index]
+  #(dispatch [::combat/set-combat-path-prop
+              [:monsters index :monster]
+              (keyword %)]))
+
+(defn on-monster-num-change [index]
+  #(dispatch [::combat/set-combat-path-prop
+              [:monsters index :num]
+              (js/parseInt %)]))
+
 (defn combat-tracker []
   (let [expanded-rows (r/atom {})]
     (fn []
       (let [mobile? @(subscribe [:mobile?])
-            {:keys [parties encounters] :as tracker-item} @(subscribe [::combat/tracker-item])
+            {:keys [parties encounters characters monsters] :as tracker-item} @(subscribe [::combat/tracker-item])
             encounter-map @(subscribe [::encounters/encounter-map])
             encounter-creatures (mapcat (comp :creatures encounter-map) encounters)
             by-type (group-by :type encounter-creatures)
@@ -5688,40 +5714,100 @@
                                          {:type :pc
                                           :character character}))))
                                parties))
+            other-characters (into
+                              (sorted-set-by #(compare (char-name %1) (char-name %2)))
+                              (map
+                               (fn [char-id]
+                                 {:type :pc
+                                  :character (character-summary-map char-id)})
+                               characters))
+            other-monsters (map
+                            (fn [{:keys [monster num]}]
+                              {:type :monster
+                               :monster (monster-map monster)})
+                            monsters)
             combatants (concat party-characters
+                               other-characters
                                encounter-characters
-                               encounter-monsters)]
+                               encounter-monsters
+                               other-monsters)]
         [:div.p-20.main-text-color
-         [:div.m-b-20
-          [:div.f-s-24.f-w-b "Parties"]
-          [:div
-           (doall
-            (map-indexed
-             (fn [index party]
-               ^{:key index}
-               [:div.m-t-10.flex.align-items-end
-                [party-selector index party]
-                [:button.form-button.m-l-5.m-b-10
-                 {:on-click #(dispatch [::combat/delete-party index])}
-                 "delete"]])
-             parties))]
-          [:div.m-t-10.flex
-           [party-selector (count parties) {}]]]
-         [:div.m-b-20
-          [:div.f-s-24.f-w-b "Encounters"]
-          [:div
-           (doall
-            (map-indexed
-             (fn [index encounter]
-               ^{:key index}
-               [:div.m-t-10.flex.align-items-end
-                [encounter-selector index encounter]
-                [:button.form-button.m-l-5.m-b-10
-                 {:on-click #(dispatch [::combat/delete-encounter index])}
-                 "delete"]])
-             encounters))]
-          [:div.m-t-10.flex
-           [encounter-selector (count encounters) {}]]]
+         [:div.flex.flex-wrap
+          [:div.m-b-20.m-r-20
+           [:div.f-s-24.f-w-b "Parties"]
+           [:div
+            (doall
+             (map-indexed
+              (fn [index party]
+                ^{:key index}
+                [:div.m-t-10.flex.align-items-end
+                 [party-selector index party]
+                 [:button.form-button.m-l-5.m-b-10
+                  {:on-click #(dispatch [::combat/delete-party index])}
+                  "delete"]])
+              parties))]
+           [:div.m-t-10.flex
+            [party-selector (count parties) {}]]]
+          [:div.m-b-20.m-r-20
+           [:div.f-s-24.f-w-b "Encounters"]
+           [:div
+            (doall
+             (map-indexed
+              (fn [index encounter]
+                ^{:key index}
+                [:div.m-t-10.flex.align-items-end
+                 [encounter-selector index encounter]
+                 [:button.form-button.m-l-5.m-b-10
+                  {:on-click #(dispatch [::combat/delete-encounter index])}
+                  "delete"]])
+              encounters))]
+           [:div.m-t-10.flex
+            [encounter-selector (count encounters) {}]]]
+          [:div.m-b-20.m-r-20
+           [:div.f-s-24.f-w-b "Characters"]
+           [:div
+            (doall
+             (map-indexed
+              (fn [index character]
+                ^{:key index}
+                [:div.m-t-10.flex.align-items-end
+                 [character-selector
+                  index
+                  {:character character}
+                  (on-character-change index)]
+                 [:button.form-button.m-l-5.m-b-10
+                  {:on-click #(dispatch [::combat/delete-character index])}
+                  "delete"]])
+              characters))]
+           [:div.m-t-10.flex
+            [character-selector
+             (count characters)
+             {}
+             (on-character-change (count characters))]]]
+          [:div.m-b-20.m-r-20
+           [:div.f-s-24.f-w-b "Monsters"]
+           [:div
+            (doall
+             (map-indexed
+              (fn [index {:keys [monster num] :as cfg}]
+                ^{:key index}
+                [:div.m-t-10.flex.align-items-end
+                 [monster-selector
+                  index
+                  cfg
+                  (on-monster-change index)
+                  (on-monster-num-change index)]
+                 [:button.form-button.m-l-5.m-b-10
+                  {:on-click #(dispatch [::combat/delete-monster index])}
+                  "delete"]])
+              monsters))]
+           [:div.m-t-10.flex
+            (let [monster-count (count monsters)]
+              [monster-selector
+               monster-count
+               {}
+               (on-monster-change monster-count)
+               (on-monster-num-change monster-count)])]]]
          [:div.m-b-20
           [:div.flex.justify-cont-s-b
            [:div.f-s-24.f-w-b.m-b-10 "Initiative"]

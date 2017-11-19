@@ -76,7 +76,9 @@
 (def default-encounter {:creatures []})
 
 (def default-combat {:parties []
-                     :encounters []})
+                     :encounters []
+                     :characters []
+                     :monsters []})
 
 (def default-background {:traits []})
 
@@ -250,36 +252,13 @@
   {:name "Musical Instrument"
    :options (zipmap (map :key equip5e/musical-instruments) (repeat 1))})
 
-#_(def test-plugins
-  {"EE" {:orcpub.dnd.e5/spell-lists {:bard
-                                     {2 [:dust-devil]}}
-         :orcpub.dnd.e5/backgrounds {:charlatan {:name "Charlatan"
-                                                 :help "You have a history of being able to work people to your advantage."
-                                                 :traits [{:name "False Identity"
-                                                           :page 128
-                                                           :summary "you have a false identity; you can forge documents"}]
-                                                 :profs {:skill {:deception true :sleight-of-hand true}
-                                                         :tool {:disguise-kit true :forgery-kit true}}
-                                                 :equipment {:clothes-fine 1
-                                                             :disguise-kit 1
-                                                             :pouch 1}
-                                                 :treasure {:gp 15}}}
-         :orcpub.dnd.e5/spells {:dust-devil {:name "Dust Devil"
-                                             :option-pack "EE"
-                                             :key :dust-devil
-                                             :school "conjuration"
-                                             :level 2
-                                             :casting-time "actions-1"
-                                             :range "60 feet"
-                                             :duration "conc-1-min"
-                                             :spell-lists {:bard true}
-                                             :components {:verbal true :somatic true :material true :material-component "fur wrapped in cloth"}
-                                             :page 17
-                                             :source :ee
-                                             :summary "Conjure dust devil"}}}})
-
 (reg-local-store-cofx
  ::e5/plugins
  local-storage-plugins-key
  ::e5/plugins)
+
+(reg-local-store-cofx
+ ::combat5e/tracker-item
+ local-storage-combat-key
+ ::combat5e/combat)
 
