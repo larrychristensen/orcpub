@@ -2223,6 +2223,17 @@
    (assoc subclass prop-key prop-value)))
 
 (reg-event-db
+ ::class5e/toggle-save-prof
+ class-interceptors
+ (fn [class [_ key]]
+   (update-in class
+              [:profs :save]
+              (fn [saves]
+                (if (key saves)
+                  (dissoc saves key)
+                  (assoc saves key true))))))
+
+(reg-event-db
  ::class5e/toggle-ability-increase-level
  class-interceptors
  (fn [class [_ level]]
