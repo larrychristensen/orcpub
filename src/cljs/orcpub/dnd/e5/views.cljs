@@ -5652,142 +5652,154 @@
 (def char-name #(-> % :character ::char/character-name))
 
 (defn combat-tracker []
-  (let [mobile? @(subscribe [:mobile?])
-        {:keys [parties encounters] :as tracker-item} @(subscribe [::combat/tracker-item])
-        encounter-map @(subscribe [::encounters/encounter-map])
-        encounter-creatures (mapcat (comp :creatures encounter-map) encounters)
-        by-type (group-by :type encounter-creatures)
-        encounter-monsters (by-type :monster)
-        character-summary-map @(subscribe [::char/summary-map])
-        encounter-characters (remove
-                              #(-> % :character nil?)
-                              (map
-                               (fn [{:keys [creature]}]
-                                 {:type :npc
-                                  :character (-> creature :character character-summary-map)})
-                               (by-type :character)))
-        monster-map @(subscribe [::monsters/monster-map])
-        encounter-monsters (map
-                            (fn [{:keys [creature]}]
-                              {:type :monster
-                               :num (:num creature)
-                               :monster (monster-map (:monster creature))})
-                            (by-type :monster))
-        party-map @(subscribe [::party/party-map])
-        party-characters (into
-                          (sorted-set-by #(compare (char-name %1) (char-name %2)))
-                          (mapcat
-                           (fn [party]
-                             (->> party
-                                  party-map
-                                  ::party/character-ids
+  (let [expanded-rows (r/atom {})]
+    (fn []
+      (let [mobile? @(subscribe [:mobile?])
+            {:keys [parties encounters] :as tracker-item} @(subscribe [::combat/tracker-item])
+            encounter-map @(subscribe [::encounters/encounter-map])
+            encounter-creatures (mapcat (comp :creatures encounter-map) encounters)
+            by-type (group-by :type encounter-creatures)
+            encounter-monsters (by-type :monster)
+            character-summary-map @(subscribe [::char/summary-map])
+            encounter-characters (remove
+                                  #(-> % :character nil?)
                                   (map
-                                   (fn [character]
-                                     {:type :pc
-                                      :character character}))))
-                           parties))
-        combatants (concat party-characters
-                           encounter-characters
-                           encounter-monsters)]
-    [:div.p-20.main-text-color
-     [:div.m-b-20
-      [:div.f-s-24.f-w-b "Parties"]
-      [:div
-       (doall
-        (map-indexed
-         (fn [index party]
-           ^{:key index}
-           [:div.m-t-10.flex.align-items-end
-            [party-selector index party]
-            [:button.form-button.m-l-5.m-b-10
-             {:on-click #(dispatch [::combat/delete-party index])}
-             "delete"]])
-         parties))]
-      [:div.m-t-10.flex
-       [party-selector (count parties) {}]]]
-     [:div.m-b-20
-      [:div.f-s-24.f-w-b "Encounters"]
-      [:div
-       (doall
-        (map-indexed
-         (fn [index encounter]
-           ^{:key index}
-           [:div.m-t-10.flex.align-items-end
-            [encounter-selector index encounter]
-            [:button.form-button.m-l-5.m-b-10
-             {:on-click #(dispatch [::combat/delete-encounter index])}
-             "delete"]])
-         encounters))]
-      [:div.m-t-10.flex
-       [encounter-selector (count encounters) {}]]]
-     [:div.m-b-20
-      [:div.flex.justify-cont-s-b
-       [:div.f-s-24.f-w-b.m-b-10 "Initiative"]
-       [:div.flex
-        [:button.form-button.m-l-5.m-b-10
-         {:on-click #(dispatch [::combat/next-initiative])}
-         [:i.fa.fa-play]
-         (if (not mobile?)
-           [:span.m-l-5
-            "next initiative"])]
-        [:button.form-button.m-l-5.m-b-10
-         {:on-click #(dispatch [::combat/set-combat-prop :ordered? true])}
-         [:i.fa.fa-arrow-down]
-         (if (not mobile?)
-           [:span.m-l-5 "order"])]]]
-      [:div.m-b-20
-       [:div.f-s-18.f-w-b "Current Initiative"]
-       [:div.f-s-36.f-w-b
-        (get tracker-item
-             :current-initiative
-             (->> tracker-item
-                  :initiative
-                  vals
-                  (mapcat vals)
-                  (apply max)))]]
-      [:div.f-s-18.f-w-b.m-b-10 "Combatants"]
-      [:div.item-list
-       (let [current-initiative (:current-initiative tracker-item)]
-         (doall
-          (map-indexed
-           (fn [index {:keys [type character monster]}]
-             (let [path [:initiative type (or (:db/id character) (:key monster))]
-                   initiative (get-in tracker-item path)]
+                                   (fn [{:keys [creature]}]
+                                     {:type :npc
+                                      :character (-> creature :character character-summary-map)})
+                                   (by-type :character)))
+            monster-map @(subscribe [::monsters/monster-map])
+            encounter-monsters (map
+                                (fn [{:keys [creature]}]
+                                  {:type :monster
+                                   :num (:num creature)
+                                   :monster (monster-map (:monster creature))})
+                                (by-type :monster))
+            party-map @(subscribe [::party/party-map])
+            party-characters (into
+                              (sorted-set-by #(compare (char-name %1) (char-name %2)))
+                              (mapcat
+                               (fn [party]
+                                 (->> party
+                                      party-map
+                                      ::party/character-ids
+                                      (map
+                                       (fn [character]
+                                         {:type :pc
+                                          :character character}))))
+                               parties))
+            combatants (concat party-characters
+                               encounter-characters
+                               encounter-monsters)]
+        [:div.p-20.main-text-color
+         [:div.m-b-20
+          [:div.f-s-24.f-w-b "Parties"]
+          [:div
+           (doall
+            (map-indexed
+             (fn [index party]
                ^{:key index}
-               [:div.item-list-item.f-s-18.f-w-b.flex.align-items-c
-                (if (and current-initiative
-                         (= current-initiative initiative))
-                  [:i.fa.fa-play.f-s-24.m-r-10])
-                [input-builder-field
-                 [:span.f-w-b.f-s-12 "Initiative"]
-                 initiative
-                 #(dispatch [::combat/set-combat-path-prop path (js/parseInt %)])
-                 {:class-name "input h-40 w-80 f-s-24 f-w-b m-r-10 m-t-10 m-b-10"
-                  :type :number}]
-                [:div.m-r-10
-                 [svg-icon
-                  (case type
-                    :pc "orc-head"
-                    :npc "overlord-helm"
-                    :monster "hydra")
-                  48]]
-                (if character
-                  [character-summary-2 character true "bob" false]
-                  [:div.p-t-20.p-b-20
-                   [monster-summary
-                    (:name monster)
-                    (:size monster)
-                    (:type monster)
-                    (:subtypes monster)
-                    (:alignment monster)]])]))
-           (if (:ordered? tracker-item)
-             (sort-by
-              (fn [{:keys [type character monster]}]
-                (let [key (or (:db/id character) (:key monster))]
-                  (get-in tracker-item [:initiative type key])))
-              >
-              combatants)
-             combatants))))]]]))
+               [:div.m-t-10.flex.align-items-end
+                [party-selector index party]
+                [:button.form-button.m-l-5.m-b-10
+                 {:on-click #(dispatch [::combat/delete-party index])}
+                 "delete"]])
+             parties))]
+          [:div.m-t-10.flex
+           [party-selector (count parties) {}]]]
+         [:div.m-b-20
+          [:div.f-s-24.f-w-b "Encounters"]
+          [:div
+           (doall
+            (map-indexed
+             (fn [index encounter]
+               ^{:key index}
+               [:div.m-t-10.flex.align-items-end
+                [encounter-selector index encounter]
+                [:button.form-button.m-l-5.m-b-10
+                 {:on-click #(dispatch [::combat/delete-encounter index])}
+                 "delete"]])
+             encounters))]
+          [:div.m-t-10.flex
+           [encounter-selector (count encounters) {}]]]
+         [:div.m-b-20
+          [:div.flex.justify-cont-s-b
+           [:div.f-s-24.f-w-b.m-b-10 "Initiative"]
+           [:div.flex
+            [:button.form-button.m-l-5.m-b-10
+             {:on-click #(dispatch [::combat/next-initiative])}
+             [:i.fa.fa-play]
+             (if (not mobile?)
+               [:span.m-l-5
+                "next initiative"])]
+            [:button.form-button.m-l-5.m-b-10
+             {:on-click #(dispatch [::combat/set-combat-prop :ordered? true])}
+             [:i.fa.fa-arrow-down]
+             (if (not mobile?)
+               [:span.m-l-5 "order"])]]]
+          [:div.m-b-20
+           [:div.f-s-18.f-w-b "Current Initiative"]
+           [:div.f-s-36.f-w-b
+            (get tracker-item
+                 :current-initiative
+                 (->> tracker-item
+                      :initiative
+                      vals
+                      (mapcat vals)
+                      (apply max)))]]
+          [:div.f-s-18.f-w-b.m-b-10 "Combatants"]
+          [:div.item-list
+           (let [current-initiative (:current-initiative tracker-item)]
+             (doall
+              (map-indexed
+               (fn [index {:keys [type character monster]}]
+                 (let [path [:initiative type (or (:db/id character) (:key monster))]
+                       initiative (get-in tracker-item path)]
+                   ^{:key index}
+                   [:div.item-list-item
+                    [:div.f-s-18.f-w-b.flex.align-items-c.pointer
+                     {:on-click #(swap! expanded-rows update path not)}
+                     (if (and current-initiative
+                              (= current-initiative initiative))
+                       [:i.fa.fa-play.f-s-24.m-r-10])
+                     [input-builder-field
+                      [:span.f-w-b.f-s-12 "Initiative"]
+                      initiative
+                      #(dispatch [::combat/set-combat-path-prop path (js/parseInt %)])
+                      {:class-name "input h-40 w-80 f-s-24 f-w-b m-r-10 m-t-10 m-b-10"
+                       :type :number}]
+                     [:div.m-r-10
+                      [svg-icon
+                       (case type
+                         :pc "orc-head"
+                         :npc "overlord-helm"
+                         :monster "hydra")
+                       48]]
+                     (if character
+                       [character-summary-2 character true "bob" false]
+                       [:div.p-t-20.p-b-20.w-100-p
+                        [monster-summary
+                         (:name monster)
+                         (:size monster)
+                         (:type monster)
+                         (:subtypes monster)
+                         (:alignment monster)]])
+                     [:i.fa {:class-name (if (get @expanded-rows path)
+                                           "fa-caret-up"
+                                           "fa-caret-down")}]]
+                    (if (get @expanded-rows path)
+                      (if character
+                        [character-display (:db/id character) false (if mobile? 1 2)]
+                        [:div.p-t-10.p-b-10
+                         [monster-component (monster-map (:key monster))]]))]))
+               (if (:ordered? tracker-item)
+                 (sort-by
+                  (fn [{:keys [type character monster]}]
+                    (let [key (or (:db/id character) (:key monster))]
+                      (get-in tracker-item [:initiative type key])))
+                  >
+                  combatants)
+                 combatants))))]]]))))
 
 (defn encounter-builder []
   (let [{:keys [creatures] :as encounter} @(subscribe [::encounters/builder-item])]
