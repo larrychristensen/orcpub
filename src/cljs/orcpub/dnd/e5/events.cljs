@@ -2145,13 +2145,20 @@
                           vals
                           (mapcat vals)
                           (sort >))
-         current-initiative (:current-initiative combat)]
+         current-initiative (:current-initiative combat)
+         next-initiative (if current-initiative
+                           (or (first (drop-while #(>= % current-initiative) initiatives))
+                               (first initiatives))
+                           (second initiatives))
+         round (get combat :round 1)]
      (assoc combat
             :current-initiative
-            (if current-initiative
-              (or (first (drop-while #(>= % current-initiative) initiatives))
-                  (first initiatives))
-              (second initiatives))))))
+            next-initiative
+            :round
+            (if (and current-initiative
+                     (> next-initiative current-initiative))
+              (inc round)
+              round)))))
 
 (reg-event-db
  ::encounters/set-encounter-path-prop
