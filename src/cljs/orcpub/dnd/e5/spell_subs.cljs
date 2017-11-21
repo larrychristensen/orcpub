@@ -198,7 +198,7 @@
                           :spellcasting-ability ::char5e/int
                           :class-name "Fighter"
                           :num num
-                          :spell-keys (get-in sl5e/spell-lists [:wizard 0])}))
+                          :spell-keys (get-in spell-lists [:wizard 0])}))
 
 (defn arcane-trickster-cantrip [subclass-key spell-lists spells-map num]
   (opt5e/spell-selection spell-lists
@@ -209,7 +209,7 @@
                           :spellcasting-ability ::char5e/int
                           :class-name "Rogue"
                           :num num
-                          :spell-keys (get-in sl5e/spell-lists [:wizard 0])}))
+                          :spell-keys (get-in spell-lists [:wizard 0])}))
 
 (defn spellcaster-subclass-levels [subclass-key spell-lists spells-map class-name]
   (case class-name

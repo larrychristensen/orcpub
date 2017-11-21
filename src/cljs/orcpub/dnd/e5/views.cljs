@@ -5823,16 +5823,21 @@
              [:i.fa.fa-arrow-down]
              (if (not mobile?)
                [:span.m-l-5 "order"])]]]
-          [:div.m-b-20
-           [:div.f-s-18.f-w-b "Current Initiative"]
-           [:div.f-s-36.f-w-b
-            (get tracker-item
-                 :current-initiative
-                 (->> tracker-item
-                      :initiative
-                      vals
-                      (mapcat vals)
-                      (apply max)))]]
+          [:div.flex.flex-wrap
+           [:div.m-b-20.m-r-20.t-a-c
+            [:div.f-s-18.f-w-b "Current Initiative"]
+            [:div.f-s-36.f-w-b
+             (get tracker-item
+                  :current-initiative
+                  (->> tracker-item
+                       :initiative
+                       vals
+                       (mapcat vals)
+                       (apply max)))]]
+           [:div.m-b-20.t-a-c
+            [:div.f-s-18.f-w-b "Round"]
+            [:div.f-s-36.f-w-b
+             (get tracker-item :round 1)]]]
           [:div.f-s-18.f-w-b.m-b-10 "Combatants"]
           [:div.item-list
            (let [current-initiative (:current-initiative tracker-item)]
