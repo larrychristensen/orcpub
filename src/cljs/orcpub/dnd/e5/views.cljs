@@ -185,30 +185,19 @@
 (defn dispatch-logout []
   (dispatch [:logout]))
 
-(defn dispatch-route-to-login []
+(defn dispatch-route-to-login [e]
+  (.stopPropagation e)
   (dispatch [:route-to-login]))
 
-(defn user-header-view []
-  (let [username @(subscribe [:username])]
-    [:div.flex.align-items-c
-     [:div.user-icon [svg-icon "orc-head" 40 ""]]
-     (if username
-       [:span.f-w-b.t-a-r
-        (if (not @(subscribe [:mobile?])) [:span.m-r-5 username])
-        [:span.underline.pointer
-         {:style login-style
-          :on-click dispatch-logout}
-         "LOG OUT"]]
-       [:span.pointer.flex.flex-column.align-items-end
-        [:span.orange.underline.f-w-b.m-l-5
-         {:style login-style
-          :on-click dispatch-route-to-login}
-         [:span "LOGIN"]]])]))
+(defn dispatch-route-to-my-account [e]
+  (dispatch [:route :my-account]))
 
 (def header-tab-style
   {:width "85px"})
 
 (def active-style {:background-color "rgba(240, 161, 0, 0.7)"})
+
+(def menu-color "#2c3445")
 
 (def header-menu-item-style
   {:position :absolute
@@ -224,6 +213,69 @@
 (def mobile-header-menu-item-style
   (assoc header-menu-item-style
          :top 46))
+
+(def user-menu-style
+  {:background-color menu-color
+   :z-index 10000
+   :position :fixed
+   :display :none})
+
+(defn handle-user-menu [e]
+  (let [user-header (js/document.getElementById "user-header")
+        user-menu (js/document.getElementById "user-menu")
+        bounding-rect (.getBoundingClientRect user-header)
+        width (.-offsetWidth user-header)
+        bottom (.-bottom bounding-rect)
+        right (.-right bounding-rect)
+        style (.-style user-menu)
+        window-width js/document.documentElement.clientWidth]
+    (set! (.-right style) (str (- window-width right) "px"))
+    (set! (.-top style) (str bottom "px"))
+    (set! (.-display style) "block")
+    (prn "RIGHT BOTTOM" right bottom)))
+
+(defn user-header-view []
+  (let [username @(subscribe [:username])
+        mobile? @(subscribe [:mobile?])]
+    [:div#user-header.pointer
+     (if username
+       {:on-mouse-over handle-user-menu
+        :on-mouse-out (fn [e]
+                        (let [user-menu (js/document.getElementById "user-menu")
+                              style (.-style user-menu)]
+                          (set! (.-display style) "none")))})
+     [:div.flex.align-items-c
+      [:div.user-icon [svg-icon "orc-head" 40 ""]]
+      (if username
+        [:span.f-w-b.t-a-r
+         (if (not @(subscribe [:mobile?])) [:span.m-r-5 username])]
+        [:span.pointer.flex.flex-column.align-items-end
+         [:span.orange.underline.f-w-b.m-l-5
+          {:style login-style
+           :on-click dispatch-route-to-login}
+          [:span "LOGIN"]]])
+      (if username
+        [:i.fa.m-l-5.fa-caret-down])]
+     [:div#user-menu.shadow.f-w-b
+      {:style user-menu-style}
+      [:div.p-10.opacity-5.hover-opacity-full
+       {:on-click dispatch-logout}
+       "LOG OUT"]
+      [:div.p-10.opacity-5.hover-opacity-full
+       {:on-click dispatch-route-to-my-account}
+       "ACCOUNT"]]
+     #_(if username
+         [:span.f-w-b.t-a-r
+          (if (not @(subscribe [:mobile?])) [:span.m-r-5 username])
+          [:span.underline.pointer
+           {:style login-style
+            :on-click dispatch-logout}
+           "LOG OUT"]]
+         [:span.pointer.flex.flex-column.align-items-end
+          [:span.orange.underline.f-w-b.m-l-5
+           {:style login-style
+            :on-click dispatch-route-to-login}
+           [:span "LOGIN"]]])]))
 
 (defn route-fn [route]
   (fn [e]
@@ -253,7 +305,7 @@
             [:div.title.uppercase title])]
          (if (and (seq buttons)
                   @hovered?)
-           [:div.uppercase
+           [:div.uppercase.shadow
             {:style (if mobile? mobile-header-menu-item-style header-menu-item-style)}
             (doall
              (map
@@ -6239,6 +6291,24 @@
               :accept ".orcbrew"
               :on-change import-file}]]
     [my-content]]])
+
+(defn my-account-page []
+  [content-page
+   "My Account"
+   [{:title (str "Delete Account")
+     :icon "trash"
+     :on-click #(dispatch
+                [:show-confirmation
+                 {:confirm-button-text "DELETE ACCOUNT"
+                  :question "Are you sure you want to delete your account, characters, and associated data?"
+                  :event [:delete-account]}])}]
+   [:div.f-s-24.p-10
+    [:div.p-5
+     [:span.f-w-b "Username: "]
+     [:span @(subscribe [:username])]]
+    [:div.p-5
+     [:span.f-w-b "Email: "]
+     [:span @(subscribe [:email])]]]])
 
 (defn builder-page [item-title reset-event save-event builder]
   [content-page

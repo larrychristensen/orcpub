@@ -869,6 +869,17 @@
         user (find-user-by-username-or-email db username)]
     {:status 200 :body (user-body db user)}))
 
+(defn delete-user [{:keys [db conn identity]}]
+  (let [username (:user identity)
+        user (d/q '[:find ?u .
+                    :in $ ?username
+                    :where [?u :orcpub.user/username ?username]]
+                  db
+                  username)]
+    (prn "USER" user)
+    @(d/transact conn [[:db/retractEntity user]])
+    {:status 200}))
+
 (defn character-summary-description [{:keys [::char5e/race-name ::char5e/subrace-name ::char5e/classes]}]
   (str race-name
        " "
@@ -908,6 +919,7 @@
    [route-map/dnd-e5-char-builder-route]
    [route-map/dnd-e5-my-content-route]
    [route-map/send-password-reset-page-route]
+   [route-map/my-account-page-route]
    [route-map/register-page-route]
    [route-map/login-page-route]
    [route-map/verify-sent-route]
@@ -1025,7 +1037,8 @@
        [(route-map/path-for route-map/register-route)
         {:post `register}]
        [(route-map/path-for route-map/user-route) ^:interceptors [check-auth]
-        {:get `get-user}]
+        {:get `get-user
+         :delete `delete-user}]
        [(route-map/path-for route-map/follow-user-route :user ":user") ^:interceptors [check-auth]
         {:post `follow-user
          :delete `unfollow-user}]
