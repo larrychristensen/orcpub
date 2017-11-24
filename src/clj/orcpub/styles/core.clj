@@ -212,7 +212,7 @@
    [:.slight-text-shadow
     {:text-shadow "1px 1px 1px rgba(0,0,0,0.8)"}]
 
-   [:.hover-shadow:hover
+   [:.hover-shadow:hover :.shadow
     {:box-shadow "0 2px 6px 0 rgba(0, 0, 0, 0.5)"}]
 
    [:.hover-no-shadow:hover
@@ -908,8 +908,8 @@
 
     [:.app-header-bar
      {:min-height (px 81)
-      :-webkit-backdrop-filter "blur(5px)"
-      :backdrop-filter "blur(5px)"
+      ;;:-webkit-backdrop-filter "blur(5px)"
+      ;;:backdrop-filter "blur(5px)"
       :background-color "rgba(0, 0, 0, 0.25)"}]
 
     #_[:.options-column

@@ -699,6 +699,17 @@
  (fn []))
 
 (reg-event-fx
+ :delete-account
+ (fn [{:keys [db]} _]
+   (let [path (routes/path-for routes/user-route)]
+     {:dispatch-n [[:logout]
+                   [:new-character]
+                   [:route routes/dnd-e5-char-builder-route]]
+      :http {:method :delete
+             :headers (authorization-headers db)
+             :url (backend-url path)}})))
+
+(reg-event-fx
  :unfollow-user
  (fn [{:keys [db]} [_ username]]
    (let [path (routes/path-for routes/follow-user-route :user username)]

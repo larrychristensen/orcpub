@@ -243,6 +243,11 @@
  (fn [db _]
    (-> db :user-data :user-data :username)))
 
+(reg-sub
+ :email
+ (fn [db _]
+   (-> db :user-data :user-data :email)))
+
 (defn built-template [template selected-plugin-options]
   template
   #_(let [selected-plugins (map
