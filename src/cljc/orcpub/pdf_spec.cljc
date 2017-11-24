@@ -37,14 +37,13 @@
   (into {}
         (map
          (fn [[k v]]
-           [(keyword (str (name k) "-" suffix)) (common/bonus-str v)])
+           [(keyword (str (name k) "-" suffix)) (common/bonus-str v)
+            v])
          vals)))
 
-(defn ability-bonuses [built-char]
-  (ability-related-bonuses "mod" (char5e/ability-bonuses built-char)))
-
 (defn save-bonuses [built-char]
-  (ability-related-bonuses "save" (es/entity-val built-char :save-bonuses)))
+  (ability-related-bonuses "save"
+                           (es/entity-val built-char :save-bonuses)))
 
 (defn skill-fields [built-char]
   (let [skill-bonuses (es/entity-val built-char :skill-bonuses)
@@ -449,15 +448,35 @@
       (str unarmored-speed "/" speed)
       speed)))
 
+(defn abilities-spec [vals suffix bonus?]
+  (reduce-kv
+   (fn [m k v]
+     (let [new-k (if suffix
+                   (keyword (str (name k) "-mod"))
+                   k)
+           new-v (if bonus? (common/bonus-str v) v)]
+       (assoc m new-k new-v)))
+   {}
+   vals))
 
 (defn make-spec [built-char
                  id
                  {:keys [print-character-sheet?
                          print-spell-cards?
-                         print-prepared-spells?] :as options}]
+                         print-prepared-spells?
+                         print-large-abilities?] :as options}]
   (let [race (char5e/race built-char)
         subrace (char5e/subrace built-char)
-        abilities (char5e/ability-values built-char)
+        abilities (abilities-spec
+                   (char5e/ability-values built-char)
+                   (if (not print-large-abilities?)
+                     "-mod")
+                   false)
+        ability-bonuses (abilities-spec
+                         (char5e/ability-bonuses built-char)
+                         (if print-large-abilities?
+                           "-mod")
+                         true)
         saving-throws (set (char5e/saving-throws built-char))
         unarmored-armor-class (char5e/base-armor-class built-char)
         ac-with-armor-fn (char5e/armor-class-with-armor built-char)
@@ -515,7 +534,7 @@
      (attacks-and-spellcasting-fields built-char)
      (skill-fields built-char)
      abilities
-     (ability-bonuses built-char)
+     ability-bonuses
      (save-bonuses built-char)
      (reduce
       (fn [saves key]

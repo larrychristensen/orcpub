@@ -3244,12 +3244,14 @@
                      id
                      print-character-sheet?
                      print-spell-cards?
-                     print-prepared-spells?]
+                     print-prepared-spells?
+                     print-large-abilities?]
   #(let [export-fn (export-pdf built-char
                                id
                                {:print-character-sheet? print-character-sheet?
                                 :print-spell-cards? print-spell-cards?
-                                :print-prepared-spells? print-prepared-spells?})]
+                                :print-prepared-spells? print-prepared-spells?
+                                :print-large-abilities? print-large-abilities?})]
      (export-fn)
      (dispatch [::char/hide-options])))
 
@@ -3258,10 +3260,18 @@
 (defn print-options [id built-char]
   (let [print-character-sheet? @(subscribe [::char/print-character-sheet?])
         print-spell-cards? @(subscribe [::char/print-spell-cards?])
-        print-prepared-spells? @(subscribe [::char/print-prepared-spells?])]
+        print-prepared-spells? @(subscribe [::char/print-prepared-spells?])
+        print-large-abilities? @(subscribe [::char/print-large-abilities?])]
     [:div.flex.justify-cont-end
      [:div.p-20
       [:div.f-s-24.f-w-b.m-b-10 "Print Options"]
+      [:div.m-b-2
+       [:div.flex
+        [:div
+         {:on-click (make-event-handler ::char/toggle-large-abilities-print)}
+         [labeled-checkbox
+          "Print Abilities Large (and Bonuses Small)"
+          print-large-abilities?]]]]
       [:div.m-b-2
        [:div.flex
         [:div
@@ -3291,7 +3301,8 @@
                                       id
                                       print-character-sheet?
                                       print-spell-cards?
-                                      print-prepared-spells?)}
+                                      print-prepared-spells?
+                                      print-large-abilities?)}
        "Print"]]]))
 
 (defn make-print-handler [id built-char]
