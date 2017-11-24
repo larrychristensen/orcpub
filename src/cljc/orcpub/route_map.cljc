@@ -72,6 +72,7 @@
 
 (def register-route :register)
 (def register-page-route :register-page)
+(def my-account-page-route :my-account)
 (def verify-route :verify)
 (def verify-failed-route :verify-failed)
 (def verify-success-route :verify-success)
@@ -141,7 +142,8 @@
                                                 "/characters" {"" dnd-e5-char-party-characters-route
                                                                ["/" :character-id] dnd-e5-char-party-character-route}}}
                           "character-summaries" dnd-e5-char-summary-list-route}}
-                  "pages/" {"register-page" register-page-route
+                  "pages/" {"my-account" my-account-page-route
+                            "register-page" register-page-route
                             "login-page" login-page-route
                             "reset-password-page" reset-password-page-route
                             "send-password-reset-page" send-password-reset-page-route
