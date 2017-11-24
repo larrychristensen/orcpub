@@ -1186,6 +1186,11 @@
    (get db ::char5e/print-prepared-spells?)))
 
 (reg-sub
+ ::char5e/print-large-abilities?
+ (fn [db _]
+   (get db ::char5e/print-large-abilities?)))
+
+(reg-sub
  ::char5e/delete-confirmation-shown?
  (fn [db [_ id]]
    (get-in db [::char5e/delete-confirmation-shown? id])))
