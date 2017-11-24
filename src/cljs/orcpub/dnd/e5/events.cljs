@@ -3257,6 +3257,11 @@
    (update db ::char5e/exclude-spell-cards-print? not)))
 
 (reg-event-db
+ ::char5e/toggle-large-abilities-print
+ (fn [db _]
+   (update db ::char5e/print-large-abilities? not)))
+
+(reg-event-db
  ::char5e/toggle-known-spells-print
  (fn [db _]
    (update db ::char5e/print-prepared-spells? not)))
