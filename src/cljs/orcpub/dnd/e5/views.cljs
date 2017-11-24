@@ -2854,6 +2854,10 @@
   (and (some? v)
        (not= :none v)))
 
+(defn obj-to-item [{:keys [name key]}]
+  {:title name
+   :value key})
+
 (defn equipped-section [id]
   [:div
    [section-header "battle-gear" "Equipped Items"]
@@ -3518,6 +3522,10 @@
    (fn [event-kw & [arg-fn]]
      #(dispatch [event-kw (if arg-fn (arg-fn %) %)]))))
 
+(defn value-to-item [v]
+  {:title v
+   :value v})
+
 (defn base-weapon-selector []
   (let [mobile? @(subscribe [:mobile?])
         other? @(subscribe [::mi/has-subtype? :other])
@@ -3577,9 +3585,7 @@
           [labeled-dropdown
            "Damage Die Number"
            {:items (map
-                    (fn [v]
-                      {:value v
-                       :title v})
+                    value-to-item
                     (range 1 10))
             :value @(subscribe [::mi/item-damage-die-count])
             :on-change (make-arg-event-handler ::mi/set-item-damage-die-count js/parseInt)}]]
@@ -3598,9 +3604,7 @@
             [labeled-dropdown
              "Versatile Damage Die Number"
              {:items (map
-                      (fn [v]
-                        {:value v
-                         :title v})
+                      value-to-item
                       (range 1 10))
               :value @(subscribe [::mi/item-versatile-damage-die-count])
               :on-change (make-arg-event-handler ::mi/set-item-versatile-damage-die-count js/parseInt)}]])
@@ -3972,9 +3976,7 @@
     [labeled-dropdown
      "Choose"
      {:items (map
-              (fn [v]
-                {:title v
-                 :value v})
+              value-to-item
               (range 1 6))
       :value (get-in option [:profs :skill-options :choose] 1)
       :on-change #(dispatch [set-path-prop-event [:profs :skill-options :choose] (js/parseInt %)])}]]
@@ -4656,9 +4658,7 @@
                  :value :select
                  :disabled? true}
                 (map
-                 (fn [{:keys [name key]}]
-                   {:title name
-                    :value key})
+                 obj-to-item
                  opt/abilities))
         :value (or (:ability spell-cfg) :select)
         :on-change #(dispatch [value-change-event index (assoc spell-cfg :ability (keyword %))])}]]
@@ -4670,9 +4670,7 @@
                  :value :select
                  :disabled? true}
                 (map
-                 (fn [{:keys [name key]}]
-                   {:title name
-                    :value key})
+                 obj-to-item
                  spells))
         :value (or (:key spell-cfg) :select)
         :on-change #(dispatch [value-change-event index (assoc spell-cfg :key (keyword %))])}]]]))
@@ -4695,16 +4693,12 @@
                               :value type})
                            [:simple :martial])
                           (map
-                           (fn [{:keys [key name]}]
-                             {:title name
-                              :value key})
+                           obj-to-item
                            weapon/weapons))}
    :num-attacks {:name "Number of Attacks"
                  :value-fn js/parseInt
                  :values (map
-                          (fn [v]
-                            {:title v
-                             :value v})
+                          value-to-item
                           (range 2 5))}
    :damage-resistance {:name "Damage Resistance"
                        :value-fn keyword
@@ -4715,16 +4709,12 @@
    :saving-throw-advantage {:name "Saving Throw Advantage"
                             :value-fn keyword
                             :values (map
-                                     (fn [{:keys [key name]}]
-                                       {:title name
-                                        :value key})
+                                     obj-to-item
                                      opt/conditions)}
    :skill-prof {:name "Skill Proficiency"
                 :value-fn keyword
                 :values (map
-                         (fn [{:keys [key name]}]
-                           {:title name
-                            :value key})
+                         obj-to-item
                          skills/skills)}
    :armor-prof {:name "Armor Proficiency"
                 :value-fn keyword
@@ -4772,9 +4762,7 @@
                   :disabled? true
                   :value :select}
                  (map
-                  (fn [[kw {:keys [name]}]]
-                    {:title name
-                     :value kw})
+                  obj-to-item
                   modifier-values))
          :value (if type (clojure.core/name type) :select)
          :on-change #(dispatch [edit-modifier-type-event index (keyword %)])}]]
@@ -4957,9 +4945,7 @@
                               :value :select
                               :disabled? true}
                              (map
-                              (fn [{:keys [name key]}]
-                                {:title name
-                                 :value key})
+                              obj-to-item
                               spells-for-level))
                      :value (or (get-in subclass [spells-kw level i])
                                 :select)
@@ -5129,9 +5115,7 @@
        [labeled-dropdown
         "Speed"
         {:items (map
-                 (fn [v]
-                   {:title v 
-                    :value v})
+                 value-to-item
                  (range 5 55 5))
          :value (or (get subrace :speed)
                     (get race :speed))
@@ -5140,9 +5124,7 @@
        [labeled-dropdown
         "Darkvision"
         {:items (map
-                 (fn [v]
-                   {:title v 
-                    :value v})
+                 value-to-item
                  [0 60 120])
          :value (or (get subrace :darkvision)
                     (get race :darkvision))
@@ -5233,9 +5215,7 @@
        [labeled-dropdown
         "Speed"
         {:items (map
-                 (fn [v]
-                   {:title v 
-                    :value v})
+                 value-to-item
                  (range 0 55 5))
          :value (get race :speed)
          :on-change #(dispatch [::races/set-race-speed %])}]]
@@ -5243,9 +5223,7 @@
        [labeled-dropdown
         "Flying Speed"
         {:items (map
-                 (fn [v]
-                   {:title v 
-                    :value v})
+                 value-to-item
                  (range 0 55 5))
          :value (or (get-in race [:props :flying-speed]) 0)
          :on-change #(dispatch [::races/set-race-value-prop :flying-speed (js/parseInt %)])}]]
@@ -5253,9 +5231,7 @@
        [labeled-dropdown
         "Swimming Speed"
         {:items (map
-                 (fn [v]
-                   {:title v 
-                    :value v})
+                 value-to-item
                  (range 0 55 5))
          :value (or (get-in race [:props :swimming-speed]) 0)
          :on-change #(dispatch [::races/set-race-value-prop :swimming-speed (js/parseInt %)])}]]
@@ -5263,9 +5239,7 @@
        [labeled-dropdown
         "Darkvision"
         {:items (map
-                 (fn [v]
-                   {:title v 
-                    :value v})
+                 value-to-item
                  [0 60 120])
          :value (get race :darkvision)
          :on-change #(dispatch [::races/set-race-prop :darkvision (js/parseInt %)])}]]]
@@ -5469,9 +5443,7 @@
        [labeled-dropdown
         "Armor Class"
         {:items (map
-                 (fn [v]
-                   {:title v
-                    :value v})
+                 value-to-item
                  (range 5 25))
          :value (or armor-class 10)
          :on-change #(dispatch [::monsters/set-monster-prop :armor-class (js/parseInt %)])}]]]
@@ -5490,9 +5462,7 @@
          {:items (cons
                   {:title "-"}
                   (map
-                   (fn [v]
-                     {:title v
-                      :value v})
+                   value-to-item
                    (range 1 36)))
           :value (get hit-points :die-count)
           :on-change #(let [v (js/parseInt %)] (dispatch [::monsters/set-monster-path-prop [:hit-points :die-count] (if (not (js/isNaN v)) v)]))}]]
@@ -5502,9 +5472,7 @@
          {:items (cons
                   {:title "-"}
                   (map
-                   (fn [v]
-                     {:title v
-                      :value v})
+                   value-to-item
                    dice/dice-sides))
           :value (get hit-points :die)
           :on-change #(let [v (js/parseInt %)]
@@ -5528,9 +5496,7 @@
               [labeled-dropdown
                name
                {:items (map
-                        (fn [v]
-                          {:title v
-                           :value v})
+                        value-to-item
                         (range 1 31))
                 :value (or (simple-kw monster) 10)
                 :on-change #(dispatch [::monsters/set-monster-prop simple-kw (js/parseInt %)])}])])
@@ -5549,9 +5515,7 @@
                {:items (cons
                         {:title "-"}
                         (map
-                         (fn [v]
-                           {:title v
-                            :value v})
+                         value-to-item
                          (range 0 18)))
                 :value (get saving-throws simple-kw)
                 :on-change #(dispatch [::monsters/set-monster-path-prop [:saving-throws simple-kw] (let [parsed (js/parseInt %)] (if (not (js/isNaN parsed)) parsed))])}])])
@@ -5570,9 +5534,7 @@
                {:items (cons
                         {:title "-"}
                         (map
-                         (fn [v]
-                           {:title v
-                            :value v})
+                         value-to-item
                          (range 1 21)))
                 :value (get skills key 0)
                 :on-change #(dispatch [::monsters/set-monster-path-prop [:skills key] (js/parseInt %)])}])])
@@ -5617,22 +5579,19 @@
       {:items (cons
                {:title "<select monster>"}
                (map
-                (fn [{:keys [name key]}]
-                  {:title name
-                   :value key})
+                obj-to-item
                 monsters))
        :value monster
        :on-change on-key-change}]
-     [:div.m-l-5.m-b-10
-      [labeled-dropdown
-       "Number"
-       {:items (map
-                (fn [v]
-                  {:title v
-                   :value v})
-                (range 1 21))
-        :value (or num 1)
-        :on-change on-num-change}]]]))
+     (if monster
+       [:div.m-l-5.m-b-10
+        [labeled-dropdown
+         "Number"
+         {:items (map
+                  value-to-item
+                  (range 1 21))
+          :value (or num 1)
+          :on-change on-num-change}]])]))
 
 (defn character-selector [index {:keys [character]} on-change]
   (let [characters @(subscribe [::char/characters])]
@@ -5716,9 +5675,7 @@
       {:items (cons
                {:title "<select encounter>"}
                (map
-                (fn [{:keys [name key]}]
-                  {:title name
-                   :value key})
+                obj-to-item
                 encounters))
        :value encounter
        :on-change #(dispatch [::combat/set-combat-path-prop [:encounters index] (keyword %)])}]]))
@@ -5744,7 +5701,7 @@
   (let [expanded-rows (r/atom {})]
     (fn []
       (let [mobile? @(subscribe [:mobile?])
-            {:keys [parties encounters characters monsters] :as tracker-item} @(subscribe [::combat/tracker-item])
+            {:keys [parties encounters characters monsters monster-data] :as tracker-item} @(subscribe [::combat/tracker-item])
             encounter-map @(subscribe [::encounters/encounter-map])
             encounter-creatures (mapcat (comp :creatures encounter-map) encounters)
             by-type (group-by :type encounter-creatures)
@@ -5762,7 +5719,7 @@
                                 (fn [{:keys [creature]}]
                                   {:type :monster
                                    :num (:num creature)
-                                   :monster (monster-map (:monster creature))})
+                                   :monster (:monster creature)})
                                 (by-type :monster))
             party-map @(subscribe [::party/party-map])
             party-characters (into
@@ -5785,15 +5742,31 @@
                                   :character (character-summary-map char-id)})
                                characters))
             other-monsters (map
-                            (fn [{:keys [monster num]}]
+                            (fn [{:keys [monster num monster-data]}]
                               {:type :monster
-                               :monster (monster-map monster)})
+                               :num num
+                               :monster monster})
                             monsters)
+            all-monsters (vals
+                          (reduce
+                           (fn [m {:keys [num monster] :as v}]
+                             (prn "V" v)
+                             (update m
+                                     monster
+                                     (fn [x]
+                                       (if x
+                                         (assoc x :num (+ (get x :num 1) (or num 1)))
+                                         (assoc v :monster (monster-map monster))))))
+                           {}
+                           (concat encounter-monsters
+                                   other-monsters)))
+            _ (prn "ALL MONSTERS" all-monsters)
             combatants (concat party-characters
                                other-characters
                                encounter-characters
-                               encounter-monsters
-                               other-monsters)]
+                               all-monsters)]
+        (prn "MONSTERS" other-monsters)
+        (prn "COMBAT" tracker-item)
         [:div.p-20.main-text-color
          [:div.flex.flex-wrap
           [:div.m-b-20.m-r-20
@@ -5906,7 +5879,8 @@
            (let [current-initiative (:current-initiative tracker-item)]
              (doall
               (map-indexed
-               (fn [index {:keys [type character monster]}]
+               (fn [index {:keys [type character monster num] :as combatant}]
+                 (prn "COMBATATNT" combatant)
                  (let [path [:initiative type (or (:db/id character) (:key monster))]
                        initiative (get-in tracker-item path)]
                    ^{:key index}
@@ -5931,13 +5905,15 @@
                        48]]
                      (if character
                        [character-summary-2 character true "bob" false]
-                       [:div.p-t-20.p-b-20.w-100-p
-                        [monster-summary
-                         (:name monster)
-                         (:size monster)
-                         (:type monster)
-                         (:subtypes monster)
-                         (:alignment monster)]])
+                       [:div.flex.w-100-p.align-items-c
+                        [:div.p-t-20.p-b-20
+                         [monster-summary
+                          (:name monster)
+                          (:size monster)
+                          (:type monster)
+                          (:subtypes monster)
+                          (:alignment monster)]]
+                        [:div.f-w-b.f-s-24 (str "(" num ")")]])
                      [:i.fa {:class-name (if (get @expanded-rows path)
                                            "fa-caret-up"
                                            "fa-caret-down")}]]
@@ -5945,6 +5921,58 @@
                       (if character
                         [character-display (:db/id character) false (if mobile? 1 2)]
                         [:div.p-t-10.p-b-10
+                         [:div.w-100-p.m-b-20
+                          [:div.flex.justify-cont-end
+                           [:button.form-button.m-t-5
+                            {:on-click #(dispatch [::combat/randomize-monster-hit-points combatant monster-map])}
+                            "Randomize Hit Points"]]
+                          [:div.flex.flex-wrap
+                           (doall
+                            (map
+                             (fn [x]
+                               (prn "MONSTER DATA" monster-data)
+                               ^{:key x}
+                               [:div.m-r-5.p-20
+                                [:div.f-w-b.f-s-18 (str "Monster " (inc x))]
+                                [:div
+                                 [:div.f-s-12.f-w-b "Hit Points"]
+                                 [comps/input-field
+                                  :input
+                                  (get-in monster-data
+                                          [(:key monster) x :hit-points]
+                                          (get-in monster [:hit-points :mean]))
+                                  (fn [])
+                                  {:type :number
+                                   :class-name "input w-80"}]]
+                                [:div.m-t-10
+                                 [:div.f-s-16.f-w-b "Conditions"]
+                                 [:div.flex
+                                  [:div.m-r-5
+                                   [:div.f-w-b.f-s-12 "Condition"]
+                                   [dropdown
+                                    {:items (cons
+                                             {:title "<select condition>"}
+                                             (map
+                                              obj-to-item
+                                              opt/conditions))}]]
+                                  [:div.m-r-5
+                                   [:div.f-w-b.f-s-12 "Duration Unit"]
+                                   [dropdown
+                                    {:items [{:title "Rounds"
+                                              :value :rounds}
+                                             {:title "Minutes"
+                                              :value :minutes}
+                                             {:title "Hours"
+                                              :value :hours}
+                                             {:title "Days"
+                                              :value :days}]}]]
+                                  [:div.m-r-5
+                                   [:div.f-w-b.f-s-12 "Duration"]
+                                   [dropdown
+                                    {:items (map
+                                             value-to-item
+                                             (range 1 21))}]]]]])
+                             (range (or num 1))))]]
                          [monster-component (monster-map (:key monster))]]))]))
                (if (:ordered? tracker-item)
                  (sort-by

@@ -2142,6 +2142,27 @@
    (assoc-in monster prop-path prop-value)))
 
 (reg-event-db
+ ::combat/randomize-monster-hit-points
+ combat-interceptors
+ (fn [combat [_ {:keys [num monster]} monster-map]]
+   (prn "MONSTER" monster)
+   (update-in combat
+              [:monster-data (:key monster)]
+              (fn [{:keys [individuals] :as monster-data}]
+                (let [{:keys [die die-count modifier]} (:hit-points monster)
+                      new-individuals (take num
+                                            (concat
+                                             individuals
+                                             (repeat
+                                              {})))]
+                  (mapv
+                   (fn [x]
+                     (assoc x :hit-points (dice/dice-roll {:num die-count
+                                                           :sides die
+                                                           :modifier modifier})))
+                   new-individuals))))))
+
+(reg-event-db
  ::combat/set-combat-prop
  combat-interceptors
  (fn [combat [_ prop-key prop-value]]
