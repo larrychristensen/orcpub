@@ -2367,6 +2367,12 @@
    (assoc-in race prop-path prop-value)))
 
 (reg-event-db
+ ::race5e/set-subrace-path-prop
+ subrace-interceptors
+ (fn [subrace [_ prop-path prop-value]]
+   (assoc-in subrace prop-path prop-value)))
+
+(reg-event-db
  ::bg5e/set-background-prop
  background-interceptors
  (fn [background [_ prop-key prop-value]]
@@ -2535,6 +2541,12 @@
  race-interceptors
  (fn [race [_ prop-path prop-value]]
    (update-in race prop-path not)))
+
+(reg-event-db
+ ::race5e/toggle-subrace-path-prop
+ subrace-interceptors
+ (fn [subrace [_ prop-path prop-value]]
+   (update-in subrace prop-path not)))
 
 (reg-event-db
  ::race5e/toggle-race-map-prop

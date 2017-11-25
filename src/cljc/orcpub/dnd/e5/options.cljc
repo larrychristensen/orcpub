@@ -1799,6 +1799,7 @@
                       source
                       {:keys [name
                               abilities
+                              profs
                               size
                               speed
                               darkvision
@@ -1809,26 +1810,36 @@
                               selections
                               traits
                               source]}]
-  (t/option-cfg
-   {:name name
-    :selections selections
-    :modifiers (concat
-                [(modifiers/subrace name)]
-                (if (and speed
-                         (not= speed (:speed race)))
-                  [(modifiers/speed (- speed (:speed race)))])
-                (if (and darkvision
-                         (not= darkvision (:darkvision race)))
-                  [(modifiers/darkvision darkvision)])
-                modifiers
-                (armor-prof-modifiers armor-proficiencies)
-                (weapon-prof-modifiers weapon-proficiencies)
-                (map
-                 (fn [[k v]]
-                   (modifiers/subrace-ability k v))
-                 abilities)
-                (traits-modifiers traits nil source)
-                (if source [(modifiers/used-resource source name)]))}))
+  (let [{:keys [skill-options]} profs
+        {skill-num :choose options :options} skill-options
+        skill-kws (if (:any options)
+                    (map :key skills/skills)
+                    (map
+                     clojure.core/key
+                     (filter val options)))]
+    (t/option-cfg
+     {:name name
+      :selections (concat
+                   (if (seq skill-kws)
+                     [(skill-selection skill-kws (or skill-num 1))])
+                   selections)
+      :modifiers (concat
+                  [(modifiers/subrace name)]
+                  (if (and speed
+                           (not= speed (:speed race)))
+                    [(modifiers/speed (- speed (:speed race)))])
+                  (if (and darkvision
+                           (not= darkvision (:darkvision race)))
+                    [(modifiers/darkvision darkvision)])
+                  modifiers
+                  (armor-prof-modifiers armor-proficiencies)
+                  (weapon-prof-modifiers weapon-proficiencies)
+                  (map
+                   (fn [[k v]]
+                     (modifiers/subrace-ability k v))
+                   abilities)
+                  (traits-modifiers traits nil source)
+                  (if source [(modifiers/used-resource source name)]))})))
 
 (defn ability-modifiers [abilities]
   (map
@@ -2039,7 +2050,7 @@
       :help help
       :selections (concat
                    (if (seq skill-kws)
-                     [(skill-selection skill-kws skill-num)])
+                     [(skill-selection skill-kws (or skill-num 1))])
                    (if (seq subraces)
                      [(subrace-selection race spell-lists spells-map language-map plugin? source subraces [:race key])])
                    (if (seq language-options) [(language-selection language-map language-options)])
@@ -2997,6 +3008,7 @@
       :medium-armor-stealth [medium-armor-master-stealth]
       :speed [(modifiers/speed v)]
       :flying-speed [(modifiers/flying-speed-override v)]
+      :flying-speed-equals-walking-speed [(modifiers/flying-speed-equal-to-walking)]
       :swimming-speed [(modifiers/swimming-speed-override v)]
       :saving-throw-advantage-traps [(modifiers/saving-throw-advantage [:traps])]
       :lizardfolk-ac (if v
