@@ -2142,25 +2142,62 @@
    (assoc-in monster prop-path prop-value)))
 
 (reg-event-db
+ ::combat/set-monster-hit-points
+ combat-interceptors
+ (fn [combat [_ {:keys [num monster]} individual-index value]]
+   (let [{:keys [die die-count modifier]} (:hit-points monster)]
+     (assoc-in combat
+               [:monster-data (:key monster) individual-index :hit-points]
+               value))))
+
+(reg-event-db
+ ::combat/delete-monster-condition
+ combat-interceptors
+ (fn [combat [_ monster-key individual-index condition-index]]
+   (update-in combat
+              [:monster-data monster-key individual-index :conditions]
+              common/remove-at-index
+              condition-index)))
+
+(reg-event-db
+ ::combat/set-monster-condition-type
+ combat-interceptors
+ (fn [combat [_ monster-key individual-index condition-index type]]
+   (update-in combat
+              [:monster-data monster-key individual-index :conditions]
+              (fn [conditions]
+                (let [conditions (vec conditions)]
+                  (assoc-in conditions [condition-index :type] type))))))
+
+(reg-event-db
+ ::combat/set-monster-condition-duration
+ combat-interceptors
+ (fn [combat [_ monster-key individual-index condition-index duration-type hours]]
+   (update-in combat
+              [:monster-data monster-key individual-index :conditions]
+              (fn [conditions]
+                (let [conditions (vec conditions)]
+                  (assoc-in conditions
+                            [condition-index :duration duration-type]
+                            hours))))))
+
+(reg-event-db
  ::combat/randomize-monster-hit-points
  combat-interceptors
  (fn [combat [_ {:keys [num monster]} monster-map]]
-   (prn "MONSTER" monster)
-   (update-in combat
-              [:monster-data (:key monster)]
-              (fn [{:keys [individuals] :as monster-data}]
-                (let [{:keys [die die-count modifier]} (:hit-points monster)
-                      new-individuals (take num
-                                            (concat
-                                             individuals
-                                             (repeat
-                                              {})))]
-                  (mapv
-                   (fn [x]
-                     (assoc x :hit-points (dice/dice-roll {:num die-count
-                                                           :sides die
-                                                           :modifier modifier})))
-                   new-individuals))))))
+   (let [{:keys [die die-count modifier]} (:hit-points monster)]
+     (update-in combat
+                [:monster-data (:key monster)]
+                (fn [monster-data]
+                  (reduce
+                   (fn [m x]
+                     (assoc-in m
+                               [x :hit-points]
+                               (dice/dice-roll {:num die-count
+                                                :sides die
+                                                :modifier modifier})))
+                   monster-data
+                   (range num)))))))
 
 (reg-event-db
  ::combat/set-combat-prop
@@ -2168,10 +2205,73 @@
  (fn [combat [_ prop-key prop-value]]
    (assoc combat prop-key prop-value)))
 
+(defn nil-or-zero? [v]
+  (or (nil? v) (zero? v)))
+
+(defn zero-duration? [{{:keys [hours minutes rounds]} :duration}]
+  (and (nil-or-zero? hours)
+       (nil-or-zero? minutes)
+       (nil-or-zero? rounds)))
+
+(defn decrement-duration [condition]
+  (update
+   condition
+   :duration
+   (fn [{:keys [hours minutes rounds] :as duration}]
+     (if (not (zero-duration? condition))
+       (let [total-rounds (+ rounds
+                             (* common/rounds-per-minute minutes)
+                             (* common/rounds-per-hour hours))
+             next-total-rounds (dec total-rounds)
+             next-hours (int (/ next-total-rounds common/rounds-per-hour))
+             remaining (rem next-total-rounds common/rounds-per-hour)
+             next-minutes (int (/ remaining common/rounds-per-minute))
+             next-rounds (rem remaining common/rounds-per-minute)]
+         {:hours next-hours
+          :minutes next-minutes
+          :rounds next-rounds})))))
+
+(defn update-individual-monster [data monster-index individual-data]
+  (assoc
+   data
+   monster-index
+   (update
+    individual-data
+    :conditions
+    (fn [conditions]
+      (into
+       []
+       (comp
+        (map
+         decrement-duration)
+        (remove
+         zero-duration?))
+       conditions)))))
+
+(defn update-monster-data-item [monster-data monster-kw data]
+  (assoc
+   monster-data
+   monster-kw
+   (reduce-kv
+    update-individual-monster
+    data
+    data)))
+
+(defn update-monster-data [monster-data]
+  (reduce-kv
+   update-monster-data-item
+   monster-data
+   monster-data))
+
+(defn update-conditions [combat]
+  (update combat
+          :monster-data
+          update-monster-data))
+
 (reg-event-db
  ::combat/next-initiative
  combat-interceptors
- (fn [combat]
+ (fn [{:keys [monster-data] :as combat}]
    (let [initiatives (->> combat
                           :initiative
                           vals
@@ -2183,14 +2283,12 @@
                                (first initiatives))
                            (second initiatives))
          round (get combat :round 1)]
-     (assoc combat
-            :current-initiative
-            next-initiative
-            :round
-            (if (and current-initiative
-                     (> next-initiative current-initiative))
-              (inc round)
-              round)))))
+     (let [next-round? (and current-initiative
+                            (> next-initiative current-initiative))]
+       (cond-> combat
+         true (assoc :current-initiative next-initiative)
+         next-round? (assoc :round (inc round))
+         next-round? update-conditions)))))
 
 (reg-event-db
  ::encounters/set-encounter-path-prop
