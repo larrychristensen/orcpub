@@ -5937,55 +5937,56 @@
                        initiative (get-in tracker-item path)]
                    ^{:key index}
                    [:div.item-list-item
-                    [:div.f-s-18.f-w-b.flex.align-items-c.pointer
-                     {:on-click #(swap! expanded-rows update path not)}
-                     (if (and current-initiative
-                              (= current-initiative initiative))
-                       [:i.fa.fa-play.f-s-24.m-r-10])
-                     [input-builder-field
-                      [:span.f-w-b.f-s-12 "Initiative"]
-                      initiative
-                      #(dispatch [::combat/set-combat-path-prop path (js/parseInt %)])
-                      {:class-name "input h-40 w-80 f-s-24 f-w-b m-r-10 m-t-10 m-b-10"
-                       :type :number}]
-                     [:div.m-r-10
-                      [svg-icon
-                       (case type
-                         :pc "orc-head"
-                         :npc "overlord-helm"
-                         :monster "hydra")
-                       48]]
-                     (if character
-                       [character-summary-2 character true "bob" false]
-                       [:div.flex.w-100-p.align-items-c
-                        [:div.p-t-20.p-b-20
-                         [monster-summary
-                          (:name monster)
-                          (:size monster)
-                          (:type monster)
-                          (:subtypes monster)
-                          (:alignment monster)]]
-                        [:div.f-w-b.f-s-24 (str "(" (or num 1) ")")]
-                        [:div.flex.flex-wrap
-                         (doall
-                          (map
-                           (fn [i]
-                             (let [{:keys [hit-points conditions]} (get-in monster-data [(:key monster) i])]
-                               ^{:key i}
-                               [:div.flex.align-items-c.m-l-20.m-t-10.m-b-10
-                                [:div
-                                 [:div.f-s-12 "hps"]
-                                 [:div.m-r-5.f-s-24.f-w-b
-                                  (or hit-points (get-in monster [:hit-points :mean]))]]
-                                [:div.flex.align-items-c
-                                 (doall
-                                  (map
-                                   (fn [{:keys [type]}]
-                                     ^{:key type}
-                                     [:div.m-l--5
-                                      [svg-icon (get-in opt/conditions-map [type :icon]) 36]])
-                                   conditions))]]))
-                           (range num)))]])
+                    [:div.flex.justify-cont-s-b.align-items-c
+                     [:div.f-s-18.f-w-b.flex.flex-wrap.align-items-c.pointer.w-100-p
+                      {:on-click #(swap! expanded-rows update path not)}
+                      (if (and current-initiative
+                               (= current-initiative initiative))
+                        [:i.fa.fa-play.f-s-24.m-r-10])
+                      [input-builder-field
+                       [:span.f-w-b.f-s-12 "Initiative"]
+                       initiative
+                       #(dispatch [::combat/set-combat-path-prop path (js/parseInt %)])
+                       {:class-name "input h-40 w-80 f-s-24 f-w-b m-r-10 m-t-10 m-b-10"
+                        :type :number}]
+                      [:div.m-r-10
+                       [svg-icon
+                        (case type
+                          :pc "orc-head"
+                          :npc "overlord-helm"
+                          :monster "hydra")
+                        48]]
+                      (if character
+                        [character-summary-2 character true "bob" false]
+                        [:div.flex.align-items-c.w-100-p
+                         [:div.p-t-20.p-b-20
+                          [monster-summary
+                           (:name monster)
+                           (:size monster)
+                           (:type monster)
+                           (:subtypes monster)
+                           (:alignment monster)]]
+                         [:div.f-w-b.f-s-24 (str "(" (or num 1) ")")]
+                         [:div.flex.flex-wrap
+                          (doall
+                           (map
+                            (fn [i]
+                              (let [{:keys [hit-points conditions]} (get-in monster-data [(:key monster) i])]
+                                ^{:key i}
+                                [:div.flex.flex-wrap.align-items-c.m-l-20.m-t-10.m-b-10
+                                 [:div
+                                  [:div.f-s-12 "hps"]
+                                  [:div.m-r-5.f-s-24.f-w-b
+                                   (or hit-points (get-in monster [:hit-points :mean]))]]
+                                 [:div.flex.flex-wrap.align-items-c
+                                  (doall
+                                   (map
+                                    (fn [{:keys [type]}]
+                                      ^{:key type}
+                                      [:div.m-l--5
+                                       [svg-icon (get-in opt/conditions-map [type :icon]) 36]])
+                                    conditions))]]))
+                            (range num)))]])]
                      [:i.fa {:class-name (if (get @expanded-rows path)
                                            "fa-caret-up"
                                            "fa-caret-down")}]]
