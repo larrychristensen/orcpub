@@ -20,22 +20,22 @@
    [{:title "Thank you for using OrcPub!"
      :font-size 32
      :paragraphs
-     ["We wrote this policy to help you understand what information we collect, how we use it, and what choices you have. Because we’re an internet company, some of the concepts below are a little technical, but we’ve tried our best to explain things in a simple and clear way. We welcome your questions and comments on this policy."]}
+     ["We wrote this policy to help you understand what information we collect, how we use it, and what choices you have. Because we're an internet company, some of the concepts below are a little technical, but we've tried our best to explain things in a simple and clear way. We welcome your questions and comments on this policy."]}
     {:title "How We Collect Your Information"
      :font-size 32
      :subsections
      [{:title "When you give it to us or give us permission to obtain it"
        :font-size 28
        :paragraphs
-       ["When you sign up for or use our products, you voluntarily give us certain information. This can include your name, profile photo, role-playing game characters, comments, likes, the email address or phone number you used to sign up, and any other information you provide us. If you’re using OrcPub on your mobile device, you can also choose to provide us with location data. And if you choose to buy something on OrcPub, you provide us with payment information, contact information (ex., address and phone number), and what you purchased. If you buy something for someone else on OrcPub, you’d also provide us with their shipping details and contact information."
+       ["When you sign up for or use our products, you voluntarily give us certain information. This can include your name, profile photo, role-playing game characters, comments, likes, the email address or phone number you used to sign up, and any other information you provide us. If you're using OrcPub on your mobile device, you can also choose to provide us with location data. And if you choose to buy something on OrcPub, you provide us with payment information, contact information (ex., address and phone number), and what you purchased. If you buy something for someone else on OrcPub, you'd also provide us with their shipping details and contact information."
         "You also may give us permission to access your information in other services. For example, you may link your Facebook or Twitter account to OrcPub, which allows us to obtain information from those accounts (like your friends or contacts). The information we get from those services often depends on your settings or their privacy policies, so be sure to check what those are."]}
       {:title "We also get technical information when you use our products"
        :font-size 28
        :paragraphs
-       ["These days, whenever you use a website, mobile application, or other internet service, there’s certain information that almost always gets created and recorded automatically. The same is true when you use our products. Here are some of the types of information we collect:"
-        "Log data. When you use OrcPub, our servers may automatically record information (“log data”), including information that your browser sends whenever you visit a website or your mobile app sends when you’re using it. This log data may include your Internet Protocol address, the address of the web pages you visited that had OrcPub features, browser type and settings, the date and time of your request, how you used OrcPub, and cookie data."
-        "Cookie data. Depending on how you’re accessing our products, we may use “cookies” (small text files sent by your computer each time you visit our website, unique to your OrcPub account or your browser) or similar technologies to record log data. When we use cookies, we may use “session” cookies (that last until you close your browser) or “persistent” cookies (that last until you or your browser delete them). For example, we may use cookies to store your language preferences or other OrcPub settings so you don‘t have to set them up every time you visit OrcPub. Some of the cookies we use are associated with your OrcPub account (including personal information about you, such as the email address you gave us), and other cookies are not."
-        "Device information. In addition to log data, we may also collect information about the device you’re using OrcPub on, including what type of device it is, what operating system you’re using, device settings, unique device identifiers, and crash data. Whether we collect some or all of this information often depends on what type of device you’re using and its settings. For example, different types of information are available depending on whether you’re using a Mac or a PC, or an iPhone or an Android phone. To learn more about what information your device makes available to us, please also check the policies of your device manufacturer or software provider."]}
+       ["These days, whenever you use a website, mobile application, or other internet service, there's certain information that almost always gets created and recorded automatically. The same is true when you use our products. Here are some of the types of information we collect:"
+        "Log data. When you use OrcPub, our servers may automatically record information (“log data”), including information that your browser sends whenever you visit a website or your mobile app sends when you're using it. This log data may include your Internet Protocol address, the address of the web pages you visited that had OrcPub features, browser type and settings, the date and time of your request, how you used OrcPub, and cookie data."
+        "Cookie data. Depending on how you're accessing our products, we may use “cookies” (small text files sent by your computer each time you visit our website, unique to your OrcPub account or your browser) or similar technologies to record log data. When we use cookies, we may use “session” cookies (that last until you close your browser) or “persistent” cookies (that last until you or your browser delete them). For example, we may use cookies to store your language preferences or other OrcPub settings so you don‘t have to set them up every time you visit OrcPub. Some of the cookies we use are associated with your OrcPub account (including personal information about you, such as the email address you gave us), and other cookies are not."
+        "Device information. In addition to log data, we may also collect information about the device you're using OrcPub on, including what type of device it is, what operating system you're using, device settings, unique device identifiers, and crash data. Whether we collect some or all of this information often depends on what type of device you're using and its settings. For example, different types of information are available depending on whether you're using a Mac or a PC, or an iPhone or an Android phone. To learn more about what information your device makes available to us, please also check the policies of your device manufacturer or software provider."]}
       {:title "Our partners and advertisers may share information with us"
        :font-size 28
        :paragraphs
@@ -44,7 +44,7 @@
     {:title "How do we use the information we collect?"
      :font-size 32
      :paragraphs
-     ["We use the information we collect to provide our products to you and make them better, develop new products, and protect OrcPub and our users. For example, we may log how often people use two different versions of a product, which can help us understand which version is better. If you make a purchase on OrcPub, we’ll save your payment information and contact information so that you can use them the next time you want to buy something on OrcPub."
+     ["We use the information we collect to provide our products to you and make them better, develop new products, and protect OrcPub and our users. For example, we may log how often people use two different versions of a product, which can help us understand which version is better. If you make a purchase on OrcPub, we'll save your payment information and contact information so that you can use them the next time you want to buy something on OrcPub."
       "We also use the information we collect to offer you customized content, including:"
       "Showing you ads you might be interested in."
       "We also use the information we collect to:"
@@ -59,8 +59,8 @@
      :font-size 32
      :paragraphs
      ["Anyone can see the public role-playing game characters and other content you create, and the profile information you give us. We may also make this public information available through what are called “APIs” (basically a technical way to share information quickly). For example, a partner might use a OrcPub API to integrate with other applications our users may be interested in. The other limited instances where we may share your personal information include:"
-      "When we have your consent. This includes sharing information with other services (like Facebook or Twitter) when you’ve chosen to link to your OrcPub account to those services or publish your activity on OrcPub to them. For example, you can choose to share your characters on Facebook or Twitter."
-      "When you buy something on OrcPub using your credit card, we may share your credit card information, contact information, and other information about the transaction with the merchant you’re buying from. The merchants treat this information just as if you had made a purchase from their website directly, which means their privacy policies and marketing policies apply to the information we share with them."
+      "When we have your consent. This includes sharing information with other services (like Facebook or Twitter) when you've chosen to link to your OrcPub account to those services or publish your activity on OrcPub to them. For example, you can choose to share your characters on Facebook or Twitter."
+      "When you buy something on OrcPub using your credit card, we may share your credit card information, contact information, and other information about the transaction with the merchant you're buying from. The merchants treat this information just as if you had made a purchase from their website directly, which means their privacy policies and marketing policies apply to the information we share with them."
       "Online advertisers typically use third party companies to audit the delivery and performance of their ads on websites and apps. We also allow these companies to collect this information on OrcPub. To learn more, please see our Help Center."
       "We may employ third party companies or individuals to process personal information on our behalf based on our instructions and in compliance with this Privacy Policy. For example, we share credit card information with the payment companies we use to store your payment information. Or, we may share data with a security consultant to help us get better at identifying spam. In addition, some of the information we request may be collected by third party providers on our behalf."
       "If we believe that disclosure is reasonably necessary to comply with a law, regulation or legal request; to protect the safety, rights, or property of the public, any person, or OrcPub; or to detect, prevent, or otherwise address fraud, security or technical issues. We may share the information described in this Policy with our wholly-owned subsidiaries and affiliates. We may engage in a merger, acquisition, bankruptcy, dissolution, reorganization, or similar transaction or proceeding that involves the transfer of the information described in this Policy. We may also share aggregated or non-personally identifiable information with our partners, advertisers or others."]}
@@ -69,14 +69,14 @@
      :paragraphs
      ["You may close your account at any time by emailing redorc@orcpub.com. We will then inactivate your account and remove your content from OrcPub. We may retain archived copies of you information as required by law or for legitimate business purposes (including to help address fraud and spam). You may remove any content you create from OrcPub at any time, although we may retain archived copies of the information. You may also disable sharing of content you create at any time, whether publicly shared or privately shared with specific users."
       "Also, we support the Do Not Track browser setting."]}
-    {:title "Our policy on children’s information"
+    {:title "Our policy on children's information"
      :font-size 32
      :paragraphs
      ["OrcPub is not directed to children under 13. If you learn that your minor child has provided us with personal information without your consent, please contact us."]}
     {:title "How do we make changes to this policy?"
      :font-size 32
      :paragraphs
-     ["We may change this policy from time to time, and if we do we’ll post any changes on this page. If you continue to use OrcPub after those changes are in effect, you agree to the revised policy. If the changes are significant, we may provide more prominent notice or get your consent as required by law."]}
+     ["We may change this policy from time to time, and if we do we'll post any changes on this page. If you continue to use OrcPub after those changes are in effect, you agree to the revised policy. If the changes are significant, we may provide more prominent notice or get your consent as required by law."]}
     {:title "How can you contact us?"
      :font-size 32
      :paragraphs
@@ -174,7 +174,7 @@
     :font-size 32
     :paragraphs
     ["For any dispute you have with OrcPub, you agree to first contact us and attempt to resolve the dispute with us informally. If OrcPub has not been able to resolve the dispute with you informally, we each agree to resolve any claim, dispute, or controversy (excluding claims for injunctive or other equitable relief) arising out of or in connection with or relating to these Terms by binding arbitration by the American Arbitration Association (\"AAA\") under the Commercial Arbitration Rules and Supplementary Procedures for Consumer Related Disputes then in effect for the AAA, except as provided herein. Unless you and OrcPub agree otherwise, the arbitration will be conducted in the county where you reside. Each party will be responsible for paying any AAA filing, administrative and arbitrator fees in accordance with AAA rules, except that OrcPub will pay for your reasonable filing, administrative, and arbitrator fees if your claim for damages does not exceed $75,000 and is non-frivolous (as measured by the standards set forth in Federal Rule of Civil Procedure 11(b)). The award rendered by the arbitrator shall include costs of arbitration, reasonable attorneys' fees and reasonable costs for expert and other witnesses, and any judgment on the award rendered by the arbitrator may be entered in any court of competent jurisdiction. Nothing in this Section shall prevent either party from seeking injunctive or other equitable relief from the courts for matters related to data security, intellectual property or unauthorized access to the Service. ALL CLAIMS MUST BE BROUGHT IN THE PARTIES' INDIVIDUAL CAPACITY, AND NOT AS A PLAINTIFF OR CLASS MEMBER IN ANY PURPORTED CLASS OR REPRESENTATIVE PROCEEDING, AND, UNLESS WE AGREE OTHERWISE, THE ARBITRATOR MAY NOT CONSOLIDATE MORE THAN ONE PERSON'S CLAIMS. YOU AGREE THAT, BY ENTERING INTO THESE TERMS, YOU AND ORCPUB ARE EACH WAIVING THE RIGHT TO A TRIAL BY JURY OR TO PARTICIPATE IN A CLASS ACTION."
-     "To the extent any claim, dispute or controversy regarding OrcPub or our Products isn’t arbitrable under applicable laws or otherwise: you and OrcPub both agree that any claim or dispute regarding OrcPub will be resolved exclusively in accordance with Clause 11 of these Terms."]
+     "To the extent any claim, dispute or controversy regarding OrcPub or our Products isn't arbitrable under applicable laws or otherwise: you and OrcPub both agree that any claim or dispute regarding OrcPub will be resolved exclusively in accordance with Clause 11 of these Terms."]
     {:title "11. Governing law and jurisdiction"
      :font-size 32
      :paragraphs
@@ -215,8 +215,8 @@
    [{:title "Our Mission"
      :font-size 32
      :paragraphs
-     ["At OrcPub, our mission is to help you discover and do what you love. That means showing you ideas that are relevant, interesting and personal to you, and making sure you don’t see anything that’s inappropriate or spammy."
-      "These are guidelines for what we do and don’t allow on OrcPub. If you come across content that seems to break these rules, you can report it to us."]}
+     ["At OrcPub, our mission is to help you discover and do what you love. That means showing you ideas that are relevant, interesting and personal to you, and making sure you don't see anything that's inappropriate or spammy."
+      "These are guidelines for what we do and don't allow on OrcPub. If you come across content that seems to break these rules, you can report it to us."]}
     {:title "Safety"
      :font-size 32
      :paragraphs
@@ -233,21 +233,21 @@
      :font-size 32
      :paragraphs
      ["To respect the rights of people on and off OrcPub, please:"
-      "Don’t infringe anyone's intellectual property, privacy or other rights."
-      "Don’t do anything or post any content that violates laws or regulations."
-      "Don’t use OrcPub’s name, logo or trademark in a way that confuses people (check out our brand guidelines for more details)."]}
+      "Don't infringe anyone's intellectual property, privacy or other rights."
+      "Don't do anything or post any content that violates laws or regulations."
+      "Don't use OrcPub's name, logo or trademark in a way that confuses people (check out our brand guidelines for more details)."]}
     {:title "Site security and access"
      :font-size 32
      :paragraphs
      ["To keep OrcPub secure, we ask that you please:"
-      "Don’t access, use or tamper with our systems or our technical providers’ systems."
-      "Don’t break or circumvent our security measures or test the vulnerability of our systems or networks."
-      "Don’t use any undocumented or unsupported method to access, search, scrape, download or change any part of OrcPub."
-      "Don’t try to reverse engineer our software."
-      "Don’t try to interfere with people on OrcPub or our hosts or networks, like sending a virus, overloading, spamming or mail-bombing."
-      "Don’t collect or store personally identifiable information from OrcPub or people on OrcPub without permission."
-      "Don’t share your password, let anyone access your account or do anything that might put your account at risk."
-      "Don’t sell access to your account, boards, or username, or otherwise transfer account features for compensation."]}
+      "Don't access, use or tamper with our systems or our technical providers' systems."
+      "Don't break or circumvent our security measures or test the vulnerability of our systems or networks."
+      "Don't use any undocumented or unsupported method to access, search, scrape, download or change any part of OrcPub."
+      "Don't try to reverse engineer our software."
+      "Don't try to interfere with people on OrcPub or our hosts or networks, like sending a virus, overloading, spamming or mail-bombing."
+      "Don't collect or store personally identifiable information from OrcPub or people on OrcPub without permission."
+      "Don't share your password, let anyone access your account or do anything that might put your account at risk."
+      "Don't sell access to your account, boards, or username, or otherwise transfer account features for compensation."]}
     {:title "Spam"
      :font-size 32
      :paragraphs
@@ -272,7 +272,7 @@
     {:title "What's a cookie?"
      :font-size 32
      :paragraphs
-     ["When you go online, you use a program called a “browser” (like Apple’s Safari or Google’s Chrome). Most websites store a small amount of text in the browser—and that text is called a “cookie.”"]}
+     ["When you go online, you use a program called a “browser” (like Apple's Safari or Google's Chrome). Most websites store a small amount of text in the browser—and that text is called a “cookie.”"]}
     {:title "How we use cookies"
      :font-size 32
      :paragraphs
@@ -283,7 +283,7 @@
      [{:title "Personalization"
        :font-size 28
        :paragraphs
-       ["Cookies help us remember which content, boards, people or websites you’ve interacted with so we can show you related content you might like."
+       ["Cookies help us remember which content, boards, people or websites you've interacted with so we can show you related content you might like."
         "We also use cookies to help advertisers show you interesting ads."]}
       {:title "Preferences"
        :font-size 28
@@ -309,11 +309,11 @@
     {:title "Where we use cookies"
      :font-size 32
      :paragraphs
-     ["We use cookies on orcpub.com, in our mobile applications, and in our products and services (like ads, emails and applications). We also use them on the websites of partners who use OrcPub’s Save button, OrcPub widgets, or ad tools like conversion tracking."]}
+     ["We use cookies on orcpub.com, in our mobile applications, and in our products and services (like ads, emails and applications). We also use them on the websites of partners who use OrcPub's Save button, OrcPub widgets, or ad tools like conversion tracking."]}
     {:title "Your options"
      :font-size 32
      :paragraphs
-     ["Your browser probably gives you cookie choices. For example, most browsers let you block “third party cookies,” which are cookies from sites other than the one you’re visiting. Those options vary from browser to browser, so check your browser settings for more info."
+     ["Your browser probably gives you cookie choices. For example, most browsers let you block “third party cookies,” which are cookies from sites other than the one you're visiting. Those options vary from browser to browser, so check your browser settings for more info."
       "Some browsers also have a privacy setting called “Do Not Track,” which we support. This setting is another way for you to decide whether we use info from our partners and other services to customize OrcPub for you."
       "Effective November 1, 2016"]}]})
 
