@@ -309,7 +309,7 @@
         {:status 200})))
 
 (defn register [{:keys [json-params db conn] :as request}]
-  (let [{:keys [username email password first-and-last-name send-updates?]} json-params
+  (let [{:keys [username email password send-updates?]} json-params
         username (if username (s/trim username))
         email (if email (s/lower-case (s/trim email)))
         password (if password (s/trim password))
@@ -328,7 +328,6 @@
          {:orcpub.user/email email
           :orcpub.user/username username
           :orcpub.user/password (hashers/encrypt password)
-          :orcpub.user/first-and-last-name first-and-last-name
           :orcpub.user/send-updates? send-updates?
           :orcpub.user/created (java.util.Date.)}))
       (catch Throwable e (do (prn e) (throw e))))))
@@ -376,17 +375,16 @@
   (let [email (:email query-params)
         {:keys [:orcpub.user/verification-sent
                 :orcpub.user/verified?
-                :orcpub.user/first-and-last-name
                 :db/id] :as user} (user-for-email db email)]
     (if verified?
       (redirect route-map/verify-success-route)
       (do-verification request
                        (merge query-params
-                              {:first-and-last-name first-and-last-name})
+                              {:first-and-last-name "OrcPub Patron"})
                        conn
                        {:db/id id}))))
 
-(defn do-send-password-reset [user-id first-and-last-name email conn request]
+(defn do-send-password-reset [user-id email conn request]
   (let [key (str (java.util.UUID/randomUUID))]
     @(d/transact
       conn
@@ -395,7 +393,7 @@
         :orcpub.user/password-reset-sent (java.util.Date.)}])
     (email/send-reset-email
      (base-url request)
-     {:first-and-last-name first-and-last-name
+     {:first-and-last-name "OrcPub Patron"
       :email email}
      key)
     {:status 200}))
@@ -409,14 +407,13 @@
 (defn send-password-reset [{:keys [query-params db conn scheme headers] :as request}]
   (try
     (let [email (:email query-params)
-          {:keys [:orcpub.user/first-and-last-name
-                  :orcpub.user/password-reset-sent
+          {:keys [:orcpub.user/password-reset-sent
                   :orcpub.user/password-reset
                   :db/id] :as user} (user-for-email db email)
           expired? (password-reset-expired? password-reset-sent)
           already-reset? (password-already-reset? password-reset password-reset-sent)]
       (if id
-        (do-send-password-reset id first-and-last-name email conn request)
+        (do-send-password-reset id email conn request)
         {:status 400 :body {:error :no-account}}))
     (catch Throwable e (do (prn e) (throw e)))))
 

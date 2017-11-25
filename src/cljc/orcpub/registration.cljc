@@ -63,7 +63,6 @@
     (cond-> {}
       bad-gmail-domain (update :email conj bad-gmail-domain)
       bad-hotmail-domain (update :email conj (str "Invalid domain '" bad-hotmail-domain "' did you mean 'hotmail'?"))
-      (s/blank? first-and-last-name) (update :first-and-last-name conj "Name is required")
       email-taken? (update :email conj "Email address is already associated with another account")
       emails-dont-match (update :verify-email conj "Email addresses don't match")
       bad-email-format? (update :email conj (if (s/blank? email)
