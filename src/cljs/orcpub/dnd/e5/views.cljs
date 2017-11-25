@@ -773,12 +773,12 @@
        "join for free"]
       [:div.f-s-16.m-t-20 "Join now to save your characters and more!"]
       [:div.m-t-10
-       [form-input {:title "First and Last Name"
-                    :key :first-and-last-name
-                    :value (:first-and-last-name registration-form)
-                    :messages (:first-and-last-name registration-validation)
-                    :type :text
-                    :on-change (fn [e] (dispatch [:registration-first-and-last-name (event-value e)]))}]
+       [form-input {:title "Username"
+                    :key :username
+                    :value (:username registration-form)
+                    :messages (:username registration-validation)
+                    :type :username
+                    :on-change (fn [e] (dispatch [:registration-username (event-value e)]))}]
        [form-input {:title "Email"
                     :key :email
                     :value (:email registration-form)
@@ -791,12 +791,6 @@
                     :messages (:verify-email registration-validation)
                     :type :email
                     :on-change (fn [e] (dispatch [:registration-verify-email (event-value e)]))}]
-       [form-input {:title "Username"
-                    :key :username
-                    :value (:username registration-form)
-                    :messages (:username registration-validation)
-                    :type :username
-                    :on-change (fn [e] (dispatch [:registration-username (event-value e)]))}]
        [form-input {:title "Password"
                     :key :password
                     :value (:password registration-form)
