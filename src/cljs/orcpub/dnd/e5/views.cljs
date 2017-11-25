@@ -5954,8 +5954,8 @@
                           :monster "hydra")
                         48]]
                       (if character
-                        [character-summary-2 character true "bob" false]
-                        [:div.flex.align-items-c.w-100-p
+                        [:div [character-summary-2 character true "bob" false]]
+                        [:div.flex.align-items-c
                          [:div.p-t-20.p-b-20
                           [monster-summary
                            (:name monster)
