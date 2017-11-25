@@ -33,8 +33,8 @@
        :font-size 28
        :paragraphs
        ["These days, whenever you use a website, mobile application, or other internet service, there's certain information that almost always gets created and recorded automatically. The same is true when you use our products. Here are some of the types of information we collect:"
-        "Log data. When you use OrcPub, our servers may automatically record information (“log data”), including information that your browser sends whenever you visit a website or your mobile app sends when you're using it. This log data may include your Internet Protocol address, the address of the web pages you visited that had OrcPub features, browser type and settings, the date and time of your request, how you used OrcPub, and cookie data."
-        "Cookie data. Depending on how you're accessing our products, we may use “cookies” (small text files sent by your computer each time you visit our website, unique to your OrcPub account or your browser) or similar technologies to record log data. When we use cookies, we may use “session” cookies (that last until you close your browser) or “persistent” cookies (that last until you or your browser delete them). For example, we may use cookies to store your language preferences or other OrcPub settings so you don‘t have to set them up every time you visit OrcPub. Some of the cookies we use are associated with your OrcPub account (including personal information about you, such as the email address you gave us), and other cookies are not."
+        "Log data. When you use OrcPub, our servers may automatically record information (\"log data\"), including information that your browser sends whenever you visit a website or your mobile app sends when you're using it. This log data may include your Internet Protocol address, the address of the web pages you visited that had OrcPub features, browser type and settings, the date and time of your request, how you used OrcPub, and cookie data."
+        "Cookie data. Depending on how you're accessing our products, we may use \"cookies\" (small text files sent by your computer each time you visit our website, unique to your OrcPub account or your browser) or similar technologies to record log data. When we use cookies, we may use \"session\" cookies (that last until you close your browser) or \"persistent\" cookies (that last until you or your browser delete them). For example, we may use cookies to store your language preferences or other OrcPub settings so you don‘t have to set them up every time you visit OrcPub. Some of the cookies we use are associated with your OrcPub account (including personal information about you, such as the email address you gave us), and other cookies are not."
         "Device information. In addition to log data, we may also collect information about the device you're using OrcPub on, including what type of device it is, what operating system you're using, device settings, unique device identifiers, and crash data. Whether we collect some or all of this information often depends on what type of device you're using and its settings. For example, different types of information are available depending on whether you're using a Mac or a PC, or an iPhone or an Android phone. To learn more about what information your device makes available to us, please also check the policies of your device manufacturer or software provider."]}
       {:title "Our partners and advertisers may share information with us"
        :font-size 28
@@ -58,7 +58,7 @@
     {:title "How and when do we share information"
      :font-size 32
      :paragraphs
-     ["Anyone can see the public role-playing game characters and other content you create, and the profile information you give us. We may also make this public information available through what are called “APIs” (basically a technical way to share information quickly). For example, a partner might use a OrcPub API to integrate with other applications our users may be interested in. The other limited instances where we may share your personal information include:"
+     ["Anyone can see the public role-playing game characters and other content you create, and the profile information you give us. We may also make this public information available through what are called \"APIs\" (basically a technical way to share information quickly). For example, a partner might use a OrcPub API to integrate with other applications our users may be interested in. The other limited instances where we may share your personal information include:"
       "When we have your consent. This includes sharing information with other services (like Facebook or Twitter) when you've chosen to link to your OrcPub account to those services or publish your activity on OrcPub to them. For example, you can choose to share your characters on Facebook or Twitter."
       "When you buy something on OrcPub using your credit card, we may share your credit card information, contact information, and other information about the transaction with the merchant you're buying from. The merchants treat this information just as if you had made a purchase from their website directly, which means their privacy policies and marketing policies apply to the information we share with them."
       "Online advertisers typically use third party companies to audit the delivery and performance of their ads on websites and apps. We also allow these companies to collect this information on OrcPub. To learn more, please see our Help Center."
@@ -268,11 +268,11 @@
    [{:title "Cookies on OrcPub"
      :font-size 32
      :paragraphs
-     ["Our privacy policy describes how we collect and use information, and what choices you have. One way we collect information is through the use of a technology called “cookies.” We use cookies for all kinds of things on OrcPub."]}
+     ["Our privacy policy describes how we collect and use information, and what choices you have. One way we collect information is through the use of a technology called \"cookies.\" We use cookies for all kinds of things on OrcPub."]}
     {:title "What's a cookie?"
      :font-size 32
      :paragraphs
-     ["When you go online, you use a program called a “browser” (like Apple's Safari or Google's Chrome). Most websites store a small amount of text in the browser—and that text is called a “cookie.”"]}
+     ["When you go online, you use a program called a \"browser\" (like Apple's Safari or Google's Chrome). Most websites store a small amount of text in the browser—and that text is called a \"cookie.\""]}
     {:title "How we use cookies"
      :font-size 32
      :paragraphs
@@ -313,8 +313,8 @@
     {:title "Your options"
      :font-size 32
      :paragraphs
-     ["Your browser probably gives you cookie choices. For example, most browsers let you block “third party cookies,” which are cookies from sites other than the one you're visiting. Those options vary from browser to browser, so check your browser settings for more info."
-      "Some browsers also have a privacy setting called “Do Not Track,” which we support. This setting is another way for you to decide whether we use info from our partners and other services to customize OrcPub for you."
+     ["Your browser probably gives you cookie choices. For example, most browsers let you block \"third party cookies,\" which are cookies from sites other than the one you're visiting. Those options vary from browser to browser, so check your browser settings for more info."
+      "Some browsers also have a privacy setting called \"Do Not Track,\" which we support. This setting is another way for you to decide whether we use info from our partners and other services to customize OrcPub for you."
       "Effective November 1, 2016"]}]})
 
 (defn cookie-policy []
