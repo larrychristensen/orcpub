@@ -2266,11 +2266,11 @@
           :monster-data
           update-monster-data))
 
-(reg-event-db
+(reg-event-fx
  ::combat/next-initiative
- combat-interceptors
- (fn [{:keys [monster-data] :as combat}]
-   (let [initiatives (->> combat
+ (fn [{:keys [db]} [_ monster-map]]
+   (let [combat (::combat/tracker-item db)
+         initiatives (->> combat
                           :initiative
                           vals
                           (mapcat vals)
@@ -2282,11 +2282,35 @@
                            (second initiatives))
          round (get combat :round 1)]
      (let [next-round? (and current-initiative
-                            (> next-initiative current-initiative))]
-       (cond-> combat
-         true (assoc :current-initiative next-initiative)
-         next-round? (assoc :round (inc round))
-         next-round? update-conditions)))))
+                            (> next-initiative current-initiative))
+           updated (cond-> combat
+                     true (assoc :current-initiative next-initiative)
+                     next-round? (assoc :round (inc round))
+                     next-round? update-conditions)
+           removed-conditions (if next-round?
+                                (filter
+                                 (comp seq :removed-conditions)
+                                 (flatten
+                                  (map
+                                   (fn [[monster-kw individuals]]
+                                     (map
+                                      (fn [[individual-index {:keys [removed-conditions]}]]
+                                        {:type :monster
+                                         :index individual-index
+                                         :name (get-in monster-map [monster-kw :name])
+                                         :removed-conditions (map :type removed-conditions)})
+                                      individuals))
+                                   (:monster-data updated)))))]
+       {:dispatch-n (cond-> [[::combat/set-combat updated]]
+                      (seq removed-conditions)
+                      (conj [:show-message
+                             [:div.m-t-5.f-w-b.f-s-18
+                              (doall
+                               (map-indexed
+                                (fn [i {:keys [name index removed-conditions]}]
+                                  ^{:key i}
+                                  [:div.m-b-5 (str name " #" (inc index) " is no longer " (common/list-print (map common/kw-to-name removed-conditions) "or") ".")])
+                                removed-conditions))]]))}))))
 
 (reg-event-db
  ::encounters/set-encounter-path-prop
