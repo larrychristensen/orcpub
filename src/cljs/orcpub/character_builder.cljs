@@ -49,7 +49,7 @@
             [re-frame.core :refer [subscribe dispatch dispatch-sync]])
   (:require-macros [cljs.core.async.macros :refer [go]]))
 
-(def print-disabled? true)
+(def print-disabled? false)
 
 (def print-enabled? (and (not print-disabled?)
                          js/window.location
@@ -1947,7 +1947,6 @@
 (def unsaved-button-style {:background "#9a031e"})
 
 (defn confirm-handler [character-changed? cfg]
-  #_(prn "CHAR CHANGED" character-changed? cfg)
   (fn [_]
     (if character-changed?
       (dispatch [:show-confirmation cfg])

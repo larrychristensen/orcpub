@@ -325,6 +325,7 @@
      (flatten
       (map-indexed
        (fn [i {:keys [ability classes spells]}]
+         (prn "ABILITY CLASSES SPELLS" ability classes spells)
          (let [suffix (str "-" (inc i))
                class-header {(keyword (str "spellcasting-class" suffix)) (s/join ", " classes)}]
            [(if ability
