@@ -815,12 +815,13 @@
   (concat
    [[:#app
      {:background-image "linear-gradient(182deg, #313A4D, #080A0D)"
-      :-webkit-touch-callout :none
-      :-webkit-user-select :none
-      :-khtml-user-select :none
-      :-moz-user-select :none
-      :-ms-user-select :none
-      :user-select :none}]
+      ;;:-webkit-touch-callout :none
+      ;;:-webkit-user-select :none
+      ;;:-khtml-user-select :none
+      ;;:-moz-user-select :none
+      ;;:-ms-user-select :none
+      ;;:user-select :none
+      }]
 
     [:.app
      {:background-image "linear-gradient(182deg, #313A4D, #080A0D)"
