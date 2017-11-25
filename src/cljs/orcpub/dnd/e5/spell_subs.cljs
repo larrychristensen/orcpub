@@ -98,6 +98,8 @@
     :skill-prof (mod5e/skill-proficiency value)
     :armor-prof (mod5e/armor-proficiency value)
     :flying-speed (mod5e/flying-speed-override value)
+    :swimming-speed (mod5e/swimming-speed-override value)
+    :flying-speed-equals-walking-speed (mod5e/flying-speed-equal-to-walking)
     :spell (mod5e/spells-known (:level value)
                                (:key value)
                                (:ability value)
