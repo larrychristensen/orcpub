@@ -5899,7 +5899,7 @@
            [:div.f-s-24.f-w-b.m-b-10 "Initiative"]
            [:div.flex
             [:button.form-button.m-l-5.m-b-10
-             {:on-click #(dispatch [::combat/next-initiative])}
+             {:on-click #(dispatch [::combat/next-initiative monster-map])}
              [:i.fa.fa-play]
              (if (not mobile?)
                [:span.m-l-5
