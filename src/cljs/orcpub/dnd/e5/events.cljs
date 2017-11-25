@@ -2268,7 +2268,7 @@
           :monster-data
           update-monster-data))
 
-(reg-event-db
+(reg-event-fx
  ::combat/next-initiative
  combat-interceptors
  (fn [{:keys [monster-data] :as combat}]
