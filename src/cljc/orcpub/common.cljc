@@ -147,3 +147,15 @@
         item))
     v)))
 
+(def rounds-per-minute 10)
+(def minutes-per-hour 60)
+(def hours-per-day 24)
+
+(def rounds-per-hour (* minutes-per-hour rounds-per-minute))
+
+(defn rounds-to-hours [rounds]
+  (int (/ rounds rounds-per-hour)))
+
+(defn rounds-to-minutes [rounds]
+  (int (/ (rem rounds rounds-per-hour) rounds-per-minute)))
+
