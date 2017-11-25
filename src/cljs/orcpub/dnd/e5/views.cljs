@@ -233,16 +233,19 @@
     (set! (.-top style) (str bottom "px"))
     (set! (.-display style) "block")))
 
+(defn hide-user-menu [e]
+  (let [user-menu (js/document.getElementById "user-menu")
+        style (.-style user-menu)]
+    (set! (.-display style) "none")))
+
 (defn user-header-view []
   (let [username @(subscribe [:username])
         mobile? @(subscribe [:mobile?])]
     [:div#user-header.pointer
      (if username
-       {:on-mouse-over handle-user-menu
-        :on-mouse-out (fn [e]
-                        (let [user-menu (js/document.getElementById "user-menu")
-                              style (.-style user-menu)]
-                          (set! (.-display style) "none")))})
+       {:on-click hide-user-menu
+        :on-mouse-over handle-user-menu
+        :on-mouse-out hide-user-menu})
      [:div.flex.align-items-c
       [:div.user-icon [svg-icon "orc-head" 40 ""]]
       (if username
