@@ -2232,21 +2232,19 @@
           :rounds next-rounds})))))
 
 (defn update-individual-monster [data monster-index individual-data]
-  (assoc
-   data
-   monster-index
-   (update
-    individual-data
-    :conditions
-    (fn [conditions]
-      (into
-       []
-       (comp
-        (map
-         decrement-duration)
-        (remove
-         zero-duration?))
-       conditions)))))
+  (let [current-conditions (:conditions individual-data)
+        decremented-conditions (map decrement-duration current-conditions)
+        {new-conditions false removed-conditions true}
+        (group-by zero-duration? decremented-conditions)]
+    (assoc
+     data
+     monster-index
+     (assoc
+      individual-data
+      :conditions
+      new-conditions
+      :removed-conditions
+      removed-conditions))))
 
 (defn update-monster-data-item [monster-data monster-kw data]
   (assoc
@@ -2268,7 +2266,7 @@
           :monster-data
           update-monster-data))
 
-(reg-event-fx
+(reg-event-db
  ::combat/next-initiative
  combat-interceptors
  (fn [{:keys [monster-data] :as combat}]
