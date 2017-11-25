@@ -61,33 +61,47 @@
 
 (def conditions
   [{:name "Blinded"
-    :key :blinded}
+    :key :blinded
+    :icon "sight-disabled"}
    {:name "Charmed"
-    :key :charmed}
+    :key :charmed
+    :icon "smitten"}
    {:name "Deafened"
-    :key :deafened}
+    :key :deafened
+    :icon "hearing-disabled"}
    {:name "Frightened"
-    :key :frightened}
+    :key :frightened
+    :icon "terror"}
    {:name "Grappled"
-    :key :grappled}
+    :key :grappled
+    :icon "grab"}
    {:name "Incapacitated"
-    :key :incapacitated}
+    :key :incapacitated
+    :icon "cement-shoes"}
    {:name "Invisible"
-    :key :invisible}
+    :key :invisible
+    :icon "invisible"}
    {:name "Paralyzed"
-    :key :paralyzed}
+    :key :paralyzed
+    :icon "oppression"}
    {:name "Petrified"
-    :key :petrified}
+    :key :petrified
+    :icon "stone-block"}
    {:name "Poisoned"
-    :key :poisoned}
+    :key :poisoned
+    :icon "vomiting"}
    {:name "Prone"
-    :key :prone}
+    :key :prone
+    :icon "despair"}
    {:name "Restrained"
-    :key :restrained}
+    :key :restrained
+    :icon "imprisoned"}
    {:name "Stunned"
-    :key :stunned}
+    :key :stunned
+    :icon "knockout"}
    {:name "Unconscious"
-    :key :unconscious}])
+    :key :unconscious
+    :icon "coma"}])
 
 (def damage-types
   [:acid

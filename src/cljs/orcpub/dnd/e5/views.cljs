@@ -231,8 +231,7 @@
         window-width js/document.documentElement.clientWidth]
     (set! (.-right style) (str (- window-width right) "px"))
     (set! (.-top style) (str bottom "px"))
-    (set! (.-display style) "block")
-    (prn "RIGHT BOTTOM" right bottom)))
+    (set! (.-display style) "block")))
 
 (defn user-header-view []
   (let [username @(subscribe [:username])
@@ -5697,6 +5696,64 @@
               [:monsters index :num]
               (js/parseInt %)]))
 
+(def rounds-per-minute 10)
+(def minutes-per-hour 60)
+(def hours-per-day 24)
+
+(def w-155 {:style {:width "155px"}})
+(def w-160 {:style {:width "160px"}})
+
+(defn duration-selector [title
+                         key
+                         max
+                         monster
+                         individual-index
+                         duration
+                         index]
+  (let [value (get duration key 0)]
+    [:div.m-r-5
+     [:div.f-w-b.f-s-12 title]
+     [dropdown
+      {:items (map
+               value-to-item
+               (range 0 max))
+       :value value
+       :on-change #(dispatch [::combat/set-monster-condition-duration monster individual-index index key (js/parseInt %)])}]]))
+
+(defn condition-selector [current-round
+                          monster
+                          individual-index
+                          {:keys [type duration] :as condition}
+                          index
+                          deletable?
+                          used-conditions]
+  (let [current-round (or current-round 0)
+        remaining-conditions (remove
+                              (comp (disj used-conditions type) :key)
+                              opt/conditions)]
+    (if (seq remaining-conditions)
+      [:div.flex.align-items-end
+       [:div.m-r-5
+        w-155
+        [:div.f-w-b.f-s-12 "Condition"]
+        [dropdown
+         {:items (cons
+                  {:title "<select condition>"}
+                  (map
+                   obj-to-item
+                   remaining-conditions))
+          :value type
+          :on-change #(dispatch [::combat/set-monster-condition-type monster individual-index index (keyword %)])}]]
+       (if type
+         [:div.flex.flex-wrap
+          [duration-selector "Hours" :hours 24 monster individual-index duration index]
+          [duration-selector "Minutes" :minutes 60 monster individual-index duration index]
+          [duration-selector "Rounds" :rounds 10 monster individual-index duration index]])
+       (if deletable?
+         [:button.form-button.f-s-14
+          {:on-click #(dispatch [::combat/delete-monster-condition monster individual-index index])}
+          [:i.fa.fa-trash]])])))
+
 (defn combat-tracker []
   (let [expanded-rows (r/atom {})]
     (fn []
@@ -5750,7 +5807,6 @@
             all-monsters (vals
                           (reduce
                            (fn [m {:keys [num monster] :as v}]
-                             (prn "V" v)
                              (update m
                                      monster
                                      (fn [x]
@@ -5760,13 +5816,10 @@
                            {}
                            (concat encounter-monsters
                                    other-monsters)))
-            _ (prn "ALL MONSTERS" all-monsters)
             combatants (concat party-characters
                                other-characters
                                encounter-characters
                                all-monsters)]
-        (prn "MONSTERS" other-monsters)
-        (prn "COMBAT" tracker-item)
         [:div.p-20.main-text-color
          [:div.flex.flex-wrap
           [:div.m-b-20.m-r-20
@@ -5880,7 +5933,6 @@
              (doall
               (map-indexed
                (fn [index {:keys [type character monster num] :as combatant}]
-                 (prn "COMBATATNT" combatant)
                  (let [path [:initiative type (or (:db/id character) (:key monster))]
                        initiative (get-in tracker-item path)]
                    ^{:key index}
@@ -5913,7 +5965,27 @@
                           (:type monster)
                           (:subtypes monster)
                           (:alignment monster)]]
-                        [:div.f-w-b.f-s-24 (str "(" num ")")]])
+                        [:div.f-w-b.f-s-24 (str "(" (or num 1) ")")]
+                        [:div.flex.flex-wrap
+                         (doall
+                          (map
+                           (fn [i]
+                             (let [{:keys [hit-points conditions]} (get-in monster-data [(:key monster) i])]
+                               ^{:key i}
+                               [:div.flex.align-items-c.m-l-20.m-t-10.m-b-10
+                                [:div
+                                 [:div.f-s-12 "hps"]
+                                 [:div.m-r-5.f-s-24.f-w-b
+                                  (or hit-points (get-in monster [:hit-points :mean]))]]
+                                [:div.flex.align-items-c
+                                 (doall
+                                  (map
+                                   (fn [{:keys [type]}]
+                                     ^{:key type}
+                                     [:div.m-l--5
+                                      [svg-icon (get-in opt/conditions-map [type :icon]) 36]])
+                                   conditions))]]))
+                           (range num)))]])
                      [:i.fa {:class-name (if (get @expanded-rows path)
                                            "fa-caret-up"
                                            "fa-caret-down")}]]
@@ -5930,7 +6002,6 @@
                            (doall
                             (map
                              (fn [x]
-                               (prn "MONSTER DATA" monster-data)
                                ^{:key x}
                                [:div.m-r-5.p-20
                                 [:div.f-w-b.f-s-18 (str "Monster " (inc x))]
@@ -5941,37 +6012,41 @@
                                   (get-in monster-data
                                           [(:key monster) x :hit-points]
                                           (get-in monster [:hit-points :mean]))
-                                  (fn [])
+                                  #(dispatch [::combat/set-monster-hit-points combatant x (js/parseInt %)])
                                   {:type :number
                                    :class-name "input w-80"}]]
-                                [:div.m-t-10
-                                 [:div.f-s-16.f-w-b "Conditions"]
-                                 [:div.flex
-                                  [:div.m-r-5
-                                   [:div.f-w-b.f-s-12 "Condition"]
-                                   [dropdown
-                                    {:items (cons
-                                             {:title "<select condition>"}
-                                             (map
-                                              obj-to-item
-                                              opt/conditions))}]]
-                                  [:div.m-r-5
-                                   [:div.f-w-b.f-s-12 "Duration Unit"]
-                                   [dropdown
-                                    {:items [{:title "Rounds"
-                                              :value :rounds}
-                                             {:title "Minutes"
-                                              :value :minutes}
-                                             {:title "Hours"
-                                              :value :hours}
-                                             {:title "Days"
-                                              :value :days}]}]]
-                                  [:div.m-r-5
-                                   [:div.f-w-b.f-s-12 "Duration"]
-                                   [dropdown
-                                    {:items (map
-                                             value-to-item
-                                             (range 1 21))}]]]]])
+                                (let [current-round (dec (get tracker-item :round 1))
+                                      conditions (get-in monster-data [(:key monster) x :conditions])
+                                      used-conditions (into #{} (map :type) conditions)]
+                                  [:div.m-t-10
+                                   [:div.flex.w-100-p
+                                    [:div.f-s-16.f-w-b
+                                     w-160
+                                     "Conditions"]
+                                    (if (seq conditions)
+                                      [:div.f-s-16.f-w-b.m-l-60 "Duration"])]
+                                   (doall
+                                    (map-indexed
+                                     (fn [i condition]
+                                       ^{:key i}
+                                       [:div.m-b-10
+                                        [condition-selector
+                                         current-round
+                                         (:key monster)
+                                         x
+                                         condition
+                                         i
+                                         true
+                                         used-conditions]])
+                                     conditions))
+                                   [condition-selector
+                                    current-round
+                                    (:key monster)
+                                    x
+                                    {}
+                                    (count conditions)
+                                    false
+                                    used-conditions]])])
                              (range (or num 1))))]]
                          [monster-component (monster-map (:key monster))]]))]))
                (if (:ordered? tracker-item)
