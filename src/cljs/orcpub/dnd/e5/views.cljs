@@ -4726,7 +4726,15 @@
                            (fn [speed]
                              {:title (str speed " ft.")
                               :value speed})
-                           [30 60])}
+                           (range 10 130 10))}
+   :flying-speed-equals-walking-speed {:name "Flying Speed Equals Walking Speed"}
+   :swimming-speed {:name "Swimming Speed"
+                    :value-fn js/parseInt
+                    :values (map
+                             (fn [speed]
+                               {:title (str speed " ft.")
+                                :value speed})
+                             (range 10 130 10))}
    :spell {:name "Spell"
            :component spell-selector}))
 
@@ -4758,7 +4766,9 @@
                   :disabled? true
                   :value :select}
                  (map
-                  obj-to-item
+                  (fn [[kw {:keys [name]}]]
+                    {:title name
+                     :value kw})
                   modifier-values))
          :value (if type (clojure.core/name type) :select)
          :on-change #(dispatch [edit-modifier-type-event index (keyword %)])}]]
@@ -4819,6 +4829,7 @@
         class-key (get class :class)
         classes @(subscribe [::classes/classes])
         mobile? @(subscribe [:mobile?])]
+    (prn "CLASS" class)
     [:div.p-20.main-text-color
      [:div.flex.flex-wrap
       [:div.m-b-20.flex-grow-1
@@ -5073,6 +5084,7 @@
         race @(subscribe [::races/race race-key])
         races @(subscribe [::races/races])
         mobile? @(subscribe [:mobile?])]
+    (prn "SUBRACE" subrace)
     [:div.p-20.main-text-color
      [:div.flex.flex-wrap
       [:div.m-b-20
@@ -5166,6 +5178,11 @@
       [:div [option-weapon-proficiency subrace ::races/toggle-subrace-map-prop]]
       [:div [option-armor-proficiency subrace ::races/toggle-subrace-map-prop]]
       [:div [option-skill-proficiency subrace ::races/toggle-subrace-map-prop]]
+      [:div
+       [option-skill-proficiency-choice
+        subrace
+        ::races/set-subrace-path-prop
+        ::races/toggle-subrace-path-prop]]
       [:div [option-languages subrace ::races/toggle-subrace-map-prop]]]
      [:div.m-b-20
       [:div.f-s-24.f-w-b.m-b-10 "Spells"]
@@ -5185,6 +5202,7 @@
 
 (defn race-builder []
   (let [race @(subscribe [::races/builder-item])]
+    (prn "RACE" race)
     [:div.p-20.main-text-color
      [:div.m-b-20.flex.flex-wrap
       [race-input-field
