@@ -12,6 +12,7 @@
             [orcpub.dnd.e5.modifiers :as modifiers]
             [orcpub.dnd.e5.weapons :as weapons]
             [orcpub.dnd.e5.units :as units5e]
+            [orcpub.dnd.e5.races :as races]
             [orcpub.dnd.e5.armor :as armor]
             [orcpub.dnd.e5.spells :as spells]
             [orcpub.dnd.e5.equipment :as equipment]
@@ -2959,19 +2960,32 @@
                 (modifiers/spells-known 1 :disguise-self ::character/cha "Deep Gnome" 0 "once per long rest")]}))
 
 
-(defn feat-prereqs [prereqs]
-  (map
-   (fn [prereq]
-     (cond
-       ((into #{} character/ability-keys) prereq)
-       (ability-prereq prereq 13)
+(defn feat-prereqs [prereqs path-prereqs]
+  (concat
+   (map
+    (fn [prereq]
+      (cond
+        ((into #{} character/ability-keys) prereq)
+        (ability-prereq prereq 13)
 
-       (= :spellcasting prereq)
-       can-cast-spell-prereq
+        (= :spellcasting prereq)
+        can-cast-spell-prereq
 
-       :else
-       (armor-prereq prereq)))
-   prereqs))
+        :else
+        (armor-prereq prereq)))
+    prereqs)
+   (let [race-prereqs (:race path-prereqs)
+         race-keys (sequence
+                    (comp
+                     (filter
+                      val)
+                     (map
+                      key))
+                    race-prereqs)]
+     (if (seq race-keys)
+       (let [race-map @(subscribe [::races/race-map])
+             race-names (map (comp :name race-map) race-keys)]
+         [(race-prereq race-names)])))))
 
 (def filter-true (filter val))
 
@@ -3110,6 +3124,7 @@
                                     icon
                                     description
                                     prereqs
+                                    path-prereqs
                                     props
                                     ability-increases]}]
   (let [feat-mods (feat-modifiers key
@@ -3127,7 +3142,7 @@
       :modifiers feat-mods
       :selections feat-selections
       :summary description
-      :prereqs (feat-prereqs prereqs)})))
+      :prereqs (feat-prereqs prereqs path-prereqs)})))
 
 (def draconic-ancestries
   [{:name "Black"
