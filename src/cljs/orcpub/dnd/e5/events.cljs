@@ -2591,6 +2591,12 @@
                              (conj s ability-key))))))
 
 (reg-event-db
+ ::feats5e/toggle-path-prereq
+ feat-interceptors
+ (fn [feat [_ path]]
+   (update-in feat (cons :path-prereqs path) not)))
+
+(reg-event-db
  ::feats5e/toggle-spellcasting-prereq
  feat-interceptors
  (fn [feat]
