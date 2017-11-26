@@ -38,8 +38,6 @@
 .splash-button-title-prefix {display: none}
 .splash-button .splash-button-content {height: 60px; width: 60px; font-size: 10px}}"]
     [:title title]
-    (include-css "/css/style.css"
-                 "/css/compiled/styles.css")
     [:script
      (format
       "   window.fbAsyncInit = function() {
@@ -67,6 +65,8 @@
        [:div {:style "display:flex;justify-content:space-around"}
         [:img {:src "/image/spiral.gif"
                :style "height:200px;width:200px;margin-top:200px"}]])]
+    (include-css "/css/style.css"
+                 "/css/compiled/styles.css")
     (include-js "/js/compiled/orcpub.js")
     (include-css "/font-awesome-4.7.0/css/font-awesome.min.css")
     (include-css "https://fonts.googleapis.com/css?family=Open+Sans")
