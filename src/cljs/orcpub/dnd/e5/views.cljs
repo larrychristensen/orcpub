@@ -129,7 +129,9 @@
   (let [theme (or theme-override @(subscribe [:theme]))
         light-theme? (= "light-theme" theme)]
     [:img.svg-icon
-     {:class-name (str "h-" size " w-" size (if light-theme? " opacity-7"))
+     {:style {:height (str size "px")
+              :width (str size "px")}
+      :class-name (if light-theme? " opacity-7")
       :src (str (if light-theme? "/image/black/" "/image/") icon-name ".svg")}]))
 
 (defn facebook-share-button-comp [url]
@@ -409,7 +411,7 @@
                   :placeholder "search"}]])
              [:div.p-r-10.pointer
               {:on-click open-orcacle}
-              (svg-icon "magnifying-glass" (if mobile? 32 48) "")]]])
+              [svg-icon "magnifying-glass" (if mobile? 32 48) ""]]]])
          [user-header-view]]]]]
      [:div.container
       [:div.content

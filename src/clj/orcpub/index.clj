@@ -16,7 +16,8 @@
                           fb-type]}
                   & [splash?]]
   (html5
-   {:lang :en}
+   {:lang :en
+    :style "height:100%"}
    [:head
     (meta-tag "og:url" url)
     (meta-tag "og:type" fb-type)
@@ -36,7 +37,10 @@
 @media (max-width: 767px) 
 {.splash-button .svg-icon {height: 32px; width: 32px}
 .splash-button-title-prefix {display: none}
-.splash-button .splash-button-content {height: 60px; width: 60px; font-size: 10px}}"]
+.splash-button .splash-button-content {height: 60px; width: 60px; font-size: 10px}}
+#app {height:100%;background-image: linear-gradient(182deg, #313A4D, #080A0D)}
+
+.app {background-image: linear-gradient(182deg, #313A4D, #080A0D);height:100%;overflow-y:scroll;-webkit-overflow-scrolling :touch;font-family:Open Sans, sans-serif}"]
     [:title title]
     [:script
      (format
@@ -58,15 +62,15 @@
 	  fjs.parentNode.insertBefore(js, fjs);
 	  }(document, 'script', 'facebook-jssdk'));"
       (oauth/app-id url))]]
-   [:body {:style "margin:0;"}
+   [:body {:style "margin:0;height:100%;line-height:1"}
     [:div#app
      (if splash?
        (views-2/splash-page)
        [:div {:style "display:flex;justify-content:space-around"}
         [:img {:src "/image/spiral.gif"
                :style "height:200px;width:200px;margin-top:200px"}]])]
-    (include-css "/css/style.css"
-                 "/css/compiled/styles.css")
+    (include-css "/css/style.css")
+    (include-css "/css/compiled/styles.css")
     (include-js "/js/compiled/orcpub.js")
     (include-css "/font-awesome-4.7.0/css/font-awesome.min.css")
     (include-css "https://fonts.googleapis.com/css?family=Open+Sans")
