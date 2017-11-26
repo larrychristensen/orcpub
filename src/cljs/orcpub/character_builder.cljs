@@ -1558,7 +1558,7 @@
     (fn []
       [:div.m-b-20
        [:div.flex.align-items-c
-        (views5e/svg-icon "bookshelf")
+        (views5e/svg-icon "bookshelf" 36)
         (selection-section-title "Option Sources")
         [expand-button "collapse" "select sources" expanded?]]
        (if @expanded?
@@ -1621,7 +1621,6 @@
         final-selections combined-selections]
     (if print-enabled? (js/console.log "FINAL SELECTIONS" final-selections))
     [:div.w-100-p
-     [option-sources]
      [:div#options-column.b-1.b-rad-5
       [section-tabs available-selections built-template character page-index]
       [:div.flex.justify-cont-s-b.p-t-5.p-10.align-items-t

@@ -949,7 +949,8 @@
    [route-map/password-reset-expired-route]
    [route-map/password-reset-used-route]
    [route-map/verify-failed-route]
-   [route-map/verify-success-route]])
+   [route-map/verify-success-route]
+   [route-map/dnd-e5-orcacle-page-route]])
 
 (defn character-page [{:keys [db conn identity headers scheme uri] {:keys [id]} :path-params :as request}]
   (let [host (headers "host")

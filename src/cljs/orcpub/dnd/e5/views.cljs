@@ -1436,7 +1436,33 @@
 #_(def pota-amazon-frame
     (amazon-frame "//ws-na.amazon-adsystem.com/widgets/q?ServiceVersion=20070822&OneJS=1&Operation=GetAdHtml&MarketPlace=US&source=ac&ref=qf_sp_asin_til&ad_type=product_link&tracking_id=orcpub-20&marketplace=amazon&region=US&placement=0786965789&asins=0786965789&linkId=a2c9018a5e1260f518fa6b0fd0812350&show_border=false&link_opens_in_new_window=true&price_color=ffffff&title_color=f0a100&bg_color=2c3445"))
 
-
+(defn orcacle []
+  (let [search-text @(subscribe [:search-text])]
+    [:div.flex.flex-column.h-100-p.white
+     {:style oracle-frame-style}
+     [:i.fa.fa-times-circle.f-s-24.orange.pointer
+      {:on-click close-orcacle
+       :style close-button-style}]
+     [:div
+      [:div.flex.justify-cont-s-a.m-t-10
+       [:div.flex.align-items-c.pointer
+        {:on-click close-orcacle}
+        [:span.f-s-32 "Orcacle"]
+        [:div.m-l-10 (svg-icon "hood" 48 "")]]]]
+     [:div
+      [:div.p-10
+       [:div.posn-rel
+        [:input.input.orcacle-input
+         {:value search-text
+          :on-change set-search-text
+          :on-key-press search-input-keypress
+          :style orcacle-input-style}]
+        [:i.fa.fa-times.posn-abs.f-s-24.pointer
+         {:style close-icon-style
+          :on-click set-search-text-empty}]]
+       [:span.f-s-14.i.opacity-5 "\"8d10 + 2\", \"magic missile\", \"kobold\", \"female calishite name\", \"tavern name\", etc."]]
+      [:div.flex-grow-1
+       [search-results]]]]))
 
 (defn content-page [title button-cfgs content]
   (let [srd-message-closed? @(subscribe [:srd-message-closed?])
@@ -1464,32 +1490,8 @@
         [:div.flex.justify-cont-s-a.align-items-c.h-100-p
          [:img.h-200.w-200.m-t-200 {:src "/image/spiral.gif"}]]])
      [app-header]
-     (let [search-text @(subscribe [:search-text])]
-       (if orcacle-open?
-         [:div.flex.flex-column.h-100-p.white
-          {:style oracle-frame-style}
-          [:i.fa.fa-times-circle.f-s-24.orange.pointer
-           {:on-click close-orcacle
-            :style close-button-style}]
-          [:div
-           [:div.flex.justify-cont-s-a.m-t-10
-            [:div.flex.align-items-c.pointer
-             {:on-click close-orcacle}
-             [:span.f-s-32 "Orcacle"]
-             [:div.m-l-10 (svg-icon "hood" 48 "")]]]]
-          [:div.p-10
-           [:div.posn-rel
-            [:input.input.orcacle-input
-             {:value search-text
-              :on-change set-search-text
-              :on-key-press search-input-keypress
-              :style orcacle-input-style}]
-            [:i.fa.fa-times.posn-abs.f-s-24.pointer
-             {:style close-icon-style
-              :on-click set-search-text-empty}]]
-           [:span.f-s-14.i.opacity-5 "\"8d10 + 2\", \"magic missile\", \"kobold\", \"female calishite name\", \"tavern name\", etc."]]
-          [:div.flex-grow-1
-           [search-results]]]))
+     (if orcacle-open?
+       [orcacle])
      (let [hdr [header title button-cfgs]]
        [:div
         [:div#sticky-header.sticky-header.w-100-p.posn-fixed
@@ -6572,6 +6574,11 @@
       (if expanded?
         [expanded-character-list-item id owner username char-page-route])]]))
 
+(defn orcacle-page []
+  [content-page
+   "Orcacle"
+   []
+   [orcacle]])
 
 (defn character-list []
   (let [characters @(subscribe [::char/characters])
