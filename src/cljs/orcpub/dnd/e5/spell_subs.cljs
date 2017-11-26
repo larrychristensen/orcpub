@@ -61,7 +61,8 @@
      (let [{:keys [ability key]} value]
        (mod5e/spells-known (or (:level value) 0)
                            key
-                           ability
+                           (if (keyword? ability)
+                             (keyword "orcpub.dnd.e5.character" (name ability)))
                            class-name
                            level)))
    spells))
