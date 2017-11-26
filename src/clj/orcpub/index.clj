@@ -1,6 +1,7 @@
 (ns orcpub.index
   (:require [hiccup.page :refer [html5 include-css include-js]]
-            [orcpub.oauth :as oauth]))
+            [orcpub.oauth :as oauth]
+            [orcpub.dnd.e5.views-2 :as views-2]))
 
 (defn meta-tag [property content]
   (if content
@@ -12,7 +13,8 @@
                           title
                           description
                           image
-                          fb-type]}]
+                          fb-type]}
+                  & [splash?]]
   (html5
    {:lang :en}
    [:head
@@ -25,6 +27,16 @@
     [:meta {:charset "UTF-8"}]
     [:meta {:name "viewport"
             :content "width=device-width, initial-scale=1"}]
+    [:style
+     "
+.splash-page-content {}
+.splash-button .splash-button-content {height: 120px; width: 120px}
+.splash-button .svg-icon {height: 64px; width: 64px}
+
+@media (max-width: 767px) 
+{.splash-button .svg-icon {height: 32px; width: 32px}
+.splash-button-title-prefix {display: none}
+.splash-button .splash-button-content {height: 60px; width: 60px; font-size: 10px}}"]
     [:title title]
     (include-css "/css/style.css"
                  "/css/compiled/styles.css")
@@ -48,11 +60,13 @@
 	  fjs.parentNode.insertBefore(js, fjs);
 	  }(document, 'script', 'facebook-jssdk'));"
       (oauth/app-id url))]]
-   [:body {:style "margin:0"}
+   [:body {:style "margin:0;"}
     [:div#app
-     [:div {:style "display:flex;justify-content:space-around"}
-      [:img {:src "/image/spiral.gif"
-             :style "height:200px;width:200px;margin-top:200px"}]]]
+     (if splash?
+       (views-2/splash-page)
+       [:div {:style "display:flex;justify-content:space-around"}
+        [:img {:src "/image/spiral.gif"
+               :style "height:200px;width:200px;margin-top:200px"}]])]
     (include-js "/js/compiled/orcpub.js")
     (include-css "/font-awesome-4.7.0/css/font-awesome.min.css")
     (include-css "https://fonts.googleapis.com/css?family=Open+Sans")
