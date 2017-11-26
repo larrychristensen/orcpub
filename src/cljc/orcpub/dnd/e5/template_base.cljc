@@ -241,7 +241,6 @@
                         ?spell-save-dc-bonus))
     ?spell-modifiers (reduce
                       (fn [m {:keys [ability class]}]
-                        (prn "ABILITY CLASSX" ability class (?spell-save-dc ability))
                         (assoc m class {:class class
                                         :ability ability
                                         :spell-save-dc (?spell-save-dc ability)
