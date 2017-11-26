@@ -1836,6 +1836,12 @@
        (assoc :orcacle-clicked? false)
        (dissoc :search-text))))
 
+(reg-event-fx
+ :open-orcacle-over-character-builder
+ (fn []
+   {:dispatch-n [[:route routes/dnd-e5-char-builder-route]
+                 [:open-orcacle]]}))
+
 (reg-event-db
  :open-orcacle
  (fn [db _]
