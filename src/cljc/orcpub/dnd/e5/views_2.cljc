@@ -17,25 +17,56 @@
    {:src (str "/image/" icon-name ".svg")}])
 
 (defn splash-page-button [title icon route & [handler]]
-  [:a.no-text-decoration.splash-button
-   (if handler
-     {:on-click handler}
-     {:href (routes/path-for route)})
-   [:div.shadow.m-5.t-a-c.p-10.pointer.flex.align-items-c.justify-cont-s-a.splash-button-content
+  [:a.splash-button
+   (let [cfg {:style (style {:text-decoration :none
+                             :color "#f0a100"})}]
+     (if handler
+       (assoc cfg :on-click handler)
+       (assoc cfg :href (routes/path-for route))))
+   [:div.splash-button-content
+    {:style (style {:box-shadow "0 2px 6px 0 rgba(0, 0, 0, 0.5)"
+                    :margin "5px"
+                    :text-align "center"
+                    :padding "10px"
+                    :cursor :pointer
+                    :display :flex
+                    :align-items :center
+                    :justify-content :space-around
+                    :font-weight :bold})}
     [:div
      (svg-icon-2 icon 64 "dark")
-     [:div.f-w-b [:span.splash-button-title-prefix "DnD 5e "] [:span title]]]]])
+     [:div
+      [:span.splash-button-title-prefix "DnD 5e "] [:span title]]]]])
 
 
 (defn splash-page []
-  [:div.app.flex.align-items-c.justify-cont-s-a
+  [:div.app
+   {:style (style
+            {:display :flex
+             :color :white
+             :align-items :center
+             :justify-content :space-around})}
    [:div.main-text-color.splash-page-content
     {:style (style {:font-family "sans-serif"})}
-    [:div.flex.justify-cont-s-a
-     [:img.orcpub-logo.h-48.pointer
-      {:src "/image/orcpub-logo.svg"}]]
-    [:div.f-w-b.f-s-12.t-a-c.text-shadow "version 2.0"]
-    [:div.flex.flex-wrap.m-t-10.justify-cont-c
+    [:div
+     {:style (style {:display :flex
+                     :justify-content :space-around})}
+     [:img
+      {:src "/image/orcpub-logo.svg"
+       :style (style {:height "70px"})}]]
+    [:div
+     {:style (style {:text-align :center
+                     :text-shadow "1px 2px 1px black"
+                     :font-weight :bold
+                     :font-size "14px"
+                     :height "48px"})}
+     "version 2.0"]
+    [:div
+     {:style (style
+              {:display :flex
+               :flex-wrap :wrap
+               :justify-content :center
+               :margin-top "10px"})}
      (splash-page-button
       "Character Builder / Sheet"
       "anvil-impact"

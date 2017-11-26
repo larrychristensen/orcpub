@@ -817,22 +817,7 @@
 
 (def app
   (concat
-   [[:#app
-     {:background-image "linear-gradient(182deg, #313A4D, #080A0D)"
-      ;;:-webkit-touch-callout :none
-      ;;:-webkit-user-select :none
-      ;;:-khtml-user-select :none
-      ;;:-moz-user-select :none
-      ;;:-ms-user-select :none
-      ;;:user-select :none
-      }]
-
-    [:.app
-     {:background-image "linear-gradient(182deg, #313A4D, #080A0D)"
-      :font-family font-family
-      :height "100%"
-      :overflow-y :scroll
-      :-webkit-overflow-scrolling :touch}]
+   [
 
     [:.character-builder-header
      {:margin-bottom "19px"}]
