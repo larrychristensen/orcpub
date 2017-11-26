@@ -51,7 +51,7 @@
    (keyword (str "-moz-" (name property))) value
    property value})
 
-(def font-family "Open Sans, sans-serif !important")
+(def font-family "Open Sans, sans-serif")
 
 (def font-sizes
   [[:.f-s-10
@@ -286,6 +286,8 @@
     {:height "60px"}]
    [:.h-72
     {:height "72px"}]
+   [:.h-120
+    {:height "120px"}]
    [:.h-200
     {:height "200px"}]
    [:.h-800
@@ -337,6 +339,8 @@
 
    [:.underline
     {:text-decoration :underline}]
+   [:.no-text-decoration
+    {:text-decoration :none}]
 
    [:.p-t-0
     {:padding-top "0px"}]

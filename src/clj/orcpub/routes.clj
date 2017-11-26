@@ -533,11 +533,6 @@
                  :headers {"Content-Type" "text/html"}})]
     merged))
 
-(defn index [{:keys [headers scheme uri server-name]} & [response]]
-  (html-response
-   (slurp (io/resource "public/index.html"))
-   response))
-
 (defn empty-index [req & [response]]
   (html-response
    (slurp (io/resource "public/blank.html"))
@@ -547,6 +542,36 @@
   '[:find ?e
     :in $ ?key
     :where [?e :orcpub.user/password-reset-key ?key]])
+
+(def default-title
+  "The New OrcPub: D&D 5e Character Builder/Generator")
+
+(def default-description
+  "Dungeons & Dragons 5th Edition (D&D 5e) character builder/generator and digital character sheet far beyond any other in the multiverse.")
+
+(defn default-image-url [host]
+  (str "http://" host "/image/orcpub-box-logo.png"))
+
+(defn index-page-response [{:keys [headers uri] :as request}
+                           {:keys [title description image-url]}]
+  (let [host (headers "host")]
+    {:status 200
+     :headers {"Content-Type" "text/html"
+               "My-Cool-Header" "cool"
+               "Access-Control-Allow-Origin" "https://www.facebook.com"}
+     :body
+     (index-page
+      {:url (str "http://" host uri)
+       :title (or title default-title)
+       :description (or description default-description)
+       :image (or image-url (default-image-url host))}
+      (= "/" uri))}))
+
+(defn default-index-page [request]
+  (index-page-response request {}))
+
+(defn index [{:keys [headers scheme uri server-name] :as request} & [response]]
+  (default-index-page request))
 
 (defn reset-password-page [{:keys [query-params db conn] :as req}]
   (if-let [key (:key query-params)]
@@ -925,32 +950,6 @@
    [route-map/password-reset-used-route]
    [route-map/verify-failed-route]
    [route-map/verify-success-route]])
-
-(def default-title
-  "The New OrcPub: D&D 5e Character Builder/Generator")
-
-(def default-description
-  "Dungeons & Dragons 5th Edition (D&D 5e) character builder/generator and digital character sheet far beyond any other in the multiverse.")
-
-(defn default-image-url [host]
-  (str "http://" host "/image/orcpub-box-logo.png"))
-
-(defn index-page-response [{:keys [headers uri] :as request}
-                           {:keys [title description image-url]}]
-  (let [host (headers "host")]
-    {:status 200
-     :headers {"Content-Type" "text/html"
-               "My-Cool-Header" "cool"
-               "Access-Control-Allow-Origin" "https://www.facebook.com"}
-     :body
-     (index-page
-      {:url (str "http://" host uri)
-       :title (or title default-title)
-       :description (or description default-description)
-       :image (or image-url (default-image-url host))})}))
-
-(defn default-index-page [request]
-  (index-page-response request {}))
 
 (defn character-page [{:keys [db conn identity headers scheme uri] {:keys [id]} :path-params :as request}]
   (let [host (headers "host")
