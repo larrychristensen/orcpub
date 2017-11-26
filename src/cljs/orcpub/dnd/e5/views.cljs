@@ -4171,7 +4171,19 @@
              (get-in feat [:prereqs prop-key])
              false
              #(dispatch [::feats/toggle-ability-prereq prop-key])])])
-       armor/armor-types))]]])
+       armor/armor-types))]
+    [:div
+     (doall
+      (map
+       (fn [{:keys [key name] :as race}]
+         ^{:key key}
+         [:div.m-r-20.m-b-10
+          [comps/labeled-checkbox
+           (str name " race")
+           (get-in feat [:path-prereqs :race key])
+           false
+           #(dispatch [::feats/toggle-path-prereq [:race key]])]])
+       @(subscribe [::races/races])))]]])
 
 (defn feat-ability-increase-options [feat]
   [:div.m-b-20
@@ -4987,15 +4999,6 @@
        :option-pack
        subclass
        "m-l-5 m-b-20"]]
-     [:div.m-b-20
-      [:div.f-s-24.f-w-b.m-b-10 "Modifiers"]
-      [option-level-modifiers
-       subclass
-       ::e5/add-subclass-modifier
-       ::e5/edit-subclass-modifier-type
-       ::e5/edit-subclass-modifier-value
-       ::e5/edit-subclass-modifier-level
-       ::e5/delete-subclass-modifier]]
      (if (#{:fighter :rogue :warlock :cleric :paladin} class-key)
        (let [spellcasting (get subclass :spellcasting)
              spellcasting? (some? spellcasting)]
@@ -5022,6 +5025,15 @@
 
             (= :warlock class-key)
             [:div [subclass-spells subclass "Expanded Spells" :warlock-spells]])]))
+     [:div.m-b-20
+      [:div.f-s-24.f-w-b.m-b-10 "Modifiers"]
+      [option-level-modifiers
+       subclass
+       ::e5/add-subclass-modifier
+       ::e5/edit-subclass-modifier-type
+       ::e5/edit-subclass-modifier-value
+       ::e5/edit-subclass-modifier-level
+       ::e5/delete-subclass-modifier]]
      [option-traits
       subclass
       ::classes/subclass-builder-item
@@ -6443,7 +6455,7 @@
    [{:title (str "New " item-title)
      :icon "plus"
      :on-click #(dispatch [reset-event])}
-    {:title "Save"
+    {:title "Save to Browser Storage"
      :icon "save"
      :on-click #(dispatch [save-event])}]
    [builder]])
