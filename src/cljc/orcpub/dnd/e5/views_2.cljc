@@ -55,7 +55,7 @@
      (splash-page-button
       "Combat Tracker"
       "sword-clash"
-      routes/dnd-e5-item-list-page-route)
+      routes/dnd-e5-combat-tracker-page-route)
      (splash-page-button
       "Homebrew Content"
       "beer-stein"
@@ -67,7 +67,7 @@
      (splash-page-button
       "Monster Builder"
       "ifrit"
-      routes/dnd-e5-encounter-builder-page-route)
+      routes/dnd-e5-monster-builder-page-route)
      (splash-page-button
       "Spell Builder"
       "gift-of-knowledge"
