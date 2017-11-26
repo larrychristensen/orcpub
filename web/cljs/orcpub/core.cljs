@@ -28,6 +28,7 @@
 (def pages
   {nil views-2/splash-page
    routes/default-route views-2/splash-page
+   routes/dnd-e5-orcacle-page-route views/orcacle-page
    routes/dnd-e5-char-builder-route ch/character-builder
    routes/dnd-e5-char-list-page-route views/character-list
    routes/dnd-e5-monster-list-page-route views/monster-list

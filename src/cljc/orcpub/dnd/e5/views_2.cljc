@@ -1,6 +1,7 @@
 (ns orcpub.dnd.e5.views-2
   (:require [orcpub.route-map :as routes]
-            [clojure.string :as s]))
+            [clojure.string :as s]
+            #?(:cljs [re-frame.core :refer [subscribe dispatch dispatch-sync]])))
 
 (defn style [style]
   #?(:cljs style)
@@ -15,8 +16,11 @@
   [:img.svg-icon
    {:src (str "/image/" icon-name ".svg")}])
 
-(defn splash-page-button [title icon route]
-  [:a.no-text-decoration.splash-button {:href (routes/path-for route)}
+(defn splash-page-button [title icon route & [handler]]
+  [:a.no-text-decoration.splash-button
+   (if handler
+     {:on-click handler}
+     {:href (routes/path-for route)})
    [:div.shadow.m-5.t-a-c.p-10.pointer.flex.align-items-c.justify-cont-s-a.splash-button-content
     [:div
      (svg-icon-2 icon 64 "dark")
@@ -52,6 +56,10 @@
       "Combat Tracker"
       "sword-clash"
       routes/dnd-e5-item-list-page-route)
+     (splash-page-button
+      "Homebrew Content"
+      "beer-stein"
+      routes/dnd-e5-my-content-route)
      (splash-page-button
       "Encounter Builder"
       "minions"

@@ -14,6 +14,7 @@
 (def dnd-e5-char-party-characters-route :char-party-characters-5e)
 (def dnd-e5-char-party-character-route :char-party-character-5e)
 (def dnd-e5-char-parties-page-route :char-parties-5e-page)
+(def dnd-e5-orcacle-page-route :orcacle-page)
 
 (def dnd-e5-char-page-routes #{default-route
                                dnd-e5-char-builder-route
@@ -152,6 +153,7 @@
                              {"character-builder" dnd-e5-char-builder-route
                               "characters" {"" dnd-e5-char-list-page-route
                                             ["/" :id] dnd-e5-char-page-route}
+                              "orcacle" dnd-e5-orcacle-page-route
                               "parties" dnd-e5-char-parties-page-route
                               "background-builder" dnd-e5-background-builder-page-route
                               "encounter-builder" dnd-e5-encounter-builder-page-route
