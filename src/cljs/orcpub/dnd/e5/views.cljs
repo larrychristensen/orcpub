@@ -4829,7 +4829,6 @@
         class-key (get class :class)
         classes @(subscribe [::classes/classes])
         mobile? @(subscribe [:mobile?])]
-    (prn "CLASS" class)
     [:div.p-20.main-text-color
      [:div.flex.flex-wrap
       [:div.m-b-20.flex-grow-1
@@ -5084,7 +5083,6 @@
         race @(subscribe [::races/race race-key])
         races @(subscribe [::races/races])
         mobile? @(subscribe [:mobile?])]
-    (prn "SUBRACE" subrace)
     [:div.p-20.main-text-color
      [:div.flex.flex-wrap
       [:div.m-b-20
@@ -5202,7 +5200,6 @@
 
 (defn race-builder []
   (let [race @(subscribe [::races/builder-item])]
-    (prn "RACE" race)
     [:div.p-20.main-text-color
      [:div.m-b-20.flex.flex-wrap
       [race-input-field
