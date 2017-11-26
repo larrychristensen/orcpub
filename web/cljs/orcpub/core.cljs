@@ -5,6 +5,7 @@
             [orcpub.dnd.e5.equipment-subs]
             [orcpub.dnd.e5.events :as events]
             [orcpub.dnd.e5.views :as views]
+            [orcpub.dnd.e5.views-2 :as views-2]
             [orcpub.route-map :as routes]
             [cljs-http.client :as http]
             [cljs.core.async :refer [<!]]
@@ -25,8 +26,8 @@
 (dispatch-sync [:initialize-db])
 
 (def pages
-  {nil ch/character-builder
-   routes/default-route ch/character-builder
+  {nil views-2/splash-page
+   routes/default-route views-2/splash-page
    routes/dnd-e5-char-builder-route ch/character-builder
    routes/dnd-e5-char-list-page-route views/character-list
    routes/dnd-e5-monster-list-page-route views/monster-list
@@ -104,3 +105,4 @@
               {:style {:padding "200px"}}
               "Sorry, we are unable to support your browser since it does not support important HTML5 features. Please try a modern browser such as " [:a {:href "https://www.google.com/chrome/browser/desktop/index.html"} "Google Chrome"] " or " [:a {:href "https://www.mozilla.org/en-US/firefox/products/?v=a"} "Mozilla Firefox"]]])
           (js/document.getElementById "app"))
+

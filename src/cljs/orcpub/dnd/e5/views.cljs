@@ -35,6 +35,7 @@
             [orcpub.dnd.e5.armor :as armor]
             [orcpub.dnd.e5.display :as disp]
             [orcpub.dnd.e5.template :as t]
+            [orcpub.dnd.e5.views-2 :as views-2]
             [orcpub.template :as template]
             [orcpub.dnd.e5.options :as opt]
             [orcpub.dnd.e5.events :as events]
@@ -127,10 +128,9 @@
 (defn svg-icon [icon-name & [size theme-override]]
   (let [theme (or theme-override @(subscribe [:theme]))
         light-theme? (= "light-theme" theme)]
-    (let [size (or size 32)]
-      [:img
-       {:class-name (str "h-" size " w-" size (if light-theme? " opacity-7"))
-        :src (str (if light-theme? "/image/black/" "/image/") icon-name ".svg")}])))
+    [:img.svg-icon
+     {:class-name (str "h-" size " w-" size (if light-theme? " opacity-7"))
+      :src (str (if light-theme? "/image/black/" "/image/") icon-name ".svg")}]))
 
 (defn facebook-share-button-comp [url]
   [:div.fb-share-button
@@ -1434,7 +1434,9 @@
   (amazon-frame "//ws-na.amazon-adsystem.com/widgets/q?ServiceVersion=20070822&OneJS=1&Operation=GetAdHtml&MarketPlace=US&source=ac&ref=qf_sp_asin_til&ad_type=product_link&tracking_id=orcpub-20&marketplace=amazon&region=US&placement=0786965819&asins=0786965819&linkId=125c478897a63892c24d0ca46c198848&show_border=false&link_opens_in_new_window=true&price_color=ffffff&title_color=f0a100&bg_color=2c3445"))
 
 #_(def pota-amazon-frame
-  (amazon-frame "//ws-na.amazon-adsystem.com/widgets/q?ServiceVersion=20070822&OneJS=1&Operation=GetAdHtml&MarketPlace=US&source=ac&ref=qf_sp_asin_til&ad_type=product_link&tracking_id=orcpub-20&marketplace=amazon&region=US&placement=0786965789&asins=0786965789&linkId=a2c9018a5e1260f518fa6b0fd0812350&show_border=false&link_opens_in_new_window=true&price_color=ffffff&title_color=f0a100&bg_color=2c3445"))
+    (amazon-frame "//ws-na.amazon-adsystem.com/widgets/q?ServiceVersion=20070822&OneJS=1&Operation=GetAdHtml&MarketPlace=US&source=ac&ref=qf_sp_asin_til&ad_type=product_link&tracking_id=orcpub-20&marketplace=amazon&region=US&placement=0786965789&asins=0786965789&linkId=a2c9018a5e1260f518fa6b0fd0812350&show_border=false&link_opens_in_new_window=true&price_color=ffffff&title_color=f0a100&bg_color=2c3445"))
+
+
 
 (defn content-page [title button-cfgs content]
   (let [srd-message-closed? @(subscribe [:srd-message-closed?])
