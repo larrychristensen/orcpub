@@ -125,9 +125,11 @@
     :target "_blank"}
    [:input {:type "hidden" :name "body" :id "fields-input"}]])
 
+
 (defn svg-icon [icon-name & [size theme-override]]
   (let [theme (or theme-override @(subscribe [:theme]))
-        light-theme? (= "light-theme" theme)]
+        light-theme? (= "light-theme" theme)
+        size (or size 32)]
     [:img.svg-icon
      {:style {:height (str size "px")
               :width (str size "px")}
@@ -1655,11 +1657,12 @@
 (def summary-style
   {:padding "33px 0"})
 
+
 (defn display-section [title icon-name value & [list? buttons]]
   [:div.m-t-20
    [:div.flex.justify-cont-s-b
     [:div.flex.align-items-c
-     (if icon-name (svg-icon icon-name))
+     (if icon-name (svg-icon icon-name 32))
      [:span.m-l-5.f-s-16.f-w-600 title]]
     (if (seq buttons)
       (apply
@@ -1685,7 +1688,7 @@
   [:div.m-t-20
    [:span.f-s-16.f-w-600 title]
    [:div.flex.align-items-c
-    (svg-icon icon-name)
+    (svg-icon icon-name 32)
     [:div.f-s-24.m-l-10.f-w-b content]]])
 
 (defn list-item-section [list-name icon-name items & [name-fn]]
@@ -2141,7 +2144,8 @@
 (defn actions-section [id title icon-name actions]
   (if (seq actions)
     (display-section
-     title icon-name
+     title
+     icon-name
      [:div.f-s-14.l-h-19
       (doall
        (map
