@@ -513,12 +513,6 @@
           {:name "Subclass Builder"
            :route routes/dnd-e5-subclass-builder-page-route}]]]]]]))
 
-(defn legal-footer []
-  [:div.m-l-15.m-b-10.m-t-10.t-a-l
-   [:span "© 2017 OrcPub"]
-   [:a.m-l-5 {:href "/terms-of-use" :target :_blank} "Terms of Use"]
-   [:a.m-l-5 {:href "/privacy-policy" :target :_blank} "Privacy Policy"]])
-
 (def registration-content-style
   {:background-color :white
    :border "1px solid white"
@@ -562,7 +556,7 @@
           :style registration-logo-style
           :on-click route-to-default-page}]]
        [:div.flex-grow-1 content]
-       [legal-footer]]
+       [views-2/legal-footer]]
       [:div.registration-image
        {:style registration-page-style}]]]]])
 
