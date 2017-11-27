@@ -37,7 +37,9 @@
 @media (max-width: 767px) 
 {.splash-button .svg-icon {height: 32px; width: 32px}
 .splash-button-title-prefix {display: none}
-.splash-button .splash-button-content {height: 60px; width: 60px; font-size: 10px}}
+.splash-button .splash-button-content {height: 60px; width: 60px; font-size: 10px}
+.legal-footer-parent {display: none}}
+
 #app {height:100%;background-image: linear-gradient(182deg, #313A4D, #080A0D)}
 
 .app {background-image: linear-gradient(182deg, #313A4D, #080A0D);height:100%;overflow-y:scroll;-webkit-overflow-scrolling :touch;font-family:Open Sans, sans-serif}
