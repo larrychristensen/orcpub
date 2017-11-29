@@ -472,7 +472,6 @@
 (defn option-selector-base []
   (let [expanded? (r/atom false)]
     (fn [{:keys [name key help selected? selectable? option-path select-fn content explanation-text icon classes multiselect? disable-checkbox? edit-event]}]
-      
       [:div.p-10.b-1.b-rad-5.m-5.b-orange
        {:class-name (s/join " " (conj
                                  (remove nil? [(if selected? "b-w-5")
@@ -487,6 +486,10 @@
             [:span.m-r-5 (comps/checkbox selected? disable-checkbox?)])
           (if icon [:div.m-r-5 (views5e/svg-icon icon 24)])
           [:span.f-w-b.f-s-1.flex-grow-1 name]
+          (if edit-event
+            [:span.orange.underline.pointer
+             {:on-click (apply views5e/make-stop-prop-event-handler edit-event)}
+             "edit"])
           (if help
             [show-info-button expanded?])]
          (if (and help @expanded?)
@@ -544,7 +547,7 @@
                                         [:div
                                          (if has-named-mods? [:div.i modifiers-str])
                                          [:div {:class-name (if has-named-mods? "m-t-5")} help]])
-                                   :edit-event edit-event)])))
+                                   :edit-event (::t/edit-event option))])))
 
 (defn selection-section-title [title]
   [:span.m-l-5.f-s-18.f-w-b.flex-grow-1 title])
