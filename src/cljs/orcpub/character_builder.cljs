@@ -471,7 +471,8 @@
 
 (defn option-selector-base []
   (let [expanded? (r/atom false)]
-    (fn [{:keys [name key help selected? selectable? option-path select-fn content explanation-text icon classes multiselect? disable-checkbox?]}]
+    (fn [{:keys [name key help selected? selectable? option-path select-fn content explanation-text icon classes multiselect? disable-checkbox? edit-event]}]
+      (prn "EDIT EVENT" edit-event)
       [:div.p-10.b-1.b-rad-5.m-5.b-orange
        {:class-name (s/join " " (conj
                                  (remove nil? [(if selected? "b-w-5")
@@ -542,7 +543,8 @@
                                    (if (or help has-named-mods?)
                                         [:div
                                          (if has-named-mods? [:div.i modifiers-str])
-                                         [:div {:class-name (if has-named-mods? "m-t-5")} help]]))])))
+                                         [:div {:class-name (if has-named-mods? "m-t-5")} help]])
+                                   :edit-event edit-event)])))
 
 (defn selection-section-title [title]
   [:span.m-l-5.f-s-18.f-w-b.flex-grow-1 title])
