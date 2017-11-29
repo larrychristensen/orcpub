@@ -2344,6 +2344,7 @@
                        cls
                        {:keys [name
                                source
+                               edit-event
                                profs
                                selections
                                spellcasting
@@ -2353,6 +2354,7 @@
                                prereqs
                                levels]
                         :as subcls}]
+  (prn "EDIT EVENT" edit-event)
   (let [kw (common/name-to-kw name)
         {:keys [armor weapon save skill-options tool-options tool language-options]} profs
         {skill-num :choose options :options} skill-options
@@ -2397,6 +2399,7 @@
                          levels)]
     (t/option-cfg
      {:name name
+      :edit-event edit-event
       :prereqs prereqs
       :selections (map
                    (fn [selection]
