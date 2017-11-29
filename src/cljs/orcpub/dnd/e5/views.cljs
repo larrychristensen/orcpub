@@ -3974,6 +3974,33 @@
     [:span.i "Hodor's Guide to Hodors"]
     [:span ")"]]])
 
+(defn option-skill-expertise-choice [option
+                                     set-path-prop-event
+                                     toggle-path-prop-event]
+  [:div.m-b-20
+   [:div.f-s-24.f-w-b.m-b-20 "Skill Expertise (Double Proficiency) Choice"]
+   [:div.m-b-10
+    [labeled-dropdown
+     "Choose"
+     {:items (map
+              value-to-item
+              (range 1 6))
+      :value (get-in option [:profs :skill-expertise-options :choose] 1)
+      :on-change #(dispatch [set-path-prop-event [:profs :skill-expertise-options :choose] (js/parseInt %)])}]]
+   [:div.f-s-18.f-w-b.m-b-20 "Options"]
+   [:div.flex.flex-wrap
+    (doall
+     (map
+      (fn [{:keys [name key]}]
+        ^{:key key}
+        [:span.m-r-20.m-b-10
+         [comps/labeled-checkbox
+          name
+          (get-in option [:profs :skill-expertise-options :options key])
+          false
+          #(dispatch [toggle-path-prop-event [:profs :skill-expertise-options :options key]])]])
+      skills/skills))]])
+
 (defn option-skill-proficiency-choice [option
                                        set-path-prop-event
                                        toggle-path-prop-event]
@@ -4926,6 +4953,11 @@
        class
        ::classes/set-class-path-prop
        ::classes/toggle-class-path-prop]]
+     [:div
+      [option-skill-expertise-choice
+       class
+       ::classes/set-class-path-prop
+       ::classes/toggle-class-path-prop]]
      [:div.m-b-20
       [:div.f-s-24.f-w-b.m-b-10 "Modifiers"]
       [option-level-modifiers
@@ -5036,6 +5068,16 @@
 
             (= :warlock class-key)
             [:div [subclass-spells subclass "Expanded Spells" :warlock-spells]])]))
+     [:div
+      [option-skill-proficiency-choice
+       subclass
+       ::classes/set-subclass-path-prop
+       ::classes/toggle-subclass-path-prop]]
+     [:div
+      [option-skill-expertise-choice
+       subclass
+       ::classes/set-subclass-path-prop
+       ::classes/toggle-subclass-path-prop]]
      [:div.m-b-20
       [:div.f-s-24.f-w-b.m-b-10 "Modifiers"]
       [option-level-modifiers

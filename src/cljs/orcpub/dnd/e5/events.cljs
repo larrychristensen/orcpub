@@ -2367,6 +2367,12 @@
    (assoc-in class prop-path prop-value)))
 
 (reg-event-db
+ ::class5e/set-subclass-path-prop
+ subclass-interceptors
+ (fn [subclass [_ prop-path prop-value]]
+   (assoc-in subclass prop-path prop-value)))
+
+(reg-event-db
  ::race5e/set-race-path-prop
  race-interceptors
  (fn [race [_ prop-path prop-value]]
@@ -2541,6 +2547,12 @@
  class-interceptors
  (fn [class [_ prop-path prop-value]]
    (update-in class prop-path not)))
+
+(reg-event-db
+ ::class5e/toggle-subclass-path-prop
+ subclass-interceptors
+ (fn [subclass [_ prop-path prop-value]]
+   (update-in subclass prop-path not)))
 
 (reg-event-db
  ::race5e/toggle-race-path-prop
