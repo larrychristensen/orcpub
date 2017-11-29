@@ -412,10 +412,11 @@
       (get option-sources source)))
 
 (defn spell-option [spells-map spellcasting-ability class-name key & [prepend-level? qualifier]]
-  (let [{:keys [name level source] :as spell} (spells-map key)]
+  (let [{:keys [name level source edit-event] :as spell} (spells-map key)]
     (t/option-cfg
      {:name (if prepend-level? (str level " - " name) name)
       :key key
+      :edit-event edit-event
       :help (spell-help spell)
       :prereqs [(t/option-prereq
                  "You already know this spell"
@@ -1810,7 +1811,8 @@
                               modifiers
                               selections
                               traits
-                              source]}]
+                              source
+                              edit-event]}]
   (let [{:keys [skill-options]} profs
         {skill-num :choose options :options} skill-options
         skill-kws (if (:any options)
@@ -1820,6 +1822,7 @@
                      (filter val options)))]
     (t/option-cfg
      {:name name
+      :edit-event edit-event
       :selections (concat
                    (if (seq skill-kws)
                      [(skill-selection skill-kws (or skill-num 1))])
@@ -2034,7 +2037,8 @@
                            tool-proficiencies
                            profs
                            source
-                           plugin?]
+                           plugin?
+                           edit-event]
                     :as race}]
   (let [key (or key (common/name-to-kw name))
         {:keys [armor weapon save skill-options tool-options tool language-options]} profs
@@ -2049,6 +2053,7 @@
       :icon icon
       :key key
       :help help
+      :edit-event edit-event
       :selections (concat
                    (if (seq skill-kws)
                      [(skill-selection skill-kws (or skill-num 1))])
@@ -2269,7 +2274,8 @@
                                  treasure
                                  custom-treasure
                                  traits
-                                 source]
+                                 source
+                                 edit-event]
                           :as background}]
   (let [kw (common/name-to-kw name)
         {:keys [skill skill-options tool-options tool language-options]
@@ -2283,6 +2289,7 @@
       {:name name
        :key kw
        :help help
+       :edit-event edit-event
        :page page
        :select-fn (fn [_ _]
                     (dispatch [:add-background-starting-equipment background]))
@@ -2354,7 +2361,6 @@
                                prereqs
                                levels]
                         :as subcls}]
-  (prn "EDIT EVENT" edit-event)
   (let [kw (common/name-to-kw name)
         {:keys [armor weapon save skill-options tool-options tool language-options]} profs
         {skill-num :choose options :options} skill-options
@@ -3129,7 +3135,8 @@
                                     prereqs
                                     path-prereqs
                                     props
-                                    ability-increases]}]
+                                    ability-increases
+                                    edit-event]}]
   (let [feat-mods (feat-modifiers key
                                   name
                                   description
@@ -3142,6 +3149,7 @@
      {:name name
       :key key
       :icon icon
+      :edit-event edit-event
       :modifiers feat-mods
       :selections feat-selections
       :summary description

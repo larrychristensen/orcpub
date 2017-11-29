@@ -563,7 +563,14 @@
 (def make-event-handler
   (memoize
    (fn [event-kw & args]
-      #(dispatch (vec (cons event-kw args))))))
+     #(dispatch (vec (cons event-kw args))))))
+
+(def make-stop-prop-event-handler
+  (memoize
+   (fn [event-kw & args]
+     (fn [e]
+       (dispatch (vec (cons event-kw args)))
+       (.stopPropagation e)))))
 
 (defn verify-failed []
   (let [params (r/atom {})]

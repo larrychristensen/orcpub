@@ -130,10 +130,8 @@
   {:name :check-auth
    :enter (fn [context]
             (let [request (:request context)
-                  _ (prn "REQUEST" request)
                   updated-request (authentication-request request backend)
                   username (get-in updated-request [:identity :user])]
-              (prn "USERNAME" username)
               (if (and (:identity updated-request)
                        username)
                 (assoc context :request (assoc updated-request :username username))
@@ -234,7 +232,6 @@
 (defn login [{:keys [json-params db] :as request}]
   (try
     (let [resp (login-response request)]
-      (prn "RESP" resp)
       resp)
     (catch Throwable e (do (prn "E" e) (throw e)))))
 
@@ -252,7 +249,6 @@
 
 (defn get-or-create-oauth-user [conn db oauth-email]
   (let [{:keys [:orcpub.user/username] :as user} (user-for-email db oauth-email)]
-    (prn "USER" user)
     (if username
       user
       (let [result @(d/transact
@@ -428,7 +424,6 @@
   {:status 200})
 
 (defn reset-password [{:keys [json-params db conn cookies identity] :as request}]
-  (prn "REQUEST" request)
   (try
     (let [{:keys [password verify-password]} json-params
           username (:user identity)
@@ -698,7 +693,6 @@
   (let [id (:db/id character)]
     (if (owns-entity? db username id)
       (let [current-character (d/pull db '[*] id)
-            _ (prn "CURRENT CHARACTER" current-character)
             problems [] #_(dnd-e5-char-type-problems current-character)
             current-valid? (spec/valid? ::se/entity current-character)]
         (if (not current-valid?)
@@ -758,8 +752,6 @@
   (let [character (entity/remove-empty-fields transit-params)
         username (:user identity)
         current-id (:db/id character)]
-    (prn "USER" username)
-    (prn "CHARACTER" character)
     (try
       (if-let [data (spec/explain-data ::se/entity character)]
         {:status 400 :body data}
@@ -903,7 +895,6 @@
                     :where [?u :orcpub.user/username ?username]]
                   db
                   username)]
-    (prn "USER" user)
     @(d/transact conn [[:db/retractEntity user]])
     {:status 200}))
 
