@@ -47,7 +47,10 @@
  ::bg5e/plugin-backgrounds
  :<- [::e5/plugin-vals]
  (fn [plugins _]
-   (apply concat (map (comp vals ::e5/backgrounds) plugins))))
+   (map
+    (fn [background]
+      (assoc background :edit-event [::bg5e/edit-background background]))
+    (apply concat (map (comp vals ::e5/backgrounds) plugins)))))
 
 (reg-sub
  ::langs5e/plugin-languages
@@ -84,9 +87,11 @@
  (fn [plugins _]
    (map
     (fn [subrace]
-      (assoc subrace :modifiers (concat (opt5e/plugin-modifiers (:props subrace)
-                                                                (:key subrace))
-                                        (spell-modifiers subrace (:name subrace)))))
+      (assoc subrace
+             :modifiers (concat (opt5e/plugin-modifiers (:props subrace)
+                                                        (:key subrace))
+                                (spell-modifiers subrace (:name subrace)))
+             :edit-event [::races5e/edit-subrace subrace]))
     (apply concat (map (comp vals ::e5/subraces) plugins)))))
 
 (defn level-modifier [class-key {:keys [type value]}]
@@ -755,7 +760,13 @@
          (update race :subraces concat (subraces-map key))
          race))
      (concat
-      (reverse plugin-races)
+      (map
+       (fn [race]
+         (assoc
+          race
+          :edit-event
+          [::races5e/edit-race race]))
+       (reverse plugin-races))
       [dwarf-option-cfg
        (elf-option-cfg spell-lists spells-map language-map)
        halfling-option-cfg
@@ -832,13 +843,19 @@
  ::feats5e/feats
  :<- [::feats5e/plugin-feats]
  (fn [plugin-feats]
-   plugin-feats))
+   (map
+    (fn [feat]
+      (assoc feat :edit-event [::feats5e/edit-feat feat]))
+    plugin-feats)))
 
 (reg-sub
  ::spells5e/plugin-spells
  :<- [::e5/plugin-vals]
  (fn [plugins _]
-   (apply concat (map (comp vals ::e5/spells) plugins))))
+   (map
+    (fn [spell]
+      (assoc spell :edit-event [::spells5e/edit-spell spell]))
+    (apply concat (map (comp vals ::e5/spells) plugins)))))
 
 (reg-sub
  ::monsters5e/plugin-monsters
