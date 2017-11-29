@@ -762,7 +762,23 @@
                    {:name name
                     :icon icon
                     :modifiers [(skill-prof-or-expertise skill-kw option-source)]})))
-              [:acrobatics :athletics])}))
+              skill-kws)}))
+
+(defn skill-expertise-selection [skill-kws num]
+  (t/selection-cfg
+   {:name "Skill Expertise (Double Proficiency)"
+    :tags #{:skill-profs :profs}
+    :min num
+    :max num
+    :options (map
+              (fn [skill-kw]
+                (let [{:keys [name icon]} (skills/skills-map skill-kw)]
+                  (t/option-cfg
+                   {:name name
+                    :icon icon
+                    :modifiers [(modifiers/skill-proficiency skill-kw)
+                                (modifiers/skill-expertise skill-kw)]})))
+              skill-kws)}))
 
 (defn skill-selection
   ([num]
@@ -2362,10 +2378,13 @@
                                levels]
                         :as subcls}]
   (let [kw (common/name-to-kw name)
-        {:keys [armor weapon save skill-options tool-options tool language-options]} profs
+        {:keys [armor weapon save skill-options skill-expertise-options tool-options tool language-options]} profs
         {skill-num :choose options :options} skill-options
         {level-factor :level-factor} spellcasting
         skill-kws (if (:any options) (map :key skills/skills) (keys options))
+        skill-expertise-kws (if (get-in skill-expertise-options [:options :any])
+                              (map :key skills/skills)
+                              (keys (:options skill-expertise-options)))
         armor-profs (keys armor)
         weapon-profs (keys weapon)
         tool-profs (keys tool)
@@ -2416,6 +2435,8 @@
                     spell-selections
                     (if (seq tool-options) [(tool-prof-selection tool-options)])
                     (if (seq skill-kws) [(skill-selection skill-kws skill-num)])
+                    (if (seq skill-expertise-kws)
+                      [(skill-expertise-selection skill-expertise-kws (:choose skill-expertise-options))])
                     (if (seq language-options) [(language-selection language-map language-options)])))
       :modifiers (concat
                   modifiers
@@ -2678,9 +2699,12 @@
                      :as cls}]
   (let [merged-class (update cls :subclasses #(into (sorted-set-by (fn [x y] (compare (:name x) (:name y)))) (concat (reverse (get plugin-subclasses-map key)) %)))
         kw (or key (common/name-to-kw name))
-        {:keys [save skill-options multiclass-skill-options tool-options multiclass-tool-options tool]
+        {:keys [save skill-options skill-expertise-options multiclass-skill-options tool-options multiclass-tool-options tool]
          armor-profs :armor weapon-profs :weapon} profs
         {level-factor :level-factor} spellcasting
+        skill-expertise-kws (if (get-in skill-expertise-options [:options :any])
+                              (map :key skills/skills)
+                              (keys (:options skill-expertise-options)))
         save-profs (keys save)
         spellcasting-template (spellcasting-template
                                spell-lists
@@ -2710,6 +2734,8 @@
                     (if equipment-choices (class-equipment-options equipment-choices kw))
                     (if skill-options
                       [(class-skill-selection skill-options :skill-proficiency first-class?)])
+                    (if (seq skill-expertise-kws)
+                      [(skill-expertise-selection skill-expertise-kws (:choose skill-expertise-options))])
                     (if multiclass-skill-options
                       [(class-skill-selection multiclass-skill-options :multiclass-skill-proficiency (complement first-class?))])
                     [(t/selection-cfg
