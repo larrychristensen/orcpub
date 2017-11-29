@@ -130,8 +130,10 @@
   {:name :check-auth
    :enter (fn [context]
             (let [request (:request context)
+                  _ (prn "REQUEST" request)
                   updated-request (authentication-request request backend)
                   username (get-in updated-request [:identity :user])]
+              (prn "USERNAME" username)
               (if (and (:identity updated-request)
                        username)
                 (assoc context :request (assoc updated-request :username username))
@@ -426,6 +428,7 @@
   {:status 200})
 
 (defn reset-password [{:keys [json-params db conn cookies identity] :as request}]
+  (prn "REQUEST" request)
   (try
     (let [{:keys [password verify-password]} json-params
           username (:user identity)
@@ -553,25 +556,27 @@
   (str "http://" host "/image/orcpub-box-logo.png"))
 
 (defn index-page-response [{:keys [headers uri] :as request}
-                           {:keys [title description image-url]}]
+                           {:keys [title description image-url]}
+                           response]
   (let [host (headers "host")]
-    {:status 200
-     :headers {"Content-Type" "text/html"
-               "My-Cool-Header" "cool"
-               "Access-Control-Allow-Origin" "https://www.facebook.com"}
-     :body
-     (index-page
-      {:url (str "http://" host uri)
-       :title (or title default-title)
-       :description (or description default-description)
-       :image (or image-url (default-image-url host))}
-      (= "/" uri))}))
+    (merge
+     response
+     {:status 200
+      :headers {"Content-Type" "text/html"
+                "Access-Control-Allow-Origin" "https://www.facebook.com"}
+      :body
+      (index-page
+       {:url (str "http://" host uri)
+        :title (or title default-title)
+        :description (or description default-description)
+        :image (or image-url (default-image-url host))}
+       (= "/" uri))})))
 
-(defn default-index-page [request]
-  (index-page-response request {}))
+(defn default-index-page [request & [response]]
+  (index-page-response request {} response))
 
 (defn index [{:keys [headers scheme uri server-name] :as request} & [response]]
-  (default-index-page request))
+  (default-index-page request response))
 
 (defn reset-password-page [{:keys [query-params db conn] :as req}]
   (if-let [key (:key query-params)]
