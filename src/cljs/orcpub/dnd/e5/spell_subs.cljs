@@ -326,7 +326,8 @@
         (assoc subclass
                :modifiers (opt5e/plugin-modifiers (:props subclass)
                                                   (:key subclass))
-               :levels levels)))
+               :levels levels
+               :edit-event [::classes5e/edit-subclass subclass])))
     (apply concat (map (comp vals ::e5/subclasses) plugins)))))
 
 (reg-sub
@@ -812,8 +813,8 @@
 (reg-sub
  ::classes5e/class
  :<- [::classes5e/class-map]
- (fn [race-map [_ key]]
-   (race-map key)))
+ (fn [class-map [_ key]]
+   (class-map key)))
 
 (reg-sub
  ::races5e/race-map
