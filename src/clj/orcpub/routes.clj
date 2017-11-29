@@ -557,7 +557,7 @@
 
 (defn index-page-response [{:keys [headers uri] :as request}
                            {:keys [title description image-url]}
-                           response]
+                           & [response]]
   (let [host (headers "host")]
     (merge
      response
@@ -969,7 +969,8 @@
                           :description (str (character-summary-description summary)
                                             ". "
                                             description)
-                          :image-url image-url})))
+                          :image-url image-url}
+                         {})))
 
 (def header-style
   {:style "color:#2c3445"})
