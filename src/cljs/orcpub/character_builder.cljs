@@ -472,7 +472,7 @@
 (defn option-selector-base []
   (let [expanded? (r/atom false)]
     (fn [{:keys [name key help selected? selectable? option-path select-fn content explanation-text icon classes multiselect? disable-checkbox? edit-event]}]
-      (prn "EDIT EVENT" edit-event)
+      
       [:div.p-10.b-1.b-rad-5.m-5.b-orange
        {:class-name (s/join " " (conj
                                  (remove nil? [(if selected? "b-w-5")
