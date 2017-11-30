@@ -4875,7 +4875,6 @@
         class-key (get class :class)
         classes @(subscribe [::classes/classes])
         mobile? @(subscribe [:mobile?])]
-    (prn "CLASS" class)
     [:div.p-20.main-text-color
      [:div.flex.flex-wrap
       [:div.m-b-20.flex-grow-1
@@ -4950,7 +4949,7 @@
         [:div.f-s-24.f-w-b.m-b-10 "Spellcasting"]
         [:div.flex.flex-wrap.m-b-20
          [labeled-dropdown
-          "Does this class select spells?"
+          "Does this class have spell slots?"
           {:items [{:title "No"
                     :value false}
                    {:title "Yes"
@@ -4961,17 +4960,7 @@
                                   (if (= "true" %)
                                     {:level-factor 3
                                      :known-mode :schedule
-                                     :spells-known {3 3
-                                                    4 1
-                                                    7 1
-                                                    8 1
-                                                    10 1
-                                                    11 1
-                                                    13 1
-                                                    14 1
-                                                    16 1
-                                                    19 1
-                                                    20 1}})])}]
+                                     :spells-known classes/third-caster-spells-known-schedule})])}]
          (if spellcaster?
            [:div.m-l-5
             [labeled-dropdown
@@ -4983,7 +4972,22 @@
                        obj-to-item
                        opt/abilities))
               :value (get-in class [:spellcasting :ability])
-              :on-change #(dispatch [::classes/set-class-path-prop [:spellcasting :ability] (keyword "orcpub.dnd.e5.character" %)])}]])]
+              :on-change #(dispatch [::classes/set-class-path-prop [:spellcasting :ability] (keyword "orcpub.dnd.e5.character" %)])}]])
+         (if spellcaster?
+           [:div.m-l-5
+            [labeled-dropdown
+             "At what level does this class first gain spell slots?"
+             {:items (map
+                      value-to-item
+                      (range 1 4))
+              :value (get-in class [:spellcasting :level-factor] 1)
+              :on-change #(let [level-factor (js/parseInt %)]
+                            (dispatch [::classes/set-class-path-prop
+                                       [:spellcasting :level-factor] level-factor
+                                       [:spellcasting :spells-known] (case level-factor
+                                                                       1 classes/full-caster-spells-known-schedule
+                                                                       2 classes/half-caster-spells-known-schedule
+                                                                       3 classes/third-caster-spells-known-schedule)]))}]])]
         (if spellcaster?
           [:div
            [:div.f-s-18.f-w-b "Select spells from which this class can choose"]
@@ -5006,7 +5010,11 @@
                         false
                         #(dispatch [::classes/toggle-class-spell-list level key])]])
                     @(subscribe [::spells/spells-for-level level])))]])
-              (range 1 5)))]])])
+              (range 1
+                     (inc (case (get-in class [:spellcasting :level-factor])
+                        2 5
+                        3 4
+                        9)))))]])])
      [:div.m-b-10
       [option-skill-proficiency-choice
        class

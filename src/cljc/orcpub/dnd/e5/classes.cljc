@@ -1689,6 +1689,48 @@
                   :modifiers [(mod/set-mod ?ranger-favored-terrain terrain)]}))
               [:arctic :coast :desert :forest :grassland :mountain :swamp :underdark])}))
 
+
+(def third-caster-spells-known-schedule
+  {3 3
+   4 1
+   7 1
+   8 1
+   10 1
+   11 1
+   13 1
+   14 1
+   16 1
+   19 1
+   20 1})
+
+(def half-caster-spells-known-schedule
+  {2 2
+   3 1
+   5 1
+   7 1
+   9 1
+   11 1
+   13 1
+   15 1
+   17 1
+   19 1})
+
+(def full-caster-spells-known-schedule
+  {1 2
+   2 1
+   3 1
+   4 1
+   5 1
+   6 1
+   7 1
+   8 1
+   9 1
+   10 1
+   11 1
+   13 1
+   15 1
+   17 1})
+
 (defn ranger-option [spells spells-map plugin-subclasses-map language-map]
   (opt5e/class-option
    spells
@@ -1713,16 +1755,7 @@
      :spellcaster true
      :spellcasting {:level-factor 2
                     :known-mode :schedule
-                    :spells-known {2 2
-                                   3 1
-                                   5 1
-                                   7 1
-                                   9 1
-                                   11 1
-                                   13 1
-                                   15 1
-                                   17 1
-                                   19 1}
+                    :spells-known half-caster-spells-known-schedule
                     :ability ::char5e/wis}
      :armor-choices [{:name "Armor"
                       :options {:scale-mail 1
@@ -2132,20 +2165,7 @@
     :spellcasting {:level-factor 1
                    :cantrips-known {1 4 4 1 10 1}
                    :known-mode :schedule
-                   :spells-known {1 2
-                                  2 1
-                                  3 1
-                                  4 1
-                                  5 1
-                                  6 1
-                                  7 1
-                                  8 1
-                                  9 1
-                                  10 1
-                                  11 1
-                                  13 1
-                                  15 1
-                                  17 1}
+                   :spells-known full-caster-spells-known-schedule
                    :ability ::char5e/cha}
     :multiclass-prereqs [(opt5e/ability-prereq ::char5e/cha 13)]
     :spellcaster true
