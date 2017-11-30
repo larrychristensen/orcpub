@@ -4874,7 +4874,9 @@
         spell-lists @(subscribe [::spells/spell-lists])
         class-key (get class :class)
         classes @(subscribe [::classes/classes])
+        class-map @(subscribe [::classes/class-map])
         mobile? @(subscribe [:mobile?])]
+    (prn "CLASS" class)
     [:div.p-20.main-text-color
      [:div.flex.flex-wrap
       [:div.m-b-20.flex-grow-1
@@ -4960,7 +4962,26 @@
                                   (if (= "true" %)
                                     {:level-factor 3
                                      :known-mode :schedule
+                                     :ability ::char/cha
                                      :spells-known classes/third-caster-spells-known-schedule})])}]
+         (if spellcaster?
+           [:div.m-l-5
+            [labeled-dropdown
+             "What spell list does this class use?"
+             {:items (cons
+                      {:title "Custom"
+                       :value "custom"}
+                      (map
+                       (fn [[class-kw]]
+                         (prn "KEYS" (keys (get class-map class-kw)))
+                         ^{:key class-kw}
+                         {:title (get-in class-map [class-kw ::template/name])
+                          :value class-kw})
+                       spell-lists))
+              :value (get-in class [:spellcasting :spell-list-kw])
+              :on-change #(dispatch [::classes/set-class-path-prop
+                                     [:spellcasting :spell-list-kw] (if (not= "custom" %)
+                                                                      (keyword %))])}]])
          (if spellcaster?
            [:div.m-l-5
             [labeled-dropdown
@@ -4988,7 +5009,8 @@
                                                                        1 classes/full-caster-spells-known-schedule
                                                                        2 classes/half-caster-spells-known-schedule
                                                                        3 classes/third-caster-spells-known-schedule)]))}]])]
-        (if spellcaster?
+        (if (and spellcaster?
+                 (not (get-in class [:spellcasting :spell-list-kw])))
           [:div
            [:div.f-s-18.f-w-b "Select spells from which this class can choose"]
            [:div
