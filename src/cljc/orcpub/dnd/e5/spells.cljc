@@ -3283,15 +3283,6 @@ If you target an object held or worn by a hostile creature, that creature must s
 The lightning ignites flammable objects in the area that aren't being worn or carried.
 At Higher Levels. When you cast this spell using a spell slot of 4th level or higher, the damage increases by 1d6 for each slot level above 3rd."
     }
-   {:name "Lightning Lure"
-    :school evocation
-    :level 0
-    :casting-time actions-1
-    :range "15 feet"
-    :components {:verbal true}
-    :duration instantaneous
-    :source :scag
-    :page 143}
    {
     :name "Locate Animals or Plants"
     :ritual true

@@ -323,7 +323,8 @@
       next-path)))
 
 (defn get-lazy [a k]
-  (if (and (seq? a) (int? k))
+  (if (and (seq? a)
+           (int? k))
     (first (drop k a))
     (get a k)))
 

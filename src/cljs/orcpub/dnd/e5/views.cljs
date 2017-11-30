@@ -3272,7 +3272,8 @@
   (let [print-character-sheet? @(subscribe [::char/print-character-sheet?])
         print-spell-cards? @(subscribe [::char/print-spell-cards?])
         print-prepared-spells? @(subscribe [::char/print-prepared-spells?])
-        print-large-abilities? @(subscribe [::char/print-large-abilities?])]
+        print-large-abilities? @(subscribe [::char/print-large-abilities?])
+        has-spells? (seq (char/spells-known built-char))]
     [:div.flex.justify-cont-end
      [:div.p-20
       [:div.f-s-24.f-w-b.m-b-10 "Print Options"]
@@ -3283,27 +3284,29 @@
          [labeled-checkbox
           "Print Abilities Large (and Bonuses Small)"
           print-large-abilities?]]]]
-      [:div.m-b-2
-       [:div.flex
-        [:div
-         {:on-click (make-event-handler ::char/toggle-spell-cards-print)}
-         [labeled-checkbox
-          "Print Spell Cards"
-          print-spell-cards?]]]]
-      [:div.m-b-10
-       [:div.m-b-10
-        [:span.f-w-b "Spells Printed"]]
-       [:div.flex
-        [:div
-         {:on-click (make-event-handler ::char/toggle-known-spells-print)}
-         [labeled-checkbox
-          "Known"
-          (not print-prepared-spells?)]]
-        [:div.m-l-20
-         {:on-click (make-event-handler ::char/toggle-known-spells-print)}
-         [labeled-checkbox
-          "Prepared"
-          print-prepared-spells?]]]]
+      (if has-spells?
+        [:div.m-b-2
+         [:div.flex
+          [:div
+           {:on-click (make-event-handler ::char/toggle-spell-cards-print)}
+           [labeled-checkbox
+            "Print Spell Cards"
+            print-spell-cards?]]]])
+      (if has-spells?
+        [:div.m-b-10
+         [:div.m-b-10
+          [:span.f-w-b "Spells Printed"]]
+         [:div.flex
+          [:div
+           {:on-click (make-event-handler ::char/toggle-known-spells-print)}
+           [labeled-checkbox
+            "Known"
+            (not print-prepared-spells?)]]
+          [:div.m-l-20
+           {:on-click (make-event-handler ::char/toggle-known-spells-print)}
+           [labeled-checkbox
+            "Prepared"
+            print-prepared-spells?]]]])
       [:span.orange.underline.pointer.uppercase.f-s-12
        {:on-click (make-event-handler ::char/hide-options)}
        "Cancel"]
@@ -3317,15 +3320,9 @@
        "Print"]]]))
 
 (defn make-print-handler [id built-char]
-  (if (seq (char/spells-known built-char))
-    #(dispatch
-     [::char/show-options
-      [print-options id built-char]])
-    (export-pdf built-char
-                id
-                {:print-character-sheet? true
-                 :print-spell-cards? false
-                 :print-prepared-spells? false})))
+  #(dispatch
+    [::char/show-options
+     [print-options id built-char]]))
 
 (defn character-page [{:keys [id] :as arg}]
   (let [id (js/parseInt id)
@@ -4520,7 +4517,6 @@
          weapon/weapons)))])])
 
 (defn option-traits [option
-                     option-key
                      add-trait-event
                      edit-trait-name-event
                      edit-trait-type-event
@@ -4532,7 +4528,7 @@
     [:div.f-s-24.f-w-b.m-b-10 "Features/Traits"]
     [:div
      [:button.form-button.m-l-5
-      {:on-click (make-event-handler add-trait-event option-key)}
+      {:on-click (make-event-handler add-trait-event)}
       "add feature / trait"]]]
    [:div
     (if (seq (:traits option))
@@ -4578,7 +4574,7 @@
               :on-change #(dispatch [edit-trait-description-event i %])}]]])
         (:traits option)))
       [:div.p-10.bg-lighter.pointer
-       {:on-click #(dispatch [add-trait-event option-key])}
+       {:on-click #(dispatch [add-trait-event])}
        [:span "There are currently no features/traits, click "]
        [:span.orange.underline "here"]
        [:span " or on the button above to add one."]])]])
@@ -4879,6 +4875,7 @@
         class-key (get class :class)
         classes @(subscribe [::classes/classes])
         mobile? @(subscribe [:mobile?])]
+    (prn "CLASS" class)
     [:div.p-20.main-text-color
      [:div.flex.flex-wrap
       [:div.m-b-20.flex-grow-1
@@ -4919,7 +4916,7 @@
         :subclass-title
         class
         "m-l-5 m-b-20"]]]
-     [:div.m-b-20
+     [:div.m-b-30
       [:div.f-s-24.f-w-b.m-b-10 "Saving Throws"]
       [:div.flex.flex-wrap
        (doall
@@ -4933,7 +4930,7 @@
              false
              #(dispatch [::classes/toggle-save-prof key])]])
          opt/abilities))]]
-     [:div.m-b-20
+     [:div.m-b-30
       [:div.f-s-24.f-w-b.m-b-10 "Ability Increase Levels"]
       [:div.flex.flex-wrap
        (let [asi-levels-set (into #{} (:ability-increase-levels class))]
@@ -4948,12 +4945,74 @@
                false
                #(dispatch [::classes/toggle-ability-increase-level level])]])
            (range 4 21))))]]
-     [:div
+     (let [spellcaster? (boolean (get class :spellcasting))]
+       [:div.m-b-30
+        [:div.f-s-24.f-w-b.m-b-10 "Spellcasting"]
+        [:div.flex.flex-wrap.m-b-20
+         [labeled-dropdown
+          "Does this class select spells?"
+          {:items [{:title "No"
+                    :value false}
+                   {:title "Yes"
+                    :value true}]
+           :value spellcaster?
+           :on-change #(dispatch [::classes/set-class-prop
+                                  :spellcasting
+                                  (if (= "true" %)
+                                    {:level-factor 3
+                                     :known-mode :schedule
+                                     :spells-known {3 3
+                                                    4 1
+                                                    7 1
+                                                    8 1
+                                                    10 1
+                                                    11 1
+                                                    13 1
+                                                    14 1
+                                                    16 1
+                                                    19 1
+                                                    20 1}})])}]
+         (if spellcaster?
+           [:div.m-l-5
+            [labeled-dropdown
+             "Spellcasting ability"
+             {:items (cons
+                      {:title "<select ability>"
+                       :value nil}
+                      (map
+                       obj-to-item
+                       opt/abilities))
+              :value (get-in class [:spellcasting :ability])
+              :on-change #(dispatch [::classes/set-class-path-prop [:spellcasting :ability] (keyword "orcpub.dnd.e5.character" %)])}]])]
+        (if spellcaster?
+          [:div
+           [:div.f-s-18.f-w-b "Select spells from which this class can choose"]
+           [:div
+            (doall
+             (map
+              (fn [level]
+                ^{:key level}
+                [:div.m-t-10
+                 [:div.f-s-16.f-w-b.m-b-10 (str "Level " level)]
+                 [:div.flex.flex-wrap
+                  (doall
+                   (map
+                    (fn [{:keys [name key]}]
+                      ^{:key key}
+                      [:div.m-r-20.m-b-10
+                       [comps/labeled-checkbox
+                        name
+                        (get-in class [:spellcasting :spell-list level key])
+                        false
+                        #(dispatch [::classes/toggle-class-spell-list level key])]])
+                    @(subscribe [::spells/spells-for-level level])))]])
+              (range 1 5)))]])])
+     [:div.m-b-10
       [option-skill-proficiency-choice
        class
        ::classes/set-class-path-prop
        ::classes/toggle-class-path-prop]]
-     [:div
+     [:div.m-b-10
       [option-skill-expertise-choice
        class
        ::classes/set-class-path-prop
@@ -4970,7 +5029,6 @@
      [:div
       [option-traits
        class
-       ::classes/class-builder-item
        ::e5/add-class-trait
        ::e5/edit-class-trait-name
        ::e5/edit-class-trait-type
@@ -5089,7 +5147,6 @@
        ::e5/delete-subclass-modifier]]
      [option-traits
       subclass
-      ::classes/subclass-builder-item
       ::e5/add-subclass-trait
       ::e5/edit-subclass-trait-name
       ::e5/edit-subclass-trait-type
@@ -5256,7 +5313,6 @@
        ::races/delete-subrace-spell]]
      [option-traits
       subrace
-      ::races/subrace-builder-item
       ::e5/add-subrace-trait
       ::e5/edit-subrace-trait-name
       ::e5/edit-subrace-trait-type
@@ -5380,7 +5436,6 @@
        ::races/delete-race-spell]]
      [option-traits
       race
-      ::races/race-builder-item
       ::e5/add-race-trait
       ::e5/edit-race-trait-name
       ::e5/edit-race-trait-type
@@ -5407,7 +5462,6 @@
      [:div
       [option-traits
        background
-       ::bg/builder-item
        ::e5/add-background-trait
        ::e5/edit-background-trait-name
        ::e5/edit-background-trait-type
@@ -5635,7 +5689,6 @@
      [:div.m-t-30
       [option-traits
        monster
-       key
        ::e5/add-monster-trait
        ::e5/edit-monster-trait-name
        ::e5/edit-monster-trait-type
