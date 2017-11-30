@@ -503,7 +503,6 @@
        19 {4 1}}
     {}))
 
-
 (defn total-slots [level level-factor]
   (let [schedule (spell-slot-schedule level-factor)]
     (reduce
@@ -569,6 +568,7 @@
                                {:keys [class-key
                                        level-factor
                                        spells-known
+                                       spell-list-kw
                                        known-mode
                                        spells
                                        ability
@@ -579,7 +579,7 @@
      (let [[num restriction] (if (number? v) [v] ((juxt :num :restriction) v))
            slots (or (if slot-schedule (slot-schedule cls-lvl)) (total-slots cls-lvl level-factor))
            all-spells (select-keys
-                       (or spells (spell-lists class-key))
+                       (or spells (spell-lists (or spell-list-kw class-key)))
                        (keys slots))
            acquire? (= :acquire known-mode)]
        (let [options (flatten
