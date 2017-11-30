@@ -569,7 +569,6 @@
                                        level-factor
                                        spells-known
                                        known-mode
-                                       spell-list
                                        spells
                                        ability
                                        slot-schedule] :as cfg}
@@ -579,25 +578,27 @@
      (let [[num restriction] (if (number? v) [v] ((juxt :num :restriction) v))
            slots (or (if slot-schedule (slot-schedule cls-lvl)) (total-slots cls-lvl level-factor))
            all-spells (select-keys
-                       (or spells (spell-lists (or spell-list class-key)))
+                       (or spells (spell-lists class-key))
                        (keys slots))
            acquire? (= :acquire known-mode)]
        (let [options (flatten
                       (map
                        (fn [[lvl spell-keys]]
-                         (map
-                          (fn [spell-key]
-                            (let [spell (spells-map spell-key)]
-                              #?@(:cljs
-                                  [(if (nil? spell) (js/console.warn (str "No spell found for key: " spell-key)))
-                                   (if (nil? (:name spell)) (js/console.warn (str "Spell is missing name: " spell-key)))])
-                              (memoized-spell-option
-                               spells-map
-                               ability
-                               (:name cls-cfg)
-                               spell-key
-                               true)))
-                          (apply-spell-restriction spells-map spell-keys restriction)))
+                         (let [spell-keys (vec spell-keys)
+                               filtered-keys (apply-spell-restriction spells-map spell-keys restriction)]
+                           (map
+                            (fn [spell-key]
+                              (let [spell (spells-map spell-key)]
+                                #?@(:cljs
+                                    [(if (nil? spell) (js/console.warn (str "No spell found for key: " spell-key)))
+                                     (if (nil? (:name spell)) (js/console.warn (str "Spell is missing name: " spell-key)))])
+                                (memoized-spell-option
+                                 spells-map
+                                 ability
+                                 (:name cls-cfg)
+                                 spell-key
+                                 true)))
+                            filtered-keys)))
                        all-spells))]
          (assoc m cls-lvl
                 [(let [cls-key-nm (class-key-name (:key cls-cfg) (:name cls-cfg))
@@ -621,9 +622,13 @@
                                      cantrips-known
                                      spells-known
                                      known-mode
-                                     ability] :as cfg}
+                                     ability
+                                     spell-list] :as cfg}
                              cls-cfg]
-  (let [spell-selections (spells-known-selections spell-lists spells-map cfg cls-cfg)
+  (let [spell-lists (if spell-list
+                      (assoc spell-lists class-key spell-list)
+                      spell-lists)
+        spell-selections (spells-known-selections spell-lists spells-map cfg cls-cfg)
         cantrip-selections (cantrip-selections spell-lists spells-map class-key (:name cls-cfg) ability cantrips-known)]
     {:selections (merge-with
                   concat
@@ -767,7 +772,7 @@
 (defn skill-expertise-selection [skill-kws num]
   (t/selection-cfg
    {:name "Skill Expertise (Double Proficiency)"
-    :tags #{:skill-profs :profs}
+    :tags #{:profs}
     :min num
     :max num
     :options (map

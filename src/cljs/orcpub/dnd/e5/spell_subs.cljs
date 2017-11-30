@@ -752,30 +752,31 @@
  :<- [::spells5e/spells-map]
  :<- [::langs5e/language-map]
  (fn [[plugin-races subraces-map spell-lists spells-map language-map]]
-   (into
-    (sorted-set-by compare-keys)
-    (map
-     (fn [{:keys [key] :as race}]
-       (if (subraces-map key)
-         (update race :subraces concat (subraces-map key))
-         race))
-     (concat
-      (map
-       (fn [race]
-         (assoc
-          race
-          :edit-event
-          [::races5e/edit-race race]))
-       (reverse plugin-races))
-      [dwarf-option-cfg
-       (elf-option-cfg spell-lists spells-map language-map)
-       halfling-option-cfg
-       (human-option-cfg spell-lists spells-map language-map)
-       dragonborn-option-cfg
-       gnome-option-cfg
-       (half-elf-option-cfg language-map)
-       half-orc-option-cfg
-       tiefling-option-cfg])))))
+   (vec
+    (into
+     (sorted-set-by compare-keys)
+     (map
+      (fn [{:keys [key] :as race}]
+        (if (subraces-map key)
+          (update race :subraces concat (subraces-map key))
+          race))
+      (concat
+       (map
+        (fn [race]
+          (assoc
+           race
+           :edit-event
+           [::races5e/edit-race race]))
+        (reverse plugin-races))
+       [dwarf-option-cfg
+        (elf-option-cfg spell-lists spells-map language-map)
+        halfling-option-cfg
+        (human-option-cfg spell-lists spells-map language-map)
+        dragonborn-option-cfg
+        gnome-option-cfg
+        (half-elf-option-cfg language-map)
+        half-orc-option-cfg
+        tiefling-option-cfg]))))))
 
 
 (defn base-class-options [spell-lists spells-map plugin-subclasses-map language-map]
@@ -800,20 +801,21 @@
  :<- [::langs5e/language-map]
  :<- [::classes5e/plugin-classes]
  (fn [[spell-lists spells-map plugin-subclasses-map language-map plugin-classes] _]
-   (into
-    (sorted-set-by #(compare (::t/key %1) (::t/key %2)))
-    (concat
-     (reverse
-      (map
-       (fn [plugin-class]
-         (opt5e/class-option
-          spell-lists
-          spells-map
-          plugin-subclasses-map
-          language-map
-          plugin-class))
-       plugin-classes))
-     (base-class-options spell-lists spells-map plugin-subclasses-map language-map)))))
+   (vec
+    (into
+     (sorted-set-by #(compare (::t/key %1) (::t/key %2)))
+     (concat
+      (reverse
+       (map
+        (fn [plugin-class]
+          (opt5e/class-option
+           spell-lists
+           spells-map
+           plugin-subclasses-map
+           language-map
+           plugin-class))
+        plugin-classes))
+      (base-class-options spell-lists spells-map plugin-subclasses-map language-map))))))
 
 (reg-sub
  ::classes5e/class-map
@@ -949,17 +951,16 @@
  (fn [db]
    (::monsters5e/filtered-monsters db)))
 
+
 (reg-sub
  ::spells5e/spells
  :<- [::spells5e/plugin-spells]
  (fn [plugin-spells]
-   (sort-by
-    :key
-    (into
-     (sorted-set-by compare-keys)
-     (concat
-      (reverse plugin-spells)
-      spells5e/spells)))))
+   (into
+    (sorted-set-by compare-keys)
+    (concat
+     (reverse plugin-spells)
+     spells5e/spells))))
 
 (reg-sub
  ::spells5e/spells-for-level
