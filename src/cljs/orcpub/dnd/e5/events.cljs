@@ -412,10 +412,11 @@
                                      [option-pack plugin-key key]
                                      item-with-key)]
            {:dispatch-n [[::e5/set-plugins new-plugins]
-                         [:show-message
-                          [:div (str type-name " saved to your browser which could be lost if you clear your history, please consider exporting and saving the content source by clicking ") [:span.orange.pointer.underline
-                                                                                                                                                                                {:on-click #(dispatch [::e5/export-plugin option-pack (str (plugins option-pack))])}
-                                                                                                                                                                                "here"]]]]})
+                         [:show-warning-message
+                          [:div [:span.f-w-b.f-s-18.red "IMPORTANT!: "] [:span.text-shadow (str type-name " saved to your browser which could be lost if you clear your browser history or your browser storage fill up, you MUST export and save the content source by clicking ")] [:span.pointer.underline.black
+                                                                                                                                                                                                                                                                    {:on-click #(dispatch [::e5/export-plugin option-pack (str (plugins option-pack))])}
+                                                                                                                                                                                                                                                                    "here"]]
+                          60000]]})
          {:dispatch [:show-error-message error-message]})))))
 
 (reg-save-homebrew
@@ -1684,8 +1685,8 @@
 
 (reg-event-db
  :show-message
- (fn [db [_ message]]
-   (go (<! (timeout 5000))
+ (fn [db [_ message ttl]]
+   (go (<! (timeout (or ttl 5000)))
        (dispatch [:hide-message]))
    (assoc db
           :message-shown? true
@@ -1693,9 +1694,19 @@
           :message-type :success)))
 
 (reg-event-db
+ :show-warning-message
+ (fn [db [_ message ttl]]
+   (go (<! (timeout (or ttl 5000)))
+       (dispatch [:hide-message]))
+   (assoc db
+          :message-shown? true
+          :message message
+          :message-type :warning)))
+
+(reg-event-db
  :show-error-message
- (fn [db [_ message]]
-   (go (<! (timeout 5000))
+ (fn [db [_ message ttl]]
+   (go (<! (timeout (or ttl 5000)))
        (dispatch [:hide-message]))
    (assoc db
           :message-shown? true
