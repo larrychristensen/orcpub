@@ -610,6 +610,7 @@
     {:style message-style
      :class-name (case message-type
                    :error "bg-red"
+                   :warning "bg-orange"
                    "bg-green")}
     [:span message-text]
     [:i.fa.fa-times]]])
