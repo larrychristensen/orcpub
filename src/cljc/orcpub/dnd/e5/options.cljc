@@ -486,7 +486,7 @@
        5 {1 1
           2 2}
        7 {2 1}
-       9 {3 1}
+       9 {3 2}
        11 {3 1}
        13 {4 1}
        15 {4 1}
@@ -502,6 +502,7 @@
        16 {3 1}
        19 {4 1}}
     {}))
+
 
 (defn total-slots [level level-factor]
   (let [schedule (spell-slot-schedule level-factor)]
