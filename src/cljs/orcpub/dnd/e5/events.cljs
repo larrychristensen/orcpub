@@ -2445,6 +2445,18 @@
    (assoc class prop-key prop-value)))
 
 (reg-event-db
+ ::class5e/toggle-class-spell-list
+ class-interceptors
+ (fn [class [_ level spell-kw]]
+   (update-in class
+              [:spellcasting :spell-list level]
+              (fn [spells]
+                (let [spells (or spells #{})]
+                  (if (spells spell-kw)
+                    (disj spells spell-kw)
+                    (conj spells spell-kw)))))))
+
+(reg-event-db
  ::class5e/toggle-subclass-spellcasting
  subclass-interceptors
  (fn [subclass]

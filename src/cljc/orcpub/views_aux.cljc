@@ -86,8 +86,8 @@
                             p))
                         (reductions conj [] path))
         ancestors (map (fn [a-p]
-                         (entity/get-in-lazy built-template
-                                 (entity/get-template-selection-path built-template a-p [])))
+                         (let [template-path (entity/get-template-selection-path built-template a-p [])]
+                           (entity/get-in-lazy built-template template-path)))
                        (butlast ancestor-paths))
         ancestor-names (map ::t/name (remove nil? ancestors))]
     (s/join " - " ancestor-names)))
