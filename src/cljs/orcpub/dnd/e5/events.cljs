@@ -11,6 +11,7 @@
             [orcpub.dnd.e5.character :as char5e]
             [orcpub.dnd.e5.backgrounds :as bg5e]
             [orcpub.dnd.e5.languages :as langs5e]
+            [orcpub.dnd.e5.selections :as selections5e]
             [orcpub.dnd.e5.feats :as feats5e]
             [orcpub.dnd.e5.races :as race5e]
             [orcpub.dnd.e5.classes :as class5e]
@@ -35,6 +36,7 @@
                                       combat->local-store
                                       background->local-store
                                       language->local-store
+                                      selection->local-store
                                       feat->local-store
                                       race->local-store
                                       subrace->local-store
@@ -49,6 +51,7 @@
                                       default-combat
                                       default-background
                                       default-language
+                                      default-selection
                                       default-feat
                                       default-race
                                       default-subrace
@@ -97,6 +100,8 @@
 
 (def language->local-store-interceptor (after language->local-store))
 
+(def selection->local-store-interceptor (after selection->local-store))
+
 (def feat->local-store-interceptor (after feat->local-store))
 
 (def race->local-store-interceptor (after race->local-store))
@@ -140,6 +145,9 @@
 
 (def language-interceptors [(path ::langs5e/builder-item)
                             language->local-store-interceptor])
+
+(def selection-interceptors [(path ::selections5e/builder-item)
+                            selection->local-store-interceptor])
 
 (def feat-interceptors [(path ::feats5e/builder-item)
                          feat->local-store-interceptor])
@@ -460,6 +468,14 @@
  "You must specify 'Name', 'Option Source Name'")
 
 (reg-save-homebrew
+ "Selection"
+ ::selections5e/save-selection
+ ::selections5e/builder-item
+ ::selections5e/homebrew-selection
+ ::e5/selections
+ "You must specify 'Name', 'Option Source Name'")
+
+(reg-save-homebrew
  "Feat"
  ::feats5e/save-feat
  ::feats5e/builder-item
@@ -524,6 +540,10 @@
 (reg-delete-homebrew
  ::langs5e/delete-language
  ::e5/languages)
+
+(reg-delete-homebrew
+ ::selections5e/delete-selection
+ ::e5/selections)
 
 (reg-delete-homebrew
  ::feats5e/delete-feat
@@ -1625,6 +1645,11 @@
  routes/dnd-e5-language-builder-page-route)
 
 (reg-edit-homebrew
+ ::selections5e/edit-selection
+ ::selections5e/set-selection
+ routes/dnd-e5-selection-builder-page-route)
+
+(reg-edit-homebrew
  ::feats5e/edit-feat
  ::feats5e/set-feat
  routes/dnd-e5-feat-builder-page-route)
@@ -2380,6 +2405,24 @@
        (assoc-in prop-path-2 prop-value-2))))
 
 (reg-event-db
+ ::selections5e/set-selection-path-prop
+ selection-interceptors
+ (fn [selection [_ prop-path prop-value]]
+   (assoc-in selection prop-path prop-value)))
+
+(reg-event-db
+ ::selections5e/delete-option
+ selection-interceptors
+ (fn [selection [_ index]]
+   (update selection :options common/remove-at-index index)))
+
+(reg-event-db
+ ::selections5e/add-option
+ selection-interceptors
+ (fn [selection]
+   (update selection :options conj {})))
+
+(reg-event-db
  ::class5e/set-subclass-path-prop
  subclass-interceptors
  (fn [subclass [_ prop-path prop-value]]
@@ -2408,6 +2451,12 @@
  language-interceptors
  (fn [language [_ prop-key prop-value]]
    (assoc language prop-key prop-value)))
+
+(reg-event-db
+ ::selections5e/set-selection-prop
+ selection-interceptors
+ (fn [selection [_ prop-key prop-value]]
+   (assoc selection prop-key prop-value)))
 
 (reg-event-db
  ::race5e/set-race-prop
@@ -3041,6 +3090,12 @@
    language))
 
 (reg-event-db
+ ::selections5e/set-selection
+ selection-interceptors
+ (fn [_ [_ selection]]
+   selection))
+
+(reg-event-db
  ::feats5e/set-feat
  feat-interceptors
  (fn [_ [_ feat]]
@@ -3114,6 +3169,12 @@
                default-language]}))
 
 (reg-event-fx
+ ::selections5e/reset-selection
+ (fn [_ _]
+   {:dispatch [::selections5e/set-selection
+               default-selection]}))
+
+(reg-event-fx
  ::feats5e/reset-feat
  (fn [_ _]
    {:dispatch [::feats5e/set-feat
@@ -3151,6 +3212,47 @@
                                   (assoc :option-pack option-pack)
                                   (merge option))]
                    [:route route]]})))
+
+(defn reg-option-selections [option-name option-key interceptors]
+  (reg-event-db
+   (keyword "orcpub.dnd.e5"
+            (str "add-" option-name "-selection"))
+   interceptors
+   (fn [option]
+     (update option :level-selections (fn [t] (if (vector? t) (conj t {}) [{}])))))
+  (reg-event-db
+   (keyword "orcpub.dnd.e5"
+            (str "edit-" option-name "-selection-type"))
+   interceptors
+   (fn [option [_ index type]]
+     (cond-> option
+       (nil? (:level-selections option)) (assoc :level-selections [])
+       true (assoc-in [:level-selections index :type] type))))
+  (reg-event-db
+   (keyword "orcpub.dnd.e5"
+            (str "edit-" option-name "-selection-level"))
+   interceptors
+   (fn [option [_ index level]]
+     (cond-> option
+       (nil? (:level-selections option)) (assoc :level-selections [])
+       true (assoc-in [:level-selections index :level] level))))
+  (reg-event-db
+   (keyword "orcpub.dnd.e5"
+            (str "edit-" option-name "-selection-num"))
+   interceptors
+   (fn [option [_ index num]]
+     (cond-> option
+       (nil? (:level-selections option)) (assoc :level-selections [])
+       true (assoc-in [:level-selections index :num] num))))
+  (reg-event-db
+   (keyword "orcpub.dnd.e5"
+            (str "delete-" option-name "-selection"))
+   interceptors
+   (fn [option [_ index]]
+     (update option :level-selections common/remove-at-index index))))
+
+(reg-option-selections "subclass" ::class5e/subclass-builder-item subclass-interceptors)
+(reg-option-selections "class" ::class5e/builder-item class-interceptors)
 
 (defn reg-option-modifiers [option-name option-key interceptors]
   (reg-event-db
@@ -3311,6 +3413,12 @@
  ::langs5e/set-language
  default-language
  routes/dnd-e5-language-builder-page-route)
+
+(reg-new-homebrew
+ ::selections5e/new-selection
+ ::selections5e/set-selection
+ default-selection
+ routes/dnd-e5-selection-builder-page-route)
 
 (reg-new-homebrew
  ::feats5e/new-feat
