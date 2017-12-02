@@ -159,3 +159,9 @@
 (defn rounds-to-minutes [rounds]
   (int (/ (rem rounds rounds-per-hour) rounds-per-minute)))
 
+(def filter-true-xform
+  (filter (fn [[k v]] v)))
+
+(defn true-keys [m]
+  (keys (sequence filter-true-xform m)))
+

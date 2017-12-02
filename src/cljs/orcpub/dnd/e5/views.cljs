@@ -4082,6 +4082,22 @@
           #(dispatch [toggle-event :skill-prof-or-expertise key])]])
       skills/skills))]])
 
+(defn option-tool-proficiency [option toggle-path-prop-event]
+  [:div.m-b-20
+   [:div.f-s-18.f-w-b.m-b-20 "Tool Proficiency"]
+   [:div.flex.flex-wrap
+    (doall
+     (map
+      (fn [{:keys [name key]}]
+        ^{:key key}
+        [:span.m-r-20.m-b-10
+         [comps/labeled-checkbox
+          name
+          (get-in option [:profs :tool key])
+          false
+          #(dispatch [toggle-path-prop-event [:profs :tool key]])]])
+      equip/tools))]])
+
 (defn option-tool-proficiency-or-expertise [option toggle-event]
   [:div.m-b-20
    [:div.f-s-18.f-w-b.m-b-20 "Tool Proficiency or Expertise"]
@@ -5328,6 +5344,7 @@
       [:div [option-saving-throw-advantages subrace ::races/toggle-subrace-map-prop]]
       [:div [option-weapon-proficiency subrace ::races/toggle-subrace-map-prop]]
       [:div [option-armor-proficiency subrace ::races/toggle-subrace-map-prop]]
+      [:div [option-tool-proficiency subrace ::races/toggle-subrace-path-prop]]
       [:div [option-skill-proficiency subrace ::races/toggle-subrace-map-prop]]
       [:div
        [option-skill-proficiency-choice
@@ -5352,6 +5369,7 @@
 
 (defn race-builder []
   (let [race @(subscribe [::races/builder-item])]
+    (prn "RACE" race)
     [:div.p-20.main-text-color
      [:div.m-b-20.flex.flex-wrap
       [race-input-field
@@ -5447,6 +5465,8 @@
        [:div [option-weapon-proficiency race ::races/toggle-race-map-prop]]]
       [:div.m-b-20
        [:div [option-armor-proficiency race ::races/toggle-race-map-prop]]]
+      [:div.m-b-20
+       [option-tool-proficiency race ::races/toggle-race-path-prop]]
       [:div.m-b-20
        [:div [option-damage-resistance race ::races/toggle-race-map-prop]]]
       [:div.m-b-20
