@@ -922,6 +922,7 @@
    [route-map/dnd-e5-spell-page-route :key ":key"]
    [route-map/dnd-e5-spell-builder-page-route]
    [route-map/dnd-e5-monster-builder-page-route]
+   [route-map/dnd-e5-selection-builder-page-route]
    [route-map/dnd-e5-background-builder-page-route]
    [route-map/dnd-e5-encounter-builder-page-route]
    [route-map/dnd-e5-combat-tracker-page-route]

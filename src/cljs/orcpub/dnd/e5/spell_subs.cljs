@@ -16,6 +16,7 @@
             [orcpub.dnd.e5.weapons :as weapon5e]
             [orcpub.dnd.e5.spells :as spells5e]
             [orcpub.dnd.e5.monsters :as monsters5e]
+            [orcpub.dnd.e5.selections :as selections5e]
             [orcpub.dnd.e5.encounters :as encounters5e]
             [orcpub.dnd.e5.combat :as combat5e]
             [orcpub.dnd.e5.spell-lists :as sl5e]
@@ -57,6 +58,18 @@
  :<- [::e5/plugin-vals]
  (fn [plugins _]
    (apply concat (map (comp vals ::e5/languages) plugins))))
+
+(reg-sub
+ ::selections5e/plugin-selections
+ :<- [::e5/plugin-vals]
+ (fn [plugins _]
+   (apply concat (map (comp vals ::e5/selections) plugins))))
+
+(reg-sub
+ ::selections5e/selection-map
+ :<- [::selections5e/plugin-selections]
+ (fn [selections]
+   (common/map-by-key selections)))
 
 (defn spell-modifiers [{:keys [spells]} class-name]
   (map
@@ -268,18 +281,48 @@
 (defn to-class-level [spell-level]
   (- (* 2 spell-level) 1))
 
-(defn make-levels [spell-lists spells-map {:keys [key class spellcasting] :as option}]
+(defn level-selection [class-key selection-map {:keys [type num]}]
+  (let [{:keys [name options]} (selection-map type)]
+    (t/selection-cfg
+     {:name name
+      :key type
+      :tags #{:class}
+      :min (or num 1)
+      :max (or num 1)
+      :options (map
+                (fn [{:keys [name description]}]
+                  (t/option-cfg
+                   {:name name
+                    :modifiers [(mod5e/trait-cfg
+                                 {:name name
+                                  :summary description})]}))
+                options)})))
+
+(defn make-level-selections [class selections selection-map]
+  (reduce
+   (fn [levels {:keys [level] :as s}]
+     (update-in levels
+               [(or level 1) :selections]
+               conj
+               (level-selection class selection-map s)))
+   {}
+   selections))
+
+(defn make-levels [spell-lists spells-map selection-map {:keys [key class spellcasting] :as option}]
   (let [modifiers (:level-modifiers option)
+        selections (:level-selections option)
         by-level (group-by :level modifiers)
         add-spellcasting? (and spellcasting
                                (#{:fighter :rogue} class))
-        spellcaster-levels (spellcaster-subclass-levels key spell-lists spells-map class)]
+        spellcaster-levels (spellcaster-subclass-levels key spell-lists spells-map class)
+        selections-levels (make-level-selections class selections selection-map)]
     (reduce-kv
      (fn [levels level level-modifiers]
        (assoc-in levels
                  [(or level 1) :modifiers]
                  (map (partial level-modifier class) level-modifiers)))
      (merge-levels
+      selections-levels
       (if add-spellcasting?
         spellcaster-levels)
       (if (and (= class :paladin)
@@ -325,10 +368,11 @@
  :<- [::e5/plugin-vals]
  :<- [::spells5e/spell-lists]
  :<- [::spells5e/spells-map]
- (fn [[plugins spell-lists spells-map] _]
+ :<- [::selections5e/selection-map]
+ (fn [[plugins spell-lists spells-map selection-map] _]
    (map
     (fn [subclass]
-      (let [levels (make-levels spell-lists spells-map subclass)]
+      (let [levels (make-levels spell-lists spells-map selection-map subclass)]
         (assoc subclass
                :modifiers (opt5e/plugin-modifiers (:props subclass)
                                                   (:key subclass))
@@ -341,10 +385,11 @@
  :<- [::e5/plugin-vals]
  :<- [::spells5e/spell-lists]
  :<- [::spells5e/spells-map]
- (fn [[plugins spell-lists spells-map]]
+ :<- [::selections5e/selection-map]
+ (fn [[plugins spell-lists spells-map selection-map]]
    (map
     (fn [class]
-      (let [levels (make-levels spell-lists spells-map class)]
+      (let [levels (make-levels spell-lists spells-map selection-map class)]
         (assoc class
                :modifiers (opt5e/plugin-modifiers (:props class)
                                                   (:key class))
@@ -1100,6 +1145,11 @@
  ::encounters5e/builder-item
  (fn [db _]
    (::encounters5e/builder-item db)))
+
+(reg-sub
+ ::selections5e/builder-item
+ (fn [db _]
+   (::selections5e/builder-item db)))
 
 (reg-sub
  ::combat5e/tracker-item
