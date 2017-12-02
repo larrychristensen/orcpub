@@ -674,19 +674,20 @@
    "Add Subclass"
    #(dispatch [::classes/new-subclass "Default Option Source"])))
 
-(defn make-item-adder [{:keys [::entity/path]}]
-  (cond
-    (-> path last (= :feats)) [feat-adder]
-    (-> path last name (s/ends-with? "cantrips-known")) [cantrip-adder]
-    (-> path last name (s/ends-with? "spells-known")) [spell-adder]
-    (-> path last name (s/ends-with? "-spells")) [spell-adder]
-    (-> path last name (s/ends-with? "-any-school")) [spell-adder]
-    :else (match path
-            [:race _ :subrace] [subrace-adder path]
-            [:race] [race-adder]
-            [:background] [background-adder]
-            [:class _ :levels _ _] [subclass-adder]
-            :else nil)))
+(defn make-item-adder [{:keys [::entity/path ::t/adder-key-fn] :as s}]
+  (let [path (if adder-key-fn (adder-key-fn s) path)]
+    (cond
+      (-> path last (= :feats)) [feat-adder]
+      (-> path last name (s/ends-with? "cantrips-known")) [cantrip-adder]
+      (-> path last name (s/ends-with? "spells-known")) [spell-adder]
+      (-> path last name (s/ends-with? "-spells")) [spell-adder]
+      (-> path last name (s/ends-with? "-any-school")) [spell-adder]
+      :else (match path
+              [:race _ :subrace] [subrace-adder path]
+              [:race] [race-adder]
+              [:background] [background-adder]
+              [:subclass] [subclass-adder]
+              :else nil))))
 
 (defn default-selection-section-body [actual-path
                                       {:keys [::t/options] :as selection}

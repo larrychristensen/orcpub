@@ -44,6 +44,7 @@
    routes/dnd-e5-class-builder-page-route views/class-builder-page
    routes/dnd-e5-feat-builder-page-route views/feat-builder-page
    routes/dnd-e5-language-builder-page-route views/language-builder-page
+   routes/dnd-e5-selection-builder-page-route views/selection-builder-page
    routes/dnd-e5-item-list-page-route views/item-list
    routes/dnd-e5-char-page-route views/character-page
    routes/dnd-e5-monster-page-route views/monster-page

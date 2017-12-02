@@ -2621,6 +2621,7 @@
                       (let [subclass-selection-key (common/name-to-kw subclass-title)]
                         [(t/selection-cfg
                           {:name (or subclass-title (str name " Archetype"))
+                           :adder-key-fn (fn [_] [:subclass])
                            :key subclass-selection-key
                            :help subclass-help
                            :tags #{:subclass}

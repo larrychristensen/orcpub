@@ -13,6 +13,7 @@
             [orcpub.dnd.e5.character :as char]
             [orcpub.dnd.e5.backgrounds :as bg]
             [orcpub.dnd.e5.languages :as langs]
+            [orcpub.dnd.e5.selections :as selections]
             [orcpub.dnd.e5.races :as races]
             [orcpub.dnd.e5.classes :as classes]
             [orcpub.dnd.e5.feats :as feats]
@@ -511,7 +512,9 @@
           {:name "Class Builder"
            :route routes/dnd-e5-class-builder-page-route}
           {:name "Subclass Builder"
-           :route routes/dnd-e5-subclass-builder-page-route}]]]]]]))
+           :route routes/dnd-e5-subclass-builder-page-route}
+          {:name "Selection Builder"
+           :route routes/dnd-e5-selection-builder-page-route}]]]]]]))
 
 (def registration-content-style
   {:background-color :white
@@ -3848,6 +3851,9 @@
 (defn language-input-field [title prop language & [class-names]]
   (builder-input-field title prop language ::langs/set-language-prop class-names))
 
+(defn selection-input-field [title prop selection & [class-names]]
+  (builder-input-field title prop selection ::selections/set-selection-prop class-names))
+
 (defn background-input-field [title prop bg & [class-names]]
   (builder-input-field title prop bg ::bg/set-background-prop class-names))
 
@@ -4693,6 +4699,30 @@
      [:div [option-skill-proficiency-or-expertise feat ::feats/toggle-feat-map-prop]]
      [:div [option-tool-proficiency-or-expertise feat ::feats/toggle-feat-map-prop]]]))
 
+(defn selection-selector [index selection-cfg value-change-event]
+  (let [selections @(subscribe [::selections/plugin-selections])]
+    [:div.flex
+     [:div.m-r-5
+      [labeled-dropdown
+       "Selection Name"
+       {:items (cons
+                {:title "<select selection>"
+                 :value nil}
+                (map
+                 obj-to-item
+                 selections))
+        :value (get selection-cfg :key)
+        :on-change #(dispatch [value-change-event index (assoc selection-cfg :key (keyword %))])}]]
+     (if (:key selection-cfg)
+       [:div
+        [labeled-dropdown
+         "Amount to Select"
+         {:items (map
+                  value-to-item
+                  (range 1 11))
+          :value (get selection-cfg :choose)
+          :on-change #(dispatch [value-change-event index (assoc selection-cfg :choose (js/parseInt %))])}]])]))
+
 (defn spell-selector [index spell-cfg value-change-event]
   (let [spells @(subscribe [::spells/spells-for-level (or (:level spell-cfg) 0)])
         spells-map @(subscribe [::spells/spells-map])
@@ -4817,13 +4847,56 @@
     :value level
     :on-change #(dispatch [edit-modifier-level-event index (js/parseInt %)])}])
 
+(defn option-level-selection [{:keys [type level num]}
+                             index
+                             edit-selection-type-event
+                             edit-selection-num-event
+                             edit-selection-level-event
+                             delete-selection-event]
+  (let [selections @(subscribe [::selections/plugin-selections])]
+    [:div
+     [:div.flex.flex-wrap.align-items-end.m-b-20
+      [:div.m-t-10
+       [labeled-dropdown
+        "Selection Type"
+        {:items (concat
+                 [{:title "<select type to add>"
+                   :disabled? true
+                   :value :select}]
+                 (map
+                  obj-to-item
+                  selections)
+                 [{:title "<create new selection>"
+                   :value :new-selection}])
+         :value (or type :select)
+         :on-change #(if (= "new-selection" %)
+                       (dispatch [::selections/new-selection])
+                       (dispatch [edit-selection-type-event index (keyword %)]))}]]
+      (if type
+        [:div.m-t-10.m-l-5
+         [modifier-level-selector index level edit-selection-level-event]])
+      (if type
+        [:div.m-t-10.m-l-5
+         [labeled-dropdown
+          "Amount to Select at this Level"
+          {:items (map
+                   value-to-item
+                   (range 1 11))
+           :value (or num 1)
+           :on-change #(dispatch [edit-selection-num-event index (js/parseInt %)])}]])
+      (if (or type level num)
+        [:div.m-t-10
+         [:button.form-button.m-l-5
+          {:on-click #(dispatch [delete-selection-event index])}
+          "delete"]])]]))
+
 (defn option-level-modifier [{:keys [type value level]}
                              index
                              edit-modifier-type-event
                              edit-modifier-value-event
                              edit-modifier-level-event
                              delete-modifier-event]
-  (let [{:keys [name values component value-fn]} (modifier-values type)]
+  (let [{:keys [name values component value-fn]} (if type (modifier-values type))]
     [:div
      [:div.flex.flex-wrap.align-items-end.m-b-20
       [:div.m-t-10
@@ -4890,6 +4963,56 @@
      edit-modifier-value-event
      edit-modifier-level-event
      delete-modifier-event]]])
+
+(def selection-help
+  [:div.p-20
+   "Selections provide options that one can pick when building a character, typically associated with a class and given at a certain level. The class and subclass builders allow selections to be added. Examples of selections one might want to build are 'Martial Maneuvers' or 'Totem Spirit'"])
+
+(defn title-with-help []
+  (let [expanded? (r/atom false)]
+    (fn [title help]
+      [:div
+       [:div
+        title
+        [:span.orange.pointer.f-s-18.m-l-5
+         {:on-click #(swap! expanded? not)}
+         [:i.fa.fa-question-circle.m-r-2]
+         [:i.fa {:class-name (if @expanded? "fa-caret-up" "fa-caret-down")}]]]
+       (if @expanded?
+         [:div.bg-light.f-s-18
+          help])])))
+
+(defn option-level-selections [{:keys [level-selections]}
+                              add-selection-event
+                              edit-selection-type-event
+                              edit-selection-num-event
+                              edit-selection-level-event
+                              delete-selection-event]
+  [:div
+   [title-with-help
+    [:span.f-w-b.f-s-24 "Selections"]
+    selection-help]
+   [:div
+    (doall
+     (map-indexed
+      (fn [index selection]
+        ^{:key index}
+        [option-level-selection         
+         selection
+         index
+         edit-selection-type-event
+         edit-selection-num-event
+         edit-selection-level-event
+         delete-selection-event])
+      level-selections))]
+   [:div
+    [option-level-selection
+     nil
+     (count level-selections)
+     edit-selection-type-event
+     edit-selection-num-event
+     edit-selection-level-event
+     delete-selection-event]]])
 
 (defn class-builder []
   (let [class @(subscribe [::classes/builder-item])
@@ -5076,6 +5199,14 @@
        ::e5/edit-class-modifier-value
        ::e5/edit-class-modifier-level
        ::e5/delete-class-modifier]]
+     [:div.m-b-20.m-t-30
+      [option-level-selections
+       class
+       ::e5/add-class-selection
+       ::e5/edit-class-selection-type
+       ::e5/edit-class-selection-num
+       ::e5/edit-class-selection-level
+       ::e5/delete-class-selection]]
      [:div
       [option-traits
        class
@@ -5520,6 +5651,52 @@
        ::e5/edit-background-trait-type
        ::e5/edit-background-trait-description
        ::e5/delete-background-trait]]]))
+
+(defn selection-builder []
+  (let [selection @(subscribe [::selections/builder-item])]
+    [:div.p-20.main-text-color
+     [:div.flex.w-100-p.flex-wrap
+      [selection-input-field
+       "Name"
+       :name
+       selection
+       "m-b-20"]
+      [selection-input-field
+       option-source-name-label
+       :option-pack
+       selection
+       "m-l-5 m-b-20"]]
+     [:div
+      [:div.flex.justify-cont-s-b
+       [:div.f-s-24.f-w-b "Options"]
+       [:button.form-button
+        {:on-click #(dispatch [::selections/add-option])}
+        "Add Option"]]
+      [:div
+       (doall
+        (map-indexed
+         (fn [i {:keys [name description]}]
+           ^{:key i}
+           [:div.m-b-30
+            [:div.flex.align-items-end.m-b-10
+             [:div.f-w-b.f-s-24.m-r-10 (str (inc i) ".")]
+             [:div.flex-grow-1
+              [input-builder-field
+               [:span.f-w-b "Name"]
+               name
+               #(dispatch [::selections/set-selection-path-prop [:options i :name] %])
+               {:class-name "input h-40"}]]
+             [:div
+              [:button.form-button.m-l-5
+               {:on-click #(dispatch [::selections/delete-option i])}
+               "delete"]]]
+            [:div.w-100-p
+             [:div.f-w-b
+              "Description"]
+             [textarea-field
+              {:value description
+               :on-change #(dispatch [::selections/set-selection-path-prop [:options i :description] %])}]]])
+         (:options selection)))]]]))
 
 (defn language-builder []
   (let [language @(subscribe [::langs/builder-item])]
@@ -6418,8 +6595,10 @@
                                                         (str type-name (if (not= 1 num) "s")))]
                                   (str num " " (common/safe-capitalize final-type-name))
                                     )]]
-          [:i.fa
-           {:class-name (if @expanded? "fa-caret-up" "fa-caret-down")}]]
+          [:div.orange.pointer
+           [:i.fa.m-r-5
+            {:class-name (if @expanded? "fa-caret-up" "fa-caret-down")}]
+           [:span.underline (if @expanded? "collapse" "expand")]]]
          (if @expanded?
            [:div.bg-lighter.p-10
             [:div.flex.justify-cont-end
@@ -6441,6 +6620,15 @@
                     {:on-click (make-event-handler delete-event item)}
                     "delete"]]])
                items))]])]))))
+
+(defn my-selections [name]
+  (my-content-type name
+                   "selection"
+                   ::e5/selections
+                   "checklist"
+                   ::selections/new-selection
+                   ::selections/edit-selection
+                   ::selections/delete-selection))
 
 (defn my-spells [name]
   (my-content-type name
@@ -6545,8 +6733,10 @@
        [:div.p-20.pointer.flex.justify-cont-s-b.align-items-c.main-text-color
         {:on-click #(swap! expanded? not)}
         [:span.f-s-24 name]
-        [:i.fa
-         {:class-name (if @expanded? "fa-caret-up" "fa-caret-down")}]]
+        [:div.orange
+         [:i.fa.m-r-5
+          {:class-name (if @expanded? "fa-caret-up" "fa-caret-down")}]
+         [:span.pointer.underline (if @expanded? "collapse" "expand")]]]
        (if @expanded?
          [:div.bg-lighter.p-10
           [:div.flex.justify-cont-end.uppercase.align-items-c.m-b-10
@@ -6566,7 +6756,8 @@
            [(my-classes name) plugin]
            [(my-subclasses name) plugin]
            [(my-feats name) plugin]
-           [(my-languages name) plugin]]])])))
+           [(my-languages name) plugin]
+           [(my-selections name) plugin]]])])))
 
 (defn my-content []
   [:div.main-text-color
@@ -6608,9 +6799,9 @@
      [:span.f-w-b "Email: "]
      [:span @(subscribe [:email])]]]])
 
-(defn builder-page [item-title reset-event save-event builder]
+(defn builder-page [item-title reset-event save-event builder & [title]]
   [content-page
-   (str item-title " Builder")
+   (or title (str item-title " Builder"))
    [{:title (str "New " item-title)
      :icon "plus"
      :on-click #(dispatch [reset-event])}
@@ -6641,6 +6832,9 @@
 
 (defn language-builder-page []
   (builder-page "Language" ::langs/reset-language ::langs/save-language language-builder))
+
+(defn selection-builder-page []
+  (builder-page "Selection" ::selections/reset-selection ::selections/save-selection selection-builder [title-with-help "Selection" selection-help]))
 
 (defn background-builder-page []
   (builder-page "Background" ::bg/reset-background ::bg/save-background background-builder))
