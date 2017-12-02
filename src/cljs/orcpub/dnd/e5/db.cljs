@@ -15,6 +15,7 @@
             [orcpub.dnd.e5.encounters :as encounters5e]
             [orcpub.dnd.e5.combat :as combat5e]
             [orcpub.dnd.e5.equipment :as equip5e]
+            [orcpub.dnd.e5.selections :as selections5e]
             [re-frame.core :as re-frame]
             [orcpub.entity :as entity]
             [orcpub.entity.strict :as se]
@@ -33,6 +34,7 @@
 (def local-storage-combat-key "combat")
 (def local-storage-background-key "background")
 (def local-storage-language-key "language")
+(def local-storage-selection-key "selection")
 (def local-storage-feat-key "feat")
 (def local-storage-race-key "race")
 (def local-storage-subrace-key "subrace")
@@ -84,6 +86,8 @@
 
 (def default-language {})
 
+(def default-selection {:options []})
+
 
 (def default-feat {:ability-increases #{}
                    :prereqs #{}})
@@ -122,6 +126,7 @@
    ::combat5e/tracker-item default-combat
    ::bg5e/builder-item default-background
    ::langs5e/builder-item default-language
+   ::selections5e/builder-item default-selection
    ::feats5e/builder-item default-feat
    ::race5e/builder-item default-race
    ::race5e/subrace-builder-item default-subrace
@@ -171,6 +176,10 @@
 (defn language->local-store [language]
   (if js/window.localStorage
     (set-item local-storage-language-key (str language))))
+
+(defn selection->local-store [selection]
+  (if js/window.localStorage
+    (set-item local-storage-selection-key (str selection))))
 
 (defn feat->local-store [feat]
   (if js/window.localStorage
