@@ -165,3 +165,9 @@
 (defn true-keys [m]
   (keys (sequence filter-true-xform m)))
 
+(defn dissoc-in [m path]
+  (update-in m
+             (butlast path)
+             (fn [x]
+               (dissoc x (last path)))))
+

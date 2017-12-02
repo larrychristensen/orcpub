@@ -103,6 +103,7 @@
     :saving-throw-advantage (mod5e/saving-throw-advantage value)
     :skill-prof (mod5e/skill-proficiency value)
     :armor-prof (mod5e/armor-proficiency value)
+    :tool-prof (mod5e/tool-proficiency value)
     :flying-speed (mod5e/flying-speed-override value)
     :swimming-speed (mod5e/swimming-speed-override value)
     :flying-speed-equals-walking-speed (mod5e/flying-speed-equal-to-walking)
@@ -1115,3 +1116,9 @@
  ::monsters5e/challenge-ratings
  (fn [db _]
    (into (sorted-set) (map :challenge) monsters5e/monsters)))
+
+(reg-sub
+ ::classes5e/has-prof?
+ :<- [::classes5e/builder-item]
+ (fn [class [_ prof-type prof-key]]
+   (some? (get-in class [:profs prof-type prof-key]))))
