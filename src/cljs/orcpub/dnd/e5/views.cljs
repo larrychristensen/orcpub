@@ -4783,6 +4783,11 @@
                             {:title armor-type
                              :value (name armor-type)})
                           [:light :medium :heavy :shields]))}
+   :tool-prof {:name "Tool Proficiency"
+               :value-fn keyword
+               :values (map
+                        obj-to-item
+                        equip/tools)}
    :flying-speed {:name "Flying Speed"
                   :value-fn js/parseInt
                   :values (map
@@ -4893,7 +4898,6 @@
         classes @(subscribe [::classes/classes])
         class-map @(subscribe [::classes/class-map])
         mobile? @(subscribe [:mobile?])]
-    (prn "CLASS" class)
     [:div.p-20.main-text-color
      [:div.flex.flex-wrap
       [:div.m-b-20.flex-grow-1
@@ -4990,7 +4994,6 @@
                        :value "custom"}
                       (map
                        (fn [[class-kw]]
-                         (prn "KEYS" (keys (get class-map class-kw)))
                          ^{:key class-kw}
                          {:title (get-in class-map [class-kw ::template/name])
                           :value class-kw})
@@ -5369,7 +5372,6 @@
 
 (defn race-builder []
   (let [race @(subscribe [::races/builder-item])]
-    (prn "RACE" race)
     [:div.p-20.main-text-color
      [:div.m-b-20.flex.flex-wrap
       [race-input-field

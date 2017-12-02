@@ -2574,6 +2574,17 @@
    (update-in class prop-path not)))
 
 (reg-event-db
+ ::class5e/toggle-class-prof
+ class-interceptors
+ (fn [class [_ prop-path]]
+   (let [v (get-in class prop-path)]
+     ;; for classes, the value for a prof signals whether
+     ;; it only applies to the first class a character takes
+     (if (= v false)
+       (common/dissoc-in class prop-path)
+       (assoc-in class prop-path false)))))
+
+(reg-event-db
  ::class5e/toggle-subclass-path-prop
  subclass-interceptors
  (fn [subclass [_ prop-path prop-value]]
