@@ -1835,7 +1835,7 @@
                               traits
                               source
                               edit-event]}]
-  (let [{:keys [skill-options]} profs
+  (let [{:keys [skill-options tool]} profs
         {skill-num :choose options :options} skill-options
         skill-kws (if (:any options)
                     (map :key skills/skills)
@@ -1860,6 +1860,7 @@
                   modifiers
                   (armor-prof-modifiers armor-proficiencies)
                   (weapon-prof-modifiers weapon-proficiencies)
+                  (tool-prof-modifiers (common/true-keys tool))
                   (map
                    (fn [[k v]]
                      (modifiers/subrace-ability k v))
@@ -2056,7 +2057,6 @@
                            language-options
                            armor-proficiencies
                            weapon-proficiencies
-                           tool-proficiencies
                            profs
                            source
                            plugin?
@@ -2101,7 +2101,7 @@
                      (modifiers/race-ability k v))
                    abilities)
                   modifiers
-                  (tool-prof-modifiers tool-proficiencies)
+                  (tool-prof-modifiers (common/true-keys tool))
                   (traits-modifiers traits nil source)
                   (armor-prof-modifiers armor-proficiencies)
                   (weapon-prof-modifiers weapon-proficiencies)
