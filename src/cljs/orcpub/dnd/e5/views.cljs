@@ -2404,6 +2404,15 @@
   {:height "400px"
    :width "100%"})
 
+(def stroke-style
+  {:stroke-width "1"
+   :stroke "white"})
+
+(def bar-stroke-style
+  {:stroke-width "5"
+   :stroke orange
+   :opacity "0.8"})
+
 (defn set-notes-fn [id]
   #(dispatch [::char/set-notes id %]))
 
@@ -2411,6 +2420,8 @@
 
 (defn summary-details [num-columns id]
   (let [built-char @(subscribe [:built-character id])
+        {:keys [::entity/owner] :as character} @(subscribe [::char/character id])
+        username @(subscribe [:username])
         race @(subscribe [::char/race id])
         classes @(subscribe [::char/classes id])
         background @(subscribe [::char/background id])
@@ -2421,11 +2432,90 @@
         faction-image-url @(subscribe [::char/faction-image-url id])
         faction-image-url-failed @(subscribe [::char/faction-image-url-failed id])
         armor-class @(subscribe [::char/armor-class id])
-        armor-class-with-armor @(subscribe [::char/armor-class-with-armor id])]
+        armor-class-with-armor @(subscribe [::char/armor-class-with-armor id])
+        total-levels @(subscribe [::char/total-levels id])
+        current-level-xps (opt/level-xps total-levels)
+        next-level-xps (opt/level-xps (inc total-levels))
+        xps (or @(subscribe [::char/xps id])
+                current-level-xps)
+        fraction (/ (- xps current-level-xps)
+                    (- next-level-xps current-level-xps))
+        line-length 160
+        buffer 10
+        progress-length (double (* line-length fraction))
+        current-route @(subscribe [:route])]
+    (prn "CURRENT ROUTE" current-route)
     [:div
      [:div
       [:div.w-100-p.t-a-c
        [:div
+        [:div.m-b-20
+         [:div.f-w-b.f-s-18 "Experience Points"]
+         [:div.flex.justify-cont-s-a
+          [:div.flex.flex-wrap.align-items-c
+           [:div
+            [comps/input-field
+             :input
+             xps
+             #(dispatch [::char/set-current-xps id (js/parseInt %)])
+             {:class-name "input"
+              :type :number}]]
+           [:div.p-5
+            [:div
+             [:svg {:width "250px"
+                    :view-box "0 0 200 40"}
+              [:line {:x1 "10"
+                      :y1 "20"
+                      :x2 "190"
+                      :y2 "20"
+                      :style stroke-style}]
+              [:line {:x1 "20"
+                      :y1 "10"
+                      :x2 "20"
+                      :y2 "25"
+                      :style stroke-style}]
+              [:line {:x1 "180"
+                      :y1 "10"
+                      :x2 "180"
+                      :y2 "25"
+                      :style stroke-style}]
+              (let [x2 (+ progress-length buffer 10)]
+                (if (and (not (js/isNaN x2))
+                         (> x2 buffer))
+                  [:line {:x1 (if (pos? current-level-xps)
+                                "10"
+                                "20")
+                          :y1 "17"
+                          :x2 (str x2)
+                          :y2 "17"
+                          :style bar-stroke-style}]))
+              [:text {:x "8"
+                      :y "30"
+                      :fill "white"
+                      :font-size "8"}
+               (str "Level " total-levels)]
+              [:text {:x "9"
+                      :y "36"
+                      :fill "white"
+                      :font-size "6"}
+               current-level-xps]
+              [:text {:x "165"
+                      :y "30"
+                      :fill "white"
+                      :font-size "8"}
+               (str "Level " (inc total-levels))]
+              [:text {:x "165"
+                      :y "36"
+                      :fill "white"
+                      :font-size "6"}
+               next-level-xps]]]]
+           (if (and (>= xps next-level-xps)
+                    (= (:handler current-route) routes/dnd-e5-char-builder-route))
+             [:button.form-button
+              {:on-click #(dispatch [::char/level-up id])}
+              [:div.flex.align-items-c
+               [svg-icon "muscle-up" 24]
+               [:span.m-l-5 "Level Up"]]])]]]
         [ability-scores-section-2 id]
         [:div.flex.p-10.justify-cont-s-a
          [skills-section-2 id]
@@ -6917,6 +7007,10 @@
       [:button.form-button
        {:on-click (make-event-handler :edit-character @(subscribe [::char/character id]))}
        "edit"])
+    (if (= username owner)
+      [:button.form-button.m-l-5
+       {:on-click (make-event-handler ::char/save-character id)}
+       "save"])
     [:button.form-button.m-l-5
      {:on-click (make-event-handler :route char-page-route)}
      "view"]
