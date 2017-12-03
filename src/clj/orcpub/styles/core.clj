@@ -306,7 +306,10 @@
    [:.posn-fixed
     {:position :fixed}]
    [:.main-text-color
-    {:color :white}]
+    {:color :white
+     :fill :white}]
+   [:.stroke-color
+    {:stroke :white}]
    [:.white
     {:color :white}]
    [:.black
@@ -1150,7 +1153,10 @@
       {:border-bottom "1px solid rgba(0,0,0,0.5)"}]
 
      [:.main-text-color
-      {:color "#363636"}]
+      {:color "#363636"
+       :fill "#363636"}]
+     [:.stroke-color
+      {:stroke "#363636"}]
 
      [:.input
      {:background-color :transparent
