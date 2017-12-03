@@ -2444,7 +2444,6 @@
         buffer 10
         progress-length (double (* line-length fraction))
         current-route @(subscribe [:route])]
-    (prn "CURRENT ROUTE" current-route)
     [:div
      [:div
       [:div.w-100-p.t-a-c
