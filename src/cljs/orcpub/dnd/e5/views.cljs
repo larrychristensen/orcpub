@@ -4545,14 +4545,14 @@
                      edit-trait-type-event
                      edit-trait-description-event
                      delete-trait-event
-                     & {:keys [edit-trait-level-event types]}]
+                     & {:keys [edit-trait-level-event types title button-title]}]
   [:div.m-b-20
    [:div.p-t-10.p-b-10.f-w-b.flex.justify-cont-s-b.align-items-c
-    [:div.f-s-24.f-w-b.m-b-10 "Features/Traits"]
+    [:div.f-s-24.f-w-b.m-b-10 (or title "Features/Traits")]
     [:div
      [:button.form-button.m-l-5
       {:on-click (make-event-handler add-trait-event)}
-      "add feature / trait"]]]
+      (or button-title "add feature / trait")]]]
    [:div
     (if (seq (:traits option))
       (doall
@@ -5959,6 +5959,8 @@
        ::e5/edit-monster-trait-type
        ::e5/edit-monster-trait-description
        ::e5/delete-monster-trait
+       :title "Actions / Features"
+       :button-title "Add Action / Feature"
        :types [{:title "Other"}
                {:title "Action"
                 :value :action}
