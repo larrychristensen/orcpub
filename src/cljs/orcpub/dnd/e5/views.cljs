@@ -2405,8 +2405,7 @@
    :width "100%"})
 
 (def stroke-style
-  {:stroke-width "1"
-   :stroke "white"})
+  {:stroke-width "1"})
 
 (def bar-stroke-style
   {:stroke-width "5"
@@ -2463,17 +2462,17 @@
             [:div
              [:svg {:width "250px"
                     :view-box "0 0 200 40"}
-              [:line {:x1 "10"
+              [:line.stroke-color {:x1 "10"
                       :y1 "20"
                       :x2 "190"
                       :y2 "20"
                       :style stroke-style}]
-              [:line {:x1 "20"
+              [:line.stroke-color {:x1 "20"
                       :y1 "10"
                       :x2 "20"
                       :y2 "25"
                       :style stroke-style}]
-              [:line {:x1 "180"
+              [:line.stroke-color {:x1 "180"
                       :y1 "10"
                       :x2 "180"
                       :y2 "25"
@@ -2488,22 +2487,22 @@
                           :x2 (str x2)
                           :y2 "17"
                           :style bar-stroke-style}]))
-              [:text {:x "8"
+              [:text.main-text-color {:x "8"
                       :y "30"
                       :fill "white"
                       :font-size "8"}
                (str "Level " total-levels)]
-              [:text {:x "9"
+              [:text.main-text-color {:x "9"
                       :y "36"
                       :fill "white"
                       :font-size "6"}
                current-level-xps]
-              [:text {:x "165"
+              [:text.main-text-color {:x "165"
                       :y "30"
                       :fill "white"
                       :font-size "8"}
                (str "Level " (inc total-levels))]
-              [:text {:x "165"
+              [:text.main-text-color {:x "165"
                       :y "36"
                       :fill "white"
                       :font-size "6"}
