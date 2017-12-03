@@ -4665,6 +4665,32 @@
         false
         #(dispatch [::feats/toggle-feat-prop kw])])]]])
 
+(defn feat-spellcasting [feat]
+  [:div.m-b-30
+   [:div.f-s-18.f-w-b.m-b-10 "Spellcasting"]
+   [:div.flex.flex-wrap
+    [:div.m-r-20.m-b-10
+     (let [kw :magic-novice]
+       [comps/labeled-checkbox
+        "Choose a class, gain (2) cantrips and (1) 1st-level spell from that class's spell list"
+        (get-in feat [:props kw])
+        false
+        #(dispatch [::feats/toggle-feat-prop kw])])]
+    [:div.m-r-20.m-b-10
+     (let [kw :ritual-casting]
+       [comps/labeled-checkbox
+        "Choose a class, gain (2) 1st-level ritual spells from that class's spell list"
+        (get-in feat [:props kw])
+        false
+        #(dispatch [::feats/toggle-feat-prop kw])])]
+    [:div.m-r-20.m-b-10
+     (let [kw :attack-spell]
+       [comps/labeled-checkbox
+        "Choose a class, gain a cantrip requiring an attack roll from that class's spell list"
+        (get-in feat [:props kw])
+        false
+        #(dispatch [::feats/toggle-feat-prop kw])])]]])
+
 (defn feat-builder []
   (let [feat @(subscribe [::feats/builder-item])]
     [:div.p-20.main-text-color
@@ -4696,6 +4722,7 @@
      [:div [feat-speed-bonuses feat]]
      [:div [feat-initiative-bonuses feat]]
      [:div [feat-misc-modifiers feat]]
+     [:div [feat-spellcasting feat]]
      [:div [option-skill-proficiency-or-expertise feat ::feats/toggle-feat-map-prop]]
      [:div [option-tool-proficiency-or-expertise feat ::feats/toggle-feat-map-prop]]]))
 
@@ -6499,6 +6526,19 @@
                  spells/schools)
          :value school
          :on-change #(dispatch [::spells/set-spell-prop :school %])}]]]
+     [:div.flex.flex-wrap
+      [:div.m-r-20.m-b-10
+       [comps/labeled-checkbox
+        "Ritual?"
+        (get spell :ritual)
+        false
+        #(dispatch [::spells/toggle-spell-prop :ritual])]]
+      [:div.m-r-20.m-b-10
+       [comps/labeled-checkbox
+        "Requires Attack Roll?"
+        (get spell :attack-roll?)
+        false
+        #(dispatch [::spells/toggle-spell-prop :attack-roll?])]]]
      [:div.flex.w-100-p.flex-wrap
       [spell-input-field "Casting Time" :casting-time spell "m-b-20"]
       [spell-input-field "Range" :range spell "m-l-5 m-b-20"]
