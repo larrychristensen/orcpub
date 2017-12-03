@@ -2442,7 +2442,8 @@
         line-length 160
         buffer 10
         progress-length (double (* line-length fraction))
-        current-route @(subscribe [:route])]
+        current-route @(subscribe [:route])
+        max-levels? (>= total-levels 20)]
     [:div
      [:div
       [:div.w-100-p.t-a-c
@@ -2472,12 +2473,17 @@
                       :x2 "20"
                       :y2 "25"
                       :style stroke-style}]
-              [:line.stroke-color {:x1 "180"
-                      :y1 "10"
-                      :x2 "180"
-                      :y2 "25"
-                      :style stroke-style}]
-              (let [x2 (+ progress-length buffer 10)]
+              (if (not max-levels?)
+                [:line.stroke-color {:x1 "180"
+                                     :y1 "10"
+                                     :x2 "180"
+                                     :y2 "25"
+                                     :style stroke-style}])
+              (let [x2 (if max-levels?
+                         (if (>= xps (opt/level-xps 20))
+                           20
+                           0)
+                         (+ progress-length buffer 10))]
                 (if (and (not (js/isNaN x2))
                          (> x2 buffer))
                   [:line {:x1 (if (pos? current-level-xps)
@@ -2497,16 +2503,18 @@
                       :fill "white"
                       :font-size "6"}
                current-level-xps]
-              [:text.main-text-color {:x "165"
-                      :y "30"
-                      :fill "white"
-                      :font-size "8"}
-               (str "Level " (inc total-levels))]
-              [:text.main-text-color {:x "165"
-                      :y "36"
-                      :fill "white"
-                      :font-size "6"}
-               next-level-xps]]]]
+              (if (not max-levels?)
+                [:text.main-text-color {:x "165"
+                                        :y "30"
+                                        :fill "white"
+                                        :font-size "8"}
+                 (str "Level " (inc total-levels))])
+              (if (not max-levels?)
+                [:text.main-text-color {:x "165"
+                                        :y "36"
+                                        :fill "white"
+                                        :font-size "6"}
+                 next-level-xps])]]]
            (if (and (>= xps next-level-xps)
                     (= (:handler current-route) routes/dnd-e5-char-builder-route))
              [:button.form-button
