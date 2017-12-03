@@ -6601,8 +6601,7 @@
                                       final-type-name (if plural
                                                         (if (not= 1 num) plural type-name)
                                                         (str type-name (if (not= 1 num) "s")))]
-                                  (str num " " (common/safe-capitalize final-type-name))
-                                    )]]
+                                  (str num " " (common/safe-capitalize final-type-name)))]]
           [:div.orange.pointer
            [:i.fa.m-r-5
             {:class-name (if @expanded? "fa-caret-up" "fa-caret-down")}]
@@ -6625,7 +6624,7 @@
                     {:on-click (make-event-handler edit-event item)}
                     "edit"]
                    [:button.form-button.m-l-5
-                    {:on-click (make-event-handler delete-event item)}
+                    {:on-click (make-stop-prop-event-handler delete-event item)}
                     "delete"]]])
                items))]])]))))
 
@@ -6769,6 +6768,10 @@
 
 (defn my-content []
   [:div.main-text-color
+   [:div.flex.justify-cont-end
+    [:button.form-button.m-r-10.m-b-10
+     {:on-click (make-event-handler ::e5/export-all-plugins)}
+     "Export All"]]
    [:div.item-list
     (doall
      (map
