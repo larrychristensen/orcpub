@@ -3036,9 +3036,20 @@
      (js/saveAs blob (str name ".orcbrew")))))
 
 (reg-event-fx
+ ::e5/export-all-plugins
+ (fn [_ _]
+   (let [blob (js/Blob.
+               (clj->js [(str @(subscribe [::e5/plugins]))])
+               (clj->js {:type "text/plain;charset=utf-8"}))]
+     (js/saveAs blob (str "all-content.orcbrew")))))
+
+
+(reg-event-fx
  ::e5/delete-plugin
  (fn [{:keys [db]} [_ name]]
    {:dispatch [::e5/set-plugins (-> db :plugins (dissoc name))]}))
+
+
 
 (reg-event-fx
  ::e5/import-plugin
@@ -3046,11 +3057,20 @@
    (let [plugin (try
                   (reader/read-string plugin-text)
                   (catch js/Error e nil))]
-     (if (spec/valid? ::e5/plugin plugin)
+     (cond 
+       (spec/valid? ::e5/plugin plugin)
        {:dispatch-n [[::e5/set-plugins (assoc (:plugins db)
                                               plugin-name
                                               plugin)]
-                     [:show-message (str "File imported as '" plugin-name "'")]]}
+                     [:show-warning-message (str "File imported as '" plugin-name "'. To be safe, you should 'Export All' and save to a safe location now.")]]}
+
+       (spec/valid? ::e5/plugins plugin)
+       {:dispatch-n [[::e5/set-plugins (e5/merge-all-plugins
+                                        (:plugins db)
+                                        plugin)]
+                     [:show-warning-message "Imported content was merged into your existing content. To be safe, you should 'Export All' and save to a safe location now."]]}
+       
+       :else
        {:dispatch [:show-error-message "Invalid .orcbrew file"]}))))
 
 (reg-event-db
