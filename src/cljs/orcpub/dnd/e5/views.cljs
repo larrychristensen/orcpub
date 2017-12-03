@@ -5326,6 +5326,14 @@
        ::e5/edit-subclass-modifier-value
        ::e5/edit-subclass-modifier-level
        ::e5/delete-subclass-modifier]]
+     [:div.m-b-20.m-t-30
+      [option-level-selections
+       subclass
+       ::e5/add-subclass-selection
+       ::e5/edit-subclass-selection-type
+       ::e5/edit-subclass-selection-num
+       ::e5/edit-subclass-selection-level
+       ::e5/delete-subclass-selection]]
      [option-traits
       subclass
       ::e5/add-subclass-trait
