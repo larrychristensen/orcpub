@@ -662,7 +662,7 @@
    {:name (name class-key)
     :key class-key
     :selections [(t/selection-cfg
-                  {:name "Level 1 Ritual"
+                  {:name "Level 1 Ritual Spells"
                    :tags #{:spells}
                    :options (spell-options
                              spells-map
@@ -672,7 +672,26 @@
                              false
                              "Ritual Only")
                    :min 2
-                   :max 2})]}))
+                   :max 2
+                   :order 7})
+                 (t/selection-cfg
+                  {:name "Additional Ritual Spells"
+                   :tags #{:spells}
+                   :show-if-zero? true
+                   :multiselect? true
+                   :min 0
+                   :max nil
+                   :order 8
+                   :options (spell-options
+                             spells-map
+                             (filter
+                              (fn [spell-kw] (ritual-spell? (spells-map spell-kw)))
+                              (apply concat
+                                     (vals (get spell-lists class-key))))
+                             spellcasting-ability
+                             class-name
+                             false
+                             "Ritual Only")})]}))
 
 (defn spell-sniper-option [spells-map class-key class-name spellcasting-ability spell-lists]
   (let [options (spell-options spells-map (filter (fn [spell-kw] (:attack-roll? (spells-map spell-kw))) (get-in spell-lists [class-key 0])) spellcasting-ability class-name)]
@@ -680,7 +699,7 @@
      {:name (name class-key)
       :key class-key
       :prereqs [(t/option-prereq
-                 "There are no attack cantrips for this class with the 'Option Sources' you have selected"
+                 "There are no attack cantrips for this class"
                  (fn [_] (seq options)))]
       :selections [(t/selection-cfg
                     {:name "Attack Cantrip"
@@ -3031,7 +3050,42 @@
 
 (def filter-true (filter val))
 
-(defn make-feat-selections [language-map k v]
+(defn magic-initiate-selection [spells-map spell-lists]
+  (t/selection-cfg
+   {:name "Spell Class"
+    :order 0
+    :tags #{:spells}
+    :options [(magic-initiate-option spells-map :bard "Bard" ::character/cha spell-lists)
+              (magic-initiate-option spells-map :cleric "Cleric" ::character/wis spell-lists)
+              (magic-initiate-option spells-map :druid "Druid" ::character/wis spell-lists)
+              (magic-initiate-option spells-map :sorcerer "Sorcerer" ::character/cha spell-lists)
+              (magic-initiate-option spells-map :warlock "Warlock" ::character/cha spell-lists)
+              (magic-initiate-option spells-map :wizard "Wizard" ::character/int spell-lists)]}))
+
+(defn ritual-caster-selection [spells-map spell-lists]
+  (t/selection-cfg
+   {:name "Ritual Caster: Spell Class"
+    :tags #{:spells}
+    :order 6
+    :options [(ritual-caster-option spells-map :bard "Bard" ::character/cha spell-lists)
+              (ritual-caster-option spells-map :cleric "Cleric" ::character/wis spell-lists)
+              (ritual-caster-option spells-map :druid "Druid" ::character/wis spell-lists)
+              (ritual-caster-option spells-map :sorcerer "Sorcerer" ::character/cha spell-lists)
+              (ritual-caster-option spells-map :warlock "Warlock" ::character/cha spell-lists)
+              (ritual-caster-option spells-map :wizard "Wizard" ::character/int spell-lists)]}))
+
+(defn spell-sniper-selection [spells-map spell-lists]
+  (t/selection-cfg
+   {:name "Spell Sniper: Spell Class"
+    :tags #{:spells}
+    :options [(spell-sniper-option spells-map :bard "Bard" ::character/cha spell-lists)
+              (spell-sniper-option spells-map :cleric "Cleric" ::character/wis spell-lists)
+              (spell-sniper-option spells-map :druid "Druid" ::character/wis spell-lists)
+              (spell-sniper-option spells-map :sorcerer "Sorcerer" ::character/cha spell-lists)
+              (spell-sniper-option spells-map :warlock "Warlock" ::character/cha spell-lists)
+              (spell-sniper-option spells-map :wizard "Wizard" ::character/int spell-lists)]}))
+
+(defn make-feat-selections [language-map spells-map spell-lists k v]
   (if v
     (case k
       :weapon-prof-choice [(weapon-proficiency-selection v)]
@@ -3040,6 +3094,12 @@
                           (fn [i]
                             (skilled-selection (str "Skill/Tool " (inc i))))
                           (range v))
+      :ritual-casting [(ritual-caster-selection spells-map
+                                                spell-lists)]
+      :magic-novice [(magic-initiate-selection spells-map
+                                               spell-lists)]
+      :attack-spell [(spell-sniper-selection spells-map
+                                             spell-lists)]
       nil)))
 
 (defn collect-map-modifiers [m modifier-fn]
@@ -3136,12 +3196,12 @@
        {:name name
         :description description})])))
 
-(defn feat-selections [language-map props ability-increases]
+(defn feat-selections [language-map spells-map spell-lists props ability-increases]
   (let [without-saves (sets/intersection ability-increases
                                          (into #{} character/ability-keys))]
     (reduce
      (fn [selections [k v]]
-       (let [feat-selections (make-feat-selections language-map k v)]
+       (let [feat-selections (make-feat-selections language-map spells-map spell-lists k v)]
          (if feat-selections
            (concat selections feat-selections)
            selections)))
@@ -3161,6 +3221,8 @@
 
 
 (defn feat-option-from-cfg [language-map
+                            spells-map
+                            spell-lists
                             {:keys [name
                                     key
                                     icon
@@ -3176,6 +3238,8 @@
                                   props
                                   ability-increases)
         feat-selections (feat-selections language-map
+                                         spells-map
+                                         spell-lists
                                          props
                                          ability-increases)]
     (t/option-cfg
