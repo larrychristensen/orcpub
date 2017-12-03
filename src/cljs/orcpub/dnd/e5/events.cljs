@@ -365,6 +365,24 @@
   (backend-url (apply routes/path-for route args)))
 
 (reg-event-fx
+ ::char5e/save-character
+ (fn [{:keys [db]} [_ id]]
+   (let [{:keys [:db/id] :as strict} (char5e/to-strict @(subscribe [::char5e/character id]))
+         built-character @(subscribe [::char5e/built-character id])
+         summary (make-summary built-character)]
+     (if (every?
+          (fn [ability-kw]
+            (nat-int? (get-in built-character [:base-abilities ability-kw])))
+          char5e/ability-keys)
+       {:dispatch [:set-loading true]
+        :http {:method :post
+               :headers (authorization-headers db)
+               :url (url-for-route routes/dnd-e5-char-list-route)
+               :transit-params (assoc strict :orcpub.entity.strict/summary summary)
+               :on-success [:character-save-success]}}
+       {:dispatch [:show-error-message "You must provide values for all ability scores"]}))))
+
+(reg-event-fx
  :save-character
  (fn [{:keys [db]} _]
    (let [{:keys [:db/id] :as strict} (char5e/to-strict (:character db))
@@ -2010,6 +2028,13 @@
     ::char5e/current-hit-points]
    current-hit-points))
 
+(defn set-current-xps [character xps]
+  (assoc-in
+   character
+   [::entity/values
+    ::char5e/xps]
+   xps))
+
 (defn set-notes [character notes]
   (assoc-in
    character
@@ -2017,10 +2042,46 @@
     ::char5e/notes]
    notes))
 
+(defn add-level [character]
+  (let [path [::entity/options
+              :class
+              0
+              ::entity/options
+              :levels]
+        levels (get-in character path)
+        updated (if levels
+                  (update-in
+                   character
+                   path
+                   (fn [levels]
+                     (conj
+                      levels
+                      (event-handlers/empty-level (count levels)))))
+                  character)
+        updated-levels (get-in updated path)]
+    updated))
+
 (reg-event-fx
  ::char5e/set-current-hit-points
  (fn [{:keys [db]} [_ id current-hit-points]]
    (update-character-fx db id #(set-current-hit-points % current-hit-points))))
+
+(reg-event-fx
+ ::char5e/set-current-xps
+ (fn [{:keys [db]} [_ id current-xps]]
+   (update-character-fx db id #(set-current-xps % current-xps))))
+
+(reg-event-fx
+ ::char5e/add-level
+ (fn [{:keys [db]} [_ id]]
+   (update-character-fx db id #(add-level %))))
+
+(reg-event-fx
+ ::char5e/level-up
+ (fn [_ [_ character-id]]
+   {:dispatch-n [[::char5e/add-level character-id]
+                 [:set-character @(subscribe [::char5e/character character-id])]
+                 [:route routes/dnd-e5-char-builder-route]]}))
 
 (reg-event-fx
  ::char5e/set-notes
