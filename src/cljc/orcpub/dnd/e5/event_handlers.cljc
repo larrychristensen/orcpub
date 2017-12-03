@@ -5,6 +5,9 @@
             [orcpub.dnd.e5.character :as char5e]
             [orcpub.dnd.e5.character.equipment :as char-equip5e]))
 
+(defn empty-level [lvl]
+  {::entity/key (keyword (str "level-" (inc lvl)))})
+
 (defn set-class-level [character [_ class-index new-highest-level]]
   (update-in
    character
@@ -15,7 +18,7 @@
          (cond
            (> new-highest-level current-highest-level)
            (vec (concat levels (map
-                                (fn [lvl] {::entity/key (keyword (str "level-" (inc lvl)))})
+                                empty-level
                                 (range current-highest-level new-highest-level))))
            
            (< new-highest-level current-highest-level)
