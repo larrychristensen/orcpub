@@ -2166,6 +2166,12 @@
    (assoc spell prop-key prop-value)))
 
 (reg-event-db
+ ::spells/toggle-spell-prop
+ spell-interceptors
+ (fn [spell [_ prop-key]]
+   (update spell prop-key not)))
+
+(reg-event-db
  ::monsters/set-monster-prop
  monster-interceptors
  (fn [monster [_ prop-key prop-value]]
@@ -2555,6 +2561,12 @@
  feat-interceptors
  (fn [feat [_ key]]
    (update-in feat [:props key] not)))
+
+(reg-event-db
+ ::feats5e/toggle-feat-selection
+ feat-interceptors
+ (fn [feat [_ key]]
+   (update-in feat [:selections key] not)))
 
 (reg-event-db
  ::feats5e/toggle-feat-value-prop

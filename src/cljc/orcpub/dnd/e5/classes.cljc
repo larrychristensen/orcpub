@@ -3006,7 +3006,7 @@ long rest."})
                   :traits [{:name "Dark One's Own Luck"
                             :level 6
                             :page 109
-                            :summary "add d10 to an attack or save roll"
+                            :summary "add d10 to an ability check or save roll"
                             :frequency units5e/rests-1}
                            {:name "Fiendish Resilience"
                             :level 10

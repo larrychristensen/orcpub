@@ -1517,7 +1517,7 @@
     {:options (concat
                (opt5e/feat-options spell-lists spells-map)
                (map
-                (partial opt5e/feat-option-from-cfg language-map)
+                (partial opt5e/feat-option-from-cfg language-map spells-map spell-lists)
                 feats))
      :show-if-zero? true
      :min 0
