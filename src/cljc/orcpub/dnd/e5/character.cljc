@@ -233,12 +233,19 @@
     to-strict-prepared-spells
     %)))
 
+(defn is-nan? [value]
+  (and value
+       (not (int? value))))
+
 (defn remove-nans [values]
-  (let [current-hit-points (::current-hit-points values)]
-    (if (and current-hit-points
-             (not (int? current-hit-points)))
-      (dissoc values ::current-hit-points)
-      values)))
+  (let [current-hit-points (::current-hit-points values)
+        xps (::xps values)]
+    (cond-> values
+      (is-nan? current-hit-points)
+      (dissoc ::current-hit-points)
+
+      (is-nan? xps)
+      (dissoc ::xps))))
 
 (defn clean-values [raw-character]
   (cond-> raw-character
