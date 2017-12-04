@@ -2033,7 +2033,8 @@
    character
    [::entity/values
     ::char5e/xps]
-   xps))
+   (if (not (js/isNaN xps))
+     xps)))
 
 (defn set-notes [character notes]
   (assoc-in
