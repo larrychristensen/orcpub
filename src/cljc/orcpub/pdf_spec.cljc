@@ -284,22 +284,42 @@
                             print-prepared-spells?
                             prepares-spells
                             prepared-spells-by-class]
-  (let [flat-spells (char5e/flat-spells spells-known)]
+  (let [flat-spells (char5e/flat-spells spells-known)
+        spells-map @(subscribe [::spells/spells-map])
+        plugin-spells-map @(subscribe [::spells/plugin-spells-map])
+        filtered-spells-known (reduce
+                               (fn [m [k v]]
+                                 (assoc m k (if print-prepared-spells?
+                                              (filter-prepared (vals v)
+                                                               k
+                                                               prepares-spells
+                                                               prepared-spells-by-class)
+                                              (vals v))))
+                               {}
+                               spells-known)
+        filtered-spell-keys (->> filtered-spells-known
+                                 vals
+                                 (apply concat)
+                                 (map :key))
+        custom-spells (sequence
+                       (comp
+                        (keep plugin-spells-map)
+                        (map #(select-keys % [:name
+                                              :school
+                                              :description
+                                              :level
+                                              :components
+                                              :range
+                                              :casting-time
+                                              :duration])))
+                       filtered-spell-keys)]
     (reduce
      (fn [m {:keys [key ability qualifier class]}]
        (-> m
            (assoc-in [:spell-save-dcs class] (save-dc-fn ability))
            (assoc-in [:spell-attack-mods class] (attack-mod-fn ability))))
-     {:spells-known (reduce
-                     (fn [m [k v]]
-                       (assoc m k (if print-prepared-spells?
-                                    (filter-prepared (vals v)
-                                                     k
-                                                     prepares-spells
-                                                     prepared-spells-by-class)
-                                    (vals v))))
-                     {}
-                     spells-known)}
+     {:custom-spells custom-spells
+      :spells-known filtered-spells-known}
      flat-spells)))
 
 (defn spell-page-fields [spells

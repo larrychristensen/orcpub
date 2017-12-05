@@ -906,6 +906,12 @@
     (apply concat (map (comp vals ::e5/spells) plugins)))))
 
 (reg-sub
+ ::spells5e/plugin-spells-map
+ :<- [::spells5e/plugin-spells]
+ (fn [plugin-spells _]
+   (common/map-by-key plugin-spells)))
+
+(reg-sub
  ::monsters5e/plugin-monsters
  :<- [::e5/plugin-vals]
  (fn [plugins _]
@@ -997,6 +1003,16 @@
  (fn [db]
    (::monsters5e/filtered-monsters db)))
 
+(reg-sub
+ ::spells5e/base-spells
+ (fn [_]
+   spells5e/spells))
+
+(reg-sub
+ ::spells5e/base-spells-map
+ :<- [::spells5e/base-spells]
+ (fn [spells]
+   (common/map-by-key spells)))
 
 (reg-sub
  ::spells5e/spells
