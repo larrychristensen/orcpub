@@ -1217,11 +1217,12 @@
 (defn print-bonus-map [m]
   (s/join ", "
           (map
-           (fn [[k v]] (str (common/safe-capitalize k) " " (common/bonus-str v)))
+           (fn [[k v]] (str (common/safe-capitalize-kw k) " " (common/bonus-str v)))
            m)))
 
 (def max-width-300
   {:max-width "300px"})
+
 
 (defn monster-component [{:keys [name size type subtypes hit-points alignment armor-class armor-notes speed saving-throws skills damage-vulnerabilities damage-resistances damage-immunities condition-immunities senses languages challenge traits actions legendary-actions source page] :as monster}]
   (let [traits-by-type (group-by :type traits)
