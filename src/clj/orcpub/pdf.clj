@@ -79,7 +79,6 @@
 (defn draw-non-jpg [doc page url x y width height]
   (with-open [c-stream (content-stream doc page)]
     (let [buff-image (ImageIO/read (.openStream (URL. url)))
-          _ (prn "IMAGE STREAM" buff-image)
           img (LosslessFactory/createFromImage doc buff-image)]
       (draw-imagex c-stream img x y width height))))
 
@@ -332,7 +331,12 @@
              (do
               (if spell
                 (do
-                  (let [x (+ margin-x (* box-width i))
+                  (let [{:keys [description
+                                casting-time
+                                duration
+                                level
+                                range]} spell
+                        x (+ margin-x (* box-width i))
                         y (+ margin-y (* box-height j))
 
                         {:keys [page source description summary]} spell
@@ -342,14 +346,16 @@
                         remaining-desc-lines
                         (draw-text-to-box cs
                                           (or description
-                                              (str summary
-                                                   " (see "
-                                                   (if source
-                                                     (s/upper-case (name source))
-                                                     "PHB")
-                                                   " "
-                                                   page
-                                                   " for more details)"))
+                                              (if summary
+                                                (str summary
+                                                     " (see "
+                                                     (if source
+                                                       (s/upper-case (name source))
+                                                       "PHB")
+                                                     " "
+                                                     page
+                                                     " for more details)")
+                                                ""))
                                           PDType1Font/HELVETICA
                                           8
                                           (+ x 0.12)
@@ -378,22 +384,23 @@
                                       (- 11.0 y 0.27)
                                       (- box-width 0.3)
                                       0.25)
-                    (draw-spell-field cs
-                                      document
-                                      "magic-swirl"
-                                      (abbreviate-casting-time
-                                       (first
-                                        (s/split
-                                         (:casting-time spell)
-                                         #",")))
-                                      (+ x 0.12)
-                                      (- 11.0 y 0.55))
-                    (draw-spell-field cs
-                                      document
-                                      "arrow-dunk"
-                                      (abbreviate-range (:range spell))
-                                      (+ x 0.62)
-                                      (- 11.0 y 0.55))
+                    (if casting-time (draw-spell-field cs
+                                       document
+                                       "magic-swirl"
+                                       (abbreviate-casting-time
+                                        (first
+                                         (s/split
+                                          casting-time
+                                          #",")))
+                                       (+ x 0.12)
+                                       (- 11.0 y 0.55)))
+                    (if range
+                      (draw-spell-field cs
+                                        document
+                                        "arrow-dunk"
+                                        (abbreviate-range range)
+                                        (+ x 0.62)
+                                        (- 11.0 y 0.55)))
                     (draw-spell-field cs
                                       document
                                       "shiny-purse"
@@ -410,12 +417,13 @@
                                           :material "M"})))
                                       (+ x 1.12)
                                       (- 11.0 y 0.55))
-                    (draw-spell-field cs
-                                      document
-                                      "sands-of-time"
-                                      (abbreviate-duration (:duration spell))
-                                      (+ x 1.62)
-                                      (- 11.0 y 0.55))
+                    (if duration
+                      (draw-spell-field cs
+                                        document
+                                        "sands-of-time"
+                                        (abbreviate-duration duration)
+                                        (+ x 1.62)
+                                        (- 11.0 y 0.55)))
                     (when (not= class-nm "Homebrew")
                       (draw-text cs
                                  class-nm
