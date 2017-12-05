@@ -305,6 +305,7 @@
                        (comp
                         (keep plugin-spells-map)
                         (map #(select-keys % [:name
+                                              :key
                                               :school
                                               :description
                                               :level
