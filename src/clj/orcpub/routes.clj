@@ -452,9 +452,7 @@
     :weapon-name-2 8
     :weapon-name-3 8}))
 
-(defn add-spell-cards! [doc spells-known spell-save-dcs spell-attack-mods custom-spells]
-  (prn "CUSTOM SPELLS" custom-spells)
-  (try
+(defn add-spell-cards! [doc spells-known spell-save-dcs spell-attack-mods custom-spells]  (try
     (let [custom-spells-map (common/map-by-key custom-spells)
           spells-map (merge spells/spell-map custom-spells-map)
           flat-spells (-> spells-known vals flatten)
