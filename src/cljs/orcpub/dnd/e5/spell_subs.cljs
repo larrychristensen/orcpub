@@ -308,6 +308,20 @@
    {}
    selections))
 
+(defn make-cleric-spell-mods [cleric-spells]
+  (vec
+   (reduce-kv
+    (fn [mods spell-level spells]
+      (concat
+       mods
+       (let [spell-kws (vals spells)]
+         (mapv
+          (fn [spell-kw]
+            (opt5e/cleric-spell spell-level spell-kw (to-class-level spell-level)))
+          spell-kws))))
+    []
+    cleric-spells)))
+
 (defn make-levels [spell-lists spells-map selection-map {:keys [key class spellcasting] :as option}]
   (let [modifiers (:level-modifiers option)
         selections (:level-selections option)
@@ -318,9 +332,10 @@
         selections-levels (make-level-selections class selections selection-map)]
     (reduce-kv
      (fn [levels level level-modifiers]
-       (assoc-in levels
-                 [(or level 1) :modifiers]
-                 (map (partial level-modifier class) level-modifiers)))
+       (update-in levels
+                  [(or level 1) :modifiers]
+                  concat
+                  (map (partial level-modifier class) level-modifiers)))
      (merge-levels
       selections-levels
       (if add-spellcasting?
@@ -338,18 +353,11 @@
                             (vals spells))))
                         []
                         (:paladin-spells option))}})
-      (if (and (= class :cleric)
-               (:cleric-spells option))
-        {1 {:modifiers (reduce-kv
-                        (fn [mods spell-level spells]
-                          (concat
-                           mods
-                           (map
-                            (fn [spell-kw]
-                              (opt5e/cleric-spell spell-level spell-kw (to-class-level spell-level)))
-                            (vals spells))))
-                        []
-                        (:cleric-spells option))}})
+      (let [cleric-spells (:cleric-spells option)]
+        (if (and (= class :cleric)
+                 cleric-spells)
+          (let [cleric-spell-mods (make-cleric-spell-mods cleric-spells)]
+            {1 {:modifiers cleric-spell-mods}})))
       (if (and (= class :warlock)
                (:warlock-spells option))
         (reduce-kv

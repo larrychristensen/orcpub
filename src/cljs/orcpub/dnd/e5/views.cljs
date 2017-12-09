@@ -5383,6 +5383,7 @@
         class-key (get subclass :class)
         classes @(subscribe [::classes/classes])
         mobile? @(subscribe [:mobile?])]
+    (prn "SUBCLASS" subclass)
     [:div.p-20.main-text-color
      [:div.flex.flex-wrap
       [:div.m-b-20
