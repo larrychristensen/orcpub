@@ -342,28 +342,30 @@
 
 (reg-sub-raw
   ::char5e/characters
-  (fn [app-db [_]]
+  (fn [app-db [_ login-optional?]]
     (go (dispatch [:set-loading true])
         (let [response (<! (http/get (routes/path-for routes/dnd-e5-char-summary-list-route)
                                      {:headers (auth-headers @app-db)}))]
           (dispatch [:set-loading false])
           (case (:status response)
             200 (dispatch [::char5e/set-characters (-> response :body)])
-            401 (dispatch [:route-to-login])
+            401 (if (not login-optional?)
+                  (dispatch [:route-to-login]))
             500 (dispatch (events/show-generic-error)))))
     (ra/make-reaction
      (fn [] (get @app-db ::char5e/characters [])))))
 
 (reg-sub-raw
   ::party5e/parties
-  (fn [app-db [_]]
+  (fn [app-db [_ login-optional?]]
     (go (dispatch [:set-loading true])
         (let [response (<! (http/get (routes/path-for routes/dnd-e5-char-parties-route)
                                      {:headers (auth-headers @app-db)}))]
           (dispatch [:set-loading false])
           (case (:status response)
             200 (dispatch [::party5e/set-parties (-> response :body)])
-            401 (dispatch [:route-to-login])
+            401 (if (not login-optional?)
+                  (dispatch [:route-to-login]))
             500 (dispatch (events/show-generic-error)))))
     (ra/make-reaction
      (fn [] (get @app-db ::char5e/parties [])))))
@@ -397,13 +399,15 @@
 
 (reg-sub
  ::party5e/party-map
- :<- [::party5e/parties]
+ (fn [[_ login-optional?]]
+   (subscribe [::party5e/parties login-optional?]))
  (fn [parties _]
    (common/map-by-id parties)))
 
 (reg-sub
  ::char5e/summary-map
- :<- [::char5e/characters]
+ (fn [[_ login-optional?]]
+   (subscribe [::char5e/characters login-optional?]))
  (fn [characters _]
    (common/map-by :db/id characters)))
 
