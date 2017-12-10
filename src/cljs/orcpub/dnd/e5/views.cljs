@@ -6087,7 +6087,7 @@
           :on-change on-num-change}]])]))
 
 (defn character-selector [index {:keys [character]} on-change]
-  (let [characters @(subscribe [::char/characters])]
+  (let [characters @(subscribe [::char/characters true])]
     [:div.flex.flex-wrap.m-l-5
      [:div.m-b-10
       [labeled-dropdown
@@ -6146,7 +6146,7 @@
     "delete"]])
 
 (defn party-selector [index party]
-  (let [parties @(subscribe [::party/parties])]
+  (let [parties @(subscribe [::party/parties true])]
     [:div
      [labeled-dropdown
       (str "Party " (inc index))
@@ -6257,7 +6257,7 @@
             encounter-creatures (mapcat (comp :creatures encounter-map) encounters)
             by-type (group-by :type encounter-creatures)
             encounter-monsters (by-type :monster)
-            character-summary-map @(subscribe [::char/summary-map])
+            character-summary-map @(subscribe [::char/summary-map true])
             encounter-characters (remove
                                   #(-> % :character nil?)
                                   (map
@@ -6272,7 +6272,7 @@
                                    :num (:num creature)
                                    :monster (:monster creature)})
                                 (by-type :monster))
-            party-map @(subscribe [::party/party-map])
+            party-map @(subscribe [::party/party-map true])
             party-characters (into
                               (sorted-set-by #(compare (char-name %1) (char-name %2)))
                               (mapcat
