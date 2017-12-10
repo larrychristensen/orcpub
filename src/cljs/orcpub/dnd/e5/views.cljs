@@ -5382,8 +5382,7 @@
         spell-lists @(subscribe [::spells/spell-lists])
         class-key (get subclass :class)
         classes @(subscribe [::classes/classes])
-        mobile? @(subscribe [:mobile?])]
-    (prn "SUBCLASS" subclass)
+        mobile? @(subscribe [:mobile?])]    
     [:div.p-20.main-text-color
      [:div.flex.flex-wrap
       [:div.m-b-20
@@ -6985,7 +6984,7 @@
   (builder-page "Language" ::langs/reset-language ::langs/save-language language-builder))
 
 (defn selection-builder-page []
-  (builder-page "Selection" ::selections/reset-selection ::selections/save-selection selection-builder [title-with-help "Selection" selection-help]))
+  (builder-page "Selection" ::selections/reset-selection ::selections/save-selection selection-builder [title-with-help "Selection Builder" selection-help]))
 
 (defn background-builder-page []
   (builder-page "Background" ::bg/reset-background ::bg/save-background background-builder))

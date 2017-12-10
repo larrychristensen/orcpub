@@ -17,10 +17,13 @@
             [clojure.string :as s]))
 
 (spec/def ::name (spec/and string? common/starts-with-letter?))
+(spec/def ::description string?)
+
 (spec/def ::key (spec/and keyword? common/keyword-starts-with-letter?))
 (spec/def ::option-pack string?)
 
-(spec/def ::option (spec/keys :req-un [::name ::description]))
+(spec/def ::option (spec/keys :req-un [::name]
+                              :opt-un [::description]))
 
 (spec/def ::options (spec/coll-of ::option :kind vector?))
 
