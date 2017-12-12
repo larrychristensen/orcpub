@@ -105,6 +105,10 @@
        "anvil-impact"
        routes/dnd-e5-char-builder-route)
       (splash-page-button
+       "Character Builder for Newbs"
+       "baby-face"
+       routes/dnd-e5-newb-char-builder-route)
+      (splash-page-button
        "Spells"
        "spell-book"
        routes/dnd-e5-spell-list-page-route)

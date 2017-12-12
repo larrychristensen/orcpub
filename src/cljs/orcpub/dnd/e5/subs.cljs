@@ -11,6 +11,7 @@
             [orcpub.dnd.e5.db :refer [tab-path]]
             [orcpub.dnd.e5.events :as events]
             [orcpub.dnd.e5.character :as char5e]
+            [orcpub.dnd.e5.char-decision-tree :as char-dec5e]
             [orcpub.dnd.e5.character.equipment :as char-equip5e]
             [orcpub.dnd.e5.party :as party5e]
             [orcpub.dnd.e5.monsters :as monsters5e]
@@ -1198,3 +1199,18 @@
  ::char5e/delete-confirmation-shown?
  (fn [db [_ id]]
    (get-in db [::char5e/delete-confirmation-shown? id])))
+
+(reg-sub
+ ::char5e/newb-char-data
+ (fn [db _]
+   (get db ::char5e/newb-char-data)))
+
+(reg-sub
+ ::char5e/current-question
+ (fn [db _]
+   (get db ::char5e/current-question (char-dec5e/next-question {}))))
+
+(reg-sub
+ ::char5e/has-question-history?
+ (fn [db _]
+   (seq (get-in db [::char5e/question-history :newb-char-data]))))
