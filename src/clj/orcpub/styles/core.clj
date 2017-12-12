@@ -1066,6 +1066,10 @@
       :padding "10px 15px"
       :text-decoration :underline}]
 
+    [:.link-button.disabled
+     {:opacity 0.5
+      :cursor :not-allowed}]
+
     [:.field
      {:margin-top "30px"}]
 
@@ -1148,6 +1152,9 @@
 
      [:.item-list
       {:border-top "1px solid rgba(0,0,0,0.5)"}]
+
+     [:.link-button
+      {:color "#363636"}]
 
      [:.item-list-item
       {:border-bottom "1px solid rgba(0,0,0,0.5)"}]
