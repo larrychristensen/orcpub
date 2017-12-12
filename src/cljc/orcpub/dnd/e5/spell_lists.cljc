@@ -413,7 +413,7 @@
    :sorcerer
    {0
     [:acid-splash #_:blade-ward :booming-blade :chill-touch :dancing-lights :fire-bolt
-     #_:friends :green-flame-blade :light :lightning-lure :mage-hand
+     #_:friends :green-flame-blade :light :mage-hand
      :mending :message :minor-illusion :poison-spray :prestidigitation :ray-of-frost
      :shocking-grasp :sword-burst :true-strike],
     1
@@ -458,7 +458,7 @@
    {0
     [#_:blade-ward :chill-touch :eldritch-blast #_:friends :mage-hand :minor-illusion :prestidigitation
      :true-strike :poison-spray
-     :booming-blade #_:green-flame-blade :lightning-lure :sword-burst],
+     :booming-blade :sword-burst],
     1
     [#_:armor-of-agathys #_:arms-of-hadar :charm-person :comprehend-languages :expeditious-retreat
      :hellish-rebuke #_:hex
@@ -487,7 +487,7 @@
     [:acid-splash #_:blade-ward :chill-touch :dancing-lights :fire-bolt #_:friends :light :mage-hand
      :mending :message :minor-illusion :poison-spray :prestidigitation :ray-of-frost
      :shocking-grasp :true-strike
-     :booming-blade :green-flame-blade :lightning-lure :sword-burst],
+     :booming-blade :green-flame-blade :sword-burst],
     1
     [:alarm :burning-hands :charm-person #_:chromatic-orb :color-spray
      :comprehend-languages :detect-magic :disguise-self

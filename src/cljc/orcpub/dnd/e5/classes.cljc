@@ -788,6 +788,12 @@
                                             (if ?wild-shape-limitation (str " and " ?wild-shape-limitation)))})]}}
     :selections [(opt5e/new-starting-equipment-selection
                   :druid
+                  {:name "Druidic Focus"
+                   :options (map
+                             #(opt5e/starting-equipment-option % 1)
+                             equipment5e/druidic-focuses)})
+                 (opt5e/new-starting-equipment-selection
+                  :druid
                   {:name "Wooden Shield or Simple Weapon"
                    :options [(t/option-cfg
                               {:name "Wooden Shield"

@@ -131,7 +131,9 @@
    ::race5e/builder-item default-race
    ::race5e/subrace-builder-item default-subrace
    ::class5e/builder-item default-class
-   ::class5e/subclass-builder-item default-subclass})
+   ::class5e/subclass-builder-item default-subclass
+   ::char5e/newb-char-data {:answers {}
+                            :tags #{}}})
 
 (defn set-item [key value]
   (try

@@ -3,6 +3,7 @@
 
 (def default-route :default)
 (def dnd-e5-char-builder-route :char-builder-5e)
+(def dnd-e5-newb-char-builder-route :newb-char-builder-5e)
 (def dnd-e5-char-list-route :char-list-5e)
 (def dnd-e5-char-route :char-5e)
 (def dnd-e5-char-page-route :char-5e-page)
@@ -18,6 +19,7 @@
 
 (def dnd-e5-char-page-routes #{default-route
                                dnd-e5-char-builder-route
+                               dnd-e5-newb-char-builder-route
                                dnd-e5-char-list-page-route
                                dnd-e5-char-page-route
                                dnd-e5-char-parties-page-route})
@@ -153,6 +155,7 @@
                             "dnd/"
                             {"5e/"
                              {"character-builder" dnd-e5-char-builder-route
+                              "newb-character-builder" dnd-e5-newb-char-builder-route
                               "characters" {"" dnd-e5-char-list-page-route
                                             ["/" :id] dnd-e5-char-page-route}
                               "orcacle" dnd-e5-orcacle-page-route
