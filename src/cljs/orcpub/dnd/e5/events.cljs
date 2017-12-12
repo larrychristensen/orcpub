@@ -9,6 +9,7 @@
             [orcpub.dnd.e5.template :as t5e]
             [orcpub.dnd.e5.common :as common5e]
             [orcpub.dnd.e5.character :as char5e]
+            [orcpub.dnd.e5.char-decision-tree :as char-dec5e]
             [orcpub.dnd.e5.backgrounds :as bg5e]
             [orcpub.dnd.e5.languages :as langs5e]
             [orcpub.dnd.e5.selections :as selections5e]
@@ -3645,6 +3646,12 @@
                  (toggle-set type $)))))))
 
 (reg-event-fx
+ ::char5e/open-character
+ (fn [_ [_ character]]
+   {:dispatch-n [[:set-character character]
+                 [:route routes/dnd-e5-char-builder-route]]}))
+
+(reg-event-fx
  :route-to-login
  (fn [_ _]
    {:dispatch [:route routes/login-page-route {:secure? true :no-return? true}]}))
@@ -3747,3 +3754,34 @@
  :close-srd-message
  (fn [db [_]]
    (assoc db :srd-message-closed? true)))
+
+(reg-event-db
+ ::char5e/add-answer
+ (fn [db [_ question answer]]
+   (update db
+           ::char5e/newb-char-data
+           char-dec5e/add-answer
+           question
+           answer)))
+
+(reg-event-db
+ ::char5e/next-question
+ (fn [db _]
+   (-> db
+       (assoc ::char5e/current-question
+              (char-dec5e/next-question (::char5e/newb-char-data db)))
+       (update ::char5e/question-history
+               (fn [{:keys [questions newb-char-data]}]
+                 {:questions (conj questions (get db ::char5e/current-question (char-dec5e/next-question {})))
+                  :newb-char-data (conj newb-char-data (::char5e/newb-char-data db))})))))
+
+(reg-event-db
+ ::char5e/previous-question
+ (fn [db _]
+   (let [{:keys [questions newb-char-data] :as hist} (::char5e/question-history db)]
+     (assoc
+      db
+      ::char5e/current-question (peek questions)
+      ::char5e/newb-char-data (peek newb-char-data)
+      ::char5e/question-history {:questions (pop questions)
+                                 :newb-char-data (pop newb-char-data)}))))

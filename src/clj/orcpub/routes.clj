@@ -937,6 +937,7 @@
    [route-map/dnd-e5-item-page-route :key ":key"]
    [route-map/dnd-e5-item-builder-page-route]
    [route-map/dnd-e5-char-builder-route]
+   [route-map/dnd-e5-newb-char-builder-route]
    [route-map/dnd-e5-my-content-route]
    [route-map/send-password-reset-page-route]
    [route-map/my-account-page-route]

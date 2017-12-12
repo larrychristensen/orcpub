@@ -1474,7 +1474,7 @@
       [:div.flex-grow-1
        [search-results]]]]))
 
-(defn content-page [title button-cfgs content]
+(defn content-page [title button-cfgs content & {:keys [hide-header-message?]}]
   (let [srd-message-closed? @(subscribe [:srd-message-closed?])
         orcacle-open? @(subscribe [:orcacle-open?])
         theme @(subscribe [:theme])
@@ -1511,7 +1511,8 @@
         [:div.flex.justify-cont-c.main-text-color
          [:div.content hdr]]
         [:div.m-l-20.m-r-20.f-w-b.f-s-18.container.m-b-10.main-text-color
-         (if (not srd-message-closed?)
+         (if (and (not srd-message-closed?)
+                  (not hide-header-message?))
            [:div
             [:div.content.bg-lighter.p-10.flex
              [:div.flex-grow-1
@@ -6948,6 +6949,48 @@
     [:div.p-5
      [:span.f-w-b "Email: "]
      [:span @(subscribe [:email])]]]])
+
+(defn newb-character-builder-page []
+  [content-page
+   "Character Builder for Newbs"
+   []
+   (let [{:keys [key question answers] :as q} @(subscribe [::char/current-question])
+         newb-char-data @(subscribe [::char/newb-char-data])
+         current-answer (get-in newb-char-data [:answers key])
+         has-history? @(subscribe [::char/has-question-history?])]
+     [:div.p-20.main-text-color
+      (if (some? q)
+        [:div
+         [:div
+          [:div.f-w-b.f-s-24
+           question]]
+         [:div.m-t-5
+          (doall
+           (map
+            (fn [{:keys [answer tag] :as a}]
+              ^{:key tag}
+              [:div.p-5.f-s-16.f-w-b
+               [comps/labeled-checkbox
+                answer
+                (= tag (get-in newb-char-data [:answers key]))
+                false
+                #(dispatch [::char/add-answer q a])]])
+            answers))]]
+        [:div.p-20.main-text-color
+         [:div.f-s-18.f-w-b "Your character is complete, click the button below to view it"]
+         [:button.form-button
+          {:on-click #(dispatch [::char/open-character (:char newb-char-data)])}
+          "View Character"]])
+      [:div.m-t-20
+       [:button.link-button
+        {:class-name (if (not has-history?) "disabled")
+         :on-click #(if has-history? (dispatch [::char/previous-question]))}
+        "Back"]
+       [:button.form-button
+        {:on-click #(if current-answer (dispatch [::char/next-question]))
+         :class-name (if (nil? current-answer) "disabled")}
+        "Next"]]])
+   :hide-header-message? true])
 
 (defn builder-page [item-title reset-event save-event builder & [title]]
   [content-page
