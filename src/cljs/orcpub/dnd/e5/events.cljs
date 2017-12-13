@@ -3108,7 +3108,8 @@
    (let [blob (js/Blob.
                (clj->js [(str plugin)])
                (clj->js {:type "text/plain;charset=utf-8"}))]
-     (js/saveAs blob (str name ".orcbrew")))))
+     (js/saveAs blob (str name ".orcbrew"))
+     {})))
 
 (reg-event-fx
  ::e5/export-all-plugins
@@ -3116,7 +3117,8 @@
    (let [blob (js/Blob.
                (clj->js [(str @(subscribe [::e5/plugins]))])
                (clj->js {:type "text/plain;charset=utf-8"}))]
-     (js/saveAs blob (str "all-content.orcbrew")))))
+     (js/saveAs blob (str "all-content.orcbrew"))
+     {})))
 
 
 (reg-event-fx
