@@ -126,20 +126,23 @@
         traits-str (traits-string traits)
         actions? (or (seq bonus-actions)
                      (seq actions)
-                     (seq reactions))
+                     (seq reactions)
+                     (seq traits))
         header (features-and-traits-header built-char)]
-    {:features-and-traits (str
-                           (if (not (s/blank? header)) (str header "\n\n"))
-                           (if actions?
-                             (s/join
-                              "\n\n"
-                              (remove nil?
-                                      [(actions-string "----------Bonus Actions----------" bonus-actions)
-                                       (actions-string "---------------Actions--------------" actions)
-                                       (actions-string "-------------Reactions-------------" reactions)
-                                       (if traits "(additional features & traits on page 2)")]))
-                             traits-str))
-     :features-and-traits-2 (if actions? traits-str)}))
+    {:features-and-traits (if (not (s/blank? header))
+                            (str header
+                                 "\n\n"
+                                 (if actions? "(additional features & traits on last page)")))
+     :features-and-traits-2 (str
+                             (if actions?
+                               (s/join
+                                "\n\n"
+                                (remove nil?
+                                        [(actions-string "----------Bonus Actions----------" bonus-actions)
+                                         (actions-string "---------------Actions--------------" actions)
+                                         (actions-string "-------------Reactions-------------" reactions)
+                                         (actions-string "-----------Other Traits------------" traits)]))
+                               traits-str))}))
 
 (defn attack-string [attack]
   (str "- " (trait-string (:name attack) (disp5e/attack-description attack))))

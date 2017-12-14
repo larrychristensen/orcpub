@@ -1,7 +1,8 @@
 (ns orcpub.dnd.e5.monsters
   (:require #?(:clj [clojure.spec.alpha :as spec])
             #?(:cljs [cljs.spec.alpha :as spec])
-            [orcpub.common :as common :refer [name-to-kw]]))
+            [orcpub.common :as common :refer [name-to-kw]]
+            [clojure.string :as s]))
 
 (spec/def ::name (spec/and string? common/starts-with-letter?))
 (spec/def ::key (spec/and keyword? common/keyword-starts-with-letter?))
@@ -12,6 +13,18 @@
 (spec/def ::hit-points (spec/keys :req-un [::die ::die-count]
                                   :opt-un [::modifier]))
 (spec/def ::homebrew-monster (spec/keys :req-un [::name ::key ::option-pack ::hit-points]))
+
+(defn monster-subheader
+  ([size type subtypes alignment]
+   (str (if size (common/safe-capitalize-kw size))
+        " "
+        (common/kw-to-name type)
+        (if (seq subtypes)
+          (str " (" (s/join ", " (map common/kw-to-name subtypes)) ")"))
+        ", "
+        alignment))
+  ([{:keys [size type subtypes alignment]}]
+   (monster-subheader size type subtypes alignment)))
 
 
 (def monster-types
