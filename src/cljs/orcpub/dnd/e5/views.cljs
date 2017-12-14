@@ -1182,19 +1182,10 @@
           [spell-summary name level school true 14]])
        results))]]])
 
-(defn monster-subheader [size type subtypes alignment]
-  (str (if size (common/safe-capitalize-kw size))
-       " "
-       (common/kw-to-name type)
-       (if (seq subtypes)
-         (str " (" (s/join ", " (map common/kw-to-name subtypes)) ")"))
-       ", "
-       alignment))
-
 (defn monster-summary [name size type subtypes alignment]
   [:div.m-r-10
    [:div name]
-   [:div.f-s-14.i.opacity-5 (monster-subheader size type subtypes alignment)]])
+   [:div.f-s-14.i.opacity-5 (monsters/monster-subheader size type subtypes alignment)]])
 
 (defn monster-results [results]
   [:div.white
@@ -1235,7 +1226,7 @@
     [:div.m-l-10.l-h-19
      (if (not @(subscribe [:mobile?])) {:style two-columns-style})
      [:span.f-s-24.f-w-b name]
-     [:div.f-s-18.i.f-w-b (monster-subheader size type subtypes alignment)]
+     [:div.f-s-18.i.f-w-b (monsters/monster-subheader size type subtypes alignment)]
      (spell-field "Armor Class" (str armor-class (if armor-notes (str " (" armor-notes ")"))))
      (let [{:keys [mean die-count die modifier]} hit-points]
        (spell-field "Hit Points" (str die-count
@@ -2518,11 +2509,12 @@
                                         :font-size "6"}
                  next-level-xps])]]]
            (if (and (>= xps next-level-xps)
-                    (= (:handler current-route) routes/dnd-e5-char-builder-route))
+                    (= (or (:handler current-route)
+                           current-route) routes/dnd-e5-char-builder-route))
              [:button.form-button
               {:on-click #(dispatch [::char/level-up id])}
               [:div.flex.align-items-c
-               [svg-icon "muscle-up" 24]
+               [svg-icon "muscle-up" 24 "white"]
                [:span.m-l-5 "Level Up"]]])]]]
         [ability-scores-section-2 id]
         [:div.flex.p-10.justify-cont-s-a

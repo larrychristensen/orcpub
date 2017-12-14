@@ -171,3 +171,9 @@
              (fn [x]
                (dissoc x (last path)))))
 
+(defn print-bonus-map [m]
+  (s/join ", "
+          (map
+           (fn [[k v]] (str (safe-capitalize-kw k) " " (bonus-str v)))
+           m)))
+
