@@ -2,10 +2,12 @@
   (:require [clojure.string :as s]
             [orcpub.common :as common]
             [orcpub.dnd.e5.display :as dis5e]
+            [orcpub.dnd.e5.monsters :as monsters]
+            [orcpub.dnd.e5.options :as options]
             [clojure.java.io :as io])
   (:import (org.apache.pdfbox.pdmodel.interactive.form PDCheckBox PDComboBox PDListBox PDRadioButton PDTextField)
            (org.apache.pdfbox.cos COSName)
-           (org.apache.pdfbox.pdmodel PDDocument PDPageContentStream PDResources)
+           (org.apache.pdfbox.pdmodel PDPage PDDocument PDPageContentStream PDResources)
            (org.apache.pdfbox.pdmodel.graphics.image PDImageXObject)
            (java.io ByteArrayOutputStream ByteArrayInputStream)
            (org.apache.pdfbox.pdmodel.graphics.image JPEGFactory LosslessFactory)
@@ -161,6 +163,9 @@
       (if color
         (set-text-color cs 0 0 0))
       (.endText cs))))
+
+(defn draw-text-from-top [cs text font font-size x y & [color]]
+  (draw-text cs text font font-size x (- 11.0 y) color))
 
 (defn draw-line [cs start-x start-y end-x end-y]
   (.drawLine cs start-x start-y end-x end-y))
@@ -455,3 +460,76 @@
                                    0.25))
                     {:remaining-lines remaining-desc-lines
                      :spell-name (:name spell)})))))))))))
+
+(defn create-monsters-pdf []
+  (let [page (PDPage.)
+        doc (PDDocument.)]
+    (.addPage doc page)
+    (with-open [cs (PDPageContentStream. doc page)]
+      (let [h (/ 11.0 5)]
+        (doseq [y (range h 11.0 h)]
+          (draw-line-in cs 0.0 y 8.5 y))
+        (let [monsters (vec (take 5 monsters/monsters))]
+          (doseq [i (range 0 5)]
+            (let [monster (monsters i)]
+              (draw-text-from-top cs
+                                      (:name monster)
+                                      PDType1Font/HELVETICA_BOLD
+                                      14
+                                      0.1
+                                      (+ (* i h) 0.25))
+              (draw-text-from-top cs
+                                      (monsters/monster-subheader monster)
+                                      PDType1Font/HELVETICA_OBLIQUE
+                                      12
+                                      0.1
+                                      (+ (* i h) 0.45))
+              (doseq [j (range 0 6)]
+                (let [ability ([:str :dex :con :int :wis :cha] j)
+                      x (+ 0.15 (* 0.65 j))]
+                  (draw-text-from-top cs
+                                          (name ability)
+                                          PDType1Font/HELVETICA_BOLD
+                                          10
+                                          x
+                                          (+ (* i h) 0.7))
+                  (draw-text-from-top cs
+                                          (str (ability monster)
+                                               " ("
+                                               (options/ability-bonus-str (ability monster))
+                                               ")")
+                                          PDType1Font/HELVETICA
+                                          12
+                                          x
+                                          (+ (* i h) 0.85))))
+              (draw-text-from-top cs
+                                      "Saving Throws"
+                                      PDType1Font/HELVETICA_BOLD
+                                      10
+                                      0.1
+                                      (+ (* i h) 1.1))
+              (draw-text-from-top cs
+                                      (common/print-bonus-map (:saving-throws monster))
+                                      PDType1Font/HELVETICA
+                                      10
+                                      (+ 0.1 (string-width
+                                              "Saving Throws "
+                                              PDType1Font/HELVETICA_BOLD
+                                              10))
+                                      (+ (* i h) 1.1))
+              (draw-text-from-top cs
+                                      "Skills"
+                                      PDType1Font/HELVETICA_BOLD
+                                      10
+                                      0.1
+                                      (+ (* i h) 1.3))
+              (draw-text-from-top cs
+                                      (common/print-bonus-map (:skills monster))
+                                      PDType1Font/HELVETICA
+                                      10
+                                      (+ 0.1 (string-width
+                                              "Skills "
+                                              PDType1Font/HELVETICA_BOLD
+                                              10))
+                                      (+ (* i h) 1.3)))))))
+    (.save doc "/home/larry/Documents/test.pdf")))
