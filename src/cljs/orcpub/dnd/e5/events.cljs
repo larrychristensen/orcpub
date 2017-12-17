@@ -3148,7 +3148,13 @@
                      [:show-warning-message "Imported content was merged into your existing content. To be safe, you should 'Export All' and save to a safe location now."]]}
        
        :else
-       {:dispatch [:show-error-message "Invalid .orcbrew file"]}))))
+       (do
+         (prn "PLUGIN" plugin)
+         (prn "INVALID PLUGINS FILE"
+              (spec/explain-data ::e5/plugins plugin))
+           (prn "INVALID PLUGIN FILE"
+                (spec/explain-data ::e5/plugin plugin))
+           {:dispatch [:show-error-message "Invalid .orcbrew file"]})))))
 
 (reg-event-db
  ::spells/set-spell
