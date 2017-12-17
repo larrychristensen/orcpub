@@ -89,9 +89,12 @@
  (fn [plugins _]
    (map
     (fn [race]
-      (assoc race :modifiers (concat (opt5e/plugin-modifiers (:props race)
-                                                             (:key race))
-                                     (spell-modifiers race (:name race)))))
+      (assoc race
+             :modifiers
+             (concat (opt5e/plugin-modifiers (:props race)
+                                             (:key race))
+                     (spell-modifiers race (:name race)))
+             :edit-event [::races5e/edit-race race]))
     (apply concat (map (comp vals ::e5/races) plugins)))))
 
 (reg-sub
@@ -815,13 +818,7 @@
           (update race :subraces concat (subraces-map key))
           race))
       (concat
-       (map
-        (fn [race]
-          (assoc
-           race
-           :edit-event
-           [::races5e/edit-race race]))
-        (reverse plugin-races))
+       (reverse plugin-races)
        [dwarf-option-cfg
         (elf-option-cfg spell-lists spells-map language-map)
         halfling-option-cfg
