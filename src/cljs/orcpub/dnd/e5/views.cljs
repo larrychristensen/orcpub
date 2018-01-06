@@ -513,6 +513,8 @@
            :route routes/dnd-e5-class-builder-page-route}
           {:name "Subclass Builder"
            :route routes/dnd-e5-subclass-builder-page-route}
+          {:name "Elritch Invocation Builder"
+           :route routes/dnd-e5-invocation-builder-page-route}
           {:name "Selection Builder"
            :route routes/dnd-e5-selection-builder-page-route}]]]]]]))
 
@@ -3941,6 +3943,9 @@
 (defn language-input-field [title prop language & [class-names]]
   (builder-input-field title prop language ::langs/set-language-prop class-names))
 
+(defn invocation-input-field [title prop invocation & [class-names]]
+  (builder-input-field title prop invocation ::classes/set-invocation-prop class-names))
+
 (defn selection-input-field [title prop selection & [class-names]]
   (builder-input-field title prop selection ::selections/set-selection-prop class-names))
 
@@ -5844,6 +5849,27 @@
        {:value (get language :description)
         :on-change #(dispatch [::langs/set-language-prop :description %])}]]]))
 
+(defn invocation-builder []
+  (let [invocation @(subscribe [::classes/invocation-builder-item])]
+    [:div.p-20.main-text-color
+     [:div.flex.w-100-p.flex-wrap
+      [invocation-input-field
+       "Name"
+       :name
+       invocation
+       "m-b-20"]
+      [invocation-input-field
+       option-source-name-label
+       :option-pack
+       invocation
+       "m-l-5 m-b-20"]]
+     [:div.w-100-p
+      [:div.f-s-24.f-w-b
+       "Description"]
+      [textarea-field
+       {:value (get invocation :description)
+        :on-change #(dispatch [::classes/set-invocation-prop :description %])}]]]))
+
 (defn monster-builder []
   (let [{:keys [name
                 key
@@ -6847,6 +6873,16 @@
                    ::classes/delete-subclass
                    "subclasses"))
 
+(defn my-invocations [name]
+  (my-content-type name
+                   "eldritch invocation"
+                   ::e5/invocations
+                   ["mounted-knight"
+                    "mounted-knight"]
+                   ::classes/new-invocation
+                   ::classes/edit-invocation
+                   ::classes/delete-invocation))
+
 (defn my-feats [name]
   (my-content-type name
                    "feat"
@@ -6894,6 +6930,7 @@
            [(my-subraces name) plugin]
            [(my-classes name) plugin]
            [(my-subclasses name) plugin]
+           [(my-invocations name) plugin]
            [(my-feats name) plugin]
            [(my-languages name) plugin]
            [(my-selections name) plugin]]])])))
@@ -7017,6 +7054,9 @@
 
 (defn language-builder-page []
   (builder-page "Language" ::langs/reset-language ::langs/save-language language-builder))
+
+(defn invocation-builder-page []
+  (builder-page "Eldritch Invocation" ::classes/reset-invocation ::classes/save-invocation invocation-builder))
 
 (defn selection-builder-page []
   (builder-page "Selection" ::selections/reset-selection ::selections/save-selection selection-builder [title-with-help "Selection Builder" selection-help]))
