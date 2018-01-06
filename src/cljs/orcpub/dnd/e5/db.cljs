@@ -34,6 +34,7 @@
 (def local-storage-combat-key "combat")
 (def local-storage-background-key "background")
 (def local-storage-language-key "language")
+(def local-storage-invocation-key "invocation")
 (def local-storage-selection-key "selection")
 (def local-storage-feat-key "feat")
 (def local-storage-race-key "race")
@@ -86,6 +87,8 @@
 
 (def default-language {})
 
+(def default-invocation {})
+
 (def default-selection {:options []})
 
 
@@ -126,6 +129,7 @@
    ::combat5e/tracker-item default-combat
    ::bg5e/builder-item default-background
    ::langs5e/builder-item default-language
+   ::class5e/invocation-builder-item default-invocation
    ::selections5e/builder-item default-selection
    ::feats5e/builder-item default-feat
    ::race5e/builder-item default-race
@@ -178,6 +182,10 @@
 (defn language->local-store [language]
   (if js/window.localStorage
     (set-item local-storage-language-key (str language))))
+
+(defn invocation->local-store [invocation]
+  (if js/window.localStorage
+    (set-item local-storage-invocation-key (str invocation))))
 
 (defn selection->local-store [selection]
   (if js/window.localStorage

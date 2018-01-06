@@ -413,6 +413,12 @@
  (fn [plugins _]
    (apply concat (map (comp vals ::e5/feats) plugins))))
 
+(reg-sub
+ ::classes5e/plugin-invocations
+ :<- [::e5/plugin-vals]
+ (fn [plugins _]
+   (apply concat (map (comp vals ::e5/invocations) plugins))))
+
 (def acolyte-bg
   {:name "Acolyte"
    :help "Your life has been devoted to serving a god or gods."
@@ -830,7 +836,7 @@
         tiefling-option-cfg]))))))
 
 
-(defn base-class-options [spell-lists spells-map plugin-subclasses-map language-map]
+(defn base-class-options [spell-lists spells-map plugin-subclasses-map language-map invocations]
   [(classes5e/barbarian-option spell-lists spells-map plugin-subclasses-map language-map)
    (classes5e/bard-option spell-lists spells-map plugin-subclasses-map language-map)
    (classes5e/cleric-option spell-lists spells-map plugin-subclasses-map language-map)
@@ -841,7 +847,7 @@
    (classes5e/ranger-option spell-lists spells-map plugin-subclasses-map language-map)
    (classes5e/rogue-option spell-lists spells-map plugin-subclasses-map language-map)
    (classes5e/sorcerer-option spell-lists spells-map plugin-subclasses-map language-map)
-   (classes5e/warlock-option spell-lists spells-map plugin-subclasses-map language-map)
+   (classes5e/warlock-option spell-lists spells-map plugin-subclasses-map language-map invocations)
    (classes5e/wizard-option spell-lists spells-map plugin-subclasses-map language-map)])
 
 (reg-sub
@@ -851,7 +857,8 @@
  :<- [::classes5e/plugin-subclasses-map]
  :<- [::langs5e/language-map]
  :<- [::classes5e/plugin-classes]
- (fn [[spell-lists spells-map plugin-subclasses-map language-map plugin-classes] _]
+ :<- [::classes5e/invocations]
+ (fn [[spell-lists spells-map plugin-subclasses-map language-map plugin-classes invocations] _]
    (vec
     (into
      (sorted-set-by #(compare (::t/key %1) (::t/key %2)))
@@ -866,7 +873,7 @@
            language-map
            plugin-class))
         plugin-classes))
-      (base-class-options spell-lists spells-map plugin-subclasses-map language-map))))))
+      (base-class-options spell-lists spells-map plugin-subclasses-map language-map invocations))))))
 
 (reg-sub
  ::classes5e/class-map
@@ -900,6 +907,15 @@
     (fn [feat]
       (assoc feat :edit-event [::feats5e/edit-feat feat]))
     plugin-feats)))
+
+(reg-sub
+ ::classes5e/invocations
+ :<- [::classes5e/plugin-invocations]
+ (fn [plugin-invocations]
+   (map
+    (fn [invocation]
+      (assoc invocation :edit-event [::classes5e/edit-invocation invocation]))
+    plugin-invocations)))
 
 (reg-sub
  ::spells5e/plugin-spells
@@ -1141,6 +1157,11 @@
  ::classes5e/subclass-builder-item
  (fn [db _]
    (::classes5e/subclass-builder-item db)))
+
+(reg-sub
+ ::classes5e/invocation-builder-item
+ (fn [db _]
+   (::classes5e/invocation-builder-item db)))
 
 (reg-sub
  ::classes5e/builder-item
