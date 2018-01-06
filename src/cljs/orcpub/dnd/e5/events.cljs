@@ -37,6 +37,7 @@
                                       combat->local-store
                                       background->local-store
                                       language->local-store
+                                      invocation->local-store
                                       selection->local-store
                                       feat->local-store
                                       race->local-store
@@ -52,6 +53,7 @@
                                       default-combat
                                       default-background
                                       default-language
+                                      default-invocation
                                       default-selection
                                       default-feat
                                       default-race
@@ -101,6 +103,8 @@
 
 (def language->local-store-interceptor (after language->local-store))
 
+(def invocation->local-store-interceptor (after invocation->local-store))
+
 (def selection->local-store-interceptor (after selection->local-store))
 
 (def feat->local-store-interceptor (after feat->local-store))
@@ -146,6 +150,9 @@
 
 (def language-interceptors [(path ::langs5e/builder-item)
                             language->local-store-interceptor])
+
+(def invocation-interceptors [(path ::class5e/invocation-builder-item)
+                              invocation->local-store-interceptor])
 
 (def selection-interceptors [(path ::selections5e/builder-item)
                             selection->local-store-interceptor])
@@ -487,6 +494,14 @@
  "You must specify 'Name', 'Option Source Name'")
 
 (reg-save-homebrew
+ "Invocation"
+ ::class5e/save-invocation
+ ::class5e/invocation-builder-item
+ ::class5e/homebrew-invocation
+ ::e5/invocations
+ "You must specify 'Name', 'Option Source Name'")
+
+(reg-save-homebrew
  "Selection"
  ::selections5e/save-selection
  ::selections5e/builder-item
@@ -559,6 +574,10 @@
 (reg-delete-homebrew
  ::langs5e/delete-language
  ::e5/languages)
+
+(reg-delete-homebrew
+ ::class5e/delete-invocation
+ ::e5/invocations)
 
 (reg-delete-homebrew
  ::selections5e/delete-selection
@@ -1664,6 +1683,11 @@
  routes/dnd-e5-language-builder-page-route)
 
 (reg-edit-homebrew
+ ::class5e/edit-invocation
+ ::class5e/set-invocation
+ routes/dnd-e5-invocation-builder-page-route)
+
+(reg-edit-homebrew
  ::selections5e/edit-selection
  ::selections5e/set-selection
  routes/dnd-e5-selection-builder-page-route)
@@ -2522,6 +2546,12 @@
    (assoc language prop-key prop-value)))
 
 (reg-event-db
+ ::class5e/set-invocation-prop
+ invocation-interceptors
+ (fn [invocation [_ prop-key prop-value]]
+   (assoc invocation prop-key prop-value)))
+
+(reg-event-db
  ::selections5e/set-selection-prop
  selection-interceptors
  (fn [selection [_ prop-key prop-value]]
@@ -3193,6 +3223,12 @@
    language))
 
 (reg-event-db
+ ::class5e/set-invocation
+ invocation-interceptors
+ (fn [_ [_ invocation]]
+   invocation))
+
+(reg-event-db
  ::selections5e/set-selection
  selection-interceptors
  (fn [_ [_ selection]]
@@ -3270,6 +3306,12 @@
  (fn [_ _]
    {:dispatch [::langs5e/set-language
                default-language]}))
+
+(reg-event-fx
+ ::class5e/reset-invocation
+ (fn [_ _]
+   {:dispatch [::class5e/set-invocation
+               default-invocation]}))
 
 (reg-event-fx
  ::selections5e/reset-selection
@@ -3516,6 +3558,12 @@
  ::langs5e/set-language
  default-language
  routes/dnd-e5-language-builder-page-route)
+
+(reg-new-homebrew
+ ::class5e/new-invocation
+ ::class5e/set-invocation
+ default-invocation
+ routes/dnd-e5-invocation-builder-page-route)
 
 (reg-new-homebrew
  ::selections5e/new-selection
