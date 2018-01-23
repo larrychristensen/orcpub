@@ -77,6 +77,30 @@
     @sorted-items)))
 
 (reg-sub
+ ::mi5e/custom-weapons
+ :<- [::mi5e/expanded-custom-items]
+ (fn [custom-items _]
+   (sequence
+    mi5e/magic-weapon-xform
+    custom-items)))
+
+(reg-sub
+ ::mi5e/custom-and-standard-weapons
+ :<- [::mi5e/custom-weapons]
+ (fn [custom-weapons _]
+   (concat
+    (map
+     (fn [{:keys [::mi5e/name] :as i}]
+       (assoc i :name name))
+     custom-weapons) weapon5e/weapons)))
+
+(reg-sub
+ ::mi5e/custom-and-standard-weapons-map
+ :<- [::mi5e/custom-and-standard-weapons]
+ (fn [custom-and-standard-weapons _]
+   (common/map-by-key custom-and-standard-weapons)))
+
+(reg-sub
  ::mi5e/magic-weapons
  :<- [::char5e/sorted-items]
  (fn [sorted-items _]
@@ -86,13 +110,13 @@
 
 (reg-sub
  ::mi5e/all-weapons
- :<- [::char5e/magic-weapons]
+ :<- [::mi5e/magic-weapons]
  (fn [magic-weapons]
    (concat magic-weapons weapon5e/weapons)))
 
 (reg-sub
  ::mi5e/all-melee-weapons
- :<- [::char5e/all-weapons]
+ :<- [::mi5e/all-weapons]
  (fn [all-weapons]
    (filter
     ::weapon5e/melee?
@@ -257,6 +281,8 @@
  :<- [::mi5e/magic-weapon-options]
  :<- [::mi5e/magic-armor-options]
  :<- [::mi5e/other-magic-item-options]
+ :<- [::mi5e/all-weapons-map]
+ :<- [::mi5e/custom-and-standard-weapons]
  :<- [::spells5e/spell-lists]
  :<- [::spells5e/spells-map]
  :<- [::bg5e/backgrounds]
@@ -267,6 +293,8 @@
  (fn [[magic-weapon-options
        magic-armor-options
        other-magic-item-options
+       weapons-map
+       custom-and-standard-weapons
        spell-lists
        spells-map
        backgrounds
@@ -277,6 +305,8 @@
    (t5e/template-selections magic-weapon-options
                             magic-armor-options
                             other-magic-item-options
+                            weapons-map
+                            custom-and-standard-weapons
                             spell-lists
                             spells-map
                             backgrounds
