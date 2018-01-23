@@ -2985,7 +2985,7 @@ long rest."})
                                               :options (opt5e/simple-weapon-options 1 (vals weapon-map))
                                               :min 1
                                               :max 1})]})]})
-                 (opt5e/simple-weapon-selection 1 :warlock)]
+                 (opt5e/simple-weapon-selection 1 :warlock weapon-map)]
     :equipment-choices [{:name "Equipment Pack"
                          :options {:scholars-pack 1
                                    :dungeoneers-pack 1}}
