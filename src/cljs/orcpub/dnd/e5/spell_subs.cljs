@@ -815,7 +815,6 @@
  :<- [::spells5e/spells-map]
  :<- [::langs5e/language-map]
  (fn [[plugin-races subraces-map spell-lists spells-map language-map]]
-   (prn "PLUGIN RACES" plugin-races)
    (vec
     (into
      (sorted-set-by compare-keys)
