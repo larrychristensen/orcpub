@@ -4073,19 +4073,22 @@
     [:span.i "Hodor's Guide to Hodors"]
     [:span ")"]]])
 
-(defn option-skill-expertise-choice [option
-                                     set-path-prop-event
-                                     toggle-path-prop-event]
+(defn option-proficiency-choice [title
+                                 proficiency-choice-key
+                                 proficiency-options
+                                 option
+                                 set-path-prop-event
+                                 toggle-path-prop-event]
   [:div.m-b-20
-   [:div.f-s-24.f-w-b.m-b-20 "Skill Expertise (Double Proficiency) Choice"]
+   [:div.f-s-24.f-w-b.m-b-20 title]
    [:div.m-b-10
     [labeled-dropdown
      "Choose"
      {:items (map
               value-to-item
               (range 1 6))
-      :value (get-in option [:profs :skill-expertise-options :choose] 1)
-      :on-change #(dispatch [set-path-prop-event [:profs :skill-expertise-options :choose] (js/parseInt %)])}]]
+      :value (get-in option [:profs proficiency-choice-key :choose] 1)
+      :on-change #(dispatch [set-path-prop-event [:profs proficiency-choice-key :choose] (js/parseInt %)])}]]
    [:div.f-s-18.f-w-b.m-b-20 "Options"]
    [:div.flex.flex-wrap
     (doall
@@ -4095,37 +4098,28 @@
         [:span.m-r-20.m-b-10
          [comps/labeled-checkbox
           name
-          (get-in option [:profs :skill-expertise-options :options key])
+          (get-in option [:profs proficiency-choice-key :options key])
           false
-          #(dispatch [toggle-path-prop-event [:profs :skill-expertise-options :options key]])]])
-      skills/skills))]])
+          #(dispatch [toggle-path-prop-event [:profs proficiency-choice-key :options key]])]])
+      proficiency-options))]])
 
-(defn option-skill-proficiency-choice [option
-                                       set-path-prop-event
-                                       toggle-path-prop-event]
-  [:div.m-b-20
-   [:div.f-s-24.f-w-b.m-b-20 "Skill Proficiency Choice"]
-   [:div.m-b-10
-    [labeled-dropdown
-     "Choose"
-     {:items (map
-              value-to-item
-              (range 1 6))
-      :value (get-in option [:profs :skill-options :choose] 1)
-      :on-change #(dispatch [set-path-prop-event [:profs :skill-options :choose] (js/parseInt %)])}]]
-   [:div.f-s-18.f-w-b.m-b-20 "Options"]
-   [:div.flex.flex-wrap
-    (doall
-     (map
-      (fn [{:keys [name key]}]
-        ^{:key key}
-        [:span.m-r-20.m-b-10
-         [comps/labeled-checkbox
-          name
-          (get-in option [:profs :skill-options :options key])
-          false
-          #(dispatch [toggle-path-prop-event [:profs :skill-options :options key]])]])
-      skills/skills))]])
+(def option-skill-expertise-choice
+  (partial option-proficiency-choice
+           "Skill Expertise (Double Proficiency) Choice"
+           :skill-expertise-options
+           skills/skills))
+
+(def option-language-proficiency-choice
+  (partial option-proficiency-choice
+           "Language Proficiency Choice"
+           :language-options
+           @(subscribe [::langs/languages])))
+
+(def option-skill-proficiency-choice
+  (partial option-proficiency-choice
+           "Skill Proficiency Choice"
+           :skill-options
+           skills/skills))
 
 (defn option-skill-proficiency [option toggle-event]
   [:div.m-b-20
@@ -5738,6 +5732,11 @@
        [:div [option-skill-proficiency race ::races/toggle-race-map-prop]]]
       [:div
        [option-skill-proficiency-choice
+        race
+        ::races/set-race-path-prop
+        ::races/toggle-race-path-prop]]
+      [:div
+       [option-language-proficiency-choice
         race
         ::races/set-race-path-prop
         ::races/toggle-race-path-prop]]]
