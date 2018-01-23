@@ -52,7 +52,7 @@
       route
       default-route)))
 
-(def default-character (char5e/set-class t5e/character :barbarian 0 (class5e/barbarian-option nil nil nil nil)))
+(def default-character (char5e/set-class t5e/character :barbarian 0 (class5e/barbarian-option nil nil nil nil nil)))
 
 (def default-spell {:level 0
                     :school "abjuration"

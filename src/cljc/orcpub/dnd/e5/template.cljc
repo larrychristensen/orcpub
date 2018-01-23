@@ -1458,6 +1458,8 @@
 (defn template-selections [magic-weapon-options
                            magic-armor-options
                            other-magic-item-options
+                           weapon-map
+                           custom-and-standard-weapons
                            spell-lists
                            spells-map
                            backgrounds
@@ -1503,21 +1505,21 @@
    (opt5e/race-selection
     {:options (conj
                (map
-                (partial opt5e/race-option spell-lists spells-map language-map)
+                (partial opt5e/race-option spell-lists spells-map language-map weapon-map)
                 races)
-               (opt5e/custom-race-option spell-lists spells-map language-map))})
+               (opt5e/custom-race-option spell-lists spells-map language-map weapon-map))})
    (opt5e/background-selection
     {:help "Background broadly describes your character origin. It also affords you two skill proficiencies and possibly proficiencies with tools or languages."
      :options (conj
                (map
-                (partial opt5e/background-option language-map)
+                (partial opt5e/background-option language-map weapon-map)
                 backgrounds)
                (opt5e/custom-background-option language-map))})
    (opt5e/feat-selection-2
     {:options (concat
                (opt5e/feat-options spell-lists spells-map)
                (map
-                (partial opt5e/feat-option-from-cfg language-map spells-map spell-lists)
+                (partial opt5e/feat-option-from-cfg language-map spells-map spell-lists custom-and-standard-weapons)
                 feats))
      :show-if-zero? true
      :min 0
