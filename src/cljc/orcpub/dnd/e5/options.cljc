@@ -719,12 +719,10 @@
                      :options options})]})))
 
 (defn weapon-proficiency-selection-2 [weapon-map weapon-proficiency-options]
-  (prn "WEPAON OPTIONS" weapon-proficiency-options)
   (let [{num :choose options :options} weapon-proficiency-options
         weapons (if (:any options)
                   (vals weapon-map)
                   (map weapon-map (keys options)))]
-    (prn "WEAPONS" weapons num)
     (t/selection-cfg
      {:name "Weapon Proficiency"
       :options (map
@@ -2114,7 +2112,6 @@
                            plugin?
                            edit-event]
                     :as race}]
-  (prn "FIRST WEAPON" (second weapon-map))
   (let [key (or key (common/name-to-kw name))
         {:keys [armor weapon save skill-options weapon-proficiency-options tool-options tool language-options]} profs
         {skill-num :choose options :options} skill-options
