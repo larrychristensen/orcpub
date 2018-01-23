@@ -10,6 +10,7 @@
             [orcpub.dice :as dice]
             [orcpub.entity.strict :as se]
             [orcpub.dnd.e5.subs :as subs]
+            [orcpub.dnd.e5.equipment-subs]
             [orcpub.dnd.e5.character :as char]
             [orcpub.dnd.e5.backgrounds :as bg]
             [orcpub.dnd.e5.languages :as langs]
@@ -2935,7 +2936,7 @@
        [tool-prof-details-section-2 id]]
       [list-item-section "Languages" "lips" @(subscribe [::char/languages id]) (partial prof-name language-map)]
       [list-item-section "Tool Proficiencies" "stone-crafting" @(subscribe [::char/tool-profs id]) (fn [[kw]] (prof-name equip/tools-map kw))]
-      [list-item-section "Weapon Proficiencies" "bowman" @(subscribe [::char/weapon-profs id]) (partial prof-name weapon/weapons-map)]
+      [list-item-section "Weapon Proficiencies" "bowman" @(subscribe [::char/weapon-profs id]) (partial prof-name @(subscribe [::mi/custom-and-standard-weapons-map]))]
       [list-item-section "Armor Proficiencies" "mailed-fist" @(subscribe [::char/armor-profs id]) (partial prof-name armor/armor-map)]]]))
 
 (defn equipped-section-dropdown [label cfg]
@@ -3102,7 +3103,7 @@
       [armor-section-2 id]]
      [:div
       {:class-name (if (= 2 num-columns) "w-50-p m-l-20")}
-      [list-item-section "Weapon Proficiencies" "bowman" weapon-profs (partial prof-name weapon/weapons-map)]
+      [list-item-section "Weapon Proficiencies" "bowman" weapon-profs (partial prof-name @(subscribe [::mi/custom-and-standard-weapons-map]))]
       [list-item-section "Armor Proficiencies" "mailed-fist" armor-profs (partial prof-name armor/armor-map)]]]))
 
 (defn has-frequency-units? [trait]
@@ -3654,7 +3655,7 @@
              {:name "All" :key :all}
              {:name "All Swords" :key :sword}
              {:name "All Axes" :key :axe}]
-            weapon/weapons)))])]]
+            @(subscribe [::mi/custom-and-standard-weapons]))))])]]
      (if other?
        [:div.main-text-color.m-b-10.m-t-10
         [:span.f-s-18.f-w-b "Base Weapon Details"]
@@ -4102,6 +4103,17 @@
           false
           #(dispatch [toggle-path-prop-event [:profs proficiency-choice-key :options key]])]])
       proficiency-options))]])
+
+(defn option-weapon-proficiency-choice [option
+                                        set-path-prop-event
+                                        toggle-path-prop-event]
+  (option-proficiency-choice
+   "Weapon Proficiency Choice"
+   :weapon-proficiency-options
+   @(subscribe [::mi/custom-and-standard-weapons])
+   option
+   set-path-prop-event
+   toggle-path-prop-event))
 
 (def option-skill-expertise-choice
   (partial option-proficiency-choice
@@ -4626,7 +4638,7 @@
              (get-in option [:props kw key])
              false
              #(dispatch [toggle-map-prop-event kw key])]])
-         weapon/weapons)))])])
+         @(subscribe [::mi/custom-and-standard-weapons]))))])])
 
 (defn option-traits [option
                      add-trait-event
@@ -4886,7 +4898,7 @@
           :value kw})
        opt/damage-types))
 
-(def modifier-values
+(defn modifier-values []
   (sorted-map-by
    <
    :weapon-prof {:name "Weapon Proficiency"
@@ -4899,7 +4911,7 @@
                            [:simple :martial])
                           (map
                            obj-to-item
-                           weapon/weapons))}
+                           @(subscribe [::mi/custom-and-standard-weapons])))}
    :num-attacks {:name "Number of Attacks"
                  :value-fn js/parseInt
                  :values (map
@@ -5012,7 +5024,8 @@
                              edit-modifier-value-event
                              edit-modifier-level-event
                              delete-modifier-event]
-  (let [{:keys [name values component value-fn]} (if type (modifier-values type))]
+  (let [mod-values (modifier-values)
+        {:keys [name values component value-fn]} (if type (mod-values type))]
     [:div
      [:div.flex.flex-wrap.align-items-end.m-b-20
       [:div.m-t-10
@@ -5026,7 +5039,7 @@
                   (fn [[kw {:keys [name]}]]
                     {:title name
                      :value kw})
-                  modifier-values))
+                  mod-values))
          :value (if type (clojure.core/name type) :select)
          :on-change #(dispatch [edit-modifier-type-event index (keyword %)])}]]
       (if type
@@ -5647,7 +5660,7 @@
                    {:title (name kw)
                     :value (name kw)})
                  ["small" "medium" "large"])
-         :value (name (get race :size))
+         :value (common/safe-name (get race :size :medium))
          :on-change #(dispatch [::races/set-race-prop :size (keyword %)])}]]
       [:div.m-r-5
        [labeled-dropdown
@@ -5737,6 +5750,11 @@
         ::races/toggle-race-path-prop]]
       [:div
        [option-language-proficiency-choice
+        race
+        ::races/set-race-path-prop
+        ::races/toggle-race-path-prop]]
+      [:div
+       [option-weapon-proficiency-choice
         race
         ::races/set-race-path-prop
         ::races/toggle-race-path-prop]]]
