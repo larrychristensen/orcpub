@@ -172,25 +172,25 @@
    #(weapon-option % num)
    weapons))
 
-(defn simple-melee-weapon-options [num]
+(defn simple-melee-weapon-options [num weapons]
   (weapon-options
    (filter
     #(and (= :simple (::weapons/type %)) (::weapons/melee? %))
-    weapons/weapons)
+    weapons)
    num))
 
-(defn martial-weapon-options [num]
+(defn martial-weapon-options [num weapons]
   (weapon-options
    (filter
     #(= :martial (::weapons/type %))
-    weapons/weapons)
+    weapons)
    num))
 
-(defn simple-weapon-options [num]
+(defn simple-weapon-options [num weapons]
   (weapon-options
    (filter
     #(= :simple (::weapons/type %))
-    weapons/weapons)
+    weapons)
    num))
 
 (defn skill-options [skills]
@@ -718,6 +718,26 @@
                      :tags #{:spells}
                      :options options})]})))
 
+(defn weapon-proficiency-selection-2 [weapon-map weapon-proficiency-options]
+  (prn "WEPAON OPTIONS" weapon-proficiency-options)
+  (let [{num :choose options :options} weapon-proficiency-options
+        weapons (if (:any options)
+                  (vals weapon-map)
+                  (map weapon-map (keys options)))]
+    (prn "WEAPONS" weapons num)
+    (t/selection-cfg
+     {:name "Weapon Proficiency"
+      :options (map
+                (fn [{:keys [name key :db/id] :as item}]
+                  (t/option-cfg
+                   {:name (or name (::mi/name item))
+                    :key key}))
+                weapons)
+      :multiselect? true
+      :tags #{:profs}
+      :min (or num 1)
+      :max (or num 1)})))
+
 (defn language-selection-aux [languages num]
   (t/selection-cfg
    {:name "Languages"
@@ -857,22 +877,22 @@
 
 
 (defn weapon-proficiency-selection
-  ([num]
+  ([num custom-and-standard-weapons]
    (t/selection-cfg
     {:name "Weapon Proficiency"
      :help (proficiency-help num "a weapon" "weapons")
-     :options (weapon-proficiency-options weapons/weapons)
+     :options (weapon-proficiency-options custom-and-standard-weapons)
      :min num
      :max num
      :tags #{:weapon-profs :profs}}))
-  ([options num]
+  ([options num custom-and-standard-weapons]
    (t/selection-cfg
     {:name "Weapon Proficiency"
      :help (proficiency-help num "a weapon" "weapons")
      :options (weapon-proficiency-options
                (filter
                 (comp (set options) :key)
-                weapons/weapons))
+                custom-and-standard-weapons))
      :min num
      :max num
      :tags #{:weapon-profs :profs}})))
@@ -1039,7 +1059,7 @@
                   :modifiers [(modifiers/armor-proficiency armor-type)]}))
               [:light :medium :heavy :shields])}))
 
-(def homebrew-weapon-prof-selection
+(defn homebrew-weapon-prof-selection [weapon-map]
   (t/selection-cfg
    {:name "Weapon Proficiency"
     :key :weapon-prof
@@ -1054,7 +1074,7 @@
                   :key key
                   :modifiers [(modifiers/weapon-proficiency key)]}))
               (conj
-               weapons/weapons
+               (vals weapon-map)
                {:name "Simple"
                 :key :simple}
                {:name "Martial"
@@ -1976,7 +1996,7 @@
                   :modifiers [(modifiers/darkvision distance)]}))
               (range 0 150 30))}))
 
-(defn custom-subrace-option [spell-lists spells-map language-map path]
+(defn custom-subrace-option [spell-lists spells-map language-map weapon-map path]
   (t/option-cfg
    {:name "Custom"
     :icon "beer-stein"
@@ -1992,7 +2012,7 @@
                  homebrew-speed-selection
                  homebrew-darkvision-selection
                  homebrew-armor-prof-selection
-                 homebrew-weapon-prof-selection
+                 (homebrew-weapon-prof-selection weapon-map)
                  (homebrew-language-selection language-map)]}))
 
 (defn custom-race-builder []
@@ -2000,7 +2020,7 @@
    [:custom-race-name]
    [:set-custom-race]))
 
-(defn subrace-selection [race spell-lists spells-map language-map plugin? source subraces path]
+(defn subrace-selection [race spell-lists spells-map language-map weapon-map plugin? source subraces path]
   (let [subrace-path (conj path :subrace)]
     (t/selection-cfg
      {:name "Subrace"
@@ -2016,9 +2036,9 @@
                   [(none-option subrace-path)])
                  
                  (not plugin?)
-                 (conj (custom-subrace-option spell-lists spells-map language-map subrace-path)))})))
+                 (conj (custom-subrace-option spell-lists spells-map language-map weapon-map subrace-path)))})))
 
-(defn custom-race-option [spell-lists spells-map language-map]
+(defn custom-race-option [spell-lists spells-map language-map weapon-map]
   (t/option-cfg
    {:name "Custom"
     :icon "beer-stein"
@@ -2031,7 +2051,7 @@
                (fn [_] @(subscribe [:homebrew? [:race]]))
                true)]
     :order 1000
-    :selections [(subrace-selection {} spell-lists spells-map language-map false nil nil [:race :custom])
+    :selections [(subrace-selection {} spell-lists spells-map language-map weapon-map false nil nil [:race :custom])
                  homebrew-skill-prof-selection
                  homebrew-tool-prof-selection
                  homebrew-ability-increase-selection
@@ -2039,7 +2059,7 @@
                  homebrew-speed-selection
                  homebrew-darkvision-selection
                  homebrew-armor-prof-selection
-                 homebrew-weapon-prof-selection
+                 (homebrew-weapon-prof-selection weapon-map)
                  (homebrew-language-selection language-map)]}))
 
 (defn custom-background-builder []
@@ -2071,6 +2091,7 @@
 (defn race-option [spell-lists
                    spells-map
                    language-map
+                   weapon-map
                    {:keys [name
                            icon
                            key
@@ -2093,8 +2114,9 @@
                            plugin?
                            edit-event]
                     :as race}]
+  (prn "FIRST WEAPON" (second weapon-map))
   (let [key (or key (common/name-to-kw name))
-        {:keys [armor weapon save skill-options tool-options tool language-options]} profs
+        {:keys [armor weapon save skill-options weapon-proficiency-options tool-options tool language-options]} profs
         {skill-num :choose options :options} skill-options
         skill-kws (if (:any options)
                     (map :key skills/skills)
@@ -2111,8 +2133,10 @@
                    (if (seq skill-kws)
                      [(skill-selection skill-kws (or skill-num 1))])
                    (if (seq subraces)
-                     [(subrace-selection race spell-lists spells-map language-map plugin? source subraces [:race key])])
+                     [(subrace-selection race spell-lists spells-map language-map weapon-map plugin? source subraces [:race key])])
                    (if (seq language-options) [(language-selection language-map language-options)])
+                   (if (seq weapon-proficiency-options)
+                     [(weapon-proficiency-selection-2 weapon-map weapon-proficiency-options)])
                    selections)
       :modifiers (concat
                   (if (not plugin?)
@@ -2215,31 +2239,31 @@
                       :key :none}))
      :prereq-fn (if class-kw (first-class? class-kw))})))
 
-(defn simple-weapon-selection [num class-kw]
+(defn simple-weapon-selection [num class-kw weapon-map]
   (new-starting-equipment-selection
    class-kw
    {:name "Simple Weapon"
     :tags #{:starting-equipment}
-    :options (weapon-options (weapons/simple-weapons weapons/weapons))
+    :options (weapon-options (weapons/simple-weapons (vals weapon-map)))
     :min num
     :max num
     :prereq-fn (first-class? class-kw)}))
 
-(defn weapon-option-2 [class-kw [k num]]
+(defn weapon-option-2 [class-kw weapon-map [k num]]
   (case k
     :simple (t/option-cfg
              {:name "Any Simple Weapon"
-              :selections [(simple-weapon-selection num class-kw)]})
+              :selections [(simple-weapon-selection num class-kw weapon-map)]})
     :martial (t/option-cfg
               {:name "Any Martial Weapon"
                :selections [(new-starting-equipment-selection
                              class-kw
                              {:name "Martial Weapon"
-                              :options (weapon-options (weapons/martial-weapons weapons/weapons))
+                              :options (weapon-options (weapons/martial-weapons (vals weapon-map)))
                               :min num
                               :max num})]})
     (t/option-cfg
-     {:name (-> k weapons/weapons-map :name (str (if (> num 1) (str " (" num ")") "")))
+     {:name (-> k weapon-map :name (str (if (> num 1) (str " (" num ")") "")))
       :modifiers [(modifiers/weapon k num)]})))
 
 (defn class-options [class-kw option-fn choices help]
@@ -2254,7 +2278,7 @@
                  options)}))
    choices))
 
-(defn class-weapon-options [weapon-choices class-kw]
+(defn class-weapon-options [weapon-choices class-kw weapon-map]
   (class-options class-kw (partial weapon-option-2 class-kw) weapon-choices "Select a weapon to begin your adventuring career with."))
 
 (defn armor-option [[k num]]
@@ -2311,6 +2335,7 @@
                 skill-kws)})
 
 (defn background-option [language-map
+                         weapon-map
                          {:keys [name
                                  help
                                  page
@@ -2349,7 +2374,7 @@
        :selections (concat
                     selections
                     (if (seq tool-options) [(tool-prof-selection tool-options)])
-                    (class-weapon-options weapon-choices nil)
+                    (class-weapon-options weapon-choices nil weapon-map)
                     (class-armor-options armor-choices nil)
                     (class-equipment-options equipment-choices nil)
                     (if (seq skill-kws) [(skill-selection skill-kws skill-num)])
@@ -2591,7 +2616,7 @@
                {:name "<none>"
                 :key :none}))}))
 
-(defn custom-subclass-option [spell-lists spells-map cls-key level-key subclass-selection-key spellcasting-class?]
+(defn custom-subclass-option [spell-lists spells-map weapon-map cls-key level-key subclass-selection-key spellcasting-class?]
   (let [path [:class cls-key :levels level-key subclass-selection-key]]
     (t/option-cfg
      {:name "Custom"
@@ -2610,7 +2635,7 @@
                          homebrew-tool-prof-selection
                          (homebrew-feat-selection spell-lists spells-map)
                          homebrew-armor-prof-selection
-                         homebrew-weapon-prof-selection]]
+                         (homebrew-weapon-prof-selection weapon-map)]]
                     selections
                     #_(if spellcasting-class?
                       selections
@@ -2620,6 +2645,7 @@
 (defn level-option [spell-lists
                     spells-map
                     language-map
+                    weapon-map
                     {:keys [name
                             plugin?
                             hit-die
@@ -2661,7 +2687,7 @@
                                      (map
                                       #(subclass-option spell-lists spells-map language-map (assoc cls :key kw) %)
                                       (if source (map (fn [sc] (assoc sc :source source)) subclasses) subclasses))
-                                     (custom-subclass-option spell-lists spells-map kw level-kw subclass-selection-key (some? spellcasting)))})]))
+                                     (custom-subclass-option spell-lists spells-map weapon-map kw level-kw subclass-selection-key (some? spellcasting)))})]))
                     (if (and (not plugin?) (ability-inc-set i))
                       [(ability-score-improvement-selection spell-lists spells-map name i)])
                     (if (not plugin?)
@@ -2712,6 +2738,7 @@
                     spells-map
                     plugin-subclasses-map
                     language-map
+                    weapon-map
                     {:keys [name
                             key
                             help
@@ -2767,7 +2794,7 @@
                       [(tool-prof-selection tool-options :tool-selection first-class?)])
                     (if (seq multiclass-tool-options)
                       [(tool-prof-selection multiclass-tool-options :multiclass-tool-selection (fn [c] (not= kw (first (:classes c)))))])
-                    (if weapon-choices (class-weapon-options weapon-choices kw))
+                    (if weapon-choices (class-weapon-options weapon-choices kw weapon-map))
                     (if armor-choices (class-armor-options armor-choices kw))
                     (if equipment-choices (class-equipment-options equipment-choices kw))
                     (if skill-options
@@ -2784,7 +2811,7 @@
                                       {::entity/key (-> current-values count inc level-key)})
                        :tags #{kw}
                        :options (map
-                                 (partial level-option spell-lists spells-map language-map merged-class kw spellcasting-template)
+                                 (partial level-option spell-lists spells-map language-map weapon-map merged-class kw spellcasting-template)
                                  (range 1 21))
                        :min 1
                        :sequential? true
@@ -3097,10 +3124,10 @@
               (spell-sniper-option spells-map :warlock "Warlock" ::character/cha spell-lists)
               (spell-sniper-option spells-map :wizard "Wizard" ::character/int spell-lists)]}))
 
-(defn make-feat-selections [language-map spells-map spell-lists k v]
+(defn make-feat-selections [language-map spells-map spell-lists proficiency-weapons k v]
   (if v
     (case k
-      :weapon-prof-choice [(weapon-proficiency-selection v)]
+      :weapon-prof-choice [(weapon-proficiency-selection v proficiency-weapons)]
       :language-choice [(language-selection-aux (vals language-map) v)]
       :skill-tool-choice (map
                           (fn [i]
@@ -3208,12 +3235,12 @@
        {:name name
         :description description})])))
 
-(defn feat-selections [language-map spells-map spell-lists props ability-increases]
+(defn feat-selections [language-map spells-map spell-lists proficiency-weapons props ability-increases]
   (let [without-saves (sets/intersection ability-increases
                                          (into #{} character/ability-keys))]
     (reduce
      (fn [selections [k v]]
-       (let [feat-selections (make-feat-selections language-map spells-map spell-lists k v)]
+       (let [feat-selections (make-feat-selections language-map spells-map spell-lists proficiency-weapons k v)]
          (if feat-selections
            (concat selections feat-selections)
            selections)))
@@ -3235,6 +3262,7 @@
 (defn feat-option-from-cfg [language-map
                             spells-map
                             spell-lists
+                            custom-and-standard-weapons
                             {:keys [name
                                     key
                                     icon
@@ -3252,6 +3280,7 @@
         feat-selections (feat-selections language-map
                                          spells-map
                                          spell-lists
+                                         custom-and-standard-weapons
                                          props
                                          ability-increases)]
     (t/option-cfg

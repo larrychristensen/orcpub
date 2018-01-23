@@ -35,12 +35,13 @@
     :page page
     :summary "Attack twice when taking Attack action"}))
 
-(defn barbarian-option [spells spells-map plugin-subclasses-map language-map]
+(defn barbarian-option [spells spells-map plugin-subclasses-map language-map weapon-map]
   (opt5e/class-option
    spells
    spells-map
    plugin-subclasses-map
    language-map
+   weapon-map
    {:name "Barbarian"
     :key :barbarian
     :hit-die 12
@@ -237,12 +238,13 @@
   {:name "Musical Instrument"
    :options (zipmap (map :key equipment5e/musical-instruments) (repeat 1))})
 
-(defn bard-option [spells spells-map plugin-subclasses-map language-map]
+(defn bard-option [spells spells-map plugin-subclasses-map language-map weapon-map]
   (opt5e/class-option
    spells
    spells-map
    plugin-subclasses-map
    language-map
+   weapon-map
    {:name "Bard"
     :key :bard
     :hit-die 8
@@ -382,12 +384,13 @@
    4 7
    5 9})
 
-(defn cleric-option [spells spells-map plugin-subclasses-map language-map]
+(defn cleric-option [spells spells-map plugin-subclasses-map language-map weapon-map]
   (opt5e/class-option
    spells
    spells-map
    plugin-subclasses-map
    language-map
+   weapon-map
    {:name "Cleric",
     :key :cleric
     :spellcasting {:level-factor 1
@@ -426,7 +429,7 @@
                                :selections [(opt5e/new-starting-equipment-selection
                                              :cleric
                                              {:name "Simple Weapon"
-                                              :options (opt5e/simple-weapon-options 1)
+                                              :options (opt5e/simple-weapon-options 1 (vals weapon-map))
                                               :min 1
                                               :max 1})]})]})
                  (opt5e/new-starting-equipment-selection
@@ -736,12 +739,17 @@
    :page 69
    :summary "moving through nonmagical difficult terrain costs no extra movement, pass through nonmagical plants without being slowed by them and without taking damage from them"})
 
-(defn druid-option [spell-lists spells-map plugin-subclasses-map language-map]
+(defn druid-option [spell-lists
+                    spells-map
+                    plugin-subclasses-map
+                    language-map
+                    weapon-map]
   (opt5e/class-option
    spell-lists
    spells-map
    plugin-subclasses-map
    language-map
+   weapon-map
    {:name "Druid"
     :key :druid
     :hit-die 8
@@ -805,7 +813,7 @@
                                :selections [(opt5e/new-starting-equipment-selection
                                              :druid
                                              {:name "Simple Weapon"
-                                              :options (opt5e/simple-weapon-options 1)
+                                              :options (opt5e/simple-weapon-options 1 (vals weapon-map))
                                               :min 1
                                               :max 1})]})]})
                  (opt5e/new-starting-equipment-selection
@@ -819,7 +827,7 @@
                                :selections [(opt5e/new-starting-equipment-selection
                                              :druid
                                              {:name "Simple Melee Weapon"
-                                              :options (opt5e/simple-melee-weapon-options 1)})]})]})]
+                                              :options (opt5e/simple-melee-weapon-options 1 (vals weapon-map))})]})]})]
     :traits [{:name "Druidic"
               :page 66
               :summary "You can speak Druidic and use it to leave hidden message and automatically spot messages left by others"}
@@ -1031,12 +1039,13 @@
       :max num}))
 
 
-(defn fighter-option [spells spells-map plugin-subclasses-map language-map]
+(defn fighter-option [spells spells-map plugin-subclasses-map language-map weapon-map]
   (opt5e/class-option
    spells
    spells-map
    plugin-subclasses-map
    language-map
+   weapon-map
    {:name "Fighter",
     :key :fighter
     :hit-die 10,
@@ -1104,20 +1113,20 @@
                                :selections [(opt5e/new-starting-equipment-selection
                                              :fighter
                                              {:name "Martial Weapon"
-                                              :options (opt5e/martial-weapon-options 1)})]
+                                              :options (opt5e/martial-weapon-options 1 (vals weapon-map))})]
                                :modifiers [(mod5e/armor :shield 1)]})
                              (t/option-cfg
                               {:name "Two Martial Weapons"
                                :selections [(opt5e/new-starting-equipment-selection
                                              :fighter
                                              {:name "Martial Weapon 1"
-                                              :options (opt5e/martial-weapon-options 1)
+                                              :options (opt5e/martial-weapon-options 1 (vals weapon-map))
                                               :min 1
                                               :max 1})
                                             (opt5e/new-starting-equipment-selection
                                              :fighter
                                              {:name "Martial Weapon 2"
-                                              :options (opt5e/martial-weapon-options 1)
+                                              :options (opt5e/martial-weapon-options 1 (vals weapon-map))
                                               :min 1
                                               :max 1})]})]})
                  (opt5e/new-starting-equipment-selection
@@ -1206,12 +1215,13 @@
            (not heavy?)
            (not two-handed?))))
 
-(defn monk-option [spells spells-map plugin-subclasses-map language-map]
+(defn monk-option [spells spells-map plugin-subclasses-map language-map weapon-map]
   (opt5e/class-option
    spells
    spells-map
    plugin-subclasses-map
    language-map
+   weapon-map
    (merge
     opt5e/monk-base-cfg
     {:hit-die 8
@@ -1401,12 +1411,13 @@
                                :summary "create minor elemental effect"}]}]})))
 
 
-(defn paladin-option [spells spells-map plugin-subclasses-map language-map]
+(defn paladin-option [spells spells-map plugin-subclasses-map language-map weapon-map]
   (opt5e/class-option
    spells
    spells-map
    plugin-subclasses-map
    language-map
+   weapon-map
    (merge
     opt5e/paladin-base-cfg
     {:name "Paladin"
@@ -1484,20 +1495,20 @@
                                 :selections [(opt5e/new-starting-equipment-selection
                                               :paladin
                                               {:name "Martial Weapon"
-                                               :options (opt5e/martial-weapon-options 1)})]
+                                               :options (opt5e/martial-weapon-options 1 (vals weapon-map))})]
                                 :modifiers [(mod5e/armor :shield 1)]})
                               (t/option-cfg
                                {:name "Two Martial Weapons"
                                 :selections [(opt5e/new-starting-equipment-selection
                                               :paladin
                                               {:name "Martial Weapon 1"
-                                               :options (opt5e/martial-weapon-options 1)
+                                               :options (opt5e/martial-weapon-options 1 (vals weapon-map))
                                                :min 1
                                                :max 1})
                                              (opt5e/new-starting-equipment-selection
                                               :paladin
                                               {:name "Martial Weapon 2"
-                                               :options (opt5e/martial-weapon-options 1)
+                                               :options (opt5e/martial-weapon-options 1 (vals weapon-map))
                                                :min 1
                                                :max 1})]})]})
                   (opt5e/new-starting-equipment-selection
@@ -1511,7 +1522,7 @@
                                 :selections [(opt5e/new-starting-equipment-selection
                                               :paladin
                                               {:name "Simple Melee Weapon"
-                                               :options (opt5e/simple-melee-weapon-options 1)})]})]})]
+                                               :options (opt5e/simple-melee-weapon-options 1 (vals weapon-map))})]})]})]
      :traits [{:name "Divine Smite"
                :level 2
                :page 85
@@ -1739,12 +1750,13 @@
    15 1
    17 1})
 
-(defn ranger-option [spells spells-map plugin-subclasses-map language-map]
+(defn ranger-option [spells spells-map plugin-subclasses-map language-map weapon-map]
   (opt5e/class-option
    spells
    spells-map
    plugin-subclasses-map
    language-map
+   weapon-map
    (merge
     opt5e/ranger-base-cfg
     {:hit-die 10
@@ -1795,7 +1807,7 @@
                                 :selections [(opt5e/new-starting-equipment-selection
                                               :ranger
                                               {:name "Simple Melee Weapon"
-                                               :options (opt5e/simple-melee-weapon-options 1)
+                                               :options (opt5e/simple-melee-weapon-options 1 (vals weapon-map))
                                                :min 2
                                                :max 2})]})]})
                   (favored-enemy-selection language-map 1)
@@ -1935,12 +1947,13 @@
 
 (def rogue-skills {:acrobatics true :athletics true :deception true :insight true :intimidation true :investigation true :perception true :performance true :persuasion true :sleight-of-hand true :stealth true})
 
-(defn rogue-option [spells spells-map plugin-subclasses-map language-map]
+(defn rogue-option [spells spells-map plugin-subclasses-map language-map weapon-map]
   (opt5e/class-option
    spells
    spells-map
    plugin-subclasses-map
    language-map
+   weapon-map
    {:name "Rogue",
     :key :rogue
     :hit-die 8
@@ -2162,12 +2175,13 @@
                               :page 102
                               :summary "spend X sorcery pts. (min 1) to target two creatures with a single target spell, where X is the spell level"})]})]}))
 
-(defn sorcerer-option [spells spells-map plugin-subclasses-map language-map]
+(defn sorcerer-option [spells spells-map plugin-subclasses-map language-map weapon-map]
   (opt5e/class-option
    spells
    spells-map
    plugin-subclasses-map
    language-map
+   weapon-map
    {:name "Sorcerer"
     :key :sorcerer
     :spellcasting {:level-factor 1
@@ -2194,7 +2208,7 @@
                                :selections [(opt5e/new-starting-equipment-selection
                                              :sorcerer
                                              {:name "Simple Weapon"
-                                              :options (opt5e/simple-weapon-options 1)
+                                              :options (opt5e/simple-weapon-options 1 (vals weapon-map))
                                               :min 1
                                               :max 1})]})]})]
     :levels {2 {:modifiers [(mod5e/dependent-trait
@@ -2331,12 +2345,13 @@
                                true)]})))
               (get-in sl5e/spell-lists [:wizard 3]))}))
 
-(defn wizard-option [spells spells-map plugin-subclasses-map language-map]
+(defn wizard-option [spells spells-map plugin-subclasses-map language-map weapon-map] 
   (opt5e/class-option
    spells
    spells-map
    plugin-subclasses-map
    language-map
+   weapon-map
    {:name "Wizard",
     :key :wizard
     :spellcasting {:level-factor 1
@@ -2593,13 +2608,6 @@
                    :summary "Can cast find familiar as a ritual, use your attack action to give your familiar an attack as a reaction"})]})
    (t/option-cfg
     {:name "Pact of the Blade"
-     #_:selections #_[(t/selection-cfg
-                       {:name "Pact Weapon Type"
-                        :tags #{:class}
-                        :min 0
-                        :max 1
-                        :options [(pact-weapon-option "Normal Weapon" weapon5e/weapons)
-                                  (pact-weapon-option "Magic Weapon" mi/magic-weapons)]})]
      :modifiers [(mod5e/trait-cfg
                   {:name opt5e/pact-of-the-blade-name
                    :page 107
@@ -2938,12 +2946,13 @@ long rest."})
               false
               "uses Mystic Arcanum")}))
 
-(defn warlock-option [spell-lists spells-map plugin-subclasses-map language-map invocations]
+(defn warlock-option [spell-lists spells-map plugin-subclasses-map language-map weapon-map invocations]
   (opt5e/class-option
    spell-lists
    spells-map
    plugin-subclasses-map
    language-map
+   weapon-map
    {:name "Warlock"
     :key :warlock
     :spellcasting {:cantrips-known {1 2 4 1 10 1}
@@ -2973,7 +2982,7 @@ long rest."})
                                :selections [(opt5e/new-starting-equipment-selection
                                              :warlock
                                              {:name "Simple Weapon"
-                                              :options (opt5e/simple-weapon-options 1)
+                                              :options (opt5e/simple-weapon-options 1 (vals weapon-map))
                                               :min 1
                                               :max 1})]})]})
                  (opt5e/simple-weapon-selection 1 :warlock)]

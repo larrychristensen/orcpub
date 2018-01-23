@@ -208,7 +208,7 @@
             tracker-item (assoc ::combat/tracker-item tracker-item)))}))
 
 (defn reset-character [_ _]
-  (char5e/set-class t5e/character :barbarian 0 (class5e/barbarian-option [] {} {} {})))
+  (char5e/set-class t5e/character :barbarian 0 (class5e/barbarian-option [] {} {} {} {})))
 
 (reg-event-db
  :reset-character

@@ -815,6 +815,7 @@
  :<- [::spells5e/spells-map]
  :<- [::langs5e/language-map]
  (fn [[plugin-races subraces-map spell-lists spells-map language-map]]
+   (prn "PLUGIN RACES" plugin-races)
    (vec
     (into
      (sorted-set-by compare-keys)
@@ -836,19 +837,19 @@
         tiefling-option-cfg]))))))
 
 
-(defn base-class-options [spell-lists spells-map plugin-subclasses-map language-map invocations]
-  [(classes5e/barbarian-option spell-lists spells-map plugin-subclasses-map language-map)
-   (classes5e/bard-option spell-lists spells-map plugin-subclasses-map language-map)
-   (classes5e/cleric-option spell-lists spells-map plugin-subclasses-map language-map)
-   (classes5e/druid-option spell-lists spells-map plugin-subclasses-map language-map)
-   (classes5e/fighter-option spell-lists spells-map plugin-subclasses-map language-map)
-   (classes5e/monk-option spell-lists spells-map plugin-subclasses-map language-map)
-   (classes5e/paladin-option spell-lists spells-map plugin-subclasses-map language-map)
-   (classes5e/ranger-option spell-lists spells-map plugin-subclasses-map language-map)
-   (classes5e/rogue-option spell-lists spells-map plugin-subclasses-map language-map)
-   (classes5e/sorcerer-option spell-lists spells-map plugin-subclasses-map language-map)
-   (classes5e/warlock-option spell-lists spells-map plugin-subclasses-map language-map invocations)
-   (classes5e/wizard-option spell-lists spells-map plugin-subclasses-map language-map)])
+(defn base-class-options [spell-lists spells-map plugin-subclasses-map language-map weapons-map invocations]
+  [(classes5e/barbarian-option spell-lists spells-map plugin-subclasses-map language-map weapons-map)
+   (classes5e/bard-option spell-lists spells-map plugin-subclasses-map language-map weapons-map)
+   (classes5e/cleric-option spell-lists spells-map plugin-subclasses-map language-map weapons-map)
+   (classes5e/druid-option spell-lists spells-map plugin-subclasses-map language-map weapons-map)
+   (classes5e/fighter-option spell-lists spells-map plugin-subclasses-map language-map weapons-map)
+   (classes5e/monk-option spell-lists spells-map plugin-subclasses-map language-map weapons-map)
+   (classes5e/paladin-option spell-lists spells-map plugin-subclasses-map language-map weapons-map)
+   (classes5e/ranger-option spell-lists spells-map plugin-subclasses-map language-map weapons-map)
+   (classes5e/rogue-option spell-lists spells-map plugin-subclasses-map language-map weapons-map)
+   (classes5e/sorcerer-option spell-lists spells-map plugin-subclasses-map language-map weapons-map)
+   (classes5e/warlock-option spell-lists spells-map plugin-subclasses-map language-map  weapons-map invocations)
+   (classes5e/wizard-option spell-lists spells-map plugin-subclasses-map language-map weapons-map)])
 
 (reg-sub
  ::classes5e/classes
@@ -858,7 +859,8 @@
  :<- [::langs5e/language-map]
  :<- [::classes5e/plugin-classes]
  :<- [::classes5e/invocations]
- (fn [[spell-lists spells-map plugin-subclasses-map language-map plugin-classes invocations] _]
+ :<- [::mi5e/custom-and-standard-weapons-map]
+ (fn [[spell-lists spells-map plugin-subclasses-map language-map plugin-classes invocations weapons-map] _]
    (vec
     (into
      (sorted-set-by #(compare (::t/key %1) (::t/key %2)))
@@ -871,9 +873,10 @@
            spells-map
            plugin-subclasses-map
            language-map
+           weapons-map
            plugin-class))
         plugin-classes))
-      (base-class-options spell-lists spells-map plugin-subclasses-map language-map invocations))))))
+      (base-class-options spell-lists spells-map plugin-subclasses-map language-map weapons-map invocations))))))
 
 (reg-sub
  ::classes5e/class-map
