@@ -2276,7 +2276,7 @@
    choices))
 
 (defn class-weapon-options [weapon-choices class-kw weapon-map]
-  (class-options class-kw (partial weapon-option-2 class-kw) weapon-choices "Select a weapon to begin your adventuring career with."))
+  (class-options class-kw (partial weapon-option-2 class-kw weapon-map) weapon-choices "Select a weapon to begin your adventuring career with."))
 
 (defn armor-option [[k num]]
   (t/option-cfg
