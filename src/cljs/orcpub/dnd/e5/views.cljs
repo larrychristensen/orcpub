@@ -5111,6 +5111,29 @@
          [:div.bg-light.f-s-18
           help])])))
 
+(defn cantrip-num-selector [level cantrips-known]
+  [:div.flex.m-b-5
+   [:div.w-150
+    [dropdown
+     {:items (cons
+              {:title "<select level>"}
+              (map
+               (fn [v]
+                 {:title v
+                  :value v})
+               (range 2 21)))
+      :value level
+      :on-change #(dispatch [::classes/set-class-path-prop
+                             [:spellcasting :cantrips-known]
+                             (-> cantrips-known
+                                 (dissoc level)
+                                 (assoc (js/parseInt %) 1))])}]]
+   [:button.form-button.m-l-5
+    {:on-click #(dispatch [::classes/set-class-path-prop
+                           [:spellcasting :cantrips-known]
+                           (dissoc cantrips-known level)])}
+    "remove"]])
+
 (defn option-level-selections [{:keys [level-selections]}
                               add-selection-event
                               edit-selection-type-event
@@ -5150,6 +5173,8 @@
         classes @(subscribe [::classes/classes])
         class-map @(subscribe [::classes/class-map])
         mobile? @(subscribe [:mobile?])]
+    (prn "CLASS")
+    (cljs.pprint/pprint class)
     [:div.p-20.main-text-color
      [:div.flex.flex-wrap
       [:div.m-b-20.flex-grow-1
@@ -5283,32 +5308,74 @@
                                                                        3 classes/third-caster-spells-known-schedule)]))}]])]
         (if (and spellcaster?
                  (not (get-in class [:spellcasting :spell-list-kw])))
-          [:div
-           [:div.f-s-18.f-w-b "Select spells from which this class can choose"]
-           [:div
-            (doall
-             (map
-              (fn [level]
-                ^{:key level}
-                [:div.m-t-10
-                 [:div.f-s-16.f-w-b.m-b-10 (str "Level " level)]
-                 [:div.flex.flex-wrap
-                  (doall
+          (let [cantrips? (get-in class [:spellcasting :cantrips?])]
+            [:div
+             [:div.f-s-18.f-w-b "Cantrips"]
+             [:div.flex.flex-wrap.m-b-20
+              [:div
+               [labeled-dropdown
+                "Does this class gain cantrips?"
+                {:items [{:title "No"
+                          :value false}
+                         {:title "Yes"
+                          :value true}]
+                 :value cantrips?
+                 :on-change #(dispatch [::classes/set-class-path-prop
+                                        [:spellcasting :cantrips?]
+                                        (= % "true")])}]]
+              (if cantrips?
+                [:div.m-l-5
+                 [labeled-dropdown
+                  "How many cantrips does this class know at first level?"
+                  {:items (map
+                           (fn [v]
+                             {:title v
+                              :value v})
+                           (range 0 6))
+                   :value (get-in class [:spellcasting :cantrips-known 1])
+                   :on-change #(dispatch [::classes/set-class-path-prop
+                                          [:spellcasting :cantrips-known 1]
+                                          (js/parseInt %)])}]])]
+             (if cantrips?
+               [:div.m-b-20
+                [:div.f-s-18.f-w-b.m-b-5 "At what other levels does this class gain cantrips?"]
+                (let [cantrips-known (get-in class [:spellcasting :cantrips-known])]
+                  (prn "CANTRIPS KNOWN" cantrips-known)
+                  [:div
                    (map
-                    (fn [{:keys [name key]}]
-                      ^{:key key}
-                      [:div.m-r-20.m-b-10
-                       [comps/labeled-checkbox
-                        name
-                        (get-in class [:spellcasting :spell-list level key])
-                        false
-                        #(dispatch [::classes/toggle-class-spell-list level key])]])
-                    @(subscribe [::spells/spells-for-level level])))]])
-              (range 1
-                     (inc (case (get-in class [:spellcasting :level-factor])
-                        2 5
-                        3 4
-                        9)))))]])])
+                    (fn [[level]]
+                      (prn "LEVEL" level)
+                      ^{:key level}
+                      [cantrip-num-selector level cantrips-known])
+                    (sort-by first (dissoc cantrips-known 1)))
+                   [cantrip-num-selector nil cantrips-known]])])
+             [:div.f-s-18.f-w-b "Select spells from which this class can choose"]
+             [:div
+              (doall
+               (map
+                (fn [level]
+                  ^{:key level}
+                  [:div.m-t-10
+                   [:div.f-s-16.f-w-b.m-b-10 (if (zero? level)
+                                               "Cantrips"
+                                               (str "Level " level))]
+                   [:div.flex.flex-wrap
+                    (doall
+                     (map
+                      (fn [{:keys [name key]}]
+                        ^{:key key}
+                        [:div.m-r-20.m-b-10
+                         [comps/labeled-checkbox
+                          name
+                          (get-in class [:spellcasting :spell-list level key])
+                          false
+                          #(dispatch [::classes/toggle-class-spell-list level key])]])
+                      @(subscribe [::spells/spells-for-level level])))]])
+                (range (if cantrips? 0 1)
+                       (inc (case (get-in class [:spellcasting :level-factor])
+                              2 5
+                              3 4
+                              9)))))]]))])
      [:div.m-b-10
       [option-skill-proficiency-choice
        class
