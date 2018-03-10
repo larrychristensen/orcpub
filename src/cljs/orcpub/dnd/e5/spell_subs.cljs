@@ -42,7 +42,25 @@
  ::e5/plugin-vals
  :<- [::e5/plugins]
  (fn [plugins]
-   (vals plugins)))
+   (let [result (map
+                 (fn [p]
+                   (into
+                    {}
+                    (map
+                     (fn [[type-k type-m]]
+                       [type-k
+                        (if (coll? type-m)
+                          (into
+                           {}
+                           (remove
+                            (fn [[k {:keys [disabled?]}]]
+                              disabled?)
+                            type-m))
+                          type-m)])
+                     p)))
+                 (filter (comp not :disabled?)
+                         (vals plugins)))]
+     result)))
 
 (reg-sub
  ::bg5e/plugin-backgrounds
