@@ -521,7 +521,6 @@
                          (fn [{:keys [class-level hit-die]}] (str class-level "d" hit-die))
                          (vals levels)))
         speed (speed built-char)]
-    (prn "SPEED" speed)
     (merge
      {:race (str race (if subrace (str "/" subrace)))
       :alignment (char5e/alignment built-char)
