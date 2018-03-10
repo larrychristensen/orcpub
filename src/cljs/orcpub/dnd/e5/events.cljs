@@ -3156,7 +3156,15 @@
  (fn [{:keys [db]} [_ name]]
    {:dispatch [::e5/set-plugins (-> db :plugins (dissoc name))]}))
 
+(reg-event-fx
+ ::e5/toggle-plugin
+ (fn [{:keys [db]} [_ name]]
+   {:dispatch [::e5/set-plugins (-> db :plugins (update-in [name :disabled?] not))]}))
 
+(reg-event-fx
+ ::e5/toggle-plugin-item
+ (fn [{:keys [db]} [_ plugin-name type-key key]]
+   {:dispatch [::e5/set-plugins (-> db :plugins (update-in [plugin-name type-key key :disabled?] not))]}))
 
 (reg-event-fx
  ::e5/import-plugin
@@ -3182,9 +3190,9 @@
          (prn "PLUGIN" plugin)
          (prn "INVALID PLUGINS FILE"
               (spec/explain-data ::e5/plugins plugin))
-           (prn "INVALID PLUGIN FILE"
-                (spec/explain-data ::e5/plugin plugin))
-           {:dispatch [:show-error-message "Invalid .orcbrew file"]})))))
+         (prn "INVALID PLUGIN FILE"
+              (spec/explain-data ::e5/plugin plugin))
+         {:dispatch [:show-error-message "Invalid .orcbrew file"]})))))
 
 (reg-event-db
  ::spells/set-spell
