@@ -519,7 +519,9 @@
                         " / "
                         (map
                          (fn [{:keys [class-level hit-die]}] (str class-level "d" hit-die))
-                         (vals levels)))]
+                         (vals levels)))
+        speed (speed built-char)]
+    (prn "SPEED" speed)
     (merge
      {:race (str race (if subrace (str "/" subrace)))
       :alignment (char5e/alignment built-char)
@@ -529,7 +531,7 @@
       :ac current-ac
       :hd-total total-hit-dice
       :initiative (common/bonus-str (es/entity-val built-char :initiative))
-      :speed (speed built-char)
+      :speed speed
       :hp-max (es/entity-val built-char :max-hit-points)
       :passive (es/entity-val built-char :passive-perception)
       :other-profs (other-profs-field built-char)

@@ -507,6 +507,7 @@
         output (ByteArrayOutputStream.)
         user-agent (get-in req [:headers "user-agent"])
         chrome? (re-matches #".*Chrome.*" user-agent)]
+    (prn "SPEED" (:speed fields) (:ac fields))
     (with-open [doc (PDDocument/load input)]
       (pdf/write-fields! doc fields (not chrome?) font-sizes)
       (if (and print-spell-cards? (seq spells-known))
