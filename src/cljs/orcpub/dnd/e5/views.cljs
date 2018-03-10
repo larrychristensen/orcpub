@@ -5173,8 +5173,6 @@
         classes @(subscribe [::classes/classes])
         class-map @(subscribe [::classes/class-map])
         mobile? @(subscribe [:mobile?])]
-    (prn "CLASS")
-    (cljs.pprint/pprint class)
     [:div.p-20.main-text-color
      [:div.flex.flex-wrap
       [:div.m-b-20.flex-grow-1
@@ -5340,11 +5338,9 @@
                [:div.m-b-20
                 [:div.f-s-18.f-w-b.m-b-5 "At what other levels does this class gain cantrips?"]
                 (let [cantrips-known (get-in class [:spellcasting :cantrips-known])]
-                  (prn "CANTRIPS KNOWN" cantrips-known)
                   [:div
                    (map
                     (fn [[level]]
-                      (prn "LEVEL" level)
                       ^{:key level}
                       [cantrip-num-selector level cantrips-known])
                     (sort-by first (dissoc cantrips-known 1)))
@@ -6822,9 +6818,9 @@
          (dispatch [::e5/import-plugin nm text]))))
     (.readAsText reader file)))
 
-(defn my-content-type [source-name type-name type-key icon add-event edit-event delete-event & [plural]]
+(defn my-content-type []
   (let [expanded? (r/atom false)]
-    (fn [plugin]
+    (fn [source-name plugin type-name type-key icon add-event edit-event delete-event plural]
       (let [items (type-key plugin)]
         [:div.pointer.item-list-item
          [:div.flex.justify-cont-s-b.align-items-c.p-10
@@ -6856,11 +6852,17 @@
               (str "add " type-name)]]
             [:div
              (doall
-              (map
-               (fn [[key {:keys [name] :as item}]]
+              (map-indexed
+               (fn [i [key {:keys [name disabled?] :as item}]]
                  ^{:key key}
                  [:div.p-t-10.p-b-10.f-w-b.flex.justify-cont-s-b.align-items-c
-                  [:span name]
+                  [:div.m-r-10.flex.align-items-c.flex-column
+                   {:on-click (make-stop-prop-event-handler ::e5/toggle-plugin-item source-name type-key key)}
+                   [:div.f-s-10 "enabled?"]
+                   [comps/checkbox
+                    (not (get-in plugin [type-key key :disabled?]))
+                    false]]
+                  [:span.flex-grow-1 name]
                   [:div
                    [:button.form-button.m-l-5
                     {:on-click (make-event-handler edit-event item)}
@@ -6870,120 +6872,143 @@
                     "delete"]]])
                items))]])]))))
 
-(defn my-selections [name]
-  (my-content-type name
-                   "selection"
-                   ::e5/selections
-                   "checklist"
-                   ::selections/new-selection
-                   ::selections/edit-selection
-                   ::selections/delete-selection))
+(defn my-selections [name plugin]
+  [my-content-type
+   plugin
+   name
+   "selection"
+   ::e5/selections
+   "checklist"
+   ::selections/new-selection
+   ::selections/edit-selection
+   ::selections/delete-selection])
 
-(defn my-spells [name]
-  (my-content-type name
-                   "spell"
-                   ::e5/spells
-                   "spell-book"
-                   ::spells/new-spell
-                   ::spells/edit-spell
-                   ::spells/delete-spell))
+(defn my-spells [name plugin]
+  [my-content-type
+   name
+   plugin
+   "spell"
+   ::e5/spells
+   "spell-book"
+   ::spells/new-spell
+   ::spells/edit-spell
+   ::spells/delete-spell])
 
-(defn my-monsters [name]
-  (my-content-type name
-                   "monster"
-                   ::e5/monsters
-                   "hydra"
-                   ::monsters/new-monster
-                   ::monsters/edit-monster
-                   ::monsters/delete-monster))
+(defn my-monsters [name plugin]
+  [my-content-type
+   name
+   plugin
+   "monster"
+   ::e5/monsters
+   "hydra"
+   ::monsters/new-monster
+   ::monsters/edit-monster
+   ::monsters/delete-monster])
 
-(defn my-encounters [name]
-  (my-content-type name
-                   "encounter"
-                   ::e5/encounters
-                   "hydra"
-                   ::encounters/new-encounter
-                   ::encounters/edit-encounter
-                   ::encounters/delete-encounter))
+(defn my-encounters [name plugin]
+  [my-content-type
+   name
+   plugin
+   "encounter"
+   ::e5/encounters
+   "hydra"
+   ::encounters/new-encounter
+   ::encounters/edit-encounter
+   ::encounters/delete-encounter])
 
-(defn my-backgrounds [name]
-  (my-content-type name
-                   "background"
-                   ::e5/backgrounds
-                   "ages"
-                   ::bg/new-background
-                   ::bg/edit-background
-                   ::bg/delete-background))
+(defn my-backgrounds [name plugin]
+  [my-content-type
+   name
+   plugin
+   "background"
+   ::e5/backgrounds
+   "ages"
+   ::bg/new-background
+   ::bg/edit-background
+   ::bg/delete-background])
 
-(defn my-races [name]
-  (my-content-type name
-                   "race"
-                   ::e5/races
-                   "woman-elf-face"
-                   ::races/new-race
-                   ::races/edit-race
-                   ::races/delete-race))
+(defn my-races [name plugin]
+  [my-content-type
+   name
+   plugin
+   "race"
+   ::e5/races
+   "woman-elf-face"
+   ::races/new-race
+   ::races/edit-race
+   ::races/delete-race])
 
-(defn my-subraces [name]
-  (my-content-type name
-                   "subrace"
-                   ::e5/subraces
-                   ["woman-elf-face"
-                    "woman-elf-face"]
-                   ::races/new-subrace
-                   ::races/edit-subrace
-                   ::races/delete-subrace))
-
-
-(defn my-classes [name]
-  (my-content-type name
-                   "class"
-                   ::e5/classes
-                   "mounted-knight"
-                   ::classes/new-class
-                   ::classes/edit-class
-                   ::classes/delete-class
-                   "classes"))
+(defn my-subraces [name plugin]
+  [my-content-type
+   name
+   plugin
+   "subrace"
+   ::e5/subraces
+   ["woman-elf-face"
+    "woman-elf-face"]
+   ::races/new-subrace
+   ::races/edit-subrace
+   ::races/delete-subrace])
 
 
-(defn my-subclasses [name]
-  (my-content-type name
-                   "subclass"
-                   ::e5/subclasses
-                   ["mounted-knight"
-                    "mounted-knight"]
-                   ::classes/new-subclass
-                   ::classes/edit-subclass
-                   ::classes/delete-subclass
-                   "subclasses"))
+(defn my-classes [name plugin]
+  [my-content-type
+   name
+   plugin
+   "class"
+   ::e5/classes
+   "mounted-knight"
+   ::classes/new-class
+   ::classes/edit-class
+   ::classes/delete-class
+   "classes"])
 
-(defn my-invocations [name]
-  (my-content-type name
-                   "eldritch invocation"
-                   ::e5/invocations
-                   ["mounted-knight"
-                    "mounted-knight"]
-                   ::classes/new-invocation
-                   ::classes/edit-invocation
-                   ::classes/delete-invocation))
 
-(defn my-feats [name]
-  (my-content-type name
-                   "feat"
-                   ::e5/feats
-                   "vitruvian-man"
-                   ::feats/new-feat
-                   ::feats/edit-feat
-                   ::feats/delete-feat))
+(defn my-subclasses [name plugin]
+  [my-content-type
+   name
+   plugin
+   "subclass"
+   ::e5/subclasses
+   ["mounted-knight"
+    "mounted-knight"]
+   ::classes/new-subclass
+   ::classes/edit-subclass
+   ::classes/delete-subclass
+   "subclasses"])
 
-(defn my-languages [name]
-  (my-content-type name
-                   "language"
-                   ::e5/languages
-                   "vitruvian-man"
-                   ::langs/new-language
-                   ::langs/edit-language
-                   ::langs/delete-language))
+(defn my-invocations [name plugin]
+  [my-content-type
+   name
+   plugin
+   "eldritch invocation"
+   ::e5/invocations
+   "warlock-eye"
+   ::classes/new-invocation
+   ::classes/edit-invocation
+   ::classes/delete-invocation])
+
+(defn my-feats [name plugin]
+  [my-content-type
+   name
+   plugin
+   "feat"
+   ::e5/feats
+   "vitruvian-man"
+   ::feats/new-feat
+   ::feats/edit-feat
+   ::feats/delete-feat])
+
+(defn my-languages [name plugin]
+  [my-content-type
+   name
+   plugin
+   "language"
+   ::e5/languages
+   "vitruvian-man"
+   ::langs/new-language
+   ::langs/edit-language
+   ::langs/delete-language])
 
 (defn my-content-item []
   (let [expanded? (r/atom false)]
@@ -6991,7 +7016,13 @@
       [:div.item-list-item
        [:div.p-20.pointer.flex.justify-cont-s-b.align-items-c.main-text-color
         {:on-click #(swap! expanded? not)}
-        [:span.f-s-24 name]
+        [:div.m-r-10.flex.align-items-c.flex-column
+         {:on-click (make-stop-prop-event-handler ::e5/toggle-plugin name)}
+         [:div.f-s-10 "enabled?"]
+         [comps/checkbox
+          (not (get plugin :disabled?))
+          false]]
+        [:span.f-s-24.flex-grow-1 name]
         [:div.orange
          [:i.fa.m-r-5
           {:class-name (if @expanded? "fa-caret-up" "fa-caret-down")}]
@@ -7006,18 +7037,18 @@
             {:on-click (make-event-handler ::e5/delete-plugin name)}
             "delete"]]
           [:div.item-list
-           [(my-spells name) plugin]
-           [(my-monsters name) plugin]
-           [(my-encounters name) plugin]
-           [(my-backgrounds name) plugin]
-           [(my-races name) plugin]
-           [(my-subraces name) plugin]
-           [(my-classes name) plugin]
-           [(my-subclasses name) plugin]
-           [(my-invocations name) plugin]
-           [(my-feats name) plugin]
-           [(my-languages name) plugin]
-           [(my-selections name) plugin]]])])))
+           [my-spells name plugin]
+           [my-monsters name plugin]
+           [my-encounters name plugin]
+           [my-backgrounds name plugin]
+           [my-races name plugin]
+           [my-subraces name plugin]
+           [my-classes name plugin]
+           [my-subclasses name plugin]
+           [my-invocations name plugin]
+           [my-feats name plugin]
+           [my-languages name plugin]
+           [my-selections name plugin]]])])))
 
 (defn my-content []
   [:div.main-text-color
@@ -7026,12 +7057,13 @@
      {:on-click (make-event-handler ::e5/export-all-plugins)}
      "Export All"]]
    [:div.item-list
-    (doall
-     (map
-      (fn [[name plugin]]
-        ^{:key name}
-        [my-content-item name plugin])
-      @(subscribe [::e5/plugins])))]])
+    (let [plugins @(subscribe [::e5/plugins])]
+      (doall
+       (map
+        (fn [[name plugin]]
+          ^{:key name}
+          [my-content-item name plugin])
+        plugins)))]])
 
 (defn my-content-page []
   [content-page
