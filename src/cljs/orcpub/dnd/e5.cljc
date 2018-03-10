@@ -8,9 +8,10 @@
 (spec/def ::spells (spec/map-of common/keyword-starts-with-letter?
                                 ::spells/homebrew-spell))
 
-(spec/def ::content-keyword (fn [v] (and (qualified-keyword? v)
-                                         (common/keyword-starts-with-letter? v)
-                                         (= (namespace v) "orcpub.dnd.e5"))))
+(spec/def ::content-keyword (fn [v] (or (= v :disabled?)
+                                        (and (qualified-keyword? v)
+                                             (common/keyword-starts-with-letter? v)
+                                             (= (namespace v) "orcpub.dnd.e5")))))
 
 (spec/def ::option-pack string?)
 
@@ -20,9 +21,11 @@
                                         ::homebrew-item))
 
 (spec/def ::plugin (spec/map-of ::content-keyword
-                                ::homebrew-items))
+                                (spec/or :items ::homebrew-items
+                                         :bool boolean?)))
 
 (spec/def ::plugins (spec/map-of string? ::plugin))
+
 
 (defn merge-plugins [plugin-1 plugin-2]
   (merge-with
