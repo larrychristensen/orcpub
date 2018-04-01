@@ -26,3 +26,8 @@ This is the code for OrcPub2.com. Many, many people have expressed interest in h
 **Q: I'm a newb Clojure developer looking to get my feet wet, where to start?**
 
 **A:** *First I would start by getting the fundamentals down at http://www.4clojure.com/, then maybe getting your bearing by checking out my more gentle (and clean) introduction to the OrcPub stack: https://github.com/larrychristensen/messenjer, which I walkthrough on https://lambdastew.com. From there you might add some unit tests or pick up an open issue on the "Issues" tab (and add unit tests with it).*
+
+
+**Q: Your DSL for defining character options is pretty cool, I can build any type of character option out there. How about I add a bunch on content from the Player's Handbook?**
+
+**A:** *I love your enthusiasm, but we cannot accept pull requests containing copyrighted content. We do, however, encourage you to fork OrcPub and create your own private version with the full content options*
