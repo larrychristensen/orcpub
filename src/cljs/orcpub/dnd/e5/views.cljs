@@ -387,6 +387,10 @@
 (defn route-to-my-content-page []
   (dispatch [:route routes/dnd-e5-my-content-route]))
 
+(def logo [:img.orcpub-logo.h-32.w-120.pointer
+           {:src "/image/orcpub-logo.svg"
+            :on-click route-to-default-route}])
+
 (defn app-header []
   (let [device-type @(subscribe [:device-type])
         mobile? (= :mobile device-type)
@@ -396,9 +400,7 @@
       [:div.content
        [:div.flex.align-items-c.h-100-p
         [:div.flex.justify-cont-s-b.align-items-c.w-100-p.p-l-20.p-r-20.h-100-p
-         [:img.orcpub-logo.h-32.w-120.pointer
-          {:src "/image/orcpub-logo.svg"
-           :on-click route-to-default-route}]
+         logo
          (let [search-text @(subscribe [:search-text])
                search-text? @(subscribe [:search-text?])]
            [:div
@@ -959,13 +961,16 @@
 
 (def confirm-handler (memoize confirm-fn))
 
-(defn header [title button-cfgs]
+(defn header [title button-cfgs & {:keys [frame?]}]
   (let [device-type @(subscribe [:device-type])]
     [:div.w-100-p
      [:div.flex.align-items-c.justify-cont-s-b.flex-wrap
-      [:h1.f-s-36.f-w-b.m-t-5.m-l-10
-       {:class-name (if (not= :mobile device-type) "m-t-21 m-b-20")}
-       title]
+      [:div.flex
+       [:h1.f-s-36.f-w-b.m-t-5.m-l-10
+        {:class-name (if (not= :mobile device-type) "m-t-21 m-b-20")}
+        title]
+       (if frame?
+         logo)]
       [:div.flex.align-items-c.justify-cont-end.flex-wrap.m-r-10.m-l-10
        (map-indexed
         (fn [i {:keys [title icon on-click style class-name] :as cfg}]
@@ -1468,35 +1473,38 @@
       [:div.flex-grow-1
        [search-results]]]]))
 
-(defn content-page [title button-cfgs content & {:keys [hide-header-message?]}]
+(defn content-page [title button-cfgs content & {:keys [hide-header-message? frame?]}]
   (let [srd-message-closed? @(subscribe [:srd-message-closed?])
         orcacle-open? @(subscribe [:orcacle-open?])
         theme @(subscribe [:theme])
         mobile? @(subscribe [:mobile?])]
     [:div.app
      {:class-name theme
-      :on-scroll (fn [e]
-                   (if (not orcacle-open?)
-                     (let [app-header (js/document.getElementById "app-header")
-                           header-height (.-offsetHeight app-header)
-                           scroll-top (.-scrollTop (.-target e))
-                           sticky-header (js/document.getElementById "sticky-header")
-                           app-main (js/document.getElementById "app-main")
-                           scrollbar-width (- js/window.innerWidth (.-offsetWidth app-main))
-                           header-container (js/document.getElementById "header-container")]
-                       (set! (.-paddingRight (.-style header-container)) (str scrollbar-width "px"))
-                       (if (>= scroll-top header-height)
-                         (set! (.-display (.-style sticky-header)) "block")
-                         (set! (.-display (.-style sticky-header)) "none")))))}
-     [download-form]
+      :on-scroll (if (not frame?)
+                   (fn [e]
+                     (if (not orcacle-open?)
+                       (let [app-header (js/document.getElementById "app-header")
+                             header-height (.-offsetHeight app-header)
+                             scroll-top (.-scrollTop (.-target e))
+                             sticky-header (js/document.getElementById "sticky-header")
+                             app-main (js/document.getElementById "app-main")
+                             scrollbar-width (- js/window.innerWidth (.-offsetWidth app-main))
+                             header-container (js/document.getElementById "header-container")]
+                         (set! (.-paddingRight (.-style header-container)) (str scrollbar-width "px"))
+                         (if (>= scroll-top header-height)
+                           (set! (.-display (.-style sticky-header)) "block")
+                           (set! (.-display (.-style sticky-header)) "none"))))))}
+     (if (not frame?)
+       [download-form])
      (if @(subscribe [:loading])
        [:div {:style loading-style}
         [:div.flex.justify-cont-s-a.align-items-c.h-100-p
          [:img.h-200.w-200.m-t-200 {:src "/image/spiral.gif"}]]])
-     [app-header]
+     (if (not frame?)
+       [app-header])
      (if orcacle-open?
        [orcacle])
-     (let [hdr [header title button-cfgs]]
+     (let [hdr [header title button-cfgs :frame? frame?]]
        [:div
         [:div#sticky-header.sticky-header.w-100-p.posn-fixed
          [:div.flex.justify-cont-c
@@ -1508,28 +1516,29 @@
          (if (and (not srd-message-closed?)
                   (not hide-header-message?))
            [:div
-            [:div.content.bg-lighter.p-10.flex
-             [:div.flex-grow-1
-              [:div "Due to licensing issues, we were forced to remove all non-SRD content, if you have questions about what is and is not SRD content please see the " srd-link ". If you would like to see the non-SRD content added back to OrcPub please sign our " [:a.orange {:href "https://www.change.org/p/wizards-of-the-coast-wizards-of-the-coast-please-grant-orc-pub-licensing-rights-to-your-content" :target "_blank"}
-                                                                                                                                                                                                                                                                         "petition here at change.org"]
-               "."]
-              (if (not mobile?)
-                [:div.m-t-10 "You can add content from other sources using the builders in the 'My Content' menu. Here are some compatible sources: "
-                 [:div.flex.flex-wrap.m-t-10
-                  [:div.m-l-5 phb-link]
-                  [:div.m-l-5 dmg-link]
-                  [:div.m-l-5 mm-link]
-                  [:div.m-l-5 xge-link]
-                  [:div.m-l-5 scag-link]
-                  [:div.m-l-5 vgm-link]
-                  [:div.m-l-5 toa-link]
-                  [:div.m-l-5 yp-link]
-                  [:div.m-l-5 cos-link]
-                  [:div.m-l-5 skt-link]
-                  [:div.m-l-5 oota-link]
-                  [:div.m-l-5 pota-link]]])]
-             [:i.fa.fa-times.p-10.pointer
-              {:on-click #(dispatch [:close-srd-message])}]]])]
+            (if (not frame?)
+              [:div.content.bg-lighter.p-10.flex
+               [:div.flex-grow-1
+                [:div "Due to licensing issues, we were forced to remove all non-SRD content, if you have questions about what is and is not SRD content please see the " srd-link ". If you would like to see the non-SRD content added back to OrcPub please sign our " [:a.orange {:href "https://www.change.org/p/wizards-of-the-coast-wizards-of-the-coast-please-grant-orc-pub-licensing-rights-to-your-content" :target "_blank"}
+                                                                                                                                                                                                                                                                           "petition here at change.org"]
+                 "."]
+                (if (not mobile?)
+                  [:div.m-t-10 "You can add content from other sources using the builders in the 'My Content' menu. Here are some compatible sources: "
+                   [:div.flex.flex-wrap.m-t-10
+                    [:div.m-l-5 phb-link]
+                    [:div.m-l-5 dmg-link]
+                    [:div.m-l-5 mm-link]
+                    [:div.m-l-5 xge-link]
+                    [:div.m-l-5 scag-link]
+                    [:div.m-l-5 vgm-link]
+                    [:div.m-l-5 toa-link]
+                    [:div.m-l-5 yp-link]
+                    [:div.m-l-5 cos-link]
+                    [:div.m-l-5 skt-link]
+                    [:div.m-l-5 oota-link]
+                    [:div.m-l-5 pota-link]]])]
+               [:i.fa.fa-times.p-10.pointer
+                {:on-click #(dispatch [:close-srd-message])}]])])]
         [:div#app-main.container
          [:div.content.w-100-p content]]
         [:div.main-text-color.flex.justify-cont-c
@@ -3421,35 +3430,51 @@
     [::char/show-options
      [print-options id built-char]]))
 
-(defn character-page [{:keys [id] :as arg}]
-  (let [id (js/parseInt id)
-        {:keys [::entity/owner] :as character} @(subscribe [::char/character id])
-        built-template (subs/built-template
-                        @(subscribe [::char/template])
-                        (subs/selected-plugin-options
-                         character))
-        built-character (subs/built-character character built-template)
-        device-type @(subscribe [:device-type])
-        username @(subscribe [:username])]
-    [content-page
-     "Character Page"
-     (remove
-      nil?
-      [[share-link id]
-       [character-page-fb-button id]
-       (if (and username
-                owner
-                (= owner username))
-         {:title "Edit"
-          :icon "pencil"
-          :on-click (make-event-handler :edit-character character)})
-       {:title "Print"
-        :icon "print"
-        :on-click (make-print-handler id built-character)}
-       (if (and username owner (not= owner username))
-         [add-to-party-component id])])
-     [:div.p-10.main-text-color
-      [character-display id true (if (= :mobile device-type) 1 2)]]]))
+(defn character-page []
+  (let [expanded? (r/atom false)]
+    (fn [{:keys [id] :as arg}]
+      (let [id (js/parseInt id)
+            frame? (= "true" (get-in arg [:query "frame"]))
+            _ (prn "FRAME?" frame?)
+            {:keys [::entity/owner] :as character} @(subscribe [::char/character id])
+            built-template (subs/built-template
+                            @(subscribe [::char/template])
+                            (subs/selected-plugin-options
+                             character))
+            built-character (subs/built-character character built-template)
+            device-type @(subscribe [:device-type])
+            username @(subscribe [:username])]
+        [content-page
+         (if (not frame?)
+           "Character Page")
+         (remove
+          nil?
+          [[share-link id]
+           [character-page-fb-button id]
+           [:div.m-l-5.hover-shadow.pointer
+            {:on-click #(swap! expanded? not)}
+            [:img.h-32 {:src "/image/world-anvil.jpeg"}]]
+           (if (and username
+                    owner
+                    (= owner username))
+             {:title "Edit"
+              :icon "pencil"
+              :on-click (make-event-handler :edit-character character)})
+           {:title "Print"
+            :icon "print"
+            :on-click (make-print-handler id built-character)}
+           (if (and username owner (not= owner username))
+             [add-to-party-component id])])
+         [:div.p-10.main-text-color
+          (if @expanded?
+            (let [url js/window.location.href]
+              [:div.p-10.flex.justify-cont-end
+               [:input.input.w-500.bg-white.black
+                {:value (str url
+                             (if (not (s/ends-with? url "?frame=true"))
+                               "?frame=true"))}]]))
+          [character-display id true (if (= :mobile device-type) 1 2)]]
+         :frame? frame?]))))
 
 (defn monster-page [{:keys [key] :as arg}]
   (let [monster @(subscribe [::monsters/monster (keyword key)])]
