@@ -90,10 +90,20 @@
                                        #(handle-url-change %))
                    (.setEnabled true)))
 
+(defn query-map [query-str]
+  (into
+   {}
+   (map
+    (fn [[_ _ k v]]
+      [k v])
+    (re-seq #"((\w+)=(\w+))+" query-str))))
+
 (defn main-view []
   (let [{:keys [handler route-params] :as route} @(subscribe [:route])
-        view (pages (or handler route))]
-    [view route-params]))
+        view (pages (or handler route))
+        query-string js/window.location.search
+        query-map (query-map query-string)]
+    [view (assoc route-params :query query-map)]))
 
 @(subscribe [:user false])
 

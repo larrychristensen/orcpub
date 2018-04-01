@@ -965,7 +965,7 @@
                                             ". "
                                             description)
                           :image-url image-url}
-                         {})))
+                         {"X-Frame-Options" "ALLOW-FROM https://www.worldanvil.com/"})))
 
 (def header-style
   {:style "color:#2c3445"})
