@@ -27,6 +27,7 @@
                  [clj-time "0.14.0"]
                  [clj-http "3.6.1"]
                  [com.yetanalytics/ring-etag-middleware "0.1.1"]
+                 [org.clojure/test.check "0.9.0"]
                  
                  [org.clojure/core.match "0.3.0-alpha5"]
                  [re-frame "0.9.0"]
