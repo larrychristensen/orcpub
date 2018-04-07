@@ -2,6 +2,39 @@
 
 This is the code for OrcPub2.com. Many, many people have expressed interest in helping out or checking out the code, so I have decided to make that possible by open sourcing it.
 
+## Getting Started with Development
+
+- Install Java: http://openjdk.java.net/ or http://www.oracle.com/technetwork/java/javase/downloads/jdk8-downloads-2133151.html
+- Install leiningen: https://leiningen.org/
+- run `lein figwheel`
+that should get a basic dev environment going.
+
+if you run into this error:
+```
+Tried to use insecure HTTP repository without TLS.
+This is almost certainly a mistake; however in rare cases where it's
+intentional please see `lein help faq` for details.
+```
+
+Adding this will get things running, but is not recommended:
+
+```clojure
+(require 'cemerick.pomegranate.aether)
+(cemerick.pomegranate.aether/register-wagon-factory!
+ "http" #(org.apache.maven.wagon.providers.http.HttpWagon.))
+```
+
+after that, I had to remove the
+
+```clojure
+["my.datomic.com" {:url "https://my.datomic.com/repo"
+:username [:gpg :env]
+:password [:gpg :env]}]]
+                    ```
+and replace `[com.datomic/datomic-pro "0.9.5561"]` with `[com.datomic/datomic-free "0.9.5697"]`
+
+then `lein figwheel` will start a local webserver.
+
 ## FAQs
 **Q: Ummmmm, why is your code so ugly, I thought Clojure code was supposed to be pretty.** 
 
