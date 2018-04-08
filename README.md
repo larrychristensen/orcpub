@@ -20,7 +20,8 @@ get a Browser Connected REPL. An easy way to try it is:
 
 and you should see an alert in the browser window.
 
-To start the back-end server you will need to open a REPL either from the command line:
+Before you start up the back-end server, you will need to [set up Datomic locally](https://docs.datomic.com/on-prem/dev-setup.html). You will then need to transact the schema. First start a REPL:
+
 ```
 lein repl
 ```
@@ -30,9 +31,15 @@ C-c M-j
 ```
 I haven't used [Cursive](https://cursive-ide.com/), but I hear it is really nice and I'm sure there's an easy way to start a REPL within it.
     
-Once you have a REPL you can run this from within it:
+Once you have a REPL you can run this from within it to create the database, transact the database schema, and start the server:
 
 ```clojure
+orcpub.server=> (require '[orcpub.db.schema :as schema]
+                            '[datomic.api :as d])
+orcpub.server=> (def db-uri "datomic:dev://localhost:4334/orcpub")
+orcpub.server=> (d/create-database db-uri)
+orcpub.server=> (def conn (d/conn db-uri))
+orcpub.server=> (d/transact conn schema/all-schemas)
 orcpub.server=> (def system-map (com.stuartsierra.component/start (orcpub.system/system :dev)))
 ```
     
