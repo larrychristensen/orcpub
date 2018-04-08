@@ -2,6 +2,78 @@
 
 This is the code for OrcPub2.com. Many, many people have expressed interest in helping out or checking out the code, so I have decided to make that possible by open sourcing it.
 
+## Getting Started with Development
+
+- Install Java: http://openjdk.java.net/ or http://www.oracle.com/technetwork/java/javase/downloads/jdk8-downloads-2133151.html
+- Install leiningen: https://leiningen.org/
+- run `lein figwheel`
+that should get a basic dev environment going.
+
+and open your browser at [localhost:3449](http://localhost:3449/).
+This will auto compile and send all changes to the browser without the
+need to reload. After the compilation process is complete, you will
+get a Browser Connected REPL. An easy way to try it is:
+
+```clojure
+(js/alert "Am I connected?")
+```
+
+and you should see an alert in the browser window.
+
+To start the back-end server you will need to open a REPL either from the command line:
+```
+lein repl
+```
+Or if you are using Emacs with [Cider](https://cider.readthedocs.io/en/latest/) you can run the command to start the Cider REPL:
+```
+C-c M-j
+```
+I haven't used [Cursive](https://cursive-ide.com/), but I hear it is really nice and I'm sure there's an easy way to start a REPL within it.
+    
+Once you have a REPL you can run this from within it:
+
+```clojure
+orcpub.server=> (def system-map (com.stuartsierra.component/start (orcpub.system/system :dev)))
+```
+    
+To stop you will need to do this:
+
+```clojure
+orcpub.server=> (com.stuartsierra.component/stop system-map)
+```
+    
+Within Emacs you should be able to save your file (C-x C-s) and reload it into the REPL (C-c C-w) to get your server-side changes to take effect. Your client-side changes will take effect immediately when you change a CLJS or CLJC file.
+
+## Troubleshooting
+
+### lein figwheel
+
+if you run into this error:
+```
+Tried to use insecure HTTP repository without TLS.
+This is almost certainly a mistake; however in rare cases where it's
+intentional please see `lein help faq` for details.
+```
+
+Adding this will get things running, but is not recommended:
+
+```clojure
+(require 'cemerick.pomegranate.aether)
+(cemerick.pomegranate.aether/register-wagon-factory!
+ "http" #(org.apache.maven.wagon.providers.http.HttpWagon.))
+```
+
+after that, I had to remove the
+
+```clojure
+["my.datomic.com" {:url "https://my.datomic.com/repo"
+:username [:gpg :env]
+:password [:gpg :env]}]]
+```
+and replace `[com.datomic/datomic-pro "0.9.5561"]` with `[com.datomic/datomic-free "0.9.5697"]`
+
+then `lein figwheel` will start a local webserver.
+
 ## FAQs
 **Q: Ummmmm, why is your code so ugly, I thought Clojure code was supposed to be pretty.** 
 
