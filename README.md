@@ -7,10 +7,9 @@ This is the code for OrcPub2.com. Many, many people have expressed interest in h
 - Install Java: http://openjdk.java.net/ or http://www.oracle.com/technetwork/java/javase/downloads/jdk8-downloads-2133151.html
 - Install leiningen: https://leiningen.org/
 - run `lein figwheel`
-that should get a basic dev environment going.
 
-and open your browser at [localhost:3449](http://localhost:3449/).
-This will auto compile and send all changes to the browser without the
+That should get a basic dev environment going and open your browser at [localhost:3449](http://localhost:3449/).
+When you save changes, it will auto compile and send all changes to the browser without the
 need to reload. After the compilation process is complete, you will
 get a Browser Connected REPL. An easy way to try it is:
 
@@ -20,42 +19,50 @@ get a Browser Connected REPL. An easy way to try it is:
 
 and you should see an alert in the browser window.
 
-Before you start up the back-end server, you will need to [set up Datomic locally](https://docs.datomic.com/on-prem/dev-setup.html). You will then need to transact the schema. First start a REPL:
+Before you start up the back-end server, you will need to [set up Datomic locally](https://docs.datomic.com/on-prem/dev-setup.html). If you're just trying to get started quickly to contribute to the main project, and happen to be on macOS, you can use [homebrew](https://brew.sh/) to do this pretty quickly:
+
+```
+brew install datomic
+brew services start datomic
+```
+
+You will then need to transact the schema. First start a REPL:
 
 ```
 lein repl
 ```
+
 Or if you are using Emacs with [Cider](https://cider.readthedocs.io/en/latest/) you can run the command to start the Cider REPL:
+
 ```
 C-c M-j
 ```
+
+For Vim users, [vim-fireplace](https://github.com/tpope/vim-fireplace) provides a good way to interact with a running repl without leaving Vim.
+
 I haven't used [Cursive](https://cursive-ide.com/), but I hear it is really nice and I'm sure there's an easy way to start a REPL within it.
-    
+
 Once you have a REPL you can run this from within it to create the database, transact the database schema, and start the server:
 
 ```clojure
-orcpub.server=> (require '[orcpub.db.schema :as schema]
-                            '[datomic.api :as d])
-orcpub.server=> (def db-uri "datomic:dev://localhost:4334/orcpub")
-orcpub.server=> (d/create-database db-uri)
-orcpub.server=> (def conn (d/conn db-uri))
-orcpub.server=> (d/transact conn schema/all-schemas)
-orcpub.server=> (def system-map (com.stuartsierra.component/start (orcpub.system/system :dev)))
+user=> (init-database)
+user=> (start-server)
 ```
-    
+
 To stop you will need to do this:
 
 ```clojure
-orcpub.server=> (com.stuartsierra.component/stop system-map)
+user=> (stop-server)
 ```
-    
-Within Emacs you should be able to save your file (C-x C-s) and reload it into the REPL (C-c C-w) to get your server-side changes to take effect. Your client-side changes will take effect immediately when you change a CLJS or CLJC file.
+
+Within Emacs you should be able to save your file (C-x C-s) and reload it into the REPL (C-c C-w) to get your server-side changes to take effect. Within Vim with `vim-fireplace` you can eval a form with `cpp`, a paragraph with `cpip`, etc; check out its help file for more information. Regardless of editor, your client-side changes will take effect immediately when you change a CLJS or CLJC file while `lein figwheel` is running.
 
 ## Troubleshooting
 
 ### lein figwheel
 
-if you run into this error:
+If you run into this error:
+
 ```
 Tried to use insecure HTTP repository without TLS.
 This is almost certainly a mistake; however in rare cases where it's
@@ -69,17 +76,6 @@ Adding this will get things running, but is not recommended:
 (cemerick.pomegranate.aether/register-wagon-factory!
  "http" #(org.apache.maven.wagon.providers.http.HttpWagon.))
 ```
-
-after that, I had to remove the
-
-```clojure
-["my.datomic.com" {:url "https://my.datomic.com/repo"
-:username [:gpg :env]
-:password [:gpg :env]}]]
-```
-and replace `[com.datomic/datomic-pro "0.9.5561"]` with `[com.datomic/datomic-free "0.9.5697"]`
-
-then `lein figwheel` will start a local webserver.
 
 ## FAQs
 **Q: Ummmmm, why is your code so ugly, I thought Clojure code was supposed to be pretty.** 
