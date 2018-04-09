@@ -1,6 +1,9 @@
 (ns user
-  (:require
-   [figwheel-sidecar.repl-api :as f]))
+  (:require [figwheel-sidecar.repl-api :as f]
+            [com.stuartsierra.component :as component]
+            [datomic.api :as datomic]
+            [orcpub.system :as s]
+            [orcpub.db.schema :as schema]))
 
 ;; user is a namespace that the Clojure runtime looks for and
 ;; loads if its available
@@ -18,6 +21,7 @@
 ;; tools.namespace https://github.com/clojure/tools.namespace
 ;; and Component https://github.com/stuartsierra/component
 
+(defonce -server (atom nil))
 
 (defn get-cljs-builds
   [id]
@@ -31,6 +35,28 @@
     (prn "BUILD" build)
     [build]))
 
+(defn init-database
+  ([]
+   (init-database :free))
+  ([mode]
+   (when-not (contains? #{:free :dev :mem} mode)
+     (throw (IllegalArgumentException. (str "Unknown db type " mode))))
+   (let [db-uri (str "datomic" mode "://localhost:4334/orcpub")]
+     (datomic/create-database db-uri)
+     (let [conn (datomic/connect db-uri)]
+       (datomic/transact conn schema/all-schemas)))))
+
+(defn stop-server
+  []
+  (when-let [s @-server]
+    (component/stop s)
+    (reset! -server nil)))
+
+(defn start-server
+  []
+  ; restart
+  (stop-server)
+  (reset! -server (component/start (s/system :dev))))
 
 (defn fig-start
   "This starts the figwheel server and watch based auto-compiler."
