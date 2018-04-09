@@ -48,6 +48,9 @@
             [bidi.bidi :as bidi])
   (:require-macros [cljs.core.async.macros :refer [go]]))
 
+;; the `amount` of "uses" an action may have before it warrants
+;; using a dropdown instead of a list of checkboxes
+(def actions-amount-many 5)
 
 (def text-color "#484848")
 
@@ -2151,29 +2154,61 @@
 
 (def toggle-feature-used-handler (memoize toggle-feature-used-fn))
 
+(defn actions-indicators [id nm units amount]
+  (if (< amount actions-amount-many)
+    ;; small, manageable number of uses
+    [:span.m-l-10
+     (doall
+       (for [i (range amount)]
+         (let [k (str nm "-" i)]
+           ^{:key i}
+           [:span
+            {:on-click (toggle-feature-used-handler id units k)}
+            [:span.m-r-5 (comps/checkbox @(subscribe [::char/feature-used? id units k]) false)]])))]
+
+    ;; larger number of uses
+    (let [initial-value @(subscribe [::char/feature-used-count id units nm amount])]
+      [:span.m-l-10
+       [comps/selection
+        (for [i (range (inc amount))]
+          (let [k (str nm "-" i)]
+            {:key k
+             :name (str i)}))
+
+        (fn on-change [e]
+          (let [v (-> e .-target .-value)]
+            (when initial-value
+              ; we have to dispatch-sync because in the case where id is nil,
+              ; this event handler dispatches, so the call below gets
+              ; a stale DB value and overwrites this one. It ought be
+              ; possible to make it affect the :db directly, but I don't
+              ; know what sort of side effects that could have....
+              ; See: update-character-fx, and its use of :dispatch; might
+              ; be able to replace that with:
+              ;  {:db (set-character db (update-fn (:character db)))}
+              (dispatch-sync [::char/toggle-feature-used id units initial-value]))
+            ((toggle-feature-used-handler id units v))))
+
+        ; if no initial value, assume "all uses available"
+        (or initial-value
+            (str nm "-" amount))]])))
+
 (defn actions-section [id title icon-name actions]
-  (if (seq actions)
+  (when (seq actions)
     (display-section
-     title
-     icon-name
-     [:div.f-s-14.l-h-19
-      (doall
-       (map
-        (fn [{{:keys [units amount]} :frequency nm :name :as action}]
-          ^{:key action}
-          [:p.m-t-10
-           [:span.f-w-600.i nm "."]
-           [:span.f-w-n.m-l-10 (common/sentensize (disp/action-description action))]
-           (if (and amount units)
-             [:span.m-l-10
-              (doall
-               (for [i (range amount)]
-                 (let [k (str nm "-" i)]
-                   ^{:key i}
-                   [:span
-                    {:on-click (toggle-feature-used-handler id units k)}
-                    [:span.m-r-5 (comps/checkbox @(subscribe [::char/feature-used? id units k]) false)]])))])])
-        (sort-by :name actions)))])))
+      title
+      icon-name
+      [:div.f-s-14.l-h-19
+       (doall
+         (map
+           (fn [{{:keys [units amount]} :frequency nm :name :as action}]
+             ^{:key action}
+             [:p.m-t-10
+              [:span.f-w-600.i nm "."]
+              [:span.f-w-n.m-l-10 (common/sentensize (disp/action-description action))]
+              (when (and amount units)
+                (actions-indicators id nm units amount))])
+           (sort-by :name actions)))])))
 
 (defn prof-name [prof-map prof-kw]
   (or (-> prof-kw prof-map :name) (common/kw-to-name prof-kw)))

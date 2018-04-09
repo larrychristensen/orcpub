@@ -16,7 +16,7 @@
    [checkbox selected? disabled?]
    [:span.m-l-5 label]])
 
-(defn selection-adder-item [key name]
+(defn selection-item [key name selected?]
   [:option.builder-dropdown-item
    {:value key}
    name])
@@ -33,8 +33,15 @@
     (map
      (fn [{:keys [key name]}]
        ^{:key key}
-       [selection-adder-item key name])
+       [selection-item key name false])
      values))])
+
+(defn selection [values on-change selected-value]
+  [:select
+   {:value selected-value
+    :on-change on-change}
+   (for [{:keys [key name]} values]
+     ^{:key key} [selection-item key name])])
 
 (defn input-field []
   (let [state (atom {:timeout nil
