@@ -2,6 +2,7 @@
   (:require [figwheel-sidecar.repl-api :as f]
             [com.stuartsierra.component :as component]
             [datomic.api :as datomic]
+            [orcpub.routes :as r]
             [orcpub.system :as s]
             [orcpub.db.schema :as schema]))
 
@@ -23,6 +24,27 @@
 
 (defonce -server (atom nil))
 
+(defmacro with-db
+  "Convenience util to get access to the datomic conn and/or db
+   objects. Call as:
+   (with-db [conn db]
+     (do-stuff-to db)
+   You can also just do (with-db [db]) or (with-db [conn])"
+  [init-vector & body]
+  `(if-let [system-map# @-server]
+     ; first :conn here is a DatomicComponent;
+     ; the second is the actual connection object
+     (let [conn# (->> system-map# :conn :conn)
+           db# (datomic/db conn#)
+
+           ; unpack the requested values:
+           {:keys ~init-vector} {:conn conn#
+                                 :db db#}]
+       ~@body)
+
+     ;; nothing in -server:
+     (throw (IllegalStateException. "Call (start-server) first"))))
+
 (defn get-cljs-builds
   [id]
   (let [project-config (->> "project.clj"
@@ -30,8 +52,11 @@
                             read-string
                             (drop 1)
                             (apply hash-map))
-        build (get-in project-config
-                      [:cljsbuild :builds id])]
+        build (->> project-config
+                   :cljsbuild
+                   :builds
+                   (filter #(= id (:id %)))
+                   first)]
     (prn "BUILD" build)
     [build]))
 
@@ -58,18 +83,31 @@
   (stop-server)
   (reset! -server (component/start (s/system :dev))))
 
+(defn verify-new-user
+  "Automatically mark a user as `verified`. Useful for local testing
+   since the email never gets sent."
+  [username-or-email]
+  (with-db [conn db]
+    (let [user (r/find-user-by-username-or-email db username-or-email)
+          verification-key (:orcpub.user/verification-key user)]
+      (r/verify {:query-params {:key verification-key}
+                 :conn conn
+                 :db db}))))
+
 (defn fig-start
   "This starts the figwheel server and watch based auto-compiler."
-  []
-  ;; this call will only work are long as your :cljsbuild and
-  ;; :figwheel configurations are at the top level of your project.clj
-  ;; and are not spread across different lein profiles
+  ([]
+   (fig-start "dev"))
+  ([build-id]
+   ;; this call will only work are long as your :cljsbuild and
+   ;; :figwheel configurations are at the top level of your project.clj
+   ;; and are not spread across different lein profiles
 
-  ;; otherwise you can pass a configuration into start-figwheel! manually
-  (f/start-figwheel!
-   {:figwheel-options {}
-    :build-ids ["web"]
-    :all-builds (get-cljs-builds "web")}))
+   ;; otherwise you can pass a configuration into start-figwheel! manually
+   (f/start-figwheel!
+     {:figwheel-options {}
+      :build-ids [build-id]
+      :all-builds (get-cljs-builds build-id)})))
 
 (defn fig-stop
   "Stop the figwheel server and watch based auto-compiler."
