@@ -9,7 +9,7 @@
             [orcpub.dnd.e5.template :as t5e]
             [orcpub.dnd.e5.common :as common5e]
             [orcpub.dnd.e5.db :refer [tab-path]]
-            [orcpub.dnd.e5.events :as events]
+            [orcpub.dnd.e5.events :refer [url-for-route] :as events]
             [orcpub.dnd.e5.character :as char5e]
             [orcpub.dnd.e5.char-decision-tree :as char-dec5e]
             [orcpub.dnd.e5.character.equipment :as char-equip5e]
@@ -345,7 +345,7 @@
   ::char5e/characters
   (fn [app-db [_ login-optional?]]
     (go (dispatch [:set-loading true])
-        (let [response (<! (http/get (routes/path-for routes/dnd-e5-char-summary-list-route)
+        (let [response (<! (http/get (url-for-route routes/dnd-e5-char-summary-list-route)
                                      {:headers (auth-headers @app-db)}))]
           (dispatch [:set-loading false])
           (case (:status response)
@@ -360,7 +360,7 @@
   ::party5e/parties
   (fn [app-db [_ login-optional?]]
     (go (dispatch [:set-loading true])
-        (let [response (<! (http/get (routes/path-for routes/dnd-e5-char-parties-route)
+        (let [response (<! (http/get (url-for-route routes/dnd-e5-char-parties-route)
                                      {:headers (auth-headers @app-db)}))]
           (dispatch [:set-loading false])
           (case (:status response)
@@ -374,9 +374,8 @@
 (reg-sub-raw
   :user
   (fn [app-db [_ required?]]
-    (go (let [path (routes/path-for routes/user-route)
-              hdrs (auth-headers @app-db)
-              response (<! (http/get path {:headers hdrs}))]
+    (go (let [hdrs (auth-headers @app-db)
+              response (<! (http/get (url-for-route routes/user-route) {:headers hdrs}))]
           (case (:status response)
             200 nil
             401 (do
@@ -425,7 +424,9 @@
     (let [int-id (if id (js/parseInt id))]
       (if (some? int-id)
         (go (dispatch [:set-loading true])
-            (let [response (<! (http/get (routes/path-for routes/dnd-e5-char-route :id int-id)))]
+            (let [response (<! (http/get (url-for-route
+                                           routes/dnd-e5-char-route
+                                           :id int-id)))]
               (dispatch [:set-loading false])
               (case (:status response)
                 200 (dispatch [::char5e/set-character

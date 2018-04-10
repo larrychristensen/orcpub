@@ -17,7 +17,7 @@
             [orcpub.dnd.e5.equipment :as equipment5e]
             [orcpub.dnd.e5.spells :as spells5e]
             [orcpub.route-map :as routes]
-            [orcpub.dnd.e5.events :as events]
+            [orcpub.dnd.e5.events :refer [url-for-route] :as events]
             [reagent.ratom :as ra]
             [cljs-http.client :as http]
             [cljs.core.async :refer [<!]])
@@ -37,7 +37,7 @@
    ::mi5e/custom-items
    (fn [app-db [_ user-data]]
      (go (dispatch [:set-loading true])
-         (let [response (<! (http/get (routes/path-for routes/dnd-e5-items-route)
+         (let [response (<! (http/get (url-for-route routes/dnd-e5-items-route)
                                       {:headers (auth-headers @app-db)}))]
            (dispatch [:set-loading false])
            (case (:status response)
@@ -245,7 +245,9 @@
  ::mi5e/remote-item
  (fn [app-db [_ id]]
    (go (dispatch [:set-loading true])
-       (let [response (<! (http/get (routes/path-for routes/dnd-e5-item-route :id id)
+       (let [response (<! (http/get (url-for-route
+                                      routes/dnd-e5-item-route
+                                      :id id)
                                     {:headers (auth-headers @app-db)}))]
          (dispatch [:set-loading false])
          (case (:status response)
