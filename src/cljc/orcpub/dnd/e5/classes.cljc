@@ -1479,7 +1479,8 @@
                  (mod5e/action
                   {:name "Lay on Hands"
                    :page 84
-                   :frequency units5e/long-rests-1
+                   :frequency (units5e/long-rests
+                                (* 5 (?class-level :paladin)))
                    :summary (str "you have a healing pool of " (* 5 (?class-level :paladin)) " HPs, with it you can heal a creature or expend 5 points to cure disease or neutralize poison")})
                  (mod5e/dependent-trait
                   {:name "Channel Divinity"
@@ -2215,6 +2216,8 @@
                              {:name "Sorcery Points"
                               :level 2
                               :page 101
+                              :frequency (units5e/long-rests
+                                           (?class-level :sorcerer))
                               :summary (str "You have " (?class-level :sorcerer) " sorcery points")})
                             (mod5e/bonus-action
                              {:name "Flexible Casting"

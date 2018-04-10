@@ -958,6 +958,15 @@
    (get-in features-used [units nm])))
 
 (reg-sub
+ ::char5e/feature-used-count
+ (fn [[_ id units nm]]
+   (subscribe [::char5e/features-used id]))
+ (fn [features-used [_ id units nm]]
+   (->> (get-in features-used [units])
+        (filter #(s/starts-with? % nm))
+        first)))
+
+(reg-sub
  :theme
  (fn [db _]
    (get-in db [:user-data :theme])))
