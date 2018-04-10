@@ -32,20 +32,25 @@
 
 (defn system [env]
   (component/system-map
-   :conn
-   (datomic/new-datomic (str (environ/env :datomic-url) "?aws_access_key_id=" (environ/env :datomic-access-key) "&aws_secret_key=" (environ/env :datomic-secret-key)))
-   
-   :service-map
-   (cond-> (merge
-            {:env env}
-            prod-service-map
-            (if (= :dev env) dev-service-map-overrides))
-     true http/default-interceptors
-     (= :dev env) http/dev-interceptors)
+    :conn
+    (datomic/new-datomic
+      (if-let [datomic-url (:datomic-url environ/env)]
+        (str datomic-url "?aws_access_key_id=" (environ/env :datomic-access-key) "&aws_secret_key=" (environ/env :datomic-secret-key))
+        (when true #_(= :dev env)
+          (println "WARN: no :datomic-url environment variable set; using local dev")
+          "datomic:free://localhost:4334/orcpub")))
 
-   :pedestal
-   (component/using
-    (pedestal/new-pedestal)
-    [:service-map :conn])))
+    :service-map
+    (cond-> (merge
+              {:env env}
+              prod-service-map
+              (if (= :dev env) dev-service-map-overrides))
+      true http/default-interceptors
+      (= :dev env) http/dev-interceptors)
+
+    :pedestal
+    (component/using
+      (pedestal/new-pedestal)
+      [:service-map :conn])))
 
 (reloaded.repl/set-init! #(system :prod))

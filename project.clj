@@ -6,12 +6,12 @@
   :main orcpub.server
 
   :min-lein-version "2.7.1"
-  
+
   :repositories [["apache" "http://repository.apache.org/snapshots/"]
                  ["my.datomic.com" {:url "https://my.datomic.com/repo"
                                     :username [:gpg :env]
                                     :password [:gpg :env]}]]
-  
+
   :dependencies [[org.clojure/clojure "1.9.0-RC1"]
                  [org.clojure/test.check "0.9.0"]
                  [org.clojure/clojurescript "1.9.946"]
@@ -47,7 +47,6 @@
                  [com.stuartsierra/component "0.3.2"]
                  [com.google.guava/guava "21.0"]
 
-                 [com.datomic/datomic-pro "0.9.5561"]
                  [com.amazonaws/aws-java-sdk-dynamodb "1.11.6"]
                  [com.fasterxml.jackson.core/jackson-databind "2.7.0"]
 
@@ -171,7 +170,9 @@
             "prod-build" ^{:doc "Recompile code with prod profile."}
             ["externs"
              ["with-profile" "prod" "cljsbuild" "once" "main"]]}
-  :profiles {:dev {:dependencies [[binaryage/devtools "0.9.4"]
+  :profiles {:dev {:dependencies [[com.datomic/datomic-free "0.9.5561"]
+
+                                  [binaryage/devtools "0.9.4"]
                                   [figwheel-sidecar "0.5.14"]
                                   [com.cemerick/piggieback "0.2.1"]
                                   [org.clojure/test.check "0.9.0"]]
@@ -181,6 +182,7 @@
                    ;; :plugins [[cider/cider-nrepl "0.12.0"]]
                    :repl-options { ; for nREPL dev you really need to limit output
                                   :init (set! *print-length* 50)
+                                  :init-ns user
                                   :nrepl-middleware [cemerick.piggieback/wrap-cljs-repl]}}
              :native-dev {:dependencies [[figwheel-sidecar "0.5.14"]
                                          [com.cemerick/piggieback "0.2.1"]
@@ -204,7 +206,8 @@
                                                          :parallel-build     true
                                                          :optimize-constants true
                                                          :optimizations :advanced
-                                                         :closure-defines {"goog.DEBUG" false}}}]}}
+                                                         :closure-defines {"goog.DEBUG" false}}}]}
+                    :dependencies [[com.datomic/datomic-pro "0.9.5561"]]}
              :uberjar {:prep-tasks ["clean" "compile" ["cljsbuild" "once" "prod"]]
                        :env {:production true}
                        :aot :all
