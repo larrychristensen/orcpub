@@ -11,17 +11,30 @@
            (org.apache.pdfbox.pdmodel.graphics.image PDImageXObject)
            (java.io ByteArrayOutputStream ByteArrayInputStream)
            (org.apache.pdfbox.pdmodel.graphics.image JPEGFactory LosslessFactory)
-           (org.apache.pdfbox.pdmodel.font PDType1Font PDType0Font)
+           (org.apache.pdfbox.pdmodel.font PDType1Font PDFont PDType0Font)
            (org.eclipse.jetty.server.handler.gzip GzipHandler)
            (javax.imageio ImageIO)
            (java.net URL)))
 
+(defn load-fonts
+  "Loads the fonts for the document. Will contain
+  :plain, :italic, :bold and :bold-italic fonts."
+  [doc]
+  (reduce-kv
+    (fn [m type file]
+      (assoc m type
+               (with-open [stream (.openStream (io/resource file))]
+                 (PDType0Font/load doc stream))))
+    {}
+    {:plain       "Vollkorn-Regular.ttf"
+     :italic      "Vollkorn-Italic.ttf"
+     :bold        "Vollkorn-Bold.ttf"
+     :bold-italic "Vollkorn-BoldItalic.ttf"}))
+
 (defn write-fields! [doc fields flatten font-sizes]
   (let [catalog (.getDocumentCatalog doc)
         form (.getAcroForm catalog)
-        res (or (.getDefaultResources form) (PDResources.))
-        font (PDType0Font/load doc (.openStream (io/resource "LiberationSans-Regular.ttf")))
-        font-name (.add res font)]
+        res (or (.getDefaultResources form) (PDResources.))]
     (.setNeedAppearances form true)
     (.setDefaultResources form res)
     (doseq [[k v] fields]
@@ -103,19 +116,19 @@
 (defn get-page [doc index]
   (.getPage doc index))
 
-(defn string-width [text font font-size]
+(defn string-width [text ^PDFont font font-size]
   (if text
     (/ (* (/ (.getStringWidth font (if (keyword? text) (common/safe-name text) text)) 1000.0) font-size) 72)
     0))
 
-(defn split-lines [text font-size width]
+(defn split-lines [text ^PDFont font font-size width]
   (let [words (s/split text #"\s")]
     (loop [lines []
            current-line nil
            [next-word & remaining-words :as current-words] words]
       (if next-word
         (let [line-with-word (str current-line (if current-line " ") next-word)
-              new-width (string-width line-with-word PDType1Font/HELVETICA font-size)]
+              new-width (string-width line-with-word font font-size)]
           (if (> new-width width)
             (recur (conj lines current-line)
                    nil
@@ -144,7 +157,7 @@
     (vec (drop max-lines lines))))
 
 (defn draw-text-to-box [cs text font font-size x y width height]
-  (let [lines (split-lines text font-size width)]
+  (let [lines (split-lines text font font-size width)]
     (draw-lines-to-box cs lines font font-size x y height)))
 
 (defn set-text-color [cs r g b]
@@ -262,7 +275,8 @@
         remaining-width (- 8.5 total-width)
         margin-x (/ remaining-width 2)
         remaining-height (- 11.0 total-height)
-        margin-y (/ remaining-height 2)]
+        margin-y (/ remaining-height 2)
+        fonts (load-fonts document)]
     (with-open [img-stream (io/input-stream (io/resource "public/image/orcpub-card-logo.png"))
                 over-img-stream (io/input-stream (io/resource "public/image/clockwise-rotation.png"))]
       (let [img (LosslessFactory/createFromImage document (ImageIO/read img-stream))
@@ -270,7 +284,7 @@
         (draw-grid cs 2.5 3.5)
         (draw-text cs
                    (str "Page " (inc page-number) " (reverse)")
-                   PDType1Font/HELVETICA_BOLD_OBLIQUE
+                   (:bold-italic fonts)
                    10
                    0.12
                    (- 11 0.15))
@@ -285,7 +299,7 @@
              (when (seq remaining-lines)
                (draw-text-to-box cs
                                spell-name
-                               PDType1Font/HELVETICA_BOLD
+                               (:bold fonts)
                                10
                                (+ x 0.12)
                                (- 11.0 y 0.08)
@@ -293,16 +307,16 @@
                                0.25)
                (draw-lines-to-box cs
                                remaining-lines
-                               PDType1Font/HELVETICA
+                               (:plain fonts)
                                8
                                (+ x 0.12)
                                (- 11.0 y 0.24)
                                (- box-height 0.2))
                (draw-text-to-box cs
                                "(reverse)"
-                               PDType1Font/HELVETICA_OBLIQUE
+                               (:italic fonts)
                                10
-                               (+ x 0.15 (string-width spell-name PDType1Font/HELVETICA_BOLD 10))
+                               (+ x 0.15 (string-width spell-name (:bold fonts) 10))
                                (- 11.0 y 0.08)
                                (- box-width 0.3)
                                (- box-height 0.2))))))))))
@@ -315,7 +329,8 @@
         remaining-width (- 8.5 total-width)
         margin-x (/ remaining-width 2)
         remaining-height (- 11.0 total-height)
-        margin-y (/ remaining-height 2)]
+        margin-y (/ remaining-height 2)
+        fonts (load-fonts document)]
     (with-open [img-stream (io/input-stream (io/resource "public/image/orcpub-card-logo.png"))
                 over-img-stream (io/input-stream (io/resource "public/image/clockwise-rotation.png"))]
       (let [img (LosslessFactory/createFromImage document (ImageIO/read img-stream))
@@ -323,7 +338,7 @@
         (draw-grid cs 2.5 3.5)
         (draw-text cs
                    (str "Page " (inc page-number))
-                   PDType1Font/HELVETICA_BOLD_OBLIQUE
+                   (:bold-italic fonts)
                    10
                    0.12
                    (- 11 0.15))
@@ -347,7 +362,7 @@
                         {:keys [page source description summary]} spell
 
                         dc-str (str "DC " dc)
-                        dc-offset (+ x 0.22 (string-width class-nm PDType1Font/HELVETICA_BOLD 10))
+                        dc-offset (+ x 0.22 (string-width class-nm (:bold fonts) 10))
                         remaining-desc-lines
                         (draw-text-to-box cs
                                           (or description
@@ -361,7 +376,7 @@
                                                      page
                                                      " for more details)")
                                                 ""))
-                                          PDType1Font/HELVETICA
+                                          (:plain fonts)
                                           8
                                           (+ x 0.12)
                                           (- 11.0 y 0.65)
@@ -375,7 +390,7 @@
                                  0.25)
                     (draw-text-to-box cs
                                       (spell-school-level spell)
-                                      PDType1Font/HELVETICA_OBLIQUE
+                                      (:italic fonts)
                                       8
                                       (+ x 0.12)
                                       (- 11.0 y 0.10)
@@ -383,7 +398,7 @@
                                       0.25)
                     (draw-text-to-box cs
                                       (:name spell)
-                                      PDType1Font/HELVETICA_BOLD
+                                      (:bold fonts)
                                       10
                                       (+ x 0.12)
                                       (- 11.0 y 0.27)
@@ -432,23 +447,23 @@
                     (when (not= class-nm "Homebrew")
                       (draw-text cs
                                  class-nm
-                                 PDType1Font/HELVETICA_BOLD
+                                 (:bold fonts)
                                  10
                                  (+ x 0.12)
                                  (- 11.0 y 3.4)
                                  [186 21 3])
                      (draw-text cs
                                 dc-str
-                                PDType1Font/HELVETICA_BOLD_OBLIQUE
+                                (:bold-italic fonts)
                                 8
                                 dc-offset
                                 (- 11.0 y 3.4)
                                 [186 21 3])
                      (draw-text cs
                                 (str "Mod " (common/bonus-str attack-bonus))
-                                PDType1Font/HELVETICA_BOLD_OBLIQUE
+                                (:bold-italic fonts)
                                 8
-                                (+ dc-offset (string-width dc-str PDType1Font/HELVETICA_BOLD 10))
+                                (+ dc-offset (string-width dc-str (:bold fonts) 10))
                                 (- 11.0 y 3.4)
                                 [186 21 3]))
                     (if (seq remaining-desc-lines)
