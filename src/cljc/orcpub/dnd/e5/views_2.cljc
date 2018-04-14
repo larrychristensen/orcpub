@@ -40,7 +40,7 @@
 
 (defn legal-footer []
   [:div.m-l-15.m-b-10.m-t-10.t-a-l
-   [:span "© 2017 OrcPub"]
+   [:span "© 2018 OrcPub"]
    [:a.m-l-5 {:href "/terms-of-use" :target :_blank} "Terms of Use"]
    [:a.m-l-5 {:href "/privacy-policy" :target :_blank} "Privacy Policy"]])
 
@@ -57,7 +57,7 @@
    [:div
     [:div {:style (style {:margin-bottom "5px"})} "Icons made by Lorc, Caduceus, and Delapouite. Available on " [:a.orange {:href "http://game-icons.net"} "http://game-icons.net"]]]
    [:div.m-l-10 {:style (style {:margin-left "10px"})}
-    [:a {:style (style orange-style) :href "https://www.facebook.com/orcpub" :target :_blank} "Feedback/Bug Reports"]]
+    [:a {:style (style orange-style) :href "https://github.com/larrychristensen/orcpub/issues" :target :_blank} "Feedback/Bug Reports"]]
    [:div.m-l-10.m-r-10.p-10
     {:style (style {:margin-left "10px"
                     :margin-right "10px"
@@ -65,7 +65,7 @@
     [:a {:style (style orange-style) :href "/privacy-policy" :target :_blank} "Privacy Policy"]
     [:a.m-l-5 {:style (orange-style {:margin-left "5px"}) :href "/terms-of-use" :target :_blank} "Terms of Use"]]
    [:div.legal-footer
-    [:p "© 2017 OrcPub" [:span {:style (style {:margin-left "20px"})} "Contact: " [:a {:href "mailto:redorc@orcpub.com"} "redorc@orcpub.com"]]]
+    [:p "© 2018 OrcPub" [:span {:style (style {:margin-left "20px"})} "Contact: " [:a {:href "mailto:redorc@orcpub.com"} "redorc@orcpub.com"]]]
     [:p "Wizards of the Coast, Dungeons & Dragons, D&D, and their logos are trademarks of Wizards of the Coast LLC in the United States and other countries. © 2017 Wizards. All Rights Reserved. OrcPub.com is not affiliated with, endorsed, sponsored, or specifically approved by Wizards of the Coast LLC."]]])
 
 (defn splash-page []
