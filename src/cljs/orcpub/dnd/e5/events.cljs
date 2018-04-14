@@ -60,6 +60,7 @@
                                       default-subrace
                                       default-class
                                       default-subclass]]
+            [orcpub.dnd.e5.autosave-fx]
             [re-frame.core :refer [reg-event-db reg-event-fx reg-fx inject-cofx path trim-v
                                    after debug dispatch dispatch-sync subscribe ->interceptor]]
             [cljs.spec.alpha :as spec]
@@ -2010,7 +2011,8 @@
     {:db (update-in
           db
           [::char5e/character-map (js/parseInt id)]
-          update-fn)}
+          update-fn)
+     ::char5e/save-character-throttled id}
     {:dispatch [:set-character (update-fn (:character db))]}))
 
 (reg-event-fx
