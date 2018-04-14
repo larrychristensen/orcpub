@@ -10,7 +10,7 @@ pom.xml
 .lein-deps-sum
 .lein-repl-history
 .lein-plugins/
-.lein-env
+.lein-*
 .idea
 orcpub.iml
 profiles.clj
