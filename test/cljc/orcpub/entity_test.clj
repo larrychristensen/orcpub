@@ -117,7 +117,7 @@
 (deftest get-all-selections-aux-2
   (let [selections (entity/get-all-selections-aux-2
                     (t5e/template
-                     (t5e/template-selections nil nil nil))
+                      (t5e/template-selections nil nil nil nil nil nil nil nil nil nil nil nil))
                     (entity/make-path-map arcane-trickster))
         ref-set (into #{} (map ::t/ref) selections)]
     (is (ref-set [:class
@@ -131,7 +131,7 @@
 (deftest make-template-option-map
   (let [selections (entity/get-all-selections-aux-2
                     (t5e/template
-                     (t5e/template-selections nil nil nil))
+                      (t5e/template-selections nil nil nil nil nil nil nil nil nil nil nil nil))
                     (entity/make-path-map arcane-trickster))
         template-option-map (entity/make-template-option-map selections)]
     (is (template-option-map [:class
@@ -262,7 +262,7 @@
                      :options [{} {} {} {} {} {} {}]}
           expected '{:key :x}]
       (is (= expected (entity/remove-empty-fields entity-1))))
-    
+
     (let [entity-1 '{:selections
                     [{:key :class,
                       :options

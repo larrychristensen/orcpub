@@ -144,7 +144,7 @@
   (let [built-char (entity/build
                     warlock-with-book-of-ancient-secrets
                     (t5e/template
-                     (t5e/template-selections nil nil nil)))
+                      (t5e/template-selections nil nil nil nil nil nil nil nil nil nil nil nil)))
         {:keys [::char5e/str
                 ::char5e/dex
                 ::char5e/con
