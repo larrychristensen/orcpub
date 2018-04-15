@@ -57,25 +57,55 @@ user=> (stop-server)
 
 Within Emacs you should be able to save your file (C-x C-s) and reload it into the REPL (C-c C-w) to get your server-side changes to take effect. Within Vim with `vim-fireplace` you can eval a form with `cpp`, a paragraph with `cpip`, etc; check out its help file for more information. Regardless of editor, your client-side changes will take effect immediately when you change a CLJS or CLJC file while `lein figwheel` is running.
 
-## Troubleshooting
+## OrcPub Fundamentals
 
-### lein figwheel
+### Overview
 
-If you run into this error:
-
-```
-Tried to use insecure HTTP repository without TLS.
-This is almost certainly a mistake; however in rare cases where it's
-intentional please see `lein help faq` for details.
-```
-
-Adding this will get things running, but is not recommended:
+OrcPub's design is based around the concept of hierarchical option selections applying modifiers to a entity. Consider D&D 5e as an example. In D&D 5e you build and maintain characters, which are entities, by selecting from a set of character options, such as race and class. When you select a race you will be affored other option selections, such as subrace or subclass. Option selections also apply modifiers to your character, such as 'Darkvision 60'. Option selections are defined in templates. An entity is really just a record of hierarchical choices made. A built entity is a collection of derived attributes and functions derived from applying all of the modifiers of all the choices made. Here is some pseudocode to this more concrete:
 
 ```clojure
-(require 'cemerick.pomegranate.aether)
-(cemerick.pomegranate.aether/register-wagon-factory!
- "http" #(org.apache.maven.wagon.providers.http.HttpWagon.))
+user> (def character-entity {:options {:race
+                                       {:key :elf,
+                                        :options {:subrace {:key :high-elf}}}}})
+                                          
+user> (def template {:selections [{:key :race
+                                   :min 1
+                                   :max 1
+                                   :options [{:name "Elf"
+                                              :key :elf
+                                              :modifiers [(modifier ?dex-bonus (+ ?dex-bonus 2))
+                                                          (modifier ?race "Elf")]
+                                              :selections [{:key :subrace
+                                                            :min 1
+                                                            :max 1
+                                                            :options [{:name "High Elf"
+                                                                       :key :high-elf
+                                                                       :modifiers [(modifier ?subrace "High Elf")
+                                                                                   (modifier ?int-bonus (+ ?int-bonus 1))]}]}]}]}]}
+                                                                 
+user> (def built-character (build-entity charater-entity template))
+
+user> built-character
+{:race "Elf"
+ :subrace "High Elf"
+ :dex-bonus 2
+ :int-bonus 1}
 ```
+
+This may seem overly complicated, but after my work on the (Original Orcpub)[orcpub.com], I realized that this really the only real correct solution as it models how character building actually works. The original Orcpub stored characters essentially like the built-character above with a centralized set of functions to compute other derived values. This is the most straightforward solution, but this has flaws:
+
+* You have difficulty figuring out which options have been selected and which ones still need to be selected.
+* You keep having to patch your data as your application evolves. For example, say you store a character's known spells as a list of spell IDs. Then you realize later that users want to also know what their attack bonus is for each spell. At the very least you'll have to make some significant changes to every stored character.
+* It is not scalable. Every time you add in more options, say from some new sourcebook, you have to pile on more conditional logic in your derived attribute functions. Believe me, this gets unmanageable very quickly.
+* It's not reusable in, say, a Rifts character builder.
+
+The OrcPub2 architecture fixes these problems:
+
+* You know exactly which options have been selected, which have not, and how every modifier is arrived at, given the entity and the most up-to-date templates.
+* You don't need to patch up stored characters if you find a bug since characters are stored as just a set of very generic choices.
+* It's scalable and pluggable. Most logic for derived values is stored inside of the options that create or modify these derived values. Many rules within D&D 5e allow for picking the best of alternate calculations for a particular attribute (AC comes to mind). With the OrcPub2 solution you can have an option easily override or modify a calculation without any other code having to know about it. This makes for a MUCH more manageable solution and makes it easy to add options as plugins. 
+* The entity builder engine could be used for building any character in any system. In fact, it could be used to build any entity in any system. For example, say you have a game system with well-defined mechanics building a vehicle, the entity builder engine could do that.
+
 
 ## FAQs
 **Q: Ummmmm, why is your code so ugly, I thought Clojure code was supposed to be pretty.** 
