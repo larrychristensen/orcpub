@@ -106,26 +106,97 @@ The OrcPub2 architecture fixes these problems:
 * It's scalable and pluggable. Most logic for derived values is stored inside of the options that create or modify these derived values. Many rules within D&D 5e allow for picking the best of alternate calculations for a particular attribute (AC comes to mind). With the OrcPub2 solution you can have an option easily override or modify a calculation without any other code having to know about it. This makes for a MUCH more manageable solution and makes it easy to add options as plugins. 
 * The entity builder engine could be used for building any character in any system. In fact, it could be used to build any entity in any system. For example, say you have a game system with well-defined mechanics building a vehicle, the entity builder engine could do that.
 
+### Modifiers
+
+Character modifiers are tough to get right. As mentioned above, the naive approach is to try to centralize all logic for a calculation in one place. For example you might have a character that looks like this:
+
+```clojure
+{:race "Elf"
+ :subrace "High Elf"
+ :base-abilities {:int 12
+                  :dex 13}}
+```
+
+Given this, you might start calculating initiative as follows:
+
+```clojure
+(defn ability-modifier [value] ...)
+
+(defn race-dexterity [character]
+  (case (:race character)
+    "Elf" 2
+    ...))
+    
+(defn subrace-dexterity [character] ...)
+
+(defn base-ability [character ability-key]
+  (get-in character [:base-abilities ability-key]))
+
+(defn dexterity [character]
+  (+ (base-ability character :dex)
+     (race-dexterity character)
+     (subrace-dexterity character)))
+     
+(defn initiative [character]
+   (ability-modifier (dexterity character)))
+```
+
+Consider what happens when you need to account for the 'Improved Initiative' feat, you'll need to add the calculation to the initiative function. Okay, this is probably still manageable. Then consider what happens when some cool subclass comes along that gets an initiative bonus at 9th level. Now it starts getting more unmanagable. When you try to add every option from every book into the mix, each of which might have some totally new condition for modifying initiative, you quickly end up with a nausiating ball of mud that will be scary to work with.
+
+OrcPub2 decentralizes most calculations using modifiers associated with selected character options. When you add options you also specify any modifiers associated with that option. For example, in the OrcPub2 entity example above, we have the elf option:
+
+```clojure
+{:name "Elf"
+  :key :elf
+  :modifiers [(modifier ?dex-bonus (+ ?dex-bonus 2))
+              (modifier ?race "Elf")]
+  ...}
+```
+
+If you build a character that has this :elf option selected, the modifiers will be applied the the :dex-bonus and :race in the built character. Let's look closer at the ?dex-bonus modifier. The second argument to the modifier function is a special symbol that prefixes a ? on the attribute instead of the : we'll expect on the output attribute key, in this case ?dex-bonus will be modifying the value output to the :dex-bonus attribute. The third argument is a modifier body. This can be any Clojure expression you like, but if you will be deriving your new value from an old value or from another attribute you must use the ?<attribute-name> reference. In this example we updating ?dex-bonus by adding 2 to it. Modifiers can be derived from attributes that are derived from other attributes, and so forth. For example, we may have a character whose options provide the following chain of modifiers:
+
+```clojure
+(modifier ?dexterity 12)
+(modifier ?intelligence 15)
+(modifier ?dex-mod (ability-mod ?dexterity))
+(modifier ?int-mod (ability-mod ?intelligence))
+(modifier ?initiative ?dex-mod)
+(modifier ?initiative (+ ?initiative (* 2 ?intelligence-mod)))
+```
+
+#### Modifier Order is Important!
+
+Consider what would happen if we applied the above modifiers in a different order:
+
+```clojure
+(modifier ?initiative (+ ?initiative (* 2 ?int-mod)))
+(modifier ?dexterity 12)
+(modifier ?intelligence 15)
+(modifier ?dex-mod (ability-mod ?dexterity))
+(modifier ?int-mod (ability-mod ?intelligence))
+(modifier ?initiative ?dex-mod)
+```
+Either our initiative calculation would throw an error our it would be completely wrong since the other derived attributes it depends on have not been applied yet. There is no logical ordering for which options should be applied, so modifiers can very well be provided out of order. For this reason we have to build a dependency graph of derived attributes and then apply the modifiers in topologically sorted order. Identifying these dependencies is why we use the ?<attribute-name> references. 
 
 ## FAQs
 **Q: Ummmmm, why is your code so ugly, I thought Clojure code was supposed to be pretty.** 
 
-**A:** *Yeah, about that...I worked on this for about 4 months full time, trying to compete with D&D Beyond's huge team and budget. That lead to a stressed-out me and ugly code. Help me make it pretty sucka!*
+**A:** *Yeah, about that...I worked on this for about 4 months full time, trying to compete with D&D Beyond's huge team and budget. That lead to a stressed-out me and ugly code. Help me make it pretty!*
 
 
-**Q: Mwahahahaha, now that I have your code I'm going to fork it and build the most awesome website in the world that will totally fucking annihilate OrcPub2.com. I'm going to call it FlumphTavern69.com. Come at me bro!**
+**Q: Mwahahahaha, now that I have your code I'm going to fork it and build the most awesome website in the world that will totally frackin' annihilate OrcPub2.com. I'm going to call it FlumphTavern69.com. Come at me bro!**
 
-**A:** *Motherfucking hell yeah, do that shit, flumphs are some sexy bitches!*
+**A:** *Hell yeah, do that, flumphs are some sexy creatures!*
 
 
-**Q: Blahahahaha, you done fucked up, we are super-mega-corp Hex Inc. we will steal your awesome code and put it into our less awesome app. What you got to say about that, huh, bitch?**
+**Q: Blahahahaha, you done fracked up, we are super-mega-corp Hex Inc. we will steal your awesome code and put it into our less awesome app. What you got to say about that, huh, beotch?**
 
-**A:** *I'm down for that shit, your app makes me sad, if you were to combine your official license and professional visual design with my more modern technical and UX design, your app would make me happy and I could justify paying all the money for all the content* 
+**A:** *I'm down for that, your app makes me sad, if you were to combine your official license and professional visual design with my more modern technical and UX design, your app would make me happy and I could justify paying all the money for all the content* 
 
 
 **Q: Seriously?!!! Your unit test coverage is pathetic!**
 
-**A:** *Yep, add some, it would be rad.*
+**A:** *Yep, add some, it would be awesome.*
 
 
 **Q: I'm a newb Clojure developer looking to get my feet wet, where to start?**
