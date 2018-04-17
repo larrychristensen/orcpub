@@ -92,7 +92,7 @@ user> built-character
  :int-bonus 1}
 ```
 
-This may seem overly complicated, but after my work on the (Original Orcpub)[orcpub.com], I realized that this really the only real correct solution as it models how character building actually works. The original Orcpub stored characters essentially like the built-character above with a centralized set of functions to compute other derived values. This is the most straightforward solution, but this has flaws:
+This may seem overly complicated, but after my work on the [Original Orcpub.com](orcpub.com), I realized that this really the only real correct solution as it models how character building actually works. The original Orcpub stored characters essentially like the built-character above with a centralized set of functions to compute other derived values. This is the most straightforward solution, but this has flaws:
 
 * You have difficulty figuring out which options have been selected and which ones still need to be selected.
 * You keep having to patch your data as your application evolves. For example, say you store a character's known spells as a list of spell IDs. Then you realize later that users want to also know what their attack bonus is for each spell. At the very least you'll have to make some significant changes to every stored character.
