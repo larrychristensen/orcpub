@@ -6934,8 +6934,8 @@
 
 (defn my-selections [name plugin]
   [my-content-type
-   plugin
    name
+   plugin
    "selection"
    ::e5/selections
    "checklist"
