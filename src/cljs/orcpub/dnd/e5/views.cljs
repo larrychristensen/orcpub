@@ -4938,7 +4938,11 @@
                  obj-to-item
                  opt/abilities))
         :value (or (:ability spell-cfg) :select)
-        :on-change #(dispatch [value-change-event index (assoc spell-cfg :ability (keyword %))])}]]
+        :on-change #(dispatch [value-change-event
+                               index
+                               (assoc spell-cfg
+                                 :ability
+                                 (keyword 'orcpub.dnd.e5.character %))])}]]
      [:div.m-l-5
       [labeled-dropdown
        "Spell"
