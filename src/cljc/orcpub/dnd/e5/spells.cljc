@@ -4736,7 +4736,7 @@ This spell dispels any darkness in its area that was created by a spell."
     :source :phb
     :page 279
     :summary "Temporarily tranform a quiver into a magical one. Until the spell ends, take a bonus action on each of your turns to make two attacks with a weapon that uses the quiver's type of ammunition. Each time you fire, the ammunition is immediately replaced with another piece of non-magical ammunition. The ammunition disappears when the spell ends."}
-   {:name "Sword Burst"
+   #_{:name "Sword Burst"
     :school conjuration
     :level 0
     :casting-time actions-1
@@ -4744,7 +4744,9 @@ This spell dispels any darkness in its area that was created by a spell."
     :components {:verbal true}
     :duration instantaneous
     :source :scag
-    :page 143}
+    :page 143
+    :description "Each creature within range other than you must succeed on a Dexterity save or take 1d6 force damage.
+      This spell's damage increases by 1d6 when you reach 5th, 11th, and 17th level."}
    {
     :name "Symbol"
     :school abjuration
