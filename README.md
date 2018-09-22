@@ -104,7 +104,7 @@ The OrcPub2 architecture fixes these problems:
 * You know exactly which options have been selected, which have not, and how every modifier is arrived at, given the entity and the most up-to-date templates.
 * You don't need to patch up stored characters if you find a bug since characters are stored as just a set of very generic choices.
 * It's scalable and pluggable. Most logic for derived values is stored inside of the options that create or modify these derived values. Many rules within D&D 5e allow for picking the best of alternate calculations for a particular attribute (AC comes to mind). With the OrcPub2 solution you can have an option easily override or modify a calculation without any other code having to know about it. This makes for a MUCH more manageable solution and makes it easy to add options as plugins. 
-* The entity builder engine could be used for building any character in any system. In fact, it could be used to build any entity in any system. For example, say you have a game system with well-defined mechanics building a vehicle, the entity builder engine could do that.
+* The entity builder engine could be used for building any character in any system. In fact, it could be used to build any entity in any system. For example, say you have a game system with well-defined mechanics for building a vehicle, the entity builder engine could do that.
 
 ### Modifiers
 
@@ -141,7 +141,7 @@ Given this, you might start calculating initiative as follows:
    (ability-modifier (dexterity character)))
 ```
 
-Consider what happens when you need to account for the 'Improved Initiative' feat, you'll need to add the calculation to the initiative function. Okay, this is probably still manageable. Then consider what happens when some cool subclass comes along that gets an initiative bonus at 9th level. Now it starts getting more unmanagable. When you try to add every option from every book into the mix, each of which might have some totally new condition for modifying initiative, you quickly end up with a nausiating ball of mud that will be scary to work with.
+Consider what happens when you need to account for the 'Improved Initiative' feat, you'll need to add the calculation to the initiative function. Okay, this is probably still manageable. Then consider what happens when some cool subclass comes along that gets an initiative bonus at 9th level. Now it starts getting more unmanagable. When you try to add every option from every book into the mix, each of which might have some totally new condition for modifying initiative, you quickly end up with a nauseating ball of mud that will be scary to work with.
 
 OrcPub2 decentralizes most calculations using modifiers associated with selected character options. When you add options you also specify any modifiers associated with that option. For example, in the OrcPub2 entity example above, we have the elf option:
 
@@ -176,7 +176,7 @@ Consider what would happen if we applied the above modifiers in a different orde
 (modifier ?int-mod (ability-mod ?intelligence))
 (modifier ?initiative ?dex-mod)
 ```
-Either our initiative calculation would throw an error our it would be completely wrong since the other derived attributes it depends on have not been applied yet. There is no logical ordering for which options should be applied, so modifiers can very well be provided out of order. For this reason we have to build a dependency graph of derived attributes and then apply the modifiers in topologically sorted order. Identifying these dependencies is why we use the ?<attribute-name> references. 
+Either our initiative calculation would throw an error or it would be completely wrong since the other derived attributes it depends on have not been applied yet. There is no logical ordering for which options should be applied, so modifiers can very well be provided out of order. For this reason we have to build a dependency graph of derived attributes and then apply the modifiers in topologically sorted order. Identifying these dependencies is why we use the ?<attribute-name> references. 
 
 ## FAQs
 **Q: Ummmmm, why is your code so ugly, I thought Clojure code was supposed to be pretty.** 
