@@ -243,7 +243,7 @@
   (into
    []
    common/add-keys-xform
-   [{:name "Burgler's Pack"
+   [{:name "Burglar's Pack"
      :items {:backpack 1
              :ball-bearings 1
              :string 1
