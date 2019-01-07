@@ -8,6 +8,8 @@ This is the code for OrcPub2.com. Many, many people have expressed interest in h
 - Install leiningen: https://leiningen.org/
 - run `lein figwheel`
 
+*NOTE:* There is an issue using leiningen 2.8.1 causing a `ClassCastException`. Building with leiningen 2.7.1 still works
+
 That should get a basic dev environment going and open your browser at [localhost:3449](http://localhost:3449/).
 When you save changes, it will auto compile and send all changes to the browser without the
 need to reload. After the compilation process is complete, you will
