@@ -10,9 +10,8 @@ RUN git clone --branch ${BRANCH} https://github.com/${REPO}/orcpub.git &&\
 	cd orcpub &&\
 	lein uberjar
 
-FROM bootstrap-lein:latest as runner
+FROM datomic:latest as runner
 MAINTAINER daemonsthere@gmail.com
 
+ADD orcpub.conf /etc/supervisor/conf.d/orcpub.conf
 COPY --from=builder /opt/orcpub/target/orcpub.jar /orcpub.jar
-ENTRYPOINT ["java", "-jar"]
-CMD ["orcpub.jar"]
