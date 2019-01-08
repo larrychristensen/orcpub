@@ -36,7 +36,6 @@
     (datomic/new-datomic
       (if-let [datomic-url (:datomic-url environ/env)]
         (str datomic-url "?aws_access_key_id=" (environ/env :datomic-access-key) "&aws_secret_key=" (environ/env :datomic-secret-key))
-        ; (str datomic-url)
         (when true #_(= :dev env)
           (println "WARN: no :datomic-url environment variable set; using local dev")
           "datomic:free://localhost:4334/orcpub")))
