@@ -28,7 +28,7 @@
                  [clj-http "3.6.1"]
                  [com.yetanalytics/ring-etag-middleware "0.1.1"]
                  [org.clojure/test.check "0.9.0"]
-                 [com.datomic/datomic-free "0.9.5561"]
+
                  [org.clojure/core.match "0.3.0-alpha5"]
                  [re-frame "0.9.0"]
                  [reagent "0.7.0"]
@@ -57,6 +57,7 @@
 
                  [pdfkit-clj "0.1.6"]
                  [vvvvalvalval/datomock "0.2.0"]]
+                 [com.datomic/datomic-free "0.9.5561"]
 
   :plugins [[lein-figwheel "0.5.14"]
             [lein-cljsbuild "1.1.6" :exclusions [[org.clojure/clojure]]]
@@ -207,7 +208,6 @@
                                                          :optimize-constants true
                                                          :optimizations :advanced
                                                          :closure-defines {"goog.DEBUG" false}}}]}
-                    :dependencies [[com.datomic/datomic-free "0.9.5561"]]}
              :uberjar {:prep-tasks ["clean" "compile" ["cljsbuild" "once" "prod"]]
                        :env {:production true}
                        :aot :all
