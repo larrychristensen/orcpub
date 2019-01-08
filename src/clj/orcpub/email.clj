@@ -28,7 +28,7 @@
   {:user (environ/env :email-access-key)
    :pass (environ/env :email-secret-key)
    :host (environ/env :email-server-url)
-   :port 587})
+   :port (environ/env :email-server-port)})
 
 (defn send-verification-email [base-url {:keys [email username first-and-last-name]} verification-key]
   (postal/send-message (email-cfg)
