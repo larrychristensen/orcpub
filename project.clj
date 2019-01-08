@@ -28,7 +28,7 @@
                  [clj-http "3.6.1"]
                  [com.yetanalytics/ring-etag-middleware "0.1.1"]
                  [org.clojure/test.check "0.9.0"]
-                 [com.datomic/datomic-free "0.9.5561"]
+                 
                  [org.clojure/core.match "0.3.0-alpha5"]
                  [re-frame "0.9.0"]
                  [reagent "0.7.0"]
@@ -206,7 +206,6 @@
                                                          :externs       ["js/externs.js"]
                                                          :parallel-build     true
                                                          :optimize-constants true
-                                                         :closure-defines {"goog.DEBUG" false}}}]}}
                                                          :optimizations :advanced}}]}
                     :dependencies [[com.datomic/datomic-free "0.9.5561"]]}
              :uberjar {:prep-tasks ["clean" "compile" ["cljsbuild" "once" "prod"]]
