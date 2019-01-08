@@ -1,15 +1,15 @@
 ---
 version: '3'
 services:
-  datomic:
+  database:
     image: akiel/datomic-free:0.9.5561
     ports:
       - "4334-4336:4334-4336"
   orcpub:
     image: orcpub:latest
-    # environment:
-    #   DATOMIC_URL: datomic
-    #   DATOMIC_ACCESS_KEY: ''
-    #   DATOMIC_SECRET_KEY: ''
+    environment:
+      DATOMIC_URL: datomic:free://database:4334/orcpub
+      DATOMIC_ACCESS_KEY: ''
+      DATOMIC_SECRET_KEY: ''
     depends_on: 
-      - datomic
+      - database
