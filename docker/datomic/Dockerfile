@@ -5,7 +5,6 @@ ENV DATOMIC_VERSION 0.9.5561
 
 RUN apt-get update &&\
 	apt-get -y install \
-		dumb-init \
 		unzip
 
 ADD https://my.datomic.com/downloads/free/${DATOMIC_VERSION} /tmp/datomic.zip
@@ -16,3 +15,6 @@ COPY transactor.properties /datomic/transactor.properties
 
 VOLUME /data
 VOLUME /log
+
+ENTRYPOINT ["/datomic/bin/transactor"]
+CMD ["/datomic/transactor.properties"]
