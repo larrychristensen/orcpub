@@ -27,7 +27,7 @@
 (defn email-cfg []
   {:user (environ/env :email-access-key)
    :pass (environ/env :email-secret-key)
-   :host "email-smtp.us-west-2.amazonaws.com"
+   :host (environ/env :email-server-url)
    :port 587})
 
 (defn send-verification-email [base-url {:keys [email username first-and-last-name]} verification-key]

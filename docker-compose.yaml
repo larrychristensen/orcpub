@@ -6,6 +6,9 @@ services:
     volumes:
       - ./data:/data
     environment:
-      PORT: 8080
+      PORT: 8890
+      EMAIL_SERVER_URL: 'to.be.added'
+      EMAIL_ACCESS_KEY: 'user'
+      EMAIL_SECRET_KEY: 'password'
     ports:
-      - "8080:8080"
+      - "8890:8890"
