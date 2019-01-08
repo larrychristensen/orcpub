@@ -13,5 +13,8 @@ RUN git clone --branch ${BRANCH} https://github.com/${REPO}/orcpub.git &&\
 FROM datomic:latest as runner
 MAINTAINER daemonsthere@gmail.com
 
-ADD orcpub.conf /etc/supervisor/conf.d/orcpub.conf
 COPY --from=builder /opt/orcpub/target/orcpub.jar /orcpub.jar
+ADD start.sh /start.sh
+
+ENTRYPOINT ["dumb-init", "--"]
+CMD ["/start.sh"]

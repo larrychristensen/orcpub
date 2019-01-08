@@ -5,7 +5,7 @@ ENV DATOMIC_VERSION 0.9.5561
 
 RUN apt-get update &&\
 	apt-get -y install \
-		supervisor \
+		dumb-init \
 		unzip
 
 ADD https://my.datomic.com/downloads/free/${DATOMIC_VERSION} /tmp/datomic.zip
@@ -25,8 +25,3 @@ RUN cp config/samples/free-transactor-template.properties transactor.properties 
 
 VOLUME /data
 VOLUME /log
-
-ADD datomic.conf /etc/supervisor/conf.d/datomic.conf
-
-ENTRYPOINT ["supervisord", "-c"]
-CMD ["/etc/supervisor/supervisord.conf"]
