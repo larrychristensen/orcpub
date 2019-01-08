@@ -14,7 +14,6 @@ FROM demonsthere/orcpub:bootstrap-lein as runner
 MAINTAINER daemonsthere@gmail.com
 
 COPY --from=builder /opt/orcpub/target/orcpub.jar /orcpub.jar
-ADD start.sh /start.sh
 
 ENTRYPOINT ["java", "-jar"]
 CMD ["/orcpub.jar"]

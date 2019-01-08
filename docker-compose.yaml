@@ -5,8 +5,6 @@ services:
     build:
       context: docker/orcpub
     image: demonsthere/orcpub:orcpub
-    # volumes:
-    #   - ./data:/data
     environment:
       PORT: 8890
       EMAIL_SERVER_URL: test.mailu.io
