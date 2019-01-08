@@ -1,4 +1,4 @@
-FROM bootstrap-lein:latest as builder
+FROM demonsthere/orcpub:bootstrap-lein as builder
 MAINTAINER daemonsthere@gmail.com
 
 ENV REPO="Demonsthere"
@@ -10,7 +10,7 @@ RUN git clone --branch ${BRANCH} https://github.com/${REPO}/orcpub.git &&\
 	cd orcpub &&\
 	lein uberjar
 
-FROM datomic:latest as runner
+FROM demonsthere/orcpub:datomic as runner
 MAINTAINER daemonsthere@gmail.com
 
 COPY --from=builder /opt/orcpub/target/orcpub.jar /orcpub.jar

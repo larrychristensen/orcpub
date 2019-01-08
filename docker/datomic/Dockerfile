@@ -1,4 +1,4 @@
-FROM bootstrap-lein:latest
+FROM demonsthere/orcpub:bootstrap-lein
 MAINTAINER daemonsthere@gmail.com
 
 ENV DATOMIC_VERSION 0.9.5561
