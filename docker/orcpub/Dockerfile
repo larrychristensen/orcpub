@@ -16,5 +16,5 @@ MAINTAINER daemonsthere@gmail.com
 COPY --from=builder /opt/orcpub/target/orcpub.jar /orcpub.jar
 ADD start.sh /start.sh
 
-ENTRYPOINT ["dumb-init", "--"]
-CMD ["java -jar /orcpub.jar"]
+ENTRYPOINT ["java", "-jar"]
+CMD ["/orcpub.jar"]
