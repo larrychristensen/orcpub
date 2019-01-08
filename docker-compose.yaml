@@ -9,9 +9,9 @@ services:
       - ./data:/data
     environment:
       PORT: 8890
-      EMAIL_SERVER_URL: 'to.be.added'
-      EMAIL_ACCESS_KEY: 'user'
-      EMAIL_SECRET_KEY: 'password'
+      EMAIL_SERVER_URL: test.mailu.io
+      EMAIL_ACCESS_KEY: admin@test.mailu.io
+      EMAIL_SECRET_KEY: letmein
       EMAIL_SERVER_PORT: 587
     ports:
       - "8890:8890"
