@@ -56,7 +56,8 @@
                  [environ "1.1.0"]
 
                  [pdfkit-clj "0.1.6"]
-                 [vvvvalvalval/datomock "0.2.0"]]
+                 [vvvvalvalval/datomock "0.2.0"]
+                 [com.datomic/datomic-free "0.9.5561"]]
 
   :plugins [[lein-figwheel "0.5.14"]
             [lein-cljsbuild "1.1.6" :exclusions [[org.clojure/clojure]]]
@@ -205,8 +206,9 @@
                                                          :externs       ["js/externs.js"]
                                                          :parallel-build     true
                                                          :optimize-constants true
-                                                         :optimizations :advanced
                                                          :closure-defines {"goog.DEBUG" false}}}]}}
+                                                         :optimizations :advanced}}]}
+                    :dependencies [[com.datomic/datomic-free "0.9.5561"]]}
              :uberjar {:prep-tasks ["clean" "compile" ["cljsbuild" "once" "prod"]]
                        :env {:production true}
                        :aot :all

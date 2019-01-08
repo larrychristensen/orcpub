@@ -8,6 +8,8 @@ This is the code for OrcPub2.com. Many, many people have expressed interest in h
 - Install leiningen: https://leiningen.org/
 - run `lein figwheel`
 
+*NOTE:* There is an issue using leiningen 2.8.1 causing a `ClassCastException`. Building with leiningen 2.7.1 still works
+
 That should get a basic dev environment going and open your browser at [localhost:3449](http://localhost:3449/).
 When you save changes, it will auto compile and send all changes to the browser without the
 need to reload. After the compilation process is complete, you will
@@ -56,6 +58,17 @@ user=> (stop-server)
 ```
 
 Within Emacs you should be able to save your file (C-x C-s) and reload it into the REPL (C-c C-w) to get your server-side changes to take effect. Within Vim with `vim-fireplace` you can eval a form with `cpp`, a paragraph with `cpip`, etc; check out its help file for more information. Regardless of editor, your client-side changes will take effect immediately when you change a CLJS or CLJC file while `lein figwheel` is running.
+
+## Running a Server
+
+Production builds should use the `prod` or `uberjar` profiles. Work is underway to Dockerize this. In the meantime, you may run a copy of Orcpub with in-memory database as follows:
+
+```shell
+lein uberjar
+PORT=8890 java -jar target/orcpub.jar
+```
+
+There are several issues which need to be worked out, such as mail server configuration, persistant database, etc. This is just a beginning.
 
 ## OrcPub Fundamentals
 
