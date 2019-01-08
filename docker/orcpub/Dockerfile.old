@@ -10,11 +10,11 @@ RUN git clone --branch ${BRANCH} https://github.com/${REPO}/orcpub.git &&\
 	cd orcpub &&\
 	lein uberjar
 
-FROM demonsthere/orcpub:bootstrap-lein as runner
+FROM demonsthere/orcpub:datomic as runner
 MAINTAINER daemonsthere@gmail.com
 
 COPY --from=builder /opt/orcpub/target/orcpub.jar /orcpub.jar
 ADD start.sh /start.sh
 
 ENTRYPOINT ["dumb-init", "--"]
-CMD ["java -jar /orcpub.jar"]
+CMD ["/start.sh"]
