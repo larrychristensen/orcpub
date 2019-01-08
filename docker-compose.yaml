@@ -2,6 +2,8 @@
 version: '3'
 services:
   orcpub:
+    build:
+      context: docker/orcpub
     image: demonsthere/orcpub:orcpub
     volumes:
       - ./data:/data
