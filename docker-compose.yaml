@@ -4,6 +4,9 @@ services:
   orcpub:
     build:
       context: docker/orcpub
+      args:
+        REPO: Orcpub
+        BRANCH: develop
     image: demonsthere/orcpub:orcpub
     environment:
       PORT: 8890
