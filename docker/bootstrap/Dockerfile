@@ -11,6 +11,6 @@ RUN apt-get update &&\
 		git
 
 # Get lein 2.7.1
-RUN curl https://raw.githubusercontent.com/technomancy/leiningen/${LEIN_VERSION}/bin/lein -o /usr/local/bin/lein &&\
-	chmod +x /usr/local/bin/lein &&\
+ADD https://raw.githubusercontent.com/technomancy/leiningen/${LEIN_VERSION}/bin/lein /usr/local/bin/lein
+RUN chmod +x /usr/local/bin/lein &&\
 	lein
