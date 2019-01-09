@@ -1,8 +1,8 @@
 FROM demonsthere/orcpub:bootstrap-lein as builder
 MAINTAINER daemonsthere@gmail.com
 
-ENV REPO="Demonsthere"
-ENV BRANCH="master"
+ARG REPO="Orcpub"
+ARG BRANCH="master"
 
 # Get orcpub source
 WORKDIR /opt
