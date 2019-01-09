@@ -22,3 +22,5 @@ env.sh
 #
 *#*
 /data
+*.crt
+*.key
