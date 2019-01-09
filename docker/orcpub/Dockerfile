@@ -2,7 +2,7 @@ FROM demonsthere/orcpub:bootstrap-lein as builder
 MAINTAINER daemonsthere@gmail.com
 
 ARG REPO="Orcpub"
-ARG BRANCH="master"
+ARG BRANCH="develop"
 
 # Get orcpub source
 WORKDIR /opt
