@@ -1,0 +1,16 @@
+FROM openjdk:8-stretch
+MAINTAINER daemonsthere@gmail.com
+
+ENV LEIN_ROOT 1
+ENV LEIN_VERSION="2.7.1"
+
+# Get dependencies
+RUN apt-get update &&\
+	apt-get install -y \
+		curl \
+		git
+
+# Get lein 2.7.1
+RUN curl https://raw.githubusercontent.com/technomancy/leiningen/${LEIN_VERSION}/bin/lein -o /usr/local/bin/lein &&\
+	chmod +x /usr/local/bin/lein &&\
+	lein
