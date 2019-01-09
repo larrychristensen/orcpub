@@ -2,12 +2,12 @@
 version: '3'
 services:
   orcpub:
-    build:
-      context: docker/orcpub
-      args:
-        REPO: Orcpub
-        BRANCH: develop
     image: demonsthere/orcpub:orcpub
+    # build:
+    #   context: docker/orcpub
+    #   args:
+    #     REPO: Orcpub
+    #     BRANCH: develop
     environment:
       PORT: 8890
       EMAIL_SERVER_URL: test.mailu.io
