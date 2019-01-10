@@ -126,7 +126,7 @@
        :orcpub.entity/options
        {:tool-proficiency
         [{:orcpub.entity/key :dice-set}
-         {:orcpub.entity/key :land-vehicles}]}}}}}, 
+         {:orcpub.entity/key :land-vehicles}]}}}}},
    :changed true})
 
 (def balanced-fighter
@@ -580,7 +580,7 @@
         {:orcpub.entity/key :perception}
         {:orcpub.entity/key :acrobatics}
         {:orcpub.entity/key :investigation}],
-       :expertise {:orcpub.entity/key :one-skill-theives-tools},
+       :expertise {:orcpub.entity/key :one-skill-thieves-tools},
        :starting-equipment-melee-weapon {:orcpub.entity/key :shortsword},
        :starting-equipment-additional-weapon
        {:orcpub.entity/key :shortbow-quiver-20-arrows},
@@ -816,7 +816,7 @@
               {:answer "I don't care about rules"
                :tag :chaotic
                :update-fn (set-law-fn :chaotic-good :chaotic-neutral :chaotic-evil)}]}
-   
+
    {:key :sex
     :question "Is your character male, female, or neither"
     :answers [{:answer "Male"
@@ -828,7 +828,7 @@
               {:answer "Other"
                :tag :androgenous
                :update-fn (set-sex-fn "other")}]}
-   
+
    {:key :lotr-character
     :question "As far as your race goes, which Lord of the Rings character is your character most like?"
     :answers [{:answer "Aragorn, Eowyn, or Bard (Human)"
@@ -859,7 +859,7 @@
                :update-fn (add-race-fn :tiefling)}
               {:answer "What's Lord of the Rings?"
                :tag :whats-lotr}]}
-   
+
    {:key :human-or-exotic
     :filter #(= :whats-lotr (:lotr-character %))
     :question "Is your character human or a more exotic race?"
@@ -868,7 +868,7 @@
                :update-fn (add-race-fn :human :tethyrian)}
               {:answer "Exotic"
                :tag :exotic}]}
-   
+
    {:key :race-description
     :filter #(= :exotic (:human-or-exotic %))
     :question "Which best describes your character?"

@@ -1741,7 +1741,7 @@
                {:name "Two Skills"
                 :selections [(expertise-selection 2 :two-skills)]})
               (t/option-cfg
-               {:name "One Skill/Theives Tools"
+               {:name "One Skill/Thieves' Tools"
                 :selections [(expertise-selection 1 :one-skill-thieves-tools)]
                 :modifiers [(modifiers/tool-proficiency :thieves-tools)
                             (modifiers/tool-expertise :thieves-tools)]})]}))
@@ -2032,7 +2032,7 @@
                      (map (fn [sr] (assoc sr :source source)) subraces)
                      subraces))
                   [(none-option subrace-path)])
-                 
+
                  (not plugin?)
                  (conj (custom-subrace-option spell-lists spells-map language-map weapon-map subrace-path)))})))
 
@@ -2528,7 +2528,7 @@
       :key (level-key i)
       :order i
       :selections (concat
-                   selections      
+                   selections
                    (some-> spellcasting-template :selections (get i)))
       :modifiers (some-> levels (get i) :modifiers)})))
 
@@ -2580,7 +2580,7 @@
                                (total-slots 3)
                                (get level)
                                pos?)))
-    
+
     :options (sequence
               (comp
                (filter
