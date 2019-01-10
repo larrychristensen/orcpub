@@ -7,7 +7,7 @@ This is the code for OrcPub2.com. Many, many people have expressed interest in h
 We have managed to dockerize the project which should make the setup easy. 
 
 **Dependencies**
-- Docker
+- [Docker](https://docs.docker.com/install/)
 - git
 
 ### Local development
