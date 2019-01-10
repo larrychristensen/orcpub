@@ -2354,7 +2354,13 @@ heal, or wish."
     :components {:verbal true :somatic true :material true :material-component "charcoal, herbs, and incense (10 gp worth) consumed in a fire in a brass brazier."}
     :duration instantaneous
     :page 240
-    :description "Summon a familiar that obeys your commands."}
+    :description "You gain the service of a familiar, a spirit that takes an animal form you choose: bat, cat, crab, frog (toad), hawk, lizard, octopus, owl, poisonous snake, fish (quipper), rat, raven, sea horse, spider, or weasel. Appearing in an unoccupied space within range, the familiar has the statistics of the chosen form, though it is a celestial, fey, or fiend (your choice) instead of a beast.
+     Your familiar acts independently of you, but it always obeys your commands. In combat, it rolls its own initiative and acts on its own turn. A familiar can't attack, but it can take other actions as normal.
+     When the familiar drops to 0 hit points, it disappears, leaving behind no physical form. It resappears after you case this spell again.
+     When your familiar is within 100 feet of you, you can communicate with it telepathically. Additionally, as an action, you can see though your familiar's eyes and hear what it hears until the start of your next turn, gaining the benefits of any special senses that the familiar has. During this time you are deaf and blind with regard to your own senses.
+     As an action, you can temporarily dismiss your familiar. It disappears into a pocket dimension where it awaits your summon. Alternatively, you can dismiss it forever. As an action while it is temporarily dismissed, you can cause it to reappear in an unoccupied space within 30 feet of you.
+     You can't have more than one familiar at a time. If you case this spell while you already have a familiar, you instead cause it to adopt a new form. Choose one of the forms from the above list. Your familiar transforms into the chosen creature.
+     Finally, when you cast a spell with a range of youch, your familiar can deliever the spell as if it has cast the spell. Your familiar must be within 100 feet of you, and it must use its reaction to deliever the spell when you cast it. If the spell requires and atack roll, you use your attack modifier for the roll."}
    {
     :name "Find Steed"
     :school conjuration
