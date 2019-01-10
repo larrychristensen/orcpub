@@ -2757,15 +2757,17 @@ When the grease appears, each creature standing in its area must succeed on a De
 • Any reduction to one of the target's ability scores
 • One effect reducing the target's hit point maximum"
     }
-   {:name "Green-Flame Blade"
+   #_{:name "Green-Flame Blade"
     :school evocation
     :level 0
     :casting-time actions-1
-    :range self
+    :range "5 feet"
     :components {:verbal true :material true :material-component "a weapon"}
     :duration instantaneous
     :source :scag
-    :page 143}
+    :page 143
+    :description "You make a single weapon attack against a creature you can see in range. If the attack hits, the target suffers the normal effects of the attack and green fire jumps from the enemy to another creature of your choice within 5 feet of it. You must be able to see the secondary target. The green flame deals fire damage equal to your spellcasting ability modifier.
+      At 5th level, the melee attack deals an extra 1d8 fire damage, and the green flame damage becomes 1d8 + your spellcasting ability modifier. Both damage dice increase by one again at levels 11 and 17."}
    #_{
     :name "Guardian of Faith"
     :school conjuration
