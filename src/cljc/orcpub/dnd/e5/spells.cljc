@@ -3814,7 +3814,7 @@ A dancing creature must use all its movement to dance without leaving its space 
     :description "A passage appears at a point of your choice that you can see on a wooden, plaster, or stone surface (such as a wall, a ceiling, or a floor) within range, and lasts for the duration. You choose the opening's dimensions: up to 5 feet wide, 8 feet tall, and 20 feet deep. The passage creates no instability in a structure surrounding it.
 When the opening disappears, any creatures or objects still in the passage created by the spell are safely ejected to an unoccupied space nearest to the surface on which you cast the spell."
     }
-   {
+   #_{
     :name "Phantasmal Force"
     :school illusion
     :level 2
@@ -3822,6 +3822,9 @@ When the opening disappears, any creatures or objects still in the passage creat
     :range "60 feet"
     :components {:verbal true :somatic true :material true :material-component "fleece (a bit)"}
     :duration conc-1-min
+    :description "You fill the mind of a creature you can see with some illusory creature, object, or phenomenon while the spell lasts. Unless the target succeeds at an Intelligence saving throw, it believes the illusion is entirely real; even its senses will verify this and any illogical situations that arise will be rationalised in the illusion's favor.
+     On your turn, the illusion deals 1d6 psychic damage if the target stands in, or enters the area within 5 feet of the illusion, including the illusion's space. The damage appears to the target to be caused by some attack or effect that is natural to the illusion. It does not deal damage if it is not something that would naturally attack or cause a damaging effect if it were real.
+     The target can make an investigation check on the illusion. If it succeeds, the spell ends."
     }
    {
     :name "Phantasmal Killer"
