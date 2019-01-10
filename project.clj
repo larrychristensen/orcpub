@@ -1,3 +1,4 @@
+; Allow http connection, as org.apache.pdfbox/pdfbox has http dependnecies
 (require 'cemerick.pomegranate.aether)
 (cemerick.pomegranate.aether/register-wagon-factory!
  "http" #(org.apache.maven.wagon.providers.http.HttpWagon.))
@@ -165,8 +166,8 @@
   ;; Please see:
   ;; https://github.com/bhauman/lein-figwheel/wiki/Using-the-Figwheel-REPL-within-NRepl
 
-  :uberjar-inclusions [".ebextensions"]
-  :jar-inclusions [".ebextensions"]
+  :uberjar-inclusions [#"^\.ebextensions"]
+  :jar-inclusions [#"^\.ebextensions"]
 
   :aliases {"figwheel-native" ["with-profile" "native-dev" "run" "-m" "user" "--figwheel"]
             ;;"figwheel-web" ["figwheel"]
