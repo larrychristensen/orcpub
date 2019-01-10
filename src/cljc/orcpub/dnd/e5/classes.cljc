@@ -137,7 +137,7 @@
     :subclass-level 3
     :subclass-title "Primal Path"
     :subclass-help "Your primal path shapes the nature of your barbarian rage and gives you additional features."
-    :subclasses [{:name "Path of the Beserker"
+    :subclasses [{:name "Path of the Berserker"
                   :levels {10 {:modifiers [(mod5e/action
                                             {:name "Intimidating Presence"
                                              :level 10
