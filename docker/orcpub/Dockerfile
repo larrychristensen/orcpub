@@ -6,7 +6,8 @@ ARG BRANCH="develop"
 
 # Get orcpub source
 WORKDIR /opt
-RUN git clone --branch ${BRANCH} https://github.com/${REPO}/orcpub.git &&\
+RUN printenv &&\
+	git clone --branch ${BRANCH} https://github.com/${REPO}/orcpub.git &&\
 	cd orcpub &&\
 	lein uberjar
 
