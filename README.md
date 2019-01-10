@@ -41,6 +41,7 @@ build:
     BRANCH: develop
 ```
 This will modify the deployment, so it will build the application rather than using our image. However note that you **need to change the REPO and BRANCH to YOUR fork** 
+Afterwards, run `docker-compose up --build` to start building!
 
 ## OrcPub Fundamentals
 
