@@ -1772,7 +1772,7 @@
                                              (let [abilities @(subscribe [::char5e/abilities nil c])]
                                                (and (>= (::char5e/wis abilities) 13)
                                                     (>= (::char5e/dex abilities) 13)))))]
-     :ability-increase-levels [4 8 10 16 19]
+     :ability-increase-levels [4 8 12 16 19]
      :spellcaster true
      :spellcasting {:level-factor 2
                     :known-mode :schedule
