@@ -1133,7 +1133,7 @@ While on the Ethereal Plane, you can see and hear the plane you originated from,
     :description "Your body becomes blurred, shifting and wavering to all who can see you. For the duration, any creature has disadvantage on attack rolls against you. An attacker is immune to this effect if it doesn't rely on sight, as with blindsight, or can see through illusions, as with truesight."
     }
    
-   {:name "Booming Blade"
+   #_{:name "Booming Blade"
     :level 0
     :school evocation
     :casting-time actions-1
@@ -1141,7 +1141,9 @@ While on the Ethereal Plane, you can see and hear the plane you originated from,
     :components {:verbal true :material true :material-component "a weapon"}
     :duration "1 round"
     :source :scag
-    :page 142}
+    :page 142
+    :description "You make a single melee weapon attack against a creature you can see in range. If the attack hits, the target is surrounded by magical energy, and it can't willingly move or it takes 1d8 thunder damage. The spell ends after dealing damage or at the start of your next turn, whichever is sooner
+      At 5th level, the melee attack deals an extra 1d8 thuinder damage, and the moving damage becomes 2d8. Both damage dice increase by one again at levels 11 and 17."}
    {
     :name "Branding Smite"
     :school evocation
