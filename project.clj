@@ -7,7 +7,7 @@
 
   :min-lein-version "2.7.1"
 
-  :repositories [["apache" "http://repository.apache.org/snapshots/"]
+  :repositories [["apache" "https://repository.apache.org/snapshots/"]
                  ["my.datomic.com" {:url "https://my.datomic.com/repo"
                                     :username [:gpg :env]
                                     :password [:gpg :env]}]]

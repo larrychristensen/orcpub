@@ -1,4 +1,4 @@
-FROM demonsthere/orcpub:bootstrap-lein as builder
+FROM lein:2.8.3 as builder
 MAINTAINER daemonsthere@gmail.com
 
 ARG REPO="Orcpub"

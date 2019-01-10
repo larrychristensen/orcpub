@@ -2,7 +2,7 @@ FROM openjdk:8-stretch
 MAINTAINER daemonsthere@gmail.com
 
 ENV LEIN_ROOT 1
-ENV LEIN_VERSION="2.7.1"
+ENV LEIN_VERSION="2.8.3"
 
 # Get dependencies
 RUN apt-get update &&\
