@@ -1133,7 +1133,7 @@ While on the Ethereal Plane, you can see and hear the plane you originated from,
     :description "Your body becomes blurred, shifting and wavering to all who can see you. For the duration, any creature has disadvantage on attack rolls against you. An attacker is immune to this effect if it doesn't rely on sight, as with blindsight, or can see through illusions, as with truesight."
     }
    
-   {:name "Booming Blade"
+   #_{:name "Booming Blade"
     :level 0
     :school evocation
     :casting-time actions-1
@@ -1141,7 +1141,9 @@ While on the Ethereal Plane, you can see and hear the plane you originated from,
     :components {:verbal true :material true :material-component "a weapon"}
     :duration "1 round"
     :source :scag
-    :page 142}
+    :page 142
+    :description "You make a single melee weapon attack against a creature you can see in range. If the attack hits, the target is surrounded by magical energy, and it can't willingly move or it takes 1d8 thunder damage. The spell ends after dealing damage or at the start of your next turn, whichever is sooner
+      At 5th level, the melee attack deals an extra 1d8 thuinder damage, and the moving damage becomes 2d8. Both damage dice increase by one again at levels 11 and 17."}
    {
     :name "Branding Smite"
     :school evocation
@@ -1917,8 +1919,7 @@ Once you detect the presence of a creature in this way, you can read its thought
                 :range "500 feet"
                 :components {:verbal true}
                 :duration instantaneous
-                :description "You teleport yourself from your current location to any other spot within range. You arrive at exactly the spot desired. It can be a place you can see, one you can visualize, or one you can describe by stating distance and direction, such as “200 feet straight downward” or “upward to the northwest at a 45-
-degree angle, 300 feet.”
+                :description "You teleport yourself from your current location to any other spot within range. You arrive at exactly the spot desired. It can be a place you can see, one you can visualize, or one you can describe by stating distance and direction, such as “200 feet straight downward” or “upward to the northwest at a 45-degree angle, 300 feet.”
 You can bring along objects as long as their weight doesn't exceed what you can carry. You can also bring one willing creature of your size or smaller who is carrying gear up to its carrying capacity. The creature must be within 5 feet of you when you cast this spell.
 If you would arrive in a place already occupied by an object or a creature, you and any creature traveling with you each take 4d6 force damage, and the spell fails to teleport you."
                 }
@@ -2353,7 +2354,13 @@ heal, or wish."
     :components {:verbal true :somatic true :material true :material-component "charcoal, herbs, and incense (10 gp worth) consumed in a fire in a brass brazier."}
     :duration instantaneous
     :page 240
-    :description "Summon a familiar that obeys your commands."}
+    :description "You gain the service of a familiar, a spirit that takes an animal form you choose: bat, cat, crab, frog (toad), hawk, lizard, octopus, owl, poisonous snake, fish (quipper), rat, raven, sea horse, spider, or weasel. Appearing in an unoccupied space within range, the familiar has the statistics of the chosen form, though it is a celestial, fey, or fiend (your choice) instead of a beast.
+     Your familiar acts independently of you, but it always obeys your commands. In combat, it rolls its own initiative and acts on its own turn. A familiar can't attack, but it can take other actions as normal.
+     When the familiar drops to 0 hit points, it disappears, leaving behind no physical form. It resappears after you case this spell again.
+     When your familiar is within 100 feet of you, you can communicate with it telepathically. Additionally, as an action, you can see though your familiar's eyes and hear what it hears until the start of your next turn, gaining the benefits of any special senses that the familiar has. During this time you are deaf and blind with regard to your own senses.
+     As an action, you can temporarily dismiss your familiar. It disappears into a pocket dimension where it awaits your summon. Alternatively, you can dismiss it forever. As an action while it is temporarily dismissed, you can cause it to reappear in an unoccupied space within 30 feet of you.
+     You can't have more than one familiar at a time. If you case this spell while you already have a familiar, you instead cause it to adopt a new form. Choose one of the forms from the above list. Your familiar transforms into the chosen creature.
+     Finally, when you cast a spell with a range of youch, your familiar can deliever the spell as if it has cast the spell. Your familiar must be within 100 feet of you, and it must use its reaction to deliever the spell when you cast it. If the spell requires and atack roll, you use your attack modifier for the roll."}
    {
     :name "Find Steed"
     :school conjuration
@@ -2423,12 +2430,8 @@ At Higher Levels. When you cast this spell using a spell slot of 4th level or hi
     :components {:verbal true :somatic true}
     :duration instantaneous
     :attack-roll? true
-    :description "You hurl a mote of fire at a creature or object within
-range. Make a ranged spell attack against the target. On a
-hit, the target takes 1d10 fire damage. A flammable object
-hit by this spell ignites if it isn’t being worn or carried.
-This spell’s damage increases by 1d10 when you reach
-5th level (2d10), 11th level (3d10), and 17th level (4d10)."
+    :description "You hurl a mote of fire at a creature or object within range. Make a ranged spell attack against the target. On a hit, the target takes 1d10 fire damage. A flammable object hit by this spell ignites if it isn’t being worn or carried.
+This spell’s damage increases by 1d10 when you reach 5th level (2d10), 11th level (3d10), and 17th level (4d10)."
     } {
     :name "Fire Shield"
     :school evocation
@@ -2755,15 +2758,17 @@ When the grease appears, each creature standing in its area must succeed on a De
 • Any reduction to one of the target's ability scores
 • One effect reducing the target's hit point maximum"
     }
-   {:name "Green-Flame Blade"
+   #_{:name "Green-Flame Blade"
     :school evocation
     :level 0
     :casting-time actions-1
-    :range self
+    :range "5 feet"
     :components {:verbal true :material true :material-component "a weapon"}
     :duration instantaneous
     :source :scag
-    :page 143}
+    :page 143
+    :description "You make a single weapon attack against a creature you can see in range. If the attack hits, the target suffers the normal effects of the attack and green fire jumps from the enemy to another creature of your choice within 5 feet of it. You must be able to see the secondary target. The green flame deals fire damage equal to your spellcasting ability modifier.
+      At 5th level, the melee attack deals an extra 1d8 fire damage, and the green flame damage becomes 1d8 + your spellcasting ability modifier. Both damage dice increase by one again at levels 11 and 17."}
    #_{
     :name "Guardian of Faith"
     :school conjuration
@@ -3051,8 +3056,7 @@ The spell ends for an affected creature if it takes any damage or if someone els
     :range "300 feet"
     :components {:verbal true :somatic true :material true :material-component "a pinch of dust and a few drops of water"}
     :duration instantaneous
-    :description "A hail of rock-hard ice pounds to the ground in a 20-
-foot-radius, 40-foot-high cylinder centered on a point within range. Each creature in the cylinder must make a Dexterity saving throw. A creature takes 2d8 bludgeoning damage and 4d6 cold damage on a failed save, or half as much damage on a successful one.
+    :description "A hail of rock-hard ice pounds to the ground in a 20-foot-radius, 40-foot-high cylinder centered on a point within range. Each creature in the cylinder must make a Dexterity saving throw. A creature takes 2d8 bludgeoning damage and 4d6 cold damage on a failed save, or half as much damage on a successful one.
 Hailstones turn the storm's area of effect into difficult terrain until the end of your next turn.
 At Higher Levels. When you cast this spell using a spell slot of 5th level or higher, the bludgeoning damage increases by 1d8 for each slot level above 4th."
     }
@@ -3810,7 +3814,7 @@ A dancing creature must use all its movement to dance without leaving its space 
     :description "A passage appears at a point of your choice that you can see on a wooden, plaster, or stone surface (such as a wall, a ceiling, or a floor) within range, and lasts for the duration. You choose the opening's dimensions: up to 5 feet wide, 8 feet tall, and 20 feet deep. The passage creates no instability in a structure surrounding it.
 When the opening disappears, any creatures or objects still in the passage created by the spell are safely ejected to an unoccupied space nearest to the surface on which you cast the spell."
     }
-   {
+   #_{
     :name "Phantasmal Force"
     :school illusion
     :level 2
@@ -3818,6 +3822,9 @@ When the opening disappears, any creatures or objects still in the passage creat
     :range "60 feet"
     :components {:verbal true :somatic true :material true :material-component "fleece (a bit)"}
     :duration conc-1-min
+    :description "You fill the mind of a creature you can see with some illusory creature, object, or phenomenon while the spell lasts. Unless the target succeeds at an Intelligence saving throw, it believes the illusion is entirely real; even its senses will verify this and any illogical situations that arise will be rationalised in the illusion's favor.
+     On your turn, the illusion deals 1d6 psychic damage if the target stands in, or enters the area within 5 feet of the illusion, including the illusion's space. The damage appears to the target to be caused by some attack or effect that is natural to the illusion. It does not deal damage if it is not something that would naturally attack or cause a damaging effect if it were real.
+     The target can make an investigation check on the illusion. If it succeeds, the spell ends."
     }
    {
     :name "Phantasmal Killer"
@@ -5169,8 +5176,7 @@ If you target a creature submerged in a liquid, the spell carries the target to 
                 :range "60 feet"
                 :components {:verbal true :somatic true :material true :material-component "a bit of spiderweb"}
                 :duration "Concentration, up to 1 hour"
-                :description "You conjure a mass of thick, sticky webbing at a point of your choice within range. The webs fill a 20-
-foot cube from that point for the duration. The webs are difficult terrain and lightly obscure their area.
+                :description "You conjure a mass of thick, sticky webbing at a point of your choice within range. The webs fill a 20-foot cube from that point for the duration. The webs are difficult terrain and lightly obscure their area.
 If the webs aren't anchored between two solid masses (such as walls or trees) or layered across a floor, wall, or ceiling, the conjured web collapses on itself, and the spell ends at the start of your next turn. Webs layered over a flat surface have a depth of 5 feet.
 Each creature that starts its turn in the webs or that enters them during its turn must make a Dexterity saving throw. On a failed save, the creature is restrained as long as it remains in the webs or until it breaks free.
 A creature restrained by the webs can use its action to make a Strength check against your spell save DC. If it succeeds, it is no longer restrained.
