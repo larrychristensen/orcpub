@@ -73,8 +73,9 @@
                                (str base-url (routes/path-for routes/reset-password-page-route) "?key=" reset-key))}))
 
 (defn send-error-email [context exception]
+  (if ( not-empty (environ/env :email-errors-enabled)) )
   (postal/send-message (email-cfg)
-                       {:from "OrcPub Errors <no-reply@orcpub.com>"
+                       {:from "OrcPub Errors " (environ/env :email-errors-enabled)
                         :to "redorc@orcpub.com"
                         :subject "Exception"
                         :body [{:type "text/plain"
