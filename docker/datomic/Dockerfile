@@ -1,4 +1,4 @@
-FROM clojure/openjdk8-lein-2.8.3
+FROM clojure:openjdk-8-lein
 MAINTAINER daemonsthere@gmail.com
 
 ENV DATOMIC_VERSION 0.9.5561

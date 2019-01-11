@@ -1,4 +1,4 @@
-FROM clojure/openjdk8-lein-2.8.3 as builder
+FROM clojure:openjdk-8-lein as builder
 MAINTAINER daemonsthere@gmail.com
 
 ARG REPO="Orcpub"
@@ -11,7 +11,7 @@ RUN printenv &&\
 	cd orcpub &&\
 	lein uberjar
 
-FROM openjdk/8-jre-alpine as runner
+FROM openjdk:8-jre-alpine as runner
 MAINTAINER daemonsthere@gmail.com
 
 COPY --from=builder /opt/orcpub/target/orcpub.jar /orcpub.jar
