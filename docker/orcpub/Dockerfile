@@ -1,16 +1,16 @@
-FROM demonsthere/orcpub:bootstrap-lein as builder
+FROM clojure:openjdk-8-lein as builder
 MAINTAINER daemonsthere@gmail.com
 
 ARG REPO="Orcpub"
 ARG BRANCH="develop"
 
 # Get orcpub source
-WORKDIR /opt
-RUN git clone --branch ${BRANCH} https://github.com/${REPO}/orcpub.git &&\
-	cd orcpub &&\
+ADD ./ /orcpub
+WORKDIR /orcpub
+RUN printenv &&\
 	lein uberjar
 
-FROM demonsthere/orcpub:bootstrap-lein as runner
+FROM openjdk:8-jre-alpine as runner
 MAINTAINER daemonsthere@gmail.com
 
 COPY --from=builder /opt/orcpub/target/orcpub.jar /orcpub.jar

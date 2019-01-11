@@ -1,3 +1,8 @@
+; Allow http connection, as org.apache.pdfbox/pdfbox has http dependnecies
+(require 'cemerick.pomegranate.aether)
+(cemerick.pomegranate.aether/register-wagon-factory!
+ "http" #(org.apache.maven.wagon.providers.http.HttpWagon.))
+
 (defproject orcpub "0.1.0-SNAPSHOT"
   :description "FIXME: write this!"
   :url "http://example.com/FIXME"
@@ -11,6 +16,7 @@
                  ["my.datomic.com" {:url "https://my.datomic.com/repo"
                                     :username [:gpg :env]
                                     :password [:gpg :env]}]]
+  :mirrors {"apache" {:url "https://repository.apache.org/snapshots/"}}
 
   :dependencies [[org.clojure/clojure "1.9.0-RC1"]
                  [org.clojure/test.check "0.9.0"]
@@ -160,8 +166,8 @@
   ;; Please see:
   ;; https://github.com/bhauman/lein-figwheel/wiki/Using-the-Figwheel-REPL-within-NRepl
 
-  :uberjar-inclusions [".ebextensions"]
-  :jar-inclusions [".ebextensions"]
+  :uberjar-inclusions [#"^\.ebextensions"]
+  :jar-inclusions [#"^\.ebextensions"]
 
   :aliases {"figwheel-native" ["with-profile" "native-dev" "run" "-m" "user" "--figwheel"]
             ;;"figwheel-web" ["figwheel"]
