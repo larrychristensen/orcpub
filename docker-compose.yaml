@@ -3,11 +3,11 @@ version: '3'
 services:
   orcpub:
     image: demonsthere/orcpub:orcpub
-    build:
-      context: docker/orcpub
-      args:
-        REPO: Demonsthere
-        BRANCH: feature/lein-2.8
+    # build:
+    #   context: docker/orcpub
+    #   args:
+    #     REPO: Orcpub
+    #     BRANCH: develop
     environment:
       PORT: 8890
       EMAIL_SERVER_URL: ''
