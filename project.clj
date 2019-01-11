@@ -1,7 +1,7 @@
 ; Allow http connection, as org.apache.pdfbox/pdfbox has http dependnecies
-; (require 'cemerick.pomegranate.aether)
-; (cemerick.pomegranate.aether/register-wagon-factory!
-;  "http" #(org.apache.maven.wagon.providers.http.HttpWagon.))
+(require 'cemerick.pomegranate.aether)
+(cemerick.pomegranate.aether/register-wagon-factory!
+ "http" #(org.apache.maven.wagon.providers.http.HttpWagon.))
 
 (defproject orcpub "0.1.0-SNAPSHOT"
   :description "FIXME: write this!"
@@ -16,9 +16,7 @@
                  ["my.datomic.com" {:url "https://my.datomic.com/repo"
                                     :username [:gpg :env]
                                     :password [:gpg :env]}]]
-  :exclusions [org.apache.pdfbox/pdfbox
-                org.apache.pdfbox/pdfbox-parent
-                org.apache.pdfbox/fontbox]
+  :mirrors {"apache" {:url "https://repository.apache.org/snapshots/"}}
 
   :dependencies [[org.clojure/clojure "1.9.0-RC1"]
                  [org.clojure/test.check "0.9.0"]

@@ -1,4 +1,4 @@
-FROM demonsthere/orcpub:bootstrap-lein
+FROM clojure/openjdk8-lein-2.8.3
 MAINTAINER daemonsthere@gmail.com
 
 ENV DATOMIC_VERSION 0.9.5561
