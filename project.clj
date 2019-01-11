@@ -16,10 +16,10 @@
                  ["my.datomic.com" {:url "https://my.datomic.com/repo"
                                     :username [:gpg :env]
                                     :password [:gpg :env]}]]
-  :exclusions [org.apache.pdfbox/pdfbox "2.1.0-20170324.170253-831"
-                org.apache.pdfbox/pdfbox-parent "2.1.0-20170324.165845-499"
-                org.apache.pdfbox/fontbox "2.1.0-20170324.165924-846"
-                ]
+  :exclusions [org.apache.pdfbox/pdfbox
+                org.apache.pdfbox/pdfbox-parent
+                org.apache.pdfbox/fontbox]
+
   :dependencies [[org.clojure/clojure "1.9.0-RC1"]
                  [org.clojure/test.check "0.9.0"]
                  [org.clojure/clojurescript "1.9.946"]
