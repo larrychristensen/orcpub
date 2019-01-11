@@ -11,7 +11,7 @@ ADD https://my.datomic.com/downloads/free/${DATOMIC_VERSION} /tmp/datomic.zip
 
 RUN unzip /tmp/datomic.zip && rm /tmp/datomic.zip &&\
 	mv datomic-free-${DATOMIC_VERSION} datomic
-ADD ./transactor.properties /datomic/transactor.properties
+ADD ./docker/datomic/transactor.properties /datomic/transactor.properties
 
 VOLUME /data
 VOLUME /log

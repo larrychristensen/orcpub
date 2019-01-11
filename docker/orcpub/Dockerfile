@@ -5,10 +5,9 @@ ARG REPO="Orcpub"
 ARG BRANCH="develop"
 
 # Get orcpub source
-WORKDIR /opt
+ADD ./ /orcpub
+WORKDIR /orcpub
 RUN printenv &&\
-	git clone --branch ${BRANCH} https://github.com/${REPO}/orcpub.git &&\
-	cd orcpub &&\
 	lein uberjar
 
 FROM openjdk:8-jre-alpine as runner
