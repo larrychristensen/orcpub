@@ -4,13 +4,16 @@ This is the code for OrcPub2.com. Many, many people have expressed interest in h
 
 ## Getting Started with Development
 
+### With docker
 We have managed to dockerize the project which should make the setup easy. 
 
 **Dependencies**
+
 - [Docker](https://docs.docker.com/install/)
+- [Docker Compose](https://docs.docker.com/compose/)
 - git
 
-### Local development
+#### Local development
 1. Start by cloning this repo and checkout the **develop** branch
 2. Create snakeoil (self-signed) ssl certificates by running `./deploy/snakeoil.sh`
 3. Run docker-compose `docker-compose up` or if you want to demonize it `docker-compose up -d`
@@ -29,7 +32,7 @@ EMAIL_SECRET_KEY: '' # Password for the user
 EMAIL_SERVER_PORT: 587 # Mail server port
 DATOMIC_URL: datomic:free://datomic:4334/orcpub # Url for the database
 ```
-### How do I contribute?
+#### How do I contribute?
 Well, first of all, thanks for rolling for initiative!
 We work on forks, meaning that it is enough for you to fork this repo, and enable this commented part in `docker-compose.yaml`
 
@@ -42,6 +45,75 @@ build:
 ```
 This will modify the deployment, so it will build the application rather than using our image. However note that you **need to change the REPO and BRANCH to YOUR fork** 
 Afterwards, run `docker-compose up --build` to start building!
+
+### Without docker
+#### Getting Started with Development
+
+- Install Java: http://openjdk.java.net/ or http://www.oracle.com/technetwork/java/javase/downloads/jdk8-downloads-2133151.html
+- Install leiningen: https://leiningen.org/
+- run `lein figwheel`
+
+*NOTE:* There is an issue using leiningen 2.8.1 causing a `ClassCastException`. Building with leiningen 2.7.1 still works
+
+That should get a basic dev environment going and open your browser at [localhost:3449](http://localhost:3449/).
+When you save changes, it will auto compile and send all changes to the browser without the
+need to reload. After the compilation process is complete, you will
+get a Browser Connected REPL. An easy way to try it is:
+
+```clojure
+(js/alert "Am I connected?")
+```
+
+and you should see an alert in the browser window.
+
+Before you start up the back-end server, you will need to [set up Datomic locally](https://docs.datomic.com/on-prem/dev-setup.html). If you're just trying to get started quickly to contribute to the main project, and happen to be on macOS, you can use [homebrew](https://brew.sh/) to do this pretty quickly:
+
+```
+brew install datomic
+brew services start datomic
+```
+
+You will then need to transact the schema. First start a REPL:
+
+```
+lein repl
+```
+
+Or if you are using Emacs with [Cider](https://cider.readthedocs.io/en/latest/) you can run the command to start the Cider REPL:
+
+```
+C-c M-j
+```
+
+For Vim users, [vim-fireplace](https://github.com/tpope/vim-fireplace) provides a good way to interact with a running repl without leaving Vim.
+
+I haven't used [Cursive](https://cursive-ide.com/), but I hear it is really nice and I'm sure there's an easy way to start a REPL within it.
+
+Once you have a REPL you can run this from within it to create the database, transact the database schema, and start the server:
+
+```clojure
+user=> (init-database)
+user=> (start-server)
+```
+
+To stop you will need to do this:
+
+```clojure
+user=> (stop-server)
+```
+
+Within Emacs you should be able to save your file (C-x C-s) and reload it into the REPL (C-c C-w) to get your server-side changes to take effect. Within Vim with `vim-fireplace` you can eval a form with `cpp`, a paragraph with `cpip`, etc; check out its help file for more information. Regardless of editor, your client-side changes will take effect immediately when you change a CLJS or CLJC file while `lein figwheel` is running.
+
+#### Running a Server
+
+Production builds should use the `prod` or `uberjar` profiles. Work is underway to Dockerize this. In the meantime, you may run a copy of Orcpub with in-memory database as follows:
+
+```shell
+lein uberjar
+PORT=8890 java -jar target/orcpub.jar
+```
+
+There are several issues which need to be worked out, such as mail server configuration, persistant database, etc. This is just a beginning.
 
 ## OrcPub Fundamentals
 
