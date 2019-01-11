@@ -10,7 +10,8 @@ RUN apt-get update &&\
 		curl \
 		git
 
-# Get lein 2.7.1
+# Get lein
 ADD https://raw.githubusercontent.com/technomancy/leiningen/${LEIN_VERSION}/bin/lein /usr/local/bin/lein
-RUN chmod +x /usr/local/bin/lein &&\
+RUN printenv &&\
+	chmod +x /usr/local/bin/lein &&\
 	lein
