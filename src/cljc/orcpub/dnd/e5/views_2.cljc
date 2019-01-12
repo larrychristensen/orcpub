@@ -40,7 +40,7 @@
 
 (defn legal-footer []
   [:div.m-l-15.m-b-10.m-t-10.t-a-l
-   [:span "© 2018 OrcPub"]
+   [:span "© 2019 OrcPub"]
    [:a.m-l-5 {:href "/terms-of-use" :target :_blank} "Terms of Use"]
    [:a.m-l-5 {:href "/privacy-policy" :target :_blank} "Privacy Policy"]])
 
@@ -65,8 +65,8 @@
     [:a {:style (style orange-style) :href "/privacy-policy" :target :_blank} "Privacy Policy"]
     [:a.m-l-5 {:style (orange-style {:margin-left "5px"}) :href "/terms-of-use" :target :_blank} "Terms of Use"]]
    [:div.legal-footer
-    [:p "© 2018 OrcPub" [:span {:style (style {:margin-left "20px"})} "Contact: " [:a {:href "mailto:redorc@orcpub.com"} "redorc@orcpub.com"]]]
-    [:p "Wizards of the Coast, Dungeons & Dragons, D&D, and their logos are trademarks of Wizards of the Coast LLC in the United States and other countries. © 2017 Wizards. All Rights Reserved. OrcPub.com is not affiliated with, endorsed, sponsored, or specifically approved by Wizards of the Coast LLC."]]])
+    [:p "© 2019 OrcPub" [:span {:style (style {:margin-left "20px"})} "Contact: " [:a {:href "mailto:redorc@orcpub.com"} "redorc@orcpub.com"]]]
+    [:p "Wizards of the Coast, Dungeons & Dragons, D&D, and their logos are trademarks of Wizards of the Coast LLC in the United States and other countries. © 2019 Wizards. All Rights Reserved. OrcPub.com is not affiliated with, endorsed, sponsored, or specifically approved by Wizards of the Coast LLC."]]])
 
 (defn splash-page []
   [:div.app
@@ -93,7 +93,7 @@
                       :font-weight :bold
                       :font-size "14px"
                       :height "48px"})}
-      "version 2.0"]
+      "version 2.0 - community edition"]
      [:div
       {:style (style
                {:display :flex

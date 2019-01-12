@@ -1555,8 +1555,8 @@
             [:a.orange {:href "/privacy-policy" :target :_blank} "Privacy Policy"]
             [:a.orange.m-l-5 {:href "/terms-of-use" :target :_blank} "Terms of Use"]]
            [:div.legal-footer
-            [:p "© 2018 OrcPub" [:span.m-l-20 "Contact: " [:a {:href "mailto:redorc@orcpub.com"} "redorc@orcpub.com"]]]
-            [:p "Wizards of the Coast, Dungeons & Dragons, D&D, and their logos are trademarks of Wizards of the Coast LLC in the United States and other countries. © 2018 Wizards. All Rights Reserved. OrcPub.com is not affiliated with, endorsed, sponsored, or specifically approved by Wizards of the Coast LLC."]]]
+            [:p "© 2019 OrcPub" [:span.m-l-20 "Contact: " [:a {:href "mailto:redorc@orcpub.com"} "redorc@orcpub.com"]]]
+            [:p "Wizards of the Coast, Dungeons & Dragons, D&D, and their logos are trademarks of Wizards of the Coast LLC in the United States and other countries. © 2019 Wizards. All Rights Reserved. OrcPub.com is not affiliated with, endorsed, sponsored, or specifically approved by Wizards of the Coast LLC."]]]
           [debug-data]]]])]))
 
 (def row-style
