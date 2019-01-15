@@ -1,8 +1,12 @@
 FROM clojure:openjdk-8-lein as builder
 MAINTAINER daemonsthere@gmail.com
 
-ADD ./ /orcpub
+# Build cache layer
 WORKDIR /orcpub
+COPY project.clj /orcpub/
+RUN lein deps
+
+ADD ./ /orcpub
 RUN printenv &&\
 	lein uberjar
 
