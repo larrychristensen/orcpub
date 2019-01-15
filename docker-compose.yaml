@@ -36,3 +36,4 @@ services:
       - ./deploy/snakeoil.key:/etc/nginx/snakeoil.key
     depends_on:
       - orcpub
+    restart: always
