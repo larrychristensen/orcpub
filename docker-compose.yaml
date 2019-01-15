@@ -21,7 +21,7 @@ services:
       - datomic
     restart: always
   datomic:
-    image: demonsthere/orcpub:datomic
+    image: orcpub/orcpub:datomic
     volumes:
       - ./data:/data
     restart: always
