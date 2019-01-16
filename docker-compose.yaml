@@ -2,12 +2,10 @@
 version: '3'
 services:
   orcpub:
-    image: demonsthere/orcpub:orcpub
-    # build:
-    #   context: docker/orcpub
-    #   args:
-    #     REPO: Orcpub
-    #     BRANCH: develop
+    image: orcpub/orcpub:orcpub
+    build:
+      context: .
+      dockerfile: docker/orcpub/Dockerfile
     environment:
       PORT: 8890
       EMAIL_SERVER_URL: ''
@@ -21,7 +19,10 @@ services:
       - datomic
     restart: always
   datomic:
-    image: demonsthere/orcpub:datomic
+    image: orcpub/orcpub:datomic
+    build:
+      context: .
+      dockerfile: docker/datomic/Dockerfile
     volumes:
       - ./data:/data
     restart: always
@@ -36,3 +37,4 @@ services:
       - ./deploy/snakeoil.key:/etc/nginx/snakeoil.key
     depends_on:
       - orcpub
+    restart: always
