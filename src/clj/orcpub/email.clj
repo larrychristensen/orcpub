@@ -2,6 +2,7 @@
   (:require [hiccup.core :as hiccup]
             [postal.core :as postal]
             [environ.core :as environ]
+            [clojure.pprint :as pprint]
             [orcpub.route-map :as routes]))
 
 (defn verification-email-html [first-and-last-name username verification-url]
