@@ -1,5 +1,5 @@
 (ns orcpub.routes
-  (:require [io.pedestal.http :as http]          
+  (:require [io.pedestal.http :as http]
             [io.pedestal.http.route :as route]
             [io.pedestal.test :as test]
             [io.pedestal.http.ring-middlewares :as ring]
@@ -46,7 +46,7 @@
             [environ.core :as environ]
             [clojure.set :as sets])
   (:import (org.apache.pdfbox.pdmodel.interactive.form PDCheckBox PDComboBox PDListBox PDRadioButton PDTextField)
-           
+
            (org.apache.pdfbox.pdmodel PDDocument PDPage PDPageContentStream)
            (org.apache.pdfbox.pdmodel.graphics.image PDImageXObject)
            (java.io ByteArrayOutputStream ByteArrayInputStream)
@@ -195,7 +195,7 @@
 (defn bad-credentials-response [db username ip]
   (security/add-failed-login-attempt! username ip)
   (if (security/too-many-attempts-for-username? username)
-    (login-error errors/too-many-attempts) 
+    (login-error errors/too-many-attempts)
     (let [user-for-username (find-user-by-username-or-email db username)]
       (login-error (if (:db/id user-for-username)
                      errors/bad-credentials
@@ -420,7 +420,8 @@
     conn
     [{:db/id user-id
       :orcpub.user/password (hashers/encrypt (s/trim password))
-      :orcpub.user/password-reset (java.util.Date.)}])
+      :orcpub.user/password-reset (java.util.Date.)
+      :orcpub.user/verified? true}])
   {:status 200})
 
 (defn reset-password [{:keys [json-params db conn cookies identity] :as request}]
@@ -582,7 +583,7 @@
                   :orcpub.user/password-reset-sent
                   :orcpub.user/password-reset] :as user}
           (first-user-by db user-by-password-reset-key-query key)
-          expired? (password-reset-expired? password-reset-sent) 
+          expired? (password-reset-expired? password-reset-sent)
           already-reset? (password-already-reset? password-reset password-reset-sent)]
       (cond
         expired? (redirect route-map/password-reset-expired-route)
