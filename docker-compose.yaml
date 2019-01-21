@@ -2,7 +2,7 @@
 version: '3'
 services:
   orcpub:
-    image: orcpub/orcpub:orcpub
+    image: orcpub/orcpub:latest
     build:
       context: .
       dockerfile: docker/orcpub/Dockerfile
@@ -19,12 +19,13 @@ services:
       - datomic
     restart: always
   datomic:
-    image: orcpub/orcpub:datomic
+    image: orcpub/datomic:latest
     build:
       context: .
       dockerfile: docker/datomic/Dockerfile
     volumes:
       - ./data:/data
+      - ./deploy/transactor.properties:/datomic/transactor.properties
     restart: always
   web:
     image: nginx:alpine
