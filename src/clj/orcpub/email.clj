@@ -2,6 +2,7 @@
   (:require [hiccup.core :as hiccup]
             [postal.core :as postal]
             [environ.core :as environ]
+            [clojure.pprint :as pprint]
             [orcpub.route-map :as routes]))
 
 (defn verification-email-html [first-and-last-name username verification-url]
@@ -75,12 +76,12 @@
 (defn send-error-email [context exception]
   (if (not-empty (environ/env :email-errors-to))
     (postal/send-message (email-cfg)
-      {:from (str "OrcPub Errors <" (environ/env :email-errors-to) ">")}
+      {:from (str "OrcPub Errors <" (environ/env :email-errors-to) ">")
       :to (str (environ/env :email-errors-to))
       :subject "Exception"
       :body [{:type "text/plain"
               :content (let [writer (java.io.StringWriter.)]
                          (do (clojure.pprint/pprint (:request context) writer)
                            (clojure.pprint/pprint (or (ex-data exception) exception) writer)
-                           (str writer)))}])))
+                           (str writer)))}]})))
 
