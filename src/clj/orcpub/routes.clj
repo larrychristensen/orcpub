@@ -285,7 +285,7 @@
   (ring-resp/redirect (str oauth/fb-oauth-url (oauth/get-fb-redirect-uri request))))
 
 (defn base-url [{:keys [scheme headers]}]
-  (str (name scheme) "://" (headers "host")))
+  (str (or (headers "x-forwarded-proto") (name scheme)) "://" (headers "host")))
 
 (defn send-verification-email [request params verification-key]
   (email/send-verification-email
