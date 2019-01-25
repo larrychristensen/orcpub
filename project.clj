@@ -161,6 +161,12 @@
              ;; :server-logfile "tmp/logs/figwheel-logfile.log"
              }
 
+  :repl-options {
+             ;; If nREPL takes too long to load it may timeout,
+             ;; increase this to wait longer before timing out.
+             ;; Defaults to 30000 (30 seconds)
+             ;; :timeout 320000
+			 }
 
   ;; setting up nREPL for Figwheel and ClojureScript dev
   ;; Please see:
