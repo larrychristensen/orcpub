@@ -93,6 +93,8 @@
                                 ;; Compress the output?
                                 :pretty-print? false}}]}
 
+  :prep-tasks [["garden" "once"]]
+
   :cljsbuild {:builds
               [{:id "dev"
                 :source-paths ["web/cljs" "src/cljc" "src/cljs"]
