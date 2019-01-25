@@ -165,7 +165,7 @@
              ;; If nREPL takes too long to load it may timeout,
              ;; increase this to wait longer before timing out.
              ;; Defaults to 30000 (30 seconds)
-             ;; :timeout 320000
+             :timeout 300000 ; 5 mins to wait
 			 }
 
   ;; setting up nREPL for Figwheel and ClojureScript dev
