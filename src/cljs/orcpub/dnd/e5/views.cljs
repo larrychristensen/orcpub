@@ -7151,7 +7151,7 @@
                  {:confirm-button-text "DELETE ACCOUNT"
                   :question "Are you sure you want to delete your account, characters, and associated data?"
                   :event [:delete-account]}])}]
-   [:div.f-s-24.p-10
+   [:div.f-s-24.p-10.white
     [:div.p-5
      [:span.f-w-b "Username: "]
      [:span @(subscribe [:username])]]
