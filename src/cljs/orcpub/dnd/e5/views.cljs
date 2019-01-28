@@ -2050,7 +2050,7 @@
         [:div.m-b-20
          [spellcaster-levels-table spell-slot-factors total-spellcaster-levels levels mobile?]])
       (if (or pact-magic? spell-slot-factors)
-        [:div.m-b-20 
+        [:div.m-b-20
          [spell-slots-table id spell-slots spell-slot-factors total-spellcaster-levels levels mobile? pact-magic?]])
       [:div.m-b-20
        [:span.f-w-b.f-s-16 "Spell Preparation"]
@@ -3168,7 +3168,7 @@
         freqs (into #{} (map has-frequency-units? all-traits))]
     [:div.details-columns
      {:class-name (if (= 2 num-columns) "flex")}
-   
+
      [:div.flex-grow-1.details-column-2
       {:class-name (if (= 2 num-columns) "w-50-p m-l-20")}
       [list-item-section "Damage Resistances" "surrounded-shield" resistances resistance-str]
@@ -5140,7 +5140,7 @@
      (map-indexed
       (fn [index modifier]
         ^{:key index}
-        [option-level-modifier         
+        [option-level-modifier
          modifier
          index
          edit-modifier-type-event
@@ -5213,7 +5213,7 @@
      (map-indexed
       (fn [index selection]
         ^{:key index}
-        [option-level-selection         
+        [option-level-selection
          selection
          index
          edit-selection-type-event
@@ -5514,7 +5514,7 @@
         spell-lists @(subscribe [::spells/spell-lists])
         class-key (get subclass :class)
         classes @(subscribe [::classes/classes])
-        mobile? @(subscribe [:mobile?])]    
+        mobile? @(subscribe [:mobile?])]
     [:div.p-20.main-text-color
      [:div.flex.flex-wrap
       [:div.m-b-20
@@ -5599,7 +5599,7 @@
       ::e5/delete-subclass-trait
       :edit-trait-level-event ::e5/edit-subclass-trait-level]]))
 
-(defn option-spell [index 
+(defn option-spell [index
                      {:keys [level value] :as spell-cfg}
                      set-spell-level-event
                      set-spell-value-event
@@ -7121,7 +7121,7 @@
      {:on-click (make-event-handler ::e5/export-all-plugins)}
      "Export All"]]
    [:div.item-list
-    (let [plugins @(subscribe [::e5/plugins])]
+    (let [plugins (sort @(subscribe [::e5/plugins]))]
       (doall
        (map
         (fn [[name plugin]]
