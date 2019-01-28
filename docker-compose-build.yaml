@@ -2,7 +2,9 @@
 version: '3'
 services:
   orcpub:
-    image: orcpub/orcpub:latest
+    build:
+      context: .
+      dockerfile: docker/orcpub/Dockerfile
     environment:
       PORT: 8890
       EMAIL_SERVER_URL: ''
@@ -16,7 +18,9 @@ services:
       - datomic
     restart: always
   datomic:
-    image: orcpub/datomic:latest
+    build:
+      context: .
+      dockerfile: docker/datomic/Dockerfile
     volumes:
       - ./data:/data
       - ./deploy/transactor.properties:/datomic/transactor.properties
