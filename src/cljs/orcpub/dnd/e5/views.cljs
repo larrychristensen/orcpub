@@ -6885,7 +6885,7 @@
 (defn my-content-type []
   (let [expanded? (r/atom false)]
     (fn [source-name plugin type-name type-key icon add-event edit-event delete-event plural]
-      (let [items (type-key plugin)]
+      (let [items (sort (type-key plugin))]
         [:div.pointer.item-list-item
          [:div.flex.justify-cont-s-b.align-items-c.p-10
           {:on-click #(swap! expanded? not)}
