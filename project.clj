@@ -30,8 +30,8 @@
                  [com.cognitect/transit-cljs "0.8.256"]
                  [cljs-http "0.1.45"]
                  [com.andrewmcveigh/cljs-time "0.5.2"]
-                 [clj-time "0.14.0"]
-                 [clj-http "3.6.1"]
+                 [clj-time "0.15.0"]
+                 [clj-http "3.9.1"]
                  [com.yetanalytics/ring-etag-middleware "0.1.1"]
                  [org.clojure/test.check "0.9.0"]
 
