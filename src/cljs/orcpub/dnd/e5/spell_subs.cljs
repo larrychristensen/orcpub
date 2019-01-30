@@ -1227,7 +1227,12 @@
 (reg-sub
  ::monsters5e/challenge-ratings
  (fn [db _]
-   (into (sorted-set) (map :challenge) monsters5e/monsters)))
+   (into (sorted-set)
+         (keep
+          (fn [pair]
+            (when (pos? (second pair))
+            (first pair)))
+            monsters5e/challenge-ratings))))
 
 (reg-sub
  ::classes5e/has-prof?
