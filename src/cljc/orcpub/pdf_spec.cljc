@@ -105,7 +105,6 @@
         damage-immunities (char5e/damage-immunities built-char)
         condition-immunities (char5e/condition-immunities built-char)
         immunities (char5e/immunities built-char)
-        ;number-of-attacks (char5e/number-of-attacks built-char)
         crit-values (char5e/critical-hit-values built-char)]
     (s/join
      "\n"
