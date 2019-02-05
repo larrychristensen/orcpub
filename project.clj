@@ -93,6 +93,8 @@
                                 ;; Compress the output?
                                 :pretty-print? false}}]}
 
+  :prep-tasks [["garden" "once"]]
+
   :cljsbuild {:builds
               [{:id "dev"
                 :source-paths ["web/cljs" "src/cljc" "src/cljs"]
@@ -161,6 +163,12 @@
              ;; :server-logfile "tmp/logs/figwheel-logfile.log"
              }
 
+  :repl-options {
+             ;; If nREPL takes too long to load it may timeout,
+             ;; increase this to wait longer before timing out.
+             ;; Defaults to 30000 (30 seconds)
+             :timeout 300000 ; 5 mins to wait
+			 }
 
   ;; setting up nREPL for Figwheel and ClojureScript dev
   ;; Please see:
