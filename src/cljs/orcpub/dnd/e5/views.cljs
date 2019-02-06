@@ -531,8 +531,6 @@
 
 (def registration-page-style
   {:background-image "url(/image/shutterstock_432001912.jpg)"
-   :background-size "1200px 800px"
-   :background-position "-350px 0px"
    :background-clip :content-box
    :width "350px"
    :min-height "600px"})
