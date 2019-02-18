@@ -63,12 +63,8 @@
 (def dnd-e5-my-content-route :my-content-5e-page)
 
 (def dnd-e5-my-content-routes #{dnd-e5-my-content-route
-                                dnd-e5-spell-builder-page-route
-                                dnd-e5-monster-builder-page-route
                                 dnd-e5-feat-builder-page-route
                                 dnd-e5-background-builder-page-route
-                                dnd-e5-encounter-builder-page-route
-                                dnd-e5-combat-tracker-page-route
                                 dnd-e5-race-builder-page-route
                                 dnd-e5-subrace-builder-page-route
                                 dnd-e5-subclass-builder-page-route
@@ -76,6 +72,14 @@
                                 dnd-e5-language-builder-page-route
                                 dnd-e5-invocation-builder-page-route
                                 dnd-e5-selection-builder-page-route})
+
+(def dnd-e5-my-encounters-route :my-content-5e-page)
+
+(def dnd-e5-my-encounters-routes #{dnd-e5-combat-tracker-page-route
+                                   dnd-e5-encounter-builder-page-route }  )
+
+
+
 
 (def register-route :register)
 (def register-page-route :register-page)
