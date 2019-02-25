@@ -26,11 +26,11 @@
 
 (defn class-string [classes levels]
   (s/join
-   " / "
+   "\n"
    (map
     (fn [cls-key]
-      (let [{:keys [class-name class-level subclass]} (levels cls-key)]
-        (str class-name " (" class-level ")")))
+      (let [{:keys [class-name class-level subclass-name]} (levels cls-key)]
+        (str class-name " [" subclass-name "](" class-level ")")))
     classes)))
 
 (defn ability-related-bonuses [suffix vals]
