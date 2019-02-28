@@ -1038,6 +1038,12 @@
                         :platform (user-agent/platform)
                         :platform-version (user-agent/platform-version)
                         :character (char/to-strict @(subscribe [:character]))})}])])))
+(defn debug-dnld []
+  [:div.t-a-r
+   [:div.orange.pointer.underline
+    {:on-click (make-event-handler ::e5/export-all-plugins-pretty-print)}
+    [:i.fa.fa-bug]]]
+)
 
 (defn dice-roll-result [{:keys [total rolls mod raw-mod plus-minus]}]
   [:div.white.f-s-32.flex.align-items-c
@@ -1564,7 +1570,7 @@
            [:div.legal-footer
             [:p "© 2019 OrcPub" [:span.m-l-20 "Contact: " [:a {:href "mailto:redorc@orcpub.com"} "redorc@orcpub.com"]]]
             [:p "Wizards of the Coast, Dungeons & Dragons, D&D, and their logos are trademarks of Wizards of the Coast LLC in the United States and other countries. © 2019 Wizards. All Rights Reserved. OrcPub.com is not affiliated with, endorsed, sponsored, or specifically approved by Wizards of the Coast LLC."]]]
-          [debug-data]]]])]))
+          [debug-dnld] [debug-data]]]])]))
 
 (def row-style
   {:border-bottom "1px solid rgba(255,255,255,0.5)"})
@@ -7124,6 +7130,9 @@
 (defn my-content []
   [:div.main-text-color
    [:div.flex.justify-cont-end
+    [:button.form-button.m-r-10.m-b-10
+     {:on-click (make-event-handler ::e5/export-all-plugins-pretty-print)}
+     "Export All (very slow, Tarrasque, DC lvl 31)"]
     [:button.form-button.m-r-10.m-b-10
      {:on-click (make-event-handler ::e5/export-all-plugins)}
      "Export All"]]

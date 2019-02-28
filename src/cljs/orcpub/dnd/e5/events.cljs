@@ -73,7 +73,8 @@
             [orcpub.route-map :as routes]
             [orcpub.errors :as errors]
             [clojure.set :as sets]
-            [cljsjs.filesaverjs])
+            [cljsjs.filesaverjs]
+            [clojure.pprint :as pprint])
   (:require-macros [cljs.core.async.macros :refer [go]]))
 
 (defn check-and-throw
@@ -3152,6 +3153,22 @@
      (js/saveAs blob (str "all-content.orcbrew"))
      {})))
 
+(reg-event-fx
+  ::e5/export-plugin-pretty-print
+  (fn [_ [_ name plugin]]
+    (let [blob (js/Blob.
+                 (clj->js [(with-out-str (pprint/pprint plugin))])
+                 (clj->js {:type "text/plain;charset=utf-8"}))]
+      (js/saveAs blob (str name ".orcbrew"))
+      {})))
+(reg-event-fx
+  ::e5/export-all-plugins-pretty-print
+  (fn [_ _]
+    (let [blob (js/Blob.
+                 (clj->js [(with-out-str (pprint/pprint @(subscribe [::e5/plugins])))])
+                 (clj->js {:type "text/plain;charset=utf-8"}))]
+      (js/saveAs blob (str "all-content.orcbrew"))
+      {})))
 
 (reg-event-fx
  ::e5/delete-plugin
