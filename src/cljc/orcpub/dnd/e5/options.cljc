@@ -53,12 +53,12 @@
   [{:key ::character/str
     :name "Strength"
     :abbr "STR"}
-   {:key ::character/con
-    :name "Constitution"
-    :abbr "CON"}
    {:key ::character/dex
     :name "Dexterity"
     :abbr "DEX"}
+   {:key ::character/con
+    :name "Constitution"
+    :abbr "CON"}
    {:key ::character/int
     :name "Intelligence"
     :abbr "INT"}
