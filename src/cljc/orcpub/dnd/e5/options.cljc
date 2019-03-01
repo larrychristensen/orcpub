@@ -82,6 +82,9 @@
    {:name "Deafened"
     :key :deafened
     :icon "hearing-disabled"}
+   {:name "Exhausted"
+    :key :exhausted
+    :icon "knockout"}
    {:name "Frightened"
     :key :frightened
     :icon "terror"}
