@@ -195,7 +195,7 @@
                       :orcpub.entity.strict/key :starting-equipment-equipment-pack,
                       :orcpub.entity.strict/option
                       {:db/id 17592186485180,
-                       :orcpub.entity.strict/key :burglers-pack}}
+                       :orcpub.entity.strict/key :burglars-pack}}
                      {:db/id 17592186485181,
                       :orcpub.entity.strict/key :starting-equipment-melee-weapon,
                       :orcpub.entity.strict/option
