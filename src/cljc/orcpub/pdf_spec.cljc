@@ -29,8 +29,10 @@
    " / "
    (map
     (fn [cls-key]
-      (let [{:keys [class-name class-level subclass]} (levels cls-key)]
-        (str class-name " (" class-level ")")))
+      (let [{:keys [class-name class-level subclass-name]} (levels cls-key)]
+        (if (empty? subclass-name)
+          (str class-name " (" class-level ")")
+          (str class-name " [" subclass-name "] (" class-level ")"))))
     classes)))
 
 (defn ability-related-bonuses [suffix vals]
