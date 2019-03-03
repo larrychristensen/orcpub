@@ -1974,7 +1974,7 @@
     :weapons {:dagger 2}
     :equipment {:thieves-tools 1}
     :equipment-choices [{:name "Equipment Pack"
-                         :options {:burglers-pack 1
+                         :options {:burglars-pack 1
                                    :dungeoneers-pack 1
                                    :explorers-pack 1}}]
     :modifiers [(mod5e/dependent-trait

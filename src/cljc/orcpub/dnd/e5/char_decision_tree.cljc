@@ -585,7 +585,7 @@
        :starting-equipment-additional-weapon
        {:orcpub.entity/key :shortbow-quiver-20-arrows},
        :starting-equipment-equipment-pack
-       {:orcpub.entity/key :burglers-pack}}}],
+       {:orcpub.entity/key :burglars-pack}}}],
     :background
     {:orcpub.entity/key :custom,
      :orcpub.entity/value "Charlatan",
