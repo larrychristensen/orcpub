@@ -217,7 +217,7 @@
 (defn spell-school-level [{:keys [level school]} class-nm]
   (if (zero? level)
     (str class-nm " - "(s/capitalize school) " cantrip")
-    (str "Level " level " " class-nm " " (str (s/capitalize school)))))
+    (str class-nm " Level " level " " (str (s/capitalize school)))))
 
 (defn draw-spell-field [cs document title value x y]
   (with-open [img-stream (io/input-stream (io/resource (str "public/image/" title ".png")))]
