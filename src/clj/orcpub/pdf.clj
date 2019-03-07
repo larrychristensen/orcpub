@@ -214,10 +214,10 @@
                       (+ margin-x total-width)
                       y)))
     (.setStrokingColor cs 0 0 0)))
-(defn spell-school-level [{:keys [level school]}]
+(defn spell-school-level [{:keys [level school]} class-nm]
   (if (zero? level)
-    (str (s/capitalize school) " cantrip")
-    (str "Level-" level " " school)))
+    (str class-nm " - "(s/capitalize school) " cantrip")
+    (str "Level " level " " class-nm " " (str (s/capitalize school)))))
 
 (defn draw-spell-field [cs document title value x y]
   (with-open [img-stream (io/input-stream (io/resource (str "public/image/" title ".png")))]
@@ -252,15 +252,15 @@
         (s/replace #"Concentration,? up to " "Conc, ")
         abbreviate-times
         (s/replace #"Instantaneous.*" "Inst")
-        (s/replace #"round" "rnd")
+        (s/replace #"round" "Rnd")
         (max-len 16))))
 
 (defn abbreviate-casting-time [casting-time]
   (-> casting-time
       abbreviate-times
-      (s/replace #"bonus action" "b.a.")
-      (s/replace #"action" "act.")
-      (s/replace #"reaction" "react.")))
+      (s/replace #"bonus action" "B.A.")
+      (s/replace #"action" "Act.")
+      (s/replace #"reaction" "React.")))
 
 (defn abbreviate-range [range]
   (-> range
@@ -284,8 +284,8 @@
         (draw-grid cs 2.5 3.5)
         (draw-text cs
                    (str "Page " (inc page-number) " (reverse)")
-                   (:bold-italic fonts)
-                   10
+                   (:italic fonts)
+                   8
                    0.12
                    (- 11 0.15))
         (doall
@@ -331,15 +331,15 @@
         remaining-height (- 11.0 total-height)
         margin-y (/ remaining-height 2)
         fonts (load-fonts document)]
-    (with-open [img-stream (io/input-stream (io/resource "public/image/orcpub-card-logo.png"))
+    (with-open [card-logo-img-stream (io/input-stream (io/resource "public/image/orcpub-card-logo.png"))
                 over-img-stream (io/input-stream (io/resource "public/image/clockwise-rotation.png"))]
-      (let [img (LosslessFactory/createFromImage document (ImageIO/read img-stream))
+      (let [card-logo-img (LosslessFactory/createFromImage document (ImageIO/read card-logo-img-stream))
             over-img (LosslessFactory/createFromImage document (ImageIO/read over-img-stream))]
         (draw-grid cs 2.5 3.5)
         (draw-text cs
                    (str "Page " (inc page-number))
-                   (:bold-italic fonts)
-                   10
+                   (:italic fonts)
+                   8
                    0.12
                    (- 11 0.15))
         (doall
@@ -359,10 +359,9 @@
                         x (+ margin-x (* box-width i))
                         y (+ margin-y (* box-height j))
 
-                        {:keys [page source description summary]} spell
+                        {:keys [page source description summary components]} spell
 
                         dc-str (str "DC " dc)
-                        dc-offset (+ x 0.22 (string-width class-nm (:bold fonts) 10))
                         remaining-desc-lines
                         (draw-text-to-box cs
                                           (or description
@@ -375,34 +374,45 @@
                                                      " "
                                                      page
                                                      " for more details)")
-                                                ""))
+                                               ""))
                                           (:plain fonts)
                                           8
-                                          (+ x 0.12)
-                                          (- 11.0 y 0.65)
+                                          (+ x 0.12) ; from the left
+                                          (- 11.0 y 1.08) ;from the top down
                                           (- box-width 0.24)
-                                          (- box-height 0.9))]
-                    (draw-imagex cs
-                                 img
-                                 (+ x 1.4)
-                                 (+ y 0.05)
-                                 1.0
-                                 0.25)
+                                          (- box-height 1.13))]
+                    (if (-> components :material-component)
                     (draw-text-to-box cs
-                                      (spell-school-level spell)
+                                      (str (s/capitalize (-> components :material-component)))
                                       (:italic fonts)
                                       8
                                       (+ x 0.12)
-                                      (- 11.0 y 0.10)
+                                      (- 11.0 y 0.55)
                                       (- box-width 0.24)
-                                      0.25)
+                                      0.5))
+                    (draw-imagex cs
+                                 card-logo-img
+                                 (+ x 1.9)
+                                 (+ y 0.02)
+                                 1.0
+                                 0.25)
                     (draw-text-to-box cs
                                       (:name spell)
                                       (:bold fonts)
                                       10
                                       (+ x 0.12)
-                                      (- 11.0 y 0.27)
+                                      (- 11.0 y)
                                       (- box-width 0.3)
+                                      0.2)
+                    (draw-text-to-box cs
+                                      (if (not= class-nm "Homebrew")
+                                        (str (spell-school-level spell class-nm) " " dc-str (str " Mod " (common/bonus-str attack-bonus)))
+                                        (spell-school-level spell class-nm))
+                                      (:italic fonts)
+                                      8
+                                      (+ x 0.12)
+                                      (- 11.0 y 0.19)
+                                      (- box-width 0.24)
                                       0.25)
                     (if casting-time (draw-spell-field cs
                                        document
@@ -413,14 +423,14 @@
                                           casting-time
                                           #",")))
                                        (+ x 0.12)
-                                       (- 11.0 y 0.55)))
+                                       (- 11.0 y 0.45)))
                     (if range
                       (draw-spell-field cs
                                         document
                                         "arrow-dunk"
                                         (abbreviate-range range)
                                         (+ x 0.62)
-                                        (- 11.0 y 0.55)))
+                                        (- 11.0 y 0.45)))
                     (draw-spell-field cs
                                       document
                                       "shiny-purse"
@@ -436,43 +446,21 @@
                                           :somatic "S"
                                           :material "M"})))
                                       (+ x 1.12)
-                                      (- 11.0 y 0.55))
+                                      (- 11.0 y 0.45))
                     (if duration
                       (draw-spell-field cs
                                         document
                                         "sands-of-time"
                                         (abbreviate-duration duration)
                                         (+ x 1.62)
-                                        (- 11.0 y 0.55)))
-                    (when (not= class-nm "Homebrew")
-                      (draw-text cs
-                                 class-nm
-                                 (:bold fonts)
-                                 10
-                                 (+ x 0.12)
-                                 (- 11.0 y 3.4)
-                                 [186 21 3])
-                     (draw-text cs
-                                dc-str
-                                (:bold-italic fonts)
-                                8
-                                dc-offset
-                                (- 11.0 y 3.4)
-                                [186 21 3])
-                     (draw-text cs
-                                (str "Mod " (common/bonus-str attack-bonus))
-                                (:bold-italic fonts)
-                                8
-                                (+ dc-offset (string-width dc-str (:bold fonts) 10))
-                                (- 11.0 y 3.4)
-                                [186 21 3]))
+                                        (- 11.0 y 0.45)))
                     (if (seq remaining-desc-lines)
                       (draw-imagex cs
                                    over-img
-                                   (+ x 2.2)
-                                   (+ y 3.2)
-                                   0.25
-                                   0.25))
+                                   (+ x 2.3)
+                                   (+ y 3.3)
+                                   0.15
+                                   0.15))
                     {:remaining-lines remaining-desc-lines
                      :spell-name (:name spell)})))))))))))
 
