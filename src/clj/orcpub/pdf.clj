@@ -406,7 +406,7 @@
                                       0.2)
                     (draw-text-to-box cs
                                       (if (not= class-nm "Homebrew")
-                                        (str (spell-school-level spell class-nm) " " dc-str (str " Mod " (common/bonus-str attack-bonus)))
+                                        (str (spell-school-level spell class-nm) " " dc-str (str " Spell Mod " (common/bonus-str attack-bonus)))
                                         (spell-school-level spell class-nm))
                                       (:italic fonts)
                                       8
