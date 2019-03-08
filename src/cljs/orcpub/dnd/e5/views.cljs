@@ -2211,8 +2211,8 @@
            (fn [{{:keys [units amount]} :frequency nm :name :as action}]
              ^{:key action}
              [:p.m-t-10
-              [:span.f-w-600.i nm "."]
-              [:span.f-w-n.m-l-10 (common/sentensize (disp/action-description action))]
+              [:span.f-w-600.i nm]
+              [:span.f-w-n.m-l-10.wsp-prw (common/sentensize (disp/action-description action))]
               (when (and amount units)
                 (actions-indicators id nm units amount))])
            (sort-by :name actions)))])))
