@@ -4,10 +4,12 @@ This is the code for OrcPub2.com. Many, many people have expressed interest in h
 
 ## Running
 
-To run a local instance of Orcpub, all you need is Docker, docker-compose, and the `docker-compose.yml` file and an SSL certificate. Simply edit the paths to the SSL certificate and key in the `web** service definition and run the following:
+To run a local instance of Orcpub, all you need is Docker, docker-compose, and the `docker-compose.yml` file and an SSL certificate. Simply edit the paths to the SSL certificate and key in the `web` service definition and run the following:
 
+```shell
    docker-compose pull
    docker-compose up -d
+```
 
 **NOTE:** If you need a quick SSL certificate, the script at `deploy/snakeoil.sh` will generate one. Links to Docker installation can be found [below](#with-docker).
 

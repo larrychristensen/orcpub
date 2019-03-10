@@ -105,7 +105,11 @@
    
    [:.i
     {:font-style :italic}]
-   
+
+   [:.wsp-prw
+    {:white-space "pre-wrap"
+     :display "block"}]
+
    [:.f-w-n
     {:font-weight :normal}]
    [:.f-w-b
