@@ -1026,8 +1026,13 @@
     (fn []
       [:div.t-a-r
        [:div.orange.pointer.underline
-        {:on-click #(swap! expanded? not)}
+        {:on-click #(swap! expanded? not)
+         :title "Development - Debug Info" }
         [:i.fa.fa-bug {:class-name (if @expanded? "white")}]]
+       [:div.orange.pointer.underline
+        {:on-click (make-event-handler ::e5/export-all-plugins-pretty-print)
+         :title "Development - Download all Orcbrews as Pretty Print, if you click this button it will take a long time to generate the orcbrew.  Click and wait."}
+        [:i.fa.fa-cloud-download]]
        (if @expanded?
          [:textarea.m-t-5
           {:read-only true
@@ -1564,7 +1569,7 @@
            [:div.legal-footer
             [:p "© 2019 OrcPub" [:span.m-l-20 "Contact: " [:a {:href "mailto:redorc@orcpub.com"} "redorc@orcpub.com"]]]
             [:p "Wizards of the Coast, Dungeons & Dragons, D&D, and their logos are trademarks of Wizards of the Coast LLC in the United States and other countries. © 2019 Wizards. All Rights Reserved. OrcPub.com is not affiliated with, endorsed, sponsored, or specifically approved by Wizards of the Coast LLC."]]]
-          [debug-data]]]])]))
+            [debug-data]]]])]))
 
 (def row-style
   {:border-bottom "1px solid rgba(255,255,255,0.5)"})
@@ -7102,7 +7107,7 @@
          [:div.bg-lighter.p-10
           [:div.flex.justify-cont-end.uppercase.align-items-c.m-b-10
            [:button.form-button.m-l-5
-            {:on-click (make-event-handler ::e5/export-plugin name plugin)}
+            {:on-click (make-event-handler ::e5/export-plugin-pretty-print name plugin)}
             "export"]
            [:button.form-button.m-l-5
             {:on-click (make-event-handler ::e5/delete-plugin name)}
