@@ -1,4 +1,4 @@
-# orcpub
+# Orcpub2 - Community Edition
 
 This is the code for OrcPub2.com. Many, many people have expressed interest in helping out or checking out the code, so I have decided to make that possible by open sourcing it.
 
@@ -13,6 +13,12 @@ To run a local instance of Orcpub, all you need is Docker, docker-compose, and t
 
 **NOTE:** If you need a quick SSL certificate, the script at `deploy/snakeoil.sh` will generate one. Links to Docker installation can be found [below](#with-docker).
 
+Unix instructions [here](https://github.com/Orcpub/orcpub/wiki/Orcpub-on-Ubuntu-18.04-with-Docker)
+
+Windows instructions [here](https://github.com/Orcpub/orcpub/wiki/Orcpub-on-Windows-10-with-Docker)
+
+Docker Cheat [Sheet](https://github.com/Orcpub/orcpub/wiki/Docker-Cheat-sheet)
+
 ## Getting Started with Development
 
 ### With docker
@@ -22,18 +28,24 @@ We have managed to dockerize the project which should make the setup easy.
 
 - [Docker](https://docs.docker.com/install/)
 - [Docker Compose](https://docs.docker.com/compose/)
-- git
+- [git](https://git-scm.com/downloads)
 
 #### Local development
-1. Start by cloning this repo and checkout the **develop** branch
+1. Start by forking this repo in your own github account and checkout the **develop** branch from there.
 2. Create snakeoil (self-signed) ssl certificates by running `./deploy/snakeoil.sh`
 3. Run docker-compose `docker-compose up` or if you want to demonize it `docker-compose up -d`
   - This will pull the ready to use orcpub docker images and run them
   - This should create a directory `data`, in which the database is stored. This persist shutting the application down. If you want a fresh database, just delete the directory
-4. The website should be accessible via browser in `https://localhost` or `http://localhost:443`
+4. The website should be accessible via browser in `https://localhost`
+
+There are two docker-compose files.
+
+`docker-compose.yaml` will pull from the docker repo which the community maintains. **this is the default**
+
+`docker-compose-build.yaml` will build orcpub from your downloaded clone directory. See below.
 
 **NOTES**
-The application configuration is Environmental Variable based, meaning that its behaviour will change when modifying them at start time. To modify the variables edit the `docker-compose.yaml` file. 
+The application configuration is Environmental Variable based, meaning that its behaviour will change when modifying them at start time. To modify the variables edit the `docker-compose.yaml` or `docker-compose-build.yaml` files.
 
 Example variables:
 ```
@@ -58,15 +70,32 @@ This will modify the deployment, so it will build the application rather than us
 Afterwards, run `docker-compose up --build` to start building!
 
 ### Without docker
-#### Getting Started with Development
 
 - Install Java: http://openjdk.java.net/ or http://www.oracle.com/technetwork/java/javase/downloads/jdk8-downloads-2133151.html
-- Install leiningen: https://leiningen.org/
-- run `lein figwheel`
+- Download [Datomic here](https://my.datomic.com/downloads/free/0.9.5561) rename the 0.9.5561 to 0.9.5561.zip and unzip it into a directory.
+- Start Datomic by going to the unziped directory and run:
+
+On Windows: `bin\transactor config/samples/free-transactor-template.properties`
+
+On Unix: `bin/transactor config/samples/free-transactor-template.properties`
+
+On macOS: [homebrew](https://brew.sh/) to do this pretty quickly:
+
+```
+brew install datomic
+brew services start datomic
+```
+
+- Install leiningen: https://leiningen.org/ into a directory. 
+- download the code from your git fork `git clone git@github.com:yourrepo/your.git` Use the clone url in YOUR repo.
+- cd into orcpub
+- run `lein repl`
+- run `lein figwheel` Once lein figwheel finishes, a browser will launch.
+
+You should leave all three processes running: Datomic transactor, lein repl, and lein figwheel.  
 
 *NOTE:* There is an issue using leiningen 2.8.1 causing a `ClassCastException`. Building with leiningen 2.7.1 still works
 
-That should get a basic dev environment going and open your browser at [localhost:3449](http://localhost:3449/).
 When you save changes, it will auto compile and send all changes to the browser without the
 need to reload. After the compilation process is complete, you will
 get a Browser Connected REPL. An easy way to try it is:
@@ -77,20 +106,9 @@ get a Browser Connected REPL. An easy way to try it is:
 
 and you should see an alert in the browser window.
 
-Before you start up the back-end server, you will need to [set up Datomic locally](https://docs.datomic.com/on-prem/dev-setup.html). If you're just trying to get started quickly to contribute to the main project, and happen to be on macOS, you can use [homebrew](https://brew.sh/) to do this pretty quickly:
+#### Editors
 
-```
-brew install datomic
-brew services start datomic
-```
-
-You will then need to transact the schema. First start a REPL:
-
-```
-lein repl
-```
-
-Or if you are using Emacs with [Cider](https://cider.readthedocs.io/en/latest/) you can run the command to start the Cider REPL:
+Emacs with [Cider](https://cider.readthedocs.io/en/latest/) you can run the command to start the Cider REPL:
 
 ```
 C-c M-j
@@ -98,9 +116,13 @@ C-c M-j
 
 For Vim users, [vim-fireplace](https://github.com/tpope/vim-fireplace) provides a good way to interact with a running repl without leaving Vim.
 
-I haven't used [Cursive](https://cursive-ide.com/), but I hear it is really nice and I'm sure there's an easy way to start a REPL within it.
+For Windows Users you can use the community edition of [IntelliJ IDEA](https://www.jetbrains.com/idea/download/#section=windows) with the [Cursive plug-in](https://cursive-ide.com/userguide/)
+
+Or you can use the [Cursive](https://cursive-ide.com/) IDE, but I hear it is really nice and I'm sure there's an easy way to start a REPL within it.
 
 Once you have a REPL you can run this from within it to create the database, transact the database schema, and start the server:
+
+You only need to `(init-database)` ONCE.
 
 ```clojure
 user=> (init-database)
