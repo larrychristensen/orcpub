@@ -979,7 +979,7 @@
                 condition-immunity
                 language]} props
         filtered-languages (true-types language)
-        filtered-resistances (true-types damage-vulnerability)
+        filtered-resistances (true-types damage-resistance)
         filtered-damage-immunities (true-types damage-immunity)
         filtered-vulnerabilities (true-types damage-vulnerability)
         filtered-condition-immunities (true-types condition-immunity)]
