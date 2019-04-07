@@ -829,6 +829,12 @@
     [:.character-builder-header
      {:margin-bottom "19px"}]
 
+    [:.senses
+     {:width "450px"}]
+
+    [:.notes
+     {:width "350px"}]
+
     [:.registration-content
      {:width "785px"
       :min-height "600px"}]
