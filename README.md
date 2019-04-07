@@ -72,21 +72,15 @@ Afterwards, run `docker-compose up --build` to start building!
 ### Without docker
 
 - Install Java: http://openjdk.java.net/ or http://www.oracle.com/technetwork/java/javase/downloads/jdk8-downloads-2133151.html
-- Download [Datomic here](https://my.datomic.com/downloads/free/0.9.5561) rename the 0.9.5561 to 0.9.5561.zip and unzip it into a directory.
-- Start Datomic by going to the unziped directory and run:
+- Download [Datomic here](https://my.datomic.com/downloads/free/0.9.5561), and unzip it into a directory.
+- Start Datomic by going to the unzipped directory and run:
 
 On Windows: `bin\transactor config/samples/free-transactor-template.properties`
 
-On Unix: `bin/transactor config/samples/free-transactor-template.properties`
+On Mac/Unix: `bin/transactor config/samples/free-transactor-template.properties`
 
-On macOS: [homebrew](https://brew.sh/) to do this pretty quickly:
 
-```
-brew install datomic
-brew services start datomic
-```
-
-- Install leiningen: https://leiningen.org/ into a directory. 
+- Install leiningen: https://leiningen.org/#install into a directory.
 - download the code from your git fork `git clone git@github.com:yourrepo/your.git` Use the clone url in YOUR repo.
 - cd into orcpub
 - run `lein repl`
@@ -94,7 +88,7 @@ brew services start datomic
 
 You should leave all three processes running: Datomic transactor, lein repl, and lein figwheel.  
 
-*NOTE:* There is an issue using leiningen 2.8.1 causing a `ClassCastException`. Building with leiningen 2.7.1 still works
+(*NOTE:* There is an issue using leiningen 2.8.1 causing a `ClassCastException`.)
 
 When you save changes, it will auto compile and send all changes to the browser without the
 need to reload. After the compilation process is complete, you will
@@ -108,19 +102,23 @@ and you should see an alert in the browser window.
 
 #### Editors
 
+##### Emacs
 Emacs with [Cider](https://cider.readthedocs.io/en/latest/) you can run the command to start the Cider REPL:
 
 ```
 C-c M-j
 ```
 
-For Vim users, [vim-fireplace](https://github.com/tpope/vim-fireplace) provides a good way to interact with a running repl without leaving Vim.
+##### Vim
+[vim-fireplace](https://github.com/tpope/vim-fireplace) provides a good way to interact with a running repl without leaving Vim.
 
-For Windows Users you can use the community edition of [IntelliJ IDEA](https://www.jetbrains.com/idea/download/#section=windows) with the [Cursive plug-in](https://cursive-ide.com/userguide/)
+##### IntelliJ / Cursive
+You can use the community edition of [IntelliJ IDEA](https://www.jetbrains.com/idea/download/) with the [Cursive plug-in](https://cursive-ide.com/).
 
-Or you can use the [Cursive](https://cursive-ide.com/) IDE, but I hear it is really nice and I'm sure there's an easy way to start a REPL within it.
 
-Once you have a REPL you can run this from within it to create the database, transact the database schema, and start the server:
+#### REPL
+
+Once you have a REPL, you can run this from within it to create the database, transact the database schema, and start the server:
 
 You only need to `(init-database)` ONCE.
 
