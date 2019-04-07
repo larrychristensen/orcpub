@@ -522,9 +522,9 @@
         character-name (char5e/character-name built-char)
         con-mod (es/entity-val built-char :con-mod)
         total-hit-dice (s/join
-                        " / "
+                        "\n"
                         (map
-                         (fn [{:keys [class-level hit-die]}] (str class-level "x(1d" hit-die "+" con-mod ")"))
+                         (fn [{:keys [class-name class-level hit-die]}] (str class-name " - " class-level "x(1d" hit-die "+" con-mod ")"))
                          (vals levels)))
         speed (speed built-char)]
     (merge
