@@ -26,6 +26,8 @@
 
 (spec/def ::homebrew-invocation (spec/keys :req-un [::name ::key ::option-pack]))
 
+(spec/def ::homebrew-boon (spec/keys :req-un [::name ::key ::option-pack]))
+
 (defn class-level [levels class-kw]
   (get-in levels [class-kw :class-level]))
 
@@ -2601,7 +2603,16 @@
                              melee-weapons-xform
                              weapons)})]}))
 
-(defn pact-boon-options [spell-lists spells-map]
+(defn pact-boon-options [plugin-boons spell-lists spells-map]
+ (concat
+   (map
+    (fn [{:keys [name description]}]
+      (t/option-cfg
+       {:name name
+        :modifiers [(mod5e/trait-cfg
+                     {:name (str "Pact Boon: " name)
+                      :description description})]}))
+    plugin-boons)
   [(t/option-cfg
     {:name "Pact of the Chain"
      :modifiers [(mod5e/spells-known 1 :find-familiar ::char5e/cha "Warlock")
@@ -2636,7 +2647,7 @@
      :modifiers [(mod5e/trait-cfg
                   {:name opt5e/pact-of-the-tome-name
                    :page 108
-                   :summary "you have a spellbook with 3 extra cantrips"})]})])
+                   :summary "you have a spellbook with 3 extra cantrips"})]})]))
 
 
 (defn eldritch-invocation-options [plugin-invocations spell-lists spells-map]
@@ -2949,7 +2960,7 @@ long rest."})
               false
               "uses Mystic Arcanum")}))
 
-(defn warlock-option [spell-lists spells-map plugin-subclasses-map language-map weapon-map invocations]
+(defn warlock-option [spell-lists spells-map plugin-subclasses-map language-map weapon-map invocations boons]
   (opt5e/class-option
    spell-lists
    spells-map
@@ -3001,7 +3012,7 @@ long rest."})
              3 {:selections [(t/selection-cfg
                               {:name "Pact Boon"
                                :tags #{:class}
-                               :options (pact-boon-options spell-lists spells-map)})]}
+                               :options (pact-boon-options boons spell-lists spells-map)})]}
              5 {:selections [(eldritch-invocation-selection invocations spell-lists spells-map)]}
              7 {:selections [(eldritch-invocation-selection invocations spell-lists spells-map)]}
              9 {:selections [(eldritch-invocation-selection invocations spell-lists spells-map)]}
