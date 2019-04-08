@@ -1453,7 +1453,7 @@
 
 (defn add-subclass-component []
   (info-block [:span
-               [:span (str srd-prefix "Don't see a class or class here that you want to use?")]
+               [:span (str srd-prefix "Don't see a class or subclass here that you want to use?")]
                [:div.m-t-5
                 [:span.pointer.underline.orange
                  {:on-click #(dispatch [:route routes/dnd-e5-class-builder-page-route])}
