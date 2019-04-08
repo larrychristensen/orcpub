@@ -528,7 +528,7 @@
            :route routes/dnd-e5-class-builder-page-route}
           {:name "Subclass Builder"
            :route routes/dnd-e5-subclass-builder-page-route}
-          {:name "Elritch Invocation Builder"
+          {:name "Eldritch Invocation Builder"
            :route routes/dnd-e5-invocation-builder-page-route}
           {:name "Selection Builder"
            :route routes/dnd-e5-selection-builder-page-route}]]]]]]))

@@ -2888,7 +2888,7 @@
    (merge
     {:name "Race"
      :order 0
-     :help "Race determines your appearance and helps shape your culture and background. It also affects you ability scores, size, speed, languages, and many other crucial inherent traits."
+     :help "Race determines your appearance and helps shape your culture and background. It also affects your ability scores, size, speed, languages and many other crucial inherent traits."
      :tags #{:race}}
     cfg)))
 
