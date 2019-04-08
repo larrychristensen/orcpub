@@ -5297,7 +5297,7 @@
         "m-l-5"]]]
      #_[:div.m-b-20
         [:div.f-w-b
-         "Subclass Flavor"]
+         "Subclass Description"]
         [textarea-field
          {:value (get class :subclass-help)
           :on-change #(dispatch [::classes/set-class-prop :subclass-help %])}]]
