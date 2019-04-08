@@ -91,15 +91,23 @@
      (in-to-sz scaled-width)
      (in-to-sz scaled-height))))
 
+(def user-agent "Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.22 (KHTML, like Gecko) Chrome/25.0.1364.172")
+
 (defn draw-non-jpg [doc page url x y width height]
   (with-open [c-stream (content-stream doc page)]
-    (let [buff-image (ImageIO/read (.openStream (URL. url)))
+    (let [buff-image (ImageIO/read (.getInputStream
+                                     (doto
+                                       (.openConnection (URL. url))
+                                       (.setRequestProperty "User-Agent" user-agent))))
           img (LosslessFactory/createFromImage doc buff-image)]
       (draw-imagex c-stream img x y width height))))
 
 (defn draw-jpg [doc page url x y width height]
   (with-open [c-stream (content-stream doc page)
-              image-stream (.openStream (URL. url))]
+              image-stream (.getInputStream
+                             (doto
+                               (.openConnection (URL. url))
+                               (.setRequestProperty "User-Agent" user-agent)))]
     (let [img (JPEGFactory/createFromStream doc image-stream)]
       (draw-imagex c-stream img x y width height))))
 
