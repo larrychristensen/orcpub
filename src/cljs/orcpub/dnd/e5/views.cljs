@@ -6917,6 +6917,12 @@
          (dispatch [::e5/import-plugin nm text]))))
     (.readAsText reader file)))
 
+(defn capitalize-words
+  [s]
+  (->> (s/split (str s) #"\b")
+       (map s/capitalize)
+       s/join))
+
 (defn my-content-type []
   (let [expanded? (r/atom false)]
     (fn [source-name plugin type-name type-key icon add-event edit-event delete-event plural]
@@ -6938,7 +6944,7 @@
                                       final-type-name (if plural
                                                         (if (not= 1 num) plural type-name)
                                                         (str type-name (if (not= 1 num) "s")))]
-                                  (str num " " (common/safe-capitalize final-type-name)))]]
+                                  (str num " " (capitalize-words final-type-name)))]]
           [:div.orange.pointer
            [:i.fa.m-r-5
             {:class-name (if @expanded? "fa-caret-up" "fa-caret-down")}]
@@ -7080,7 +7086,7 @@
   [my-content-type
    name
    plugin
-   "eldritch invocation"
+   "eldritch invocations"
    ::e5/invocations
    "warlock-eye"
    ::classes/new-invocation
