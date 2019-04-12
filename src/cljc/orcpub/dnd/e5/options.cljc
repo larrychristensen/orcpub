@@ -400,13 +400,20 @@
    [:span.f-w-b (str name ": ")]
    [:span.f-w-n value]])
 
-(defn spell-help [{:keys [school casting-time range duration description summary source page]}]
+(defn spell-help [{:keys [school casting-time range duration components description summary source page]}]
   [:div
    [:div.m-b-5
     (spell-field "School" school)
     (spell-field "Casting Time" casting-time)
     (spell-field "Range" range)
-    (spell-field "Duration" duration)]
+    (spell-field "Duration" duration)
+    (let [{:keys [verbal somatic material material-component]} components]
+      (spell-field "Components" (str
+          (s/join ", " (remove nil?
+              [(if verbal "V")
+               (if somatic "S")
+               (if material "M")]))
+          (if material-component (str " (" material-component ")")))))]
    [:div.f-w-n (if (or description summary)
                  (doall
                   (map-indexed
