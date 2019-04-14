@@ -80,8 +80,10 @@ On Windows: `bin\transactor config/samples/free-transactor-template.properties`
 On Mac/Unix: `bin/transactor config/samples/free-transactor-template.properties`
 
 
-- Install leiningen: https://leiningen.org/#install into a directory.
-- download the code from your git fork `git clone git@github.com:yourrepo/your.git` Use the clone url in YOUR repo.
+- Install leiningen (https://leiningen.org/#install) into a directory.
+    - Mac / Linux: The latest version (2.9.1 as of this writing) should work.
+    - Windows: There is an issue with 2.9.1, so downgrade to 2.8.1 (`lein downgrade 2.8.1`).
+- Download the code from your git fork `git clone git@github.com:yourrepo/your.git` Use the clone url in YOUR repo.
 - cd into orcpub
 - run `lein repl`
 - run `lein figwheel` Once lein figwheel finishes, a browser will launch.
