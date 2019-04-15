@@ -1,6 +1,7 @@
 (ns user
-  (:require [figwheel-sidecar.repl-api :as f]
+  (:require [clojure.java.io :as io]
             [com.stuartsierra.component :as component]
+            [figwheel-sidecar.repl-api :as f]
             [datomic.api :as datomic]
             [orcpub.routes :as r]
             [orcpub.system :as s]
@@ -45,11 +46,18 @@
      ;; nothing in -server:
      (throw (IllegalStateException. "Call (start-server) first"))))
 
-(defn get-cljs-builds
+(defn- project-form
+  []
+  (with-open [r (java.io.PushbackReader. (io/reader "project.clj"))]
+    (binding [*read-eval* false]
+      (loop [form (read r)]
+        (if (= (first form) 'defproject)
+          form
+          (recur (read r)))))))
+
+(defn get-cljs-build
   [id]
-  (let [project-config (->> "project.clj"
-                            slurp
-                            read-string
+  (let [project-config (->> (project-form)
                             (drop 1)
                             (apply hash-map))
         build (->> project-config
@@ -95,11 +103,13 @@
                  :db db}))))
 
 (defn fig-start
-  "This starts the figwheel server and watch based auto-compiler."
+  "This starts the figwheel server and watch based auto-compiler.
+
+  Afterwards, call (cljs-repl) to connect."
   ([]
    (fig-start "dev"))
   ([build-id]
-   ;; this call will only work are long as your :cljsbuild and
+   ;; this call will only work as long as your :cljsbuild and
    ;; :figwheel configurations are at the top level of your project.clj
    ;; and are not spread across different lein profiles
 
@@ -107,7 +117,7 @@
    (f/start-figwheel!
      {:figwheel-options {}
       :build-ids [build-id]
-      :all-builds (get-cljs-builds build-id)})))
+      :all-builds (get-cljs-build build-id)})))
 
 (defn fig-stop
   "Stop the figwheel server and watch based auto-compiler."
@@ -117,6 +127,8 @@
 ;; if you are in an nREPL environment you will need to make sure you
 ;; have setup piggieback for this to work
 (defn cljs-repl
-  "Launch a ClojureScript REPL that is connected to your build and host environment."
+  "Launch a ClojureScript REPL that is connected to your build and host environment.
+
+  (NB: Call fig-start first.)"
   []
   (f/cljs-repl))

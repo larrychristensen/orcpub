@@ -56,7 +56,6 @@
                  [com.amazonaws/aws-java-sdk-dynamodb "1.11.6"]
                  [com.fasterxml.jackson.core/jackson-databind "2.7.0"]
 
-                 [binaryage/devtools "0.9.4"]
                  [hiccup "1.0.5"]
                  [com.draines/postal "2.0.2"]
                  [environ "1.1.0"]
@@ -185,21 +184,19 @@
             "prod-build" ^{:doc "Recompile code with prod profile."}
             ["externs"
              ["with-profile" "prod" "cljsbuild" "once" "main"]]}
-  :profiles {:dev {:dependencies [[com.datomic/datomic-free "0.9.5561"]
-
-                                  [binaryage/devtools "0.9.4"]
-                                  [figwheel-sidecar "0.5.14"]
-                                  [com.cemerick/piggieback "0.2.1"]
+  :profiles {:dev {:dependencies [[binaryage/devtools "0.9.4"]
+                                  [figwheel-sidecar "0.5.18"]
+                                  [cider/piggieback "0.4.0"]
                                   [org.clojure/test.check "0.9.0"]]
                    ;; need to add dev source path here to get user.clj loaded
-                   :source-paths ["src/clj" "src/cljc" "src/cljs" "dev"]
+                   :source-paths ["web/cljs" "src/clj" "src/cljc" "src/cljs" "dev"]
                    ;; for CIDER
                    ;; :plugins [[cider/cider-nrepl "0.12.0"]]
                    :repl-options { ; for nREPL dev you really need to limit output
                                   :init (set! *print-length* 50)
                                   :init-ns user
-                                  :nrepl-middleware [cemerick.piggieback/wrap-cljs-repl]}}
-             :native-dev {:dependencies [[figwheel-sidecar "0.5.14"]
+                                  :nrepl-middleware [cider.piggieback/wrap-cljs-repl]}}
+             :native-dev {:dependencies [[figwheel-sidecar "0.5.18"]
                                          [com.cemerick/piggieback "0.2.1"]
                                          [org.clojure/test.check "0.9.0"]]
                           :source-paths ["src/cljs" "native/cljs" "src/cljc" "env/dev"]
