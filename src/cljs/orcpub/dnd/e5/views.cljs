@@ -2931,7 +2931,7 @@
                    #_{:on-click (toggle-details-expanded-handler expanded-details item-kw)}
                    [:td.p-10.f-w-b (or (:name treasure) treasure-name)]
                    [:td.p-10 (::char-equip/quantity treasure-cfg)]]))
-              treasure-cfgs))]]]]))))
+              (sort treasure-cfgs)))]]]]))))
 
 
 (defn skill-details-section-2 []
