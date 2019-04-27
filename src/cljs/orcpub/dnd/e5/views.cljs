@@ -2904,6 +2904,35 @@
                            weight)]]]]))
               equipment-cfgs))]]]]))))
 
+(defn treasure-section []
+  (let [expanded-details (r/atom {})]
+    (fn [id]
+      (let [mobile? @(subscribe [:mobile?])
+            treasure-cfgs @(subscribe [::char/treasure id])]
+        [:div
+         [:div.flex.align-items-c
+          (svg-icon "cash" 32)
+          [:span.m-l-5.f-w-b.f-s-18 "Treasure"]]
+         [:div
+          [:table.w-100-p.t-a-l.striped
+           [:tbody
+            [:tr.f-w-b
+             {:class-name (if mobile? "f-s-12")}
+             [:th.p-10 "Name"]
+             [:th.p-10 "Qty."]
+             [:th]]
+            (doall
+             (map
+              (fn [[treasure-kw treasure-cfg]]
+                (let [treasure-name (::char-equip/name treasure-cfg)
+                      {:keys [::equip/name] :as treasure} (equip/treasure-map treasure-kw)]
+                  ^{:key treasure-kw}
+                  [:tr.pointer
+                   #_{:on-click (toggle-details-expanded-handler expanded-details item-kw)}
+                   [:td.p-10.f-w-b (or (:name treasure) treasure-name)]
+                   [:td.p-10 (::char-equip/quantity treasure-cfg)]]))
+              treasure-cfgs))]]]]))))
+
 
 (defn skill-details-section-2 []
   (let [expanded-details (r/atom {})]
@@ -3242,7 +3271,9 @@
    [:div.m-t-30
     [magic-items-section-2 id]]
    [:div.m-t-30
-    [other-equipment-section-2 id]]])
+    [other-equipment-section-2 id]]
+   [:div.m-t-30
+    [treasure-section id]]])
 
 (defn details-tab [title icon device-type selected? on-select]
   [:div.b-b-2.f-w-b.pointer.p-10.hover-opacity-full
