@@ -5063,7 +5063,7 @@
       [:div.m-t-10
        [labeled-dropdown
         "Selection Type"
-        {:items (concat
+        {:items (sort-by :title (concat
                  [{:title "<select type to add>"
                    :disabled? true
                    :value :select}]
@@ -5071,7 +5071,7 @@
                   obj-to-item
                   selections)
                  [{:title "<create new selection>"
-                   :value :new-selection}])
+                   :value :new-selection}]))
          :value (or type :select)
          :on-change #(if (= "new-selection" %)
                        (dispatch [::selections/new-selection])
@@ -5107,7 +5107,7 @@
       [:div.m-t-10
        [labeled-dropdown
         "Modifier Type"
-        {:items (cons
+        {:items (sort-by :title (cons
                  {:title "<select type to add>"
                   :disabled? true
                   :value :select}
@@ -5115,7 +5115,7 @@
                   (fn [[kw {:keys [name]}]]
                     {:title name
                      :value kw})
-                  mod-values))
+                  mod-values)))
          :value (if type (clojure.core/name type) :select)
          :on-change #(dispatch [edit-modifier-type-event index (keyword %)])}]]
       (if type
