@@ -521,11 +521,15 @@
         classes (char5e/classes built-char)
         character-name (char5e/character-name built-char)
         con-mod (es/entity-val built-char :con-mod)
-        total-hit-dice (s/join
-                        "\n"
-                        (map
-                         (fn [{:keys [class-name class-level hit-die]}] (str class-name " - " class-level "x(1d" hit-die "+" con-mod ")"))
-                         (vals levels)))
+        total-hit-dice (->> levels
+                            vals
+                            (reduce
+                              (fn [levels-per-die level]
+                                (update levels-per-die (:hit-die level) (fnil #(+ % (:class-level level)) 0)))
+                              {})
+                            (sort-by key)
+                            (map #(str (val %) "x(1d" (key %) "+" con-mod ")"))
+                            (s/join "\n"))
         speed (speed built-char)]
     (merge
      {:race (str race (if subrace (str "/" subrace)))
