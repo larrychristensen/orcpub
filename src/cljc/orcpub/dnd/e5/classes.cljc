@@ -72,7 +72,7 @@
                  {:name "Rage"
                   :page 48
                   :duration units5e/minutes-1
-                  :frequency (units5e/rests (condp <= (?class-level :barbarian)
+                  :frequency (units5e/long-rests (condp <= (?class-level :barbarian)
                                               17 6
                                               12 5
                                               6 4
