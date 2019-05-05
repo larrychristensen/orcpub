@@ -520,11 +520,16 @@
         levels (char5e/levels built-char)
         classes (char5e/classes built-char)
         character-name (char5e/character-name built-char)
-        total-hit-dice (s/join
-                        " / "
-                        (map
-                         (fn [{:keys [class-level hit-die]}] (str class-level "d" hit-die))
-                         (vals levels)))
+        con-mod (es/entity-val built-char :con-mod)
+        total-hit-dice (->> levels
+                            vals
+                            (reduce
+                              (fn [levels-per-die level]
+                                (update levels-per-die (:hit-die level) (fnil #(+ % (:class-level level)) 0)))
+                              {})
+                            (sort-by key)
+                            (map #(str (val %) "x(1d" (key %) "+" con-mod ")"))
+                            (s/join "\n"))
         speed (speed built-char)]
     (merge
      {:race (str race (if subrace (str "/" subrace)))
@@ -533,7 +538,7 @@
       :background (char5e/background built-char)
       :prof-bonus (common/bonus-str (es/entity-val built-char :prof-bonus))
       :ac current-ac
-      :hd-total total-hit-dice
+      :hd total-hit-dice
       :initiative (common/bonus-str (es/entity-val built-char :initiative))
       :speed speed
       :hp-max (es/entity-val built-char :max-hit-points)
