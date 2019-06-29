@@ -1019,20 +1019,24 @@
          @(subscribe [:message])
          hide-message]])]))
 
-(def debug-data-style {:width "400px" :height "400px"})
+(def debug-data-style {:width "400px" :height "450px"})
+
+(defn clj->json
+  [ds]
+  (.stringify js/JSON (clj->js ds) nil 2))
 
 (defn debug-data []
   (let [expanded? (r/atom false)]
     (fn []
       [:div.t-a-r
        [:div.orange.pointer.underline
-        {:on-click #(swap! expanded? not)
-         :title "Development - Debug Info" }
-        [:i.fa.fa-bug {:class-name (if @expanded? "white")}]]
-       [:div.orange.pointer.underline
         {:on-click (make-event-handler ::e5/export-all-plugins-pretty-print)
          :title "Development - Download all Orcbrews as Pretty Print, if you click this button it will take a long time to generate the orcbrew.  Click and wait."}
         [:i.fa.fa-cloud-download]]
+       [:div.orange.pointer.underline
+        {:on-click #(swap! expanded? not)
+         :title "Development - Debug Info" }
+        [:i.fa.fa-bug {:class-name (if @expanded? "white")}]]
        (if @expanded?
          [:textarea.m-t-5
           {:read-only true
@@ -1042,7 +1046,18 @@
                         :device-type (user-agent/device-type)
                         :platform (user-agent/platform)
                         :platform-version (user-agent/platform-version)
-                        :character (char/to-strict @(subscribe [:character]))})}])])))
+                        :character (char/to-strict @(subscribe [:character]))})}])
+       (if @expanded?
+         [:textarea.m-t-5
+          {:read-only true
+           :style debug-data-style
+           :value (clj->json {:browser (user-agent/browser)
+                              :browser-version (user-agent/browser-version)
+                              :device-type (user-agent/device-type)
+                              :platform (user-agent/platform)
+                              :platform-version (user-agent/platform-version)
+                              :character (char/to-strict @(subscribe [:character]))})}])
+       ])))
 
 (defn dice-roll-result [{:keys [total rolls mod raw-mod plus-minus]}]
   [:div.white.f-s-32.flex.align-items-c
