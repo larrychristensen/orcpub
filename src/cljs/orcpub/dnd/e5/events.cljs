@@ -62,7 +62,7 @@
                                       default-subclass]]
             [orcpub.dnd.e5.autosave-fx]
             [re-frame.core :refer [reg-event-db reg-event-fx reg-fx inject-cofx path trim-v
-                                   after debug dispatch dispatch-sync subscribe ->interceptor]]
+                                   after dispatch dispatch-sync subscribe ->interceptor]]
             [cljs.spec.alpha :as spec]
             [cljs-http.client :as http]
             [cljs.core.async :refer [<! timeout]]
@@ -1828,29 +1828,6 @@
   (let [result (sets/difference subtypes hidden-subtypes)]
     result))
 
-(defn all-subtypes-removed? [subtypes hidden-subtypes]
-  (and (seq subtypes)
-       (seq hidden-subtypes)
-       (->> subtypes
-            (remove
-             hidden-subtypes)
-            empty?)))
-
-(defn filter-monsters [filter-text monster-filters]
-  (let [pattern (if filter-text
-                  (re-pattern (str ".*" (s/lower-case filter-text) ".*")))]
-    (sort-by
-     :name
-     (sequence
-      (filter
-       (fn [{:keys [name type subtypes size]}]
-         (and (or (s/blank? filter-text)
-                  (re-matches pattern (s/lower-case name)))
-              (not (or (-> monster-filters :size size)
-                       (-> monster-filters :type type)
-                       (all-subtypes-removed? subtypes (:subtype monster-filters)))))))
-      @(subscribe [::monsters/sorted-monsters])))))
-
 (defn filter-by-name-xform [filter-text name-key]
   (let [pattern (re-pattern (str ".*" (s/lower-case filter-text) ".*"))]
     (filter
@@ -1941,13 +1918,15 @@
    (assoc db ::char5e/builder-tab tab)))
 
 (reg-event-db
+  ::char5e/sort-monsters
+  (fn [db [_ sort-criteria sort-direction]]
+    (assoc db ::char5e/monster-sort-criteria sort-criteria
+              ::char5e/monster-sort-direction sort-direction)))
+
+(reg-event-db
  ::char5e/filter-monsters
  (fn [db [_ filter-text]]
-   (assoc db
-          ::char5e/monster-text-filter filter-text
-          ::monsters/filtered-monsters (if (>= (count filter-text) 3)
-                                           (filter-monsters filter-text (::char5e/monster-filter-hidden? db))
-                                           @(subscribe [::monsters/sorted-monsters])))))
+   (assoc db ::char5e/monster-text-filter filter-text)))
 
 (reg-event-db
  ::char5e/filter-spells
@@ -1980,11 +1959,7 @@
 (reg-event-db
  ::char5e/toggle-monster-filter-hidden
  (fn [db [_ filter value]]
-   (let [updated (update-in db [::char5e/monster-filter-hidden? filter value] not)]
-     (assoc updated
-            ::char5e/filtered-monsters
-            (filter-monsters (::char5e/monster-text-filter updated)
-                             (::char5e/monster-filter-hidden? updated))))))
+   (update-in db [::char5e/monster-filter-hidden? filter value] not)))
 
 (defn toggle-set [key set]
   (if (get set key)

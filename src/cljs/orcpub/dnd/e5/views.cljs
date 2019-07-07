@@ -7551,51 +7551,51 @@
              parties))]]]))))
 
 (defn monster-list-item [{:keys [name size type subtypes alignment key] :as monster}]
-  (let [expanded? @(subscribe [:monster-expanded? name])
-        device-type @(subscribe [:device-type])
-        monster-page-path (routes/path-for routes/dnd-e5-monster-page-route :key key)
-        monster-page-route (routes/match-route monster-page-path)
-        homebrew? (:option-pack monster)]
-    [:div.main-text-color.item-list-item
-     [:div.pointer
-      [:div.flex.justify-cont-s-b.align-items-c
-       {:on-click #(dispatch [:toggle-monster-expanded name])}
-       [:div.m-l-10
-        [:div.f-s-24.f-w-600.p-b-20.p-t-20.flex
-         (if homebrew?
-           [:div.m-r-10 (svg-icon "beer-stein" 24 @(subscribe [:theme]))])
-         [monster-summary name size type subtypes alignment]]]
-       [:div.orange.pointer.m-r-10
-        (if (not= device-type :mobile) [:span.underline (if expanded?
-                                                          "collapse"
-                                                          "open")])
-        [:i.fa.m-l-5
-         {:class-name (if expanded? "fa-caret-up" "fa-caret-down")}]]]
-      (if expanded?
-        [:div.p-10
-         {:style character-display-style}
-         [:div.flex.justify-cont-end.uppercase.align-items-c
-          [:button.form-button.m-l-5
-           {:on-click #(dispatch [:route monster-page-route])}
-           "view"]
-          (if homebrew?
+  (r/with-let [device-type? (subscribe [:device-type])]
+    (let [homebrew? (:option-pack monster)
+          expanded? @(subscribe [:monster-expanded? name])]
+      [:div.main-text-color.item-list-item
+       [:div.pointer
+        [:div.flex.justify-cont-s-b.align-items-c
+         {:on-click #(dispatch [:toggle-monster-expanded name])}
+         [:div.m-l-10
+          [:div.f-s-24.f-w-600.p-b-20.p-t-20.flex
+           (when homebrew?
+             [:div.m-r-10 (svg-icon "beer-stein" 24 @(subscribe [:theme]))])
+           [monster-summary name size type subtypes alignment]]]
+         [:div.orange.pointer.m-r-10
+          (when (not= @device-type? :mobile)
+            [:span.underline (if expanded?
+                               "collapse"
+                               "open")])
+          [:i.fa.m-l-5
+           {:class-name (if expanded? "fa-caret-up" "fa-caret-down")}]]]
+        (when expanded?
+          [:div.p-10
+           {:style character-display-style}
+           [:div.flex.justify-cont-end.uppercase.align-items-c
             [:button.form-button.m-l-5
-             {:on-click (make-event-handler ::monsters/edit-monster monster)}
-             "edit"])
-          (if homebrew?
-            [:button.form-button.m-l-5
-             {:on-click (make-event-handler ::monsters/delete-monster monster)}
-             "delete"])]
-         [monster-component monster]])]]))
+             {:on-click #(dispatch [:route (routes/match-route (routes/path-for routes/dnd-e5-monster-page-route :key key))])}
+             "view"]
+            (if homebrew?
+              [:button.form-button.m-l-5
+               {:on-click (make-event-handler ::monsters/edit-monster monster)}
+               "edit"])
+            (if homebrew?
+              [:button.form-button.m-l-5
+               {:on-click (make-event-handler ::monsters/delete-monster monster)}
+               "delete"])]
+           [monster-component monster]])]])))
 
-(defn monster-list-items [expanded-monsters device-type]
-  [:div.item-list
-   (doall
-    (map
-     (fn [{:keys [name] :as monster}]
-       ^{:key name}
-       [monster-list-item monster])
-     @(subscribe [::monsters/filtered-monsters])))])
+(defn monster-list-items []
+  (let [filtered-monsters @(subscribe [::monsters/filtered-monsters])]
+    [:div.item-list
+     (doall
+       (map
+         (fn [{:keys [name] :as monster}]
+           ^{:key name}
+           [monster-list-item monster])
+         filtered-monsters))]))
 
 (defn clear-monsters-filter []
   (dispatch [::char/filter-monsters ""]))
@@ -7605,73 +7605,100 @@
    (fn [a]
      #(swap! a not))))
 
+(defn- sort-toggle
+  "Resembles an underlined link. Uses the FA arrows to indicate sorting direction.
+
+   Should be generalized or moved."
+  [label value sort-event sort-criteria sort-direction]
+  [:div.orange.pointer.m-r-10
+   {:on-click #(dispatch [sort-event value (if (= sort-direction "asc") "desc" "asc")])}
+   [:span.underline label]
+   [:i.fa.m-l-5
+    {:class (s/join " "
+                    [(when (not= sort-criteria value)
+                       "invisible")
+                     (if (= sort-direction "asc")
+                       "fa-caret-up"
+                       "fa-caret-down")])}]])
+
+(defn monster-trait-filters
+  []
+  [:div.flex.flex-wrap
+   [:div.main-text-color.p-20
+    [:div.f-s-16.f-w-b "Size"]
+    [:div
+     (doall
+       (map
+         (fn [size]
+           ^{:key size}
+           [:div.p-5.pointer
+            {:on-click (make-event-handler ::char/toggle-monster-filter-hidden :size size)}
+            (comps/checkbox (not @(subscribe [::char/monster-filter-hidden? :size size])) false)
+            (str " " (s/capitalize (common/kw-to-name size)))])
+         @(subscribe [::char/monster-sizes])))]]
+   [:div.main-text-color.p-20
+    [:div.f-s-16.f-w-b "Type"]
+    [:div
+     (doall
+       (map
+         (fn [type]
+           ^{:key type}
+           [:div.p-5.pointer
+            {:on-click (make-event-handler ::char/toggle-monster-filter-hidden :type type)}
+            (comps/checkbox (not @(subscribe [::char/monster-filter-hidden? :type type])) false)
+            (str " " (s/capitalize (common/kw-to-name type)))])
+         @(subscribe [::char/monster-types])))]]
+   (let [subtypes @(subscribe [::char/monster-subtypes])]
+     [:div.main-text-color.p-20
+      [:div.f-s-16.f-w-b "Subtype"]
+      [:div
+       (doall
+         (map
+           (fn [subtype]
+             ^{:key subtype}
+             [:div.p-5.pointer
+              {:on-click (make-event-handler ::char/toggle-monster-filter-hidden :subtype subtype)}
+              (comps/checkbox (not @(subscribe [::char/monster-filter-hidden? :subtype subtype])) false)
+              (str " " (s/capitalize (common/kw-to-name subtype)))])
+           subtypes))]])])
+
+(defn monster-filter-toggle
+  [filters-expanded?]
+  [:div.orange.pointer.m-r-10
+   {:on-click (toggle-handler filters-expanded?)}
+   (when (not= @(subscribe [:device-type]) :mobile)
+     [:span.underline (if @filters-expanded?
+                        "hide"
+                        "filters")])
+   [:i.fa.m-l-5
+    {:class-name (if @filters-expanded? "fa-caret-up" "fa-caret-down")}]])
+
 (defn monster-list []
-  (let [filters-expanded? (r/atom false)]
-    (fn []
-      (let [expanded-monsters @(subscribe [:expanded-monsters])
-            device-type @(subscribe [:device-type])]
-        [content-page
-         "Monsters"
-         []
-         [:div.p-l-5.p-r-5.p-b-10
-          [:div.p-b-10.p-l-10.p-r-10
-           [:div.posn-rel
-            [:input.input.f-s-24.p-l-20.w-100-p.h-60
-             {:value @(subscribe [::char/monster-text-filter])
-              :on-change (make-arg-event-handler ::char/filter-monsters event-value)}]
-            [:i.fa.fa-times.posn-abs.f-s-24.pointer.main-text-color
-             {:style close-icon-style
-              :on-click clear-monsters-filter}]]]
-          [:div
-           [:div.flex.justify-cont-end.m-b-10
-            [:div.orange.pointer.m-r-10
-             {:on-click (toggle-handler filters-expanded?)}
-             (if (not= device-type :mobile)
-               [:span.underline (if @filters-expanded?
-                                  "hide"
-                                  "filters")])
-             [:i.fa.m-l-5
-              {:class-name (if @filters-expanded? "fa-caret-up" "fa-caret-down")}]]]
-           (if @filters-expanded?
-             [:div.flex.flex-wrap
-              [:div.main-text-color.p-20
-               [:div.f-s-16.f-w-b "Size"]
-               [:div
-                (doall
-                 (map
-                  (fn [size]
-                    ^{:key size}
-                    [:div.p-5.pointer
-                     {:on-click (make-event-handler ::char/toggle-monster-filter-hidden :size size)}
-                     (comps/checkbox (not @(subscribe [::char/monster-filter-hidden? :size size])) false)
-                     (common/kw-to-name size)])
-                  @(subscribe [::char/monster-sizes])))]]
-              [:div.main-text-color.p-20
-               [:div.f-s-16.f-w-b "Type"]
-               [:div
-                (doall
-                 (map
-                  (fn [type]
-                    ^{:key type}
-                    [:div.p-5.pointer
-                     {:on-click (make-event-handler ::char/toggle-monster-filter-hidden :type type)}
-                     (comps/checkbox (not @(subscribe [::char/monster-filter-hidden? :type type])) false)
-                     (common/kw-to-name type)])
-                  @(subscribe [::char/monster-types])))]]
-              (let [subtypes @(subscribe [::char/monster-subtypes])]
-                [:div.main-text-color.p-20
-                 [:div.f-s-16.f-w-b "Subtype"]
-                 [:div
-                  (doall
-                   (map
-                    (fn [subtype]
-                      ^{:key subtype}
-                      [:div.p-5.pointer
-                       {:on-click (make-event-handler ::char/toggle-monster-filter-hidden :subtype subtype)}
-                       (comps/checkbox (not @(subscribe [::char/monster-filter-hidden? :subtype subtype])) false)
-                       (common/kw-to-name subtype)])
-                    subtypes))]])])]
-          [monster-list-items expanded-monsters device-type]]]))))
+  (r/with-let [filters-expanded? (r/atom false)
+               sort-criteria (subscribe [::char/monster-sort-criteria])
+               sort-direction (subscribe [::char/monster-sort-direction])]
+    [content-page
+     "Monsters"
+     []
+     [:div.p-l-5.p-r-5.p-b-10
+      [:div.p-b-10.p-l-10.p-r-10
+       [:div.posn-rel
+        [:input.input.f-s-24.p-l-20.w-100-p.h-60
+         {:value     @(subscribe [::char/monster-text-filter])
+          :on-change (make-arg-event-handler ::char/filter-monsters event-value)}]
+        [:i.fa.fa-times.posn-abs.f-s-24.pointer.main-text-color
+         {:style    close-icon-style
+          :on-click clear-monsters-filter}]]]
+      [:div
+       [:div.flex.justify-cont-s-b.m-b-10
+        [:div.orange.m-l-10.m-r-10 "Sort by:"]
+        [sort-toggle "Name" "name" ::char/sort-monsters @sort-criteria @sort-direction]
+        [sort-toggle "Challenge Rating" "cr" ::char/sort-monsters @sort-criteria @sort-direction]
+        [:div.flex-grow-1]
+        [monster-filter-toggle filters-expanded?]]
+       (when @filters-expanded?
+         [monster-trait-filters])]
+      [monster-list-items]]]))
 
 (defn spell-list-item [{:keys [name level school key] :as spell}]
   (let [expanded? @(subscribe [:spell-expanded? name])

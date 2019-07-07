@@ -1036,13 +1036,46 @@
 (reg-sub
  ::monsters5e/sorted-monsters
  :<- [::monsters5e/monsters]
- (fn [monsters]
-   (sort-by :name monsters)))
+ :<- [::char5e/monster-sort-criteria]
+ :<- [::char5e/monster-sort-direction]
+ (fn [[monsters sort-criteria sort-direction]]
+   (let [comparator (if (= sort-direction "asc") compare #(compare %2 %1))]
+     (case sort-criteria
+       "name" (sort-by :name comparator monsters)
+       "cr" (sort-by :challenge comparator monsters)))))
+
+(defn all-subtypes-removed? [subtypes hidden-subtypes]
+  (and (seq subtypes)
+       (seq hidden-subtypes)
+       (->> subtypes
+            (remove
+              hidden-subtypes)
+            empty?)))
+
+(defn filter-monsters [monsters filter-text monster-filters]
+  (let [lower-case-filter-text (s/lower-case filter-text)]
+    (filter
+      (fn [{:keys [name type subtypes size]}]
+        (and (or (< (count filter-text) 3)
+                 (s/includes? (s/lower-case name) lower-case-filter-text))
+             (not (or (-> monster-filters :size size)
+                      (-> monster-filters :type type)
+                      (all-subtypes-removed? subtypes (:subtype monster-filters))))))
+      monsters)))
 
 (reg-sub
  ::monsters5e/filtered-monsters
- (fn [db]
-   (::monsters5e/filtered-monsters db)))
+ :<- [::monsters5e/sorted-monsters]
+ :<- [::char5e/monster-text-filter]
+ :<- [::char5e/monster-filters]
+ (fn [[sorted-monsters filter-text monster-filters]]
+   (filter-monsters sorted-monsters (if filter-text filter-text "") monster-filters)))
+
+(reg-sub
+  ::monsters5e/filtered-monster-names
+  :<- [::monsters5e/filtered-monsters]
+  (fn [filtered-monsters]
+    (into #{} (map :name filtered-monsters))))
 
 (reg-sub
  ::spells5e/base-spells

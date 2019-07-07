@@ -18,12 +18,12 @@
                                     :password [:gpg :env]}]]
   :mirrors {"apache" {:url "https://repository.apache.org/snapshots/"}}
 
-  :dependencies [[org.clojure/clojure "1.10.0"]
+  :dependencies [[org.clojure/clojure "1.10.1"]
                  [org.clojure/test.check "0.9.0"]
-                 [org.clojure/clojurescript "1.10.439"]
-                 [org.clojure/core.async "0.4.490"]
-                 [cljsjs/react "16.6.0-0"]
-                 [cljsjs/react-dom "16.6.0-0"]
+                 [org.clojure/clojurescript "1.10.520"]
+                 [org.clojure/core.async "0.4.500"]
+                 #_[cljsjs/react "16.6.0-0"]
+                 #_[cljsjs/react-dom "16.6.0-0"]
                  [cljsjs/facebook "v20150729-0"]
                  [cljsjs/google-platformjs-extern "1.0.0-0"]
                  [cljsjs/filesaverjs "1.3.3-0"]
@@ -36,7 +36,7 @@
                  [org.clojure/test.check "0.9.0"]
 
                  [org.clojure/core.match "0.3.0-alpha5"]
-                 [re-frame "0.9.0"]
+                 [re-frame "0.10.6"]
                  [reagent "0.7.0"]
                  [garden "1.3.2"]
                  [org.apache.pdfbox/pdfbox "2.1.0-20170324.170253-831"]
@@ -64,7 +64,7 @@
                  [vvvvalvalval/datomock "0.2.0"]
                  [com.datomic/datomic-free "0.9.5561"]]
 
-  :plugins [[lein-figwheel "0.5.18"]
+  :plugins [[lein-figwheel "0.5.19"]
             [lein-cljsbuild "1.1.7" :exclusions [[org.clojure/clojure]]]
             [lein-garden "0.3.0"]
             [lein-environ "1.1.0"]
@@ -113,10 +113,7 @@
                                :asset-path           "/js/compiled/out"
                                :output-to            "resources/public/js/compiled/orcpub.js"
                                :output-dir           "resources/public/js/compiled/out"
-                               :source-map-timestamp true
-                               ;; To console.log CLJS data-structures make sure you enable devtools in Chrome
-                               ;; https://github.com/binaryage/cljs-devtools
-                               :preloads             [devtools.preload]}}}
+                               :source-map-timestamp true}}}
               }
 
   :figwheel { ;; :http-server-root "public" ;; default and assumes "resources"
@@ -178,16 +175,21 @@
             ["externs"
              ["with-profile" "prod" "cljsbuild" "once" "main"]]}
   :profiles {:dev          {:dependencies [[binaryage/devtools "0.9.10"]
-                                           [figwheel-sidecar "0.5.18"]
+                                           [figwheel-sidecar "0.5.19"]
                                            [cider/piggieback "0.4.0"]
-                                           [org.clojure/test.check "0.9.0"]]
+                                           [org.clojure/test.check "0.9.0"]
+                                           [day8.re-frame/re-frame-10x "0.3.7"]]
                             ;; need to add dev source path here to get user.clj loaded
                             :source-paths ["web/cljs" "src/clj" "src/cljc" "src/cljs" "dev"]
+                            :cljsbuild    {:builds {:dev {:compiler {:closure-defines {"re_frame.trace.trace_enabled_QMARK_" true}
+                                                                     ;; To console.log CLJS data-structures make sure you enable devtools in Chrome
+                                                                     ;; https://github.com/binaryage/cljs-devtools
+                                                                     :preloads        [devtools.preload day8.re-frame-10x.preload]}}}}
                             ;; for CIDER
                             ;; :plugins [[cider/cider-nrepl "0.12.0"]]
                             :repl-options {:init-ns          user
                                            :nrepl-middleware [cider.piggieback/wrap-cljs-repl]}}
-             :native-dev   {:dependencies [[figwheel-sidecar "0.5.18"]
+             :native-dev   {:dependencies [[figwheel-sidecar "0.5.19"]
                                            [com.cemerick/piggieback "0.2.1"]
                                            [org.clojure/test.check "0.9.0"]]
                             :source-paths ["src/cljs" "native/cljs" "src/cljc" "env/dev"]
