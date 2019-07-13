@@ -1,0 +1,3 @@
+To have your homebrew orcbrew file automatically loaded when a new client connects place it here with the name "homebrew.orcbrew".
+This will elect to not import the homebrew if any other homebrew has already been imported.
+If you want to overwrite what is already loaded delete all of the content from the Content List section and reload the page.

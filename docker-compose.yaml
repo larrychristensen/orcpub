@@ -30,6 +30,7 @@ services:
       - ./deploy/nginx.conf:/etc/nginx/conf.d/default.conf
       - ./deploy/snakeoil.crt:/etc/nginx/snakeoil.crt
       - ./deploy/snakeoil.key:/etc/nginx/snakeoil.key
+      - ./deploy/homebrew/:/usr/share/nginx/html/homebrew/
     depends_on:
       - orcpub
     restart: always
