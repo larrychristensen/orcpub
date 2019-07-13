@@ -27,3 +27,4 @@ env.sh
 /data
 *.crt
 *.key
+deploy/homebrew/*

@@ -1,5 +1,0 @@
-# Ignore everything in this directory. We do not want to import homebrew.
-*
-# Except this file and the readme
-!.gitignore
-!readme
