@@ -25,11 +25,14 @@
   [{:type "text/html"
     :content (hiccup/html (verification-email-html first-and-last-name username verification-url))}])
 
+(def truthy? #{"true"})
+
 (defn email-cfg []
   {:user (environ/env :email-access-key)
    :pass (environ/env :email-secret-key)
    :host (environ/env :email-server-url)
-   :port (Integer/parseInt (or (environ/env :email-server-port) "587"))})
+   :port (Integer/parseInt (or (environ/env :email-server-port) "587")) 
+   :ssl (truthy? (environ/env :email-ssl))})
 
 (defn send-verification-email [base-url {:keys [email username first-and-last-name]} verification-key]
   (postal/send-message (email-cfg)
