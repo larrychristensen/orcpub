@@ -2604,49 +2604,50 @@
                              weapons)})]}))
 
 (defn pact-boon-options [plugin-boons spell-lists spells-map]
-  (mapcat
-   (fn [{:keys [name description]}]
-     (t/option-cfg
-      {:name name
-       :modifiers [(mod5e/trait-cfg
-                    {:name (str "Pact Boon: " name)
-                     :description description})]}))
-   plugin-boons)
- [(t/option-cfg
-   {:name "Pact of the Chain"
-    :modifiers [(mod5e/spells-known 1 :find-familiar ::char5e/cha "Warlock")
-                (mod5e/trait-cfg
-                 {:name opt5e/pact-of-the-chain-name
-                  :page 107
-                  :summary "Can cast find familiar as a ritual, use your attack action to give your familiar an attack as a reaction"})]})
-  (t/option-cfg
-   {:name "Pact of the Blade"
-    :modifiers [(mod5e/trait-cfg
-                 {:name opt5e/pact-of-the-blade-name
-                  :page 107
-                  :summary "summon a magical weapon"})]})
-  (t/option-cfg
-   {:name "Pact of the Tome"
-    :selections [(t/selection-cfg
-                  {:name "Book of Shadows Cantrips"
-                   :tags #{:spells}
-                   :min 3
-                   :max 3
-                   :options (opt5e/spell-options spells-map
-                                                 (into
-                                                  #{}
-                                                  (mapcat
-                                                   (fn [[cls-kw spells-by-level]]
-                                                     (spells-by-level 0))
-                                                   spell-lists))
-                                                 ::char5e/cha
-                                                 "Warlock"
-                                                 false
-                                                 "uses Book of Shadows")})]
-    :modifiers [(mod5e/trait-cfg
-                 {:name opt5e/pact-of-the-tome-name
-                  :page 108
-                  :summary "you have a spellbook with 3 extra cantrips"})]})])
+ (concat
+   (map
+    (fn [{:keys [name description]}]
+      (t/option-cfg
+       {:name name
+        :modifiers [(mod5e/trait-cfg
+                     {:name (str "Pact Boon: " name)
+                      :description description})]}))
+    plugin-boons)
+  [(t/option-cfg
+    {:name "Pact of the Chain"
+     :modifiers [(mod5e/spells-known 1 :find-familiar ::char5e/cha "Warlock")
+                 (mod5e/trait-cfg
+                  {:name opt5e/pact-of-the-chain-name
+                   :page 107
+                   :summary "Can cast find familiar as a ritual, use your attack action to give your familiar an attack as a reaction"})]})
+   (t/option-cfg
+    {:name "Pact of the Blade"
+     :modifiers [(mod5e/trait-cfg
+                  {:name opt5e/pact-of-the-blade-name
+                   :page 107
+                   :summary "summon a magical weapon"})]})
+   (t/option-cfg
+    {:name "Pact of the Tome"
+     :selections [(t/selection-cfg
+                   {:name "Book of Shadows Cantrips"
+                    :tags #{:spells}
+                    :min 3
+                    :max 3
+                    :options (opt5e/spell-options spells-map
+                                                  (into
+                                                   #{}
+                                                   (mapcat
+                                                    (fn [[cls-kw spells-by-level]]
+                                                      (spells-by-level 0))
+                                                    spell-lists))
+                                                  ::char5e/cha
+                                                  "Warlock"
+                                                  false
+                                                  "uses Book of Shadows")})]
+     :modifiers [(mod5e/trait-cfg
+                  {:name opt5e/pact-of-the-tome-name
+                   :page 108
+                   :summary "you have a spellbook with 3 extra cantrips"})]})]))
 
 
 (defn eldritch-invocation-options [plugin-invocations spell-lists spells-map]
