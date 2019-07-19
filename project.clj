@@ -18,12 +18,12 @@
                                     :password [:gpg :env]}]]
   :mirrors {"apache" {:url "https://repository.apache.org/snapshots/"}}
 
-  :dependencies [[org.clojure/clojure "1.10.0"]
+  :dependencies [[org.clojure/clojure "1.10.1"]
                  [org.clojure/test.check "0.9.0"]
-                 [org.clojure/clojurescript "1.10.439"]
-                 [org.clojure/core.async "0.4.490"]
-                 [cljsjs/react "16.6.0-0"]
-                 [cljsjs/react-dom "16.6.0-0"]
+                 [org.clojure/clojurescript "1.10.520"]
+                 [org.clojure/core.async "0.4.500"]
+                 #_[cljsjs/react "16.6.0-0"]
+                 #_[cljsjs/react-dom "16.6.0-0"]
                  [cljsjs/facebook "v20150729-0"]
                  [cljsjs/google-platformjs-extern "1.0.0-0"]
                  [cljsjs/filesaverjs "1.3.3-0"]
@@ -36,7 +36,7 @@
                  [org.clojure/test.check "0.9.0"]
 
                  [org.clojure/core.match "0.3.0-alpha5"]
-                 [re-frame "0.9.0"]
+                 [re-frame "0.10.6"]
                  [reagent "0.7.0"]
                  [garden "1.3.2"]
                  [org.apache.pdfbox/pdfbox "2.1.0-20170324.170253-831"]
@@ -65,7 +65,7 @@
                  [com.datomic/datomic-free "0.9.5561"]
                  [funcool/cuerdas "2.2.0"]]
 
-  :plugins [[lein-figwheel "0.5.18"]
+  :plugins [[lein-figwheel "0.5.19"]
             [lein-cljsbuild "1.1.7" :exclusions [[org.clojure/clojure]]]
             [lein-garden "0.3.0"]
             [lein-environ "1.1.0"]
@@ -96,36 +96,26 @@
   :prep-tasks [["garden" "once"]]
 
   :cljsbuild {:builds
-              [{:id "dev"
+              {:dev
+               {
                 :source-paths ["web/cljs" "src/cljc" "src/cljs"]
 
                 ;; the presence of a :figwheel configuration here
                 ;; will cause figwheel to inject the figwheel client
                 ;; into your build
-                :figwheel {:on-jsload "orcpub.core/on-js-reload"
-                           ;; :open-urls will pop open your application
-                           ;; in the default browser once Figwheel has
-                           ;; started and complied your application.
-                           ;; Comment this out once it no longer serves you.
-                           :open-urls ["http://localhost:3449/index.html"]}
+                :figwheel     {:on-jsload "orcpub.core/on-js-reload"
+                               ;; :open-urls will pop open your application
+                               ;; in the default browser once Figwheel has
+                               ;; started and complied your application.
+                               ;; Comment this out once it no longer serves you.
+                               :open-urls ["http://localhost:8890/index.html"]}
 
-                :compiler {:main orcpub.core
-                           :asset-path "/js/compiled/out"
-                           :output-to "resources/public/js/compiled/orcpub.js"
-                           :output-dir "resources/public/js/compiled/out"
-                           :source-map-timestamp true
-                           ;; To console.log CLJS data-structures make sure you enable devtools in Chrome
-                           ;; https://github.com/binaryage/cljs-devtools
-                           :preloads [devtools.preload]}}
-               ;; This next build is an compressed minified build for
-               ;; production. You can build this with:
-               ;; lein cljsbuild once min
-               #_{:id "min"
-                :source-paths ["src/cljc" "src/cljs"]
-                :compiler {:output-to "resources/public/js/compiled/orcpub.js"
-                           :main orcpub.core
-                           :optimizations :advanced
-                           :pretty-print false}}]}
+                :compiler     {:main                 orcpub.core
+                               :asset-path           "/js/compiled/out"
+                               :output-to            "resources/public/js/compiled/orcpub.js"
+                               :output-dir           "resources/public/js/compiled/out"
+                               :source-map-timestamp true}}}
+              }
 
   :figwheel { ;; :http-server-root "public" ;; default and assumes "resources"
              ;; :server-port 3449 ;; default
@@ -185,52 +175,58 @@
             "prod-build" ^{:doc "Recompile code with prod profile."}
             ["externs"
              ["with-profile" "prod" "cljsbuild" "once" "main"]]}
-  :profiles {:dev {:dependencies [[binaryage/devtools "0.9.4"]
-                                  [figwheel-sidecar "0.5.18"]
-                                  [cider/piggieback "0.4.0"]
-                                  [org.clojure/test.check "0.9.0"]]
-                   ;; need to add dev source path here to get user.clj loaded
-                   :source-paths ["web/cljs" "src/clj" "src/cljc" "src/cljs" "dev"]
-                   ;; for CIDER
-                   ;; :plugins [[cider/cider-nrepl "0.12.0"]]
-                   :repl-options { ; for nREPL dev you really need to limit output
-                                  :init (set! *print-length* 50)
-                                  :init-ns user
-                                  :nrepl-middleware [cider.piggieback/wrap-cljs-repl]}}
-             :native-dev {:dependencies [[figwheel-sidecar "0.5.18"]
-                                         [com.cemerick/piggieback "0.2.1"]
-                                         [org.clojure/test.check "0.9.0"]]
-                          :source-paths ["src/cljs" "native/cljs" "src/cljc" "env/dev"]
-                          :cljsbuild    {:builds [{:id "main"
-                                                   :source-paths ["src/cljs" "native/cljs" "src/cljc" "env/dev"]
-                                                   :figwheel     true
-                                                   :compiler     {:output-to     "target/not-used.js"
-                                                                  :main          "env.main"
-                                                                  :output-dir    "target"
-                                                                  :optimizations :none}}]}
-                          :repl-options {:nrepl-middleware [cemerick.piggieback/wrap-cljs-repl]}}
-             :prod {:cljsbuild {:builds [{:id "main"
-                                          :source-paths ["src/cljs" "native/cljs" "src/cljc" "env/prod"]
-                                          :compiler     {:output-to     "main.js"
-                                                         :main          "env.main"
-                                                         :output-dir    "target"
-                                                         :static-fns    true
-                                                         :externs       ["js/externs.js"]
-                                                         :parallel-build     true
-                                                         :optimize-constants true
-                                                         :optimizations :advanced}}]}
-                    :dependencies [[com.datomic/datomic-free "0.9.5561"]]}
-             :uberjar {:prep-tasks ["clean" "compile" ["cljsbuild" "once" "prod"]]
-                       :env {:production true}
-                       :aot :all
-                       :omit-source true
-                       :cljsbuild {:builds
-                                   [{:id "prod"
-                                     :source-paths ["web/cljs" "src/cljc" "src/cljs"]
-                                     :compiler {:main orcpub.core
-                                                :asset-path "/js/compiled/out"
-                                                :output-to "resources/public/js/compiled/orcpub.js"
-                                                ;;:output-dir "resources/public/js/compiled/out"
-                                                :optimizations :advanced
-                                                :pretty-print false
-                                                }}]}}})
+  :profiles {:dev          {:dependencies [[binaryage/devtools "0.9.10"]
+                                           [figwheel-sidecar "0.5.19"]
+                                           [cider/piggieback "0.4.0"]
+                                           [org.clojure/test.check "0.9.0"]
+                                           [day8.re-frame/re-frame-10x "0.3.7"]]
+                            ;; need to add dev source path here to get user.clj loaded
+                            :source-paths ["web/cljs" "src/clj" "src/cljc" "src/cljs" "dev"]
+                            :cljsbuild    {:builds {:dev {:compiler {:closure-defines {"re_frame.trace.trace_enabled_QMARK_" true}
+                                                                     ;; To console.log CLJS data-structures make sure you enable devtools in Chrome
+                                                                     ;; https://github.com/binaryage/cljs-devtools
+                                                                     :preloads        [devtools.preload day8.re-frame-10x.preload]}}}}
+                            ;; for CIDER
+                            ;; :plugins [[cider/cider-nrepl "0.12.0"]]
+                            :repl-options {:init-ns          user
+                                           :nrepl-middleware [cider.piggieback/wrap-cljs-repl]}}
+             :native-dev   {:dependencies [[figwheel-sidecar "0.5.19"]
+                                           [com.cemerick/piggieback "0.2.1"]
+                                           [org.clojure/test.check "0.9.0"]]
+                            :source-paths ["src/cljs" "native/cljs" "src/cljc" "env/dev"]
+                            :cljsbuild    {:builds [{:id           "main"
+                                                     :source-paths ["src/cljs" "native/cljs" "src/cljc" "env/dev"]
+                                                     :figwheel     true
+                                                     :compiler     {:output-to     "target/not-used.js"
+                                                                    :main          "env.main"
+                                                                    :output-dir    "target"
+                                                                    :optimizations :none}}]}
+                            :repl-options {:nrepl-middleware [cemerick.piggieback/wrap-cljs-repl]}}
+             :prod         {:cljsbuild    {:builds [{:id           "main"
+                                                     :source-paths ["src/cljs" "native/cljs" "src/cljc" "env/prod"]
+                                                     :compiler     {:output-to          "main.js"
+                                                                    :main               "env.main"
+                                                                    :output-dir         "target"
+                                                                    :static-fns         true
+                                                                    :externs            ["js/externs.js"]
+                                                                    :parallel-build     true
+                                                                    :optimize-constants true
+                                                                    :optimizations      :advanced}}]}
+                            :dependencies [[com.datomic/datomic-free "0.9.5561"]]}
+             :uberjar      {:prep-tasks  ["clean" "compile" ["cljsbuild" "once" "prod"]]
+                            :env         {:production true}
+                            :aot         :all
+                            :omit-source true
+                            :cljsbuild   {:builds
+                                          {:prod
+                                           {
+                                            :source-paths ["web/cljs" "src/cljc" "src/cljs"]
+                                            :compiler     {:main          orcpub.core
+                                                           :asset-path    "/js/compiled/out"
+                                                           :output-to     "resources/public/js/compiled/orcpub.js"
+                                                           ;;:output-dir "resources/public/js/compiled/out"
+                                                           :optimizations :advanced
+                                                           :pretty-print  false}}}}}
+             ;; Use like: lein with-profile +start-server repl
+             :start-server {:repl-options {:init-ns user
+                                           :init    (start-server)}}})

@@ -93,7 +93,7 @@ On Mac/Unix: `bin/transactor config/samples/free-transactor-template.properties`
     - Windows: There is an issue with 2.9.1, so downgrade to 2.8.1 (`lein downgrade 2.8.1`).
 - Download the code from your git fork `git clone git@github.com:yourrepo/your.git` Use the clone url in YOUR repo.
 - cd into orcpub
-- run `lein repl`
+- run `lein with-profile +start-server repl`
 - run `lein figwheel` Once lein figwheel finishes, a browser will launch.
 
 You should leave all three processes running: Datomic transactor, lein repl, and lein figwheel.  

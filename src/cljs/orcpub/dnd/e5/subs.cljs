@@ -874,9 +874,25 @@
        sorted-items)))
 
 (reg-sub
+  ::char5e/monster-sort-criteria
+  (fn [db _]
+    (get db ::char5e/monster-sort-criteria "name")))
+
+(reg-sub
+  ::char5e/monster-sort-direction
+  (fn [db _]
+    (get db ::char5e/monster-sort-direction "asc")))
+
+(reg-sub
+  ::char5e/monster-filters
+  (fn [db _]
+    (get db ::char5e/monster-filter-hidden?)))
+
+(reg-sub
  ::char5e/monster-filter-hidden?
- (fn [db [_ filter value]]
-   (get-in db [::char5e/monster-filter-hidden? filter value])))
+ :<- [::char5e/monster-filters]
+ (fn [monster-filters [_ filter value]]
+   (get-in monster-filters [filter value] false)))
 
 (reg-sub
  ::char5e/spell-prepared?
