@@ -60,6 +60,7 @@ EMAIL_SERVER_URL: '' # Url to a smtp server
 EMAIL_ACCESS_KEY: '' # User for the mail server
 EMAIL_SECRET_KEY: '' # Password for the user
 EMAIL_SERVER_PORT: 587 # Mail server port
+EMAIL_SSL: 'false' # Should SSL be used? Gmail requires this.
 DATOMIC_URL: datomic:free://datomic:4334/orcpub # Url for the database
 ```
 #### How do I contribute?
