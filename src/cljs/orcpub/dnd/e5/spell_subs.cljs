@@ -441,7 +441,7 @@
  ::classes5e/plugin-boons
  :<- [::e5/plugin-vals]
  (fn [plugins _]
-   (apply concat (map (comp vals ::e5/boons) plugins))))
+   (mapcat #(-> % ::e5/boons vals) plugins)))
 
 (def acolyte-bg
   {:name "Acolyte"
