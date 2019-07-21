@@ -2889,8 +2889,7 @@
                       ;;expanded? (@expanded-details item-kw)
                       ]
                   ^{:key item-kw}
-                  [:tr.pointer
-                   #_{:on-click (toggle-details-expanded-handler expanded-details item-kw)}
+                  [:tr
                    [:td.p-10.f-w-b (or (:name item) item-name)]
                    [:td.p-10 (::char-equip/quantity item-cfg)]
                    [:td.p-10
@@ -2905,7 +2904,7 @@
               equipment-cfgs))]]]]))))
 
 (defn treasure-section []
-  (let [expanded-details (r/atom {})]
+  (r/with-let [expanded-details (r/atom {})]
     (fn [id]
       (let [mobile? @(subscribe [:mobile?])
             treasure-cfgs @(subscribe [::char/treasure id])]
@@ -2927,7 +2926,7 @@
                 (let [treasure-name (::char-equip/name treasure-cfg)
                       {:keys [::equip/name] :as treasure} (equip/treasure-map treasure-kw)]
                   ^{:key treasure-kw}
-                  [:tr.pointer
+                  [:tr
                    #_{:on-click (toggle-details-expanded-handler expanded-details item-kw)}
                    [:td.p-10.f-w-b (or (:name treasure) treasure-name)]
                    [:td.p-10 (::char-equip/quantity treasure-cfg)]]))
