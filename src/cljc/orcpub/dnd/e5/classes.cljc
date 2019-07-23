@@ -2606,12 +2606,13 @@
 (defn pact-boon-options [plugin-boons spell-lists spells-map]
  (concat
    (map
-    (fn [{:keys [name description]}]
+    (fn [{:keys [name description edit-event]}]
       (t/option-cfg
        {:name name
         :modifiers [(mod5e/trait-cfg
                      {:name (str "Pact Boon: " name)
-                      :description description})]}))
+                      :description description})]
+        :edit-event edit-event}))
     plugin-boons)
   [(t/option-cfg
     {:name "Pact of the Chain"
