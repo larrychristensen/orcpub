@@ -530,6 +530,8 @@
            :route routes/dnd-e5-subclass-builder-page-route}
           {:name "Eldritch Invocation Builder"
            :route routes/dnd-e5-invocation-builder-page-route}
+          {:name "Pact Boon Builder"
+           :route routes/dnd-e5-boon-builder-page-route}
           {:name "Selection Builder"
            :route routes/dnd-e5-selection-builder-page-route}]]]]]]))
 
@@ -4034,6 +4036,9 @@
 (defn invocation-input-field [title prop invocation & [class-names]]
   (builder-input-field title prop invocation ::classes/set-invocation-prop class-names))
 
+(defn boon-input-field [title prop boon & [class-names]]
+  (builder-input-field title prop boon ::classes/set-boon-prop class-names))
+
 (defn selection-input-field [title prop selection & [class-names]]
   (builder-input-field title prop selection ::selections/set-selection-prop class-names))
 
@@ -6049,6 +6054,27 @@
        {:value (get language :description)
         :on-change #(dispatch [::langs/set-language-prop :description %])}]]]))
 
+(defn boon-builder []
+  (let [boon @(subscribe [::classes/boon-builder-item])]
+    [:div.p-20.main-text-color
+     [:div.flex.w-100-p.flex-wrap
+      [boon-input-field
+       "Name"
+       :name
+       boon
+       "m-b-20"]
+      [boon-input-field
+       option-source-name-label
+       :option-pack
+       boon
+       "m-l-5 m-b-20"]]
+     [:div.w-100-p
+      [:div.f-s-24.f-w-b
+       "Description"]
+      [textarea-field
+       {:value (get boon :description)
+        :on-change #(dispatch [::classes/set-boon-prop :description %])}]]]))
+
 (defn invocation-builder []
   (let [invocation @(subscribe [::classes/invocation-builder-item])]
     [:div.p-20.main-text-color
@@ -7125,6 +7151,17 @@
    ::classes/edit-invocation
    ::classes/delete-invocation])
 
+(defn my-boons [name plugin]
+  [my-content-type
+   name
+   plugin
+   "pact boon"
+   ::e5/boons
+   "cursed-star"
+   ::classes/new-boon
+   ::classes/edit-boon
+   ::classes/delete-boon])
+
 (defn my-feats [name plugin]
   [my-content-type
    name
@@ -7183,6 +7220,7 @@
            [my-classes name plugin]
            [my-subclasses name plugin]
            [my-invocations name plugin]
+           [my-boons name plugin]
            [my-feats name plugin]
            [my-languages name plugin]
            [my-selections name plugin]]])])))
@@ -7310,6 +7348,9 @@
 
 (defn invocation-builder-page []
   (builder-page "Eldritch Invocation" ::classes/reset-invocation ::classes/save-invocation invocation-builder))
+
+(defn boon-builder-page []
+  (builder-page "Pact Boon" ::classes/reset-boon ::classes/save-boon boon-builder))
 
 (defn selection-builder-page []
   (builder-page "Selection" ::selections/reset-selection ::selections/save-selection selection-builder [title-with-help "Selection Builder" selection-help]))
