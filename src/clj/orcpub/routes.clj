@@ -934,7 +934,6 @@
    [route-map/dnd-e5-class-builder-page-route]
    [route-map/dnd-e5-language-builder-page-route]
    [route-map/dnd-e5-invocation-builder-page-route]
-   [route-map/dnd-e5-boon-builder-page-route]
    [route-map/dnd-e5-feat-builder-page-route]
    [route-map/dnd-e5-item-list-page-route]
    [route-map/dnd-e5-item-page-route :key ":key"]

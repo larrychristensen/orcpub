@@ -42,7 +42,6 @@
 (def dnd-e5-class-builder-page-route :class-builder-5e-page)
 (def dnd-e5-language-builder-page-route :language-builder-5e-page)
 (def dnd-e5-invocation-builder-page-route :invocation-builder-5e-page)
-(def dnd-e5-boon-builder-page-route :boon-builder-5e-page)
 (def dnd-e5-feat-builder-page-route :feat-builder-5e-page)
 (def dnd-e5-selection-builder-page-route :selection-builder-5e-page)
 
@@ -72,7 +71,6 @@
                                 dnd-e5-class-builder-page-route
                                 dnd-e5-language-builder-page-route
                                 dnd-e5-invocation-builder-page-route
-                                dnd-e5-boon-builder-page-route
                                 dnd-e5-selection-builder-page-route})
 
 (def dnd-e5-my-encounters-route :my-content-5e-page)
@@ -177,7 +175,6 @@
                               "class-builder" dnd-e5-class-builder-page-route
                               "language-builder" dnd-e5-language-builder-page-route
                               "invocation-builder" dnd-e5-invocation-builder-page-route
-                              "boon-builder" dnd-e5-boon-builder-page-route
                               "feat-builder" dnd-e5-feat-builder-page-route
                               "spell-builder" dnd-e5-spell-builder-page-route
                               "selection-builder" dnd-e5-selection-builder-page-route
