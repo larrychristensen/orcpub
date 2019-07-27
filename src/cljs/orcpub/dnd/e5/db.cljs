@@ -35,7 +35,6 @@
 (def local-storage-background-key "background")
 (def local-storage-language-key "language")
 (def local-storage-invocation-key "invocation")
-(def local-storage-boon-key "boon")
 (def local-storage-selection-key "selection")
 (def local-storage-feat-key "feat")
 (def local-storage-race-key "race")
@@ -90,8 +89,6 @@
 
 (def default-invocation {})
 
-(def default-boon {})
-
 (def default-selection {:options []})
 
 
@@ -133,7 +130,6 @@
    ::bg5e/builder-item default-background
    ::langs5e/builder-item default-language
    ::class5e/invocation-builder-item default-invocation
-   ::class5e/boon-builder-item default-boon
    ::selections5e/builder-item default-selection
    ::feats5e/builder-item default-feat
    ::race5e/builder-item default-race
@@ -190,10 +186,6 @@
 (defn invocation->local-store [invocation]
   (if js/window.localStorage
     (set-item local-storage-invocation-key (str invocation))))
-
-(defn boon->local-store [boon]
-  (if js/window.localStorage
-    (set-item local-storage-boon-key (str boon))))
 
 (defn selection->local-store [selection]
   (if js/window.localStorage
