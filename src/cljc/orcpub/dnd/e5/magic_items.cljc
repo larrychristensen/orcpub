@@ -241,6 +241,9 @@
 (defn sword? [w]
   (= :sword (::weapons5e/subtype w)))
 
+(defn staff? [w]
+  (= :staff (::weapons5e/subtype w)))
+
 (defn axe? [w]
   (= :axe (::weapons5e/subtype w)))
 
@@ -2418,8 +2421,8 @@ If you attempt to control a sphere that is under another creature’s control, y
 If the sphere comes into contact with a planar portal, such as that created by the gate spell, or an extradimensional space, such as that within a portable hole, the GM determines randomly what happens, using the following table."
      }{
      name-key "Staff of Charming"
-     ::type :staff
-
+     ::type :weapon
+     ::item-subtype :staff
      ::rarity :rare
 
      ::attunement [:bard, :cleric, :druid, :sorcerer, :warlock, :wizard]
@@ -2428,28 +2431,30 @@ If you are holding the staff and fail a saving throw against an enchantment spel
 The staff regains 1d8 + 2 expended charges daily at dawn. If you expend the last charge, roll a d20. On a 1, the staff becomes a nonmagical quarterstaff."
      }{
      name-key "Staff of Fire"
-     ::type :staff
-
+     ::type :weapon
+     ::item-subtype :staff
      ::rarity :very-rare
 
      ::attunement [:druid :sorcerer :warlock :wizard]
+     ::modifiers [(mod5e/damage-resistance :fire)]
      ::description "You have resistance to fire damage while you hold this staff.
 The staff has 10 charges. While holding it, you can use an action to expend 1 or more of its charges to cast one of the following spells from it, using your spell save DC: burning hands (1 charge), fireball (3 charges), or wall of fire (4 charges).
 The staff regains 1d6 + 4 expended charges daily at dawn. If you expend the last charge, roll a d20. On a 1, the staff blackens, crumbles into cinders, and is destroyed."
      }{
      name-key "Staff of Frost"
-     ::type :staff
-
+     ::type :weapon
+     ::item-subtype :staff
      ::rarity :very-rare
 
      ::attunement [:druid :sorcerer :warlock :wizard]
+     ::modifiers [(mod5e/damage-resistance :cold)]
      ::description "You have resistance to cold damage while you hold this staff.
 The staff has 10 charges. While holding it, you can use an action to expend 1 or more of its charges to cast one of the following spells from it, using your spell save DC: cone of cold (5 charges), fog cloud (1 charge), ice storm (4 charges), or wall of ice (4 charges).
 The staff regains 1d6 + 4 expended charges daily at dawn. If you expend the last charge, roll a d20. On a 1, the staff turns to water and is destroyed."
      }{
      name-key "Staff of Healing"
-     ::type :staff
-
+     ::type :weapon
+     ::item-subtype :staff
      ::rarity :rare
 
      ::attunement [:bard, :cleric, :druid]
@@ -2457,13 +2462,17 @@ The staff regains 1d6 + 4 expended charges daily at dawn. If you expend the last
 The staff regains 1d6 + 4 expended charges daily at dawn. If you expend the last charge, roll a d20. On a 1, the staff vanishes in a flash of light, lost forever."
      }{
      name-key "Staff of Power"
-     ::type :staff
-
+     ::type :weapon
+     ::item-subtype :staff
+     ::magical-attack-bonus 2
+     ::magical-damage-bonus 2
+     ::magical-ac-bonus 2
      ::rarity :very-rare
 
      ::attunement [:sorcerer, :warlock, :wizard]
-     ::magical-attack-bonus 2
-     ::magical-damage-bonus 2
+     ::modifiers [(mod5e/ac-bonus-fn (fn [_ _] 2))
+                  (mod5e/spell-attack-modifier-bonus 2)
+                  (mod5e/saving-throw-bonuses 2)]
      ::description "This staff can be wielded as a magic quarterstaff that grants a +2 bonus to attack and damage rolls made with it. While holding it, you gain a +2 bonus to Armor Class, saving throws, and spell attack rolls.
 The staff has 20 charges for the following properties. The staff regains 2d8 + 4 expended charges daily at dawn. If you expend the last charge, roll a d20. On a 1, the staff retains its +2 bonus to attack and damage rolls but loses all other properties. On a 20, the staff regains 1d8 + 2 charges.
 Power Strike. When you hit with a melee attack using the staff, you can expend 1 charge to deal an extra 1d6 force damage to the target.
@@ -2472,8 +2481,8 @@ Retributive Strike. You can use an action to break the staff over your knee or a
 You have a 50 percent chance to instantly travel to a random plane of existence, avoiding the explosion. If you fail to avoid the effect, you take force damage equal to 16 × the number of charges in the staff. Every other creature in the area must make a DC 17 Dexterity saving throw. On a failed save, a creature takes an amount of damage based on how far away it is from the point of origin, as shown in the following table. On a successful save, a creature takes half as much damage."
      }{
      name-key "Staff of Striking"
-     ::type :staff
-
+     ::type :weapon
+     ::item-subtype :staff
      ::rarity :very-rare
 
      ::attunement [:any]
@@ -2483,7 +2492,8 @@ You have a 50 percent chance to instantly travel to a random plane of existence,
 The staff has 10 charges. When you hit with a melee attack using it, you can expend up to 3 of its charges. For each charge you expend, the target takes an extra 1d6 force damage. The staff regains 1d6 + 4 expended charges daily at dawn. If you expend the last charge, roll a d20. On a 1, the staff becomes a nonmagical quarterstaff."
      }{
      name-key "Staff of Swarming Insects"
-     ::type :staff, 
+     ::type :weapon
+     ::item-subtype :staff
      ::rarity :rare 
      ::attunement [:bard, :cleric, :druid, :sorcerer, :warlock, :wizard]
 
@@ -2492,13 +2502,14 @@ Spells. While holding the staff, you can use an action to expend some of its cha
 Insect Cloud. While holding the staff, you can use an action and expend 1 charge to cause a swarm of harmless flying insects to spread out in a 30-foot radius from you. The insects remain for 10 minutes, making the area heavily obscured for creatures other than you. The swarm moves with you, remaining centered on you. A wind of at least 10 miles per hour disperses the swarm and ends the effect."
      }{
      name-key "Staff of the Magi"
-     ::type :staff
-
+     ::type :weapon
+     ::item-subtype :staff
      ::rarity :legendary
 
      ::attunement [:sorcerer, :warlock, :wizard]
      ::magical-attack-bonus 2
      ::magical-damage-bonus 2
+     ::modifiers [(mod5e/spell-attack-modifier-bonus 2)]
      ::description "This staff can be wielded as a magic quarterstaff that grants a +2 bonus to attack and damage rolls made with it. While you hold it, you gain a +2 bonus to spell attack rolls.
 The staff has 50 charges for the following properties. It regains 4d6 + 2 expended charges daily at dawn. If you expend the last charge, roll a d20. On a 20, the staff regains 1d12 + 1 charges.
 Spell Absorption. While holding the staff, you have advantage on saving throws against spells. In addition, you can use your reaction when another creature casts a spell that targets only you. If you do, the staff absorbs the magic of the spell, canceling its effect and gaining a number of charges equal to the absorbed spell’s level. However, if doing so brings the staff’s total number of charges above 50, the staff explodes as if you activated its retributive strike (see below).
@@ -2509,8 +2520,8 @@ You have a 50 percent chance to instantly travel to a random plane of existence,
 Every other creature in the area must make a DC 17 Dexterity saving throw. On a failed save, a creature takes an amount of damage based on how far away it is from the point of origin, as shown in the following table. On a successful save, a creature takes half as much damage."
      }{
      name-key "Staff of the Python"
-     ::type :staff
-
+     ::type :weapon
+     ::item-subtype :staff
      ::rarity :uncommon
 
      ::attunement [:cleric, :druid, :warlock]
@@ -2519,13 +2530,14 @@ On your turn, you can mentally command the snake if it is within 60 feet of you 
 If the snake is reduced to 0 hit points, it dies and reverts to its staff form. The staff then shatters and is destroyed. If the snake reverts to staff form before losing all its hit points, it regains all of them."
      }{
      name-key "Staff of the Woodlands"
-     ::type :staff
-
+     ::type :weapon
+     ::item-subtype :staff
      ::rarity :rare
 
      ::attunement [:druid]
      ::magical-attack-bonus 2
      ::magical-damage-bonus 2
+     ::modifiers [(mod5e/spell-attack-modifier-bonus 2)]
      ::description "This staff can be wielded as a magic quarterstaff that grants a +2 bonus to attack and damage rolls made with it. While holding it, you have a +2 bonus to spell attack rolls.
 The staff has 10 charges for the following properties. It regains 1d6 + 4 expended charges daily at dawn. If you expend the last charge, roll a d20. On a 1, the staff loses its properties and becomes a nonmagical quarterstaff.
 Spells. You can use an action to expend 1 or more of the staff’s charges to cast one of the following spells from it, using your spell save DC: animal friendship (1 charge), awaken (5 charges), barkskin
@@ -2534,7 +2546,8 @@ You can also use an action to cast the pass without trace spell from the staff w
 Tree Form. You can use an action to plant one end of the staff in fertile earth and expend 1 charge to transform the staff into a healthy tree. The tree is 60 feet tall and has a 5-foot-diameter trunk, and its branches at the top spread out in a 20-foot radius. The tree appears ordinary but radiates a faint aura of transmutation magic if targeted by detect magic. While touching the tree and using another action to speak its command word, you return the staff to its normal form. Any creature in the tree falls when it reverts to a staff."
      }{
      name-key "Staff of Thunder and Lightning"
-     ::type :staff
+     ::type :weapon
+     ::item-subtype :staff
 
      ::rarity :very-rare
 
@@ -2549,8 +2562,8 @@ Thunderclap. You can use an action to cause the staff to issue a deafening thund
 Thunder and Lightning. You can use an action to use the Lightning Strike and Thunderclap properties at the same time. Doing so doesn’t expend the daily use of those properties, only the use of this one."
      }{
      name-key "Staff of Withering"
-     ::type :staff
-
+     ::type :weapon
+     ::item-subtype :staff
      ::rarity :rare
 
      ::attunement [:cleric, :druid, :warlock]
@@ -2873,7 +2886,7 @@ The boots regain 2 hours of flying capability for every 12 hours they aren’t i
   (assoc item :key (common/name-to-kw (name-key item))))
 
 (def weapon-subtypes
-  #{:axe :sword})
+  #{:axe :sword :staff})
 
 (defn any-fn [item]
   true)

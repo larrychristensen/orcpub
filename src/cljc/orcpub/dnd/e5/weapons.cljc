@@ -118,6 +118,7 @@
    {:name "Quarterstaff",
     ::damage-type :bludgeoning,
     ::type :simple,
+    ::subtype :staff
     ::damage-die 6,
     ::damage-die-count 1,
     ::versatile {::damage-die 8, ::damage-die-count 1},
