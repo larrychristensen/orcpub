@@ -2373,6 +2373,9 @@
                         {:name "Spellcasting Equipment"
                          :options {:component-pouch 1
                                    :arcane-focus 1}}]
+    :weapon-choices [{:name "Melee Weapon"
+                      :options {:quarterstaff 1
+                                :dagger 1}}]
     :equipment {:spellbook 1}
     :profs {:weapon {:dagger true :dart true :sling true :quarterstaff true :crossbow-light true}
             :save {::char5e/int true ::char5e/wis true}
