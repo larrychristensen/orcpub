@@ -7470,7 +7470,7 @@
   (let [editing-parties (r/atom {})
         expanded-characters (r/atom {})]
     (fn []
-      (let [parties @(subscribe [::party/parties])
+      (let [parties (sort-by ::party/name @(subscribe [::party/parties]))
             device-type @(subscribe [:device-type])
             username @(subscribe [:username])]
         [content-page
@@ -7562,7 +7562,7 @@
                                 {:on-click #(dispatch [::party/remove-character id character-id])}
                                 "remove from party"]]
                               [character-display character-id false (if (= :mobile device-type) 1 2)]])]]))
-                     characters))]]))
+                     (sort-by :orcpub.dnd.e5.character/character-name characters)))]]))
              parties))]]]))))
 
 (defn monster-list-item [{:keys [name size type subtypes alignment key] :as monster}]
