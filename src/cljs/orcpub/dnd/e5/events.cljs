@@ -621,9 +621,20 @@
     :http {:method :post
            :headers (authorization-headers db)
            :url (url-for-route routes/dnd-e5-char-parties-route)
-           :transit-params {::party5e/name "New Party"
+           :transit-params {::party5e/name "A New Party"
                             ::party5e/character-ids character-ids}
            :on-success [::party5e/make-party-success]}}))
+
+(reg-event-fx
+  ::party5e/make-empty-party
+  (fn [{:keys [db]} [_]]
+    {:dispatch [:set-loading true]
+     :http {:method :post
+            :headers (authorization-headers db)
+            :url (url-for-route routes/dnd-e5-char-parties-route)
+            :transit-params {::party5e/name "A New Party"}
+            :on-success (.reload js/window.location true)
+            }}))
 
 (reg-event-fx
  ::party5e/rename-party
