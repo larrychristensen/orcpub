@@ -3581,7 +3581,7 @@
 
 (defn base-builder-field [name comp]
   [:div.field.main-text-color.m-t-0
-   [:div.personality-label.f-s-18 name]
+   [:div.personality-label.f-s-16 name]
    comp])
 
 (defn builder-field [el-type name value on-change attrs & [children]]
@@ -4627,7 +4627,7 @@
 
 (defn option-damage-resistance [option toggle-map-prop-event]
   [:div.m-b-20
-   [:div.f-s-18.f-w-b.m-b-10 "Damage Resistance"]
+   [:div.f-s-18.f-w-b.m-b-10 "Damage Resistances"]
    (let [kw :damage-resistance]
      [:div.flex.flex-wrap
       [:div.m-r-20.m-b-10
@@ -4650,7 +4650,7 @@
 
 (defn option-damage-immunity [option toggle-map-prop-event]
   [:div.m-b-20
-   [:div.f-s-18.f-w-b.m-b-10 "Damage Immunity"]
+   [:div.f-s-18.f-w-b.m-b-10 "Damage Immunities"]
    (let [kw :damage-immunity]
      [:div.flex.flex-wrap
       (doall
@@ -4667,7 +4667,7 @@
 
 (defn option-damage-vulnerability [option toggle-map-prop-event]
   [:div.m-b-20
-   [:div.f-s-18.f-w-b.m-b-10 "Damage Vulnerability"]
+   [:div.f-s-18.f-w-b.m-b-10 "Damage Vulnerabilities"]
    (let [kw :damage-vulnerability]
      [:div.flex.flex-wrap
       (doall
@@ -4684,7 +4684,7 @@
 
 (defn option-condition-immunity [option toggle-map-prop-event]
   [:div.m-b-20
-   [:div.f-s-18.f-w-b.m-b-10 "Condition Immunity"]
+   [:div.f-s-18.f-w-b.m-b-10 "Condition Immunities"]
    (let [kw :condition-immunity]
      [:div.flex.flex-wrap
       (doall
@@ -4701,7 +4701,7 @@
 
 (defn option-weapon-proficiency [option toggle-map-prop-event]
   [:div.m-b-20
-   [:div.f-s-18.f-w-b.m-b-10 "Weapon Proficiency"]
+   [:div.f-s-18.f-w-b.m-b-10 "Weapon Proficiencies"]
    (let [kw :weapon-prof]
      [:div.flex.flex-wrap
       (doall
@@ -6101,25 +6101,14 @@
        "Name"
        :name
        monster
-       "m-b-20"]
+       "m-b-20 flex-grow-1"]
       [monster-input-field
        option-source-name-label
        :option-pack
        monster
-       "m-l-5 m-b-20"]]
+       "m-l-5 m-b-20 flex-grow-1"]]
      [:div.flex.w-100-p.flex-wrap
-      [:div.flex-grow-1.m-b-20.m-l-5
-       [labeled-dropdown
-        "Challenge"
-        {:items (map
-                 (fn [v]
-                   {:title (if (< 0 v 1)
-                             (clojure.core/str "1/" (/ 1 v))
-                             v)
-                    :value v})
-                 @(subscribe [::monsters/challenge-ratings]))
-         :value (or challenge 0)
-         :on-change #(dispatch [::monsters/set-monster-prop :challenge (js/parseFloat %)])}]]
+
       [:div.flex-grow-1.m-b-20.m-l-5
        [labeled-dropdown
         "Size"
@@ -6163,24 +6152,11 @@
        "Armor Notes"
        :armor-notes
        monster
-       "m-l-5 m-b-20 flex-grow-1 notes"]]
+       "m-b-5 m-l-5 flex-grow-1"]]
      [:div.flex.w-100-p.flex-wrap
-      [monster-input-field
-       "Speed"
-       :speed
-       monster
-       "m-l-5 m-b-20 flex-grow-1"]
-      [monster-input-field
-       "Senses"
-       :senses
-       monster
-       "m-l-5 m-b-20 flex-grow-1 senses"]]
-     [:div.m-b-20
-      [:div.f-s-24.f-w-b "Hit Points"]
-      [:div.flex.w-100-p.flex-wrap
-       [:div.m-r-5
+       [:div.m-l-5.m-b-20
         [labeled-dropdown
-         "Die Count"
+         "HP Die Count"
          {:items (cons
                   {:title "-"}
                   (map
@@ -6188,9 +6164,9 @@
                    (range 1 36)))
           :value (get hit-points :die-count)
           :on-change #(let [v (js/parseInt %)] (dispatch [::monsters/set-monster-path-prop [:hit-points :die-count] (if (not (js/isNaN v)) v)]))}]]
-       [:div.m-r-5
+       [:div.m-l-5.m-b-20
         [labeled-dropdown
-         "Die"
+         "HP Die"
          {:items (cons
                   {:title "-"}
                   (map
@@ -6199,13 +6175,19 @@
           :value (get hit-points :die)
           :on-change #(let [v (js/parseInt %)]
                         (dispatch [::monsters/set-monster-path-prop [:hit-points :die] (if (not (js/isNaN v)) v)]))}]]
-       [:div.m-r-5
+       [:div.m-l-5.m-b-20
         [input-builder-field
-         [:span.f-w-b "Modifier"]
+         [:span.f-w-b.m-b-5.f-s-16 "HP Modifier"]
          (get hit-points :modifier 0)
          #(let [v (js/parseInt %)]
             (dispatch [::monsters/set-monster-path-prop [:hit-points :modifier] (if (not (js/isNaN v)) v)]))
-         {:class-name "input h-40"}]]]]
+         {:class-name "input h-40"}]];]
+      [monster-input-field
+       "Speed"
+       :speed
+       monster
+       "m-l-5 m-b-5 flex-grow-1"]
+      ]
      [:div
       [:div.f-s-24.f-w-b "Abilities"]
       [:div.flex.w-100-p.flex-wrap
@@ -6242,8 +6224,8 @@
                 :value (get saving-throws simple-kw)
                 :on-change #(dispatch [::monsters/set-monster-path-prop [:saving-throws simple-kw] (let [parsed (js/parseInt %)] (if (not (js/isNaN parsed)) parsed))])}])])
          opt/abilities))]]
-     [:div
-      [:div.f-s-24.f-w-b "Skills"]
+     [:div.m-b-20
+      [:div.f-s-24.f-w-b. "Skills"]
       [:div.flex.w-100-p.flex-wrap
        (doall
         (map
@@ -6260,24 +6242,37 @@
                          (range 1 21)))
                 :value (get skills key 0)
                 :on-change #(dispatch [::monsters/set-monster-path-prop [:skills key] (js/parseInt %)])}])])
-         skills/skills))]]
-     [:div [option-languages monster ::monsters/toggle-monster-map-prop]]
-     [:div [option-damage-resistance monster ::monsters/toggle-monster-map-prop]]
-     [:div [option-damage-immunity monster ::monsters/toggle-monster-map-prop]]
-     [:div [option-damage-vulnerability monster ::monsters/toggle-monster-map-prop]]
-     [:div [option-condition-immunity monster ::monsters/toggle-monster-map-prop]]
+         skills/skills))]
+      [:div [option-damage-vulnerability monster ::monsters/toggle-monster-map-prop]]
+      [:div [option-damage-resistance monster ::monsters/toggle-monster-map-prop]]
+      [:div [option-damage-immunity monster ::monsters/toggle-monster-map-prop]]
+      [:div [option-condition-immunity monster ::monsters/toggle-monster-map-prop]]
+      [monster-input-field
+       "Senses"
+       :senses
+       monster
+       "m-l-5 m-b-5 flex-grow-1"]
+      [:div.m-t-20 [option-languages monster ::monsters/toggle-monster-map-prop]]
+      ]
+     [:div.w-100-p.m-b-20
+     [:div.f-s-24.f-w-b.w-20-p "Challenge Rating"
+      [labeled-dropdown
+       ""
+       {:items (map
+                 (fn [v]
+                   {:title (if (< 0 v 1)
+                             (clojure.core/str "1/" (/ 1 v))
+                             v)
+                    :value v})
+                 @(subscribe [::monsters/challenge-ratings]))
+        :value (or challenge 0)
+        :on-change #(dispatch [::monsters/set-monster-prop :challenge (js/parseFloat %)])}]]]
      [:div.w-100-p
       [:div.f-s-24.f-w-b
-       "Description"]
+       "Special Traits"]
       [textarea-field
        {:value (get monster :description)
         :on-change #(dispatch [::monsters/set-monster-prop :description %])}]]
-     [:div.w-100-p.m-t-30
-      [:div.f-s-24.f-w-b
-       "Legendary Actions Description"]
-      [textarea-field
-       {:value (get-in monster [:legendary-actions :description])
-        :on-change #(dispatch [::monsters/set-monster-path-prop [:legendary-actions :description] %])}]]
      [:div.m-t-30
       [option-traits
        monster
@@ -6292,7 +6287,14 @@
                {:title "Action"
                 :value :action}
                {:title "Legendary Action"
-                :value :legendary-action}]]]]))
+                :value :legendary-action}]]]
+     [:div.w-100-p.m-t-30
+      [:div.f-s-20.f-w-b
+       "Legendary Actions"]
+      [textarea-field
+       {:value (get-in monster [:legendary-actions :description])
+        :on-change #(dispatch [::monsters/set-monster-path-prop [:legendary-actions :description] %])}]]
+     ]))
 
 (defn monster-selector [index {:keys [monster num]} on-key-change on-num-change]
   (let [monsters @(subscribe [::monsters/sorted-monsters])]
