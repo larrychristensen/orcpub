@@ -1,3 +1,14 @@
+![GitHub language count](https://img.shields.io/github/languages/count/orcpub/orcpub) ![GitHub top language](https://img.shields.io/github/languages/top/orcpub/orcpub) ![GitHub contributors](https://img.shields.io/github/contributors/orcpub/orcpub) ![GitHub repo size](https://img.shields.io/github/repo-size/orcpub/orcpub)
+![GitHub last commit (branch)](https://img.shields.io/github/last-commit/orcpub/orcpub/develop) 
+
+![GitHub pull requests](https://img.shields.io/github/issues-pr/orcpub/orcpub) ![GitHub closed pull requests](https://img.shields.io/github/issues-pr-closed/orcpub/orcpub)
+
+![GitHub issues](https://img.shields.io/github/issues/orcpub/orcpub) ![GitHub closed issues](https://img.shields.io/github/issues-closed/orcpub/orcpub)
+
+![Docker Pulls](https://img.shields.io/docker/pulls/orcpub/orcpub)
+![Docker Cloud Automated build](https://img.shields.io/docker/cloud/automated/orcpub/orcpub)
+![Docker Cloud Build Status](https://img.shields.io/docker/cloud/build/orcpub/orcpub)
+
 # Orcpub2 - Community Edition
 
 This is the code for OrcPub2.com. Many, many people have expressed interest in helping out or checking out the code, so I have decided to make that possible by open sourcing it.
