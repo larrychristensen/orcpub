@@ -3935,7 +3935,7 @@
         (let [speed-mod-type @(subscribe [::mi/speed-mod-type type-kw])]
           ^{:key type-kw}
           [:div.flex.align-items-c
-           [:div.w-100 (common/safe-capitalize type-kw)]
+           [:div.w-100 (common/safe-capitalize-kw type-kw)]
            [:div
             [dropdown
              {:value speed-mod-type
