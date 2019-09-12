@@ -1,5 +1,3 @@
-![GitHub labels](https://img.shields.io/github/labels/orcpub/orcpub/help wanted)
-
 ![GitHub language count](https://img.shields.io/github/languages/count/orcpub/orcpub) ![GitHub top language](https://img.shields.io/github/languages/top/orcpub/orcpub) ![GitHub contributors](https://img.shields.io/github/contributors/orcpub/orcpub) ![GitHub repo size](https://img.shields.io/github/repo-size/orcpub/orcpub)
 ![GitHub last commit (branch)](https://img.shields.io/github/last-commit/orcpub/orcpub/develop) 
 
