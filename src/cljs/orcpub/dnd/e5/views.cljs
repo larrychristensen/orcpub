@@ -2907,7 +2907,9 @@
   (r/with-let [expanded-details (r/atom {})]
     (fn [id]
       (let [mobile? @(subscribe [:mobile?])
-            treasure-cfgs @(subscribe [::char/treasure id])]
+            treasure-cfgs (merge
+                             @(subscribe [::char/treasure id])
+                             (zipmap (range) @(subscribe [::char/custom-treasure id])))]
         [:div
          [:div.flex.align-items-c
           (svg-icon "cash" 32)
@@ -2927,10 +2929,9 @@
                       {:keys [::equip/name] :as treasure} (equip/treasure-map treasure-kw)]
                   ^{:key treasure-kw}
                   [:tr
-                   #_{:on-click (toggle-details-expanded-handler expanded-details item-kw)}
                    [:td.p-10.f-w-b (or (:name treasure) treasure-name)]
                    [:td.p-10 (::char-equip/quantity treasure-cfg)]]))
-              (sort treasure-cfgs)))]]]]))))
+              treasure-cfgs))]]]]))))
 
 
 (defn skill-details-section-2 []
