@@ -3186,7 +3186,7 @@ This spell closes all mortal wounds, but it doesn't restore missing body parts. 
 Coming back from the dead is an ordeal. The target takes a -4 penalty to all attack rolls, saving throws, and ability checks. Every time the target finishes a long rest, the penalty is reduced by 1 until it disappears."
     }
    {
-    :name "Rar.'s Telepathic Bond"
+    :name "Telepathic Bond"
     :ritual true
     :school divination
     :level 5
