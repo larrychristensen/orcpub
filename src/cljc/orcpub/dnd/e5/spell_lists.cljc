@@ -263,7 +263,7 @@
     [:animate-objects :bigbys-hand :cloudkill :cone-of-cold
      :conjure-elemental :contact-other-plane :creation :dominate-person
      :dream :geas :hold-monster :legend-lore :mislead :modify-memory
-     :passwall :planar-binding :scrying :seeming :telekinesis
+     :passwall :planar-binding :telepathic-bond :scrying :seeming :telekinesis
      :teleportation-circle :wall-of-force :wall-of-stone],
     6
     [#_:arcane-gate :chain-lightning :circle-of-death :contingency :create-undead
