@@ -18,12 +18,12 @@
                                     :password [:gpg :env]}]]
   :mirrors {"apache" {:url "https://repository.apache.org/snapshots/"}}
 
-  :dependencies [[org.clojure/clojure "1.10.1"]
+  :dependencies [[org.clojure/clojure "1.10.0"]
                  [org.clojure/test.check "0.9.0"]
-                 [org.clojure/clojurescript "1.10.520"]
-                 [org.clojure/core.async "0.4.500"]
-                 #_[cljsjs/react "16.6.0-0"]
-                 #_[cljsjs/react-dom "16.6.0-0"]
+                 [org.clojure/clojurescript "1.10.439"]
+                 [org.clojure/core.async "0.4.490"]
+                 [cljsjs/react "16.6.0-0"]
+                 [cljsjs/react-dom "16.6.0-0"]
                  [cljsjs/facebook "v20150729-0"]
                  [cljsjs/google-platformjs-extern "1.0.0-0"]
                  [cljsjs/filesaverjs "1.3.3-0"]
@@ -36,7 +36,7 @@
                  [org.clojure/test.check "0.9.0"]
 
                  [org.clojure/core.match "0.3.0-alpha5"]
-                 [re-frame "0.10.6"]
+                 [re-frame "0.9.0"]
                  [reagent "0.7.0"]
                  [garden "1.3.2"]
                  [org.apache.pdfbox/pdfbox "2.1.0-20170324.170253-831"]
