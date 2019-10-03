@@ -36,7 +36,7 @@
                  [org.clojure/test.check "0.9.0"]
 
                  [org.clojure/core.match "0.3.0-alpha5"]
-                 [re-frame "0.9.0"]
+                 [re-frame "0.10.9"]
                  [reagent "0.7.0"]
                  [garden "1.3.2"]
                  [org.apache.pdfbox/pdfbox "2.1.0-20170324.170253-831"]
