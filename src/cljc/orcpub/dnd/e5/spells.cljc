@@ -302,6 +302,18 @@ At Higher Levels. When you cast this spell using a spell slot of 6th level or hi
 While affected by this spell, the object is more difficult to break or force open; the DC to break it or pick any locks on it increases by 10."
     }
    {
+    :name "Arcane Sword"
+    :key :arcane-sword
+    :school evocation
+    :level 7
+    :casting-time actions-1
+    :range "60 feet"
+    :components {:verbal true :somatic true :material true :material-component "a miniature platinum sword with a grip and pommel of copper and zinc, worth 250 gp"}
+    :duration conc-1-min
+    :description "You create a sword-shaped plane of force that hovers within range. It lasts for the duration.
+When the sword appears, you make a melee spell attack against a target of your choice within 5 feet of the sword. On a hit, the target takes 3d10 force damage. Until the spell ends, you can use a bonus action on each of your turns to move the sword up to 20 feet to a spot you can see and repeat this attack against the same target or a different one."
+    }
+   {
     :name "Arcanist's Magic Aura"
     :key :arcanists-magic-aura
     :school illusion
