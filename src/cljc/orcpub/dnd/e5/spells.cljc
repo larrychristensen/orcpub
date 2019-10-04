@@ -2831,10 +2831,6 @@ Similarly, this spell doesn't directly affect plant growth. The moved earth carr
     :description "For the duration, you hide a target that you touch from divination magic. The target can be a willing creature or a place or an object no larger than 10 feet in any dimension. The target can't be targeted by any divination magic or perceived through magical scrying sensors."
     }])
 
-(def o-spells
-  [
-   {}
-   ])
 
 (def p-spells
   [{
@@ -4228,7 +4224,6 @@ An affected creature is aware of the spell and can thus avoid answering question
     m-spells
     n-spells
     p-spells
-    o-spells
     r-spells
     s-spells
     t-spells
