@@ -10,7 +10,7 @@
     [:animal-friendship :bane :charm-person :comprehend-languages :cure-wounds
      :detect-magic :disguise-self :faerie-fire :feather-fall
      :healing-word :heroism :identify :illusory-script
-     :longstrider :silent-image :sleep :speak-with-animals :tashas-hideous-laughter :thunderwave
+     :longstrider :silent-image :sleep :speak-with-animals :hideous-laughter :thunderwave
      :unseen-servant
      ],
     2
@@ -21,7 +21,7 @@
      :see-invisibility :shatter :silence :suggestion :zone-of-truth],
     3
     [:bestow-curse :clairvoyance :dispel-magic :fear :glyph-of-warding
-     :hypnotic-pattern :leomunds-tiny-hut :major-image :nondetection :plant-growth :sending
+     :hypnotic-pattern :tiny-hut :major-image :nondetection :plant-growth :sending
      :speak-with-dead :speak-with-plants :stinking-cloud
      :tongues],
     4
@@ -35,10 +35,10 @@
      :seeming :teleportation-circle],
     6
     [:eyebite :find-the-path :guards-and-wards 
-     :mass-suggestion :ottos-irresistible-dance :programmed-illusion :true-seeing],
+     :mass-suggestion :irresistible-dance :programmed-illusion :true-seeing],
     7
     [:etherealness :forcecage
-     :mirage-arcane :mordenkainens-sword :mordenkainens-magnificent-mansion :project-image
+     :mirage-arcane :arcane-sword :magnificent-mansion :project-image
      :regenerate :resurrection :symbol
      :teleport],
     8
@@ -234,48 +234,48 @@
      :fog-cloud :grease :identify :illusory-script
      :jump :longstrider :mage-armor :magic-missile
      :protection-from-evil-and-good :shield :silent-image :sleep
-     :tashas-hideous-laughter :tensers-floating-disk :thunderwave :unseen-servant
+     :hideous-laughter :floating-disk :thunderwave :unseen-servant
      ],
     2
     [:alter-self :arcane-lock
      :blindness-deafness :blur :continual-flame :darkness :darkvision
      :detect-thoughts :enlarge-reduce :flaming-sphere :gentle-repose
      :gust-of-wind :hold-person :invisibility :knock :levitate
-     :locate-object :magic-mouth :magic-weapon :melfs-acid-arrow :mirror-image :misty-step
-     :nystuls-magic-aura :ray-of-enfeeblement :rope-trick :scorching-ray :see-invisibility
+     :locate-object :magic-mouth :magic-weapon :acid-arrow :mirror-image :misty-step
+     :arcanists-magic-aura :ray-of-enfeeblement :rope-trick :scorching-ray :see-invisibility
      :shatter :spider-climb :suggestion :web],
     3
     [:animate-dead :bestow-curse :blink :clairvoyance :counterspell :dispel-magic
      :fear :fireball :fly :gaseous-form :glyph-of-warding :haste
-     :hypnotic-pattern :leomunds-tiny-hut :lightning-bolt :magic-circle :major-image
+     :hypnotic-pattern :tiny-hut :lightning-bolt :magic-circle :major-image
      :nondetection :phantom-steed :protection-from-energy :remove-curse
      :sending :sleet-storm :slow :stinking-cloud :tongues
      :vampiric-touch :water-breathing],
     4
     [:arcane-eye :banishment :blight :confusion
-     :conjure-minor-elementals :control-water :dimension-door :evards-black-tentacles :fabricate
+     :conjure-minor-elementals :control-water :dimension-door :black-tentacles :fabricate
      :fire-shield :greater-invisibility
-     :hallucinatory-terrain :ice-storm :leomunds-secret-chest :locate-creature
-     :mordenkainens-faithful-hound :mordenkainens-private-sanctum :otilukes-resilient-sphere
+     :hallucinatory-terrain :ice-storm :secret-chest :locate-creature
+     :faithful-hound :private-sanctum :resilient-sphere
      :phantasmal-killer :polymorph
      :stone-shape :stoneskin :wall-of-fire],
     5
-    [:animate-objects :bigbys-hand :cloudkill :cone-of-cold
+    [:animate-objects :arcane-hand :cloudkill :cone-of-cold
      :conjure-elemental :contact-other-plane :creation :dominate-person
      :dream :geas :hold-monster :legend-lore :mislead :modify-memory
      :passwall :planar-binding :telepathic-bond :scrying :seeming :telekinesis
      :teleportation-circle :wall-of-force :wall-of-stone],
     6
     [#_:arcane-gate :chain-lightning :circle-of-death :contingency :create-undead
-     :disintegrate :drawmijs-instant-summons :eyebite :flesh-to-stone
+     :disintegrate :instant-summons :eyebite :flesh-to-stone
      :globe-of-invulnerability :guards-and-wards
-     :magic-jar :mass-suggestion :move-earth :otilukes-freezing-sphere :ottos-irresistible-dance
+     :magic-jar :mass-suggestion :move-earth :freezing-sphere :irresistible-dance
      :programmed-illusion :sunbeam :true-seeing :wall-of-ice
      ],
     7
     [:delayed-blast-fireball :etherealness
-     :finger-of-death :forcecage :mirage-arcane :mordenkainens-magnificent-mansion
-     :mordenkainens-sword :plane-shift :prismatic-spray :project-image :reverse-gravity
+     :finger-of-death :forcecage :mirage-arcane :magnificent-mansion
+     :arcane-sword :plane-shift :prismatic-spray :project-image :reverse-gravity
      :sequester :simulacrum :symbol :teleport],
     8
     [:antimagic-field :antipathy-sympathy :clone :control-weather

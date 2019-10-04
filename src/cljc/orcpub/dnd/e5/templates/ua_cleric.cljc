@@ -82,7 +82,7 @@
                              (opt5e/cleric-spell 2 :protection-from-poison 3)
                              (opt5e/cleric-spell 3 :slow 5)
                              (opt5e/cleric-spell 3 :protection-from-energy 5)
-                             (opt5e/cleric-spell 4 :otilukes-resilient-sphere 7)
+                             (opt5e/cleric-spell 4 :resilient-sphere 7)
                              (opt5e/cleric-spell 4 :guardian-of-faith 7)
                              (opt5e/cleric-spell 5 :antilife-shell 9)
                              (opt5e/cleric-spell 5 :wall-of-force 9)]
