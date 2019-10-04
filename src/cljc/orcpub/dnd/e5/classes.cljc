@@ -920,7 +920,7 @@
                                            (t/option-cfg
                                             {:name "Swamp"
                                              :modifiers [(druid-spell 2 :darkness 3)
-                                                         (druid-spell 2 :melfs-acid-arrow 3)
+                                                         (druid-spell 2 :acid-arrow 3)
                                                          (druid-spell 3 :water-walk 5)
                                                          (druid-spell 3 :stinking-cloud 5)
                                                          (druid-spell 4 :freedom-of-movement 7)
@@ -3089,7 +3089,7 @@ long rest."})
                                                :summary (str "charm or frighten a creature within 60 ft., spell save DC " (?spell-save-dc ::char5e/cha) "WIS save")
                                                :frequency units5e/rests-1})]}}}
                  #_{:name "The Great Old One"
-                    :levels {1 {:selections [(opt5e/warlock-subclass-spell-selection [:dissonant-whispers :tashas-hideous-laughter])]}
+                    :levels {1 {:selections [(opt5e/warlock-subclass-spell-selection [:dissonant-whispers :hideous-laughter])]}
                              3 {:selections [(opt5e/warlock-subclass-spell-selection [:detect-thoughts :phantasmal-force])]}
                              5 {:selections [(opt5e/warlock-subclass-spell-selection [:clairvoyance :sending])]}
                              6 {:modifiers [(mod5e/reaction
@@ -3097,7 +3097,7 @@ long rest."})
                                               :page 110
                                               :frequency units5e/rests-1
                                               :summary "impose disadvantage on an attack roll against you, if it misses, gain advantage on your next attack roll against the attacker"})]}
-                             7 {:selections [(opt5e/warlock-subclass-spell-selection [:dominate-beast :evards-black-tentacles])]}
+                             7 {:selections [(opt5e/warlock-subclass-spell-selection [:dominate-beast :black-tentacles])]}
                              9 {:selections [(opt5e/warlock-subclass-spell-selection [:dominate-person :telekinesis])]}
                              10 {:modifiers [(mod5e/damage-resistance :psychic)]}}
                     :traits [{:name "Awakened Mind"
