@@ -28,9 +28,14 @@
 
 #### Bug Fixes:
 
+- [#244](https://github.com/Orcpub/orcpub/issues/244) Bigby's Hand is not SRD compliant
+- [#243](https://github.com/Orcpub/orcpub/issues/243) Nystul's Magic Aura is not SRD compliant
+- [#242](https://github.com/Orcpub/orcpub/issues/242) Tasha's Hideous Laughter is not SRD compliant
+- [#241](https://github.com/Orcpub/orcpub/issues/241) Leomund's Tiny Hut not SRD compliant
 - [#218](https://github.com/Orcpub/orcpub/issues/218) Staff of Power Issues
 - [#171](https://github.com/Orcpub/orcpub/issues/171) Barbarian Rage Displays Error
 - [#134](https://github.com/Orcpub/orcpub/issues/134) Wrong requirements for Ritual Caster
+- [#133](https://github.com/Orcpub/orcpub/issues/133) Monster Vulnerability Shows as Resistance Too
 - [#124](https://github.com/Orcpub/orcpub/issues/124) discord images not getting attached
 - [#109](https://github.com/Orcpub/orcpub/issues/109) Rogue Arcane Trickster spell slots
 - [#98](https://github.com/Orcpub/orcpub/issues/98) Drop downs under features show up wrong
