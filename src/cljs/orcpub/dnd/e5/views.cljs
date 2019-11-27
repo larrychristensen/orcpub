@@ -6912,7 +6912,7 @@
      [:div.flex.w-100-p.flex-wrap
       [spell-input-field "Casting Time" :casting-time spell "m-b-20"]
       [spell-input-field "Range" :range spell "m-l-5 m-b-20"]
-      [spell-input-field "Duration" :duration spell "m-l-5 m-b-20"]]
+      ]
      [:div [:h2.f-s-24.f-w-b.m-b-10 "Components"]]
      [:div.flex.w-100-p.flex-wrap
       [component-checkbox :verbal spell]
@@ -6921,8 +6921,10 @@
      [:div.m-b-20
       [textarea-field
        {:value (get-in spell [:components :material-component])
-        :on-change #(dispatch [::spells/set-material-component %])}]]
+        :on-change #(dispatch [::spells/set-material-component %])}]
+      ]
      [:div.w-100-p
+      [spell-input-field "Duration" :duration spell "m-b-20"]
       [:div.f-s-24.f-w-b
        "Description"]
       [textarea-field
