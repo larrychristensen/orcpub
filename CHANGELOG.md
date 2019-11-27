@@ -1,5 +1,18 @@
 # Changelog
 
+## v2.5.0.7 (27/11/2019)
+
+#### Enhancements:
+
+- [#262](https://github.com/Orcpub/orcpub/issues/262) Add css classes to make it easier for bots to scrape
+
+#### Bug Fixes:
+
+- [#251](https://github.com/Orcpub/orcpub/issues/251) Sickle not working with Two-Weapon Fighting
+- [#239](https://github.com/Orcpub/orcpub/issues/239) Races with cantrips break right hand spell view
+
+---
+
 ## v2.5.0.6 (18/11/2019)
 
 #### Enhancements:
