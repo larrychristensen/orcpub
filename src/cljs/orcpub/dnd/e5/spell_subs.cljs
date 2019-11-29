@@ -882,6 +882,7 @@
  :<- [::langs5e/language-map]
  :<- [::classes5e/plugin-classes]
  :<- [::classes5e/invocations]
+ :<- [::classes5e/boons]
  :<- [::mi5e/custom-and-standard-weapons-map]
  (fn [[spell-lists spells-map plugin-subclasses-map language-map plugin-classes invocations boons weapons-map] _]
    (vec
