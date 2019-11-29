@@ -437,6 +437,12 @@
  (fn [plugins _]
    (apply concat (map (comp vals ::e5/invocations) plugins))))
 
+(reg-sub
+ ::classes5e/plugin-boons
+ :<- [::e5/plugin-vals]
+ (fn [plugins _]
+   (mapcat #(-> % ::e5/boons vals) plugins)))
+
 (def acolyte-bg
   {:name "Acolyte"
    :help "Your life has been devoted to serving a god or gods."
@@ -854,7 +860,7 @@
         tiefling-option-cfg]))))))
 
 
-(defn base-class-options [spell-lists spells-map plugin-subclasses-map language-map weapons-map invocations]
+(defn base-class-options [spell-lists spells-map plugin-subclasses-map language-map weapons-map invocations boons]
   [(classes5e/barbarian-option spell-lists spells-map plugin-subclasses-map language-map weapons-map)
    (classes5e/bard-option spell-lists spells-map plugin-subclasses-map language-map weapons-map)
    (classes5e/cleric-option spell-lists spells-map plugin-subclasses-map language-map weapons-map)
@@ -865,7 +871,7 @@
    (classes5e/ranger-option spell-lists spells-map plugin-subclasses-map language-map weapons-map)
    (classes5e/rogue-option spell-lists spells-map plugin-subclasses-map language-map weapons-map)
    (classes5e/sorcerer-option spell-lists spells-map plugin-subclasses-map language-map weapons-map)
-   (classes5e/warlock-option spell-lists spells-map plugin-subclasses-map language-map  weapons-map invocations)
+   (classes5e/warlock-option spell-lists spells-map plugin-subclasses-map language-map  weapons-map invocations boons)
    (classes5e/wizard-option spell-lists spells-map plugin-subclasses-map language-map weapons-map)])
 
 (reg-sub
@@ -877,7 +883,7 @@
  :<- [::classes5e/plugin-classes]
  :<- [::classes5e/invocations]
  :<- [::mi5e/custom-and-standard-weapons-map]
- (fn [[spell-lists spells-map plugin-subclasses-map language-map plugin-classes invocations weapons-map] _]
+ (fn [[spell-lists spells-map plugin-subclasses-map language-map plugin-classes invocations boons weapons-map] _]
    (vec
     (into
      (sorted-set-by #(compare (::t/key %1) (::t/key %2)))
@@ -893,7 +899,7 @@
            weapons-map
            plugin-class))
         plugin-classes))
-      (base-class-options spell-lists spells-map plugin-subclasses-map language-map weapons-map invocations))))))
+      (base-class-options spell-lists spells-map plugin-subclasses-map language-map weapons-map invocations boons))))))
 
 (reg-sub
  ::classes5e/class-map
@@ -936,6 +942,15 @@
     (fn [invocation]
       (assoc invocation :edit-event [::classes5e/edit-invocation invocation]))
     plugin-invocations)))
+
+(reg-sub
+ ::classes5e/boons
+ :<- [::classes5e/plugin-boons]
+ (fn [plugin-boons]
+   (map
+    (fn [boon]
+      (assoc boon :edit-event [::classes5e/edit-boon boon]))
+    plugin-boons)))
 
 (reg-sub
  ::spells5e/plugin-spells
@@ -1215,6 +1230,11 @@
  ::classes5e/invocation-builder-item
  (fn [db _]
    (::classes5e/invocation-builder-item db)))
+
+(reg-sub
+ ::classes5e/boon-builder-item
+ (fn [db _]
+   (::classes5e/boon-builder-item db)))
 
 (reg-sub
  ::classes5e/builder-item
