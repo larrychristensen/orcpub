@@ -444,6 +444,30 @@
    [:.invisible
     {:visibility :hidden}]
 
+   [:.tooltip
+    {:position "relative"
+     :display "inline-block"
+     :border-bottom "1px dotted black" }]
+
+   [:.tooltip [:.tooltiptext
+               {:visibility "hidden"
+                :width "130px"
+                :bottom "100%"
+                :left "50%"
+                :margin-left "-60px"
+                :background-color "black"
+                :font-family "Open Sans, sans-serif"
+                :color "#fff"
+                :text-align "center"
+                :padding "10px 10px"
+                :border-radius "6px"
+                :position "absolute"
+                :z-index "1"}
+               ]]
+
+   [:.tooltip:hover [:.tooltiptext
+                     {:visibility "visible"}]]
+
    (at-keyframes
     :fade-out
     [:from {:opacity 1
