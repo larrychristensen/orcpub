@@ -6919,7 +6919,7 @@
         {:items (map
                  (fn [school] {:title school
                                :value school})
-                 spells/schools)
+                 (sort spells/schools))
          :value school
          :on-change #(dispatch [::spells/set-spell-prop :school %])}]]]
      [:div.flex.flex-wrap
