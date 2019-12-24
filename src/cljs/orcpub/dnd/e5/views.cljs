@@ -4283,7 +4283,7 @@
 (defn option-languages [option toggle-map-prop-event]
   (let [languages @(subscribe [::langs/languages])]
     [:div.m-b-20
-     [:div.f-s-18.f-w-b.m-b-20 "Languages"]
+     [:div.f-s-24.f-w-b.m-b-20 "Languages"]
      [:div.flex.flex-wrap
       (doall
        (map
