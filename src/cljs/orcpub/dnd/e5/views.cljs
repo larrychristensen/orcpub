@@ -2059,19 +2059,40 @@
 (defn finish-long-rest-fn [id]
   #(dispatch [::char/finish-long-rest id]))
 
+(defn finish-short-rest-fn [id]
+  #(dispatch [::char/finish-short-rest id]))
+
+(defn finish-short-rest-warlock-fn [id]
+  #(dispatch [::char/finish-short-rest-warlock id]))
+
 (def finish-long-rest-handler (memoize finish-long-rest-fn))
+
+(def finish-short-rest-handler (memoize finish-short-rest-fn))
+
+(def finish-short-rest-handler-warlock (memoize finish-short-rest-warlock-fn))
 
 (defn finish-long-rest-button [id]
   [:button.form-button.p-5
    {:on-click (finish-long-rest-handler id)}
    "finish long rest"])
 
+(defn finish-short-rest-button [id]
+  [:button.form-button.p-5.m-l-5
+   {:on-click (finish-short-rest-handler id)}
+   "finish short rest"])
+
+(defn finish-short-rest-button-warlock [id]
+  [:button.form-button.p-5.m-l-5
+   {:on-click (finish-short-rest-handler-warlock id)}
+   "finish short rest"])
+
 (defn spells-known-section [id spells-known spell-slots spell-modifiers spell-slot-factors total-spellcaster-levels levels]
   (let [mobile? @(subscribe [:mobile?])
         multiclass? (> (count spell-slot-factors) 1)
         prepares-spells @(subscribe [::char/prepares-spells id])
         pact-magic? @(subscribe [::char/pact-magic? id])
-        prepare-spell-count-fn @(subscribe [::char/prepare-spell-count-fn id])]
+        prepare-spell-count-fn @(subscribe [::char/prepare-spell-count-fn id])
+        classes (set @(subscribe [::char/classes id]))]
     [display-section
      "Spells"
      "spell-book"
@@ -2102,7 +2123,8 @@
       [:div.m-b-20
        [spells-tables id spells-known spell-slots spell-modifiers]]]
      nil
-     [[finish-long-rest-button id]]]))
+     [[finish-long-rest-button id]
+      (when (contains? classes :warlock) [finish-short-rest-button-warlock id])]]))
 
 (defn equipment-section [title icon-name equipment equipment-map]
   [list-display-section title icon-name
@@ -3248,9 +3270,7 @@
          [finish-long-rest-button id])
        (if (or (freqs ::units/short-rest)
                (freqs ::units/rest))
-         [:button.form-button.p-5.m-l-5
-          {:on-click (make-event-handler ::char/finish-short-rest id)}
-          "finish short rest"])
+          [finish-short-rest-button id])
        (if (freqs ::units/round)
          [:button.form-button.p-5.m-l-5
           {:on-click (make-event-handler ::char/new-round id)}
