@@ -2167,6 +2167,19 @@
                  ::units5e/rest)))
 
 (reg-event-fx
+  ::char5e/finish-short-rest-warlock
+  (fn [{:keys [db]} [_ id]]
+    (clear-period db
+                  id
+                  (fn [character]
+                    (update
+                      character
+                      ::entity/values
+                      dissoc
+                      ::spells/slots-used))
+                  ::units5e/rest)))
+
+(reg-event-fx
  ::char5e/finish-short-rest
  (fn [{:keys [db]} [_ id]]
    (clear-period db id nil ::units5e/short-rest ::units5e/rest)))
