@@ -1571,7 +1571,8 @@ Once the stone has canceled 50 levels of spells, it burns out and turns dull gra
                 (mod5e/ability ::char5e/int 2))
     (ioun-stone "Leadership"
                 :very-rare
-                "Your Charisma score increases by 2, to a maximum of 20, while this marbled pink and green sphere orbits your head.")
+                "Your Charisma score increases by 2, to a maximum of 20, while this marbled pink and green sphere orbits your head."
+                (mod5e/ability ::char5e/cha 2))
     (ioun-stone "Mastery"
                 :legendary
                 "Your proficiency bonus increases by 1 while this pale green prism orbits your head."
