@@ -2162,9 +2162,24 @@
                     character
                     ::entity/values
                     dissoc
-                    ::spells/slots-used))
+                    ::spells/slots-used
+                    character
+                    ::char5e/current-hit-points ::char5e/max-hit-points))
                  ::units5e/long-rest
                  ::units5e/rest)))
+
+(reg-event-fx
+  ::char5e/finish-short-rest-warlock
+  (fn [{:keys [db]} [_ id]]
+    (clear-period db
+                  id
+                  (fn [character]
+                    (update
+                      character
+                      ::entity/values
+                      dissoc
+                      ::spells/slots-used))
+                  ::units5e/rest)))
 
 (reg-event-fx
  ::char5e/finish-short-rest
