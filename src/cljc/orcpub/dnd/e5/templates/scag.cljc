@@ -115,11 +115,11 @@
                              (opt5e/cleric-spell 1 :detect-magic 1)
                              (opt5e/cleric-spell 1 :magic-missile 1)
                              (opt5e/cleric-spell 2 :magic-weapon 3)
-                             (opt5e/cleric-spell 2 :nystuls-magic-aura 3)
+                             (opt5e/cleric-spell 2 :arcanists-magic-aura 3)
                              (opt5e/cleric-spell 3 :dispel-magic 5)
                              (opt5e/cleric-spell 3 :magic-circle 5)
                              (opt5e/cleric-spell 4 :arcane-eye 7)
-                             (opt5e/cleric-spell 4 :leomunds-secret-chest 7)
+                             (opt5e/cleric-spell 4 :secret-chest 7)
                              (opt5e/cleric-spell 5 :planar-binding 9)
                              (opt5e/cleric-spell 5 :teleportation-circle 9)]
                  :selections [(opt5e/spell-selection {:title "Wizard Cantrips"

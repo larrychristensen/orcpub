@@ -3,7 +3,8 @@
             [postal.core :as postal]
             [environ.core :as environ]
             [clojure.pprint :as pprint]
-            [orcpub.route-map :as routes]))
+            [orcpub.route-map :as routes]
+            [cuerdas.core :as str]))
 
 (defn verification-email-html [first-and-last-name username verification-url]
   [:div
@@ -29,7 +30,10 @@
   {:user (environ/env :email-access-key)
    :pass (environ/env :email-secret-key)
    :host (environ/env :email-server-url)
-   :port (Integer/parseInt (or (environ/env :email-server-port) "587"))})
+   :port (Integer/parseInt (or (environ/env :email-server-port) "587"))
+   :ssl (or (str/to-bool (environ/env :email-ssl)) nil)
+   :tls (or (str/to-bool (environ/env :email-tls)) nil)
+   })
 
 (defn send-verification-email [base-url {:keys [email username first-and-last-name]} verification-key]
   (postal/send-message (email-cfg)
@@ -70,18 +74,18 @@
                         :to email
                         :subject "OrcPub Password Reset"
                         :body (reset-password-email
-                               first-and-last-name
-                               (str base-url (routes/path-for routes/reset-password-page-route) "?key=" reset-key))}))
+                                first-and-last-name
+                                (str base-url (routes/path-for routes/reset-password-page-route) "?key=" reset-key))}))
 
 (defn send-error-email [context exception]
   (if (not-empty (environ/env :email-errors-to))
     (postal/send-message (email-cfg)
-      {:from (str "OrcPub Errors <" (environ/env :email-errors-to) ">")
-      :to (str (environ/env :email-errors-to))
-      :subject "Exception"
-      :body [{:type "text/plain"
-              :content (let [writer (java.io.StringWriter.)]
-                         (do (clojure.pprint/pprint (:request context) writer)
-                           (clojure.pprint/pprint (or (ex-data exception) exception) writer)
-                           (str writer)))}]})))
+                         {:from (str "OrcPub Errors <" (environ/env :email-errors-to) ">")
+                          :to (str (environ/env :email-errors-to))
+                          :subject "Exception"
+                          :body [{:type "text/plain"
+                                  :content (let [writer (java.io.StringWriter.)]
+                                             (do (clojure.pprint/pprint (:request context) writer)
+                                                 (clojure.pprint/pprint (or (ex-data exception) exception) writer)
+                                                 (str writer)))}]})))
 

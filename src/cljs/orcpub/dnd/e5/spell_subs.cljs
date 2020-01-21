@@ -437,6 +437,12 @@
  (fn [plugins _]
    (apply concat (map (comp vals ::e5/invocations) plugins))))
 
+(reg-sub
+ ::classes5e/plugin-boons
+ :<- [::e5/plugin-vals]
+ (fn [plugins _]
+   (mapcat #(-> % ::e5/boons vals) plugins)))
+
 (def acolyte-bg
   {:name "Acolyte"
    :help "Your life has been devoted to serving a god or gods."
@@ -854,7 +860,7 @@
         tiefling-option-cfg]))))))
 
 
-(defn base-class-options [spell-lists spells-map plugin-subclasses-map language-map weapons-map invocations]
+(defn base-class-options [spell-lists spells-map plugin-subclasses-map language-map weapons-map invocations boons]
   [(classes5e/barbarian-option spell-lists spells-map plugin-subclasses-map language-map weapons-map)
    (classes5e/bard-option spell-lists spells-map plugin-subclasses-map language-map weapons-map)
    (classes5e/cleric-option spell-lists spells-map plugin-subclasses-map language-map weapons-map)
@@ -865,7 +871,7 @@
    (classes5e/ranger-option spell-lists spells-map plugin-subclasses-map language-map weapons-map)
    (classes5e/rogue-option spell-lists spells-map plugin-subclasses-map language-map weapons-map)
    (classes5e/sorcerer-option spell-lists spells-map plugin-subclasses-map language-map weapons-map)
-   (classes5e/warlock-option spell-lists spells-map plugin-subclasses-map language-map  weapons-map invocations)
+   (classes5e/warlock-option spell-lists spells-map plugin-subclasses-map language-map  weapons-map invocations boons)
    (classes5e/wizard-option spell-lists spells-map plugin-subclasses-map language-map weapons-map)])
 
 (reg-sub
@@ -876,8 +882,9 @@
  :<- [::langs5e/language-map]
  :<- [::classes5e/plugin-classes]
  :<- [::classes5e/invocations]
+ :<- [::classes5e/boons]
  :<- [::mi5e/custom-and-standard-weapons-map]
- (fn [[spell-lists spells-map plugin-subclasses-map language-map plugin-classes invocations weapons-map] _]
+ (fn [[spell-lists spells-map plugin-subclasses-map language-map plugin-classes invocations boons weapons-map] _]
    (vec
     (into
      (sorted-set-by #(compare (::t/key %1) (::t/key %2)))
@@ -893,7 +900,7 @@
            weapons-map
            plugin-class))
         plugin-classes))
-      (base-class-options spell-lists spells-map plugin-subclasses-map language-map weapons-map invocations))))))
+      (base-class-options spell-lists spells-map plugin-subclasses-map language-map weapons-map invocations boons))))))
 
 (reg-sub
  ::classes5e/class-map
@@ -936,6 +943,15 @@
     (fn [invocation]
       (assoc invocation :edit-event [::classes5e/edit-invocation invocation]))
     plugin-invocations)))
+
+(reg-sub
+ ::classes5e/boons
+ :<- [::classes5e/plugin-boons]
+ (fn [plugin-boons]
+   (map
+    (fn [boon]
+      (assoc boon :edit-event [::classes5e/edit-boon boon]))
+    plugin-boons)))
 
 (reg-sub
  ::spells5e/plugin-spells
@@ -1036,13 +1052,46 @@
 (reg-sub
  ::monsters5e/sorted-monsters
  :<- [::monsters5e/monsters]
- (fn [monsters]
-   (sort-by :name monsters)))
+ :<- [::char5e/monster-sort-criteria]
+ :<- [::char5e/monster-sort-direction]
+ (fn [[monsters sort-criteria sort-direction]]
+   (let [comparator (if (= sort-direction "asc") compare #(compare %2 %1))]
+     (case sort-criteria
+       "name" (sort-by :name comparator monsters)
+       "cr" (sort-by :challenge comparator monsters)))))
+
+(defn all-subtypes-removed? [subtypes hidden-subtypes]
+  (and (seq subtypes)
+       (seq hidden-subtypes)
+       (->> subtypes
+            (remove
+              hidden-subtypes)
+            empty?)))
+
+(defn filter-monsters [monsters filter-text monster-filters]
+  (let [lower-case-filter-text (s/lower-case filter-text)]
+    (filter
+      (fn [{:keys [name type subtypes size]}]
+        (and (or (< (count filter-text) 3)
+                 (s/includes? (s/lower-case name) lower-case-filter-text))
+             (not (or (-> monster-filters :size size)
+                      (-> monster-filters :type type)
+                      (all-subtypes-removed? subtypes (:subtype monster-filters))))))
+      monsters)))
 
 (reg-sub
  ::monsters5e/filtered-monsters
- (fn [db]
-   (::monsters5e/filtered-monsters db)))
+ :<- [::monsters5e/sorted-monsters]
+ :<- [::char5e/monster-text-filter]
+ :<- [::char5e/monster-filters]
+ (fn [[sorted-monsters filter-text monster-filters]]
+   (filter-monsters sorted-monsters (if filter-text filter-text "") monster-filters)))
+
+(reg-sub
+  ::monsters5e/filtered-monster-names
+  :<- [::monsters5e/filtered-monsters]
+  (fn [filtered-monsters]
+    (into #{} (map :name filtered-monsters))))
 
 (reg-sub
  ::spells5e/base-spells
@@ -1182,6 +1231,11 @@
  ::classes5e/invocation-builder-item
  (fn [db _]
    (::classes5e/invocation-builder-item db)))
+
+(reg-sub
+ ::classes5e/boon-builder-item
+ (fn [db _]
+   (::classes5e/boon-builder-item db)))
 
 (reg-sub
  ::classes5e/builder-item

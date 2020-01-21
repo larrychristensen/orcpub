@@ -7,6 +7,8 @@
             [orcpub.system :as s]
             [orcpub.db.schema :as schema]))
 
+(alter-var-root #'*print-length* (constantly 50))
+
 ;; user is a namespace that the Clojure runtime looks for and
 ;; loads if its available
 

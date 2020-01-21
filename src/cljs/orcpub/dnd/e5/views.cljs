@@ -45,7 +45,8 @@
             [cljs.reader :as reader]
             [orcpub.user-agent :as user-agent]
             [cljs.core.async :refer [<! timeout]]
-            [bidi.bidi :as bidi])
+            [bidi.bidi :as bidi]
+            [camel-snake-kebab.core :as csk])
   (:require-macros [cljs.core.async.macros :refer [go]]))
 
 ;; the `amount` of "uses" an action may have before it warrants
@@ -93,7 +94,9 @@
     [:input.flex-grow-1
      (merge
       attrs
-      {:auto-complete :off})]]])
+      ;; Rem'd out to allow auto fill on use/password
+      ;;{:auto-complete :off}
+     )]]])
 
 (defn form-input []
   (let [blurred? (r/atom false)]
@@ -530,6 +533,8 @@
            :route routes/dnd-e5-subclass-builder-page-route}
           {:name "Eldritch Invocation Builder"
            :route routes/dnd-e5-invocation-builder-page-route}
+          {:name "Pact Boon Builder"
+           :route routes/dnd-e5-boon-builder-page-route}
           {:name "Selection Builder"
            :route routes/dnd-e5-selection-builder-page-route}]]]]]]))
 
@@ -1019,20 +1024,24 @@
          @(subscribe [:message])
          hide-message]])]))
 
-(def debug-data-style {:width "400px" :height "400px"})
+(def debug-data-style {:width "400px" :height "450px"})
+
+(defn clj->json
+  [ds]
+  (.stringify js/JSON (clj->js ds) nil 2))
 
 (defn debug-data []
   (let [expanded? (r/atom false)]
     (fn []
       [:div.t-a-r
        [:div.orange.pointer.underline
-        {:on-click #(swap! expanded? not)
-         :title "Development - Debug Info" }
-        [:i.fa.fa-bug {:class-name (if @expanded? "white")}]]
-       [:div.orange.pointer.underline
         {:on-click (make-event-handler ::e5/export-all-plugins-pretty-print)
          :title "Development - Download all Orcbrews as Pretty Print, if you click this button it will take a long time to generate the orcbrew.  Click and wait."}
         [:i.fa.fa-cloud-download]]
+       [:div.orange.pointer.underline
+        {:on-click #(swap! expanded? not)
+         :title "Development - Debug Info" }
+        [:i.fa.fa-bug {:class-name (if @expanded? "white")}]]
        (if @expanded?
          [:textarea.m-t-5
           {:read-only true
@@ -1042,7 +1051,18 @@
                         :device-type (user-agent/device-type)
                         :platform (user-agent/platform)
                         :platform-version (user-agent/platform-version)
-                        :character (char/to-strict @(subscribe [:character]))})}])])))
+                        :character (char/to-strict @(subscribe [:character]))})}])
+       (if @expanded?
+         [:textarea.m-t-5
+          {:read-only true
+           :style debug-data-style
+           :value (clj->json {:browser (user-agent/browser)
+                              :browser-version (user-agent/browser-version)
+                              :device-type (user-agent/device-type)
+                              :platform (user-agent/platform)
+                              :platform-version (user-agent/platform-version)
+                              :character (char/to-strict @(subscribe [:character]))})}])
+       ])))
 
 (defn dice-roll-result [{:keys [total rolls mod raw-mod plus-minus]}]
   [:div.white.f-s-32.flex.align-items-c
@@ -1619,10 +1639,10 @@
         [:img.m-r-20.m-t-10.m-b-10 {:src image-url
                                     :style thumbnail-style}])
       [:div.flex.character-summary.m-t-20.m-b-20
-       (if (and character-name include-name?) [:span.m-r-20.m-b-5 character-name])
+       (if (and character-name include-name?) [:span.m-r-20.m-b-5.character-name character-name])
        [:span.m-r-10.m-b-5
-        [:span race-name]
-        [:div.f-s-12.m-t-5.opacity-6 subrace-name]]
+        [:span.character-race-name race-name]
+        [:div.f-s-12.m-t-5.opacity-6.character-subrace-name subrace-name]]
        (if (seq classes)
          [:span.flex
           (map-indexed
@@ -1634,8 +1654,8 @@
              (fn [{:keys [::char/class-name ::char/level ::char/subclass-name]}]
                (let []
                  [:span
-                  [:span (str class-name " (" level ")")]
-                  [:div.f-s-12.m-t-5.opacity-6 (if subclass-name subclass-name)]]))
+                  [:div.class-name (str class-name) ] [:div.level (str "(" level ")")]
+                  [:div.f-s-12.m-t-5.opacity-6.sub-class-name (if subclass-name subclass-name)]]))
              classes)))])]]
      (if (and show-owner?
               (some? owner)
@@ -2041,19 +2061,40 @@
 (defn finish-long-rest-fn [id]
   #(dispatch [::char/finish-long-rest id]))
 
+(defn finish-short-rest-fn [id]
+  #(dispatch [::char/finish-short-rest id]))
+
+(defn finish-short-rest-warlock-fn [id]
+  #(dispatch [::char/finish-short-rest-warlock id]))
+
 (def finish-long-rest-handler (memoize finish-long-rest-fn))
+
+(def finish-short-rest-handler (memoize finish-short-rest-fn))
+
+(def finish-short-rest-handler-warlock (memoize finish-short-rest-warlock-fn))
 
 (defn finish-long-rest-button [id]
   [:button.form-button.p-5
    {:on-click (finish-long-rest-handler id)}
    "finish long rest"])
 
+(defn finish-short-rest-button [id]
+  [:button.form-button.p-5.m-l-5
+   {:on-click (finish-short-rest-handler id)}
+   "finish short rest"])
+
+(defn finish-short-rest-button-warlock [id]
+  [:button.form-button.p-5.m-l-5
+   {:on-click (finish-short-rest-handler-warlock id)}
+   "finish short rest"])
+
 (defn spells-known-section [id spells-known spell-slots spell-modifiers spell-slot-factors total-spellcaster-levels levels]
   (let [mobile? @(subscribe [:mobile?])
         multiclass? (> (count spell-slot-factors) 1)
         prepares-spells @(subscribe [::char/prepares-spells id])
         pact-magic? @(subscribe [::char/pact-magic? id])
-        prepare-spell-count-fn @(subscribe [::char/prepare-spell-count-fn id])]
+        prepare-spell-count-fn @(subscribe [::char/prepare-spell-count-fn id])
+        classes (set @(subscribe [::char/classes id]))]
     [display-section
      "Spells"
      "spell-book"
@@ -2084,7 +2125,8 @@
       [:div.m-b-20
        [spells-tables id spells-known spell-slots spell-modifiers]]]
      nil
-     [[finish-long-rest-button id]]]))
+     [[finish-long-rest-button id]
+      (when (contains? classes :warlock) [finish-short-rest-button-warlock id])]]))
 
 (defn equipment-section [title icon-name equipment equipment-map]
   [list-display-section title icon-name
@@ -2246,13 +2288,15 @@
   [:div
    [:div.p-10.flex.flex-column.align-items-c
     (section-header-2 "Armor Class" "checked-shield")
-    [:div.f-s-24.f-w-b @(subscribe [::char/current-armor-class id])]]])
+    [:div.f-s-24.f-w-b.armor-class @(subscribe [::char/current-armor-class id])]]])
 
 (defn basic-section [title icon v]
   [:div
    [:div.p-10.flex.flex-column.align-items-c
     (section-header-2 title icon)
-    [:div.f-s-24.f-w-b v]]])
+    [:div.f-s-24.f-w-b
+     {:class (csk/->kebab-case title)}
+     v]]])
 
 (def current-hit-points-editor-style
   {:width "60px"
@@ -2316,7 +2360,7 @@
     [:div
      [proficiency-bonus-section-2 id]
      [passive-perception-section-2 id]
-     [:div.p-10.flex.flex-column.align-items-c
+     [:div.p-10.flex.flex-column.align-items-c.skills
       (section-header-2 "Skills" "juggler")
       [:table
        [:tbody
@@ -2326,10 +2370,10 @@
             ^{:key skill-key}
             [:tr.t-a-l
              {:class-name (if (skill-profs skill-key) "f-w-b" "opacity-7")}
-             [:td [:div
+             [:td [:div.skill-name
                    (svg-icon icon 18)
                    [:span.m-l-5 skill-name]]]
-             [:td [:div.p-5 (common/bonus-str (skill-bonuses skill-key))]]])
+             [:td [:div.p-5.skillbonus (common/bonus-str (skill-bonuses skill-key))]]])
           skills/skills))]]]]))
 
 (defn ability-scores-section-2 [id]
@@ -2338,18 +2382,18 @@
         theme @(subscribe [:theme])]
     [:div
      [:div.f-s-18.f-w-b "Ability Scores"]
-     [:div.flex.justify-cont-s-a.m-t-10
+     [:div.flex.justify-cont-s-a.m-t-10.ability-scores
       (doall
        (map
         (fn [k]
           ^{:key k}
           [:div
            (t/ability-icon k 24 theme)
-           [:div
+           [:div.ability-score-name
             [:span.f-s-20.uppercase (name k)]]
-           [:div.f-s-24.f-w-b (abilities k)]
+           [:div.f-s-24.f-w-b.ability-score (abilities k)]
            [:div.f-s-12.opacity-5.m-b--2.m-t-2 "mod"]
-           [:div.f-s-18 (common/bonus-str (ability-bonuses k))]])
+           [:div.f-s-18.ability-score-modifier (common/bonus-str (ability-bonuses k))]])
         char/ability-keys))]]))
 
 (defn saving-throws-section-2 [id]
@@ -2364,12 +2408,12 @@
         (map
          (fn [k]
            ^{:key k}
-           [:tr.t-a-l
+            [:tr.t-a-l
             {:class-name (if (saving-throws k) "f-w-b" "opacity-7")}
             [:td [:div
                   (t/ability-icon k 18 theme)
-                  [:span.m-l-5 (s/upper-case (name k))]]]
-            [:td [:div.p-5 (common/bonus-str (save-bonuses k))]]])
+                  [:span.m-l-5.saving-throw-name (s/upper-case (name k))]]]
+            [:td [:div.p-5.saving-throw-bonus (common/bonus-str (save-bonuses k))]]])
          char/ability-keys))]]]))
 
 (defn feet-str [num]
@@ -2387,13 +2431,13 @@
      (section-header-2 "Speed" "walking-boot")
      [:span.f-s-24.f-w-b
       [:span
-       [:span (feet-str (+ (or unarmored-speed-bonus 0)
+       [:span [:div.speed (feet-str (+ (or unarmored-speed-bonus 0)
                       (if speed-with-armor
                         (speed-with-armor nil)
                         speed)))]
        (if (or unarmored-speed-bonus
                speed-with-armor)
-         [:span.display-section-qualifier-text "(unarmored)"])]
+         [:span.display-section-qualifier-text "(unarmored)"])]]
       (if speed-with-armor
         [:div.f-s-18
          (doall
@@ -2403,19 +2447,24 @@
                    speed (speed-with-armor armor)]
                ^{:key armor-kw}
                [:div
-                [:div
-                 [:span (feet-str speed)]
-                 [:span.display-section-qualifier-text (str "(" (:name armor) " armor)")]]]))
+                [:div.speed
+                 [:span (feet-str speed)]]
+                 [:span.display-section-qualifier-text (str "(" (:name armor) " armor)")]]))
            (dissoc all-armor :shield)))]
         (if unarmored-speed-bonus
           [:div.f-s-18
            [:span
-            [:span (feet-str speed)]
+            [:div.speed
+            [:span (feet-str speed)]]
             [:span.display-section-qualifier-text "(armored)"]]]))
       (if (and swim-speed (pos? swim-speed))
-        [:div.f-s-18 [:span (feet-str swim-speed)] [:span.display-section-qualifier-text "(swim)"]])
+        [:div.f-s-18
+         [:div.speed
+         [:span (feet-str swim-speed)]] [:span.display-section-qualifier-text "(swim)"]])
       (if (and flying-speed (pos? flying-speed))
-        [:div.f-s-18 [:span (feet-str flying-speed)] [:span.display-section-qualifier-text "(fly)"]])]]))
+        [:div.f-s-18
+         [:div.speed
+         [:span (feet-str flying-speed)]] [:span.display-section-qualifier-text "(fly)"]])]]))
 
 (defn personality-section [title & descriptions]
   (if (and (seq descriptions)
@@ -2889,8 +2938,7 @@
                       ;;expanded? (@expanded-details item-kw)
                       ]
                   ^{:key item-kw}
-                  [:tr.pointer
-                   #_{:on-click (toggle-details-expanded-handler expanded-details item-kw)}
+                  [:tr
                    [:td.p-10.f-w-b (or (:name item) item-name)]
                    [:td.p-10 (::char-equip/quantity item-cfg)]
                    [:td.p-10
@@ -2903,6 +2951,36 @@
                                   ", "))
                            weight)]]]]))
               equipment-cfgs))]]]]))))
+
+(defn treasure-section []
+  (r/with-let [expanded-details (r/atom {})]
+    (fn [id]
+      (let [mobile? @(subscribe [:mobile?])
+            treasure-cfgs (merge
+                             @(subscribe [::char/treasure id])
+                             (zipmap (range) @(subscribe [::char/custom-treasure id])))]
+        [:div
+         [:div.flex.align-items-c
+          (svg-icon "cash" 32)
+          [:span.m-l-5.f-w-b.f-s-18 "Treasure"]]
+         [:div
+          [:table.w-100-p.t-a-l.striped
+           [:tbody
+            [:tr.f-w-b
+             {:class-name (if mobile? "f-s-12")}
+             [:th.p-10 "Name"]
+             [:th.p-10 "Qty."]
+             [:th]]
+            (doall
+             (map
+              (fn [[treasure-kw treasure-cfg]]
+                (let [treasure-name (::char-equip/name treasure-cfg)
+                      {:keys [::equip/name] :as treasure} (equip/treasure-map treasure-kw)]
+                  ^{:key treasure-kw}
+                  [:tr
+                   [:td.p-10.f-w-b (or (:name treasure) treasure-name)]
+                   [:td.p-10 (::char-equip/quantity treasure-cfg)]]))
+              treasure-cfgs))]]]]))))
 
 
 (defn skill-details-section-2 []
@@ -3194,9 +3272,7 @@
          [finish-long-rest-button id])
        (if (or (freqs ::units/short-rest)
                (freqs ::units/rest))
-         [:button.form-button.p-5.m-l-5
-          {:on-click (make-event-handler ::char/finish-short-rest id)}
-          "finish short rest"])
+          [finish-short-rest-button id])
        (if (freqs ::units/round)
          [:button.form-button.p-5.m-l-5
           {:on-click (make-event-handler ::char/new-round id)}
@@ -3242,7 +3318,9 @@
    [:div.m-t-30
     [magic-items-section-2 id]]
    [:div.m-t-30
-    [other-equipment-section-2 id]]])
+    [other-equipment-section-2 id]]
+   [:div.m-t-30
+    [treasure-section id]]])
 
 (defn details-tab [title icon device-type selected? on-select]
   [:div.b-b-2.f-w-b.pointer.p-10.hover-opacity-full
@@ -3566,7 +3644,7 @@
 
 (defn base-builder-field [name comp]
   [:div.field.main-text-color.m-t-0
-   [:div.personality-label.f-s-18 name]
+   [:div.personality-label.f-s-16 name]
    comp])
 
 (defn builder-field [el-type name value on-change attrs & [children]]
@@ -3889,7 +3967,7 @@
         (let [speed-mod-type @(subscribe [::mi/speed-mod-type type-kw])]
           ^{:key type-kw}
           [:div.flex.align-items-c
-           [:div.w-100 (common/safe-capitalize type-kw)]
+           [:div.w-100 (common/safe-capitalize-kw type-kw)]
            [:div
             [dropdown
              {:value speed-mod-type
@@ -4018,6 +4096,9 @@
 
 (defn invocation-input-field [title prop invocation & [class-names]]
   (builder-input-field title prop invocation ::classes/set-invocation-prop class-names))
+
+(defn boon-input-field [title prop boon & [class-names]]
+  (builder-input-field title prop boon ::classes/set-boon-prop class-names))
 
 (defn selection-input-field [title prop selection & [class-names]]
   (builder-input-field title prop selection ::selections/set-selection-prop class-names))
@@ -4224,7 +4305,7 @@
 (defn option-languages [option toggle-map-prop-event]
   (let [languages @(subscribe [::langs/languages])]
     [:div.m-b-20
-     [:div.f-s-18.f-w-b.m-b-20 "Languages"]
+     [:div.f-s-24.f-w-b.m-b-20 "Languages"]
      [:div.flex.flex-wrap
       (doall
        (map
@@ -4612,7 +4693,7 @@
 
 (defn option-damage-resistance [option toggle-map-prop-event]
   [:div.m-b-20
-   [:div.f-s-18.f-w-b.m-b-10 "Damage Resistance"]
+   [:div.f-s-18.f-w-b.m-b-10 "Damage Resistances"]
    (let [kw :damage-resistance]
      [:div.flex.flex-wrap
       [:div.m-r-20.m-b-10
@@ -4635,7 +4716,7 @@
 
 (defn option-damage-immunity [option toggle-map-prop-event]
   [:div.m-b-20
-   [:div.f-s-18.f-w-b.m-b-10 "Damage Immunity"]
+   [:div.f-s-18.f-w-b.m-b-10 "Damage Immunities"]
    (let [kw :damage-immunity]
      [:div.flex.flex-wrap
       (doall
@@ -4652,7 +4733,7 @@
 
 (defn option-damage-vulnerability [option toggle-map-prop-event]
   [:div.m-b-20
-   [:div.f-s-18.f-w-b.m-b-10 "Damage Vulnerability"]
+   [:div.f-s-18.f-w-b.m-b-10 "Damage Vulnerabilities"]
    (let [kw :damage-vulnerability]
      [:div.flex.flex-wrap
       (doall
@@ -4669,7 +4750,7 @@
 
 (defn option-condition-immunity [option toggle-map-prop-event]
   [:div.m-b-20
-   [:div.f-s-18.f-w-b.m-b-10 "Condition Immunity"]
+   [:div.f-s-18.f-w-b.m-b-10 "Condition Immunities"]
    (let [kw :condition-immunity]
      [:div.flex.flex-wrap
       (doall
@@ -4686,7 +4767,7 @@
 
 (defn option-weapon-proficiency [option toggle-map-prop-event]
   [:div.m-b-20
-   [:div.f-s-18.f-w-b.m-b-10 "Weapon Proficiency"]
+   [:div.f-s-18.f-w-b.m-b-10 "Weapon Proficiencies"]
    (let [kw :weapon-prof]
      [:div.flex.flex-wrap
       (doall
@@ -5063,7 +5144,7 @@
       [:div.m-t-10
        [labeled-dropdown
         "Selection Type"
-        {:items (concat
+        {:items (sort-by :title (concat
                  [{:title "<select type to add>"
                    :disabled? true
                    :value :select}]
@@ -5071,7 +5152,7 @@
                   obj-to-item
                   selections)
                  [{:title "<create new selection>"
-                   :value :new-selection}])
+                   :value :new-selection}]))
          :value (or type :select)
          :on-change #(if (= "new-selection" %)
                        (dispatch [::selections/new-selection])
@@ -5107,7 +5188,7 @@
       [:div.m-t-10
        [labeled-dropdown
         "Modifier Type"
-        {:items (cons
+        {:items (sort-by :title (cons
                  {:title "<select type to add>"
                   :disabled? true
                   :value :select}
@@ -5115,7 +5196,7 @@
                   (fn [[kw {:keys [name]}]]
                     {:title name
                      :value kw})
-                  mod-values))
+                  mod-values)))
          :value (if type (clojure.core/name type) :select)
          :on-change #(dispatch [edit-modifier-type-event index (keyword %)])}]]
       (if type
@@ -6034,6 +6115,27 @@
        {:value (get language :description)
         :on-change #(dispatch [::langs/set-language-prop :description %])}]]]))
 
+(defn boon-builder []
+  (let [boon @(subscribe [::classes/boon-builder-item])]
+    [:div.p-20.main-text-color
+     [:div.flex.w-100-p.flex-wrap
+      [boon-input-field
+       "Name"
+       :name
+       boon
+       "m-b-20"]
+      [boon-input-field
+       option-source-name-label
+       :option-pack
+       boon
+       "m-l-5 m-b-20"]]
+     [:div.w-100-p
+      [:div.f-s-24.f-w-b
+       "Description"]
+      [textarea-field
+       {:value (get boon :description)
+        :on-change #(dispatch [::classes/set-boon-prop :description %])}]]]))
+
 (defn invocation-builder []
   (let [invocation @(subscribe [::classes/invocation-builder-item])]
     [:div.p-20.main-text-color
@@ -6086,25 +6188,14 @@
        "Name"
        :name
        monster
-       "m-b-20"]
+       "m-b-20 flex-grow-1"]
       [monster-input-field
        option-source-name-label
        :option-pack
        monster
-       "m-l-5 m-b-20"]]
+       "m-l-5 m-b-20 flex-grow-1"]]
      [:div.flex.w-100-p.flex-wrap
-      [:div.flex-grow-1.m-b-20.m-l-5
-       [labeled-dropdown
-        "Challenge"
-        {:items (map
-                 (fn [v]
-                   {:title (if (< 0 v 1)
-                             (clojure.core/str "1/" (/ 1 v))
-                             v)
-                    :value v})
-                 @(subscribe [::monsters/challenge-ratings]))
-         :value (or challenge 0)
-         :on-change #(dispatch [::monsters/set-monster-prop :challenge (js/parseFloat %)])}]]
+
       [:div.flex-grow-1.m-b-20.m-l-5
        [labeled-dropdown
         "Size"
@@ -6148,24 +6239,11 @@
        "Armor Notes"
        :armor-notes
        monster
-       "m-l-5 m-b-20 flex-grow-1 notes"]]
+       "m-b-5 m-l-5 flex-grow-1"]]
      [:div.flex.w-100-p.flex-wrap
-      [monster-input-field
-       "Speed"
-       :speed
-       monster
-       "m-l-5 m-b-20 flex-grow-1"]
-      [monster-input-field
-       "Senses"
-       :senses
-       monster
-       "m-l-5 m-b-20 flex-grow-1 senses"]]
-     [:div.m-b-20
-      [:div.f-s-24.f-w-b "Hit Points"]
-      [:div.flex.w-100-p.flex-wrap
-       [:div.m-r-5
+       [:div.m-l-5.m-b-20
         [labeled-dropdown
-         "Die Count"
+         "HP Die Count"
          {:items (cons
                   {:title "-"}
                   (map
@@ -6173,9 +6251,9 @@
                    (range 1 36)))
           :value (get hit-points :die-count)
           :on-change #(let [v (js/parseInt %)] (dispatch [::monsters/set-monster-path-prop [:hit-points :die-count] (if (not (js/isNaN v)) v)]))}]]
-       [:div.m-r-5
+       [:div.m-l-5.m-b-20
         [labeled-dropdown
-         "Die"
+         "HP Die"
          {:items (cons
                   {:title "-"}
                   (map
@@ -6184,13 +6262,19 @@
           :value (get hit-points :die)
           :on-change #(let [v (js/parseInt %)]
                         (dispatch [::monsters/set-monster-path-prop [:hit-points :die] (if (not (js/isNaN v)) v)]))}]]
-       [:div.m-r-5
+       [:div.m-l-5.m-b-20
         [input-builder-field
-         [:span.f-w-b "Modifier"]
+         [:span.f-w-b.m-b-5.f-s-16 "HP Modifier"]
          (get hit-points :modifier 0)
          #(let [v (js/parseInt %)]
             (dispatch [::monsters/set-monster-path-prop [:hit-points :modifier] (if (not (js/isNaN v)) v)]))
-         {:class-name "input h-40"}]]]]
+         {:class-name "input h-40"}]];]
+      [monster-input-field
+       "Speed"
+       :speed
+       monster
+       "m-l-5 m-b-5 flex-grow-1"]
+      ]
      [:div
       [:div.f-s-24.f-w-b "Abilities"]
       [:div.flex.w-100-p.flex-wrap
@@ -6227,8 +6311,8 @@
                 :value (get saving-throws simple-kw)
                 :on-change #(dispatch [::monsters/set-monster-path-prop [:saving-throws simple-kw] (let [parsed (js/parseInt %)] (if (not (js/isNaN parsed)) parsed))])}])])
          opt/abilities))]]
-     [:div
-      [:div.f-s-24.f-w-b "Skills"]
+     [:div.m-b-20
+      [:div.f-s-24.f-w-b. "Skills"]
       [:div.flex.w-100-p.flex-wrap
        (doall
         (map
@@ -6245,24 +6329,37 @@
                          (range 1 21)))
                 :value (get skills key 0)
                 :on-change #(dispatch [::monsters/set-monster-path-prop [:skills key] (js/parseInt %)])}])])
-         skills/skills))]]
-     [:div [option-languages monster ::monsters/toggle-monster-map-prop]]
-     [:div [option-damage-resistance monster ::monsters/toggle-monster-map-prop]]
-     [:div [option-damage-immunity monster ::monsters/toggle-monster-map-prop]]
-     [:div [option-damage-vulnerability monster ::monsters/toggle-monster-map-prop]]
-     [:div [option-condition-immunity monster ::monsters/toggle-monster-map-prop]]
+         skills/skills))]
+      [:div [option-damage-vulnerability monster ::monsters/toggle-monster-map-prop]]
+      [:div [option-damage-resistance monster ::monsters/toggle-monster-map-prop]]
+      [:div [option-damage-immunity monster ::monsters/toggle-monster-map-prop]]
+      [:div [option-condition-immunity monster ::monsters/toggle-monster-map-prop]]
+      [monster-input-field
+       "Senses"
+       :senses
+       monster
+       "m-l-5 m-b-5 flex-grow-1"]
+      [:div.m-t-20 [option-languages monster ::monsters/toggle-monster-map-prop]]
+      ]
+     [:div.w-100-p.m-b-20
+     [:div.f-s-24.f-w-b.w-20-p "Challenge Rating"
+      [labeled-dropdown
+       ""
+       {:items (map
+                 (fn [v]
+                   {:title (if (< 0 v 1)
+                             (clojure.core/str "1/" (/ 1 v))
+                             v)
+                    :value v})
+                 @(subscribe [::monsters/challenge-ratings]))
+        :value (or challenge 0)
+        :on-change #(dispatch [::monsters/set-monster-prop :challenge (js/parseFloat %)])}]]]
      [:div.w-100-p
       [:div.f-s-24.f-w-b
-       "Description"]
+       "Special Traits"]
       [textarea-field
        {:value (get monster :description)
         :on-change #(dispatch [::monsters/set-monster-prop :description %])}]]
-     [:div.w-100-p.m-t-30
-      [:div.f-s-24.f-w-b
-       "Legendary Actions Description"]
-      [textarea-field
-       {:value (get-in monster [:legendary-actions :description])
-        :on-change #(dispatch [::monsters/set-monster-path-prop [:legendary-actions :description] %])}]]
      [:div.m-t-30
       [option-traits
        monster
@@ -6277,7 +6374,14 @@
                {:title "Action"
                 :value :action}
                {:title "Legendary Action"
-                :value :legendary-action}]]]]))
+                :value :legendary-action}]]]
+     [:div.w-100-p.m-t-30
+      [:div.f-s-20.f-w-b
+       "Legendary Actions"]
+      [textarea-field
+       {:value (get-in monster [:legendary-actions :description])
+        :on-change #(dispatch [::monsters/set-monster-path-prop [:legendary-actions :description] %])}]]
+     ]))
 
 (defn monster-selector [index {:keys [monster num]} on-key-change on-num-change]
   (let [monsters @(subscribe [::monsters/sorted-monsters])]
@@ -6837,7 +6941,7 @@
         {:items (map
                  (fn [school] {:title school
                                :value school})
-                 spells/schools)
+                 (sort spells/schools))
          :value school
          :on-change #(dispatch [::spells/set-spell-prop :school %])}]]]
      [:div.flex.flex-wrap
@@ -6856,7 +6960,7 @@
      [:div.flex.w-100-p.flex-wrap
       [spell-input-field "Casting Time" :casting-time spell "m-b-20"]
       [spell-input-field "Range" :range spell "m-l-5 m-b-20"]
-      [spell-input-field "Duration" :duration spell "m-l-5 m-b-20"]]
+      ]
      [:div [:h2.f-s-24.f-w-b.m-b-10 "Components"]]
      [:div.flex.w-100-p.flex-wrap
       [component-checkbox :verbal spell]
@@ -6865,8 +6969,10 @@
      [:div.m-b-20
       [textarea-field
        {:value (get-in spell [:components :material-component])
-        :on-change #(dispatch [::spells/set-material-component %])}]]
+        :on-change #(dispatch [::spells/set-material-component %])}]
+      ]
      [:div.w-100-p
+      [spell-input-field "Duration" :duration spell "m-b-20"]
       [:div.f-s-24.f-w-b
        "Description"]
       [textarea-field
@@ -7110,6 +7216,17 @@
    ::classes/edit-invocation
    ::classes/delete-invocation])
 
+(defn my-boons [name plugin]
+  [my-content-type
+   name
+   plugin
+   "pact boon"
+   ::e5/boons
+   "cursed-star"
+   ::classes/new-boon
+   ::classes/edit-boon
+   ::classes/delete-boon])
+
 (defn my-feats [name plugin]
   [my-content-type
    name
@@ -7168,6 +7285,7 @@
            [my-classes name plugin]
            [my-subclasses name plugin]
            [my-invocations name plugin]
+           [my-boons name plugin]
            [my-feats name plugin]
            [my-languages name plugin]
            [my-selections name plugin]]])])))
@@ -7295,6 +7413,9 @@
 
 (defn invocation-builder-page []
   (builder-page "Eldritch Invocation" ::classes/reset-invocation ::classes/save-invocation invocation-builder))
+
+(defn boon-builder-page []
+  (builder-page "Pact Boon" ::classes/reset-boon ::classes/save-boon boon-builder))
 
 (defn selection-builder-page []
   (builder-page "Selection" ::selections/reset-selection ::selections/save-selection selection-builder [title-with-help "Selection Builder" selection-help]))
@@ -7455,14 +7576,16 @@
   (let [editing-parties (r/atom {})
         expanded-characters (r/atom {})]
     (fn []
-      (let [parties @(subscribe [::party/parties])
+      (let [parties (sort-by ::party/name @(subscribe [::party/parties]))
             device-type @(subscribe [:device-type])
             username @(subscribe [:username])]
         [content-page
          "Parties"
-         []
+         [{:title "Create Party"
+           :icon "users"
+           :on-click (make-event-handler ::party/make-empty-party)}]
          [:div.p-5
-          [:div
+           [:div
            (doall
             (map
              (fn [{:keys [:db/id ::party/name] characters ::party/character-ids}]
@@ -7547,55 +7670,55 @@
                                 {:on-click #(dispatch [::party/remove-character id character-id])}
                                 "remove from party"]]
                               [character-display character-id false (if (= :mobile device-type) 1 2)]])]]))
-                     characters))]]))
+                     (sort-by :orcpub.dnd.e5.character/character-name characters)))]]))
              parties))]]]))))
 
 (defn monster-list-item [{:keys [name size type subtypes alignment key] :as monster}]
-  (let [expanded? @(subscribe [:monster-expanded? name])
-        device-type @(subscribe [:device-type])
-        monster-page-path (routes/path-for routes/dnd-e5-monster-page-route :key key)
-        monster-page-route (routes/match-route monster-page-path)
-        homebrew? (:option-pack monster)]
-    [:div.main-text-color.item-list-item
-     [:div.pointer
-      [:div.flex.justify-cont-s-b.align-items-c
-       {:on-click #(dispatch [:toggle-monster-expanded name])}
-       [:div.m-l-10
-        [:div.f-s-24.f-w-600.p-b-20.p-t-20.flex
-         (if homebrew?
-           [:div.m-r-10 (svg-icon "beer-stein" 24 @(subscribe [:theme]))])
-         [monster-summary name size type subtypes alignment]]]
-       [:div.orange.pointer.m-r-10
-        (if (not= device-type :mobile) [:span.underline (if expanded?
-                                                          "collapse"
-                                                          "open")])
-        [:i.fa.m-l-5
-         {:class-name (if expanded? "fa-caret-up" "fa-caret-down")}]]]
-      (if expanded?
-        [:div.p-10
-         {:style character-display-style}
-         [:div.flex.justify-cont-end.uppercase.align-items-c
-          [:button.form-button.m-l-5
-           {:on-click #(dispatch [:route monster-page-route])}
-           "view"]
-          (if homebrew?
+  (r/with-let [device-type? (subscribe [:device-type])]
+    (let [homebrew? (:option-pack monster)
+          expanded? @(subscribe [:monster-expanded? name])]
+      [:div.main-text-color.item-list-item
+       [:div.pointer
+        [:div.flex.justify-cont-s-b.align-items-c
+         {:on-click #(dispatch [:toggle-monster-expanded name])}
+         [:div.m-l-10
+          [:div.f-s-24.f-w-600.p-b-20.p-t-20.flex
+           (when homebrew?
+             [:div.m-r-10 (svg-icon "beer-stein" 24 @(subscribe [:theme]))])
+           [monster-summary name size type subtypes alignment]]]
+         [:div.orange.pointer.m-r-10
+          (when (not= @device-type? :mobile)
+            [:span.underline (if expanded?
+                               "collapse"
+                               "open")])
+          [:i.fa.m-l-5
+           {:class-name (if expanded? "fa-caret-up" "fa-caret-down")}]]]
+        (when expanded?
+          [:div.p-10
+           {:style character-display-style}
+           [:div.flex.justify-cont-end.uppercase.align-items-c
             [:button.form-button.m-l-5
-             {:on-click (make-event-handler ::monsters/edit-monster monster)}
-             "edit"])
-          (if homebrew?
-            [:button.form-button.m-l-5
-             {:on-click (make-event-handler ::monsters/delete-monster monster)}
-             "delete"])]
-         [monster-component monster]])]]))
+             {:on-click #(dispatch [:route (routes/match-route (routes/path-for routes/dnd-e5-monster-page-route :key key))])}
+             "view"]
+            (if homebrew?
+              [:button.form-button.m-l-5
+               {:on-click (make-event-handler ::monsters/edit-monster monster)}
+               "edit"])
+            (if homebrew?
+              [:button.form-button.m-l-5
+               {:on-click (make-event-handler ::monsters/delete-monster monster)}
+               "delete"])]
+           [monster-component monster]])]])))
 
-(defn monster-list-items [expanded-monsters device-type]
-  [:div.item-list
-   (doall
-    (map
-     (fn [{:keys [name] :as monster}]
-       ^{:key name}
-       [monster-list-item monster])
-     @(subscribe [::monsters/filtered-monsters])))])
+(defn monster-list-items []
+  (let [filtered-monsters @(subscribe [::monsters/filtered-monsters])]
+    [:div.item-list
+     (doall
+       (map
+         (fn [{:keys [name] :as monster}]
+           ^{:key name}
+           [monster-list-item monster])
+         filtered-monsters))]))
 
 (defn clear-monsters-filter []
   (dispatch [::char/filter-monsters ""]))
@@ -7605,73 +7728,100 @@
    (fn [a]
      #(swap! a not))))
 
+(defn- sort-toggle
+  "Resembles an underlined link. Uses the FA arrows to indicate sorting direction.
+
+   Should be generalized or moved."
+  [label value sort-event sort-criteria sort-direction]
+  [:div.orange.pointer.m-r-10
+   {:on-click #(dispatch [sort-event value (if (= sort-direction "asc") "desc" "asc")])}
+   [:span.underline label]
+   [:i.fa.m-l-5
+    {:class (s/join " "
+                    [(when (not= sort-criteria value)
+                       "invisible")
+                     (if (= sort-direction "asc")
+                       "fa-caret-up"
+                       "fa-caret-down")])}]])
+
+(defn monster-trait-filters
+  []
+  [:div.flex.flex-wrap
+   [:div.main-text-color.p-20
+    [:div.f-s-16.f-w-b "Size"]
+    [:div
+     (doall
+       (map
+         (fn [size]
+           ^{:key size}
+           [:div.p-5.pointer
+            {:on-click (make-event-handler ::char/toggle-monster-filter-hidden :size size)}
+            (comps/checkbox (not @(subscribe [::char/monster-filter-hidden? :size size])) false)
+            (str " " (s/capitalize (common/kw-to-name size)))])
+         @(subscribe [::char/monster-sizes])))]]
+   [:div.main-text-color.p-20
+    [:div.f-s-16.f-w-b "Type"]
+    [:div
+     (doall
+       (map
+         (fn [type]
+           ^{:key type}
+           [:div.p-5.pointer
+            {:on-click (make-event-handler ::char/toggle-monster-filter-hidden :type type)}
+            (comps/checkbox (not @(subscribe [::char/monster-filter-hidden? :type type])) false)
+            (str " " (s/capitalize (common/kw-to-name type)))])
+         @(subscribe [::char/monster-types])))]]
+   (let [subtypes @(subscribe [::char/monster-subtypes])]
+     [:div.main-text-color.p-20
+      [:div.f-s-16.f-w-b "Subtype"]
+      [:div
+       (doall
+         (map
+           (fn [subtype]
+             ^{:key subtype}
+             [:div.p-5.pointer
+              {:on-click (make-event-handler ::char/toggle-monster-filter-hidden :subtype subtype)}
+              (comps/checkbox (not @(subscribe [::char/monster-filter-hidden? :subtype subtype])) false)
+              (str " " (s/capitalize (common/kw-to-name subtype)))])
+           subtypes))]])])
+
+(defn monster-filter-toggle
+  [filters-expanded?]
+  [:div.orange.pointer.m-r-10
+   {:on-click (toggle-handler filters-expanded?)}
+   (when (not= @(subscribe [:device-type]) :mobile)
+     [:span.underline (if @filters-expanded?
+                        "hide"
+                        "filters")])
+   [:i.fa.m-l-5
+    {:class-name (if @filters-expanded? "fa-caret-up" "fa-caret-down")}]])
+
 (defn monster-list []
-  (let [filters-expanded? (r/atom false)]
-    (fn []
-      (let [expanded-monsters @(subscribe [:expanded-monsters])
-            device-type @(subscribe [:device-type])]
-        [content-page
-         "Monsters"
-         []
-         [:div.p-l-5.p-r-5.p-b-10
-          [:div.p-b-10.p-l-10.p-r-10
-           [:div.posn-rel
-            [:input.input.f-s-24.p-l-20.w-100-p.h-60
-             {:value @(subscribe [::char/monster-text-filter])
-              :on-change (make-arg-event-handler ::char/filter-monsters event-value)}]
-            [:i.fa.fa-times.posn-abs.f-s-24.pointer.main-text-color
-             {:style close-icon-style
-              :on-click clear-monsters-filter}]]]
-          [:div
-           [:div.flex.justify-cont-end.m-b-10
-            [:div.orange.pointer.m-r-10
-             {:on-click (toggle-handler filters-expanded?)}
-             (if (not= device-type :mobile)
-               [:span.underline (if @filters-expanded?
-                                  "hide"
-                                  "filters")])
-             [:i.fa.m-l-5
-              {:class-name (if @filters-expanded? "fa-caret-up" "fa-caret-down")}]]]
-           (if @filters-expanded?
-             [:div.flex.flex-wrap
-              [:div.main-text-color.p-20
-               [:div.f-s-16.f-w-b "Size"]
-               [:div
-                (doall
-                 (map
-                  (fn [size]
-                    ^{:key size}
-                    [:div.p-5.pointer
-                     {:on-click (make-event-handler ::char/toggle-monster-filter-hidden :size size)}
-                     (comps/checkbox (not @(subscribe [::char/monster-filter-hidden? :size size])) false)
-                     (common/kw-to-name size)])
-                  @(subscribe [::char/monster-sizes])))]]
-              [:div.main-text-color.p-20
-               [:div.f-s-16.f-w-b "Type"]
-               [:div
-                (doall
-                 (map
-                  (fn [type]
-                    ^{:key type}
-                    [:div.p-5.pointer
-                     {:on-click (make-event-handler ::char/toggle-monster-filter-hidden :type type)}
-                     (comps/checkbox (not @(subscribe [::char/monster-filter-hidden? :type type])) false)
-                     (common/kw-to-name type)])
-                  @(subscribe [::char/monster-types])))]]
-              (let [subtypes @(subscribe [::char/monster-subtypes])]
-                [:div.main-text-color.p-20
-                 [:div.f-s-16.f-w-b "Subtype"]
-                 [:div
-                  (doall
-                   (map
-                    (fn [subtype]
-                      ^{:key subtype}
-                      [:div.p-5.pointer
-                       {:on-click (make-event-handler ::char/toggle-monster-filter-hidden :subtype subtype)}
-                       (comps/checkbox (not @(subscribe [::char/monster-filter-hidden? :subtype subtype])) false)
-                       (common/kw-to-name subtype)])
-                    subtypes))]])])]
-          [monster-list-items expanded-monsters device-type]]]))))
+  (r/with-let [filters-expanded? (r/atom false)
+               sort-criteria (subscribe [::char/monster-sort-criteria])
+               sort-direction (subscribe [::char/monster-sort-direction])]
+    [content-page
+     "Monsters"
+     []
+     [:div.p-l-5.p-r-5.p-b-10
+      [:div.p-b-10.p-l-10.p-r-10
+       [:div.posn-rel
+        [:input.input.f-s-24.p-l-20.w-100-p.h-60
+         {:value     @(subscribe [::char/monster-text-filter])
+          :on-change (make-arg-event-handler ::char/filter-monsters event-value)}]
+        [:i.fa.fa-times.posn-abs.f-s-24.pointer.main-text-color
+         {:style    close-icon-style
+          :on-click clear-monsters-filter}]]]
+      [:div
+       [:div.flex.justify-cont-s-b.m-b-10
+        [:div.orange.m-l-10.m-r-10 "Sort by:"]
+        [sort-toggle "Name" "name" ::char/sort-monsters @sort-criteria @sort-direction]
+        [sort-toggle "Challenge Rating" "cr" ::char/sort-monsters @sort-criteria @sort-direction]
+        [:div.flex-grow-1]
+        [monster-filter-toggle filters-expanded?]]
+       (when @filters-expanded?
+         [monster-trait-filters])]
+      [monster-list-items]]]))
 
 (defn spell-list-item [{:keys [name level school key] :as spell}]
   (let [expanded? @(subscribe [:spell-expanded? name])

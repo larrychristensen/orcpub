@@ -1,3 +1,14 @@
+![GitHub language count](https://img.shields.io/github/languages/count/orcpub/orcpub) ![GitHub top language](https://img.shields.io/github/languages/top/orcpub/orcpub) ![GitHub contributors](https://img.shields.io/github/contributors/orcpub/orcpub) ![GitHub repo size](https://img.shields.io/github/repo-size/orcpub/orcpub)
+![GitHub last commit (branch)](https://img.shields.io/github/last-commit/orcpub/orcpub/develop) 
+
+![GitHub pull requests](https://img.shields.io/github/issues-pr/orcpub/orcpub) ![GitHub closed pull requests](https://img.shields.io/github/issues-pr-closed/orcpub/orcpub)
+
+![GitHub issues](https://img.shields.io/github/issues/orcpub/orcpub) ![GitHub closed issues](https://img.shields.io/github/issues-closed/orcpub/orcpub)
+
+![Docker Pulls](https://img.shields.io/docker/pulls/orcpub/orcpub)
+![Docker Cloud Automated build](https://img.shields.io/docker/cloud/automated/orcpub/orcpub)
+![Docker Cloud Build Status](https://img.shields.io/docker/cloud/build/orcpub/orcpub)
+
 # Orcpub2 - Community Edition
 
 This is the code for OrcPub2.com. Many, many people have expressed interest in helping out or checking out the code, so I have decided to make that possible by open sourcing it.
@@ -18,6 +29,13 @@ Unix instructions [here](https://github.com/Orcpub/orcpub/wiki/Orcpub-on-Ubuntu-
 Windows instructions [here](https://github.com/Orcpub/orcpub/wiki/Orcpub-on-Windows-10-with-Docker)
 
 Docker Cheat [Sheet](https://github.com/Orcpub/orcpub/wiki/Docker-Cheat-sheet)
+
+### Importing your homebrew automatically
+
+To have your homebrew orcbrew file automatically loaded when a new client connects place it in the 'deploy/homebrew/' folder with the name "homebrew.orcbrew".
+All orcbrew files have to be combined into a single file named "homebrew.orcbrew" because that is the only file that will be loaded.
+This will elect to not import the homebrew if any other homebrew has already been imported on that device.
+If you want to overwrite what is already loaded delete all of the content from the Content List section and reload the page.
 
 ## Getting Started with Development
 
@@ -53,6 +71,7 @@ EMAIL_SERVER_URL: '' # Url to a smtp server
 EMAIL_ACCESS_KEY: '' # User for the mail server
 EMAIL_SECRET_KEY: '' # Password for the user
 EMAIL_SERVER_PORT: 587 # Mail server port
+EMAIL_SSL: 'false' # Should SSL be used? Gmail requires this.
 DATOMIC_URL: datomic:free://datomic:4334/orcpub # Url for the database
 ```
 #### How do I contribute?
@@ -85,7 +104,7 @@ On Mac/Unix: `bin/transactor config/samples/free-transactor-template.properties`
     - Windows: There is an issue with 2.9.1, so downgrade to 2.8.1 (`lein downgrade 2.8.1`).
 - Download the code from your git fork `git clone git@github.com:yourrepo/your.git` Use the clone url in YOUR repo.
 - cd into orcpub
-- run `lein repl`
+- run `lein with-profile +start-server repl`
 - run `lein figwheel` Once lein figwheel finishes, a browser will launch.
 
 You should leave all three processes running: Datomic transactor, lein repl, and lein figwheel.  

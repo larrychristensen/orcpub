@@ -118,6 +118,7 @@
    {:name "Quarterstaff",
     ::damage-type :bludgeoning,
     ::type :simple,
+    ::subtype :staff
     ::damage-die 6,
     ::damage-die-count 1,
     ::versatile {::damage-die 8, ::damage-die-count 1},
@@ -130,7 +131,8 @@
     ::type :simple,
     ::damage-die-count 1,
     ::melee? true,
-    :key :sickle
+    :key :sickle,
+    ::light? true,
     ::link "https://en.wikipedia.org/wiki/Sickle"}
    {::melee? true,
     ::versatile {::damage-die 8, ::damage-die-count 1},

@@ -137,4 +137,17 @@ html, body, #app {
 	  })(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
 
 	  ga('create', 'UA-69209720-3', 'auto');
-	  ga('send', 'pageview');"]]))
+    ga('send', 'pageview');
+    let plugins = localStorage.getItem('plugins');
+    if(plugins === null || plugins === '{}')
+    {
+      fetch('https://' + window.location.host + '/homebrew.orcbrew')
+        .then(resp => resp.text())
+        .then(text => {
+          if(!text.toUpperCase().includes('NOT FOUND')){
+            localStorage.setItem('plugins',text);
+            window.location.reload(false);
+          }
+      });
+    }
+    "]]))

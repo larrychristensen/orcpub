@@ -38,6 +38,7 @@
                                       background->local-store
                                       language->local-store
                                       invocation->local-store
+                                      boon->local-store
                                       selection->local-store
                                       feat->local-store
                                       race->local-store
@@ -54,6 +55,7 @@
                                       default-background
                                       default-language
                                       default-invocation
+                                      default-boon
                                       default-selection
                                       default-feat
                                       default-race
@@ -62,7 +64,7 @@
                                       default-subclass]]
             [orcpub.dnd.e5.autosave-fx]
             [re-frame.core :refer [reg-event-db reg-event-fx reg-fx inject-cofx path trim-v
-                                   after debug dispatch dispatch-sync subscribe ->interceptor]]
+                                   after dispatch dispatch-sync subscribe ->interceptor]]
             [cljs.spec.alpha :as spec]
             [cljs-http.client :as http]
             [cljs.core.async :refer [<! timeout]]
@@ -106,6 +108,8 @@
 (def language->local-store-interceptor (after language->local-store))
 
 (def invocation->local-store-interceptor (after invocation->local-store))
+
+(def boon->local-store-interceptor (after boon->local-store))
 
 (def selection->local-store-interceptor (after selection->local-store))
 
@@ -155,6 +159,9 @@
 
 (def invocation-interceptors [(path ::class5e/invocation-builder-item)
                               invocation->local-store-interceptor])
+
+(def boon-interceptors [(path ::class5e/boon-builder-item)
+                              boon->local-store-interceptor])
 
 (def selection-interceptors [(path ::selections5e/builder-item)
                             selection->local-store-interceptor])
@@ -504,6 +511,14 @@
  "You must specify 'Name', 'Option Source Name'")
 
 (reg-save-homebrew
+ "Boon"
+ ::class5e/save-boon
+ ::class5e/boon-builder-item
+ ::class5e/homebrew-boon
+ ::e5/boons
+ "You must specify 'Name', 'Option Source Name'")
+
+(reg-save-homebrew
  "Selection"
  ::selections5e/save-selection
  ::selections5e/builder-item
@@ -582,6 +597,10 @@
  ::e5/invocations)
 
 (reg-delete-homebrew
+ ::class5e/delete-boon
+ ::e5/boons)
+
+(reg-delete-homebrew
  ::selections5e/delete-selection
  ::e5/selections)
 
@@ -621,9 +640,20 @@
     :http {:method :post
            :headers (authorization-headers db)
            :url (url-for-route routes/dnd-e5-char-parties-route)
-           :transit-params {::party5e/name "New Party"
+           :transit-params {::party5e/name "A New Party"
                             ::party5e/character-ids character-ids}
            :on-success [::party5e/make-party-success]}}))
+
+(reg-event-fx
+  ::party5e/make-empty-party
+  (fn [{:keys [db]} [_]]
+    {:dispatch [:set-loading true]
+     :http {:method :post
+            :headers (authorization-headers db)
+            :url (url-for-route routes/dnd-e5-char-parties-route)
+            :transit-params {::party5e/name "A New Party"}
+            :on-success (.reload js/window.location true)
+            }}))
 
 (reg-event-fx
  ::party5e/rename-party
@@ -1690,6 +1720,11 @@
  routes/dnd-e5-invocation-builder-page-route)
 
 (reg-edit-homebrew
+ ::class5e/edit-boon
+ ::class5e/set-boon
+ routes/dnd-e5-boon-builder-page-route)
+
+(reg-edit-homebrew
  ::selections5e/edit-selection
  ::selections5e/set-selection
  routes/dnd-e5-selection-builder-page-route)
@@ -1828,29 +1863,6 @@
   (let [result (sets/difference subtypes hidden-subtypes)]
     result))
 
-(defn all-subtypes-removed? [subtypes hidden-subtypes]
-  (and (seq subtypes)
-       (seq hidden-subtypes)
-       (->> subtypes
-            (remove
-             hidden-subtypes)
-            empty?)))
-
-(defn filter-monsters [filter-text monster-filters]
-  (let [pattern (if filter-text
-                  (re-pattern (str ".*" (s/lower-case filter-text) ".*")))]
-    (sort-by
-     :name
-     (sequence
-      (filter
-       (fn [{:keys [name type subtypes size]}]
-         (and (or (s/blank? filter-text)
-                  (re-matches pattern (s/lower-case name)))
-              (not (or (-> monster-filters :size size)
-                       (-> monster-filters :type type)
-                       (all-subtypes-removed? subtypes (:subtype monster-filters)))))))
-      @(subscribe [::monsters/sorted-monsters])))))
-
 (defn filter-by-name-xform [filter-text name-key]
   (let [pattern (re-pattern (str ".*" (s/lower-case filter-text) ".*"))]
     (filter
@@ -1941,13 +1953,15 @@
    (assoc db ::char5e/builder-tab tab)))
 
 (reg-event-db
+  ::char5e/sort-monsters
+  (fn [db [_ sort-criteria sort-direction]]
+    (assoc db ::char5e/monster-sort-criteria sort-criteria
+              ::char5e/monster-sort-direction sort-direction)))
+
+(reg-event-db
  ::char5e/filter-monsters
  (fn [db [_ filter-text]]
-   (assoc db
-          ::char5e/monster-text-filter filter-text
-          ::monsters/filtered-monsters (if (>= (count filter-text) 3)
-                                           (filter-monsters filter-text (::char5e/monster-filter-hidden? db))
-                                           @(subscribe [::monsters/sorted-monsters])))))
+   (assoc db ::char5e/monster-text-filter filter-text)))
 
 (reg-event-db
  ::char5e/filter-spells
@@ -1980,11 +1994,7 @@
 (reg-event-db
  ::char5e/toggle-monster-filter-hidden
  (fn [db [_ filter value]]
-   (let [updated (update-in db [::char5e/monster-filter-hidden? filter value] not)]
-     (assoc updated
-            ::char5e/filtered-monsters
-            (filter-monsters (::char5e/monster-text-filter updated)
-                             (::char5e/monster-filter-hidden? updated))))))
+   (update-in db [::char5e/monster-filter-hidden? filter value] not)))
 
 (defn toggle-set [key set]
   (if (get set key)
@@ -2152,9 +2162,24 @@
                     character
                     ::entity/values
                     dissoc
-                    ::spells/slots-used))
+                    ::spells/slots-used
+                    character
+                    ::char5e/current-hit-points ::char5e/max-hit-points))
                  ::units5e/long-rest
                  ::units5e/rest)))
+
+(reg-event-fx
+  ::char5e/finish-short-rest-warlock
+  (fn [{:keys [db]} [_ id]]
+    (clear-period db
+                  id
+                  (fn [character]
+                    (update
+                      character
+                      ::entity/values
+                      dissoc
+                      ::spells/slots-used))
+                  ::units5e/rest)))
 
 (reg-event-fx
  ::char5e/finish-short-rest
@@ -2553,6 +2578,12 @@
  invocation-interceptors
  (fn [invocation [_ prop-key prop-value]]
    (assoc invocation prop-key prop-value)))
+
+(reg-event-db
+ ::class5e/set-boon-prop
+ boon-interceptors
+ (fn [boon [_ prop-key prop-value]]
+   (assoc boon prop-key prop-value)))
 
 (reg-event-db
  ::selections5e/set-selection-prop
@@ -3256,6 +3287,12 @@
    invocation))
 
 (reg-event-db
+ ::class5e/set-boon
+ boon-interceptors
+ (fn [_ [_ boon]]
+   boon))
+
+(reg-event-db
  ::selections5e/set-selection
  selection-interceptors
  (fn [_ [_ selection]]
@@ -3339,6 +3376,12 @@
  (fn [_ _]
    {:dispatch [::class5e/set-invocation
                default-invocation]}))
+
+(reg-event-fx
+ ::class5e/reset-boon
+ (fn [_ _]
+   {:dispatch [::class5e/set-boon
+               default-boon]}))
 
 (reg-event-fx
  ::selections5e/reset-selection
@@ -3597,6 +3640,12 @@
  ::selections5e/set-selection
  default-selection
  routes/dnd-e5-selection-builder-page-route)
+
+(reg-new-homebrew
+ ::class5e/new-boon
+ ::class5e/set-boon
+ default-boon
+ routes/dnd-e5-boon-builder-page-route)
 
 (reg-new-homebrew
  ::feats5e/new-feat

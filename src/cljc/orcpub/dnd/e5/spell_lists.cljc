@@ -10,9 +10,8 @@
     [:animal-friendship :bane :charm-person :comprehend-languages :cure-wounds
      :detect-magic :disguise-self :faerie-fire :feather-fall
      :healing-word :heroism :identify :illusory-script
-     :longstrider :silent-image :sleep :speak-with-animals :tashas-hideous-laughter :thunderwave
-     :unseen-servant
-     ],
+     :longstrider :silent-image :sleep :speak-with-animals :hideous-laughter :thunderwave
+     :unseen-servant],
     2
     [:animal-messenger :blindness-deafness :calm-emotions
      :detect-thoughts :enhance-ability :enthrall :heat-metal
@@ -21,7 +20,7 @@
      :see-invisibility :shatter :silence :suggestion :zone-of-truth],
     3
     [:bestow-curse :clairvoyance :dispel-magic :fear :glyph-of-warding
-     :hypnotic-pattern :leomunds-tiny-hut :major-image :nondetection :plant-growth :sending
+     :hypnotic-pattern :tiny-hut :major-image :nondetection :plant-growth :sending
      :speak-with-dead :speak-with-plants :stinking-cloud
      :tongues],
     4
@@ -35,16 +34,17 @@
      :seeming :teleportation-circle],
     6
     [:eyebite :find-the-path :guards-and-wards 
-     :mass-suggestion :ottos-irresistible-dance :programmed-illusion :true-seeing],
+     :mass-suggestion :irresistible-dance :programmed-illusion :true-seeing],
     7
     [:etherealness :forcecage
-     :mirage-arcane :mordenkainens-sword :mordenkainens-magnificent-mansion :project-image
+     :mirage-arcane :arcane-sword :magnificent-mansion :project-image
      :regenerate :resurrection :symbol
      :teleport],
     8
     [:dominate-monster :feeblemind :glibness :mind-blank
      :power-word-stun],
-    9 [:foresight :power-word-kill :true-polymorph]},
+    9
+    [:foresight :power-word-kill :true-polymorph]},
    :cleric
    {0
     [:guidance :light :mending :resistance :sacred-flame :spare-the-dying :thaumaturgy],
@@ -79,16 +79,19 @@
     7
     [:conjure-celestial :divine-word :etherealness :fire-storm
      :plane-shift :regenerate :resurrection :symbol],
-    8 [:antimagic-field :control-weather :earthquake :holy-aura],
-    9 [:astral-projection :gate :mass-heal :true-resurrection]},
+    8
+    [:antimagic-field :control-weather :earthquake :holy-aura],
+    9
+    [:astral-projection :gate :mass-heal :true-resurrection]},
    :druid
-   {0 [:druidcraft :guidance :mending :poison-spray :produce-flame :resistance :shillelagh ],
+   {0
+    [:druidcraft :guidance :mending :poison-spray :produce-flame :resistance :shillelagh ],
     1
     [:animal-friendship :charm-person :create-or-destroy-water :cure-wounds :detect-magic
      :detect-poison-and-disease :entangle :faerie-fire :fog-cloud :goodberry
      :healing-word :jump :longstrider :purify-food-and-drink
-     :speak-with-animals :thunderwave
-     ],
+     :speak-with-animals :thunderwave]
+    ,
     2
     [:animal-messenger :barkskin :darkvision :enhance-ability
      :find-traps :flame-blade :flaming-sphere :gust-of-wind :heat-metal
@@ -119,7 +122,8 @@
     8
     [:animal-shapes :antipathy-sympathy :control-weather :earthquake
      :feeblemind :sunburst :tsunami],
-    9 [:foresight :shapechange :storm-of-vengeance :true-resurrection]},
+    9 
+    [:foresight :shapechange :storm-of-vengeance :true-resurrection]},
    :paladin
    {1
     [:bless :command :cure-wounds :detect-evil-and-good :detect-magic
@@ -132,8 +136,10 @@
     3
     [:create-food-and-water :daylight
      :dispel-magic :magic-circle :remove-curse :revivify]
-    4 [:banishment :death-ward :locate-creature]
-    5 [:dispel-evil-and-good :geas :raise-dead]}
+    4 
+    [:banishment :death-ward :locate-creature]
+    5 
+    [:dispel-evil-and-good :geas :raise-dead]}
    :ranger
    {1
     [:alarm :animal-friendship :cure-wounds :detect-magic :detect-poison-and-disease
@@ -151,7 +157,8 @@
     4
     [:conjure-woodland-beings :freedom-of-movement :locate-creature
      :stoneskin],
-    5 [:commune-with-nature :tree-stride]},
+    5 
+    [:commune-with-nature :tree-stride]},
    :sorcerer
    {0
     [:acid-splash :chill-touch :dancing-lights :fire-bolt
@@ -161,8 +168,7 @@
     [:burning-hands :charm-person :color-spray :comprehend-languages
      :detect-magic :disguise-self :expeditious-retreat :false-life
      :feather-fall :fog-cloud :jump :mage-armor :magic-missile :shield
-     :silent-image :sleep :thunderwave
-     ],
+     :silent-image :sleep :thunderwave],
     2
     [:alter-self :blindness-deafness :blur :darkness :darkvision
      :detect-thoughts :enhance-ability :enlarge-reduce :gust-of-wind
@@ -181,20 +187,19 @@
     5
     [:animate-objects :cloudkill :cone-of-cold :creation
      :dominate-person :hold-monster :insect-plague :seeming :telekinesis
-     :teleportation-circle :wall-of-stone
-     ],
+     :teleportation-circle :wall-of-stone],
     6
     [:chain-lightning :circle-of-death :disintegrate :eyebite
      :globe-of-invulnerability :mass-suggestion :move-earth :sunbeam
-     :true-seeing
-     ],
+     :true-seeing],
     7
     [:delayed-blast-fireball :etherealness :finger-of-death :fire-storm
      :plane-shift :prismatic-spray :reverse-gravity :teleport],
     8
     [:dominate-monster :earthquake :incendiary-cloud :power-word-stun
      :sunburst],
-    9 [:gate :meteor-swarm :power-word-kill :time-stop :wish]},
+    9 
+    [:gate :meteor-swarm :power-word-kill :time-stop :wish]},
    :warlock
    {0
     [:chill-touch :eldritch-blast :mage-hand :minor-illusion :prestidigitation
@@ -205,28 +210,29 @@
     2
     [:darkness :enthrall :hold-person :invisibility :mirror-image
      :misty-step :ray-of-enfeeblement :shatter :spider-climb
-     :suggestion
-     ],
+     :suggestion],
     3
     [:counterspell :dispel-magic :fear :fly :gaseous-form :hypnotic-pattern
      :magic-circle :major-image :remove-curse :tongues :vampiric-touch],
-    4 [:banishment :blight :dimension-door :hallucinatory-terrain ],
-    5 [:contact-other-plane :dream :hold-monster :scrying],
+    4 
+    [:banishment :blight :dimension-door :hallucinatory-terrain ],
+    5 
+    [:contact-other-plane :dream :hold-monster :scrying],
     6
     [:circle-of-death :conjure-fey :create-undead :eyebite
-     :flesh-to-stone :mass-suggestion :true-seeing
-     ],
-    7 [:etherealness :finger-of-death :forcecage :plane-shift],
+     :flesh-to-stone :mass-suggestion :true-seeing],
+    7 
+    [:etherealness :finger-of-death :forcecage :plane-shift],
     8
     [:demiplane :dominate-monster :feeblemind :glibness
      :power-word-stun],
-    9 [:astral-projection :foresight :imprisonment :power-word-kill :true-polymorph]},
+    9 
+    [:astral-projection :foresight :imprisonment :power-word-kill :true-polymorph]},
    :wizard
    {0
     [:acid-splash :chill-touch :dancing-lights :fire-bolt :light :mage-hand
      :mending :message :minor-illusion :poison-spray :prestidigitation :ray-of-frost
-     :shocking-grasp :true-strike
-     :booming-blade :green-flame-blade :sword-burst],
+     :shocking-grasp :true-strike],
     1
     [:alarm :burning-hands :charm-person :color-spray
      :comprehend-languages :detect-magic :disguise-self
@@ -234,48 +240,46 @@
      :fog-cloud :grease :identify :illusory-script
      :jump :longstrider :mage-armor :magic-missile
      :protection-from-evil-and-good :shield :silent-image :sleep
-     :tashas-hideous-laughter :tensers-floating-disk :thunderwave :unseen-servant
-     ],
+     :hideous-laughter :floating-disk :thunderwave :unseen-servant],
     2
     [:alter-self :arcane-lock
      :blindness-deafness :blur :continual-flame :darkness :darkvision
      :detect-thoughts :enlarge-reduce :flaming-sphere :gentle-repose
      :gust-of-wind :hold-person :invisibility :knock :levitate
-     :locate-object :magic-mouth :magic-weapon :melfs-acid-arrow :mirror-image :misty-step
-     :nystuls-magic-aura :ray-of-enfeeblement :rope-trick :scorching-ray :see-invisibility
+     :locate-object :magic-mouth :magic-weapon :acid-arrow :mirror-image :misty-step
+     :arcanists-magic-aura :ray-of-enfeeblement :rope-trick :scorching-ray :see-invisibility
      :shatter :spider-climb :suggestion :web],
     3
     [:animate-dead :bestow-curse :blink :clairvoyance :counterspell :dispel-magic
      :fear :fireball :fly :gaseous-form :glyph-of-warding :haste
-     :hypnotic-pattern :leomunds-tiny-hut :lightning-bolt :magic-circle :major-image
+     :hypnotic-pattern :tiny-hut :lightning-bolt :magic-circle :major-image
      :nondetection :phantom-steed :protection-from-energy :remove-curse
      :sending :sleet-storm :slow :stinking-cloud :tongues
      :vampiric-touch :water-breathing],
     4
     [:arcane-eye :banishment :blight :confusion
-     :conjure-minor-elementals :control-water :dimension-door :evards-black-tentacles :fabricate
+     :conjure-minor-elementals :control-water :dimension-door :black-tentacles :fabricate
      :fire-shield :greater-invisibility
-     :hallucinatory-terrain :ice-storm :leomunds-secret-chest :locate-creature
-     :mordenkainens-faithful-hound :mordenkainens-private-sanctum :otilukes-resilient-sphere
+     :hallucinatory-terrain :ice-storm :secret-chest :locate-creature
+     :faithful-hound :private-sanctum :resilient-sphere
      :phantasmal-killer :polymorph
      :stone-shape :stoneskin :wall-of-fire],
     5
-    [:animate-objects :bigbys-hand :cloudkill :cone-of-cold
+    [:animate-objects :arcane-hand :cloudkill :cone-of-cold
      :conjure-elemental :contact-other-plane :creation :dominate-person
      :dream :geas :hold-monster :legend-lore :mislead :modify-memory
-     :passwall :planar-binding :scrying :seeming :telekinesis
+     :passwall :planar-binding :telepathic-bond :scrying :seeming :telekinesis
      :teleportation-circle :wall-of-force :wall-of-stone],
     6
-    [#_:arcane-gate :chain-lightning :circle-of-death :contingency :create-undead
-     :disintegrate :drawmijs-instant-summons :eyebite :flesh-to-stone
+    [:chain-lightning :circle-of-death :contingency :create-undead
+     :disintegrate :instant-summons :eyebite :flesh-to-stone
      :globe-of-invulnerability :guards-and-wards
-     :magic-jar :mass-suggestion :move-earth :otilukes-freezing-sphere :ottos-irresistible-dance
-     :programmed-illusion :sunbeam :true-seeing :wall-of-ice
-     ],
+     :magic-jar :mass-suggestion :move-earth :freezing-sphere :irresistible-dance
+     :programmed-illusion :sunbeam :true-seeing :wall-of-ice],
     7
     [:delayed-blast-fireball :etherealness
-     :finger-of-death :forcecage :mirage-arcane :mordenkainens-magnificent-mansion
-     :mordenkainens-sword :plane-shift :prismatic-spray :project-image :reverse-gravity
+     :finger-of-death :forcecage :mirage-arcane :magnificent-mansion
+     :arcane-sword :plane-shift :prismatic-spray :project-image :reverse-gravity
      :sequester :simulacrum :symbol :teleport],
     8
     [:antimagic-field :antipathy-sympathy :clone :control-weather
@@ -295,7 +299,7 @@
 (def spell-lists
   phb-spell-lists
   #_(merge-with
-   merge-class-lists
-   phb-spell-lists
-   ee-spell-lists
-   ua-starter-spells-lists))
+     merge-class-lists
+     phb-spell-lists
+     ee-spell-lists
+     ua-starter-spells-lists))

@@ -26,6 +26,8 @@
 
 (spec/def ::homebrew-invocation (spec/keys :req-un [::name ::key ::option-pack]))
 
+(spec/def ::homebrew-boon (spec/keys :req-un [::name ::key ::option-pack]))
+
 (defn class-level [levels class-kw]
   (get-in levels [class-kw :class-level]))
 
@@ -72,7 +74,7 @@
                  {:name "Rage"
                   :page 48
                   :duration units5e/minutes-1
-                  :frequency (units5e/rests (condp <= (?class-level :barbarian)
+                  :frequency (units5e/long-rests (condp <= (?class-level :barbarian)
                                               17 6
                                               12 5
                                               6 4
@@ -920,7 +922,7 @@
                                            (t/option-cfg
                                             {:name "Swamp"
                                              :modifiers [(druid-spell 2 :darkness 3)
-                                                         (druid-spell 2 :melfs-acid-arrow 3)
+                                                         (druid-spell 2 :acid-arrow 3)
                                                          (druid-spell 3 :water-walk 5)
                                                          (druid-spell 3 :stinking-cloud 5)
                                                          (druid-spell 4 :freedom-of-movement 7)
@@ -1292,7 +1294,7 @@
               3 {:modifiers [(mod5e/reaction
                               {:name "Deflect Missiles"
                                :page 78
-                               :summary (str "When hit by a ranged attack, reduce the damage by 1d10 " (common/mod-str (+ (?ability-bonuses ::char5e/dex) (?class-level :monk))) ". If you reduce it to 0, you can catch the missile and use it in a ranged attack as a monk weapon with range 20/60")})]}
+                               :summary (str "When hit by a ranged attack, reduce the damage by 1d10 " (common/mod-str (+ (?ability-bonuses ::char5e/dex) (?class-level :monk))) ". If you reduce it to 0, you can catch the missile (if you have a free hand and it's small enough to hold) and use it in a ranged attack with proficiency, as a monk weapon, for 1 ki point with range 20/60")})]}
               4 {:modifiers [(mod5e/reaction
                               {:name "Slow Fall"
                                :page 78
@@ -2373,6 +2375,9 @@
                         {:name "Spellcasting Equipment"
                          :options {:component-pouch 1
                                    :arcane-focus 1}}]
+    :weapon-choices [{:name "Melee Weapon"
+                      :options {:quarterstaff 1
+                                :dagger 1}}]
     :equipment {:spellbook 1}
     :profs {:weapon {:dagger true :dart true :sling true :quarterstaff true :crossbow-light true}
             :save {::char5e/int true ::char5e/wis true}
@@ -2601,7 +2606,17 @@
                              melee-weapons-xform
                              weapons)})]}))
 
-(defn pact-boon-options [spell-lists spells-map]
+(defn pact-boon-options [plugin-boons spell-lists spells-map]
+ (concat
+   (map
+    (fn [{:keys [name description edit-event]}]
+      (t/option-cfg
+       {:name name
+        :modifiers [(mod5e/trait-cfg
+                     {:name (str "Pact Boon: " name)
+                      :description description})]
+        :edit-event edit-event}))
+    plugin-boons)
   [(t/option-cfg
     {:name "Pact of the Chain"
      :modifiers [(mod5e/spells-known 1 :find-familiar ::char5e/cha "Warlock")
@@ -2636,7 +2651,7 @@
      :modifiers [(mod5e/trait-cfg
                   {:name opt5e/pact-of-the-tome-name
                    :page 108
-                   :summary "you have a spellbook with 3 extra cantrips"})]})])
+                   :summary "you have a spellbook with 3 extra cantrips"})]})]))
 
 
 (defn eldritch-invocation-options [plugin-invocations spell-lists spells-map]
@@ -2949,7 +2964,7 @@ long rest."})
               false
               "uses Mystic Arcanum")}))
 
-(defn warlock-option [spell-lists spells-map plugin-subclasses-map language-map weapon-map invocations]
+(defn warlock-option [spell-lists spells-map plugin-subclasses-map language-map weapon-map invocations boons]
   (opt5e/class-option
    spell-lists
    spells-map
@@ -3001,7 +3016,7 @@ long rest."})
              3 {:selections [(t/selection-cfg
                               {:name "Pact Boon"
                                :tags #{:class}
-                               :options (pact-boon-options spell-lists spells-map)})]}
+                               :options (pact-boon-options boons spell-lists spells-map)})]}
              5 {:selections [(eldritch-invocation-selection invocations spell-lists spells-map)]}
              7 {:selections [(eldritch-invocation-selection invocations spell-lists spells-map)]}
              9 {:selections [(eldritch-invocation-selection invocations spell-lists spells-map)]}
@@ -3086,7 +3101,7 @@ long rest."})
                                                :summary (str "charm or frighten a creature within 60 ft., spell save DC " (?spell-save-dc ::char5e/cha) "WIS save")
                                                :frequency units5e/rests-1})]}}}
                  #_{:name "The Great Old One"
-                    :levels {1 {:selections [(opt5e/warlock-subclass-spell-selection [:dissonant-whispers :tashas-hideous-laughter])]}
+                    :levels {1 {:selections [(opt5e/warlock-subclass-spell-selection [:dissonant-whispers :hideous-laughter])]}
                              3 {:selections [(opt5e/warlock-subclass-spell-selection [:detect-thoughts :phantasmal-force])]}
                              5 {:selections [(opt5e/warlock-subclass-spell-selection [:clairvoyance :sending])]}
                              6 {:modifiers [(mod5e/reaction
@@ -3094,7 +3109,7 @@ long rest."})
                                               :page 110
                                               :frequency units5e/rests-1
                                               :summary "impose disadvantage on an attack roll against you, if it misses, gain advantage on your next attack roll against the attacker"})]}
-                             7 {:selections [(opt5e/warlock-subclass-spell-selection [:dominate-beast :evards-black-tentacles])]}
+                             7 {:selections [(opt5e/warlock-subclass-spell-selection [:dominate-beast :black-tentacles])]}
                              9 {:selections [(opt5e/warlock-subclass-spell-selection [:dominate-person :telekinesis])]}
                              10 {:modifiers [(mod5e/damage-resistance :psychic)]}}
                     :traits [{:name "Awakened Mind"
