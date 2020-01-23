@@ -1560,7 +1560,7 @@ heal, or wish."
      When your familiar is within 100 feet of you, you can communicate with it telepathically. Additionally, as an action, you can see though your familiar's eyes and hear what it hears until the start of your next turn, gaining the benefits of any special senses that the familiar has. During this time you are deaf and blind with regard to your own senses.
      As an action, you can temporarily dismiss your familiar. It disappears into a pocket dimension where it awaits your summon. Alternatively, you can dismiss it forever. As an action while it is temporarily dismissed, you can cause it to reappear in an unoccupied space within 30 feet of you.
      You can't have more than one familiar at a time. If you case this spell while you already have a familiar, you instead cause it to adopt a new form. Choose one of the forms from the above list. Your familiar transforms into the chosen creature.
-     Finally, when you cast a spell with a range of touch, your familiar can deliver the spell as if it has cast the spell. Your familiar must be within 100 feet of you, and it must use its reaction to deliver the spell when you cast it. If the spell requires and attack roll, you use your attack modifier for the roll."}
+     Finally, when you cast a spell with a range of touch, your familiar can deliver the spell as if it has cast the spell. Your familiar must be within 100 feet of you, and it must use its reaction to deliver the spell when you cast it. If the spell requires an attack roll, you use your attack modifier for the roll."}
    {
     :name "Find Steed"
     :school conjuration
