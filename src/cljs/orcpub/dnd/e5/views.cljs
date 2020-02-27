@@ -3254,7 +3254,8 @@
                               (traits-by-type :b-action))
         reactions (concat @(subscribe [::char/reactions id])
                           (traits-by-type :reaction))
-        traits (traits-by-type nil)
+        traits (concat (traits-by-type nil)
+                       (traits-by-type :other))
         attacks @(subscribe [::char/attacks id])
         all-traits (concat actions bonus-actions reactions traits attacks)
         freqs (into #{} (map has-frequency-units? all-traits))]
@@ -5584,7 +5585,8 @@
        ::e5/edit-class-trait-description
        ::e5/delete-class-trait
        :edit-trait-level-event ::e5/edit-class-trait-level
-       :types [{:title "Other"}
+       :types [{:title "Other"
+                :value :other}
                {:title "Action"
                 :value :action}
                {:title "Bonus Action"
@@ -5717,7 +5719,8 @@
       ::e5/edit-subclass-trait-description
       ::e5/delete-subclass-trait
       :edit-trait-level-event ::e5/edit-subclass-trait-level
-       :types [{:title "Other"}
+       :types [{:title "Other"
+                :value :other}
                {:title "Action"
                 :value :action}
                {:title "Bonus Action"
