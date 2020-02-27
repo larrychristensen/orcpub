@@ -6777,7 +6777,7 @@
                            (:type monster)
                            (:subtypes monster)
                            (:alignment monster)]]
-                         [:div.f-w-b.f-s-24 (str "(" num ")")]
+                         [:div.f-w-b.f-s-24 (str "(" (or num 0) ")")]
                          [:div.flex.flex-wrap
                           (doall
                            (map
