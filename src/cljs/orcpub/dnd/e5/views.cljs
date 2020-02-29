@@ -3249,10 +3249,15 @@
         damage-vulnerabilities @(subscribe [::char/damage-vulnerabilities id])
         condition-immunities @(subscribe [::char/condition-immunities id])
         immunities @(subscribe [::char/immunities id])
-        actions @(subscribe [::char/actions id])
-        bonus-actions @(subscribe [::char/bonus-actions id])
-        reactions @(subscribe [::char/reactions id])
-        traits @(subscribe [::char/traits id])
+        traits-by-type (group-by :type @(subscribe [::char/traits id]))
+        actions (concat @(subscribe [::char/actions id])
+                        (traits-by-type :action))
+        bonus-actions (concat @(subscribe [::char/bonus-actions id])
+                              (traits-by-type :b-action))
+        reactions (concat @(subscribe [::char/reactions id])
+                          (traits-by-type :reaction))
+        traits (concat (traits-by-type nil)
+                       (traits-by-type :other))
         attacks @(subscribe [::char/attacks id])
         all-traits (concat actions bonus-actions reactions traits attacks)
         freqs (into #{} (map has-frequency-units? all-traits))]
@@ -5581,7 +5586,15 @@
        ::e5/edit-class-trait-type
        ::e5/edit-class-trait-description
        ::e5/delete-class-trait
-       :edit-trait-level-event ::e5/edit-class-trait-level]]]))
+       :edit-trait-level-event ::e5/edit-class-trait-level
+       :types [{:title "Other"
+                :value :other}
+               {:title "Action"
+                :value :action}
+               {:title "Bonus Action"
+                :value :b-action}
+               {:title "Reaction"
+                :value :reaction}]]]]))
 
 (defn subclass-spells [subclass spells-title spells-kw]
   [:div
@@ -5707,7 +5720,15 @@
       ::e5/edit-subclass-trait-type
       ::e5/edit-subclass-trait-description
       ::e5/delete-subclass-trait
-      :edit-trait-level-event ::e5/edit-subclass-trait-level]]))
+      :edit-trait-level-event ::e5/edit-subclass-trait-level
+       :types [{:title "Other"
+                :value :other}
+               {:title "Action"
+                :value :action}
+               {:title "Bonus Action"
+                :value :b-action}
+               {:title "Reaction"
+                :value :reaction}]]]))
 
 (defn option-spell [index
                      {:keys [level value] :as spell-cfg}
