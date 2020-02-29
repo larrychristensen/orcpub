@@ -6401,8 +6401,8 @@
          "Number"
          {:items (map
                   value-to-item
-                  (range 1 21))
-          :value (or num 1)
+                  (range 0 21))
+          :value (or num 0)
           :on-change on-num-change}]])]))
 
 (defn character-selector [index {:keys [character]} on-change]
@@ -6779,7 +6779,7 @@
                            (:type monster)
                            (:subtypes monster)
                            (:alignment monster)]]
-                         [:div.f-w-b.f-s-24 (str "(" (or num 1) ")")]
+                         [:div.f-w-b.f-s-24 (str "(" (or num 0) ")")]
                          [:div.flex.flex-wrap
                           (doall
                            (map
