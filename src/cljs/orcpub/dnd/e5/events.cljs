@@ -1332,7 +1332,7 @@
           (s/split cookie "; "))))
 
 (defn show-generic-error []
-  [:show-error-message [:div "There was an error, please refresh your browser and try again. If the problem persists please contact " [:a {:href "mailto:redorc@orcpub.com"} "redorc@orcpub.com."]]])
+  [:show-error-message [:div "There was an error, please refresh your browser and try again."]])
 
 (reg-fx
  :http
@@ -1389,7 +1389,7 @@
        (= error-code errors/unverified) {:db (assoc db :temp-email (-> response :body :email))
                                          :dispatch [:route routes/verify-sent-route]}
        (= error-code errors/unverified-expired) {:dispatch [:route routes/verify-failed-route]}
-       :else (dispatch-login-failure [:div "An error occurred. If the problem persists please email " [:a {:href "mailto:redorc@orcpub.com" :target :blank} "redorc@orcpub.com"]])))))
+       :else (dispatch-login-failure [:div "A login error occurred."])))))
 
 (reg-event-fx
  :logout
