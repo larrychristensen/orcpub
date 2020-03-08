@@ -319,22 +319,6 @@
  (fn [db [_ name]]
    (get-in db [:expanded-items name])))
 
-(defn get-fb-login-status [callback]
-  (try
-    (if (and js/FB
-             (.-getLoginStatus js/FB))
-      (.getLoginStatus js/FB callback))
-    (catch js/Object e (js/console.log "FAILED GETTING FB LOGIN STATUE" e))))
-
-(reg-sub-raw
- :fb-logged-in?
- (fn [app-db _]
-   (get-fb-login-status
-    (fn [response]
-      (dispatch [:set-fb-logged-in (= "connected" (.-status response))])))
-   (ra/make-reaction
-    (fn [] (get @app-db :fb-logged-in? false)))))
-
 (defn auth-headers [db]
   (let [token (-> db :user-data :token)]
     (if token

@@ -144,53 +144,6 @@
       :class-name (if light-theme? " opacity-7")
       :src (str (if light-theme? "/image/black/" "/image/") icon-name ".svg")}]))
 
-(defn facebook-share-button-comp [url]
-  [:div.fb-share-button
-   {:data-layout "button"
-    :data-href url}])
-
-(defn on-fb-login [logged-in?]
-  (if (not logged-in?)
-    (do (go (<! (timeout 2000))
-            (if (not @(subscribe [:login-message-shown?]))
-              (dispatch [:show-login-message "You must enable popups to allow Facebook login."])))
-        (if js/FB
-          (.login js/FB events/fb-login-callback (clj->js {:scope "email"}))))))
-
-(defn fb-login-button-comp []
-  [:div.flex.justify-cont-s-a
-   [:button.form-button.flex.align-items-c
-    (let [logged-in? @(subscribe [:fb-logged-in?])]
-      {:on-click #(if logged-in?
-                    (dispatch [:fb-logout])
-                    (on-fb-login logged-in?))})
-    [:i.fa.fa-facebook.f-s-18]
-    [:span.m-l-10.f-s-14
-     "Login with Facebook"]]])
-
-(defn dispatch-init-fb []
-  (dispatch [:init-fb]))
-
-(defn add-facebook-init [comp]
-  (with-meta
-    comp
-    {:component-did-mount dispatch-init-fb}))
-
-(def facebook-login-button
-  (add-facebook-init
-   fb-login-button-comp))
-
-(def facebook-share-button
-  (add-facebook-init
-    facebook-share-button-comp))
-
-(defn character-page-fb-button [id]
-  [facebook-share-button
-   (str
-    "http://"
-    js/window.location.hostname
-    (routes/path-for routes/dnd-e5-char-page-route :id id))])
-
 (def login-style
   {:color "#f0a100"})
 
@@ -433,16 +386,16 @@
        [:div.flex.w-100-p.align-items-end
         {:class-name (if mobile? "justify-cont-s-b" "justify-cont-s-b")}
         [:div
-         [:a {:href "https://www.patreon.com/orcpub" :target :_blank}
+         [:a {:href "https://www.patreon.com/DungeonMastersVault" :target :_blank}
           [:img.h-32.m-l-10.m-b-5.pointer.opacity-7.hover-opacity-full
            {:src (if mobile?
                    "https://c5.patreon.com/external/logo/downloads_logomark_color_on_navy.png"
                    "https://c5.patreon.com/external/logo/become_a_patron_button.png")}]]
          (if (not mobile?)
            [:div.main-text-color.p-10
-            (social-icon "facebook" "https://www.facebook.com/orcpub")
-            (social-icon "twitter" "https://twitter.com/OrcPub")
-            (social-icon "reddit-alien" "https://www.reddit.com/r/orcpub/")])]
+            (social-icon "facebook" "https://www.facebook.com/groups/252484128656613/")
+            (social-icon "twitter" "https://twitter.com/thDMV")
+            (social-icon "reddit-alien" "https://www.reddit.com/r/dungeonmastersvault/")])]
         [:div.flex.m-b-5.m-r-5
          [header-tab
           "characters"
@@ -913,8 +866,8 @@
                          :text-shadow "1px 2px 1px rgba(0,0,0,0.37)"
                          :margin-top "20px"}}
            "LOGIN"]
-          [:div.m-t-10
-           [facebook-login-button]]
+          ;[:div.m-t-10
+          ; [facebook-login-button]]
           [:div
            {:style {:margin-top "50px"}}
            [form-input {:title "Username or Email"
@@ -1582,13 +1535,13 @@
            [:div
             [:div.m-b-5 "Icons made by Lorc, Caduceus, and Delapouite. Available on " [:a.orange {:href "http://game-icons.net"} "http://game-icons.net"]]]
            [:div.m-l-10
-            [:a.orange {:href "https://github.com/larrychristensen/orcpub/issues" :target :_blank} "Feedback/Bug Reports"]]
+            [:a.orange {:href "https://github.com/Orcpub/orcpub/issues" :target :_blank} "Feedback/Bug Reports"]]
            [:div.m-l-10.m-r-10.p-10
             [:a.orange {:href "/privacy-policy" :target :_blank} "Privacy Policy"]
             [:a.orange.m-l-5 {:href "/terms-of-use" :target :_blank} "Terms of Use"]]
            [:div.legal-footer
-            [:p "© 2019 OrcPub" [:span.m-l-20 "Contact: " [:a {:href "mailto:redorc@orcpub.com"} "redorc@orcpub.com"]]]
-            [:p "Wizards of the Coast, Dungeons & Dragons, D&D, and their logos are trademarks of Wizards of the Coast LLC in the United States and other countries. © 2019 Wizards. All Rights Reserved. OrcPub.com is not affiliated with, endorsed, sponsored, or specifically approved by Wizards of the Coast LLC."]]]
+            [:p "© 2020 " [:a.orange {:href "https://github.com/Orcpub/orcpub/" :target :_blank} "Orcpub"]]
+            [:p "Wizards of the Coast, Dungeons & Dragons, D&D, and their logos are trademarks of Wizards of the Coast LLC in the United States and other countries. © 2020 Wizards. All Rights Reserved. OrcPub.com is not affiliated with, endorsed, sponsored, or specifically approved by Wizards of the Coast LLC."]]]
             [debug-data]]]])]))
 
 (def row-style
@@ -3580,7 +3533,6 @@
          (remove
           nil?
           [[share-link id]
-           [character-page-fb-button id]
            [:div.m-l-5.hover-shadow.pointer
             {:on-click #(swap! expanded? not)}
             [:img.h-32 {:src "/image/world-anvil.jpeg"}]]
@@ -7464,7 +7416,6 @@
    {:style character-display-style}
    [:div.flex.justify-cont-end.uppercase.align-items-c
     [share-link id]
-    [:div.m-r-5 [character-page-fb-button id]]
     (if (= username owner)
       [:button.form-button
        {:on-click (make-event-handler :edit-character @(subscribe [::char/character id]))}

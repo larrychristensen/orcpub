@@ -24,8 +24,6 @@
                  [org.clojure/core.async "0.4.490"]
                  [cljsjs/react "16.6.0-0"]
                  [cljsjs/react-dom "16.6.0-0"]
-                 [cljsjs/facebook "v20150729-0"]
-                 [cljsjs/google-platformjs-extern "1.0.0-0"]
                  [cljsjs/filesaverjs "1.3.3-0"]
                  [com.cognitect/transit-cljs "0.8.256"]
                  [cljs-http "0.1.45"]
