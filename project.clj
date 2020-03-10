@@ -62,7 +62,7 @@
 
                  [pdfkit-clj "0.1.7"]
                  [vvvvalvalval/datomock "0.2.0"]
-                 [com.datomic/datomic-free "0.9.5561"]
+                 [com.datomic/datomic-free "0.9.5697"]
                  [funcool/cuerdas "2.2.0"]
                  [camel-snake-kebab "0.4.0"]
                  ]
@@ -214,7 +214,7 @@
                                                                     :parallel-build     true
                                                                     :optimize-constants true
                                                                     :optimizations      :advanced}}]}
-                            :dependencies [[com.datomic/datomic-free "0.9.5561"]]}
+                            :dependencies [[com.datomic/datomic-free "0.9.5697"]]}
              :uberjar      {:prep-tasks  ["clean" "compile" ["cljsbuild" "once" "prod"]]
                             :env         {:production true}
                             :aot         :all
