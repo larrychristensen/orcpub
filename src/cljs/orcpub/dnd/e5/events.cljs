@@ -1332,7 +1332,7 @@
           (s/split cookie "; "))))
 
 (defn show-generic-error []
-  [:show-error-message [:div "There was an error, please refresh your browser and try again. If the problem persists please contact " [:a {:href "mailto:redorc@orcpub.com"} "redorc@orcpub.com."]]])
+  [:show-error-message [:div "There was an error, please refresh your browser and try again."]])
 
 (reg-fx
  :http
@@ -1389,60 +1389,12 @@
        (= error-code errors/unverified) {:db (assoc db :temp-email (-> response :body :email))
                                          :dispatch [:route routes/verify-sent-route]}
        (= error-code errors/unverified-expired) {:dispatch [:route routes/verify-failed-route]}
-       :else (dispatch-login-failure [:div "An error occurred. If the problem persists please email " [:a {:href "mailto:redorc@orcpub.com" :target :blank} "redorc@orcpub.com"]])))))
-
-(defn fb []
-  js/FB)
-
-(defn get-fb-user [callback]
-  (if js/FB
-    (.api js/FB "/me?fields=email" callback)))
-
-(defn fb-init []
-  (try
-    ((goog.object.get js/window "fbAsyncInit"))
-    (catch :default e (prn "E" e))))
-
-(defn fb-login-callback [response]
-  (if (= "connected" (.-status response))
-    (do (dispatch [:hide-login-message])
-        (go (let [path (routes/path-for routes/fb-login-route)
-                  url (backend-url path)
-                  {:keys [status] :as response} (<! (http/post url
-                                                     {:json-params (js->clj response)}))]
-              (case status
-                200 (dispatch [:login-success true response])
-                401 (dispatch [:show-login-message "You must allow OrcPub to view your email address so we can create your account. We will not send you emails unless you later give us permission to. In Facebook, please go to 'Settings' > 'Apps', delete 'orcpub', and try again."])
-                nil))))))
-
-(reg-event-fx
- :init-fb
- (fn [_ _]
-   (fb-init)))
-
-(reg-event-db
- :set-fb-logged-in
- (fn [db [_ logged-in?]]
-   (assoc db :fb-logged-in? logged-in?)))
-
-(reg-event-fx
- :fb-logout
- (fn [{:keys [db]} _]
-   (let [facebook js/FB]
-     (if facebook
-       (try
-         (do
-           (prn "FB LOGOUT")
-           (.logout facebook (fn [])))
-         (catch js/Error e (prn "LOGOUT ERROR" e)))))
-   {:db (assoc db :fb-logged-in? false)}))
+       :else (dispatch-login-failure [:div "A login error occurred."])))))
 
 (reg-event-fx
  :logout
  (fn [cofx [_ response]]
-   {:dispatch-n [[:clear-login]
-                 [:fb-logout]
-                 [:set-fb-logged-in false]]}))
+   {:dispatch-n [[:clear-login]]}))
 
 (def login-routes
   #{routes/login-page-route

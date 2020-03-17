@@ -119,10 +119,14 @@
               (vec-trait "Immunities" (resistance-strings immunities))]))))
 
 (defn traits-fields [built-char]
-  (let [bonus-actions (sort-by :name (es/entity-val built-char :bonus-actions))
-        actions (sort-by :name (es/entity-val built-char :actions))
-        reactions (sort-by :name (es/entity-val built-char :reactions))
-        traits (sort-by :name (es/entity-val built-char :traits))
+  (let [traits-by-type (group-by :type (es/entity-val built-char :traits))
+        bonus-actions (sort-by :name (concat (es/entity-val built-char :bonus-actions)
+                                             (traits-by-type :b-action)))
+        actions (sort-by :name (concat (es/entity-val built-char :actions)
+                                       (traits-by-type :action)))
+        reactions (sort-by :name (concat (es/entity-val built-char :reactions)
+                                         (traits-by-type :reaction)))
+        traits (sort-by :name (traits-by-type nil))
         traits-str (traits-string traits)
         actions? (or (seq bonus-actions)
                      (seq actions)
