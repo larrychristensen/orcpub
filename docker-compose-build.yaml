@@ -15,7 +15,7 @@ services:
       EMAIL_ERRORS_TO: ''
       EMAIL_SSL: 'TRUE'
       EMAIL_TLS: 'FALSE'
-      DATOMIC_URL: datomic:free://datomic:4334/orcpub
+      DATOMIC_URL: datomic:free://datomic:4334/orcpub?password=datomic
     depends_on:
       - datomic
     restart: always
@@ -25,7 +25,7 @@ services:
       dockerfile: docker/datomic/Dockerfile
     volumes:
       - ./data:/data
-      - ./deploy/transactor.properties:/datomic/transactor.properties
+      - ./logs:/logs
     restart: always
   web:
     image: nginx:alpine
