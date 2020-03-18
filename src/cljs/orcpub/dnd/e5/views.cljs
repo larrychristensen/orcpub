@@ -349,8 +349,8 @@
 (defn route-to-my-encounters-page []
   (dispatch [:route routes/dnd-e5-my-encounters-route]))
 
-(def logo [:img.orcpub-logo.h-32.w-120.pointer
-           {:src "/image/orcpub-logo.svg"
+(def logo [:img.h-60.pointer
+           {:src "/image/dmv-logo.svg"
             :on-click route-to-default-route}])
 
 (defn app-header []
@@ -497,13 +497,10 @@
    :color text-color})
 
 (def registration-page-style
-  {:background-image "url(/image/shutterstock_432001912.jpg)"
+  {:background-image "url(/image/login-side.jpg)"
    :background-clip :content-box
    :width "350px"
    :min-height "600px"})
-
-(def registration-logo-style
-  {:height "25.3px"})
 
 (def registration-left-column-style
   {:flex-direction :column
@@ -527,9 +524,8 @@
       [:div.flex {:style registration-left-column-style}
        [:div.flex.justify-cont-s-a.align-items-c
         {:style registration-header-style}
-        [:img.pointer
-         {:src "/image/orcpub-logo.svg"
-          :style registration-logo-style
+        [:img.h-55.pointer
+         {:src "/image/dmv-logo.svg"
           :on-click route-to-default-page}]]
        [:div.flex-grow-1 content]
        [views-2/legal-footer]]
