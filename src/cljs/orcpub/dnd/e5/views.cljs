@@ -1135,10 +1135,10 @@
          (if (zero? level)
            " cantrip"))]])
 
-(defn spell-component [{:keys [name level school casting-time range duration components description summary page source] :as spell} include-name? & [subheader-size]]
+(defn spell-component [{:keys [name level school casting-time ritual range duration components description summary page source] :as spell} include-name? & [subheader-size]]
   [:div.m-l-10.l-h-19
    [spell-summary name level school include-name? subheader-size]
-   (spell-field "Casting Time" casting-time)
+   (spell-field "Casting Time" (str casting-time (if ritual " (ritual)" "")))
    (spell-field "Range" range)
    (spell-field "Duration" duration)
    (let [{:keys [verbal somatic material material-component]} components]
