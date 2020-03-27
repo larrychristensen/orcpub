@@ -2588,7 +2588,7 @@ The staff can be wielded as a magic quarterstaff. On a hit, it deals damage as a
      }{
      name-key "Sun Blade"
      ::type :weapon
-     ::item-subtype :longsword
+     ::item-subtype :longsword-finesse
 
      ::rarity :rare
 
