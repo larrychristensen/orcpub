@@ -414,6 +414,14 @@
                                       (- box-width 0.3)
                                       0.2)
                     (draw-text-to-box cs
+                                      (if ritual " (ritual)" "")
+                                      (:italic fonts)
+                                      10
+                                      (+ x 0.12 (string-width (:name spell) (:bold fonts) 10))
+                                      (- 11.0 y)
+                                      (- box-width 0.3)
+                                      0.2)
+                    (draw-text-to-box cs
                                       (if (not= class-nm "Homebrew")
                                         (str (spell-school-level spell class-nm) " " dc-str (str " Spell Mod " (common/bonus-str attack-bonus)))
                                         (spell-school-level spell class-nm))
@@ -431,7 +439,7 @@
                                                (first
                                                  (s/split
                                                    casting-time
-                                                   #","))) (if ritual " [r]" ""))
+                                                   #","))))
                                         (+ x 0.12)
                                         (- 11.0 y 0.45)))
                     (if range
