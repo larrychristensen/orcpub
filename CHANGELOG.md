@@ -4,21 +4,26 @@
 
 #### Enhancements:
 
+- [#348](https://github.com/Orcpub/orcpub/issues/348) Version bump Datomic from 0.9.5561 to 0.9.5703
+- [#346](https://github.com/Orcpub/orcpub/issues/346) Update site look/feel - new header, new login sidebar
 - [#345](https://github.com/Orcpub/orcpub/issues/345) Features for Races and Subraces can be split
 - [#313](https://github.com/Orcpub/orcpub/issues/313) Split up Homebrew Class features into Actions, Bonus Actions and Reactions
 - [#228](https://github.com/Orcpub/orcpub/issues/228) Add Ritual marker for ritual spells
 
 #### Bug Fixes:
 
+- [#350](https://github.com/Orcpub/orcpub/issues/350) Remove Google and Facebook Auth API's
+- [#349](https://github.com/Orcpub/orcpub/issues/349) Removed Banner and links.
+- [#347](https://github.com/Orcpub/orcpub/issues/347) Changes default signup form
 - [#334](https://github.com/Orcpub/orcpub/issues/334) The information for the weapon Sun Blade is wrong. For example, the Finesse property doesn't appear.
 - [#321](https://github.com/Orcpub/orcpub/issues/321) General Maintenance - Update Github urls
-- [#306](https://github.com/Orcpub/orcpub/issues/306) Combat tracker sets generators icon as active as well 
-- [#302](https://github.com/Orcpub/orcpub/issues/302) Issues with Character Sharing
+- [#319](https://github.com/Orcpub/orcpub/issues/319) General Maintenance - Remove Amazon links to splash banner
+- [#318](https://github.com/Orcpub/orcpub/issues/318) General Maintenance - Remove Google API logins
+- [#317](https://github.com/Orcpub/orcpub/issues/317) General Maintenance - Remove Google Analytics 
+- [#316](https://github.com/Orcpub/orcpub/issues/316) General Maintenance - Remove deprecated Facebook API/Logins
 - [#299](https://github.com/Orcpub/orcpub/issues/299) Monster view doesn't respect \n
 - [#298](https://github.com/Orcpub/orcpub/issues/298) Spelling Errors in 'Find Familiar'
-- [#283](https://github.com/Orcpub/orcpub/issues/283) Space in fillable-char-sheet spell slot
 - [#279](https://github.com/Orcpub/orcpub/issues/279) Combat Tracker Bug
-- [#12](https://github.com/Orcpub/orcpub/issues/12) Password Reset and Auth Emails have wrong URL string
 
 ---
 
