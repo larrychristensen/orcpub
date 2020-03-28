@@ -1,5 +1,52 @@
 # Changelog
 
+## v2.5.0.10 (28/03/2020)
+
+#### Enhancements:
+
+- [#313](https://github.com/Orcpub/orcpub/issues/313) Split up Homebrew Class features into Actions, Bonus Actions and Reactions
+- [#228](https://github.com/Orcpub/orcpub/issues/228) Add Ritual marker for ritual spells
+
+#### Bug Fixes:
+
+- [#334](https://github.com/Orcpub/orcpub/issues/334) The information for the weapon Sun Blade is wrong. For example, the Finesse property doesn't appear.
+- [#321](https://github.com/Orcpub/orcpub/issues/321) General Maintenance - Update Github urls
+- [#306](https://github.com/Orcpub/orcpub/issues/306) Combat tracker sets generators icon as active as well 
+- [#302](https://github.com/Orcpub/orcpub/issues/302) Issues with Character Sharing
+- [#299](https://github.com/Orcpub/orcpub/issues/299) Monster view doesn't respect \n
+- [#298](https://github.com/Orcpub/orcpub/issues/298) Spelling Errors in 'Find Familiar'
+- [#283](https://github.com/Orcpub/orcpub/issues/283) Space in fillable-char-sheet spell slot
+- [#279](https://github.com/Orcpub/orcpub/issues/279) Combat Tracker Bug
+- [#12](https://github.com/Orcpub/orcpub/issues/12) Password Reset and Auth Emails have wrong URL string
+
+---
+
+## v2.5.0.9 (16/01/2020)
+
+#### Enhancements:
+
+- [#284](https://github.com/Orcpub/orcpub/issues/284) Tooltip for HomeBrew Icon
+- [#278](https://github.com/Orcpub/orcpub/issues/278) Alphabetize spell School list in Spell Builder
+- [#226](https://github.com/Orcpub/orcpub/issues/226) Triggering a long rest doesn't restore hp. 
+- [#125](https://github.com/Orcpub/orcpub/issues/125) [Suggestion] Pact Builder for Warlock Class
+
+#### Bug Fixes:
+
+- [#293](https://github.com/Orcpub/orcpub/issues/293) Ioun Stone (Leadership) does not increase Charisma
+- [#271](https://github.com/Orcpub/orcpub/issues/271) Class/Level
+- [#265](https://github.com/Orcpub/orcpub/issues/265) Short Rest Button Missing (Warlocks)
+- [#68](https://github.com/Orcpub/orcpub/issues/68) [Bug] Duplicate Spells Displays
+
+---
+
+## v2.5.0.8 (30/11/2019)
+
+#### Bug Fixes:
+
+- [#264](https://github.com/Orcpub/orcpub/issues/264) Arcane Hand has a Formatting Issue
+
+---
+
 ## v2.5.0.7 (27/11/2019)
 
 #### Enhancements:
