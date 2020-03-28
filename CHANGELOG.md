@@ -4,6 +4,7 @@
 
 #### Enhancements:
 
+- [#345](https://github.com/Orcpub/orcpub/issues/345) Features for Races and Subraces can be split
 - [#313](https://github.com/Orcpub/orcpub/issues/313) Split up Homebrew Class features into Actions, Bonus Actions and Reactions
 - [#228](https://github.com/Orcpub/orcpub/issues/228) Add Ritual marker for ritual spells
 
