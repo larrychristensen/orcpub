@@ -77,7 +77,7 @@
 
   :clean-targets ^{:protect false} ["resources/public/js/compiled" "target"]
 
-  :resource-paths ["resources" "resources/.ebextensions/*.config"]
+  :resource-paths ["resources" "resources/.ebextensions/"]
 
   :uberjar-name "orcpub.jar"
 
