@@ -63,9 +63,8 @@
      [:div
       {:style (style {:display :flex
                       :justify-content :space-around})}
-      [:img
-       {:src "/image/orcpub-logo.svg"
-        :style (style {:height "70px"})}]]
+      [:img.w-30-p
+       {:src "/image/dmv-logo.svg" }]]
      [:div
       {:style (style {:text-align :center
                       :text-shadow "1px 2px 1px black"
