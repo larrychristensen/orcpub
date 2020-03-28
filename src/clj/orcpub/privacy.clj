@@ -98,7 +98,7 @@
       {:style "background-color:#2c3445"}
       [:div.content
        [:div.flex.justify-cont-s-b.align-items-c.w-100-p.p-l-20.p-r-20
-        [:img.orcpub-logo.h-32.w-120.pointer {:src "/image/orcpub-logo.svg"}]]]]
+        [:img.h-60 {:src "/image/dmv-logo.svg"}]]]]
      [:div.container
       [:div.content
        [:div.f-s-24

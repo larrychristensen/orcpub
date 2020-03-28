@@ -1,7 +1,8 @@
 (ns orcpub.index
   (:require [hiccup.page :refer [html5 include-css include-js]]
             [orcpub.oauth :as oauth]
-            [orcpub.dnd.e5.views-2 :as views-2]))
+            [orcpub.dnd.e5.views-2 :as views-2]
+            [orcpub.favicon :as fi]))
 
 (defn meta-tag [property content]
   (if content
@@ -27,6 +28,10 @@
     [:meta {:charset "UTF-8"}]
     [:meta {:name "viewport"
             :content "width=device-width, initial-scale=1"}]
+    (fi/install :png-prefix "favicon-"
+                :img "/favicon"
+                :xml "/favicon"
+                :ver "1")
     [:style
      "
 .splash-page-content {}
