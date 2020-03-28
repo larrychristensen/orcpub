@@ -5755,7 +5755,15 @@
       ::e5/edit-subrace-trait-name
       ::e5/edit-subrace-trait-type
       ::e5/edit-subrace-trait-description
-      ::e5/delete-subrace-trait]]))
+      ::e5/delete-subrace-trait
+      :types [{:title "Other"
+               :value :other}
+              {:title "Action"
+               :value :action}
+              {:title "Bonus Action"
+               :value :b-action}
+              {:title "Reaction"
+               :value :reaction}]]]))
 
 (defn race-builder []
   (let [race @(subscribe [::races/builder-item])]
@@ -5896,7 +5904,15 @@
       ::e5/edit-race-trait-name
       ::e5/edit-race-trait-type
       ::e5/edit-race-trait-description
-      ::e5/delete-race-trait]]))
+      ::e5/delete-race-trait
+      :types [{:title "Other"
+               :value :other}
+              {:title "Action"
+               :value :action}
+              {:title "Bonus Action"
+               :value :b-action}
+              {:title "Reaction"
+               :value :reaction}]]]))
 
 (defn background-builder []
   (let [background @(subscribe [::bg/builder-item])]
