@@ -2660,18 +2660,36 @@ The talisman has 6 charges. If you are wearing or holding it, you can use an act
      name-key "Tome of Clear Thought"
      ::type :wondrous-item
      ::rarity :very-rare
+     ::description "This book contains memory and logic exercises, and its words are charged with magic. If you spend 48 hours over a period of 6 days or fewer studying the book’s contents and practicing its guidelines, your Intelligence score increases by 2, as does your maximum for that score. The manual then loses its magic, but regains it in a century. (this doesn't apply modifiers automatically, once you have read the Tome remove this one and add the read version)"
+     }{
+     name-key "Tome of Clear Thought (read with modifiers)"
+     ::type :wondrous-item
+     ::rarity :very-rare
      ::description "This book contains memory and logic exercises, and its words are charged with magic. If you spend 48 hours over a period of 6 days or fewer studying the book’s contents and practicing its guidelines, your Intelligence score increases by 2, as does your maximum for that score. The manual then loses its magic, but regains it in a century."
+     ::modifiers [(mod5e/ability ::char5e/int 2)]
      }{
      name-key "Tome of Leadership and Influence"
      ::type :wondrous-item
      ::rarity :very-rare
-     ::description "This book contains guidelines for influencing and charming others, and its words are charged with magic. If you spend 48 hours over a period of 6 days or fewer studying the book’s contents and practicing its guidelines, your Charisma score increases by 2, as does your maximum for that score. The manual then loses its magic, but regains it in a century."
+     ::description "This book contains guidelines for influencing and charming others, and its words are charged with magic. If you spend 48 hours over a period of 6 days or fewer studying the book’s contents and practicing its guidelines, your Charisma score increases by 2, as does your maximum for that score. The manual then loses its magic, but regains it in a century. (this doesn't apply modifiers automatically, once you have read the Tome remove this one and add the read version)"
      }{
+       name-key "Tome of Leadership and Influence (read with modifiers)"
+       ::type :wondrous-item
+       ::rarity :very-rare
+       ::description "This book contains guidelines for influencing and charming others, and its words are charged with magic. If you spend 48 hours over a period of 6 days or fewer studying the book’s contents and practicing its guidelines, your Charisma score increases by 2, as does your maximum for that score. The manual then loses its magic, but regains it in a century."
+       ::modifiers [(mod5e/ability ::char5e/cha 2)]
+       }{
      name-key "Tome of Understanding"
      ::type :wondrous-item
      ::rarity :very-rare
-     ::description "This book contains intuition and insight exercises, and its words are charged with magic. If you spend 48 hours over a period of 6 days or fewer studying the book’s contents and practicing its guidelines, your Wisdom score increases by 2, as does your maximum for that score. The manual then loses its magic, but regains it in a century."
+     ::description "This book contains intuition and insight exercises, and its words are charged with magic. If you spend 48 hours over a period of 6 days or fewer studying the book’s contents and practicing its guidelines, your Wisdom score increases by 2, as does your maximum for that score. The manual then loses its magic, but regains it in a century. (this doesn't apply modifiers automatically, once you have read the Tome remove this one and add the read version)"
      }{
+       name-key "Tome of Understanding (read with modifiers)"
+       ::type :wondrous-item
+       ::rarity :very-rare
+       ::description "This book contains intuition and insight exercises, and its words are charged with magic. If you spend 48 hours over a period of 6 days or fewer studying the book’s contents and practicing its guidelines, your Wisdom score increases by 2, as does your maximum for that score. The manual then loses its magic, but regains it in a century."
+       ::modifiers [(mod5e/ability ::char5e/wis 2)]
+       }{
      name-key "Trident of Fish Command"
      ::type :weapon
      ::item-subtype :trident
