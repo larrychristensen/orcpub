@@ -627,7 +627,7 @@ In addition, while attuned to the belt, you have a 50 percent chance each day at
 If you aren’t a dwarf, you gain the following additional benefits while wearing the belt:
 • You have advantage on saving throws against poison, and you have resistance against poison damage.
 • You have darkvision out to a range of 60 feet.
-• You can speak, read, and write Dwarvish."}
+• You can speak, read, and write Dwarvish. (requires attunement)"}
 {
      name-key "Belt of Hill Giant Strength"
 
