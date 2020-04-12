@@ -19,7 +19,8 @@
 (spec/def ::race string?)
 (spec/def ::darkvision boolean?)
 (spec/def ::speed nat-int?)
-(spec/def ::character-ability (spec/int-in 1 21))
+; ::character-ability changed to 1 35 for max ability score's of 35 because tome's and other magical items can increase beyond 20
+(spec/def ::character-ability (spec/int-in 1 35))
 (spec/def ::initiative int?)
 (spec/def ::savings-throw keyword?)
 (spec/def ::savings-throws (spec/* ::savings-throw))
