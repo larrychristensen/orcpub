@@ -349,8 +349,8 @@
 (defn route-to-my-encounters-page []
   (dispatch [:route routes/dnd-e5-my-encounters-route]))
 
-(def logo [:img.orcpub-logo.h-32.w-120.pointer
-           {:src "/image/orcpub-logo.svg"
+(def logo [:img.h-60.pointer
+           {:src "/image/dmv-logo.svg"
             :on-click route-to-default-route}])
 
 (defn app-header []
@@ -497,13 +497,10 @@
    :color text-color})
 
 (def registration-page-style
-  {:background-image "url(/image/shutterstock_432001912.jpg)"
+  {:background-image "url(/image/login-side.jpg)"
    :background-clip :content-box
    :width "350px"
    :min-height "600px"})
-
-(def registration-logo-style
-  {:height "25.3px"})
 
 (def registration-left-column-style
   {:flex-direction :column
@@ -527,9 +524,8 @@
       [:div.flex {:style registration-left-column-style}
        [:div.flex.justify-cont-s-a.align-items-c
         {:style registration-header-style}
-        [:img.pointer
-         {:src "/image/orcpub-logo.svg"
-          :style registration-logo-style
+        [:img.h-55.pointer
+         {:src "/image/dmv-logo.svg"
           :on-click route-to-default-page}]]
        [:div.flex-grow-1 content]
        [views-2/legal-footer]]
@@ -1123,7 +1119,7 @@
 (defn tavern-name-result [name]
   [:span.f-s-24.f-w-b.white name])
 
-(defn spell-summary [name level school include-name? & [subheader-size]]
+(defn spell-summary [name level school ritual include-name? & [subheader-size]]
   [:div.p-b-20
    (if include-name? [:span.f-s-24.f-w-b name])
    [:div.i.f-w-b.opacity-5
@@ -1131,13 +1127,13 @@
     (str (if (pos? level)
            (str (common/ordinal level) "-level"))
          " "
-         (common/safe-capitalize school)
+         (str (common/safe-capitalize school) (if ritual " (can be cast as ritual)" ""))
          (if (zero? level)
            " cantrip"))]])
 
-(defn spell-component [{:keys [name level school casting-time range duration components description summary page source] :as spell} include-name? & [subheader-size]]
+(defn spell-component [{:keys [name level school casting-time ritual range duration components description summary page source] :as spell} include-name? & [subheader-size]]
   [:div.m-l-10.l-h-19
-   [spell-summary name level school include-name? subheader-size]
+   [spell-summary name level school ritual include-name? subheader-size]
    (spell-field "Casting Time" casting-time)
    (spell-field "Range" range)
    (spell-field "Duration" duration)
@@ -1169,13 +1165,13 @@
     [:div.m-l-10
      (doall
       (map
-       (fn [{:keys [key name level school casting-time range duration components description summary page source]}]
+       (fn [{:keys [key name level school ritual casting-time range duration components description summary page source]}]
          ^{:key name}
          [:div.pointer
           {:on-click (let [spell-page-path (routes/path-for routes/dnd-e5-spell-page-route :key key)
                            spell-page-route (routes/match-route spell-page-path)]
                        (make-event-handler :route spell-page-route))}
-          [spell-summary name level school true 14]])
+          [spell-summary name level school ritual true 14]])
        results))]]])
 
 (defn monster-summary [name size type subtypes alignment]
@@ -5759,7 +5755,15 @@
       ::e5/edit-subrace-trait-name
       ::e5/edit-subrace-trait-type
       ::e5/edit-subrace-trait-description
-      ::e5/delete-subrace-trait]]))
+      ::e5/delete-subrace-trait
+      :types [{:title "Other"
+               :value :other}
+              {:title "Action"
+               :value :action}
+              {:title "Bonus Action"
+               :value :b-action}
+              {:title "Reaction"
+               :value :reaction}]]]))
 
 (defn race-builder []
   (let [race @(subscribe [::races/builder-item])]
@@ -5900,7 +5904,15 @@
       ::e5/edit-race-trait-name
       ::e5/edit-race-trait-type
       ::e5/edit-race-trait-description
-      ::e5/delete-race-trait]]))
+      ::e5/delete-race-trait
+      :types [{:title "Other"
+               :value :other}
+              {:title "Action"
+               :value :action}
+              {:title "Bonus Action"
+               :value :b-action}
+              {:title "Reaction"
+               :value :reaction}]]]))
 
 (defn background-builder []
   (let [background @(subscribe [::bg/builder-item])]
@@ -7708,7 +7720,7 @@
          [monster-trait-filters])]
       [monster-list-items]]]))
 
-(defn spell-list-item [{:keys [name level school key] :as spell}]
+(defn spell-list-item [{:keys [name level school ritual key] :as spell}]
   (let [expanded? @(subscribe [:spell-expanded? name])
         device-type @(subscribe [:device-type])
         spell-page-path (routes/path-for routes/dnd-e5-spell-page-route :key key)
@@ -7722,7 +7734,7 @@
         [:div.f-s-24.f-w-600.p-t-20.flex
          (if homebrew?
            [:div.m-r-10 (svg-icon "beer-stein" 24 @(subscribe [:theme]))])
-         [spell-summary name level school true 12]]]
+         [spell-summary name level school ritual true 12]]]
        [:div.orange.pointer.m-r-10
         (if (not= device-type :mobile) [:span.underline (if expanded?
                                                           "collapse"

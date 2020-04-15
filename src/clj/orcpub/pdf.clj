@@ -363,6 +363,7 @@
                                 casting-time
                                 duration
                                 level
+                                ritual
                                 range]} spell
                         x (+ margin-x (* box-width i))
                         y (+ margin-y (* box-height j))
@@ -413,6 +414,14 @@
                                       (- box-width 0.3)
                                       0.2)
                     (draw-text-to-box cs
+                                      (if ritual " (ritual)" "")
+                                      (:italic fonts)
+                                      10
+                                      (+ x 0.12 (string-width (:name spell) (:bold fonts) 10))
+                                      (- 11.0 y)
+                                      (- box-width 0.3)
+                                      0.2)
+                    (draw-text-to-box cs
                                       (if (not= class-nm "Homebrew")
                                         (str (spell-school-level spell class-nm) " " dc-str (str " Spell Mod " (common/bonus-str attack-bonus)))
                                         (spell-school-level spell class-nm))
@@ -422,16 +431,17 @@
                                       (- 11.0 y 0.19)
                                       (- box-width 0.24)
                                       0.25)
-                    (if casting-time (draw-spell-field cs
-                                       document
-                                       "magic-swirl"
-                                       (abbreviate-casting-time
-                                        (first
-                                         (s/split
-                                          casting-time
-                                          #",")))
-                                       (+ x 0.12)
-                                       (- 11.0 y 0.45)))
+                    (if casting-time
+                      (draw-spell-field cs
+                                        document
+                                        "magic-swirl"
+                                        (str (abbreviate-casting-time
+                                               (first
+                                                 (s/split
+                                                   casting-time
+                                                   #","))))
+                                        (+ x 0.12)
+                                        (- 11.0 y 0.45)))
                     (if range
                       (draw-spell-field cs
                                         document

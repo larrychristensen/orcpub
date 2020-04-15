@@ -60,7 +60,7 @@
 
                  [pdfkit-clj "0.1.7"]
                  [vvvvalvalval/datomock "0.2.0"]
-                 [com.datomic/datomic-free "0.9.5561"]
+                 [com.datomic/datomic-free "0.9.5697"]
                  [funcool/cuerdas "2.2.0"]
                  [camel-snake-kebab "0.4.0"]
                  ]
@@ -77,7 +77,7 @@
 
   :clean-targets ^{:protect false} ["resources/public/js/compiled" "target"]
 
-  :resource-paths ["resources" "resources/.ebextensions/*.config"]
+  :resource-paths ["resources" "resources/.ebextensions/"]
 
   :uberjar-name "orcpub.jar"
 
@@ -212,7 +212,7 @@
                                                                     :parallel-build     true
                                                                     :optimize-constants true
                                                                     :optimizations      :advanced}}]}
-                            :dependencies [[com.datomic/datomic-free "0.9.5561"]]}
+                            :dependencies [[com.datomic/datomic-free "0.9.5697"]]}
              :uberjar      {:prep-tasks  ["clean" "compile" ["cljsbuild" "once" "prod"]]
                             :env         {:production true}
                             :aot         :all

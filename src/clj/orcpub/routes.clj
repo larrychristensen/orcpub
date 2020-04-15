@@ -512,7 +512,7 @@
   "Dungeons & Dragons 5th Edition (D&D 5e) character builder/generator and digital character sheet far beyond any other in the multiverse.")
 
 (defn default-image-url [host]
-  (str "http://" host "/image/orcpub-box-logo.png"))
+  (str "http://" host "/image/dmv-box-logo.png"))
 
 (defn index-page-response [{:keys [headers uri] :as request}
                            {:keys [title description image-url]}
@@ -994,7 +994,7 @@
        ["/css/*" {:get `get-css}]
        ["/font-awesome-4.7.0/*" {:get `get-fa}]
        ["/image/*" {:get `get-image}]
-       ["/favicon.ico" {:get `get-favicon}]
+       ["/favicon/*" {:get `get-favicon}]
        [(route-map/path-for route-map/register-route)
         {:post `register}]
        [(route-map/path-for route-map/user-route) ^:interceptors [check-auth]
