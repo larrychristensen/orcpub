@@ -50,6 +50,20 @@
        :raw-mod raw-mod
        :plus-minus plus-minus})))
 
+(defn dice-roll-text-2 [dice-text]
+  (if-let [[_ num-str sides-str plus-minus-str mod-str :as match]
+           (re-matches dice-regex dice-text)]
+    (let [num (or (parse-int num-str) 1)
+          sides (or (parse-int sides-str))
+          plus-minus (if (= "-" plus-minus-str)
+                       -1
+                       1)
+          raw-mod (or (parse-int mod-str) 0)
+          mod (* raw-mod plus-minus)
+          rolls (roll-n num sides)
+          total (apply + mod rolls)]
+      (str total " = " rolls " " plus-minus-str " " raw-mod))))
+
 (spec/def ::num pos-int?)
 (spec/def ::sides pos-int?)
 (spec/def ::drop-num pos-int?)

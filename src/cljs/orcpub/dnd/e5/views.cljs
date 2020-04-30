@@ -2235,7 +2235,10 @@
              [:td [:div.skill-name
                    (svg-icon icon 18)
                    [:span.m-l-5 skill-name]]]
-             [:td [:div.p-5.skillbonus (common/bonus-str (skill-bonuses skill-key))]]])
+             [:td [:div.p-5.skillbonus (common/bonus-str (skill-bonuses skill-key))]]
+             [:td [:button.form-button-checks
+               {:on-click #(dispatch [:show-message-2 (str skill-name " check " (dice/dice-roll-text-2 (str "1d20" (common/mod-str (skill-bonuses skill-key)))))])}
+               "Roll"]]])
           skills/skills))]]]]))
 
 (defn ability-scores-section-2 [id]
@@ -2271,11 +2274,14 @@
          (fn [k]
            ^{:key k}
             [:tr.t-a-l
-            {:class-name (if (saving-throws k) "f-w-b" "opacity-7")}
-            [:td [:div
-                  (t/ability-icon k 18 theme)
-                  [:span.m-l-5.saving-throw-name (s/upper-case (name k))]]]
-            [:td [:div.p-5.saving-throw-bonus (common/bonus-str (save-bonuses k))]]])
+             {:class-name (if (saving-throws k) "f-w-b" "opacity-7")}
+             [:td [:div
+                   (t/ability-icon k 18 theme)
+                   [:span.m-l-5.saving-throw-name (s/upper-case (name k))]]]
+             [:td [:div.p-5.saving-throw-bonus (common/bonus-str (save-bonuses k))]]
+             [:td [:button.form-button-checks
+                   {:on-click #(dispatch [:show-message-2 (str (s/upper-case (name k)) " check " (dice/dice-roll-text-2 (str "1d20" (common/mod-str (save-bonuses k))))) 10000])}
+                   "Roll"]]])
          char/ability-keys))]]]))
 
 (defn feet-str [num]
@@ -2681,20 +2687,20 @@
              {:class-name (if mobile? "f-s-12")}
              [:th.p-10 "Name"]
              (if (not mobile?) [:th.p-10 "Proficient?"])
-             [:th.p-10 "Details"]
+             [:th "Details"]
              [:th]
-             [:th.p-10 (if mobile? "Atk" [:div.w-40 "Attack Bonus"])]]
+             [:th (if mobile? "Atk" [:div.w-40 "Attack Bonus"])]]
             (doall
              (map
               (fn [[weapon-key {:keys [equipped?]}]]
                 (let [{:keys [name description ranged? ::weapon/type ::weapon/damage-die-count ::weapon/damage-die] :as weapon} (all-weapons-map weapon-key)
                       proficient? (if has-weapon-prof (has-weapon-prof weapon))
                       expanded? (@expanded-details weapon-key)
-                      damage-modifier (weapon-damage-modifier weapon)]
+                      damage-modifier (weapon-damage-modifier weapon)
+                      droll (str damage-die-count "d" damage-die)]
                   (if (not= type :ammunition)
                     ^{:key weapon-key}
-                   [:tr.pointer
-                    {:on-click (toggle-details-expanded-handler expanded-details weapon-key)}
+                   [:tr
                     [:td.p-10.f-w-b (or (:name weapon)
                                         (::mi/name weapon))]
                     (if (not mobile?)
@@ -2704,13 +2710,20 @@
                       (weapon-attack-description weapon damage-modifier nil)]
                      (if expanded?
                        (weapon-details weapon weapon-damage-modifier))]
-                    [:td
+                    [:td.pointer
+                     {:on-click (toggle-details-expanded-handler expanded-details weapon-key)}
                      [:div.orange
                       (if (not mobile?)
                         [:span.underline (if expanded? "less" "more")])
                       [:i.fa.m-l-5
                        {:class-name (if expanded? "fa-caret-up" "fa-caret-down")}]]]
-                    [:td.p-10.f-w-b.f-s-18 (common/bonus-str (weapon-attack-modifier weapon))]])))
+                    [:td.p-10.f-w-b.f-s-18 (common/bonus-str (weapon-attack-modifier weapon))]
+                    [:td [:button.form-button-checks
+                          {:on-click #(dispatch [:show-message-2 (str name " attack " (dice/dice-roll-text-2 (str "1d20" (common/mod-str (weapon-attack-modifier weapon)))))])}
+                          "Attack"]]
+                    [:td [:button.form-button-checks
+                          {:on-click #(dispatch [:show-message-2 (str name " damage " (dice/dice-roll-text-2 (str droll (common/mod-str (weapon-attack-modifier weapon)))))])}
+                          "Damage"]]])))
               all-weapons))]]]]))))
 
 (defn magic-item-rows [expanded-details magic-item-cfgs magic-weapon-cfgs magic-armor-cfgs]
@@ -2878,7 +2891,11 @@
                    [:td.p-10 (boolean-icon proficient?)]
                    (if skill-expertise
                      [:td.p-10 (boolean-icon expertise?)])
-                   [:td.p-10.f-s-18.f-w-b (common/bonus-str (key skill-bonuses))]]))
+                   [:td.p-10.f-s-18.f-w-b (common/bonus-str (key skill-bonuses))]
+                    [:td [:button.form-button-checks
+                     {:on-click #(dispatch [:show-message-2 (str name " check " (dice/dice-roll-text-2 (str "1d20" (common/mod-str (key skill-bonuses)))))])}
+                     "Roll"]]
+]))
               skills/skills))]]]]))))
 
 (defn tool-prof-details-section-2 []
