@@ -1093,6 +1093,8 @@
       :border-radius "2px"
       :text-transform :uppercase
       :padding "8px 8px"
+      :margin-right "2px"
+      :margin-left "2px"
       :cursor :pointer
       :background-image "linear-gradient(to bottom, #f1a20f, #dbab50)"}]
 

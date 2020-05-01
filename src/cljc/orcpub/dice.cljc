@@ -62,6 +62,7 @@
           mod (* raw-mod plus-minus)
           rolls (roll-n num sides)
           total (apply + mod rolls)]
+      (prn (str "total:" total " roll:" rolls " plus-minus:" plus-minus-str " raw-mod:" raw-mod " dice-text:" dice-text))
       (str total " = " rolls " " plus-minus-str " " raw-mod))))
 
 (spec/def ::num pos-int?)

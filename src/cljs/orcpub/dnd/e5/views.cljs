@@ -1794,10 +1794,10 @@
   (let [spell-map @(subscribe [::spells/spells-map])
         spell (spell-map key)
         cls-mods (get spell-modifiers class)
+        spell-dc (get cls-mods :spell-save-dc)
         remaining-preps (- prepare-spell-count
                            prepared-spell-count)]
-    [[:tr.pointer
-      {:on-click on-click}
+    [[:tr.spell
       [:td.p-l-10.p-b-10.p-t-10.f-w-b
        (if (and (pos? lvl)
                 (get prepares-spells class))
@@ -1820,7 +1820,11 @@
       [:td.p-l-10.p-b-10.p-t-10 (if ability (s/upper-case (common/safe-name ability)))]
       [:td.p-l-10.p-b-10.p-t-10 (get cls-mods :spell-save-dc)]
       [:td.p-l-10.p-b-10.p-t-10 (common/bonus-str (get cls-mods :spell-attack-modifier))]
-      [:td.p-r-10.orange
+      [:td.p-l-10.p-b-10.p-t-10 [:button.form-button-checks
+                                 {:on-click #(dispatch [:show-message-2 (str (:name spell) " attack " (dice/dice-roll-text-2 (str "1d20" (common/bonus-str (get cls-mods :spell-attack-modifier)))))])}
+                                 "Roll"]]
+      [:td.p-l-10.p-b-10.p-t-10.pointer.orange
+       {:on-click on-click}
        [:i.fa
         {:class-name (if expanded? "fa-caret-up" "fa-caret-down")}]]]
      (if expanded?
@@ -1853,7 +1857,7 @@
           (if (pos? lvl)
             [:span.f-w-b (str @(subscribe [::char/spell-slots-remaining id lvl]) " remaining")])]
          [:table.w-100-p.t-a-l.striped
-          [:tbody
+          [:tbody.spells
            [:tr.f-w-b.f-s-12
             [:th.p-l-10.p-b-10.p-t-10 (if (and (not (zero? lvl))
                                                (seq prepares-spells))
@@ -1862,9 +1866,11 @@
             [:th.p-l-10.p-b-10.p-t-10 (if mobile? "Src" "Source")]
             [:th.p-l-10.p-b-10.p-t-10 (if mobile? "Aby" "Ability")]
             [:th.p-l-10.p-b-10.p-t-10 "DC"]
-            [:th.p-l-10
+            [:th
              {:class-name (if (not mobile?) "p-b-10 p-t-10")}
-             "Mod."]]
+             "Mod."]
+            [:th.p-l-10.p-b-10.p-t-10 "Attack"]
+            [:th.p-l-10.p-b-10.p-t-10]]
            (doall
             (map-indexed
              (fn [i r]
@@ -2161,7 +2167,7 @@
      v]]
    (if (boolean show-button)
      [:div.f-s-24.f-w-b [:button.form-button-checks
-                         {:on-click #(dispatch [:show-message-2 (str title " check " (dice/dice-roll-text-2 (str "1d20" v))) 10000])}
+                         {:on-click #(dispatch [:show-message-2 (str title " check " (dice/dice-roll-text-2 (str "1d20" v)))])}
                          "Roll"]])])
 
 (def current-hit-points-editor-style
@@ -2284,7 +2290,7 @@
                    [:span.m-l-5.saving-throw-name (s/upper-case (name k))]]]
              [:td [:div.p-5.saving-throw-bonus (common/bonus-str (save-bonuses k))]]
              [:td [:button.form-button-checks
-                   {:on-click #(dispatch [:show-message-2 (str (s/upper-case (name k)) " check " (dice/dice-roll-text-2 (str "1d20" (common/mod-str (save-bonuses k))))) 10000])}
+                   {:on-click #(dispatch [:show-message-2 (str (s/upper-case (name k)) " check " (dice/dice-roll-text-2 (str "1d20" (common/mod-str (save-bonuses k)))))])}
                    "Roll"]]])
          char/ability-keys))]]]))
 
@@ -2626,14 +2632,14 @@
           [:span.m-l-5.f-w-b.f-s-18 "Armor"]]
          [:div
           [:table.w-100-p.t-a-l.striped
-           [:tbody
+           [:tbody.armor
             [:tr.f-w-b
              {:class-name (if mobile? "f-s-12")}
              [:th.p-10 "Name"]
              (if (not mobile?) [:th.p-10 "Proficient?"])
              [:th.p-10 "Details"]
-             [:th]
-             [:th.p-10 "AC"]]
+             [:th.p-10 "AC"]
+             [:th.p-10]]
             (doall
              (for [{:keys [name description type key] :as armor} (conj armor-details nil)
                    shield (conj shield-details nil)]
@@ -2648,8 +2654,7 @@
                                    (armor-profs type)))
                      expanded? (@expanded-details k)]
                  ^{:key (str key (:key shield))}
-                 [:tr.pointer
-                  {:on-click (toggle-details-expanded-handler expanded-details k)}
+                 [:tr.item
                   [:td.p-10.f-w-b (str (or (::mi/name armor) (:name armor) "unarmored")
                                        (if shield (str " + " (:name shield))))]
                   (if (not mobile?)
@@ -2657,13 +2662,14 @@
                   [:td.p-10.w-100-p
                    [:div
                     (armor-details-section armor shield expanded?)]]
+                  [:td.p-10.f-w-b.f-s-18 ac]
                   [:td
                    [:div.orange
-                    (if (not mobile?)
-                      [:span.underline (if expanded? "less" "more")])
+                    {:on-click (toggle-details-expanded-handler expanded-details k)}
+                    #_(if (not mobile?)
+                        [:span.underline (if expanded? "less" "more")])
                     [:i.fa.m-l-5
-                     {:class-name (if expanded? "fa-caret-up" "fa-caret-down")}]]]
-                  [:td.p-10.f-w-b.f-s-18 ac]])))]]]]))))
+                     {:class-name (if expanded? "fa-caret-up" "fa-caret-down")}]]]])))]]]]))))
 
 (defn section-header [icon title]
   [:div.flex.align-items-c
@@ -2686,14 +2692,15 @@
          [section-header "crossed-swords" "Weapons"]
          [:div
           [:table.w-100-p.t-a-l.striped
-           [:tbody
+           [:tbody.weapons
             [:tr.f-w-b
              {:class-name (if mobile? "f-s-12")}
              [:th.p-10 "Name"]
              (if (not mobile?) [:th.p-10 "Proficient?"])
              [:th "Details"]
-             [:th]
-             [:th (if mobile? "Atk" [:div.w-40 "Attack Bonus"])]]
+
+             [:th (if mobile? "Atk" [:div.w-40 "Attack Bonus"])]
+             [:th.p-10]]
             (doall
              (map
               (fn [[weapon-key {:keys [equipped?]}]]
@@ -2704,7 +2711,7 @@
                       droll (str damage-die-count "d" damage-die)]
                   (if (not= type :ammunition)
                     ^{:key weapon-key}
-                   [:tr
+                   [:tr.weapon
                     [:td.p-10.f-w-b (or (:name weapon)
                                         (::mi/name weapon))]
                     (if (not mobile?)
@@ -2714,20 +2721,21 @@
                       (weapon-attack-description weapon damage-modifier nil)]
                      (if expanded?
                        (weapon-details weapon weapon-damage-modifier))]
-                    [:td.pointer
-                     {:on-click (toggle-details-expanded-handler expanded-details weapon-key)}
-                     [:div.orange
-                      (if (not mobile?)
-                        [:span.underline (if expanded? "less" "more")])
-                      [:i.fa.m-l-5
-                       {:class-name (if expanded? "fa-caret-up" "fa-caret-down")}]]]
+
                     [:td.p-10.f-w-b.f-s-18 (common/bonus-str (weapon-attack-modifier weapon))]
                     [:td [:button.form-button-checks
                           {:on-click #(dispatch [:show-message-2 (str name " attack " (dice/dice-roll-text-2 (str "1d20" (common/mod-str (weapon-attack-modifier weapon)))))])}
                           "Attack"]]
                     [:td [:button.form-button-checks
                           {:on-click #(dispatch [:show-message-2 (str name " damage " (dice/dice-roll-text-2 (str droll (common/mod-str (weapon-attack-modifier weapon)))))])}
-                          "Damage"]]])))
+                          "Damage"]]
+                    [:td.pointer
+                     {:on-click (toggle-details-expanded-handler expanded-details weapon-key)}
+                     [:div.orange
+                      #_(if (not mobile?)
+                          [:span.underline (if expanded? "less" "more")])
+                      [:i.fa.m-l-5
+                       {:class-name (if expanded? "fa-caret-up" "fa-caret-down")}]]]])))
               all-weapons))]]]]))))
 
 (defn magic-item-rows [expanded-details magic-item-cfgs magic-weapon-cfgs magic-armor-cfgs]
@@ -2737,16 +2745,16 @@
      (fn [[item-kw item-cfg]]
        (let [{:keys [::mi/name ::mi/type ::mi/item-subtype ::mi/rarity ::mi/attunement ::mi/description ::mi/summary] :as item} (magic-item-map item-kw)
              expanded? (@expanded-details item-kw)]
-         [[:tr.pointer
-           {:on-click (toggle-details-expanded-handler expanded-details item-kw)}
+         [[:tr
            [:td.p-10.f-w-b (or (:name item) name)]
            [:td.p-10 (str (common/kw-to-name type)
                           ", "
                           (common/kw-to-name rarity))]
-           [:td.p-r-5
+           [:td.p-r-5.pointer
+            {:on-click (toggle-details-expanded-handler expanded-details item-kw)}
             [:div.orange
-             (if (not mobile?)
-               [:span.underline (if expanded? "less" "more")])
+             #_(if (not mobile?)
+                 [:span.underline (if expanded? "less" "more")])
              [:i.fa.m-l-5
               {:class-name (if expanded? "fa-caret-up" "fa-caret-down")}]]]]
           (if expanded?
@@ -2772,7 +2780,7 @@
           [:span.m-l-5.f-w-b.f-s-18 "Other Magic Items"]]
          [:div.f-s-14
           [:table.w-100-p.t-a-l.striped
-           [:tbody
+           [:tbody.other-magic-items
             [:tr.f-w-b
              {:class-name (if mobile? "f-s-12")}
              [:th.p-10 "Name"]
@@ -2802,7 +2810,7 @@
           [:span.m-l-5.f-w-b.f-s-18 "Other Equipment"]]
          [:div
           [:table.w-100-p.t-a-l.striped
-           [:tbody
+           [:tbody.equipment
             [:tr.f-w-b
              {:class-name (if mobile? "f-s-12")}
              [:th.p-10 "Name"]
@@ -2817,7 +2825,7 @@
                       ;;expanded? (@expanded-details item-kw)
                       ]
                   ^{:key item-kw}
-                  [:tr
+                  [:tr.item
                    [:td.p-10.f-w-b (or (:name item) item-name)]
                    [:td.p-10 (::char-equip/quantity item-cfg)]
                    [:td.p-10
