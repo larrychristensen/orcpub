@@ -9,13 +9,34 @@
 ![Docker Cloud Automated build](https://img.shields.io/docker/cloud/automated/orcpub/orcpub)
 ![Docker Cloud Build Status](https://img.shields.io/docker/cloud/build/orcpub/orcpub)
 
-# Orcpub2 - Community Edition
+# Community Edition
 
-This is the code for OrcPub2.com. Many, many people have expressed interest in helping out or checking out the code, so I have decided to make that possible by open sourcing it.
+This is the code for OrcPub2
 
 ## Running
 
-To run a local instance of Orcpub, all you need is Docker, docker-compose, and the `docker-compose.yml` file and an SSL certificate. Simply edit the paths to the SSL certificate and key in the `web` service definition and run the following:
+To run a local instance of Orcpub, check out this branch by doing a `git clone git@github.com:Orcpub/orcpub.git`. Edit the `docker-compose.yaml` and update the `ADMIN_PASSWORD` and `DATOMIC_PASSWORD`.
+
+Update the `<change this>` in the `DATOMIC_URL` to match the password used in `DATOMIC_PASSWORD`.
+Create an SSL certificate using `deploy/snakeoil.sh (or bat)` or simply edit the paths to an existing SSL certificate and key in the `web` service definition.
+
+Example:
+
+```shell
+      # Datomic connection string - Make sure the <change this> matches the DATOMIC_PASSWORD below 
+      DATOMIC_URL: datomic:free://datomic:4334/orcpub?password=OkIchangedit
+      
+    ...
+
+    datomic:
+      image: orcpub/datomic:latest
+      environment:
+        ADMIN_PASSWORD: supersecretadminpassword
+        # Must match the datomic:free://datomic:4334/orcpub?password=<change this>
+        DATOMIC_PASSWORD: OkIchangedit
+```
+
+Next
 
 ```shell
    docker-compose pull
@@ -23,12 +44,6 @@ To run a local instance of Orcpub, all you need is Docker, docker-compose, and t
 ```
 
 **NOTE:** If you need a quick SSL certificate, the script at `deploy/snakeoil.sh` will generate one. Links to Docker installation can be found [below](#with-docker).
-
-Unix instructions [here](https://github.com/Orcpub/orcpub/wiki/Orcpub-on-Ubuntu-18.04-with-Docker)
-
-Windows instructions [here](https://github.com/Orcpub/orcpub/wiki/Orcpub-on-Windows-10-with-Docker)
-
-Docker Cheat [Sheet](https://github.com/Orcpub/orcpub/wiki/Docker-Cheat-sheet)
 
 ### Importing your homebrew automatically
 
@@ -41,6 +56,11 @@ If you want to overwrite what is already loaded delete all of the content from t
 
 ### With docker
 We have managed to dockerize the project which should make the setup easy. 
+Unix instructions [here](https://github.com/Orcpub/orcpub/wiki/Orcpub-on-Ubuntu-18.04-with-Docker)
+
+Windows instructions [here](https://github.com/Orcpub/orcpub/wiki/Orcpub-on-Windows-10-with-Docker)
+
+Docker Cheat [Sheet](https://github.com/Orcpub/orcpub/wiki/Docker-Cheat-sheet)
 
 **Dependencies**
 
@@ -60,33 +80,37 @@ There are two docker-compose files.
 
 `docker-compose.yaml` will pull from the docker repo which the community maintains. **this is the default**
 
-`docker-compose-build.yaml` will build orcpub from your downloaded clone directory. See below.
+`docker-compose-build.yaml` (rename this to docker-compose.yaml) will build orcpub from your downloaded cloned directory and build from source. 
 
 **NOTES**
-The application configuration is Environmental Variable based, meaning that its behaviour will change when modifying them at start time. To modify the variables edit the `docker-compose.yaml` or `docker-compose-build.yaml` files.
+The application configuration is Environmental Variable based, meaning that its behaviour will change when modifying them at start time. To modify the variables edit the `docker-compose.yaml` or `docker-compose-build.yaml` files or remove those, and set your own in your shell/environment.
 
 Example variables:
-```
+
+```shell
 EMAIL_SERVER_URL: '' # Url to a smtp server
 EMAIL_ACCESS_KEY: '' # User for the mail server
 EMAIL_SECRET_KEY: '' # Password for the user
 EMAIL_SERVER_PORT: 587 # Mail server port
 EMAIL_SSL: 'false' # Should SSL be used? Gmail requires this.
-DATOMIC_URL: datomic:free://datomic:4334/orcpub # Url for the database
+DATOMIC_URL: datomic:free://datomic:4334/orcpub?password=yourpassword # Url for the database
+ADMIN_PASSWORD: supersecretpassword
+DATOMIC_PASSWORD: yourpassword
 ```
+
+To change the datomic passwords you can do it through the environment variables `ADMIN_PASSWORD_OLD` and `DATOMIC_PASSWORD_OLD` start the container once, then set the `ADMIN_PASSWORD` and `DATOMIC_PASSWORD` to your new passwords.
+
+More on these passwords here.
+[ADMIN_PASSWORD](https://docs.datomic.com/on-prem/configuring-embedded.html#sec-2-1)
+[DATOMIC_PASSWORD](https://docs.datomic.com/on-prem/configuring-embedded.html#sec-2-1)
+
 #### How do I contribute?
 Well, first of all, thanks for rolling for initiative!
-We work on forks, meaning that it is enough for you to fork this repo, and enable this commented part in `docker-compose.yaml`
+We work on forks, meaning that it is enough for you to fork this repo, and rename the `docker-compose-build.yaml` to `docker-compose.yaml` 
 
-```yaml
-build:
-  context: docker/orcpub
-  args:
-    REPO: Orcpub
-    BRANCH: develop
-```
 This will modify the deployment, so it will build the application rather than using our image. However note that you **need to change the REPO and BRANCH to YOUR fork** 
-Afterwards, run `docker-compose up --build` to start building!
+Afterwards, run `docker-compose build` to start building!
+To launch, `docker-compose up` or if you want to push the containers to the background `docker-compose up -d`
 
 ### Without docker
 
@@ -100,16 +124,15 @@ On Mac/Unix: `bin/transactor config/samples/free-transactor-template.properties`
 
 
 - Install leiningen (https://leiningen.org/#install) into a directory.
-    - Mac / Linux: The latest version (2.9.1 as of this writing) should work.
-    - Windows: There is an issue with 2.9.1, so downgrade to 2.8.1 (`lein downgrade 2.8.1`).
+- Mac / Linux: The latest version (2.9.1 as of this writing) should work.
+- Windows: 2.9.3 Can be installed with [chocolatey](https://chocolatey.org/install) using `choco install lein --version 2.9.3`
 - Download the code from your git fork `git clone git@github.com:yourrepo/your.git` Use the clone url in YOUR repo.
 - cd into orcpub
+- Pick an editor the next steps are optional in some cases.
 - run `lein with-profile +start-server repl`
 - run `lein figwheel` Once lein figwheel finishes, a browser will launch.
 
-You should leave all three processes running: Datomic transactor, lein repl, and lein figwheel.  
-
-(*NOTE:* There is an issue using leiningen 2.8.1 causing a `ClassCastException`.)
+You should leave all three processes running: Datomic transactor, lein repl, and lein figwheel. 
 
 When you save changes, it will auto compile and send all changes to the browser without the
 need to reload. After the compilation process is complete, you will
@@ -136,6 +159,10 @@ C-c M-j
 ##### IntelliJ / Cursive
 You can use the community edition of [IntelliJ IDEA](https://www.jetbrains.com/idea/download/) with the [Cursive plug-in](https://cursive-ide.com/).
 
+##### VS Code
+You can use the open source edition of [Visual Studio Code](https://code.visualstudio.com/Download) with the Calva: Clojure & ClojureScript Interactive Programming, Clojure Code, and Bookmarks Extensions.
+
+To start REPL with VS Code, first launch datomic in a cmd window, then jack-in using the Leiningen + Legacy Figwheel, figwheel-native, and select the :dev and optionally :start-server.
 
 #### REPL
 
@@ -155,17 +182,6 @@ user=> (stop-server)
 ```
 
 Within Emacs you should be able to save your file (C-x C-s) and reload it into the REPL (C-c C-w) to get your server-side changes to take effect. Within Vim with `vim-fireplace` you can eval a form with `cpp`, a paragraph with `cpip`, etc; check out its help file for more information. Regardless of editor, your client-side changes will take effect immediately when you change a CLJS or CLJC file while `lein figwheel` is running.
-
-#### Running a Server
-
-Production builds should use the `prod` or `uberjar` profiles. Work is underway to Dockerize this. In the meantime, you may run a copy of Orcpub with in-memory database as follows:
-
-```shell
-lein uberjar
-PORT=8890 java -jar target/orcpub.jar
-```
-
-There are several issues which need to be worked out, such as mail server configuration, persistant database, etc. This is just a beginning.
 
 ## OrcPub Fundamentals
 

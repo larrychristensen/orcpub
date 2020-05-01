@@ -1516,6 +1516,12 @@
                                                :max 1})]})]})
                   (opt5e/new-starting-equipment-selection
                    :paladin
+                   {:name "Holy Symbol"
+                    :options (map
+                              #(opt5e/starting-equipment-option % 1)
+                              equipment5e/holy-symbols)})
+                  (opt5e/new-starting-equipment-selection
+                   :paladin
                    {:name "Melee Weapon"
                     :options [(t/option-cfg
                                {:name "Five Javelins"

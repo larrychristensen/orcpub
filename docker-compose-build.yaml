@@ -15,7 +15,8 @@ services:
       EMAIL_ERRORS_TO: ''
       EMAIL_SSL: 'TRUE'
       EMAIL_TLS: 'FALSE'
-      DATOMIC_URL: datomic:free://datomic:4334/orcpub?password=datomic
+      # Datomic connection string - Make sure the <change this> matches the DATOMIC_PASSWORD below 
+      DATOMIC_URL: datomic:free://datomic:4334/orcpub?password=<change this>
     depends_on:
       - datomic
     restart: always
@@ -23,6 +24,10 @@ services:
     build:
       context: .
       dockerfile: docker/datomic/Dockerfile
+    environment:
+      ADMIN_PASSWORD: <change this as well!>
+      # Must match the <change this> in the DATOMIC_URL above.
+      DATOMIC_PASSWORD: <change this>
     volumes:
       - ./data:/data
       - ./logs:/logs
