@@ -2023,7 +2023,6 @@
      (remove
       nil?
       [(if character-id [views5e/share-link character-id])
-       (if character-id [views5e/character-page-fb-button character-id])
        {:title "Random"
         :icon "random"
         :on-click (confirm-handler

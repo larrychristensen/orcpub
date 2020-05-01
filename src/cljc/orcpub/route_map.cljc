@@ -92,8 +92,6 @@
 (def re-verify-route :re-verify)
 (def verify-sent-route :verify-sent)
 (def login-route :login)
-(def fb-login-route :fb-login)
-(def google-login-route :google-login)
 (def login-page-route :login-page)
 (def follow-user-route :follow-user)
 (def character-pdf-route :character-pdf)
@@ -121,8 +119,6 @@
                   "re-verify" re-verify-route
                   "register" register-route
                   "login" login-route
-                  "fb-login" fb-login-route
-                  "google-login" google-login-route
                   "user" user-route
                   
                   "character.pdf" character-pdf-route

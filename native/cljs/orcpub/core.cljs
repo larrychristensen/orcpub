@@ -24,7 +24,7 @@
                   :padding-bottom 5
                   :padding-left 5
                   :padding-right 5}}
-    [image {:source (js/require "./assets/images/orcpub-logo.png")}]]
+    [image {:source (js/require "./assets/images/dmv-logo.png")}]]
    [v5e/character-builder]])
 
 (defn init []

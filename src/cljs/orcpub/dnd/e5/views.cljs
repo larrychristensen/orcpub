@@ -144,53 +144,6 @@
       :class-name (if light-theme? " opacity-7")
       :src (str (if light-theme? "/image/black/" "/image/") icon-name ".svg")}]))
 
-(defn facebook-share-button-comp [url]
-  [:div.fb-share-button
-   {:data-layout "button"
-    :data-href url}])
-
-(defn on-fb-login [logged-in?]
-  (if (not logged-in?)
-    (do (go (<! (timeout 2000))
-            (if (not @(subscribe [:login-message-shown?]))
-              (dispatch [:show-login-message "You must enable popups to allow Facebook login."])))
-        (if js/FB
-          (.login js/FB events/fb-login-callback (clj->js {:scope "email"}))))))
-
-(defn fb-login-button-comp []
-  [:div.flex.justify-cont-s-a
-   [:button.form-button.flex.align-items-c
-    (let [logged-in? @(subscribe [:fb-logged-in?])]
-      {:on-click #(if logged-in?
-                    (dispatch [:fb-logout])
-                    (on-fb-login logged-in?))})
-    [:i.fa.fa-facebook.f-s-18]
-    [:span.m-l-10.f-s-14
-     "Login with Facebook"]]])
-
-(defn dispatch-init-fb []
-  (dispatch [:init-fb]))
-
-(defn add-facebook-init [comp]
-  (with-meta
-    comp
-    {:component-did-mount dispatch-init-fb}))
-
-(def facebook-login-button
-  (add-facebook-init
-   fb-login-button-comp))
-
-(def facebook-share-button
-  (add-facebook-init
-    facebook-share-button-comp))
-
-(defn character-page-fb-button [id]
-  [facebook-share-button
-   (str
-    "http://"
-    js/window.location.hostname
-    (routes/path-for routes/dnd-e5-char-page-route :id id))])
-
 (def login-style
   {:color "#f0a100"})
 
@@ -396,8 +349,8 @@
 (defn route-to-my-encounters-page []
   (dispatch [:route routes/dnd-e5-my-encounters-route]))
 
-(def logo [:img.orcpub-logo.h-32.w-120.pointer
-           {:src "/image/orcpub-logo.svg"
+(def logo [:img.h-60.pointer
+           {:src "/image/dmv-logo.svg"
             :on-click route-to-default-route}])
 
 (defn app-header []
@@ -433,16 +386,16 @@
        [:div.flex.w-100-p.align-items-end
         {:class-name (if mobile? "justify-cont-s-b" "justify-cont-s-b")}
         [:div
-         [:a {:href "https://www.patreon.com/orcpub" :target :_blank}
+         [:a {:href "https://www.patreon.com/DungeonMastersVault" :target :_blank}
           [:img.h-32.m-l-10.m-b-5.pointer.opacity-7.hover-opacity-full
            {:src (if mobile?
                    "https://c5.patreon.com/external/logo/downloads_logomark_color_on_navy.png"
                    "https://c5.patreon.com/external/logo/become_a_patron_button.png")}]]
          (if (not mobile?)
            [:div.main-text-color.p-10
-            (social-icon "facebook" "https://www.facebook.com/orcpub")
-            (social-icon "twitter" "https://twitter.com/OrcPub")
-            (social-icon "reddit-alien" "https://www.reddit.com/r/orcpub/")])]
+            (social-icon "facebook" "https://www.facebook.com/groups/252484128656613/")
+            (social-icon "twitter" "https://twitter.com/thDMV")
+            (social-icon "reddit-alien" "https://www.reddit.com/r/dungeonmastersvault/")])]
         [:div.flex.m-b-5.m-r-5
          [header-tab
           "characters"
@@ -544,13 +497,10 @@
    :color text-color})
 
 (def registration-page-style
-  {:background-image "url(/image/shutterstock_432001912.jpg)"
+  {:background-image "url(/image/login-side.jpg)"
    :background-clip :content-box
    :width "350px"
    :min-height "600px"})
-
-(def registration-logo-style
-  {:height "25.3px"})
 
 (def registration-left-column-style
   {:flex-direction :column
@@ -574,9 +524,8 @@
       [:div.flex {:style registration-left-column-style}
        [:div.flex.justify-cont-s-a.align-items-c
         {:style registration-header-style}
-        [:img.pointer
-         {:src "/image/orcpub-logo.svg"
-          :style registration-logo-style
+        [:img.h-55.pointer
+         {:src "/image/dmv-logo.svg"
           :on-click route-to-default-page}]]
        [:div.flex-grow-1 content]
        [views-2/legal-footer]]
@@ -913,8 +862,8 @@
                          :text-shadow "1px 2px 1px rgba(0,0,0,0.37)"
                          :margin-top "20px"}}
            "LOGIN"]
-          [:div.m-t-10
-           [facebook-login-button]]
+          ;[:div.m-t-10
+          ; [facebook-login-button]]
           [:div
            {:style {:margin-top "50px"}}
            [form-input {:title "Username or Email"
@@ -1170,7 +1119,7 @@
 (defn tavern-name-result [name]
   [:span.f-s-24.f-w-b.white name])
 
-(defn spell-summary [name level school include-name? & [subheader-size]]
+(defn spell-summary [name level school ritual include-name? & [subheader-size]]
   [:div.p-b-20
    (if include-name? [:span.f-s-24.f-w-b name])
    [:div.i.f-w-b.opacity-5
@@ -1178,13 +1127,13 @@
     (str (if (pos? level)
            (str (common/ordinal level) "-level"))
          " "
-         (common/safe-capitalize school)
+         (str (common/safe-capitalize school) (if ritual " (can be cast as ritual)" ""))
          (if (zero? level)
            " cantrip"))]])
 
-(defn spell-component [{:keys [name level school casting-time range duration components description summary page source] :as spell} include-name? & [subheader-size]]
+(defn spell-component [{:keys [name level school casting-time ritual range duration components description summary page source] :as spell} include-name? & [subheader-size]]
   [:div.m-l-10.l-h-19
-   [spell-summary name level school include-name? subheader-size]
+   [spell-summary name level school ritual include-name? subheader-size]
    (spell-field "Casting Time" casting-time)
    (spell-field "Range" range)
    (spell-field "Duration" duration)
@@ -1216,13 +1165,13 @@
     [:div.m-l-10
      (doall
       (map
-       (fn [{:keys [key name level school casting-time range duration components description summary page source]}]
+       (fn [{:keys [key name level school ritual casting-time range duration components description summary page source]}]
          ^{:key name}
          [:div.pointer
           {:on-click (let [spell-page-path (routes/path-for routes/dnd-e5-spell-page-route :key key)
                            spell-page-route (routes/match-route spell-page-path)]
                        (make-event-handler :route spell-page-route))}
-          [spell-summary name level school true 14]])
+          [spell-summary name level school ritual true 14]])
        results))]]])
 
 (defn monster-summary [name size type subtypes alignment]
@@ -1319,7 +1268,7 @@
          (map-indexed
           (fn [i {:keys [name description]}]
             ^{:key i}
-            [:div.m-t-10 (spell-field name description)])
+            [:div.m-t-10.wsp-prw (spell-field name description)])
           traits))])
      (if actions
        [:div.m-t-20
@@ -1329,7 +1278,7 @@
           (map-indexed
            (fn [i {:keys [name description]}]
              ^{:key i}
-             [:div.m-t-10 (spell-field name description)])
+             [:div.m-t-10.wsp-prw (spell-field name description)])
            actions))]])
      (if legendary-actions
        [:div.m-t-20
@@ -1409,77 +1358,6 @@
 (def srd-link
   [:a.orange {:href "/SRD-OGL_V5.1.pdf" :target "_blank"} "the 5e SRD"])
 
-(defn amazon-link [title url]
-  [:a.orange {:href url :target "_blank"} title])
-
-(def phb-link (amazon-link "PHB" "https://www.amazon.com/gp/product/0786965606/ref=as_li_tl?ie=UTF8&tag=orcpub-20&camp=1789&creative=9325&linkCode=as2&creativeASIN=0786965606&linkId=d0e5f5e84d625c00ca1e9f9086e5d7c4"))
-
-(def dmg-link (amazon-link "DMG" "https://www.amazon.com/gp/product/0786965622/ref=as_li_tl?ie=UTF8&tag=orcpub-20&camp=1789&creative=9325&linkCode=as2&creativeASIN=0786965622&linkId=067760cfb629d77c7162287b06684bf4"))
-
-(def mm-link (amazon-link "MM" "https://www.amazon.com/gp/product/0786965614/ref=as_li_tl?ie=UTF8&tag=orcpub-20&camp=1789&creative=9325&linkCode=as2&creativeASIN=0786965614&linkId=6d27c01945d45ceff0204eade602f998"))
-
-(def xge-link (amazon-link "XGE" "https://www.amazon.com/gp/product/0786966114/ref=as_li_tl?ie=UTF8&tag=orcpub-20&camp=1789&creative=9325&linkCode=as2&creativeASIN=0786966114&linkId=df71445fe4cab418c535a38d55c3b761"))
-
-(def scag-link (amazon-link "SCAG" "https://www.amazon.com/gp/product/0786965800/ref=as_li_tl?ie=UTF8&tag=orcpub-20&camp=1789&creative=9325&linkCode=as2&creativeASIN=0786965800&linkId=deac8f6d8ceeb243cc29931992bcde52"))
-
-(def vgm-link (amazon-link "VGM" "https://www.amazon.com/gp/product/0786966017/ref=as_li_tl?ie=UTF8&tag=orcpub-20&camp=1789&creative=9325&linkCode=as2&creativeASIN=0786966017&linkId=1db974c1bc5c3f2f49971ad2e1fc7906"))
-
-(def toa-link (amazon-link "TOA" "https://www.amazon.com/gp/product/0786966106/ref=as_li_tl?ie=UTF8&tag=orcpub-20&camp=1789&creative=9325&linkCode=as2&creativeASIN=0786966106&linkId=83a1e9d255d69267b0b441e8a7bcde80"))
-
-(def skt-link (amazon-link "SKT" "https://www.amazon.com/gp/product/0786966009/ref=as_li_tl?ie=UTF8&tag=orcpub-20&camp=1789&creative=9325&linkCode=as2&creativeASIN=0786966009&linkId=191904c4573b03a08afbc490e1c94fd9"))
-
-(def oota-link (amazon-link "OOTA" "https://www.amazon.com/gp/product/0786965819/ref=as_li_tl?ie=UTF8&tag=orcpub-20&camp=1789&creative=9325&linkCode=as2&creativeASIN=0786965819&linkId=e00c6e6016c6d319a0191c35cde3d24b"))
-
-(def pota-link (amazon-link "POTA" "https://www.amazon.com/gp/product/0786965789/ref=as_li_tl?ie=UTF8&tag=orcpub-20&camp=1789&creative=9325&linkCode=as2&creativeASIN=0786965789&linkId=7db71e3ac545c311e302d15692072b74"))
-
-(def yp-link (amazon-link "YP" "https://www.amazon.com/gp/product/0786966092/ref=as_li_tl?ie=UTF8&tag=orcpub-20&camp=1789&creative=9325&linkCode=as2&creativeASIN=0786966092&linkId=09d5160452645b8c9cac1e66735120f3"))
-
-(def cos-link (amazon-link "COS" "https://www.amazon.com/gp/product/0786965983/ref=as_li_tl?ie=UTF8&tag=orcpub-20&camp=1789&creative=9325&linkCode=as2&creativeASIN=0786965983&linkId=b47dbcb3687fd053c365d68c7132937e"))
-
-#_(defn amazon-frame [link]
-  [:iframe {:style {:width "120px" :height "240px"}
-            :margin-width 0
-            :margin-height 0
-            :scrolling :no
-            :frame-border 0
-            :src link}])
-
-#_(def scag-amazon-frame
-  (amazon-frame "//ws-na.amazon-adsystem.com/widgets/q?ServiceVersion=20070822&OneJS=1&Operation=GetAdHtml&MarketPlace=US&source=ac&ref=tf_til&ad_type=product_link&tracking_id=orcpub-20&marketplace=amazon&region=US&placement=0786965800&asins=0786965800&linkId=f35402a86dd0851190d952228fab36e9&show_border=false&link_opens_in_new_window=true&price_color=ffffff&title_color=f0a100&bg_color=2c3445"))
-
-#_(def volos-amazon-frame
-  (amazon-frame "//ws-na.amazon-adsystem.com/widgets/q?ServiceVersion=20070822&OneJS=1&Operation=GetAdHtml&MarketPlace=US&source=ac&ref=tf_til&ad_type=product_link&tracking_id=orcpub-20&marketplace=amazon&region=US&placement=0786966017&asins=0786966017&linkId=8c552e7b980d7d944bd12dec57e002e8&show_border=false&link_opens_in_new_window=true&price_color=ffffff&title_color=f0a100&bg_color=2c3445"))
-
-#_(def phb-amazon-frame
-  (amazon-frame "//ws-na.amazon-adsystem.com/widgets/q?ServiceVersion=20070822&OneJS=1&Operation=GetAdHtml&MarketPlace=US&source=ac&ref=qf_sp_asin_til&ad_type=product_link&tracking_id=orcpub-20&marketplace=amazon&region=US&placement=0786965606&asins=0786965606&linkId=3b5b686390559c31dbc3c20d20f37ec4&show_border=false&link_opens_in_new_window=true&price_color=ffffff&title_color=f0a100&bg_color=2c3445"))
-
-#_(def dmg-amazon-frame
-  (amazon-frame "//ws-na.amazon-adsystem.com/widgets/q?ServiceVersion=20070822&OneJS=1&Operation=GetAdHtml&MarketPlace=US&source=ac&ref=tf_til&ad_type=product_link&tracking_id=orcpub-20&marketplace=amazon&region=US&placement=0786965622&asins=0786965622&linkId=01922a9aafc4ea52eb90aed12bbeac04&show_border=false&link_opens_in_new_window=true&price_color=ffffff&title_color=f0a100&bg_color=2c3445"))
-
-#_(def mm-amazon-frame
-  (amazon-frame "//ws-na.amazon-adsystem.com/widgets/q?ServiceVersion=20070822&OneJS=1&Operation=GetAdHtml&MarketPlace=US&source=ac&ref=qf_sp_asin_til&ad_type=product_link&tracking_id=orcpub-20&marketplace=amazon&region=US&placement=0786965614&asins=0786965614&linkId=5300756d865067bd552325212c176447&show_border=false&link_opens_in_new_window=true&price_color=ffffff&title_color=f0a100&bg_color=2c3445"))
-
-#_(def xanathars-amazon-frame
-  (amazon-frame "//ws-na.amazon-adsystem.com/widgets/q?ServiceVersion=20070822&OneJS=1&Operation=GetAdHtml&MarketPlace=US&source=ac&ref=tf_til&ad_type=product_link&tracking_id=orcpub-20&marketplace=amazon&region=US&placement=0786966114&asins=0786966114&linkId=b1241c813fda22ff1b5ba56ba52cee50&show_border=false&link_opens_in_new_window=true&price_color=ffffff&title_color=f0a100&bg_color=2c3445"))
-
-#_(def toa-amazon-frame
-  (amazon-frame "//ws-na.amazon-adsystem.com/widgets/q?ServiceVersion=20070822&OneJS=1&Operation=GetAdHtml&MarketPlace=US&source=ac&ref=tf_til&ad_type=product_link&tracking_id=orcpub-20&marketplace=amazon&region=US&placement=0786966106&asins=0786966106&linkId=8ef050066313a6092678df98f18401f7&show_border=false&link_opens_in_new_window=true&price_color=ffffff&title_color=f0a100&bg_color=2c3445"))
-
-#_(def yawning-portal-amazon-frame
-  (amazon-frame "//ws-na.amazon-adsystem.com/widgets/q?ServiceVersion=20070822&OneJS=1&Operation=GetAdHtml&MarketPlace=US&source=ac&ref=qf_sp_asin_til&ad_type=product_link&tracking_id=orcpub-20&marketplace=amazon&region=US&placement=0786966092&asins=0786966092&linkId=df092b3840d56523be6c3626966a0e47&show_border=false&link_opens_in_new_window=true&price_color=ffffff&title_color=f0a100&bg_color=2c3445"))
-
-#_(def cos-amazon-frame
-  (amazon-frame "//ws-na.amazon-adsystem.com/widgets/q?ServiceVersion=20070822&OneJS=1&Operation=GetAdHtml&MarketPlace=US&source=ac&ref=qf_sp_asin_til&ad_type=product_link&tracking_id=orcpub-20&marketplace=amazon&region=US&placement=0786965983&asins=0786965983&linkId=91dfcae14b0c8ecd3795eaf375104ca5&show_border=false&link_opens_in_new_window=true&price_color=ffffff&title_color=f0a100&bg_color=2c3445"))
-
-#_(def skt-amazon-frame
-  (amazon-frame "//ws-na.amazon-adsystem.com/widgets/q?ServiceVersion=20070822&OneJS=1&Operation=GetAdHtml&MarketPlace=US&source=ac&ref=qf_sp_asin_til&ad_type=product_link&tracking_id=orcpub-20&marketplace=amazon&region=US&placement=0786966009&asins=0786966009&linkId=b0fe41c5ff03ada5d23ebd4a176abcf6&show_border=false&link_opens_in_new_window=true&price_color=ffffff&title_color=f0a100&bg_color=2c3445"))
-
-#_(def oota-amazon-frame
-  (amazon-frame "//ws-na.amazon-adsystem.com/widgets/q?ServiceVersion=20070822&OneJS=1&Operation=GetAdHtml&MarketPlace=US&source=ac&ref=qf_sp_asin_til&ad_type=product_link&tracking_id=orcpub-20&marketplace=amazon&region=US&placement=0786965819&asins=0786965819&linkId=125c478897a63892c24d0ca46c198848&show_border=false&link_opens_in_new_window=true&price_color=ffffff&title_color=f0a100&bg_color=2c3445"))
-
-#_(def pota-amazon-frame
-    (amazon-frame "//ws-na.amazon-adsystem.com/widgets/q?ServiceVersion=20070822&OneJS=1&Operation=GetAdHtml&MarketPlace=US&source=ac&ref=qf_sp_asin_til&ad_type=product_link&tracking_id=orcpub-20&marketplace=amazon&region=US&placement=0786965789&asins=0786965789&linkId=a2c9018a5e1260f518fa6b0fd0812350&show_border=false&link_opens_in_new_window=true&price_color=ffffff&title_color=f0a100&bg_color=2c3445"))
-
 (defn orcacle []
   (let [search-text @(subscribe [:search-text])]
     [:div.flex.flex-column.h-100-p.white
@@ -1547,31 +1425,15 @@
            hdr]]]
         [:div.flex.justify-cont-c.main-text-color
          [:div.content hdr]]
-        [:div.m-l-20.m-r-20.f-w-b.f-s-18.container.m-b-10.main-text-color
+        ;  Banner for announcements
+        #_[:div.m-l-20.m-r-20.f-w-b.f-s-18.container.m-b-10.main-text-color
          (if (and (not srd-message-closed?)
                   (not hide-header-message?))
            [:div
             (if (not frame?)
               [:div.content.bg-lighter.p-10.flex
                [:div.flex-grow-1
-                [:div "Due to licensing issues, we were forced to remove all non-SRD content, if you have questions about what is and is not SRD content please see the " srd-link ". If you would like to see the non-SRD content added back to OrcPub please sign our " [:a.orange {:href "https://www.change.org/p/wizards-of-the-coast-wizards-of-the-coast-please-grant-orc-pub-licensing-rights-to-your-content" :target "_blank"}
-                                                                                                                                                                                                                                                                           "petition here at change.org"]
-                 "."]
-                (if (not mobile?)
-                  [:div.m-t-10 "You can add content from other sources using the builders in the 'My Content' menu. Here are some compatible sources: "
-                   [:div.flex.flex-wrap.m-t-10
-                    [:div.m-l-5 phb-link]
-                    [:div.m-l-5 dmg-link]
-                    [:div.m-l-5 mm-link]
-                    [:div.m-l-5 xge-link]
-                    [:div.m-l-5 scag-link]
-                    [:div.m-l-5 vgm-link]
-                    [:div.m-l-5 toa-link]
-                    [:div.m-l-5 yp-link]
-                    [:div.m-l-5 cos-link]
-                    [:div.m-l-5 skt-link]
-                    [:div.m-l-5 oota-link]
-                    [:div.m-l-5 pota-link]]])]
+                [:div "Site is based on SRD rules. " srd-link "."]]
                [:i.fa.fa-times.p-10.pointer
                 {:on-click #(dispatch [:close-srd-message])}]])])]
         [:div#app-main.container
@@ -1582,13 +1444,13 @@
            [:div
             [:div.m-b-5 "Icons made by Lorc, Caduceus, and Delapouite. Available on " [:a.orange {:href "http://game-icons.net"} "http://game-icons.net"]]]
            [:div.m-l-10
-            [:a.orange {:href "https://github.com/larrychristensen/orcpub/issues" :target :_blank} "Feedback/Bug Reports"]]
+            [:a.orange {:href "https://github.com/Orcpub/orcpub/issues" :target :_blank} "Feedback/Bug Reports"]]
            [:div.m-l-10.m-r-10.p-10
             [:a.orange {:href "/privacy-policy" :target :_blank} "Privacy Policy"]
             [:a.orange.m-l-5 {:href "/terms-of-use" :target :_blank} "Terms of Use"]]
            [:div.legal-footer
-            [:p "© 2019 OrcPub" [:span.m-l-20 "Contact: " [:a {:href "mailto:redorc@orcpub.com"} "redorc@orcpub.com"]]]
-            [:p "Wizards of the Coast, Dungeons & Dragons, D&D, and their logos are trademarks of Wizards of the Coast LLC in the United States and other countries. © 2019 Wizards. All Rights Reserved. OrcPub.com is not affiliated with, endorsed, sponsored, or specifically approved by Wizards of the Coast LLC."]]]
+            [:p "© 2020 " [:a.orange {:href "https://github.com/Orcpub/orcpub/" :target :_blank} "Orcpub"]]
+            [:p "Wizards of the Coast, Dungeons & Dragons, D&D, and their logos are trademarks of Wizards of the Coast LLC in the United States and other countries. © 2020 Wizards. All Rights Reserved. OrcPub.com is not affiliated with, endorsed, sponsored, or specifically approved by Wizards of the Coast LLC."]]]
             [debug-data]]]])]))
 
 (def row-style
@@ -3249,10 +3111,15 @@
         damage-vulnerabilities @(subscribe [::char/damage-vulnerabilities id])
         condition-immunities @(subscribe [::char/condition-immunities id])
         immunities @(subscribe [::char/immunities id])
-        actions @(subscribe [::char/actions id])
-        bonus-actions @(subscribe [::char/bonus-actions id])
-        reactions @(subscribe [::char/reactions id])
-        traits @(subscribe [::char/traits id])
+        traits-by-type (group-by :type @(subscribe [::char/traits id]))
+        actions (concat @(subscribe [::char/actions id])
+                        (traits-by-type :action))
+        bonus-actions (concat @(subscribe [::char/bonus-actions id])
+                              (traits-by-type :b-action))
+        reactions (concat @(subscribe [::char/reactions id])
+                          (traits-by-type :reaction))
+        traits (concat (traits-by-type nil)
+                       (traits-by-type :other))
         attacks @(subscribe [::char/attacks id])
         all-traits (concat actions bonus-actions reactions traits attacks)
         freqs (into #{} (map has-frequency-units? all-traits))]
@@ -3575,7 +3442,6 @@
          (remove
           nil?
           [[share-link id]
-           [character-page-fb-button id]
            [:div.m-l-5.hover-shadow.pointer
             {:on-click #(swap! expanded? not)}
             [:img.h-32 {:src "/image/world-anvil.jpeg"}]]
@@ -5581,7 +5447,15 @@
        ::e5/edit-class-trait-type
        ::e5/edit-class-trait-description
        ::e5/delete-class-trait
-       :edit-trait-level-event ::e5/edit-class-trait-level]]]))
+       :edit-trait-level-event ::e5/edit-class-trait-level
+       :types [{:title "Other"
+                :value :other}
+               {:title "Action"
+                :value :action}
+               {:title "Bonus Action"
+                :value :b-action}
+               {:title "Reaction"
+                :value :reaction}]]]]))
 
 (defn subclass-spells [subclass spells-title spells-kw]
   [:div
@@ -5707,7 +5581,15 @@
       ::e5/edit-subclass-trait-type
       ::e5/edit-subclass-trait-description
       ::e5/delete-subclass-trait
-      :edit-trait-level-event ::e5/edit-subclass-trait-level]]))
+      :edit-trait-level-event ::e5/edit-subclass-trait-level
+       :types [{:title "Other"
+                :value :other}
+               {:title "Action"
+                :value :action}
+               {:title "Bonus Action"
+                :value :b-action}
+               {:title "Reaction"
+                :value :reaction}]]]))
 
 (defn option-spell [index
                      {:keys [level value] :as spell-cfg}
@@ -5873,7 +5755,15 @@
       ::e5/edit-subrace-trait-name
       ::e5/edit-subrace-trait-type
       ::e5/edit-subrace-trait-description
-      ::e5/delete-subrace-trait]]))
+      ::e5/delete-subrace-trait
+      :types [{:title "Other"
+               :value :other}
+              {:title "Action"
+               :value :action}
+              {:title "Bonus Action"
+               :value :b-action}
+              {:title "Reaction"
+               :value :reaction}]]]))
 
 (defn race-builder []
   (let [race @(subscribe [::races/builder-item])]
@@ -6014,7 +5904,15 @@
       ::e5/edit-race-trait-name
       ::e5/edit-race-trait-type
       ::e5/edit-race-trait-description
-      ::e5/delete-race-trait]]))
+      ::e5/delete-race-trait
+      :types [{:title "Other"
+               :value :other}
+              {:title "Action"
+               :value :action}
+              {:title "Bonus Action"
+               :value :b-action}
+              {:title "Reaction"
+               :value :reaction}]]]))
 
 (defn background-builder []
   (let [background @(subscribe [::bg/builder-item])]
@@ -6401,8 +6299,8 @@
          "Number"
          {:items (map
                   value-to-item
-                  (range 1 21))
-          :value (or num 1)
+                  (range 0 21))
+          :value (or num 0)
           :on-change on-num-change}]])]))
 
 (defn character-selector [index {:keys [character]} on-change]
@@ -6779,7 +6677,7 @@
                            (:type monster)
                            (:subtypes monster)
                            (:alignment monster)]]
-                         [:div.f-w-b.f-s-24 (str "(" (or num 1) ")")]
+                         [:div.f-w-b.f-s-24 (str "(" (or num 0) ")")]
                          [:div.flex.flex-wrap
                           (doall
                            (map
@@ -7443,7 +7341,6 @@
    {:style character-display-style}
    [:div.flex.justify-cont-end.uppercase.align-items-c
     [share-link id]
-    [:div.m-r-5 [character-page-fb-button id]]
     (if (= username owner)
       [:button.form-button
        {:on-click (make-event-handler :edit-character @(subscribe [::char/character id]))}
@@ -7823,7 +7720,7 @@
          [monster-trait-filters])]
       [monster-list-items]]]))
 
-(defn spell-list-item [{:keys [name level school key] :as spell}]
+(defn spell-list-item [{:keys [name level school ritual key] :as spell}]
   (let [expanded? @(subscribe [:spell-expanded? name])
         device-type @(subscribe [:device-type])
         spell-page-path (routes/path-for routes/dnd-e5-spell-page-route :key key)
@@ -7837,7 +7734,7 @@
         [:div.f-s-24.f-w-600.p-t-20.flex
          (if homebrew?
            [:div.m-r-10 (svg-icon "beer-stein" 24 @(subscribe [:theme]))])
-         [spell-summary name level school true 12]]]
+         [spell-summary name level school ritual true 12]]]
        [:div.orange.pointer.m-r-10
         (if (not= device-type :mobile) [:span.underline (if expanded?
                                                           "collapse"

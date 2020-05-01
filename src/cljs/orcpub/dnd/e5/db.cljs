@@ -124,7 +124,7 @@
    :route (parse-route)
    :route-history (list default-route)
    :return-route default-route
-   :registration-form {:send-updates? true}
+   :registration-form {:send-updates? false}
    :device-type (user-agent/device-type)
    ::spells5e/builder-item default-spell
    ::monsters5e/builder-item default-monster

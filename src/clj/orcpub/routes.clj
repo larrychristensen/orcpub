@@ -246,44 +246,6 @@
                             (s/lower-case email))]
     user))
 
-
-(defn get-or-create-oauth-user [conn db oauth-email]
-  (let [{:keys [:orcpub.user/username] :as user} (user-for-email db oauth-email)]
-    (if username
-      user
-      (let [result @(d/transact
-                     conn
-                     [{:orcpub.user/email oauth-email
-                       :orcpub.user/username oauth-email
-                       :orcpub.user/send-updates? false
-                       :orcpub.user/created (java.util.Date.)
-                       :orcpub.user/verified? true}])]
-        (user-for-email (d/db conn) oauth-email)))))
-
-(defn oauth-login [email-fn]
-  (fn [{:keys [conn db] :as request}]
-    (let [fb-email (email-fn request)
-          user (get-or-create-oauth-user conn db fb-email)]
-      (create-login-response db user))))
-
-(defn fb-login [{:keys [json-params db conn remote-addr] :as request}]
-  (if-let [access-token (-> json-params :authResponse :accessToken)]
-    (let [fb-user (oauth/get-fb-user access-token)]
-      (if-let [email (:email fb-user)]
-        (create-login-response db (get-or-create-oauth-user conn db email))
-        (login-error errors/fb-email-permission)))
-    {:status 400}))
-
-(def google-login
-  (oauth-login oauth/get-google-email))
-
-
-(defn google-oauth-code [request]
-  (ring-resp/redirect (str oauth/google-oauth-url (oauth/get-google-redirect-uri request))))
-
-(defn fb-oauth-code [request]
-  (ring-resp/redirect (str oauth/fb-oauth-url (oauth/get-fb-redirect-uri request))))
-
 (defn base-url [{:keys [scheme headers]}]
   (str (or (headers "x-forwarded-proto") (name scheme)) "://" (headers "host")))
 
@@ -550,7 +512,7 @@
   "Dungeons & Dragons 5th Edition (D&D 5e) character builder/generator and digital character sheet far beyond any other in the multiverse.")
 
 (defn default-image-url [host]
-  (str "http://" host "/image/orcpub-box-logo.png"))
+  (str "http://" host "/image/dmv-box-logo.png"))
 
 (defn index-page-response [{:keys [headers uri] :as request}
                            {:keys [title description image-url]}
@@ -559,8 +521,7 @@
     (merge
      response
      {:status 200
-      :headers {"Content-Type" "text/html"
-                "Access-Control-Allow-Origin" "https://www.facebook.com"}
+      :headers {"Content-Type" "text/html" }
       :body
       (index-page
        {:url (str "http://" host uri)
@@ -1033,7 +994,7 @@
        ["/css/*" {:get `get-css}]
        ["/font-awesome-4.7.0/*" {:get `get-fa}]
        ["/image/*" {:get `get-image}]
-       ["/favicon.ico" {:get `get-favicon}]
+       ["/favicon/*" {:get `get-favicon}]
        [(route-map/path-for route-map/register-route)
         {:post `register}]
        [(route-map/path-for route-map/user-route) ^:interceptors [check-auth]
@@ -1078,14 +1039,6 @@
         {:delete `party/remove-character}]
        [(route-map/path-for route-map/login-route)
         {:post `login}]
-       ["/code/fb"
-        {:get `fb-oauth-code}]
-       ["/code/google"
-        {:get `google-oauth-code}]
-       [(route-map/path-for route-map/fb-login-route)
-        {:post `fb-login}]
-       #_[(route-map/path-for route-map/google-login-route)
-        {:get `google-login}]
        [(route-map/path-for route-map/character-pdf-route)
         {:post `character-pdf-2}]
        [(route-map/path-for route-map/verify-route)

@@ -606,7 +606,7 @@ This spell's damage increases by 1d8 when you reach 5th level (2d8), 11th level 
     :range "150 feet"
     :components {:verbal true :somatic true :material true :material-component "the powder of a crushed black pearl worth at least 500 gp"}
     :duration instantaneous
-    :description "A sphere of negative energy ripples out in a 60-footradius
+    :description "A sphere of negative energy ripples out in a 60-foot radius
 sphere from a point within range. Each creature in that area must make a Constitution saving throw. A target takes 8d6 necrotic damage on a failed save, or half as much damage on a successful one.
 At Higher Levels. When you cast this spell using a spell slot of 7th level or higher, the damage increases by 2d6 for each slot level above 6th."
     }
@@ -866,8 +866,7 @@ At Higher Levels. When you cast this spell using certain higher-level spell slot
     :range self
     :components {:verbal true}
     :duration "1 minute"
-    :description "You mentally contact a demigod, the spirit of a longdead
-sage, or some other mysterious entity from another plane. Contacting this extraplanar intelligence can strain or even break your mind. When you cast this spell, make a DC 15 Intelligence saving throw. On a failure, you take 6d6 psychic damage and are insane until you finish a long rest. While insane, you can't take actions, can't understand what other creatures say, can't read, and speak only in gibberish. A greater restoration spell cast on you ends this effect. On a successful save, you can ask the entity up to five questions. You must ask your questions before the spell ends. The GM answers each question with one word, such as “yes,” “no,” “maybe,” “never,” “irrelevant,” or “unclear” (if the entity doesn't know the answer to the question). If a one-word answer would be misleading, the GM might instead offer a short phrase as an answer."
+    :description "You mentally contact a demigod, the spirit of a long dead sage, or some other mysterious entity from another plane. Contacting this extraplanar intelligence can strain or even break your mind. When you cast this spell, make a DC 15 Intelligence saving throw. On a failure, you take 6d6 psychic damage and are insane until you finish a long rest. While insane, you can't take actions, can't understand what other creatures say, can't read, and speak only in gibberish. A greater restoration spell cast on you ends this effect. On a successful save, you can ask the entity up to five questions. You must ask your questions before the spell ends. The GM answers each question with one word, such as “yes,” “no,” “maybe,” “never,” “irrelevant,” or “unclear” (if the entity doesn't know the answer to the question). If a one-word answer would be misleading, the GM might instead offer a short phrase as an answer."
     }
    {
     :name "Contagion"
@@ -1399,8 +1398,7 @@ At Higher Levels. When you cast this spell using a spell slot of 3rd level or hi
                 :duration conc-1-min
                 :description "You cause a creature or an object you can see within range to grow larger or smaller for the duration. Choose either a creature or an object that is neither worn nor carried. If the target is unwilling, it can make a Constitution saving throw. On a success, the spell has no effect.
 If the target is a creature, everything it is wearing and carrying changes size with it. Any item dropped by an affected creature returns to normal size at once.
-Enlarge. The target's size doubles in all dimensions, and its weight is multiplied by eight. This growth increases its size by one category—
-from Medium to Large, for example. If there isn't enough room for the target to double its size, the creature or object attains the maximum possible size in the space available. Until the spell ends, the target also has advantage on Strength checks and Strength saving throws. The target's weapons also grow to match its new size. While these weapons are enlarged, the target's attacks with them deal 1d4 extra damage.
+Enlarge. The target's size doubles in all dimensions, and its weight is multiplied by eight. This growth increases its size by one category — from Medium to Large, for example. If there isn't enough room for the target to double its size, the creature or object attains the maximum possible size in the space available. Until the spell ends, the target also has advantage on Strength checks and Strength saving throws. The target's weapons also grow to match its new size. While these weapons are enlarged, the target's attacks with them deal 1d4 extra damage.
 Reduce. The target's size is halved in all dimensions, and its weight is reduced to one-eighth of normal. This reduction decreases its size by one category—from Medium to Small, for example. Until the spell ends, the target also has disadvantage on Strength checks and Strength saving throws. The target's weapons also shrink to match its new size. While these weapons are reduced, the target's attacks with them deal 1d4 less damage (this can't reduce the damage below 1)."
                 }
                {
@@ -1558,11 +1556,11 @@ heal, or wish."
     :page 240
     :description "You gain the service of a familiar, a spirit that takes an animal form you choose: bat, cat, crab, frog (toad), hawk, lizard, octopus, owl, poisonous snake, fish (quipper), rat, raven, sea horse, spider, or weasel. Appearing in an unoccupied space within range, the familiar has the statistics of the chosen form, though it is a celestial, fey, or fiend (your choice) instead of a beast.
      Your familiar acts independently of you, but it always obeys your commands. In combat, it rolls its own initiative and acts on its own turn. A familiar can't attack, but it can take other actions as normal.
-     When the familiar drops to 0 hit points, it disappears, leaving behind no physical form. It resappears after you case this spell again.
+     When the familiar drops to 0 hit points, it disappears, leaving behind no physical form. It reappears after you case this spell again.
      When your familiar is within 100 feet of you, you can communicate with it telepathically. Additionally, as an action, you can see though your familiar's eyes and hear what it hears until the start of your next turn, gaining the benefits of any special senses that the familiar has. During this time you are deaf and blind with regard to your own senses.
      As an action, you can temporarily dismiss your familiar. It disappears into a pocket dimension where it awaits your summon. Alternatively, you can dismiss it forever. As an action while it is temporarily dismissed, you can cause it to reappear in an unoccupied space within 30 feet of you.
      You can't have more than one familiar at a time. If you case this spell while you already have a familiar, you instead cause it to adopt a new form. Choose one of the forms from the above list. Your familiar transforms into the chosen creature.
-     Finally, when you cast a spell with a range of youch, your familiar can deliever the spell as if it has cast the spell. Your familiar must be within 100 feet of you, and it must use its reaction to deliever the spell when you cast it. If the spell requires and atack roll, you use your attack modifier for the roll."}
+     Finally, when you cast a spell with a range of touch, your familiar can deliver the spell as if it has cast the spell. Your familiar must be within 100 feet of you, and it must use its reaction to deliver the spell when you cast it. If the spell requires an attack roll, you use your attack modifier for the roll."}
    {
     :name "Find Steed"
     :school conjuration
@@ -2289,7 +2287,7 @@ A dispel magic spell can end the spell only if it is cast as a 9th-level spell, 
     :range "150 feet"
     :components {:verbal true :somatic true}
     :duration conc-1-min
-    :description "A swirling cloud of smoke shot through with whitehot
+    :description "A swirling cloud of smoke shot through with white-hot
 embers appears in a 20-foot-radius sphere centered on a point within range. The cloud spreads around corners and is heavily obscured. It lasts for the duration or until a wind of moderate or greater speed (at least 10 miles per hour) disperses it.
 When the cloud appears, each creature in it must make a Dexterity saving throw. A creature takes 10d8 fire damage on a failed save, or half as much damage on a successful one. A creature must also make this saving throw when it enters the spell's area for the first time on a turn or ends its turn there.
 The cloud moves 10 feet directly away from you in a direction that you choose at the start of each of your turns."
@@ -2807,7 +2805,7 @@ At Higher Levels. If you cast this spell using a spell slot of 6th level or high
     :range "120 feet"
     :components {:verbal true :somatic true :material true :material-component "several seeds of any moonseed plant and a piece of opalescent feldspar"}
     :duration conc-1-min
-    :description "A silvery beam of pale light shines down in a 5-footradius,
+    :description "A silvery beam of pale light shines down in a 5-foot radius,
 40-foot-high cylinder centered on a point within range. Until the spell ends, dim light fills the cylinder.
 When a creature enters the spell's area for the first time on a turn or starts its turn there, it is engulfed in ghostly flames that cause searing pain, and it must make a Constitution saving throw. It takes 2d10 radiant damage on a failed save, or half as much damage on a successful one.
 A shapechanger makes its saving throw with disadvantage. If it fails, it also instantly reverts to its original form and can't assume a different form until it leaves the spell's light.
@@ -2885,7 +2883,7 @@ At Higher Levels. When you cast this spell using a spell slot of 5th level or hi
     :range "30 feet"
     :components {:verbal true :somatic true}
     :duration "1 hour"
-    :description "A Large quasi-real, horselike creature appears on the ground in an unoccupied space of your choice within range. You decide the creature's appearance, but it is equipped with a saddle, bit, and bridle. Any of the equipment created by the spell vanishes in a puff of smoke if it is carried more than 10 feet away from the steed.
+    :description "A Large quasi-real, horse-like creature appears on the ground in an unoccupied space of your choice within range. You decide the creature's appearance, but it is equipped with a saddle, bit, and bridle. Any of the equipment created by the spell vanishes in a puff of smoke if it is carried more than 10 feet away from the steed.
 For the duration, you or a creature you choose can ride the steed. The creature uses the statistics for a riding horse, except it has a speed of 100 feet and can travel 10 miles in an hour, or 13 miles at a fast pace. When the spell ends, the steed gradually fades, giving the rider 1 minute to dismount. The spell ends if you use an action to dismiss it or if the steed takes any damage."
     }
    {
@@ -2913,7 +2911,7 @@ A creature enlisted to join your group counts as a member of it, receiving a ful
     :duration "24 hours"
     :description "With this spell, you attempt to bind a celestial, an elemental, a fey, or a fiend to your service. The creature must be within range for the entire casting of the spell. (Typically, the creature is first summoned into the center of an inverted magic circle in order to keep it trapped while this spell is cast.) At the completion of the casting, the target must make a Charisma saving throw. On a failed save, it is bound to serve you for the duration. If the creature was summoned or created by another spell, that spell's duration is extended to match the duration of this spell.
 A bound creature must follow your instructions to the best of its ability. You might command the creature to accompany you on an adventure, to guard a location, or to deliver a message. The creature obeys the letter of your instructions, but if the creature is hostile to you, it strives to twist your words to achieve its own objectives. If the creature carries out your instructions completely before the spell ends, it travels to you to report this fact if you are on the same plane of existence. If you are on a different plane of existence, it returns to the place where you bound it and remains there until the spell ends.
-At Higher Levels. When you cast this spell using a spell slot of a higher level, the duration increases to 10 days with a 6th-level slot, to 30 days with a 7thlevel slot, to 180 days with an 8th-level slot, and to a year and a day with a 9th-level spell slot."
+At Higher Levels. When you cast this spell using a spell slot of a higher level, the duration increases to 10 days with a 6th-level slot, to 30 days with a 7th level slot, to 180 days with an 8th-level slot, and to a year and a day with a 9th-level spell slot."
     }
    {
     :name "Plane Shift"
@@ -3287,8 +3285,7 @@ Casting this spell to restore life to a creature that has been dead for one year
     :range "100 feet"
     :components {:verbal true :somatic true :material true :material-component "a lodestone and iron filings"}
     :duration conc-1-min
-    :description "This spell reverses gravity in a 50-foot-radius, 100-
-foot high cylinder centered on a point within range. All creatures and objects that aren't somehow anchored to the ground in the area fall upward and reach the top of the area when you cast this spell. A creature can make a Dexterity saving throw to grab onto a fixed object it can reach, thus avoiding the fall.
+    :description "This spell reverses gravity in a 50-foot-radius, 100-foot high cylinder centered on a point within range. All creatures and objects that aren't somehow anchored to the ground in the area fall upward and reach the top of the area when you cast this spell. A creature can make a Dexterity saving throw to grab onto a fixed object it can reach, thus avoiding the fall.
 If some solid object (such as a ceiling) is encountered in this fall, falling objects and creatures strike it just as they would during a normal downward fall. If an object or creature reaches the top of the area without striking anything, it remains there, oscillating slightly, for the duration.
 At the end of the duration, affected objects and creatures fall back down."
     }
@@ -3312,8 +3309,7 @@ At the end of the duration, affected objects and creatures fall back down."
     :duration "1 hour"
     :description "You touch a length of rope that is up to 60 feet long. One end of the rope then rises into the air until the whole rope hangs perpendicular to the ground. At the upper end of the rope, an invisible entrance opens to an extradimensional space that lasts until the spell ends.
 The extradimensional space can be reached by climbing to the top of the rope. The space can hold as many as eight Medium or smaller creatures. The rope can be pulled into the space, making the rope disappear from view outside the space.
-Attacks and spells can't cross through the entrance into or out of the extradimensional space, but those inside can see out of it as if through a 3-foot-by-5-
-foot window centered on the rope.
+Attacks and spells can't cross through the entrance into or out of the extradimensional space, but those inside can see out of it as if through a 3-foot-by-5-foot window centered on the rope.
 Anything inside the extradimensional space drops out when the spell ends."
     }])
 

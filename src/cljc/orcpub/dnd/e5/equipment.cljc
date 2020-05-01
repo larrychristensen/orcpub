@@ -52,8 +52,8 @@
     :key :herbalism-kit}
    {:name "Navigator's Tools"
     :key :navigators-tools}
-   {:name "Poisoner's Tools"
-    :key :poisoners-tools}
+   {:name "Poisoner's Kit"
+    :key :poisoners-kit}
    {:name "Thieves' Tools"
     :key :thieves-tools}])
 
