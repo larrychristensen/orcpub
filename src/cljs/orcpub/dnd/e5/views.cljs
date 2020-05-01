@@ -2152,13 +2152,17 @@
     (section-header-2 "Armor Class" "checked-shield")
     [:div.f-s-24.f-w-b.armor-class @(subscribe [::char/current-armor-class id])]]])
 
-(defn basic-section [title icon v]
+(defn basic-section [title icon v show-button]
   [:div
    [:div.p-10.flex.flex-column.align-items-c
     (section-header-2 title icon)
     [:div.f-s-24.f-w-b
      {:class (csk/->kebab-case title)}
-     v]]])
+     v]]
+   (if (boolean show-button)
+     [:div.f-s-24.f-w-b [:button.form-button-checks
+                         {:on-click #(dispatch [:show-message-2 (str title " check " (dice/dice-roll-text-2 (str "1d20" v))) 10000])}
+                         "Roll"]])])
 
 (def current-hit-points-editor-style
   {:width "60px"
@@ -2172,7 +2176,7 @@
                     " / "
                     (map
                      (fn [{:keys [class-level hit-die]}] (str class-level "d" hit-die))
-                     (vals levels))))))
+                     (vals levels))) false)))
 
 (defn set-current-hit-points-fn [id]
   #(dispatch [::char/set-current-hit-points
@@ -2195,26 +2199,26 @@
                                @(subscribe [::char/max-hit-points id]))
                     :on-change (set-current-hit-points-handler id)}]
                   [:span.m-l-5 "/"]
-                  [:span.m-l-5 @(subscribe [::char/max-hit-points id])]]))
+                  [:span.m-l-5 @(subscribe [::char/max-hit-points id])]] false))
 
 (defn initiative-section-2 [id]
-  (basic-section "Initiative" "sprint" (common/bonus-str @(subscribe [::char/initiative id]))))
+  (basic-section "Initiative" "sprint" (common/bonus-str @(subscribe [::char/initiative id])) true))
 
 (defn darkvision-section-2 [id]
-  (basic-section "Darkvision" "night-vision" (str @(subscribe [::char/darkvision id]) " ft.")))
+  (basic-section "Darkvision" "night-vision" (str @(subscribe [::char/darkvision id]) " ft.") false))
 
 (defn critical-hits-section-2 [id]
   (let [crit-values-str @(subscribe [::char/crit-values-str id])]
-    (basic-section "Critical Hits" nil crit-values-str)))
+    (basic-section "Critical Hits" nil crit-values-str false)))
 
 (defn number-of-attacks-section-2 [id]
-  (basic-section "Number of Attacks" nil @(subscribe [::char/number-of-attacks id])))
+  (basic-section "Number of Attacks" nil @(subscribe [::char/number-of-attacks id]) false))
 
 (defn passive-perception-section-2 [id]
-  (basic-section "Passive Perception" "awareness" @(subscribe [::char/passive-perception id])))
+  (basic-section "Passive Perception" "awareness" @(subscribe [::char/passive-perception id]) false))
 
 (defn proficiency-bonus-section-2 [id]
-  (basic-section "Proficiency Bonus" nil (common/bonus-str @(subscribe [::char/proficiency-bonus id]))))
+  (basic-section "Proficiency Bonus" nil (common/bonus-str @(subscribe [::char/proficiency-bonus id])) false))
 
 (defn skills-section-2 [id]
   (let [skill-profs (or @(subscribe [::char/skill-profs id]) #{})
