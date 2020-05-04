@@ -2219,7 +2219,7 @@
                   [:span.m-l-5 @(subscribe [::char/max-hit-points id])]] false))
 
 (defn initiative-section-2 [id]
-  (basic-section "Initiative" "sprint" (common/bonus-str @(subscribe [::char/initiative id])) true))
+  (basic-section "Initiative" "sprint" (common/mod-str @(subscribe [::char/initiative id])) true))
 
 (defn darkvision-section-2 [id]
   (basic-section "Darkvision" "night-vision" (str @(subscribe [::char/darkvision id]) " ft.") false))
