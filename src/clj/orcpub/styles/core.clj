@@ -457,6 +457,8 @@
                 :margin-left "-60px"
                 :background-color "black"
                 :font-family "Open Sans, sans-serif"
+                :font-size "14px"
+                :font-weight "normal"
                 :color "#fff"
                 :text-align "center"
                 :padding "10px 10px"
@@ -1085,7 +1087,7 @@
       :cursor :pointer
       :background-image "linear-gradient(to bottom, #f1a20f, #dbab50)"}]
 
-    [:.form-button-checks
+    [:.roll-button
      {:color :white
       :font-weight 600
       :font-size "9px"
