@@ -1832,7 +1832,7 @@
       [:td.p-l-10.p-b-10.p-t-10 (get cls-mods :spell-save-dc)]
       [:td.p-l-10.p-b-10.p-t-10 (common/bonus-str (get cls-mods :spell-attack-modifier))]
       [:td.p-l-10.p-b-10.p-t-10 [:div.tooltip [:button.roll-button
-                                               {:on-click (button-roll-handler (str (:name spell) " attack: ") (str "1d20" (common/bonus-str (get cls-mods :spell-attack-modifier))))}
+                                               {:on-click (button-roll-handler (str (:name spell) " attack: ") (str "1d20" (common/mod-str (get cls-mods :spell-attack-modifier))))}
                                                "Roll"] [:span.tooltiptext "ctrl+click for advantage shift+click for disadvantage"]]]
       [:td.p-l-10.p-b-10.p-t-10.pointer.orange
        {:on-click on-click}
