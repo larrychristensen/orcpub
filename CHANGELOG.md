@@ -1,19 +1,26 @@
 # Changelog
 
+## v2.5.0.12 (05/05/2020)
+
+#### Bug Fixes:
+
+- [#377](https://github.com/Orcpub/orcpub/pull/377) fix for damage roll to use weapon-damage-modifier
+
+---
+
 ## v2.5.0.11 (05/05/2020)
 
 #### Enhancements:
 
-- [#372](https://github.com/Orcpub/orcpub/issues/372) Add roll buttons for skill checks
-- [#233](https://github.com/Orcpub/orcpub/issues/233) Character Export (.json?)
+- [#373](https://github.com/Orcpub/orcpub/pull/373) Add ability and attack/damage rolls
 
 #### Bug Fixes:
 
-- [#362](https://github.com/Orcpub/orcpub/issues/362) Paladin Starting Equipment is missing a Holy Symbol
-- [#358](https://github.com/Orcpub/orcpub/issues/358) Belt of Dwarvenkind
-- [#353](https://github.com/Orcpub/orcpub/issues/353) Remove wording from Error msg
-- [#339](https://github.com/Orcpub/orcpub/issues/339) Poisoner's Kit is named wrong
-- [#332](https://github.com/Orcpub/orcpub/issues/332) Tomes don't increase the max value for a stat
+- [#367](https://github.com/Orcpub/orcpub/pull/367) Fix for missing Holy Symbol
+- [#351](https://github.com/Orcpub/orcpub/pull/351) Fix typo for Poisoner's Kit
+- [#354](https://github.com/Orcpub/orcpub/pull/354) Remove "Accounts from the old Orcpub.." verbiage.
+- [#359](https://github.com/Orcpub/orcpub/pull/359) Add Belt of Dwarvenkind
+- [#352](https://github.com/Orcpub/orcpub/pull/352) Fixes for character-ability's being limited to 20.  New max is 35.
 
 ---
 
@@ -21,26 +28,21 @@
 
 #### Enhancements:
 
-- [#348](https://github.com/Orcpub/orcpub/issues/348) Version bump Datomic from 0.9.5561 to 0.9.5703
-- [#346](https://github.com/Orcpub/orcpub/issues/346) Update site look/feel - new header, new login sidebar
-- [#345](https://github.com/Orcpub/orcpub/issues/345) Features for Races and Subraces can be split
-- [#313](https://github.com/Orcpub/orcpub/issues/313) Split up Homebrew Class features into Actions, Bonus Actions and Reactions
-- [#228](https://github.com/Orcpub/orcpub/issues/228) Add Ritual marker for ritual spells
+- [#336](https://github.com/Orcpub/orcpub/pull/336) Update site look/feel - new header, new login sidebar
+- [#342](https://github.com/Orcpub/orcpub/pull/342) Race Features Action Split
+- [#333](https://github.com/Orcpub/orcpub/pull/333) Update default value - Registration form set "Yes! Send me updates about orcpub" = false
+- [#329](https://github.com/Orcpub/orcpub/pull/329) Version bump Datomic from 0.9.5561 to 0.9.5703
+- [#314](https://github.com/Orcpub/orcpub/pull/314) Organized Class Features
 
 #### Bug Fixes:
 
-- [#350](https://github.com/Orcpub/orcpub/issues/350) Remove Google and Facebook Auth API's
-- [#349](https://github.com/Orcpub/orcpub/issues/349) Removed Banner and links.
-- [#347](https://github.com/Orcpub/orcpub/issues/347) Changes default signup form
-- [#334](https://github.com/Orcpub/orcpub/issues/334) The information for the weapon Sun Blade is wrong. For example, the Finesse property doesn't appear.
-- [#321](https://github.com/Orcpub/orcpub/issues/321) General Maintenance - Update Github urls
-- [#319](https://github.com/Orcpub/orcpub/issues/319) General Maintenance - Remove Amazon links to splash banner
-- [#318](https://github.com/Orcpub/orcpub/issues/318) General Maintenance - Remove Google API logins
-- [#317](https://github.com/Orcpub/orcpub/issues/317) General Maintenance - Remove Google Analytics 
-- [#316](https://github.com/Orcpub/orcpub/issues/316) General Maintenance - Remove deprecated Facebook API/Logins
-- [#299](https://github.com/Orcpub/orcpub/issues/299) Monster view doesn't respect \n
-- [#298](https://github.com/Orcpub/orcpub/issues/298) Spelling Errors in 'Find Familiar'
-- [#279](https://github.com/Orcpub/orcpub/issues/279) Combat Tracker Bug
+- [#325](https://github.com/Orcpub/orcpub/pull/325) Remove Google and Facebook Auth API's
+- [#326](https://github.com/Orcpub/orcpub/pull/326) Removed Banner and links.
+- [#343](https://github.com/Orcpub/orcpub/pull/343) Fix ritual on spell page
+- [#344](https://github.com/Orcpub/orcpub/pull/344) Fix for Sun Blade
+- [#315](https://github.com/Orcpub/orcpub/pull/315) Encounter num fix
+- [#300](https://github.com/Orcpub/orcpub/pull/300) Fix spelling errors and formatting in #298
+- [#301](https://github.com/Orcpub/orcpub/pull/301) Fix for monster view not respecting crlf in spells and actions #299
 
 ---
 
@@ -48,25 +50,24 @@
 
 #### Enhancements:
 
-- [#284](https://github.com/Orcpub/orcpub/issues/284) Tooltip for HomeBrew Icon
-- [#278](https://github.com/Orcpub/orcpub/issues/278) Alphabetize spell School list in Spell Builder
-- [#226](https://github.com/Orcpub/orcpub/issues/226) Triggering a long rest doesn't restore hp. 
-- [#125](https://github.com/Orcpub/orcpub/issues/125) [Suggestion] Pact Builder for Warlock Class
+- [#285](https://github.com/Orcpub/orcpub/pull/285) Tool tip homebrew
+- [#286](https://github.com/Orcpub/orcpub/pull/286) Alphabetize spell school list
 
 #### Bug Fixes:
 
-- [#293](https://github.com/Orcpub/orcpub/issues/293) Ioun Stone (Leadership) does not increase Charisma
-- [#271](https://github.com/Orcpub/orcpub/issues/271) Class/Level
-- [#265](https://github.com/Orcpub/orcpub/issues/265) Short Rest Button Missing (Warlocks)
-- [#68](https://github.com/Orcpub/orcpub/issues/68) [Bug] Duplicate Spells Displays
+- [#287](https://github.com/Orcpub/orcpub/pull/287) Fix languages section in the subrace builder
+- [#297](https://github.com/Orcpub/orcpub/pull/297) Fixes #68 blank spells and duplicates
+- [#291](https://github.com/Orcpub/orcpub/pull/291) Added finish short rest button for warlock
+- [#294](https://github.com/Orcpub/orcpub/pull/294) Fixes #293 for Ioun Stone (Leadership) does not increase Charisma
+- [#288](https://github.com/Orcpub/orcpub/pull/288) Fix for triggering a long rest does not restore hp
 
 ---
 
 ## v2.5.0.8 (30/11/2019)
 
-#### Bug Fixes:
+#### Enhancements:
 
-- [#264](https://github.com/Orcpub/orcpub/issues/264) Arcane Hand has a Formatting Issue
+- [#268](https://github.com/Orcpub/orcpub/pull/268) Pact boon builder
 
 ---
 
@@ -74,12 +75,12 @@
 
 #### Enhancements:
 
-- [#262](https://github.com/Orcpub/orcpub/issues/262) Add css classes to make it easier for bots to scrape
+- [#256](https://github.com/Orcpub/orcpub/pull/256) Add css classes to make it easier for bots to scrape.
 
 #### Bug Fixes:
 
-- [#251](https://github.com/Orcpub/orcpub/issues/251) Sickle not working with Two-Weapon Fighting
-- [#239](https://github.com/Orcpub/orcpub/issues/239) Races with cantrips break right hand spell view
+- [#261](https://github.com/Orcpub/orcpub/pull/261) Fixes Sickle not working with Two-Weapon Fighting #251
+- [#266](https://github.com/Orcpub/orcpub/pull/266) Fixed formatting Arcane Hand
 
 ---
 
@@ -87,42 +88,44 @@
 
 #### Enhancements:
 
-- [#231](https://github.com/Orcpub/orcpub/issues/231) Custom treasure doesn't display with normal treasure
-- [#195](https://github.com/Orcpub/orcpub/issues/195) Deflect Missiles Clarification
-- [#167](https://github.com/Orcpub/orcpub/issues/167) Sort monsters by challenge level
-- [#164](https://github.com/Orcpub/orcpub/issues/164) Selection Drop Down Sorting
-- [#146](https://github.com/Orcpub/orcpub/issues/146) Re-Order Character Creation Tabs
-- [#144](https://github.com/Orcpub/orcpub/issues/144) My Content Titles all the same
-- [#143](https://github.com/Orcpub/orcpub/issues/143) Monster Senses & Armor Notes
-- [#120](https://github.com/Orcpub/orcpub/issues/120) Hit Dice representation problems in character sheet
-- [#100](https://github.com/Orcpub/orcpub/issues/100) Add Spell material component cost to spells/printed cards
-- [#93](https://github.com/Orcpub/orcpub/issues/93) Condition Immunity: Exhaustion missing from Monster Builder
-- [#80](https://github.com/Orcpub/orcpub/issues/80) Add Subclass Name to PDF
-- [#79](https://github.com/Orcpub/orcpub/issues/79) [Suggestion] Party Sorting
-- [#77](https://github.com/Orcpub/orcpub/issues/77) Preserve line breaks
-- [#53](https://github.com/Orcpub/orcpub/issues/53) My Content Folders
-- [#51](https://github.com/Orcpub/orcpub/issues/51) [Suggestion] Allow Party creation on the Parties page
-- [#49](https://github.com/Orcpub/orcpub/issues/49) Clean up the My Content list and other buttons
-- [#48](https://github.com/Orcpub/orcpub/issues/48) [Suggestion] Re-arrange Monster Builder to Mirror Monster Stat Blocks
-- [#42](https://github.com/Orcpub/orcpub/issues/42) Blank Spell entry bug
-- [#41](https://github.com/Orcpub/orcpub/issues/41) Add Missing CRs to monster creator
-- [#9](https://github.com/Orcpub/orcpub/issues/9) Document for setup
-- [#3](https://github.com/Orcpub/orcpub/issues/3) Enable configuration for exception handling email
+- [#166](https://github.com/Orcpub/orcpub/pull/166) List treasure on Character Viewer
+- [#168](https://github.com/Orcpub/orcpub/pull/168) Subclass-builder Sort Selection Type and Modifier Type by title alphabetically
+- [#194](https://github.com/Orcpub/orcpub/pull/194) Added another debug window to output json.  Allows users to export to…
+- [#224](https://github.com/Orcpub/orcpub/pull/224) Re-arranged Monster page to match handbooks.
+- [#150](https://github.com/Orcpub/orcpub/pull/150) Custom Warlock Pact Boons
+- [#197](https://github.com/Orcpub/orcpub/pull/197) Sort monsters by challenge level
+- [#205](https://github.com/Orcpub/orcpub/pull/205) Made email  SSL configurable.
+- [#203](https://github.com/Orcpub/orcpub/pull/203) Added the ability to server and import homebrew on first page load.
+- [#137](https://github.com/Orcpub/orcpub/pull/137) Class Description and Subclass Flavor "help" text editable
+- [#156](https://github.com/Orcpub/orcpub/pull/156) Show spell components in character builder
+- [#154](https://github.com/Orcpub/orcpub/pull/154) Spelling Corrections
+- [#148](https://github.com/Orcpub/orcpub/pull/148) Reorder tabs on character builder
+- [#142](https://github.com/Orcpub/orcpub/pull/142) Monster Senses & Armor Notes
+- [#122](https://github.com/Orcpub/orcpub/pull/122) Pretty print orcbrews
+- [#105](https://github.com/Orcpub/orcpub/pull/105) Spell card add materials
+- [#91](https://github.com/Orcpub/orcpub/pull/91) Feature/subclass print
+- [#89](https://github.com/Orcpub/orcpub/pull/89) Add subclass to class string
+- [#62](https://github.com/Orcpub/orcpub/pull/62) Fix snakeoil bat
+- [#63](https://github.com/Orcpub/orcpub/pull/63) Fix css lien figwheel
+- [#67](https://github.com/Orcpub/orcpub/pull/67) Fix sorting mycontent
+- [#71](https://github.com/Orcpub/orcpub/pull/71) Fix pdf printing equipment
 
 #### Bug Fixes:
 
-- [#244](https://github.com/Orcpub/orcpub/issues/244) Bigby's Hand is not SRD compliant
-- [#243](https://github.com/Orcpub/orcpub/issues/243) Nystul's Magic Aura is not SRD compliant
-- [#242](https://github.com/Orcpub/orcpub/issues/242) Tasha's Hideous Laughter is not SRD compliant
-- [#241](https://github.com/Orcpub/orcpub/issues/241) Leomund's Tiny Hut not SRD compliant
-- [#218](https://github.com/Orcpub/orcpub/issues/218) Staff of Power Issues
-- [#171](https://github.com/Orcpub/orcpub/issues/171) Barbarian Rage Displays Error
-- [#134](https://github.com/Orcpub/orcpub/issues/134) Wrong requirements for Ritual Caster
-- [#133](https://github.com/Orcpub/orcpub/issues/133) Monster Vulnerability Shows as Resistance Too
-- [#124](https://github.com/Orcpub/orcpub/issues/124) discord images not getting attached
-- [#109](https://github.com/Orcpub/orcpub/issues/109) Rogue Arcane Trickster spell slots
-- [#98](https://github.com/Orcpub/orcpub/issues/98) Drop downs under features show up wrong
-- [#95](https://github.com/Orcpub/orcpub/issues/95) Rogue "Burglar's Pack" missing
-- [#92](https://github.com/Orcpub/orcpub/issues/92) Ability Score/Saving Throw order in Monster Builder
-- [#82](https://github.com/Orcpub/orcpub/issues/82) Ioun Stone (Strength) doesn't increase Strength total
-- [#8](https://github.com/Orcpub/orcpub/issues/8) Automated docker build
+- [#245](https://github.com/Orcpub/orcpub/pull/245) Srd spell fixes
+- [#238](https://github.com/Orcpub/orcpub/pull/238) Add Rar.'s Telepathic Bond to Wizard Spell List
+- [#212](https://github.com/Orcpub/orcpub/pull/212) Fixed speed modifier type not displaying on the Item Builder
+- [#149](https://github.com/Orcpub/orcpub/pull/149) Added a generic user agent to get images on PDF creation.
+- [#176](https://github.com/Orcpub/orcpub/pull/176) Change pdf field hitdice from single line to multi-line in pdfs
+- [#219](https://github.com/Orcpub/orcpub/pull/219) Move staff's to weapons, so they calculate properly.
+- [#221](https://github.com/Orcpub/orcpub/pull/221) Sort parties, and characters by name.
+- [#175](https://github.com/Orcpub/orcpub/pull/175) fix for barbarian rage long-rests
+- [#147](https://github.com/Orcpub/orcpub/pull/147) Fixs for hitdice
+- [#145](https://github.com/Orcpub/orcpub/pull/145) Capitalised and pluralized Eldritch Invocations in the My Content tab
+- [#139](https://github.com/Orcpub/orcpub/pull/139) Show monster damage resistances properly
+- [#97](https://github.com/Orcpub/orcpub/pull/97) Updated internal name of burglars-pack
+- [#99](https://github.com/Orcpub/orcpub/pull/99) Fix features dropdowns
+- [#106](https://github.com/Orcpub/orcpub/pull/106) Fix linebreaks in feats
+- [#70](https://github.com/Orcpub/orcpub/pull/70) Fix missing monster Challenge Ratings
+- [#74](https://github.com/Orcpub/orcpub/pull/74) Fix typo burglars pack
+- [#65](https://github.com/Orcpub/orcpub/pull/65) Fix user account black
