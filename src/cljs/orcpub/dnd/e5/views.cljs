@@ -2738,7 +2738,7 @@
                                          {:on-click (button-roll-handler (str name " attack: ") (str "1d20" (common/mod-str (weapon-attack-modifier weapon))))}
                                          "Attack"] [:span.tooltiptext "ctrl+click for advantage shift+click for disadvantage"]]]
                      [:td [:button.roll-button
-                                         {:on-click (button-roll-handler (str name " damage: ") (str damage-die-count "d" damage-die (common/mod-str (weapon-attack-modifier weapon))))}
+                                         {:on-click (button-roll-handler (str name " damage: ") (str damage-die-count "d" damage-die (common/mod-str (weapon-damage-modifier weapon))))}
                                          "Damage"]]
                      [:td.pointer
                       {:on-click (toggle-details-expanded-handler expanded-details weapon-key)}
