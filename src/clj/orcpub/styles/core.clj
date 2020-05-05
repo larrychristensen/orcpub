@@ -457,6 +457,8 @@
                 :margin-left "-60px"
                 :background-color "black"
                 :font-family "Open Sans, sans-serif"
+                :font-size "14px"
+                :font-weight "normal"
                 :color "#fff"
                 :text-align "center"
                 :padding "10px 10px"
@@ -856,9 +858,7 @@
 
 (def app
   (concat
-   [
-
-    [:.character-builder-header
+   [[:.character-builder-header
      {:margin-bottom "19px"}]
 
     [:.senses
@@ -878,12 +878,12 @@
      {:margin "10px 0"}]
 
     #_["input::-webkit-outer-spin-button"
-     "input::-webkit-inner-spin-button"
-     {:-webkit-appearance :none
-      :margin 0}]
+       "input::-webkit-inner-spin-button"
+       {:-webkit-appearance :none
+        :margin 0}]
 
     #_["input[type=number]"
-     {:-moz-appearance :textfield}]
+       {:-moz-appearance :textfield}]
 
     [:a :a:visited
      {:color orange}]
@@ -938,8 +938,8 @@
      {:border-bottom "1px solid rgba(255,255,255,0.5)"}]
 
     #_[:.header-tab:hover
-     [(garden.selectors/& (garden.selectors/not :.disabled))
-      {:background-color orange}]]
+       [(garden.selectors/& (garden.selectors/not :.disabled))
+        {:background-color orange}]]
 
     [:.app-header-bar
      {:min-height (px 81)
@@ -948,7 +948,7 @@
       :background-color "rgba(0, 0, 0, 0.25)"}]
 
     #_[:.options-column
-     {:width "300px"}]
+       {:width "300px"}]
 
     [:.builder-column
      {:display :none
@@ -985,7 +985,7 @@
       :border-bottom "5px solid rgba(72,72,72,0.37)"}
      [:.builder-tab-text
       {:opacity 0.2}]]
- 
+
     [:.selected-builder-tab
      {:border-bottom-color "#f1a20f"}
      [:.builder-tab-text
@@ -1038,7 +1038,7 @@
 
     [:.remove-item-button
      {:color button-color
-      :font-size "16px" 
+      :font-size "16px"
       :margin-left "5px"
       :cursor :pointer}]
 
@@ -1084,6 +1084,19 @@
       :border-radius "5px"
       :text-transform :uppercase
       :padding "10px 15px"
+      :cursor :pointer
+      :background-image "linear-gradient(to bottom, #f1a20f, #dbab50)"}]
+
+    [:.roll-button
+     {:color :white
+      :font-weight 600
+      :font-size "9px"
+      :border :none
+      :border-radius "2px"
+      :text-transform :uppercase
+      :padding "8px 8px"
+      :margin-right "2px"
+      :margin-left "2px"
       :cursor :pointer
       :background-image "linear-gradient(to bottom, #f1a20f, #dbab50)"}]
 
@@ -1213,16 +1226,16 @@
       {:stroke "#363636"}]
 
      [:.input
-     {:background-color :transparent
-      :color :black
-      :border "1px solid #282828"
-      :border-radius "5px"
-      :margin-top "5px"
-      :display :block
-      :padding "10px"
-      :width "100%"
-      :box-sizing :border-box
-      :font-size "14px"}]
+      {:background-color :transparent
+       :color :black
+       :border "1px solid #282828"
+       :border-radius "5px"
+       :margin-top "5px"
+       :display :block
+       :padding "10px"
+       :width "100%"
+       :box-sizing :border-box
+       :font-size "14px"}]
 
      [:.form-button
       {:background-image "linear-gradient(to bottom, #33658A, #33658A)"}]

@@ -1751,6 +1751,16 @@
           :message-type :success)))
 
 (reg-event-db
+ :show-message-2
+; Display msg with out auto closing the msg.
+ (fn [db [_ message]]
+   (prn message)
+   (assoc db
+          :message-shown? true
+          :message message
+          :message-type :success)))
+
+(reg-event-db
  :show-warning-message
  (fn [db [_ message ttl]]
    (go (<! (timeout (or ttl 5000)))
