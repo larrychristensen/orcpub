@@ -1,5 +1,22 @@
 # Changelog
 
+## v2.5.0.11 (05/05/2020)
+
+#### Enhancements:
+
+- [#372](https://github.com/Orcpub/orcpub/issues/372) Add roll buttons for skill checks
+- [#233](https://github.com/Orcpub/orcpub/issues/233) Character Export (.json?)
+
+#### Bug Fixes:
+
+- [#362](https://github.com/Orcpub/orcpub/issues/362) Paladin Starting Equipment is missing a Holy Symbol
+- [#358](https://github.com/Orcpub/orcpub/issues/358) Belt of Dwarvenkind
+- [#353](https://github.com/Orcpub/orcpub/issues/353) Remove wording from Error msg
+- [#339](https://github.com/Orcpub/orcpub/issues/339) Poisoner's Kit is named wrong
+- [#332](https://github.com/Orcpub/orcpub/issues/332) Tomes don't increase the max value for a stat
+
+---
+
 ## v2.5.0.10 (28/03/2020)
 
 #### Enhancements:
