@@ -2899,7 +2899,7 @@
             [:tr.f-w-b
              {:class-name (if mobile? "f-s-12")}
              [:th.p-10 "Name"]
-             [:td.p-10 (if mobile? "Prof?" "Proficient?")]
+             [:th.p-10 (if mobile? "Prof?" "Proficient?")]
              (if skill-expertise
                [:th.p-10 "Expertise?"])
              [:th.p-10 (if (not mobile?) [:div.w-40 "Bonus"])]]
@@ -2940,7 +2940,7 @@
               [:tr.f-w-b
                {:class-name (if mobile? "f-s-12")}
                [:th.p-10 "Name"]
-               [:td.p-10 (if mobile? "Prof?" "Proficient?")]
+               [:th.p-10 (if mobile? "Prof?" "Proficient?")]
                (if tool-expertise
                  [:th.p-10 "Expertise?"])
                [:th.p-10 (if (not mobile?) [:div.w-40 "Bonus"])]]
@@ -2956,7 +2956,10 @@
                      [:td.p-10 (boolean-icon proficient?)]
                      (if tool-expertise
                        [:td.p-10 (boolean-icon expertise?)])
-                     [:td.p-10.f-s-18.f-w-b (common/bonus-str (tool-bonus-fn kw))]]))
+                     [:td.p-10.f-s-18.f-w-b (common/bonus-str (tool-bonus-fn kw))]
+                     [:td [:div.tooltip [:button.roll-button
+                                         {:on-click (button-roll-handler (str name " check: ") (str "1d20" (common/mod-str (tool-bonus-fn kw))))}
+                                         "Roll"] [:span.tooltiptext "ctrl+click for advantage shift+click for disadvantage"]]]]))
                 tool-profs))]]]])))))
 
 
