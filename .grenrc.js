@@ -4,8 +4,7 @@ module.exports = {
         "duplicate",
         "wontfix",
         "invalid",
-        "help wanted",
-		"closed"
+        "help wanted"
     ],
     "template": {
         "issue": "- [{{text}}]({{url}}) {{name}}"
