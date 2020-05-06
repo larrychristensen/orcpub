@@ -1765,11 +1765,10 @@
 (defn button-roll-fn [message roll]
   (fn [e]
     (if (.-shiftKey e)
-      (dispatch [:show-message-2 (str message " w/ Disadvantage: " (dice/dice-roll-text-2 roll) "  |  " (dice/dice-roll-text-2 roll))]))
-    (if (.-ctrlKey e)
-      (dispatch [:show-message-2 (str message " w/ Advantage: " (dice/dice-roll-text-2 roll) "  |  " (dice/dice-roll-text-2 roll))]))
-    (and (not (.-ctrlKey e)) (not (.-shiftKey e))
-         (dispatch [:show-message-2 (str message " " (dice/dice-roll-text-2 roll))]))))
+      (dispatch [:show-message-2 (str message " w/ Disadvantage: " (dice/dice-roll-text-2 roll) "  |  " (dice/dice-roll-text-2 roll))]) 
+      (if (or (.-ctrlKey e) (.-metaKey e))
+        (dispatch [:show-message-2 (str message " w/ Advantage: " (dice/dice-roll-text-2 roll) "  |  " (dice/dice-roll-text-2 roll))])
+        (dispatch [:show-message-2 (str message " " (dice/dice-roll-text-2 roll))])))))
 
 (def button-roll-handler (memoize button-roll-fn))
 
