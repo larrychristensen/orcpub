@@ -115,7 +115,8 @@ html, body, #app {
     (include-css "/font-awesome-4.7.0/css/font-awesome.min.css")
     (include-css "https://fonts.googleapis.com/css?family=Open+Sans")
     [:script
-     "if(plugins === null || plugins === '{}')
+     "let plugins = localStorage.getItem ('plugins');
+     if(plugins === null || plugins === '{}')
     {
       fetch('https://' + window.location.host + '/homebrew.orcbrew')
         .then(resp => resp.text())
