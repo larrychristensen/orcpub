@@ -69,7 +69,7 @@
   (or (:name (equipment-map equipment-kw))
       (if (string? equipment-kw)
         equipment-kw
-        (common/kw-to-name equipment-kw))))
+        (common/kw-to-name equipment-kw true))))
 
 (defn unit-amount-description [{:keys [units amount singular plural] :or {amount 1 plural (plural-map units)}}]
   (str amount " " (if (not= 1 amount)
