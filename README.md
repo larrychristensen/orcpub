@@ -53,7 +53,7 @@ You will need a few tools:
 
  `git clone https://github.com/Orcpub/orcpub.git` if you don't have a github account
 
- `git@github.com:Orcpub/orcpub.git` if you do
+ `git clone git@github.com:Orcpub/orcpub.git` if you do
  
 ### Edit docker-compose.yaml
 
