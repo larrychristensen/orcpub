@@ -51,7 +51,9 @@ You will need a few tools:
 
  Clone a copy of our repository to your machine:
 
- `git clone git@github.com:Orcpub/orcpub.git`
+ `git clone https://github.com/Orcpub/orcpub.git` if you don't have a github account
+
+ `git@github.com:Orcpub/orcpub.git` if you do
  
 ### Edit docker-compose.yaml
 
