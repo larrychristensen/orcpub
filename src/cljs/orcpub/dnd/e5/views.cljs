@@ -3016,8 +3016,8 @@
                    none-item
                    (map
                     (fn [[key]]
-                      (let [{:keys [name]} (all-armor-map key)]
-                        {:title name
+                      (let [{:keys [name] :as armor} (all-armor-map key)]
+                        {:title (or (:name armor) (::mi/name armor))
                          :value key}))
                     carried-armor))
            :value (or worn-armor (-> best-armor-combo :armor :key))
@@ -3029,8 +3029,8 @@
                    none-item
                    (map
                     (fn [[key]]
-                      (let [{:keys [name]} (all-armor-map key)]
-                        {:title name
+                      (let [{:keys [name] :as shield} (all-armor-map key)]
+                        {:title (or (:name shield) (::mi/name shield))
                          :value key}))
                     carried-shields))
            :value (or wielded-shield (-> best-armor-combo :shield :key))
@@ -3048,8 +3048,8 @@
                  none-item
                  (map
                   (fn [[key]]
-                    (let [{:keys [name]} (all-weapons-map key)]
-                      {:title name
+                    (let [{:keys [name] :as weapon} (all-weapons-map key)]
+                      {:title (or (:name weapon) (::mi/name weapon))
                        :value key}))
                   carried-weapons))
          :value main-hand-weapon-kw
@@ -3070,8 +3070,8 @@
                             dual-wield-weapon?)))
                      (map
                       (fn [[key]]
-                        (let [{:keys [name]} (all-weapons-map key)]
-                          {:title name
+                        (let [{:keys [name] :as weapon} (all-weapons-map key)]
+                          {:title (or (:name weapon) (::mi/name weapon))
                            :value key}))))
                     carried-weapons))
            :value off-hand-weapon-kw
