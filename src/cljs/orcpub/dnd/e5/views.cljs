@@ -3016,8 +3016,8 @@
                    none-item
                    (map
                     (fn [[key]]
-                      (let [{:keys [name]} (all-armor-map key)]
-                        {:title name
+                      (let [{:keys [name] :as item} (all-armor-map key)]
+                        {:title (weapon-name item)
                          :value key}))
                     carried-armor))
            :value (or worn-armor (-> best-armor-combo :armor :key))
@@ -3029,8 +3029,8 @@
                    none-item
                    (map
                     (fn [[key]]
-                      (let [{:keys [name]} (all-armor-map key)]
-                        {:title name
+                      (let [{:keys [name] :as item} (all-armor-map key)]
+                        {:title (weapon-name item)
                          :value key}))
                     carried-shields))
            :value (or wielded-shield (-> best-armor-combo :shield :key))
@@ -3048,8 +3048,8 @@
                  none-item
                  (map
                   (fn [[key]]
-                    (let [{:keys [name]} (all-weapons-map key)]
-                      {:title name
+                    (let [{:keys [name] :as item} (all-weapons-map key)]
+                      {:title (weapon-name item)
                        :value key}))
                   carried-weapons))
          :value main-hand-weapon-kw
@@ -3070,28 +3070,28 @@
                             dual-wield-weapon?)))
                      (map
                       (fn [[key]]
-                        (let [{:keys [name]} (all-weapons-map key)]
-                          {:title name
+                        (let [{:keys [name] :as item} (all-weapons-map key)]
+                          {:title (weapon-name item)
                            :value key}))))
                     carried-weapons))
            :value off-hand-weapon-kw
            :on-change (wield-handler ::char/wield-off-hand-weapon id)}])
        #_[:div.flex.flex-wrap
-        [equipped-section-dropdown
-         "Attuned Magic Item 1"
-         {:items [none-item]
-          :value nil
-          :on-change (fn [])}]
-        [equipped-section-dropdown
-         "Attuned Magic Item 2"
-         {:items [none-item]
-          :value nil
-          :on-change (fn [])}]
-        [equipped-section-dropdown
-         "Attuned Magic Item 3"
-         {:items [none-item]
-          :value nil
-          :on-change (fn [])}]]])]])
+          [equipped-section-dropdown
+           "Attuned Magic Item 1"
+           {:items [none-item]
+            :value nil
+            :on-change (fn [])}]
+          [equipped-section-dropdown
+           "Attuned Magic Item 2"
+           {:items [none-item]
+            :value nil
+            :on-change (fn [])}]
+          [equipped-section-dropdown
+           "Attuned Magic Item 3"
+           {:items [none-item]
+            :value nil
+            :on-change (fn [])}]]])]])
 
 (defn combat-details [num-columns id]
   (let [weapon-profs @(subscribe [::char/weapon-profs id])
