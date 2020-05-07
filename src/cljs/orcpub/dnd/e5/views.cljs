@@ -3054,8 +3054,7 @@
                   carried-weapons))
          :value main-hand-weapon-kw
          :on-change (wield-handler ::char/wield-main-hand-weapon id)}]
-(prn carried-weapons)
-(if (or (equipped? off-hand-weapon-kw)
+       (if (or (equipped? off-hand-weapon-kw)
                (and (equipped? main-hand-weapon-kw)
                     (dual-wield-weapon? main-hand-weapon)))
          [equipped-section-dropdown
@@ -3078,21 +3077,21 @@
            :value off-hand-weapon-kw
            :on-change (wield-handler ::char/wield-off-hand-weapon id)}])
        #_[:div.flex.flex-wrap
-        [equipped-section-dropdown
-         "Attuned Magic Item 1"
-         {:items [none-item]
-          :value nil
-          :on-change (fn [])}]
-        [equipped-section-dropdown
-         "Attuned Magic Item 2"
-         {:items [none-item]
-          :value nil
-          :on-change (fn [])}]
-        [equipped-section-dropdown
-         "Attuned Magic Item 3"
-         {:items [none-item]
-          :value nil
-          :on-change (fn [])}]]])]])
+          [equipped-section-dropdown
+           "Attuned Magic Item 1"
+           {:items [none-item]
+            :value nil
+            :on-change (fn [])}]
+          [equipped-section-dropdown
+           "Attuned Magic Item 2"
+           {:items [none-item]
+            :value nil
+            :on-change (fn [])}]
+          [equipped-section-dropdown
+           "Attuned Magic Item 3"
+           {:items [none-item]
+            :value nil
+            :on-change (fn [])}]]])]])
 
 (defn combat-details [num-columns id]
   (let [weapon-profs @(subscribe [::char/weapon-profs id])
