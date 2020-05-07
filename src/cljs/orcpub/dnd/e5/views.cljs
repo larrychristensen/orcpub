@@ -3016,8 +3016,8 @@
                    none-item
                    (map
                     (fn [[key]]
-                      (let [{:keys [name] :as armor} (all-armor-map key)]
-                        {:title (or (:name armor) (::mi/name armor))
+                      (let [{:keys [name] :as item} (all-armor-map key)]
+                        {:title (weapon-name item)
                          :value key}))
                     carried-armor))
            :value (or worn-armor (-> best-armor-combo :armor :key))
@@ -3029,8 +3029,8 @@
                    none-item
                    (map
                     (fn [[key]]
-                      (let [{:keys [name] :as shield} (all-armor-map key)]
-                        {:title (or (:name shield) (::mi/name shield))
+                      (let [{:keys [name] :as item} (all-armor-map key)]
+                        {:title (weapon-name item)
                          :value key}))
                     carried-shields))
            :value (or wielded-shield (-> best-armor-combo :shield :key))
@@ -3048,13 +3048,14 @@
                  none-item
                  (map
                   (fn [[key]]
-                    (let [{:keys [name] :as weapon} (all-weapons-map key)]
-                      {:title (or (:name weapon) (::mi/name weapon))
+                    (let [{:keys [name] :as item} (all-weapons-map key)]
+                      {:title (weapon-name item)
                        :value key}))
                   carried-weapons))
          :value main-hand-weapon-kw
          :on-change (wield-handler ::char/wield-main-hand-weapon id)}]
-       (if (or (equipped? off-hand-weapon-kw)
+(prn carried-weapons)
+(if (or (equipped? off-hand-weapon-kw)
                (and (equipped? main-hand-weapon-kw)
                     (dual-wield-weapon? main-hand-weapon)))
          [equipped-section-dropdown
@@ -3070,8 +3071,8 @@
                             dual-wield-weapon?)))
                      (map
                       (fn [[key]]
-                        (let [{:keys [name] :as weapon} (all-weapons-map key)]
-                          {:title (or (:name weapon) (::mi/name weapon))
+                        (let [{:keys [name] :as item} (all-weapons-map key)]
+                          {:title (weapon-name item)
                            :value key}))))
                     carried-weapons))
            :value off-hand-weapon-kw
