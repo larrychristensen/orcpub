@@ -1762,6 +1762,16 @@
    [:div.f-w-b.m-b-5 label]
    [dropdown cfg]])
 
+(defn button-roll-fn [message roll]
+  (fn [e]
+    (if (.-shiftKey e)
+      (dispatch [:show-message-2 (str message " w/ Disadvantage: " (dice/dice-roll-text-2 roll) "  |  " (dice/dice-roll-text-2 roll))]) 
+      (if (or (.-ctrlKey e) (.-metaKey e))
+        (dispatch [:show-message-2 (str message " w/ Advantage: " (dice/dice-roll-text-2 roll) "  |  " (dice/dice-roll-text-2 roll))])
+        (dispatch [:show-message-2 (str message " " (dice/dice-roll-text-2 roll))])))))
+
+(def button-roll-handler (memoize button-roll-fn))
+
 (defn cast-spell-component []
   (let [selected-level (r/atom nil)]
     (fn [id lvl]
@@ -1794,10 +1804,10 @@
   (let [spell-map @(subscribe [::spells/spells-map])
         spell (spell-map key)
         cls-mods (get spell-modifiers class)
+        spell-dc (get cls-mods :spell-save-dc)
         remaining-preps (- prepare-spell-count
                            prepared-spell-count)]
-    [[:tr.pointer
-      {:on-click on-click}
+    [[:tr.spell
       [:td.p-l-10.p-b-10.p-t-10.f-w-b
        (if (and (pos? lvl)
                 (get prepares-spells class))
@@ -1820,7 +1830,11 @@
       [:td.p-l-10.p-b-10.p-t-10 (if ability (s/upper-case (common/safe-name ability)))]
       [:td.p-l-10.p-b-10.p-t-10 (get cls-mods :spell-save-dc)]
       [:td.p-l-10.p-b-10.p-t-10 (common/bonus-str (get cls-mods :spell-attack-modifier))]
-      [:td.p-r-10.orange
+      [:td.p-l-10.p-b-10.p-t-10 [:div.tooltip [:button.roll-button
+                                               {:on-click (button-roll-handler (str (:name spell) " attack: ") (str "1d20" (common/mod-str (get cls-mods :spell-attack-modifier))))}
+                                               "Roll"] [:span.tooltiptext "ctrl+click for advantage shift+click for disadvantage"]]]
+      [:td.p-l-10.p-b-10.p-t-10.pointer.orange
+       {:on-click on-click}
        [:i.fa
         {:class-name (if expanded? "fa-caret-up" "fa-caret-down")}]]]
      (if expanded?
@@ -1853,7 +1867,7 @@
           (if (pos? lvl)
             [:span.f-w-b (str @(subscribe [::char/spell-slots-remaining id lvl]) " remaining")])]
          [:table.w-100-p.t-a-l.striped
-          [:tbody
+          [:tbody.spells
            [:tr.f-w-b.f-s-12
             [:th.p-l-10.p-b-10.p-t-10 (if (and (not (zero? lvl))
                                                (seq prepares-spells))
@@ -1862,9 +1876,11 @@
             [:th.p-l-10.p-b-10.p-t-10 (if mobile? "Src" "Source")]
             [:th.p-l-10.p-b-10.p-t-10 (if mobile? "Aby" "Ability")]
             [:th.p-l-10.p-b-10.p-t-10 "DC"]
-            [:th.p-l-10
+            [:th
              {:class-name (if (not mobile?) "p-b-10 p-t-10")}
-             "Mod."]]
+             "Mod."]
+            [:th.p-l-10.p-b-10.p-t-10 "Attack"]
+            [:th.p-l-10.p-b-10.p-t-10]]
            (doall
             (map-indexed
              (fn [i r]
@@ -2152,13 +2168,17 @@
     (section-header-2 "Armor Class" "checked-shield")
     [:div.f-s-24.f-w-b.armor-class @(subscribe [::char/current-armor-class id])]]])
 
-(defn basic-section [title icon v]
+(defn basic-section [title icon v show-button]
   [:div
    [:div.p-10.flex.flex-column.align-items-c
     (section-header-2 title icon)
     [:div.f-s-24.f-w-b
      {:class (csk/->kebab-case title)}
-     v]]])
+     v]]
+   (if (boolean show-button)
+     [:div.f-s-24.f-w-b [:div.tooltip [:button.roll-button
+                                       {:on-click (button-roll-handler (str title " check: ") (str "1d20" v))}
+                                       "Roll"] [:span.tooltiptext "ctrl+click for advantage shift+click for disadvantage"]]])])
 
 (def current-hit-points-editor-style
   {:width "60px"
@@ -2172,7 +2192,7 @@
                     " / "
                     (map
                      (fn [{:keys [class-level hit-die]}] (str class-level "d" hit-die))
-                     (vals levels))))))
+                     (vals levels))) false)))
 
 (defn set-current-hit-points-fn [id]
   #(dispatch [::char/set-current-hit-points
@@ -2195,26 +2215,26 @@
                                @(subscribe [::char/max-hit-points id]))
                     :on-change (set-current-hit-points-handler id)}]
                   [:span.m-l-5 "/"]
-                  [:span.m-l-5 @(subscribe [::char/max-hit-points id])]]))
+                  [:span.m-l-5 @(subscribe [::char/max-hit-points id])]] false))
 
 (defn initiative-section-2 [id]
-  (basic-section "Initiative" "sprint" (common/bonus-str @(subscribe [::char/initiative id]))))
+  (basic-section "Initiative" "sprint" (common/mod-str @(subscribe [::char/initiative id])) true))
 
 (defn darkvision-section-2 [id]
-  (basic-section "Darkvision" "night-vision" (str @(subscribe [::char/darkvision id]) " ft.")))
+  (basic-section "Darkvision" "night-vision" (str @(subscribe [::char/darkvision id]) " ft.") false))
 
 (defn critical-hits-section-2 [id]
   (let [crit-values-str @(subscribe [::char/crit-values-str id])]
-    (basic-section "Critical Hits" nil crit-values-str)))
+    (basic-section "Critical Hits" nil crit-values-str false)))
 
 (defn number-of-attacks-section-2 [id]
-  (basic-section "Number of Attacks" nil @(subscribe [::char/number-of-attacks id])))
+  (basic-section "Number of Attacks" nil @(subscribe [::char/number-of-attacks id]) false))
 
 (defn passive-perception-section-2 [id]
-  (basic-section "Passive Perception" "awareness" @(subscribe [::char/passive-perception id])))
+  (basic-section "Passive Perception" "awareness" @(subscribe [::char/passive-perception id]) false))
 
 (defn proficiency-bonus-section-2 [id]
-  (basic-section "Proficiency Bonus" nil (common/bonus-str @(subscribe [::char/proficiency-bonus id]))))
+  (basic-section "Proficiency Bonus" nil (common/bonus-str @(subscribe [::char/proficiency-bonus id])) false))
 
 (defn skills-section-2 [id]
   (let [skill-profs (or @(subscribe [::char/skill-profs id]) #{})
@@ -2235,7 +2255,10 @@
              [:td [:div.skill-name
                    (svg-icon icon 18)
                    [:span.m-l-5 skill-name]]]
-             [:td [:div.p-5.skillbonus (common/bonus-str (skill-bonuses skill-key))]]])
+             [:td [:div.p-5.skillbonus (common/bonus-str (skill-bonuses skill-key))]]
+             [:td [:div.tooltip [:button.roll-button
+                                 {:on-click (button-roll-handler (str skill-name " check: ") (str "1d20" (common/mod-str (skill-bonuses skill-key))))}
+                                 "Roll"][:span.tooltiptext "ctrl+click for advantage shift+click for disadvantage"]]]])
           skills/skills))]]]]))
 
 (defn ability-scores-section-2 [id]
@@ -2271,11 +2294,14 @@
          (fn [k]
            ^{:key k}
             [:tr.t-a-l
-            {:class-name (if (saving-throws k) "f-w-b" "opacity-7")}
-            [:td [:div
-                  (t/ability-icon k 18 theme)
-                  [:span.m-l-5.saving-throw-name (s/upper-case (name k))]]]
-            [:td [:div.p-5.saving-throw-bonus (common/bonus-str (save-bonuses k))]]])
+             {:class-name (if (saving-throws k) "f-w-b" "opacity-7")}
+             [:td [:div
+                   (t/ability-icon k 18 theme)
+                   [:span.m-l-5.saving-throw-name (s/upper-case (name k))]]]
+             [:td [:div.p-5.saving-throw-bonus (common/bonus-str (save-bonuses k))]]
+             [:td [:div.tooltip [:button.roll-button
+                                 {:on-click (button-roll-handler (str (s/upper-case (name k)) " check: ") (str "1d20" (common/mod-str (save-bonuses k))))}
+                                 "Roll"][:span.tooltiptext "ctrl+click for advantage shift+click for disadvantage"]]]])
          char/ability-keys))]]]))
 
 (defn feet-str [num]
@@ -2616,14 +2642,14 @@
           [:span.m-l-5.f-w-b.f-s-18 "Armor"]]
          [:div
           [:table.w-100-p.t-a-l.striped
-           [:tbody
+           [:tbody.armor
             [:tr.f-w-b
              {:class-name (if mobile? "f-s-12")}
              [:th.p-10 "Name"]
              (if (not mobile?) [:th.p-10 "Proficient?"])
              [:th.p-10 "Details"]
-             [:th]
-             [:th.p-10 "AC"]]
+             [:th.p-10 "AC"]
+             [:th.p-10]]
             (doall
              (for [{:keys [name description type key] :as armor} (conj armor-details nil)
                    shield (conj shield-details nil)]
@@ -2638,8 +2664,7 @@
                                    (armor-profs type)))
                      expanded? (@expanded-details k)]
                  ^{:key (str key (:key shield))}
-                 [:tr.pointer
-                  {:on-click (toggle-details-expanded-handler expanded-details k)}
+                 [:tr.item
                   [:td.p-10.f-w-b (str (or (::mi/name armor) (:name armor) "unarmored")
                                        (if shield (str " + " (:name shield))))]
                   (if (not mobile?)
@@ -2647,13 +2672,14 @@
                   [:td.p-10.w-100-p
                    [:div
                     (armor-details-section armor shield expanded?)]]
+                  [:td.p-10.f-w-b.f-s-18 ac]
                   [:td
                    [:div.orange
-                    (if (not mobile?)
-                      [:span.underline (if expanded? "less" "more")])
+                    {:on-click (toggle-details-expanded-handler expanded-details k)}
+                    #_(if (not mobile?)
+                        [:span.underline (if expanded? "less" "more")])
                     [:i.fa.m-l-5
-                     {:class-name (if expanded? "fa-caret-up" "fa-caret-down")}]]]
-                  [:td.p-10.f-w-b.f-s-18 ac]])))]]]]))))
+                     {:class-name (if expanded? "fa-caret-up" "fa-caret-down")}]]]])))]]]]))))
 
 (defn section-header [icon title]
   [:div.flex.align-items-c
@@ -2676,41 +2702,50 @@
          [section-header "crossed-swords" "Weapons"]
          [:div
           [:table.w-100-p.t-a-l.striped
-           [:tbody
+           [:tbody.weapons
             [:tr.f-w-b
              {:class-name (if mobile? "f-s-12")}
              [:th.p-10 "Name"]
              (if (not mobile?) [:th.p-10 "Proficient?"])
-             [:th.p-10 "Details"]
-             [:th]
-             [:th.p-10 (if mobile? "Atk" [:div.w-40 "Attack Bonus"])]]
+             [:th "Details"]
+
+             [:th (if mobile? "Atk" [:div.w-40 "Attack Bonus"])]
+             [:th.p-10]]
             (doall
              (map
               (fn [[weapon-key {:keys [equipped?]}]]
                 (let [{:keys [name description ranged? ::weapon/type ::weapon/damage-die-count ::weapon/damage-die] :as weapon} (all-weapons-map weapon-key)
                       proficient? (if has-weapon-prof (has-weapon-prof weapon))
                       expanded? (@expanded-details weapon-key)
-                      damage-modifier (weapon-damage-modifier weapon)]
+                      damage-modifier (weapon-damage-modifier weapon)
+                      droll (str damage-die-count "d" damage-die)]
                   (if (not= type :ammunition)
                     ^{:key weapon-key}
-                   [:tr.pointer
-                    {:on-click (toggle-details-expanded-handler expanded-details weapon-key)}
-                    [:td.p-10.f-w-b (or (:name weapon)
-                                        (::mi/name weapon))]
-                    (if (not mobile?)
-                      [:td.p-10 (boolean-icon proficient?)])
-                    [:td.p-10.w-100-p
-                     [:div
-                      (weapon-attack-description weapon damage-modifier nil)]
-                     (if expanded?
-                       (weapon-details weapon weapon-damage-modifier))]
-                    [:td
-                     [:div.orange
-                      (if (not mobile?)
-                        [:span.underline (if expanded? "less" "more")])
-                      [:i.fa.m-l-5
-                       {:class-name (if expanded? "fa-caret-up" "fa-caret-down")}]]]
-                    [:td.p-10.f-w-b.f-s-18 (common/bonus-str (weapon-attack-modifier weapon))]])))
+                    [:tr.weapon
+                     [:td.p-10.f-w-b (or (:name weapon)
+                                         (::mi/name weapon))]
+                     (if (not mobile?)
+                       [:td.p-10 (boolean-icon proficient?)])
+                     [:td.p-10.w-100-p
+                      [:div
+                       (weapon-attack-description weapon damage-modifier nil)]
+                      (if expanded?
+                        (weapon-details weapon weapon-damage-modifier))]
+
+                     [:td.p-10.f-w-b.f-s-18 (common/bonus-str (weapon-attack-modifier weapon))]
+                     [:td [:div.tooltip [:button.roll-button
+                                         {:on-click (button-roll-handler (str name " attack: ") (str "1d20" (common/mod-str (weapon-attack-modifier weapon))))}
+                                         "Attack"] [:span.tooltiptext "ctrl+click for advantage shift+click for disadvantage"]]]
+                     [:td [:button.roll-button
+                                         {:on-click (button-roll-handler (str name " damage: ") (str damage-die-count "d" damage-die (common/mod-str (weapon-damage-modifier weapon))))}
+                                         "Damage"]]
+                     [:td.pointer
+                      {:on-click (toggle-details-expanded-handler expanded-details weapon-key)}
+                      [:div.orange
+                       #_(if (not mobile?)
+                           [:span.underline (if expanded? "less" "more")])
+                       [:i.fa.m-l-5
+                        {:class-name (if expanded? "fa-caret-up" "fa-caret-down")}]]]])))
               all-weapons))]]]]))))
 
 (defn magic-item-rows [expanded-details magic-item-cfgs magic-weapon-cfgs magic-armor-cfgs]
@@ -2720,16 +2755,16 @@
      (fn [[item-kw item-cfg]]
        (let [{:keys [::mi/name ::mi/type ::mi/item-subtype ::mi/rarity ::mi/attunement ::mi/description ::mi/summary] :as item} (magic-item-map item-kw)
              expanded? (@expanded-details item-kw)]
-         [[:tr.pointer
-           {:on-click (toggle-details-expanded-handler expanded-details item-kw)}
+         [[:tr
            [:td.p-10.f-w-b (or (:name item) name)]
            [:td.p-10 (str (common/kw-to-name type)
                           ", "
                           (common/kw-to-name rarity))]
-           [:td.p-r-5
+           [:td.p-r-5.pointer
+            {:on-click (toggle-details-expanded-handler expanded-details item-kw)}
             [:div.orange
-             (if (not mobile?)
-               [:span.underline (if expanded? "less" "more")])
+             #_(if (not mobile?)
+                 [:span.underline (if expanded? "less" "more")])
              [:i.fa.m-l-5
               {:class-name (if expanded? "fa-caret-up" "fa-caret-down")}]]]]
           (if expanded?
@@ -2755,7 +2790,7 @@
           [:span.m-l-5.f-w-b.f-s-18 "Other Magic Items"]]
          [:div.f-s-14
           [:table.w-100-p.t-a-l.striped
-           [:tbody
+           [:tbody.other-magic-items
             [:tr.f-w-b
              {:class-name (if mobile? "f-s-12")}
              [:th.p-10 "Name"]
@@ -2785,7 +2820,7 @@
           [:span.m-l-5.f-w-b.f-s-18 "Other Equipment"]]
          [:div
           [:table.w-100-p.t-a-l.striped
-           [:tbody
+           [:tbody.equipment
             [:tr.f-w-b
              {:class-name (if mobile? "f-s-12")}
              [:th.p-10 "Name"]
@@ -2800,7 +2835,7 @@
                       ;;expanded? (@expanded-details item-kw)
                       ]
                   ^{:key item-kw}
-                  [:tr
+                  [:tr.item
                    [:td.p-10.f-w-b (or (:name item) item-name)]
                    [:td.p-10 (::char-equip/quantity item-cfg)]
                    [:td.p-10
@@ -2863,7 +2898,7 @@
             [:tr.f-w-b
              {:class-name (if mobile? "f-s-12")}
              [:th.p-10 "Name"]
-             [:td.p-10 (if mobile? "Prof?" "Proficient?")]
+             [:th.p-10 (if mobile? "Prof?" "Proficient?")]
              (if skill-expertise
                [:th.p-10 "Expertise?"])
              [:th.p-10 (if (not mobile?) [:div.w-40 "Bonus"])]]
@@ -2878,7 +2913,11 @@
                    [:td.p-10 (boolean-icon proficient?)]
                    (if skill-expertise
                      [:td.p-10 (boolean-icon expertise?)])
-                   [:td.p-10.f-s-18.f-w-b (common/bonus-str (key skill-bonuses))]]))
+                   [:td.p-10.f-s-18.f-w-b (common/bonus-str (key skill-bonuses))]
+                    [:td [:div.tooltip [:button.roll-button
+                                        {:on-click (button-roll-handler (str name " check: ") (str "1d20" (common/mod-str (key skill-bonuses))))}
+                                        "Roll"][:span.tooltiptext "ctrl+click for advantage shift+click for disadvantage"]]]
+]))
               skills/skills))]]]]))))
 
 (defn tool-prof-details-section-2 []
@@ -2900,7 +2939,7 @@
               [:tr.f-w-b
                {:class-name (if mobile? "f-s-12")}
                [:th.p-10 "Name"]
-               [:td.p-10 (if mobile? "Prof?" "Proficient?")]
+               [:th.p-10 (if mobile? "Prof?" "Proficient?")]
                (if tool-expertise
                  [:th.p-10 "Expertise?"])
                [:th.p-10 (if (not mobile?) [:div.w-40 "Bonus"])]]
@@ -2916,7 +2955,10 @@
                      [:td.p-10 (boolean-icon proficient?)]
                      (if tool-expertise
                        [:td.p-10 (boolean-icon expertise?)])
-                     [:td.p-10.f-s-18.f-w-b (common/bonus-str (tool-bonus-fn kw))]]))
+                     [:td.p-10.f-s-18.f-w-b (common/bonus-str (tool-bonus-fn kw))]
+                     [:td [:div.tooltip [:button.roll-button
+                                         {:on-click (button-roll-handler (str name " check: ") (str "1d20" (common/mod-str (tool-bonus-fn kw))))}
+                                         "Roll"] [:span.tooltiptext "ctrl+click for advantage shift+click for disadvantage"]]]]))
                 tool-profs))]]]])))))
 
 
@@ -2974,8 +3016,8 @@
                    none-item
                    (map
                     (fn [[key]]
-                      (let [{:keys [name]} (all-armor-map key)]
-                        {:title name
+                      (let [{:keys [name] :as item} (all-armor-map key)]
+                        {:title (weapon-name item)
                          :value key}))
                     carried-armor))
            :value (or worn-armor (-> best-armor-combo :armor :key))
@@ -2987,8 +3029,8 @@
                    none-item
                    (map
                     (fn [[key]]
-                      (let [{:keys [name]} (all-armor-map key)]
-                        {:title name
+                      (let [{:keys [name] :as item} (all-armor-map key)]
+                        {:title (weapon-name item)
                          :value key}))
                     carried-shields))
            :value (or wielded-shield (-> best-armor-combo :shield :key))
@@ -3006,8 +3048,8 @@
                  none-item
                  (map
                   (fn [[key]]
-                    (let [{:keys [name]} (all-weapons-map key)]
-                      {:title name
+                    (let [{:keys [name] :as item} (all-weapons-map key)]
+                      {:title (weapon-name item)
                        :value key}))
                   carried-weapons))
          :value main-hand-weapon-kw
@@ -3028,28 +3070,28 @@
                             dual-wield-weapon?)))
                      (map
                       (fn [[key]]
-                        (let [{:keys [name]} (all-weapons-map key)]
-                          {:title name
+                        (let [{:keys [name] :as item} (all-weapons-map key)]
+                          {:title (weapon-name item)
                            :value key}))))
                     carried-weapons))
            :value off-hand-weapon-kw
            :on-change (wield-handler ::char/wield-off-hand-weapon id)}])
        #_[:div.flex.flex-wrap
-        [equipped-section-dropdown
-         "Attuned Magic Item 1"
-         {:items [none-item]
-          :value nil
-          :on-change (fn [])}]
-        [equipped-section-dropdown
-         "Attuned Magic Item 2"
-         {:items [none-item]
-          :value nil
-          :on-change (fn [])}]
-        [equipped-section-dropdown
-         "Attuned Magic Item 3"
-         {:items [none-item]
-          :value nil
-          :on-change (fn [])}]]])]])
+          [equipped-section-dropdown
+           "Attuned Magic Item 1"
+           {:items [none-item]
+            :value nil
+            :on-change (fn [])}]
+          [equipped-section-dropdown
+           "Attuned Magic Item 2"
+           {:items [none-item]
+            :value nil
+            :on-change (fn [])}]
+          [equipped-section-dropdown
+           "Attuned Magic Item 3"
+           {:items [none-item]
+            :value nil
+            :on-change (fn [])}]]])]])
 
 (defn combat-details [num-columns id]
   (let [weapon-profs @(subscribe [::char/weapon-profs id])

@@ -1219,7 +1219,8 @@
    [:th.p-5 "Base"]
    [:th.p-5 "Con"]
    [:th.p-5 "Misc"]
-   [:th.p-5 "Total"]])
+   [:th.p-5 "Total"]
+   [:th.p-5 ""]])
 
 (defn hp-selection-name-level [selection]
   (let [[_ class-kw _ level-kw _] (::entity/path selection)
@@ -1319,7 +1320,8 @@
                  [:td.p-5 first-class-hit-die]
                  [:td.p-5 con-bonus-str]
                  [:td.p-5 (common/bonus-str (+ misc-bonus cls-level-bonus))]
-                 [:td.p-5 (+ (:hit-die first-class) level-bonus)]])
+                 [:td.p-5 (+ (:hit-die first-class) level-bonus)]
+                 [:td.p5]])
               (doall
                (map-indexed
                 (fn [j level-value]
@@ -1337,14 +1339,20 @@
                               :value (:value level-value)}]]
                    [:td.p-5 con-bonus-str]
                    [:td.p-5 (common/bonus-str (+ misc-bonus cls-level-bonus))]
-                   [:td.p-5 (+ (:value level-value) level-bonus)]])
+                   [:td.p-5 (+ (:value level-value) level-bonus)]
+                   [:td.p-5 [:button.roll-button
+                             {:on-click (fn [e]
+                                          (let [value (js/parseInt (dice/die-roll (-> levels cls :hit-die)))]
+                                            (dispatch [:set-level-hit-points built-template character level-value value])))}
+                             "d" (-> levels cls :hit-die)]]])
                 level-values))
               [:tr
                [:td.p-5 "Total"]
                [:td.p-5 total-base-hps]
                [:td.p-5 (common/bonus-str total-con-bonus)]
                [:td.p-5 (common/bonus-str total-misc-bonus)]
-               [:td.p-5 (+ total-base-hps total-con-bonus total-misc-bonus)]]]]]))
+               [:td.p-5 (+ total-base-hps total-con-bonus total-misc-bonus)]
+               [:td.p-5]]]]]))
        classes))
      (if (> (count classes) 1)
        [:div.m-t-20
@@ -1357,7 +1365,8 @@
            [:td.p-5 total-base-hps]
            [:td.p-5 (common/bonus-str total-con-bonus)]
            [:td.p-5 (common/bonus-str total-misc-bonus)]
-           [:td.p-5 total-hps]]]]])]))
+           [:td.p-5 total-hps]
+           [:td.p-5]]]]])]))
 
 (defn remaining-adjustments-fn [built-template character]
   #(Math/abs (entity/count-remaining built-template character %)))
