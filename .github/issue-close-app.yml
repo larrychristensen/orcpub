@@ -1,15 +1,15 @@
 # Comment that will be sent if an issue is judged to be closed
-comment: "This issue is closed because it does not meet our issue template layout. Please read it, and follow the prompting questions."
+comment: "This issue was closed because it does not meet our issue template layout. Please read it, and follow the prompting questions."
 issueConfigs:
 # There can be several configs for different kind of issues.
+# Bug report
 - content:
-# Example 1: bug report
   - "Describe the bug"
   - "To Reproduce"
   - "Expected behavior"
   - "Additional context"
+# Feature requests
 - content:
-# Example 2: feature request
   - "Motivation / Use Case"
   - "Expected Behavior"
   - "Other Information"
