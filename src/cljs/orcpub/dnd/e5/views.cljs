@@ -6852,17 +6852,7 @@
        :option-pack
        spell
        "m-l-5 m-b-20"]]
-     [:div.m-b-20
-      [:div.f-w-b.m-b-10 "Add This Spell to Which Class Spell Lists?"]
-      [:div.flex.flex-wrap
-       (map
-        (fn [{:keys [key name]}]
-          ^{:key key}
-          [:div.m-r-10.pointer.m-b-10
-           {:on-click #(dispatch [::spells/toggle-spell-list key])}
-           [comps/checkbox (get-in spell [:spell-lists key])]
-           [:span.m-l-5 name]])
-        @(subscribe [::spells/spellcasting-classes]))]]
+
      [:div.flex.w-100-p.flex-wrap
       [:div.flex-grow-1.m-b-20
        [labeled-dropdown
@@ -6883,24 +6873,24 @@
                                :value school})
                  (sort spells/schools))
          :value school
-         :on-change #(dispatch [::spells/set-spell-prop :school %])}]]]
-     [:div.flex.flex-wrap
-      [:div.m-r-20.m-b-10
-       [comps/labeled-checkbox
-        "Ritual?"
-        (get spell :ritual)
-        false
-        #(dispatch [::spells/toggle-spell-prop :ritual])]]
-      [:div.m-r-20.m-b-10
-       [comps/labeled-checkbox
-        "Requires Attack Roll?"
-        (get spell :attack-roll?)
-        false
-        #(dispatch [::spells/toggle-spell-prop :attack-roll?])]]]
+         :on-change #(dispatch [::spells/set-spell-prop :school %])}]]
+      [;:div.flex.flex-wrap
+       :div.flex-grow-1.m-l-5
+       [:div.m-t-20.m-r-20.m-b-10
+        [comps/labeled-checkbox
+         "Ritual?"
+         (get spell :ritual)
+         false
+         #(dispatch [::spells/toggle-spell-prop :ritual])]]
+       [:div.m-r-20.m-b-10
+        [comps/labeled-checkbox
+         "Requires Attack Roll?"
+         (get spell :attack-roll?)
+         false
+         #(dispatch [::spells/toggle-spell-prop :attack-roll?])]]]]
      [:div.flex.w-100-p.flex-wrap
       [spell-input-field "Casting Time" :casting-time spell "m-b-20"]
-      [spell-input-field "Range" :range spell "m-l-5 m-b-20"]
-      ]
+      [spell-input-field "Range" :range spell "m-l-5 m-b-20"]]
      [:div [:h2.f-s-24.f-w-b.m-b-10 "Components"]]
      [:div.flex.w-100-p.flex-wrap
       [component-checkbox :verbal spell]
@@ -6909,15 +6899,27 @@
      [:div.m-b-20
       [textarea-field
        {:value (get-in spell [:components :material-component])
-        :on-change #(dispatch [::spells/set-material-component %])}]
-      ]
+        :on-change #(dispatch [::spells/set-material-component %])}]]
+     [:div.m-b-20
+      [spell-input-field "Duration" :duration spell "m-b-20"]]
      [:div.w-100-p
-      [spell-input-field "Duration" :duration spell "m-b-20"]
       [:div.f-s-24.f-w-b
        "Description"]
-      [textarea-field
-       {:value (get spell :description)
-        :on-change #(dispatch [::spells/set-spell-prop :description %])}]]]))
+      [:div.m-b-20
+       [textarea-field
+        {:value (get spell :description)
+         :on-change #(dispatch [::spells/set-spell-prop :description %])}]]]
+     [:div.m-b-20
+      [:div.f-w-b.m-b-10 "Add This Spell to Which Class Spell Lists?"]
+      [:div.flex.flex-wrap
+       (map
+        (fn [{:keys [key name]}]
+          ^{:key key}
+          [:div.m-r-10.pointer.m-b-10
+           {:on-click #(dispatch [::spells/toggle-spell-list key])}
+           [comps/checkbox (get-in spell [:spell-lists key])]
+           [:span.m-l-5 name]])
+        @(subscribe [::spells/spellcasting-classes]))]]]))
 
 (defn item-builder []
   (let [{:keys [::mi/name ::mi/type ::mi/rarity ::mi/description ::mi/attunement] :as item}
