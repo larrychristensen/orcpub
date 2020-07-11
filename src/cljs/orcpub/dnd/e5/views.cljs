@@ -2736,8 +2736,8 @@
                         (weapon-details weapon weapon-damage-modifier))]
 
                      [:td.p-10.f-w-b.f-s-18 (common/bonus-str (weapon-attack-modifier weapon))]
-                     [:td (roll-button (str name " attack: ") (str "1d20" (common/mod-str (weapon-attack-modifier weapon))) "Attack")]
-                     [:td (roll-button (str name " damage: ") (str damage-die-count "d" damage-die (common/mod-str (weapon-damage-modifier weapon))) "Damage" true)]
+                     [:td (roll-button (str name " attack: ") (str "1d20" (common/mod-str (weapon-attack-modifier weapon))) :text "Attack")]
+                     [:td (roll-button (str name " damage: ") (str damage-die-count "d" damage-die (common/mod-str (weapon-damage-modifier weapon))) :text "Damage" :disable-tooltip true)]
                      [:td.pointer
                       {:on-click (toggle-details-expanded-handler expanded-details weapon-key)}
                       [:div.orange
