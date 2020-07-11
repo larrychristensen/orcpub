@@ -1807,7 +1807,8 @@
         spell-dc (get cls-mods :spell-save-dc)
         remaining-preps (- prepare-spell-count
                            prepared-spell-count)]
-    [[:tr.spell
+    [[:tr.spell.pointer
+      {:on-click on-click}
       [:td.p-l-10.p-b-10.p-t-10.f-w-b
        (if (and (pos? lvl)
                 (get prepares-spells class))
@@ -1831,15 +1832,16 @@
       [:td.p-l-10.p-b-10.p-t-10 (get cls-mods :spell-save-dc)]
       [:td.p-l-10.p-b-10.p-t-10 (common/bonus-str (get cls-mods :spell-attack-modifier))]
       [:td.p-l-10.p-b-10.p-t-10 [:div.tooltip [:button.roll-button
-                                               {:on-click (button-roll-handler (str (:name spell) " attack: ") (str "1d20" (common/mod-str (get cls-mods :spell-attack-modifier))))}
+                                               {:on-click (fn [e]
+                                                (.stopPropagation e)
+                                                ((button-roll-handler (str (:name spell) " attack: ") (str "1d20" (common/mod-str (get cls-mods :spell-attack-modifier)))) e))}
                                                "Roll"] [:span.tooltiptext "ctrl+click for advantage shift+click for disadvantage"]]]
       [:td.p-l-10.p-b-10.p-t-10.pointer.orange
-       {:on-click on-click}
        [:i.fa
         {:class-name (if expanded? "fa-caret-up" "fa-caret-down")}]]]
      (if expanded?
        [:tr {:style expanded-spell-background-style}
-        [:td {:col-span 6}
+        [:td {:col-span 7}
          [:div.p-10
           (if (pos? lvl)
             [cast-spell-component id lvl])
@@ -2664,7 +2666,8 @@
                                    (armor-profs type)))
                      expanded? (@expanded-details k)]
                  ^{:key (str key (:key shield))}
-                 [:tr.item
+                 [:tr.item.pointer
+                  {:on-click (toggle-details-expanded-handler expanded-details k)}
                   [:td.p-10.f-w-b (str (or (::mi/name armor) (:name armor) "unarmored")
                                        (if shield (str " + " (:name shield))))]
                   (if (not mobile?)
@@ -2673,9 +2676,8 @@
                    [:div
                     (armor-details-section armor shield expanded?)]]
                   [:td.p-10.f-w-b.f-s-18 ac]
-                  [:td
+                  [:td.pointer
                    [:div.orange
-                    {:on-click (toggle-details-expanded-handler expanded-details k)}
                     #_(if (not mobile?)
                         [:span.underline (if expanded? "less" "more")])
                     [:i.fa.m-l-5
@@ -2708,7 +2710,6 @@
              [:th.p-10 "Name"]
              (if (not mobile?) [:th.p-10 "Proficient?"])
              [:th "Details"]
-
              [:th (if mobile? "Atk" [:div.w-40 "Attack Bonus"])]
              [:th.p-10]]
             (doall
@@ -2721,7 +2722,8 @@
                       droll (str damage-die-count "d" damage-die)]
                   (if (not= type :ammunition)
                     ^{:key weapon-key}
-                    [:tr.weapon
+                    [:tr.weapon.pointer
+                     {:on-click (toggle-details-expanded-handler expanded-details weapon-key)}
                      [:td.p-10.f-w-b (or (:name weapon)
                                          (::mi/name weapon))]
                      (if (not mobile?)
@@ -2734,13 +2736,16 @@
 
                      [:td.p-10.f-w-b.f-s-18 (common/bonus-str (weapon-attack-modifier weapon))]
                      [:td [:div.tooltip [:button.roll-button
-                                         {:on-click (button-roll-handler (str name " attack: ") (str "1d20" (common/mod-str (weapon-attack-modifier weapon))))}
+                                         {:on-click (fn [e]
+                                          (.stopPropagation e)
+                                          ((button-roll-handler (str name " attack: ") (str "1d20" (common/mod-str (weapon-attack-modifier weapon)))) e))}
                                          "Attack"] [:span.tooltiptext "ctrl+click for advantage shift+click for disadvantage"]]]
                      [:td [:button.roll-button
-                                         {:on-click (button-roll-handler (str name " damage: ") (str damage-die-count "d" damage-die (common/mod-str (weapon-damage-modifier weapon))))}
+                                         {:on-click (fn [e]
+                                          (.stopPropagation e)
+                                          ((button-roll-handler (str name " damage: ") (str damage-die-count "d" damage-die (common/mod-str (weapon-damage-modifier weapon)))) e))}
                                          "Damage"]]
                      [:td.pointer
-                      {:on-click (toggle-details-expanded-handler expanded-details weapon-key)}
                       [:div.orange
                        #_(if (not mobile?)
                            [:span.underline (if expanded? "less" "more")])
@@ -2755,13 +2760,13 @@
      (fn [[item-kw item-cfg]]
        (let [{:keys [::mi/name ::mi/type ::mi/item-subtype ::mi/rarity ::mi/attunement ::mi/description ::mi/summary] :as item} (magic-item-map item-kw)
              expanded? (@expanded-details item-kw)]
-         [[:tr
+         [[:tr.pointer
+           {:on-click (toggle-details-expanded-handler expanded-details item-kw)}
            [:td.p-10.f-w-b (or (:name item) name)]
            [:td.p-10 (str (common/kw-to-name type)
                           ", "
                           (common/kw-to-name rarity))]
            [:td.p-r-5.pointer
-            {:on-click (toggle-details-expanded-handler expanded-details item-kw)}
             [:div.orange
              #_(if (not mobile?)
                  [:span.underline (if expanded? "less" "more")])
