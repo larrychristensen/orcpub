@@ -17,8 +17,7 @@
                           fb-type]}
                   & [splash?]]
   (html5
-   {:lang :en
-    :style "height:100%"}
+   {:lang :en}
    [:head
     (meta-tag "og:url" url)
     (meta-tag "og:type" fb-type)
@@ -44,9 +43,9 @@
 .splash-button .splash-button-content {height: 60px; width: 60px; font-size: 10px}
 .legal-footer-parent {display: none}}
 
-#app {height:100%;background-image: linear-gradient(182deg, #313A4D, #080A0D)}
+#app {background-color: #080A0D}
 
-.app {background-image: linear-gradient(182deg, #313A4D, #080A0D);height:100%;overflow-y:scroll;-webkit-overflow-scrolling :touch;font-family:Open Sans, sans-serif}
+.app {background-image: linear-gradient(182deg, #313A4D, #080A0D);background-attachment: fixed;height:100%;overflow-y:scroll;-webkit-overflow-scrolling: touch;font-family:Open Sans, sans-serif}
 
 html, body, div, span, applet, object, iframe,
 h1, h2, h3, h4, h5, h6, p, blockquote, pre,
@@ -99,11 +98,11 @@ table {
 	border-spacing: 0;
 }
 
-html, body, #app {
+body, #app {
     height: 100%;
 }"]
     [:title title]]
-   [:body {:style "margin:0;height:100%;line-height:1"}
+   [:body {:style "margin:0;line-height:1"}
     [:div#app
      (if splash?
        (views-2/splash-page)
