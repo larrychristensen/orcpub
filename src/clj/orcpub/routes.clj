@@ -495,11 +495,6 @@
                  :headers {"Content-Type" "text/html"}})]
     merged))
 
-(defn empty-index [req & [response]]
-  (html-response
-   (slurp (io/resource "public/blank.html"))
-   response))
-
 (def user-by-password-reset-key-query
   '[:find ?e
     :in $ ?key
