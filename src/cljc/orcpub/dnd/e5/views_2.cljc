@@ -48,7 +48,7 @@
   {:color :orange})
 
 (defn splash-page []
-  [:div.app
+  [:div.app.h-full
    {:style (style {:display :flex
                    :flex-direction :column})}
    [:div

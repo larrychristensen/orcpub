@@ -31,6 +31,9 @@
                 :img "/favicon"
                 :xml "/favicon"
                 :ver "1")
+    [:script
+     "document.documentElement.style.setProperty('--innerHeight', `${window.innerHeight}px`);
+     window.addEventListener('resize', () => document.documentElement.style.setProperty('--innerHeight', `${window.innerHeight}px`));"]
     [:style
      "
 .splash-page-content {}
@@ -43,9 +46,13 @@
 .splash-button .splash-button-content {height: 60px; width: 60px; font-size: 10px}
 .legal-footer-parent {display: none}}
 
-#app {background-color: #080A0D}
+body {background-color: #080A0D}
 
-.app {background-image: linear-gradient(182deg, #313A4D, #080A0D);background-attachment: fixed;height:100%;overflow-y:scroll;-webkit-overflow-scrolling: touch;font-family:Open Sans, sans-serif}
+#app {background-image: linear-gradient(182deg, #313A4D, #080A0D);background-attachment: fixed}
+
+.app {height:100%;font-family:Open Sans, sans-serif}
+
+.h-full {height: 100vh;height: var(--innerHeight, 100vh)}
 
 html, body, div, span, applet, object, iframe,
 h1, h2, h3, h4, h5, h6, p, blockquote, pre,
@@ -100,17 +107,13 @@ table {
 
 html {
 	min-height: 100%;
-}
-
-body, #app {
-    height: 100%;
 }"]
     [:title title]]
    [:body {:style "margin:0;line-height:1"}
     [:div#app
      (if splash?
        (views-2/splash-page)
-       [:div {:style "display:flex;justify-content:space-around"}
+       [:div.h-full {:style "display:flex;justify-content:space-around"}
         [:img {:src "/image/spiral.gif"
                :style "height:200px;width:200px;margin-top:200px"}]])]
     (include-css "/css/compiled/styles.css")
@@ -120,14 +123,14 @@ body, #app {
     [:script
      "let plugins = localStorage.getItem ('plugins');
      if(plugins === null || plugins === '{}')
-    {
-      fetch('https://' + window.location.host + '/homebrew.orcbrew')
-        .then(resp => resp.text())
-        .then(text => {
-          if(!text.toUpperCase().includes('NOT FOUND')){
-            localStorage.setItem('plugins',text);
-            window.location.reload(false);
-          }
-      });
-    }
+     {
+       fetch('https://' + window.location.host + '/homebrew.orcbrew')
+         .then(resp => resp.text())
+         .then(text => {
+           if(!text.toUpperCase().includes('NOT FOUND')){
+             localStorage.setItem('plugins',text);
+             window.location.reload(false);
+           }
+       });
+     }
     "]]))

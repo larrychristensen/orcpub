@@ -515,7 +515,7 @@
   (dispatch [:route :default]))
 
 (defn registration-page [content]
-  [:div.sans.h-100-p.flex
+  [:div.sans.h-full.flex
    {:style {:flex-direction :column}}
    [:div.flex.justify-cont-s-a.align-items-c.flex-grow-1.h-100-p
     [:div.registration-content
