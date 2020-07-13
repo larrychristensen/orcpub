@@ -69,6 +69,7 @@
             [lein-cljsbuild "1.1.7" :exclusions [[org.clojure/clojure]]]
             [lein-garden "0.3.0"]
             [lein-environ "1.1.0"]
+            [lein-cljfmt "0.6.8"]
             #_[lein-resource "16.9.1"]]
 
   :source-paths ["src/clj" "src/cljc" "src/cljs"]
@@ -92,8 +93,6 @@
                                 :output-to "resources/public/css/compiled/styles.css"
                                 ;; Compress the output?
                                 :pretty-print? false}}]}
-
-  :prep-tasks [["garden" "once"]]
 
   :cljsbuild {:builds
               {:dev
@@ -172,6 +171,7 @@
             "externs" ["do" "clean"
                        ["run" "-m" "externs"]]
             "rebuild-modules" ["run" "-m" "user" "--rebuild-modules"]
+            "lint" ["with-profile" "lint" "run" "-m" "clj-kondo.main" "--lint" "src"]
             "prod-build" ^{:doc "Recompile code with prod profile."}
             ["externs"
              ["with-profile" "prod" "cljsbuild" "once" "main"]]}
@@ -227,6 +227,7 @@
                                                            ;;:output-dir "resources/public/js/compiled/out"
                                                            :optimizations :advanced
                                                            :pretty-print  false}}}}}
+             :lint         {:dependencies [[clj-kondo "RELEASE"]]}
              ;; Use like: lein with-profile +start-server repl
              :start-server {:repl-options {:init-ns user
                                            :init    (start-server)}}})
