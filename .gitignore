@@ -1,7 +1,9 @@
 .editorconfig
 .gitattributes
 
-/resources/public/js/compiled/**
+/resources/public/css/compiled
+/resources/public/js/compiled
+/resources/*_backup.pdf
 figwheel_server.log
 pom.xml
 *jar
@@ -20,7 +22,6 @@ profiles.clj
 env.sh
 .repl
 .nrepl-port
-/resources/*_backup.pdf
 *~
 #
 *#*
