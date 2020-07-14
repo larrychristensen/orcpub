@@ -3,10 +3,8 @@
             [io.pedestal.http.route :as route]
             [io.pedestal.test :as test]
             [io.pedestal.http.ring-middlewares :as ring]
-            [ring.middleware.cookies :only [wrap-cookies]]
             [ring.middleware.resource :as ring-resource]
             [ring.util.response :as ring-resp]
-            [ring.middleware.etag :refer [wrap-etag]]
             [io.pedestal.http.body-params :as body-params]
             [io.pedestal.interceptor.error :as error-int]
             [io.pedestal.interceptor.chain :refer [terminate]]
@@ -16,7 +14,7 @@
             [buddy.sign.jwt :as jwt]
             [buddy.hashers :as hashers]
             [buddy.auth.middleware :refer [authentication-request]]
-            [pandect.algo.sha1 :refer [sha1]]
+            [clojure.edn :as edn]
             [clojure.java.io :as io]
             [clj-time.core :as t :refer [hours from-now ago]]
             [clj-time.coerce :as tc :refer [from-date]]
@@ -233,7 +231,7 @@
   (try
     (let [resp (login-response request)]
       resp)
-    (catch Throwable e (do (prn "E" e) (throw e)))))
+    (catch Throwable e (prn "E" e) (throw e))))
 
 
 (defn user-for-email [db email]
@@ -258,15 +256,15 @@
 (defn do-verification [request params conn & [tx-data]]
   (let [verification-key (str (java.util.UUID/randomUUID))
         now (java.util.Date.)]
-    (do @(d/transact
-          conn
-          [(merge
-            tx-data
-            {:orcpub.user/verified? false
-             :orcpub.user/verification-key verification-key
-             :orcpub.user/verification-sent now})])
-        (send-verification-email request params verification-key)
-        {:status 200})))
+    @(d/transact
+        conn
+        [(merge
+          tx-data
+          {:orcpub.user/verified? false
+            :orcpub.user/verification-key verification-key
+            :orcpub.user/verification-sent now})])
+      (send-verification-email request params verification-key)
+      {:status 200}))
 
 (defn register [{:keys [json-params db conn] :as request}]
   (let [{:keys [username email password send-updates?]} json-params
@@ -290,7 +288,7 @@
           :orcpub.user/password (hashers/encrypt password)
           :orcpub.user/send-updates? send-updates?
           :orcpub.user/created (java.util.Date.)}))
-      (catch Throwable e (do (prn e) (throw e))))))
+      (catch Throwable e (prn e) (throw e)))))
 
 (def user-for-verification-key-query
   '[:find ?e
@@ -375,7 +373,7 @@
       (if id
         (do-send-password-reset id email conn request)
         {:status 400 :body {:error :no-account}}))
-    (catch Throwable e (do (prn e) (throw e)))))
+    (catch Throwable e (prn e) (throw e))))
 
 (defn do-password-reset [conn user-id password]
   @(d/transact
@@ -395,7 +393,7 @@
         (not= password verify-password) {:status 400 :message "Passwords do not match"}
         (seq (registration/validate-password password)) {:status 400 :message "New password is invalid"}
         :else (do-password-reset conn id password)))
-    (catch Throwable t (do (prn t) (throw t)))))
+    (catch Throwable t (prn t) (throw t))))
 
 (def font-sizes
   (merge
@@ -457,7 +455,7 @@
     (catch Exception e (prn "FAILED ADDING SPELLS CARDS!" e))))
 
 (defn character-pdf-2 [req]
-  (let [fields (-> req :form-params :body clojure.edn/read-string)
+  (let [fields (-> req :form-params :body edn/read-string)
         {:keys [image-url image-url-failed faction-image-url faction-image-url-failed spells-known custom-spells spell-save-dcs spell-attack-mods print-spell-cards?]} fields
         input (.openStream (io/resource (cond
                                           (find fields :spellcasting-class-6) "fillable-char-sheet-6-spells.pdf"
@@ -717,7 +715,7 @@
           (if (:db/id clean-character)
             (update-character db conn clean-character username)
             (create-new-character conn clean-character username))))
-      (catch Exception e (do (prn "ERROR" e) (throw e))))))
+      (catch Exception e (prn "ERROR" e) (throw e)))))
 
 (defn save-character [{:keys [db transit-params body conn identity] :as request}]
   (do-save-character db conn transit-params identity))

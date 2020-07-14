@@ -63,8 +63,8 @@
                                       default-class
                                       default-subclass]]
             [orcpub.dnd.e5.autosave-fx]
-            [re-frame.core :refer [reg-event-db reg-event-fx reg-fx inject-cofx path trim-v
-                                   after dispatch dispatch-sync subscribe ->interceptor]]
+            [re-frame.core :refer [reg-event-db reg-event-fx reg-fx inject-cofx path
+                                   after dispatch subscribe ->interceptor]]
             [cljs.spec.alpha :as spec]
             [cljs-http.client :as http]
             [cljs.core.async :refer [<! timeout]]
@@ -1845,35 +1845,35 @@
   (let [search-text (s/lower-case text)
         dice-result (dice/dice-roll-text search-text)
         kw (if search-text (common/name-to-kw search-text))
-        name-result (name-result search-text)]
-    (let [top-result (cond
-                       dice-result {:type :dice-roll
-                                    :result dice-result}
-                       (spells/spell-map kw) {:type :spell
-                                              :result (spells/spell-map kw)}
-                       (monsters/monster-map kw) {:type :monster
-                                                  :result (monsters/monster-map kw)}
-                       (mi/magic-item-map kw) {:type :magic-item
-                                                        :result (mi/magic-item-map kw)}
-                       (= "tavern name" search-text) {:type :tavern-name
-                                                      :result (char-rand5e/random-tavern-name)}
-                       name-result name-result
-                       :else nil)
-          filter-xform (filter-by-name-xform search-text :name)
-          top-spells (if (>= (count text) 3)
+        name-result (name-result search-text)
+        top-result (cond
+                     dice-result {:type :dice-roll
+                                  :result dice-result}
+                     (spells/spell-map kw) {:type :spell
+                                            :result (spells/spell-map kw)}
+                     (monsters/monster-map kw) {:type :monster
+                                                :result (monsters/monster-map kw)}
+                     (mi/magic-item-map kw) {:type :magic-item
+                                             :result (mi/magic-item-map kw)}
+                     (= "tavern name" search-text) {:type :tavern-name
+                                                    :result (char-rand5e/random-tavern-name)}
+                     name-result name-result
+                     :else nil)
+        filter-xform (filter-by-name-xform search-text :name)
+        top-spells (if (>= (count text) 3)
+                     (sequence
+                      filter-xform
+                      spells/spells))
+        top-monsters (if (>= (count text) 3)
                        (sequence
                         filter-xform
-                        spells/spells))
-          top-monsters (if (>= (count text) 3)
-                         (sequence
-                          filter-xform
-                          monsters/monsters))]
-      (cond-> {}
-        top-result (assoc :top-result top-result)
-        (seq top-spells) (update :results conj {:type :spell
-                                                :results top-spells})
-        (seq top-monsters) (update :results conj {:type :monster
-                                                  :results top-monsters})))))
+                        monsters/monsters))]
+    (cond-> {}
+      top-result (assoc :top-result top-result)
+      (seq top-spells) (update :results conj {:type :spell
+                                              :results top-spells})
+      (seq top-monsters) (update :results conj {:type :monster
+                                                :results top-monsters}))))
 
 
 (reg-event-db
@@ -2405,27 +2405,27 @@
                            (or (first (drop-while #(>= % current-initiative) initiatives))
                                (first initiatives))
                            (second initiatives))
-         round (get combat :round 1)]
-     (let [next-round? (and current-initiative
-                            (> next-initiative current-initiative))
-           updated (cond-> combat
-                     true (assoc :current-initiative next-initiative)
-                     next-round? (assoc :round (inc round))
-                     next-round? update-conditions)
-           removed-conditions (if next-round?
-                                (filter
-                                 (comp seq :removed-conditions)
-                                 (flatten
-                                  (map
-                                   (fn [[monster-kw individuals]]
-                                     (map
-                                      (fn [[individual-index {:keys [removed-conditions]}]]
-                                        {:type :monster
-                                         :index individual-index
-                                         :name (get-in monster-map [monster-kw :name])
-                                         :removed-conditions (map :type removed-conditions)})
-                                      individuals))
-                                   (:monster-data updated)))))]
+         round (get combat :round 1)
+         next-round? (and current-initiative
+                          (> next-initiative current-initiative))
+         updated (cond-> combat
+                   true (assoc :current-initiative next-initiative)
+                   next-round? (assoc :round (inc round))
+                   next-round? update-conditions)
+         removed-conditions (if next-round?
+                              (filter
+                               (comp seq :removed-conditions)
+                               (flatten
+                                (map
+                                 (fn [[monster-kw individuals]]
+                                   (map
+                                    (fn [[individual-index {:keys [removed-conditions]}]]
+                                      {:type :monster
+                                       :index individual-index
+                                       :name (get-in monster-map [monster-kw :name])
+                                       :removed-conditions (map :type removed-conditions)})
+                                    individuals))
+                                 (:monster-data updated)))))]
        {:dispatch-n (cond-> [[::combat/set-combat updated]]
                       (seq removed-conditions)
                       (conj [:show-message
@@ -2435,7 +2435,7 @@
                                 (fn [i {:keys [name index removed-conditions]}]
                                   ^{:key i}
                                   [:div.m-b-5 (str name " #" (inc index) " is no longer " (common/list-print (map common/kw-to-name removed-conditions) "or") ".")])
-                                removed-conditions))]]))}))))
+                                removed-conditions))]]))})))
 
 (reg-event-db
  ::encounters/set-encounter-path-prop

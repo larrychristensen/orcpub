@@ -229,9 +229,9 @@
   (if-let [stored-str (if js/window.localStorage
                         (.getItem js/window.localStorage local-storage-key))]
     (try (reader/read-string stored-str)
-         (catch js/Object e (do (prn "E" e)
-                                (js/console.warn "UNREADABLE ITEM FOUND, REMOVING.." local-storage-key stored-str)
-                                (.removeItem js/window.localStorage local-storage-key))))))
+         (catch js/Object e (prn "E" e)
+                (js/console.warn "UNREADABLE ITEM FOUND, REMOVING.." local-storage-key stored-str)
+                (.removeItem js/window.localStorage local-storage-key)))))
 
 (defn reg-local-store-cofx [key local-storage-key item-spec & [item-fn]]
   (re-frame/reg-cofx

@@ -22,7 +22,6 @@
             [orcpub.dnd.e5.party :as party]
             [orcpub.dnd.e5.character.random :as char-random]
             [orcpub.dnd.e5.character.equipment :as char-equip]
-            [cljs.pprint :refer [pprint]]
             [orcpub.registration :as registration]
             [orcpub.dnd.e5 :as e5]
             [orcpub.dnd.e5.magic-items :as mi]
@@ -1519,10 +1518,9 @@
             [:span.m-l-5.m-r-5 "/"]
             (map
              (fn [{:keys [::char/class-name ::char/level ::char/subclass-name]}]
-               (let []
-                 [:span
-                  [:div.class-name (str class-name) ] [:div.level (str "(" level ")")]
-                  [:div.f-s-12.m-t-5.opacity-6.sub-class-name (if subclass-name subclass-name)]]))
+               [:span
+                [:div.class-name (str class-name)] [:div.level (str "(" level ")")]
+                [:div.f-s-12.m-t-5.opacity-6.sub-class-name (if subclass-name subclass-name)]])
              classes)))])]]
      (if (and show-owner?
               (some? owner)
@@ -7898,4 +7896,3 @@
          {:style close-icon-style
           :on-click (make-event-handler ::char/filter-items "")}]]]
       [item-list-items]]]))
-
