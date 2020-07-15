@@ -386,6 +386,7 @@
          [:div.flex.w-100-p.align-items-end
           {:class-name (if mobile? "justify-cont-s-b" "justify-cont-s-b")}
           [:div
+           {:style {:min-width "53px"}}
            [:a {:href "https://www.patreon.com/DungeonMastersVault" :target :_blank}
             [:img.h-32.m-l-10.m-b-5.pointer.opacity-7.hover-opacity-full
              {:src (if mobile?
@@ -396,8 +397,7 @@
               (social-icon "facebook" "https://www.facebook.com/groups/252484128656613/")
               (social-icon "twitter" "https://twitter.com/thDMV")
               (social-icon "reddit-alien" "https://www.reddit.com/r/dungeonmastersvault/")])]
-          [:div.flex.m-b-5.m-t-5.justify-cont-s-b
-           {:class-name (when mobile? "flex-grow-1")}
+          [:div.flex.m-b-5.m-t-5.justify-cont-s-b.app-header-menu
            [header-tab
             "characters"
             "battle-gear"

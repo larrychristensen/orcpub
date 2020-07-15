@@ -758,27 +758,29 @@
     xs-query
     [:.user-icon
      {:display :none}]
-     [:.character-builder-header
-      #_{:margin-bottom 0}]
-     [:.list-character-summary
-      {:font-size "18px"}]
-     [:.character-summary
-      {:flex-wrap :wrap}]
-     [:.app-header
-      {:height :auto
-       :background-image :none
-       :background-color "rgba(0, 0, 0, 0.3)"
-       :min-height 0}]
-     [:.app-header-bar
-      {:min-height (px 50)
-       :backdrop-filter :none
-       :-webkit-backdrop-filter :none}]
-     [:.content
-      {:width "100%"}]
-     #_[:.options-column
-      {:width "100%"}]
-     [:.header-button-text :.header-links
-      {:display :none}])
+    [:.character-builder-header
+     #_{:margin-bottom 0}]
+    [:.list-character-summary
+     {:font-size "18px"}]
+    [:.character-summary
+     {:flex-wrap :wrap}]
+    [:.app-header
+     {:height :auto
+      :background-image :none
+      :background-color "rgba(0, 0, 0, 0.3)"
+      :min-height 0}]
+    [:.app-header-bar
+     {:min-height (px 50)
+      :backdrop-filter :none
+      :-webkit-backdrop-filter :none}]
+    [:.app-header-menu
+     {:flex-grow 1}]
+    [:.content
+     {:width "100%"}]
+    #_[:.options-column
+       {:width "100%"}]
+    [:.header-button-text :.header-links
+     {:display :none}])
 
     #_(at-media
      xs-query
