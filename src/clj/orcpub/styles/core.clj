@@ -197,6 +197,8 @@
    [:.m-b-40
     {:margin-bottom "40px"}]
 
+   [:.m-l-2
+    {:margin-left "2px"}]
    [:.m-l--10
     {:margin-left "-10px"}]
    [:.m-l--5

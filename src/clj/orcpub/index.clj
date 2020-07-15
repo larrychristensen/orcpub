@@ -26,7 +26,7 @@
     (meta-tag "og:image" image)
     [:meta {:charset "UTF-8"}]
     [:meta {:name "viewport"
-            :content "width=device-width, initial-scale=1"}]
+            :content "width=device-width, initial-scale=1.0, minimum-scale=1.0"}]
     (fi/install :png-prefix "favicon-"
                 :img "/favicon"
                 :xml "/favicon"
@@ -53,6 +53,8 @@ body {background-color: #080A0D}
 .app {height:100%;font-family:Open Sans, sans-serif}
 
 .h-full {height: 100vh;height: var(--innerHeight, 100vh)}
+
+.min-h-full {min-height: 100vh;min-height: var(--innerHeight, 100vh)}
 
 html, body, div, span, applet, object, iframe,
 h1, h2, h3, h4, h5, h6, p, blockquote, pre,
