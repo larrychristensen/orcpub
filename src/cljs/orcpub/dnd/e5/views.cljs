@@ -901,7 +901,7 @@
               "RESET PASSWORD"]]]]])))))
 
 (def loading-style
-  {:position :absolute
+  {:position :fixed
    :height "100%"
    :width "100%"
    :top 0
@@ -1392,11 +1392,7 @@
                       (let [app-header (js/document.getElementById "app-header")
                             header-height (.-offsetHeight app-header)
                             scroll-top (.-scrollTop (.-documentElement (.-target e)))
-                            sticky-header (js/document.getElementById "sticky-header")
-                            app-main (js/document.getElementById "app-main")
-                            scrollbar-width (- js/window.innerWidth (.-offsetWidth app-main))
-                            header-container (js/document.getElementById "header-container")]
-                        (set! (.-paddingRight (.-style header-container)) (str scrollbar-width "px"))
+                            sticky-header (js/document.getElementById "sticky-header")]
                         (if (>= scroll-top header-height)
                           (set! (.-display (.-style sticky-header)) "block")
                           (set! (.-display (.-style sticky-header)) "none")))))]
