@@ -623,8 +623,8 @@
               :on-click (toggle-homebrew path)}
              [tooltip
               (if (not homebrew?)
-                "Homebrew is off for " title " - enabling this option allows you select options you would not normally have (turns on homebrew rules)"
-                "Homebrew is on for " title " - you can select anything and make it homebrew")
+                (str "Homebrew is off for " title " - enabling this option allows you select options you would not normally have (turns on homebrew rules)")
+                (str "Homebrew is on for " title " - you can select anything and make it homebrew"))
               (views5e/svg-icon "beer-stein" 18)]])]
          (if (and help path @expanded?)
            [help-section help])
