@@ -452,7 +452,7 @@
    [:.tooltip [:.tooltiptext
                {:visibility "hidden"
                 :width "130px"
-                :bottom "100%"
+                :bottom "calc(100% + 5px)"
                 :left "50%"
                 :margin-left "-60px"
                 :background-color "black"
