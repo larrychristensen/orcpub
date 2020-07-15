@@ -586,6 +586,13 @@
 
 (def toggle-homebrew (memoize toggle-homebrew-fn))
 
+(defn tooltip [text content]
+  (if @(subscribe [:mobile?])
+    content
+    [:div.tooltip
+     content
+     [:span.tooltiptext text]]))
+
 (defn selection-section-base []
   (let [expanded? (r/atom false)]
     (fn [{:keys [title path parent-title name icon help max min remaining body hide-lock? hide-homebrew?]}]
@@ -603,21 +610,22 @@
           (if (and path help)
             [show-info-button expanded?])
           (if (not hide-lock?)
-            [:div.tooltip
+            [tooltip
+             (if locked?
+               "Locked to prevent changes - click to unlock"
+               "Unlocked - click to lock the section to prevent changes")
              [:i.fa.f-s-16.m-l-10.m-r-5.pointer
               {:class-name (if locked? "fa-lock" "fa-unlock-alt opacity-5 hover-opacity-full")
-               :on-click (toggle-locked path)}]
-             (if locked? [:span.tooltiptext "Locked to prevent changes - click to unlock"]
-                         [:span.tooltiptext "Unlocked - click to lock the section to prevent changes"])
-             ])
+               :on-click (toggle-locked path)}]])
           (if (not hide-homebrew?)
             [:span.pointer
              {:class-name (if (not homebrew?) "opacity-5 hover-opacity-full")
               :on-click (toggle-homebrew path)}
-             [:div.tooltip
-              (views5e/svg-icon "beer-stein" 18)
-              (if (not homebrew?) [:span.tooltiptext "Homebrew is off for " title " - enabling this option allows you select options you would not normally have (turns on homebrew rules)"]
-                                  [:span.tooltiptext "Homebrew is on for " title " - you can select anything and make it homebrew"] )]])]
+             [tooltip
+              (if (not homebrew?)
+                "Homebrew is off for " title " - enabling this option allows you select options you would not normally have (turns on homebrew rules)"
+                "Homebrew is on for " title " - you can select anything and make it homebrew")
+              (views5e/svg-icon "beer-stein" 18)]])]
          (if (and help path @expanded?)
            [help-section help])
          (if (int? min)
