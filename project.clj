@@ -108,7 +108,7 @@
                                ;; in the default browser once Figwheel has
                                ;; started and complied your application.
                                ;; Comment this out once it no longer serves you.
-                               :open-urls ["http://localhost:8890/index.html"]}
+                               :open-urls ["http://localhost:8890"]}
 
                 :compiler     {:main                 orcpub.core
                                :asset-path           "/js/compiled/out"
