@@ -1,5 +1,5 @@
 (ns orcpub.security
-  (:require [clj-time.core :as t :refer [ago now minutes hours]]))
+  (:require [clj-time.core :as t :refer [ago minutes]]))
 
 (defn compare-dates [attempt-1 attempt-2]
   (compare (:date attempt-1) (:date attempt-2)))

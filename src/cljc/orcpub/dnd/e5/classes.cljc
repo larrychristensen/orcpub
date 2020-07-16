@@ -13,7 +13,7 @@
             [orcpub.dnd.e5.spells :as spells5e]
             [orcpub.dnd.e5.spell-lists :as sl5e]
             [orcpub.dnd.e5.template-base :as t-base]
-            [re-frame.core :refer [reg-sub reg-sub-raw dispatch subscribe]]
+            [re-frame.core :refer [subscribe]]
             [clojure.string :as s]))
 
 (spec/def ::name (spec/and string? common/starts-with-letter?))

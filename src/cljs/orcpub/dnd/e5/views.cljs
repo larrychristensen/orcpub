@@ -43,10 +43,8 @@
             [clojure.string :as s]
             [cljs.reader :as reader]
             [orcpub.user-agent :as user-agent]
-            [cljs.core.async :refer [<! timeout]]
             [bidi.bidi :as bidi]
-            [camel-snake-kebab.core :as csk])
-  (:require-macros [cljs.core.async.macros :refer [go]]))
+            [camel-snake-kebab.core :as csk]))
 
 ;; the `amount` of "uses" an action may have before it warrants
 ;; using a dropdown instead of a list of checkboxes

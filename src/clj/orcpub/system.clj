@@ -1,6 +1,6 @@
 (ns orcpub.system
   (:require [com.stuartsierra.component :as component]       
-            [reloaded.repl :refer [init start stop go reset]] 
+            [reloaded.repl :as rrepl]
             [io.pedestal.http :as http]                      
             [orcpub.pedestal :as pedestal]                                       
             [orcpub.routes :as routes]
@@ -53,4 +53,4 @@
       (pedestal/new-pedestal)
       [:service-map :conn])))
 
-(reloaded.repl/set-init! #(system :prod))
+(rrepl/set-init! #(system :prod))

@@ -33,21 +33,18 @@
             [orcpub.dnd.e5.equipment :as equip5e]
             [orcpub.dnd.e5.skills :as skill5e]
             [orcpub.dnd.e5.events :as events5e]
-            [orcpub.dnd.e5.db :as db5e]
+            [orcpub.dnd.e5.db :as db]
             [orcpub.dnd.e5.views :as views5e]
             [orcpub.route-map :as routes]
             [orcpub.pdf-spec :as pdf-spec]
             [orcpub.user-agent :as user-agent]
-            [orcpub.dnd.e5.db :as db]
 
             [clojure.spec.alpha :as spec]
             [clojure.spec.test.alpha :as stest]
-            [cljs.core.async :refer [<!]]
             [clojure.core.match :refer [match]]
 
             [reagent.core :as r]
-            [re-frame.core :refer [subscribe dispatch dispatch-sync]])
-  (:require-macros [cljs.core.async.macros :refer [go]]))
+            [re-frame.core :refer [subscribe dispatch dispatch-sync]]))
 
 (def print-disabled? false)
 

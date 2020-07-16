@@ -6,14 +6,10 @@
             [orcpub.dnd.e5.display :as dis5e]
             [orcpub.dnd.e5.monsters :as monsters]
             [orcpub.dnd.e5.options :as options])
-  (:import (org.apache.pdfbox.pdmodel.interactive.form PDCheckBox PDComboBox PDListBox PDRadioButton PDTextField)
-           (org.apache.pdfbox.cos COSName)
+  (:import (org.apache.pdfbox.pdmodel.interactive.form PDCheckBox PDTextField)
            (org.apache.pdfbox.pdmodel PDPage PDDocument PDPageContentStream PDResources)
-           (org.apache.pdfbox.pdmodel.graphics.image PDImageXObject)
-           (java.io ByteArrayOutputStream ByteArrayInputStream)
            (org.apache.pdfbox.pdmodel.graphics.image JPEGFactory LosslessFactory)
            (org.apache.pdfbox.pdmodel.font PDType1Font PDFont PDType0Font)
-           (org.eclipse.jetty.server.handler.gzip GzipHandler)
            (javax.imageio ImageIO)
            (java.net URL)))
 

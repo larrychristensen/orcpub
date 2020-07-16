@@ -1,5 +1,5 @@
 (ns orcpub.dnd.e5.spell-subs
-  (:require [re-frame.core :refer [reg-sub reg-sub-raw dispatch subscribe]]
+  (:require [re-frame.core :refer [reg-sub]]
             [orcpub.common :as common]
             [orcpub.template :as t]
             [orcpub.modifiers :as mod]
@@ -29,9 +29,7 @@
             [orcpub.dnd.e5.template-base :as t-base]
             [reagent.ratom :as ra]
             [clojure.string :as s]
-            [cljs-http.client :as http]
-            [cljs.core.async :refer [<!]])
-  (:require-macros [cljs.core.async.macros :refer [go]]))
+            [cljs-http.client :as http]))
 
 (reg-sub
  ::e5/plugins

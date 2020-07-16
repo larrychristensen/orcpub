@@ -1,5 +1,4 @@
 (ns orcpub.core
-  (:require-macros [cljs.core.async.macros :refer [go]])
   (:require [orcpub.character-builder :as ch]
             [orcpub.dnd.e5.subs]
             [orcpub.dnd.e5.equipment-subs]
@@ -8,7 +7,6 @@
             [orcpub.dnd.e5.views-2 :as views-2]
             [orcpub.route-map :as routes]
             [cljs-http.client :as http]
-            [cljs.core.async :refer [<!]]
             [clojure.string :as s]
             [re-frame.core :refer [dispatch dispatch-sync subscribe]]
             [reagent.core :as r]

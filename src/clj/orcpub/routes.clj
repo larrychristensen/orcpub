@@ -43,15 +43,8 @@
             [hiccup.page :as page]
             [environ.core :as environ]
             [clojure.set :as sets])
-  (:import (org.apache.pdfbox.pdmodel.interactive.form PDCheckBox PDComboBox PDListBox PDRadioButton PDTextField)
-
-           (org.apache.pdfbox.pdmodel PDDocument PDPage PDPageContentStream)
-           (org.apache.pdfbox.pdmodel.graphics.image PDImageXObject)
-           (java.io ByteArrayOutputStream ByteArrayInputStream)
-           (org.apache.pdfbox.pdmodel.graphics.image JPEGFactory LosslessFactory)
-           (org.eclipse.jetty.server.handler.gzip GzipHandler)
-           (javax.imageio ImageIO)
-           (java.net URL))
+  (:import (org.apache.pdfbox.pdmodel PDDocument PDPage PDPageContentStream)
+           (java.io ByteArrayOutputStream ByteArrayInputStream))
   (:gen-class))
 
 (deftype FixedBuffer [^long len])
