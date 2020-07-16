@@ -254,7 +254,7 @@
   (let [hovered? (r/atom false)]
     (fn [title icon on-click disabled active device-type & buttons]
       (let [mobile? (= :mobile device-type)]
-        [:div.f-w-b.f-s-14.t-a-c.header-tab.m-5.posn-rel
+        [:div.f-w-b.f-s-14.t-a-c.header-tab.m-l-2.m-r-2.posn-rel
          {:on-click (fn [e] (if (seq buttons)
                               #(swap! hovered? not)
                               (on-click e)))
@@ -356,139 +356,139 @@
   (let [device-type @(subscribe [:device-type])
         mobile? (= :mobile device-type)
         active-route @(subscribe [:route])]
-    [:div#app-header.app-header.flex.flex-column.justify-cont-s-b.white
-     [:div.app-header-bar.container
-      [:div.content
-       [:div.flex.align-items-c.h-100-p
-        [:div.flex.justify-cont-s-b.align-items-c.w-100-p.p-l-20.p-r-20.h-100-p
-         logo
-         (let [search-text @(subscribe [:search-text])
-               search-text? @(subscribe [:search-text?])]
-           [:div
-            {:class-name (if mobile? "p-l-10 p-r-10" "p-l-20 p-r-20 flex-grow-1")}
-            [:div.b-rad-5.flex.align-items-c
-             {:style search-input-parent-style}
-             (if (not mobile?)
-               [:div.p-l-20.flex-grow-1
-                [:input.w-100-p.main-text-color
-                 {:style search-input-style
-                  :value search-text
-                  :on-key-press search-input-keypress
-                  :on-change set-search-text
-                  :placeholder "search"}]])
-             [:div.p-r-10.pointer
-              {:on-click open-orcacle}
-              [svg-icon "magnifying-glass" (if mobile? 32 48) ""]]]])
-         [user-header-view]]]]]
-     [:div.container
-      [:div.content
-       [:div.flex.w-100-p.align-items-end
-        {:class-name (if mobile? "justify-cont-s-b" "justify-cont-s-b")}
-        [:div
-         [:a {:href "https://www.patreon.com/DungeonMastersVault" :target :_blank}
-          [:img.h-32.m-l-10.m-b-5.pointer.opacity-7.hover-opacity-full
-           {:src (if mobile?
-                   "https://c5.patreon.com/external/logo/downloads_logomark_color_on_navy.png"
-                   "https://c5.patreon.com/external/logo/become_a_patron_button.png")}]]
-         (if (not mobile?)
-           [:div.main-text-color.p-10
-            (social-icon "facebook" "https://www.facebook.com/groups/252484128656613/")
-            (social-icon "twitter" "https://twitter.com/thDMV")
-            (social-icon "reddit-alien" "https://www.reddit.com/r/dungeonmastersvault/")])]
-        [:div.flex.m-b-5.m-r-5
-         [header-tab
-          "characters"
-          "battle-gear"
-          route-to-character-list-page
-          false
-          (routes/dnd-e5-char-page-routes (or (:handler active-route) active-route))
-          device-type
-          {:name "Character List"
-           :route routes/dnd-e5-char-list-page-route}
-          {:name "Character Builder"
-           :route routes/dnd-e5-char-builder-route}
-          {:name "Parties"
-           :route routes/dnd-e5-char-parties-page-route}]
-         [header-tab
-          "spells"
-          "spell-book"
-          route-to-spell-list-page
-          false
-          (routes/dnd-e5-spell-page-routes (or (:handler active-route) active-route))
-          device-type
-          {:name "Spell List"
-           :route routes/dnd-e5-spell-list-page-route}
-          {:name "Spell Builder"
-           :route routes/dnd-e5-spell-builder-page-route}]
-         [header-tab
-          "monsters"
-          "spiked-dragon-head"
-          route-to-monster-list-page
-          false
-          (routes/dnd-e5-monster-page-routes (or (:handler active-route) active-route))
-          device-type
-          {:name "Monster List"
-           :route routes/dnd-e5-monster-list-page-route}
-          {:name "Monster Builder"
-           :route routes/dnd-e5-monster-builder-page-route}]
-         [header-tab
-          "items"
-          "all-for-one"
-          route-to-item-list-page
-          false
-          (routes/dnd-e5-item-page-routes
-           (or (:handler active-route)
-               active-route))
-          device-type
-          {:name "Item List"
-           :route routes/dnd-e5-item-list-page-route}
-          {:name "Item Builder"
-           :route routes/dnd-e5-item-builder-page-route}]
-         [header-tab
-          "encounters"
-          "dungeon-gate"
-          route-to-my-encounters-page
-          false
-          (routes/dnd-e5-my-encounters-routes
-            (or (:handler active-route)
-                active-route))
-          device-type
-          {:name "Combat Tracker"
-           :route routes/dnd-e5-combat-tracker-page-route}
-          {:name "Encounter Builder"
-           :route routes/dnd-e5-encounter-builder-page-route}
-          ]
-         [header-tab
-          "My Content"
-          "beer-stein"
-          route-to-my-content-page
-          false
-          (routes/dnd-e5-my-content-routes
-           (or (:handler active-route)
-               active-route))
-          device-type
-          {:name "Content List"
-           :route routes/dnd-e5-my-content-route}
-          {:name "Feat Builder"
-           :route routes/dnd-e5-feat-builder-page-route}
-          {:name "Background Builder"
-           :route routes/dnd-e5-background-builder-page-route}
-          {:name "Language Builder"
-           :route routes/dnd-e5-language-builder-page-route}
-          {:name "Race Builder"
-           :route routes/dnd-e5-race-builder-page-route}
-          {:name "Subrace Builder"
-           :route routes/dnd-e5-subrace-builder-page-route}
-          {:name "Class Builder"
-           :route routes/dnd-e5-class-builder-page-route}
-          {:name "Subclass Builder"
-           :route routes/dnd-e5-subclass-builder-page-route}
-          {:name "Eldritch Invocation Builder"
-           :route routes/dnd-e5-invocation-builder-page-route}
-          {:name "Pact Boon Builder"
-           :route routes/dnd-e5-boon-builder-page-route}
-          {:name "Selection Builder"
-           :route routes/dnd-e5-selection-builder-page-route}]]]]]]))
+      [:div#app-header.app-header.flex.flex-column.justify-cont-s-b.white
+       [:div.app-header-bar.container
+        [:div.content
+         [:div.flex.align-items-c.h-100-p
+          [:div.flex.justify-cont-s-b.align-items-c.w-100-p.p-l-20.p-r-20.h-100-p
+           logo
+           (let [search-text @(subscribe [:search-text])
+                 search-text? @(subscribe [:search-text?])]
+             [:div
+              {:class-name (if mobile? "p-l-10 p-r-10" "p-l-20 p-r-20 flex-grow-1")}
+              [:div.b-rad-5.flex.align-items-c
+               {:style search-input-parent-style}
+               (if (not mobile?)
+                 [:div.p-l-20.flex-grow-1
+                  [:input.w-100-p.main-text-color
+                   {:style search-input-style
+                    :value search-text
+                    :on-key-press search-input-keypress
+                    :on-change set-search-text
+                    :placeholder "search"}]])
+               [:div.p-r-10.pointer
+                {:on-click open-orcacle}
+                [svg-icon "magnifying-glass" (if mobile? 32 48) ""]]]])
+           [user-header-view]]]]]
+       [:div.container
+        [:div.content
+         [:div.flex.w-100-p.align-items-end
+          {:class-name (if mobile? "justify-cont-s-b" "justify-cont-s-b")}
+          [:div
+           {:style {:min-width "53px"}}
+           [:a {:href "https://www.patreon.com/DungeonMastersVault" :target :_blank}
+            [:img.h-32.m-l-10.m-b-5.pointer.opacity-7.hover-opacity-full
+             {:src (if mobile?
+                     "https://c5.patreon.com/external/logo/downloads_logomark_color_on_navy.png"
+                     "https://c5.patreon.com/external/logo/become_a_patron_button.png")}]]
+           (if (not mobile?)
+             [:div.main-text-color.p-10
+              (social-icon "facebook" "https://www.facebook.com/groups/252484128656613/")
+              (social-icon "twitter" "https://twitter.com/thDMV")
+              (social-icon "reddit-alien" "https://www.reddit.com/r/dungeonmastersvault/")])]
+          [:div.flex.m-b-5.m-t-5.justify-cont-s-b.app-header-menu
+           [header-tab
+            "characters"
+            "battle-gear"
+            route-to-character-list-page
+            false
+            (routes/dnd-e5-char-page-routes (or (:handler active-route) active-route))
+            device-type
+            {:name "Character List"
+             :route routes/dnd-e5-char-list-page-route}
+            {:name "Character Builder"
+             :route routes/dnd-e5-char-builder-route}
+            {:name "Parties"
+             :route routes/dnd-e5-char-parties-page-route}]
+           [header-tab
+            "spells"
+            "spell-book"
+            route-to-spell-list-page
+            false
+            (routes/dnd-e5-spell-page-routes (or (:handler active-route) active-route))
+            device-type
+            {:name "Spell List"
+             :route routes/dnd-e5-spell-list-page-route}
+            {:name "Spell Builder"
+             :route routes/dnd-e5-spell-builder-page-route}]
+           [header-tab
+            "monsters"
+            "spiked-dragon-head"
+            route-to-monster-list-page
+            false
+            (routes/dnd-e5-monster-page-routes (or (:handler active-route) active-route))
+            device-type
+            {:name "Monster List"
+             :route routes/dnd-e5-monster-list-page-route}
+            {:name "Monster Builder"
+             :route routes/dnd-e5-monster-builder-page-route}]
+           [header-tab
+            "items"
+            "all-for-one"
+            route-to-item-list-page
+            false
+            (routes/dnd-e5-item-page-routes
+             (or (:handler active-route)
+                 active-route))
+            device-type
+            {:name "Item List"
+             :route routes/dnd-e5-item-list-page-route}
+            {:name "Item Builder"
+             :route routes/dnd-e5-item-builder-page-route}]
+           [header-tab
+            "encounters"
+            "dungeon-gate"
+            route-to-my-encounters-page
+            false
+            (routes/dnd-e5-my-encounters-routes
+             (or (:handler active-route)
+                 active-route))
+            device-type
+            {:name "Combat Tracker"
+             :route routes/dnd-e5-combat-tracker-page-route}
+            {:name "Encounter Builder"
+             :route routes/dnd-e5-encounter-builder-page-route}]
+           [header-tab
+            "My Content"
+            "beer-stein"
+            route-to-my-content-page
+            false
+            (routes/dnd-e5-my-content-routes
+             (or (:handler active-route)
+                 active-route))
+            device-type
+            {:name "Content List"
+             :route routes/dnd-e5-my-content-route}
+            {:name "Feat Builder"
+             :route routes/dnd-e5-feat-builder-page-route}
+            {:name "Background Builder"
+             :route routes/dnd-e5-background-builder-page-route}
+            {:name "Language Builder"
+             :route routes/dnd-e5-language-builder-page-route}
+            {:name "Race Builder"
+             :route routes/dnd-e5-race-builder-page-route}
+            {:name "Subrace Builder"
+             :route routes/dnd-e5-subrace-builder-page-route}
+            {:name "Class Builder"
+             :route routes/dnd-e5-class-builder-page-route}
+            {:name "Subclass Builder"
+             :route routes/dnd-e5-subclass-builder-page-route}
+            {:name "Eldritch Invocation Builder"
+             :route routes/dnd-e5-invocation-builder-page-route}
+            {:name "Pact Boon Builder"
+             :route routes/dnd-e5-boon-builder-page-route}
+            {:name "Selection Builder"
+             :route routes/dnd-e5-selection-builder-page-route}]]]]]]))
 
 (def registration-content-style
   {:background-color :white
@@ -514,7 +514,7 @@
   (dispatch [:route :default]))
 
 (defn registration-page [content]
-  [:div.sans.h-100-p.flex
+  [:div.sans.h-full.flex
    {:style {:flex-direction :column}}
    [:div.flex.justify-cont-s-a.align-items-c.flex-grow-1.h-100-p
     [:div.registration-content
@@ -900,7 +900,7 @@
               "RESET PASSWORD"]]]]])))))
 
 (def loading-style
-  {:position :absolute
+  {:position :fixed
    :height "100%"
    :width "100%"
    :top 0
@@ -1386,71 +1386,77 @@
        [search-results]]]]))
 
 (defn content-page [title button-cfgs content & {:keys [hide-header-message? frame?]}]
-  (let [srd-message-closed? @(subscribe [:srd-message-closed?])
-        orcacle-open? @(subscribe [:orcacle-open?])
-        theme @(subscribe [:theme])
-        mobile? @(subscribe [:mobile?])]
-    [:div.app
-     {:class-name theme
-      :on-scroll (if (not frame?)
-                   (fn [e]
-                     (if (not orcacle-open?)
-                       (let [app-header (js/document.getElementById "app-header")
-                             header-height (.-offsetHeight app-header)
-                             scroll-top (.-scrollTop (.-target e))
-                             sticky-header (js/document.getElementById "sticky-header")
-                             app-main (js/document.getElementById "app-main")
-                             scrollbar-width (- js/window.innerWidth (.-offsetWidth app-main))
-                             header-container (js/document.getElementById "header-container")]
-                         (set! (.-paddingRight (.-style header-container)) (str scrollbar-width "px"))
-                         (if (>= scroll-top header-height)
-                           (set! (.-display (.-style sticky-header)) "block")
-                           (set! (.-display (.-style sticky-header)) "none"))))))}
-     (if (not frame?)
-       [download-form])
-     (if @(subscribe [:loading])
-       [:div {:style loading-style}
-        [:div.flex.justify-cont-s-a.align-items-c.h-100-p
-         [:img.h-200.w-200.m-t-200 {:src "/image/spiral.gif"}]]])
-     (if (not frame?)
-       [app-header])
-     (if orcacle-open?
-       [orcacle])
-     (let [hdr [header title button-cfgs :frame? frame?]]
-       [:div
-        [:div#sticky-header.sticky-header.w-100-p.posn-fixed
-         [:div.flex.justify-cont-c
-          [:div#header-container.f-s-14.main-text-color.content
-           hdr]]]
-        [:div.flex.justify-cont-c.main-text-color
-         [:div.content hdr]]
+  (let [on-scroll (fn [e]
+                    (when (not @(subscribe [:orcacle-open?]))
+                      (let [app-header (js/document.getElementById "app-header")
+                            header-height (.-offsetHeight app-header)
+                            scroll-top (.-scrollTop (.-documentElement (.-target e)))
+                            sticky-header (js/document.getElementById "sticky-header")]
+                        (if (>= scroll-top header-height)
+                          (set! (.-display (.-style sticky-header)) "block")
+                          (set! (.-display (.-style sticky-header)) "none")))))]
+    (r/create-class
+     {:component-did-mount (fn [comp]
+                             (when (not frame?)
+                               (js/window.addEventListener "scroll" on-scroll)))
+      :component-will-unmount (fn [comp]
+                                (when (not frame?)
+                                  (js/window.removeEventListener "scroll" on-scroll)))
+      :reagent-render
+      (fn [title button-cfgs content & {:keys [hide-header-message? frame?]}]
+        (let [srd-message-closed? @(subscribe [:srd-message-closed?])
+              orcacle-open? @(subscribe [:orcacle-open?])
+              theme @(subscribe [:theme])
+              mobile? @(subscribe [:mobile?])]
+          [:div.app.min-h-full
+           {:class-name theme
+            :on-scroll (if (not frame?)
+                         (fn [e]))}
+           (when (not frame?)
+             [download-form])
+           (when @(subscribe [:loading])
+             [:div {:style loading-style}
+              [:div.flex.justify-cont-s-a.align-items-c.h-100-p
+               [:img.h-200.w-200.m-t-200 {:src "/image/spiral.gif"}]]])
+           (when (not frame?)
+             [app-header])
+           (when orcacle-open?
+             [orcacle])
+           (let [hdr [header title button-cfgs :frame? frame?]]
+             [:div
+              [:div#sticky-header.sticky-header.w-100-p.posn-fixed
+               [:div.flex.justify-cont-c
+                [:div#header-container.f-s-14.main-text-color.content
+                 hdr]]]
+              [:div.flex.justify-cont-c.main-text-color
+               [:div.content hdr]]
         ;  Banner for announcements
-        #_[:div.m-l-20.m-r-20.f-w-b.f-s-18.container.m-b-10.main-text-color
-         (if (and (not srd-message-closed?)
-                  (not hide-header-message?))
-           [:div
-            (if (not frame?)
-              [:div.content.bg-lighter.p-10.flex
-               [:div.flex-grow-1
-                [:div "Site is based on SRD rules. " srd-link "."]]
-               [:i.fa.fa-times.p-10.pointer
-                {:on-click #(dispatch [:close-srd-message])}]])])]
-        [:div#app-main.container
-         [:div.content.w-100-p content]]
-        [:div.main-text-color.flex.justify-cont-c
-         [:div.content.f-w-n.f-s-12
-          [:div.flex.justify-cont-s-b.align-items-c.flex-wrap.p-10
-           [:div
-            [:div.m-b-5 "Icons made by Lorc, Caduceus, and Delapouite. Available on " [:a.orange {:href "http://game-icons.net"} "http://game-icons.net"]]]
-           [:div.m-l-10
-            [:a.orange {:href "https://github.com/Orcpub/orcpub/issues" :target :_blank} "Feedback/Bug Reports"]]
-           [:div.m-l-10.m-r-10.p-10
-            [:a.orange {:href "/privacy-policy" :target :_blank} "Privacy Policy"]
-            [:a.orange.m-l-5 {:href "/terms-of-use" :target :_blank} "Terms of Use"]]
-           [:div.legal-footer
-            [:p "© 2020 " [:a.orange {:href "https://github.com/Orcpub/orcpub/" :target :_blank} "Orcpub"]]
-            [:p "Wizards of the Coast, Dungeons & Dragons, D&D, and their logos are trademarks of Wizards of the Coast LLC in the United States and other countries. © 2020 Wizards. All Rights Reserved. OrcPub.com is not affiliated with, endorsed, sponsored, or specifically approved by Wizards of the Coast LLC."]]]
-            [debug-data]]]])]))
+              #_[:div.m-l-20.m-r-20.f-w-b.f-s-18.container.m-b-10.main-text-color
+                 (if (and (not srd-message-closed?)
+                          (not hide-header-message?))
+                   [:div
+                    (if (not frame?)
+                      [:div.content.bg-lighter.p-10.flex
+                       [:div.flex-grow-1
+                        [:div "Site is based on SRD rules. " srd-link "."]]
+                       [:i.fa.fa-times.p-10.pointer
+                        {:on-click #(dispatch [:close-srd-message])}]])])]
+              [:div#app-main.container
+               [:div.content.w-100-p content]]
+              [:div.main-text-color.flex.justify-cont-c
+               [:div.content.f-w-n.f-s-12
+                [:div.flex.justify-cont-s-b.align-items-c.flex-wrap.p-10
+                 [:div
+                  [:div.m-b-5 "Icons made by Lorc, Caduceus, and Delapouite. Available on " [:a.orange {:href "http://game-icons.net"} "http://game-icons.net"]]]
+                 [:div.m-l-10
+                  [:a.orange {:href "https://github.com/Orcpub/orcpub/issues" :target :_blank} "Feedback/Bug Reports"]]
+                 [:div.m-l-10.m-r-10.p-10
+                  [:a.orange {:href "/privacy-policy" :target :_blank} "Privacy Policy"]
+                  [:a.orange.m-l-5 {:href "/terms-of-use" :target :_blank} "Terms of Use"]]
+                 [:div.legal-footer
+                  [:p "© 2020 " [:a.orange {:href "https://github.com/Orcpub/orcpub/" :target :_blank} "Orcpub"]]
+                  [:p "Wizards of the Coast, Dungeons & Dragons, D&D, and their logos are trademarks of Wizards of the Coast LLC in the United States and other countries. © 2020 Wizards. All Rights Reserved. OrcPub.com is not affiliated with, endorsed, sponsored, or specifically approved by Wizards of the Coast LLC."]]]
+                [debug-data]]]])]))})))
 
 (def row-style
   {:border-bottom "1px solid rgba(255,255,255,0.5)"})
