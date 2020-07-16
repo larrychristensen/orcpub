@@ -31,6 +31,7 @@
                 :img "/favicon"
                 :xml "/favicon"
                 :ver "1")
+    (include-css "/css/cookiestyles.css")
     [:script
      "document.documentElement.style.setProperty('--innerHeight', `${window.innerHeight}px`);
      window.addEventListener('resize', () => document.documentElement.style.setProperty('--innerHeight', `${window.innerHeight}px`));"]
@@ -120,8 +121,10 @@ html {
                :style "height:200px;width:200px;margin-top:200px"}]])]
     (include-css "/css/compiled/styles.css")
     (include-js "/js/compiled/orcpub.js")
+    (include-js "/js/cookies.js")
     (include-css "/font-awesome-4.7.0/css/font-awesome.min.css")
     (include-css "https://fonts.googleapis.com/css?family=Open+Sans")
+    [:script " window.start.init({Palette:\"palette7\",Mode:\"banner bottom\",})"]    
     [:script
      "let plugins = localStorage.getItem ('plugins');
      if(plugins === null || plugins === '{}')
