@@ -70,6 +70,7 @@
             [lein-garden "0.3.0"]
             [lein-environ "1.1.0"]
             [lein-cljfmt "0.6.8"]
+            [lein-kibit "0.1.8"]
             #_[lein-resource "16.9.1"]]
 
   :source-paths ["src/clj" "src/cljc" "src/cljs"]

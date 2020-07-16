@@ -86,7 +86,7 @@
 
 (defonce history (doto (make-history)
                    (goog.events/listen EventType.NAVIGATE
-                                       #(handle-url-change %))
+                                       handle-url-change)
                    (.setEnabled true)))
 
 (defn query-map [query-str]

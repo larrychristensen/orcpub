@@ -54,10 +54,10 @@
    @failed-login-attempts-by-username))
 
 (defn usernames-for-attempts [attempts]
-  (into #{} (map :user attempts)))
+  (set (map :user attempts)))
 
 (defn ips-for-attempts [attempts]
-  (into #{} (map :ip attempts)))
+  (set (map :ip attempts)))
 
 (defn multiple-account-access-aux [ip attempts-by-ip]
   (some-> ip

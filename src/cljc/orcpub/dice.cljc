@@ -8,7 +8,7 @@
   (inc (rand-int sides)))
 
 (defn roll-n [num sides]
-  (take num (repeatedly #(die-roll sides))))
+  (repeatedly num #(die-roll sides)))
 
 (defn dice-roll [{:keys [num sides drop-num modifier]}]
   (apply +

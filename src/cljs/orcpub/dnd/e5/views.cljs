@@ -1384,7 +1384,7 @@
 
 (defn content-page [title button-cfgs content & {:keys [hide-header-message? frame?]}]
   (let [on-scroll (fn [e]
-                    (when (not @(subscribe [:orcacle-open?]))
+                    (when-not @(subscribe [:orcacle-open?])
                       (let [app-header (js/document.getElementById "app-header")
                             header-height (.-offsetHeight app-header)
                             scroll-top (.-scrollTop (.-documentElement (.-target e)))
@@ -1394,10 +1394,10 @@
                           (set! (.-display (.-style sticky-header)) "none")))))]
     (r/create-class
      {:component-did-mount (fn [comp]
-                             (when (not frame?)
+                             (when-not frame?
                                (js/window.addEventListener "scroll" on-scroll)))
       :component-will-unmount (fn [comp]
-                                (when (not frame?)
+                                (when-not frame?
                                   (js/window.removeEventListener "scroll" on-scroll)))
       :reagent-render
       (fn [title button-cfgs content & {:keys [hide-header-message? frame?]}]
@@ -1407,15 +1407,15 @@
               mobile? @(subscribe [:mobile?])]
           [:div.app.min-h-full
            {:class-name theme
-            :on-scroll (if (not frame?)
+            :on-scroll (when-not frame?
                          (fn [e]))}
-           (when (not frame?)
+           (when-not frame?
              [download-form])
            (when @(subscribe [:loading])
              [:div {:style loading-style}
               [:div.flex.justify-cont-s-a.align-items-c.h-100-p
                [:img.h-200.w-200.m-t-200 {:src "/image/spiral.gif"}]]])
-           (when (not frame?)
+           (when-not frame?
              [app-header])
            (when orcacle-open?
              [orcacle])
@@ -1777,7 +1777,7 @@
   (let [mobile? @(subscribe [:mobile?])
         button [:button.roll-button
                 {:on-click (button-roll-handler message roll)}
-                (if text text "Roll")]]
+                (or text "Roll")]]
     (if (or mobile? disable-tooltip)
       button
       [:div.tooltip
@@ -3170,7 +3170,7 @@
                        (traits-by-type :other))
         attacks @(subscribe [::char/attacks id])
         all-traits (concat actions bonus-actions reactions traits attacks)
-        freqs (into #{} (map has-frequency-units? all-traits))]
+        freqs (set (map has-frequency-units? all-traits))]
     [:div.details-columns
      {:class-name (if (= 2 num-columns) "flex")}
 
@@ -3307,11 +3307,10 @@
       (let [device-type @(subscribe [:device-type])
             selected-tab @(subscribe [::char/selected-display-tab])
             two-columns? (= 2 num-columns)
-            tab (if selected-tab
-                  selected-tab
-                  (if two-columns?
-                    "combat"
-                    "summary"))]
+            tab (or selected-tab
+                    (if two-columns?
+                      "combat"
+                      "summary"))]
         [:div.w-100-p
          [:div
           (if show-summary?
@@ -5318,7 +5317,7 @@
      [:div.m-b-30
       [:div.f-s-24.f-w-b.m-b-10 "Ability Increase Levels"]
       [:div.flex.flex-wrap
-       (let [asi-levels-set (into #{} (:ability-increase-levels class))]
+       (let [asi-levels-set (set (:ability-increase-levels class))]
          (doall
           (map
            (fn [level]

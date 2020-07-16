@@ -49,9 +49,8 @@
 (defn parse-route []
   (let [route (if js/window.location
                 (bidi/match-route route-map/routes js/window.location.pathname))]
-    (if route
-      route
-      default-route)))
+    (or route
+        default-route)))
 
 (def default-character (char5e/set-class t5e/character :barbarian 0 (class5e/barbarian-option nil nil nil nil nil)))
 

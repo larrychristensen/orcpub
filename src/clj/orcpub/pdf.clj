@@ -147,7 +147,7 @@
 
 (defn draw-lines-to-box [cs lines font font-size x y height]
   (let [leading (* font-size 1.1)
-        max-lines (- (/ (* 72 height) leading) 1)
+        max-lines (dec (/ (* 72 height) leading))
         units-x (* 72 x)
         units-y (* 72 y)
         fitting-lines (vec (take max-lines lines))]
@@ -384,9 +384,9 @@
                                      (- 11.0 y 1.08) ;from the top down
                                      (- box-width 0.24)
                                      (- box-height 1.13))]
-               (if (-> components :material-component)
+               (if (:material-component components)
                  (draw-text-to-box cs
-                                   (str (s/capitalize (-> components :material-component)))
+                                   (str (s/capitalize (:material-component components)))
                                    (:italic fonts)
                                    8
                                    (+ x 0.12)

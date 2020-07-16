@@ -333,7 +333,7 @@
                                      {:headers (auth-headers @app-db)}))]
           (dispatch [:set-loading false])
           (case (:status response)
-            200 (dispatch [::char5e/set-characters (-> response :body)])
+            200 (dispatch [::char5e/set-characters (:body response)])
             401 (if (not login-optional?)
                   (dispatch [:route-to-login]))
             500 (dispatch (events/show-generic-error)))))
@@ -348,7 +348,7 @@
                                      {:headers (auth-headers @app-db)}))]
           (dispatch [:set-loading false])
           (case (:status response)
-            200 (dispatch [::party5e/set-parties (-> response :body)])
+            200 (dispatch [::party5e/set-parties (:body response)])
             401 (if (not login-optional?)
                   (dispatch [:route-to-login]))
             500 (dispatch (events/show-generic-error)))))
@@ -374,7 +374,7 @@
  :following-users
  :<- [:user]
  (fn [user _]
-   (into #{} (:following user))))
+   (set (:following user))))
 
 (reg-sub
  ::char5e/character-map
@@ -415,7 +415,7 @@
               (case (:status response)
                 200 (dispatch [::char5e/set-character
                                int-id
-                               (char5e/from-strict (-> response :body))])
+                               (char5e/from-strict (:body response))])
                 401 (dispatch [:route-to-login])
                 500 (dispatch (events/show-generic-error))))))
       (ra/make-reaction
@@ -808,17 +808,17 @@
 (reg-sub
  ::char5e/monster-types
  (fn [_ _]
-   (into #{} (map :type monsters5e/monsters))))
+   (set (map :type monsters5e/monsters))))
 
 (reg-sub
  ::char5e/monster-subtypes
  (fn [_ _]
-   (into #{} (mapcat :subtypes monsters5e/monsters))))
+   (set (mapcat :subtypes monsters5e/monsters))))
 
 (reg-sub
  ::char5e/monster-sizes
  (fn [_ _]
-   (into #{} (map :size monsters5e/monsters))))
+   (set (map :size monsters5e/monsters))))
 
 (reg-sub
  ::char5e/spell-text-filter

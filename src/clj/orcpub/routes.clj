@@ -644,12 +644,12 @@
       (let [current-character (d/pull db '[*] id)
             problems [] #_(dnd-e5-char-type-problems current-character)
             current-valid? (spec/valid? ::se/entity current-character)]
-        (if (not current-valid?)
-          (do (prn "INVALID CHARACTER FOUND, REPLACING" #_current-character)
-              (prn "INVALID CHARACTER EXPLANATION" #_(spec/explain-data ::se/entity current-character))))
+        (when-not current-valid?
+          (prn "INVALID CHARACTER FOUND, REPLACING" #_current-character)
+          (prn "INVALID CHARACTER EXPLANATION" #_(spec/explain-data ::se/entity current-character)))
         (if (seq problems)
           {:status 400 :body problems}
-          (if (not current-valid?)
+          (if-not current-valid?
             (let [new-character (entity/remove-ids character)
                   tx [[:db/retractEntity (:db/id current-character)]
                       (-> new-character
@@ -664,8 +664,7 @@
                   new-ids (entity/db-ids new-character)
                   retract-ids (sets/difference current-ids new-ids)
                   retractions (map
-                               (fn [retract-id]
-                                 [:db/retractEntity retract-id])
+                               :db/retractEntity
                                retract-ids)
                   tx (conj retractions
                            (-> new-character
@@ -691,7 +690,7 @@
     (update-in character
                [::se/values ::char5e/xps]
                #(try
-                  (if (not (s/blank? %))
+                  (if-not (s/blank? %)
                     (Long/parseLong %)
                     0)
                   (catch NumberFormatException e 0)))
@@ -947,8 +946,7 @@
 
 (def expanded-index-routes
   (route/expand-routes
-   (into #{} index-page-routes)))
-
+   (set index-page-routes)))
 
 (def service-error-handler
   (error-int/error-dispatch [ctx ex]

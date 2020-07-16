@@ -2075,7 +2075,7 @@
 (reg-event-fx
  ::char5e/add-level
  (fn [{:keys [db]} [_ id]]
-   (update-character-fx db id #(add-level %))))
+   (update-character-fx db id add-level)))
 
 (reg-event-fx
  ::char5e/level-up
