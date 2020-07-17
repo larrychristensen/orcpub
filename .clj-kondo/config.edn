@@ -26,6 +26,7 @@
              (orcpub.dnd.e5.modifiers/bonus-action)
              (orcpub.dnd.e5.modifiers/reaction)
              (orcpub.dnd.e5.modifiers/level-val)
-             (orcpub.entity-spec/make-entity)]}}
+             (orcpub.entity-spec/make-entity)
+             (orcpub.routes-test/with-conn)]}}
   :lint-as {reagent.core/with-let clojure.core/let
             hiccup.def/defhtml clojure.core/defn}}
