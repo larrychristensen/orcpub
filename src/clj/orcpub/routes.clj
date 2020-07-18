@@ -711,7 +711,6 @@
       (catch Exception e (prn "ERROR" e) (throw e)))))
 
 (defn save-character [{:keys [db transit-params body conn identity] :as request}]
-  (println transit-params)
   (do-save-character db conn transit-params identity))
 
 (defn owns-item [db username item-id]
