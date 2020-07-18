@@ -20,6 +20,7 @@
             [clj-time.coerce :as tc :refer [from-date]]
             [clojure.string :as s]
             [clojure.spec.alpha :as spec]
+            [clojure.pprint]
             [orcpub.dnd.e5.skills :as skill5e]
             [orcpub.dnd.e5.character :as char5e]
             [orcpub.dnd.e5.spells :as spells]
@@ -648,7 +649,8 @@
           (prn "INVALID CHARACTER FOUND, REPLACING" #_current-character)
           (prn "INVALID CHARACTER EXPLANATION" #_(spec/explain-data ::se/entity current-character)))
         (if (seq problems)
-          {:status 400 :body problems}
+          (throw (ex-info "Character has problems"
+                          {:error :character-problems :problems problems}))
           (if-not current-valid?
             (let [new-character (entity/remove-ids character)
                   tx [[:db/retractEntity (:db/id current-character)]
@@ -657,8 +659,7 @@
                                  :orcpub.entity.strict/owner username)
                           add-dnd-5e-character-tags)]
                   result @(d/transact conn tx)]
-              {:status 200
-               :body (d/pull (d/db conn) '[*] (-> result :tempids (get "tempid")))})
+              (d/pull (d/db conn) '[*] (-> result :tempids (get "tempid"))))
             (let [new-character (entity/remove-orphan-ids character)
                   current-ids (entity/db-ids current-character)
                   new-ids (entity/db-ids new-character)
@@ -672,9 +673,9 @@
                                (assoc :orcpub.entity.strict/owner username)
                                add-dnd-5e-character-tags))]
               @(d/transact conn tx)
-              {:status 200
-               :body (d/pull (d/db conn) '[*] id)}))))
-      {:status 401 :body "You do not own this character"})))
+              (d/pull (d/db conn) '[*] id)))))
+      (throw (ex-info "Not user character"
+                      {:error :not-user-character})))))
 
 (defn create-new-character [conn character username]
   (let [result @(d/transact conn
@@ -683,8 +684,7 @@
                                         ::se/owner username)
                                  add-dnd-5e-character-tags)])
         new-id (get-new-id "tempid" result)]
-    {:status 200
-     :body (d/pull (d/db conn) '[*] new-id)}))
+    (d/pull (d/db conn) '[*] new-id)))
 
 (defn clean-up-character [character]
   (if (-> character ::se/values ::char5e/xps string?)
@@ -704,10 +704,16 @@
     (try
       (if-let [data (spec/explain-data ::se/entity character)]
         {:status 400 :body data}
-        (let [clean-character (clean-up-character character)]
-          (if (:db/id clean-character)
-            (update-character db conn clean-character username)
-            (create-new-character conn clean-character username))))
+        (let [clean-character (clean-up-character character)
+              updated-character (if (:db/id clean-character)
+                                  (update-character db conn clean-character username)
+                                  (create-new-character conn clean-character username))]
+          {:status 200 :body updated-character}))
+      (catch clojure.lang.ExceptionInfo e
+        (let [data (ex-data e)]
+          (case (:error data)
+            :character-problems {:status 400 :body (:problems data)}
+            :not-user-character {:status 401 :body "You do not own this character"})))
       (catch Exception e (prn "ERROR" e) (throw e)))))
 
 (defn save-character [{:keys [db transit-params body conn identity] :as request}]
