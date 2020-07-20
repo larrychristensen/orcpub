@@ -1,8 +1,8 @@
 (ns orcpub.system
   (:require [com.stuartsierra.component :as component]       
-            [reloaded.repl :refer [init start stop go reset]] 
-            [io.pedestal.http :as http]                      
-            [orcpub.pedestal :as pedestal]                                       
+            [reloaded.repl]
+            [io.pedestal.http :as http]
+            [orcpub.pedestal :as pedestal]                         
             [orcpub.routes :as routes]
             [orcpub.datomic :as datomic]
             [environ.core :as environ])
@@ -22,7 +22,7 @@
   {::http/routes routes/routes
    ::http/type :jetty
    ::http/port (let [port-str (System/getenv "PORT")]
-                 (if port-str (Integer/parseInt port-str)))
+                 (when port-str (Integer/parseInt port-str)))
    ::http/join false
    ::http/resource-path "/public"
    ::http/container-options {:context-configurator (fn [c]
@@ -44,7 +44,7 @@
     (cond-> (merge
               {:env env}
               prod-service-map
-              (if (= :dev env) dev-service-map-overrides))
+              (when (= :dev env) dev-service-map-overrides))
       true http/default-interceptors
       (= :dev env) http/dev-interceptors)
 

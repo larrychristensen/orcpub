@@ -2,7 +2,6 @@
   (:require [com.stuartsierra.component :as component]
             [io.pedestal.http :as http]
             [pandect.algo.sha1 :refer :all]
-            [ring.middleware.etag :refer [wrap-etag]]
             [datomic.api :as d]
             [clojure.string :as s]
             [clj-time.format :as tf]
