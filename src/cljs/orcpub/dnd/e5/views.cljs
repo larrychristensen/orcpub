@@ -1777,10 +1777,13 @@
 
 (def button-roll-handler (memoize button-roll-fn))
 
-(defn roll-button [message roll & {:keys [text disable-tooltip]}]
+(defn roll-button [message roll & {:keys [text disable-tooltip style]}]
   (let [mobile? @(subscribe [:mobile?])
         button [:button.roll-button
-                {:on-click (button-roll-handler message roll)}
+                {:on-click (fn [e]
+                             (.stopPropagation e)
+                             ((button-roll-handler message roll) e))
+                 :style style}
                 (if text text "Roll")]]
     (if (or mobile? disable-tooltip)
       button
@@ -1847,11 +1850,11 @@
       [:td.p-l-10.p-b-10.p-t-10 (if ability (s/upper-case (common/safe-name ability)))]
       [:td.p-l-10.p-b-10.p-t-10 (get cls-mods :spell-save-dc)]
       [:td.p-l-10.p-b-10.p-t-10 (common/bonus-str (get cls-mods :spell-attack-modifier))]
-      [:td.p-l-10.p-b-10.p-t-10 [:div.tooltip [:button.roll-button
-                                               {:on-click (fn [e]
-                                                (.stopPropagation e)
-                                                ((button-roll-handler (str (:name spell) " attack: ") (str "1d20" (common/mod-str (get cls-mods :spell-attack-modifier)))) e))}
-                                               "Roll"] [:span.tooltiptext "ctrl+click for advantage shift+click for disadvantage"]]]
+      [:td.p-l-10.p-b-10.p-t-10
+       (roll-button
+        (str (:name spell) " attack: ")
+        (str "1d20" (common/mod-str (get cls-mods :spell-attack-modifier)))
+        :text (str "1d20" (common/mod-str (get cls-mods :spell-attack-modifier))))]
       [:td.p-l-10.p-b-10.p-t-10.pointer.orange
        [:i.fa
         {:class-name (if expanded? "fa-caret-up" "fa-caret-down")}]]]
@@ -2192,9 +2195,13 @@
     (section-header-2 title icon)
     [:div.f-s-24.f-w-b
      {:class (csk/->kebab-case title)}
-     v]]
-   (if (boolean show-button)
-     [:div.f-s-24.f-w-b (roll-button (str title " check: ") (str "1d20" v))])])
+     (if (boolean show-button)
+       (roll-button
+        (str title " check: ")
+        (str "1d20" v)
+        :text v
+        :style {:font-size "24px" :padding "2px 8px"})
+       v)]]])
 
 (def current-hit-points-editor-style
   {:width "60px"
@@ -2271,8 +2278,11 @@
              [:td [:div.skill-name
                    (svg-icon icon 18)
                    [:span.m-l-5 skill-name]]]
-             [:td [:div.p-5.skillbonus (common/bonus-str (skill-bonuses skill-key))]]
-             [:td (roll-button (str skill-name " check: ") (str "1d20" (common/mod-str (skill-bonuses skill-key))))]])
+             #_[:td [:div.p-5.skillbonus (common/bonus-str (skill-bonuses skill-key))]]
+             [:td.p-1 (roll-button
+                   (str skill-name " check: ")
+                   (str "1d20" (common/mod-str (skill-bonuses skill-key)))
+                   :text (common/mod-str (skill-bonuses skill-key)))]])
           skills/skills))]]]]))
 
 (defn ability-scores-section-2 [id]
@@ -2312,8 +2322,11 @@
              [:td [:div
                    (t/ability-icon k 18 theme)
                    [:span.m-l-5.saving-throw-name (s/upper-case (name k))]]]
-             [:td [:div.p-5.saving-throw-bonus (common/bonus-str (save-bonuses k))]]
-             [:td (roll-button (str (s/upper-case (name k)) " check: ") (str "1d20" (common/mod-str (save-bonuses k))))]])
+             #_[:td [:div.p-5.saving-throw-bonus (common/bonus-str (save-bonuses k))]]
+             [:td.p-1 (roll-button
+                   (str (s/upper-case (name k)) " check: ")
+                   (str "1d20" (common/mod-str (save-bonuses k)))
+                   :text (common/bonus-str (save-bonuses k)))]])
          char/ability-keys))]]]))
 
 (defn feet-str [num]
@@ -2719,8 +2732,9 @@
              {:class-name (if mobile? "f-s-12")}
              [:th.p-10 "Name"]
              (if (not mobile?) [:th.p-10 "Proficient?"])
-             [:th "Details"]
-             [:th (if mobile? "Atk" [:div.w-40 "Attack Bonus"])]
+             [:th.p-10 "Details"]
+             [:th.t-a-c (if mobile? "Atk" [:div.w-60 "Attack"])]
+             [:th.t-a-c (if mobile? "Dmg" [:div.w-60 "Damage"])]
              [:th.p-10]]
             (doall
              (map
@@ -2743,18 +2757,16 @@
                        (weapon-attack-description weapon damage-modifier nil)]
                       (if expanded?
                         (weapon-details weapon weapon-damage-modifier))]
-
-                     [:td.p-10.f-w-b.f-s-18 (common/bonus-str (weapon-attack-modifier weapon))]
-                     [:td [:div.tooltip [:button.roll-button
-                                         {:on-click (fn [e]
-                                          (.stopPropagation e)
-                                          ((button-roll-handler (str name " attack: ") (str "1d20" (common/mod-str (weapon-attack-modifier weapon)))) e))}
-                                         "Attack"] [:span.tooltiptext "ctrl+click for advantage shift+click for disadvantage"]]]
-                     [:td [:button.roll-button
-                                         {:on-click (fn [e]
-                                          (.stopPropagation e)
-                                          ((button-roll-handler (str name " damage: ") (str damage-die-count "d" damage-die (common/mod-str (weapon-damage-modifier weapon)))) e))}
-                                         "Damage"]]
+                     #_[:td.p-10.f-w-b.f-s-18 (common/bonus-str (weapon-attack-modifier weapon))]
+                     [:td (roll-button
+                           (str name " attack: ")
+                           (str "1d20" (common/mod-str (weapon-attack-modifier weapon)))
+                           :text (str "1d20" (common/bonus-str (weapon-attack-modifier weapon))))]
+                     [:td (roll-button
+                           (str name " damage: ")
+                           (str damage-die-count "d" damage-die (common/mod-str (weapon-damage-modifier weapon)))
+                           :text (str damage-die-count "d" damage-die (common/mod-str (weapon-damage-modifier weapon)))
+                           :style {:width "100%"})]
                      [:td.pointer
                       [:div.orange
                        #_(if (not mobile?)
@@ -2928,8 +2940,11 @@
                    [:td.p-10 (boolean-icon proficient?)]
                    (if skill-expertise
                      [:td.p-10 (boolean-icon expertise?)])
-                   [:td.p-10.f-s-18.f-w-b (common/bonus-str (key skill-bonuses))]
-                    [:td (roll-button (str name " check: ") (str "1d20" (common/mod-str (key skill-bonuses))))]]))
+                   #_[:td.p-10.f-s-18.f-w-b (common/bonus-str (key skill-bonuses))]
+                   [:td.p-10.f-s-18.f-w-b (roll-button
+                         (str name " check: ")
+                         (str "1d20" (common/mod-str (key skill-bonuses)))
+                         :text (common/bonus-str (key skill-bonuses)))]]))
               skills/skills))]]]]))))
 
 (defn tool-prof-details-section-2 []
