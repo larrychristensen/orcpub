@@ -1,10 +1,11 @@
 (ns orcpub.pdf
   (:require [clojure.string :as s]
+            [clojure.java.io :as io]
+            [clojure.stacktrace]
             [orcpub.common :as common]
             [orcpub.dnd.e5.display :as dis5e]
             [orcpub.dnd.e5.monsters :as monsters]
-            [orcpub.dnd.e5.options :as options]
-            [clojure.java.io :as io])
+            [orcpub.dnd.e5.options :as options])
   (:import (org.apache.pdfbox.pdmodel.interactive.form PDCheckBox PDComboBox PDListBox PDRadioButton PDTextField)
            (org.apache.pdfbox.cos COSName)
            (org.apache.pdfbox.pdmodel PDPage PDDocument PDPageContentStream PDResources)

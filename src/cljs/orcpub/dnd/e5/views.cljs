@@ -2061,6 +2061,11 @@
   (or (:name weapon)
       (::mi/name weapon)))
 
+(defn weapon-attack-description-short [{:keys [::weapon/ranged?] :as weapon}]
+  (disp/attack-description-short (-> weapon
+                                     (assoc :attack-type (if ranged? :ranged :melee))
+                                     (dissoc :description))))
+
 (defn weapon-attack-description [{:keys [::weapon/ranged?] :as weapon} damage-modifier attack-modifier]
   (disp/attack-description (-> weapon
                                (assoc :attack-type (if ranged? :ranged :melee))
@@ -2742,18 +2747,18 @@
                       expanded? (@expanded-details weapon-key)
                       damage-modifier (weapon-damage-modifier weapon)
                       droll (str damage-die-count "d" damage-die)]
-                  (if (not= type :ammunition)
+                  (when (not= type :ammunition)
                     ^{:key weapon-key}
                     [:tr.weapon.pointer
                      {:on-click (toggle-details-expanded-handler expanded-details weapon-key)}
                      [:td.p-10.f-w-b (or (:name weapon)
                                          (::mi/name weapon))]
-                     (if (not mobile?)
+                     (when (not mobile?)
                        [:td.p-10 (boolean-icon proficient?)])
                      [:td.p-10.w-100-p
                       [:div
-                       (weapon-attack-description weapon damage-modifier nil)]
-                      (if expanded?
+                       (weapon-attack-description-short weapon)]
+                      (when expanded?
                         (weapon-details weapon weapon-damage-modifier))]
                      [:td (roll-button
                            (str name " attack: ")
