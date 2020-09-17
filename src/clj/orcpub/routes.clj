@@ -985,7 +985,7 @@
   [request]
   (let [path (subs (codec/url-decode (req/path-info request)) 1)
         new-path (s/replace-first path #"^assets/" webjars-root)]
-    (-> (resp/resource-response new-path)
+    (-> (ring-resp/resource-response new-path)
         (head/head-response request))))
 
 (def routes
