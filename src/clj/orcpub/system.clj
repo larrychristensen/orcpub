@@ -1,6 +1,6 @@
 (ns orcpub.system
   (:require [com.stuartsierra.component :as component]       
-            [reloaded.repl]
+            [reloaded.repl :as rrepl]
             [io.pedestal.http :as http]
             [orcpub.pedestal :as pedestal]                         
             [orcpub.routes :as routes]
