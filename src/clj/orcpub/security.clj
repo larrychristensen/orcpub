@@ -1,5 +1,5 @@
 (ns orcpub.security
-  (:require [clj-time.core :as t :refer [ago now minutes hours]]))
+  (:require [clj-time.core :as t :refer [ago minutes]]))
 
 (defn compare-dates [attempt-1 attempt-2]
   (compare (:date attempt-1) (:date attempt-2)))
@@ -54,10 +54,10 @@
    @failed-login-attempts-by-username))
 
 (defn usernames-for-attempts [attempts]
-  (into #{} (map :user attempts)))
+  (set (map :user attempts)))
 
 (defn ips-for-attempts [attempts]
-  (into #{} (map :ip attempts)))
+  (set (map :ip attempts)))
 
 (defn multiple-account-access-aux [ip attempts-by-ip]
   (some-> ip

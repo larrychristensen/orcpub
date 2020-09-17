@@ -1,6 +1,5 @@
 (ns orcpub.styles.core
-     (:require [garden.def :refer [defstylesheet defstyles]]
-               [garden.stylesheet :refer [at-media at-keyframes]]
+     (:require [garden.stylesheet :refer [at-media at-keyframes]]
                [garden.units :refer [px]]
                [orcpub.constants :as const]
                [garden.selectors :as s]))

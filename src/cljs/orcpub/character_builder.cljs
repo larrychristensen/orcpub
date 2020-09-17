@@ -33,21 +33,18 @@
             [orcpub.dnd.e5.equipment :as equip5e]
             [orcpub.dnd.e5.skills :as skill5e]
             [orcpub.dnd.e5.events :as events5e]
-            [orcpub.dnd.e5.db :as db5e]
+            [orcpub.dnd.e5.db :as db]
             [orcpub.dnd.e5.views :as views5e]
             [orcpub.route-map :as routes]
             [orcpub.pdf-spec :as pdf-spec]
             [orcpub.user-agent :as user-agent]
-            [orcpub.dnd.e5.db :as db]
 
             [clojure.spec.alpha :as spec]
             [clojure.spec.test.alpha :as stest]
-            [cljs.core.async :refer [<!]]
             [clojure.core.match :refer [match]]
 
             [reagent.core :as r]
-            [re-frame.core :refer [subscribe dispatch dispatch-sync]])
-  (:require-macros [cljs.core.async.macros :refer [go]]))
+            [re-frame.core :refer [subscribe dispatch dispatch-sync]]))
 
 (def print-disabled? false)
 
@@ -259,7 +256,7 @@
   (let [options (::t/options selection)
         selected-classes @(subscribe [::char5e/levels])
         unselected-classes (remove
-                            (into #{} (keys selected-classes))
+                            (set (keys selected-classes))
                             (map ::t/key options))
         unselected-classes-set (set unselected-classes)
         remaining-classes (filter
@@ -442,7 +439,7 @@
   (let [{:keys [::t/key]} selection
         selected-items @(subscribe [:entity-option key])
         item-map @(subscribe item-map-sub)
-        selected-keys (into #{} (map ::entity/key selected-items))
+        selected-keys (set (map ::entity/key selected-items))
         options (entity/selection-options selection)
         magic-weapons (= key :magic-weapons)]
     [:div
@@ -622,7 +619,7 @@
              {:class-name (if (not homebrew?) "opacity-5 hover-opacity-full")
               :on-click (toggle-homebrew path)}
              [tooltip
-              (if (not homebrew?)
+              (if-not homebrew?
                 (str "Homebrew is off for " title " - enabling this option allows you select options you would not normally have (turns on homebrew rules)")
                 (str "Homebrew is on for " title " - you can select anything and make it homebrew"))
               (views5e/svg-icon "beer-stein" 18)]])]
@@ -829,7 +826,7 @@
                                      (<= min num-increased max))
                                0
                                (- min num-increased))
-               allowed-abilities (into #{} (map ::t/key options))
+               allowed-abilities (set (map ::t/key options))
                ancestors-title (views-aux/ancestor-names-string built-template path)]
            ^{:key i}
            [:div
@@ -1105,7 +1102,7 @@
 
 (def point-buy-starting-abilities-fn #(set-abilities! (char5e/abilities 8 8 8 8 8 8)))
 
-(def reroll-abilities-fn #(reroll-abilities))
+(def reroll-abilities-fn reroll-abilities)
 
 (def standard-abilities-fn #(set-abilities! (char5e/abilities 15 14 13 12 10 8)))
 
@@ -1183,8 +1180,8 @@
         selected-skills (get-in character path)
         selected-count (count selected-skills)
         remaining (- max selected-count)
-        available-skills (into #{} (map ::t/key options))
-        selected-skill-keys (into #{} (map ::entity/key selected-skills))]
+        available-skills (set (map ::t/key options))
+        selected-skill-keys (set (map ::entity/key selected-skills))]
     (doall
      (map
       (fn [{:keys [name key ability icon description]}]
@@ -1566,7 +1563,7 @@
                 name])
              [:div.t-a-c
               (views5e/svg-icon icon 32)]]
-            (if (not (= total-remaining 0))
+            (if (not (zero? total-remaining))
               [:div.flex.justify-cont-end.m-t--10.p-l-20 (remaining-indicator total-remaining 12 11)])]))
        pages))]))
 
@@ -1907,7 +1904,7 @@
 (defn al-legality []
   (let [expanded? (r/atom false)]
     (fn [al-illegal-reasons used-resources]
-      (let [num-resources (count (into #{} (map :resource-key used-resources)))
+      (let [num-resources (count (set (map :resource-key used-resources)))
             multiple-resources? (> num-resources 1)
             has-homebrew? @(subscribe [:has-homebrew?])
             mobile? @(subscribe [:mobile?])

@@ -22,7 +22,6 @@
             [orcpub.dnd.e5.party :as party]
             [orcpub.dnd.e5.character.random :as char-random]
             [orcpub.dnd.e5.character.equipment :as char-equip]
-            [cljs.pprint :refer [pprint]]
             [orcpub.registration :as registration]
             [orcpub.dnd.e5 :as e5]
             [orcpub.dnd.e5.magic-items :as mi]
@@ -44,10 +43,8 @@
             [clojure.string :as s]
             [cljs.reader :as reader]
             [orcpub.user-agent :as user-agent]
-            [cljs.core.async :refer [<! timeout]]
             [bidi.bidi :as bidi]
-            [camel-snake-kebab.core :as csk])
-  (:require-macros [cljs.core.async.macros :refer [go]]))
+            [camel-snake-kebab.core :as csk]))
 
 ;; the `amount` of "uses" an action may have before it warrants
 ;; using a dropdown instead of a list of checkboxes
@@ -294,7 +291,7 @@
   [:a.p-5.opacity-5.hover-opacity-full.main-text-color
    {:style social-icon-style
     :href link :target :_blank}
-   [:i.fa
+   [:i.fab
     {:class-name (str "fa-" icon)}]])
 
 (def search-input-style
@@ -393,7 +390,7 @@
                      "https://c5.patreon.com/external/logo/become_a_patron_button.png")}]]
            (if (not mobile?)
              [:div.main-text-color.p-10
-              (social-icon "facebook" "https://www.facebook.com/groups/252484128656613/")
+              (social-icon "facebook-f" "https://www.facebook.com/groups/252484128656613/")
               (social-icon "twitter" "https://twitter.com/thDMV")
               (social-icon "reddit-alien" "https://www.reddit.com/r/dungeonmastersvault/")])]
           [:div.flex.m-b-5.m-t-5.justify-cont-s-b.app-header-menu
@@ -985,7 +982,7 @@
        [:div.orange.pointer.underline
         {:on-click (make-event-handler ::e5/export-all-plugins-pretty-print)
          :title "Development - Download all Orcbrews as Pretty Print, if you click this button it will take a long time to generate the orcbrew.  Click and wait."}
-        [:i.fa.fa-cloud-download]]
+        [:i.fa.fa-cloud-download-alt]]
        [:div.orange.pointer.underline
         {:on-click #(swap! expanded? not)
          :title "Development - Debug Info" }
@@ -1387,7 +1384,7 @@
 
 (defn content-page [title button-cfgs content & {:keys [hide-header-message? frame?]}]
   (let [on-scroll (fn [e]
-                    (when (not @(subscribe [:orcacle-open?]))
+                    (when-not @(subscribe [:orcacle-open?])
                       (let [app-header (js/document.getElementById "app-header")
                             header-height (.-offsetHeight app-header)
                             scroll-top (.-scrollTop (.-documentElement (.-target e)))
@@ -1397,10 +1394,10 @@
                           (set! (.-display (.-style sticky-header)) "none")))))]
     (r/create-class
      {:component-did-mount (fn [comp]
-                             (when (not frame?)
+                             (when-not frame?
                                (js/window.addEventListener "scroll" on-scroll)))
       :component-will-unmount (fn [comp]
-                                (when (not frame?)
+                                (when-not frame?
                                   (js/window.removeEventListener "scroll" on-scroll)))
       :reagent-render
       (fn [title button-cfgs content & {:keys [hide-header-message? frame?]}]
@@ -1410,15 +1407,15 @@
               mobile? @(subscribe [:mobile?])]
           [:div.app.min-h-full
            {:class-name theme
-            :on-scroll (if (not frame?)
+            :on-scroll (when-not frame?
                          (fn [e]))}
-           (when (not frame?)
+           (when-not frame?
              [download-form])
            (when @(subscribe [:loading])
              [:div {:style loading-style}
               [:div.flex.justify-cont-s-a.align-items-c.h-100-p
                [:img.h-200.w-200.m-t-200 {:src "/image/spiral.gif"}]]])
-           (when (not frame?)
+           (when-not frame?
              [app-header])
            (when orcacle-open?
              [orcacle])
@@ -1519,10 +1516,9 @@
             [:span.m-l-5.m-r-5 "/"]
             (map
              (fn [{:keys [::char/class-name ::char/level ::char/subclass-name]}]
-               (let []
-                 [:span
-                  [:div.class-name (str class-name) ] [:div.level (str "(" level ")")]
-                  [:div.f-s-12.m-t-5.opacity-6.sub-class-name (if subclass-name subclass-name)]]))
+               [:span
+                [:div.class-name (str class-name)] [:div.level (str "(" level ")")]
+                [:div.f-s-12.m-t-5.opacity-6.sub-class-name (if subclass-name subclass-name)]])
              classes)))])]]
      (if (and show-owner?
               (some? owner)
@@ -1784,7 +1780,7 @@
                              (.stopPropagation e)
                              ((button-roll-handler message roll) e))
                  :style style}
-                (if text text "Roll")]]
+                (or text "Roll")]]
     (if (or mobile? disable-tooltip)
       button
       [:div.tooltip
@@ -3190,7 +3186,7 @@
                        (traits-by-type :other))
         attacks @(subscribe [::char/attacks id])
         all-traits (concat actions bonus-actions reactions traits attacks)
-        freqs (into #{} (map has-frequency-units? all-traits))]
+        freqs (set (map has-frequency-units? all-traits))]
     [:div.details-columns
      {:class-name (if (= 2 num-columns) "flex")}
 
@@ -3327,11 +3323,10 @@
       (let [device-type @(subscribe [:device-type])
             selected-tab @(subscribe [::char/selected-display-tab])
             two-columns? (= 2 num-columns)
-            tab (if selected-tab
-                  selected-tab
-                  (if two-columns?
-                    "combat"
-                    "summary"))]
+            tab (or selected-tab
+                    (if two-columns?
+                      "combat"
+                      "summary"))]
         [:div.w-100-p
          [:div
           (if show-summary?
@@ -5338,7 +5333,7 @@
      [:div.m-b-30
       [:div.f-s-24.f-w-b.m-b-10 "Ability Increase Levels"]
       [:div.flex.flex-wrap
-       (let [asi-levels-set (into #{} (:ability-increase-levels class))]
+       (let [asi-levels-set (set (:ability-increase-levels class))]
          (doall
           (map
            (fn [level]
@@ -7597,7 +7592,7 @@
                          "cancel"]]]
                       [:div.flex.align-items-c
                        [:span.m-l-5 name]
-                       [:i.fa.fa-pencil.m-l-10.opacity-5.hover-opacity-full.pointer
+                       [:i.fa.fa-pencil-alt.m-l-10.opacity-5.hover-opacity-full.pointer
                         {:on-click #(swap! editing-parties assoc id name)}]])]]
                   [:div.item-list
                    (doall
@@ -7914,4 +7909,3 @@
          {:style close-icon-style
           :on-click (make-event-handler ::char/filter-items "")}]]]
       [item-list-items]]]))
-

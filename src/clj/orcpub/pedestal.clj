@@ -1,8 +1,7 @@
 (ns orcpub.pedestal
   (:require [com.stuartsierra.component :as component]
             [io.pedestal.http :as http]
-            [pandect.algo.sha1 :refer :all]
-            [ring.middleware.etag :refer [wrap-etag]]
+            [pandect.algo.sha1 :refer [sha1]]
             [datomic.api :as d]
             [clojure.string :as s]
             [clj-time.format :as tf]
@@ -16,9 +15,9 @@
 (defn db-interceptor [conn]
   {:name :db-interceptor
    :enter (fn [context]
-            (let [conn (:conn conn)]
-              (let [db (d/db conn)]
-                (update context :request assoc :db db :conn conn))))})
+            (let [conn (:conn conn)
+                  db (d/db conn)]
+                (update context :request assoc :db db :conn conn)))})
 
 (defmulti calculate-etag class)
 

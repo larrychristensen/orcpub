@@ -190,4 +190,4 @@
   (apply bidi/path-for routes args))
 
 (defn match-route [path]
-  (->> path (bidi/match-route routes)))
+  (bidi/match-route routes path))

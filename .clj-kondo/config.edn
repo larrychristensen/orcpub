@@ -1,0 +1,32 @@
+{:linters {:if {:level :off}
+           :unused-namespace {:level :off}
+           :unused-binding {:level :off}
+           :unresolved-symbol
+           {:exclude
+            [(clojure.core.match/match)
+             (cljs.core.match/match)
+             (io.pedestal.interceptor.error/error-dispatch)
+             (orcpub.modifiers/modifier)
+             (orcpub.modifiers/deferred-modifier)
+             (orcpub.modifiers/cum-sum-mod)
+             (orcpub.modifiers/vec-mod)
+             (orcpub.modifiers/set-mod)
+             (orcpub.modifiers/map-mod)
+             (orcpub.modifiers/fn-mod)
+             (orcpub.dnd.e5.modifiers/spells-known-cfg)
+             (orcpub.dnd.e5.modifiers/prop-trait)
+             (orcpub.dnd.e5.modifiers/dependent-trait)
+             (orcpub.dnd.e5.modifiers/dependent-trait-2)
+             (orcpub.dnd.e5.modifiers/skill-proficiency)
+             (orcpub.dnd.e5.modifiers/skill-expertise)
+             (orcpub.dnd.e5.modifiers/tool-expertise)
+             (orcpub.dnd.e5.modifiers/ac-bonus-fn)
+             (orcpub.dnd.e5.modifiers/attack)
+             (orcpub.dnd.e5.modifiers/action)
+             (orcpub.dnd.e5.modifiers/bonus-action)
+             (orcpub.dnd.e5.modifiers/reaction)
+             (orcpub.dnd.e5.modifiers/level-val)
+             (orcpub.entity-spec/make-entity)
+             (orcpub.routes-test/with-conn)]}}
+  :lint-as {reagent.core/with-let clojure.core/let
+            hiccup.def/defhtml clojure.core/defn}}

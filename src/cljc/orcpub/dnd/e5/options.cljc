@@ -603,8 +603,8 @@
            all-spells (select-keys
                        (or spells (spell-lists (or spell-list-kw class-key)))
                        (keys slots))
-           acquire? (= :acquire known-mode)]
-       (let [options (flatten
+           acquire? (= :acquire known-mode)
+           options (flatten
                       (map
                        (fn [[lvl spell-keys]]
                          (let [spell-keys (vec spell-keys)
@@ -634,7 +634,7 @@
                      :class-name cls-nm
                      :min num
                      :max (if (not acquire?) num)
-                     :options options}))]))))
+                     :options options}))])))
    {}
    spells-known))
 

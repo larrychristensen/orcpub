@@ -122,7 +122,7 @@ html {
     (include-css "/css/compiled/styles.css")
     (include-js "/js/compiled/orcpub.js")
     (include-js "/js/cookies.js")
-    (include-css "/font-awesome-4.7.0/css/font-awesome.min.css")
+    (include-css "/assets/font-awesome/5.13.1/css/all.min.css")
     (include-css "https://fonts.googleapis.com/css?family=Open+Sans")
     [:script " window.start.init({Palette:\"palette7\",Mode:\"banner bottom\",})"]    
     [:script

@@ -25,12 +25,6 @@
   {:db/ident key
    :db/valueType :db.type/string
    :db/cardinality :db.cardinality/one
-   :db/fulltext true})
-
-(defn fulltext-prop [key]
-  {:db/ident key
-   :db/valueType :db.type/string
-   :db/cardinality :db.cardinality/one
    :db/fulltext true
    :db/noHistory true})
 

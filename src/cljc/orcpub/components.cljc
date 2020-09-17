@@ -1,6 +1,5 @@
 (ns orcpub.components
-  (:require [re-frame.core :refer [dispatch]]
-            [clojure.string :as s]
+  (:require [clojure.string :as s]
             #?(:cljs [reagent.core :refer [atom]])))
 
 (defn checkbox [selected? disable?]
