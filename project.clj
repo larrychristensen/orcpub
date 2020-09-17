@@ -62,8 +62,7 @@
                  [vvvvalvalval/datomock "0.2.0"]
                  [com.datomic/datomic-free "0.9.5697"]
                  [funcool/cuerdas "2.2.0"]
-                 [camel-snake-kebab "0.4.0"]
-                 ]
+                 [camel-snake-kebab "0.4.0"]]
 
   :plugins [[lein-figwheel "0.5.19"]
             [lein-cljsbuild "1.1.7" :exclusions [[org.clojure/clojure]]]
@@ -83,22 +82,23 @@
 
   :uberjar-name "orcpub.jar"
 
-  :garden {:builds [{ ;; Optional name of the build:
+  :garden {:builds [{;; Optional name of the build:
                      :id "screen"
                      ;; Source paths where the stylesheet source code is
                      :source-paths ["src/clj" "src/cljc"]
                      ;; The var containing your stylesheet:
                      :stylesheet orcpub.styles.core/app
                      ;; Compiler flags passed to `garden.core/css`:
-                     :compiler { ;; Where to save the file:
+                     :compiler {;; Where to save the file:
                                 :output-to "resources/public/css/compiled/styles.css"
                                 ;; Compress the output?
                                 :pretty-print? false}}]}
 
+  :prep-tasks [["garden" "once"]]
+
   :cljsbuild {:builds
               {:dev
-               {
-                :source-paths ["web/cljs" "src/cljc" "src/cljs"]
+               {:source-paths ["web/cljs" "src/cljc" "src/cljs"]
 
                 ;; the presence of a :figwheel configuration here
                 ;; will cause figwheel to inject the figwheel client
@@ -114,10 +114,9 @@
                                :asset-path           "/js/compiled/out"
                                :output-to            "resources/public/js/compiled/orcpub.js"
                                :output-dir           "resources/public/js/compiled/out"
-                               :source-map-timestamp true}}}
-              }
+                               :source-map-timestamp true}}}}
 
-  :figwheel { ;; :http-server-root "public" ;; default and assumes "resources"
+  :figwheel {;; :http-server-root "public" ;; default and assumes "resources"
              ;; :server-port 3449 ;; default
              ;; :server-ip "127.0.0.1"
 
@@ -153,12 +152,11 @@
              ;; :server-logfile "tmp/logs/figwheel-logfile.log"
              }
 
-  :repl-options {
-             ;; If nREPL takes too long to load it may timeout,
+  :repl-options {;; If nREPL takes too long to load it may timeout,
              ;; increase this to wait longer before timing out.
              ;; Defaults to 30000 (30 seconds)
-             :timeout 300000 ; 5 mins to wait
-			 }
+                 :timeout 300000 ; 5 mins to wait
+                 }
 
   ;; setting up nREPL for Figwheel and ClojureScript dev
   ;; Please see:
@@ -220,8 +218,7 @@
                             :omit-source true
                             :cljsbuild   {:builds
                                           {:prod
-                                           {
-                                            :source-paths ["web/cljs" "src/cljc" "src/cljs"]
+                                           {:source-paths ["web/cljs" "src/cljc" "src/cljs"]
                                             :compiler     {:main          orcpub.core
                                                            :asset-path    "/js/compiled/out"
                                                            :output-to     "resources/public/js/compiled/orcpub.js"
