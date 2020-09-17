@@ -5,7 +5,6 @@
             [orcpub.common :as common]
             [orcpub.dnd.e5.display :as dis5e]
             [orcpub.dnd.e5.monsters :as monsters]
-           (org.apache.pdfbox.cos COSName)
             [orcpub.dnd.e5.options :as options])
   (:import (org.apache.pdfbox.pdmodel.interactive.form PDCheckBox PDTextField)
            (org.apache.pdfbox.pdmodel PDPage PDDocument PDPageContentStream PDResources)
