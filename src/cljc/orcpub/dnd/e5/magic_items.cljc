@@ -3,7 +3,6 @@
             [orcpub.common :as common]
             [orcpub.modifiers :as mod]
             [orcpub.entity :as entity]
-            [orcpub.dnd.e5.weapons :as weapons]
             [orcpub.dnd.e5.armor :as armor5e]
             [orcpub.dnd.e5.weapons :as weapons5e]
             [orcpub.dnd.e5.equipment :as equip5e]
@@ -2914,8 +2913,8 @@ The boots regain 2 hours of flying capability for every 12 hours they aren’t i
 
 (def weapons-and-ammunition
   (concat
-   weapons/weapons
-   weapons/ammunition))
+   weapons5e/weapons
+   weapons5e/ammunition))
 
 (defn add-key [item]
   (assoc item :key (common/name-to-kw (name-key item))))
@@ -2931,7 +2930,7 @@ The boots regain 2 hours of flying capability for every 12 hours they aren’t i
     (types type)))
 
 (defn subtypes-fn [subtypes]
-  (fn [{:keys [::weapons/subtype]}]
+  (fn [{:keys [::weapons5e/subtype]}]
     (subtypes subtype)))
 
 (defn keys-fn [keys]
@@ -3059,7 +3058,7 @@ The boots regain 2 hours of flying capability for every 12 hours they aren’t i
 
 (def all-weapons-map
   (merge
-   weapons/weapons-map
+   weapons5e/weapons-map
    magic-weapon-map))
 
 (def magic-armor-xform

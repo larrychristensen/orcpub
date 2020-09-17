@@ -1,7 +1,6 @@
 (ns orcpub.dnd.e5.views-2
   (:require [orcpub.route-map :as routes]
-            [clojure.string :as s]
-            #?(:cljs [re-frame.core :refer [subscribe dispatch dispatch-sync]])))
+            [clojure.string :as s]))
 
 (defn style [style]
   #?(:cljs style)

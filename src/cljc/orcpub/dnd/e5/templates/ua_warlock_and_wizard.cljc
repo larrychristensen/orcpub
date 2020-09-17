@@ -6,7 +6,7 @@
             [orcpub.dnd.e5.units :as units5e]
             [orcpub.modifiers :as mod]
             [orcpub.template :as t]
-            [re-frame.core :refer [subscribe]]))
+            #_[re-frame.core :refer [subscribe]]))
 
 
 #_(def warlock-option-cfg

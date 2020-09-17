@@ -13,7 +13,7 @@
             [orcpub.dnd.e5.spells :as spells5e]
             [orcpub.dnd.e5.spell-lists :as sl5e]
             [orcpub.dnd.e5.template-base :as t-base]
-            [re-frame.core :refer [reg-sub reg-sub-raw dispatch subscribe]]
+            [re-frame.core :refer [subscribe]]
             [clojure.string :as s]))
 
 (spec/def ::name (spec/and string? common/starts-with-letter?))
@@ -1659,8 +1659,8 @@
 (defn favored-enemy-option [language-map [enemy-type info]]
   (let [vec-info? (sequential? info)
         languages (if vec-info? info (:languages info))
-        name (if vec-info? (common/kw-to-name enemy-type) (:name info))]
-    (let [language-options (zipmap languages (repeat true))]
+        name (if vec-info? (common/kw-to-name enemy-type) (:name info))
+        language-options (zipmap languages (repeat true))]
       (t/option-cfg
        {:name name
         :selections (if (> (count languages) 1)
@@ -1672,7 +1672,7 @@
                     nil?
                     [(if (= 1 (count languages))
                        (mod5e/language (first languages)))
-                     (mod/set-mod ?ranger-favored-enemies enemy-type)])}))))
+                     (mod/set-mod ?ranger-favored-enemies enemy-type)])})))
 
 (defn favored-enemy-selection [language-map order]
   (t/selection-cfg

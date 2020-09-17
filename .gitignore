@@ -12,6 +12,7 @@ pom.xml
 /out/
 /target/
 /node_modules/
+/.clj-kondo/.cache
 .lein-deps-sum
 .lein-repl-history
 .lein-plugins/

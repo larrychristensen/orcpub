@@ -6,6 +6,7 @@
             [orcpub.entity-spec :as es]
             [orcpub.template :as t]
             [orcpub.entity.strict :as strict]
+            [clojure.string :as s]
             [clojure.set :refer [difference union intersection]]))
 
 (spec/def ::key ::strict/key)
@@ -229,7 +230,7 @@
 
 (defn take-1
   "Returns the pair [element, s'] where s' is set s with element removed."
-  [s] {:pre [(not (empty? s))]}
+  [s] {:pre [(seq s)]}
   (let [item (first s)]
     [item (without s item)]))
 
@@ -694,8 +695,8 @@
 
 (defn name-to-kw [name]
   (-> name
-      clojure.string/lower-case
-      (clojure.string/replace #"\W" "-")
+      s/lower-case
+      (s/replace #"\W" "-")
       keyword))
 
 (defn get-option-value-path [template entity path]
