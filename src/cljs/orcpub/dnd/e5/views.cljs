@@ -291,7 +291,7 @@
   [:a.p-5.opacity-5.hover-opacity-full.main-text-color
    {:style social-icon-style
     :href link :target :_blank}
-   [:i.fa
+   [:i.fab
     {:class-name (str "fa-" icon)}]])
 
 (def search-input-style
@@ -390,7 +390,7 @@
                      "https://c5.patreon.com/external/logo/become_a_patron_button.png")}]]
            (if (not mobile?)
              [:div.main-text-color.p-10
-              (social-icon "facebook" "https://www.facebook.com/groups/252484128656613/")
+              (social-icon "facebook-f" "https://www.facebook.com/groups/252484128656613/")
               (social-icon "twitter" "https://twitter.com/thDMV")
               (social-icon "reddit-alien" "https://www.reddit.com/r/dungeonmastersvault/")])]
           [:div.flex.m-b-5.m-t-5.justify-cont-s-b.app-header-menu
@@ -982,7 +982,7 @@
        [:div.orange.pointer.underline
         {:on-click (make-event-handler ::e5/export-all-plugins-pretty-print)
          :title "Development - Download all Orcbrews as Pretty Print, if you click this button it will take a long time to generate the orcbrew.  Click and wait."}
-        [:i.fa.fa-cloud-download]]
+        [:i.fa.fa-cloud-download-alt]]
        [:div.orange.pointer.underline
         {:on-click #(swap! expanded? not)
          :title "Development - Debug Info" }
@@ -7576,7 +7576,7 @@
                          "cancel"]]]
                       [:div.flex.align-items-c
                        [:span.m-l-5 name]
-                       [:i.fa.fa-pencil.m-l-10.opacity-5.hover-opacity-full.pointer
+                       [:i.fa.fa-pencil-alt.m-l-10.opacity-5.hover-opacity-full.pointer
                         {:on-click #(swap! editing-parties assoc id name)}]])]]
                   [:div.item-list
                    (doall

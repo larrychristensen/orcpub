@@ -51,8 +51,7 @@
                  [com.stuartsierra/component "0.3.2"]
                  [com.google.guava/guava "21.0"]
 
-                 [com.amazonaws/aws-java-sdk-dynamodb "1.11.6"]
-                 [com.fasterxml.jackson.core/jackson-databind "2.7.0"]
+                 [com.fasterxml.jackson.core/jackson-databind "2.11.1"]
 
                  [hiccup "1.0.5"]
                  [com.draines/postal "2.0.2"]
@@ -62,7 +61,8 @@
                  [vvvvalvalval/datomock "0.2.0"]
                  [com.datomic/datomic-free "0.9.5697"]
                  [funcool/cuerdas "2.2.0"]
-                 [camel-snake-kebab "0.4.0"]]
+                 [camel-snake-kebab "0.4.0"]
+                 [org.webjars/font-awesome "5.13.1"]]
 
   :plugins [[lein-figwheel "0.5.19"]
             [lein-cljsbuild "1.1.7" :exclusions [[org.clojure/clojure]]]
