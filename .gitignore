@@ -13,6 +13,7 @@ pom.xml
 /target/
 /node_modules/
 .clj-kondo
+.calva
 .lein-deps-sum
 .lein-repl-history
 .lein-plugins/

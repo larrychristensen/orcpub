@@ -4,7 +4,7 @@
             [orcpub.dnd.e5.character :as char5e]
             [orcpub.template :as t]
             [orcpub.common :as common]
-            [re-frame.core :refer [subscribe]]
+            #_[re-frame.core :refer [subscribe]]
             [clojure.string :as s]))
 
 #_(def action #(mod5e/action %))

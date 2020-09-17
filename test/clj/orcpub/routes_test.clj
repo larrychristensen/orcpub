@@ -1,17 +1,18 @@
 (ns orcpub.routes-test
-  (:require [orcpub.routes :as routes]
-            [orcpub.dnd.e5.magic-items :as mi]
-            [orcpub.dnd.e5.character :as char]
-            [orcpub.modifiers :as mod]
-            [orcpub.entity :as entity]
-            [clojure.test :refer [deftest is testing]]
-            [orcpub.errors :as errors]
-            [io.pedestal.http :as http]
-            [io.pedestal.test :refer [response-for]]
-            [orcpub.db.schema :as schema]
-            [datomic.api :as d]
-            [datomock.core :as dm]
-            [clojure.set :refer [intersection]])
+  (:require
+   [clojure.test :refer [deftest is testing]]
+   [clojure.set :refer [intersection]]
+   [datomic.api :as d]
+   [datomock.core :as dm]
+   [io.pedestal.http :as http]
+   [orcpub.routes :as routes]
+   [orcpub.dnd.e5.magic-items :as mi]
+   [orcpub.dnd.e5.character :as char5e]
+   [orcpub.modifiers :as mod]
+   [orcpub.entity :as entity]
+   [orcpub.entity.strict :as se]
+   [orcpub.errors :as errors]
+   [orcpub.db.schema :as schema])
   (:import [java.util UUID]))
 
 #_(def service
@@ -27,10 +28,65 @@
 
 (defmacro with-conn [conn-binding & body]
   `(let [uri# (str "datomic:mem:orcpub-test-" (UUID/randomUUID))
-         ~conn-binding (do (d/create-database uri#)
-                           (d/connect uri#))]
+         ~conn-binding (do
+                         (d/create-database uri#)
+                         (d/connect uri#))]
      (try ~@body
           (finally (d/delete-database uri#)))))
+
+(defn test-character []
+  {::se/selections
+   [{::se/key :ability-scores
+     ::se/option
+     {::se/key :standard-scores
+      ::se/map-value
+      {::char5e/str 15
+       ::char5e/dex 14
+       ::char5e/con 13
+       ::char5e/int 12
+       ::char5e/wis 10
+       ::char5e/cha 8}}}
+    {::se/key :class
+     ::se/options
+     [{::se/key :barbarian
+       ::se/selections
+       [{::se/key :levels
+         ::se/options [{::se/key :level-1}]}]}]}
+    {::se/key :weapons
+     ::se/options
+     [{::se/key :javelin
+       ::se/map-value {:orcpub.dnd.e5.character.equipment/quantity 4
+                                        :orcpub.dnd.e5.character.equipment/equipped? true
+                                        :orcpub.dnd.e5.character.equipment/class-starting-equipment? true}}]}]
+   ::se/summary
+   {::char5e/character-name "Charry"
+    ::char5e/classes
+    [{::char5e/class-name "Barbarian"
+      ::char5e/level 1}]}})
+
+(deftest test-do-save-character
+  (with-conn conn
+    (let [mocked-conn (dm/fork-conn conn)]
+      @(d/transact mocked-conn schema/all-schemas)
+      @(d/transact mocked-conn [{:orcpub.user/username "testy"
+                                 :orcpub.user/email "test@test.com"}
+                                {:orcpub.user/username "testy-2"
+                                 :orcpub.user/email "test-2@test.com"}])
+      (testing "Save new character"
+        (let [character (test-character)
+              saved-character (:body (routes/do-save-character (d/db mocked-conn) mocked-conn character {:user "testy"}))]
+          (is (= "testy" (::se/owner saved-character)))))
+      (testing "Update character"
+        (let [character (test-character)
+              saved-character (:body (routes/do-save-character (d/db mocked-conn) mocked-conn character {:user "testy"}))
+              updated-character (:body (routes/do-save-character
+                                        (d/db mocked-conn)
+                                        mocked-conn
+                                        (assoc-in saved-character [::se/summary ::char5e/character-name] "Charry-2")
+                                        {:user "testy"}))]
+          (is (= "testy" (::se/owner updated-character)))
+          (is (= "Charry" (-> saved-character ::se/summary ::char5e/character-name)))
+          (is (= "Charry-2" (-> updated-character ::se/summary ::char5e/character-name))))))))
 
 (deftest test-save-entity
   (with-conn conn
@@ -47,11 +103,11 @@
           (is (= "testy" (::mi/owner saved-entity)))
           (is (int? (:db/id saved-entity)))
           (is (= "Cool Item" (::mi/name saved-entity)))))
-      
+
       (testing "Create and update entity"
         (let [entity {::mi/modifiers [{::mod/key :saving-throw-bonus
-                                         ::mod/args [{::mod/keyword-arg ::char/str}
-                                                     {::mod/int-arg 1}]}]}
+                                       ::mod/args [{::mod/keyword-arg ::char5e/str}
+                                                   {::mod/int-arg 1}]}]}
               saved-entity (routes/save-entity mocked-conn "testy" entity ::mi/owner)]
           (is (= "testy" (::mi/owner saved-entity)))
           (is (int? (:db/id saved-entity)))
@@ -60,7 +116,7 @@
 
       (testing "Update other user's entity"
         (let [entity {::mi/modifiers [{::mod/key :saving-throw-bonus
-                                       ::mod/args [{::mod/keyword-arg ::char/str}
+                                       ::mod/args [{::mod/keyword-arg ::char5e/str}
                                                    {::mod/int-arg 1}]}]}
               saved-entity (routes/save-entity mocked-conn "testy" entity ::mi/owner)
               saved-entity-2 (routes/save-entity mocked-conn "testy-2" entity ::mi/owner)]
@@ -69,7 +125,7 @@
 
       (testing "Removal of orphans"
         (let [entity {::mi/modifiers [{::mod/key :saving-throw-bonus
-                                       ::mod/args [{::mod/keyword-arg ::char/str}
+                                       ::mod/args [{::mod/keyword-arg ::char5e/str}
                                                    {::mod/int-arg 1}]}]}
               saved-entity (routes/save-entity mocked-conn "testy" entity ::mi/owner)
               root-id (:db/id saved-entity)
@@ -82,7 +138,7 @@
 
       (testing "Removal of non-children ids"
         (let [entity {::mi/modifiers [{::mod/key :saving-throw-bonus
-                                       ::mod/args [{::mod/keyword-arg ::char/str}
+                                       ::mod/args [{::mod/keyword-arg ::char5e/str}
                                                    {::mod/int-arg 1}]}]}
               saved-entity (routes/save-entity mocked-conn "testy" entity ::mi/owner)
               root-id (:db/id saved-entity)

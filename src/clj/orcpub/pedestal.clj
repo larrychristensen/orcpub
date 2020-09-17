@@ -15,9 +15,9 @@
 (defn db-interceptor [conn]
   {:name :db-interceptor
    :enter (fn [context]
-            (let [conn (:conn conn)]
-              (let [db (d/db conn)]
-                (update context :request assoc :db db :conn conn))))})
+            (let [conn (:conn conn)
+                  db (d/db conn)]
+                (update context :request assoc :db db :conn conn)))})
 
 (defmulti calculate-etag class)
 

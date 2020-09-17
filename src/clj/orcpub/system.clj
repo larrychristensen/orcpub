@@ -53,4 +53,4 @@
       (pedestal/new-pedestal)
       [:service-map :conn])))
 
-(reloaded.repl/set-init! #(system :prod))
+(rrepl/set-init! #(system :prod))

@@ -41,7 +41,7 @@
                                       {:headers (auth-headers @app-db)}))]
            (dispatch [:set-loading false])
            (case (:status response)
-             200 (dispatch [::mi5e/set-custom-items (-> response :body)])
+             200 (dispatch [::mi5e/set-custom-items (:body response)])
              401 nil ;;(dispatch [:route routes/login-page-route {:secure? true}])
              500 (dispatch (events/show-generic-error)))))
      (ra/make-reaction
@@ -251,7 +251,7 @@
                                     {:headers (auth-headers @app-db)}))]
          (dispatch [:set-loading false])
          (case (:status response)
-           200 (dispatch [::mi5e/add-remote-item (-> response :body)])
+           200 (dispatch [::mi5e/add-remote-item (:body response)])
            500 (dispatch (events/show-generic-error)))))
    (ra/make-reaction
     (fn [] (get-in @app-db [::mi5e/remote-items id] {})))))

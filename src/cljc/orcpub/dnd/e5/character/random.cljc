@@ -1643,7 +1643,7 @@
 (def sexes
   [::male ::female])
 
-(def sexes-set (into #{} sexes))
+(def sexes-set (set sexes))
 
 (def human-subraces
   [::calishite
@@ -1655,7 +1655,7 @@
    ::rashemi
    ::mulan])
 
-(def subraces-set (into #{} human-subraces))
+(def subraces-set (set human-subraces))
 
 (def races
   [::elf
@@ -1665,7 +1665,7 @@
    ::human
    ::human])
 
-(def races-set (into #{} races))
+(def races-set (set races))
 
 (defn random-sex []
   (rand-nth sexes))
@@ -1788,7 +1788,7 @@
    (set-name mulan-names ::female)))
 
 (def human-subraces-set
-  (into #{} human-subraces))
+  (set human-subraces))
 
 (def races-and-subraces
   (concat (vec human-subraces)

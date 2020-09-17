@@ -3,10 +3,8 @@
             [io.pedestal.http.route :as route]
             [io.pedestal.test :as test]
             [io.pedestal.http.ring-middlewares :as ring]
-            [ring.middleware.cookies :only [wrap-cookies]]
             [ring.middleware.resource :as ring-resource]
             [ring.util.response :as ring-resp]
-            [ring.middleware.etag :refer [wrap-etag]]
             [io.pedestal.http.body-params :as body-params]
             [io.pedestal.interceptor.error :as error-int]
             [io.pedestal.interceptor.chain :refer [terminate]]
@@ -16,12 +14,13 @@
             [buddy.sign.jwt :as jwt]
             [buddy.hashers :as hashers]
             [buddy.auth.middleware :refer [authentication-request]]
-            [pandect.algo.sha1 :refer [sha1]]
+            [clojure.edn :as edn]
             [clojure.java.io :as io]
             [clj-time.core :as t :refer [hours from-now ago]]
             [clj-time.coerce :as tc :refer [from-date]]
             [clojure.string :as s]
             [clojure.spec.alpha :as spec]
+            [clojure.pprint]
             [orcpub.dnd.e5.skills :as skill5e]
             [orcpub.dnd.e5.character :as char5e]
             [orcpub.dnd.e5.spells :as spells]
@@ -237,7 +236,7 @@
   (try
     (let [resp (login-response request)]
       resp)
-    (catch Throwable e (do (prn "E" e) (throw e)))))
+    (catch Throwable e (prn "E" e) (throw e))))
 
 
 (defn user-for-email [db email]
@@ -262,15 +261,15 @@
 (defn do-verification [request params conn & [tx-data]]
   (let [verification-key (str (java.util.UUID/randomUUID))
         now (java.util.Date.)]
-    (do @(d/transact
-          conn
-          [(merge
-            tx-data
-            {:orcpub.user/verified? false
-             :orcpub.user/verification-key verification-key
-             :orcpub.user/verification-sent now})])
-        (send-verification-email request params verification-key)
-        {:status 200})))
+    @(d/transact
+        conn
+        [(merge
+          tx-data
+          {:orcpub.user/verified? false
+            :orcpub.user/verification-key verification-key
+            :orcpub.user/verification-sent now})])
+      (send-verification-email request params verification-key)
+      {:status 200}))
 
 (defn register [{:keys [json-params db conn] :as request}]
   (let [{:keys [username email password send-updates?]} json-params
@@ -294,7 +293,7 @@
           :orcpub.user/password (hashers/encrypt password)
           :orcpub.user/send-updates? send-updates?
           :orcpub.user/created (java.util.Date.)}))
-      (catch Throwable e (do (prn e) (throw e))))))
+      (catch Throwable e (prn e) (throw e)))))
 
 (def user-for-verification-key-query
   '[:find ?e
@@ -379,7 +378,7 @@
       (if id
         (do-send-password-reset id email conn request)
         {:status 400 :body {:error :no-account}}))
-    (catch Throwable e (do (prn e) (throw e)))))
+    (catch Throwable e (prn e) (throw e))))
 
 (defn do-password-reset [conn user-id password]
   @(d/transact
@@ -399,7 +398,7 @@
         (not= password verify-password) {:status 400 :message "Passwords do not match"}
         (seq (registration/validate-password password)) {:status 400 :message "New password is invalid"}
         :else (do-password-reset conn id password)))
-    (catch Throwable t (do (prn t) (throw t)))))
+    (catch Throwable t (prn t) (throw t))))
 
 (def font-sizes
   (merge
@@ -461,7 +460,7 @@
     (catch Exception e (prn "FAILED ADDING SPELLS CARDS!" e))))
 
 (defn character-pdf-2 [req]
-  (let [fields (-> req :form-params :body clojure.edn/read-string)
+  (let [fields (-> req :form-params :body edn/read-string)
         {:keys [image-url image-url-failed faction-image-url faction-image-url-failed spells-known custom-spells spell-save-dcs spell-attack-mods print-spell-cards?]} fields
         input (.openStream (io/resource (cond
                                           (find fields :spellcasting-class-6) "fillable-char-sheet-6-spells.pdf"
@@ -657,12 +656,13 @@
       (let [current-character (d/pull db '[*] id)
             problems [] #_(dnd-e5-char-type-problems current-character)
             current-valid? (spec/valid? ::se/entity current-character)]
-        (if (not current-valid?)
-          (do (prn "INVALID CHARACTER FOUND, REPLACING" #_current-character)
-              (prn "INVALID CHARACTER EXPLANATION" #_(spec/explain-data ::se/entity current-character))))
+        (when-not current-valid?
+          (prn "INVALID CHARACTER FOUND, REPLACING" #_current-character)
+          (prn "INVALID CHARACTER EXPLANATION" #_(spec/explain-data ::se/entity current-character)))
         (if (seq problems)
-          {:status 400 :body problems}
-          (if (not current-valid?)
+          (throw (ex-info "Character has problems"
+                          {:error :character-problems :problems problems}))
+          (if-not current-valid?
             (let [new-character (entity/remove-ids character)
                   tx [[:db/retractEntity (:db/id current-character)]
                       (-> new-character
@@ -670,8 +670,7 @@
                                  :orcpub.entity.strict/owner username)
                           add-dnd-5e-character-tags)]
                   result @(d/transact conn tx)]
-              {:status 200
-               :body (d/pull (d/db conn) '[*] (-> result :tempids (get "tempid")))})
+              (d/pull (d/db conn) '[*] (-> result :tempids (get "tempid"))))
             (let [new-character (entity/remove-orphan-ids character)
                   current-ids (entity/db-ids current-character)
                   new-ids (entity/db-ids new-character)
@@ -685,9 +684,9 @@
                                (assoc :orcpub.entity.strict/owner username)
                                add-dnd-5e-character-tags))]
               @(d/transact conn tx)
-              {:status 200
-               :body (d/pull (d/db conn) '[*] id)}))))
-      {:status 401 :body "You do not own this character"})))
+              (d/pull (d/db conn) '[*] id)))))
+      (throw (ex-info "Not user character"
+                      {:error :not-user-character})))))
 
 (defn create-new-character [conn character username]
   (let [result @(d/transact conn
@@ -696,15 +695,14 @@
                                         ::se/owner username)
                                  add-dnd-5e-character-tags)])
         new-id (get-new-id "tempid" result)]
-    {:status 200
-     :body (d/pull (d/db conn) '[*] new-id)}))
+    (d/pull (d/db conn) '[*] new-id)))
 
 (defn clean-up-character [character]
   (if (-> character ::se/values ::char5e/xps string?)
     (update-in character
                [::se/values ::char5e/xps]
                #(try
-                  (if (not (s/blank? %))
+                  (if-not (s/blank? %)
                     (Long/parseLong %)
                     0)
                   (catch NumberFormatException e 0)))
@@ -717,11 +715,17 @@
     (try
       (if-let [data (spec/explain-data ::se/entity character)]
         {:status 400 :body data}
-        (let [clean-character (clean-up-character character)]
-          (if (:db/id clean-character)
-            (update-character db conn clean-character username)
-            (create-new-character conn clean-character username))))
-      (catch Exception e (do (prn "ERROR" e) (throw e))))))
+        (let [clean-character (clean-up-character character)
+              updated-character (if (:db/id clean-character)
+                                  (update-character db conn clean-character username)
+                                  (create-new-character conn clean-character username))]
+          {:status 200 :body updated-character}))
+      (catch clojure.lang.ExceptionInfo e
+        (let [data (ex-data e)]
+          (case (:error data)
+            :character-problems {:status 400 :body (:problems data)}
+            :not-user-character {:status 401 :body "You do not own this character"})))
+      (catch Exception e (prn "ERROR" e) (throw e)))))
 
 (defn save-character [{:keys [db transit-params body conn identity] :as request}]
   (do-save-character db conn transit-params identity))
@@ -960,8 +964,7 @@
 
 (def expanded-index-routes
   (route/expand-routes
-   (into #{} index-page-routes)))
-
+   (set index-page-routes)))
 
 (def service-error-handler
   (error-int/error-dispatch [ctx ex]
