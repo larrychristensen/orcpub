@@ -497,7 +497,8 @@
                  {:keys [print-character-sheet?
                          print-spell-cards?
                          print-prepared-spells?
-                         print-large-abilities?] :as options}]
+                         print-large-abilities?
+                         print-character-sheet-style?] :as options}]
   (let [race (char5e/race built-char)
         subrace (char5e/subrace built-char)
         abilities (abilities-spec
@@ -569,7 +570,8 @@
       :faction-image-url-failed (char5e/faction-image-url-failed built-char)
       :faction-name (char5e/faction-name built-char)
       :print-character-sheet? print-character-sheet?
-      :print-spell-cards? print-spell-cards?}
+      :print-spell-cards? print-spell-cards?
+      :print-character-sheet-style? print-character-sheet-style?}
      (attacks-and-spellcasting-fields built-char)
      (skill-fields built-char)
      abilities
