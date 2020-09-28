@@ -37,7 +37,7 @@
 
 (defn send-verification-email [base-url {:keys [email username first-and-last-name]} verification-key]
   (postal/send-message (email-cfg)
-                       {:from "OrcPub Team <no-reply@orcpub.com>"
+                       {:from (str "OrcPub Team <" (environ/env :email-from-address) ">")
                         :to email
                         :subject "OrcPub Email Verification"
                         :body (verification-email
@@ -70,7 +70,7 @@
 
 (defn send-reset-email [base-url {:keys [email username first-and-last-name]} reset-key]
   (postal/send-message (email-cfg)
-                       {:from "OrcPub Team <no-reply@orcpub.com>"
+                       {:from (str "OrcPub Team <" (environ/env :email-from-address) ">")
                         :to email
                         :subject "OrcPub Password Reset"
                         :body (reset-password-email
@@ -80,7 +80,7 @@
 (defn send-error-email [context exception]
   (if (not-empty (environ/env :email-errors-to))
     (postal/send-message (email-cfg)
-                         {:from (str "OrcPub Errors <" (environ/env :email-errors-to) ">")
+                         {:from (str "OrcPub Errors <" (environ/env :email-from-address) ">")
                           :to (str (environ/env :email-errors-to))
                           :subject "Exception"
                           :body [{:type "text/plain"
