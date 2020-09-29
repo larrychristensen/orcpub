@@ -3,6 +3,7 @@
             [postal.core :as postal]
             [environ.core :as environ]
             [clojure.pprint :as pprint]
+            [clojure.string :as s]
             [orcpub.route-map :as routes]
             [cuerdas.core :as str]))
 
@@ -36,7 +37,7 @@
    })
 
 (defn emailfrom []
-  (if (not (clojure.string/blank? (environ/env :email-from-address))) (environ/env :email-from-address) (str "no-reply@orcpub.com")))
+  (if (not (s/blank? (environ/env :email-from-address))) (environ/env :email-from-address) (str "no-reply@orcpub.com")))
 
 (defn send-verification-email [base-url {:keys [email username first-and-last-name]} verification-key]
   (postal/send-message (email-cfg)
