@@ -98,29 +98,37 @@
    "/"
    (s/replace (common/safe-name units) #"-" " ")))
 
-(defn attack-description [{:keys [description summary attack-type area-type damage-type damage-die damage-die-count damage-modifier attack-modifier save save-dc page source] :as attack}]
-  (let [summary (or summary description)
-        attack-mod-str (if attack-modifier (str (common/bonus-str attack-modifier) " to hit, "))]
+(defn attack-description-short [{:keys [description summary attack-type area-type] :as attack}]
+  (let [summary (or summary description)]
     (str
-     (if summary (str summary ", "))
+     (when summary (str summary ", "))
      (case attack-type
        :area (case area-type
-               :line (str (:line-width attack) " x " (:line-length attack) " ft. line, ")
-               :cone (str (:length attack) " ft. cone, ")
+               :line (str (:line-width attack) " x " (:line-length attack) " ft. line")
+               :cone (str (:length attack) " ft. cone")
                nil)
-       :ranged (str "ranged, " attack-mod-str)
-       (str "melee, " attack-mod-str))
+       :ranged "ranged"
+       "melee"))))
+
+(defn attack-description [{:keys [description summary attack-type area-type damage-type damage-die damage-die-count damage-modifier attack-modifier save save-dc page source] :as attack}]
+  (let [attack-mod-str (when attack-modifier (str (common/bonus-str attack-modifier) " to hit, "))]
+    (str
+     (attack-description-short attack)
+     (case attack-type
+       :area ", "
+       :ranged (str ", " attack-mod-str)
+       (str ", " attack-mod-str))
      (or damage-die-count
          (::weapons/damage-die-count attack))
      "d"
      (or damage-die
          (::weapons/damage-die attack))
-     (if damage-modifier (common/mod-str damage-modifier))
+     (when damage-modifier (common/mod-str damage-modifier))
      " "
-     (if damage-type (common/safe-name damage-type))
+     (when damage-type (common/safe-name damage-type))
      " damage"
-     (if save (str ", DC" save-dc " " (common/safe-name save) " save"))
-     #_(if page (str " (" (source-description source page) ")")))))
+     (when save (str ", DC" save-dc " " (common/safe-name save) " save"))
+     #_(when page (str " (" (source-description source page) ")")))))
 
 (defn action-description [{:keys [description summary source page duration range frequency qualifier]}]
   (str

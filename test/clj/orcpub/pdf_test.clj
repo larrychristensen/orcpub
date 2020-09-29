@@ -3,7 +3,7 @@
             [orcpub.pdf :as pdf])
   (:import (org.apache.pdfbox.pdmodel PDDocument PDPage PDPageContentStream)))
 
-(deftest fonts-test
+(deftest fonts-test []
   "Tests the creation of fonts for the document and their ability to print latin and cyrillic characters"
   (let [^PDDocument doc (PDDocument.)
         ^PDPage page (PDPage.)
