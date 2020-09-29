@@ -114,7 +114,6 @@
        (if @blurred? (validation-messages messages))])))
 
 (defn export-pdf [built-char id & [options]]
-  (prn (str options))
   (fn [_]
     (let [field (.getElementById js/document "fields-input")]
       (aset field "value" (str (pdf-spec/make-spec built-char id options)))
