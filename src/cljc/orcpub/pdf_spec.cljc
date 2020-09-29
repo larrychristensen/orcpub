@@ -546,7 +546,8 @@
       :hd total-hit-dice
       :initiative (common/bonus-str (es/entity-val built-char :initiative))
       :speed speed
-      :hp-max (es/entity-val built-char :max-hit-points)
+      :hp-max (es/entity-val built-char :-max-hitpoints)
+      :hp-current (char5e/current-hit-points built-char)
       :passive (es/entity-val built-char :passive-perception)
       :other-profs (other-profs-field built-char)
       :personality-traits (s/join "\n\n" [(char5e/personality-trait-1 built-char) (char5e/personality-trait-2 built-char)])
