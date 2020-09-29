@@ -2301,8 +2301,11 @@
            [:div.ability-score-name
             [:span.f-s-20.uppercase (name k)]]
            [:div.f-s-24.f-w-b.ability-score (abilities k)]
-           [:div.f-s-12.opacity-5.m-b--2.m-t-2 "mod"]
-           [:div.f-s-18.ability-score-modifier (common/bonus-str (ability-bonuses k))]])
+           [:div.f-s-12.opacity-5.m-b-2.m-t-2 " mod"]
+           [:div.f-s-18.ability-score-modifier (roll-button
+                                                (str (clojure.string/upper-case (name k)) " check: ")
+                                                (str "1d20 " (common/mod-str (ability-bonuses k)))
+                                                :text (common/bonus-str (ability-bonuses k)))]])
         char/ability-keys))]]))
 
 (defn saving-throws-section-2 [id]
