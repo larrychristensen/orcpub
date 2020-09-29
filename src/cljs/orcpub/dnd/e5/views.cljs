@@ -3446,12 +3446,6 @@
         [:div.m-t-10
          [labeled-dropdown
           "Select Character sheet"
-          #_(case print-character-sheet-style?
-            ;nil "Select Character sheet"
-              1 "Original 5e Character sheet"
-              2 "Original 5e Character sheet - optional variant"
-              ;3 "Icewind Dale"
-              "Select Character sheet")
           {:items [{:title "Select" :value " "}
                    {:title "Original 5e Character sheet" :value 1}
                    {:title "Original 5e Character sheet - optional variant" :value 2}]
