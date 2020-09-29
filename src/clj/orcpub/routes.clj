@@ -453,15 +453,23 @@
 
 (defn character-pdf-2 [req]
   (let [fields (-> req :form-params :body edn/read-string)
-        {:keys [image-url image-url-failed faction-image-url faction-image-url-failed spells-known custom-spells spell-save-dcs spell-attack-mods print-spell-cards?]} fields
+        {:keys [image-url image-url-failed faction-image-url faction-image-url-failed spells-known custom-spells spell-save-dcs spell-attack-mods print-spell-cards? print-character-sheet-style?]} fields
+
+        sheet6 (str "fillable-char-sheetstyle-" print-character-sheet-style? "-6-spells.pdf")
+        sheet5 (str "fillable-char-sheetstyle-" print-character-sheet-style? "-5-spells.pdf")
+        sheet4 (str "fillable-char-sheetstyle-" print-character-sheet-style? "-4-spells.pdf")
+        sheet3 (str "fillable-char-sheetstyle-" print-character-sheet-style? "-3-spells.pdf")
+        sheet2 (str "fillable-char-sheetstyle-" print-character-sheet-style? "-2-spells.pdf")
+        sheet1 (str "fillable-char-sheetstyle-" print-character-sheet-style? "-1-spells.pdf")
+        sheet0 (str "fillable-char-sheetstyle-" print-character-sheet-style? "-0-spells.pdf")
         input (.openStream (io/resource (cond
-                                          (find fields :spellcasting-class-6) "fillable-char-sheet-6-spells.pdf"
-                                          (find fields :spellcasting-class-5) "fillable-char-sheet-5-spells.pdf"
-                                          (find fields :spellcasting-class-4) "fillable-char-sheet-4-spells.pdf"
-                                          (find fields :spellcasting-class-3) "fillable-char-sheet-3-spells.pdf"
-                                          (find fields :spellcasting-class-2) "fillable-char-sheet-2-spells.pdf"
-                                          (find fields :spellcasting-class-1) "fillable-char-sheet-1-spells.pdf"
-                                          :else "fillable-char-sheet-0-spells.pdf")))
+                                          (find fields :spellcasting-class-6) sheet6
+                                          (find fields :spellcasting-class-5) sheet5
+                                          (find fields :spellcasting-class-4) sheet4
+                                          (find fields :spellcasting-class-3) sheet3
+                                          (find fields :spellcasting-class-2) sheet2
+                                          (find fields :spellcasting-class-1) sheet1
+                                          :else sheet0)))
         output (ByteArrayOutputStream.)
         user-agent (get-in req [:headers "user-agent"])
         chrome? (re-matches #".*Chrome.*" user-agent)]
