@@ -70,7 +70,7 @@ EMAIL_SERVER_URL: '' # DNS name of your smtp server
 EMAIL_ACCESS_KEY: '' # User for the mail server
 EMAIL_SECRET_KEY: '' # Password for the user
 EMAIL_SERVER_PORT: 587 # Mail server port
-EMAIL_FROM_ADDRESS: 'no-reply@orcpub.com' # Email address to send from
+EMAIL_FROM_ADDRESS: '' # Email address to send from, will default to 'no-reply@orcpub.com'
 EMAIL_SSL: 'false' # Should SSL be used? Gmail requires this.
 EMAIL_TLS: 'false' # Should TLS be used? 
 DATOMIC_URL: datomic:free://datomic:4334/orcpub?password=yourpassword # Url for the database
@@ -194,7 +194,7 @@ EMAIL_SERVER_URL: '' # Url to a smtp server
 EMAIL_ACCESS_KEY: '' # User for the mail server
 EMAIL_SECRET_KEY: '' # Password for the user
 EMAIL_SERVER_PORT: 587 # Mail server port
-EMAIL_FROM_ADDRESS: 'no-reply@orcpub.com' # Email address to send from
+EMAIL_FROM_ADDRESS: '' # Email address to send from, will default to 'no-reply@orcpub.com'
 EMAIL_SSL: 'false' # Should SSL be used? Gmail requires this.
 DATOMIC_URL: datomic:free://datomic:4334/orcpub?password=yourpassword # Url for the database
 ADMIN_PASSWORD: supersecretpassword

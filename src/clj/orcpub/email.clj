@@ -35,9 +35,12 @@
    :tls (or (str/to-bool (environ/env :email-tls)) nil)
    })
 
+(defn emailfrom []
+  (if (not (clojure.string/blank? (environ/env :email-from-address))) (environ/env :email-from-address) (str "no-reply@orcpub.com")))
+
 (defn send-verification-email [base-url {:keys [email username first-and-last-name]} verification-key]
   (postal/send-message (email-cfg)
-                       {:from (str "OrcPub Team <" (environ/env :email-from-address) ">")
+                       {:from (str "OrcPub Team <" (emailfrom) ">")
                         :to email
                         :subject "OrcPub Email Verification"
                         :body (verification-email
@@ -70,7 +73,7 @@
 
 (defn send-reset-email [base-url {:keys [email username first-and-last-name]} reset-key]
   (postal/send-message (email-cfg)
-                       {:from (str "OrcPub Team <" (environ/env :email-from-address) ">")
+                       {:from (str "OrcPub Team <" (emailfrom) ">")
                         :to email
                         :subject "OrcPub Password Reset"
                         :body (reset-password-email
@@ -80,7 +83,7 @@
 (defn send-error-email [context exception]
   (if (not-empty (environ/env :email-errors-to))
     (postal/send-message (email-cfg)
-                         {:from (str "OrcPub Errors <" (environ/env :email-from-address) ">")
+                         {:from (str "OrcPub Errors <" (emailfrom) ">")
                           :to (str (environ/env :email-errors-to))
                           :subject "Exception"
                           :body [{:type "text/plain"
