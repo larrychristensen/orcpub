@@ -1491,7 +1491,9 @@
                                    ::char/image-url
                                    ::char/race-name
                                    ::char/subrace-name
-                                   ::char/classes]}
+                                   ::char/classes
+                                   ::char/alignment
+                                   ::char/background]}
                            include-name?
                            owner
                            show-owner?
@@ -1503,7 +1505,10 @@
         [:img.m-r-20.m-t-10.m-b-10 {:src image-url
                                     :style thumbnail-style}])
       [:div.flex.character-summary.m-t-20.m-b-20
-       (if (and character-name include-name?) [:span.m-r-20.m-b-5.character-name character-name])
+       (if (and character-name include-name?) [:span.m-r-20.m-b-5
+                                               [:span.character-name character-name]
+                                               [:div.f-s-12.m-t-5.opacity-6.character-background background]
+                                               [:div.f-s-12.m-t-5.opacity-6.character-alignment alignment]])
        [:span.m-r-10.m-b-5
         [:span.character-race-name race-name]
         [:div.f-s-12.m-t-5.opacity-6.character-subrace-name subrace-name]]
@@ -1533,12 +1538,16 @@
         subrace @(subscribe [::char/subrace id])
         levels @(subscribe [::char/levels id])
         classes @(subscribe [::char/classes id])
+        alignment  @(subscribe [::char/alignment id])
+        background  @(subscribe [::char/background id])
         {:keys [::se/owner] :as strict-character} @(subscribe [::char/character id])]
     (character-summary-2
      {::char/character-name character-name
       ::char/image-url image-url
       ::char/race-name race
       ::char/subrace-name subrace
+      ::char/alignment alignment
+      ::char/background background
       ::char/classes (map
                       (fn [class-kw]
                         (let [{:keys [class-name class-level subclass-name] :as cfg}
