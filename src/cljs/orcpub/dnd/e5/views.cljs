@@ -1224,9 +1224,10 @@
                                       (let [mean
                                             (or mean
                                                 (if (and die die-count)
-                                                  (dice/dice-mean die
-                                                                  die-count
-                                                                  (or modifier 0))))]
+                                                  (dice/dice-mean
+                                                   die-count
+                                                   die
+                                                   (or modifier 0))))]
                                         (if mean (str " (" mean ")"))))))
      (spell-field "Speed" speed)
      [:div.m-t-10.flex.justify-cont-s-a.m-b-10
