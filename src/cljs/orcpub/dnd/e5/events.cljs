@@ -1134,7 +1134,7 @@
    character
    (entity/get-entity-path built-template character path)
    {::entity/key :average
-    ::entity/value (dice/die-mean (-> levels class-kw :hit-die))}))
+    ::entity/value (dice/die-mean-round-up (-> levels class-kw :hit-die))}))
 
 (reg-event-db
  :set-hit-points-to-average
