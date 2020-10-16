@@ -3778,6 +3778,11 @@
    (update db ::char5e/print-large-abilities? not)))
 
 (reg-event-db
+ ::char5e/set-print-character-sheet-style?
+ (fn [db [_ id]]
+   (assoc-in db [::char5e/print-character-sheet-style?] id)))
+
+(reg-event-db
  ::char5e/toggle-known-spells-print
  (fn [db _]
    (update db ::char5e/print-prepared-spells? not)))

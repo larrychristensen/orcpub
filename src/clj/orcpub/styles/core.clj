@@ -1092,12 +1092,12 @@
 
     [:.roll-button
      {:color :white
+      :min-width "35px"
       :font-weight 600
-      :font-size "9px"
+      :font-size "14px"
       :border :none
       :border-radius "2px"
-      :text-transform :uppercase
-      :padding "8px 8px"
+      :padding "6px 6px"
       :margin-right "2px"
       :margin-left "2px"
       :cursor :pointer
@@ -1108,7 +1108,8 @@
 
     [:.form-button.disabled
      {:opacity 0.5
-      :cursor :not-allowed}]
+      :cursor :not-allowed
+      :pointer-events "none"}]
 
     [:.form-button.disabled:hover
      {:box-shadow :none}]

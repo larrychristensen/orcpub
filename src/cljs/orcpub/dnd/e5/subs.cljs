@@ -1206,6 +1206,11 @@
    (get db ::char5e/print-large-abilities?)))
 
 (reg-sub
+ ::char5e/print-character-sheet-style?
+ (fn [db [_ id]]
+   (get db ::char5e/print-character-sheet-style?)))
+
+(reg-sub
  ::char5e/delete-confirmation-shown?
  (fn [db [_ id]]
    (get-in db [::char5e/delete-confirmation-shown? id])))
