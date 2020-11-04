@@ -1491,6 +1491,13 @@
                                    ::char/image-url
                                    ::char/race-name
                                    ::char/subrace-name
+                                   ::char/age
+                                   ::char/sex
+                                   ::char/height
+                                   ::char/weight
+                                   ::char/hair
+                                   ::char/eyes
+                                   ::char/skin
                                    ::char/classes
                                    ::char/alignment
                                    ::char/background]}
@@ -1500,7 +1507,7 @@
                            show-follow?]
   (let [username @(subscribe [:username])]
     [:div.flex.justify-cont-s-b.w-100-p.align-items-c
-     [:div.flex.align-items-c
+     [:div.flex.align-items-c.align-items-t
       (if image-url
         [:img.m-r-20.m-t-10.m-b-10 {:src image-url
                                     :style thumbnail-style}])
@@ -1508,7 +1515,10 @@
        (if (and character-name include-name?) [:span.m-r-20.m-b-5
                                                [:span.character-name character-name]
                                                [:div.f-s-12.m-t-5.opacity-6.character-background background]
-                                               [:div.f-s-12.m-t-5.opacity-6.character-alignment alignment]])
+                                               [:div.f-s-12.m-t-5.opacity-6.character-alignment alignment]
+                                               (when age [:div.f-s-12.m-t-5.opacity-6.character-age "Age: " age])
+                                               (when sex [:div.f-s-12.m-t-5.opacity-6.character-sex "Sex: " sex])
+                                               (when height [:div.f-s-12.m-t-5.opacity-6.character-height "Height: " height])])
        [:span.m-r-10.m-b-5
         [:span.character-race-name race-name]
         [:div.f-s-12.m-t-5.opacity-6.character-subrace-name subrace-name]]
@@ -1523,7 +1533,12 @@
              (fn [{:keys [::char/class-name ::char/level ::char/subclass-name]}]
                [:span
                 [:div.class-name (str class-name)] [:div.level (str "(" level ")")]
-                [:div.f-s-12.m-t-5.opacity-6.sub-class-name (if subclass-name subclass-name)]])
+                [:div.f-s-12.m-t-5.opacity-6.sub-class-name (if subclass-name subclass-name)]
+                
+                (when weight [:div.f-s-12.m-t-5.opacity-6.character-weight "Weight: " weight])
+                (when hair [:div.f-s-12.m-t-5.opacity-6.character-hair "Hair: " hair])
+                (when eyes [:div.f-s-12.m-t-5.opacity-6.character-eyes "Eyes: " eyes])
+                (when skin [:div.f-s-12.m-t-5.opacity-6.character-skin "Skin: " skin])])
              classes)))])]]
      (if (and show-owner?
               (some? owner)
@@ -1533,6 +1548,13 @@
 
 (defn character-summary [id & [include-name?]]
   (let [character-name @(subscribe [::char/character-name id])
+        age @(subscribe [::char/age id])
+        sex @(subscribe [::char/sex id])
+        height @(subscribe [::char/height id])
+        weight @(subscribe [::char/weight id])
+        hair @(subscribe [::char/hair id])
+        eyes @(subscribe [::char/eyes id])
+        skin @(subscribe [::char/skin id])
         image-url @(subscribe [::char/image-url id])
         race @(subscribe [::char/race id])
         subrace @(subscribe [::char/subrace id])
@@ -1543,6 +1565,13 @@
         {:keys [::se/owner] :as strict-character} @(subscribe [::char/character id])]
     (character-summary-2
      {::char/character-name character-name
+      ::char/age age
+      ::char/sex sex
+      ::char/height height
+      ::char/weight weight
+      ::char/hair hair
+      ::char/eyes eyes
+      ::char/skin skin
       ::char/image-url image-url
       ::char/race-name race
       ::char/subrace-name subrace
