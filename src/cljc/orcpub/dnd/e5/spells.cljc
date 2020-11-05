@@ -109,8 +109,7 @@ This spell's damage increases by 1d6 when you reach 5th level (2d6), 11th level 
     :components {:verbal true :somatic true :material true :material-component "a tiny strip of white cloth"}
     :duration "8 hours"
     :description "Your spell bolsters your allies with toughness and resolve. Choose up to three creatures within range. Each target's hit point maximum and current hit points increase by 5 for the duration.
-At Higher Levels. When you cast this spell using a spell slot of 3rd level or higher, a target's hit points
-increase by an additional 5 for each slot level above 2nd."
+At Higher Levels. When you cast this spell using a spell slot of 3rd level or higher, a target's hit points increase by an additional 5 for each slot level above 2nd."
     }
    {
     :name "Alarm"
@@ -199,14 +198,12 @@ At Higher Levels. When you cast this spell using a spell slot of 4th level or hi
     :description "Objects come to life at your command. Choose up to ten nonmagical objects within range that are not being worn or carried. Medium targets count as two objects, Large targets count as four objects, Huge targets count as eight objects. You can't animate any object larger than Huge. Each target animates and becomes a creature under your control until the spell ends or until reduced to 0 hit points.
 As a bonus action, you can mentally command any creature you made with this spell if the creature is within 500 feet of you (if you control multiple creatures, you can command any or all of them at the same time, issuing the same command to each one). You decide what action the creature will take and where it will move during its next turn, or you can issue a general command, such as to guard a particular chamber or corridor. If you issue no commands, the creature only defends itself against hostile creatures. Once given an order, the creature continues to follow it until its task is complete.
 Animated Object Statistics
-Size HP AC Attack Str Dex
+Size HP AC Attack           Str Dex
 Tiny 20 18 +8 to hit, 1d4 + 4 damage 4 18
 Small 25 16 +6 to hit, 1d8 + 2 damage 6 14
 Medium 40 13 +5 to hit, 2d6 + 1 damage 10 12
-Large 50 10 +6 to hit, 2d10 + 2 damage
-14 10
-Huge 80 10 +8 to hit, 2d12 + 4 damage
-18 6
+Large 50 10 +6 to hit, 2d10 + 2 damage 14 10
+Huge 80 10 +8 to hit, 2d12 + 4 damage 18 6
 An animated object is a construct with AC, hit points, attacks, Strength, and Dexterity determined by its size. Its Constitution is 10 and its Intelligence and Wisdom are 3, and its Charisma is 1. Its speed is 30 feet; if the object lacks legs or other appendages it can use for locomotion, it instead has a flying speed of 30 feet and can hover. If the object is securely attached to a surface or a larger object, such as a chain bolted to a wall, its speed is 0. It has blindsight with a radius of 30 feet and is blind beyond that distance. When the animated object drops to 0 hit points, it reverts to its original object form, and any remaining damage carries over to its original object form.
 If you command an object to attack, it can make a single melee attack against a creature within 5 feet of it. It makes a slam attack with an attack bonus and bludgeoning damage determined by its size. The GM might rule that a specific object inflicts slashing or piercing damage based on its form.
 At Higher Levels. If you cast this spell using a spell slot of 6th level or higher, you can animate two additional objects for each slot level above 5th."
@@ -219,8 +216,7 @@ At Higher Levels. If you cast this spell using a spell slot of 6th level or high
     :range "Self (10-foot radius)"
     :components {:verbal true :somatic true}
     :duration "Concentration, up to 1 hour"
-    :description "A shimmering barrier extends out from you in a 10-
-foot radius and moves with you, remaining centered on you and hedging out creatures other than undead and constructs. The barrier lasts for the duration.
+    :description "A shimmering barrier extends out from you in a 10-foot radius and moves with you, remaining centered on you and hedging out creatures other than undead and constructs. The barrier lasts for the duration.
 The barrier prevents an affected creature from passing or reaching through. An affected creature can cast spells or make attacks with ranged or reach weapons through the barrier.
 If you move so that an affected creature is forced to pass through the barrier, the spell ends."
     }
@@ -486,8 +482,7 @@ At Higher Levels. When you cast this spell using a spell slot of 5th level or hi
     :range "30 feet"
     :components {:verbal true}
     :duration "1 minute"
-    :description "You can blind or deafen a foe. Choose one creature that you can see within range to make a Constitution saving throw. If it fails, the target is either blinded or deafened (your choice) for the duration. At the end of each of its turns, the target can make a Constitution saving throw. On a success, the spell
-ends.
+    :description "You can blind or deafen a foe. Choose one creature that you can see within range to make a Constitution saving throw. If it fails, the target is either blinded or deafened (your choice) for the duration. At the end of each of its turns, the target can make a Constitution saving throw. On a success, the spell ends.
 At Higher Levels. When you cast this spell using a spell slot of 3rd level or higher, you can target one additional creature for each slot level above 2nd."
     }
    {
@@ -1000,8 +995,7 @@ At Higher Levels. When you cast this spell using a spell slot of 2nd level or hi
     :level 6
     :casting-time "1 minute"
     :range "10 feet"
-    :components {:verbal true :somatic true :material true :material-component "one clay pot filled with grave dirt, one clay pot filled with brackish water, and
-one 150 gp black onyx stone for each corpse"}
+    :components {:verbal true :somatic true :material true :material-component "one clay pot filled with grave dirt, one clay pot filled with brackish water, and one 150 gp black onyx stone for each corpse"}
     :duration instantaneous
     :description "You can cast this spell only at night. Choose up to three corpses of Medium or Small humanoids within range. Each corpse becomes a ghoul under your control. (The GM has game statistics for these creatures.)
 As a bonus action on each of your turns, you can mentally command any creature you animated with this spell if the creature is within 120 feet of you (if you control multiple creatures, you can command any or all of them at the same time, issuing the same command to each one). You decide what action the creature will take and where it will move during its next turn, or you can issue a general command, such as to guard a particular chamber or corridor. If you issue no commands, the creature only defends itself against hostile creatures. Once given an order, the creature continues to follow it until its task is complete.
@@ -1190,8 +1184,7 @@ If you would arrive in a place already occupied by an object or a creature, you 
                 :range self
                 :components {:verbal true :somatic true}
                 :duration "1 hour"
-                :description "You make yourself—including your clothing, armor, weapons, and other belongings on your person—
-look different until the spell ends or until you use your action to dismiss it. You can seem 1 foot shorter or taller and can appear thin, fat, or in between. You can't change your body type, so you must adopt a form that has the same basic arrangement of limbs. Otherwise, the extent of the illusion is up to you.
+                :description "You make yourself—including your clothing, armor, weapons, and other belongings on your person look different until the spell ends or until you use your action to dismiss it. You can seem 1 foot shorter or taller and can appear thin, fat, or in between. You can't change your body type, so you must adopt a form that has the same basic arrangement of limbs. Otherwise, the extent of the illusion is up to you.
 The changes wrought by this spell fail to hold up to physical inspection. For example, if you use this spell to add a hat to your outfit, objects pass through the hat, and anyone who touches it would feel nothing or would feel your head and hair. If you use this spell to appear thinner than you are, the hand of someone who reaches out to touch you would bump into you while it was seemingly still in midair.
 To discern that you are disguised, a creature can use its action to inspect your appearance and must succeed on an Intelligence (Investigation) check against your spell save DC."
                 }
@@ -1323,8 +1316,8 @@ At Higher Levels. When you cast this spell using a 6th-level spell slot, the dur
                 :components {:verbal true :somatic true :material true :material-component "a handful of sand, a dab of ink, and a writing quill plucked from a sleeping bird"}
                 :duration "8 hours"
                 :description "This spell shapes a creature's dreams. Choose a creature known to you as the target of this spell. The target must be on the same plane of existence as you. Creatures that don't sleep, such as elves, can't be contacted by this spell. You, or a willing creature you touch, enters a trance state, acting as a messenger. While in the trance, the messenger is aware of his or her surroundings, but can't take actions or move.
-If the target is asleep, the messenger appears in the target's dreams and can converse with the target as long as it remains asleep, through the duration of
-the spell. The messenger can also shape the environment of the dream, creating landscapes, objects, and other images. The messenger can emerge from the trance at any time, ending the effect of the spell early. The target recalls the dream perfectly upon waking. If the target is awake when you cast the spell, the messenger knows it, and can either end the trance (and the spell) or wait for the target to fall asleep, at which point the messenger appears in the target's dreams. You can make the messenger appear monstrous and terrifying to the target. If you do, the messenger can deliver a message of no more than ten words and then the target must make a Wisdom saving throw. On a failed save, echoes of the phantasmal monstrosity spawn a nightmare that lasts the duration of the target's sleep and prevents the target from gaining any benefit from that rest. In addition, when the target wakes up, it takes 3d6 psychic damage.
+If the target is asleep, the messenger appears in the target's dreams and can converse with the target as long as it remains asleep, through the duration of the spell.
+The messenger can also shape the environment of the dream, creating landscapes, objects, and other images. The messenger can emerge from the trance at any time, ending the effect of the spell early. The target recalls the dream perfectly upon waking. If the target is awake when you cast the spell, the messenger knows it, and can either end the trance (and the spell) or wait for the target to fall asleep, at which point the messenger appears in the target's dreams. You can make the messenger appear monstrous and terrifying to the target. If you do, the messenger can deliver a message of no more than ten words and then the target must make a Wisdom saving throw. On a failed save, echoes of the phantasmal monstrosity spawn a nightmare that lasts the duration of the target's sleep and prevents the target from gaining any benefit from that rest. In addition, when the target wakes up, it takes 3d6 psychic damage.
 If you have a body part, lock of hair, clipping from a nail, or similar portion of the target's body, the target makes its saving throw with disadvantage."
                 }
                {
@@ -1580,8 +1573,7 @@ You can't have more than one steed bonded by this spell at a time. As an action,
     :level 6
     :casting-time "1 minute"
     :range self
-    :components {:verbal true :somatic true :material true :material-component "a set of divinatory tools—
-such as bones, ivory sticks, cards, teeth, or carved runes—worth 100 gp and an object from the location you wish to find"}
+    :components {:verbal true :somatic true :material true :material-component "a set of divinatory tools-such as bones, ivory sticks, cards, teeth, or carved runes—worth 100 gp and an object from the location you wish to find"}
     :duration "Concentration, up to 1 day"
     :description "This spell allows you to find the shortest, most direct physical route to a specific fixed location that you are familiar with on the same plane of existence. If you name a destination on another plane of existence, a destination that moves (such as a mobile fortress), or a destination that isn't specific (such as “a green dragon's lair”), the spell fails.
 For the duration, as long as you are on the same plane of existence as the destination, you know how far it is and in what direction it lies. While you are traveling there, whenever you are presented with a choice of paths along the way, you automatically determine which path is the shortest and most direct route (but not necessarily the safest route) to the destination."
@@ -1991,8 +1983,7 @@ Other Spell Effect. You can place your choice of one of the following magical ef
 • Place stinking cloud in two locations. The vapors appear in the places you designate; they return within 10 minutes if dispersed by wind while guards and wards lasts.
 • Place a constant gust of wind in one corridor or room.
 • Place a suggestion in one location. You select an area of up to 5 feet square, and any creature that enters or passes through the area receives the suggestion mentally.
-The whole warded area radiates magic. A dispel magic cast on a specific effect, if successful, removes
-only that effect.
+The whole warded area radiates magic. A dispel magic cast on a specific effect, if successful, removes only that effect.
 You can create a permanently guarded and warded structure by casting this spell there every day for one year."
     }
    {
@@ -2532,8 +2523,7 @@ At Higher Levels. When you cast this spell using a spell slot of 4th level or hi
     :components {:verbal true :somatic true :material true :material-component "a gem, crystal, reliquary, or some other ornamental container worth at least 500 gp"}
     :duration "Until dispelled"
     :description "Your body falls into a catatonic state as your soul leaves it and enters the container you used for the spell's material component. While your soul inhabits the container, you are aware of your surroundings as if you were in the container's space. You can't move or use reactions. The only action you can take is to project your soul up to 100 feet out of the container, either returning to your living body (and ending the spell) or attempting to possess a humanoids body.
-You can attempt to possess any humanoid within 100 feet of you that you can see (creatures warded by a protection from evil and good or magic circle
-spell can't be possessed). The target must make a Charisma saving throw. On a failure, your soul moves into the target's body, and the target's soul becomes trapped in the container. On a success, the target resists your efforts to possess it, and you can't attempt to possess it again for 24 hours.
+You can attempt to possess any humanoid within 100 feet of you that you can see (creatures warded by a protection from evil and good or magic circle spell can't be possessed). The target must make a Charisma saving throw. On a failure, your soul moves into the target's body, and the target's soul becomes trapped in the container. On a success, the target resists your efforts to possess it, and you can't attempt to possess it again for 24 hours.
 Once you possess a creature's body, you control it. Your game statistics are replaced by the statistics of the creature, though you retain your alignment and your Intelligence, Wisdom, and Charisma scores. You retain the benefit of your own class features. If the target has any class levels, you can't use any of its class features.
 Meanwhile, the possessed creature's soul can perceive from the container using its own senses, but it can't move or take actions at all.
 While possessing a body, you can use your action to return from the host body to the container if it is within 100 feet of you, returning the host creature's soul to its body. If the host body dies while you're in it, the creature dies, and you must make a Charisma saving throw against your own spellcasting DC. On a success, you return to the container if it is within 100 feet of you. Otherwise, you die.
@@ -2713,8 +2703,7 @@ The spell damages objects in the area and ignites flammable objects that aren't 
     :range touch
     :components {:verbal true :somatic true}
     :duration "24 hours"
-    :description "Until the spell ends, one willing creature you touch is immune to psychic damage, any effect that would sense its emotions or read its thoughts, divination
-spells, and the charmed condition. The spell even foils wish spells and spells or effects of similar power used to affect the target's mind or to gain information about the target."
+    :description "Until the spell ends, one willing creature you touch is immune to psychic damage, any effect that would sense its emotions or read its thoughts, divination spells, and the charmed condition. The spell even foils wish spells and spells or effects of similar power used to affect the target's mind or to gain information about the target."
     }
    {
     :name "Minor Illusion"
@@ -2737,12 +2726,10 @@ If a creature uses its action to examine the sound or image, the creature can de
     :range "Sight"
     :components {:verbal true :somatic true}
     :duration "10 days"
-    :description "You make terrain in an area up to 1 mile square look,
-sound, smell, and even feel like some other sort of terrain. The terrain's general shape remains the same, however. Open fields or a road could be made to resemble a swamp, hill, crevasse, or some other difficult or impassable terrain. A pond can be made to seem like a grassy meadow, a precipice like a gentle slope, or a rock-strewn gully like a wide and smooth road.
+    :description "You make terrain in an area up to 1 mile square look, sound, smell, and even feel like some other sort of terrain. The terrain's general shape remains the same, however. Open fields or a road could be made to resemble a swamp, hill, crevasse, or some other difficult or impassable terrain. A pond can be made to seem like a grassy meadow, a precipice like a gentle slope, or a rock-strewn gully like a wide and smooth road.
 Similarly, you can alter the appearance of structures, or add them where none are present. The spell doesn't disguise, conceal, or add creatures.
 The illusion includes audible, visual, tactile, and olfactory elements, so it can turn clear ground into difficult terrain (or vice versa) or otherwise impede movement through the area. Any piece of the illusory terrain (such as a rock or stick) that is removed from the spell's area disappears immediately.
-Creatures with truesight can see through the illusion to the terrain's true form; however, all other elements of the illusion remain, so while the creature is aware of the illusion's presence, the
-creature can still physically interact with the illusion."
+Creatures with truesight can see through the illusion to the terrain's true form; however, all other elements of the illusion remain, so while the creature is aware of the illusion's presence, the creature can still physically interact with the illusion."
     }
    {
     :name "Mirror Image"
@@ -3063,8 +3050,7 @@ When you cast the spell, you decide what sort of security the spell provides, ch
 • The barrier of the warded area appears dark and foggy, preventing vision (including darkvision) through it.
 • Sensors created by divination spells can't appear inside the protected area or pass through the barrier at its perimeter.
 • Creatures in the area can't be targeted by divination spells.
-• Nothing can teleport into or out of the warded
-area.
+• Nothing can teleport into or out of the warded area.
 • Planar travel is blocked within the warded area.
 Casting this spell on the same spot every day for a year makes this effect permanent.
 At Higher Levels. When you cast this spell using a spell slot of 5th level or higher, you can increase the size of the cube by 100 feet for each slot level beyond 4th. Thus you could protect a cube that can be up to 200 feet on one side by using a spell slot of 5th level."
@@ -3462,8 +3448,7 @@ At Higher Levels. When you cast this spell using a spell slot of 3rd level or hi
     :range self
     :components {:verbal true :somatic true}
     :duration "1 round"
-    :description "An invisible barrier of magical force appears and protects you. Until the start of your next turn, you have a +5 bonus to AC, including against the triggering attack, and you take no damage from
-magic missile."
+    :description "An invisible barrier of magical force appears and protects you. Until the start of your next turn, you have a +5 bonus to AC, including against the triggering attack, and you take no damage from magic missile."
     }
    {
     :name "Shield of Faith"
@@ -3580,9 +3565,7 @@ A creature affected by this spell makes another Wisdom saving throw at the end o
     :range touch
     :components {:verbal true :somatic true}
     :duration instantaneous
-    :description "You touch a living creature that has 0 hit points. The
-creature becomes stable. This spell has no effect on
-undead or constructs."}
+    :description "You touch a living creature that has 0 hit points. The creature becomes stable. This spell has no effect on undead or constructs."}
    {
     :name "Speak with Animals"
     :ritual true
@@ -3781,8 +3764,7 @@ Stunning. Each target must make a Wisdom saving throw and becomes stunned for 1 
     :components {:verbal true :somatic true}
     :duration conc-10-min
     :description "You gain the ability to move or manipulate creatures or objects by thought. When you cast the spell, and as your action each round for the duration, you can exert your will on one creature or object that you can see within range, causing the appropriate effect below. You can affect the same target round after round, or choose a new one at any time. If you switch targets, the prior target is no longer affected by the spell.
-Creature. You can try to move a Huge or smaller creature. Make an ability check with your spellcasting ability contested by the creature's Strength check. If you win the contest, you move the creature up to 30 feet in any direction, including upward but not beyond the range of this spell. Until
-the end of your next turn, the creature is restrained in your telekinetic grip. A creature lifted upward is suspended in mid-air.
+Creature. You can try to move a Huge or smaller creature. Make an ability check with your spellcasting ability contested by the creature's Strength check. If you win the contest, you move the creature up to 30 feet in any direction, including upward but not beyond the range of this spell. Until the end of your next turn, the creature is restrained in your telekinetic grip. A creature lifted upward is suspended in mid-air.
 On subsequent rounds, you can use your action to attempt to maintain your telekinetic grip on the creature by repeating the contest.
 Object. You can try to move an object that weighs up to 1,000 pounds. If the object isn't being worn or carried, you automatically move it up to 30 feet in any direction, but not beyond the range of this spell.
 If the object is worn or carried by a creature, you must make an ability check with your spellcasting ability contested by that creature's Strength check. If you succeed, you pull the object away from that creature and can move it up to 30 feet in any direction but not beyond the range of this spell.
