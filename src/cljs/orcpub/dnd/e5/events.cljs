@@ -360,11 +360,30 @@
         race (char5e/race built-char)
         subrace (char5e/subrace built-char)
         character-name (char5e/character-name built-char)
-        image-url (char5e/image-url built-char)]
+        image-url (char5e/image-url built-char)
+        age (char5e/age built-char)
+        sex (char5e/sex built-char)
+        height (char5e/height built-char)
+        weight (char5e/weight built-char)
+        hair (char5e/hair built-char)
+        eyes (char5e/eyes built-char)
+        skin (char5e/skin built-char)
+        ;alignment (char5e/get-prop built-char ::alignment)  ;This are not available? 
+        ;background (char5e/get-prop built-char ::background)  ;This are not available? 
+]
     (cond-> {::char5e/character-name (or character-name "")}
       image-url (assoc ::char5e/image-url image-url)
       race (assoc ::char5e/race-name race)
       subrace (assoc ::char5e/subrace-name subrace)
+      age (assoc ::char5e/age age)
+      sex (assoc ::char5e/sex sex)
+      height (assoc ::char5e/height height)
+      weight (assoc ::char5e/weight weight)
+      hair (assoc ::char5e/hair hair)
+      eyes (assoc ::char5e/eyes eyes)
+      skin (assoc ::char5e/skin skin)
+      ;alignment (assoc ::char5e/alignment alignment) ;This are not available? 
+      ;background (assoc ::char5e/background background)
       (seq classes) (assoc ::char5e/classes (map
                                              (fn [cls-nm]
                                                (let [{:keys [class-name subclass-name class-level]}
