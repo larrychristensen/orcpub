@@ -1516,9 +1516,9 @@
                                                [:span.character-name character-name]
                                                [:div.f-s-12.m-t-5.opacity-6.character-background background]
                                                [:div.f-s-12.m-t-5.opacity-6.character-alignment alignment]
-                                               (when age [:div.f-s-12.m-t-5.opacity-6.character-age "Age: " age])
-                                               (when sex [:div.f-s-12.m-t-5.opacity-6.character-sex "Sex: " sex])
-                                               (when height [:div.f-s-12.m-t-5.opacity-6.character-height "Height: " height])])
+                                               (when (not (s/blank? age)) [:div.f-s-12.m-t-5.opacity-6.character-age "Age: " age])
+                                               (when (not (s/blank? sex)) [:div.f-s-12.m-t-5.opacity-6.character-sex "Sex: " sex])
+                                               (when (not (s/blank? height)) [:div.f-s-12.m-t-5.opacity-6.character-height "Height: " height])])
        [:span.m-r-10.m-b-5
         [:span.character-race-name race-name]
         [:div.f-s-12.m-t-5.opacity-6.character-subrace-name subrace-name]]
@@ -1534,11 +1534,10 @@
                [:span
                 [:div.class-name (str class-name)] [:div.level (str "(" level ")")]
                 [:div.f-s-12.m-t-5.opacity-6.sub-class-name (if subclass-name subclass-name)]
-                
-                (when weight [:div.f-s-12.m-t-5.opacity-6.character-weight "Weight: " weight])
-                (when hair [:div.f-s-12.m-t-5.opacity-6.character-hair "Hair: " hair])
-                (when eyes [:div.f-s-12.m-t-5.opacity-6.character-eyes "Eyes: " eyes])
-                (when skin [:div.f-s-12.m-t-5.opacity-6.character-skin "Skin: " skin])])
+                (when (not (s/blank? weight)) [:div.f-s-12.m-t-5.opacity-6.character-weight "Weight: " weight])
+                (when (not (s/blank? hair)) [:div.f-s-12.m-t-5.opacity-6.character-hair "Hair: " hair])
+                (when (not (s/blank? eyes)) [:div.f-s-12.m-t-5.opacity-6.character-eyes "Eyes: " eyes])
+                (when (not (s/blank? skin)) [:div.f-s-12.m-t-5.opacity-6.character-skin "Skin: " skin])])
              classes)))])]]
      (if (and show-owner?
               (some? owner)
