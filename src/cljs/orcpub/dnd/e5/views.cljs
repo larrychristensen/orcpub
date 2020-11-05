@@ -1518,10 +1518,14 @@
                                                [:div.f-s-12.m-t-5.opacity-6.character-alignment alignment]
                                                (when (not (s/blank? age)) [:div.f-s-12.m-t-5.opacity-6.character-age "Age: " age])
                                                (when (not (s/blank? sex)) [:div.f-s-12.m-t-5.opacity-6.character-sex "Sex: " sex])
-                                               (when (not (s/blank? height)) [:div.f-s-12.m-t-5.opacity-6.character-height "Height: " height])])
+                                               (when (not (s/blank? height)) [:div.f-s-12.m-t-5.opacity-6.character-height "Height: " height])
+                                               (when (not (s/blank? weight)) [:div.f-s-12.m-t-5.opacity-6.character-weight "Weight: " weight])])
        [:span.m-r-10.m-b-5
         [:span.character-race-name race-name]
-        [:div.f-s-12.m-t-5.opacity-6.character-subrace-name subrace-name]]
+        [:div.f-s-12.m-t-5.opacity-6.character-subrace-name subrace-name]
+        (when (not (s/blank? hair)) [:div.f-s-12.m-t-5.opacity-6.character-hair "Hair: " hair])
+        (when (not (s/blank? eyes)) [:div.f-s-12.m-t-5.opacity-6.character-eyes "Eyes: " eyes])
+        (when (not (s/blank? skin)) [:div.f-s-12.m-t-5.opacity-6.character-skin "Skin: " skin])]
        (if (seq classes)
          [:span.flex
           (map-indexed
@@ -1533,11 +1537,7 @@
              (fn [{:keys [::char/class-name ::char/level ::char/subclass-name]}]
                [:span
                 [:div.class-name (str class-name)] [:div.level (str "(" level ")")]
-                [:div.f-s-12.m-t-5.opacity-6.sub-class-name (if subclass-name subclass-name)]
-                (when (not (s/blank? weight)) [:div.f-s-12.m-t-5.opacity-6.character-weight "Weight: " weight])
-                (when (not (s/blank? hair)) [:div.f-s-12.m-t-5.opacity-6.character-hair "Hair: " hair])
-                (when (not (s/blank? eyes)) [:div.f-s-12.m-t-5.opacity-6.character-eyes "Eyes: " eyes])
-                (when (not (s/blank? skin)) [:div.f-s-12.m-t-5.opacity-6.character-skin "Skin: " skin])])
+                [:div.f-s-12.m-t-5.opacity-6.sub-class-name (if subclass-name subclass-name)]])
              classes)))])]]
      (if (and show-owner?
               (some? owner)
