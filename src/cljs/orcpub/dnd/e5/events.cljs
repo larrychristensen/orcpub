@@ -368,9 +368,9 @@
         hair (char5e/hair built-char)
         eyes (char5e/eyes built-char)
         skin (char5e/skin built-char)
-        ;alignment (char5e/get-prop built-char ::alignment)  ;This are not available? 
-        ;background (char5e/get-prop built-char ::background)  ;This are not available? 
-]
+        ;alignment (char5e/get-prop built-char ::alignment)  ;This is not available? 
+        ;background (char5e/get-prop built-char ::background)  ;This is not available? 
+        ]
     (cond-> {::char5e/character-name (or character-name "")}
       image-url (assoc ::char5e/image-url image-url)
       race (assoc ::char5e/race-name race)
@@ -382,8 +382,8 @@
       hair (assoc ::char5e/hair hair)
       eyes (assoc ::char5e/eyes eyes)
       skin (assoc ::char5e/skin skin)
-      ;alignment (assoc ::char5e/alignment alignment) ;This are not available? 
-      ;background (assoc ::char5e/background background)
+      ;alignment (assoc ::char5e/alignment alignment) ;This is not available? 
+      ;background (assoc ::char5e/background background) ;This is not available? 
       (seq classes) (assoc ::char5e/classes (map
                                              (fn [cls-nm]
                                                (let [{:keys [class-name subclass-name class-level]}
