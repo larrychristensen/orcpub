@@ -1,0 +1,84 @@
+name: Docker Releases
+on:
+  push:
+    # Sequence of patterns matched against refs/tags
+    tags:
+    - 'v*' # Push events to matching v*, i.e. v1.0, v20.15.10
+jobs:
+  build:
+    name: Build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Get Version
+        id: get_version
+        run: |
+          echo ::set-output name=VERSION1::${GITHUB_REF#refs/*/}
+          echo ::set-output name=VERSION2::${GITHUB_REF#refs/*/v}
+        shell: bash
+
+      - name: Version
+        run: |
+          echo Version: $VERSION1
+          echo Version2: $VERSION2
+        shell: bash
+
+      - name: Get Time
+        id: time
+        uses: nanzm/get-time-action@v1.1
+        with:
+          timeZone: -7
+          format: 'MM-DD-YYYY'
+
+      - name: Checkout
+        uses: actions/checkout@v2
+
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v1
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v1
+
+      - name: Update src/cljs/orcpub/ver.cljc
+        run: |
+          echo Version1: ${{ steps.get_version.outputs.VERSION1 }}
+          echo Version2: ${{ steps.get_version.outputs.VERSION2 }}
+          sed -i 's/^(defn version \[\] "*.")/\(defn version [] "${{ steps.get_version.outputs.VERSION1 }}")/' src/cljs/orcpub/ver.cljc
+          sed -i 's/^(defn date \[\] "*.")/\(defn date [] "${{ steps.time.outputs.time }}")/' src/cljs/orcpub/ver.cljc
+          cat src/cljs/orcpub/ver.cljc
+
+      - name: Login to DockerHub
+        uses: docker/login-action@v1
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: Build and push
+        uses: docker/build-push-action@v2
+        with:
+          context: .
+          file: ./docker/orcpub/Dockerfile
+          platforms: linux/amd64
+          push: true
+          tags: orcpub/orcpub:latest
+
+      - name: Commit changes
+        uses: EndBug/add-and-commit@v4
+        with:
+          author_name: Github Workflow
+          message: "Github Workflow"
+          ref: 'develop'
+          add: src/cljs/orcpub/ver.cljc
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Create Release
+        id: create_release
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: ${{ github.ref }}
+          release_name: Release ${{ github.ref }}
+          draft: false
+          prerelease: false
+
