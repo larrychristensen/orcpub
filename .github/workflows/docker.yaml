@@ -75,7 +75,7 @@ jobs:
         with:
           author_name: Github Workflow
           message: "Github Workflow"
-          ref: 'develop'
+          branch: 'develop'
           add: src/cljs/orcpub/ver.cljc
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
