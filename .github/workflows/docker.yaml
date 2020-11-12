@@ -71,14 +71,13 @@ jobs:
           platforms: linux/amd64
           push: true
           tags: orcpub/orcpub:release-${{ steps.get_version.outputs.VERSION2 }}
-
+      with:
+      node-version: 15.x
       - name: Release Notes
         run: |
           npm install github-release-notes -g
           gren release --username=orcpub --repo=orcpub -D prs --override --token=${{ secrets.GREN_GITHUB_TOKEN }}
           gren changelog --username=orcpub --repo=orcpub -D prs --override --token=${{ secrets.GREN_GITHUB_TOKEN }}
-      with:
-      node-version: 15.x
       - name: Do git actions
         run: |
           git config user.name github-actions
