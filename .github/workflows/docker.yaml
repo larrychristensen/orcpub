@@ -79,6 +79,7 @@ jobs:
 
       - name: Do git actions
         run: |
+          git checkout develop
           git commit -am "Github Actions"
           git push
 
