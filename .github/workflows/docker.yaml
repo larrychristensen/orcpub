@@ -72,13 +72,13 @@ jobs:
           push: true
           tags: orcpub/orcpub:release-${{ steps.get_version.outputs.VERSION2 }}
 
-        - name: Configure CI Git User
-          run: |
-            git config --global user.name 'GithubActions'
-            git config --global user.email 'system-admin@users.noreply.github.com'
+      - name: Configure CI Git User
+        run: |
+          git config --global user.name 'GithubActions'
+          git config --global user.email 'system-admin@users.noreply.github.com'
 
-        - name: Do git actions
-          run: |
-            git commit -am "Github Actions"
-            git push
+      - name: Do git actions
+        run: |
+          git commit -am "Github Actions"
+          git push
 
