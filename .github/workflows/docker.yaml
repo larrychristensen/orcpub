@@ -31,6 +31,8 @@ jobs:
 
       - name: Checkout
         uses: actions/checkout@v2
+        with:
+          token: ${{ secrets.GITHUBTOKENACTION }}
 
       - name: Update src/cljs/orcpub/ver.cljc
         run: |
@@ -70,13 +72,13 @@ jobs:
           push: true
           tags: orcpub/orcpub:release-${{ steps.get_version.outputs.VERSION2 }}
 
-      - name: Commit changes
-        uses: EndBug/add-and-commit@v5.2.0
-        with:
-          author_name: Github Workflow
-          message: "Github Workflow"
-          branch: 'develop'
-          add: "src/cljs/orcpub/ver.cljc --force"
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUBTOKENACTION }}
+        - name: Configure CI Git User
+          run: |
+            git config --global user.name 'GithubActions'
+            git config --global user.email 'system-admin@users.noreply.github.com'
+
+        - name: Do git actions
+          run: |
+            git commit -am "Github Actions"
+            git push
 
