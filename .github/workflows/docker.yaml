@@ -82,15 +82,6 @@ jobs:
           push: true
           tags: orcpub/datomic:latest
 
-      - name: Build and push ${{ steps.get_version.outputs.VERSION2 }} datomic
-        uses: docker/build-push-action@v2
-        with:
-          context: .
-          file: ./docker/datomic/Dockerfile
-          platforms: linux/amd64
-          push: true
-          tags: orcpub/datomic:release-${{ steps.get_version.outputs.VERSION2 }}
-
       - name: git - Check in version file
         run: |
           git config user.name github-actions
@@ -102,5 +93,11 @@ jobs:
           git commit -m "Github Actions"
           git push
 
-
-
+      - name: Build and push ${{ steps.get_version.outputs.VERSION2 }} datomic
+        uses: docker/build-push-action@v2
+        with:
+          context: .
+          file: ./docker/datomic/Dockerfile
+          platforms: linux/amd64
+          push: true
+          tags: orcpub/datomic:release-${{ steps.get_version.outputs.VERSION2 }}
