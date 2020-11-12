@@ -78,5 +78,5 @@ jobs:
           branch: 'develop'
           add: "src/cljs/orcpub/ver.cljc --force"
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.GITHUBTOKENACTION }}
 
