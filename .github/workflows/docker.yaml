@@ -77,7 +77,8 @@ jobs:
           npm install github-release-notes -g
           gren release --username=orcpub --repo=orcpub -D prs --override --token=${{ secrets.GREN_GITHUB_TOKEN }}
           gren changelog --username=orcpub --repo=orcpub -D prs --override --token=${{ secrets.GREN_GITHUB_TOKEN }}
-
+      with:
+      node-version: 15.x
       - name: Do git actions
         run: |
           git config user.name github-actions
