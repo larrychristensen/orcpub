@@ -32,7 +32,6 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v2.3.4
         with:
-          #token: ${{ secrets.GITHUBTOKENACTION }}
           ssh-key: ${{ secrets.ACTIONSKEY }}
 
       - name: Update src/cljs/orcpub/ver.cljc
@@ -73,6 +72,12 @@ jobs:
           push: true
           tags: orcpub/orcpub:release-${{ steps.get_version.outputs.VERSION2 }}
 
+      - name: Release Notes
+        run: |
+          npm install github-release-notes -g
+          gren release --username=orcpub --repo=orcpub -D prs --override --token=${{ secrets.GREN_GITHUB_TOKEN }}
+          gren changelog --username=orcpub --repo=orcpub -D prs --override --token=${{ secrets.GREN_GITHUB_TOKEN }}
+
       - name: Do git actions
         run: |
           git config user.name github-actions
@@ -83,4 +88,6 @@ jobs:
           git add .
           git commit -m "Github Actions"
           git push
+
+
 
