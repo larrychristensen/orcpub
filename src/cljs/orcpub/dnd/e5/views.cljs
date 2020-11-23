@@ -1494,22 +1494,41 @@
                                    ::char/image-url
                                    ::char/race-name
                                    ::char/subrace-name
-                                   ::char/classes]}
+                                   ::char/age
+                                   ::char/sex
+                                   ::char/height
+                                   ::char/weight
+                                   ::char/hair
+                                   ::char/eyes
+                                   ::char/skin
+                                   ::char/classes
+                                   ::char/alignment
+                                   ::char/background]}
                            include-name?
                            owner
                            show-owner?
                            show-follow?]
   (let [username @(subscribe [:username])]
     [:div.flex.justify-cont-s-b.w-100-p.align-items-c
-     [:div.flex.align-items-c
+     [:div.flex.align-items-c.align-items-t
       (if image-url
         [:img.m-r-20.m-t-10.m-b-10 {:src image-url
                                     :style thumbnail-style}])
       [:div.flex.character-summary.m-t-20.m-b-20
-       (if (and character-name include-name?) [:span.m-r-20.m-b-5.character-name character-name])
+       (if (and character-name include-name?) [:span.m-r-20.m-b-5
+                                               [:span.character-name character-name]
+                                               [:div.f-s-12.m-t-5.opacity-6.character-background background]
+                                               [:div.f-s-12.m-t-5.opacity-6.character-alignment alignment]
+                                               (when (not (s/blank? age)) [:div.f-s-12.m-t-5.opacity-6.character-age "Age: " age])
+                                               (when (not (s/blank? sex)) [:div.f-s-12.m-t-5.opacity-6.character-sex "Sex: " sex])
+                                               (when (not (s/blank? height)) [:div.f-s-12.m-t-5.opacity-6.character-height "Height: " height])
+                                               (when (not (s/blank? weight)) [:div.f-s-12.m-t-5.opacity-6.character-weight "Weight: " weight])])
        [:span.m-r-10.m-b-5
         [:span.character-race-name race-name]
-        [:div.f-s-12.m-t-5.opacity-6.character-subrace-name subrace-name]]
+        [:div.f-s-12.m-t-5.opacity-6.character-subrace-name subrace-name]
+        (when (not (s/blank? hair)) [:div.f-s-12.m-t-5.opacity-6.character-hair "Hair: " hair])
+        (when (not (s/blank? eyes)) [:div.f-s-12.m-t-5.opacity-6.character-eyes "Eyes: " eyes])
+        (when (not (s/blank? skin)) [:div.f-s-12.m-t-5.opacity-6.character-skin "Skin: " skin])]
        (if (seq classes)
          [:span.flex
           (map-indexed
@@ -1531,17 +1550,35 @@
 
 (defn character-summary [id & [include-name?]]
   (let [character-name @(subscribe [::char/character-name id])
+        age @(subscribe [::char/age id])
+        sex @(subscribe [::char/sex id])
+        height @(subscribe [::char/height id])
+        weight @(subscribe [::char/weight id])
+        hair @(subscribe [::char/hair id])
+        eyes @(subscribe [::char/eyes id])
+        skin @(subscribe [::char/skin id])
         image-url @(subscribe [::char/image-url id])
         race @(subscribe [::char/race id])
         subrace @(subscribe [::char/subrace id])
         levels @(subscribe [::char/levels id])
         classes @(subscribe [::char/classes id])
+        alignment  @(subscribe [::char/alignment id])
+        background  @(subscribe [::char/background id])
         {:keys [::se/owner] :as strict-character} @(subscribe [::char/character id])]
     (character-summary-2
      {::char/character-name character-name
+      ::char/age age
+      ::char/sex sex
+      ::char/height height
+      ::char/weight weight
+      ::char/hair hair
+      ::char/eyes eyes
+      ::char/skin skin
       ::char/image-url image-url
       ::char/race-name race
       ::char/subrace-name subrace
+      ::char/alignment alignment
+      ::char/background background
       ::char/classes (map
                       (fn [class-kw]
                         (let [{:keys [class-name class-level subclass-name] :as cfg}
