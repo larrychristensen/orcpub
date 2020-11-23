@@ -225,18 +225,7 @@
     ::versatile {::damage-die 10, ::damage-die-count 1},
     ::melee? true,
     :key :longsword
-    ::link "https://en.wikipedia.org/wiki/Sword"}
-   {:name "Longsword",
-    ::damage-type :slashing,
-    ::damage-die 8,
-    ::type :martial,
-    ::subtype :longsword-finesse,
-    ::finesse? true,
-    ::damage-die-count 1,
-    ::versatile {::damage-die 10, ::damage-die-count 1},
-    ::melee? true
-    :key :longsword-finesse
-    ::link "https://en.wikipedia.org/wiki/Sword"}
+    ::link "https://en.wikipedia.org/wiki/Sword"}   
    {:name "Maul",
     ::damage-type :bludgeoning,
     ::damage-die 6,
