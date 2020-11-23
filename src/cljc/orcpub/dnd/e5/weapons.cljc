@@ -223,7 +223,8 @@
     ::subtype :sword
     ::damage-die-count 1,
     ::versatile {::damage-die 10, ::damage-die-count 1},
-    ::melee? true,
+    ::melee? true
+    ::finesse? false
     :key :longsword
     ::link "https://en.wikipedia.org/wiki/Sword"}   
    {:name "Maul",
