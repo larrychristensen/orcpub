@@ -2787,10 +2787,12 @@
             (doall
              (map
               (fn [[weapon-key {:keys [equipped?]}]]
-                (let [{:keys [name description ranged? ::weapon/type ::weapon/damage-die-count ::weapon/damage-die] :as weapon} (all-weapons-map weapon-key)
+                (let [{:keys [name description ranged? ::weapon/type ::weapon/damage-die-count ::weapon/damage-die ::weapon/versatile] :as weapon} (all-weapons-map weapon-key)
                       proficient? (if has-weapon-prof (has-weapon-prof weapon))
                       expanded? (@expanded-details weapon-key)
                       damage-modifier (weapon-damage-modifier weapon)
+                      versatile-damage-die-count (:orcpub.dnd.e5.weapons/damage-die-count versatile)
+                      versatile-damage-die (:orcpub.dnd.e5.weapons/damage-die versatile)
                       droll (str damage-die-count "d" damage-die)]
                   (when (not= type :ammunition)
                     ^{:key weapon-key}
@@ -2804,7 +2806,6 @@
                       [:div
                        (weapon-attack-description-short weapon)]
                       (when expanded?
-                        (prn weapon)
                         (weapon-details weapon weapon-damage-modifier))]
                      [:td (roll-button
                            (str name " attack: ")
@@ -2814,7 +2815,13 @@
                            (str name " damage: ")
                            (str damage-die-count "d" damage-die (common/mod-str (weapon-damage-modifier weapon)))
                            :text (str damage-die-count "d" damage-die (common/mod-str (weapon-damage-modifier weapon)))
-                           :style {:width "100%"})]
+                           :style {:width "100%"})
+                      (when versatile
+                        (roll-button
+                         (str name " versatile damage: ")
+                         (str versatile-damage-die-count "d" versatile-damage-die (common/mod-str (weapon-damage-modifier weapon)))
+                         :text (str "v " versatile-damage-die-count "d" versatile-damage-die (common/mod-str (weapon-damage-modifier weapon)))
+                         :style {:width "100%"}))]
                      [:td.pointer
                       [:div.orange
                        #_(if (not mobile?)
