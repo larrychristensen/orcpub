@@ -1092,7 +1092,7 @@
 
     [:.roll-button
      {:color :white
-      :min-width "35px"
+      :min-width "68px"
       :font-weight 600
       :font-size "14px"
       :border :none
@@ -1100,6 +1100,8 @@
       :padding "6px 6px"
       :margin-right "2px"
       :margin-left "2px"
+      :margin-bottom "2px"
+      :margin-top "2px"
       :cursor :pointer
       :background-image "linear-gradient(to bottom, #f1a20f, #dbab50)"}]
 
