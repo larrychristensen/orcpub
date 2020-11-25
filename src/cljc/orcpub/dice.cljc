@@ -60,8 +60,8 @@
           sides (or (parse-int sides-str))
           plus-minus (if (= "-" plus-minus-str)
                        -1
-                       1)
-          raw-mod (or (parse-int mod-str) 0)
+                       +1)
+          raw-mod (or (parse-int mod-str) +0)
           mod (* raw-mod plus-minus)
           rolls (roll-n num sides)
           total (apply + mod rolls)]

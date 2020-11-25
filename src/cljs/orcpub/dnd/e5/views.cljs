@@ -2239,7 +2239,7 @@
      (if (boolean show-button)
        (roll-button
         (str title " check: ")
-        (str "1d20" v)
+        (str "1d20" (common/mod-str v))
         :text v
         :style {:font-size "24px" :padding "2px 8px"})
        v)]]])
@@ -2802,7 +2802,7 @@
                      [:td (roll-button
                            (str name " attack: ")
                            (str "1d20" (common/mod-str (weapon-attack-modifier weapon)))
-                           :text (str "1d20" (common/bonus-str (weapon-attack-modifier weapon))))]
+                           :text (str "1d20" (common/mod-str (weapon-attack-modifier weapon))))]
                      [:td (roll-button
                            (str name " damage: ")
                            (str damage-die-count "d" damage-die (common/mod-str (weapon-damage-modifier weapon)))
