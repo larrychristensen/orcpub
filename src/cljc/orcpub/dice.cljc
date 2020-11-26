@@ -19,10 +19,13 @@
 (defn dice-string [die die-count modifier]
   (str die "d" die-count (common/mod-str modifier)))
 
-(defn die-mean [die]
+(defn die-mean-round-down [die]
   (int (Math/floor (/ (apply + (range 1 (inc die))) die))))
 
-(defn dice-mean [num sides modifier]
+(defn die-mean-round-up [die]
+  (int (Math/ceil (/ (apply + (range 1 (inc die))) die))))
+
+(defn dice-mean-round-down [num sides modifier]
   (int (Math/floor (+ modifier (* num (/ (apply + (range 1 (inc sides))) sides))))))
 
 (def dice-regex #"(\d+)?d(\d+)\s?([+-])?\s?(\d+)?")
@@ -57,8 +60,8 @@
           sides (or (parse-int sides-str))
           plus-minus (if (= "-" plus-minus-str)
                        -1
-                       1)
-          raw-mod (or (parse-int mod-str) 0)
+                       +1)
+          raw-mod (or (parse-int mod-str) +0)
           mod (* raw-mod plus-minus)
           rolls (roll-n num sides)
           total (apply + mod rolls)]

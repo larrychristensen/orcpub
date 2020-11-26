@@ -2562,7 +2562,7 @@
                ::t/help "This option rolls virtual dice for you and sets that value for this level's hit points. It could pay off with a high roll, but you might also roll a 1."
                ::t/modifiers [(modifiers/deferred-max-hit-points)
                               (al-illegal-hit-points-mod "Rolling for hit points is not legal.")]}
-              (let [average (dice/die-mean die)]
+              (let [average (dice/die-mean-round-up die)]
                 (t/option-cfg
                  {:name "Average"
                   :key :average

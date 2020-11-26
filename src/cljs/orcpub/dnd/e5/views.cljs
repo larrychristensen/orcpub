@@ -40,6 +40,7 @@
             [orcpub.template :as template]
             [orcpub.dnd.e5.options :as opt]
             [orcpub.dnd.e5.events :as events]
+            [orcpub.ver :as v]
             [clojure.string :as s]
             [cljs.reader :as reader]
             [orcpub.user-agent :as user-agent]
@@ -1224,7 +1225,7 @@
                                       (let [mean
                                             (or mean
                                                 (if (and die die-count)
-                                                  (dice/dice-mean
+                                                  (dice/dice-mean-round-down
                                                    die-count
                                                    die
                                                    (or modifier 0))))]
@@ -1453,7 +1454,8 @@
                   [:a.orange.m-l-5 {:href "/terms-of-use" :target :_blank} "Terms of Use"]]
                  [:div.legal-footer
                   [:p "© 2020 " [:a.orange {:href "https://github.com/Orcpub/orcpub/" :target :_blank} "Orcpub"]]
-                  [:p "Wizards of the Coast, Dungeons & Dragons, D&D, and their logos are trademarks of Wizards of the Coast LLC in the United States and other countries. © 2020 Wizards. All Rights Reserved. OrcPub.com is not affiliated with, endorsed, sponsored, or specifically approved by Wizards of the Coast LLC."]]]
+                  [:p "Wizards of the Coast, Dungeons & Dragons, D&D, and their logos are trademarks of Wizards of the Coast LLC in the United States and other countries. © 2020 Wizards. All Rights Reserved. OrcPub.com is not affiliated with, endorsed, sponsored, or specifically approved by Wizards of the Coast LLC."]
+                  [:p "Version " (v/version) " (" (v/date) ")"]]]
                 [debug-data]]]])]))})))
 
 (def row-style
@@ -1492,22 +1494,41 @@
                                    ::char/image-url
                                    ::char/race-name
                                    ::char/subrace-name
-                                   ::char/classes]}
+                                   ::char/age
+                                   ::char/sex
+                                   ::char/height
+                                   ::char/weight
+                                   ::char/hair
+                                   ::char/eyes
+                                   ::char/skin
+                                   ::char/classes
+                                   ::char/alignment
+                                   ::char/background]}
                            include-name?
                            owner
                            show-owner?
                            show-follow?]
   (let [username @(subscribe [:username])]
     [:div.flex.justify-cont-s-b.w-100-p.align-items-c
-     [:div.flex.align-items-c
+     [:div.flex.align-items-c.align-items-t
       (if image-url
         [:img.m-r-20.m-t-10.m-b-10 {:src image-url
                                     :style thumbnail-style}])
       [:div.flex.character-summary.m-t-20.m-b-20
-       (if (and character-name include-name?) [:span.m-r-20.m-b-5.character-name character-name])
+       (if (and character-name include-name?) [:span.m-r-20.m-b-5
+                                               [:span.character-name character-name]
+                                               [:div.f-s-12.m-t-5.opacity-6.character-background background]
+                                               [:div.f-s-12.m-t-5.opacity-6.character-alignment alignment]
+                                               (when (not (s/blank? age)) [:div.f-s-12.m-t-5.opacity-6.character-age "Age: " age])
+                                               (when (not (s/blank? sex)) [:div.f-s-12.m-t-5.opacity-6.character-sex "Sex: " sex])
+                                               (when (not (s/blank? height)) [:div.f-s-12.m-t-5.opacity-6.character-height "Height: " height])
+                                               (when (not (s/blank? weight)) [:div.f-s-12.m-t-5.opacity-6.character-weight "Weight: " weight])])
        [:span.m-r-10.m-b-5
         [:span.character-race-name race-name]
-        [:div.f-s-12.m-t-5.opacity-6.character-subrace-name subrace-name]]
+        [:div.f-s-12.m-t-5.opacity-6.character-subrace-name subrace-name]
+        (when (not (s/blank? hair)) [:div.f-s-12.m-t-5.opacity-6.character-hair "Hair: " hair])
+        (when (not (s/blank? eyes)) [:div.f-s-12.m-t-5.opacity-6.character-eyes "Eyes: " eyes])
+        (when (not (s/blank? skin)) [:div.f-s-12.m-t-5.opacity-6.character-skin "Skin: " skin])]
        (if (seq classes)
          [:span.flex
           (map-indexed
@@ -1529,17 +1550,35 @@
 
 (defn character-summary [id & [include-name?]]
   (let [character-name @(subscribe [::char/character-name id])
+        age @(subscribe [::char/age id])
+        sex @(subscribe [::char/sex id])
+        height @(subscribe [::char/height id])
+        weight @(subscribe [::char/weight id])
+        hair @(subscribe [::char/hair id])
+        eyes @(subscribe [::char/eyes id])
+        skin @(subscribe [::char/skin id])
         image-url @(subscribe [::char/image-url id])
         race @(subscribe [::char/race id])
         subrace @(subscribe [::char/subrace id])
         levels @(subscribe [::char/levels id])
         classes @(subscribe [::char/classes id])
+        alignment  @(subscribe [::char/alignment id])
+        background  @(subscribe [::char/background id])
         {:keys [::se/owner] :as strict-character} @(subscribe [::char/character id])]
     (character-summary-2
      {::char/character-name character-name
+      ::char/age age
+      ::char/sex sex
+      ::char/height height
+      ::char/weight weight
+      ::char/hair hair
+      ::char/eyes eyes
+      ::char/skin skin
       ::char/image-url image-url
       ::char/race-name race
       ::char/subrace-name subrace
+      ::char/alignment alignment
+      ::char/background background
       ::char/classes (map
                       (fn [class-kw]
                         (let [{:keys [class-name class-level subclass-name] :as cfg}
@@ -2200,7 +2239,7 @@
      (if (boolean show-button)
        (roll-button
         (str title " check: ")
-        (str "1d20" v)
+        (str "1d20" (common/mod-str v))
         :text v
         :style {:font-size "24px" :padding "2px 8px"})
        v)]]])
@@ -2573,11 +2612,13 @@
                               ::weapon/damage-type
                               ::mi/magical-damage-bonus
                               ::mi/magical-attack-bonus
+                              ::mi/magical-damage-type
                               ::weapon/ranged?
                               ::weapon/melee?
                               ::weapon/range
                               ::weapon/two-handed?
                               ::weapon/finesse?
+                              ::mi/magical-finesse?
                               ::weapon/link
                               ::weapon/versatile
                               ::weapon/thrown]
@@ -2585,7 +2626,9 @@
                       damage-modifier-fn]
   [:div.m-t-10.i
    (weapon-details-field "Type" (common/safe-name type))
-   (weapon-details-field "Damage Type" (common/safe-name damage-type))
+   (if magical-damage-type
+     (weapon-details-field "Damage Type" (common/safe-name magical-damage-type))
+     (weapon-details-field "Damage Type" (common/safe-name damage-type)))
    (if magical-damage-bonus
      (weapon-details-field "Magical Damage Bonus" magical-damage-bonus))
    (if magical-attack-bonus
@@ -2593,7 +2636,9 @@
    (weapon-details-field "Melee/Ranged" (if melee? "melee" "ranged"))
    (if range
      (weapon-details-field "Range" (str (::weapon/min range) "/" (::weapon/max range) " ft.")))
-   (weapon-details-field "Finesse?" (yes-no finesse?))
+   (if magical-finesse?
+     (weapon-details-field "Finesse?" (yes-no magical-finesse?))
+     (weapon-details-field "Finesse?" (yes-no finesse?)))
    (weapon-details-field "Two-handed?" (yes-no two-handed?))
    (weapon-details-field "Versatile" (if versatile
                                        (str (::weapon/damage-die-count versatile)
@@ -2742,10 +2787,12 @@
             (doall
              (map
               (fn [[weapon-key {:keys [equipped?]}]]
-                (let [{:keys [name description ranged? ::weapon/type ::weapon/damage-die-count ::weapon/damage-die] :as weapon} (all-weapons-map weapon-key)
+                (let [{:keys [name description ranged? ::weapon/type ::weapon/damage-die-count ::weapon/damage-die ::weapon/versatile] :as weapon} (all-weapons-map weapon-key)
                       proficient? (if has-weapon-prof (has-weapon-prof weapon))
                       expanded? (@expanded-details weapon-key)
                       damage-modifier (weapon-damage-modifier weapon)
+                      versatile-damage-die-count (:orcpub.dnd.e5.weapons/damage-die-count versatile)
+                      versatile-damage-die (:orcpub.dnd.e5.weapons/damage-die versatile)
                       droll (str damage-die-count "d" damage-die)]
                   (when (not= type :ammunition)
                     ^{:key weapon-key}
@@ -2763,12 +2810,18 @@
                      [:td (roll-button
                            (str name " attack: ")
                            (str "1d20" (common/mod-str (weapon-attack-modifier weapon)))
-                           :text (str "1d20" (common/bonus-str (weapon-attack-modifier weapon))))]
+                           :text (str "1d20" (common/mod-str (weapon-attack-modifier weapon))))]
                      [:td (roll-button
                            (str name " damage: ")
                            (str damage-die-count "d" damage-die (common/mod-str (weapon-damage-modifier weapon)))
                            :text (str damage-die-count "d" damage-die (common/mod-str (weapon-damage-modifier weapon)))
-                           :style {:width "100%"})]
+                           :style {:width "100%"})
+                      (when versatile
+                        (roll-button
+                         (str name " versatile damage: ")
+                         (str versatile-damage-die-count "d" versatile-damage-die (common/mod-str (weapon-damage-modifier weapon)))
+                         :text (str "v " versatile-damage-die-count "d" versatile-damage-die (common/mod-str (weapon-damage-modifier weapon)))
+                         :style {:width "100%"}))]
                      [:td.pointer
                       [:div.orange
                        #_(if (not mobile?)

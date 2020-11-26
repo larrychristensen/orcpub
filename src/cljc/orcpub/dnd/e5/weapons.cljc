@@ -223,20 +223,10 @@
     ::subtype :sword
     ::damage-die-count 1,
     ::versatile {::damage-die 10, ::damage-die-count 1},
-    ::melee? true,
-    :key :longsword
-    ::link "https://en.wikipedia.org/wiki/Sword"}
-   {:name "Longsword",
-    ::damage-type :slashing,
-    ::damage-die 8,
-    ::type :martial,
-    ::subtype :longsword-finesse,
-    ::finesse? true,
-    ::damage-die-count 1,
-    ::versatile {::damage-die 10, ::damage-die-count 1},
     ::melee? true
-    :key :longsword-finesse
-    ::link "https://en.wikipedia.org/wiki/Sword"}
+    ::finesse? false
+    :key :longsword
+    ::link "https://en.wikipedia.org/wiki/Sword"}   
    {:name "Maul",
     ::damage-type :bludgeoning,
     ::damage-die 6,
@@ -363,15 +353,6 @@
     ::range {::min 100, ::max 400},
     :key :crossbow-heavy
     ::ammunition? true
-    ::two-handed? true}
-   {:name "Thunder Cannon",
-    ::damage-type :piercing,
-    ::damage-die 6,
-    ::type ::special
-    ::damage-die-count 2,
-    ::ranged? true,
-    ::range {::min 150, ::max 500},
-    :key :thunder-cannon
     ::two-handed? true}
    {:name "Longbow",
     ::damage-type :piercing,

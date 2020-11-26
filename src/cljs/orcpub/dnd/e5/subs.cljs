@@ -537,44 +537,50 @@
    ::char5e/current-hit-points char5e/current-hit-points
    ::char5e/hit-point-level-bonus char5e/hit-point-level-bonus
    ::char5e/class-hit-point-level-bonus char5e/class-hit-point-level-bonus
-   ::char5e/initiative char5e/initiative 
-   ::char5e/passive-perception char5e/passive-perception 
-   ::char5e/character-name char5e/character-name 
-   ::char5e/proficiency-bonus char5e/proficiency-bonus 
-   ::char5e/save-bonuses char5e/save-bonuses 
-   ::char5e/saving-throws char5e/saving-throws 
-   ::char5e/race char5e/race 
+   ::char5e/initiative char5e/initiative
+   ::char5e/passive-perception char5e/passive-perception
+   ::char5e/character-name char5e/character-name
+   ::char5e/proficiency-bonus char5e/proficiency-bonus
+   ::char5e/save-bonuses char5e/save-bonuses
+   ::char5e/saving-throws char5e/saving-throws
+   ::char5e/race char5e/race
    ::char5e/subrace char5e/subrace
+   ::char5e/age char5e/age
    ::char5e/sex char5e/sex
-   ::char5e/alignment char5e/alignment 
-   ::char5e/background char5e/background 
-   ::char5e/classes char5e/classes 
-   ::char5e/levels char5e/levels 
-   ::char5e/darkvision char5e/darkvision 
-   ::char5e/skill-profs char5e/skill-proficiencies 
+   ::char5e/height char5e/height
+   ::char5e/weight char5e/weight
+   ::char5e/hair char5e/hair
+   ::char5e/eyes char5e/eyes
+   ::char5e/skin char5e/skin
+   ::char5e/alignment char5e/alignment
+   ::char5e/background char5e/background
+   ::char5e/classes char5e/classes
+   ::char5e/levels char5e/levels
+   ::char5e/darkvision char5e/darkvision
+   ::char5e/skill-profs char5e/skill-proficiencies
    ::char5e/skill-bonuses char5e/skill-bonuses
    ::char5e/skill-expertise char5e/skill-expertise
    ::char5e/tool-profs char5e/tool-proficiencies
    ::char5e/tool-expertise char5e/tool-expertise
-   ::char5e/tool-bonus-fn char5e/tool-bonus-fn 
-   ::char5e/weapon-profs char5e/weapon-proficiencies 
-   ::char5e/armor-profs char5e/armor-proficiencies 
+   ::char5e/tool-bonus-fn char5e/tool-bonus-fn
+   ::char5e/weapon-profs char5e/weapon-proficiencies
+   ::char5e/armor-profs char5e/armor-proficiencies
    ::char5e/resistances char5e/damage-resistances
    ::char5e/damage-vulnerabilities char5e/damage-vulnerabilities
-   ::char5e/damage-immunities char5e/damage-immunities 
-   ::char5e/immunities char5e/immunities 
-   ::char5e/condition-immunities char5e/condition-immunities 
-   ::char5e/languages char5e/languages 
+   ::char5e/damage-immunities char5e/damage-immunities
+   ::char5e/immunities char5e/immunities
+   ::char5e/condition-immunities char5e/condition-immunities
+   ::char5e/languages char5e/languages
    ::char5e/abilities char5e/ability-values
    ::char5e/race-ability-increases char5e/race-ability-increases
    ::char5e/subrace-ability-increases char5e/subrace-ability-increases
    ::char5e/ability-increases char5e/ability-increases
-   ::char5e/ability-bonuses char5e/ability-bonuses 
-   ::char5e/armor-class char5e/base-armor-class 
-   ::char5e/armor-class-with-armor char5e/armor-class-with-armor 
-   ::char5e/armor char5e/normal-armor-inventory 
-   ::char5e/magic-armor char5e/magic-armor-inventory 
-   ::char5e/all-armor-inventory char5e/all-armor-inventory 
+   ::char5e/ability-bonuses char5e/ability-bonuses
+   ::char5e/armor-class char5e/base-armor-class
+   ::char5e/armor-class-with-armor char5e/armor-class-with-armor
+   ::char5e/armor char5e/normal-armor-inventory
+   ::char5e/magic-armor char5e/magic-armor-inventory
+   ::char5e/all-armor-inventory char5e/all-armor-inventory
    ::char5e/spells-known char5e/spells-known
    ::char5e/spells-known-modes char5e/spells-known-modes
    ::char5e/spell-slots char5e/spell-slots
@@ -584,7 +590,7 @@
    ::char5e/spell-modifiers char5e/spell-modifiers
    ::char5e/spell-slot-factors char5e/spell-slot-factors
    ::char5e/total-spellcaster-levels char5e/total-spellcaster-levels
-   ::char5e/weapons char5e/normal-weapons-inventory 
+   ::char5e/weapons char5e/normal-weapons-inventory
    ::char5e/magic-weapons char5e/magic-weapons-inventory
    ::char5e/equipment char5e/normal-equipment-inventory
    ::char5e/custom-equipment char5e/custom-equipment
