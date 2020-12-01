@@ -39,8 +39,8 @@ jobs:
         run: |
           echo Version1: ${{ steps.get_version.outputs.VERSION1 }}
           echo Version2: ${{ steps.get_version.outputs.VERSION2 }}
-          sed -i 's/^(defn version \[\] "*.")/\(defn version [] "${{ steps.get_version.outputs.VERSION1 }}")/' src/cljs/orcpub/ver.cljc
-          sed -i 's/^(defn date \[\] "*.")/\(defn date [] "${{ steps.time.outputs.time }}")/' src/cljs/orcpub/ver.cljc
+          sed -i 's/defn version \[\] \".*\"/\defn version [] "${{ steps.get_version.outputs.VERSION1 }}"/' src/cljs/orcpub/ver.cljc
+          sed -i 's/defn date \[\] ".*"/\defn date [] "${{ steps.time.outputs.time }}"/' src/cljs/orcpub/ver.cljc
           cat src/cljs/orcpub/ver.cljc
 
       - name: Login to DockerHub
