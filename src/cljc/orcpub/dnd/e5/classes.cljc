@@ -2007,7 +2007,7 @@
                               :name "Cunning Action"
                               :page 96
                               :frequency units5e/turns-1
-                              :summary "Dash, Disengage or Hide"
+                              :summary "as a bonus action you can Dash, Disengage or Hide"
                               })]}
              5 {:modifiers [(opt5e/uncanny-dodge-modifier 96)]}
              6 {:selections [(assoc
@@ -2048,7 +2048,7 @@
              {:level 18
               :name "Elusive"
               :page 96
-              :summary "attack rolls only have disadvantage on you if you are incapacitated"
+              :summary "no attack roll has advantage against you while you aren’t incapacitated."
               }
              {:level 20
               :name "Stroke of Luck"
