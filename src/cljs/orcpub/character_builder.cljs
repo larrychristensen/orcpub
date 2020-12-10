@@ -46,7 +46,7 @@
             [reagent.core :as r]
             [re-frame.core :refer [subscribe dispatch dispatch-sync]]))
 ;console-print
-(def print-disabled? true)
+(def print-disabled? false)
 
 (def print-enabled? (and (not print-disabled?)
                          js/window.location
