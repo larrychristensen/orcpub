@@ -3574,6 +3574,7 @@
 
 (defn character-page []
   (let [expanded? (r/atom false)]
+    (js/window.scrollTo 0,0) ;//Force a scroll to top of page.
     (fn [{:keys [id] :as arg}]
       (let [id (js/parseInt id)
             frame? (= "true" (get-in arg [:query "frame"]))
