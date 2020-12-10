@@ -4958,6 +4958,7 @@
 
 (defn feat-builder []
   (let [feat @(subscribe [::feats/builder-item])]
+    (js/window.scrollTo 0,0) ;//Force a scroll to top of page.
     [:div.p-20.main-text-color
      [:div.m-b-20.flex.flex-wrap
       [feat-input-field
@@ -5644,6 +5645,7 @@
         class-key (get subclass :class)
         classes @(subscribe [::classes/classes])
         mobile? @(subscribe [:mobile?])]
+    (js/window.scrollTo 0,0) ;//Force a scroll to top of page.
     [:div.p-20.main-text-color
      [:div.flex.flex-wrap
       [:div.m-b-20
@@ -5912,6 +5914,7 @@
 
 (defn race-builder []
   (let [race @(subscribe [::races/builder-item])]
+    (js/window.scrollTo 0,0) ;//Force a scroll to top of page.
     [:div.p-20.main-text-color
      [:div.m-b-20.flex.flex-wrap
       [race-input-field
@@ -6061,6 +6064,7 @@
 
 (defn background-builder []
   (let [background @(subscribe [::bg/builder-item])]
+    (js/window.scrollTo 0,0) ;//Force a scroll to top of page.
     [:div.p-20.main-text-color
      [:div.m-b-20.flex.flex-wrap
       [background-input-field
@@ -6943,6 +6947,7 @@
 
 (defn spell-builder []
   (let [{:keys [:level :school] :as spell} @(subscribe [::spells/builder-item])]
+    (js/window.scrollTo 0,0) ;//Force a scroll to top of page.
     [:div.p-20.main-text-color
      [:div.flex.w-100-p.flex-wrap
       [spell-input-field

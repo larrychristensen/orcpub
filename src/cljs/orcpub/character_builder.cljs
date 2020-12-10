@@ -45,8 +45,8 @@
 
             [reagent.core :as r]
             [re-frame.core :refer [subscribe dispatch dispatch-sync]]))
-
-(def print-disabled? false)
+;console-print
+(def print-disabled? true)
 
 (def print-enabled? (and (not print-disabled?)
                          js/window.location
@@ -2032,6 +2032,7 @@
                              @(subscribe [::char5e/character-changed? character-id])
                              (not= db/default-character character))]
     (if print-enabled? (print-char built-char))
+    (if (and character-id (not character-changed?)) (js/window.scrollTo 0,0)) ;//Force a scroll to top of page only if we are not editing.
     [views5e/content-page
      "Character Builder"
      (remove
@@ -2066,7 +2067,7 @@
                  "Update Existing Character"
                  "Save New Character")
         :icon "save"
-        :style (if character-changed? unsaved-button-style) 
+        :style (if character-changed? unsaved-button-style)
         :on-click save-character}
        (if (:db/id character)
          {:title "View"
