@@ -3828,9 +3828,10 @@
 
 (reg-event-db
  ::char5e/delete-all-plugins
- (js/localStorage.removeItem "plugins")
- #_{:dispatch-n [:route routes/dnd-e5-my-content-route]}
- )
+ (fn [db _]
+   (js/localStorage.removeItem "plugins")
+   (js/location.reload)
+   {:dispatch-n [:route routes/dnd-e5-my-content-route]}))
 
 (reg-event-fx
  ::char5e/don-armor
