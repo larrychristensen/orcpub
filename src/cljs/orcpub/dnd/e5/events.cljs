@@ -3816,6 +3816,22 @@
  (fn [db [_ id]]
    (assoc-in db [::char5e/delete-confirmation-shown? id] false)))
 
+(reg-event-db
+ ::char5e/show-delete-plugin-confirmation
+ (fn [db _]
+   (assoc-in db [::char5e/delete-plugin-confirmation-shown?] true)))
+
+(reg-event-db
+ ::char5e/hide-delete-plugin-confirmation
+ (fn [db _]
+   (assoc-in db [::char5e/delete-plugin-confirmation-shown?] false)))
+
+(reg-event-db
+ ::char5e/delete-all-plugins
+ (js/localStorage.removeItem "plugins")
+ #_{:dispatch-n [:route routes/dnd-e5-my-content-route]}
+ )
+
 (reg-event-fx
  ::char5e/don-armor
  (fn [{:keys [db]} [_ id armor-kw]]
