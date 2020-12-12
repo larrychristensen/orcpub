@@ -3826,12 +3826,13 @@
  (fn [db _]
    (assoc-in db [::char5e/delete-plugin-confirmation-shown?] false)))
 
+;to-do probably should reach into plugins and delete one at the time instead of brute forcing it.
 (reg-event-db
  ::char5e/delete-all-plugins
  (fn [db _]
    (js/localStorage.removeItem "plugins")
    (js/location.reload)
-   {:dispatch-n [:route routes/dnd-e5-my-content-route]}))
+   #_{:dispatch-n [:route routes/dnd-e5-my-content-route]}))
 
 (reg-event-fx
  ::char5e/don-armor
