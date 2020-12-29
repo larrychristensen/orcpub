@@ -7339,8 +7339,23 @@
   [:div.main-text-color
    [:div.flex.justify-cont-end
     [:button.form-button.m-r-10.m-b-10
+     {:on-click (make-event-handler ::char/show-delete-plugin-confirmation)}
+     "Delete All"]
+    [:button.form-button.m-r-10.m-b-10
      {:on-click (make-event-handler ::e5/export-all-plugins)}
      "Export All"]]
+   [:div.flex.justify-cont-end
+    (if @(subscribe [::char/delete-plugin-confirmation-shown?])
+      [:div.p-20.flex.justify-cont-end
+       [:div
+        [:div.m-b-10 "Are you sure you want to delete ALL Option sources?"]
+        [:div.flex
+         [:button.form-button
+          {:on-click (make-event-handler ::char/hide-delete-plugin-confirmation)}
+          "cancel"]
+         [:span.link-button
+          {:on-click (make-event-handler ::char/delete-all-plugins)}
+          "delete"]]]])]
    [:div.item-list
     (let [plugins (sort @(subscribe [::e5/plugins]))]
       (doall
