@@ -1397,7 +1397,8 @@
     (r/create-class
      {:component-did-mount (fn [comp]
                              (when-not frame?
-                               (js/window.addEventListener "scroll" on-scroll)))
+                               (js/window.addEventListener "scroll" on-scroll))
+                             (js/window.scrollTo 0,0))
       :component-will-unmount (fn [comp]
                                 (when-not frame?
                                   (js/window.removeEventListener "scroll" on-scroll)))
