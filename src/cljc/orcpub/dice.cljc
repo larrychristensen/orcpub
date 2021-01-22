@@ -39,7 +39,7 @@
   (if-let [[_ num-str sides-str plus-minus-str mod-str :as match]
            (re-matches dice-regex dice-text)]
     (let [num (or (parse-int num-str) 1)
-          sides (or (parse-int sides-str) )
+          sides (parse-int sides-str)
           plus-minus (if (= "-" plus-minus-str)
                        -1
                        1)
@@ -57,7 +57,7 @@
   (if-let [[_ num-str sides-str plus-minus-str mod-str :as match]
            (re-matches dice-regex dice-text)]
     (let [num (or (parse-int num-str) 1)
-          sides (or (parse-int sides-str))
+          sides (parse-int sides-str)
           plus-minus (if (= "-" plus-minus-str)
                        -1
                        +1)
