@@ -2240,7 +2240,7 @@
      (if (boolean show-button)
        (roll-button
         (str title " check: ")
-        (str "1d20" (common/mod-str v))
+        (str "1d20" v)
         :text v
         :style {:font-size "24px" :padding "2px 8px"})
        v)]]])
