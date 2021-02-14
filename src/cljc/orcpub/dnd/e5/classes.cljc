@@ -13,7 +13,7 @@
             [orcpub.dnd.e5.spells :as spells5e]
             [orcpub.dnd.e5.spell-lists :as sl5e]
             [orcpub.dnd.e5.template-base :as t-base]
-            [re-frame.core :refer [reg-sub reg-sub-raw dispatch subscribe]]
+            [re-frame.core :refer [subscribe]]
             [clojure.string :as s]))
 
 (spec/def ::name (spec/and string? common/starts-with-letter?))
@@ -1227,6 +1227,7 @@
    (merge
     opt5e/monk-base-cfg
     {:hit-die 8
+     :name "Monk"
      :key :monk
      :ability-increase-levels [4 8 12 16 19]
      :unarmored-abilities [::char5e/wis]
@@ -1350,7 +1351,7 @@
                :page 79
                :level 15
                :summary "you can't be aged magically and you need no food or water"}
-              
+
               {:name "Perfect Self"
                :page 79
                :level 20
@@ -1359,7 +1360,7 @@
                    :modifiers [(mod5e/dependent-trait
                                 {:name "Open Hand Technique"
                                  :page 79
-                                 :summary (str "when you hit with Flurry of Blows, you impose one of the effects on the target: 1) must make a DC "(?spell-save-dc ::char5e/wis) " DEX save or be knocked prone. 2) make a DC " (?spell-save-dc ::char5e/wis) " STR save or be pushed 15 ft. 3) can't take reactions until end of your next turn")})]
+                                 :summary (str "when you hit with Flurry of Blows, you impose one of the effects on the target: 1) must make a DC " (?spell-save-dc ::char5e/wis) " DEX save or be knocked prone. 2) make a DC " (?spell-save-dc ::char5e/wis) " STR save or be pushed 15 ft. 3) can't take reactions until end of your next turn")})]
                    :levels {6 {:modifiers [(mod5e/action
                                             {:name "Wholeness of Body"
                                              :page 79
@@ -1658,8 +1659,8 @@
 (defn favored-enemy-option [language-map [enemy-type info]]
   (let [vec-info? (sequential? info)
         languages (if vec-info? info (:languages info))
-        name (if vec-info? (common/kw-to-name enemy-type) (:name info))]
-    (let [language-options (zipmap languages (repeat true))]
+        name (if vec-info? (common/kw-to-name enemy-type) (:name info))
+        language-options (zipmap languages (repeat true))]
       (t/option-cfg
        {:name name
         :selections (if (> (count languages) 1)
@@ -1671,7 +1672,7 @@
                     nil?
                     [(if (= 1 (count languages))
                        (mod5e/language (first languages)))
-                     (mod/set-mod ?ranger-favored-enemies enemy-type)])}))))
+                     (mod/set-mod ?ranger-favored-enemies enemy-type)])})))
 
 (defn favored-enemy-selection [language-map order]
   (t/selection-cfg
@@ -1769,6 +1770,7 @@
    (merge
     opt5e/ranger-base-cfg
     {:hit-die 10
+     :name "Ranger"
      :key :ranger
      :profs {:armor {:light false :medium false :shields false}
              :weapon {:simple false :martial false}
@@ -1826,7 +1828,7 @@
                               {:name "Primeval Awareness"
                                :level 3
                                :page 92
-                               :summary (str "spend an X-level spell slot, for X minutes, you sense the types of creatures within 1 mile" (if (seq ?ranger-favored-terrain) (str "(6 if " (common/list-print (map #(common/kw-to-name % false) ?ranger-favored-terrain))) ")") )})]}
+                               :summary (str "spend an X-level spell slot, for X minutes, you sense the types of creatures within 1 mile" (if (seq ?ranger-favored-terrain) (str "(6 if " (common/list-print (map #(common/kw-to-name % false) ?ranger-favored-terrain))) ")"))})]}
               5 {:modifiers [(mod5e/num-attacks 2)]}
               6 {:selections [(favored-enemy-selection language-map 2)
                               (favored-terrain-selection 2)]}
@@ -1837,7 +1839,7 @@
                                 :frequency units5e/turns-1
                                 :level 20
                                 :page 92
-                                :summary (str "add " (common/bonus-str (?ability-bonuses ::char5e/wis)) " to an attack or damage roll") })]}}
+                                :summary (str "add " (common/bonus-str (?ability-bonuses ::char5e/wis)) " to an attack or damage roll")})]}}
      :traits [(lands-stride 8)
               {:name "Hide in Plain Sight"
                :level 10
@@ -1899,8 +1901,7 @@
                                                                       (mod5e/trait-cfg
                                                                        {:name "Steel Will"
                                                                         :page 93
-                                                                        :summary "You have advantage on saving throws against being frightened."})]
-                                                          })]})]}
+                                                                        :summary "You have advantage on saving throws against being frightened."})]})]})]}
                             11 {:selections [(t/selection-cfg
                                               {:name "Multiattack"
                                                :tags #{:class}
@@ -1909,8 +1910,7 @@
                                                            :modifiers [(mod5e/action
                                                                         {:name "Volley"
                                                                          :page 93
-                                                                         :summary "You can use your action to make a ranged attack against any number of creatures within 10 feet of a point you can see within your weapon’s range. You must have ammunition for each target, as normal, and you make a separate attack roll for each target." 
-                                                                         })]})
+                                                                         :summary "You can use your action to make a ranged attack against any number of creatures within 10 feet of a point you can see within your weapon’s range. You must have ammunition for each target, as normal, and you make a separate attack roll for each target."})]})
                                                          (t/option-cfg
                                                           {:name "Whirlwind Attack"
                                                            :modifiers [(mod5e/action
@@ -1924,8 +1924,8 @@
                                                           {:name "Evasion"
                                                            :modifiers [(opt5e/evasion 15 93)
                                                                        (mod5e/trait-cfg
-                                                                       {:page 93
-                                                                        :summary "When you are subjected to an effect, such as a red dragon’s fiery breath or a lightning bolt spell, that allows you to make a Dexterity saving throw to take only half damage, you instead take no damage if you succeed on the saving throw, and only half damage if you fail."})]})
+                                                                        {:page 93
+                                                                         :summary "When you are subjected to an effect, such as a red dragon’s fiery breath or a lightning bolt spell, that allows you to make a Dexterity saving throw to take only half damage, you instead take no damage if you succeed on the saving throw, and only half damage if you fail."})]})
                                                          (t/option-cfg
                                                           {:name "Stand Against the Tide"
                                                            :modifiers  [(mod5e/reaction
@@ -2007,7 +2007,7 @@
                               :name "Cunning Action"
                               :page 96
                               :frequency units5e/turns-1
-                              :summary "Dash, Disengage or Hide"
+                              :summary "as a bonus action you can Dash, Disengage or Hide"
                               })]}
              5 {:modifiers [(opt5e/uncanny-dodge-modifier 96)]}
              6 {:selections [(assoc
@@ -2048,7 +2048,7 @@
              {:level 18
               :name "Elusive"
               :page 96
-              :summary "attack rolls only have disadvantage on you if you are incapacitated"
+              :summary "no attack roll has advantage against you while you aren’t incapacitated."
               }
              {:level 20
               :name "Stroke of Luck"

@@ -70,11 +70,14 @@ EMAIL_SERVER_URL: '' # DNS name of your smtp server
 EMAIL_ACCESS_KEY: '' # User for the mail server
 EMAIL_SECRET_KEY: '' # Password for the user
 EMAIL_SERVER_PORT: 587 # Mail server port
+EMAIL_FROM_ADDRESS: '' # Email address to send from, will default to 'no-reply@orcpub.com'
+EMAIL_ERRORS_TO: '' # Email address that errors will be sent to
 EMAIL_SSL: 'false' # Should SSL be used? Gmail requires this.
 EMAIL_TLS: 'false' # Should TLS be used? 
 DATOMIC_URL: datomic:free://datomic:4334/orcpub?password=yourpassword # Url for the database
 ADMIN_PASSWORD: supersecretpassword #The datomic admin password (should be diffrent than the DATOMIC_PASSWORD)
 DATOMIC_PASSWORD: yourpassword #The datomic application password
+SIGNATURE: '<change me to something unique>' # The Secret used to hash your password in the browser, 20+ characters recommended
 ```
 
 The `ADMIN_PASSWORD` and `DATOMIC_PASSWORD`
@@ -193,10 +196,13 @@ EMAIL_SERVER_URL: '' # Url to a smtp server
 EMAIL_ACCESS_KEY: '' # User for the mail server
 EMAIL_SECRET_KEY: '' # Password for the user
 EMAIL_SERVER_PORT: 587 # Mail server port
+EMAIL_FROM_ADDRESS: '' # Email address to send from, will default to 'no-reply@orcpub.com'
+EMAIL_ERRORS_TO: '' # Email address that errors will be sent to
 EMAIL_SSL: 'false' # Should SSL be used? Gmail requires this.
 DATOMIC_URL: datomic:free://datomic:4334/orcpub?password=yourpassword # Url for the database
 ADMIN_PASSWORD: supersecretpassword
 DATOMIC_PASSWORD: yourpassword
+SIGNATURE: '<change me to something unique>' # The Secret used to hash your password in the browser, 20+ characters recommended
 ```
 
 To change the datomic passwords you can do it through the environment variables `ADMIN_PASSWORD_OLD` and `DATOMIC_PASSWORD_OLD` start the container once, then set the `ADMIN_PASSWORD` and `DATOMIC_PASSWORD` to your new passwords.

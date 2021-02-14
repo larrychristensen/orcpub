@@ -51,8 +51,7 @@
                  [com.stuartsierra/component "0.3.2"]
                  [com.google.guava/guava "21.0"]
 
-                 [com.amazonaws/aws-java-sdk-dynamodb "1.11.6"]
-                 [com.fasterxml.jackson.core/jackson-databind "2.7.0"]
+                 [com.fasterxml.jackson.core/jackson-databind "2.11.1"]
 
                  [hiccup "1.0.5"]
                  [com.draines/postal "2.0.2"]
@@ -63,12 +62,14 @@
                  [com.datomic/datomic-free "0.9.5697"]
                  [funcool/cuerdas "2.2.0"]
                  [camel-snake-kebab "0.4.0"]
-                 ]
+                 [org.webjars/font-awesome "5.13.1"]]
 
   :plugins [[lein-figwheel "0.5.19"]
             [lein-cljsbuild "1.1.7" :exclusions [[org.clojure/clojure]]]
             [lein-garden "0.3.0"]
             [lein-environ "1.1.0"]
+            [lein-cljfmt "0.6.8"]
+            [lein-kibit "0.1.8"]
             #_[lein-resource "16.9.1"]]
 
   :source-paths ["src/clj" "src/cljc" "src/cljs"]
@@ -81,14 +82,14 @@
 
   :uberjar-name "orcpub.jar"
 
-  :garden {:builds [{ ;; Optional name of the build:
+  :garden {:builds [{;; Optional name of the build:
                      :id "screen"
                      ;; Source paths where the stylesheet source code is
                      :source-paths ["src/clj" "src/cljc"]
                      ;; The var containing your stylesheet:
                      :stylesheet orcpub.styles.core/app
                      ;; Compiler flags passed to `garden.core/css`:
-                     :compiler { ;; Where to save the file:
+                     :compiler {;; Where to save the file:
                                 :output-to "resources/public/css/compiled/styles.css"
                                 ;; Compress the output?
                                 :pretty-print? false}}]}
@@ -97,8 +98,7 @@
 
   :cljsbuild {:builds
               {:dev
-               {
-                :source-paths ["web/cljs" "src/cljc" "src/cljs"]
+               {:source-paths ["web/cljs" "src/cljc" "src/cljs"]
 
                 ;; the presence of a :figwheel configuration here
                 ;; will cause figwheel to inject the figwheel client
@@ -108,16 +108,15 @@
                                ;; in the default browser once Figwheel has
                                ;; started and complied your application.
                                ;; Comment this out once it no longer serves you.
-                               :open-urls ["http://localhost:8890/index.html"]}
+                               :open-urls ["http://localhost:8890"]}
 
                 :compiler     {:main                 orcpub.core
                                :asset-path           "/js/compiled/out"
                                :output-to            "resources/public/js/compiled/orcpub.js"
                                :output-dir           "resources/public/js/compiled/out"
-                               :source-map-timestamp true}}}
-              }
+                               :source-map-timestamp true}}}}
 
-  :figwheel { ;; :http-server-root "public" ;; default and assumes "resources"
+  :figwheel {;; :http-server-root "public" ;; default and assumes "resources"
              ;; :server-port 3449 ;; default
              ;; :server-ip "127.0.0.1"
 
@@ -153,12 +152,11 @@
              ;; :server-logfile "tmp/logs/figwheel-logfile.log"
              }
 
-  :repl-options {
-             ;; If nREPL takes too long to load it may timeout,
+  :repl-options {;; If nREPL takes too long to load it may timeout,
              ;; increase this to wait longer before timing out.
              ;; Defaults to 30000 (30 seconds)
-             :timeout 300000 ; 5 mins to wait
-			 }
+                 :timeout 300000 ; 5 mins to wait
+                 }
 
   ;; setting up nREPL for Figwheel and ClojureScript dev
   ;; Please see:
@@ -172,6 +170,7 @@
             "externs" ["do" "clean"
                        ["run" "-m" "externs"]]
             "rebuild-modules" ["run" "-m" "user" "--rebuild-modules"]
+            "lint" ["with-profile" "lint" "run" "-m" "clj-kondo.main" "--lint" "src"]
             "prod-build" ^{:doc "Recompile code with prod profile."}
             ["externs"
              ["with-profile" "prod" "cljsbuild" "once" "main"]]}
@@ -219,14 +218,14 @@
                             :omit-source true
                             :cljsbuild   {:builds
                                           {:prod
-                                           {
-                                            :source-paths ["web/cljs" "src/cljc" "src/cljs"]
+                                           {:source-paths ["web/cljs" "src/cljc" "src/cljs"]
                                             :compiler     {:main          orcpub.core
                                                            :asset-path    "/js/compiled/out"
                                                            :output-to     "resources/public/js/compiled/orcpub.js"
                                                            ;;:output-dir "resources/public/js/compiled/out"
                                                            :optimizations :advanced
                                                            :pretty-print  false}}}}}
+             :lint         {:dependencies [[clj-kondo "RELEASE"]]}
              ;; Use like: lein with-profile +start-server repl
              :start-server {:repl-options {:init-ns user
                                            :init    (start-server)}}})

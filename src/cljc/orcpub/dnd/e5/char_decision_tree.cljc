@@ -800,7 +800,7 @@
     :question "Is your character a hero or a villain?"
     :answers [{:answer "Hero"
                :tag :good}
-              {:answer "Villan"
+              {:answer "Villain"
                :tag :evil}
               {:answer "Both or neither (things aren't so black and white)"
                :tag :neutral}]}

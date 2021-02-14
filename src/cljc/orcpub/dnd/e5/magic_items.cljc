@@ -3,7 +3,6 @@
             [orcpub.common :as common]
             [orcpub.modifiers :as mod]
             [orcpub.entity :as entity]
-            [orcpub.dnd.e5.weapons :as weapons]
             [orcpub.dnd.e5.armor :as armor5e]
             [orcpub.dnd.e5.weapons :as weapons5e]
             [orcpub.dnd.e5.equipment :as equip5e]
@@ -2604,15 +2603,16 @@ The staff can be wielded as a magic quarterstaff. On a hit, it deals damage as a
      }{
      name-key "Sun Blade"
      ::type :weapon
-     ::item-subtype :longsword-finesse
+     ::item-subtype sword?
 
      ::rarity :rare
 
      ::attunement [:any]
      ::magical-attack-bonus 2
      ::magical-damage-bonus 2
-     :finesse? true
-     :damage-type :radiant
+     ::magical-damage-type :radiant
+     ::magical-finesse? true
+     
      ::description "This item appears to be a longsword hilt. While grasping the hilt, you can use a bonus action to cause a blade of pure radiance to spring into existence, or make the blade disappear. While the blade exists, this magic longsword has the finesse property. If you are proficient with shortswords or longswords, you are proficient with the sun blade.
 You gain a +2 bonus to attack and damage rolls made with this weapon, which deals radiant damage instead of slashing damage. When you hit an undead with it, that target takes an extra 1d8 radiant damage.
 The sword’s luminous blade emits bright light in a 15-foot radius and dim light for an additional 15 feet. The light is sunlight. While the blade persists, you can use an action to expand or reduce its radius of bright and dim light by 5 feet each, to a maximum of 30 feet each or a minimum of 10 feet each."
@@ -2914,8 +2914,8 @@ The boots regain 2 hours of flying capability for every 12 hours they aren’t i
 
 (def weapons-and-ammunition
   (concat
-   weapons/weapons
-   weapons/ammunition))
+   weapons5e/weapons
+   weapons5e/ammunition))
 
 (defn add-key [item]
   (assoc item :key (common/name-to-kw (name-key item))))
@@ -2931,7 +2931,7 @@ The boots regain 2 hours of flying capability for every 12 hours they aren’t i
     (types type)))
 
 (defn subtypes-fn [subtypes]
-  (fn [{:keys [::weapons/subtype]}]
+  (fn [{:keys [::weapons5e/subtype]}]
     (subtypes subtype)))
 
 (defn keys-fn [keys]
@@ -3059,7 +3059,7 @@ The boots regain 2 hours of flying capability for every 12 hours they aren’t i
 
 (def all-weapons-map
   (merge
-   weapons/weapons-map
+   weapons5e/weapons-map
    magic-weapon-map))
 
 (def magic-armor-xform

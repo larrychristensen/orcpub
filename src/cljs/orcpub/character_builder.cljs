@@ -33,23 +33,20 @@
             [orcpub.dnd.e5.equipment :as equip5e]
             [orcpub.dnd.e5.skills :as skill5e]
             [orcpub.dnd.e5.events :as events5e]
-            [orcpub.dnd.e5.db :as db5e]
+            [orcpub.dnd.e5.db :as db]
             [orcpub.dnd.e5.views :as views5e]
             [orcpub.route-map :as routes]
             [orcpub.pdf-spec :as pdf-spec]
             [orcpub.user-agent :as user-agent]
-            [orcpub.dnd.e5.db :as db]
 
             [clojure.spec.alpha :as spec]
             [clojure.spec.test.alpha :as stest]
-            [cljs.core.async :refer [<!]]
             [clojure.core.match :refer [match]]
 
             [reagent.core :as r]
-            [re-frame.core :refer [subscribe dispatch dispatch-sync]])
-  (:require-macros [cljs.core.async.macros :refer [go]]))
-
-(def print-disabled? false)
+            [re-frame.core :refer [subscribe dispatch dispatch-sync]]))
+;console-print
+(def print-disabled? true)
 
 (def print-enabled? (and (not print-disabled?)
                          js/window.location
@@ -259,7 +256,7 @@
   (let [options (::t/options selection)
         selected-classes @(subscribe [::char5e/levels])
         unselected-classes (remove
-                            (into #{} (keys selected-classes))
+                            (set (keys selected-classes))
                             (map ::t/key options))
         unselected-classes-set (set unselected-classes)
         remaining-classes (filter
@@ -442,7 +439,7 @@
   (let [{:keys [::t/key]} selection
         selected-items @(subscribe [:entity-option key])
         item-map @(subscribe item-map-sub)
-        selected-keys (into #{} (map ::entity/key selected-items))
+        selected-keys (set (map ::entity/key selected-items))
         options (entity/selection-options selection)
         magic-weapons (= key :magic-weapons)]
     [:div
@@ -586,6 +583,13 @@
 
 (def toggle-homebrew (memoize toggle-homebrew-fn))
 
+(defn tooltip [text content]
+  (if @(subscribe [:mobile?])
+    content
+    [:div.tooltip
+     content
+     [:span.tooltiptext text]]))
+
 (defn selection-section-base []
   (let [expanded? (r/atom false)]
     (fn [{:keys [title path parent-title name icon help max min remaining body hide-lock? hide-homebrew?]}]
@@ -603,21 +607,22 @@
           (if (and path help)
             [show-info-button expanded?])
           (if (not hide-lock?)
-            [:div.tooltip
+            [tooltip
+             (if locked?
+               "Locked to prevent changes - click to unlock"
+               "Unlocked - click to lock the section to prevent changes")
              [:i.fa.f-s-16.m-l-10.m-r-5.pointer
               {:class-name (if locked? "fa-lock" "fa-unlock-alt opacity-5 hover-opacity-full")
-               :on-click (toggle-locked path)}]
-             (if locked? [:span.tooltiptext "Locked to prevent changes - click to unlock"]
-                         [:span.tooltiptext "Unlocked - click to lock the section to prevent changes"])
-             ])
+               :on-click (toggle-locked path)}]])
           (if (not hide-homebrew?)
             [:span.pointer
              {:class-name (if (not homebrew?) "opacity-5 hover-opacity-full")
               :on-click (toggle-homebrew path)}
-             [:div.tooltip
-              (views5e/svg-icon "beer-stein" 18)
-              (if (not homebrew?) [:span.tooltiptext "Homebrew is off for " title " - enabling this option allows you select options you would not normally have (turns on homebrew rules)"]
-                                  [:span.tooltiptext "Homebrew is on for " title " - you can select anything and make it homebrew"] )]])]
+             [tooltip
+              (if-not homebrew?
+                (str "Homebrew is off for " title " - enabling this option allows you select options you would not normally have (turns on homebrew rules)")
+                (str "Homebrew is on for " title " - you can select anything and make it homebrew"))
+              (views5e/svg-icon "beer-stein" 18)]])]
          (if (and help path @expanded?)
            [help-section help])
          (if (int? min)
@@ -821,7 +826,7 @@
                                      (<= min num-increased max))
                                0
                                (- min num-increased))
-               allowed-abilities (into #{} (map ::t/key options))
+               allowed-abilities (set (map ::t/key options))
                ancestors-title (views-aux/ancestor-names-string built-template path)]
            ^{:key i}
            [:div
@@ -1097,7 +1102,7 @@
 
 (def point-buy-starting-abilities-fn #(set-abilities! (char5e/abilities 8 8 8 8 8 8)))
 
-(def reroll-abilities-fn #(reroll-abilities))
+(def reroll-abilities-fn reroll-abilities)
 
 (def standard-abilities-fn #(set-abilities! (char5e/abilities 15 14 13 12 10 8)))
 
@@ -1175,8 +1180,8 @@
         selected-skills (get-in character path)
         selected-count (count selected-skills)
         remaining (- max selected-count)
-        available-skills (into #{} (map ::t/key options))
-        selected-skill-keys (into #{} (map ::entity/key selected-skills))]
+        available-skills (set (map ::t/key options))
+        selected-skill-keys (set (map ::entity/key selected-skills))]
     (doall
      (map
       (fn [{:keys [name key ability icon description]}]
@@ -1558,7 +1563,7 @@
                 name])
              [:div.t-a-c
               (views5e/svg-icon icon 32)]]
-            (if (not (= total-remaining 0))
+            (if (not (zero? total-remaining))
               [:div.flex.justify-cont-end.m-t--10.p-l-20 (remaining-indicator total-remaining 12 11)])]))
        pages))]))
 
@@ -1899,7 +1904,7 @@
 (defn al-legality []
   (let [expanded? (r/atom false)]
     (fn [al-illegal-reasons used-resources]
-      (let [num-resources (count (into #{} (map :resource-key used-resources)))
+      (let [num-resources (count (set (map :resource-key used-resources)))
             multiple-resources? (> num-resources 1)
             has-homebrew? @(subscribe [:has-homebrew?])
             mobile? @(subscribe [:mobile?])
@@ -2027,6 +2032,7 @@
                              @(subscribe [::char5e/character-changed? character-id])
                              (not= db/default-character character))]
     (if print-enabled? (print-char built-char))
+    (if (not character-changed?) (js/window.scrollTo 0,0)) ;//Force a scroll to top of page only if we are not editing.
     [views5e/content-page
      "Character Builder"
      (remove
@@ -2061,7 +2067,7 @@
                  "Update Existing Character"
                  "Save New Character")
         :icon "save"
-        :style (if character-changed? unsaved-button-style) 
+        :style (if character-changed? unsaved-button-style)
         :on-click save-character}
        (if (:db/id character)
          {:title "View"

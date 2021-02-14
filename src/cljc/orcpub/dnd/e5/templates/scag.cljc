@@ -10,7 +10,7 @@
             [orcpub.dnd.e5.equipment :as equip5e]
             [orcpub.dnd.e5.spell-lists :as sl]
             [orcpub.dnd.e5.options :as opt5e]
-            [re-frame.core :refer [subscribe]]))
+            #_[re-frame.core :refer [subscribe]]))
 
 #_(def scag-barbarian
   {:name "Barbarian"

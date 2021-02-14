@@ -63,8 +63,8 @@
                                       default-class
                                       default-subclass]]
             [orcpub.dnd.e5.autosave-fx]
-            [re-frame.core :refer [reg-event-db reg-event-fx reg-fx inject-cofx path trim-v
-                                   after dispatch dispatch-sync subscribe ->interceptor]]
+            [re-frame.core :refer [reg-event-db reg-event-fx reg-fx inject-cofx path
+                                   after dispatch subscribe ->interceptor]]
             [cljs.spec.alpha :as spec]
             [cljs-http.client :as http]
             [cljs.core.async :refer [<! timeout]]
@@ -360,11 +360,30 @@
         race (char5e/race built-char)
         subrace (char5e/subrace built-char)
         character-name (char5e/character-name built-char)
-        image-url (char5e/image-url built-char)]
+        image-url (char5e/image-url built-char)
+        age (char5e/age built-char)
+        sex (char5e/sex built-char)
+        height (char5e/height built-char)
+        weight (char5e/weight built-char)
+        hair (char5e/hair built-char)
+        eyes (char5e/eyes built-char)
+        skin (char5e/skin built-char)
+        ;alignment (char5e/get-prop built-char ::alignment)  ;This is not available? 
+        ;background (char5e/get-prop built-char ::background)  ;This is not available? 
+        ]
     (cond-> {::char5e/character-name (or character-name "")}
       image-url (assoc ::char5e/image-url image-url)
       race (assoc ::char5e/race-name race)
       subrace (assoc ::char5e/subrace-name subrace)
+      age (assoc ::char5e/age age)
+      sex (assoc ::char5e/sex sex)
+      height (assoc ::char5e/height height)
+      weight (assoc ::char5e/weight weight)
+      hair (assoc ::char5e/hair hair)
+      eyes (assoc ::char5e/eyes eyes)
+      skin (assoc ::char5e/skin skin)
+      ;alignment (assoc ::char5e/alignment alignment) ;This is not available? 
+      ;background (assoc ::char5e/background background) ;This is not available? 
       (seq classes) (assoc ::char5e/classes (map
                                              (fn [cls-nm]
                                                (let [{:keys [class-name subclass-name class-level]}
@@ -1134,7 +1153,7 @@
    character
    (entity/get-entity-path built-template character path)
    {::entity/key :average
-    ::entity/value (dice/die-mean (-> levels class-kw :hit-die))}))
+    ::entity/value (dice/die-mean-round-up (-> levels class-kw :hit-die))}))
 
 (reg-event-db
  :set-hit-points-to-average
@@ -1845,35 +1864,35 @@
   (let [search-text (s/lower-case text)
         dice-result (dice/dice-roll-text search-text)
         kw (if search-text (common/name-to-kw search-text))
-        name-result (name-result search-text)]
-    (let [top-result (cond
-                       dice-result {:type :dice-roll
-                                    :result dice-result}
-                       (spells/spell-map kw) {:type :spell
-                                              :result (spells/spell-map kw)}
-                       (monsters/monster-map kw) {:type :monster
-                                                  :result (monsters/monster-map kw)}
-                       (mi/magic-item-map kw) {:type :magic-item
-                                                        :result (mi/magic-item-map kw)}
-                       (= "tavern name" search-text) {:type :tavern-name
-                                                      :result (char-rand5e/random-tavern-name)}
-                       name-result name-result
-                       :else nil)
-          filter-xform (filter-by-name-xform search-text :name)
-          top-spells (if (>= (count text) 3)
+        name-result (name-result search-text)
+        top-result (cond
+                     dice-result {:type :dice-roll
+                                  :result dice-result}
+                     (spells/spell-map kw) {:type :spell
+                                            :result (spells/spell-map kw)}
+                     (monsters/monster-map kw) {:type :monster
+                                                :result (monsters/monster-map kw)}
+                     (mi/magic-item-map kw) {:type :magic-item
+                                             :result (mi/magic-item-map kw)}
+                     (= "tavern name" search-text) {:type :tavern-name
+                                                    :result (char-rand5e/random-tavern-name)}
+                     name-result name-result
+                     :else nil)
+        filter-xform (filter-by-name-xform search-text :name)
+        top-spells (if (>= (count text) 3)
+                     (sequence
+                      filter-xform
+                      spells/spells))
+        top-monsters (if (>= (count text) 3)
                        (sequence
                         filter-xform
-                        spells/spells))
-          top-monsters (if (>= (count text) 3)
-                         (sequence
-                          filter-xform
-                          monsters/monsters))]
-      (cond-> {}
-        top-result (assoc :top-result top-result)
-        (seq top-spells) (update :results conj {:type :spell
-                                                :results top-spells})
-        (seq top-monsters) (update :results conj {:type :monster
-                                                  :results top-monsters})))))
+                        monsters/monsters))]
+    (cond-> {}
+      top-result (assoc :top-result top-result)
+      (seq top-spells) (update :results conj {:type :spell
+                                              :results top-spells})
+      (seq top-monsters) (update :results conj {:type :monster
+                                                :results top-monsters}))))
 
 
 (reg-event-db
@@ -2075,7 +2094,7 @@
 (reg-event-fx
  ::char5e/add-level
  (fn [{:keys [db]} [_ id]]
-   (update-character-fx db id #(add-level %))))
+   (update-character-fx db id add-level)))
 
 (reg-event-fx
  ::char5e/level-up
@@ -2405,27 +2424,27 @@
                            (or (first (drop-while #(>= % current-initiative) initiatives))
                                (first initiatives))
                            (second initiatives))
-         round (get combat :round 1)]
-     (let [next-round? (and current-initiative
-                            (> next-initiative current-initiative))
-           updated (cond-> combat
-                     true (assoc :current-initiative next-initiative)
-                     next-round? (assoc :round (inc round))
-                     next-round? update-conditions)
-           removed-conditions (if next-round?
-                                (filter
-                                 (comp seq :removed-conditions)
-                                 (flatten
-                                  (map
-                                   (fn [[monster-kw individuals]]
-                                     (map
-                                      (fn [[individual-index {:keys [removed-conditions]}]]
-                                        {:type :monster
-                                         :index individual-index
-                                         :name (get-in monster-map [monster-kw :name])
-                                         :removed-conditions (map :type removed-conditions)})
-                                      individuals))
-                                   (:monster-data updated)))))]
+         round (get combat :round 1)
+         next-round? (and current-initiative
+                          (> next-initiative current-initiative))
+         updated (cond-> combat
+                   true (assoc :current-initiative next-initiative)
+                   next-round? (assoc :round (inc round))
+                   next-round? update-conditions)
+         removed-conditions (if next-round?
+                              (filter
+                               (comp seq :removed-conditions)
+                               (flatten
+                                (map
+                                 (fn [[monster-kw individuals]]
+                                   (map
+                                    (fn [[individual-index {:keys [removed-conditions]}]]
+                                      {:type :monster
+                                       :index individual-index
+                                       :name (get-in monster-map [monster-kw :name])
+                                       :removed-conditions (map :type removed-conditions)})
+                                    individuals))
+                                 (:monster-data updated)))))]
        {:dispatch-n (cond-> [[::combat/set-combat updated]]
                       (seq removed-conditions)
                       (conj [:show-message
@@ -2435,7 +2454,7 @@
                                 (fn [i {:keys [name index removed-conditions]}]
                                   ^{:key i}
                                   [:div.m-b-5 (str name " #" (inc index) " is no longer " (common/list-print (map common/kw-to-name removed-conditions) "or") ".")])
-                                removed-conditions))]]))}))))
+                                removed-conditions))]]))})))
 
 (reg-event-db
  ::encounters/set-encounter-path-prop
@@ -3778,6 +3797,11 @@
    (update db ::char5e/print-large-abilities? not)))
 
 (reg-event-db
+ ::char5e/set-print-character-sheet-style?
+ (fn [db [_ id]]
+   (assoc-in db [::char5e/print-character-sheet-style?] id)))
+
+(reg-event-db
  ::char5e/toggle-known-spells-print
  (fn [db _]
    (update db ::char5e/print-prepared-spells? not)))
@@ -3791,6 +3815,23 @@
  ::char5e/hide-delete-confirmation
  (fn [db [_ id]]
    (assoc-in db [::char5e/delete-confirmation-shown? id] false)))
+
+(reg-event-db
+ ::char5e/show-delete-plugin-confirmation
+ (fn [db _]
+   (assoc-in db [::char5e/delete-plugin-confirmation-shown?] true)))
+
+(reg-event-db
+ ::char5e/hide-delete-plugin-confirmation
+ (fn [db _]
+   (assoc-in db [::char5e/delete-plugin-confirmation-shown?] false)))
+
+;to-do probably should reach into plugins and delete one at the time instead of brute forcing it.
+(reg-event-db
+ ::char5e/delete-all-plugins
+ (fn [db _]
+   (js/localStorage.removeItem "plugins")
+   (js/location.reload)))
 
 (reg-event-fx
  ::char5e/don-armor
