@@ -1705,7 +1705,28 @@
      :modifiers [(modifiers/trait-cfg
        {:name "Dueling Fighting Style"
         :page 72
-        :description "When you are wielding a melee weapon in one hand and no other weapons, you gain a +2 bonus to damage rolls with that weapon."})]})
+        :description "When you are wielding a melee weapon in one hand and no other weapons, you gain a +2 bonus to damage rolls with that weapon."})
+                ;(mods/vec-mod ?ac-bonus-fns
+                ;(mods/vec-mod ?attack-modifier-fns
+                (mods/vec-mod ?melee-damage-bonus-fns ;vec-mod prop
+                              (fn [_ _] 5) ;vec-mod val ... maybe?
+                              nil ;vec-mod nm
+                              nil ;vec-mod value ... maybe?
+                              [(let [main-hand-weapon ?orcpub.dnd.e5.character/main-hand-weapon
+                                     off-hand-weapon ?orcpub.dnd.e5.character/off-hand-weapon
+                                     all-weapons-map @(subscribe [::mi/all-weapons-map])]
+                                 (and (and main-hand-weapon
+                                           (-> all-weapons-map
+                                               main-hand-weapon
+                                               ::weapons/melee?)
+                                           (not (-> all-weapons-map
+                                                    main-hand-weapon
+                                                    ::weapons/two-handed?)))
+                                      (and off-hand-weapon
+                                           (not (-> all-weapons-map  ;ensure no weapons in off hand
+                                                    off-hand-weapon
+                                                    ::weapons/type)))))])
+                 ]})
    (t/option-cfg
     {:name "Great Weapon Fighting"
      :modifiers [(modifiers/trait-cfg

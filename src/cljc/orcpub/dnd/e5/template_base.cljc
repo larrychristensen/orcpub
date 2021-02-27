@@ -224,8 +224,17 @@
                               (let [definitely-finesse? (and finesse?
                                                              (::weapon5e/finesse? weapon))
                                     melee? (::weapon5e/melee? weapon)]
-                                (+ (or (::mi5e/magical-damage-bonus weapon) 0)
-                                   (?weapon-ability-damage-modifier weapon definitely-finesse? off-hand?))))
+                                (apply +
+                                       (+ (or (::mi5e/magical-damage-bonus weapon) 0)
+                                          (?weapon-ability-damage-modifier weapon definitely-finesse? off-hand?))
+                                       (if melee?
+                                         (map
+                                          #(% weapon)
+                                          ?melee-damage-bonus-fns)
+                                         (map
+                                          #(% weapon)
+                                          ?ranged-damage-bonus-fns)) ;any non-melee is assumed to be ranged/finesse/dex
+                                       )))
     ?best-weapon-damage-modifier (fn [weapon & [off-hand?]]
                                    (max (?weapon-damage-modifier weapon false off-hand?)
                                         (?weapon-damage-modifier weapon true off-hand?)))

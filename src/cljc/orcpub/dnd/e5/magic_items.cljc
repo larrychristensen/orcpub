@@ -246,6 +246,11 @@
 (defn axe? [w]
   (= :axe (::weapons5e/subtype w)))
 
+(defn bow? [w]
+  (or (= :longbow (::weapons5e/subtype w))
+      (= :shortbow (::weapons5e/subtype w)))
+  )
+
 (defn slashing-sword? [w]
  (and (= :slashing (::weapons5e/damage-type w))
       (sword? w)))
@@ -260,8 +265,8 @@
 
 (def weapon-not-ammunition? (complement ammunition?))
 
-(defn heavy-metal-armor? [a] 
-   (and (#{:medium :heavy} (:type a)) 
+(defn heavy-metal-armor? [a]
+   (and (#{:medium :heavy} (:type a))
            (not= :hide (:key a))))
 
 (defn not-shield? [a] (#{:light :medium :heavy} (:type a)))
@@ -285,7 +290,7 @@ They return to Valhalla after 1 hour or when they drop to 0 hit points. Once you
                        (str "
 You must have proficiency with all "
                             requirement
-                            ". If you blow the horn without meeting this requirement, the summoned berserkers attack you. If you meet the requirement, they are friendly to you and your companions and follow your commands."))) 
+                            ". If you blow the horn without meeting this requirement, the summoned berserkers attack you. If you meet the requirement, they are friendly to you and your companions and follow your commands.")))
    })
 
 (defn potion-of-giant-strength [name strength rarity]
@@ -308,7 +313,9 @@ The creature exists for a duration specific to each figurine. At the end of the 
 " description)})
 
 (defn belt-of-giant-strength-mod [value]
-  (mod/vec-mod ?ability-overrides {:ability :orcpub.dnd.e5.character/str :value (min 30 (+ value (if (and ?giants-bane-gauntlet ?giants-bane-hammer) 4 0)))}))
+  (mod/vec-mod ?ability-overrides
+               {:ability :orcpub.dnd.e5.character/str :value
+                (min 30 (+ value (if (and ?giants-bane-gauntlet ?giants-bane-hammer) 4 0)))}))
 
 (defn dragon-scale-mail [color-nm resistance-kw]
   {name-key (str "Dragon Scale Mail, " color-nm)
@@ -425,7 +432,7 @@ Curse. This armor is cursed, a fact that is revealed only when an identify spell
       ::description (str "You have resistance to " (name damage-type) " damage.")
       })
    damage-types5e/damage-types))
-                            
+
 (def raw-magic-items
   (concat
    armors-of-resistance
@@ -658,7 +665,7 @@ If you aren’t a dwarf, you gain the following additional benefits while wearin
 
      ::attunement [:any]
      ::modifiers [(belt-of-giant-strength-mod 23)]
-    
+
      ::description "While wearing this belt, your Strength score changes to 23. If your Strength is already equal to or greater than 23, the item has no effect on you."
      }
     {
@@ -770,6 +777,9 @@ The bowl is about 1 foot in diameter and half as deep. It weighs 3 pounds and ho
      ::rarity :uncommon
 
      ::attunement [:any]
+     ::modifiers [(mod5e/weapon-proficiency :longbow)
+                  (mod5e/weapon-proficiency :shortbow)
+                  (mod5e/weapon-attack-bonus-mod #{:longbow :shortbow} 2)]
      ::description "While wearing these bracers, you have proficiency with the longbow and shortbow, and you gain a +2 bonus to damage rolls on ranged attacks made with such weapons."
      }{
      name-key "Bracers of Defense"
@@ -825,7 +835,7 @@ Alternatively, when you light the candle for the first time, you can cast the ga
      name-key "Cape of the Mountebank"
      ::type :wondrous-item
      ::rarity :rare
-     ::modifiers [(mod5e/action 
+     ::modifiers [(mod5e/action
                   {:name "Cape of the Mountebank"
                    :page 157
                    :source :dmg
@@ -857,7 +867,7 @@ The chime can be used ten times. After the tenth time, it cracks and becomes use
      name-key "Circlet of Blasting"
      ::type :wondrous-item
      ::rarity :uncommon
-     ::modifiers [(mod5e/action 
+     ::modifiers [(mod5e/action
                   {:name "Circlet of Blasting"
                    :page 158
                    :source :dmg
@@ -872,7 +882,7 @@ The chime can be used ten times. After the tenth time, it cracks and becomes use
 
      ::attunement [:any]
      ::modifiers [(mod5e/damage-resistance :poison)
-                 (mod5e/action 
+                 (mod5e/action
                   {:name "Cloak of Arachnidia"
                    :page 158
                    :source :dmg
@@ -939,7 +949,7 @@ shifts to camouflage you. Pulling the hood up or down requires an action."}
      ::rarity :rare
 
      ::attunement [:any]
-     ::modifiers [(mod5e/action 
+     ::modifiers [(mod5e/action
                   {:name "Cloak of the Bat"
                    :page 159
                    :source :dmg
@@ -1519,7 +1529,6 @@ While focusing on a creature with detect thoughts, you can use an action to cast
      ::magical-attack-bonus 3
      ::magical-damage-bonus 3
      ::description "You gain a +3 bonus to attack and damage rolls made with this magic weapon. When you hit a fiend or an undead with it, that creature takes an extra 2d10 radiant damage.
->>>>>>> master
 While you hold the drawn sword, it creates an aura in a 10-foot radius around you. You and all creatures friendly to you in the aura have advantage
 on saving throws against spells and other magical effects. If you have 17 or more levels in the paladin class, the radius of the aura increases to 30 feet."
      }{
@@ -2107,7 +2116,7 @@ If you die while wearing the ring, your soul enters it, unless it already houses
        ::type :ring
        ::rarity :very-rare
        ::attunement [:any]
-       ::attunement-details "requires attunement outdoors at night" 
+       ::attunement-details "requires attunement outdoors at night"
      ::description "While wearing this ring in dim light or darkness, you can cast dancing lights and light from the ring at will. Casting either spell from the ring requires an action.
 The ring has 6 charges for the following other properties. The ring regains 1d6 expended charges daily at dawn.
 Faerie Fire. You can expend 1 charge as an action to cast faerie fire from the ring.
@@ -2510,7 +2519,7 @@ The staff has 10 charges. When you hit with a melee attack using it, you can exp
      name-key "Staff of Swarming Insects"
      ::type :weapon
      ::item-subtype :staff
-     ::rarity :rare 
+     ::rarity :rare
      ::attunement [:bard, :cleric, :druid, :sorcerer, :warlock, :wizard]
 
      ::description "This staff has 10 charges and regains 1d6 + 4 expended charges daily at dawn. If you expend the last charge, roll a d20. On a 1, a swarm of insects consumes and destroys the staff, then disperses.
@@ -2612,7 +2621,7 @@ The staff can be wielded as a magic quarterstaff. On a hit, it deals damage as a
      ::magical-damage-bonus 2
      ::magical-damage-type :radiant
      ::magical-finesse? true
-     
+
      ::description "This item appears to be a longsword hilt. While grasping the hilt, you can use a bonus action to cause a blade of pure radiance to spring into existence, or make the blade disappear. While the blade exists, this magic longsword has the finesse property. If you are proficient with shortswords or longswords, you are proficient with the sun blade.
 You gain a +2 bonus to attack and damage rolls made with this weapon, which deals radiant damage instead of slashing damage. When you hit an undead with it, that target takes an extra 1d8 radiant damage.
 The sword’s luminous blade emits bright light in a 15-foot radius and dim light for an additional 15 feet. The light is sunlight. While the blade persists, you can use an action to expand or reduce its radius of bright and dim light by 5 feet each, to a maximum of 30 feet each or a minimum of 10 feet each."
@@ -2966,7 +2975,7 @@ The boots regain 2 hours of flying capability for every 12 hours they aren’t i
                  (throw (IllegalArgumentException. (str "No base types matched for weapon item!: " (::name item))))))
       (map
        (fn [weapon]
-         (let [name (if name-fn 
+         (let [name (if name-fn
                       (name-fn weapon)
                       (if (> (count of-type) 1)
                         (str (name-key item) ", " (:name weapon))
@@ -3014,7 +3023,7 @@ The boots regain 2 hours of flying capability for every 12 hours they aren’t i
       (map
        (fn [armor]
          (let [name (if (> (count of-type) 1)
-                      (if name-fn 
+                      (if name-fn
                         (name-fn armor)
                         (str (name-key item) ", " (:name armor)))
                       (name-key item))

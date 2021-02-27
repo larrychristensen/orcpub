@@ -545,6 +545,9 @@
 (defn attack-modifier-fn [bonus-fn]
   (mods/vec-mod ?attack-modifier-fns bonus-fn))
 
+(defn melee-damage-bonus-fn [bonus-fn]
+  (mods/vec-mod ?melee-damage-bonus-fns bonus-fn))
+
 (defn armored-ac-bonus [bonus]
   (mods/cum-sum-mod ?armored-ac-bonus bonus))
 
@@ -585,6 +588,17 @@
 (defmacro level-val [level mappings]
   (let [flat-mappings (conj (vec (apply concat (sort-by first > (dissoc mappings :default)))) (:default mappings))]
     `(condp <= ~level ~@flat-mappings)))
+
+(defn
+  ^{:doc "Function that allows application of bonuses to specific weapons."
+    :user/comment "Moved from commented-out UA namespace."}
+
+  weapon-attack-bonus-mod [weapons bonus]
+  (attack-modifier-fn
+   (fn [{kw :key base-kw :base-key}]
+     (if (weapons kw)
+       bonus
+       0))))
 
 (def mods-map
   {:ability ability
