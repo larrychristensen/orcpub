@@ -779,7 +779,7 @@ The bowl is about 1 foot in diameter and half as deep. It weighs 3 pounds and ho
      ::attunement [:any]
      ::modifiers [(mod5e/weapon-proficiency :longbow)
                   (mod5e/weapon-proficiency :shortbow)
-                  (mod5e/weapon-attack-bonus-mod #{:longbow :shortbow} 2)]
+                  (mod5e/weapon-damage-bonus-mod #{:longbow :shortbow} 2)]
      ::description "While wearing these bracers, you have proficiency with the longbow and shortbow, and you gain a +2 bonus to damage rolls on ranged attacks made with such weapons."
      }{
      name-key "Bracers of Defense"

@@ -545,6 +545,13 @@
 (defn attack-modifier-fn [bonus-fn]
   (mods/vec-mod ?attack-modifier-fns bonus-fn))
 
+(defn
+  ^{:doc "For applying generic damage bonuses from various sources, to various sources. Controlled by functions to filter or specify conditions"
+    :user/comment "May be best to keep this and remove melee-damage-bonus-fn (and never add the ranged-damage-bonus-fn). Undecided."}
+
+  damage-bonus-fn [bonus-fn]
+  (mods/vec-mod ?damage-bonus-fns bonus-fn))
+
 (defn melee-damage-bonus-fn [bonus-fn]
   (mods/vec-mod ?melee-damage-bonus-fns bonus-fn))
 
@@ -590,11 +597,22 @@
     `(condp <= ~level ~@flat-mappings)))
 
 (defn
-  ^{:doc "Function that allows application of bonuses to specific weapons."
-    :user/comment "Moved from commented-out UA namespace."}
+  ^{:doc "Function that allows application of attack modifiers to specific weapons."
+    :user/comment "Moved from a disused, soon to be trimmed, namespace."}
 
   weapon-attack-bonus-mod [weapons bonus]
   (attack-modifier-fn
+   (fn [{kw :key base-kw :base-key}]
+     (if (weapons kw)
+       bonus
+       0))))
+
+(defn
+  ^{:doc "Function that allows application of damage bonuses to specific weapons."
+    :user/comment "Duplicated from weapon-attack-bonus-mod. May be better to combine the two with a third arg to differentiate"}
+
+  weapon-damage-bonus-mod [weapons bonus]
+  (damage-bonus-fn
    (fn [{kw :key base-kw :base-key}]
      (if (weapons kw)
        bonus
