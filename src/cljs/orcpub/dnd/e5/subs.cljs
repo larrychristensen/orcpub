@@ -1197,6 +1197,12 @@
    (-> db ::char5e/exclude-spell-cards-print? not)))
 
 (reg-sub
+ ::char5e/print-spell-card-dc-mod?
+ (fn [db _]
+   (-> db ::char5e/exclude-spell-cards-by-dc-mod? not)))
+
+
+(reg-sub
  ::char5e/print-character-sheet?
  (fn [db _]
    (-> db ::char5e/exclude-character-sheet-print? not)))

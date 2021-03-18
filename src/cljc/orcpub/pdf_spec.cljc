@@ -292,6 +292,7 @@
                             print-prepared-spells?
                             prepares-spells
                             prepared-spells-by-class]
+  
   (let [flat-spells (char5e/flat-spells spells-known)
         spells-map @(subscribe [::spells/spells-map])
         plugin-spells-map @(subscribe [::spells/plugin-spells-map])
@@ -498,7 +499,8 @@
                          print-spell-cards?
                          print-prepared-spells?
                          print-large-abilities?
-                         print-character-sheet-style?] :as options}]
+                         print-character-sheet-style?
+                         print-spell-card-dc-mod?] :as options}]
   (let [race (char5e/race built-char)
         subrace (char5e/subrace built-char)
         abilities (abilities-spec
@@ -572,7 +574,9 @@
       :faction-name (char5e/faction-name built-char)
       :print-character-sheet? print-character-sheet?
       :print-spell-cards? print-spell-cards?
-      :print-character-sheet-style? print-character-sheet-style?}
+      :print-character-sheet-style? print-character-sheet-style?
+      :print-spell-card-dc-mod? print-spell-card-dc-mod?
+      }
      (attacks-and-spellcasting-fields built-char)
      (skill-fields built-char)
      abilities
