@@ -380,14 +380,17 @@
        spell-pages)))))
 
 (defn spellcasting-fields [built-char print-prepared-spells?]
-  (let [spells-known (char5e/spells-known built-char)
-        spell-attack-modifier-fn (char5e/spell-attack-modifier-fn built-char)
+  (let [spell-attack-modifier-fn (char5e/spell-attack-modifier-fn built-char)
         spell-save-dc-fn (char5e/spell-save-dc-fn built-char)
         spell-slots (char5e/spell-slots built-char)
         prepares-spells (char5e/prepares-spells built-char)
-        prepared-spells-by-class (char5e/prepared-spells-by-class built-char)]
+        prepared-spells-by-class (char5e/prepared-spells-by-class built-char)
+        sorted-spells-known (into {}
+                                  (map (fn [[id datum]]
+                                         [id (into (sorted-map) datum)]))
+                                  (char5e/spells-known built-char))]
 
-    (spell-page-fields spells-known
+    (spell-page-fields sorted-spells-known
                        spell-slots
                        spell-save-dc-fn
                        spell-attack-modifier-fn
