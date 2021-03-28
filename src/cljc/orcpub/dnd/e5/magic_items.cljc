@@ -247,6 +247,11 @@
 (defn axe? [w]
   (= :axe (::weapons5e/subtype w)))
 
+(defn bow? [w]
+  (or (= :longbow (::weapons5e/subtype w))
+      (= :shortbow (::weapons5e/subtype w)))
+  )
+
 (defn slashing-sword? [w]
  (and (= :slashing (::weapons5e/damage-type w))
       (sword? w)))
@@ -309,7 +314,9 @@ The creature exists for a duration specific to each figurine. At the end of the 
 " description)})
 
 (defn belt-of-giant-strength-mod [value]
-  (mod/vec-mod ?ability-overrides {:ability :orcpub.dnd.e5.character/str :value (min 30 (+ value (if (and ?giants-bane-gauntlet ?giants-bane-hammer) 4 0)))}))
+  (mod/vec-mod ?ability-overrides
+               {:ability :orcpub.dnd.e5.character/str :value
+                (min 30 (+ value (if (and ?giants-bane-gauntlet ?giants-bane-hammer) 4 0)))}))
 
 (defn dragon-scale-mail [color-nm resistance-kw]
   {name-key (str "Dragon Scale Mail, " color-nm)
@@ -791,6 +798,9 @@ The bowl is about 1 foot in diameter and half as deep. It weighs 3 pounds and ho
      ::rarity :uncommon
 
      ::attunement [:any]
+     ::modifiers [(mod5e/weapon-proficiency :longbow)
+                  (mod5e/weapon-proficiency :shortbow)
+                  (mod5e/weapon-damage-bonus-mod #{:longbow :shortbow} 2)]
      ::description "While wearing these bracers, you have proficiency with the longbow and shortbow, and you gain a +2 bonus to damage rolls on ranged attacks made with such weapons."
      }{
      name-key "Bracers of Defense"
@@ -1540,7 +1550,6 @@ While focusing on a creature with detect thoughts, you can use an action to cast
      ::magical-attack-bonus 3
      ::magical-damage-bonus 3
      ::description "You gain a +3 bonus to attack and damage rolls made with this magic weapon. When you hit a fiend or an undead with it, that creature takes an extra 2d10 radiant damage.
->>>>>>> master
 While you hold the drawn sword, it creates an aura in a 10-foot radius around you. You and all creatures friendly to you in the aura have advantage
 on saving throws against spells and other magical effects. If you have 17 or more levels in the paladin class, the radius of the aura increases to 30 feet."
      }{
