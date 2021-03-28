@@ -3792,6 +3792,16 @@
    (update db ::char5e/exclude-spell-cards-print? not)))
 
 (reg-event-db
+ ::char5e/toggle-spell-cards-by-level
+ (fn [db _]
+   (update db ::char5e/exclude-spell-cards-by-level? not)))
+
+(reg-event-db
+ ::char5e/toggle-spell-cards-by-dc-mod
+ (fn [db _]
+   (update db ::char5e/exclude-spell-cards-by-dc-mod? not)))
+
+(reg-event-db
  ::char5e/toggle-large-abilities-print
  (fn [db _]
    (update db ::char5e/print-large-abilities? not)))

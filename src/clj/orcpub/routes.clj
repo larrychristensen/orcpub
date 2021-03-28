@@ -410,7 +410,7 @@
     :weapon-name-2 8
     :weapon-name-3 8}))
 
-(defn add-spell-cards! [doc spells-known spell-save-dcs spell-attack-mods custom-spells]  (try
+(defn add-spell-cards! [doc spells-known spell-save-dcs spell-attack-mods custom-spells print-spell-card-dc-mod?]  (try
     (let [custom-spells-map (common/map-by-key custom-spells)
           spells-map (merge spells/spell-map custom-spells-map)
           flat-spells (-> spells-known vals flatten)
@@ -421,7 +421,7 @@
                               class)
                             key])
                          flat-spells)
-          parts (vec (partition-all 9 sorted-spells))]
+          parts (vec (partition-all 9 flat-spells))]
       (doseq [i (range (count parts))
               :let [part (parts i)]]
         (let [page (PDPage.)]
@@ -444,7 +444,8 @@
                                          2.5
                                          3.5
                                          spells
-                                         i))
+                                         i
+                                         print-spell-card-dc-mod?))
                   back-page (PDPage.)]
               (with-open [back-page-cs (PDPageContentStream. doc back-page)]
                 (.addPage doc back-page)
@@ -453,7 +454,7 @@
 
 (defn character-pdf-2 [req]
   (let [fields (-> req :form-params :body edn/read-string)
-        {:keys [image-url image-url-failed faction-image-url faction-image-url-failed spells-known custom-spells spell-save-dcs spell-attack-mods print-spell-cards? print-character-sheet-style?]} fields
+        {:keys [image-url image-url-failed faction-image-url faction-image-url-failed spells-known custom-spells spell-save-dcs spell-attack-mods print-spell-cards? print-character-sheet-style? print-spell-card-dc-mod?]} fields
 
         sheet6 (str "fillable-char-sheetstyle-" print-character-sheet-style? "-6-spells.pdf")
         sheet5 (str "fillable-char-sheetstyle-" print-character-sheet-style? "-5-spells.pdf")
@@ -476,7 +477,7 @@
     (with-open [doc (PDDocument/load input)]
       (pdf/write-fields! doc fields (not chrome?) font-sizes)
       (if (and print-spell-cards? (seq spells-known))
-        (add-spell-cards! doc spells-known spell-save-dcs spell-attack-mods custom-spells))
+        (add-spell-cards! doc spells-known spell-save-dcs spell-attack-mods custom-spells print-spell-card-dc-mod?))
       (if (and image-url
                (re-matches #"^(https?|ftp|file)://[-a-zA-Z0-9+&@#/%?=~_|!:,.;]*[-a-zA-Z0-9+&@#/%=~_|]" image-url)
                (not image-url-failed))
