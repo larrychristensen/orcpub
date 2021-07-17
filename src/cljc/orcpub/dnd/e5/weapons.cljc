@@ -226,7 +226,7 @@
     ::melee? true
     ::finesse? false
     :key :longsword
-    ::link "https://en.wikipedia.org/wiki/Sword"}   
+    ::link "https://en.wikipedia.org/wiki/Sword"}
    {:name "Maul",
     ::damage-type :bludgeoning,
     ::damage-die 6,
