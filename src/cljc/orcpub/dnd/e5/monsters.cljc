@@ -1836,9 +1836,7 @@ Green Dragon
 :actions [{:name "Multiattack" :description "The dragon makes three attacks: one with its bite and two with its claws."}
 {:name "Bite" :description "Melee Weapon Attack: +7 to hit, reach 10 ft., one target. Hit: 15 (2d10 + 4) piercing damage plus 7 (2d6) poison damage."}
 {:name "Claw" :description "Melee Weapon Attack: +7 to hit, reach 5 ft., one target. Hit: 11 (2d6 + 4) slashing damage."}
-{:name "Poison Breath " :notes "Recharge 5–6" :description "The dragon exhales
-"}]
-
+{:name "Poison Breath " :notes "Recharge 5–6" :description "The dragon exhales poisonous gas in a 15-foot cone. Each creature in that area must make a DC 11 Constitution saving throw, taking 21 (6d6) poison damage on a failed save, or half as much damage on a successful one."}]
 }{
 :name "Green Dragon Wyrmling"
 :size :medium
