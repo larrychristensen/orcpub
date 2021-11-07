@@ -1866,8 +1866,7 @@ Green Dragon
 :traits [{:name "Amphibious" :description "The dragon can breathe air and water."}]
 
 :actions [{:name "Bite" :description "Melee Weapon Attack: +4 to hit, reach 5 ft., one target. Hit: 7 (1d10 + 2) piercing damage plus 3 (1d6) poison damage."}
-{:name "Poison Breath (Recharge 5-6)" :description "The dragon exhales poisonous gas in a 15-foot cone. Each creature in that area must make a DC 11 Constitution saving throw, taking 21 (6d6) poison damage on a failed save, or half as much damage on a successful one."}]
-
+{:name "Poison Breath " :notes "Recharge 5-6" :description "The dragon exhales poisonous gas in a 15-foot cone. Each creature in that area must make a DC 11 Constitution saving throw, taking 21 (6d6) poison damage on a failed save, or half as much damage on a successful one."}]
 }{
 :name "Ancient Red Dragon"
 :size :gargantuan
