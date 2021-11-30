@@ -14,9 +14,9 @@ jobs:
         with:
           java-version: 8.0.292
       - name: Load Libs
-        run: cp -r ./lib/org/ ~/.m2/repository/
+        run: cp -r ./lib/* ~/.m2/repository/
       - name: ls .m2
-        run: ls -la ~/.m2/
+        run: ls -la ~/.m2/repository/org/
       - name: Install clojure tools
         uses: DeLaGuardo/setup-clojure@3.4
         with:
