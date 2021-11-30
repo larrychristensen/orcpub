@@ -13,8 +13,10 @@ jobs:
         uses: actions/setup-java@v1
         with:
           java-version: 8.0.292
+      - name: ls 1
+        run: ls -la ~/
       - name: Load Libs
-        run: cp -r ./lib/* ~/.m2/repository/
+        run: cp -r ./lib/org/* ~/.m2/repository/org/
       - name: ls .m2
         run: ls -la ~/.m2/repository/org/
       - name: Install clojure tools
