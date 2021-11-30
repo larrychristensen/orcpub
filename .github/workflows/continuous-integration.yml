@@ -14,7 +14,7 @@ jobs:
         with:
           java-version: 8.0.292
       - name: Load Libs
-        run: cp -r ./lib/org/ ~/.m2/
+        run: cp -r ./lib/org/ ~/.m2/repository/
       - name: ls .m2
         run: ls -la ~/.m2/
       - name: Install clojure tools
