@@ -16,7 +16,7 @@ jobs:
       - name: ls 1
         run: ls -la ~/
       - name: Load Libs
-        run: mkdir ~/.m2/repository/ && mkdir ~/.m2/repository/org && cp -rv ./lib/* ~/.m2/repository/org
+        run: mkdir ~/.m2/repository/ && mkdir ~/.m2/repository/org && cp -rv ./lib/* ~/.m2/repository
       - name: ls .m2
         run: ls -la ~/.m2/repository/org/
       - name: Install clojure tools
