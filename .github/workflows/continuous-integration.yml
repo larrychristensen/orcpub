@@ -4,7 +4,7 @@ on: [pull_request]
 
 jobs:
   lint:
-    name: Lint
+    name: Run Linter and Tests
     runs-on: ubuntu-18.04
     steps:
       - name: Checkout
@@ -13,10 +13,8 @@ jobs:
         uses: actions/setup-java@v1
         with:
           java-version: 8.0.292
-      - name: ls ~
-        run: ls -la ~/
-      - name: Load Libs
-        run: mkdir ~/.m2/repository/ && mkdir ~/.m2/repository/org && cp -rv ./lib/* ~/.m2/repository
+      - name: Load pdfbox from /lib
+        run: mkdir ~/.m2/repository/ && mkdir ~/.m2/repository/org/ && cp -rv ./lib/* ~/.m2/repository
       - name: ls .m2
         run: ls -la ~/.m2/repository/org/
       - name: Install clojure tools
