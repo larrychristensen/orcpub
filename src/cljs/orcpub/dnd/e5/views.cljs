@@ -1231,8 +1231,6 @@
                                                    (or modifier 0))))]
                                         (if mean (str " (" mean ")"))))))
      (spell-field "Speed" speed)
-     (if description
-       (str description))
      [:div.m-t-10.flex.justify-cont-s-a.m-b-10
       {:style max-width-300}
       (doall
@@ -1244,6 +1242,8 @@
            (let [ability-value (get monster ability-key)]
              [:div ability-value " (" (common/bonus-str (opt/ability-bonus ability-value)) ")"])])
         [:str :dex :con :int :wis :cha]))]
+     (if description
+       (str description))
      (if (seq saving-throws)
        (spell-field "Saving Throws" (print-bonus-map saving-throws)))
      (if skills (spell-field "Skills" (print-bonus-map skills)))
