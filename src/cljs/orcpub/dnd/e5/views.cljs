@@ -1242,8 +1242,6 @@
            (let [ability-value (get monster ability-key)]
              [:div ability-value " (" (common/bonus-str (opt/ability-bonus ability-value)) ")"])])
         [:str :dex :con :int :wis :cha]))]
-     (if description
-       (str description))
      (if (seq saving-throws)
        (spell-field "Saving Throws" (print-bonus-map saving-throws)))
      (if skills (spell-field "Skills" (print-bonus-map skills)))
@@ -1292,7 +1290,9 @@
              (fn [i {:keys [name notes description]}]
                ^{:key i}
                [:div.m-t-10 (spell-field (str name " " notes) description)])
-             (:actions legendary-actions)))])])]))
+             (:actions legendary-actions)))])])
+     (if description
+       [:div.m-t-10 (str description)])]))
 
 (defn monster-result [monster]
   [:div.white
